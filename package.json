@@ -1,0 +1,23 @@
+{
+  "name": "base402",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsx --env-file=.env index.ts",
+    "test": "vitest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "tsx": "^4.19.2",
+    "vitest": "^3.0.5"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "viem": "^2.23.1"
+  },
+  "type": "module"
+}
