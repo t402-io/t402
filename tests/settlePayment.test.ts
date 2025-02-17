@@ -5,7 +5,7 @@ import { botWallet, facilitatorWallet } from "../src/shared/wallet";
 import { Address } from "viem";
 import { createPayment } from "../src/client/client";
 import { getUsdcAddressForChain, getUSDCBalance } from "../src/shared/usdc";
-import { settlePayment, verifyPayment } from "../src/facilitator/facilitator";
+import { settle, verify } from "../src/facilitator/facilitator";
 
 describe("settlePayment", () => {
   const wallet = botWallet;
@@ -21,23 +21,18 @@ describe("settlePayment", () => {
       description: "example",
       mimeType: "text/plain",
       resourceAddress: resourceAddress,
-      resourceMaxTimeSeconds: 60,
-      recommendedDeadlineSeconds: 10,
+      requiredDeadlineSeconds: 10,
       chainId: baseSepolia.id,
       usdcAddress: getUsdcAddressForChain(baseSepolia.id),
       outputSchema: null,
     };
 
     const payment = await createPayment(wallet, paymentDetails);
-    const valid = await verifyPayment(wallet, payment, paymentDetails);
+    const valid = await verify(wallet, payment, paymentDetails);
 
     expect(valid.isValid).toBe(true);
 
-    const result = await settlePayment(
-      facilitatorWallet,
-      payment,
-      paymentDetails
-    );
+    const result = await settle(facilitatorWallet, payment, paymentDetails);
     expect(result.success).toBe(true);
 
     const finalBalance = await getUSDCBalance(wallet, resourceAddress);
@@ -46,4 +41,4 @@ describe("settlePayment", () => {
       initialBalance + paymentDetails.maxAmountRequired
     );
   });
-});
+}, 10000);

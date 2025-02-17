@@ -1,10 +1,12 @@
-402 payments protocol
+# 402 payments protocol
+
+> "1 line of code to accept digital dollars. No fee, 2 second settlement, $0.05 minimum payment."
 
 ## Terms:
 
-- resource: some thing on the internet, could be a file, a service, etc.
+- resource: some thing on the internet, could be a file, a service, api, etc.
 - client: entity wanting to pay for a resource
-- router service: service that facilitates verification and execution of payments
+- facilitator service: service that facilitates verification and execution of payments onchain
 - resource server: an http server that provides an api or other resources for a client
 
 ## Goals:
@@ -47,68 +49,67 @@ Cons:
 
 # V1 Flow
 
-1. Request endpoint
-2. Receive 402 response with body `PaymentNeededDetails`
+1. Make http request to resource server
+2. Receive 402 response with json body `PaymentNeededDetails`
 
-```typescript
-type PaymentNeededDetails = {
-  version: number; // Version of the payment protocol
-  maxAmountRequired: bigint; // Maximum amount required to pay for the resource
-  resource: Resource; // URL of resource to pay for
-  description: string; // Description of the resource
-  mimeType: string; // MIME type of the resource response
-  outputSchema?: object | undefined; // Output schema of the resource response
-  routerAddress: Address; // Address of the routing account that facilitates payment
+```
+{
+  version: number;                      // Version of the payment protocol
+  maxAmountRequired: uint256 as string; // Maximum amount required to pay for the resource
+  resource: string;                     // URL of resource to pay for
+  description: string;                  // Description of the resource
+  mimeType: string;                     // MIME type of the resource response
+  outputSchema?: object | null;         // Output schema of the resource response
+  resourceAddress: string;              // Address of the routing account that facilitates payment
+  recommendedDeadlineSeconds: number;   // Time in seconds for the resource to be processed
+
 };
 ```
 
-3. Create payment payload
+3. Client creates payment payload to include as `X-PAYMENT` header
 
-3.a Sign permit operation with `usdc` contract for `routerAddress`
+3.a Sign EIP-3009 `authorizeTransfer` operation with `usdc` contract for `resourceAddress`
 
-3.b Create `PaymentPayloadV1`
+3.b Create type `PaymentPayloadV1`
 
-```typescript
-export type PaymentPayloadV1 = {
+```
+// PaymentPayloadV1
+{
   version: number;
   payload: PayloadV1;
-  resource: Resource;
+  resource: string;
 };
 
-export type PayloadV1 = {
-  signature: PermitSignature;
+// PayloadV1
+{
+  signature: HexString;
   params: PermitParameters;
 };
 
-export type PermitSignature = {
-  r: Hex;
-  s: Hex;
-  v: number;
-};
 
-// Standard parameters for a permit signature
-export type PermitParameters = {
-  ownerAddress: Address;
-  spenderAddress: Address;
-  deadline: bigint;
+// AuthorizationParameters json
+{
+  from: Address as string;
+  to: Address as string;
+  value: uint256 as string;
+  validAfter: uint256 as string;
+  validBefore: uint256 as string;
+  nonce: HexString;
   chainId: number;
-  permitVersion: string;
-  // Nonce applies to the spender
-  nonce: bigint;
-  // Value of usdc to approve (usdc uses 6 decimals, to get float its value / 10^6)
-  value: bigint;
+  version: string;
+  usdcAddress: Address as string;
 };
 ```
 
 3.c Convert `PaymentPayloadV1` to json and base64 encode
 
-4. Send request to resource server with `Payment-Signature` header
+4. Send request to resource server with `X-PAYMENT` header
 
-5. Resource server verifies payload or forwards payment header to router service
+5. Resource server verifies payload its self or forwards payment header to facilitator service calling `verify`
 
-### Verification (default path)
+### Verification (default path, synchronous)
 
-Router service (CDP provided) has the follow interface provided over REST. `PaymentHeader` is the base64 encoded `PaymentPayloadV1`
+Facilitator service (CDP provided) has the follow interface provided over REST. This is stubbed out in typescript but can be implemented in any language. `PaymentHeader` is the base64 encoded `PaymentPayloadV1`
 
 ```typescript
 export type PaymentExecutionResponse = {
@@ -118,37 +119,34 @@ export type PaymentExecutionResponse = {
   chainId?: number | undefined;
 };
 
-interface RouterService {
-  verifyPayment(
+export type ValidPaymentResponse = {
+  isValid: boolean;
+  invalidReason?: string | undefined;
+};
+
+interface FacilitatorService {
+  verify(
     paymentHeader: string,
     paymentDetails: PaymentNeededDetails
-  ): {
-    isValid: boolean;
-    invalidReason?: string | undefined;
-  };
-  executePayment(
+  ): ValidPaymentResponse;
+  settle(
     paymentHeader: string,
-    amount: string
+    paymentDetails: PaymentNeededDetails
   ): PaymentExecutionResponse; // amount is the required payment represented as a string
 }
 ```
 
-6. Verifier confirms funds are available and the resource should accept the request
+6. Verifier confirms funds are available and performs other checks to ensure the resource should accept the request
 
 7. Resource server performs work to fulfill request
 
-8. Resource server called `executePayment` with the amount required to pay for the resource
+8. Resource server calls `settle` on the facilitator service
 
-8.a router service performs a multi-call on the usdc contract consuming the permit signature, and then calling `transferFrom` with the amount required to pay for the resource
+8.a facilitator service broadcasts the transaction to the usdc contract using `transferWithAuthorization` to settle the payment and waits for the tx to be confirmed
 
-9. Resource server returns the `PaymentExecutionResponse` from the router service
+9. Facilitator service returns the `PaymentExecutionResponse` to the resource server
 
 10. Resource server returns the response to the client
-
-#### Notes
-
-- there is a window of time while the resource server is performing the work that the client could revoke a nonce or move funds that would result in the payment failing
-- the resource server currently waits for payment to execute before returning the response to the client, meaning the minimum response time is 1 block
 
 ### Verification (optimistic aka just trust me bro)
 
@@ -165,3 +163,30 @@ todo: more detailed steps
 ## Future
 
 - re-requesting resources that have been paid for
+
+# Dev
+
+#### Notes
+
+- there is a window of time while the resource server is performing the work that the client could revoke a nonce or move funds that would result in the payment failing
+- the resource server currently waits for payment to execute before returning the response to the client, meaning the minimum response time is 1 block
+
+## Running example
+
+1. create `.env` cp `.env.example .env` and follow instruction in the file to create wallets
+
+2. `npm install` to install dependencies
+
+3. in 3 separate terminals, run `npm run example-facilitator`, `npm run example-resource`, then finally `npm run example-client`. You should see things happen across all 3 terminals, and get a joke at the end in the client terminal.
+
+## Running tests
+
+1. `npm install` to install dependencies
+2. Create `.env` with funded keys as above
+3. `npm run test` to run tests
+
+## TODO
+
+- more tests
+- fix wallet typing issues
+- have tests run on an anvil fork

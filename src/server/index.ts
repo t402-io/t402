@@ -13,11 +13,11 @@ import {
 const defaultServer = "http://localhost:4020";
 
 export async function requestVerify(
-  payload: PaymentPayloadV1,
+  payload: string,
   paymentDetails: PaymentNeededDetails
 ): Promise<ValidPaymentResponse> {
   const res = await axios.post(`${defaultServer}/verify`, {
-    payload: paymentPayloadV1ToJsonSafe(payload),
+    payload: payload,
     details: paymentNeededDetailsToJsonSafe(paymentDetails),
   });
 
@@ -29,11 +29,11 @@ export async function requestVerify(
 }
 
 export async function requestSettle(
-  payload: PaymentPayloadV1,
+  payload: string,
   paymentDetails: PaymentNeededDetails
 ): Promise<PaymentExecutionResponse> {
   const res = await axios.post(`${defaultServer}/settle`, {
-    payload: paymentPayloadV1ToJsonSafe(payload),
+    payload: payload,
     details: paymentNeededDetailsToJsonSafe(paymentDetails),
   });
 

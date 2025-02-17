@@ -4,25 +4,18 @@ import { Hono } from "hono";
 import { logger } from "hono/logger";
 
 import { SignerWallet } from "../shared/wallet";
-import {
-  PaymentPayloadV1,
-  PaymentNeededDetails,
-  paymentNeededDetailsSchema,
-  paymentPayloadV1Schema,
-} from "../shared/types";
-import { settlePayment, verifyPayment } from "./facilitator";
-import {
-  paymentNeededDetailsFromObj,
-  paymentPayloadV1FromObj,
-} from "../shared/types/convert";
+import { PaymentNeededDetails } from "../shared/types";
+import { settle, verify } from "./facilitator";
+import { paymentNeededDetailsFromObj } from "../shared/types/convert";
+import { decodePayment } from "../shared/sign";
 
 type VerifyRequest = {
-  payload: PaymentPayloadV1;
+  payload: string;
   details: PaymentNeededDetails;
 };
 
 type SettleRequest = {
-  payload: PaymentPayloadV1;
+  payload: string;
   details: PaymentNeededDetails;
 };
 
@@ -32,14 +25,12 @@ export function makeServer(wallet: SignerWallet): Hono {
 
   app.post("/verify", async (c) => {
     // TODO: add zod validation
-    const req = await c.req.json();
-    console.log(req);
+    const req: VerifyRequest = await c.req.json();
 
     const paymentDetails = paymentNeededDetailsFromObj(req.details);
-    const payload = paymentPayloadV1FromObj(req.payload);
+    const payload = decodePayment(req.payload);
 
-    const valid = await verifyPayment(wallet, payload, paymentDetails);
-
+    const valid = await verify(wallet, payload, paymentDetails);
     return c.json(valid);
   });
 
@@ -48,10 +39,11 @@ export function makeServer(wallet: SignerWallet): Hono {
     const req: SettleRequest = await c.req.json();
 
     const paymentDetails = paymentNeededDetailsFromObj(req.details);
-    const payload = paymentPayloadV1FromObj(req.payload);
+    const payload = decodePayment(req.payload);
 
-    const res = await settlePayment(wallet, payload, paymentDetails);
+    const res = await settle(wallet, payload, paymentDetails);
 
+    console.log("Payment processed", res);
     return c.json(res);
   });
 

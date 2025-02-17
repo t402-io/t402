@@ -8,14 +8,14 @@ import {
 } from "../src/shared/types";
 
 import {
-  paymentNeededDetailsToJSON,
-  paymentNeededDetailsFromJSON,
-  authorizationParametersToJSON,
-  authorizationParametersFromJSON,
-  payloadV1ToJSON,
-  payloadV1FromJSON,
-  paymentPayloadV1ToJSON,
-  paymentPayloadV1FromJSON,
+  paymentNeededDetailsToJsonSafe,
+  paymentNeededDetailsFromObj,
+  authorizationParametersToJsonSafe,
+  authorizationParametersFromObj,
+  payloadV1ToJsonSafe,
+  payloadV1FromObj,
+  paymentPayloadV1ToJsonSafe,
+  paymentPayloadV1FromObj,
 } from "../src/shared/types/convert";
 
 describe("types conversion", () => {
@@ -28,14 +28,15 @@ describe("types conversion", () => {
       mimeType: "application/json",
       outputSchema: null,
       resourceAddress: "0x123" as `0x${string}`,
-      resourceMaxTimeSeconds: 60,
-      recommendedDeadlineSeconds: 30,
+      requiredDeadlineSeconds: 30,
       usdcAddress: "0x456" as `0x${string}`,
       chainId: 1,
     };
 
-    const json = paymentNeededDetailsToJSON(details);
-    const restored = paymentNeededDetailsFromJSON(json);
+    const jsonObj = paymentNeededDetailsToJsonSafe(details);
+    const jsonString = JSON.stringify(jsonObj);
+    const parsedJson = JSON.parse(jsonString);
+    const restored = paymentNeededDetailsFromObj(parsedJson);
     expect(restored).toEqual(details);
   });
 
@@ -52,8 +53,10 @@ describe("types conversion", () => {
       usdcAddress: "0x456" as `0x${string}`,
     };
 
-    const json = authorizationParametersToJSON(params);
-    const restored = authorizationParametersFromJSON(json);
+    const jsonObj = authorizationParametersToJsonSafe(params);
+    const jsonString = JSON.stringify(jsonObj);
+    const parsedJson = JSON.parse(jsonString);
+    const restored = authorizationParametersFromObj(parsedJson);
     expect(restored).toEqual(params);
   });
 
@@ -73,8 +76,10 @@ describe("types conversion", () => {
       },
     };
 
-    const json = payloadV1ToJSON(payload);
-    const restored = payloadV1FromJSON(json);
+    const jsonObj = payloadV1ToJsonSafe(payload);
+    const jsonString = JSON.stringify(jsonObj);
+    const parsedJson = JSON.parse(jsonString);
+    const restored = payloadV1FromObj(parsedJson);
     expect(restored).toEqual(payload);
   });
 
@@ -98,8 +103,10 @@ describe("types conversion", () => {
       },
     };
 
-    const json = paymentPayloadV1ToJSON(paymentPayload);
-    const restored = paymentPayloadV1FromJSON(json);
+    const jsonObj = paymentPayloadV1ToJsonSafe(paymentPayload);
+    const jsonString = JSON.stringify(jsonObj);
+    const parsedJson = JSON.parse(jsonString);
+    const restored = paymentPayloadV1FromObj(parsedJson);
     expect(restored).toEqual(paymentPayload);
   });
 });
