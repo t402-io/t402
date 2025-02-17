@@ -1,5 +1,4 @@
-import { privateKeyToAccount } from "viem/accounts";
-import { Address, Hex, PublicClient, WalletClient } from "viem";
+import { Address, Hex, PublicClient } from "viem";
 import { abi } from "./erc20PermitABI";
 import { config } from "./config";
 
@@ -12,7 +11,7 @@ export function getUsdcAddressForChain(chainId: number): Address {
 }
 
 // Function to get the current nonce for an address
-export async function getNonce(
+export async function getPermitNonce(
   client: PublicClient,
   owner: Address
 ): Promise<Hex> {
@@ -22,7 +21,7 @@ export async function getNonce(
     functionName: "nonces",
     args: [owner],
   });
-  console.log({ nonce });
+
   return nonce as Hex;
 }
 
