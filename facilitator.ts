@@ -1,13 +1,16 @@
-import { PublicClient, WalletClient, WalletClient } from "viem";
+import { PublicClient } from "viem";
 import {
   PaymentExecutionResponse,
   PaymentNeededDetails,
   PaymentPayloadV1,
   ValidPaymentRequest,
 } from "./types";
-import { permitTypes, usdcName } from "./permit";
+
 import { getUsdcAddressForChain, getUSDCBalance } from "./usdc";
 import { abi } from "./erc20PermitABI";
+import { SignerWallet } from "./wallet";
+import { authorizationTypes, authorizationPrimaryType } from "./permit";
+import { config } from "./config";
 
 const PROTOCOL_VERSION = 1;
 
@@ -39,28 +42,31 @@ export async function verifyPayment(
     };
   }
 
+  const usdcName = config[payload.payload.params.chainId].usdcName;
+
   // Verify permit signature is recoverable for the owner address
   const permitTypedData = {
-    types: permitTypes,
-    primaryType: "Permit",
+    types: authorizationTypes,
+    primaryType: authorizationPrimaryType,
     domain: {
       name: usdcName,
-      version: payload.payload.params.permitVersion,
+      version: payload.payload.params.version,
       chainId: payload.payload.params.chainId,
       // This implicitly verifies the usdc address is correct in the signature
       verifyingContract: paymentDetails.usdcAddress,
     },
     message: {
-      owner: payload.payload.params.ownerAddress,
-      spender: payload.payload.params.spenderAddress,
+      from: payload.payload.params.from,
+      to: payload.payload.params.to,
       value: payload.payload.params.value,
+      validAfter: payload.payload.params.validAfter,
+      validBefore: payload.payload.params.validBefore,
       nonce: payload.payload.params.nonce,
-      deadline: payload.payload.params.deadline,
     },
   };
 
   const recoveredAddress = await client.verifyTypedData({
-    address: payload.payload.params.ownerAddress,
+    address: payload.payload.params.from,
     ...permitTypedData,
     signature: payload.payload.signature,
   });
@@ -85,8 +91,8 @@ export async function verifyPayment(
 
   // Verify deadline is far enough in the future
   if (
-    payload.payload.params.deadline <
-    Date.now() / 1000 + paymentDetails.resourceMaxTimeSeconds
+    payload.payload.params.validBefore <
+    Date.now() / 1000 + paymentDetails.recommendedDeadlineSeconds
   ) {
     return {
       isValid: false,
@@ -95,14 +101,9 @@ export async function verifyPayment(
   }
 
   // Verify client has enough funds to cover paymentDetails.maxAmountRequired
-  const balance = await getUSDCBalance(
-    client,
-    payload.payload.params.ownerAddress
-  );
+  const balance = await getUSDCBalance(client, payload.payload.params.from);
 
-  console.log(`balance: ${balance}`);
-
-  if (balance <= paymentDetails.maxAmountRequired) {
+  if (balance < paymentDetails.maxAmountRequired) {
     return {
       isValid: false,
       invalidReason: "Client does not have enough funds",
@@ -125,47 +126,32 @@ export async function verifyPayment(
 }
 
 export async function settlePayment(
-  wallet: WalletClient,
+  wallet: SignerWallet,
   payload: PaymentPayloadV1,
   paymentDetails: PaymentNeededDetails
 ): Promise<PaymentExecutionResponse> {
   // TODO: probably should store stuff in a db here, but the txs can be recovered from chain if we must
 
-  const usdcAddress = getUsdcAddressForChain(payload.payload.params.chainId);
-
-  const results = await wallet.multicall({
-    allowFailure: false,
-    contracts: [
-      {
-        abi,
-        address: usdcAddress,
-        functionName: "permit",
-        args: [
-          payload.payload.params.ownerAddress,
-          payload.payload.params.spenderAddress,
-          payload.payload.params.value,
-          payload.payload.params.deadline,
-          payload.payload.signature,
-        ],
-      },
-      {
-        abi: abi,
-        address: usdcAddress,
-        functionName: "transferFrom",
-        args: [
-          payload.payload.params.ownerAddress,
-          paymentDetails.resourceAddress,
-          payload.payload.params.value,
-        ],
-      },
+  const tx = await wallet.writeContract({
+    address: payload.payload.params.usdcAddress,
+    abi,
+    functionName: "transferWithAuthorization",
+    args: [
+      payload.payload.params.from,
+      payload.payload.params.to,
+      payload.payload.params.value,
+      payload.payload.params.validAfter,
+      payload.payload.params.validBefore,
+      payload.payload.params.nonce,
+      payload.payload.signature,
     ],
   });
 
-  console.log(results);
+  const receipt = await wallet.waitForTransactionReceipt({ hash: tx });
 
   return {
     success: true,
-    txHash: results[0].hash,
+    txHash: tx,
     chainId: payload.payload.params.chainId,
   };
 }

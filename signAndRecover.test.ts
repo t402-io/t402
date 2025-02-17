@@ -3,32 +3,23 @@ import { expect, test, describe } from "vitest";
 import { createPayment } from "./client";
 import { verifyPayment } from "./facilitator";
 import { baseSepolia } from "viem/chains";
-import { Resource } from "./types";
+import { Resource, PaymentNeededDetails } from "./types";
 import { getUsdcAddressForChain } from "./usdc";
 import { botWallet } from "./wallet";
-describe("sign and recover", () => {
-  // const wallet = createWalletClient({
-  //   chain: baseSepolia,
-  //   account: privateKeyToAccount(
-  //     "0x1234567890123456789012345678901234567890123456789012345678901234"
-  //   ),
-  //   transport: http(),
-  // }).extend(publicActions);
 
+describe("sign and recover", () => {
   const wallet = botWallet;
 
   test("happy path sign and recover", async () => {
-    console.log(`wallet: ${wallet.account?.address}`);
-
-    const paymentDetails = {
+    const paymentDetails: PaymentNeededDetails = {
       version: 1,
       maxAmountRequired: BigInt(1 * 10 ** 6),
       resource: "https://example.com" as Resource,
       description: "example",
       mimeType: "text/plain",
-      routerAddress: "0x0000000000000000000000000000000000000000" as Address,
-      resourceMaxTimeSeconds: 10,
-      recommendedDeadlineSeconds: 60,
+      resourceAddress: "0x0000000000000000000000000000000000000000" as Address,
+      resourceMaxTimeSeconds: 60,
+      recommendedDeadlineSeconds: 10,
       chainId: baseSepolia.id,
       usdcAddress: getUsdcAddressForChain(wallet.chain?.id as number),
     };
@@ -43,13 +34,13 @@ describe("sign and recover", () => {
   });
 
   test("rejects incompatible payload version", async () => {
-    const paymentDetails = {
+    const paymentDetails: PaymentNeededDetails = {
       version: 2, // Different version
       maxAmountRequired: BigInt(1 * 10 ** 6),
       resource: "https://example.com" as Resource,
       description: "example",
       mimeType: "text/plain",
-      routerAddress: "0x0000000000000000000000000000000000000000" as Address,
+      resourceAddress: "0x0000000000000000000000000000000000000000" as Address,
       resourceMaxTimeSeconds: 10,
       recommendedDeadlineSeconds: 60,
       chainId: baseSepolia.id,
@@ -67,13 +58,13 @@ describe("sign and recover", () => {
   });
 
   test("rejects invalid USDC address", async () => {
-    const paymentDetails = {
+    const paymentDetails: PaymentNeededDetails = {
       version: 1,
       maxAmountRequired: BigInt(1 * 10 ** 6),
       resource: "https://example.com" as Resource,
       description: "example",
       mimeType: "text/plain",
-      routerAddress: "0x0000000000000000000000000000000000000000" as Address,
+      resourceAddress: "0x0000000000000000000000000000000000000000" as Address,
       resourceMaxTimeSeconds: 10,
       recommendedDeadlineSeconds: 60,
       chainId: baseSepolia.id,
@@ -88,13 +79,13 @@ describe("sign and recover", () => {
   });
 
   test("rejects invalid permit signature", async () => {
-    const paymentDetails = {
+    const paymentDetails: PaymentNeededDetails = {
       version: 1,
       maxAmountRequired: BigInt(1 * 10 ** 6),
       resource: "https://example.com" as Resource,
       description: "example",
       mimeType: "text/plain",
-      routerAddress: "0x0000000000000000000000000000000000000000" as Address,
+      resourceAddress: "0x0000000000000000000000000000000000000000" as Address,
       resourceMaxTimeSeconds: 10,
       recommendedDeadlineSeconds: 60,
       chainId: baseSepolia.id,
@@ -118,15 +109,15 @@ describe("sign and recover", () => {
   });
 
   test("rejects expired deadline", async () => {
-    const paymentDetails = {
+    const paymentDetails: PaymentNeededDetails = {
       version: 1,
       maxAmountRequired: BigInt(1 * 10 ** 6),
       resource: "https://example.com" as Resource,
       description: "example",
       mimeType: "text/plain",
-      routerAddress: "0x0000000000000000000000000000000000000000" as Address,
-      resourceMaxTimeSeconds: 10,
-      recommendedDeadlineSeconds: 1,
+      resourceAddress: "0x0000000000000000000000000000000000000000" as Address,
+      resourceMaxTimeSeconds: 1,
+      recommendedDeadlineSeconds: 10, // this should be less than resourceMaxTimeSeconds
       chainId: baseSepolia.id,
       usdcAddress: getUsdcAddressForChain(wallet.chain?.id as number),
     };
@@ -141,17 +132,17 @@ describe("sign and recover", () => {
   });
 
   test("rejects insufficient funds", async () => {
-    const paymentDetails = {
+    const paymentDetails: PaymentNeededDetails = {
       version: 1,
-      maxAmountRequired: BigInt(999999999 * 10 ** 6), // Very large amount
+      maxAmountRequired: BigInt(99999999999 * 10 ** 6), // Very large amount, greater than balance of wallet
       resource: "https://example.com" as Resource,
       description: "example",
       mimeType: "text/plain",
-      routerAddress: "0x0000000000000000000000000000000000000000" as Address,
-      resourceMaxTimeSeconds: 10,
-      recommendedDeadlineSeconds: 60,
+      resourceAddress: "0x0000000000000000000000000000000000000000" as Address,
+      resourceMaxTimeSeconds: 60,
+      recommendedDeadlineSeconds: 10,
       chainId: baseSepolia.id,
-      usdcAddress: getUsdcAddressForChain(wallet.chain?.id as number),
+      usdcAddress: getUsdcAddressForChain(wallet.chain?.id),
     };
 
     const payment = await createPayment(wallet, paymentDetails);
@@ -162,15 +153,15 @@ describe("sign and recover", () => {
   });
 
   test("rejects insufficient value in payload", async () => {
-    const paymentDetails = {
+    const paymentDetails: PaymentNeededDetails = {
       version: 1,
       maxAmountRequired: BigInt(2 * 10 ** 6),
       resource: "https://example.com" as Resource,
       description: "example",
       mimeType: "text/plain",
-      routerAddress: "0x0000000000000000000000000000000000000000" as Address,
-      resourceMaxTimeSeconds: 10,
-      recommendedDeadlineSeconds: 60,
+      resourceAddress: "0x0000000000000000000000000000000000000000" as Address,
+      resourceMaxTimeSeconds: 60,
+      recommendedDeadlineSeconds: 10,
       chainId: baseSepolia.id,
       usdcAddress: getUsdcAddressForChain(wallet.chain?.id as number),
     };

@@ -2,6 +2,25 @@ import { WalletClient, Hex, toHex } from "viem";
 import { config } from "./config";
 import { AuthorizationParameters } from "./types";
 
+export const authorizationTypes = {
+  TransferWithAuthorization: [
+    { name: "from", type: "address" },
+    { name: "to", type: "address" },
+    { name: "value", type: "uint256" },
+    { name: "validAfter", type: "uint256" },
+    { name: "validBefore", type: "uint256" },
+    { name: "nonce", type: "bytes32" },
+  ],
+  // EIP712Domain: [
+  //   { name: "name", type: "string" },
+  //   { name: "version", type: "string" },
+  //   { name: "chainId", type: "uint256" },
+  //   { name: "verifyingContract", type: "address" },
+  // ],
+};
+
+export const authorizationPrimaryType = "TransferWithAuthorization";
+
 /**
  * Signs an EIP-3009 authorization for USDC transfer
  * @param walletClient - The wallet client that will sign the authorization
@@ -17,7 +36,6 @@ import { AuthorizationParameters } from "./types";
  * @param params.usdcAddress - The address of the USDC contract
  * @returns The signature for the authorization
  */
-
 export async function signAuthorization(
   walletClient: WalletClient,
   {
@@ -36,29 +54,14 @@ export async function signAuthorization(
 
   const data = {
     account: walletClient.account!,
-    types: {
-      // EIP712Domain: [
-      //   { name: "name", type: "string" },
-      //   { name: "version", type: "string" },
-      //   { name: "chainId", type: "uint256" },
-      //   { name: "verifyingContract", type: "address" },
-      // ],
-      TransferWithAuthorization: [
-        { name: "from", type: "address" },
-        { name: "to", type: "address" },
-        { name: "value", type: "uint256" },
-        { name: "validAfter", type: "uint256" },
-        { name: "validBefore", type: "uint256" },
-        { name: "nonce", type: "bytes32" },
-      ],
-    } as const,
+    types: authorizationTypes,
     domain: {
       name: usdcName,
       version: version,
       chainId: chainId,
       verifyingContract: usdcAddress,
     },
-    primaryType: "TransferWithAuthorization" as const,
+    primaryType: authorizationPrimaryType,
     message: {
       from,
       to,
