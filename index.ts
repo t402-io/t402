@@ -41,7 +41,7 @@ export async function main() {
     args: [
       authRequest.from,
       authRequest.to,
-      authRequest.value,
+      authRequest.value / BigInt(2),
       authRequest.validAfter,
       authRequest.validBefore,
       authRequest.nonce,
