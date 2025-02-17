@@ -1,7 +1,7 @@
 import { Address } from "viem";
 import { expect, test, describe } from "vitest";
 import { createPayment } from "../src/client/client";
-import { verifyPayment } from "../src/facilitator/facilitator";
+import { verify } from "../src/facilitator/facilitator";
 import { baseSepolia } from "viem/chains";
 import { Resource, PaymentNeededDetails } from "../src/shared/types";
 import { getUsdcAddressForChain } from "../src/shared/usdc";
@@ -18,8 +18,7 @@ describe("sign and recover", () => {
       description: "example",
       mimeType: "text/plain",
       resourceAddress: "0x0000000000000000000000000000000000000000" as Address,
-      resourceMaxTimeSeconds: 60,
-      recommendedDeadlineSeconds: 10,
+      requiredDeadlineSeconds: 30,
       chainId: baseSepolia.id,
       usdcAddress: getUsdcAddressForChain(wallet.chain?.id as number),
       outputSchema: null,
@@ -29,7 +28,7 @@ describe("sign and recover", () => {
 
     console.log(payment);
 
-    const valid = await verifyPayment(wallet, payment, paymentDetails);
+    const valid = await verify(wallet, payment, paymentDetails);
     console.log(valid);
     expect(valid.isValid).toBe(true);
   });
@@ -42,8 +41,7 @@ describe("sign and recover", () => {
       description: "example",
       mimeType: "text/plain",
       resourceAddress: "0x0000000000000000000000000000000000000000" as Address,
-      resourceMaxTimeSeconds: 10,
-      recommendedDeadlineSeconds: 60,
+      requiredDeadlineSeconds: 60,
       chainId: baseSepolia.id,
       usdcAddress: getUsdcAddressForChain(wallet.chain?.id as number),
       outputSchema: null,
@@ -54,7 +52,7 @@ describe("sign and recover", () => {
       { ...paymentDetails, version: 1 } // Create payment with v1 but verify against v2
     );
 
-    const valid = await verifyPayment(wallet, payment, paymentDetails);
+    const valid = await verify(wallet, payment, paymentDetails);
     expect(valid.isValid).toBe(false);
     expect(valid.invalidReason).toContain("Incompatible payload version");
   });
@@ -67,8 +65,7 @@ describe("sign and recover", () => {
       description: "example",
       mimeType: "text/plain",
       resourceAddress: "0x0000000000000000000000000000000000000000" as Address,
-      resourceMaxTimeSeconds: 10,
-      recommendedDeadlineSeconds: 60,
+      requiredDeadlineSeconds: 60,
       chainId: baseSepolia.id,
       usdcAddress: "0x1234567890123456789012345678901234567890" as Address, // Wrong address
       outputSchema: null,
@@ -76,7 +73,7 @@ describe("sign and recover", () => {
 
     const payment = await createPayment(wallet, paymentDetails);
 
-    const valid = await verifyPayment(wallet, payment, paymentDetails);
+    const valid = await verify(wallet, payment, paymentDetails);
     expect(valid.isValid).toBe(false);
     expect(valid.invalidReason).toBe("Invalid usdc address");
   });
@@ -89,8 +86,7 @@ describe("sign and recover", () => {
       description: "example",
       mimeType: "text/plain",
       resourceAddress: "0x0000000000000000000000000000000000000000" as Address,
-      resourceMaxTimeSeconds: 10,
-      recommendedDeadlineSeconds: 60,
+      requiredDeadlineSeconds: 60,
       chainId: baseSepolia.id,
       usdcAddress: getUsdcAddressForChain(wallet.chain?.id as number),
       outputSchema: null,
@@ -107,7 +103,7 @@ describe("sign and recover", () => {
       },
     };
 
-    const valid = await verifyPayment(wallet, corruptedPayment, paymentDetails);
+    const valid = await verify(wallet, corruptedPayment, paymentDetails);
     expect(valid.isValid).toBe(false);
     expect(valid.invalidReason).toBe("Invalid permit signature");
   });
@@ -120,8 +116,7 @@ describe("sign and recover", () => {
       description: "example",
       mimeType: "text/plain",
       resourceAddress: "0x0000000000000000000000000000000000000000" as Address,
-      resourceMaxTimeSeconds: 1,
-      recommendedDeadlineSeconds: 10, // this should be less than resourceMaxTimeSeconds
+      requiredDeadlineSeconds: 1,
       chainId: baseSepolia.id,
       usdcAddress: getUsdcAddressForChain(wallet.chain?.id as number),
       outputSchema: null,
@@ -129,7 +124,7 @@ describe("sign and recover", () => {
 
     const payment = await createPayment(wallet, paymentDetails);
 
-    const valid = await verifyPayment(wallet, payment, paymentDetails);
+    const valid = await verify(wallet, payment, paymentDetails);
     expect(valid.isValid).toBe(false);
     expect(valid.invalidReason).toBe(
       "Deadline on permit isn't far enough in the future"
@@ -144,8 +139,7 @@ describe("sign and recover", () => {
       description: "example",
       mimeType: "text/plain",
       resourceAddress: "0x0000000000000000000000000000000000000000" as Address,
-      resourceMaxTimeSeconds: 60,
-      recommendedDeadlineSeconds: 10,
+      requiredDeadlineSeconds: 10,
       chainId: baseSepolia.id,
       usdcAddress: getUsdcAddressForChain(wallet.chain?.id),
       outputSchema: null,
@@ -153,7 +147,7 @@ describe("sign and recover", () => {
 
     const payment = await createPayment(wallet, paymentDetails);
 
-    const valid = await verifyPayment(wallet, payment, paymentDetails);
+    const valid = await verify(wallet, payment, paymentDetails);
     expect(valid.isValid).toBe(false);
     expect(valid.invalidReason).toBe("Client does not have enough funds");
   });
@@ -166,8 +160,7 @@ describe("sign and recover", () => {
       description: "example",
       mimeType: "text/plain",
       resourceAddress: "0x0000000000000000000000000000000000000000" as Address,
-      resourceMaxTimeSeconds: 60,
-      recommendedDeadlineSeconds: 10,
+      requiredDeadlineSeconds: 10,
       chainId: baseSepolia.id,
       usdcAddress: getUsdcAddressForChain(wallet.chain?.id as number),
       outputSchema: null,
@@ -178,7 +171,7 @@ describe("sign and recover", () => {
       { ...paymentDetails, maxAmountRequired: BigInt(1 * 10 ** 6) } // Create with lower amount
     );
 
-    const valid = await verifyPayment(wallet, payment, paymentDetails);
+    const valid = await verify(wallet, payment, paymentDetails);
     expect(valid.isValid).toBe(false);
     expect(valid.invalidReason).toBe(
       "Value in payload is not enough to cover paymentDetails.maxAmountRequired"

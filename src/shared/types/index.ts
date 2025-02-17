@@ -75,10 +75,8 @@ export const paymentNeededDetailsSchema = z.object({
   outputSchema: z.object({}).nullable(),
   // address to pay value for access to the resource
   resourceAddress: z.custom<Address>(),
-  // max time in seconds it may take for the resource to be processed
-  resourceMaxTimeSeconds: z.number(),
-  // recommended deadline in seconds for the resource to be processed
-  recommendedDeadlineSeconds: z.number(),
+  // time in seconds it may before payment can be settled (how long the resource server needs to process the payment)
+  requiredDeadlineSeconds: z.number(),
   // address of the USDC contract
   usdcAddress: z.custom<Address>(),
   // chain id of the chain to send payment on

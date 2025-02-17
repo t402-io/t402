@@ -9,7 +9,7 @@ import {
 import { getUsdcAddressForChain, getUSDCBalance } from "../shared/usdc";
 import { abi } from "../shared/erc20PermitABI";
 import { SignerWallet } from "../shared/wallet";
-import { authorizationTypes, authorizationPrimaryType } from "../shared/permit";
+import { authorizationTypes, authorizationPrimaryType } from "../shared/sign";
 import { config } from "../shared/config";
 
 const PROTOCOL_VERSION = 1;
@@ -28,7 +28,7 @@ const PROTOCOL_VERSION = 1;
  * - Verifies client has sufficient USDC balance
  * - Ensures payment amount meets required minimum
  */
-export async function verifyPayment(
+export async function verify(
   client: PublicClient,
   payload: PaymentPayloadV1,
   paymentDetails: PaymentNeededDetails
@@ -104,14 +104,20 @@ export async function verifyPayment(
     };
   }
 
-  // Verify deadline is far enough in the future
-  if (
-    payload.payload.params.validBefore <
-    Date.now() / 1000 + paymentDetails.recommendedDeadlineSeconds
-  ) {
+  // Verify deadline is not yet expired
+  // Pad 3 block to account for round tripping
+  if (payload.payload.params.validBefore < Date.now() / 1000 + 6) {
     return {
       isValid: false,
       invalidReason: "Deadline on permit isn't far enough in the future",
+    };
+  }
+
+  // Verify deadline is not yet valid
+  if (payload.payload.params.validAfter > Date.now() / 1000) {
+    return {
+      isValid: false,
+      invalidReason: "Deadline on permit is in the future",
     };
   }
 
@@ -149,7 +155,7 @@ export async function verifyPayment(
  * @remarks This function executes the actual USDC transfer using the signed authorization from the user.
  * The facilitator wallet submits the transaction but does not need to hold or transfer any tokens itself.
  */
-export async function settlePayment(
+export async function settle(
   wallet: SignerWallet,
   payload: PaymentPayloadV1,
   paymentDetails: PaymentNeededDetails
@@ -157,7 +163,7 @@ export async function settlePayment(
   // TODO: probably should store stuff in a db here, but the txs can be recovered from chain if we must
 
   // re-verify to ensure the payment is still valid
-  const valid = await verifyPayment(wallet, payload, paymentDetails);
+  const valid = await verify(wallet, payload, paymentDetails);
 
   if (!valid.isValid) {
     return {

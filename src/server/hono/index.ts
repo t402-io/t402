@@ -8,7 +8,7 @@ import {
 import { Address } from "viem";
 import { getUsdcAddressForChain } from "../../shared/usdc";
 import { requestSettle, requestVerify } from "..";
-import { decodePayment } from "../../shared/permit";
+import { decodePayment } from "../../shared/sign";
 import { paymentNeededDetailsToJsonSafe } from "../../shared/types/convert";
 
 export function paymentMiddleware(
@@ -34,8 +34,7 @@ export function paymentMiddleware(
     description,
     mimeType,
     resourceAddress: address,
-    resourceMaxTimeSeconds: maxDeadlineSeconds * 2,
-    recommendedDeadlineSeconds: maxDeadlineSeconds,
+    requiredDeadlineSeconds: maxDeadlineSeconds,
     usdcAddress: getUsdcAddressForChain(testnet ? 84532 : 8453),
     chainId: testnet ? 84532 : 1,
     outputSchema,
@@ -52,8 +51,7 @@ export function paymentMiddleware(
       );
     }
 
-    const payload: PaymentPayloadV1 = decodePayment(payment);
-    const response = await requestVerify(payload, paymentDetails);
+    const response = await requestVerify(payment, paymentDetails);
     if (!response.isValid) {
       return Response.json(
         {
@@ -66,7 +64,7 @@ export function paymentMiddleware(
 
     await next();
 
-    const settle = await requestSettle(payload, paymentDetails);
+    const settle = await requestSettle(payment, paymentDetails);
     if (!settle.success) {
       return Response.json(
         {

@@ -1,10 +1,6 @@
 import { PaymentNeededDetails, PaymentPayloadV1 } from "../shared/types";
 import { getVersion } from "../shared/usdc";
-import {
-  createNonce,
-  encodePayment,
-  signAuthorization,
-} from "../shared/permit";
+import { createNonce, encodePayment, signAuthorization } from "../shared/sign";
 import { SignerWallet } from "../shared/wallet";
 
 export async function createPayment(
@@ -19,7 +15,7 @@ export async function createPayment(
     Math.floor(Date.now() / 1000) - 5 // 1 block (2s) before to account for block timestamping
   );
   const validBefore = BigInt(
-    Math.floor(Date.now() / 1000 + paymentDetails.resourceMaxTimeSeconds)
+    Math.floor(Date.now() / 1000 + paymentDetails.requiredDeadlineSeconds)
   );
 
   const { signature } = await signAuthorization(client, {
