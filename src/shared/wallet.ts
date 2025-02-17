@@ -1,12 +1,4 @@
-import {
-  createPublicClient,
-  createWalletClient,
-  createTestClient,
-  http,
-  WalletClient,
-  PublicClient,
-  publicActions,
-} from "viem";
+import { createWalletClient, http, publicActions } from "viem";
 import type {
   Chain,
   Transport,
@@ -18,9 +10,7 @@ import type {
 } from "viem";
 import { baseSepolia } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
-import { Address, Hex } from "viem";
-import { abi } from "./erc20PermitABI";
-import { config } from "./config";
+import { Hex } from "viem";
 
 // Create a public client for reading data
 export type SignerWallet<

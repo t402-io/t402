@@ -1,11 +1,11 @@
 import { Address } from "viem";
 import { expect, test, describe } from "vitest";
-import { createPayment } from "./client";
-import { verifyPayment } from "./facilitator";
+import { createPayment } from "../src/client/client";
+import { verifyPayment } from "../src/facilitator/facilitator";
 import { baseSepolia } from "viem/chains";
-import { Resource, PaymentNeededDetails } from "./types";
-import { getUsdcAddressForChain } from "./usdc";
-import { botWallet } from "./wallet";
+import { Resource, PaymentNeededDetails } from "../src/shared/types";
+import { getUsdcAddressForChain } from "../src/shared/usdc";
+import { botWallet } from "../src/shared/wallet";
 
 describe("sign and recover", () => {
   const wallet = botWallet;
@@ -22,6 +22,7 @@ describe("sign and recover", () => {
       recommendedDeadlineSeconds: 10,
       chainId: baseSepolia.id,
       usdcAddress: getUsdcAddressForChain(wallet.chain?.id as number),
+      outputSchema: null,
     };
 
     const payment = await createPayment(wallet, paymentDetails);
@@ -45,6 +46,7 @@ describe("sign and recover", () => {
       recommendedDeadlineSeconds: 60,
       chainId: baseSepolia.id,
       usdcAddress: getUsdcAddressForChain(wallet.chain?.id as number),
+      outputSchema: null,
     };
 
     const payment = await createPayment(
@@ -69,6 +71,7 @@ describe("sign and recover", () => {
       recommendedDeadlineSeconds: 60,
       chainId: baseSepolia.id,
       usdcAddress: "0x1234567890123456789012345678901234567890" as Address, // Wrong address
+      outputSchema: null,
     };
 
     const payment = await createPayment(wallet, paymentDetails);
@@ -90,6 +93,7 @@ describe("sign and recover", () => {
       recommendedDeadlineSeconds: 60,
       chainId: baseSepolia.id,
       usdcAddress: getUsdcAddressForChain(wallet.chain?.id as number),
+      outputSchema: null,
     };
 
     const payment = await createPayment(wallet, paymentDetails);
@@ -120,6 +124,7 @@ describe("sign and recover", () => {
       recommendedDeadlineSeconds: 10, // this should be less than resourceMaxTimeSeconds
       chainId: baseSepolia.id,
       usdcAddress: getUsdcAddressForChain(wallet.chain?.id as number),
+      outputSchema: null,
     };
 
     const payment = await createPayment(wallet, paymentDetails);
@@ -143,6 +148,7 @@ describe("sign and recover", () => {
       recommendedDeadlineSeconds: 10,
       chainId: baseSepolia.id,
       usdcAddress: getUsdcAddressForChain(wallet.chain?.id),
+      outputSchema: null,
     };
 
     const payment = await createPayment(wallet, paymentDetails);
@@ -164,6 +170,7 @@ describe("sign and recover", () => {
       recommendedDeadlineSeconds: 10,
       chainId: baseSepolia.id,
       usdcAddress: getUsdcAddressForChain(wallet.chain?.id as number),
+      outputSchema: null,
     };
 
     const payment = await createPayment(

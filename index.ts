@@ -1,8 +1,12 @@
-import { botWallet, facilitatorWallet } from "./wallet";
-import { createPayment } from "./client";
-import { abi } from "./erc20PermitABI";
-import { getNonce, getUsdcAddressForChain, getVersion } from "./usdc";
-import { signAuthorization, createNonce } from "./permit";
+import { botWallet, facilitatorWallet } from "./src/shared/wallet";
+import { createPayment } from "./src/client/client";
+import { abi } from "./src/shared/erc20PermitABI";
+import {
+  getPermitNonce,
+  getUsdcAddressForChain,
+  getVersion,
+} from "./src/shared/usdc";
+import { signAuthorization, createNonce } from "./src/shared/permit";
 
 export async function main() {
   // TODO: probably should store stuff in a db here, but the txs can be recovered from chain if we must

@@ -1,6 +1,8 @@
 import { WalletClient, Hex, toHex } from "viem";
-import { config } from "./src/shared/config";
-import { AuthorizationParameters } from "./types";
+import { config } from "./config";
+import { AuthorizationParameters } from "../types";
+import { PaymentPayloadV1 } from "./types";
+import { z } from "zod";
 
 export const authorizationTypes = {
   TransferWithAuthorization: [
@@ -81,4 +83,56 @@ export async function signAuthorization(
 
 export function createNonce(): Hex {
   return toHex(crypto.getRandomValues(new Uint8Array(32)));
+}
+
+export function encodePayment(payment: PaymentPayloadV1): string {
+  const safe = {
+    ...payment,
+    payload: {
+      ...payment.payload,
+      params: Object.fromEntries(
+        Object.entries(payment.payload.params).map(([key, value]) => [
+          key,
+          typeof value === "bigint" ? value.toString() : value,
+        ])
+      ),
+    },
+  };
+  return safeBase64Encode(JSON.stringify(safe));
+}
+
+export function decodePayment(payment: string): PaymentPayloadV1 {
+  // TODO: setup proper zod validation
+  const decoded = safeBase64Decode(payment);
+  const parsed = JSON.parse(decoded);
+
+  const withBigInts = {
+    ...parsed,
+    payload: {
+      ...parsed.payload,
+      params: {
+        ...parsed.payload.params,
+        value: BigInt(parsed.payload.params.value),
+        validAfter: BigInt(parsed.payload.params.validAfter),
+        validBefore: BigInt(parsed.payload.params.validBefore),
+        nonce: parsed.payload.params.nonce,
+      },
+    },
+  };
+
+  return withBigInts as PaymentPayloadV1;
+}
+
+function safeBase64Encode(data: string): string {
+  if (typeof window !== "undefined") {
+    return window.btoa(data);
+  }
+  return Buffer.from(data).toString("base64");
+}
+
+function safeBase64Decode(data: string): string {
+  if (typeof window !== "undefined") {
+    return window.atob(data);
+  }
+  return Buffer.from(data, "base64").toString("utf-8");
 }

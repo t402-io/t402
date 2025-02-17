@@ -1,11 +1,11 @@
 import { expect, test, describe } from "vitest";
-import { Resource } from "./types";
+import { Resource } from "../src/shared/types";
 import { baseSepolia } from "viem/chains";
-import { botWallet, facilitatorWallet } from "./wallet";
+import { botWallet, facilitatorWallet } from "../src/shared/wallet";
 import { Address } from "viem";
-import { createPayment } from "./client";
-import { getUsdcAddressForChain, getUSDCBalance } from "./usdc";
-import { settlePayment, verifyPayment } from "./facilitator";
+import { createPayment } from "../src/client/client";
+import { getUsdcAddressForChain, getUSDCBalance } from "../src/shared/usdc";
+import { settlePayment, verifyPayment } from "../src/facilitator/facilitator";
 
 describe("settlePayment", () => {
   const wallet = botWallet;
@@ -25,6 +25,7 @@ describe("settlePayment", () => {
       recommendedDeadlineSeconds: 10,
       chainId: baseSepolia.id,
       usdcAddress: getUsdcAddressForChain(baseSepolia.id),
+      outputSchema: null,
     };
 
     const payment = await createPayment(wallet, paymentDetails);

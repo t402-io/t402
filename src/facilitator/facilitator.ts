@@ -3,32 +3,47 @@ import {
   PaymentExecutionResponse,
   PaymentNeededDetails,
   PaymentPayloadV1,
-  ValidPaymentRequest,
-} from "./types";
+  ValidPaymentResponse,
+} from "../shared/types";
 
-import { getUsdcAddressForChain, getUSDCBalance } from "./usdc";
-import { abi } from "./erc20PermitABI";
-import { SignerWallet } from "./wallet";
-import { authorizationTypes, authorizationPrimaryType } from "./permit";
-import { config } from "./config";
+import { getUsdcAddressForChain, getUSDCBalance } from "../shared/usdc";
+import { abi } from "../shared/erc20PermitABI";
+import { SignerWallet } from "../shared/wallet";
+import { authorizationTypes, authorizationPrimaryType } from "../shared/permit";
+import { config } from "../shared/config";
 
 const PROTOCOL_VERSION = 1;
 
+/**
+ * Verifies a payment payload against the required payment details
+ * @param client - The public client used for blockchain interactions
+ * @param payload - The signed payment payload containing transfer parameters and signature
+ * @param paymentDetails - The payment requirements that the payload must satisfy
+ * @returns A ValidPaymentRequest indicating if the payment is valid and any invalidation reason
+ * @remarks This function performs several verification steps:
+ * - Verifies protocol version compatibility
+ * - Validates the permit signature
+ * - Confirms USDC contract address is correct for the chain
+ * - Checks permit deadline is sufficiently in the future
+ * - Verifies client has sufficient USDC balance
+ * - Ensures payment amount meets required minimum
+ */
 export async function verifyPayment(
   client: PublicClient,
   payload: PaymentPayloadV1,
   paymentDetails: PaymentNeededDetails
-): Promise<ValidPaymentRequest> {
-  /* TODO: verification steps:
+): Promise<ValidPaymentResponse> {
+  /* TODO: work with security team on brainstorming more verification steps
+  verification steps:
     - ✅ verify payload version
     - ✅ verify usdc address is correct for the chain
     - ✅ verify permit signature
     - ✅ verify deadline
     - ✅ verify nonce is current
-    - verify client has enough funds to cover paymentDetails.maxAmountRequired
-    - verify value in payload is enough to cover paymentDetails.maxAmountRequired
-    - verify resource is not expired
-    - verify resource is not already paid for
+    - ✅ verify client has enough funds to cover paymentDetails.maxAmountRequired
+    - ✅ verify value in payload is enough to cover paymentDetails.maxAmountRequired
+    - check min amount is above some threshold we think is reasonable for covering gas
+    - verify resource is not already paid for (next version)
     */
 
   // Verify payload version
@@ -125,12 +140,31 @@ export async function verifyPayment(
   };
 }
 
+/**
+ * Settles a payment by executing a USDC transferWithAuthorization transaction
+ * @param wallet - The facilitator wallet that will submit the transaction
+ * @param payload - The signed payment payload containing the transfer parameters and signature
+ * @param paymentDetails - The original payment details that were used to create the payload
+ * @returns A PaymentExecutionResponse containing the transaction status and hash
+ * @remarks This function executes the actual USDC transfer using the signed authorization from the user.
+ * The facilitator wallet submits the transaction but does not need to hold or transfer any tokens itself.
+ */
 export async function settlePayment(
   wallet: SignerWallet,
   payload: PaymentPayloadV1,
   paymentDetails: PaymentNeededDetails
 ): Promise<PaymentExecutionResponse> {
   // TODO: probably should store stuff in a db here, but the txs can be recovered from chain if we must
+
+  // re-verify to ensure the payment is still valid
+  const valid = await verifyPayment(wallet, payload, paymentDetails);
+
+  if (!valid.isValid) {
+    return {
+      success: false,
+      error: `Payment is no longer valid: ${valid.invalidReason}`,
+    };
+  }
 
   const tx = await wallet.writeContract({
     address: payload.payload.params.usdcAddress,
@@ -148,6 +182,15 @@ export async function settlePayment(
   });
 
   const receipt = await wallet.waitForTransactionReceipt({ hash: tx });
+
+  if (receipt.status !== "success") {
+    return {
+      success: false,
+      error: `Transaction failed`,
+      txHash: tx,
+      chainId: payload.payload.params.chainId,
+    };
+  }
 
   return {
     success: true,
