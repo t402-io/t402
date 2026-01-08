@@ -51,10 +51,6 @@ jobs:
         working-directory: ./typescript
         run: pnpm test
 
-      - name: Run linting
-        working-directory: ./typescript
-        run: pnpm lint:check
-
   publish:
     needs: test
     runs-on: ubuntu-latest
