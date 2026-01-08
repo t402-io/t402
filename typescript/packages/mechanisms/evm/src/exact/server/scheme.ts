@@ -6,13 +6,34 @@ import {
   SchemeNetworkServer,
   MoneyParser,
 } from "@t402/core/types";
+import {
+  getDefaultToken,
+  getTokenConfig,
+  getTokenByAddress,
+  TokenConfig,
+  TOKEN_REGISTRY,
+} from "../../tokens.js";
+
+/**
+ * Configuration options for ExactEvmScheme
+ */
+export interface ExactEvmSchemeConfig {
+  /** Preferred token symbol (e.g., "USDT0", "USDC"). Defaults to network's highest priority token. */
+  preferredToken?: string;
+}
 
 /**
  * EVM server implementation for the Exact payment scheme.
+ * Supports USDT0, USDC, and other EIP-3009 compatible tokens.
  */
 export class ExactEvmScheme implements SchemeNetworkServer {
   readonly scheme = "exact";
   private moneyParsers: MoneyParser[] = [];
+  private config: ExactEvmSchemeConfig;
+
+  constructor(config: ExactEvmSchemeConfig = {}) {
+    this.config = config;
+  }
 
   /**
    * Register a custom money parser in the parser chain.
@@ -130,114 +151,117 @@ export class ExactEvmScheme implements SchemeNetworkServer {
 
   /**
    * Default money conversion implementation.
-   * Converts decimal amount to USDC on the specified network.
+   * Converts decimal amount to the preferred token on the specified network.
+   * Priority: USDT0 > USDC > other configured tokens
    *
    * @param amount - The decimal amount (e.g., 1.50)
    * @param network - The network to use
-   * @returns The parsed asset amount in USDC
+   * @returns The parsed asset amount
    */
   private defaultMoneyConversion(amount: number, network: Network): AssetAmount {
-    // Convert decimal amount to token amount (USDC has 6 decimals)
-    const tokenAmount = this.convertToTokenAmount(amount.toString(), network);
-    const assetInfo = this.getDefaultAsset(network);
+    const token = this.getDefaultAsset(network);
+
+    // Convert decimal amount to token amount
+    const tokenAmount = this.convertToTokenAmount(amount.toString(), network, token.decimals);
 
     return {
       amount: tokenAmount,
-      asset: assetInfo.address,
+      asset: token.address,
       extra: {
-        name: assetInfo.name,
-        version: assetInfo.version,
+        name: token.name,
+        version: token.version,
+        symbol: token.symbol,
+        tokenType: token.tokenType,
       },
     };
   }
 
   /**
-   * Convert decimal amount to token units (e.g., 0.10 -> 100000 for 6-decimal USDC)
+   * Convert decimal amount to token units (e.g., 0.10 -> 100000 for 6-decimal tokens)
    *
    * @param decimalAmount - The decimal amount to convert
    * @param network - The network to use
+   * @param decimals - Optional number of decimals (defaults to network asset decimals)
    * @returns The token amount as a string
    */
-  private convertToTokenAmount(decimalAmount: string, network: Network): string {
-    const decimals = this.getAssetDecimals(network);
+  private convertToTokenAmount(decimalAmount: string, network: Network, decimals?: number): string {
+    const tokenDecimals = decimals ?? this.getAssetDecimals(network);
     const amount = parseFloat(decimalAmount);
     if (isNaN(amount)) {
       throw new Error(`Invalid amount: ${decimalAmount}`);
     }
-    // Convert to smallest unit (e.g., for USDC with 6 decimals: 0.10 * 10^6 = 100000)
-    const tokenAmount = Math.floor(amount * Math.pow(10, decimals));
+    // Convert to smallest unit (e.g., for USDC/USDT with 6 decimals: 0.10 * 10^6 = 100000)
+    const tokenAmount = Math.floor(amount * Math.pow(10, tokenDecimals));
     return tokenAmount.toString();
   }
 
   /**
-   * Get the default asset info for a network (typically USDC)
+   * Get the default asset info for a network.
+   * Priority: configured preferredToken > USDT0 > USDC > first available
    *
    * @param network - The network to get asset info for
-   * @returns The asset information including address, name, and version
+   * @returns The asset information including address, name, version, and decimals
    */
-  private getDefaultAsset(network: Network): { address: string; name: string; version: string } {
-    // Map of network to USDC info including EIP-712 domain parameters
-    const usdcInfo: Record<string, { address: string; name: string; version: string }> = {
-      "eip155:8453": {
-        address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-        name: "USD Coin",
-        version: "2",
-      }, // Base mainnet USDC
-      "eip155:84532": {
-        address: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
-        name: "USDC",
-        version: "2",
-      }, // Base Sepolia USDC
-      "eip155:1": {
-        address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-        name: "USD Coin",
-        version: "2",
-      }, // Ethereum mainnet USDC
-      "eip155:11155111": {
-        address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
-        name: "USDC",
-        version: "2",
-      }, // Sepolia USDC
-    };
-
-    const assetInfo = usdcInfo[network];
-    if (!assetInfo) {
-      throw new Error(`No default asset configured for network ${network}`);
+  private getDefaultAsset(network: Network): TokenConfig {
+    // If a preferred token is configured, try to use it
+    if (this.config.preferredToken) {
+      const preferred = getTokenConfig(network, this.config.preferredToken);
+      if (preferred) return preferred;
     }
 
-    return assetInfo;
+    // Use the network's default token (sorted by priority)
+    const defaultToken = getDefaultToken(network);
+    if (defaultToken) return defaultToken;
+
+    throw new Error(`No tokens configured for network ${network}`);
   }
 
   /**
    * Get asset info for a given symbol on a network
    *
-   * @param symbol - The asset symbol
+   * @param symbol - The asset symbol (e.g., "USDT0", "USDC", "USDT")
    * @param network - The network to use
-   * @returns The asset information including address, name, and version
+   * @returns The token configuration
    */
-  private getAssetInfo(
-    symbol: string,
-    network: Network,
-  ): { address: string; name: string; version: string } {
-    const upperSymbol = symbol.toUpperCase();
+  private getAssetInfo(symbol: string, network: Network): TokenConfig {
+    const token = getTokenConfig(network, symbol);
+    if (token) return token;
 
-    // For now, only support USDC
-    if (upperSymbol === "USDC" || upperSymbol === "USD") {
+    // Fallback: treat "USD" as request for default stablecoin
+    if (symbol.toUpperCase() === "USD") {
       return this.getDefaultAsset(network);
     }
 
-    // Could extend to support other tokens
     throw new Error(`Unsupported asset: ${symbol} on network ${network}`);
   }
 
   /**
-   * Get the number of decimals for the asset
+   * Get the number of decimals for the asset on a network
    *
-   * @param _ - The network to use (unused)
+   * @param network - The network to use
+   * @param tokenAddress - Optional token address to look up
    * @returns The number of decimals for the asset
    */
-  private getAssetDecimals(_: Network): number {
-    // USDC has 6 decimals on all EVM chains
+  private getAssetDecimals(network: Network, tokenAddress?: string): number {
+    if (tokenAddress) {
+      const token = getTokenByAddress(network, tokenAddress as `0x${string}`);
+      if (token) return token.decimals;
+    }
+    // Default to 6 decimals (USDC/USDT standard)
     return 6;
+  }
+
+  /**
+   * Get all supported networks
+   */
+  static getSupportedNetworks(): string[] {
+    return Object.keys(TOKEN_REGISTRY);
+  }
+
+  /**
+   * Check if a network is supported
+   */
+  static isNetworkSupported(network: string): boolean {
+    return network in TOKEN_REGISTRY;
   }
 }
