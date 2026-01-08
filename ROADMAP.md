@@ -77,7 +77,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 - [x] Implement balance caching with TTL
 - [x] Add comprehensive test suite (90%+ coverage)
 - [x] Write WDK integration documentation
-- [ ] Publish @t402/wdk v2.0.0
+- [x] Publish @t402/wdk v2.0.0
 
 #### Deliverables
 - Clean, branded codebase
