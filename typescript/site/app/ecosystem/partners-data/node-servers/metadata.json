@@ -3,5 +3,5 @@
   "category": "Infrastructure & Tooling",
   "logoUrl": "/logos/node-servers.png",
   "description": "Reference t402 server implementations in Node.js using Hono and Express, plus an advanced example with dynamic pricing and complex logic.",
-  "websiteUrl": "https://github.com/coinbase/t402/tree/main/examples/typescript/servers"
+  "websiteUrl": "https://github.com/t402-io/t402/tree/main/examples/typescript/servers"
 }

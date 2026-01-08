@@ -5,11 +5,10 @@ description = "t402: An internet native payments protocol"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 authors = [
-    { name = "erik", email = "erik.reppel@coinbase.com" },
-    { name = "Coinbase Developer Platform", email = "" }
+    { name = "T402 Team", email = "dev@t402.io" }
 ]
 requires-python = ">=3.10"
-keywords = ["t402", "sdk", "crypto", "cdp", "payments", "web3"]
+keywords = ["t402", "sdk", "crypto", "usdt", "payments", "web3", "tether"]
 dependencies = [
     "eth-account>=0.13.7",
     "eth-typing>=4.0.0",
