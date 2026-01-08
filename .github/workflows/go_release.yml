@@ -1,0 +1,96 @@
+name: Go Release
+
+on:
+  push:
+    tags:
+      - "go/v*"
+  pull_request:
+    paths:
+      - "go/**"
+      - ".github/workflows/go_release.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: ["1.22", "1.23", "1.24"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+          cache-dependency-path: go/go.sum
+
+      - name: Install dependencies
+        working-directory: ./go
+        run: go mod download
+
+      - name: Run tests
+        working-directory: ./go
+        run: go test -v -race -coverprofile=coverage.out ./...
+
+      - name: Run linting
+        if: matrix.go-version == '1.24'
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          working-directory: ./go
+
+      - name: Upload coverage
+        if: matrix.go-version == '1.24'
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./go/coverage.out
+          flags: go
+          fail_ci_if_error: false
+
+  release:
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/go/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+          cache-dependency-path: go/go.sum
+
+      - name: Verify module
+        working-directory: ./go
+        run: |
+          go mod verify
+          go mod tidy
+          git diff --exit-code go.mod go.sum
+
+      - name: Extract version
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/go/}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Released Go module version: $VERSION"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Go SDK ${{ steps.version.outputs.version }}"
+          body: |
+            ## Go SDK ${{ steps.version.outputs.version }}
+
+            ### Installation
+
+            ```bash
+            go get github.com/t402-io/t402/go@${{ steps.version.outputs.version }}
+            ```
+
+            ### Changelog
+
+            See [CHANGELOG.md](https://github.com/t402-io/t402/blob/main/go/CHANGELOG.md) for details.
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.version, '-') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
