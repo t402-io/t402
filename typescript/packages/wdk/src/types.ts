@@ -194,3 +194,27 @@ export interface WDKConstructor {
   new (seedPhrase: string): WDKInstance;
   getRandomSeedPhrase(): string;
 }
+
+/**
+ * Balance cache configuration for T402WDK
+ */
+export interface T402BalanceCacheConfig {
+  /** Whether caching is enabled (default: true) */
+  enabled?: boolean;
+  /** TTL for native balance in milliseconds (default: 15000 = 15 seconds) */
+  nativeBalanceTTL?: number;
+  /** TTL for token balance in milliseconds (default: 30000 = 30 seconds) */
+  tokenBalanceTTL?: number;
+  /** TTL for aggregated balances in milliseconds (default: 60000 = 60 seconds) */
+  aggregatedBalanceTTL?: number;
+  /** Maximum cache entries (default: 500) */
+  maxSize?: number;
+}
+
+/**
+ * Extended T402 WDK configuration with cache options
+ */
+export interface T402WDKOptions {
+  /** Balance cache configuration */
+  cache?: T402BalanceCacheConfig;
+}
