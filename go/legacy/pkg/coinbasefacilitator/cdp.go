@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/coinbase/cdp-sdk/go/auth"
-	"github.com/coinbase/t402/go/pkg/types"
+	"github.com/awesome-doge/t402/go/pkg/types"
 )
 
 // SDKVersion represents the current version of the SDK

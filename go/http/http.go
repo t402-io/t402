@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 
-	t402 "github.com/coinbase/t402/go"
+	t402 "github.com/awesome-doge/t402/go"
 )
 
 // ============================================================================

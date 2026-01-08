@@ -129,8 +129,8 @@ http/your_framework/
 package yourframework
 
 import (
-    t402 "github.com/coinbase/t402/go"
-    t402http "github.com/coinbase/t402/go/http"
+    t402 "github.com/awesome-doge/t402/go"
+    t402http "github.com/awesome-doge/t402/go/http"
 )
 
 // Middleware creates t402 payment middleware for YourFramework.
@@ -272,7 +272,7 @@ This runs both `go fmt` and `goimports`.
 Use typed errors from `errors.go`:
 
 ```go
-import t402 "github.com/coinbase/t402/go"
+import t402 "github.com/awesome-doge/t402/go"
 
 if err != nil {
     return nil, t402.NewVerificationError("invalid signature", err)
@@ -291,13 +291,13 @@ Examples live in `examples/go/`. When adding a new example:
 When adding a Go example, include a `go.mod` that references the local SDK:
 
 ```go
-module github.com/coinbase/t402/examples/go/your-example
+module github.com/awesome-doge/t402/examples/go/your-example
 
 go 1.24
 
-require github.com/coinbase/t402/go v0.0.0
+require github.com/awesome-doge/t402/go v0.0.0
 
-replace github.com/coinbase/t402/go => ../../../go
+replace github.com/awesome-doge/t402/go => ../../../go
 ```
 
 ## Documentation

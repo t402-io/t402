@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	t402 "github.com/coinbase/t402/go"
+	t402 "github.com/awesome-doge/t402/go"
 )
 
 // TestRegisterMoneyParser_SingleCustomParser tests a single custom money parser

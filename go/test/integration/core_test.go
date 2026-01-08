@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	t402 "github.com/coinbase/t402/go"
-	"github.com/coinbase/t402/go/test/mocks/cash"
-	"github.com/coinbase/t402/go/types"
+	t402 "github.com/awesome-doge/t402/go"
+	"github.com/awesome-doge/t402/go/test/mocks/cash"
+	"github.com/awesome-doge/t402/go/types"
 )
 
 // TestCoreIntegration tests the integration between t402Client, t402ResourceServer, and t402Facilitator

@@ -5,7 +5,7 @@ Gin middleware integration for the t402 Payment Protocol. This package provides 
 ## Installation
 
 ```bash
-go get github.com/coinbase/t402/go
+go get github.com/awesome-doge/t402/go
 ```
 
 ## Quick Start
@@ -16,10 +16,10 @@ package main
 import (
 	"time"
 
-	t402 "github.com/coinbase/t402/go"
-	t402http "github.com/coinbase/t402/go/http"
-	ginmw "github.com/coinbase/t402/go/http/gin"
-	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/server"
+	t402 "github.com/awesome-doge/t402/go"
+	t402http "github.com/awesome-doge/t402/go/http"
+	ginmw "github.com/awesome-doge/t402/go/http/gin"
+	evm "github.com/awesome-doge/t402/go/mechanisms/evm/exact/server"
 	"github.com/gin-gonic/gin"
 )
 
@@ -154,8 +154,8 @@ Register schemes for different networks:
 
 ```go
 import (
-	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/server"
-	svm "github.com/coinbase/t402/go/mechanisms/svm/exact/server"
+	evm "github.com/awesome-doge/t402/go/mechanisms/evm/exact/server"
+	svm "github.com/awesome-doge/t402/go/mechanisms/svm/exact/server"
 )
 
 r.Use(ginmw.PaymentMiddlewareFromConfig(routes,
@@ -225,10 +225,10 @@ import (
 	"log"
 	"time"
 
-	t402 "github.com/coinbase/t402/go"
-	t402http "github.com/coinbase/t402/go/http"
-	ginmw "github.com/coinbase/t402/go/http/gin"
-	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/server"
+	t402 "github.com/awesome-doge/t402/go"
+	t402http "github.com/awesome-doge/t402/go/http"
+	ginmw "github.com/awesome-doge/t402/go/http/gin"
+	evm "github.com/awesome-doge/t402/go/mechanisms/evm/exact/server"
 	"github.com/gin-gonic/gin"
 )
 

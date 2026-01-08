@@ -13,13 +13,13 @@ import (
 	solana "github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/rpc"
 
-	t402 "github.com/coinbase/t402/go"
-	svm "github.com/coinbase/t402/go/mechanisms/svm"
-	svmclient "github.com/coinbase/t402/go/mechanisms/svm/exact/client"
-	svmfacilitator "github.com/coinbase/t402/go/mechanisms/svm/exact/facilitator"
-	svmserver "github.com/coinbase/t402/go/mechanisms/svm/exact/server"
-	svmsigners "github.com/coinbase/t402/go/signers/svm"
-	"github.com/coinbase/t402/go/types"
+	t402 "github.com/awesome-doge/t402/go"
+	svm "github.com/awesome-doge/t402/go/mechanisms/svm"
+	svmclient "github.com/awesome-doge/t402/go/mechanisms/svm/exact/client"
+	svmfacilitator "github.com/awesome-doge/t402/go/mechanisms/svm/exact/facilitator"
+	svmserver "github.com/awesome-doge/t402/go/mechanisms/svm/exact/server"
+	svmsigners "github.com/awesome-doge/t402/go/signers/svm"
+	"github.com/awesome-doge/t402/go/types"
 )
 
 // newRealClientSvmSigner creates a client signer using the helper

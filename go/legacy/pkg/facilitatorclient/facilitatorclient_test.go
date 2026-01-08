@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coinbase/t402/go/pkg/facilitatorclient"
-	"github.com/coinbase/t402/go/pkg/types"
+	"github.com/awesome-doge/t402/go/pkg/facilitatorclient"
+	"github.com/awesome-doge/t402/go/pkg/types"
 )
 
 func TestVerify(t *testing.T) {

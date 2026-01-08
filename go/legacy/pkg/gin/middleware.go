@@ -9,8 +9,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/coinbase/t402/go/pkg/facilitatorclient"
-	"github.com/coinbase/t402/go/pkg/types"
+	"github.com/awesome-doge/t402/go/pkg/facilitatorclient"
+	"github.com/awesome-doge/t402/go/pkg/types"
 )
 
 const t402Version = 1

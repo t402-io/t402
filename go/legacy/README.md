@@ -3,7 +3,7 @@
 ## Installation
 
 ```bash
-go get github.com/coinbase/t402/go
+go get github.com/awesome-doge/t402/go
 ```
 
 ## Usage
@@ -16,7 +16,7 @@ package main
 import (
 	"math/big"
 
-	t402gin "github.com/coinbase/t402/go/pkg/gin"
+	t402gin "github.com/awesome-doge/t402/go/pkg/gin"
 	"github.com/gin-gonic/gin"
 )
 

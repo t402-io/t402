@@ -16,7 +16,7 @@ An **t402 client** is an application that makes HTTP requests to payment-protect
 ### Installation
 
 ```bash
-go get github.com/coinbase/t402/go
+go get github.com/awesome-doge/t402/go
 ```
 
 ### Basic HTTP Client
@@ -27,10 +27,10 @@ package main
 import (
     "net/http"
     
-    t402 "github.com/coinbase/t402/go"
-    t402http "github.com/coinbase/t402/go/http"
-    evm "github.com/coinbase/t402/go/mechanisms/evm/exact/client"
-    evmsigners "github.com/coinbase/t402/go/signers/evm"
+    t402 "github.com/awesome-doge/t402/go"
+    t402http "github.com/awesome-doge/t402/go/http"
+    evm "github.com/awesome-doge/t402/go/mechanisms/evm/exact/client"
+    evmsigners "github.com/awesome-doge/t402/go/signers/evm"
 )
 
 func main() {
@@ -62,7 +62,7 @@ func main() {
 #### EVM Signer
 
 ```go
-import evmsigners "github.com/coinbase/t402/go/signers/evm"
+import evmsigners "github.com/awesome-doge/t402/go/signers/evm"
 
 signer, err := evmsigners.NewClientSignerFromPrivateKey("0x1234...")
 if err != nil {
@@ -75,7 +75,7 @@ fmt.Println("Address:", signer.Address())
 #### SVM Signer
 
 ```go
-import svmsigners "github.com/coinbase/t402/go/signers/svm"
+import svmsigners "github.com/awesome-doge/t402/go/signers/svm"
 
 signer, err := svmsigners.NewClientSignerFromPrivateKey("5J7W...")
 if err != nil {
@@ -514,8 +514,8 @@ Payment payloads are created fresh for each 402 response. They are not cached be
 ```go
 import (
     "testing"
-    t402 "github.com/coinbase/t402/go"
-    evm "github.com/coinbase/t402/go/mechanisms/evm/exact/client"
+    t402 "github.com/awesome-doge/t402/go"
+    evm "github.com/awesome-doge/t402/go/mechanisms/evm/exact/client"
 )
 
 func TestClientRegistration(t *testing.T) {

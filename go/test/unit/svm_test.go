@@ -4,9 +4,9 @@ package unit_test
 import (
 	"testing"
 
-	t402 "github.com/coinbase/t402/go"
-	svm "github.com/coinbase/t402/go/mechanisms/svm"
-	svmserver "github.com/coinbase/t402/go/mechanisms/svm/exact/server"
+	t402 "github.com/awesome-doge/t402/go"
+	svm "github.com/awesome-doge/t402/go/mechanisms/svm"
+	svmserver "github.com/awesome-doge/t402/go/mechanisms/svm/exact/server"
 )
 
 // TestSolanaServerPriceParsing tests V2 server price parsing

@@ -5,11 +5,11 @@ import (
 	"math/big"
 	"testing"
 
-	t402 "github.com/coinbase/t402/go"
-	"github.com/coinbase/t402/go/mechanisms/evm"
-	evmclient "github.com/coinbase/t402/go/mechanisms/evm/exact/client"
-	evmv1client "github.com/coinbase/t402/go/mechanisms/evm/exact/v1/client"
-	"github.com/coinbase/t402/go/types"
+	t402 "github.com/awesome-doge/t402/go"
+	"github.com/awesome-doge/t402/go/mechanisms/evm"
+	evmclient "github.com/awesome-doge/t402/go/mechanisms/evm/exact/client"
+	evmv1client "github.com/awesome-doge/t402/go/mechanisms/evm/exact/v1/client"
+	"github.com/awesome-doge/t402/go/types"
 )
 
 // Mock EVM signer for client

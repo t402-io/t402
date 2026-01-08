@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/coinbase/t402/go/pkg/types"
+	"github.com/awesome-doge/t402/go/pkg/types"
 )
 
 // DefaultFacilitatorURL is the default URL for the t402 facilitator service

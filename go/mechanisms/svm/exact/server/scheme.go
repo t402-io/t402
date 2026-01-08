@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"strings"
 
-	t402 "github.com/coinbase/t402/go"
-	"github.com/coinbase/t402/go/mechanisms/svm"
-	"github.com/coinbase/t402/go/types"
+	t402 "github.com/awesome-doge/t402/go"
+	"github.com/awesome-doge/t402/go/mechanisms/svm"
+	"github.com/awesome-doge/t402/go/types"
 )
 
 // ExactSvmScheme implements the SchemeNetworkServer interface for SVM (Solana) exact payments (V2)

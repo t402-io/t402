@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/coinbase/t402/go/types"
+	"github.com/awesome-doge/t402/go/types"
 )
 
 // t402Client manages payment mechanisms and creates payment payloads
