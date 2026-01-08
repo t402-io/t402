@@ -8,6 +8,13 @@ on:
     paths:
       - "go/**"
       - ".github/workflows/go_release.yml"
+  workflow_dispatch:
+    inputs:
+      skip_release:
+        description: "Skip GitHub release creation (test only)"
+        required: false
+        default: true
+        type: boolean
 
 jobs:
   test:
