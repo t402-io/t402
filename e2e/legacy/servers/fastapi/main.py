@@ -7,9 +7,9 @@ from typing import Any, Dict, Optional
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
-from x402.fastapi.middleware import require_payment
-from x402.types import EIP712Domain, TokenAmount, TokenAsset
-from x402.chains import (
+from t402.fastapi.middleware import require_payment
+from t402.types import EIP712Domain, TokenAmount, TokenAsset
+from t402.chains import (
     get_chain_id,
     get_token_decimals,
     get_token_name,

@@ -1,9 +1,9 @@
-import { x402ResourceServer } from "@x402/core/server";
-import { Network } from "@x402/core/types";
+import { t402ResourceServer } from "@t402/core/server";
+import { Network } from "@t402/core/types";
 import { ExactSvmScheme } from "./scheme";
 
 /**
- * Configuration options for registering SVM schemes to an x402ResourceServer
+ * Configuration options for registering SVM schemes to an t402ResourceServer
  */
 export interface SvmResourceServerConfig {
   /**
@@ -13,16 +13,16 @@ export interface SvmResourceServerConfig {
 }
 
 /**
- * Registers SVM payment schemes to an existing x402ResourceServer instance.
+ * Registers SVM payment schemes to an existing t402ResourceServer instance.
  *
- * @param server - The x402ResourceServer instance to register schemes to
+ * @param server - The t402ResourceServer instance to register schemes to
  * @param config - Configuration for SVM resource server registration
  * @returns The server instance for chaining
  */
 export function registerExactSvmScheme(
-  server: x402ResourceServer,
+  server: t402ResourceServer,
   config: SvmResourceServerConfig = {},
-): x402ResourceServer {
+): t402ResourceServer {
   if (config.networks && config.networks.length > 0) {
     config.networks.forEach(network => {
       server.register(network, new ExactSvmScheme());

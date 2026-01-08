@@ -20,7 +20,7 @@ export const minikitConfig = {
   },
   miniapp: {
     version: "1",
-    name: "x402 Mini App",
+    name: "t402 Mini App",
     subtitle: "Payment-protected APIs",
     description: "A Farcaster Mini App with payment protected endpoints",
     screenshotUrls: [] as string[],

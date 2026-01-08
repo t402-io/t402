@@ -1,4 +1,4 @@
-import { ExactSvmPayload } from "../../types/verify/x402Specs";
+import { ExactSvmPayload } from "../../types/verify/t402Specs";
 import {
   getBase64EncodedWireTransaction,
   getBase64Encoder,

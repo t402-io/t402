@@ -12,8 +12,8 @@ window.addEventListener("load", () => {
     return;
   }
 
-  const x402 = window.x402;
-  const paymentRequired = x402.paymentRequired;
+  const t402 = window.t402;
+  const paymentRequired = t402.paymentRequired;
 
   if (!paymentRequired?.accepts?.[0]) {
     console.error("No payment requirements found");

@@ -17,7 +17,7 @@ export type PaymentRequirements = {
 };
 
 export type PaymentRequired = {
-  x402Version: number;
+  t402Version: number;
   error?: string;
   resource: ResourceInfo;
   accepts: PaymentRequirements[];
@@ -25,7 +25,7 @@ export type PaymentRequired = {
 };
 
 export type PaymentPayload = {
-  x402Version: number;
+  t402Version: number;
   resource: ResourceInfo;
   accepted: PaymentRequirements;
   payload: Record<string, unknown>;

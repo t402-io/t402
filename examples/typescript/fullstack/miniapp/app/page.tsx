@@ -18,13 +18,13 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { useAccount, useWalletClient, useSwitchChain } from "wagmi";
 import { baseSepolia } from "wagmi/chains";
 import { sdk } from "@farcaster/miniapp-sdk";
-import { x402Client, wrapFetchWithPayment } from "@x402/fetch";
-import { registerExactEvmScheme } from "@x402/evm/exact/client";
-import type { ClientEvmSigner } from "@x402/evm";
+import { t402Client, wrapFetchWithPayment } from "@t402/fetch";
+import { registerExactEvmScheme } from "@t402/evm/exact/client";
+import type { ClientEvmSigner } from "@t402/evm";
 import type { WalletClient, Account } from "viem";
 
 /**
- * Converts a wagmi/viem WalletClient to a ClientEvmSigner for x402Client
+ * Converts a wagmi/viem WalletClient to a ClientEvmSigner for t402Client
  */
 function wagmiToClientSigner(walletClient: WalletClient): ClientEvmSigner {
   if (!walletClient.account) {
@@ -110,8 +110,8 @@ export default function App() {
         await switchChainAsync({ chainId: baseSepolia.id });
       }
 
-      // Create x402 client and register EVM scheme with wagmi signer
-      const client = new x402Client();
+      // Create t402 client and register EVM scheme with wagmi signer
+      const client = new t402Client();
       const signer = wagmiToClientSigner(walletClient);
       registerExactEvmScheme(client, { signer });
 
@@ -177,7 +177,7 @@ export default function App() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-                x402 Mini App
+                t402 Mini App
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 {isInMiniApp ? "Running as Mini App" : "Running in browser"}
@@ -212,10 +212,10 @@ export default function App() {
           {/* Hero Section */}
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-              x402 Payment Protocol Demo
+              t402 Payment Protocol Demo
             </h2>
             <p className="text-gray-600 dark:text-gray-300">
-              This Mini App demonstrates the x402 v2 SDK with Farcaster and
+              This Mini App demonstrates the t402 v2 SDK with Farcaster and
               OnchainKit integration.
             </p>
           </div>
@@ -275,7 +275,7 @@ export default function App() {
               Protected Action
             </h3>
             <p className="text-gray-600 dark:text-gray-300 mb-6">
-              This button calls an x402-protected API endpoint.
+              This button calls an t402-protected API endpoint.
             </p>
             <button
               onClick={handleProtectedAction}
@@ -345,7 +345,7 @@ export default function App() {
                 Farcaster Mini App
               </p>
               <p>
-                • Use the &quot;Call Protected API&quot; button to test the x402
+                • Use the &quot;Call Protected API&quot; button to test the t402
                 protected endpoint
               </p>
               <p>• Payment of $0.01 USDC is required to access the endpoint</p>

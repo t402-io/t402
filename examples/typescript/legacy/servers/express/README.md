@@ -1,6 +1,6 @@
-# x402-express Example Server
+# t402-express Example Server
 
-This is an example Express.js server that demonstrates how to use the `x402-express` middleware to implement paywall functionality in your API endpoints.
+This is an example Express.js server that demonstrates how to use the `t402-express` middleware to implement paywall functionality in your API endpoints.
 
 ## Prerequisites
 

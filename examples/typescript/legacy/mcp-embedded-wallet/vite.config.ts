@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     port: 3000,
     headers: {
-      // Allow all origins in development to support localhost x402 requests
+      // Allow all origins in development to support localhost t402 requests
       "Access-Control-Allow-Origin": "*",
     },
   },

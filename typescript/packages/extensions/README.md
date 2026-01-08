@@ -1,23 +1,23 @@
-# @x402/extensions
+# @t402/extensions
 
-x402 Payment Protocol Extensions. This package provides optional extensions that enhance the x402 payment protocol with additional functionality like resource discovery and cataloging.
+t402 Payment Protocol Extensions. This package provides optional extensions that enhance the t402 payment protocol with additional functionality like resource discovery and cataloging.
 
 ## Installation
 
 ```bash
-pnpm install @x402/extensions
+pnpm install @t402/extensions
 ```
 
 ## Overview
 
-Extensions are optional features that can be added to x402 payment flows. They allow servers to provide additional metadata and enable facilitators to offer enhanced services like resource discovery and cataloging.
+Extensions are optional features that can be added to t402 payment flows. They allow servers to provide additional metadata and enable facilitators to offer enhanced services like resource discovery and cataloging.
 
 Currently, this package includes:
-- **Bazaar Discovery Extension**: Enables automatic cataloging and indexing of x402-enabled resources
+- **Bazaar Discovery Extension**: Enables automatic cataloging and indexing of t402-enabled resources
 
 ## Bazaar Discovery Extension
 
-The Bazaar Discovery Extension enables facilitators to automatically catalog and index x402-enabled resources by following server-declared discovery instructions. This allows users to discover paid APIs and services through facilitator catalogs.
+The Bazaar Discovery Extension enables facilitators to automatically catalog and index t402-enabled resources by following server-declared discovery instructions. This allows users to discover paid APIs and services through facilitator catalogs.
 
 ### How It Works
 
@@ -35,7 +35,7 @@ Declare endpoint discovery metadata in your payment middleware configuration. Th
 #### Basic Example: GET Endpoint with Query Parameters
 
 ```typescript
-import { declareDiscoveryExtension } from "@x402/extensions/bazaar";
+import { declareDiscoveryExtension } from "@t402/extensions/bazaar";
 
 const resources = {
   "GET /weather": {
@@ -74,7 +74,7 @@ const resources = {
 For POST, PUT, and PATCH endpoints, specify `bodyType` to indicate the request body format:
 
 ```typescript
-import { declareDiscoveryExtension } from "@x402/extensions/bazaar";
+import { declareDiscoveryExtension } from "@t402/extensions/bazaar";
 
 const resources = {
   "POST /api/translate": {
@@ -186,13 +186,13 @@ const resources = {
 #### Using with Next.js Middleware
 
 ```typescript
-import { paymentProxy, x402ResourceServer } from "@x402/next";
-import { HTTPFacilitatorClient } from "@x402/core/http";
-import { ExactEvmScheme } from "@x402/evm/exact/server";
-import { declareDiscoveryExtension } from "@x402/extensions/bazaar";
+import { paymentProxy, t402ResourceServer } from "@t402/next";
+import { HTTPFacilitatorClient } from "@t402/core/http";
+import { ExactEvmScheme } from "@t402/evm/exact/server";
+import { declareDiscoveryExtension } from "@t402/extensions/bazaar";
 
-const facilitatorClient = new HTTPFacilitatorClient({ url: "https://facilitator.x402.org" });
-const resourceServer = new x402ResourceServer(facilitatorClient)
+const facilitatorClient = new HTTPFacilitatorClient({ url: "https://facilitator.t402.org" });
+const resourceServer = new t402ResourceServer(facilitatorClient)
   .register("eip155:84532", new ExactEvmScheme());
 
 export const proxy = paymentProxy(
@@ -229,8 +229,8 @@ Extract discovery information from incoming payment requests to catalog resource
 #### Basic Usage
 
 ```typescript
-import { extractDiscoveryInfo } from "@x402/extensions/bazaar";
-import type { PaymentPayload, PaymentRequirements } from "@x402/core/types";
+import { extractDiscoveryInfo } from "@t402/extensions/bazaar";
+import type { PaymentPayload, PaymentRequirements } from "@t402/core/types";
 
 async function handlePayment(
   paymentPayload: PaymentPayload,
@@ -244,7 +244,7 @@ async function handlePayment(
     // {
     //   resourceUrl: "https://api.example.com/weather",
     //   method: "GET",
-    //   x402Version: 2,
+    //   t402Version: 2,
     //   discoveryInfo: {
     //     input: { type: "http", method: "GET", queryParams: { city: "..." } },
     //     output: { type: "json", example: { ... } }
@@ -265,7 +265,7 @@ async function handlePayment(
 #### Validating Discovery Extensions
 
 ```typescript
-import { validateDiscoveryExtension, extractDiscoveryInfo } from "@x402/extensions/bazaar";
+import { validateDiscoveryExtension, extractDiscoveryInfo } from "@t402/extensions/bazaar";
 
 function processPayment(paymentPayload: PaymentPayload, paymentRequirements: PaymentRequirements) {
   const discovered = extractDiscoveryInfo(paymentPayload, paymentRequirements);
@@ -291,11 +291,11 @@ function processPayment(paymentPayload: PaymentPayload, paymentRequirements: Pay
 The `bazaarResourceServerExtension` automatically enriches discovery extensions with HTTP method information from the request context:
 
 ```typescript
-import { bazaarResourceServerExtension } from "@x402/extensions/bazaar";
-import { x402ResourceServer } from "@x402/core/server";
+import { bazaarResourceServerExtension } from "@t402/extensions/bazaar";
+import { t402ResourceServer } from "@t402/core/server";
 
 // The extension helper automatically extracts discovery info
-const resourceServer = new x402ResourceServer(facilitatorClient)
+const resourceServer = new t402ResourceServer(facilitatorClient)
   .register("eip155:84532", new ExactEvmScheme())
   .useExtension(bazaarResourceServerExtension);
 ```
@@ -348,7 +348,7 @@ Extracts discovery information from a payment request (for facilitators).
 interface DiscoveredResource {
   resourceUrl: string;
   method: string;
-  x402Version: number;
+  t402Version: number;
   discoveryInfo: DiscoveryInfo;
 }
 ```
@@ -403,9 +403,9 @@ A server extension that automatically enriches discovery extensions with HTTP me
 
 **Usage:**
 ```typescript
-import { bazaarResourceServerExtension } from "@x402/extensions/bazaar";
+import { bazaarResourceServerExtension } from "@t402/extensions/bazaar";
 
-const resourceServer = new x402ResourceServer(facilitatorClient)
+const resourceServer = new t402ResourceServer(facilitatorClient)
   .useExtension(bazaarResourceServerExtension);
 ```
 
@@ -414,7 +414,7 @@ const resourceServer = new x402ResourceServer(facilitatorClient)
 The extension identifier constant (`"bazaar"`).
 
 ```typescript
-import { BAZAAR } from "@x402/extensions/bazaar";
+import { BAZAAR } from "@t402/extensions/bazaar";
 // BAZAAR === "bazaar"
 ```
 
@@ -441,7 +441,7 @@ Use discovery schemas to validate API requests and responses during development.
 **Solutions:**
 - Ensure the server has declared the extension using `declareDiscoveryExtension`
 - Check that `paymentPayload.extensions.bazaar` exists
-- Verify you're using x402 v2 (v1 uses a different format in `outputSchema`)
+- Verify you're using t402 v2 (v1 uses a different format in `outputSchema`)
 
 ### Schema Validation Fails
 
@@ -471,12 +471,12 @@ Use discovery schemas to validate API requests and responses during development.
 
 ## Related Resources
 
-- [x402 Core Package](../core/README.md) - Core x402 protocol implementation
-- [x402 Specification](../../../specs/x402-specification.md) - Full protocol specification
+- [t402 Core Package](../core/README.md) - Core t402 protocol implementation
+- [t402 Specification](../../../specs/t402-specification.md) - Full protocol specification
 
 ## Version Support
 
-This package supports both x402 v1 and v2:
+This package supports both t402 v1 and v2:
 - **v2**: Extensions are in `PaymentPayload.extensions` and `PaymentRequired.extensions`
 - **v1**: Discovery info is in `PaymentRequirements.outputSchema` (automatically converted)
 

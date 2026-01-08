@@ -1,7 +1,7 @@
 /**
- * @module @x402/evm - x402 Payment Protocol EVM Implementation
+ * @module @t402/evm - t402 Payment Protocol EVM Implementation
  *
- * This module provides the EVM-specific implementation of the x402 payment protocol.
+ * This module provides the EVM-specific implementation of the t402 payment protocol.
  */
 
 // Export EVM implementation modules here

@@ -46,10 +46,10 @@ export function SolanaPaywall({ paymentRequirement, onSuccessfulResponse }: Sola
       onStatus: setStatus,
     });
 
-  const x402 = window.x402;
+  const t402 = window.t402;
   const amount =
-    typeof x402.amount === "number"
-      ? x402.amount
+    typeof t402.amount === "number"
+      ? t402.amount
       : Number(paymentRequirement.maxAmountRequired ?? 0) / 1_000_000;
 
   const network = paymentRequirement.network;
@@ -155,7 +155,7 @@ export function SolanaPaywall({ paymentRequirement, onSuccessfulResponse }: Sola
   }, [activeWallet, resetBalance]);
 
   const handlePayment = useCallback(async () => {
-    if (!x402) {
+    if (!t402) {
       return;
     }
 
@@ -184,7 +184,7 @@ export function SolanaPaywall({ paymentRequirement, onSuccessfulResponse }: Sola
       const paymentHeader = await createHeader(1);
 
       setStatus("Requesting content with payment...");
-      const response = await fetch(x402.currentUrl, {
+      const response = await fetch(t402.currentUrl, {
         headers: {
           "X-PAYMENT": paymentHeader,
           "Access-Control-Expose-Headers": "X-PAYMENT-RESPONSE",
@@ -198,14 +198,14 @@ export function SolanaPaywall({ paymentRequirement, onSuccessfulResponse }: Sola
 
       if (response.status === 402) {
         const errorData = await response.json().catch(() => ({}));
-        if (errorData && typeof errorData.x402Version === "number") {
+        if (errorData && typeof errorData.t402Version === "number") {
           const retryPayment = await exact.svm.createPaymentHeader(
             walletSigner,
-            errorData.x402Version,
+            errorData.t402Version,
             validPaymentRequirements,
           );
 
-          const retryResponse = await fetch(x402.currentUrl, {
+          const retryResponse = await fetch(t402.currentUrl, {
             headers: {
               "X-PAYMENT": retryPayment,
               "Access-Control-Expose-Headers": "X-PAYMENT-RESPONSE",
@@ -243,7 +243,7 @@ export function SolanaPaywall({ paymentRequirement, onSuccessfulResponse }: Sola
       setIsPaying(false);
     }
   }, [
-    x402,
+    t402,
     walletSigner,
     activeAccount,
     usdcBalance,

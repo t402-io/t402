@@ -1,6 +1,6 @@
 import { config } from "dotenv";
 import express from "express";
-import { exact } from "x402/schemes";
+import { exact } from "t402/schemes";
 import {
   Network,
   PaymentPayload,
@@ -8,9 +8,9 @@ import {
   Price,
   Resource,
   settleResponseHeader,
-} from "x402/types";
-import { useFacilitator } from "x402/verify";
-import { processPriceToAtomicAmount, findMatchingPaymentRequirements } from "x402/shared";
+} from "t402/types";
+import { useFacilitator } from "t402/verify";
+import { processPriceToAtomicAmount, findMatchingPaymentRequirements } from "t402/shared";
 
 config();
 
@@ -24,7 +24,7 @@ if (!facilitatorUrl || !payTo) {
 
 const app = express();
 const { verify, settle } = useFacilitator({ url: facilitatorUrl });
-const x402Version = 1;
+const t402Version = 1;
 
 /**
  * Creates payment requirements for a given price and network
@@ -81,7 +81,7 @@ async function verifyPayment(
   const payment = req.header("X-PAYMENT");
   if (!payment) {
     res.status(402).json({
-      x402Version,
+      t402Version,
       error: "X-PAYMENT header is required",
       accepts: paymentRequirements,
     });
@@ -91,10 +91,10 @@ async function verifyPayment(
   let decodedPayment: PaymentPayload;
   try {
     decodedPayment = exact.evm.decodePayment(payment);
-    decodedPayment.x402Version = x402Version;
+    decodedPayment.t402Version = t402Version;
   } catch (error) {
     res.status(402).json({
-      x402Version,
+      t402Version,
       error: error || "Invalid or malformed payment header",
       accepts: paymentRequirements,
     });
@@ -108,7 +108,7 @@ async function verifyPayment(
     const response = await verify(decodedPayment, selectedPaymentRequirement);
     if (!response.isValid) {
       res.status(402).json({
-        x402Version,
+        t402Version,
         error: response.invalidReason,
         accepts: paymentRequirements,
         payer: response.payer,
@@ -117,7 +117,7 @@ async function verifyPayment(
     }
   } catch (error) {
     res.status(402).json({
-      x402Version,
+      t402Version,
       error,
       accepts: paymentRequirements,
     });
@@ -207,7 +207,7 @@ app.get("/dynamic-price", async (req, res) => {
     });
   } catch (error) {
     res.status(402).json({
-      x402Version,
+      t402Version,
       error,
       accepts: paymentRequirements,
     });
@@ -264,7 +264,7 @@ app.get("/multiple-payment-requirements", async (req, res) => {
     });
   } catch (error) {
     res.status(402).json({
-      x402Version,
+      t402Version,
       error,
       accepts: paymentRequirements,
     });

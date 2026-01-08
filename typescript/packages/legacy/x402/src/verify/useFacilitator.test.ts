@@ -4,7 +4,7 @@ import { PaymentPayload, PaymentRequirements } from "../types/verify";
 
 describe("useFacilitator", () => {
   const mockPaymentPayload: PaymentPayload = {
-    x402Version: 1,
+    t402Version: 1,
     scheme: "exact",
     network: "base-sepolia",
     payload: {
@@ -46,11 +46,11 @@ describe("useFacilitator", () => {
       const { verify } = useFacilitator();
       await verify(mockPaymentPayload, mockPaymentRequirements);
 
-      expect(fetch).toHaveBeenCalledWith("https://x402.org/facilitator/verify", {
+      expect(fetch).toHaveBeenCalledWith("https://t402.org/facilitator/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          x402Version: mockPaymentPayload.x402Version,
+          t402Version: mockPaymentPayload.t402Version,
           paymentPayload: mockPaymentPayload,
           paymentRequirements: mockPaymentRequirements,
         }),
@@ -66,7 +66,7 @@ describe("useFacilitator", () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          x402Version: mockPaymentPayload.x402Version,
+          t402Version: mockPaymentPayload.t402Version,
           paymentPayload: mockPaymentPayload,
           paymentRequirements: mockPaymentRequirements,
         }),
@@ -80,13 +80,13 @@ describe("useFacilitator", () => {
         supported: { Authorization: "Bearer test-token" },
       };
       const { verify } = useFacilitator({
-        url: "https://x402.org/facilitator",
+        url: "https://t402.org/facilitator",
         createAuthHeaders: async () => mockHeaders,
       });
       await verify(mockPaymentPayload, mockPaymentRequirements);
 
       expect(fetch).toHaveBeenCalledWith(
-        "https://x402.org/facilitator/verify",
+        "https://t402.org/facilitator/verify",
         expect.objectContaining({
           headers: { "Content-Type": "application/json", ...mockHeaders.verify },
         }),
@@ -144,11 +144,11 @@ describe("useFacilitator", () => {
       const { settle } = useFacilitator();
       await settle(mockPaymentPayload, mockPaymentRequirements);
 
-      expect(fetch).toHaveBeenCalledWith("https://x402.org/facilitator/settle", {
+      expect(fetch).toHaveBeenCalledWith("https://t402.org/facilitator/settle", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          x402Version: mockPaymentPayload.x402Version,
+          t402Version: mockPaymentPayload.t402Version,
           paymentPayload: mockPaymentPayload,
           paymentRequirements: mockPaymentRequirements,
         }),
@@ -164,7 +164,7 @@ describe("useFacilitator", () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          x402Version: mockPaymentPayload.x402Version,
+          t402Version: mockPaymentPayload.t402Version,
           paymentPayload: mockPaymentPayload,
           paymentRequirements: mockPaymentRequirements,
         }),
@@ -178,13 +178,13 @@ describe("useFacilitator", () => {
         supported: { Authorization: "Bearer test-token" },
       };
       const { settle } = useFacilitator({
-        url: "https://x402.org/facilitator",
+        url: "https://t402.org/facilitator",
         createAuthHeaders: async () => mockHeaders,
       });
       await settle(mockPaymentPayload, mockPaymentRequirements);
 
       expect(fetch).toHaveBeenCalledWith(
-        "https://x402.org/facilitator/settle",
+        "https://t402.org/facilitator/settle",
         expect.objectContaining({
           headers: { "Content-Type": "application/json", ...mockHeaders.settle },
         }),
@@ -240,7 +240,7 @@ describe("useFacilitator", () => {
       const { supported } = useFacilitator();
       await supported();
 
-      expect(fetch).toHaveBeenCalledWith("https://x402.org/facilitator/supported", {
+      expect(fetch).toHaveBeenCalledWith("https://t402.org/facilitator/supported", {
         headers: { "Content-Type": "application/json" },
         method: "GET",
       });
@@ -275,7 +275,7 @@ describe("useFacilitator", () => {
       const { list } = useFacilitator();
       await list();
 
-      expect(fetch).toHaveBeenCalledWith("https://x402.org/facilitator/discovery/resources?", {
+      expect(fetch).toHaveBeenCalledWith("https://t402.org/facilitator/discovery/resources?", {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
@@ -302,7 +302,7 @@ describe("useFacilitator", () => {
       await list(config);
 
       const expectedUrl =
-        "https://x402.org/facilitator/discovery/resources?type=test-type&limit=10&offset=20";
+        "https://t402.org/facilitator/discovery/resources?type=test-type&limit=10&offset=20";
       expect(fetch).toHaveBeenCalledWith(expectedUrl, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
@@ -319,7 +319,7 @@ describe("useFacilitator", () => {
       await list(config);
 
       const expectedUrl =
-        "https://x402.org/facilitator/discovery/resources?type=test-type&limit=10";
+        "https://t402.org/facilitator/discovery/resources?type=test-type&limit=10";
       expect(fetch).toHaveBeenCalledWith(expectedUrl, {
         method: "GET",
         headers: { "Content-Type": "application/json" },

@@ -6,7 +6,7 @@ import {
   ErrorReasons,
 } from "../../../../types/verify";
 import { SupportedSVMNetworks } from "../../../../types/shared";
-import { X402Config } from "../../../../types/config";
+import { T402Config } from "../../../../types/config";
 import {
   Address,
   assertIsInstructionWithAccounts,
@@ -59,14 +59,14 @@ import { SCHEME } from "../../";
  * @param signer - The signer that will sign and simulate the transaction
  * @param payload - The payment payload to verify
  * @param paymentRequirements - The payment requirements to verify against
- * @param config - Optional configuration for X402 operations (e.g., custom RPC URLs)
+ * @param config - Optional configuration for T402 operations (e.g., custom RPC URLs)
  * @returns A VerifyResponse indicating if the payment is valid and any invalidation reason
  */
 export async function verify(
   signer: TransactionSigner,
   payload: PaymentPayload,
   paymentRequirements: PaymentRequirements,
-  config?: X402Config,
+  config?: T402Config,
 ): Promise<VerifyResponse> {
   try {
     // verify that the scheme and network are supported
@@ -157,13 +157,13 @@ export function verifySchemesAndNetworks(
  * @param svmPayload - The SVM payload containing the transaction
  * @param paymentRequirements - The payment requirements to verify against
  * @param signer - The signer that will sign the transaction
- * @param config - Optional configuration for X402 operations (e.g., custom RPC URLs)
+ * @param config - Optional configuration for T402 operations (e.g., custom RPC URLs)
  */
 export async function transactionIntrospection(
   svmPayload: ExactSvmPayload,
   paymentRequirements: PaymentRequirements,
   signer: TransactionSigner,
-  config?: X402Config,
+  config?: T402Config,
 ): Promise<void> {
   const rpc = getRpcClient(paymentRequirements.network, config?.svmConfig?.rpcUrl);
   const decodedTransaction = decodeTransactionFromPayload(svmPayload);

@@ -27,16 +27,16 @@ contextBridge.exposeInMainWorld("electron", {
       });
     }),
 
-  OnMakeX402Request: callback =>
-    ipcRenderer.on("make-x402-request", (_event, params) => {
+  OnMakeT402Request: callback =>
+    ipcRenderer.on("make-t402-request", (_event, params) => {
       callback(params)
         .then(result => {
-          console.log("make-x402-request-response", result);
-          ipcRenderer.send("make-x402-request-response", result);
+          console.log("make-t402-request-response", result);
+          ipcRenderer.send("make-t402-request-response", result);
         })
         .catch(error => {
-          console.error("make-x402-request-error", error);
-          ipcRenderer.send("make-x402-request-response", { error: error.message });
+          console.error("make-t402-request-error", error);
+          ipcRenderer.send("make-t402-request-response", { error: error.message });
         });
     }),
 

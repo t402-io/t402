@@ -11,22 +11,22 @@ import (
 	"strings"
 	"time"
 
-	x402 "github.com/coinbase/x402/go"
-	"github.com/coinbase/x402/go/types"
-	evm "github.com/coinbase/x402/go/mechanisms/evm/exact/client"
-	evmsigners "github.com/coinbase/x402/go/signers/evm"
+	t402 "github.com/coinbase/t402/go"
+	"github.com/coinbase/t402/go/types"
+	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/client"
+	evmsigners "github.com/coinbase/t402/go/signers/evm"
 	"github.com/joho/godotenv"
 )
 
 /**
- * Custom Client Implementation - Direct x402 Integration
+ * Custom Client Implementation - Direct t402 Integration
  *
- * This example demonstrates how to implement x402 payment handling manually
+ * This example demonstrates how to implement t402 payment handling manually
  * WITHOUT using the pre-built HTTP client wrapper. It shows the implementation
  * details of how to handle 402 responses and create payments directly.
  *
  * This is useful when you:
- * - Want to understand how x402 works under the hood
+ * - Want to understand how t402 works under the hood
  * - Need to integrate with a custom HTTP client or framework
  * - Want full control over the payment flow
  * - Are building a custom transport layer
@@ -35,7 +35,7 @@ import (
  * 1. Make initial HTTP request
  * 2. Detect 402 Payment Required response
  * 3. Extract payment requirements from response
- * 4. Create payment using x402 core package
+ * 4. Create payment using t402 core package
  * 5. Retry request with payment header
  * 6. Handle successful response
  */
@@ -62,20 +62,20 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// Create x402 client (core package)
+	// Create t402 client (core package)
 	evmSigner, err := evmsigners.NewClientSignerFromPrivateKey(evmPrivateKey)
 	if err != nil {
 		fmt.Printf("❌ Failed to create signer: %v\n", err)
 		os.Exit(1)
 	}
 
-	x402Client := x402.Newx402Client().
+	t402Client := t402.Newt402Client().
 		Register("eip155:*", evm.NewExactEvmScheme(evmSigner))
 
 	// Make the request with custom payment handling
 	fmt.Println("🔧 Using custom payment implementation (no wrapper)\n")
 	
-	resp, err := makeRequestWithPayment(ctx, x402Client, url)
+	resp, err := makeRequestWithPayment(ctx, t402Client, url)
 	if err != nil {
 		fmt.Printf("❌ Request failed: %v\n", err)
 		os.Exit(1)
@@ -106,7 +106,7 @@ func main() {
 }
 
 // makeRequestWithPayment implements the complete payment flow manually
-func makeRequestWithPayment(ctx context.Context, x402Client *x402.X402Client, url string) (*http.Response, error) {
+func makeRequestWithPayment(ctx context.Context, t402Client *t402.T402Client, url string) (*http.Response, error) {
 	// ========================================================================
 	// Step 1: Make initial request
 	// ========================================================================
@@ -182,7 +182,7 @@ func makeRequestWithPayment(ctx context.Context, x402Client *x402.X402Client, ur
 	var payloadBytes []byte
 	if version == 2 {
 		// V2 payment creation
-		payload, err := x402Client.CreatePaymentPayload(ctx, paymentRequirements, resource, extensions)
+		payload, err := t402Client.CreatePaymentPayload(ctx, paymentRequirements, resource, extensions)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create V2 payment: %w", err)
 		}
@@ -200,7 +200,7 @@ func makeRequestWithPayment(ctx context.Context, x402Client *x402.X402Client, ur
 			Asset:             paymentRequirements.Asset,
 			MaxTimeoutSeconds: paymentRequirements.MaxTimeoutSeconds,
 		}
-		payload, err := x402Client.CreatePaymentPayloadV1(ctx, requirementsV1)
+		payload, err := t402Client.CreatePaymentPayloadV1(ctx, requirementsV1)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create V1 payment: %w", err)
 		}
@@ -285,19 +285,19 @@ func detectVersion(headers map[string]string, body []byte) (int, error) {
 		return 2, nil
 	}
 
-	// V1 uses body with x402Version field
+	// V1 uses body with t402Version field
 	if len(body) > 0 {
 		var versionCheck struct {
-			X402Version int `json:"x402Version"`
+			T402Version int `json:"t402Version"`
 		}
 		if err := json.Unmarshal(body, &versionCheck); err == nil {
-			if versionCheck.X402Version == 1 {
+			if versionCheck.T402Version == 1 {
 				return 1, nil
 			}
 		}
 	}
 
-	return 0, fmt.Errorf("could not detect x402 version from response")
+	return 0, fmt.Errorf("could not detect t402 version from response")
 }
 
 // extractV2Requirements extracts payment requirements from V2 response
@@ -363,17 +363,17 @@ func extractV1Requirements(body []byte) (types.PaymentRequirements, error) {
 }
 
 // extractSettlementResponse extracts settlement details from response header
-func extractSettlementResponse(headerValue string) (x402.SettleResponse, error) {
+func extractSettlementResponse(headerValue string) (t402.SettleResponse, error) {
 	// Decode base64 header
 	decoded, err := base64.StdEncoding.DecodeString(headerValue)
 	if err != nil {
-		return x402.SettleResponse{}, fmt.Errorf("invalid base64 encoding: %w", err)
+		return t402.SettleResponse{}, fmt.Errorf("invalid base64 encoding: %w", err)
 	}
 
 	// Parse settlement response
-	var settleResp x402.SettleResponse
+	var settleResp t402.SettleResponse
 	if err := json.Unmarshal(decoded, &settleResp); err != nil {
-		return x402.SettleResponse{}, fmt.Errorf("invalid settlement response JSON: %w", err)
+		return t402.SettleResponse{}, fmt.Errorf("invalid settlement response JSON: %w", err)
 	}
 
 	return settleResp, nil

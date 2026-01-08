@@ -1,13 +1,13 @@
-# x402-gin Example Server
+# t402-gin Example Server
 
 Gin server demonstrating how to protect API endpoints with a paywall using the 
-`x402/go/http/gin` middleware.
+`t402/go/http/gin` middleware.
 
 ## Prerequisites
 
 - Go 1.24 or higher
 - Valid EVM address for receiving payments
-- URL of a facilitator supporting the desired payment network, see [facilitator list](https://www.x402.org/ecosystem?category=facilitators)
+- URL of a facilitator supporting the desired payment network, see [facilitator list](https://www.t402.org/ecosystem?category=facilitators)
 
 ## Setup
 
@@ -70,7 +70,7 @@ Note: `amount` is in atomic units (e.g., 1000 = 0.001 USDC, since USDC has 6 dec
 
 ```json
 {
-  "x402Version": 2,
+  "t402Version": 2,
   "error": "Payment required",
   "resource": {
     "url": "http://localhost:4021/weather",
@@ -133,14 +133,14 @@ To add more paid endpoints, follow this pattern:
 
 ```go
 // First, configure the payment middleware with your routes
-routes := x402http.RoutesConfig{
+routes := t402http.RoutesConfig{
     "GET /your-endpoint": {
-        Accepts: x402http.PaymentOptions{
+        Accepts: t402http.PaymentOptions{
             {
                 Scheme:  "exact",
                 PayTo:   evmPayeeAddress,
                 Price:   "$0.10",
-                Network: x402.Network("eip155:84532"),
+                Network: t402.Network("eip155:84532"),
             },
         },
         Description: "Your endpoint description",
@@ -152,7 +152,7 @@ r.Use(ginmw.X402Payment(ginmw.Config{
     Routes:      routes,
     Facilitator: facilitatorClient,
     Schemes: []ginmw.SchemeConfig{
-        {Network: x402.Network("eip155:*"), Server: evm.NewExactEvmScheme()},
+        {Network: t402.Network("eip155:*"), Server: evm.NewExactEvmScheme()},
     },
     Timeout: 30 * time.Second,
 }))
@@ -171,7 +171,7 @@ r.GET("/your-endpoint", func(c *gin.Context) {
 - `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` — Solana Devnet
 - `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` — Solana Mainnet
 
-## x402ResourceServer Config
+## t402ResourceServer Config
 
 The middleware uses scheme registrations to declare how payments for each network should be processed:
 
@@ -180,8 +180,8 @@ r.Use(ginmw.X402Payment(ginmw.Config{
     Routes:      routes,
     Facilitator: facilitatorClient,
     Schemes: []ginmw.SchemeConfig{
-        {Network: x402.Network("eip155:*"), Server: evm.NewExactEvmScheme()},  // All EVM chains
-        // {Network: x402.Network("solana:*"), Server: svm.NewExactSvmScheme()}, // All SVM chains
+        {Network: t402.Network("eip155:*"), Server: evm.NewExactEvmScheme()},  // All EVM chains
+        // {Network: t402.Network("solana:*"), Server: svm.NewExactSvmScheme()}, // All SVM chains
     },
     Timeout:    30 * time.Second,
 }))
@@ -192,14 +192,14 @@ r.Use(ginmw.X402Payment(ginmw.Config{
 The `HTTPFacilitatorClient` connects to a facilitator service that verifies and settles payments on-chain:
 
 ```go
-facilitatorClient := x402http.NewHTTPFacilitatorClient(&x402http.FacilitatorConfig{
+facilitatorClient := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
     URL: facilitatorURL,
 })
 
 // Or use multiple facilitators for redundancy
-facilitatorClients := []x402.FacilitatorClient{
-    x402http.NewHTTPFacilitatorClient(&x402http.FacilitatorConfig{URL: primaryFacilitatorURL}),
-    x402http.NewHTTPFacilitatorClient(&x402http.FacilitatorConfig{URL: backupFacilitatorURL}),
+facilitatorClients := []t402.FacilitatorClient{
+    t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{URL: primaryFacilitatorURL}),
+    t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{URL: backupFacilitatorURL}),
 }
 ```
 
@@ -215,5 +215,5 @@ See [Advanced Examples](../advanced/) for:
 ## Related Resources
 
 - [Gin Documentation](https://gin-gonic.com/docs/)
-- [x402 Go Package Documentation](../../../../go/)
+- [t402 Go Package Documentation](../../../../go/)
 - [Client Examples](../../clients/) — build clients that can make paid requests

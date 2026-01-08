@@ -1,21 +1,21 @@
 import { NextFunction, Request, Response } from "express";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { findMatchingRoute } from "x402/shared";
-import { getPaywallHtml } from "x402/paywall";
-import { exact } from "x402/schemes";
+import { findMatchingRoute } from "t402/shared";
+import { getPaywallHtml } from "t402/paywall";
+import { exact } from "t402/schemes";
 import {
   PaymentMiddlewareConfig,
   PaymentPayload,
   RoutesConfig,
   FacilitatorConfig,
   RouteConfig,
-} from "x402/types";
-import { useFacilitator } from "x402/verify";
+} from "t402/types";
+import { useFacilitator } from "t402/verify";
 import { paymentMiddleware } from "./index";
 import { Address as SolanaAddress } from "@solana/kit";
 
 // Mock dependencies
-vi.mock("x402/verify", () => ({
+vi.mock("t402/verify", () => ({
   useFacilitator: vi.fn().mockReturnValue({
     verify: vi.fn(),
     settle: vi.fn(),
@@ -24,11 +24,11 @@ vi.mock("x402/verify", () => ({
   }),
 }));
 
-vi.mock("x402/paywall", () => ({
+vi.mock("t402/paywall", () => ({
   getPaywallHtml: vi.fn(),
 }));
 
-vi.mock("x402/shared", async importOriginal => {
+vi.mock("t402/shared", async importOriginal => {
   const actual = (await importOriginal()) as Record<string, unknown>;
   return {
     ...actual,
@@ -80,12 +80,12 @@ vi.mock("x402/shared", async importOriginal => {
   };
 });
 
-vi.mock("x402/shared/evm", () => ({
+vi.mock("t402/shared/evm", () => ({
   getUsdcAddressForChain: vi.fn().mockReturnValue("0x036CbD53842c5426634e7929541eC2318f3dCF7e"),
 }));
 
 // Mock exact.evm.decodePayment
-vi.mock("x402/schemes", () => ({
+vi.mock("t402/schemes", () => ({
   exact: {
     evm: {
       encodePayment: vi.fn(),
@@ -138,7 +138,7 @@ describe("paymentMiddleware()", () => {
 
   const validPayment: PaymentPayload = {
     scheme: "exact",
-    x402Version: 1,
+    t402Version: 1,
     network: "base-sepolia",
     payload: {
       signature: "0x123",
@@ -223,7 +223,7 @@ describe("paymentMiddleware()", () => {
       expect.objectContaining({
         error: "X-PAYMENT header is required",
         accepts: expect.any(Array),
-        x402Version: 1,
+        t402Version: 1,
       }),
     );
   });
@@ -279,7 +279,7 @@ describe("paymentMiddleware()", () => {
 
     expect(mockRes.status).toHaveBeenCalledWith(402);
     expect(mockRes.json).toHaveBeenCalledWith({
-      x402Version: 1,
+      t402Version: 1,
       error: "Invalid payment",
       accepts: [
         {
@@ -312,7 +312,7 @@ describe("paymentMiddleware()", () => {
 
     expect(mockRes.status).toHaveBeenCalledWith(402);
     expect(mockRes.json).toHaveBeenCalledWith({
-      x402Version: 1,
+      t402Version: 1,
       error: "Unexpected error",
       accepts: [
         {
@@ -375,7 +375,7 @@ describe("paymentMiddleware()", () => {
 
     expect(mockRes.status).toHaveBeenCalledWith(402);
     expect(mockRes.json).toHaveBeenCalledWith({
-      x402Version: 1,
+      t402Version: 1,
       error: "Settlement failed",
       accepts: [
         {
@@ -420,7 +420,7 @@ describe("paymentMiddleware()", () => {
 
     expect(mockRes.status).toHaveBeenCalledWith(402);
     expect(mockRes.json).toHaveBeenCalledWith({
-      x402Version: 1,
+      t402Version: 1,
       error: "invalid_transaction_state",
       accepts: [
         {
@@ -463,7 +463,7 @@ describe("paymentMiddleware()", () => {
     // When settlement fails, middleware returns 402 error (buffered response is discarded)
     expect(mockRes.status).toHaveBeenCalledWith(402);
     expect(mockRes.json).toHaveBeenCalledWith({
-      x402Version: 1,
+      t402Version: 1,
       error: "Settlement failed",
       accepts: [
         {
@@ -646,7 +646,7 @@ describe("paymentMiddleware()", () => {
         cdpClientKey: "test-client-key",
         appName: "Test App",
         appLogo: "/test-logo.png",
-        sessionTokenEndpoint: "/api/x402/session-token",
+        sessionTokenEndpoint: "/api/t402/session-token",
       };
 
       const middlewareWithPaywall = paymentMiddleware(
@@ -668,7 +668,7 @@ describe("paymentMiddleware()", () => {
           cdpClientKey: "test-client-key",
           appName: "Test App",
           appLogo: "/test-logo.png",
-          sessionTokenEndpoint: "/api/x402/session-token",
+          sessionTokenEndpoint: "/api/t402/session-token",
         }),
       );
     });

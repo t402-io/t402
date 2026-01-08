@@ -1,11 +1,11 @@
-package x402
+package t402
 
 import (
 	"context"
 	"errors"
 	"testing"
 
-	"github.com/coinbase/x402/go/types"
+	"github.com/coinbase/t402/go/types"
 )
 
 // Mock facilitator client for testing
@@ -40,7 +40,7 @@ func (m *mockFacilitatorClient) GetSupported(ctx context.Context) (SupportedResp
 	// Default kinds for backward compatibility with server_hooks tests
 	return SupportedResponse{
 		Kinds: []SupportedKind{
-			{X402Version: 2, Scheme: "exact", Network: "eip155:8453"},
+			{T402Version: 2, Scheme: "exact", Network: "eip155:8453"},
 		},
 		Extensions: []string{},
 		Signers:    make(map[string][]string),
@@ -49,7 +49,7 @@ func (m *mockFacilitatorClient) GetSupported(ctx context.Context) (SupportedResp
 
 // Test BeforeVerify hook - abort verification
 func TestBeforeVerifyHook_Abort(t *testing.T) {
-	server := Newx402ResourceServer()
+	server := Newt402ResourceServer()
 
 	// Register hook that aborts verification
 	server.OnBeforeVerify(func(ctx VerifyContext) (*BeforeHookResult, error) {
@@ -60,7 +60,7 @@ func TestBeforeVerifyHook_Abort(t *testing.T) {
 	})
 
 	// Try to verify (should be aborted by hook)
-	payload := types.PaymentPayload{X402Version: 2, Payload: map[string]interface{}{}}
+	payload := types.PaymentPayload{T402Version: 2, Payload: map[string]interface{}{}}
 	requirements := types.PaymentRequirements{Scheme: "exact", Network: "eip155:8453"}
 
 	result, err := server.VerifyPayment(
@@ -92,7 +92,7 @@ func TestBeforeVerifyHook_Abort(t *testing.T) {
 func TestBeforeVerifyHook_Continue(t *testing.T) {
 	called := false
 
-	server := Newx402ResourceServer()
+	server := Newt402ResourceServer()
 
 	// Register hook that allows verification to continue
 	server.OnBeforeVerify(func(ctx VerifyContext) (*BeforeHookResult, error) {
@@ -102,7 +102,7 @@ func TestBeforeVerifyHook_Continue(t *testing.T) {
 	})
 
 	// Try to verify (will fail due to no facilitators, but hook should be called)
-	payload := types.PaymentPayload{X402Version: 2, Payload: map[string]interface{}{}}
+	payload := types.PaymentPayload{T402Version: 2, Payload: map[string]interface{}{}}
 	requirements := types.PaymentRequirements{Scheme: "exact", Network: "eip155:8453"}
 
 	_, _ = server.VerifyPayment(
@@ -120,7 +120,7 @@ func TestBeforeVerifyHook_Continue(t *testing.T) {
 func TestAfterVerifyHook(t *testing.T) {
 	var capturedResult *VerifyResponse
 
-	server := Newx402ResourceServer()
+	server := Newt402ResourceServer()
 
 	// Register hook to capture result
 	server.OnAfterVerify(func(ctx VerifyResultContext) error {
@@ -141,7 +141,7 @@ func TestAfterVerifyHook(t *testing.T) {
 	}
 
 	// Verify payment (typed)
-	payload := types.PaymentPayload{X402Version: 2, Payload: map[string]interface{}{}}
+	payload := types.PaymentPayload{T402Version: 2, Payload: map[string]interface{}{}}
 	requirements := types.PaymentRequirements{Scheme: "exact", Network: "eip155:8453"}
 
 	result, err := server.VerifyPayment(
@@ -166,7 +166,7 @@ func TestAfterVerifyHook(t *testing.T) {
 
 // Test OnVerifyFailure hook - recovery
 func TestOnVerifyFailureHook_Recover(t *testing.T) {
-	server := Newx402ResourceServer()
+	server := Newt402ResourceServer()
 
 	// Register hook that recovers from failure
 	server.OnVerifyFailure(func(ctx VerifyFailureContext) (*VerifyFailureHookResult, error) {
@@ -191,7 +191,7 @@ func TestOnVerifyFailureHook_Recover(t *testing.T) {
 	}
 
 	// Verify payment (should be recovered by hook)
-	payload := types.PaymentPayload{X402Version: 2, Payload: map[string]interface{}{}}
+	payload := types.PaymentPayload{T402Version: 2, Payload: map[string]interface{}{}}
 	requirements := types.PaymentRequirements{Scheme: "exact", Network: "eip155:8453"}
 
 	result, err := server.VerifyPayment(
@@ -213,7 +213,7 @@ func TestOnVerifyFailureHook_Recover(t *testing.T) {
 func TestOnVerifyFailureHook_NoRecover(t *testing.T) {
 	hookCalled := false
 
-	server := Newx402ResourceServer()
+	server := Newt402ResourceServer()
 
 	// Register hook that doesn't recover
 	server.OnVerifyFailure(func(ctx VerifyFailureContext) (*VerifyFailureHookResult, error) {
@@ -234,7 +234,7 @@ func TestOnVerifyFailureHook_NoRecover(t *testing.T) {
 	}
 
 	// Verify payment (should fail)
-	payload := types.PaymentPayload{X402Version: 2, Payload: map[string]interface{}{}}
+	payload := types.PaymentPayload{T402Version: 2, Payload: map[string]interface{}{}}
 	requirements := types.PaymentRequirements{Scheme: "exact", Network: "eip155:8453"}
 
 	_, err := server.VerifyPayment(
@@ -254,7 +254,7 @@ func TestOnVerifyFailureHook_NoRecover(t *testing.T) {
 
 // Test BeforeSettle hook - abort settlement
 func TestBeforeSettleHook_Abort(t *testing.T) {
-	server := Newx402ResourceServer()
+	server := Newt402ResourceServer()
 
 	// Register hook that aborts settlement
 	server.OnBeforeSettle(func(ctx SettleContext) (*BeforeHookResult, error) {
@@ -265,7 +265,7 @@ func TestBeforeSettleHook_Abort(t *testing.T) {
 	})
 
 	// Try to settle (should be aborted by hook)
-	payload := types.PaymentPayload{X402Version: 2, Payload: map[string]interface{}{}}
+	payload := types.PaymentPayload{T402Version: 2, Payload: map[string]interface{}{}}
 	requirements := types.PaymentRequirements{Scheme: "exact", Network: "eip155:8453"}
 
 	result, err := server.SettlePayment(
@@ -297,7 +297,7 @@ func TestBeforeSettleHook_Abort(t *testing.T) {
 func TestAfterSettleHook(t *testing.T) {
 	var capturedTxHash string
 
-	server := Newx402ResourceServer()
+	server := Newt402ResourceServer()
 
 	// Register hook to capture settlement result
 	server.OnAfterSettle(func(ctx SettleResultContext) error {
@@ -322,7 +322,7 @@ func TestAfterSettleHook(t *testing.T) {
 	}
 
 	// Settle payment
-	payload := types.PaymentPayload{X402Version: 2, Payload: map[string]interface{}{}}
+	payload := types.PaymentPayload{T402Version: 2, Payload: map[string]interface{}{}}
 	requirements := types.PaymentRequirements{Scheme: "exact", Network: "eip155:8453"}
 
 	result, err := server.SettlePayment(
@@ -347,7 +347,7 @@ func TestAfterSettleHook(t *testing.T) {
 
 // Test OnSettleFailure hook - recovery
 func TestOnSettleFailureHook_Recover(t *testing.T) {
-	server := Newx402ResourceServer()
+	server := Newt402ResourceServer()
 
 	// Register hook that recovers from failure
 	server.OnSettleFailure(func(ctx SettleFailureContext) (*SettleFailureHookResult, error) {
@@ -374,7 +374,7 @@ func TestOnSettleFailureHook_Recover(t *testing.T) {
 	}
 
 	// Settle payment (should be recovered by hook)
-	payload := types.PaymentPayload{X402Version: 2, Payload: map[string]interface{}{}}
+	payload := types.PaymentPayload{T402Version: 2, Payload: map[string]interface{}{}}
 	requirements := types.PaymentRequirements{Scheme: "exact", Network: "eip155:8453"}
 
 	result, err := server.SettlePayment(
@@ -400,7 +400,7 @@ func TestOnSettleFailureHook_Recover(t *testing.T) {
 func TestMultipleHooks_ExecutionOrder(t *testing.T) {
 	executionOrder := []string{}
 
-	server := Newx402ResourceServer()
+	server := Newt402ResourceServer()
 
 	// Register multiple hooks in order
 	server.OnBeforeVerify(func(ctx VerifyContext) (*BeforeHookResult, error) {
@@ -435,7 +435,7 @@ func TestMultipleHooks_ExecutionOrder(t *testing.T) {
 	}
 
 	// Verify payment
-	payload := types.PaymentPayload{X402Version: 2, Payload: map[string]interface{}{}}
+	payload := types.PaymentPayload{T402Version: 2, Payload: map[string]interface{}{}}
 	requirements := types.PaymentRequirements{Scheme: "exact", Network: "eip155:8453"}
 
 	_, _ = server.VerifyPayment(
@@ -463,7 +463,7 @@ func TestHooks_FunctionalOptions(t *testing.T) {
 	hookCalled := false
 
 	// Create service with hooks registered via options
-	server := Newx402ResourceServer(
+	server := Newt402ResourceServer(
 		WithBeforeVerifyHook(func(ctx VerifyContext) (*BeforeHookResult, error) {
 			hookCalled = true
 			return nil, nil
@@ -471,7 +471,7 @@ func TestHooks_FunctionalOptions(t *testing.T) {
 	)
 
 	// Verify
-	payload := types.PaymentPayload{X402Version: 2, Payload: map[string]interface{}{}}
+	payload := types.PaymentPayload{T402Version: 2, Payload: map[string]interface{}{}}
 	requirements := types.PaymentRequirements{Scheme: "exact", Network: "eip155:8453"}
 
 	_, _ = server.VerifyPayment(

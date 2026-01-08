@@ -1,12 +1,12 @@
-import { x402Facilitator } from "@x402/core/facilitator";
-import { Network } from "@x402/core/types";
+import { t402Facilitator } from "@t402/core/facilitator";
+import { Network } from "@t402/core/types";
 import { FacilitatorSvmSigner } from "../../signer";
 import { ExactSvmScheme } from "./scheme";
 import { ExactSvmSchemeV1 } from "../v1/facilitator/scheme";
 import { NETWORKS } from "../../v1";
 
 /**
- * Configuration options for registering SVM schemes to an x402Facilitator
+ * Configuration options for registering SVM schemes to an t402Facilitator
  */
 export interface SvmFacilitatorConfig {
   /**
@@ -22,9 +22,9 @@ export interface SvmFacilitatorConfig {
 }
 
 /**
- * Registers SVM payment schemes to an existing x402Facilitator instance.
+ * Registers SVM payment schemes to an existing t402Facilitator instance.
  *
- * @param facilitator - The x402Facilitator instance to register schemes to
+ * @param facilitator - The t402Facilitator instance to register schemes to
  * @param config - Configuration for SVM facilitator registration
  * @returns The facilitator instance for chaining
  *
@@ -44,9 +44,9 @@ export interface SvmFacilitatorConfig {
  * ```
  */
 export function registerExactSvmScheme(
-  facilitator: x402Facilitator,
+  facilitator: t402Facilitator,
   config: SvmFacilitatorConfig,
-): x402Facilitator {
+): t402Facilitator {
   // Register V2 scheme with specified networks
   facilitator.register(config.networks, new ExactSvmScheme(config.signer));
 

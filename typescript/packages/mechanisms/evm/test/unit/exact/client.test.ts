@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { ExactEvmScheme } from "../../../src/exact/client/scheme";
 import type { ClientEvmSigner } from "../../../src/signer";
-import { PaymentRequirements } from "@x402/core/types";
+import { PaymentRequirements } from "@t402/core/types";
 
 describe("ExactEvmScheme (Client)", () => {
   let client: ExactEvmScheme;
@@ -40,7 +40,7 @@ describe("ExactEvmScheme (Client)", () => {
 
       const result = await client.createPaymentPayload(2, requirements);
 
-      expect(result.x402Version).toBe(2);
+      expect(result.t402Version).toBe(2);
       expect(result.payload).toBeDefined();
       expect(result.payload.authorization).toBeDefined();
       expect(result.payload.signature).toBeDefined();
@@ -190,7 +190,7 @@ describe("ExactEvmScheme (Client)", () => {
 
       const result = await client.createPaymentPayload(2, ethereumRequirements);
 
-      expect(result.x402Version).toBe(2);
+      expect(result.t402Version).toBe(2);
       expect(result.payload.authorization).toBeDefined();
     });
 

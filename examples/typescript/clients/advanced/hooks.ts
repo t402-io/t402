@@ -1,6 +1,6 @@
 import { privateKeyToAccount } from "viem/accounts";
-import { x402Client } from "@x402/fetch";
-import { ExactEvmScheme } from "@x402/evm/exact/client";
+import { t402Client } from "@t402/fetch";
+import { ExactEvmScheme } from "@t402/evm/exact/client";
 
 /**
  * Hooks Example
@@ -25,7 +25,7 @@ export async function runHooksExample(evmPrivateKey: `0x${string}`, url: string)
 
   const evmSigner = privateKeyToAccount(evmPrivateKey);
 
-  const client = new x402Client()
+  const client = new t402Client()
     .register("eip155:*", new ExactEvmScheme(evmSigner))
     .onBeforePaymentCreation(async context => {
       console.log("🔍 [BeforePaymentCreation] Creating payment for:");
@@ -38,7 +38,7 @@ export async function runHooksExample(evmPrivateKey: `0x${string}`, url: string)
     })
     .onAfterPaymentCreation(async context => {
       console.log("✅ [AfterPaymentCreation] Payment created successfully");
-      console.log(`   Version: ${context.paymentPayload.x402Version}`);
+      console.log(`   Version: ${context.paymentPayload.t402Version}`);
       console.log();
 
       // Perform side effects like logging to database, sending metrics, etc.
@@ -52,7 +52,7 @@ export async function runHooksExample(evmPrivateKey: `0x${string}`, url: string)
       // return { recovered: true, payload: alternativePayload };
     });
 
-  const { wrapFetchWithPayment } = await import("@x402/fetch");
+  const { wrapFetchWithPayment } = await import("@t402/fetch");
   const fetchWithPayment = wrapFetchWithPayment(fetch, client);
 
   console.log(`🌐 Making request to: ${url}\n`);
@@ -63,8 +63,8 @@ export async function runHooksExample(evmPrivateKey: `0x${string}`, url: string)
   console.log("Response body:", body);
 
   // Extract payment response from headers
-  const { x402HTTPClient } = await import("@x402/fetch");
-  const paymentResponse = new x402HTTPClient(client).getPaymentSettleResponse(name =>
+  const { t402HTTPClient } = await import("@t402/fetch");
+  const paymentResponse = new t402HTTPClient(client).getPaymentSettleResponse(name =>
     response.headers.get(name),
   );
   if (paymentResponse) {

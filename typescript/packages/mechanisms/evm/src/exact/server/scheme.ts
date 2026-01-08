@@ -5,7 +5,7 @@ import {
   Price,
   SchemeNetworkServer,
   MoneyParser,
-} from "@x402/core/types";
+} from "@t402/core/types";
 
 /**
  * EVM server implementation for the Exact payment scheme.
@@ -82,7 +82,7 @@ export class ExactEvmScheme implements SchemeNetworkServer {
    *
    * @param paymentRequirements - The base payment requirements
    * @param supportedKind - The supported kind from facilitator (unused)
-   * @param supportedKind.x402Version - The x402 version
+   * @param supportedKind.t402Version - The t402 version
    * @param supportedKind.scheme - The logical payment scheme
    * @param supportedKind.network - The network identifier in CAIP-2 format
    * @param supportedKind.extra - Optional extra metadata regarding scheme/network implementation details
@@ -92,7 +92,7 @@ export class ExactEvmScheme implements SchemeNetworkServer {
   enhancePaymentRequirements(
     paymentRequirements: PaymentRequirements,
     supportedKind: {
-      x402Version: number;
+      t402Version: number;
       scheme: string;
       network: Network;
       extra?: Record<string, unknown>;

@@ -4,7 +4,7 @@ import {
   SchemeNetworkFacilitator,
   SettleResponse,
   VerifyResponse,
-} from "@x402/core/types";
+} from "@t402/core/types";
 import { getAddress, Hex, isAddressEqual, parseErc6492Signature, parseSignature } from "viem";
 import { authorizationTypes, eip3009ABI } from "../../constants";
 import { FacilitatorEvmSigner } from "../../signer";

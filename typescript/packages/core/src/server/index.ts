@@ -1,10 +1,10 @@
-export { x402ResourceServer } from "./x402ResourceServer";
-export type { ResourceConfig, ResourceInfo } from "./x402ResourceServer";
+export { t402ResourceServer } from "./t402ResourceServer";
+export type { ResourceConfig, ResourceInfo } from "./t402ResourceServer";
 
 export { HTTPFacilitatorClient } from "../http/httpFacilitatorClient";
 export type { FacilitatorClient, FacilitatorConfig } from "../http/httpFacilitatorClient";
 
-export { x402HTTPResourceServer, RouteConfigurationError } from "../http/x402HTTPResourceServer";
+export { t402HTTPResourceServer, RouteConfigurationError } from "../http/t402HTTPResourceServer";
 export type {
   HTTPRequestContext,
   HTTPResponseInstructions,
@@ -21,4 +21,4 @@ export type {
   ProcessSettleSuccessResponse,
   ProcessSettleFailureResponse,
   RouteValidationError,
-} from "../http/x402HTTPResourceServer";
+} from "../http/t402HTTPResourceServer";

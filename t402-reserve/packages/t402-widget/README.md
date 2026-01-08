@@ -1,0 +1,19 @@
+# t402-widget
+
+t402 embeddable widget
+
+## Overview
+
+This package is part of the **t402** ecosystem - The Tether Payment Protocol.
+
+Visit [https://t402.io](https://t402.io) for documentation.
+
+## Installation
+
+```bash
+npm install t402-widget
+```
+
+## License
+
+Apache-2.0

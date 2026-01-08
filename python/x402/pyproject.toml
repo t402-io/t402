@@ -1,7 +1,7 @@
 [project]
-name = "x402"
+name = "t402"
 version = "1.0.0"
-description = "x402: An internet native payments protocol"
+description = "t402: An internet native payments protocol"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 authors = [
@@ -9,7 +9,7 @@ authors = [
     { name = "Coinbase Developer Platform", email = "" }
 ]
 requires-python = ">=3.10"
-keywords = ["x402", "sdk", "crypto", "cdp", "payments", "web3"]
+keywords = ["t402", "sdk", "crypto", "cdp", "payments", "web3"]
 dependencies = [
     "eth-account>=0.13.7",
     "eth-typing>=4.0.0",
@@ -40,7 +40,7 @@ dev = [
 asyncio_mode = "auto"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/x402"]
+packages = ["src/t402"]
 
 [tool.hatch.metadata]
 allow-direct-references = true

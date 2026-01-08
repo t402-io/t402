@@ -1,7 +1,7 @@
 /* eslint-env node */
 import { config } from "dotenv";
 import express, { Request, Response } from "express";
-import { verify, settle } from "x402/facilitator";
+import { verify, settle } from "t402/facilitator";
 import {
   PaymentRequirementsSchema,
   type PaymentRequirements,
@@ -15,8 +15,8 @@ import {
   ConnectedClient,
   SupportedPaymentKind,
   isSvmSignerWallet,
-  type X402Config,
-} from "x402/types";
+  type T402Config,
+} from "t402/types";
 
 config();
 
@@ -29,8 +29,8 @@ if (!EVM_PRIVATE_KEY && !SVM_PRIVATE_KEY) {
   process.exit(1);
 }
 
-// Create X402 config with custom RPC URL if provided
-const x402Config: X402Config | undefined = SVM_RPC_URL
+// Create T402 config with custom RPC URL if provided
+const t402Config: T402Config | undefined = SVM_RPC_URL
   ? { svmConfig: { rpcUrl: SVM_RPC_URL } }
   : undefined;
 
@@ -52,7 +52,7 @@ type SettleRequest = {
 app.get("/verify", (req: Request, res: Response) => {
   res.json({
     endpoint: "/verify",
-    description: "POST to verify x402 payments",
+    description: "POST to verify t402 payments",
     body: {
       paymentPayload: "PaymentPayload",
       paymentRequirements: "PaymentRequirements",
@@ -78,7 +78,7 @@ app.post("/verify", async (req: Request, res: Response) => {
     }
 
     // verify
-    const valid = await verify(client, paymentPayload, paymentRequirements, x402Config);
+    const valid = await verify(client, paymentPayload, paymentRequirements, t402Config);
     res.json(valid);
   } catch (error) {
     console.error("error", error);
@@ -89,7 +89,7 @@ app.post("/verify", async (req: Request, res: Response) => {
 app.get("/settle", (req: Request, res: Response) => {
   res.json({
     endpoint: "/settle",
-    description: "POST to settle x402 payments",
+    description: "POST to settle t402 payments",
     body: {
       paymentPayload: "PaymentPayload",
       paymentRequirements: "PaymentRequirements",
@@ -103,7 +103,7 @@ app.get("/supported", async (req: Request, res: Response) => {
   // evm
   if (EVM_PRIVATE_KEY) {
     kinds.push({
-      x402Version: 1,
+      t402Version: 1,
       scheme: "exact",
       network: "base-sepolia",
     });
@@ -115,7 +115,7 @@ app.get("/supported", async (req: Request, res: Response) => {
     const feePayer = isSvmSignerWallet(signer) ? signer.address : undefined;
 
     kinds.push({
-      x402Version: 1,
+      t402Version: 1,
       scheme: "exact",
       network: "solana-devnet",
       extra: {
@@ -145,7 +145,7 @@ app.post("/settle", async (req: Request, res: Response) => {
     }
 
     // settle
-    const response = await settle(signer, paymentPayload, paymentRequirements, x402Config);
+    const response = await settle(signer, paymentPayload, paymentRequirements, t402Config);
     res.json(response);
   } catch (error) {
     console.error("error", error);

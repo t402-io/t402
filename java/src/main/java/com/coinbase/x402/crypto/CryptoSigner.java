@@ -1,9 +1,9 @@
-package com.coinbase.x402.crypto;
+package com.coinbase.t402.crypto;
 
 import java.util.Map;
 
 /**
- * Produces a protocol-specific signature for an <em>x402 payment-authorization payload</em>.
+ * Produces a protocol-specific signature for an <em>t402 payment-authorization payload</em>.
  *
  * <p>The caller decides which concrete signer to use (e.g. by scheme ID or DI).
  * Each implementation MUST interpret the {@code payload} keys as defined by its

@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'x402.org',
+  title: 't402.org',
   description: 'A chain-agnostic protocol for web payments',
 };
 
@@ -38,7 +38,7 @@ export default function RootLayout({
           sizes="180x180"
           href="/apple-touch-icon.png"
         />
-        <meta name="apple-mobile-web-app-title" content="x402" />
+        <meta name="apple-mobile-web-app-title" content="t402" />
         <link rel="manifest" href="/site.webmanifest" />
       </head>
       <body

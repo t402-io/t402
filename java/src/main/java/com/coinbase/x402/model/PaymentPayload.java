@@ -1,6 +1,6 @@
-package com.coinbase.x402.model;
+package com.coinbase.t402.model;
 
-import com.coinbase.x402.util.Json;
+import com.coinbase.t402.util.Json;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -9,7 +9,7 @@ import java.util.Map;
 
 /** Base header object encoded into X-PAYMENT. */
 public class PaymentPayload {
-    public int x402Version;
+    public int t402Version;
     public String scheme;
     public String network;
     public Map<String,Object> payload; // scheme‑specific map

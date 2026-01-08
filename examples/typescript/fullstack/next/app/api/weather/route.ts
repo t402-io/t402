@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withX402 } from "@x402/next";
-import { declareDiscoveryExtension } from "@x402/extensions/bazaar";
+import { withT402 } from "@t402/next";
+import { declareDiscoveryExtension } from "@t402/extensions/bazaar";
 import { server, paywall, evmAddress, svmAddress } from "../../../proxy";
 
 /**
@@ -25,13 +25,13 @@ const handler = async (_: NextRequest) => {
 };
 
 /**
- * Protected weather API endpoint using withX402 wrapper
+ * Protected weather API endpoint using withT402 wrapper
  *
- * This demonstrates the v2 withX402 wrapper for individual API routes.
- * Unlike middleware, withX402 guarantees payment settlement only after
+ * This demonstrates the v2 withT402 wrapper for individual API routes.
+ * Unlike middleware, withT402 guarantees payment settlement only after
  * the handler returns a successful response (status < 400).
  */
-export const GET = withX402(
+export const GET = withT402(
   handler,
   {
     accepts: [

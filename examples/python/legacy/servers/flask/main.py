@@ -1,8 +1,8 @@
 import os
 from flask import Flask, jsonify
 from dotenv import load_dotenv
-from x402.flask.middleware import PaymentMiddleware
-from x402.types import EIP712Domain, TokenAmount, TokenAsset
+from t402.flask.middleware import PaymentMiddleware
+from t402.types import EIP712Domain, TokenAmount, TokenAsset
 
 # Load environment variables
 load_dotenv()

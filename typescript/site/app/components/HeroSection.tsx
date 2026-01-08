@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import { CodeSnippet } from "./CodeSnippet";
 import { HeroIllustration } from "./HeroIllustration";
-import { X402Logo } from "./Logo";
+import { T402Logo } from "./Logo";
 import { textStagger, fadeInUp, fadeInFromRight } from "@/lib/animations";
 
 interface HeroSectionProps {
@@ -26,7 +26,7 @@ export function HeroSection({ codeSnippet }: HeroSectionProps) {
           animate="animate"
         >
           <motion.div variants={fadeInUp} className="flex items-baseline gap-4">
-            <X402Logo className="h-[49px] w-auto" />
+            <T402Logo className="h-[49px] w-auto" />
             <span className="text-base font-medium">Payment Required</span>
           </motion.div>
 
@@ -34,9 +34,9 @@ export function HeroSection({ codeSnippet }: HeroSectionProps) {
             variants={fadeInUp}
             className="text-base sm:text-lg font-medium leading-relaxed max-w-[600px]"
           >
-            x402 is an open, neutral standard for internet-native payments. It absolves the
+            t402 is an open, neutral standard for internet-native payments. It absolves the
             Internet's original sin by natively making payments possible between clients and
-            servers, creating win-win economies that empower agentic payments at scale. x402 exists
+            servers, creating win-win economies that empower agentic payments at scale. t402 exists
             to build a more free and fair internet.
           </motion.p>
 

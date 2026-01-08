@@ -1,10 +1,10 @@
 [project]
-name = "x402-advanced-server-example"
+name = "t402-advanced-server-example"
 version = "0.1.0"
-description = "Advanced example of using FastAPI server with x402 payment handling without middleware"
+description = "Advanced example of using FastAPI server with t402 payment handling without middleware"
 requires-python = ">=3.10"
 dependencies = [
-    "x402",
+    "t402",
     "fastapi>=0.109.0",
     "uvicorn>=0.27.0",
     "python-dotenv>=1.0.0"
@@ -24,4 +24,4 @@ allow-direct-references = true
 package = false
 
 [tool.uv.sources]
-x402 = { path = "../../../../python/x402", editable = true } 
+t402 = { path = "../../../../python/t402", editable = true } 

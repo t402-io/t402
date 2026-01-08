@@ -1,4 +1,4 @@
-// Package integration_test contains integration tests for the x402 Go SDK.
+// Package integration_test contains integration tests for the t402 Go SDK.
 // This file specifically tests the SVM (Solana) mechanism integration with both V1 and V2 implementations.
 // These tests make REAL on-chain transactions using private keys from environment variables.
 package integration_test
@@ -13,13 +13,13 @@ import (
 	solana "github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/rpc"
 
-	x402 "github.com/coinbase/x402/go"
-	svm "github.com/coinbase/x402/go/mechanisms/svm"
-	svmclient "github.com/coinbase/x402/go/mechanisms/svm/exact/client"
-	svmfacilitator "github.com/coinbase/x402/go/mechanisms/svm/exact/facilitator"
-	svmserver "github.com/coinbase/x402/go/mechanisms/svm/exact/server"
-	svmsigners "github.com/coinbase/x402/go/signers/svm"
-	"github.com/coinbase/x402/go/types"
+	t402 "github.com/coinbase/t402/go"
+	svm "github.com/coinbase/t402/go/mechanisms/svm"
+	svmclient "github.com/coinbase/t402/go/mechanisms/svm/exact/client"
+	svmfacilitator "github.com/coinbase/t402/go/mechanisms/svm/exact/facilitator"
+	svmserver "github.com/coinbase/t402/go/mechanisms/svm/exact/server"
+	svmsigners "github.com/coinbase/t402/go/signers/svm"
+	"github.com/coinbase/t402/go/types"
 )
 
 // newRealClientSvmSigner creates a client signer using the helper
@@ -209,7 +209,7 @@ func (s *realFacilitatorSvmSigner) GetAddresses(ctx context.Context, network str
 
 // Local facilitator client for testing with extra fields support
 type localSvmFacilitatorClient struct {
-	facilitator *x402.X402Facilitator
+	facilitator *t402.T402Facilitator
 	signer      *realFacilitatorSvmSigner
 }
 
@@ -217,7 +217,7 @@ func (l *localSvmFacilitatorClient) Verify(
 	ctx context.Context,
 	payloadBytes []byte,
 	requirementsBytes []byte,
-) (*x402.VerifyResponse, error) {
+) (*t402.VerifyResponse, error) {
 	// Pass bytes directly to facilitator (it handles unmarshaling internally)
 	return l.facilitator.Verify(ctx, payloadBytes, requirementsBytes)
 }
@@ -226,12 +226,12 @@ func (l *localSvmFacilitatorClient) Settle(
 	ctx context.Context,
 	payloadBytes []byte,
 	requirementsBytes []byte,
-) (*x402.SettleResponse, error) {
+) (*t402.SettleResponse, error) {
 	// Pass bytes directly to facilitator (it handles unmarshaling internally)
 	return l.facilitator.Settle(ctx, payloadBytes, requirementsBytes)
 }
 
-func (l *localSvmFacilitatorClient) GetSupported(ctx context.Context) (x402.SupportedResponse, error) {
+func (l *localSvmFacilitatorClient) GetSupported(ctx context.Context) (t402.SupportedResponse, error) {
 	// Networks already registered - no parameters needed
 	// GetExtra() on the SVM facilitator will automatically add feePayer
 	return l.facilitator.GetSupported(), nil
@@ -249,7 +249,7 @@ func TestSVMIntegrationV2(t *testing.T) {
 		t.Skip("Skipping SVM integration test: SVM_CLIENT_PRIVATE_KEY, SVM_FACILITATOR_PRIVATE_KEY, SVM_FACILITATOR_ADDRESS, and SVM_RESOURCE_SERVER_ADDRESS must be set")
 	}
 
-	t.Run("SVM V2 Flow - x402Client / x402ResourceServer / x402Facilitator", func(t *testing.T) {
+	t.Run("SVM V2 Flow - t402Client / t402ResourceServer / t402Facilitator", func(t *testing.T) {
 		ctx := context.Background()
 
 		// Create real client signer
@@ -259,7 +259,7 @@ func TestSVMIntegrationV2(t *testing.T) {
 		}
 
 		// Setup client with SVM v2 scheme
-		client := x402.Newx402Client()
+		client := t402.Newt402Client()
 		svmClient := svmclient.NewExactSvmScheme(clientSigner, &svm.ClientConfig{
 			RPCURL: "https://api.devnet.solana.com",
 		})
@@ -273,10 +273,10 @@ func TestSVMIntegrationV2(t *testing.T) {
 		}
 
 		// Setup facilitator with SVM v2 scheme
-		facilitator := x402.Newx402Facilitator()
+		facilitator := t402.Newt402Facilitator()
 		svmFacilitator := svmfacilitator.NewExactSvmScheme(facilitatorSigner)
 		// Register for Solana Devnet
-		facilitator.Register([]x402.Network{svm.SolanaDevnetCAIP2}, svmFacilitator)
+		facilitator.Register([]t402.Network{svm.SolanaDevnetCAIP2}, svmFacilitator)
 
 		// Create facilitator client wrapper (adds feePayer via GetSupported override)
 		facilitatorClient := &localSvmFacilitatorClient{
@@ -286,8 +286,8 @@ func TestSVMIntegrationV2(t *testing.T) {
 
 		// Setup resource server with SVM v2
 		svmServer := svmserver.NewExactSvmScheme()
-		server := x402.Newx402ResourceServer(
-			x402.WithFacilitatorClient(facilitatorClient),
+		server := t402.Newt402ResourceServer(
+			t402.WithFacilitatorClient(facilitatorClient),
 		)
 		server.Register(svm.SolanaDevnetCAIP2, svmServer)
 
@@ -318,8 +318,8 @@ func TestSVMIntegrationV2(t *testing.T) {
 		paymentRequiredResponse := server.CreatePaymentRequiredResponse(accepts, resource, "", nil)
 
 		// Verify it's V2
-		if paymentRequiredResponse.X402Version != 2 {
-			t.Errorf("Expected X402Version 2, got %d", paymentRequiredResponse.X402Version)
+		if paymentRequiredResponse.T402Version != 2 {
+			t.Errorf("Expected T402Version 2, got %d", paymentRequiredResponse.T402Version)
 		}
 
 		// Verify feePayer is in requirements
@@ -345,8 +345,8 @@ func TestSVMIntegrationV2(t *testing.T) {
 		}
 
 		// Verify payload is V2
-		if paymentPayload.X402Version != 2 {
-			t.Errorf("Expected payload X402Version 2, got %d", paymentPayload.X402Version)
+		if paymentPayload.T402Version != 2 {
+			t.Errorf("Expected payload T402Version 2, got %d", paymentPayload.T402Version)
 		}
 
 		// Verify payload structure
@@ -424,7 +424,7 @@ func TestSVMIntegrationV1(t *testing.T) {
 		t.Skip("Skipping SVM V1 integration test: SVM_CLIENT_PRIVATE_KEY, SVM_FACILITATOR_PRIVATE_KEY, SVM_FACILITATOR_ADDRESS, and SVM_RESOURCE_SERVER_ADDRESS must be set")
 	}
 
-	t.Run("SVM V1 Flow (Legacy) - x402Client / x402ResourceServer / x402Facilitator", func(t *testing.T) {
+	t.Run("SVM V1 Flow (Legacy) - t402Client / t402ResourceServer / t402Facilitator", func(t *testing.T) {
 		ctx := context.Background()
 
 		// Create real client signer
@@ -434,7 +434,7 @@ func TestSVMIntegrationV1(t *testing.T) {
 		}
 
 		// Setup client with SVM v1 scheme
-		client := x402.Newx402Client()
+		client := t402.Newt402Client()
 		svmClient := svmv1client.NewExactSvmSchemeV1(clientSigner, &svm.ClientConfig{
 			RPCURL: "https://api.devnet.solana.com",
 		})
@@ -448,10 +448,10 @@ func TestSVMIntegrationV1(t *testing.T) {
 		}
 
 		// Setup facilitator with SVM v1 scheme
-		facilitator := x402.Newx402Facilitator()
+		facilitator := t402.Newt402Facilitator()
 		svmFacilitator := svmv1facilitator.NewExactSvmSchemeV1(facilitatorSigner)
 		// Register for Solana Devnet
-		facilitator.RegisterV1([]x402.Network{svm.SolanaDevnetV1}, svmFacilitator)
+		facilitator.RegisterV1([]t402.Network{svm.SolanaDevnetV1}, svmFacilitator)
 
 		// Create facilitator client wrapper (adds feePayer via GetSupported override)
 		facilitatorClient := &localSvmFacilitatorClient{
@@ -461,8 +461,8 @@ func TestSVMIntegrationV1(t *testing.T) {
 
 		// Setup resource server with SVM v2 (server is V2 only)
 		svmServer := svmserver.NewExactSvmScheme()
-		server := x402.Newx402ResourceServer(
-			x402.WithFacilitatorClient(facilitatorClient),
+		server := t402.Newt402ResourceServer(
+			t402.WithFacilitatorClient(facilitatorClient),
 		)
 		// Register for CAIP-2 network (server uses V2 format)
 		server.Register(svm.SolanaDevnetCAIP2, svmServer)
@@ -474,7 +474,7 @@ func TestSVMIntegrationV1(t *testing.T) {
 		}
 
 		// Server - builds PaymentRequired response for 0.001 USDC (V1 uses version 1)
-		accepts := []x402.PaymentRequirements{
+		accepts := []t402.PaymentRequirements{
 			{
 				Scheme:            svm.SchemeExact,
 				Network:           svm.SolanaDevnetV1, // V1 network name
@@ -486,21 +486,21 @@ func TestSVMIntegrationV1(t *testing.T) {
 				},
 			},
 		}
-		resource := x402.ResourceInfo{
+		resource := t402.ResourceInfo{
 			URL:         "https://legacy.example.com/api",
 			Description: "Legacy API Access",
 			MimeType:    "application/json",
 		}
 
 		// For V1, we need to explicitly set the version to 1
-		paymentRequiredResponse := x402.PaymentRequired{
-			X402Version: 1, // V1 uses version 1
+		paymentRequiredResponse := t402.PaymentRequired{
+			T402Version: 1, // V1 uses version 1
 			Accepts:     accepts,
 			Resource:    &resource,
 		}
 
 		// Client - responds with PaymentPayload response
-		selected, err := client.SelectPaymentRequirements(paymentRequiredResponse.X402Version, accepts)
+		selected, err := client.SelectPaymentRequirements(paymentRequiredResponse.T402Version, accepts)
 		if err != nil {
 			t.Fatalf("Failed to select payment requirements: %v", err)
 		}
@@ -512,7 +512,7 @@ func TestSVMIntegrationV1(t *testing.T) {
 		}
 
 		// V1 doesn't use resource/extensions from PaymentRequired
-		payloadBytes, err := client.CreatePaymentPayload(ctx, paymentRequiredResponse.X402Version, selectedBytes, nil, nil)
+		payloadBytes, err := client.CreatePaymentPayload(ctx, paymentRequiredResponse.T402Version, selectedBytes, nil, nil)
 		if err != nil {
 			t.Fatalf("Failed to create payment payload: %v", err)
 		}
@@ -524,8 +524,8 @@ func TestSVMIntegrationV1(t *testing.T) {
 		}
 
 		// Verify payload is V1
-		if paymentPayload.X402Version != 1 {
-			t.Errorf("Expected payload X402Version 1, got %d", paymentPayload.X402Version)
+		if paymentPayload.T402Version != 1 {
+			t.Errorf("Expected payload T402Version 1, got %d", paymentPayload.T402Version)
 		}
 
 		// Server - maps payment payload to payment requirements

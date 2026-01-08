@@ -1,12 +1,12 @@
-# x402 Server Example
+# t402 Server Example
 
-This server demonstrates x402 payment integration with multiple pricing tiers.
+This server demonstrates t402 payment integration with multiple pricing tiers.
 
 ## Setup
 
 1. Create a `.env` file:
 ```env
-FACILITATOR_URL=https://x402.org/facilitator
+FACILITATOR_URL=https://t402.org/facilitator
 NETWORK=base-sepolia
 ADDRESS=0x_YOUR_WALLET_ADDRESS_HERE
 PORT=3001

@@ -81,7 +81,7 @@ describe("facilitator - smart wallet deployment check", () => {
     }
 
     return {
-      x402Version: 1,
+      t402Version: 1,
       scheme: "exact",
       network: "base-sepolia",
       payload: {

@@ -31,7 +31,7 @@ export function buildPaymentRequirements(
  */
 export function buildPaymentRequired(overrides?: Partial<PaymentRequired>): PaymentRequired {
   return {
-    x402Version: 2,
+    t402Version: 2,
     resource: {
       url: "https://example.com/resource",
       description: "Test resource",
@@ -48,7 +48,7 @@ export function buildPaymentRequired(overrides?: Partial<PaymentRequired>): Paym
  */
 export function buildPaymentPayload(overrides?: Partial<PaymentPayload>): PaymentPayload {
   return {
-    x402Version: 2,
+    t402Version: 2,
     payload: {
       signature: "test_signature",
       from: "test_sender",
@@ -89,7 +89,7 @@ export function buildSettleResponse(overrides?: Partial<SettleResponse>): Settle
 
 /**
  * Builds a supported response for testing.
- * Uses flat array format with x402Version in each kind for backward compatibility.
+ * Uses flat array format with t402Version in each kind for backward compatibility.
  *
  * Args:
  *   overrides: Partial overrides for the supported response
@@ -101,7 +101,7 @@ export function buildSupportedResponse(overrides?: Partial<SupportedResponse>): 
   const base: SupportedResponse = {
     kinds: [
       {
-        x402Version: 2,
+        t402Version: 2,
         scheme: "test-scheme",
         network: "test:network" as Network,
         extra: {},

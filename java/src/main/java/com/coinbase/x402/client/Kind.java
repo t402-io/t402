@@ -1,4 +1,4 @@
-package com.coinbase.x402.client;
+package com.coinbase.t402.client;
 
 /** Identifies a payment scheme+network pair that a facilitator supports. */
 public class Kind {

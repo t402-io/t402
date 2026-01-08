@@ -10,9 +10,9 @@ export interface SvmConfig {
 }
 
 /**
- * Configuration options for X402 client and facilitator operations.
+ * Configuration options for T402 client and facilitator operations.
  */
-export interface X402Config {
+export interface T402Config {
   /** Configuration for Solana (SVM) operations */
   svmConfig?: SvmConfig;
   // Future: evmConfig?: EvmConfig for EVM-specific configurations

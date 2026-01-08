@@ -1,4 +1,4 @@
-package x402
+package t402
 
 import (
 	"context"
@@ -7,12 +7,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coinbase/x402/go/types"
+	"github.com/coinbase/t402/go/types"
 )
 
-// x402ResourceServer manages payment requirements and verification for protected resources
+// t402ResourceServer manages payment requirements and verification for protected resources
 // V2 ONLY - This server only produces and accepts V2 payments
-type x402ResourceServer struct {
+type t402ResourceServer struct {
 	mu sync.RWMutex
 
 	// V2 only - server only produces/accepts V2 (default, no suffix)
@@ -69,11 +69,11 @@ func (c *SupportedCache) Get(key string) (SupportedResponse, bool) {
 }
 
 // ResourceServerOption configures the server
-type ResourceServerOption func(*x402ResourceServer)
+type ResourceServerOption func(*t402ResourceServer)
 
 // WithFacilitatorClient adds a facilitator client
 func WithFacilitatorClient(client FacilitatorClient) ResourceServerOption {
-	return func(s *x402ResourceServer) {
+	return func(s *t402ResourceServer) {
 		// Store temporarily - will populate map in Initialize
 		if s.tempFacilitatorClients == nil {
 			s.tempFacilitatorClients = []FacilitatorClient{}
@@ -84,20 +84,20 @@ func WithFacilitatorClient(client FacilitatorClient) ResourceServerOption {
 
 // WithSchemeServer registers a scheme server implementation (V2, default)
 func WithSchemeServer(network Network, schemeServer SchemeNetworkServer) ResourceServerOption {
-	return func(s *x402ResourceServer) {
+	return func(s *t402ResourceServer) {
 		s.Register(network, schemeServer)
 	}
 }
 
 // WithCacheTTL sets the cache TTL for supported kinds
 func WithCacheTTL(ttl time.Duration) ResourceServerOption {
-	return func(s *x402ResourceServer) {
+	return func(s *t402ResourceServer) {
 		s.supportedCache.ttl = ttl
 	}
 }
 
-func Newx402ResourceServer(opts ...ResourceServerOption) *x402ResourceServer {
-	s := &x402ResourceServer{
+func Newt402ResourceServer(opts ...ResourceServerOption) *t402ResourceServer {
+	s := &t402ResourceServer{
 		schemes:              make(map[Network]map[string]SchemeNetworkServer),
 		facilitatorClients:   make(map[Network]map[string]FacilitatorClient),
 		registeredExtensions: make(map[string]types.ResourceServerExtension),
@@ -116,7 +116,7 @@ func Newx402ResourceServer(opts ...ResourceServerOption) *x402ResourceServer {
 }
 
 // Initialize populates facilitator clients by querying GetSupported
-func (s *x402ResourceServer) Initialize(ctx context.Context) error {
+func (s *t402ResourceServer) Initialize(ctx context.Context) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -150,7 +150,7 @@ func (s *x402ResourceServer) Initialize(ctx context.Context) error {
 }
 
 // Register registers a payment mechanism (V2, default)
-func (s *x402ResourceServer) Register(network Network, schemeServer SchemeNetworkServer) *x402ResourceServer {
+func (s *t402ResourceServer) Register(network Network, schemeServer SchemeNetworkServer) *t402ResourceServer {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -162,7 +162,7 @@ func (s *x402ResourceServer) Register(network Network, schemeServer SchemeNetwor
 	return s
 }
 
-func (s *x402ResourceServer) RegisterExtension(extension types.ResourceServerExtension) *x402ResourceServer {
+func (s *t402ResourceServer) RegisterExtension(extension types.ResourceServerExtension) *t402ResourceServer {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -174,42 +174,42 @@ func (s *x402ResourceServer) RegisterExtension(extension types.ResourceServerExt
 // Hook Registration Methods (Chainable)
 // ============================================================================
 
-func (s *x402ResourceServer) OnBeforeVerify(hook BeforeVerifyHook) *x402ResourceServer {
+func (s *t402ResourceServer) OnBeforeVerify(hook BeforeVerifyHook) *t402ResourceServer {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.beforeVerifyHooks = append(s.beforeVerifyHooks, hook)
 	return s
 }
 
-func (s *x402ResourceServer) OnAfterVerify(hook AfterVerifyHook) *x402ResourceServer {
+func (s *t402ResourceServer) OnAfterVerify(hook AfterVerifyHook) *t402ResourceServer {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.afterVerifyHooks = append(s.afterVerifyHooks, hook)
 	return s
 }
 
-func (s *x402ResourceServer) OnVerifyFailure(hook OnVerifyFailureHook) *x402ResourceServer {
+func (s *t402ResourceServer) OnVerifyFailure(hook OnVerifyFailureHook) *t402ResourceServer {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.onVerifyFailureHooks = append(s.onVerifyFailureHooks, hook)
 	return s
 }
 
-func (s *x402ResourceServer) OnBeforeSettle(hook BeforeSettleHook) *x402ResourceServer {
+func (s *t402ResourceServer) OnBeforeSettle(hook BeforeSettleHook) *t402ResourceServer {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.beforeSettleHooks = append(s.beforeSettleHooks, hook)
 	return s
 }
 
-func (s *x402ResourceServer) OnAfterSettle(hook AfterSettleHook) *x402ResourceServer {
+func (s *t402ResourceServer) OnAfterSettle(hook AfterSettleHook) *t402ResourceServer {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.afterSettleHooks = append(s.afterSettleHooks, hook)
 	return s
 }
 
-func (s *x402ResourceServer) OnSettleFailure(hook OnSettleFailureHook) *x402ResourceServer {
+func (s *t402ResourceServer) OnSettleFailure(hook OnSettleFailureHook) *t402ResourceServer {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.onSettleFailureHooks = append(s.onSettleFailureHooks, hook)
@@ -221,7 +221,7 @@ func (s *x402ResourceServer) OnSettleFailure(hook OnSettleFailureHook) *x402Reso
 // ============================================================================
 
 // BuildPaymentRequirements creates payment requirements for a resource
-func (s *x402ResourceServer) BuildPaymentRequirements(
+func (s *t402ResourceServer) BuildPaymentRequirements(
 	ctx context.Context,
 	config ResourceConfig,
 	supportedKind types.SupportedKind,
@@ -275,7 +275,7 @@ func (s *x402ResourceServer) BuildPaymentRequirements(
 }
 
 // FindMatchingRequirements finds requirements that match a payment payload
-func (s *x402ResourceServer) FindMatchingRequirements(available []types.PaymentRequirements, payload types.PaymentPayload) *types.PaymentRequirements {
+func (s *t402ResourceServer) FindMatchingRequirements(available []types.PaymentRequirements, payload types.PaymentPayload) *types.PaymentRequirements {
 	for _, req := range available {
 		if payload.Accepted.Scheme == req.Scheme &&
 			payload.Accepted.Network == req.Network &&
@@ -289,7 +289,7 @@ func (s *x402ResourceServer) FindMatchingRequirements(available []types.PaymentR
 }
 
 // VerifyPayment verifies a V2 payment
-func (s *x402ResourceServer) VerifyPayment(ctx context.Context, payload types.PaymentPayload, requirements types.PaymentRequirements) (*VerifyResponse, error) {
+func (s *t402ResourceServer) VerifyPayment(ctx context.Context, payload types.PaymentPayload, requirements types.PaymentRequirements) (*VerifyResponse, error) {
 	// Marshal to bytes early for hooks (escape hatch for extensions)
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
@@ -356,7 +356,7 @@ func (s *x402ResourceServer) VerifyPayment(ctx context.Context, payload types.Pa
 }
 
 // SettlePayment settles a V2 payment
-func (s *x402ResourceServer) SettlePayment(ctx context.Context, payload types.PaymentPayload, requirements types.PaymentRequirements) (*SettleResponse, error) {
+func (s *t402ResourceServer) SettlePayment(ctx context.Context, payload types.PaymentPayload, requirements types.PaymentRequirements) (*SettleResponse, error) {
 	// Marshal to bytes early for hooks (escape hatch for extensions)
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
@@ -423,14 +423,14 @@ func (s *x402ResourceServer) SettlePayment(ctx context.Context, payload types.Pa
 }
 
 // CreatePaymentRequiredResponse creates a V2 PaymentRequired response
-func (s *x402ResourceServer) CreatePaymentRequiredResponse(
+func (s *t402ResourceServer) CreatePaymentRequiredResponse(
 	requirements []types.PaymentRequirements,
 	resourceInfo *types.ResourceInfo,
 	errorMsg string,
 	extensions map[string]interface{},
 ) types.PaymentRequired {
 	return types.PaymentRequired{
-		X402Version: 2,
+		T402Version: 2,
 		Error:       errorMsg,
 		Resource:    resourceInfo,
 		Accepts:     requirements,
@@ -439,7 +439,7 @@ func (s *x402ResourceServer) CreatePaymentRequiredResponse(
 }
 
 // ProcessPaymentRequest processes a payment request end-to-end
-func (s *x402ResourceServer) ProcessPaymentRequest(
+func (s *t402ResourceServer) ProcessPaymentRequest(
 	ctx context.Context,
 	config ResourceConfig,
 	payload *types.PaymentPayload,
@@ -451,7 +451,7 @@ func (s *x402ResourceServer) ProcessPaymentRequest(
 
 // BuildPaymentRequirementsFromConfig builds payment requirements from config
 // This wraps the single requirement builder with facilitator data
-func (s *x402ResourceServer) BuildPaymentRequirementsFromConfig(ctx context.Context, config ResourceConfig) ([]types.PaymentRequirements, error) {
+func (s *t402ResourceServer) BuildPaymentRequirementsFromConfig(ctx context.Context, config ResourceConfig) ([]types.PaymentRequirements, error) {
 	// Find supported kind for this scheme/network
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -472,9 +472,9 @@ func (s *x402ResourceServer) BuildPaymentRequirementsFromConfig(ctx context.Cont
 		// Iterate through flat kinds array (version is in each element)
 		for _, kind := range cachedResponse.Kinds {
 			// Match on scheme and network (only check V2 kinds)
-			if kind.X402Version == 2 && kind.Scheme == config.Scheme && string(kind.Network) == string(config.Network) {
+			if kind.T402Version == 2 && kind.Scheme == config.Scheme && string(kind.Network) == string(config.Network) {
 				supportedKind = types.SupportedKind{
-					X402Version: kind.X402Version,
+					T402Version: kind.T402Version,
 					Scheme:      kind.Scheme,
 					Network:     string(kind.Network),
 					Extra:       kind.Extra, // This includes feePayer for SVM!

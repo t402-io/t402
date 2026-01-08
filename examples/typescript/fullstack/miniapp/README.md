@@ -1,6 +1,6 @@
-# x402 Farcaster Mini App Example (v2 SDK)
+# t402 Farcaster Mini App Example (v2 SDK)
 
-This is a [Next.js](https://nextjs.org) project demonstrating how to build a [Farcaster Mini App](https://miniapps.farcaster.xyz/) with x402 payment-protected API endpoints using the `@x402/next`, `@x402/fetch` and `@x402/evm` packages.
+This is a [Next.js](https://nextjs.org) project demonstrating how to build a [Farcaster Mini App](https://miniapps.farcaster.xyz/) with t402 payment-protected API endpoints using the `@t402/next`, `@t402/fetch` and `@t402/evm` packages.
 
 ## Prerequisites
 
@@ -41,13 +41,13 @@ Configure the following variables in your `.env`:
 ### Required Variables
 
 ```bash
-# x402 Payment Configuration (required)
-FACILITATOR_URL=https://x402.org/facilitator
+# t402 Payment Configuration (required)
+FACILITATOR_URL=https://t402.org/facilitator
 EVM_ADDRESS=0xYourWalletAddress
 
 # OnchainKit Configuration
 NEXT_PUBLIC_ONCHAINKIT_API_KEY=your_onchainkit_api_key_here
-NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME=x402 Mini App
+NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME=t402 Mini App
 
 # App URLs and Images
 NEXT_PUBLIC_URL=http://localhost:3000
@@ -71,14 +71,14 @@ The `/api/protected` endpoint uses the `withX402` wrapper for payment protection
 
 ```typescript
 // app/api/protected/route.ts
-import { withX402 } from "@x402/next";
-import { x402ResourceServer, HTTPFacilitatorClient } from "@x402/core/server";
-import { registerExactEvmScheme } from "@x402/evm/exact/server";
+import { withX402 } from "@t402/next";
+import { t402ResourceServer, HTTPFacilitatorClient } from "@t402/core/server";
+import { registerExactEvmScheme } from "@t402/evm/exact/server";
 
 const facilitatorClient = new HTTPFacilitatorClient({
   url: process.env.FACILITATOR_URL,
 });
-const server = new x402ResourceServer(facilitatorClient);
+const server = new t402ResourceServer(facilitatorClient);
 registerExactEvmScheme(server);
 
 export const GET = withX402(
@@ -101,14 +101,14 @@ export const GET = withX402(
 
 ### Client-Side Payment Handling
 
-The frontend uses `@x402/fetch` to handle payments:
+The frontend uses `@t402/fetch` to handle payments:
 
 ```typescript
-import { x402Client, wrapFetchWithPayment } from "@x402/fetch";
-import { registerExactEvmScheme } from "@x402/evm/exact/client";
+import { t402Client, wrapFetchWithPayment } from "@t402/fetch";
+import { registerExactEvmScheme } from "@t402/evm/exact/client";
 
 // Create client and register EVM scheme
-const client = new x402Client();
+const client = new t402Client();
 registerExactEvmScheme(client, { signer: wagmiToClientSigner(walletClient) });
 
 // Wrap fetch with payment handling
@@ -147,7 +147,7 @@ export const minikitConfig = {
   },
   miniapp: {
     version: "1",
-    name: "x402 Mini App",
+    name: "t402 Mini App",
     // ... other config
   },
 };
@@ -177,7 +177,7 @@ The `PAYMENT-REQUIRED` header contains payment requirements:
 
 ```json
 {
-  "x402Version": 2,
+  "t402Version": 2,
   "error": "Payment required",
   "accepts": [
     {
@@ -201,7 +201,7 @@ The `PAYMENT-REQUIRED` header contains payment requirements:
   "message": "Protected action completed successfully",
   "timestamp": "2024-01-01T00:00:00Z",
   "data": {
-    "secretMessage": "This content was paid for with x402!",
+    "secretMessage": "This content was paid for with t402!",
     "accessedAt": 1704067200000
   }
 }
@@ -216,14 +216,14 @@ Create a new route file (e.g., `app/api/premium/route.ts`) and use the `withX402
 ```typescript
 // app/api/premium/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { withX402 } from "@x402/next";
-import { x402ResourceServer, HTTPFacilitatorClient } from "@x402/core/server";
-import { registerExactEvmScheme } from "@x402/evm/exact/server";
+import { withX402 } from "@t402/next";
+import { t402ResourceServer, HTTPFacilitatorClient } from "@t402/core/server";
+import { registerExactEvmScheme } from "@t402/evm/exact/server";
 
 const facilitatorClient = new HTTPFacilitatorClient({
   url: process.env.FACILITATOR_URL,
 });
-const server = new x402ResourceServer(facilitatorClient);
+const server = new t402ResourceServer(facilitatorClient);
 registerExactEvmScheme(server);
 
 const handler = async (_: NextRequest) => {
@@ -258,7 +258,7 @@ Network identifiers use [CAIP-2](https://github.com/ChainAgnostic/CAIPs/blob/mai
 ## Resources
 
 - [Farcaster Mini Apps Documentation](https://miniapps.farcaster.xyz/)
-- [x402 Protocol Documentation](https://x402.org)
+- [t402 Protocol Documentation](https://t402.org)
 - [OnchainKit Documentation](https://onchainkit.xyz)
 - [MiniKit Documentation](https://docs.base.org/builderkits/minikit/overview)
 - [Next.js Documentation](https://nextjs.org/docs)

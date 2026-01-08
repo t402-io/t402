@@ -4,32 +4,32 @@ import (
 	"context"
 	"testing"
 
-	x402 "github.com/coinbase/x402/go"
-	"github.com/coinbase/x402/go/test/mocks/cash"
-	"github.com/coinbase/x402/go/types"
+	t402 "github.com/coinbase/t402/go"
+	"github.com/coinbase/t402/go/test/mocks/cash"
+	"github.com/coinbase/t402/go/types"
 )
 
-// TestCoreIntegration tests the integration between x402Client, x402ResourceServer, and x402Facilitator
+// TestCoreIntegration tests the integration between t402Client, t402ResourceServer, and t402Facilitator
 func TestCoreIntegration(t *testing.T) {
-	t.Run("Cash Flow - x402Client / x402ResourceServer / x402Facilitator", func(t *testing.T) {
+	t.Run("Cash Flow - t402Client / t402ResourceServer / t402Facilitator", func(t *testing.T) {
 		ctx := context.Background()
 
 		// Setup client with cash scheme
-		client := x402.Newx402Client()
-		client.Register("x402:cash", cash.NewSchemeNetworkClient("John"))
+		client := t402.Newt402Client()
+		client.Register("t402:cash", cash.NewSchemeNetworkClient("John"))
 
 		// Setup facilitator with cash scheme
-		facilitator := x402.Newx402Facilitator()
-		facilitator.Register([]x402.Network{"x402:cash"}, cash.NewSchemeNetworkFacilitator())
+		facilitator := t402.Newt402Facilitator()
+		facilitator.Register([]t402.Network{"t402:cash"}, cash.NewSchemeNetworkFacilitator())
 
 		// Create facilitator client wrapper
 		facilitatorClient := cash.NewFacilitatorClient(facilitator)
 
 		// Setup resource server (V2 only)
-		server := x402.Newx402ResourceServer(
-			x402.WithFacilitatorClient(facilitatorClient),
+		server := t402.Newt402ResourceServer(
+			t402.WithFacilitatorClient(facilitatorClient),
 		)
-		server.Register("x402:cash", cash.NewSchemeNetworkServer())
+		server.Register("t402:cash", cash.NewSchemeNetworkServer())
 
 		// Initialize server to populate facilitator clients
 		err := server.Initialize(ctx)

@@ -1,6 +1,6 @@
 # Contributing
 
-x402 welcomes contributions of schemes, middleware, new chain support, and more. We aim to make x402 as secure and trusted as possible. Merging contributions is at the discretion of the x402 Foundation team, based on the risk of the contribution and the quality of implementation.
+t402 welcomes contributions of schemes, middleware, new chain support, and more. We aim to make t402 as secure and trusted as possible. Merging contributions is at the discretion of the t402 Foundation team, based on the risk of the contribution and the quality of implementation.
 
 ## Contents
 
@@ -12,10 +12,10 @@ x402 welcomes contributions of schemes, middleware, new chain support, and more.
 
 ## Repository Structure
 
-The x402 repository contains implementations in multiple languages plus protocol specifications.
+The t402 repository contains implementations in multiple languages plus protocol specifications.
 
 ```
-x402/
+t402/
 ├── typescript/          # TypeScript SDK (pnpm monorepo)
 ├── python/              # Python SDK
 ├── go/                  # Go SDK
@@ -67,7 +67,7 @@ Run tests for the packages you modified:
 cd typescript && pnpm test
 
 # Python
-cd python/x402 && uv run pytest
+cd python/t402 && uv run pytest
 
 # Go
 cd go && make test
@@ -92,7 +92,7 @@ git config --global commit.gpgsign true
 The paywall is a browser UI component that exists across TypeScript, Go, and Python. If you modify paywall source files in TypeScript:
 
 ```bash
-cd typescript && pnpm --filter @x402/paywall build:paywall
+cd typescript && pnpm --filter @t402/paywall build:paywall
 ```
 
 This generates template files in:
@@ -100,14 +100,14 @@ This generates template files in:
 - `typescript/packages/http/paywall/src/svm/gen/template.ts`
 - `go/http/evm_paywall_template.go`
 - `go/http/svm_paywall_template.go`
-- `python/x402/src/x402/evm_paywall_template.py`
-- `python/x402/src/x402/svm_paywall_template.py`
+- `python/t402/src/t402/evm_paywall_template.py`
+- `python/t402/src/t402/svm_paywall_template.py`
 
 Commit the generated files with your PR.
 
 ## New Schemes
 
-Schemes dictate how funds are moved from client to server. New schemes require thorough review by the x402 Foundation team.
+Schemes dictate how funds are moved from client to server. New schemes require thorough review by the t402 Foundation team.
 
 Recommended approach:
 
@@ -119,27 +119,27 @@ See [specs/CONTRIBUTING.md](specs/CONTRIBUTING.md) for spec writing guidelines.
 
 ## New Chains
 
-x402 aims to be chain-agnostic. New chain implementations are welcome.
+t402 aims to be chain-agnostic. New chain implementations are welcome.
 
-Because different chains have different best practices, a scheme may have a different mechanism on a new chain than it does on EVM. If the scheme mechanism varies from the reference implementation, the x402 Foundation will re-audit the scheme for that chain before accepting.
+Because different chains have different best practices, a scheme may have a different mechanism on a new chain than it does on EVM. If the scheme mechanism varies from the reference implementation, the t402 Foundation will re-audit the scheme for that chain before accepting.
 
 ### Required Interfaces
 
 Each language SDK defines interfaces that chain mechanisms must implement:
 
-**TypeScript** (`@x402/core`):
+**TypeScript** (`@t402/core`):
 - `SchemeNetworkClient` - Signs payment payloads
 - `SchemeNetworkServer` - Validates payment requirements  
 - `SchemeNetworkFacilitator` - Verifies and settles payments
 
-**Go** (`github.com/coinbase/x402/go`):
+**Go** (`github.com/coinbase/t402/go`):
 - `ClientScheme` - Signs payment payloads
 - `ServerScheme` - Validates payment requirements
 - `FacilitatorScheme` - Verifies and settles payments
 
-**Python** (`x402`):
-- Implement signing in `src/x402/your_chain.py`
-- Integrate with the base client in `src/x402/clients/base.py`
+**Python** (`t402`):
+- Implement signing in `src/t402/your_chain.py`
+- Integrate with the base client in `src/t402/clients/base.py`
 
 See the language-specific guides for detailed implementation patterns.
 
@@ -149,7 +149,7 @@ HTTP middleware packages should:
 
 - Follow best practices for the target framework
 - Include tests
-- Follow x402 client/server patterns from existing middleware
+- Follow t402 client/server patterns from existing middleware
 
 ## Examples
 

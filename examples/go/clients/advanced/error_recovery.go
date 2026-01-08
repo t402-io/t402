@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"net/http"
 
-	x402 "github.com/coinbase/x402/go"
-	x402http "github.com/coinbase/x402/go/http"
-	evm "github.com/coinbase/x402/go/mechanisms/evm/exact/client"
-	evmsigners "github.com/coinbase/x402/go/signers/evm"
+	t402 "github.com/coinbase/t402/go"
+	t402http "github.com/coinbase/t402/go/http"
+	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/client"
+	evmsigners "github.com/coinbase/t402/go/signers/evm"
 )
 
 /**
@@ -22,7 +22,7 @@ import (
  */
 
 type ErrorRecoveryClient struct {
-	client          *x402.X402Client
+	client          *t402.T402Client
 	fallbackEnabled bool
 	attemptCount    int
 }
@@ -36,8 +36,8 @@ func runErrorRecoveryExample(ctx context.Context, evmPrivateKey, url string) err
 		return err
 	}
 
-	// Create x402 client with comprehensive error handling
-	client := x402.Newx402Client().
+	// Create t402 client with comprehensive error handling
+	client := t402.Newt402Client().
 		Register("eip155:*", evm.NewExactEvmScheme(evmSigner))
 
 	// Recovery counter
@@ -45,7 +45,7 @@ func runErrorRecoveryExample(ctx context.Context, evmPrivateKey, url string) err
 	successfulRecoveries := 0
 
 	// OnBeforePaymentCreation: Pre-flight validation
-	client.OnBeforePaymentCreation(func(ctx x402.PaymentCreationContext) (*x402.BeforePaymentCreationHookResult, error) {
+	client.OnBeforePaymentCreation(func(ctx t402.PaymentCreationContext) (*t402.BeforePaymentCreationHookResult, error) {
 		fmt.Printf("🔍 [Pre-flight] Validating payment requirements...\n")
 		fmt.Printf("   Network: %s, Scheme: %s\n", ctx.SelectedRequirements.GetNetwork(), ctx.SelectedRequirements.GetScheme())
 
@@ -56,7 +56,7 @@ func runErrorRecoveryExample(ctx context.Context, evmPrivateKey, url string) err
 	})
 
 	// OnPaymentCreationFailure: Advanced error recovery
-	client.OnPaymentCreationFailure(func(ctx x402.PaymentCreationFailureContext) (*x402.PaymentCreationFailureHookResult, error) {
+	client.OnPaymentCreationFailure(func(ctx t402.PaymentCreationFailureContext) (*t402.PaymentCreationFailureHookResult, error) {
 		recoveryAttempts++
 		fmt.Printf("❌ [Error Recovery] Payment creation failed (attempt %d)\n", recoveryAttempts)
 		fmt.Printf("   Error: %v\n", ctx.Error)
@@ -90,7 +90,7 @@ func runErrorRecoveryExample(ctx context.Context, evmPrivateKey, url string) err
 	})
 
 	// OnAfterPaymentCreation: Success logging
-	client.OnAfterPaymentCreation(func(ctx x402.PaymentCreatedContext) error {
+	client.OnAfterPaymentCreation(func(ctx t402.PaymentCreatedContext) error {
 		fmt.Printf("✅ [Success] Payment created\n")
 		if recoveryAttempts > 0 {
 			fmt.Printf("   Recovered after %d attempts\n", recoveryAttempts)
@@ -99,8 +99,8 @@ func runErrorRecoveryExample(ctx context.Context, evmPrivateKey, url string) err
 	})
 
 	// Wrap HTTP client
-	httpClient := x402http.Newx402HTTPClient(client)
-	wrappedClient := x402http.WrapHTTPClientWithPayment(http.DefaultClient, httpClient)
+	httpClient := t402http.Newt402HTTPClient(client)
+	wrappedClient := t402http.WrapHTTPClientWithPayment(http.DefaultClient, httpClient)
 
 	// Make request
 	fmt.Printf("\n🌐 Making request to: %s\n\n", url)

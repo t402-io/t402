@@ -2,7 +2,7 @@
 
 ## Summary
 
-The HTTP transport implements x402 payment flows over standard HTTP/HTTPS protocols. This is the original transport for x402 and leverages existing HTTP status codes and headers for payment required signaling and payment payload transmission.
+The HTTP transport implements t402 payment flows over standard HTTP/HTTPS protocols. This is the original transport for t402 and leverages existing HTTP status codes and headers for payment required signaling and payment payload transmission.
 
 ## Payment Required Signaling
 
@@ -18,7 +18,7 @@ HTTP/1.1 402 Payment Required
 Content-Type: application/json
 
 {
-  "x402Version": 1,
+  "t402Version": 1,
   "error": "Payment required to access this resource",
   "accepts": [
     {
@@ -65,7 +65,7 @@ The base64 payload decodes to:
 
 ```json
 {
-  "x402Version": 1,
+  "t402Version": 1,
   "scheme": "exact",
   "network": "base-sepolia",
   "payload": {
@@ -121,7 +121,7 @@ Content-Type: application/json
 X-PAYMENT-RESPONSE: eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3JSZWFzb24iOiJpbnN1ZmZpY2llbnRfZnVuZHMiLCJ0cmFuc2FjdGlvbiI6IiIsIm5ldHdvcmsiOiJiYXNlLXNlcG9saWEiLCJwYXllciI6IjB4ODU3YjA2NTE5RTkxZTNBNTQ1Mzg3OTFiRGJiMEUyMjM3M2UzNmI2NiJ9
 
 {
-  "x402Version": 1,
+  "t402Version": 1,
   "error": "Payment failed: insufficient funds",
   "accepts": [...]
 }
@@ -129,9 +129,9 @@ X-PAYMENT-RESPONSE: eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3JSZWFzb24iOiJpbnN1ZmZpY2llbnRf
 
 ## Error Handling
 
-HTTP transport maps x402 errors to standard HTTP status codes:
+HTTP transport maps t402 errors to standard HTTP status codes:
 
-| x402 Error       | HTTP Status | Description                                     |
+| t402 Error       | HTTP Status | Description                                     |
 | ---------------- | ----------- | ----------------------------------------------- |
 | Payment Required | 402         | Payment needed to access resource               |
 | Invalid Payment  | 400         | Malformed payment payload or requirements       |
@@ -143,7 +143,7 @@ HTTP transport maps x402 errors to standard HTTP status codes:
 
 ```json
 {
-  "x402Version": 1,
+  "t402Version": 1,
   "error": "Human-readable error message",
   "accepts": [
     /* payment requirements */
@@ -153,8 +153,8 @@ HTTP transport maps x402 errors to standard HTTP status codes:
 
 ## References
 
-- [Core x402 Specification](../x402-specification.md)
+- [Core t402 Specification](../t402-specification.md)
 - [HTTP/1.1 Specification (RFC 7231)](https://tools.ietf.org/html/rfc7231)
 - [HTTP 402 Status Code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402)
-- [Express.js x402 Integration](../../examples/typescript/servers/express.ts)
-- [Fetch API x402 Client](../../examples/typescript/clients/fetch.ts)
+- [Express.js t402 Integration](../../examples/typescript/servers/express.ts)
+- [Fetch API t402 Client](../../examples/typescript/clients/fetch.ts)

@@ -1,6 +1,6 @@
 # Demo of paying for Anthropic tokens via a proxy
 
-This example demonstrates how to use x402 to pay for Anthropic API calls using a proxy server. The setup involves configuring both a Go proxy server and a TypeScript agent.
+This example demonstrates how to use t402 to pay for Anthropic API calls using a proxy server. The setup involves configuring both a Go proxy server and a TypeScript agent.
 
 ## Prerequisites
 
@@ -78,8 +78,8 @@ cd clients/agent
    - Verify installation with `go version`
 
 2. **Module Not Found**
-   - Make sure you've built the x402 package before running the agent
-   - Run `pnpm install` and `pnpm build` in the x402 package directory
+   - Make sure you've built the t402 package before running the agent
+   - Run `pnpm install` and `pnpm build` in the t402 package directory
 
 3. **Invalid Private Key**
    - Ensure your private key is prefixed with `0x`

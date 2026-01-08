@@ -1,10 +1,10 @@
-name: Publish @x402/svm package to NPM
+name: Publish @t402/svm package to NPM
 
 on:
   workflow_dispatch:
 
 jobs:
-  publish-npm-x402-svm:
+  publish-npm-t402-svm:
     runs-on: ubuntu-latest
     environment: ${{ github.ref == 'refs/heads/main' && 'npm' || '' }}
     permissions:
@@ -35,9 +35,9 @@ jobs:
         working-directory: ./typescript
         run: |
           pnpm install --frozen-lockfile
-          pnpm -r --filter=@x402/core --filter=@x402/svm run build
+          pnpm -r --filter=@t402/core --filter=@t402/svm run build
       
-      - name: Publish @x402/svm package
+      - name: Publish @t402/svm package
         working-directory: ./typescript/packages/mechanisms/svm
         run: |
           # Get package information directly

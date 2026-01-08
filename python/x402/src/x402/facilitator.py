@@ -3,7 +3,7 @@ from typing_extensions import (
     TypedDict,
 )  # use `typing_extensions.TypedDict` instead of `typing.TypedDict` on Python < 3.12
 import httpx
-from x402.types import (
+from t402.types import (
     PaymentPayload,
     PaymentRequirements,
     VerifyResponse,
@@ -14,7 +14,7 @@ from x402.types import (
 
 
 class FacilitatorConfig(TypedDict, total=False):
-    """Configuration for the X402 facilitator service.
+    """Configuration for the T402 facilitator service.
 
     Attributes:
         url: The base URL for the facilitator service
@@ -28,7 +28,7 @@ class FacilitatorConfig(TypedDict, total=False):
 class FacilitatorClient:
     def __init__(self, config: Optional[FacilitatorConfig] = None):
         if config is None:
-            config = {"url": "https://x402.org/facilitator"}
+            config = {"url": "https://t402.org/facilitator"}
 
         # Validate URL format
         url = config.get("url", "")
@@ -53,7 +53,7 @@ class FacilitatorClient:
             response = await client.post(
                 f"{self.config['url']}/verify",
                 json={
-                    "x402Version": payment.x402_version,
+                    "t402Version": payment.t402_version,
                     "paymentPayload": payment.model_dump(by_alias=True),
                     "paymentRequirements": payment_requirements.model_dump(
                         by_alias=True, exclude_none=True
@@ -79,7 +79,7 @@ class FacilitatorClient:
             response = await client.post(
                 f"{self.config['url']}/settle",
                 json={
-                    "x402Version": payment.x402_version,
+                    "t402Version": payment.t402_version,
                     "paymentPayload": payment.model_dump(by_alias=True),
                     "paymentRequirements": payment_requirements.model_dump(
                         by_alias=True, exclude_none=True

@@ -1,4 +1,4 @@
-# x402-MCP Enhancement Plan
+# t402-MCP Enhancement Plan
 
 ## 1. Fix Current UX Issues
 - [ ] Convert OTP input in SignIn.tsx to text input for paste support
@@ -38,7 +38,7 @@
 ## 3. HTTP Request with Payment Tool
 ### Setup
 - [x] Create Viem ToAccount wrapper for cdp-core
-- [x] Implement x402 client integration
+- [x] Implement t402 client integration
 - [x] Define payment flow types and interfaces
 
 ### Implementation

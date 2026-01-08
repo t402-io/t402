@@ -6,12 +6,12 @@ from typing import Any, Dict
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
-from x402.common import process_price_to_atomic_amount, x402_VERSION
-from x402.exact import decode_payment
-from x402.facilitator import FacilitatorClient, FacilitatorConfig
-from x402.encoding import safe_base64_encode
-from x402.common import find_matching_payment_requirements
-from x402.types import (
+from t402.common import process_price_to_atomic_amount, t402_VERSION
+from t402.exact import decode_payment
+from t402.facilitator import FacilitatorClient, FacilitatorConfig
+from t402.encoding import safe_base64_encode
+from t402.common import find_matching_payment_requirements
+from t402.types import (
     PaymentPayload,
     PaymentRequirements,
     Price,
@@ -19,7 +19,7 @@ from x402.types import (
     TokenAmount,
     TokenAsset,
     EIP712Domain,
-    x402PaymentRequiredResponse,
+    t402PaymentRequiredResponse,
     SettleResponse,
 )
 
@@ -41,7 +41,7 @@ if not PAY_TO_ADDRESS:
     raise ValueError("Missing required environment variable: PAY_TO_ADDRESS")
 
 
-app = FastAPI(title="x402 Advanced Server Example")
+app = FastAPI(title="t402 Advanced Server Example")
 
 # Initialize facilitator client
 facilitator_config: FacilitatorConfig = {"url": FACILITATOR_URL}
@@ -137,8 +137,8 @@ async def verify_payment(
     """
     x_payment = request.headers.get("X-PAYMENT")
     if not x_payment:
-        error_data = x402PaymentRequiredResponse(
-            x402_version=x402_VERSION,
+        error_data = t402PaymentRequiredResponse(
+            t402_version=t402_VERSION,
             error="X-PAYMENT header is required",
             accepts=payment_requirements,
         ).model_dump(by_alias=True)
@@ -146,11 +146,11 @@ async def verify_payment(
 
     try:
         decoded_payment_dict = decode_payment(x_payment)
-        decoded_payment_dict["x402Version"] = x402_VERSION
+        decoded_payment_dict["t402Version"] = t402_VERSION
         decoded_payment = PaymentPayload(**decoded_payment_dict)
     except Exception as e:
-        error_data = x402PaymentRequiredResponse(
-            x402_version=x402_VERSION,
+        error_data = t402PaymentRequiredResponse(
+            t402_version=t402_VERSION,
             error=str(e) or "Invalid or malformed payment header",
             accepts=payment_requirements,
         ).model_dump(by_alias=True)
@@ -164,15 +164,15 @@ async def verify_payment(
             decoded_payment, selected_payment_requirement
         )
         if not verify_response.is_valid:
-            error_data = x402PaymentRequiredResponse(
-                x402_version=x402_VERSION,
+            error_data = t402PaymentRequiredResponse(
+                t402_version=t402_VERSION,
                 error=verify_response.invalid_reason or "Payment verification failed",
                 accepts=payment_requirements,
             ).model_dump(by_alias=True)
             raise PaymentRequiredException(error_data)
     except Exception as e:
-        error_data = x402PaymentRequiredResponse(
-            x402_version=x402_VERSION,
+        error_data = t402PaymentRequiredResponse(
+            t402_version=t402_VERSION,
             error=str(e),
             accepts=payment_requirements,
         ).model_dump(by_alias=True)

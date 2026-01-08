@@ -8,7 +8,7 @@ export default function ProtectedPage() {
         </p>
         <iframe width="100%" height="300" scrolling="no" frameBorder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/2044190296&color=%23ff5500&auto_play=true&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"></iframe>
         <div style={{ fontSize: '10px', color: '#cccccc', lineBreak: 'anywhere', wordBreak: 'normal', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', fontFamily: 'Interstate,Lucida Grande,Lucida Sans Unicode,Lucida Sans,Garuda,Verdana,Tahoma,sans-serif', fontWeight: '100' }}>
-          <a href="https://soundcloud.com/dan-kim-675678711" title="danXkim" target="_blank" style={{ color: '#cccccc', textDecoration: 'none' }}>danXkim</a> · <a href="https://soundcloud.com/dan-kim-675678711/x402" title="x402 (DJ Reppel Remix)" target="_blank" style={{ color: '#cccccc', textDecoration: 'none' }}>x402 (DJ Reppel Remix)</a>
+          <a href="https://soundcloud.com/dan-kim-675678711" title="danXkim" target="_blank" style={{ color: '#cccccc', textDecoration: 'none' }}>danXkim</a> · <a href="https://soundcloud.com/dan-kim-675678711/t402" title="t402 (DJ Reppel Remix)" target="_blank" style={{ color: '#cccccc', textDecoration: 'none' }}>t402 (DJ Reppel Remix)</a>
         </div>
       </div>
     </div>

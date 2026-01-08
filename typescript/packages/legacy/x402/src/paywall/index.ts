@@ -54,13 +54,13 @@ export function getPaywallHtml({
   sessionTokenEndpoint,
 }: PaywallOptions): string {
   const logOnTestnet = testnet
-    ? "console.log('Payment requirements initialized:', window.x402);"
+    ? "console.log('Payment requirements initialized:', window.t402);"
     : "";
 
   // Create the configuration script to inject with proper escaping
   const configScript = `
   <script>
-    window.x402 = {
+    window.t402 = {
       amount: ${amount},
       paymentRequirements: ${JSON.stringify(paymentRequirements)},
       testnet: ${testnet},

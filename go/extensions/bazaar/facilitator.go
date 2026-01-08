@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	x402 "github.com/coinbase/x402/go"
-	"github.com/coinbase/x402/go/extensions/types"
-	v1 "github.com/coinbase/x402/go/extensions/v1"
-	x402types "github.com/coinbase/x402/go/types"
+	t402 "github.com/coinbase/t402/go"
+	"github.com/coinbase/t402/go/extensions/types"
+	v1 "github.com/coinbase/t402/go/extensions/v1"
+	t402types "github.com/coinbase/t402/go/types"
 	"github.com/xeipuuv/gojsonschema"
 )
 
@@ -88,7 +88,7 @@ func ValidateDiscoveryExtension(extension types.DiscoveryExtension) ValidationRe
 type DiscoveredResource struct {
 	ResourceURL   string
 	Method        string
-	X402Version   int
+	T402Version   int
 	DiscoveryInfo *types.DiscoveryInfo
 }
 
@@ -129,7 +129,7 @@ func ExtractDiscoveredResourceFromPaymentPayload(
 ) (*DiscoveredResource, error) {
 	// First detect version to know how to unmarshal
 	var versionCheck struct {
-		X402Version int `json:"x402Version"`
+		T402Version int `json:"t402Version"`
 	}
 	if err := json.Unmarshal(payloadBytes, &versionCheck); err != nil {
 		return nil, fmt.Errorf("failed to parse version: %w", err)
@@ -137,12 +137,12 @@ func ExtractDiscoveredResourceFromPaymentPayload(
 
 	var discoveryInfo *types.DiscoveryInfo
 	var resourceURL string
-	version := versionCheck.X402Version
+	version := versionCheck.T402Version
 
 	switch version {
 	case 2:
 		// V2: Unmarshal full payload to access extensions and resource
-		var payload x402.PaymentPayload
+		var payload t402.PaymentPayload
 		if err := json.Unmarshal(payloadBytes, &payload); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal v2 payload: %w", err)
 		}
@@ -176,7 +176,7 @@ func ExtractDiscoveredResourceFromPaymentPayload(
 		}
 	case 1:
 		// V1: Unmarshal requirements to access outputSchema
-		var requirementsV1 x402types.PaymentRequirementsV1
+		var requirementsV1 t402types.PaymentRequirementsV1
 		if err := json.Unmarshal(requirementsBytes, &requirementsV1); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal v1 requirements: %w", err)
 		}
@@ -215,7 +215,7 @@ func ExtractDiscoveredResourceFromPaymentPayload(
 	return &DiscoveredResource{
 		ResourceURL:   resourceURL,
 		Method:        method,
-		X402Version:   version,
+		T402Version:   version,
 		DiscoveryInfo: discoveryInfo,
 	}, nil
 }
@@ -258,7 +258,7 @@ func ExtractDiscoveredResourceFromPaymentRequired(
 ) (*DiscoveredResource, error) {
 	// First detect version to know how to unmarshal
 	var versionCheck struct {
-		X402Version int `json:"x402Version"`
+		T402Version int `json:"t402Version"`
 	}
 	if err := json.Unmarshal(paymentRequiredBytes, &versionCheck); err != nil {
 		return nil, fmt.Errorf("failed to parse version: %w", err)
@@ -266,12 +266,12 @@ func ExtractDiscoveredResourceFromPaymentRequired(
 
 	var discoveryInfo *types.DiscoveryInfo
 	var resourceURL string
-	version := versionCheck.X402Version
+	version := versionCheck.T402Version
 
 	switch version {
 	case 2:
 		// V2: Unmarshal full PaymentRequired to access extensions and accepts
-		var paymentRequired x402types.PaymentRequired
+		var paymentRequired t402types.PaymentRequired
 		if err := json.Unmarshal(paymentRequiredBytes, &paymentRequired); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal v2 payment required: %w", err)
 		}
@@ -306,7 +306,7 @@ func ExtractDiscoveredResourceFromPaymentRequired(
 
 	case 1:
 		// V1: Unmarshal PaymentRequiredV1 to access accepts array
-		var paymentRequiredV1 x402types.PaymentRequiredV1
+		var paymentRequiredV1 t402types.PaymentRequiredV1
 		if err := json.Unmarshal(paymentRequiredBytes, &paymentRequiredV1); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal v1 payment required: %w", err)
 		}
@@ -350,7 +350,7 @@ func ExtractDiscoveredResourceFromPaymentRequired(
 	return &DiscoveredResource{
 		ResourceURL:   resourceURL,
 		Method:        method,
-		X402Version:   version,
+		T402Version:   version,
 		DiscoveryInfo: discoveryInfo,
 	}, nil
 }

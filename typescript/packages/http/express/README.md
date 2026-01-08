@@ -1,25 +1,25 @@
-# @x402/express
+# @t402/express
 
-Express middleware integration for the x402 Payment Protocol. This package provides a simple middleware function for adding x402 payment requirements to your Express.js applications.
+Express middleware integration for the t402 Payment Protocol. This package provides a simple middleware function for adding t402 payment requirements to your Express.js applications.
 
 ## Installation
 
 ```bash
-pnpm install @x402/express
+pnpm install @t402/express
 ```
 
 ## Quick Start
 
 ```typescript
 import express from "express";
-import { paymentMiddleware, x402ResourceServer } from "@x402/express";
-import { ExactEvmScheme } from "@x402/evm/exact/server";
-import { HTTPFacilitatorClient } from "@x402/core/server";
+import { paymentMiddleware, t402ResourceServer } from "@t402/express";
+import { ExactEvmScheme } from "@t402/evm/exact/server";
+import { HTTPFacilitatorClient } from "@t402/core/server";
 
 const app = express();
 
-const facilitatorClient = new HTTPFacilitatorClient({ url: "https://facilitator.x402.org" });
-const resourceServer = new x402ResourceServer(facilitatorClient)
+const facilitatorClient = new HTTPFacilitatorClient({ url: "https://facilitator.t402.org" });
+const resourceServer = new t402ResourceServer(facilitatorClient)
   .register("eip155:84532", new ExactEvmScheme());
 
 // Apply the payment middleware with your configuration
@@ -55,7 +55,7 @@ The `paymentMiddleware` function accepts the following parameters:
 ```typescript
 paymentMiddleware(
   routes: RoutesConfig,
-  server: x402ResourceServer,
+  server: t402ResourceServer,
   paywallConfig?: PaywallConfig,
   paywall?: PaywallProvider,
   syncFacilitatorOnStart?: boolean
@@ -65,7 +65,7 @@ paymentMiddleware(
 ### Parameters
 
 1. **`routes`** (required): Route configurations for protected endpoints
-2. **`server`** (required): Pre-configured x402ResourceServer instance
+2. **`server`** (required): Pre-configured t402ResourceServer instance
 3. **`paywallConfig`** (optional): Configuration for the built-in paywall UI
 4. **`paywall`** (optional): Custom paywall provider
 5. **`syncFacilitatorOnStart`** (optional): Whether to sync with facilitator on startup (defaults to true)
@@ -76,7 +76,7 @@ See the sections below for detailed configuration options.
 
 ### ExpressAdapter
 
-The `ExpressAdapter` class implements the `HTTPAdapter` interface from `@x402/core`, providing Express-specific request handling:
+The `ExpressAdapter` class implements the `HTTPAdapter` interface from `@t402/core`, providing Express-specific request handling:
 
 ```typescript
 class ExpressAdapter implements HTTPAdapter {
@@ -94,7 +94,7 @@ class ExpressAdapter implements HTTPAdapter {
 ```typescript
 function paymentMiddleware(
   routes: RoutesConfig,
-  server: x402ResourceServer,
+  server: t402ResourceServer,
   paywallConfig?: PaywallConfig,
   paywall?: PaywallProvider,
   syncFacilitatorOnStart?: boolean,
@@ -103,7 +103,7 @@ function paymentMiddleware(
 
 Creates Express middleware that:
 
-1. Uses the provided x402ResourceServer for payment processing
+1. Uses the provided t402ResourceServer for payment processing
 2. Checks if the incoming request matches a protected route
 3. Validates payment headers if required
 4. Returns payment instructions (402 status) if payment is missing or invalid
@@ -137,10 +137,10 @@ The middleware automatically displays a paywall UI when browsers request protect
 
 **Option 1: Full Paywall UI (Recommended)**
 
-Install the optional `@x402/paywall` package for a complete wallet connection and payment UI:
+Install the optional `@t402/paywall` package for a complete wallet connection and payment UI:
 
 ```bash
-pnpm add @x402/paywall
+pnpm add @t402/paywall
 ```
 
 Then configure it:
@@ -165,7 +165,7 @@ The paywall includes:
 
 **Option 2: Basic Paywall (No Installation)**
 
-Without `@x402/paywall` installed, the middleware returns a basic HTML page with payment instructions. This works but doesn't include wallet connections.
+Without `@t402/paywall` installed, the middleware returns a basic HTML page with payment instructions. This works but doesn't include wallet connections.
 
 **Option 3: Custom Paywall Provider**
 
@@ -177,7 +177,7 @@ app.use(paymentMiddleware(routes, resourceServer, paywallConfig, customPaywallPr
 
 This allows full customization of the paywall UI.
 
-**For advanced configuration** (builder pattern, network-specific bundles, custom handlers), see the [@x402/paywall README](../paywall/README.md).
+**For advanced configuration** (builder pattern, network-specific bundles, custom handlers), see the [@t402/paywall README](../paywall/README.md).
 
 ## Advanced Usage
 
@@ -214,12 +214,12 @@ app.use(
 
 ### Custom Facilitator Client
 
-If you need to use a custom facilitator server, configure it when creating the x402ResourceServer:
+If you need to use a custom facilitator server, configure it when creating the t402ResourceServer:
 
 ```typescript
-import { HTTPFacilitatorClient } from "@x402/core/server";
-import { x402ResourceServer } from "@x402/express";
-import { ExactEvmScheme } from "@x402/evm/exact/server";
+import { HTTPFacilitatorClient } from "@t402/core/server";
+import { t402ResourceServer } from "@t402/express";
+import { ExactEvmScheme } from "@t402/evm/exact/server";
 
 const customFacilitator = new HTTPFacilitatorClient({
   url: "https://your-facilitator.com",
@@ -229,24 +229,24 @@ const customFacilitator = new HTTPFacilitatorClient({
   }),
 });
 
-const resourceServer = new x402ResourceServer(customFacilitator)
+const resourceServer = new t402ResourceServer(customFacilitator)
   .register("eip155:84532", new ExactEvmScheme());
 
 app.use(paymentMiddleware(routes, resourceServer, paywallConfig));
 ```
 
-## Migration from x402-express
+## Migration from t402-express
 
-If you're migrating from the legacy `x402-express` package:
+If you're migrating from the legacy `t402-express` package:
 
-1. **Update imports**: Change from `x402-express` to `@x402/express`
-2. **New API**: Create an x402ResourceServer and register payment schemes
+1. **Update imports**: Change from `t402-express` to `@t402/express`
+2. **New API**: Create an t402ResourceServer and register payment schemes
 3. **Parameter order**: Routes first, then resource server, then optional paywall config
 
-### Before (x402-express):
+### Before (t402-express):
 
 ```typescript
-import { paymentMiddleware } from "x402-express";
+import { paymentMiddleware } from "t402-express";
 
 app.use(
   paymentMiddleware(
@@ -258,15 +258,15 @@ app.use(
 );
 ```
 
-### After (@x402/express):
+### After (@t402/express):
 
 ```typescript
-import { paymentMiddleware, x402ResourceServer } from "@x402/express";
-import { HTTPFacilitatorClient } from "@x402/core/server";
-import { ExactEvmScheme } from "@x402/evm/exact/server";
+import { paymentMiddleware, t402ResourceServer } from "@t402/express";
+import { HTTPFacilitatorClient } from "@t402/core/server";
+import { ExactEvmScheme } from "@t402/evm/exact/server";
 
 const facilitator = new HTTPFacilitatorClient({ url: facilitatorUrl });
-const resourceServer = new x402ResourceServer(facilitator)
+const resourceServer = new t402ResourceServer(facilitator)
   .register("eip155:84532", new ExactEvmScheme());
 
 app.use(

@@ -19,9 +19,9 @@ export interface SchemeNetworkClient {
   readonly scheme: string;
 
   createPaymentPayload(
-    x402Version: number,
+    t402Version: number,
     paymentRequirements: PaymentRequirements,
-  ): Promise<Pick<PaymentPayload, "x402Version" | "payload">>;
+  ): Promise<Pick<PaymentPayload, "t402Version" | "payload">>;
 }
 
 export interface SchemeNetworkFacilitator {
@@ -115,7 +115,7 @@ export interface SchemeNetworkServer {
    *
    * @param paymentRequirements - Base payment requirements with amount/asset already set
    * @param supportedKind - The supported kind from facilitator's /supported endpoint
-   * @param supportedKind.x402Version - The x402 version
+   * @param supportedKind.t402Version - The t402 version
    * @param supportedKind.scheme - The payment scheme
    * @param supportedKind.network - The network identifier
    * @param supportedKind.extra - Optional extra metadata
@@ -125,7 +125,7 @@ export interface SchemeNetworkServer {
   enhancePaymentRequirements(
     paymentRequirements: PaymentRequirements,
     supportedKind: {
-      x402Version: number;
+      t402Version: number;
       scheme: string;
       network: Network;
       extra?: Record<string, unknown>;

@@ -1,5 +1,5 @@
 import { config } from "dotenv";
-import { decodeXPaymentResponse, wrapFetchWithPayment, createSigner, type Hex } from "x402-fetch";
+import { decodeXPaymentResponse, wrapFetchWithPayment, createSigner, type Hex } from "t402-fetch";
 
 config();
 
@@ -14,7 +14,7 @@ if (!baseURL || !privateKey || !endpointPath) {
 }
 
 /**
- * This example shows how to use the x402-fetch package to make a request to a resource server that requires a payment.
+ * This example shows how to use the t402-fetch package to make a request to a resource server that requires a payment.
  *
  * To run this example, you need to set the following environment variables:
  * - PRIVATE_KEY: The private key of the signer

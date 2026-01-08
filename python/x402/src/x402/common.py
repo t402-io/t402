@@ -1,14 +1,14 @@
 from decimal import Decimal
 from typing import List, Optional
 
-from x402.chains import (
+from t402.chains import (
     get_chain_id,
     get_token_decimals,
     get_token_name,
     get_token_version,
     get_default_token_address,
 )
-from x402.types import Price, TokenAmount, PaymentRequirements, PaymentPayload
+from t402.types import Price, TokenAmount, PaymentRequirements, PaymentPayload
 
 
 def parse_money(amount: str | int, address: str, network: str) -> int:
@@ -111,4 +111,4 @@ def find_matching_payment_requirements(
     return None
 
 
-x402_VERSION = 1
+t402_VERSION = 1

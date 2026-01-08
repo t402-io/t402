@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import type { PaymentRequired } from "@x402/core/types";
+import type { PaymentRequired } from "@t402/core/types";
 import { isEvmNetwork, isSvmNetwork } from "./paywallUtils";
 import { EvmPaywall } from "./evm/EvmPaywall";
 import { SolanaPaywall } from "./svm/SolanaPaywall";
@@ -12,8 +12,8 @@ import { SolanaPaywall } from "./svm/SolanaPaywall";
  * @returns The PaywallApp component
  */
 export function PaywallApp() {
-  const x402 = window.x402;
-  const paymentRequired: PaymentRequired = x402.paymentRequired;
+  const t402 = window.t402;
+  const paymentRequired: PaymentRequired = t402.paymentRequired;
 
   const handleSuccessfulResponse = useCallback(async (response: Response) => {
     const contentType = response.headers.get("content-type");
