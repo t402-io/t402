@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coinbase/t402/go/types"
+	"github.com/awesome-doge/t402/go/types"
 )
 
 // t402ResourceServer manages payment requirements and verification for protected resources

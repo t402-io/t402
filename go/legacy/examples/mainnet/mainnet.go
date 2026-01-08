@@ -5,8 +5,8 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/coinbase/t402/go/pkg/coinbasefacilitator"
-	t402gin "github.com/coinbase/t402/go/pkg/gin"
+	"github.com/awesome-doge/t402/go/pkg/coinbasefacilitator"
+	t402gin "github.com/awesome-doge/t402/go/pkg/gin"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )

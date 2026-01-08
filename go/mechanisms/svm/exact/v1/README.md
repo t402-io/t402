@@ -32,8 +32,8 @@ The V1 implementation exists solely for backwards compatibility. **New implement
 
 ```go
 import (
-    t402 "github.com/coinbase/t402/go"
-    "github.com/coinbase/t402/go/mechanisms/solana/v1"
+    t402 "github.com/awesome-doge/t402/go"
+    "github.com/awesome-doge/t402/go/mechanisms/solana/v1"
 )
 
 client := t402.NewX402Client()
@@ -47,8 +47,8 @@ v1.RegisterClient(client, signer, "solana", "solana-devnet")
 
 ```go
 import (
-    t402 "github.com/coinbase/t402/go"
-    "github.com/coinbase/t402/go/mechanisms/solana/v1"
+    t402 "github.com/awesome-doge/t402/go"
+    "github.com/awesome-doge/t402/go/mechanisms/solana/v1"
 )
 
 facilitator := t402.NewX402Facilitator()
@@ -64,14 +64,14 @@ If you're currently using V1, consider migrating to V2:
 
 **Before (V1)**:
 ```go
-import "github.com/coinbase/t402/go/mechanisms/solana/v1"
+import "github.com/awesome-doge/t402/go/mechanisms/solana/v1"
 
 v1.RegisterClient(client, signer, "solana")
 ```
 
 **After (V2)**:
 ```go
-import "github.com/coinbase/t402/go/mechanisms/solana"
+import "github.com/awesome-doge/t402/go/mechanisms/solana"
 
 solana.RegisterClient(client, signer, "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")
 ```

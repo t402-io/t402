@@ -8,8 +8,8 @@ import (
 	"net/url"
 	"os"
 
-	t402gin "github.com/coinbase/t402/go/pkg/gin"
-	"github.com/coinbase/t402/go/pkg/types"
+	t402gin "github.com/awesome-doge/t402/go/pkg/gin"
+	"github.com/awesome-doge/t402/go/pkg/types"
 	"github.com/gin-gonic/gin"
 )
 

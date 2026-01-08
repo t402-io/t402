@@ -9,9 +9,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 
-	t402 "github.com/coinbase/t402/go"
-	"github.com/coinbase/t402/go/mechanisms/evm"
-	"github.com/coinbase/t402/go/types"
+	t402 "github.com/awesome-doge/t402/go"
+	"github.com/awesome-doge/t402/go/mechanisms/evm"
+	"github.com/awesome-doge/t402/go/types"
 )
 
 // ExactEvmSchemeConfig holds configuration for the ExactEvmScheme facilitator

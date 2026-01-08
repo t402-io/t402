@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	t402 "github.com/coinbase/t402/go"
-	"github.com/coinbase/t402/go/extensions/bazaar"
-	t402http "github.com/coinbase/t402/go/http"
+	t402 "github.com/awesome-doge/t402/go"
+	"github.com/awesome-doge/t402/go/extensions/bazaar"
+	t402http "github.com/awesome-doge/t402/go/http"
 	"github.com/gin-gonic/gin"
 )
 

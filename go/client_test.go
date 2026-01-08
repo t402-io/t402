@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/coinbase/t402/go/types"
+	"github.com/awesome-doge/t402/go/types"
 )
 
 // Mock V1 client for testing

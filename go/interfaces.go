@@ -3,7 +3,7 @@ package t402
 import (
 	"context"
 
-	"github.com/coinbase/t402/go/types"
+	"github.com/awesome-doge/t402/go/types"
 )
 
 // MoneyParser is a function that converts a decimal amount to an AssetAmount

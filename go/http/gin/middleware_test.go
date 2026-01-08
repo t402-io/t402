@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	t402 "github.com/coinbase/t402/go"
-	t402http "github.com/coinbase/t402/go/http"
-	"github.com/coinbase/t402/go/types"
+	t402 "github.com/awesome-doge/t402/go"
+	t402http "github.com/awesome-doge/t402/go/http"
+	"github.com/awesome-doge/t402/go/types"
 	"github.com/gin-gonic/gin"
 )
 
