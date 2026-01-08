@@ -1,16 +1,16 @@
-# x402 Python
+# t402 Python
 
-Python package for the x402 payments protocol.
+Python package for the t402 payments protocol.
 
 ## Installation
 
 ```bash
-pip install x402
+pip install t402
 ```
 
 ## Overview
 
-The x402 package provides the core building blocks for implementing the x402 Payment Protocol in Python. It's designed to be used by:
+The t402 package provides the core building blocks for implementing the t402 Payment Protocol in Python. It's designed to be used by:
 
 - FastAPI middleware for accepting payments
 - Flask middleware for accepting payments
@@ -19,11 +19,11 @@ The x402 package provides the core building blocks for implementing the x402 Pay
 
 ## FastAPI Integration
 
-The simplest way to add x402 payment protection to your FastAPI application:
+The simplest way to add t402 payment protection to your FastAPI application:
 
 ```py
 from fastapi import FastAPI
-from x402.fastapi.middleware import require_payment
+from t402.fastapi.middleware import require_payment
 
 app = FastAPI()
 app.middleware("http")(
@@ -47,11 +47,11 @@ app.middleware("http")(
 
 ## Flask Integration
 
-The simplest way to add x402 payment protection to your Flask application:
+The simplest way to add t402 payment protection to your Flask application:
 
 ```py
 from flask import Flask
-from x402.flask.middleware import PaymentMiddleware
+from t402.flask.middleware import PaymentMiddleware
 
 app = Flask(__name__)
 
@@ -87,13 +87,13 @@ payment_middleware.add(
 #### Httpx Client
 ```py
 from eth_account import Account
-from x402.clients.httpx import x402HttpxClient
+from t402.clients.httpx import t402HttpxClient
 
 # Initialize account
 account = Account.from_key("your_private_key")
 
 # Create client and make request
-async with x402HttpxClient(account=account, base_url="https://api.example.com") as client:
+async with t402HttpxClient(account=account, base_url="https://api.example.com") as client:
     response = await client.get("/protected-endpoint")
     print(await response.aread())
 ```
@@ -101,13 +101,13 @@ async with x402HttpxClient(account=account, base_url="https://api.example.com") 
 #### Requests Session Client
 ```py
 from eth_account import Account
-from x402.clients.requests import x402_requests
+from t402.clients.requests import t402_requests
 
 # Initialize account
 account = Account.from_key("your_private_key")
 
 # Create session and make request
-session = x402_requests(account)
+session = t402_requests(account)
 response = session.get("https://api.example.com/protected-endpoint")
 print(response.content)
 ```
@@ -118,15 +118,15 @@ print(response.content)
 ```py
 import httpx
 from eth_account import Account
-from x402.clients.httpx import x402_payment_hooks
+from t402.clients.httpx import t402_payment_hooks
 
 # Initialize account
 account = Account.from_key("your_private_key")
 
-# Create httpx client with x402 payment hooks
+# Create httpx client with t402 payment hooks
 async with httpx.AsyncClient(base_url="https://api.example.com") as client:
     # Add payment hooks directly to client
-    client.event_hooks = x402_payment_hooks(account)
+    client.event_hooks = t402_payment_hooks(account)
     
     # Make request - payment handling is automatic
     response = await client.get("/protected-endpoint")
@@ -137,14 +137,14 @@ async with httpx.AsyncClient(base_url="https://api.example.com") as client:
 ```py
 import requests
 from eth_account import Account
-from x402.clients.requests import x402_http_adapter
+from t402.clients.requests import t402_http_adapter
 
 # Initialize account
 account = Account.from_key("your_private_key")
 
-# Create session and mount the x402 adapter
+# Create session and mount the t402 adapter
 session = requests.Session()
-adapter = x402_http_adapter(account)
+adapter = t402_http_adapter(account)
 
 # Mount the adapter for both HTTP and HTTPS
 session.mount("http://", adapter)
@@ -157,7 +157,7 @@ print(response.content)
 
 ## Manual Server Integration
 
-If you're not using the FastAPI middleware, you can implement the x402 protocol manually. Here's what you'll need to handle:
+If you're not using the FastAPI middleware, you can implement the t402 protocol manually. Here's what you'll need to handle:
 
 1. Return 402 error responses with the appropriate response body
 2. Use the facilitator to validate payments
@@ -169,8 +169,8 @@ Here's an example of manual integration:
 ```py
 from typing import Annotated
 from fastapi import FastAPI, Request
-from x402.types import PaymentRequiredResponse, PaymentRequirements
-from x402.encoding import safe_base64_decode
+from t402.types import PaymentRequiredResponse, PaymentRequirements
+from t402.encoding import safe_base64_decode
 
 payment_requirements = PaymentRequirements(...)
 facilitator = FacilitatorClient(facilitator_url)
@@ -178,7 +178,7 @@ facilitator = FacilitatorClient(facilitator_url)
 @app.get("/foo")
 async def foo(req: request: Request):
     payment_required = PaymentRequiredResponse(
-        x402_version: 1,
+        t402_version: 1,
         accepts=[payment_requirements],
         error="",
     )
@@ -214,4 +214,4 @@ async def foo(req: request: Request):
         )
 ```
 
-For more examples and advanced usage patterns, check out our [examples directory](https://github.com/coinbase/x402/tree/main/examples/python).
+For more examples and advanced usage patterns, check out our [examples directory](https://github.com/coinbase/t402/tree/main/examples/python).

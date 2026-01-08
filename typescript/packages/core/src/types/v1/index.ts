@@ -16,13 +16,13 @@ export type PaymentRequirementsV1 = {
 };
 
 export type PaymentRequiredV1 = {
-  x402Version: 1;
+  t402Version: 1;
   error?: string;
   accepts: PaymentRequirementsV1[];
 };
 
 export type PaymentPayloadV1 = {
-  x402Version: 1;
+  t402Version: 1;
   scheme: string;
   network: Network;
   payload: Record<string, unknown>;
@@ -49,7 +49,7 @@ export type SettleResponseV1 = {
 
 export type SupportedResponseV1 = {
   kinds: {
-    x402Version: number;
+    t402Version: number;
     scheme: string;
     network: Network;
     extra?: Record<string, unknown>;

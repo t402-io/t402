@@ -1,27 +1,27 @@
-import { x402Client, x402ClientConfig, x402HTTPClient } from "@x402/core/client";
-import { type PaymentRequired } from "@x402/core/types";
+import { t402Client, t402ClientConfig, t402HTTPClient } from "@t402/core/client";
+import { type PaymentRequired } from "@t402/core/types";
 
 /**
- * Enables the payment of APIs using the x402 payment protocol v2.
+ * Enables the payment of APIs using the t402 payment protocol v2.
  *
  * This function wraps the native fetch API to automatically handle 402 Payment Required responses
  * by creating and sending payment headers. It will:
  * 1. Make the initial request
  * 2. If a 402 response is received, parse the payment requirements
- * 3. Create a payment header using the configured x402HTTPClient
+ * 3. Create a payment header using the configured t402HTTPClient
  * 4. Retry the request with the payment header
  *
  * @param fetch - The fetch function to wrap (typically globalThis.fetch)
- * @param client - Configured x402Client or x402HTTPClient instance for handling payments
+ * @param client - Configured t402Client or t402HTTPClient instance for handling payments
  * @returns A wrapped fetch function that handles 402 responses automatically
  *
  * @example
  * ```typescript
- * import { wrapFetchWithPayment, x402Client } from '@x402/fetch';
- * import { ExactEvmScheme } from '@x402/evm';
- * import { ExactSvmScheme } from '@x402/svm';
+ * import { wrapFetchWithPayment, t402Client } from '@t402/fetch';
+ * import { ExactEvmScheme } from '@t402/evm';
+ * import { ExactSvmScheme } from '@t402/svm';
  *
- * const client = new x402Client()
+ * const client = new t402Client()
  *   .register('eip155:8453', new ExactEvmScheme(evmSigner))
  *   .register('solana:mainnet', new ExactSvmScheme(svmSigner))
  *   .register('eip155:1', new ExactEvmScheme(evmSigner), 1); // v1 protocol
@@ -39,9 +39,9 @@ import { type PaymentRequired } from "@x402/core/types";
  */
 export function wrapFetchWithPayment(
   fetch: typeof globalThis.fetch,
-  client: x402Client | x402HTTPClient,
+  client: t402Client | t402HTTPClient,
 ) {
-  const httpClient = client instanceof x402HTTPClient ? client : new x402HTTPClient(client);
+  const httpClient = client instanceof t402HTTPClient ? client : new t402HTTPClient(client);
 
   return async (input: RequestInfo, init?: RequestInit) => {
     const response = await fetch(input, init);
@@ -123,25 +123,25 @@ export function wrapFetchWithPayment(
  */
 export function wrapFetchWithPaymentFromConfig(
   fetch: typeof globalThis.fetch,
-  config: x402ClientConfig,
+  config: t402ClientConfig,
 ) {
-  const client = x402Client.fromConfig(config);
+  const client = t402Client.fromConfig(config);
   return wrapFetchWithPayment(fetch, client);
 }
 
 // Re-export types and utilities for convenience
-export { x402Client, x402HTTPClient } from "@x402/core/client";
+export { t402Client, t402HTTPClient } from "@t402/core/client";
 export type {
   PaymentPolicy,
   SchemeRegistration,
   SelectPaymentRequirements,
-  x402ClientConfig,
-} from "@x402/core/client";
-export { decodePaymentResponseHeader } from "@x402/core/http";
+  t402ClientConfig,
+} from "@t402/core/client";
+export { decodePaymentResponseHeader } from "@t402/core/http";
 export type {
   Network,
   PaymentPayload,
   PaymentRequired,
   PaymentRequirements,
   SchemeNetworkClient,
-} from "@x402/core/types";
+} from "@t402/core/types";

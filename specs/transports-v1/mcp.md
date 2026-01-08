@@ -2,7 +2,7 @@
 
 ## Summary
 
-The MCP transport implements x402 payment flows over the Model Context Protocol using JSON-RPC messages. This enables AI agents and MCP clients to seamlessly pay for tools and resources independent of the underlying MCP transport.
+The MCP transport implements t402 payment flows over the Model Context Protocol using JSON-RPC messages. This enables AI agents and MCP clients to seamlessly pay for tools and resources independent of the underlying MCP transport.
 
 The flow described below can be used for any MCP request/response cycle: tool calls, resources or client/server initialization.
 
@@ -23,7 +23,7 @@ The server indicates payment is required using JSON-RPC's native error format wi
     "code": 402,
     "message": "Payment required",
     "data": {
-      "x402Version": 1,
+      "t402Version": 1,
       "error": "Payment required to access this resource",
       "accepts": [
         {
@@ -50,9 +50,9 @@ The server indicates payment is required using JSON-RPC's native error format wi
 
 ## Payment Payload Transmission
 
-Clients send payment data using the MCP `_meta` field with key `x402/payment`.
+Clients send payment data using the MCP `_meta` field with key `t402/payment`.
 
-**Mechanism**: `_meta["x402/payment"]` field in request parameters
+**Mechanism**: `_meta["t402/payment"]` field in request parameters
 **Data Format**: `PaymentPayload` schema in metadata field
 
 **Example (Tool Call with Payment):**
@@ -69,8 +69,8 @@ Clients send payment data using the MCP `_meta` field with key `x402/payment`.
       "analysis_type": "deep"
     },
     "_meta": {
-      "x402/payment": {
-        "x402Version": 1,
+      "t402/payment": {
+        "t402Version": 1,
         "scheme": "exact",
         "network": "base-sepolia",
         "payload": {
@@ -92,9 +92,9 @@ Clients send payment data using the MCP `_meta` field with key `x402/payment`.
 
 ## Settlement Response Delivery
 
-Servers communicate payment settlement results using the `_meta["x402/payment-response"]` field.
+Servers communicate payment settlement results using the `_meta["t402/payment-response"]` field.
 
-**Mechanism**: `_meta["x402/payment-response"]` field in response result
+**Mechanism**: `_meta["t402/payment-response"]` field in response result
 **Data Format**: `SettlementResponse` schema in metadata field
 
 **Example (Successful Tool Response):**
@@ -111,7 +111,7 @@ Servers communicate payment settlement results using the `_meta["x402/payment-re
       }
     ],
     "_meta": {
-      "x402/payment-response": {
+      "t402/payment-response": {
         "success": true,
         "transaction": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
         "network": "base-sepolia",
@@ -132,12 +132,12 @@ Servers communicate payment settlement results using the `_meta["x402/payment-re
     "code": 402,
     "message": "Payment settlement failed: insufficient funds",
     "data": {
-      "x402Version": 1,
+      "t402Version": 1,
       "error": "Payment settlement failed: insufficient funds",
       "accepts": [
         /* original payment requirements */
       ],
-      "x402/payment-response": {
+      "t402/payment-response": {
         "success": false,
         "errorReason": "insufficient_funds",
         "transaction": "",
@@ -151,16 +151,16 @@ Servers communicate payment settlement results using the `_meta["x402/payment-re
 
 ## Error Handling
 
-MCP transport maps x402 errors to appropriate JSON-RPC mechanisms:
+MCP transport maps t402 errors to appropriate JSON-RPC mechanisms:
 
-| x402 Error       | JSON-RPC Response | Code   | Description                                                    |
+| t402 Error       | JSON-RPC Response | Code   | Description                                                    |
 | ---------------- | ----------------- | ------ | -------------------------------------------------------------- |
 | Payment Required | Error Response    | 402    | Payment required with `PaymentRequirementsResponse` in `data` |
 | Payment Failed   | Error Response    | 402    | Payment settlement failed with failure details in `data`      |
 | Invalid Payment  | Error Response    | -32602 | Malformed payment payload or invalid parameters                |
 | Server Error     | Error Response    | -32603 | Internal server error during payment processing                |
 | Parse Error      | Error Response    | -32700 | Invalid JSON in payment payload                                |
-| Method Error     | Error Response    | -32601 | Unsupported x402 method or capability                          |
+| Method Error     | Error Response    | -32601 | Unsupported t402 method or capability                          |
 
 ### Payment-Related Errors (402)
 
@@ -174,7 +174,7 @@ Payment-related errors use JSON-RPC's native error format with code 402 and stru
     "code": 402,
     "message": "Payment required to access this resource",
     "data": {
-      "x402Version": 1,
+      "t402Version": 1,
       "error": "Payment required to access this resource",
       "accepts": [
         /* PaymentRequirements array */
@@ -194,22 +194,22 @@ Technical errors use standard JSON-RPC error responses:
   "id": 1,
   "error": {
     "code": -32602,
-    "message": "Invalid parameters: malformed payment payload in _meta['x402/payment']"
+    "message": "Invalid parameters: malformed payment payload in _meta['t402/payment']"
   }
 }
 ```
 
 **Common Protocol Error Examples:**
 
-- **Parse Error (-32700)**: Invalid JSON in `_meta["x402/payment"]` field
+- **Parse Error (-32700)**: Invalid JSON in `_meta["t402/payment"]` field
 - **Invalid Params (-32602)**: Missing required payment fields or invalid payment schema
 - **Internal Error (-32603)**: Payment processor unavailable or blockchain network error
-- **Method Not Found (-32601)**: Server doesn't support x402 payments for the requested method
+- **Method Not Found (-32601)**: Server doesn't support t402 payments for the requested method
 
 ## References
 
-- [Core x402 Specification](../x402-specification.md)
+- [Core t402 Specification](../t402-specification.md)
 - [MCP Specification](https://modelcontextprotocol.io/specification/)
 - [MCP \_meta Field Documentation](https://modelcontextprotocol.io/specification/2025-06-18/basic#meta)
-- [x402-mcp](https://github.com/ethanniser/x402-mcp)
-- [agents/x402-mcp](https://github.com/cloudflare/agents/blob/main/packages/agents/src/mcp/x402.ts)
+- [t402-mcp](https://github.com/ethanniser/t402-mcp)
+- [agents/t402-mcp](https://github.com/cloudflare/agents/blob/main/packages/agents/src/mcp/t402.ts)

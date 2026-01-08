@@ -1,12 +1,12 @@
-from x402.types import (
+from t402.types import (
     PaymentRequirements,
-    x402PaymentRequiredResponse,
+    t402PaymentRequiredResponse,
     ExactPaymentPayload,
     EIP3009Authorization,
     VerifyResponse,
     SettleResponse,
     PaymentPayload,
-    X402Headers,
+    T402Headers,
 )
 
 
@@ -41,7 +41,7 @@ def test_payment_requirements_serde():
     assert PaymentRequirements(**expected) == original
 
 
-def test_x402_payment_required_response_serde():
+def test_t402_payment_required_response_serde():
     payment_req = PaymentRequirements(
         scheme="exact",
         network="base",
@@ -55,16 +55,16 @@ def test_x402_payment_required_response_serde():
         asset="0x0000000000000000000000000000000000000000",
         extra=None,
     )
-    original = x402PaymentRequiredResponse(
-        x402_version=1, accepts=[payment_req], error=""
+    original = t402PaymentRequiredResponse(
+        t402_version=1, accepts=[payment_req], error=""
     )
     expected = {
-        "x402Version": 1,
+        "t402Version": 1,
         "accepts": [payment_req.model_dump(by_alias=True)],
         "error": "",
     }
     assert original.model_dump(by_alias=True) == expected
-    assert x402PaymentRequiredResponse(**expected) == original
+    assert t402PaymentRequiredResponse(**expected) == original
 
 
 def test_eip3009_authorization_serde():
@@ -140,13 +140,13 @@ def test_payment_payload_serde():
     )
     payload = ExactPaymentPayload(signature="0x123", authorization=auth)
     original = PaymentPayload(
-        x402_version=1,
+        t402_version=1,
         scheme="exact",
         network="base",
         payload=payload,
     )
     expected = {
-        "x402Version": 1,
+        "t402Version": 1,
         "scheme": "exact",
         "network": "base",
         "payload": payload.model_dump(by_alias=True),
@@ -155,8 +155,8 @@ def test_payment_payload_serde():
     assert PaymentPayload(**expected) == original
 
 
-def test_x402_headers_serde():
-    original = X402Headers(x_payment="test-payment")
+def test_t402_headers_serde():
+    original = T402Headers(x_payment="test-payment")
     expected = {"x_payment": "test-payment"}
     assert original.model_dump(by_alias=True) == expected
-    assert X402Headers(**expected) == original
+    assert T402Headers(**expected) == original

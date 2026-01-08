@@ -4,15 +4,15 @@ import base64
 from unittest.mock import MagicMock, patch
 from requests import Response, PreparedRequest, Session
 from eth_account import Account
-from x402.clients.requests import (
-    x402HTTPAdapter,
-    x402_http_adapter,
-    x402_requests,
+from t402.clients.requests import (
+    t402HTTPAdapter,
+    t402_http_adapter,
+    t402_requests,
 )
-from x402.clients.base import (
+from t402.clients.base import (
     PaymentError,
 )
-from x402.types import PaymentRequirements, x402PaymentRequiredResponse
+from t402.types import PaymentRequirements, t402PaymentRequiredResponse
 
 
 @pytest.fixture
@@ -22,12 +22,12 @@ def account():
 
 @pytest.fixture
 def session(account):
-    return x402_requests(account)
+    return t402_requests(account)
 
 
 @pytest.fixture
 def adapter(account):
-    return x402_http_adapter(account)
+    return t402_http_adapter(account)
 
 
 @pytest.fixture
@@ -131,8 +131,8 @@ def test_adapter_retry(adapter):
 
 def test_adapter_payment_flow(adapter, payment_requirements):
     # Mock the payment required response
-    payment_response = x402PaymentRequiredResponse(
-        x402_version=1,
+    payment_response = t402PaymentRequiredResponse(
+        t402_version=1,
         accepts=[payment_requirements],
         error="Payment Required",
     )
@@ -209,8 +209,8 @@ def test_adapter_payment_flow(adapter, payment_requirements):
 def test_adapter_payment_error(adapter, payment_requirements):
     # Mock the payment required response with unsupported scheme
     payment_requirements.scheme = "unsupported"
-    payment_response = x402PaymentRequiredResponse(
-        x402_version=1,
+    payment_response = t402PaymentRequiredResponse(
+        t402_version=1,
         accepts=[payment_requirements],
         error="Payment Required",
     )
@@ -252,49 +252,49 @@ def test_adapter_general_error(adapter):
         assert not adapter._is_retry
 
 
-def test_x402_http_adapter(account):
+def test_t402_http_adapter(account):
     # Test basic adapter creation
-    adapter = x402_http_adapter(account)
-    assert isinstance(adapter, x402HTTPAdapter)
+    adapter = t402_http_adapter(account)
+    assert isinstance(adapter, t402HTTPAdapter)
     assert adapter.client.account == account
     assert adapter.client.max_value is None
 
     # Test with max_value
-    adapter = x402_http_adapter(account, max_value=1000)
+    adapter = t402_http_adapter(account, max_value=1000)
     assert adapter.client.max_value == 1000
 
     # Test with custom selector
     def custom_selector(accepts, network_filter=None, scheme_filter=None):
         return accepts[0]
 
-    adapter = x402_http_adapter(account, payment_requirements_selector=custom_selector)
+    adapter = t402_http_adapter(account, payment_requirements_selector=custom_selector)
     assert (
         adapter.client.select_payment_requirements
         != adapter.client.__class__.select_payment_requirements
     )
 
     # Test passing adapter kwargs
-    adapter = x402_http_adapter(account, pool_connections=10, pool_maxsize=100)
+    adapter = t402_http_adapter(account, pool_connections=10, pool_maxsize=100)
     # Note: HTTPAdapter doesn't expose these properties, so we can't directly assert them
 
 
-def test_x402_requests(account):
+def test_t402_requests(account):
     # Test session creation
-    session = x402_requests(account)
+    session = t402_requests(account)
     assert isinstance(session, Session)
 
     # Check http adapter mounting
     adapter = session.adapters.get("http://")
-    assert isinstance(adapter, x402HTTPAdapter)
+    assert isinstance(adapter, t402HTTPAdapter)
     assert adapter.client.account == account
 
     # Check https adapter mounting
     adapter = session.adapters.get("https://")
-    assert isinstance(adapter, x402HTTPAdapter)
+    assert isinstance(adapter, t402HTTPAdapter)
     assert adapter.client.account == account
 
     # Test with max_value
-    session = x402_requests(account, max_value=1000)
+    session = t402_requests(account, max_value=1000)
     adapter = session.adapters.get("http://")
     assert adapter.client.max_value == 1000
 
@@ -302,7 +302,7 @@ def test_x402_requests(account):
     def custom_selector(accepts, network_filter=None, scheme_filter=None):
         return accepts[0]
 
-    session = x402_requests(account, payment_requirements_selector=custom_selector)
+    session = t402_requests(account, payment_requirements_selector=custom_selector)
     adapter = session.adapters.get("http://")
     assert (
         adapter.client.select_payment_requirements

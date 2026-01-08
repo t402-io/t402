@@ -20,7 +20,7 @@ import {
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useAccount } from "wagmi";
 import { sdk } from "@farcaster/frame-sdk";
-import { wrapFetchWithPayment } from "x402-fetch";
+import { wrapFetchWithPayment } from "t402-fetch";
 import { getWalletClient } from "wagmi/actions";
 import { createConfig, http } from "@wagmi/core";
 import { base, baseSepolia } from "@wagmi/core/chains";
@@ -89,7 +89,7 @@ export default function App() {
       return;
     }
 
-    // For x402-fetch, we need to pass the wallet client's account
+    // For t402-fetch, we need to pass the wallet client's account
     const fetchWithPayment = wrapFetchWithPayment(
       fetch,
       walletClient as unknown as Parameters<typeof wrapFetchWithPayment>[1]
@@ -150,7 +150,7 @@ export default function App() {
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-lg font-semibold text-gray-900 dark:text-white">x402 Mini App Template</h1>
+              <h1 className="text-lg font-semibold text-gray-900 dark:text-white">t402 Mini App Template</h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 {isInMiniApp ? 'Running as Mini App' : 'Running in browser'}
               </p>
@@ -187,7 +187,7 @@ export default function App() {
               Welcome to Your Mini App
             </h2>
             <p className="text-gray-600 dark:text-gray-300">
-              This is a clean template with x402, OnchainKit, and Farcaster as a mini app.
+              This is a clean template with t402, OnchainKit, and Farcaster as a mini app.
             </p>
           </div>
 
@@ -232,7 +232,7 @@ export default function App() {
               Protected Action
             </h3>
             <p className="text-gray-600 dark:text-gray-300 mb-6">
-              This button calls the x402 protected API endpoint.
+              This button calls the t402 protected API endpoint.
             </p>
             <button
               onClick={handleProtectedAction}

@@ -1,8 +1,8 @@
 {
-  "name": "x402_examples",
+  "name": "t402_examples",
   "private": "true",
   "version": "0.0.2",
-  "description": "x402 Payment Protocol Monorepo",
+  "description": "t402 Payment Protocol Monorepo",
   "main": "index.js",
   "scripts": {
     "build": "turbo run build",

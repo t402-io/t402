@@ -1,13 +1,13 @@
-module github.com/coinbase/x402/examples/go/clients/advanced
+module github.com/awesome-doge/t402/examples/go/clients/advanced
 
 go 1.24.0
 
 toolchain go1.24.1
 
-replace github.com/coinbase/x402/go => ../../../../go
+replace github.com/awesome-doge/t402/go => ../../../../go
 
 require (
-	github.com/coinbase/x402/go v0.0.0-00010101000000-000000000000
+	github.com/awesome-doge/t402/go v0.0.0-00010101000000-000000000000
 	github.com/joho/godotenv v1.5.1
 )
 

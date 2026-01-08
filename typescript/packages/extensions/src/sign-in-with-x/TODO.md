@@ -2,7 +2,7 @@
 
 ## Overview
 
-Implement the Sign-In-With-X (SIWx) extension for the x402 protocol, providing CAIP-122 standard wallet-based identity assertions. This extension allows clients to prove control of a wallet that may have previously paid for a resource, enabling servers to grant access without requiring repurchase.
+Implement the Sign-In-With-X (SIWx) extension for the t402 protocol, providing CAIP-122 standard wallet-based identity assertions. This extension allows clients to prove control of a wallet that may have previously paid for a resource, enabling servers to grant access without requiring repurchase.
 
 ## Core Exports Required
 

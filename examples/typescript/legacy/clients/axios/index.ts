@@ -1,6 +1,6 @@
 import axios from "axios";
 import { config } from "dotenv";
-import { withPaymentInterceptor, decodeXPaymentResponse, createSigner, type Hex } from "x402-axios";
+import { withPaymentInterceptor, decodeXPaymentResponse, createSigner, type Hex } from "t402-axios";
 
 config();
 
@@ -14,7 +14,7 @@ if (!baseURL || !privateKey || !endpointPath) {
 }
 
 /**
- * This example shows how to use the x402-axios package to make a request to a resource server that requires a payment.
+ * This example shows how to use the t402-axios package to make a request to a resource server that requires a payment.
  *
  * To run this example, you need to set the following environment variables:
  * - PRIVATE_KEY: The private key of the signer

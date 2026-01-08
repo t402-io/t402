@@ -7,10 +7,10 @@ import (
 	"os"
 	"time"
 
-	x402 "github.com/coinbase/x402/go"
-	x402http "github.com/coinbase/x402/go/http"
-	ginmw "github.com/coinbase/x402/go/http/gin"
-	evm "github.com/coinbase/x402/go/mechanisms/evm/exact/server"
+	t402 "github.com/coinbase/t402/go"
+	t402http "github.com/coinbase/t402/go/http"
+	ginmw "github.com/coinbase/t402/go/http/gin"
+	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/server"
 	ginfw "github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -40,11 +40,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	evmNetwork := x402.Network("eip155:84532") // Base Sepolia
+	evmNetwork := t402.Network("eip155:84532") // Base Sepolia
 
 	r := ginfw.Default()
 
-	facilitatorClient := x402http.NewHTTPFacilitatorClient(&x402http.FacilitatorConfig{
+	facilitatorClient := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
 		URL: facilitatorURL,
 	})
 
@@ -57,10 +57,10 @@ func main() {
 	 * For example, on Gnosis Chain (xDai) network, we could use Wrapped XDAI
 	 * instead of USDC (this is for demonstration - WXDAI isn't EIP-3009 compliant).
 	 */
-	evmScheme := evm.NewExactEvmScheme().RegisterMoneyParser(func(amount float64, network x402.Network) (*x402.AssetAmount, error) {
+	evmScheme := evm.NewExactEvmScheme().RegisterMoneyParser(func(amount float64, network t402.Network) (*t402.AssetAmount, error) {
 		// Custom logic for Gnosis Chain (eip155:100)
 		if string(network) == "eip155:100" {
-			return &x402.AssetAmount{
+			return &t402.AssetAmount{
 				Amount: fmt.Sprintf("%.0f", amount*1e18),             // Wrapped XDAI has 18 decimals
 				Asset:  "0xe91d153e0b41518a2ce8dd3d7944fa863463a97d", // WXDAI address on Gnosis
 				Extra: map[string]interface{}{
@@ -72,7 +72,7 @@ func main() {
 
 		// For large amounts on any network, use DAI instead of USDC
 		if amount > 100 {
-			return &x402.AssetAmount{
+			return &t402.AssetAmount{
 				Amount: fmt.Sprintf("%.0f", math.Round(amount*1e18)), // DAI has 18 decimals
 				Asset:  "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb", // DAI on Base Sepolia
 				Extra: map[string]interface{}{
@@ -86,9 +86,9 @@ func main() {
 		return nil, nil
 	})
 
-	routes := x402http.RoutesConfig{
+	routes := t402http.RoutesConfig{
 		"GET /weather": {
-			Accepts: x402http.PaymentOptions{
+			Accepts: t402http.PaymentOptions{
 				{
 					Scheme:  "exact",
 					PayTo:   evmPayeeAddress,
@@ -101,7 +101,7 @@ func main() {
 		},
 	}
 
-	r.Use(ginmw.X402Payment(ginmw.Config{
+	r.Use(ginmw.T402Payment(ginmw.Config{
 		Routes:      routes,
 		Facilitator: facilitatorClient,
 		Schemes: []ginmw.SchemeConfig{

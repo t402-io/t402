@@ -3,23 +3,23 @@ import requests
 import json
 from requests.adapters import HTTPAdapter
 from eth_account import Account
-from x402.clients.base import (
-    x402Client,
+from t402.clients.base import (
+    t402Client,
     PaymentError,
     PaymentSelectorCallable,
 )
-from x402.types import x402PaymentRequiredResponse
+from t402.types import t402PaymentRequiredResponse
 import copy
 
 
-class x402HTTPAdapter(HTTPAdapter):
-    """HTTP adapter for handling x402 payment required responses."""
+class t402HTTPAdapter(HTTPAdapter):
+    """HTTP adapter for handling t402 payment required responses."""
 
-    def __init__(self, client: x402Client, **kwargs):
-        """Initialize the adapter with an x402Client.
+    def __init__(self, client: t402Client, **kwargs):
+        """Initialize the adapter with an t402Client.
 
         Args:
-            client: x402Client instance for handling payments
+            client: t402Client instance for handling payments
             **kwargs: Additional arguments to pass to HTTPAdapter
         """
         super().__init__(**kwargs)
@@ -51,7 +51,7 @@ class x402HTTPAdapter(HTTPAdapter):
 
             # Parse the JSON content without using response.json() which consumes it
             data = json.loads(content.decode("utf-8"))
-            payment_response = x402PaymentRequiredResponse(**data)
+            payment_response = t402PaymentRequiredResponse(**data)
 
             # Select payment requirements
             selected_requirements = self.client.select_payment_requirements(
@@ -60,7 +60,7 @@ class x402HTTPAdapter(HTTPAdapter):
 
             # Create payment header
             payment_header = self.client.create_payment_header(
-                selected_requirements, payment_response.x402_version
+                selected_requirements, payment_response.t402_version
             )
 
             # Mark as retry and add payment header
@@ -84,12 +84,12 @@ class x402HTTPAdapter(HTTPAdapter):
             raise PaymentError(f"Failed to handle payment: {str(e)}") from e
 
 
-def x402_http_adapter(
+def t402_http_adapter(
     account: Account,
     max_value: Optional[int] = None,
     payment_requirements_selector: Optional[PaymentSelectorCallable] = None,
     **kwargs,
-) -> x402HTTPAdapter:
+) -> t402HTTPAdapter:
     """Create an HTTP adapter that handles 402 Payment Required responses.
 
     Args:
@@ -101,23 +101,23 @@ def x402_http_adapter(
         **kwargs: Additional arguments to pass to HTTPAdapter
 
     Returns:
-        x402HTTPAdapter instance that can be mounted to a requests session
+        t402HTTPAdapter instance that can be mounted to a requests session
     """
-    client = x402Client(
+    client = t402Client(
         account,
         max_value=max_value,
         payment_requirements_selector=payment_requirements_selector,
     )
-    return x402HTTPAdapter(client, **kwargs)
+    return t402HTTPAdapter(client, **kwargs)
 
 
-def x402_requests(
+def t402_requests(
     account: Account,
     max_value: Optional[int] = None,
     payment_requirements_selector: Optional[PaymentSelectorCallable] = None,
     **kwargs,
 ) -> requests.Session:
-    """Create a requests session with x402 payment handling.
+    """Create a requests session with t402 payment handling.
 
     Args:
         account: eth_account.Account instance for signing payments
@@ -128,10 +128,10 @@ def x402_requests(
         **kwargs: Additional arguments to pass to HTTPAdapter
 
     Returns:
-        Session with x402 payment handling configured
+        Session with t402 payment handling configured
     """
     session = requests.Session()
-    adapter = x402_http_adapter(
+    adapter = t402_http_adapter(
         account,
         max_value=max_value,
         payment_requirements_selector=payment_requirements_selector,

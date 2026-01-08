@@ -7,20 +7,20 @@ from fastapi import Request
 from fastapi.responses import JSONResponse, HTMLResponse
 from pydantic import validate_call
 
-from x402.common import (
+from t402.common import (
     process_price_to_atomic_amount,
-    x402_VERSION,
+    t402_VERSION,
     find_matching_payment_requirements,
 )
-from x402.encoding import safe_base64_decode
-from x402.facilitator import FacilitatorClient, FacilitatorConfig
-from x402.path import path_is_match
-from x402.paywall import is_browser_request, get_paywall_html
-from x402.types import (
+from t402.encoding import safe_base64_decode
+from t402.facilitator import FacilitatorClient, FacilitatorConfig
+from t402.path import path_is_match
+from t402.paywall import is_browser_request, get_paywall_html
+from t402.types import (
     PaymentPayload,
     PaymentRequirements,
     Price,
-    x402PaymentRequiredResponse,
+    t402PaymentRequiredResponse,
     PaywallConfig,
     SupportedNetworks,
     HTTPInputSchema,
@@ -61,7 +61,7 @@ def require_payment(
         output_schema (Optional[Any], optional): Schema for the response. Defaults to None.
         discoverable (bool, optional): Whether the route is discoverable. Defaults to True.
         facilitator_config (Optional[Dict[str, Any]], optional): Configuration for the payment facilitator.
-            If not provided, defaults to the public x402.org facilitator.
+            If not provided, defaults to the public t402.org facilitator.
         network (str, optional): Ethereum network ID. Defaults to "base-sepolia" (Base Sepolia testnet).
         resource (Optional[str], optional): Resource URL. Defaults to None (uses request URL).
         paywall_config (Optional[PaywallConfig], optional): Configuration for paywall UI customization.
@@ -124,7 +124,7 @@ def require_payment(
             )
         ]
 
-        def x402_response(error: str):
+        def t402_response(error: str):
             """Create a 402 response with payment requirements."""
             request_headers = dict(request.headers)
             status_code = 402
@@ -141,8 +141,8 @@ def require_payment(
                     headers=headers,
                 )
             else:
-                response_data = x402PaymentRequiredResponse(
-                    x402_version=x402_VERSION,
+                response_data = t402PaymentRequiredResponse(
+                    t402_version=t402_VERSION,
                     accepts=payment_requirements,
                     error=error,
                 ).model_dump(by_alias=True)
@@ -158,7 +158,7 @@ def require_payment(
         payment_header = request.headers.get("X-PAYMENT", "")
 
         if payment_header == "":
-            return x402_response("No X-PAYMENT header provided")
+            return t402_response("No X-PAYMENT header provided")
 
         # Decode payment header
         try:
@@ -168,7 +168,7 @@ def require_payment(
             logger.warning(
                 f"Invalid payment header format from {request.client.host if request.client else 'unknown'}: {str(e)}"
             )
-            return x402_response("Invalid payment header format")
+            return t402_response("Invalid payment header format")
 
         # Find matching payment requirements
         selected_payment_requirements = find_matching_payment_requirements(
@@ -176,7 +176,7 @@ def require_payment(
         )
 
         if not selected_payment_requirements:
-            return x402_response("No matching payment requirements found")
+            return t402_response("No matching payment requirements found")
 
         # Verify payment
         verify_response = await facilitator.verify(
@@ -185,7 +185,7 @@ def require_payment(
 
         if not verify_response.is_valid:
             error_reason = verify_response.invalid_reason or "Unknown error"
-            return x402_response(f"Invalid payment: {error_reason}")
+            return t402_response(f"Invalid payment: {error_reason}")
 
         request.state.payment_details = selected_payment_requirements
         request.state.verify_response = verify_response
@@ -207,12 +207,12 @@ def require_payment(
                     settle_response.model_dump_json(by_alias=True).encode("utf-8")
                 ).decode("utf-8")
             else:
-                return x402_response(
+                return t402_response(
                     "Settle failed: "
                     + (settle_response.error_reason or "Unknown error")
                 )
         except Exception:
-            return x402_response("Settle failed")
+            return t402_response("Settle failed")
 
         return response
 

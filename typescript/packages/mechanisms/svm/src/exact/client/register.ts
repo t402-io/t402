@@ -1,12 +1,12 @@
-import { x402Client, SelectPaymentRequirements, PaymentPolicy } from "@x402/core/client";
-import { Network } from "@x402/core/types";
+import { t402Client, SelectPaymentRequirements, PaymentPolicy } from "@t402/core/client";
+import { Network } from "@t402/core/types";
 import { ClientSvmSigner } from "../../signer";
 import { ExactSvmScheme } from "./scheme";
 import { ExactSvmSchemeV1 } from "../v1/client/scheme";
 import { NETWORKS } from "../../v1";
 
 /**
- * Configuration options for registering SVM schemes to an x402Client
+ * Configuration options for registering SVM schemes to an t402Client
  */
 export interface SvmClientConfig {
   /**
@@ -31,13 +31,13 @@ export interface SvmClientConfig {
 }
 
 /**
- * Registers SVM payment schemes to an existing x402Client instance.
+ * Registers SVM payment schemes to an existing t402Client instance.
  *
- * @param client - The x402Client instance to register schemes to
+ * @param client - The t402Client instance to register schemes to
  * @param config - Configuration for SVM client registration
  * @returns The client instance for chaining
  */
-export function registerExactSvmScheme(client: x402Client, config: SvmClientConfig): x402Client {
+export function registerExactSvmScheme(client: t402Client, config: SvmClientConfig): t402Client {
   // Register V2 scheme
   if (config.networks && config.networks.length > 0) {
     config.networks.forEach(network => {

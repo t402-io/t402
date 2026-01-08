@@ -17,7 +17,7 @@ type ProvidersProps = {
  * @returns The Providers component
  */
 export function Providers({ children }: ProvidersProps) {
-  const { testnet = true, cdpClientKey, appName, appLogo, paymentRequirements } = window.x402;
+  const { testnet = true, cdpClientKey, appName, appLogo, paymentRequirements } = window.t402;
   const selectedRequirement = choosePaymentRequirement(paymentRequirements, testnet);
 
   if (!isEvmNetwork(selectedRequirement.network)) {

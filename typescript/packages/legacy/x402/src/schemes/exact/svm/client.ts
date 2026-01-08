@@ -13,7 +13,7 @@ import {
   Instruction,
 } from "@solana/kit";
 import { PaymentPayload, PaymentRequirements } from "../../../types/verify";
-import { X402Config } from "../../../types/config";
+import { T402Config } from "../../../types/config";
 import {
   fetchMint,
   findAssociatedTokenPda,
@@ -32,20 +32,20 @@ import { getRpcClient } from "../../../shared/svm/rpc";
  * Creates and encodes a payment header for the given client and payment requirements.
  *
  * @param client - The signer instance used to create the payment header
- * @param x402Version - The version of the X402 protocol to use
+ * @param t402Version - The version of the T402 protocol to use
  * @param paymentRequirements - The payment requirements containing scheme and network information
- * @param config - Optional configuration for X402 operations (e.g., custom RPC URLs)
+ * @param config - Optional configuration for T402 operations (e.g., custom RPC URLs)
  * @returns A promise that resolves to a base64 encoded payment header string
  */
 export async function createPaymentHeader(
   client: TransactionSigner,
-  x402Version: number,
+  t402Version: number,
   paymentRequirements: PaymentRequirements,
-  config?: X402Config,
+  config?: T402Config,
 ): Promise<string> {
   const paymentPayload = await createAndSignPayment(
     client,
-    x402Version,
+    t402Version,
     paymentRequirements,
     config,
   );
@@ -56,16 +56,16 @@ export async function createPaymentHeader(
  * Creates and signs a payment for the given client and payment requirements.
  *
  * @param client - The signer instance used to create and sign the payment tx
- * @param x402Version - The version of the X402 protocol to use
+ * @param t402Version - The version of the T402 protocol to use
  * @param paymentRequirements - The payment requirements
- * @param config - Optional configuration for X402 operations (e.g., custom RPC URLs)
+ * @param config - Optional configuration for T402 operations (e.g., custom RPC URLs)
  * @returns A promise that resolves to a payment payload containing a base64 encoded solana token transfer tx
  */
 export async function createAndSignPayment(
   client: TransactionSigner,
-  x402Version: number,
+  t402Version: number,
   paymentRequirements: PaymentRequirements,
-  config?: X402Config,
+  config?: T402Config,
 ): Promise<PaymentPayload> {
   const transactionMessage = await createTransferTransactionMessage(
     client,
@@ -79,7 +79,7 @@ export async function createAndSignPayment(
   return {
     scheme: paymentRequirements.scheme,
     network: paymentRequirements.network,
-    x402Version: x402Version,
+    t402Version: t402Version,
     payload: {
       transaction: base64EncodedWireTransaction,
     },
@@ -91,13 +91,13 @@ export async function createAndSignPayment(
  *
  * @param client - The signer instance used to create the transfer transaction message
  * @param paymentRequirements - The payment requirements
- * @param config - Optional configuration for X402 operations (e.g., custom RPC URLs)
+ * @param config - Optional configuration for T402 operations (e.g., custom RPC URLs)
  * @returns A promise that resolves to the transaction message with the transfer instruction
  */
 async function createTransferTransactionMessage(
   client: TransactionSigner,
   paymentRequirements: PaymentRequirements,
-  config?: X402Config,
+  config?: T402Config,
 ) {
   const rpc = getRpcClient(paymentRequirements.network, config?.svmConfig?.rpcUrl);
 
@@ -143,13 +143,13 @@ async function createTransferTransactionMessage(
  *
  * @param client - The signer instance used to create the transfer instruction
  * @param paymentRequirements - The payment requirements
- * @param config - Optional configuration for X402 operations (e.g., custom RPC URLs)
+ * @param config - Optional configuration for T402 operations (e.g., custom RPC URLs)
  * @returns A promise that resolves to the transfer instruction array
  */
 async function createTransferInstructions(
   client: TransactionSigner,
   paymentRequirements: PaymentRequirements,
-  config?: X402Config,
+  config?: T402Config,
 ): Promise<Instruction[]> {
   const { asset, maxAmountRequired: amount, payTo } = paymentRequirements;
 

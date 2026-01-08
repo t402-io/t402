@@ -7,10 +7,10 @@ import (
 	"os"
 	"time"
 
-	x402 "github.com/coinbase/x402/go"
-	x402http "github.com/coinbase/x402/go/http"
-	ginmw "github.com/coinbase/x402/go/http/gin"
-	evm "github.com/coinbase/x402/go/mechanisms/evm/exact/server"
+	t402 "github.com/coinbase/t402/go"
+	t402http "github.com/coinbase/t402/go/http"
+	ginmw "github.com/coinbase/t402/go/http/gin"
+	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/server"
 	ginfw "github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -41,11 +41,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	evmNetwork := x402.Network("eip155:84532") // Base Sepolia
+	evmNetwork := t402.Network("eip155:84532") // Base Sepolia
 
 	r := ginfw.Default()
 
-	facilitatorClient := x402http.NewHTTPFacilitatorClient(&x402http.FacilitatorConfig{
+	facilitatorClient := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
 		URL: facilitatorURL,
 	})
 
@@ -71,7 +71,7 @@ func main() {
 	 * This function is called at request time to determine where the payment
 	 * should be sent. It receives the full HTTP request context.
 	 */
-	dynamicPayTo := func(ctx context.Context, reqCtx x402http.HTTPRequestContext) (string, error) {
+	dynamicPayTo := func(ctx context.Context, reqCtx t402http.HTTPRequestContext) (string, error) {
 		// Get the country from query parameter
 		country := "US" // default
 		if reqCtx.Adapter != nil {
@@ -88,12 +88,12 @@ func main() {
 		return address, nil
 	}
 
-	routes := x402http.RoutesConfig{
+	routes := t402http.RoutesConfig{
 		"GET /weather": {
-			Accepts: x402http.PaymentOptions{
+			Accepts: t402http.PaymentOptions{
 				{
 					Scheme:  "exact",
-					PayTo:   x402http.DynamicPayToFunc(dynamicPayTo),
+					PayTo:   t402http.DynamicPayToFunc(dynamicPayTo),
 					Price:   "$0.001",
 					Network: evmNetwork,
 				},
@@ -103,7 +103,7 @@ func main() {
 		},
 	}
 
-	r.Use(ginmw.X402Payment(ginmw.Config{
+	r.Use(ginmw.T402Payment(ginmw.Config{
 		Routes:      routes,
 		Facilitator: facilitatorClient,
 		Schemes: []ginmw.SchemeConfig{

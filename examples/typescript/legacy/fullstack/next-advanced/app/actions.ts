@@ -2,9 +2,9 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { useFacilitator } from "x402/verify";
-import { PaymentRequirements } from "x402/types";
-import { exact } from "x402/schemes";
+import { useFacilitator } from "t402/verify";
+import { PaymentRequirements } from "t402/types";
+import { exact } from "t402/schemes";
 
 export async function verifyPayment(payload: string): Promise<string> {
   // right now this needs to be defined in 2 places, we'll clean this up with a proper nextjs abstraction

@@ -9,8 +9,8 @@ import (
 	"syscall"
 	"time"
 
-	x402gin "github.com/coinbase/x402/go/pkg/gin"
-	"github.com/coinbase/x402/go/pkg/types"
+	t402gin "github.com/coinbase/t402/go/pkg/gin"
+	"github.com/coinbase/t402/go/pkg/types"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -58,13 +58,13 @@ func main() {
 
 	// Protected endpoint that requires payment
 	r.GET("/protected",
-		x402gin.PaymentMiddleware(
+		t402gin.PaymentMiddleware(
 			big.NewFloat(0.001), // $0.001 USD
 			address,
-			x402gin.WithFacilitatorConfig(facilitatorConfig),
-			x402gin.WithDescription("Protected endpoint requiring payment"),
-			x402gin.WithResource("http://localhost:"+port+"/protected"),
-			x402gin.WithTestnet(network == "base-sepolia"),
+			t402gin.WithFacilitatorConfig(facilitatorConfig),
+			t402gin.WithDescription("Protected endpoint requiring payment"),
+			t402gin.WithResource("http://localhost:"+port+"/protected"),
+			t402gin.WithTestnet(network == "base-sepolia"),
 		),
 		func(c *gin.Context) {
 			if shutdownRequested {

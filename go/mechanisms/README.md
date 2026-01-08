@@ -1,6 +1,6 @@
-# x402 Mechanisms
+# t402 Mechanisms
 
-This directory contains **mechanism implementations** for the x402 protocol.
+This directory contains **mechanism implementations** for the t402 protocol.
 
 ## What are Mechanisms?
 

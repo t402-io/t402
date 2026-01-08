@@ -48,7 +48,7 @@ describe("preparePaymentHeader", () => {
     const currentTime = Math.floor(Date.now() / 1000);
 
     expect(result).toEqual({
-      x402Version: 1,
+      t402Version: 1,
       scheme: "exact",
       network: "base-sepolia",
       payload: {
@@ -90,9 +90,9 @@ describe("preparePaymentHeader", () => {
     expect(validBefore).toBe(currentTime + mockPaymentRequirements.maxTimeoutSeconds);
   });
 
-  it("should handle different x402 versions", () => {
+  it("should handle different t402 versions", () => {
     const result = preparePaymentHeader(mockFromAddress, 2, mockPaymentRequirements);
-    expect(result.x402Version).toBe(2);
+    expect(result.t402Version).toBe(2);
   });
 });
 
@@ -110,7 +110,7 @@ describe("signPaymentHeader", () => {
   };
 
   const mockUnsignedHeader: UnsignedPaymentPayload = {
-    x402Version: 1,
+    t402Version: 1,
     scheme: "exact",
     network: "base-sepolia",
     payload: {
@@ -163,7 +163,7 @@ describe("signPaymentHeader", () => {
     const result = await signPaymentHeader(client, mockPaymentRequirements, mockUnsignedHeader);
 
     // Check that all original fields are preserved
-    expect(result.x402Version).toBe(mockUnsignedHeader.x402Version);
+    expect(result.t402Version).toBe(mockUnsignedHeader.t402Version);
     expect(result.scheme).toBe(mockUnsignedHeader.scheme);
     expect(result.network).toBe(mockUnsignedHeader.network);
     expect("authorization" in result.payload).toBe(true);
@@ -197,7 +197,7 @@ describe("createPaymentHeader", () => {
   };
 
   const mockSignedPayment = {
-    x402Version: 1,
+    t402Version: 1,
     scheme: "exact",
     network: "base-sepolia",
     payload: {
@@ -235,7 +235,7 @@ describe("createPaymentHeader", () => {
     expect(result).toBe("encoded-payment-header");
     expect(vi.mocked(encodePayment)).toHaveBeenCalledWith(
       expect.objectContaining({
-        x402Version: 1,
+        t402Version: 1,
         scheme: "exact",
         network: "base-sepolia",
         payload: expect.objectContaining({
@@ -250,13 +250,13 @@ describe("createPaymentHeader", () => {
     );
   });
 
-  it("should handle different x402 versions", async () => {
+  it("should handle different t402 versions", async () => {
     const client = createTestClient();
     await createPaymentHeader(client, 2, mockPaymentRequirements);
 
     expect(vi.mocked(encodePayment)).toHaveBeenCalledWith(
       expect.objectContaining({
-        x402Version: 2,
+        t402Version: 2,
       }),
     );
   });

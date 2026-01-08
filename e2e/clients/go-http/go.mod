@@ -1,10 +1,10 @@
-module github.com/coinbase/x402-go/e2e/clients/go-http
+module github.com/awesome-doge/t402-go/e2e/clients/go-http
 
 go 1.24.0
 
 toolchain go1.24.1
 
-require github.com/coinbase/x402/go v0.0.0
+require github.com/awesome-doge/t402/go v0.0.0
 
 require (
 	filippo.io/edwards25519 v1.0.0-rc.1 // indirect
@@ -51,4 +51,4 @@ require (
 	golang.org/x/time v0.9.0 // indirect
 )
 
-replace github.com/coinbase/x402/go => ../../../go
+replace github.com/awesome-doge/t402/go => ../../../go

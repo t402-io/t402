@@ -1,10 +1,10 @@
-# x402 Demo Site
+# t402 Demo Site
 
-This is a [Next.js](https://nextjs.org) project that demonstrates the x402 payment protocol in action and showcases ecosystem builders. The demo site includes a modern UI and a facilitator backend that handles payment verification and settlement.
+This is a [Next.js](https://nextjs.org) project that demonstrates the t402 payment protocol in action and showcases ecosystem builders. The demo site includes a modern UI and a facilitator backend that handles payment verification and settlement.
 
 ## Overview
 
-x402 is an open protocol for internet-native payments built around the HTTP 402 status code. This demo site showcases how to implement x402 in a real-world application, demonstrating:
+t402 is an open protocol for internet-native payments built around the HTTP 402 status code. This demo site showcases how to implement t402 in a real-world application, demonstrating:
 
 - Payment-gated content access
 - Real-time payment verification
@@ -55,7 +55,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - `/app` - Next.js application code
   - `/facilitator` - Payment facilitator API routes
   - `/protected` - Example protected route
-- `/middleware.ts` - x402 payment middleware configuration
+- `/middleware.ts` - t402 payment middleware configuration
 - `/ecosystem` - Directory of ecosystem builders 
 
 ## How It Works
@@ -67,7 +67,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## Adding Your Project to the Ecosystem
 
-We welcome projects that are building with x402! To add your project to our ecosystem page, follow these steps:
+We welcome projects that are building with t402! To add your project to our ecosystem page, follow these steps:
 
 1. Fork the repository
 2. Create a new directory in `app/ecosystem/partners-data/[your-project-slug]`
@@ -77,9 +77,9 @@ We welcome projects that are building with x402! To add your project to our ecos
 ```json
 {
   "name": "Your Project Name",
-  "description": "A brief description of your project and how it uses x402",
+  "description": "A brief description of your project and how it uses t402",
   "logoUrl": "/logos/your-logo.png",
-  "websiteUrl": "https://your-project.com", // ideally pointing to somehwere to learn more about the x402 integration
+  "websiteUrl": "https://your-project.com", // ideally pointing to somehwere to learn more about the t402 integration
   "category": "Client-Side Integrations" // Must match one of our categories: - `Client-Side Integrations`, `Services/Endpoints`, `Infrastructure & Tooling`, `Learning & Community Resources`
 }
 ```
@@ -114,7 +114,7 @@ We welcome projects that are building with x402! To add your project to our ecos
 ### Requirements by Category
 
 #### Client-Side Integrations
-- Must demonstrate a working integration with x402
+- Must demonstrate a working integration with t402
 - Should include a link to documentation, quickstart, or code examples
 - Must be actively maintained
 
@@ -125,7 +125,7 @@ We welcome projects that are building with x402! To add your project to our ecos
 
 #### Infrastructure & Tooling
 - Should include comprehensive documentation
-- Should demonstrate clear value to the x402 ecosystem
+- Should demonstrate clear value to the t402 ecosystem
 
 #### Learning & Community Resources
 - Must include a GitHub template or starter kit
@@ -134,7 +134,7 @@ We welcome projects that are building with x402! To add your project to our ecos
 - Should demonstrate a practical use case
 
 #### Facilitators
-- Must implement the x402 facilitator API specification
+- Must implement the t402 facilitator API specification
 - Should support at least one payment scheme (e.g., "exact")
 - Must provide working verify and/or settle endpoints
 - Should maintain high uptime and reliability
@@ -151,7 +151,7 @@ We welcome projects that are building with x402! To add your project to our ecos
 To learn more about the technologies used in this project:
 
 - [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API
-- [x402 Protocol Documentation](https://github.com/coinbase/x402) - learn about the x402 payment protocol
+- [t402 Protocol Documentation](https://github.com/coinbase/t402) - learn about the t402 payment protocol
 - [EVM Documentation](https://ethereum.org/en/developers/docs/) - learn about Ethereum Virtual Machine
 
 ## Deploy on Vercel
@@ -162,8 +162,8 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ## Contributing
 
-We welcome contributions! Please see our [Contributing Guidelines](https://github.com/coinbase/x402/blob/main/CONTRIBUTING.md) for details.
+We welcome contributions! Please see our [Contributing Guidelines](https://github.com/coinbase/t402/blob/main/CONTRIBUTING.md) for details.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/coinbase/x402/blob/main/LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/coinbase/t402/blob/main/LICENSE) file for details.

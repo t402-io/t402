@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	x402 "github.com/coinbase/x402/go"
-	x402http "github.com/coinbase/x402/go/http"
-	"github.com/coinbase/x402/go/types"
+	t402 "github.com/coinbase/t402/go"
+	t402http "github.com/coinbase/t402/go/http"
+	"github.com/coinbase/t402/go/types"
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,7 +30,7 @@ func init() {
 // Mock Implementations
 // ============================================================================
 
-// mockSchemeServer implements x402.SchemeNetworkServer for testing
+// mockSchemeServer implements t402.SchemeNetworkServer for testing
 type mockSchemeServer struct {
 	scheme string
 }
@@ -39,8 +39,8 @@ func (m *mockSchemeServer) Scheme() string {
 	return m.scheme
 }
 
-func (m *mockSchemeServer) ParsePrice(price x402.Price, network x402.Network) (x402.AssetAmount, error) {
-	return x402.AssetAmount{
+func (m *mockSchemeServer) ParsePrice(price t402.Price, network t402.Network) (t402.AssetAmount, error) {
+	return t402.AssetAmount{
 		Asset:  "USDC",
 		Amount: "1000000",
 	}, nil
@@ -50,34 +50,34 @@ func (m *mockSchemeServer) EnhancePaymentRequirements(ctx context.Context, base 
 	return base, nil
 }
 
-// mockFacilitatorClient implements x402.FacilitatorClient for testing
+// mockFacilitatorClient implements t402.FacilitatorClient for testing
 type mockFacilitatorClient struct {
-	verifyFunc    func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.VerifyResponse, error)
-	settleFunc    func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.SettleResponse, error)
-	supportedFunc func(ctx context.Context) (x402.SupportedResponse, error)
+	verifyFunc    func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error)
+	settleFunc    func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error)
+	supportedFunc func(ctx context.Context) (t402.SupportedResponse, error)
 }
 
-func (m *mockFacilitatorClient) Verify(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.VerifyResponse, error) {
+func (m *mockFacilitatorClient) Verify(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error) {
 	if m.verifyFunc != nil {
 		return m.verifyFunc(ctx, payloadBytes, requirementsBytes)
 	}
-	return &x402.VerifyResponse{IsValid: true, Payer: "0xmock"}, nil
+	return &t402.VerifyResponse{IsValid: true, Payer: "0xmock"}, nil
 }
 
-func (m *mockFacilitatorClient) Settle(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.SettleResponse, error) {
+func (m *mockFacilitatorClient) Settle(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 	if m.settleFunc != nil {
 		return m.settleFunc(ctx, payloadBytes, requirementsBytes)
 	}
-	return &x402.SettleResponse{Success: true, Transaction: "0xtx", Network: "eip155:1", Payer: "0xmock"}, nil
+	return &t402.SettleResponse{Success: true, Transaction: "0xtx", Network: "eip155:1", Payer: "0xmock"}, nil
 }
 
-func (m *mockFacilitatorClient) GetSupported(ctx context.Context) (x402.SupportedResponse, error) {
+func (m *mockFacilitatorClient) GetSupported(ctx context.Context) (t402.SupportedResponse, error) {
 	if m.supportedFunc != nil {
 		return m.supportedFunc(ctx)
 	}
-	return x402.SupportedResponse{
-		Kinds: []x402.SupportedKind{
-			{X402Version: 2, Scheme: "exact", Network: "eip155:1"},
+	return t402.SupportedResponse{
+		Kinds: []t402.SupportedKind{
+			{T402Version: 2, Scheme: "exact", Network: "eip155:1"},
 		},
 		Extensions: []string{},
 		Signers:    make(map[string][]string),
@@ -100,10 +100,10 @@ func createTestRouter() *gin.Engine {
 
 // createPaymentHeader creates a base64-encoded payment header for testing
 func createPaymentHeader(payTo string) string {
-	payload := x402.PaymentPayload{
-		X402Version: 2,
+	payload := t402.PaymentPayload{
+		T402Version: 2,
 		Payload:     map[string]interface{}{"sig": "test"},
-		Accepted: x402.PaymentRequirements{
+		Accepted: t402.PaymentRequirements{
 			Scheme:            "exact",
 			Network:           "eip155:1",
 			Asset:             "USDC",
@@ -258,9 +258,9 @@ func TestGinAdapter_GetUserAgent(t *testing.T) {
 // ============================================================================
 
 func TestPaymentMiddleware_CallsNextWhenNoPaymentRequired(t *testing.T) {
-	routes := x402http.RoutesConfig{
-		"GET /api": x402http.RouteConfig{
-			Accepts: x402http.PaymentOptions{
+	routes := t402http.RoutesConfig{
+		"GET /api": t402http.RouteConfig{
+			Accepts: t402http.PaymentOptions{
 				{
 					Scheme:  "exact",
 					PayTo:   "0xtest",
@@ -294,10 +294,10 @@ func TestPaymentMiddleware_CallsNextWhenNoPaymentRequired(t *testing.T) {
 
 func TestPaymentMiddleware_Returns402JSONForPaymentError(t *testing.T) {
 	mockClient := &mockFacilitatorClient{
-		supportedFunc: func(ctx context.Context) (x402.SupportedResponse, error) {
-			return x402.SupportedResponse{
-				Kinds: []x402.SupportedKind{
-					{X402Version: 2, Scheme: "exact", Network: "eip155:1"},
+		supportedFunc: func(ctx context.Context) (t402.SupportedResponse, error) {
+			return t402.SupportedResponse{
+				Kinds: []t402.SupportedKind{
+					{T402Version: 2, Scheme: "exact", Network: "eip155:1"},
 				},
 				Extensions: []string{},
 				Signers:    make(map[string][]string),
@@ -307,9 +307,9 @@ func TestPaymentMiddleware_Returns402JSONForPaymentError(t *testing.T) {
 
 	mockServer := &mockSchemeServer{scheme: "exact"}
 
-	routes := x402http.RoutesConfig{
-		"GET /api": x402http.RouteConfig{
-			Accepts: x402http.PaymentOptions{
+	routes := t402http.RoutesConfig{
+		"GET /api": t402http.RouteConfig{
+			Accepts: t402http.PaymentOptions{
 				{
 					Scheme:  "exact",
 					PayTo:   "0xtest",
@@ -350,10 +350,10 @@ func TestPaymentMiddleware_Returns402JSONForPaymentError(t *testing.T) {
 
 func TestPaymentMiddleware_Returns402HTMLForBrowserRequest(t *testing.T) {
 	mockClient := &mockFacilitatorClient{
-		supportedFunc: func(ctx context.Context) (x402.SupportedResponse, error) {
-			return x402.SupportedResponse{
-				Kinds: []x402.SupportedKind{
-					{X402Version: 2, Scheme: "exact", Network: "eip155:1"},
+		supportedFunc: func(ctx context.Context) (t402.SupportedResponse, error) {
+			return t402.SupportedResponse{
+				Kinds: []t402.SupportedKind{
+					{T402Version: 2, Scheme: "exact", Network: "eip155:1"},
 				},
 				Extensions: []string{},
 				Signers:    make(map[string][]string),
@@ -363,9 +363,9 @@ func TestPaymentMiddleware_Returns402HTMLForBrowserRequest(t *testing.T) {
 
 	mockServer := &mockSchemeServer{scheme: "exact"}
 
-	routes := x402http.RoutesConfig{
-		"*": x402http.RouteConfig{
-			Accepts: x402http.PaymentOptions{
+	routes := t402http.RoutesConfig{
+		"*": t402http.RouteConfig{
+			Accepts: t402http.PaymentOptions{
 				{
 					Scheme:  "exact",
 					PayTo:   "0xtest",
@@ -377,7 +377,7 @@ func TestPaymentMiddleware_Returns402HTMLForBrowserRequest(t *testing.T) {
 		},
 	}
 
-	paywallConfig := &x402http.PaywallConfig{
+	paywallConfig := &t402http.PaywallConfig{
 		AppName:      "Test App",
 		CDPClientKey: "test-key",
 	}
@@ -427,22 +427,22 @@ func TestPaymentMiddleware_SettlesAndReturnsResponseForVerifiedPayment(t *testin
 	settleCalled := false
 
 	mockClient := &mockFacilitatorClient{
-		verifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.VerifyResponse, error) {
-			return &x402.VerifyResponse{IsValid: true, Payer: "0xpayer"}, nil
+		verifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error) {
+			return &t402.VerifyResponse{IsValid: true, Payer: "0xpayer"}, nil
 		},
-		settleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.SettleResponse, error) {
+		settleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 			settleCalled = true
-			return &x402.SettleResponse{
+			return &t402.SettleResponse{
 				Success:     true,
 				Transaction: "0xtx",
 				Network:     "eip155:1",
 				Payer:       "0xpayer",
 			}, nil
 		},
-		supportedFunc: func(ctx context.Context) (x402.SupportedResponse, error) {
-			return x402.SupportedResponse{
-				Kinds: []x402.SupportedKind{
-					{X402Version: 2, Scheme: "exact", Network: "eip155:1"},
+		supportedFunc: func(ctx context.Context) (t402.SupportedResponse, error) {
+			return t402.SupportedResponse{
+				Kinds: []t402.SupportedKind{
+					{T402Version: 2, Scheme: "exact", Network: "eip155:1"},
 				},
 				Extensions: []string{},
 				Signers:    make(map[string][]string),
@@ -452,9 +452,9 @@ func TestPaymentMiddleware_SettlesAndReturnsResponseForVerifiedPayment(t *testin
 
 	mockServer := &mockSchemeServer{scheme: "exact"}
 
-	routes := x402http.RoutesConfig{
-		"POST /api": x402http.RouteConfig{
-			Accepts: x402http.PaymentOptions{
+	routes := t402http.RoutesConfig{
+		"POST /api": t402http.RouteConfig{
+			Accepts: t402http.PaymentOptions{
 				{
 					Scheme:  "exact",
 					PayTo:   "0xtest",
@@ -501,17 +501,17 @@ func TestPaymentMiddleware_SkipsSettlementWhenHandlerReturns400OrHigher(t *testi
 	settleCalled := false
 
 	mockClient := &mockFacilitatorClient{
-		verifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.VerifyResponse, error) {
-			return &x402.VerifyResponse{IsValid: true, Payer: "0xpayer"}, nil
+		verifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error) {
+			return &t402.VerifyResponse{IsValid: true, Payer: "0xpayer"}, nil
 		},
-		settleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.SettleResponse, error) {
+		settleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 			settleCalled = true
-			return &x402.SettleResponse{Success: true, Transaction: "0xtx"}, nil
+			return &t402.SettleResponse{Success: true, Transaction: "0xtx"}, nil
 		},
-		supportedFunc: func(ctx context.Context) (x402.SupportedResponse, error) {
-			return x402.SupportedResponse{
-				Kinds: []x402.SupportedKind{
-					{X402Version: 2, Scheme: "exact", Network: "eip155:1"},
+		supportedFunc: func(ctx context.Context) (t402.SupportedResponse, error) {
+			return t402.SupportedResponse{
+				Kinds: []t402.SupportedKind{
+					{T402Version: 2, Scheme: "exact", Network: "eip155:1"},
 				},
 				Extensions: []string{},
 				Signers:    make(map[string][]string),
@@ -521,9 +521,9 @@ func TestPaymentMiddleware_SkipsSettlementWhenHandlerReturns400OrHigher(t *testi
 
 	mockServer := &mockSchemeServer{scheme: "exact"}
 
-	routes := x402http.RoutesConfig{
-		"POST /api": x402http.RouteConfig{
-			Accepts: x402http.PaymentOptions{
+	routes := t402http.RoutesConfig{
+		"POST /api": t402http.RouteConfig{
+			Accepts: t402http.PaymentOptions{
 				{
 					Scheme:  "exact",
 					PayTo:   "0xtest",
@@ -565,19 +565,19 @@ func TestPaymentMiddleware_SkipsSettlementWhenHandlerReturns400OrHigher(t *testi
 
 func TestPaymentMiddleware_Returns402WhenSettlementFails(t *testing.T) {
 	mockClient := &mockFacilitatorClient{
-		verifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.VerifyResponse, error) {
-			return &x402.VerifyResponse{IsValid: true, Payer: "0xpayer"}, nil
+		verifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error) {
+			return &t402.VerifyResponse{IsValid: true, Payer: "0xpayer"}, nil
 		},
-		settleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.SettleResponse, error) {
-			return &x402.SettleResponse{
+		settleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
+			return &t402.SettleResponse{
 				Success:     false,
 				ErrorReason: "Insufficient funds",
 			}, nil
 		},
-		supportedFunc: func(ctx context.Context) (x402.SupportedResponse, error) {
-			return x402.SupportedResponse{
-				Kinds: []x402.SupportedKind{
-					{X402Version: 2, Scheme: "exact", Network: "eip155:1"},
+		supportedFunc: func(ctx context.Context) (t402.SupportedResponse, error) {
+			return t402.SupportedResponse{
+				Kinds: []t402.SupportedKind{
+					{T402Version: 2, Scheme: "exact", Network: "eip155:1"},
 				},
 				Extensions: []string{},
 				Signers:    make(map[string][]string),
@@ -587,9 +587,9 @@ func TestPaymentMiddleware_Returns402WhenSettlementFails(t *testing.T) {
 
 	mockServer := &mockSchemeServer{scheme: "exact"}
 
-	routes := x402http.RoutesConfig{
-		"POST /api": x402http.RouteConfig{
-			Accepts: x402http.PaymentOptions{
+	routes := t402http.RoutesConfig{
+		"POST /api": t402http.RouteConfig{
+			Accepts: t402http.PaymentOptions{
 				{
 					Scheme:  "exact",
 					PayTo:   "0xtest",
@@ -640,19 +640,19 @@ func TestPaymentMiddleware_CustomErrorHandler(t *testing.T) {
 	customHandlerCalled := false
 
 	mockClient := &mockFacilitatorClient{
-		verifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.VerifyResponse, error) {
-			return &x402.VerifyResponse{IsValid: true, Payer: "0xpayer"}, nil
+		verifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error) {
+			return &t402.VerifyResponse{IsValid: true, Payer: "0xpayer"}, nil
 		},
-		settleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.SettleResponse, error) {
-			return &x402.SettleResponse{
+		settleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
+			return &t402.SettleResponse{
 				Success:     false,
 				ErrorReason: "Settlement rejected",
 			}, nil
 		},
-		supportedFunc: func(ctx context.Context) (x402.SupportedResponse, error) {
-			return x402.SupportedResponse{
-				Kinds: []x402.SupportedKind{
-					{X402Version: 2, Scheme: "exact", Network: "eip155:1"},
+		supportedFunc: func(ctx context.Context) (t402.SupportedResponse, error) {
+			return t402.SupportedResponse{
+				Kinds: []t402.SupportedKind{
+					{T402Version: 2, Scheme: "exact", Network: "eip155:1"},
 				},
 				Extensions: []string{},
 				Signers:    make(map[string][]string),
@@ -662,9 +662,9 @@ func TestPaymentMiddleware_CustomErrorHandler(t *testing.T) {
 
 	mockServer := &mockSchemeServer{scheme: "exact"}
 
-	routes := x402http.RoutesConfig{
-		"POST /api": x402http.RouteConfig{
-			Accepts: x402http.PaymentOptions{
+	routes := t402http.RoutesConfig{
+		"POST /api": t402http.RouteConfig{
+			Accepts: t402http.PaymentOptions{
 				{
 					Scheme:  "exact",
 					PayTo:   "0xtest",
@@ -718,24 +718,24 @@ func TestPaymentMiddleware_CustomErrorHandler(t *testing.T) {
 
 func TestPaymentMiddleware_CustomSettlementHandler(t *testing.T) {
 	settlementHandlerCalled := false
-	var capturedSettleResponse *x402.SettleResponse
+	var capturedSettleResponse *t402.SettleResponse
 
 	mockClient := &mockFacilitatorClient{
-		verifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.VerifyResponse, error) {
-			return &x402.VerifyResponse{IsValid: true, Payer: "0xpayer"}, nil
+		verifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error) {
+			return &t402.VerifyResponse{IsValid: true, Payer: "0xpayer"}, nil
 		},
-		settleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.SettleResponse, error) {
-			return &x402.SettleResponse{
+		settleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
+			return &t402.SettleResponse{
 				Success:     true,
 				Transaction: "0xtx123",
 				Network:     "eip155:1",
 				Payer:       "0xpayer",
 			}, nil
 		},
-		supportedFunc: func(ctx context.Context) (x402.SupportedResponse, error) {
-			return x402.SupportedResponse{
-				Kinds: []x402.SupportedKind{
-					{X402Version: 2, Scheme: "exact", Network: "eip155:1"},
+		supportedFunc: func(ctx context.Context) (t402.SupportedResponse, error) {
+			return t402.SupportedResponse{
+				Kinds: []t402.SupportedKind{
+					{T402Version: 2, Scheme: "exact", Network: "eip155:1"},
 				},
 				Extensions: []string{},
 				Signers:    make(map[string][]string),
@@ -745,9 +745,9 @@ func TestPaymentMiddleware_CustomSettlementHandler(t *testing.T) {
 
 	mockServer := &mockSchemeServer{scheme: "exact"}
 
-	routes := x402http.RoutesConfig{
-		"POST /api": x402http.RouteConfig{
-			Accepts: x402http.PaymentOptions{
+	routes := t402http.RoutesConfig{
+		"POST /api": t402http.RouteConfig{
+			Accepts: t402http.PaymentOptions{
 				{
 					Scheme:  "exact",
 					PayTo:   "0xtest",
@@ -758,7 +758,7 @@ func TestPaymentMiddleware_CustomSettlementHandler(t *testing.T) {
 		},
 	}
 
-	customSettlementHandler := func(c *gin.Context, settleResponse *x402.SettleResponse) {
+	customSettlementHandler := func(c *gin.Context, settleResponse *t402.SettleResponse) {
 		settlementHandlerCalled = true
 		capturedSettleResponse = settleResponse
 		// Add custom header
@@ -808,10 +808,10 @@ func TestPaymentMiddleware_CustomSettlementHandler(t *testing.T) {
 
 func TestPaymentMiddleware_WithTimeout(t *testing.T) {
 	mockClient := &mockFacilitatorClient{
-		supportedFunc: func(ctx context.Context) (x402.SupportedResponse, error) {
-			return x402.SupportedResponse{
-				Kinds: []x402.SupportedKind{
-					{X402Version: 2, Scheme: "exact", Network: "eip155:1"},
+		supportedFunc: func(ctx context.Context) (t402.SupportedResponse, error) {
+			return t402.SupportedResponse{
+				Kinds: []t402.SupportedKind{
+					{T402Version: 2, Scheme: "exact", Network: "eip155:1"},
 				},
 				Extensions: []string{},
 				Signers:    make(map[string][]string),
@@ -821,9 +821,9 @@ func TestPaymentMiddleware_WithTimeout(t *testing.T) {
 
 	mockServer := &mockSchemeServer{scheme: "exact"}
 
-	routes := x402http.RoutesConfig{
-		"*": x402http.RouteConfig{
-			Accepts: x402http.PaymentOptions{
+	routes := t402http.RoutesConfig{
+		"*": t402http.RouteConfig{
+			Accepts: t402http.PaymentOptions{
 				{
 					Scheme:  "exact",
 					PayTo:   "0xtest",
@@ -860,15 +860,15 @@ func TestPaymentMiddleware_WithTimeout(t *testing.T) {
 }
 
 // ============================================================================
-// X402Payment (Builder Pattern) Tests
+// T402Payment (Builder Pattern) Tests
 // ============================================================================
 
-func TestX402Payment_CreatesWorkingMiddleware(t *testing.T) {
+func TestT402Payment_CreatesWorkingMiddleware(t *testing.T) {
 	mockClient := &mockFacilitatorClient{
-		supportedFunc: func(ctx context.Context) (x402.SupportedResponse, error) {
-			return x402.SupportedResponse{
-				Kinds: []x402.SupportedKind{
-					{X402Version: 2, Scheme: "exact", Network: "eip155:1"},
+		supportedFunc: func(ctx context.Context) (t402.SupportedResponse, error) {
+			return t402.SupportedResponse{
+				Kinds: []t402.SupportedKind{
+					{T402Version: 2, Scheme: "exact", Network: "eip155:1"},
 				},
 				Extensions: []string{},
 				Signers:    make(map[string][]string),
@@ -878,9 +878,9 @@ func TestX402Payment_CreatesWorkingMiddleware(t *testing.T) {
 
 	mockServer := &mockSchemeServer{scheme: "exact"}
 
-	routes := x402http.RoutesConfig{
-		"GET /api": x402http.RouteConfig{
-			Accepts: x402http.PaymentOptions{
+	routes := t402http.RoutesConfig{
+		"GET /api": t402http.RouteConfig{
+			Accepts: t402http.PaymentOptions{
 				{
 					Scheme:  "exact",
 					PayTo:   "0xtest",
@@ -892,7 +892,7 @@ func TestX402Payment_CreatesWorkingMiddleware(t *testing.T) {
 	}
 
 	router := createTestRouter()
-	router.Use(X402Payment(Config{
+	router.Use(T402Payment(Config{
 		Routes:      routes,
 		Facilitator: mockClient,
 		Schemes: []SchemeConfig{
@@ -929,12 +929,12 @@ func TestX402Payment_CreatesWorkingMiddleware(t *testing.T) {
 	}
 }
 
-func TestX402Payment_RegistersMultipleFacilitators(t *testing.T) {
+func TestT402Payment_RegistersMultipleFacilitators(t *testing.T) {
 	mockClient1 := &mockFacilitatorClient{
-		supportedFunc: func(ctx context.Context) (x402.SupportedResponse, error) {
-			return x402.SupportedResponse{
-				Kinds: []x402.SupportedKind{
-					{X402Version: 2, Scheme: "exact", Network: "eip155:1"},
+		supportedFunc: func(ctx context.Context) (t402.SupportedResponse, error) {
+			return t402.SupportedResponse{
+				Kinds: []t402.SupportedKind{
+					{T402Version: 2, Scheme: "exact", Network: "eip155:1"},
 				},
 				Extensions: []string{},
 				Signers:    make(map[string][]string),
@@ -942,10 +942,10 @@ func TestX402Payment_RegistersMultipleFacilitators(t *testing.T) {
 		},
 	}
 	mockClient2 := &mockFacilitatorClient{
-		supportedFunc: func(ctx context.Context) (x402.SupportedResponse, error) {
-			return x402.SupportedResponse{
-				Kinds: []x402.SupportedKind{
-					{X402Version: 2, Scheme: "exact", Network: "eip155:1"},
+		supportedFunc: func(ctx context.Context) (t402.SupportedResponse, error) {
+			return t402.SupportedResponse{
+				Kinds: []t402.SupportedKind{
+					{T402Version: 2, Scheme: "exact", Network: "eip155:1"},
 				},
 				Extensions: []string{},
 				Signers:    make(map[string][]string),
@@ -955,9 +955,9 @@ func TestX402Payment_RegistersMultipleFacilitators(t *testing.T) {
 
 	mockServer := &mockSchemeServer{scheme: "exact"}
 
-	routes := x402http.RoutesConfig{
-		"*": x402http.RouteConfig{
-			Accepts: x402http.PaymentOptions{
+	routes := t402http.RoutesConfig{
+		"*": t402http.RouteConfig{
+			Accepts: t402http.PaymentOptions{
 				{
 					Scheme:  "exact",
 					PayTo:   "0xtest",
@@ -970,9 +970,9 @@ func TestX402Payment_RegistersMultipleFacilitators(t *testing.T) {
 
 	// This should not panic and properly register multiple facilitators
 	router := createTestRouter()
-	router.Use(X402Payment(Config{
+	router.Use(T402Payment(Config{
 		Routes:       routes,
-		Facilitators: []x402.FacilitatorClient{mockClient1, mockClient2},
+		Facilitators: []t402.FacilitatorClient{mockClient1, mockClient2},
 		Schemes: []SchemeConfig{
 			{Network: "eip155:1", Server: mockServer},
 		},
@@ -992,13 +992,13 @@ func TestX402Payment_RegistersMultipleFacilitators(t *testing.T) {
 	}
 }
 
-func TestX402Payment_RegistersMultipleSchemes(t *testing.T) {
+func TestT402Payment_RegistersMultipleSchemes(t *testing.T) {
 	mockServer1 := &mockSchemeServer{scheme: "exact"}
 	mockServer2 := &mockSchemeServer{scheme: "exact"}
 
-	routes := x402http.RoutesConfig{
-		"*": x402http.RouteConfig{
-			Accepts: x402http.PaymentOptions{
+	routes := t402http.RoutesConfig{
+		"*": t402http.RouteConfig{
+			Accepts: t402http.PaymentOptions{
 				{
 					Scheme:  "exact",
 					PayTo:   "0xtest",
@@ -1011,7 +1011,7 @@ func TestX402Payment_RegistersMultipleSchemes(t *testing.T) {
 
 	// This should not panic
 	router := createTestRouter()
-	router.Use(X402Payment(Config{
+	router.Use(T402Payment(Config{
 		Routes: routes,
 		Schemes: []SchemeConfig{
 			{Network: "eip155:1", Server: mockServer1},

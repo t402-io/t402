@@ -1,2 +1,2 @@
-export * from "./x402Client";
-export * from "../http/x402HTTPClient";
+export * from "./t402Client";
+export * from "../http/t402HTTPClient";

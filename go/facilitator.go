@@ -1,4 +1,4 @@
-package x402
+package t402
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/coinbase/x402/go/types"
+	"github.com/coinbase/t402/go/types"
 )
 
 // schemeData stores facilitator and its registered networks
@@ -16,9 +16,9 @@ type schemeData struct {
 	pattern     Network
 }
 
-// x402Facilitator manages payment verification and settlement
+// t402Facilitator manages payment verification and settlement
 // Supports both V1 and V2 for legacy interoperability
-type x402Facilitator struct {
+type t402Facilitator struct {
 	mu sync.RWMutex
 
 	// Separate arrays for V1 and V2 (V2 uses default name, no suffix)
@@ -36,8 +36,8 @@ type x402Facilitator struct {
 	onSettleFailureHooks []FacilitatorOnSettleFailureHook
 }
 
-func Newx402Facilitator() *x402Facilitator {
-	return &x402Facilitator{
+func Newt402Facilitator() *t402Facilitator {
+	return &t402Facilitator{
 		schemesV1:  []*schemeData{},
 		schemes:    []*schemeData{},
 		extensions: []string{},
@@ -46,7 +46,7 @@ func Newx402Facilitator() *x402Facilitator {
 
 // RegisterV1 registers a V1 facilitator mechanism for multiple networks (legacy)
 // Networks are stored and used for GetSupported() - no need to specify them later.
-func (f *x402Facilitator) RegisterV1(networks []Network, facilitator SchemeNetworkFacilitatorV1) *x402Facilitator {
+func (f *t402Facilitator) RegisterV1(networks []Network, facilitator SchemeNetworkFacilitatorV1) *t402Facilitator {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
@@ -68,7 +68,7 @@ func (f *x402Facilitator) RegisterV1(networks []Network, facilitator SchemeNetwo
 
 // Register registers a facilitator mechanism for multiple networks (V2, default)
 // Networks are stored and used for GetSupported() - no need to specify them later.
-func (f *x402Facilitator) Register(networks []Network, facilitator SchemeNetworkFacilitator) *x402Facilitator {
+func (f *t402Facilitator) Register(networks []Network, facilitator SchemeNetworkFacilitator) *t402Facilitator {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
@@ -89,7 +89,7 @@ func (f *x402Facilitator) Register(networks []Network, facilitator SchemeNetwork
 }
 
 // RegisterExtension registers a protocol extension
-func (f *x402Facilitator) RegisterExtension(extension string) *x402Facilitator {
+func (f *t402Facilitator) RegisterExtension(extension string) *t402Facilitator {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
@@ -108,42 +108,42 @@ func (f *x402Facilitator) RegisterExtension(extension string) *x402Facilitator {
 // Hook Registration Methods
 // ============================================================================
 
-func (f *x402Facilitator) OnBeforeVerify(hook FacilitatorBeforeVerifyHook) *x402Facilitator {
+func (f *t402Facilitator) OnBeforeVerify(hook FacilitatorBeforeVerifyHook) *t402Facilitator {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.beforeVerifyHooks = append(f.beforeVerifyHooks, hook)
 	return f
 }
 
-func (f *x402Facilitator) OnAfterVerify(hook FacilitatorAfterVerifyHook) *x402Facilitator {
+func (f *t402Facilitator) OnAfterVerify(hook FacilitatorAfterVerifyHook) *t402Facilitator {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.afterVerifyHooks = append(f.afterVerifyHooks, hook)
 	return f
 }
 
-func (f *x402Facilitator) OnVerifyFailure(hook FacilitatorOnVerifyFailureHook) *x402Facilitator {
+func (f *t402Facilitator) OnVerifyFailure(hook FacilitatorOnVerifyFailureHook) *t402Facilitator {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.onVerifyFailureHooks = append(f.onVerifyFailureHooks, hook)
 	return f
 }
 
-func (f *x402Facilitator) OnBeforeSettle(hook FacilitatorBeforeSettleHook) *x402Facilitator {
+func (f *t402Facilitator) OnBeforeSettle(hook FacilitatorBeforeSettleHook) *t402Facilitator {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.beforeSettleHooks = append(f.beforeSettleHooks, hook)
 	return f
 }
 
-func (f *x402Facilitator) OnAfterSettle(hook FacilitatorAfterSettleHook) *x402Facilitator {
+func (f *t402Facilitator) OnAfterSettle(hook FacilitatorAfterSettleHook) *t402Facilitator {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.afterSettleHooks = append(f.afterSettleHooks, hook)
 	return f
 }
 
-func (f *x402Facilitator) OnSettleFailure(hook FacilitatorOnSettleFailureHook) *x402Facilitator {
+func (f *t402Facilitator) OnSettleFailure(hook FacilitatorOnSettleFailureHook) *t402Facilitator {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.onSettleFailureHooks = append(f.onSettleFailureHooks, hook)
@@ -155,7 +155,7 @@ func (f *x402Facilitator) OnSettleFailure(hook FacilitatorOnSettleFailureHook) *
 // ============================================================================
 
 // Verify verifies a payment (detects version from bytes, routes to typed mechanism)
-func (f *x402Facilitator) Verify(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*VerifyResponse, error) {
+func (f *t402Facilitator) Verify(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*VerifyResponse, error) {
 	// Detect version
 	version, err := types.DetectVersion(payloadBytes)
 	if err != nil {
@@ -282,7 +282,7 @@ func (f *x402Facilitator) Verify(ctx context.Context, payloadBytes []byte, requi
 }
 
 // Settle settles a payment (detects version from bytes, routes to typed mechanism)
-func (f *x402Facilitator) Settle(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*SettleResponse, error) {
+func (f *t402Facilitator) Settle(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*SettleResponse, error) {
 	// Detect version
 	version, err := types.DetectVersion(payloadBytes)
 	if err != nil {
@@ -413,7 +413,7 @@ func (f *x402Facilitator) Settle(ctx context.Context, payloadBytes []byte, requi
 // ============================================================================
 
 // verifyV1 verifies a V1 payment (internal, typed)
-func (f *x402Facilitator) verifyV1(ctx context.Context, payload types.PaymentPayloadV1, requirements types.PaymentRequirementsV1) (*VerifyResponse, error) {
+func (f *t402Facilitator) verifyV1(ctx context.Context, payload types.PaymentPayloadV1, requirements types.PaymentRequirementsV1) (*VerifyResponse, error) {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 
@@ -437,7 +437,7 @@ func (f *x402Facilitator) verifyV1(ctx context.Context, payload types.PaymentPay
 }
 
 // verifyV2 verifies a V2 payment (internal, typed)
-func (f *x402Facilitator) verifyV2(ctx context.Context, payload types.PaymentPayload, requirements types.PaymentRequirements) (*VerifyResponse, error) {
+func (f *t402Facilitator) verifyV2(ctx context.Context, payload types.PaymentPayload, requirements types.PaymentRequirements) (*VerifyResponse, error) {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 
@@ -461,7 +461,7 @@ func (f *x402Facilitator) verifyV2(ctx context.Context, payload types.PaymentPay
 }
 
 // settleV1 settles a V1 payment (internal, typed)
-func (f *x402Facilitator) settleV1(ctx context.Context, payload types.PaymentPayloadV1, requirements types.PaymentRequirementsV1) (*SettleResponse, error) {
+func (f *t402Facilitator) settleV1(ctx context.Context, payload types.PaymentPayloadV1, requirements types.PaymentRequirementsV1) (*SettleResponse, error) {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 
@@ -485,7 +485,7 @@ func (f *x402Facilitator) settleV1(ctx context.Context, payload types.PaymentPay
 }
 
 // settleV2 settles a V2 payment (internal, typed)
-func (f *x402Facilitator) settleV2(ctx context.Context, payload types.PaymentPayload, requirements types.PaymentRequirements) (*SettleResponse, error) {
+func (f *t402Facilitator) settleV2(ctx context.Context, payload types.PaymentPayload, requirements types.PaymentRequirements) (*SettleResponse, error) {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 
@@ -515,7 +515,7 @@ func (f *x402Facilitator) settleV2(ctx context.Context, payload types.PaymentPay
 // Returns:
 //
 //	SupportedResponse with kinds as array (with version in each element), extensions, and signers
-func (f *x402Facilitator) GetSupported() SupportedResponse {
+func (f *t402Facilitator) GetSupported() SupportedResponse {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 
@@ -529,7 +529,7 @@ func (f *x402Facilitator) GetSupported() SupportedResponse {
 
 		for network := range data.networks {
 			kind := SupportedKind{
-				X402Version: 1,
+				T402Version: 1,
 				Scheme:      scheme,
 				Network:     string(network),
 			}
@@ -556,7 +556,7 @@ func (f *x402Facilitator) GetSupported() SupportedResponse {
 
 		for network := range data.networks {
 			kind := SupportedKind{
-				X402Version: 2,
+				T402Version: 2,
 				Scheme:      scheme,
 				Network:     string(network),
 			}

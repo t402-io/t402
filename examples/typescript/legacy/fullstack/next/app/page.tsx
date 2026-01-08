@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import WordmarkCondensed from './assets/x402_wordmark_light.svg';
+import WordmarkCondensed from './assets/t402_wordmark_light.svg';
 
 export default function Home() {
   return (

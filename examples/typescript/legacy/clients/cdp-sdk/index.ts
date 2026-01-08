@@ -2,7 +2,7 @@ import { CdpClient } from "@coinbase/cdp-sdk";
 import axios from "axios";
 import { config } from "dotenv";
 import { toAccount } from "viem/accounts";
-import { decodeXPaymentResponse, withPaymentInterceptor } from "x402-axios";
+import { decodeXPaymentResponse, withPaymentInterceptor } from "t402-axios";
 
 config();
 
@@ -23,7 +23,7 @@ const client = new CdpClient({
   walletSecret,
 });
 const serverAccount = await client.evm.getOrCreateAccount({
-  name: "x402",
+  name: "t402",
 });
 
 const account = toAccount(serverAccount);

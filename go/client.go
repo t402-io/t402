@@ -1,16 +1,16 @@
-package x402
+package t402
 
 import (
 	"context"
 	"fmt"
 	"sync"
 
-	"github.com/coinbase/x402/go/types"
+	"github.com/coinbase/t402/go/types"
 )
 
-// x402Client manages payment mechanisms and creates payment payloads
+// t402Client manages payment mechanisms and creates payment payloads
 // This is used by applications that need to make payments (have wallets/signers)
-type x402Client struct {
+type t402Client struct {
 	mu sync.RWMutex
 
 	// Separate maps for V1 and V2 (V2 uses default name, no suffix)
@@ -28,25 +28,25 @@ type x402Client struct {
 }
 
 // ClientOption configures the client
-type ClientOption func(*x402Client)
+type ClientOption func(*t402Client)
 
 // WithPaymentSelector sets a custom payment requirements selector
 func WithPaymentSelector(selector PaymentRequirementsSelector) ClientOption {
-	return func(c *x402Client) {
+	return func(c *t402Client) {
 		c.requirementsSelector = selector
 	}
 }
 
 // WithPolicy registers a payment policy at creation time
 func WithPolicy(policy PaymentPolicy) ClientOption {
-	return func(c *x402Client) {
+	return func(c *t402Client) {
 		c.policies = append(c.policies, policy)
 	}
 }
 
-// Newx402Client creates a new x402 client
-func Newx402Client(opts ...ClientOption) *x402Client {
-	c := &x402Client{
+// Newt402Client creates a new t402 client
+func Newt402Client(opts ...ClientOption) *t402Client {
+	c := &t402Client{
 		schemesV1:            make(map[Network]map[string]SchemeNetworkClientV1),
 		schemes:              make(map[Network]map[string]SchemeNetworkClient),
 		requirementsSelector: DefaultPaymentSelector,
@@ -61,7 +61,7 @@ func Newx402Client(opts ...ClientOption) *x402Client {
 }
 
 // RegisterV1 registers a V1 payment mechanism
-func (c *x402Client) RegisterV1(network Network, client SchemeNetworkClientV1) *x402Client {
+func (c *t402Client) RegisterV1(network Network, client SchemeNetworkClientV1) *t402Client {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -73,7 +73,7 @@ func (c *x402Client) RegisterV1(network Network, client SchemeNetworkClientV1) *
 }
 
 // Register registers a payment mechanism (V2, default)
-func (c *x402Client) Register(network Network, client SchemeNetworkClient) *x402Client {
+func (c *t402Client) Register(network Network, client SchemeNetworkClient) *t402Client {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -85,7 +85,7 @@ func (c *x402Client) Register(network Network, client SchemeNetworkClient) *x402
 }
 
 // RegisterPolicy registers a policy to filter or transform payment requirements
-func (c *x402Client) RegisterPolicy(policy PaymentPolicy) *x402Client {
+func (c *t402Client) RegisterPolicy(policy PaymentPolicy) *t402Client {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.policies = append(c.policies, policy)
@@ -93,7 +93,7 @@ func (c *x402Client) RegisterPolicy(policy PaymentPolicy) *x402Client {
 }
 
 // OnBeforePaymentCreation registers a hook to execute before payment payload creation
-func (c *x402Client) OnBeforePaymentCreation(hook BeforePaymentCreationHook) *x402Client {
+func (c *t402Client) OnBeforePaymentCreation(hook BeforePaymentCreationHook) *t402Client {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.beforePaymentCreationHooks = append(c.beforePaymentCreationHooks, hook)
@@ -101,7 +101,7 @@ func (c *x402Client) OnBeforePaymentCreation(hook BeforePaymentCreationHook) *x4
 }
 
 // OnAfterPaymentCreation registers a hook to execute after successful payment payload creation
-func (c *x402Client) OnAfterPaymentCreation(hook AfterPaymentCreationHook) *x402Client {
+func (c *t402Client) OnAfterPaymentCreation(hook AfterPaymentCreationHook) *t402Client {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.afterPaymentCreationHooks = append(c.afterPaymentCreationHooks, hook)
@@ -109,7 +109,7 @@ func (c *x402Client) OnAfterPaymentCreation(hook AfterPaymentCreationHook) *x402
 }
 
 // OnPaymentCreationFailure registers a hook to execute when payment payload creation fails
-func (c *x402Client) OnPaymentCreationFailure(hook OnPaymentCreationFailureHook) *x402Client {
+func (c *t402Client) OnPaymentCreationFailure(hook OnPaymentCreationFailureHook) *t402Client {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.onPaymentCreationFailureHooks = append(c.onPaymentCreationFailureHooks, hook)
@@ -117,7 +117,7 @@ func (c *x402Client) OnPaymentCreationFailure(hook OnPaymentCreationFailureHook)
 }
 
 // SelectPaymentRequirementsV1 selects a V1 payment requirement
-func (c *x402Client) SelectPaymentRequirementsV1(requirements []types.PaymentRequirementsV1) (types.PaymentRequirementsV1, error) {
+func (c *t402Client) SelectPaymentRequirementsV1(requirements []types.PaymentRequirementsV1) (types.PaymentRequirementsV1, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
@@ -161,7 +161,7 @@ func (c *x402Client) SelectPaymentRequirementsV1(requirements []types.PaymentReq
 }
 
 // SelectPaymentRequirements selects a payment requirement (V2, default)
-func (c *x402Client) SelectPaymentRequirements(requirements []types.PaymentRequirements) (types.PaymentRequirements, error) {
+func (c *t402Client) SelectPaymentRequirements(requirements []types.PaymentRequirements) (types.PaymentRequirements, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
@@ -205,7 +205,7 @@ func (c *x402Client) SelectPaymentRequirements(requirements []types.PaymentRequi
 }
 
 // CreatePaymentPayloadV1 creates a V1 payment payload
-func (c *x402Client) CreatePaymentPayloadV1(
+func (c *t402Client) CreatePaymentPayloadV1(
 	ctx context.Context,
 	requirements types.PaymentRequirementsV1,
 ) (types.PaymentPayloadV1, error) {
@@ -237,7 +237,7 @@ func (c *x402Client) CreatePaymentPayloadV1(
 }
 
 // CreatePaymentPayload creates a payment payload (V2, default)
-func (c *x402Client) CreatePaymentPayload(
+func (c *t402Client) CreatePaymentPayload(
 	ctx context.Context,
 	requirements types.PaymentRequirements,
 	resource *types.ResourceInfo,
@@ -281,7 +281,7 @@ func (c *x402Client) CreatePaymentPayload(
 }
 
 // GetRegisteredSchemes returns a list of registered schemes for debugging
-func (c *x402Client) GetRegisteredSchemes() map[int][]struct {
+func (c *t402Client) GetRegisteredSchemes() map[int][]struct {
 	Network Network
 	Scheme  string
 } {

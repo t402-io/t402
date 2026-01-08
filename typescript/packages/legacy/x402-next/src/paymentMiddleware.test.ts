@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { exact } from "x402/schemes";
-import { findMatchingRoute, findMatchingPaymentRequirements } from "x402/shared";
-import { getPaywallHtml } from "x402/paywall";
+import { exact } from "t402/schemes";
+import { findMatchingRoute, findMatchingPaymentRequirements } from "t402/shared";
+import { getPaywallHtml } from "t402/paywall";
 import {
   FacilitatorConfig,
   Network,
@@ -10,21 +10,21 @@ import {
   PaymentPayload,
   PaymentRequirements,
   RouteConfig,
-} from "x402/types";
+} from "t402/types";
 import type { Address as SolanaAddress } from "@solana/kit";
-import { useFacilitator } from "x402/verify";
+import { useFacilitator } from "t402/verify";
 import { paymentMiddleware } from "./index";
 
 // Mock dependencies
-vi.mock("x402/verify", () => ({
+vi.mock("t402/verify", () => ({
   useFacilitator: vi.fn(),
 }));
 
-vi.mock("x402/paywall", () => ({
+vi.mock("t402/paywall", () => ({
   getPaywallHtml: vi.fn(),
 }));
 
-vi.mock("x402/shared", async importOriginal => {
+vi.mock("t402/shared", async importOriginal => {
   const actual = (await importOriginal()) as Record<string, unknown>;
   return {
     ...actual,
@@ -83,11 +83,11 @@ vi.mock("x402/shared", async importOriginal => {
   };
 });
 
-vi.mock("x402/shared/evm", () => ({
+vi.mock("t402/shared/evm", () => ({
   getUsdcAddressForChain: vi.fn().mockReturnValue("0x036CbD53842c5426634e7929541eC2318f3dCF7e"),
 }));
 
-vi.mock("x402/schemes", () => ({
+vi.mock("t402/schemes", () => ({
   exact: {
     evm: {
       decodePayment: vi.fn(),
@@ -315,7 +315,7 @@ describe("paymentMiddleware()", () => {
     expect(response.status).toBe(402);
     const json = await response.json();
     expect(json).toEqual({
-      x402Version: 1,
+      t402Version: 1,
       error: "X-PAYMENT header is required",
       accepts: [
         {
@@ -397,7 +397,7 @@ describe("paymentMiddleware()", () => {
     const decodedPayment = {
       scheme: "exact",
       network: "base-sepolia",
-      x402Version: 1,
+      t402Version: 1,
     };
     mockDecodePayment.mockReturnValue(decodedPayment);
 
@@ -443,7 +443,7 @@ describe("paymentMiddleware()", () => {
     const decodedPayment = {
       scheme: "exact",
       network: "base-sepolia",
-      x402Version: 1,
+      t402Version: 1,
     };
     mockDecodePayment.mockReturnValue(decodedPayment);
 
@@ -457,7 +457,7 @@ describe("paymentMiddleware()", () => {
     expect(response.status).toBe(402);
     const json = await response.json();
     expect(json).toEqual({
-      x402Version: 1,
+      t402Version: 1,
       error: "insufficient_funds",
       accepts: [
         {
@@ -492,7 +492,7 @@ describe("paymentMiddleware()", () => {
     const decodedPayment = {
       scheme: "exact",
       network: "base-sepolia",
-      x402Version: 1,
+      t402Version: 1,
     };
     mockDecodePayment.mockReturnValue(decodedPayment);
 
@@ -525,7 +525,7 @@ describe("paymentMiddleware()", () => {
     expect(response.status).toBe(402);
     const json = await response.json();
     expect(json).toEqual({
-      x402Version: 1,
+      t402Version: 1,
       error:
         "This facilitator only supports: base-sepolia, solana-devnet. Network 'base' is not supported.",
       accepts: [
@@ -561,7 +561,7 @@ describe("paymentMiddleware()", () => {
     const decodedPayment = {
       scheme: "exact",
       network: "base-sepolia",
-      x402Version: 1,
+      t402Version: 1,
     };
     mockDecodePayment.mockReturnValue(decodedPayment);
 
@@ -605,7 +605,7 @@ describe("paymentMiddleware()", () => {
     const decodedPayment = {
       scheme: "exact",
       network: "base-sepolia",
-      x402Version: 1,
+      t402Version: 1,
     };
     mockDecodePayment.mockReturnValue(decodedPayment);
 
@@ -617,7 +617,7 @@ describe("paymentMiddleware()", () => {
     expect(response.status).toBe(402);
     const json = await response.json();
     expect(json).toEqual({
-      x402Version: 1,
+      t402Version: 1,
       error: "Settlement failed",
       accepts: [
         {
@@ -652,7 +652,7 @@ describe("paymentMiddleware()", () => {
     const decodedPayment = {
       scheme: "exact",
       network: "base-sepolia",
-      x402Version: 1,
+      t402Version: 1,
     };
     mockDecodePayment.mockReturnValue(decodedPayment);
 
@@ -670,7 +670,7 @@ describe("paymentMiddleware()", () => {
     expect(response.status).toBe(402);
     const json = await response.json();
     expect(json).toEqual({
-      x402Version: 1,
+      t402Version: 1,
       error: "invalid_transaction_state",
       accepts: [
         {
@@ -716,7 +716,7 @@ describe("paymentMiddleware()", () => {
     expect(response.status).toBe(402);
     const json = await response.json();
     expect(json).toEqual({
-      x402Version: 1,
+      t402Version: 1,
       error: "X-PAYMENT header is required",
       accepts: [
         {
@@ -805,7 +805,7 @@ describe("paymentMiddleware()", () => {
     const decodedPayment = {
       scheme: "exact",
       network: "base-sepolia",
-      x402Version: 1,
+      t402Version: 1,
     };
     mockDecodePayment.mockReturnValue(decodedPayment);
 
@@ -880,7 +880,7 @@ describe("paymentMiddleware()", () => {
     const json = await response.json();
     expect(json).toEqual(
       expect.objectContaining({
-        x402Version: 1,
+        t402Version: 1,
         accepts: expect.arrayContaining([
           expect.objectContaining({
             network: "solana-devnet",
@@ -941,7 +941,7 @@ describe("paymentMiddleware()", () => {
     const json = await response.json();
     expect(json).toEqual(
       expect.objectContaining({
-        x402Version: 1,
+        t402Version: 1,
         accepts: expect.arrayContaining([
           expect.objectContaining({
             network: "solana",
@@ -994,7 +994,7 @@ describe("paymentMiddleware()", () => {
         cdpClientKey: "test-client-key",
         appName: "Test App",
         appLogo: "/test-logo.png",
-        sessionTokenEndpoint: "/api/x402/session-token",
+        sessionTokenEndpoint: "/api/t402/session-token",
       };
 
       const middlewareWithPaywall = paymentMiddleware(
@@ -1025,7 +1025,7 @@ describe("paymentMiddleware()", () => {
           cdpClientKey: "test-client-key",
           appName: "Test App",
           appLogo: "/test-logo.png",
-          sessionTokenEndpoint: "/api/x402/session-token",
+          sessionTokenEndpoint: "/api/t402/session-token",
         }),
       );
     });

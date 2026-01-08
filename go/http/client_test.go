@@ -10,34 +10,34 @@ import (
 	"strings"
 	"testing"
 
-	x402 "github.com/coinbase/x402/go"
-	"github.com/coinbase/x402/go/types"
+	t402 "github.com/coinbase/t402/go"
+	"github.com/coinbase/t402/go/types"
 )
 
-func TestNewx402HTTPClient(t *testing.T) {
-	x402Client := x402.Newx402Client()
-	client := Newx402HTTPClient(x402Client)
+func TestNewt402HTTPClient(t *testing.T) {
+	t402Client := t402.Newt402Client()
+	client := Newt402HTTPClient(t402Client)
 	if client == nil {
 		t.Fatal("Expected client to be created")
 	}
 	if client.client == nil {
-		t.Fatal("Expected composed x402Client")
+		t.Fatal("Expected composed t402Client")
 	}
 }
 
 func TestEncodePaymentSignatureHeader(t *testing.T) {
-	client := Newx402HTTPClient(x402.Newx402Client())
+	client := Newt402HTTPClient(t402.Newt402Client())
 
 	tests := []struct {
 		name     string
-		payload  x402.PaymentPayload
+		payload  t402.PaymentPayload
 		expected string
 	}{
 		{
 			name: "v2 payload",
-			payload: x402.PaymentPayload{
-				X402Version: 2,
-				Accepted: x402.PaymentRequirements{
+			payload: t402.PaymentPayload{
+				T402Version: 2,
+				Accepted: t402.PaymentRequirements{
 					Scheme:  "exact",
 					Network: "eip155:1",
 				},
@@ -47,9 +47,9 @@ func TestEncodePaymentSignatureHeader(t *testing.T) {
 		},
 		{
 			name: "v1 payload",
-			payload: x402.PaymentPayload{
-				X402Version: 1,
-				Accepted: x402.PaymentRequirements{
+			payload: t402.PaymentPayload{
+				T402Version: 1,
+				Accepted: t402.PaymentRequirements{
 					Scheme:  "exact",
 					Network: "eip155:1",
 				},
@@ -79,26 +79,26 @@ func TestEncodePaymentSignatureHeader(t *testing.T) {
 				t.Fatalf("Failed to decode base64: %v", err)
 			}
 
-			var decodedPayload x402.PaymentPayload
+			var decodedPayload t402.PaymentPayload
 			if err := json.Unmarshal(decoded, &decodedPayload); err != nil {
 				t.Fatalf("Failed to unmarshal JSON: %v", err)
 			}
 
-			if decodedPayload.X402Version != tt.payload.X402Version {
-				t.Errorf("Version mismatch: got %d, want %d", decodedPayload.X402Version, tt.payload.X402Version)
+			if decodedPayload.T402Version != tt.payload.T402Version {
+				t.Errorf("Version mismatch: got %d, want %d", decodedPayload.T402Version, tt.payload.T402Version)
 			}
 		})
 	}
 }
 
 func TestGetPaymentRequiredResponse(t *testing.T) {
-	client := Newx402HTTPClient(x402.Newx402Client())
+	client := Newt402HTTPClient(t402.Newt402Client())
 
 	// Test v2 header format
-	requirements := x402.PaymentRequired{
-		X402Version: 2,
+	requirements := t402.PaymentRequired{
+		T402Version: 2,
 		Error:       "Payment required",
-		Accepts: []x402.PaymentRequirements{
+		Accepts: []t402.PaymentRequirements{
 			{
 				Scheme:  "exact",
 				Network: "eip155:1",
@@ -121,18 +121,18 @@ func TestGetPaymentRequiredResponse(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if result.X402Version != 2 {
-		t.Errorf("Expected version 2, got %d", result.X402Version)
+	if result.T402Version != 2 {
+		t.Errorf("Expected version 2, got %d", result.T402Version)
 	}
 	if len(result.Accepts) != 1 {
 		t.Errorf("Expected 1 requirement, got %d", len(result.Accepts))
 	}
 
 	// Test v1 body format
-	v1Requirements := x402.PaymentRequired{
-		X402Version: 1,
+	v1Requirements := t402.PaymentRequired{
+		T402Version: 1,
 		Error:       "Payment required",
-		Accepts: []x402.PaymentRequirements{
+		Accepts: []t402.PaymentRequirements{
 			{
 				Scheme:  "exact",
 				Network: "eip155:1",
@@ -150,8 +150,8 @@ func TestGetPaymentRequiredResponse(t *testing.T) {
 		t.Fatalf("Unexpected error for v1: %v", err)
 	}
 
-	if result.X402Version != 1 {
-		t.Errorf("Expected version 1, got %d", result.X402Version)
+	if result.T402Version != 1 {
+		t.Errorf("Expected version 1, got %d", result.T402Version)
 	}
 
 	// Test no payment required found
@@ -162,9 +162,9 @@ func TestGetPaymentRequiredResponse(t *testing.T) {
 }
 
 func TestGetPaymentSettleResponse(t *testing.T) {
-	client := Newx402HTTPClient(x402.Newx402Client())
+	client := Newt402HTTPClient(t402.Newt402Client())
 
-	settleResponse := x402.SettleResponse{
+	settleResponse := t402.SettleResponse{
 		Success:     true,
 		Transaction: "0xtx",
 		Payer:       "0xpayer",
@@ -220,10 +220,10 @@ func TestPaymentRoundTripper(t *testing.T) {
 
 		if callCount == 1 {
 			// First call - return 402
-			requirements := x402.PaymentRequired{
-				X402Version: 2,
+			requirements := t402.PaymentRequired{
+				T402Version: 2,
 				Error:       "Payment required",
-				Accepts: []x402.PaymentRequirements{
+				Accepts: []t402.PaymentRequirements{
 					{
 						Scheme:  "mock",
 						Network: "test:1",
@@ -256,12 +256,12 @@ func TestPaymentRoundTripper(t *testing.T) {
 		scheme: "mock",
 	}
 
-	// Create x402 client
-	x402Client := x402.Newx402Client()
-	x402Client.Register("test:1", mockClient)
+	// Create t402 client
+	t402Client := t402.Newt402Client()
+	t402Client.Register("test:1", mockClient)
 
 	// Create HTTP client wrapper
-	httpClient := WrapHTTPClientWithPayment(http.DefaultClient, Newx402HTTPClient(x402Client))
+	httpClient := WrapHTTPClientWithPayment(http.DefaultClient, Newt402HTTPClient(t402Client))
 
 	// Make request
 	resp, err := httpClient.Get(server.URL)
@@ -292,8 +292,8 @@ func TestPaymentRoundTripperNoRetryOn200(t *testing.T) {
 	}))
 	defer server.Close()
 
-	x402Client := Newx402HTTPClient(x402.Newx402Client())
-	httpClient := WrapHTTPClientWithPayment(http.DefaultClient, x402Client)
+	t402Client := Newt402HTTPClient(t402.Newt402Client())
+	httpClient := WrapHTTPClientWithPayment(http.DefaultClient, t402Client)
 
 	resp, err := httpClient.Get(server.URL)
 	if err != nil {
@@ -313,7 +313,7 @@ func TestDoWithPayment(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := Newx402HTTPClient(x402.Newx402Client())
+	client := Newt402HTTPClient(t402.Newt402Client())
 	ctx := context.Background()
 	req, _ := http.NewRequest("GET", server.URL, nil)
 
@@ -337,7 +337,7 @@ func TestGetWithPayment(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := Newx402HTTPClient(x402.Newx402Client())
+	client := Newt402HTTPClient(t402.Newt402Client())
 	ctx := context.Background()
 
 	resp, err := client.GetWithPayment(ctx, server.URL)
@@ -360,7 +360,7 @@ func TestPostWithPayment(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := Newx402HTTPClient(x402.Newx402Client())
+	client := Newt402HTTPClient(t402.Newt402Client())
 	ctx := context.Background()
 
 	resp, err := client.PostWithPayment(ctx, server.URL, strings.NewReader("test body"))
@@ -381,7 +381,7 @@ func (m *mockSchemeClient) Scheme() string {
 
 func (m *mockSchemeClient) CreatePaymentPayload(ctx context.Context, requirements types.PaymentRequirements) (types.PaymentPayload, error) {
 	return types.PaymentPayload{
-		X402Version: 2,
+		T402Version: 2,
 		Payload:     map[string]interface{}{"mock": "payload"},
 	}, nil
 }

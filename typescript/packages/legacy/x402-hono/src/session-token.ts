@@ -9,7 +9,7 @@ import type { Context } from "hono";
  *
  * Setup:
  * 1. Set CDP_API_KEY_ID and CDP_API_KEY_SECRET environment variables
- * 2. Add this to your Hono app: app.post("/api/x402/session-token", POST);
+ * 2. Add this to your Hono app: app.post("/api/t402/session-token", POST);
  *
  * @param c - The Hono Context containing the session token request
  * @returns Promise<Response> - The response containing the session token or error

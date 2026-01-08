@@ -1,9 +1,9 @@
-package x402
+package t402
 
 import (
 	"context"
 
-	"github.com/coinbase/x402/go/types"
+	"github.com/coinbase/t402/go/types"
 )
 
 // MoneyParser is a function that converts a decimal amount to an AssetAmount
@@ -161,6 +161,6 @@ type FacilitatorClient interface {
 	// Settle a payment (detects version from bytes, routes internally)
 	Settle(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*SettleResponse, error)
 
-	// GetSupported returns supported payment kinds in flat array format with x402Version in each element (backward compatible)
+	// GetSupported returns supported payment kinds in flat array format with t402Version in each element (backward compatible)
 	GetSupported(ctx context.Context) (SupportedResponse, error)
 }

@@ -109,7 +109,7 @@ describe("verify", () => {
     const validPayload: PaymentPayload = {
       scheme: SCHEME,
       network: "solana-devnet",
-      x402Version: 1,
+      t402Version: 1,
       payload: {
         transaction: "valid_transaction_string",
       } as ExactSvmPayload,
@@ -417,7 +417,7 @@ describe("verify", () => {
       mockPayload = {
         scheme: SCHEME,
         network: "solana-devnet",
-        x402Version: 1,
+        t402Version: 1,
         payload: { transaction: "..." } as ExactSvmPayload,
       };
       mockRequirements = {
@@ -892,7 +892,7 @@ describe("verify", () => {
     const mockPayload: PaymentPayload = {
       scheme: SCHEME,
       network: "solana-devnet" as Network,
-      x402Version: 1,
+      t402Version: 1,
       payload: {
         transaction: "base64encodedtransaction",
       } as ExactSvmPayload,

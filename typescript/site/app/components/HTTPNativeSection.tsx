@@ -161,7 +161,7 @@ export function HTTPNativeSection() {
               variants={fadeInUp}
               className="text-sm sm:text-base font-medium text-gray-70 leading-relaxed text-center md:text-left"
             >
-              x402 is built-in to existing HTTP requests, with no additional communication required.
+              t402 is built-in to existing HTTP requests, with no additional communication required.
             </motion.p>
           </motion.div>
         </div>

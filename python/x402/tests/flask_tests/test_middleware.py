@@ -1,5 +1,5 @@
 from flask import Flask, g
-from x402.flask.middleware import PaymentMiddleware
+from t402.flask.middleware import PaymentMiddleware
 
 
 def create_app_with_middleware(configs):
@@ -179,7 +179,7 @@ def test_browser_request_returns_html():
         # Check that HTML is returned
         html_content = resp.get_data(as_text=True)
         assert "<!DOCTYPE html>" in html_content or "<html>" in html_content
-        assert "window.x402" in html_content
+        assert "window.t402" in html_content
 
 
 def test_api_client_request_returns_json():
@@ -239,7 +239,7 @@ def test_paywall_config_injection():
         assert resp.status_code == 402
 
         html_content = resp.get_data(as_text=True)
-        assert "window.x402" in html_content
+        assert "window.t402" in html_content
         assert '"appName": "Test Application"' in html_content
         assert '"appLogo": "https://example.com/logo.png"' in html_content
         assert '"amount": 2.5' in html_content

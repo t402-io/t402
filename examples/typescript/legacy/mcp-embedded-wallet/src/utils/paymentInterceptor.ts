@@ -1,6 +1,6 @@
 import { AxiosInstance } from "axios";
 import { Chain } from "viem";
-import { PaymentRequirements } from "x402/types";
+import { PaymentRequirements } from "t402/types";
 import { operationStore } from "../stores/operations";
 import { budgetStore } from "../stores/budget";
 import { checkUSDCBalanceForPaymentAtomic } from "./balanceChecker";
@@ -26,7 +26,7 @@ export class PaymentInterceptorError extends Error {
 }
 
 /**
- * Creates Axios interceptors to handle x402 payment flow.
+ * Creates Axios interceptors to handle t402 payment flow.
  * Handles 402 responses, balance checks, and payment retries.
  *
  * @param instance - Axios instance to add interceptors to

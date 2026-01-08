@@ -1,14 +1,14 @@
-# Go x402
+# Go t402
 
 ## Installation
 
 ```bash
-go get github.com/coinbase/x402/go
+go get github.com/coinbase/t402/go
 ```
 
 ## Usage
 
-### Accepting x402 Payments with a [Gin](https://github.com/gin-gonic/gin) Resource Server
+### Accepting t402 Payments with a [Gin](https://github.com/gin-gonic/gin) Resource Server
 
 ```go
 package main
@@ -16,7 +16,7 @@ package main
 import (
 	"math/big"
 
-	x402gin "github.com/coinbase/x402/go/pkg/gin"
+	t402gin "github.com/coinbase/t402/go/pkg/gin"
 	"github.com/gin-gonic/gin"
 )
 
@@ -29,11 +29,11 @@ func main() {
 
 	r.GET(
 		"/joke",
-		x402gin.PaymentMiddleware(
+		t402gin.PaymentMiddleware(
 			big.NewFloat(0.0001),
 			"0x209693Bc6afc0C5328bA36FaF03C514EF312287C",
-			x402gin.WithFacilitatorConfig(facilitatorConfig),
-			x402gin.WithResource("http://localhost:4021/joke"),
+			t402gin.WithFacilitatorConfig(facilitatorConfig),
+			t402gin.WithResource("http://localhost:4021/joke"),
 		),
 		func(c *gin.Context) {
 			c.JSON(200, gin.H{

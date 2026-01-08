@@ -1,19 +1,19 @@
-# Advanced x402 Client Examples
+# Advanced t402 Client Examples
 
-Advanced patterns for x402 TypeScript clients demonstrating builder pattern registration, payment lifecycle hooks, and network preferences.
+Advanced patterns for t402 TypeScript clients demonstrating builder pattern registration, payment lifecycle hooks, and network preferences.
 
 ```typescript
-import { x402Client, wrapFetchWithPayment } from "@x402/fetch";
-import { ExactEvmScheme } from "@x402/evm/exact/client";
+import { t402Client, wrapFetchWithPayment } from "@t402/fetch";
+import { ExactEvmScheme } from "@t402/evm/exact/client";
 import { privateKeyToAccount } from "viem/accounts";
 
-const client = new x402Client()
+const client = new t402Client()
   .register("eip155:*", new ExactEvmScheme(privateKeyToAccount(evmPrivateKey)))
   .onBeforePaymentCreation(async ctx => {
     console.log("Creating payment for:", ctx.selectedRequirements.network);
   })
   .onAfterPaymentCreation(async ctx => {
-    console.log("Payment created:", ctx.paymentPayload.x402Version);
+    console.log("Payment created:", ctx.paymentPayload.t402Version);
   });
 
 const fetchWithPayment = wrapFetchWithPayment(fetch, client);
@@ -25,7 +25,7 @@ const response = await fetchWithPayment("http://localhost:4021/weather");
 - Node.js v20+ (install via [nvm](https://github.com/nvm-sh/nvm))
 - pnpm v10 (install via [pnpm.io/installation](https://pnpm.io/installation))
 - Valid EVM and/or SVM private keys for making payments
-- A running x402 server (see [server examples](../../servers/))
+- A running t402 server (see [server examples](../../servers/))
 - Familiarity with the [basic fetch client](../fetch/)
 
 ## Setup
@@ -86,16 +86,16 @@ pnpm dev:builder-pattern
 Use the builder pattern for fine-grained control over which networks are supported and with which signers:
 
 ```typescript
-import { x402Client, wrapFetchWithPayment } from "@x402/fetch";
-import { ExactEvmScheme } from "@x402/evm/exact/client";
-import { ExactSvmScheme } from "@x402/svm/exact/client";
+import { t402Client, wrapFetchWithPayment } from "@t402/fetch";
+import { ExactEvmScheme } from "@t402/evm/exact/client";
+import { ExactSvmScheme } from "@t402/svm/exact/client";
 import { privateKeyToAccount } from "viem/accounts";
 
 const evmSigner = privateKeyToAccount(evmPrivateKey);
 const mainnetSigner = privateKeyToAccount(mainnetPrivateKey);
 
 // More specific patterns take precedence over wildcards
-const client = new x402Client()
+const client = new t402Client()
   .register("eip155:*", new ExactEvmScheme(evmSigner)) // All EVM networks
   .register("eip155:1", new ExactEvmScheme(mainnetSigner)) // Ethereum mainnet override
   .register("solana:*", new ExactSvmScheme(svmSigner)); // All Solana networks
@@ -115,20 +115,20 @@ const response = await fetchWithPayment("http://localhost:4021/weather");
 Register custom logic at different payment stages for observability and control:
 
 ```typescript
-import { x402Client, wrapFetchWithPayment } from "@x402/fetch";
-import { ExactEvmScheme } from "@x402/evm/exact/client";
+import { t402Client, wrapFetchWithPayment } from "@t402/fetch";
+import { ExactEvmScheme } from "@t402/evm/exact/client";
 import { privateKeyToAccount } from "viem/accounts";
 
 const signer = privateKeyToAccount(process.env.EVM_PRIVATE_KEY);
 
-const client = new x402Client()
+const client = new t402Client()
   .register("eip155:*", new ExactEvmScheme(signer))
   .onBeforePaymentCreation(async context => {
     console.log("Creating payment for:", context.selectedRequirements);
     // Abort payment by returning: { abort: true, reason: "Not allowed" }
   })
   .onAfterPaymentCreation(async context => {
-    console.log("Payment created:", context.paymentPayload.x402Version);
+    console.log("Payment created:", context.paymentPayload.t402Version);
     // Send to analytics, database, etc.
   })
   .onPaymentCreationFailure(async context => {
@@ -158,15 +158,15 @@ Available hooks:
 Configure client-side network preferences with automatic fallback:
 
 ```typescript
-import { x402Client, wrapFetchWithPayment, type PaymentRequirements } from "@x402/fetch";
-import { ExactEvmScheme } from "@x402/evm/exact/client";
-import { ExactSvmScheme } from "@x402/svm/exact/client";
+import { t402Client, wrapFetchWithPayment, type PaymentRequirements } from "@t402/fetch";
+import { ExactEvmScheme } from "@t402/evm/exact/client";
+import { ExactSvmScheme } from "@t402/svm/exact/client";
 
 // Define network preference order (most preferred first)
 const networkPreferences = ["solana:", "eip155:"];
 
 const preferredNetworkSelector = (
-  _x402Version: number,
+  _t402Version: number,
   options: PaymentRequirements[],
 ): PaymentRequirements => {
   // Try each preference in order
@@ -178,7 +178,7 @@ const preferredNetworkSelector = (
   return options[0];
 };
 
-const client = new x402Client(preferredNetworkSelector)
+const client = new t402Client(preferredNetworkSelector)
   .register("eip155:*", new ExactEvmScheme(evmSigner))
   .register("solana:*", new ExactSvmScheme(svmSigner));
 

@@ -1,6 +1,6 @@
-# x402 Flask Example Server
+# t402 Flask Example Server
 
-This is an example Flask server that demonstrates how to use the x402 `flask` middleware to implement paywall functionality in your API endpoints.
+This is an example Flask server that demonstrates how to use the t402 `flask` middleware to implement paywall functionality in your API endpoints.
 
 ## Prerequisites
 

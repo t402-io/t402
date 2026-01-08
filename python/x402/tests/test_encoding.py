@@ -1,5 +1,5 @@
 import pytest
-from x402.encoding import safe_base64_encode, safe_base64_decode
+from t402.encoding import safe_base64_encode, safe_base64_decode
 
 
 def test_safe_base64_encode():

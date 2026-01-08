@@ -1,11 +1,11 @@
 {
-  "name": "x402.org Facilitator",
-  "logoUrl": "/logos/x402-logo.png",
-  "description": "Default testnet facilitator for x402",
-  "websiteUrl": "https://x402.org",
+  "name": "t402.org Facilitator",
+  "logoUrl": "/logos/t402-logo.png",
+  "description": "Default testnet facilitator for t402",
+  "websiteUrl": "https://t402.org",
   "category": "Facilitators",
   "facilitator": {
-      "baseUrl": "https://www.x402.org/facilitator",
+      "baseUrl": "https://www.t402.org/facilitator",
       "networks": ["base-sepolia", "solana-devnet"],
       "schemes": ["exact"],
       "assets": ["EIP-3009", "SPL"],

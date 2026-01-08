@@ -1,6 +1,6 @@
-package com.coinbase.x402.client;
+package com.coinbase.t402.client;
 
-import com.coinbase.x402.model.PaymentRequirements;
+import com.coinbase.t402.model.PaymentRequirements;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;

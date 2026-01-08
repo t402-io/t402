@@ -1,8 +1,8 @@
-import { paymentProxy } from "@x402/next";
-import { x402ResourceServer, HTTPFacilitatorClient } from "@x402/core/server";
-import { registerExactEvmScheme } from "@x402/evm/exact/server";
-import { registerExactSvmScheme } from "@x402/svm/exact/server";
-import { bazaarResourceServerExtension, declareDiscoveryExtension } from "@x402/extensions/bazaar";
+import { paymentProxy } from "@t402/next";
+import { t402ResourceServer, HTTPFacilitatorClient } from "@t402/core/server";
+import { registerExactEvmScheme } from "@t402/evm/exact/server";
+import { registerExactSvmScheme } from "@t402/svm/exact/server";
+import { bazaarResourceServerExtension, declareDiscoveryExtension } from "@t402/extensions/bazaar";
 
 export const EVM_PAYEE_ADDRESS = process.env.EVM_PAYEE_ADDRESS as `0x${string}`;
 export const SVM_PAYEE_ADDRESS = process.env.SVM_PAYEE_ADDRESS as string;
@@ -18,8 +18,8 @@ if (!facilitatorUrl) {
 // Create HTTP facilitator client
 const facilitatorClient = new HTTPFacilitatorClient({ url: facilitatorUrl });
 
-// Create x402 resource server with builder pattern (cleaner!)
-export const server = new x402ResourceServer(facilitatorClient);
+// Create t402 resource server with builder pattern (cleaner!)
+export const server = new t402ResourceServer(facilitatorClient);
 
 // Register server schemes
 registerExactEvmScheme(server);

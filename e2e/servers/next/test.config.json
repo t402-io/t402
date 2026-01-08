@@ -2,7 +2,7 @@
   "name": "next",
   "type": "server",
   "language": "typescript",
-  "x402Version": 2,
+  "t402Version": 2,
   "extensions": [
     "bazaar"
   ],
@@ -22,14 +22,14 @@
       "protocolFamily": "svm"
     },
     {
-      "path": "/api/protected-withx402",
+      "path": "/api/protected-witht402",
       "method": "GET",
       "description": "Protected endpoint using withX402 wrapper",
       "requiresPayment": true,
       "protocolFamily": "evm"
     },
     {
-      "path": "/api/protected-svm-withx402",
+      "path": "/api/protected-svm-witht402",
       "method": "GET",
       "description": "Protected endpoint using withX402 wrapper on SVM",
       "requiresPayment": true,

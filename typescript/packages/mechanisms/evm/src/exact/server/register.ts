@@ -1,9 +1,9 @@
-import { x402ResourceServer } from "@x402/core/server";
-import { Network } from "@x402/core/types";
+import { t402ResourceServer } from "@t402/core/server";
+import { Network } from "@t402/core/types";
 import { ExactEvmScheme } from "./scheme";
 
 /**
- * Configuration options for registering EVM schemes to an x402ResourceServer
+ * Configuration options for registering EVM schemes to an t402ResourceServer
  */
 export interface EvmResourceServerConfig {
   /**
@@ -14,28 +14,28 @@ export interface EvmResourceServerConfig {
 }
 
 /**
- * Registers EVM exact payment schemes to an x402ResourceServer instance.
+ * Registers EVM exact payment schemes to an t402ResourceServer instance.
  *
  * This function registers:
  * - V2: eip155:* wildcard scheme with ExactEvmScheme (or specific networks if provided)
  *
- * @param server - The x402ResourceServer instance to register schemes to
+ * @param server - The t402ResourceServer instance to register schemes to
  * @param config - Configuration for EVM resource server registration
  * @returns The server instance for chaining
  *
  * @example
  * ```typescript
- * import { registerExactEvmScheme } from "@x402/evm/exact/server/register";
- * import { x402ResourceServer } from "@x402/core/server";
+ * import { registerExactEvmScheme } from "@t402/evm/exact/server/register";
+ * import { t402ResourceServer } from "@t402/core/server";
  *
- * const server = new x402ResourceServer(facilitatorClient);
+ * const server = new t402ResourceServer(facilitatorClient);
  * registerExactEvmScheme(server, {});
  * ```
  */
 export function registerExactEvmScheme(
-  server: x402ResourceServer,
+  server: t402ResourceServer,
   config: EvmResourceServerConfig = {},
-): x402ResourceServer {
+): t402ResourceServer {
   // Register V2 scheme
   if (config.networks && config.networks.length > 0) {
     // Register specific networks

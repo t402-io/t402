@@ -1,10 +1,10 @@
-# x402 Go Server Documentation
+# t402 Go Server Documentation
 
-This guide covers how to build payment-accepting servers in Go using the x402 package.
+This guide covers how to build payment-accepting servers in Go using the t402 package.
 
 ## Overview
 
-An **x402 server** is an application that protects HTTP resources with payment requirements. The server:
+An **t402 server** is an application that protects HTTP resources with payment requirements. The server:
 
 1. Defines which routes require payment
 2. Returns 402 Payment Required for unpaid requests
@@ -17,7 +17,7 @@ An **x402 server** is an application that protects HTTP resources with payment r
 ### Installation
 
 ```bash
-go get github.com/coinbase/x402/go
+go get github.com/coinbase/t402/go
 ```
 
 ### Basic Gin Server
@@ -27,19 +27,19 @@ package main
 
 import (
     "github.com/gin-gonic/gin"
-    x402 "github.com/coinbase/x402/go"
-    x402http "github.com/coinbase/x402/go/http"
-    ginmw "github.com/coinbase/x402/go/http/gin"
-    evm "github.com/coinbase/x402/go/mechanisms/evm/exact/server"
+    t402 "github.com/coinbase/t402/go"
+    t402http "github.com/coinbase/t402/go/http"
+    ginmw "github.com/coinbase/t402/go/http/gin"
+    evm "github.com/coinbase/t402/go/mechanisms/evm/exact/server"
 )
 
 func main() {
     r := gin.Default()
     
     // 1. Configure payment routes
-    routes := x402http.RoutesConfig{
+    routes := t402http.RoutesConfig{
         "GET /data": {
-            Accepts: x402http.PaymentOptions{
+            Accepts: t402http.PaymentOptions{
                 {
                     Scheme:  "exact",
                     PayTo:   "0x...",
@@ -53,8 +53,8 @@ func main() {
     }
     
     // 2. Create facilitator client
-    facilitator := x402http.NewHTTPFacilitatorClient(&x402http.FacilitatorConfig{
-        URL: "https://x402.org/facilitator",
+    facilitator := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
+        URL: "https://t402.org/facilitator",
     })
     
     // 3. Add payment middleware
@@ -82,9 +82,9 @@ func main() {
 Routes define payment requirements for specific endpoints.
 
 ```go
-routes := x402http.RoutesConfig{
+routes := t402http.RoutesConfig{
     "GET /resource": {
-        Accepts: x402http.PaymentOptions{
+        Accepts: t402http.PaymentOptions{
             {
                 Scheme:  "exact",           // Payment scheme (exact, upto, etc.)
                 PayTo:   "0x...",           // Payment recipient address
@@ -103,23 +103,23 @@ routes := x402http.RoutesConfig{
 Route keys use pattern matching:
 
 ```go
-routes := x402http.RoutesConfig{
+routes := t402http.RoutesConfig{
     "GET /exact-match":    {...},  // Exact path match
     "GET /users/*":        {...},  // Wildcard suffix
     "*":                   {...},  // All routes
 }
 ```
 
-### 2. Resource Server Core (x402.X402ResourceServer)
+### 2. Resource Server Core (t402.X402ResourceServer)
 
 The core server manages payment verification and requirements.
 
 **Key Methods:**
 
 ```go
-server := x402.Newx402ResourceServer(
-    x402.WithFacilitatorClient(facilitator),
-    x402.WithSchemeServer(network, schemeServer),
+server := t402.Newt402ResourceServer(
+    t402.WithFacilitatorClient(facilitator),
+    t402.WithSchemeServer(network, schemeServer),
 )
 
 // Build payment requirements for a resource
@@ -138,10 +138,10 @@ The HTTP layer adds request/response handling.
 
 ```go
 // Create HTTP resource server
-httpServer := x402http.Newx402HTTPResourceServer(
+httpServer := t402http.Newt402HTTPResourceServer(
     routes,
-    x402.WithFacilitatorClient(facilitator),
-    x402.WithSchemeServer(network, schemeServer),
+    t402.WithFacilitatorClient(facilitator),
+    t402.WithSchemeServer(network, schemeServer),
 )
 
 // Process HTTP requests
@@ -156,8 +156,8 @@ headers, _ := httpServer.ProcessSettlement(ctx, payload, requirements, statusCod
 Servers use facilitator clients to verify and settle payments.
 
 ```go
-facilitator := x402http.NewHTTPFacilitatorClient(&x402http.FacilitatorConfig{
-    URL: "https://x402.org/facilitator",
+facilitator := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
+    URL: "https://t402.org/facilitator",
 })
 
 // Verify payment (called by middleware)
@@ -172,7 +172,7 @@ settleResp, err := facilitator.Settle(ctx, payloadBytes, requirementsBytes)
 ### Gin Middleware
 
 ```go
-import ginmw "github.com/coinbase/x402/go/http/gin"
+import ginmw "github.com/coinbase/t402/go/http/gin"
 
 r.Use(ginmw.X402Payment(ginmw.Config{
     Routes:      routes,
@@ -197,10 +197,10 @@ r.Use(ginmw.X402Payment(ginmw.Config{
 Implement custom middleware using the HTTP server directly:
 
 ```go
-func customPaymentMiddleware(server *x402http.HTTPServer) gin.HandlerFunc {
+func customPaymentMiddleware(server *t402http.HTTPServer) gin.HandlerFunc {
     return func(c *gin.Context) {
         adapter := NewGinAdapter(c)
-        reqCtx := x402http.HTTPRequestContext{
+        reqCtx := t402http.HTTPRequestContext{
             Adapter: adapter,
             Path:    c.Request.URL.Path,
             Method:  c.Request.Method,
@@ -209,11 +209,11 @@ func customPaymentMiddleware(server *x402http.HTTPServer) gin.HandlerFunc {
         result := server.ProcessHTTPRequest(ctx, reqCtx, nil)
         
         switch result.Type {
-        case x402http.ResultNoPaymentRequired:
+        case t402http.ResultNoPaymentRequired:
             c.Next()
-        case x402http.ResultPaymentError:
+        case t402http.ResultPaymentError:
             // Return 402 with payment requirements
-        case x402http.ResultPaymentVerified:
+        case t402http.ResultPaymentVerified:
             // Continue and settle
         }
     }
@@ -229,14 +229,14 @@ See **[examples/go/servers/custom/](../../examples/go/servers/custom/)** for com
 Charge different amounts based on request context:
 
 ```go
-routes := x402http.RoutesConfig{
+routes := t402http.RoutesConfig{
     "GET /data": {
-        Accepts: x402http.PaymentOptions{
+        Accepts: t402http.PaymentOptions{
             {
                 Scheme:  "exact",
                 PayTo:   "0x...",
                 Network: "eip155:84532",
-                Price: x402http.DynamicPriceFunc(func(ctx context.Context, reqCtx x402http.HTTPRequestContext) (x402.Price, error) {
+                Price: t402http.DynamicPriceFunc(func(ctx context.Context, reqCtx t402http.HTTPRequestContext) (t402.Price, error) {
                     tier := extractTierFromRequest(reqCtx)
                     if tier == "premium" {
                         return "$0.005", nil
@@ -254,14 +254,14 @@ routes := x402http.RoutesConfig{
 Route payments to different addresses:
 
 ```go
-routes := x402http.RoutesConfig{
+routes := t402http.RoutesConfig{
     "GET /marketplace/item/*": {
-        Accepts: x402http.PaymentOptions{
+        Accepts: t402http.PaymentOptions{
             {
                 Scheme:  "exact",
                 Price:   "$10.00",
                 Network: "eip155:84532",
-                PayTo: x402http.DynamicPayToFunc(func(ctx context.Context, reqCtx x402http.HTTPRequestContext) (string, error) {
+                PayTo: t402http.DynamicPayToFunc(func(ctx context.Context, reqCtx t402http.HTTPRequestContext) (string, error) {
                     sellerID := extractSellerFromPath(reqCtx.Path)
                     return getSellerAddress(sellerID)
                 }),
@@ -277,10 +277,10 @@ Use alternative tokens for payments:
 
 ```go
 evmScheme := evm.NewExactEvmScheme().RegisterMoneyParser(
-    func(amount float64, network x402.Network) (*x402.AssetAmount, error) {
+    func(amount float64, network t402.Network) (*t402.AssetAmount, error) {
         // Use DAI for large amounts
         if amount > 100 {
-            return &x402.AssetAmount{
+            return &t402.AssetAmount{
                 Amount: fmt.Sprintf("%.0f", amount*1e18),
                 Asset:  "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb", // DAI
                 Extra:  map[string]interface{}{"token": "DAI"},
@@ -296,17 +296,17 @@ evmScheme := evm.NewExactEvmScheme().RegisterMoneyParser(
 Run custom logic during payment processing:
 
 ```go
-server := x402.Newx402ResourceServer(
-    x402.WithFacilitatorClient(facilitator),
-    x402.WithSchemeServer(network, schemeServer),
+server := t402.Newt402ResourceServer(
+    t402.WithFacilitatorClient(facilitator),
+    t402.WithSchemeServer(network, schemeServer),
 )
 
-server.OnBeforeVerify(func(ctx x402.VerifyContext) (*x402.BeforeHookResult, error) {
+server.OnBeforeVerify(func(ctx t402.VerifyContext) (*t402.BeforeHookResult, error) {
     log.Printf("Verifying payment for %s", ctx.Requirements.Network)
     return nil, nil
 })
 
-server.OnAfterSettle(func(ctx x402.SettleResultContext) error {
+server.OnAfterSettle(func(ctx t402.SettleResultContext) error {
     log.Printf("Payment settled: %s", ctx.Result.Transaction)
     return nil
 })
@@ -318,8 +318,8 @@ Add protocol extensions like Bazaar discovery:
 
 ```go
 import (
-    "github.com/coinbase/x402/go/extensions/bazaar"
-    "github.com/coinbase/x402/go/extensions/types"
+    "github.com/coinbase/t402/go/extensions/bazaar"
+    "github.com/coinbase/t402/go/extensions/types"
 )
 
 discoveryExt, _ := bazaar.DeclareDiscoveryExtension(
@@ -330,9 +330,9 @@ discoveryExt, _ := bazaar.DeclareDiscoveryExtension(
     &types.OutputConfig{...},
 )
 
-routes := x402http.RoutesConfig{
+routes := t402http.RoutesConfig{
     "GET /weather": {
-        Accepts: x402http.PaymentOptions{
+        Accepts: t402http.PaymentOptions{
             {Scheme: "exact", PayTo: "0x...", Price: "$0.001", Network: "eip155:84532"},
         },
         Extensions: map[string]interface{}{
@@ -344,11 +344,11 @@ routes := x402http.RoutesConfig{
 
 ## API Reference
 
-### x402.X402ResourceServer
+### t402.X402ResourceServer
 
 **Constructor:**
 ```go
-func Newx402ResourceServer(opts ...ResourceServerOption) *X402ResourceServer
+func Newt402ResourceServer(opts ...ResourceServerOption) *X402ResourceServer
 ```
 
 **Options:**
@@ -374,7 +374,7 @@ func (s *X402ResourceServer) VerifyPayment(ctx context.Context, payload PaymentP
 func (s *X402ResourceServer) SettlePayment(ctx context.Context, payload PaymentPayload, requirements PaymentRequirements) (SettleResponse, error)
 ```
 
-### x402http.RoutesConfig
+### t402http.RoutesConfig
 
 ```go
 type RoutesConfig map[string]RouteConfig
@@ -389,8 +389,8 @@ type RouteConfig struct {
 type PaymentOption struct {
     Scheme  string                  // "exact", etc.
     PayTo   interface{}             // string or DynamicPayToFunc
-    Price   interface{}             // x402.Price or DynamicPriceFunc
-    Network x402.Network            // "eip155:84532", etc.
+    Price   interface{}             // t402.Price or DynamicPriceFunc
+    Network t402.Network            // "eip155:84532", etc.
 }
 ```
 
@@ -431,7 +431,7 @@ r.Use(ginmw.X402Payment(ginmw.Config{
 ```go
 r.Use(ginmw.X402Payment(ginmw.Config{
     // ... config ...
-    SettlementHandler: func(c *gin.Context, resp x402.SettleResponse) {
+    SettlementHandler: func(c *gin.Context, resp t402.SettleResponse) {
         log.Printf("Payment settled: tx=%s, payer=%s", resp.Transaction, resp.Payer)
         
         // Store in database, emit metrics, etc.
@@ -465,9 +465,9 @@ r.Use(ginmw.X402Payment(ginmw.Config{
 ### 3. Use Descriptive Routes
 
 ```go
-routes := x402http.RoutesConfig{
+routes := t402http.RoutesConfig{
     "GET /api/weather": {
-        Accepts: x402http.PaymentOptions{
+        Accepts: t402http.PaymentOptions{
             {Scheme: "exact", PayTo: "0x...", Price: "$0.001", Network: "eip155:84532"},
         },
         Description: "Get current weather data for a city",
@@ -483,7 +483,7 @@ r.Use(ginmw.X402Payment(ginmw.Config{
     ErrorHandler: func(c *gin.Context, err error) {
         // Log and notify on errors
     },
-    SettlementHandler: func(c *gin.Context, resp x402.SettleResponse) {
+    SettlementHandler: func(c *gin.Context, resp t402.SettleResponse) {
         // Record successful payments
     },
     // ...
@@ -495,10 +495,10 @@ r.Use(ginmw.X402Payment(ginmw.Config{
 Don't protect everything:
 
 ```go
-routes := x402http.RoutesConfig{
+routes := t402http.RoutesConfig{
     // Protected
-    "GET /api/premium":    {Accepts: x402http.PaymentOptions{{Price: "$1.00", ...}}},
-    "POST /api/compute":   {Accepts: x402http.PaymentOptions{{Price: "$5.00", ...}}},
+    "GET /api/premium":    {Accepts: t402http.PaymentOptions{{Price: "$1.00", ...}}},
+    "POST /api/compute":   {Accepts: t402http.PaymentOptions{{Price: "$5.00", ...}}},
     // Leave /health, /docs, etc. unprotected
 }
 ```
@@ -540,10 +540,10 @@ r.Use(ginmw.X402Payment(ginmw.Config{
 Different prices for different endpoints:
 
 ```go
-routes := x402http.RoutesConfig{
-    "GET /api/basic":       {Accepts: x402http.PaymentOptions{{Price: "$0.001", ...}}},   // Cheap
-    "GET /api/premium":     {Accepts: x402http.PaymentOptions{{Price: "$0.10", ...}}},    // Medium
-    "POST /api/compute":    {Accepts: x402http.PaymentOptions{{Price: "$1.00", ...}}},    // Expensive
+routes := t402http.RoutesConfig{
+    "GET /api/basic":       {Accepts: t402http.PaymentOptions{{Price: "$0.001", ...}}},   // Cheap
+    "GET /api/premium":     {Accepts: t402http.PaymentOptions{{Price: "$0.10", ...}}},    // Medium
+    "POST /api/compute":    {Accepts: t402http.PaymentOptions{{Price: "$1.00", ...}}},    // Expensive
 }
 ```
 
@@ -552,14 +552,14 @@ routes := x402http.RoutesConfig{
 Implement dynamic pricing based on request context:
 
 ```go
-routes := x402http.RoutesConfig{
+routes := t402http.RoutesConfig{
     "GET /api/data": {
-        Accepts: x402http.PaymentOptions{
+        Accepts: t402http.PaymentOptions{
             {
                 Scheme:  "exact",
                 PayTo:   "0x...",
                 Network: "eip155:84532",
-                Price: x402http.DynamicPriceFunc(func(ctx context.Context, reqCtx x402http.HTTPRequestContext) (x402.Price, error) {
+                Price: t402http.DynamicPriceFunc(func(ctx context.Context, reqCtx t402http.HTTPRequestContext) (t402.Price, error) {
                     tier := getUserTier(reqCtx)
                     switch tier {
                     case "free":
@@ -583,14 +583,14 @@ routes := x402http.RoutesConfig{
 Route payments to different sellers:
 
 ```go
-routes := x402http.RoutesConfig{
+routes := t402http.RoutesConfig{
     "GET /marketplace/item/*": {
-        Accepts: x402http.PaymentOptions{
+        Accepts: t402http.PaymentOptions{
             {
                 Scheme:  "exact",
                 Price:   "$10.00",
                 Network: "eip155:84532",
-                PayTo: x402http.DynamicPayToFunc(func(ctx context.Context, reqCtx x402http.HTTPRequestContext) (string, error) {
+                PayTo: t402http.DynamicPayToFunc(func(ctx context.Context, reqCtx t402http.HTTPRequestContext) (string, error) {
                     itemID := extractItemID(reqCtx.Path)
                     seller, err := db.GetItemSeller(itemID)
                     if err != nil {
@@ -706,21 +706,21 @@ See [`test/integration/`](test/integration/) for examples testing against real f
 
 **Testnet:**
 ```go
-facilitator := x402http.NewHTTPFacilitatorClient(&x402http.FacilitatorConfig{
-    URL: "https://x402.org/facilitator", // Testnet
+facilitator := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
+    URL: "https://t402.org/facilitator", // Testnet
 })
 ```
 
 **Mainnet:**
 ```go
-facilitator := x402http.NewHTTPFacilitatorClient(&x402http.FacilitatorConfig{
+facilitator := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
     URL: "https://facilitator.coinbase.com", // Production
 })
 ```
 
 **Self-Hosted:**
 ```go
-facilitator := x402http.NewHTTPFacilitatorClient(&x402http.FacilitatorConfig{
+facilitator := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
     URL: "https://your-facilitator.example.com",
 })
 ```
@@ -739,7 +739,7 @@ Complete examples are available in [`examples/go/servers/`](../../examples/go/se
 
 **V1:**
 ```go
-routes := x402gin.Routes{
+routes := t402gin.Routes{
     "GET /data": {
         Network: "base-sepolia",
         // ...
@@ -749,7 +749,7 @@ routes := x402gin.Routes{
 
 **V2:**
 ```go
-routes := x402http.RoutesConfig{
+routes := t402http.RoutesConfig{
     "GET /data": {
         Network: "eip155:84532",  // CAIP-2 format
         // ...
@@ -761,12 +761,12 @@ routes := x402http.RoutesConfig{
 
 **V1:**
 ```go
-import "github.com/coinbase/x402/go/middleware/gin"
+import "github.com/coinbase/t402/go/middleware/gin"
 ```
 
 **V2:**
 ```go
-import ginmw "github.com/coinbase/x402/go/http/gin"
+import ginmw "github.com/coinbase/t402/go/http/gin"
 ```
 
 ## Related Documentation

@@ -20,7 +20,7 @@ export class CoverageTracker {
    * Args:
    *   componentName: Name of the component
    *   protocolFamily: Protocol family (e.g., 'evm', 'svm')
-   *   version: x402 version number
+   *   version: t402 version number
    * 
    * Returns:
    *   Coverage key string
@@ -52,7 +52,7 @@ export class CoverageTracker {
    *   true if scenario provides new coverage, false if all components already covered
    */
   isNewCoverage(scenario: TestScenario): boolean {
-    const version = scenario.server.config.x402Version;
+    const version = scenario.server.config.t402Version;
     const protocolFamily = scenario.protocolFamily;
 
     const clientKey = this.getCoverageKey(
@@ -99,7 +99,7 @@ export class CoverageTracker {
    *   scenario: Test scenario to mark as covered
    */
   markCovered(scenario: TestScenario): void {
-    const version = scenario.server.config.x402Version;
+    const version = scenario.server.config.t402Version;
     const protocolFamily = scenario.protocolFamily;
 
     const clientKey = this.getCoverageKey(
@@ -167,7 +167,7 @@ export function minimizeScenarios(scenarios: TestScenario[]): TestScenario[] {
       minimized.push(scenario);
       tracker.markCovered(scenario);
     } else {
-      verboseLog(`  ⏭️  Skipping (covered): ${scenario.client.name} → ${scenario.server.name} → ${scenario.endpoint.path} [${scenario.facilitator?.name || 'default'}] (${scenario.protocolFamily}-v${scenario.server.config.x402Version})`);
+      verboseLog(`  ⏭️  Skipping (covered): ${scenario.client.name} → ${scenario.server.name} → ${scenario.endpoint.path} [${scenario.facilitator?.name || 'default'}] (${scenario.protocolFamily}-v${scenario.server.config.t402Version})`);
     }
   }
 

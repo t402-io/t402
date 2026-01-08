@@ -11,10 +11,10 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/signer/core/apitypes"
 
-	x402evm "github.com/coinbase/x402/go/mechanisms/evm"
+	t402evm "github.com/coinbase/t402/go/mechanisms/evm"
 )
 
-// ClientSigner implements x402evm.ClientEvmSigner using an ECDSA private key.
+// ClientSigner implements t402evm.ClientEvmSigner using an ECDSA private key.
 // This provides client-side EIP-712 signing for creating payment payloads.
 type ClientSigner struct {
 	privateKey *ecdsa.PrivateKey
@@ -38,9 +38,9 @@ type ClientSigner struct {
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
-//	client := x402.Newx402Client().
+//	client := t402.Newt402Client().
 //	    Register("eip155:*", evm.NewExactEvmClient(signer))
-func NewClientSignerFromPrivateKey(privateKeyHex string) (x402evm.ClientEvmSigner, error) {
+func NewClientSignerFromPrivateKey(privateKeyHex string) (t402evm.ClientEvmSigner, error) {
 	// Strip 0x prefix if present
 	privateKeyHex = strings.TrimPrefix(privateKeyHex, "0x")
 
@@ -80,12 +80,12 @@ func (s *ClientSigner) Address() string {
 //	Error if signing fails
 func (s *ClientSigner) SignTypedData(
 	ctx context.Context,
-	domain x402evm.TypedDataDomain,
-	types map[string][]x402evm.TypedDataField,
+	domain t402evm.TypedDataDomain,
+	types map[string][]t402evm.TypedDataField,
 	primaryType string,
 	message map[string]interface{},
 ) ([]byte, error) {
-	// Convert x402 types to go-ethereum apitypes
+	// Convert t402 types to go-ethereum apitypes
 	typedData := apitypes.TypedData{
 		Types:       make(apitypes.Types),
 		PrimaryType: primaryType,

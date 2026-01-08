@@ -8,7 +8,7 @@ importers:
 
   .:
     dependencies:
-      '@x402/core':
+      '@t402/core':
         specifier: workspace:*
         version: link:../core
       ajv:

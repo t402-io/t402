@@ -1,6 +1,6 @@
-# x402 Go Facilitator Documentation
+# t402 Go Facilitator Documentation
 
-This guide covers how to build payment facilitator services in Go using the x402 package.
+This guide covers how to build payment facilitator services in Go using the t402 package.
 
 ## Overview
 
@@ -29,7 +29,7 @@ Client → Resource Server → Facilitator → Network
 ### Installation
 
 ```bash
-go get github.com/coinbase/x402/go
+go get github.com/coinbase/t402/go
 ```
 
 ### Basic Facilitator Server
@@ -39,13 +39,13 @@ package main
 
 import (
     "github.com/gin-gonic/gin"
-    x402 "github.com/coinbase/x402/go"
-    evm "github.com/coinbase/x402/go/mechanisms/evm/exact/facilitator"
+    t402 "github.com/coinbase/t402/go"
+    evm "github.com/coinbase/t402/go/mechanisms/evm/exact/facilitator"
 )
 
 func main() {
     // 1. Create facilitator
-    facilitator := x402.Newx402Facilitator()
+    facilitator := t402.Newt402Facilitator()
     
     // 2. Register payment schemes
     // Note: Requires facilitator signer with RPC integration
@@ -65,14 +65,14 @@ func main() {
 
 ## Core Concepts
 
-### 1. Facilitator Core (x402.X402Facilitator)
+### 1. Facilitator Core (t402.X402Facilitator)
 
 The core facilitator manages verification and settlement.
 
 **Key Methods:**
 
 ```go
-facilitator := x402.Newx402Facilitator()
+facilitator := t402.Newt402Facilitator()
 
 // Register payment mechanisms
 facilitator.Register(network, schemeFacilitator)
@@ -112,7 +112,7 @@ Returns supported networks and schemes.
 {
   "kinds": [
     {
-      "x402Version": 2,
+      "t402Version": 2,
       "scheme": "exact",
       "network": "eip155:84532"
     }
@@ -284,11 +284,11 @@ facilitator.OnBeforeVerify(func(ctx FacilitatorVerifyContext) (*BeforeHookResult
 
 ## API Reference
 
-### x402.X402Facilitator
+### t402.X402Facilitator
 
 **Constructor:**
 ```go
-func Newx402Facilitator() *X402Facilitator
+func Newt402Facilitator() *X402Facilitator
 ```
 
 **Registration:**
@@ -402,7 +402,7 @@ Facilitator signers need to:
 
 ```go
 func TestFacilitatorVerify(t *testing.T) {
-    facilitator := x402.Newx402Facilitator()
+    facilitator := t402.Newt402Facilitator()
     facilitator.Register(network, mockScheme)
     
     result, err := facilitator.Verify(ctx, payloadBytes, requirementsBytes)
@@ -424,7 +424,7 @@ Test against real blockchain networks (testnet):
 // Create real signer with RPC connection
 signer := newRealFacilitatorSigner(privateKey, rpcURL)
 
-facilitator := x402.Newx402Facilitator()
+facilitator := t402.Newt402Facilitator()
 facilitator.Register(network, evm.NewExactEvmScheme(signer))
 
 // Test real verification and settlement
@@ -545,7 +545,7 @@ facilitator.OnSettleFailure(func(ctx FacilitatorSettleFailureContext) (*SettleFa
 ### HTTP Server Handler
 
 ```go
-func handleVerify(facilitator *x402.X402Facilitator) gin.HandlerFunc {
+func handleVerify(facilitator *t402.X402Facilitator) gin.HandlerFunc {
     return func(c *gin.Context) {
         ctx, cancel := context.WithTimeout(c.Request.Context(), 30*time.Second)
         defer cancel()
@@ -574,7 +574,7 @@ func handleVerify(facilitator *x402.X402Facilitator) gin.HandlerFunc {
 ### Settlement with Timeout
 
 ```go
-func handleSettle(facilitator *x402.X402Facilitator) gin.HandlerFunc {
+func handleSettle(facilitator *t402.X402Facilitator) gin.HandlerFunc {
     return func(c *gin.Context) {
         // Use longer timeout for blockchain operations
         ctx, cancel := context.WithTimeout(c.Request.Context(), 60*time.Second)
@@ -702,7 +702,7 @@ CMD ["./facilitator"]
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: x402-facilitator
+  name: t402-facilitator
 spec:
   replicas: 3
   template:

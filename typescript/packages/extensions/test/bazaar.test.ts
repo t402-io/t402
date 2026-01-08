@@ -315,7 +315,7 @@ describe("Bazaar Discovery Extension", () => {
       const extension = declared.bazaar;
 
       const paymentPayload = {
-        x402Version: 2,
+        t402Version: 2,
         scheme: "exact",
         network: "eip155:8453" as unknown,
         payload: {},
@@ -356,7 +356,7 @@ describe("Bazaar Discovery Extension", () => {
       };
 
       const v1Payload = {
-        x402Version: 1,
+        t402Version: 1,
         scheme: "exact",
         network: "eip155:8453" as unknown,
         payload: {},
@@ -372,7 +372,7 @@ describe("Bazaar Discovery Extension", () => {
 
     it("should return null when no discovery info is present", () => {
       const paymentPayload = {
-        x402Version: 2,
+        t402Version: 2,
         scheme: "exact",
         network: "eip155:8453" as unknown,
         payload: {},
@@ -809,7 +809,7 @@ describe("Bazaar Discovery Extension", () => {
       const extension = declared.bazaar;
 
       const paymentRequired = {
-        x402Version: 2,
+        t402Version: 2,
         resource: {
           url: "/api/action",
           description: "Execute an action",
@@ -842,7 +842,7 @@ describe("Bazaar Discovery Extension", () => {
         scheme: "exact",
         network: "eip155:8453" as unknown,
         maxAmountRequired: "10000",
-        resource: "https://mesh.heurist.xyz/x402/agents/TokenResolverAgent/search",
+        resource: "https://mesh.heurist.xyz/t402/agents/TokenResolverAgent/search",
         description: "Find tokens by address, ticker/symbol, or token name",
         mimeType: "application/json",
         outputSchema: {
@@ -876,7 +876,7 @@ describe("Bazaar Discovery Extension", () => {
       };
 
       const v1Payload = {
-        x402Version: 1,
+        t402Version: 1,
         scheme: "exact",
         network: "eip155:8453" as unknown,
         payload: {},
@@ -908,7 +908,7 @@ describe("Bazaar Discovery Extension", () => {
       const v2Extension = declared.bazaar;
 
       const v2Payload = {
-        x402Version: 2,
+        t402Version: 2,
         scheme: "exact",
         network: "eip155:8453" as unknown,
         payload: {},
@@ -947,7 +947,7 @@ describe("Bazaar Discovery Extension", () => {
       };
 
       const v1Payload = {
-        x402Version: 1,
+        t402Version: 1,
         scheme: "exact",
         network: "eip155:8453" as unknown,
         payload: {},

@@ -5,10 +5,10 @@
   "protocolFamilies": [
     "evm"
   ],
-  "x402Versions": [
+  "t402Versions": [
     1
   ],
-  "description": "Python requests client with x402 HTTP adapter",
+  "description": "Python requests client with t402 HTTP adapter",
   "environment": {
     "required": [
       "EVM_PRIVATE_KEY",

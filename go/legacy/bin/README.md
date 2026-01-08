@@ -1,6 +1,6 @@
 # Demo Proxy
 
-This is a universal proxy for demo purposes. **It is not meant for production** It makes any website or API payable via x402.
+This is a universal proxy for demo purposes. **It is not meant for production** It makes any website or API payable via t402.
 
 To run
 

@@ -2,15 +2,15 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Context } from "hono";
 import type {
   HTTPProcessResult,
-  x402HTTPResourceServer,
+  t402HTTPResourceServer,
   PaywallProvider,
   FacilitatorClient,
-} from "@x402/core/server";
+} from "@t402/core/server";
 import {
-  x402ResourceServer,
-  x402HTTPResourceServer as HTTPResourceServer,
-} from "@x402/core/server";
-import type { PaymentPayload, PaymentRequirements, SchemeNetworkServer } from "@x402/core/types";
+  t402ResourceServer,
+  t402HTTPResourceServer as HTTPResourceServer,
+} from "@t402/core/server";
+import type { PaymentPayload, PaymentRequirements, SchemeNetworkServer } from "@t402/core/types";
 import { paymentMiddleware, paymentMiddlewareFromConfig, type SchemeRegistration } from "./index";
 
 // --- Test Fixtures ---
@@ -39,13 +39,13 @@ let mockProcessSettlement: ReturnType<typeof vi.fn>;
 let mockRegisterPaywallProvider: ReturnType<typeof vi.fn>;
 let mockRequiresPayment: ReturnType<typeof vi.fn>;
 
-vi.mock("@x402/core/server", () => ({
-  x402ResourceServer: vi.fn().mockImplementation(() => ({
+vi.mock("@t402/core/server", () => ({
+  t402ResourceServer: vi.fn().mockImplementation(() => ({
     initialize: vi.fn().mockResolvedValue(undefined),
     registerExtension: vi.fn(),
     register: vi.fn(),
   })),
-  x402HTTPResourceServer: vi.fn().mockImplementation(() => ({
+  t402HTTPResourceServer: vi.fn().mockImplementation(() => ({
     initialize: vi.fn().mockResolvedValue(undefined),
     processHTTPRequest: mockProcessHTTPRequest,
     processSettlement: mockProcessSettlement,
@@ -161,7 +161,7 @@ describe("paymentMiddleware", () => {
           processSettlement: mockProcessSettlement,
           registerPaywallProvider: mockRegisterPaywallProvider,
           requiresPayment: mockRequiresPayment,
-        }) as unknown as x402HTTPResourceServer,
+        }) as unknown as t402HTTPResourceServer,
     );
   });
 
@@ -170,7 +170,7 @@ describe("paymentMiddleware", () => {
 
     const middleware = paymentMiddleware(
       mockRoutes,
-      {} as unknown as x402ResourceServer,
+      {} as unknown as t402ResourceServer,
       undefined,
       undefined,
       false,
@@ -197,7 +197,7 @@ describe("paymentMiddleware", () => {
 
     const middleware = paymentMiddleware(
       mockRoutes,
-      {} as unknown as x402ResourceServer,
+      {} as unknown as t402ResourceServer,
       undefined,
       undefined,
       false,
@@ -224,7 +224,7 @@ describe("paymentMiddleware", () => {
 
     const middleware = paymentMiddleware(
       mockRoutes,
-      {} as unknown as x402ResourceServer,
+      {} as unknown as t402ResourceServer,
       undefined,
       undefined,
       false,
@@ -251,7 +251,7 @@ describe("paymentMiddleware", () => {
 
     const middleware = paymentMiddleware(
       mockRoutes,
-      {} as unknown as x402ResourceServer,
+      {} as unknown as t402ResourceServer,
       undefined,
       undefined,
       false,
@@ -276,7 +276,7 @@ describe("paymentMiddleware", () => {
 
     const middleware = paymentMiddleware(
       mockRoutes,
-      {} as unknown as x402ResourceServer,
+      {} as unknown as t402ResourceServer,
       undefined,
       undefined,
       false,
@@ -313,7 +313,7 @@ describe("paymentMiddleware", () => {
 
     const middleware = paymentMiddleware(
       mockRoutes,
-      {} as unknown as x402ResourceServer,
+      {} as unknown as t402ResourceServer,
       undefined,
       undefined,
       false,
@@ -340,7 +340,7 @@ describe("paymentMiddleware", () => {
 
     const middleware = paymentMiddleware(
       mockRoutes,
-      {} as unknown as x402ResourceServer,
+      {} as unknown as t402ResourceServer,
       undefined,
       undefined,
       false,
@@ -378,7 +378,7 @@ describe("paymentMiddleware", () => {
 
     const middleware = paymentMiddleware(
       mockRoutes,
-      {} as unknown as x402ResourceServer,
+      {} as unknown as t402ResourceServer,
       undefined,
       undefined,
       false,
@@ -410,7 +410,7 @@ describe("paymentMiddleware", () => {
 
     const middleware = paymentMiddleware(
       mockRoutes,
-      {} as unknown as x402ResourceServer,
+      {} as unknown as t402ResourceServer,
       paywallConfig,
       undefined,
       false,
@@ -427,7 +427,7 @@ describe("paymentMiddleware", () => {
     setupMockHttpServer({ type: "no-payment-required" });
     const paywall: PaywallProvider = { generateHtml: vi.fn() };
 
-    paymentMiddleware(mockRoutes, {} as unknown as x402ResourceServer, undefined, paywall, false);
+    paymentMiddleware(mockRoutes, {} as unknown as t402ResourceServer, undefined, paywall, false);
 
     expect(mockRegisterPaywallProvider).toHaveBeenCalledWith(paywall);
   });
@@ -449,26 +449,26 @@ describe("paymentMiddlewareFromConfig", () => {
           processSettlement: mockProcessSettlement,
           registerPaywallProvider: mockRegisterPaywallProvider,
           requiresPayment: mockRequiresPayment,
-        }) as unknown as x402HTTPResourceServer,
+        }) as unknown as t402HTTPResourceServer,
     );
 
-    vi.mocked(x402ResourceServer).mockImplementation(
+    vi.mocked(t402ResourceServer).mockImplementation(
       () =>
         ({
           initialize: vi.fn().mockResolvedValue(undefined),
           registerExtension: vi.fn(),
           register: vi.fn(),
-        }) as unknown as x402ResourceServer,
+        }) as unknown as t402ResourceServer,
     );
   });
 
-  it("creates x402ResourceServer with facilitator clients", () => {
+  it("creates t402ResourceServer with facilitator clients", () => {
     setupMockHttpServer({ type: "no-payment-required" });
     const facilitator = { verify: vi.fn(), settle: vi.fn() } as unknown as FacilitatorClient;
 
     paymentMiddlewareFromConfig(mockRoutes, facilitator);
 
-    expect(x402ResourceServer).toHaveBeenCalledWith(facilitator);
+    expect(t402ResourceServer).toHaveBeenCalledWith(facilitator);
   });
 
   it("registers scheme servers for each network", () => {
@@ -481,7 +481,7 @@ describe("paymentMiddlewareFromConfig", () => {
 
     paymentMiddlewareFromConfig(mockRoutes, undefined, schemes);
 
-    const serverInstance = vi.mocked(x402ResourceServer).mock.results[0].value;
+    const serverInstance = vi.mocked(t402ResourceServer).mock.results[0].value;
     expect(serverInstance.register).toHaveBeenCalledTimes(2);
     expect(serverInstance.register).toHaveBeenCalledWith("eip155:84532", schemeServer);
     expect(serverInstance.register).toHaveBeenCalledWith("eip155:8453", schemeServer);
@@ -515,7 +515,7 @@ describe("HonoAdapter", () => {
           processSettlement: mockProcessSettlement,
           registerPaywallProvider: mockRegisterPaywallProvider,
           requiresPayment: mockRequiresPayment,
-        }) as unknown as x402HTTPResourceServer,
+        }) as unknown as t402HTTPResourceServer,
     );
   });
 
@@ -524,7 +524,7 @@ describe("HonoAdapter", () => {
 
     const middleware = paymentMiddleware(
       mockRoutes,
-      {} as unknown as x402ResourceServer,
+      {} as unknown as t402ResourceServer,
       undefined,
       undefined,
       false,
@@ -548,7 +548,7 @@ describe("HonoAdapter", () => {
 
     const middleware = paymentMiddleware(
       mockRoutes,
-      {} as unknown as x402ResourceServer,
+      {} as unknown as t402ResourceServer,
       undefined,
       undefined,
       false,
@@ -571,7 +571,7 @@ describe("HonoAdapter", () => {
 
     const middleware = paymentMiddleware(
       mockRoutes,
-      {} as unknown as x402ResourceServer,
+      {} as unknown as t402ResourceServer,
       undefined,
       undefined,
       false,
@@ -594,7 +594,7 @@ describe("HonoAdapter", () => {
 
     const middleware = paymentMiddleware(
       mockRoutes,
-      {} as unknown as x402ResourceServer,
+      {} as unknown as t402ResourceServer,
       undefined,
       undefined,
       false,
@@ -619,7 +619,7 @@ describe("HonoAdapter", () => {
 
     const middleware = paymentMiddleware(
       mockRoutes,
-      {} as unknown as x402ResourceServer,
+      {} as unknown as t402ResourceServer,
       undefined,
       undefined,
       false,

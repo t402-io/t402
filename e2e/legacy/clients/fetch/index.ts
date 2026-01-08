@@ -1,6 +1,6 @@
 import { config } from "dotenv";
 import { Hex } from "viem";
-import { createSigner, decodeXPaymentResponse, MultiNetworkSigner, wrapFetchWithPayment } from "x402-fetch";
+import { createSigner, decodeXPaymentResponse, MultiNetworkSigner, wrapFetchWithPayment } from "t402-fetch";
 
 config();
 

@@ -38,12 +38,12 @@ export default function ProtectedPage() {
           </a>{" "}
           ·{" "}
           <a
-            href="https://soundcloud.com/dan-kim-675678711/x402"
-            title="x402 (DJ Reppel Remix)"
+            href="https://soundcloud.com/dan-kim-675678711/t402"
+            title="t402 (DJ Reppel Remix)"
             target="_blank"
             style={{ color: "#cccccc", textDecoration: "none" }}
           >
-            x402 (DJ Reppel Remix)
+            t402 (DJ Reppel Remix)
           </a>
         </div>
       </div>

@@ -1,10 +1,10 @@
 [project]
 name = "client-discovery-example"
 version = "0.1.0"
-description = "Example of using the x402 discovery layer"
+description = "Example of using the t402 discovery layer"
 requires-python = ">=3.10"
 dependencies = [
-    "x402",
+    "t402",
     "cdp-sdk>=1.31.2",
     "Flask>=3.1.1",
     "uvicorn>=0.27.0"
@@ -24,4 +24,4 @@ allow-direct-references = true
 package = false
 
 [tool.uv.sources]
-x402 = { path = "../../../python/x402", editable = true } 
+t402 = { path = "../../../python/t402", editable = true } 

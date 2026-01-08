@@ -7,26 +7,26 @@ import { Providers } from "./providers";
 const geist = Geist({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "x402 Mini App",
+  title: "t402 Mini App",
   description:
-    "A Farcaster Mini App with x402 payment-protected endpoints using the v2 SDK.",
-  keywords: ["mini app", "x402", "onchainkit", "farcaster", "web3", "payments"],
-  authors: [{ name: "x402 Team" }],
+    "A Farcaster Mini App with t402 payment-protected endpoints using the v2 SDK.",
+  keywords: ["mini app", "t402", "onchainkit", "farcaster", "web3", "payments"],
+  authors: [{ name: "t402 Team" }],
 
   // Open Graph metadata for social sharing and embeds
   openGraph: {
-    title: "x402 Mini App",
+    title: "t402 Mini App",
     description:
-      "A Farcaster Mini App with x402 payment-protected endpoints using the v2 SDK.",
+      "A Farcaster Mini App with t402 payment-protected endpoints using the v2 SDK.",
     type: "website",
     url: process.env.NEXT_PUBLIC_URL || "https://example.com/",
-    siteName: "x402 Mini App",
+    siteName: "t402 Mini App",
     images: [
       {
         url: process.env.NEXT_PUBLIC_APP_HERO_IMAGE || "/icon.png",
         width: 1200,
         height: 630,
-        alt: "x402 Mini App",
+        alt: "t402 Mini App",
       },
     ],
   },
@@ -34,16 +34,16 @@ export const metadata: Metadata = {
   // Twitter Card metadata
   twitter: {
     card: "summary_large_image",
-    title: "x402 Mini App",
+    title: "t402 Mini App",
     description:
-      "A Farcaster Mini App with x402 payment-protected endpoints using the v2 SDK.",
+      "A Farcaster Mini App with t402 payment-protected endpoints using the v2 SDK.",
     images: [process.env.NEXT_PUBLIC_APP_HERO_IMAGE || "/icon.png"],
   },
 
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME || "x402 Mini App",
+    title: process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME || "t402 Mini App",
   },
   formatDetection: {
     telephone: false,
@@ -59,11 +59,11 @@ export const metadata: Metadata = {
       version: "next",
       imageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE,
       button: {
-        title: `Launch ${process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME || "x402 Mini App"}`,
+        title: `Launch ${process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME || "t402 Mini App"}`,
         action: {
           type: "launch_frame",
           name:
-            process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME || "x402 Mini App",
+            process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME || "t402 Mini App",
           url: process.env.NEXT_PUBLIC_URL,
           splashImageUrl: process.env.NEXT_PUBLIC_SPLASH_IMAGE,
           splashBackgroundColor:
@@ -101,7 +101,7 @@ export default function RootLayout({
         <meta
           name="apple-mobile-web-app-title"
           content={
-            process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME || "x402 Mini App"
+            process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME || "t402 Mini App"
           }
         />
 

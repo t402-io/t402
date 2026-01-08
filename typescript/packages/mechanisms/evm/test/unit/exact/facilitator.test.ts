@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { ExactEvmScheme } from "../../../src/exact/facilitator/scheme";
 import { ExactEvmScheme as ClientExactEvmScheme } from "../../../src/exact/client/scheme";
 import type { ClientEvmSigner, FacilitatorEvmSigner } from "../../../src/signer";
-import { PaymentRequirements, PaymentPayload } from "@x402/core/types";
+import { PaymentRequirements, PaymentPayload } from "@t402/core/types";
 
 describe("ExactEvmScheme (Facilitator)", () => {
   let facilitator: ExactEvmScheme;
@@ -79,7 +79,7 @@ describe("ExactEvmScheme (Facilitator)", () => {
       };
 
       const payload: PaymentPayload = {
-        x402Version: 2,
+        t402Version: 2,
         payload: {
           authorization: {
             from: mockClientSigner.address,
@@ -256,7 +256,7 @@ describe("ExactEvmScheme (Facilitator)", () => {
       };
 
       const payload: PaymentPayload = {
-        x402Version: 2,
+        t402Version: 2,
         payload: {
           authorization: {
             from: mockClientSigner.address,

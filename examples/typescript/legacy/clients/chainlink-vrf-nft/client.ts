@@ -5,7 +5,7 @@ import { baseSepolia } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
 import { http, publicActions, createWalletClient, Hex } from "viem";
 import axios from "axios";
-import { withPaymentInterceptor } from "x402-axios";
+import { withPaymentInterceptor } from "t402-axios";
 
 // --- Load .env ---
 const __filename_env = fileURLToPath(import.meta.url);
@@ -37,13 +37,13 @@ const clientWallet = createWalletClient({
   transport: http(providerUrl),
 }).extend(publicActions);
 
-// --- Axios Setup with x402 Interceptor ---
+// --- Axios Setup with t402 Interceptor ---
 const resourceServerPort = 4023; // Port for the VRF resource server
 const resourceServerUrl = `http://localhost:${resourceServerPort}`;
 const requestMintUrl = `${resourceServerUrl}/request-mint`;
 
 let axiosInstance = axios.create();
-// Apply the x402 interceptor to handle payments
+// Apply the t402 interceptor to handle payments
 axiosInstance = withPaymentInterceptor(axiosInstance, clientWallet);
 
 // --- Main Execution ---
@@ -53,7 +53,7 @@ async function makeMintRequest() {
   );
 
   try {
-    // Make the POST request. The x402 interceptor handles the 402 payment flow.
+    // Make the POST request. The t402 interceptor handles the 402 payment flow.
     const response = await axiosInstance.post(requestMintUrl, {});
 
     console.log("Client: Success! Resource Server Response:");

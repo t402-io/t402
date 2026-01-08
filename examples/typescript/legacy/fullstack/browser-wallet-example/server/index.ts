@@ -2,13 +2,13 @@ import { config } from "dotenv";
 import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import { cors } from "hono/cors";
-import { paymentMiddleware, Network, Resource } from "x402-hono";
+import { paymentMiddleware, Network, Resource } from "t402-hono";
 import { v4 as uuidv4 } from "uuid";
 
 config();
 
 // Configuration from environment variables
-const facilitatorUrl = process.env.FACILITATOR_URL as Resource || "https://x402.org/facilitator";
+const facilitatorUrl = process.env.FACILITATOR_URL as Resource || "https://t402.org/facilitator";
 const payTo = process.env.ADDRESS as `0x${string}`;
 const network = (process.env.NETWORK as Network) || "base-sepolia";
 const port = parseInt(process.env.PORT || "3001");
@@ -37,7 +37,7 @@ interface Session {
 
 const sessions = new Map<string, Session>();
 
-// Configure x402 payment middleware with two payment options
+// Configure t402 payment middleware with two payment options
 app.use(
   paymentMiddleware(
     payTo,
@@ -213,7 +213,7 @@ app.get("/api/sessions", (c) => {
 });
 
 console.log(`
-🚀 x402 Payment Template Server
+🚀 t402 Payment Template Server
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💰 Accepting payments to: ${payTo}
 🔗 Network: ${network}
@@ -224,7 +224,7 @@ console.log(`
    - One-Time Access: $0.10
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🛠️  This is a template! Customize it for your app.
-📚 Learn more: https://x402.org
+📚 Learn more: https://t402.org
 💬 Get help: https://discord.gg/invite/cdp
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `);

@@ -2,8 +2,8 @@
   "name": "fastapi",
   "type": "server",
   "language": "python",
-  "x402Version": 1,
-  "description": "Python FastAPI server with x402 payment middleware",
+  "t402Version": 1,
+  "description": "Python FastAPI server with t402 payment middleware",
   "endpoints": [
     {
       "path": "/protected",

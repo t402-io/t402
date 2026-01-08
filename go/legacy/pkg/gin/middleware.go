@@ -9,11 +9,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/coinbase/x402/go/pkg/facilitatorclient"
-	"github.com/coinbase/x402/go/pkg/types"
+	"github.com/coinbase/t402/go/pkg/facilitatorclient"
+	"github.com/coinbase/t402/go/pkg/types"
 )
 
-const x402Version = 1
+const t402Version = 1
 
 // PaymentMiddlewareOptions is the options for the PaymentMiddleware.
 type PaymentMiddlewareOptions struct {
@@ -93,7 +93,7 @@ func WithResourceRootURL(resourceRootURL string) Options {
 	}
 }
 
-// PaymentMiddleware is the Gin middleware for the resource server using the x402payment protocol.
+// PaymentMiddleware is the Gin middleware for the resource server using the t402payment protocol.
 // Amount: the decimal denominated amount to charge (ex: 0.01 for 1 cent)
 func PaymentMiddleware(amount *big.Float, address string, opts ...Options) gin.HandlerFunc {
 	options := &PaymentMiddlewareOptions{
@@ -151,7 +151,7 @@ func PaymentMiddleware(amount *big.Float, address string, opts ...Options) gin.H
 			fmt.Println("failed to set USDC info:", err)
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"error":       err.Error(),
-				"x402Version": x402Version,
+				"t402Version": t402Version,
 			})
 			return
 		}
@@ -172,11 +172,11 @@ func PaymentMiddleware(amount *big.Float, address string, opts ...Options) gin.H
 			c.AbortWithStatusJSON(http.StatusPaymentRequired, gin.H{
 				"error":       "X-PAYMENT header is required",
 				"accepts":     []*types.PaymentRequirements{paymentRequirements},
-				"x402Version": x402Version,
+				"t402Version": t402Version,
 			})
 			return
 		}
-		paymentPayload.X402Version = x402Version
+		paymentPayload.T402Version = t402Version
 
 		// Verify payment
 		response, err := facilitatorClient.Verify(paymentPayload, paymentRequirements)
@@ -184,7 +184,7 @@ func PaymentMiddleware(amount *big.Float, address string, opts ...Options) gin.H
 			fmt.Println("failed to verify", err)
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"error":       err.Error(),
-				"x402Version": x402Version,
+				"t402Version": t402Version,
 			})
 			return
 		}
@@ -194,7 +194,7 @@ func PaymentMiddleware(amount *big.Float, address string, opts ...Options) gin.H
 			c.AbortWithStatusJSON(http.StatusPaymentRequired, gin.H{
 				"error":       response.InvalidReason,
 				"accepts":     []*types.PaymentRequirements{paymentRequirements},
-				"x402Version": x402Version,
+				"t402Version": t402Version,
 			})
 			return
 		}
@@ -226,7 +226,7 @@ func PaymentMiddleware(amount *big.Float, address string, opts ...Options) gin.H
 			c.AbortWithStatusJSON(http.StatusPaymentRequired, gin.H{
 				"error":       err.Error(),
 				"accepts":     []*types.PaymentRequirements{paymentRequirements},
-				"x402Version": x402Version,
+				"t402Version": t402Version,
 			})
 			return
 		}
@@ -238,7 +238,7 @@ func PaymentMiddleware(amount *big.Float, address string, opts ...Options) gin.H
 			c.Writer = writer.ResponseWriter
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"error":       err.Error(),
-				"x402Version": x402Version,
+				"t402Version": t402Version,
 			})
 			return
 		}

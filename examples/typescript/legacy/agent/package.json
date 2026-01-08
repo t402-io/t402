@@ -11,8 +11,8 @@
   "keywords": [],
   "license": "Apache-2.0",
   "author": "Coinbase Inc.",
-  "repository": "https://github.com/coinbase/x402",
-  "description": "x402 Payment Protocol",
+  "repository": "https://github.com/coinbase/t402",
+  "description": "t402 Payment Protocol",
   "devDependencies": {
     "@eslint/js": "^9.24.0",
     "@types/node": "^22.13.4",
@@ -35,7 +35,7 @@
     "@langchain/openai": "^0.5.2",
     "dotenv": "^16.4.7",
     "viem": "^2.26.2",
-    "x402-fetch": "workspace:*",
+    "t402-fetch": "workspace:*",
     "zod": "^3.24.2"
   },
   "type": "module",
