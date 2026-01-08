@@ -108,6 +108,30 @@ export {
 } from "./chains.js";
 export type { TokenInfo } from "./chains.js";
 
+// Error types and utilities
+export {
+  // Error classes
+  WDKError,
+  WDKInitializationError,
+  ChainError,
+  SignerError,
+  SigningError,
+  BalanceError,
+  TransactionError,
+  BridgeError,
+  RPCError,
+  // Error codes
+  WDKErrorCode,
+  // Utilities
+  wrapError,
+  isWDKError,
+  hasErrorCode,
+  withRetry,
+  withTimeout,
+  DEFAULT_RETRY_CONFIG,
+} from "./errors.js";
+export type { RetryConfig } from "./errors.js";
+
 // Bridge utilities
 export { WdkBridge, createDirectBridge } from "./bridge.js";
 export type { BridgeQuoteResult, BridgeQuote, BridgeSigner } from "./bridge.js";
