@@ -3,13 +3,30 @@
  *
  * This module provides the EVM-specific implementation of the t402 payment protocol.
  * Supports USDT0, USDC, and other EIP-3009 compatible tokens.
+ *
+ * Schemes:
+ * - exact: EIP-3009 transferWithAuthorization (gasless, recommended)
+ * - exact-legacy: approve + transferFrom (legacy tokens like USDT)
  */
 
 // Export EVM implementation modules
-export { ExactEvmScheme } from "./exact";
+export { ExactEvmScheme } from "./exact/index.js";
 export type { ExactEvmSchemeConfig } from "./exact/server/scheme.js";
-export { toClientEvmSigner, toFacilitatorEvmSigner } from "./signer";
-export type { ClientEvmSigner, FacilitatorEvmSigner } from "./signer";
+
+// Export exact-legacy scheme for legacy tokens
+export {
+  ExactLegacyEvmClientScheme,
+  ExactLegacyEvmServerScheme,
+  ExactLegacyEvmFacilitatorScheme,
+} from "./exact-legacy/index.js";
+export type {
+  ExactLegacyEvmServerSchemeConfig,
+  ExactLegacyEvmFacilitatorSchemeConfig,
+} from "./exact-legacy/index.js";
+
+// Export signer utilities
+export { toClientEvmSigner, toFacilitatorEvmSigner } from "./signer.js";
+export type { ClientEvmSigner, FacilitatorEvmSigner } from "./signer.js";
 
 // Export token configuration utilities
 export {
@@ -33,3 +50,9 @@ export {
 
 // Export token types
 export type { TokenConfig, TokenType, NetworkTokenRegistry } from "./tokens.js";
+
+// Export payload types
+export type { ExactEvmPayloadV1, ExactEvmPayloadV2, ExactLegacyPayload } from "./types.js";
+
+// Export constants
+export { authorizationTypes, legacyAuthorizationTypes, eip3009ABI, erc20LegacyABI } from "./constants.js";
