@@ -76,6 +76,8 @@ export { WDKSigner, createWDKSigner, MockWDKSigner } from "./signer.js";
 // Types
 export type {
   T402WDKConfig,
+  T402WDKOptions,
+  T402BalanceCacheConfig,
   EvmChainConfig,
   NormalizedChainConfig,
   TokenBalance,
@@ -90,6 +92,20 @@ export type {
   WDKInstance,
   WDKConstructor,
 } from "./types.js";
+
+// Cache
+export {
+  TTLCache,
+  BalanceCache,
+  DEFAULT_CACHE_CONFIG,
+  DEFAULT_BALANCE_CACHE_CONFIG,
+} from "./cache.js";
+export type {
+  CacheConfig,
+  CacheStats,
+  BalanceCacheConfig,
+  BalanceCacheStats,
+} from "./cache.js";
 
 // Chain configuration
 export {
