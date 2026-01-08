@@ -34,7 +34,7 @@ const MockWDKConstructor: WDKConstructor = class MockWDK {
   }
 
   static getRandomSeedPhrase(): string {
-    return "test seed phrase word one two three four five six seven eight nine ten eleven twelve";
+    return "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about word one two three four five six seven eight nine ten eleven twelve";
   }
 } as unknown as WDKConstructor;
 
@@ -78,14 +78,14 @@ describe("T402WDK", () => {
     });
 
     it("should create instance with config", () => {
-      const wdk = new T402WDK("test seed phrase", {
+      const wdk = new T402WDK("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about", {
         arbitrum: "https://arb1.arbitrum.io/rpc",
       });
       expect(wdk).toBeDefined();
     });
 
     it("should normalize string config to chain config", () => {
-      const wdk = new T402WDK("test seed phrase", {
+      const wdk = new T402WDK("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about", {
         arbitrum: "https://custom-rpc.io",
       });
       const config = wdk.getChainConfig("arbitrum");
@@ -94,7 +94,7 @@ describe("T402WDK", () => {
     });
 
     it("should add default chain if none configured", () => {
-      const wdk = new T402WDK("test seed phrase", {});
+      const wdk = new T402WDK("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about", {});
       const chains = wdk.getConfiguredChains();
       expect(chains.length).toBeGreaterThan(0);
     });
@@ -105,7 +105,7 @@ describe("T402WDK", () => {
 
     beforeEach(() => {
       T402WDK.registerWDK(MockWDKConstructor, MockWalletManagerEvm);
-      wdk = new T402WDK("test seed phrase", {
+      wdk = new T402WDK("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about", {
         arbitrum: "https://arb1.arbitrum.io/rpc",
         base: "https://mainnet.base.org",
       });
@@ -142,7 +142,7 @@ describe("T402WDK", () => {
 
     beforeEach(() => {
       T402WDK.registerWDK(MockWDKConstructor, MockWalletManagerEvm);
-      wdk = new T402WDK("test seed phrase", {
+      wdk = new T402WDK("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about", {
         arbitrum: "https://arb1.arbitrum.io/rpc",
       });
     });
@@ -174,7 +174,7 @@ describe("T402WDK", () => {
 
     beforeEach(() => {
       T402WDK.registerWDK(MockWDKConstructor, MockWalletManagerEvm);
-      wdk = new T402WDK("test seed phrase", {
+      wdk = new T402WDK("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about", {
         arbitrum: "https://arb1.arbitrum.io/rpc",
       });
     });
@@ -185,7 +185,7 @@ describe("T402WDK", () => {
     });
 
     it("should return 0 for chain without USDT0", async () => {
-      const wdkBase = new T402WDK("test seed phrase", {
+      const wdkBase = new T402WDK("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about", {
         base: "https://mainnet.base.org",
       });
       const balance = await wdkBase.getUsdt0Balance("base");
@@ -211,7 +211,7 @@ describe("T402WDK", () => {
 
     beforeEach(() => {
       T402WDK.registerWDK(MockWDKConstructor, MockWalletManagerEvm);
-      wdk = new T402WDK("test seed phrase", {
+      wdk = new T402WDK("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about", {
         arbitrum: "https://arb1.arbitrum.io/rpc",
       });
     });
