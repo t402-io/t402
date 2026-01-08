@@ -8,14 +8,14 @@ import (
 	"net/http"
 	"os"
 
-	t402 "github.com/coinbase/t402/go"
-	t402http "github.com/coinbase/t402/go/http"
-	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/client"
-	evmv1 "github.com/coinbase/t402/go/mechanisms/evm/exact/v1/client"
-	svm "github.com/coinbase/t402/go/mechanisms/svm/exact/client"
-	svmv1 "github.com/coinbase/t402/go/mechanisms/svm/exact/v1/client"
-	evmsigners "github.com/coinbase/t402/go/signers/evm"
-	svmsigners "github.com/coinbase/t402/go/signers/svm"
+	t402 "github.com/t402-io/t402/go"
+	t402http "github.com/t402-io/t402/go/http"
+	evm "github.com/t402-io/t402/go/mechanisms/evm/exact/client"
+	evmv1 "github.com/t402-io/t402/go/mechanisms/evm/exact/v1/client"
+	svm "github.com/t402-io/t402/go/mechanisms/svm/exact/client"
+	svmv1 "github.com/t402-io/t402/go/mechanisms/svm/exact/v1/client"
+	evmsigners "github.com/t402-io/t402/go/signers/evm"
+	svmsigners "github.com/t402-io/t402/go/signers/svm"
 )
 
 // Result structure for e2e test output

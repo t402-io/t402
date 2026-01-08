@@ -73,9 +73,9 @@ go run .
 
 ```go
 import (
-    t402 "github.com/coinbase/t402/go"
-    evm "github.com/coinbase/t402/go/mechanisms/evm/exact/client"
-    evmsigners "github.com/coinbase/t402/go/signers/evm"
+    t402 "github.com/t402-io/t402/go"
+    evm "github.com/t402-io/t402/go/mechanisms/evm/exact/client"
+    evmsigners "github.com/t402-io/t402/go/signers/evm"
 )
 
 evmSigner, _ := evmsigners.NewClientSignerFromPrivateKey(os.Getenv("EVM_PRIVATE_KEY"))

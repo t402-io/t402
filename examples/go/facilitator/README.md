@@ -235,9 +235,9 @@ Register additional schemes for other networks:
 
 ```go
 import (
-    t402 "github.com/coinbase/t402/go"
-    evm "github.com/coinbase/t402/go/mechanisms/evm/exact/facilitator"
-    svm "github.com/coinbase/t402/go/mechanisms/svm/exact/facilitator"
+    t402 "github.com/t402-io/t402/go"
+    evm "github.com/t402-io/t402/go/mechanisms/evm/exact/facilitator"
+    svm "github.com/t402-io/t402/go/mechanisms/svm/exact/facilitator"
 )
 
 facilitator := t402.Newt402Facilitator()

@@ -17,7 +17,7 @@ An **t402 server** is an application that protects HTTP resources with payment r
 ### Installation
 
 ```bash
-go get github.com/awesome-doge/t402/go
+go get github.com/t402-io/t402/go
 ```
 
 ### Basic Gin Server
@@ -27,10 +27,10 @@ package main
 
 import (
     "github.com/gin-gonic/gin"
-    t402 "github.com/awesome-doge/t402/go"
-    t402http "github.com/awesome-doge/t402/go/http"
-    ginmw "github.com/awesome-doge/t402/go/http/gin"
-    evm "github.com/awesome-doge/t402/go/mechanisms/evm/exact/server"
+    t402 "github.com/t402-io/t402/go"
+    t402http "github.com/t402-io/t402/go/http"
+    ginmw "github.com/t402-io/t402/go/http/gin"
+    evm "github.com/t402-io/t402/go/mechanisms/evm/exact/server"
 )
 
 func main() {
@@ -172,7 +172,7 @@ settleResp, err := facilitator.Settle(ctx, payloadBytes, requirementsBytes)
 ### Gin Middleware
 
 ```go
-import ginmw "github.com/awesome-doge/t402/go/http/gin"
+import ginmw "github.com/t402-io/t402/go/http/gin"
 
 r.Use(ginmw.X402Payment(ginmw.Config{
     Routes:      routes,
@@ -318,8 +318,8 @@ Add protocol extensions like Bazaar discovery:
 
 ```go
 import (
-    "github.com/awesome-doge/t402/go/extensions/bazaar"
-    "github.com/awesome-doge/t402/go/extensions/types"
+    "github.com/t402-io/t402/go/extensions/bazaar"
+    "github.com/t402-io/t402/go/extensions/types"
 )
 
 discoveryExt, _ := bazaar.DeclareDiscoveryExtension(
@@ -714,7 +714,7 @@ facilitator := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
 **Mainnet:**
 ```go
 facilitator := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
-    URL: "https://facilitator.coinbase.com", // Production
+    URL: "https://facilitator.t402.io", // Production
 })
 ```
 
@@ -761,12 +761,12 @@ routes := t402http.RoutesConfig{
 
 **V1:**
 ```go
-import "github.com/awesome-doge/t402/go/middleware/gin"
+import "github.com/t402-io/t402/go/middleware/gin"
 ```
 
 **V2:**
 ```go
-import ginmw "github.com/awesome-doge/t402/go/http/gin"
+import ginmw "github.com/t402-io/t402/go/http/gin"
 ```
 
 ## Related Documentation

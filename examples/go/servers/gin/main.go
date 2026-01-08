@@ -6,11 +6,11 @@ import (
 	"os"
 	"time"
 
-	t402 "github.com/coinbase/t402/go"
-	t402http "github.com/coinbase/t402/go/http"
-	ginmw "github.com/coinbase/t402/go/http/gin"
-	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/server"
-	svm "github.com/coinbase/t402/go/mechanisms/svm/exact/server"
+	t402 "github.com/t402-io/t402/go"
+	t402http "github.com/t402-io/t402/go/http"
+	ginmw "github.com/t402-io/t402/go/http/gin"
+	evm "github.com/t402-io/t402/go/mechanisms/evm/exact/server"
+	svm "github.com/t402-io/t402/go/mechanisms/svm/exact/server"
 	ginfw "github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )

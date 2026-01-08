@@ -25,8 +25,8 @@
     "jetton"
   ],
   "license": "Apache-2.0",
-  "author": "Coinbase Inc.",
-  "repository": "https://github.com/coinbase/t402",
+  "author": "T402 Team",
+  "repository": "https://github.com/t402-io/t402",
   "description": "t402 Payment Protocol TON Implementation",
   "devDependencies": {
     "@eslint/js": "^9.24.0",

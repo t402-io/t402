@@ -6,8 +6,8 @@ Client-side EIP-712 signing for Ethereum-based t402 payments.
 
 ```go
 import (
-    evmclient "github.com/awesome-doge/t402/go/mechanisms/evm/exact/client"
-    evmsigners "github.com/awesome-doge/t402/go/signers/evm"
+    evmclient "github.com/t402-io/t402/go/mechanisms/evm/exact/client"
+    evmsigners "github.com/t402-io/t402/go/signers/evm"
 )
 
 // Create signer from private key
@@ -137,7 +137,7 @@ signer, _ := evmsigners.NewClientSignerFromPrivateKey("0x1234...")
 Run tests:
 
 ```bash
-go test github.com/awesome-doge/t402/go/signers/evm -v
+go test github.com/t402-io/t402/go/signers/evm -v
 ```
 
 Use in your own tests:
@@ -145,7 +145,7 @@ Use in your own tests:
 ```go
 import (
     "testing"
-    evmsigners "github.com/awesome-doge/t402/go/signers/evm"
+    evmsigners "github.com/t402-io/t402/go/signers/evm"
 )
 
 func TestPayment(t *testing.T) {
@@ -160,7 +160,7 @@ func TestPayment(t *testing.T) {
 ## Dependencies
 
 - `github.com/ethereum/go-ethereum` - Core Ethereum library
-- `github.com/awesome-doge/t402/go/mechanisms/evm` - t402 EVM types
+- `github.com/t402-io/t402/go/mechanisms/evm` - t402 EVM types
 
 ## Related
 

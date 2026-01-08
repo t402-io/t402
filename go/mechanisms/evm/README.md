@@ -18,7 +18,7 @@ The exact scheme is organized by role:
 
 **Import Path:**
 ```
-github.com/awesome-doge/t402/go/mechanisms/evm/exact/client
+github.com/t402-io/t402/go/mechanisms/evm/exact/client
 ```
 
 **Exports:**
@@ -29,7 +29,7 @@ github.com/awesome-doge/t402/go/mechanisms/evm/exact/client
 
 **Import Path:**
 ```
-github.com/awesome-doge/t402/go/mechanisms/evm/exact/server
+github.com/t402-io/t402/go/mechanisms/evm/exact/server
 ```
 
 **Exports:**
@@ -41,7 +41,7 @@ github.com/awesome-doge/t402/go/mechanisms/evm/exact/server
 
 **Import Path:**
 ```
-github.com/awesome-doge/t402/go/mechanisms/evm/exact/facilitator
+github.com/t402-io/t402/go/mechanisms/evm/exact/facilitator
 ```
 
 **Exports:**

@@ -10,7 +10,7 @@
 
 1. **Pick or build your own project.** 
 2. **Stand up a wrapper.** Build a small HTTP service (and/or MCP Server) that calls the required API and exposes a paid endpoint.
-3. **Show, don’t tell.** Record a ≤ 2‑minute video of an agent or human using your service and tag @coinbaseDev on X.
+3. **Show, don’t tell.** Record a ≤ 2‑minute video of an agent or human using your service and tag @t402_io on X.
 
 Impact-based micro‑grants up to **\$3k** are available for projects that unlock new demand or supply and are live on mainnet.
 

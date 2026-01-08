@@ -8,11 +8,11 @@ import (
 	"os"
 	"time"
 
-	t402 "github.com/coinbase/t402/go"
-	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/facilitator"
-	evmv1 "github.com/coinbase/t402/go/mechanisms/evm/exact/v1/facilitator"
-	svm "github.com/coinbase/t402/go/mechanisms/svm/exact/facilitator"
-	svmv1 "github.com/coinbase/t402/go/mechanisms/svm/exact/v1/facilitator"
+	t402 "github.com/t402-io/t402/go"
+	evm "github.com/t402-io/t402/go/mechanisms/evm/exact/facilitator"
+	evmv1 "github.com/t402-io/t402/go/mechanisms/evm/exact/v1/facilitator"
+	svm "github.com/t402-io/t402/go/mechanisms/svm/exact/facilitator"
+	svmv1 "github.com/t402-io/t402/go/mechanisms/svm/exact/v1/facilitator"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
