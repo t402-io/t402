@@ -5,7 +5,7 @@ import { evmPaywall } from "./evm";
 import { svmPaywall } from "./svm";
 
 const mockPaymentRequired: PaymentRequired = {
-  x402Version: 2,
+  t402Version: 2,
   error: "Payment required",
   resource: {
     url: "https://example.com/api/data",
@@ -127,7 +127,7 @@ describe("PaywallBuilder", () => {
       const paywall = createPaywall().withNetwork(evmPaywall).build();
       const html = paywall.generateHtml(mockPaymentRequired);
 
-      expect(html).toContain("window.x402");
+      expect(html).toContain("window.t402");
       expect(html).toContain("0.1");
     });
 

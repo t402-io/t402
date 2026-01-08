@@ -1,11 +1,11 @@
-import { paymentProxy } from "@x402/next";
-import { x402ResourceServer, HTTPFacilitatorClient } from "@x402/core/server";
-import { registerExactEvmScheme } from "@x402/evm/exact/server";
-import { registerExactSvmScheme } from "@x402/svm/exact/server";
-import { createPaywall } from "@x402/paywall";
-import { evmPaywall } from "@x402/paywall/evm";
-import { svmPaywall } from "@x402/paywall/svm";
-import { declareDiscoveryExtension } from "@x402/extensions/bazaar";
+import { paymentProxy } from "@t402/next";
+import { t402ResourceServer, HTTPFacilitatorClient } from "@t402/core/server";
+import { registerExactEvmScheme } from "@t402/evm/exact/server";
+import { registerExactSvmScheme } from "@t402/svm/exact/server";
+import { createPaywall } from "@t402/paywall";
+import { evmPaywall } from "@t402/paywall/evm";
+import { svmPaywall } from "@t402/paywall/svm";
+import { declareDiscoveryExtension } from "@t402/extensions/bazaar";
 
 const facilitatorUrl = process.env.FACILITATOR_URL;
 export const evmAddress = process.env.EVM_ADDRESS as `0x${string}`;
@@ -24,8 +24,8 @@ if (!evmAddress || !svmAddress) {
 // Create HTTP facilitator client
 const facilitatorClient = new HTTPFacilitatorClient({ url: facilitatorUrl });
 
-// Create x402 resource server
-export const server = new x402ResourceServer(facilitatorClient);
+// Create t402 resource server
+export const server = new t402ResourceServer(facilitatorClient);
 
 // Register schemes
 registerExactEvmScheme(server);
@@ -36,8 +36,8 @@ export const paywall = createPaywall()
   .withNetwork(evmPaywall)
   .withNetwork(svmPaywall)
   .withConfig({
-    appName: process.env.APP_NAME || "Next x402 Demo",
-    appLogo: process.env.APP_LOGO || "/x402-icon-blue.png",
+    appName: process.env.APP_NAME || "Next t402 Demo",
+    appLogo: process.env.APP_LOGO || "/t402-icon-blue.png",
     testnet: true,
   })
   .build();
@@ -60,7 +60,7 @@ export const proxy = paymentProxy(
           payTo: svmAddress,
         },
       ],
-      description: "Premium music: x402 Remix",
+      description: "Premium music: t402 Remix",
       mimeType: "text/html",
       extensions: {
         ...declareDiscoveryExtension({}),

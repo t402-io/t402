@@ -3,17 +3,17 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { focusApp, operations } from "./electron";
 import { logger } from "./logger";
-import { useFacilitator } from "x402/verify";
+import { useFacilitator } from "t402/verify";
 import { ipcMain } from "electron";
 
 // Create an MCP server
 const server = new McpServer({
-  name: "x402-mcp",
+  name: "t402-mcp",
   version: "1.0.0",
 });
 
-// Input schema for the x402 request tool
-const x402RequestSchema = z.object({
+// Input schema for the t402 request tool
+const t402RequestSchema = z.object({
   baseURL: z.string().url(),
   path: z.string(),
   method: z.enum(["GET", "POST", "PUT", "DELETE", "PATCH"]),
@@ -22,7 +22,7 @@ const x402RequestSchema = z.object({
   correlationId: z
     .string()
     .optional()
-    .describe("Optional correlation ID to group related x402 operations together"),
+    .describe("Optional correlation ID to group related t402 operations together"),
   maxAmountPerRequest: z.number().optional().describe("Optional max amount per request"),
   paymentRequirements: z
     .array(z.any())
@@ -39,16 +39,16 @@ const signMessageSchema = z.object({
 
 // Register tools
 server.registerTool(
-  "make_http_request_with_x402",
+  "make_http_request_with_t402",
   {
-    title: operations.makeX402Request.title,
-    description: operations.makeX402Request.description,
-    inputSchema: x402RequestSchema.shape,
+    title: operations.makeT402Request.title,
+    description: operations.makeT402Request.description,
+    inputSchema: t402RequestSchema.shape,
   },
   async params => {
-    logger.info("make_http_request_with_x402 tool called", params);
+    logger.info("make_http_request_with_t402 tool called", params);
     try {
-      const response = await operations.makeX402Request.tool(params);
+      const response = await operations.makeT402Request.tool(params);
       return {
         content: [
           {
@@ -58,7 +58,7 @@ server.registerTool(
         ],
       };
     } catch (error) {
-      logger.error("x402 request failed", error);
+      logger.error("t402 request failed", error);
       throw error;
     }
   },
@@ -138,7 +138,7 @@ server.registerTool(
 ipcMain.handle("get-discovery-list", async () => {
   try {
     const facilitator = {
-      url: "https://x402.org/facilitator" as `${string}://${string}`, // <--- Use a facilitator with discovery support here
+      url: "https://t402.org/facilitator" as `${string}://${string}`, // <--- Use a facilitator with discovery support here
     };
     const { list } = useFacilitator(facilitator);
     return await list();

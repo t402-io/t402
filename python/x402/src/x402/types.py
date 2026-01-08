@@ -10,7 +10,7 @@ from typing_extensions import (
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic.alias_generators import to_camel
 
-from x402.networks import SupportedNetworks
+from t402.networks import SupportedNetworks
 
 
 # Add HTTP request structure types
@@ -124,8 +124,8 @@ class PaymentRequirements(BaseModel):
 
 
 # Returned by a server as json alongside a 402 response code
-class x402PaymentRequiredResponse(BaseModel):
-    x402_version: int
+class t402PaymentRequiredResponse(BaseModel):
+    t402_version: int
     accepts: list[PaymentRequirements]
     error: str
 
@@ -195,7 +195,7 @@ SchemePayloads = ExactPaymentPayload
 
 
 class PaymentPayload(BaseModel):
-    x402_version: int
+    t402_version: int
     scheme: str
     network: str
     payload: SchemePayloads
@@ -207,7 +207,7 @@ class PaymentPayload(BaseModel):
     )
 
 
-class X402Headers(BaseModel):
+class T402Headers(BaseModel):
     x_payment: str
 
 
@@ -223,11 +223,11 @@ class PaywallConfig(TypedDict, total=False):
 
 
 class DiscoveredResource(BaseModel):
-    """A discovery resource represents a discoverable resource in the X402 ecosystem."""
+    """A discovery resource represents a discoverable resource in the T402 ecosystem."""
 
     resource: str
     type: str = Field(..., pattern="^http$")  # Currently only supports 'http'
-    x402_version: int = Field(..., alias="x402Version")
+    t402_version: int = Field(..., alias="t402Version")
     accepts: List["PaymentRequirements"]
     last_updated: datetime = Field(
         ...,
@@ -274,7 +274,7 @@ class DiscoveryResourcesPagination(BaseModel):
 class ListDiscoveryResourcesResponse(BaseModel):
     """Response from the discovery resources endpoint."""
 
-    x402_version: int = Field(..., alias="x402Version")
+    t402_version: int = Field(..., alias="t402Version")
     items: List[DiscoveredResource]
     pagination: DiscoveryResourcesPagination
 

@@ -1,8 +1,8 @@
 import os
 from dotenv import load_dotenv
 from eth_account import Account
-from x402.clients.requests import x402_requests
-from x402.clients.base import decode_x_payment_response, x402Client
+from t402.clients.requests import t402_requests
+from t402.clients.base import decode_x_payment_response, t402Client
 
 # Load environment variables
 load_dotenv()
@@ -33,7 +33,7 @@ def custom_payment_selector(
     # network conditions, or other business logic rather than hardcoding a network.
 
     # Filter by base-sepolia network (testnet)
-    return x402Client.default_payment_requirements_selector(
+    return t402Client.default_payment_requirements_selector(
         accepts,
         network_filter="base-sepolia",
         scheme_filter=scheme_filter,
@@ -42,8 +42,8 @@ def custom_payment_selector(
 
 
 def main():
-    # Create requests session with x402 payment handling and network filtering
-    session = x402_requests(
+    # Create requests session with t402 payment handling and network filtering
+    session = t402_requests(
         account,
         payment_requirements_selector=custom_payment_selector,
     )

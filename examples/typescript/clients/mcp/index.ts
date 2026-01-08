@@ -1,17 +1,17 @@
 /**
- * MCP Server with x402 Payment Integration
+ * MCP Server with t402 Payment Integration
  *
  * This example demonstrates how to create an MCP server that can make
- * paid API requests using the x402 protocol with both EVM and SVM support.
+ * paid API requests using the t402 protocol with both EVM and SVM support.
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import axios from "axios";
 import { config } from "dotenv";
-import { x402Client, wrapAxiosWithPayment } from "@x402/axios";
-import { registerExactEvmScheme } from "@x402/evm/exact/client";
-import { registerExactSvmScheme } from "@x402/svm/exact/client";
+import { t402Client, wrapAxiosWithPayment } from "@t402/axios";
+import { registerExactEvmScheme } from "@t402/evm/exact/client";
+import { registerExactSvmScheme } from "@t402/svm/exact/client";
 import { privateKeyToAccount } from "viem/accounts";
 import { createKeyPairSignerFromBytes } from "@solana/kit";
 import { base58 } from "@scure/base";
@@ -28,12 +28,12 @@ if (!evmPrivateKey && !svmPrivateKey) {
 }
 
 /**
- * Creates an axios client configured with x402 payment support for EVM and/or SVM.
+ * Creates an axios client configured with t402 payment support for EVM and/or SVM.
  *
  * @returns A wrapped axios instance that handles 402 payment flows automatically.
  */
 async function createClient() {
-  const client = new x402Client();
+  const client = new t402Client();
 
   if (evmPrivateKey) {
     const evmSigner = privateKeyToAccount(evmPrivateKey);
@@ -49,14 +49,14 @@ async function createClient() {
 }
 
 /**
- * Initializes and starts the MCP server with x402 payment-enabled tools.
+ * Initializes and starts the MCP server with t402 payment-enabled tools.
  */
 async function main() {
   const api = await createClient();
 
   // Create an MCP server
   const server = new McpServer({
-    name: "x402 MCP Client Demo",
+    name: "t402 MCP Client Demo",
     version: "2.0.0",
   });
 

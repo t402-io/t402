@@ -2,9 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { WalletAccount } from "@wallet-standard/base";
 import type { WalletWithSolanaFeatures } from "@solana/wallet-standard-features";
 
-import { registerExactSvmScheme } from "@x402/svm/exact/client";
-import { x402Client } from "@x402/core/client";
-import type { PaymentRequired } from "@x402/core/types";
+import { registerExactSvmScheme } from "@t402/svm/exact/client";
+import { t402Client } from "@t402/core/client";
+import type { PaymentRequired } from "@t402/core/types";
 
 import { Spinner } from "./Spinner";
 import { getNetworkDisplayName, SOLANA_NETWORK_REFS } from "../paywallUtils";
@@ -39,8 +39,8 @@ export function SolanaPaywall({ paymentRequired, onSuccessfulResponse }: SolanaP
   const [hideBalance, setHideBalance] = useState(true);
   const attemptedSilentConnectWalletsRef = useRef<Set<string>>(new Set());
 
-  const x402 = window.x402;
-  const amount = x402.amount;
+  const t402 = window.t402;
+  const amount = t402.amount;
 
   const firstRequirement = paymentRequired.accepts[0];
   if (!firstRequirement) {
@@ -158,7 +158,7 @@ export function SolanaPaywall({ paymentRequired, onSuccessfulResponse }: SolanaP
   }, [activeWallet, resetBalance]);
 
   const handlePayment = useCallback(async () => {
-    if (!x402) {
+    if (!t402) {
       return;
     }
 
@@ -180,7 +180,7 @@ export function SolanaPaywall({ paymentRequired, onSuccessfulResponse }: SolanaP
 
       setStatus("Creating payment signature...");
 
-      const client = new x402Client();
+      const client = new t402Client();
       registerExactSvmScheme(client, { signer: walletSigner });
 
       const paymentPayload = await client.createPaymentPayload(paymentRequired);
@@ -188,7 +188,7 @@ export function SolanaPaywall({ paymentRequired, onSuccessfulResponse }: SolanaP
       const paymentHeader = btoa(JSON.stringify(paymentPayload));
 
       setStatus("Requesting content with payment...");
-      const response = await fetch(x402.currentUrl, {
+      const response = await fetch(t402.currentUrl, {
         headers: {
           "PAYMENT-SIGNATURE": paymentHeader,
           "Access-Control-Expose-Headers": "PAYMENT-RESPONSE",
@@ -206,7 +206,7 @@ export function SolanaPaywall({ paymentRequired, onSuccessfulResponse }: SolanaP
       setIsPaying(false);
     }
   }, [
-    x402,
+    t402,
     walletSigner,
     activeAccount,
     usdcBalance,

@@ -2,8 +2,8 @@
   "name": "flask",
   "type": "server",
   "language": "python",
-  "x402Version": 1,
-  "description": "Python Flask server with x402 payment middleware",
+  "t402Version": 1,
+  "description": "Python Flask server with t402 payment middleware",
   "endpoints": [
     {
       "path": "/protected",

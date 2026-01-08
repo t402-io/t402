@@ -1,4 +1,4 @@
-# x402 <Framework> E2E Test Server
+# t402 <Framework> E2E Test Server
 
 ## Overview
 
@@ -61,7 +61,7 @@ pnpm run dev
 
 ## Testing
 
-This server is used by the e2e test suite to verify x402 client implementations. The local facilitator allows testing without relying on external services.
+This server is used by the e2e test suite to verify t402 client implementations. The local facilitator allows testing without relying on external services.
 
 ### Running E2E Tests
 
@@ -100,6 +100,6 @@ For production use:
 
 ## Related Documentation
 
-- [x402 Protocol Specification](../../../specs/x402-specification.md)
+- [t402 Protocol Specification](../../../specs/t402-specification.md)
 - [Express Middleware Package](../../../typescript/packages/http/express/README.md)
 - [E2E Test Suite](../../README.md)

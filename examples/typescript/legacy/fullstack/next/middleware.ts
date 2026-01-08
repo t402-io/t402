@@ -1,5 +1,5 @@
 import { Address } from "viem";
-import { paymentMiddleware, Network, Resource } from "x402-next";
+import { paymentMiddleware, Network, Resource } from "t402-next";
 
 const facilitatorUrl = process.env.NEXT_PUBLIC_FACILITATOR_URL as Resource;
 const payTo = process.env.RESOURCE_WALLET_ADDRESS as Address;
@@ -20,8 +20,8 @@ export const middleware = paymentMiddleware(
     url: facilitatorUrl,
   },
   {
-    appName: "Next x402 Demo",
-    appLogo: "/x402-icon-blue.png",
+    appName: "Next t402 Demo",
+    appLogo: "/t402-icon-blue.png",
   },
 );
 

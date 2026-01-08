@@ -2,7 +2,7 @@ import type { IpcMainEvent } from "electron";
 import { app, ipcMain, BrowserWindow, Menu } from "electron";
 import path from "path";
 import { logger } from "./logger";
-import { X402RequestParams } from "./src/utils/x402Client";
+import { T402RequestParams } from "./src/utils/t402Client";
 
 type BeforeSendHeadersDetails = {
   requestHeaders: Record<string, string | string[]>;
@@ -20,11 +20,11 @@ type HeadersReceivedCallback = (details: {
 }) => void;
 
 export interface DiscoveryListResponse {
-  x402Version: number;
+  t402Version: number;
   items: Array<{
     type: string;
     resource: string;
-    x402Version: number;
+    t402Version: number;
     accepts: Array<{
       scheme: "exact";
       description: string;
@@ -348,17 +348,17 @@ export const operations = {
     },
   },
 
-  makeX402Request: {
-    title: "Make HTTP Request with X402 Payment",
-    description: "Make an HTTP request to an X402-enabled endpoint, handling any required payments",
-    tool: async (params: X402RequestParams): Promise<unknown> => {
-      logger.info("makeX402Request called", params);
-      mainWindow?.webContents.send("make-x402-request", params);
+  makeT402Request: {
+    title: "Make HTTP Request with T402 Payment",
+    description: "Make an HTTP request to an T402-enabled endpoint, handling any required payments",
+    tool: async (params: T402RequestParams): Promise<unknown> => {
+      logger.info("makeT402Request called", params);
+      mainWindow?.webContents.send("make-t402-request", params);
       return new Promise((resolve, reject) => {
         ipcMain.once(
-          "make-x402-request-response",
+          "make-t402-request-response",
           (_event: IpcMainEvent, result: { error?: string; data?: unknown }) => {
-            logger.info("make-x402-request-response from main", result);
+            logger.info("make-t402-request-response from main", result);
             if (result.error) {
               reject(new Error(result.error));
             } else {

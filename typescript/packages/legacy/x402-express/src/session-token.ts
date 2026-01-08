@@ -9,7 +9,7 @@ import type { Request, Response } from "express";
  *
  * Setup:
  * 1. Set CDP_API_KEY_ID and CDP_API_KEY_SECRET environment variables
- * 2. Add this to your Express app: app.post("/api/x402/session-token", POST);
+ * 2. Add this to your Express app: app.post("/api/t402/session-token", POST);
  *
  * @param req - The Express Request containing the session token request
  * @param res - The Express Response object

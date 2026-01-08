@@ -1,7 +1,7 @@
 import { PaymentPayload, PaymentRequirements } from "../types/payments";
 import { VerifyResponse, SettleResponse, SupportedResponse } from "../types/facilitator";
 
-const DEFAULT_FACILITATOR_URL = "https://x402.org/facilitator";
+const DEFAULT_FACILITATOR_URL = "https://t402.org/facilitator";
 
 export interface FacilitatorConfig {
   url?: string;
@@ -50,7 +50,7 @@ export interface FacilitatorClient {
 }
 
 /**
- * HTTP-based client for interacting with x402 facilitator services
+ * HTTP-based client for interacting with t402 facilitator services
  * Handles HTTP communication with facilitator endpoints
  */
 export class HTTPFacilitatorClient implements FacilitatorClient {
@@ -91,7 +91,7 @@ export class HTTPFacilitatorClient implements FacilitatorClient {
       method: "POST",
       headers,
       body: JSON.stringify({
-        x402Version: paymentPayload.x402Version,
+        t402Version: paymentPayload.t402Version,
         paymentPayload: this.toJsonSafe(paymentPayload),
         paymentRequirements: this.toJsonSafe(paymentRequirements),
       }),
@@ -129,7 +129,7 @@ export class HTTPFacilitatorClient implements FacilitatorClient {
       method: "POST",
       headers,
       body: JSON.stringify({
-        x402Version: paymentPayload.x402Version,
+        t402Version: paymentPayload.t402Version,
         paymentPayload: this.toJsonSafe(paymentPayload),
         paymentRequirements: this.toJsonSafe(paymentRequirements),
       }),

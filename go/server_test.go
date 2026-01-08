@@ -1,4 +1,4 @@
-package x402
+package t402
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coinbase/x402/go/types"
+	"github.com/coinbase/t402/go/types"
 )
 
 // Mock server for testing
@@ -66,8 +66,8 @@ func (m *mockServerFacilitatorClient) GetSupported(ctx context.Context) (Support
 	}, nil
 }
 
-func TestNewx402ResourceServer(t *testing.T) {
-	server := Newx402ResourceServer()
+func TestNewt402ResourceServer(t *testing.T) {
+	server := Newt402ResourceServer()
 	if server == nil {
 		t.Fatal("Expected server to be created")
 	}
@@ -85,12 +85,12 @@ func TestNewx402ResourceServer(t *testing.T) {
 func TestServerWithOptions(t *testing.T) {
 	mockClient := &mockFacilitatorClient{
 		kinds: []SupportedKind{
-			{X402Version: 2, Scheme: "exact", Network: "eip155:1"},
+			{T402Version: 2, Scheme: "exact", Network: "eip155:1"},
 		},
 	}
 	mockServer := &mockSchemeNetworkServer{scheme: "exact"}
 
-	server := Newx402ResourceServer(
+	server := Newt402ResourceServer(
 		WithFacilitatorClient(mockClient),
 		WithSchemeServer("eip155:1", mockServer),
 		WithCacheTTL(10*time.Minute),
@@ -114,19 +114,19 @@ func TestServerInitialize(t *testing.T) {
 	mockClient := &mockServerFacilitatorClient{
 		kinds: []SupportedKind{
 			{
-				X402Version: 2,
+				T402Version: 2,
 				Scheme:      "exact",
 				Network:     "eip155:1",
 			},
 			{
-				X402Version: 2,
+				T402Version: 2,
 				Scheme:      "transfer",
 				Network:     "eip155:8453",
 			},
 		},
 	}
 
-	server := Newx402ResourceServer(WithFacilitatorClient(mockClient))
+	server := Newt402ResourceServer(WithFacilitatorClient(mockClient))
 	err := server.Initialize(ctx)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
@@ -150,7 +150,7 @@ func TestServerInitializeWithMultipleFacilitators(t *testing.T) {
 	mockClient1 := &mockServerFacilitatorClient{
 		kinds: []SupportedKind{
 			{
-				X402Version: 2,
+				T402Version: 2,
 				Scheme:      "exact",
 				Network:     "eip155:1",
 			},
@@ -161,19 +161,19 @@ func TestServerInitializeWithMultipleFacilitators(t *testing.T) {
 	mockClient2 := &mockServerFacilitatorClient{
 		kinds: []SupportedKind{
 			{
-				X402Version: 2,
+				T402Version: 2,
 				Scheme:      "exact",
 				Network:     "eip155:1", // Same as first
 			},
 			{
-				X402Version: 2,
+				T402Version: 2,
 				Scheme:      "exact",
 				Network:     "eip155:8453", // New network
 			},
 		},
 	}
 
-	server := Newx402ResourceServer(
+	server := Newt402ResourceServer(
 		WithFacilitatorClient(mockClient1),
 		WithFacilitatorClient(mockClient2),
 	)
@@ -186,7 +186,7 @@ func TestServerInitializeWithMultipleFacilitators(t *testing.T) {
 	// Verify initialization worked by testing actual verify calls would route correctly
 	// (facilitatorClientsMap is now private, test behavior instead of structure)
 	payload := types.PaymentPayload{
-		X402Version: 2,
+		T402Version: 2,
 		Accepted:    types.PaymentRequirements{Scheme: "exact", Network: "eip155:1"},
 		Payload:     map[string]interface{}{},
 	}
@@ -214,7 +214,7 @@ func TestServerBuildPaymentRequirements(t *testing.T) {
 
 	mockClient := &mockFacilitatorClient{}
 
-	server := Newx402ResourceServer(
+	server := Newt402ResourceServer(
 		WithFacilitatorClient(mockClient),
 		WithSchemeServer("eip155:1", mockServer),
 	)
@@ -260,7 +260,7 @@ func TestServerBuildPaymentRequirements(t *testing.T) {
 
 func TestServerBuildPaymentRequirementsNoScheme(t *testing.T) {
 	ctx := context.Background()
-	server := Newx402ResourceServer()
+	server := Newt402ResourceServer()
 
 	config := ResourceConfig{
 		Scheme:  "unregistered",
@@ -286,7 +286,7 @@ func TestServerBuildPaymentRequirementsNoScheme(t *testing.T) {
 }
 
 func TestServerCreatePaymentRequiredResponse(t *testing.T) {
-	server := Newx402ResourceServer()
+	server := Newt402ResourceServer()
 
 	requirements := []types.PaymentRequirements{
 		{
@@ -311,8 +311,8 @@ func TestServerCreatePaymentRequiredResponse(t *testing.T) {
 		map[string]interface{}{"custom": "extension"},
 	)
 
-	if response.X402Version != 2 {
-		t.Fatalf("Expected version 2, got %d", response.X402Version)
+	if response.T402Version != 2 {
+		t.Fatalf("Expected version 2, got %d", response.T402Version)
 	}
 	if response.Error != "Custom error message" {
 		t.Fatalf("Expected custom error, got %s", response.Error)
@@ -333,7 +333,7 @@ func TestServerVerifyPayment(t *testing.T) {
 
 	mockClient := &mockFacilitatorClient{
 		kinds: []SupportedKind{
-			{X402Version: 2, Scheme: "exact", Network: "eip155:1"},
+			{T402Version: 2, Scheme: "exact", Network: "eip155:1"},
 		},
 		verify: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*VerifyResponse, error) {
 			return &VerifyResponse{
@@ -343,7 +343,7 @@ func TestServerVerifyPayment(t *testing.T) {
 		},
 	}
 
-	server := Newx402ResourceServer(WithFacilitatorClient(mockClient))
+	server := Newt402ResourceServer(WithFacilitatorClient(mockClient))
 	server.Initialize(ctx)
 
 	requirements := types.PaymentRequirements{
@@ -355,7 +355,7 @@ func TestServerVerifyPayment(t *testing.T) {
 	}
 
 	payload := types.PaymentPayload{
-		X402Version: 2,
+		T402Version: 2,
 		Accepted:    requirements,
 		Payload:     map[string]interface{}{},
 	}
@@ -378,7 +378,7 @@ func TestServerSettlePayment(t *testing.T) {
 
 	mockClient := &mockFacilitatorClient{
 		kinds: []SupportedKind{
-			{X402Version: 2, Scheme: "exact", Network: "eip155:1"},
+			{T402Version: 2, Scheme: "exact", Network: "eip155:1"},
 		},
 		settle: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*SettleResponse, error) {
 			return &SettleResponse{
@@ -390,7 +390,7 @@ func TestServerSettlePayment(t *testing.T) {
 		},
 	}
 
-	server := Newx402ResourceServer(WithFacilitatorClient(mockClient))
+	server := Newt402ResourceServer(WithFacilitatorClient(mockClient))
 	server.Initialize(ctx)
 
 	requirements := types.PaymentRequirements{
@@ -402,7 +402,7 @@ func TestServerSettlePayment(t *testing.T) {
 	}
 
 	payload := types.PaymentPayload{
-		X402Version: 2,
+		T402Version: 2,
 		Accepted:    requirements,
 		Payload:     map[string]interface{}{},
 	}
@@ -421,7 +421,7 @@ func TestServerSettlePayment(t *testing.T) {
 }
 
 func TestServerFindMatchingRequirements(t *testing.T) {
-	server := Newx402ResourceServer()
+	server := Newt402ResourceServer()
 
 	available := []types.PaymentRequirements{
 		{
@@ -442,7 +442,7 @@ func TestServerFindMatchingRequirements(t *testing.T) {
 
 	// Test V2 matching (typed)
 	payloadV2 := types.PaymentPayload{
-		X402Version: 2,
+		T402Version: 2,
 		Accepted: types.PaymentRequirements{
 			Scheme:  "transfer",
 			Network: "eip155:8453",
@@ -464,7 +464,7 @@ func TestServerFindMatchingRequirements(t *testing.T) {
 
 	// Test no match
 	payloadNoMatch := types.PaymentPayload{
-		X402Version: 2,
+		T402Version: 2,
 		Accepted: types.PaymentRequirements{
 			Scheme:  "nonexistent",
 			Network: "eip155:1",
@@ -488,7 +488,7 @@ func TestServerProcessPaymentRequest(t *testing.T) {
 	mockServer := &mockSchemeNetworkServer{scheme: "exact"}
 	mockClient := &mockFacilitatorClient{}
 
-	server := Newx402ResourceServer(
+	server := Newt402ResourceServer(
 		WithFacilitatorClient(mockClient),
 		WithSchemeServer("eip155:1", mockServer),
 	)
@@ -523,7 +523,7 @@ func TestServerProcessPaymentRequest(t *testing.T) {
 	builtReqs, _ := server.BuildPaymentRequirements(ctx, config)
 
 	payload := &PaymentPayload{
-		X402Version: 2,
+		T402Version: 2,
 		Payload:     map[string]interface{}{},
 		Accepted:    builtReqs[0], // Use the actual built requirements
 	}
@@ -561,7 +561,7 @@ func TestSupportedCache(t *testing.T) {
 
 	response := SupportedResponse{
 		Kinds: []SupportedKind{
-			{X402Version: 2, Scheme: "exact", Network: "eip155:1"},
+			{T402Version: 2, Scheme: "exact", Network: "eip155:1"},
 		},
 		Extensions: []string{},
 		Signers:    make(map[string][]string),

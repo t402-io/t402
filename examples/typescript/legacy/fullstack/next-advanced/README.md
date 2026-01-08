@@ -1,6 +1,6 @@
 # [WIP] Native Next.js example
 
-This is an example of integrating x402 deeply into an existing next.js codebase. We will provide helpers that simply this in the next release of `x402-next`.
+This is an example of integrating t402 deeply into an existing next.js codebase. We will provide helpers that simply this in the next release of `t402-next`.
 
 ## Setup
 

@@ -1,0 +1,25 @@
+{
+  "name": "t402-axios",
+  "version": "0.0.1",
+  "description": "t402 Axios interceptor. Visit https://t402.io for documentation.",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "keywords": [
+    "t402",
+    "tether",
+    "usdt",
+    "payment",
+    "http-402",
+    "cryptocurrency",
+    "stablecoin",
+    "blockchain",
+    "web3"
+  ],
+  "author": "t402 Protocol",
+  "license": "Apache-2.0",
+  "homepage": "https://t402.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/t402-protocol/t402.git"
+  }
+}

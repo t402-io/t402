@@ -2,7 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { config } from "dotenv";
 import { Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { wrapFetchWithPayment } from "x402-fetch";
+import { wrapFetchWithPayment } from "t402-fetch";
 
 config();
 
@@ -25,6 +25,6 @@ const anthropic = new Anthropic({
 const msg = await anthropic.messages.create({
   model: "claude-3-7-sonnet-20250219",
   max_tokens: 1024,
-  messages: [{ role: "user", content: "Hello, Claude do you know what x402 is?" }],
+  messages: [{ role: "user", content: "Hello, Claude do you know what t402 is?" }],
 });
 console.log(msg);

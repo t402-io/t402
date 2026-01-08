@@ -1,6 +1,6 @@
-# x402 Extensions
+# t402 Extensions
 
-This directory contains **extension helpers** for the x402 protocol.
+This directory contains **extension helpers** for the t402 protocol.
 
 ## What are Extensions?
 
@@ -24,14 +24,14 @@ The extension helpers facilitate the conversation between:
 Servers use helpers to attach extension metadata to payment requirements:
 
 ```go
-import "github.com/coinbase/x402/go/extensions/bazaar"
+import "github.com/coinbase/t402/go/extensions/bazaar"
 
 // Server declares: "This resource supports Bazaar discovery"
 extension, _ := bazaar.DeclareDiscoveryExtension(...)
 
-routes := x402http.RoutesConfig{
+routes := t402http.RoutesConfig{
     "GET /api/data": {
-        Accepts: x402http.PaymentOptions{
+        Accepts: t402http.PaymentOptions{
             {Scheme: "exact", PayTo: "0x...", Price: "$0.001", Network: "eip155:84532"},
         },
         Extensions: map[string]interface{}{
@@ -72,7 +72,7 @@ PaymentPayload (Client → Server → Facilitator):
 Recipients (clients, facilitators) can extract extension data:
 
 ```go
-import "github.com/coinbase/x402/go/extensions/bazaar"
+import "github.com/coinbase/t402/go/extensions/bazaar"
 
 // Facilitator extracts from client payment (in hook context)
 discovered, _ := bazaar.ExtractDiscoveredResourceFromPaymentPayload(
@@ -151,7 +151,7 @@ The **Bazaar** extension is one example of a server-facilitator extension for au
 
 **Import Path:**
 ```
-github.com/coinbase/x402/go/extensions/bazaar
+github.com/coinbase/t402/go/extensions/bazaar
 ```
 
 **Purpose:**
@@ -182,7 +182,7 @@ Extensions can serve many purposes. Planned extensions include:
 
 Authentication and identity extension:
 
-- **Purpose**: Allow servers to request user authentication via x402 payments
+- **Purpose**: Allow servers to request user authentication via t402 payments
 - **Helpers**: Declaration of auth requirements, extraction of identity claims
 - **Implementation**: Applications decide how to verify identity and manage sessions
 
@@ -242,7 +242,7 @@ The `types/` subdirectory contains shared type definitions:
 
 **Import Path:**
 ```
-github.com/coinbase/x402/go/extensions/types
+github.com/coinbase/t402/go/extensions/types
 ```
 
 **Exports:**

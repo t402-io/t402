@@ -18,7 +18,7 @@ let facilitatorNetworkCombos: Array<{
   useCdpFacilitator: boolean;
   network: string;
   protocolFamily: ProtocolFamily;
-  x402Version: number;
+  t402Version: number;
   facilitatorName?: string;
 }> = [];
 
@@ -245,17 +245,17 @@ export class TestDiscovery {
 
     for (const facilitator of facilitators) {
       const protocolFamilies = facilitator.config.protocolFamilies || ['evm'];
-      const x402Versions = facilitator.config.x402Versions || [2];
+      const t402Versions = facilitator.config.t402Versions || [2];
 
       for (const protocolFamily of protocolFamilies) {
-        for (const x402Version of x402Versions) {
+        for (const t402Version of t402Versions) {
           // Add network combos based on protocol family
           if (protocolFamily === 'evm') {
             facilitatorNetworkCombos.push({
               useCdpFacilitator: false,
               network: 'eip155:84532',
               protocolFamily: protocolFamily as ProtocolFamily,
-              x402Version,
+              t402Version,
               facilitatorName: facilitator.name
             });
           } else if (protocolFamily === 'svm') {
@@ -263,7 +263,7 @@ export class TestDiscovery {
               useCdpFacilitator: false,
               network: 'solana:devnet',
               protocolFamily: protocolFamily as ProtocolFamily,
-              x402Version,
+              t402Version,
               facilitatorName: facilitator.name
             });
           }
@@ -277,7 +277,7 @@ export class TestDiscovery {
         useCdpFacilitator: false,
         network: 'eip155:84532',
         protocolFamily: 'evm',
-        x402Version: 2
+        t402Version: 2
       });
     }
   }
@@ -299,18 +299,18 @@ export class TestDiscovery {
       // Default to EVM if no protocol families specified for backward compatibility
       const clientProtocolFamilies = client.config.protocolFamilies || ['evm'];
 
-      // Get client's supported x402 versions (default to [1] for backward compatibility)
-      const clientVersions = client.config.x402Versions;
+      // Get client's supported t402 versions (default to [1] for backward compatibility)
+      const clientVersions = client.config.t402Versions;
       if (!clientVersions) {
-        errorLog(`  ⚠️  Skipping ${client.name}: No x402 versions specified`);
+        errorLog(`  ⚠️  Skipping ${client.name}: No t402 versions specified`);
         continue;
       }
 
       for (const server of servers) {
-        // Get server's x402 version (default to 1 for backward compatibility)
-        const serverVersion = server.config.x402Version;
+        // Get server's t402 version (default to 1 for backward compatibility)
+        const serverVersion = server.config.t402Version;
         if (!serverVersion) {
-          errorLog(`  ⚠️  Skipping ${server.name}: No x402 version specified`);
+          errorLog(`  ⚠️  Skipping ${server.name}: No t402 version specified`);
           continue;
         }
 
@@ -337,9 +337,9 @@ export class TestDiscovery {
             const combosForProtocol = this.getFacilitatorNetworkCombosForProtocol(endpointProtocolFamily);
 
             for (const combo of combosForProtocol) {
-              // Skip if facilitator doesn't support the server's x402 version
-              if (combo.x402Version !== serverVersion) {
-                verboseLog(`  ⚠️  Skipping facilitator ${combo.facilitatorName} for ${server.name}: Version mismatch (facilitator supports v${combo.x402Version}, server implements v${serverVersion})`);
+              // Skip if facilitator doesn't support the server's t402 version
+              if (combo.t402Version !== serverVersion) {
+                verboseLog(`  ⚠️  Skipping facilitator ${combo.facilitatorName} for ${server.name}: Version mismatch (facilitator supports v${combo.t402Version}, server implements v${serverVersion})`);
                 continue;
               }
 
@@ -391,14 +391,14 @@ export class TestDiscovery {
       const protocolFamilies = new Set(
         server.config.endpoints?.filter(e => e.requiresPayment).map(e => e.protocolFamily || 'evm') || ['evm']
       );
-      const version = server.config.x402Version || 1;
-      log(`   - ${server.name} (${server.config.language}) v${version} - ${paidEndpoints} x402 endpoints [${Array.from(protocolFamilies).join(', ')}]`);
+      const version = server.config.t402Version || 1;
+      log(`   - ${server.name} (${server.config.language}) v${version} - ${paidEndpoints} t402 endpoints [${Array.from(protocolFamilies).join(', ')}]`);
     });
 
     log(`📱 Clients found: ${clients.length}`);
     clients.forEach(client => {
       const protocolFamilies = client.config.protocolFamilies || ['evm'];
-      const versions = client.config.x402Versions || [1];
+      const versions = client.config.t402Versions || [1];
       log(`   - ${client.name} (${client.config.language}) v[${versions.join(', ')}] [${protocolFamilies.join(', ')}]`);
     });
 
@@ -409,7 +409,7 @@ export class TestDiscovery {
     
     regularFacilitators.forEach(facilitator => {
       const protocolFamilies = facilitator.config.protocolFamilies || ['evm'];
-      const versions = facilitator.config.x402Versions || [2];
+      const versions = facilitator.config.t402Versions || [2];
       log(`   - ${facilitator.name} (${facilitator.config.language}) v[${versions.join(', ')}] [${protocolFamilies.join(', ')}]`);
     });
     
@@ -417,7 +417,7 @@ export class TestDiscovery {
       log(`   External:`);
       externalFacilitators.forEach(facilitator => {
         const protocolFamilies = facilitator.config.protocolFamilies || ['evm'];
-        const versions = facilitator.config.x402Versions || [2];
+        const versions = facilitator.config.t402Versions || [2];
         log(`     - ${facilitator.name} (${facilitator.config.language}) v[${versions.join(', ')}] [${protocolFamilies.join(', ')}]`);
       });
     }

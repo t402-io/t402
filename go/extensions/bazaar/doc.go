@@ -1,7 +1,7 @@
 /*
-Package bazaar provides the Bazaar Discovery Extension for x402 v2 and v1.
+Package bazaar provides the Bazaar Discovery Extension for t402 v2 and v1.
 
-Enables facilitators to automatically catalog and index x402-enabled resources
+Enables facilitators to automatically catalog and index t402-enabled resources
 by following the server's provided discovery instructions.
 
 # V2 Usage
@@ -12,7 +12,7 @@ The v2 extension follows a pattern where:
 
 # For Resource Servers (V2)
 
-	import "github.com/coinbase/x402/go/extensions/bazaar"
+	import "github.com/coinbase/t402/go/extensions/bazaar"
 
 	// Declare a GET endpoint
 	extension, err := bazaar.DeclareDiscoveryExtension(
@@ -29,10 +29,10 @@ The v2 extension follows a pattern where:
 	)
 
 	// Include in PaymentRequired response
-	paymentRequired := x402.PaymentRequired{
-		X402Version: 2,
-		Resource: x402.Resource{...},
-		Accepts: []x402.PaymentRequirements{...},
+	paymentRequired := t402.PaymentRequired{
+		T402Version: 2,
+		Resource: t402.Resource{...},
+		Accepts: []t402.PaymentRequirements{...},
 		Extensions: map[string]interface{}{
 			bazaar.BAZAAR: extension,
 		},
@@ -40,7 +40,7 @@ The v2 extension follows a pattern where:
 
 # For Facilitators (V2 and V1)
 
-	import "github.com/coinbase/x402/go/extensions/bazaar"
+	import "github.com/coinbase/t402/go/extensions/bazaar"
 
 	// Extract from client's PaymentPayload (facilitator hook context)
 	// V2: Extensions are in PaymentPayload.Extensions (client copied from PaymentRequired)
@@ -57,7 +57,7 @@ The v2 extension follows a pattern where:
 
 # For Clients (Processing 402 Responses)
 
-	import "github.com/coinbase/x402/go/extensions/bazaar"
+	import "github.com/coinbase/t402/go/extensions/bazaar"
 
 	// Extract from server's 402 PaymentRequired response
 	// V2: Checks PaymentRequired.Extensions, falls back to Accepts[0]
@@ -76,7 +76,7 @@ The v2 extension follows a pattern where:
 V1 discovery information is stored in the `outputSchema` field of PaymentRequirements.
 Both extraction functions automatically handle v1 format.
 
-	import v1 "github.com/coinbase/x402/go/extensions/bazaar/v1"
+	import v1 "github.com/coinbase/t402/go/extensions/bazaar/v1"
 
 	// Direct v1 extraction (for advanced use cases)
 	infoV1, err := v1.ExtractDiscoveryInfoV1(paymentRequirementsV1)

@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ExactSvmSchemeV1 } from "../../../src/exact/v1/facilitator/scheme";
 import type { FacilitatorSvmSigner } from "../../../src/signer";
-import type { PaymentRequirementsV1 } from "@x402/core/types/v1";
-import type { PaymentPayloadV1 } from "@x402/core/types/v1";
+import type { PaymentRequirementsV1 } from "@t402/core/types/v1";
+import type { PaymentPayloadV1 } from "@t402/core/types/v1";
 import { USDC_DEVNET_ADDRESS } from "../../../src/constants";
 
 describe("ExactSvmSchemeV1", () => {
@@ -55,7 +55,7 @@ describe("ExactSvmSchemeV1", () => {
       const facilitator = new ExactSvmSchemeV1(mockSigner);
 
       const payload: PaymentPayloadV1 = {
-        x402Version: 1,
+        t402Version: 1,
         scheme: "wrong",
         network: "solana-devnet",
         payload: {
@@ -85,7 +85,7 @@ describe("ExactSvmSchemeV1", () => {
       const facilitator = new ExactSvmSchemeV1(mockSigner);
 
       const payload: PaymentPayloadV1 = {
-        x402Version: 1,
+        t402Version: 1,
         scheme: "exact",
         network: "solana-mainnet", // Wrong network
         payload: {
@@ -116,7 +116,7 @@ describe("ExactSvmSchemeV1", () => {
       const facilitator = new ExactSvmSchemeV1(mockSigner);
 
       const payload: PaymentPayloadV1 = {
-        x402Version: 1,
+        t402Version: 1,
         scheme: "exact",
         network: "solana-devnet",
         payload: {
@@ -144,7 +144,7 @@ describe("ExactSvmSchemeV1", () => {
       const facilitator = new ExactSvmSchemeV1(mockSigner);
 
       const payload: PaymentPayloadV1 = {
-        x402Version: 1,
+        t402Version: 1,
         scheme: "exact",
         network: "solana-devnet",
         payload: {
@@ -177,7 +177,7 @@ describe("ExactSvmSchemeV1", () => {
       const facilitator = new ExactSvmSchemeV1(mockSigner);
 
       const payload: PaymentPayloadV1 = {
-        x402Version: 1,
+        t402Version: 1,
         scheme: "wrong",
         network: "solana-devnet",
         payload: {

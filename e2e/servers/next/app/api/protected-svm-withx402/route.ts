@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withX402 } from "@x402/next";
-import { declareDiscoveryExtension } from "@x402/extensions/bazaar";
+import { withT402 } from "@t402/next";
+import { declareDiscoveryExtension } from "@t402/extensions/bazaar";
 import { server, SVM_PAYEE_ADDRESS, SVM_NETWORK } from "../../../proxy";
 
 /**
@@ -8,15 +8,15 @@ import { server, SVM_PAYEE_ADDRESS, SVM_NETWORK } from "../../../proxy";
  */
 const handler = async (_: NextRequest) => {
   return NextResponse.json({
-    message: "Protected endpoint accessed successfully (withX402)",
+    message: "Protected endpoint accessed successfully (withT402)",
     timestamp: new Date().toISOString(),
   });
 };
 
 /**
- * Protected SVM endpoint using withX402 wrapper
+ * Protected SVM endpoint using withT402 wrapper
  */
-export const GET = withX402(
+export const GET = withT402(
   handler,
   {
     accepts: {
@@ -29,7 +29,7 @@ export const GET = withX402(
       ...declareDiscoveryExtension({
         output: {
           example: {
-            message: "Protected endpoint accessed successfully (withX402)",
+            message: "Protected endpoint accessed successfully (withT402)",
             timestamp: "2024-01-01T00:00:00Z",
           },
           schema: {

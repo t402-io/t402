@@ -1,5 +1,5 @@
 {
-  "name": "x402-mini-app",
+  "name": "t402-mini-app",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -23,8 +23,8 @@
     "react-hot-toast": "^2.5.2",
     "viem": "^2.27.2",
     "wagmi": "^2.14.11",
-    "x402-fetch": "workspace:*",
-    "x402-next": "workspace:*"
+    "t402-fetch": "workspace:*",
+    "t402-next": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.17.30",

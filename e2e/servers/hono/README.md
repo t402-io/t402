@@ -1,11 +1,11 @@
 # E2E Test Server: Express (TypeScript)
 
-This server demonstrates and tests the x402 Express.js middleware with both EVM and SVM payment protection.
+This server demonstrates and tests the t402 Express.js middleware with both EVM and SVM payment protection.
 
 ## What It Tests
 
 ### Core Functionality
-- ✅ **V2 Protocol** - Modern x402 server middleware
+- ✅ **V2 Protocol** - Modern t402 server middleware
 - ✅ **Payment Protection** - Middleware protecting specific routes
 - ✅ **Multi-chain Support** - EVM and SVM payment acceptance
 - ✅ **Facilitator Integration** - HTTP communication with facilitator
@@ -22,9 +22,9 @@ This server demonstrates and tests the x402 Express.js middleware with both EVM 
 
 ```typescript
 import express from "express";
-import { x402Middleware } from "@x402/server/express";
-import { ExactEvmServer } from "@x402/evm";
-import { ExactEvmServer } from "@x402/svm";
+import { t402Middleware } from "@t402/server/express";
+import { ExactEvmServer } from "@t402/evm";
+import { ExactEvmServer } from "@t402/svm";
 
 const app = express();
 
@@ -50,8 +50,8 @@ const routes = {
   }
 };
 
-// Apply x402 middleware with EVM and SVM services
-app.use(x402Middleware({
+// Apply t402 middleware with EVM and SVM services
+app.use(t402Middleware({
   routes,
   facilitatorUrl: "http://localhost:4023",
   servers: {
@@ -130,7 +130,7 @@ PAYMENT-REQUIRED: <base64-encoded-payment-requirements>
 
 {
   "error": "Payment required",
-  "x402Version": 2,
+  "t402Version": 2,
   "accepts": [...]
 }
 ```
@@ -148,10 +148,10 @@ PAYMENT-RESPONSE: <base64-encoded-settlement-response>
 
 ## Package Dependencies
 
-- `@x402/server` - Express middleware
-- `@x402/evm` - EVM service
-- `@x402/svm` - SVM service
-- `@x402/extensions/bazaar` - Discovery extension
+- `@t402/server` - Express middleware
+- `@t402/evm` - EVM service
+- `@t402/svm` - SVM service
+- `@t402/extensions/bazaar` - Discovery extension
 - `express` - HTTP server framework
 
 ## Implementation Highlights

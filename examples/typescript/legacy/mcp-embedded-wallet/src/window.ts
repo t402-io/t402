@@ -1,5 +1,5 @@
-import { ListDiscoveryResourcesResponse } from "x402/types";
-import { X402RequestParams } from "./utils/x402Client";
+import { ListDiscoveryResourcesResponse } from "t402/types";
+import { T402RequestParams } from "./utils/t402Client";
 
 export interface ElectronWindow extends Window {
   electron: {
@@ -10,7 +10,7 @@ export interface ElectronWindow extends Window {
     OnSignMessage: (callback: (message: string) => Promise<string>) => void;
     OnDiscoveryList: (callback: () => Promise<ListDiscoveryResourcesResponse>) => void;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    OnMakeX402Request: (callback: (params: X402RequestParams) => Promise<any>) => void;
+    OnMakeT402Request: (callback: (params: T402RequestParams) => Promise<any>) => void;
     OnGetWalletAddress: (callback: () => Promise<string>) => void;
   };
 }

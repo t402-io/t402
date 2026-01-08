@@ -26,7 +26,7 @@ export type SettleResponse = {
 };
 
 export type SupportedKind = {
-  x402Version: number;
+  t402Version: number;
   scheme: string;
   network: Network;
   extra?: Record<string, unknown>;

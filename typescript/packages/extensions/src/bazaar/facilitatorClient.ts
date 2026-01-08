@@ -2,7 +2,7 @@
  * Client extensions for querying Bazaar discovery resources
  */
 
-import { HTTPFacilitatorClient } from "@x402/core/http";
+import { HTTPFacilitatorClient } from "@t402/core/http";
 import { WithExtensions } from "../types";
 
 /**
@@ -17,18 +17,18 @@ export interface ListDiscoveryResourcesParams {
   type?: string;
 
   /**
-   * The number of discovered x402 resources to return per page.
+   * The number of discovered t402 resources to return per page.
    */
   limit?: number;
 
   /**
-   * The offset of the first discovered x402 resource to return.
+   * The offset of the first discovered t402 resource to return.
    */
   offset?: number;
 }
 
 /**
- * A discovered x402 resource from the bazaar.
+ * A discovered t402 resource from the bazaar.
  */
 export interface DiscoveryResource {
   /** The URL of the discovered resource */
@@ -59,7 +59,7 @@ export interface DiscoveryResourcesResponse {
 export interface BazaarClientExtension {
   discovery: {
     /**
-     * List x402 discovery resources from the bazaar.
+     * List t402 discovery resources from the bazaar.
      *
      * @param params - Optional filtering and pagination parameters
      * @returns A promise resolving to the discovery resources response

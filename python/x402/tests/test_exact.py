@@ -3,14 +3,14 @@ import time
 import base64
 from eth_account import Account
 from hexbytes import HexBytes
-from x402.exact import (
+from t402.exact import (
     create_nonce,
     prepare_payment_header,
     sign_payment_header,
     encode_payment,
     decode_payment,
 )
-from x402.types import PaymentRequirements
+from t402.types import PaymentRequirements
 
 
 @pytest.fixture
@@ -54,7 +54,7 @@ def test_prepare_payment_header(account, payment_requirements):
     header = prepare_payment_header(account.address, 1, payment_requirements)
 
     # Test header structure
-    assert header["x402Version"] == 1
+    assert header["t402Version"] == 1
     assert header["scheme"] == payment_requirements.scheme
     assert header["network"] == payment_requirements.network
     assert "payload" in header
@@ -86,7 +86,7 @@ def test_sign_payment_header(account, payment_requirements):
 
     # Test decoded structure
     decoded = decode_payment(signed_message)
-    assert "x402Version" in decoded
+    assert "t402Version" in decoded
     assert "scheme" in decoded
     assert "network" in decoded
     assert "payload" in decoded

@@ -1,4 +1,4 @@
-package x402
+package t402
 
 import (
 	"context"
@@ -70,21 +70,21 @@ type OnPaymentCreationFailureHook func(PaymentCreationFailureContext) (*PaymentC
 
 // WithBeforePaymentCreationHook registers a hook to execute before payment creation
 func WithBeforePaymentCreationHook(hook BeforePaymentCreationHook) ClientOption {
-	return func(c *x402Client) {
+	return func(c *t402Client) {
 		c.beforePaymentCreationHooks = append(c.beforePaymentCreationHooks, hook)
 	}
 }
 
 // WithAfterPaymentCreationHook registers a hook to execute after successful payment creation
 func WithAfterPaymentCreationHook(hook AfterPaymentCreationHook) ClientOption {
-	return func(c *x402Client) {
+	return func(c *t402Client) {
 		c.afterPaymentCreationHooks = append(c.afterPaymentCreationHooks, hook)
 	}
 }
 
 // WithOnPaymentCreationFailureHook registers a hook to execute when payment creation fails
 func WithOnPaymentCreationFailureHook(hook OnPaymentCreationFailureHook) ClientOption {
-	return func(c *x402Client) {
+	return func(c *t402Client) {
 		c.onPaymentCreationFailureHooks = append(c.onPaymentCreationFailureHooks, hook)
 	}
 }

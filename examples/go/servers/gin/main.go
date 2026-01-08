@@ -6,11 +6,11 @@ import (
 	"os"
 	"time"
 
-	x402 "github.com/coinbase/x402/go"
-	x402http "github.com/coinbase/x402/go/http"
-	ginmw "github.com/coinbase/x402/go/http/gin"
-	evm "github.com/coinbase/x402/go/mechanisms/evm/exact/server"
-	svm "github.com/coinbase/x402/go/mechanisms/svm/exact/server"
+	t402 "github.com/coinbase/t402/go"
+	t402http "github.com/coinbase/t402/go/http"
+	ginmw "github.com/coinbase/t402/go/http/gin"
+	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/server"
+	svm "github.com/coinbase/t402/go/mechanisms/svm/exact/server"
 	ginfw "github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -37,15 +37,15 @@ func main() {
 	facilitatorURL := os.Getenv("FACILITATOR_URL")
 	if facilitatorURL == "" {
 		fmt.Println("❌ FACILITATOR_URL environment variable is required")
-		fmt.Println("   Example: https://x402.org/facilitator")
+		fmt.Println("   Example: https://t402.org/facilitator")
 		os.Exit(1)
 	}
 
 	// Network configuration - Base Sepolia testnet
-	evmNetwork := x402.Network("eip155:84532")
-	svmNetwork := x402.Network("solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1")
+	evmNetwork := t402.Network("eip155:84532")
+	svmNetwork := t402.Network("solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1")
 
-	fmt.Printf("🚀 Starting Gin x402 server...\n")
+	fmt.Printf("🚀 Starting Gin t402 server...\n")
 	fmt.Printf("   EVM Payee address: %s\n", evmAddress)
 	fmt.Printf("   SVM Payee address: %s\n", svmAddress)
 	fmt.Printf("   EVM Network: %s\n", evmNetwork)
@@ -56,20 +56,20 @@ func main() {
 	r := ginfw.Default()
 
 	// Create HTTP facilitator client
-	facilitatorClient := x402http.NewHTTPFacilitatorClient(&x402http.FacilitatorConfig{
+	facilitatorClient := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
 		URL: facilitatorURL,
 	})
 
 	/**
-	 * Configure x402 payment middleware
+	 * Configure t402 payment middleware
 	 *
 	 * This middleware protects specific routes with payment requirements.
 	 * When a client accesses a protected route without payment, they receive
 	 * a 402 Payment Required response with payment details.
 	 */
-	routes := x402http.RoutesConfig{
+	routes := t402http.RoutesConfig{
 		"GET /weather": {
-			Accepts: x402http.PaymentOptions{
+			Accepts: t402http.PaymentOptions{
 				{
 					Scheme:  "exact",
 					Price:   "$0.001",
@@ -88,8 +88,8 @@ func main() {
 		},
 	}
 
-	// Apply x402 payment middleware
-	r.Use(ginmw.X402Payment(ginmw.Config{
+	// Apply t402 payment middleware
+	r.Use(ginmw.T402Payment(ginmw.Config{
 		Routes:      routes,
 		Facilitator: facilitatorClient,
 		Schemes: []ginmw.SchemeConfig{
@@ -102,7 +102,7 @@ func main() {
 	/**
 	 * Protected endpoint - requires $0.001 USDC payment
 	 *
-	 * Clients must provide a valid x402 payment to access this endpoint.
+	 * Clients must provide a valid t402 payment to access this endpoint.
 	 * The payment is verified and settled before the endpoint handler runs.
 	 */
 	r.GET("/weather", func(c *ginfw.Context) {
@@ -131,7 +131,7 @@ func main() {
 	/**
 	 * Health check endpoint - no payment required
 	 *
-	 * This endpoint is not protected by x402 middleware.
+	 * This endpoint is not protected by t402 middleware.
 	 */
 	r.GET("/health", func(c *ginfw.Context) {
 		c.JSON(http.StatusOK, ginfw.H{

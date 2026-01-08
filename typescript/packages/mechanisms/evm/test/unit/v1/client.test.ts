@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ExactEvmSchemeV1 } from "../../../src/exact/v1";
 import type { ClientEvmSigner } from "../../../src/signer";
-import type { PaymentRequirementsV1 } from "@x402/core/types/v1";
+import type { PaymentRequirementsV1 } from "@t402/core/types/v1";
 
 describe("ExactEvmSchemeV1", () => {
   let mockSigner: ClientEvmSigner;
@@ -39,7 +39,7 @@ describe("ExactEvmSchemeV1", () => {
 
       const payload = await client.createPaymentPayload(1, requirements as never);
 
-      expect(payload.x402Version).toBe(1);
+      expect(payload.t402Version).toBe(1);
       expect(payload.scheme).toBe("exact");
       expect(payload.network).toBe("base-sepolia");
       expect(payload.payload).toBeDefined();

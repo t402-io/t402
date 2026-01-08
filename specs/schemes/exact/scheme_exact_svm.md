@@ -1,6 +1,6 @@
 # Exact Payment Scheme for Solana Virtual Machine (SVM) (`exact`)
 
-This document specifies the `exact` payment scheme for the x402 protocol on Solana.
+This document specifies the `exact` payment scheme for the t402 protocol on Solana.
 
 This scheme facilitates payments of a specific amount of an SPL token on the Solana blockchain.
 
@@ -29,7 +29,7 @@ The protocol flow for `exact` on Solana is client-driven.
 
 ## `PaymentRequirements` for `exact`
 
-In addition to the standard x402 `PaymentRequirements` fields, the `exact` scheme on Solana requires the following inside the `extra` field:
+In addition to the standard t402 `PaymentRequirements` fields, the `exact` scheme on Solana requires the following inside the `extra` field:
 
 ```json
 {
@@ -64,7 +64,7 @@ Full `PaymentPayload` object:
 
 ```json
 {
-  "x402Version": 2,
+  "t402Version": 2,
   "resource": {
     "url": "https://example.com/weather",
     "description": "Access to protected content",

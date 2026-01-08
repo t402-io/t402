@@ -1,6 +1,6 @@
 # Dynamic Agent
 
-This example demonstrates an agent that can perform multi-tool tasks, without prior knowledge of the tools available to it. Each tool is paid for on a per-request basis using x402.
+This example demonstrates an agent that can perform multi-tool tasks, without prior knowledge of the tools available to it. Each tool is paid for on a per-request basis using t402.
 
 ## Run
 
@@ -113,7 +113,7 @@ const bot = agent({
 });
 ```
 
-`indexTool` makes a call to the index and receives a list of available tools, `httpTool` allows the agent to pay for http requests via x402.
+`indexTool` makes a call to the index and receives a list of available tools, `httpTool` allows the agent to pay for http requests via t402.
 
 With these 2 tools and a small system prompt, the agent can now dynamically perform tasks with tools without tools being known to it ahead of time in code.
 

@@ -1,10 +1,10 @@
 import { privateKeyToAccount } from "viem/accounts";
-import { x402Client, type PaymentRequirements } from "@x402/fetch";
-import { ExactEvmScheme } from "@x402/evm/exact/client";
-import { ExactSvmScheme } from "@x402/svm/exact/client";
+import { t402Client, type PaymentRequirements } from "@t402/fetch";
+import { ExactEvmScheme } from "@t402/evm/exact/client";
+import { ExactSvmScheme } from "@t402/svm/exact/client";
 import { createKeyPairSignerFromBytes } from "@solana/kit";
 import { base58 } from "@scure/base";
-import { x402HTTPClient, wrapFetchWithPayment } from "@x402/fetch";
+import { t402HTTPClient, wrapFetchWithPayment } from "@t402/fetch";
 
 /**
  * Preferred Network Example
@@ -42,12 +42,12 @@ export async function runPreferredNetworkExample(
    * client has registered support for. So fallback to options[0] means
    * "first mutually-supported option" (which preserves server's preference order).
    *
-   * @param _x402Version - The x402 protocol version
+   * @param _t402Version - The t402 protocol version
    * @param options - Array of mutually supported payment options
    * @returns The selected payment requirement based on network preference
    */
   const preferredNetworkSelector = (
-    _x402Version: number,
+    _t402Version: number,
     options: PaymentRequirements[],
   ): PaymentRequirements => {
     console.log("📋 Mutually supported payment options (server offers + client supports):");
@@ -70,7 +70,7 @@ export async function runPreferredNetworkExample(
     return options[0];
   };
 
-  const client = new x402Client(preferredNetworkSelector)
+  const client = new t402Client(preferredNetworkSelector)
     .register("eip155:*", new ExactEvmScheme(evmSigner))
     .register("solana:*", new ExactSvmScheme(svmSigner));
 
@@ -84,7 +84,7 @@ export async function runPreferredNetworkExample(
   console.log("Response body:", body);
 
   // Extract payment response from headers
-  const paymentResponse = new x402HTTPClient(client).getPaymentSettleResponse(name =>
+  const paymentResponse = new t402HTTPClient(client).getPaymentSettleResponse(name =>
     response.headers.get(name),
   );
   if (paymentResponse) {

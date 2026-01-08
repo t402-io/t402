@@ -1,7 +1,7 @@
 {
-  "name": "browser-wallet-x402-example",
+  "name": "browser-wallet-t402-example",
   "version": "1.0.0",
-  "description": "Example of x402 payments with browser wallet integration",
+  "description": "Example of t402 payments with browser wallet integration",
   "private": true,
   "scripts": {
     "dev": "concurrently \"pnpm dev:server\" \"pnpm dev:client\"",
@@ -19,8 +19,8 @@
     "viem": "^2.31.3",
     "axios": "^1.10.0",
     "uuid": "^11.0.6",
-    "x402-axios": "workspace:*",
-    "x402-hono": "workspace:*"
+    "t402-axios": "workspace:*",
+    "t402-hono": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.15.3",

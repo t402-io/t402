@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/coinbase/x402/go/pkg/types"
+	"github.com/coinbase/t402/go/pkg/types"
 )
 
 const (
 	CoinbaseFacilitatorBaseURL = "https://api.cdp.coinbase.com"
-	CoinbaseFacilitatorV2Route = "/platform/v2/x402"
+	CoinbaseFacilitatorV2Route = "/platform/v2/t402"
 )
 
 // CreateCdpAuthHeaders creates CDP auth headers
@@ -51,7 +51,7 @@ func CreateCdpAuthHeaders(apiKeyID, apiKeySecret string) func() (map[string]map[
 	}
 }
 
-// CreateFacilitatorConfig creates a facilitator config for the Coinbase X402 facilitator
+// CreateFacilitatorConfig creates a facilitator config for the Coinbase T402 facilitator
 func CreateFacilitatorConfig(apiKeyID, apiKeySecret string) *types.FacilitatorConfig {
 	return &types.FacilitatorConfig{
 		URL:               fmt.Sprintf("%s%s", CoinbaseFacilitatorBaseURL, CoinbaseFacilitatorV2Route),

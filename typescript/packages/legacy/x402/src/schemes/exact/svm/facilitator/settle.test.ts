@@ -79,7 +79,7 @@ describe("SVM Settle", () => {
     paymentPayload = {
       scheme: "exact",
       network: "solana-devnet",
-      x402Version: 1,
+      t402Version: 1,
       payload: {
         transaction: "base64_encoded_transaction",
       } as ExactSvmPayload,

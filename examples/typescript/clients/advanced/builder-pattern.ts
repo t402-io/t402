@@ -1,14 +1,14 @@
 import { privateKeyToAccount } from "viem/accounts";
-import { x402Client, wrapFetchWithPayment, x402HTTPClient } from "@x402/fetch";
-import { ExactEvmScheme } from "@x402/evm/exact/client";
-import { ExactSvmScheme } from "@x402/svm/exact/client";
+import { t402Client, wrapFetchWithPayment, t402HTTPClient } from "@t402/fetch";
+import { ExactEvmScheme } from "@t402/evm/exact/client";
+import { ExactSvmScheme } from "@t402/svm/exact/client";
 import { createKeyPairSignerFromBytes } from "@solana/kit";
 import { base58 } from "@scure/base";
 
 /**
  * Builder Pattern Example
  *
- * This demonstrates how to configure the x402Client using the builder pattern,
+ * This demonstrates how to configure the t402Client using the builder pattern,
  * chaining .register() calls to map network patterns to mechanism schemes.
  *
  * Use this approach when you need:
@@ -34,7 +34,7 @@ export async function runBuilderPatternExample(
 
   // Builder pattern allows fine-grained control over network registration
   // More specific patterns (e.g., "eip155:1") take precedence over wildcards (e.g., "eip155:*")
-  const client = new x402Client()
+  const client = new t402Client()
     .register("eip155:*", new ExactEvmScheme(evmSigner)) // All EVM networks
     .register("eip155:1", new ExactEvmScheme(ethereumMainnetSigner)) // Ethereum mainnet override
     .register("solana:*", new ExactSvmScheme(svmSigner)) // All Solana networks
@@ -57,7 +57,7 @@ export async function runBuilderPatternExample(
   console.log("Response body:", body);
 
   if (response.ok) {
-    const paymentResponse = new x402HTTPClient(client).getPaymentSettleResponse(name =>
+    const paymentResponse = new t402HTTPClient(client).getPaymentSettleResponse(name =>
       response.headers.get(name),
     );
     if (paymentResponse) {

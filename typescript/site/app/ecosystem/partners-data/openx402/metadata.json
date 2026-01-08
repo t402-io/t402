@@ -1,11 +1,11 @@
 {
   "name": "OpenX402.ai Facilitator",
-  "description": "The first permissionless, gasless and omnichain x402 facilitator that any x402 server can use without login",
-  "logoUrl": "/logos/openx402.png",
-  "websiteUrl": "https://openx402.ai",
+  "description": "The first permissionless, gasless and omnichain t402 facilitator that any t402 server can use without login",
+  "logoUrl": "/logos/opent402.png",
+  "websiteUrl": "https://opent402.ai",
   "category": "Facilitators",
   "facilitator": {
-    "baseUrl": "https://openx402.ai",
+    "baseUrl": "https://opent402.ai",
     "networks": [
       "base",
       "base-sepolia",

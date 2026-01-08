@@ -2,13 +2,13 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { Address, getAddress } from "viem";
 import type { Address as SolanaAddress } from "@solana/kit";
-import { exact } from "x402/schemes";
+import { exact } from "t402/schemes";
 import {
   findMatchingPaymentRequirements,
   processPriceToAtomicAmount,
   toJsonSafe,
-} from "x402/shared";
-import { getPaywallHtml } from "x402/paywall";
+} from "t402/shared";
+import { getPaywallHtml } from "t402/paywall";
 import {
   moneySchema,
   PaymentPayload,
@@ -24,8 +24,8 @@ import {
   SupportedPaymentKindsResponse,
   VerifyResponse,
   SettleResponse,
-} from "x402/types";
-import { safeBase64Encode } from "x402/shared";
+} from "t402/types";
+import { safeBase64Encode } from "t402/shared";
 
 /**
  * Builds payment requirements from route configuration
@@ -140,7 +140,7 @@ export async function buildPaymentRequirements(
  * @param price - The price for the resource
  * @param network - The blockchain network to use
  * @param paymentRequirements - Array of payment requirements
- * @param x402Version - The X402 protocol version
+ * @param t402Version - The T402 protocol version
  * @param errorMessages - Custom error messages configuration
  * @param customPaywallHtml - Custom HTML for the paywall
  * @param paywall - Paywall configuration options
@@ -151,7 +151,7 @@ export function handleMissingPaymentHeader(
   price: Price,
   network: Network,
   paymentRequirements: PaymentRequirements[],
-  x402Version: number,
+  t402Version: number,
   errorMessages?: PaymentMiddlewareConfig["errorMessages"],
   customPaywallHtml?: string,
   paywall?: PaywallConfig,
@@ -195,7 +195,7 @@ export function handleMissingPaymentHeader(
 
   return new NextResponse(
     JSON.stringify({
-      x402Version,
+      t402Version,
       error: errorMessages?.paymentRequired || "X-PAYMENT header is required",
       accepts: paymentRequirements,
     }),
@@ -208,7 +208,7 @@ export function handleMissingPaymentHeader(
  *
  * @param paymentHeader - The X-PAYMENT header value
  * @param paymentRequirements - Array of payment requirements
- * @param x402Version - The X402 protocol version
+ * @param t402Version - The T402 protocol version
  * @param verify - Function to verify the payment
  * @param errorMessages - Custom error messages configuration
  * @returns Promise resolving to decoded payment and requirements, or an error response
@@ -216,7 +216,7 @@ export function handleMissingPaymentHeader(
 export async function verifyPayment(
   paymentHeader: string,
   paymentRequirements: PaymentRequirements[],
-  x402Version: number,
+  t402Version: number,
   verify: (payment: PaymentPayload, requirements: PaymentRequirements) => Promise<VerifyResponse>,
   errorMessages?: PaymentMiddlewareConfig["errorMessages"],
 ): Promise<
@@ -227,12 +227,12 @@ export async function verifyPayment(
   let decodedPayment: PaymentPayload;
   try {
     decodedPayment = exact.evm.decodePayment(paymentHeader);
-    decodedPayment.x402Version = x402Version;
+    decodedPayment.t402Version = t402Version;
   } catch (error) {
     return {
       error: new NextResponse(
         JSON.stringify({
-          x402Version,
+          t402Version,
           error:
             errorMessages?.invalidPayment ||
             (error instanceof Error ? error.message : "Invalid payment"),
@@ -251,7 +251,7 @@ export async function verifyPayment(
     return {
       error: new NextResponse(
         JSON.stringify({
-          x402Version,
+          t402Version,
           error:
             errorMessages?.noMatchingRequirements || "Unable to find matching payment requirements",
           accepts: toJsonSafe(paymentRequirements),
@@ -273,7 +273,7 @@ export async function verifyPayment(
     return {
       error: new NextResponse(
         JSON.stringify({
-          x402Version,
+          t402Version,
           error: error instanceof Error ? error.message : "Payment verification failed",
           accepts: paymentRequirements,
         }),
@@ -286,7 +286,7 @@ export async function verifyPayment(
     return {
       error: new NextResponse(
         JSON.stringify({
-          x402Version,
+          t402Version,
           error: errorMessages?.verificationFailed || verification.invalidReason,
           accepts: paymentRequirements,
           payer: verification.payer,
@@ -309,7 +309,7 @@ export async function verifyPayment(
  * @param decodedPayment - The decoded payment payload
  * @param selectedPaymentRequirements - The selected payment requirements
  * @param settle - Function to settle the payment
- * @param x402Version - The X402 protocol version
+ * @param t402Version - The T402 protocol version
  * @param errorMessages - Custom error messages configuration
  * @param paymentRequirements - Array of payment requirements for error responses
  * @returns Promise resolving to the response with settlement header or error response
@@ -319,7 +319,7 @@ export async function settlePayment(
   decodedPayment: PaymentPayload,
   selectedPaymentRequirements: PaymentRequirements,
   settle: (payment: PaymentPayload, requirements: PaymentRequirements) => Promise<SettleResponse>,
-  x402Version: number,
+  t402Version: number,
   errorMessages?: PaymentMiddlewareConfig["errorMessages"],
   paymentRequirements?: PaymentRequirements[],
 ): Promise<NextResponse> {
@@ -345,7 +345,7 @@ export async function settlePayment(
   } catch (error) {
     return new NextResponse(
       JSON.stringify({
-        x402Version,
+        t402Version,
         error:
           errorMessages?.settlementFailed ||
           (error instanceof Error ? error.message : "Failed to settle payment"),

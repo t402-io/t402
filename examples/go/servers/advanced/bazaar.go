@@ -6,12 +6,12 @@ import (
 	"os"
 	"time"
 
-	x402 "github.com/coinbase/x402/go"
-	"github.com/coinbase/x402/go/extensions/bazaar"
-	"github.com/coinbase/x402/go/extensions/types"
-	x402http "github.com/coinbase/x402/go/http"
-	ginmw "github.com/coinbase/x402/go/http/gin"
-	evm "github.com/coinbase/x402/go/mechanisms/evm/exact/server"
+	t402 "github.com/coinbase/t402/go"
+	"github.com/coinbase/t402/go/extensions/bazaar"
+	"github.com/coinbase/t402/go/extensions/types"
+	t402http "github.com/coinbase/t402/go/http"
+	ginmw "github.com/coinbase/t402/go/http/gin"
+	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/server"
 	ginfw "github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -22,7 +22,7 @@ const DefaultPort = "4021"
  * Bazaar Discovery Extension Example
  *
  * This example demonstrates how to add the Bazaar discovery extension
- * to make your x402-protected API discoverable by clients and facilitators.
+ * to make your t402-protected API discoverable by clients and facilitators.
  * The extension includes input/output schemas and examples.
  */
 
@@ -41,11 +41,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	evmNetwork := x402.Network("eip155:84532") // Base Sepolia
+	evmNetwork := t402.Network("eip155:84532") // Base Sepolia
 
 	r := ginfw.Default()
 
-	facilitatorClient := x402http.NewHTTPFacilitatorClient(&x402http.FacilitatorConfig{
+	facilitatorClient := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
 		URL: facilitatorURL,
 	})
 
@@ -89,9 +89,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	routes := x402http.RoutesConfig{
+	routes := t402http.RoutesConfig{
 		"GET /weather": {
-			Accepts: x402http.PaymentOptions{
+			Accepts: t402http.PaymentOptions{
 				{
 					Scheme:  "exact",
 					PayTo:   evmPayeeAddress,
@@ -107,7 +107,7 @@ func main() {
 		},
 	}
 
-	r.Use(ginmw.X402Payment(ginmw.Config{
+	r.Use(ginmw.T402Payment(ginmw.Config{
 		Routes:      routes,
 		Facilitator: facilitatorClient,
 		Schemes: []ginmw.SchemeConfig{

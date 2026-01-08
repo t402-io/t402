@@ -32,11 +32,11 @@ Define how servers communicate payment settlement results:
 
 Define transport-specific error handling:
 
-- **Error Types**: How different x402 error conditions map to transport-specific mechanisms
+- **Error Types**: How different t402 error conditions map to transport-specific mechanisms
 - **Error Format**: Structure of error responses (may include `PaymentRequirementsResponse` for payment-related errors)
 - **Examples**: Error response examples showing both technical errors and payment requirement errors
 
 ## References
 
-- [Core x402 Specification](../x402-specification.md) - Contains all schema definitions (`PaymentRequirementsResponse`, `PaymentPayload`, `SettlementResponse`, etc.)
+- [Core t402 Specification](../t402-specification.md) - Contains all schema definitions (`PaymentRequirementsResponse`, `PaymentPayload`, `SettlementResponse`, etc.)
 - Relevant transport protocol documentation

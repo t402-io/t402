@@ -1,17 +1,17 @@
-# x402 Signers
+# t402 Signers
 
-This directory contains **signer helper implementations** that simplify cryptographic signing for x402 payments.
+This directory contains **signer helper implementations** that simplify cryptographic signing for t402 payments.
 
 ## What are Signers?
 
-**Signers** are components that handle cryptographic signing operations for blockchain transactions. In the x402 protocol, signers are used to:
+**Signers** are components that handle cryptographic signing operations for blockchain transactions. In the t402 protocol, signers are used to:
 
 - **Clients**: Sign payment payloads to authorize transfers
 - **Facilitators**: Sign and submit transactions to the blockchain
 
 ## Key Concept: Mechanisms Define Signer Interfaces
 
-**Each mechanism declares its own expected signer shape.** The signer interface is defined by the mechanism, not by the core x402 protocol.
+**Each mechanism declares its own expected signer shape.** The signer interface is defined by the mechanism, not by the core t402 protocol.
 
 ### Why Mechanisms Own Signer Interfaces
 
@@ -144,7 +144,7 @@ signers/
 ### EVM Client Signer
 
 ```go
-import evmsigners "github.com/coinbase/x402/go/signers/evm"
+import evmsigners "github.com/coinbase/t402/go/signers/evm"
 
 signer, _ := evmsigners.NewClientSignerFromPrivateKey("0x...")
 // Returns: mechanisms/evm.ClientEvmSigner implementation
@@ -153,7 +153,7 @@ signer, _ := evmsigners.NewClientSignerFromPrivateKey("0x...")
 ### SVM Client Signer
 
 ```go
-import svmsigners "github.com/coinbase/x402/go/signers/svm"
+import svmsigners "github.com/coinbase/t402/go/signers/svm"
 
 signer, _ := svmsigners.NewClientSignerFromPrivateKey("5J...")
 // Returns: mechanisms/svm.ClientSvmSigner implementation

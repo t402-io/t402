@@ -5,7 +5,7 @@ import {
   ExactSvmPayload,
   ErrorReasons,
 } from "../../../../types/verify";
-import { X402Config } from "../../../../types/config";
+import { T402Config } from "../../../../types/config";
 import {
   assertIsTransactionMessageWithBlockhashLifetime,
   Commitment,
@@ -43,14 +43,14 @@ import { verify } from "./verify";
  * @param signer - The signer that will sign the transaction
  * @param payload - The payment payload to settle
  * @param paymentRequirements - The payment requirements to settle against
- * @param config - Optional configuration for X402 operations (e.g., custom RPC URLs)
+ * @param config - Optional configuration for T402 operations (e.g., custom RPC URLs)
  * @returns A SettleResponse indicating if the payment is settled and any error reason
  */
 export async function settle(
   signer: TransactionSigner,
   payload: PaymentPayload,
   paymentRequirements: PaymentRequirements,
-  config?: X402Config,
+  config?: T402Config,
 ): Promise<SettleResponse> {
   const verifyResponse = await verify(signer, payload, paymentRequirements, config);
   if (!verifyResponse.isValid) {

@@ -1,6 +1,6 @@
 # Go SDK Contributing Guide
 
-Guide for developing and contributing to the x402 Go SDK.
+Guide for developing and contributing to the t402 Go SDK.
 
 ## Contents
 
@@ -17,9 +17,9 @@ The Go SDK is a single Go module with modular subpackages.
 
 ```
 go/
-├── client.go              # x402.X402Client
-├── server.go              # x402.X402ResourceServer
-├── facilitator.go         # x402.X402Facilitator
+├── client.go              # t402.X402Client
+├── server.go              # t402.X402ResourceServer
+├── facilitator.go         # t402.X402Facilitator
 ├── types.go               # Core types
 ├── interfaces.go          # Interface definitions
 ├── *_hooks.go             # Lifecycle hooks
@@ -129,15 +129,15 @@ http/your_framework/
 package yourframework
 
 import (
-    x402 "github.com/coinbase/x402/go"
-    x402http "github.com/coinbase/x402/go/http"
+    t402 "github.com/coinbase/t402/go"
+    t402http "github.com/coinbase/t402/go/http"
 )
 
-// Middleware creates x402 payment middleware for YourFramework.
-func Middleware(httpServer *x402http.HTTPResourceServer) YourFrameworkMiddleware {
+// Middleware creates t402 payment middleware for YourFramework.
+func Middleware(httpServer *t402http.HTTPResourceServer) YourFrameworkMiddleware {
     return func(c YourContext) {
         // 1. Extract route key from request
-        routeKey := x402http.RouteKey(c.Request().Method, c.Request().URL.Path)
+        routeKey := t402http.RouteKey(c.Request().Method, c.Request().URL.Path)
         
         // 2. Check if route requires payment
         if !httpServer.HasRouteConfig(routeKey) {
@@ -272,10 +272,10 @@ This runs both `go fmt` and `goimports`.
 Use typed errors from `errors.go`:
 
 ```go
-import x402 "github.com/coinbase/x402/go"
+import t402 "github.com/coinbase/t402/go"
 
 if err != nil {
-    return nil, x402.NewVerificationError("invalid signature", err)
+    return nil, t402.NewVerificationError("invalid signature", err)
 }
 ```
 
@@ -291,13 +291,13 @@ Examples live in `examples/go/`. When adding a new example:
 When adding a Go example, include a `go.mod` that references the local SDK:
 
 ```go
-module github.com/coinbase/x402/examples/go/your-example
+module github.com/coinbase/t402/examples/go/your-example
 
 go 1.24
 
-require github.com/coinbase/x402/go v0.0.0
+require github.com/coinbase/t402/go v0.0.0
 
-replace github.com/coinbase/x402/go => ../../../go
+replace github.com/coinbase/t402/go => ../../../go
 ```
 
 ## Documentation

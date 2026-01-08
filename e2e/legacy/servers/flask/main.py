@@ -4,7 +4,7 @@ import sys
 import logging
 from flask import Flask, jsonify, request
 from dotenv import load_dotenv
-from x402.flask.middleware import PaymentMiddleware
+from t402.flask.middleware import PaymentMiddleware
 
 # Configure logging to reduce verbosity
 logging.getLogger("werkzeug").setLevel(logging.ERROR)

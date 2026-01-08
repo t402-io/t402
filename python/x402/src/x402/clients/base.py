@@ -1,14 +1,14 @@
 import time
 from typing import Optional, Callable, Dict, Any, List
 from eth_account import Account
-from x402.exact import sign_payment_header
-from x402.types import (
+from t402.exact import sign_payment_header
+from t402.types import (
     PaymentRequirements,
     UnsupportedSchemeException,
 )
-from x402.common import x402_VERSION
+from t402.common import t402_VERSION
 import secrets
-from x402.encoding import safe_base64_decode
+from t402.encoding import safe_base64_decode
 import json
 
 # Define type for the payment requirements selector
@@ -60,8 +60,8 @@ class PaymentAlreadyAttemptedError(PaymentError):
     pass
 
 
-class x402Client:
-    """Base client for handling x402 payments."""
+class t402Client:
+    """Base client for handling t402 payments."""
 
     def __init__(
         self,
@@ -69,7 +69,7 @@ class x402Client:
         max_value: Optional[int] = None,
         payment_requirements_selector: Optional[PaymentSelectorCallable] = None,
     ):
-        """Initialize the x402 client.
+        """Initialize the t402 client.
 
         Args:
             account: eth_account.Account instance for signing payments
@@ -98,7 +98,7 @@ class x402Client:
             max_value: Optional maximum allowed payment amount
 
         Returns:
-            Selected payment requirements (PaymentRequirements instance from x402.types)
+            Selected payment requirements (PaymentRequirements instance from t402.types)
 
         Raises:
             UnsupportedSchemeException: If no supported scheme is found
@@ -143,7 +143,7 @@ class x402Client:
             scheme_filter: Optional scheme to filter by
 
         Returns:
-            Selected payment requirements (PaymentRequirements instance from x402.types)
+            Selected payment requirements (PaymentRequirements instance from t402.types)
 
         Raises:
             UnsupportedSchemeException: If no supported scheme is found
@@ -156,19 +156,19 @@ class x402Client:
     def create_payment_header(
         self,
         payment_requirements: PaymentRequirements,
-        x402_version: int = x402_VERSION,
+        t402_version: int = t402_VERSION,
     ) -> str:
         """Create a payment header for the given requirements.
 
         Args:
             payment_requirements: Selected payment requirements
-            x402_version: x402 protocol version
+            t402_version: t402 protocol version
 
         Returns:
             Signed payment header
         """
         unsigned_header = {
-            "x402Version": x402_version,
+            "t402Version": t402_version,
             "scheme": payment_requirements.scheme,
             "network": payment_requirements.network,
             "payload": {

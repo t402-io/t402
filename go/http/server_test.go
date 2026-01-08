@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	x402 "github.com/coinbase/x402/go"
-	"github.com/coinbase/x402/go/types"
+	t402 "github.com/coinbase/t402/go"
+	"github.com/coinbase/t402/go/types"
 )
 
 // Mock HTTP adapter for testing
@@ -48,7 +48,7 @@ func (m *mockHTTPAdapter) GetUserAgent() string {
 	return m.agent
 }
 
-func TestNewx402HTTPResourceServer(t *testing.T) {
+func TestNewt402HTTPResourceServer(t *testing.T) {
 	routes := RoutesConfig{
 		"GET /api": {
 			Accepts: PaymentOptions{
@@ -62,11 +62,11 @@ func TestNewx402HTTPResourceServer(t *testing.T) {
 		},
 	}
 
-	server := Newx402HTTPResourceServer(routes)
+	server := Newt402HTTPResourceServer(routes)
 	if server == nil {
 		t.Fatal("Expected server to be created")
 	}
-	if server.X402ResourceServer == nil {
+	if server.T402ResourceServer == nil {
 		t.Fatal("Expected embedded resource server")
 	}
 	if len(server.compiledRoutes) != 1 {
@@ -90,7 +90,7 @@ func TestProcessHTTPRequestNoPaymentRequired(t *testing.T) {
 		},
 	}
 
-	server := Newx402HTTPResourceServer(routes)
+	server := Newt402HTTPResourceServer(routes)
 
 	// Request to non-protected path
 	adapter := &mockHTTPAdapter{
@@ -136,11 +136,11 @@ func TestProcessHTTPRequestPaymentRequired(t *testing.T) {
 
 	// Create mock facilitator client
 	mockClient := &mockFacilitatorClient{
-		supported: func(ctx context.Context) (x402.SupportedResponse, error) {
-			return x402.SupportedResponse{
-				Kinds: []x402.SupportedKind{
+		supported: func(ctx context.Context) (t402.SupportedResponse, error) {
+			return t402.SupportedResponse{
+				Kinds: []t402.SupportedKind{
 					{
-						X402Version: 2,
+						T402Version: 2,
 						Scheme:      "exact",
 						Network:     "eip155:1",
 					},
@@ -151,10 +151,10 @@ func TestProcessHTTPRequestPaymentRequired(t *testing.T) {
 		},
 	}
 
-	server := Newx402HTTPResourceServer(
+	server := Newt402HTTPResourceServer(
 		routes,
-		x402.WithFacilitatorClient(mockClient),
-		x402.WithSchemeServer("eip155:1", mockServer),
+		t402.WithFacilitatorClient(mockClient),
+		t402.WithSchemeServer("eip155:1", mockServer),
 	)
 	server.Initialize(ctx)
 
@@ -208,10 +208,10 @@ func TestProcessHTTPRequestWithBrowser(t *testing.T) {
 	mockServer := &mockSchemeServer{scheme: "exact"}
 	mockClient := &mockFacilitatorClient{}
 
-	server := Newx402HTTPResourceServer(
+	server := Newt402HTTPResourceServer(
 		routes,
-		x402.WithFacilitatorClient(mockClient),
-		x402.WithSchemeServer("eip155:1", mockServer),
+		t402.WithFacilitatorClient(mockClient),
+		t402.WithSchemeServer("eip155:1", mockServer),
 	)
 	server.Initialize(ctx)
 
@@ -283,16 +283,16 @@ func TestProcessHTTPRequestWithPaymentVerified(t *testing.T) {
 		scheme: "exact",
 	}
 	mockClient := &mockFacilitatorClient{
-		verify: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.VerifyResponse, error) {
-			return &x402.VerifyResponse{
+		verify: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error) {
+			return &t402.VerifyResponse{
 				IsValid: true,
 				Payer:   "0xpayer",
 			}, nil
 		},
-		supported: func(ctx context.Context) (x402.SupportedResponse, error) {
-			return x402.SupportedResponse{
-				Kinds: []x402.SupportedKind{
-					{X402Version: 2, Scheme: "exact", Network: "eip155:1"},
+		supported: func(ctx context.Context) (t402.SupportedResponse, error) {
+			return t402.SupportedResponse{
+				Kinds: []t402.SupportedKind{
+					{T402Version: 2, Scheme: "exact", Network: "eip155:1"},
 				},
 				Extensions: []string{},
 				Signers:    make(map[string][]string),
@@ -300,15 +300,15 @@ func TestProcessHTTPRequestWithPaymentVerified(t *testing.T) {
 		},
 	}
 
-	server := Newx402HTTPResourceServer(
+	server := Newt402HTTPResourceServer(
 		routes,
-		x402.WithFacilitatorClient(mockClient),
-		x402.WithSchemeServer("eip155:1", mockServer),
+		t402.WithFacilitatorClient(mockClient),
+		t402.WithSchemeServer("eip155:1", mockServer),
 	)
 	server.Initialize(ctx)
 
 	// Create payment payload that matches the route requirements exactly
-	acceptedRequirements := x402.PaymentRequirements{
+	acceptedRequirements := t402.PaymentRequirements{
 		Scheme:            "exact",
 		Network:           "eip155:1",
 		Asset:             "USDC",
@@ -320,8 +320,8 @@ func TestProcessHTTPRequestWithPaymentVerified(t *testing.T) {
 		},
 	}
 
-	paymentPayload := x402.PaymentPayload{
-		X402Version: 2,
+	paymentPayload := t402.PaymentPayload{
+		T402Version: 2,
 		Payload:     map[string]interface{}{"sig": "test"},
 		Accepted:    acceptedRequirements,
 	}
@@ -374,8 +374,8 @@ func TestProcessSettlement(t *testing.T) {
 	ctx := context.Background()
 
 	mockClient := &mockFacilitatorClient{
-		settle: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.SettleResponse, error) {
-			return &x402.SettleResponse{
+		settle: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
+			return &t402.SettleResponse{
 				Success:     true,
 				Transaction: "0xtx",
 				Payer:       "0xpayer",
@@ -384,9 +384,9 @@ func TestProcessSettlement(t *testing.T) {
 		},
 	}
 
-	server := Newx402HTTPResourceServer(
+	server := Newt402HTTPResourceServer(
 		RoutesConfig{},
-		x402.WithFacilitatorClient(mockClient),
+		t402.WithFacilitatorClient(mockClient),
 	)
 	server.Initialize(ctx)
 
@@ -399,7 +399,7 @@ func TestProcessSettlement(t *testing.T) {
 	}
 
 	payload := types.PaymentPayload{
-		X402Version: 2,
+		T402Version: 2,
 		Accepted:    requirements,
 		Payload:     map[string]interface{}{},
 	}
@@ -497,17 +497,17 @@ func TestNormalizePath(t *testing.T) {
 }
 
 func TestGetDisplayAmount(t *testing.T) {
-	server := Newx402HTTPResourceServer(RoutesConfig{})
+	server := Newt402HTTPResourceServer(RoutesConfig{})
 
 	tests := []struct {
 		name     string
-		required x402.PaymentRequired
+		required t402.PaymentRequired
 		expected float64
 	}{
 		{
 			name: "USDC with 6 decimals",
-			required: x402.PaymentRequired{
-				Accepts: []x402.PaymentRequirements{
+			required: t402.PaymentRequired{
+				Accepts: []t402.PaymentRequirements{
 					{Amount: "5000000"},
 				},
 			},
@@ -515,8 +515,8 @@ func TestGetDisplayAmount(t *testing.T) {
 		},
 		{
 			name: "Small amount",
-			required: x402.PaymentRequired{
-				Accepts: []x402.PaymentRequirements{
+			required: t402.PaymentRequired{
+				Accepts: []t402.PaymentRequirements{
 					{Amount: "100000"},
 				},
 			},
@@ -524,8 +524,8 @@ func TestGetDisplayAmount(t *testing.T) {
 		},
 		{
 			name: "Invalid amount",
-			required: x402.PaymentRequired{
-				Accepts: []x402.PaymentRequirements{
+			required: t402.PaymentRequired{
+				Accepts: []t402.PaymentRequirements{
 					{Amount: "not-a-number"},
 				},
 			},
@@ -533,7 +533,7 @@ func TestGetDisplayAmount(t *testing.T) {
 		},
 		{
 			name:     "No requirements",
-			required: x402.PaymentRequired{},
+			required: t402.PaymentRequired{},
 			expected: 0.0,
 		},
 	}
@@ -557,8 +557,8 @@ func (m *mockSchemeServer) Scheme() string {
 	return m.scheme
 }
 
-func (m *mockSchemeServer) ParsePrice(price x402.Price, network x402.Network) (x402.AssetAmount, error) {
-	return x402.AssetAmount{
+func (m *mockSchemeServer) ParsePrice(price t402.Price, network t402.Network) (t402.AssetAmount, error) {
+	return t402.AssetAmount{
 		Asset:  "USDC",
 		Amount: "1000000",
 	}, nil
@@ -570,32 +570,32 @@ func (m *mockSchemeServer) EnhancePaymentRequirements(ctx context.Context, base 
 
 // Mock facilitator client
 type mockFacilitatorClient struct {
-	verify    func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.VerifyResponse, error)
-	settle    func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.SettleResponse, error)
-	supported func(ctx context.Context) (x402.SupportedResponse, error)
+	verify    func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error)
+	settle    func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error)
+	supported func(ctx context.Context) (t402.SupportedResponse, error)
 }
 
-func (m *mockFacilitatorClient) Verify(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.VerifyResponse, error) {
+func (m *mockFacilitatorClient) Verify(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error) {
 	if m.verify != nil {
 		return m.verify(ctx, payloadBytes, requirementsBytes)
 	}
-	return &x402.VerifyResponse{IsValid: true, Payer: "0xmock"}, nil
+	return &t402.VerifyResponse{IsValid: true, Payer: "0xmock"}, nil
 }
 
-func (m *mockFacilitatorClient) Settle(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.SettleResponse, error) {
+func (m *mockFacilitatorClient) Settle(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 	if m.settle != nil {
 		return m.settle(ctx, payloadBytes, requirementsBytes)
 	}
-	return &x402.SettleResponse{Success: true, Transaction: "0xmock", Network: "eip155:1", Payer: "0xmock"}, nil
+	return &t402.SettleResponse{Success: true, Transaction: "0xmock", Network: "eip155:1", Payer: "0xmock"}, nil
 }
 
-func (m *mockFacilitatorClient) GetSupported(ctx context.Context) (x402.SupportedResponse, error) {
+func (m *mockFacilitatorClient) GetSupported(ctx context.Context) (t402.SupportedResponse, error) {
 	if m.supported != nil {
 		return m.supported(ctx)
 	}
-	return x402.SupportedResponse{
-		Kinds: []x402.SupportedKind{
-			{X402Version: 2, Scheme: "exact", Network: "eip155:1"},
+	return t402.SupportedResponse{
+		Kinds: []t402.SupportedKind{
+			{T402Version: 2, Scheme: "exact", Network: "eip155:1"},
 		},
 		Extensions: []string{},
 		Signers:    make(map[string][]string),

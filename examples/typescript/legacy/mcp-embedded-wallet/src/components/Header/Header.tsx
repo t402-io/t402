@@ -5,7 +5,7 @@ import { Dialog, Flex } from "@radix-ui/themes";
 
 import { Button } from "../Button";
 import { SessionSpendingTracker } from "../SessionSpendingTracker";
-import { TestX402Button } from "./TestX402Button";
+import { TestT402Button } from "./TestT402Button";
 import { Wallet } from "../Wallet";
 
 export const Header = () => {
@@ -33,7 +33,7 @@ export const Header = () => {
               <DiscoveryModal isOpen={isDiscoveryOpen} onClose={() => setIsDiscoveryOpen(false)} />
             </Dialog.Content>
           </Dialog.Root>
-          {process.env.NODE_ENV === "development" && <TestX402Button />}
+          {process.env.NODE_ENV === "development" && <TestT402Button />}
         </Flex>
       </Flex>
     )

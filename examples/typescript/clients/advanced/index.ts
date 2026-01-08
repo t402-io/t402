@@ -12,9 +12,9 @@ const endpointPath = process.env.ENDPOINT_PATH || "/weather";
 const url = `${baseURL}${endpointPath}`;
 
 /**
- * Main example runner for advanced x402 client patterns.
+ * Main example runner for advanced t402 client patterns.
  *
- * This package demonstrates advanced patterns for production-ready x402 clients:
+ * This package demonstrates advanced patterns for production-ready t402 clients:
  *
  * - builder-pattern: Fine-grained control over network registration
  * - hooks: Payment lifecycle hooks for custom logic at different stages

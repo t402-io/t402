@@ -1,6 +1,6 @@
 # X402 Python Examples
 
-This directory contains a collection of Python examples demonstrating how to use the X402 protocol in various contexts. These examples use the Python `x402` package and standard Python web frameworks/HTTP clients.
+This directory contains a collection of Python examples demonstrating how to use the X402 protocol in various contexts. These examples use the Python `t402` package and standard Python web frameworks/HTTP clients.
 
 ## Setup
 
@@ -27,26 +27,26 @@ The examples are organized into several categories:
 
 ### Clients
 
-Examples of different client implementations for interacting with x402-protected services:
+Examples of different client implementations for interacting with t402-protected services:
 
-- `clients/httpx/` - Two approaches with httpx: a pre-configured `x402HttpxClient` and an extensible `event_hooks` integration.
-- `clients/requests/` - Two approaches with requests: a simple `x402_requests` session and an extensible HTTP adapter.
+- `clients/httpx/` - Two approaches with httpx: a pre-configured `t402HttpxClient` and an extensible `event_hooks` integration.
+- `clients/requests/` - Two approaches with requests: a simple `t402_requests` session and an extensible HTTP adapter.
 
 ### Discovery
 
-- `discovery/` - Uses the facilitator to list available x402-protected resources (Bazaar) with CDP credentials.
+- `discovery/` - Uses the facilitator to list available t402-protected resources (Bazaar) with CDP credentials.
 
 ### Fullstack
 
-- `fullstack/fastapi/` - FastAPI application with x402 middleware protecting routes. Includes simple UI assets.
-- `fullstack/flask/` - Flask application with x402 middleware protecting routes. Includes simple UI assets.
+- `fullstack/fastapi/` - FastAPI application with t402 middleware protecting routes. Includes simple UI assets.
+- `fullstack/flask/` - Flask application with t402 middleware protecting routes. Includes simple UI assets.
 
 ### Servers
 
 Examples of different server implementations:
 
-- `servers/fastapi/` - FastAPI server using x402 middleware to protect endpoints.
-- `servers/flask/` - Flask server using x402 middleware to protect endpoints.
+- `servers/fastapi/` - FastAPI server using t402 middleware to protect endpoints.
+- `servers/flask/` - Flask server using t402 middleware to protect endpoints.
 - `servers/advanced/` - FastAPI server without middleware: delayed settlement, dynamic pricing, multiple requirements.
 - `servers/mainnet/` - Server example for accepting real USDC on Base mainnet using the Coinbase hosted facilitator.
 

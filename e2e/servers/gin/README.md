@@ -1,11 +1,11 @@
 # E2E Test Server: Gin (Go)
 
-This server demonstrates and tests the x402 Gin middleware with both EVM and SVM payment protection.
+This server demonstrates and tests the t402 Gin middleware with both EVM and SVM payment protection.
 
 ## What It Tests
 
 ### Core Functionality
-- ✅ **V2 Protocol** - Modern x402 server middleware
+- ✅ **V2 Protocol** - Modern t402 server middleware
 - ✅ **Payment Protection** - Middleware protecting specific routes
 - ✅ **Multi-chain Support** - EVM and SVM payment acceptance
 - ✅ **Facilitator Integration** - HTTP communication with facilitator
@@ -23,21 +23,21 @@ This server demonstrates and tests the x402 Gin middleware with both EVM and SVM
 ```go
 import (
     ginfw "github.com/gin-gonic/gin"
-    x402 "github.com/coinbase/x402/go"
-    x402http "github.com/coinbase/x402/go/http"
-    ginmw "github.com/coinbase/x402/go/http/gin"
-    evm "github.com/coinbase/x402/go/mechanisms/evm/exact/server"
-    svm "github.com/coinbase/x402/go/mechanisms/svm/exact/server"
-    "github.com/coinbase/x402/go/extensions/bazaar"
+    t402 "github.com/coinbase/t402/go"
+    t402http "github.com/coinbase/t402/go/http"
+    ginmw "github.com/coinbase/t402/go/http/gin"
+    evm "github.com/coinbase/t402/go/mechanisms/evm/exact/server"
+    svm "github.com/coinbase/t402/go/mechanisms/svm/exact/server"
+    "github.com/coinbase/t402/go/extensions/bazaar"
 )
 
 // Create Gin router
 r := ginfw.New()
 
 // Define payment routes
-routes := x402http.RoutesConfig{
+routes := t402http.RoutesConfig{
     "GET /protected": {
-        Accepts: x402http.PaymentOptions{
+        Accepts: t402http.PaymentOptions{
             {
                 Scheme:  "exact",
                 Network: "eip155:84532",
@@ -50,7 +50,7 @@ routes := x402http.RoutesConfig{
         },
     },
     "GET /protected-svm": {
-        Accepts: x402http.PaymentOptions{
+        Accepts: t402http.PaymentOptions{
             {
                 Scheme:  "exact",
                 Network: "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
@@ -146,7 +146,7 @@ Content-Type: application/json
 
 {
   "error": "Payment required",
-  "x402Version": 2,
+  "t402Version": 2,
   "accepts": [...],
   "resource": {...},
   "extensions": {
@@ -173,12 +173,12 @@ Content-Type: application/json
 
 ## Dependencies
 
-- `github.com/coinbase/x402/go` - Core x402
-- `github.com/coinbase/x402/go/http` - HTTP integration
-- `github.com/coinbase/x402/go/http/gin` - Gin middleware
-- `github.com/coinbase/x402/go/mechanisms/evm` - EVM server
-- `github.com/coinbase/x402/go/mechanisms/svm` - SVM server
-- `github.com/coinbase/x402/go/extensions/bazaar` - Discovery extension
+- `github.com/coinbase/t402/go` - Core t402
+- `github.com/coinbase/t402/go/http` - HTTP integration
+- `github.com/coinbase/t402/go/http/gin` - Gin middleware
+- `github.com/coinbase/t402/go/mechanisms/evm` - EVM server
+- `github.com/coinbase/t402/go/mechanisms/svm` - SVM server
+- `github.com/coinbase/t402/go/extensions/bazaar` - Discovery extension
 - `github.com/gin-gonic/gin` - HTTP framework
 
 ## Implementation Highlights

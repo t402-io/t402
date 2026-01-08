@@ -2,8 +2,8 @@ import os
 import asyncio
 from dotenv import load_dotenv
 from eth_account import Account
-from x402.clients.httpx import x402_payment_hooks
-from x402.clients.base import decode_x_payment_response
+from t402.clients.httpx import t402_payment_hooks
+from t402.clients.base import decode_x_payment_response
 import httpx
 
 # Load environment variables
@@ -24,10 +24,10 @@ print(f"Initialized account: {account.address}")
 
 
 async def main():
-    # Create httpx client with x402 payment hooks
+    # Create httpx client with t402 payment hooks
     async with httpx.AsyncClient(base_url=base_url) as client:
         # Add payment hooks directly to client.event_hooks
-        client.event_hooks = x402_payment_hooks(account)
+        client.event_hooks = t402_payment_hooks(account)
 
         # Make request
         try:

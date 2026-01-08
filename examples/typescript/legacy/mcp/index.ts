@@ -11,7 +11,7 @@ import axios from "axios";
 import { config } from "dotenv";
 import { Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { withPaymentInterceptor } from "x402-axios";
+import { withPaymentInterceptor } from "t402-axios";
 
 config();
 
@@ -29,7 +29,7 @@ const client = withPaymentInterceptor(axios.create({ baseURL }), account);
 
 // Create an MCP server
 const server = new McpServer({
-  name: "x402 MCP Client Demo",
+  name: "t402 MCP Client Demo",
   version: "1.0.0",
 });
 

@@ -1,23 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { wrapFetchWithPayment, wrapFetchWithPaymentFromConfig } from "./index";
-import type { x402Client, x402HTTPClient, x402ClientConfig } from "@x402/core/client";
-import type { PaymentPayload, PaymentRequired, PaymentRequirements } from "@x402/core/types";
+import type { t402Client, t402HTTPClient, t402ClientConfig } from "@t402/core/client";
+import type { PaymentPayload, PaymentRequired, PaymentRequirements } from "@t402/core/types";
 
-// Mock the @x402/core/client module
-vi.mock("@x402/core/client", () => {
-  const MockX402HTTPClient = vi.fn();
-  MockX402HTTPClient.prototype.getPaymentRequiredResponse = vi.fn();
-  MockX402HTTPClient.prototype.encodePaymentSignatureHeader = vi.fn();
+// Mock the @t402/core/client module
+vi.mock("@t402/core/client", () => {
+  const MockT402HTTPClient = vi.fn();
+  MockT402HTTPClient.prototype.getPaymentRequiredResponse = vi.fn();
+  MockT402HTTPClient.prototype.encodePaymentSignatureHeader = vi.fn();
 
-  const MockX402Client = vi.fn() as ReturnType<typeof vi.fn> & {
+  const MockT402Client = vi.fn() as ReturnType<typeof vi.fn> & {
     fromConfig: ReturnType<typeof vi.fn>;
   };
-  MockX402Client.prototype.createPaymentPayload = vi.fn();
-  MockX402Client.fromConfig = vi.fn();
+  MockT402Client.prototype.createPaymentPayload = vi.fn();
+  MockT402Client.fromConfig = vi.fn();
 
   return {
-    x402HTTPClient: MockX402HTTPClient,
-    x402Client: MockX402Client,
+    t402HTTPClient: MockT402HTTPClient,
+    t402Client: MockT402Client,
   };
 });
 
@@ -25,11 +25,11 @@ type RequestInitWithRetry = RequestInit & { __is402Retry?: boolean };
 
 describe("wrapFetchWithPayment()", () => {
   let mockFetch: ReturnType<typeof vi.fn>;
-  let mockClient: x402Client;
+  let mockClient: t402Client;
   let wrappedFetch: ReturnType<typeof wrapFetchWithPayment>;
 
   const validPaymentRequired: PaymentRequired = {
-    x402Version: 2,
+    t402Version: 2,
     resource: {
       url: "https://api.example.com/resource",
       description: "Test payment",
@@ -49,7 +49,7 @@ describe("wrapFetchWithPayment()", () => {
   };
 
   const validPaymentPayload: PaymentPayload = {
-    x402Version: 2,
+    t402Version: 2,
     resource: validPaymentRequired.resource,
     accepted: validPaymentRequired.accepts[0],
     payload: { signature: "0xmocksignature" },
@@ -73,11 +73,11 @@ describe("wrapFetchWithPayment()", () => {
     mockFetch = vi.fn();
 
     // Create mock client
-    const { x402Client: MockX402Client, x402HTTPClient: MockX402HTTPClient } = await import(
-      "@x402/core/client"
+    const { t402Client: MockT402Client, t402HTTPClient: MockT402HTTPClient } = await import(
+      "@t402/core/client"
     );
 
-    mockClient = new MockX402Client() as unknown as x402Client;
+    mockClient = new MockT402Client() as unknown as t402Client;
 
     // Setup default mock implementations
     (mockClient.createPaymentPayload as ReturnType<typeof vi.fn>).mockResolvedValue(
@@ -85,10 +85,10 @@ describe("wrapFetchWithPayment()", () => {
     );
 
     (
-      MockX402HTTPClient.prototype.getPaymentRequiredResponse as ReturnType<typeof vi.fn>
+      MockT402HTTPClient.prototype.getPaymentRequiredResponse as ReturnType<typeof vi.fn>
     ).mockReturnValue(validPaymentRequired);
     (
-      MockX402HTTPClient.prototype.encodePaymentSignatureHeader as ReturnType<typeof vi.fn>
+      MockT402HTTPClient.prototype.encodePaymentSignatureHeader as ReturnType<typeof vi.fn>
     ).mockReturnValue({
       "PAYMENT-SIGNATURE": "encoded-payment-header",
     });
@@ -107,7 +107,7 @@ describe("wrapFetchWithPayment()", () => {
   });
 
   it("should handle 402 errors and retry with payment header", async () => {
-    const { x402HTTPClient: MockX402HTTPClient } = await import("@x402/core/client");
+    const { t402HTTPClient: MockT402HTTPClient } = await import("@t402/core/client");
     const successResponse = createResponse(200, { data: "success" });
 
     mockFetch
@@ -122,9 +122,9 @@ describe("wrapFetchWithPayment()", () => {
     } as RequestInitWithRetry);
 
     expect(result).toBe(successResponse);
-    expect(MockX402HTTPClient.prototype.getPaymentRequiredResponse).toHaveBeenCalled();
+    expect(MockT402HTTPClient.prototype.getPaymentRequiredResponse).toHaveBeenCalled();
     expect(mockClient.createPaymentPayload).toHaveBeenCalledWith(validPaymentRequired);
-    expect(MockX402HTTPClient.prototype.encodePaymentSignatureHeader).toHaveBeenCalledWith(
+    expect(MockT402HTTPClient.prototype.encodePaymentSignatureHeader).toHaveBeenCalledWith(
       validPaymentPayload,
     );
     expect(mockFetch).toHaveBeenCalledTimes(2);
@@ -159,9 +159,9 @@ describe("wrapFetchWithPayment()", () => {
   });
 
   it("should reject with descriptive error if payment requirements parsing fails", async () => {
-    const { x402HTTPClient: MockX402HTTPClient } = await import("@x402/core/client");
+    const { t402HTTPClient: MockT402HTTPClient } = await import("@t402/core/client");
     (
-      MockX402HTTPClient.prototype.getPaymentRequiredResponse as ReturnType<typeof vi.fn>
+      MockT402HTTPClient.prototype.getPaymentRequiredResponse as ReturnType<typeof vi.fn>
     ).mockImplementation(() => {
       throw new Error("Invalid payment header format");
     });
@@ -185,9 +185,9 @@ describe("wrapFetchWithPayment()", () => {
   });
 
   it("should reject with generic error message for unknown parsing errors", async () => {
-    const { x402HTTPClient: MockX402HTTPClient } = await import("@x402/core/client");
+    const { t402HTTPClient: MockT402HTTPClient } = await import("@t402/core/client");
     (
-      MockX402HTTPClient.prototype.getPaymentRequiredResponse as ReturnType<typeof vi.fn>
+      MockT402HTTPClient.prototype.getPaymentRequiredResponse as ReturnType<typeof vi.fn>
     ).mockImplementation(() => {
       throw "String error"; // Non-Error thrown
     });
@@ -210,24 +210,24 @@ describe("wrapFetchWithPayment()", () => {
   });
 
   it("should handle v1 payment responses from body", async () => {
-    const { x402HTTPClient: MockX402HTTPClient } = await import("@x402/core/client");
+    const { t402HTTPClient: MockT402HTTPClient } = await import("@t402/core/client");
     const successResponse = createResponse(200, { data: "success" });
 
     const v1PaymentRequired: PaymentRequired = {
       ...validPaymentRequired,
-      x402Version: 1,
+      t402Version: 1,
     };
 
     const v1PaymentPayload: PaymentPayload = {
       ...validPaymentPayload,
-      x402Version: 1,
+      t402Version: 1,
     };
 
     (
-      MockX402HTTPClient.prototype.getPaymentRequiredResponse as ReturnType<typeof vi.fn>
+      MockT402HTTPClient.prototype.getPaymentRequiredResponse as ReturnType<typeof vi.fn>
     ).mockReturnValue(v1PaymentRequired);
     (
-      MockX402HTTPClient.prototype.encodePaymentSignatureHeader as ReturnType<typeof vi.fn>
+      MockT402HTTPClient.prototype.encodePaymentSignatureHeader as ReturnType<typeof vi.fn>
     ).mockReturnValue({
       "X-PAYMENT": "v1-payment-header",
     });
@@ -241,7 +241,7 @@ describe("wrapFetchWithPayment()", () => {
     const result = await wrappedFetch("https://api.example.com", { method: "GET" });
 
     expect(result).toBe(successResponse);
-    expect(MockX402HTTPClient.prototype.encodePaymentSignatureHeader).toHaveBeenCalledWith(
+    expect(MockT402HTTPClient.prototype.encodePaymentSignatureHeader).toHaveBeenCalledWith(
       v1PaymentPayload,
     );
     expect(mockFetch).toHaveBeenLastCalledWith(
@@ -284,7 +284,7 @@ describe("wrapFetchWithPayment()", () => {
   });
 
   it("should handle empty response body gracefully", async () => {
-    const { x402HTTPClient: MockX402HTTPClient } = await import("@x402/core/client");
+    const { t402HTTPClient: MockT402HTTPClient } = await import("@t402/core/client");
     const successResponse = createResponse(200, { data: "success" });
 
     // Response with headers only, no body
@@ -299,11 +299,11 @@ describe("wrapFetchWithPayment()", () => {
     const result = await wrappedFetch("https://api.example.com", { method: "GET" });
 
     expect(result).toBe(successResponse);
-    expect(MockX402HTTPClient.prototype.getPaymentRequiredResponse).toHaveBeenCalled();
+    expect(MockT402HTTPClient.prototype.getPaymentRequiredResponse).toHaveBeenCalled();
   });
 
   it("should handle invalid JSON in response body gracefully", async () => {
-    const { x402HTTPClient: MockX402HTTPClient } = await import("@x402/core/client");
+    const { t402HTTPClient: MockT402HTTPClient } = await import("@t402/core/client");
     const successResponse = createResponse(200, { data: "success" });
 
     // Response with invalid JSON body
@@ -318,13 +318,13 @@ describe("wrapFetchWithPayment()", () => {
     const result = await wrappedFetch("https://api.example.com", { method: "GET" });
 
     expect(result).toBe(successResponse);
-    expect(MockX402HTTPClient.prototype.getPaymentRequiredResponse).toHaveBeenCalled();
+    expect(MockT402HTTPClient.prototype.getPaymentRequiredResponse).toHaveBeenCalled();
   });
 
-  it("should accept x402HTTPClient directly", async () => {
-    const { x402HTTPClient: MockX402HTTPClient } = await import("@x402/core/client");
+  it("should accept t402HTTPClient directly", async () => {
+    const { t402HTTPClient: MockT402HTTPClient } = await import("@t402/core/client");
 
-    const httpClient = new MockX402HTTPClient(mockClient) as unknown as x402HTTPClient;
+    const httpClient = new MockT402HTTPClient(mockClient) as unknown as t402HTTPClient;
     const wrappedWithHttpClient = wrapFetchWithPayment(mockFetch, httpClient);
 
     const successResponse = createResponse(200, { data: "success" });
@@ -344,35 +344,35 @@ describe("wrapFetchWithPaymentFromConfig()", () => {
 
     mockFetch = vi.fn();
 
-    const { x402Client: MockX402Client, x402HTTPClient: MockX402HTTPClient } = await import(
-      "@x402/core/client"
+    const { t402Client: MockT402Client, t402HTTPClient: MockT402HTTPClient } = await import(
+      "@t402/core/client"
     );
-    (MockX402Client.fromConfig as ReturnType<typeof vi.fn>).mockReturnValue(new MockX402Client());
+    (MockT402Client.fromConfig as ReturnType<typeof vi.fn>).mockReturnValue(new MockT402Client());
 
     (
-      MockX402HTTPClient.prototype.getPaymentRequiredResponse as ReturnType<typeof vi.fn>
+      MockT402HTTPClient.prototype.getPaymentRequiredResponse as ReturnType<typeof vi.fn>
     ).mockReturnValue({
-      x402Version: 2,
+      t402Version: 2,
       resource: { url: "test", description: "test", mimeType: "text/plain" },
       accepts: [],
     });
   });
 
   it("should create client from config and wrap fetch", async () => {
-    const { x402Client: MockX402Client } = await import("@x402/core/client");
+    const { t402Client: MockT402Client } = await import("@t402/core/client");
 
-    const config: x402ClientConfig = {
+    const config: t402ClientConfig = {
       schemes: [],
     };
 
     const wrappedFetch = wrapFetchWithPaymentFromConfig(mockFetch, config);
 
-    expect(MockX402Client.fromConfig).toHaveBeenCalledWith(config);
+    expect(MockT402Client.fromConfig).toHaveBeenCalledWith(config);
     expect(typeof wrappedFetch).toBe("function");
   });
 
   it("should return wrapped fetch function", async () => {
-    const config: x402ClientConfig = {
+    const config: t402ClientConfig = {
       schemes: [],
     };
 

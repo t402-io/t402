@@ -2,7 +2,7 @@
  * TypeScript Facilitator for E2E Testing
  *
  * This facilitator provides HTTP endpoints for payment verification and settlement
- * using the x402 TypeScript SDK.
+ * using the t402 TypeScript SDK.
  * 
  * Features:
  * - Payment verification and settlement
@@ -13,19 +13,19 @@
 
 import { base58 } from "@scure/base";
 import { createKeyPairSignerFromBytes } from "@solana/kit";
-import { x402Facilitator } from "@x402/core/facilitator";
+import { t402Facilitator } from "@t402/core/facilitator";
 import {
   Network,
   PaymentPayload,
   PaymentRequirements,
   SettleResponse,
   VerifyResponse,
-} from "@x402/core/types";
-import { toFacilitatorEvmSigner } from "@x402/evm";
-import { registerExactEvmScheme } from "@x402/evm/exact/facilitator";
-import { BAZAAR, extractDiscoveryInfo } from "@x402/extensions/bazaar";
-import { toFacilitatorSvmSigner } from "@x402/svm";
-import { registerExactSvmScheme } from "@x402/svm/exact/facilitator";
+} from "@t402/core/types";
+import { toFacilitatorEvmSigner } from "@t402/evm";
+import { registerExactEvmScheme } from "@t402/evm/exact/facilitator";
+import { BAZAAR, extractDiscoveryInfo } from "@t402/extensions/bazaar";
+import { toFacilitatorSvmSigner } from "@t402/svm";
+import { registerExactSvmScheme } from "@t402/svm/exact/facilitator";
 import crypto from "crypto";
 import dotenv from "dotenv";
 import express from "express";
@@ -66,7 +66,7 @@ const viemClient = createWalletClient({
   transport: http(),
 }).extend(publicActions);
 
-// Initialize the x402 Facilitator with EVM and SVM support
+// Initialize the t402 Facilitator with EVM and SVM support
 
 const evmSigner = toFacilitatorEvmSigner({
   address: evmAccount.address,
@@ -118,7 +118,7 @@ function createPaymentHash(paymentPayload: PaymentPayload): string {
     .digest("hex");
 }
 
-const facilitator = new x402Facilitator();
+const facilitator = new t402Facilitator();
 
 // Register EVM and SVM schemes using the new register helpers
 registerExactEvmScheme(facilitator, {
@@ -144,7 +144,7 @@ facilitator.registerExtension(BAZAAR)
         bazaarCatalog.catalogResource(
           discovered.resourceUrl,
           discovered.method,
-          discovered.x402Version,
+          discovered.t402Version,
           discovered.discoveryInfo,
           context.requirements,
         );
@@ -337,7 +337,7 @@ app.post("/close", (req, res) => {
 app.listen(parseInt(PORT), () => {
   console.log(`
 ╔════════════════════════════════════════════════════════╗
-║           x402 TypeScript Facilitator                  ║
+║           t402 TypeScript Facilitator                  ║
 ╠════════════════════════════════════════════════════════╣
 ║  Server:     http://localhost:${PORT}                  ║
 ║  Network:    eip155:84532                              ║

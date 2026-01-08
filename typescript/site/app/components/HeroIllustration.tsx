@@ -15,7 +15,7 @@ export function HeroIllustration() {
       />
       {/* Phone positioned in palm area */}
       <a
-        href="https://www.x402.org/protected"
+        href="https://www.t402.org/protected"
         target="_blank"
         rel="noopener noreferrer"
         className="absolute bottom-[260px] right-[190px] z-10"

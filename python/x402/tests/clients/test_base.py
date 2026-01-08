@@ -2,14 +2,14 @@ import pytest
 import json
 import base64
 from eth_account import Account
-from x402.clients.base import (
-    x402Client,
+from t402.clients.base import (
+    t402Client,
     PaymentAmountExceededError,
     UnsupportedSchemeException,
     decode_x_payment_response,
 )
-from x402.types import PaymentRequirements
-from x402.exact import decode_payment
+from t402.types import PaymentRequirements
+from t402.exact import decode_payment
 
 
 @pytest.fixture
@@ -19,7 +19,7 @@ def account():
 
 @pytest.fixture
 def client(account):
-    return x402Client(account)
+    return t402Client(account)
 
 
 @pytest.fixture
@@ -71,20 +71,20 @@ def test_decode_x_payment_response():
 
 def test_client_initialization(account):
     # Test basic initialization
-    client = x402Client(account)
+    client = t402Client(account)
     assert client.account == account
     assert client.max_value is None
 
     # Test initialization with max_value
-    client = x402Client(account, max_value=1000)
+    client = t402Client(account, max_value=1000)
     assert client.max_value == 1000
 
     # Test initialization with custom selector
     def custom_selector(accepts, network_filter=None, scheme_filter=None):
         return accepts[0]  # Just return first requirement
 
-    client = x402Client(account, payment_requirements_selector=custom_selector)
-    assert client.select_payment_requirements != x402Client.select_payment_requirements
+    client = t402Client(account, payment_requirements_selector=custom_selector)
+    assert client.select_payment_requirements != t402Client.select_payment_requirements
 
 
 def test_generate_nonce(client):
@@ -146,7 +146,7 @@ def test_create_payment_header(client, payment_requirements):
 
     # Test header structure
     decoded = decode_payment(header)
-    assert "x402Version" in decoded
+    assert "t402Version" in decoded
     assert "scheme" in decoded
     assert "network" in decoded
     assert "payload" in decoded

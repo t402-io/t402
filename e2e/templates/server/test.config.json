@@ -2,7 +2,7 @@
   "name": "<server-name>",
   "type": "server",
   "language": "<go/python/typescript>",
-  "x402Version": "<1/2>",
+  "t402Version": "<1/2>",
   "extensions": [
     "<extension-name-1>",
     "<extension-name-2>"

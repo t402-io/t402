@@ -1,6 +1,6 @@
-# x402 fastapi Example Server
+# t402 fastapi Example Server
 
-This is an example FastAPI server that demonstrates how to use the x402 `fastapi` middleware to implement paywall functionality in your API endpoints.
+This is an example FastAPI server that demonstrates how to use the t402 `fastapi` middleware to implement paywall functionality in your API endpoints.
 
 ## Prerequisites
 

@@ -11,8 +11,8 @@ import (
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/gagliardetto/solana-go/rpc"
 
-	"github.com/coinbase/x402/go/mechanisms/svm"
-	"github.com/coinbase/x402/go/types"
+	"github.com/coinbase/t402/go/mechanisms/svm"
+	"github.com/coinbase/t402/go/types"
 )
 
 // ExactSvmScheme implements the SchemeNetworkClient interface for SVM (Solana) exact payments (V2)
@@ -190,7 +190,7 @@ func (c *ExactSvmScheme) CreatePaymentPayload(
 
 	// Return partial V2 payload (core will add accepted, resource, extensions)
 	return types.PaymentPayload{
-		X402Version: 2,
+		T402Version: 2,
 		Payload:     svmPayload.ToMap(),
 	}, nil
 }

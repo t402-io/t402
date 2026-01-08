@@ -1,6 +1,6 @@
-# x402-next Example App
+# t402-next Example App
 
-This is a Next.js application that demonstrates how to use the `x402-next` middleware to implement paywall functionality in your Next.js routes.
+This is a Next.js application that demonstrates how to use the `t402-next` middleware to implement paywall functionality in your Next.js routes.
 
 ## Prerequisites
 
@@ -34,11 +34,11 @@ pnpm dev
 The app includes protected routes that require payment to access:
 
 ### Protected Page Route
-The `/protected` route requires a payment of $0.01 to access. The route is protected using the x402-next middleware:
+The `/protected` route requires a payment of $0.01 to access. The route is protected using the t402-next middleware:
 
 ```typescript
 // middleware.ts
-import { paymentMiddleware, Network, Resource } from "x402-next";
+import { paymentMiddleware, Network, Resource } from "t402-next";
 
 const facilitatorUrl = process.env.NEXT_PUBLIC_FACILITATOR_URL as Resource;
 const payTo = process.env.RESOURCE_WALLET_ADDRESS as Address;

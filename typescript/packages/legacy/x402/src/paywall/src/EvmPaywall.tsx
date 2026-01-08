@@ -46,10 +46,10 @@ export function EvmPaywall({ paymentRequirement, onSuccessfulResponse }: EvmPayw
   const [formattedUsdcBalance, setFormattedUsdcBalance] = useState<string>("");
   const [hideBalance, setHideBalance] = useState(true);
 
-  const x402 = window.x402;
+  const t402 = window.t402;
   const amount =
-    typeof x402.amount === "number"
-      ? x402.amount
+    typeof t402.amount === "number"
+      ? t402.amount
       : Number(paymentRequirement.maxAmountRequired ?? 0) / 1_000_000;
 
   const network = paymentRequirement.network as Network;
@@ -57,7 +57,7 @@ export function EvmPaywall({ paymentRequirement, onSuccessfulResponse }: EvmPayw
   const chainId = paymentChain.id;
   const chainName = getNetworkDisplayName(network);
   const testnet = isTestnetNetwork(network);
-  const showOnramp = Boolean(!testnet && isConnected && x402.sessionTokenEndpoint);
+  const showOnramp = Boolean(!testnet && isConnected && t402.sessionTokenEndpoint);
 
   const publicClient = useMemo(
     () =>
@@ -125,7 +125,7 @@ export function EvmPaywall({ paymentRequirement, onSuccessfulResponse }: EvmPayw
   }, [sessionToken]);
 
   const handlePayment = useCallback(async () => {
-    if (!address || !x402) {
+    if (!address || !t402) {
       return;
     }
 
@@ -158,7 +158,7 @@ export function EvmPaywall({ paymentRequirement, onSuccessfulResponse }: EvmPayw
       const paymentHeader: string = exact.evm.encodePayment(initialPayment);
 
       setStatus("Requesting content with payment...");
-      const response = await fetch(x402.currentUrl, {
+      const response = await fetch(t402.currentUrl, {
         headers: {
           "X-PAYMENT": paymentHeader,
           "Access-Control-Expose-Headers": "X-PAYMENT-RESPONSE",
@@ -177,16 +177,16 @@ export function EvmPaywall({ paymentRequirement, onSuccessfulResponse }: EvmPayw
           );
         }
 
-        if (errorData && typeof errorData.x402Version === "number") {
+        if (errorData && typeof errorData.t402Version === "number") {
           const retryPayment = await exact.evm.createPayment(
             walletClient,
-            errorData.x402Version,
+            errorData.t402Version,
             validPaymentRequirements,
           );
 
-          retryPayment.x402Version = errorData.x402Version;
+          retryPayment.t402Version = errorData.t402Version;
           const retryHeader = exact.evm.encodePayment(retryPayment);
-          const retryResponse = await fetch(x402.currentUrl, {
+          const retryResponse = await fetch(t402.currentUrl, {
             headers: {
               "X-PAYMENT": retryHeader,
               "Access-Control-Expose-Headers": "X-PAYMENT-RESPONSE",
@@ -227,7 +227,7 @@ export function EvmPaywall({ paymentRequirement, onSuccessfulResponse }: EvmPayw
     }
   }, [
     address,
-    x402,
+    t402,
     paymentRequirement,
     handleSwitchChain,
     wagmiWalletClient,
@@ -236,7 +236,7 @@ export function EvmPaywall({ paymentRequirement, onSuccessfulResponse }: EvmPayw
     onSuccessfulResponse,
   ]);
 
-  if (!x402) {
+  if (!t402) {
     return null;
   }
 

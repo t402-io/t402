@@ -1,19 +1,19 @@
-# x402-core Custom Server
+# t402-core Custom Server
 
-Gin server demonstrating how to implement x402 payment handling manually without using pre-built middleware packages like `x402/go/http/gin`.
+Gin server demonstrating how to implement t402 payment handling manually without using pre-built middleware packages like `t402/go/http/gin`.
 
 ## Prerequisites
 
 - Go 1.24 or higher
 - Valid EVM address for receiving payments
-- URL of a facilitator supporting the desired payment network, see [facilitator list](https://www.x402.org/ecosystem?category=facilitators)
+- URL of a facilitator supporting the desired payment network, see [facilitator list](https://www.t402.org/ecosystem?category=facilitators)
 
 ## Setup
 
 1. Create a `.env` file with required environment variables:
 
 ```bash
-FACILITATOR_URL=https://x402.org/facilitator
+FACILITATOR_URL=https://t402.org/facilitator
 EVM_PAYEE_ADDRESS=0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
 ```
 
@@ -101,7 +101,7 @@ The `PAYMENT-REQUIRED` header contains base64-encoded JSON with the payment requ
 
 ```json
 {
-  "x402Version": 2,
+  "t402Version": 2,
   "error": "Payment required",
   "resource": {
     "url": "http://localhost:4021/weather",
@@ -149,7 +149,7 @@ The `PAYMENT-RESPONSE` header contains base64-encoded JSON with the settlement d
 
 ## Payment Flow
 
-The custom implementation demonstrates each step of the x402 payment flow:
+The custom implementation demonstrates each step of the t402 payment flow:
 
 1. **Request Arrives** — Middleware intercepts all requests
 2. **Route Check** — Determine if route requires payment
@@ -167,9 +167,9 @@ The custom implementation demonstrates each step of the x402 payment flow:
 ### Defining Payment Requirements
 
 ```go
-routes := x402http.RoutesConfig{
+routes := t402http.RoutesConfig{
     "GET /weather": {
-        Accepts: x402http.PaymentOptions{
+        Accepts: t402http.PaymentOptions{
             {
                 Scheme:  "exact",
                 PayTo:   evmPayeeAddress,
@@ -183,17 +183,17 @@ routes := x402http.RoutesConfig{
 }
 ```
 
-### Creating the x402 Server
+### Creating the t402 Server
 
 ```go
-x402Server := x402http.Newx402HTTPResourceServer(
+t402Server := t402http.Newt402HTTPResourceServer(
     routes,
-    x402.WithFacilitatorClient(facilitatorClient),
-    x402.WithSchemeServer(evmNetwork, evm.NewExactEvmScheme()),
+    t402.WithFacilitatorClient(facilitatorClient),
+    t402.WithSchemeServer(evmNetwork, evm.NewExactEvmScheme()),
 )
 
-if err := x402Server.Initialize(ctx); err != nil {
-    fmt.Printf("Warning: failed to initialize x402 server: %v\n", err)
+if err := t402Server.Initialize(ctx); err != nil {
+    fmt.Printf("Warning: failed to initialize t402 server: %v\n", err)
 }
 ```
 
@@ -203,15 +203,15 @@ if err := x402Server.Initialize(ctx); err != nil {
 result := server.ProcessHTTPRequest(ctx, reqCtx, nil)
 
 switch result.Type {
-case x402http.ResultNoPaymentRequired:
+case t402http.ResultNoPaymentRequired:
     // No payment required, continue to handler
     c.Next()
 
-case x402http.ResultPaymentError:
+case t402http.ResultPaymentError:
     // Payment required but not provided or invalid
     handlePaymentError(c, result.Response)
 
-case x402http.ResultPaymentVerified:
+case t402http.ResultPaymentVerified:
     // Payment verified, continue with settlement handling
     handlePaymentVerified(c, server, ctx, result)
 }
@@ -251,11 +251,11 @@ for key, value := range settlementHeaders {
 | Header Management      | ✅ Automatic            | ❌ Manual             |
 | Flexibility            | Limited                 | ✅ Complete control   |
 | Error Handling         | ✅ Built-in             | ❌ You implement      |
-| Maintenance            | x402 team               | You maintain          |
+| Maintenance            | t402 team               | You maintain          |
 
 ## When to Use Each Approach
 
-**Use Middleware (x402/go/http/gin) when:**
+**Use Middleware (t402/go/http/gin) when:**
 
 - Building standard applications
 - Want quick integration
@@ -274,7 +274,7 @@ for key, value := range settlementHeaders {
 
 To use this pattern with other frameworks:
 
-1. Implement the `x402http.HTTPAdapter` interface for your framework
+1. Implement the `t402http.HTTPAdapter` interface for your framework
 2. Create a middleware function that uses `server.ProcessHTTPRequest()`
 3. Handle the three result types: `NoPaymentRequired`, `PaymentError`, `PaymentVerified`
 4. Use `server.ProcessSettlement()` to settle payments after successful responses

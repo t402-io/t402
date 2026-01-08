@@ -1,6 +1,6 @@
-# x402
+# t402
 
-x402 is an open standard for internet native payments. It aims to support all networks (both crypto & fiat) and forms of value (stablecoins, tokens, fiat).
+t402 is an open standard for internet native payments. It aims to support all networks (both crypto & fiat) and forms of value (stablecoins, tokens, fiat).
 
 ```typescript
 app.use(
@@ -23,49 +23,49 @@ app.use(
 
 ```shell
 # All available reference sdks
-npm install @x402/core @x402/evm @x402/svm @x402/axios @x402/fetch @x402/express @x402/hono @x402/next @x402/paywall @x402/extensions
+npm install @t402/core @t402/evm @t402/svm @t402/axios @t402/fetch @t402/express @t402/hono @t402/next @t402/paywall @t402/extensions
 
 # Minimal Fetch client
-npm install @x402/core @x402/evm @x402/svm @x402/fetch
+npm install @t402/core @t402/evm @t402/svm @t402/fetch
 
 # Minimal express Server
-npm install @x402/core @x402/evm @x402/svm @x402/express
+npm install @t402/core @t402/evm @t402/svm @t402/express
 ```
 
 ### Python
 
 ```shell
-pip install x402
+pip install t402
 ```
 
 ### Go
 
 ```shell
-go get github.com/coinbase/x402/go
+go get github.com/coinbase/t402/go
 ```
 
 </details>
 
 ## Principles
 
-- **Open standard:** the x402 protocol will never force reliance on a single party
-- **HTTP Native:** x402 is meant to seamlessly complement the existing HTTP request made by traditional web services, it should not mandate additional requests outside the scope of a typical client / server flow.
-- **Chain and token agnostic:** we welcome contributions that add support for new chains, signing standards, or schemes, so long as they meet our acceptance criteria laid out in [CONTRIBUTING.md](https://github.com/coinbase/x402/blob/main/CONTRIBUTING.md)
+- **Open standard:** the t402 protocol will never force reliance on a single party
+- **HTTP Native:** t402 is meant to seamlessly complement the existing HTTP request made by traditional web services, it should not mandate additional requests outside the scope of a typical client / server flow.
+- **Chain and token agnostic:** we welcome contributions that add support for new chains, signing standards, or schemes, so long as they meet our acceptance criteria laid out in [CONTRIBUTING.md](https://github.com/coinbase/t402/blob/main/CONTRIBUTING.md)
 - **Trust minimizing:** all payment schemes must not allow for the facilitator or resource server to move funds, other than in accordance with client intentions
-- **Easy to use:** x402 needs to be 10x better than existing ways to pay on the internet. This means abstracting as many details of crypto as possible away from the client and resource server, and into the facilitator. This means the client/server should not need to think about gas, rpc, etc.
+- **Easy to use:** t402 needs to be 10x better than existing ways to pay on the internet. This means abstracting as many details of crypto as possible away from the client and resource server, and into the facilitator. This means the client/server should not need to think about gas, rpc, etc.
 
 ## Ecosystem
 
-The x402 ecosystem is growing! Check out our [ecosystem page](https://x402.org/ecosystem) to see projects building with x402, including:
+The t402 ecosystem is growing! Check out our [ecosystem page](https://t402.org/ecosystem) to see projects building with t402, including:
 
 - Client-side integrations
 - Services and endpoints
 - Ecosystem infrastructure and tooling
 - Learning and community resources
 
-Want to add your project to the ecosystem? See our [demo site README](https://github.com/coinbase/x402/tree/main/typescript/site#adding-your-project-to-the-ecosystem) for detailed instructions on how to submit your project.
+Want to add your project to the ecosystem? See our [demo site README](https://github.com/coinbase/t402/tree/main/typescript/site#adding-your-project-to-the-ecosystem) for detailed instructions on how to submit your project.
 
-**Roadmap:** see [ROADMAP.md](https://github.com/coinbase/x402/blob/main/ROADMAP.md)
+**Roadmap:** see [ROADMAP.md](https://github.com/coinbase/t402/blob/main/ROADMAP.md)
 
 ## Terms:
 
@@ -84,14 +84,14 @@ Want to add your project to the ecosystem? See our [demo site README](https://gi
 
 ## Specification
 
-See `specs/` for full documentation of the x402 standard/
+See `specs/` for full documentation of the t402 standard/
 
-### Typical x402 flow
+### Typical t402 flow
 
-x402 payments typically adhere to the following flow, but servers have a lot of flexibility. See `advanced` folders in `examples/`.
+t402 payments typically adhere to the following flow, but servers have a lot of flexibility. See `advanced` folders in `examples/`.
 ![](./static/flow.png)
 
-The following outlines the flow of a payment using the `x402` protocol. Note that steps (1) and (2) are optional if the client already knows the payment details accepted for a resource.
+The following outlines the flow of a payment using the `t402` protocol. Note that steps (1) and (2) are optional if the client already knows the payment details accepted for a resource.
 
 1. `Client` makes an HTTP request to a `resource server`.
 
@@ -121,7 +121,7 @@ The following outlines the flow of a payment using the `x402` protocol. Note tha
 
 A scheme is a logical way of moving money.
 
-Blockchains allow for a large number of flexible ways to move money. To help facilitate an expanding number of payment use cases, the `x402` protocol is extensible to different ways of settling payments via its `scheme` field.
+Blockchains allow for a large number of flexible ways to move money. To help facilitate an expanding number of payment use cases, the `t402` protocol is extensible to different ways of settling payments via its `scheme` field.
 
 Each payment scheme may have different operational functionality depending on what actions are necessary to fulfill the payment.
 For example `exact`, the first scheme shipping as part of the protocol, would have different behavior than `upto`. `exact` transfers a specific amount (ex: pay $1 to read an article), while a theoretical `upto` would transfer up to an amount, based on the resources consumed during a request (ex: generating tokens from an LLM).

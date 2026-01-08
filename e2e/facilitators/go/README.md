@@ -1,6 +1,6 @@
 # E2E Test Facilitator: Go
 
-This facilitator demonstrates and tests the Go x402 facilitator implementation with both EVM and SVM payment verification and settlement.
+This facilitator demonstrates and tests the Go t402 facilitator implementation with both EVM and SVM payment verification and settlement.
 
 ## What It Demonstrates
 
@@ -9,11 +9,11 @@ This facilitator demonstrates and tests the Go x402 facilitator implementation w
 This e2e facilitator showcases **production-ready lifecycle hook patterns**:
 
 ```go
-facilitator := x402.Newx402Facilitator()
+facilitator := t402.Newt402Facilitator()
 	.Register("eip155:*", evmFacilitator)
 	.RegisterExtension(exttypes.BAZAAR)
 	// Hook 1: Track verified payments + extract discovery info
-	.OnAfterVerify(func(ctx x402.FacilitatorVerifyResultContext) error {
+	.OnAfterVerify(func(ctx t402.FacilitatorVerifyResultContext) error {
 		if ctx.Result.IsValid {
 			paymentHash := createPaymentHash(ctx.PaymentPayload)
 			verifiedPayments[paymentHash] = ctx.Timestamp.Unix()
@@ -27,10 +27,10 @@ facilitator := x402.Newx402Facilitator()
 		return nil
 	}).
 	// Hook 2: Validate payment was verified before settlement
-	OnBeforeSettle(func(ctx x402.FacilitatorSettleContext) (*x402.FacilitatorBeforeHookResult, error) {
+	OnBeforeSettle(func(ctx t402.FacilitatorSettleContext) (*t402.FacilitatorBeforeHookResult, error) {
 		paymentHash := createPaymentHash(ctx.PaymentPayload)
 		if !verifiedPayments.has(paymentHash) {
-			return &x402.FacilitatorBeforeHookResult{
+			return &t402.FacilitatorBeforeHookResult{
 				Abort:  true,
 				Reason: "Payment must be verified first",
 			}, nil
@@ -39,7 +39,7 @@ facilitator := x402.Newx402Facilitator()
 		// Check timeout
 		age := ctx.Timestamp.Unix() - verifiedPayments[paymentHash]
 		if age > 5*60 {
-			return &x402.FacilitatorBeforeHookResult{
+			return &t402.FacilitatorBeforeHookResult{
 				Abort:  true,
 				Reason: "Verification expired",
 			}, nil
@@ -47,13 +47,13 @@ facilitator := x402.Newx402Facilitator()
 		return nil, nil
 	}).
 	// Hook 3: Clean up tracking after settlement
-	OnAfterSettle(func(ctx x402.FacilitatorSettleResultContext) error {
+	OnAfterSettle(func(ctx t402.FacilitatorSettleResultContext) error {
 		paymentHash := createPaymentHash(ctx.PaymentPayload)
 		delete(verifiedPayments, paymentHash)
 		return nil
 	}).
 	// Hook 4: Clean up on failure too
-	OnSettleFailure(func(ctx x402.FacilitatorSettleFailureContext) (*x402.FacilitatorSettleFailureHookResult, error) {
+	OnSettleFailure(func(ctx t402.FacilitatorSettleFailureContext) (*t402.FacilitatorSettleFailureHookResult, error) {
 		paymentHash := createPaymentHash(ctx.PaymentPayload)
 		delete(verifiedPayments, paymentHash)
 		return nil, nil
@@ -64,8 +64,8 @@ facilitator := x402.Newx402Facilitator()
 ## What It Tests
 
 ### Core Functionality
-- ✅ **V2 Protocol** - Modern x402 facilitator protocol
-- ✅ **V1 Protocol** - Legacy x402 facilitator protocol
+- ✅ **V2 Protocol** - Modern t402 facilitator protocol
+- ✅ **V1 Protocol** - Legacy t402 facilitator protocol
 - ✅ **Payment Verification** - Validates payment payloads off-chain
 - ✅ **Payment Settlement** - Executes transactions on-chain
 - ✅ **Multi-chain Support** - EVM and SVM mechanisms
@@ -83,16 +83,16 @@ facilitator := x402.Newx402Facilitator()
 
 ```go
 import (
-    x402 "github.com/coinbase/x402/go"
-    "github.com/coinbase/x402/go/mechanisms/evm"
-    evmv1 "github.com/coinbase/x402/go/mechanisms/evm/exact/v1"
-    "github.com/coinbase/x402/go/mechanisms/svm"
-    svmv1 "github.com/coinbase/x402/go/mechanisms/svm/exact/v1"
-    "github.com/coinbase/x402/go/extensions/bazaar"
+    t402 "github.com/coinbase/t402/go"
+    "github.com/coinbase/t402/go/mechanisms/evm"
+    evmv1 "github.com/coinbase/t402/go/mechanisms/evm/exact/v1"
+    "github.com/coinbase/t402/go/mechanisms/svm"
+    svmv1 "github.com/coinbase/t402/go/mechanisms/svm/exact/v1"
+    "github.com/coinbase/t402/go/extensions/bazaar"
 )
 
 // Create facilitator
-facilitator := x402.Newx402Facilitator()
+facilitator := t402.Newt402Facilitator()
 facilitator.RegisterExtension(bazaar.EXTENSION_NAME)
 
 // Register EVM V2 wildcard
@@ -183,7 +183,7 @@ export PORT=4024
 **Request:**
 ```json
 {
-  "x402Version": 2,
+  "t402Version": 2,
   "paymentPayload": { ... },
   "paymentRequirements": { ... }
 }
@@ -204,7 +204,7 @@ export PORT=4024
 **Request:**
 ```json
 {
-  "x402Version": 2,
+  "t402Version": 2,
   "paymentPayload": { ... },
   "paymentRequirements": { ... }
 }
@@ -258,9 +258,9 @@ export PORT=4024
 
 ## Dependencies
 
-- `github.com/coinbase/x402/go` - Core facilitator
-- `github.com/coinbase/x402/go/mechanisms/evm` - EVM mechanisms
-- `github.com/coinbase/x402/go/mechanisms/svm` - SVM mechanisms
-- `github.com/coinbase/x402/go/extensions/bazaar` - Bazaar extension
+- `github.com/coinbase/t402/go` - Core facilitator
+- `github.com/coinbase/t402/go/mechanisms/evm` - EVM mechanisms
+- `github.com/coinbase/t402/go/mechanisms/svm` - SVM mechanisms
+- `github.com/coinbase/t402/go/extensions/bazaar` - Bazaar extension
 - `github.com/ethereum/go-ethereum` - Ethereum client
 - `github.com/gagliardetto/solana-go` - Solana client

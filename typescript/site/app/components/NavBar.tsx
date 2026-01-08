@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { X402Logo } from "./Logo";
+import { T402Logo } from "./Logo";
 
 function CloseIcon() {
   return (
@@ -56,13 +56,13 @@ export function NavBar() {
               Ecosystem
             </Link>
             <Link
-              href="/writing/x402-v2-launch"
+              href="/writing/t402-v2-launch"
               className="text-sm font-medium text-black hover:text-gray-600 transition-colors"
             >
               Writing
             </Link>
             <Link
-              href="https://www.x402.org/x402-whitepaper.pdf"
+              href="https://www.t402.org/t402-whitepaper.pdf"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-medium text-black hover:text-gray-600 transition-colors"
@@ -73,8 +73,8 @@ export function NavBar() {
 
           {/* Center logo (home link) */}
           <div className="flex flex-1 lg:flex-none justify-center">
-            <Link href="/" aria-label="x402 home" className="inline-flex items-center">
-              <X402Logo className="h-7 w-auto" />
+            <Link href="/" aria-label="t402 home" className="inline-flex items-center">
+              <T402Logo className="h-7 w-auto" />
             </Link>
           </div>
 
@@ -82,7 +82,7 @@ export function NavBar() {
           <div className="hidden lg:flex flex-1 items-center gap-6 justify-end">
             {/* Docs button */}
             <Link
-              href="https://x402.gitbook.io/x402"
+              href="https://t402.gitbook.io/t402"
               className="flex items-center gap-1 px-4 py-2 border border-black text-black font-medium text-sm hover:bg-gray-10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
               target="_blank"
               rel="noopener noreferrer"
@@ -162,14 +162,14 @@ export function NavBar() {
                 Ecosystem
               </Link>
               <Link
-                href="/writing/x402-v2-launch"
+                href="/writing/t402-v2-launch"
                 className="block py-2 text-black font-medium text-sm hover:text-gray-60 transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Writing
               </Link>
               <Link
-                href="https://www.x402.org/x402-whitepaper.pdf"
+                href="https://www.t402.org/t402-whitepaper.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block py-2 text-black font-medium text-sm hover:text-gray-60 transition-colors"
@@ -185,7 +185,7 @@ export function NavBar() {
             {/* CTA buttons */}
             <div className="space-y-3 pt-2">
               <Link
-                href="https://x402.gitbook.io/x402"
+                href="https://t402.gitbook.io/t402"
                 className="flex items-center justify-center gap-2 w-full px-4 py-3 border border-black text-black font-medium text-sm hover:bg-gray-10 transition-colors"
                 target="_blank"
                 rel="noopener noreferrer"

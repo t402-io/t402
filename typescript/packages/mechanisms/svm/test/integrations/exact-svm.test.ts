@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { x402Client, x402HTTPClient } from "@x402/core/client";
-import { x402Facilitator } from "@x402/core/facilitator";
+import { t402Client, t402HTTPClient } from "@t402/core/client";
+import { t402Facilitator } from "@t402/core/facilitator";
 import {
   HTTPAdapter,
   HTTPResponseInstructions,
-  x402HTTPResourceServer,
-  x402ResourceServer,
+  t402HTTPResourceServer,
+  t402ResourceServer,
   FacilitatorClient,
-} from "@x402/core/server";
+} from "@t402/core/server";
 import {
   Network,
   PaymentPayload,
@@ -15,7 +15,7 @@ import {
   VerifyResponse,
   SettleResponse,
   SupportedResponse,
-} from "@x402/core/types";
+} from "@t402/core/types";
 import { ExactSvmScheme as ExactSvmClient, toFacilitatorSvmSigner } from "../../src";
 import { ExactSvmScheme as ExactSvmServer } from "../../src/exact/server/scheme";
 import { ExactSvmScheme as ExactSvmFacilitator } from "../../src/exact/facilitator/scheme";
@@ -42,19 +42,19 @@ if (
 
 /**
  * SVM Facilitator Client wrapper
- * Wraps the x402Facilitator for use with x402ResourceServer
+ * Wraps the t402Facilitator for use with t402ResourceServer
  */
 class SvmFacilitatorClient implements FacilitatorClient {
   readonly scheme = "exact";
   readonly network = "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"; // Solana Devnet
-  readonly x402Version = 2;
+  readonly t402Version = 2;
 
   /**
    * Creates a new SvmFacilitatorClient instance
    *
-   * @param facilitator - The x402 facilitator to wrap
+   * @param facilitator - The t402 facilitator to wrap
    */
-  constructor(private readonly facilitator: x402Facilitator) {}
+  constructor(private readonly facilitator: t402Facilitator) {}
 
   /**
    * Verifies a payment payload
@@ -123,9 +123,9 @@ function buildSvmPaymentRequirements(
 }
 
 describe("SVM Integration Tests", () => {
-  describe("x402Client / x402ResourceServer / x402Facilitator - SVM Flow", () => {
-    let client: x402Client;
-    let server: x402ResourceServer;
+  describe("t402Client / t402ResourceServer / t402Facilitator - SVM Flow", () => {
+    let client: t402Client;
+    let server: t402ResourceServer;
     let clientAddress: string;
 
     beforeEach(async () => {
@@ -136,20 +136,20 @@ describe("SVM Integration Tests", () => {
       const svmClient = new ExactSvmClient(clientSigner, {
         rpcUrl: "https://api.devnet.solana.com",
       });
-      client = new x402Client().register("solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1", svmClient);
+      client = new t402Client().register("solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1", svmClient);
 
       const facilitatorBytes = base58.decode(FACILITATOR_PRIVATE_KEY);
       const facilitatorKeypair = await createKeyPairSignerFromBytes(facilitatorBytes);
       const facilitatorSigner = toFacilitatorSvmSigner(facilitatorKeypair);
 
       const svmFacilitator = new ExactSvmFacilitator(facilitatorSigner);
-      const facilitator = new x402Facilitator().register(
+      const facilitator = new t402Facilitator().register(
         "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
         svmFacilitator,
       );
 
       const facilitatorClient = new SvmFacilitatorClient(facilitator);
-      server = new x402ResourceServer(facilitatorClient);
+      server = new t402ResourceServer(facilitatorClient);
       server.register("solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1", new ExactSvmServer());
       await server.initialize();
     });
@@ -166,7 +166,7 @@ describe("SVM Integration Tests", () => {
       const paymentPayload = await client.createPaymentPayload(paymentRequired);
 
       expect(paymentPayload).toBeDefined();
-      expect(paymentPayload.x402Version).toBe(2);
+      expect(paymentPayload.t402Version).toBe(2);
       expect(paymentPayload.accepted.scheme).toBe("exact");
 
       const svmPayload = paymentPayload.payload as ExactSvmPayloadV2;
@@ -190,9 +190,9 @@ describe("SVM Integration Tests", () => {
     });
   });
 
-  describe("x402HTTPClient / x402HTTPResourceServer / x402Facilitator - SVM Flow", () => {
-    let client: x402HTTPClient;
-    let httpServer: x402HTTPResourceServer;
+  describe("t402HTTPClient / t402HTTPResourceServer / t402Facilitator - SVM Flow", () => {
+    let client: t402HTTPClient;
+    let httpServer: t402HTTPResourceServer;
 
     const routes = {
       "/api/protected": {
@@ -224,7 +224,7 @@ describe("SVM Integration Tests", () => {
       const facilitatorSigner = toFacilitatorSvmSigner(facilitatorKeypair);
 
       const svmFacilitator = new ExactSvmFacilitator(facilitatorSigner);
-      const facilitator = new x402Facilitator().register(
+      const facilitator = new t402Facilitator().register(
         "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
         svmFacilitator,
       );
@@ -237,18 +237,18 @@ describe("SVM Integration Tests", () => {
       const svmClient = new ExactSvmClient(clientSigner, {
         rpcUrl: "https://api.devnet.solana.com",
       });
-      const paymentClient = new x402Client().register(
+      const paymentClient = new t402Client().register(
         "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
         svmClient,
       );
-      client = new x402HTTPClient(paymentClient) as x402HTTPClient;
+      client = new t402HTTPClient(paymentClient) as t402HTTPClient;
 
       // Create resource server and register schemes (composition pattern)
-      const ResourceServer = new x402ResourceServer(facilitatorClient);
+      const ResourceServer = new t402ResourceServer(facilitatorClient);
       ResourceServer.register("solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1", new ExactSvmServer());
       await ResourceServer.initialize(); // Initialize to fetch supported kinds
 
-      httpServer = new x402HTTPResourceServer(ResourceServer, routes);
+      httpServer = new t402HTTPResourceServer(ResourceServer, routes);
     });
 
     it("middleware should successfully verify and settle a SVM payment from an http client", async () => {
@@ -320,7 +320,7 @@ describe("SVM Integration Tests", () => {
   });
 
   describe("Price Parsing Integration", () => {
-    let server: x402ResourceServer;
+    let server: t402ResourceServer;
     let svmServer: ExactSvmServer;
 
     beforeEach(async () => {
@@ -331,13 +331,13 @@ describe("SVM Integration Tests", () => {
         defaultRpcUrl: "https://api.devnet.solana.com",
       });
 
-      const facilitator = new x402Facilitator().register(
+      const facilitator = new t402Facilitator().register(
         "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
         new ExactSvmFacilitator(facilitatorSvmSigner),
       );
 
       const facilitatorClient = new SvmFacilitatorClient(facilitator);
-      server = new x402ResourceServer(facilitatorClient);
+      server = new t402ResourceServer(facilitatorClient);
 
       svmServer = new ExactSvmServer();
       server.register("solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1", svmServer);

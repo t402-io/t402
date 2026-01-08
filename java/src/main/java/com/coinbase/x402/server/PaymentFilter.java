@@ -1,14 +1,14 @@
-package com.coinbase.x402.server;
+package com.coinbase.t402.server;
 
-import com.coinbase.x402.client.FacilitatorClient;
-import com.coinbase.x402.client.SettlementResponse;
-import com.coinbase.x402.client.VerificationResponse;
-import com.coinbase.x402.model.ExactSchemePayload;
-import com.coinbase.x402.model.PaymentPayload;
-import com.coinbase.x402.model.PaymentRequirements;
-import com.coinbase.x402.model.PaymentRequiredResponse;
-import com.coinbase.x402.model.SettlementResponseHeader;
-import com.coinbase.x402.util.Json;
+import com.coinbase.t402.client.FacilitatorClient;
+import com.coinbase.t402.client.SettlementResponse;
+import com.coinbase.t402.client.VerificationResponse;
+import com.coinbase.t402.model.ExactSchemePayload;
+import com.coinbase.t402.model.PaymentPayload;
+import com.coinbase.t402.model.PaymentRequirements;
+import com.coinbase.t402.model.PaymentRequiredResponse;
+import com.coinbase.t402.model.SettlementResponseHeader;
+import com.coinbase.t402.util.Json;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -24,7 +24,7 @@ import java.math.BigInteger;
 import java.util.Map;
 import java.util.Objects;
 
-/** Servlet/Spring filter that enforces x402 payments on selected paths. */
+/** Servlet/Spring filter that enforces t402 payments on selected paths. */
 public class PaymentFilter implements Filter {
 
     private final String                       payTo;
@@ -249,7 +249,7 @@ public class PaymentFilter implements Filter {
         resp.setContentType("application/json");
 
         PaymentRequiredResponse prr = new PaymentRequiredResponse();
-        prr.x402Version = 1;
+        prr.t402Version = 1;
         prr.accepts.add(buildRequirements(path));
         prr.error = error;
 

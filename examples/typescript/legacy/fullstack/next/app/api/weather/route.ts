@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withX402, Network, Resource } from "x402-next";
+import { withT402, Network, Resource } from "t402-next";
 import { Address } from "viem";
 
 const facilitatorUrl = process.env.NEXT_PUBLIC_FACILITATOR_URL as Resource;
@@ -29,7 +29,7 @@ const handler = async (_: NextRequest) => {
  * Protected weather API endpoint
  * Payment is only settled after successful response (status < 400)
  */
-export const GET = withX402(
+export const GET = withT402(
   handler,
   payTo,
   {
@@ -43,7 +43,7 @@ export const GET = withX402(
     url: facilitatorUrl,
   },
   {
-    appName: "Next x402 Demo",
-    appLogo: "/x402-icon-blue.png",
+    appName: "Next t402 Demo",
+    appLogo: "/t402-icon-blue.png",
   },
 );

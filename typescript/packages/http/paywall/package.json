@@ -1,5 +1,5 @@
 {
-  "name": "@x402/paywall",
+  "name": "@t402/paywall",
   "version": "2.0.0",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -18,15 +18,15 @@
     "lint:check": "eslint . --ext .ts"
   },
   "keywords": [
-    "x402",
+    "t402",
     "paywall",
     "payment",
     "http-402"
   ],
   "license": "Apache-2.0",
   "author": "Coinbase Inc.",
-  "repository": "https://github.com/coinbase/x402",
-  "description": "x402 Payment Protocol Paywall UI",
+  "repository": "https://github.com/coinbase/t402",
+  "description": "t402 Payment Protocol Paywall UI",
   "devDependencies": {
     "@craftamap/esbuild-plugin-html": "^0.9.0",
     "@eslint/js": "^9.24.0",
@@ -35,8 +35,8 @@
     "@types/react-dom": "^19",
     "@typescript-eslint/eslint-plugin": "^8.29.1",
     "@typescript-eslint/parser": "^8.29.1",
-    "@x402/evm": "workspace:*",
-    "@x402/svm": "workspace:*",
+    "@t402/evm": "workspace:*",
+    "@t402/svm": "workspace:*",
     "buffer": "^6.0.3",
     "esbuild": "^0.25.4",
     "eslint": "^9.24.0",
@@ -67,7 +67,7 @@
     "@wallet-standard/app": "^1.1.0",
     "@wallet-standard/base": "^1.1.0",
     "@wallet-standard/features": "^1.1.0",
-    "@x402/core": "workspace:*",
+    "@t402/core": "workspace:*",
     "viem": "^2.39.3",
     "wagmi": "^2.17.1",
     "zod": "^3.24.2"

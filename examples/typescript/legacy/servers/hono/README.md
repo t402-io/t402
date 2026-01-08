@@ -1,6 +1,6 @@
-# x402-hono Example Server
+# t402-hono Example Server
 
-This is an example Hono server that demonstrates how to use the `x402-hono` middleware to implement paywall functionality in your API endpoints.
+This is an example Hono server that demonstrates how to use the `t402-hono` middleware to implement paywall functionality in your API endpoints.
 
 ## Prerequisites
 

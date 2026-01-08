@@ -6,20 +6,20 @@ import (
 	"strconv"
 	"strings"
 
-	x402 "github.com/coinbase/x402/go"
-	"github.com/coinbase/x402/go/mechanisms/svm"
-	"github.com/coinbase/x402/go/types"
+	t402 "github.com/coinbase/t402/go"
+	"github.com/coinbase/t402/go/mechanisms/svm"
+	"github.com/coinbase/t402/go/types"
 )
 
 // ExactSvmScheme implements the SchemeNetworkServer interface for SVM (Solana) exact payments (V2)
 type ExactSvmScheme struct {
-	moneyParsers []x402.MoneyParser
+	moneyParsers []t402.MoneyParser
 }
 
 // NewExactSvmScheme creates a new ExactSvmScheme
 func NewExactSvmScheme() *ExactSvmScheme {
 	return &ExactSvmScheme{
-		moneyParsers: []x402.MoneyParser{},
+		moneyParsers: []t402.MoneyParser{},
 	}
 }
 
@@ -44,10 +44,10 @@ func (s *ExactSvmScheme) Scheme() string {
 //
 // Example:
 //
-//	svmServer.RegisterMoneyParser(func(amount float64, network x402.Network) (*x402.AssetAmount, error) {
+//	svmServer.RegisterMoneyParser(func(amount float64, network t402.Network) (*t402.AssetAmount, error) {
 //	    // Use custom token for large amounts
 //	    if amount > 100 {
-//	        return &x402.AssetAmount{
+//	        return &t402.AssetAmount{
 //	            Amount: fmt.Sprintf("%.0f", amount * 1e9),
 //	            Asset:  "CustomTokenMint111111111111111111111",
 //	            Extra:  map[string]interface{}{"token": "CUSTOM", "tier": "large"},
@@ -55,7 +55,7 @@ func (s *ExactSvmScheme) Scheme() string {
 //	    }
 //	    return nil, nil // Use next parser
 //	})
-func (s *ExactSvmScheme) RegisterMoneyParser(parser x402.MoneyParser) *ExactSvmScheme {
+func (s *ExactSvmScheme) RegisterMoneyParser(parser t402.MoneyParser) *ExactSvmScheme {
 	s.moneyParsers = append(s.moneyParsers, parser)
 	return s
 }
@@ -73,13 +73,13 @@ func (s *ExactSvmScheme) RegisterMoneyParser(parser x402.MoneyParser) *ExactSvmS
 // Returns:
 //
 //	AssetAmount with amount, asset, and optional extra fields
-func (s *ExactSvmScheme) ParsePrice(price x402.Price, network x402.Network) (x402.AssetAmount, error) {
+func (s *ExactSvmScheme) ParsePrice(price t402.Price, network t402.Network) (t402.AssetAmount, error) {
 	networkStr := string(network)
 
 	// Get network config to determine the default asset
 	config, err := svm.GetNetworkConfig(networkStr)
 	if err != nil {
-		return x402.AssetAmount{}, err
+		return t402.AssetAmount{}, err
 	}
 
 	// Handle pre-parsed price object (with amount and asset)
@@ -87,7 +87,7 @@ func (s *ExactSvmScheme) ParsePrice(price x402.Price, network x402.Network) (x40
 		if amountVal, hasAmount := priceMap["amount"]; hasAmount {
 			amountStr, ok := amountVal.(string)
 			if !ok {
-				return x402.AssetAmount{}, fmt.Errorf("amount must be a string")
+				return t402.AssetAmount{}, fmt.Errorf("amount must be a string")
 			}
 
 			asset := config.DefaultAsset.Address
@@ -104,7 +104,7 @@ func (s *ExactSvmScheme) ParsePrice(price x402.Price, network x402.Network) (x40
 				}
 			}
 
-			return x402.AssetAmount{
+			return t402.AssetAmount{
 				Amount: amountStr,
 				Asset:  asset,
 				Extra:  extra,
@@ -115,7 +115,7 @@ func (s *ExactSvmScheme) ParsePrice(price x402.Price, network x402.Network) (x40
 	// Parse Money to decimal number
 	decimalAmount, err := s.parseMoneyToDecimal(price)
 	if err != nil {
-		return x402.AssetAmount{}, err
+		return t402.AssetAmount{}, err
 	}
 
 	// Try each custom money parser in order
@@ -137,7 +137,7 @@ func (s *ExactSvmScheme) ParsePrice(price x402.Price, network x402.Network) (x40
 }
 
 // parseMoneyToDecimal converts Money (string | number) to decimal amount
-func (s *ExactSvmScheme) parseMoneyToDecimal(price x402.Price) (float64, error) {
+func (s *ExactSvmScheme) parseMoneyToDecimal(price t402.Price) (float64, error) {
 	// Handle string prices
 	if priceStr, ok := price.(string); ok {
 		// Remove $ sign and currency identifiers
@@ -171,15 +171,15 @@ func (s *ExactSvmScheme) parseMoneyToDecimal(price x402.Price) (float64, error) 
 }
 
 // defaultMoneyConversion converts decimal amount to USDC AssetAmount
-func (s *ExactSvmScheme) defaultMoneyConversion(amount float64, config *svm.NetworkConfig) (x402.AssetAmount, error) {
+func (s *ExactSvmScheme) defaultMoneyConversion(amount float64, config *svm.NetworkConfig) (t402.AssetAmount, error) {
 	// Convert decimal to smallest unit (e.g., $1.50 -> 1500000 for USDC with 6 decimals)
 	amountStr := fmt.Sprintf("%.6f", amount)
 	parsedAmount, err := svm.ParseAmount(amountStr, config.DefaultAsset.Decimals)
 	if err != nil {
-		return x402.AssetAmount{}, fmt.Errorf("failed to convert amount: %w", err)
+		return t402.AssetAmount{}, fmt.Errorf("failed to convert amount: %w", err)
 	}
 
-	return x402.AssetAmount{
+	return t402.AssetAmount{
 		Amount: strconv.FormatUint(parsedAmount, 10),
 		Asset:  config.DefaultAsset.Address,
 		Extra:  make(map[string]interface{}),

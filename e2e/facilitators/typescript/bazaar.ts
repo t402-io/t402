@@ -1,10 +1,10 @@
-import type { DiscoveryInfo } from "@x402/extensions/bazaar";
-import type { PaymentRequirements } from "@x402/core/types";
+import type { DiscoveryInfo } from "@t402/extensions/bazaar";
+import type { PaymentRequirements } from "@t402/core/types";
 
 export interface DiscoveredResource {
   resource: string;
   type: "http";
-  x402Version: number;
+  t402Version: number;
   accepts: PaymentRequirements[];
   discoveryInfo?: DiscoveryInfo;
   lastUpdated: string;
@@ -17,18 +17,18 @@ export class BazaarCatalog {
   catalogResource(
     resourceUrl: string,
     method: string,
-    x402Version: number,
+    t402Version: number,
     discoveryInfo: DiscoveryInfo,
     paymentRequirements: PaymentRequirements,
   ): void {
     console.log(`📝 Discovered resource: ${resourceUrl}`);
     console.log(`   Method: ${method}`);
-    console.log(`   x402 Version: ${x402Version}`);
+    console.log(`   t402 Version: ${t402Version}`);
 
     this.discoveredResources.set(resourceUrl, {
       resource: resourceUrl,
       type: "http",
-      x402Version,
+      t402Version,
       accepts: [paymentRequirements],
       discoveryInfo,
       lastUpdated: new Date().toISOString(),
@@ -42,7 +42,7 @@ export class BazaarCatalog {
     const items = allResources.slice(offset, offset + limit);
 
     return {
-      x402Version: 1,
+      t402Version: 1,
       items,
       pagination: {
         limit,

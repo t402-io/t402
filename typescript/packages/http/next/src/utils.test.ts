@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest, NextResponse } from "next/server";
 import type {
-  x402HTTPResourceServer,
-  x402ResourceServer,
+  t402HTTPResourceServer,
+  t402ResourceServer,
   PaywallProvider,
-} from "@x402/core/server";
-import type { PaymentPayload, PaymentRequirements } from "@x402/core/types";
+} from "@t402/core/server";
+import type { PaymentPayload, PaymentRequirements } from "@t402/core/types";
 import {
   createHttpServer,
   createRequestContext,
@@ -13,8 +13,8 @@ import {
   handleSettlement,
 } from "./utils";
 
-// Mock @x402/core/server
-vi.mock("@x402/core/server", () => {
+// Mock @t402/core/server
+vi.mock("@t402/core/server", () => {
   const MockHTTPResourceServer = vi.fn().mockImplementation(() => ({
     initialize: vi.fn().mockResolvedValue(undefined),
     registerPaywallProvider: vi.fn(),
@@ -22,8 +22,8 @@ vi.mock("@x402/core/server", () => {
     requiresPayment: vi.fn().mockReturnValue(true),
   }));
   return {
-    x402HTTPResourceServer: MockHTTPResourceServer,
-    x402ResourceServer: vi.fn(),
+    t402HTTPResourceServer: MockHTTPResourceServer,
+    t402ResourceServer: vi.fn(),
   };
 });
 
@@ -51,14 +51,14 @@ function createMockRequest(
 }
 
 /**
- * Factory for creating a mock x402ResourceServer.
+ * Factory for creating a mock t402ResourceServer.
  *
- * @returns A mock x402ResourceServer.
+ * @returns A mock t402ResourceServer.
  */
-function createMockResourceServer(): x402ResourceServer {
+function createMockResourceServer(): t402ResourceServer {
   return {
     initialize: vi.fn().mockResolvedValue(undefined),
-  } as unknown as x402ResourceServer;
+  } as unknown as t402ResourceServer;
 }
 
 describe("createHttpServer", () => {
@@ -194,7 +194,7 @@ describe("handlePaymentError", () => {
 });
 
 describe("handleSettlement", () => {
-  let mockHttpServer: x402HTTPResourceServer;
+  let mockHttpServer: t402HTTPResourceServer;
   const mockPaymentPayload = {
     scheme: "exact",
     network: "eip155:84532",
@@ -209,7 +209,7 @@ describe("handleSettlement", () => {
       processSettlement: vi
         .fn()
         .mockResolvedValue({ success: true, headers: { "PAYMENT-RESPONSE": "settled" } }),
-    } as unknown as x402HTTPResourceServer;
+    } as unknown as t402HTTPResourceServer;
   });
 
   it("returns original response when status >= 400 without settling", async () => {

@@ -22,7 +22,7 @@ const svmRequirement: PaymentRequirements = {
 };
 
 const mockPaymentRequired: PaymentRequired = {
-  x402Version: 2,
+  t402Version: 2,
   resource: {
     url: "https://example.com/api/data",
     description: "Test",

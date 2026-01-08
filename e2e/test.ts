@@ -233,7 +233,7 @@ async function runTest() {
   // Initialize logger
   loggerConfig({ logFile: parsedArgs.logFile, verbose: parsedArgs.verbose });
 
-  log('🚀 Starting X402 E2E Test Suite');
+  log('🚀 Starting T402 E2E Test Suite');
   log('===============================');
 
   // Load configuration from environment

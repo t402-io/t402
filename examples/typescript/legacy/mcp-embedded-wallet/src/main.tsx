@@ -11,7 +11,7 @@ import { ElectronWindow } from "./window";
 import { getDiscoveryList } from "./services/discovery";
 import { getWalletAddress, signMessage } from "./services/walletService";
 
-import { makeX402Request } from "./utils/x402Client";
+import { makeT402Request } from "./utils/t402Client";
 
 import "@radix-ui/themes/styles.css";
 import "./main.module.css";
@@ -37,5 +37,5 @@ declare let window: ElectronWindow;
 
 window.electron.OnSignMessage(signMessage);
 window.electron.OnDiscoveryList(getDiscoveryList);
-window.electron.OnMakeX402Request(makeX402Request);
+window.electron.OnMakeT402Request(makeT402Request);
 window.electron.OnGetWalletAddress(getWalletAddress);

@@ -7,9 +7,9 @@ import { NavBar } from "../components/NavBar";
 import { Footer } from "../components/Footer";
 
 export const metadata = {
-  title: "Ecosystem | x402",
+  title: "Ecosystem | t402",
   description:
-    "Discover innovative projects, tools, and applications built by our growing community of partners and developers leveraging x402 technology.",
+    "Discover innovative projects, tools, and applications built by our growing community of partners and developers leveraging t402 technology.",
 };
 
 export const revalidate = 3600;

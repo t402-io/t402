@@ -1,17 +1,17 @@
 import express from "express";
-import { paymentMiddleware } from "@x402/express";
-import { x402ResourceServer, HTTPFacilitatorClient } from "@x402/core/server";
-import { registerExactEvmScheme } from "@x402/evm/exact/server";
-import { registerExactSvmScheme } from "@x402/svm/exact/server";
-import { bazaarResourceServerExtension, declareDiscoveryExtension } from "@x402/extensions/bazaar";
+import { paymentMiddleware } from "@t402/express";
+import { t402ResourceServer, HTTPFacilitatorClient } from "@t402/core/server";
+import { registerExactEvmScheme } from "@t402/evm/exact/server";
+import { registerExactSvmScheme } from "@t402/svm/exact/server";
+import { bazaarResourceServerExtension, declareDiscoveryExtension } from "@t402/extensions/bazaar";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 /**
- * Express E2E Test Server with x402 Payment Middleware
+ * Express E2E Test Server with t402 Payment Middleware
  *
- * This server demonstrates how to integrate x402 payment middleware
+ * This server demonstrates how to integrate t402 payment middleware
  * with an Express application for end-to-end testing.
  */
 
@@ -43,8 +43,8 @@ const app = express();
 // Create HTTP facilitator client
 const facilitatorClient = new HTTPFacilitatorClient({ url: facilitatorUrl });
 
-// Create x402 resource server
-const server = new x402ResourceServer(facilitatorClient);
+// Create t402 resource server
+const server = new t402ResourceServer(facilitatorClient);
 
 // Register server schemes
 registerExactEvmScheme(server);
@@ -57,7 +57,7 @@ console.log(`Facilitator account: ${process.env.EVM_PRIVATE_KEY ? process.env.EV
 console.log(`Using remote facilitator at: ${facilitatorUrl}`);
 
 /**
- * Configure x402 payment middleware using builder pattern
+ * Configure t402 payment middleware using builder pattern
  *
  * This middleware protects endpoints with $0.001 USDC payment requirements
  * on Base Sepolia and Solana Devnet with bazaar discovery extension.
@@ -124,7 +124,7 @@ app.use(
 /**
  * Protected endpoint - requires payment to access
  *
- * This endpoint demonstrates a resource protected by x402 payment middleware.
+ * This endpoint demonstrates a resource protected by t402 payment middleware.
  * Clients must provide a valid payment signature to access this endpoint.
  */
 app.get("/protected", (req, res) => {
@@ -137,7 +137,7 @@ app.get("/protected", (req, res) => {
 /**
  * Protected SVM endpoint - requires payment to access
  *
- * This endpoint demonstrates a resource protected by x402 payment middleware for SVM.
+ * This endpoint demonstrates a resource protected by t402 payment middleware for SVM.
  * Clients must provide a valid payment signature to access this endpoint.
  */
 app.get("/protected-svm", (req, res) => {
@@ -180,7 +180,7 @@ app.post("/close", (req, res) => {
 app.listen(parseInt(PORT), () => {
   console.log(`
 ╔════════════════════════════════════════════════════════╗
-║           x402 Express E2E Test Server                 ║
+║           t402 Express E2E Test Server                 ║
 ╠════════════════════════════════════════════════════════╣
 ║  Server:     http://localhost:${PORT}                  ║
 ║  EVM Network:    ${EVM_NETWORK}                         ║

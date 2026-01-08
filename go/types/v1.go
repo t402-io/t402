@@ -7,14 +7,14 @@ import (
 // PaymentPayloadV1 represents a v1 payment payload structure
 // V1 has scheme and network at top level (not in accepted field)
 type PaymentPayloadV1 struct {
-	X402Version int                    `json:"x402Version"`
+	T402Version int                    `json:"t402Version"`
 	Scheme      string                 `json:"scheme"`
 	Network     string                 `json:"network"`
 	Payload     map[string]interface{} `json:"payload"`
 }
 
 // PaymentPayloadView interface implementation for V1
-func (p PaymentPayloadV1) GetVersion() int                    { return p.X402Version }
+func (p PaymentPayloadV1) GetVersion() int                    { return p.T402Version }
 func (p PaymentPayloadV1) GetScheme() string                  { return p.Scheme }
 func (p PaymentPayloadV1) GetNetwork() string                 { return p.Network }
 func (p PaymentPayloadV1) GetPayload() map[string]interface{} { return p.Payload }
@@ -54,14 +54,14 @@ func (r PaymentRequirementsV1) GetExtra() map[string]interface{} {
 
 // PaymentRequiredV1 represents a v1 402 response structure
 type PaymentRequiredV1 struct {
-	X402Version int                     `json:"x402Version"`
+	T402Version int                     `json:"t402Version"`
 	Error       string                  `json:"error,omitempty"`
 	Accepts     []PaymentRequirementsV1 `json:"accepts"`
 }
 
 // SupportedKindV1 represents a V1 supported payment configuration
 type SupportedKindV1 struct {
-	X402Version int              `json:"x402Version"`
+	T402Version int              `json:"t402Version"`
 	Scheme      string           `json:"scheme"`
 	Network     string           `json:"network"`
 	Extra       *json.RawMessage `json:"extra,omitempty"`

@@ -1,10 +1,10 @@
 import json
 from typing import Dict, Any, List, Optional
 
-from x402.types import PaymentRequirements, PaywallConfig
-from x402.common import x402_VERSION
-from x402.evm_paywall_template import EVM_PAYWALL_TEMPLATE
-from x402.svm_paywall_template import SVM_PAYWALL_TEMPLATE
+from t402.types import PaymentRequirements, PaywallConfig
+from t402.common import t402_VERSION
+from t402.evm_paywall_template import EVM_PAYWALL_TEMPLATE
+from t402.svm_paywall_template import SVM_PAYWALL_TEMPLATE
 
 
 def get_paywall_template(network: str) -> str:
@@ -34,12 +34,12 @@ def is_browser_request(headers: Dict[str, Any]) -> bool:
     return False
 
 
-def create_x402_config(
+def create_t402_config(
     error: str,
     payment_requirements: List[PaymentRequirements],
     paywall_config: Optional[PaywallConfig] = None,
 ) -> Dict[str, Any]:
-    """Create x402 configuration object from payment requirements."""
+    """Create t402 configuration object from payment requirements."""
 
     requirements = payment_requirements[0] if payment_requirements else None
     display_amount = 0
@@ -61,7 +61,7 @@ def create_x402_config(
     # Get paywall config values or defaults
     config = paywall_config or {}
 
-    # Create the window.x402 configuration object
+    # Create the window.t402 configuration object
     return {
         "amount": display_amount,
         "paymentRequirements": [
@@ -70,7 +70,7 @@ def create_x402_config(
         "testnet": testnet,
         "currentUrl": current_url,
         "error": error,
-        "x402_version": x402_VERSION,
+        "t402_version": t402_VERSION,
         "appName": config.get("app_name", ""),
         "appLogo": config.get("app_logo", ""),
     }
@@ -84,19 +84,19 @@ def inject_payment_data(
 ) -> str:
     """Inject payment requirements into HTML as JavaScript variables."""
 
-    # Create x402 configuration object
-    x402_config = create_x402_config(error, payment_requirements, paywall_config)
+    # Create t402 configuration object
+    t402_config = create_t402_config(error, payment_requirements, paywall_config)
 
     # Create the configuration script (matching TypeScript pattern)
     log_on_testnet = (
-        "console.log('Payment requirements initialized:', window.x402);"
-        if x402_config["testnet"]
+        "console.log('Payment requirements initialized:', window.t402);"
+        if t402_config["testnet"]
         else ""
     )
 
     config_script = f"""
   <script>
-    window.x402 = {json.dumps(x402_config)};
+    window.t402 = {json.dumps(t402_config)};
     {log_on_testnet}
   </script>"""
 

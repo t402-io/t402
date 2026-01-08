@@ -1,4 +1,4 @@
-# x402 Advanced Resource Server Example (Python)
+# t402 Advanced Resource Server Example (Python)
 
 This is an advanced Python example using FastAPI that demonstrates how to implement paywall functionality without using middleware. This approach is useful for more complex scenarios, such as:
 
@@ -44,7 +44,7 @@ This advanced implementation provides a structured approach to handling payments
 3. Dynamic pricing capabilities
 4. Multiple payment requirement options
 5. Proper error handling and response formatting
-6. Integration with the x402 facilitator service
+6. Integration with the t402 facilitator service
 
 ## Usage examples:
 
@@ -130,7 +130,7 @@ The server includes example endpoints that demonstrate different payment scenari
 ### Payment Required (402)
 ```json5
 {
-  "x402Version": 1,
+  "t402Version": 1,
   "error": "X-PAYMENT header is required",
   "accepts": [
     {

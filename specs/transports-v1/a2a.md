@@ -2,14 +2,14 @@
 
 ## Summary
 
-The A2A transport implements x402 payment flows over the Agent-to-Agent protocol using JSON-RPC messages and task-based state management. This enables AI agents to monetize their services through on-chain cryptocurrency payments within the A2A framework, leveraging the protocol's task lifecycle and metadata system for payment coordination.
+The A2A transport implements t402 payment flows over the Agent-to-Agent protocol using JSON-RPC messages and task-based state management. This enables AI agents to monetize their services through on-chain cryptocurrency payments within the A2A framework, leveraging the protocol's task lifecycle and metadata system for payment coordination.
 
 ## Payment Required Signaling
 
 The server agent indicates payment is required using A2A's task state `input-required` with payment metadata.
 
-**Mechanism**: Task with `state: "input-required"` and `x402.payment.status: "payment-required"` in message metadata  
-**Data Format**: `PaymentRequirementsResponse` schema in `x402.payment.required` metadata field
+**Mechanism**: Task with `state: "input-required"` and `t402.payment.status: "payment-required"` in message metadata  
+**Data Format**: `PaymentRequirementsResponse` schema in `t402.payment.required` metadata field
 
 **Example:**
 
@@ -32,9 +32,9 @@ The server agent indicates payment is required using A2A's task state `input-req
           }
         ],
         "metadata": {
-          "x402.payment.status": "payment-required",
-          "x402.payment.required": {
-            "x402Version": 1,
+          "t402.payment.status": "payment-required",
+          "t402.payment.required": {
+            "t402Version": 1,
             "error": "Payment required to access this resource",
             "accepts": [
               {
@@ -66,8 +66,8 @@ The server agent indicates payment is required using A2A's task state `input-req
 
 Clients send payment data using the A2A message metadata with task correlation.
 
-**Mechanism**: Message with `x402.payment.payload` metadata field and `taskId` for correlation  
-**Data Format**: `PaymentPayload` schema in `x402.payment.payload` metadata field
+**Mechanism**: Message with `t402.payment.payload` metadata field and `taskId` for correlation  
+**Data Format**: `PaymentPayload` schema in `t402.payment.payload` metadata field
 
 **Example:**
 
@@ -84,9 +84,9 @@ Clients send payment data using the A2A message metadata with task correlation.
         { "kind": "text", "text": "Here is the payment authorization." }
       ],
       "metadata": {
-        "x402.payment.status": "payment-submitted",
-        "x402.payment.payload": {
-          "x402Version": 1,
+        "t402.payment.status": "payment-submitted",
+        "t402.payment.payload": {
+          "t402Version": 1,
           "scheme": "exact",
           "network": "base",
           "payload": {
@@ -111,8 +111,8 @@ Clients send payment data using the A2A message metadata with task correlation.
 
 Servers communicate payment settlement results using task status updates with settlement metadata.
 
-**Mechanism**: Task status update with `x402.payment.receipts` metadata field  
-**Data Format**: Array of `SettlementResponse` schemas in `x402.payment.receipts` metadata field
+**Mechanism**: Task status update with `t402.payment.receipts` metadata field  
+**Data Format**: Array of `SettlementResponse` schemas in `t402.payment.receipts` metadata field
 
 **Example (Successful Settlement):**
 
@@ -132,8 +132,8 @@ Servers communicate payment settlement results using task status updates with se
           { "kind": "text", "text": "Payment successful. Your image is ready." }
         ],
         "metadata": {
-          "x402.payment.status": "payment-completed",
-          "x402.payment.receipts": [
+          "t402.payment.status": "payment-completed",
+          "t402.payment.receipts": [
             {
               "success": true,
               "transaction": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
@@ -177,9 +177,9 @@ Servers communicate payment settlement results using task status updates with se
           }
         ],
         "metadata": {
-          "x402.payment.status": "payment-failed",
-          "x402.payment.error": "EXPIRED_PAYMENT",
-          "x402.payment.receipts": [
+          "t402.payment.status": "payment-failed",
+          "t402.payment.error": "EXPIRED_PAYMENT",
+          "t402.payment.receipts": [
             {
               "success": false,
               "errorReason": "Payment authorization was submitted after its 'validBefore' timestamp.",
@@ -196,7 +196,7 @@ Servers communicate payment settlement results using task status updates with se
 
 ## Payment Status Lifecycle
 
-The A2A transport uses a detailed payment status progression tracked in the `x402.payment.status` metadata field:
+The A2A transport uses a detailed payment status progression tracked in the `t402.payment.status` metadata field:
 
 | Status              | Description                               | Task State                   |
 | ------------------- | ----------------------------------------- | ---------------------------- |
@@ -209,9 +209,9 @@ The A2A transport uses a detailed payment status progression tracked in the `x40
 
 ## Error Handling
 
-A2A transport maps x402 errors to task states and metadata:
+A2A transport maps t402 errors to task states and metadata:
 
-| x402 Error       | Task State       | Payment Status      | Description                                     |
+| t402 Error       | Task State       | Payment Status      | Description                                     |
 | ---------------- | ---------------- | ------------------- | ----------------------------------------------- |
 | Payment Required | `input-required` | `payment-required`  | Payment needed to access resource               |
 | Payment Rejected | `failed`         | `payment-rejected`  | Client declined payment requirements            |
@@ -240,9 +240,9 @@ Task state transitions to `failed` with detailed error information in metadata:
         }
       ],
       "metadata": {
-        "x402.payment.status": "payment-failed",
-        "x402.payment.error": "INSUFFICIENT_FUNDS",
-        "x402.payment.receipts": [
+        "t402.payment.status": "payment-failed",
+        "t402.payment.error": "INSUFFICIENT_FUNDS",
+        "t402.payment.receipts": [
           {
             "success": false,
             "errorReason": "The client's wallet has insufficient funds to cover the payment.",
@@ -258,15 +258,15 @@ Task state transitions to `failed` with detailed error information in metadata:
 
 ## Extension Declaration and Activation
 
-Agents supporting x402 payments must declare the extension in their AgentCard:
+Agents supporting t402 payments must declare the extension in their AgentCard:
 
 ```json
 {
   "capabilities": {
     "extensions": [
       {
-        "uri": "https://github.com/google-a2a/a2a-x402/v0.1",
-        "description": "Supports payments using the x402 protocol for on-chain settlement.",
+        "uri": "https://github.com/google-a2a/a2a-t402/v0.1",
+        "description": "Supports payments using the t402 protocol for on-chain settlement.",
         "required": true
       }
     ]
@@ -277,12 +277,12 @@ Agents supporting x402 payments must declare the extension in their AgentCard:
 Clients must activate the extension using the `X-A2A-Extensions` HTTP header:
 
 ```http
-X-A2A-Extensions: https://github.com/google-a2a/a2a-x402/v0.1
+X-A2A-Extensions: https://github.com/google-a2a/a2a-t402/v0.1
 ```
 
 ## References
 
-- [Core x402 Specification](../x402-specification.md)
+- [Core t402 Specification](../t402-specification.md)
 - [A2A Protocol Specification](https://a2a-protocol.org/latest/specification)
 - [A2A Extensions Documentation](https://github.com/a2aproject/A2A/blob/main/docs/topics/extensions.md)
-- [A2A x402 Extension Specification](https://github.com/google-agentic-commerce/a2a-x402/blob/main/spec/v0.1/spec.md)
+- [A2A t402 Extension Specification](https://github.com/google-agentic-commerce/a2a-t402/blob/main/spec/v0.1/spec.md)

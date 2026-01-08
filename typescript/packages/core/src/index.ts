@@ -1,1 +1,1 @@
-export const x402Version = 2;
+export const t402Version = 2;

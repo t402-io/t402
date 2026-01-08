@@ -1,11 +1,11 @@
-# @x402/hono
+# @t402/hono
 
-Hono middleware integration for the x402 Payment Protocol. This package provides a simple middleware function for adding x402 payment requirements to your Hono applications.
+Hono middleware integration for the t402 Payment Protocol. This package provides a simple middleware function for adding t402 payment requirements to your Hono applications.
 
 ## Installation
 
 ```bash
-pnpm install @x402/hono
+pnpm install @t402/hono
 ```
 
 ## Quick Start
@@ -13,14 +13,14 @@ pnpm install @x402/hono
 ```typescript
 import { Hono } from "hono";
 import { serve } from "@hono/node-server";
-import { paymentMiddleware, x402ResourceServer } from "@x402/hono";
-import { ExactEvmScheme } from "@x402/evm/exact/server";
-import { HTTPFacilitatorClient } from "@x402/core/server";
+import { paymentMiddleware, t402ResourceServer } from "@t402/hono";
+import { ExactEvmScheme } from "@t402/evm/exact/server";
+import { HTTPFacilitatorClient } from "@t402/core/server";
 
 const app = new Hono();
 
-const facilitatorClient = new HTTPFacilitatorClient({ url: "https://facilitator.x402.org" });
-const resourceServer = new x402ResourceServer(facilitatorClient)
+const facilitatorClient = new HTTPFacilitatorClient({ url: "https://facilitator.t402.org" });
+const resourceServer = new t402ResourceServer(facilitatorClient)
   .register("eip155:84532", new ExactEvmScheme());
 
 // Apply the payment middleware with your configuration
@@ -56,7 +56,7 @@ The `paymentMiddleware` function accepts the following parameters:
 ```typescript
 paymentMiddleware(
   routes: RoutesConfig,
-  server: x402ResourceServer,
+  server: t402ResourceServer,
   paywallConfig?: PaywallConfig,
   paywall?: PaywallProvider,
   syncFacilitatorOnStart?: boolean
@@ -66,7 +66,7 @@ paymentMiddleware(
 ### Parameters
 
 1. **`routes`** (required): Route configurations for protected endpoints
-2. **`server`** (required): Pre-configured x402ResourceServer instance
+2. **`server`** (required): Pre-configured t402ResourceServer instance
 3. **`paywallConfig`** (optional): Configuration for the built-in paywall UI
 4. **`paywall`** (optional): Custom paywall provider
 5. **`syncFacilitatorOnStart`** (optional): Whether to sync with facilitator on startup (defaults to true)
@@ -75,7 +75,7 @@ paymentMiddleware(
 
 ### HonoAdapter
 
-The `HonoAdapter` class implements the `HTTPAdapter` interface from `@x402/core`, providing Hono-specific request handling:
+The `HonoAdapter` class implements the `HTTPAdapter` interface from `@t402/core`, providing Hono-specific request handling:
 
 ```typescript
 class HonoAdapter implements HTTPAdapter {
@@ -93,7 +93,7 @@ class HonoAdapter implements HTTPAdapter {
 ```typescript
 function paymentMiddleware(
   routes: RoutesConfig,
-  server: x402ResourceServer,
+  server: t402ResourceServer,
   paywallConfig?: PaywallConfig,
   paywall?: PaywallProvider,
   syncFacilitatorOnStart?: boolean,
@@ -102,7 +102,7 @@ function paymentMiddleware(
 
 Creates Hono middleware that:
 
-1. Uses the provided x402ResourceServer for payment processing
+1. Uses the provided t402ResourceServer for payment processing
 2. Checks if the incoming request matches a protected route
 3. Validates payment headers if required
 4. Returns payment instructions (402 status) if payment is missing or invalid
@@ -136,10 +136,10 @@ The middleware automatically displays a paywall UI when browsers request protect
 
 **Option 1: Full Paywall UI (Recommended)**
 
-Install the optional `@x402/paywall` package for a complete wallet connection and payment UI:
+Install the optional `@t402/paywall` package for a complete wallet connection and payment UI:
 
 ```bash
-pnpm add @x402/paywall
+pnpm add @t402/paywall
 ```
 
 Then configure it:
@@ -156,7 +156,7 @@ app.use(paymentMiddleware(routes, resourceServer, paywallConfig));
 
 **Option 2: Basic Paywall (No Installation)**
 
-Without `@x402/paywall` installed, the middleware returns a basic HTML page with payment instructions.
+Without `@t402/paywall` installed, the middleware returns a basic HTML page with payment instructions.
 
 **Option 3: Custom Paywall Provider**
 
@@ -224,7 +224,7 @@ app.use(
         mimeType: "application/json",
       },
     },
-    new x402ResourceServer(facilitatorClient)
+    new t402ResourceServer(facilitatorClient)
       .register("eip155:84532", new ExactEvmScheme())
       .register("solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1", new ExactSvmScheme()),
   ),
@@ -233,12 +233,12 @@ app.use(
 
 ### Custom Facilitator Client
 
-If you need to use a custom facilitator server, configure it when creating the x402ResourceServer:
+If you need to use a custom facilitator server, configure it when creating the t402ResourceServer:
 
 ```typescript
-import { HTTPFacilitatorClient } from "@x402/core/server";
-import { x402ResourceServer } from "@x402/hono";
-import { ExactEvmScheme } from "@x402/evm/exact/server";
+import { HTTPFacilitatorClient } from "@t402/core/server";
+import { t402ResourceServer } from "@t402/hono";
+import { ExactEvmScheme } from "@t402/evm/exact/server";
 
 const customFacilitator = new HTTPFacilitatorClient({
   url: "https://your-facilitator.com",
@@ -248,7 +248,7 @@ const customFacilitator = new HTTPFacilitatorClient({
   }),
 });
 
-const resourceServer = new x402ResourceServer(customFacilitator)
+const resourceServer = new t402ResourceServer(customFacilitator)
   .register("eip155:84532", new ExactEvmScheme());
 
 app.use(paymentMiddleware(routes, resourceServer, paywallConfig));

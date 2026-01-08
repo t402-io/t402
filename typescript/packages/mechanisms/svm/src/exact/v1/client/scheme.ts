@@ -25,8 +25,8 @@ import type {
   PaymentPayload,
   PaymentRequirements,
   SchemeNetworkClient,
-} from "@x402/core/types";
-import type { PaymentRequirementsV1 } from "@x402/core/types/v1";
+} from "@t402/core/types";
+import type { PaymentRequirementsV1 } from "@t402/core/types/v1";
 import {
   DEFAULT_COMPUTE_UNIT_LIMIT,
   DEFAULT_COMPUTE_UNIT_PRICE_MICROLAMPORTS,
@@ -56,15 +56,15 @@ export class ExactSvmSchemeV1 implements SchemeNetworkClient {
   /**
    * Creates a payment payload for the Exact scheme (V1).
    *
-   * @param x402Version - The x402 protocol version
+   * @param t402Version - The t402 protocol version
    * @param paymentRequirements - The payment requirements
    * @returns Promise resolving to a payment payload
    */
   async createPaymentPayload(
-    x402Version: number,
+    t402Version: number,
     paymentRequirements: PaymentRequirements,
   ): Promise<
-    Pick<PaymentPayload, "x402Version" | "payload"> & { scheme: string; network: Network }
+    Pick<PaymentPayload, "t402Version" | "payload"> & { scheme: string; network: Network }
   > {
     const selectedV1 = paymentRequirements as unknown as PaymentRequirementsV1;
     const rpc = createRpcClient(selectedV1.network, this.config?.rpcUrl);
@@ -132,7 +132,7 @@ export class ExactSvmSchemeV1 implements SchemeNetworkClient {
     };
 
     return {
-      x402Version,
+      t402Version,
       scheme: selectedV1.scheme,
       network: selectedV1.network,
       payload,

@@ -2,8 +2,8 @@ import os
 import json
 from dotenv import load_dotenv
 from eth_account import Account
-from x402.clients.requests import x402_http_adapter
-from x402.clients.base import decode_x_payment_response
+from t402.clients.requests import t402_http_adapter
+from t402.clients.base import decode_x_payment_response
 import requests
 
 # Load environment variables
@@ -24,9 +24,9 @@ account = Account.from_key(private_key)
 
 
 def main():
-    # Create a session and mount the x402 adapter
+    # Create a session and mount the t402 adapter
     session = requests.Session()
-    adapter = x402_http_adapter(account)
+    adapter = t402_http_adapter(account)
 
     # Mount the adapter for both HTTP and HTTPS
     session.mount("http://", adapter)

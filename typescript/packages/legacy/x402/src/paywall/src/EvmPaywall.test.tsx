@@ -14,7 +14,7 @@ describe("EvmPaywall - Error Response Parsing", () => {
         statusText: "Payment Required",
         json: vi.fn().mockResolvedValue({
           error: "invalid_exact_evm_payload_undeployed_smart_wallet",
-          x402Version: 1,
+          t402Version: 1,
           accepts: [
             {
               scheme: "exact",
@@ -45,13 +45,13 @@ describe("EvmPaywall - Error Response Parsing", () => {
       );
     });
 
-    it("should retry payment when 402 has x402Version but no undeployed wallet error", async () => {
+    it("should retry payment when 402 has t402Version but no undeployed wallet error", async () => {
       const mock402Response = {
         ok: false,
         status: 402,
         statusText: "Payment Required",
         json: vi.fn().mockResolvedValue({
-          x402Version: 2,
+          t402Version: 2,
           accepts: [
             {
               scheme: "exact",
@@ -68,21 +68,21 @@ describe("EvmPaywall - Error Response Parsing", () => {
 
       if (errorData.error === "invalid_exact_evm_payload_undeployed_smart_wallet") {
         shouldRetry = false;
-      } else if (errorData && typeof errorData.x402Version === "number") {
+      } else if (errorData && typeof errorData.t402Version === "number") {
         shouldRetry = true;
       }
 
       expect(shouldRetry).toBe(true);
     });
 
-    it("should handle 402 with both error and x402Version (error takes precedence)", async () => {
+    it("should handle 402 with both error and t402Version (error takes precedence)", async () => {
       const mock402Response = {
         ok: false,
         status: 402,
         statusText: "Payment Required",
         json: vi.fn().mockResolvedValue({
           error: "invalid_exact_evm_payload_undeployed_smart_wallet",
-          x402Version: 1,
+          t402Version: 1,
           accepts: [],
         }),
       };
@@ -96,7 +96,7 @@ describe("EvmPaywall - Error Response Parsing", () => {
         shouldRetry = false;
         errorMessage =
           "Smart wallet must be deployed before making payments. Please deploy your wallet first.";
-      } else if (errorData && typeof errorData.x402Version === "number") {
+      } else if (errorData && typeof errorData.t402Version === "number") {
         shouldRetry = true;
       }
 

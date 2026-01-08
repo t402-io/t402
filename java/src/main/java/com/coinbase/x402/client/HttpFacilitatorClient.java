@@ -1,7 +1,7 @@
-package com.coinbase.x402.client;
+package com.coinbase.t402.client;
 
-import com.coinbase.x402.model.PaymentRequirements;
-import com.coinbase.x402.util.Json;
+import com.coinbase.t402.model.PaymentRequirements;
+import com.coinbase.t402.util.Json;
 
 import java.io.IOException;
 import java.net.URI;
@@ -43,7 +43,7 @@ public class HttpFacilitatorClient implements FacilitatorClient {
             throws IOException, InterruptedException {
 
         Map<String,Object> body = Map.of(
-                "x402Version", 1,
+                "t402Version", 1,
                 "paymentHeader", paymentHeader,
                 "paymentRequirements", req
         );
@@ -70,7 +70,7 @@ public class HttpFacilitatorClient implements FacilitatorClient {
             throws IOException, InterruptedException {
 
         Map<String,Object> body = Map.of(
-                "x402Version", 1,
+                "t402Version", 1,
                 "paymentHeader", paymentHeader,
                 "paymentRequirements", req
         );

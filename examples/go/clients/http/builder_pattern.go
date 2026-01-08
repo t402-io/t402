@@ -1,24 +1,24 @@
 package main
 
 import (
-	x402 "github.com/coinbase/x402/go"
-	evm "github.com/coinbase/x402/go/mechanisms/evm/exact/client"
-	svm "github.com/coinbase/x402/go/mechanisms/svm/exact/client"
-	evmsigners "github.com/coinbase/x402/go/signers/evm"
-	svmsigners "github.com/coinbase/x402/go/signers/svm"
+	t402 "github.com/coinbase/t402/go"
+	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/client"
+	svm "github.com/coinbase/t402/go/mechanisms/svm/exact/client"
+	evmsigners "github.com/coinbase/t402/go/signers/evm"
+	svmsigners "github.com/coinbase/t402/go/signers/svm"
 )
 
 /**
  * Builder Pattern Client
  *
- * This demonstrates the basic way to configure an x402 client by chaining
+ * This demonstrates the basic way to configure an t402 client by chaining
  * Register() calls to map network patterns to scheme clients.
  *
  * This approach gives you fine-grained control over which networks use
  * which signers and schemes.
  */
 
-func createBuilderPatternClient(evmPrivateKey, svmPrivateKey string) (*x402.X402Client, error) {
+func createBuilderPatternClient(evmPrivateKey, svmPrivateKey string) (*t402.T402Client, error) {
 	// Create signers from private keys
 	evmSigner, err := evmsigners.NewClientSignerFromPrivateKey(evmPrivateKey)
 	if err != nil {
@@ -26,7 +26,7 @@ func createBuilderPatternClient(evmPrivateKey, svmPrivateKey string) (*x402.X402
 	}
 
 	// Create client and register schemes using builder pattern
-	client := x402.Newx402Client()
+	client := t402.Newt402Client()
 
 	// Register EVM scheme for all EVM networks
 	client.Register("eip155:*", evm.NewExactEvmScheme(evmSigner))

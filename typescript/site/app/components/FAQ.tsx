@@ -10,24 +10,24 @@ interface FAQItem {
 
 const faqData: FAQItem[] = [
   {
-    question: "What is x402 used for?",
+    question: "What is t402 used for?",
     answer:
-      "x402 enables instant, low-cost payments for digital services. It's designed for API monetization, agentic commerce, paywalled content, and any scenario where traditional payment methods are too slow or expensive.",
+      "t402 enables instant, low-cost payments for digital services. It's designed for API monetization, agentic commerce, paywalled content, and any scenario where traditional payment methods are too slow or expensive.",
   },
   {
-    question: "Is x402 production ready?",
+    question: "Is t402 production ready?",
     answer:
-      "Yes, x402 is production-ready and has processed millions of transactions. The protocol is open-source and has been audited for security.",
+      "Yes, t402 is production-ready and has processed millions of transactions. The protocol is open-source and has been audited for security.",
   },
   {
-    question: "How do I integrate x402?",
+    question: "How do I integrate t402?",
     answer:
       <>
         Integration is simple - add a single line of middleware to your server.
         Check our{" "}
         <a
           className="underline"
-          href="https://x402.gitbook.io/x402/getting-started/quickstart-for-sellers#id-2.-add-payment-middleware"
+          href="https://t402.gitbook.io/t402/getting-started/quickstart-for-sellers#id-2.-add-payment-middleware"
           target="_blank"
           rel="noreferrer"
         >
@@ -37,9 +37,9 @@ const faqData: FAQItem[] = [
       </>,
   },
   {
-    question: "What blockchains does x402 support?",
+    question: "What blockchains does t402 support?",
     answer:
-      "x402 is blockchain-agnostic and supports all EVM-compatible chains, Solana, and more. Stablecoin payments are the primary use case. x402 is also extensible to traditional payment methods.",
+      "t402 is blockchain-agnostic and supports all EVM-compatible chains, Solana, and more. Stablecoin payments are the primary use case. t402 is also extensible to traditional payment methods.",
   },
 ];
 

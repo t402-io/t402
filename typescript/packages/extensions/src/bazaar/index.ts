@@ -1,7 +1,7 @@
 /**
- * Bazaar Discovery Extension for x402 v2 and v1
+ * Bazaar Discovery Extension for t402 v2 and v1
  *
- * Enables facilitators to automatically catalog and index x402-enabled resources
+ * Enables facilitators to automatically catalog and index t402-enabled resources
  * by following the server's provided discovery instructions.
  *
  * ## V2 Usage
@@ -13,7 +13,7 @@
  * ### For Resource Servers (V2)
  *
  * ```typescript
- * import { declareDiscoveryExtension, BAZAAR } from '@x402/extensions/bazaar';
+ * import { declareDiscoveryExtension, BAZAAR } from '@t402/extensions/bazaar';
  *
  * // Declare a GET endpoint
  * const extension = declareDiscoveryExtension(
@@ -29,7 +29,7 @@
  *
  * // Include in PaymentRequired response
  * const paymentRequired = {
- *   x402Version: 2,
+ *   t402Version: 2,
  *   resource: { ... },
  *   accepts: [ ... ],
  *   extensions: {
@@ -44,7 +44,7 @@
  * import {
  *   extractDiscoveryInfo,
  *   BAZAAR
- * } from '@x402/extensions/bazaar';
+ * } from '@t402/extensions/bazaar';
  *
  * // V2: Extensions are in PaymentPayload.extensions (client copied from PaymentRequired)
  * // V1: Discovery info is in PaymentRequirements.outputSchema
@@ -64,7 +64,7 @@
  * The `extractDiscoveryInfo` function automatically handles v1 format as a fallback.
  *
  * ```typescript
- * import { extractDiscoveryInfoV1 } from '@x402/extensions/bazaar/v1';
+ * import { extractDiscoveryInfoV1 } from '@t402/extensions/bazaar/v1';
  *
  * // Direct v1 extraction
  * const infoV1 = extractDiscoveryInfoV1(paymentRequirementsV1);

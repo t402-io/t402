@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	x402 "github.com/coinbase/x402/go"
+	t402 "github.com/coinbase/t402/go"
 )
 
 // Note: mockHTTPAdapter and mockSchemeServer are defined in server_test.go
@@ -40,10 +40,10 @@ func TestDynamicPayTo(t *testing.T) {
 	}
 
 	mockFacilitator := &mockFacilitatorClient{
-		supported: func(ctx context.Context) (x402.SupportedResponse, error) {
-			return x402.SupportedResponse{
-				Kinds: []x402.SupportedKind{
-					{X402Version: 2, Scheme: "exact", Network: "eip155:8453"},
+		supported: func(ctx context.Context) (t402.SupportedResponse, error) {
+			return t402.SupportedResponse{
+				Kinds: []t402.SupportedKind{
+					{T402Version: 2, Scheme: "exact", Network: "eip155:8453"},
 				},
 				Extensions: []string{},
 				Signers:    make(map[string][]string),
@@ -51,9 +51,9 @@ func TestDynamicPayTo(t *testing.T) {
 		},
 	}
 
-	server := Newx402HTTPResourceServer(routes,
-		x402.WithSchemeServer("eip155:8453", mockServer),
-		x402.WithFacilitatorClient(mockFacilitator),
+	server := Newt402HTTPResourceServer(routes,
+		t402.WithSchemeServer("eip155:8453", mockServer),
+		t402.WithFacilitatorClient(mockFacilitator),
 	)
 
 	// Initialize to populate facilitator support
@@ -91,10 +91,10 @@ func TestDynamicPrice(t *testing.T) {
 	}
 
 	mockFacilitator := &mockFacilitatorClient{
-		supported: func(ctx context.Context) (x402.SupportedResponse, error) {
-			return x402.SupportedResponse{
-				Kinds: []x402.SupportedKind{
-					{X402Version: 2, Scheme: "exact", Network: "eip155:8453"},
+		supported: func(ctx context.Context) (t402.SupportedResponse, error) {
+			return t402.SupportedResponse{
+				Kinds: []t402.SupportedKind{
+					{T402Version: 2, Scheme: "exact", Network: "eip155:8453"},
 				},
 				Extensions: []string{},
 				Signers:    make(map[string][]string),
@@ -110,7 +110,7 @@ func TestDynamicPrice(t *testing.T) {
 					Network: "eip155:8453",
 					PayTo:   "0xRecipient",
 					// Dynamic price based on tier query param
-					Price: DynamicPriceFunc(func(ctx context.Context, reqCtx HTTPRequestContext) (x402.Price, error) {
+					Price: DynamicPriceFunc(func(ctx context.Context, reqCtx HTTPRequestContext) (t402.Price, error) {
 						// In production, would check query params or headers
 						// For testing, use path-based logic
 						if reqCtx.Path == "/api/data?tier=premium" {
@@ -123,9 +123,9 @@ func TestDynamicPrice(t *testing.T) {
 		},
 	}
 
-	server := Newx402HTTPResourceServer(routes,
-		x402.WithSchemeServer("eip155:8453", mockServer),
-		x402.WithFacilitatorClient(mockFacilitator),
+	server := Newt402HTTPResourceServer(routes,
+		t402.WithSchemeServer("eip155:8453", mockServer),
+		t402.WithFacilitatorClient(mockFacilitator),
 	)
 
 	// Initialize to populate facilitator support
@@ -200,7 +200,7 @@ func TestDynamicPayToAndPrice(t *testing.T) {
 						return "0xDefaultCreator", nil
 					}),
 					// Dynamic price: Based on content type
-					Price: DynamicPriceFunc(func(ctx context.Context, reqCtx HTTPRequestContext) (x402.Price, error) {
+					Price: DynamicPriceFunc(func(ctx context.Context, reqCtx HTTPRequestContext) (t402.Price, error) {
 						// In production, would check request body or headers
 						if reqCtx.Path == "/content/creator123" {
 							return "$5.00", nil // Premium content
@@ -213,10 +213,10 @@ func TestDynamicPayToAndPrice(t *testing.T) {
 	}
 
 	mockFacilitator := &mockFacilitatorClient{
-		supported: func(ctx context.Context) (x402.SupportedResponse, error) {
-			return x402.SupportedResponse{
-				Kinds: []x402.SupportedKind{
-					{X402Version: 2, Scheme: "exact", Network: "eip155:8453"},
+		supported: func(ctx context.Context) (t402.SupportedResponse, error) {
+			return t402.SupportedResponse{
+				Kinds: []t402.SupportedKind{
+					{T402Version: 2, Scheme: "exact", Network: "eip155:8453"},
 				},
 				Extensions: []string{},
 				Signers:    make(map[string][]string),
@@ -224,9 +224,9 @@ func TestDynamicPayToAndPrice(t *testing.T) {
 		},
 	}
 
-	server := Newx402HTTPResourceServer(routes,
-		x402.WithSchemeServer("eip155:8453", mockServer),
-		x402.WithFacilitatorClient(mockFacilitator),
+	server := Newt402HTTPResourceServer(routes,
+		t402.WithSchemeServer("eip155:8453", mockServer),
+		t402.WithFacilitatorClient(mockFacilitator),
 	)
 
 	// Initialize to populate facilitator support
@@ -272,7 +272,7 @@ func TestDynamicPayTo_Error(t *testing.T) {
 		},
 	}
 
-	server := Newx402HTTPResourceServer(routes)
+	server := Newt402HTTPResourceServer(routes)
 
 	adapter := &mockHTTPAdapter{
 		method: "GET",
@@ -312,7 +312,7 @@ func TestDynamicPrice_Error(t *testing.T) {
 					Network: "eip155:8453",
 					PayTo:   "0xRecipient",
 					// Dynamic price that returns an error
-					Price: DynamicPriceFunc(func(ctx context.Context, reqCtx HTTPRequestContext) (x402.Price, error) {
+					Price: DynamicPriceFunc(func(ctx context.Context, reqCtx HTTPRequestContext) (t402.Price, error) {
 						return nil, fmt.Errorf("pricing server unavailable")
 					}),
 				},
@@ -320,7 +320,7 @@ func TestDynamicPrice_Error(t *testing.T) {
 		},
 	}
 
-	server := Newx402HTTPResourceServer(routes)
+	server := Newt402HTTPResourceServer(routes)
 
 	adapter := &mockHTTPAdapter{
 		method: "GET",
@@ -365,7 +365,7 @@ func TestStaticPayToAndPrice(t *testing.T) {
 		},
 	}
 
-	server := Newx402HTTPResourceServer(routes, x402.WithSchemeServer("eip155:8453", mockServer))
+	server := Newt402HTTPResourceServer(routes, t402.WithSchemeServer("eip155:8453", mockServer))
 
 	adapter := &mockHTTPAdapter{
 		method: "GET",

@@ -1,8 +1,8 @@
 import { config } from "dotenv";
 import express from "express";
-import { paymentMiddleware, x402ResourceServer } from "@x402/express";
-import { ExactEvmScheme } from "@x402/evm/exact/server";
-import { HTTPFacilitatorClient } from "@x402/core/server";
+import { paymentMiddleware, t402ResourceServer } from "@t402/express";
+import { ExactEvmScheme } from "@t402/evm/exact/server";
+import { HTTPFacilitatorClient } from "@t402/core/server";
 config();
 
 const evmAddress = process.env.EVM_ADDRESS as `0x${string}`;
@@ -35,7 +35,7 @@ app.use(
         mimeType: "application/json",
       },
     },
-    new x402ResourceServer(facilitatorClient).register(
+    new t402ResourceServer(facilitatorClient).register(
       "eip155:84532",
       new ExactEvmScheme().registerMoneyParser(async (amount, network) => {
         // Custom money parser such that on the Gnosis Chain (xDai) network, we use Wrapped XDAI (WXDAI) when describing money

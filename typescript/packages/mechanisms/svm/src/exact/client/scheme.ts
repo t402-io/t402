@@ -20,7 +20,7 @@ import {
   setTransactionMessageLifetimeUsingBlockhash,
   type Address,
 } from "@solana/kit";
-import type { PaymentPayload, PaymentRequirements, SchemeNetworkClient } from "@x402/core/types";
+import type { PaymentPayload, PaymentRequirements, SchemeNetworkClient } from "@t402/core/types";
 import {
   DEFAULT_COMPUTE_UNIT_LIMIT,
   DEFAULT_COMPUTE_UNIT_PRICE_MICROLAMPORTS,
@@ -50,14 +50,14 @@ export class ExactSvmScheme implements SchemeNetworkClient {
   /**
    * Creates a payment payload for the Exact scheme.
    *
-   * @param x402Version - The x402 protocol version
+   * @param t402Version - The t402 protocol version
    * @param paymentRequirements - The payment requirements
    * @returns Promise resolving to a payment payload
    */
   async createPaymentPayload(
-    x402Version: number,
+    t402Version: number,
     paymentRequirements: PaymentRequirements,
-  ): Promise<Pick<PaymentPayload, "x402Version" | "payload">> {
+  ): Promise<Pick<PaymentPayload, "t402Version" | "payload">> {
     const rpc = createRpcClient(paymentRequirements.network, this.config?.rpcUrl);
 
     const tokenMint = await fetchMint(rpc, paymentRequirements.asset as Address);
@@ -123,7 +123,7 @@ export class ExactSvmScheme implements SchemeNetworkClient {
     };
 
     return {
-      x402Version,
+      t402Version,
       payload,
     };
   }

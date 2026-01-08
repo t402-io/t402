@@ -1,14 +1,14 @@
-# @x402/axios Example Client
+# @t402/axios Example Client
 
-Example client demonstrating how to use `@x402/axios` to make HTTP requests to endpoints protected by the x402 payment protocol.
+Example client demonstrating how to use `@t402/axios` to make HTTP requests to endpoints protected by the t402 payment protocol.
 
 ```typescript
-import { x402Client, wrapAxiosWithPayment } from "@x402/axios";
-import { registerExactEvmScheme } from "@x402/evm/exact/client";
+import { t402Client, wrapAxiosWithPayment } from "@t402/axios";
+import { registerExactEvmScheme } from "@t402/evm/exact/client";
 import { privateKeyToAccount } from "viem/accounts";
 import axios from "axios";
 
-const client = new x402Client();
+const client = new t402Client();
 registerExactEvmScheme(client, { signer: privateKeyToAccount(process.env.EVM_PRIVATE_KEY) });
 
 const api = wrapAxiosWithPayment(axios.create(), client);
@@ -21,7 +21,7 @@ console.log(response.data);
 
 - Node.js v20+ (install via [nvm](https://github.com/nvm-sh/nvm))
 - pnpm v10 (install via [pnpm.io/installation](https://pnpm.io/installation))
-- A running x402 server (see [express server example](../../servers/express))
+- A running t402 server (see [express server example](../../servers/express))
 - Valid EVM and/or SVM private keys for making payments
 
 ## Setup

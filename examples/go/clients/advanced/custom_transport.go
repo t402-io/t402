@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	x402 "github.com/coinbase/x402/go"
-	x402http "github.com/coinbase/x402/go/http"
-	evm "github.com/coinbase/x402/go/mechanisms/evm/exact/client"
-	evmsigners "github.com/coinbase/x402/go/signers/evm"
+	t402 "github.com/coinbase/t402/go"
+	t402http "github.com/coinbase/t402/go/http"
+	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/client"
+	evmsigners "github.com/coinbase/t402/go/signers/evm"
 )
 
 /**
@@ -88,14 +88,14 @@ func runCustomTransportExample(ctx context.Context, evmPrivateKey, url string) e
 		return err
 	}
 
-	// Create x402 client
-	client := x402.Newx402Client().
+	// Create t402 client
+	client := t402.Newt402Client().
 		Register("eip155:*", evm.NewExactEvmScheme(evmSigner))
 
-	httpClient := x402http.Newx402HTTPClient(client)
+	httpClient := t402http.Newt402HTTPClient(client)
 
 	// Build custom transport stack:
-	// Base transport -> Retry logic -> Timing -> x402 Payment
+	// Base transport -> Retry logic -> Timing -> t402 Payment
 	baseTransport := &http.Transport{
 		MaxIdleConns:        100,
 		MaxIdleConnsPerHost: 10,
@@ -115,8 +115,8 @@ func runCustomTransportExample(ctx context.Context, evmPrivateKey, url string) e
 		RetryDelay: 100 * time.Millisecond,
 	}
 
-	// Wrap with x402 payment handling
-	wrappedClient := x402http.WrapHTTPClientWithPayment(&http.Client{
+	// Wrap with t402 payment handling
+	wrappedClient := t402http.WrapHTTPClientWithPayment(&http.Client{
 		Transport: retryTransport,
 		Timeout:   30 * time.Second,
 	}, httpClient)

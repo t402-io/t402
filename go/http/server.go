@@ -11,8 +11,8 @@ import (
 	"strconv"
 	"strings"
 
-	x402 "github.com/coinbase/x402/go"
-	"github.com/coinbase/x402/go/types"
+	t402 "github.com/coinbase/t402/go"
+	"github.com/coinbase/t402/go/types"
 )
 
 // ============================================================================
@@ -48,7 +48,7 @@ type PaywallConfig struct {
 type DynamicPayToFunc func(context.Context, HTTPRequestContext) (string, error)
 
 // DynamicPriceFunc is a function that resolves price dynamically based on request context
-type DynamicPriceFunc func(context.Context, HTTPRequestContext) (x402.Price, error)
+type DynamicPriceFunc func(context.Context, HTTPRequestContext) (t402.Price, error)
 
 // UnpaidResponse represents the custom response for unpaid (402) API requests.
 // This allows servers to return preview data, error messages, or other content
@@ -82,8 +82,8 @@ type UnpaidResponseBodyFunc func(ctx context.Context, reqCtx HTTPRequestContext)
 type PaymentOption struct {
 	Scheme            string                 `json:"scheme"`
 	PayTo             interface{}            `json:"payTo"` // string or DynamicPayToFunc
-	Price             interface{}            `json:"price"` // x402.Price or DynamicPriceFunc
-	Network           x402.Network           `json:"network"`
+	Price             interface{}            `json:"price"` // t402.Price or DynamicPriceFunc
+	Network           t402.Network           `json:"network"`
 	MaxTimeoutSeconds int                    `json:"maxTimeoutSeconds,omitempty"`
 	Extra             map[string]interface{} `json:"extra,omitempty"`
 }
@@ -160,29 +160,29 @@ type ProcessSettleResult struct {
 	Headers     map[string]string
 	ErrorReason string
 	Transaction string
-	Network     x402.Network
+	Network     t402.Network
 	Payer       string
 }
 
 // ============================================================================
-// x402HTTPResourceServer
+// t402HTTPResourceServer
 // ============================================================================
 
-// x402HTTPResourceServer provides HTTP-specific payment handling
-type x402HTTPResourceServer struct {
-	*x402.X402ResourceServer
+// t402HTTPResourceServer provides HTTP-specific payment handling
+type t402HTTPResourceServer struct {
+	*t402.T402ResourceServer
 	compiledRoutes []CompiledRoute
 }
 
-// Newx402HTTPResourceServer creates a new HTTP resource server
-func Newx402HTTPResourceServer(routes RoutesConfig, opts ...x402.ResourceServerOption) *x402HTTPResourceServer {
-	return Wrappedx402HTTPResourceServer(routes, x402.Newx402ResourceServer(opts...))
+// Newt402HTTPResourceServer creates a new HTTP resource server
+func Newt402HTTPResourceServer(routes RoutesConfig, opts ...t402.ResourceServerOption) *t402HTTPResourceServer {
+	return Wrappedt402HTTPResourceServer(routes, t402.Newt402ResourceServer(opts...))
 }
 
-// Wrappedx402HTTPResourceServer wraps an existing resource server with HTTP functionality.
-func Wrappedx402HTTPResourceServer(routes RoutesConfig, resourceServer *x402.X402ResourceServer) *x402HTTPResourceServer {
-	server := &x402HTTPResourceServer{
-		X402ResourceServer: resourceServer,
+// Wrappedt402HTTPResourceServer wraps an existing resource server with HTTP functionality.
+func Wrappedt402HTTPResourceServer(routes RoutesConfig, resourceServer *t402.T402ResourceServer) *t402HTTPResourceServer {
+	server := &t402HTTPResourceServer{
+		T402ResourceServer: resourceServer,
 		compiledRoutes:     []CompiledRoute{},
 	}
 
@@ -217,7 +217,7 @@ func Wrappedx402HTTPResourceServer(routes RoutesConfig, resourceServer *x402.X40
 // Returns:
 //
 //	Array of payment requirements (one per option)
-func (s *x402HTTPResourceServer) BuildPaymentRequirementsFromOptions(ctx context.Context, options []PaymentOption, reqCtx HTTPRequestContext) ([]types.PaymentRequirements, error) {
+func (s *t402HTTPResourceServer) BuildPaymentRequirementsFromOptions(ctx context.Context, options []PaymentOption, reqCtx HTTPRequestContext) ([]types.PaymentRequirements, error) {
 	allRequirements := make([]types.PaymentRequirements, 0)
 
 	for _, option := range options {
@@ -237,8 +237,8 @@ func (s *x402HTTPResourceServer) BuildPaymentRequirementsFromOptions(ctx context
 			return nil, fmt.Errorf("payTo must be string or DynamicPayToFunc, got %T", option.PayTo)
 		}
 
-		// Resolve Price (x402.Price or DynamicPriceFunc)
-		var resolvedPrice x402.Price
+		// Resolve Price (t402.Price or DynamicPriceFunc)
+		var resolvedPrice t402.Price
 		if priceFunc, ok := option.Price.(DynamicPriceFunc); ok {
 			// It's a function, call it
 			price, err := priceFunc(ctx, reqCtx)
@@ -252,7 +252,7 @@ func (s *x402HTTPResourceServer) BuildPaymentRequirementsFromOptions(ctx context
 		}
 
 		// Build resource config from this option
-		resourceConfig := x402.ResourceConfig{
+		resourceConfig := t402.ResourceConfig{
 			Scheme:            option.Scheme,
 			PayTo:             resolvedPayTo,
 			Price:             resolvedPrice,
@@ -273,7 +273,7 @@ func (s *x402HTTPResourceServer) BuildPaymentRequirementsFromOptions(ctx context
 }
 
 // ProcessHTTPRequest handles an HTTP request and returns processing result
-func (s *x402HTTPResourceServer) ProcessHTTPRequest(ctx context.Context, reqCtx HTTPRequestContext, paywallConfig *PaywallConfig) HTTPProcessResult {
+func (s *t402HTTPResourceServer) ProcessHTTPRequest(ctx context.Context, reqCtx HTTPRequestContext, paywallConfig *PaywallConfig) HTTPProcessResult {
 	// Find matching route
 	routeConfig := s.getRouteConfig(reqCtx.Path, reqCtx.Method)
 	if routeConfig == nil {
@@ -409,13 +409,13 @@ func (s *x402HTTPResourceServer) ProcessHTTPRequest(ctx context.Context, reqCtx 
 }
 
 // RequiresPayment checks if a request requires payment based on route configuration
-func (s *x402HTTPResourceServer) RequiresPayment(reqCtx HTTPRequestContext) bool {
+func (s *t402HTTPResourceServer) RequiresPayment(reqCtx HTTPRequestContext) bool {
 	routeConfig := s.getRouteConfig(reqCtx.Path, reqCtx.Method)
 	return routeConfig != nil
 }
 
 // ProcessSettlement handles settlement after successful response
-func (s *x402HTTPResourceServer) ProcessSettlement(ctx context.Context, payload types.PaymentPayload, requirements types.PaymentRequirements) *ProcessSettleResult {
+func (s *t402HTTPResourceServer) ProcessSettlement(ctx context.Context, payload types.PaymentPayload, requirements types.PaymentRequirements) *ProcessSettleResult {
 	// Settle payment (type-safe, no marshal needed)
 	settleResult, err := s.SettlePayment(ctx, payload, requirements)
 	if err != nil {
@@ -446,7 +446,7 @@ func (s *x402HTTPResourceServer) ProcessSettlement(ctx context.Context, payload 
 // ============================================================================
 
 // getRouteConfig finds matching route configuration
-func (s *x402HTTPResourceServer) getRouteConfig(path, method string) *RouteConfig {
+func (s *t402HTTPResourceServer) getRouteConfig(path, method string) *RouteConfig {
 	normalizedPath := normalizePath(path)
 	upperMethod := strings.ToUpper(method)
 
@@ -462,7 +462,7 @@ func (s *x402HTTPResourceServer) getRouteConfig(path, method string) *RouteConfi
 }
 
 // extractPaymentV2 extracts V2 payment from headers (V2 only)
-func (s *x402HTTPResourceServer) extractPaymentV2(adapter HTTPAdapter) (*types.PaymentPayload, error) {
+func (s *t402HTTPResourceServer) extractPaymentV2(adapter HTTPAdapter) (*types.PaymentPayload, error) {
 	// Check v2 header
 	header := adapter.GetHeader("PAYMENT-SIGNATURE")
 	if header == "" {
@@ -502,17 +502,17 @@ func (s *x402HTTPResourceServer) extractPaymentV2(adapter HTTPAdapter) (*types.P
 // extractPayment extracts payment from headers (legacy method, now calls extractPaymentV2)
 //
 //nolint:unused // Legacy method kept for API compatibility
-func (s *x402HTTPResourceServer) extractPayment(adapter HTTPAdapter) *x402.PaymentPayload {
+func (s *t402HTTPResourceServer) extractPayment(adapter HTTPAdapter) *t402.PaymentPayload {
 	payload, err := s.extractPaymentV2(adapter)
 	if err != nil || payload == nil {
 		return nil
 	}
 
 	// Convert V2 to generic PaymentPayload for compatibility
-	return &x402.PaymentPayload{
-		X402Version: payload.X402Version,
+	return &t402.PaymentPayload{
+		T402Version: payload.T402Version,
 		Payload:     payload.Payload,
-		Accepted:    x402.PaymentRequirements{}, // TODO: Convert
+		Accepted:    t402.PaymentRequirements{}, // TODO: Convert
 		Resource:    nil,
 		Extensions:  payload.Extensions,
 	}
@@ -524,7 +524,7 @@ func decodeBase64Header(header string) ([]byte, error) {
 }
 
 // isWebBrowser checks if request is from a web browser
-func (s *x402HTTPResourceServer) isWebBrowser(adapter HTTPAdapter) bool {
+func (s *t402HTTPResourceServer) isWebBrowser(adapter HTTPAdapter) bool {
 	accept := adapter.GetAcceptHeader()
 	userAgent := adapter.GetUserAgent()
 	return strings.Contains(accept, "text/html") && strings.Contains(userAgent, "Mozilla")
@@ -539,7 +539,7 @@ func (s *x402HTTPResourceServer) isWebBrowser(adapter HTTPAdapter) bool {
 //	paywallConfig: Optional paywall configuration
 //	customHTML: Optional custom HTML for the paywall
 //	unpaidResponse: Optional custom response for API clients (ignored for browser requests)
-func (s *x402HTTPResourceServer) createHTTPResponseV2(paymentRequired types.PaymentRequired, isWebBrowser bool, paywallConfig *PaywallConfig, customHTML string, unpaidResponse *UnpaidResponse) *HTTPResponseInstructions {
+func (s *t402HTTPResourceServer) createHTTPResponseV2(paymentRequired types.PaymentRequired, isWebBrowser bool, paywallConfig *PaywallConfig, customHTML string, unpaidResponse *UnpaidResponse) *HTTPResponseInstructions {
 	if isWebBrowser {
 		html := s.generatePaywallHTMLV2(paymentRequired, paywallConfig, customHTML)
 		return &HTTPResponseInstructions{
@@ -574,10 +574,10 @@ func (s *x402HTTPResourceServer) createHTTPResponseV2(paymentRequired types.Paym
 // createHTTPResponse creates response instructions (legacy method)
 //
 //nolint:unused // Legacy method kept for API compatibility
-func (s *x402HTTPResourceServer) createHTTPResponse(paymentRequired x402.PaymentRequired, isWebBrowser bool, paywallConfig *PaywallConfig, customHTML string) *HTTPResponseInstructions {
+func (s *t402HTTPResourceServer) createHTTPResponse(paymentRequired t402.PaymentRequired, isWebBrowser bool, paywallConfig *PaywallConfig, customHTML string) *HTTPResponseInstructions {
 	// Convert to V2 and call V2 method
 	v2Required := types.PaymentRequired{
-		X402Version: 2,
+		T402Version: 2,
 		Error:       paymentRequired.Error,
 		Resource:    nil, // TODO: convert
 		Extensions:  paymentRequired.Extensions,
@@ -586,30 +586,30 @@ func (s *x402HTTPResourceServer) createHTTPResponse(paymentRequired x402.Payment
 }
 
 // createSettlementHeaders creates settlement response headers
-func (s *x402HTTPResourceServer) createSettlementHeaders(response *x402.SettleResponse) map[string]string {
+func (s *t402HTTPResourceServer) createSettlementHeaders(response *t402.SettleResponse) map[string]string {
 	return map[string]string{
 		"PAYMENT-RESPONSE": encodePaymentResponseHeader(*response),
 	}
 }
 
 // generatePaywallHTMLV2 generates HTML paywall for V2 PaymentRequired
-func (s *x402HTTPResourceServer) generatePaywallHTMLV2(paymentRequired types.PaymentRequired, config *PaywallConfig, customHTML string) string {
+func (s *t402HTTPResourceServer) generatePaywallHTMLV2(paymentRequired types.PaymentRequired, config *PaywallConfig, customHTML string) string {
 	if customHTML != "" {
 		return customHTML
 	}
 
 	// Convert V2 to generic format to reuse existing HTML generation
-	genericRequired := x402.PaymentRequired{
-		X402Version: paymentRequired.X402Version,
+	genericRequired := t402.PaymentRequired{
+		T402Version: paymentRequired.T402Version,
 		Error:       paymentRequired.Error,
 		Resource:    nil,                          // Will convert
-		Accepts:     []x402.PaymentRequirements{}, // Will convert
+		Accepts:     []t402.PaymentRequirements{}, // Will convert
 		Extensions:  paymentRequired.Extensions,
 	}
 
 	// Convert resource
 	if paymentRequired.Resource != nil {
-		genericRequired.Resource = &x402.ResourceInfo{
+		genericRequired.Resource = &t402.ResourceInfo{
 			URL:         paymentRequired.Resource.URL,
 			Description: paymentRequired.Resource.Description,
 			MimeType:    paymentRequired.Resource.MimeType,
@@ -618,7 +618,7 @@ func (s *x402HTTPResourceServer) generatePaywallHTMLV2(paymentRequired types.Pay
 
 	// Convert accepts
 	for _, reqV2 := range paymentRequired.Accepts {
-		genericRequired.Accepts = append(genericRequired.Accepts, x402.PaymentRequirements{
+		genericRequired.Accepts = append(genericRequired.Accepts, t402.PaymentRequirements{
 			Scheme:  reqV2.Scheme,
 			Network: reqV2.Network,
 			Asset:   reqV2.Asset,
@@ -633,7 +633,7 @@ func (s *x402HTTPResourceServer) generatePaywallHTMLV2(paymentRequired types.Pay
 }
 
 // generatePaywallHTML generates HTML paywall for browsers
-func (s *x402HTTPResourceServer) generatePaywallHTML(paymentRequired x402.PaymentRequired, config *PaywallConfig, customHTML string) string {
+func (s *t402HTTPResourceServer) generatePaywallHTML(paymentRequired t402.PaymentRequired, config *PaywallConfig, customHTML string) string {
 	if customHTML != "" {
 		return customHTML
 	}
@@ -740,7 +740,7 @@ func (s *x402HTTPResourceServer) generatePaywallHTML(paymentRequired x402.Paymen
 }
 
 // getDisplayAmount extracts display amount from payment requirements
-func (s *x402HTTPResourceServer) getDisplayAmount(paymentRequired x402.PaymentRequired) float64 {
+func (s *t402HTTPResourceServer) getDisplayAmount(paymentRequired t402.PaymentRequired) float64 {
 	if len(paymentRequired.Accepts) > 0 {
 		firstReq := paymentRequired.Accepts[0]
 		// Check if amount field exists

@@ -1,15 +1,15 @@
 import type { Context } from "hono";
 import { Address, getAddress } from "viem";
 import { Address as SolanaAddress } from "@solana/kit";
-import { exact } from "x402/schemes";
+import { exact } from "t402/schemes";
 import {
   computeRoutePatterns,
   findMatchingPaymentRequirements,
   findMatchingRoute,
   processPriceToAtomicAmount,
   toJsonSafe,
-} from "x402/shared";
-import { getPaywallHtml } from "x402/paywall";
+} from "t402/shared";
+import { getPaywallHtml } from "t402/paywall";
 import {
   ERC20TokenAmount,
   FacilitatorConfig,
@@ -22,8 +22,8 @@ import {
   PaywallConfig,
   SupportedEVMNetworks,
   SupportedSVMNetworks,
-} from "x402/types";
-import { useFacilitator } from "x402/verify";
+} from "t402/types";
+import { useFacilitator } from "t402/verify";
 
 /**
  * Creates a payment middleware factory for Hono
@@ -43,7 +43,7 @@ import { useFacilitator } from "x402/verify";
  *     price: '$0.01', // USDC amount in dollars
  *     network: 'base-sepolia'
  *   },
- *   // Optional facilitator configuration. Defaults to x402.org/facilitator for testnet usage
+ *   // Optional facilitator configuration. Defaults to t402.org/facilitator for testnet usage
  * ));
  *
  * // Advanced configuration - Endpoint-specific payment requirements & custom facilitator
@@ -79,7 +79,7 @@ export function paymentMiddleware(
   paywall?: PaywallConfig,
 ) {
   const { verify, settle, supported } = useFacilitator(facilitator);
-  const x402Version = 1;
+  const t402Version = 1;
 
   // Pre-compile route patterns to regex and extract verbs
   const routePatterns = computeRoutePatterns(routes);
@@ -243,7 +243,7 @@ export function paymentMiddleware(
         {
           error: errorMessages?.paymentRequired || "X-PAYMENT header is required",
           accepts: paymentRequirements,
-          x402Version,
+          t402Version,
         },
         402,
       );
@@ -253,7 +253,7 @@ export function paymentMiddleware(
     let decodedPayment: PaymentPayload;
     try {
       decodedPayment = exact.evm.decodePayment(payment);
-      decodedPayment.x402Version = x402Version;
+      decodedPayment.t402Version = t402Version;
     } catch (error) {
       return c.json(
         {
@@ -261,7 +261,7 @@ export function paymentMiddleware(
             errorMessages?.invalidPayment ||
             (error instanceof Error ? error.message : "Invalid or malformed payment header"),
           accepts: paymentRequirements,
-          x402Version,
+          t402Version,
         },
         402,
       );
@@ -277,7 +277,7 @@ export function paymentMiddleware(
           error:
             errorMessages?.noMatchingRequirements || "Unable to find matching payment requirements",
           accepts: toJsonSafe(paymentRequirements),
-          x402Version,
+          t402Version,
         },
         402,
       );
@@ -292,7 +292,7 @@ export function paymentMiddleware(
             error: errorMessages?.verificationFailed || verification.invalidReason,
             accepts: paymentRequirements,
             payer: verification.payer,
-            x402Version,
+            t402Version,
           },
           402,
         );
@@ -305,7 +305,7 @@ export function paymentMiddleware(
             errorMessages?.verificationFailed ||
             (error instanceof Error ? error.message : "Payment verification failed"),
           accepts: paymentRequirements,
-          x402Version,
+          t402Version,
         },
         402,
       );
@@ -339,7 +339,7 @@ export function paymentMiddleware(
             errorMessages?.settlementFailed ||
             (error instanceof Error ? error.message : "Failed to settle payment"),
           accepts: paymentRequirements,
-          x402Version,
+          t402Version,
         },
         402,
       );
@@ -356,5 +356,5 @@ export type {
   Resource,
   RouteConfig,
   RoutesConfig,
-} from "x402/types";
+} from "t402/types";
 export type { Address as SolanaAddress } from "@solana/kit";

@@ -41,9 +41,9 @@ function safeClone<T>(obj: T): T {
 export function ensureValidAmount(paymentRequirements: PaymentRequirements): PaymentRequirements {
   const updatedRequirements = safeClone(paymentRequirements);
 
-  if (window.x402?.amount) {
+  if (window.t402?.amount) {
     try {
-      const amountInBaseUnits = Math.round(window.x402.amount * 1_000_000);
+      const amountInBaseUnits = Math.round(window.t402.amount * 1_000_000);
       updatedRequirements.maxAmountRequired = amountInBaseUnits.toString();
     } catch (error) {
       console.error("Failed to parse amount:", error);
@@ -67,7 +67,7 @@ export function ensureValidAmount(paymentRequirements: PaymentRequirements): Pay
  * @returns The session token
  */
 export const generateOnrampSessionToken = async (address: string): Promise<string | undefined> => {
-  const endpoint = window.x402?.sessionTokenEndpoint;
+  const endpoint = window.t402?.sessionTokenEndpoint;
   if (!endpoint) {
     return undefined;
   }

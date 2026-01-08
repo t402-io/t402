@@ -1,13 +1,13 @@
 [project]
-name = "x402-flask-e2e"
+name = "t402-flask-e2e"
 version = "0.1.0"
-description = "Python Flask server for x402 e2e tests"
+description = "Python Flask server for t402 e2e tests"
 requires-python = ">=3.10"
 dependencies = [
     "flask>=3.0.0",
     "python-dotenv>=1.0.0",
     "cdp-sdk>=1.15.0",
-    "x402"
+    "t402"
 ]
 
 [build-system]
@@ -24,4 +24,4 @@ allow-direct-references = true
 package = false
 
 [tool.uv.sources]
-x402 = { path = "../../../../python/x402", editable = true } 
+t402 = { path = "../../../../python/t402", editable = true } 
