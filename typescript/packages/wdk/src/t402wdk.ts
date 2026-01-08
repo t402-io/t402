@@ -19,7 +19,9 @@ import type {
   TokenBalance,
   BridgeParams,
   BridgeResult,
+  T402WDKOptions,
 } from "./types.js";
+import { BalanceCache, type BalanceCacheConfig, type BalanceCacheStats } from "./cache.js";
 import {
   normalizeChainConfig,
   CHAIN_TOKENS,
@@ -67,9 +69,11 @@ import {
 export class T402WDK {
   private _wdk: WDKInstance | null = null;
   private _config: T402WDKConfig;
+  private _options: T402WDKOptions;
   private _normalizedChains: Map<string, NormalizedChainConfig> = new Map();
   private _seedPhrase: string;
   private _signerCache: Map<string, WDKSigner> = new Map();
+  private _balanceCache: BalanceCache;
   private _initializationError: Error | null = null;
 
   // WDK module references (set via registerWDK)
@@ -161,9 +165,10 @@ export class T402WDK {
    *
    * @param seedPhrase - BIP-39 mnemonic seed phrase
    * @param config - Chain configuration (RPC endpoints)
+   * @param options - Additional options (cache configuration, etc.)
    * @throws {WDKInitializationError} If seed phrase is invalid
    */
-  constructor(seedPhrase: string, config: T402WDKConfig = {}) {
+  constructor(seedPhrase: string, config: T402WDKConfig = {}, options: T402WDKOptions = {}) {
     // Validate seed phrase
     if (!seedPhrase || typeof seedPhrase !== "string") {
       throw new WDKInitializationError("Seed phrase is required and must be a string");
@@ -181,6 +186,10 @@ export class T402WDK {
 
     this._seedPhrase = seedPhrase;
     this._config = config;
+    this._options = options;
+
+    // Initialize balance cache
+    this._balanceCache = new BalanceCache(options.cache);
 
     // Normalize chain configurations
     for (const [chain, chainConfig] of Object.entries(config)) {
@@ -415,6 +424,8 @@ export class T402WDK {
   /**
    * Get USDT0 balance for a chain
    *
+   * Uses cache if enabled to reduce RPC calls.
+   *
    * @throws {BalanceError} If balance fetch fails
    */
   async getUsdt0Balance(chain: string, accountIndex = 0): Promise<bigint> {
@@ -425,7 +436,14 @@ export class T402WDK {
 
     try {
       const signer = await this.getSigner(chain, accountIndex);
-      return await signer.getTokenBalance(usdt0Address);
+      const address = signer.address;
+
+      return await this._balanceCache.getOrFetchTokenBalance(
+        chain,
+        usdt0Address,
+        address,
+        async () => signer.getTokenBalance(usdt0Address),
+      );
     } catch (error) {
       // Return 0 for balance errors (chain might not support USDT0)
       if (isWDKError(error) && error.code === WDKErrorCode.TOKEN_BALANCE_FETCH_FAILED) {
@@ -438,6 +456,8 @@ export class T402WDK {
   /**
    * Get USDC balance for a chain
    *
+   * Uses cache if enabled to reduce RPC calls.
+   *
    * @throws {BalanceError} If balance fetch fails
    */
   async getUsdcBalance(chain: string, accountIndex = 0): Promise<bigint> {
@@ -448,7 +468,14 @@ export class T402WDK {
 
     try {
       const signer = await this.getSigner(chain, accountIndex);
-      return await signer.getTokenBalance(usdcAddress);
+      const address = signer.address;
+
+      return await this._balanceCache.getOrFetchTokenBalance(
+        chain,
+        usdcAddress,
+        address,
+        async () => signer.getTokenBalance(usdcAddress),
+      );
     } catch (error) {
       // Return 0 for balance errors (chain might not support USDC)
       if (isWDKError(error) && error.code === WDKErrorCode.TOKEN_BALANCE_FETCH_FAILED) {
@@ -460,6 +487,8 @@ export class T402WDK {
 
   /**
    * Get all token balances for a chain
+   *
+   * Uses cache if enabled to reduce RPC calls.
    *
    * @throws {ChainError} If chain is not configured
    * @throws {BalanceError} If balance fetch fails
@@ -476,12 +505,18 @@ export class T402WDK {
 
     try {
       const signer = await this.getSigner(chain, accountIndex);
+      const address = signer.address;
       const tokens = CHAIN_TOKENS[chain] || [];
 
-      // Fetch all token balances in parallel with error handling
+      // Fetch all token balances in parallel with caching and error handling
       const tokenBalanceResults = await Promise.allSettled(
         tokens.map(async (token) => {
-          const balance = await signer.getTokenBalance(token.address);
+          const balance = await this._balanceCache.getOrFetchTokenBalance(
+            chain,
+            token.address,
+            address,
+            async () => signer.getTokenBalance(token.address),
+          );
           return {
             token: token.address,
             symbol: token.symbol,
@@ -508,10 +543,14 @@ export class T402WDK {
         };
       });
 
-      // Get native balance
+      // Get native balance with caching
       let nativeBalance: bigint;
       try {
-        nativeBalance = await signer.getBalance();
+        nativeBalance = await this._balanceCache.getOrFetchNativeBalance(
+          chain,
+          address,
+          async () => signer.getBalance(),
+        );
       } catch {
         nativeBalance = 0n;
       }
@@ -779,6 +818,68 @@ export class T402WDK {
       return [];
     }
     return getBridgeableChains().filter((chain) => chain !== fromChain);
+  }
+
+  // ========== Cache Management ==========
+
+  /**
+   * Check if balance caching is enabled
+   */
+  get isCacheEnabled(): boolean {
+    return this._balanceCache.enabled;
+  }
+
+  /**
+   * Get cache configuration
+   */
+  getCacheConfig(): BalanceCacheConfig {
+    return this._balanceCache.config;
+  }
+
+  /**
+   * Get cache statistics
+   */
+  getCacheStats(): BalanceCacheStats {
+    return this._balanceCache.getStats();
+  }
+
+  /**
+   * Invalidate all cached balances
+   *
+   * Call this after sending transactions to ensure fresh balance data.
+   */
+  invalidateBalanceCache(): void {
+    this._balanceCache.clear();
+  }
+
+  /**
+   * Invalidate cached balances for a specific chain
+   *
+   * @param chain - Chain name to invalidate
+   * @returns Number of cache entries invalidated
+   */
+  invalidateChainCache(chain: string): number {
+    return this._balanceCache.invalidateChain(chain);
+  }
+
+  /**
+   * Invalidate cached balances for a specific address
+   *
+   * @param address - Address to invalidate (case-insensitive)
+   * @returns Number of cache entries invalidated
+   */
+  invalidateAddressCache(address: string): number {
+    return this._balanceCache.invalidateAddress(address);
+  }
+
+  /**
+   * Dispose of cache resources
+   *
+   * Call this when the T402WDK instance is no longer needed.
+   */
+  dispose(): void {
+    this._balanceCache.dispose();
+    this._signerCache.clear();
   }
 }
 
