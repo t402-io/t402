@@ -84,3 +84,54 @@ export type {
   BridgeTransaction,
   BridgeSigner,
 } from "./bridge/index.js";
+
+// Export ERC-4337 Account Abstraction module
+export {
+  // Builder
+  UserOpBuilder,
+  createUserOpBuilder,
+  // Bundler
+  BundlerClient,
+  BundlerError,
+  createBundlerClient,
+  // Paymaster
+  PaymasterClient,
+  createPaymasterClient,
+  encodePaymasterAndData,
+  decodePaymasterAndData,
+  // T402 Integration
+  GaslessT402Client,
+  createGaslessT402Client,
+  // Constants
+  ENTRYPOINT_V07_ADDRESS,
+  ENTRYPOINT_V06_ADDRESS,
+  DEFAULT_GAS_LIMITS,
+  ENTRYPOINT_V07_ABI,
+  ACCOUNT_ABI,
+  BUNDLER_METHODS,
+  PaymasterType,
+  packAccountGasLimits,
+  unpackAccountGasLimits,
+  packGasFees,
+  unpackGasFees,
+} from "./erc4337/index.js";
+
+// Export ERC-4337 types
+export type {
+  UserOperation,
+  PackedUserOperation,
+  PaymasterData,
+  GasEstimate,
+  UserOperationReceipt,
+  UserOperationResult,
+  BundlerConfig,
+  PaymasterConfig,
+  SmartAccountSigner,
+  UserOpBuilderConfig,
+  TransactionIntent,
+  UserOpBuilderOptions,
+  PaymasterResponse,
+  SponsorRequest,
+  GaslessPaymentParams,
+  GaslessClientConfig,
+} from "./erc4337/index.js";
