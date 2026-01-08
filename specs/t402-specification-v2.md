@@ -31,7 +31,7 @@ t402 is made up of three core components:
 
 t402 is an open payment standard that enables clients to pay for external resources. The protocol defines standardized message formats and payment flows that can be implemented over various transport layers, providing a standardized mechanism for payments across different payment schemes, networks and transport layers.
 
-This specification is based on the t402 protocol implementation and documentation available in the [Coinbase t402 repository](https://github.com/t402-io/t402). It aims to provide a comprehensive and implementation-agnostic specification for the t402 protocol.
+This specification is based on the t402 protocol implementation and documentation available in the [T402 repository](https://github.com/t402-io/t402). It aims to provide a comprehensive and implementation-agnostic specification for the t402 protocol.
 
 **2. Core Payment Flow**
 

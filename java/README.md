@@ -32,7 +32,7 @@ This library provides a Java implementation of the `t402` protocol, with the fol
 
 - `**PaymentFilter**`: A servlet filter that authenticates payments and rejects unauthorized requests
 - `**FacilitatorClient**`: A client for verifying and settling payments with a facilitator service
-- `**X402HttpClient**`: A convenience HTTP client for making payment-enabled requests
+- `**T402HttpClient**`: A convenience HTTP client for making payment-enabled requests
 
 ## Compatibility
 
@@ -113,7 +113,7 @@ public FilterRegistration paymentFilter(ServletContext servletContext) {
 To make HTTP requests that include payment proofs:
 
 ```java
-import io.t402.client.X402HttpClient;
+import io.t402.client.T402HttpClient;
 import io.t402.crypto.CryptoSigner;
 
 import java.math.BigInteger;
@@ -132,7 +132,7 @@ CryptoSigner signer = new CryptoSigner() {
 };
 
 // 2. Create the client
-X402HttpClient client = new X402HttpClient(signer);
+T402HttpClient client = new T402HttpClient(signer);
 
 // 3. Make a GET request with payment
 BigInteger amount = BigInteger.valueOf(1000);
