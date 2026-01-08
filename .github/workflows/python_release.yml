@@ -81,11 +81,10 @@ jobs:
     needs: build
     if: startsWith(github.ref, 'refs/tags/python/v') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    environment:
-      name: pypi
-      url: https://pypi.org/project/t402/
+    environment: ${{ github.event.inputs.dry_run != 'true' && 'pypi' || '' }}
     permissions:
       id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
