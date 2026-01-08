@@ -1,0 +1,169 @@
+name: NPM Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      package:
+        description: "Package to publish (all, core, evm, svm, ton, wdk, extensions, http)"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - core
+          - evm
+          - svm
+          - ton
+          - wdk
+          - extensions
+          - http
+      dry_run:
+        description: "Dry run (no actual publish)"
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: ./typescript
+
+      - name: Install dependencies
+        working-directory: ./typescript
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests
+        working-directory: ./typescript
+        run: pnpm test
+
+      - name: Run linting
+        working-directory: ./typescript
+        run: pnpm lint:check
+
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: ./typescript
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        working-directory: ./typescript
+        run: pnpm install --frozen-lockfile
+
+      - name: Build all packages
+        working-directory: ./typescript
+        run: pnpm build
+
+      - name: Publish @t402/core
+        if: ${{ github.event.inputs.package == 'all' || github.event.inputs.package == 'core' || github.event_name == 'push' }}
+        working-directory: ./typescript/packages/core
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
+            pnpm publish --access public --no-git-checks --dry-run
+          else
+            pnpm publish --access public --no-git-checks
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @t402/evm
+        if: ${{ github.event.inputs.package == 'all' || github.event.inputs.package == 'evm' || github.event_name == 'push' }}
+        working-directory: ./typescript/packages/mechanisms/evm
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
+            pnpm publish --access public --no-git-checks --dry-run
+          else
+            pnpm publish --access public --no-git-checks
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @t402/svm
+        if: ${{ github.event.inputs.package == 'all' || github.event.inputs.package == 'svm' || github.event_name == 'push' }}
+        working-directory: ./typescript/packages/mechanisms/svm
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
+            pnpm publish --access public --no-git-checks --dry-run
+          else
+            pnpm publish --access public --no-git-checks
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @t402/ton
+        if: ${{ github.event.inputs.package == 'all' || github.event.inputs.package == 'ton' || github.event_name == 'push' }}
+        working-directory: ./typescript/packages/mechanisms/ton
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
+            pnpm publish --access public --no-git-checks --dry-run
+          else
+            pnpm publish --access public --no-git-checks
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @t402/wdk
+        if: ${{ github.event.inputs.package == 'all' || github.event.inputs.package == 'wdk' || github.event_name == 'push' }}
+        working-directory: ./typescript/packages/wdk
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
+            pnpm publish --access public --no-git-checks --dry-run
+          else
+            pnpm publish --access public --no-git-checks
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @t402/extensions
+        if: ${{ github.event.inputs.package == 'all' || github.event.inputs.package == 'extensions' || github.event_name == 'push' }}
+        working-directory: ./typescript/packages/extensions
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
+            pnpm publish --access public --no-git-checks --dry-run
+          else
+            pnpm publish --access public --no-git-checks
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @t402/http
+        if: ${{ github.event.inputs.package == 'all' || github.event.inputs.package == 'http' || github.event_name == 'push' }}
+        working-directory: ./typescript/packages/http
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
+            pnpm publish --access public --no-git-checks --dry-run
+          else
+            pnpm publish --access public --no-git-checks
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
