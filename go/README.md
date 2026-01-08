@@ -9,7 +9,7 @@ t402 is a protocol that enables HTTP resources to require cryptocurrency payment
 ## Installation
 
 ```bash
-go get github.com/awesome-doge/t402/go
+go get github.com/t402-io/t402/go
 ```
 
 ## What This Package Exports
@@ -186,7 +186,7 @@ For payment processing services that verify and settle payments.
 ## Package Structure
 
 ```
-github.com/awesome-doge/t402/go
+github.com/t402-io/t402/go
 │
 ├── Core (framework-agnostic)
 │   ├── client.go              - t402.X402Client

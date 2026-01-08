@@ -132,7 +132,7 @@ Each language SDK defines interfaces that chain mechanisms must implement:
 - `SchemeNetworkServer` - Validates payment requirements  
 - `SchemeNetworkFacilitator` - Verifies and settles payments
 
-**Go** (`github.com/coinbase/t402/go`):
+**Go** (`github.com/t402-io/t402/go`):
 - `ClientScheme` - Signs payment payloads
 - `ServerScheme` - Validates payment requirements
 - `FacilitatorScheme` - Verifies and settles payments

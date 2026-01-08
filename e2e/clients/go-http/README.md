@@ -24,12 +24,12 @@ This client demonstrates and tests the Go t402 HTTP client with both EVM and SVM
 
 ```go
 import (
-    t402 "github.com/coinbase/t402/go"
-    t402http "github.com/coinbase/t402/go/http"
-    "github.com/coinbase/t402/go/mechanisms/evm"
-    evmv1 "github.com/coinbase/t402/go/mechanisms/evm/exact/v1"
-    "github.com/coinbase/t402/go/mechanisms/svm"
-    svmv1 "github.com/coinbase/t402/go/mechanisms/svm/exact/v1"
+    t402 "github.com/t402-io/t402/go"
+    t402http "github.com/t402-io/t402/go/http"
+    "github.com/t402-io/t402/go/mechanisms/evm"
+    evmv1 "github.com/t402-io/t402/go/mechanisms/evm/exact/v1"
+    "github.com/t402-io/t402/go/mechanisms/svm"
+    svmv1 "github.com/t402-io/t402/go/mechanisms/svm/exact/v1"
 )
 
 // Create t402 client with direct registration
@@ -135,9 +135,9 @@ export SVM_PRIVATE_KEY="..."
 
 ## Dependencies
 
-- `github.com/coinbase/t402/go` - Core t402 protocol
-- `github.com/coinbase/t402/go/http` - HTTP integration
-- `github.com/coinbase/t402/go/mechanisms/evm` - EVM mechanisms
-- `github.com/coinbase/t402/go/mechanisms/svm` - SVM mechanisms
+- `github.com/t402-io/t402/go` - Core t402 protocol
+- `github.com/t402-io/t402/go/http` - HTTP integration
+- `github.com/t402-io/t402/go/mechanisms/evm` - EVM mechanisms
+- `github.com/t402-io/t402/go/mechanisms/svm` - SVM mechanisms
 - `github.com/ethereum/go-ethereum` - Ethereum Go library
 - `github.com/gagliardetto/solana-go` - Solana Go library

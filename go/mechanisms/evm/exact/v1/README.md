@@ -16,8 +16,8 @@ This package contains the V1 implementation of the EVM mechanism for t402.
 
 ```go
 import (
-    t402 "github.com/awesome-doge/t402/go"
-    evmv1 "github.com/awesome-doge/t402/go/mechanisms/evm/exact/v1"
+    t402 "github.com/t402-io/t402/go"
+    evmv1 "github.com/t402-io/t402/go/mechanisms/evm/exact/v1"
 )
 
 // Register V1 client

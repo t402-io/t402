@@ -29,7 +29,7 @@ Client → Resource Server → Facilitator → Network
 ### Installation
 
 ```bash
-go get github.com/awesome-doge/t402/go
+go get github.com/t402-io/t402/go
 ```
 
 ### Basic Facilitator Server
@@ -39,8 +39,8 @@ package main
 
 import (
     "github.com/gin-gonic/gin"
-    t402 "github.com/awesome-doge/t402/go"
-    evm "github.com/awesome-doge/t402/go/mechanisms/evm/exact/facilitator"
+    t402 "github.com/t402-io/t402/go"
+    evm "github.com/t402-io/t402/go/mechanisms/evm/exact/facilitator"
 )
 
 func main() {

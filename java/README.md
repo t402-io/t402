@@ -1,10 +1,10 @@
 # t402 Java
 
-[![Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen.svg)](https://github.com/coinbase/t402/java)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/coinbase/t402/blob/main/LICENSE)
-[![Java Version](https://img.shields.io/badge/java-17%2B-orange)](https://github.com/coinbase/t402/java)
+[![Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen.svg)](https://github.com/t402-io/t402/java)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/t402-io/t402/blob/main/LICENSE)
+[![Java Version](https://img.shields.io/badge/java-17%2B-orange)](https://github.com/t402-io/t402/java)
 
-Java implementation of [t402](https://github.com/coinbase/t402)
+Java implementation of [t402](https://github.com/t402-io/t402)
 
 ## Quick Start
 
@@ -47,7 +47,7 @@ To use this library, you need to build and install it locally:
 
 ```bash
 # Clone the repository
-git clone https://github.com/coinbase/t402.git
+git clone https://github.com/t402-io/t402.git
 cd t402/java
 
 # Build and install to your local Maven repository
@@ -58,7 +58,7 @@ Then add the dependency to your Maven project:
 
 ```xml
 <dependency>
-    <groupId>com.coinbase</groupId>
+    <groupId>io.t402</groupId>
     <artifactId>t402</artifactId>
     <version>0.1.0-SNAPSHOT</version>
 </dependency>
@@ -71,8 +71,8 @@ Then add the dependency to your Maven project:
 Integrate the `t402` filter into your servlet-based application to require payment for specific paths:
 
 ```java
-import com.coinbase.t402.server.PaymentFilter;
-import com.coinbase.t402.client.HttpFacilitatorClient;
+import io.t402.server.PaymentFilter;
+import io.t402.client.HttpFacilitatorClient;
 
 import java.math.BigInteger;
 import java.util.Map;
@@ -113,8 +113,8 @@ public FilterRegistration paymentFilter(ServletContext servletContext) {
 To make HTTP requests that include payment proofs:
 
 ```java
-import com.coinbase.t402.client.X402HttpClient;
-import com.coinbase.t402.crypto.CryptoSigner;
+import io.t402.client.X402HttpClient;
+import io.t402.crypto.CryptoSigner;
 
 import java.math.BigInteger;
 import java.net.URI;
@@ -149,8 +149,8 @@ System.out.println("Response: " + response.body());
 Here's a complete example of a Spring Boot application with a paid joke API:
 
 ```java
-import com.coinbase.t402.server.PaymentFilter;
-import com.coinbase.t402.client.HttpFacilitatorClient;
+import io.t402.server.PaymentFilter;
+import io.t402.client.HttpFacilitatorClient;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;

@@ -11,10 +11,10 @@ import (
 	"strings"
 	"time"
 
-	t402 "github.com/coinbase/t402/go"
-	"github.com/coinbase/t402/go/types"
-	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/client"
-	evmsigners "github.com/coinbase/t402/go/signers/evm"
+	t402 "github.com/t402-io/t402/go"
+	"github.com/t402-io/t402/go/types"
+	evm "github.com/t402-io/t402/go/mechanisms/evm/exact/client"
+	evmsigners "github.com/t402-io/t402/go/signers/evm"
 	"github.com/joho/godotenv"
 )
 

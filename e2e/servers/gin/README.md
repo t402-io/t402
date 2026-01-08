@@ -23,12 +23,12 @@ This server demonstrates and tests the t402 Gin middleware with both EVM and SVM
 ```go
 import (
     ginfw "github.com/gin-gonic/gin"
-    t402 "github.com/coinbase/t402/go"
-    t402http "github.com/coinbase/t402/go/http"
-    ginmw "github.com/coinbase/t402/go/http/gin"
-    evm "github.com/coinbase/t402/go/mechanisms/evm/exact/server"
-    svm "github.com/coinbase/t402/go/mechanisms/svm/exact/server"
-    "github.com/coinbase/t402/go/extensions/bazaar"
+    t402 "github.com/t402-io/t402/go"
+    t402http "github.com/t402-io/t402/go/http"
+    ginmw "github.com/t402-io/t402/go/http/gin"
+    evm "github.com/t402-io/t402/go/mechanisms/evm/exact/server"
+    svm "github.com/t402-io/t402/go/mechanisms/svm/exact/server"
+    "github.com/t402-io/t402/go/extensions/bazaar"
 )
 
 // Create Gin router
@@ -173,12 +173,12 @@ Content-Type: application/json
 
 ## Dependencies
 
-- `github.com/coinbase/t402/go` - Core t402
-- `github.com/coinbase/t402/go/http` - HTTP integration
-- `github.com/coinbase/t402/go/http/gin` - Gin middleware
-- `github.com/coinbase/t402/go/mechanisms/evm` - EVM server
-- `github.com/coinbase/t402/go/mechanisms/svm` - SVM server
-- `github.com/coinbase/t402/go/extensions/bazaar` - Discovery extension
+- `github.com/t402-io/t402/go` - Core t402
+- `github.com/t402-io/t402/go/http` - HTTP integration
+- `github.com/t402-io/t402/go/http/gin` - Gin middleware
+- `github.com/t402-io/t402/go/mechanisms/evm` - EVM server
+- `github.com/t402-io/t402/go/mechanisms/svm` - SVM server
+- `github.com/t402-io/t402/go/extensions/bazaar` - Discovery extension
 - `github.com/gin-gonic/gin` - HTTP framework
 
 ## Implementation Highlights

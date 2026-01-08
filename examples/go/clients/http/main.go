@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	t402 "github.com/coinbase/t402/go"
+	t402 "github.com/t402-io/t402/go"
 	"github.com/joho/godotenv"
 )
 

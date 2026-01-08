@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	t402 "github.com/coinbase/t402/go"
-	t402http "github.com/coinbase/t402/go/http"
-	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/client"
-	evmsigners "github.com/coinbase/t402/go/signers/evm"
+	t402 "github.com/t402-io/t402/go"
+	t402http "github.com/t402-io/t402/go/http"
+	evm "github.com/t402-io/t402/go/mechanisms/evm/exact/client"
+	evmsigners "github.com/t402-io/t402/go/signers/evm"
 )
 
 /**

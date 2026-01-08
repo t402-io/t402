@@ -1,11 +1,11 @@
 package main
 
 import (
-	t402 "github.com/coinbase/t402/go"
-	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/client"
-	svm "github.com/coinbase/t402/go/mechanisms/svm/exact/client"
-	evmsigners "github.com/coinbase/t402/go/signers/evm"
-	svmsigners "github.com/coinbase/t402/go/signers/svm"
+	t402 "github.com/t402-io/t402/go"
+	evm "github.com/t402-io/t402/go/mechanisms/evm/exact/client"
+	svm "github.com/t402-io/t402/go/mechanisms/svm/exact/client"
+	evmsigners "github.com/t402-io/t402/go/signers/evm"
+	svmsigners "github.com/t402-io/t402/go/signers/svm"
 )
 
 /**
