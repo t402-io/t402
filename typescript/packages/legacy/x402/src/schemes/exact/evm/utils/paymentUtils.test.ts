@@ -21,7 +21,7 @@ const defaultEvmNetwork = SupportedEVMNetworks[0] as (typeof SupportedEVMNetwork
 const defaultSvmNetwork = SupportedSVMNetworks[0] as (typeof SupportedSVMNetworks)[number];
 
 const validEvmPayment: PaymentPayload = {
-  x402Version: 1,
+  t402Version: 1,
   scheme: "exact",
   network: defaultEvmNetwork,
   payload: validEvmPayload,
@@ -34,7 +34,7 @@ const validSvmPayload: ExactSvmPayload = {
 
 // valid SVM payment payload
 const validSvmPayment: PaymentPayload = {
-  x402Version: 1,
+  t402Version: 1,
   scheme: "exact",
   network: defaultSvmNetwork,
   payload: validSvmPayload,

@@ -1,10 +1,10 @@
-# x402 Go Client Documentation
+# t402 Go Client Documentation
 
-This guide covers how to build payment-enabled clients in Go using the x402 package.
+This guide covers how to build payment-enabled clients in Go using the t402 package.
 
 ## Overview
 
-An **x402 client** is an application that makes HTTP requests to payment-protected resources. The client automatically:
+An **t402 client** is an application that makes HTTP requests to payment-protected resources. The client automatically:
 
 1. Detects when a resource requires payment (402 response)
 2. Creates a payment payload using registered mechanisms
@@ -16,7 +16,7 @@ An **x402 client** is an application that makes HTTP requests to payment-protect
 ### Installation
 
 ```bash
-go get github.com/coinbase/x402/go
+go get github.com/coinbase/t402/go
 ```
 
 ### Basic HTTP Client
@@ -27,24 +27,24 @@ package main
 import (
     "net/http"
     
-    x402 "github.com/coinbase/x402/go"
-    x402http "github.com/coinbase/x402/go/http"
-    evm "github.com/coinbase/x402/go/mechanisms/evm/exact/client"
-    evmsigners "github.com/coinbase/x402/go/signers/evm"
+    t402 "github.com/coinbase/t402/go"
+    t402http "github.com/coinbase/t402/go/http"
+    evm "github.com/coinbase/t402/go/mechanisms/evm/exact/client"
+    evmsigners "github.com/coinbase/t402/go/signers/evm"
 )
 
 func main() {
     // 1. Create signer from private key
     signer, _ := evmsigners.NewClientSignerFromPrivateKey("0x...")
     
-    // 2. Create x402 client and register schemes
-    client := x402.Newx402Client().
+    // 2. Create t402 client and register schemes
+    client := t402.Newt402Client().
         Register("eip155:*", evm.NewExactEvmScheme(signer))
     
     // 3. Wrap HTTP client
-    httpClient := x402http.WrapHTTPClientWithPayment(
+    httpClient := t402http.WrapHTTPClientWithPayment(
         http.DefaultClient,
-        x402http.Newx402HTTPClient(client),
+        t402http.Newt402HTTPClient(client),
     )
     
     // 4. Make requests - payments handled automatically
@@ -62,7 +62,7 @@ func main() {
 #### EVM Signer
 
 ```go
-import evmsigners "github.com/coinbase/x402/go/signers/evm"
+import evmsigners "github.com/coinbase/t402/go/signers/evm"
 
 signer, err := evmsigners.NewClientSignerFromPrivateKey("0x1234...")
 if err != nil {
@@ -75,7 +75,7 @@ fmt.Println("Address:", signer.Address())
 #### SVM Signer
 
 ```go
-import svmsigners "github.com/coinbase/x402/go/signers/svm"
+import svmsigners "github.com/coinbase/t402/go/signers/svm"
 
 signer, err := svmsigners.NewClientSignerFromPrivateKey("5J7W...")
 if err != nil {
@@ -85,14 +85,14 @@ if err != nil {
 fmt.Println("Address:", signer.Address())
 ```
 
-### 2. Client Core (x402.X402Client)
+### 2. Client Core (t402.X402Client)
 
 The core client manages payment scheme registration and payload creation.
 
 **Key Methods:**
 
 ```go
-client := x402.Newx402Client()
+client := t402.Newt402Client()
 
 // Register payment schemes for networks
 client.Register(network, schemeClient)
@@ -143,11 +143,11 @@ client.
 The HTTP layer adds automatic payment handling to standard HTTP clients.
 
 ```go
-// Create HTTP-aware x402 client
-httpClient := x402http.Newx402HTTPClient(client)
+// Create HTTP-aware t402 client
+httpClient := t402http.Newt402HTTPClient(client)
 
 // Wrap any http.Client
-wrappedClient := x402http.WrapHTTPClientWithPayment(http.DefaultClient, httpClient)
+wrappedClient := t402http.WrapHTTPClientWithPayment(http.DefaultClient, httpClient)
 
 // Make requests
 resp, err := wrappedClient.Get(url)
@@ -169,21 +169,21 @@ Hooks allow you to run custom logic during payment creation.
 ### Available Hooks
 
 ```go
-client.OnBeforePaymentCreation(func(ctx x402.PaymentCreationContext) (*x402.BeforePaymentCreationResult, error) {
+client.OnBeforePaymentCreation(func(ctx t402.PaymentCreationContext) (*t402.BeforePaymentCreationResult, error) {
     // Called before payment creation
     // Can abort by returning: &BeforePaymentCreationResult{Abort: true, Reason: "..."}
     fmt.Printf("Creating payment for %s\n", ctx.Requirements.Network)
     return nil, nil
 })
 
-client.OnAfterPaymentCreation(func(ctx x402.PaymentCreationResultContext) error {
+client.OnAfterPaymentCreation(func(ctx t402.PaymentCreationResultContext) error {
     // Called after successful payment creation
     // Use for logging, metrics, etc.
     fmt.Printf("Payment created: %d bytes\n", len(ctx.PayloadBytes))
     return nil
 })
 
-client.OnPaymentCreationFailure(func(ctx x402.PaymentCreationFailureContext) (*x402.PaymentCreationFailureResult, error) {
+client.OnPaymentCreationFailure(func(ctx t402.PaymentCreationFailureContext) (*t402.PaymentCreationFailureResult, error) {
     // Called when payment creation fails
     // Can recover by returning: &PaymentCreationFailureResult{Recovered: true, Payload: ...}
     fmt.Printf("Payment failed: %v\n", ctx.Error)
@@ -236,7 +236,7 @@ Support multiple blockchains with different signers:
 evmSigner, _ := evmsigners.NewClientSignerFromPrivateKey(evmKey)
 svmSigner, _ := svmsigners.NewClientSignerFromPrivateKey(svmKey)
 
-client := x402.Newx402Client().
+client := t402.Newt402Client().
     Register("eip155:*", evm.NewExactEvmScheme(evmSigner)).
     Register("solana:*", svm.NewExactEvmScheme(svmSigner))
 ```
@@ -253,9 +253,9 @@ customTransport := &RetryTransport{
 }
 
 // Wrap with payment handling
-httpClient := x402http.WrapHTTPClientWithPayment(
+httpClient := t402http.WrapHTTPClientWithPayment(
     &http.Client{Transport: customTransport},
-    x402http.Newx402HTTPClient(client),
+    t402http.Newt402HTTPClient(client),
 )
 ```
 
@@ -285,11 +285,11 @@ wg.Wait()
 
 ## API Reference
 
-### x402.X402Client
+### t402.X402Client
 
 **Constructor:**
 ```go
-func Newx402Client() *X402Client
+func Newt402Client() *X402Client
 ```
 
 **Registration Methods:**
@@ -311,23 +311,23 @@ func (c *X402Client) CreatePaymentPayload(ctx context.Context, requirements Paym
 func (c *X402Client) SelectPaymentRequirements(accepts []PaymentRequirements) (PaymentRequirements, error)
 ```
 
-### x402http.HTTPClient
+### t402http.HTTPClient
 
 **Constructor:**
 ```go
-func Newx402HTTPClient(client *X402Client) *x402HTTPClient
+func Newt402HTTPClient(client *X402Client) *t402HTTPClient
 ```
 
 **Wrapper:**
 ```go
-func WrapHTTPClientWithPayment(client *http.Client, x402Client *x402HTTPClient) *http.Client
+func WrapHTTPClientWithPayment(client *http.Client, t402Client *t402HTTPClient) *http.Client
 ```
 
 **Convenience Methods:**
 ```go
-func (c *x402HTTPClient) GetWithPayment(ctx context.Context, url string) (*http.Response, error)
-func (c *x402HTTPClient) PostWithPayment(ctx context.Context, url string, body io.Reader) (*http.Response, error)
-func (c *x402HTTPClient) DoWithPayment(ctx context.Context, req *http.Request) (*http.Response, error)
+func (c *t402HTTPClient) GetWithPayment(ctx context.Context, url string) (*http.Response, error)
+func (c *t402HTTPClient) PostWithPayment(ctx context.Context, url string, body io.Reader) (*http.Response, error)
+func (c *t402HTTPClient) DoWithPayment(ctx context.Context, req *http.Request) (*http.Response, error)
 ```
 
 ## Error Handling
@@ -401,7 +401,7 @@ client.Register("eip155:*", evm.NewExactEvmScheme(signer))
 
 ```go
 // Create once
-httpClient := x402http.WrapHTTPClientWithPayment(http.DefaultClient, x402http.Newx402HTTPClient(client))
+httpClient := t402http.WrapHTTPClientWithPayment(http.DefaultClient, t402http.Newt402HTTPClient(client))
 
 // Reuse many times
 resp1, _ := httpClient.Get(url1)
@@ -480,9 +480,9 @@ transport := &http.Transport{
     IdleConnTimeout:     90 * time.Second,
 }
 
-httpClient := x402http.WrapHTTPClientWithPayment(
+httpClient := t402http.WrapHTTPClientWithPayment(
     &http.Client{Transport: transport},
-    x402http.Newx402HTTPClient(client),
+    t402http.Newt402HTTPClient(client),
 )
 ```
 
@@ -514,14 +514,14 @@ Payment payloads are created fresh for each 402 response. They are not cached be
 ```go
 import (
     "testing"
-    x402 "github.com/coinbase/x402/go"
-    evm "github.com/coinbase/x402/go/mechanisms/evm/exact/client"
+    t402 "github.com/coinbase/t402/go"
+    evm "github.com/coinbase/t402/go/mechanisms/evm/exact/client"
 )
 
 func TestClientRegistration(t *testing.T) {
     signer, _ := evmsigners.NewClientSignerFromPrivateKey(testKey)
     
-    client := x402.Newx402Client().
+    client := t402.Newt402Client().
         Register("eip155:*", evm.NewExactEvmScheme(signer))
     
     // Test client behavior
@@ -534,7 +534,7 @@ See [`test/integration/`](test/integration/) for examples of testing against rea
 
 ## Migration from V1
 
-If you're migrating from x402 v1:
+If you're migrating from t402 v1:
 
 ### Client Changes
 

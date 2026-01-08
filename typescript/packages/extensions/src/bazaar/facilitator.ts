@@ -8,7 +8,7 @@
  */
 
 import Ajv from "ajv/dist/2020";
-import type { PaymentPayload, PaymentRequirements, PaymentRequirementsV1 } from "@x402/core/types";
+import type { PaymentPayload, PaymentRequirements, PaymentRequirementsV1 } from "@t402/core/types";
 import type { DiscoveryExtension, DiscoveryInfo } from "./types";
 import { BAZAAR } from "./types";
 import { extractDiscoveryInfoV1 } from "./v1/facilitator";
@@ -102,7 +102,7 @@ export function validateDiscoveryExtension(extension: DiscoveryExtension): Valid
 export interface DiscoveredResource {
   resourceUrl: string;
   method: string;
-  x402Version: number;
+  t402Version: number;
   discoveryInfo: DiscoveryInfo;
 }
 
@@ -123,7 +123,7 @@ export function extractDiscoveryInfo(
   let discoveryInfo: DiscoveryInfo | null = null;
   let resourceUrl: string;
 
-  if (paymentPayload.x402Version === 2) {
+  if (paymentPayload.t402Version === 2) {
     resourceUrl = paymentPayload.resource?.url ?? "";
 
     if (paymentPayload.extensions) {
@@ -150,7 +150,7 @@ export function extractDiscoveryInfo(
         }
       }
     }
-  } else if (paymentPayload.x402Version === 1) {
+  } else if (paymentPayload.t402Version === 1) {
     const requirementsV1 = paymentRequirements as PaymentRequirementsV1;
     resourceUrl = requirementsV1.resource;
     discoveryInfo = extractDiscoveryInfoV1(requirementsV1);
@@ -165,7 +165,7 @@ export function extractDiscoveryInfo(
   return {
     resourceUrl,
     method: discoveryInfo.input.method,
-    x402Version: paymentPayload.x402Version,
+    t402Version: paymentPayload.t402Version,
     discoveryInfo,
   };
 }

@@ -1,6 +1,6 @@
 # Python SDK Contributing Guide
 
-Guide for developing and contributing to the x402 Python SDK.
+Guide for developing and contributing to the t402 Python SDK.
 
 ## Contents
 
@@ -17,11 +17,11 @@ The Python SDK is a single package using `uv` for dependency management.
 
 ```
 python/
-└── x402/
+└── t402/
     ├── pyproject.toml
     ├── uv.lock
     ├── src/
-    │   └── x402/
+    │   └── t402/
     │       ├── __init__.py
     │       ├── types.py           # Core types (Pydantic models)
     │       ├── encoding.py        # Base64 encoding utilities
@@ -51,7 +51,7 @@ python/
 ### Installation with uv
 
 ```bash
-cd python/x402
+cd python/t402
 
 # Install uv if you don't have it
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -63,7 +63,7 @@ uv sync --all-extras --dev
 ### Installation with pip
 
 ```bash
-cd python/x402
+cd python/t402
 pip install -e ".[dev]"
 ```
 
@@ -71,7 +71,7 @@ pip install -e ".[dev]"
 
 ### Common Commands
 
-From the `python/x402/` directory:
+From the `python/t402/` directory:
 
 | Command | Description |
 |---------|-------------|
@@ -88,7 +88,7 @@ From the `python/x402/` directory:
 uv sync --dev
 
 # Import and use
-uv run python -c "from x402 import PaymentRequirements; print(PaymentRequirements)"
+uv run python -c "from t402 import PaymentRequirements; print(PaymentRequirements)"
 ```
 
 ## Adding Features
@@ -97,14 +97,14 @@ uv run python -c "from x402 import PaymentRequirements; print(PaymentRequirement
 
 To add support for a new HTTP client library:
 
-1. Create a new file in `src/x402/clients/`:
+1. Create a new file in `src/t402/clients/`:
 
 ```python
-# src/x402/clients/your_client.py
-from x402.clients.base import BaseX402Client
+# src/t402/clients/your_client.py
+from t402.clients.base import BaseX402Client
 
-class x402YourClient(BaseX402Client):
-    """x402 client wrapper for your-library."""
+class t402YourClient(BaseX402Client):
+    """t402 client wrapper for your-library."""
     
     def __init__(self, account, **kwargs):
         super().__init__(account)
@@ -113,7 +113,7 @@ class x402YourClient(BaseX402Client):
     # Implement payment handling hooks
 ```
 
-2. Export from `src/x402/clients/__init__.py`
+2. Export from `src/t402/clients/__init__.py`
 
 3. Add tests in `tests/clients/test_your_client.py`
 
@@ -121,15 +121,15 @@ class x402YourClient(BaseX402Client):
 
 To add middleware for a new web framework:
 
-1. Create a new directory in `src/x402/`:
+1. Create a new directory in `src/t402/`:
 
 ```
-src/x402/your_framework/
+src/t402/your_framework/
 ├── __init__.py
 └── middleware.py
 ```
 
-2. Implement the middleware pattern. Reference `src/x402/fastapi/middleware.py` or `src/x402/flask/middleware.py`.
+2. Implement the middleware pattern. Reference `src/t402/fastapi/middleware.py` or `src/t402/flask/middleware.py`.
 
 3. Key responsibilities:
    - Check for payment header on protected routes
@@ -154,11 +154,11 @@ See [New Chains](../CONTRIBUTING.md#new-chains) in the root contributing guide f
 
 To add support for a new blockchain in Python:
 
-1. Create the mechanism file in `src/x402/your_chain.py`
+1. Create the mechanism file in `src/t402/your_chain.py`
 
 ```python
-# src/x402/your_chain.py
-from x402.types import PaymentPayload, PaymentRequirements
+# src/t402/your_chain.py
+from t402.types import PaymentPayload, PaymentRequirements
 
 def sign_payload(
     payload: PaymentPayload,
@@ -170,8 +170,8 @@ def sign_payload(
     pass
 ```
 
-2. Integrate with the client in `src/x402/clients/base.py`
-3. Reference `src/x402/exact.py` for the existing EVM implementation pattern
+2. Integrate with the client in `src/t402/clients/base.py`
+3. Reference `src/t402/exact.py` for the existing EVM implementation pattern
 
 ## Testing
 
@@ -191,7 +191,7 @@ uv run pytest tests/test_types.py::test_payment_requirements
 uv run pytest -v
 
 # With coverage
-uv run pytest --cov=x402
+uv run pytest --cov=t402
 ```
 
 ### Test Organization
@@ -271,5 +271,5 @@ Package publishing to PyPI is handled by maintainers via GitHub Actions. Version
 
 - Open an issue on GitHub
 - Check the [examples](../examples/python/) for usage patterns
-- Reference the [README](x402/README.md) for API documentation
+- Reference the [README](t402/README.md) for API documentation
 

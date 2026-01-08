@@ -1,4 +1,4 @@
-// Package http provides HTTP-specific implementations of x402 components.
+// Package http provides HTTP-specific implementations of t402 components.
 // This includes HTTP-aware clients, services, and facilitator clients.
 package http
 
@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 
-	x402 "github.com/coinbase/x402/go"
+	t402 "github.com/coinbase/t402/go"
 )
 
 // ============================================================================
@@ -16,25 +16,25 @@ import (
 
 // HTTP Client types
 type (
-	// HTTPClient is an alias for x402HTTPClient
-	HTTPClient = x402HTTPClient
+	// HTTPClient is an alias for t402HTTPClient
+	HTTPClient = t402HTTPClient
 
-	// HTTPServer is an alias for x402HTTPResourceServer
-	HTTPServer = x402HTTPResourceServer
+	// HTTPServer is an alias for t402HTTPResourceServer
+	HTTPServer = t402HTTPResourceServer
 )
 
 // ============================================================================
 // Constructor functions with simpler names
 // ============================================================================
 
-// NewClient creates a new HTTP-aware x402 client
-func NewClient(client *x402.X402Client) *x402HTTPClient {
-	return Newx402HTTPClient(client)
+// NewClient creates a new HTTP-aware t402 client
+func NewClient(client *t402.T402Client) *t402HTTPClient {
+	return Newt402HTTPClient(client)
 }
 
 // NewServer creates a new HTTP resource server
-func NewServer(routes RoutesConfig, opts ...x402.ResourceServerOption) *x402HTTPResourceServer {
-	return Newx402HTTPResourceServer(routes, opts...)
+func NewServer(routes RoutesConfig, opts ...t402.ResourceServerOption) *t402HTTPResourceServer {
+	return Newt402HTTPResourceServer(routes, opts...)
 }
 
 // NewFacilitatorClient creates a new HTTP facilitator client
@@ -46,22 +46,22 @@ func NewFacilitatorClient(config *FacilitatorConfig) *HTTPFacilitatorClient {
 // Convenience functions
 // ============================================================================
 
-// WrapClient wraps a standard HTTP client with x402 payment handling
-func WrapClient(client *http.Client, x402Client *x402HTTPClient) *http.Client {
-	return WrapHTTPClientWithPayment(client, x402Client)
+// WrapClient wraps a standard HTTP client with t402 payment handling
+func WrapClient(client *http.Client, t402Client *t402HTTPClient) *http.Client {
+	return WrapHTTPClientWithPayment(client, t402Client)
 }
 
 // Get performs a GET request with automatic payment handling
-func Get(ctx context.Context, url string, x402Client *x402HTTPClient) (*http.Response, error) {
-	return x402Client.GetWithPayment(ctx, url)
+func Get(ctx context.Context, url string, t402Client *t402HTTPClient) (*http.Response, error) {
+	return t402Client.GetWithPayment(ctx, url)
 }
 
 // Post performs a POST request with automatic payment handling
-func Post(ctx context.Context, url string, body io.Reader, x402Client *x402HTTPClient) (*http.Response, error) {
-	return x402Client.PostWithPayment(ctx, url, body)
+func Post(ctx context.Context, url string, body io.Reader, t402Client *t402HTTPClient) (*http.Response, error) {
+	return t402Client.PostWithPayment(ctx, url, body)
 }
 
 // Do performs an HTTP request with automatic payment handling
-func Do(ctx context.Context, req *http.Request, x402Client *x402HTTPClient) (*http.Response, error) {
-	return x402Client.DoWithPayment(ctx, req)
+func Do(ctx context.Context, req *http.Request, t402Client *t402HTTPClient) (*http.Response, error) {
+	return t402Client.DoWithPayment(ctx, req)
 }

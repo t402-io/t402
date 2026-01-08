@@ -1,4 +1,4 @@
-package x402
+package t402
 
 import (
 	"context"
@@ -6,12 +6,12 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/coinbase/x402/go/types"
+	"github.com/coinbase/t402/go/types"
 )
 
 // Test Facilitator BeforeVerify hook - abort verification
 func TestFacilitatorBeforeVerifyHook_Abort(t *testing.T) {
-	facilitator := Newx402Facilitator()
+	facilitator := Newt402Facilitator()
 
 	// Register hook that aborts verification
 	facilitator.OnBeforeVerify(func(ctx FacilitatorVerifyContext) (*FacilitatorBeforeHookResult, error) {
@@ -24,7 +24,7 @@ func TestFacilitatorBeforeVerifyHook_Abort(t *testing.T) {
 	// Try to verify (should be aborted by hook)
 	// Note: Hooks are not fully integrated yet - this test validates hook registration works
 	// TODO: Integrate hooks into Verify execution
-	payload := types.PaymentPayload{X402Version: 2, Payload: map[string]interface{}{}}
+	payload := types.PaymentPayload{T402Version: 2, Payload: map[string]interface{}{}}
 	requirements := types.PaymentRequirements{Scheme: "exact", Network: "eip155:8453"}
 
 	payloadBytes, _ := json.Marshal(payload)
@@ -59,7 +59,7 @@ func TestFacilitatorBeforeVerifyHook_Abort(t *testing.T) {
 func TestFacilitatorAfterVerifyHook(t *testing.T) {
 	var capturedPayer string
 
-	facilitator := Newx402Facilitator()
+	facilitator := Newt402Facilitator()
 
 	// Register mock scheme facilitator
 	mockScheme := &mockSchemeFacilitator{
@@ -77,7 +77,7 @@ func TestFacilitatorAfterVerifyHook(t *testing.T) {
 	})
 
 	// Verify payment (marshal to bytes for facilitator API)
-	payload := types.PaymentPayload{X402Version: 2, Payload: map[string]interface{}{}}
+	payload := types.PaymentPayload{T402Version: 2, Payload: map[string]interface{}{}}
 	requirements := types.PaymentRequirements{Scheme: "exact", Network: "eip155:8453"}
 
 	payloadBytes, _ := json.Marshal(payload)
@@ -105,7 +105,7 @@ func TestFacilitatorAfterVerifyHook(t *testing.T) {
 
 // Test Facilitator OnVerifyFailure hook - recovery
 func TestFacilitatorOnVerifyFailureHook_Recover(t *testing.T) {
-	facilitator := Newx402Facilitator()
+	facilitator := Newt402Facilitator()
 
 	// Register mock scheme facilitator that fails
 	mockScheme := &mockSchemeFacilitator{
@@ -128,7 +128,7 @@ func TestFacilitatorOnVerifyFailureHook_Recover(t *testing.T) {
 	})
 
 	// Verify payment (should be recovered by hook)
-	payload := types.PaymentPayload{X402Version: 2, Payload: map[string]interface{}{}}
+	payload := types.PaymentPayload{T402Version: 2, Payload: map[string]interface{}{}}
 	requirements := types.PaymentRequirements{Scheme: "exact", Network: "eip155:8453"}
 
 	payloadBytes, _ := json.Marshal(payload)
@@ -155,7 +155,7 @@ func TestFacilitatorOnVerifyFailureHook_Recover(t *testing.T) {
 
 // Test Facilitator BeforeSettle hook - abort
 func TestFacilitatorBeforeSettleHook_Abort(t *testing.T) {
-	facilitator := Newx402Facilitator()
+	facilitator := Newt402Facilitator()
 
 	// Register hook that aborts settlement
 	facilitator.OnBeforeSettle(func(ctx FacilitatorSettleContext) (*FacilitatorBeforeHookResult, error) {
@@ -166,7 +166,7 @@ func TestFacilitatorBeforeSettleHook_Abort(t *testing.T) {
 	})
 
 	// Try to settle (should be aborted by hook)
-	payload := types.PaymentPayload{X402Version: 2, Payload: map[string]interface{}{}}
+	payload := types.PaymentPayload{T402Version: 2, Payload: map[string]interface{}{}}
 	requirements := types.PaymentRequirements{Scheme: "exact", Network: "eip155:8453"}
 
 	payloadBytes, _ := json.Marshal(payload)
@@ -191,7 +191,7 @@ func TestFacilitatorBeforeSettleHook_Abort(t *testing.T) {
 func TestFacilitatorAfterSettleHook(t *testing.T) {
 	var capturedTx string
 
-	facilitator := Newx402Facilitator()
+	facilitator := Newt402Facilitator()
 
 	// Register mock scheme facilitator
 	mockScheme := &mockSchemeFacilitator{
@@ -209,7 +209,7 @@ func TestFacilitatorAfterSettleHook(t *testing.T) {
 	})
 
 	// Settle payment
-	payload := types.PaymentPayload{X402Version: 2, Payload: map[string]interface{}{}}
+	payload := types.PaymentPayload{T402Version: 2, Payload: map[string]interface{}{}}
 	requirements := types.PaymentRequirements{Scheme: "exact", Network: "eip155:8453"}
 
 	payloadBytes, _ := json.Marshal(payload)
@@ -237,7 +237,7 @@ func TestFacilitatorAfterSettleHook(t *testing.T) {
 
 // Test Facilitator OnSettleFailure hook - recovery
 func TestFacilitatorOnSettleFailureHook_Recover(t *testing.T) {
-	facilitator := Newx402Facilitator()
+	facilitator := Newt402Facilitator()
 
 	// Register mock scheme facilitator that fails
 	mockScheme := &mockSchemeFacilitator{
@@ -262,7 +262,7 @@ func TestFacilitatorOnSettleFailureHook_Recover(t *testing.T) {
 	})
 
 	// Settle payment (should be recovered by hook)
-	payload := types.PaymentPayload{X402Version: 2, Payload: map[string]interface{}{}}
+	payload := types.PaymentPayload{T402Version: 2, Payload: map[string]interface{}{}}
 	requirements := types.PaymentRequirements{Scheme: "exact", Network: "eip155:8453"}
 
 	payloadBytes, _ := json.Marshal(payload)
@@ -291,7 +291,7 @@ func TestFacilitatorOnSettleFailureHook_Recover(t *testing.T) {
 func TestFacilitatorMultipleHooks_ExecutionOrder(t *testing.T) {
 	executionOrder := []string{}
 
-	facilitator := Newx402Facilitator()
+	facilitator := Newt402Facilitator()
 
 	// Register mock scheme facilitator
 	mockScheme := &mockSchemeFacilitator{
@@ -324,7 +324,7 @@ func TestFacilitatorMultipleHooks_ExecutionOrder(t *testing.T) {
 	})
 
 	// Verify payment
-	payload := types.PaymentPayload{X402Version: 2, Payload: map[string]interface{}{}}
+	payload := types.PaymentPayload{T402Version: 2, Payload: map[string]interface{}{}}
 	requirements := types.PaymentRequirements{Scheme: "exact", Network: "eip155:8453"}
 
 	payloadBytes, _ := json.Marshal(payload)

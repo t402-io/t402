@@ -1,13 +1,13 @@
-# x402-next Example App
+# t402-next Example App
 
-Next.js application demonstrating how to protect routes with a paywall using the `@x402/next` middleware.
+Next.js application demonstrating how to protect routes with a paywall using the `@t402/next` middleware.
 
 ## Prerequisites
 
 - Node.js v20+ (install via [nvm](https://github.com/nvm-sh/nvm))
 - pnpm v10 (install via [pnpm.io/installation](https://pnpm.io/installation))
 - Valid EVM and SVM addresses for receiving payments
-- URL of a facilitator supporting the desired payment network, see [facilitator list](https://www.x402.org/ecosystem?category=facilitators)
+- URL of a facilitator supporting the desired payment network, see [facilitator list](https://www.t402.org/ecosystem?category=facilitators)
 
 ## Setup
 
@@ -45,16 +45,16 @@ The `/protected` route is protected using `paymentProxy`. Page routes are protec
 
 ```typescript
 // proxy.ts
-import { paymentProxy } from "@x402/next";
-import { x402ResourceServer, HTTPFacilitatorClient } from "@x402/core/server";
-import { registerExactEvmScheme } from "@x402/evm/exact/server";
-import { registerExactSvmScheme } from "@x402/svm/exact/server";
-import { createPaywall } from "@x402/paywall";
-import { evmPaywall } from "@x402/paywall/evm";
-import { svmPaywall } from "@x402/paywall/svm";
+import { paymentProxy } from "@t402/next";
+import { t402ResourceServer, HTTPFacilitatorClient } from "@t402/core/server";
+import { registerExactEvmScheme } from "@t402/evm/exact/server";
+import { registerExactSvmScheme } from "@t402/svm/exact/server";
+import { createPaywall } from "@t402/paywall";
+import { evmPaywall } from "@t402/paywall/evm";
+import { svmPaywall } from "@t402/paywall/svm";
 
 const facilitatorClient = new HTTPFacilitatorClient({ url: facilitatorUrl });
-const server = new x402ResourceServer(facilitatorClient);
+const server = new t402ResourceServer(facilitatorClient);
 
 // Register schemes
 registerExactEvmScheme(server);
@@ -65,8 +65,8 @@ const paywall = createPaywall()
   .withNetwork(evmPaywall)
   .withNetwork(svmPaywall)
   .withConfig({
-    appName: "Next x402 Demo",
-    appLogo: "/x402-icon-blue.png",
+    appName: "Next t402 Demo",
+    appLogo: "/t402-icon-blue.png",
     testnet: true,
   })
   .build();
@@ -88,7 +88,7 @@ export const proxy = paymentProxy(
           payTo: svmAddress,
         },
       ],
-      description: "Premium music: x402 Remix",
+      description: "Premium music: t402 Remix",
       mimeType: "text/html",
     },
   },
@@ -109,7 +109,7 @@ The `/api/weather` route demonstrates the `withX402` wrapper for individual API 
 ```typescript
 // app/api/weather/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { withX402 } from "@x402/next";
+import { withX402 } from "@t402/next";
 import { server, paywall, evmAddress, svmAddress } from "../../../proxy";
 
 const handler = async (_: NextRequest) => {
@@ -164,7 +164,7 @@ Note: `amount` is in atomic units (e.g., 1000 = 0.001 USDC, since USDC has 6 dec
 
 ```json
 {
-  "x402Version": 2,
+  "t402Version": 2,
   "error": "Payment required",
   "resource": {
     "url": "http://localhost:3000/api/weather",

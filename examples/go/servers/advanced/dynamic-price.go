@@ -7,10 +7,10 @@ import (
 	"os"
 	"time"
 
-	x402 "github.com/coinbase/x402/go"
-	x402http "github.com/coinbase/x402/go/http"
-	ginmw "github.com/coinbase/x402/go/http/gin"
-	evm "github.com/coinbase/x402/go/mechanisms/evm/exact/server"
+	t402 "github.com/coinbase/t402/go"
+	t402http "github.com/coinbase/t402/go/http"
+	ginmw "github.com/coinbase/t402/go/http/gin"
+	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/server"
 	ginfw "github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -40,11 +40,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	evmNetwork := x402.Network("eip155:84532") // Base Sepolia
+	evmNetwork := t402.Network("eip155:84532") // Base Sepolia
 
 	r := ginfw.Default()
 
-	facilitatorClient := x402http.NewHTTPFacilitatorClient(&x402http.FacilitatorConfig{
+	facilitatorClient := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
 		URL: facilitatorURL,
 	})
 
@@ -55,7 +55,7 @@ func main() {
 	 * It receives the full HTTP request context and can make decisions
 	 * based on query parameters, headers, or any other request data.
 	 */
-	dynamicPrice := func(ctx context.Context, reqCtx x402http.HTTPRequestContext) (x402.Price, error) {
+	dynamicPrice := func(ctx context.Context, reqCtx t402http.HTTPRequestContext) (t402.Price, error) {
 		// In a real implementation, you would extract the tier from query params
 		// or headers using reqCtx.Adapter
 		
@@ -67,7 +67,7 @@ func main() {
 		//     tier = extractQueryParam(reqCtx.Adapter, "tier")
 		// }
 
-		var price x402.Price
+		var price t402.Price
 		if tier == "premium" {
 			price = "$0.005" // Premium tier: 0.5 cents
 			fmt.Printf("💰 Premium tier pricing: %s\n", price)
@@ -79,13 +79,13 @@ func main() {
 		return price, nil
 	}
 
-	routes := x402http.RoutesConfig{
+	routes := t402http.RoutesConfig{
 		"GET /weather": {
-			Accepts: x402http.PaymentOptions{
+			Accepts: t402http.PaymentOptions{
 				{
 					Scheme:  "exact",
 					PayTo:   evmPayeeAddress,
-					Price:   x402http.DynamicPriceFunc(dynamicPrice),
+					Price:   t402http.DynamicPriceFunc(dynamicPrice),
 					Network: evmNetwork,
 				},
 			},
@@ -94,7 +94,7 @@ func main() {
 		},
 	}
 
-	r.Use(ginmw.X402Payment(ginmw.Config{
+	r.Use(ginmw.T402Payment(ginmw.Config{
 		Routes:      routes,
 		Facilitator: facilitatorClient,
 		Schemes: []ginmw.SchemeConfig{

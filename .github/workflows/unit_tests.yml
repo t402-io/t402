@@ -2,7 +2,7 @@ name: Run Unit Tests
 on: [pull_request]
 
 jobs:
-  test-x402-typescript:
+  test-t402-typescript:
     runs-on: ubuntu-latest
     strategy:
       matrix:

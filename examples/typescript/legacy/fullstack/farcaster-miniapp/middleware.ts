@@ -1,5 +1,5 @@
 import { Address } from "viem";
-import { paymentMiddleware } from "x402-next";
+import { paymentMiddleware } from "t402-next";
 
 const payTo = process.env.RESOURCE_WALLET_ADDRESS as Address;
 const network = (process.env.NETWORK || "base-sepolia") as

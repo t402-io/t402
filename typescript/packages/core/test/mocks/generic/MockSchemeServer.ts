@@ -45,7 +45,7 @@ export class MockSchemeNetworkServer implements SchemeNetworkServer {
    *
    * @param paymentRequirements
    * @param supportedKind
-   * @param supportedKind.x402Version
+   * @param supportedKind.t402Version
    * @param supportedKind.scheme
    * @param supportedKind.network
    * @param supportedKind.extra
@@ -54,7 +54,7 @@ export class MockSchemeNetworkServer implements SchemeNetworkServer {
   async enhancePaymentRequirements(
     paymentRequirements: PaymentRequirements,
     _supportedKind: {
-      x402Version: number;
+      t402Version: number;
       scheme: string;
       network: Network;
       extra?: Record<string, unknown>;

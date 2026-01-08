@@ -24,7 +24,7 @@ type PaymentRequirements struct {
 
 // PaymentPayload represents the decoded payment payload for a client's payment
 type PaymentPayload struct {
-	X402Version int              `json:"x402Version"`
+	T402Version int              `json:"t402Version"`
 	Scheme      string           `json:"scheme"`
 	Network     string           `json:"network"`
 	Payload     *ExactEvmPayload `json:"payload"`
@@ -84,8 +84,8 @@ func DecodePaymentPayloadFromBase64(encoded string) (*PaymentPayload, error) {
 		return nil, fmt.Errorf("failed to unmarshal payment payload: %w", err)
 	}
 
-	// Set the x402Version after decoding, matching the TypeScript behavior
-	payload.X402Version = 1
+	// Set the t402Version after decoding, matching the TypeScript behavior
+	payload.T402Version = 1
 
 	return &payload, nil
 }

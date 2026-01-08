@@ -1,10 +1,10 @@
-name: Publish @x402/axios package to NPM
+name: Publish @t402/axios package to NPM
 
 on:
   workflow_dispatch:
 
 jobs:
-  publish-npm-x402-axios:
+  publish-npm-t402-axios:
     runs-on: ubuntu-latest
     environment: ${{ github.ref == 'refs/heads/main' && 'npm' || '' }}
     permissions:
@@ -35,9 +35,9 @@ jobs:
         working-directory: ./typescript
         run: |
           pnpm install --frozen-lockfile
-          pnpm -r --filter=@x402/core --filter=@x402/axios run build
+          pnpm -r --filter=@t402/core --filter=@t402/axios run build
       
-      - name: Publish @x402/axios package
+      - name: Publish @t402/axios package
         working-directory: ./typescript/packages/http/axios
         run: |
           # Get package information directly

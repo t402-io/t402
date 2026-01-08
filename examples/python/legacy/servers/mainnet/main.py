@@ -1,10 +1,10 @@
 import os
 from typing import Any, Dict
 
-from cdp.x402 import create_facilitator_config
+from cdp.t402 import create_facilitator_config
 from dotenv import load_dotenv
 from fastapi import FastAPI
-from x402.fastapi.middleware import require_payment
+from t402.fastapi.middleware import require_payment
 
 # Load environment variables
 load_dotenv()

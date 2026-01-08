@@ -66,14 +66,14 @@ export function getEvmPaywallHtml(options: EvmPaywallOptions): string {
   const { amount, testnet, paymentRequired, currentUrl, appName, appLogo } = options;
 
   const logOnTestnet = testnet
-    ? "console.log('EVM Payment required initialized:', window.x402);"
+    ? "console.log('EVM Payment required initialized:', window.t402);"
     : "";
 
   const config = getChainConfig();
 
   const configScript = `
   <script>
-    window.x402 = {
+    window.t402 = {
       amount: ${amount},
       paymentRequired: ${JSON.stringify(paymentRequired)},
       testnet: ${testnet},

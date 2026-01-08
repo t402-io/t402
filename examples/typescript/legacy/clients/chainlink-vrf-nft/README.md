@@ -1,6 +1,6 @@
-# VRF NFT Minting Example (via x402 Payment)
+# VRF NFT Minting Example (via t402 Payment)
 
-This example demonstrates how a client pays USDC via the `x402` protocol (`exact` scheme) to a custom resource server. This resource server, upon successful payment verification and settlement via a facilitator, then uses its own funds to pay ETH and mint a VRF NFT to the client's address.
+This example demonstrates how a client pays USDC via the `t402` protocol (`exact` scheme) to a custom resource server. This resource server, upon successful payment verification and settlement via a facilitator, then uses its own funds to pay ETH and mint a VRF NFT to the client's address.
 
 Based on the value returned by the VRF result, one of four characters will be selected for the NFT. The NFT and its image can be viewed on [OpenSea](https://testnets.opensea.io/) by connecting to Base Sepolia and searching for the NFT contract address. The source code for the contract can be viewed [here](https://sepolia.basescan.org/address/0xcD8841f9a8Dbc483386fD80ab6E9FD9656Da39A2#code).
 
@@ -8,18 +8,18 @@ Based on the value returned by the VRF result, one of four characters will be se
 
 This example involves three components running concurrently:
 
-1.  **Facilitator Server (`examples/typescript/facilitator.ts`):** A standard x402 facilitator server responsible for verifying payment signatures (`/verify`) and settling USDC payments (`/settle`) by calling `transferWithAuthorization` on the USDC contract. The Facilitator responds to requests from the VRF Resource Server
+1.  **Facilitator Server (`examples/typescript/facilitator.ts`):** A standard t402 facilitator server responsible for verifying payment signatures (`/verify`) and settling USDC payments (`/settle`) by calling `transferWithAuthorization` on the USDC contract. The Facilitator responds to requests from the VRF Resource Server
 2.  **VRF Resource Server (`resource.ts`):** A custom HTTP server (using Hono) that:
     - Exposes a `/request-mint` endpoint.
     - Handles initial requests by responding with `402 Payment Required`, providing the necessary `PaymentDetails` (USDC amount, recipient address, etc.).
-    - Receives subsequent requests containing the `X-PAYMENT` header (sent by the client's interceptor, implmented in `x402/axios`).
+    - Receives subsequent requests containing the `X-PAYMENT` header (sent by the client's interceptor, implmented in `t402/axios`).
     - Calls the **Facilitator's** `/verify` endpoint to validate the client's payment.
     - If valid, it extracts the client's address (`from`) from the payment payload.
     - Uses its _own wallet_ (funded with ETH) and `viem` to call `requestNFT(address _recipient)` on the target NFT contract, passing the client's address and the required ETH value.
     - Calls the **Facilitator's** `/settle` endpoint to trigger the actual USDC transfer from the client to the resource server's wallet.
     - Responds to the client with the outcome (including minting and settlement transaction hashes).
 3.  **Client (`client.ts`):** A script that:
-    - Uses `axios` with the `x402/axios` interceptor. The implementation of this custom interceptor is in `/typescript/packages/x402-axios`
+    - Uses `axios` with the `t402/axios` interceptor. The implementation of this custom interceptor is in `/typescript/packages/t402-axios`
     - Makes a request to the **Resource Server's** `/request-mint` endpoint.
     - The interceptor automatically handles the `402` response, prompts the client's wallet (via `viem`) to sign the EIP-3009 authorization for the USDC payment, constructs the `X-PAYMENT` header, and retries the request.
 

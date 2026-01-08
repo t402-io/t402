@@ -1,7 +1,7 @@
 /**
- * Express E2E Test Server with x402 Payment Middleware
+ * Express E2E Test Server with t402 Payment Middleware
  *
- * This server demonstrates how to integrate x402 payment middleware
+ * This server demonstrates how to integrate t402 payment middleware
  * with an Express application for end-to-end testing.
  */
 
@@ -16,7 +16,7 @@
 /**
  * Implement Server app
  * - Create server
- * - Register x402 middleware
+ * - Register t402 middleware
  * - Configure payment required endpoints in middleware
  * - Implement payment required endpoints
  * - Implement health check endpoint
@@ -24,7 +24,7 @@
  * 
  * On startup, log the server details and endpoints
 ╔════════════════════════════════════════════════════════╗
-║           x402 <Framework> E2E Test Server             ║
+║           t402 <Framework> E2E Test Server             ║
 ╠════════════════════════════════════════════════════════╣
 ║  Server:     http://localhost:<port>                   ║
 ║  Protocol Family: <protocol family>                    ║

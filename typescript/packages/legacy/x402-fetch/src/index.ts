@@ -7,16 +7,16 @@ import {
   isMultiNetworkSigner,
   isSvmSignerWallet,
   Network,
-  X402Config,
-} from "x402/types";
+  T402Config,
+} from "t402/types";
 import {
   createPaymentHeader,
   PaymentRequirementsSelector,
   selectPaymentRequirements,
-} from "x402/client";
+} from "t402/client";
 
 /**
- * Enables the payment of APIs using the x402 payment protocol.
+ * Enables the payment of APIs using the t402 payment protocol.
  *
  * This function wraps the native fetch API to automatically handle 402 Payment Required responses
  * by creating and sending a payment header. It will:
@@ -30,7 +30,7 @@ import {
  * @param walletClient - The wallet client used to sign payment messages
  * @param maxValue - The maximum allowed payment amount in base units (defaults to 0.1 USDC)
  * @param paymentRequirementsSelector - A function that selects the payment requirements from the response
- * @param config - Optional configuration for X402 operations (e.g., custom RPC URLs)
+ * @param config - Optional configuration for T402 operations (e.g., custom RPC URLs)
  * @returns A wrapped fetch function that handles 402 responses automatically
  *
  * @example
@@ -57,7 +57,7 @@ export function wrapFetchWithPayment(
   walletClient: Signer | MultiNetworkSigner,
   maxValue: bigint = BigInt(0.1 * 10 ** 6), // Default to 0.10 USDC
   paymentRequirementsSelector: PaymentRequirementsSelector = selectPaymentRequirements,
-  config?: X402Config,
+  config?: T402Config,
 ) {
   return async (input: RequestInfo, init?: RequestInit) => {
     const response = await fetch(input, init);
@@ -66,8 +66,8 @@ export function wrapFetchWithPayment(
       return response;
     }
 
-    const { x402Version, accepts } = (await response.json()) as {
-      x402Version: number;
+    const { t402Version, accepts } = (await response.json()) as {
+      t402Version: number;
       accepts: unknown[];
     };
     const parsedPaymentRequirements = accepts.map(x => PaymentRequirementsSchema.parse(x));
@@ -92,7 +92,7 @@ export function wrapFetchWithPayment(
 
     const paymentHeader = await createPaymentHeader(
       walletClient,
-      x402Version,
+      t402Version,
       selectedPaymentRequirements,
       config,
     );
@@ -116,7 +116,7 @@ export function wrapFetchWithPayment(
   };
 }
 
-export { decodeXPaymentResponse } from "x402/shared";
-export { createSigner, type Signer, type MultiNetworkSigner, type X402Config } from "x402/types";
-export { type PaymentRequirementsSelector } from "x402/client";
+export { decodeXPaymentResponse } from "t402/shared";
+export { createSigner, type Signer, type MultiNetworkSigner, type T402Config } from "t402/types";
+export { type PaymentRequirementsSelector } from "t402/client";
 export type { Hex } from "viem";

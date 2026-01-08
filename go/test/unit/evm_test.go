@@ -5,11 +5,11 @@ import (
 	"math/big"
 	"testing"
 
-	x402 "github.com/coinbase/x402/go"
-	"github.com/coinbase/x402/go/mechanisms/evm"
-	evmclient "github.com/coinbase/x402/go/mechanisms/evm/exact/client"
-	evmv1client "github.com/coinbase/x402/go/mechanisms/evm/exact/v1/client"
-	"github.com/coinbase/x402/go/types"
+	t402 "github.com/coinbase/t402/go"
+	"github.com/coinbase/t402/go/mechanisms/evm"
+	evmclient "github.com/coinbase/t402/go/mechanisms/evm/exact/client"
+	evmv1client "github.com/coinbase/t402/go/mechanisms/evm/exact/v1/client"
+	"github.com/coinbase/t402/go/types"
 )
 
 // Mock EVM signer for client
@@ -136,7 +136,7 @@ func TestEVMVersionMismatch(t *testing.T) {
 
 		// Setup V1 client
 		clientSigner := &mockClientEvmSigner{}
-		client := x402.Newx402Client()
+		client := t402.Newt402Client()
 		evmClientV1 := evmv1client.NewExactEvmSchemeV1(clientSigner)
 		client.RegisterV1("eip155:8453", evmClientV1)
 
@@ -153,8 +153,8 @@ func TestEVMVersionMismatch(t *testing.T) {
 			t.Fatalf("Failed to create payment: %v", err)
 		}
 		// Verify it created a V1 payload
-		if payload.X402Version != 1 {
-			t.Errorf("Expected V1 payload from V1 client, got v%d", payload.X402Version)
+		if payload.T402Version != 1 {
+			t.Errorf("Expected V1 payload from V1 client, got v%d", payload.T402Version)
 		}
 		if payload.Scheme != evm.SchemeExact {
 			t.Errorf("Expected scheme %s, got %s", evm.SchemeExact, payload.Scheme)
@@ -166,7 +166,7 @@ func TestEVMVersionMismatch(t *testing.T) {
 
 		// Setup V2 client
 		clientSigner := &mockClientEvmSigner{}
-		client := x402.Newx402Client()
+		client := t402.Newt402Client()
 		evmClient := evmclient.NewExactEvmScheme(clientSigner)
 		client.Register("eip155:8453", evmClient)
 
@@ -185,8 +185,8 @@ func TestEVMVersionMismatch(t *testing.T) {
 			t.Fatalf("Failed to create payment: %v", err)
 		}
 		// Verify it created a V2 payload
-		if payload.X402Version != 2 {
-			t.Errorf("Expected V2 payload from V2 client, got v%d", payload.X402Version)
+		if payload.T402Version != 2 {
+			t.Errorf("Expected V2 payload from V2 client, got v%d", payload.T402Version)
 		}
 		if payload.Accepted.Scheme != evm.SchemeExact {
 			t.Errorf("Expected scheme in accepted field")
@@ -203,7 +203,7 @@ func TestEVMDualVersionSupport(t *testing.T) {
 
 		// Setup client with BOTH V1 and V2 implementations
 		clientSigner := &mockClientEvmSigner{}
-		client := x402.Newx402Client()
+		client := t402.Newt402Client()
 
 		// Register V1 implementation
 		evmClientV1 := evmv1client.NewExactEvmSchemeV1(clientSigner)
@@ -228,8 +228,8 @@ func TestEVMDualVersionSupport(t *testing.T) {
 			t.Fatalf("Failed to create V1 payment: %v", err)
 		}
 
-		if payloadV1.X402Version != 1 {
-			t.Errorf("Expected V1 payload, got v%d", payloadV1.X402Version)
+		if payloadV1.T402Version != 1 {
+			t.Errorf("Expected V1 payload, got v%d", payloadV1.T402Version)
 		}
 
 		// Verify V1 structure (scheme at top level, not in Accepted)
@@ -256,8 +256,8 @@ func TestEVMDualVersionSupport(t *testing.T) {
 			t.Fatalf("Failed to create V2 payment: %v", err)
 		}
 
-		if payloadV2.X402Version != 2 {
-			t.Errorf("Expected V2 payload, got v%d", payloadV2.X402Version)
+		if payloadV2.T402Version != 2 {
+			t.Errorf("Expected V2 payload, got v%d", payloadV2.T402Version)
 		}
 		if payloadV2.Accepted.Scheme == "" {
 			t.Error("Expected V2 payload to have Accepted.Scheme")
@@ -269,7 +269,7 @@ func TestEVMDualVersionSupport(t *testing.T) {
 
 		// Setup client with BOTH V1 and V2 implementations
 		clientSigner := &mockClientEvmSigner{}
-		client := x402.Newx402Client()
+		client := t402.Newt402Client()
 
 		// Register V1 implementation
 		evmClientV1 := evmv1client.NewExactEvmSchemeV1(clientSigner)
@@ -294,8 +294,8 @@ func TestEVMDualVersionSupport(t *testing.T) {
 			t.Fatalf("Failed to create V2 payment: %v", err)
 		}
 
-		if payloadV2.X402Version != 2 {
-			t.Errorf("Expected V2 payload, got v%d", payloadV2.X402Version)
+		if payloadV2.T402Version != 2 {
+			t.Errorf("Expected V2 payload, got v%d", payloadV2.T402Version)
 		}
 
 		// Verify V2 structure (has scheme/network in Accepted)

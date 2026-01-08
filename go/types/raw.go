@@ -5,18 +5,18 @@ import (
 	"fmt"
 )
 
-// DetectVersion extracts x402Version from JSON bytes
+// DetectVersion extracts t402Version from JSON bytes
 func DetectVersion(data []byte) (int, error) {
 	var detector struct {
-		X402Version int `json:"x402Version"`
+		T402Version int `json:"t402Version"`
 	}
 	if err := json.Unmarshal(data, &detector); err != nil {
 		return 0, fmt.Errorf("failed to detect version: %w", err)
 	}
-	if detector.X402Version < 1 {
-		return 0, fmt.Errorf("invalid version: %d", detector.X402Version)
+	if detector.T402Version < 1 {
+		return 0, fmt.Errorf("invalid version: %d", detector.T402Version)
 	}
-	return detector.X402Version, nil
+	return detector.T402Version, nil
 }
 
 // ExtractRequirementsInfo gets scheme and network from requirements bytes
@@ -44,7 +44,7 @@ type RequirementsInfo struct {
 // PayloadBase is minimal payload structure (version + payload field only)
 // Used by v2 client to return partial payload before core wraps it
 type PayloadBase struct {
-	X402Version int                    `json:"x402Version"`
+	T402Version int                    `json:"t402Version"`
 	Payload     map[string]interface{} `json:"payload"`
 }
 
@@ -60,7 +60,7 @@ func ToPayloadBase(data []byte) (*PayloadBase, error) {
 // PaymentRequiredPartial for extracting accepts array as raw bytes
 // Keeps accepts as raw bytes to avoid version-specific unmarshaling
 type PaymentRequiredPartial struct {
-	X402Version int               `json:"x402Version"`
+	T402Version int               `json:"t402Version"`
 	Error       string            `json:"error,omitempty"`
 	Accepts     []json.RawMessage `json:"accepts"` // Keep as raw bytes
 	Resource    json.RawMessage   `json:"resource,omitempty"`

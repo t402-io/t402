@@ -1,4 +1,4 @@
-// Package integration_test contains integration tests for the x402 Go SDK.
+// Package integration_test contains integration tests for the t402 Go SDK.
 // This file specifically tests the EVM mechanism integration with both V1 and V2 implementations.
 // These tests make REAL on-chain transactions using private keys from environment variables.
 package integration_test
@@ -18,13 +18,13 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/signer/core/apitypes"
 
-	x402 "github.com/coinbase/x402/go"
-	"github.com/coinbase/x402/go/mechanisms/evm"
-	evmclient "github.com/coinbase/x402/go/mechanisms/evm/exact/client"
-	evmfacilitator "github.com/coinbase/x402/go/mechanisms/evm/exact/facilitator"
-	evmserver "github.com/coinbase/x402/go/mechanisms/evm/exact/server"
-	evmsigners "github.com/coinbase/x402/go/signers/evm"
-	"github.com/coinbase/x402/go/types"
+	t402 "github.com/coinbase/t402/go"
+	"github.com/coinbase/t402/go/mechanisms/evm"
+	evmclient "github.com/coinbase/t402/go/mechanisms/evm/exact/client"
+	evmfacilitator "github.com/coinbase/t402/go/mechanisms/evm/exact/facilitator"
+	evmserver "github.com/coinbase/t402/go/mechanisms/evm/exact/server"
+	evmsigners "github.com/coinbase/t402/go/signers/evm"
+	"github.com/coinbase/t402/go/types"
 )
 
 // newRealClientEvmSigner creates a client signer using the helper
@@ -215,14 +215,14 @@ func (s *realFacilitatorEvmSigner) VerifyTypedData(
 
 // Local facilitator client for testing
 type localEvmFacilitatorClient struct {
-	facilitator *x402.X402Facilitator
+	facilitator *t402.T402Facilitator
 }
 
 func (l *localEvmFacilitatorClient) Verify(
 	ctx context.Context,
 	payloadBytes []byte,
 	requirementsBytes []byte,
-) (*x402.VerifyResponse, error) {
+) (*t402.VerifyResponse, error) {
 	// Pass bytes directly to facilitator (it handles unmarshaling internally)
 	return l.facilitator.Verify(ctx, payloadBytes, requirementsBytes)
 }
@@ -231,12 +231,12 @@ func (l *localEvmFacilitatorClient) Settle(
 	ctx context.Context,
 	payloadBytes []byte,
 	requirementsBytes []byte,
-) (*x402.SettleResponse, error) {
+) (*t402.SettleResponse, error) {
 	// Pass bytes directly to facilitator (it handles unmarshaling internally)
 	return l.facilitator.Settle(ctx, payloadBytes, requirementsBytes)
 }
 
-func (l *localEvmFacilitatorClient) GetSupported(ctx context.Context) (x402.SupportedResponse, error) {
+func (l *localEvmFacilitatorClient) GetSupported(ctx context.Context) (t402.SupportedResponse, error) {
 	// Networks already registered - no parameters needed
 	return l.facilitator.GetSupported(), nil
 }
@@ -252,7 +252,7 @@ func TestEVMIntegrationV2(t *testing.T) {
 		t.Skip("Skipping EVM integration test: EVM_CLIENT_PRIVATE_KEY, EVM_FACILITATOR_PRIVATE_KEY, and EVM_RESOURCE_SERVER_ADDRESS must be set")
 	}
 
-	t.Run("EVM V2 Flow - x402Client / x402ResourceServer / x402Facilitator", func(t *testing.T) {
+	t.Run("EVM V2 Flow - t402Client / t402ResourceServer / t402Facilitator", func(t *testing.T) {
 		ctx := context.Background()
 
 		// Create real client signer
@@ -262,7 +262,7 @@ func TestEVMIntegrationV2(t *testing.T) {
 		}
 
 		// Setup client with EVM v2 scheme
-		client := x402.Newx402Client()
+		client := t402.Newt402Client()
 		evmClient := evmclient.NewExactEvmScheme(clientSigner)
 		// Register for Base Sepolia
 		client.Register("eip155:84532", evmClient)
@@ -274,22 +274,22 @@ func TestEVMIntegrationV2(t *testing.T) {
 		}
 
 		// Setup facilitator with EVM v2 scheme
-		facilitator := x402.Newx402Facilitator()
+		facilitator := t402.Newt402Facilitator()
 		// Enable smart wallet deployment via EIP-6492
 		evmConfig := &evmfacilitator.ExactEvmSchemeConfig{
 			DeployERC4337WithEIP6492: true,
 		}
 		evmFacilitator := evmfacilitator.NewExactEvmScheme(facilitatorSigner, evmConfig)
 		// Register for Base Sepolia
-		facilitator.Register([]x402.Network{"eip155:84532"}, evmFacilitator)
+		facilitator.Register([]t402.Network{"eip155:84532"}, evmFacilitator)
 
 		// Create facilitator client wrapper
 		facilitatorClient := &localEvmFacilitatorClient{facilitator: facilitator}
 
 		// Setup resource server with EVM v2
 		evmServer := evmserver.NewExactEvmScheme()
-		server := x402.Newx402ResourceServer(
-			x402.WithFacilitatorClient(facilitatorClient),
+		server := t402.Newt402ResourceServer(
+			t402.WithFacilitatorClient(facilitatorClient),
 		)
 		server.Register("eip155:84532", evmServer)
 
@@ -321,8 +321,8 @@ func TestEVMIntegrationV2(t *testing.T) {
 		paymentRequiredResponse := server.CreatePaymentRequiredResponse(accepts, resource, "", nil)
 
 		// Verify it's V2
-		if paymentRequiredResponse.X402Version != 2 {
-			t.Errorf("Expected X402Version 2, got %d", paymentRequiredResponse.X402Version)
+		if paymentRequiredResponse.T402Version != 2 {
+			t.Errorf("Expected T402Version 2, got %d", paymentRequiredResponse.T402Version)
 		}
 
 		// Client - selects payment requirement (V2 typed)
@@ -338,8 +338,8 @@ func TestEVMIntegrationV2(t *testing.T) {
 		}
 
 		// Verify payload is V2
-		if paymentPayload.X402Version != 2 {
-			t.Errorf("Expected payload X402Version 2, got %d", paymentPayload.X402Version)
+		if paymentPayload.T402Version != 2 {
+			t.Errorf("Expected payload T402Version 2, got %d", paymentPayload.T402Version)
 		}
 
 		// Verify payload structure
@@ -420,7 +420,7 @@ func TestEVMIntegrationV1(t *testing.T) {
 		t.Skip("Skipping EVM V1 integration test: EVM_CLIENT_PRIVATE_KEY, EVM_FACILITATOR_PRIVATE_KEY, and EVM_RESOURCE_SERVER_ADDRESS must be set")
 	}
 
-	t.Run("EVM V1 Flow (Legacy) - x402Client / x402ResourceServer / x402Facilitator", func(t *testing.T) {
+	t.Run("EVM V1 Flow (Legacy) - t402Client / t402ResourceServer / t402Facilitator", func(t *testing.T) {
 		ctx := context.Background()
 
 		// Create real client signer
@@ -430,7 +430,7 @@ func TestEVMIntegrationV1(t *testing.T) {
 		}
 
 		// Setup client with EVM v1 scheme
-		client := x402.Newx402Client()
+		client := t402.Newt402Client()
 		evmClientV1 := evmv1client.NewExactEvmSchemeV1(clientSigner)
 		// Register for Base Sepolia using V1 registration
 		client.RegisterV1("eip155:84532", evmClientV1)
@@ -442,10 +442,10 @@ func TestEVMIntegrationV1(t *testing.T) {
 		}
 
 		// Setup facilitator with EVM v1 scheme
-		facilitator := x402.Newx402Facilitator()
+		facilitator := t402.Newt402Facilitator()
 		evmFacilitatorV1 := evmv1facilitator.NewExactEvmSchemeV1(facilitatorSigner, nil)
 		// Register for Base Sepolia using V1 registration
-		facilitator.RegisterV1([]x402.Network{"eip155:84532"}, evmFacilitatorV1)
+		facilitator.RegisterV1([]t402.Network{"eip155:84532"}, evmFacilitatorV1)
 
 		// Create facilitator client wrapper
 		facilitatorClient := &localEvmFacilitatorClient{facilitator: facilitator}
@@ -453,8 +453,8 @@ func TestEVMIntegrationV1(t *testing.T) {
 		// Setup resource server with EVM v1
 		// V1 doesn't have separate server, uses V2 server
 		evmServerV1 := evmserver.NewExactEvmScheme()
-		server := x402.Newx402ResourceServer(
-			x402.WithFacilitatorClient(facilitatorClient),
+		server := t402.Newt402ResourceServer(
+			t402.WithFacilitatorClient(facilitatorClient),
 		)
 		server.Register("eip155:84532", evmServerV1)
 
@@ -465,7 +465,7 @@ func TestEVMIntegrationV1(t *testing.T) {
 		}
 
 		// Server - builds PaymentRequired response for 0.001 USDC (V1 uses version 1)
-		accepts := []x402.PaymentRequirements{
+		accepts := []t402.PaymentRequirements{
 			{
 				Scheme:            evm.SchemeExact,
 				Network:           "eip155:84532",                               // Base Sepolia
@@ -478,21 +478,21 @@ func TestEVMIntegrationV1(t *testing.T) {
 				},
 			},
 		}
-		resource := x402.ResourceInfo{
+		resource := t402.ResourceInfo{
 			URL:         "https://legacy.example.com/api",
 			Description: "Legacy API Access",
 			MimeType:    "application/json",
 		}
 
 		// For V1, we need to explicitly set the version to 1
-		paymentRequiredResponse := x402.PaymentRequired{
-			X402Version: 1, // V1 uses version 1
+		paymentRequiredResponse := t402.PaymentRequired{
+			T402Version: 1, // V1 uses version 1
 			Accepts:     accepts,
 			Resource:    &resource,
 		}
 
 		// Client - responds with PaymentPayload response
-		selected, err := client.SelectPaymentRequirements(paymentRequiredResponse.X402Version, accepts)
+		selected, err := client.SelectPaymentRequirements(paymentRequiredResponse.T402Version, accepts)
 		if err != nil {
 			t.Fatalf("Failed to select payment requirements: %v", err)
 		}
@@ -504,7 +504,7 @@ func TestEVMIntegrationV1(t *testing.T) {
 		}
 
 		// V1 doesn't use resource/extensions from PaymentRequired (uses requirements.Resource field)
-		payloadBytes, err := client.CreatePaymentPayload(ctx, paymentRequiredResponse.X402Version, selectedBytes, nil, nil)
+		payloadBytes, err := client.CreatePaymentPayload(ctx, paymentRequiredResponse.T402Version, selectedBytes, nil, nil)
 		if err != nil {
 			t.Fatalf("Failed to create payment payload: %v", err)
 		}
@@ -516,8 +516,8 @@ func TestEVMIntegrationV1(t *testing.T) {
 		}
 
 		// Verify payload is V1
-		if paymentPayload.X402Version != 1 {
-			t.Errorf("Expected payload X402Version 1, got %d", paymentPayload.X402Version)
+		if paymentPayload.T402Version != 1 {
+			t.Errorf("Expected payload T402Version 1, got %d", paymentPayload.T402Version)
 		}
 
 		// Verify payload structure (v1 has scheme at top level)

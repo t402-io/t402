@@ -1,13 +1,13 @@
 [project]
-name = "x402-httpx-e2e"
+name = "t402-httpx-e2e"
 version = "0.1.0"
-description = "Python httpx client for x402 e2e tests"
+description = "Python httpx client for t402 e2e tests"
 requires-python = ">=3.10"
 dependencies = [
     "httpx>=0.24.0",
     "eth-account>=0.8.0",
     "python-dotenv>=1.0.0",
-    "x402"
+    "t402"
 ]
 
 [build-system]
@@ -24,4 +24,4 @@ allow-direct-references = true
 package = false
 
 [tool.uv.sources]
-x402 = { path = "../../../../python/x402", editable = true } 
+t402 = { path = "../../../../python/t402", editable = true } 

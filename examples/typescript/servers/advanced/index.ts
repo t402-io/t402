@@ -1,7 +1,7 @@
 /**
  * Advanced Express Server Examples
  *
- * This package demonstrates advanced patterns for production-ready x402 servers:
+ * This package demonstrates advanced patterns for production-ready t402 servers:
  *
  * - bazaar: Bazaar discovery extension for API discoverability
  * - hooks: Payment lifecycle hooks for verification and settlement

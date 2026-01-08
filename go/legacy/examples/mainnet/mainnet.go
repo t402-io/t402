@@ -5,8 +5,8 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/coinbase/x402/go/pkg/coinbasefacilitator"
-	x402gin "github.com/coinbase/x402/go/pkg/gin"
+	"github.com/coinbase/t402/go/pkg/coinbasefacilitator"
+	t402gin "github.com/coinbase/t402/go/pkg/gin"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -40,13 +40,13 @@ func main() {
 	// Protected endpoint that costs $0.01 USDC
 	r.GET(
 		"/premium-joke",
-		x402gin.PaymentMiddleware(
+		t402gin.PaymentMiddleware(
 			big.NewFloat(0.01), // $0.01 USD
 			payTo,              // Your wallet address
-			x402gin.WithFacilitatorConfig(facilitatorConfig),
-			x402gin.WithDescription("A premium programming joke"),
-			x402gin.WithResource("https://api.example.com/premium-joke"),
-			x402gin.WithTestnet(false), // Use mainnet!
+			t402gin.WithFacilitatorConfig(facilitatorConfig),
+			t402gin.WithDescription("A premium programming joke"),
+			t402gin.WithResource("https://api.example.com/premium-joke"),
+			t402gin.WithTestnet(false), // Use mainnet!
 		),
 		func(c *gin.Context) {
 			c.JSON(200, gin.H{

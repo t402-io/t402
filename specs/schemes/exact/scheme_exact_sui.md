@@ -42,7 +42,7 @@ Full `PaymentPayload` object:
 
 ```json
 {
-  "x402Version": 2,
+  "t402Version": 2,
   "resource": {
     "url": "https://api.example.com/resource",
     "description": "Access to protected content",

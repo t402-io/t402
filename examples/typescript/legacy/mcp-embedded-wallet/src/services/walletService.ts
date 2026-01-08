@@ -8,7 +8,7 @@ import { Address } from "viem";
  *
  * @param message - The message to be signed
  * @param correlationId - Optional ID to correlate this operation with others
- * @param authorizationData - Optional payment authorization data for x402
+ * @param authorizationData - Optional payment authorization data for t402
  * @returns {Promise<string>} The signature of the signed message
  * @throws {Error} If signing fails or user is not found
  */
@@ -63,25 +63,25 @@ export async function signMessage(
 }
 
 /**
- * Specialized function for signing x402 payment authorizations.
- * Converts authorization data to JSON and signs it, tracking the operation with specific x402 context.
+ * Specialized function for signing t402 payment authorizations.
+ * Converts authorization data to JSON and signs it, tracking the operation with specific t402 context.
  *
  * @param correlationId - ID to correlate this payment authorization with other operations
  * @param authorizationData - Payment authorization details to be signed
  * @returns {Promise<string>} The signature of the payment authorization
  * @throws {Error} If signing fails or user is not found
  */
-export async function signX402Payment(
+export async function signT402Payment(
   correlationId: string,
   authorizationData: AuthorizationData,
 ): Promise<string> {
-  // Use the regular signMessage function with X402 context
+  // Use the regular signMessage function with T402 context
   const message = JSON.stringify(authorizationData);
 
   // Sign the message with correlation context
   const signature = await signMessage(message, correlationId, authorizationData);
 
-  // Update the description to be more specific for X402
+  // Update the description to be more specific for T402
   operationStore.getState().updateWalletOperation(operationStore.getState().operations.length - 1, {
     description: `Payment authorization signed successfully`,
   });

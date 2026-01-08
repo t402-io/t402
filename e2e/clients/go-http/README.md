@@ -1,12 +1,12 @@
 # E2E Test Client: Go HTTP
 
-This client demonstrates and tests the Go x402 HTTP client with both EVM and SVM payment support.
+This client demonstrates and tests the Go t402 HTTP client with both EVM and SVM payment support.
 
 ## What It Tests
 
 ### Core Functionality
-- ✅ **V2 Protocol** - Modern x402 protocol with CAIP-2 networks
-- ✅ **V1 Protocol** - Legacy x402 protocol with simple network names
+- ✅ **V2 Protocol** - Modern t402 protocol with CAIP-2 networks
+- ✅ **V1 Protocol** - Legacy t402 protocol with simple network names
 - ✅ **Multi-chain Support** - Both EVM and SVM in a single client
 - ✅ **HTTP RoundTripper Integration** - Transparent payment via Go's http.Client
 - ✅ **Automatic Retry** - Handles 402 responses and retries with payment
@@ -24,30 +24,30 @@ This client demonstrates and tests the Go x402 HTTP client with both EVM and SVM
 
 ```go
 import (
-    x402 "github.com/coinbase/x402/go"
-    x402http "github.com/coinbase/x402/go/http"
-    "github.com/coinbase/x402/go/mechanisms/evm"
-    evmv1 "github.com/coinbase/x402/go/mechanisms/evm/exact/v1"
-    "github.com/coinbase/x402/go/mechanisms/svm"
-    svmv1 "github.com/coinbase/x402/go/mechanisms/svm/exact/v1"
+    t402 "github.com/coinbase/t402/go"
+    t402http "github.com/coinbase/t402/go/http"
+    "github.com/coinbase/t402/go/mechanisms/evm"
+    evmv1 "github.com/coinbase/t402/go/mechanisms/evm/exact/v1"
+    "github.com/coinbase/t402/go/mechanisms/svm"
+    svmv1 "github.com/coinbase/t402/go/mechanisms/svm/exact/v1"
 )
 
-// Create x402 client with direct registration
-x402Client := x402.Newx402Client()
+// Create t402 client with direct registration
+t402Client := t402.Newt402Client()
 
 // Register EVM support
-x402Client.Register("eip155:*", evm.NewExactEvmClient(evmSigner))
-x402Client.RegisterV1("base-sepolia", evmv1.NewExactEvmClientV1(evmSigner))
+t402Client.Register("eip155:*", evm.NewExactEvmClient(evmSigner))
+t402Client.RegisterV1("base-sepolia", evmv1.NewExactEvmClientV1(evmSigner))
 
 // Register SVM support  
-x402Client.Register("solana:*", svm.NewExactSvmClient(svmSigner))
-x402Client.RegisterV1("solana-devnet", svmv1.NewExactSvmClientV1(svmSigner))
+t402Client.Register("solana:*", svm.NewExactSvmClient(svmSigner))
+t402Client.RegisterV1("solana-devnet", svmv1.NewExactSvmClientV1(svmSigner))
 
 // Create HTTP wrapper
-httpClient := x402http.Newx402HTTPClient(x402Client)
+httpClient := t402http.Newt402HTTPClient(t402Client)
 
 // Wrap standard http.Client
-client := x402http.WrapHTTPClientWithPayment(http.DefaultClient, httpClient)
+client := t402http.WrapHTTPClientWithPayment(http.DefaultClient, httpClient)
 
 // Make request - 402 responses handled automatically
 resp, err := client.Get(url)
@@ -135,9 +135,9 @@ export SVM_PRIVATE_KEY="..."
 
 ## Dependencies
 
-- `github.com/coinbase/x402/go` - Core x402 protocol
-- `github.com/coinbase/x402/go/http` - HTTP integration
-- `github.com/coinbase/x402/go/mechanisms/evm` - EVM mechanisms
-- `github.com/coinbase/x402/go/mechanisms/svm` - SVM mechanisms
+- `github.com/coinbase/t402/go` - Core t402 protocol
+- `github.com/coinbase/t402/go/http` - HTTP integration
+- `github.com/coinbase/t402/go/mechanisms/evm` - EVM mechanisms
+- `github.com/coinbase/t402/go/mechanisms/svm` - SVM mechanisms
 - `github.com/ethereum/go-ethereum` - Ethereum Go library
 - `github.com/gagliardetto/solana-go` - Solana Go library

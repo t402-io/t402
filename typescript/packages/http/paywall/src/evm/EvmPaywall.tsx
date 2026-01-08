@@ -3,9 +3,9 @@ import { createPublicClient, formatUnits, http, publicActions, type Chain } from
 import * as allChains from "viem/chains";
 import { useAccount, useSwitchChain, useWalletClient, useConnect, useDisconnect } from "wagmi";
 
-import { registerExactEvmScheme } from "@x402/evm/exact/client";
-import { x402Client } from "@x402/core/client";
-import type { PaymentRequired } from "@x402/core/types";
+import { registerExactEvmScheme } from "@t402/evm/exact/client";
+import { t402Client } from "@t402/core/client";
+import type { PaymentRequired } from "@t402/core/types";
 import { getUSDCBalance } from "./utils";
 
 import { Spinner } from "./Spinner";
@@ -39,8 +39,8 @@ export function EvmPaywall({ paymentRequired, onSuccessfulResponse }: EvmPaywall
   const [hideBalance, setHideBalance] = useState(true);
   const [selectedConnectorId, setSelectedConnectorId] = useState<string>("");
 
-  const x402 = window.x402;
-  const amount = x402.amount;
+  const t402 = window.t402;
+  const amount = t402.amount;
 
   const firstRequirement = paymentRequired.accepts[0];
   if (!firstRequirement) {
@@ -122,7 +122,7 @@ export function EvmPaywall({ paymentRequired, onSuccessfulResponse }: EvmPaywall
   }, [connectors, selectedConnectorId]);
 
   const handlePayment = useCallback(async () => {
-    if (!address || !x402) {
+    if (!address || !t402) {
       return;
     }
 
@@ -148,7 +148,7 @@ export function EvmPaywall({ paymentRequired, onSuccessfulResponse }: EvmPaywall
 
       // Create client and register EVM schemes (handles v1 and v2)
       const signer = wagmiToClientSigner(walletClient);
-      const client = new x402Client();
+      const client = new t402Client();
       registerExactEvmScheme(client, { signer });
 
       // Create payment payload - client automatically handles version
@@ -158,7 +158,7 @@ export function EvmPaywall({ paymentRequired, onSuccessfulResponse }: EvmPaywall
       const paymentHeader = btoa(JSON.stringify(paymentPayload));
 
       setStatus("Requesting content with payment...");
-      const response = await fetch(x402.currentUrl, {
+      const response = await fetch(t402.currentUrl, {
         headers: {
           "PAYMENT-SIGNATURE": paymentHeader,
           "Access-Control-Expose-Headers": "PAYMENT-RESPONSE",
@@ -177,7 +177,7 @@ export function EvmPaywall({ paymentRequired, onSuccessfulResponse }: EvmPaywall
     }
   }, [
     address,
-    x402,
+    t402,
     paymentRequired,
     handleSwitchChain,
     wagmiWalletClient,
@@ -186,7 +186,7 @@ export function EvmPaywall({ paymentRequired, onSuccessfulResponse }: EvmPaywall
     onSuccessfulResponse,
   ]);
 
-  if (!x402) {
+  if (!t402) {
     return null;
   }
 

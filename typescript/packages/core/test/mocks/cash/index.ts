@@ -1,4 +1,4 @@
-import { x402Facilitator } from "../../../../src/facilitator";
+import { t402Facilitator } from "../../../../src/facilitator";
 import { FacilitatorClient } from "../../../../src/server";
 import {
   SettleResponse,
@@ -29,16 +29,16 @@ export class CashSchemeNetworkClient implements SchemeNetworkClient {
   /**
    * Creates a payment payload for the cash scheme.
    *
-   * @param x402Version - The x402 protocol version
+   * @param t402Version - The t402 protocol version
    * @param requirements - The payment requirements
    * @returns Promise resolving to the payment payload
    */
   createPaymentPayload(
-    x402Version: number,
+    t402Version: number,
     requirements: PaymentRequirements,
   ): Promise<PaymentPayload> {
     return Promise.resolve({
-      x402Version: 2,
+      t402Version: 2,
       scheme: requirements.scheme,
       network: requirements.network,
       payload: {
@@ -148,7 +148,7 @@ export function buildCashPaymentRequirements(
 ): PaymentRequirements {
   return {
     scheme: "cash",
-    network: "x402:cash",
+    network: "t402:cash",
     asset: asset,
     amount: amount,
     payTo: payTo,
@@ -212,7 +212,7 @@ export class CashSchemeNetworkServer implements SchemeNetworkServer {
    *
    * @param paymentRequirements - Base payment requirements
    * @param supportedKind - The supported kind from facilitator
-   * @param supportedKind.x402Version - The x402 version
+   * @param supportedKind.t402Version - The t402 version
    * @param supportedKind.scheme - The payment scheme
    * @param supportedKind.network - The network identifier
    * @param supportedKind.extra - Optional extra metadata
@@ -222,7 +222,7 @@ export class CashSchemeNetworkServer implements SchemeNetworkServer {
   async enhancePaymentRequirements(
     paymentRequirements: PaymentRequirements,
     supportedKind: {
-      x402Version: number;
+      t402Version: number;
       scheme: string;
       network: Network;
       extra?: Record<string, unknown>;
@@ -242,15 +242,15 @@ export class CashSchemeNetworkServer implements SchemeNetworkServer {
  */
 export class CashFacilitatorClient implements FacilitatorClient {
   readonly scheme = "cash";
-  readonly network = "x402:cash";
-  readonly x402Version = 2;
+  readonly network = "t402:cash";
+  readonly t402Version = 2;
 
   /**
    * Registers a facilitator for the cash scheme.
    *
    * @param facilitator - The cash facilitator to register
    */
-  constructor(private readonly facilitator: x402Facilitator) {}
+  constructor(private readonly facilitator: t402Facilitator) {}
 
   /**
    * Verifies a payment payload against requirements.
@@ -289,7 +289,7 @@ export class CashFacilitatorClient implements FacilitatorClient {
     return Promise.resolve({
       kinds: [
         {
-          x402Version: this.x402Version,
+          t402Version: this.t402Version,
           scheme: this.scheme,
           network: this.network,
           extra: {},

@@ -2,7 +2,7 @@
   "name": "express",
   "type": "server",
   "language": "typescript",
-  "x402Version": 2,
+  "t402Version": 2,
   "extensions": [
     "bazaar"
   ],

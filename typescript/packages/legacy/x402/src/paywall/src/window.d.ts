@@ -2,7 +2,7 @@ import { PaymentRequirements } from "../../types/verify";
 
 declare global {
   interface Window {
-    x402: {
+    t402: {
       amount?: number;
       testnet?: boolean;
       paymentRequirements: PaymentRequirements | PaymentRequirements[];

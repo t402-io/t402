@@ -1,8 +1,8 @@
-import type { PaymentRequired } from "@x402/core/types";
+import type { PaymentRequired } from "@t402/core/types";
 
 declare global {
   interface Window {
-    x402: {
+    t402: {
       amount?: number;
       testnet?: boolean;
       paymentRequired: PaymentRequired;

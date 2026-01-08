@@ -31,7 +31,7 @@ export interface PaymentRequirements {
  * Payment required response structure
  */
 export interface PaymentRequired {
-  x402Version: number;
+  t402Version: number;
   error?: string;
   resource?: {
     url: string;

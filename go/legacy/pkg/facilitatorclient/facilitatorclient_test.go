@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coinbase/x402/go/pkg/facilitatorclient"
-	"github.com/coinbase/x402/go/pkg/types"
+	"github.com/coinbase/t402/go/pkg/facilitatorclient"
+	"github.com/coinbase/t402/go/pkg/types"
 )
 
 func TestVerify(t *testing.T) {
@@ -38,7 +38,7 @@ func TestVerify(t *testing.T) {
 
 	// Test data
 	paymentPayload := &types.PaymentPayload{
-		X402Version: 1,
+		T402Version: 1,
 		Scheme:      "exact",
 		Network:     "base-sepolia",
 		Payload: &types.ExactEvmPayload{
@@ -102,7 +102,7 @@ func TestSettle(t *testing.T) {
 
 	// Test data
 	paymentPayload := &types.PaymentPayload{
-		X402Version: 1,
+		T402Version: 1,
 		Scheme:      "exact",
 		Network:     "base-sepolia",
 		Payload: &types.ExactEvmPayload{
@@ -210,7 +210,7 @@ func TestVerifyWithAuthHeaders(t *testing.T) {
 
 	// Test verify with auth headers
 	paymentPayload := &types.PaymentPayload{
-		X402Version: 1,
+		T402Version: 1,
 		Scheme:      "exact",
 		Network:     "base-sepolia",
 		Payload: &types.ExactEvmPayload{
@@ -281,7 +281,7 @@ func TestSettleWithAuthHeaders(t *testing.T) {
 
 	// Test settle with auth headers
 	paymentPayload := &types.PaymentPayload{
-		X402Version: 1,
+		T402Version: 1,
 		Scheme:      "exact",
 		Network:     "base-sepolia",
 		Payload: &types.ExactEvmPayload{

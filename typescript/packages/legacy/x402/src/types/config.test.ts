@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { X402Config, SvmConfig } from "./config";
+import { T402Config, SvmConfig } from "./config";
 
-describe("X402Config Types", () => {
+describe("T402Config Types", () => {
   describe("SvmConfig", () => {
     it("should accept valid SvmConfig with rpcUrl", () => {
       const config: SvmConfig = {
@@ -18,9 +18,9 @@ describe("X402Config Types", () => {
     });
   });
 
-  describe("X402Config", () => {
-    it("should accept valid X402Config with svmConfig", () => {
-      const config: X402Config = {
+  describe("T402Config", () => {
+    it("should accept valid T402Config with svmConfig", () => {
+      const config: T402Config = {
         svmConfig: {
           rpcUrl: "https://api.mainnet-beta.solana.com",
         },
@@ -29,14 +29,14 @@ describe("X402Config Types", () => {
       expect(config.svmConfig?.rpcUrl).toBe("https://api.mainnet-beta.solana.com");
     });
 
-    it("should accept empty X402Config", () => {
-      const config: X402Config = {};
+    it("should accept empty T402Config", () => {
+      const config: T402Config = {};
 
       expect(config.svmConfig).toBeUndefined();
     });
 
-    it("should accept X402Config with empty svmConfig", () => {
-      const config: X402Config = {
+    it("should accept T402Config with empty svmConfig", () => {
+      const config: T402Config = {
         svmConfig: {},
       };
 
@@ -45,9 +45,9 @@ describe("X402Config Types", () => {
     });
 
     it("should handle optional chaining correctly", () => {
-      const config1: X402Config = {};
-      const config2: X402Config = { svmConfig: {} };
-      const config3: X402Config = { svmConfig: { rpcUrl: "http://localhost:8899" } };
+      const config1: T402Config = {};
+      const config2: T402Config = { svmConfig: {} };
+      const config3: T402Config = { svmConfig: { rpcUrl: "http://localhost:8899" } };
 
       expect(config1.svmConfig?.rpcUrl).toBeUndefined();
       expect(config2.svmConfig?.rpcUrl).toBeUndefined();

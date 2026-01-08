@@ -3,8 +3,8 @@ from typing import Any, Dict
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
-from x402.fastapi.middleware import require_payment
-from x402.types import EIP712Domain, TokenAmount, TokenAsset
+from t402.fastapi.middleware import require_payment
+from t402.types import EIP712Domain, TokenAmount, TokenAsset
 
 # Load environment variables
 load_dotenv()

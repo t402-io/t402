@@ -1,7 +1,7 @@
 {
   "name": "auth-based-pricing",
   "version": "1.0.0",
-  "description": "Demo of Sign-In with Ethereum (SIWE), JWT authentication, and conditional x402 payments.",
+  "description": "Demo of Sign-In with Ethereum (SIWE), JWT authentication, and conditional t402 payments.",
   "main": "dist/backend.js",
   "type": "module",
   "scripts": {
@@ -15,7 +15,7 @@
   "keywords": [
     "siwe",
     "jwt",
-    "x402",
+    "t402",
     "hono",
     "web3",
     "auth"
@@ -29,9 +29,9 @@
     "node-fetch": "^3.3.2",
     "siwe": "^2.3.2",
     "viem": "^2.13.8",
-    "x402": "workspace:*",
-    "x402-fetch": "workspace:*",
-    "x402-hono": "workspace:*"
+    "t402": "workspace:*",
+    "t402-fetch": "workspace:*",
+    "t402-hono": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.14.2",

@@ -2,25 +2,25 @@ import { config } from "dotenv";
 import { privateKeyToAccount } from "viem/accounts";
 import { createKeyPairSignerFromBytes } from "@solana/kit";
 import { base58 } from "@scure/base";
-import { x402Client } from "@x402/core/client";
+import { t402Client } from "@t402/core/client";
 import {
   decodePaymentRequiredHeader,
   decodePaymentResponseHeader,
   encodePaymentSignatureHeader,
-} from "@x402/core/http";
-import { ExactEvmScheme } from "@x402/evm/exact/client";
-import { ExactSvmScheme } from "@x402/svm/exact/client";
-import type { PaymentRequirements } from "@x402/core/types";
+} from "@t402/core/http";
+import { ExactEvmScheme } from "@t402/evm/exact/client";
+import { ExactSvmScheme } from "@t402/svm/exact/client";
+import type { PaymentRequirements } from "@t402/core/types";
 
 config();
 
 /**
- * Custom x402 Client Implementation (v2 Protocol)
+ * Custom t402 Client Implementation (v2 Protocol)
  *
- * This example demonstrates how to implement x402 payment handling manually
- * using only the core packages, without the convenience wrappers like @x402/fetch.
+ * This example demonstrates how to implement t402 payment handling manually
+ * using only the core packages, without the convenience wrappers like @t402/fetch.
  *
- * x402 v2 Protocol Headers:
+ * t402 v2 Protocol Headers:
  * - PAYMENT-REQUIRED: Server → Client (402 response)
  * - PAYMENT-SIGNATURE: Client → Server (retry with payment)
  * - PAYMENT-RESPONSE: Server → Client (settlement confirmation)
@@ -32,12 +32,12 @@ const baseURL = process.env.SERVER_URL || "http://localhost:4021";
 const url = `${baseURL}/weather`;
 
 /**
- * Makes a request with x402 payment handling.
+ * Makes a request with t402 payment handling.
  *
- * @param client - The x402 client instance to use for payments
+ * @param client - The t402 client instance to use for payments
  * @param url - The URL to request
  */
-async function makeRequestWithPayment(client: x402Client, url: string): Promise<void> {
+async function makeRequestWithPayment(client: t402Client, url: string): Promise<void> {
   console.log(`\n🌐 Making initial request to: ${url}\n`);
 
   // Step 1: Make initial request
@@ -97,10 +97,10 @@ async function makeRequestWithPayment(client: x402Client, url: string): Promise<
 }
 
 /**
- * Main entry point demonstrating custom x402 client usage.
+ * Main entry point demonstrating custom t402 client usage.
  */
 async function main(): Promise<void> {
-  console.log("\n🔧 Custom x402 Client (v2 Protocol)\n");
+  console.log("\n🔧 Custom t402 Client (v2 Protocol)\n");
 
   if (!evmPrivateKey) {
     console.error("❌ EVM_PRIVATE_KEY required");
@@ -119,7 +119,7 @@ async function main(): Promise<void> {
     return selected;
   };
 
-  const client = new x402Client(selectPayment)
+  const client = new t402Client(selectPayment)
     .register("eip155:*", new ExactEvmScheme(evmSigner))
     .register("solana:*", new ExactSvmScheme(solanaSigner));
   console.log("✅ Client ready\n");

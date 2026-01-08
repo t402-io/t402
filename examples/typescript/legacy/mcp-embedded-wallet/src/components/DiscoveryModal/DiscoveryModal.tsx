@@ -26,7 +26,7 @@ import { Button } from "../Button";
 interface DiscoveryItem {
   type: string;
   resource: string;
-  x402Version: number;
+  t402Version: number;
   accepts: Array<{
     scheme: "exact";
     description: string;
@@ -45,7 +45,7 @@ interface DiscoveryItem {
 }
 
 interface DiscoveryResponse {
-  x402Version: number;
+  t402Version: number;
   items: DiscoveryItem[];
   pagination: {
     limit: number;
@@ -60,7 +60,7 @@ interface DiscoveryModalProps {
 }
 
 /**
- * Modal component that displays a list of discovered x402 resources and their payment requirements.
+ * Modal component that displays a list of discovered t402 resources and their payment requirements.
  * Allows users to view detailed information about each resource, copy asset addresses, and generate prompts.
  *
  * @param root0 - Component props

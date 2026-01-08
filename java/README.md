@@ -1,10 +1,10 @@
-# x402 Java
+# t402 Java
 
-[![Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen.svg)](https://github.com/coinbase/x402/java)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/coinbase/x402/blob/main/LICENSE)
-[![Java Version](https://img.shields.io/badge/java-17%2B-orange)](https://github.com/coinbase/x402/java)
+[![Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen.svg)](https://github.com/coinbase/t402/java)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/coinbase/t402/blob/main/LICENSE)
+[![Java Version](https://img.shields.io/badge/java-17%2B-orange)](https://github.com/coinbase/t402/java)
 
-Java implementation of [x402](https://github.com/coinbase/x402)
+Java implementation of [t402](https://github.com/coinbase/t402)
 
 ## Quick Start
 
@@ -26,9 +26,9 @@ mvn spotbugs:check
 
 ## Overview
 
-x402 is a system for decentralized payments for API calls, web content, and other HTTP resources. The `402` stands for the HTTP status code `Payment Required`.
+t402 is a system for decentralized payments for API calls, web content, and other HTTP resources. The `402` stands for the HTTP status code `Payment Required`.
 
-This library provides a Java implementation of the `x402` protocol, with the following core components:
+This library provides a Java implementation of the `t402` protocol, with the following core components:
 
 - `**PaymentFilter**`: A servlet filter that authenticates payments and rejects unauthorized requests
 - `**FacilitatorClient**`: A client for verifying and settling payments with a facilitator service
@@ -47,8 +47,8 @@ To use this library, you need to build and install it locally:
 
 ```bash
 # Clone the repository
-git clone https://github.com/coinbase/x402.git
-cd x402/java
+git clone https://github.com/coinbase/t402.git
+cd t402/java
 
 # Build and install to your local Maven repository
 mvn clean install
@@ -59,7 +59,7 @@ Then add the dependency to your Maven project:
 ```xml
 <dependency>
     <groupId>com.coinbase</groupId>
-    <artifactId>x402</artifactId>
+    <artifactId>t402</artifactId>
     <version>0.1.0-SNAPSHOT</version>
 </dependency>
 ```
@@ -68,11 +68,11 @@ Then add the dependency to your Maven project:
 
 ### Server Side - Requiring Payments for Access
 
-Integrate the `x402` filter into your servlet-based application to require payment for specific paths:
+Integrate the `t402` filter into your servlet-based application to require payment for specific paths:
 
 ```java
-import com.coinbase.x402.server.PaymentFilter;
-import com.coinbase.x402.client.HttpFacilitatorClient;
+import com.coinbase.t402.server.PaymentFilter;
+import com.coinbase.t402.client.HttpFacilitatorClient;
 
 import java.math.BigInteger;
 import java.util.Map;
@@ -84,7 +84,7 @@ Map<String, BigInteger> priceTable = Map.of(
 );
 
 // 2. Create a facilitator client
-String facilitatorUrl = "https://x402.org/faciliator";
+String facilitatorUrl = "https://t402.org/faciliator";
 HttpFacilitatorClient facilitator = new HttpFacilitatorClient(facilitatorUrl);
 
 // 3. Create and register the filter
@@ -113,8 +113,8 @@ public FilterRegistration paymentFilter(ServletContext servletContext) {
 To make HTTP requests that include payment proofs:
 
 ```java
-import com.coinbase.x402.client.X402HttpClient;
-import com.coinbase.x402.crypto.CryptoSigner;
+import com.coinbase.t402.client.X402HttpClient;
+import com.coinbase.t402.crypto.CryptoSigner;
 
 import java.math.BigInteger;
 import java.net.URI;
@@ -149,8 +149,8 @@ System.out.println("Response: " + response.body());
 Here's a complete example of a Spring Boot application with a paid joke API:
 
 ```java
-import com.coinbase.x402.server.PaymentFilter;
-import com.coinbase.x402.client.HttpFacilitatorClient;
+import com.coinbase.t402.server.PaymentFilter;
+import com.coinbase.t402.client.HttpFacilitatorClient;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
@@ -174,7 +174,7 @@ public class PaidJokeApplication implements ServletContextInitializer {
     @Override
     public void onStartup(ServletContext servletContext) {
         // Set up the payment filter
-        String facilitatorUrl = "https://x402.org/facilitator";
+        String facilitatorUrl = "https://t402.org/facilitator";
         HttpFacilitatorClient facilitator = new HttpFacilitatorClient(facilitatorUrl);
         
         // Define which URLs require payment and their prices
@@ -240,7 +240,7 @@ When a payment is required but not provided or is invalid, the filter returns a 
 
 ```json
 {
-  "x402Version": 1,
+  "t402Version": 1,
   "accepts": [
     {
       "scheme": "exact",
@@ -279,7 +279,7 @@ When payment settlement fails after successful verification, the filter returns 
 
 ```json
 {
-  "x402Version": 1,
+  "t402Version": 1,
   "accepts": [...],
   "error": "settlement failed: insufficient balance"
 }

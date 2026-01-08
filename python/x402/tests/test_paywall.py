@@ -1,10 +1,10 @@
-from x402.paywall import (
+from t402.paywall import (
     is_browser_request,
-    create_x402_config,
+    create_t402_config,
     inject_payment_data,
     get_paywall_html,
 )
-from x402.types import PaymentRequirements, PaywallConfig
+from t402.types import PaymentRequirements, PaywallConfig
 
 
 class TestIsBrowserRequest:
@@ -50,8 +50,8 @@ class TestIsBrowserRequest:
         assert is_browser_request(headers) is False
 
 
-class TestCreateX402Config:
-    """Test x402 configuration creation."""
+class TestCreateT402Config:
+    """Test t402 configuration creation."""
 
     def test_create_config_with_payment_requirements(self):
         payment_req = PaymentRequirements(
@@ -68,14 +68,14 @@ class TestCreateX402Config:
 
         error = "Payment required"
 
-        config = create_x402_config(error, [payment_req])
+        config = create_t402_config(error, [payment_req])
 
         assert config["amount"] == 1.0  # 1 USDC
         assert config["testnet"] is True
         assert config["currentUrl"] == "https://example.com/api/data"
         assert config["error"] == "Payment required"
         assert len(config["paymentRequirements"]) == 1
-        assert config["x402_version"] == 1
+        assert config["t402_version"] == 1
 
     def test_create_config_with_mainnet(self):
         payment_req = PaymentRequirements(
@@ -90,7 +90,7 @@ class TestCreateX402Config:
             asset="0xUSDC",
         )
 
-        config = create_x402_config("Payment required", [payment_req])
+        config = create_t402_config("Payment required", [payment_req])
 
         assert config["testnet"] is False
         assert config["amount"] == 0.5
@@ -113,13 +113,13 @@ class TestCreateX402Config:
             app_logo="https://example.com/logo.png",
         )
 
-        config = create_x402_config("Payment required", [payment_req], paywall_config)
+        config = create_t402_config("Payment required", [payment_req], paywall_config)
 
         assert config["appName"] == "Test App"
         assert config["appLogo"] == "https://example.com/logo.png"
 
     def test_create_config_empty_requirements(self):
-        config = create_x402_config("No requirements", [])
+        config = create_t402_config("No requirements", [])
 
         assert config["amount"] == 0
         assert config["currentUrl"] == ""
@@ -156,7 +156,7 @@ class TestInjectPaymentData:
 
         result = inject_payment_data(html_content, "Payment required", [payment_req])
 
-        assert "window.x402 = " in result
+        assert "window.t402 = " in result
         assert "console.log('Payment requirements initialized" in result
         assert '"amount": 1.0' in result
         assert '"testnet": true' in result
@@ -187,7 +187,7 @@ class TestInjectPaymentData:
 
         result = inject_payment_data(html_content, "Payment required", [payment_req])
 
-        assert "window.x402 = " in result
+        assert "window.t402 = " in result
         assert "console.log('Payment requirements initialized" not in result
         assert '"testnet": false' in result
 
@@ -224,7 +224,7 @@ class TestInjectPaymentData:
 
         # Check that script is injected before </head>
         head_end_pos = result.find("</head>")
-        script_pos = result.find("window.x402 = ")
+        script_pos = result.find("window.t402 = ")
         assert script_pos < head_end_pos
 
 
@@ -252,7 +252,7 @@ class TestGetPaywallHtml:
         result = get_paywall_html("Payment required", [payment_req], paywall_config)
 
         assert isinstance(result, str)
-        assert "window.x402 = " in result
+        assert "window.t402 = " in result
         assert '"amount": 2.0' in result
         assert '"appName": "My App"' in result
         assert '"appLogo": "https://example.com/logo.png"' in result

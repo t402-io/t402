@@ -15,7 +15,7 @@ import { FAQ } from "./components/FAQ";
 import { ComparisonTable } from "./components/ComparisonTable";
 import { HTTPNativeSection } from "./components/HTTPNativeSection";
 import { HeroSection } from "./components/HeroSection";
-import { WhatsX402Section } from "./components/WhatsX402Section";
+import { WhatsT402Section } from "./components/WhatsT402Section";
 import { AnimatedSectionHeader } from "./components/AnimatedSectionHeader";
 
 function ArrowIcon() {
@@ -68,7 +68,7 @@ const traditionalSteps = [
   },
 ];
 
-const x402Steps = [
+const t402Steps = [
   {
     number: "1",
     title: "AI agent sends HTTP request and receives 402: Payment Required",
@@ -111,8 +111,8 @@ export default function HomePage() {
       {/* Stats Section */}
       <StatsSection />
 
-      {/* What's x402? */}
-      <WhatsX402Section />
+      {/* What's t402? */}
+      <WhatsT402Section />
 
       <HTTPNativeSection />
 
@@ -127,7 +127,7 @@ export default function HomePage() {
             <FeatureCard
               icon={<ZeroFeesIcon />}
               title="Zero protocol fees"
-              description="x402 is free for the customer and the merchant—just pay nominal payment network fees"
+              description="t402 is free for the customer and the merchant—just pay nominal payment network fees"
             />
             <FeatureCard
               icon={<ZeroWaitIcon />}
@@ -142,12 +142,12 @@ export default function HomePage() {
             <FeatureCard
               icon={<ZeroCentralizationIcon />}
               title="Zero centralization"
-              description="Anyone on the internet can build on or extend x402"
+              description="Anyone on the internet can build on or extend t402"
             />
             <FeatureCard
               icon={<ZeroRestrictionsIcon />}
               title="Zero restrictions"
-              description="x402 is a neutral standard, not tied to any specific network"
+              description="t402 is a neutral standard, not tied to any specific network"
             />
           </div>
         </div>
@@ -158,7 +158,7 @@ export default function HomePage() {
         <div className="max-w-[1177px] mx-auto px-4 sm:px-6 md:px-10">
           <AnimatedSectionHeader
             title="We need a new way to transfer value on the internet..."
-            description="The old way of doing payments is barely working for a human world, let alone an agentic future. x402 does in moments what existing systems can't do at all."
+            description="The old way of doing payments is barely working for a human world, let alone an agentic future. t402 does in moments what existing systems can't do at all."
             align="center"
             className="mb-12 md:mb-16 lg:mb-20"
             maxDescriptionWidth="635px"
@@ -167,7 +167,7 @@ export default function HomePage() {
 
           <ComparisonTable
             traditionalSteps={traditionalSteps}
-            x402Steps={x402Steps}
+            t402Steps={t402Steps}
           />
         </div>
       </section>

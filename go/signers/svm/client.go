@@ -6,10 +6,10 @@ import (
 
 	solana "github.com/gagliardetto/solana-go"
 
-	x402svm "github.com/coinbase/x402/go/mechanisms/svm"
+	t402svm "github.com/coinbase/t402/go/mechanisms/svm"
 )
 
-// ClientSigner implements x402svm.ClientSvmSigner using an Ed25519 private key.
+// ClientSigner implements t402svm.ClientSvmSigner using an Ed25519 private key.
 // This provides client-side transaction signing for creating payment payloads.
 type ClientSigner struct {
 	privateKey solana.PrivateKey
@@ -32,9 +32,9 @@ type ClientSigner struct {
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
-//	client := x402.Newx402Client().
+//	client := t402.Newt402Client().
 //	    Register("solana:*", svm.NewExactSvmClient(signer))
-func NewClientSignerFromPrivateKey(privateKeyBase58 string) (x402svm.ClientSvmSigner, error) {
+func NewClientSignerFromPrivateKey(privateKeyBase58 string) (t402svm.ClientSvmSigner, error) {
 	// Parse base58-encoded private key
 	privateKey, err := solana.PrivateKeyFromBase58(privateKeyBase58)
 	if err != nil {

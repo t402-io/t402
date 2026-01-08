@@ -1,24 +1,24 @@
 import { base58 } from "@scure/base";
 import { createKeyPairSignerFromBytes } from "@solana/kit";
-import { x402Facilitator } from "@x402/core/facilitator";
-import { Network } from "@x402/core/types";
-import { toFacilitatorEvmSigner } from "@x402/evm";
-import { ExactEvmScheme } from "@x402/evm/exact/facilitator";
-import { ExactEvmSchemeV1 } from "@x402/evm/exact/v1/facilitator";
-import { toFacilitatorSvmSigner } from "@x402/svm";
-import { ExactSvmScheme } from "@x402/svm/exact/facilitator";
-import { ExactSvmSchemeV1 } from "@x402/svm/exact/v1/facilitator";
+import { t402Facilitator } from "@t402/core/facilitator";
+import { Network } from "@t402/core/types";
+import { toFacilitatorEvmSigner } from "@t402/evm";
+import { ExactEvmScheme } from "@t402/evm/exact/facilitator";
+import { ExactEvmSchemeV1 } from "@t402/evm/exact/v1/facilitator";
+import { toFacilitatorSvmSigner } from "@t402/svm";
+import { ExactSvmScheme } from "@t402/svm/exact/facilitator";
+import { ExactSvmSchemeV1 } from "@t402/svm/exact/v1/facilitator";
 import { createWalletClient, http, publicActions } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { baseSepolia } from "viem/chains";
 
 /**
- * Initialize and configure the x402 facilitator with EVM and SVM support
+ * Initialize and configure the t402 facilitator with EVM and SVM support
  * This is called lazily on first use to support Next.js module loading
  *
- * @returns A configured x402Facilitator instance
+ * @returns A configured t402Facilitator instance
  */
-async function createFacilitator(): Promise<x402Facilitator> {
+async function createFacilitator(): Promise<t402Facilitator> {
   // Validate required environment variables
   if (!process.env.FACILITATOR_EVM_PRIVATE_KEY) {
     throw new Error("❌ FACILITATOR_EVM_PRIVATE_KEY environment variable is required");
@@ -38,7 +38,7 @@ async function createFacilitator(): Promise<x402Facilitator> {
     transport: http(),
   }).extend(publicActions);
 
-  // Initialize the x402 Facilitator with EVM signer
+  // Initialize the t402 Facilitator with EVM signer
   const evmSigner = toFacilitatorEvmSigner({
     address: evmAccount.address,
     readContract: (args: {
@@ -89,7 +89,7 @@ async function createFacilitator(): Promise<x402Facilitator> {
   const svmSigner = toFacilitatorSvmSigner(svmAccount);
 
   // Create and configure the facilitator
-  const facilitator = new x402Facilitator()
+  const facilitator = new t402Facilitator()
     .register("eip155:84532", new ExactEvmScheme(evmSigner))
     .registerV1("base-sepolia" as Network, new ExactEvmSchemeV1(evmSigner))
     .register("solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1", new ExactSvmScheme(svmSigner))
@@ -99,7 +99,7 @@ async function createFacilitator(): Promise<x402Facilitator> {
 }
 
 // Lazy initialization
-let _facilitatorPromise: Promise<x402Facilitator> | null = null;
+let _facilitatorPromise: Promise<t402Facilitator> | null = null;
 
 /**
  * Get the configured facilitator instance
@@ -107,7 +107,7 @@ let _facilitatorPromise: Promise<x402Facilitator> | null = null;
  *
  * @returns A promise that resolves to the configured facilitator
  */
-export async function getFacilitator(): Promise<x402Facilitator> {
+export async function getFacilitator(): Promise<t402Facilitator> {
   if (!_facilitatorPromise) {
     _facilitatorPromise = createFacilitator();
   }

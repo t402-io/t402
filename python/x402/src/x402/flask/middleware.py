@@ -2,24 +2,24 @@ import base64
 import json
 from typing import Any, Dict, Optional, Union, get_args, cast
 from flask import Flask, request, g
-from x402.path import path_is_match
-from x402.types import (
+from t402.path import path_is_match
+from t402.types import (
     Price,
     PaymentPayload,
     PaymentRequirements,
-    x402PaymentRequiredResponse,
+    t402PaymentRequiredResponse,
     PaywallConfig,
     SupportedNetworks,
     HTTPInputSchema,
 )
-from x402.common import (
+from t402.common import (
     process_price_to_atomic_amount,
-    x402_VERSION,
+    t402_VERSION,
     find_matching_payment_requirements,
 )
-from x402.encoding import safe_base64_decode
-from x402.facilitator import FacilitatorClient, FacilitatorConfig
-from x402.paywall import is_browser_request, get_paywall_html
+from t402.encoding import safe_base64_decode
+from t402.facilitator import FacilitatorClient, FacilitatorConfig
+from t402.paywall import is_browser_request, get_paywall_html
 
 
 class ResponseWrapper:
@@ -63,7 +63,7 @@ class ResponseWrapper:
 
 class PaymentMiddleware:
     """
-    Flask middleware for x402 payment requirements.
+    Flask middleware for t402 payment requirements.
     Allows multiple registrations with different path patterns and configurations.
 
     Usage:
@@ -210,7 +210,7 @@ class PaymentMiddleware:
                     )
                 ]
 
-                def x402_response(error: str):
+                def t402_response(error: str):
                     """Create a 402 response with payment requirements."""
                     request_headers = dict(request.headers)
                     status = "402 Payment Required"
@@ -226,8 +226,8 @@ class PaymentMiddleware:
                         start_response(status, headers)
                         return [html_content.encode("utf-8")]
                     else:
-                        response_data = x402PaymentRequiredResponse(
-                            x402_version=x402_VERSION,
+                        response_data = t402PaymentRequiredResponse(
+                            t402_version=t402_VERSION,
                             accepts=payment_requirements,
                             error=error,
                         ).model_dump(by_alias=True)
@@ -244,14 +244,14 @@ class PaymentMiddleware:
                 payment_header = request.headers.get("X-PAYMENT", "")
 
                 if payment_header == "":
-                    return x402_response("No X-PAYMENT header provided")
+                    return t402_response("No X-PAYMENT header provided")
 
                 # Decode payment header
                 try:
                     payment_dict = json.loads(safe_base64_decode(payment_header))
                     payment = PaymentPayload(**payment_dict)
                 except Exception as e:
-                    return x402_response(f"Invalid payment header format: {str(e)}")
+                    return t402_response(f"Invalid payment header format: {str(e)}")
 
                 # Find matching payment requirements
                 selected_payment_requirements = find_matching_payment_requirements(
@@ -259,7 +259,7 @@ class PaymentMiddleware:
                 )
 
                 if not selected_payment_requirements:
-                    return x402_response("No matching payment requirements found")
+                    return t402_response("No matching payment requirements found")
 
                 # Verify payment (async call in sync context)
                 import asyncio
@@ -275,7 +275,7 @@ class PaymentMiddleware:
 
                 if not verify_response.is_valid:
                     error_reason = verify_response.invalid_reason or "Unknown error"
-                    return x402_response(f"Invalid payment: {error_reason}")
+                    return t402_response(f"Invalid payment: {error_reason}")
 
                 # Store payment details in Flask g object
                 g.payment_details = selected_payment_requirements
@@ -315,13 +315,13 @@ class PaymentMiddleware:
                             )
                         else:
                             # Settlement failed - discard buffered response and return 402
-                            return x402_response(
+                            return t402_response(
                                 "Settle failed: "
                                 + (settle_response.error_reason or "Unknown error")
                             )
                     except Exception as e:
                         # Settlement error - discard buffered response and return 402
-                        return x402_response(
+                        return t402_response(
                             "Settle failed: " + (str(e) or "Unknown error")
                         )
                     finally:

@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { x402Client, x402HTTPClient } from "../../src/client";
-import { x402Facilitator } from "../../src/facilitator";
+import { t402Client, t402HTTPClient } from "../../src/client";
+import { t402Facilitator } from "../../src/facilitator";
 import {
   HTTPAdapter,
   HTTPResponseInstructions,
-  x402HTTPResourceServer,
-  x402ResourceServer,
+  t402HTTPResourceServer,
+  t402ResourceServer,
 } from "../../src/server";
 import {
   buildCashPaymentRequirements,
@@ -17,21 +17,21 @@ import {
 import { Network, PaymentPayload, PaymentRequirements } from "../../src/types";
 
 describe("Core Integration Tests", () => {
-  describe("x402Client / x402ResourceServer / x402Facilitator - Cash Flow", () => {
-    let client: x402Client;
-    let server: x402ResourceServer;
+  describe("t402Client / t402ResourceServer / t402Facilitator - Cash Flow", () => {
+    let client: t402Client;
+    let server: t402ResourceServer;
 
     beforeEach(async () => {
-      client = new x402Client().register("x402:cash", new CashSchemeNetworkClient("John"));
+      client = new t402Client().register("t402:cash", new CashSchemeNetworkClient("John"));
 
-      const facilitator = new x402Facilitator().register(
-        "x402:cash",
+      const facilitator = new t402Facilitator().register(
+        "t402:cash",
         new CashSchemeNetworkFacilitator(),
       );
 
       const facilitatorClient = new CashFacilitatorClient(facilitator);
-      server = new x402ResourceServer(facilitatorClient);
-      server.register("x402:cash", new CashSchemeNetworkServer());
+      server = new t402ResourceServer(facilitatorClient);
+      server.register("t402:cash", new CashSchemeNetworkServer());
       await server.initialize(); // Initialize to fetch supported kinds
     });
 
@@ -62,9 +62,9 @@ describe("Core Integration Tests", () => {
     });
   });
 
-  describe("x402HTTPClient / x402HTTPResourceServer / x402Facilitator - Cash Flow", () => {
-    let client: x402HTTPClient;
-    let httpServer: x402HTTPResourceServer;
+  describe("t402HTTPClient / t402HTTPResourceServer / t402Facilitator - Cash Flow", () => {
+    let client: t402HTTPClient;
+    let httpServer: t402HTTPResourceServer;
 
     const routes = {
       "/api/protected": {
@@ -72,7 +72,7 @@ describe("Core Integration Tests", () => {
           scheme: "cash",
           payTo: "merchant@example.com",
           price: "$0.10",
-          network: "x402:cash" as Network,
+          network: "t402:cash" as Network,
         },
         description: "Access to protected API",
         mimeType: "application/json",
@@ -95,26 +95,26 @@ describe("Core Integration Tests", () => {
     };
 
     beforeEach(async () => {
-      const facilitator = new x402Facilitator().register(
-        "x402:cash",
+      const facilitator = new t402Facilitator().register(
+        "t402:cash",
         new CashSchemeNetworkFacilitator(),
       );
 
       const facilitatorClient = new CashFacilitatorClient(facilitator);
 
-      const paymentClient = new x402Client().register(
-        "x402:cash",
+      const paymentClient = new t402Client().register(
+        "t402:cash",
         new CashSchemeNetworkClient("John"),
       );
-      client = new x402HTTPClient(paymentClient) as x402HTTPClient;
+      client = new t402HTTPClient(paymentClient) as t402HTTPClient;
 
       // Create resource server and register schemes
-      const ResourceServer = new x402ResourceServer(facilitatorClient);
-      ResourceServer.register("x402:cash", new CashSchemeNetworkServer());
+      const ResourceServer = new t402ResourceServer(facilitatorClient);
+      ResourceServer.register("t402:cash", new CashSchemeNetworkServer());
       await ResourceServer.initialize(); // Initialize to fetch supported kinds
 
       // Create HTTP server with the resource server
-      httpServer = new x402HTTPResourceServer(ResourceServer, routes);
+      httpServer = new t402HTTPResourceServer(ResourceServer, routes);
     });
 
     it("middleware should successfully verify and settle a cash payment from an http client", async () => {

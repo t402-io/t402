@@ -1,12 +1,12 @@
-# Advanced x402 Client Examples
+# Advanced t402 Client Examples
 
-Advanced patterns for x402 Go clients demonstrating payment lifecycle hooks, network preferences, and production-ready transports.
+Advanced patterns for t402 Go clients demonstrating payment lifecycle hooks, network preferences, and production-ready transports.
 
 ## Prerequisites
 
 - Go 1.21 or higher
 - An Ethereum private key (testnet recommended)
-- A running x402 server (see [server examples](../../servers/))
+- A running t402 server (see [server examples](../../servers/))
 - Familiarity with the [basic HTTP client](../http/)
 
 ## Setup
@@ -60,39 +60,39 @@ Register custom logic at different payment stages for observability and control:
 
 ```go
 import (
-    x402 "github.com/coinbase/x402/go"
-    x402http "github.com/coinbase/x402/go/http"
-    evm "github.com/coinbase/x402/go/mechanisms/evm/exact/client"
-    evmsigners "github.com/coinbase/x402/go/signers/evm"
+    t402 "github.com/coinbase/t402/go"
+    t402http "github.com/coinbase/t402/go/http"
+    evm "github.com/coinbase/t402/go/mechanisms/evm/exact/client"
+    evmsigners "github.com/coinbase/t402/go/signers/evm"
 )
 
 signer, _ := evmsigners.NewClientSignerFromPrivateKey(os.Getenv("EVM_PRIVATE_KEY"))
 
-client := x402.Newx402Client().
+client := t402.Newt402Client().
     Register("eip155:*", evm.NewExactEvmScheme(signer))
 
 // OnBeforePaymentCreation: validation before payment
-client.OnBeforePaymentCreation(func(ctx x402.PaymentCreationContext) (*x402.BeforePaymentCreationHookResult, error) {
+client.OnBeforePaymentCreation(func(ctx t402.PaymentCreationContext) (*t402.BeforePaymentCreationHookResult, error) {
     fmt.Printf("Creating payment for: %s\n", ctx.SelectedRequirements.GetNetwork())
-    // Abort payment by returning: &x402.BeforePaymentCreationHookResult{Abort: true, Reason: "Not allowed"}
+    // Abort payment by returning: &t402.BeforePaymentCreationHookResult{Abort: true, Reason: "Not allowed"}
     return nil, nil
 })
 
 // OnAfterPaymentCreation: logging after successful payment
-client.OnAfterPaymentCreation(func(ctx x402.PaymentCreatedContext) error {
+client.OnAfterPaymentCreation(func(ctx t402.PaymentCreatedContext) error {
     fmt.Printf("Payment created: version %d\n", ctx.Version)
     return nil
 })
 
 // OnPaymentCreationFailure: error recovery
-client.OnPaymentCreationFailure(func(ctx x402.PaymentCreationFailureContext) (*x402.PaymentCreationFailureHookResult, error) {
+client.OnPaymentCreationFailure(func(ctx t402.PaymentCreationFailureContext) (*t402.PaymentCreationFailureHookResult, error) {
     fmt.Printf("Payment failed: %v\n", ctx.Error)
-    // Recover by returning: &x402.PaymentCreationFailureHookResult{Recovered: true, Payload: altPayload}
+    // Recover by returning: &t402.PaymentCreationFailureHookResult{Recovered: true, Payload: altPayload}
     return nil, nil
 })
 
-httpClient := x402http.Newx402HTTPClient(client)
-wrappedClient := x402http.WrapHTTPClientWithPayment(http.DefaultClient, httpClient)
+httpClient := t402http.Newt402HTTPClient(client)
+wrappedClient := t402http.WrapHTTPClientWithPayment(http.DefaultClient, httpClient)
 
 resp, _ := wrappedClient.Get("http://localhost:4021/weather")
 ```
@@ -110,7 +110,7 @@ Available hooks:
 Configure network-specific signers with wildcard fallback:
 
 ```go
-client := x402.Newx402Client().
+client := t402.Newt402Client().
     // Specific networks (highest priority)
     Register("eip155:1", evm.NewExactEvmScheme(mainnetSigner)).
     Register("eip155:8453", evm.NewExactEvmScheme(baseSigner)).
@@ -135,7 +135,7 @@ type RetryTransport struct {
     RetryDelay time.Duration
 }
 
-// Stack transports: Base -> Timing -> Retry -> x402 Payment
+// Stack transports: Base -> Timing -> Retry -> t402 Payment
 baseTransport := &http.Transport{
     MaxIdleConns:        100,
     MaxIdleConnsPerHost: 10,
@@ -145,7 +145,7 @@ baseTransport := &http.Transport{
 timingTransport := &TimingTransport{Transport: baseTransport}
 retryTransport := &RetryTransport{Transport: timingTransport, MaxRetries: 3, RetryDelay: 100 * time.Millisecond}
 
-wrappedClient := x402http.WrapHTTPClientWithPayment(
+wrappedClient := t402http.WrapHTTPClientWithPayment(
     &http.Client{Transport: retryTransport, Timeout: 30 * time.Second},
     httpClient,
 )

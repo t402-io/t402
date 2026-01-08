@@ -1,10 +1,10 @@
-name: Publish @x402/extensions package to NPM
+name: Publish @t402/extensions package to NPM
 
 on:
   workflow_dispatch:
 
 jobs:
-  publish-npm-x402-extensions:
+  publish-npm-t402-extensions:
     runs-on: ubuntu-latest
     environment: ${{ github.ref == 'refs/heads/main' && 'npm' || '' }}
     permissions:
@@ -35,9 +35,9 @@ jobs:
         working-directory: ./typescript
         run: |
           pnpm install --frozen-lockfile
-          pnpm -r --filter=@x402/core --filter=@x402/extensions run build
+          pnpm -r --filter=@t402/core --filter=@t402/extensions run build
       
-      - name: Publish @x402/extensions package
+      - name: Publish @t402/extensions package
         working-directory: ./typescript/packages/extensions
         run: |
           # Get package information directly

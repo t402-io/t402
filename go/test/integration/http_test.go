@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	x402 "github.com/coinbase/x402/go"
-	x402http "github.com/coinbase/x402/go/http"
-	"github.com/coinbase/x402/go/test/mocks/cash"
-	"github.com/coinbase/x402/go/types"
+	t402 "github.com/coinbase/t402/go"
+	t402http "github.com/coinbase/t402/go/http"
+	"github.com/coinbase/t402/go/test/mocks/cash"
+	"github.com/coinbase/t402/go/types"
 )
 
 // mockHTTPAdapter implements the HTTPAdapter interface for testing
@@ -60,20 +60,20 @@ func (m *mockHTTPAdapter) GetUserAgent() string {
 	return "TestClient/1.0"
 }
 
-// TestHTTPIntegration tests the integration between x402HTTPClient, x402HTTPResourceServer, and x402Facilitator
+// TestHTTPIntegration tests the integration between t402HTTPClient, t402HTTPResourceServer, and t402Facilitator
 func TestHTTPIntegration(t *testing.T) {
-	t.Run("Cash Flow - x402HTTPClient / x402HTTPResourceServer / x402Facilitator", func(t *testing.T) {
+	t.Run("Cash Flow - t402HTTPClient / t402HTTPResourceServer / t402Facilitator", func(t *testing.T) {
 		ctx := context.Background()
 
 		// Setup routes configuration
-		routes := x402http.RoutesConfig{
+		routes := t402http.RoutesConfig{
 			"/api/protected": {
-				Accepts: x402http.PaymentOptions{
+				Accepts: t402http.PaymentOptions{
 					{
 						Scheme:  "cash",
 						PayTo:   "merchant@example.com",
 						Price:   "$0.10",
-						Network: "x402:cash",
+						Network: "t402:cash",
 					},
 				},
 				Description: "Access to protected API",
@@ -82,25 +82,25 @@ func TestHTTPIntegration(t *testing.T) {
 		}
 
 		// Setup facilitator with cash scheme
-		facilitator := x402.Newx402Facilitator()
-		facilitator.Register([]x402.Network{"x402:cash"}, cash.NewSchemeNetworkFacilitator())
+		facilitator := t402.Newt402Facilitator()
+		facilitator.Register([]t402.Network{"t402:cash"}, cash.NewSchemeNetworkFacilitator())
 
 		// Create facilitator client wrapper
 		facilitatorClient := cash.NewFacilitatorClient(facilitator)
 
-		// Setup x402 client with cash scheme
-		x402Client := x402.Newx402Client()
-		x402Client.Register("x402:cash", cash.NewSchemeNetworkClient("John"))
+		// Setup t402 client with cash scheme
+		t402Client := t402.Newt402Client()
+		t402Client.Register("t402:cash", cash.NewSchemeNetworkClient("John"))
 
 		// Setup HTTP client wrapper
-		httpClient := x402http.Newx402HTTPClient(x402Client)
+		httpClient := t402http.Newt402HTTPClient(t402Client)
 
 		// Setup HTTP server
-		server := x402http.Newx402HTTPResourceServer(
+		server := t402http.Newt402HTTPResourceServer(
 			routes,
-			x402.WithFacilitatorClient(facilitatorClient),
+			t402.WithFacilitatorClient(facilitatorClient),
 		)
-		server.Register("x402:cash", cash.NewSchemeNetworkServer())
+		server.Register("t402:cash", cash.NewSchemeNetworkServer())
 
 		// Initialize server to fetch supported kinds
 		err := server.Initialize(ctx)
@@ -117,7 +117,7 @@ func TestHTTPIntegration(t *testing.T) {
 		}
 
 		// Create request context
-		reqCtx := x402http.HTTPRequestContext{
+		reqCtx := t402http.HTTPRequestContext{
 			Adapter: mockAdapter,
 			Path:    "/api/protected",
 			Method:  "GET",
@@ -126,7 +126,7 @@ func TestHTTPIntegration(t *testing.T) {
 		// Process initial request without payment - should get 402 response
 		httpProcessResult := server.ProcessHTTPRequest(ctx, reqCtx, nil)
 
-		if httpProcessResult.Type != x402http.ResultPaymentError {
+		if httpProcessResult.Type != t402http.ResultPaymentError {
 			t.Fatalf("Expected payment-error result, got %s", httpProcessResult.Type)
 		}
 
@@ -171,12 +171,12 @@ func TestHTTPIntegration(t *testing.T) {
 			})
 		}
 
-		selected, err := x402Client.SelectPaymentRequirements(acceptsV2)
+		selected, err := t402Client.SelectPaymentRequirements(acceptsV2)
 		if err != nil {
 			t.Fatalf("Failed to select payment requirements: %v", err)
 		}
 
-		payload, err := x402Client.CreatePaymentPayload(
+		payload, err := t402Client.CreatePaymentPayload(
 			ctx,
 			selected,
 			nil, // Cash doesn't use resource
@@ -196,7 +196,7 @@ func TestHTTPIntegration(t *testing.T) {
 		// Process request with payment
 		httpProcessResult2 := server.ProcessHTTPRequest(ctx, reqCtx, nil)
 
-		if httpProcessResult2.Type != x402http.ResultPaymentVerified {
+		if httpProcessResult2.Type != t402http.ResultPaymentVerified {
 			t.Fatalf("Expected payment-verified result, got %s", httpProcessResult2.Type)
 		}
 
@@ -232,7 +232,7 @@ func TestHTTPIntegration(t *testing.T) {
 			t.Fatalf("Failed to decode settlement response: %v", err)
 		}
 
-		var settleResponse x402.SettleResponse
+		var settleResponse t402.SettleResponse
 		err = json.Unmarshal(settleData, &settleResponse)
 		if err != nil {
 			t.Fatalf("Failed to unmarshal settlement response: %v", err)

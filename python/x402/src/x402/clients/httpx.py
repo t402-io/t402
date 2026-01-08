@@ -1,17 +1,17 @@
 from typing import Optional, Dict, List
 from httpx import Request, Response, AsyncClient
 from eth_account import Account
-from x402.clients.base import (
-    x402Client,
+from t402.clients.base import (
+    t402Client,
     MissingRequestConfigError,
     PaymentError,
     PaymentSelectorCallable,
 )
-from x402.types import x402PaymentRequiredResponse
+from t402.types import t402PaymentRequiredResponse
 
 
 class HttpxHooks:
-    def __init__(self, client: x402Client):
+    def __init__(self, client: t402Client):
         self.client = client
         self._is_retry = False
 
@@ -39,7 +39,7 @@ class HttpxHooks:
 
             data = response.json()
 
-            payment_response = x402PaymentRequiredResponse(**data)
+            payment_response = t402PaymentRequiredResponse(**data)
 
             # Select payment requirements
             selected_requirements = self.client.select_payment_requirements(
@@ -48,7 +48,7 @@ class HttpxHooks:
 
             # Create payment header
             payment_header = self.client.create_payment_header(
-                selected_requirements, payment_response.x402_version
+                selected_requirements, payment_response.t402_version
             )
 
             # Mark as retry and add payment header
@@ -76,7 +76,7 @@ class HttpxHooks:
             raise PaymentError(f"Failed to handle payment: {str(e)}") from e
 
 
-def x402_payment_hooks(
+def t402_payment_hooks(
     account: Account,
     max_value: Optional[int] = None,
     payment_requirements_selector: Optional[PaymentSelectorCallable] = None,
@@ -93,8 +93,8 @@ def x402_payment_hooks(
     Returns:
         Dictionary of event hooks that can be directly assigned to client.event_hooks
     """
-    # Create x402Client
-    client = x402Client(
+    # Create t402Client
+    client = t402Client(
         account,
         max_value=max_value,
         payment_requirements_selector=payment_requirements_selector,
@@ -110,8 +110,8 @@ def x402_payment_hooks(
     }
 
 
-class x402HttpxClient(AsyncClient):
-    """AsyncClient with built-in x402 payment handling."""
+class t402HttpxClient(AsyncClient):
+    """AsyncClient with built-in t402 payment handling."""
 
     def __init__(
         self,
@@ -120,7 +120,7 @@ class x402HttpxClient(AsyncClient):
         payment_requirements_selector: Optional[PaymentSelectorCallable] = None,
         **kwargs,
     ):
-        """Initialize an AsyncClient with x402 payment handling.
+        """Initialize an AsyncClient with t402 payment handling.
 
         Args:
             account: eth_account.Account instance for signing payments
@@ -131,6 +131,6 @@ class x402HttpxClient(AsyncClient):
             **kwargs: Additional arguments to pass to AsyncClient
         """
         super().__init__(**kwargs)
-        self.event_hooks = x402_payment_hooks(
+        self.event_hooks = t402_payment_hooks(
             account, max_value, payment_requirements_selector
         )

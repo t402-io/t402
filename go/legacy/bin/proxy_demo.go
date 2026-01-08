@@ -8,8 +8,8 @@ import (
 	"net/url"
 	"os"
 
-	x402gin "github.com/coinbase/x402/go/pkg/gin"
-	"github.com/coinbase/x402/go/pkg/types"
+	t402gin "github.com/coinbase/t402/go/pkg/gin"
+	"github.com/coinbase/t402/go/pkg/types"
 	"github.com/gin-gonic/gin"
 )
 
@@ -38,15 +38,15 @@ func main() {
 	}
 
 	r.Any("/*path",
-		x402gin.PaymentMiddleware(
+		t402gin.PaymentMiddleware(
 			big.NewFloat(config.Amount),
 			config.PayTo,
-			x402gin.WithFacilitatorConfig(facilitatorConfig),
-			x402gin.WithResource(config.TargetURL),
-			x402gin.WithTestnet(config.Testnet),
-			x402gin.WithDescription(config.Description),
-			x402gin.WithMimeType(config.MimeType),
-			x402gin.WithMaxTimeoutSeconds(config.MaxTimeoutSeconds),
+			t402gin.WithFacilitatorConfig(facilitatorConfig),
+			t402gin.WithResource(config.TargetURL),
+			t402gin.WithTestnet(config.Testnet),
+			t402gin.WithDescription(config.Description),
+			t402gin.WithMimeType(config.MimeType),
+			t402gin.WithMaxTimeoutSeconds(config.MaxTimeoutSeconds),
 		),
 		proxyHandler(config.TargetURL, config.Headers))
 
@@ -114,7 +114,7 @@ func proxyHandler(targetURL string, headers map[string]string) gin.HandlerFunc {
 func loadConfig(configPath string) (*ProxyConfig, error) {
 	config := &ProxyConfig{
 		// default values
-		FacilitatorURL:    "https://x402.org/facilitator",
+		FacilitatorURL:    "https://t402.org/facilitator",
 		Testnet:           true,
 		MaxTimeoutSeconds: 60,
 	}
