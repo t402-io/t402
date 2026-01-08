@@ -46,6 +46,8 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 | Basic Signer | Production |
 | Multi-chain Wallets | Production |
 | Balance Aggregation | Production |
+| Balance Caching (TTL) | Production |
+| Error Handling | Production |
 | Bridge (LayerZero) | Beta |
 | Gasless (ERC-4337) | Beta |
 | MCP Server | Planned |
@@ -71,10 +73,10 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 - [ ] Configure CI/CD for automated releases
 
 **Week 3-4: WDK Core Enhancement**
-- [ ] Complete WDK signer with full error handling
-- [ ] Implement balance caching with TTL
-- [ ] Add comprehensive test suite (90%+ coverage)
-- [ ] Write WDK integration documentation
+- [x] Complete WDK signer with full error handling
+- [x] Implement balance caching with TTL
+- [x] Add comprehensive test suite (90%+ coverage)
+- [x] Write WDK integration documentation
 - [ ] Publish @t402/wdk v2.0.0
 
 #### Deliverables
