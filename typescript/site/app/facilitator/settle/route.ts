@@ -1,8 +1,8 @@
-import { PaymentPayload, PaymentRequirements, SettleResponse } from "@x402/core/types";
+import { PaymentPayload, PaymentRequirements, SettleResponse } from "@t402/core/types";
 import { getFacilitator } from "../index";
 
 /**
- * Handles POST requests to settle x402 payments
+ * Handles POST requests to settle t402 payments
  *
  * @param req - The incoming request containing payment settlement details
  * @returns A JSON response with the settlement result
@@ -95,7 +95,7 @@ export async function POST(req: Request) {
 export async function GET() {
   return Response.json({
     endpoint: "/settle",
-    description: "POST to settle x402 payments",
+    description: "POST to settle t402 payments",
     body: {
       paymentPayload: "PaymentPayload",
       paymentRequirements: "PaymentRequirements",

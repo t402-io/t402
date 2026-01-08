@@ -1,12 +1,12 @@
 # E2E Test Client: TypeScript Fetch
 
-This client demonstrates and tests the `@x402/fetch` package with both EVM and SVM payment support.
+This client demonstrates and tests the `@t402/fetch` package with both EVM and SVM payment support.
 
 ## What It Tests
 
 ### Core Functionality
-- ✅ **V2 Protocol** - Modern x402 protocol with CAIP-2 networks
-- ✅ **V1 Protocol** - Legacy x402 protocol with simple network names
+- ✅ **V2 Protocol** - Modern t402 protocol with CAIP-2 networks
+- ✅ **V1 Protocol** - Legacy t402 protocol with simple network names
 - ✅ **Multi-chain Support** - Both EVM and SVM in a single client
 - ✅ **Automatic Payment Handling** - Transparent 402 response handling
 - ✅ **Payment Response Decoding** - Extracts settlement information from headers
@@ -22,15 +22,15 @@ This client demonstrates and tests the `@x402/fetch` package with both EVM and S
 ### Usage Pattern
 
 ```typescript
-import { wrapFetchWithPayment } from "@x402/fetch";
-import { x402Client } from "@x402/core/client";
-import { ExactEvmClient } from "@x402/evm";
-import { ExactEvmClientV1 } from "@x402/evm/v1";
-import { ExactSvmClient } from "@x402/svm";
-import { ExactSvmClientV1 } from "@x402/svm/v1";
+import { wrapFetchWithPayment } from "@t402/fetch";
+import { t402Client } from "@t402/core/client";
+import { ExactEvmClient } from "@t402/evm";
+import { ExactEvmClientV1 } from "@t402/evm/v1";
+import { ExactSvmClient } from "@t402/svm";
+import { ExactSvmClientV1 } from "@t402/svm/v1";
 
-// Build x402 client with direct registration
-const client = new x402Client()
+// Build t402 client with direct registration
+const client = new t402Client()
   .register("eip155:*", new ExactEvmClient(evmAccount))
   .register("solana:*", new ExactSvmClient(svmSigner))
   .registerV1("base-sepolia", new ExactEvmClientV1(evmAccount))
@@ -108,11 +108,11 @@ pnpm start
 
 ## Package Dependencies
 
-- `@x402/fetch` - HTTP wrapper with payment handling
-- `@x402/core` - Core x402 client and types
-- `@x402/evm` - EVM payment mechanisms (V2)
-- `@x402/evm/v1` - EVM payment mechanisms (V1)
-- `@x402/svm` - SVM payment mechanisms (V2)
-- `@x402/svm/v1` - SVM payment mechanisms (V1)
+- `@t402/fetch` - HTTP wrapper with payment handling
+- `@t402/core` - Core t402 client and types
+- `@t402/evm` - EVM payment mechanisms (V2)
+- `@t402/evm/v1` - EVM payment mechanisms (V1)
+- `@t402/svm` - SVM payment mechanisms (V2)
+- `@t402/svm/v1` - SVM payment mechanisms (V1)
 - `viem` - Ethereum library for account creation
 - `@solana/kit` - Solana keypair utilities

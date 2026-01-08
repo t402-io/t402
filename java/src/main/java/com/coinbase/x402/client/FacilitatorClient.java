@@ -1,11 +1,11 @@
-package com.coinbase.x402.client;
+package com.coinbase.t402.client;
 
-import com.coinbase.x402.model.PaymentRequirements;
+import com.coinbase.t402.model.PaymentRequirements;
 
 import java.io.IOException;
 import java.util.Set;
 
-/** Contract for calling an x402 facilitator (HTTP, gRPC, mock, etc.). */
+/** Contract for calling an t402 facilitator (HTTP, gRPC, mock, etc.). */
 public interface FacilitatorClient {
     /**
      * Verifies a payment header against the given requirements.

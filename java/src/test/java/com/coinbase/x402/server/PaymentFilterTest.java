@@ -1,11 +1,11 @@
-package com.coinbase.x402.server;
+package com.coinbase.t402.server;
 
-import com.coinbase.x402.client.FacilitatorClient;
-import com.coinbase.x402.client.SettlementResponse;
-import com.coinbase.x402.client.VerificationResponse;
-import com.coinbase.x402.model.Authorization;
-import com.coinbase.x402.model.ExactSchemePayload;
-import com.coinbase.x402.model.PaymentPayload;
+import com.coinbase.t402.client.FacilitatorClient;
+import com.coinbase.t402.client.SettlementResponse;
+import com.coinbase.t402.client.VerificationResponse;
+import com.coinbase.t402.model.Authorization;
+import com.coinbase.t402.model.ExactSchemePayload;
+import com.coinbase.t402.model.PaymentPayload;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
@@ -78,7 +78,7 @@ class PaymentFilterTest {
 
         // build a syntactically correct header whose resource matches the path
         PaymentPayload p = new PaymentPayload();
-        p.x402Version = 1;
+        p.t402Version = 1;
         p.scheme      = "exact";
         p.network     = "base-sepolia";
         p.payload     = Map.of("resource", "/private");
@@ -112,7 +112,7 @@ class PaymentFilterTest {
 
         // well-formed header for /private
         PaymentPayload p = new PaymentPayload();
-        p.x402Version = 1;
+        p.t402Version = 1;
         p.scheme      = "exact";
         p.network     = "base-sepolia";
         p.payload     = Map.of("resource", "/private");
@@ -140,7 +140,7 @@ class PaymentFilterTest {
 
         // header says resource is /other
         PaymentPayload p = new PaymentPayload();
-        p.x402Version = 1;
+        p.t402Version = 1;
         p.scheme      = "exact";
         p.network     = "base-sepolia";
         p.payload     = Map.of("resource", "/other");
@@ -200,7 +200,7 @@ class PaymentFilterTest {
         
         // Create a valid header
         PaymentPayload p = new PaymentPayload();
-        p.x402Version = 1;
+        p.t402Version = 1;
         p.scheme      = "exact";
         p.network     = "base-sepolia";
         p.payload     = Map.of("resource", "/private");
@@ -225,7 +225,7 @@ class PaymentFilterTest {
         
         // Create a valid header
         PaymentPayload p = new PaymentPayload();
-        p.x402Version = 1;
+        p.t402Version = 1;
         p.scheme      = "exact";
         p.network     = "base-sepolia";
         p.payload     = Map.of("resource", "/private");
@@ -258,7 +258,7 @@ class PaymentFilterTest {
         
         // Create a valid header
         PaymentPayload p = new PaymentPayload();
-        p.x402Version = 1;
+        p.t402Version = 1;
         p.scheme      = "exact";
         p.network     = "base-sepolia";
         p.payload     = Map.of("resource", "/private");
@@ -295,7 +295,7 @@ class PaymentFilterTest {
         // Create payment payload with proper authorization structure
         String payerAddress = "0x1234567890abcdef1234567890abcdef12345678";
         PaymentPayload p = new PaymentPayload();
-        p.x402Version = 1;
+        p.t402Version = 1;
         p.scheme = "exact";
         p.network = "base-sepolia";
         
@@ -371,7 +371,7 @@ class PaymentFilterTest {
         
         // Create payment payload without authorization
         PaymentPayload p = new PaymentPayload();
-        p.x402Version = 1;
+        p.t402Version = 1;
         p.scheme = "exact";
         p.network = "base-sepolia";
         p.payload = Map.of("resource", "/private");
@@ -417,7 +417,7 @@ class PaymentFilterTest {
         
         // Create payment payload with malformed authorization (string instead of object)
         PaymentPayload p = new PaymentPayload();
-        p.x402Version = 1;
+        p.t402Version = 1;
         p.scheme = "exact";
         p.network = "base-sepolia";
         p.payload = Map.of(
@@ -466,7 +466,7 @@ class PaymentFilterTest {
         
         // Create a valid header
         PaymentPayload p = new PaymentPayload();
-        p.x402Version = 1;
+        p.t402Version = 1;
         p.scheme = "exact";
         p.network = "base-sepolia";
         p.payload = Map.of("resource", "/private");
@@ -494,7 +494,7 @@ class PaymentFilterTest {
         
         // Create a valid header
         PaymentPayload p = new PaymentPayload();
-        p.x402Version = 1;
+        p.t402Version = 1;
         p.scheme = "exact";
         p.network = "base-sepolia";
         p.payload = Map.of("resource", "/private");

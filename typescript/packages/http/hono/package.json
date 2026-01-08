@@ -1,5 +1,5 @@
 {
-  "name": "@x402/hono",
+  "name": "@t402/hono",
   "version": "2.0.0",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -18,8 +18,8 @@
   "keywords": [],
   "license": "Apache-2.0",
   "author": "Coinbase Inc.",
-  "repository": "https://github.com/coinbase/x402",
-  "description": "x402 Payment Protocol",
+  "repository": "https://github.com/coinbase/t402",
+  "description": "t402 Payment Protocol",
   "devDependencies": {
     "@eslint/js": "^9.24.0",
     "@types/node": "^22.13.4",
@@ -39,16 +39,16 @@
     "vitest": "^3.0.5"
   },
   "dependencies": {
-    "@x402/core": "workspace:^",
-    "@x402/extensions": "workspace:^",
+    "@t402/core": "workspace:^",
+    "@t402/extensions": "workspace:^",
     "zod": "^3.24.2"
   },
   "peerDependencies": {
     "hono": "^4.0.0",
-    "@x402/paywall": "workspace:*"
+    "@t402/paywall": "workspace:*"
   },
   "peerDependenciesMeta": {
-    "@x402/paywall": {
+    "@t402/paywall": {
       "optional": true
     }
   },

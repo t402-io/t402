@@ -7,6 +7,6 @@ export const CDP_CONFIG: Config = {
 };
 
 export const APP_CONFIG = {
-  name: "x402 MCP", // the name of your application
+  name: "t402 MCP", // the name of your application
   logoUrl: "https://picsum.photos/64", // logo will be displayed in select components
 };

@@ -94,7 +94,7 @@ importers:
 
   ../typescript/packages/extensions:
     dependencies:
-      '@x402/core':
+      '@t402/core':
         specifier: workspace:*
         version: link:../core
       ajv:
@@ -152,7 +152,7 @@ importers:
 
   ../typescript/packages/http/axios:
     dependencies:
-      '@x402/core':
+      '@t402/core':
         specifier: workspace:^
         version: link:../../core
       axios:
@@ -216,13 +216,13 @@ importers:
       '@solana/kit':
         specifier: ^2.1.1
         version: 2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      '@x402/core':
+      '@t402/core':
         specifier: workspace:^
         version: link:../../core
-      '@x402/extensions':
+      '@t402/extensions':
         specifier: workspace:^
         version: link:../../extensions
-      '@x402/paywall':
+      '@t402/paywall':
         specifier: workspace:*
         version: link:../paywall
       viem:
@@ -286,7 +286,7 @@ importers:
 
   ../typescript/packages/http/fetch:
     dependencies:
-      '@x402/core':
+      '@t402/core':
         specifier: workspace:^
         version: link:../../core
       viem:
@@ -344,13 +344,13 @@ importers:
 
   ../typescript/packages/http/hono:
     dependencies:
-      '@x402/core':
+      '@t402/core':
         specifier: workspace:^
         version: link:../../core
-      '@x402/extensions':
+      '@t402/extensions':
         specifier: workspace:^
         version: link:../../extensions
-      '@x402/paywall':
+      '@t402/paywall':
         specifier: workspace:*
         version: link:../paywall
       zod:
@@ -411,13 +411,13 @@ importers:
       '@coinbase/cdp-sdk':
         specifier: ^1.22.0
         version: 1.38.4(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      '@x402/core':
+      '@t402/core':
         specifier: workspace:^
         version: link:../../core
-      '@x402/extensions':
+      '@t402/extensions':
         specifier: workspace:^
         version: link:../../extensions
-      '@x402/paywall':
+      '@t402/paywall':
         specifier: workspace:*
         version: link:../paywall
       next:
@@ -514,7 +514,7 @@ importers:
       '@wallet-standard/features':
         specifier: ^1.1.0
         version: 1.1.0
-      '@x402/core':
+      '@t402/core':
         specifier: workspace:*
         version: link:../../core
       viem:
@@ -548,10 +548,10 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^8.29.1
         version: 8.46.2(eslint@9.38.0(jiti@1.21.7))(typescript@5.8.3)
-      '@x402/evm':
+      '@t402/evm':
         specifier: workspace:*
         version: link:../../mechanisms/evm
-      '@x402/svm':
+      '@t402/svm':
         specifier: workspace:*
         version: link:../../mechanisms/svm
       buffer:
@@ -600,7 +600,7 @@ importers:
         specifier: ^3.0.5
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.16.0)(jiti@1.21.7)(jsdom@26.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(tsx@4.20.3)(yaml@2.8.1)
 
-  ../typescript/packages/legacy/x402:
+  ../typescript/packages/legacy/t402:
     dependencies:
       '@scure/base':
         specifier: ^1.2.6
@@ -718,7 +718,7 @@ importers:
         specifier: ^3.0.5
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.16.0)(jiti@1.21.7)(jsdom@26.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(tsx@4.20.3)(yaml@2.8.1)
 
-  ../typescript/packages/legacy/x402-axios:
+  ../typescript/packages/legacy/t402-axios:
     dependencies:
       axios:
         specifier: ^1.7.9
@@ -726,9 +726,9 @@ importers:
       viem:
         specifier: ^2.21.26
         version: 2.31.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.71)
-      x402:
+      t402:
         specifier: workspace:^
-        version: link:../x402
+        version: link:../t402
       zod:
         specifier: ^3.24.2
         version: 3.25.71
@@ -779,7 +779,7 @@ importers:
         specifier: ^3.0.5
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.16.0)(jiti@1.21.7)(jsdom@26.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(tsx@4.20.3)(yaml@2.8.1)
 
-  ../typescript/packages/legacy/x402-express:
+  ../typescript/packages/legacy/t402-express:
     dependencies:
       '@coinbase/cdp-sdk':
         specifier: ^1.22.0
@@ -793,9 +793,9 @@ importers:
       viem:
         specifier: ^2.21.26
         version: 2.31.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.71)
-      x402:
+      t402:
         specifier: workspace:^
-        version: link:../x402
+        version: link:../t402
       zod:
         specifier: ^3.24.2
         version: 3.25.71
@@ -849,14 +849,14 @@ importers:
         specifier: ^3.0.5
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.16.0)(jiti@1.21.7)(jsdom@26.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(tsx@4.20.3)(yaml@2.8.1)
 
-  ../typescript/packages/legacy/x402-fetch:
+  ../typescript/packages/legacy/t402-fetch:
     dependencies:
       viem:
         specifier: ^2.21.26
         version: 2.31.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.71)
-      x402:
+      t402:
         specifier: workspace:^
-        version: link:../x402
+        version: link:../t402
       zod:
         specifier: ^3.24.2
         version: 3.25.71
@@ -907,7 +907,7 @@ importers:
         specifier: ^3.0.5
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.16.0)(jiti@1.21.7)(jsdom@26.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(tsx@4.20.3)(yaml@2.8.1)
 
-  ../typescript/packages/legacy/x402-hono:
+  ../typescript/packages/legacy/t402-hono:
     dependencies:
       '@coinbase/cdp-sdk':
         specifier: ^1.22.0
@@ -921,9 +921,9 @@ importers:
       viem:
         specifier: ^2.21.26
         version: 2.31.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.71)
-      x402:
+      t402:
         specifier: workspace:^
-        version: link:../x402
+        version: link:../t402
       zod:
         specifier: ^3.24.2
         version: 3.25.71
@@ -974,7 +974,7 @@ importers:
         specifier: ^3.0.5
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.16.0)(jiti@1.21.7)(jsdom@26.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(tsx@4.20.3)(yaml@2.8.1)
 
-  ../typescript/packages/legacy/x402-next:
+  ../typescript/packages/legacy/t402-next:
     dependencies:
       '@coinbase/cdp-sdk':
         specifier: ^1.22.0
@@ -988,9 +988,9 @@ importers:
       viem:
         specifier: ^2.21.26
         version: 2.31.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.71)
-      x402:
+      t402:
         specifier: workspace:^
-        version: link:../x402
+        version: link:../t402
       zod:
         specifier: ^3.24.2
         version: 3.25.71
@@ -1043,7 +1043,7 @@ importers:
 
   ../typescript/packages/mechanisms/evm:
     dependencies:
-      '@x402/core':
+      '@t402/core':
         specifier: workspace:*
         version: link:../../core
       viem:
@@ -1119,7 +1119,7 @@ importers:
       '@solana/transaction-confirmation':
         specifier: ^2.1.1
         version: 2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      '@x402/core':
+      '@t402/core':
         specifier: workspace:*
         version: link:../../core
       zod:
@@ -1180,16 +1180,16 @@ importers:
       '@solana/kit':
         specifier: ^2.1.1
         version: 2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      '@x402/axios':
+      '@t402/axios':
         specifier: workspace:*
         version: link:../../../typescript/packages/http/axios
-      '@x402/core':
+      '@t402/core':
         specifier: workspace:*
         version: link:../../../typescript/packages/core
-      '@x402/evm':
+      '@t402/evm':
         specifier: workspace:*
         version: link:../../../typescript/packages/mechanisms/evm
-      '@x402/svm':
+      '@t402/svm':
         specifier: workspace:*
         version: link:../../../typescript/packages/mechanisms/svm
       axios:
@@ -1241,16 +1241,16 @@ importers:
       '@solana/kit':
         specifier: ^2.1.1
         version: 2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      '@x402/core':
+      '@t402/core':
         specifier: workspace:*
         version: link:../../../typescript/packages/core
-      '@x402/evm':
+      '@t402/evm':
         specifier: workspace:*
         version: link:../../../typescript/packages/mechanisms/evm
-      '@x402/fetch':
+      '@t402/fetch':
         specifier: workspace:*
         version: link:../../../typescript/packages/http/fetch
-      '@x402/svm':
+      '@t402/svm':
         specifier: workspace:*
         version: link:../../../typescript/packages/mechanisms/svm
       axios:
@@ -1302,16 +1302,16 @@ importers:
       '@solana/kit':
         specifier: ^2.1.1
         version: 2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      '@x402/core':
+      '@t402/core':
         specifier: workspace:*
         version: link:../../../typescript/packages/core
-      '@x402/evm':
+      '@t402/evm':
         specifier: workspace:*
         version: link:../../../typescript/packages/mechanisms/evm
-      '@x402/extensions':
+      '@t402/extensions':
         specifier: workspace:*
         version: link:../../../typescript/packages/extensions
-      '@x402/svm':
+      '@t402/svm':
         specifier: workspace:*
         version: link:../../../typescript/packages/mechanisms/svm
       dotenv:
@@ -1354,9 +1354,9 @@ importers:
       viem:
         specifier: ^2.21.26
         version: 2.38.3(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.1.12)
-      x402-axios:
+      t402-axios:
         specifier: workspace:*
-        version: link:../../../../typescript/packages/legacy/x402-axios
+        version: link:../../../../typescript/packages/legacy/t402-axios
     devDependencies:
       '@eslint/js':
         specifier: ^9.24.0
@@ -1400,9 +1400,9 @@ importers:
       viem:
         specifier: ^2.21.26
         version: 2.38.3(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.1.12)
-      x402-fetch:
+      t402-fetch:
         specifier: workspace:*
-        version: link:../../../../typescript/packages/legacy/x402-fetch
+        version: link:../../../../typescript/packages/legacy/t402-fetch
     devDependencies:
       '@eslint/js':
         specifier: ^9.24.0
@@ -1443,9 +1443,9 @@ importers:
       express:
         specifier: ^4.18.2
         version: 4.21.2
-      x402-express:
+      t402-express:
         specifier: workspace:*
-        version: link:../../../../typescript/packages/legacy/x402-express
+        version: link:../../../../typescript/packages/legacy/t402-express
     devDependencies:
       '@eslint/js':
         specifier: ^9.24.0
@@ -1495,9 +1495,9 @@ importers:
       hono:
         specifier: ^4.7.1
         version: 4.10.2
-      x402-hono:
+      t402-hono:
         specifier: workspace:*
-        version: link:../../../../typescript/packages/legacy/x402-hono
+        version: link:../../../../typescript/packages/legacy/t402-hono
     devDependencies:
       '@eslint/js':
         specifier: ^9.24.0
@@ -1550,9 +1550,9 @@ importers:
       viem:
         specifier: ^2.21.26
         version: 2.38.3(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@4.1.12)
-      x402-next:
+      t402-next:
         specifier: workspace:*
-        version: link:../../../../typescript/packages/legacy/x402-next
+        version: link:../../../../typescript/packages/legacy/t402-next
     devDependencies:
       '@eslint/js':
         specifier: ^9.24.0
@@ -1614,19 +1614,19 @@ importers:
 
   servers/express:
     dependencies:
-      '@x402/core':
+      '@t402/core':
         specifier: workspace:*
         version: link:../../../typescript/packages/core
-      '@x402/evm':
+      '@t402/evm':
         specifier: workspace:*
         version: link:../../../typescript/packages/mechanisms/evm
-      '@x402/express':
+      '@t402/express':
         specifier: workspace:*
         version: link:../../../typescript/packages/http/express
-      '@x402/extensions':
+      '@t402/extensions':
         specifier: workspace:*
         version: link:../../../typescript/packages/extensions
-      '@x402/svm':
+      '@t402/svm':
         specifier: workspace:*
         version: link:../../../typescript/packages/mechanisms/svm
       dotenv:
@@ -1678,19 +1678,19 @@ importers:
       '@hono/node-server':
         specifier: ^1.14.0
         version: 1.19.5(hono@4.10.2)
-      '@x402/core':
+      '@t402/core':
         specifier: workspace:*
         version: link:../../../typescript/packages/core
-      '@x402/evm':
+      '@t402/evm':
         specifier: workspace:*
         version: link:../../../typescript/packages/mechanisms/evm
-      '@x402/extensions':
+      '@t402/extensions':
         specifier: workspace:*
         version: link:../../../typescript/packages/extensions
-      '@x402/hono':
+      '@t402/hono':
         specifier: workspace:*
         version: link:../../../typescript/packages/http/hono
-      '@x402/svm':
+      '@t402/svm':
         specifier: workspace:*
         version: link:../../../typescript/packages/mechanisms/svm
       dotenv:
@@ -1742,19 +1742,19 @@ importers:
       '@heroicons/react':
         specifier: ^2.2.0
         version: 2.2.0(react@19.2.1)
-      '@x402/core':
+      '@t402/core':
         specifier: workspace:*
         version: link:../../../typescript/packages/core
-      '@x402/evm':
+      '@t402/evm':
         specifier: workspace:*
         version: link:../../../typescript/packages/mechanisms/evm
-      '@x402/extensions':
+      '@t402/extensions':
         specifier: workspace:*
         version: link:../../../typescript/packages/extensions
-      '@x402/next':
+      '@t402/next':
         specifier: workspace:*
         version: link:../../../typescript/packages/http/next
-      '@x402/svm':
+      '@t402/svm':
         specifier: workspace:*
         version: link:../../../typescript/packages/mechanisms/svm
       next:

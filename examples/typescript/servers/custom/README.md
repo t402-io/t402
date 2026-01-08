@@ -1,12 +1,12 @@
-# @x402/core Custom Server
+# @t402/core Custom Server
 
-Demonstrates how to implement x402 payment handling manually without using pre-built middleware packages like `@x402/express` or `@x402/hono`.
+Demonstrates how to implement t402 payment handling manually without using pre-built middleware packages like `@t402/express` or `@t402/hono`.
 
 ```typescript
-import { x402ResourceServer, HTTPFacilitatorClient } from "@x402/core/server";
-import { ExactEvmScheme } from "@x402/evm/exact/server";
+import { t402ResourceServer, HTTPFacilitatorClient } from "@t402/core/server";
+import { ExactEvmScheme } from "@t402/evm/exact/server";
 
-const resourceServer = new x402ResourceServer(
+const resourceServer = new t402ResourceServer(
   new HTTPFacilitatorClient({ url: facilitatorUrl }),
 ).register("eip155:84532", new ExactEvmScheme());
 
@@ -31,7 +31,7 @@ res.set("PAYMENT-RESPONSE", encode(settleResult));
 - Node.js v20+ (install via [nvm](https://github.com/nvm-sh/nvm))
 - pnpm v10 (install via [pnpm.io/installation](https://pnpm.io/installation))
 - Valid EVM address for receiving payments
-- URL of a facilitator supporting the desired payment network, see [facilitator list](https://www.x402.org/ecosystem?category=facilitators)
+- URL of a facilitator supporting the desired payment network, see [facilitator list](https://www.t402.org/ecosystem?category=facilitators)
 
 ## Setup
 
@@ -132,7 +132,7 @@ The `PAYMENT-REQUIRED` header contains base64-encoded JSON with the payment requ
 
 ```json
 {
-  "x402Version": 2,
+  "t402Version": 2,
   "error": "Payment required",
   "resource": {
     "url": "http://localhost:4021/weather",
@@ -193,7 +193,7 @@ The `PAYMENT-RESPONSE` header contains base64-encoded JSON with the settlement d
 
 ## Payment Flow
 
-The custom implementation demonstrates each step of the x402 payment flow:
+The custom implementation demonstrates each step of the t402 payment flow:
 
 1. **Request Arrives** — Middleware intercepts all requests
 2. **Route Check** — Determine if route requires payment
@@ -273,7 +273,7 @@ res.set("PAYMENT-RESPONSE", settlementHeader);
 
 ## Middleware vs Custom Comparison
 
-| Aspect                 | With Middleware (@x402/express) | Custom Implementation |
+| Aspect                 | With Middleware (@t402/express) | Custom Implementation |
 | ---------------------- | ------------------------------- | --------------------- |
 | Code Complexity        | ~10 lines                       | ~150 lines            |
 | Automatic Verification | ✅ Yes                          | ❌ Manual             |
@@ -281,11 +281,11 @@ res.set("PAYMENT-RESPONSE", settlementHeader);
 | Header Management      | ✅ Automatic                    | ❌ Manual             |
 | Flexibility            | Limited                         | ✅ Complete control   |
 | Error Handling         | ✅ Built-in                     | ❌ You implement      |
-| Maintenance            | x402 team                       | You maintain          |
+| Maintenance            | t402 team                       | You maintain          |
 
 ## When to Use Each Approach
 
-**Use Middleware (@x402/express, @x402/hono) when:**
+**Use Middleware (@t402/express, @t402/hono) when:**
 
 - Building standard applications
 - Want quick integration
@@ -306,7 +306,7 @@ To use this pattern with other frameworks:
 
 1. Create middleware function for your framework
 2. Check for payment requirements per route
-3. Use `x402ResourceServer` to verify/settle payments
+3. Use `t402ResourceServer` to verify/settle payments
 4. Intercept responses to add settlement headers
 
 The pattern in `index.ts` can be adapted to any Node.js web framework.

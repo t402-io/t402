@@ -1,21 +1,21 @@
-# x402-next
+# t402-next
 
-Next.js middleware integration for the x402 Payment Protocol. This package allows you to easily add paywall functionality to your Next.js applications using the x402 protocol.
+Next.js middleware integration for the t402 Payment Protocol. This package allows you to easily add paywall functionality to your Next.js applications using the t402 protocol.
 
 ## Installation
 
 ```bash
-pnpm install x402-next
+pnpm install t402-next
 ```
 
 ## Quick Start
 
 ### Protecting Page Routes
 
-Page routes are protected using the x402-next middleware. Create a middleware file in your Next.js project (e.g., `middleware.ts`):
+Page routes are protected using the t402-next middleware. Create a middleware file in your Next.js project (e.g., `middleware.ts`):
 
 ```typescript
-import { paymentMiddleware, Network } from 'x402-next';
+import { paymentMiddleware, Network } from 't402-next';
 
 export const middleware = paymentMiddleware(
   "0xYourAddress",
@@ -44,7 +44,7 @@ API routes are protected using the `withX402` route wrapper. This is the recomme
 ```typescript
 // app/api/your-endpoint/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { withX402 } from "x402-next";
+import { withX402 } from "t402-next";
 
 const handler = async (_: NextRequest) => {
   return NextResponse.json({ data: "your response" });
@@ -69,7 +69,7 @@ The `paymentMiddleware` function is used to protect page routes. It can also pro
 
 1. `payTo`: Your receiving address (`0x${string}`)
 2. `routes`: Route configurations for protected endpoints
-3. `facilitator`: (Optional) Configuration for the x402 facilitator service
+3. `facilitator`: (Optional) Configuration for the t402 facilitator service
 4. `paywall`: (Optional) Configuration for the built-in paywall
 
 ### withX402
@@ -79,7 +79,7 @@ The `withX402` function wraps API route handlers. This is the recommended approa
 1. `handler`: Your API route handler function
 2. `payTo`: Your receiving address (`0x${string}`)
 3. `routeConfig`: Payment configuration for this specific route
-4. `facilitator`: (Optional) Configuration for the x402 facilitator service
+4. `facilitator`: (Optional) Configuration for the t402 facilitator service
 5. `paywall`: (Optional) Configuration for the built-in paywall
 
 See the Middleware Options section below for detailed configuration options.
@@ -117,14 +117,14 @@ interface PaymentMiddlewareConfig {
 
 ```typescript
 type FacilitatorConfig = {
-  url: string;                        // URL of the x402 facilitator service
+  url: string;                        // URL of the t402 facilitator service
   createAuthHeaders?: CreateHeaders;  // Optional function to create authentication headers
 };
 ```
 
 ### Paywall Configuration
 
-For more on paywall configuration options, refer to the [paywall README](../x402/src/paywall/README.md).
+For more on paywall configuration options, refer to the [paywall README](../t402/src/paywall/README.md).
 
 ```typescript
 type PaywallConfig = {
@@ -135,22 +135,22 @@ type PaywallConfig = {
 };
 ```
 
-## Accessing Mainnet with @coinbase/x402
+## Accessing Mainnet with @coinbase/t402
 
-To use the official Coinbase facilitator package (`@coinbase/x402`) in your Next.js project:
+To use the official Coinbase facilitator package (`@coinbase/t402`) in your Next.js project:
 
 1. Install the Coinbase facilitator package:
 
 ```bash
-pnpm install @coinbase/x402
+pnpm install @coinbase/t402
 ```
 
 2. Use it in your middleware file::
 
 ```ts
 // middleware.ts
-import { paymentMiddleware } from "x402-next";
-import { facilitator } from "@coinbase/x402";
+import { paymentMiddleware } from "t402-next";
+import { facilitator } from "@coinbase/t402";
 
 export const middleware = paymentMiddleware(
   "0xYourAddress",
@@ -175,7 +175,7 @@ CDP_API_KEY_SECRET=your-cdp-api-key-secret
 
 ## Optional: Coinbase Onramp Integration
 
-**Note**: Onramp integration is completely optional. Your x402 paywall will work perfectly without it. This feature is for users who want to provide an easy way for their customers to fund their wallets directly from the paywall.
+**Note**: Onramp integration is completely optional. Your t402 paywall will work perfectly without it. This feature is for users who want to provide an easy way for their customers to fund their wallets directly from the paywall.
 
 When configured, a "Get more USDC" button will appear in your paywall, allowing users to purchase USDC directly through Coinbase Onramp.
 
@@ -191,7 +191,7 @@ export const middleware = paymentMiddleware(
   routes,
   facilitator,
   {
-    sessionTokenEndpoint: "/api/x402/session-token", // Enable onramp functionality
+    sessionTokenEndpoint: "/api/t402/session-token", // Enable onramp functionality
     cdpClientKey: "your-cdp-client-key",
     appName: "My App",
   }
@@ -205,11 +205,11 @@ export const middleware = paymentMiddleware(
 Create an API route that matches the path you configured above:
 
 ```typescript
-// app/api/x402/session-token/route.ts
-export { POST } from "x402-next";
+// app/api/t402/session-token/route.ts
+export { POST } from "t402-next";
 ```
 
-That's it! The `x402-next` package provides the complete session token implementation.
+That's it! The `t402-next` package provides the complete session token implementation.
 
 #### 3. Get CDP API Keys
 
@@ -236,7 +236,7 @@ CDP_API_KEY_SECRET=your_secret_api_key_secret_here
 
 ### How Onramp Works
 
-Once set up, your x402 paywall will automatically show a "Get more USDC" button when users need to fund their wallets. 
+Once set up, your t402 paywall will automatically show a "Get more USDC" button when users need to fund their wallets. 
 
 1. **Generates session token**: Your backend securely creates a session token using CDP's API
 2. **Opens secure onramp**: User is redirected to Coinbase Onramp with the session token
@@ -257,12 +257,12 @@ Once set up, your x402 paywall will automatically show a "Get more USDC" button 
 3. **API route not found**
     - Ensure you've created your session token API route at the path you configured
     - Check that your API route path matches your `sessionTokenEndpoint` configuration
-    - Verify the export: `export { POST } from "x402-next";`
+    - Verify the export: `export { POST } from "t402-next";`
     - Example: If you configured `sessionTokenEndpoint: "/api/custom/onramp"`, create `app/api/custom/onramp/route.ts`
 
 
 ## Resources
 
-- [x402 Protocol](https://x402.org)
+- [t402 Protocol](https://t402.org)
 - [CDP Documentation](https://docs.cdp.coinbase.com)
 - [CDP Discord](https://discord.com/invite/cdp)

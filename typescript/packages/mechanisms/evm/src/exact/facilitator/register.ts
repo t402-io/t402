@@ -1,12 +1,12 @@
-import { x402Facilitator } from "@x402/core/facilitator";
-import { Network } from "@x402/core/types";
+import { t402Facilitator } from "@t402/core/facilitator";
+import { Network } from "@t402/core/types";
 import { FacilitatorEvmSigner } from "../../signer";
 import { ExactEvmScheme } from "./scheme";
 import { ExactEvmSchemeV1 } from "../v1/facilitator/scheme";
 import { NETWORKS } from "../../v1";
 
 /**
- * Configuration options for registering EVM schemes to an x402Facilitator
+ * Configuration options for registering EVM schemes to an t402Facilitator
  */
 export interface EvmFacilitatorConfig {
   /**
@@ -30,23 +30,23 @@ export interface EvmFacilitatorConfig {
 }
 
 /**
- * Registers EVM exact payment schemes to an x402Facilitator instance.
+ * Registers EVM exact payment schemes to an t402Facilitator instance.
  *
  * This function registers:
  * - V2: Specified networks with ExactEvmScheme
  * - V1: All supported EVM networks with ExactEvmSchemeV1
  *
- * @param facilitator - The x402Facilitator instance to register schemes to
+ * @param facilitator - The t402Facilitator instance to register schemes to
  * @param config - Configuration for EVM facilitator registration
  * @returns The facilitator instance for chaining
  *
  * @example
  * ```typescript
- * import { registerExactEvmScheme } from "@x402/evm/exact/facilitator/register";
- * import { x402Facilitator } from "@x402/core/facilitator";
+ * import { registerExactEvmScheme } from "@t402/evm/exact/facilitator/register";
+ * import { t402Facilitator } from "@t402/core/facilitator";
  * import { createPublicClient, createWalletClient } from "viem";
  *
- * const facilitator = new x402Facilitator();
+ * const facilitator = new t402Facilitator();
  *
  * // Single network
  * registerExactEvmScheme(facilitator, {
@@ -62,9 +62,9 @@ export interface EvmFacilitatorConfig {
  * ```
  */
 export function registerExactEvmScheme(
-  facilitator: x402Facilitator,
+  facilitator: t402Facilitator,
   config: EvmFacilitatorConfig,
-): x402Facilitator {
+): t402Facilitator {
   // Register V2 scheme with specified networks
   facilitator.register(
     config.networks,

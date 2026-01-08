@@ -1,6 +1,6 @@
-# x402 Discovery Example
+# t402 Discovery Example
 
-This example demonstrates how to use the x402 discovery feature to find and list available x402-protected resources across the network.
+This example demonstrates how to use the t402 discovery feature to find and list available t402-protected resources across the network.
 
 ## Prerequisites
 
@@ -24,8 +24,8 @@ uv run python main.py
 ## How It Works
 
 The example demonstrates how to:
-1. Use the x402 facilitator to discover available resources
-2. List all x402-protected endpoints in the network
+1. Use the t402 facilitator to discover available resources
+2. List all t402-protected endpoints in the network
 3. View detailed information about each resource including:
    - Resource URLs
    - Last update timestamps
@@ -39,8 +39,8 @@ The example demonstrates how to:
 import json
 import asyncio
 from datetime import datetime
-from x402.facilitator import FacilitatorClient
-from cdp.x402 import create_facilitator_config
+from t402.facilitator import FacilitatorClient
+from cdp.t402 import create_facilitator_config
 
 # Initialize facilitator client (no API keys required for discovery)
 facilitator = FacilitatorClient(create_facilitator_config())
@@ -61,7 +61,7 @@ async def main():
             print(f"  Resource URL: {item_json['resource']}")
             print(f"  Type: {item_json['type']}")
             print(f"  Last Updated: {datetime.fromisoformat(item_json['lastUpdated'].replace('Z', '+00:00')).strftime('%m/%d/%Y, %I:%M:%S %p')}")
-            print(f"  X402 Version: {item_json['x402Version']}")
+            print(f"  X402 Version: {item_json['t402Version']}")
             print(f"  Accepts: {json.dumps(item_json['accepts'], indent=2)}")
             if item_json.get("metadata"):
                 print(f"  Metadata: {json.dumps(item_json['metadata'], indent=2)}")
@@ -76,14 +76,14 @@ if __name__ == "__main__":
 
 ## Output Example
 
-The script will output a formatted list of all discovered x402 resources, including their URLs, types, update times, and accepted payment methods. Example output:
+The script will output a formatted list of all discovered t402 resources, including their URLs, types, update times, and accepted payment methods. Example output:
 
 ```
 Discovered X402 Resources:
 ========================
 
 Resource 1:
-  Resource URL: https://api.example.com/x402/endpoint
+  Resource URL: https://api.example.com/t402/endpoint
   Type: http
   Last Updated: 8/9/2025, 1:07:04 AM
   X402 Version: 1
@@ -92,7 +92,7 @@ Resource 1:
       "scheme": "exact",
       "network": "base-sepolia",
       "maxAmountRequired": "1000000",
-      "resource": "https://api.example.com/x402/endpoint",
+      "resource": "https://api.example.com/t402/endpoint",
       "description": "Example protected endpoint",
       "mimeType": "application/json",
       "payTo": "0x1234...",

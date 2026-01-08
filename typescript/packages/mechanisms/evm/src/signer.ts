@@ -1,5 +1,5 @@
 /**
- * ClientEvmSigner - Used by x402 clients to sign payment authorizations
+ * ClientEvmSigner - Used by t402 clients to sign payment authorizations
  * This is typically a LocalAccount or wallet that holds private keys
  * and can sign EIP-712 typed data for payment authorizations
  */
@@ -14,7 +14,7 @@ export type ClientEvmSigner = {
 };
 
 /**
- * FacilitatorEvmSigner - Used by x402 facilitators to verify and settle payments
+ * FacilitatorEvmSigner - Used by t402 facilitators to verify and settle payments
  * This is typically a viem PublicClient + WalletClient combination that can
  * read contract state, verify signatures, write transactions, and wait for receipts
  *

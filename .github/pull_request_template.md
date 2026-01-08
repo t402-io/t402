@@ -1,5 +1,5 @@
 <!--
-Thanks for contributing to x402!
+Thanks for contributing to t402!
 Please fill out the information below to help reviewers understand your changes.
 
 Note: We require commit signing.

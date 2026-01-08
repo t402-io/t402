@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withX402 } from "@x402/next";
-import { x402ResourceServer, HTTPFacilitatorClient } from "@x402/core/server";
-import { registerExactEvmScheme } from "@x402/evm/exact/server";
+import { withT402 } from "@t402/next";
+import { t402ResourceServer, HTTPFacilitatorClient } from "@t402/core/server";
+import { registerExactEvmScheme } from "@t402/evm/exact/server";
 
 const facilitatorUrl = process.env.FACILITATOR_URL;
 export const evmAddress = process.env.EVM_ADDRESS as `0x${string}`;
@@ -19,8 +19,8 @@ if (!evmAddress) {
 // Create HTTP facilitator client
 const facilitatorClient = new HTTPFacilitatorClient({ url: facilitatorUrl });
 
-// Create x402 resource server
-const server = new x402ResourceServer(facilitatorClient);
+// Create t402 resource server
+const server = new t402ResourceServer(facilitatorClient);
 registerExactEvmScheme(server);
 
 /**
@@ -41,7 +41,7 @@ const handler = async (_: NextRequest) => {
       message: "Protected action completed successfully",
       timestamp: new Date().toISOString(),
       data: {
-        secretMessage: "This content was paid for with x402!",
+        secretMessage: "This content was paid for with t402!",
         accessedAt: Date.now(),
       },
     },
@@ -50,13 +50,13 @@ const handler = async (_: NextRequest) => {
 };
 
 /**
- * Protected API endpoint using withX402 wrapper
+ * Protected API endpoint using withT402 wrapper
  *
- * This demonstrates the v2 withX402 wrapper for individual API routes.
- * Unlike middleware, withX402 guarantees payment settlement only after
+ * This demonstrates the v2 withT402 wrapper for individual API routes.
+ * Unlike middleware, withT402 guarantees payment settlement only after
  * the handler returns a successful response (status < 400).
  */
-export const GET = withX402(
+export const GET = withT402(
   handler,
   {
     accepts: [

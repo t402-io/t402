@@ -1,6 +1,6 @@
 # TypeScript SDK Contributing Guide
 
-Guide for developing and contributing to the x402 TypeScript SDK.
+Guide for developing and contributing to the t402 TypeScript SDK.
 
 ## Contents
 
@@ -18,20 +18,20 @@ The TypeScript SDK is a pnpm workspace managed with Turborepo.
 ```
 typescript/
 ├── packages/
-│   ├── core/              # @x402/core - Protocol implementation
+│   ├── core/              # @t402/core - Protocol implementation
 │   ├── mechanisms/
-│   │   ├── evm/           # @x402/evm - Ethereum/EVM chains
-│   │   └── svm/           # @x402/svm - Solana
+│   │   ├── evm/           # @t402/evm - Ethereum/EVM chains
+│   │   └── svm/           # @t402/svm - Solana
 │   ├── http/
-│   │   ├── axios/         # @x402/axios - Axios interceptor
-│   │   ├── express/       # @x402/express - Express middleware
-│   │   ├── fetch/         # @x402/fetch - Fetch wrapper
-│   │   ├── hono/          # @x402/hono - Hono middleware
-│   │   ├── next/          # @x402/next - Next.js integration
-│   │   └── paywall/       # @x402/paywall - Browser paywall UI
-│   ├── extensions/        # @x402/extensions - Bazaar, Sign-in-with-x
+│   │   ├── axios/         # @t402/axios - Axios interceptor
+│   │   ├── express/       # @t402/express - Express middleware
+│   │   ├── fetch/         # @t402/fetch - Fetch wrapper
+│   │   ├── hono/          # @t402/hono - Hono middleware
+│   │   ├── next/          # @t402/next - Next.js integration
+│   │   └── paywall/       # @t402/paywall - Browser paywall UI
+│   ├── extensions/        # @t402/extensions - Bazaar, Sign-in-with-x
 │   └── legacy/            # Legacy v1 packages (deprecated)
-├── site/                  # x402.org marketing site
+├── site/                  # t402.org marketing site
 ├── turbo.json
 └── pnpm-workspace.yaml
 ```
@@ -39,11 +39,11 @@ typescript/
 ### Package Dependencies
 
 ```
-@x402/core
+@t402/core
     ↑
-@x402/evm, @x402/svm
+@t402/evm, @t402/svm
     ↑
-@x402/express, @x402/hono, @x402/next, @x402/axios, @x402/fetch
+@t402/express, @t402/hono, @t402/next, @t402/axios, @t402/fetch
 ```
 
 The core package provides transport-agnostic primitives. Mechanism packages (`evm`, `svm`) implement chain-specific logic. HTTP packages provide framework integrations.
@@ -69,7 +69,7 @@ pnpm install
 pnpm build
 
 # Build a specific package
-pnpm --filter @x402/core build
+pnpm --filter @t402/core build
 ```
 
 ## Development Workflow
@@ -123,7 +123,7 @@ cd packages/http/your-framework
 
 ```json
 {
-  "name": "@x402/your-framework",
+  "name": "@t402/your-framework",
   "version": "0.1.0",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -138,7 +138,7 @@ cd packages/http/your-framework
     "format:check": "prettier -c .prettierrc --check \"**/*.{ts,js,cjs,json,md}\""
   },
   "dependencies": {
-    "@x402/core": "workspace:*"
+    "@t402/core": "workspace:*"
   }
 }
 ```
@@ -159,7 +159,7 @@ To add support for a new blockchain in TypeScript:
 mkdir -p packages/mechanisms/your-chain
 ```
 
-2. Implement the required interfaces from `@x402/core`:
+2. Implement the required interfaces from `@t402/core`:
    - `SchemeNetworkClient` - Signs payment payloads
    - `SchemeNetworkServer` - Validates payment requirements
    - `SchemeNetworkFacilitator` - Verifies and settles payments
@@ -169,7 +169,7 @@ mkdir -p packages/mechanisms/your-chain
 ```typescript
 // src/exact/client/register.ts
 export function registerExactYourChainScheme(
-  client: x402Client,
+  client: t402Client,
   config: { signer: YourChainSigner; networks?: Network | Network[] }
 ) {
   const networks = config.networks ?? 'yourchain:*';
@@ -178,7 +178,7 @@ export function registerExactYourChainScheme(
 }
 ```
 
-4. Follow the existing `@x402/evm` or `@x402/svm` package structure.
+4. Follow the existing `@t402/evm` or `@t402/svm` package structure.
 
 ### Adding Extensions
 
@@ -197,7 +197,7 @@ Extensions go in `packages/extensions/`. Each extension should:
 pnpm test
 
 # Single package
-pnpm --filter @x402/evm test
+pnpm --filter @t402/evm test
 
 # Watch mode
 cd packages/mechanisms/evm
@@ -215,7 +215,7 @@ pnpm test:integration
 Or for a specific package:
 
 ```bash
-pnpm --filter @x402/evm test:integration
+pnpm --filter @t402/evm test:integration
 ```
 
 ### Test File Organization

@@ -1,11 +1,11 @@
-# @x402/next
+# @t402/next
 
-Next.js integration for the x402 Payment Protocol. This package allows you to easily add paywall functionality to your Next.js applications using the x402 protocol.
+Next.js integration for the t402 Payment Protocol. This package allows you to easily add paywall functionality to your Next.js applications using the t402 protocol.
 
 ## Installation
 
 ```bash
-pnpm install @x402/next
+pnpm install @t402/next
 ```
 
 ## Quick Start
@@ -15,12 +15,12 @@ pnpm install @x402/next
 Page routes are protected using the `paymentProxy`. Create a proxy (middleware) file in your Next.js project (`proxy.ts`):
 
 ```typescript
-import { paymentProxy, x402ResourceServer } from "@x402/next";
-import { HTTPFacilitatorClient } from "@x402/core/server";
-import { ExactEvmScheme } from "@x402/evm/exact/server";
+import { paymentProxy, t402ResourceServer } from "@t402/next";
+import { HTTPFacilitatorClient } from "@t402/core/server";
+import { ExactEvmScheme } from "@t402/evm/exact/server";
 
-const facilitatorClient = new HTTPFacilitatorClient({ url: "https://facilitator.x402.org" });
-const resourceServer = new x402ResourceServer(facilitatorClient)
+const facilitatorClient = new HTTPFacilitatorClient({ url: "https://facilitator.t402.org" });
+const resourceServer = new t402ResourceServer(facilitatorClient)
   .register("eip155:84532", new ExactEvmScheme());
 
 export const proxy = paymentProxy(
@@ -51,7 +51,7 @@ API routes are protected using the `withX402` route wrapper. This is the recomme
 ```typescript
 // app/api/your-endpoint/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { withX402 } from "@x402/next";
+import { withX402 } from "@t402/next";
 
 const handler = async (_: NextRequest) => {
   return NextResponse.json({ data: "your response" });
@@ -68,7 +68,7 @@ export const GET = withX402(
     },
     description: "Access to API endpoint",
   },
-  server, // your configured x402ResourceServer
+  server, // your configured t402ResourceServer
 );
 ```
 
@@ -81,7 +81,7 @@ The `paymentProxy` function is used to protect page routes. It can also protect 
 ```typescript
 paymentProxy(
   routes: RoutesConfig,
-  server: x402ResourceServer,
+  server: t402ResourceServer,
   paywallConfig?: PaywallConfig,
   paywall?: PaywallProvider,
   syncFacilitatorOnStart?: boolean
@@ -91,7 +91,7 @@ paymentProxy(
 #### Parameters
 
 1. **`routes`** (required): Route configurations for protected endpoints
-2. **`server`** (required): Pre-configured x402ResourceServer instance
+2. **`server`** (required): Pre-configured t402ResourceServer instance
 3. **`paywallConfig`** (optional): Configuration for the built-in paywall UI
 4. **`paywall`** (optional): Custom paywall provider
 5. **`syncFacilitatorOnStart`** (optional): Whether to sync with facilitator on startup (defaults to true)
@@ -104,7 +104,7 @@ The `withX402` function wraps API route handlers. This is the recommended approa
 withX402(
   routeHandler: (request: NextRequest) => Promise<NextResponse>,
   routeConfig: RouteConfig,
-  server: x402ResourceServer,
+  server: t402ResourceServer,
   paywallConfig?: PaywallConfig,
   paywall?: PaywallProvider,
   syncFacilitatorOnStart?: boolean
@@ -115,7 +115,7 @@ withX402(
 
 1. **`routeHandler`** (required): Your API route handler function
 2. **`routeConfig`** (required): Payment configuration for this specific route
-3. **`server`** (required): Pre-configured x402ResourceServer instance
+3. **`server`** (required): Pre-configured t402ResourceServer instance
 4. **`paywallConfig`** (optional): Configuration for the built-in paywall UI
 5. **`paywall`** (optional): Custom paywall provider
 6. **`syncFacilitatorOnStart`** (optional): Whether to sync with facilitator on startup (defaults to true)
@@ -124,7 +124,7 @@ withX402(
 
 ### NextAdapter
 
-The `NextAdapter` class implements the `HTTPAdapter` interface from `@x402/core`, providing Next.js-specific request handling:
+The `NextAdapter` class implements the `HTTPAdapter` interface from `@t402/core`, providing Next.js-specific request handling:
 
 ```typescript
 class NextAdapter implements HTTPAdapter {
@@ -159,13 +159,13 @@ const routes: RoutesConfig = {
 ### Multiple Payment Networks
 
 ```typescript
-import { paymentProxy, x402ResourceServer } from "@x402/next";
-import { HTTPFacilitatorClient } from "@x402/core/server";
-import { registerExactEvmScheme } from "@x402/evm/exact/server";
-import { registerExactSvmScheme } from "@x402/svm/exact/server";
+import { paymentProxy, t402ResourceServer } from "@t402/next";
+import { HTTPFacilitatorClient } from "@t402/core/server";
+import { registerExactEvmScheme } from "@t402/evm/exact/server";
+import { registerExactSvmScheme } from "@t402/svm/exact/server";
 
 const facilitatorClient = new HTTPFacilitatorClient({ url: facilitatorUrl });
-const server = new x402ResourceServer(facilitatorClient);
+const server = new t402ResourceServer(facilitatorClient);
 
 registerExactEvmScheme(server);
 registerExactSvmScheme(server);
@@ -198,9 +198,9 @@ export const middleware = paymentProxy(
 ### Custom Paywall
 
 ```typescript
-import { createPaywall } from "@x402/paywall";
-import { evmPaywall } from "@x402/paywall/evm";
-import { svmPaywall } from "@x402/paywall/svm";
+import { createPaywall } from "@t402/paywall";
+import { evmPaywall } from "@t402/paywall/evm";
+import { svmPaywall } from "@t402/paywall/svm";
 
 const paywall = createPaywall()
   .withNetwork(evmPaywall)
@@ -219,19 +219,19 @@ export const middleware = paymentProxy(
   paywall,
 );
 ```
-## Migration from x402-next
+## Migration from t402-next
 
-If you're migrating from the legacy `x402-next` package:
+If you're migrating from the legacy `t402-next` package:
 
-1. **Update imports**: Change from `x402-next` to `@x402/next`
-2. **New API**: Create an x402ResourceServer and register payment schemes
+1. **Update imports**: Change from `t402-next` to `@t402/next`
+2. **New API**: Create an t402ResourceServer and register payment schemes
 3. **Function rename**: `paymentMiddleware` is now `paymentProxy`
 4. **Parameter order**: Routes first, then resource server
 
-### Before (x402-next):
+### Before (t402-next):
 
 ```typescript
-import { paymentMiddleware } from "x402-next";
+import { paymentMiddleware } from "t402-next";
 
 export const middleware = paymentMiddleware(
   "0xYourAddress",
@@ -247,15 +247,15 @@ export const middleware = paymentMiddleware(
 );
 ```
 
-### After (@x402/next):
+### After (@t402/next):
 
 ```typescript
-import { paymentProxy, x402ResourceServer } from "@x402/next";
-import { HTTPFacilitatorClient } from "@x402/core/server";
-import { ExactEvmScheme } from "@x402/evm/exact/server";
+import { paymentProxy, t402ResourceServer } from "@t402/next";
+import { HTTPFacilitatorClient } from "@t402/core/server";
+import { ExactEvmScheme } from "@t402/evm/exact/server";
 
 const facilitator = new HTTPFacilitatorClient({ url: facilitatorUrl });
-const resourceServer = new x402ResourceServer(facilitator)
+const resourceServer = new t402ResourceServer(facilitator)
   .register("eip155:84532", new ExactEvmScheme());
 
 export const middleware = paymentProxy(

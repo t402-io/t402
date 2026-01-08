@@ -37,7 +37,7 @@ export async function runInteractiveMode(
   // Add regular facilitators
   regularFacilitators.forEach(f => {
     facilitatorChoices.push({
-      title: `${f.name} (${formatVersions(f.config.x402Versions)}) [${f.config.protocolFamilies?.join(', ') || ''}]${f.config.extensions ? ' {' + f.config.extensions.join(', ') + '}' : ''}`,
+      title: `${f.name} (${formatVersions(f.config.t402Versions)}) [${f.config.protocolFamilies?.join(', ') || ''}]${f.config.extensions ? ' {' + f.config.extensions.join(', ') + '}' : ''}`,
       value: f.name,
       selected: minimize // With --min: all selected. Without --min: none selected
     });
@@ -54,7 +54,7 @@ export async function runInteractiveMode(
     
     externalFacilitators.forEach(f => {
       facilitatorChoices.push({
-        title: `${f.name} (${formatVersions(f.config.x402Versions)}) [${f.config.protocolFamilies?.join(', ') || ''}]${f.config.extensions ? ' {' + f.config.extensions.join(', ') + '}' : ''}`,
+        title: `${f.name} (${formatVersions(f.config.t402Versions)}) [${f.config.protocolFamilies?.join(', ') || ''}]${f.config.extensions ? ' {' + f.config.extensions.join(', ') + '}' : ''}`,
         value: f.name,
         selected: false // External facilitators are never selected by default
       });
@@ -80,7 +80,7 @@ export async function runInteractiveMode(
     const families = Array.from(new Set(s.config.endpoints?.map(e => e.protocolFamily).filter(Boolean))) || [];
     const extInfo = s.config.extensions ? ' {' + s.config.extensions.join(', ') + '}' : '';
     return {
-      title: `${s.name} (v${s.config.x402Version}) [${families.join(', ')}]${extInfo}`,
+      title: `${s.name} (v${s.config.t402Version}) [${families.join(', ')}]${extInfo}`,
       value: s.name,
       selected: minimize // With --min: all selected. Without --min: none selected
     };
@@ -102,7 +102,7 @@ export async function runInteractiveMode(
 
   // Question 3: Select clients (multi-select)
   const clientChoices = allClients.map(c => ({
-    title: `${c.name} (${formatVersions(c.config.x402Versions)}) [${c.config.protocolFamilies?.join(', ') || ''}]`,
+    title: `${c.name} (${formatVersions(c.config.t402Versions)}) [${c.config.protocolFamilies?.join(', ') || ''}]`,
     value: c.name,
     selected: minimize // With --min: all selected. Without --min: none selected
   }));
@@ -175,7 +175,7 @@ export async function runInteractiveMode(
 
   if (availableVersions.length > 1) {
     const versionChoices = availableVersions.map(v => {
-      const count = preliminaryScenarios.filter(s => s.server.config.x402Version === v).length;
+      const count = preliminaryScenarios.filter(s => s.server.config.t402Version === v).length;
       return {
         title: `v${v} (${count} scenarios)`,
         value: v,
@@ -186,7 +186,7 @@ export async function runInteractiveMode(
     const versionsResponse = await prompts({
       type: 'multiselect',
       name: 'versions',
-      message: 'Select x402 versions',
+      message: 'Select t402 versions',
       choices: versionChoices,
       min: 1,
       hint: 'Space to select, Enter to confirm',

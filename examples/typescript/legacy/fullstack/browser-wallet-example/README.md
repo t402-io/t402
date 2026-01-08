@@ -1,17 +1,17 @@
-# x402 Browser Wallet Payment Template
+# t402 Browser Wallet Payment Template
 
-> 🛠️ **A starter template for building payment-enabled applications with x402**
+> 🛠️ **A starter template for building payment-enabled applications with t402**
 
-This is a simplified scaffolding project demonstrating [x402 payment protocol](https://x402.org) integration with browser wallet support. Use this as a foundation to build your own micropayment-enabled services, SaaS applications, or any project that needs frictionless web payments.
+This is a simplified scaffolding project demonstrating [t402 payment protocol](https://t402.org) integration with browser wallet support. Use this as a foundation to build your own micropayment-enabled services, SaaS applications, or any project that needs frictionless web payments.
 
-## What is x402?
+## What is t402?
 
-x402 is a payments protocol for the internet built on HTTP. It enables:
+t402 is a payments protocol for the internet built on HTTP. It enables:
 - **1 line of code** to accept digital dollars
 - **No fees**, 2 second settlement
 - **$0.001 minimum** payments
 
-Learn more at [x402.org](https://x402.org) or check out the [GitHub repository](https://github.com/coinbase/x402).
+Learn more at [t402.org](https://t402.org) or check out the [GitHub repository](https://github.com/coinbase/t402).
 
 ## This Template Includes
 
@@ -20,7 +20,7 @@ Learn more at [x402.org](https://x402.org) or check out the [GitHub repository](
 - **One-Time Access** ($0.10): Single-use payments for actions or content
 
 ✅ **Complete Implementation**:
-- Server with x402 payment middleware (Hono)
+- Server with t402 payment middleware (Hono)
 - React client with wallet integration (Viem)
 - Session management and validation
 - Clean, modern UI ready to customize
@@ -43,7 +43,7 @@ pnpm install:all
 
 Create `.env`:
 ```env
-FACILITATOR_URL=https://x402.org/facilitator
+FACILITATOR_URL=https://t402.org/facilitator
 NETWORK=base-sepolia
 ADDRESS=0x_YOUR_WALLET_ADDRESS_HERE
 PORT=3001
@@ -125,7 +125,7 @@ This scaffolding is perfect as a starting point for:
 - **API Services**: Monetize your API with per-call or time-based pricing
 - **Digital Tools**: Add trial periods or one-time purchase options
 - **Gaming**: Implement in-game purchases or pay-to-play mechanics
-- **Any Web Service**: If you can imagine it, you can charge for it with x402
+- **Any Web Service**: If you can imagine it, you can charge for it with t402
 
 ## Customization Guide
 
@@ -155,12 +155,12 @@ The UI is intentionally minimal so you can add your own design system. All style
 
 ## Get Help
 
-Building something with x402? We're here to help!
+Building something with t402? We're here to help!
 
-- 📚 **Documentation**: [x402.org](https://x402.org)
-- 💻 **Source Code**: [github.com/coinbase/x402](https://github.com/coinbase/x402)
+- 📚 **Documentation**: [t402.org](https://t402.org)
+- 💻 **Source Code**: [github.com/coinbase/t402](https://github.com/coinbase/t402)
 - 💬 **Community**: [Join our Discord](https://discord.gg/invite/cdp)
-- 🐛 **Issues**: [GitHub Issues](https://github.com/coinbase/x402/issues)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/coinbase/t402/issues)
 
 ## Contributing
 
@@ -168,7 +168,7 @@ Found a bug or have an improvement for this template? Please open an issue or su
 
 ## License
 
-This template is open source and available under the same license as the x402 protocol. See the [x402 repository](https://github.com/coinbase/x402) for details.
+This template is open source and available under the same license as the t402 protocol. See the [t402 repository](https://github.com/coinbase/t402) for details.
 
 ---
 

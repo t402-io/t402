@@ -5,21 +5,21 @@ import (
 	"encoding/json"
 	"net/http"
 
-	x402 "github.com/coinbase/x402/go"
-	x402http "github.com/coinbase/x402/go/http"
+	t402 "github.com/coinbase/t402/go"
+	t402http "github.com/coinbase/t402/go/http"
 )
 
-// wrapHTTPClient wraps a standard HTTP client with x402 payment handling
-func wrapHTTPClient(x402Client *x402.X402Client) *http.Client {
-	// Create x402 HTTP client wrapper
-	httpClient := x402http.Newx402HTTPClient(x402Client)
+// wrapHTTPClient wraps a standard HTTP client with t402 payment handling
+func wrapHTTPClient(t402Client *t402.T402Client) *http.Client {
+	// Create t402 HTTP client wrapper
+	httpClient := t402http.Newt402HTTPClient(t402Client)
 
 	// Wrap standard HTTP client with payment handling
-	return x402http.WrapHTTPClientWithPayment(http.DefaultClient, httpClient)
+	return t402http.WrapHTTPClientWithPayment(http.DefaultClient, httpClient)
 }
 
 // extractPaymentResponse extracts settlement details from response headers
-func extractPaymentResponse(headers http.Header) (*x402.SettleResponse, error) {
+func extractPaymentResponse(headers http.Header) (*t402.SettleResponse, error) {
 	// Try v2 header first
 	paymentHeader := headers.Get("PAYMENT-RESPONSE")
 	if paymentHeader == "" {
@@ -38,7 +38,7 @@ func extractPaymentResponse(headers http.Header) (*x402.SettleResponse, error) {
 	}
 
 	// Parse settlement response
-	var settleResp x402.SettleResponse
+	var settleResp t402.SettleResponse
 	if err := json.Unmarshal(decoded, &settleResp); err != nil {
 		return nil, err
 	}

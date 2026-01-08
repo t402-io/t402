@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
  *
  * Setup:
  * 1. Set CDP_API_KEY_ID and CDP_API_KEY_SECRET environment variables
- * 2. Copy this file to: app/api/x402/session-token/route.ts
+ * 2. Copy this file to: app/api/t402/session-token/route.ts
  *
  * @param request - The NextRequest containing the session token request
  * @returns Promise<NextResponse> - The response containing the session token or error

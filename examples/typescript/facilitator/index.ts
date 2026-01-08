@@ -1,16 +1,16 @@
 import { base58 } from "@scure/base";
 import { createKeyPairSignerFromBytes } from "@solana/kit";
-import { x402Facilitator } from "@x402/core/facilitator";
+import { t402Facilitator } from "@t402/core/facilitator";
 import {
   PaymentPayload,
   PaymentRequirements,
   SettleResponse,
   VerifyResponse,
-} from "@x402/core/types";
-import { toFacilitatorEvmSigner } from "@x402/evm";
-import { registerExactEvmScheme } from "@x402/evm/exact/facilitator";
-import { toFacilitatorSvmSigner } from "@x402/svm";
-import { registerExactSvmScheme } from "@x402/svm/exact/facilitator";
+} from "@t402/core/types";
+import { toFacilitatorEvmSigner } from "@t402/evm";
+import { registerExactEvmScheme } from "@t402/evm/exact/facilitator";
+import { toFacilitatorSvmSigner } from "@t402/svm";
+import { registerExactSvmScheme } from "@t402/svm/exact/facilitator";
 import dotenv from "dotenv";
 import express from "express";
 import { createWalletClient, http, publicActions } from "viem";
@@ -52,7 +52,7 @@ const viemClient = createWalletClient({
   transport: http(),
 }).extend(publicActions);
 
-// Initialize the x402 Facilitator with EVM and SVM support
+// Initialize the t402 Facilitator with EVM and SVM support
 
 const evmSigner = toFacilitatorEvmSigner({
   getCode: (args: { address: `0x${string}` }) => viemClient.getCode(args),
@@ -95,7 +95,7 @@ const evmSigner = toFacilitatorEvmSigner({
 // Facilitator can now handle all Solana networks with automatic RPC creation
 const svmSigner = toFacilitatorSvmSigner(svmAccount);
 
-const facilitator = new x402Facilitator()
+const facilitator = new t402Facilitator()
   .onBeforeVerify(async (context) => {
     console.log("Before verify", context);
   })

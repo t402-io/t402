@@ -1,16 +1,16 @@
 import { config } from "dotenv";
 import express, { Request, Response, NextFunction } from "express";
-import { x402ResourceServer, HTTPFacilitatorClient, ResourceConfig } from "@x402/core/server";
-import { ExactEvmScheme } from "@x402/evm/exact/server";
-import type { PaymentRequirements } from "@x402/core/types";
+import { t402ResourceServer, HTTPFacilitatorClient, ResourceConfig } from "@t402/core/server";
+import { ExactEvmScheme } from "@t402/evm/exact/server";
+import type { PaymentRequirements } from "@t402/core/types";
 
 config();
 
 /**
- * Custom x402 Server Implementation
+ * Custom t402 Server Implementation
  *
- * This example demonstrates how to implement x402 payment handling manually
- * without using the pre-built middleware packages like @x402/express.
+ * This example demonstrates how to implement t402 payment handling manually
+ * without using the pre-built middleware packages like @t402/express.
  *
  * It shows you how the payment flow works under the hood:
  * 1. Check for payment in request headers
@@ -23,7 +23,7 @@ config();
  * - Complete control over the payment flow
  * - Integration with unsupported frameworks
  * - Custom error handling or logging
- * - Understanding of how x402 works internally
+ * - Understanding of how t402 works internally
  */
 
 const evmAddress = process.env.EVM_ADDRESS as `0x${string}`;
@@ -39,14 +39,14 @@ if (!facilitatorUrl) {
   process.exit(1);
 }
 
-console.log("\n🔧 Custom x402 Server Implementation");
+console.log("\n🔧 Custom t402 Server Implementation");
 console.log("This example demonstrates manual payment handling without middleware.\n");
 console.log(`✅ Payment address: ${evmAddress}`);
 console.log(`✅ Facilitator: ${facilitatorUrl}\n`);
 
 // Create facilitator client and resource server
 const facilitatorClient = new HTTPFacilitatorClient({ url: facilitatorUrl });
-const resourceServer = new x402ResourceServer(facilitatorClient).register(
+const resourceServer = new t402ResourceServer(facilitatorClient).register(
   "eip155:84532",
   new ExactEvmScheme(),
 );

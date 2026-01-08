@@ -2,7 +2,7 @@
  * Type definitions for the Bazaar Discovery Extension
  */
 
-import type { BodyMethods, QueryParamMethods } from "@x402/core/http";
+import type { BodyMethods, QueryParamMethods } from "@t402/core/http";
 
 /**
  * Extension identifier constant for the Bazaar discovery extension

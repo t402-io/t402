@@ -22,7 +22,7 @@ const queryClient = new QueryClient();
  * @returns The Providers component
  */
 export function Providers({ children }: ProvidersProps) {
-  const { paymentRequired } = window.x402;
+  const { paymentRequired } = window.t402;
 
   // Determine which chain to connect to
   let targetChain: Chain = allChains.base; // Default to Base
@@ -46,7 +46,7 @@ export function Providers({ children }: ProvidersProps) {
     connectors: [
       injected(),
       coinbaseWallet({
-        appName: window.x402.appName || "x402 Paywall",
+        appName: window.t402.appName || "t402 Paywall",
       }),
     ],
     transports: {

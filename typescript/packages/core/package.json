@@ -1,5 +1,5 @@
 {
-  "name": "@x402/core",
+  "name": "@t402/core",
   "version": "2.0.0",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -19,8 +19,8 @@
   "keywords": [],
   "license": "Apache-2.0",
   "author": "Coinbase Inc.",
-  "repository": "https://github.com/coinbase/x402",
-  "description": "x402 Payment Protocol",
+  "repository": "https://github.com/coinbase/t402",
+  "description": "t402 Payment Protocol",
   "devDependencies": {
     "@eslint/js": "^9.24.0",
     "@types/node": "^22.13.4",

@@ -129,7 +129,7 @@ describe("ExactEvmScheme (Server)", () => {
       const result = await server.enhancePaymentRequirements(
         requirements as never,
         {
-          x402Version: 2,
+          t402Version: 2,
           scheme: "exact",
           network: "eip155:84532",
         },

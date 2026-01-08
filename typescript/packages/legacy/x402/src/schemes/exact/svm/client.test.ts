@@ -225,7 +225,7 @@ describe("SVM Client", () => {
       expect(header).toBe("encoded_payment_header");
     });
 
-    it("should handle different x402 versions", async () => {
+    it("should handle different t402 versions", async () => {
       // Arrange
       const encodePaymentSpy = vi
         .spyOn(paymentUtils, "encodePayment")
@@ -237,7 +237,7 @@ describe("SVM Client", () => {
       // Assert
       expect(encodePaymentSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          x402Version: 2,
+          t402Version: 2,
         }),
       );
     });

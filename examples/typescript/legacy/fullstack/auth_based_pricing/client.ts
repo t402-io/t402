@@ -4,7 +4,7 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { baseSepolia, base } from 'viem/chains';
 import { SiweMessage } from 'siwe';
 import _fetch from 'node-fetch'; // Using ESM-compatible import for node-fetch
-import { wrapFetchWithPayment, decodeXPaymentResponse } from 'x402-fetch';
+import { wrapFetchWithPayment, decodeXPaymentResponse } from 't402-fetch';
 import { fileURLToPath } from 'url';
 
 // --- Environment Variable Loading ---
@@ -82,11 +82,11 @@ async function runClientDemo() {
     // console.log('[ClientSim] JWT:', jwtToken); // Optionally log the full JWT for debugging
   } catch (error) {
     console.error('[ClientSim] ❌ SIWE Login flow error:', error);
-    // If login fails, we might not want to proceed with x402 calls that rely on JWT for discount
+    // If login fails, we might not want to proceed with t402 calls that rely on JWT for discount
   }
 
-  // --- Setup x402-fetch for subsequent calls ---
-  // This wraps the standard fetch with x402 payment handling capabilities using the client's wallet.
+  // --- Setup t402-fetch for subsequent calls ---
+  // This wraps the standard fetch with t402 payment handling capabilities using the client's wallet.
   const fetchWithClientPayment = wrapFetchWithPayment(_fetch as any, clientWalletAccount);
 
   // --- Step 2: Call /demo-weather WITH JWT (Authenticated - Expecting Discounted Price) ---
@@ -98,21 +98,21 @@ async function runClientDemo() {
         headers: { 'Authorization': `Bearer ${jwtToken}` }, // Include JWT for authentication
       });
       
-      const x402RespHeader = response.headers.get('x-payment-response');
+      const t402RespHeader = response.headers.get('x-payment-response');
       
       if (!response.ok) {
-        // This block might be hit if x402-fetch fails to handle the 402 automatically, or for other errors.
+        // This block might be hit if t402-fetch fails to handle the 402 automatically, or for other errors.
         const errText = await response.text();
         console.error(`[ClientSim]   ❌ Error from server (authenticated call): ${response.status} - ${errText}`);
-        // Log x-payment-response even on error, if present, for debugging x402 client issues
-        if (x402RespHeader) console.error('[ClientSim]   x-payment-response (on error):', decodeXPaymentResponse(x402RespHeader));
+        // Log x-payment-response even on error, if present, for debugging t402 client issues
+        if (t402RespHeader) console.error('[ClientSim]   x-payment-response (on error):', decodeXPaymentResponse(t402RespHeader));
         throw new Error(`Authenticated /demo-weather call failed: ${response.status}`);
       }
       
       const weatherData = await response.json();
       console.log('[ClientSim]   ✅ Weather data (authenticated):', weatherData);
-      if (x402RespHeader) {
-        console.log('[ClientSim]   ✅ x-payment-response (authenticated):', decodeXPaymentResponse(x402RespHeader));
+      if (t402RespHeader) {
+        console.log('[ClientSim]   ✅ x-payment-response (authenticated):', decodeXPaymentResponse(t402RespHeader));
       }
     } catch (error: any) {
       console.error('[ClientSim]   ❌ Error during authenticated /demo-weather call:', error.message);
@@ -126,19 +126,19 @@ async function runClientDemo() {
   try {
     const response = await fetchWithClientPayment(`${serverBaseUrl}/demo-weather`, { method: 'GET' });
     
-    const x402RespHeader = response.headers.get('x-payment-response');
+    const t402RespHeader = response.headers.get('x-payment-response');
 
     if (!response.ok) {
       const errText = await response.text();
       console.error(`[ClientSim]   ❌ Error from server (unauthenticated call): ${response.status} - ${errText}`);
-      if (x402RespHeader) console.error('[ClientSim]   x-payment-response (on error):', decodeXPaymentResponse(x402RespHeader));
+      if (t402RespHeader) console.error('[ClientSim]   x-payment-response (on error):', decodeXPaymentResponse(t402RespHeader));
       throw new Error(`Unauthenticated /demo-weather call failed: ${response.status}`);
     }
     
     const weatherData = await response.json();
     console.log('[ClientSim]   ✅ Weather data (unauthenticated):', weatherData);
-    if (x402RespHeader) {
-      console.log('[ClientSim]   ✅ x-payment-response (unauthenticated):', decodeXPaymentResponse(x402RespHeader));
+    if (t402RespHeader) {
+      console.log('[ClientSim]   ✅ x-payment-response (unauthenticated):', decodeXPaymentResponse(t402RespHeader));
     }
   } catch (error: any) {
     console.error('[ClientSim]   ❌ Error during unauthenticated /demo-weather call:', error.message);

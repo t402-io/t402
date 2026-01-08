@@ -3,30 +3,30 @@ package gin
 import (
 	"time"
 
-	x402 "github.com/coinbase/x402/go"
-	x402http "github.com/coinbase/x402/go/http"
+	t402 "github.com/coinbase/t402/go"
+	t402http "github.com/coinbase/t402/go/http"
 	"github.com/gin-gonic/gin"
 )
 
-// Config provides struct-based configuration for x402 payment middleware.
+// Config provides struct-based configuration for t402 payment middleware.
 // This is a cleaner alternative to the variadic options pattern.
 type Config struct {
 	// Routes maps HTTP patterns to payment requirements
-	Routes x402http.RoutesConfig
+	Routes t402http.RoutesConfig
 
 	// Facilitator is a single facilitator client (most common case)
 	// Use this OR Facilitators (not both)
-	Facilitator x402.FacilitatorClient
+	Facilitator t402.FacilitatorClient
 
 	// Facilitators is an array of facilitator clients (for fallback/redundancy)
 	// Use this OR Facilitator (not both)
-	Facilitators []x402.FacilitatorClient
+	Facilitators []t402.FacilitatorClient
 
 	// Schemes to register with the server
 	Schemes []SchemeConfig
 
 	// PaywallConfig for browser-based payment UI (optional)
-	PaywallConfig *x402http.PaywallConfig
+	PaywallConfig *t402http.PaywallConfig
 
 	// SyncFacilitatorOnStart fetches supported kinds from facilitators on startup
 	// Default: true
@@ -40,16 +40,16 @@ type Config struct {
 	ErrorHandler func(*gin.Context, error)
 
 	// SettlementHandler called after successful settlement (optional)
-	SettlementHandler func(*gin.Context, *x402.SettleResponse)
+	SettlementHandler func(*gin.Context, *t402.SettleResponse)
 }
 
 // SchemeConfig configures a payment scheme for a network.
 type SchemeConfig struct {
-	Network x402.Network
-	Server  x402.SchemeNetworkServer
+	Network t402.Network
+	Server  t402.SchemeNetworkServer
 }
 
-// X402Payment creates payment middleware using struct-based configuration.
+// T402Payment creates payment middleware using struct-based configuration.
 // This is a cleaner, more readable alternative to PaymentMiddleware with variadic options.
 //
 // Args:
@@ -62,7 +62,7 @@ type SchemeConfig struct {
 //
 // Example:
 //
-//	r.Use(ginmw.X402Payment(ginmw.Config{
+//	r.Use(ginmw.T402Payment(ginmw.Config{
 //	    Routes: routes,
 //	    Facilitator: facilitatorClient,
 //	    Schemes: []ginmw.SchemeConfig{
@@ -72,7 +72,7 @@ type SchemeConfig struct {
 //	    SyncFacilitatorOnStart: true,
 //	    Timeout: 30 * time.Second,
 //	}))
-func X402Payment(config Config) gin.HandlerFunc {
+func T402Payment(config Config) gin.HandlerFunc {
 	// Set defaults
 	if config.Timeout == 0 {
 		config.Timeout = 30 * time.Second
@@ -92,7 +92,7 @@ func X402Payment(config Config) gin.HandlerFunc {
 	}
 
 	// Normalize facilitators list
-	var facilitators []x402.FacilitatorClient
+	var facilitators []t402.FacilitatorClient
 	if config.Facilitator != nil {
 		facilitators = append(facilitators, config.Facilitator)
 	}
@@ -129,7 +129,7 @@ func X402Payment(config Config) gin.HandlerFunc {
 	return PaymentMiddlewareFromConfig(config.Routes, opts...)
 }
 
-// SimpleX402Payment creates middleware with minimal configuration.
+// SimpleT402Payment creates middleware with minimal configuration.
 // Uses a single route pattern and facilitator for the simplest possible setup.
 //
 // Args:
@@ -145,33 +145,33 @@ func X402Payment(config Config) gin.HandlerFunc {
 //
 // Example:
 //
-//	r.Use(gin.SimpleX402Payment(
+//	r.Use(gin.SimpleT402Payment(
 //	    "0x123...",
 //	    "$0.001",
 //	    "eip155:8453",
 //	    "https://facilitator.example.com",
 //	))
-func SimpleX402Payment(payTo string, price string, network x402.Network, facilitatorURL string) gin.HandlerFunc {
+func SimpleT402Payment(payTo string, price string, network t402.Network, facilitatorURL string) gin.HandlerFunc {
 	// Create facilitator client
-	facilitator := x402http.NewHTTPFacilitatorClient(&x402http.FacilitatorConfig{
+	facilitator := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
 		URL: facilitatorURL,
 	})
 
 	// Create routes for all endpoints
-	routes := x402http.RoutesConfig{
+	routes := t402http.RoutesConfig{
 		"*": {
-			Accepts: []x402http.PaymentOption{
+			Accepts: []t402http.PaymentOption{
 				{
 					Scheme:  "exact",
 					PayTo:   payTo,
-					Price:   x402.Price(price),
+					Price:   t402.Price(price),
 					Network: network,
 				},
 			},
 		},
 	}
 
-	return X402Payment(Config{
+	return T402Payment(Config{
 		Routes:                 routes,
 		Facilitator:            facilitator,
 		SyncFacilitatorOnStart: true,

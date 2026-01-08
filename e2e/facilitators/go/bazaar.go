@@ -5,15 +5,15 @@ import (
 	"sync"
 	"time"
 
-	x402 "github.com/coinbase/x402/go"
-	exttypes "github.com/coinbase/x402/go/extensions/types"
+	t402 "github.com/coinbase/t402/go"
+	exttypes "github.com/coinbase/t402/go/extensions/types"
 )
 
 type DiscoveredResource struct {
 	Resource      string                     `json:"resource"`
 	Type          string                     `json:"type"`
-	X402Version   int                        `json:"x402Version"`
-	Accepts       []x402.PaymentRequirements `json:"accepts"`
+	T402Version   int                        `json:"t402Version"`
+	Accepts       []t402.PaymentRequirements `json:"accepts"`
 	DiscoveryInfo *exttypes.DiscoveryInfo    `json:"discoveryInfo,omitempty"`
 	LastUpdated   string                     `json:"lastUpdated"`
 	Metadata      map[string]interface{}     `json:"metadata,omitempty"`
@@ -34,13 +34,13 @@ func NewBazaarCatalog() *BazaarCatalog {
 func (c *BazaarCatalog) CatalogResource(
 	resourceURL string,
 	method string,
-	x402Version int,
+	t402Version int,
 	discoveryInfo *exttypes.DiscoveryInfo,
-	paymentRequirements x402.PaymentRequirements,
+	paymentRequirements t402.PaymentRequirements,
 ) {
 	log.Printf("📝 Discovered resource: %s", resourceURL)
 	log.Printf("   Method: %s", method)
-	log.Printf("   x402 Version: %d", x402Version)
+	log.Printf("   t402 Version: %d", t402Version)
 
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
@@ -48,8 +48,8 @@ func (c *BazaarCatalog) CatalogResource(
 	c.discoveredResources[resourceURL] = DiscoveredResource{
 		Resource:      resourceURL,
 		Type:          "http",
-		X402Version:   x402Version,
-		Accepts:       []x402.PaymentRequirements{paymentRequirements},
+		T402Version:   t402Version,
+		Accepts:       []t402.PaymentRequirements{paymentRequirements},
 		DiscoveryInfo: discoveryInfo,
 		LastUpdated:   time.Now().Format(time.RFC3339),
 		Metadata:      make(map[string]interface{}),

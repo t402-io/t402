@@ -11,8 +11,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 
-	x402gin "github.com/coinbase/x402/go/pkg/gin"
-	"github.com/coinbase/x402/go/pkg/types"
+	t402gin "github.com/coinbase/t402/go/pkg/gin"
+	"github.com/coinbase/t402/go/pkg/types"
 )
 
 // TestServerConfig configures how the test facilitator server responds.
@@ -43,7 +43,7 @@ func NewTestConfig() TestServerConfig {
 
 	return TestServerConfig{
 		PaymentPayload: &types.PaymentPayload{
-			X402Version: 1,
+			T402Version: 1,
 			Scheme:      "exact",
 			Network:     "base-sepolia",
 			Payload: &types.ExactEvmPayload{
@@ -71,7 +71,7 @@ func NewTestConfig() TestServerConfig {
 }
 
 // setupTest creates a test environment with configurable facilitator server.
-func setupTest(t *testing.T, amount *big.Float, address string, config TestServerConfig, opts ...x402gin.Options) (*gin.Engine, *httptest.ResponseRecorder, *http.Request) {
+func setupTest(t *testing.T, amount *big.Float, address string, config TestServerConfig, opts ...t402gin.Options) (*gin.Engine, *httptest.ResponseRecorder, *http.Request) {
 	t.Helper()
 
 	// Create a test facilitator server
@@ -103,9 +103,9 @@ func setupTest(t *testing.T, amount *big.Float, address string, config TestServe
 	facilitatorConfig := &types.FacilitatorConfig{
 		URL: facilitatorServer.URL,
 	}
-	allOpts := append([]x402gin.Options{x402gin.WithFacilitatorConfig(facilitatorConfig)}, opts...)
+	allOpts := append([]t402gin.Options{t402gin.WithFacilitatorConfig(facilitatorConfig)}, opts...)
 
-	router.GET("/protected", x402gin.PaymentMiddleware(amount, address, allOpts...), func(c *gin.Context) {
+	router.GET("/protected", t402gin.PaymentMiddleware(amount, address, allOpts...), func(c *gin.Context) {
 		c.String(http.StatusOK, "success")
 	})
 
@@ -263,26 +263,26 @@ func TestPaymentMiddleware_SettlementServerError(t *testing.T) {
 func TestPaymentMiddleware_Options(t *testing.T) {
 	testCases := []struct {
 		name    string
-		opts    []x402gin.Options
+		opts    []t402gin.Options
 		amount  *big.Float
 		address string
 	}{
 		{
 			name: "with custom description",
-			opts: []x402gin.Options{
-				x402gin.WithDescription("Test Description"),
-				x402gin.WithMimeType("application/json"),
-				x402gin.WithMaxTimeoutSeconds(120),
-				x402gin.WithTestnet(true),
+			opts: []t402gin.Options{
+				t402gin.WithDescription("Test Description"),
+				t402gin.WithMimeType("application/json"),
+				t402gin.WithMaxTimeoutSeconds(120),
+				t402gin.WithTestnet(true),
 			},
 			amount:  big.NewFloat(1.0),
 			address: "0xTestAddress",
 		},
 		{
 			name: "with custom paywall HTML",
-			opts: []x402gin.Options{
-				x402gin.WithCustomPaywallHTML("<html><body>Custom Paywall</body></html>"),
-				x402gin.WithResource("test-resource"),
+			opts: []t402gin.Options{
+				t402gin.WithCustomPaywallHTML("<html><body>Custom Paywall</body></html>"),
+				t402gin.WithResource("test-resource"),
 			},
 			amount:  big.NewFloat(2.0),
 			address: "0xTestAddress2",
@@ -331,7 +331,7 @@ func TestPaymentMiddleware_NetworkSelection(t *testing.T) {
 				big.NewFloat(1.0),
 				"0xTestAddress",
 				NewTestConfig(),
-				x402gin.WithTestnet(tc.testnet),
+				t402gin.WithTestnet(tc.testnet),
 			)
 
 			router.ServeHTTP(w, req)

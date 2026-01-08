@@ -1,10 +1,10 @@
 import * as React from "react";
 
-export interface X402LogoProps extends React.SVGProps<SVGSVGElement> {
+export interface T402LogoProps extends React.SVGProps<SVGSVGElement> {
   title?: string;
 }
 
-export function X402Logo({ title, ...props }: X402LogoProps) {
+export function T402Logo({ title, ...props }: T402LogoProps) {
   return (
     <svg
       viewBox="0 0 130 49"

@@ -10,22 +10,22 @@ import (
 	"strings"
 	"sync"
 
-	x402 "github.com/coinbase/x402/go"
-	"github.com/coinbase/x402/go/types"
+	t402 "github.com/coinbase/t402/go"
+	"github.com/coinbase/t402/go/types"
 )
 
 // ============================================================================
-// x402HTTPClient - HTTP-aware payment client
+// t402HTTPClient - HTTP-aware payment client
 // ============================================================================
 
-// x402HTTPClient wraps x402Client with HTTP-specific payment handling
-type x402HTTPClient struct {
-	client *x402.X402Client
+// t402HTTPClient wraps t402Client with HTTP-specific payment handling
+type t402HTTPClient struct {
+	client *t402.T402Client
 }
 
-// Newx402HTTPClient creates a new HTTP-aware x402 client
-func Newx402HTTPClient(client *x402.X402Client) *x402HTTPClient {
-	return &x402HTTPClient{
+// Newt402HTTPClient creates a new HTTP-aware t402 client
+func Newt402HTTPClient(client *t402.T402Client) *t402HTTPClient {
+	return &t402HTTPClient{
 		client: client,
 	}
 }
@@ -37,7 +37,7 @@ func Newx402HTTPClient(client *x402.X402Client) *x402HTTPClient {
 // EncodePaymentSignatureHeader encodes a payment payload into HTTP headers
 // Returns appropriate headers based on protocol version
 // Works with raw payload bytes
-func (c *x402HTTPClient) EncodePaymentSignatureHeader(payloadBytes []byte) map[string]string {
+func (c *t402HTTPClient) EncodePaymentSignatureHeader(payloadBytes []byte) map[string]string {
 	// Detect version from bytes
 	version, err := types.DetectVersion(payloadBytes)
 	if err != nil {
@@ -57,13 +57,13 @@ func (c *x402HTTPClient) EncodePaymentSignatureHeader(payloadBytes []byte) map[s
 			"X-PAYMENT": encoded,
 		}
 	default:
-		panic(fmt.Sprintf("unsupported x402 version: %d", version))
+		panic(fmt.Sprintf("unsupported t402 version: %d", version))
 	}
 }
 
 // GetPaymentRequiredResponse extracts payment requirements from HTTP response
 // Handles both v1 (body) and v2 (header) formats
-func (c *x402HTTPClient) GetPaymentRequiredResponse(headers map[string]string, body []byte) (x402.PaymentRequired, error) {
+func (c *t402HTTPClient) GetPaymentRequiredResponse(headers map[string]string, body []byte) (t402.PaymentRequired, error) {
 	// Normalize headers to uppercase
 	normalizedHeaders := make(map[string]string)
 	for k, v := range headers {
@@ -77,19 +77,19 @@ func (c *x402HTTPClient) GetPaymentRequiredResponse(headers map[string]string, b
 
 	// Fall back to v1 body format
 	if len(body) > 0 {
-		var required x402.PaymentRequired
+		var required t402.PaymentRequired
 		if err := json.Unmarshal(body, &required); err == nil {
-			if required.X402Version == 1 {
+			if required.T402Version == 1 {
 				return required, nil
 			}
 		}
 	}
 
-	return x402.PaymentRequired{}, fmt.Errorf("no payment required information found in response")
+	return t402.PaymentRequired{}, fmt.Errorf("no payment required information found in response")
 }
 
 // GetPaymentSettleResponse extracts settlement response from HTTP headers
-func (c *x402HTTPClient) GetPaymentSettleResponse(headers map[string]string) (*x402.SettleResponse, error) {
+func (c *t402HTTPClient) GetPaymentSettleResponse(headers map[string]string) (*t402.SettleResponse, error) {
 	// Normalize headers to uppercase
 	normalizedHeaders := make(map[string]string)
 	for k, v := range headers {
@@ -113,9 +113,9 @@ func (c *x402HTTPClient) GetPaymentSettleResponse(headers map[string]string) (*x
 // HTTP Client Wrapper
 // ============================================================================
 
-// WrapHTTPClientWithPayment wraps a standard HTTP client with x402 payment handling
+// WrapHTTPClientWithPayment wraps a standard HTTP client with t402 payment handling
 // This allows transparent payment handling for HTTP requests
-func WrapHTTPClientWithPayment(client *http.Client, x402Client *x402HTTPClient) *http.Client {
+func WrapHTTPClientWithPayment(client *http.Client, t402Client *t402HTTPClient) *http.Client {
 	if client == nil {
 		client = http.DefaultClient
 	}
@@ -128,17 +128,17 @@ func WrapHTTPClientWithPayment(client *http.Client, x402Client *x402HTTPClient) 
 
 	client.Transport = &PaymentRoundTripper{
 		Transport:  originalTransport,
-		x402Client: x402Client,
+		t402Client: t402Client,
 		retryCount: &sync.Map{},
 	}
 
 	return client
 }
 
-// PaymentRoundTripper implements http.RoundTripper with x402 payment handling
+// PaymentRoundTripper implements http.RoundTripper with t402 payment handling
 type PaymentRoundTripper struct {
 	Transport  http.RoundTripper
-	x402Client *x402HTTPClient
+	t402Client *t402HTTPClient
 	retryCount *sync.Map // Track retry count per request to prevent infinite loops
 }
 
@@ -219,7 +219,7 @@ func (t *PaymentRoundTripper) RoundTrip(req *http.Request) (*http.Response, erro
 	}
 
 	// Encode payment header (works for both V1 and V2)
-	paymentHeaders := t.x402Client.EncodePaymentSignatureHeader(payloadBytes)
+	paymentHeaders := t.t402Client.EncodePaymentSignatureHeader(payloadBytes)
 
 	// Create new request with payment header
 	paymentReq := req.Clone(ctx)
@@ -243,13 +243,13 @@ func (t *PaymentRoundTripper) handleV1Payment(ctx context.Context, body []byte) 
 	}
 
 	// Select V1 requirements
-	selectedV1, err := t.x402Client.client.SelectPaymentRequirementsV1(paymentRequiredV1.Accepts)
+	selectedV1, err := t.t402Client.client.SelectPaymentRequirementsV1(paymentRequiredV1.Accepts)
 	if err != nil {
 		return nil, fmt.Errorf("cannot fulfill V1 payment requirements: %w", err)
 	}
 
 	// Create V1 payment payload
-	payloadV1, err := t.x402Client.client.CreatePaymentPayloadV1(ctx, selectedV1)
+	payloadV1, err := t.t402Client.client.CreatePaymentPayloadV1(ctx, selectedV1)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create V1 payment: %w", err)
 	}
@@ -286,13 +286,13 @@ func (t *PaymentRoundTripper) handleV2Payment(ctx context.Context, headers map[s
 	}
 
 	// Select V2 requirements
-	selectedV2, err := t.x402Client.client.SelectPaymentRequirements(paymentRequiredV2.Accepts)
+	selectedV2, err := t.t402Client.client.SelectPaymentRequirements(paymentRequiredV2.Accepts)
 	if err != nil {
 		return nil, fmt.Errorf("cannot fulfill V2 payment requirements: %w", err)
 	}
 
 	// Create V2 payment payload
-	payloadV2, err := t.x402Client.client.CreatePaymentPayload(
+	payloadV2, err := t.t402Client.client.CreatePaymentPayload(
 		ctx,
 		selectedV2,
 		paymentRequiredV2.Resource,
@@ -319,22 +319,22 @@ func detectPaymentRequiredVersion(headers map[string]string, body []byte) (int, 
 		return 2, nil
 	}
 
-	// V1 uses body with x402Version field
+	// V1 uses body with t402Version field
 	if len(body) > 0 {
 		var versionCheck struct {
-			X402Version int `json:"x402Version"`
+			T402Version int `json:"t402Version"`
 		}
 		if err := json.Unmarshal(body, &versionCheck); err == nil {
-			if versionCheck.X402Version == 1 {
+			if versionCheck.T402Version == 1 {
 				return 1, nil
 			}
-			if versionCheck.X402Version == 2 {
+			if versionCheck.T402Version == 2 {
 				return 2, nil
 			}
 		}
 	}
 
-	return 0, fmt.Errorf("could not detect x402 version from response")
+	return 0, fmt.Errorf("could not detect t402 version from response")
 }
 
 // ============================================================================
@@ -342,12 +342,12 @@ func detectPaymentRequiredVersion(headers map[string]string, body []byte) (int, 
 // ============================================================================
 
 // DoWithPayment performs an HTTP request with automatic payment handling
-func (c *x402HTTPClient) DoWithPayment(ctx context.Context, req *http.Request) (*http.Response, error) {
+func (c *t402HTTPClient) DoWithPayment(ctx context.Context, req *http.Request) (*http.Response, error) {
 	// Create a client with our transport
 	client := &http.Client{
 		Transport: &PaymentRoundTripper{
 			Transport:  http.DefaultTransport,
-			x402Client: c,
+			t402Client: c,
 			retryCount: &sync.Map{},
 		},
 	}
@@ -356,7 +356,7 @@ func (c *x402HTTPClient) DoWithPayment(ctx context.Context, req *http.Request) (
 }
 
 // GetWithPayment performs a GET request with automatic payment handling
-func (c *x402HTTPClient) GetWithPayment(ctx context.Context, url string) (*http.Response, error) {
+func (c *t402HTTPClient) GetWithPayment(ctx context.Context, url string) (*http.Response, error) {
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -365,7 +365,7 @@ func (c *x402HTTPClient) GetWithPayment(ctx context.Context, url string) (*http.
 }
 
 // PostWithPayment performs a POST request with automatic payment handling
-func (c *x402HTTPClient) PostWithPayment(ctx context.Context, url string, body io.Reader) (*http.Response, error) {
+func (c *t402HTTPClient) PostWithPayment(ctx context.Context, url string, body io.Reader) (*http.Response, error) {
 	req, err := http.NewRequestWithContext(ctx, "POST", url, body)
 	if err != nil {
 		return nil, err
@@ -378,7 +378,7 @@ func (c *x402HTTPClient) PostWithPayment(ctx context.Context, url string, body i
 // ============================================================================
 
 // encodePaymentRequiredHeader encodes payment requirements as base64
-func encodePaymentRequiredHeader(required x402.PaymentRequired) string {
+func encodePaymentRequiredHeader(required t402.PaymentRequired) string {
 	data, err := json.Marshal(required)
 	if err != nil {
 		panic(fmt.Sprintf("failed to marshal payment required: %v", err))
@@ -387,22 +387,22 @@ func encodePaymentRequiredHeader(required x402.PaymentRequired) string {
 }
 
 // decodePaymentRequiredHeader decodes a base64 payment required header
-func decodePaymentRequiredHeader(header string) (x402.PaymentRequired, error) {
+func decodePaymentRequiredHeader(header string) (t402.PaymentRequired, error) {
 	data, err := base64.StdEncoding.DecodeString(header)
 	if err != nil {
-		return x402.PaymentRequired{}, fmt.Errorf("invalid base64 encoding: %w", err)
+		return t402.PaymentRequired{}, fmt.Errorf("invalid base64 encoding: %w", err)
 	}
 
-	var required x402.PaymentRequired
+	var required t402.PaymentRequired
 	if err := json.Unmarshal(data, &required); err != nil {
-		return x402.PaymentRequired{}, fmt.Errorf("invalid payment required JSON: %w", err)
+		return t402.PaymentRequired{}, fmt.Errorf("invalid payment required JSON: %w", err)
 	}
 
 	return required, nil
 }
 
 // encodePaymentResponseHeader encodes a settlement response as base64
-func encodePaymentResponseHeader(response x402.SettleResponse) string {
+func encodePaymentResponseHeader(response t402.SettleResponse) string {
 	data, err := json.Marshal(response)
 	if err != nil {
 		panic(fmt.Sprintf("failed to marshal settle response: %v", err))
@@ -411,13 +411,13 @@ func encodePaymentResponseHeader(response x402.SettleResponse) string {
 }
 
 // decodePaymentResponseHeader decodes a base64 payment response header
-func decodePaymentResponseHeader(header string) (*x402.SettleResponse, error) {
+func decodePaymentResponseHeader(header string) (*t402.SettleResponse, error) {
 	data, err := base64.StdEncoding.DecodeString(header)
 	if err != nil {
 		return nil, fmt.Errorf("invalid base64 encoding: %w", err)
 	}
 
-	var response x402.SettleResponse
+	var response t402.SettleResponse
 	if err := json.Unmarshal(data, &response); err != nil {
 		return nil, fmt.Errorf("invalid settle response JSON: %w", err)
 	}

@@ -1,10 +1,10 @@
-from x402.common import (
+from t402.common import (
     parse_money,
     process_price_to_atomic_amount,
     get_usdc_address,
     find_matching_payment_requirements,
 )
-from x402.types import (
+from t402.types import (
     TokenAmount,
     TokenAsset,
     EIP712Domain,
@@ -154,7 +154,7 @@ def test_find_matching_payment_requirements():
     )
 
     payment = PaymentPayload(
-        x402_version=1, scheme="exact", network="base-sepolia", payload=exact_payload
+        t402_version=1, scheme="exact", network="base-sepolia", payload=exact_payload
     )
 
     # Test finding matching requirement

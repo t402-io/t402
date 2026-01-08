@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { x402Client, x402HTTPClient } from "@x402/core/client";
-import { x402Facilitator } from "@x402/core/facilitator";
+import { t402Client, t402HTTPClient } from "@t402/core/client";
+import { t402Facilitator } from "@t402/core/facilitator";
 import {
   HTTPAdapter,
   HTTPResponseInstructions,
-  x402HTTPResourceServer,
-  x402ResourceServer,
+  t402HTTPResourceServer,
+  t402ResourceServer,
   FacilitatorClient,
-} from "@x402/core/server";
+} from "@t402/core/server";
 import {
   Network,
   PaymentPayload,
@@ -15,7 +15,7 @@ import {
   VerifyResponse,
   SettleResponse,
   SupportedResponse,
-} from "@x402/core/types";
+} from "@t402/core/types";
 import { ExactEvmScheme as ExactEvmClient, toFacilitatorEvmSigner } from "../../src";
 import { ExactEvmScheme as ExactEvmServer } from "../../src/exact/server/scheme";
 import { ExactEvmScheme as ExactEvmFacilitator } from "../../src/exact/facilitator/scheme";
@@ -36,19 +36,19 @@ if (!CLIENT_PRIVATE_KEY || !FACILITATOR_PRIVATE_KEY) {
 
 /**
  * EVM Facilitator Client wrapper
- * Wraps the x402Facilitator for use with x402ResourceServer
+ * Wraps the t402Facilitator for use with t402ResourceServer
  */
 class EvmFacilitatorClient implements FacilitatorClient {
   readonly scheme = "exact";
   readonly network = "eip155:84532"; // Base Sepolia
-  readonly x402Version = 2;
+  readonly t402Version = 2;
 
   /**
    * Creates a new EvmFacilitatorClient instance
    *
-   * @param facilitator - The x402 facilitator to wrap
+   * @param facilitator - The t402 facilitator to wrap
    */
-  constructor(private readonly facilitator: x402Facilitator) {}
+  constructor(private readonly facilitator: t402Facilitator) {}
 
   /**
    * Verifies a payment payload
@@ -117,9 +117,9 @@ function buildEvmPaymentRequirements(
 }
 
 describe("EVM Integration Tests", () => {
-  describe("x402Client / x402ResourceServer / x402Facilitator - EVM Flow", () => {
-    let client: x402Client;
-    let server: x402ResourceServer;
+  describe("t402Client / t402ResourceServer / t402Facilitator - EVM Flow", () => {
+    let client: t402Client;
+    let server: t402ResourceServer;
     let clientAddress: `0x${string}`;
 
     beforeEach(async () => {
@@ -128,7 +128,7 @@ describe("EVM Integration Tests", () => {
       clientAddress = clientAccount.address;
 
       const evmClient = new ExactEvmClient(clientAccount);
-      client = new x402Client().register("eip155:84532", evmClient);
+      client = new t402Client().register("eip155:84532", evmClient);
 
       // Create facilitator account and signer from environment variable
       const facilitatorAccount = privateKeyToAccount(FACILITATOR_PRIVATE_KEY);
@@ -164,10 +164,10 @@ describe("EVM Integration Tests", () => {
       });
 
       const evmFacilitator = new ExactEvmFacilitator(facilitatorSigner);
-      const facilitator = new x402Facilitator().register("eip155:84532", evmFacilitator);
+      const facilitator = new t402Facilitator().register("eip155:84532", evmFacilitator);
 
       const facilitatorClient = new EvmFacilitatorClient(facilitator);
-      server = new x402ResourceServer(facilitatorClient);
+      server = new t402ResourceServer(facilitatorClient);
       server.register("eip155:84532", new ExactEvmServer());
       await server.initialize(); // Initialize to fetch supported kinds
     });
@@ -191,7 +191,7 @@ describe("EVM Integration Tests", () => {
       const paymentPayload = await client.createPaymentPayload(paymentRequired);
 
       expect(paymentPayload).toBeDefined();
-      expect(paymentPayload.x402Version).toBe(2);
+      expect(paymentPayload.t402Version).toBe(2);
       expect(paymentPayload.accepted.scheme).toBe("exact");
 
       // Verify the payload structure
@@ -228,9 +228,9 @@ describe("EVM Integration Tests", () => {
     });
   });
 
-  describe("x402HTTPClient / x402HTTPResourceServer / x402Facilitator - EVM Flow", () => {
-    let client: x402HTTPClient;
-    let httpServer: x402HTTPResourceServer;
+  describe("t402HTTPClient / t402HTTPResourceServer / t402Facilitator - EVM Flow", () => {
+    let client: t402HTTPClient;
+    let httpServer: t402HTTPResourceServer;
 
     const routes = {
       "/api/protected": {
@@ -291,7 +291,7 @@ describe("EVM Integration Tests", () => {
       });
 
       const evmFacilitator = new ExactEvmFacilitator(facilitatorSigner);
-      const facilitator = new x402Facilitator().register("eip155:84532", evmFacilitator);
+      const facilitator = new t402Facilitator().register("eip155:84532", evmFacilitator);
 
       const facilitatorClient = new EvmFacilitatorClient(facilitator);
 
@@ -299,15 +299,15 @@ describe("EVM Integration Tests", () => {
       const clientAccount = privateKeyToAccount(CLIENT_PRIVATE_KEY);
 
       const evmClient = new ExactEvmClient(clientAccount);
-      const paymentClient = new x402Client().register("eip155:84532", evmClient);
-      client = new x402HTTPClient(paymentClient) as x402HTTPClient;
+      const paymentClient = new t402Client().register("eip155:84532", evmClient);
+      client = new t402HTTPClient(paymentClient) as t402HTTPClient;
 
       // Create resource server and register schemes (composition pattern)
-      const ResourceServer = new x402ResourceServer(facilitatorClient);
+      const ResourceServer = new t402ResourceServer(facilitatorClient);
       ResourceServer.register("eip155:84532", new ExactEvmServer());
       await ResourceServer.initialize(); // Initialize to fetch supported kinds
 
-      httpServer = new x402HTTPResourceServer(ResourceServer, routes);
+      httpServer = new t402HTTPResourceServer(ResourceServer, routes);
     });
 
     it("middleware should successfully verify and settle an EVM payment from an http client", async () => {
@@ -385,7 +385,7 @@ describe("EVM Integration Tests", () => {
   });
 
   describe("Price Parsing Integration", () => {
-    let server: x402ResourceServer;
+    let server: t402ResourceServer;
     let evmServer: ExactEvmServer;
 
     beforeEach(async () => {
@@ -417,13 +417,13 @@ describe("EVM Integration Tests", () => {
         waitForTransactionReceipt: args => publicClient.waitForTransactionReceipt(args),
         getCode: args => publicClient.getCode(args),
       });
-      const facilitator = new x402Facilitator().register(
+      const facilitator = new t402Facilitator().register(
         "eip155:84532",
         new ExactEvmFacilitator(facilitatorSigner),
       );
 
       const facilitatorClient = new EvmFacilitatorClient(facilitator);
-      server = new x402ResourceServer(facilitatorClient);
+      server = new t402ResourceServer(facilitatorClient);
 
       evmServer = new ExactEvmServer();
       server.register("eip155:84532", evmServer);

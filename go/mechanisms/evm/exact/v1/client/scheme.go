@@ -7,8 +7,8 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/coinbase/x402/go/mechanisms/evm"
-	"github.com/coinbase/x402/go/types"
+	"github.com/coinbase/t402/go/mechanisms/evm"
+	"github.com/coinbase/t402/go/types"
 )
 
 // ExactEvmSchemeV1 implements the SchemeNetworkClientV1 interface for EVM exact payments (V1)
@@ -113,7 +113,7 @@ func (c *ExactEvmSchemeV1) CreatePaymentPayload(
 
 	// Build complete v1 payload (scheme/network at top level)
 	return types.PaymentPayloadV1{
-		X402Version: 1,
+		T402Version: 1,
 		Scheme:      requirements.Scheme,
 		Network:     requirements.Network,
 		Payload:     evmPayload.ToMap(),

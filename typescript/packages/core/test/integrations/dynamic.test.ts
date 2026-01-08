@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import {
-  x402HTTPResourceServer,
+  t402HTTPResourceServer,
   HTTPAdapter,
   HTTPRequestContext,
-} from "../../src/http/x402HTTPResourceServer";
-import { x402ResourceServer } from "../../src/server/x402ResourceServer";
+} from "../../src/http/t402HTTPResourceServer";
+import { t402ResourceServer } from "../../src/server/t402ResourceServer";
 import { decodePaymentRequiredHeader } from "../../src/http";
 import { CashFacilitatorClient, CashSchemeNetworkServer } from "../mocks";
-import { x402Facilitator } from "../../src/facilitator";
+import { t402Facilitator } from "../../src/facilitator";
 import { CashSchemeNetworkFacilitator } from "../mocks/cash";
 import { Network, Price } from "../../src/types";
 
@@ -125,17 +125,17 @@ interface ExtendedHTTPRequestContext extends HTTPRequestContext {
 }
 
 describe("Dynamic Pricing & PayTo Integration Tests", () => {
-  let ResourceServer: x402ResourceServer;
+  let ResourceServer: t402ResourceServer;
 
   beforeEach(async () => {
-    const facilitator = new x402Facilitator().register(
-      "x402:cash",
+    const facilitator = new t402Facilitator().register(
+      "t402:cash",
       new CashSchemeNetworkFacilitator(),
     );
 
     const facilitatorClient = new CashFacilitatorClient(facilitator);
-    ResourceServer = new x402ResourceServer(facilitatorClient);
-    ResourceServer.register("x402:cash", new CashSchemeNetworkServer());
+    ResourceServer = new t402ResourceServer(facilitatorClient);
+    ResourceServer.register("t402:cash", new CashSchemeNetworkServer());
     await ResourceServer.initialize();
   });
 
@@ -145,7 +145,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         "GET /api/data": {
           accepts: {
             scheme: "cash",
-            network: "x402:cash" as Network,
+            network: "t402:cash" as Network,
             payTo: "merchant@example.com",
             price: async (_context: HTTPRequestContext) => {
               // Extract tier from query params
@@ -161,7 +161,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         },
       };
 
-      const httpServer = new x402HTTPResourceServer(ResourceServer, routes);
+      const httpServer = new t402HTTPResourceServer(ResourceServer, routes);
 
       // Test 1: Premium tier
       const premiumAdapter = new MockHTTPAdapter({
@@ -236,7 +236,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         "GET /api/items": {
           accepts: {
             scheme: "cash",
-            network: "x402:cash" as Network,
+            network: "t402:cash" as Network,
             payTo: "merchant@example.com",
             price: async (_context: HTTPRequestContext) => {
               const limit = parseInt((context.adapter.getQueryParam?.("limit") as string) || "10");
@@ -253,7 +253,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         },
       };
 
-      const httpServer = new x402HTTPResourceServer(ResourceServer, routes);
+      const httpServer = new t402HTTPResourceServer(ResourceServer, routes);
 
       // Request 100 items
       const adapter = new MockHTTPAdapter({
@@ -286,7 +286,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         "POST /api/compute": {
           accepts: {
             scheme: "cash",
-            network: "x402:cash" as Network,
+            network: "t402:cash" as Network,
             payTo: "compute@example.com",
             price: async (_context: HTTPRequestContext) => {
               const body = _context.adapter.getBody?.() as Record<string, unknown> | undefined;
@@ -307,7 +307,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         },
       };
 
-      const httpServer = new x402HTTPResourceServer(ResourceServer, routes);
+      const httpServer = new t402HTTPResourceServer(ResourceServer, routes);
 
       // Test 1: High complexity, 5 minute job
       const highComplexityAdapter = new MockHTTPAdapter({
@@ -366,7 +366,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         "POST /api/process": {
           accepts: {
             scheme: "cash",
-            network: "x402:cash" as Network,
+            network: "t402:cash" as Network,
             payTo: "processor@example.com",
             price: async (_context: HTTPRequestContext) => {
               const body = _context.adapter.getBody?.() as Record<string, unknown> | undefined;
@@ -384,7 +384,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         },
       };
 
-      const httpServer = new x402HTTPResourceServer(ResourceServer, routes);
+      const httpServer = new t402HTTPResourceServer(ResourceServer, routes);
 
       const adapter = new MockHTTPAdapter({
         path: "/api/process",
@@ -424,7 +424,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         "GET /api/resource": {
           accepts: {
             scheme: "cash",
-            network: "x402:cash" as Network,
+            network: "t402:cash" as Network,
             payTo: "api@example.com",
             price: async (_context: HTTPRequestContext) => {
               const apiKey = _context.adapter.getHeader("x-api-key");
@@ -452,7 +452,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         },
       };
 
-      const httpServer = new x402HTTPResourceServer(ResourceServer, routes);
+      const httpServer = new t402HTTPResourceServer(ResourceServer, routes);
 
       // Test 1: Premium user
       const premiumAdapter = new MockHTTPAdapter({
@@ -520,7 +520,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         "POST /api/upload": {
           accepts: {
             scheme: "cash",
-            network: "x402:cash" as Network,
+            network: "t402:cash" as Network,
             payTo: "storage@example.com",
             price: async (_context: HTTPRequestContext) => {
               const contentLength = _context.adapter.getHeader("content-length");
@@ -536,7 +536,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         },
       };
 
-      const httpServer = new x402HTTPResourceServer(ResourceServer, routes);
+      const httpServer = new t402HTTPResourceServer(ResourceServer, routes);
 
       // Upload 10MB file
       const adapter = new MockHTTPAdapter({
@@ -569,7 +569,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         "GET /api/advanced": {
           accepts: {
             scheme: "cash",
-            network: "x402:cash" as Network,
+            network: "t402:cash" as Network,
             payTo: "service@example.com",
             price: async (_context: HTTPRequestContext) => {
               const enableAI = _context.adapter.getHeader("x-enable-ai");
@@ -587,7 +587,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         },
       };
 
-      const httpServer = new x402HTTPResourceServer(ResourceServer, routes);
+      const httpServer = new t402HTTPResourceServer(ResourceServer, routes);
 
       // With AI, with cache
       const aiCacheAdapter = new MockHTTPAdapter({
@@ -643,7 +643,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         "POST /api/process": {
           accepts: {
             scheme: "cash",
-            network: "x402:cash" as Network,
+            network: "t402:cash" as Network,
             price: "$0.50" as Price,
             payTo: async (context: HTTPRequestContext) => {
               const region = context.adapter.getHeader("x-region");
@@ -662,7 +662,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         },
       };
 
-      const httpServer = new x402HTTPResourceServer(ResourceServer, routes);
+      const httpServer = new t402HTTPResourceServer(ResourceServer, routes);
 
       // Test US region
       const usAdapter = new MockHTTPAdapter({
@@ -710,7 +710,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         "GET /api/user-content": {
           accepts: {
             scheme: "cash",
-            network: "x402:cash" as Network,
+            network: "t402:cash" as Network,
             price: "$0.25" as Price,
             payTo: async (context: HTTPRequestContext) => {
               const authHeader = context.adapter.getHeader("authorization");
@@ -737,7 +737,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         },
       };
 
-      const httpServer = new x402HTTPResourceServer(ResourceServer, routes);
+      const httpServer = new t402HTTPResourceServer(ResourceServer, routes);
 
       // Creator content - pay creator directly
       const creatorAdapter = new MockHTTPAdapter({
@@ -787,7 +787,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         "POST /api/inference": {
           accepts: {
             scheme: "cash",
-            network: "x402:cash" as Network,
+            network: "t402:cash" as Network,
             price: "$1.00" as Price,
             payTo: async (context: HTTPRequestContext) => {
               const body = context.adapter.getBody?.() as Record<string, unknown> | undefined;
@@ -808,7 +808,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         },
       };
 
-      const httpServer = new x402HTTPResourceServer(ResourceServer, routes);
+      const httpServer = new t402HTTPResourceServer(ResourceServer, routes);
 
       // GPT-4 request
       const gptAdapter = new MockHTTPAdapter({
@@ -864,7 +864,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         "GET /api/premium-data": {
           accepts: {
             scheme: "cash",
-            network: "x402:cash" as Network,
+            network: "t402:cash" as Network,
             payTo: async (context: HTTPRequestContext) => {
               // Route based on data source (query param)
               const source = context.adapter.getQueryParam?.("source") as string | undefined;
@@ -898,7 +898,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         },
       };
 
-      const httpServer = new x402HTTPResourceServer(ResourceServer, routes);
+      const httpServer = new t402HTTPResourceServer(ResourceServer, routes);
 
       // Pro subscription, 30-day data, blockchain source
       const adapter = new MockHTTPAdapter({
@@ -969,7 +969,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         "GET /api/data": {
           accepts: {
             scheme: "cash",
-            network: "x402:cash" as Network,
+            network: "t402:cash" as Network,
             payTo: "api@example.com",
             price: async (_context: HTTPRequestContext) => {
               const apiKey = _context.adapter.getHeader("x-api-key") || "anonymous";
@@ -991,7 +991,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         },
       };
 
-      const httpServer = new x402HTTPResourceServer(ResourceServer, routes);
+      const httpServer = new t402HTTPResourceServer(ResourceServer, routes);
 
       const adapter = new MockHTTPAdapter({
         path: "/api/data",
@@ -1043,7 +1043,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         "POST /api/task": {
           accepts: {
             scheme: "cash",
-            network: "x402:cash" as Network,
+            network: "t402:cash" as Network,
             price: "$0.10" as Price,
             payTo: async (_context: HTTPRequestContext) => {
               // Round-robin load balancing
@@ -1058,7 +1058,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         },
       };
 
-      const httpServer = new x402HTTPResourceServer(ResourceServer, routes);
+      const httpServer = new t402HTTPResourceServer(ResourceServer, routes);
 
       const adapter = new MockHTTPAdapter({
         path: "/api/task",
@@ -1101,7 +1101,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         "GET /api/resource": {
           accepts: {
             scheme: "cash",
-            network: "x402:cash" as Network,
+            network: "t402:cash" as Network,
             payTo: "service@example.com",
             price: async (_context: HTTPRequestContext) => {
               // Check if client provides a timestamp header (for testing)
@@ -1120,7 +1120,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         },
       };
 
-      const httpServer = new x402HTTPResourceServer(ResourceServer, routes);
+      const httpServer = new t402HTTPResourceServer(ResourceServer, routes);
 
       // Peak hour - use local time noon (12 PM)
       const peakDate = new Date();
@@ -1182,7 +1182,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         "POST /api/test": {
           accepts: {
             scheme: "cash",
-            network: "x402:cash" as Network,
+            network: "t402:cash" as Network,
             payTo: async (context: HTTPRequestContext) => {
               capturedContext = context;
               return "test@example.com";
@@ -1193,7 +1193,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         },
       };
 
-      const httpServer = new x402HTTPResourceServer(ResourceServer, routes);
+      const httpServer = new t402HTTPResourceServer(ResourceServer, routes);
 
       const adapter = new MockHTTPAdapter({
         path: "/api/test",

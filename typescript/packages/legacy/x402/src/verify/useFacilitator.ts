@@ -12,7 +12,7 @@ import {
   VerifyResponse,
 } from "../types/verify";
 
-const DEFAULT_FACILITATOR_URL = "https://x402.org/facilitator";
+const DEFAULT_FACILITATOR_URL = "https://t402.org/facilitator";
 
 export type CreateHeaders = () => Promise<{
   verify: Record<string, string>;
@@ -22,7 +22,7 @@ export type CreateHeaders = () => Promise<{
 }>;
 
 /**
- * Creates a facilitator client for interacting with the X402 payment facilitator service
+ * Creates a facilitator client for interacting with the T402 payment facilitator service
  *
  * @param facilitator - The facilitator config to use. If not provided, the default facilitator will be used.
  * @returns An object containing verify and settle functions for interacting with the facilitator
@@ -51,7 +51,7 @@ export function useFacilitator(facilitator?: FacilitatorConfig) {
       method: "POST",
       headers,
       body: JSON.stringify({
-        x402Version: payload.x402Version,
+        t402Version: payload.t402Version,
         paymentPayload: toJsonSafe(payload),
         paymentRequirements: toJsonSafe(paymentRequirements),
       }),
@@ -97,7 +97,7 @@ export function useFacilitator(facilitator?: FacilitatorConfig) {
       method: "POST",
       headers,
       body: JSON.stringify({
-        x402Version: payload.x402Version,
+        t402Version: payload.t402Version,
         paymentPayload: toJsonSafe(payload),
         paymentRequirements: toJsonSafe(paymentRequirements),
       }),

@@ -2,11 +2,11 @@
   "name": "gin",
   "type": "server",
   "language": "go",
-  "x402Version": 2,
+  "t402Version": 2,
   "extensions": [
     "bazaar"
   ],
-  "description": "Go Gin server with x402 v2 payment middleware",
+  "description": "Go Gin server with t402 v2 payment middleware",
   "endpoints": [
     {
       "path": "/protected",

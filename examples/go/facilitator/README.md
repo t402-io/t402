@@ -1,10 +1,10 @@
-# x402 Facilitator Example
+# t402 Facilitator Example
 
-This example demonstrates how to build a simple x402 facilitator that verifies and settles payments on behalf of clients.
+This example demonstrates how to build a simple t402 facilitator that verifies and settles payments on behalf of clients.
 
 ## What is a Facilitator?
 
-A **facilitator** is a service that acts as a payment processor in the x402 protocol:
+A **facilitator** is a service that acts as a payment processor in the t402 protocol:
 
 1. **Verifies** payment signatures from clients
 2. **Settles** payments by submitting transactions to the blockchain
@@ -100,7 +100,7 @@ if err != nil {
 result, err := facilitator.Verify(ctx, payload, requirements)
 if err != nil {
     // Extract structured error details if needed
-    if ve, ok := err.(*x402.VerifyError); ok {
+    if ve, ok := err.(*t402.VerifyError); ok {
         log.Printf("Verification failed: reason=%s, payer=%s, network=%s",
                    ve.Reason, ve.Payer, ve.Network)
     }
@@ -125,12 +125,12 @@ Returns supported networks and schemes.
 {
   "kinds": [
     {
-      "x402Version": 2,
+      "t402Version": 2,
       "scheme": "exact",
       "network": "eip155:84532"
     },
     {
-      "x402Version": 2,
+      "t402Version": 2,
       "scheme": "exact",
       "network": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
     }
@@ -146,7 +146,7 @@ Verifies a payment signature.
 ```json
 {
   "paymentPayload": {
-    "x402Version": 2,
+    "t402Version": 2,
     "resource": {
       "url": "http://localhost:4021/weather",
       "description": "Weather data",
@@ -235,21 +235,21 @@ Register additional schemes for other networks:
 
 ```go
 import (
-    x402 "github.com/coinbase/x402/go"
-    evm "github.com/coinbase/x402/go/mechanisms/evm/exact/facilitator"
-    svm "github.com/coinbase/x402/go/mechanisms/svm/exact/facilitator"
+    t402 "github.com/coinbase/t402/go"
+    evm "github.com/coinbase/t402/go/mechanisms/evm/exact/facilitator"
+    svm "github.com/coinbase/t402/go/mechanisms/svm/exact/facilitator"
 )
 
-facilitator := x402.Newx402Facilitator()
+facilitator := t402.Newt402Facilitator()
 
 // Register EVM scheme with smart wallet deployment enabled
 evmConfig := &evm.ExactEvmSchemeConfig{
     DeployERC4337WithEIP6492: true,
 }
-facilitator.Register([]x402.Network{"eip155:84532"}, evm.NewExactEvmScheme(evmSigner, evmConfig))
+facilitator.Register([]t402.Network{"eip155:84532"}, evm.NewExactEvmScheme(evmSigner, evmConfig))
 
 // Register SVM scheme
-facilitator.Register([]x402.Network{"solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"}, svm.NewExactSvmScheme(svmSigner))
+facilitator.Register([]t402.Network{"solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"}, svm.NewExactSvmScheme(svmSigner))
 ```
 
 ### Lifecycle Hooks
@@ -257,35 +257,35 @@ facilitator.Register([]x402.Network{"solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"}, 
 Add custom logic before/after verify and settle operations:
 
 ```go
-facilitator := x402.Newx402Facilitator()
+facilitator := t402.Newt402Facilitator()
 
-facilitator.OnBeforeVerify(func(ctx x402.FacilitatorVerifyContext) (*x402.FacilitatorBeforeHookResult, error) {
+facilitator.OnBeforeVerify(func(ctx t402.FacilitatorVerifyContext) (*t402.FacilitatorBeforeHookResult, error) {
     // Log or validate before verification
     return nil, nil
 })
 
-facilitator.OnAfterVerify(func(ctx x402.FacilitatorVerifyResultContext) error {
+facilitator.OnAfterVerify(func(ctx t402.FacilitatorVerifyResultContext) error {
     // Track verified payments
     return nil
 })
 
-facilitator.OnVerifyFailure(func(ctx x402.FacilitatorVerifyFailureContext) (*x402.FacilitatorVerifyFailureHookResult, error) {
+facilitator.OnVerifyFailure(func(ctx t402.FacilitatorVerifyFailureContext) (*t402.FacilitatorVerifyFailureHookResult, error) {
     // Handle verification failures
     return nil, nil
 })
 
-facilitator.OnBeforeSettle(func(ctx x402.FacilitatorSettleContext) (*x402.FacilitatorBeforeHookResult, error) {
+facilitator.OnBeforeSettle(func(ctx t402.FacilitatorSettleContext) (*t402.FacilitatorBeforeHookResult, error) {
     // Validate before settlement
-    // Return &x402.FacilitatorBeforeHookResult{Abort: true, Reason: "..."} to cancel
+    // Return &t402.FacilitatorBeforeHookResult{Abort: true, Reason: "..."} to cancel
     return nil, nil
 })
 
-facilitator.OnAfterSettle(func(ctx x402.FacilitatorSettleResultContext) error {
+facilitator.OnAfterSettle(func(ctx t402.FacilitatorSettleResultContext) error {
     // Track successful settlements
     return nil
 })
 
-facilitator.OnSettleFailure(func(ctx x402.FacilitatorSettleFailureContext) (*x402.FacilitatorSettleFailureHookResult, error) {
+facilitator.OnSettleFailure(func(ctx t402.FacilitatorSettleFailureContext) (*t402.FacilitatorSettleFailureHookResult, error) {
     // Handle settlement failures
     return nil, nil
 })

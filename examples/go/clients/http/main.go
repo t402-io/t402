@@ -8,14 +8,14 @@ import (
 	"os"
 	"time"
 
-	x402 "github.com/coinbase/x402/go"
+	t402 "github.com/coinbase/t402/go"
 	"github.com/joho/godotenv"
 )
 
 /**
  * Main example runner for Go HTTP client demonstrations.
  *
- * This example shows how to use the x402 Go HTTP client to make requests
+ * This example shows how to use the t402 Go HTTP client to make requests
  * to resource servers that require payment. Different client creation
  * patterns can be selected via CLI argument:
  *
@@ -55,7 +55,7 @@ func main() {
 	}
 
 	// Create client based on pattern
-	var client *x402.X402Client
+	var client *t402.T402Client
 	var err error
 
 	switch pattern {
@@ -82,7 +82,7 @@ func main() {
 }
 
 // makeRequest performs an HTTP GET request with payment handling
-func makeRequest(client *x402.X402Client, url string) error {
+func makeRequest(client *t402.T402Client, url string) error {
 	httpClient := wrapHTTPClient(client)
 
 	fmt.Printf("Making request to: %s\n\n", url)

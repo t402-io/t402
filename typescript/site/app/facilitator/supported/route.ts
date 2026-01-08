@@ -1,7 +1,7 @@
 import { getFacilitator } from "../index";
 
 /**
- * Returns the supported payment kinds for the x402 protocol
+ * Returns the supported payment kinds for the t402 protocol
  *
  * @returns A JSON response containing the list of supported payment kinds
  */

@@ -3,8 +3,8 @@ from waitress import serve
 
 from dotenv import load_dotenv
 from flask import Flask, send_from_directory
-from x402.flask.middleware import PaymentMiddleware
-from x402.types import PaywallConfig
+from t402.flask.middleware import PaymentMiddleware
+from t402.types import PaywallConfig
 
 # Load environment variables
 load_dotenv()
@@ -36,8 +36,8 @@ payment_middleware.add(
     network=NETWORK,
     paywall_config=PaywallConfig(
         cdp_client_key=CDP_CLIENT_KEY or "",
-        app_name="x402 Python Example",
-        app_logo="/static/x402.png",
+        app_name="t402 Python Example",
+        app_logo="/static/t402.png",
     ),
 )
 

@@ -1,12 +1,12 @@
 import {
   PaywallConfig,
   PaywallProvider,
-  x402ResourceServer,
+  t402ResourceServer,
   RoutesConfig,
   RouteConfig,
   FacilitatorClient,
-} from "@x402/core/server";
-import { SchemeNetworkServer, Network } from "@x402/core/types";
+} from "@t402/core/server";
+import { SchemeNetworkServer, Network } from "@t402/core/types";
 import { NextRequest, NextResponse } from "next/server";
 import {
   createHttpServer,
@@ -31,14 +31,14 @@ export interface SchemeRegistration {
 }
 
 /**
- * Next.js payment proxy for x402 protocol (direct server instance).
+ * Next.js payment proxy for t402 protocol (direct server instance).
  *
- * Use this when you want to pass a pre-configured x402ResourceServer instance.
+ * Use this when you want to pass a pre-configured t402ResourceServer instance.
  * This provides more flexibility for testing, custom configuration, and reusing
  * server instances across multiple proxies.
  *
  * @param routes - Route configurations for protected endpoints
- * @param server - Pre-configured x402ResourceServer instance
+ * @param server - Pre-configured t402ResourceServer instance
  * @param paywallConfig - Optional configuration for the built-in paywall UI
  * @param paywall - Optional custom paywall provider (overrides default)
  * @param syncFacilitatorOnStart - Whether to sync with the facilitator on startup (defaults to true)
@@ -46,11 +46,11 @@ export interface SchemeRegistration {
  *
  * @example
  * ```typescript
- * import { paymentProxy } from "@x402/next";
- * import { x402ResourceServer } from "@x402/core/server";
- * import { registerExactEvmScheme } from "@x402/evm/exact/server";
+ * import { paymentProxy } from "@t402/next";
+ * import { t402ResourceServer } from "@t402/core/server";
+ * import { registerExactEvmScheme } from "@t402/evm/exact/server";
  *
- * const server = new x402ResourceServer(myFacilitatorClient);
+ * const server = new t402ResourceServer(myFacilitatorClient);
  * registerExactEvmScheme(server, {});
  *
  * export const proxy = paymentProxy(routes, server, paywallConfig);
@@ -58,7 +58,7 @@ export interface SchemeRegistration {
  */
 export function paymentProxy(
   routes: RoutesConfig,
-  server: x402ResourceServer,
+  server: t402ResourceServer,
   paywallConfig?: PaywallConfig,
   paywall?: PaywallProvider,
   syncFacilitatorOnStart: boolean = true,
@@ -68,7 +68,7 @@ export function paymentProxy(
   // Dynamically register bazaar extension if routes declare it
   let bazaarPromise: Promise<void> | null = null;
   if (checkIfBazaarNeeded(routes)) {
-    bazaarPromise = import(/* webpackIgnore: true */ "@x402/extensions/bazaar")
+    bazaarPromise = import(/* webpackIgnore: true */ "@t402/extensions/bazaar")
       .then(({ bazaarResourceServerExtension }) => {
         server.registerExtension(bazaarResourceServerExtension);
       })
@@ -119,10 +119,10 @@ export function paymentProxy(
 }
 
 /**
- * Next.js payment proxy for x402 protocol (configuration-based).
+ * Next.js payment proxy for t402 protocol (configuration-based).
  *
  * Use this when you want to quickly set up proxy with simple configuration.
- * This function creates and configures the x402ResourceServer internally.
+ * This function creates and configures the t402ResourceServer internally.
  *
  * @param routes - Route configurations for protected endpoints
  * @param facilitatorClients - Optional facilitator client(s) for payment processing
@@ -134,7 +134,7 @@ export function paymentProxy(
  *
  * @example
  * ```typescript
- * import { paymentProxyFromConfig } from "@x402/next";
+ * import { paymentProxyFromConfig } from "@t402/next";
  *
  * export const proxy = paymentProxyFromConfig(
  *   routes,
@@ -152,7 +152,7 @@ export function paymentProxyFromConfig(
   paywall?: PaywallProvider,
   syncFacilitatorOnStart: boolean = true,
 ) {
-  const ResourceServer = new x402ResourceServer(facilitatorClients);
+  const ResourceServer = new t402ResourceServer(facilitatorClients);
 
   if (schemes) {
     schemes.forEach(({ network, server: schemeServer }) => {
@@ -166,15 +166,15 @@ export function paymentProxyFromConfig(
 }
 
 /**
- * Wraps a Next.js App Router API route handler with x402 payment protection.
+ * Wraps a Next.js App Router API route handler with t402 payment protection.
  *
- * Unlike `paymentProxy` which works as middleware, `withX402` wraps individual route handlers
+ * Unlike `paymentProxy` which works as middleware, `withT402` wraps individual route handlers
  * and guarantees that payment settlement only occurs after the handler returns a successful
  * response (status < 400). This provides more precise control over when payments are settled.
  *
  * @param routeHandler - The API route handler function to wrap
  * @param routeConfig - Payment configuration for this specific route
- * @param server - Pre-configured x402ResourceServer instance
+ * @param server - Pre-configured t402ResourceServer instance
  * @param paywallConfig - Optional configuration for the built-in paywall UI
  * @param paywall - Optional custom paywall provider (overrides default)
  * @param syncFacilitatorOnStart - Whether to sync with the facilitator on startup (defaults to true)
@@ -183,18 +183,18 @@ export function paymentProxyFromConfig(
  * @example
  * ```typescript
  * import { NextRequest, NextResponse } from "next/server";
- * import { withX402 } from "@x402/next";
- * import { x402ResourceServer } from "@x402/core/server";
- * import { registerExactEvmScheme } from "@x402/evm/exact/server";
+ * import { withT402 } from "@t402/next";
+ * import { t402ResourceServer } from "@t402/core/server";
+ * import { registerExactEvmScheme } from "@t402/evm/exact/server";
  *
- * const server = new x402ResourceServer(myFacilitatorClient);
+ * const server = new t402ResourceServer(myFacilitatorClient);
  * registerExactEvmScheme(server, {});
  *
  * const handler = async (request: NextRequest) => {
  *   return NextResponse.json({ data: "protected content" });
  * };
  *
- * export const GET = withX402(
+ * export const GET = withT402(
  *   handler,
  *   {
  *     accepts: {
@@ -209,10 +209,10 @@ export function paymentProxyFromConfig(
  * );
  * ```
  */
-export function withX402<T = unknown>(
+export function withT402<T = unknown>(
   routeHandler: (request: NextRequest) => Promise<NextResponse<T>>,
   routeConfig: RouteConfig,
-  server: x402ResourceServer,
+  server: t402ResourceServer,
   paywallConfig?: PaywallConfig,
   paywall?: PaywallProvider,
   syncFacilitatorOnStart: boolean = true,
@@ -223,7 +223,7 @@ export function withX402<T = unknown>(
   // Dynamically register bazaar extension if route declares it
   let bazaarPromise: Promise<void> | null = null;
   if (checkIfBazaarNeeded(routes)) {
-    bazaarPromise = import(/* webpackIgnore: true */ "@x402/extensions/bazaar")
+    bazaarPromise = import(/* webpackIgnore: true */ "@t402/extensions/bazaar")
       .then(({ bazaarResourceServerExtension }) => {
         server.registerExtension(bazaarResourceServerExtension);
       })
@@ -294,12 +294,12 @@ export type {
   PaymentPayload,
   Network,
   SchemeNetworkServer,
-} from "@x402/core/types";
+} from "@t402/core/types";
 
-export type { PaywallProvider, PaywallConfig, RouteConfig } from "@x402/core/server";
+export type { PaywallProvider, PaywallConfig, RouteConfig } from "@t402/core/server";
 
-export { RouteConfigurationError } from "@x402/core/server";
+export { RouteConfigurationError } from "@t402/core/server";
 
-export type { RouteValidationError } from "@x402/core/server";
+export type { RouteValidationError } from "@t402/core/server";
 
 export { NextAdapter } from "./adapter";

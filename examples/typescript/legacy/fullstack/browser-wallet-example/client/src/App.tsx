@@ -119,7 +119,7 @@ function App() {
   return (
     <div className="app">
       <header>
-        <h1>x402 Payment Template</h1>
+        <h1>t402 Payment Template</h1>
         <p>Build your own payment-enabled app with this starter template</p>
         <div className="server-status">{serverStatus}</div>
       </header>
@@ -239,13 +239,13 @@ function App() {
           Each purchase requires approval in wallet.
         </p>
         <div className="builder-resources">
-          <h3>🛠️ Build with x402</h3>
+          <h3>🛠️ Build with t402</h3>
           <p>This is a template to help you build your own payment-enabled applications!</p>
           <div className="resource-links">
-            <a href="https://x402.org" target="_blank" rel="noopener noreferrer">
-              📚 x402 Documentation
+            <a href="https://t402.org" target="_blank" rel="noopener noreferrer">
+              📚 t402 Documentation
             </a>
-            <a href="https://github.com/coinbase/x402" target="_blank" rel="noopener noreferrer">
+            <a href="https://github.com/coinbase/t402" target="_blank" rel="noopener noreferrer">
               💻 GitHub Repository
             </a>
             <a href="https://discord.gg/invite/cdp" target="_blank" rel="noopener noreferrer">

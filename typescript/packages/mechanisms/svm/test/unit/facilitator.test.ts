@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ExactSvmScheme } from "../../src/exact/facilitator/scheme";
 import type { FacilitatorSvmSigner } from "../../src/signer";
-import type { PaymentRequirements, PaymentPayload } from "@x402/core/types";
+import type { PaymentRequirements, PaymentPayload } from "@t402/core/types";
 import { USDC_DEVNET_ADDRESS, SOLANA_DEVNET_CAIP2 } from "../../src/constants";
 
 describe("ExactSvmScheme", () => {
@@ -54,7 +54,7 @@ describe("ExactSvmScheme", () => {
       const facilitator = new ExactSvmScheme(mockSigner);
 
       const payload: PaymentPayload = {
-        x402Version: 2,
+        t402Version: 2,
         resource: {
           url: "http://example.com/protected",
           description: "Test resource",
@@ -94,7 +94,7 @@ describe("ExactSvmScheme", () => {
       const facilitator = new ExactSvmScheme(mockSigner);
 
       const payload: PaymentPayload = {
-        x402Version: 2,
+        t402Version: 2,
         resource: {
           url: "http://example.com/protected",
           description: "Test resource",
@@ -135,7 +135,7 @@ describe("ExactSvmScheme", () => {
       const facilitator = new ExactSvmScheme(mockSigner);
 
       const payload: PaymentPayload = {
-        x402Version: 2,
+        t402Version: 2,
         resource: {
           url: "http://example.com/protected",
           description: "Test resource",
@@ -175,7 +175,7 @@ describe("ExactSvmScheme", () => {
       const facilitator = new ExactSvmScheme(mockSigner);
 
       const payload: PaymentPayload = {
-        x402Version: 2,
+        t402Version: 2,
         resource: {
           url: "http://example.com/protected",
           description: "Test resource",
@@ -218,7 +218,7 @@ describe("ExactSvmScheme", () => {
       const facilitator = new ExactSvmScheme(mockSigner);
 
       const payload: PaymentPayload = {
-        x402Version: 2,
+        t402Version: 2,
         resource: {
           url: "http://example.com/protected",
           description: "Test resource",

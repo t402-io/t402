@@ -1,11 +1,11 @@
-# x402-http Example Client
+# t402-http Example Client
 
-Example client demonstrating how to use the x402 Go HTTP client to make requests to endpoints protected by the x402 payment protocol.
+Example client demonstrating how to use the t402 Go HTTP client to make requests to endpoints protected by the t402 payment protocol.
 
 ## Prerequisites
 
 - Go 1.24 or higher
-- A running x402 server (see [gin server example](../../servers/gin))
+- A running t402 server (see [gin server example](../../servers/gin))
 - Valid EVM and/or SVM private keys for making payments
 
 ## Setup
@@ -54,23 +54,23 @@ go run . mechanism-helper-registration
 
 ```go
 import (
-    x402 "github.com/coinbase/x402/go"
-    x402http "github.com/coinbase/x402/go/http"
-    evm "github.com/coinbase/x402/go/mechanisms/evm/exact/client"
-    evmsigners "github.com/coinbase/x402/go/signers/evm"
+    t402 "github.com/coinbase/t402/go"
+    t402http "github.com/coinbase/t402/go/http"
+    evm "github.com/coinbase/t402/go/mechanisms/evm/exact/client"
+    evmsigners "github.com/coinbase/t402/go/signers/evm"
 )
 
 // Create signer
 signer, err := evmsigners.NewClientSignerFromPrivateKey(os.Getenv("EVM_PRIVATE_KEY"))
 
 // Configure client with builder pattern
-client := x402.Newx402Client().
+client := t402.Newt402Client().
     Register("eip155:*", evm.NewExactEvmScheme(signer))
 
 // Wrap HTTP client with payment handling
-httpClient := x402http.WrapHTTPClientWithPayment(
+httpClient := t402http.WrapHTTPClientWithPayment(
     http.DefaultClient,
-    x402http.Newx402HTTPClient(client),
+    t402http.Newt402HTTPClient(client),
 )
 
 // Make request to paid endpoint (payment is handled automatically)
@@ -164,7 +164,7 @@ solana-keygen new
 
 ## Testing Against Local Server
 
-1. Start a local x402 server:
+1. Start a local t402 server:
 ```bash
 cd ../../servers/gin
 go run main.go
@@ -182,6 +182,6 @@ See [Advanced Examples](../advanced/) for custom transport, retry logic and erro
 
 ## Related Resources
 
-- [x402 Go Package Documentation](../../../../go/)
+- [t402 Go Package Documentation](../../../../go/)
 - [Signer Helpers Documentation](../../../../go/signers/)
 - [Server Examples](../../servers/) — build servers that can receive these payments

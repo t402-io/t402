@@ -1,4 +1,4 @@
-package x402
+package t402
 
 import (
 	"testing"
@@ -14,7 +14,7 @@ func TestValidatePaymentPayload(t *testing.T) {
 		{
 			name: "valid v2 payload",
 			payload: PaymentPayload{
-				X402Version: 2,
+				T402Version: 2,
 				Accepted: PaymentRequirements{
 					Scheme:  "exact",
 					Network: "eip155:1",
@@ -26,7 +26,7 @@ func TestValidatePaymentPayload(t *testing.T) {
 		{
 			name: "valid v1 payload",
 			payload: PaymentPayload{
-				X402Version: 1,
+				T402Version: 1,
 				Accepted: PaymentRequirements{
 					Scheme:  "exact",
 					Network: "eip155:1",
@@ -38,7 +38,7 @@ func TestValidatePaymentPayload(t *testing.T) {
 		{
 			name: "invalid version",
 			payload: PaymentPayload{
-				X402Version: 3,
+				T402Version: 3,
 				Accepted: PaymentRequirements{
 					Scheme:  "exact",
 					Network: "eip155:1",
@@ -46,12 +46,12 @@ func TestValidatePaymentPayload(t *testing.T) {
 				Payload: map[string]interface{}{"sig": "test"},
 			},
 			wantErr: true,
-			errMsg:  "unsupported x402 version",
+			errMsg:  "unsupported t402 version",
 		},
 		{
 			name: "missing scheme",
 			payload: PaymentPayload{
-				X402Version: 2,
+				T402Version: 2,
 				Accepted: PaymentRequirements{
 					Network: "eip155:1",
 				},
@@ -63,7 +63,7 @@ func TestValidatePaymentPayload(t *testing.T) {
 		{
 			name: "missing network",
 			payload: PaymentPayload{
-				X402Version: 2,
+				T402Version: 2,
 				Accepted: PaymentRequirements{
 					Scheme: "exact",
 				},
@@ -75,7 +75,7 @@ func TestValidatePaymentPayload(t *testing.T) {
 		{
 			name: "missing payload",
 			payload: PaymentPayload{
-				X402Version: 2,
+				T402Version: 2,
 				Accepted: PaymentRequirements{
 					Scheme:  "exact",
 					Network: "eip155:1",

@@ -9,16 +9,16 @@ import {
   isSvmSignerWallet,
   Network,
   evm,
-  X402Config,
-} from "x402/types";
+  T402Config,
+} from "t402/types";
 import {
   createPaymentHeader,
   PaymentRequirementsSelector,
   selectPaymentRequirements,
-} from "x402/client";
+} from "t402/client";
 
 /**
- * Enables the payment of APIs using the x402 payment protocol.
+ * Enables the payment of APIs using the t402 payment protocol.
  *
  * When a request receives a 402 response:
  * 1. Extracts payment requirements from the response
@@ -29,7 +29,7 @@ import {
  * @param axiosClient - The Axios instance to add the interceptor to
  * @param walletClient - A wallet client that can sign transactions and create payment headers
  * @param paymentRequirementsSelector - A function that selects the payment requirements from the response
- * @param config - Optional configuration for X402 operations (e.g., custom RPC URLs)
+ * @param config - Optional configuration for T402 operations (e.g., custom RPC URLs)
  * @returns The modified Axios instance with the payment interceptor
  *
  * @example
@@ -55,7 +55,7 @@ export function withPaymentInterceptor(
   axiosClient: AxiosInstance,
   walletClient: Signer | MultiNetworkSigner,
   paymentRequirementsSelector: PaymentRequirementsSelector = selectPaymentRequirements,
-  config?: X402Config,
+  config?: T402Config,
 ) {
   axiosClient.interceptors.response.use(
     response => response,
@@ -74,8 +74,8 @@ export function withPaymentInterceptor(
           return Promise.reject(error);
         }
 
-        const { x402Version, accepts } = error.response.data as {
-          x402Version: number;
+        const { t402Version, accepts } = error.response.data as {
+          t402Version: number;
           accepts: PaymentRequirements[];
         };
         const parsed = accepts.map(x => PaymentRequirementsSchema.parse(x));
@@ -91,7 +91,7 @@ export function withPaymentInterceptor(
         const selectedPaymentRequirements = paymentRequirementsSelector(parsed, network, "exact");
         const paymentHeader = await createPaymentHeader(
           walletClient,
-          x402Version,
+          t402Version,
           selectedPaymentRequirements,
           config,
         );
@@ -112,7 +112,7 @@ export function withPaymentInterceptor(
   return axiosClient;
 }
 
-export { decodeXPaymentResponse } from "x402/shared";
-export { createSigner, type Signer, type MultiNetworkSigner, type X402Config } from "x402/types";
-export { type PaymentRequirementsSelector } from "x402/client";
+export { decodeXPaymentResponse } from "t402/shared";
+export { createSigner, type Signer, type MultiNetworkSigner, type T402Config } from "t402/types";
+export { type PaymentRequirementsSelector } from "t402/client";
 export type { Hex } from "viem";

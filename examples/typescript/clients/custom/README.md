@@ -1,14 +1,14 @@
-# Custom x402 Client Implementation
+# Custom t402 Client Implementation
 
-Demonstrates how to implement x402 payment handling manually using only the core packages, without convenience wrappers like `@x402/fetch` or `@x402/axios`.
+Demonstrates how to implement t402 payment handling manually using only the core packages, without convenience wrappers like `@t402/fetch` or `@t402/axios`.
 
 ```typescript
-import { x402Client } from "@x402/core/client";
-import { decodePaymentRequiredHeader, encodePaymentSignatureHeader } from "@x402/core/http";
-import { ExactEvmScheme } from "@x402/evm/exact/client";
+import { t402Client } from "@t402/core/client";
+import { decodePaymentRequiredHeader, encodePaymentSignatureHeader } from "@t402/core/http";
+import { ExactEvmScheme } from "@t402/evm/exact/client";
 import { privateKeyToAccount } from "viem/accounts";
 
-const client = new x402Client().register(
+const client = new t402Client().register(
   "eip155:*",
   new ExactEvmScheme(privateKeyToAccount(evmPrivateKey)),
 );
@@ -35,7 +35,7 @@ console.log(await response.json());
 - Node.js v20+ (install via [nvm](https://github.com/nvm-sh/nvm))
 - pnpm v10 (install via [pnpm.io/installation](https://pnpm.io/installation))
 - Valid EVM and SVM private keys for making payments
-- A running x402 server (see [server examples](../../servers/))
+- A running t402 server (see [server examples](../../servers/))
 
 ## Setup
 
@@ -93,7 +93,7 @@ pnpm dev
 1. **Initial Request** — Make HTTP request to protected endpoint
 2. **402 Response** — Server responds with requirements in `PAYMENT-REQUIRED` header
 3. **Parse Requirements** — Decode requirements using `decodePaymentRequiredHeader()`
-4. **Create Payment** — Use `x402Client.createPaymentPayload()` to generate payload
+4. **Create Payment** — Use `t402Client.createPaymentPayload()` to generate payload
 5. **Encode Payment** — Use `encodePaymentSignatureHeader()` for the header value
 6. **Retry with Payment** — Make new request with `PAYMENT-SIGNATURE` header
 7. **Success** — Receive 200 with settlement in `PAYMENT-RESPONSE` header
@@ -103,9 +103,9 @@ pnpm dev
 ### 1. Setting Up the Client
 
 ```typescript
-import { x402Client } from "@x402/core/client";
-import { ExactEvmScheme } from "@x402/evm/exact/client";
-import { ExactSvmScheme } from "@x402/svm/exact/client";
+import { t402Client } from "@t402/core/client";
+import { ExactEvmScheme } from "@t402/evm/exact/client";
+import { ExactSvmScheme } from "@t402/svm/exact/client";
 import { privateKeyToAccount } from "viem/accounts";
 
 const evmSigner = privateKeyToAccount(evmPrivateKey);
@@ -116,7 +116,7 @@ const selectPayment = (_version: number, requirements: PaymentRequirements[]) =>
   return requirements[1]; // Select second option (e.g., Solana)
 };
 
-const client = new x402Client(selectPayment)
+const client = new t402Client(selectPayment)
   .register("eip155:*", new ExactEvmScheme(evmSigner))
   .register("solana:*", new ExactSvmScheme(svmSigner));
 ```
@@ -124,7 +124,7 @@ const client = new x402Client(selectPayment)
 ### 2. Detecting Payment Required
 
 ```typescript
-import { decodePaymentRequiredHeader } from "@x402/core/http";
+import { decodePaymentRequiredHeader } from "@t402/core/http";
 
 if (response.status === 402) {
   const paymentRequiredHeader = response.headers.get("PAYMENT-REQUIRED");
@@ -136,7 +136,7 @@ if (response.status === 402) {
 ### 3. Creating Payment Payload
 
 ```typescript
-import { encodePaymentSignatureHeader } from "@x402/core/http";
+import { encodePaymentSignatureHeader } from "@t402/core/http";
 
 const paymentPayload = await client.createPaymentPayload(paymentRequired);
 const paymentHeader = encodePaymentSignatureHeader(paymentPayload);
@@ -155,7 +155,7 @@ const response = await fetch(url, {
 ### 5. Extracting Settlement
 
 ```typescript
-import { decodePaymentResponseHeader } from "@x402/core/http";
+import { decodePaymentResponseHeader } from "@t402/core/http";
 
 const settlementHeader = response.headers.get("PAYMENT-RESPONSE");
 const settlement = decodePaymentResponseHeader(settlementHeader);
@@ -164,7 +164,7 @@ const settlement = decodePaymentResponseHeader(settlementHeader);
 
 ## Wrapper vs Custom Comparison
 
-| Aspect            | With Wrapper (@x402/fetch) | Custom Implementation |
+| Aspect            | With Wrapper (@t402/fetch) | Custom Implementation |
 | ----------------- | -------------------------- | --------------------- |
 | Code Complexity   | ~10 lines                  | ~100 lines            |
 | Automatic Retry   | ✅ Yes                     | ❌ Manual             |
@@ -177,7 +177,7 @@ const settlement = decodePaymentResponseHeader(settlementHeader);
 - Need complete control over every step of the payment flow
 - Integrating with non-standard HTTP libraries
 - Implementing custom retry/error logic
-- Learning how x402 works under the hood
+- Learning how t402 works under the hood
 
 ## Adapting to Other HTTP Clients
 
@@ -186,7 +186,7 @@ To use this pattern with other HTTP clients (axios, got, etc.):
 1. Detect 402 status code
 2. Extract requirements from `PAYMENT-REQUIRED` header
 3. Use `decodePaymentRequiredHeader()` to parse
-4. Use `x402Client.createPaymentPayload()` to create payload
+4. Use `t402Client.createPaymentPayload()` to create payload
 5. Use `encodePaymentSignatureHeader()` to encode
 6. Add `PAYMENT-SIGNATURE` header to retry request
 7. Extract settlement from `PAYMENT-RESPONSE` header

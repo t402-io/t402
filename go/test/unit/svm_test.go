@@ -4,19 +4,19 @@ package unit_test
 import (
 	"testing"
 
-	x402 "github.com/coinbase/x402/go"
-	svm "github.com/coinbase/x402/go/mechanisms/svm"
-	svmserver "github.com/coinbase/x402/go/mechanisms/svm/exact/server"
+	t402 "github.com/coinbase/t402/go"
+	svm "github.com/coinbase/t402/go/mechanisms/svm"
+	svmserver "github.com/coinbase/t402/go/mechanisms/svm/exact/server"
 )
 
 // TestSolanaServerPriceParsing tests V2 server price parsing
 func TestSolanaServerPriceParsing(t *testing.T) {
 	server := svmserver.NewExactSvmScheme()
-	network := x402.Network(svm.SolanaDevnetCAIP2)
+	network := t402.Network(svm.SolanaDevnetCAIP2)
 
 	tests := []struct {
 		name          string
-		price         x402.Price
+		price         t402.Price
 		expectedAsset string
 		shouldError   bool
 	}{
