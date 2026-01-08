@@ -27,9 +27,9 @@ describe("ExactEvmScheme (Server) - registerMoneyParser", () => {
       expect(result1.extra?.token).toBe("DAI");
       expect(result1.amount).toBe((150 * 1e18).toString());
 
-      // Small amount should fall back to default (USDC)
+      // Small amount should fall back to default (USDT0 is now default on Ethereum)
       const result2 = await server.parsePrice(50, "eip155:1");
-      expect(result2.asset).toBe("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"); // Ethereum USDC
+      expect(result2.asset).toBe("0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee"); // Ethereum USDT0
       expect(result2.amount).toBe("50000000"); // 50 * 1e6
     });
 
