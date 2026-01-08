@@ -1,11 +1,11 @@
-# @x402/core
+# @t402/core
 
-Core implementation of the x402 payment protocol for TypeScript/JavaScript applications. Provides transport-agnostic client, server and facilitator components.
+Core implementation of the t402 payment protocol for TypeScript/JavaScript applications. Provides transport-agnostic client, server and facilitator components.
 
 ## Installation
 
 ```bash
-pnpm install @x402/core
+pnpm install @t402/core
 ```
 
 ## Quick Start
@@ -13,16 +13,16 @@ pnpm install @x402/core
 ### Client Usage
 
 ```typescript
-import { x402Client } from '@x402/core/client';
-import { x402HTTPClient } from '@x402/core/http';
-import { ExactEvmScheme } from '@x402/evm/exact/client';
+import { t402Client } from '@t402/core/client';
+import { t402HTTPClient } from '@t402/core/http';
+import { ExactEvmScheme } from '@t402/evm/exact/client';
 
 // Create core client and register payment schemes
-const coreClient = new x402Client()
+const coreClient = new t402Client()
   .register('eip155:*', new ExactEvmScheme(evmSigner));
 
 // Wrap with HTTP client for header encoding/decoding
-const client = new x402HTTPClient(coreClient);
+const client = new t402HTTPClient(coreClient);
 
 // Make a request
 const response = await fetch('https://api.example.com/protected');
@@ -52,17 +52,17 @@ if (response.status === 402) {
 ### Server Usage
 
 ```typescript
-import { x402ResourceServer, HTTPFacilitatorClient } from '@x402/core/server';
-import { x402HTTPResourceServer } from '@x402/core/http';
-import { ExactEvmScheme } from '@x402/evm/exact/server';
+import { t402ResourceServer, HTTPFacilitatorClient } from '@t402/core/server';
+import { t402HTTPResourceServer } from '@t402/core/http';
+import { ExactEvmScheme } from '@t402/evm/exact/server';
 
 // Connect to facilitator
 const facilitatorClient = new HTTPFacilitatorClient({
-  url: 'https://x402.org/facilitator',
+  url: 'https://t402.org/facilitator',
 });
 
 // Create resource server with payment schemes
-const resourceServer = new x402ResourceServer(facilitatorClient)
+const resourceServer = new t402ResourceServer(facilitatorClient)
   .register('eip155:*', new ExactEvmScheme());
 
 // Initialize (fetches supported kinds from facilitator)
@@ -83,16 +83,16 @@ const routes = {
 };
 
 // Create HTTP server wrapper
-const httpServer = new x402HTTPResourceServer(resourceServer, routes);
+const httpServer = new t402HTTPResourceServer(resourceServer, routes);
 ```
 
 ### Facilitator Usage
 
 ```typescript
-import { x402Facilitator } from '@x402/core/facilitator';
-import { registerExactEvmScheme } from '@x402/evm/exact/facilitator';
+import { t402Facilitator } from '@t402/core/facilitator';
+import { registerExactEvmScheme } from '@t402/evm/exact/facilitator';
 
-const facilitator = new x402Facilitator();
+const facilitator = new t402Facilitator();
 
 // Register scheme implementations using helper
 registerExactEvmScheme(facilitator, {
@@ -153,7 +153,7 @@ const routes = {
 Use `fromConfig()` for declarative setup:
 
 ```typescript
-const client = x402Client.fromConfig({
+const client = t402Client.fromConfig({
   schemes: [
     { network: 'eip155:8453', client: new ExactEvmScheme(evmSigner) },
     { network: 'solana:mainnet', client: new ExactSvmScheme(svmSigner) },
@@ -251,7 +251,7 @@ type PaymentRequirements = {
 };
 
 type PaymentPayload = {
-  x402Version: number;
+  t402Version: number;
   resource: ResourceInfo;
   accepted: PaymentRequirements;
   payload: Record<string, unknown>;
@@ -259,7 +259,7 @@ type PaymentPayload = {
 };
 
 type PaymentRequired = {
-  x402Version: number;
+  t402Version: number;
   error?: string;
   resource: ResourceInfo;
   accepts: PaymentRequirements[];
@@ -271,23 +271,23 @@ type PaymentRequired = {
 
 For framework-specific middleware, use:
 
-- `@x402/express` - Express.js middleware
-- `@x402/hono` - Hono middleware  
-- `@x402/next` - Next.js integration
-- `@x402/axios` - Axios interceptor
-- `@x402/fetch` - Fetch wrapper
+- `@t402/express` - Express.js middleware
+- `@t402/hono` - Hono middleware  
+- `@t402/next` - Next.js integration
+- `@t402/axios` - Axios interceptor
+- `@t402/fetch` - Fetch wrapper
 
 ## Implementation Packages
 
 For blockchain-specific implementations:
 
-- `@x402/evm` - Ethereum and EVM-compatible chains
-- `@x402/svm` - Solana blockchain
+- `@t402/evm` - Ethereum and EVM-compatible chains
+- `@t402/svm` - Solana blockchain
 
 ## Examples
 
-See the [examples directory](https://github.com/coinbase/x402/tree/main/examples/typescript) for complete examples.
+See the [examples directory](https://github.com/coinbase/t402/tree/main/examples/typescript) for complete examples.
 
 ## Contributing
 
-Contributions welcome! See [Contributing Guide](https://github.com/coinbase/x402/blob/main/CONTRIBUTING.md).
+Contributions welcome! See [Contributing Guide](https://github.com/coinbase/t402/blob/main/CONTRIBUTING.md).

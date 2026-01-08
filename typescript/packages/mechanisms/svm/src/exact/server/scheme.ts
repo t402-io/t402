@@ -5,7 +5,7 @@ import type {
   Price,
   SchemeNetworkServer,
   MoneyParser,
-} from "@x402/core/types";
+} from "@t402/core/types";
 import { convertToTokenAmount, getUsdcAddress } from "../../utils";
 
 /**
@@ -73,7 +73,7 @@ export class ExactSvmScheme implements SchemeNetworkServer {
    *
    * @param paymentRequirements - The base payment requirements
    * @param supportedKind - The supported kind configuration
-   * @param supportedKind.x402Version - The x402 protocol version
+   * @param supportedKind.t402Version - The t402 protocol version
    * @param supportedKind.scheme - The payment scheme
    * @param supportedKind.network - The network identifier
    * @param supportedKind.extra - Extra metadata including feePayer address
@@ -83,7 +83,7 @@ export class ExactSvmScheme implements SchemeNetworkServer {
   enhancePaymentRequirements(
     paymentRequirements: PaymentRequirements,
     supportedKind: {
-      x402Version: number;
+      t402Version: number;
       scheme: string;
       network: Network;
       extra?: Record<string, unknown>;

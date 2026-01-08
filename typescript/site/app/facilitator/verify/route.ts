@@ -1,8 +1,8 @@
-import { VerifyResponse, PaymentPayload, PaymentRequirements } from "@x402/core/types";
+import { VerifyResponse, PaymentPayload, PaymentRequirements } from "@t402/core/types";
 import { getFacilitator } from "../index";
 
 /**
- * Handles POST requests to verify x402 payments
+ * Handles POST requests to verify t402 payments
  *
  * @param req - The incoming request containing payment verification details
  * @returns A JSON response indicating whether the payment is valid
@@ -72,7 +72,7 @@ export async function POST(req: Request) {
 export async function GET() {
   return Response.json({
     endpoint: "/verify",
-    description: "POST to verify x402 payments",
+    description: "POST to verify t402 payments",
     body: {
       paymentPayload: "PaymentPayload",
       paymentRequirements: "PaymentRequirements",

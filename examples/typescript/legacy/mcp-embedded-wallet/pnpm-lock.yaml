@@ -17,7 +17,7 @@ importers:
       '@coinbase/cdp-react':
         specifier: ^0.0.18
         version: 0.0.18(@coinbase/cdp-core@0.0.18(@types/react@19.1.8)(bufferutil@4.0.9)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.25.76))(@coinbase/cdp-hooks@0.0.18(@coinbase/cdp-core@0.0.18(@types/react@19.1.8)(bufferutil@4.0.9)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.25.76))(react@18.3.1))(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@coinbase/x402':
+      '@coinbase/t402':
         specifier: 0.4.3
         version: 0.4.3(@tanstack/query-core@5.83.1)(@tanstack/react-query@5.84.0(react@18.3.1))(@types/react@19.1.8)(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)
       '@modelcontextprotocol/sdk':
@@ -53,10 +53,10 @@ importers:
       winston:
         specifier: ^3.17.0
         version: 3.17.0
-      x402:
+      t402:
         specifier: 0.4.3
         version: 0.4.3(@tanstack/query-core@5.83.1)(@tanstack/react-query@5.84.0(react@18.3.1))(@types/react@19.1.8)(bufferutil@4.0.9)(encoding@0.1.13)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      x402-axios:
+      t402-axios:
         specifier: 0.4.2
         version: 0.4.2(@tanstack/query-core@5.83.1)(@tanstack/react-query@5.84.0(react@18.3.1))(@types/react@19.1.8)(bufferutil@4.0.9)(encoding@0.1.13)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)
       zod:
@@ -227,7 +227,7 @@ packages:
   '@coinbase/wallet-sdk@4.3.6':
     resolution: {integrity: sha512-4q8BNG1ViL4mSAAvPAtpwlOs1gpC+67eQtgIwNvT3xyeyFFd+guwkc8bcX5rTmQhXpqnhzC4f0obACbP9CqMSA==}
 
-  '@coinbase/x402@0.4.3':
+  '@coinbase/t402@0.4.3':
     resolution: {integrity: sha512-1E77B0W12qpXH2Em8Z4CJLRUnumzn+YCyedIN2dnHMHh9bfCDfdmjTZJACl4Wxv3zUErX+Zl4JafjkrpQ94Yvw==}
 
   '@colors/colors@1.6.0':
@@ -4349,10 +4349,10 @@ packages:
       utf-8-validate:
         optional: true
 
-  x402-axios@0.4.2:
+  t402-axios@0.4.2:
     resolution: {integrity: sha512-6aaVrSq/w43xtOz7KCI5SRcd+8EEj6q3ZEALJbcjlM6oAi30wTiZOCrH6UEMpLYSyEGMt1Jl25AL3tuwJXTumA==}
 
-  x402@0.4.3:
+  t402@0.4.3:
     resolution: {integrity: sha512-GbIgX2EZYAOZX1ZrEYIVXtjDKLtNuwp7lUlM3dCJAF5TqELP+bDrLy3UsypzNcJoHPVvNa+jB4BPZ83/W2nZDA==}
 
   xmlbuilder@15.1.1:
@@ -4708,11 +4708,11 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@coinbase/x402@0.4.3(@tanstack/query-core@5.83.1)(@tanstack/react-query@5.84.0(react@18.3.1))(@types/react@19.1.8)(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)':
+  '@coinbase/t402@0.4.3(@tanstack/query-core@5.83.1)(@tanstack/react-query@5.84.0(react@18.3.1))(@types/react@19.1.8)(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)':
     dependencies:
       '@coinbase/cdp-sdk': 1.30.0(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(utf-8-validate@5.0.10)
       viem: 2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
-      x402: 0.4.3(@tanstack/query-core@5.83.1)(@tanstack/react-query@5.84.0(react@18.3.1))(@types/react@19.1.8)(bufferutil@4.0.9)(encoding@0.1.13)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)
+      t402: 0.4.3(@tanstack/query-core@5.83.1)(@tanstack/react-query@5.84.0(react@18.3.1))(@types/react@19.1.8)(bufferutil@4.0.9)(encoding@0.1.13)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)
       zod: 3.25.76
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -10039,11 +10039,11 @@ snapshots:
       bufferutil: 4.0.9
       utf-8-validate: 5.0.10
 
-  x402-axios@0.4.2(@tanstack/query-core@5.83.1)(@tanstack/react-query@5.84.0(react@18.3.1))(@types/react@19.1.8)(bufferutil@4.0.9)(encoding@0.1.13)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10):
+  t402-axios@0.4.2(@tanstack/query-core@5.83.1)(@tanstack/react-query@5.84.0(react@18.3.1))(@types/react@19.1.8)(bufferutil@4.0.9)(encoding@0.1.13)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10):
     dependencies:
       axios: 1.11.0
       viem: 2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
-      x402: 0.4.3(@tanstack/query-core@5.83.1)(@tanstack/react-query@5.84.0(react@18.3.1))(@types/react@19.1.8)(bufferutil@4.0.9)(encoding@0.1.13)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)
+      t402: 0.4.3(@tanstack/query-core@5.83.1)(@tanstack/react-query@5.84.0(react@18.3.1))(@types/react@19.1.8)(bufferutil@4.0.9)(encoding@0.1.13)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)
       zod: 3.25.76
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -10076,7 +10076,7 @@ snapshots:
       - uploadthing
       - utf-8-validate
 
-  x402@0.4.3(@tanstack/query-core@5.83.1)(@tanstack/react-query@5.84.0(react@18.3.1))(@types/react@19.1.8)(bufferutil@4.0.9)(encoding@0.1.13)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10):
+  t402@0.4.3(@tanstack/query-core@5.83.1)(@tanstack/react-query@5.84.0(react@18.3.1))(@types/react@19.1.8)(bufferutil@4.0.9)(encoding@0.1.13)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10):
     dependencies:
       viem: 2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
       wagmi: 2.16.1(@tanstack/query-core@5.83.1)(@tanstack/react-query@5.84.0(react@18.3.1))(@types/react@19.1.8)(bufferutil@4.0.9)(encoding@0.1.13)(react@18.3.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.33.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)

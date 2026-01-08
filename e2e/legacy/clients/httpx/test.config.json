@@ -5,10 +5,10 @@
   "protocolFamilies": [
     "evm"
   ],
-  "x402Versions": [
+  "t402Versions": [
     1
   ],
-  "description": "Python httpx client with x402 payment hooks",
+  "description": "Python httpx client with t402 payment hooks",
   "environment": {
     "required": [
       "EVM_PRIVATE_KEY",

@@ -1,11 +1,11 @@
-package x402
+package t402
 
 import (
 	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/coinbase/x402/go/types"
+	"github.com/coinbase/t402/go/types"
 )
 
 // Network represents a blockchain network identifier in CAIP-2 format
@@ -56,13 +56,13 @@ type AssetAmount struct {
 	Extra  map[string]interface{} `json:"extra,omitempty"`
 }
 
-// PartialPaymentPayload contains only x402Version for version detection
+// PartialPaymentPayload contains only t402Version for version detection
 // Used to detect protocol version before unmarshaling to specific types
 type PartialPaymentPayload struct {
-	X402Version int `json:"x402Version"`
+	T402Version int `json:"t402Version"`
 }
 
-// Re-export V2 types as default in x402 package
+// Re-export V2 types as default in t402 package
 // V2 types are defined in types/v2.go but re-exported here for convenience
 type (
 	PaymentRequirements = types.PaymentRequirements

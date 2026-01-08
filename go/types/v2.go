@@ -7,7 +7,7 @@ import (
 // PaymentPayload represents a v2 payment payload structure
 // V2 has accepted field with nested scheme/network/requirements
 type PaymentPayload struct {
-	X402Version int                    `json:"x402Version"`
+	T402Version int                    `json:"t402Version"`
 	Payload     map[string]interface{} `json:"payload"`
 	Accepted    PaymentRequirements    `json:"accepted"`
 	Resource    *ResourceInfo          `json:"resource,omitempty"`
@@ -15,7 +15,7 @@ type PaymentPayload struct {
 }
 
 // PaymentPayloadView interface implementation for V2
-func (p PaymentPayload) GetVersion() int                    { return p.X402Version }
+func (p PaymentPayload) GetVersion() int                    { return p.T402Version }
 func (p PaymentPayload) GetScheme() string                  { return p.Accepted.Scheme }
 func (p PaymentPayload) GetNetwork() string                 { return p.Accepted.Network }
 func (p PaymentPayload) GetPayload() map[string]interface{} { return p.Payload }
@@ -42,7 +42,7 @@ func (r PaymentRequirements) GetExtra() map[string]interface{} { return r.Extra 
 
 // PaymentRequired represents a v2 402 response structure
 type PaymentRequired struct {
-	X402Version int                    `json:"x402Version"`
+	T402Version int                    `json:"t402Version"`
 	Error       string                 `json:"error,omitempty"`
 	Resource    *ResourceInfo          `json:"resource,omitempty"`
 	Accepts     []PaymentRequirements  `json:"accepts"`
@@ -58,7 +58,7 @@ type ResourceInfo struct {
 
 // SupportedKind represents a supported payment configuration
 type SupportedKind struct {
-	X402Version int                    `json:"x402Version"`
+	T402Version int                    `json:"t402Version"`
 	Scheme      string                 `json:"scheme"`
 	Network     string                 `json:"network"`
 	Extra       map[string]interface{} `json:"extra,omitempty"`

@@ -2,13 +2,13 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest, NextResponse } from "next/server";
 import type {
   HTTPProcessResult,
-  x402HTTPResourceServer,
+  t402HTTPResourceServer,
   PaywallProvider,
   FacilitatorClient,
-} from "@x402/core/server";
-import { x402ResourceServer } from "@x402/core/server";
-import type { PaymentPayload, PaymentRequirements, SchemeNetworkServer } from "@x402/core/types";
-import { paymentProxy, paymentProxyFromConfig, withX402, type SchemeRegistration } from "./index";
+} from "@t402/core/server";
+import { t402ResourceServer } from "@t402/core/server";
+import type { PaymentPayload, PaymentRequirements, SchemeNetworkServer } from "@t402/core/types";
+import { paymentProxy, paymentProxyFromConfig, withT402, type SchemeRegistration } from "./index";
 
 import { createHttpServer } from "./utils";
 
@@ -21,14 +21,14 @@ vi.mock("./utils", async () => {
   };
 });
 
-// Mock @x402/core/server
-vi.mock("@x402/core/server", () => ({
-  x402ResourceServer: vi.fn().mockImplementation(() => ({
+// Mock @t402/core/server
+vi.mock("@t402/core/server", () => ({
+  t402ResourceServer: vi.fn().mockImplementation(() => ({
     initialize: vi.fn().mockResolvedValue(undefined),
     registerExtension: vi.fn(),
     register: vi.fn(),
   })),
-  x402HTTPResourceServer: vi.fn(),
+  t402HTTPResourceServer: vi.fn(),
 }));
 
 // --- Test Fixtures ---
@@ -62,20 +62,20 @@ const mockPaymentRequirements = {
  *
  * @param processResult - The result to return from processHTTPRequest.
  * @param settlementResult - Result to return from processSettlement (success with headers or failure).
- * @returns A mock x402HTTPResourceServer.
+ * @returns A mock t402HTTPResourceServer.
  */
 function createMockHttpServer(
   processResult: HTTPProcessResult,
   settlementResult:
     | { success: true; headers: Record<string, string> }
     | { success: false; errorReason: string } = { success: true, headers: {} },
-): x402HTTPResourceServer {
+): t402HTTPResourceServer {
   return {
     processHTTPRequest: vi.fn().mockResolvedValue(processResult),
     processSettlement: vi.fn().mockResolvedValue(settlementResult),
     registerPaywallProvider: vi.fn(),
     requiresPayment: vi.fn().mockReturnValue(true),
-  } as unknown as x402HTTPResourceServer;
+  } as unknown as t402HTTPResourceServer;
 }
 
 /**
@@ -104,9 +104,9 @@ function createMockRequest(
 /**
  * Sets up createHttpServer mock to return the provided server.
  *
- * @param mockServer - The mock x402HTTPResourceServer to return.
+ * @param mockServer - The mock t402HTTPResourceServer to return.
  */
-function setupMockCreateHttpServer(mockServer: x402HTTPResourceServer): void {
+function setupMockCreateHttpServer(mockServer: t402HTTPResourceServer): void {
   vi.mocked(createHttpServer).mockReturnValue({
     httpServer: mockServer,
     init: vi.fn().mockResolvedValue(undefined),
@@ -122,7 +122,7 @@ describe("paymentProxy", () => {
     const mockServer = createMockHttpServer({ type: "no-payment-required" });
     setupMockCreateHttpServer(mockServer);
 
-    const proxy = paymentProxy(mockRoutes, {} as unknown as x402ResourceServer);
+    const proxy = paymentProxy(mockRoutes, {} as unknown as t402ResourceServer);
     const response = await proxy(createMockRequest());
 
     expect(response.status).toBe(200);
@@ -140,7 +140,7 @@ describe("paymentProxy", () => {
     });
     setupMockCreateHttpServer(mockServer);
 
-    const proxy = paymentProxy(mockRoutes, {} as unknown as x402ResourceServer);
+    const proxy = paymentProxy(mockRoutes, {} as unknown as t402ResourceServer);
     const response = await proxy(createMockRequest());
 
     expect(response.status).toBe(402);
@@ -160,7 +160,7 @@ describe("paymentProxy", () => {
     });
     setupMockCreateHttpServer(mockServer);
 
-    const proxy = paymentProxy(mockRoutes, {} as unknown as x402ResourceServer);
+    const proxy = paymentProxy(mockRoutes, {} as unknown as t402ResourceServer);
     const response = await proxy(createMockRequest());
 
     expect(response.status).toBe(402);
@@ -180,7 +180,7 @@ describe("paymentProxy", () => {
     );
     setupMockCreateHttpServer(mockServer);
 
-    const proxy = paymentProxy(mockRoutes, {} as unknown as x402ResourceServer);
+    const proxy = paymentProxy(mockRoutes, {} as unknown as t402ResourceServer);
     const response = await proxy(createMockRequest());
 
     expect(response.status).toBe(200);
@@ -196,7 +196,7 @@ describe("paymentProxy", () => {
     setupMockCreateHttpServer(mockServer);
     const paywallConfig = { appName: "test-app", testnet: true };
 
-    const proxy = paymentProxy(mockRoutes, {} as unknown as x402ResourceServer, paywallConfig);
+    const proxy = paymentProxy(mockRoutes, {} as unknown as t402ResourceServer, paywallConfig);
     await proxy(createMockRequest());
 
     expect(mockServer.processHTTPRequest).toHaveBeenCalledWith(expect.anything(), paywallConfig);
@@ -207,7 +207,7 @@ describe("paymentProxy", () => {
     setupMockCreateHttpServer(mockServer);
     const paywall: PaywallProvider = { generateHtml: vi.fn() };
 
-    paymentProxy(mockRoutes, {} as unknown as x402ResourceServer, undefined, paywall);
+    paymentProxy(mockRoutes, {} as unknown as t402ResourceServer, undefined, paywall);
 
     expect(createHttpServer).toHaveBeenCalledWith(mockRoutes, expect.anything(), paywall, true);
   });
@@ -221,7 +221,7 @@ describe("paymentProxy", () => {
     vi.mocked(mockServer.processSettlement).mockRejectedValue(new Error("Settlement rejected"));
     setupMockCreateHttpServer(mockServer);
 
-    const proxy = paymentProxy(mockRoutes, {} as unknown as x402ResourceServer);
+    const proxy = paymentProxy(mockRoutes, {} as unknown as t402ResourceServer);
     const response = await proxy(createMockRequest());
 
     expect(response.status).toBe(402);
@@ -240,7 +240,7 @@ describe("paymentProxy", () => {
     );
     setupMockCreateHttpServer(mockServer);
 
-    const proxy = paymentProxy(mockRoutes, {} as unknown as x402ResourceServer);
+    const proxy = paymentProxy(mockRoutes, {} as unknown as t402ResourceServer);
     const response = await proxy(createMockRequest());
 
     expect(response.status).toBe(402);
@@ -250,7 +250,7 @@ describe("paymentProxy", () => {
   });
 });
 
-describe("withX402", () => {
+describe("withT402", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -260,7 +260,7 @@ describe("withX402", () => {
     setupMockCreateHttpServer(mockServer);
     const handler = vi.fn().mockResolvedValue(NextResponse.json({ data: "protected" }));
 
-    const wrappedHandler = withX402(handler, mockRouteConfig, {} as unknown as x402ResourceServer);
+    const wrappedHandler = withT402(handler, mockRouteConfig, {} as unknown as t402ResourceServer);
     const response = await wrappedHandler(createMockRequest());
 
     expect(handler).toHaveBeenCalled();
@@ -280,7 +280,7 @@ describe("withX402", () => {
     setupMockCreateHttpServer(mockServer);
     const handler = vi.fn().mockResolvedValue(NextResponse.json({ data: "protected" }));
 
-    const wrappedHandler = withX402(handler, mockRouteConfig, {} as unknown as x402ResourceServer);
+    const wrappedHandler = withT402(handler, mockRouteConfig, {} as unknown as t402ResourceServer);
     const response = await wrappedHandler(createMockRequest());
 
     expect(handler).not.toHaveBeenCalled();
@@ -299,7 +299,7 @@ describe("withX402", () => {
     setupMockCreateHttpServer(mockServer);
     const handler = vi.fn().mockResolvedValue(NextResponse.json({ data: "protected" }));
 
-    const wrappedHandler = withX402(handler, mockRouteConfig, {} as unknown as x402ResourceServer);
+    const wrappedHandler = withT402(handler, mockRouteConfig, {} as unknown as t402ResourceServer);
     const response = await wrappedHandler(createMockRequest());
 
     expect(handler).toHaveBeenCalled();
@@ -320,7 +320,7 @@ describe("withX402", () => {
         new NextResponse(JSON.stringify({ error: "Bad request" }), { status: 400 }),
       );
 
-    const wrappedHandler = withX402(handler, mockRouteConfig, {} as unknown as x402ResourceServer);
+    const wrappedHandler = withT402(handler, mockRouteConfig, {} as unknown as t402ResourceServer);
     const response = await wrappedHandler(createMockRequest());
 
     expect(handler).toHaveBeenCalled();
@@ -338,7 +338,7 @@ describe("withX402", () => {
     setupMockCreateHttpServer(mockServer);
     const handler = vi.fn().mockResolvedValue(NextResponse.json({ data: "protected" }));
 
-    const wrappedHandler = withX402(handler, mockRouteConfig, {} as unknown as x402ResourceServer);
+    const wrappedHandler = withT402(handler, mockRouteConfig, {} as unknown as t402ResourceServer);
     const response = await wrappedHandler(createMockRequest());
 
     expect(handler).toHaveBeenCalled();
@@ -359,7 +359,7 @@ describe("withX402", () => {
     setupMockCreateHttpServer(mockServer);
     const handler = vi.fn().mockResolvedValue(NextResponse.json({ data: "protected" }));
 
-    const wrappedHandler = withX402(handler, mockRouteConfig, {} as unknown as x402ResourceServer);
+    const wrappedHandler = withT402(handler, mockRouteConfig, {} as unknown as t402ResourceServer);
     const response = await wrappedHandler(createMockRequest());
 
     expect(handler).toHaveBeenCalled();
@@ -375,14 +375,14 @@ describe("paymentProxyFromConfig", () => {
     vi.clearAllMocks();
   });
 
-  it("creates x402ResourceServer with facilitator clients", () => {
+  it("creates t402ResourceServer with facilitator clients", () => {
     const mockServer = createMockHttpServer({ type: "no-payment-required" });
     setupMockCreateHttpServer(mockServer);
     const facilitator = { verify: vi.fn(), settle: vi.fn() } as unknown as FacilitatorClient;
 
     paymentProxyFromConfig(mockRoutes, facilitator);
 
-    expect(x402ResourceServer).toHaveBeenCalledWith(facilitator);
+    expect(t402ResourceServer).toHaveBeenCalledWith(facilitator);
   });
 
   it("registers scheme servers for each network", () => {
@@ -396,7 +396,7 @@ describe("paymentProxyFromConfig", () => {
 
     paymentProxyFromConfig(mockRoutes, undefined, schemes);
 
-    const serverInstance = vi.mocked(x402ResourceServer).mock.results[0].value;
+    const serverInstance = vi.mocked(t402ResourceServer).mock.results[0].value;
     expect(serverInstance.register).toHaveBeenCalledTimes(2);
     expect(serverInstance.register).toHaveBeenCalledWith("eip155:84532", schemeServer);
     expect(serverInstance.register).toHaveBeenCalledWith("eip155:8453", schemeServer);

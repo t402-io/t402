@@ -14,7 +14,7 @@ import (
 /**
  * Advanced Client Examples
  *
- * This package demonstrates advanced patterns for production-ready x402 clients:
+ * This package demonstrates advanced patterns for production-ready t402 clients:
  *
  * - custom-transport: Custom HTTP transport with retry logic and circuit breaker
  * - error-recovery: Advanced error handling and automatic recovery strategies

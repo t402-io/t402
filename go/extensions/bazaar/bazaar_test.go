@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	x402 "github.com/coinbase/x402/go"
-	"github.com/coinbase/x402/go/extensions/bazaar"
-	v1 "github.com/coinbase/x402/go/extensions/v1"
+	t402 "github.com/coinbase/t402/go"
+	"github.com/coinbase/t402/go/extensions/bazaar"
+	v1 "github.com/coinbase/t402/go/extensions/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -336,16 +336,16 @@ func TestExtractDiscoveredResourceFromPaymentPayload_FullFlow(t *testing.T) {
 			nil,
 		)
 
-		requirements := x402.PaymentRequirements{
+		requirements := t402.PaymentRequirements{
 			Scheme:  "exact",
 			Network: "eip155:8453",
 		}
 
-		paymentPayload := x402.PaymentPayload{
-			X402Version: 2,
+		paymentPayload := t402.PaymentPayload{
+			T402Version: 2,
 			Accepted:    requirements,
 			Payload:     map[string]interface{}{},
-			Resource: &x402.ResourceInfo{
+			Resource: &t402.ResourceInfo{
 				URL: "https://api.example.com/data",
 			},
 			Extensions: map[string]interface{}{
@@ -366,7 +366,7 @@ func TestExtractDiscoveredResourceFromPaymentPayload_FullFlow(t *testing.T) {
 		assert.Equal(t, bazaar.MethodPOST, bodyInput.Method)
 		assert.Equal(t, "http", bodyInput.Type)
 		assert.Equal(t, "https://api.example.com/data", info.ResourceURL)
-		assert.Equal(t, 2, info.X402Version)
+		assert.Equal(t, 2, info.T402Version)
 	})
 
 	t.Run("should extract info from v1 PaymentRequirements", func(t *testing.T) {
@@ -393,7 +393,7 @@ func TestExtractDiscoveredResourceFromPaymentPayload_FullFlow(t *testing.T) {
 		}
 
 		v1Payload := map[string]interface{}{
-			"x402Version": 1,
+			"t402Version": 1,
 			"scheme":      "exact",
 			"network":     "eip155:8453",
 			"payload":     map[string]interface{}{},
@@ -412,17 +412,17 @@ func TestExtractDiscoveredResourceFromPaymentPayload_FullFlow(t *testing.T) {
 		assert.Equal(t, bazaar.MethodGET, queryInput.Method)
 		assert.Equal(t, "http", queryInput.Type)
 		assert.Equal(t, "https://api.example.com/data", info.ResourceURL)
-		assert.Equal(t, 1, info.X402Version)
+		assert.Equal(t, 1, info.T402Version)
 	})
 
 	t.Run("should return nil when no discovery info is present", func(t *testing.T) {
-		requirements := x402.PaymentRequirements{
+		requirements := t402.PaymentRequirements{
 			Scheme:  "exact",
 			Network: "eip155:8453",
 		}
 
-		paymentPayload := x402.PaymentPayload{
-			X402Version: 2,
+		paymentPayload := t402.PaymentPayload{
+			T402Version: 2,
 			Accepted:    requirements,
 			Payload:     map[string]interface{}{},
 		}
@@ -445,7 +445,7 @@ func TestExtractDiscoveredResourceFromPaymentPayload_FullFlow(t *testing.T) {
 
 	t.Run("should return error for unsupported version", func(t *testing.T) {
 		payload := map[string]interface{}{
-			"x402Version": 99,
+			"t402Version": 99,
 		}
 		payloadBytes, _ := json.Marshal(payload)
 
@@ -787,7 +787,7 @@ func TestIntegration_FullWorkflow(t *testing.T) {
 
 		// 2. Server includes in PaymentRequired (simulate JSON round-trip)
 		paymentRequiredJSON, _ := json.Marshal(map[string]interface{}{
-			"x402Version": 2,
+			"t402Version": 2,
 			"resource": map[string]interface{}{
 				"url":         "/api/action",
 				"description": "Execute an action",
@@ -837,7 +837,7 @@ func TestIntegration_FullWorkflow(t *testing.T) {
 			"scheme":            "exact",
 			"network":           "eip155:8453",
 			"maxAmountRequired": "10000",
-			"resource":          "https://mesh.heurist.xyz/x402/agents/TokenResolverAgent/search",
+			"resource":          "https://mesh.heurist.xyz/t402/agents/TokenResolverAgent/search",
 			"description":       "Find tokens by address, ticker/symbol, or token name",
 			"mimeType":          "application/json",
 			"outputSchema": map[string]interface{}{
@@ -871,7 +871,7 @@ func TestIntegration_FullWorkflow(t *testing.T) {
 		}
 
 		v1Payload := map[string]interface{}{
-			"x402Version": 1,
+			"t402Version": 1,
 			"scheme":      "exact",
 			"network":     "eip155:8453",
 			"payload":     map[string]interface{}{},
@@ -899,8 +899,8 @@ func TestIntegration_FullWorkflow(t *testing.T) {
 		assert.NotNil(t, bodyMap["type_hint"])
 
 		// Verify resource URL extracted correctly
-		assert.Equal(t, "https://mesh.heurist.xyz/x402/agents/TokenResolverAgent/search", info.ResourceURL)
-		assert.Equal(t, 1, info.X402Version)
+		assert.Equal(t, "https://mesh.heurist.xyz/t402/agents/TokenResolverAgent/search", info.ResourceURL)
+		assert.Equal(t, 1, info.T402Version)
 	})
 
 	t.Run("should handle unified extraction for both v1 and v2", func(t *testing.T) {
@@ -917,16 +917,16 @@ func TestIntegration_FullWorkflow(t *testing.T) {
 			nil,
 		)
 
-		v2Requirements := x402.PaymentRequirements{
+		v2Requirements := t402.PaymentRequirements{
 			Scheme:  "exact",
 			Network: "eip155:8453",
 		}
 
-		v2Payload := x402.PaymentPayload{
-			X402Version: 2,
+		v2Payload := t402.PaymentPayload{
+			T402Version: 2,
 			Accepted:    v2Requirements,
 			Payload:     map[string]interface{}{},
-			Resource: &x402.ResourceInfo{
+			Resource: &t402.ResourceInfo{
 				URL: "https://api.example.com/items",
 			},
 			Extensions: map[string]interface{}{
@@ -945,7 +945,7 @@ func TestIntegration_FullWorkflow(t *testing.T) {
 		queryInput, ok := v2Info.DiscoveryInfo.Input.(bazaar.QueryInput)
 		require.True(t, ok)
 		assert.Equal(t, bazaar.MethodGET, queryInput.Method)
-		assert.Equal(t, 2, v2Info.X402Version)
+		assert.Equal(t, 2, v2Info.T402Version)
 
 		// V1 case - discovery info is in PaymentRequirements.outputSchema
 		v1Requirements := map[string]interface{}{
@@ -961,7 +961,7 @@ func TestIntegration_FullWorkflow(t *testing.T) {
 		}
 
 		v1Payload := map[string]interface{}{
-			"x402Version": 1,
+			"t402Version": 1,
 			"scheme":      "exact",
 			"network":     "eip155:8453",
 			"payload":     map[string]interface{}{},
@@ -978,7 +978,7 @@ func TestIntegration_FullWorkflow(t *testing.T) {
 		queryInput2, ok := v1Info.DiscoveryInfo.Input.(bazaar.QueryInput)
 		require.True(t, ok)
 		assert.Equal(t, bazaar.MethodGET, queryInput2.Method)
-		assert.Equal(t, 1, v1Info.X402Version)
+		assert.Equal(t, 1, v1Info.T402Version)
 
 		// Both v1 and v2 return the same DiscoveryInfo structure
 		assert.IsType(t, v2Info.DiscoveryInfo.Input, v1Info.DiscoveryInfo.Input)
@@ -1002,14 +1002,14 @@ func TestExtractDiscoveredResourceFromPaymentRequired(t *testing.T) {
 		require.NoError(t, err)
 
 		// Create a v2 PaymentRequired with extensions
-		paymentRequired := x402.PaymentRequired{
-			X402Version: 2,
-			Resource: &x402.ResourceInfo{
+		paymentRequired := t402.PaymentRequired{
+			T402Version: 2,
+			Resource: &t402.ResourceInfo{
 				URL:         "https://api.example.com/data",
 				Description: "Test resource",
 				MimeType:    "application/json",
 			},
-			Accepts: []x402.PaymentRequirements{
+			Accepts: []t402.PaymentRequirements{
 				{
 					Scheme:  "exact",
 					Network: "eip155:8453",
@@ -1028,7 +1028,7 @@ func TestExtractDiscoveredResourceFromPaymentRequired(t *testing.T) {
 		require.NotNil(t, info)
 
 		assert.Equal(t, "https://api.example.com/data", info.ResourceURL)
-		assert.Equal(t, 2, info.X402Version)
+		assert.Equal(t, 2, info.T402Version)
 		assert.Equal(t, "GET", info.Method)
 
 		queryInput, ok := info.DiscoveryInfo.Input.(bazaar.QueryInput)
@@ -1038,12 +1038,12 @@ func TestExtractDiscoveredResourceFromPaymentRequired(t *testing.T) {
 
 	t.Run("v2: should return nil when no discovery info is present", func(t *testing.T) {
 		// Create a v2 PaymentRequired without extensions
-		paymentRequired := x402.PaymentRequired{
-			X402Version: 2,
-			Resource: &x402.ResourceInfo{
+		paymentRequired := t402.PaymentRequired{
+			T402Version: 2,
+			Resource: &t402.ResourceInfo{
 				URL: "https://api.example.com/data",
 			},
-			Accepts: []x402.PaymentRequirements{
+			Accepts: []t402.PaymentRequirements{
 				{
 					Scheme:  "exact",
 					Network: "eip155:8453",
@@ -1075,12 +1075,12 @@ func TestExtractDiscoveredResourceFromPaymentRequired(t *testing.T) {
 		)
 		require.NoError(t, err)
 
-		paymentRequired := x402.PaymentRequired{
-			X402Version: 2,
-			Resource: &x402.ResourceInfo{
+		paymentRequired := t402.PaymentRequired{
+			T402Version: 2,
+			Resource: &t402.ResourceInfo{
 				URL: "https://api.example.com/users",
 			},
-			Accepts: []x402.PaymentRequirements{
+			Accepts: []t402.PaymentRequirements{
 				{
 					Scheme:  "exact",
 					Network: "eip155:8453",
@@ -1106,7 +1106,7 @@ func TestExtractDiscoveredResourceFromPaymentRequired(t *testing.T) {
 	t.Run("v1: should extract discovery info from accepts[0].outputSchema", func(t *testing.T) {
 		// Create a v1 PaymentRequired with outputSchema in accepts[0]
 		v1PaymentRequired := map[string]interface{}{
-			"x402Version": 1,
+			"t402Version": 1,
 			"accepts": []interface{}{
 				map[string]interface{}{
 					"scheme":            "exact",
@@ -1137,7 +1137,7 @@ func TestExtractDiscoveredResourceFromPaymentRequired(t *testing.T) {
 		require.NotNil(t, info)
 
 		assert.Equal(t, "https://api.example.com/data", info.ResourceURL)
-		assert.Equal(t, 1, info.X402Version)
+		assert.Equal(t, 1, info.T402Version)
 		assert.Equal(t, "GET", info.Method)
 
 		queryInput, ok := info.DiscoveryInfo.Input.(bazaar.QueryInput)
@@ -1147,7 +1147,7 @@ func TestExtractDiscoveredResourceFromPaymentRequired(t *testing.T) {
 
 	t.Run("v1: should return nil when accepts array is empty", func(t *testing.T) {
 		v1PaymentRequired := map[string]interface{}{
-			"x402Version": 1,
+			"t402Version": 1,
 			"accepts":     []interface{}{},
 		}
 
@@ -1160,7 +1160,7 @@ func TestExtractDiscoveredResourceFromPaymentRequired(t *testing.T) {
 
 	t.Run("v1: should extract discovery info from POST with bodyFields", func(t *testing.T) {
 		v1PaymentRequired := map[string]interface{}{
-			"x402Version": 1,
+			"t402Version": 1,
 			"accepts": []interface{}{
 				map[string]interface{}{
 					"scheme":            "exact",
@@ -1209,7 +1209,7 @@ func TestExtractDiscoveredResourceFromPaymentRequired(t *testing.T) {
 
 	t.Run("should return error for unsupported version", func(t *testing.T) {
 		paymentRequired := map[string]interface{}{
-			"x402Version": 99,
+			"t402Version": 99,
 			"accepts":     []interface{}{},
 		}
 		paymentRequiredBytes, _ := json.Marshal(paymentRequired)
@@ -1232,12 +1232,12 @@ func TestExtractDiscoveredResourceFromPaymentRequired(t *testing.T) {
 			"schema": map[string]interface{}{},
 		}
 
-		paymentRequired := x402.PaymentRequired{
-			X402Version: 2,
-			Resource: &x402.ResourceInfo{
+		paymentRequired := t402.PaymentRequired{
+			T402Version: 2,
+			Resource: &t402.ResourceInfo{
 				URL: "https://api.example.com/data",
 			},
-			Accepts: []x402.PaymentRequirements{
+			Accepts: []t402.PaymentRequirements{
 				{
 					Scheme:  "exact",
 					Network: "eip155:8453",

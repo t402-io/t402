@@ -2,7 +2,7 @@
   "name": "express",
   "type": "server",
   "language": "typescript",
-  "x402Version": 1,
+  "t402Version": 1,
   "endpoints": [
     {
       "path": "/protected",

@@ -8,7 +8,7 @@ import {
   getGroupStatus,
   getTargetUrl,
   getStatusText,
-} from "../../utils/x402Utils";
+} from "../../utils/t402Utils";
 import { OperationBadge } from "../OperationBadge";
 
 type GroupedOperationProps = {

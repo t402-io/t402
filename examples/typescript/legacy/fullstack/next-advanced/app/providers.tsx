@@ -11,8 +11,8 @@ export function Providers(props: { children: React.ReactNode }) {
       config={{
         appearance: {
           mode: "auto",
-          logo: "/x402-icon-blue.png",
-          name: "Next Advanced x402 Demo",
+          logo: "/t402-icon-blue.png",
+          name: "Next Advanced t402 Demo",
         },
       }}
     >

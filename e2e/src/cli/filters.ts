@@ -42,7 +42,7 @@ export function filterScenarios(
 
     // Version filter
     if (filters.versions && filters.versions.length > 0) {
-      const serverVersion = scenario.server.config.x402Version;
+      const serverVersion = scenario.server.config.t402Version;
       if (!serverVersion || !filters.versions.includes(serverVersion)) {
         return false;
       }
@@ -83,8 +83,8 @@ export function shouldShowExtensionOutput(
 export function getUniqueVersions(scenarios: TestScenario[]): number[] {
   const versions = new Set<number>();
   scenarios.forEach(s => {
-    if (s.server.config.x402Version) {
-      versions.add(s.server.config.x402Version);
+    if (s.server.config.t402Version) {
+      versions.add(s.server.config.t402Version);
     }
   });
   return Array.from(versions).sort();

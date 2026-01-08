@@ -1,12 +1,12 @@
 # E2E Test Facilitator: TypeScript
 
-This facilitator demonstrates and tests the TypeScript x402 facilitator implementation with both EVM and SVM payment verification and settlement.
+This facilitator demonstrates and tests the TypeScript t402 facilitator implementation with both EVM and SVM payment verification and settlement.
 
 ## What It Tests
 
 ### Core Functionality
-- ✅ **V2 Protocol** - Modern x402 facilitator protocol
-- ✅ **V1 Protocol** - Legacy x402 facilitator protocol
+- ✅ **V2 Protocol** - Modern t402 facilitator protocol
+- ✅ **V1 Protocol** - Legacy t402 facilitator protocol
 - ✅ **Payment Verification** - Validates payment payloads off-chain
 - ✅ **Payment Settlement** - Executes transactions on-chain
 - ✅ **Multi-chain Support** - EVM and SVM mechanisms
@@ -25,7 +25,7 @@ This facilitator demonstrates and tests the TypeScript x402 facilitator implemen
 This e2e facilitator showcases **production-ready lifecycle hook patterns**:
 
 ```typescript
-const facilitator = new x402Facilitator()
+const facilitator = new t402Facilitator()
   .register("eip155:*", new ExactEvmFacilitator(evmSigner))
   .registerExtension(BAZAAR)
   // Hook 1: Track verified payments + extract discovery info
@@ -70,14 +70,14 @@ const facilitator = new x402Facilitator()
 ### Facilitator Setup
 
 ```typescript
-import { x402Facilitator } from "@x402/core/facilitator";
-import { ExactEvmFacilitator } from "@x402/evm";
-import { ExactEvmFacilitatorV1, NETWORKS as EVM_NETWORKS } from "@x402/evm/v1";
-import { ExactSvmFacilitator } from "@x402/svm";
-import { ExactSvmFacilitatorV1, NETWORKS as SVM_NETWORKS } from "@x402/svm/v1";
+import { t402Facilitator } from "@t402/core/facilitator";
+import { ExactEvmFacilitator } from "@t402/evm";
+import { ExactEvmFacilitatorV1, NETWORKS as EVM_NETWORKS } from "@t402/evm/v1";
+import { ExactSvmFacilitator } from "@t402/svm";
+import { ExactSvmFacilitatorV1, NETWORKS as SVM_NETWORKS } from "@t402/svm/v1";
 
 // Create facilitator with bazaar extension
-const facilitator = new x402Facilitator()
+const facilitator = new t402Facilitator()
   .registerExtension("bazaar");
 
 // Register EVM V2 wildcard
@@ -101,7 +101,7 @@ EVM_NETWORKS.forEach(network => {
 
 ```typescript
 import express from "express";
-import { createFacilitatorRouter } from "@x402/server/facilitator";
+import { createFacilitatorRouter } from "@t402/server/facilitator";
 
 const app = express();
 app.use(express.json());
@@ -119,7 +119,7 @@ app.listen(port, () => {
 1. **Extension Registration** - Bazaar discovery
 2. **Comprehensive Network Support** - All EVM V1 networks, all SVM V1 networks
 3. **Wildcard Schemes** - Efficient V2 registration with `eip155:*` and `solana:*`
-4. **HTTP Router Integration** - `@x402/server/facilitator` for Express
+4. **HTTP Router Integration** - `@t402/server/facilitator` for Express
 5. **Real Signers** - Actual blockchain transaction submission
 6. **Multi-Protocol** - V1 and V2 side-by-side
 
@@ -164,12 +164,12 @@ pnpm start
 
 ## Package Dependencies
 
-- `@x402/core` - Core facilitator
-- `@x402/server` - Facilitator HTTP router
-- `@x402/evm` - EVM facilitator (V2)
-- `@x402/evm/v1` - EVM facilitator (V1) + NETWORKS
-- `@x402/svm` - SVM facilitator (V2)
-- `@x402/svm/v1` - SVM facilitator (V1) + NETWORKS
+- `@t402/core` - Core facilitator
+- `@t402/server` - Facilitator HTTP router
+- `@t402/evm` - EVM facilitator (V2)
+- `@t402/evm/v1` - EVM facilitator (V1) + NETWORKS
+- `@t402/svm` - SVM facilitator (V2)
+- `@t402/svm/v1` - SVM facilitator (V1) + NETWORKS
 - `express` - HTTP server
 - `viem` - Ethereum transactions
 - `@solana/web3.js` - Solana transactions

@@ -6,11 +6,11 @@ import { PaymentPayload, PaymentRequirements } from "../../../src/types/payments
  */
 export class MockSchemeNetworkClient implements SchemeNetworkClient {
   public readonly scheme: string;
-  private payloadResult: Pick<PaymentPayload, "x402Version" | "payload"> | Error;
+  private payloadResult: Pick<PaymentPayload, "t402Version" | "payload"> | Error;
 
   // Call tracking
   public createPaymentPayloadCalls: Array<{
-    x402Version: number;
+    t402Version: number;
     requirements: PaymentRequirements;
   }> = [];
 
@@ -21,25 +21,25 @@ export class MockSchemeNetworkClient implements SchemeNetworkClient {
    */
   constructor(
     scheme: string,
-    payloadResult?: Pick<PaymentPayload, "x402Version" | "payload"> | Error,
+    payloadResult?: Pick<PaymentPayload, "t402Version" | "payload"> | Error,
   ) {
     this.scheme = scheme;
     this.payloadResult = payloadResult || {
-      x402Version: 2,
+      t402Version: 2,
       payload: { signature: "mock_signature", from: "mock_address" },
     };
   }
 
   /**
    *
-   * @param x402Version
+   * @param t402Version
    * @param paymentRequirements
    */
   async createPaymentPayload(
-    x402Version: number,
+    t402Version: number,
     paymentRequirements: PaymentRequirements,
-  ): Promise<Pick<PaymentPayload, "x402Version" | "payload">> {
-    this.createPaymentPayloadCalls.push({ x402Version, requirements: paymentRequirements });
+  ): Promise<Pick<PaymentPayload, "t402Version" | "payload">> {
+    this.createPaymentPayloadCalls.push({ t402Version, requirements: paymentRequirements });
 
     if (this.payloadResult instanceof Error) {
       throw this.payloadResult;
@@ -52,7 +52,7 @@ export class MockSchemeNetworkClient implements SchemeNetworkClient {
    *
    * @param result
    */
-  setPayloadResult(result: Pick<PaymentPayload, "x402Version" | "payload"> | Error): void {
+  setPayloadResult(result: Pick<PaymentPayload, "t402Version" | "payload"> | Error): void {
     this.payloadResult = result;
   }
 

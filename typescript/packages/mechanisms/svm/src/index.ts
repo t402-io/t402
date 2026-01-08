@@ -1,7 +1,7 @@
 /**
- * @module @x402/svm - x402 Payment Protocol SVM Implementation
+ * @module @t402/svm - t402 Payment Protocol SVM Implementation
  *
- * This module provides the SVM-specific implementation of the x402 payment protocol.
+ * This module provides the SVM-specific implementation of the t402 payment protocol.
  */
 
 // Export V2 implementations (default)

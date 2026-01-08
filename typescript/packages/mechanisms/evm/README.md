@@ -1,16 +1,16 @@
-# @x402/evm
+# @t402/evm
 
-EVM (Ethereum Virtual Machine) implementation of the x402 payment protocol using the **Exact** payment scheme with EIP-3009 TransferWithAuthorization.
+EVM (Ethereum Virtual Machine) implementation of the t402 payment protocol using the **Exact** payment scheme with EIP-3009 TransferWithAuthorization.
 
 ## Installation
 
 ```bash
-npm install @x402/evm
+npm install @t402/evm
 ```
 
 ## Overview
 
-This package provides three main components for handling x402 payments on EVM-compatible blockchains:
+This package provides three main components for handling t402 payments on EVM-compatible blockchains:
 
 - **Client** - For applications that need to make payments (have wallets/signers)
 - **Facilitator** - For payment processors that verify and execute on-chain transactions  
@@ -18,13 +18,13 @@ This package provides three main components for handling x402 payments on EVM-co
 
 ## Package Exports
 
-### Main Package (`@x402/evm`)
+### Main Package (`@t402/evm`)
 
-**V2 Protocol Support** - Modern x402 protocol with CAIP-2 network identifiers
+**V2 Protocol Support** - Modern t402 protocol with CAIP-2 network identifiers
 
 **Client:**
 - `ExactEvmClient` - V2 client implementation using EIP-3009
-- `toClientEvmSigner(account)` - Converts viem accounts to x402 signers
+- `toClientEvmSigner(account)` - Converts viem accounts to t402 signers
 - `ClientEvmSigner` - TypeScript type for client signers
 
 **Facilitator:**
@@ -35,9 +35,9 @@ This package provides three main components for handling x402 payments on EVM-co
 **Service:**
 - `ExactEvmServer` - V2 service for building payment requirements
 
-### V1 Package (`@x402/evm/v1`)
+### V1 Package (`@t402/evm/v1`)
 
-**V1 Protocol Support** - Legacy x402 protocol with simple network names
+**V1 Protocol Support** - Legacy t402 protocol with simple network names
 
 **Exports:**
 - `ExactEvmClientV1` - V1 client implementation
@@ -57,12 +57,12 @@ This package provides three main components for handling x402 payments on EVM-co
 ]
 ```
 
-### Client Builder (`@x402/evm/client`)
+### Client Builder (`@t402/evm/client`)
 
 **Convenience builder** for creating fully-configured EVM clients
 
 **Exports:**
-- `createEvmClient(config)` - Creates x402Client with EVM support
+- `createEvmClient(config)` - Creates t402Client with EVM support
 - `EvmClientConfig` - Configuration interface
 
 **What it does:**
@@ -73,8 +73,8 @@ This package provides three main components for handling x402 payments on EVM-co
 
 **Example:**
 ```typescript
-import { createEvmClient } from "@x402/evm/client";
-import { toClientEvmSigner } from "@x402/evm";
+import { createEvmClient } from "@t402/evm/client";
+import { toClientEvmSigner } from "@t402/evm";
 import { privateKeyToAccount } from "viem/accounts";
 
 const account = privateKeyToAccount("0x...");
@@ -105,8 +105,8 @@ const client = createEvmClient({ signer });
 ### 1. Using Pre-built Builder (Recommended)
 
 ```typescript
-import { createEvmClient } from "@x402/evm/client";
-import { wrapFetchWithPayment } from "@x402/fetch";
+import { createEvmClient } from "@t402/evm/client";
+import { wrapFetchWithPayment } from "@t402/fetch";
 
 const client = createEvmClient({ signer: myEvmSigner });
 const paidFetch = wrapFetchWithPayment(fetch, client);
@@ -115,11 +115,11 @@ const paidFetch = wrapFetchWithPayment(fetch, client);
 ### 2. Direct Registration (Full Control)
 
 ```typescript
-import { x402Client } from "@x402/core/client";
-import { ExactEvmClient } from "@x402/evm";
-import { ExactEvmClientV1 } from "@x402/evm/v1";
+import { t402Client } from "@t402/core/client";
+import { ExactEvmClient } from "@t402/evm";
+import { ExactEvmClientV1 } from "@t402/evm/v1";
 
-const client = new x402Client()
+const client = new t402Client()
   .register("eip155:*", new ExactEvmClient(signer))
   .registerSchemeV1("base-sepolia", new ExactEvmClientV1(signer))
   .registerSchemeV1("base", new ExactEvmClientV1(signer));
@@ -128,13 +128,13 @@ const client = new x402Client()
 ### 3. Using Config (Flexible)
 
 ```typescript
-import { x402Client } from "@x402/core/client";
-import { ExactEvmClient } from "@x402/evm";
+import { t402Client } from "@t402/core/client";
+import { ExactEvmClient } from "@t402/evm";
 
-const client = x402Client.fromConfig({
+const client = t402Client.fromConfig({
   schemes: [
     { network: "eip155:*", client: new ExactEvmClient(signer) },
-    { network: "base-sepolia", client: new ExactEvmClientV1(signer), x402Version: 1 }
+    { network: "base-sepolia", client: new ExactEvmClientV1(signer), t402Version: 1 }
   ],
   policies: [myCustomPolicy]
 });
@@ -150,7 +150,7 @@ const client = x402Client.fromConfig({
 - Any `eip155:<chainId>` network
 
 **V1 Networks** (simple names):
-See `NETWORKS` constant in `@x402/evm/v1`
+See `NETWORKS` constant in `@t402/evm/v1`
 
 ## Asset Support
 
@@ -178,6 +178,6 @@ npm run format
 
 ## Related Packages
 
-- `@x402/core` - Core protocol types and client
-- `@x402/fetch` - HTTP wrapper with automatic payment handling
-- `@x402/svm` - Solana/SVM implementation
+- `@t402/core` - Core protocol types and client
+- `@t402/fetch` - HTTP wrapper with automatic payment handling
+- `@t402/svm` - Solana/SVM implementation

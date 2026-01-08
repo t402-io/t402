@@ -1,12 +1,12 @@
-import { x402Client, SelectPaymentRequirements, PaymentPolicy } from "@x402/core/client";
-import { Network } from "@x402/core/types";
+import { t402Client, SelectPaymentRequirements, PaymentPolicy } from "@t402/core/client";
+import { Network } from "@t402/core/types";
 import { ClientEvmSigner } from "../../signer";
 import { ExactEvmScheme } from "./scheme";
 import { ExactEvmSchemeV1 } from "../v1/client/scheme";
 import { NETWORKS } from "../../v1";
 
 /**
- * Configuration options for registering EVM schemes to an x402Client
+ * Configuration options for registering EVM schemes to an t402Client
  */
 export interface EvmClientConfig {
   /**
@@ -33,28 +33,28 @@ export interface EvmClientConfig {
 }
 
 /**
- * Registers EVM exact payment schemes to an x402Client instance.
+ * Registers EVM exact payment schemes to an t402Client instance.
  *
  * This function registers:
  * - V2: eip155:* wildcard scheme with ExactEvmScheme (or specific networks if provided)
  * - V1: All supported EVM networks with ExactEvmSchemeV1
  *
- * @param client - The x402Client instance to register schemes to
+ * @param client - The t402Client instance to register schemes to
  * @param config - Configuration for EVM client registration
  * @returns The client instance for chaining
  *
  * @example
  * ```typescript
- * import { registerExactEvmScheme } from "@x402/evm/exact/client/register";
- * import { x402Client } from "@x402/core/client";
+ * import { registerExactEvmScheme } from "@t402/evm/exact/client/register";
+ * import { t402Client } from "@t402/core/client";
  * import { privateKeyToAccount } from "viem/accounts";
  *
  * const account = privateKeyToAccount("0x...");
- * const client = new x402Client();
+ * const client = new t402Client();
  * registerExactEvmScheme(client, { signer: account });
  * ```
  */
-export function registerExactEvmScheme(client: x402Client, config: EvmClientConfig): x402Client {
+export function registerExactEvmScheme(client: t402Client, config: EvmClientConfig): t402Client {
   // Register V2 scheme
   if (config.networks && config.networks.length > 0) {
     // Register specific networks

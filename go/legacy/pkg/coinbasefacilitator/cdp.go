@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/coinbase/cdp-sdk/go/auth"
-	"github.com/coinbase/x402/go/pkg/types"
+	"github.com/coinbase/t402/go/pkg/types"
 )
 
 // SDKVersion represents the current version of the SDK
@@ -17,7 +17,7 @@ const SDKVersion = "0.0.0"
 // Parameters:
 //   - apiKeyId: The api key ID
 //   - apiKeySecret: The api key secret
-//   - requestHost: The host for the request (e.g. 'https://x402.org/facilitator')
+//   - requestHost: The host for the request (e.g. 'https://t402.org/facilitator')
 //   - requestPath: The path for the request (e.g. '/verify')
 //
 // Returns:
@@ -51,7 +51,7 @@ func CreateCorrelationHeader() string {
 	data := map[string]string{
 		"sdk_version":    SDKVersion,
 		"sdk_language":   "go",
-		"source":         "x402",
+		"source":         "t402",
 		"source_version": types.Version,
 	}
 

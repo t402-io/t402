@@ -53,8 +53,8 @@ export interface TestConfig {
   type: 'server' | 'client' | 'facilitator';
   language: string;
   protocolFamilies?: ProtocolFamily[];
-  x402Version?: number; // For servers - single version they implement
-  x402Versions?: number[]; // For clients and facilitators - array of versions they support
+  t402Version?: number; // For servers - single version they implement
+  t402Versions?: number[]; // For clients and facilitators - array of versions they support
   extensions?: string[]; // Protocol extensions supported (e.g., ["bazaar"])
   endpoints?: TestEndpoint[];
   supportedMethods?: string[];

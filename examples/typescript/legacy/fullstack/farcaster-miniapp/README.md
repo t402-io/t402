@@ -1,13 +1,13 @@
-# x402 Farcaster Mini App Example
+# t402 Farcaster Mini App Example
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-onchain --mini`](), configured with [MiniKit](https://docs.base.org/builderkits/minikit/overview) and [OnchainKit](https://www.base.org/builders/onchainkit). It demonstrates how to build a [Farcaster Mini App](https://miniapps.farcaster.xyz/) with x402 payment-protected API endpoints, showcasing seamless integration between Farcaster's social platform and x402's payment protocol.
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-onchain --mini`](), configured with [MiniKit](https://docs.base.org/builderkits/minikit/overview) and [OnchainKit](https://www.base.org/builders/onchainkit). It demonstrates how to build a [Farcaster Mini App](https://miniapps.farcaster.xyz/) with t402 payment-protected API endpoints, showcasing seamless integration between Farcaster's social platform and t402's payment protocol.
 
 ## Features
 
 - 🚀 **Farcaster Mini App**: Native-like app experience within Farcaster
-- 💳 **x402 Payments**: Seamless payment processing on Base network
+- 💳 **t402 Payments**: Seamless payment processing on Base network
 - 🔗 **Wallet Integration**: Connect with Coinbase Wallet via OnchainKit
-- 🛡️ **Protected API Routes**: Server-side payment verification with x402 middleware
+- 🛡️ **Protected API Routes**: Server-side payment verification with t402 middleware
 - 📱 **Responsive Design**: Optimized for mobile and desktop experiences
 - 🔔 **Background Notifications**: Redis-backed notification system using Upstash
 - 🎨 **Custom Theming**: Pixel font integration with Pixelify Sans and dark/light mode support
@@ -17,7 +17,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-oncha
 - **Frontend**: Next.js 15, React 19, TypeScript
 - **Styling**: Tailwind CSS
 - **Wallet**: OnchainKit, Coinbase Wallet, Wagmi
-- **Payments**: x402 protocol with Base network
+- **Payments**: t402 protocol with Base network
 - **Farcaster**: Frame SDK for Mini App detection and integration
 - **Notifications**: Redis/Upstash for background notifications
 
@@ -76,13 +76,13 @@ Configure the following variables in your `.env.local`:
 ```bash
 # OnchainKit Configuration
 NEXT_PUBLIC_ONCHAINKIT_API_KEY=your_onchainkit_api_key_here
-NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME=x402 Mini App
+NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME=t402 Mini App
 
-# x402 Payment Configuration
+# t402 Payment Configuration
 RESOURCE_WALLET_ADDRESS=0x0000000000000000000000000000000000000000
 NETWORK=base-sepolia
 
-# CDP Wallet Configuration (required for x402 base mainnet settlements)
+# CDP Wallet Configuration (required for t402 base mainnet settlements)
 CDP_API_KEY_ID=your_cdp_api_key_id_here
 CDP_API_KEY_SECRET=your_cdp_api_key_secret_here
 CDP_WALLET_SECRET=your_cdp_wallet_secret_here
@@ -145,9 +145,9 @@ await sdk.actions.ready();
 const isInMiniApp = await sdk.isInMiniApp();
 ```
 
-### x402 Payment Protection
+### t402 Payment Protection
 
-The `/api/protected` endpoint is protected using x402 middleware:
+The `/api/protected` endpoint is protected using t402 middleware:
 
 ```typescript
 // middleware.ts
@@ -168,10 +168,10 @@ export const middleware = paymentMiddleware(
 
 ### Client-Side Payment Handling
 
-The frontend uses `x402-fetch` to automatically handle payments when calling protected endpoints:
+The frontend uses `t402-fetch` to automatically handle payments when calling protected endpoints:
 
 ```typescript
-import { wrapFetchWithPayment } from "x402-fetch";
+import { wrapFetchWithPayment } from "t402-fetch";
 
 const fetchWithPayment = wrapFetchWithPayment(fetch, walletClient);
 const response = await fetchWithPayment("/api/protected");
@@ -291,7 +291,7 @@ export const config = {
 
 3. **Update the project name** in environment variables
 4. **Modify the UI** to match your app's branding
-5. **Add your own protected endpoints** following the x402 pattern
+5. **Add your own protected endpoints** following the t402 pattern
 6. **Integrate with Farcaster data** using the Frame SDK
 7. **Deploy to your domain** for Mini App distribution
 
@@ -309,7 +309,7 @@ export const config = {
 ## Resources
 
 - [Farcaster Mini Apps Documentation](https://miniapps.farcaster.xyz/)
-- [x402 Protocol Documentation](https://x402.com)
+- [t402 Protocol Documentation](https://t402.com)
 - [OnchainKit Documentation](https://onchainkit.xyz)
 - [Coinbase Developer Platform](https://portal.cdp.coinbase.com/)
 - [MiniKit Documentation](https://docs.base.org/builderkits/minikit/overview)

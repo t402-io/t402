@@ -1,13 +1,13 @@
-# @x402/express Advanced Examples
+# @t402/express Advanced Examples
 
-Express.js server demonstrating advanced x402 patterns including dynamic pricing, payment routing, lifecycle hooks and API discoverability.
+Express.js server demonstrating advanced t402 patterns including dynamic pricing, payment routing, lifecycle hooks and API discoverability.
 
 ```typescript
-import { paymentMiddleware, x402ResourceServer } from "@x402/express";
-import { ExactEvmScheme } from "@x402/evm/exact/server";
-import { HTTPFacilitatorClient } from "@x402/core/server";
+import { paymentMiddleware, t402ResourceServer } from "@t402/express";
+import { ExactEvmScheme } from "@t402/evm/exact/server";
+import { HTTPFacilitatorClient } from "@t402/core/server";
 
-const resourceServer = new x402ResourceServer(new HTTPFacilitatorClient({ url: facilitatorUrl }))
+const resourceServer = new t402ResourceServer(new HTTPFacilitatorClient({ url: facilitatorUrl }))
   .register("eip155:84532", new ExactEvmScheme())
   .onBeforeVerify(async ctx => console.log("Verifying payment..."))
   .onAfterSettle(async ctx => console.log("Settled:", ctx.result.transaction));
@@ -34,7 +34,7 @@ app.use(
 - Node.js v20+ (install via [nvm](https://github.com/nvm-sh/nvm))
 - pnpm v10 (install via [pnpm.io/installation](https://pnpm.io/installation))
 - Valid EVM for receiving payments
-- URL of a facilitator supporting the desired payment network, see [facilitator list](https://www.x402.org/ecosystem?category=facilitators)
+- URL of a facilitator supporting the desired payment network, see [facilitator list](https://www.t402.org/ecosystem?category=facilitators)
 
 ## Setup
 
@@ -100,7 +100,7 @@ pnpm dev
 Adding the discovery extension to make your API discoverable:
 
 ```typescript
-import { declareDiscoveryExtension } from "@x402/extensions/bazaar";
+import { declareDiscoveryExtension } from "@t402/extensions/bazaar";
 
 app.use(
   paymentMiddleware(
@@ -199,7 +199,7 @@ app.use(
 Run custom logic before/after verification and settlement:
 
 ```typescript
-const resourceServer = new x402ResourceServer(facilitatorClient)
+const resourceServer = new t402ResourceServer(facilitatorClient)
   .register("eip155:84532", new ExactEvmScheme())
   .onBeforeVerify(async context => {
     console.log("Before verify hook", context);
@@ -235,9 +235,9 @@ Available hooks:
 Accept payments in custom tokens. Register a money parser on the scheme to support alternative tokens for specific networks.
 
 ```typescript
-import { ExactEvmScheme } from "@x402/evm/exact/server";
+import { ExactEvmScheme } from "@t402/evm/exact/server";
 
-const resourceServer = new x402ResourceServer(facilitatorClient).register(
+const resourceServer = new t402ResourceServer(facilitatorClient).register(
   "eip155:84532",
   new ExactEvmScheme().registerMoneyParser(async (amount, network) => {
     // Use Wrapped XDAI on Gnosis Chain
@@ -281,7 +281,7 @@ The `PAYMENT-REQUIRED` header contains base64-encoded JSON with the payment requ
 
 ```json
 {
-  "x402Version": 2,
+  "t402Version": 2,
   "error": "Payment required",
   "resource": {
     "url": "http://localhost:4021/weather",

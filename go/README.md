@@ -1,28 +1,28 @@
-# x402 Go Package
+# t402 Go Package
 
-Go implementation of the x402 protocol - a standard for HTTP 402 Payment Required responses with cryptocurrency micropayments.
+Go implementation of the t402 protocol - a standard for HTTP 402 Payment Required responses with cryptocurrency micropayments.
 
-## What is x402?
+## What is t402?
 
-x402 is a protocol that enables HTTP resources to require cryptocurrency payments. When a client requests a paid resource, the server responds with `402 Payment Required` along with payment details. The client creates a payment, retries the request, and receives the resource after successful payment verification and settlement.
+t402 is a protocol that enables HTTP resources to require cryptocurrency payments. When a client requests a paid resource, the server responds with `402 Payment Required` along with payment details. The client creates a payment, retries the request, and receives the resource after successful payment verification and settlement.
 
 ## Installation
 
 ```bash
-go get github.com/coinbase/x402/go
+go get github.com/coinbase/t402/go
 ```
 
 ## What This Package Exports
 
-This package provides modules to support the x402 protocol in Go applications.
+This package provides modules to support the t402 protocol in Go applications.
 
 ### Core Classes
 
 The package exports three core types that can be used by clients, servers, and facilitators:
 
-- **`x402.X402Client`** - Creates payment payloads for clients making paid requests
-- **`x402.X402ResourceServer`** - Verifies payments and builds requirements for servers accepting payments
-- **`x402.X402Facilitator`** - Verifies and settles payments for facilitator services
+- **`t402.X402Client`** - Creates payment payloads for clients making paid requests
+- **`t402.X402ResourceServer`** - Verifies payments and builds requirements for servers accepting payments
+- **`t402.X402Facilitator`** - Verifies and settles payments for facilitator services
 
 These core classes are **framework-agnostic** and can be used in any context (HTTP, gRPC, WebSockets, CLI tools, etc.).
 
@@ -30,9 +30,9 @@ These core classes are **framework-agnostic** and can be used in any context (HT
 
 The package exports HTTP-specific wrappers around the core classes:
 
-- **`x402http.HTTPClient`** - Wraps `http.Client` with automatic payment handling for clients
-- **`x402http.HTTPServer`** - Integrates resource server with HTTP request processing
-- **`x402http.HTTPFacilitatorClient`** - HTTP client for calling facilitator endpoints
+- **`t402http.HTTPClient`** - Wraps `http.Client` with automatic payment handling for clients
+- **`t402http.HTTPServer`** - Integrates resource server with HTTP request processing
+- **`t402http.HTTPFacilitatorClient`** - HTTP client for calling facilitator endpoints
 
 These wrappers handle HTTP-specific concerns like headers, status codes, and request/response serialization.
 
@@ -186,12 +186,12 @@ For payment processing services that verify and settle payments.
 ## Package Structure
 
 ```
-github.com/coinbase/x402/go
+github.com/coinbase/t402/go
 │
 ├── Core (framework-agnostic)
-│   ├── client.go              - x402.X402Client
-│   ├── server.go              - x402.X402ResourceServer
-│   ├── facilitator.go         - x402.X402Facilitator
+│   ├── client.go              - t402.X402Client
+│   ├── server.go              - t402.X402ResourceServer
+│   ├── facilitator.go         - t402.X402Facilitator
 │   ├── types.go               - Core types
 │   └── *_hooks.go             - Lifecycle hooks
 │

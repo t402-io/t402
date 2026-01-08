@@ -10,8 +10,8 @@ export default function Home() {
           <div className="text-center">
             <div className="mb-6">
               <Image
-                src="/x402-logo-dark.png"
-                alt="x402 logo"
+                src="/t402-logo-dark.png"
+                alt="t402 logo"
                 width={320}
                 height={160}
                 className="mx-auto"

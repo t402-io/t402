@@ -1,8 +1,8 @@
-import type { ClientEvmSigner } from "@x402/evm";
+import type { ClientEvmSigner } from "@t402/evm";
 import type { Account, WalletClient } from "viem";
 
 /**
- * Converts a wagmi/viem WalletClient to a ClientEvmSigner for x402Client
+ * Converts a wagmi/viem WalletClient to a ClientEvmSigner for t402Client
  *
  * @param walletClient - The wagmi wallet client from useWalletClient()
  * @returns ClientEvmSigner compatible with ExactEvmClient

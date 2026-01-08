@@ -2,9 +2,9 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { Address } from "viem";
 import type { Address as SolanaAddress } from "@solana/kit";
-import { computeRoutePatterns, findMatchingRoute } from "x402/shared";
-import { FacilitatorConfig, Resource, RoutesConfig, RouteConfig, PaywallConfig } from "x402/types";
-import { useFacilitator } from "x402/verify";
+import { computeRoutePatterns, findMatchingRoute } from "t402/shared";
+import { FacilitatorConfig, Resource, RoutesConfig, RouteConfig, PaywallConfig } from "t402/types";
+import { useFacilitator } from "t402/verify";
 
 import { POST } from "./api/session-token";
 import {
@@ -32,7 +32,7 @@ import {
  *     price: '$0.01', // USDC amount in dollars
  *     network: 'base-sepolia'
  *   },
- *   // Optional facilitator configuration. Defaults to x402.org/facilitator for testnet usage
+ *   // Optional facilitator configuration. Defaults to t402.org/facilitator for testnet usage
  * );
  *
  * // Advanced configuration - Endpoint-specific payment requirements & custom facilitator
@@ -83,7 +83,7 @@ export function paymentMiddleware(
   paywall?: PaywallConfig,
 ) {
   const { verify, settle, supported } = useFacilitator(facilitator);
-  const x402Version = 1;
+  const t402Version = 1;
 
   // Pre-compile route patterns to regex and extract verbs
   const routePatterns = computeRoutePatterns(routes);
@@ -124,7 +124,7 @@ export function paymentMiddleware(
         price,
         network,
         paymentRequirements,
-        x402Version,
+        t402Version,
         errorMessages,
         customPaywallHtml,
         paywall,
@@ -135,7 +135,7 @@ export function paymentMiddleware(
     const verificationResult = await verifyPayment(
       paymentHeader,
       paymentRequirements,
-      x402Version,
+      t402Version,
       verify,
       errorMessages,
     );
@@ -151,7 +151,7 @@ export function paymentMiddleware(
 
     // if the response from the protected route is >= 400, do not settle the payment
     // NOTE: This check is ineffective in Next.js middleware as NextResponse.next() does not provide access to the actual route handler's response
-    // For API routes, use withX402 instead to guarantee payment settlement only after successful responses (status < 400)
+    // For API routes, use withT402 instead to guarantee payment settlement only after successful responses (status < 400)
     if (response.status >= 400) {
       return response;
     }
@@ -162,7 +162,7 @@ export function paymentMiddleware(
       decodedPayment,
       selectedRequirements,
       settle,
-      x402Version,
+      t402Version,
       errorMessages,
       paymentRequirements,
     );
@@ -186,24 +186,24 @@ export function paymentMiddleware(
  * ```typescript
  * // Simple configuration - Protected route with $0.01 USDC on base-sepolia
  * import { NextRequest, NextResponse } from "next/server";
- * import { withX402 } from "x402-next";
+ * import { withT402 } from "t402-next";
  *
  * const handler = async (request: NextRequest) => {
  *   return NextResponse.json({ message: "Success" });
  * };
  *
- * export const GET = withX402(
+ * export const GET = withT402(
  *   handler,
  *   '0x123...', // payTo address
  *   {
  *     price: '$0.01', // USDC amount in dollars
  *     network: 'base-sepolia'
  *   },
- *   // Optional facilitator configuration. Defaults to x402.org/facilitator for testnet usage
+ *   // Optional facilitator configuration. Defaults to t402.org/facilitator for testnet usage
  * );
  *
  * // Advanced configuration - Custom payment settings & facilitator
- * export const POST = withX402(
+ * export const POST = withT402(
  *   handler,
  *   '0x123...', // payTo: The address to receive payments
  *   {
@@ -238,7 +238,7 @@ export function paymentMiddleware(
  * );
  * ```
  */
-export function withX402<T = unknown>(
+export function withT402<T = unknown>(
   handler: (request: NextRequest) => Promise<NextResponse<T>>,
   payTo: Address | SolanaAddress,
   routeConfig: RouteConfig | ((req: NextRequest) => Promise<RouteConfig>),
@@ -246,7 +246,7 @@ export function withX402<T = unknown>(
   paywall?: PaywallConfig,
 ): (request: NextRequest) => Promise<NextResponse<T | unknown>> {
   const { verify, settle, supported } = useFacilitator(facilitator);
-  const x402Version = 1;
+  const t402Version = 1;
 
   return async function wrappedHandler(request: NextRequest) {
     const method = request.method.toUpperCase();
@@ -280,7 +280,7 @@ export function withX402<T = unknown>(
         price,
         network,
         paymentRequirements,
-        x402Version,
+        t402Version,
         errorMessages,
         customPaywallHtml,
         paywall,
@@ -291,7 +291,7 @@ export function withX402<T = unknown>(
     const verificationResult = await verifyPayment(
       paymentHeader,
       paymentRequirements,
-      x402Version,
+      t402Version,
       verify,
       errorMessages,
     );
@@ -316,7 +316,7 @@ export function withX402<T = unknown>(
       decodedPayment,
       selectedRequirements,
       settle,
-      x402Version,
+      t402Version,
       errorMessages,
       paymentRequirements,
     )) as NextResponse<T>;
@@ -330,7 +330,7 @@ export type {
   Resource,
   RouteConfig,
   RoutesConfig,
-} from "x402/types";
+} from "t402/types";
 export type { Address as SolanaAddress } from "@solana/kit";
 
 // Export session token API handlers for Onramp

@@ -1,5 +1,5 @@
 {
-  "name": "@x402/svm",
+  "name": "@t402/svm",
   "version": "2.0.0",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -17,7 +17,7 @@
     "lint:check": "eslint . --ext .ts"
   },
   "keywords": [
-    "x402",
+    "t402",
     "payment",
     "protocol",
     "svm",
@@ -25,8 +25,8 @@
   ],
   "license": "Apache-2.0",
   "author": "Coinbase Inc.",
-  "repository": "https://github.com/coinbase/x402",
-  "description": "x402 Payment Protocol SVM Implementation",
+  "repository": "https://github.com/coinbase/t402",
+  "description": "t402 Payment Protocol SVM Implementation",
   "devDependencies": {
     "@eslint/js": "^9.24.0",
     "@types/node": "^22.13.4",
@@ -45,7 +45,7 @@
     "vitest": "^3.0.5"
   },
   "dependencies": {
-    "@x402/core": "workspace:*",
+    "@t402/core": "workspace:*",
     "@scure/base": "^1.2.6",
     "@solana-program/compute-budget": "^0.8.0",
     "@solana-program/token": "^0.5.1",

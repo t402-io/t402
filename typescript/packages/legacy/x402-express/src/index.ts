@@ -1,15 +1,15 @@
 import { NextFunction, Request, Response } from "express";
 import { Address, getAddress } from "viem";
 import { Address as SolanaAddress } from "@solana/kit";
-import { exact } from "x402/schemes";
+import { exact } from "t402/schemes";
 import {
   computeRoutePatterns,
   findMatchingPaymentRequirements,
   findMatchingRoute,
   processPriceToAtomicAmount,
   toJsonSafe,
-} from "x402/shared";
-import { getPaywallHtml } from "x402/paywall";
+} from "t402/shared";
+import { getPaywallHtml } from "t402/paywall";
 import {
   FacilitatorConfig,
   ERC20TokenAmount,
@@ -22,8 +22,8 @@ import {
   settleResponseHeader,
   SupportedEVMNetworks,
   SupportedSVMNetworks,
-} from "x402/types";
-import { useFacilitator } from "x402/verify";
+} from "t402/types";
+import { useFacilitator } from "t402/verify";
 
 /**
  * Creates a payment middleware factory for Express
@@ -43,7 +43,7 @@ import { useFacilitator } from "x402/verify";
  *     price: '$0.01', // USDC amount in dollars
  *     network: 'base-sepolia'
  *   },
- *   // Optional facilitator configuration. Defaults to x402.org/facilitator for testnet usage
+ *   // Optional facilitator configuration. Defaults to t402.org/facilitator for testnet usage
  * ));
  *
  * // Advanced configuration - Endpoint-specific payment requirements & custom facilitator
@@ -79,7 +79,7 @@ export function paymentMiddleware(
   paywall?: PaywallConfig,
 ) {
   const { verify, settle, supported } = useFacilitator(facilitator);
-  const x402Version = 1;
+  const t402Version = 1;
 
   // Pre-compile route patterns to regex and extract verbs
   const routePatterns = computeRoutePatterns(routes);
@@ -230,7 +230,7 @@ export function paymentMiddleware(
         return;
       }
       res.status(402).json({
-        x402Version,
+        t402Version,
         error: "X-PAYMENT header is required",
         accepts: toJsonSafe(paymentRequirements),
       });
@@ -240,11 +240,11 @@ export function paymentMiddleware(
     let decodedPayment: PaymentPayload;
     try {
       decodedPayment = exact.evm.decodePayment(payment);
-      decodedPayment.x402Version = x402Version;
+      decodedPayment.t402Version = t402Version;
     } catch (error) {
       console.error(error);
       res.status(402).json({
-        x402Version,
+        t402Version,
         error: error instanceof Error ? error.message : "Invalid or malformed payment header",
         accepts: toJsonSafe(paymentRequirements),
       });
@@ -257,7 +257,7 @@ export function paymentMiddleware(
     );
     if (!selectedPaymentRequirements) {
       res.status(402).json({
-        x402Version,
+        t402Version,
         error: "Unable to find matching payment requirements",
         accepts: toJsonSafe(paymentRequirements),
       });
@@ -268,7 +268,7 @@ export function paymentMiddleware(
       const response = await verify(decodedPayment, selectedPaymentRequirements);
       if (!response.isValid) {
         res.status(402).json({
-          x402Version,
+          t402Version,
           error: response.invalidReason,
           accepts: toJsonSafe(paymentRequirements),
           payer: response.payer,
@@ -278,7 +278,7 @@ export function paymentMiddleware(
     } catch (error) {
       console.error(error);
       res.status(402).json({
-        x402Version,
+        t402Version,
         error: error instanceof Error ? error.message : "Payment verification failed",
         accepts: toJsonSafe(paymentRequirements),
       });
@@ -372,7 +372,7 @@ export function paymentMiddleware(
       if (!settleResponse.success) {
         bufferedCalls = [];
         res.status(402).json({
-          x402Version,
+          t402Version,
           error: settleResponse.errorReason,
           accepts: toJsonSafe(paymentRequirements),
         });
@@ -385,7 +385,7 @@ export function paymentMiddleware(
       // If settlement fails, don't send the buffered response
       bufferedCalls = [];
       res.status(402).json({
-        x402Version,
+        t402Version,
         error: error instanceof Error ? error.message : "Payment settlement failed",
         accepts: toJsonSafe(paymentRequirements),
       });
@@ -417,5 +417,5 @@ export type {
   Resource,
   RouteConfig,
   RoutesConfig,
-} from "x402/types";
+} from "t402/types";
 export type { Address as SolanaAddress } from "@solana/kit";

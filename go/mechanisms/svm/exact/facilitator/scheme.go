@@ -11,9 +11,9 @@ import (
 	computebudget "github.com/gagliardetto/solana-go/programs/compute-budget"
 	"github.com/gagliardetto/solana-go/programs/token"
 
-	x402 "github.com/coinbase/x402/go"
-	"github.com/coinbase/x402/go/mechanisms/svm"
-	"github.com/coinbase/x402/go/types"
+	t402 "github.com/coinbase/t402/go"
+	"github.com/coinbase/t402/go/mechanisms/svm"
+	"github.com/coinbase/t402/go/types"
 )
 
 // ExactSvmScheme implements the SchemeNetworkFacilitator interface for SVM (Solana) exact payments (V2)
@@ -41,7 +41,7 @@ func (f *ExactSvmScheme) CaipFamily() string {
 // GetExtra returns mechanism-specific extra data for the supported kinds endpoint.
 // For SVM, this includes a randomly selected fee payer address.
 // Random selection distributes load across multiple signers.
-func (f *ExactSvmScheme) GetExtra(network x402.Network) map[string]interface{} {
+func (f *ExactSvmScheme) GetExtra(network t402.Network) map[string]interface{} {
 	addresses := f.signer.GetAddresses(context.Background(), string(network))
 
 	// Randomly select from available addresses to distribute load
@@ -54,7 +54,7 @@ func (f *ExactSvmScheme) GetExtra(network x402.Network) map[string]interface{} {
 
 // GetSigners returns signer addresses used by this facilitator.
 // For SVM, returns all available fee payer addresses for the given network.
-func (f *ExactSvmScheme) GetSigners(network x402.Network) []string {
+func (f *ExactSvmScheme) GetSigners(network t402.Network) []string {
 	addresses := f.signer.GetAddresses(context.Background(), string(network))
 	result := make([]string, len(addresses))
 	for i, addr := range addresses {
@@ -68,26 +68,26 @@ func (f *ExactSvmScheme) Verify(
 	ctx context.Context,
 	payload types.PaymentPayload,
 	requirements types.PaymentRequirements,
-) (*x402.VerifyResponse, error) {
-	network := x402.Network(requirements.Network)
+) (*t402.VerifyResponse, error) {
+	network := t402.Network(requirements.Network)
 
 	// Step 1: Validate Payment Requirements
 	if payload.Accepted.Scheme != svm.SchemeExact || requirements.Scheme != svm.SchemeExact {
-		return nil, x402.NewVerifyError("unsupported_scheme", "", network, nil)
+		return nil, t402.NewVerifyError("unsupported_scheme", "", network, nil)
 	}
 
 	// V2: Network matching - validate payload network matches requirements
 	if string(payload.Accepted.Network) != string(requirements.Network) {
-		return nil, x402.NewVerifyError("network_mismatch", "", network, nil)
+		return nil, t402.NewVerifyError("network_mismatch", "", network, nil)
 	}
 
 	if requirements.Extra == nil || requirements.Extra["feePayer"] == nil {
-		return nil, x402.NewVerifyError("invalid_exact_solana_payload_missing_fee_payer", "", network, nil)
+		return nil, t402.NewVerifyError("invalid_exact_solana_payload_missing_fee_payer", "", network, nil)
 	}
 
 	feePayerStr, ok := requirements.Extra["feePayer"].(string)
 	if !ok {
-		return nil, x402.NewVerifyError("invalid_exact_solana_payload_missing_fee_payer", "", network, nil)
+		return nil, t402.NewVerifyError("invalid_exact_solana_payload_missing_fee_payer", "", network, nil)
 	}
 
 	// Verify that the requested feePayer is managed by this facilitator
@@ -105,46 +105,46 @@ func (f *ExactSvmScheme) Verify(
 		}
 	}
 	if !feePayerManaged {
-		return nil, x402.NewVerifyError("fee_payer_not_managed_by_facilitator", "", network, nil)
+		return nil, t402.NewVerifyError("fee_payer_not_managed_by_facilitator", "", network, nil)
 	}
 
 	// Parse payload
 	solanaPayload, err := svm.PayloadFromMap(payload.Payload)
 	if err != nil {
-		return nil, x402.NewVerifyError("invalid_exact_solana_payload_transaction", "", network, err)
+		return nil, t402.NewVerifyError("invalid_exact_solana_payload_transaction", "", network, err)
 	}
 
 	// Step 2: Parse and Validate Transaction Structure
 	tx, err := svm.DecodeTransaction(solanaPayload.Transaction)
 	if err != nil {
-		return nil, x402.NewVerifyError("invalid_exact_solana_payload_transaction_could_not_be_decoded", "", network, err)
+		return nil, t402.NewVerifyError("invalid_exact_solana_payload_transaction_could_not_be_decoded", "", network, err)
 	}
 
 	// 3 instructions: ComputeLimit + ComputePrice + TransferChecked
 	if len(tx.Message.Instructions) != 3 {
-		return nil, x402.NewVerifyError("invalid_exact_solana_payload_transaction_instructions_length", "", network, nil)
+		return nil, t402.NewVerifyError("invalid_exact_solana_payload_transaction_instructions_length", "", network, nil)
 	}
 
 	// Step 3: Verify Compute Budget Instructions
 	if err := f.verifyComputeLimitInstruction(tx, tx.Message.Instructions[0]); err != nil {
-		return nil, x402.NewVerifyError(err.Error(), "", network, err)
+		return nil, t402.NewVerifyError(err.Error(), "", network, err)
 	}
 
 	if err := f.verifyComputePriceInstruction(tx, tx.Message.Instructions[1]); err != nil {
-		return nil, x402.NewVerifyError(err.Error(), "", network, err)
+		return nil, t402.NewVerifyError(err.Error(), "", network, err)
 	}
 
 	// Extract payer from transaction
 	payer, err := svm.GetTokenPayerFromTransaction(tx)
 	if err != nil {
-		return nil, x402.NewVerifyError("invalid_exact_solana_payload_no_transfer_instruction", payer, network, err)
+		return nil, t402.NewVerifyError("invalid_exact_solana_payload_no_transfer_instruction", payer, network, err)
 	}
 
 	// V2: payload.Accepted.Network is already validated by scheme lookup
 	// Network matching is implicit - facilitator was selected based on requirements.Network
 
 	// Convert requirements to old struct format for helper methods
-	reqStruct := x402.PaymentRequirements{
+	reqStruct := t402.PaymentRequirements{
 		Scheme:  requirements.Scheme,
 		Network: requirements.Network,
 		Asset:   requirements.Asset,
@@ -155,7 +155,7 @@ func (f *ExactSvmScheme) Verify(
 
 	// Step 4: Verify Transfer Instruction
 	if err := f.verifyTransferInstruction(tx, tx.Message.Instructions[2], reqStruct, signerAddressStrs); err != nil {
-		return nil, x402.NewVerifyError(err.Error(), payer, network, err)
+		return nil, t402.NewVerifyError(err.Error(), payer, network, err)
 	}
 
 	// Step 5: Sign and Simulate Transaction
@@ -164,20 +164,20 @@ func (f *ExactSvmScheme) Verify(
 	// feePayer already validated in Step 1
 	feePayer, err := solana.PublicKeyFromBase58(feePayerStr)
 	if err != nil {
-		return nil, x402.NewVerifyError("invalid_fee_payer", payer, network, err)
+		return nil, t402.NewVerifyError("invalid_fee_payer", payer, network, err)
 	}
 
 	// Sign transaction with the feePayer's signer
 	if err := f.signer.SignTransaction(ctx, tx, feePayer, string(requirements.Network)); err != nil {
-		return nil, x402.NewVerifyError("transaction_signing_failed", payer, network, err)
+		return nil, t402.NewVerifyError("transaction_signing_failed", payer, network, err)
 	}
 
 	// Simulate transaction to verify it would succeed
 	if err := f.signer.SimulateTransaction(ctx, tx, string(requirements.Network)); err != nil {
-		return nil, x402.NewVerifyError("transaction_simulation_failed", payer, network, err)
+		return nil, t402.NewVerifyError("transaction_simulation_failed", payer, network, err)
 	}
 
-	return &x402.VerifyResponse{
+	return &t402.VerifyResponse{
 		IsValid: true,
 		Payer:   payer,
 	}, nil
@@ -189,67 +189,67 @@ func (f *ExactSvmScheme) Settle(
 	ctx context.Context,
 	payload types.PaymentPayload,
 	requirements types.PaymentRequirements,
-) (*x402.SettleResponse, error) {
-	network := x402.Network(requirements.Network)
+) (*t402.SettleResponse, error) {
+	network := t402.Network(requirements.Network)
 
 	// First verify the payment
 	verifyResp, err := f.Verify(ctx, payload, requirements)
 	if err != nil {
 		// Convert VerifyError to SettleError
-		ve := &x402.VerifyError{}
+		ve := &t402.VerifyError{}
 		if errors.As(err, &ve) {
-			return nil, x402.NewSettleError(ve.Reason, ve.Payer, ve.Network, "", ve.Err)
+			return nil, t402.NewSettleError(ve.Reason, ve.Payer, ve.Network, "", ve.Err)
 		}
-		return nil, x402.NewSettleError("verification_failed", "", network, "", err)
+		return nil, t402.NewSettleError("verification_failed", "", network, "", err)
 	}
 
 	// Parse payload
 	solanaPayload, err := svm.PayloadFromMap(payload.Payload)
 	if err != nil {
-		return nil, x402.NewSettleError("invalid_exact_solana_payload_transaction", verifyResp.Payer, network, "", err)
+		return nil, t402.NewSettleError("invalid_exact_solana_payload_transaction", verifyResp.Payer, network, "", err)
 	}
 
 	// Decode transaction
 	tx, err := svm.DecodeTransaction(solanaPayload.Transaction)
 	if err != nil {
-		return nil, x402.NewSettleError("invalid_exact_solana_payload_transaction", verifyResp.Payer, network, "", err)
+		return nil, t402.NewSettleError("invalid_exact_solana_payload_transaction", verifyResp.Payer, network, "", err)
 	}
 
 	// Extract and validate feePayer from requirements matches transaction
 	feePayerStr, ok := requirements.Extra["feePayer"].(string)
 	if !ok {
-		return nil, x402.NewSettleError("missing_fee_payer", verifyResp.Payer, network, "", nil)
+		return nil, t402.NewSettleError("missing_fee_payer", verifyResp.Payer, network, "", nil)
 	}
 
 	expectedFeePayer, err := solana.PublicKeyFromBase58(feePayerStr)
 	if err != nil {
-		return nil, x402.NewSettleError("invalid_fee_payer", verifyResp.Payer, network, "", err)
+		return nil, t402.NewSettleError("invalid_fee_payer", verifyResp.Payer, network, "", err)
 	}
 
 	// Verify transaction feePayer matches requirements
 	actualFeePayer := tx.Message.AccountKeys[0] // First account is fee payer
 	if actualFeePayer != expectedFeePayer {
-		return nil, x402.NewSettleError("fee_payer_mismatch", verifyResp.Payer, network, "",
+		return nil, t402.NewSettleError("fee_payer_mismatch", verifyResp.Payer, network, "",
 			fmt.Errorf("expected %s, got %s", expectedFeePayer, actualFeePayer))
 	}
 
 	// Sign with the feePayer's signer
 	if err := f.signer.SignTransaction(ctx, tx, expectedFeePayer, string(requirements.Network)); err != nil {
-		return nil, x402.NewSettleError("transaction_failed", verifyResp.Payer, network, "", err)
+		return nil, t402.NewSettleError("transaction_failed", verifyResp.Payer, network, "", err)
 	}
 
 	// Send transaction to network
 	signature, err := f.signer.SendTransaction(ctx, tx, string(requirements.Network))
 	if err != nil {
-		return nil, x402.NewSettleError("transaction_failed", verifyResp.Payer, network, "", err)
+		return nil, t402.NewSettleError("transaction_failed", verifyResp.Payer, network, "", err)
 	}
 
 	// Wait for confirmation
 	if err := f.signer.ConfirmTransaction(ctx, signature, string(requirements.Network)); err != nil {
-		return nil, x402.NewSettleError("transaction_confirmation_failed", verifyResp.Payer, network, signature.String(), err)
+		return nil, t402.NewSettleError("transaction_confirmation_failed", verifyResp.Payer, network, signature.String(), err)
 	}
 
-	return &x402.SettleResponse{
+	return &t402.SettleResponse{
 		Success:     true,
 		Transaction: signature.String(),
 		Network:     network,
@@ -325,7 +325,7 @@ func (f *ExactSvmScheme) verifyComputePriceInstruction(tx *solana.Transaction, i
 func (f *ExactSvmScheme) verifyTransferInstruction(
 	tx *solana.Transaction,
 	inst solana.CompiledInstruction,
-	requirements x402.PaymentRequirements,
+	requirements t402.PaymentRequirements,
 	signerAddresses []string,
 ) error {
 	progID := tx.Message.AccountKeys[inst.ProgramIDIndex]

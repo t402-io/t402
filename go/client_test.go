@@ -1,11 +1,11 @@
-package x402
+package t402
 
 import (
 	"context"
 	"errors"
 	"testing"
 
-	"github.com/coinbase/x402/go/types"
+	"github.com/coinbase/t402/go/types"
 )
 
 // Mock V1 client for testing
@@ -19,7 +19,7 @@ func (m *mockSchemeNetworkClientV1) Scheme() string {
 
 func (m *mockSchemeNetworkClientV1) CreatePaymentPayload(ctx context.Context, requirements types.PaymentRequirementsV1) (types.PaymentPayloadV1, error) {
 	return types.PaymentPayloadV1{
-		X402Version: 1,
+		T402Version: 1,
 		Scheme:      m.scheme,
 		Network:     "eip155:1",
 		Payload: map[string]interface{}{
@@ -40,7 +40,7 @@ func (m *mockSchemeNetworkClientV2) Scheme() string {
 
 func (m *mockSchemeNetworkClientV2) CreatePaymentPayload(ctx context.Context, requirements types.PaymentRequirements) (types.PaymentPayload, error) {
 	return types.PaymentPayload{
-		X402Version: 2,
+		T402Version: 2,
 		Payload: map[string]interface{}{
 			"signature": "mock_signature",
 			"from":      "0xmock",
@@ -48,8 +48,8 @@ func (m *mockSchemeNetworkClientV2) CreatePaymentPayload(ctx context.Context, re
 	}, nil
 }
 
-func TestNewx402Client(t *testing.T) {
-	client := Newx402Client()
+func TestNewt402Client(t *testing.T) {
+	client := Newt402Client()
 	if client == nil {
 		t.Fatal("Expected client to be created")
 	}
@@ -60,7 +60,7 @@ func TestNewx402Client(t *testing.T) {
 }
 
 func TestClientRegister(t *testing.T) {
-	client := Newx402Client()
+	client := Newt402Client()
 	mockClientV1 := &mockSchemeNetworkClientV1{scheme: "exact"}
 	mockClientV2 := &mockSchemeNetworkClientV2{scheme: "exact"}
 
@@ -87,7 +87,7 @@ func TestClientRegister(t *testing.T) {
 func TestClientWithScheme(t *testing.T) {
 	mockClientV2 := &mockSchemeNetworkClientV2{scheme: "exact"}
 
-	client := Newx402Client()
+	client := Newt402Client()
 	client.Register("eip155:1", mockClientV2)
 
 	schemes := client.GetRegisteredSchemes()
@@ -97,7 +97,7 @@ func TestClientWithScheme(t *testing.T) {
 }
 
 func TestClientSelectPaymentRequirements(t *testing.T) {
-	client := Newx402Client()
+	client := Newt402Client()
 	mockClient := &mockSchemeNetworkClientV2{scheme: "exact"}
 	client.Register("eip155:1", mockClient)
 
@@ -167,7 +167,7 @@ func TestClientSelectPaymentRequirementsWithCustomSelector(t *testing.T) {
 		return highest
 	}
 
-	client := Newx402Client(WithPaymentSelector(customSelector))
+	client := Newt402Client(WithPaymentSelector(customSelector))
 	mockClient := &mockSchemeNetworkClientV2{scheme: "exact"}
 	client.Register("eip155:1", mockClient)
 
@@ -199,7 +199,7 @@ func TestClientSelectPaymentRequirementsWithCustomSelector(t *testing.T) {
 
 func TestClientCreatePaymentPayload(t *testing.T) {
 	ctx := context.Background()
-	client := Newx402Client()
+	client := Newt402Client()
 
 	mockClient := &mockSchemeNetworkClientV2{scheme: "exact"}
 	client.Register("eip155:1", mockClient)
@@ -229,8 +229,8 @@ func TestClientCreatePaymentPayload(t *testing.T) {
 	}
 
 	// Check fields directly (already typed!)
-	if payload.X402Version != 2 {
-		t.Fatalf("Expected version 2, got %d", payload.X402Version)
+	if payload.T402Version != 2 {
+		t.Fatalf("Expected version 2, got %d", payload.T402Version)
 	}
 	if payload.Accepted.Scheme != "exact" {
 		t.Fatalf("Expected accepted scheme 'exact', got %s", payload.Accepted.Scheme)
@@ -251,7 +251,7 @@ func TestClientCreatePaymentPayload(t *testing.T) {
 
 func TestClientCreatePaymentPayloadValidation(t *testing.T) {
 	ctx := context.Background()
-	client := Newx402Client()
+	client := Newt402Client()
 
 	// Try to create payload with invalid requirements (typed, missing scheme)
 	invalidReqsV2 := types.PaymentRequirements{
@@ -269,7 +269,7 @@ func TestClientCreatePaymentPayloadValidation(t *testing.T) {
 
 func TestClientCreatePaymentPayloadNoScheme(t *testing.T) {
 	ctx := context.Background()
-	client := Newx402Client()
+	client := Newt402Client()
 
 	// Register a different scheme
 	mockClient := &mockSchemeNetworkClientV2{scheme: "different"}
@@ -298,7 +298,7 @@ func TestClientCreatePaymentPayloadNoScheme(t *testing.T) {
 }
 
 func TestClientGetRegisteredSchemes(t *testing.T) {
-	client := Newx402Client()
+	client := Newt402Client()
 	mockClientV2_1 := &mockSchemeNetworkClientV2{scheme: "exact"}
 	mockClientV2_2 := &mockSchemeNetworkClientV2{scheme: "transfer"}
 	mockClientV1_1 := &mockSchemeNetworkClientV1{scheme: "exact"}
@@ -326,7 +326,7 @@ func TestClientGetRegisteredSchemes(t *testing.T) {
 // func TestClientCreatePaymentForRequired(t *testing.T) { ... }
 
 func TestClientNetworkPatternMatching(t *testing.T) {
-	client := Newx402Client()
+	client := Newt402Client()
 	mockClient := &mockSchemeNetworkClientV2{scheme: "exact"}
 
 	// Register with wildcard

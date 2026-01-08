@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"net/http"
 
-	x402 "github.com/coinbase/x402/go"
-	x402http "github.com/coinbase/x402/go/http"
-	evm "github.com/coinbase/x402/go/mechanisms/evm/exact/client"
-	evmsigners "github.com/coinbase/x402/go/signers/evm"
+	t402 "github.com/coinbase/t402/go"
+	t402http "github.com/coinbase/t402/go/http"
+	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/client"
+	evmsigners "github.com/coinbase/t402/go/signers/evm"
 )
 
 /**
@@ -37,21 +37,21 @@ func runHooksExample(ctx context.Context, evmPrivateKey, url string) error {
 	}
 
 	// Create client with scheme registration
-	client := x402.Newx402Client().
+	client := t402.Newt402Client().
 		Register("eip155:*", evm.NewExactEvmScheme(evmSigner))
 
 	// Register lifecycle hooks
 
 	// OnBeforePaymentCreation: Called before payment is created
 	// Use this for logging, validation, or aborting payment creation
-	client.OnBeforePaymentCreation(func(ctx x402.PaymentCreationContext) (*x402.BeforePaymentCreationHookResult, error) {
+	client.OnBeforePaymentCreation(func(ctx t402.PaymentCreationContext) (*t402.BeforePaymentCreationHookResult, error) {
 		fmt.Printf("🔍 [BeforePaymentCreation] Creating payment for:\n")
 		fmt.Printf("   Network: %s\n", ctx.SelectedRequirements.GetNetwork())
 		fmt.Printf("   Scheme: %s\n", ctx.SelectedRequirements.GetScheme())
 		fmt.Println()
 
 		// You can abort payment creation by returning:
-		// return &x402.BeforePaymentCreationHookResult{
+		// return &t402.BeforePaymentCreationHookResult{
 		//     Abort: true,
 		//     Reason: "Payment not allowed for this resource",
 		// }, nil
@@ -61,7 +61,7 @@ func runHooksExample(ctx context.Context, evmPrivateKey, url string) error {
 
 	// OnAfterPaymentCreation: Called after payment is successfully created
 	// Use this for logging, metrics, or other side effects
-	client.OnAfterPaymentCreation(func(ctx x402.PaymentCreatedContext) error {
+	client.OnAfterPaymentCreation(func(ctx t402.PaymentCreatedContext) error {
 		fmt.Printf("✅ [AfterPaymentCreation] Payment created successfully\n")
 		fmt.Printf("   Version: %d\n", ctx.Version)
 		fmt.Println()
@@ -74,12 +74,12 @@ func runHooksExample(ctx context.Context, evmPrivateKey, url string) error {
 
 	// OnPaymentCreationFailure: Called when payment creation fails
 	// Use this for error recovery or alternative payment methods
-	client.OnPaymentCreationFailure(func(ctx x402.PaymentCreationFailureContext) (*x402.PaymentCreationFailureHookResult, error) {
+	client.OnPaymentCreationFailure(func(ctx t402.PaymentCreationFailureContext) (*t402.PaymentCreationFailureHookResult, error) {
 		fmt.Printf("❌ [OnPaymentCreationFailure] Payment creation failed: %v\n", ctx.Error)
 		fmt.Println()
 
 		// You could attempt to recover by providing an alternative payload:
-		// return &x402.PaymentCreationFailureHookResult{
+		// return &t402.PaymentCreationFailureHookResult{
 		//     Recovered: true,
 		//     Payload: alternativePayload,
 		// }, nil
@@ -88,8 +88,8 @@ func runHooksExample(ctx context.Context, evmPrivateKey, url string) error {
 	})
 
 	// Create HTTP client wrapper
-	httpClient := x402http.Newx402HTTPClient(client)
-	wrappedClient := x402http.WrapHTTPClientWithPayment(http.DefaultClient, httpClient)
+	httpClient := t402http.Newt402HTTPClient(client)
+	wrappedClient := t402http.WrapHTTPClientWithPayment(http.DefaultClient, httpClient)
 
 	// Make request to trigger hooks
 	fmt.Printf("🌐 Making request to: %s\n\n", url)

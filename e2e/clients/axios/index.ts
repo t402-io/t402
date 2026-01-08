@@ -1,12 +1,12 @@
 import { config } from "dotenv";
 import axios from "axios";
-import { wrapAxiosWithPayment, decodePaymentResponseHeader } from "@x402/axios";
+import { wrapAxiosWithPayment, decodePaymentResponseHeader } from "@t402/axios";
 import { privateKeyToAccount } from "viem/accounts";
-import { registerExactEvmScheme } from "@x402/evm/exact/client";
-import { registerExactSvmScheme } from "@x402/svm/exact/client";
+import { registerExactEvmScheme } from "@t402/evm/exact/client";
+import { registerExactSvmScheme } from "@t402/svm/exact/client";
 import { base58 } from "@scure/base";
 import { createKeyPairSignerFromBytes } from "@solana/kit";
-import { x402Client } from "@x402/core/client";
+import { t402Client } from "@t402/core/client";
 
 config();
 
@@ -19,7 +19,7 @@ const svmSigner = await createKeyPairSignerFromBytes(
 );
 
 // Create client and register EVM and SVM schemes using the new register helpers
-const client = new x402Client();
+const client = new t402Client();
 registerExactEvmScheme(client, { signer: evmAccount });
 registerExactSvmScheme(client, { signer: svmSigner });
 

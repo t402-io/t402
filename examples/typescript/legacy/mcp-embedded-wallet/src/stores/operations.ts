@@ -3,7 +3,7 @@ import { useStore } from "zustand/react";
 
 type OperationStatus = "pending" | "success" | "error";
 
-// X402 Payment Requirements (from 402 response)
+// T402 Payment Requirements (from 402 response)
 export interface PaymentRequirements {
   scheme: "exact";
   network: string;
@@ -51,7 +51,7 @@ export interface HttpOperation extends BaseOperation {
   url: string; // The full URL that was requested
   errorMessage?: string; // Error details if status is "error"
 
-  // X402 specific fields
+  // T402 specific fields
   maxAmountPerRequest?: number; // Max amount per request
   paymentRequirements?: PaymentRequirements[]; // From 402 response 'accepts'
   selectedPayment?: PaymentRequirements; // Which payment option was chosen
@@ -67,7 +67,7 @@ export interface WalletOperation extends BaseOperation {
   signature?: string; // Resulting signature (for sign actions)
   errorMessage?: string; // Error details if status is "error"
 
-  // X402 specific fields
+  // T402 specific fields
   authorizationData?: AuthorizationData; // EIP-3009 authorization that was signed
   transactionHash?: string; // Transaction hash when payment is settled
   blockExplorerUrl?: string; // Link to view transaction on block explorer

@@ -12,7 +12,7 @@ declare global {
 }
 
 /**
- * Fetches the list of available x402 discovery items through the Electron IPC bridge.
+ * Fetches the list of available t402 discovery items through the Electron IPC bridge.
  * Communicates with the main process to get the current discovery list.
  *
  * @returns {Promise<DiscoveryListResponse>} A promise that resolves to the discovery list response

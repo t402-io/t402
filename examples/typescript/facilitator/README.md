@@ -1,6 +1,6 @@
-# x402 Facilitator Example
+# t402 Facilitator Example
 
-Express.js facilitator service that verifies and settles payments on-chain for the x402 protocol.
+Express.js facilitator service that verifies and settles payments on-chain for the t402 protocol.
 
 ## Prerequisites
 
@@ -47,12 +47,12 @@ Returns payment schemes and networks this facilitator supports.
 {
   "kinds": [
     {
-      "x402Version": 2,
+      "t402Version": 2,
       "scheme": "exact",
       "network": "eip155:84532"
     },
     {
-      "x402Version": 2,
+      "t402Version": 2,
       "scheme": "exact",
       "network": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
       "extra": {
@@ -77,7 +77,7 @@ Request:
 ```json
 {
   "paymentPayload": {
-    "x402Version": 2,
+    "t402Version": 2,
     "resource": {
       "url": "http://localhost:4021/weather",
       "description": "Weather data",
@@ -168,10 +168,10 @@ Response (failure):
 Register additional schemes for other networks:
 
 ```typescript
-import { registerExactEvmScheme } from "@x402/evm/exact/facilitator";
-import { registerExactSvmScheme } from "@x402/svm/exact/facilitator";
+import { registerExactEvmScheme } from "@t402/evm/exact/facilitator";
+import { registerExactSvmScheme } from "@t402/svm/exact/facilitator";
 
-const facilitator = new x402Facilitator();
+const facilitator = new t402Facilitator();
 
 registerExactEvmScheme(facilitator, {
   signer: evmSigner,
@@ -189,7 +189,7 @@ registerExactSvmScheme(facilitator, {
 Add custom logic before/after verify and settle operations:
 
 ```typescript
-const facilitator = new x402Facilitator()
+const facilitator = new t402Facilitator()
   .onBeforeVerify(async (context) => {
     // Log or validate before verification
   })

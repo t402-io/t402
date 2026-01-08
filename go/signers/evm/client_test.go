@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	x402evm "github.com/coinbase/x402/go/mechanisms/evm"
+	t402evm "github.com/coinbase/t402/go/mechanisms/evm"
 )
 
 // Test private key (deterministic for testing)
@@ -108,14 +108,14 @@ func TestClientSigner_SignTypedData(t *testing.T) {
 	}
 
 	// Create test typed data (EIP-3009 TransferWithAuthorization format)
-	domain := x402evm.TypedDataDomain{
+	domain := t402evm.TypedDataDomain{
 		Name:              "USD Coin",
 		Version:           "2",
 		ChainID:           big.NewInt(84532),
 		VerifyingContract: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
 	}
 
-	types := map[string][]x402evm.TypedDataField{
+	types := map[string][]t402evm.TypedDataField{
 		"TransferWithAuthorization": {
 			{Name: "from", Type: "address"},
 			{Name: "to", Type: "address"},
@@ -164,14 +164,14 @@ func TestClientSigner_SignTypedData_WithEIP712DomainInTypes(t *testing.T) {
 	}
 
 	// Test with EIP712Domain already in types (should not add duplicate)
-	domain := x402evm.TypedDataDomain{
+	domain := t402evm.TypedDataDomain{
 		Name:              "Test Token",
 		Version:           "1",
 		ChainID:           big.NewInt(84532),
 		VerifyingContract: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
 	}
 
-	types := map[string][]x402evm.TypedDataField{
+	types := map[string][]t402evm.TypedDataField{
 		"EIP712Domain": {
 			{Name: "name", Type: "string"},
 			{Name: "version", Type: "string"},
@@ -199,7 +199,7 @@ func TestClientSigner_SignTypedData_WithEIP712DomainInTypes(t *testing.T) {
 }
 
 // testRecovery verifies that a signature can be recovered to the expected address
-func testRecovery(t *testing.T, signature []byte, expectedAddr string, domain x402evm.TypedDataDomain, types map[string][]x402evm.TypedDataField, message map[string]interface{}) {
+func testRecovery(t *testing.T, signature []byte, expectedAddr string, domain t402evm.TypedDataDomain, types map[string][]t402evm.TypedDataField, message map[string]interface{}) {
 	// This would require implementing the full recovery logic
 	// For now, we just check the signature format
 	// The actual recovery is tested in the mechanisms/evm package

@@ -2,7 +2,7 @@
 
 ## Summary
 
-The HTTP transport implements x402 payment flows over standard HTTP/HTTPS protocols. This is the original transport for x402 and leverages existing HTTP status codes and headers for payment required signaling and payment payload transmission.
+The HTTP transport implements t402 payment flows over standard HTTP/HTTPS protocols. This is the original transport for t402 and leverages existing HTTP status codes and headers for payment required signaling and payment payload transmission.
 
 ## Payment Required Signaling
 
@@ -27,7 +27,7 @@ The base64 header decodes to:
 
 ```json
 {
-  "x402Version": 2,
+  "t402Version": 2,
   "error": "PAYMENT-SIGNATURE header is required",
   "resource": {
     "url": "https://api.example.com/premium-data",
@@ -75,7 +75,7 @@ The base64 payload decodes to:
 
 ```json
 {
-  "x402Version": 2,
+  "t402Version": 2,
   "resource": {
     "url": "https://api.example.com/premium-data",
     "description": "Access to premium market data",
@@ -146,7 +146,7 @@ Content-Type: application/json
 PAYMENT-RESPONSE: eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3JSZWFzb24iOiJpbnN1ZmZpY2llbnRfZnVuZHMiLCJ0cmFuc2FjdGlvbiI6IiIsIm5ldHdvcmsiOiJlaXAxNTU6ODQ1MzIiLCJwYXllciI6IjB4ODU3YjA2NTE5RTkxZTNBNTQ1Mzg3OTFiRGJiMEUyMjM3M2UzNmI2NiJ9
 
 {
-  "x402Version": 2,
+  "t402Version": 2,
   "error": "Payment failed: insufficient funds"
   "accepts": [...]
 }
@@ -162,9 +162,9 @@ PAYMENT-RESPONSE: eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3JSZWFzb24iOiJpbnN1ZmZpY2llbnRfZn
 
 ## Error Handling
 
-HTTP transport maps x402 errors to standard HTTP status codes:
+HTTP transport maps t402 errors to standard HTTP status codes:
 
-| x402 Error       | HTTP Status | Description                                     |
+| t402 Error       | HTTP Status | Description                                     |
 | ---------------- | ----------- | ----------------------------------------------- |
 | Payment Required | 402         | Payment needed to access resource               |
 | Invalid Payment  | 400         | Malformed payment payload or requirements       |
@@ -174,6 +174,6 @@ HTTP transport maps x402 errors to standard HTTP status codes:
 
 ## References
 
-- [Core x402 Specification](../x402-specification-v2.md)
+- [Core t402 Specification](../t402-specification-v2.md)
 - [HTTP/1.1 Specification (RFC 7231)](https://tools.ietf.org/html/rfc7231)
 - [HTTP 402 Status Code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402)

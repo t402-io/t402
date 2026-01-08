@@ -1,19 +1,19 @@
-# x402 Client Examples
+# t402 Client Examples
 
-This directory contains TypeScript client examples demonstrating how to make HTTP requests to x402-protected endpoints.
+This directory contains TypeScript client examples demonstrating how to make HTTP requests to t402-protected endpoints.
 
 ## Directory Structure
 
 | Directory | Description |
 | --- | --- |
-| [`fetch/`](./fetch/) | Using `@x402/fetch` with the native Fetch API |
-| [`axios/`](./axios/) | Using `@x402/axios` with Axios |
+| [`fetch/`](./fetch/) | Using `@t402/fetch` with the native Fetch API |
+| [`axios/`](./axios/) | Using `@t402/axios` with Axios |
 | [`advanced/`](./advanced/) | Advanced patterns: lifecycle hooks, network preferences |
-| [`custom/`](./custom/) | Manual implementation using only `@x402/core` |
+| [`custom/`](./custom/) | Manual implementation using only `@t402/core` |
 
 ## Framework Examples
 
-The **fetch** and **axios** directories showcase the minimal approach to integrating x402 payments into your HTTP client. These use our client interceptors that automatically handle the 402 payment flow:
+The **fetch** and **axios** directories showcase the minimal approach to integrating t402 payments into your HTTP client. These use our client interceptors that automatically handle the 402 payment flow:
 
 1. Intercept 402 responses
 2. Parse payment requirements
@@ -33,11 +33,11 @@ These patterns are useful for production applications that need observability, c
 
 ## Custom Implementation
 
-The **custom** directory shows how to implement x402 payment handling manually using only `@x402/core`, without any client interceptors. Use this approach when:
+The **custom** directory shows how to implement t402 payment handling manually using only `@t402/core`, without any client interceptors. Use this approach when:
 
 - You need complete control over the payment flow
 - You're integrating with an HTTP client we don't have a package for
-- You want to understand how x402 works under the hood
+- You want to understand how t402 works under the hood
 
 ## Getting Started
 

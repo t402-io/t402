@@ -3,17 +3,17 @@
 ## Goals:
 
 1. Create clearer separation between the Spec, Facilitator, and SDK
-2. Make it easier to add new networks, schemes, and generally extend the base x402 packages and spec for experimentation
-3. Improve x402's conformity to common web standards and best practices
+2. Make it easier to add new networks, schemes, and generally extend the base t402 packages and spec for experimentation
+3. Improve t402's conformity to common web standards and best practices
 4. Codify learnings from experiments related to discovery
 5. Give resource servers more tools to engage clients
 6. Maintain backwards compatibility with v1 in the reference SDK, within a namespace
 
-## x402 Spec
+## t402 Spec
 
 ### Concept: Separation of Spec, Facilitator, and SDK
 
-x402 v2 establishes clear boundaries between three distinct layers:
+t402 v2 establishes clear boundaries between three distinct layers:
 
 1. **The Specification** - Core protocol for payment signaling, consent, and settlement
 2. **Facilitator** – (optional) verification and onchain/offchain settlement
@@ -23,7 +23,7 @@ This will materialize across documentation, code, and complimentary materials.
 
 ### Version
 
-Increment `x402Version` to `2`.
+Increment `t402Version` to `2`.
 
 ### PaymentRequired
 
@@ -53,7 +53,7 @@ Increment `x402Version` to `2`.
 **PaymentRequired with Extensions:**
 ```json
 {
-  "x402Version": "2",
+  "t402Version": "2",
   "error": "No PAYMENT-SIGNATURE header provided",
   "resource": {
     "url": "https://api.example.com/v1/ai/generate",
@@ -88,7 +88,7 @@ Increment `x402Version` to `2`.
 }
 ```
 
-**Why**: The core x402 protocol focuses on payment signaling and settlement, but real-world applications need additional capabilities like service discovery, identity verification, authentication flows, and custom business logic. Extensions provide a standardized way to add these features without polluting the core payment protocol or requiring spec changes for each new capability.
+**Why**: The core t402 protocol focuses on payment signaling and settlement, but real-world applications need additional capabilities like service discovery, identity verification, authentication flows, and custom business logic. Extensions provide a standardized way to add these features without polluting the core payment protocol or requiring spec changes for each new capability.
 
 ### PaymentRequirements
 
@@ -191,7 +191,7 @@ Increment `x402Version` to `2`.
 **PaymentPayload with Extensions:**
 ```json
 {
-  "x402Version": 2,
+  "t402Version": 2,
   "payload": { /* scheme-specific data */ },
   "accepted": {
     "scheme": "exact",
@@ -214,7 +214,7 @@ Increment `x402Version` to `2`.
 }
 ```
 
-**Why**: The core x402 protocol focuses on payment signaling and settlement, but real-world applications need additional capabilities like service discovery, identity verification, authentication flows, and custom business logic. Extensions provide a standardized way to add these features without polluting the core payment protocol or requiring spec changes for each new capability.
+**Why**: The core t402 protocol focuses on payment signaling and settlement, but real-world applications need additional capabilities like service discovery, identity verification, authentication flows, and custom business logic. Extensions provide a standardized way to add these features without polluting the core payment protocol or requiring spec changes for each new capability.
 
 **Validation Rule**: The `PaymentRequired`'s `extensions` must be a subset of the `PaymentPayload`'s `extensions`. The client must echo at least the info received. It may append additional info, however it cannot delete or overwrite existing info.
 
@@ -222,7 +222,7 @@ Increment `x402Version` to `2`.
 
 | Field Name | Type | Required | Description |
 | --- | --- | --- | --- |
-| `x402Version` | `number` | Required | Protocol version identifier |
+| `t402Version` | `number` | Required | Protocol version identifier |
 | `scheme` | `string` | Required | Payment scheme identifier (e.g., "exact") |
 | `network` | `string` | Required | Network identifier in CAIP-2 format (e.g., "eip155:84532") or custom string |
 | `payload` | `object` | Required | Payment data object |
@@ -237,7 +237,7 @@ Increment `x402Version` to `2`.
 
 **What**: A new extension implementing the CAIP-122 standard for chain-agnostic wallet-based identity assertions. This extension allows clients to prove control of a wallet that may have previously paid for a resource, enabling servers to grant access without requiring repurchase. The SIWx extension follows the standardized structure with `info` and `schema` properties.
 
-**Why**: The CAIP-122 standard provides a chain-agnostic, interoperable way for blockchain accounts to authenticate with off-chain services. This aligns x402 with emerging identity standards used in WalletConnect v2, SIWS, and multi-chain wallets. It enables:
+**Why**: The CAIP-122 standard provides a chain-agnostic, interoperable way for blockchain accounts to authenticate with off-chain services. This aligns t402 with emerging identity standards used in WalletConnect v2, SIWS, and multi-chain wallets. It enables:
 - Cross-chain authentication (EVM and non-EVM)
 - Smart account verification via EIP-1271/6492
 - Natural interoperability with W3C Verifiable Credentials
@@ -249,7 +249,7 @@ Servers advertise SIWx support by including the extension in their PaymentRequir
 
 ```json
 {
-  "x402Version": "2",
+  "t402Version": "2",
   "error": "No authentication provided",
   "resource": {
     "url": "https://api.example.com/data/123",
@@ -341,7 +341,7 @@ Clients sign the CAIP-122 message and include it in their response:
 
 ### Discovery
 
-**What**: The discovery layer is being codified as an extension. Discovery enables Facilitators to automatically catalog and index x402-enabled resources by following the server's provided discovery instructions. When a server includes discovery information, Facilitators can proactively explore endpoints to maintain fresh payment requirements.
+**What**: The discovery layer is being codified as an extension. Discovery enables Facilitators to automatically catalog and index t402-enabled resources by following the server's provided discovery instructions. When a server includes discovery information, Facilitators can proactively explore endpoints to maintain fresh payment requirements.
 
 ```json
 {
@@ -382,7 +382,7 @@ Clients sign the CAIP-122 message and include it in their response:
 }
 ```
 
-**Why**: The discovery layer is not strictly a payments concern, but it's a valuable service for the x402 ecosystem.
+**Why**: The discovery layer is not strictly a payments concern, but it's a valuable service for the t402 ecosystem.
 
 **Discovery Flow**:
 
@@ -400,17 +400,17 @@ The facilitator's `/supported` endpoint is being updated with three key improvem
 
 #### 1. Version-Grouped Kinds
 
-**What**: The `kinds` array is being restructured to group supported payment kinds by `x402Version`, eliminating redundant version declarations.
+**What**: The `kinds` array is being restructured to group supported payment kinds by `t402Version`, eliminating redundant version declarations.
 
 ```git
 - "kinds": [
 -   {
--     "x402Version": 2,
+-     "t402Version": 2,
 -     "scheme": "exact",
 -     "network": "eip155:84532"
 -   },
 -   {
--     "x402Version": 2,
+-     "t402Version": 2,
 -     "scheme": "exact",
 -     "network": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"
 -   }
@@ -439,7 +439,7 @@ The facilitator's `/supported` endpoint is being updated with three key improvem
 + }
 ```
 
-**Why**: Facilitators supporting both v1 and v2 of the protocol were repeating the `x402Version` field for every payment kind. Grouping by version reduces payload size and improves readability, especially for facilitators supporting multiple versions with many network/scheme combinations.
+**Why**: Facilitators supporting both v1 and v2 of the protocol were repeating the `t402Version` field for every payment kind. Grouping by version reduces payload size and improves readability, especially for facilitators supporting multiple versions with many network/scheme combinations.
 
 #### 2. Public Signer Registry
 
@@ -571,30 +571,30 @@ interface SchemeNetworkFacilitator {
 }
 
 // Usage
-const client = new x402Client()
+const client = new t402Client()
   .register("eip155:*", new ExactEvmScheme(evmWallet))
   .register("solana:*", new ExactEvmScheme(svmWallet))
   .withIndentitySigner(svmWallet);
 
-const server = new x402Server()
+const server = new t402Server()
   .register("eip155:*", new ExactEvmScheme())
   .register("solana:*", new ExactEvmScheme()).
 
 // Facilitator
-const facilitator = new x402Facilitator()
+const facilitator = new t402Facilitator()
   .register("eip155:*", new ExactEvmScheme(evmWallet))
   .register("solana:*", new ExactEvmScheme(svmWallet));
 ```
 
 **Why**: Currently, contributors must navigate nested directories, modify core switching logic in `client/createPaymentHeader.ts` and `facilitator/facilitator.ts`, and understand internal coupling to add support for new blockchains or payment schemes. This refactor eliminates these barriers by providing a single interface to implement and explicit registration.
 
-**Implementation Packaging**: The EVM and SVM implementations to be extracted into separate packages (`@x402/evm` and `@x402/svm`) to serve as reference implementations. For developer experience, they will be imported by default in the core `@x402/core` package, but their separation allows them to demonstrate the implementation pattern for future schemes and networks.
+**Implementation Packaging**: The EVM and SVM implementations to be extracted into separate packages (`@t402/evm` and `@t402/svm`) to serve as reference implementations. For developer experience, they will be imported by default in the core `@t402/core` package, but their separation allows them to demonstrate the implementation pattern for future schemes and networks.
 
 **Extensibility**: After this refactor, adding support for new networks, schemes, or implementations will not require a PR to the core repository. Developers can create their own packages implementing the `SchemeNetworkClient`, `SchemeNetworkServer` and `SchemeNetworkFacilitator` interfaces and use them immediately. We will continue to welcome PRs to add new implementations as official packages, but unofficial packages will be fully compatible with plug-and-play functionality.
 
 ### Client Configuration
 
-The sdk will export a client type contructed via a builder pattern, that is leveraged for reference client packages such as `@x402/axios` and `@x402/fetch`
+The sdk will export a client type contructed via a builder pattern, that is leveraged for reference client packages such as `@t402/axios` and `@t402/fetch`
 
 #### Composable Client Architecture
 

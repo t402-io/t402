@@ -1,11 +1,11 @@
 # Integration Tests
 
-These integration tests verify the complete x402 payment flows with real mechanism implementations. The EVM and SVM tests can make **real on-chain transactions** when configured with private keys.
+These integration tests verify the complete t402 payment flows with real mechanism implementations. The EVM and SVM tests can make **real on-chain transactions** when configured with private keys.
 
 ## Test Overview
 
 ### Core Integration Tests (Always Run)
-- ✅ **TestCoreIntegration** - Core x402 client/service/facilitator flow (mock cash)
+- ✅ **TestCoreIntegration** - Core t402 client/service/facilitator flow (mock cash)
 - ✅ **TestHTTPIntegration** - HTTP layer integration (mock cash)
 
 ### Mechanism Integration Tests (Require Configuration)

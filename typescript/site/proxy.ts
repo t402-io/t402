@@ -1,11 +1,11 @@
-import { paymentProxyFromConfig } from "@x402/next";
-import { HTTPFacilitatorClient } from "@x402/core/server";
-import { ExactEvmScheme } from "@x402/evm/exact/server";
-import { ExactSvmScheme } from "@x402/svm/exact/server";
+import { paymentProxyFromConfig } from "@t402/next";
+import { HTTPFacilitatorClient } from "@t402/core/server";
+import { ExactEvmScheme } from "@t402/evm/exact/server";
+import { ExactSvmScheme } from "@t402/svm/exact/server";
 import { NextRequest, NextResponse } from "next/server";
-import { createPaywall } from "@x402/paywall";
-import { evmPaywall } from "@x402/paywall/evm";
-import { svmPaywall } from "@x402/paywall/svm";
+import { createPaywall } from "@t402/paywall";
+import { evmPaywall } from "@t402/paywall/evm";
+import { svmPaywall } from "@t402/paywall/svm";
 
 const evmPayeeAddress = process.env.RESOURCE_EVM_ADDRESS as `0x${string}`;
 const svmPayeeAddress = process.env.RESOURCE_SVM_ADDRESS as string;
@@ -40,12 +40,12 @@ const paywall = createPaywall()
   .withNetwork(evmPaywall)
   .withNetwork(svmPaywall)
   .withConfig({
-    appName: "x402 Demo",
-    appLogo: "/logos/x402-examples.png",
+    appName: "t402 Demo",
+    appLogo: "/logos/t402-examples.png",
   })
   .build();
 
-const x402PaymentProxy = paymentProxyFromConfig(
+const t402PaymentProxy = paymentProxyFromConfig(
   {
     "/protected": {
       accepts: [
@@ -100,9 +100,9 @@ export const proxy = async (req: NextRequest) => {
   if (geolocationResponse) {
     return geolocationResponse;
   }
-  const delegate = x402PaymentProxy as unknown as (
+  const delegate = t402PaymentProxy as unknown as (
     request: NextRequest,
-  ) => ReturnType<typeof x402PaymentProxy>;
+  ) => ReturnType<typeof t402PaymentProxy>;
   return delegate(req);
 };
 

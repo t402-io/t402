@@ -8,13 +8,13 @@ import (
 	"syscall"
 	"time"
 
-	x402 "github.com/coinbase/x402/go"
-	"github.com/coinbase/x402/go/extensions/bazaar"
-	"github.com/coinbase/x402/go/extensions/types"
-	x402http "github.com/coinbase/x402/go/http"
-	ginmw "github.com/coinbase/x402/go/http/gin"
-	evm "github.com/coinbase/x402/go/mechanisms/evm/exact/server"
-	svm "github.com/coinbase/x402/go/mechanisms/svm/exact/server"
+	t402 "github.com/coinbase/t402/go"
+	"github.com/coinbase/t402/go/extensions/bazaar"
+	"github.com/coinbase/t402/go/extensions/types"
+	t402http "github.com/coinbase/t402/go/http"
+	ginmw "github.com/coinbase/t402/go/http/gin"
+	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/server"
+	svm "github.com/coinbase/t402/go/mechanisms/svm/exact/server"
 	ginfw "github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -22,9 +22,9 @@ import (
 var shutdownRequested bool
 
 /**
- * Gin E2E Test Server with x402 v2 Payment Middleware
+ * Gin E2E Test Server with t402 v2 Payment Middleware
  *
- * This server demonstrates how to integrate x402 v2 payment middleware
+ * This server demonstrates how to integrate t402 v2 payment middleware
  * with a Gin application for end-to-end testing.
  */
 
@@ -59,8 +59,8 @@ func main() {
 	}
 
 	// Network configurations
-	evmNetwork := x402.Network("eip155:84532")                            // Base Sepolia
-	svmNetwork := x402.Network("solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1") // Solana Devnet
+	evmNetwork := t402.Network("eip155:84532")                            // Base Sepolia
+	svmNetwork := t402.Network("solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1") // Solana Devnet
 
 	fmt.Printf("EVM Payee address: %s\n", evmPayeeAddress)
 	fmt.Printf("SVM Payee address: %s\n", svmPayeeAddress)
@@ -72,12 +72,12 @@ func main() {
 	r.Use(ginfw.Recovery())
 
 	// Create HTTP facilitator client
-	facilitatorClient := x402http.NewHTTPFacilitatorClient(&x402http.FacilitatorConfig{
+	facilitatorClient := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
 		URL: facilitatorURL,
 	})
 
 	/**
-	 * Configure x402 payment middleware
+	 * Configure t402 payment middleware
 	 *
 	 * This middleware protects the /protected endpoint with a $0.001 USDC payment requirement
 	 * on the Base Sepolia testnet with bazaar discovery extension.
@@ -106,9 +106,9 @@ func main() {
 		fmt.Printf("Warning: Failed to create bazaar extension: %v\n", err)
 	}
 
-	routes := x402http.RoutesConfig{
+	routes := t402http.RoutesConfig{
 		"GET /protected": {
-			Accepts: x402http.PaymentOptions{
+			Accepts: t402http.PaymentOptions{
 				{
 					Scheme:  "exact",
 					PayTo:   evmPayeeAddress,
@@ -121,7 +121,7 @@ func main() {
 			},
 		},
 		"GET /protected-svm": {
-			Accepts: x402http.PaymentOptions{
+			Accepts: t402http.PaymentOptions{
 				{
 					Scheme:  "exact",
 					PayTo:   svmPayeeAddress,
@@ -136,7 +136,7 @@ func main() {
 	}
 
 	// Apply payment middleware with detailed error logging
-	r.Use(ginmw.X402Payment(ginmw.Config{
+	r.Use(ginmw.T402Payment(ginmw.Config{
 		Routes:      routes,
 		Facilitator: facilitatorClient,
 		Schemes: []ginmw.SchemeConfig{
@@ -158,7 +158,7 @@ func main() {
 				"error": err.Error(),
 			})
 		},
-		SettlementHandler: func(c *ginfw.Context, settleResp *x402.SettleResponse) {
+		SettlementHandler: func(c *ginfw.Context, settleResp *t402.SettleResponse) {
 			// Log successful settlement
 			fmt.Printf("✅ [E2E SERVER SUCCESS] Payment settled\n")
 			fmt.Printf("   Path: %s\n", c.Request.URL.Path)
@@ -171,7 +171,7 @@ func main() {
 	/**
 	 * Protected endpoint - requires payment to access
 	 *
-	 * This endpoint demonstrates a resource protected by x402 payment middleware.
+	 * This endpoint demonstrates a resource protected by t402 payment middleware.
 	 * Clients must provide a valid payment signature to access this endpoint.
 	 */
 	r.GET("/protected", func(c *ginfw.Context) {
@@ -259,7 +259,7 @@ func main() {
 	// Print startup banner
 	fmt.Printf(`
 ╔════════════════════════════════════════════════════════╗
-║           x402 Gin E2E Test Server                     ║
+║           t402 Gin E2E Test Server                     ║
 ╠════════════════════════════════════════════════════════╣
 ║  Server:     http://localhost:%-29s ║
 ║  EVM Network: %-40s ║

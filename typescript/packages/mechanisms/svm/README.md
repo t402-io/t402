@@ -1,16 +1,16 @@
-# @x402/svm
+# @t402/svm
 
-SVM (Solana Virtual Machine) implementation of the x402 payment protocol using the **Exact** payment scheme with SPL Token transfers.
+SVM (Solana Virtual Machine) implementation of the t402 payment protocol using the **Exact** payment scheme with SPL Token transfers.
 
 ## Installation
 
 ```bash
-npm install @x402/svm
+npm install @t402/svm
 ```
 
 ## Overview
 
-This package provides three main components for handling x402 payments on Solana:
+This package provides three main components for handling t402 payments on Solana:
 
 - **Client** - For applications that need to make payments (have wallets/signers)
 - **Facilitator** - For payment processors that verify and execute on-chain transactions
@@ -18,13 +18,13 @@ This package provides three main components for handling x402 payments on Solana
 
 ## Package Exports
 
-### Main Package (`@x402/svm`)
+### Main Package (`@t402/svm`)
 
-**V2 Protocol Support** - Modern x402 protocol with CAIP-2 network identifiers
+**V2 Protocol Support** - Modern t402 protocol with CAIP-2 network identifiers
 
 **Client:**
 - `ExactSvmClient` - V2 client implementation using SPL Token
-- `toClientSvmSigner(keypair)` - Converts Solana keypairs to x402 signers
+- `toClientSvmSigner(keypair)` - Converts Solana keypairs to t402 signers
 - `ClientSvmSigner` - TypeScript type for client signers
 - `ClientSvmConfig` - Optional RPC configuration
 
@@ -40,9 +40,9 @@ This package provides three main components for handling x402 payments on Solana
 **Utilities:**
 - Network validation, asset info lookup, amount formatting, transaction encoding
 
-### V1 Package (`@x402/svm/v1`)
+### V1 Package (`@t402/svm/v1`)
 
-**V1 Protocol Support** - Legacy x402 protocol with simple network names
+**V1 Protocol Support** - Legacy t402 protocol with simple network names
 
 **Exports:**
 - `ExactSvmClientV1` - V1 client implementation
@@ -58,12 +58,12 @@ This package provides three main components for handling x402 payments on Solana
 ]
 ```
 
-### Client Builder (`@x402/svm/client`)
+### Client Builder (`@t402/svm/client`)
 
 **Convenience builder** for creating fully-configured SVM clients
 
 **Exports:**
-- `createSvmClient(config)` - Creates x402Client with SVM support
+- `createSvmClient(config)` - Creates t402Client with SVM support
 - `SvmClientConfig` - Configuration interface
 
 **What it does:**
@@ -74,8 +74,8 @@ This package provides three main components for handling x402 payments on Solana
 
 **Example:**
 ```typescript
-import { createSvmClient } from "@x402/svm/client";
-import { toClientSvmSigner } from "@x402/svm";
+import { createSvmClient } from "@t402/svm/client";
+import { toClientSvmSigner } from "@t402/svm";
 import { createKeyPairSignerFromBytes } from "@solana/kit";
 import { base58 } from "@scure/base";
 
@@ -109,8 +109,8 @@ const client = createSvmClient({ signer });
 ### 1. Using Pre-built Builder (Recommended)
 
 ```typescript
-import { createSvmClient } from "@x402/svm/client";
-import { wrapFetchWithPayment } from "@x402/fetch";
+import { createSvmClient } from "@t402/svm/client";
+import { wrapFetchWithPayment } from "@t402/fetch";
 
 const client = createSvmClient({ signer: mySvmSigner });
 const paidFetch = wrapFetchWithPayment(fetch, client);
@@ -119,11 +119,11 @@ const paidFetch = wrapFetchWithPayment(fetch, client);
 ### 2. Direct Registration (Full Control)
 
 ```typescript
-import { x402Client } from "@x402/core/client";
-import { ExactSvmClient } from "@x402/svm";
-import { ExactSvmClientV1 } from "@x402/svm/v1";
+import { t402Client } from "@t402/core/client";
+import { ExactSvmClient } from "@t402/svm";
+import { ExactSvmClientV1 } from "@t402/svm/v1";
 
-const client = new x402Client()
+const client = new t402Client()
   .register("solana:*", new ExactSvmClient(signer))
   .registerSchemeV1("solana-devnet", new ExactSvmClientV1(signer))
   .registerSchemeV1("solana", new ExactSvmClientV1(signer));
@@ -132,16 +132,16 @@ const client = new x402Client()
 ### 3. Using Config (Flexible)
 
 ```typescript
-import { x402Client } from "@x402/core/client";
-import { ExactSvmClient } from "@x402/svm";
+import { t402Client } from "@t402/core/client";
+import { ExactSvmClient } from "@t402/svm";
 
-const client = x402Client.fromConfig({
+const client = t402Client.fromConfig({
   schemes: [
     { network: "solana:*", client: new ExactSvmClient(signer) },
     { 
       network: "solana-devnet", 
       client: new ExactSvmClientV1(signer), 
-      x402Version: 1 
+      t402Version: 1 
     }
   ]
 });
@@ -193,8 +193,8 @@ pnpm format
 
 ## Related Packages
 
-- `@x402/core` - Core protocol types and client
-- `@x402/fetch` - HTTP wrapper with automatic payment handling
-- `@x402/evm` - EVM/Ethereum implementation
+- `@t402/core` - Core protocol types and client
+- `@t402/fetch` - HTTP wrapper with automatic payment handling
+- `@t402/evm` - EVM/Ethereum implementation
 - `@solana/web3.js` - Solana JavaScript SDK (peer dependency)
 

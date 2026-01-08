@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	x402 "github.com/coinbase/x402/go"
-	"github.com/coinbase/x402/go/extensions/bazaar"
-	x402http "github.com/coinbase/x402/go/http"
+	t402 "github.com/coinbase/t402/go"
+	"github.com/coinbase/t402/go/extensions/bazaar"
+	t402http "github.com/coinbase/t402/go/http"
 	"github.com/gin-gonic/gin"
 )
 
@@ -73,16 +73,16 @@ func (a *GinAdapter) GetUserAgent() string {
 // MiddlewareConfig configures the payment middleware
 type MiddlewareConfig struct {
 	// Routes configuration
-	Routes x402http.RoutesConfig
+	Routes t402http.RoutesConfig
 
 	// Facilitator client(s)
-	FacilitatorClients []x402.FacilitatorClient
+	FacilitatorClients []t402.FacilitatorClient
 
 	// Scheme registrations
 	Schemes []SchemeRegistration
 
 	// Paywall configuration
-	PaywallConfig *x402http.PaywallConfig
+	PaywallConfig *t402http.PaywallConfig
 
 	// Sync with facilitator on start
 	SyncFacilitatorOnStart bool
@@ -91,7 +91,7 @@ type MiddlewareConfig struct {
 	ErrorHandler func(*gin.Context, error)
 
 	// Custom settlement handler
-	SettlementHandler func(*gin.Context, *x402.SettleResponse)
+	SettlementHandler func(*gin.Context, *t402.SettleResponse)
 
 	// Context timeout for payment operations
 	Timeout time.Duration
@@ -99,22 +99,22 @@ type MiddlewareConfig struct {
 
 // SchemeRegistration registers a scheme with the server
 type SchemeRegistration struct {
-	Network x402.Network
-	Server  x402.SchemeNetworkServer
+	Network t402.Network
+	Server  t402.SchemeNetworkServer
 }
 
 // MiddlewareOption configures the middleware
 type MiddlewareOption func(*MiddlewareConfig)
 
 // WithFacilitatorClient adds a facilitator client
-func WithFacilitatorClient(client x402.FacilitatorClient) MiddlewareOption {
+func WithFacilitatorClient(client t402.FacilitatorClient) MiddlewareOption {
 	return func(c *MiddlewareConfig) {
 		c.FacilitatorClients = append(c.FacilitatorClients, client)
 	}
 }
 
 // WithScheme registers a scheme server
-func WithScheme(network x402.Network, schemeServer x402.SchemeNetworkServer) MiddlewareOption {
+func WithScheme(network t402.Network, schemeServer t402.SchemeNetworkServer) MiddlewareOption {
 	return func(c *MiddlewareConfig) {
 		c.Schemes = append(c.Schemes, SchemeRegistration{
 			Network: network,
@@ -124,7 +124,7 @@ func WithScheme(network x402.Network, schemeServer x402.SchemeNetworkServer) Mid
 }
 
 // WithPaywallConfig sets the paywall configuration
-func WithPaywallConfig(config *x402http.PaywallConfig) MiddlewareOption {
+func WithPaywallConfig(config *t402http.PaywallConfig) MiddlewareOption {
 	return func(c *MiddlewareConfig) {
 		c.PaywallConfig = config
 	}
@@ -145,7 +145,7 @@ func WithErrorHandler(handler func(*gin.Context, error)) MiddlewareOption {
 }
 
 // WithSettlementHandler sets a custom settlement handler
-func WithSettlementHandler(handler func(*gin.Context, *x402.SettleResponse)) MiddlewareOption {
+func WithSettlementHandler(handler func(*gin.Context, *t402.SettleResponse)) MiddlewareOption {
 	return func(c *MiddlewareConfig) {
 		c.SettlementHandler = handler
 	}
@@ -162,8 +162,8 @@ func WithTimeout(timeout time.Duration) MiddlewareOption {
 // Payment Middleware
 // ============================================================================
 
-// PaymentMiddleware creates Gin middleware for x402 payment handling using a pre-configured server.
-func PaymentMiddleware(routes x402http.RoutesConfig, server *x402.X402ResourceServer, opts ...MiddlewareOption) gin.HandlerFunc {
+// PaymentMiddleware creates Gin middleware for t402 payment handling using a pre-configured server.
+func PaymentMiddleware(routes t402http.RoutesConfig, server *t402.T402ResourceServer, opts ...MiddlewareOption) gin.HandlerFunc {
 	config := &MiddlewareConfig{
 		Routes:                 routes,
 		SyncFacilitatorOnStart: true,
@@ -176,7 +176,7 @@ func PaymentMiddleware(routes x402http.RoutesConfig, server *x402.X402ResourceSe
 	}
 
 	// Wrap the resource server with HTTP functionality
-	httpServer := x402http.Wrappedx402HTTPResourceServer(routes, server)
+	httpServer := t402http.Wrappedt402HTTPResourceServer(routes, server)
 
 	httpServer.RegisterExtension(bazaar.BazaarResourceServerExtension)
 
@@ -185,7 +185,7 @@ func PaymentMiddleware(routes x402http.RoutesConfig, server *x402.X402ResourceSe
 		ctx, cancel := context.WithTimeout(context.Background(), config.Timeout)
 		defer cancel()
 		if err := httpServer.Initialize(ctx); err != nil {
-			fmt.Printf("Warning: failed to initialize x402 server: %v\n", err)
+			fmt.Printf("Warning: failed to initialize t402 server: %v\n", err)
 		}
 	}
 
@@ -193,12 +193,12 @@ func PaymentMiddleware(routes x402http.RoutesConfig, server *x402.X402ResourceSe
 	return createMiddlewareHandler(httpServer, config)
 }
 
-// PaymentMiddlewareFromConfig creates Gin middleware for x402 payment handling.
+// PaymentMiddlewareFromConfig creates Gin middleware for t402 payment handling.
 // This creates the server internally from the provided options.
-func PaymentMiddlewareFromConfig(routes x402http.RoutesConfig, opts ...MiddlewareOption) gin.HandlerFunc {
+func PaymentMiddlewareFromConfig(routes t402http.RoutesConfig, opts ...MiddlewareOption) gin.HandlerFunc {
 	config := &MiddlewareConfig{
 		Routes:                 routes,
-		FacilitatorClients:     []x402.FacilitatorClient{},
+		FacilitatorClients:     []t402.FacilitatorClient{},
 		Schemes:                []SchemeRegistration{},
 		SyncFacilitatorOnStart: true,
 		Timeout:                30 * time.Second,
@@ -209,12 +209,12 @@ func PaymentMiddlewareFromConfig(routes x402http.RoutesConfig, opts ...Middlewar
 		opt(config)
 	}
 
-	serverOpts := []x402.ResourceServerOption{}
+	serverOpts := []t402.ResourceServerOption{}
 	for _, client := range config.FacilitatorClients {
-		serverOpts = append(serverOpts, x402.WithFacilitatorClient(client))
+		serverOpts = append(serverOpts, t402.WithFacilitatorClient(client))
 	}
 
-	httpServer := x402http.Newx402HTTPResourceServer(config.Routes, serverOpts...)
+	httpServer := t402http.Newt402HTTPResourceServer(config.Routes, serverOpts...)
 
 	httpServer.RegisterExtension(bazaar.BazaarResourceServerExtension)
 
@@ -228,7 +228,7 @@ func PaymentMiddlewareFromConfig(routes x402http.RoutesConfig, opts ...Middlewar
 		ctx, cancel := context.WithTimeout(context.Background(), config.Timeout)
 		defer cancel()
 		if err := httpServer.Initialize(ctx); err != nil {
-			fmt.Printf("Warning: failed to initialize x402 server: %v\n", err)
+			fmt.Printf("Warning: failed to initialize t402 server: %v\n", err)
 		}
 	}
 
@@ -237,11 +237,11 @@ func PaymentMiddlewareFromConfig(routes x402http.RoutesConfig, opts ...Middlewar
 }
 
 // createMiddlewareHandler creates the actual Gin handler function.
-func createMiddlewareHandler(server *x402http.HTTPServer, config *MiddlewareConfig) gin.HandlerFunc {
+func createMiddlewareHandler(server *t402http.HTTPServer, config *MiddlewareConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Create adapter and request context
 		adapter := NewGinAdapter(c)
-		reqCtx := x402http.HTTPRequestContext{
+		reqCtx := t402http.HTTPRequestContext{
 			Adapter: adapter,
 			Path:    c.Request.URL.Path,
 			Method:  c.Request.Method,
@@ -266,15 +266,15 @@ func createMiddlewareHandler(server *x402http.HTTPServer, config *MiddlewareConf
 
 		// Handle result
 		switch result.Type {
-		case x402http.ResultNoPaymentRequired:
+		case t402http.ResultNoPaymentRequired:
 			// No payment required, continue to next handler
 			c.Next()
 
-		case x402http.ResultPaymentError:
+		case t402http.ResultPaymentError:
 			// Payment required but not provided or invalid
 			handlePaymentError(c, result.Response, config)
 
-		case x402http.ResultPaymentVerified:
+		case t402http.ResultPaymentVerified:
 			// Payment verified, continue with settlement handling
 			handlePaymentVerified(c, server, ctx, result, config)
 		}
@@ -282,7 +282,7 @@ func createMiddlewareHandler(server *x402http.HTTPServer, config *MiddlewareConf
 }
 
 // handlePaymentError handles payment error responses
-func handlePaymentError(c *gin.Context, response *x402http.HTTPResponseInstructions, _ *MiddlewareConfig) {
+func handlePaymentError(c *gin.Context, response *t402http.HTTPResponseInstructions, _ *MiddlewareConfig) {
 	// Set status
 	c.Status(response.Status)
 
@@ -303,7 +303,7 @@ func handlePaymentError(c *gin.Context, response *x402http.HTTPResponseInstructi
 }
 
 // handlePaymentVerified handles verified payments with settlement
-func handlePaymentVerified(c *gin.Context, server *x402http.HTTPServer, ctx context.Context, result x402http.HTTPProcessResult, config *MiddlewareConfig) {
+func handlePaymentVerified(c *gin.Context, server *t402http.HTTPServer, ctx context.Context, result t402http.HTTPProcessResult, config *MiddlewareConfig) {
 	// Capture response for settlement
 	writer := &responseCapture{
 		ResponseWriter: c.Writer,
@@ -373,7 +373,7 @@ func handlePaymentVerified(c *gin.Context, server *x402http.HTTPServer, ctx cont
 
 	// Call settlement handler if configured
 	if config.SettlementHandler != nil {
-		settleResponse := &x402.SettleResponse{
+		settleResponse := &t402.SettleResponse{
 			Success:     true,
 			Transaction: settleResult.Transaction,
 			Network:     settleResult.Network,

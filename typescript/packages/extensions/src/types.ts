@@ -1,5 +1,5 @@
 /**
- * Shared type utilities for x402 extensions
+ * Shared type utilities for t402 extensions
  */
 
 /**

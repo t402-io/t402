@@ -1,4 +1,4 @@
-package x402
+package t402
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/coinbase/x402/go/types"
+	"github.com/coinbase/t402/go/types"
 )
 
 // Mock V1 facilitator for testing
@@ -91,8 +91,8 @@ func (m *mockSchemeNetworkFacilitator) Settle(ctx context.Context, payload types
 	}, nil
 }
 
-func TestNewx402Facilitator(t *testing.T) {
-	facilitator := Newx402Facilitator()
+func TestNewt402Facilitator(t *testing.T) {
+	facilitator := Newt402Facilitator()
 	if facilitator == nil {
 		t.Fatal("Expected facilitator to be created")
 	}
@@ -105,7 +105,7 @@ func TestNewx402Facilitator(t *testing.T) {
 }
 
 func TestFacilitatorRegister(t *testing.T) {
-	facilitator := Newx402Facilitator()
+	facilitator := Newt402Facilitator()
 	mockFacilitatorV2 := &mockSchemeNetworkFacilitator{scheme: "exact"}
 	mockFacilitatorV1 := &mockSchemeNetworkFacilitatorV1{scheme: "exact"}
 
@@ -116,7 +116,7 @@ func TestFacilitatorRegister(t *testing.T) {
 	supported := facilitator.GetSupported()
 	v2Kinds := []SupportedKind{}
 	for _, kind := range supported.Kinds {
-		if kind.X402Version == 2 {
+		if kind.T402Version == 2 {
 			v2Kinds = append(v2Kinds, kind)
 		}
 	}
@@ -132,7 +132,7 @@ func TestFacilitatorRegister(t *testing.T) {
 	supported = facilitator.GetSupported()
 	v1Kinds := []SupportedKind{}
 	for _, kind := range supported.Kinds {
-		if kind.X402Version == 1 {
+		if kind.T402Version == 1 {
 			v1Kinds = append(v1Kinds, kind)
 		}
 	}
@@ -146,7 +146,7 @@ func TestFacilitatorRegister(t *testing.T) {
 	}
 	v2Count := 0
 	for _, kind := range supported.Kinds {
-		if kind.X402Version == 2 {
+		if kind.T402Version == 2 {
 			v2Count++
 		}
 	}
@@ -156,7 +156,7 @@ func TestFacilitatorRegister(t *testing.T) {
 }
 
 func TestFacilitatorRegisterExtension(t *testing.T) {
-	facilitator := Newx402Facilitator()
+	facilitator := Newt402Facilitator()
 
 	facilitator.RegisterExtension("bazaar")
 	if len(facilitator.extensions) != 1 {
@@ -180,7 +180,7 @@ func TestFacilitatorRegisterExtension(t *testing.T) {
 
 func TestFacilitatorVerify(t *testing.T) {
 	ctx := context.Background()
-	facilitator := Newx402Facilitator()
+	facilitator := Newt402Facilitator()
 
 	// Simple mock that always succeeds
 	mockFacilitator := &mockSchemeNetworkFacilitator{scheme: "exact"}
@@ -195,7 +195,7 @@ func TestFacilitatorVerify(t *testing.T) {
 	}
 
 	payload := types.PaymentPayload{
-		X402Version: 2,
+		T402Version: 2,
 		Accepted:    requirements,
 		Payload: map[string]interface{}{
 			"signature": "test",
@@ -223,7 +223,7 @@ func TestFacilitatorVerify(t *testing.T) {
 
 func TestFacilitatorVerifyValidation(t *testing.T) {
 	ctx := context.Background()
-	facilitator := Newx402Facilitator()
+	facilitator := Newt402Facilitator()
 	mockFacilitator := &mockSchemeNetworkFacilitator{scheme: "exact"}
 	facilitator.Register([]Network{"eip155:1"}, mockFacilitator)
 
@@ -244,7 +244,7 @@ func TestFacilitatorVerifyValidation(t *testing.T) {
 	}
 
 	invalidPayload := types.PaymentPayload{
-		X402Version: 2,
+		T402Version: 2,
 		Accepted:    invalidRequirements,
 		Payload:     map[string]interface{}{},
 	}
@@ -261,7 +261,7 @@ func TestFacilitatorVerifyValidation(t *testing.T) {
 
 	// Test valid payload with invalid requirements
 	validPayload := types.PaymentPayload{
-		X402Version: 2,
+		T402Version: 2,
 		Accepted:    requirements,
 		Payload:     map[string]interface{}{},
 	}
@@ -281,7 +281,7 @@ func TestFacilitatorVerifyValidation(t *testing.T) {
 
 func TestFacilitatorVerifySchemeMismatch(t *testing.T) {
 	ctx := context.Background()
-	facilitator := Newx402Facilitator()
+	facilitator := Newt402Facilitator()
 	mockFacilitator := &mockSchemeNetworkFacilitator{
 		scheme: "exact",
 		verifyFunc: func(ctx context.Context, payload types.PaymentPayload, requirements types.PaymentRequirements) (*VerifyResponse, error) {
@@ -311,7 +311,7 @@ func TestFacilitatorVerifySchemeMismatch(t *testing.T) {
 	}
 
 	payload := types.PaymentPayload{
-		X402Version: 2,
+		T402Version: 2,
 		Accepted:    mismatchedRequirements,
 		Payload:     map[string]interface{}{},
 	}
@@ -339,7 +339,7 @@ func TestFacilitatorVerifySchemeMismatch(t *testing.T) {
 
 func TestFacilitatorVerifyNetworkMismatch(t *testing.T) {
 	ctx := context.Background()
-	facilitator := Newx402Facilitator()
+	facilitator := Newt402Facilitator()
 	mockFacilitator := &mockSchemeNetworkFacilitator{
 		scheme: "exact",
 		verifyFunc: func(ctx context.Context, payload types.PaymentPayload, requirements types.PaymentRequirements) (*VerifyResponse, error) {
@@ -369,7 +369,7 @@ func TestFacilitatorVerifyNetworkMismatch(t *testing.T) {
 	}
 
 	payload := types.PaymentPayload{
-		X402Version: 2,
+		T402Version: 2,
 		Accepted:    mismatchedNetworkRequirements,
 		Payload:     map[string]interface{}{},
 	}
@@ -396,7 +396,7 @@ func TestFacilitatorVerifyNetworkMismatch(t *testing.T) {
 
 func TestFacilitatorSettle(t *testing.T) {
 	ctx := context.Background()
-	facilitator := Newx402Facilitator()
+	facilitator := Newt402Facilitator()
 
 	mockFacilitator := &mockSchemeNetworkFacilitator{
 		scheme: "exact",
@@ -421,7 +421,7 @@ func TestFacilitatorSettle(t *testing.T) {
 	}
 
 	payload := types.PaymentPayload{
-		X402Version: 2,
+		T402Version: 2,
 		Accepted:    requirements,
 		Payload: map[string]interface{}{
 			"signature": "test",
@@ -446,7 +446,7 @@ func TestFacilitatorSettle(t *testing.T) {
 
 func TestFacilitatorSettleVerifiesFirst(t *testing.T) {
 	ctx := context.Background()
-	facilitator := Newx402Facilitator()
+	facilitator := Newt402Facilitator()
 
 	verifyCallCount := 0
 	mockFacilitator := &mockSchemeNetworkFacilitator{
@@ -472,7 +472,7 @@ func TestFacilitatorSettleVerifiesFirst(t *testing.T) {
 	}
 
 	payload := types.PaymentPayload{
-		X402Version: 2,
+		T402Version: 2,
 		Accepted:    requirements,
 		Payload:     map[string]interface{}{},
 	}
@@ -498,7 +498,7 @@ func TestFacilitatorSettleVerifiesFirst(t *testing.T) {
 }
 
 func TestFacilitatorGetSupported(t *testing.T) {
-	facilitator := Newx402Facilitator()
+	facilitator := Newt402Facilitator()
 
 	mockFacilitatorV2_1 := &mockSchemeNetworkFacilitator{scheme: "exact"}
 	mockFacilitatorV2_2 := &mockSchemeNetworkFacilitator{scheme: "transfer"}
@@ -529,7 +529,7 @@ func TestFacilitatorGetSupported(t *testing.T) {
 	foundV1Exact := false
 
 	for _, kind := range supported.Kinds {
-		if kind.X402Version == 2 {
+		if kind.T402Version == 2 {
 			if kind.Scheme == "exact" && kind.Network == "eip155:1" {
 				foundV2Exact = true
 			}
@@ -537,7 +537,7 @@ func TestFacilitatorGetSupported(t *testing.T) {
 				foundV2Transfer = true
 			}
 		}
-		if kind.X402Version == 1 {
+		if kind.T402Version == 1 {
 			if kind.Scheme == "exact" && kind.Network == "eip155:1" {
 				foundV1Exact = true
 			}
@@ -557,7 +557,7 @@ func TestFacilitatorGetSupported(t *testing.T) {
 
 func TestFacilitatorNetworkPatternMatching(t *testing.T) {
 	ctx := context.Background()
-	facilitator := Newx402Facilitator()
+	facilitator := Newt402Facilitator()
 	mockFacilitator := &mockSchemeNetworkFacilitator{scheme: "exact"}
 
 	// Register with multiple networks (will auto-derive eip155:* pattern)
@@ -572,7 +572,7 @@ func TestFacilitatorNetworkPatternMatching(t *testing.T) {
 	}
 
 	payload := types.PaymentPayload{
-		X402Version: 2,
+		T402Version: 2,
 		Accepted:    requirements,
 		Payload:     map[string]interface{}{},
 	}

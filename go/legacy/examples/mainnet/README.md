@@ -1,6 +1,6 @@
 # Example Mainnet Server
 
-This example demonstrates how to accept real USDC payments on Base mainnet using Coinbase's [hosted x402 facilitator](https://docs.cdp.coinbase.com/x402/docs/welcome).
+This example demonstrates how to accept real USDC payments on Base mainnet using Coinbase's [hosted t402 facilitator](https://docs.cdp.coinbase.com/t402/docs/welcome).
 
 ## Prerequisites
 

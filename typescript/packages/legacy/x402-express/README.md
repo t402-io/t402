@@ -1,18 +1,18 @@
-# x402-express
+# t402-express
 
-Express middleware integration for the x402 Payment Protocol. This package allows you to easily add paywall functionality to your Express.js applications using the x402 protocol.
+Express middleware integration for the t402 Payment Protocol. This package allows you to easily add paywall functionality to your Express.js applications using the t402 protocol.
 
 ## Installation
 
 ```bash
-npm install x402-express
+npm install t402-express
 ```
 
 ## Quick Start
 
 ```typescript
 import express from "express";
-import { paymentMiddleware, Network } from "x402-express";
+import { paymentMiddleware, Network } from "t402-express";
 
 const app = express();
 
@@ -46,7 +46,7 @@ The `paymentMiddleware` function accepts three parameters:
 
 1. `payTo`: Your receiving address (`0x${string}`)
 2. `routes`: Route configurations for protected endpoints
-3. `facilitator`: (Optional) Configuration for the x402 facilitator service
+3. `facilitator`: (Optional) Configuration for the t402 facilitator service
 4. `paywall`: (Optional) Configuration for the built-in paywall
 
 See the Middleware Options section below for detailed configuration options.
@@ -84,14 +84,14 @@ interface PaymentMiddlewareConfig {
 
 ```typescript
 type FacilitatorConfig = {
-  url: string;                        // URL of the x402 facilitator service
+  url: string;                        // URL of the t402 facilitator service
   createAuthHeaders?: CreateHeaders;  // Optional function to create authentication headers
 };
 ```
 
 ### Paywall Configuration
 
-For more on paywall configuration options, refer to the [paywall README](../x402/src/paywall/README.md).
+For more on paywall configuration options, refer to the [paywall README](../t402/src/paywall/README.md).
 
 ```typescript
 type PaywallConfig = {
@@ -104,7 +104,7 @@ type PaywallConfig = {
 
 ## Optional: Coinbase Onramp Integration
 
-**Note**: Onramp integration is completely optional. Your x402 paywall will work perfectly without it. This feature is for users who want to provide an easy way for their customers to fund their wallets directly from the paywall.
+**Note**: Onramp integration is completely optional. Your t402 paywall will work perfectly without it. This feature is for users who want to provide an easy way for their customers to fund their wallets directly from the paywall.
 
 When configured, a "Get more USDC" button will appear in your paywall, allowing users to purchase USDC directly through Coinbase Onramp.
 
@@ -116,12 +116,12 @@ Add a session token endpoint to your Express app:
 
 ```typescript
 import express from "express";
-import { POST } from "x402-express/session-token";
+import { POST } from "t402-express/session-token";
 
 const app = express();
 
 // Add the session token endpoint
-app.post("/api/x402/session-token", POST);
+app.post("/api/t402/session-token", POST);
 ```
 
 #### 2. Configure Your Middleware
@@ -134,7 +134,7 @@ app.use(paymentMiddleware(
   routes,
   facilitator,
   {
-    sessionTokenEndpoint: "/api/x402/session-token",
+    sessionTokenEndpoint: "/api/t402/session-token",
     cdpClientKey: "your-cdp-client-key",
   }
 ));
@@ -167,7 +167,7 @@ CDP_API_KEY_SECRET=your_secret_api_key_secret_here
 
 ### How Onramp Works
 
-Once set up, your x402 paywall will automatically show a "Get more USDC" button when users need to fund their wallets. 
+Once set up, your t402 paywall will automatically show a "Get more USDC" button when users need to fund their wallets. 
 
 1. **Generates session token**: Your backend securely creates a session token using CDP's API
 2. **Opens secure onramp**: User is redirected to Coinbase Onramp with the session token
@@ -188,12 +188,12 @@ Once set up, your x402 paywall will automatically show a "Get more USDC" button 
 3. **API route not found**
     - Ensure you've added the session token route: `app.post("/your-path", POST)`
     - Check that your route path matches your `sessionTokenEndpoint` configuration
-    - Verify the import: `import { POST } from "x402-express/session-token"`
+    - Verify the import: `import { POST } from "t402-express/session-token"`
     - Example: If you configured `sessionTokenEndpoint: "/api/custom/onramp"`, add `app.post("/api/custom/onramp", POST)`
 
 
 ## Resources
 
-- [x402 Protocol](https://x402.org)
+- [t402 Protocol](https://t402.org)
 - [CDP Documentation](https://docs.cdp.coinbase.com)
 - [CDP Discord](https://discord.com/invite/cdp)

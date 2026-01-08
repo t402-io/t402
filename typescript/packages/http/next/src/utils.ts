@@ -3,38 +3,38 @@ import {
   HTTPRequestContext,
   HTTPResponseInstructions,
   PaywallProvider,
-  x402HTTPResourceServer,
-  x402ResourceServer,
+  t402HTTPResourceServer,
+  t402ResourceServer,
   RoutesConfig,
-} from "@x402/core/server";
-import { PaymentPayload, PaymentRequirements } from "@x402/core/types";
+} from "@t402/core/server";
+import { PaymentPayload, PaymentRequirements } from "@t402/core/types";
 import { NextAdapter } from "./adapter";
 
 /**
  * Result of createHttpServer
  */
 export interface HttpServerInstance {
-  httpServer: x402HTTPResourceServer;
+  httpServer: t402HTTPResourceServer;
   init: () => Promise<void>;
 }
 
 /**
- * Creates and configures the x402 HTTP server with initialization logic
+ * Creates and configures the t402 HTTP server with initialization logic
  *
  * @param routes - The route configuration for the server
- * @param server - The x402 resource server instance
+ * @param server - The t402 resource server instance
  * @param paywall - Optional paywall provider for custom payment UI
  * @param syncFacilitatorOnStart - Whether to sync with the facilitator on start (defaults to true)
  * @returns The HTTP server instance with initialization function
  */
 export function createHttpServer(
   routes: RoutesConfig,
-  server: x402ResourceServer,
+  server: t402ResourceServer,
   paywall?: PaywallProvider,
   syncFacilitatorOnStart: boolean = true,
 ): HttpServerInstance {
-  // Create the x402 HTTP server instance with the resource server
-  const httpServer = new x402HTTPResourceServer(server, routes);
+  // Create the t402 HTTP server instance with the resource server
+  const httpServer = new t402HTTPResourceServer(server, routes);
 
   // Register custom paywall provider if provided
   if (paywall) {
@@ -61,7 +61,7 @@ export function createHttpServer(
  * Creates HTTP request context from a Next.js request
  *
  * @param request - The Next.js request object
- * @returns The HTTP request context for x402 processing
+ * @returns The HTTP request context for t402 processing
  */
 export function createRequestContext(request: NextRequest): HTTPRequestContext {
   // Create adapter and context
@@ -100,14 +100,14 @@ export function handlePaymentError(response: HTTPResponseInstructions): NextResp
 /**
  * Handles settlement after a successful response
  *
- * @param httpServer - The x402 HTTP resource server instance
+ * @param httpServer - The t402 HTTP resource server instance
  * @param response - The Next.js response from the protected route
  * @param paymentPayload - The payment payload from the client
  * @param paymentRequirements - The payment requirements for the route
  * @returns The response with settlement headers or an error response if settlement fails
  */
 export async function handleSettlement(
-  httpServer: x402HTTPResourceServer,
+  httpServer: t402HTTPResourceServer,
   response: NextResponse,
   paymentPayload: PaymentPayload,
   paymentRequirements: PaymentRequirements,

@@ -1,12 +1,12 @@
 [project]
-name = "x402-requests-example"
+name = "t402-requests-example"
 version = "0.1.0"
-description = "Example of using x402 with requests"
+description = "Example of using t402 with requests"
 requires-python = ">=3.10"
 dependencies = [
     "requests>=2.31.0",
     "eth-account>=0.8.0",
-    "x402"
+    "t402"
 ]
 
 [build-system]
@@ -23,4 +23,4 @@ allow-direct-references = true
 package = false
 
 [tool.uv.sources]
-x402 = { path = "../../../../python/x402", editable = true } 
+t402 = { path = "../../../../python/t402", editable = true } 

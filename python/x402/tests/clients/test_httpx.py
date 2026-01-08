@@ -4,11 +4,11 @@ import base64
 from unittest.mock import AsyncMock, MagicMock, patch
 from httpx import Request, Response
 from eth_account import Account
-from x402.clients.httpx import HttpxHooks, x402_payment_hooks, x402HttpxClient
-from x402.clients.base import (
+from t402.clients.httpx import HttpxHooks, t402_payment_hooks, t402HttpxClient
+from t402.clients.base import (
     PaymentError,
 )
-from x402.types import PaymentRequirements, x402PaymentRequiredResponse
+from t402.types import PaymentRequirements, t402PaymentRequiredResponse
 
 
 @pytest.fixture
@@ -38,7 +38,7 @@ def payment_requirements():
 
 @pytest.fixture
 def hooks(account):
-    hooks_dict = x402_payment_hooks(account)
+    hooks_dict = t402_payment_hooks(account)
     return hooks_dict["response"][0].__self__
 
 
@@ -77,8 +77,8 @@ async def test_on_response_missing_request(hooks):
 
 async def test_on_response_payment_flow(hooks, payment_requirements):
     # Mock the payment required response
-    payment_response = x402PaymentRequiredResponse(
-        x402_version=1,
+    payment_response = t402PaymentRequiredResponse(
+        t402_version=1,
         accepts=[payment_requirements],
         error="Payment Required",  # Add required error field
     )
@@ -114,7 +114,7 @@ async def test_on_response_payment_flow(hooks, payment_requirements):
     mock_header = "mock_payment_header"
     hooks.client.create_payment_header = MagicMock(return_value=mock_header)
 
-    with patch("x402.clients.httpx.AsyncClient", return_value=mock_client):
+    with patch("t402.clients.httpx.AsyncClient", return_value=mock_client):
         result = await hooks.on_response(response)
 
         # Verify the result
@@ -141,8 +141,8 @@ async def test_on_response_payment_flow(hooks, payment_requirements):
 async def test_on_response_payment_error(hooks, payment_requirements):
     # Mock the payment required response with unsupported scheme
     payment_requirements.scheme = "unsupported"
-    payment_response = x402PaymentRequiredResponse(
-        x402_version=1,
+    payment_response = t402PaymentRequiredResponse(
+        t402_version=1,
         accepts=[payment_requirements],
         error="Payment Required",  # Add required error field
     )
@@ -174,9 +174,9 @@ async def test_on_response_general_error(hooks):
     assert not hooks._is_retry
 
 
-def test_x402_payment_hooks(account):
+def test_t402_payment_hooks(account):
     # Test hooks dictionary creation
-    hooks_dict = x402_payment_hooks(account)
+    hooks_dict = t402_payment_hooks(account)
     assert "request" in hooks_dict
     assert "response" in hooks_dict
     assert len(hooks_dict["request"]) == 1
@@ -189,7 +189,7 @@ def test_x402_payment_hooks(account):
     assert hooks_instance.client.max_value is None
 
     # Test with max_value
-    hooks_dict = x402_payment_hooks(account, max_value=1000)
+    hooks_dict = t402_payment_hooks(account, max_value=1000)
     hooks_instance = hooks_dict["response"][0].__self__
     assert hooks_instance.client.max_value == 1000
 
@@ -197,7 +197,7 @@ def test_x402_payment_hooks(account):
     def custom_selector(accepts, network_filter=None, scheme_filter=None):
         return accepts[0]
 
-    hooks_dict = x402_payment_hooks(
+    hooks_dict = t402_payment_hooks(
         account, payment_requirements_selector=custom_selector
     )
     hooks_instance = hooks_dict["response"][0].__self__
@@ -207,9 +207,9 @@ def test_x402_payment_hooks(account):
     )
 
 
-def test_x402_httpx_client(account):
+def test_t402_httpx_client(account):
     # Test client initialization
-    client = x402HttpxClient(account=account)
+    client = t402HttpxClient(account=account)
     assert "request" in client.event_hooks
     assert "response" in client.event_hooks
 
@@ -221,7 +221,7 @@ def test_x402_httpx_client(account):
     assert hooks_instance.client.max_value is None
 
     # Test with max_value
-    client = x402HttpxClient(account=account, max_value=1000)
+    client = t402HttpxClient(account=account, max_value=1000)
     hooks_instance = client.event_hooks["response"][0].__self__
     assert hooks_instance.client.max_value == 1000
 
@@ -229,7 +229,7 @@ def test_x402_httpx_client(account):
     def custom_selector(accepts, network_filter=None, scheme_filter=None):
         return accepts[0]
 
-    client = x402HttpxClient(
+    client = t402HttpxClient(
         account=account, payment_requirements_selector=custom_selector
     )
     hooks_instance = client.event_hooks["response"][0].__self__

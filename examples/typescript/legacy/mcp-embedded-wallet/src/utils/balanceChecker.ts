@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect } from "react";
 import { createPublicClient, http, parseUnits, publicActions, Address, Chain } from "viem";
-import { getUSDCBalance } from "x402/shared/evm";
+import { getUSDCBalance } from "t402/shared/evm";
 import { formatUSDC } from "./chainConfig";
 
 export interface BalanceCheckResult {

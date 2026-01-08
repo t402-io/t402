@@ -1,11 +1,11 @@
-# x402-fetch
+# t402-fetch
 
-A utility package that extends the native `fetch` API to automatically handle 402 Payment Required responses using the x402 payment protocol. This package enables seamless integration of payment functionality into your applications when making HTTP requests.
+A utility package that extends the native `fetch` API to automatically handle 402 Payment Required responses using the t402 payment protocol. This package enables seamless integration of payment functionality into your applications when making HTTP requests.
 
 ## Installation
 
 ```bash
-npm install x402-fetch
+npm install t402-fetch
 ```
 
 ## Quick Start
@@ -13,7 +13,7 @@ npm install x402-fetch
 ```typescript
 import { createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { wrapFetchWithPayment } from "x402-fetch";
+import { wrapFetchWithPayment } from "t402-fetch";
 import { baseSepolia } from "viem/chains";
 
 // Create a wallet client
@@ -44,7 +44,7 @@ Wraps the native fetch API to handle 402 Payment Required responses automaticall
 #### Parameters
 
 - `fetch`: The fetch function to wrap (typically `globalThis.fetch`)
-- `walletClient`: The wallet client used to sign payment messages (must implement the x402 wallet interface)
+- `walletClient`: The wallet client used to sign payment messages (must implement the t402 wallet interface)
 - `maxValue`: Optional maximum allowed payment amount in base units (defaults to 0.1 USDC)
 - `paymentRequirementsSelector`: Optional function to select payment requirements from the response (defaults to `selectPaymentRequirements`)
 
@@ -63,7 +63,7 @@ A wrapped fetch function that automatically handles 402 responses by:
 import { config } from "dotenv";
 import { createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { wrapFetchWithPayment } from "x402-fetch";
+import { wrapFetchWithPayment } from "t402-fetch";
 import { baseSepolia } from "viem/chains";
 
 config();

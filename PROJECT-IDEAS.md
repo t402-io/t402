@@ -1,7 +1,7 @@
 # PROJECT-IDEAS.md
 
-> **📌** Not all of the third‑party APIs listed below natively support x402 today—and that’s totally fine.
-> Wrap any API or scraper you need behind a thin x402 server (a dozen lines of code), then let agents pay through the protocol.
+> **📌** Not all of the third‑party APIs listed below natively support t402 today—and that’s totally fine.
+> Wrap any API or scraper you need behind a thin t402 server (a dozen lines of code), then let agents pay through the protocol.
 > Have questions? Open a grant or reach out to @murrlincoln on X or GitHub.
 
 ---
@@ -18,10 +18,10 @@ Impact-based micro‑grants up to **\$3k** are available for projects that unloc
 
 ### Unstoppable Agent
 
-* **What it does:** An unstoppable agent that provisions inference or tooling via x402.
+* **What it does:** An unstoppable agent that provisions inference or tooling via t402.
 * **Payment moment:** Each API invocation.
 * **Suggested APIs:** Any model of your choice, decentralized hosting provider.
-* You can put it in a sandbox with other agents and have them create a x402-enabled society together. All sorts of interesting experiments to run.
+* You can put it in a sandbox with other agents and have them create a t402-enabled society together. All sorts of interesting experiments to run.
 
 ---
 
@@ -57,7 +57,7 @@ Impact-based micro‑grants up to **\$3k** are available for projects that unloc
 
 ### Agentic Commerce Proof‑of‑Concept
 
-* End‑to‑end merchant checkout driven by an agent paying through x402.
+* End‑to‑end merchant checkout driven by an agent paying through t402.
 ---
 
 ## Knowledge & Services

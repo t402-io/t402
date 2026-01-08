@@ -12,11 +12,11 @@ import type { FacilitatorProxy, DiscoveredServer, TestConfig } from '../src/type
  * Discovery resources response structure
  */
 interface DiscoveryResourcesResponse {
-  x402Version: number;
+  t402Version: number;
   items: Array<{
     resource: string;
     type: string;
-    x402Version: number;
+    t402Version: number;
     accepts: any[];
     discoveryInfo?: any;
     lastUpdated: string;

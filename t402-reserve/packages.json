@@ -1,0 +1,129 @@
+{
+  "packages": [
+    {
+      "name": "t402",
+      "description": "The Tether Payment Protocol - HTTP 402 for USDT",
+      "priority": "critical"
+    },
+    {
+      "name": "t402-core",
+      "description": "t402 core protocol implementation",
+      "priority": "critical"
+    },
+    {
+      "name": "t402-client",
+      "description": "t402 client library",
+      "priority": "critical"
+    },
+    {
+      "name": "t402-server",
+      "description": "t402 server middleware",
+      "priority": "critical"
+    },
+    {
+      "name": "t402-evm",
+      "description": "t402 EVM blockchain implementation",
+      "priority": "high"
+    },
+    {
+      "name": "t402-tron",
+      "description": "t402 TRON blockchain implementation",
+      "priority": "high"
+    },
+    {
+      "name": "t402-solana",
+      "description": "t402 Solana blockchain implementation",
+      "priority": "high"
+    },
+    {
+      "name": "t402-ton",
+      "description": "t402 TON blockchain implementation",
+      "priority": "high"
+    },
+    {
+      "name": "t402-express",
+      "description": "t402 Express.js middleware",
+      "priority": "high"
+    },
+    {
+      "name": "t402-next",
+      "description": "t402 Next.js integration",
+      "priority": "high"
+    },
+    {
+      "name": "t402-react",
+      "description": "t402 React components",
+      "priority": "high"
+    },
+    {
+      "name": "t402-vue",
+      "description": "t402 Vue components",
+      "priority": "medium"
+    },
+    {
+      "name": "t402-hono",
+      "description": "t402 Hono middleware",
+      "priority": "medium"
+    },
+    {
+      "name": "t402-fastify",
+      "description": "t402 Fastify middleware",
+      "priority": "medium"
+    },
+    {
+      "name": "t402-axios",
+      "description": "t402 Axios interceptor",
+      "priority": "medium"
+    },
+    {
+      "name": "t402-fetch",
+      "description": "t402 Fetch API wrapper",
+      "priority": "medium"
+    },
+    {
+      "name": "t402-sdk",
+      "description": "t402 full SDK",
+      "priority": "medium"
+    },
+    {
+      "name": "t402-cli",
+      "description": "t402 command line interface",
+      "priority": "medium"
+    },
+    {
+      "name": "t402-paywall",
+      "description": "t402 paywall component",
+      "priority": "medium"
+    },
+    {
+      "name": "t402-widget",
+      "description": "t402 embeddable widget",
+      "priority": "medium"
+    },
+    {
+      "name": "t402-protocol",
+      "description": "t402 protocol specification",
+      "priority": "high"
+    },
+    {
+      "name": "tether402",
+      "description": "Tether HTTP 402 Payment Protocol",
+      "priority": "high"
+    },
+    {
+      "name": "tether-402",
+      "description": "Tether HTTP 402 Payment Protocol",
+      "priority": "medium"
+    },
+    {
+      "name": "usdt402",
+      "description": "USDT HTTP 402 Payment Protocol",
+      "priority": "high"
+    },
+    {
+      "name": "usdt-402",
+      "description": "USDT HTTP 402 Payment Protocol",
+      "priority": "medium"
+    }
+  ]
+}

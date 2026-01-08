@@ -1,11 +1,11 @@
 package main
 
 import (
-	x402 "github.com/coinbase/x402/go"
-	evm "github.com/coinbase/x402/go/mechanisms/evm/exact/client"
-	svm "github.com/coinbase/x402/go/mechanisms/svm/exact/client"
-	evmsigners "github.com/coinbase/x402/go/signers/evm"
-	svmsigners "github.com/coinbase/x402/go/signers/svm"
+	t402 "github.com/coinbase/t402/go"
+	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/client"
+	svm "github.com/coinbase/t402/go/mechanisms/svm/exact/client"
+	evmsigners "github.com/coinbase/t402/go/signers/evm"
+	svmsigners "github.com/coinbase/t402/go/signers/svm"
 )
 
 /**
@@ -18,7 +18,7 @@ import (
  * all networks of a particular type with the same signer.
  */
 
-func createMechanismHelperRegistrationClient(evmPrivateKey, svmPrivateKey string) (*x402.X402Client, error) {
+func createMechanismHelperRegistrationClient(evmPrivateKey, svmPrivateKey string) (*t402.T402Client, error) {
 	// Create signers from private keys
 	evmSigner, err := evmsigners.NewClientSignerFromPrivateKey(evmPrivateKey)
 	if err != nil {
@@ -26,7 +26,7 @@ func createMechanismHelperRegistrationClient(evmPrivateKey, svmPrivateKey string
 	}
 
 	// Start with a new client
-	client := x402.Newx402Client()
+	client := t402.Newt402Client()
 
 	// Register EVM scheme for all EVM networks using wildcard
 	// This registers:
@@ -47,7 +47,7 @@ func createMechanismHelperRegistrationClient(evmPrivateKey, svmPrivateKey string
 	}
 
 	// The fluent API allows chaining for clean code:
-	// client := x402.Newx402Client().
+	// client := t402.Newt402Client().
 	//     Register("eip155:*", evm.NewExactEvmScheme(evmSigner)).
 	//     Register("solana:*", svm.NewExactSvmScheme(svmSigner))
 

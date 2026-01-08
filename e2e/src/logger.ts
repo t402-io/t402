@@ -15,7 +15,7 @@ class Logger {
     if (config.logFile) {
       try {
         this.logStream = createWriteStream(config.logFile);
-        this.log(`🚀 X402 E2E Test Suite - Log started at ${new Date().toISOString()}`);
+        this.log(`🚀 T402 E2E Test Suite - Log started at ${new Date().toISOString()}`);
         this.log(`📝 Logging output to: ${config.logFile}`);
       } catch (error) {
         console.error(`Failed to create log file ${config.logFile}:`, error);

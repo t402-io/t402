@@ -3,8 +3,8 @@ import json
 import asyncio
 from dotenv import load_dotenv
 from eth_account import Account
-from x402.clients.httpx import x402_payment_hooks
-from x402.clients.base import decode_x_payment_response
+from t402.clients.httpx import t402_payment_hooks
+from t402.clients.base import decode_x_payment_response
 import httpx
 
 # Load environment variables
@@ -25,12 +25,12 @@ account = Account.from_key(private_key)
 
 
 async def main():
-    # Create httpx client with x402 payment hooks and increased timeout
+    # Create httpx client with t402 payment hooks and increased timeout
     # Set timeout to 30 seconds to handle busy servers during test runs
     timeout = httpx.Timeout(30.0, connect=10.0)
     async with httpx.AsyncClient(base_url=base_url, timeout=timeout) as client:
         # Add payment hooks directly to client.event_hooks
-        client.event_hooks = x402_payment_hooks(account)
+        client.event_hooks = t402_payment_hooks(account)
 
         # Make request
         try:

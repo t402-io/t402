@@ -1,5 +1,5 @@
 {
-  "name": "x402-e2e",
+  "name": "t402-e2e",
   "version": "1.0.0",
   "description": "End-to-end tests for X402 protocol",
   "main": "dist/test.js",

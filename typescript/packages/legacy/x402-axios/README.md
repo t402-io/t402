@@ -1,11 +1,11 @@
-# x402-axios
+# t402-axios
 
-A utility package that extends Axios to automatically handle 402 Payment Required responses using the x402 payment protocol. This package enables seamless integration of payment functionality into your applications when making HTTP requests with Axios.
+A utility package that extends Axios to automatically handle 402 Payment Required responses using the t402 payment protocol. This package enables seamless integration of payment functionality into your applications when making HTTP requests with Axios.
 
 ## Installation
 
 ```bash
-npm install x402-axios
+npm install t402-axios
 ```
 
 ## Quick Start
@@ -13,7 +13,7 @@ npm install x402-axios
 ```typescript
 import { createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { withPaymentInterceptor } from "x402-axios";
+import { withPaymentInterceptor } from "t402-axios";
 import axios from "axios";
 import { baseSepolia } from "viem/chains";
 
@@ -54,7 +54,7 @@ Adds a response interceptor to an Axios instance to handle 402 Payment Required 
 #### Parameters
 
 - `axiosClient`: The Axios instance to add the interceptor to
-- `walletClient`: The wallet client used to sign payment messages (must implement the x402 wallet interface)
+- `walletClient`: The wallet client used to sign payment messages (must implement the t402 wallet interface)
 
 #### Returns
 

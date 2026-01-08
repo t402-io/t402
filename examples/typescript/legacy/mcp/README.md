@@ -1,12 +1,12 @@
-# x402 MCP Example Client
+# t402 MCP Example Client
 
-This is an example client that demonstrates how to use the x402 payment protocol with the Model Context Protocol (MCP) to make paid API requests through an MCP server.
+This is an example client that demonstrates how to use the t402 payment protocol with the Model Context Protocol (MCP) to make paid API requests through an MCP server.
 
 ## Prerequisites
 
 - Node.js v20+ (install via [nvm](https://github.com/nvm-sh/nvm))
 - pnpm v10 (install via [pnpm.io/installation](https://pnpm.io/installation))
-- A running x402 server (you can use the example express server at `examples/typescript/servers/express`)
+- A running t402 server (you can use the example express server at `examples/typescript/servers/express`)
 - A valid Ethereum private key for making payments
 - Claude Desktop with MCP support
 
@@ -56,7 +56,7 @@ pnpm dev
 
 The example demonstrates how to:
 1. Create a wallet client using viem
-2. Set up an MCP server with x402 payment handling
+2. Set up an MCP server with t402 payment handling
 3. Create a tool that makes paid API requests
 4. Handle responses and errors through the MCP protocol
 
@@ -69,7 +69,7 @@ import axios from "axios";
 import { createWalletClient, Hex, http, publicActions } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { baseSepolia } from "viem/chains";
-import { withPaymentInterceptor } from "x402-axios";
+import { withPaymentInterceptor } from "t402-axios";
 
 // Create wallet client
 const wallet = createWalletClient({
@@ -83,7 +83,7 @@ const client = withPaymentInterceptor(axios.create({ baseURL: RESOURCE_SERVER_UR
 
 // Create MCP server
 const server = new McpServer({
-  name: "x402 MCP Client Demo",
+  name: "t402 MCP Client Demo",
   version: "1.0.0",
 });
 
@@ -128,12 +128,12 @@ To use this pattern in your own application:
 
 1. Install the required dependencies:
 ```bash
-npm install @modelcontextprotocol/sdk x402-axios viem
+npm install @modelcontextprotocol/sdk t402-axios viem
 ```
 
 2. Set up your environment variables
 3. Create a wallet client
-4. Set up your MCP server with x402 payment handling
+4. Set up your MCP server with t402 payment handling
 5. Define your tools for making paid requests
 6. Connect to the MCP transport
 

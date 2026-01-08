@@ -1,30 +1,30 @@
-import { x402Client, x402ClientConfig, x402HTTPClient } from "@x402/core/client";
-import { type PaymentRequired } from "@x402/core/types";
+import { t402Client, t402ClientConfig, t402HTTPClient } from "@t402/core/client";
+import { type PaymentRequired } from "@t402/core/types";
 import type { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "axios";
 
 /**
- * Wraps an Axios instance with x402 payment handling.
+ * Wraps an Axios instance with t402 payment handling.
  *
  * This function adds an interceptor to automatically handle 402 Payment Required responses
  * by creating and sending payment headers. It will:
  * 1. Intercept 402 responses
  * 2. Parse the payment requirements
- * 3. Create a payment header using the configured x402HTTPClient
+ * 3. Create a payment header using the configured t402HTTPClient
  * 4. Retry the request with the payment header
  *
  * @param axiosInstance - The Axios instance to wrap
- * @param client - Configured x402Client instance for handling payments
+ * @param client - Configured t402Client instance for handling payments
  * @returns The wrapped Axios instance that handles 402 responses automatically
  *
  * @example
  * ```typescript
  * import axios from 'axios';
- * import { wrapAxiosWithPayment, x402Client } from '@x402/axios';
- * import { ExactEvmScheme } from '@x402/evm';
+ * import { wrapAxiosWithPayment, t402Client } from '@t402/axios';
+ * import { ExactEvmScheme } from '@t402/evm';
  * import { privateKeyToAccount } from 'viem/accounts';
  *
  * const account = privateKeyToAccount('0x...');
- * const client = new x402Client()
+ * const client = new t402Client()
  *   .register('eip155:*', new ExactEvmScheme(account));
  *
  * const api = wrapAxiosWithPayment(axios.create(), client);
@@ -40,9 +40,9 @@ import type { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "axio
  */
 export function wrapAxiosWithPayment(
   axiosInstance: AxiosInstance,
-  client: x402Client,
+  client: t402Client,
 ): AxiosInstance {
-  const httpClient = new x402HTTPClient(client);
+  const httpClient = new t402HTTPClient(client);
 
   axiosInstance.interceptors.response.use(
     response => response,
@@ -130,7 +130,7 @@ export function wrapAxiosWithPayment(
 }
 
 /**
- * Wraps an Axios instance with x402 payment handling using a configuration object.
+ * Wraps an Axios instance with t402 payment handling using a configuration object.
  *
  * @param axiosInstance - The Axios instance to wrap
  * @param config - Configuration options including scheme registrations and selectors
@@ -139,8 +139,8 @@ export function wrapAxiosWithPayment(
  * @example
  * ```typescript
  * import axios from 'axios';
- * import { wrapAxiosWithPaymentFromConfig } from '@x402/axios';
- * import { ExactEvmScheme } from '@x402/evm';
+ * import { wrapAxiosWithPaymentFromConfig } from '@t402/axios';
+ * import { ExactEvmScheme } from '@t402/evm';
  * import { privateKeyToAccount } from 'viem/accounts';
  *
  * const account = privateKeyToAccount('0x...');
@@ -156,25 +156,25 @@ export function wrapAxiosWithPayment(
  */
 export function wrapAxiosWithPaymentFromConfig(
   axiosInstance: AxiosInstance,
-  config: x402ClientConfig,
+  config: t402ClientConfig,
 ): AxiosInstance {
-  const client = x402Client.fromConfig(config);
+  const client = t402Client.fromConfig(config);
   return wrapAxiosWithPayment(axiosInstance, client);
 }
 
 // Re-export types and utilities for convenience
-export { x402Client, x402HTTPClient } from "@x402/core/client";
+export { t402Client, t402HTTPClient } from "@t402/core/client";
 export type {
   PaymentPolicy,
   SchemeRegistration,
   SelectPaymentRequirements,
-  x402ClientConfig,
-} from "@x402/core/client";
-export { decodePaymentResponseHeader } from "@x402/core/http";
+  t402ClientConfig,
+} from "@t402/core/client";
+export { decodePaymentResponseHeader } from "@t402/core/http";
 export type {
   Network,
   PaymentPayload,
   PaymentRequired,
   PaymentRequirements,
   SchemeNetworkClient,
-} from "@x402/core/types";
+} from "@t402/core/types";

@@ -8,14 +8,14 @@ import (
 	"net/http"
 	"os"
 
-	x402 "github.com/coinbase/x402/go"
-	x402http "github.com/coinbase/x402/go/http"
-	evm "github.com/coinbase/x402/go/mechanisms/evm/exact/client"
-	evmv1 "github.com/coinbase/x402/go/mechanisms/evm/exact/v1/client"
-	svm "github.com/coinbase/x402/go/mechanisms/svm/exact/client"
-	svmv1 "github.com/coinbase/x402/go/mechanisms/svm/exact/v1/client"
-	evmsigners "github.com/coinbase/x402/go/signers/evm"
-	svmsigners "github.com/coinbase/x402/go/signers/svm"
+	t402 "github.com/coinbase/t402/go"
+	t402http "github.com/coinbase/t402/go/http"
+	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/client"
+	evmv1 "github.com/coinbase/t402/go/mechanisms/evm/exact/v1/client"
+	svm "github.com/coinbase/t402/go/mechanisms/svm/exact/client"
+	svmv1 "github.com/coinbase/t402/go/mechanisms/svm/exact/v1/client"
+	evmsigners "github.com/coinbase/t402/go/signers/evm"
+	svmsigners "github.com/coinbase/t402/go/signers/svm"
 )
 
 // Result structure for e2e test output
@@ -61,8 +61,8 @@ func main() {
 		return
 	}
 
-	// Create x402 client with fluent API
-	x402Client := x402.Newx402Client().
+	// Create t402 client with fluent API
+	t402Client := t402.Newt402Client().
 		Register("eip155:*", evm.NewExactEvmScheme(evmSigner)).
 		Register("solana:*", svm.NewExactSvmScheme(svmSigner)).
 		RegisterV1("base-sepolia", evmv1.NewExactEvmSchemeV1(evmSigner)).
@@ -71,10 +71,10 @@ func main() {
 		RegisterV1("solana", svmv1.NewExactSvmSchemeV1(svmSigner))
 
 	// Create HTTP client wrapper
-	httpClient := x402http.Newx402HTTPClient(x402Client)
+	httpClient := t402http.Newt402HTTPClient(t402Client)
 
 	// Wrap standard HTTP client with payment handling
-	client := x402http.WrapHTTPClientWithPayment(http.DefaultClient, httpClient)
+	client := t402http.WrapHTTPClientWithPayment(http.DefaultClient, httpClient)
 
 	// Make the request
 	url := serverURL + endpointPath
@@ -124,7 +124,7 @@ func main() {
 	if resp.StatusCode == 402 {
 		// Payment was required but we got a 402, so payment failed
 		success = false
-	} else if settleResp, ok := paymentResponse.(*x402.SettleResponse); ok && paymentResponse != nil {
+	} else if settleResp, ok := paymentResponse.(*t402.SettleResponse); ok && paymentResponse != nil {
 		// Payment was attempted, check if it succeeded
 		success = settleResp.Success
 	}

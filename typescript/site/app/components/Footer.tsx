@@ -38,7 +38,7 @@ export function Footer() {
           <nav aria-label="Footer navigation">
             <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
               <Link
-                href="https://x402.gitbook.io/x402"
+                href="https://t402.gitbook.io/t402"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white hover:text-gray-300 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
@@ -52,13 +52,13 @@ export function Footer() {
                 Ecosystem
               </Link>
               <Link
-                href="/writing/x402-v2-launch"
+                href="/writing/t402-v2-launch"
                 className="text-white hover:text-gray-300 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
               >
                 Writing
               </Link>
               <Link
-                href="https://www.x402.org/x402-whitepaper.pdf"
+                href="https://www.t402.org/t402-whitepaper.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white hover:text-gray-300 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
@@ -72,7 +72,7 @@ export function Footer() {
         {/* Social icons */}
         <div className="flex items-center gap-6 mb-8">
           <Link
-            href="https://github.com/coinbase/x402"
+            href="https://github.com/coinbase/t402"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
@@ -97,7 +97,7 @@ export function Footer() {
         {/* Copyright row */}
         <div className="flex justify-between items-center">
           <p className="text-white/40 text-sm">
-            While x402 is an open and neutral standard, this website is maintained by
+            While t402 is an open and neutral standard, this website is maintained by
             {" "}Coinbase Developer Platform. By using this site, you agree to be bound by the{" "}
             <Link
               href="https://www.coinbase.com/legal/developer-platform/terms-of-service"
@@ -124,7 +124,7 @@ export function Footer() {
       {/* Logo section - below copyright */}
       <div className="relative w-full">
         <img
-          src="/images/x402_vector.svg"
+          src="/images/t402_vector.svg"
           alt=""
           aria-hidden="true"
           className="w-full h-auto"

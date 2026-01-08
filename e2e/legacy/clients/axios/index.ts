@@ -1,7 +1,7 @@
 import axios from "axios";
 import { config } from "dotenv";
 import { Hex } from "viem";
-import { withPaymentInterceptor, decodeXPaymentResponse, createSigner, MultiNetworkSigner } from "x402-axios";
+import { withPaymentInterceptor, decodeXPaymentResponse, createSigner, MultiNetworkSigner } from "t402-axios";
 
 config();
 

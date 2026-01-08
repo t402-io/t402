@@ -5,11 +5,11 @@ from typing_extensions import (
     TypedDict,
 )  # use `typing_extensions.TypedDict` instead of `typing.TypedDict` on Python < 3.12
 from eth_account import Account
-from x402.encoding import safe_base64_encode, safe_base64_decode
-from x402.types import (
+from t402.encoding import safe_base64_encode, safe_base64_decode
+from t402.types import (
     PaymentRequirements,
 )
-from x402.chains import get_chain_id
+from t402.chains import get_chain_id
 import json
 
 
@@ -19,15 +19,15 @@ def create_nonce() -> bytes:
 
 
 def prepare_payment_header(
-    sender_address: str, x402_version: int, payment_requirements: PaymentRequirements
+    sender_address: str, t402_version: int, payment_requirements: PaymentRequirements
 ) -> Dict[str, Any]:
-    """Prepare an unsigned payment header with sender address, x402 version, and payment requirements."""
+    """Prepare an unsigned payment header with sender address, t402 version, and payment requirements."""
     nonce = create_nonce()
     valid_after = str(int(time.time()) - 60)  # 60 seconds before
     valid_before = str(int(time.time()) + payment_requirements.max_timeout_seconds)
 
     return {
-        "x402Version": x402_version,
+        "t402Version": t402_version,
         "scheme": payment_requirements.scheme,
         "network": payment_requirements.network,
         "payload": {
@@ -45,7 +45,7 @@ def prepare_payment_header(
 
 
 class PaymentHeader(TypedDict):
-    x402Version: int
+    t402Version: int
     scheme: str
     network: str
     payload: dict[str, Any]

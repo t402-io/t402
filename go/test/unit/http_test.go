@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	x402 "github.com/coinbase/x402/go"
-	x402http "github.com/coinbase/x402/go/http"
-	"github.com/coinbase/x402/go/test/mocks/cash"
+	t402 "github.com/coinbase/t402/go"
+	t402http "github.com/coinbase/t402/go/http"
+	"github.com/coinbase/t402/go/test/mocks/cash"
 )
 
 // mockBrowserHTTPAdapter implements the HTTPAdapter interface for browser testing
@@ -63,14 +63,14 @@ func TestHTTPBrowserPaywall(t *testing.T) {
 		ctx := context.Background()
 
 		// Setup routes configuration
-		routes := x402http.RoutesConfig{
+		routes := t402http.RoutesConfig{
 			"/web/protected": {
-				Accepts: x402http.PaymentOptions{
+				Accepts: t402http.PaymentOptions{
 					{
 						Scheme:  "cash",
 						PayTo:   "merchant@example.com",
 						Price:   "$5.00",
-						Network: "x402:cash",
+						Network: "t402:cash",
 					},
 				},
 				Description: "Premium Web Content",
@@ -79,18 +79,18 @@ func TestHTTPBrowserPaywall(t *testing.T) {
 		}
 
 		// Setup facilitator with cash scheme
-		facilitator := x402.Newx402Facilitator()
-		facilitator.Register([]x402.Network{"x402:cash"}, cash.NewSchemeNetworkFacilitator())
+		facilitator := t402.Newt402Facilitator()
+		facilitator.Register([]t402.Network{"t402:cash"}, cash.NewSchemeNetworkFacilitator())
 
 		// Create facilitator client wrapper
 		facilitatorClient := cash.NewFacilitatorClient(facilitator)
 
 		// Setup HTTP server
-		server := x402http.Newx402HTTPResourceServer(
+		server := t402http.Newt402HTTPResourceServer(
 			routes,
-			x402.WithFacilitatorClient(facilitatorClient),
+			t402.WithFacilitatorClient(facilitatorClient),
 		)
-		server.Register("x402:cash", cash.NewSchemeNetworkServer())
+		server.Register("t402:cash", cash.NewSchemeNetworkServer())
 
 		// Initialize server
 		err := server.Initialize(ctx)
@@ -107,14 +107,14 @@ func TestHTTPBrowserPaywall(t *testing.T) {
 		}
 
 		// Create request context
-		reqCtx := x402http.HTTPRequestContext{
+		reqCtx := t402http.HTTPRequestContext{
 			Adapter: mockBrowserAdapter,
 			Path:    "/web/protected",
 			Method:  "GET",
 		}
 
 		// Configure paywall
-		paywallConfig := &x402http.PaywallConfig{
+		paywallConfig := &t402http.PaywallConfig{
 			AppName:      "Test App",
 			AppLogo:      "/logo.png",
 			CDPClientKey: "test-key",
@@ -124,7 +124,7 @@ func TestHTTPBrowserPaywall(t *testing.T) {
 		// Process browser request without payment
 		httpProcessResult := server.ProcessHTTPRequest(ctx, reqCtx, paywallConfig)
 
-		if httpProcessResult.Type != x402http.ResultPaymentError {
+		if httpProcessResult.Type != t402http.ResultPaymentError {
 			t.Fatalf("Expected payment-error result, got %s", httpProcessResult.Type)
 		}
 

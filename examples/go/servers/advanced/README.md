@@ -1,12 +1,12 @@
-# x402-gin Advanced Examples
+# t402-gin Advanced Examples
 
-Gin server demonstrating advanced x402 patterns including dynamic pricing, payment routing, lifecycle hooks and API discoverability.
+Gin server demonstrating advanced t402 patterns including dynamic pricing, payment routing, lifecycle hooks and API discoverability.
 
 ## Prerequisites
 
 - Go 1.21 or higher
 - Valid EVM address for receiving payments
-- URL of a facilitator supporting the desired payment network, see [facilitator list](https://www.x402.org/ecosystem?category=facilitators)
+- URL of a facilitator supporting the desired payment network, see [facilitator list](https://www.t402.org/ecosystem?category=facilitators)
 
 ## Setup
 
@@ -82,9 +82,9 @@ discoveryExtension, err := bazaar.DeclareDiscoveryExtension(
     },
 )
 
-routes := x402http.RoutesConfig{
+routes := t402http.RoutesConfig{
     "GET /weather": {
-        Accepts: x402http.PaymentOptions{
+        Accepts: t402http.PaymentOptions{
             {
                 Scheme:  "exact",
                 PayTo:   evmPayeeAddress,
@@ -108,7 +108,7 @@ routes := x402http.RoutesConfig{
 Calculate prices at runtime based on request context:
 
 ```go
-dynamicPrice := func(ctx context.Context, reqCtx x402http.HTTPRequestContext) (x402.Price, error) {
+dynamicPrice := func(ctx context.Context, reqCtx t402http.HTTPRequestContext) (t402.Price, error) {
     tier := "standard" // Extract from request context
     if tier == "premium" {
         return "$0.005", nil // Premium tier: 0.5 cents
@@ -116,13 +116,13 @@ dynamicPrice := func(ctx context.Context, reqCtx x402http.HTTPRequestContext) (x
     return "$0.001", nil // Standard tier: 0.1 cents
 }
 
-routes := x402http.RoutesConfig{
+routes := t402http.RoutesConfig{
     "GET /weather": {
-        Accepts: x402http.PaymentOptions{
+        Accepts: t402http.PaymentOptions{
             {
                 Scheme:  "exact",
                 PayTo:   evmPayeeAddress,
-                Price:   x402http.DynamicPriceFunc(dynamicPrice),
+                Price:   t402http.DynamicPriceFunc(dynamicPrice),
                 Network: evmNetwork,
             },
         },
@@ -142,7 +142,7 @@ addressLookup := map[string]string{
     "UK": "0x...",
 }
 
-dynamicPayTo := func(ctx context.Context, reqCtx x402http.HTTPRequestContext) (string, error) {
+dynamicPayTo := func(ctx context.Context, reqCtx t402http.HTTPRequestContext) (string, error) {
     country := "US" // Extract from request context
     address, ok := addressLookup[country]
     if !ok {
@@ -151,12 +151,12 @@ dynamicPayTo := func(ctx context.Context, reqCtx x402http.HTTPRequestContext) (s
     return address, nil
 }
 
-routes := x402http.RoutesConfig{
+routes := t402http.RoutesConfig{
     "GET /weather": {
-        Accepts: x402http.PaymentOptions{
+        Accepts: t402http.PaymentOptions{
             {
                 Scheme:  "exact",
-                PayTo:   x402http.DynamicPayToFunc(dynamicPayTo),
+                PayTo:   t402http.DynamicPayToFunc(dynamicPayTo),
                 Price:   "$0.001",
                 Network: evmNetwork,
             },
@@ -173,28 +173,28 @@ Run custom logic before/after verification and settlement:
 
 ```go
 // Create facilitator client
-facilitatorClient := x402http.NewHTTPFacilitatorClient(&x402http.FacilitatorConfig{
+facilitatorClient := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
     URL: facilitatorURL,
 })
 
-// Create x402 resource server with hooks
-server := x402.Newx402ResourceServer(
-    x402.WithFacilitatorClient(facilitatorClient),
+// Create t402 resource server with hooks
+server := t402.Newt402ResourceServer(
+    t402.WithFacilitatorClient(facilitatorClient),
 ).
     Register(evmNetwork, evm.NewExactEvmScheme()).
-    OnBeforeVerify(func(ctx x402.VerifyContext) (*x402.BeforeHookResult, error) {
+    OnBeforeVerify(func(ctx t402.VerifyContext) (*t402.BeforeHookResult, error) {
         fmt.Println("Before verify hook", ctx)
-        // Abort verification by returning &x402.BeforeHookResult{Abort: true, Reason: "..."}
+        // Abort verification by returning &t402.BeforeHookResult{Abort: true, Reason: "..."}
         return nil, nil
     }).
-    OnAfterSettle(func(ctx x402.SettleResultContext) error {
+    OnAfterSettle(func(ctx t402.SettleResultContext) error {
         // Log payment to database
         db.RecordTransaction(ctx.Result.Transaction, ctx.Result.Payer)
         return nil
     }).
-    OnSettleFailure(func(ctx x402.SettleFailureContext) (*x402.SettleFailureHookResult, error) {
+    OnSettleFailure(func(ctx t402.SettleFailureContext) (*t402.SettleFailureHookResult, error) {
         // Return a result with Recovered=true to recover from the failure
-        // return &x402.SettleFailureHookResult{Recovered: true, Result: &x402.SettleResponse{...}}
+        // return &t402.SettleFailureHookResult{Recovered: true, Result: &t402.SettleResponse{...}}
         return nil, nil
     })
 
@@ -225,10 +225,10 @@ Accept payments in custom tokens. Register a money parser on the scheme to suppo
 
 ```go
 evmScheme := evm.NewExactEvmScheme().RegisterMoneyParser(
-    func(amount float64, network x402.Network) (*x402.AssetAmount, error) {
+    func(amount float64, network t402.Network) (*t402.AssetAmount, error) {
         // Use Wrapped XDAI on Gnosis Chain
         if string(network) == "eip155:100" {
-            return &x402.AssetAmount{
+            return &t402.AssetAmount{
                 Amount: fmt.Sprintf("%.0f", amount*1e18),
                 Asset:  "0xe91d153e0b41518a2ce8dd3d7944fa863463a97d",
                 Extra:  map[string]interface{}{"token": "Wrapped XDAI"},
@@ -265,7 +265,7 @@ The `PAYMENT-REQUIRED` header contains base64-encoded JSON with the payment requ
 
 ```json
 {
-  "x402Version": 2,
+  "t402Version": 2,
   "error": "Payment required",
   "resource": {
     "url": "http://localhost:4021/weather",

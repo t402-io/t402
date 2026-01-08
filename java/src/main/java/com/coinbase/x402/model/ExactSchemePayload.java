@@ -1,4 +1,4 @@
-package com.coinbase.x402.model;
+package com.coinbase.t402.model;
 
 /**
  * Payload structure for the "exact" EVM payment scheme.

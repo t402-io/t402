@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	x402 "github.com/coinbase/x402/go"
+	t402 "github.com/coinbase/t402/go"
 )
 
 // TestRegisterMoneyParser_SingleCustomParser tests a single custom money parser
@@ -12,9 +12,9 @@ func TestRegisterMoneyParser_SingleCustomParser(t *testing.T) {
 	server := NewExactSvmScheme()
 
 	// Register custom parser: large amounts use custom token
-	server.RegisterMoneyParser(func(amount float64, network x402.Network) (*x402.AssetAmount, error) {
+	server.RegisterMoneyParser(func(amount float64, network t402.Network) (*t402.AssetAmount, error) {
 		if amount > 100 {
-			return &x402.AssetAmount{
+			return &t402.AssetAmount{
 				Amount: fmt.Sprintf("%.0f", amount*1e9), // Custom token with 9 decimals
 				Asset:  "CustomLargeTokenMint111111111111111",
 				Extra: map[string]interface{}{
@@ -67,9 +67,9 @@ func TestRegisterMoneyParser_MultipleInChain(t *testing.T) {
 	server := NewExactSvmScheme()
 
 	// Parser 1: Premium tier (> 1000)
-	server.RegisterMoneyParser(func(amount float64, network x402.Network) (*x402.AssetAmount, error) {
+	server.RegisterMoneyParser(func(amount float64, network t402.Network) (*t402.AssetAmount, error) {
 		if amount > 1000 {
-			return &x402.AssetAmount{
+			return &t402.AssetAmount{
 				Amount: fmt.Sprintf("%.0f", amount*1e9),
 				Asset:  "PremiumMint1111111111111111111111111",
 				Extra:  map[string]interface{}{"tier": "premium"},
@@ -79,9 +79,9 @@ func TestRegisterMoneyParser_MultipleInChain(t *testing.T) {
 	})
 
 	// Parser 2: Large tier (> 100)
-	server.RegisterMoneyParser(func(amount float64, network x402.Network) (*x402.AssetAmount, error) {
+	server.RegisterMoneyParser(func(amount float64, network t402.Network) (*t402.AssetAmount, error) {
 		if amount > 100 {
-			return &x402.AssetAmount{
+			return &t402.AssetAmount{
 				Amount: fmt.Sprintf("%.0f", amount*1e9),
 				Asset:  "LargeMint11111111111111111111111111",
 				Extra:  map[string]interface{}{"tier": "large"},
@@ -123,9 +123,9 @@ func TestRegisterMoneyParser_MultipleInChain(t *testing.T) {
 func TestRegisterMoneyParser_StringPrices(t *testing.T) {
 	server := NewExactSvmScheme()
 
-	server.RegisterMoneyParser(func(amount float64, network x402.Network) (*x402.AssetAmount, error) {
+	server.RegisterMoneyParser(func(amount float64, network t402.Network) (*t402.AssetAmount, error) {
 		if amount > 50 {
-			return &x402.AssetAmount{
+			return &t402.AssetAmount{
 				Amount: fmt.Sprintf("%.0f", amount*1e9),
 				Asset:  "CustomMint111111111111111111111111",
 			}, nil
@@ -162,10 +162,10 @@ func TestRegisterMoneyParser_Chainability(t *testing.T) {
 	server := NewExactSvmScheme()
 
 	result := server.
-		RegisterMoneyParser(func(amount float64, network x402.Network) (*x402.AssetAmount, error) {
+		RegisterMoneyParser(func(amount float64, network t402.Network) (*t402.AssetAmount, error) {
 			return nil, nil
 		}).
-		RegisterMoneyParser(func(amount float64, network x402.Network) (*x402.AssetAmount, error) {
+		RegisterMoneyParser(func(amount float64, network t402.Network) (*t402.AssetAmount, error) {
 			return nil, nil
 		})
 

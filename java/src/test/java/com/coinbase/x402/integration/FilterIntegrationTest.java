@@ -1,9 +1,9 @@
-package com.coinbase.x402.integration;
+package com.coinbase.t402.integration;
 
-import com.coinbase.x402.client.FacilitatorClient;
-import com.coinbase.x402.client.VerificationResponse;
-import com.coinbase.x402.model.PaymentPayload;
-import com.coinbase.x402.server.PaymentFilter;
+import com.coinbase.t402.client.FacilitatorClient;
+import com.coinbase.t402.client.VerificationResponse;
+import com.coinbase.t402.model.PaymentPayload;
+import com.coinbase.t402.server.PaymentFilter;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,13 +37,13 @@ class FilterIntegrationTest {
     static void startJetty() throws Exception {
         // ----- stub facilitator -----------------------------------------
         FacilitatorClient stubFac = new FacilitatorClient() {
-            @Override public VerificationResponse verify(String hdr, com.coinbase.x402.model.PaymentRequirements r) {
+            @Override public VerificationResponse verify(String hdr, com.coinbase.t402.model.PaymentRequirements r) {
                 VerificationResponse vr = new VerificationResponse();
                 vr.isValid = true;                       // always accept
                 return vr;
             }
-            @Override public com.coinbase.x402.client.SettlementResponse settle(String h, com.coinbase.x402.model.PaymentRequirements r) { return new com.coinbase.x402.client.SettlementResponse(); }
-            @Override public java.util.Set<com.coinbase.x402.client.Kind> supported() { return java.util.Set.of(); }
+            @Override public com.coinbase.t402.client.SettlementResponse settle(String h, com.coinbase.t402.model.PaymentRequirements r) { return new com.coinbase.t402.client.SettlementResponse(); }
+            @Override public java.util.Set<com.coinbase.t402.client.Kind> supported() { return java.util.Set.of(); }
         };
 
         // price-table: /private costs 1 (value irrelevant here)
@@ -89,7 +89,7 @@ class FilterIntegrationTest {
 
         HttpResponse<String> rsp = http.send(req, HttpResponse.BodyHandlers.ofString());
         assertEquals(402, rsp.statusCode());
-        assertTrue(rsp.body().contains("\"x402Version\":"));
+        assertTrue(rsp.body().contains("\"t402Version\":"));
     }
 
     /* ---------- test: valid header -> 200 ----------------------------- */
@@ -97,7 +97,7 @@ class FilterIntegrationTest {
     void validHeaderGets200() throws Exception {
         // build minimal payment header with matching resource
         PaymentPayload p = new PaymentPayload();
-        p.x402Version = 1;
+        p.t402Version = 1;
         p.scheme      = "exact";
         p.network     = "base-sepolia";
         p.payload     = Map.of("resource", "/private");

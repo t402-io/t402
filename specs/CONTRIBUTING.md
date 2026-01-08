@@ -1,6 +1,6 @@
 # Specs Contributing Guide
 
-Guide for proposing and documenting new x402 specifications.
+Guide for proposing and documenting new t402 specifications.
 
 ## Contents
 
@@ -12,11 +12,11 @@ Guide for proposing and documenting new x402 specifications.
 
 ## Overview
 
-The `specs/` directory contains the formal specifications for the x402 protocol. These documents define the standards that implementations must follow.
+The `specs/` directory contains the formal specifications for the t402 protocol. These documents define the standards that implementations must follow.
 
 ```
 specs/
-├── x402-specification.md      # Core protocol specification
+├── t402-specification.md      # Core protocol specification
 ├── schemes/
 │   └── exact/
 │       ├── scheme_exact.md    # Scheme overview
@@ -46,7 +46,7 @@ Current schemes:
 
 ### Transports
 
-Transports define how x402 messages are transmitted over different protocols:
+Transports define how t402 messages are transmitted over different protocols:
 
 - `http.md` - HTTP transport (status codes, headers)
 - `mcp.md` - Model Context Protocol transport
@@ -54,7 +54,7 @@ Transports define how x402 messages are transmitted over different protocols:
 
 ### Core Specification
 
-`x402-specification.md` defines the protocol fundamentals:
+`t402-specification.md` defines the protocol fundamentals:
 - Core types (`PaymentRequirements`, `PaymentPayload`, `SettlementResponse`)
 - Facilitator interface
 - Security considerations
@@ -176,7 +176,7 @@ Every section should include concrete examples:
 
 Don't redefine types from the core spec. Reference them:
 
-> See `PaymentRequirements` in [x402-specification.md](x402-specification.md#5-types)
+> See `PaymentRequirements` in [t402-specification.md](t402-specification.md#5-types)
 
 ### Document Security Considerations
 

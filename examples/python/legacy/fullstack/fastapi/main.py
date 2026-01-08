@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from x402.fastapi.middleware import require_payment
-from x402.types import PaywallConfig
+from t402.fastapi.middleware import require_payment
+from t402.types import PaywallConfig
 
 # Load environment variables
 load_dotenv()
@@ -33,8 +33,8 @@ app.middleware("http")(
         network=NETWORK,
         paywall_config=PaywallConfig(
             cdp_client_key=CDP_CLIENT_KEY or "",
-            app_name="x402 Python Example",
-            app_logo="/static/x402.png",
+            app_name="t402 Python Example",
+            app_logo="/static/t402.png",
         ),
     )
 )

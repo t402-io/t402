@@ -12,12 +12,12 @@ import { SolanaPaywall } from "./SolanaPaywall";
  * @returns The PaywallApp component
  */
 export function PaywallApp() {
-  const x402 = window.x402;
-  const testnet = x402.testnet ?? true;
+  const t402 = window.t402;
+  const testnet = t402.testnet ?? true;
 
   const paymentRequirement = useMemo<PaymentRequirements>(() => {
-    return choosePaymentRequirement(x402.paymentRequirements, testnet);
-  }, [testnet, x402.paymentRequirements]);
+    return choosePaymentRequirement(t402.paymentRequirements, testnet);
+  }, [testnet, t402.paymentRequirements]);
 
   const handleSuccessfulResponse = useCallback(async (response: Response) => {
     const contentType = response.headers.get("content-type");

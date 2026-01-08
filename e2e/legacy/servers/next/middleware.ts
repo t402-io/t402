@@ -1,5 +1,5 @@
 import { Address } from "viem";
-import { paymentMiddleware, Network, Resource, FacilitatorConfig } from "x402-next";
+import { paymentMiddleware, Network, Resource, FacilitatorConfig } from "t402-next";
 
 const payTo = process.env.EVM_PAYEE_ADDRESS as Address;
 const network = process.env.EVM_NETWORK as Network;
@@ -29,8 +29,8 @@ export const middleware = paymentMiddleware(
   },
   facilitatorConfig,
   {
-    appName: "Next x402 E2E Test",
-    appLogo: "/x402-icon-blue.png",
+    appName: "Next t402 E2E Test",
+    appLogo: "/t402-icon-blue.png",
   },
 );
 

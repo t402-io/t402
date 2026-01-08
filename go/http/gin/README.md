@@ -1,11 +1,11 @@
-# x402 Gin Middleware
+# t402 Gin Middleware
 
-Gin middleware integration for the x402 Payment Protocol. This package provides middleware for adding x402 payment requirements to your Gin applications.
+Gin middleware integration for the t402 Payment Protocol. This package provides middleware for adding t402 payment requirements to your Gin applications.
 
 ## Installation
 
 ```bash
-go get github.com/coinbase/x402/go
+go get github.com/coinbase/t402/go
 ```
 
 ## Quick Start
@@ -16,21 +16,21 @@ package main
 import (
 	"time"
 
-	x402 "github.com/coinbase/x402/go"
-	x402http "github.com/coinbase/x402/go/http"
-	ginmw "github.com/coinbase/x402/go/http/gin"
-	evm "github.com/coinbase/x402/go/mechanisms/evm/exact/server"
+	t402 "github.com/coinbase/t402/go"
+	t402http "github.com/coinbase/t402/go/http"
+	ginmw "github.com/coinbase/t402/go/http/gin"
+	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/server"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	r := gin.Default()
 
-	facilitator := x402http.NewHTTPFacilitatorClient(&x402http.FacilitatorConfig{
-		URL: "https://facilitator.x402.org",
+	facilitator := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
+		URL: "https://facilitator.t402.org",
 	})
 
-	routes := x402http.RoutesConfig{
+	routes := t402http.RoutesConfig{
 		"GET /protected": {
 			Scheme:      "exact",
 			PayTo:       "0xYourAddress",
@@ -73,11 +73,11 @@ r.Use(ginmw.PaymentMiddlewareFromConfig(routes,
 Use `PaymentMiddleware` when you need to configure the server separately (e.g., with lifecycle hooks):
 
 ```go
-server := x402.Newx402ResourceServer(
-	x402.WithFacilitatorClient(facilitator),
+server := t402.Newt402ResourceServer(
+	t402.WithFacilitatorClient(facilitator),
 ).
 	Register("eip155:*", evm.NewExactEvmScheme()).
-	OnAfterSettle(func(ctx x402.SettleResultContext) error {
+	OnAfterSettle(func(ctx t402.SettleResultContext) error {
 		log.Printf("Payment settled: %s", ctx.Result.Transaction)
 		return nil
 	})
@@ -100,7 +100,7 @@ r.Use(ginmw.PaymentMiddleware(routes, server))
 Define which routes require payment:
 
 ```go
-routes := x402http.RoutesConfig{
+routes := t402http.RoutesConfig{
 	"GET /api/data": {
 		Scheme:      "exact",
 		PayTo:       "0xYourAddress",
@@ -127,7 +127,7 @@ Routes support wildcards:
 Configure the paywall UI for browser requests:
 
 ```go
-paywallConfig := &x402http.PaywallConfig{
+paywallConfig := &t402http.PaywallConfig{
 	AppName: "My API Service",
 	AppLogo: "https://myapp.com/logo.svg",
 	Testnet: true,
@@ -154,8 +154,8 @@ Register schemes for different networks:
 
 ```go
 import (
-	evm "github.com/coinbase/x402/go/mechanisms/evm/exact/server"
-	svm "github.com/coinbase/x402/go/mechanisms/svm/exact/server"
+	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/server"
+	svm "github.com/coinbase/t402/go/mechanisms/svm/exact/server"
 )
 
 r.Use(ginmw.PaymentMiddlewareFromConfig(routes,
@@ -170,10 +170,10 @@ r.Use(ginmw.PaymentMiddlewareFromConfig(routes,
 Configure with custom authentication:
 
 ```go
-facilitator := x402http.NewHTTPFacilitatorClient(&x402http.FacilitatorConfig{
+facilitator := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
 	URL: "https://your-facilitator.com",
-	CreateAuthHeaders: func() (*x402http.FacilitatorAuthHeaders, error) {
-		return &x402http.FacilitatorAuthHeaders{
+	CreateAuthHeaders: func() (*t402http.FacilitatorAuthHeaders, error) {
+		return &t402http.FacilitatorAuthHeaders{
 			Verify: map[string]string{"Authorization": "Bearer verify-token"},
 			Settle: map[string]string{"Authorization": "Bearer settle-token"},
 		}, nil
@@ -189,7 +189,7 @@ Track successful payments:
 r.Use(ginmw.PaymentMiddlewareFromConfig(routes,
 	ginmw.WithFacilitatorClient(facilitator),
 	ginmw.WithScheme("eip155:*", evm.NewExactEvmScheme()),
-	ginmw.WithSettlementHandler(func(c *gin.Context, settlement *x402.SettleResponse) {
+	ginmw.WithSettlementHandler(func(c *gin.Context, settlement *t402.SettleResponse) {
 		log.Printf("Payment settled - Payer: %s, Tx: %s",
 			settlement.Payer,
 			settlement.Transaction,
@@ -225,21 +225,21 @@ import (
 	"log"
 	"time"
 
-	x402 "github.com/coinbase/x402/go"
-	x402http "github.com/coinbase/x402/go/http"
-	ginmw "github.com/coinbase/x402/go/http/gin"
-	evm "github.com/coinbase/x402/go/mechanisms/evm/exact/server"
+	t402 "github.com/coinbase/t402/go"
+	t402http "github.com/coinbase/t402/go/http"
+	ginmw "github.com/coinbase/t402/go/http/gin"
+	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/server"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	r := gin.Default()
 
-	facilitator := x402http.NewHTTPFacilitatorClient(&x402http.FacilitatorConfig{
-		URL: "https://facilitator.x402.org",
+	facilitator := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
+		URL: "https://facilitator.t402.org",
 	})
 
-	routes := x402http.RoutesConfig{
+	routes := t402http.RoutesConfig{
 		"GET /api/data": {
 			Scheme:      "exact",
 			PayTo:       "0xYourAddress",
@@ -256,7 +256,7 @@ func main() {
 		},
 	}
 
-	paywallConfig := &x402http.PaywallConfig{
+	paywallConfig := &t402http.PaywallConfig{
 		AppName: "My API Service",
 		AppLogo: "/logo.svg",
 		Testnet: true,
@@ -267,7 +267,7 @@ func main() {
 		ginmw.WithScheme("eip155:*", evm.NewExactEvmScheme()),
 		ginmw.WithPaywallConfig(paywallConfig),
 		ginmw.WithTimeout(60*time.Second),
-		ginmw.WithSettlementHandler(func(c *gin.Context, settlement *x402.SettleResponse) {
+		ginmw.WithSettlementHandler(func(c *gin.Context, settlement *t402.SettleResponse) {
 			log.Printf("✅ Payment settled: %s", settlement.Transaction)
 		}),
 	))
@@ -312,6 +312,6 @@ r.Use(ginmw.SimplePaymentMiddleware(
 	"0xYourAddress",
 	"$0.10",
 	"eip155:84532",
-	"https://facilitator.x402.org",
+	"https://facilitator.t402.org",
 ))
 ```

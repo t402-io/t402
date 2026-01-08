@@ -1,18 +1,18 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import { paymentMiddleware } from "@x402/hono";
-import { x402ResourceServer, HTTPFacilitatorClient } from "@x402/core/server";
-import { registerExactEvmScheme } from "@x402/evm/exact/server";
-import { registerExactSvmScheme } from "@x402/svm/exact/server";
-import { bazaarResourceServerExtension, declareDiscoveryExtension } from "@x402/extensions/bazaar";
+import { paymentMiddleware } from "@t402/hono";
+import { t402ResourceServer, HTTPFacilitatorClient } from "@t402/core/server";
+import { registerExactEvmScheme } from "@t402/evm/exact/server";
+import { registerExactSvmScheme } from "@t402/svm/exact/server";
+import { bazaarResourceServerExtension, declareDiscoveryExtension } from "@t402/extensions/bazaar";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 /**
- * Hono E2E Test Server with x402 Payment Middleware
+ * Hono E2E Test Server with t402 Payment Middleware
  *
- * This server demonstrates how to integrate x402 payment middleware
+ * This server demonstrates how to integrate t402 payment middleware
  * with a Hono application for end-to-end testing.
  */
 
@@ -44,15 +44,15 @@ const app = new Hono();
 // Create HTTP facilitator client
 const facilitatorClient = new HTTPFacilitatorClient({ url: facilitatorUrl });
 
-// Create x402 resource server with builder pattern (cleaner!)
-const x402Server = new x402ResourceServer(facilitatorClient);
+// Create t402 resource server with builder pattern (cleaner!)
+const t402Server = new t402ResourceServer(facilitatorClient);
 
 // Register server schemes
-registerExactEvmScheme(x402Server);
-registerExactSvmScheme(x402Server);
+registerExactEvmScheme(t402Server);
+registerExactSvmScheme(t402Server);
 
 // Register Bazaar discovery extension
-x402Server.registerExtension(bazaarResourceServerExtension);
+t402Server.registerExtension(bazaarResourceServerExtension);
 
 console.log(
   `Facilitator account: ${process.env.EVM_PRIVATE_KEY ? process.env.EVM_PRIVATE_KEY.substring(0, 10) + "..." : "not configured"}`,
@@ -60,7 +60,7 @@ console.log(
 console.log(`Using remote facilitator at: ${facilitatorUrl}`);
 
 /**
- * Configure x402 payment middleware using builder pattern
+ * Configure t402 payment middleware using builder pattern
  *
  * This middleware protects endpoints with $0.001 USDC payment requirements
  * on Base Sepolia and Solana Devnet with bazaar discovery extension.
@@ -121,14 +121,14 @@ app.use(
         },
       },
     },
-    x402Server, // Pass pre-configured server instance
+    t402Server, // Pass pre-configured server instance
   ),
 );
 
 /**
  * Protected endpoint - requires payment to access
  *
- * This endpoint demonstrates a resource protected by x402 payment middleware.
+ * This endpoint demonstrates a resource protected by t402 payment middleware.
  * Clients must provide a valid payment signature to access this endpoint.
  */
 app.get("/protected", (c) => {
@@ -141,7 +141,7 @@ app.get("/protected", (c) => {
 /**
  * Protected SVM endpoint - requires payment to access
  *
- * This endpoint demonstrates a resource protected by x402 payment middleware for SVM.
+ * This endpoint demonstrates a resource protected by t402 payment middleware for SVM.
  * Clients must provide a valid payment signature to access this endpoint.
  */
 app.get("/protected-svm", (c) => {
@@ -189,7 +189,7 @@ const server = serve({
 
 console.log(`
 ╔════════════════════════════════════════════════════════╗
-║           x402 Hono E2E Test Server                    ║
+║           t402 Hono E2E Test Server                    ║
 ╠════════════════════════════════════════════════════════╣
 ║  Server:         http://localhost:${PORT}              ║
 ║  EVM Network:    ${EVM_NETWORK}                         ║

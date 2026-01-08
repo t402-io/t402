@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 /**
- * Protected API endpoint that requires x402 payment to access.
+ * Protected API endpoint that requires t402 payment to access.
  * This route demonstrates how to protect API endpoints with payment requirements.
  *
  * @returns {Promise<NextResponse>} JSON response indicating success or error

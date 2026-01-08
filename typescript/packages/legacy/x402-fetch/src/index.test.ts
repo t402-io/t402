@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { wrapFetchWithPayment } from "./index";
-import { evm, PaymentRequirements } from "x402/types";
+import { evm, PaymentRequirements } from "t402/types";
 
-vi.mock("x402/client", () => ({
+vi.mock("t402/client", () => ({
   createPaymentHeader: vi.fn(),
   selectPaymentRequirements: vi.fn(),
 }));
@@ -46,7 +46,7 @@ describe("fetchWithPayment()", () => {
     } as unknown as typeof evm.SignerWallet;
 
     // Mock payment requirements selector
-    const { selectPaymentRequirements } = await import("x402/client");
+    const { selectPaymentRequirements } = await import("t402/client");
     (selectPaymentRequirements as ReturnType<typeof vi.fn>).mockImplementation(
       (requirements, _) => requirements[0],
     );
@@ -68,14 +68,14 @@ describe("fetchWithPayment()", () => {
     const paymentHeader = "payment-header-value";
     const successResponse = createResponse(200, { data: "success" });
 
-    const { createPaymentHeader, selectPaymentRequirements } = await import("x402/client");
+    const { createPaymentHeader, selectPaymentRequirements } = await import("t402/client");
     (createPaymentHeader as ReturnType<typeof vi.fn>).mockResolvedValue(paymentHeader);
     (selectPaymentRequirements as ReturnType<typeof vi.fn>).mockImplementation(
       (requirements, _) => requirements[0],
     );
     mockFetch
       .mockResolvedValueOnce(
-        createResponse(402, { accepts: validPaymentRequirements, x402Version: 1 }),
+        createResponse(402, { accepts: validPaymentRequirements, t402Version: 1 }),
       )
       .mockResolvedValueOnce(successResponse);
 
@@ -111,7 +111,7 @@ describe("fetchWithPayment()", () => {
   it("should not retry if already retried", async () => {
     const errorResponse = createResponse(402, {
       accepts: validPaymentRequirements,
-      x402Version: 1,
+      t402Version: 1,
     });
     mockFetch.mockResolvedValue(errorResponse);
 
@@ -125,7 +125,7 @@ describe("fetchWithPayment()", () => {
   it("should allow optional fetch request config", async () => {
     const errorResponse = createResponse(402, {
       accepts: validPaymentRequirements,
-      x402Version: 1,
+      t402Version: 1,
     });
     mockFetch.mockResolvedValue(errorResponse);
 
@@ -140,7 +140,7 @@ describe("fetchWithPayment()", () => {
           maxAmountRequired: "200000", // 0.2 USDC, which exceeds our default max of 0.1 USDC
         },
       ],
-      x402Version: 1,
+      t402Version: 1,
     });
     mockFetch.mockResolvedValue(errorResponse);
 
@@ -153,10 +153,10 @@ describe("fetchWithPayment()", () => {
 
   it("should reject if payment header creation fails", async () => {
     const paymentError = new Error("Payment failed");
-    const { createPaymentHeader } = await import("x402/client");
+    const { createPaymentHeader } = await import("t402/client");
     (createPaymentHeader as ReturnType<typeof vi.fn>).mockRejectedValue(paymentError);
     mockFetch.mockResolvedValue(
-      createResponse(402, { accepts: validPaymentRequirements, x402Version: 1 }),
+      createResponse(402, { accepts: validPaymentRequirements, t402Version: 1 }),
     );
 
     await expect(

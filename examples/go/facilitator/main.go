@@ -8,11 +8,11 @@ import (
 	"os"
 	"time"
 
-	x402 "github.com/coinbase/x402/go"
-	evm "github.com/coinbase/x402/go/mechanisms/evm/exact/facilitator"
-	evmv1 "github.com/coinbase/x402/go/mechanisms/evm/exact/v1/facilitator"
-	svm "github.com/coinbase/x402/go/mechanisms/svm/exact/facilitator"
-	svmv1 "github.com/coinbase/x402/go/mechanisms/svm/exact/v1/facilitator"
+	t402 "github.com/coinbase/t402/go"
+	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/facilitator"
+	evmv1 "github.com/coinbase/t402/go/mechanisms/evm/exact/v1/facilitator"
+	svm "github.com/coinbase/t402/go/mechanisms/svm/exact/facilitator"
+	svmv1 "github.com/coinbase/t402/go/mechanisms/svm/exact/v1/facilitator"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -32,8 +32,8 @@ func main() {
 
 	svmPrivateKey := os.Getenv("SVM_PRIVATE_KEY")
 
-	evmNetwork := x402.Network("eip155:84532")
-	svmNetwork := x402.Network("solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1")
+	evmNetwork := t402.Network("eip155:84532")
+	svmNetwork := t402.Network("solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1")
 
 	evmSigner, err := newFacilitatorEvmSigner(evmPrivateKey, DefaultEvmRPC)
 	if err != nil {
@@ -46,31 +46,31 @@ func main() {
 		svmSigner, _ = newFacilitatorSvmSigner(svmPrivateKey, DefaultSvmRPC)
 	}
 
-	facilitator := x402.Newx402Facilitator()
+	facilitator := t402.Newt402Facilitator()
 	
 	// Register V2 EVM scheme with smart wallet deployment enabled
 	evmConfig := &evm.ExactEvmSchemeConfig{
 		DeployERC4337WithEIP6492: true,
 	}
-	facilitator.Register([]x402.Network{evmNetwork}, evm.NewExactEvmScheme(evmSigner, evmConfig))
+	facilitator.Register([]t402.Network{evmNetwork}, evm.NewExactEvmScheme(evmSigner, evmConfig))
 
 	// Register V1 EVM scheme with smart wallet deployment enabled
 	evmV1Config := &evmv1.ExactEvmSchemeV1Config{
 		DeployERC4337WithEIP6492: true,
 	}
-	facilitator.RegisterV1([]x402.Network{"base-sepolia"}, evmv1.NewExactEvmSchemeV1(evmSigner, evmV1Config))
+	facilitator.RegisterV1([]t402.Network{"base-sepolia"}, evmv1.NewExactEvmSchemeV1(evmSigner, evmV1Config))
 
 	if svmSigner != nil {
-		facilitator.Register([]x402.Network{svmNetwork}, svm.NewExactSvmScheme(svmSigner))
-		facilitator.RegisterV1([]x402.Network{"solana-devnet"}, svmv1.NewExactSvmSchemeV1(svmSigner))
+		facilitator.Register([]t402.Network{svmNetwork}, svm.NewExactSvmScheme(svmSigner))
+		facilitator.RegisterV1([]t402.Network{"solana-devnet"}, svmv1.NewExactSvmSchemeV1(svmSigner))
 	}
 
-	facilitator.OnAfterVerify(func(ctx x402.FacilitatorVerifyResultContext) error {
+	facilitator.OnAfterVerify(func(ctx t402.FacilitatorVerifyResultContext) error {
 		fmt.Printf("✅ Payment verified\n")
 		return nil
 	})
 
-	facilitator.OnAfterSettle(func(ctx x402.FacilitatorSettleResultContext) error {
+	facilitator.OnAfterSettle(func(ctx t402.FacilitatorSettleResultContext) error {
 		fmt.Printf("🎉 Payment settled: %s\n", ctx.Result.Transaction)
 		return nil
 	})
@@ -107,7 +107,7 @@ func main() {
 		if err != nil {
 			// All failures (business logic and system errors) are returned as errors
 			// You can extract structured information from VerifyError if needed:
-			// if ve, ok := err.(*x402.VerifyError); ok {
+			// if ve, ok := err.(*t402.VerifyError); ok {
 			//     log.Printf("Verification failed: reason=%s, payer=%s, network=%s",
 			//                ve.Reason, ve.Payer, ve.Network)
 			// }
@@ -140,7 +140,7 @@ func main() {
 		if err != nil {
 			// All failures (business logic and system errors) are returned as errors
 			// You can extract structured information from SettleError if needed:
-			// if se, ok := err.(*x402.SettleError); ok {
+			// if se, ok := err.(*t402.SettleError); ok {
 			//     log.Printf("Settlement failed: reason=%s, payer=%s, network=%s, tx=%s",
 			//                se.Reason, se.Payer, se.Network, se.Transaction)
 			// }

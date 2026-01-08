@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"net/http"
 
-	x402 "github.com/coinbase/x402/go"
-	x402http "github.com/coinbase/x402/go/http"
-	evm "github.com/coinbase/x402/go/mechanisms/evm/exact/client"
-	evmsigners "github.com/coinbase/x402/go/signers/evm"
+	t402 "github.com/coinbase/t402/go"
+	t402http "github.com/coinbase/t402/go/http"
+	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/client"
+	evmsigners "github.com/coinbase/t402/go/signers/evm"
 )
 
 /**
@@ -44,7 +44,7 @@ func runMultiNetworkPriorityExample(ctx context.Context, evmPrivateKey, url stri
 
 	// Create client with prioritized network registration
 	// More specific registrations take precedence over wildcards
-	client := x402.Newx402Client()
+	client := t402.Newt402Client()
 
 	// Level 1: Specific networks (highest priority)
 	fmt.Println("✅ Registering Ethereum Mainnet (eip155:1) with mainnet signer")
@@ -61,7 +61,7 @@ func runMultiNetworkPriorityExample(ctx context.Context, evmPrivateKey, url stri
 	client.Register("eip155:*", evm.NewExactEvmScheme(primarySigner))
 
 	// Add logging to show which network is being used
-	client.OnBeforePaymentCreation(func(ctx x402.PaymentCreationContext) (*x402.BeforePaymentCreationHookResult, error) {
+	client.OnBeforePaymentCreation(func(ctx t402.PaymentCreationContext) (*t402.BeforePaymentCreationHookResult, error) {
 		fmt.Printf("💰 Creating payment for network: %s\n", ctx.SelectedRequirements.GetNetwork())
 		fmt.Printf("   Scheme: %s\n", ctx.SelectedRequirements.GetScheme())
 		
@@ -83,8 +83,8 @@ func runMultiNetworkPriorityExample(ctx context.Context, evmPrivateKey, url stri
 	})
 
 	// Wrap HTTP client
-	httpClient := x402http.Newx402HTTPClient(client)
-	wrappedClient := x402http.WrapHTTPClientWithPayment(http.DefaultClient, httpClient)
+	httpClient := t402http.Newt402HTTPClient(client)
+	wrappedClient := t402http.WrapHTTPClientWithPayment(http.DefaultClient, httpClient)
 
 	// Make request
 	fmt.Printf("🌐 Making request to: %s\n", url)

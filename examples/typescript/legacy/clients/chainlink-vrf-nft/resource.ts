@@ -39,9 +39,9 @@ type ExactEvmPayload = {
 };
 
 type XPaymentHeader = {
-  x402Version: number;
+  t402Version: number;
   scheme: string;
-  network?: string; // Expecting network name from x402-axios
+  network?: string; // Expecting network name from t402-axios
   networkId?: string; // Keep for type flexibility, but validation uses network
   payload: ExactEvmPayload;
   resource: string;
@@ -97,7 +97,7 @@ const nftContractAbi = [
 ];
 
 // --- Payment Details object (matching PaymentRequirementsSchema) ---
-// This format is needed for both the 402 response (for x402-axios)
+// This format is needed for both the 402 response (for t402-axios)
 // and the facilitator calls (for its internal validation).
 const paymentDetailsRequired: PaymentDetails = {
   scheme: SCHEME,
@@ -125,17 +125,17 @@ app.post("/request-mint", async c => {
   console.log("INFO ResourceServer: Received POST /request-mint");
   const paymentHeaderBase64 = c.req.header("X-PAYMENT");
 
-  // 1. Return 402 if no payment header as per the x402 spec.
+  // 1. Return 402 if no payment header as per the t402 spec.
   if (!paymentHeaderBase64) {
     console.log("INFO ResourceServer: No X-PAYMENT header found. Responding 402.");
     console.info("Resource Server sent back: ", {
-      x402Version: 1,
+      t402Version: 1,
       accepts: [paymentDetailsRequired],
       error: "Payment required",
     });
     // Use the single, correctly formatted details object
     return c.json(
-      { x402Version: 1, accepts: [paymentDetailsRequired], error: "Payment required" },
+      { t402Version: 1, accepts: [paymentDetailsRequired], error: "Payment required" },
       402,
     );
   }
@@ -193,7 +193,7 @@ app.post("/request-mint", async c => {
       // Use the single, correctly formatted details object
       return c.json(
         {
-          x402Version: 1,
+          t402Version: 1,
           accepts: [paymentDetailsRequired],
           error: "Payment verification failed.",
           details: verificationResult?.invalidReason || "Unknown",

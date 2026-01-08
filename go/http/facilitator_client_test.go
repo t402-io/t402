@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	x402 "github.com/coinbase/x402/go"
+	t402 "github.com/coinbase/t402/go"
 )
 
 // Test helper functions
@@ -42,15 +42,15 @@ func (p *funcAuthProvider) GetAuthHeaders(ctx context.Context) (AuthHeaders, err
 	return p.fn(ctx)
 }
 
-func NewMultiFacilitatorClient(clients ...x402.FacilitatorClient) x402.FacilitatorClient {
+func NewMultiFacilitatorClient(clients ...t402.FacilitatorClient) t402.FacilitatorClient {
 	return &multiFacilitatorClient{clients: clients}
 }
 
 type multiFacilitatorClient struct {
-	clients []x402.FacilitatorClient
+	clients []t402.FacilitatorClient
 }
 
-func (m *multiFacilitatorClient) Verify(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.VerifyResponse, error) {
+func (m *multiFacilitatorClient) Verify(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error) {
 	for _, client := range m.clients {
 		result, err := client.Verify(ctx, payloadBytes, requirementsBytes)
 		if err == nil {
@@ -60,7 +60,7 @@ func (m *multiFacilitatorClient) Verify(ctx context.Context, payloadBytes []byte
 	return nil, fmt.Errorf("all facilitators failed verification")
 }
 
-func (m *multiFacilitatorClient) Settle(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.SettleResponse, error) {
+func (m *multiFacilitatorClient) Settle(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 	for _, client := range m.clients {
 		result, err := client.Settle(ctx, payloadBytes, requirementsBytes)
 		if err == nil {
@@ -70,8 +70,8 @@ func (m *multiFacilitatorClient) Settle(ctx context.Context, payloadBytes []byte
 	return nil, fmt.Errorf("all facilitators failed settlement")
 }
 
-func (m *multiFacilitatorClient) GetSupported(ctx context.Context) (x402.SupportedResponse, error) {
-	allKinds := []x402.SupportedKind{}
+func (m *multiFacilitatorClient) GetSupported(ctx context.Context) (t402.SupportedResponse, error) {
+	allKinds := []t402.SupportedKind{}
 	extensionMap := make(map[string]bool)
 	signersByFamily := make(map[string]map[string]bool)
 
@@ -109,7 +109,7 @@ func (m *multiFacilitatorClient) GetSupported(ctx context.Context) (x402.Support
 		}
 	}
 
-	return x402.SupportedResponse{
+	return t402.SupportedResponse{
 		Kinds:      allKinds,
 		Extensions: extensions,
 		Signers:    signers,
@@ -162,12 +162,12 @@ func TestHTTPFacilitatorClientVerify(t *testing.T) {
 			t.Fatalf("Failed to decode request: %v", err)
 		}
 
-		if requestBody["x402Version"].(float64) != 2 {
+		if requestBody["t402Version"].(float64) != 2 {
 			t.Error("Expected version 2 in request")
 		}
 
 		// Return success response
-		response := x402.VerifyResponse{
+		response := t402.VerifyResponse{
 			IsValid: true,
 			Payer:   "0xverifiedpayer",
 		}
@@ -181,7 +181,7 @@ func TestHTTPFacilitatorClientVerify(t *testing.T) {
 		URL: server.URL,
 	})
 
-	requirements := x402.PaymentRequirements{
+	requirements := t402.PaymentRequirements{
 		Scheme:  "exact",
 		Network: "eip155:1",
 		Asset:   "USDC",
@@ -189,8 +189,8 @@ func TestHTTPFacilitatorClientVerify(t *testing.T) {
 		PayTo:   "0xrecipient",
 	}
 
-	payload := x402.PaymentPayload{
-		X402Version: 2,
+	payload := t402.PaymentPayload{
+		T402Version: 2,
 		Accepted:    requirements,
 		Payload:     map[string]interface{}{"sig": "test"},
 	}
@@ -225,7 +225,7 @@ func TestHTTPFacilitatorClientSettle(t *testing.T) {
 		}
 
 		// Return success response
-		response := x402.SettleResponse{
+		response := t402.SettleResponse{
 			Success:     true,
 			Transaction: "0xsettledtx",
 			Payer:       "0xpayer",
@@ -241,7 +241,7 @@ func TestHTTPFacilitatorClientSettle(t *testing.T) {
 		URL: server.URL,
 	})
 
-	requirements := x402.PaymentRequirements{
+	requirements := t402.PaymentRequirements{
 		Scheme:  "exact",
 		Network: "eip155:1",
 		Asset:   "USDC",
@@ -249,8 +249,8 @@ func TestHTTPFacilitatorClientSettle(t *testing.T) {
 		PayTo:   "0xrecipient",
 	}
 
-	payload := x402.PaymentPayload{
-		X402Version: 2,
+	payload := t402.PaymentPayload{
+		T402Version: 2,
 		Accepted:    requirements,
 		Payload:     map[string]interface{}{},
 	}
@@ -288,15 +288,15 @@ func TestHTTPFacilitatorClientGetSupported(t *testing.T) {
 		}
 
 		// Return supported response
-		response := x402.SupportedResponse{
-			Kinds: []x402.SupportedKind{
+		response := t402.SupportedResponse{
+			Kinds: []t402.SupportedKind{
 				{
-					X402Version: 2,
+					T402Version: 2,
 					Scheme:      "exact",
 					Network:     "eip155:1",
 				},
 				{
-					X402Version: 2,
+					T402Version: 2,
 					Scheme:      "exact",
 					Network:     "eip155:8453",
 				},
@@ -344,11 +344,11 @@ func TestHTTPFacilitatorClientWithAuth(t *testing.T) {
 		// Return minimal response
 		switch r.URL.Path {
 		case "/verify":
-			json.NewEncoder(w).Encode(x402.VerifyResponse{IsValid: true, Payer: "0xpayer"})
+			json.NewEncoder(w).Encode(t402.VerifyResponse{IsValid: true, Payer: "0xpayer"})
 		case "/settle":
-			json.NewEncoder(w).Encode(x402.SettleResponse{Success: true, Transaction: "0xtx", Payer: "0xpayer", Network: "eip155:1"})
+			json.NewEncoder(w).Encode(t402.SettleResponse{Success: true, Transaction: "0xtx", Payer: "0xpayer", Network: "eip155:1"})
 		case "/supported":
-			json.NewEncoder(w).Encode(x402.SupportedResponse{})
+			json.NewEncoder(w).Encode(t402.SupportedResponse{})
 		}
 	}))
 	defer server.Close()
@@ -359,7 +359,7 @@ func TestHTTPFacilitatorClientWithAuth(t *testing.T) {
 	})
 
 	// Test all endpoints with auth
-	requirements := x402.PaymentRequirements{
+	requirements := t402.PaymentRequirements{
 		Scheme:  "exact",
 		Network: "eip155:1",
 		Asset:   "USDC",
@@ -367,8 +367,8 @@ func TestHTTPFacilitatorClientWithAuth(t *testing.T) {
 		PayTo:   "0xrecipient",
 	}
 
-	payload := x402.PaymentPayload{
-		X402Version: 2,
+	payload := t402.PaymentPayload{
+		T402Version: 2,
 		Accepted:    requirements,
 		Payload:     map[string]interface{}{},
 	}
@@ -410,7 +410,7 @@ func TestHTTPFacilitatorClientErrorHandling(t *testing.T) {
 		URL: server.URL,
 	})
 
-	requirements := x402.PaymentRequirements{
+	requirements := t402.PaymentRequirements{
 		Scheme:  "exact",
 		Network: "eip155:1",
 		Asset:   "USDC",
@@ -418,8 +418,8 @@ func TestHTTPFacilitatorClientErrorHandling(t *testing.T) {
 		PayTo:   "0xrecipient",
 	}
 
-	payload := x402.PaymentPayload{
-		X402Version: 2,
+	payload := t402.PaymentPayload{
+		T402Version: 2,
 		Accepted:    requirements,
 		Payload:     map[string]interface{}{},
 	}
@@ -500,18 +500,18 @@ func TestMultiFacilitatorClient(t *testing.T) {
 	// Create mock facilitator clients
 	client1 := &mockMultiFacilitatorClient{
 		id: "client1",
-		verifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.VerifyResponse, error) {
-			var p x402.PaymentPayload
+		verifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error) {
+			var p t402.PaymentPayload
 			json.Unmarshal(payloadBytes, &p)
 			if p.Accepted.Scheme == "exact" {
-				return &x402.VerifyResponse{IsValid: true, Payer: "client1"}, nil
+				return &t402.VerifyResponse{IsValid: true, Payer: "client1"}, nil
 			}
-			return nil, &x402.PaymentError{Message: "unsupported"}
+			return nil, &t402.PaymentError{Message: "unsupported"}
 		},
-		supportedFunc: func(ctx context.Context) (x402.SupportedResponse, error) {
-			return x402.SupportedResponse{
-				Kinds: []x402.SupportedKind{
-					{X402Version: 2, Scheme: "exact", Network: "eip155:1"},
+		supportedFunc: func(ctx context.Context) (t402.SupportedResponse, error) {
+			return t402.SupportedResponse{
+				Kinds: []t402.SupportedKind{
+					{T402Version: 2, Scheme: "exact", Network: "eip155:1"},
 				},
 				Extensions: []string{"ext1"},
 				Signers:    make(map[string][]string),
@@ -521,18 +521,18 @@ func TestMultiFacilitatorClient(t *testing.T) {
 
 	client2 := &mockMultiFacilitatorClient{
 		id: "client2",
-		verifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.VerifyResponse, error) {
-			var p x402.PaymentPayload
+		verifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error) {
+			var p t402.PaymentPayload
 			json.Unmarshal(payloadBytes, &p)
 			if p.Accepted.Scheme == "transfer" {
-				return &x402.VerifyResponse{IsValid: true, Payer: "client2"}, nil
+				return &t402.VerifyResponse{IsValid: true, Payer: "client2"}, nil
 			}
-			return nil, &x402.PaymentError{Message: "unsupported"}
+			return nil, &t402.PaymentError{Message: "unsupported"}
 		},
-		supportedFunc: func(ctx context.Context) (x402.SupportedResponse, error) {
-			return x402.SupportedResponse{
-				Kinds: []x402.SupportedKind{
-					{X402Version: 2, Scheme: "transfer", Network: "eip155:8453"},
+		supportedFunc: func(ctx context.Context) (t402.SupportedResponse, error) {
+			return t402.SupportedResponse{
+				Kinds: []t402.SupportedKind{
+					{T402Version: 2, Scheme: "transfer", Network: "eip155:8453"},
 				},
 				Extensions: []string{"ext2"},
 				Signers:    make(map[string][]string),
@@ -543,7 +543,7 @@ func TestMultiFacilitatorClient(t *testing.T) {
 	multiClient := NewMultiFacilitatorClient(client1, client2)
 
 	// Test Verify - should use client1 for "exact"
-	requirements1 := x402.PaymentRequirements{
+	requirements1 := t402.PaymentRequirements{
 		Scheme:  "exact",
 		Network: "eip155:1",
 		Asset:   "USDC",
@@ -551,8 +551,8 @@ func TestMultiFacilitatorClient(t *testing.T) {
 		PayTo:   "0xrecipient",
 	}
 
-	payload1 := x402.PaymentPayload{
-		X402Version: 2,
+	payload1 := t402.PaymentPayload{
+		T402Version: 2,
 		Accepted:    requirements1,
 		Payload:     map[string]interface{}{},
 	}
@@ -570,7 +570,7 @@ func TestMultiFacilitatorClient(t *testing.T) {
 	}
 
 	// Test Verify - should use client2 for "transfer"
-	requirements2 := x402.PaymentRequirements{
+	requirements2 := t402.PaymentRequirements{
 		Scheme:  "transfer",
 		Network: "eip155:8453",
 		Asset:   "USDC",
@@ -578,8 +578,8 @@ func TestMultiFacilitatorClient(t *testing.T) {
 		PayTo:   "0xrecipient",
 	}
 
-	payload2 := x402.PaymentPayload{
-		X402Version: 2,
+	payload2 := t402.PaymentPayload{
+		T402Version: 2,
 		Accepted:    requirements2,
 		Payload:     map[string]interface{}{},
 	}
@@ -613,30 +613,30 @@ func TestMultiFacilitatorClient(t *testing.T) {
 // Mock facilitator client for multi-client testing
 type mockMultiFacilitatorClient struct {
 	id            string
-	verifyFunc    func(context.Context, []byte, []byte) (*x402.VerifyResponse, error)
-	settleFunc    func(context.Context, []byte, []byte) (*x402.SettleResponse, error)
-	supportedFunc func(context.Context) (x402.SupportedResponse, error)
+	verifyFunc    func(context.Context, []byte, []byte) (*t402.VerifyResponse, error)
+	settleFunc    func(context.Context, []byte, []byte) (*t402.SettleResponse, error)
+	supportedFunc func(context.Context) (t402.SupportedResponse, error)
 }
 
-func (m *mockMultiFacilitatorClient) Verify(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.VerifyResponse, error) {
+func (m *mockMultiFacilitatorClient) Verify(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error) {
 	if m.verifyFunc != nil {
 		return m.verifyFunc(ctx, payloadBytes, requirementsBytes)
 	}
 	return nil, fmt.Errorf("no verify function")
 }
 
-func (m *mockMultiFacilitatorClient) Settle(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.SettleResponse, error) {
+func (m *mockMultiFacilitatorClient) Settle(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 	if m.settleFunc != nil {
 		return m.settleFunc(ctx, payloadBytes, requirementsBytes)
 	}
 	return nil, fmt.Errorf("no settle function")
 }
 
-func (m *mockMultiFacilitatorClient) GetSupported(ctx context.Context) (x402.SupportedResponse, error) {
+func (m *mockMultiFacilitatorClient) GetSupported(ctx context.Context) (t402.SupportedResponse, error) {
 	if m.supportedFunc != nil {
 		return m.supportedFunc(ctx)
 	}
-	return x402.SupportedResponse{}, nil
+	return t402.SupportedResponse{}, nil
 }
 
 func (m *mockMultiFacilitatorClient) Identifier() string {

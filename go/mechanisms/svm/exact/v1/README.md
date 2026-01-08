@@ -1,6 +1,6 @@
-# Solana V1 Mechanism for x402
+# Solana V1 Mechanism for t402
 
-This package provides V1 support for the Solana payment mechanism. It enables backwards compatibility for existing clients and facilitators using the x402 protocol version 1.
+This package provides V1 support for the Solana payment mechanism. It enables backwards compatibility for existing clients and facilitators using the t402 protocol version 1.
 
 ## Purpose
 
@@ -17,8 +17,8 @@ The V1 implementation exists solely for backwards compatibility. **New implement
 - V2 uses `Amount` field
 
 ### Protocol Version
-- V1 only supports x402 version 1
-- V2 only supports x402 version 2
+- V1 only supports t402 version 1
+- V2 only supports t402 version 2
 
 ## What's Included
 
@@ -32,11 +32,11 @@ The V1 implementation exists solely for backwards compatibility. **New implement
 
 ```go
 import (
-    x402 "github.com/coinbase/x402/go"
-    "github.com/coinbase/x402/go/mechanisms/solana/v1"
+    t402 "github.com/coinbase/t402/go"
+    "github.com/coinbase/t402/go/mechanisms/solana/v1"
 )
 
-client := x402.NewX402Client()
+client := t402.NewX402Client()
 signer := &MySolanaSigner{...}
 
 // Register for V1 networks
@@ -47,11 +47,11 @@ v1.RegisterClient(client, signer, "solana", "solana-devnet")
 
 ```go
 import (
-    x402 "github.com/coinbase/x402/go"
-    "github.com/coinbase/x402/go/mechanisms/solana/v1"
+    t402 "github.com/coinbase/t402/go"
+    "github.com/coinbase/t402/go/mechanisms/solana/v1"
 )
 
-facilitator := x402.NewX402Facilitator()
+facilitator := t402.NewX402Facilitator()
 signer := &MyFacilitatorSigner{...}
 
 // Register for V1 networks
@@ -64,14 +64,14 @@ If you're currently using V1, consider migrating to V2:
 
 **Before (V1)**:
 ```go
-import "github.com/coinbase/x402/go/mechanisms/solana/v1"
+import "github.com/coinbase/t402/go/mechanisms/solana/v1"
 
 v1.RegisterClient(client, signer, "solana")
 ```
 
 **After (V2)**:
 ```go
-import "github.com/coinbase/x402/go/mechanisms/solana"
+import "github.com/coinbase/t402/go/mechanisms/solana"
 
 solana.RegisterClient(client, signer, "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")
 ```
@@ -96,5 +96,5 @@ The transaction structure, verification logic, and settlement process are identi
 ## See Also
 
 - [V2 Implementation](../README.md) - Recommended for new implementations
-- [x402 Protocol Specification](../../../../specs/)
+- [t402 Protocol Specification](../../../../specs/)
 

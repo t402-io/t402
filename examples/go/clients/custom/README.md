@@ -1,12 +1,12 @@
-# Custom x402 Client Implementation
+# Custom t402 Client Implementation
 
-Example client demonstrating how to implement x402 payment handling manually using only the core packages, without convenience wrappers like `x402http.WrapHTTPClientWithPayment`.
+Example client demonstrating how to implement t402 payment handling manually using only the core packages, without convenience wrappers like `t402http.WrapHTTPClientWithPayment`.
 
 ## Prerequisites
 
 - Go 1.24 or higher
 - Valid EVM private key for making payments
-- A running x402 server (see [server examples](../../servers/))
+- A running t402 server (see [server examples](../../servers/))
 
 ## Setup
 
@@ -62,7 +62,7 @@ go run .
 1. **Initial Request** — Make HTTP request to protected endpoint
 2. **402 Response** — Server responds with requirements in `PAYMENT-REQUIRED` header
 3. **Parse Requirements** — Decode requirements using version detection
-4. **Create Payment** — Use `x402Client.CreatePaymentPayload()` to generate payload
+4. **Create Payment** — Use `t402Client.CreatePaymentPayload()` to generate payload
 5. **Encode Payment** — Base64 encode the payload for the header value
 6. **Retry with Payment** — Make new request with `PAYMENT-SIGNATURE` header
 7. **Success** — Receive 200 with settlement in `PAYMENT-RESPONSE` header
@@ -73,14 +73,14 @@ go run .
 
 ```go
 import (
-    x402 "github.com/coinbase/x402/go"
-    evm "github.com/coinbase/x402/go/mechanisms/evm/exact/client"
-    evmsigners "github.com/coinbase/x402/go/signers/evm"
+    t402 "github.com/coinbase/t402/go"
+    evm "github.com/coinbase/t402/go/mechanisms/evm/exact/client"
+    evmsigners "github.com/coinbase/t402/go/signers/evm"
 )
 
 evmSigner, _ := evmsigners.NewClientSignerFromPrivateKey(os.Getenv("EVM_PRIVATE_KEY"))
 
-client := x402.Newx402Client().
+client := t402.Newt402Client().
     Register("eip155:*", evm.NewExactEvmScheme(evmSigner))
 ```
 
@@ -106,8 +106,8 @@ if resp.StatusCode == http.StatusPaymentRequired {
 // Select first payment requirement
 requirements := paymentRequired.Accepts[0]
 
-// Create payment payload using the x402 client
-payload, _ := x402Client.CreatePaymentPayload(ctx, requirements, 
+// Create payment payload using the t402 client
+payload, _ := t402Client.CreatePaymentPayload(ctx, requirements, 
     paymentRequired.Resource, paymentRequired.Extensions)
 
 payloadBytes, _ := json.Marshal(payload)
@@ -129,14 +129,14 @@ retryResp, _ := http.DefaultClient.Do(retryReq)
 settlementHeader := resp.Header.Get("PAYMENT-RESPONSE")
 decoded, _ := base64.StdEncoding.DecodeString(settlementHeader)
 
-var settlement x402.SettleResponse
+var settlement t402.SettleResponse
 json.Unmarshal(decoded, &settlement)
 // settlement.Transaction, settlement.Network, settlement.Payer
 ```
 
 ## Wrapper vs Custom Comparison
 
-| Aspect            | With Wrapper (x402http) | Custom Implementation |
+| Aspect            | With Wrapper (t402http) | Custom Implementation |
 | ----------------- | ----------------------- | --------------------- |
 | Code Complexity   | ~10 lines               | ~250 lines            |
 | Automatic Retry   | ✅ Yes                  | ❌ Manual             |
@@ -149,7 +149,7 @@ json.Unmarshal(decoded, &settlement)
 - Need complete control over every step of the payment flow
 - Integrating with non-standard HTTP libraries (Resty, Fiber, etc.)
 - Implementing custom retry/error logic
-- Learning how x402 works under the hood
+- Learning how t402 works under the hood
 - Building adapters for unsupported frameworks
 
 ## Protocol Versions
@@ -161,7 +161,7 @@ The example handles both v1 and v2 protocols:
 - Payment signature in `PAYMENT-SIGNATURE` header
 
 **V1 Protocol (legacy):**
-- Payment requirements in response body with `x402Version: 1`
+- Payment requirements in response body with `t402Version: 1`
 - Payment signature in `X-PAYMENT` header
 
 ## Next Steps
@@ -171,6 +171,6 @@ The example handles both v1 and v2 protocols:
 
 ## Related Resources
 
-- [x402 Go Package Documentation](../../../../go/)
+- [t402 Go Package Documentation](../../../../go/)
 - [HTTP Client Package](../../../../go/http/)
 - [Payment Types](../../../../go/types/)

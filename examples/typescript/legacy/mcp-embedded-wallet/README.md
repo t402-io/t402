@@ -1,4 +1,4 @@
-# x402-MCP
+# t402-MCP
 
 ## Development
 
@@ -24,7 +24,7 @@ Add as an MCP server for Claude, in `claude_desktop_config.json` (`cmd + ,` -> D
 ```json
 {
   "mcpServers": {
-    "x402-wallet": {
+    "t402-wallet": {
       "command": "pnpm",
       "args": [
         "--silent",

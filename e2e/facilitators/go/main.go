@@ -16,16 +16,16 @@ import (
 	"sync"
 	"time"
 
-	x402 "github.com/coinbase/x402/go"
-	"github.com/coinbase/x402/go/extensions/bazaar"
-	exttypes "github.com/coinbase/x402/go/extensions/types"
-	evmmech "github.com/coinbase/x402/go/mechanisms/evm"
-	evm "github.com/coinbase/x402/go/mechanisms/evm/exact/facilitator"
-	evmv1 "github.com/coinbase/x402/go/mechanisms/evm/exact/v1/facilitator"
-	svmmech "github.com/coinbase/x402/go/mechanisms/svm"
-	svm "github.com/coinbase/x402/go/mechanisms/svm/exact/facilitator"
-	svmv1 "github.com/coinbase/x402/go/mechanisms/svm/exact/v1/facilitator"
-	x402types "github.com/coinbase/x402/go/types"
+	t402 "github.com/coinbase/t402/go"
+	"github.com/coinbase/t402/go/extensions/bazaar"
+	exttypes "github.com/coinbase/t402/go/extensions/types"
+	evmmech "github.com/coinbase/t402/go/mechanisms/evm"
+	evm "github.com/coinbase/t402/go/mechanisms/evm/exact/facilitator"
+	evmv1 "github.com/coinbase/t402/go/mechanisms/evm/exact/v1/facilitator"
+	svmmech "github.com/coinbase/t402/go/mechanisms/svm"
+	svm "github.com/coinbase/t402/go/mechanisms/svm/exact/facilitator"
+	svmv1 "github.com/coinbase/t402/go/mechanisms/svm/exact/v1/facilitator"
+	t402types "github.com/coinbase/t402/go/types"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
@@ -52,13 +52,13 @@ const (
 
 // Request/Response types
 type VerifyRequest struct {
-	X402Version         int             `json:"x402Version"`
+	T402Version         int             `json:"t402Version"`
 	PaymentPayload      json.RawMessage `json:"paymentPayload"`
 	PaymentRequirements json.RawMessage `json:"paymentRequirements"`
 }
 
 type SettleRequest struct {
-	X402Version         int             `json:"x402Version"`
+	T402Version         int             `json:"t402Version"`
 	PaymentPayload      json.RawMessage `json:"paymentPayload"`
 	PaymentRequirements json.RawMessage `json:"paymentRequirements"`
 }
@@ -466,7 +466,7 @@ var (
 	verificationMutex = &sync.RWMutex{}
 )
 
-func createPaymentHash(paymentPayload x402.PaymentPayload) string {
+func createPaymentHash(paymentPayload t402.PaymentPayload) string {
 	data, _ := json.Marshal(paymentPayload)
 	hash := sha256.Sum256(data)
 	return hex.EncodeToString(hash[:])
@@ -676,8 +676,8 @@ func main() {
 	svmAddresses := svmSigner.GetAddresses(context.Background(), "solana-devnet")
 	log.Printf("SVM Facilitator account: %s", svmAddresses[0].String())
 
-	// Initialize the x402 Facilitator with EVM and SVM support
-	facilitator := x402.Newx402Facilitator()
+	// Initialize the t402 Facilitator with EVM and SVM support
+	facilitator := t402.Newt402Facilitator()
 
 	// Register EVM schemes with network arrays
 	// Enable smart wallet deployment via EIP-6492
@@ -685,27 +685,27 @@ func main() {
 		DeployERC4337WithEIP6492: true,
 	}
 	evmFacilitatorScheme := evm.NewExactEvmScheme(evmSigner, evmConfig)
-	facilitator.Register([]x402.Network{"eip155:84532"}, evmFacilitatorScheme)
+	facilitator.Register([]t402.Network{"eip155:84532"}, evmFacilitatorScheme)
 
 	evmV1Config := &evmv1.ExactEvmSchemeV1Config{
 		DeployERC4337WithEIP6492: true,
 	}
 	evmFacilitatorV1Scheme := evmv1.NewExactEvmSchemeV1(evmSigner, evmV1Config)
-	facilitator.RegisterV1([]x402.Network{"base-sepolia"}, evmFacilitatorV1Scheme)
+	facilitator.RegisterV1([]t402.Network{"base-sepolia"}, evmFacilitatorV1Scheme)
 
 	// Register SVM schemes with network arrays
 	svmFacilitatorScheme := svm.NewExactSvmScheme(svmSigner)
-	facilitator.Register([]x402.Network{"solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"}, svmFacilitatorScheme) // Devnet
+	facilitator.Register([]t402.Network{"solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"}, svmFacilitatorScheme) // Devnet
 
 	svmFacilitatorV1Scheme := svmv1.NewExactSvmSchemeV1(svmSigner)
-	facilitator.RegisterV1([]x402.Network{"solana-devnet"}, svmFacilitatorV1Scheme)
+	facilitator.RegisterV1([]t402.Network{"solana-devnet"}, svmFacilitatorV1Scheme)
 
 	// Register the Bazaar discovery extension
 	facilitator.RegisterExtension(exttypes.BAZAAR)
 
 	// Lifecycle hooks for payment tracking and discovery
 	facilitator.
-		OnAfterVerify(func(ctx x402.FacilitatorVerifyResultContext) error {
+		OnAfterVerify(func(ctx t402.FacilitatorVerifyResultContext) error {
 			// Hook 1: Track verified payment for verify→settle flow validation
 			if ctx.Result.IsValid {
 				// Hooks now use view interfaces - create hash from payload view
@@ -733,7 +733,7 @@ func main() {
 					// Unmarshal requirements for cataloging based on version
 					version := ctx.Payload.GetVersion()
 					if version == 2 {
-						var requirements x402.PaymentRequirements
+						var requirements t402.PaymentRequirements
 						if err := json.Unmarshal(ctx.RequirementsBytes, &requirements); err == nil {
 							bazaarCatalog.CatalogResource(
 								discovered.ResourceURL,
@@ -744,11 +744,11 @@ func main() {
 							)
 						}
 					} else if version == 1 {
-						var requirementsV1 x402types.PaymentRequirementsV1
+						var requirementsV1 t402types.PaymentRequirementsV1
 						if err := json.Unmarshal(ctx.RequirementsBytes, &requirementsV1); err == nil {
 							// Convert V1 requirements to V2 format for catalog
 							// This is acceptable for e2e testing as catalog interface expects V2
-							requirements := x402.PaymentRequirements{
+							requirements := t402.PaymentRequirements{
 								Scheme:            requirementsV1.Scheme,
 								Network:           requirementsV1.Network,
 								Asset:             requirementsV1.Asset,
@@ -769,7 +769,7 @@ func main() {
 			}
 			return nil
 		}).
-		OnBeforeSettle(func(ctx x402.FacilitatorSettleContext) (*x402.FacilitatorBeforeHookResult, error) {
+		OnBeforeSettle(func(ctx t402.FacilitatorSettleContext) (*t402.FacilitatorBeforeHookResult, error) {
 			// Hook 3: Validate payment was previously verified
 			paymentHash := fmt.Sprintf("v%d-%s-%s",
 				ctx.Payload.GetVersion(),
@@ -780,7 +780,7 @@ func main() {
 			verificationMutex.RUnlock()
 
 			if !verified {
-				return &x402.FacilitatorBeforeHookResult{
+				return &t402.FacilitatorBeforeHookResult{
 					Abort:  true,
 					Reason: "Payment must be verified before settlement",
 				}, nil
@@ -793,7 +793,7 @@ func main() {
 				delete(verifiedPayments, paymentHash)
 				verificationMutex.Unlock()
 
-				return &x402.FacilitatorBeforeHookResult{
+				return &t402.FacilitatorBeforeHookResult{
 					Abort:  true,
 					Reason: "Payment verification expired (must settle within 5 minutes)",
 				}, nil
@@ -801,7 +801,7 @@ func main() {
 
 			return nil, nil
 		}).
-		OnAfterSettle(func(ctx x402.FacilitatorSettleResultContext) error {
+		OnAfterSettle(func(ctx t402.FacilitatorSettleResultContext) error {
 			// Hook 4: Clean up verified payment tracking after successful settlement
 			paymentHash := fmt.Sprintf("v%d-%s-%s",
 				ctx.Payload.GetVersion(),
@@ -816,7 +816,7 @@ func main() {
 			}
 			return nil
 		}).
-		OnSettleFailure(func(ctx x402.FacilitatorSettleFailureContext) (*x402.FacilitatorSettleFailureHookResult, error) {
+		OnSettleFailure(func(ctx t402.FacilitatorSettleFailureContext) (*t402.FacilitatorSettleFailureHookResult, error) {
 			// Hook 5: Clean up verified payment tracking on failure too
 			paymentHash := fmt.Sprintf("v%d-%s-%s",
 				ctx.Payload.GetVersion(),
@@ -840,7 +840,7 @@ func main() {
 	router.POST("/verify", func(c *gin.Context) {
 		// First, peek at the version to determine which struct to use
 		var versionCheck struct {
-			X402Version int `json:"x402Version"`
+			T402Version int `json:"t402Version"`
 		}
 
 		// Read body into buffer so we can parse it twice
@@ -895,7 +895,7 @@ func main() {
 	router.POST("/settle", func(c *gin.Context) {
 		// First, peek at the version to determine which struct to use
 		var versionCheck struct {
-			X402Version int `json:"x402Version"`
+			T402Version int `json:"t402Version"`
 		}
 
 		// Read body into buffer so we can parse it twice
@@ -943,7 +943,7 @@ func main() {
 			// Check if this was an abort from hook
 			if strings.Contains(err.Error(), "settlement aborted:") {
 				// Return a proper SettleResponse instead of 500 error
-				c.JSON(http.StatusOK, x402.SettleResponse{
+				c.JSON(http.StatusOK, t402.SettleResponse{
 					Success:     false,
 					ErrorReason: strings.TrimPrefix(err.Error(), "settlement aborted: "),
 					Network:     "", // Network not available in error case since we don't parse the raw JSON
@@ -982,7 +982,7 @@ func main() {
 		items, total := bazaarCatalog.GetResources(limit, offset)
 
 		c.JSON(http.StatusOK, gin.H{
-			"x402Version": 1,
+			"t402Version": 1,
 			"items":       items,
 			"pagination": gin.H{
 				"limit":  limit,
@@ -1020,7 +1020,7 @@ func main() {
 	// Start the server
 	fmt.Printf(`
 ╔════════════════════════════════════════════════════════╗
-║              x402 Go Facilitator                       ║
+║              t402 Go Facilitator                       ║
 ╠════════════════════════════════════════════════════════╣
 ║  Server:     http://localhost:%s                      ║
 ║  Network:    %s                       ║

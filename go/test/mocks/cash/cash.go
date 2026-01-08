@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	x402 "github.com/coinbase/x402/go"
-	"github.com/coinbase/x402/go/types"
+	t402 "github.com/coinbase/t402/go"
+	"github.com/coinbase/t402/go/types"
 )
 
 // ============================================================================
@@ -37,7 +37,7 @@ func (c *SchemeNetworkClient) CreatePaymentPayload(ctx context.Context, requirem
 	validUntil := time.Now().Add(time.Duration(requirements.MaxTimeoutSeconds) * time.Second).Unix()
 
 	return types.PaymentPayload{
-		X402Version: 2,
+		T402Version: 2,
 		Payload: map[string]interface{}{
 			"signature":  fmt.Sprintf("~%s", c.payer),
 			"validUntil": strconv.FormatInt(validUntil, 10),
@@ -65,80 +65,80 @@ func (f *SchemeNetworkFacilitator) Scheme() string {
 
 // CaipFamily returns the CAIP family pattern
 func (f *SchemeNetworkFacilitator) CaipFamily() string {
-	return "x402:*"
+	return "t402:*"
 }
 
 // GetExtra returns mechanism-specific extra data for the supported kinds endpoint.
 // For the mock cash scheme, return nil.
-func (f *SchemeNetworkFacilitator) GetExtra(_ x402.Network) map[string]interface{} {
+func (f *SchemeNetworkFacilitator) GetExtra(_ t402.Network) map[string]interface{} {
 	return nil
 }
 
 // GetSigners returns signer addresses
-func (f *SchemeNetworkFacilitator) GetSigners(_ x402.Network) []string {
+func (f *SchemeNetworkFacilitator) GetSigners(_ t402.Network) []string {
 	return []string{}
 }
 
 // Verify verifies a V2 payment payload against requirements (typed)
-func (f *SchemeNetworkFacilitator) Verify(ctx context.Context, payload types.PaymentPayload, requirements types.PaymentRequirements) (*x402.VerifyResponse, error) {
-	network := x402.Network(requirements.Network)
+func (f *SchemeNetworkFacilitator) Verify(ctx context.Context, payload types.PaymentPayload, requirements types.PaymentRequirements) (*t402.VerifyResponse, error) {
+	network := t402.Network(requirements.Network)
 
 	// Extract payload fields
 	signature, ok := payload.Payload["signature"].(string)
 	if !ok {
-		return nil, x402.NewVerifyError("missing_signature", "", network, nil)
+		return nil, t402.NewVerifyError("missing_signature", "", network, nil)
 	}
 
 	name, ok := payload.Payload["name"].(string)
 	if !ok {
-		return nil, x402.NewVerifyError("missing_name", "", network, nil)
+		return nil, t402.NewVerifyError("missing_name", "", network, nil)
 	}
 
 	validUntilStr, ok := payload.Payload["validUntil"].(string)
 	if !ok {
-		return nil, x402.NewVerifyError("missing_validUntil", "", network, nil)
+		return nil, t402.NewVerifyError("missing_validUntil", "", network, nil)
 	}
 
 	// Check signature
 	expectedSig := fmt.Sprintf("~%s", name)
 	if signature != expectedSig {
-		return nil, x402.NewVerifyError("invalid_signature", signature, network, nil)
+		return nil, t402.NewVerifyError("invalid_signature", signature, network, nil)
 	}
 
 	// Check expiration
 	validUntil, err := strconv.ParseInt(validUntilStr, 10, 64)
 	if err != nil {
-		return nil, x402.NewVerifyError("invalid_validUntil", signature, network, err)
+		return nil, t402.NewVerifyError("invalid_validUntil", signature, network, err)
 	}
 
 	if validUntil < time.Now().Unix() {
-		return nil, x402.NewVerifyError("expired_signature", signature, network, nil)
+		return nil, t402.NewVerifyError("expired_signature", signature, network, nil)
 	}
 
-	return &x402.VerifyResponse{
+	return &t402.VerifyResponse{
 		IsValid: true,
 		Payer:   signature,
 	}, nil
 }
 
 // Settle settles a V2 payment (typed)
-func (f *SchemeNetworkFacilitator) Settle(ctx context.Context, payload types.PaymentPayload, requirements types.PaymentRequirements) (*x402.SettleResponse, error) {
-	network := x402.Network(requirements.Network)
+func (f *SchemeNetworkFacilitator) Settle(ctx context.Context, payload types.PaymentPayload, requirements types.PaymentRequirements) (*t402.SettleResponse, error) {
+	network := t402.Network(requirements.Network)
 
 	// First verify the payment
 	verifyResponse, err := f.Verify(ctx, payload, requirements)
 	if err != nil {
 		// Convert VerifyError to SettleError
-		if ve, ok := err.(*x402.VerifyError); ok {
-			return nil, x402.NewSettleError(ve.Reason, ve.Payer, ve.Network, "", ve.Err)
+		if ve, ok := err.(*t402.VerifyError); ok {
+			return nil, t402.NewSettleError(ve.Reason, ve.Payer, ve.Network, "", ve.Err)
 		}
-		return nil, x402.NewSettleError("verification_failed", "", network, "", err)
+		return nil, t402.NewSettleError("verification_failed", "", network, "", err)
 	}
 
 	// Extract name for transaction message
 	name, _ := payload.Payload["name"].(string)
 
-	return &x402.SettleResponse{
+	return &t402.SettleResponse{
 		Success:     true,
 		Transaction: fmt.Sprintf("%s transferred %s %s to %s", name, requirements.Amount, requirements.Asset, requirements.PayTo),
 		Network:     network,
@@ -164,9 +164,9 @@ func (s *SchemeNetworkServer) Scheme() string {
 }
 
 // ParsePrice parses a price into asset amount format
-func (s *SchemeNetworkServer) ParsePrice(price x402.Price, network x402.Network) (x402.AssetAmount, error) {
+func (s *SchemeNetworkServer) ParsePrice(price t402.Price, network t402.Network) (t402.AssetAmount, error) {
 	// Handle pre-parsed price object
-	if assetAmount, ok := price.(x402.AssetAmount); ok {
+	if assetAmount, ok := price.(t402.AssetAmount); ok {
 		return assetAmount, nil
 	}
 
@@ -177,7 +177,7 @@ func (s *SchemeNetworkServer) ParsePrice(price x402.Price, network x402.Network)
 		if asset == "" {
 			asset = "USD"
 		}
-		return x402.AssetAmount{
+		return t402.AssetAmount{
 			Amount: amount,
 			Asset:  asset,
 			Extra:  nil,
@@ -192,7 +192,7 @@ func (s *SchemeNetworkServer) ParsePrice(price x402.Price, network x402.Network)
 		cleanPrice = strings.TrimSuffix(cleanPrice, "USD")
 		cleanPrice = strings.TrimSpace(cleanPrice)
 
-		return x402.AssetAmount{
+		return t402.AssetAmount{
 			Amount: cleanPrice,
 			Asset:  "USD",
 			Extra:  nil,
@@ -201,7 +201,7 @@ func (s *SchemeNetworkServer) ParsePrice(price x402.Price, network x402.Network)
 
 	// Handle number input
 	if priceNum, ok := price.(float64); ok {
-		return x402.AssetAmount{
+		return t402.AssetAmount{
 			Amount: fmt.Sprintf("%.2f", priceNum),
 			Asset:  "USD",
 			Extra:  nil,
@@ -209,14 +209,14 @@ func (s *SchemeNetworkServer) ParsePrice(price x402.Price, network x402.Network)
 	}
 
 	if priceInt, ok := price.(int); ok {
-		return x402.AssetAmount{
+		return t402.AssetAmount{
 			Amount: strconv.Itoa(priceInt),
 			Asset:  "USD",
 			Extra:  nil,
 		}, nil
 	}
 
-	return x402.AssetAmount{}, fmt.Errorf("invalid price format: %v", price)
+	return t402.AssetAmount{}, fmt.Errorf("invalid price format: %v", price)
 }
 
 // EnhancePaymentRequirements enhances payment requirements with cash-specific details
@@ -236,36 +236,36 @@ func (s *SchemeNetworkServer) EnhancePaymentRequirements(
 
 // FacilitatorClient wraps a facilitator for the cash scheme
 type FacilitatorClient struct {
-	facilitator *x402.X402Facilitator
+	facilitator *t402.T402Facilitator
 }
 
 // NewFacilitatorClient creates a new cash facilitator client
-func NewFacilitatorClient(facilitator *x402.X402Facilitator) *FacilitatorClient {
+func NewFacilitatorClient(facilitator *t402.T402Facilitator) *FacilitatorClient {
 	return &FacilitatorClient{
 		facilitator: facilitator,
 	}
 }
 
 // Verify verifies a payment payload against requirements
-func (c *FacilitatorClient) Verify(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.VerifyResponse, error) {
+func (c *FacilitatorClient) Verify(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error) {
 	// Pass bytes directly to facilitator (it will unmarshal internally)
 	return c.facilitator.Verify(ctx, payloadBytes, requirementsBytes)
 }
 
 // Settle settles a payment based on the payload and requirements
-func (c *FacilitatorClient) Settle(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*x402.SettleResponse, error) {
+func (c *FacilitatorClient) Settle(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 	// Pass bytes directly to facilitator (it will unmarshal internally)
 	return c.facilitator.Settle(ctx, payloadBytes, requirementsBytes)
 }
 
 // GetSupported gets supported payment kinds and extensions
-func (c *FacilitatorClient) GetSupported(ctx context.Context) (x402.SupportedResponse, error) {
-	return x402.SupportedResponse{
-		Kinds: []x402.SupportedKind{
+func (c *FacilitatorClient) GetSupported(ctx context.Context) (t402.SupportedResponse, error) {
+	return t402.SupportedResponse{
+		Kinds: []t402.SupportedKind{
 			{
-				X402Version: 2,
+				T402Version: 2,
 				Scheme:      "cash",
-				Network:     "x402:cash",
+				Network:     "t402:cash",
 				Extra:       nil,
 			},
 		},
@@ -287,7 +287,7 @@ func (c *FacilitatorClient) Identifier() string {
 func BuildPaymentRequirements(payTo string, asset string, amount string) types.PaymentRequirements {
 	return types.PaymentRequirements{
 		Scheme:            "cash",
-		Network:           "x402:cash",
+		Network:           "t402:cash",
 		Asset:             asset,
 		Amount:            amount,
 		PayTo:             payTo,

@@ -1,4 +1,4 @@
-package x402
+package t402
 
 import (
 	"context"
@@ -116,42 +116,42 @@ type OnSettleFailureHook func(SettleFailureContext) (*SettleFailureHookResult, e
 
 // WithBeforeVerifyHook registers a hook to execute before payment verification
 func WithBeforeVerifyHook(hook BeforeVerifyHook) ResourceServerOption {
-	return func(s *x402ResourceServer) {
+	return func(s *t402ResourceServer) {
 		s.beforeVerifyHooks = append(s.beforeVerifyHooks, hook)
 	}
 }
 
 // WithAfterVerifyHook registers a hook to execute after successful payment verification
 func WithAfterVerifyHook(hook AfterVerifyHook) ResourceServerOption {
-	return func(s *x402ResourceServer) {
+	return func(s *t402ResourceServer) {
 		s.afterVerifyHooks = append(s.afterVerifyHooks, hook)
 	}
 }
 
 // WithOnVerifyFailureHook registers a hook to execute when payment verification fails
 func WithOnVerifyFailureHook(hook OnVerifyFailureHook) ResourceServerOption {
-	return func(s *x402ResourceServer) {
+	return func(s *t402ResourceServer) {
 		s.onVerifyFailureHooks = append(s.onVerifyFailureHooks, hook)
 	}
 }
 
 // WithBeforeSettleHook registers a hook to execute before payment settlement
 func WithBeforeSettleHook(hook BeforeSettleHook) ResourceServerOption {
-	return func(s *x402ResourceServer) {
+	return func(s *t402ResourceServer) {
 		s.beforeSettleHooks = append(s.beforeSettleHooks, hook)
 	}
 }
 
 // WithAfterSettleHook registers a hook to execute after successful payment settlement
 func WithAfterSettleHook(hook AfterSettleHook) ResourceServerOption {
-	return func(s *x402ResourceServer) {
+	return func(s *t402ResourceServer) {
 		s.afterSettleHooks = append(s.afterSettleHooks, hook)
 	}
 }
 
 // WithOnSettleFailureHook registers a hook to execute when payment settlement fails
 func WithOnSettleFailureHook(hook OnSettleFailureHook) ResourceServerOption {
-	return func(s *x402ResourceServer) {
+	return func(s *t402ResourceServer) {
 		s.onSettleFailureHooks = append(s.onSettleFailureHooks, hook)
 	}
 }

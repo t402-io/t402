@@ -12,7 +12,7 @@ const OUTPUT_HTML = path.join(DIST_DIR, "paywall.html");
 const OUTPUT_TS = path.join("src/paywall/gen", "template.ts");
 
 // Path to Python package static directory (relative to this TypeScript package)
-const PYTHON_DIR = path.join("..", "..", "..", "python", "x402", "src", "x402");
+const PYTHON_DIR = path.join("..", "..", "..", "python", "t402", "src", "t402");
 const OUTPUT_PY = path.join(PYTHON_DIR, "template.py");
 
 const options: esbuild.BuildOptions = {

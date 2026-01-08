@@ -1,6 +1,6 @@
-# x402-next Example App
+# t402-next Example App
 
-This is a Next.js application that demonstrates how to use the `x402-next` middleware to implement paywall functionality in your Next.js routes.
+This is a Next.js application that demonstrates how to use the `t402-next` middleware to implement paywall functionality in your Next.js routes.
 
 ## Prerequisites
 
@@ -34,11 +34,11 @@ pnpm dev
 The app includes protected routes that require payment to access:
 
 ### Protected Page Route
-The `/protected` route requires a payment of $0.01 to access. The page route is protected using the x402-next middleware:
+The `/protected` route requires a payment of $0.01 to access. The page route is protected using the t402-next middleware:
 
 ```typescript
 // middleware.ts
-import { paymentMiddleware, Network, Resource } from "x402-next";
+import { paymentMiddleware, Network, Resource } from "t402-next";
 
 const facilitatorUrl = process.env.NEXT_PUBLIC_FACILITATOR_URL as Resource;
 const payTo = process.env.RESOURCE_WALLET_ADDRESS as Address;
@@ -68,12 +68,12 @@ export const config = {
 ```
 
 ### Protected API Route
-The `/api/weather` API route requires a payment of $0.01 to access. The API route is protected using the x402-next route wrapper. This is the recommened approach to protect API routes as it guarantees payment settlement only AFTER successful API responses (status < 400). API routes can also be protected by the x402-next middleware, however this will charge clients for failed API responses.
+The `/api/weather` API route requires a payment of $0.01 to access. The API route is protected using the t402-next route wrapper. This is the recommened approach to protect API routes as it guarantees payment settlement only AFTER successful API responses (status < 400). API routes can also be protected by the t402-next middleware, however this will charge clients for failed API responses.
 
 ```typescript
 // app/api/weather/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { withX402, Network, Resource } from "x402-next";
+import { withX402, Network, Resource } from "t402-next";
 
 const handler = async (_: NextRequest) => {
   return NextResponse.json({
@@ -90,7 +90,7 @@ export const GET = withX402(
     config: { description: "Access to weather API" }
   },
   { url: facilitatorUrl },
-  { appName: "Next x402 Demo", appLogo: "/x402-icon-blue.png" }
+  { appName: "Next t402 Demo", appLogo: "/t402-icon-blue.png" }
 );
 ```
 

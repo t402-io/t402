@@ -127,7 +127,7 @@ export default function EcosystemClient({
             </div>
             <p className="max-w-[400px] text-right font-code-ui text-base leading-relaxed text-gray-60 sm:text-lg">
               Discover innovative projects, tools, and applications built by our growing community
-              of partners and developers leveraging x402 technology.
+              of partners and developers leveraging t402 technology.
             </p>
           </div>
 

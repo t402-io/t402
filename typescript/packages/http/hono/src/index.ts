@@ -2,12 +2,12 @@ import {
   HTTPRequestContext,
   PaywallConfig,
   PaywallProvider,
-  x402HTTPResourceServer,
-  x402ResourceServer,
+  t402HTTPResourceServer,
+  t402ResourceServer,
   RoutesConfig,
   FacilitatorClient,
-} from "@x402/core/server";
-import { SchemeNetworkServer, Network } from "@x402/core/types";
+} from "@t402/core/server";
+import { SchemeNetworkServer, Network } from "@t402/core/types";
 import { Context, MiddlewareHandler } from "hono";
 import { HonoAdapter } from "./adapter";
 
@@ -45,14 +45,14 @@ export interface SchemeRegistration {
 }
 
 /**
- * Hono payment middleware for x402 protocol (direct server instance).
+ * Hono payment middleware for t402 protocol (direct server instance).
  *
- * Use this when you want to pass a pre-configured x402ResourceServer instance.
+ * Use this when you want to pass a pre-configured t402ResourceServer instance.
  * This provides more flexibility for testing, custom configuration, and reusing
  * server instances across multiple middlewares.
  *
  * @param routes - Route configurations for protected endpoints
- * @param server - Pre-configured x402ResourceServer instance
+ * @param server - Pre-configured t402ResourceServer instance
  * @param paywallConfig - Optional configuration for the built-in paywall UI
  * @param paywall - Optional custom paywall provider (overrides default)
  * @param syncFacilitatorOnStart - Whether to sync with the facilitator on startup (defaults to true)
@@ -60,11 +60,11 @@ export interface SchemeRegistration {
  *
  * @example
  * ```typescript
- * import { paymentMiddleware } from "@x402/hono";
- * import { x402ResourceServer } from "@x402/core/server";
- * import { registerExactEvmScheme } from "@x402/evm/exact/server";
+ * import { paymentMiddleware } from "@t402/hono";
+ * import { t402ResourceServer } from "@t402/core/server";
+ * import { registerExactEvmScheme } from "@t402/evm/exact/server";
  *
- * const server = new x402ResourceServer(myFacilitatorClient);
+ * const server = new t402ResourceServer(myFacilitatorClient);
  * registerExactEvmScheme(server, {});
  *
  * app.use(paymentMiddleware(routes, server, paywallConfig));
@@ -72,13 +72,13 @@ export interface SchemeRegistration {
  */
 export function paymentMiddleware(
   routes: RoutesConfig,
-  server: x402ResourceServer,
+  server: t402ResourceServer,
   paywallConfig?: PaywallConfig,
   paywall?: PaywallProvider,
   syncFacilitatorOnStart: boolean = true,
 ): MiddlewareHandler {
-  // Create the x402 HTTP server instance with the resource server
-  const httpServer = new x402HTTPResourceServer(server, routes);
+  // Create the t402 HTTP server instance with the resource server
+  const httpServer = new t402HTTPResourceServer(server, routes);
 
   // Register custom paywall provider if provided
   if (paywall) {
@@ -92,7 +92,7 @@ export function paymentMiddleware(
   // Dynamically register bazaar extension if routes declare it
   let bazaarPromise: Promise<void> | null = null;
   if (checkIfBazaarNeeded(routes)) {
-    bazaarPromise = import("@x402/extensions/bazaar")
+    bazaarPromise = import("@t402/extensions/bazaar")
       .then(({ bazaarResourceServerExtension }) => {
         server.registerExtension(bazaarResourceServerExtension);
       })
@@ -208,10 +208,10 @@ export function paymentMiddleware(
 }
 
 /**
- * Hono payment middleware for x402 protocol (configuration-based).
+ * Hono payment middleware for t402 protocol (configuration-based).
  *
  * Use this when you want to quickly set up middleware with simple configuration.
- * This function creates and configures the x402ResourceServer internally.
+ * This function creates and configures the t402ResourceServer internally.
  *
  * @param routes - Route configurations for protected endpoints
  * @param facilitatorClients - Optional facilitator client(s) for payment processing
@@ -223,7 +223,7 @@ export function paymentMiddleware(
  *
  * @example
  * ```typescript
- * import { paymentMiddlewareFromConfig } from "@x402/hono";
+ * import { paymentMiddlewareFromConfig } from "@t402/hono";
  *
  * app.use(paymentMiddlewareFromConfig(
  *   routes,
@@ -241,7 +241,7 @@ export function paymentMiddlewareFromConfig(
   paywall?: PaywallProvider,
   syncFacilitatorOnStart: boolean = true,
 ): MiddlewareHandler {
-  const ResourceServer = new x402ResourceServer(facilitatorClients);
+  const ResourceServer = new t402ResourceServer(facilitatorClients);
 
   if (schemes) {
     schemes.forEach(({ network, server: schemeServer }) => {
@@ -254,7 +254,7 @@ export function paymentMiddlewareFromConfig(
   return paymentMiddleware(routes, ResourceServer, paywallConfig, paywall, syncFacilitatorOnStart);
 }
 
-export { x402ResourceServer, x402HTTPResourceServer } from "@x402/core/server";
+export { t402ResourceServer, t402HTTPResourceServer } from "@t402/core/server";
 
 export type {
   PaymentRequired,
@@ -262,12 +262,12 @@ export type {
   PaymentPayload,
   Network,
   SchemeNetworkServer,
-} from "@x402/core/types";
+} from "@t402/core/types";
 
-export type { PaywallProvider, PaywallConfig } from "@x402/core/server";
+export type { PaywallProvider, PaywallConfig } from "@t402/core/server";
 
-export { RouteConfigurationError } from "@x402/core/server";
+export { RouteConfigurationError } from "@t402/core/server";
 
-export type { RouteValidationError } from "@x402/core/server";
+export type { RouteValidationError } from "@t402/core/server";
 
 export { HonoAdapter } from "./adapter";

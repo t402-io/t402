@@ -48,12 +48,12 @@ export function getSvmPaywallHtml(options: SvmPaywallOptions): string {
   const { amount, testnet, paymentRequired, currentUrl, appName, appLogo } = options;
 
   const logOnTestnet = testnet
-    ? "console.log('SVM Payment required initialized:', window.x402);"
+    ? "console.log('SVM Payment required initialized:', window.t402);"
     : "";
 
   const configScript = `
   <script>
-    window.x402 = {
+    window.t402 = {
       amount: ${amount},
       paymentRequired: ${JSON.stringify(paymentRequired)},
       testnet: ${testnet},

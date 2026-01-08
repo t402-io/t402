@@ -1,12 +1,12 @@
-# @x402/hono Example Server
+# @t402/hono Example Server
 
-Hono server demonstrating how to protect API endpoints with a paywall using the `@x402/hono` middleware.
+Hono server demonstrating how to protect API endpoints with a paywall using the `@t402/hono` middleware.
 
 ```typescript
 import { Hono } from "hono";
-import { paymentMiddleware, x402ResourceServer } from "@x402/hono";
-import { ExactEvmScheme } from "@x402/evm/exact/server";
-import { HTTPFacilitatorClient } from "@x402/core/server";
+import { paymentMiddleware, t402ResourceServer } from "@t402/hono";
+import { ExactEvmScheme } from "@t402/evm/exact/server";
+import { HTTPFacilitatorClient } from "@t402/core/server";
 
 const app = new Hono();
 
@@ -19,7 +19,7 @@ app.use(
         mimeType: "application/json",
       },
     },
-    new x402ResourceServer(new HTTPFacilitatorClient({ url: facilitatorUrl }))
+    new t402ResourceServer(new HTTPFacilitatorClient({ url: facilitatorUrl }))
       .register("eip155:84532", new ExactEvmScheme()),
   ),
 );
@@ -32,7 +32,7 @@ app.get("/weather", c => c.json({ weather: "sunny", temperature: 70 }));
 - Node.js v20+ (install via [nvm](https://github.com/nvm-sh/nvm))
 - pnpm v10 (install via [pnpm.io/installation](https://pnpm.io/installation))
 - Valid EVM and SVM addresses for receiving payments
-- URL of a facilitator supporting the desired payment network, see [facilitator list](https://www.x402.org/ecosystem?category=facilitators)
+- URL of a facilitator supporting the desired payment network, see [facilitator list](https://www.t402.org/ecosystem?category=facilitators)
 
 ## Setup
 
@@ -109,7 +109,7 @@ Note: `amount` is in atomic units (e.g., 1000 = 0.001 USDC, since USDC has 6 dec
 
 ```json
 {
-  "x402Version": 2,
+  "t402Version": 2,
   "error": "Payment required",
   "resource": {
     "url": "http://localhost:4021/weather",
@@ -219,12 +219,12 @@ app.get("/your-endpoint", (c) => {
 - `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` — Solana Devnet
 - `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` — Solana Mainnet
 
-## x402ResourceServer Config
+## t402ResourceServer Config
 
-The `x402ResourceServer` uses a builder pattern to register payment schemes that declare how payments for each network should be processed:
+The `t402ResourceServer` uses a builder pattern to register payment schemes that declare how payments for each network should be processed:
 
 ```typescript
-const resourceServer = new x402ResourceServer(facilitatorClient)
+const resourceServer = new t402ResourceServer(facilitatorClient)
   .register("eip155:*", new ExactEvmScheme()) // All EVM chains
   .register("solana:*", new ExactSvmScheme()); // All SVM chains
 ```

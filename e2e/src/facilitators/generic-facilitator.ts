@@ -2,7 +2,7 @@ import { BaseProxy, RunConfig } from '../proxy-base';
 import { verboseLog, errorLog } from '../logger';
 
 export interface VerifyRequest {
-  x402Version: number;
+  t402Version: number;
   paymentPayload: any;
   paymentRequirements: any;
 }
@@ -14,7 +14,7 @@ export interface VerifyResponse {
 }
 
 export interface SettleRequest {
-  x402Version: number;
+  t402Version: number;
   paymentPayload: any;
   paymentRequirements: any;
 }
@@ -29,7 +29,7 @@ export interface SettleResponse {
 
 export interface SupportedResponse {
   kinds: Array<{
-    x402Version: number;
+    t402Version: number;
     scheme: string;
     network: string;
     extra?: Record<string, any>;

@@ -1,12 +1,12 @@
 # cdp-sdk signer example using Axios
 
-This is an example showcasing using `cdp-sdk`'s server wallets as the signer for our  `x402-axios` client.
+This is an example showcasing using `cdp-sdk`'s server wallets as the signer for our  `t402-axios` client.
 
 ## Prerequisites
 
 - Node.js v20+ (install via [nvm](https://github.com/nvm-sh/nvm))
 - pnpm v10 (install via [pnpm.io/installation](https://pnpm.io/installation))
-- A running x402 server (you can use the example express server at `examples/typescript/servers/express`)
+- A running t402 server (you can use the example express server at `examples/typescript/servers/express`)
 - A valid Ethereum private key for making payments
 
 ## Setup
@@ -33,7 +33,7 @@ pnpm dev
 
 The example demonstrates how to:
 1. Create a wallet client using cdp-sdk's server wallets
-2. Create an Axios instance with x402 payment handling
+2. Create an Axios instance with t402 payment handling
 3. Make a request to a paid endpoint
 4. Handle the response or any errors
 
@@ -43,7 +43,7 @@ The example demonstrates how to:
 import { config } from "dotenv";
 import { createWalletClient, http, publicActions } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { withPaymentInterceptor } from "x402-axios";
+import { withPaymentInterceptor } from "t402-axios";
 import axios from "axios";
 import { baseSepolia } from "viem/chains";
 
@@ -58,7 +58,7 @@ const client = new CdpClient({
   walletSecret,
 });
 const serverAccount = await client.evm.getOrCreateAccount({
-  name: "x402-axios-example",
+  name: "t402-axios-example",
 })
 
 // Create Axios instance with payment handling

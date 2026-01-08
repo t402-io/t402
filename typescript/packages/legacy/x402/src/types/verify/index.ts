@@ -1,2 +1,2 @@
-export * from "./x402Specs";
+export * from "./t402Specs";
 export * from "./facilitator";

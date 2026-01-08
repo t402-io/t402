@@ -118,7 +118,7 @@ describe("ExactSvmScheme", () => {
       const result = await server.enhancePaymentRequirements(
         requirements as never,
         {
-          x402Version: 2,
+          t402Version: 2,
           scheme: "exact",
           network: SOLANA_MAINNET_CAIP2,
           extra: { feePayer: facilitatorAddress },
@@ -146,7 +146,7 @@ describe("ExactSvmScheme", () => {
       const result = await server.enhancePaymentRequirements(
         requirements as never,
         {
-          x402Version: 2,
+          t402Version: 2,
           scheme: "exact",
           network: SOLANA_DEVNET_CAIP2,
           extra: { feePayer: "FeePayer1111111111111111111111111111" },

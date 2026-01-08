@@ -7,18 +7,18 @@ import { SiweMessage, generateNonce } from 'siwe';
 
 import {
   PaymentRequirements,
-  Price as X402Price,
-  Network as X402Network,
-  Resource as X402Resource,
+  Price as T402Price,
+  Network as T402Network,
+  Resource as T402Resource,
   PaymentPayload,
   settleResponseHeader,
   ERC20TokenAmount
-} from 'x402/types';
-import { useFacilitator } from 'x402/verify';
-import { exact } from 'x402/schemes';
-import { processPriceToAtomicAmount } from 'x402/shared';
+} from 't402/types';
+import { useFacilitator } from 't402/verify';
+import { exact } from 't402/schemes';
+import { processPriceToAtomicAmount } from 't402/shared';
 // uncomment to use the CDP Base mainnet facilitator
-//import { facilitator } from "@coinbase/x402"; 
+//import { facilitator } from "@coinbase/t402"; 
 
 
 // --- Environment Variable Loading ---
@@ -28,46 +28,46 @@ config(); // Load .env or .env-local
 const JWT_SECRET = process.env.JWT_SECRET as string;
 const DEMO_SERVER_PORT = parseInt(process.env.DEMO_SERVER_PORT || '3000', 10);
 const BUSINESS_WALLET_ADDRESS = process.env.BUSINESS_WALLET_ADDRESS as Hex; // Wallet to receive payments
-const FACILITATOR_URL = 'https://x402.org/facilitator'; // x402 Sepolia Facilitator
-const X402_NETWORK = process.env.X402_NETWORK as X402Network; // Network for x402 payments (e.g., 'base-sepolia', 'base')
-const X402_VERSION = 1; // Standard x402 version
+const FACILITATOR_URL = 'https://t402.org/facilitator'; // t402 Sepolia Facilitator
+const T402_NETWORK = process.env.T402_NETWORK as T402Network; // Network for t402 payments (e.g., 'base-sepolia', 'base')
+const T402_VERSION = 1; // Standard t402 version
 
 // Validate essential configuration
-if (!JWT_SECRET || !BUSINESS_WALLET_ADDRESS || !FACILITATOR_URL || !X402_NETWORK) {
+if (!JWT_SECRET || !BUSINESS_WALLET_ADDRESS || !FACILITATOR_URL || !T402_NETWORK) {
   console.error('CRITICAL ERROR: Missing essential server environment variables. Check .env-local or .env file.');
   process.exit(1);
 }
 
-// --- Hono App & x402 Facilitator Setup ---
+// --- Hono App & t402 Facilitator Setup ---
 const app = new Hono();
-// Initialize x402 facilitator client for payment verification and settlement
+// Initialize t402 facilitator client for payment verification and settlement
 // for mainnet, use the CDP Base mainnet facilitator as follows:
-// const { verify: verifyX402Payment, settle: settleX402Payment } = useFacilitator(facilitator);
-const { verify: verifyX402Payment, settle: settleX402Payment } = useFacilitator({ url: FACILITATOR_URL });
+// const { verify: verifyT402Payment, settle: settleT402Payment } = useFacilitator(facilitator);
+const { verify: verifyT402Payment, settle: settleT402Payment } = useFacilitator({ url: FACILITATOR_URL });
 
 // --- SIWE Nonce Store (In-Memory for Demo) ---
 // IMPORTANT: For production, use a persistent store (e.g., Redis, DB) with proper TTL management for nonces.
 const issuedNonces = new Set<string>();
 const NONCE_EXPIRATION_TIME_MS = 5 * 60 * 1000; // Nonces expire after 5 minutes
 
-// --- Helper: Create x402 Exact Payment Requirements ---
+// --- Helper: Create t402 Exact Payment Requirements ---
 /**
- * Constructs the payment requirements object for an x402 payment.
+ * Constructs the payment requirements object for an t402 payment.
  * @param price The price for the resource (e.g., '$0.10').
  * @param network The blockchain network for the payment.
  * @param resource The URL or identifier of the resource being accessed.
  * @param description A description for the payment.
- * @returns PaymentRequirements object for the x402 challenge.
+ * @returns PaymentRequirements object for the t402 challenge.
  */
 function createExactPaymentRequirements(
-  price: X402Price,
-  network: X402Network,
-  resource: X402Resource,
+  price: T402Price,
+  network: T402Network,
+  resource: T402Resource,
   description = "",
 ): PaymentRequirements {
   const atomicAmountForAsset = processPriceToAtomicAmount(price, network);
   if ("error" in atomicAmountForAsset) {
-    console.error("[X402Svc] Error processing price to atomic amount:", atomicAmountForAsset.error);
+    console.error("[T402Svc] Error processing price to atomic amount:", atomicAmountForAsset.error);
     throw new Error(`Failed to process price: ${atomicAmountForAsset.error}`);
   }
   const { maxAmountRequired, asset } = atomicAmountForAsset;
@@ -87,8 +87,8 @@ function createExactPaymentRequirements(
   };
 }
 
-// --- Helper: Handle x402 Payment Flow (Verification & Challenge Response) ---
-interface X402HandlingResult {
+// --- Helper: Handle t402 Payment Flow (Verification & Challenge Response) ---
+interface T402HandlingResult {
   success: boolean;
   response?: Response; // Pre-formatted Hono Response for 402 challenges or errors
   decodedPayment?: PaymentPayload; // Validated and decoded payment from X-PAYMENT header
@@ -96,23 +96,23 @@ interface X402HandlingResult {
 }
 
 /**
- * Handles the x402 payment verification logic.
+ * Handles the t402 payment verification logic.
  * Checks for X-PAYMENT header, decodes it, verifies with facilitator.
  * Returns a success status or a pre-formatted 402 Hono Response object.
  */
-async function handleX402PaymentVerification(
+async function handleT402PaymentVerification(
   c: HonoContext,
   paymentRequirements: PaymentRequirements[],
-): Promise<X402HandlingResult> {
+): Promise<T402HandlingResult> {
   const paymentHeader = c.req.header('X-PAYMENT');
 
   // If no payment header, issue a 402 challenge with payment requirements
   if (!paymentHeader) {
-    console.log('[X402Svc] No X-PAYMENT header. Responding with 402 challenge.');
+    console.log('[T402Svc] No X-PAYMENT header. Responding with 402 challenge.');
     return {
       success: false,
       response: c.json({
-        x402Version: X402_VERSION,
+        t402Version: T402_VERSION,
         error: "X-PAYMENT header is required",
         accepts: paymentRequirements
       }, 402)
@@ -124,11 +124,11 @@ async function handleX402PaymentVerification(
   try {
     decodedPayment = exact.evm.decodePayment(paymentHeader);
   } catch (error: any) {
-    console.error('[X402Svc] Error decoding X-PAYMENT header:', error.message);
+    console.error('[T402Svc] Error decoding X-PAYMENT header:', error.message);
     return {
       success: false,
       response: c.json({
-        x402Version: X402_VERSION,
+        t402Version: T402_VERSION,
         error: error.message || "Invalid or malformed X-PAYMENT header",
         accepts: paymentRequirements
       }, 402)
@@ -137,31 +137,31 @@ async function handleX402PaymentVerification(
 
   // Verify the decoded payment with the facilitator
   try {
-    const verificationResponse = await verifyX402Payment(decodedPayment, paymentRequirements[0]);
+    const verificationResponse = await verifyT402Payment(decodedPayment, paymentRequirements[0]);
     if (!verificationResponse.isValid) {
-      console.warn('[X402Svc] Payment verification failed by facilitator:', verificationResponse.invalidReason);
+      console.warn('[T402Svc] Payment verification failed by facilitator:', verificationResponse.invalidReason);
       return {
         success: false,
         response: c.json({
-          x402Version: X402_VERSION,
+          t402Version: T402_VERSION,
           error: verificationResponse.invalidReason,
           accepts: paymentRequirements,
           payer: verificationResponse.payer
         }, 402)
       };
     }
-    console.log('[X402Svc] Payment verified successfully by facilitator for payer:', verificationResponse.payer);
+    console.log('[T402Svc] Payment verified successfully by facilitator for payer:', verificationResponse.payer);
     return {
       success: true,
       decodedPayment: decodedPayment,
       verifiedPayer: verificationResponse.payer as Hex
     };
   } catch (error: any) {
-    console.error('[X402Svc] Critical error during facilitator payment verification process:', error.message);
+    console.error('[T402Svc] Critical error during facilitator payment verification process:', error.message);
     return {
       success: false,
       response: c.json({
-        x402Version: X402_VERSION,
+        t402Version: T402_VERSION,
         error: error.message || "Facilitator verification process failed",
         accepts: paymentRequirements
       }, 500) // Use 500 for server-side errors with facilitator
@@ -229,12 +229,12 @@ app.post('/auth/verify-siwe', async (c) => {
   }
 });
 
-// --- x402 Gated Demo Endpoint (/demo-weather) with Conditional Pricing ---
+// --- t402 Gated Demo Endpoint (/demo-weather) with Conditional Pricing ---
 app.get('/demo-weather', async (c: HonoContext) => {
   // 1. Determine Price Conditionally based on JWT authentication
   const authHeader = c.req.header('Authorization');
   let isAuthenticated = false;
-  let priceString: X402Price = '$0.10'; // Default price for unauthenticated users
+  let priceString: T402Price = '$0.10'; // Default price for unauthenticated users
 
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.substring(7);
@@ -243,43 +243,43 @@ app.get('/demo-weather', async (c: HonoContext) => {
       if (payload && payload.sub) { // Check for subject (wallet address) in JWT
         isAuthenticated = true;
         priceString = '$0.01'; // Discounted price for authenticated users
-        console.log(`[X402Svc] User ${payload.sub} is authenticated via JWT. Applying discounted price: ${priceString}`);
+        console.log(`[T402Svc] User ${payload.sub} is authenticated via JWT. Applying discounted price: ${priceString}`);
       }
     } catch (err) {
       // JWT invalid or expired, treat as unauthenticated for pricing
-      console.log('[X402Svc] JWT verification failed for pricing. Applying default price.');
+      console.log('[T402Svc] JWT verification failed for pricing. Applying default price.');
     }
   }
   if (!isAuthenticated) {
-    console.log(`[X402Svc] User not authenticated via JWT. Applying default price: ${priceString}`);
+    console.log(`[T402Svc] User not authenticated via JWT. Applying default price: ${priceString}`);
   }
 
   // 2. Construct Payment Requirements for the determined price
-  const resourceUrl = c.req.url as X402Resource; // The resource being accessed
+  const resourceUrl = c.req.url as T402Resource; // The resource being accessed
   let paymentRequirements: PaymentRequirements[];
   try {
-    paymentRequirements = [createExactPaymentRequirements(priceString, X402_NETWORK, resourceUrl, 'Access to premium demo weather forecast')];
+    paymentRequirements = [createExactPaymentRequirements(priceString, T402_NETWORK, resourceUrl, 'Access to premium demo weather forecast')];
   } catch (error: any) {
-    console.error('[X402Svc] Error creating payment requirements for /demo-weather:', error.message);
+    console.error('[T402Svc] Error creating payment requirements for /demo-weather:', error.message);
     return c.json({ error: 'Server error: Could not create payment requirements.' }, 500);
   }
 
-  // 3. Handle x402 Payment Flow (Verification/Challenge)
-  const x402Result = await handleX402PaymentVerification(c, paymentRequirements);
+  // 3. Handle t402 Payment Flow (Verification/Challenge)
+  const t402Result = await handleT402PaymentVerification(c, paymentRequirements);
 
   // If payment verification failed or a challenge was issued, return the 402 response
-  if (!x402Result.success || !x402Result.decodedPayment || !x402Result.verifiedPayer) {
-    return x402Result.response!;
+  if (!t402Result.success || !t402Result.decodedPayment || !t402Result.verifiedPayer) {
+    return t402Result.response!;
   }
 
   // 4. Settle Payment (Good practice after successful verification)
   try {
-    const settlement = await settleX402Payment(x402Result.decodedPayment, paymentRequirements[0]);
+    const settlement = await settleT402Payment(t402Result.decodedPayment, paymentRequirements[0]);
     const paymentResponseHeaderVal = settleResponseHeader(settlement);
     c.header('X-PAYMENT-RESPONSE', paymentResponseHeaderVal); // Send settlement confirmation to client
-    console.log('[X402Svc] /demo-weather: Payment settled. X-PAYMENT-RESPONSE header set.');
+    console.log('[T402Svc] /demo-weather: Payment settled. X-PAYMENT-RESPONSE header set.');
   } catch (error: any) {
-    console.error('[X402Svc] /demo-weather: Payment settlement failed (after verification). This is a server-side issue:', error.message);
+    console.error('[T402Svc] /demo-weather: Payment settlement failed (after verification). This is a server-side issue:', error.message);
     // Note: Content is still served as payment was verified. Settlement failure is logged.
   }
 
@@ -288,10 +288,10 @@ app.get('/demo-weather', async (c: HonoContext) => {
   const weatherReport = {
     location: 'Demo City',
     temperature: '72°F',
-    condition: 'Sunny with x402 skies!',
+    condition: 'Sunny with t402 skies!',
     message: 'This is a mock weather report. Payment was successful!',
     pricePaid: priceString, // Reflect the price that was required for this access
-    payer: x402Result.verifiedPayer // The verified wallet address that paid
+    payer: t402Result.verifiedPayer // The verified wallet address that paid
   };
   return c.json(weatherReport);
 });
@@ -302,11 +302,11 @@ async function main() {
     fetch: app.fetch,
     port: DEMO_SERVER_PORT,
   }, (info) => {
-    console.log(`🚀 SIWE-JWT-x402 Demo Server running on http://localhost:${info.port}`);
+    console.log(`🚀 SIWE-JWT-t402 Demo Server running on http://localhost:${info.port}`);
     console.log('----------------------------------------------------------------------');
     console.log('🔑 JWT Secret:', JWT_SECRET ? 'LOADED' : 'MISSING - Server will fail!');
     console.log('💼 Business Wallet:', BUSINESS_WALLET_ADDRESS || 'MISSING - Payments will fail!');
-    console.log('🌍 x402 Network:', X402_NETWORK || 'MISSING - Payments will fail!');
+    console.log('🌍 t402 Network:', T402_NETWORK || 'MISSING - Payments will fail!');
     console.log('----------------------------------------------------------------------');
     console.log('💡 To test, run the client script in a separate terminal: npm run dev:client');
     console.log('----------------------------------------------------------------------');

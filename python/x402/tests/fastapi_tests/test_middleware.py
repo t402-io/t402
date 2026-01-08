@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.testclient import TestClient
-from x402.fastapi.middleware import require_payment
-from x402.types import PaywallConfig
+from t402.fastapi.middleware import require_payment
+from t402.types import PaywallConfig
 
 
 async def test_endpoint():
@@ -101,7 +101,7 @@ def expected_path(given: str, expected: str) -> bool:
 
 
 def test_path_matching():
-    from x402.path import path_is_match
+    from t402.path import path_is_match
 
     # Test paths are parsed correctly
     assert expected_path("/", "/")
@@ -144,7 +144,7 @@ def test_path_matching():
 
 def test_abusive_url_paths():
     """Test various abusive and edge-case URL paths that could bypass security"""
-    from x402.path import path_is_match
+    from t402.path import path_is_match
 
     # Path traversal attacks
     path_traversal_attempts = [
@@ -344,7 +344,7 @@ def test_browser_request_returns_html():
 
     html_content = response.text
     assert "<!DOCTYPE html>" in html_content or "<html>" in html_content
-    assert "window.x402" in html_content
+    assert "window.t402" in html_content
 
 
 def test_api_client_request_returns_json():
@@ -406,7 +406,7 @@ def test_paywall_config_injection():
     assert response.status_code == 402
 
     html_content = response.text
-    assert "window.x402" in html_content
+    assert "window.t402" in html_content
     assert '"appName": "Test Application"' in html_content
     assert '"appLogo": "https://example.com/logo.png"' in html_content
     assert '"amount": 2.5' in html_content
