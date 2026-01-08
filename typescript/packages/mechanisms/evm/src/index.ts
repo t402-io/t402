@@ -56,3 +56,31 @@ export type { ExactEvmPayloadV1, ExactEvmPayloadV2, ExactLegacyPayload } from ".
 
 // Export constants
 export { authorizationTypes, legacyAuthorizationTypes, eip3009ABI, erc20LegacyABI } from "./constants.js";
+
+// Export USDT0 bridge module
+export {
+  // Bridge client
+  Usdt0Bridge,
+  createUsdt0Bridge,
+  // Bridge constants
+  LAYERZERO_ENDPOINT_IDS,
+  USDT0_OFT_ADDRESSES,
+  LAYERZERO_ENDPOINT_V2,
+  getEndpointId,
+  getUsdt0OftAddress,
+  supportsBridging,
+  getBridgeableChains,
+  addressToBytes32,
+  bytes32ToAddress,
+} from "./bridge/index.js";
+
+// Export bridge types
+export type {
+  BridgeQuoteParams,
+  BridgeQuote,
+  BridgeExecuteParams,
+  BridgeResult,
+  BridgeStatus,
+  BridgeTransaction,
+  BridgeSigner,
+} from "./bridge/index.js";

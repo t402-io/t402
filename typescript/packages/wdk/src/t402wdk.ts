@@ -28,6 +28,7 @@ import {
   DEFAULT_RPC_ENDPOINTS,
 } from "./chains.js";
 import { WDKSigner, createWDKSigner } from "./signer.js";
+import { supportsBridging, getBridgeableChains } from "@t402/evm";
 
 /**
  * T402WDK - Tether WDK integration for T402 payments
@@ -404,6 +405,37 @@ export class T402WDK {
    */
   getUsdt0Chains(): string[] {
     return this.getConfiguredChains().filter((chain) => USDT0_ADDRESSES[chain]);
+  }
+
+  /**
+   * Get chains that support USDT0 bridging
+   *
+   * Returns configured chains that have LayerZero OFT bridge support.
+   */
+  getBridgeableChains(): string[] {
+    return this.getConfiguredChains().filter((chain) => supportsBridging(chain));
+  }
+
+  /**
+   * Check if bridging is supported between two chains
+   */
+  canBridge(fromChain: string, toChain: string): boolean {
+    return (
+      fromChain !== toChain &&
+      supportsBridging(fromChain) &&
+      supportsBridging(toChain) &&
+      this._normalizedChains.has(fromChain)
+    );
+  }
+
+  /**
+   * Get all possible bridge destinations from a chain
+   */
+  getBridgeDestinations(fromChain: string): string[] {
+    if (!supportsBridging(fromChain)) {
+      return [];
+    }
+    return getBridgeableChains().filter((chain) => chain !== fromChain);
   }
 }
 

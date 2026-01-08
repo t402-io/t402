@@ -107,3 +107,16 @@ export {
   getPreferredToken,
 } from "./chains.js";
 export type { TokenInfo } from "./chains.js";
+
+// Bridge utilities
+export { WdkBridge, createDirectBridge } from "./bridge.js";
+export type { BridgeQuoteResult, BridgeQuote, BridgeSigner } from "./bridge.js";
+
+// Re-export bridge utilities from @t402/evm for convenience
+export {
+  supportsBridging,
+  getBridgeableChains,
+  LAYERZERO_ENDPOINT_IDS,
+  USDT0_OFT_ADDRESSES,
+  Usdt0Bridge,
+} from "@t402/evm";
