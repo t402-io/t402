@@ -47,7 +47,7 @@ X402                          →    T402
 @t402/extensions              →    @t402/extensions
 t402-express                  →    t402-express (legacy)
 t402-fetch                    →    t402-fetch (legacy)
-github.com/coinbase/t402      →    github.com/awesome-doge/t402
+github.com/t402-io/t402      →    github.com/awesome-doge/t402
 pip install t402              →    pip install t402
 com.coinbase.t402             →    io.t402.sdk
 ```
@@ -69,7 +69,7 @@ com.coinbase.t402             →    io.t402.sdk
 gh repo create awesome-doge/t402 --private
 
 # 2. Clone original t402
-git clone https://github.com/coinbase/t402.git t402-migration
+git clone https://github.com/t402-io/t402.git t402-migration
 cd t402-migration
 
 # 3. Remove original remote
@@ -143,7 +143,7 @@ typescript/packages/
 module github.com/awesome-doge/t402/go
 
 // Update all imports
-// Old: github.com/coinbase/t402/go
+// Old: github.com/t402-io/t402/go
 // New: github.com/awesome-doge/t402/go
 ```
 

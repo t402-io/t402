@@ -161,12 +161,12 @@ replace_github_urls() {
 
   if [ "$DRY_RUN" = "true" ]; then
     echo "  [DRY RUN] Would replace:"
-    echo "    github.com/coinbase/x402 -> github.com/awesome-doge/t402"
+    echo "    github.com/t402-io/t402 -> github.com/awesome-doge/t402"
   else
     find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.json" -o -name "*.md" -o -name "*.go" -o -name "*.py" -o -name "*.java" -o -name "*.toml" \) \
       -not -path "*/node_modules/*" \
       -not -path "*/.git/*" \
-      -exec sed -i '' 's|github.com/coinbase/x402|github.com/awesome-doge/t402|g' {} \;
+      -exec sed -i '' 's|github.com/t402-io/t402|github.com/awesome-doge/t402|g' {} \;
   fi
 
   echo -e "${GREEN}  Done!${NC}"
@@ -179,8 +179,8 @@ replace_go_module() {
   if [ "$DRY_RUN" = "true" ]; then
     echo "  [DRY RUN] Would update go.mod files"
   else
-    find . -name "go.mod" -exec sed -i '' 's|github.com/coinbase/x402|github.com/awesome-doge/t402|g' {} \;
-    find . -name "*.go" -exec sed -i '' 's|github.com/coinbase/x402|github.com/awesome-doge/t402|g' {} \;
+    find . -name "go.mod" -exec sed -i '' 's|github.com/t402-io/t402|github.com/awesome-doge/t402|g' {} \;
+    find . -name "*.go" -exec sed -i '' 's|github.com/t402-io/t402|github.com/awesome-doge/t402|g' {} \;
   fi
 
   echo -e "${GREEN}  Done!${NC}"

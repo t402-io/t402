@@ -72,7 +72,7 @@ export function Footer() {
         {/* Social icons */}
         <div className="flex items-center gap-6 mb-8">
           <Link
-            href="https://github.com/coinbase/t402"
+            href="https://github.com/t402-io/t402"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
@@ -81,11 +81,11 @@ export function Footer() {
             <GithubIcon className="w-6 h-6" />
           </Link>
           <Link
-            href="https://discord.com/invite/cdp"
+            href="https://x.com/t402_io"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-            aria-label="Discord"
+            aria-label="Twitter"
           >
             <DiscordIcon className="w-6 h-6" />
           </Link>
@@ -97,26 +97,7 @@ export function Footer() {
         {/* Copyright row */}
         <div className="flex justify-between items-center">
           <p className="text-white/40 text-sm">
-            While t402 is an open and neutral standard, this website is maintained by
-            {" "}Coinbase Developer Platform. By using this site, you agree to be bound by the{" "}
-            <Link
-              href="https://www.coinbase.com/legal/developer-platform/terms-of-service"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-500 hover:text-blue-400"
-            >
-              CDP Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link
-              href="https://www.coinbase.com/legal/privacy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-500 hover:text-blue-400"
-            >
-              Global Privacy Policy
-            </Link>
-            .
+            T402 is the official payment protocol for USDT. This website is maintained by the T402 team.
           </p>
         </div>
       </div>
