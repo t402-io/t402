@@ -1,0 +1,31 @@
+# T402 Facilitator - Caddy Configuration
+# Automatic HTTPS with Let's Encrypt
+
+facilitator.t402.io {
+    reverse_proxy facilitator:8080
+
+    # Security headers
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy strict-origin-when-cross-origin
+        -Server
+    }
+
+    # Enable compression
+    encode gzip
+
+    # Logging
+    log {
+        output file /data/access.log {
+            roll_size 100mb
+            roll_keep 5
+        }
+    }
+}
+
+# Health check endpoint (no HTTPS required for internal monitoring)
+:8081 {
+    respond /health "OK" 200
+}
