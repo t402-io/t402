@@ -100,7 +100,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 - [ ] Complete TON facilitator implementation
 - [ ] Add TON testnet support
 - [ ] Implement TON transaction tracking
-- [ ] Add TON to Go SDK
+- [x] Add TON to Go SDK (mechanisms/ton with client, server, facilitator)
 - [ ] Integration tests
 - [ ] Publish @t402/ton v2.0.0
 
@@ -290,7 +290,7 @@ github.com/awesome-doge/t402/go
 ├── mechanisms/
 │   ├── evm/               - EVM (Ethereum, Arbitrum, Base, etc.)
 │   ├── svm/               - Solana
-│   ├── ton/               - TON [IN PROGRESS]
+│   ├── ton/               - TON (client, server, facilitator)
 │   └── tron/              - TRON [PLANNED]
 ├── http/                  - Framework integrations
 │   └── gin/               - Gin middleware
