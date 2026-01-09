@@ -7,6 +7,77 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2026-01-09] - TRON Blockchain Support
+
+### Added
+
+#### TypeScript SDK (`@t402/tron` v1.0.0)
+- **TRON Network Support**: Full support for TRON mainnet (`tron:mainnet`), Nile testnet (`tron:nile`), and Shasta testnet (`tron:shasta`)
+- **USDT TRC-20 Payments**: TIP-20 compatible token transfers for USDT payments
+- **Register Functions**: Convenience functions for easy scheme integration
+  - `registerExactTronClientScheme` - Client-side registration with signer
+  - `registerExactTronServerScheme` - Resource server registration
+  - `registerExactTronFacilitatorScheme` - Facilitator registration
+- **Wildcard Network Registration**: Support for `tron:*` pattern matching
+- **Sub-path Exports**: Separate entry points for client, server, and facilitator modules
+- **Signer Interfaces**: `ClientTronSigner` and `FacilitatorTronSigner` for wallet integration
+- **Utility Functions**: Address validation (base58check), amount conversion, transaction building
+
+#### Python SDK (`t402` v1.2.0)
+- **TRON Network Support**: Full support for all three TRON networks
+- **Network Constants**: `TRON_MAINNET`, `TRON_NILE`, `TRON_SHASTA` identifiers
+- **USDT Addresses**: Pre-configured mainnet and testnet USDT TRC-20 addresses
+- **Pydantic Models**: Type-safe `TronAuthorization` and `TronPaymentPayload` models
+- **Network Detection**: `is_tron_network()` and updated `get_network_type()` functions
+- **Price Processing**: Automatic TRON handling in `parse_money()` and `process_price_to_atomic_amount()`
+- **Utility Functions**: Address validation, amount parsing/formatting
+
+#### Go SDK (`github.com/t402-io/t402/go` v1.2.0)
+- **TRON Mechanism**: Complete TRON payment mechanism implementation
+- **Client Scheme**: `ExactTronScheme` for creating TRON payment payloads
+- **Server Scheme**: Payment requirement enhancement with TRC-20 metadata
+- **Facilitator Scheme**: Transaction verification, settlement, and confirmation
+- **Type Definitions**: `ExactTronPayload`, `ExactTronAuthorization`, signer interfaces
+- **Network Configuration**: Pre-configured mainnet and testnet settings
+
+#### Documentation & Examples
+- **README Updates**: Added TRON to "Supported Networks" section
+- **Quick Start Examples**: Updated multi-network code samples for all SDKs
+- **Examples Directory**: Complete working examples for all SDKs
+  - TypeScript client (`examples/typescript/clients/tron/`)
+  - TypeScript server (`examples/typescript/servers/tron/`)
+  - Go client (`examples/go/clients/tron/`)
+  - Go server (`examples/go/servers/tron/`)
+  - Python Flask server (`examples/python/flask-tron/`)
+
+### Technical Details
+
+#### Network Identifiers (CAIP-2)
+- TRON Mainnet: `tron:mainnet`
+- TRON Nile Testnet: `tron:nile`
+- TRON Shasta Testnet: `tron:shasta`
+
+#### USDT TRC-20 Contract Addresses
+- Mainnet: `TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t`
+- Nile: `TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf`
+- Shasta: `TG3XXyExBkPp9nzdajDZsozEu4BkaSJozs`
+
+#### Address Format
+- Base58check encoded
+- 34 characters, starts with 'T'
+- Regex: `^T[1-9A-HJ-NP-Za-km-z]{33}$`
+
+#### Payment Flow
+1. Client receives 402 Payment Required with TRON payment details
+2. Client builds TRC-20 transfer transaction (TriggerSmartContract)
+3. Client signs the transaction with their wallet
+4. Client sends signed transaction JSON in `PAYMENT-SIGNATURE` header
+5. Server/Facilitator verifies the signature and transfer details
+6. Facilitator broadcasts the transaction to TRON network
+7. Server returns the requested resource
+
+---
+
 ## [2026-01-09] - TON Blockchain Support
 
 ### Added
@@ -115,6 +186,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [@t402/evm](https://www.npmjs.com/package/@t402/evm)
 - [@t402/svm](https://www.npmjs.com/package/@t402/svm)
 - [@t402/ton](https://www.npmjs.com/package/@t402/ton)
+- [@t402/tron](https://www.npmjs.com/package/@t402/tron)
 
 ### PyPI (Python)
 - [t402](https://pypi.org/project/t402/)
@@ -164,4 +236,46 @@ import tonclient "github.com/t402-io/t402/go/mechanisms/ton/exact/client"
 
 tonScheme := tonclient.NewExactTonScheme(signer)
 client.Register(t402.Network("ton:mainnet"), tonScheme)
+```
+
+### Upgrading to TRON Support
+
+#### TypeScript
+```typescript
+// Install @t402/tron package
+// pnpm add @t402/tron
+
+import { registerExactTronClientScheme } from "@t402/tron";
+
+// Add TRON to your existing client
+registerExactTronClientScheme(client, {
+  signer: tronSigner,
+});
+```
+
+#### Python
+```python
+# TRON networks are automatically supported in t402 v1.2.0+
+# Just use tron:mainnet, tron:nile, or tron:shasta in your routes
+from t402.tron import TRON_MAINNET
+
+paywall = create_paywall(
+    routes={
+        "GET /api": {
+            "price": "$0.01",
+            "network": TRON_MAINNET,
+            "pay_to": tron_address,
+        },
+    },
+    facilitator_url=facilitator_url,
+)
+```
+
+#### Go
+```go
+// Add TRON scheme to your client
+import tronclient "github.com/t402-io/t402/go/mechanisms/tron/exact/client"
+
+tronScheme := tronclient.NewExactTronScheme(signer)
+client.Register(t402.Network("tron:mainnet"), tronScheme)
 ```

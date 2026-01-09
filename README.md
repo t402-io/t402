@@ -23,7 +23,7 @@ app.use(
 
 ```shell
 # All available packages
-pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/wdk @t402/extensions
+pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/tron @t402/wdk @t402/extensions
 
 # Minimal client
 pnpm add @t402/core @t402/evm
@@ -73,6 +73,13 @@ go get github.com/t402-io/t402/go@v1.0.0
 - TON Testnet (`ton:testnet`)
 - Supports USDT Jetton (TEP-74 standard)
 - Pre-signed BOC message format
+
+### TRON
+- TRON Mainnet (`tron:mainnet`)
+- TRON Nile Testnet (`tron:nile`)
+- TRON Shasta Testnet (`tron:shasta`)
+- Supports USDT TRC-20 (TIP-20 standard)
+- Pre-signed transaction format
 
 </details>
 
@@ -167,12 +174,13 @@ Clients and facilitators must explicitly support different `(scheme, network)` p
 ## Quick Start Examples
 
 <details>
-<summary><b>TypeScript Client with TON</b></summary>
+<summary><b>TypeScript Client (Multi-Network)</b></summary>
 
 ```typescript
 import { t402Client, wrapFetchWithPayment } from "@t402/fetch";
 import { registerExactEvmScheme } from "@t402/evm/exact/client";
 import { registerExactTonClientScheme } from "@t402/ton";
+import { registerExactTronClientScheme } from "@t402/tron";
 import { privateKeyToAccount } from "viem/accounts";
 
 // Create client and register payment schemes
@@ -186,10 +194,12 @@ registerExactEvmScheme(client, {
 // Register TON networks
 registerExactTonClientScheme(client, {
   signer: tonSigner,
-  getJettonWalletAddress: async (owner, master) => {
-    // Return the Jetton wallet address for the owner
-    return jettonWalletAddress;
-  },
+  getJettonWalletAddress: async (owner, master) => jettonWalletAddress,
+});
+
+// Register TRON networks
+registerExactTronClientScheme(client, {
+  signer: tronSigner,
 });
 
 // Make payments automatically
@@ -200,13 +210,14 @@ const response = await fetchWithPayment("https://api.example.com/data");
 </details>
 
 <details>
-<summary><b>TypeScript Server with TON</b></summary>
+<summary><b>TypeScript Server (Multi-Network)</b></summary>
 
 ```typescript
 import express from "express";
 import { paymentMiddleware, t402ResourceServer } from "@t402/express";
 import { ExactEvmScheme } from "@t402/evm/exact/server";
 import { ExactTonScheme } from "@t402/ton/exact/server";
+import { ExactTronScheme } from "@t402/tron/exact/server";
 
 const app = express();
 
@@ -219,13 +230,16 @@ app.use(
           { scheme: "exact", price: "$0.01", network: "eip155:8453", payTo: evmAddress },
           // Accept TON payments
           { scheme: "exact", price: "$0.01", network: "ton:mainnet", payTo: tonAddress },
+          // Accept TRON payments
+          { scheme: "exact", price: "$0.01", network: "tron:mainnet", payTo: tronAddress },
         ],
         description: "Premium API data",
       },
     },
     new t402ResourceServer(facilitatorClient)
       .register("eip155:8453", new ExactEvmScheme())
-      .register("ton:mainnet", new ExactTonScheme()),
+      .register("ton:mainnet", new ExactTonScheme())
+      .register("tron:mainnet", new ExactTronScheme()),
   ),
 );
 ```
@@ -233,22 +247,29 @@ app.use(
 </details>
 
 <details>
-<summary><b>Python Server with TON</b></summary>
+<summary><b>Python Server (TON/TRON)</b></summary>
 
 ```python
 from flask import Flask
 from t402.flask import create_paywall
+from t402.tron import TRON_MAINNET
 
 app = Flask(__name__)
 
-# Create paywall with TON support
+# Create paywall with TON and TRON support
 paywall = create_paywall(
     routes={
         "GET /api/data": {
             "price": "$0.01",
-            "network": "ton:mainnet",
-            "pay_to": "EQC...",  # TON address
+            "network": "ton:mainnet",  # or TRON_MAINNET for TRON
+            "pay_to": "EQC...",  # TON or TRON address
             "description": "Premium API data",
+        },
+        "GET /api/premium": {
+            "price": "$0.05",
+            "network": TRON_MAINNET,  # tron:mainnet
+            "pay_to": "TR7NHq...",  # TRON address
+            "description": "Premium content",
         },
     },
     facilitator_url="https://facilitator.example.com",
@@ -263,30 +284,31 @@ def get_data():
 </details>
 
 <details>
-<summary><b>Go Client with TON</b></summary>
+<summary><b>Go Client (Multi-Network)</b></summary>
 
 ```go
 package main
 
 import (
-    "github.com/t402-io/t402/go/client"
-    "github.com/t402-io/t402/go/mechanisms/ton"
+    t402 "github.com/t402-io/t402/go"
+    tonclient "github.com/t402-io/t402/go/mechanisms/ton/exact/client"
+    tronclient "github.com/t402-io/t402/go/mechanisms/tron/exact/client"
 )
 
 func main() {
     // Create client
-    c := client.New()
+    client := t402.NewClient()
 
     // Register TON scheme
-    ton.RegisterExactScheme(c, ton.ClientConfig{
-        Signer: tonSigner,
-        GetJettonWalletAddress: func(owner, master string) (string, error) {
-            return jettonWalletAddress, nil
-        },
-    })
+    tonScheme := tonclient.NewExactTonScheme(tonSigner)
+    client.Register(t402.Network("ton:mainnet"), tonScheme)
+
+    // Register TRON scheme
+    tronScheme := tronclient.NewExactTronScheme(tronSigner)
+    client.Register(t402.Network("tron:mainnet"), tronScheme)
 
     // Make request with automatic payment
-    resp, err := c.Get("https://api.example.com/data")
+    // The client will select the appropriate network based on server requirements
 }
 ```
 
