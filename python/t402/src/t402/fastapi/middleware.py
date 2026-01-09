@@ -1,7 +1,7 @@
 import base64
 import json
 import logging
-from typing import Any, Callable, Optional, get_args, cast
+from typing import Any, Callable, Optional, cast
 
 from fastapi import Request
 from fastapi.responses import JSONResponse, HTMLResponse
@@ -14,6 +14,7 @@ from t402.common import (
 )
 from t402.encoding import safe_base64_decode
 from t402.facilitator import FacilitatorClient, FacilitatorConfig
+from t402.networks import get_all_supported_networks, SupportedNetworks
 from t402.path import path_is_match
 from t402.paywall import is_browser_request, get_paywall_html
 from t402.types import (
@@ -22,7 +23,6 @@ from t402.types import (
     Price,
     t402PaymentRequiredResponse,
     PaywallConfig,
-    SupportedNetworks,
     HTTPInputSchema,
 )
 
@@ -73,7 +73,7 @@ def require_payment(
     """
 
     # Validate network is supported
-    supported_networks = get_args(SupportedNetworks)
+    supported_networks = get_all_supported_networks()
     if network not in supported_networks:
         raise ValueError(
             f"Unsupported network: {network}. Must be one of: {supported_networks}"
