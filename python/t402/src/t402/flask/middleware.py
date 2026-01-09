@@ -1,15 +1,15 @@
 import base64
 import json
-from typing import Any, Dict, Optional, Union, get_args, cast
+from typing import Any, Dict, Optional, Union, cast
 from flask import Flask, request, g
 from t402.path import path_is_match
+from t402.networks import get_all_supported_networks, SupportedNetworks
 from t402.types import (
     Price,
     PaymentPayload,
     PaymentRequirements,
     t402PaymentRequiredResponse,
     PaywallConfig,
-    SupportedNetworks,
     HTTPInputSchema,
 )
 from t402.common import (
@@ -148,7 +148,7 @@ class PaymentMiddleware:
         """Create a WSGI middleware function for the given configuration."""
 
         # Validate network is supported
-        supported_networks = get_args(SupportedNetworks)
+        supported_networks = get_all_supported_networks()
         if config["network"] not in supported_networks:
             raise ValueError(
                 f"Unsupported network: {config['network']}. Must be one of: {supported_networks}"

@@ -164,6 +164,46 @@ class EIP3009Authorization(BaseModel):
         return v
 
 
+class TonAuthorization(BaseModel):
+    """TON Jetton transfer authorization metadata."""
+
+    from_: str = Field(alias="from")
+    to: str
+    jetton_master: str = Field(alias="jettonMaster")
+    jetton_amount: str = Field(alias="jettonAmount")
+    ton_amount: str = Field(alias="tonAmount")
+    valid_until: int = Field(alias="validUntil")
+    seqno: int
+    query_id: str = Field(alias="queryId")
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
+    @field_validator("jetton_amount", "ton_amount")
+    def validate_amount(cls, v):
+        try:
+            int(v)
+        except ValueError:
+            raise ValueError("amount must be an integer encoded as a string")
+        return v
+
+
+class TonPaymentPayload(BaseModel):
+    """TON payment payload containing signed BOC and authorization."""
+
+    signed_boc: str = Field(alias="signedBoc")
+    authorization: TonAuthorization
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
+
 class VerifyResponse(BaseModel):
     is_valid: bool = Field(alias="isValid")
     invalid_reason: Optional[str] = Field(None, alias="invalidReason")
@@ -191,7 +231,7 @@ class SettleResponse(BaseModel):
 
 
 # Union of payloads for each scheme
-SchemePayloads = ExactPaymentPayload
+SchemePayloads = Union[ExactPaymentPayload, TonPaymentPayload]
 
 
 class PaymentPayload(BaseModel):
