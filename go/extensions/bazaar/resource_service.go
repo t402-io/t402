@@ -3,7 +3,7 @@ package bazaar
 import (
 	"fmt"
 
-	"github.com/t402-io/t402/go/extensions/types"
+	"github.com/awesome-doge/t402/go/extensions/types"
 )
 
 // DeclareDiscoveryExtension creates a discovery extension for any HTTP method

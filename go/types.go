@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/t402-io/t402/go/types"
+	"github.com/awesome-doge/t402/go/types"
 )
 
 // Network represents a blockchain network identifier in CAIP-2 format

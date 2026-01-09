@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	t402 "github.com/t402-io/t402/go"
+	t402 "github.com/awesome-doge/t402/go"
 )
 
 // Note: mockHTTPAdapter and mockSchemeServer are defined in server_test.go
