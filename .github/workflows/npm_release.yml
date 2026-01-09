@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       package:
-        description: "Package to publish (all, core, evm, svm, ton, wdk, extensions, http)"
+        description: "Package to publish (all, core, evm, svm, ton, wdk, extensions)"
         required: true
         default: "all"
         type: choice
@@ -19,7 +19,6 @@ on:
           - ton
           - wdk
           - extensions
-          - http
       dry_run:
         description: "Dry run (no actual publish)"
         required: false
@@ -152,14 +151,3 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish @t402/http
-        if: ${{ github.event.inputs.package == 'all' || github.event.inputs.package == 'http' || github.event_name == 'push' }}
-        working-directory: ./typescript/packages/http
-        run: |
-          if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
-            pnpm publish --access public --no-git-checks --dry-run
-          else
-            pnpm publish --access public --no-git-checks
-          fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
