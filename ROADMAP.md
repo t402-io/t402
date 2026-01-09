@@ -187,12 +187,17 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 - [ ] Set up Algolia search
 
 **Week 19-20: Infrastructure**
+- [x] Build facilitator service (`services/facilitator/`)
+  - Production-ready Go service
+  - Redis-based rate limiting
+  - Prometheus metrics
+  - Health/readiness endpoints
+  - Docker + docker-compose
+  - EVM multi-chain support
 - [ ] Deploy facilitator.t402.io
   - Multi-region deployment
-  - Redis for nonce tracking
-  - Rate limiting
   - API key management
-- [ ] Set up monitoring (Grafana, Prometheus)
+- [ ] Set up monitoring (Grafana dashboards)
 - [ ] Load testing (10k+ TPS target)
 - [ ] Security hardening
 
@@ -201,7 +206,8 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 - [x] @t402/wdk-gasless package (v1.0.0 published)
 - [x] @t402/wdk-bridge package (v1.0.0 published)
 - [x] docs.t402.io live
-- [ ] facilitator.t402.io production
+- [x] Facilitator service built (services/facilitator/)
+- [ ] facilitator.t402.io deployed to production
 
 ---
 
@@ -358,23 +364,31 @@ t402 (pip install t402)
 
 ### facilitator.t402.io
 
-Production facilitator service providing:
+Production facilitator service for payment verification and settlement.
 
-- **Verify endpoint**: `/verify` - Validate payment signatures
-- **Settle endpoint**: `/settle` - Execute on-chain transfers
-- **Status endpoint**: `/status` - Check payment status
+**Status**: Service built (`services/facilitator/`), deployment pending.
 
-**Supported Networks**:
-- All EVM chains (mainnet + testnets)
-- TON (mainnet + testnet)
-- TRON (mainnet + testnet)
-- Solana (mainnet + devnet)
+**API Endpoints**:
+- `POST /verify` - Validate payment signatures
+- `POST /settle` - Execute on-chain transfers
+- `GET /supported` - List supported networks and schemes
+- `GET /health` - Liveness probe
+- `GET /ready` - Readiness probe
+- `GET /metrics` - Prometheus metrics
 
-**Features**:
+**Current Features** (in `services/facilitator/`):
+- Multi-chain EVM support (Ethereum, Arbitrum, Base, Optimism)
+- Redis-based rate limiting
+- Prometheus metrics
+- Health/readiness endpoints
+- Docker + docker-compose support
+- Graceful shutdown
+
+**Planned Features**:
 - Multi-region deployment (US, EU, APAC)
+- TON, TRON, Solana support
 - Hot wallet rotation
-- Rate limiting (10,000 req/min per API key)
-- Real-time monitoring
+- API key management
 - Gas price optimization
 
 ### docs.t402.io
