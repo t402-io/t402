@@ -53,6 +53,29 @@ go get github.com/awesome-doge/t402/go@v1.0.0
 
 </details>
 
+<details>
+<summary><b>Supported Networks</b></summary>
+
+### EVM (Ethereum Virtual Machine)
+- Ethereum Mainnet (`eip155:1`)
+- Base (`eip155:8453`, `eip155:84532`)
+- Optimism, Arbitrum, Polygon, and more
+- Supports USDC, USDT, and native tokens
+- ERC-4337 gasless transactions supported
+
+### SVM (Solana Virtual Machine)
+- Solana Mainnet (`solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp`)
+- Solana Devnet (`solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1`)
+- Supports USDC and native SOL
+
+### TON (The Open Network)
+- TON Mainnet (`ton:mainnet`)
+- TON Testnet (`ton:testnet`)
+- Supports USDT Jetton (TEP-74 standard)
+- Pre-signed BOC message format
+
+</details>
+
 ## Principles
 
 - **Open standard:** the t402 protocol will never force reliance on a single party
@@ -140,3 +163,131 @@ See `specs/schemes` for more details on schemes, and see `specs/schemes/exact/sc
 Because a scheme is a logical way of moving money, the way a scheme is implemented can be different for different blockchains. (ex: the way you need to implement `exact` on Ethereum is very different from the way you need to implement `exact` on Solana).
 
 Clients and facilitators must explicitly support different `(scheme, network)` pairs in order to be able to create proper payloads and verify / settle payments.
+
+## Quick Start Examples
+
+<details>
+<summary><b>TypeScript Client with TON</b></summary>
+
+```typescript
+import { t402Client, wrapFetchWithPayment } from "@t402/fetch";
+import { registerExactEvmScheme } from "@t402/evm/exact/client";
+import { registerExactTonClientScheme } from "@t402/ton";
+import { privateKeyToAccount } from "viem/accounts";
+
+// Create client and register payment schemes
+const client = new t402Client();
+
+// Register EVM networks
+registerExactEvmScheme(client, {
+  signer: privateKeyToAccount(process.env.EVM_PRIVATE_KEY as `0x${string}`),
+});
+
+// Register TON networks
+registerExactTonClientScheme(client, {
+  signer: tonSigner,
+  getJettonWalletAddress: async (owner, master) => {
+    // Return the Jetton wallet address for the owner
+    return jettonWalletAddress;
+  },
+});
+
+// Make payments automatically
+const fetchWithPayment = wrapFetchWithPayment(fetch, client);
+const response = await fetchWithPayment("https://api.example.com/data");
+```
+
+</details>
+
+<details>
+<summary><b>TypeScript Server with TON</b></summary>
+
+```typescript
+import express from "express";
+import { paymentMiddleware, t402ResourceServer } from "@t402/express";
+import { ExactEvmScheme } from "@t402/evm/exact/server";
+import { ExactTonScheme } from "@t402/ton/exact/server";
+
+const app = express();
+
+app.use(
+  paymentMiddleware(
+    {
+      "GET /api/data": {
+        accepts: [
+          // Accept EVM payments
+          { scheme: "exact", price: "$0.01", network: "eip155:8453", payTo: evmAddress },
+          // Accept TON payments
+          { scheme: "exact", price: "$0.01", network: "ton:mainnet", payTo: tonAddress },
+        ],
+        description: "Premium API data",
+      },
+    },
+    new t402ResourceServer(facilitatorClient)
+      .register("eip155:8453", new ExactEvmScheme())
+      .register("ton:mainnet", new ExactTonScheme()),
+  ),
+);
+```
+
+</details>
+
+<details>
+<summary><b>Python Server with TON</b></summary>
+
+```python
+from flask import Flask
+from t402.flask import create_paywall
+
+app = Flask(__name__)
+
+# Create paywall with TON support
+paywall = create_paywall(
+    routes={
+        "GET /api/data": {
+            "price": "$0.01",
+            "network": "ton:mainnet",
+            "pay_to": "EQC...",  # TON address
+            "description": "Premium API data",
+        },
+    },
+    facilitator_url="https://facilitator.example.com",
+)
+app.register_blueprint(paywall)
+
+@app.route("/api/data")
+def get_data():
+    return {"data": "premium content"}
+```
+
+</details>
+
+<details>
+<summary><b>Go Client with TON</b></summary>
+
+```go
+package main
+
+import (
+    "github.com/awesome-doge/t402/go/client"
+    "github.com/awesome-doge/t402/go/mechanisms/ton"
+)
+
+func main() {
+    // Create client
+    c := client.New()
+
+    // Register TON scheme
+    ton.RegisterExactScheme(c, ton.ClientConfig{
+        Signer: tonSigner,
+        GetJettonWalletAddress: func(owner, master string) (string, error) {
+            return jettonWalletAddress, nil
+        },
+    })
+
+    // Make request with automatic payment
+    resp, err := c.Get("https://api.example.com/data")
+}
+```
+
+</details>
