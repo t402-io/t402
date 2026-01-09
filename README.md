@@ -23,7 +23,7 @@ app.use(
 
 ```shell
 # All available packages
-pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/tron @t402/wdk @t402/extensions @t402/mcp
+pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/tron @t402/wdk @t402/wdk-gasless @t402/extensions @t402/mcp
 
 # Minimal client
 pnpm add @t402/core @t402/evm
@@ -32,6 +32,9 @@ pnpm add @t402/core @t402/evm
 pnpm add @t402/mcp
 # or run directly
 npx @t402/mcp
+
+# WDK Gasless Payments (Tether WDK + ERC-4337)
+pnpm add @t402/wdk-gasless
 
 # Or with npm
 npm install @t402/core @t402/evm
@@ -105,6 +108,14 @@ go get github.com/t402-io/t402/go@v1.0.0
 - **6 payment tools**: getBalance, getAllBalances, pay, payGasless, getBridgeFee, bridge
 - **Demo mode** for testing without real transactions
 - **Multi-chain support**: All EVM networks + cross-chain bridging
+
+### WDK Gasless Payments
+- **Tether WDK integration** for gasless stablecoin payments
+- **ERC-4337 Account Abstraction** via Safe smart accounts
+- **Zero gas fees** for end users via paymaster sponsorship
+- **Supported tokens**: USDT0, USDC across 7 chains
+- **Batch payments** for multiple transfers in one transaction
+- **Bundler support**: Pimlico, Alchemy, Stackup, Biconomy
 
 </details>
 
@@ -688,5 +699,91 @@ const result = await executePay(
   { privateKey: "0x...", demoMode: true }
 );
 ```
+
+</details>
+
+<details>
+<summary><b>WDK Gasless Payments (TypeScript)</b></summary>
+
+The `@t402/wdk-gasless` package enables gasless USDT0 payments using Tether WDK and ERC-4337.
+
+```typescript
+import { createWdkGaslessClient } from "@t402/wdk-gasless";
+import { createPublicClient, http } from "viem";
+import { arbitrum } from "viem/chains";
+
+// Create public client
+const publicClient = createPublicClient({
+  chain: arbitrum,
+  transport: http(),
+});
+
+// Create gasless client with WDK account
+const client = await createWdkGaslessClient({
+  wdkAccount: myWdkAccount, // From @tetherto/wdk
+  publicClient,
+  chainId: 42161, // Arbitrum
+  bundler: {
+    bundlerUrl: "https://api.pimlico.io/v2/arbitrum/rpc?apikey=...",
+    chainId: 42161,
+  },
+  paymaster: {
+    address: "0x...",
+    url: "https://api.pimlico.io/v2/arbitrum/rpc?apikey=...",
+    type: "sponsoring",
+  },
+});
+
+// Check smart account address
+const accountAddress = await client.getAccountAddress();
+console.log("Smart Account:", accountAddress);
+
+// Check USDT0 balance
+const balance = await client.getFormattedBalance();
+console.log("USDT0 Balance:", balance);
+
+// Check if payment can be sponsored (free gas)
+const sponsorInfo = await client.canSponsor({
+  to: "0x...",
+  amount: 1000000n, // 1 USDT0
+});
+console.log("Can Sponsor:", sponsorInfo.canSponsor);
+
+// Execute gasless payment
+const result = await client.pay({
+  to: "0x...",
+  amount: 1000000n, // 1 USDT0 (6 decimals)
+});
+
+console.log("UserOp Hash:", result.userOpHash);
+console.log("Sponsored:", result.sponsored);
+
+// Wait for confirmation
+const receipt = await result.wait();
+console.log("Transaction Hash:", receipt.txHash);
+```
+
+**Batch Payments:**
+```typescript
+// Send to multiple recipients in one transaction
+const result = await client.payBatch({
+  payments: [
+    { to: "0xAlice...", amount: 1000000n },  // 1 USDT0
+    { to: "0xBob...", amount: 2000000n },    // 2 USDT0
+    { to: "0xCharlie...", amount: 500000n }, // 0.5 USDT0
+  ],
+});
+```
+
+**Supported Chains:**
+| Chain | Chain ID | USDT0 | USDC |
+|-------|----------|-------|------|
+| Ethereum | 1 | ✅ | ✅ |
+| Arbitrum | 42161 | ✅ | ✅ |
+| Base | 8453 | ✅ | ✅ |
+| Optimism | 10 | ✅ | ✅ |
+| Ink | 57073 | ✅ | - |
+| Berachain | 80084 | ✅ | - |
+| Unichain | 130 | ✅ | - |
 
 </details>
