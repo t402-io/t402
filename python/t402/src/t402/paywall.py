@@ -5,12 +5,15 @@ from t402.types import PaymentRequirements, PaywallConfig
 from t402.common import t402_VERSION
 from t402.evm_paywall_template import EVM_PAYWALL_TEMPLATE
 from t402.svm_paywall_template import SVM_PAYWALL_TEMPLATE
+from t402.ton_paywall_template import TON_PAYWALL_TEMPLATE
 
 
 def get_paywall_template(network: str) -> str:
     """Get the appropriate paywall template for the given network."""
     if network.startswith("solana:"):
         return SVM_PAYWALL_TEMPLATE
+    if network.startswith("ton:"):
+        return TON_PAYWALL_TEMPLATE
     return EVM_PAYWALL_TEMPLATE
 
 

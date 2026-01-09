@@ -8,6 +8,7 @@ from t402.chains import (
     get_token_version,
     get_default_token_address,
 )
+from t402.networks import is_ton_network
 from t402.types import Price, TokenAmount, PaymentRequirements, PaymentPayload
 
 
@@ -22,8 +23,14 @@ def parse_money(amount: str | int, address: str, network: str) -> int:
             amount = amount[1:]
         decimal_amount = Decimal(amount)
 
-        chain_id = get_chain_id(network)
-        decimals = get_token_decimals(chain_id, address)
+        # Handle TON networks differently
+        if is_ton_network(network):
+            from t402.ton import DEFAULT_DECIMALS
+            decimals = DEFAULT_DECIMALS  # USDT on TON uses 6 decimals
+        else:
+            chain_id = get_chain_id(network)
+            decimals = get_token_decimals(chain_id, address)
+
         decimal_amount = decimal_amount * Decimal(10**decimals)
         return int(decimal_amount)
     return amount
@@ -39,19 +46,42 @@ def process_price_to_atomic_amount(
         network: Network identifier
 
     Returns:
-        Tuple of (max_amount_required, asset_address, eip712_domain)
+        Tuple of (max_amount_required, asset_address, extra_info)
+        For EVM: extra_info contains EIP-712 domain (name, version)
+        For TON: extra_info contains Jetton metadata (name, symbol)
 
     Raises:
         ValueError: If price format is invalid
     """
     if isinstance(price, (str, int)):
-        # Money type - convert USD to USDC atomic units
+        # Money type - convert USD to atomic units
         try:
             if isinstance(price, str) and price.startswith("$"):
                 price = price[1:]
             amount = Decimal(str(price))
 
-            # Get USDC address for the network
+            # Handle TON networks
+            if is_ton_network(network):
+                from t402.ton import (
+                    get_usdt_address,
+                    get_default_asset,
+                    DEFAULT_DECIMALS,
+                )
+
+                asset_address = get_usdt_address(network)
+                decimals = DEFAULT_DECIMALS
+                atomic_amount = int(amount * Decimal(10**decimals))
+
+                # For TON, return Jetton metadata instead of EIP-712 domain
+                asset_info = get_default_asset(network)
+                extra_info = {
+                    "name": asset_info["name"] if asset_info else "Tether USD",
+                    "symbol": asset_info["symbol"] if asset_info else "USDT",
+                }
+
+                return str(atomic_amount), asset_address, extra_info
+
+            # Handle EVM networks
             chain_id = get_chain_id(network)
             asset_address = get_usdc_address(chain_id)
             decimals = get_token_decimals(chain_id, asset_address)
