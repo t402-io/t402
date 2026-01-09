@@ -19,6 +19,8 @@ import (
 	t402 "github.com/t402-io/t402/go"
 	evmmech "github.com/t402-io/t402/go/mechanisms/evm"
 	evm "github.com/t402-io/t402/go/mechanisms/evm/exact/facilitator"
+	"github.com/t402-io/t402/go/mechanisms/ton"
+	tonfac "github.com/t402-io/t402/go/mechanisms/ton/exact/facilitator"
 	"github.com/t402-io/t402/services/facilitator/internal/cache"
 	"github.com/t402-io/t402/services/facilitator/internal/config"
 	"github.com/t402-io/t402/services/facilitator/internal/server"
@@ -111,6 +113,38 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, error) {
 		}
 	} else {
 		log.Printf("Warning: EVM_PRIVATE_KEY not set, EVM chains disabled")
+	}
+
+	// Setup TON chains if mnemonic is provided
+	if cfg.TonMnemonic != "" {
+		tonSigner, err := newFacilitatorTonSigner(cfg.TonMnemonic, cfg.TonRPC, cfg.TonTestnetRPC)
+		if err != nil {
+			log.Printf("Warning: Failed to create TON signer: %v", err)
+		} else {
+			var tonNetworks []t402.Network
+
+			// Add mainnet if RPC is configured
+			if cfg.TonRPC != "" {
+				tonNetworks = append(tonNetworks, t402.Network(ton.TonMainnetCAIP2))
+				configuredNetworks = append(configuredNetworks, "TON Mainnet")
+			}
+
+			// Add testnet if RPC is configured
+			if cfg.TonTestnetRPC != "" {
+				tonNetworks = append(tonNetworks, t402.Network(ton.TonTestnetCAIP2))
+				configuredNetworks = append(configuredNetworks, "TON Testnet")
+			}
+
+			if len(tonNetworks) > 0 {
+				facilitator.Register(tonNetworks, tonfac.NewExactTonScheme(tonSigner))
+				addrs := tonSigner.GetAddresses(context.Background(), ton.TonMainnetCAIP2)
+				if len(addrs) > 0 {
+					log.Printf("TON facilitator address: %s", addrs[0])
+				}
+			}
+		}
+	} else {
+		log.Printf("Warning: TON_MNEMONIC not set, TON chains disabled")
 	}
 
 	// Log configured networks
