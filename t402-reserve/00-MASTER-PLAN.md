@@ -82,6 +82,6 @@ T402 is a strategic fork of the t402 payment protocol, repositioned as a **Tethe
 
 ## Contact
 
-- Repository: https://github.com/awesome-doge/t402
+- Repository: https://github.com/t402-io/t402
 - Documentation: https://docs.t402.io (planned)
 - Website: https://t402.io (planned)

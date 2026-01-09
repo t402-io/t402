@@ -27,7 +27,7 @@
   ],
   "license": "Apache-2.0",
   "author": "T402 Team",
-  "repository": "https://github.com/awesome-doge/t402",
+  "repository": "https://github.com/t402-io/t402",
   "description": "T402 Payment Protocol integration with Tether Wallet Development Kit (WDK)",
   "devDependencies": {
     "@eslint/js": "^9.24.0",

@@ -41,7 +41,7 @@
 
 | Week | Tasks | Deliverables |
 |------|-------|--------------|
-| W1 | Repository setup | Private repo at awesome-doge/t402 |
+| W1 | Repository setup | Private repo at t402-io/t402 |
 | W2 | Global renaming | All t402 → t402 references |
 | W3 | CI/CD setup | GitHub Actions configured |
 | W4 | Documentation | Updated README, CONTRIBUTING |
@@ -168,7 +168,7 @@ export class T402WDK {
 - [x] @t402/svm
 - [x] @t402/wdk
 - [x] t402 (Python)
-- [x] github.com/awesome-doge/t402/go
+- [x] github.com/t402-io/t402/go
 
 ---
 

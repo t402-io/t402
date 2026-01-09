@@ -6,9 +6,9 @@ import (
 	"os"
 	"time"
 
-	t402http "github.com/awesome-doge/t402/go/http"
-	ginmw "github.com/awesome-doge/t402/go/http/gin"
-	tonserver "github.com/awesome-doge/t402/go/mechanisms/ton/exact/server"
+	t402http "github.com/t402-io/t402/go/http"
+	ginmw "github.com/t402-io/t402/go/http/gin"
+	tonserver "github.com/t402-io/t402/go/mechanisms/ton/exact/server"
 	ginfw "github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
