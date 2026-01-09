@@ -61,7 +61,14 @@ go get github.com/t402-io/t402/go@v1.0.0
 - Base (`eip155:8453`, `eip155:84532`)
 - Optimism, Arbitrum, Polygon, and more
 - Supports USDC, USDT, and native tokens
-- ERC-4337 gasless transactions supported
+
+### ERC-4337 Account Abstraction
+- **Gasless Transactions**: Users pay zero gas fees via paymaster sponsorship
+- **Smart Accounts**: Safe 4337 Module v0.3.0 integration
+- **Bundlers**: Pimlico, Alchemy, and generic bundler support
+- **Paymasters**: Pimlico, Biconomy, Stackup integrations
+- **EntryPoint v0.7**: Full support for latest ERC-4337 specification
+- Supported on all EVM networks above
 
 ### SVM (Solana Virtual Machine)
 - Solana Mainnet (`solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp`)
@@ -310,6 +317,146 @@ func main() {
     // Make request with automatic payment
     // The client will select the appropriate network based on server requirements
 }
+```
+
+</details>
+
+<details>
+<summary><b>ERC-4337 Gasless Transactions (TypeScript)</b></summary>
+
+```typescript
+import { SafeSmartAccount, createBundlerClient, createPaymaster } from "@t402/evm/erc4337";
+
+// 1. Create Safe smart account
+const safeAccount = new SafeSmartAccount({
+  owner: privateKeyToAccount(ownerPrivateKey),
+  chainId: 8453, // Base
+  salt: 0n,
+});
+const smartAccountAddress = await safeAccount.getAddress();
+
+// 2. Connect to Pimlico bundler
+const bundler = createBundlerClient({
+  provider: "pimlico",
+  apiKey: process.env.PIMLICO_API_KEY,
+  chainId: 8453,
+});
+
+// 3. Setup paymaster for gas sponsorship
+const paymaster = createPaymaster({
+  provider: "pimlico",
+  apiKey: process.env.PIMLICO_API_KEY,
+  chainId: 8453,
+});
+
+// 4. Build UserOperation
+const callData = safeAccount.encodeExecute(targetAddress, 0n, data);
+const userOp = await bundler.buildUserOperation({
+  sender: smartAccountAddress,
+  callData,
+});
+
+// 5. Get paymaster sponsorship
+const paymasterData = await paymaster.sponsorUserOperation(userOp);
+
+// 6. Sign and submit
+const signature = await safeAccount.signUserOpHash(userOpHash);
+const hash = await bundler.sendUserOperation({ ...userOp, ...paymasterData, signature });
+const receipt = await bundler.waitForReceipt(hash);
+```
+
+</details>
+
+<details>
+<summary><b>ERC-4337 Gasless Transactions (Python)</b></summary>
+
+```python
+from t402.erc4337 import (
+    SafeSmartAccount, SafeAccountConfig,
+    create_bundler_client, create_paymaster,
+    ENTRYPOINT_V07_ADDRESS,
+)
+
+# 1. Create Safe smart account
+safe_account = SafeSmartAccount(SafeAccountConfig(
+    owner_private_key="0x...",
+    chain_id=8453,  # Base
+    salt=0,
+))
+smart_account_address = safe_account.get_address()
+
+# 2. Connect to Pimlico bundler
+bundler = create_bundler_client(
+    provider="pimlico",
+    api_key=os.getenv("PIMLICO_API_KEY"),
+    chain_id=8453,
+)
+
+# 3. Setup paymaster for gas sponsorship
+paymaster = create_paymaster(
+    provider="pimlico",
+    api_key=os.getenv("PIMLICO_API_KEY"),
+    chain_id=8453,
+)
+
+# 4. Build UserOperation
+call_data = safe_account.encode_execute(target_address, 0, b"")
+user_op = UserOperation(
+    sender=smart_account_address,
+    call_data=call_data,
+    # ... gas limits
+)
+
+# 5. Get paymaster sponsorship
+paymaster_data = paymaster.get_paymaster_data(user_op, 8453, ENTRYPOINT_V07_ADDRESS)
+
+# 6. Submit to bundler
+user_op_hash = bundler.send_user_operation(user_op)
+receipt = bundler.wait_for_receipt(user_op_hash)
+```
+
+</details>
+
+<details>
+<summary><b>ERC-4337 Gasless Transactions (Go)</b></summary>
+
+```go
+import "github.com/t402-io/t402/go/mechanisms/evm/erc4337"
+
+// 1. Create Safe smart account
+safeAccount, _ := erc4337.NewSafeSmartAccount(erc4337.SafeAccountConfig{
+    Owner:   privateKey,
+    ChainID: 8453, // Base
+    Salt:    big.NewInt(0),
+})
+smartAccountAddress, _ := safeAccount.GetAddress()
+
+// 2. Connect to Pimlico bundler
+bundler := erc4337.NewPimlicoBundlerClient(erc4337.PimlicoConfig{
+    APIKey:  os.Getenv("PIMLICO_API_KEY"),
+    ChainID: 8453,
+})
+
+// 3. Setup paymaster for gas sponsorship
+paymaster := erc4337.NewPimlicoPaymaster(erc4337.PimlicoPaymasterConfig{
+    APIKey:  os.Getenv("PIMLICO_API_KEY"),
+    ChainID: 8453,
+})
+
+// 4. Build UserOperation
+callData, _ := safeAccount.EncodeExecute(targetAddress, big.NewInt(0), []byte{})
+userOp := &erc4337.UserOperation{
+    Sender:   smartAccountAddress,
+    CallData: callData,
+    // ... gas limits
+}
+
+// 5. Get paymaster sponsorship
+paymasterData, _ := paymaster.SponsorUserOperation(userOp)
+
+// 6. Submit to bundler
+hash, _ := bundler.SendUserOperation(userOp)
+receipt, _ := bundler.WaitForReceipt(hash, 60*time.Second, 2*time.Second)
 ```
 
 </details>
