@@ -23,7 +23,7 @@ app.use(
 
 ```shell
 # All available packages
-pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/wdk @t402/http @t402/extensions
+pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/wdk @t402/extensions
 
 # Minimal client
 pnpm add @t402/core @t402/evm
