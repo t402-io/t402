@@ -1,0 +1,284 @@
+# @t402/core
+
+Core protocol types and HTTP utilities for T402.
+
+## Installation
+
+```bash
+pnpm add @t402/core
+```
+
+## Constants
+
+### t402Version
+
+Current protocol version number.
+
+```typescript
+import { t402Version } from '@t402/core';
+
+console.log(t402Version); // 2
+```
+
+## HTTP Client
+
+### createT402HTTPClient
+
+Creates an HTTP client that automatically handles 402 responses.
+
+```typescript
+import { createT402HTTPClient } from '@t402/core';
+import { ExactEvmScheme } from '@t402/evm';
+
+const client = createT402HTTPClient({
+  signers: [
+    {
+      scheme: 'exact',
+      network: 'eip155:8453',
+      signer: myEvmSigner
+    }
+  ]
+});
+
+// Automatically handles payment
+const response = await client.fetch('https://api.example.com/premium');
+```
+
+#### Options
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `signers` | `SignerConfig[]` | Array of signer configurations |
+| `facilitatorUrl` | `string` | Optional facilitator URL |
+| `maxRetries` | `number` | Max payment retries (default: 3) |
+
+### SignerConfig
+
+```typescript
+interface SignerConfig {
+  scheme: string;      // Payment scheme name
+  network: string;     // CAIP-2 network identifier
+  signer: Signer;      // Signer instance
+  priority?: number;   // Higher priority = preferred
+}
+```
+
+## HTTP Server
+
+### createT402HTTPServer
+
+Creates middleware for HTTP servers to require payments.
+
+```typescript
+import { createT402HTTPServer } from '@t402/core';
+import { ExactEvmScheme } from '@t402/evm';
+
+const paymentMiddleware = createT402HTTPServer({
+  schemes: [ExactEvmScheme.server({ rpcUrl: RPC_URL })],
+  facilitatorUrl: 'https://facilitator.t402.io'
+});
+```
+
+### PaymentMiddlewareConfig
+
+```typescript
+interface PaymentMiddlewareConfig {
+  schemes: ServerScheme[];
+  facilitatorUrl: string;
+  onPaymentVerified?: (payment: VerifiedPayment) => void;
+  onPaymentFailed?: (error: PaymentError) => void;
+}
+```
+
+## Framework Integrations
+
+### Express Middleware
+
+```typescript
+import express from 'express';
+import { expressMiddleware } from '@t402/core/express';
+
+const app = express();
+
+app.use('/api/premium', expressMiddleware({
+  price: '$0.01',
+  payTo: '0x...',
+  network: 'eip155:8453'
+}));
+
+app.get('/api/premium', (req, res) => {
+  res.json({ data: 'Premium content' });
+});
+```
+
+### Next.js Middleware
+
+```typescript
+import { withPayment } from '@t402/core/next';
+
+export default withPayment(handler, {
+  price: '$0.01',
+  payTo: '0x...',
+  network: 'eip155:8453'
+});
+```
+
+### Hono Middleware
+
+```typescript
+import { Hono } from 'hono';
+import { paymentMiddleware } from '@t402/core/hono';
+
+const app = new Hono();
+
+app.use('/api/premium/*', paymentMiddleware({
+  price: '$0.01',
+  payTo: '0x...',
+  network: 'eip155:8453'
+}));
+```
+
+## Types
+
+### PaymentRequirements
+
+```typescript
+interface PaymentRequirements {
+  /** Payment scheme identifier */
+  scheme: string;
+
+  /** CAIP-2 network identifier (e.g., "eip155:8453") */
+  network: string;
+
+  /** Maximum amount in smallest units */
+  maxAmountRequired: string;
+
+  /** Resource being accessed */
+  resource: string;
+
+  /** Human-readable description */
+  description?: string;
+
+  /** Response MIME type */
+  mimeType?: string;
+
+  /** Payment recipient address */
+  payTo: string;
+
+  /** Maximum wait time for payment */
+  maxTimeoutSeconds?: number;
+
+  /** Token contract address */
+  asset?: string;
+
+  /** Additional scheme-specific data */
+  extra?: Record<string, unknown>;
+}
+```
+
+### PaymentPayload
+
+```typescript
+interface PaymentPayload {
+  /** Protocol version */
+  x402Version: number;
+
+  /** Payment scheme used */
+  scheme: string;
+
+  /** Network identifier */
+  network: string;
+
+  /** Base64-encoded scheme-specific payload */
+  payload: string;
+}
+```
+
+### VerifiedPayment
+
+```typescript
+interface VerifiedPayment {
+  /** Transaction hash */
+  txHash: string;
+
+  /** Block number */
+  blockNumber: number;
+
+  /** Amount paid */
+  amount: string;
+
+  /** Payer address */
+  from: string;
+
+  /** Recipient address */
+  to: string;
+
+  /** Network identifier */
+  network: string;
+}
+```
+
+## Utilities
+
+### parsePrice
+
+Converts human-readable price to smallest units.
+
+```typescript
+import { parsePrice } from '@t402/core';
+
+parsePrice('$0.01');      // "10000" (6 decimals)
+parsePrice('0.01 USDT');  // "10000"
+parsePrice('1000000');    // "1000000" (already in smallest units)
+```
+
+### formatPrice
+
+Formats smallest units to human-readable string.
+
+```typescript
+import { formatPrice } from '@t402/core';
+
+formatPrice('10000', 6);    // "0.01"
+formatPrice('1000000', 6);  // "1.00"
+```
+
+### encodePayload
+
+Encodes scheme-specific payload to base64.
+
+```typescript
+import { encodePayload } from '@t402/core';
+
+const encoded = encodePayload({
+  authorization: '0x...',
+  validAfter: 0,
+  validBefore: 1234567890
+});
+```
+
+### decodePayload
+
+Decodes base64 payload to object.
+
+```typescript
+import { decodePayload } from '@t402/core';
+
+const decoded = decodePayload<ExactEvmPayload>(encodedString);
+```
+
+## CAIP-2 Network IDs
+
+T402 uses CAIP-2 for network identification:
+
+| Network | CAIP-2 ID |
+|---------|-----------|
+| Ethereum | `eip155:1` |
+| Arbitrum | `eip155:42161` |
+| Base | `eip155:8453` |
+| Optimism | `eip155:10` |
+| Polygon | `eip155:137` |
+| TON Mainnet | `ton:mainnet` |
+| TON Testnet | `ton:testnet` |
+| TRON Mainnet | `tron:mainnet` |
+| TRON Nile | `tron:nile` |

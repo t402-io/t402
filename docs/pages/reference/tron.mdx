@@ -1,0 +1,375 @@
+# @t402/tron
+
+TRON blockchain support for T402 with TRC-20 USDT payments.
+
+## Installation
+
+```bash
+pnpm add @t402/tron
+```
+
+## Schemes
+
+### ExactTronScheme
+
+The primary TRON payment scheme using TRC-20 token transfers.
+
+#### Client
+
+```typescript
+import { ExactTronClientScheme } from '@t402/tron';
+
+const scheme = ExactTronClientScheme({
+  signer: tronSigner,
+  network: 'tron:mainnet'
+});
+```
+
+#### Server
+
+```typescript
+import { ExactTronServerScheme } from '@t402/tron';
+
+const scheme = ExactTronServerScheme({
+  endpoint: 'https://api.trongrid.io',
+  network: 'tron:mainnet'
+});
+```
+
+#### Facilitator
+
+```typescript
+import { ExactTronFacilitatorScheme } from '@t402/tron';
+
+const scheme = ExactTronFacilitatorScheme({
+  signer: facilitatorSigner,
+  endpoint: 'https://api.trongrid.io',
+  network: 'tron:mainnet'
+});
+```
+
+## Signers
+
+### ClientTronSigner Interface
+
+```typescript
+interface ClientTronSigner {
+  address: string;
+  signTransaction: (transaction: TronTransaction) => Promise<SignedTransaction>;
+}
+```
+
+### FacilitatorTronSigner Interface
+
+```typescript
+interface FacilitatorTronSigner {
+  address: string;
+  signAndBroadcast: (transaction: TronTransaction) => Promise<BroadcastResult>;
+  waitForConfirmation: (txId: string) => Promise<TransactionConfirmation>;
+}
+```
+
+## Token Configuration
+
+### USDT Addresses
+
+```typescript
+import { USDT_ADDRESSES } from '@t402/tron';
+
+// USDT on mainnet
+const usdtMainnet = USDT_ADDRESSES['tron:mainnet'];
+// TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t
+
+// USDT on Nile testnet
+const usdtNile = USDT_ADDRESSES['tron:nile'];
+// TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf
+```
+
+### TRC-20 Registry
+
+```typescript
+import { TRC20_REGISTRY, getTRC20Config } from '@t402/tron';
+
+const config = getTRC20Config('tron:mainnet', 'USDT');
+// { address: 'TR7NHqje...', decimals: 6, symbol: 'USDT' }
+```
+
+### Utility Functions
+
+```typescript
+import {
+  getNetworkTokens,
+  getDefaultToken,
+  getUsdtNetworks,
+  isNetworkSupported
+} from '@t402/tron';
+
+// Get all TRC-20 tokens on mainnet
+const tokens = getNetworkTokens('tron:mainnet');
+
+// Get default token for payment
+const defaultToken = getDefaultToken('tron:mainnet');
+
+// Check network support
+const supported = isNetworkSupported('tron:mainnet'); // true
+
+// Get networks with USDT
+const networks = getUsdtNetworks(); // ['tron:mainnet', 'tron:nile', 'tron:shasta']
+```
+
+## Constants
+
+### Network Identifiers
+
+```typescript
+import {
+  TRON_MAINNET_CAIP2,
+  TRON_NILE_CAIP2,
+  TRON_SHASTA_CAIP2,
+  TRON_NETWORKS
+} from '@t402/tron';
+
+// 'tron:mainnet'
+// 'tron:nile'
+// 'tron:shasta'
+// ['mainnet', 'nile', 'shasta']
+```
+
+### Endpoints
+
+```typescript
+import { NETWORK_ENDPOINTS } from '@t402/tron';
+
+// {
+//   'tron:mainnet': 'https://api.trongrid.io',
+//   'tron:nile': 'https://nile.trongrid.io',
+//   'tron:shasta': 'https://api.shasta.trongrid.io'
+// }
+```
+
+### TRC-20 Function Selectors
+
+```typescript
+import {
+  TRC20_TRANSFER_SELECTOR,
+  TRC20_APPROVE_SELECTOR,
+  TRC20_BALANCE_OF_SELECTOR
+} from '@t402/tron';
+```
+
+### Fee Configuration
+
+```typescript
+import {
+  DEFAULT_FEE_LIMIT,
+  MIN_FEE_LIMIT,
+  MAX_FEE_LIMIT,
+  SUN_PER_TRX
+} from '@t402/tron';
+
+// Default fee limit: 100 TRX
+// Min fee limit: 1 TRX
+// Max fee limit: 1000 TRX
+// 1 TRX = 1,000,000 SUN
+```
+
+### Validity Configuration
+
+```typescript
+import {
+  MIN_VALIDITY_BUFFER,
+  DEFAULT_VALIDITY_DURATION
+} from '@t402/tron';
+
+// Min buffer: 60 seconds
+// Default duration: 300 seconds (5 minutes)
+```
+
+## Utilities
+
+### Address Validation
+
+```typescript
+import { validateTronAddress, addressesEqual, formatAddress } from '@t402/tron';
+
+// Validate address format
+const isValid = validateTronAddress('TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t');
+
+// Compare addresses (handles different formats)
+const equal = addressesEqual(address1, address2);
+
+// Format address to base58
+const formatted = formatAddress(hexAddress);
+```
+
+### Amount Conversion
+
+```typescript
+import { convertToSmallestUnits, convertFromSmallestUnits } from '@t402/tron';
+
+// Convert to SUN (6 decimals for USDT)
+const amount = convertToSmallestUnits('1.5', 6); // 1500000n
+
+// Convert from SUN
+const display = convertFromSmallestUnits(1500000n, 6); // '1.5'
+```
+
+### Network Utilities
+
+```typescript
+import { normalizeNetwork, getEndpoint, isTronNetwork } from '@t402/tron';
+
+// Normalize network identifier
+normalizeNetwork('tron:mainnet'); // 'mainnet'
+normalizeNetwork('mainnet');      // 'mainnet'
+
+// Get endpoint for network
+const endpoint = getEndpoint('tron:mainnet');
+// 'https://api.trongrid.io'
+
+// Check if network is TRON
+isTronNetwork('tron:mainnet'); // true
+isTronNetwork('eip155:1');     // false
+```
+
+### Payment Utilities
+
+```typescript
+import {
+  generatePaymentReference,
+  calculateExpiration,
+  estimateTransactionFee
+} from '@t402/tron';
+
+// Generate unique payment reference
+const ref = generatePaymentReference();
+
+// Calculate expiration timestamp
+const expiration = calculateExpiration(300); // 5 minutes from now
+
+// Estimate transaction fee
+const fee = await estimateTransactionFee({
+  from: senderAddress,
+  to: recipientAddress,
+  amount: 1000000n,
+  token: USDT_ADDRESS
+});
+```
+
+## Types
+
+### ExactTronPayloadV2
+
+```typescript
+interface ExactTronPayloadV2 {
+  /** Signed transaction (hex) */
+  signedTransaction: string;
+
+  /** Transaction ID */
+  txId: string;
+
+  /** Sender address (base58) */
+  senderAddress: string;
+
+  /** Recipient address (base58) */
+  recipientAddress: string;
+
+  /** Token contract address */
+  tokenAddress: string;
+
+  /** Amount in smallest units */
+  amount: string;
+
+  /** Expiration timestamp */
+  expiration: number;
+
+  /** Payment reference */
+  reference: string;
+}
+```
+
+### TronAuthorization
+
+```typescript
+interface TronAuthorization {
+  /** Sender address */
+  from: string;
+
+  /** Recipient address */
+  to: string;
+
+  /** Amount in smallest units */
+  value: string;
+
+  /** Expiration timestamp */
+  expiration: number;
+
+  /** Unique nonce */
+  nonce: string;
+}
+```
+
+### TRC20Config
+
+```typescript
+interface TRC20Config {
+  /** Contract address (base58) */
+  address: string;
+
+  /** Token decimals */
+  decimals: number;
+
+  /** Token symbol */
+  symbol: string;
+
+  /** Token name */
+  name?: string;
+}
+```
+
+### TransactionConfirmation
+
+```typescript
+interface TransactionConfirmation {
+  /** Transaction ID */
+  txId: string;
+
+  /** Block number */
+  blockNumber: number;
+
+  /** Block timestamp */
+  blockTimestamp: number;
+
+  /** Transaction result */
+  result: 'SUCCESS' | 'FAILED';
+
+  /** Energy used */
+  energyUsed: number;
+
+  /** Bandwidth used */
+  bandwidthUsed: number;
+}
+```
+
+## Supported Networks
+
+| Network | CAIP-2 | USDT | Endpoint |
+|---------|--------|------|----------|
+| Mainnet | `tron:mainnet` | Yes | api.trongrid.io |
+| Nile (Testnet) | `tron:nile` | Yes | nile.trongrid.io |
+| Shasta (Testnet) | `tron:shasta` | Yes | api.shasta.trongrid.io |
+
+## Fee Considerations
+
+TRON uses energy and bandwidth for transactions:
+
+| Operation | Energy Cost | Bandwidth Cost |
+|-----------|-------------|----------------|
+| TRC-20 Transfer | ~30,000 | ~350 bytes |
+| TRC-20 Approval | ~15,000 | ~250 bytes |
+
+Users need either:
+- Sufficient TRX staked for energy/bandwidth
+- TRX for fee payment (burns TRX if no staked resources)
+
+Typical USDT transfer costs ~5-10 TRX when paying with TRX.

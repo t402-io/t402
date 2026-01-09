@@ -1,0 +1,489 @@
+# @t402/wdk
+
+Tether Wallet Development Kit integration for T402, enabling self-custodial multi-chain wallets with USDT0 payments and cross-chain bridging.
+
+## Installation
+
+```bash
+pnpm add @t402/wdk @tetherto/wdk @tetherto/wdk-wallet-evm
+```
+
+## Quick Start
+
+```typescript
+import WDK from '@tetherto/wdk';
+import WalletManagerEvm from '@tetherto/wdk-wallet-evm';
+import { T402WDK } from '@t402/wdk';
+
+// Register WDK modules (once at app startup)
+T402WDK.registerWDK(WDK, WalletManagerEvm);
+
+// Create wallet
+const seedPhrase = T402WDK.generateSeedPhrase();
+const wallet = new T402WDK(seedPhrase, {
+  arbitrum: 'https://arb1.arbitrum.io/rpc',
+  base: 'https://mainnet.base.org'
+});
+
+// Initialize
+await wallet.initialize();
+
+// Get address
+const address = await wallet.getAddress('arbitrum');
+```
+
+## T402WDK Class
+
+### Constructor
+
+```typescript
+const wallet = new T402WDK(seedPhrase, chainConfig, options?);
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `seedPhrase` | `string` | BIP-39 seed phrase |
+| `chainConfig` | `EvmChainConfig` | RPC endpoints per chain |
+| `options` | `T402WDKOptions` | Optional configuration |
+
+### Options
+
+```typescript
+interface T402WDKOptions {
+  /** Cache configuration */
+  cache?: T402BalanceCacheConfig;
+
+  /** Auto-refresh balances */
+  autoRefresh?: boolean;
+
+  /** Refresh interval (ms) */
+  refreshInterval?: number;
+}
+```
+
+### Static Methods
+
+#### registerWDK
+
+Register WDK modules (required before creating instances).
+
+```typescript
+T402WDK.registerWDK(WDK, WalletManagerEvm);
+```
+
+#### generateSeedPhrase
+
+Generate a new BIP-39 seed phrase.
+
+```typescript
+const seedPhrase = T402WDK.generateSeedPhrase();
+// "word1 word2 word3 ... word12"
+```
+
+### Instance Methods
+
+#### initialize
+
+Initialize the wallet and derive accounts.
+
+```typescript
+await wallet.initialize();
+```
+
+#### getAddress
+
+Get wallet address for a chain.
+
+```typescript
+const address = await wallet.getAddress('arbitrum');
+// '0x...'
+```
+
+#### getSigner
+
+Get a T402-compatible signer for payments.
+
+```typescript
+const signer = await wallet.getSigner('arbitrum');
+
+// Use with T402 HTTP client
+const client = createT402HTTPClient({
+  signers: [{ scheme: 'exact', signer }]
+});
+```
+
+#### getUsdt0Balance
+
+Get USDT0 balance on a specific chain.
+
+```typescript
+const balance = await wallet.getUsdt0Balance('arbitrum');
+// 1000000n (1 USDT0)
+```
+
+#### getUsdcBalance
+
+Get USDC balance on a specific chain.
+
+```typescript
+const balance = await wallet.getUsdcBalance('base');
+```
+
+#### getAggregatedBalances
+
+Get balances across all configured chains.
+
+```typescript
+const balances = await wallet.getAggregatedBalances();
+
+console.log('Total USDT0:', balances.totalUsdt0);
+console.log('Total USDC:', balances.totalUsdc);
+console.log('By chain:', balances.byChain);
+// {
+//   arbitrum: { usdt0: 500000n, usdc: 0n },
+//   base: { usdt0: 500000n, usdc: 1000000n }
+// }
+```
+
+#### findBestChainForPayment
+
+Find the best chain for a payment amount.
+
+```typescript
+const best = await wallet.findBestChainForPayment(1000000n);
+
+if (best) {
+  console.log('Chain:', best.chain);   // 'arbitrum'
+  console.log('Token:', best.token);   // 'USDT0'
+  console.log('Balance:', best.balance); // 5000000n
+}
+```
+
+#### bridgeUsdt0
+
+Bridge USDT0 between chains via LayerZero.
+
+```typescript
+const result = await wallet.bridgeUsdt0({
+  fromChain: 'ethereum',
+  toChain: 'arbitrum',
+  amount: 100000000n // 100 USDT0
+});
+
+console.log('Tx hash:', result.txHash);
+console.log('Message GUID:', result.messageGuid);
+```
+
+## WDKSigner
+
+Low-level signer for T402 payments.
+
+### createWDKSigner
+
+```typescript
+import { createWDKSigner } from '@t402/wdk';
+
+const signer = createWDKSigner(wdkAccount, chainId);
+```
+
+### MockWDKSigner
+
+For testing without real WDK.
+
+```typescript
+import { MockWDKSigner } from '@t402/wdk';
+
+const mockSigner = new MockWDKSigner('0x...address', 8453);
+```
+
+## Chain Configuration
+
+### Default Chains
+
+```typescript
+import { DEFAULT_CHAINS, DEFAULT_RPC_ENDPOINTS } from '@t402/wdk';
+
+// Supported chains
+// ['ethereum', 'arbitrum', 'base', 'optimism', 'polygon', 'ink', 'berachain', 'unichain']
+
+// Default RPC endpoints (use your own for production)
+// {
+//   ethereum: 'https://eth.llamarpc.com',
+//   arbitrum: 'https://arb1.arbitrum.io/rpc',
+//   base: 'https://mainnet.base.org',
+//   ...
+// }
+```
+
+### Token Addresses
+
+```typescript
+import { USDT0_ADDRESSES, USDC_ADDRESSES, CHAIN_TOKENS } from '@t402/wdk';
+
+// USDT0 on Arbitrum
+const usdt0 = USDT0_ADDRESSES['arbitrum'];
+
+// All tokens available on a chain
+const tokens = CHAIN_TOKENS['base'];
+// ['USDT0', 'USDC']
+```
+
+### Utility Functions
+
+```typescript
+import {
+  getNetworkFromChain,
+  getChainFromNetwork,
+  getChainId,
+  getUsdt0Chains,
+  getPreferredToken
+} from '@t402/wdk';
+
+// Chain to CAIP-2 network
+getNetworkFromChain('arbitrum'); // 'eip155:42161'
+
+// CAIP-2 to chain name
+getChainFromNetwork('eip155:8453'); // 'base'
+
+// Get chain ID
+getChainId('arbitrum'); // 42161
+
+// Chains with USDT0
+getUsdt0Chains(); // ['ethereum', 'arbitrum', 'base', ...]
+
+// Get preferred token for chain
+getPreferredToken('base'); // 'USDT0'
+```
+
+## Caching
+
+### TTLCache
+
+Generic TTL-based cache.
+
+```typescript
+import { TTLCache } from '@t402/wdk';
+
+const cache = new TTLCache<string>({
+  ttl: 60000, // 1 minute
+  maxSize: 100
+});
+
+cache.set('key', 'value');
+const value = cache.get('key');
+```
+
+### BalanceCache
+
+Specialized cache for token balances.
+
+```typescript
+import { BalanceCache, DEFAULT_BALANCE_CACHE_CONFIG } from '@t402/wdk';
+
+const balanceCache = new BalanceCache(DEFAULT_BALANCE_CACHE_CONFIG);
+
+// Cache balance
+balanceCache.setBalance('arbitrum', '0x...', 'USDT0', 1000000n);
+
+// Get cached balance
+const balance = balanceCache.getBalance('arbitrum', '0x...', 'USDT0');
+
+// Get stats
+const stats = balanceCache.getStats();
+console.log('Hit rate:', stats.hitRate);
+```
+
+## Error Handling
+
+### Error Classes
+
+```typescript
+import {
+  WDKError,
+  WDKInitializationError,
+  ChainError,
+  SignerError,
+  SigningError,
+  BalanceError,
+  TransactionError,
+  BridgeError,
+  RPCError
+} from '@t402/wdk';
+
+try {
+  await wallet.getUsdt0Balance('invalid-chain');
+} catch (error) {
+  if (error instanceof ChainError) {
+    console.log('Chain not supported:', error.chain);
+  }
+}
+```
+
+### Error Codes
+
+```typescript
+import { WDKErrorCode, hasErrorCode } from '@t402/wdk';
+
+// WDKErrorCode enum values:
+// NOT_INITIALIZED, INVALID_SEED_PHRASE, CHAIN_NOT_CONFIGURED,
+// SIGNER_NOT_AVAILABLE, SIGNING_FAILED, BALANCE_FETCH_FAILED,
+// TRANSACTION_FAILED, BRIDGE_FAILED, RPC_ERROR
+
+if (hasErrorCode(error, WDKErrorCode.BALANCE_FETCH_FAILED)) {
+  // Handle balance fetch error
+}
+```
+
+### Utilities
+
+```typescript
+import { wrapError, isWDKError, withRetry, withTimeout } from '@t402/wdk';
+
+// Wrap unknown errors
+const wdkError = wrapError(unknownError, WDKErrorCode.RPC_ERROR);
+
+// Check if WDK error
+if (isWDKError(error)) {
+  console.log('Error code:', error.code);
+}
+
+// Retry with exponential backoff
+const result = await withRetry(
+  () => fetchBalance(),
+  { maxRetries: 3, initialDelay: 1000 }
+);
+
+// Timeout wrapper
+const result = await withTimeout(
+  slowOperation(),
+  5000 // 5 second timeout
+);
+```
+
+## Bridge Integration
+
+### WdkBridge
+
+High-level bridge for WDK wallets.
+
+```typescript
+import { WdkBridge } from '@t402/wdk';
+
+const bridge = new WdkBridge(wallet, 'arbitrum');
+
+// Get quote
+const quote = await bridge.quote({
+  toChain: 'base',
+  amount: 50000000n
+});
+
+// Execute bridge
+const result = await bridge.execute({
+  toChain: 'base',
+  amount: 50000000n
+});
+```
+
+### createDirectBridge
+
+Create a bridge without full WDK wrapper.
+
+```typescript
+import { createDirectBridge } from '@t402/wdk';
+
+const bridge = createDirectBridge(signer, 'arbitrum');
+```
+
+## Types
+
+### T402WDKConfig
+
+```typescript
+interface T402WDKConfig {
+  /** Seed phrase */
+  seedPhrase: string;
+
+  /** Chain RPC endpoints */
+  chains: EvmChainConfig;
+
+  /** Optional settings */
+  options?: T402WDKOptions;
+}
+```
+
+### EvmChainConfig
+
+```typescript
+type EvmChainConfig = {
+  [chain: string]: string; // chain name -> RPC URL
+};
+
+// Example
+const config: EvmChainConfig = {
+  arbitrum: 'https://arb1.arbitrum.io/rpc',
+  base: 'https://mainnet.base.org'
+};
+```
+
+### TokenBalance
+
+```typescript
+interface TokenBalance {
+  chain: string;
+  token: string;
+  balance: bigint;
+  address: string;
+}
+```
+
+### AggregatedBalance
+
+```typescript
+interface AggregatedBalance {
+  totalUsdt0: bigint;
+  totalUsdc: bigint;
+  byChain: {
+    [chain: string]: {
+      usdt0: bigint;
+      usdc: bigint;
+    };
+  };
+}
+```
+
+### BridgeParams
+
+```typescript
+interface BridgeParams {
+  fromChain: string;
+  toChain: string;
+  amount: bigint;
+  recipient?: string; // Defaults to same address
+}
+```
+
+### BridgeResult
+
+```typescript
+interface BridgeResult {
+  txHash: string;
+  messageGuid: string;
+  fromChain: string;
+  toChain: string;
+  amount: bigint;
+  estimatedTime: number;
+}
+```
+
+## Supported Chains
+
+| Chain | USDT0 | USDC | Bridge |
+|-------|-------|------|--------|
+| Ethereum | Yes | Yes | Yes |
+| Arbitrum | Yes | Yes | Yes |
+| Base | Yes | Yes | Yes |
+| Optimism | Yes | Yes | No |
+| Polygon | Yes | Yes | No |
+| Ink | Yes | No | Yes |
+| Berachain | Yes | No | Yes |
+| Unichain | Yes | No | Yes |
