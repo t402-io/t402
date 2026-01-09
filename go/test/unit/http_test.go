@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	t402 "github.com/awesome-doge/t402/go"
-	t402http "github.com/awesome-doge/t402/go/http"
-	"github.com/awesome-doge/t402/go/test/mocks/cash"
+	t402 "github.com/t402-io/t402/go"
+	t402http "github.com/t402-io/t402/go/http"
+	"github.com/t402-io/t402/go/test/mocks/cash"
 )
 
 // mockBrowserHTTPAdapter implements the HTTPAdapter interface for browser testing

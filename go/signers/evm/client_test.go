@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	t402evm "github.com/awesome-doge/t402/go/mechanisms/evm"
+	t402evm "github.com/t402-io/t402/go/mechanisms/evm"
 )
 
 // Test private key (deterministic for testing)

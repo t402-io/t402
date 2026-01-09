@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	t402 "github.com/awesome-doge/t402/go"
-	t402http "github.com/awesome-doge/t402/go/http"
-	"github.com/awesome-doge/t402/go/test/mocks/cash"
-	"github.com/awesome-doge/t402/go/types"
+	t402 "github.com/t402-io/t402/go"
+	t402http "github.com/t402-io/t402/go/http"
+	"github.com/t402-io/t402/go/test/mocks/cash"
+	"github.com/t402-io/t402/go/types"
 )
 
 // mockHTTPAdapter implements the HTTPAdapter interface for testing

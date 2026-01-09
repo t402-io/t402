@@ -12,8 +12,8 @@ import (
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/gagliardetto/solana-go/rpc"
 
-	svm "github.com/awesome-doge/t402/go/mechanisms/svm"
-	"github.com/awesome-doge/t402/go/types"
+	svm "github.com/t402-io/t402/go/mechanisms/svm"
+	"github.com/t402-io/t402/go/types"
 )
 
 // ExactSvmSchemeV1 implements the SchemeNetworkClientV1 interface for SVM (Solana) exact payments (V1)
