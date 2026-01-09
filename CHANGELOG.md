@@ -7,6 +7,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2026-01-09] - USDT0 Cross-Chain Bridge via LayerZero
+
+### Added
+
+#### USDT0 Bridge (`bridge/v1.0.0`)
+
+Cross-chain USDT0 transfers using LayerZero OFT standard with message tracking via LayerZero Scan API.
+
+#### TypeScript SDK (`@t402/evm`)
+- **Usdt0Bridge Client**: Quote and execute cross-chain USDT0 transfers
+  - `quote()` - Get bridge quote with fees and estimated time
+  - `send()` - Execute bridge transaction with GUID extraction
+  - Message GUID extraction from OFTSent event logs
+- **LayerZeroScanClient**: Track cross-chain message delivery
+  - `getMessage()` - Get message status by GUID
+  - `getMessagesByWallet()` - Get messages by wallet address
+  - `waitForDelivery()` - Poll until delivered with status callbacks
+  - `isDelivered()` - Quick delivery check
+- **CrossChainPaymentRouter**: High-level cross-chain payment routing
+  - `routePayment()` - Bridge funds to destination chain
+  - `estimateFees()` - Get fee estimates
+  - `trackMessage()` / `waitForDelivery()` - Delivery tracking
+
+#### Go SDK (`github.com/t402-io/t402/go/mechanisms/evm/bridge`)
+- **Usdt0Bridge**: `Quote()`, `Send()`, `GetSupportedDestinations()`
+- **LayerZeroScanClient**: `GetMessage()`, `GetMessagesByWallet()`, `WaitForDelivery()`
+- **CrossChainPaymentRouter**: `RoutePayment()`, `EstimateFees()`, `TrackMessage()`
+- **Types**: `BridgeQuoteParams`, `BridgeResult`, `LayerZeroMessage`, `SendParam`
+- **Constants**: Endpoint IDs, OFT addresses, utility functions
+- **Unit Tests**: Comprehensive test coverage
+
+#### Python SDK (`t402.bridge`)
+- **Usdt0Bridge**: Async client with `quote()` and `send()` methods
+- **LayerZeroScanClient**: Async message tracking with httpx
+- **CrossChainPaymentRouter**: Async payment routing
+- **Types**: Dataclasses for all bridge types
+- **Constants**: LayerZero endpoint IDs and USDT0 OFT addresses
+
+#### Examples
+- `examples/typescript/clients/bridge/` - TypeScript bridge example
+- `examples/go/clients/bridge/` - Go bridge example
+- `examples/python/bridge/` - Python bridge example
+
+### Technical Details
+
+#### Supported Chains
+| Chain | LayerZero EID | USDT0 OFT Address |
+|-------|---------------|-------------------|
+| Ethereum | 30101 | `0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee` |
+| Arbitrum | 30110 | `0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9` |
+| Ink | 30291 | `0x0200C29006150606B650577BBE7B6248F58470c1` |
+| Berachain | 30362 | `0x779Ded0c9e1022225f8E0630b35a9b54bE713736` |
+| Unichain | 30320 | `0x588ce4F028D8e7B53B687865d6A67b3A54C75518` |
+
+#### LayerZero Scan API
+- Base URL: `https://scan.layerzero-api.com/v1`
+- Message statuses: `INFLIGHT`, `CONFIRMING`, `DELIVERED`, `FAILED`, `BLOCKED`
+
+#### Bridge Flow
+1. Create bridge client for source chain
+2. Get quote with fees and estimated receive amount
+3. Execute bridge (handles approval if needed)
+4. Extract message GUID from OFTSent event
+5. Track delivery via LayerZero Scan API
+6. Receive funds on destination chain
+
+---
+
 ## [2026-01-09] - ERC-4337 Account Abstraction Support
 
 ### Added
