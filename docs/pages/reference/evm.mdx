@@ -1,0 +1,393 @@
+# @t402/evm
+
+EVM blockchain support for T402 with EIP-3009 gasless transfers, ERC-4337 account abstraction, and LayerZero USDT0 bridging.
+
+## Installation
+
+```bash
+pnpm add @t402/evm
+```
+
+## Schemes
+
+### ExactEvmScheme
+
+The primary EVM payment scheme using EIP-3009 `transferWithAuthorization`.
+
+#### Client
+
+```typescript
+import { ExactEvmScheme, toClientEvmSigner } from '@t402/evm';
+import { privateKeyToAccount } from 'viem/accounts';
+
+const account = privateKeyToAccount(PRIVATE_KEY);
+const signer = toClientEvmSigner(account);
+
+const scheme = ExactEvmScheme.client({
+  signer,
+  network: 'eip155:8453' // Base
+});
+```
+
+#### Server
+
+```typescript
+const scheme = ExactEvmScheme.server({
+  rpcUrl: 'https://mainnet.base.org',
+  network: 'eip155:8453'
+});
+```
+
+#### Facilitator
+
+```typescript
+const scheme = ExactEvmScheme.facilitator({
+  signer: facilitatorSigner,
+  rpcUrl: 'https://mainnet.base.org',
+  network: 'eip155:8453'
+});
+```
+
+### ExactLegacyEvmScheme
+
+For legacy tokens (like USDT on Ethereum) that don't support EIP-3009.
+
+```typescript
+import { ExactLegacyEvmClientScheme } from '@t402/evm';
+
+const scheme = ExactLegacyEvmClientScheme({
+  signer,
+  network: 'eip155:1' // Ethereum mainnet
+});
+```
+
+## Signers
+
+### toClientEvmSigner
+
+Creates a client signer from a viem account.
+
+```typescript
+import { toClientEvmSigner } from '@t402/evm';
+import { privateKeyToAccount } from 'viem/accounts';
+
+const account = privateKeyToAccount('0x...');
+const signer = toClientEvmSigner(account);
+```
+
+#### ClientEvmSigner Interface
+
+```typescript
+interface ClientEvmSigner {
+  address: `0x${string}`;
+  signTypedData: (params: SignTypedDataParams) => Promise<`0x${string}`>;
+}
+```
+
+### toFacilitatorEvmSigner
+
+Creates a facilitator signer with transaction capabilities.
+
+```typescript
+import { toFacilitatorEvmSigner } from '@t402/evm';
+
+const signer = toFacilitatorEvmSigner(account, walletClient);
+```
+
+## Token Configuration
+
+### Token Addresses
+
+```typescript
+import {
+  USDT0_ADDRESSES,
+  USDC_ADDRESSES,
+  USDT_LEGACY_ADDRESSES
+} from '@t402/evm';
+
+// USDT0 on Base
+const usdt0Base = USDT0_ADDRESSES['eip155:8453'];
+// 0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee
+```
+
+### Token Registry
+
+```typescript
+import { TOKEN_REGISTRY, getTokenConfig } from '@t402/evm';
+
+const config = getTokenConfig('eip155:8453', 'USDT0');
+// { address: '0x...', decimals: 6, symbol: 'USDT0', supportsEIP3009: true }
+```
+
+### Utility Functions
+
+```typescript
+import {
+  getNetworkTokens,
+  getDefaultToken,
+  supportsEIP3009,
+  getUsdt0Networks
+} from '@t402/evm';
+
+// Get all tokens on Base
+const tokens = getNetworkTokens('eip155:8453');
+
+// Get default token for a network
+const defaultToken = getDefaultToken('eip155:8453');
+
+// Check EIP-3009 support
+const hasGasless = supportsEIP3009('eip155:8453', '0x...');
+
+// Get networks with USDT0
+const networks = getUsdt0Networks(); // ['eip155:8453', 'eip155:42161', ...]
+```
+
+## ERC-4337 Account Abstraction
+
+Gasless payments using ERC-4337 smart accounts.
+
+### UserOpBuilder
+
+Builds ERC-4337 user operations.
+
+```typescript
+import { createUserOpBuilder } from '@t402/evm';
+
+const builder = createUserOpBuilder({
+  entryPoint: ENTRYPOINT_V07_ADDRESS,
+  chainId: 8453,
+  smartAccountAddress: '0x...'
+});
+
+const userOp = await builder.buildUserOp({
+  to: recipientAddress,
+  data: transferData,
+  value: 0n
+});
+```
+
+### BundlerClient
+
+Submits user operations to bundlers.
+
+```typescript
+import { createBundlerClient } from '@t402/evm';
+
+const bundler = createBundlerClient({
+  url: 'https://bundler.example.com',
+  chainId: 8453
+});
+
+// Get gas estimate
+const gas = await bundler.estimateUserOperationGas(userOp);
+
+// Send operation
+const hash = await bundler.sendUserOperation(userOp);
+
+// Wait for receipt
+const receipt = await bundler.waitForUserOperationReceipt(hash);
+```
+
+### PaymasterClient
+
+Sponsors gas fees for user operations.
+
+```typescript
+import { createPaymasterClient, PaymasterType } from '@t402/evm';
+
+const paymaster = createPaymasterClient({
+  url: 'https://paymaster.example.com',
+  chainId: 8453,
+  type: PaymasterType.VERIFYING
+});
+
+// Get sponsored operation
+const sponsored = await paymaster.sponsorUserOperation(userOp, {
+  token: USDT0_ADDRESS
+});
+```
+
+### GaslessT402Client
+
+High-level client for gasless T402 payments.
+
+```typescript
+import { createGaslessT402Client } from '@t402/evm';
+
+const client = createGaslessT402Client({
+  smartAccountAddress: '0x...',
+  signer: eoaSigner,
+  bundlerUrl: 'https://bundler.example.com',
+  paymasterUrl: 'https://paymaster.example.com',
+  chainId: 8453
+});
+
+// Make gasless payment
+const result = await client.pay({
+  to: merchantAddress,
+  amount: 1000000n, // 1 USDT0
+  token: USDT0_ADDRESS
+});
+```
+
+### Constants
+
+```typescript
+import {
+  ENTRYPOINT_V07_ADDRESS,
+  ENTRYPOINT_V06_ADDRESS,
+  DEFAULT_GAS_LIMITS
+} from '@t402/evm';
+```
+
+## LayerZero Bridge
+
+Cross-chain USDT0 bridging via LayerZero OFT.
+
+### Usdt0Bridge
+
+```typescript
+import { createUsdt0Bridge } from '@t402/evm';
+
+const bridge = createUsdt0Bridge(signer, 'eip155:42161'); // From Arbitrum
+
+// Get quote
+const quote = await bridge.quote({
+  toChain: 'eip155:8453', // To Base
+  amount: 100000000n,     // 100 USDT0
+  recipient: '0x...'
+});
+
+console.log('Native fee:', quote.nativeFee);
+console.log('Estimated time:', quote.estimatedTime);
+
+// Execute bridge
+const result = await bridge.send({
+  toChain: 'eip155:8453',
+  amount: 100000000n,
+  recipient: '0x...'
+});
+
+console.log('Tx hash:', result.txHash);
+console.log('Message GUID:', result.messageGuid);
+```
+
+### LayerZeroScanClient
+
+Track cross-chain message status.
+
+```typescript
+import { createLayerZeroScanClient } from '@t402/evm';
+
+const scan = createLayerZeroScanClient();
+
+// Get message status
+const message = await scan.getMessage(messageGuid);
+console.log('Status:', message.status); // INFLIGHT, CONFIRMING, DELIVERED
+
+// Wait for delivery
+const delivered = await scan.waitForDelivery(messageGuid, {
+  timeout: 600000,  // 10 minutes
+  pollInterval: 5000
+});
+```
+
+### CrossChainPaymentRouter
+
+Automatic routing for cross-chain payments.
+
+```typescript
+import { createCrossChainPaymentRouter } from '@t402/evm';
+
+const router = createCrossChainPaymentRouter(signer, 'eip155:42161');
+
+// Check if routing is possible
+if (router.canRoute('eip155:42161', 'eip155:8453')) {
+  const result = await router.routePayment({
+    toChain: 'eip155:8453',
+    amount: 50000000n,
+    recipient: '0x...'
+  });
+}
+```
+
+### Bridge Constants
+
+```typescript
+import {
+  LAYERZERO_ENDPOINT_IDS,
+  USDT0_OFT_ADDRESSES,
+  getBridgeableChains,
+  supportsBridging
+} from '@t402/evm';
+
+// Check bridge support
+const canBridge = supportsBridging('eip155:8453'); // true
+
+// Get all bridgeable chains
+const chains = getBridgeableChains();
+// ['eip155:1', 'eip155:42161', 'eip155:8453', ...]
+```
+
+## Types
+
+### ExactEvmPayloadV2
+
+```typescript
+interface ExactEvmPayloadV2 {
+  signature: `0x${string}`;
+  authorization: {
+    from: `0x${string}`;
+    to: `0x${string}`;
+    value: string;
+    validAfter: string;
+    validBefore: string;
+    nonce: `0x${string}`;
+  };
+}
+```
+
+### UserOperation
+
+```typescript
+interface UserOperation {
+  sender: `0x${string}`;
+  nonce: bigint;
+  initCode: `0x${string}`;
+  callData: `0x${string}`;
+  callGasLimit: bigint;
+  verificationGasLimit: bigint;
+  preVerificationGas: bigint;
+  maxFeePerGas: bigint;
+  maxPriorityFeePerGas: bigint;
+  paymasterAndData: `0x${string}`;
+  signature: `0x${string}`;
+}
+```
+
+### BridgeResult
+
+```typescript
+interface BridgeResult {
+  txHash: `0x${string}`;
+  messageGuid: `0x${string}`;
+  amountSent: bigint;
+  amountToReceive: bigint;
+  fromChain: string;
+  toChain: string;
+  estimatedTime: number;
+}
+```
+
+## Supported Networks
+
+| Network | Chain ID | CAIP-2 | USDT0 | Bridge |
+|---------|----------|--------|-------|--------|
+| Ethereum | 1 | `eip155:1` | Yes | Yes |
+| Arbitrum | 42161 | `eip155:42161` | Yes | Yes |
+| Base | 8453 | `eip155:8453` | Yes | Yes |
+| Optimism | 10 | `eip155:10` | Yes | No |
+| Polygon | 137 | `eip155:137` | Yes | No |
+| Ink | 57073 | `eip155:57073` | Yes | Yes |
+| Berachain | 80094 | `eip155:80094` | Yes | Yes |
+| Unichain | 130 | `eip155:130` | Yes | Yes |

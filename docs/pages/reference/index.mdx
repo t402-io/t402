@@ -1,0 +1,149 @@
+# API Reference
+
+Complete API documentation for T402 packages.
+
+## Packages
+
+| Package | Description |
+|---------|-------------|
+| [@t402/core](/reference/core) | Protocol types, HTTP utilities, client/server framework |
+| [@t402/evm](/reference/evm) | EVM chains with EIP-3009, ERC-4337, and LayerZero bridge |
+| [@t402/ton](/reference/ton) | TON blockchain with Jetton transfers |
+| [@t402/tron](/reference/tron) | TRON blockchain with TRC-20 tokens |
+| [@t402/wdk](/reference/wdk) | Tether WDK integration for self-custodial wallets |
+
+## Architecture
+
+T402 follows a three-component architecture:
+
+```
+┌─────────┐     ┌─────────────┐     ┌─────────────┐
+│ Client  │────▶│ Facilitator │────▶│   Server    │
+└─────────┘     └─────────────┘     └─────────────┘
+     │                 │                   │
+     └─────── Payment Authorization ───────┘
+```
+
+### Client
+
+The client initiates payments by signing authorization messages:
+
+```typescript
+import { ExactEvmScheme } from '@t402/evm';
+
+const scheme = ExactEvmScheme.client({
+  signer: myWalletSigner,
+  network: 'eip155:8453' // Base
+});
+```
+
+### Facilitator
+
+The facilitator validates payments and executes on-chain transfers:
+
+```typescript
+import { ExactEvmScheme } from '@t402/evm';
+
+const scheme = ExactEvmScheme.facilitator({
+  signer: facilitatorSigner,
+  rpcUrl: 'https://mainnet.base.org'
+});
+```
+
+### Server
+
+The server defines payment requirements and verifies completion:
+
+```typescript
+import { ExactEvmScheme } from '@t402/evm';
+
+const scheme = ExactEvmScheme.server({
+  rpcUrl: 'https://mainnet.base.org'
+});
+```
+
+## Common Types
+
+### PaymentRequirements
+
+Defines what payment is required for a resource:
+
+```typescript
+interface PaymentRequirements {
+  scheme: string;           // Payment scheme (e.g., "exact")
+  network: string;          // CAIP-2 network ID
+  maxAmountRequired: string; // Maximum amount in smallest units
+  resource: string;         // Resource identifier
+  description?: string;     // Human-readable description
+  mimeType?: string;        // Response MIME type
+  payTo: string;           // Recipient address
+  maxTimeoutSeconds?: number;
+  asset?: string;          // Token address (optional)
+  extra?: Record<string, unknown>;
+}
+```
+
+### PaymentPayload
+
+The payment authorization sent by the client:
+
+```typescript
+interface PaymentPayload {
+  x402Version: number;
+  scheme: string;
+  network: string;
+  payload: string; // Scheme-specific payload (base64 encoded)
+}
+```
+
+## HTTP Protocol
+
+### 402 Response
+
+When payment is required, servers return HTTP 402:
+
+```http
+HTTP/1.1 402 Payment Required
+X-Payment: {"x402Version":2,"schemes":[...]}
+Content-Type: application/json
+
+{
+  "error": "Payment required",
+  "accepts": [...]
+}
+```
+
+### Payment Header
+
+Clients include payment in the `X-Payment` header:
+
+```http
+GET /reference/resource HTTP/1.1
+X-Payment: {"x402Version":2,"scheme":"exact","network":"eip155:8453","payload":"..."}
+```
+
+## Error Handling
+
+All packages use consistent error types:
+
+```typescript
+import { T402Error, PaymentError, ValidationError } from '@t402/core';
+
+try {
+  await client.fetch(url);
+} catch (error) {
+  if (error instanceof PaymentError) {
+    console.log('Payment failed:', error.code);
+  }
+}
+```
+
+### Error Codes
+
+| Code | Description |
+|------|-------------|
+| `INSUFFICIENT_BALANCE` | Not enough tokens for payment |
+| `INVALID_SIGNATURE` | Payment signature verification failed |
+| `EXPIRED_PAYMENT` | Payment authorization has expired |
+| `NETWORK_MISMATCH` | Wrong blockchain network |
+| `INVALID_RECIPIENT` | Invalid payment recipient address |

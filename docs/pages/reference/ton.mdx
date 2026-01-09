@@ -1,0 +1,349 @@
+# @t402/ton
+
+TON blockchain support for T402 with USDT Jetton payments.
+
+## Installation
+
+```bash
+pnpm add @t402/ton
+```
+
+## Schemes
+
+### ExactTonScheme
+
+The primary TON payment scheme using signed Jetton transfer messages.
+
+#### Client
+
+```typescript
+import { ExactTonScheme, toClientTonSigner } from '@t402/ton';
+import { mnemonicToPrivateKey } from '@ton/crypto';
+
+const keyPair = await mnemonicToPrivateKey(mnemonic.split(' '));
+const signer = toClientTonSigner(keyPair, walletAddress);
+
+const scheme = ExactTonScheme.client({
+  signer,
+  network: 'ton:mainnet'
+});
+```
+
+#### Server
+
+```typescript
+const scheme = ExactTonScheme.server({
+  endpoint: 'https://toncenter.com/api/v2/jsonRPC',
+  network: 'ton:mainnet'
+});
+```
+
+#### Facilitator
+
+```typescript
+const scheme = ExactTonScheme.facilitator({
+  signer: facilitatorSigner,
+  endpoint: 'https://toncenter.com/api/v2/jsonRPC',
+  network: 'ton:mainnet'
+});
+```
+
+## Signers
+
+### toClientTonSigner
+
+Creates a client signer from a TON key pair.
+
+```typescript
+import { toClientTonSigner } from '@t402/ton';
+import { mnemonicToPrivateKey } from '@ton/crypto';
+
+const keyPair = await mnemonicToPrivateKey(mnemonic.split(' '));
+const signer = toClientTonSigner(keyPair, walletAddress);
+```
+
+#### ClientTonSigner Interface
+
+```typescript
+interface ClientTonSigner {
+  address: string;
+  signMessage: (params: SignMessageParams) => Promise<string>;
+}
+
+interface SignMessageParams {
+  message: string;
+  stateInit?: string;
+}
+```
+
+### toFacilitatorTonSigner
+
+Creates a facilitator signer with transaction submission capabilities.
+
+```typescript
+import { toFacilitatorTonSigner } from '@t402/ton';
+
+const signer = toFacilitatorTonSigner(keyPair, walletContract, tonClient);
+```
+
+#### FacilitatorTonSigner Interface
+
+```typescript
+interface FacilitatorTonSigner {
+  address: string;
+  sendTransaction: (params: SendTransactionParams) => Promise<string>;
+  waitForTransaction: (params: WaitForTransactionParams) => Promise<TransactionConfirmation>;
+}
+```
+
+## Token Configuration
+
+### USDT Addresses
+
+```typescript
+import { USDT_ADDRESSES } from '@t402/ton';
+
+// USDT Jetton on mainnet
+const usdtMainnet = USDT_ADDRESSES['ton:mainnet'];
+// EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs
+
+// USDT Jetton on testnet
+const usdtTestnet = USDT_ADDRESSES['ton:testnet'];
+```
+
+### Jetton Registry
+
+```typescript
+import { JETTON_REGISTRY, getJettonConfig } from '@t402/ton';
+
+const config = getJettonConfig('ton:mainnet', 'USDT');
+// { address: 'EQCxE6...', decimals: 6, symbol: 'USDT' }
+```
+
+### Utility Functions
+
+```typescript
+import {
+  getNetworkJettons,
+  getDefaultJetton,
+  getUsdtNetworks,
+  isNetworkSupported
+} from '@t402/ton';
+
+// Get all Jettons on mainnet
+const jettons = getNetworkJettons('ton:mainnet');
+
+// Get default Jetton for payment
+const defaultJetton = getDefaultJetton('ton:mainnet');
+
+// Check network support
+const supported = isNetworkSupported('ton:mainnet'); // true
+
+// Get networks with USDT
+const networks = getUsdtNetworks(); // ['ton:mainnet', 'ton:testnet']
+```
+
+## Constants
+
+### Network Identifiers
+
+```typescript
+import {
+  TON_MAINNET_CAIP2,
+  TON_TESTNET_CAIP2,
+  TON_NETWORKS
+} from '@t402/ton';
+
+// 'ton:mainnet'
+// 'ton:testnet'
+// ['mainnet', 'testnet']
+```
+
+### Endpoints
+
+```typescript
+import {
+  TON_MAINNET_ENDPOINT,
+  TON_TESTNET_ENDPOINT,
+  NETWORK_ENDPOINTS
+} from '@t402/ton';
+
+// Default JSON-RPC endpoints
+const mainnetEndpoint = TON_MAINNET_ENDPOINT;
+// https://toncenter.com/api/v2/jsonRPC
+```
+
+### Jetton Operations
+
+```typescript
+import {
+  JETTON_TRANSFER_OP,
+  JETTON_INTERNAL_TRANSFER_OP,
+  JETTON_TRANSFER_NOTIFICATION_OP,
+  JETTON_BURN_OP
+} from '@t402/ton';
+```
+
+### Gas Configuration
+
+```typescript
+import {
+  DEFAULT_JETTON_TRANSFER_TON,
+  DEFAULT_FORWARD_TON,
+  MIN_JETTON_TRANSFER_TON,
+  MAX_JETTON_TRANSFER_TON
+} from '@t402/ton';
+
+// Default TON amount for Jetton transfer: 0.05 TON
+// Forward amount for notifications: 0.001 TON
+```
+
+## Utilities
+
+### Address Validation
+
+```typescript
+import { validateTonAddress, parseTonAddress, addressesEqual } from '@t402/ton';
+
+// Validate address format
+const isValid = validateTonAddress('EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs');
+
+// Parse to Address object
+const address = parseTonAddress('EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs');
+
+// Compare addresses
+const equal = addressesEqual(address1, address2);
+```
+
+### Amount Conversion
+
+```typescript
+import { convertToJettonAmount, convertFromJettonAmount } from '@t402/ton';
+
+// Convert to smallest units (6 decimals)
+const amount = convertToJettonAmount('1.5'); // 1500000n
+
+// Convert from smallest units
+const display = convertFromJettonAmount(1500000n); // '1.5'
+```
+
+### Jetton Transfer
+
+```typescript
+import {
+  buildJettonTransferBody,
+  parseJettonTransferBody,
+  estimateJettonTransferGas,
+  generateQueryId
+} from '@t402/ton';
+
+// Build transfer message body
+const body = buildJettonTransferBody({
+  destination: recipientAddress,
+  amount: 1000000n,
+  responseDestination: senderAddress,
+  queryId: generateQueryId()
+});
+
+// Estimate gas for transfer
+const gas = estimateJettonTransferGas({
+  fromJettonWallet: senderJettonWallet,
+  toAddress: recipientAddress,
+  amount: 1000000n
+});
+```
+
+### Network Utilities
+
+```typescript
+import { normalizeNetwork, getEndpoint, isTonNetwork } from '@t402/ton';
+
+// Normalize network identifier
+normalizeNetwork('ton:mainnet'); // 'mainnet'
+normalizeNetwork('mainnet');     // 'mainnet'
+
+// Get endpoint for network
+const endpoint = getEndpoint('ton:mainnet');
+
+// Check if network is TON
+isTonNetwork('ton:mainnet'); // true
+isTonNetwork('eip155:1');    // false
+```
+
+## Types
+
+### ExactTonPayloadV2
+
+```typescript
+interface ExactTonPayloadV2 {
+  /** Signed message (base64) */
+  signedMessage: string;
+
+  /** Transaction BOC (base64) */
+  transactionBoc: string;
+
+  /** Sender wallet address */
+  senderAddress: string;
+
+  /** Recipient address */
+  recipientAddress: string;
+
+  /** Jetton master address */
+  jettonMaster: string;
+
+  /** Amount in smallest units */
+  amount: string;
+
+  /** Valid until timestamp */
+  validUntil: number;
+
+  /** Query ID for tracking */
+  queryId: string;
+}
+```
+
+### JettonConfig
+
+```typescript
+interface JettonConfig {
+  /** Jetton master contract address */
+  address: string;
+
+  /** Token decimals */
+  decimals: number;
+
+  /** Token symbol */
+  symbol: string;
+
+  /** Token name */
+  name?: string;
+}
+```
+
+### TransactionConfirmation
+
+```typescript
+interface TransactionConfirmation {
+  /** Transaction hash */
+  hash: string;
+
+  /** Logical time */
+  lt: string;
+
+  /** Transaction fee */
+  fee: string;
+
+  /** Success status */
+  success: boolean;
+
+  /** Block ID */
+  blockId: string;
+}
+```
+
+## Supported Networks
+
+| Network | CAIP-2 | USDT | Endpoint |
+|---------|--------|------|----------|
+| Mainnet | `ton:mainnet` | Yes | toncenter.com |
+| Testnet | `ton:testnet` | Yes | testnet.toncenter.com |

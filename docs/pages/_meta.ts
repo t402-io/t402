@@ -19,6 +19,10 @@ export default {
     title: 'Advanced',
     type: 'page'
   },
+  reference: {
+    title: 'API Reference',
+    type: 'page'
+  },
   '---': {
     type: 'separator'
   },
