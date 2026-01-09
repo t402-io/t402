@@ -381,6 +381,7 @@ Production facilitator service for payment verification and settlement.
 - Multi-chain EVM support (Ethereum, Arbitrum, Base, Optimism)
 - TON blockchain support (Mainnet + Testnet)
 - TRON blockchain support (Mainnet + Nile + Shasta)
+- Solana blockchain support (Mainnet + Devnet)
 - Redis-based rate limiting
 - Prometheus metrics
 - Health/readiness endpoints
@@ -391,10 +392,10 @@ Production facilitator service for payment verification and settlement.
 - EVM: `0xC88f67e776f16DcFBf42e6bDda1B82604448899B`
 - TON: `EQ5d11d21276ac6b5efdf179e654ff0c6eee34e0abfa263a`
 - TRON: `TT1MqNNj2k5qdGA6nrrCodW6oyHbbAreQ5`
+- Solana: `8GGtWHRQ1wz5gDKE2KXZLktqzcfV1CBqSbeUZjA7hoWL`
 
 **Planned Features**:
 - Multi-region deployment (US, EU, APAC)
-- Solana support
 - Hot wallet rotation
 - API key management
 - Gas price optimization
