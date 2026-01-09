@@ -1,11 +1,17 @@
 /**
  * USDT0 Cross-Chain Bridge Module
  *
- * Provides cross-chain USDT0 transfers using LayerZero OFT standard.
+ * Provides cross-chain USDT0 transfers using LayerZero OFT standard,
+ * with message tracking via LayerZero Scan API.
  *
  * @example
  * ```typescript
- * import { Usdt0Bridge, getBridgeableChains } from '@t402/evm';
+ * import {
+ *   Usdt0Bridge,
+ *   LayerZeroScanClient,
+ *   CrossChainPaymentRouter,
+ *   getBridgeableChains,
+ * } from '@t402/evm';
  *
  * // Check supported chains
  * console.log(getBridgeableChains()); // ['ethereum', 'arbitrum', 'ink', ...]
@@ -32,11 +38,32 @@
  * });
  *
  * console.log(`Bridge tx: ${result.txHash}`);
+ * console.log(`Message GUID: ${result.messageGuid}`);
+ *
+ * // Track message delivery
+ * const scanClient = new LayerZeroScanClient();
+ * const message = await scanClient.waitForDelivery(result.messageGuid, {
+ *   onStatusChange: (status) => console.log(`Status: ${status}`),
+ * });
+ * console.log(`Delivered! Dest TX: ${message.dstTxHash}`);
  * ```
  */
 
 // Bridge client
 export { Usdt0Bridge, createUsdt0Bridge } from "./client.js";
+
+// LayerZero Scan client
+export {
+  LayerZeroScanClient,
+  createLayerZeroScanClient,
+  LAYERZERO_SCAN_BASE_URL,
+} from "./scan.js";
+
+// Cross-chain payment router
+export {
+  CrossChainPaymentRouter,
+  createCrossChainPaymentRouter,
+} from "./router.js";
 
 // Constants
 export {
@@ -56,6 +83,7 @@ export {
 
 // Types
 export type {
+  // Bridge types
   BridgeQuoteParams,
   BridgeQuote,
   BridgeExecuteParams,
@@ -67,4 +95,13 @@ export type {
   MessagingFee,
   OftReceipt,
   MessageReceipt,
+  TransactionLog,
+  TransactionReceipt,
+  // LayerZero Scan types
+  LayerZeroMessage,
+  LayerZeroMessageStatus,
+  WaitForDeliveryOptions,
+  // Cross-chain payment types
+  CrossChainPaymentParams,
+  CrossChainPaymentResult,
 } from "./types.js";
