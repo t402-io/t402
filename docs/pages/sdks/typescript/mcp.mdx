@@ -1,0 +1,191 @@
+# @t402/mcp
+
+Model Context Protocol (MCP) server for AI agent payments with Claude Desktop.
+
+## Installation
+
+```bash
+# Install globally
+npm install -g @t402/mcp
+
+# Or run directly
+npx @t402/mcp
+```
+
+## Features
+
+- **6 payment tools** for AI agents
+- **Multi-chain support** (EVM, TON, TRON)
+- **Demo mode** for testing without real transactions
+- **Claude Desktop** integration
+
+## MCP Tools
+
+| Tool | Description |
+|------|-------------|
+| `t402/getBalance` | Check wallet balance on a specific network |
+| `t402/getAllBalances` | Check balances across all supported networks |
+| `t402/pay` | Execute stablecoin payment |
+| `t402/payGasless` | Execute gasless payment (ERC-4337) |
+| `t402/getBridgeFee` | Get fee quote for cross-chain bridge |
+| `t402/bridge` | Bridge USDT0 between chains |
+
+## Claude Desktop Setup
+
+Add to your Claude Desktop configuration (`claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "t402": {
+      "command": "npx",
+      "args": ["@t402/mcp"],
+      "env": {
+        "T402_PRIVATE_KEY": "0x...",
+        "T402_DEMO_MODE": "true"
+      }
+    }
+  }
+}
+```
+
+### Configuration Options
+
+| Environment Variable | Description | Default |
+|---------------------|-------------|---------|
+| `T402_PRIVATE_KEY` | EVM private key for signing | Required |
+| `T402_DEMO_MODE` | Enable demo mode (no real transactions) | `false` |
+| `T402_RPC_ETHEREUM` | Custom Ethereum RPC URL | Public RPC |
+| `T402_RPC_BASE` | Custom Base RPC URL | Public RPC |
+| `T402_RPC_ARBITRUM` | Custom Arbitrum RPC URL | Public RPC |
+
+## Usage Examples
+
+Once configured, you can ask Claude to:
+
+> "Check my USDT balance on Arbitrum"
+
+> "Send 10 USDT0 to 0x1234... on Base"
+
+> "What's the fee to bridge 100 USDT0 from Arbitrum to Ethereum?"
+
+> "Bridge 50 USDT0 from Arbitrum to Ethereum"
+
+## Demo Mode
+
+Demo mode simulates transactions without executing them:
+
+```bash
+T402_DEMO_MODE=true npx @t402/mcp
+```
+
+In demo mode:
+- Balances return mock values
+- Payments return simulated transaction hashes
+- No real blockchain transactions occur
+
+## Tool Details
+
+### t402/getBalance
+
+Check balance on a specific network.
+
+**Input:**
+```json
+{
+  "network": "eip155:8453",
+  "token": "USDT0"
+}
+```
+
+**Output:**
+```json
+{
+  "balance": "1000000000",
+  "formatted": "1000.00 USDT0",
+  "network": "eip155:8453"
+}
+```
+
+### t402/pay
+
+Execute a stablecoin payment.
+
+**Input:**
+```json
+{
+  "to": "0x...",
+  "amount": "1000000",
+  "network": "eip155:8453",
+  "token": "USDT0"
+}
+```
+
+**Output:**
+```json
+{
+  "txHash": "0x...",
+  "amount": "1000000",
+  "network": "eip155:8453",
+  "status": "confirmed"
+}
+```
+
+### t402/bridge
+
+Bridge USDT0 between chains.
+
+**Input:**
+```json
+{
+  "fromChain": "arbitrum",
+  "toChain": "ethereum",
+  "amount": "100000000",
+  "recipient": "0x..."
+}
+```
+
+**Output:**
+```json
+{
+  "txHash": "0x...",
+  "messageGuid": "0x...",
+  "fromChain": "arbitrum",
+  "toChain": "ethereum",
+  "estimatedTime": 900
+}
+```
+
+## Supported Networks
+
+| Network | ID | Tokens |
+|---------|-----|--------|
+| Ethereum | `eip155:1` | USDT0, USDC, USDT |
+| Base | `eip155:8453` | USDT0, USDC |
+| Arbitrum | `eip155:42161` | USDT0, USDC |
+| Optimism | `eip155:10` | USDT0, USDC |
+| Polygon | `eip155:137` | USDC, USDT |
+| Ink | `eip155:57073` | USDT0 |
+| Berachain | `eip155:80084` | USDT0 |
+| Unichain | `eip155:130` | USDT0 |
+
+## Security Considerations
+
+- Store private keys securely (use environment variables)
+- Enable demo mode for testing
+- Set spending limits in your application
+- Monitor agent actions and transactions
+
+## Programmatic Usage
+
+```typescript
+import { createMcpServer } from '@t402/mcp'
+
+const server = createMcpServer({
+  privateKey: process.env.PRIVATE_KEY,
+  demoMode: process.env.NODE_ENV !== 'production'
+})
+
+// Use with MCP client
+await server.start()
+```

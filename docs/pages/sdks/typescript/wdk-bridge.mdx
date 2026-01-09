@@ -1,0 +1,207 @@
+# @t402/wdk-bridge
+
+Cross-chain USDT0 bridging with automatic source chain selection using LayerZero OFT.
+
+## Installation
+
+```bash
+pnpm add @t402/wdk-bridge
+```
+
+## Features
+
+- **Multi-chain management**: View balances across all configured chains
+- **Automatic routing**: Select best source chain based on balances and fees
+- **Fee optimization**: Choose strategy - cheapest, fastest, or preferred
+- **LayerZero tracking**: Monitor delivery via LayerZero Scan API
+
+## Quick Start
+
+```typescript
+import { WdkBridgeClient } from '@t402/wdk-bridge'
+
+// Create bridge client with WDK accounts
+const bridge = new WdkBridgeClient({
+  accounts: {
+    ethereum: ethereumWdkAccount,
+    arbitrum: arbitrumWdkAccount,
+    ink: inkWdkAccount
+  },
+  defaultStrategy: 'cheapest'
+})
+
+// Get multi-chain balances
+const summary = await bridge.getBalances()
+console.log('Total USDT0:', summary.totalUsdt0)
+console.log('Bridgeable chains:', summary.bridgeableChains)
+
+// Auto-bridge to Ethereum
+const result = await bridge.autoBridge({
+  toChain: 'ethereum',
+  amount: 100_000000n, // 100 USDT0
+  recipient: '0x...'
+})
+
+console.log('Bridge TX:', result.txHash)
+console.log('From chain:', result.fromChain)
+console.log('Message GUID:', result.messageGuid)
+
+// Wait for delivery
+const delivery = await result.waitForDelivery({
+  onStatusChange: (status) => console.log('Status:', status)
+})
+
+console.log('Delivered!', delivery.dstTxHash)
+```
+
+## Route Selection
+
+Get available routes before bridging:
+
+```typescript
+const routes = await bridge.getRoutes('ethereum', 100_000000n)
+
+routes.forEach(route => {
+  console.log(`${route.fromChain} -> ${route.toChain}`)
+  console.log(`  Fee: ${route.nativeFee} wei`)
+  console.log(`  Time: ~${route.estimatedTime / 60} minutes`)
+  console.log(`  Available: ${route.available}`)
+  if (!route.available) {
+    console.log(`  Reason: ${route.unavailableReason}`)
+  }
+})
+```
+
+## Route Strategies
+
+| Strategy | Description |
+|----------|-------------|
+| `cheapest` | Select route with lowest native fee (default) |
+| `fastest` | Select route with fastest estimated delivery |
+| `preferred` | Use preferred source chain if available |
+
+```typescript
+// Use fastest route
+const bridge = new WdkBridgeClient({
+  accounts: { ... },
+  defaultStrategy: 'fastest'
+})
+
+// Or specify per-request
+const result = await bridge.autoBridge({
+  toChain: 'ethereum',
+  amount: 100_000000n,
+  recipient: '0x...',
+  preferredSourceChain: 'arbitrum' // Use 'preferred' strategy
+})
+```
+
+## Direct Bridge
+
+Bridge from a specific chain:
+
+```typescript
+const result = await bridge.bridge({
+  fromChain: 'arbitrum',
+  toChain: 'ethereum',
+  amount: 50_000000n, // 50 USDT0
+  recipient: '0x...',
+  slippageTolerance: 0.3 // 0.3%
+})
+```
+
+## Track Messages
+
+Track bridge transactions manually:
+
+```typescript
+// Get message status
+const message = await bridge.trackMessage(messageGuid)
+console.log('Status:', message.status)
+// INFLIGHT -> CONFIRMING -> DELIVERED
+
+// Wait for delivery
+const delivered = await bridge.waitForDelivery(messageGuid, {
+  timeout: 600000, // 10 minutes
+  pollInterval: 10000, // 10 seconds
+  onStatusChange: (status) => console.log('Status:', status)
+})
+```
+
+## Supported Chains
+
+| Chain | Chain ID | LayerZero EID | USDT0 Address |
+|-------|----------|---------------|---------------|
+| Ethereum | 1 | 30101 | `0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee` |
+| Arbitrum | 42161 | 30110 | `0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9` |
+| Ink | 57073 | 30291 | `0x0200C29006150606B650577BBE7B6248F58470c1` |
+| Berachain | 80084 | 30362 | `0x779Ded0c9e1022225f8E0630b35a9b54bE713736` |
+| Unichain | 130 | 30320 | `0x588ce4F028D8e7B53B687865d6A67b3A54C75518` |
+
+## Estimated Bridge Times
+
+| Route | Time |
+|-------|------|
+| Ethereum -> Arbitrum | ~3 minutes |
+| Arbitrum -> Ethereum | ~15 minutes |
+| L2 -> L2 | ~5 minutes |
+
+## API Reference
+
+### WdkBridgeClient
+
+```typescript
+interface WdkBridgeClient {
+  // Configuration
+  getConfiguredChains(): string[]
+  hasChain(chain: string): boolean
+  setRpcUrl(chain: string, url: string): void
+
+  // Balances
+  getChainBalance(chain: string): Promise<ChainBalance>
+  getBalances(): Promise<BalanceSummary>
+
+  // Routing
+  getRoutes(toChain: string, amount: bigint): Promise<BridgeRoute[]>
+
+  // Bridging
+  autoBridge(params: AutoBridgeParams): Promise<WdkBridgeResult>
+  bridge(params: BridgeParams): Promise<WdkBridgeResult>
+
+  // Tracking
+  trackMessage(guid: string): Promise<LayerZeroMessage>
+  waitForDelivery(guid: string, options?: WaitOptions): Promise<LayerZeroMessage>
+}
+
+interface AutoBridgeParams {
+  toChain: string
+  amount: bigint
+  recipient: Address
+  preferredSourceChain?: string
+  slippageTolerance?: number
+}
+
+interface WdkBridgeResult {
+  txHash: Hex
+  messageGuid: Hex
+  amountSent: bigint
+  amountToReceive: bigint
+  fromChain: string
+  toChain: string
+  estimatedTime: number
+  waitForDelivery(options?: WaitOptions): Promise<DeliveryResult>
+}
+
+interface BalanceSummary {
+  balances: ChainBalance[]
+  totalUsdt0: bigint
+  chainsWithBalance: string[]
+  bridgeableChains: string[]
+}
+```
+
+## Related Packages
+
+- [@t402/evm](/sdks/typescript/evm) - Core bridge implementation
+- [@t402/wdk](/sdks/typescript/wdk) - WDK account integration
+- [@t402/wdk-gasless](/sdks/typescript/wdk-gasless) - Gasless payments

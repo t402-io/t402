@@ -1,0 +1,74 @@
+# Supported Chains
+
+T402 supports multiple blockchain networks for stablecoin payments.
+
+## EVM Chains
+
+| Chain | Network ID | USDT0 | USDC | USDT | Gasless |
+|-------|------------|-------|------|------|---------|
+| Ethereum | `eip155:1` | ✅ | ✅ | ✅ | ✅ |
+| Arbitrum | `eip155:42161` | ✅ | ✅ | - | ✅ |
+| Base | `eip155:8453` | ✅ | ✅ | - | ✅ |
+| Optimism | `eip155:10` | ✅ | ✅ | - | ✅ |
+| Polygon | `eip155:137` | - | ✅ | ✅ | ✅ |
+| Ink | `eip155:57073` | ✅ | - | - | ✅ |
+| Berachain | `eip155:80084` | ✅ | - | - | ✅ |
+| Unichain | `eip155:130` | ✅ | - | - | ✅ |
+
+## Non-EVM Chains
+
+| Chain | Network ID | Token | Status |
+|-------|------------|-------|--------|
+| TON | `ton:mainnet` | USDT Jetton | Production |
+| TRON | `tron:mainnet` | USDT TRC-20 | Production |
+| Solana | `solana:mainnet` | USDC SPL | Production |
+
+## USDT0 Addresses
+
+USDT0 is the new Omnichain Fungible Token (OFT) version of USDT with EIP-3009 support.
+
+| Chain | Address |
+|-------|---------|
+| Ethereum | `0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee` |
+| Arbitrum | `0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9` |
+| Ink | `0x0200C29006150606B650577BBE7B6248F58470c1` |
+| Berachain | `0x779Ded0c9e1022225f8E0630b35a9b54bE713736` |
+| Unichain | `0x588ce4F028D8e7B53B687865d6A67b3A54C75518` |
+
+## Cross-Chain Bridging
+
+USDT0 supports cross-chain transfers via LayerZero OFT:
+
+| Route | Estimated Time |
+|-------|----------------|
+| Ethereum ↔ Arbitrum | ~3-15 minutes |
+| L2 ↔ L2 | ~5 minutes |
+| Any ↔ Ethereum | ~15 minutes |
+
+See [@t402/wdk-bridge](/sdks/typescript/wdk-bridge) for bridging integration.
+
+## Network Selection
+
+When configuring T402, use the network ID format:
+
+```typescript
+// EVM chains
+'eip155:1'      // Ethereum
+'eip155:8453'   // Base
+'eip155:42161'  // Arbitrum
+
+// Non-EVM chains
+'ton:mainnet'   // TON
+'tron:mainnet'  // TRON
+'solana:mainnet' // Solana
+```
+
+## Adding New Chains
+
+T402 is extensible. To add support for a new chain:
+
+1. Implement the scheme interface for your chain
+2. Register the scheme with the client/server
+3. Submit a PR to the T402 repository
+
+See [Contributing](/api/contributing) for details.

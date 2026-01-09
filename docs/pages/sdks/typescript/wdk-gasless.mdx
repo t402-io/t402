@@ -1,0 +1,165 @@
+# @t402/wdk-gasless
+
+Gasless USDT0 payments using Tether WDK and ERC-4337 Account Abstraction.
+
+## Installation
+
+```bash
+pnpm add @t402/wdk-gasless
+```
+
+## Features
+
+- **Zero gas fees** for end users via paymaster sponsorship
+- **Smart accounts** using Safe 4337 Module v0.3.0
+- **Batch payments** for multiple transfers in one transaction
+- **WDK integration** for secure key management
+
+## Quick Start
+
+```typescript
+import { createWdkGaslessClient } from '@t402/wdk-gasless'
+import { createPublicClient, http } from 'viem'
+import { arbitrum } from 'viem/chains'
+
+// Create public client
+const publicClient = createPublicClient({
+  chain: arbitrum,
+  transport: http()
+})
+
+// Create gasless client
+const client = await createWdkGaslessClient({
+  wdkAccount: myWdkAccount, // From @tetherto/wdk
+  publicClient,
+  chainId: 42161, // Arbitrum
+  bundler: {
+    bundlerUrl: 'https://api.pimlico.io/v2/arbitrum/rpc?apikey=...',
+    chainId: 42161
+  },
+  paymaster: {
+    address: '0x...',
+    url: 'https://api.pimlico.io/v2/arbitrum/rpc?apikey=...',
+    type: 'sponsoring'
+  }
+})
+
+// Check smart account
+const accountAddress = await client.getAccountAddress()
+console.log('Smart Account:', accountAddress)
+
+// Check balance
+const balance = await client.getFormattedBalance()
+console.log('USDT0 Balance:', balance)
+
+// Execute gasless payment
+const result = await client.pay({
+  to: '0x...',
+  amount: 1000000n // 1 USDT0 (6 decimals)
+})
+
+console.log('UserOp Hash:', result.userOpHash)
+console.log('Sponsored:', result.sponsored)
+
+// Wait for confirmation
+const receipt = await result.wait()
+console.log('Transaction Hash:', receipt.txHash)
+```
+
+## Batch Payments
+
+Send to multiple recipients in one transaction:
+
+```typescript
+const result = await client.payBatch({
+  payments: [
+    { to: '0xAlice...', amount: 1000000n },  // 1 USDT0
+    { to: '0xBob...', amount: 2000000n },    // 2 USDT0
+    { to: '0xCharlie...', amount: 500000n }  // 0.5 USDT0
+  ]
+})
+
+const receipt = await result.wait()
+console.log('Batch payment confirmed:', receipt.txHash)
+```
+
+## Check Sponsorship
+
+Check if a payment can be sponsored (free gas):
+
+```typescript
+const sponsorInfo = await client.canSponsor({
+  to: '0x...',
+  amount: 1000000n
+})
+
+if (sponsorInfo.canSponsor) {
+  console.log('Payment will be sponsored!')
+} else {
+  console.log('User must pay gas:', sponsorInfo.estimatedGas)
+}
+```
+
+## Supported Chains
+
+| Chain | Chain ID | USDT0 | USDC |
+|-------|----------|-------|------|
+| Ethereum | 1 | ✅ | ✅ |
+| Arbitrum | 42161 | ✅ | ✅ |
+| Base | 8453 | ✅ | ✅ |
+| Optimism | 10 | ✅ | ✅ |
+| Ink | 57073 | ✅ | - |
+| Berachain | 80084 | ✅ | - |
+| Unichain | 130 | ✅ | - |
+
+## Bundler Providers
+
+| Provider | Features |
+|----------|----------|
+| [Pimlico](https://pimlico.io) | Fast, reliable, wide chain support |
+| [Alchemy](https://alchemy.com) | Enterprise-grade infrastructure |
+| [Stackup](https://stackup.sh) | Open-source friendly |
+| [Biconomy](https://biconomy.io) | SDK integrations |
+
+## API Reference
+
+### WdkGaslessClient
+
+```typescript
+interface WdkGaslessClient {
+  // Account
+  getAccountAddress(): Promise<Address>
+  isAccountDeployed(): Promise<boolean>
+
+  // Balances
+  getBalance(): Promise<bigint>
+  getFormattedBalance(): Promise<string>
+  getNativeBalance(): Promise<bigint>
+
+  // Payments
+  pay(params: PayParams): Promise<PayResult>
+  payBatch(params: BatchPayParams): Promise<PayResult>
+
+  // Sponsorship
+  canSponsor(params: PayParams): Promise<SponsorInfo>
+}
+
+interface PayParams {
+  to: Address
+  amount: bigint
+  token?: Address // Default: USDT0
+}
+
+interface PayResult {
+  userOpHash: Hex
+  sponsored: boolean
+  wait(): Promise<PayReceipt>
+}
+
+interface PayReceipt {
+  txHash: Hex
+  success: boolean
+  gasUsed: bigint
+  actualGasCost: bigint
+}
+```

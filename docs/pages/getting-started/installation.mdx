@@ -1,0 +1,112 @@
+# Installation
+
+Install T402 packages for your preferred language.
+
+## TypeScript / JavaScript
+
+### npm / pnpm / yarn
+
+```bash
+# Core packages
+pnpm add @t402/core @t402/evm
+
+# All available packages
+pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/tron @t402/wdk @t402/wdk-gasless @t402/wdk-bridge @t402/mcp
+```
+
+### Individual Packages
+
+| Package | Description | Install |
+|---------|-------------|---------|
+| `@t402/core` | Protocol types, HTTP utilities | `pnpm add @t402/core` |
+| `@t402/evm` | EVM chains support | `pnpm add @t402/evm` |
+| `@t402/svm` | Solana support | `pnpm add @t402/svm` |
+| `@t402/ton` | TON support | `pnpm add @t402/ton` |
+| `@t402/tron` | TRON support | `pnpm add @t402/tron` |
+| `@t402/wdk` | Tether WDK integration | `pnpm add @t402/wdk` |
+| `@t402/wdk-gasless` | Gasless payments | `pnpm add @t402/wdk-gasless` |
+| `@t402/wdk-bridge` | Cross-chain bridge | `pnpm add @t402/wdk-bridge` |
+| `@t402/mcp` | MCP server for AI | `pnpm add @t402/mcp` |
+
+### HTTP Framework Integrations
+
+```bash
+# Express.js
+pnpm add @t402/express
+
+# Next.js
+pnpm add @t402/next
+
+# Hono
+pnpm add @t402/hono
+```
+
+### Client Wrappers
+
+```bash
+# Fetch wrapper
+pnpm add @t402/fetch
+
+# Axios interceptor
+pnpm add @t402/axios
+```
+
+## Python
+
+```bash
+# pip
+pip install t402
+
+# uv
+uv add t402
+
+# poetry
+poetry add t402
+```
+
+The Python package includes:
+- Core protocol types
+- EVM, TON, and TRON mechanisms
+- Flask and FastAPI integrations
+
+## Go
+
+```bash
+# Set GOPRIVATE for private repo (if needed)
+go env -w GOPRIVATE=github.com/t402-io/t402
+
+# Install
+go get github.com/t402-io/t402/go@latest
+```
+
+The Go module includes:
+- Core protocol types
+- EVM, TON, and TRON mechanisms
+- Gin middleware integration
+
+## MCP Server (AI Agents)
+
+For AI agent integration with Claude Desktop:
+
+```bash
+# Install globally
+npm install -g @t402/mcp
+
+# Or run directly
+npx @t402/mcp
+```
+
+See [MCP Integration](/advanced/mcp) for configuration details.
+
+## Requirements
+
+### TypeScript
+- Node.js 18+ or Bun 1.0+
+- TypeScript 5.0+ (recommended)
+
+### Python
+- Python 3.9+
+- pip or uv package manager
+
+### Go
+- Go 1.21+

@@ -1,0 +1,52 @@
+# T402 Documentation
+
+**The Official Payment Protocol for USDT**
+
+T402 is an open standard for HTTP-native stablecoin payments. It enables seamless USDT and USDT0 payments across multiple blockchains with a single HTTP header.
+
+## Why T402?
+
+- **HTTP Native**: Pay for any HTTP resource with a single header
+- **Multi-Chain**: Support for Ethereum, Arbitrum, Base, TON, TRON, Solana, and more
+- **Gasless**: ERC-4337 account abstraction for zero-gas user experience
+- **Cross-Chain**: LayerZero OFT bridging for USDT0 transfers
+- **AI Ready**: MCP server for AI agent payments
+
+## Quick Install
+
+```bash
+# TypeScript
+pnpm add @t402/core @t402/evm
+
+# Python
+pip install t402
+
+# Go
+go get github.com/t402-io/t402/go
+```
+
+## Packages
+
+| Package | Description |
+|---------|-------------|
+| [@t402/core](/sdks/typescript/core) | Protocol types and HTTP utilities |
+| [@t402/evm](/sdks/typescript/evm) | EVM chains (Ethereum, Arbitrum, Base, etc.) |
+| [@t402/ton](/sdks/typescript/ton) | TON blockchain support |
+| [@t402/tron](/sdks/typescript/tron) | TRON blockchain support |
+| [@t402/wdk](/sdks/typescript/wdk) | Tether WDK integration |
+| [@t402/wdk-gasless](/sdks/typescript/wdk-gasless) | Gasless payments with WDK + ERC-4337 |
+| [@t402/wdk-bridge](/sdks/typescript/wdk-bridge) | Cross-chain bridging with WDK + LayerZero |
+| [@t402/mcp](/sdks/typescript/mcp) | MCP server for AI agents |
+
+## Supported Networks
+
+- **EVM**: Ethereum, Arbitrum, Base, Optimism, Polygon, Ink, Berachain, Unichain
+- **TON**: TON Mainnet and Testnet
+- **TRON**: TRON Mainnet and Testnets
+- **Solana**: Mainnet and Devnet
+
+See [Chains](/chains) for detailed information.
+
+## Get Started
+
+Ready to integrate T402? Start with our [Quick Start Guide](/getting-started/quickstart).
