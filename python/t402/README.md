@@ -6,6 +6,9 @@ Python package for the t402 payments protocol.
 
 ```bash
 pip install t402
+
+# or with uv
+uv add t402
 ```
 
 ## Overview
@@ -214,4 +217,4 @@ async def foo(req: request: Request):
         )
 ```
 
-For more examples and advanced usage patterns, check out our [examples directory](https://github.com/t402-io/t402/tree/main/examples/python).
+For more examples and advanced usage patterns, check out our [examples directory](https://github.com/awesome-doge/t402/tree/main/examples/python).
