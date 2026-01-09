@@ -1,11 +1,9 @@
-version: '3.8'
-
 services:
   facilitator:
     image: ghcr.io/t402-io/facilitator:latest
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ../..
+      dockerfile: services/facilitator/Dockerfile
     ports:
       - "8080:8080"
     environment:
