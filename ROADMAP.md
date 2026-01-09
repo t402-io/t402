@@ -23,9 +23,9 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 ### Supported Languages
 | Language | Package | Version | Status |
 |----------|---------|---------|--------|
-| TypeScript | `@t402/*` | 2.1.0 | Production |
-| Go | `github.com/t402-io/t402/go` | 1.1.0 | Production |
-| Python | `t402` | 1.1.0 | Production |
+| TypeScript | `@t402/*` | 2.2.0 | Production |
+| Go | `github.com/t402-io/t402/go` | 1.2.0 | Production |
+| Python | `t402` | 1.2.0 | Production |
 | Java | `io.t402:t402` | 0.1.x | Beta |
 
 ### Supported Blockchains
@@ -37,7 +37,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 | Ink | EIP-3009 | - | ERC-4337 | Production |
 | Berachain | EIP-3009 | - | ERC-4337 | Beta |
 | TON | - | Jetton | - | Production |
-| TRON | - | TRC-20 | - | Planned |
+| TRON | - | TRC-20 | - | Production |
 | Solana | - | SPL | - | Production |
 
 ### WDK Integration
@@ -105,13 +105,14 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 - [x] Integration tests
 - [x] Publish @t402/ton v2.1.0
 
-**Week 7-8: TRON Support**
-- [ ] Create @t402/tron package
-- [ ] Implement TRC-20 USDT transfers
-- [ ] Add TRON signer
-- [ ] Add TRON to Go SDK
-- [ ] Add TRON to Python SDK
-- [ ] Publish @t402/tron v1.0.0
+**Week 7-8: TRON Support** ✅
+- [x] Create @t402/tron package
+- [x] Implement TRC-20 USDT transfers
+- [x] Add TRON signer interfaces (ClientTronSigner, FacilitatorTronSigner)
+- [x] Add TRON to Go SDK (mechanisms/tron with client, server, facilitator)
+- [x] Add TRON to Python SDK (tron.py with types, utilities, network support)
+- [x] Add examples for all SDKs (TypeScript, Go, Python)
+- [x] Publish @t402/tron v1.0.0
 
 **Week 9-10: ERC-4337 Production**
 - [ ] Integrate Pimlico bundler
@@ -292,7 +293,7 @@ github.com/t402-io/t402/go
 │   ├── evm/               - EVM (Ethereum, Arbitrum, Base, etc.)
 │   ├── svm/               - Solana
 │   ├── ton/               - TON (client, server, facilitator)
-│   └── tron/              - TRON [PLANNED]
+│   └── tron/              - TRON (client, server, facilitator)
 ├── http/                  - Framework integrations
 │   └── gin/               - Gin middleware
 └── types/                 - Protocol types
@@ -305,7 +306,7 @@ t402 (pip install t402)
 ├── core/                  - Protocol types
 ├── evm/                   - EVM mechanism
 ├── ton/                   - TON mechanism (types, utilities, paywall)
-├── tron/                  - TRON mechanism [PLANNED]
+├── tron/                  - TRON mechanism (types, utilities, network support)
 ├── wdk/                   - WDK adapter [PLANNED]
 ├── fastapi/               - FastAPI integration
 ├── flask/                 - Flask integration
@@ -342,6 +343,14 @@ t402 (pip install t402)
 |---------|----------------|
 | Mainnet | `EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs` |
 | Testnet | `kQBqSpvo4S87mX9tTc4FX3Sfqf4uSp3Tx-Fz4RBUfTRWBx` |
+
+### TRON USDT (TRC-20)
+
+| Network | Contract Address |
+|---------|------------------|
+| Mainnet | `TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t` |
+| Nile Testnet | `TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf` |
+| Shasta Testnet | `TG3XXyExBkPp9nzdajDZsozEu4BkaSJozs` |
 
 ---
 
