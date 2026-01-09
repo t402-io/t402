@@ -88,6 +88,12 @@ go get github.com/t402-io/t402/go@v1.0.0
 - Supports USDT TRC-20 (TIP-20 standard)
 - Pre-signed transaction format
 
+### USDT0 Cross-Chain Bridge (LayerZero)
+- **Cross-chain USDT0 transfers** via LayerZero OFT standard
+- **Supported chains**: Ethereum, Arbitrum, Ink, Berachain, Unichain
+- **Message tracking** via LayerZero Scan API
+- **Cross-chain payment routing** for multi-chain payments
+
 </details>
 
 ## Principles
@@ -457,6 +463,147 @@ paymasterData, _ := paymaster.SponsorUserOperation(userOp)
 // 6. Submit to bundler
 hash, _ := bundler.SendUserOperation(userOp)
 receipt, _ := bundler.WaitForReceipt(hash, 60*time.Second, 2*time.Second)
+```
+
+</details>
+
+<details>
+<summary><b>USDT0 Cross-Chain Bridge (TypeScript)</b></summary>
+
+```typescript
+import {
+  Usdt0Bridge,
+  LayerZeroScanClient,
+  getBridgeableChains,
+} from "@t402/evm";
+
+// Check supported chains
+console.log(getBridgeableChains()); // ['ethereum', 'arbitrum', 'ink', 'berachain', 'unichain']
+
+// Create bridge client
+const bridge = new Usdt0Bridge(signer, "arbitrum");
+
+// Get quote
+const quote = await bridge.quote({
+  fromChain: "arbitrum",
+  toChain: "ethereum",
+  amount: 100_000000n, // 100 USDT0
+  recipient: "0x...",
+});
+console.log(`Fee: ${quote.nativeFee} wei`);
+
+// Execute bridge
+const result = await bridge.send({
+  fromChain: "arbitrum",
+  toChain: "ethereum",
+  amount: 100_000000n,
+  recipient: "0x...",
+});
+console.log(`TX: ${result.txHash}`);
+console.log(`Message GUID: ${result.messageGuid}`);
+
+// Track delivery via LayerZero Scan
+const scanClient = new LayerZeroScanClient();
+const message = await scanClient.waitForDelivery(result.messageGuid, {
+  onStatusChange: (status) => console.log(`Status: ${status}`),
+});
+console.log(`Delivered! Dest TX: ${message.dstTxHash}`);
+```
+
+</details>
+
+<details>
+<summary><b>USDT0 Cross-Chain Bridge (Python)</b></summary>
+
+```python
+from t402.bridge import (
+    Usdt0Bridge,
+    LayerZeroScanClient,
+    BridgeQuoteParams,
+    BridgeExecuteParams,
+    get_bridgeable_chains,
+)
+
+# Check supported chains
+print(get_bridgeable_chains())  # ['ethereum', 'arbitrum', 'ink', ...]
+
+# Create bridge client
+bridge = Usdt0Bridge(signer, "arbitrum")
+
+# Get quote
+quote = await bridge.quote(BridgeQuoteParams(
+    from_chain="arbitrum",
+    to_chain="ethereum",
+    amount=100_000000,  # 100 USDT0
+    recipient="0x...",
+))
+print(f"Fee: {quote.native_fee} wei")
+
+# Execute bridge
+result = await bridge.send(BridgeExecuteParams(
+    from_chain="arbitrum",
+    to_chain="ethereum",
+    amount=100_000000,
+    recipient="0x...",
+))
+print(f"TX: {result.tx_hash}")
+print(f"Message GUID: {result.message_guid}")
+
+# Track delivery via LayerZero Scan
+scan_client = LayerZeroScanClient()
+message = await scan_client.wait_for_delivery(
+    result.message_guid,
+    on_status_change=lambda s: print(f"Status: {s}"),
+)
+print(f"Delivered! Dest TX: {message.dst_tx_hash}")
+```
+
+</details>
+
+<details>
+<summary><b>USDT0 Cross-Chain Bridge (Go)</b></summary>
+
+```go
+import (
+    "math/big"
+    "github.com/t402-io/t402/go/mechanisms/evm/bridge"
+)
+
+// Check supported chains
+chains := bridge.GetBridgeableChains() // [ethereum, arbitrum, ink, ...]
+
+// Create bridge client
+bridgeClient, _ := bridge.NewUsdt0Bridge(signer, "arbitrum")
+
+// Get quote
+quote, _ := bridgeClient.Quote(ctx, &bridge.BridgeQuoteParams{
+    FromChain: "arbitrum",
+    ToChain:   "ethereum",
+    Amount:    big.NewInt(100_000000), // 100 USDT0
+    Recipient: "0x...",
+})
+fmt.Printf("Fee: %s wei\n", quote.NativeFee)
+
+// Execute bridge
+result, _ := bridgeClient.Send(ctx, &bridge.BridgeExecuteParams{
+    BridgeQuoteParams: bridge.BridgeQuoteParams{
+        FromChain: "arbitrum",
+        ToChain:   "ethereum",
+        Amount:    big.NewInt(100_000000),
+        Recipient: "0x...",
+    },
+})
+fmt.Printf("TX: %s\n", result.TxHash)
+fmt.Printf("Message GUID: %s\n", result.MessageGUID)
+
+// Track delivery via LayerZero Scan
+scanClient := bridge.NewLayerZeroScanClient()
+message, _ := scanClient.WaitForDelivery(ctx, result.MessageGUID, &bridge.WaitForDeliveryOptions{
+    OnStatusChange: func(status bridge.LayerZeroMessageStatus) {
+        fmt.Printf("Status: %s\n", status)
+    },
+})
+fmt.Printf("Delivered! Dest TX: %s\n", message.DstTxHash)
 ```
 
 </details>
