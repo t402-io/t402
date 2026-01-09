@@ -174,16 +174,16 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 - [ ] Multi-sig support
 - [ ] Hardware wallet support (via WDK)
 
-**Week 17-18: Documentation Site**
-- [ ] Set up Nextra project for docs.t402.io
-- [ ] Write comprehensive documentation:
+**Week 17-18: Documentation Site** ✅
+- [x] Set up Nextra project for docs.t402.io
+- [x] Write comprehensive documentation:
   - Getting Started guides
   - Server integration (Express, Next, Hono, FastAPI, Go)
   - Client integration (Fetch, Axios, WDK)
   - Chain-specific guides
   - Advanced features (gasless, bridge, MCP)
   - API reference
-- [ ] Deploy to docs.t402.io
+- [x] Deploy to docs.t402.io
 - [ ] Set up Algolia search
 
 **Week 19-20: Infrastructure**
@@ -200,7 +200,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 - [x] @t402/mcp package (v1.0.0 published)
 - [x] @t402/wdk-gasless package (v1.0.0 published)
 - [x] @t402/wdk-bridge package (v1.0.0 published)
-- [ ] docs.t402.io live
+- [x] docs.t402.io live
 - [ ] facilitator.t402.io production
 
 ---
