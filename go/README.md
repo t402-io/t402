@@ -8,8 +8,14 @@ t402 is a protocol that enables HTTP resources to require cryptocurrency payment
 
 ## Installation
 
+This is a private repository. Configure Go to bypass the checksum database:
+
 ```bash
-go get github.com/t402-io/t402/go
+# Set GOPRIVATE (one-time setup)
+go env -w GOPRIVATE=github.com/awesome-doge/t402
+
+# Install the package
+go get github.com/awesome-doge/t402/go@v1.0.0
 ```
 
 ## What This Package Exports
@@ -186,7 +192,7 @@ For payment processing services that verify and settle payments.
 ## Package Structure
 
 ```
-github.com/t402-io/t402/go
+github.com/awesome-doge/t402/go
 │
 ├── Core (framework-agnostic)
 │   ├── client.go              - t402.X402Client
