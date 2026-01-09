@@ -7,6 +7,77 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2026-01-09] - WDK Gasless Payments
+
+### Added
+
+#### @t402/wdk-gasless (`wdk-gasless/v1.0.0`)
+
+Gasless USDT0 payments using Tether WDK and ERC-4337 Account Abstraction. Enables users to send stablecoin payments without holding ETH for gas fees.
+
+#### Core Features
+- **WdkSmartAccount**: Wraps Tether WDK accounts in Safe smart accounts (4337 module v0.3.0)
+  - Counterfactual address computation
+  - EIP-712 typed data signing via WDK
+  - Multi-owner support with configurable threshold
+- **WdkGaslessClient**: High-level client for gasless payments
+  - `pay()` - Execute single gasless USDT0 transfer
+  - `payBatch()` - Execute multiple payments in one UserOperation
+  - `canSponsor()` - Check if payment can be gas-sponsored
+  - `getBalance()` / `getFormattedBalance()` - Check token balances
+  - `getAccountAddress()` / `isAccountDeployed()` - Account status
+
+#### Supported Tokens & Chains
+| Chain | Chain ID | USDT0 | USDC |
+|-------|----------|-------|------|
+| Ethereum | 1 | ✅ | ✅ |
+| Arbitrum | 42161 | ✅ | ✅ |
+| Base | 8453 | ✅ | ✅ |
+| Optimism | 10 | ✅ | ✅ |
+| Ink | 57073 | ✅ | - |
+| Berachain | 80084 | ✅ | - |
+| Unichain | 130 | ✅ | - |
+
+#### Usage Example
+```typescript
+import { createWdkGaslessClient } from '@t402/wdk-gasless';
+
+const client = await createWdkGaslessClient({
+  wdkAccount: myWdkAccount,
+  publicClient,
+  chainId: 42161,
+  bundler: {
+    bundlerUrl: 'https://api.pimlico.io/v2/arbitrum/rpc?apikey=...',
+    chainId: 42161,
+  },
+  paymaster: {
+    address: '0x...',
+    url: 'https://api.pimlico.io/v2/arbitrum/rpc?apikey=...',
+    type: 'sponsoring',
+  },
+});
+
+// Execute gasless payment
+const result = await client.pay({
+  to: '0x...',
+  amount: 1000000n, // 1 USDT0
+});
+
+const receipt = await result.wait();
+console.log('Confirmed:', receipt.txHash);
+```
+
+#### Bundler/Paymaster Support
+- Pimlico
+- Alchemy
+- Stackup
+- Biconomy
+
+#### Examples
+- `examples/typescript/wdk-gasless/` - Demo with mock WDK account
+
+---
+
 ## [2026-01-09] - MCP Integration for AI Agent Payments
 
 ### Added
