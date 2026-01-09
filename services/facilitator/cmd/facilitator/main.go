@@ -23,6 +23,8 @@ import (
 	tonfac "github.com/t402-io/t402/go/mechanisms/ton/exact/facilitator"
 	"github.com/t402-io/t402/go/mechanisms/tron"
 	tronfac "github.com/t402-io/t402/go/mechanisms/tron/exact/facilitator"
+	"github.com/t402-io/t402/go/mechanisms/svm"
+	svmfac "github.com/t402-io/t402/go/mechanisms/svm/exact/facilitator"
 	"github.com/t402-io/t402/services/facilitator/internal/cache"
 	"github.com/t402-io/t402/services/facilitator/internal/config"
 	"github.com/t402-io/t402/services/facilitator/internal/server"
@@ -176,6 +178,32 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, error) {
 		}
 	} else {
 		log.Printf("Warning: TRON_PRIVATE_KEY not set, TRON chains disabled")
+	}
+
+	// Setup Solana chains if private key is provided
+	if cfg.SvmPrivateKey != "" {
+		solanaSigner, err := newFacilitatorSolanaSigner(cfg.SvmPrivateKey, cfg.SolanaRPC, "")
+		if err != nil {
+			log.Printf("Warning: Failed to create Solana signer: %v", err)
+		} else {
+			var solanaNetworks []t402.Network
+
+			// Add mainnet
+			solanaNetworks = append(solanaNetworks, t402.Network(svm.SolanaMainnetCAIP2))
+			configuredNetworks = append(configuredNetworks, "Solana Mainnet")
+
+			// Add devnet
+			solanaNetworks = append(solanaNetworks, t402.Network(svm.SolanaDevnetCAIP2))
+			configuredNetworks = append(configuredNetworks, "Solana Devnet")
+
+			facilitator.Register(solanaNetworks, svmfac.NewExactSvmScheme(solanaSigner))
+			addrs := solanaSigner.GetAddresses(context.Background(), svm.SolanaMainnetCAIP2)
+			if len(addrs) > 0 {
+				log.Printf("Solana facilitator address: %s", addrs[0].String())
+			}
+		}
+	} else {
+		log.Printf("Warning: SVM_PRIVATE_KEY not set, Solana chains disabled")
 	}
 
 	// Log configured networks
