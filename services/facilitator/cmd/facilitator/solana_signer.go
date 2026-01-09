@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/ed25519"
 	"encoding/hex"
 	"fmt"
 	"strings"
@@ -28,25 +29,28 @@ func newFacilitatorSolanaSigner(privateKeyHex string, mainnetRPC string, devnetR
 	// Remove 0x prefix if present
 	privateKeyHex = strings.TrimPrefix(privateKeyHex, "0x")
 
-	// Parse private key (64 bytes hex = 32 bytes key)
+	// Parse private key (hex encoded)
 	privateKeyBytes, err := hex.DecodeString(privateKeyHex)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode private key: %w", err)
 	}
 
 	// Solana private keys are 64 bytes (32 bytes seed + 32 bytes public key)
-	// If we only have 32 bytes (seed), we need to derive the full key
+	// If we only have 32 bytes (seed), we need to derive the full keypair using ed25519
 	var privateKey solana.PrivateKey
+	var publicKey solana.PublicKey
+
 	if len(privateKeyBytes) == 32 {
-		// This is a seed, derive the full keypair
-		privateKey = solana.PrivateKey(privateKeyBytes)
+		// This is a 32-byte seed, derive the full ed25519 keypair
+		ed25519PrivateKey := ed25519.NewKeyFromSeed(privateKeyBytes)
+		privateKey = solana.PrivateKey(ed25519PrivateKey)
+		publicKey = solana.PublicKeyFromBytes(ed25519PrivateKey.Public().(ed25519.PublicKey))
 	} else if len(privateKeyBytes) == 64 {
 		privateKey = solana.PrivateKey(privateKeyBytes)
+		publicKey = privateKey.PublicKey()
 	} else {
 		return nil, fmt.Errorf("invalid private key length: expected 32 or 64 bytes, got %d", len(privateKeyBytes))
 	}
-
-	publicKey := privateKey.PublicKey()
 
 	signer := &facilitatorSolanaSigner{
 		privateKey: privateKey,
