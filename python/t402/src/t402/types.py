@@ -204,6 +204,46 @@ class TonPaymentPayload(BaseModel):
     )
 
 
+class TronAuthorization(BaseModel):
+    """TRON TRC20 transfer authorization metadata."""
+
+    from_: str = Field(alias="from")
+    to: str
+    contract_address: str = Field(alias="contractAddress")
+    amount: str
+    expiration: int
+    ref_block_bytes: str = Field(alias="refBlockBytes")
+    ref_block_hash: str = Field(alias="refBlockHash")
+    timestamp: int
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
+    @field_validator("amount")
+    def validate_amount(cls, v):
+        try:
+            int(v)
+        except ValueError:
+            raise ValueError("amount must be an integer encoded as a string")
+        return v
+
+
+class TronPaymentPayload(BaseModel):
+    """TRON payment payload containing signed transaction and authorization."""
+
+    signed_transaction: str = Field(alias="signedTransaction")
+    authorization: TronAuthorization
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
+
 class VerifyResponse(BaseModel):
     is_valid: bool = Field(alias="isValid")
     invalid_reason: Optional[str] = Field(None, alias="invalidReason")
@@ -231,7 +271,7 @@ class SettleResponse(BaseModel):
 
 
 # Union of payloads for each scheme
-SchemePayloads = Union[ExactPaymentPayload, TonPaymentPayload]
+SchemePayloads = Union[ExactPaymentPayload, TonPaymentPayload, TronPaymentPayload]
 
 
 class PaymentPayload(BaseModel):

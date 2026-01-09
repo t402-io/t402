@@ -8,7 +8,7 @@ from t402.chains import (
     get_token_version,
     get_default_token_address,
 )
-from t402.networks import is_ton_network
+from t402.networks import is_ton_network, is_tron_network
 from t402.types import Price, TokenAmount, PaymentRequirements, PaymentPayload
 
 
@@ -27,6 +27,10 @@ def parse_money(amount: str | int, address: str, network: str) -> int:
         if is_ton_network(network):
             from t402.ton import DEFAULT_DECIMALS
             decimals = DEFAULT_DECIMALS  # USDT on TON uses 6 decimals
+        # Handle TRON networks
+        elif is_tron_network(network):
+            from t402.tron import DEFAULT_DECIMALS
+            decimals = DEFAULT_DECIMALS  # USDT on TRON uses 6 decimals
         else:
             chain_id = get_chain_id(network)
             decimals = get_token_decimals(chain_id, address)
@@ -74,6 +78,27 @@ def process_price_to_atomic_amount(
 
                 # For TON, return Jetton metadata instead of EIP-712 domain
                 asset_info = get_default_asset(network)
+                extra_info = {
+                    "name": asset_info["name"] if asset_info else "Tether USD",
+                    "symbol": asset_info["symbol"] if asset_info else "USDT",
+                }
+
+                return str(atomic_amount), asset_address, extra_info
+
+            # Handle TRON networks
+            if is_tron_network(network):
+                from t402.tron import (
+                    get_usdt_address as get_tron_usdt_address,
+                    get_default_asset as get_tron_default_asset,
+                    DEFAULT_DECIMALS,
+                )
+
+                asset_address = get_tron_usdt_address(network)
+                decimals = DEFAULT_DECIMALS
+                atomic_amount = int(amount * Decimal(10**decimals))
+
+                # For TRON, return TRC20 metadata
+                asset_info = get_tron_default_asset(network)
                 extra_info = {
                     "name": asset_info["name"] if asset_info else "Tether USD",
                     "symbol": asset_info["symbol"] if asset_info else "USDT",
