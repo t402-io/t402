@@ -1,7 +1,7 @@
 package bazaar
 
 // Re-export types from the shared types package for convenience
-import "github.com/t402-io/t402/go/extensions/types"
+import "github.com/awesome-doge/t402/go/extensions/types"
 
 // Re-export extension constant
 const BAZAAR = types.BAZAAR

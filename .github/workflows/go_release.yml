@@ -86,7 +86,7 @@ jobs:
             ### Installation
 
             ```bash
-            go get github.com/t402-io/t402/go@${{ steps.version.outputs.version }}
+            go get github.com/awesome-doge/t402/go@${{ steps.version.outputs.version }}
             ```
 
             ### Changelog

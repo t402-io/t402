@@ -1,8 +1,8 @@
 package bazaar
 
 import (
-	"github.com/t402-io/t402/go/extensions/types"
-	"github.com/t402-io/t402/go/http"
+	"github.com/awesome-doge/t402/go/extensions/types"
+	"github.com/awesome-doge/t402/go/http"
 )
 
 type bazaarResourceServerExtension struct{}

@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	t402 "github.com/t402-io/t402/go"
-	"github.com/t402-io/t402/go/types"
+	t402 "github.com/awesome-doge/t402/go"
+	"github.com/awesome-doge/t402/go/types"
 )
 
 func TestNewt402HTTPClient(t *testing.T) {

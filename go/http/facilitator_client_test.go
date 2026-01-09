@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	t402 "github.com/t402-io/t402/go"
+	t402 "github.com/awesome-doge/t402/go"
 )
 
 // Test helper functions
