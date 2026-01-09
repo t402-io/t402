@@ -7,8 +7,8 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/awesome-doge/t402/go/mechanisms/evm"
-	"github.com/awesome-doge/t402/go/types"
+	"github.com/t402-io/t402/go/mechanisms/evm"
+	"github.com/t402-io/t402/go/types"
 )
 
 // ExactEvmSchemeV1 implements the SchemeNetworkClientV1 interface for EVM exact payments (V1)

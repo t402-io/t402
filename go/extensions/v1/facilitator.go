@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/awesome-doge/t402/go/extensions/types"
+	"github.com/t402-io/t402/go/extensions/types"
 )
 
 // V1OutputSchema represents the v1 outputSchema structure

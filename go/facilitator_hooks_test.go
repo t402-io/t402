@@ -6,7 +6,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/awesome-doge/t402/go/types"
+	"github.com/t402-io/t402/go/types"
 )
 
 // Test Facilitator BeforeVerify hook - abort verification
