@@ -62,6 +62,13 @@ export {
   // Bridge client
   Usdt0Bridge,
   createUsdt0Bridge,
+  // LayerZero Scan client
+  LayerZeroScanClient,
+  createLayerZeroScanClient,
+  LAYERZERO_SCAN_BASE_URL,
+  // Cross-chain payment router
+  CrossChainPaymentRouter,
+  createCrossChainPaymentRouter,
   // Bridge constants
   LAYERZERO_ENDPOINT_IDS,
   USDT0_OFT_ADDRESSES,
@@ -83,6 +90,15 @@ export type {
   BridgeStatus,
   BridgeTransaction,
   BridgeSigner,
+  TransactionReceipt,
+  TransactionLog,
+  // LayerZero Scan types
+  LayerZeroMessage,
+  LayerZeroMessageStatus,
+  WaitForDeliveryOptions,
+  // Cross-chain payment types
+  CrossChainPaymentParams,
+  CrossChainPaymentResult,
 } from "./bridge/index.js";
 
 // Export ERC-4337 Account Abstraction module

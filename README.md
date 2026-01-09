@@ -23,7 +23,7 @@ app.use(
 
 ```shell
 # All available packages
-pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/tron @t402/wdk @t402/wdk-gasless @t402/extensions @t402/mcp
+pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/tron @t402/wdk @t402/wdk-gasless @t402/wdk-bridge @t402/extensions @t402/mcp
 
 # Minimal client
 pnpm add @t402/core @t402/evm
@@ -116,6 +116,13 @@ go get github.com/t402-io/t402/go@v1.0.0
 - **Supported tokens**: USDT0, USDC across 7 chains
 - **Batch payments** for multiple transfers in one transaction
 - **Bundler support**: Pimlico, Alchemy, Stackup, Biconomy
+
+### WDK Cross-Chain Bridge
+- **Multi-chain USDT0 bridging** with automatic source chain selection
+- **Tether WDK integration** for signing bridge transactions
+- **Fee-optimized routing**: cheapest, fastest, or preferred strategies
+- **LayerZero tracking**: Monitor delivery via LayerZero Scan API
+- **Supported chains**: Ethereum, Arbitrum, Ink, Berachain, Unichain
 
 </details>
 
@@ -785,5 +792,73 @@ const result = await client.payBatch({
 | Ink | 57073 | ✅ | - |
 | Berachain | 80084 | ✅ | - |
 | Unichain | 130 | ✅ | - |
+
+</details>
+
+<details>
+<summary><b>WDK Cross-Chain Bridge (TypeScript)</b></summary>
+
+The `@t402/wdk-bridge` package enables cross-chain USDT0 bridging with automatic source chain selection.
+
+```typescript
+import { WdkBridgeClient } from "@t402/wdk-bridge";
+
+// Create bridge client with WDK accounts for multiple chains
+const bridge = new WdkBridgeClient({
+  accounts: {
+    ethereum: ethereumWdkAccount, // From @tetherto/wdk
+    arbitrum: arbitrumWdkAccount,
+    ink: inkWdkAccount,
+  },
+  defaultStrategy: "cheapest", // or 'fastest', 'preferred'
+});
+
+// Get multi-chain balance summary
+const summary = await bridge.getBalances();
+console.log("Total USDT0:", summary.totalUsdt0);
+console.log("Bridgeable chains:", summary.bridgeableChains);
+
+// Get available routes to a destination
+const routes = await bridge.getRoutes("ethereum", 100_000000n);
+routes.forEach((route) => {
+  console.log(`${route.fromChain} -> ${route.toChain}`);
+  console.log(`  Fee: ${route.nativeFee} wei`);
+  console.log(`  Available: ${route.available}`);
+});
+
+// Auto-bridge: automatically selects the best source chain
+const result = await bridge.autoBridge({
+  toChain: "ethereum",
+  amount: 100_000000n, // 100 USDT0
+  recipient: "0x...",
+});
+
+console.log("Bridge TX:", result.txHash);
+console.log("From chain:", result.fromChain);
+console.log("Message GUID:", result.messageGuid);
+
+// Wait for delivery with status updates
+const delivery = await result.waitForDelivery({
+  onStatusChange: (status) => console.log("Status:", status),
+  // INFLIGHT -> CONFIRMING -> DELIVERED
+});
+
+console.log("Delivery success:", delivery.success);
+console.log("Destination TX:", delivery.dstTxHash);
+```
+
+**Route Strategies:**
+- **cheapest** (default): Select route with lowest native fee
+- **fastest**: Select route with fastest estimated delivery
+- **preferred**: Use preferred source chain if available
+
+**Supported Chains:**
+| Chain | Chain ID | LayerZero EID |
+|-------|----------|---------------|
+| Ethereum | 1 | 30101 |
+| Arbitrum | 42161 | 30110 |
+| Ink | 57073 | 30291 |
+| Berachain | 80084 | 30362 |
+| Unichain | 130 | 30320 |
 
 </details>
