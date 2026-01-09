@@ -23,10 +23,15 @@ app.use(
 
 ```shell
 # All available packages
-pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/tron @t402/wdk @t402/extensions
+pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/tron @t402/wdk @t402/extensions @t402/mcp
 
 # Minimal client
 pnpm add @t402/core @t402/evm
+
+# MCP Server for AI Agents
+pnpm add @t402/mcp
+# or run directly
+npx @t402/mcp
 
 # Or with npm
 npm install @t402/core @t402/evm
@@ -93,6 +98,13 @@ go get github.com/t402-io/t402/go@v1.0.0
 - **Supported chains**: Ethereum, Arbitrum, Ink, Berachain, Unichain
 - **Message tracking** via LayerZero Scan API
 - **Cross-chain payment routing** for multi-chain payments
+
+### MCP Server for AI Agents
+- **Model Context Protocol (MCP)** server for AI agent payments
+- **Claude Desktop integration** with simple configuration
+- **6 payment tools**: getBalance, getAllBalances, pay, payGasless, getBridgeFee, bridge
+- **Demo mode** for testing without real transactions
+- **Multi-chain support**: All EVM networks + cross-chain bridging
 
 </details>
 
@@ -604,6 +616,77 @@ message, _ := scanClient.WaitForDelivery(ctx, result.MessageGUID, &bridge.WaitFo
     },
 })
 fmt.Printf("Delivered! Dest TX: %s\n", message.DstTxHash)
+```
+
+</details>
+
+<details>
+<summary><b>MCP Server for AI Agents (Claude Desktop)</b></summary>
+
+The `@t402/mcp` package enables AI agents like Claude to make stablecoin payments.
+
+**Installation:**
+```bash
+npm install -g @t402/mcp
+# or run directly
+npx @t402/mcp
+```
+
+**Claude Desktop Configuration** (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+```json
+{
+  "mcpServers": {
+    "t402": {
+      "command": "npx",
+      "args": ["@t402/mcp"],
+      "env": {
+        "T402_DEMO_MODE": "true"
+      }
+    }
+  }
+}
+```
+
+**Available MCP Tools:**
+| Tool | Description |
+|------|-------------|
+| `t402/getBalance` | Check wallet balance on a specific network |
+| `t402/getAllBalances` | Check balances across all networks |
+| `t402/pay` | Execute stablecoin payment (USDC/USDT/USDT0) |
+| `t402/payGasless` | Execute gasless payment via ERC-4337 |
+| `t402/getBridgeFee` | Get USDT0 bridge fee quote |
+| `t402/bridge` | Bridge USDT0 between chains |
+
+**Example Prompts for Claude:**
+- "Check my USDC balance on Base"
+- "Show my balances across all chains"
+- "Send 10 USDC to 0x... on Arbitrum"
+- "How much does it cost to bridge 100 USDT0 from Arbitrum to Ethereum?"
+
+**Environment Variables:**
+```bash
+T402_PRIVATE_KEY=0x...     # Wallet private key
+T402_DEMO_MODE=true        # Enable demo mode (no real transactions)
+T402_BUNDLER_URL=...       # ERC-4337 bundler URL
+T402_PAYMASTER_URL=...     # Paymaster URL for gasless
+T402_RPC_ETHEREUM=...      # Custom RPC URLs per network
+```
+
+**Programmatic Usage:**
+```typescript
+import { executeGetBalance, executePay } from "@t402/mcp";
+
+// Check balance
+const balance = await executeGetBalance({
+  network: "base",
+  address: "0x...",
+});
+
+// Execute payment (demo mode)
+const result = await executePay(
+  { to: "0x...", amount: "10.00", token: "USDC", network: "base" },
+  { privateKey: "0x...", demoMode: true }
+);
 ```
 
 </details>
