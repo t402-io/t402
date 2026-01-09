@@ -11,6 +11,14 @@
 // Export TON exact scheme (client)
 export { ExactTonScheme } from "./exact/index.js";
 
+// Export register functions for easy integration
+export { registerExactTonScheme as registerExactTonClientScheme } from "./exact/client/index.js";
+export type { TonClientConfig } from "./exact/client/index.js";
+export { registerExactTonScheme as registerExactTonServerScheme } from "./exact/server/index.js";
+export type { TonResourceServerConfig } from "./exact/server/index.js";
+export { registerExactTonScheme as registerExactTonFacilitatorScheme } from "./exact/facilitator/index.js";
+export type { TonFacilitatorConfig } from "./exact/facilitator/index.js";
+
 // Export signer utilities
 export { toClientTonSigner, toFacilitatorTonSigner } from "./signer.js";
 export type {
