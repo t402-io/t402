@@ -1,7 +1,3 @@
-def hello() -> str:
-    return "Hello from t402!"
-
-
 # Re-export commonly used items for convenience
 from t402.common import (
     parse_money,
@@ -49,6 +45,10 @@ from t402.paywall import (
     get_paywall_template,
     is_browser_request,
 )
+
+def hello() -> str:
+    return "Hello from t402!"
+
 
 __all__ = [
     # Core
