@@ -64,6 +64,33 @@ from t402.paywall import (
     get_paywall_template,
     is_browser_request,
 )
+from t402.erc4337 import (
+    # Constants
+    ENTRYPOINT_V07_ADDRESS,
+    ENTRYPOINT_V06_ADDRESS,
+    SAFE_4337_ADDRESSES,
+    SUPPORTED_CHAINS as ERC4337_SUPPORTED_CHAINS,
+    # Types
+    UserOperation,
+    PackedUserOperation,
+    PaymasterData,
+    GasEstimate,
+    UserOperationReceipt,
+    # Bundlers
+    GenericBundlerClient,
+    PimlicoBundlerClient,
+    AlchemyBundlerClient,
+    create_bundler_client,
+    # Paymasters
+    PimlicoPaymaster,
+    BiconomyPaymaster,
+    StackupPaymaster,
+    create_paymaster,
+    # Accounts
+    SafeSmartAccount,
+    SafeAccountConfig,
+    create_smart_account,
+)
 
 def hello() -> str:
     return "Hello from t402!"
@@ -132,4 +159,25 @@ __all__ = [
     "get_paywall_html",
     "get_paywall_template",
     "is_browser_request",
+    # ERC-4337 Account Abstraction
+    "ENTRYPOINT_V07_ADDRESS",
+    "ENTRYPOINT_V06_ADDRESS",
+    "SAFE_4337_ADDRESSES",
+    "ERC4337_SUPPORTED_CHAINS",
+    "UserOperation",
+    "PackedUserOperation",
+    "PaymasterData",
+    "GasEstimate",
+    "UserOperationReceipt",
+    "GenericBundlerClient",
+    "PimlicoBundlerClient",
+    "AlchemyBundlerClient",
+    "create_bundler_client",
+    "PimlicoPaymaster",
+    "BiconomyPaymaster",
+    "StackupPaymaster",
+    "create_paymaster",
+    "SafeSmartAccount",
+    "SafeAccountConfig",
+    "create_smart_account",
 ]

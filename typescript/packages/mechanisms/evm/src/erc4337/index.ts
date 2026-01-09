@@ -72,10 +72,32 @@ export {
 export { UserOpBuilder, createUserOpBuilder } from "./builder.js";
 export type { UserOpBuilderOptions } from "./builder.js";
 
-// Bundler
+// Bundler (base)
 export { BundlerClient, BundlerError, createBundlerClient } from "./bundler.js";
 
-// Paymaster
+// Bundlers (provider-specific)
+export {
+  // Factory
+  createBundlerClient as createProviderBundlerClient,
+  detectBundlerProvider,
+  createBundlerClientFromUrl,
+  // Pimlico
+  PimlicoBundlerClient,
+  createPimlicoBundlerClient,
+  // Alchemy
+  AlchemyBundlerClient,
+  createAlchemyBundlerClient,
+  // Types
+  type BundlerProvider,
+  type PimlicoConfig,
+  type PimlicoGasPrice,
+  type AlchemyConfig,
+  type AlchemyPolicyConfig,
+  type AssetChange,
+  type SimulationResult,
+} from "./bundlers/index.js";
+
+// Paymaster (base)
 export {
   PaymasterClient,
   createPaymasterClient,
@@ -83,6 +105,53 @@ export {
   decodePaymasterAndData,
 } from "./paymaster.js";
 export type { PaymasterResponse, SponsorRequest } from "./paymaster.js";
+
+// Paymasters (provider-specific)
+export {
+  // Factory
+  createPaymaster,
+  detectPaymasterProvider,
+  createUnifiedPaymaster,
+  // Pimlico
+  PimlicoPaymaster,
+  createPimlicoPaymaster,
+  // Biconomy
+  BiconomyPaymaster,
+  createBiconomyPaymaster,
+  // Stackup
+  StackupPaymaster,
+  createStackupPaymaster,
+  // Types
+  type PaymasterProvider,
+  type UnifiedPaymaster,
+  type PimlicoPaymasterConfig,
+  type PimlicoPaymasterType,
+  type PimlicoPolicy,
+  type PimlicoSponsorResult,
+  type BiconomyPaymasterConfig,
+  type BiconomyPaymasterMode,
+  type BiconomySpendingLimit,
+  type BiconomyErc20Config,
+  type BiconomySponsorResult,
+  type StackupPaymasterConfig,
+  type StackupPaymasterType,
+  type StackupContext,
+  type StackupSponsorResult,
+} from "./paymasters/index.js";
+
+// Smart Accounts
+export {
+  // Factory
+  createSmartAccount,
+  detectAccountType,
+  // Safe
+  SafeSmartAccount,
+  createSafeSmartAccount,
+  SAFE_4337_ADDRESSES,
+  // Types
+  type AccountType,
+  type SafeSmartAccountConfig,
+} from "./accounts/index.js";
 
 // T402 Integration
 export { GaslessT402Client, createGaslessT402Client } from "./t402.js";
