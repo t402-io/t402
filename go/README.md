@@ -12,10 +12,10 @@ This is a private repository. Configure Go to bypass the checksum database:
 
 ```bash
 # Set GOPRIVATE (one-time setup)
-go env -w GOPRIVATE=github.com/awesome-doge/t402
+go env -w GOPRIVATE=github.com/t402-io/t402
 
 # Install the package
-go get github.com/awesome-doge/t402/go@v1.0.0
+go get github.com/t402-io/t402/go@v1.0.0
 ```
 
 ## What This Package Exports
@@ -198,7 +198,7 @@ For payment processing services that verify and settle payments.
 ## Package Structure
 
 ```
-github.com/awesome-doge/t402/go
+github.com/t402-io/t402/go
 │
 ├── Core (framework-agnostic)
 │   ├── client.go              - t402.X402Client

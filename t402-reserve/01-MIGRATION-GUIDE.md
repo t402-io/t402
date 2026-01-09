@@ -47,7 +47,7 @@ X402                          →    T402
 @t402/extensions              →    @t402/extensions
 t402-express                  →    t402-express (legacy)
 t402-fetch                    →    t402-fetch (legacy)
-github.com/t402-io/t402      →    github.com/awesome-doge/t402
+github.com/t402-io/t402      →    github.com/t402-io/t402
 pip install t402              →    pip install t402
 com.coinbase.t402             →    io.t402.sdk
 ```
@@ -66,7 +66,7 @@ com.coinbase.t402             →    io.t402.sdk
 
 ```bash
 # 1. Create new private repository
-gh repo create awesome-doge/t402 --private
+gh repo create t402-io/t402 --private
 
 # 2. Clone original t402
 git clone https://github.com/t402-io/t402.git t402-migration
@@ -76,7 +76,7 @@ cd t402-migration
 git remote remove origin
 
 # 4. Add new remote
-git remote add origin git@github.com:awesome-doge/t402.git
+git remote add origin git@github.com:t402-io/t402.git
 
 # 5. Push to new repository
 git push -u origin main
@@ -140,11 +140,11 @@ typescript/packages/
 
 ```go
 // go.mod
-module github.com/awesome-doge/t402/go
+module github.com/t402-io/t402/go
 
 // Update all imports
 // Old: github.com/t402-io/t402/go
-// New: github.com/awesome-doge/t402/go
+// New: github.com/t402-io/t402/go
 ```
 
 ### Step 5: Python Package Migration

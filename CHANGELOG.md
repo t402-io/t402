@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **FastAPI Integration**: Middleware support for TON networks
 - **Utility Functions**: Address validation, network detection, amount conversion
 
-#### Go SDK (`github.com/awesome-doge/t402/go` v1.1.0)
+#### Go SDK (`github.com/t402-io/t402/go` v1.1.0)
 - **TON Mechanism**: Complete TON payment mechanism implementation
 - **Client Scheme**: `ExactTonScheme` for creating TON payment payloads
 - **Server Scheme**: Payment verification and requirement enhancement
@@ -120,7 +120,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [t402](https://pypi.org/project/t402/)
 
 ### Go
-- [github.com/awesome-doge/t402/go](https://github.com/awesome-doge/t402/tree/main/go)
+- [github.com/t402-io/t402/go](https://github.com/t402-io/t402/tree/main/go)
 
 ---
 
@@ -160,7 +160,7 @@ paywall = create_paywall(
 #### Go
 ```go
 // Add TON scheme to your client
-import tonclient "github.com/awesome-doge/t402/go/mechanisms/ton/exact/client"
+import tonclient "github.com/t402-io/t402/go/mechanisms/ton/exact/client"
 
 tonScheme := tonclient.NewExactTonScheme(signer)
 client.Register(t402.Network("ton:mainnet"), tonScheme)

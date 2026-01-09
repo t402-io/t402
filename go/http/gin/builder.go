@@ -3,8 +3,8 @@ package gin
 import (
 	"time"
 
-	t402 "github.com/awesome-doge/t402/go"
-	t402http "github.com/awesome-doge/t402/go/http"
+	t402 "github.com/t402-io/t402/go"
+	t402http "github.com/t402-io/t402/go/http"
 	"github.com/gin-gonic/gin"
 )
 

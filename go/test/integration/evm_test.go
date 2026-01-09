@@ -18,13 +18,13 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/signer/core/apitypes"
 
-	t402 "github.com/awesome-doge/t402/go"
-	"github.com/awesome-doge/t402/go/mechanisms/evm"
-	evmclient "github.com/awesome-doge/t402/go/mechanisms/evm/exact/client"
-	evmfacilitator "github.com/awesome-doge/t402/go/mechanisms/evm/exact/facilitator"
-	evmserver "github.com/awesome-doge/t402/go/mechanisms/evm/exact/server"
-	evmsigners "github.com/awesome-doge/t402/go/signers/evm"
-	"github.com/awesome-doge/t402/go/types"
+	t402 "github.com/t402-io/t402/go"
+	"github.com/t402-io/t402/go/mechanisms/evm"
+	evmclient "github.com/t402-io/t402/go/mechanisms/evm/exact/client"
+	evmfacilitator "github.com/t402-io/t402/go/mechanisms/evm/exact/facilitator"
+	evmserver "github.com/t402-io/t402/go/mechanisms/evm/exact/server"
+	evmsigners "github.com/t402-io/t402/go/signers/evm"
+	"github.com/t402-io/t402/go/types"
 )
 
 // newRealClientEvmSigner creates a client signer using the helper

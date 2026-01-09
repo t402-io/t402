@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"strings"
 
-	t402 "github.com/awesome-doge/t402/go"
-	"github.com/awesome-doge/t402/go/mechanisms/ton"
-	"github.com/awesome-doge/t402/go/types"
+	t402 "github.com/t402-io/t402/go"
+	"github.com/t402-io/t402/go/mechanisms/ton"
+	"github.com/t402-io/t402/go/types"
 )
 
 // ExactTonScheme implements the SchemeNetworkServer interface for TON exact payments (V2)

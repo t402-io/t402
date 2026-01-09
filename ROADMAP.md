@@ -24,7 +24,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 | Language | Package | Version | Status |
 |----------|---------|---------|--------|
 | TypeScript | `@t402/*` | 2.1.0 | Production |
-| Go | `github.com/awesome-doge/t402/go` | 1.1.0 | Production |
+| Go | `github.com/t402-io/t402/go` | 1.1.0 | Production |
 | Python | `t402` | 1.1.0 | Production |
 | Java | `io.t402:t402` | 0.1.x | Beta |
 
@@ -284,7 +284,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 ### Go Module
 
 ```
-github.com/awesome-doge/t402/go
+github.com/t402-io/t402/go
 ├── client.go              - HTTP client
 ├── server.go              - HTTP server
 ├── facilitator.go         - Facilitator service
@@ -398,7 +398,7 @@ We welcome contributions! See [CONTRIBUTING.md](./CONTRIBUTING.md) for guideline
 
 - **Website**: https://t402.io
 - **Documentation**: https://docs.t402.io
-- **GitHub**: https://github.com/awesome-doge/t402
+- **GitHub**: https://github.com/t402-io/t402
 - **Twitter**: [@t402_io](https://x.com/t402_io)
 
 ---
