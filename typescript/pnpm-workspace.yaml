@@ -5,6 +5,7 @@ packages:
   - packages/mechanisms/*
   - packages/mcp
   - packages/wdk
+  - packages/wdk-gasless
   - packages/legacy/*
   - examples/facilitator
   - examples/**/*
