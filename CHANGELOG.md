@@ -7,6 +7,81 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2026-01-09] - WDK Cross-Chain Bridge
+
+### Added
+
+#### @t402/wdk-bridge (`wdk-bridge/v1.0.0`)
+
+Cross-chain USDT0 bridging with automatic source chain selection for Tether WDK accounts using LayerZero OFT standard.
+
+#### Core Features
+- **WdkBridgeClient**: Multi-chain bridge client with automatic routing
+  - `getBalances()` - Get USDT0 balances across all configured chains
+  - `getRoutes()` - Get available bridge routes with fee quotes
+  - `autoBridge()` - Automatically select best source chain and execute bridge
+  - `bridge()` - Execute bridge from a specific chain
+  - `trackMessage()` - Track bridge transaction via LayerZero Scan
+  - `waitForDelivery()` - Wait for cross-chain delivery confirmation
+
+- **WdkBridgeSigner**: Adapts WDK accounts to work with Usdt0Bridge
+  - Implements BridgeSigner interface from @t402/evm
+  - Handles contract reads/writes via WDK account
+  - Transaction receipt parsing with LayerZero event extraction
+
+#### Route Strategies
+- **cheapest** (default): Select route with lowest native fee
+- **fastest**: Select route with fastest estimated delivery
+- **preferred**: Use preferred source chain if available
+
+#### Supported Chains
+| Chain | Chain ID | LayerZero EID | USDT0 OFT |
+|-------|----------|---------------|-----------|
+| Ethereum | 1 | 30101 | `0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee` |
+| Arbitrum | 42161 | 30110 | `0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9` |
+| Ink | 57073 | 30291 | `0x0200C29006150606B650577BBE7B6248F58470c1` |
+| Berachain | 80084 | 30362 | `0x779Ded0c9e1022225f8E0630b35a9b54bE713736` |
+| Unichain | 130 | 30320 | `0x588ce4F028D8e7B53B687865d6A67b3A54C75518` |
+
+#### Usage Example
+```typescript
+import { WdkBridgeClient } from '@t402/wdk-bridge';
+
+const bridge = new WdkBridgeClient({
+  accounts: {
+    ethereum: ethereumWdkAccount,
+    arbitrum: arbitrumWdkAccount,
+  },
+  defaultStrategy: 'cheapest',
+});
+
+// Get multi-chain balances
+const summary = await bridge.getBalances();
+console.log('Total USDT0:', summary.totalUsdt0);
+
+// Auto-bridge with best route selection
+const result = await bridge.autoBridge({
+  toChain: 'ethereum',
+  amount: 100_000000n, // 100 USDT0
+  recipient: '0x...',
+});
+
+// Wait for delivery with status updates
+const delivery = await result.waitForDelivery({
+  onStatusChange: (status) => console.log('Status:', status),
+});
+console.log('Delivered!', delivery.dstTxHash);
+```
+
+#### Dependencies
+- `@t402/evm` - Usdt0Bridge and LayerZeroScanClient
+- `@t402/wdk` - WDK account integration
+
+#### Examples
+- `examples/typescript/wdk-bridge/` - Demo with mock WDK accounts
+
+---
+
 ## [2026-01-09] - WDK Gasless Payments
 
 ### Added
