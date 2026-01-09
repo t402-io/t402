@@ -21,6 +21,8 @@ import (
 	evm "github.com/t402-io/t402/go/mechanisms/evm/exact/facilitator"
 	"github.com/t402-io/t402/go/mechanisms/ton"
 	tonfac "github.com/t402-io/t402/go/mechanisms/ton/exact/facilitator"
+	"github.com/t402-io/t402/go/mechanisms/tron"
+	tronfac "github.com/t402-io/t402/go/mechanisms/tron/exact/facilitator"
 	"github.com/t402-io/t402/services/facilitator/internal/cache"
 	"github.com/t402-io/t402/services/facilitator/internal/config"
 	"github.com/t402-io/t402/services/facilitator/internal/server"
@@ -145,6 +147,35 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, error) {
 		}
 	} else {
 		log.Printf("Warning: TON_MNEMONIC not set, TON chains disabled")
+	}
+
+	// Setup TRON chains if private key is provided
+	if cfg.TronPrivateKey != "" {
+		tronSigner, err := newFacilitatorTronSigner(cfg.TronPrivateKey, cfg.TronRPC)
+		if err != nil {
+			log.Printf("Warning: Failed to create TRON signer: %v", err)
+		} else {
+			var tronNetworks []t402.Network
+
+			// Add mainnet
+			tronNetworks = append(tronNetworks, t402.Network(tron.TronMainnetCAIP2))
+			configuredNetworks = append(configuredNetworks, "TRON Mainnet")
+
+			// Add testnets
+			tronNetworks = append(tronNetworks, t402.Network(tron.TronNileCAIP2))
+			configuredNetworks = append(configuredNetworks, "TRON Nile")
+
+			tronNetworks = append(tronNetworks, t402.Network(tron.TronShastaCAIP2))
+			configuredNetworks = append(configuredNetworks, "TRON Shasta")
+
+			facilitator.Register(tronNetworks, tronfac.NewExactTronScheme(tronSigner))
+			addrs := tronSigner.GetAddresses(context.Background(), tron.TronMainnetCAIP2)
+			if len(addrs) > 0 {
+				log.Printf("TRON facilitator address: %s", addrs[0])
+			}
+		}
+	} else {
+		log.Printf("Warning: TRON_PRIVATE_KEY not set, TRON chains disabled")
 	}
 
 	// Log configured networks
