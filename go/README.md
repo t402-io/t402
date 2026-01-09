@@ -73,6 +73,11 @@ Payment scheme implementations that can be registered by clients, servers, and f
   - `server/` - Server-side payment verification
   - `facilitator/` - Facilitator-side payment settlement
 
+- **`mechanisms/ton/exact`** - TON exact payment using Jetton transfers (USDT)
+  - `client/` - Client-side payment creation
+  - `server/` - Server-side payment verification
+  - `facilitator/` - Facilitator-side payment settlement
+
 Each role (client, server, facilitator) has its own mechanism implementation with appropriate functionality for that role.
 
 ### Extensions
@@ -118,6 +123,7 @@ The package is designed with extreme modularity:
 │         Mechanisms (Pluggable)          │
 │  - EVM exact (client/server/facil.)    │
 │  - SVM exact (client/server/facil.)    │
+│  - TON exact (client/server/facil.)    │
 └─────────────────────────────────────────┘
                   │
                   ▼
@@ -213,10 +219,14 @@ github.com/awesome-doge/t402/go
 │   │   ├── client/            - EVM client mechanism
 │   │   ├── server/            - EVM server mechanism
 │   │   └── facilitator/       - EVM facilitator mechanism
-│   └── svm/exact/
-│       ├── client/            - SVM client mechanism
-│       ├── server/            - SVM server mechanism
-│       └── facilitator/       - SVM facilitator mechanism
+│   ├── svm/exact/
+│   │   ├── client/            - SVM client mechanism
+│   │   ├── server/            - SVM server mechanism
+│   │   └── facilitator/       - SVM facilitator mechanism
+│   └── ton/exact/
+│       ├── client/            - TON client mechanism
+│       ├── server/            - TON server mechanism
+│       └── facilitator/       - TON facilitator mechanism
 │
 ├── signers/                   - Signer helpers
 │   ├── evm/                   - EVM client signers
@@ -254,6 +264,14 @@ All Solana networks using CAIP-2 identifiers:
 
 Use `solana:*` wildcard to support all Solana networks.
 
+### TON (The Open Network)
+
+TON networks using CAIP-2 identifiers:
+- TON Mainnet (`ton:mainnet`)
+- TON Testnet (`ton:testnet`)
+
+Use `ton:*` wildcard to support all TON networks.
+
 ## Supported Schemes
 
 ### Exact Payment
@@ -261,6 +279,7 @@ Use `solana:*` wildcard to support all Solana networks.
 Transfer an exact amount to access a resource:
 - **EVM**: Uses EIP-3009 `transferWithAuthorization` (USDC compatible tokens)
 - **SVM**: Uses Solana token transfers (USDC SPL token)
+- **TON**: Uses Jetton transfers (USDT)
 
 ## Features
 
@@ -286,6 +305,7 @@ Transfer an exact amount to access a resource:
 - **[signers/](signers/README.md)** - Signer helper utilities
 - **[mechanisms/evm/](mechanisms/evm/README.md)** - EVM payment mechanisms
 - **[mechanisms/svm/](mechanisms/svm/README.md)** - SVM payment mechanisms
+- **[mechanisms/ton/](mechanisms/ton/)** - TON payment mechanisms
 - **[extensions/](extensions/)** - Protocol extensions
 
 ### Examples
