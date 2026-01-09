@@ -1,0 +1,227 @@
+# Server Integration
+
+Integrate T402 payments into your HTTP server.
+
+## Express.js
+
+```typescript
+import express from 'express'
+import { paymentMiddleware, t402ResourceServer } from '@t402/express'
+import { ExactEvmScheme } from '@t402/evm'
+
+const app = express()
+
+// Configure payment requirements per route
+const paymentConfig = {
+  'GET /api/premium': {
+    accepts: [
+      { scheme: 'exact', network: 'eip155:8453', price: '$0.01', payTo: '0x...' },
+      { scheme: 'exact', network: 'eip155:42161', price: '$0.01', payTo: '0x...' },
+    ],
+    description: 'Premium API access'
+  },
+  'POST /api/generate': {
+    accepts: [
+      { scheme: 'exact', network: 'eip155:8453', price: '$0.10', payTo: '0x...' }
+    ],
+    description: 'AI generation endpoint'
+  }
+}
+
+// Create resource server with schemes
+const resourceServer = new t402ResourceServer(facilitatorClient)
+  .register('eip155:8453', new ExactEvmScheme())
+  .register('eip155:42161', new ExactEvmScheme())
+
+// Add middleware
+app.use(paymentMiddleware(paymentConfig, resourceServer))
+
+// Your routes
+app.get('/api/premium', (req, res) => {
+  res.json({ data: 'Premium content!' })
+})
+
+app.post('/api/generate', (req, res) => {
+  res.json({ result: 'Generated content!' })
+})
+
+app.listen(3000)
+```
+
+## Next.js
+
+```typescript
+// app/api/premium/route.ts
+import { withPayment } from '@t402/next'
+import { ExactEvmScheme } from '@t402/evm'
+
+export const GET = withPayment(
+  async (req) => {
+    return Response.json({ data: 'Premium content!' })
+  },
+  {
+    scheme: 'exact',
+    network: 'eip155:8453',
+    price: '$0.01',
+    payTo: '0x...',
+    description: 'Premium API access'
+  }
+)
+```
+
+## Hono
+
+```typescript
+import { Hono } from 'hono'
+import { paymentMiddleware } from '@t402/hono'
+import { ExactEvmScheme } from '@t402/evm'
+
+const app = new Hono()
+
+app.use('/api/*', paymentMiddleware({
+  'GET /api/premium': {
+    scheme: 'exact',
+    network: 'eip155:8453',
+    price: '$0.01',
+    payTo: '0x...'
+  }
+}))
+
+app.get('/api/premium', (c) => {
+  return c.json({ data: 'Premium content!' })
+})
+
+export default app
+```
+
+## Python (FastAPI)
+
+```python
+from fastapi import FastAPI
+from t402.fastapi import PaymentMiddleware, PaymentConfig
+
+app = FastAPI()
+
+# Add payment middleware
+app.add_middleware(
+    PaymentMiddleware,
+    config={
+        "GET /api/premium": PaymentConfig(
+            scheme="exact",
+            network="eip155:8453",
+            price="$0.01",
+            pay_to="0x...",
+            description="Premium API access"
+        )
+    },
+    facilitator_url="https://facilitator.t402.io"
+)
+
+@app.get("/api/premium")
+async def premium():
+    return {"data": "Premium content!"}
+```
+
+## Python (Flask)
+
+```python
+from flask import Flask
+from t402.flask import create_paywall
+
+app = Flask(__name__)
+
+paywall = create_paywall(
+    routes={
+        "GET /api/premium": {
+            "scheme": "exact",
+            "network": "eip155:8453",
+            "price": "$0.01",
+            "pay_to": "0x...",
+            "description": "Premium API access"
+        }
+    },
+    facilitator_url="https://facilitator.t402.io"
+)
+app.register_blueprint(paywall)
+
+@app.route("/api/premium")
+def premium():
+    return {"data": "Premium content!"}
+```
+
+## Go (Gin)
+
+```go
+package main
+
+import (
+    "github.com/gin-gonic/gin"
+    t402 "github.com/t402-io/t402/go"
+    "github.com/t402-io/t402/go/http/gin"
+)
+
+func main() {
+    r := gin.Default()
+
+    // Add payment middleware
+    r.Use(t402gin.PaymentMiddleware(t402gin.Config{
+        Routes: map[string]t402.PaymentRequirements{
+            "GET /api/premium": {
+                Scheme:  "exact",
+                Network: "eip155:8453",
+                Price:   "$0.01",
+                PayTo:   "0x...",
+            },
+        },
+        FacilitatorURL: "https://facilitator.t402.io",
+    }))
+
+    r.GET("/api/premium", func(c *gin.Context) {
+        c.JSON(200, gin.H{"data": "Premium content!"})
+    })
+
+    r.Run(":3000")
+}
+```
+
+## Multi-Network Support
+
+Accept payments from multiple networks:
+
+```typescript
+const paymentConfig = {
+  'GET /api/data': {
+    accepts: [
+      // EVM chains
+      { scheme: 'exact', network: 'eip155:1', price: '$0.01', payTo: evmAddress },
+      { scheme: 'exact', network: 'eip155:8453', price: '$0.01', payTo: evmAddress },
+      { scheme: 'exact', network: 'eip155:42161', price: '$0.01', payTo: evmAddress },
+      // TON
+      { scheme: 'exact', network: 'ton:mainnet', price: '$0.01', payTo: tonAddress },
+      // TRON
+      { scheme: 'exact', network: 'tron:mainnet', price: '$0.01', payTo: tronAddress },
+    ],
+    description: 'Multi-network API access'
+  }
+}
+```
+
+## Custom Pricing
+
+Dynamic pricing based on request:
+
+```typescript
+app.use(paymentMiddleware({
+  'POST /api/generate': {
+    accepts: [
+      { scheme: 'exact', network: 'eip155:8453', payTo: '0x...' }
+    ],
+    // Dynamic pricing function
+    getPrice: (req) => {
+      const tokens = parseInt(req.body.maxTokens) || 100
+      return `$${(tokens * 0.001).toFixed(4)}`
+    },
+    description: 'AI text generation'
+  }
+}))
+```

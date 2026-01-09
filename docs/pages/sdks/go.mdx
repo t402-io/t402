@@ -1,0 +1,80 @@
+# Go SDK
+
+The T402 Go SDK provides comprehensive support for HTTP-native stablecoin payments.
+
+## Installation
+
+```bash
+go get github.com/t402-io/t402/go@latest
+```
+
+## Quick Start
+
+```go
+package main
+
+import (
+    t402 "github.com/t402-io/t402/go"
+    "github.com/t402-io/t402/go/mechanisms/evm/exact/client"
+)
+
+func main() {
+    // Create client
+    c := t402.NewClient()
+
+    // Register EVM scheme
+    evmScheme := client.NewExactEvmScheme(privateKey)
+    c.Register("eip155:8453", evmScheme)
+
+    // Make request
+    resp, err := c.Fetch("https://api.example.com/premium")
+}
+```
+
+## Modules
+
+| Module | Description |
+|--------|-------------|
+| `go` | Core client and server |
+| `go/mechanisms/evm` | EVM mechanism |
+| `go/mechanisms/ton` | TON mechanism |
+| `go/mechanisms/tron` | TRON mechanism |
+| `go/http/gin` | Gin middleware |
+
+## Gin Middleware
+
+```go
+package main
+
+import (
+    "github.com/gin-gonic/gin"
+    t402 "github.com/t402-io/t402/go"
+    t402gin "github.com/t402-io/t402/go/http/gin"
+)
+
+func main() {
+    r := gin.Default()
+
+    r.Use(t402gin.PaymentMiddleware(t402gin.Config{
+        Routes: map[string]t402.PaymentRequirements{
+            "GET /api/premium": {
+                Scheme:  "exact",
+                Network: "eip155:8453",
+                Price:   "$0.01",
+                PayTo:   "0x...",
+            },
+        },
+        FacilitatorURL: "https://facilitator.t402.io",
+    }))
+
+    r.GET("/api/premium", func(c *gin.Context) {
+        c.JSON(200, gin.H{"data": "Premium content!"})
+    })
+
+    r.Run(":3000")
+}
+```
+
+## Requirements
+
+- Go 1.21+

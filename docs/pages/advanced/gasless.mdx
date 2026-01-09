@@ -1,0 +1,210 @@
+# Gasless Payments
+
+Enable users to send USDT0 without holding ETH for gas using ERC-4337 Account Abstraction.
+
+## Overview
+
+Gasless payments use ERC-4337 (Account Abstraction) to allow users to pay transaction fees with stablecoins instead of native tokens. A **paymaster** sponsors the gas cost, which can be:
+
+- Subsidized by the application
+- Deducted from the stablecoin amount
+- Paid by a third party
+
+## How It Works
+
+```
+┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+│   User   │───▶│  Smart   │───▶│ Bundler  │───▶│ Paymaster│
+│  (WDK)   │    │ Account  │    │          │    │          │
+└──────────┘    └──────────┘    └──────────┘    └──────────┘
+                     │                               │
+                     └───────────────────────────────┘
+                              UserOperation
+```
+
+1. User signs a **UserOperation** with their WDK account
+2. UserOperation is sent to a **Bundler**
+3. **Paymaster** sponsors the gas cost
+4. Bundler submits transaction on-chain
+5. User's USDT0 is transferred without them paying gas
+
+## Quick Start
+
+```typescript
+import { createWdkGaslessClient } from '@t402/wdk-gasless'
+
+const client = await createWdkGaslessClient({
+  wdkAccount: myWdkAccount,
+  publicClient,
+  chainId: 42161,
+  bundler: {
+    bundlerUrl: 'https://api.pimlico.io/v2/arbitrum/rpc?apikey=...',
+    chainId: 42161
+  },
+  paymaster: {
+    address: '0x...',
+    url: 'https://api.pimlico.io/v2/arbitrum/rpc?apikey=...',
+    type: 'sponsoring'
+  }
+})
+
+// Execute gasless payment
+const result = await client.pay({
+  to: '0x...',
+  amount: 10_000000n // 10 USDT0
+})
+
+await result.wait()
+```
+
+## Smart Account Setup
+
+T402 uses **Safe** smart accounts with the 4337 Module:
+
+```typescript
+// Smart account is automatically created
+const address = await client.getAccountAddress()
+console.log('Smart Account:', address)
+
+// Check if deployed
+const deployed = await client.isAccountDeployed()
+console.log('Deployed:', deployed) // false until first transaction
+```
+
+The smart account is deployed on first use (counterfactual deployment).
+
+## Bundler Providers
+
+| Provider | Chains | Features |
+|----------|--------|----------|
+| [Pimlico](https://pimlico.io) | 20+ | Fast, reliable, good UX |
+| [Alchemy](https://alchemy.com) | 10+ | Enterprise infrastructure |
+| [Stackup](https://stackup.sh) | 15+ | Open-source, self-hostable |
+| [Biconomy](https://biconomy.io) | 10+ | SDK integrations |
+
+## Paymaster Types
+
+### Sponsoring Paymaster
+
+Application pays all gas costs:
+
+```typescript
+paymaster: {
+  type: 'sponsoring',
+  address: '0x...',
+  url: 'https://...'
+}
+```
+
+### Verifying Paymaster
+
+Validates conditions before sponsoring:
+
+```typescript
+paymaster: {
+  type: 'verifying',
+  address: '0x...',
+  url: 'https://...',
+  context: { maxCost: '1000000' } // Custom validation data
+}
+```
+
+## Batch Payments
+
+Send to multiple recipients in one transaction:
+
+```typescript
+const result = await client.payBatch({
+  payments: [
+    { to: '0xAlice...', amount: 1_000000n },
+    { to: '0xBob...', amount: 2_000000n },
+    { to: '0xCharlie...', amount: 500000n }
+  ]
+})
+
+// Single transaction, single gas cost
+const receipt = await result.wait()
+console.log('TX:', receipt.txHash)
+```
+
+## Check Sponsorship Availability
+
+Before executing, check if sponsorship is available:
+
+```typescript
+const info = await client.canSponsor({
+  to: '0x...',
+  amount: 10_000000n
+})
+
+if (info.canSponsor) {
+  // Gas will be sponsored
+  await client.pay({ to: '0x...', amount: 10_000000n })
+} else {
+  // User needs native token for gas
+  console.log('Estimated gas:', info.estimatedGas)
+}
+```
+
+## Supported Chains
+
+| Chain | Chain ID | Bundler Support |
+|-------|----------|-----------------|
+| Ethereum | 1 | ✅ |
+| Arbitrum | 42161 | ✅ |
+| Base | 8453 | ✅ |
+| Optimism | 10 | ✅ |
+| Polygon | 137 | ✅ |
+| Ink | 57073 | ✅ |
+| Berachain | 80084 | ✅ |
+| Unichain | 130 | ✅ |
+
+## ERC-4337 Details
+
+### EntryPoint
+
+T402 uses EntryPoint v0.7:
+
+```
+0x0000000071727De22E5E9d8BAf0edAc6f37da032
+```
+
+### UserOperation Structure
+
+```typescript
+interface UserOperation {
+  sender: Address           // Smart account address
+  nonce: bigint            // Anti-replay
+  initCode: Hex            // Account deployment (if needed)
+  callData: Hex            // Transaction data
+  accountGasLimits: Hex    // Packed gas limits
+  preVerificationGas: bigint
+  gasFees: Hex             // Packed gas prices
+  paymasterAndData: Hex    // Paymaster info
+  signature: Hex           // User signature
+}
+```
+
+## Error Handling
+
+```typescript
+import { UserOperationError, PaymasterError } from '@t402/wdk-gasless'
+
+try {
+  await client.pay({ to, amount })
+} catch (error) {
+  if (error instanceof PaymasterError) {
+    console.log('Paymaster rejected:', error.reason)
+  } else if (error instanceof UserOperationError) {
+    console.log('UserOp failed:', error.code)
+  }
+}
+```
+
+## Best Practices
+
+1. **Check sponsorship** before prompting user
+2. **Batch when possible** to reduce gas
+3. **Handle failures gracefully** with retry logic
+4. **Monitor gas prices** for cost optimization
+5. **Set reasonable timeouts** for confirmations

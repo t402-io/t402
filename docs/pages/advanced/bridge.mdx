@@ -1,0 +1,240 @@
+# Cross-Chain Bridge
+
+Transfer USDT0 between chains using LayerZero OFT standard.
+
+## Overview
+
+USDT0 is an Omnichain Fungible Token (OFT) that can be bridged between supported chains via LayerZero. T402 provides easy-to-use bridging interfaces for both manual and automatic chain selection.
+
+## How It Works
+
+```
+Source Chain                LayerZero                Destination Chain
+┌──────────┐               ┌──────────┐              ┌──────────┐
+│  USDT0   │──────────────▶│   DVN    │─────────────▶│  USDT0   │
+│   OFT    │   send()      │ Network  │   receive()  │   OFT    │
+└──────────┘               └──────────┘              └──────────┘
+```
+
+1. User calls `send()` on source chain OFT contract
+2. LayerZero Decentralized Verifier Network (DVN) relays message
+3. Destination chain OFT mints equivalent USDT0
+4. User receives USDT0 on destination chain
+
+## Quick Start
+
+### Using @t402/evm (Direct)
+
+```typescript
+import { Usdt0Bridge, LayerZeroScanClient } from '@t402/evm'
+
+// Create bridge client
+const bridge = new Usdt0Bridge(signer, 'arbitrum')
+
+// Get quote
+const quote = await bridge.quote({
+  fromChain: 'arbitrum',
+  toChain: 'ethereum',
+  amount: 100_000000n, // 100 USDT0
+  recipient: '0x...'
+})
+
+console.log('Fee:', quote.nativeFee, 'wei')
+
+// Execute bridge
+const result = await bridge.send({
+  fromChain: 'arbitrum',
+  toChain: 'ethereum',
+  amount: 100_000000n,
+  recipient: '0x...'
+})
+
+console.log('TX:', result.txHash)
+console.log('Message GUID:', result.messageGuid)
+
+// Track delivery
+const scanClient = new LayerZeroScanClient()
+const message = await scanClient.waitForDelivery(result.messageGuid, {
+  onStatusChange: (status) => console.log('Status:', status)
+})
+
+console.log('Delivered! Dest TX:', message.dstTxHash)
+```
+
+### Using @t402/wdk-bridge (WDK Integration)
+
+```typescript
+import { WdkBridgeClient } from '@t402/wdk-bridge'
+
+// Create client with multiple WDK accounts
+const bridge = new WdkBridgeClient({
+  accounts: {
+    ethereum: ethereumAccount,
+    arbitrum: arbitrumAccount
+  },
+  defaultStrategy: 'cheapest'
+})
+
+// Auto-select best source chain
+const result = await bridge.autoBridge({
+  toChain: 'ethereum',
+  amount: 100_000000n,
+  recipient: '0x...'
+})
+
+console.log('Bridging from:', result.fromChain)
+
+// Wait for delivery
+const delivery = await result.waitForDelivery()
+console.log('Done!', delivery.dstTxHash)
+```
+
+## Supported Routes
+
+| From | To | Fee (approx) | Time |
+|------|-----|--------------|------|
+| Ethereum | Arbitrum | ~$2-5 | ~3 min |
+| Arbitrum | Ethereum | ~$2-5 | ~15 min |
+| Arbitrum | Ink | ~$1-3 | ~5 min |
+| Any L2 | Any L2 | ~$1-3 | ~5 min |
+
+## LayerZero Scan
+
+Track messages using the LayerZero Scan API:
+
+```typescript
+import { LayerZeroScanClient } from '@t402/evm'
+
+const client = new LayerZeroScanClient()
+
+// Get message status
+const message = await client.getMessage(messageGuid)
+console.log('Status:', message.status)
+// INFLIGHT | CONFIRMING | DELIVERED | FAILED | BLOCKED
+
+// Get messages by wallet
+const messages = await client.getMessagesByWallet('0x...', 10)
+```
+
+## Message Statuses
+
+| Status | Description |
+|--------|-------------|
+| `INFLIGHT` | Message sent, in transit |
+| `CONFIRMING` | Awaiting DVN confirmations |
+| `DELIVERED` | Successfully delivered |
+| `FAILED` | Delivery failed |
+| `BLOCKED` | Blocked by DVN security |
+
+## Route Selection Strategies
+
+When using `@t402/wdk-bridge`:
+
+### Cheapest (Default)
+
+Select route with lowest native fee:
+
+```typescript
+const bridge = new WdkBridgeClient({
+  accounts: { ... },
+  defaultStrategy: 'cheapest'
+})
+```
+
+### Fastest
+
+Select route with fastest estimated delivery:
+
+```typescript
+const bridge = new WdkBridgeClient({
+  accounts: { ... },
+  defaultStrategy: 'fastest'
+})
+```
+
+### Preferred
+
+Use specific source chain if available:
+
+```typescript
+const result = await bridge.autoBridge({
+  toChain: 'ethereum',
+  amount: 100_000000n,
+  recipient: '0x...',
+  preferredSourceChain: 'arbitrum'
+})
+```
+
+## Fee Estimation
+
+```typescript
+// Get quote without executing
+const quote = await bridge.quote({
+  fromChain: 'arbitrum',
+  toChain: 'ethereum',
+  amount: 100_000000n,
+  recipient: '0x...'
+})
+
+console.log('Native fee:', quote.nativeFee, 'wei')
+console.log('Amount to receive:', quote.minAmountToReceive)
+console.log('Estimated time:', quote.estimatedTime, 'seconds')
+```
+
+## Slippage Protection
+
+Set maximum slippage tolerance:
+
+```typescript
+const result = await bridge.send({
+  fromChain: 'arbitrum',
+  toChain: 'ethereum',
+  amount: 100_000000n,
+  recipient: '0x...',
+  slippageTolerance: 0.5 // 0.5%
+})
+```
+
+## USDT0 Contract Addresses
+
+| Chain | Address |
+|-------|---------|
+| Ethereum | `0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee` |
+| Arbitrum | `0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9` |
+| Ink | `0x0200C29006150606B650577BBE7B6248F58470c1` |
+| Berachain | `0x779Ded0c9e1022225f8E0630b35a9b54bE713736` |
+| Unichain | `0x588ce4F028D8e7B53B687865d6A67b3A54C75518` |
+
+## LayerZero Endpoint IDs
+
+| Chain | Endpoint ID |
+|-------|-------------|
+| Ethereum | 30101 |
+| Arbitrum | 30110 |
+| Ink | 30291 |
+| Berachain | 30362 |
+| Unichain | 30320 |
+
+## Error Handling
+
+```typescript
+import { BridgeError, InsufficientBalanceError } from '@t402/evm'
+
+try {
+  await bridge.send({ ... })
+} catch (error) {
+  if (error instanceof InsufficientBalanceError) {
+    console.log('Need more USDT0:', error.required)
+  } else if (error instanceof BridgeError) {
+    console.log('Bridge failed:', error.message)
+  }
+}
+```
+
+## Best Practices
+
+1. **Always get a quote first** to show users the fee
+2. **Set appropriate slippage** for volatile periods
+3. **Monitor delivery** with LayerZero Scan
+4. **Handle stuck messages** with manual retry
+5. **Keep native tokens** for gas on source chain

@@ -1,0 +1,221 @@
+# MCP Integration
+
+Enable AI agents like Claude to make stablecoin payments using the Model Context Protocol (MCP).
+
+## Overview
+
+The `@t402/mcp` package provides an MCP server that exposes T402 payment capabilities to AI agents. This enables use cases like:
+
+- AI agents paying for API calls
+- Automated payment workflows
+- AI-powered financial assistants
+
+## Architecture
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│  Claude Desktop │────▶│   @t402/mcp     │────▶│   Blockchain    │
+│  (MCP Client)   │     │   (MCP Server)  │     │   (EVM/TON/etc) │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+```
+
+## Setup
+
+### 1. Install the Package
+
+```bash
+npm install -g @t402/mcp
+```
+
+### 2. Configure Claude Desktop
+
+Edit `claude_desktop_config.json`:
+
+**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "t402": {
+      "command": "npx",
+      "args": ["@t402/mcp"],
+      "env": {
+        "T402_PRIVATE_KEY": "0x...",
+        "T402_DEMO_MODE": "true"
+      }
+    }
+  }
+}
+```
+
+### 3. Restart Claude Desktop
+
+The T402 tools will now be available to Claude.
+
+## Available Tools
+
+### t402/getBalance
+
+Check wallet balance on a specific network.
+
+```
+"Check my USDT0 balance on Base"
+```
+
+### t402/getAllBalances
+
+Get balances across all supported networks.
+
+```
+"What are all my stablecoin balances?"
+```
+
+### t402/pay
+
+Execute a stablecoin payment.
+
+```
+"Send 5 USDT0 to 0x1234... on Arbitrum"
+```
+
+### t402/payGasless
+
+Execute a gasless payment using ERC-4337.
+
+```
+"Send 10 USDT0 to 0x1234... without paying gas"
+```
+
+### t402/getBridgeFee
+
+Get fee quote for cross-chain bridging.
+
+```
+"How much does it cost to bridge 100 USDT0 from Arbitrum to Ethereum?"
+```
+
+### t402/bridge
+
+Bridge USDT0 between chains.
+
+```
+"Bridge 50 USDT0 from Arbitrum to Ethereum"
+```
+
+## Demo Mode
+
+For testing without real transactions:
+
+```json
+{
+  "mcpServers": {
+    "t402": {
+      "command": "npx",
+      "args": ["@t402/mcp"],
+      "env": {
+        "T402_DEMO_MODE": "true"
+      }
+    }
+  }
+}
+```
+
+In demo mode:
+- No private key required
+- Returns simulated balances and transactions
+- Safe for development and testing
+
+## Custom RPC Endpoints
+
+Configure custom RPC URLs for better reliability:
+
+```json
+{
+  "env": {
+    "T402_PRIVATE_KEY": "0x...",
+    "T402_RPC_ETHEREUM": "https://eth.llamarpc.com",
+    "T402_RPC_BASE": "https://base.llamarpc.com",
+    "T402_RPC_ARBITRUM": "https://arb1.arbitrum.io/rpc"
+  }
+}
+```
+
+## Security Best Practices
+
+1. **Use environment variables** for private keys
+2. **Enable demo mode** during development
+3. **Set spending limits** in your workflows
+4. **Monitor transactions** via block explorers
+5. **Use separate wallets** for AI agents
+
+## Example Conversations
+
+### Checking Balances
+
+> **User**: "What's my USDT balance?"
+>
+> **Claude**: Let me check your balances across all networks.
+>
+> *[Uses t402/getAllBalances]*
+>
+> Here are your current balances:
+> - Ethereum: 150.00 USDT0
+> - Arbitrum: 500.00 USDT0
+> - Base: 75.50 USDT0
+> - Total: 725.50 USDT0
+
+### Making Payments
+
+> **User**: "Pay 25 USDT0 to 0xAlice... on Base for the API subscription"
+>
+> **Claude**: I'll send 25 USDT0 to that address on Base.
+>
+> *[Uses t402/pay]*
+>
+> Payment sent successfully!
+> - Amount: 25.00 USDT0
+> - To: 0xAlice...
+> - Network: Base
+> - Transaction: 0x1234...
+
+### Cross-Chain Bridging
+
+> **User**: "I need USDT0 on Ethereum but my funds are on Arbitrum"
+>
+> **Claude**: I can bridge your USDT0 from Arbitrum to Ethereum. Let me check the fee first.
+>
+> *[Uses t402/getBridgeFee]*
+>
+> The bridge fee is approximately 0.002 ETH (~$5). How much would you like to bridge?
+>
+> **User**: "Bridge 200 USDT0"
+>
+> *[Uses t402/bridge]*
+>
+> Bridge transaction initiated!
+> - Amount: 200.00 USDT0
+> - From: Arbitrum
+> - To: Ethereum
+> - Estimated time: ~15 minutes
+> - Transaction: 0x5678...
+
+## Troubleshooting
+
+### MCP Server Not Found
+
+Ensure `@t402/mcp` is installed globally:
+
+```bash
+npm install -g @t402/mcp
+```
+
+### Connection Errors
+
+Check that Claude Desktop is properly configured and restarted.
+
+### Transaction Failures
+
+- Verify sufficient balance for amount + gas
+- Check network status
+- Ensure private key has correct permissions

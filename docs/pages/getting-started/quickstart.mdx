@@ -1,0 +1,67 @@
+# Quick Start
+
+Get up and running with T402 in under 5 minutes.
+
+## Overview
+
+T402 enables HTTP-native payments using USDT and USDT0. Here's what a typical flow looks like:
+
+1. **Client** makes a request to a protected resource
+2. **Server** responds with `402 Payment Required` and payment options
+3. **Client** signs a payment authorization
+4. **Server** verifies and settles the payment
+5. **Client** receives the requested resource
+
+## Server Setup (Express.js)
+
+```typescript
+import express from 'express'
+import { paymentMiddleware } from '@t402/express'
+import { ExactEvmScheme } from '@t402/evm'
+
+const app = express()
+
+// Add payment middleware
+app.use(paymentMiddleware({
+  'GET /api/premium': {
+    price: '$0.01',
+    network: 'eip155:8453', // Base
+    payTo: '0xYourAddress...',
+    description: 'Premium API access'
+  }
+}))
+
+app.get('/api/premium', (req, res) => {
+  res.json({ data: 'Premium content!' })
+})
+
+app.listen(3000)
+```
+
+## Client Setup
+
+```typescript
+import { t402Client, wrapFetchWithPayment } from '@t402/fetch'
+import { registerExactEvmScheme } from '@t402/evm/exact/client'
+import { privateKeyToAccount } from 'viem/accounts'
+
+// Create and configure client
+const client = new t402Client()
+registerExactEvmScheme(client, {
+  signer: privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`)
+})
+
+// Wrap fetch to automatically handle payments
+const fetchWithPayment = wrapFetchWithPayment(fetch, client)
+
+// Make requests - payments are handled automatically!
+const response = await fetchWithPayment('https://api.example.com/api/premium')
+const data = await response.json()
+```
+
+## What's Next?
+
+- [Installation](/getting-started/installation) - Detailed installation guide
+- [Core Concepts](/getting-started/concepts) - Understand how T402 works
+- [Server Integration](/getting-started/server) - Complete server setup
+- [Client Integration](/getting-started/client) - Complete client setup

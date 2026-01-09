@@ -1,0 +1,206 @@
+# Client Integration
+
+Make T402 payments from your application.
+
+## TypeScript (Fetch)
+
+The easiest way to integrate T402 is with the fetch wrapper:
+
+```typescript
+import { t402Client, wrapFetchWithPayment } from '@t402/fetch'
+import { registerExactEvmScheme } from '@t402/evm/exact/client'
+import { privateKeyToAccount } from 'viem/accounts'
+
+// 1. Create client
+const client = new t402Client()
+
+// 2. Register payment schemes
+registerExactEvmScheme(client, {
+  signer: privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`)
+})
+
+// 3. Wrap fetch
+const fetchWithPayment = wrapFetchWithPayment(fetch, client)
+
+// 4. Make requests - payments handled automatically!
+const response = await fetchWithPayment('https://api.example.com/premium')
+const data = await response.json()
+```
+
+## Multi-Network Client
+
+Support multiple blockchain networks:
+
+```typescript
+import { t402Client, wrapFetchWithPayment } from '@t402/fetch'
+import { registerExactEvmScheme } from '@t402/evm/exact/client'
+import { registerExactTonClientScheme } from '@t402/ton'
+import { registerExactTronClientScheme } from '@t402/tron'
+
+const client = new t402Client()
+
+// Register EVM (Ethereum, Base, Arbitrum, etc.)
+registerExactEvmScheme(client, {
+  signer: evmSigner
+})
+
+// Register TON
+registerExactTonClientScheme(client, {
+  signer: tonSigner,
+  getJettonWalletAddress: async (owner, master) => {
+    // Return the Jetton wallet address
+    return jettonWalletAddress
+  }
+})
+
+// Register TRON
+registerExactTronClientScheme(client, {
+  signer: tronSigner
+})
+
+// Now the client can pay on any supported network
+const fetchWithPayment = wrapFetchWithPayment(fetch, client)
+```
+
+## Axios Integration
+
+```typescript
+import axios from 'axios'
+import { t402AxiosInterceptor } from '@t402/axios'
+import { registerExactEvmScheme } from '@t402/evm/exact/client'
+
+const client = new t402Client()
+registerExactEvmScheme(client, { signer })
+
+// Add interceptor to axios instance
+const api = axios.create({ baseURL: 'https://api.example.com' })
+t402AxiosInterceptor(api, client)
+
+// Make requests
+const response = await api.get('/premium')
+```
+
+## With Tether WDK
+
+Use Tether WDK for wallet management:
+
+```typescript
+import { WDK } from '@tetherto/wdk'
+import { createWdkSigner } from '@t402/wdk'
+
+// Initialize WDK
+const wdk = new WDK({ /* config */ })
+const account = await wdk.createAccount()
+
+// Create signer from WDK account
+const signer = createWdkSigner(account)
+
+// Use with T402 client
+const client = new t402Client()
+registerExactEvmScheme(client, { signer })
+```
+
+## Python Client
+
+```python
+import httpx
+from t402.client import T402Client
+from t402.evm import create_evm_signer
+
+# Create client
+client = T402Client()
+
+# Register EVM signer
+signer = create_evm_signer(private_key="0x...")
+client.register("eip155:8453", signer)
+
+# Make request
+async with httpx.AsyncClient() as http:
+    response = await client.fetch(
+        http,
+        "https://api.example.com/premium"
+    )
+    data = response.json()
+```
+
+## Go Client
+
+```go
+package main
+
+import (
+    "fmt"
+    t402 "github.com/t402-io/t402/go"
+    "github.com/t402-io/t402/go/mechanisms/evm/exact/client"
+)
+
+func main() {
+    // Create client
+    c := t402.NewClient()
+
+    // Register EVM scheme
+    evmScheme := client.NewExactEvmScheme(privateKey)
+    c.Register("eip155:8453", evmScheme)
+
+    // Make request
+    resp, err := c.Fetch("https://api.example.com/premium")
+    if err != nil {
+        panic(err)
+    }
+    fmt.Println(resp.Body)
+}
+```
+
+## Payment Preferences
+
+Configure network preferences:
+
+```typescript
+const client = new t402Client({
+  // Prefer these networks (in order)
+  preferredNetworks: ['eip155:8453', 'eip155:42161', 'eip155:1'],
+
+  // Maximum amount willing to pay
+  maxAmount: '10000000', // 10 USDT
+
+  // Callback on payment
+  onPayment: (payment) => {
+    console.log(`Paid ${payment.amount} on ${payment.network}`)
+  }
+})
+```
+
+## Error Handling
+
+```typescript
+import { T402Error, PaymentRequiredError, PaymentFailedError } from '@t402/core'
+
+try {
+  const response = await fetchWithPayment('https://api.example.com/premium')
+} catch (error) {
+  if (error instanceof PaymentRequiredError) {
+    console.log('Payment required:', error.requirements)
+  } else if (error instanceof PaymentFailedError) {
+    console.log('Payment failed:', error.reason)
+  } else if (error instanceof T402Error) {
+    console.log('T402 error:', error.message)
+  }
+}
+```
+
+## Balance Checking
+
+Check balances before making requests:
+
+```typescript
+import { getBalance } from '@t402/evm'
+
+// Check USDT0 balance on Base
+const balance = await getBalance({
+  address: '0x...',
+  network: 'eip155:8453',
+  token: 'USDT0'
+})
+
+console.log(`Balance: ${balance.formatted} USDT0`)
+```

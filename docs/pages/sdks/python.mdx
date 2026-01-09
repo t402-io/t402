@@ -1,0 +1,79 @@
+# Python SDK
+
+The T402 Python SDK provides comprehensive support for HTTP-native stablecoin payments.
+
+## Installation
+
+```bash
+pip install t402
+```
+
+## Quick Start
+
+```python
+from t402.client import T402Client
+from t402.evm import create_evm_signer
+
+# Create client
+client = T402Client()
+
+# Register signer
+signer = create_evm_signer(private_key="0x...")
+client.register("eip155:8453", signer)
+
+# Make request
+response = await client.fetch(url)
+```
+
+## Modules
+
+| Module | Description |
+|--------|-------------|
+| `t402.core` | Protocol types and utilities |
+| `t402.evm` | EVM mechanism |
+| `t402.ton` | TON mechanism |
+| `t402.tron` | TRON mechanism |
+| `t402.flask` | Flask integration |
+| `t402.fastapi` | FastAPI integration |
+
+## Flask Integration
+
+```python
+from flask import Flask
+from t402.flask import create_paywall
+
+app = Flask(__name__)
+
+paywall = create_paywall(
+    routes={
+        "GET /api/premium": {
+            "scheme": "exact",
+            "network": "eip155:8453",
+            "price": "$0.01",
+            "pay_to": "0x..."
+        }
+    },
+    facilitator_url="https://facilitator.t402.io"
+)
+app.register_blueprint(paywall)
+```
+
+## FastAPI Integration
+
+```python
+from fastapi import FastAPI
+from t402.fastapi import PaymentMiddleware
+
+app = FastAPI()
+
+app.add_middleware(
+    PaymentMiddleware,
+    config={ ... },
+    facilitator_url="https://facilitator.t402.io"
+)
+```
+
+## Requirements
+
+- Python 3.9+
+- pip or uv package manager
