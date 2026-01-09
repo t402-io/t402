@@ -1,6 +1,15 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
+import { keccak256, toBytes } from "viem";
 import { Usdt0Bridge, createUsdt0Bridge } from "../../../src/bridge/client";
 import type { BridgeSigner } from "../../../src/bridge/types";
+
+// OFTSent event topic for mock logs
+const OFT_SENT_EVENT_TOPIC = keccak256(
+  toBytes("OFTSent(bytes32,uint32,address,uint256,uint256)")
+);
+
+// Mock message GUID
+const MOCK_MESSAGE_GUID = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
 
 describe("Usdt0Bridge", () => {
   let mockSigner: BridgeSigner;
@@ -13,7 +22,20 @@ describe("Usdt0Bridge", () => {
         lzTokenFee: 0n,
       }),
       writeContract: vi.fn().mockResolvedValue("0xtxhash123"),
-      waitForTransactionReceipt: vi.fn().mockResolvedValue({ status: "success" }),
+      waitForTransactionReceipt: vi.fn().mockResolvedValue({
+        status: "success",
+        transactionHash: "0xtxhash123",
+        logs: [
+          {
+            address: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+            topics: [
+              OFT_SENT_EVENT_TOPIC,
+              MOCK_MESSAGE_GUID, // GUID as indexed param
+            ],
+            data: "0x",
+          },
+        ],
+      }),
     };
   });
 
@@ -152,6 +174,7 @@ describe("Usdt0Bridge", () => {
       });
 
       expect(result.txHash).toBe("0xtxhash123");
+      expect(result.messageGuid).toBe(MOCK_MESSAGE_GUID);
       expect(result.amountSent).toBe(100_000000n);
       expect(result.fromChain).toBe("arbitrum");
       expect(result.toChain).toBe("ethereum");
@@ -199,9 +222,11 @@ describe("Usdt0Bridge", () => {
         lzTokenFee: 0n,
       });
 
-      mockSigner.waitForTransactionReceipt = vi
-        .fn()
-        .mockResolvedValue({ status: "reverted" });
+      mockSigner.waitForTransactionReceipt = vi.fn().mockResolvedValue({
+        status: "reverted",
+        transactionHash: "0xtxhash123",
+        logs: [],
+      });
 
       const bridge = new Usdt0Bridge(mockSigner, "arbitrum");
 

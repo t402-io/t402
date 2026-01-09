@@ -141,6 +141,30 @@ export interface MessageReceipt {
 }
 
 /**
+ * Transaction log entry
+ */
+export interface TransactionLog {
+  /** Contract address that emitted the log */
+  address: Address;
+  /** Indexed event parameters */
+  topics: readonly `0x${string}`[];
+  /** Non-indexed event data */
+  data: `0x${string}`;
+}
+
+/**
+ * Transaction receipt with logs
+ */
+export interface TransactionReceipt {
+  /** Transaction status ("success" or "reverted") */
+  status: string;
+  /** Transaction hash */
+  transactionHash: `0x${string}`;
+  /** Event logs emitted during transaction */
+  logs: readonly TransactionLog[];
+}
+
+/**
  * Signer interface for bridge operations
  */
 export interface BridgeSigner {
@@ -164,5 +188,103 @@ export interface BridgeSigner {
   /** Wait for transaction receipt */
   waitForTransactionReceipt(args: {
     hash: `0x${string}`;
-  }): Promise<{ status: string }>;
+  }): Promise<TransactionReceipt>;
+}
+
+// ============================================================================
+// LayerZero Scan Types
+// ============================================================================
+
+/**
+ * LayerZero message status from Scan API
+ */
+export type LayerZeroMessageStatus =
+  | "INFLIGHT"    // Message sent, in transit between chains
+  | "CONFIRMING"  // Awaiting confirmations
+  | "DELIVERED"   // Successfully delivered to destination chain
+  | "FAILED"      // Delivery failed
+  | "BLOCKED";    // Message blocked by DVN
+
+/**
+ * LayerZero message from Scan API
+ */
+export interface LayerZeroMessage {
+  /** Unique message identifier */
+  guid: string;
+  /** Source chain LayerZero endpoint ID */
+  srcEid: number;
+  /** Destination chain LayerZero endpoint ID */
+  dstEid: number;
+  /** Source chain OApp address */
+  srcUaAddress: string;
+  /** Destination chain OApp address */
+  dstUaAddress: string;
+  /** Source chain transaction hash */
+  srcTxHash: string;
+  /** Destination chain transaction hash (when delivered) */
+  dstTxHash?: string;
+  /** Current message status */
+  status: LayerZeroMessageStatus;
+  /** Source chain block number */
+  srcBlockNumber: number;
+  /** Destination chain block number (when delivered) */
+  dstBlockNumber?: number;
+  /** Timestamp when message was created */
+  created: string;
+  /** Timestamp when message was last updated */
+  updated: string;
+}
+
+/**
+ * Options for waiting for message delivery
+ */
+export interface WaitForDeliveryOptions {
+  /** Maximum time to wait in milliseconds (default: 600000 = 10 minutes) */
+  timeout?: number;
+  /** Polling interval in milliseconds (default: 10000 = 10 seconds) */
+  pollInterval?: number;
+  /** Callback when status changes */
+  onStatusChange?: (status: LayerZeroMessageStatus) => void;
+}
+
+// ============================================================================
+// Cross-Chain Payment Router Types
+// ============================================================================
+
+/**
+ * Parameters for cross-chain payment routing
+ */
+export interface CrossChainPaymentParams {
+  /** Source chain where user has funds */
+  sourceChain: string;
+  /** Destination chain where payment is needed */
+  destinationChain: string;
+  /** Amount to transfer (in token units, 6 decimals for USDT0) */
+  amount: bigint;
+  /** Payment recipient on destination chain */
+  payTo: Address;
+  /** Payer address (receives bridged funds on destination) */
+  payer: Address;
+  /** Slippage tolerance percentage (default: 0.5) */
+  slippageTolerance?: number;
+}
+
+/**
+ * Result of cross-chain payment routing
+ */
+export interface CrossChainPaymentResult {
+  /** Bridge transaction hash on source chain */
+  bridgeTxHash: `0x${string}`;
+  /** LayerZero message GUID for tracking */
+  messageGuid: `0x${string}`;
+  /** Amount bridged from source chain */
+  amountBridged: bigint;
+  /** Estimated amount to receive on destination */
+  estimatedReceiveAmount: bigint;
+  /** Source chain name */
+  sourceChain: string;
+  /** Destination chain name */
+  destinationChain: string;
+  /** Estimated delivery time in seconds */
+  estimatedDeliveryTime: number;
 }

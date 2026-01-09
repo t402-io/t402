@@ -91,6 +91,32 @@ from t402.erc4337 import (
     SafeAccountConfig,
     create_smart_account,
 )
+from t402.bridge import (
+    # Client
+    Usdt0Bridge,
+    create_usdt0_bridge,
+    # LayerZero Scan
+    LayerZeroScanClient,
+    create_layerzero_scan_client,
+    # Router
+    CrossChainPaymentRouter,
+    create_cross_chain_payment_router,
+    # Constants
+    LAYERZERO_ENDPOINT_IDS,
+    USDT0_OFT_ADDRESSES,
+    LAYERZERO_SCAN_BASE_URL,
+    get_bridgeable_chains,
+    supports_bridging,
+    # Types
+    BridgeQuoteParams,
+    BridgeQuote,
+    BridgeExecuteParams,
+    BridgeResult,
+    LayerZeroMessage,
+    LayerZeroMessageStatus,
+    CrossChainPaymentParams,
+    CrossChainPaymentResult,
+)
 
 def hello() -> str:
     return "Hello from t402!"
@@ -180,4 +206,24 @@ __all__ = [
     "SafeSmartAccount",
     "SafeAccountConfig",
     "create_smart_account",
+    # USDT0 Bridge
+    "Usdt0Bridge",
+    "create_usdt0_bridge",
+    "LayerZeroScanClient",
+    "create_layerzero_scan_client",
+    "CrossChainPaymentRouter",
+    "create_cross_chain_payment_router",
+    "LAYERZERO_ENDPOINT_IDS",
+    "USDT0_OFT_ADDRESSES",
+    "LAYERZERO_SCAN_BASE_URL",
+    "get_bridgeable_chains",
+    "supports_bridging",
+    "BridgeQuoteParams",
+    "BridgeQuote",
+    "BridgeExecuteParams",
+    "BridgeResult",
+    "LayerZeroMessage",
+    "LayerZeroMessageStatus",
+    "CrossChainPaymentParams",
+    "CrossChainPaymentResult",
 ]

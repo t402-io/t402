@@ -36,6 +36,7 @@
  */
 
 import type { Address } from "viem";
+import { keccak256, toBytes } from "viem";
 import {
   getEndpointId,
   getUsdt0OftAddress,
@@ -54,7 +55,16 @@ import type {
   BridgeSigner,
   SendParam,
   MessagingFee,
+  TransactionReceipt,
 } from "./types.js";
+
+/**
+ * OFTSent event signature for GUID extraction
+ * Event: OFTSent(bytes32 indexed guid, uint32 dstEid, address indexed from, uint256 amountSentLD, uint256 amountReceivedLD)
+ */
+const OFT_SENT_EVENT_TOPIC = keccak256(
+  toBytes("OFTSent(bytes32,uint32,address,uint256,uint256)")
+);
 
 /**
  * Default slippage tolerance (0.5%)
@@ -160,15 +170,39 @@ export class Usdt0Bridge {
       throw new Error(`Bridge transaction failed: ${txHash}`);
     }
 
+    // Extract message GUID from OFTSent event logs
+    const messageGuid = this.extractMessageGuid(receipt);
+
     return {
       txHash,
-      messageGuid: "0x" + "0".repeat(64) as `0x${string}`, // Would be extracted from event logs
+      messageGuid,
       amountSent: params.amount,
       amountToReceive: sendParam.minAmountLD,
       fromChain: params.fromChain,
       toChain: params.toChain,
       estimatedTime: ESTIMATED_BRIDGE_TIME,
     };
+  }
+
+  /**
+   * Extract LayerZero message GUID from OFTSent event logs
+   *
+   * @param receipt - Transaction receipt with logs
+   * @returns Message GUID as hex string
+   */
+  private extractMessageGuid(receipt: TransactionReceipt): `0x${string}` {
+    for (const log of receipt.logs) {
+      // Check if this is an OFTSent event
+      if (log.topics[0] === OFT_SENT_EVENT_TOPIC && log.topics[1]) {
+        // GUID is the first indexed parameter (topics[1])
+        return log.topics[1];
+      }
+    }
+
+    throw new Error(
+      "Failed to extract message GUID from transaction logs. " +
+        "The OFTSent event was not found in the transaction receipt.",
+    );
   }
 
   /**
