@@ -194,9 +194,10 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
   - Health/readiness endpoints
   - Docker + docker-compose
   - EVM multi-chain support
-- [ ] Deploy facilitator.t402.io
-  - Multi-region deployment
-  - API key management
+- [x] Deploy facilitator.t402.io
+  - Production deployment on home server
+  - Automatic SSL via Caddy + Let's Encrypt
+  - EVM networks: Ethereum, Arbitrum, Base, Optimism
 - [ ] Set up monitoring (Grafana dashboards)
 - [ ] Load testing (10k+ TPS target)
 - [ ] Security hardening
@@ -207,7 +208,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 - [x] @t402/wdk-bridge package (v1.0.0 published)
 - [x] docs.t402.io live
 - [x] Facilitator service built (services/facilitator/)
-- [ ] facilitator.t402.io deployed to production
+- [x] facilitator.t402.io deployed to production
 
 ---
 
@@ -366,7 +367,7 @@ t402 (pip install t402)
 
 Production facilitator service for payment verification and settlement.
 
-**Status**: Service built (`services/facilitator/`), deployment pending.
+**Status**: Live at https://facilitator.t402.io
 
 **API Endpoints**:
 - `POST /verify` - Validate payment signatures
@@ -376,13 +377,15 @@ Production facilitator service for payment verification and settlement.
 - `GET /ready` - Readiness probe
 - `GET /metrics` - Prometheus metrics
 
-**Current Features** (in `services/facilitator/`):
+**Current Features**:
 - Multi-chain EVM support (Ethereum, Arbitrum, Base, Optimism)
 - Redis-based rate limiting
 - Prometheus metrics
 - Health/readiness endpoints
-- Docker + docker-compose support
-- Graceful shutdown
+- Automatic SSL via Caddy + Let's Encrypt
+- Docker deployment
+
+**Facilitator Address**: `0xC88f67e776f16DcFBf42e6bDda1B82604448899B`
 
 **Planned Features**:
 - Multi-region deployment (US, EU, APAC)
