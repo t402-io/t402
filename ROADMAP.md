@@ -23,9 +23,9 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 ### Supported Languages
 | Language | Package | Version | Status |
 |----------|---------|---------|--------|
-| TypeScript | `@t402/*` | 2.0.0 | Production |
-| Go | `github.com/awesome-doge/t402/go` | 1.0.0 | Production |
-| Python | `t402` | 1.0.0 | Production |
+| TypeScript | `@t402/*` | 2.1.0 | Production |
+| Go | `github.com/awesome-doge/t402/go` | 1.1.0 | Production |
+| Python | `t402` | 1.1.0 | Production |
 | Java | `io.t402:t402` | 0.1.x | Beta |
 
 ### Supported Blockchains
@@ -36,7 +36,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 | Base | EIP-3009 | - | ERC-4337 | Production |
 | Ink | EIP-3009 | - | ERC-4337 | Production |
 | Berachain | EIP-3009 | - | ERC-4337 | Beta |
-| TON | - | Jetton | - | Beta |
+| TON | - | Jetton | - | Production |
 | TRON | - | TRC-20 | - | Planned |
 | Solana | - | SPL | - | Production |
 
@@ -96,13 +96,14 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 
 #### Milestones
 
-**Week 5-6: TON Complete**
-- [ ] Complete TON facilitator implementation
-- [ ] Add TON testnet support
-- [ ] Implement TON transaction tracking
+**Week 5-6: TON Complete** ✅
+- [x] Complete TON facilitator implementation
+- [x] Add TON testnet support
+- [x] Implement TON transaction tracking
 - [x] Add TON to Go SDK (mechanisms/ton with client, server, facilitator)
-- [ ] Integration tests
-- [ ] Publish @t402/ton v2.0.0
+- [x] Add TON to Python SDK (ton.py with types, utilities, Flask/FastAPI support)
+- [x] Integration tests
+- [x] Publish @t402/ton v2.1.0
 
 **Week 7-8: TRON Support**
 - [ ] Create @t402/tron package
@@ -303,7 +304,7 @@ github.com/awesome-doge/t402/go
 t402 (pip install t402)
 ├── core/                  - Protocol types
 ├── evm/                   - EVM mechanism
-├── ton/                   - TON mechanism [PLANNED]
+├── ton/                   - TON mechanism (types, utilities, paywall)
 ├── tron/                  - TRON mechanism [PLANNED]
 ├── wdk/                   - WDK adapter [PLANNED]
 ├── fastapi/               - FastAPI integration
