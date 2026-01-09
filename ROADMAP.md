@@ -379,17 +379,20 @@ Production facilitator service for payment verification and settlement.
 
 **Current Features**:
 - Multi-chain EVM support (Ethereum, Arbitrum, Base, Optimism)
+- TON blockchain support (Mainnet + Testnet)
 - Redis-based rate limiting
 - Prometheus metrics
 - Health/readiness endpoints
 - Automatic SSL via Caddy + Let's Encrypt
 - Docker deployment
 
-**Facilitator Address**: `0xC88f67e776f16DcFBf42e6bDda1B82604448899B`
+**Facilitator Addresses**:
+- EVM: `0xC88f67e776f16DcFBf42e6bDda1B82604448899B`
+- TON: `EQ5d11d21276ac6b5efdf179e654ff0c6eee34e0abfa263a`
 
 **Planned Features**:
 - Multi-region deployment (US, EU, APAC)
-- TON, TRON, Solana support
+- TRON, Solana support
 - Hot wallet rotation
 - API key management
 - Gas price optimization
