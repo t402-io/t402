@@ -3,6 +3,7 @@ packages:
   - packages/extensions
   - packages/http/*
   - packages/mechanisms/*
+  - packages/mcp
   - packages/wdk
   - packages/legacy/*
   - examples/facilitator

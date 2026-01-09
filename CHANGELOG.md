@@ -7,6 +7,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2026-01-09] - MCP Integration for AI Agent Payments
+
+### Added
+
+#### @t402/mcp (`mcp/v1.0.0`)
+
+Model Context Protocol (MCP) server enabling AI agents like Claude to make stablecoin payments across multiple blockchain networks.
+
+#### MCP Tools
+- **t402/getBalance**: Check wallet balance (native + stablecoins) on a specific network
+- **t402/getAllBalances**: Check balances across all supported networks with aggregated totals
+- **t402/pay**: Execute stablecoin payments (USDC, USDT, USDT0)
+- **t402/payGasless**: Execute gasless payments using ERC-4337 account abstraction
+- **t402/getBridgeFee**: Get fee quotes for USDT0 cross-chain bridging
+- **t402/bridge**: Bridge USDT0 between chains using LayerZero OFT
+
+#### Features
+- **Demo Mode**: Simulate transactions without real execution for testing
+- **Multi-Chain Support**: Ethereum, Base, Arbitrum, Optimism, Polygon, Avalanche, Ink, Berachain, Unichain
+- **Custom RPC URLs**: Configure custom endpoints per network
+- **ERC-4337 Support**: Gasless transactions with bundler/paymaster configuration
+- **CLI Entry Point**: `npx @t402/mcp` for Claude Desktop integration
+
+#### Claude Desktop Integration
+```json
+{
+  "mcpServers": {
+    "t402": {
+      "command": "npx",
+      "args": ["@t402/mcp"],
+      "env": {
+        "T402_DEMO_MODE": "true"
+      }
+    }
+  }
+}
+```
+
+#### Environment Variables
+| Variable | Description |
+|----------|-------------|
+| `T402_PRIVATE_KEY` | Wallet private key for signing transactions |
+| `T402_DEMO_MODE` | Enable simulated transactions |
+| `T402_BUNDLER_URL` | ERC-4337 bundler URL |
+| `T402_PAYMASTER_URL` | Paymaster URL for sponsored gas |
+| `T402_RPC_*` | Custom RPC URLs per network |
+
+#### Examples
+- `examples/typescript/mcp/standalone.ts` - Programmatic usage without MCP server
+
+---
+
 ## [2026-01-09] - USDT0 Cross-Chain Bridge via LayerZero
 
 ### Added
