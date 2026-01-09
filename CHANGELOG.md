@@ -7,6 +7,82 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2026-01-09] - ERC-4337 Account Abstraction Support
+
+### Added
+
+#### ERC-4337 Gasless Transactions (`erc4337/v1.0.0`)
+
+Full ERC-4337 v0.7 Account Abstraction support across all SDKs, enabling gasless transactions with smart accounts and paymaster sponsorship.
+
+#### TypeScript SDK (`@t402/evm`)
+- **Bundler Clients**: Generic, Pimlico, and Alchemy bundler integrations
+  - `createBundlerClient()` - Factory function with provider auto-detection
+  - `PimlicoBundlerClient` - Extended methods: `getUserOperationGasPrice`, `sendCompressedUserOperation`
+  - `AlchemyBundlerClient` - Extended methods: `requestGasAndPaymasterAndData`, `simulateUserOperationAssetChanges`
+- **Paymaster Integrations**: Gas sponsorship with multiple providers
+  - `PimlicoPaymaster` - Sponsorship policies and token quotes
+  - `BiconomyPaymaster` - Sponsored and ERC-20 payment modes
+  - `StackupPaymaster` - Off-chain sponsorship support
+  - `createPaymaster()` - Unified factory function
+- **Safe Smart Account**: Safe 4337 module v0.3.0 integration
+  - `SafeSmartAccount` - Counterfactual address derivation
+  - `encodeExecute()` / `encodeExecuteBatch()` - Transaction encoding
+  - `signUserOpHash()` - EIP-712 typed data signing
+
+#### Go SDK (`github.com/t402-io/t402/go/mechanisms/evm/erc4337`)
+- **Core Types**: `UserOperation`, `PackedUserOperation`, `GasEstimate`, `UserOperationReceipt`
+- **Bundler Clients**: `GenericBundlerClient`, `PimlicoBundlerClient`, `AlchemyBundlerClient`
+- **Paymaster Clients**: `PimlicoPaymaster`, `BiconomyPaymaster`, `StackupPaymaster`
+- **Safe Account**: `SafeSmartAccount` with full 4337 module support
+- **Utilities**: Gas packing/unpacking, network detection, constants
+
+#### Python SDK (`t402.erc4337`)
+- **Types**: `UserOperation`, `PackedUserOperation`, `PaymasterData`, `GasEstimate`
+- **Bundler Clients**: `GenericBundlerClient`, `PimlicoBundlerClient`, `AlchemyBundlerClient`
+- **Paymaster Clients**: `PimlicoPaymaster`, `BiconomyPaymaster`, `StackupPaymaster`, `UnifiedPaymaster`
+- **Safe Account**: `SafeSmartAccount` with eth-account signing
+- **Factory Functions**: `create_bundler_client()`, `create_paymaster()`, `create_smart_account()`
+
+#### Documentation & Examples
+- **TypeScript Example**: `examples/typescript/clients/erc4337/`
+- **Go Example**: `examples/go/clients/erc4337/`
+- **Python Example**: `examples/python/erc4337-gasless/`
+
+### Technical Details
+
+#### Supported Chains
+| Chain | Chain ID | Pimlico | Alchemy |
+|-------|----------|---------|---------|
+| Ethereum Mainnet | 1 | ✓ | ✓ |
+| Ethereum Sepolia | 11155111 | ✓ | ✓ |
+| Base | 8453 | ✓ | ✓ |
+| Base Sepolia | 84532 | ✓ | ✓ |
+| Optimism | 10 | ✓ | ✓ |
+| Arbitrum One | 42161 | ✓ | ✓ |
+| Polygon | 137 | ✓ | ✓ |
+
+#### EntryPoint Addresses
+- v0.7: `0x0000000071727De22E5E9d8BAf0edAc6f37da032`
+- v0.6 (legacy): `0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789`
+
+#### Safe 4337 Module Addresses (v0.3.0)
+- Module: `0xa581c4A4DB7175302464fF3C06380BC3270b4037`
+- Module Setup: `0x2dd68b007B46fBe91B9A7c3EDa5A7a1063cB5b47`
+- Singleton: `0x29fcB43b46531BcA003ddC8FCB67FFE91900C762`
+- Proxy Factory: `0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67`
+
+#### Gasless Transaction Flow
+1. Create Safe smart account (counterfactual address)
+2. Build UserOperation with call data
+3. Estimate gas via bundler
+4. Request paymaster sponsorship
+5. Sign UserOperation hash
+6. Submit to bundler
+7. Wait for on-chain confirmation
+
+---
+
 ## [2026-01-09] - TRON Blockchain Support
 
 ### Added
