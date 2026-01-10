@@ -198,7 +198,13 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
   - Production deployment on home server
   - Automatic SSL via Caddy + Let's Encrypt
   - EVM networks: Ethereum, Arbitrum, Base, Optimism
-- [ ] Set up monitoring (Grafana dashboards)
+- [x] Set up monitoring (Grafana dashboards)
+  - Prometheus metrics collection (prometheus.yml)
+  - Grafana dashboard with 13 panels
+  - Request rate, latency, success metrics
+  - Verify/Settle operation tracking
+  - Network breakdown charts
+  - Available at grafana.facilitator.t402.io
 - [ ] Load testing (10k+ TPS target)
 - [ ] Security hardening
 
