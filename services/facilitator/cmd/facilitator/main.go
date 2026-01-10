@@ -80,6 +80,9 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, error) {
 			{t402.Network("eip155:42161"), cfg.ArbitrumRPC, "Arbitrum"},
 			{t402.Network("eip155:8453"), cfg.BaseRPC, "Base"},
 			{t402.Network("eip155:10"), cfg.OptimismRPC, "Optimism"},
+			{t402.Network("eip155:57073"), cfg.InkRPC, "Ink"},
+			{t402.Network("eip155:80084"), cfg.BerachainRPC, "Berachain"},
+			{t402.Network("eip155:130"), cfg.UnichainRPC, "Unichain"},
 		}
 
 		// Use Base RPC as default if available, otherwise use first available RPC
