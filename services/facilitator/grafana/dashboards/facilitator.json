@@ -18,7 +18,7 @@
       "type": "row"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -59,7 +59,7 @@
       "type": "stat"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -102,7 +102,7 @@
       "type": "stat"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -143,7 +143,7 @@
       "type": "stat"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -196,7 +196,7 @@
       "type": "row"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -247,7 +247,7 @@
       "type": "timeseries"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -316,7 +316,7 @@
       "type": "row"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -367,8 +367,8 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(facilitator_verify_total[5m])) by (result)",
-          "legendFormat": "verify - {{result}}",
+          "expr": "sum(rate(facilitator_requests_total{endpoint=\"/verify\"}[5m])) by (status)",
+          "legendFormat": "verify - {{status}}",
           "refId": "A"
         }
       ],
@@ -376,7 +376,7 @@
       "type": "timeseries"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -427,8 +427,8 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(facilitator_settle_total[5m])) by (result)",
-          "legendFormat": "settle - {{result}}",
+          "expr": "sum(rate(facilitator_requests_total{endpoint=\"/settle\"}[5m])) by (status)",
+          "legendFormat": "settle - {{status}}",
           "refId": "A"
         }
       ],
@@ -440,11 +440,11 @@
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 25 },
       "id": 103,
       "panels": [],
-      "title": "Network Breakdown",
+      "title": "Status Breakdown",
       "type": "row"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -486,16 +486,16 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(facilitator_verify_total[1h])) by (network)",
-          "legendFormat": "{{network}}",
+          "expr": "sum(increase(facilitator_requests_total{endpoint=\"/verify\"}[1h])) by (status)",
+          "legendFormat": "{{status}}",
           "refId": "A"
         }
       ],
-      "title": "Verify by Network (1h)",
+      "title": "Verify by Status (1h)",
       "type": "timeseries"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -537,16 +537,16 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(facilitator_settle_total[1h])) by (network)",
-          "legendFormat": "{{network}}",
+          "expr": "sum(increase(facilitator_requests_total{endpoint=\"/settle\"}[1h])) by (status)",
+          "legendFormat": "{{status}}",
           "refId": "A"
         }
       ],
-      "title": "Settle by Network (1h)",
+      "title": "Settle by Status (1h)",
       "type": "timeseries"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -570,16 +570,16 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(facilitator_verify_total[24h])) by (network)",
-          "legendFormat": "{{network}}",
+          "expr": "sum(increase(facilitator_requests_total{endpoint=\"/verify\"}[24h])) by (status)",
+          "legendFormat": "{{status}}",
           "refId": "A"
         }
       ],
-      "title": "Verify Distribution (24h)",
+      "title": "Verify Status Distribution (24h)",
       "type": "piechart"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -603,12 +603,12 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(facilitator_settle_total[24h])) by (network)",
-          "legendFormat": "{{network}}",
+          "expr": "sum(increase(facilitator_requests_total{endpoint=\"/settle\"}[24h])) by (status)",
+          "legendFormat": "{{status}}",
           "refId": "A"
         }
       ],
-      "title": "Settle Distribution (24h)",
+      "title": "Settle Status Distribution (24h)",
       "type": "piechart"
     },
     {
@@ -620,7 +620,7 @@
       "type": "row"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
