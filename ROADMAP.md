@@ -212,7 +212,15 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
   - 100% success rate within rate limits
   - Rate limiting validated (429 responses working)
   - Grafana alerts configured (7 alert rules)
-- [ ] Security hardening
+- [x] Security hardening completed
+  - Network isolation (internal/external bridge networks)
+  - Only Caddy (80/443) exposed to internet
+  - Redis password authentication
+  - no-new-privileges on all containers
+  - Read-only filesystem for facilitator
+  - Secure cookies and HSTS for Grafana
+  - Dependency vulnerability scanning (govulncheck)
+  - Go 1.24.4 for security patches
 
 #### Deliverables
 - [x] @t402/mcp package (v1.0.0 published)
