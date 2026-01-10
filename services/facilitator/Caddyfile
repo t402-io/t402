@@ -25,6 +25,56 @@ facilitator.t402.io {
     }
 }
 
+# Grafana dashboard
+grafana.facilitator.t402.io {
+    reverse_proxy grafana:3000
+
+    # Security headers
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options SAMEORIGIN
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy strict-origin-when-cross-origin
+        -Server
+    }
+
+    # Enable compression
+    encode gzip
+
+    # Logging
+    log {
+        output file /data/grafana-access.log {
+            roll_size 100mb
+            roll_keep 5
+        }
+    }
+}
+
+# Prometheus metrics (internal access)
+prometheus.facilitator.t402.io {
+    reverse_proxy prometheus:9090
+
+    # Basic auth for security (configure in environment)
+    # basicauth /* {
+    #     admin $PROMETHEUS_HASH
+    # }
+
+    # Security headers
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        X-XSS-Protection "1; mode=block"
+        -Server
+    }
+
+    log {
+        output file /data/prometheus-access.log {
+            roll_size 100mb
+            roll_keep 5
+        }
+    }
+}
+
 # Health check endpoint (no HTTPS required for internal monitoring)
 :8081 {
     respond /health "OK" 200
