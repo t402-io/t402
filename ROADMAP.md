@@ -378,7 +378,7 @@ Production facilitator service for payment verification and settlement.
 - `GET /metrics` - Prometheus metrics
 
 **Current Features**:
-- Multi-chain EVM support (Ethereum, Arbitrum, Base, Optimism)
+- Multi-chain EVM support (Ethereum, Arbitrum, Base, Optimism, Ink, Berachain, Unichain)
 - TON blockchain support (Mainnet + Testnet)
 - TRON blockchain support (Mainnet + Nile + Shasta)
 - Solana blockchain support (Mainnet + Devnet)
