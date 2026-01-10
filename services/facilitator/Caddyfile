@@ -52,7 +52,7 @@ grafana.facilitator.t402.io {
 
 # Prometheus metrics (internal access)
 prometheus.facilitator.t402.io {
-    reverse_proxy prometheus:9090
+    reverse_proxy prometheus:9090  # internal docker port, external is 9091
 
     # Basic auth for security (configure in environment)
     # basicauth /* {
