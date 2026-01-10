@@ -43,6 +43,17 @@ services:
       timeout: 5s
       retries: 5
 
+  # Redis exporter for Prometheus metrics
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.55.0
+    environment:
+      - REDIS_ADDR=redis://redis:6379
+    ports:
+      - "9121:9121"
+    depends_on:
+      - redis
+    restart: unless-stopped
+
   # Caddy for automatic HTTPS
   caddy:
     image: caddy:2-alpine
