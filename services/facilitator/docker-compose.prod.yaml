@@ -4,12 +4,13 @@ services:
     build:
       context: ../..
       dockerfile: services/facilitator/Dockerfile
-    ports:
-      - "8080:8080"
+    # Port only exposed internally, Caddy handles external traffic
+    expose:
+      - "8080"
     environment:
       - PORT=8080
       - ENVIRONMENT=production
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-t402redis}@redis:6379
       - RATE_LIMIT_REQUESTS=1000
       - RATE_LIMIT_WINDOW=60
     env_file:
@@ -30,31 +31,48 @@ services:
           memory: 512M
         reservations:
           memory: 256M
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=64M
+    networks:
+      - internal
+      - external
 
   redis:
     image: redis:7-alpine
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-t402redis}
     volumes:
       - redis_data:/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-t402redis}", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - internal
 
   # Redis exporter for Prometheus metrics
   redis-exporter:
     image: oliver006/redis_exporter:v1.55.0
     environment:
       - REDIS_ADDR=redis://redis:6379
-    ports:
-      - "9121:9121"
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-t402redis}
+    expose:
+      - "9121"
     depends_on:
       - redis
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - internal
 
-  # Caddy for automatic HTTPS
+  # Caddy for automatic HTTPS (only service exposed to internet)
   caddy:
     image: caddy:2-alpine
     ports:
@@ -67,8 +85,13 @@ services:
     depends_on:
       - facilitator
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - internal
+      - external
 
-  # Prometheus for metrics collection
+  # Prometheus for metrics collection (internal only)
   prometheus:
     image: prom/prometheus:v2.48.0
     volumes:
@@ -79,8 +102,8 @@ services:
       - '--storage.tsdb.path=/prometheus'
       - '--storage.tsdb.retention.time=30d'
       - '--web.enable-lifecycle'
-    ports:
-      - "9091:9090"
+    expose:
+      - "9090"
     depends_on:
       - facilitator
     restart: unless-stopped
@@ -89,8 +112,12 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - internal
 
-  # Grafana for dashboards
+  # Grafana for dashboards (internal only, accessed via Caddy)
   grafana:
     image: grafana/grafana:10.2.2
     volumes:
@@ -106,8 +133,10 @@ services:
       - GF_SERVER_ROOT_URL=https://grafana.facilitator.t402.io
       - GF_UNIFIED_ALERTING_ENABLED=true
       - GF_ALERTING_ENABLED=false
-    ports:
-      - "3000:3000"
+      - GF_SECURITY_COOKIE_SECURE=true
+      - GF_SECURITY_STRICT_TRANSPORT_SECURITY=true
+    expose:
+      - "3000"
     depends_on:
       - prometheus
     restart: unless-stopped
@@ -116,6 +145,17 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
+    internal: true
+  external:
+    driver: bridge
 
 volumes:
   redis_data:
