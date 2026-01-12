@@ -381,8 +381,8 @@ export class t402ResourceServer {
     );
 
     if (!SchemeNetworkServer) {
-      // Fallback to placeholder implementation if no server registered
-      // TODO: Remove this fallback once implementations are registered
+      // No server implementation registered for this scheme/network combination
+      // Return empty requirements - caller must register appropriate scheme servers
       console.warn(
         `No server implementation registered for scheme: ${scheme}, network: ${resourceConfig.network}`,
       );
