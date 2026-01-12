@@ -2,7 +2,7 @@
 
 > **The Official Payment Protocol for USDT**
 
-This document outlines the development roadmap for T402, a payment protocol specifically designed for USDT and USDT0, with deep integration with [Tether WDK](https://wallet.tether.io/).
+This document outlines the development status and roadmap for T402, a payment protocol specifically designed for USDT and USDT0, with deep integration with [Tether WDK](https://wallet.tether.io/).
 
 ---
 
@@ -18,433 +18,250 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 
 ---
 
-## Current Status
+## Deployed Resources
 
-### Supported Languages
-| Language | Package | Version | Status |
-|----------|---------|---------|--------|
-| TypeScript | `@t402/*` | 2.2.0 | Production |
-| Go | `github.com/t402-io/t402/go` | 1.2.0 | Production |
-| Python | `t402` | 1.2.0 | Production |
-| Java | `io.t402:t402` | 0.1.x | Beta |
+### Live Services
 
-### Supported Blockchains
-| Chain | USDT0 | USDT | Gasless | Status |
-|-------|-------|------|---------|--------|
-| Ethereum | EIP-3009 | Legacy | ERC-4337 | Production |
-| Arbitrum | EIP-3009 | - | ERC-4337 | Production |
-| Base | EIP-3009 | - | ERC-4337 | Production |
-| Ink | EIP-3009 | - | ERC-4337 | Production |
-| Berachain | EIP-3009 | - | ERC-4337 | Beta |
-| TON | - | Jetton | - | Production |
-| TRON | - | TRC-20 | - | Production |
-| Solana | - | SPL | - | Production |
+| Service | URL | Status |
+|---------|-----|--------|
+| Facilitator API | https://facilitator.t402.io | ✅ Live |
+| Documentation | https://docs.t402.io | ✅ Live |
+| Grafana Monitoring | https://grafana.facilitator.t402.io | ✅ Live |
+| Container Registry | https://github.com/t402-io/t402/pkgs/container/facilitator | ✅ Live |
 
-### WDK Integration
-| Feature | Package | Status |
-|---------|---------|--------|
-| Basic Signer | @t402/wdk | Production |
-| Multi-chain Wallets | @t402/wdk | Production |
-| Balance Aggregation | @t402/wdk | Production |
-| Balance Caching (TTL) | @t402/wdk | Production |
-| Error Handling | @t402/wdk | Production |
-| Bridge (LayerZero) | @t402/wdk-bridge | Production |
-| Gasless (ERC-4337) | @t402/wdk-gasless | Production |
-| Multi-sig (Safe) | @t402/wdk-multisig | Production |
-| MCP Server | @t402/mcp | Production |
+### Package Registries
+
+| Registry | URL | Status |
+|----------|-----|--------|
+| NPM | https://www.npmjs.com/org/t402 | ✅ Published |
+| PyPI | https://pypi.org/project/t402/ | ✅ Published |
+| Go Modules | github.com/t402-io/t402/go | ✅ Published |
+
+### Pending
+
+| Service | URL | Status |
+|---------|-----|--------|
+| Main Website | https://t402.io | ⏳ Pending |
+| Ecosystem Directory | https://t402.org/ecosystem | ⏳ Pending |
 
 ---
 
-## Roadmap Phases
+## Package Versions
 
-### Phase 1: Foundation (Weeks 1-4)
+### TypeScript (@t402/*)
 
-#### Goals
-- Complete codebase cleanup
-- Enhance WDK core integration
-- Publish stable packages
+| Package | Version | Description |
+|---------|---------|-------------|
+| @t402/core | 2.0.0 | Protocol types, HTTP utilities |
+| @t402/evm | 2.2.0 | EVM chains (EIP-3009, USDT0) |
+| @t402/svm | 2.0.0 | Solana (SPL tokens) |
+| @t402/ton | 2.1.0 | TON (USDT Jetton) |
+| @t402/tron | 1.0.0 | TRON (TRC-20 USDT) |
+| @t402/wdk | 2.0.1 | Tether WDK integration |
+| @t402/wdk-gasless | 1.0.0 | ERC-4337 gasless payments |
+| @t402/wdk-bridge | 1.0.0 | LayerZero bridging |
+| @t402/wdk-multisig | 1.0.0 | Safe multi-sig wallets |
+| @t402/mcp | 1.0.0 | AI agent MCP server |
+| @t402/express | 2.0.0 | Express.js middleware |
+| @t402/next | 2.0.0 | Next.js integration |
+| @t402/hono | 2.0.0 | Hono middleware |
+| @t402/fastify | 2.0.0 | Fastify middleware |
+| @t402/fetch | 2.0.0 | Fetch client wrapper |
+| @t402/axios | 2.0.0 | Axios interceptor |
+| @t402/paywall | 2.0.0 | Universal paywall UI |
+| @t402/react | 2.0.0 | React components |
+| @t402/vue | 2.0.0 | Vue components |
+| @t402/cli | 2.0.0 | Command-line tools |
+| @t402/extensions | 2.0.0 | Protocol extensions |
 
-#### Milestones
+### Other SDKs
 
-**Week 1-2: Cleanup & Branding**
-- [x] Set up github.com/t402-io organization
-- [x] Migrate repository to t402-io/t402
-- [x] Configure NPM @t402 publishing (@t402/core, @t402/evm, @t402/svm, @t402/ton, @t402/wdk, @t402/extensions)
-- [x] Update all remaining metadata (homepage, topics)
-- [x] Configure CI/CD for automated releases (npm, Go, Python)
-
-**Week 3-4: WDK Core Enhancement**
-- [x] Complete WDK signer with full error handling
-- [x] Implement balance caching with TTL
-- [x] Add comprehensive test suite (90%+ coverage)
-- [x] Write WDK integration documentation
-- [x] Publish @t402/wdk v2.0.0
-
-#### Deliverables
-- Clean, branded codebase
-- @t402/wdk v2.0.0 with full documentation
-- Automated release pipeline
-
----
-
-### Phase 2: Multi-Chain (Weeks 5-12)
-
-#### Goals
-- Complete TON support
-- Add TRON support
-- Production-ready gasless payments
-- Complete LayerZero bridge
-
-#### Milestones
-
-**Week 5-6: TON Complete** ✅
-- [x] Complete TON facilitator implementation
-- [x] Add TON testnet support
-- [x] Implement TON transaction tracking
-- [x] Add TON to Go SDK (mechanisms/ton with client, server, facilitator)
-- [x] Add TON to Python SDK (ton.py with types, utilities, Flask/FastAPI support)
-- [x] Integration tests
-- [x] Publish @t402/ton v2.1.0
-
-**Week 7-8: TRON Support** ✅
-- [x] Create @t402/tron package
-- [x] Implement TRC-20 USDT transfers
-- [x] Add TRON signer interfaces (ClientTronSigner, FacilitatorTronSigner)
-- [x] Add TRON to Go SDK (mechanisms/tron with client, server, facilitator)
-- [x] Add TRON to Python SDK (tron.py with types, utilities, network support)
-- [x] Add examples for all SDKs (TypeScript, Go, Python)
-- [x] Publish @t402/tron v1.0.0
-
-**Week 9-10: ERC-4337 Production** ✅
-- [x] Integrate Pimlico bundler
-- [x] Integrate Alchemy AA
-- [x] Add paymaster providers (Biconomy, Stackup)
-- [x] Safe smart account support
-- [x] Production deployment testing
-- [x] Update ERC-4337 documentation
-
-**Week 11-12: LayerZero Bridge** ✅
-- [x] Complete bridge client implementation
-- [x] Implement fee estimation
-- [x] Add message tracking (LayerZero Scan)
-- [x] Cross-chain payment routing
-- [x] Publish bridge module in @t402/evm
-
-#### Deliverables ✅
-- Full TON support (@t402/ton)
-- Full TRON support (@t402/tron)
-- Production ERC-4337 gasless (in @t402/evm)
-- Complete LayerZero bridge (in @t402/evm)
-- All chains integrated
+| SDK | Version | Status |
+|-----|---------|--------|
+| Go | 1.24.0 | Production |
+| Python | 1.4.0 | Production |
+| Java | 1.0.0-SNAPSHOT | Development |
 
 ---
 
-### Phase 3: Enterprise (Weeks 13-20)
+## Supported Blockchains
 
-#### Goals
-- AI agent integration via MCP
-- Advanced WDK features
-- Complete documentation
-- Production infrastructure
-
-#### Milestones
-
-**Week 13-14: MCP Integration** ✅
-- [x] Create @t402/mcp package
-- [x] Implement MCP server with tools:
-  - `t402/getBalance`
-  - `t402/getAllBalances`
-  - `t402/pay`
-  - `t402/payGasless`
-  - `t402/bridge`
-  - `t402/getBridgeFee`
-- [x] Claude Desktop integration guide
-- [x] AI agent examples
-- [x] Publish @t402/mcp v1.0.0
-
-**Week 15-16: WDK Advanced** ✅
-- [x] Create @t402/wdk-gasless package
-  - Smart account creation from WDK signer
-  - Gasless USDT0 transfers
-  - Batch payments
-  - Sponsored transaction detection
-- [x] Create @t402/wdk-bridge package
-  - Automatic chain selection
-  - Fee-optimized routing
-  - Transaction tracking
-- [x] Multi-sig support (@t402/wdk-multisig)
-- [x] Hardware wallet support (Ledger, Trezor via WDK)
-
-**Week 17-18: Documentation Site** ✅
-- [x] Set up Nextra project for docs.t402.io
-- [x] Write comprehensive documentation:
-  - Getting Started guides
-  - Server integration (Express, Next, Hono, FastAPI, Go)
-  - Client integration (Fetch, Axios, WDK)
-  - Chain-specific guides
-  - Advanced features (gasless, bridge, MCP)
-  - API reference
-- [x] Deploy to docs.t402.io
-- [x] Set up Algolia search integration
-
-**Week 19-20: Infrastructure**
-- [x] Build facilitator service (`services/facilitator/`)
-  - Production-ready Go service
-  - Redis-based rate limiting
-  - Prometheus metrics
-  - Health/readiness endpoints
-  - Docker + docker-compose
-  - EVM multi-chain support
-- [x] Deploy facilitator.t402.io
-  - Production deployment on home server
-  - Automatic SSL via Caddy + Let's Encrypt
-  - EVM networks: Ethereum, Arbitrum, Base, Optimism
-- [x] Set up monitoring (Grafana dashboards)
-  - Prometheus metrics collection (prometheus.yml)
-  - Grafana dashboard with 13 panels
-  - Request rate, latency, success metrics
-  - Verify/Settle operation tracking
-  - Network breakdown charts
-  - Available at grafana.facilitator.t402.io
-- [x] Load testing completed
-  - 620-670 requests/second sustained throughput
-  - P50 latency: 105-204ms
-  - P95 latency: 267-590ms
-  - 100% success rate within rate limits
-  - Rate limiting validated (429 responses working)
-  - Grafana alerts configured (7 alert rules)
-- [x] Security hardening completed
-  - Network isolation (internal/external bridge networks)
-  - Only Caddy (80/443) exposed to internet
-  - Redis password authentication
-  - no-new-privileges on all containers
-  - Read-only filesystem for facilitator
-  - Secure cookies and HSTS for Grafana
-  - Dependency vulnerability scanning (govulncheck)
-  - Go 1.24.4 for security patches
-- [x] Endpoint testing completed
-  - /verify endpoint tested on all chains (EVM, TON, TRON, Solana)
-  - /settle endpoint tested on testnets (TON testnet, TRON Nile)
-  - Proper error handling and response formats validated
-  - Metrics recording verified in Prometheus
-  - No alerts triggered during load testing
-
-#### Deliverables
-- [x] @t402/mcp package (v1.0.0 published)
-- [x] @t402/wdk-gasless package (v1.0.0 published)
-- [x] @t402/wdk-bridge package (v1.0.0 published)
-- [x] docs.t402.io live
-- [x] Facilitator service built (services/facilitator/)
-- [x] facilitator.t402.io deployed to production
+| Chain | Token | Mechanism | Gasless | Status |
+|-------|-------|-----------|---------|--------|
+| Ethereum | USDT0 | EIP-3009 | ERC-4337 | Production |
+| Arbitrum | USDT0 | EIP-3009 | ERC-4337 | Production |
+| Base | USDT0 | EIP-3009 | ERC-4337 | Production |
+| Optimism | USDT0 | EIP-3009 | ERC-4337 | Production |
+| Ink | USDT0 | EIP-3009 | ERC-4337 | Production |
+| Berachain | USDT0 | EIP-3009 | ERC-4337 | Beta |
+| Unichain | USDT0 | EIP-3009 | ERC-4337 | Production |
+| TON | USDT | Jetton | - | Production |
+| TRON | USDT | TRC-20 | - | Production |
+| Solana | USDT | SPL | - | Production |
 
 ---
 
-### Phase 4: Launch (Weeks 21-26)
+## Completed Milestones
 
-#### Goals
-- Security validation
-- Open source release
-- Tether partnership
-- Community building
+### Foundation ✅
+- [x] GitHub organization (t402-io) setup
+- [x] Repository migration to t402-io/t402
+- [x] NPM @t402 namespace publishing
+- [x] PyPI t402 package publishing
+- [x] Go module publishing
+- [x] CI/CD pipelines (GitHub Actions)
+- [x] Automated release workflows (npm, Go, Python)
 
-#### Milestones
+### Multi-Chain Support ✅
+- [x] EVM chains with EIP-3009/USDT0
+- [x] TON with USDT Jetton
+- [x] TRON with TRC-20 USDT
+- [x] Solana with SPL tokens
 
-**Week 21-22: Security Audit**
-- [ ] Protocol security review (Trail of Bits, OpenZeppelin, or similar)
-- [ ] Penetration testing
-- [x] Bug bounty program setup
-- [ ] Fix all critical/high findings
-- [x] Security documentation
+### Advanced Features ✅
+- [x] ERC-4337 gasless payments
+- [x] LayerZero cross-chain bridging
+- [x] Safe multi-sig support
+- [x] MCP server for AI agents
+- [x] Hardware wallet support (Ledger, Trezor)
 
-**Week 23-24: Open Source Preparation**
-- [x] Final code review pass
-- [x] Remove any sensitive data
-- [x] License verification (Apache 2.0)
-- [x] CONTRIBUTING.md update (added security section, code of conduct)
-- [x] Issue templates (bug report, feature request, new chain, documentation)
-- [x] Discussion templates (Q&A, ideas, show-and-tell, general, announcements)
-- [x] Community guidelines (CODE_OF_CONDUCT.md, SUPPORT.md)
+### Server Frameworks ✅
+- [x] Express.js middleware (@t402/express)
+- [x] Next.js integration (@t402/next)
+- [x] Hono middleware (@t402/hono)
+- [x] Fastify middleware (@t402/fastify)
+- [x] FastAPI integration (Python)
+- [x] Flask integration (Python)
+- [x] Gin middleware (Go)
 
-**Week 25-26: Tether Partnership & Launch**
-- [x] Prepare technical demo for Tether/WDK team
-- [x] Create partnership proposal:
-  - Technical integration plan
-  - "Powered by Tether" branding
-  - Revenue/fee structure
-- [x] Developer documentation publication
+### Client Libraries ✅
+- [x] Fetch client wrapper (@t402/fetch)
+- [x] Axios interceptor (@t402/axios)
+- [x] Universal paywall component (@t402/paywall)
+- [x] React components (@t402/react)
+- [x] Vue components (@t402/vue)
+- [x] CLI tools (@t402/cli)
 
-**Websites**
+### Infrastructure ✅
+- [x] Facilitator service (Go)
+- [x] Docker containerization
+- [x] Redis rate limiting
+- [x] Prometheus metrics
+- [x] Grafana dashboards
+- [x] Watchtower auto-deployment
+- [x] Caddy reverse proxy with SSL
+- [x] GitHub Container Registry publishing
+- [x] Trivy security scanning
+- [x] SBOM generation
+
+### Documentation & Community ✅
+- [x] Documentation site (docs.t402.io)
+- [x] Algolia search integration
+- [x] Bug bounty program
+- [x] Security policy
+- [x] Issue/Discussion templates
+- [x] Contributing guidelines
+- [x] Code of conduct
+
+---
+
+## Pending Items
+
+### Websites
 - [ ] t402.io - Main landing page
 - [ ] t402.org/ecosystem - Ecosystem directory
 
-#### Deliverables
-- Security audit report
+### Security
+- [ ] External security audit (Trail of Bits, OpenZeppelin, or similar)
+- [ ] Penetration testing
+- [ ] Address all critical/high audit findings
+
+### Future SDKs
+- [ ] Java SDK stable release (currently 1.0.0-SNAPSHOT)
+- [ ] Rust SDK
+- [ ] Swift SDK
+
+### Infrastructure Enhancements
+- [ ] Multi-region deployment (US, EU, APAC)
+- [ ] Hot wallet rotation
+- [ ] Gas price optimization
 
 ---
 
-## Package Architecture
+## Facilitator Service
 
-### NPM Packages (@t402/)
+Production facilitator service for payment verification and settlement.
 
-```
-@t402/core           - Protocol types, HTTP utilities, base client/server
-@t402/evm            - EVM mechanism (EIP-3009, USDT0)
-@t402/svm            - Solana mechanism
-@t402/ton            - TON mechanism (USDT Jetton)
-@t402/tron           - TRON mechanism (TRC-20 USDT) [NEW]
+**Live at**: https://facilitator.t402.io
 
-@t402/wdk            - Tether WDK integration
-@t402/wdk-gasless    - WDK + ERC-4337
-@t402/wdk-multisig   - WDK + Safe multi-sig [NEW]
-@t402/wdk-bridge     - WDK + LayerZero
-@t402/mcp            - MCP server for AI agents
+### API Endpoints
 
-@t402/express        - Express.js middleware
-@t402/next           - Next.js integration
-@t402/hono           - Hono middleware
-@t402/fastify        - Fastify middleware
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/verify` | POST | Validate payment signatures |
+| `/settle` | POST | Execute on-chain transfers |
+| `/supported` | GET | List supported networks and schemes |
+| `/health` | GET | Liveness probe |
+| `/ready` | GET | Readiness probe |
+| `/metrics` | GET | Prometheus metrics |
 
-@t402/fetch          - Fetch client wrapper
-@t402/axios          - Axios interceptor
+### Facilitator Addresses
 
-@t402/paywall        - Universal paywall component
-@t402/react          - React components
-@t402/vue            - Vue components
+| Chain | Address |
+|-------|---------|
+| EVM | `0xC88f67e776f16DcFBf42e6bDda1B82604448899B` |
+| TON | `EQ5d11d21276ac6b5efdf179e654ff0c6eee34e0abfa263a` |
+| TRON | `TT1MqNNj2k5qdGA6nrrCodW6oyHbbAreQ5` |
+| Solana | `8GGtWHRQ1wz5gDKE2KXZLktqzcfV1CBqSbeUZjA7hoWL` |
 
-@t402/extensions     - Protocol extensions (Bazaar, etc.)
-@t402/cli            - Command line tools
-```
+### Features
 
-### Go Module
-
-```
-github.com/t402-io/t402/go
-├── client.go              - HTTP client
-├── server.go              - HTTP server
-├── facilitator.go         - Facilitator service
-├── mechanisms/
-│   ├── evm/               - EVM (Ethereum, Arbitrum, Base, etc.)
-│   ├── svm/               - Solana
-│   ├── ton/               - TON (client, server, facilitator)
-│   └── tron/              - TRON (client, server, facilitator)
-├── http/                  - Framework integrations
-│   └── gin/               - Gin middleware
-└── types/                 - Protocol types
-```
-
-### Python Package
-
-```
-t402 (pip install t402)
-├── core/                  - Protocol types
-├── evm/                   - EVM mechanism
-├── ton/                   - TON mechanism (types, utilities, paywall)
-├── tron/                  - TRON mechanism (types, utilities, network support)
-├── wdk/                   - WDK adapter
-├── fastapi/               - FastAPI integration
-├── flask/                 - Flask integration
-└── clients/               - HTTP clients
-```
+- Multi-chain support (EVM, TON, TRON, Solana)
+- Redis-based rate limiting
+- Prometheus metrics & Grafana dashboards
+- API key authentication
+- Automatic SSL via Caddy
+- Docker deployment with Watchtower
+- Trivy vulnerability scanning
+- SBOM generation
 
 ---
 
-## Token Support
+## Token Addresses
 
-### USDT0 (New OFT Token)
+### USDT0 (OFT Token)
 
-| Chain | Address | EIP-3009 |
-|-------|---------|----------|
-| Ethereum | `0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee` | Yes |
-| Arbitrum | `0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9` | Yes |
-| Base | TBA | Yes |
-| Ink | `0x0200C29006150606B650577BBE7B6248F58470c1` | Yes |
-| Berachain | `0x779Ded0c9e1022225f8E0630b35a9b54bE713736` | Yes |
-| Unichain | `0x588ce4F028D8e7B53B687865d6A67b3A54C75518` | Yes |
+| Chain | Address |
+|-------|---------|
+| Ethereum | `0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee` |
+| Arbitrum | `0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9` |
+| Ink | `0x0200C29006150606B650577BBE7B6248F58470c1` |
+| Berachain | `0x779Ded0c9e1022225f8E0630b35a9b54bE713736` |
+| Unichain | `0x588ce4F028D8e7B53B687865d6A67b3A54C75518` |
 
 ### USDT (Legacy)
 
-| Chain | Address | Protocol |
-|-------|---------|----------|
-| Ethereum | `0xdAC17F958D2ee523a2206206994597C13D831ec7` | ERC-20 |
-| TRON | `TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t` | TRC-20 |
-| Polygon | `0xc2132D05D31c914a87C6611C10748AEb04B58e8F` | ERC-20 |
-| BNB Chain | `0x55d398326f99059fF775485246999027B3197955` | BEP-20 |
+| Chain | Address |
+|-------|---------|
+| Ethereum | `0xdAC17F958D2ee523a2206206994597C13D831ec7` |
+| TRON | `TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t` |
+| Polygon | `0xc2132D05D31c914a87C6611C10748AEb04B58e8F` |
+| BNB Chain | `0x55d398326f99059fF775485246999027B3197955` |
 
 ### TON USDT
 
-| Network | Master Address |
-|---------|----------------|
+| Network | Address |
+|---------|---------|
 | Mainnet | `EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs` |
 | Testnet | `kQBqSpvo4S87mX9tTc4FX3Sfqf4uSp3Tx-Fz4RBUfTRWBx` |
 
 ### TRON USDT (TRC-20)
 
-| Network | Contract Address |
-|---------|------------------|
+| Network | Address |
+|---------|---------|
 | Mainnet | `TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t` |
 | Nile Testnet | `TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf` |
 | Shasta Testnet | `TG3XXyExBkPp9nzdajDZsozEu4BkaSJozs` |
-
----
-
-## Infrastructure
-
-### facilitator.t402.io
-
-Production facilitator service for payment verification and settlement.
-
-**Status**: Live at https://facilitator.t402.io
-
-**API Endpoints**:
-- `POST /verify` - Validate payment signatures
-- `POST /settle` - Execute on-chain transfers
-- `GET /supported` - List supported networks and schemes
-- `GET /health` - Liveness probe
-- `GET /ready` - Readiness probe
-- `GET /metrics` - Prometheus metrics
-
-**Current Features**:
-- Multi-chain EVM support (Ethereum, Arbitrum, Base, Optimism, Ink, Berachain, Unichain)
-- TON blockchain support (Mainnet + Testnet)
-- TRON blockchain support (Mainnet + Nile + Shasta)
-- Solana blockchain support (Mainnet + Devnet)
-- Redis-based rate limiting
-- Prometheus metrics
-- Health/readiness endpoints
-- Automatic SSL via Caddy + Let's Encrypt
-- Docker deployment
-- GitHub Actions CI/CD (test, build, security scan)
-- Watchtower auto-deployment (5-minute polling)
-- Trivy container vulnerability scanning
-- SBOM generation
-- API key authentication
-  - X-API-Key header, Authorization Bearer, query param support
-  - SHA-256 key hashing for secure storage
-  - Per-key usage metrics (`facilitator_api_key_usage_total`)
-  - Auth failure tracking (`facilitator_api_key_auth_failed_total`)
-  - Configurable via `API_KEYS` environment variable
-
-**Facilitator Addresses**:
-- EVM: `0xC88f67e776f16DcFBf42e6bDda1B82604448899B`
-- TON: `EQ5d11d21276ac6b5efdf179e654ff0c6eee34e0abfa263a`
-- TRON: `TT1MqNNj2k5qdGA6nrrCodW6oyHbbAreQ5`
-- Solana: `8GGtWHRQ1wz5gDKE2KXZLktqzcfV1CBqSbeUZjA7hoWL`
-
-**Planned Features**:
-- Multi-region deployment (US, EU, APAC)
-- Hot wallet rotation
-- Gas price optimization
-
-### docs.t402.io
-
-Comprehensive documentation site powered by Nextra:
-
-- Getting started guides
-- Server integration tutorials
-- Client integration tutorials
-- Chain-specific documentation
-- API reference
-- Examples and templates
 
 ---
 
