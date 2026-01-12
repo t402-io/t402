@@ -417,16 +417,18 @@ Production facilitator service for payment verification and settlement.
 - Watchtower auto-deployment (5-minute polling)
 - Trivy container vulnerability scanning
 - SBOM generation
+- API key authentication
+  - X-API-Key header, Authorization Bearer, query param support
+  - SHA-256 key hashing for secure storage
+  - Per-key usage metrics (`facilitator_api_key_usage_total`)
+  - Auth failure tracking (`facilitator_api_key_auth_failed_total`)
+  - Configurable via `API_KEYS` environment variable
 
 **Facilitator Addresses**:
 - EVM: `0xC88f67e776f16DcFBf42e6bDda1B82604448899B`
 - TON: `EQ5d11d21276ac6b5efdf179e654ff0c6eee34e0abfa263a`
 - TRON: `TT1MqNNj2k5qdGA6nrrCodW6oyHbbAreQ5`
 - Solana: `8GGtWHRQ1wz5gDKE2KXZLktqzcfV1CBqSbeUZjA7hoWL`
-
-**Current Features**:
-- API key authentication (X-API-Key header, Bearer token, query param)
-- Per-key usage metrics tracking
 
 **Planned Features**:
 - Multi-region deployment (US, EU, APAC)
