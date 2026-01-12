@@ -1,0 +1,93 @@
+title: "[Show & Tell]: "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Show Off Your Project!
+
+        Built something with t402? We'd love to see it! Share your project with the community.
+
+  - type: input
+    id: project_name
+    attributes:
+      label: Project Name
+      placeholder: My Awesome Project
+    validations:
+      required: true
+
+  - type: input
+    id: project_url
+    attributes:
+      label: Project URL
+      description: Link to your project (GitHub, website, demo, etc.)
+      placeholder: https://...
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Project Type
+      options:
+        - Web application
+        - Mobile app
+        - API / Backend service
+        - Library / SDK extension
+        - CLI tool
+        - Bot / Automation
+        - Integration
+        - Tutorial / Example
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: chains
+    attributes:
+      label: Chains Used
+      description: Which blockchains does your project use?
+      multiple: true
+      options:
+        - Ethereum
+        - Arbitrum
+        - Base
+        - Optimism
+        - TON
+        - TRON
+        - Solana
+        - Multiple chains
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Tell us about your project
+      placeholder: |
+        - What does it do?
+        - What problem does it solve?
+        - What t402 features did you use?
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots / Demo
+      description: Share screenshots, GIFs, or video links
+      placeholder: Drag and drop images or paste links...
+
+  - type: textarea
+    id: learnings
+    attributes:
+      label: Learnings & Tips
+      description: Any tips or learnings you'd like to share with others?
+      placeholder: What worked well? Any challenges you overcame?
+
+  - type: checkboxes
+    id: featured
+    attributes:
+      label: Feature Request
+      options:
+        - label: I'd like this project to be considered for the t402 showcase
