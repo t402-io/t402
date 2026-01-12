@@ -1,0 +1,105 @@
+name: Feature Request
+description: Suggest a new feature or enhancement
+title: "[Feature]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! Please fill out the form below.
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Feature Category
+      description: What type of feature is this?
+      options:
+        - New blockchain support
+        - New payment scheme
+        - SDK enhancement
+        - Facilitator service
+        - WDK integration
+        - MCP/AI integration
+        - Documentation
+        - Developer experience
+        - Performance
+        - Security
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: sdk
+    attributes:
+      label: Target SDK(s)
+      description: Which SDK(s) should this feature be implemented in?
+      multiple: true
+      options:
+        - TypeScript
+        - Go
+        - Python
+        - Java
+        - All SDKs
+        - Not applicable
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve? Is there a current limitation?
+      placeholder: Describe the problem or limitation...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe your proposed solution or feature.
+      placeholder: Describe the solution...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any alternative solutions or workarounds?
+      placeholder: Describe alternatives...
+
+  - type: textarea
+    id: api
+    attributes:
+      label: Proposed API (if applicable)
+      description: If this involves API changes, provide example usage.
+      render: typescript
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature to you?
+      options:
+        - Nice to have
+        - Important
+        - Critical for my use case
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I am willing to submit a PR for this feature
+        - label: I would like guidance on implementing this
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues to ensure this feature hasn't been requested
+          required: true

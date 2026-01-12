@@ -4,11 +4,29 @@ t402 welcomes contributions of schemes, middleware, new chain support, and more.
 
 ## Contents
 
+- [Code of Conduct](#code-of-conduct)
+- [Security](#security)
 - [Repository Structure](#repository-structure)
 - [Language-Specific Guides](#language-specific-guides)
 - [Contributing Workflow](#contributing-workflow)
 - [Commit Signing](#commit-signing)
 - [Getting Help](#getting-help)
+
+## Code of Conduct
+
+This project follows the [Contributor Covenant Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct/). By participating, you are expected to uphold this code. Please report unacceptable behavior to the maintainers.
+
+## Security
+
+**Do not report security vulnerabilities through public GitHub issues.**
+
+If you discover a security vulnerability, please report it privately:
+
+1. Go to the [Security Advisories](https://github.com/t402-io/t402/security/advisories/new) page
+2. Click "Report a vulnerability"
+3. Provide detailed information about the vulnerability
+
+We take security seriously and will respond promptly to verified reports. See our [Security Policy](SECURITY.md) for more details.
 
 ## Repository Structure
 

@@ -1,0 +1,103 @@
+name: New Chain Support
+description: Request support for a new blockchain
+title: "[Chain]: "
+labels: ["new-chain", "enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for requesting support for a new blockchain! Please provide as much detail as possible.
+
+  - type: input
+    id: chain_name
+    attributes:
+      label: Blockchain Name
+      description: Name of the blockchain
+      placeholder: "e.g., Avalanche, Polygon, etc."
+    validations:
+      required: true
+
+  - type: input
+    id: chain_id
+    attributes:
+      label: Chain ID / Network Identifier
+      description: The chain ID or network identifier
+      placeholder: "e.g., eip155:43114, cosmos:cosmoshub-4"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: chain_type
+    attributes:
+      label: Chain Type
+      options:
+        - EVM-compatible
+        - Cosmos SDK
+        - Move-based (Aptos/Sui)
+        - Solana-compatible
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: usdt_info
+    attributes:
+      label: USDT/USDT0 Information
+      description: Information about USDT or USDT0 on this chain
+      placeholder: |
+        - USDT Contract Address:
+        - Token Standard: (e.g., ERC-20, TRC-20)
+        - Decimals:
+        - Official Tether support: Yes/No
+    validations:
+      required: true
+
+  - type: textarea
+    id: transfer_mechanism
+    attributes:
+      label: Preferred Transfer Mechanism
+      description: How should payments be authorized and settled?
+      placeholder: |
+        e.g., EIP-3009 (transferWithAuthorization), permit2, native transfer with signature, etc.
+
+  - type: textarea
+    id: resources
+    attributes:
+      label: Resources
+      description: Links to documentation, RPC endpoints, block explorers, etc.
+      placeholder: |
+        - Documentation:
+        - RPC Endpoints:
+        - Block Explorer:
+        - SDK/Libraries:
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this chain support?
+      options:
+        - Nice to have
+        - Important - significant user demand
+        - Critical - blocking production use
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I am willing to implement this chain support
+        - label: I can help test on this chain
+        - label: I have access to testnet tokens for testing
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I have verified USDT/USDT0 exists on this chain
+          required: true
+        - label: I have searched existing issues for this chain request
+          required: true

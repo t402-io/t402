@@ -1,0 +1,70 @@
+name: Documentation
+description: Report documentation issues or request improvements
+title: "[Docs]: "
+labels: ["documentation", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve our documentation!
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Documentation Type
+      options:
+        - Missing documentation
+        - Incorrect/outdated information
+        - Unclear explanation
+        - Typo/formatting issue
+        - New tutorial request
+        - API reference issue
+        - Example code issue
+    validations:
+      required: true
+
+  - type: dropdown
+    id: location
+    attributes:
+      label: Documentation Location
+      description: Where is the documentation issue?
+      options:
+        - docs.t402.io website
+        - README.md
+        - CONTRIBUTING.md
+        - Code comments/JSDoc/GoDoc
+        - API reference
+        - Examples
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: url
+    attributes:
+      label: Page URL or File Path
+      description: Link to the page or path to the file
+      placeholder: "https://docs.t402.io/... or typescript/packages/core/README.md"
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe the documentation issue or improvement
+      placeholder: Describe the issue...
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested Improvement
+      description: If you have a suggestion for how to fix or improve the documentation
+      placeholder: Describe your suggestion...
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I am willing to submit a PR to fix this documentation issue

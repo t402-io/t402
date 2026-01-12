@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://docs.t402.io
+    about: Check our documentation for guides and API reference
+  - name: Security Vulnerabilities
+    url: https://github.com/t402-io/t402/security/advisories/new
+    about: Report security vulnerabilities privately
+  - name: Discussions
+    url: https://github.com/t402-io/t402/discussions
+    about: Ask questions and discuss ideas with the community
