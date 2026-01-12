@@ -1,0 +1,26 @@
+{
+  "name": "t402-tether-demo",
+  "version": "1.0.0",
+  "description": "T402 Technical Demo for Tether Partnership",
+  "type": "module",
+  "scripts": {
+    "demo:wdk": "npx tsx demo-wdk-payment.ts",
+    "demo:gasless": "npx tsx demo-gasless.ts",
+    "demo:bridge": "npx tsx demo-bridge.ts",
+    "demo:mcp": "npx tsx demo-mcp-ai.ts",
+    "demo:all": "npm run demo:wdk && npm run demo:gasless && npm run demo:bridge && npm run demo:mcp"
+  },
+  "dependencies": {
+    "@t402/core": "workspace:*",
+    "@t402/evm": "workspace:*",
+    "@t402/ton": "workspace:*",
+    "@t402/wdk": "workspace:*",
+    "@t402/wdk-bridge": "workspace:*",
+    "@t402/wdk-gasless": "workspace:*",
+    "@t402/mcp": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.0"
+  }
+}

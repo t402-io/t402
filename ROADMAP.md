@@ -265,7 +265,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 - [x] Community guidelines (CODE_OF_CONDUCT.md, SUPPORT.md)
 
 **Week 25-26: Tether Partnership & Launch**
-- [ ] Prepare technical demo for Tether/WDK team
+- [x] Prepare technical demo for Tether/WDK team
 - [ ] Create partnership proposal:
   - Technical integration plan
   - "Powered by Tether" branding
