@@ -7,6 +7,9 @@
   "scripts": {
     "build": "tsup",
     "test": "vitest run --pool=forks",
+    "test:integration": "vitest run --config vitest.integration.config.ts --pool=forks",
+    "test:all": "vitest run --pool=forks && vitest run --config vitest.integration.config.ts --pool=forks",
+    "test:coverage": "vitest run --pool=forks --coverage && vitest run --config vitest.integration.config.ts --pool=forks --coverage",
     "test:watch": "vitest",
     "format": "prettier -c .prettierrc --write \"**/*.{ts,js,cjs,json,md}\"",
     "format:check": "prettier -c .prettierrc --check \"**/*.{ts,js,cjs,json,md}\"",
@@ -37,6 +40,7 @@
     "@types/node": "^22.13.4",
     "@typescript-eslint/eslint-plugin": "^8.29.1",
     "@typescript-eslint/parser": "^8.29.1",
+    "@vitest/coverage-v8": "^3.2.4",
     "eslint": "^9.24.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jsdoc": "^50.6.9",
