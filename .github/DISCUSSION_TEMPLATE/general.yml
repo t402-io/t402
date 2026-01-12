@@ -1,0 +1,25 @@
+title: "[Discussion]: "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## General Discussion
+
+        Start a conversation about t402, payment protocols, or related topics.
+
+  - type: textarea
+    id: topic
+    attributes:
+      label: What would you like to discuss?
+      description: Share your thoughts, start a conversation
+      placeholder: What's on your mind?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any additional context, links, or resources
+      placeholder: Optional - add any relevant links or context...

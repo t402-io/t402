@@ -1,0 +1,57 @@
+title: "[Idea]: "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Share Your Idea
+
+        We love hearing ideas from the community! Share your thoughts on how to improve t402.
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: What type of idea is this?
+      options:
+        - New blockchain support
+        - New payment scheme
+        - SDK improvement
+        - Developer experience
+        - Documentation
+        - Tooling
+        - Integration
+        - Performance
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: Idea Description
+      description: Describe your idea
+      placeholder: What's your idea and why would it be valuable?
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Use Case
+      description: How would this be used?
+      placeholder: Describe a scenario where this would be helpful...
+
+  - type: textarea
+    id: implementation
+    attributes:
+      label: Possible Implementation
+      description: Any thoughts on how this could be implemented?
+      placeholder: Optional - share any implementation ideas...
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution Interest
+      options:
+        - label: I would be interested in helping implement this

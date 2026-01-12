@@ -1,0 +1,60 @@
+title: "[Q&A]: "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Ask a Question
+
+        Before asking, please:
+        - Check the [documentation](https://docs.t402.io)
+        - Search existing discussions and issues
+
+  - type: dropdown
+    id: topic
+    attributes:
+      label: Topic
+      description: What area is your question about?
+      options:
+        - Getting started / Setup
+        - TypeScript SDK
+        - Go SDK
+        - Python SDK
+        - EVM chains (Ethereum, Arbitrum, Base, etc.)
+        - TON blockchain
+        - TRON blockchain
+        - Solana blockchain
+        - WDK integration
+        - MCP / AI agents
+        - Facilitator service
+        - Gasless transactions (ERC-4337)
+        - Cross-chain bridge
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What would you like to know?
+      placeholder: Describe your question in detail...
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Any additional context that might help answer your question
+      placeholder: |
+        - What are you trying to achieve?
+        - What have you tried so far?
+        - Any error messages?
+
+  - type: textarea
+    id: code
+    attributes:
+      label: Code (if applicable)
+      description: Share relevant code snippets
+      render: typescript
