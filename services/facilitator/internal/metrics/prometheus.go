@@ -11,11 +11,13 @@ import (
 
 // Metrics holds all Prometheus metrics for the facilitator
 type Metrics struct {
-	requestsTotal   *prometheus.CounterVec
-	requestDuration *prometheus.HistogramVec
-	verifyTotal     *prometheus.CounterVec
-	settleTotal     *prometheus.CounterVec
-	activeRequests  prometheus.Gauge
+	requestsTotal    *prometheus.CounterVec
+	requestDuration  *prometheus.HistogramVec
+	verifyTotal      *prometheus.CounterVec
+	settleTotal      *prometheus.CounterVec
+	activeRequests   prometheus.Gauge
+	apiKeyUsage      *prometheus.CounterVec
+	apiKeyAuthFailed *prometheus.CounterVec
 }
 
 // New creates and registers all Prometheus metrics
@@ -56,6 +58,20 @@ func New() *Metrics {
 				Help: "Number of currently active requests",
 			},
 		),
+		apiKeyUsage: prometheus.NewCounterVec(
+			prometheus.CounterOpts{
+				Name: "facilitator_api_key_usage_total",
+				Help: "Total requests per API key",
+			},
+			[]string{"key_name", "endpoint"},
+		),
+		apiKeyAuthFailed: prometheus.NewCounterVec(
+			prometheus.CounterOpts{
+				Name: "facilitator_api_key_auth_failed_total",
+				Help: "Total failed API key authentications",
+			},
+			[]string{"reason"},
+		),
 	}
 
 	// Register all metrics
@@ -65,6 +81,8 @@ func New() *Metrics {
 		m.verifyTotal,
 		m.settleTotal,
 		m.activeRequests,
+		m.apiKeyUsage,
+		m.apiKeyAuthFailed,
 	)
 
 	return m
@@ -109,6 +127,16 @@ func (m *Metrics) RecordSettle(network, scheme string, success bool) {
 		result = "failure"
 	}
 	m.settleTotal.WithLabelValues(network, scheme, result).Inc()
+}
+
+// RecordAPIKeyUsage records API key usage
+func (m *Metrics) RecordAPIKeyUsage(keyName, endpoint string) {
+	m.apiKeyUsage.WithLabelValues(keyName, endpoint).Inc()
+}
+
+// RecordAPIKeyAuthFailed records a failed API key authentication
+func (m *Metrics) RecordAPIKeyAuthFailed(reason string) {
+	m.apiKeyAuthFailed.WithLabelValues(reason).Inc()
 }
 
 // Handler returns the Prometheus HTTP handler

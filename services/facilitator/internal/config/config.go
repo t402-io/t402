@@ -21,6 +21,10 @@ type Config struct {
 	RateLimitRequests int
 	RateLimitWindow   time.Duration
 
+	// API Key Authentication
+	APIKeys         string // Comma-separated list of "key:name" pairs
+	APIKeyRequired  bool   // If true, all requests require API key
+
 	// EVM Configuration
 	EvmPrivateKey string
 	EthRPC        string
@@ -61,6 +65,10 @@ func Load() *Config {
 		// Rate Limiting
 		RateLimitRequests: getEnvInt("RATE_LIMIT_REQUESTS", 1000),
 		RateLimitWindow:   time.Duration(getEnvInt("RATE_LIMIT_WINDOW", 60)) * time.Second,
+
+		// API Key Authentication
+		APIKeys:        getEnv("API_KEYS", ""),
+		APIKeyRequired: getEnvBool("API_KEY_REQUIRED", false),
 
 		// EVM Configuration
 		EvmPrivateKey: getEnv("EVM_PRIVATE_KEY", ""),
@@ -111,6 +119,13 @@ func getEnvInt(key string, defaultValue int) int {
 		if intValue, err := strconv.Atoi(value); err == nil {
 			return intValue
 		}
+	}
+	return defaultValue
+}
+
+func getEnvBool(key string, defaultValue bool) bool {
+	if value := os.Getenv(key); value != "" {
+		return value == "true" || value == "1" || value == "yes"
 	}
 	return defaultValue
 }
