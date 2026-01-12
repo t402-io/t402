@@ -259,8 +259,8 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 - [ ] Final code review pass
 - [ ] Remove any sensitive data
 - [ ] License verification (Apache 2.0)
-- [ ] CONTRIBUTING.md update
-- [ ] Issue templates
+- [x] CONTRIBUTING.md update (added security section, code of conduct)
+- [x] Issue templates (bug report, feature request, new chain, documentation)
 - [ ] Discussion templates
 - [ ] Community guidelines
 
