@@ -1,12 +1,30 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/solid";
 
 import type { Partner } from "../ecosystem/data";
 
 interface EcosystemCardProps {
   partner: Partner;
   variant?: "featured" | "standard";
+}
+
+function ExternalLinkIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
+      <path d="M15 3h6v6" />
+      <path d="M10 14L21 3" />
+    </svg>
+  );
 }
 
 export function EcosystemCard({ partner, variant = "standard" }: EcosystemCardProps) {
@@ -16,29 +34,27 @@ export function EcosystemCard({ partner, variant = "standard" }: EcosystemCardPr
 
   return (
     <article
-      className={`group relative w-full flex flex-col border border-foreground bg-background cursor-pointer transition-all duration-200 hover:bg-gray-10 hover:border-accent-orange hover:shadow-lg ${
-        isFeatured ? "px-3 pt-4 pb-5" : "px-4 pt-5 pb-6"
+      className={`group relative flex h-full w-full flex-col rounded-xl border border-border bg-background-secondary transition-all duration-200 hover:border-brand hover:bg-background-tertiary ${
+        isFeatured ? "p-4" : "p-5"
       }`}
     >
-      <div className="absolute inset-x-0 top-0 h-[7px] bg-black group-hover:bg-accent-orange transition-colors duration-200" aria-hidden="true" />
-
       <Link
         href={partner.websiteUrl}
         target={isExternal ? "_blank" : undefined}
         rel={isExternal ? "noopener noreferrer" : undefined}
-        className="absolute inset-0 z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        className="absolute inset-0 z-20 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         aria-label={`Learn more about ${partner.name}`}
       />
 
       <div
-        className={`relative z-10 pointer-events-none flex items-start justify-between ${
+        className={`pointer-events-none relative z-10 flex items-start justify-between ${
           isFeatured ? "mb-3" : "mb-4"
         }`}
       >
         {partner.logoUrl ? (
           <div
-            className={`overflow-hidden border border-foreground ${
-              isFeatured ? "h-[60px] w-[60px]" : "h-[56px] w-[56px]"
+            className={`overflow-hidden rounded-lg bg-background-tertiary ${
+              isFeatured ? "h-12 w-12" : "h-14 w-14"
             }`}
           >
             <Image
@@ -46,33 +62,33 @@ export function EcosystemCard({ partner, variant = "standard" }: EcosystemCardPr
               alt={`${partner.name} logo`}
               width={120}
               height={120}
-              className="h-full w-full object-contain"
+              className="h-full w-full object-contain p-2"
             />
           </div>
         ) : (
           <div
-            className={`border border-foreground ${
-              isFeatured ? "h-[60px] w-[60px]" : "h-[56px] w-[56px]"
+            className={`rounded-lg bg-background-tertiary ${
+              isFeatured ? "h-12 w-12" : "h-14 w-14"
             }`}
             aria-hidden="true"
           />
         )}
 
-        <span className="rounded-sm bg-gray-10 px-2 py-1 text-xs font-medium text-foreground">
+        <span className="rounded-full bg-background-tertiary px-2.5 py-1 text-xs font-medium text-foreground-secondary">
           {tagLabel}
         </span>
       </div>
 
-      <div className="relative z-10 pointer-events-none space-y-2">
+      <div className="pointer-events-none relative z-10 flex-1 space-y-2">
         <h3
-          className={`leading-snug ${
-            isFeatured ? "text-sm font-semibold uppercase" : "text-base font-medium uppercase"
+          className={`font-semibold leading-snug ${
+            isFeatured ? "text-sm" : "text-base"
           }`}
         >
           {partner.name}
         </h3>
         <p
-          className={`text-gray-60 leading-relaxed ${
+          className={`leading-relaxed text-foreground-secondary ${
             isFeatured ? "text-xs" : "text-sm"
           }`}
         >
@@ -81,12 +97,17 @@ export function EcosystemCard({ partner, variant = "standard" }: EcosystemCardPr
       </div>
 
       <div
-        className={`relative z-10 pointer-events-none font-medium ${
-          isFeatured ? "mt-3 text-xs" : "mt-4 text-sm"
+        className={`pointer-events-none relative z-10 ${
+          isFeatured ? "mt-3" : "mt-4"
         }`}
       >
-        <span className="inline-flex items-center gap-1 text-accent-orange">
-          Visit website <ArrowTopRightOnSquareIcon className="h-3 w-3" />
+        <span
+          className={`inline-flex items-center gap-1.5 font-medium text-brand transition-colors group-hover:text-brand-secondary ${
+            isFeatured ? "text-xs" : "text-sm"
+          }`}
+        >
+          Visit website
+          <ExternalLinkIcon className="h-3.5 w-3.5" />
         </span>
       </div>
     </article>
