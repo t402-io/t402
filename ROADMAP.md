@@ -424,10 +424,13 @@ Production facilitator service for payment verification and settlement.
 - TRON: `TT1MqNNj2k5qdGA6nrrCodW6oyHbbAreQ5`
 - Solana: `8GGtWHRQ1wz5gDKE2KXZLktqzcfV1CBqSbeUZjA7hoWL`
 
+**Current Features**:
+- API key authentication (X-API-Key header, Bearer token, query param)
+- Per-key usage metrics tracking
+
 **Planned Features**:
 - Multi-region deployment (US, EU, APAC)
 - Hot wallet rotation
-- API key management
 - Gas price optimization
 
 ### docs.t402.io
