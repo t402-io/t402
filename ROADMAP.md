@@ -221,6 +221,12 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
   - Secure cookies and HSTS for Grafana
   - Dependency vulnerability scanning (govulncheck)
   - Go 1.24.4 for security patches
+- [x] Endpoint testing completed
+  - /verify endpoint tested on all chains (EVM, TON, TRON, Solana)
+  - /settle endpoint tested on testnets (TON testnet, TRON Nile)
+  - Proper error handling and response formats validated
+  - Metrics recording verified in Prometheus
+  - No alerts triggered during load testing
 
 #### Deliverables
 - [x] @t402/mcp package (v1.0.0 published)
