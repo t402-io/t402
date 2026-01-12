@@ -192,7 +192,7 @@ class PaymentMiddleware:
                         mime_type=config["mime_type"],
                         pay_to=config["pay_to_address"],
                         max_timeout_seconds=config["max_deadline_seconds"],
-                        # TODO: Rename output_schema to request_structure
+                        # Contains both input and output schema (field name kept for backwards compatibility)
                         output_schema={
                             "input": {
                                 "type": "http",

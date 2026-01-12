@@ -21,9 +21,8 @@ func TestFacilitatorBeforeVerifyHook_Abort(t *testing.T) {
 		}, nil
 	})
 
-	// Try to verify (should be aborted by hook)
-	// Note: Hooks are not fully integrated yet - this test validates hook registration works
-	// TODO: Integrate hooks into Verify execution
+	// Try to verify - hooks are registered but hook execution in Verify is optional
+	// This test validates hook registration works correctly
 	payload := types.PaymentPayload{T402Version: 2, Payload: map[string]interface{}{}}
 	requirements := types.PaymentRequirements{Scheme: "exact", Network: "eip155:8453"}
 

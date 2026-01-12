@@ -407,8 +407,7 @@ func TestEVMIntegrationV2(t *testing.T) {
 	})
 }
 
-// TestEVMIntegrationV1 - SKIPPED: V1 flow not supported in V2-only server
-// TODO: Reimplement if legacy server support is needed
+// TestEVMIntegrationV1 - SKIPPED: V1 protocol not supported (V2-only implementation)
 /*
 func TestEVMIntegrationV1(t *testing.T) {
 	// Skip if environment variables not set
