@@ -67,10 +67,10 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 #### Milestones
 
 **Week 1-2: Cleanup & Branding**
-- [ ] Set up github.com/t402-io organization
-- [ ] Migrate repository
+- [x] Set up github.com/t402-io organization
+- [x] Migrate repository to t402-io/t402
 - [x] Configure NPM @t402 publishing (@t402/core, @t402/evm, @t402/svm, @t402/ton, @t402/wdk, @t402/extensions)
-- [ ] Update all remaining metadata
+- [x] Update all remaining metadata (homepage, topics)
 - [x] Configure CI/CD for automated releases (npm, Go, Python)
 
 **Week 3-4: WDK Core Enhancement**
