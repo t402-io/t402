@@ -117,6 +117,35 @@ from t402.bridge import (
     CrossChainPaymentParams,
     CrossChainPaymentResult,
 )
+from t402.wdk import (
+    # Signer
+    WDKSigner,
+    generate_seed_phrase,
+    validate_seed_phrase,
+    # Types
+    WDKConfig,
+    ChainConfig as WDKChainConfig,
+    NetworkType,
+    TokenInfo as WDKTokenInfo,
+    TokenBalance,
+    ChainBalance,
+    AggregatedBalance,
+    PaymentParams,
+    PaymentResult,
+    SignedTypedData,
+    # Chain utilities
+    DEFAULT_CHAINS as WDK_DEFAULT_CHAINS,
+    USDT0_ADDRESSES as WDK_USDT0_ADDRESSES,
+    get_chain_config as get_wdk_chain_config,
+    get_usdt0_chains as get_wdk_usdt0_chains,
+    # Errors
+    WDKError,
+    WDKInitializationError,
+    SignerError,
+    SigningError,
+    BalanceError as WDKBalanceError,
+    WDKErrorCode,
+)
 
 def hello() -> str:
     return "Hello from t402!"
@@ -226,4 +255,31 @@ __all__ = [
     "LayerZeroMessageStatus",
     "CrossChainPaymentParams",
     "CrossChainPaymentResult",
+    # WDK - Signer
+    "WDKSigner",
+    "generate_seed_phrase",
+    "validate_seed_phrase",
+    # WDK - Types
+    "WDKConfig",
+    "WDKChainConfig",
+    "NetworkType",
+    "WDKTokenInfo",
+    "TokenBalance",
+    "ChainBalance",
+    "AggregatedBalance",
+    "PaymentParams",
+    "PaymentResult",
+    "SignedTypedData",
+    # WDK - Chain utilities
+    "WDK_DEFAULT_CHAINS",
+    "WDK_USDT0_ADDRESSES",
+    "get_wdk_chain_config",
+    "get_wdk_usdt0_chains",
+    # WDK - Errors
+    "WDKError",
+    "WDKInitializationError",
+    "SignerError",
+    "SigningError",
+    "WDKBalanceError",
+    "WDKErrorCode",
 ]
