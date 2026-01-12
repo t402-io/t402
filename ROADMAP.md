@@ -185,7 +185,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
   - Advanced features (gasless, bridge, MCP)
   - API reference
 - [x] Deploy to docs.t402.io
-- [ ] Set up Algolia search
+- [x] Set up Algolia search integration
 
 **Week 19-20: Infrastructure**
 - [x] Build facilitator service (`services/facilitator/`)
