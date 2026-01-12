@@ -6,12 +6,16 @@ on:
     paths:
       - 'typescript/site/**'
       - 'typescript/packages/**'
+      - 'typescript/pnpm-lock.yaml'
+      - 'pnpm-lock.yaml'
       - '.github/workflows/site.yml'
   pull_request:
     branches: [main]
     paths:
       - 'typescript/site/**'
       - 'typescript/packages/**'
+      - 'typescript/pnpm-lock.yaml'
+      - 'pnpm-lock.yaml'
   workflow_dispatch:
 
 env:
