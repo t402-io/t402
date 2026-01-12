@@ -407,6 +407,10 @@ Production facilitator service for payment verification and settlement.
 - Health/readiness endpoints
 - Automatic SSL via Caddy + Let's Encrypt
 - Docker deployment
+- GitHub Actions CI/CD (test, build, security scan)
+- Watchtower auto-deployment (5-minute polling)
+- Trivy container vulnerability scanning
+- SBOM generation
 
 **Facilitator Addresses**:
 - EVM: `0xC88f67e776f16DcFBf42e6bDda1B82604448899B`
