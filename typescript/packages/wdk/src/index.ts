@@ -160,3 +160,26 @@ export {
   USDT0_OFT_ADDRESSES,
   Usdt0Bridge,
 } from "@t402/evm";
+
+// Hardware wallet support
+export {
+  // Types
+  type HardwareWalletType,
+  type DeviceStatus,
+  type HardwareWalletConnectionOptions,
+  type HardwareWalletDeviceInfo,
+  type HardwareWalletSigner,
+  type LedgerOptions,
+  type TrezorOptions,
+  HardwareWalletErrorCode,
+  HardwareWalletError,
+  // Ledger
+  LedgerSigner,
+  createLedgerSigner,
+  // Trezor
+  TrezorSigner,
+  createTrezorSigner,
+  // Utilities
+  detectHardwareWalletSupport,
+  isHardwareWalletSupported,
+} from "./hardware/index.js";

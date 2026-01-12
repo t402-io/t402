@@ -31,6 +31,11 @@
   "description": "T402 Payment Protocol integration with Tether Wallet Development Kit (WDK)",
   "devDependencies": {
     "@eslint/js": "^9.24.0",
+    "@ledgerhq/hw-app-eth": "^7.1.1",
+    "@ledgerhq/hw-transport-web-ble": "^6.30.0",
+    "@ledgerhq/hw-transport-webhid": "^6.30.11",
+    "@ledgerhq/hw-transport-webusb": "^6.29.15",
+    "@trezor/connect": "^9.7.1",
     "@types/node": "^22.13.4",
     "@typescript-eslint/eslint-plugin": "^8.29.1",
     "@typescript-eslint/parser": "^8.29.1",
@@ -53,14 +58,34 @@
     "viem": "^2.39.3"
   },
   "peerDependencies": {
+    "@ledgerhq/hw-app-eth": ">=6.0.0",
+    "@ledgerhq/hw-transport-web-ble": ">=6.0.0",
+    "@ledgerhq/hw-transport-webhid": ">=6.0.0",
+    "@ledgerhq/hw-transport-webusb": ">=6.0.0",
     "@tetherto/wdk": ">=1.0.0-beta.0",
-    "@tetherto/wdk-wallet-evm": ">=1.0.0-beta.0"
+    "@tetherto/wdk-wallet-evm": ">=1.0.0-beta.0",
+    "@trezor/connect": ">=9.0.0"
   },
   "peerDependenciesMeta": {
     "@tetherto/wdk": {
       "optional": true
     },
     "@tetherto/wdk-wallet-evm": {
+      "optional": true
+    },
+    "@ledgerhq/hw-app-eth": {
+      "optional": true
+    },
+    "@ledgerhq/hw-transport-webusb": {
+      "optional": true
+    },
+    "@ledgerhq/hw-transport-webhid": {
+      "optional": true
+    },
+    "@ledgerhq/hw-transport-web-ble": {
+      "optional": true
+    },
+    "@trezor/connect": {
       "optional": true
     }
   },
