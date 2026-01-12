@@ -1,4 +1,22 @@
 import type { DocsThemeConfig } from 'nextra-theme-docs'
+import { useRouter } from 'nextra/hooks'
+import { DocSearch } from '@docsearch/react'
+import '@docsearch/css'
+
+/**
+ * Algolia DocSearch configuration
+ *
+ * To enable Algolia search:
+ * 1. Apply for DocSearch at https://docsearch.algolia.com/apply/
+ * 2. Or create your own Algolia account and index
+ * 3. Set the following environment variables:
+ *    - NEXT_PUBLIC_ALGOLIA_APP_ID
+ *    - NEXT_PUBLIC_ALGOLIA_API_KEY (search-only key)
+ *    - NEXT_PUBLIC_ALGOLIA_INDEX_NAME
+ */
+const ALGOLIA_APP_ID = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID
+const ALGOLIA_API_KEY = process.env.NEXT_PUBLIC_ALGOLIA_API_KEY
+const ALGOLIA_INDEX_NAME = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME
 
 const config: DocsThemeConfig = {
   logo: (
@@ -11,6 +29,18 @@ const config: DocsThemeConfig = {
   },
   chat: {
     link: 'https://twitter.com/t402_io'
+  },
+  // Algolia DocSearch - renders custom search if credentials are configured
+  search: {
+    component: ALGOLIA_APP_ID && ALGOLIA_API_KEY && ALGOLIA_INDEX_NAME
+      ? () => (
+          <DocSearch
+            appId={ALGOLIA_APP_ID}
+            apiKey={ALGOLIA_API_KEY}
+            indexName={ALGOLIA_INDEX_NAME}
+          />
+        )
+      : undefined // Falls back to Nextra's built-in search
   },
   docsRepositoryBase: 'https://github.com/t402-io/t402/tree/main/docs',
   footer: {
