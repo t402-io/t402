@@ -124,30 +124,38 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, error) {
 
 	// Setup TON chains if mnemonic is provided
 	if cfg.TonMnemonic != "" {
-		tonSigner, err := newFacilitatorTonSigner(cfg.TonMnemonic, cfg.TonRPC, cfg.TonTestnetRPC)
+		tonSigner, err := newFacilitatorTonSignerWithAddresses(
+			cfg.TonMnemonic,
+			cfg.TonRPC,
+			cfg.TonTestnetRPC,
+			cfg.TonMainnetAddress,
+			cfg.TonTestnetAddress,
+		)
 		if err != nil {
 			log.Printf("Warning: Failed to create TON signer: %v", err)
 		} else {
 			var tonNetworks []t402.Network
 
-			// Add mainnet if RPC is configured
-			if cfg.TonRPC != "" {
+			// Add mainnet if RPC and address are configured
+			if cfg.TonRPC != "" && cfg.TonMainnetAddress != "" {
 				tonNetworks = append(tonNetworks, t402.Network(ton.TonMainnetCAIP2))
 				configuredNetworks = append(configuredNetworks, "TON Mainnet")
+				log.Printf("TON mainnet address: %s", cfg.TonMainnetAddress)
+			} else if cfg.TonRPC != "" {
+				log.Printf("Warning: TON_MAINNET_ADDRESS not set, TON mainnet disabled")
 			}
 
-			// Add testnet if RPC is configured
-			if cfg.TonTestnetRPC != "" {
+			// Add testnet if RPC and address are configured
+			if cfg.TonTestnetRPC != "" && cfg.TonTestnetAddress != "" {
 				tonNetworks = append(tonNetworks, t402.Network(ton.TonTestnetCAIP2))
 				configuredNetworks = append(configuredNetworks, "TON Testnet")
+				log.Printf("TON testnet address: %s", cfg.TonTestnetAddress)
+			} else if cfg.TonTestnetRPC != "" {
+				log.Printf("Warning: TON_TESTNET_ADDRESS not set, TON testnet disabled")
 			}
 
 			if len(tonNetworks) > 0 {
 				facilitator.Register(tonNetworks, tonfac.NewExactTonScheme(tonSigner))
-				addrs := tonSigner.GetAddresses(context.Background(), ton.TonMainnetCAIP2)
-				if len(addrs) > 0 {
-					log.Printf("TON facilitator address: %s", addrs[0])
-				}
 			}
 		}
 	} else {

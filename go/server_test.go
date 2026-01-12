@@ -480,78 +480,9 @@ func TestServerFindMatchingRequirements(t *testing.T) {
 	}
 }
 
-// TestServerProcessPaymentRequest - SKIPPED: ProcessPaymentRequest is a stub
-/*
-func TestServerProcessPaymentRequest(t *testing.T) {
-	ctx := context.Background()
+// ProcessPaymentRequest is handled by the HTTP layer (go/http/server.go)
+// See TestHTTPServerProcessRequest in http/server_test.go for integration tests
 
-	mockServer := &mockSchemeNetworkServer{scheme: "exact"}
-	mockClient := &mockFacilitatorClient{}
-
-	server := Newt402ResourceServer(
-		WithFacilitatorClient(mockClient),
-		WithSchemeServer("eip155:1", mockServer),
-	)
-	server.Initialize(ctx)
-
-	config := ResourceConfig{
-		Scheme:  "exact",
-		PayTo:   "0xrecipient",
-		Price:   "$1.00",
-		Network: "eip155:1",
-	}
-
-	info := ResourceInfo{
-		URL:         "https://api.example.com/resource",
-		Description: "API resource",
-	}
-
-	// Test without payment (should require payment)
-	result, err := server.ProcessPaymentRequest(ctx, nil, config, info, nil)
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-	if result.Success {
-		t.Fatal("Expected payment to be required")
-	}
-	if result.RequiresPayment == nil {
-		t.Fatal("Expected payment required response")
-	}
-
-	// Test with valid payment
-	// First, build requirements to see what they actually are
-	builtReqs, _ := server.BuildPaymentRequirements(ctx, config)
-
-	payload := &PaymentPayload{
-		T402Version: 2,
-		Payload:     map[string]interface{}{},
-		Accepted:    builtReqs[0], // Use the actual built requirements
-	}
-
-	result, err = server.ProcessPaymentRequest(ctx, payload, config, info, nil)
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-	if !result.Success {
-		if result.Error != "" {
-			t.Fatalf("Expected payment to be verified, got error: %s", result.Error)
-		}
-		if result.RequiresPayment != nil {
-			t.Fatalf("Expected payment to be verified, got payment required: %v", result.RequiresPayment.Error)
-		}
-		t.Fatal("Expected payment to be verified")
-	}
-	if result.VerificationResult == nil {
-		t.Fatal("Expected verification result")
-	}
-	if !result.VerificationResult.IsValid {
-		t.Fatal("Expected valid verification")
-	}
-}
-*/
-
-// TestSupportedCache - SKIPPED: Cache.Clear method not implemented
-/*
 func TestSupportedCache(t *testing.T) {
 	cache := &SupportedCache{
 		data:   make(map[string]SupportedResponse),
@@ -573,8 +504,30 @@ func TestSupportedCache(t *testing.T) {
 		t.Fatal("Expected item in cache")
 	}
 
+	// Get before expiry
+	got, exists := cache.Get("test")
+	if !exists {
+		t.Fatal("Expected item to exist in cache")
+	}
+	if len(got.Kinds) != 1 {
+		t.Fatal("Expected 1 kind in response")
+	}
+
 	// Wait for expiry
 	time.Sleep(150 * time.Millisecond)
+
+	// Get after expiry should fail
+	_, exists = cache.Get("test")
+	if exists {
+		t.Fatal("Expected item to be expired")
+	}
+
+	// Set again and test Clear
+	cache.Set("test", response)
+	cache.Set("test2", response)
+	if len(cache.data) != 2 {
+		t.Fatal("Expected 2 items in cache")
+	}
 
 	// Clear cache
 	cache.Clear()
@@ -584,5 +537,12 @@ func TestSupportedCache(t *testing.T) {
 	if len(cache.expiry) != 0 {
 		t.Fatal("Expected expiry map to be cleared")
 	}
+
+	// Test Delete
+	cache.Set("test", response)
+	cache.Delete("test")
+	_, exists = cache.Get("test")
+	if exists {
+		t.Fatal("Expected item to be deleted")
+	}
 }
-*/

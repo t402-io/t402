@@ -68,6 +68,22 @@ func (c *SupportedCache) Get(key string) (SupportedResponse, bool) {
 	return response, true
 }
 
+// Clear removes all entries from the cache
+func (c *SupportedCache) Clear() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.data = make(map[string]SupportedResponse)
+	c.expiry = make(map[string]time.Time)
+}
+
+// Delete removes a specific entry from the cache
+func (c *SupportedCache) Delete(key string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	delete(c.data, key)
+	delete(c.expiry, key)
+}
+
 // ResourceServerOption configures the server
 type ResourceServerOption func(*t402ResourceServer)
 
@@ -438,16 +454,8 @@ func (s *t402ResourceServer) CreatePaymentRequiredResponse(
 	}
 }
 
-// ProcessPaymentRequest processes a payment request end-to-end
-func (s *t402ResourceServer) ProcessPaymentRequest(
-	ctx context.Context,
-	config ResourceConfig,
-	payload *types.PaymentPayload,
-) (*types.PaymentRequirements, *VerifyResponse, error) {
-	// This is a stub - needs full implementation
-	// For now, return error
-	return nil, nil, fmt.Errorf("not implemented")
-}
+// ProcessPaymentRequest is handled by the HTTP layer (go/http/server.go)
+// Use t402HTTPResourceServer.ProcessRequest for HTTP-specific payment processing
 
 // BuildPaymentRequirementsFromConfig builds payment requirements from config
 // This wraps the single requirement builder with facilitator data
