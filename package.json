@@ -1,4 +1,7 @@
 {
   "private": true,
-  "packageManager": "pnpm@10.7.0"
+  "packageManager": "pnpm@10.7.0",
+  "devDependencies": {
+    "next": "^16.0.10"
+  }
 }

@@ -24,6 +24,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 
 | Service | URL | Status |
 |---------|-----|--------|
+| Main Website | https://t402.io | ✅ Live |
 | Facilitator API | https://facilitator.t402.io | ✅ Live |
 | Documentation | https://docs.t402.io | ✅ Live |
 | Grafana Monitoring | https://grafana.facilitator.t402.io | ✅ Live |
@@ -41,7 +42,6 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 
 | Service | URL | Status |
 |---------|-----|--------|
-| Main Website | https://t402.io | ⏳ Pending |
 | Ecosystem Directory | https://t402.org/ecosystem | ⏳ Pending |
 
 ---
