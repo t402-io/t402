@@ -273,6 +273,10 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
   - Revenue/fee structure
 - [x] Developer documentation publication
 
+**Websites**
+- [ ] t402.io - Main landing page
+- [ ] t402.org/ecosystem - Ecosystem directory
+
 #### Deliverables
 - Security audit report
 
