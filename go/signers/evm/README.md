@@ -41,10 +41,10 @@ Creates a client signer from a hex-encoded private key.
 
 ```go
 // With 0x prefix
-signer, _ := evmsigners.NewClientSignerFromPrivateKey("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
+signer, _ := evmsigners.NewClientSignerFromPrivateKey("0x...")
 
 // Without 0x prefix (both work)
-signer, _ := evmsigners.NewClientSignerFromPrivateKey("ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
+signer, _ := evmsigners.NewClientSignerFromPrivateKey("...")
 
 // From environment variable
 signer, _ := evmsigners.NewClientSignerFromPrivateKey(os.Getenv("PRIVATE_KEY"))
@@ -149,8 +149,8 @@ import (
 )
 
 func TestPayment(t *testing.T) {
-    // Use test private key
-    testKey := "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+    // Use test private key (Hardhat Account #0 for local testing)
+    testKey := os.Getenv("TEST_PRIVATE_KEY")
     signer, _ := evmsigners.NewClientSignerFromPrivateKey(testKey)
     
     // Test payment flow...
