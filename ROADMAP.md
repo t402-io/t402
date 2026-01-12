@@ -251,7 +251,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 **Week 21-22: Security Audit**
 - [ ] Protocol security review (Trail of Bits, OpenZeppelin, or similar)
 - [ ] Penetration testing
-- [ ] Bug bounty program setup
+- [x] Bug bounty program setup
 - [ ] Fix all critical/high findings
 - [x] Security documentation
 

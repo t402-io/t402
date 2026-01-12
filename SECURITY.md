@@ -376,10 +376,11 @@ We follow responsible disclosure practices:
 
 ### Bug Bounty
 
-We plan to launch a bug bounty program. Details will be announced at:
-- GitHub Discussions
-- Twitter [@t402_io](https://x.com/t402_io)
-- Website [t402.io](https://t402.io)
+We have an active bug bounty program. See **[BUG_BOUNTY.md](BUG_BOUNTY.md)** for:
+- Reward tiers ($50 - $10,000 in USDT)
+- Scope and vulnerability categories
+- Reporting guidelines
+- Response timeline
 
 ### Hall of Fame
 
