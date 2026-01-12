@@ -342,7 +342,7 @@ t402 (pip install t402)
 ├── evm/                   - EVM mechanism
 ├── ton/                   - TON mechanism (types, utilities, paywall)
 ├── tron/                  - TRON mechanism (types, utilities, network support)
-├── wdk/                   - WDK adapter [PLANNED]
+├── wdk/                   - WDK adapter
 ├── fastapi/               - FastAPI integration
 ├── flask/                 - Flask integration
 └── clients/               - HTTP clients
