@@ -1,0 +1,43 @@
+title: "[Announcement]: "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Announcement
+
+        *This category is for official announcements from maintainers.*
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Announcement Type
+      options:
+        - New Release
+        - New Feature
+        - Breaking Change
+        - Deprecation Notice
+        - Security Advisory
+        - Event / Meetup
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: content
+    attributes:
+      label: Announcement
+      description: What would you like to announce?
+      placeholder: Share your announcement...
+    validations:
+      required: true
+
+  - type: textarea
+    id: links
+    attributes:
+      label: Related Links
+      description: Links to releases, documentation, or other resources
+      placeholder: |
+        - Release:
+        - Documentation:
+        - Migration guide:
