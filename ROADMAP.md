@@ -272,13 +272,11 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
   - "Powered by Tether" branding
   - Revenue/fee structure
 - [ ] Schedule meetings with Tether team
-- [ ] Public repository release
 - [ ] Launch announcement
 - [ ] Developer documentation publication
 
 #### Deliverables
 - Security audit report
-- Public open-source repository
 - Official Tether partnership (goal)
 - Launch announcement
 
