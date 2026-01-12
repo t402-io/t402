@@ -173,7 +173,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
   - Fee-optimized routing
   - Transaction tracking
 - [x] Multi-sig support (@t402/wdk-multisig)
-- [ ] Hardware wallet support (via WDK)
+- [x] Hardware wallet support (Ledger, Trezor via WDK)
 
 **Week 17-18: Documentation Site** ✅
 - [x] Set up Nextra project for docs.t402.io
