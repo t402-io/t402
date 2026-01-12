@@ -10,6 +10,24 @@
   <version>1.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
+  <name>t402</name>
+  <description>T402 Payment Protocol SDK for Java</description>
+  <url>https://github.com/t402-io/t402</url>
+
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <url>https://github.com/t402-io/t402</url>
+    <connection>scm:git:git://github.com/t402-io/t402.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/t402-io/t402.git</developerConnection>
+  </scm>
+
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
