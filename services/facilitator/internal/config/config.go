@@ -36,9 +36,11 @@ type Config struct {
 	UnichainRPC   string
 
 	// TON Configuration
-	TonMnemonic    string
-	TonRPC         string
-	TonTestnetRPC  string
+	TonMnemonic       string
+	TonRPC            string
+	TonTestnetRPC     string
+	TonMainnetAddress string // Pre-computed wallet address for mainnet
+	TonTestnetAddress string // Pre-computed wallet address for testnet
 
 	// TRON Configuration
 	TronPrivateKey string
@@ -81,9 +83,11 @@ func Load() *Config {
 		UnichainRPC:   getEnv("UNICHAIN_RPC", "https://mainnet.unichain.org"),
 
 		// TON Configuration
-		TonMnemonic:   getEnv("TON_MNEMONIC", ""),
-		TonRPC:        getEnv("TON_RPC", "https://toncenter.com/api/v2/jsonRPC"),
-		TonTestnetRPC: getEnv("TON_TESTNET_RPC", "https://testnet.toncenter.com/api/v2/jsonRPC"),
+		TonMnemonic:       getEnv("TON_MNEMONIC", ""),
+		TonRPC:            getEnv("TON_RPC", "https://toncenter.com/api/v2/jsonRPC"),
+		TonTestnetRPC:     getEnv("TON_TESTNET_RPC", "https://testnet.toncenter.com/api/v2/jsonRPC"),
+		TonMainnetAddress: getEnv("TON_MAINNET_ADDRESS", ""),
+		TonTestnetAddress: getEnv("TON_TESTNET_ADDRESS", ""),
 
 		// TRON Configuration
 		TronPrivateKey: getEnv("TRON_PRIVATE_KEY", ""),
