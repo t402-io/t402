@@ -314,7 +314,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 @t402/vue            - Vue components
 
 @t402/extensions     - Protocol extensions (Bazaar, etc.)
-@t402/cli            - Command line tools [PLANNED]
+@t402/cli            - Command line tools
 ```
 
 ### Go Module
