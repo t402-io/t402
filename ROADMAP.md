@@ -25,6 +25,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 | Service | URL | Status |
 |---------|-----|--------|
 | Main Website | https://t402.io | ✅ Live |
+| Ecosystem Directory | https://t402.io/ecosystem | ✅ Live |
 | Facilitator API | https://facilitator.t402.io | ✅ Live |
 | Documentation | https://docs.t402.io | ✅ Live |
 | Grafana Monitoring | https://grafana.facilitator.t402.io | ✅ Live |
@@ -37,12 +38,6 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 | NPM | https://www.npmjs.com/org/t402 | ✅ Published |
 | PyPI | https://pypi.org/project/t402/ | ✅ Published |
 | Go Modules | github.com/t402-io/t402/go | ✅ Published |
-
-### Pending
-
-| Service | URL | Status |
-|---------|-----|--------|
-| Ecosystem Directory | https://t402.org/ecosystem | ⏳ Pending |
 
 ---
 
