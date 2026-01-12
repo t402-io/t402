@@ -139,10 +139,67 @@ curl http://localhost:8080/metrics
 | `REDIS_URL` | Redis connection URL | `redis://localhost:6379` |
 | `RATE_LIMIT_REQUESTS` | Max requests per window | `1000` |
 | `RATE_LIMIT_WINDOW` | Rate limit window (seconds) | `60` |
+| `API_KEYS` | Comma-separated API keys (key:name format) | - |
+| `API_KEY_REQUIRED` | Require API key for all requests | `false` |
 | `EVM_PRIVATE_KEY` | Private key for EVM chains | - |
 | `ETH_RPC` | Ethereum RPC endpoint | `https://eth.llamarpc.com` |
 | `ARBITRUM_RPC` | Arbitrum RPC endpoint | `https://arb1.arbitrum.io/rpc` |
 | `BASE_RPC` | Base RPC endpoint | `https://mainnet.base.org` |
+
+## API Key Authentication
+
+The facilitator supports API key authentication for protected endpoints.
+
+### Configuration
+
+Set API keys via environment variable:
+
+```bash
+# Single key
+API_KEYS=my-secret-key:production
+
+# Multiple keys
+API_KEYS=key1:app1,key2:app2,key3:analytics
+```
+
+To require API keys for all requests (except /health, /ready, /metrics, /supported):
+
+```bash
+API_KEY_REQUIRED=true
+```
+
+### Usage
+
+Provide the API key in one of three ways:
+
+1. **X-API-Key header** (recommended):
+   ```bash
+   curl -H "X-API-Key: my-secret-key" http://localhost:8080/verify
+   ```
+
+2. **Authorization header** (Bearer token):
+   ```bash
+   curl -H "Authorization: Bearer my-secret-key" http://localhost:8080/verify
+   ```
+
+3. **Query parameter**:
+   ```bash
+   curl "http://localhost:8080/verify?api_key=my-secret-key"
+   ```
+
+### Behavior
+
+- If `API_KEYS` is empty and `API_KEY_REQUIRED=false`: No authentication required
+- If `API_KEYS` is set: Requests with valid keys succeed, invalid keys are rejected
+- If `API_KEY_REQUIRED=true`: All requests must include a valid API key
+
+### Excluded Endpoints
+
+These endpoints never require authentication:
+- `/health` - Liveness probe
+- `/ready` - Readiness probe
+- `/metrics` - Prometheus metrics
+- `/supported` - Supported networks
 
 ## Rate Limiting
 
@@ -165,6 +222,8 @@ Available Prometheus metrics:
 | `facilitator_verify_total` | Counter | network, scheme, result | Verify requests |
 | `facilitator_settle_total` | Counter | network, scheme, result | Settle requests |
 | `facilitator_active_requests` | Gauge | - | Currently active requests |
+| `facilitator_api_key_usage_total` | Counter | key_name, endpoint | Requests per API key |
+| `facilitator_api_key_auth_failed_total` | Counter | reason | Failed authentication attempts |
 
 ## Deployment
 

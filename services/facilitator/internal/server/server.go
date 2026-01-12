@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	t402 "github.com/t402-io/t402/go"
+	"github.com/t402-io/t402/services/facilitator/internal/auth"
 	"github.com/t402-io/t402/services/facilitator/internal/cache"
 	"github.com/t402-io/t402/services/facilitator/internal/config"
 	"github.com/t402-io/t402/services/facilitator/internal/health"
@@ -38,6 +39,7 @@ type Server struct {
 	metrics     *metrics.Metrics
 	limiter     ratelimit.Limiter
 	health      *health.Checker
+	authManager *auth.Manager
 }
 
 // New creates a new facilitator server
@@ -56,6 +58,16 @@ func New(
 	limiter := ratelimit.NewRedisLimiter(redisClient, cfg.RateLimitRequests, cfg.RateLimitWindow)
 	healthChecker := health.NewChecker(redisClient, Version)
 
+	// Create auth manager and load API keys
+	authManager := auth.NewManager(redisClient)
+	if cfg.APIKeys != "" {
+		if err := authManager.LoadFromEnv(cfg.APIKeys); err != nil {
+			log.Printf("Warning: failed to load API keys: %v", err)
+		} else {
+			log.Printf("Loaded %d API keys", authManager.GetKeyCount())
+		}
+	}
+
 	// Create router
 	router := gin.New()
 
@@ -66,6 +78,7 @@ func New(
 		metrics:     m,
 		limiter:     limiter,
 		health:      healthChecker,
+		authManager: authManager,
 	}
 
 	// Setup middleware and routes
@@ -94,6 +107,26 @@ func (s *Server) setupMiddleware() {
 
 	// Rate limiting middleware (skip health/metrics endpoints)
 	s.router.Use(RateLimitMiddleware(s.limiter))
+
+	// API key authentication middleware
+	authConfig := auth.DefaultConfig()
+	authConfig.Required = s.config.APIKeyRequired
+	s.router.Use(auth.Middleware(s.authManager, authConfig))
+
+	// API key metrics middleware
+	s.router.Use(s.apiKeyMetricsMiddleware())
+}
+
+// apiKeyMetricsMiddleware records API key usage metrics
+func (s *Server) apiKeyMetricsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Next()
+
+		// Record API key usage if authenticated
+		if keyName := auth.GetKeyName(c); keyName != "" {
+			s.metrics.RecordAPIKeyUsage(keyName, c.FullPath())
+		}
+	}
 }
 
 // setupRoutes configures all routes
