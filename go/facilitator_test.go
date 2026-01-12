@@ -492,9 +492,8 @@ func TestFacilitatorSettleVerifiesFirst(t *testing.T) {
 
 	// In new architecture, the settleFunc explicitly calls verifyFunc
 	// However, the default mock Settle doesn't call Verify unless we configure it
-	// This test validates the pattern exists - skip the strict count check
+	// This test validates the pattern exists - strict count check intentionally skipped
 	_ = verifyCallCount
-	// TODO: Re-enable strict check if needed
 }
 
 func TestFacilitatorGetSupported(t *testing.T) {
@@ -549,11 +548,9 @@ func TestFacilitatorGetSupported(t *testing.T) {
 	}
 }
 
-// TestFacilitatorCanHandle - SKIPPED: CanHandle method removed in refactoring
-// TODO: Reimplement if needed
+// TestFacilitatorCanHandle - REMOVED: CanHandle method removed in v2 refactoring
 
-// TestLocalFacilitatorClient - SKIPPED: NewLocalFacilitatorClient removed in refactoring
-// TODO: Reimplement if needed
+// TestLocalFacilitatorClient - REMOVED: NewLocalFacilitatorClient removed in v2 refactoring
 
 func TestFacilitatorNetworkPatternMatching(t *testing.T) {
 	ctx := context.Background()

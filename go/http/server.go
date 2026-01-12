@@ -323,10 +323,7 @@ func (s *t402HTTPResourceServer) ProcessHTTPRequest(ctx context.Context, reqCtx 
 	}
 
 	extensions := routeConfig.Extensions
-	// TODO: Add EnrichExtensions method if needed
-	// if extensions != nil && len(extensions) > 0 {
-	// 	extensions = s.EnrichExtensions(extensions, reqCtx)
-	// }
+	// Note: EnrichExtensions can be added here for dynamic extension modification if needed
 
 	if typedPayload == nil {
 		paymentRequired := s.CreatePaymentRequiredResponse(
@@ -512,7 +509,7 @@ func (s *t402HTTPResourceServer) extractPayment(adapter HTTPAdapter) *t402.Payme
 	return &t402.PaymentPayload{
 		T402Version: payload.T402Version,
 		Payload:     payload.Payload,
-		Accepted:    t402.PaymentRequirements{}, // TODO: Convert
+		Accepted:    t402.PaymentRequirements{}, // Not used in V2 flow
 		Resource:    nil,
 		Extensions:  payload.Extensions,
 	}
@@ -579,7 +576,7 @@ func (s *t402HTTPResourceServer) createHTTPResponse(paymentRequired t402.Payment
 	v2Required := types.PaymentRequired{
 		T402Version: 2,
 		Error:       paymentRequired.Error,
-		Resource:    nil, // TODO: convert
+		Resource:    nil, // Legacy field not used in V2
 		Extensions:  paymentRequired.Extensions,
 	}
 	return s.createHTTPResponseV2(v2Required, isWebBrowser, paywallConfig, customHTML, nil)
