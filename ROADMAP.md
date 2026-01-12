@@ -50,6 +50,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 | Error Handling | @t402/wdk | Production |
 | Bridge (LayerZero) | @t402/wdk-bridge | Production |
 | Gasless (ERC-4337) | @t402/wdk-gasless | Production |
+| Multi-sig (Safe) | @t402/wdk-multisig | Production |
 | MCP Server | @t402/mcp | Production |
 
 ---
@@ -171,7 +172,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
   - Automatic chain selection
   - Fee-optimized routing
   - Transaction tracking
-- [ ] Multi-sig support
+- [x] Multi-sig support (@t402/wdk-multisig)
 - [ ] Hardware wallet support (via WDK)
 
 **Week 17-18: Documentation Site** ✅
@@ -295,9 +296,10 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 @t402/tron           - TRON mechanism (TRC-20 USDT) [NEW]
 
 @t402/wdk            - Tether WDK integration
-@t402/wdk-gasless    - WDK + ERC-4337 [NEW]
-@t402/wdk-bridge     - WDK + LayerZero [NEW]
-@t402/mcp            - MCP server for AI agents [NEW]
+@t402/wdk-gasless    - WDK + ERC-4337
+@t402/wdk-multisig   - WDK + Safe multi-sig [NEW]
+@t402/wdk-bridge     - WDK + LayerZero
+@t402/mcp            - MCP server for AI agents
 
 @t402/express        - Express.js middleware
 @t402/next           - Next.js integration
