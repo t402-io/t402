@@ -1,0 +1,19 @@
+{
+  "name": "t402-wdk-multisig-example",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Example usage of @t402/wdk-multisig package for multi-sig Safe smart accounts",
+  "type": "module",
+  "scripts": {
+    "start": "tsx index.ts"
+  },
+  "dependencies": {
+    "@t402/wdk-multisig": "workspace:*",
+    "@t402/wdk": "workspace:*",
+    "viem": "^2.39.3"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
