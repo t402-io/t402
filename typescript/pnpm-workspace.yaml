@@ -6,6 +6,7 @@ packages:
   - packages/mcp
   - packages/wdk
   - packages/wdk-gasless
+  - packages/wdk-multisig
   - packages/wdk-bridge
   - packages/legacy/*
   - examples/facilitator
