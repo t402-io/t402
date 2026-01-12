@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-function GithubIcon({ className }: { className?: string }) {
+function GitHubIcon({ className }: { className?: string }) {
   return (
     <svg
       className={className}
@@ -14,7 +14,7 @@ function GithubIcon({ className }: { className?: string }) {
   );
 }
 
-function DiscordIcon({ className }: { className?: string }) {
+function XIcon({ className }: { className?: string }) {
   return (
     <svg
       className={className}
@@ -23,94 +23,189 @@ function DiscordIcon({ className }: { className?: string }) {
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
     >
-      <path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028 14.09 14.09 0 001.226-1.994.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
     </svg>
   );
 }
 
+const footerLinks = {
+  product: [
+    { label: "SDKs", href: "https://docs.t402.io/sdks" },
+    { label: "Documentation", href: "https://docs.t402.io" },
+    { label: "Ecosystem", href: "/ecosystem" },
+    { label: "Playground", href: "https://docs.t402.io/playground" },
+  ],
+  developers: [
+    { label: "Quickstart", href: "https://docs.t402.io/quickstart" },
+    { label: "TypeScript SDK", href: "https://docs.t402.io/sdks/typescript" },
+    { label: "Python SDK", href: "https://docs.t402.io/sdks/python" },
+    { label: "Go SDK", href: "https://docs.t402.io/sdks/go" },
+  ],
+  resources: [
+    {
+      label: "GitHub",
+      href: "https://github.com/t402-io/t402",
+      external: true,
+    },
+    {
+      label: "Whitepaper",
+      href: "https://www.t402.org/t402-whitepaper.pdf",
+      external: true,
+    },
+    { label: "Blog", href: "/writing" },
+    { label: "Brand", href: "/brand" },
+  ],
+  chains: [
+    { label: "Ethereum", href: "https://docs.t402.io/chains/ethereum" },
+    { label: "Base", href: "https://docs.t402.io/chains/base" },
+    { label: "TON", href: "https://docs.t402.io/chains/ton" },
+    { label: "TRON", href: "https://docs.t402.io/chains/tron" },
+  ],
+};
+
 export function Footer() {
   return (
-    <footer className="bg-black text-white" role="contentinfo">
-      {/* Content section */}
-      <div className="max-w-container mx-auto px-10 pt-20 pb-10">
-        {/* Top row: navigation */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-end gap-6 mb-10">
-          <nav aria-label="Footer navigation">
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+    <footer
+      className="border-t border-border bg-background"
+      role="contentinfo"
+    >
+      <div className="mx-auto max-w-[1440px] px-4 py-16 sm:px-6 lg:px-8">
+        {/* Main Footer Content */}
+        <div className="grid gap-12 lg:grid-cols-6">
+          {/* Brand Column */}
+          <div className="lg:col-span-2">
+            <Link href="/" className="inline-block">
+              <span className="text-2xl font-bold tracking-tight text-foreground">
+                T402
+              </span>
+            </Link>
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-foreground-secondary">
+              The official payment protocol for USDT. HTTP-native stablecoin
+              payments across multiple blockchains.
+            </p>
+
+            {/* Social Links */}
+            <div className="mt-6 flex items-center gap-4">
               <Link
-                href="https://t402.gitbook.io/t402"
+                href="https://github.com/t402-io/t402"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white hover:text-gray-300 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground-secondary transition-colors hover:bg-background-secondary hover:text-foreground"
+                aria-label="GitHub"
               >
-                Docs
+                <GitHubIcon className="h-5 w-5" />
               </Link>
               <Link
-                href="/ecosystem"
-                className="text-white hover:text-gray-300 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-              >
-                Ecosystem
-              </Link>
-              <Link
-                href="/writing/t402-v2-launch"
-                className="text-white hover:text-gray-300 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-              >
-                Writing
-              </Link>
-              <Link
-                href="https://www.t402.org/t402-whitepaper.pdf"
+                href="https://x.com/t402_io"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white hover:text-gray-300 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground-secondary transition-colors hover:bg-background-secondary hover:text-foreground"
+                aria-label="X (Twitter)"
               >
-                Whitepaper
+                <XIcon className="h-5 w-5" />
               </Link>
             </div>
-          </nav>
+          </div>
+
+          {/* Links Columns */}
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 lg:col-span-4">
+            {/* Product */}
+            <div>
+              <h3 className="text-sm font-semibold text-foreground">Product</h3>
+              <ul className="mt-4 space-y-3">
+                {footerLinks.product.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-foreground-secondary transition-colors hover:text-foreground"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Developers */}
+            <div>
+              <h3 className="text-sm font-semibold text-foreground">
+                Developers
+              </h3>
+              <ul className="mt-4 space-y-3">
+                {footerLinks.developers.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-foreground-secondary transition-colors hover:text-foreground"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Resources */}
+            <div>
+              <h3 className="text-sm font-semibold text-foreground">
+                Resources
+              </h3>
+              <ul className="mt-4 space-y-3">
+                {footerLinks.resources.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      target={link.external ? "_blank" : undefined}
+                      rel={link.external ? "noopener noreferrer" : undefined}
+                      className="text-sm text-foreground-secondary transition-colors hover:text-foreground"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Chains */}
+            <div>
+              <h3 className="text-sm font-semibold text-foreground">Chains</h3>
+              <ul className="mt-4 space-y-3">
+                {footerLinks.chains.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-foreground-secondary transition-colors hover:text-foreground"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
 
-        {/* Social icons */}
-        <div className="flex items-center gap-6 mb-8">
-          <Link
-            href="https://github.com/t402-io/t402"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-            aria-label="GitHub"
-          >
-            <GithubIcon className="w-6 h-6" />
-          </Link>
-          <Link
-            href="https://x.com/t402_io"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-            aria-label="Twitter"
-          >
-            <DiscordIcon className="w-6 h-6" />
-          </Link>
-        </div>
-
-        {/* Divider */}
-        <div className="h-px bg-white/40 mb-8" />
-
-        {/* Copyright row */}
-        <div className="flex justify-between items-center">
-          <p className="text-white/40 text-sm">
-            T402 is the official payment protocol for USDT. This website is maintained by the T402 team.
+        {/* Bottom Bar */}
+        <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 sm:flex-row">
+          <p className="text-sm text-foreground-tertiary">
+            {new Date().getFullYear()} T402. The official payment protocol for
+            USDT.
           </p>
+          <div className="flex items-center gap-6">
+            <Link
+              href="/privacy"
+              className="text-sm text-foreground-tertiary transition-colors hover:text-foreground-secondary"
+            >
+              Privacy
+            </Link>
+            <Link
+              href="/terms"
+              className="text-sm text-foreground-tertiary transition-colors hover:text-foreground-secondary"
+            >
+              Terms
+            </Link>
+          </div>
         </div>
-      </div>
-
-      {/* Logo section - below copyright */}
-      <div className="relative w-full">
-        <img
-          src="/images/t402_vector.svg"
-          alt=""
-          aria-hidden="true"
-          className="w-full h-auto"
-          style={{ filter: 'brightness(0.75)' }}
-        />
       </div>
     </footer>
   );

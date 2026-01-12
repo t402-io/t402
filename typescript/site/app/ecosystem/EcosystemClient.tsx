@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -23,25 +22,35 @@ type PartitionResult = {
 
 function FolderIcon({ className }: { className?: string }) {
   return (
-    <Image
-      src="/images/icons/folder.svg"
-      alt=""
-      width={20}
-      height={20}
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       className={className}
-    />
+      aria-hidden="true"
+    >
+      <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
+    </svg>
   );
 }
 
-function IndentArrowIcon({ className }: { className?: string }) {
+function ChevronIcon({ className, isOpen }: { className?: string; isOpen: boolean }) {
   return (
-    <Image
-      src="/images/icons/indent_group5.svg"
-      alt=""
-      width={20}
-      height={20}
-      className={className}
-    />
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`${className} transition-transform ${isOpen ? "rotate-90" : ""}`}
+      aria-hidden="true"
+    >
+      <path d="M9 18l6-6-6-6" />
+    </svg>
   );
 }
 
@@ -106,35 +115,47 @@ export default function EcosystemClient({
       : (byCategory[activeFilter] ?? []).filter((partner) => !partner.featured);
 
   return (
-    <div className="mx-auto max-w-container px-6 py-16 sm:px-10">
+    <div className="mx-auto max-w-[1440px] px-4 py-16 sm:px-6 lg:px-8">
       {/* Hero */}
       <section className="relative mb-16">
-        <div className="pointer-events-none absolute left-[350px] top-[25px] z-0 h-[509px] w-[514px] opacity-30">
-          <Image
-            src="/images/ecosystem-halftone.svg"
-            alt=""
-            width={514}
-            height={550}
-            className="h-full w-full"
-            priority
-          />
-        </div>
+        {/* Background gradient */}
+        <div
+          className="pointer-events-none absolute -top-20 right-0 h-[500px] w-[500px] opacity-30"
+          style={{
+            background:
+              "radial-gradient(circle at center, rgba(80, 175, 149, 0.3), transparent 70%)",
+          }}
+        />
 
         <div className="relative z-10">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between"
+          >
             <div className="space-y-4">
-              <h1 className="font-display text-7xl tracking-tight">Ecosystem</h1>
+              <h1 className="text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
+                Ecosystem
+              </h1>
+              <p className="max-w-md text-lg text-foreground-secondary">
+                Discover innovative projects, tools, and applications built by our growing
+                community of partners and developers.
+              </p>
             </div>
-            <p className="max-w-[400px] text-right font-code-ui text-base leading-relaxed text-gray-60 sm:text-lg">
-              Discover innovative projects, tools, and applications built by our growing community
-              of partners and developers leveraging t402 technology.
-            </p>
-          </div>
+          </motion.div>
 
           {featured.length > 0 && (
-            <div className="mt-[107px] space-y-3">
-              <p className="text-sm font-medium leading-5">Featured projects</p>
-              <AnimatedGrid className="grid grid-cols-1 gap-[10px] sm:grid-cols-2 lg:grid-cols-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="mt-16 space-y-4"
+            >
+              <p className="text-sm font-medium uppercase tracking-wider text-foreground-tertiary">
+                Featured projects
+              </p>
+              <AnimatedGrid className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {featured.slice(0, 4).map((partner) => (
                   <AnimatedCard
                     key={partner.slug ?? partner.name}
@@ -148,24 +169,22 @@ export default function EcosystemClient({
                   </AnimatedCard>
                 ))}
               </AnimatedGrid>
-            </div>
+            </motion.div>
           )}
         </div>
       </section>
 
       {/* Sidebar + main content */}
       <section className="flex flex-col gap-12 lg:flex-row">
-        <aside
-          className="w-full text-sm lg:w-48 xl:w-56"
-          aria-label="Ecosystem categories"
-        >
+        <aside className="w-full lg:w-56" aria-label="Ecosystem categories">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="mb-2 flex w-full cursor-pointer items-center gap-2 py-1 text-left"
+            className="mb-3 flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left transition-colors hover:bg-background-secondary"
             aria-expanded={isExpanded}
           >
-            <FolderIcon className="h-7 w-7 shrink-0" />
-            <span className="font-mono text-sm font-medium tracking-[-0.28px]">Ecosystem</span>
+            <FolderIcon className="h-5 w-5 text-brand" />
+            <span className="flex-1 text-sm font-medium">Ecosystem</span>
+            <ChevronIcon className="h-4 w-4 text-foreground-tertiary" isOpen={isExpanded} />
           </button>
 
           <AnimatePresence initial={false}>
@@ -175,23 +194,36 @@ export default function EcosystemClient({
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.2, ease: "easeInOut" }}
-                className="flex flex-col gap-0.5 overflow-hidden pl-2"
+                className="flex flex-col gap-1 overflow-hidden pl-2"
               >
                 {[
                   { id: "everything", name: "Everything" },
                   ...categories.map((category) => ({ id: category.id, name: category.name })),
                 ].map((category) => {
                   const isActive = activeFilter === category.id;
+                  const count =
+                    category.id === "everything"
+                      ? initialPartners.length
+                      : byCategory[category.id]?.length ?? 0;
+
                   return (
                     <button
                       key={category.id}
                       onClick={() => handleFilterChange(category.id)}
-                      className={`relative flex w-full cursor-pointer items-center gap-1.5 py-1.5 text-left font-mono text-sm font-medium tracking-[-0.28px] transition-colors ${
-                        isActive ? "text-foreground" : "text-foreground/30 hover:text-foreground/60"
+                      className={`relative flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+                        isActive
+                          ? "bg-background-secondary text-foreground"
+                          : "text-foreground-secondary hover:bg-background-secondary hover:text-foreground"
                       }`}
                     >
-                      <IndentArrowIcon className="h-4 w-4 shrink-0" />
                       <span>{category.name}</span>
+                      <span
+                        className={`text-xs ${
+                          isActive ? "text-foreground-secondary" : "text-foreground-tertiary"
+                        }`}
+                      >
+                        {count}
+                      </span>
                     </button>
                   );
                 })}
@@ -224,11 +256,14 @@ export default function EcosystemClient({
                       aria-labelledby={`${category.id}-heading`}
                       className="scroll-mt-24 space-y-4"
                     >
-                      <h2 id={`${category.id}-heading`} className="font-['Helvetica_Neue',sans-serif] text-lg font-medium">
+                      <h2
+                        id={`${category.id}-heading`}
+                        className="text-xl font-semibold"
+                      >
                         {category.name}
                       </h2>
 
-                      <AnimatedGrid className="grid gap-[10px] sm:grid-cols-2 lg:grid-cols-4">
+                      <AnimatedGrid className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {partners.map((partner) => (
                           <AnimatedCard
                             key={partner.slug ?? partner.name}
@@ -255,12 +290,12 @@ export default function EcosystemClient({
                 transition={{ duration: 0.2, ease: "easeInOut" }}
               >
                 <section className="scroll-mt-24 space-y-4">
-                  <h2 className="font-['Helvetica_Neue',sans-serif] text-lg font-medium">
+                  <h2 className="text-xl font-semibold">
                     {categories.find((category) => category.id === activeFilter)?.name ??
                       "Ecosystem"}
                   </h2>
                   {filteredPartners.length > 0 ? (
-                    <AnimatedGrid className="grid gap-[10px] sm:grid-cols-2 lg:grid-cols-4">
+                    <AnimatedGrid className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                       {filteredPartners.map((partner) => (
                         <AnimatedCard
                           key={partner.slug ?? partner.name}
@@ -275,13 +310,14 @@ export default function EcosystemClient({
                       ))}
                     </AnimatedGrid>
                   ) : (
-                    <p className="text-sm text-gray-60">No projects in this category yet.</p>
+                    <p className="text-sm text-foreground-tertiary">
+                      No projects in this category yet.
+                    </p>
                   )}
                 </section>
               </motion.div>
             )}
           </AnimatePresence>
-
         </div>
       </section>
     </div>

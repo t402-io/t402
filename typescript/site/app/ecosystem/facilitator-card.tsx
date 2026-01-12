@@ -1,28 +1,101 @@
-'use client';
+"use client";
 
-import { useState, type KeyboardEvent } from 'react';
-import Image from 'next/image';
-import { XMarkIcon } from '@heroicons/react/24/solid';
-import type { Partner } from './data';
+import { useState, type KeyboardEvent } from "react";
+import Image from "next/image";
+import type { Partner } from "./data";
 
 interface FacilitatorCardProps {
   partner: Partner;
-  variant?: 'standard' | 'featured';
+  variant?: "standard" | "featured";
 }
 
-export default function FacilitatorCard({ partner, variant = 'standard' }: FacilitatorCardProps) {
+function CloseIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M18 6L6 18" />
+      <path d="M6 6l12 12" />
+    </svg>
+  );
+}
+
+function ArrowIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M5 12h14" />
+      <path d="M12 5l7 7-7 7" />
+    </svg>
+  );
+}
+
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M20 6L9 17l-5-5" />
+    </svg>
+  );
+}
+
+function XIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M18 6L6 18" />
+      <path d="M6 6l12 12" />
+    </svg>
+  );
+}
+
+export default function FacilitatorCard({
+  partner,
+  variant = "standard",
+}: FacilitatorCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   if (!partner.facilitator) {
-    return null; // This shouldn't happen, but just in case
+    return null;
   }
 
   const { facilitator } = partner;
-  const isFeatured = variant === 'featured';
+  const isFeatured = variant === "featured";
   const tagLabel = partner.typeLabel ?? partner.category;
   const handleOpen = () => setIsModalOpen(true);
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
-    if (event.key === 'Enter' || event.key === ' ') {
+    if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       handleOpen();
     }
@@ -35,21 +108,19 @@ export default function FacilitatorCard({ partner, variant = 'standard' }: Facil
         tabIndex={0}
         onClick={handleOpen}
         onKeyDown={handleKeyDown}
-        className={`group relative w-full flex flex-col border border-foreground bg-background cursor-pointer outline-none transition-all duration-200 hover:bg-gray-10 hover:border-accent-orange hover:shadow-lg focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-          isFeatured ? 'px-3 pt-4 pb-5' : 'px-4 pt-5 pb-6'
+        className={`group relative flex h-full w-full cursor-pointer flex-col rounded-xl border border-border bg-background-secondary outline-none transition-all duration-200 hover:border-brand hover:bg-background-tertiary focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+          isFeatured ? "p-4" : "p-5"
         }`}
       >
-        <div className="absolute inset-x-0 top-0 h-[7px] bg-black group-hover:bg-accent-orange transition-colors duration-200" aria-hidden="true" />
-
         <div
           className={`relative z-20 flex items-start justify-between ${
-            isFeatured ? 'mb-3' : 'mb-4'
+            isFeatured ? "mb-3" : "mb-4"
           }`}
         >
           {partner.logoUrl ? (
             <div
-              className={`overflow-hidden border border-foreground ${
-                isFeatured ? 'h-[60px] w-[60px]' : 'h-[56px] w-[56px]'
+              className={`overflow-hidden rounded-lg bg-background-tertiary ${
+                isFeatured ? "h-12 w-12" : "h-14 w-14"
               }`}
             >
               <Image
@@ -57,34 +128,34 @@ export default function FacilitatorCard({ partner, variant = 'standard' }: Facil
                 alt={`${partner.name} logo`}
                 width={120}
                 height={120}
-                className="h-full w-full object-contain"
+                className="h-full w-full object-contain p-2"
               />
             </div>
           ) : (
             <div
-              className={`border border-foreground ${
-                isFeatured ? 'h-[60px] w-[60px]' : 'h-[56px] w-[56px]'
+              className={`rounded-lg bg-background-tertiary ${
+                isFeatured ? "h-12 w-12" : "h-14 w-14"
               }`}
               aria-hidden="true"
             />
           )}
 
-          <span className="rounded-sm bg-gray-10 px-2 py-1 text-xs font-medium text-foreground">
+          <span className="rounded-full bg-background-tertiary px-2.5 py-1 text-xs font-medium text-foreground-secondary">
             {tagLabel}
           </span>
         </div>
 
-        <div className="relative z-20 space-y-2">
+        <div className="relative z-20 flex-1 space-y-2">
           <h3
-            className={`leading-snug ${
-              isFeatured ? 'text-sm font-semibold uppercase' : 'text-base font-medium uppercase'
+            className={`font-semibold leading-snug ${
+              isFeatured ? "text-sm" : "text-base"
             }`}
           >
             {partner.name}
           </h3>
           <p
-            className={`text-gray-60 leading-relaxed ${
-              isFeatured ? 'text-xs' : 'text-sm'
+            className={`leading-relaxed text-foreground-secondary ${
+              isFeatured ? "text-xs" : "text-sm"
             }`}
           >
             {partner.description}
@@ -92,11 +163,16 @@ export default function FacilitatorCard({ partner, variant = 'standard' }: Facil
         </div>
 
         <div
-          className={`relative z-20 font-medium ${
-            isFeatured ? 'mt-3 text-xs' : 'mt-4 text-sm'
-          }`}
+          className={`relative z-20 ${isFeatured ? "mt-3" : "mt-4"}`}
         >
-          <span className="inline-flex items-center gap-1 text-accent-orange">View details →</span>
+          <span
+            className={`inline-flex items-center gap-1.5 font-medium text-brand transition-colors group-hover:text-brand-secondary ${
+              isFeatured ? "text-xs" : "text-sm"
+            }`}
+          >
+            View details
+            <ArrowIcon className="h-3.5 w-3.5" />
+          </span>
         </div>
       </article>
 
@@ -105,54 +181,58 @@ export default function FacilitatorCard({ partner, variant = 'standard' }: Facil
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            className="absolute inset-0 bg-overlay-backdrop backdrop-blur-sm"
             onClick={() => setIsModalOpen(false)}
           />
 
           {/* Modal Content */}
-          <div className="relative bg-gray-900 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-700">
+          <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-border bg-background-secondary shadow-2xl">
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-700">
-              <div className="flex items-center space-x-4">
-                <div className="relative w-12 h-12">
+            <div className="flex items-center justify-between border-b border-border p-6">
+              <div className="flex items-center gap-4">
+                <div className="relative h-12 w-12 overflow-hidden rounded-lg bg-background-tertiary">
                   <Image
                     src={partner.logoUrl}
                     alt={`${partner.name} logo`}
                     fill
                     sizes="48px"
-                    style={{ objectFit: 'contain', borderRadius: '0.5rem' }}
-                    className="bg-gray-700/[.5] p-1"
+                    className="object-contain p-2"
                   />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-white font-mono">{partner.name}</h2>
-                  <p className="text-sm text-gray-400 font-mono">Facilitator</p>
+                  <h2 className="text-xl font-bold">{partner.name}</h2>
+                  <p className="text-sm text-foreground-tertiary">Facilitator</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-gray-400 hover:text-white transition-colors"
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground-tertiary transition-colors hover:bg-background-tertiary hover:text-foreground"
+                aria-label="Close modal"
               >
-                <XMarkIcon className="w-6 h-6" />
+                <CloseIcon className="h-5 w-5" />
               </button>
             </div>
 
             {/* Content */}
-            <div className="p-6 space-y-6">
+            <div className="space-y-6 p-6">
               {/* Description */}
               <div>
-                <h3 className="text-lg font-semibold text-white mb-2 font-mono">Description</h3>
-                <p className="text-gray-300 font-mono">{partner.description}</p>
+                <h3 className="mb-2 text-sm font-semibold uppercase tracking-wider text-foreground-tertiary">
+                  Description
+                </h3>
+                <p className="text-foreground-secondary">{partner.description}</p>
               </div>
 
               {/* Base URL */}
               <div>
-                <h3 className="text-lg font-semibold text-white mb-2 font-mono">Base URL</h3>
+                <h3 className="mb-2 text-sm font-semibold uppercase tracking-wider text-foreground-tertiary">
+                  Base URL
+                </h3>
                 <a
                   href={facilitator.baseUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 hover:text-blue-300 font-mono break-all"
+                  className="break-all font-mono text-sm text-brand hover:text-brand-secondary"
                 >
                   {facilitator.baseUrl}
                 </a>
@@ -160,12 +240,14 @@ export default function FacilitatorCard({ partner, variant = 'standard' }: Facil
 
               {/* Networks */}
               <div>
-                <h3 className="text-lg font-semibold text-white mb-3 font-mono">Supported Networks</h3>
+                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-foreground-tertiary">
+                  Supported Networks
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {facilitator.networks.map((network) => (
                     <span
                       key={network}
-                      className="text-sm bg-gray-700 text-gray-300 px-3 py-1 rounded-full font-mono"
+                      className="rounded-full bg-background-tertiary px-3 py-1 text-sm text-foreground-secondary"
                     >
                       {network}
                     </span>
@@ -175,12 +257,14 @@ export default function FacilitatorCard({ partner, variant = 'standard' }: Facil
 
               {/* Schemes */}
               <div>
-                <h3 className="text-lg font-semibold text-white mb-3 font-mono">Payment Schemes</h3>
+                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-foreground-tertiary">
+                  Payment Schemes
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {facilitator.schemes.map((scheme) => (
                     <span
                       key={scheme}
-                      className="text-sm bg-green-700 text-green-200 px-3 py-1 rounded-full font-mono"
+                      className="rounded-full bg-brand-muted px-3 py-1 text-sm text-brand"
                     >
                       {scheme}
                     </span>
@@ -190,12 +274,14 @@ export default function FacilitatorCard({ partner, variant = 'standard' }: Facil
 
               {/* Assets */}
               <div>
-                <h3 className="text-lg font-semibold text-white mb-3 font-mono">Supported Assets</h3>
+                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-foreground-tertiary">
+                  Supported Assets
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {facilitator.assets.map((asset) => (
                     <span
                       key={asset}
-                      className="text-sm bg-purple-700 text-purple-200 px-3 py-1 rounded-full font-mono"
+                      className="rounded-full bg-chain-ethereum/10 px-3 py-1 text-sm text-chain-ethereum"
                     >
                       {asset}
                     </span>
@@ -205,35 +291,93 @@ export default function FacilitatorCard({ partner, variant = 'standard' }: Facil
 
               {/* Capabilities */}
               <div>
-                <h3 className="text-lg font-semibold text-white mb-3 font-mono">Capabilities</h3>
+                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-foreground-tertiary">
+                  Capabilities
+                </h3>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="flex items-center space-x-2">
-                    <div className={`w-3 h-3 rounded-full ${facilitator.supports.verify ? 'bg-green-500' : 'bg-red-500'}`} />
-                    <span className="text-gray-300 font-mono">Verify Payments</span>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`flex h-5 w-5 items-center justify-center rounded-full ${
+                        facilitator.supports.verify
+                          ? "bg-success/20 text-success"
+                          : "bg-error/20 text-error"
+                      }`}
+                    >
+                      {facilitator.supports.verify ? (
+                        <CheckIcon className="h-3 w-3" />
+                      ) : (
+                        <XIcon className="h-3 w-3" />
+                      )}
+                    </div>
+                    <span className="text-sm text-foreground-secondary">
+                      Verify Payments
+                    </span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <div className={`w-3 h-3 rounded-full ${facilitator.supports.settle ? 'bg-green-500' : 'bg-red-500'}`} />
-                    <span className="text-gray-300 font-mono">Settle Payments</span>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`flex h-5 w-5 items-center justify-center rounded-full ${
+                        facilitator.supports.settle
+                          ? "bg-success/20 text-success"
+                          : "bg-error/20 text-error"
+                      }`}
+                    >
+                      {facilitator.supports.settle ? (
+                        <CheckIcon className="h-3 w-3" />
+                      ) : (
+                        <XIcon className="h-3 w-3" />
+                      )}
+                    </div>
+                    <span className="text-sm text-foreground-secondary">
+                      Settle Payments
+                    </span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <div className={`w-3 h-3 rounded-full ${facilitator.supports.supported ? 'bg-green-500' : 'bg-red-500'}`} />
-                    <span className="text-gray-300 font-mono">Supported Endpoint</span>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`flex h-5 w-5 items-center justify-center rounded-full ${
+                        facilitator.supports.supported
+                          ? "bg-success/20 text-success"
+                          : "bg-error/20 text-error"
+                      }`}
+                    >
+                      {facilitator.supports.supported ? (
+                        <CheckIcon className="h-3 w-3" />
+                      ) : (
+                        <XIcon className="h-3 w-3" />
+                      )}
+                    </div>
+                    <span className="text-sm text-foreground-secondary">
+                      Supported Endpoint
+                    </span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <div className={`w-3 h-3 rounded-full ${facilitator.supports.list ? 'bg-green-500' : 'bg-red-500'}`} />
-                    <span className="text-gray-300 font-mono">List Resources</span>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`flex h-5 w-5 items-center justify-center rounded-full ${
+                        facilitator.supports.list
+                          ? "bg-success/20 text-success"
+                          : "bg-error/20 text-error"
+                      }`}
+                    >
+                      {facilitator.supports.list ? (
+                        <CheckIcon className="h-3 w-3" />
+                      ) : (
+                        <XIcon className="h-3 w-3" />
+                      )}
+                    </div>
+                    <span className="text-sm text-foreground-secondary">
+                      List Resources
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="flex justify-end p-6 border-t border-gray-700">
+            <div className="flex justify-end border-t border-border p-6">
               <a
                 href={partner.websiteUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-mono transition-colors"
+                className="inline-flex h-10 items-center justify-center rounded-lg bg-brand px-6 text-sm font-medium text-background transition-colors hover:bg-brand-secondary"
               >
                 Visit Website
               </a>

@@ -48,12 +48,12 @@ async function getPartners(): Promise<Partner[]> {
 
 function EcosystemLoading() {
   return (
-    <div className="mx-auto max-w-container px-6 py-16 sm:px-10">
+    <div className="mx-auto max-w-[1440px] px-4 py-16 sm:px-6 lg:px-8">
       <div className="animate-pulse space-y-8">
-        <div className="h-20 w-64 bg-gray-10" />
-        <div className="grid grid-cols-4 gap-3">
+        <div className="h-20 w-64 rounded-lg bg-background-secondary" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-48 bg-gray-10" />
+            <div key={i} className="h-48 rounded-xl bg-background-secondary" />
           ))}
         </div>
       </div>
