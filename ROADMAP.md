@@ -304,7 +304,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 @t402/express        - Express.js middleware
 @t402/next           - Next.js integration
 @t402/hono           - Hono middleware
-@t402/fastify        - Fastify middleware [PLANNED]
+@t402/fastify        - Fastify middleware
 
 @t402/fetch          - Fetch client wrapper
 @t402/axios          - Axios interceptor
