@@ -135,38 +135,18 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
 
-  deploy:
-    name: Deploy to Production
+  # Deployment is handled by Watchtower on the server
+  # which automatically pulls new images from ghcr.io
+  notify:
+    name: Notify Build Complete
     runs-on: ubuntu-latest
     needs: [build, security-scan]
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event.inputs.deploy == 'true')
-    environment:
-      name: production
-      url: https://facilitator.t402.io
+    if: github.ref == 'refs/heads/main'
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          script: |
-            cd /home/doge/github/t402/services/facilitator
-            git pull origin main
-            docker compose -f docker-compose.prod.yaml pull facilitator
-            docker compose -f docker-compose.prod.yaml up -d facilitator
-            # Wait for health check
-            sleep 10
-            curl -sf http://localhost:8080/health || exit 1
-            echo "Deployment successful!"
-
-      - name: Verify deployment
+      - name: Build summary
         run: |
-          sleep 5
-          curl -sf https://facilitator.t402.io/health || exit 1
-          echo "Health check passed!"
-
-      - name: Notify on failure
-        if: failure()
-        run: |
-          echo "::error::Deployment failed! Check the logs above."
+          echo "## Build Complete! :rocket:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** \`ghcr.io/t402-io/facilitator:latest\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Watchtower will auto-deploy to production within 5 minutes." >> $GITHUB_STEP_SUMMARY

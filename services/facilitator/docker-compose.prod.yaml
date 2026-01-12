@@ -7,6 +7,8 @@ services:
     # Port only exposed internally, Caddy handles external traffic
     expose:
       - "8080"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     environment:
       - PORT=8080
       - ENVIRONMENT=production
@@ -149,6 +151,25 @@ services:
       - no-new-privileges:true
     networks:
       - internal
+
+  # Watchtower - Auto-update containers from ghcr.io
+  watchtower:
+    image: containrrr/watchtower:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/doge/.docker/config.json:/config.json:ro
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=300
+      - WATCHTOWER_INCLUDE_STOPPED=false
+      - WATCHTOWER_REVIVE_STOPPED=false
+      - WATCHTOWER_ROLLING_RESTART=true
+      - WATCHTOWER_LABEL_ENABLE=true
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
 
 networks:
   internal:
