@@ -1,0 +1,49 @@
+# Git
+.git
+.gitignore
+
+# CI/CD
+.github
+
+# Documentation
+docs
+*.md
+
+# Go services (not needed for site build)
+go
+services
+
+# Python
+python
+**/*.pyc
+**/__pycache__
+
+# Java
+java
+
+# Rust
+rust
+
+# Build outputs
+**/node_modules
+**/.next
+**/dist
+**/build
+**/.open-next
+**/out
+
+# Development files
+**/.env*.local
+**/*.log
+**/.DS_Store
+**/.pnpm-store
+
+# IDE
+.idea
+.vscode
+**/*.swp
+**/*.swo
+
+# Docker files in subdirectories
+**/Dockerfile
+**/docker-compose*.yml

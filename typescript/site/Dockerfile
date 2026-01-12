@@ -9,12 +9,11 @@ RUN corepack enable && corepack prepare pnpm@10.7.0 --activate
 
 WORKDIR /app
 
-# Copy root workspace files
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+# Copy root package files
+COPY package.json pnpm-lock.yaml ./
 
-# Copy typescript workspace
-COPY typescript/package.json typescript/pnpm-lock.yaml ./typescript/
-COPY typescript/pnpm-workspace.yaml ./typescript/
+# Copy typescript workspace files
+COPY typescript/package.json typescript/pnpm-lock.yaml typescript/pnpm-workspace.yaml ./typescript/
 
 # Copy all package.json files for workspace packages
 COPY typescript/site/package.json ./typescript/site/
