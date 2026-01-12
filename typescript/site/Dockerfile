@@ -18,6 +18,7 @@ COPY typescript/package.json typescript/pnpm-lock.yaml typescript/pnpm-workspace
 # Copy all package.json files for workspace packages
 COPY typescript/site/package.json ./typescript/site/
 COPY typescript/packages/core/package.json ./typescript/packages/core/
+COPY typescript/packages/extensions/package.json ./typescript/packages/extensions/
 COPY typescript/packages/http/next/package.json ./typescript/packages/http/next/
 COPY typescript/packages/http/paywall/package.json ./typescript/packages/http/paywall/
 COPY typescript/packages/mechanisms/evm/package.json ./typescript/packages/mechanisms/evm/
