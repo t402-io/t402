@@ -39,13 +39,13 @@
   },
   "dependencies": {
     "@coinbase/cdp-sdk": "^1.22.0",
-    "@t402/core": "workspace:^",
-    "@t402/extensions": "workspace:^",
+    "@t402/core": "^2.0.0",
+    "@t402/extensions": "^2.0.0",
     "zod": "^3.24.2"
   },
   "peerDependencies": {
     "next": "^16.0.10",
-    "@t402/paywall": "workspace:*"
+    "@t402/paywall": "^2.0.0"
   },
   "peerDependenciesMeta": {
     "@t402/paywall": {
