@@ -12,6 +12,5 @@ packages:
   - packages/legacy/*
   - examples/facilitator
   - examples/**/*
-  - site
 ignoredBuiltDependencies:
   - esbuild
