@@ -100,6 +100,7 @@ function ExternalLinkIcon() {
 }
 
 const navLinks = [
+  { href: "/sdks", label: "SDKs" },
   { href: "/ecosystem", label: "Ecosystem" },
   { href: "https://docs.t402.io", label: "Docs", external: true },
   { href: "https://github.com/t402-io/t402", label: "GitHub", external: true },
