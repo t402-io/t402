@@ -1,7 +1,0 @@
-{
-  "name": "Axios & Fetch Clients",
-  "category": "Client-Side Integrations",
-  "logoUrl": "/logos/axios-fetch-clients.png",
-  "description": "Reference TypeScript clients for t402 using both Axios and Fetch. Easily integrate t402 payments into your own applications.",
-  "websiteUrl": "https://github.com/t402-io/t402/tree/main/examples/typescript/clients"
-}
