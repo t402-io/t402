@@ -95,7 +95,15 @@ export function registerRequestCommand(program: Command): void {
             spinner.info("Payment required (402)");
 
             // Parse 402 response
-            const paymentRequired = await response.json();
+            const paymentRequired = (await response.json()) as {
+              accepts?: Array<{
+                network: string;
+                asset?: string;
+                amount: string;
+                payTo: string;
+              }>;
+              resource?: { description?: string };
+            };
             if (!paymentRequired.accepts || !Array.isArray(paymentRequired.accepts)) {
               printError("Invalid 402 response format");
               return;
@@ -104,7 +112,7 @@ export function registerRequestCommand(program: Command): void {
             // Select payment option
             const preferredNetwork = options.network || getConfig("defaultNetwork");
             let requirement = paymentRequired.accepts.find(
-              (r: { network: string }) => r.network === preferredNetwork,
+              (r) => r.network === preferredNetwork,
             );
             if (!requirement) {
               requirement = paymentRequired.accepts[0];
@@ -135,7 +143,9 @@ export function registerRequestCommand(program: Command): void {
             let paymentProof: string;
 
             if (options.gasless) {
-              const { WdkGaslessClient } = await import("@t402/wdk-gasless");
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const wdkGasless: any = await import("@t402/wdk-gasless");
+              const { WdkGaslessClient } = wdkGasless;
 
               paySpinner.text = "Initializing gasless client...";
               const client = await WdkGaslessClient.create({
@@ -156,14 +166,16 @@ export function registerRequestCommand(program: Command): void {
                 console.log(`  User Operation Hash: ${chalk.cyan(result.userOpHash)}`);
               }
             } else {
-              const { WDKSigner } = await import("@t402/wdk");
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const wdk: any = await import("@t402/wdk");
+              const { createPaymentProcessor } = wdk;
 
               paySpinner.text = "Initializing wallet...";
-              const signer = new WDKSigner({ seedPhrase });
-              await signer.initialize();
+              const processor = createPaymentProcessor({ seedPhrase });
+              await processor.initialize();
 
               paySpinner.text = "Sending payment...";
-              const txHash = await signer.pay({
+              const txHash = await processor.pay({
                 network: requirement.network,
                 asset: requirement.asset || "usdt",
                 to: requirement.payTo,

@@ -1,7 +1,7 @@
 import { Command } from "commander";
 import chalk from "chalk";
 import { getConfig } from "../config/index.js";
-import { printHeader, getAvailableNetworks } from "../utils/index.js";
+import { printHeader } from "../utils/index.js";
 import { NETWORKS } from "../types.js";
 
 /**
