@@ -14,6 +14,7 @@ import {
   getNetworkName,
   isValidUrl,
 } from "../utils/index.js";
+import { VERSION } from "../version.js";
 
 // Machine ID for basic encryption key
 const MACHINE_KEY = `t402-cli-${process.env.USER || "default"}`;
@@ -61,7 +62,7 @@ export function registerRequestCommand(program: Command): void {
 
         // Build request options
         const headers: Record<string, string> = {
-          "User-Agent": "t402-cli/2.0.0",
+          "User-Agent": `t402-cli/${VERSION}`,
         };
 
         if (options.header) {

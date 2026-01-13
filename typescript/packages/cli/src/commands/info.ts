@@ -3,6 +3,7 @@ import chalk from "chalk";
 import { getConfig } from "../config/index.js";
 import { printHeader } from "../utils/index.js";
 import { NETWORKS } from "../types.js";
+import { VERSION } from "../version.js";
 
 /**
  * Register info command
@@ -19,7 +20,7 @@ export function registerInfoCommand(program: Command): void {
 
       printHeader("T402 Payment Protocol");
 
-      console.log("  Version: 2.0.0");
+      console.log(`  Version: ${VERSION}`);
       console.log("  Facilitator: " + chalk.cyan(getConfig("facilitatorUrl")));
       console.log();
 
@@ -123,6 +124,6 @@ export function registerInfoCommand(program: Command): void {
     .command("version")
     .description("Show CLI version")
     .action(() => {
-      console.log("t402 CLI v2.0.0");
+      console.log(`t402 CLI v${VERSION}`);
     });
 }
