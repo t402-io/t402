@@ -23,21 +23,21 @@ app.use(
 
 ```shell
 # All available packages
-pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/tron @t402/wdk @t402/wdk-gasless @t402/wdk-bridge @t402/extensions @t402/mcp
+pnpm add @t402-io/core @t402-io/evm @t402-io/svm @t402-io/ton @t402-io/tron @t402-io/wdk @t402-io/wdk-gasless @t402-io/wdk-bridge @t402-io/extensions @t402-io/mcp
 
 # Minimal client
-pnpm add @t402/core @t402/evm
+pnpm add @t402-io/core @t402-io/evm
 
 # MCP Server for AI Agents
-pnpm add @t402/mcp
+pnpm add @t402-io/mcp
 # or run directly
-npx @t402/mcp
+npx @t402-io/mcp
 
 # WDK Gasless Payments (Tether WDK + ERC-4337)
-pnpm add @t402/wdk-gasless
+pnpm add @t402-io/wdk-gasless
 
 # Or with npm
-npm install @t402/core @t402/evm
+npm install @t402-io/core @t402-io/evm
 ```
 
 ### Python
@@ -220,10 +220,10 @@ Clients and facilitators must explicitly support different `(scheme, network)` p
 <summary><b>TypeScript Client (Multi-Network)</b></summary>
 
 ```typescript
-import { t402Client, wrapFetchWithPayment } from "@t402/fetch";
-import { registerExactEvmScheme } from "@t402/evm/exact/client";
-import { registerExactTonClientScheme } from "@t402/ton";
-import { registerExactTronClientScheme } from "@t402/tron";
+import { t402Client, wrapFetchWithPayment } from "@t402-io/fetch";
+import { registerExactEvmScheme } from "@t402-io/evm/exact/client";
+import { registerExactTonClientScheme } from "@t402-io/ton";
+import { registerExactTronClientScheme } from "@t402-io/tron";
 import { privateKeyToAccount } from "viem/accounts";
 
 // Create client and register payment schemes
@@ -257,10 +257,10 @@ const response = await fetchWithPayment("https://api.example.com/data");
 
 ```typescript
 import express from "express";
-import { paymentMiddleware, t402ResourceServer } from "@t402/express";
-import { ExactEvmScheme } from "@t402/evm/exact/server";
-import { ExactTonScheme } from "@t402/ton/exact/server";
-import { ExactTronScheme } from "@t402/tron/exact/server";
+import { paymentMiddleware, t402ResourceServer } from "@t402-io/express";
+import { ExactEvmScheme } from "@t402-io/evm/exact/server";
+import { ExactTonScheme } from "@t402-io/ton/exact/server";
+import { ExactTronScheme } from "@t402-io/tron/exact/server";
 
 const app = express();
 
@@ -361,7 +361,7 @@ func main() {
 <summary><b>ERC-4337 Gasless Transactions (TypeScript)</b></summary>
 
 ```typescript
-import { SafeSmartAccount, createBundlerClient, createPaymaster } from "@t402/evm/erc4337";
+import { SafeSmartAccount, createBundlerClient, createPaymaster } from "@t402-io/evm/erc4337";
 
 // 1. Create Safe smart account
 const safeAccount = new SafeSmartAccount({
@@ -505,7 +505,7 @@ import {
   Usdt0Bridge,
   LayerZeroScanClient,
   getBridgeableChains,
-} from "@t402/evm";
+} from "@t402-io/evm";
 
 // Check supported chains
 console.log(getBridgeableChains()); // ['ethereum', 'arbitrum', 'ink', 'berachain', 'unichain']
@@ -641,13 +641,13 @@ fmt.Printf("Delivered! Dest TX: %s\n", message.DstTxHash)
 <details>
 <summary><b>MCP Server for AI Agents (Claude Desktop)</b></summary>
 
-The `@t402/mcp` package enables AI agents like Claude to make stablecoin payments.
+The `@t402-io/mcp` package enables AI agents like Claude to make stablecoin payments.
 
 **Installation:**
 ```bash
-npm install -g @t402/mcp
+npm install -g @t402-io/mcp
 # or run directly
-npx @t402/mcp
+npx @t402-io/mcp
 ```
 
 **Claude Desktop Configuration** (`~/Library/Application Support/Claude/claude_desktop_config.json`):
@@ -656,7 +656,7 @@ npx @t402/mcp
   "mcpServers": {
     "t402": {
       "command": "npx",
-      "args": ["@t402/mcp"],
+      "args": ["@t402-io/mcp"],
       "env": {
         "T402_DEMO_MODE": "true"
       }
@@ -692,7 +692,7 @@ T402_RPC_ETHEREUM=...      # Custom RPC URLs per network
 
 **Programmatic Usage:**
 ```typescript
-import { executeGetBalance, executePay } from "@t402/mcp";
+import { executeGetBalance, executePay } from "@t402-io/mcp";
 
 // Check balance
 const balance = await executeGetBalance({
@@ -712,10 +712,10 @@ const result = await executePay(
 <details>
 <summary><b>WDK Gasless Payments (TypeScript)</b></summary>
 
-The `@t402/wdk-gasless` package enables gasless USDT0 payments using Tether WDK and ERC-4337.
+The `@t402-io/wdk-gasless` package enables gasless USDT0 payments using Tether WDK and ERC-4337.
 
 ```typescript
-import { createWdkGaslessClient } from "@t402/wdk-gasless";
+import { createWdkGaslessClient } from "@t402-io/wdk-gasless";
 import { createPublicClient, http } from "viem";
 import { arbitrum } from "viem/chains";
 
@@ -798,10 +798,10 @@ const result = await client.payBatch({
 <details>
 <summary><b>WDK Cross-Chain Bridge (TypeScript)</b></summary>
 
-The `@t402/wdk-bridge` package enables cross-chain USDT0 bridging with automatic source chain selection.
+The `@t402-io/wdk-bridge` package enables cross-chain USDT0 bridging with automatic source chain selection.
 
 ```typescript
-import { WdkBridgeClient } from "@t402/wdk-bridge";
+import { WdkBridgeClient } from "@t402-io/wdk-bridge";
 
 // Create bridge client with WDK accounts for multiple chains
 const bridge = new WdkBridgeClient({
