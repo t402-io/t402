@@ -4,6 +4,7 @@ import { registerPayCommands } from "./commands/pay.js";
 import { registerRequestCommand } from "./commands/request.js";
 import { registerConfigCommands } from "./commands/config.js";
 import { registerInfoCommand } from "./commands/info.js";
+import { VERSION } from "./version.js";
 
 /**
  * Create and configure the CLI program
@@ -14,7 +15,7 @@ export function createCli(): Command {
   program
     .name("t402")
     .description("Command-line interface for the T402 payment protocol")
-    .version("2.0.0");
+    .version(VERSION);
 
   // Register command groups
   registerWalletCommands(program);
