@@ -9,7 +9,6 @@ import {
 } from "../config/index.js";
 import {
   createSpinner,
-  formatAddress,
   formatAmount,
   printSuccess,
   printError,
@@ -20,7 +19,6 @@ import {
   encryptSeed,
   decryptSeed,
   getNetworkName,
-  getAvailableNetworks,
 } from "../utils/index.js";
 
 // Machine ID for basic encryption key
@@ -43,11 +41,11 @@ export function registerWalletCommands(program: Command): void {
       }
 
       try {
-        // Dynamic import to avoid loading WDK unless needed
-        const { generateMnemonic } = await import("@t402/wdk");
+        // Use viem for seed phrase generation
+        const { generateMnemonic, english } = await import("viem/accounts");
 
         const spinner = createSpinner("Generating seed phrase...").start();
-        const mnemonic = generateMnemonic();
+        const mnemonic = generateMnemonic(english);
         spinner.succeed("Seed phrase generated");
 
         console.log();
@@ -89,10 +87,9 @@ export function registerWalletCommands(program: Command): void {
       }
 
       try {
-        // Validate by trying to create a signer
-        const { WDKSigner } = await import("@t402/wdk");
-        const signer = new WDKSigner({ seedPhrase: phrase });
-        await signer.initialize();
+        // Validate by trying to create an account
+        const { mnemonicToAccount } = await import("viem/accounts");
+        mnemonicToAccount(phrase); // Throws if invalid
 
         // Store encrypted seed
         const encrypted = encryptSeed(phrase, MACHINE_KEY);
@@ -119,42 +116,22 @@ export function registerWalletCommands(program: Command): void {
 
       try {
         const seedPhrase = decryptSeed(encrypted, MACHINE_KEY);
-        const { WDKSigner } = await import("@t402/wdk");
+        const { mnemonicToAccount } = await import("viem/accounts");
 
         const spinner = createSpinner("Loading wallet...").start();
-        const signer = new WDKSigner({ seedPhrase });
-        await signer.initialize();
+        const account = mnemonicToAccount(seedPhrase);
         spinner.succeed("Wallet loaded");
 
         printHeader("Wallet Addresses");
 
-        const addresses: Record<string, string> = {};
-
-        // EVM address
-        const evmAddress = signer.getAddress("evm");
-        if (evmAddress) {
-          addresses["EVM (Ethereum, Arbitrum, Base, etc.)"] = evmAddress;
-        }
-
-        // Solana address
-        const solanaAddress = signer.getAddress("solana");
-        if (solanaAddress) {
-          addresses["Solana"] = solanaAddress;
-        }
-
-        // TON address
-        const tonAddress = signer.getAddress("ton");
-        if (tonAddress) {
-          addresses["TON"] = tonAddress;
-        }
-
-        // TRON address
-        const tronAddress = signer.getAddress("tron");
-        if (tronAddress) {
-          addresses["TRON"] = tronAddress;
-        }
+        const addresses: Record<string, string> = {
+          "EVM (Ethereum, Arbitrum, Base, etc.)": account.address,
+        };
 
         printTable(addresses);
+
+        console.log();
+        console.log(chalk.gray("Note: Install @t402/wdk for full multi-chain support"));
       } catch (error) {
         printError(`Failed to load wallet: ${error instanceof Error ? error.message : error}`);
       }
@@ -175,58 +152,52 @@ export function registerWalletCommands(program: Command): void {
 
       try {
         const seedPhrase = decryptSeed(encrypted, MACHINE_KEY);
-        const { WDKSigner } = await import("@t402/wdk");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const wdkModule: any = await import("@t402/wdk");
+        const { T402WDK } = wdkModule;
 
         const spinner = createSpinner("Fetching balances...").start();
         const testnet = getConfig("testnet");
 
-        // Create signer with appropriate chains
-        const signer = new WDKSigner({
-          seedPhrase,
-          chains: testnet
-            ? {
-                "arbitrum-sepolia": "https://sepolia-rollup.arbitrum.io/rpc",
-                "base-sepolia": "https://sepolia.base.org",
-              }
-            : {
-                arbitrum: "https://arb1.arbitrum.io/rpc",
-                base: "https://mainnet.base.org",
-              },
-        });
-        await signer.initialize();
+        // Create WDK with appropriate chains
+        const chainConfig = testnet
+          ? {
+              "arbitrum-sepolia": "https://sepolia-rollup.arbitrum.io/rpc",
+              "base-sepolia": "https://sepolia.base.org",
+            }
+          : {
+              arbitrum: "https://arb1.arbitrum.io/rpc",
+              base: "https://mainnet.base.org",
+            };
+
+        const wdk = new T402WDK(seedPhrase, chainConfig);
 
         if (options.network) {
           // Single network balance
+          const chainName = options.network.replace("eip155:", "").replace("8453", "base").replace("42161", "arbitrum");
           spinner.text = `Fetching balance for ${getNetworkName(options.network)}...`;
-          const balance = await signer.getBalance(options.network);
+          const balance = await wdk.getUsdt0Balance(chainName);
           spinner.succeed("Balance fetched");
 
           printHeader(`Balance on ${getNetworkName(options.network)}`);
-          console.log(`  ${chalk.green(formatAmount(balance.toString()))} USDT`);
+          console.log(`  ${chalk.green(formatAmount(balance.toString()))} USDT0`);
         } else {
           // All balances
-          const balances = await signer.getAllBalances();
+          const balances = await wdk.getAggregatedBalances();
           spinner.succeed("Balances fetched");
 
           printHeader("Wallet Balances");
+          console.log(`  Total USDT0: ${chalk.green(formatAmount(balances.totalUsdt0.toString()))}`);
 
-          const networks = getAvailableNetworks(testnet);
-          let hasNonZero = false;
-
-          for (const network of networks) {
-            const balance = balances[network.id];
-            if (balance !== undefined) {
-              const formatted = formatAmount(balance.toString());
-              if (options.all || balance > 0n) {
-                const color = balance > 0n ? chalk.green : chalk.gray;
-                console.log(`  ${network.name.padEnd(20)} ${color(formatted)} USDT`);
-                hasNonZero = hasNonZero || balance > 0n;
+          if (balances.chains.length > 0) {
+            console.log();
+            for (const chain of balances.chains) {
+              const usdt0 = chain.tokens.find((t: { symbol: string }) => t.symbol === "USDT0");
+              if (usdt0 && (options.all || usdt0.balance > 0n)) {
+                const color = usdt0.balance > 0n ? chalk.green : chalk.gray;
+                console.log(`  ${chain.chain.padEnd(20)} ${color(formatAmount(usdt0.balance.toString()))} USDT0`);
               }
             }
-          }
-
-          if (!hasNonZero && !options.all) {
-            console.log(chalk.gray("  No balances found. Use --all to show all networks."));
           }
         }
       } catch (error) {

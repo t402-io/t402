@@ -7,7 +7,6 @@ import {
   resetConfig,
   getConfigPath,
   setRpcEndpoint,
-  getRpcEndpoint,
 } from "../config/index.js";
 import {
   printSuccess,

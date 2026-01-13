@@ -77,7 +77,9 @@ export function registerPayCommands(program: Command): void {
 
           if (options.gasless) {
             // Gasless payment using ERC-4337
-            const { WdkGaslessClient } = await import("@t402/wdk-gasless");
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const wdkGasless: any = await import("@t402/wdk-gasless");
+            const { WdkGaslessClient } = wdkGasless;
 
             spinner.text = "Initializing gasless client...";
             const client = await WdkGaslessClient.create({
@@ -100,14 +102,16 @@ export function registerPayCommands(program: Command): void {
             }
           } else {
             // Standard payment
-            const { WDKSigner } = await import("@t402/wdk");
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const wdk: any = await import("@t402/wdk");
+            const { createPaymentProcessor } = wdk;
 
             spinner.text = "Initializing wallet...";
-            const signer = new WDKSigner({ seedPhrase });
-            await signer.initialize();
+            const processor = createPaymentProcessor({ seedPhrase });
+            await processor.initialize();
 
             spinner.text = "Sending payment...";
-            const txHash = await signer.pay({
+            const txHash = await processor.pay({
               network,
               asset: options.asset,
               to,
@@ -154,7 +158,15 @@ export function registerPayCommands(program: Command): void {
           return;
         }
 
-        const paymentRequired = await response.json();
+        const paymentRequired = (await response.json()) as {
+          accepts?: Array<{
+            network: string;
+            asset?: string;
+            amount: string;
+            payTo: string;
+          }>;
+          resource?: { description?: string };
+        };
         if (!paymentRequired.accepts || !Array.isArray(paymentRequired.accepts)) {
           spinner.fail("Invalid 402 response format");
           return;
@@ -182,7 +194,9 @@ export function registerPayCommands(program: Command): void {
         const paySpinner = createSpinner("Processing payment...").start();
 
         if (options.gasless) {
-          const { WdkGaslessClient } = await import("@t402/wdk-gasless");
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const wdkGasless: any = await import("@t402/wdk-gasless");
+          const { WdkGaslessClient } = wdkGasless;
 
           paySpinner.text = "Initializing gasless client...";
           const client = await WdkGaslessClient.create({
@@ -218,14 +232,16 @@ export function registerPayCommands(program: Command): void {
             retrySpinner.warn(`Request returned ${retryResponse.status}`);
           }
         } else {
-          const { WDKSigner } = await import("@t402/wdk");
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const wdk: any = await import("@t402/wdk");
+          const { createPaymentProcessor } = wdk;
 
           paySpinner.text = "Initializing wallet...";
-          const signer = new WDKSigner({ seedPhrase });
-          await signer.initialize();
+          const processor = createPaymentProcessor({ seedPhrase });
+          await processor.initialize();
 
           paySpinner.text = "Sending payment...";
-          const txHash = await signer.pay({
+          const txHash = await processor.pay({
             network: requirement.network,
             asset: requirement.asset || "usdt",
             to: requirement.payTo,
