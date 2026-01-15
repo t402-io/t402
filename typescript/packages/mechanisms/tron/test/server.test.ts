@@ -222,14 +222,8 @@ describe("ExactTronScheme (Server)", () => {
     });
   });
 
-  // Note: All enhancePaymentRequirements tests are skipped due to a bug in the source code.
-  // The source uses `require("../../tokens.js")` in getTokenByAddress() which doesn't resolve
-  // correctly in vitest because the relative path is based on compiled output location.
-  // Bug: getTRC20Config is called with an address but expects a symbol, causing fallthrough
-  // to getTokenByAddress which has the broken dynamic require.
-  // TODO: Fix source code to use static imports instead of dynamic require
   describe("enhancePaymentRequirements", () => {
-    it.skip("should add token metadata to requirements when asset is USDT", async () => {
+    it("should add token metadata to requirements when asset is USDT", async () => {
       const scheme = new ExactTronScheme();
 
       const requirements = {
@@ -258,7 +252,7 @@ describe("ExactTronScheme (Server)", () => {
       expect(enhanced.extra.decimals).toBe(DEFAULT_USDT_DECIMALS);
     });
 
-    it.skip("should preserve existing extra fields", async () => {
+    it("should preserve existing extra fields", async () => {
       const scheme = new ExactTronScheme();
 
       const requirements = {
@@ -285,7 +279,7 @@ describe("ExactTronScheme (Server)", () => {
       expect(enhanced.extra.symbol).toBe("USDT");
     });
 
-    it.skip("should copy extension data from supportedKind", async () => {
+    it("should copy extension data from supportedKind", async () => {
       const scheme = new ExactTronScheme();
 
       const requirements = {
@@ -319,9 +313,7 @@ describe("ExactTronScheme (Server)", () => {
       expect(enhanced.extra.notIncluded).toBeUndefined();
     });
 
-    // Skip tests that trigger the dynamic require issue
-    // The getTokenByAddress dynamic require path issue should be fixed in source
-    it.skip("should use default token when asset not in registry", async () => {
+    it("should use default token when asset not in registry", async () => {
       const scheme = new ExactTronScheme();
 
       const requirements = {
@@ -348,7 +340,7 @@ describe("ExactTronScheme (Server)", () => {
       expect(enhanced.extra.decimals).toBe(DEFAULT_USDT_DECIMALS);
     });
 
-    it.skip("should work with nile testnet", async () => {
+    it("should work with nile testnet", async () => {
       const scheme = new ExactTronScheme();
 
       const requirements = {
@@ -374,7 +366,7 @@ describe("ExactTronScheme (Server)", () => {
       expect(enhanced.extra.symbol).toBe("USDT");
     });
 
-    it.skip("should work with shasta testnet", async () => {
+    it("should work with shasta testnet", async () => {
       const scheme = new ExactTronScheme();
 
       const requirements = {
