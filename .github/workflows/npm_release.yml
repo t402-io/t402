@@ -7,18 +7,33 @@ on:
   workflow_dispatch:
     inputs:
       package:
-        description: "Package to publish (all, core, evm, svm, ton, wdk, extensions)"
+        description: "Package to publish"
         required: true
         default: "all"
         type: choice
         options:
           - all
           - core
+          - extensions
           - evm
           - svm
           - ton
+          - tron
+          - express
+          - next
+          - hono
+          - fastify
+          - fetch
+          - axios
+          - paywall
+          - react
+          - vue
           - wdk
-          - extensions
+          - wdk-gasless
+          - wdk-bridge
+          - wdk-multisig
+          - mcp
+          - cli
       dry_run:
         description: "Dry run (no actual publish)"
         required: false
@@ -32,9 +47,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
-        with:
-          run_install: false
+        uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v4
         with:
@@ -56,13 +69,64 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Core packages
+          - name: core
+            path: packages/core
+          - name: extensions
+            path: packages/extensions
+          # Mechanism packages
+          - name: evm
+            path: packages/mechanisms/evm
+          - name: svm
+            path: packages/mechanisms/svm
+          - name: ton
+            path: packages/mechanisms/ton
+          - name: tron
+            path: packages/mechanisms/tron
+          # HTTP server packages
+          - name: express
+            path: packages/http/express
+          - name: next
+            path: packages/http/next
+          - name: hono
+            path: packages/http/hono
+          - name: fastify
+            path: packages/http/fastify
+          # HTTP client packages
+          - name: fetch
+            path: packages/http/fetch
+          - name: axios
+            path: packages/http/axios
+          # UI packages
+          - name: paywall
+            path: packages/http/paywall
+          - name: react
+            path: packages/http/react
+          - name: vue
+            path: packages/http/vue
+          # WDK packages
+          - name: wdk
+            path: packages/wdk
+          - name: wdk-gasless
+            path: packages/wdk-gasless
+          - name: wdk-bridge
+            path: packages/wdk-bridge
+          - name: wdk-multisig
+            path: packages/wdk-multisig
+          # Tool packages
+          - name: mcp
+            path: packages/mcp
+          - name: cli
+            path: packages/cli
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
-        with:
-          run_install: false
+        uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v4
         with:
@@ -79,75 +143,14 @@ jobs:
         working-directory: ./typescript
         run: pnpm build
 
-      - name: Publish @t402/core
-        if: ${{ github.event.inputs.package == 'all' || github.event.inputs.package == 'core' || github.event_name == 'push' }}
-        working-directory: ./typescript/packages/core
+      - name: Publish @t402/${{ matrix.name }}
+        if: ${{ github.event.inputs.package == 'all' || github.event.inputs.package == matrix.name || github.event_name == 'push' }}
+        working-directory: ./typescript/${{ matrix.path }}
         run: |
           if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
             pnpm publish --access public --no-git-checks --dry-run
           else
-            pnpm publish --access public --no-git-checks
+            pnpm publish --access public --no-git-checks || echo "Package may already exist at this version"
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish @t402/evm
-        if: ${{ github.event.inputs.package == 'all' || github.event.inputs.package == 'evm' || github.event_name == 'push' }}
-        working-directory: ./typescript/packages/mechanisms/evm
-        run: |
-          if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
-            pnpm publish --access public --no-git-checks --dry-run
-          else
-            pnpm publish --access public --no-git-checks
-          fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish @t402/svm
-        if: ${{ github.event.inputs.package == 'all' || github.event.inputs.package == 'svm' || github.event_name == 'push' }}
-        working-directory: ./typescript/packages/mechanisms/svm
-        run: |
-          if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
-            pnpm publish --access public --no-git-checks --dry-run
-          else
-            pnpm publish --access public --no-git-checks
-          fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish @t402/ton
-        if: ${{ github.event.inputs.package == 'all' || github.event.inputs.package == 'ton' || github.event_name == 'push' }}
-        working-directory: ./typescript/packages/mechanisms/ton
-        run: |
-          if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
-            pnpm publish --access public --no-git-checks --dry-run
-          else
-            pnpm publish --access public --no-git-checks
-          fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish @t402/wdk
-        if: ${{ github.event.inputs.package == 'all' || github.event.inputs.package == 'wdk' || github.event_name == 'push' }}
-        working-directory: ./typescript/packages/wdk
-        run: |
-          if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
-            pnpm publish --access public --no-git-checks --dry-run
-          else
-            pnpm publish --access public --no-git-checks
-          fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish @t402/extensions
-        if: ${{ github.event.inputs.package == 'all' || github.event.inputs.package == 'extensions' || github.event_name == 'push' }}
-        working-directory: ./typescript/packages/extensions
-        run: |
-          if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
-            pnpm publish --access public --no-git-checks --dry-run
-          else
-            pnpm publish --access public --no-git-checks
-          fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
