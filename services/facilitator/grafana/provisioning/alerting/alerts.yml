@@ -2,13 +2,118 @@ apiVersion: 1
 
 groups:
   - orgId: 1
-    name: T402 Facilitator Alerts
+    name: T402 Facilitator - Critical Alerts
+    folder: T402
+    interval: 30s
+    rules:
+      # Service Down Alert - Highest priority
+      - uid: t402-service-down
+        title: Facilitator Service Down
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 120
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: up{job="facilitator"}
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 120
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 1
+                    type: lt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - B
+                  reducer:
+                    type: last
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+              type: threshold
+        noDataState: Alerting
+        execErrState: Alerting
+        for: 1m
+        annotations:
+          summary: T402 Facilitator service is down
+          description: "Facilitator service is not responding to health checks. Immediate action required."
+          runbook_url: "https://docs.t402.io/runbooks/facilitator-down"
+        labels:
+          severity: critical
+          service: facilitator
+          team: platform
+
+      # Redis Down Alert
+      - uid: t402-redis-down
+        title: Redis Service Down
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 120
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: redis_up
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 120
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 1
+                    type: lt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - B
+                  reducer:
+                    type: last
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+              type: threshold
+        noDataState: Alerting
+        execErrState: Alerting
+        for: 1m
+        annotations:
+          summary: Redis service is down
+          description: "Redis is not responding. Rate limiting and caching functionality is impacted."
+          runbook_url: "https://docs.t402.io/runbooks/redis-down"
+        labels:
+          severity: critical
+          service: redis
+          team: platform
+
+  - orgId: 1
+    name: T402 Facilitator - SLO Alerts
     folder: T402
     interval: 1m
     rules:
-      # High Error Rate Alert (5xx errors)
+      # High Error Rate Alert (SLO: 99.9% availability = <0.1% 5xx errors)
       - uid: t402-high-error-rate
-        title: High Error Rate
+        title: High Error Rate (SLO Breach)
         condition: C
         data:
           - refId: A
@@ -40,7 +145,7 @@ groups:
               conditions:
                 - evaluator:
                     params:
-                      - 0.05
+                      - 0.001
                     type: gt
                   operator:
                     type: and
@@ -58,15 +163,18 @@ groups:
         execErrState: Error
         for: 2m
         annotations:
-          summary: High error rate detected on T402 Facilitator
-          description: "Error rate is above 5% (current: {{ $values.C }})"
+          summary: High error rate breaching 99.9% SLO
+          description: "Error rate is above 0.1% (current: {{ $values.C | printf \"%.4f\" }}). SLO target: 99.9% availability."
+          runbook_url: "https://docs.t402.io/runbooks/high-error-rate"
         labels:
           severity: critical
           service: facilitator
+          team: platform
+          slo: availability
 
-      # High Latency Alert (P95 > 1s)
+      # High Latency Alert (SLO: P95 < 500ms)
       - uid: t402-high-latency
-        title: High P95 Latency
+        title: High P95 Latency (SLO Breach)
         condition: B
         data:
           - refId: A
@@ -88,7 +196,7 @@ groups:
               conditions:
                 - evaluator:
                     params:
-                      - 1
+                      - 0.5
                     type: gt
                   operator:
                     type: and
@@ -106,15 +214,18 @@ groups:
         execErrState: Error
         for: 5m
         annotations:
-          summary: High latency detected on T402 Facilitator
-          description: "P95 latency is above 1 second (current: {{ $values.A }}s)"
+          summary: High P95 latency breaching SLO
+          description: "P95 latency is above 500ms (current: {{ $values.A | printf \"%.3f\" }}s). SLO target: P95 < 500ms."
+          runbook_url: "https://docs.t402.io/runbooks/high-latency"
         labels:
           severity: warning
           service: facilitator
+          team: platform
+          slo: latency
 
-      # Service Down Alert
-      - uid: t402-service-down
-        title: Facilitator Service Down
+      # Very High Latency Alert (P99 > 2s)
+      - uid: t402-very-high-latency
+        title: Very High P99 Latency
         condition: B
         data:
           - refId: A
@@ -123,7 +234,7 @@ groups:
               to: 0
             datasourceUid: PBFA97CFB590B2093
             model:
-              expr: up{job="facilitator"}
+              expr: histogram_quantile(0.99, sum(rate(facilitator_request_duration_seconds_bucket[5m])) by (le))
               intervalMs: 1000
               maxDataPoints: 43200
               refId: A
@@ -136,118 +247,12 @@ groups:
               conditions:
                 - evaluator:
                     params:
-                      - 1
-                    type: lt
-                  operator:
-                    type: and
-                  query:
-                    params:
-                      - B
-                  reducer:
-                    type: last
-              expression: A
-              intervalMs: 1000
-              maxDataPoints: 43200
-              refId: B
-              type: threshold
-        noDataState: Alerting
-        execErrState: Alerting
-        for: 1m
-        annotations:
-          summary: T402 Facilitator service is down
-          description: "Facilitator service is not responding to health checks"
-        labels:
-          severity: critical
-          service: facilitator
-
-      # High Client Error Rate (4xx errors)
-      - uid: t402-high-client-errors
-        title: High Client Error Rate
-        condition: C
-        data:
-          - refId: A
-            relativeTimeRange:
-              from: 300
-              to: 0
-            datasourceUid: PBFA97CFB590B2093
-            model:
-              expr: sum(rate(facilitator_requests_total{status=~"4.."}[5m])) or vector(0)
-              intervalMs: 1000
-              maxDataPoints: 43200
-              refId: A
-          - refId: B
-            relativeTimeRange:
-              from: 300
-              to: 0
-            datasourceUid: PBFA97CFB590B2093
-            model:
-              expr: sum(rate(facilitator_requests_total[5m])) or vector(0)
-              intervalMs: 1000
-              maxDataPoints: 43200
-              refId: B
-          - refId: C
-            relativeTimeRange:
-              from: 300
-              to: 0
-            datasourceUid: __expr__
-            model:
-              conditions:
-                - evaluator:
-                    params:
-                      - 0.2
+                      - 2
                     type: gt
                   operator:
                     type: and
                   query:
                     params:
-                      - C
-                  reducer:
-                    type: last
-              expression: $A / $B
-              intervalMs: 1000
-              maxDataPoints: 43200
-              refId: C
-              type: math
-        noDataState: OK
-        execErrState: Error
-        for: 5m
-        annotations:
-          summary: High client error rate on T402 Facilitator
-          description: "Client error rate (4xx) is above 20% (current: {{ $values.C }})"
-        labels:
-          severity: warning
-          service: facilitator
-
-      # Redis Down Alert
-      - uid: t402-redis-down
-        title: Redis Service Down
-        condition: B
-        data:
-          - refId: A
-            relativeTimeRange:
-              from: 300
-              to: 0
-            datasourceUid: PBFA97CFB590B2093
-            model:
-              expr: redis_up
-              intervalMs: 1000
-              maxDataPoints: 43200
-              refId: A
-          - refId: B
-            relativeTimeRange:
-              from: 300
-              to: 0
-            datasourceUid: __expr__
-            model:
-              conditions:
-                - evaluator:
-                    params:
-                      - 1
-                    type: lt
-                  operator:
-                    type: and
-                  query:
-                    params:
                       - B
                   reducer:
                     type: last
@@ -256,16 +261,22 @@ groups:
               maxDataPoints: 43200
               refId: B
               type: threshold
-        noDataState: Alerting
-        execErrState: Alerting
-        for: 1m
+        noDataState: OK
+        execErrState: Error
+        for: 3m
         annotations:
-          summary: Redis service is down
-          description: "Redis is not responding, rate limiting may not work"
+          summary: Very high P99 latency detected
+          description: "P99 latency is above 2s (current: {{ $values.A | printf \"%.3f\" }}s). User experience is significantly impacted."
         labels:
           severity: critical
-          service: redis
+          service: facilitator
+          team: platform
 
+  - orgId: 1
+    name: T402 Facilitator - Payment Alerts
+    folder: T402
+    interval: 1m
+    rules:
       # Verify Endpoint Errors
       - uid: t402-verify-errors
         title: Verify Endpoint Errors
@@ -309,10 +320,12 @@ groups:
         for: 2m
         annotations:
           summary: Verify endpoint returning errors
-          description: "The /verify endpoint is returning 5xx errors"
+          description: "The /verify endpoint is returning 5xx errors. Payment verification is failing."
+          runbook_url: "https://docs.t402.io/runbooks/verify-errors"
         labels:
           severity: critical
           service: facilitator
+          team: payments
 
       # Settle Endpoint Errors
       - uid: t402-settle-errors
@@ -357,7 +370,370 @@ groups:
         for: 2m
         annotations:
           summary: Settle endpoint returning errors
-          description: "The /settle endpoint is returning 5xx errors"
+          description: "The /settle endpoint is returning 5xx errors. Payment settlement is failing - funds may not be transferred."
+          runbook_url: "https://docs.t402.io/runbooks/settle-errors"
         labels:
           severity: critical
           service: facilitator
+          team: payments
+
+      # Low Settlement Success Rate
+      - uid: t402-low-settlement-rate
+        title: Low Settlement Success Rate
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: sum(rate(facilitator_settlements_total{status="success"}[10m])) or vector(0)
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: sum(rate(facilitator_settlements_total[10m])) or vector(0)
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0.95
+                    type: lt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - C
+                  reducer:
+                    type: last
+              expression: $A / $B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: math
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: Low settlement success rate
+          description: "Settlement success rate is below 95% (current: {{ $values.C | printf \"%.2f\" }}). Payments may be failing to settle."
+        labels:
+          severity: warning
+          service: facilitator
+          team: payments
+
+      # Low Verification Success Rate
+      - uid: t402-low-verification-rate
+        title: Low Verification Success Rate
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: sum(rate(facilitator_verifications_total{status="valid"}[10m])) or vector(0)
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: sum(rate(facilitator_verifications_total[10m])) or vector(0)
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0.90
+                    type: lt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - C
+                  reducer:
+                    type: last
+              expression: $A / $B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: math
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: Low verification success rate
+          description: "Verification success rate is below 90% (current: {{ $values.C | printf \"%.2f\" }}). Many payments are failing verification."
+        labels:
+          severity: warning
+          service: facilitator
+          team: payments
+
+  - orgId: 1
+    name: T402 Facilitator - Warning Alerts
+    folder: T402
+    interval: 2m
+    rules:
+      # High Client Error Rate (4xx errors)
+      - uid: t402-high-client-errors
+        title: High Client Error Rate
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: sum(rate(facilitator_requests_total{status=~"4.."}[5m])) or vector(0)
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: sum(rate(facilitator_requests_total[5m])) or vector(0)
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0.15
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - C
+                  reducer:
+                    type: last
+              expression: $A / $B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: math
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: High client error rate
+          description: "Client error rate (4xx) is above 15% (current: {{ $values.C | printf \"%.2f\" }}). May indicate integration issues."
+        labels:
+          severity: warning
+          service: facilitator
+          team: platform
+
+      # Redis Memory Warning
+      - uid: t402-redis-memory-high
+        title: Redis Memory Usage High
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: redis_memory_used_bytes
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: redis_memory_max_bytes
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0.8
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - C
+                  reducer:
+                    type: last
+              expression: $A / $B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: math
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: Redis memory usage is high
+          description: "Redis memory usage is above 80% (current: {{ $values.C | printf \"%.2f\" }}). Consider scaling or cleaning up."
+        labels:
+          severity: warning
+          service: redis
+          team: platform
+
+      # Network-Specific Error Rate - EVM
+      - uid: t402-evm-errors
+        title: High Error Rate on EVM Networks
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: sum(rate(facilitator_settlements_total{network=~"eip155:.*",status="failed"}[5m])) or vector(0)
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: sum(rate(facilitator_settlements_total{network=~"eip155:.*"}[5m])) or vector(0)
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0.1
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - C
+                  reducer:
+                    type: last
+              expression: $A / $B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: math
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: High error rate on EVM networks
+          description: "Settlement error rate on EVM networks is above 10% (current: {{ $values.C | printf \"%.2f\" }}). Check RPC providers."
+        labels:
+          severity: warning
+          service: facilitator
+          team: payments
+          network: evm
+
+      # Network-Specific Error Rate - Solana
+      - uid: t402-solana-errors
+        title: High Error Rate on Solana Networks
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: sum(rate(facilitator_settlements_total{network=~"solana:.*",status="failed"}[5m])) or vector(0)
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: sum(rate(facilitator_settlements_total{network=~"solana:.*"}[5m])) or vector(0)
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0.1
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - C
+                  reducer:
+                    type: last
+              expression: $A / $B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: math
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: High error rate on Solana networks
+          description: "Settlement error rate on Solana networks is above 10% (current: {{ $values.C | printf \"%.2f\" }}). Check RPC providers."
+        labels:
+          severity: warning
+          service: facilitator
+          team: payments
+          network: solana
