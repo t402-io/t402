@@ -1,5 +1,5 @@
 // Shared extension utilities
-export { WithExtensions } from "./types";
+export type { WithExtensions } from "./types";
 
 // Bazaar extension
 export * from "./bazaar";

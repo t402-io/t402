@@ -8,7 +8,6 @@ import {
 } from "@t402/core/types";
 import {
   getTokenConfig,
-  getTokenByAddress,
   TokenConfig,
   TOKEN_REGISTRY,
   USDT_LEGACY_ADDRESSES,

@@ -10,11 +10,9 @@
  */
 
 import type { Address, Hex } from "viem";
-import { concat, pad, toHex } from "viem";
 import type {
   UserOperation,
   PaymasterData,
-  GasEstimate,
 } from "../types.js";
 import { ENTRYPOINT_V07_ADDRESS, DEFAULT_GAS_LIMITS, packAccountGasLimits, packGasFees } from "../constants.js";
 
@@ -69,20 +67,11 @@ export interface StackupSponsorResult {
  * Stackup paymaster client
  */
 export class StackupPaymaster {
-  private readonly apiKey: string;
-  private readonly chainId: number;
   private readonly paymasterUrl: string;
-  private readonly rpcUrl: string;
-  private readonly type: StackupPaymasterType;
 
   constructor(config: StackupPaymasterConfig) {
-    this.apiKey = config.apiKey;
-    this.chainId = config.chainId;
-    this.type = config.type ?? "payg";
     this.paymasterUrl = config.paymasterUrl ??
       `https://api.stackup.sh/v1/paymaster/${config.apiKey}`;
-    this.rpcUrl = config.rpcUrl ??
-      `https://api.stackup.sh/v1/node/${config.apiKey}`;
   }
 
   /**
