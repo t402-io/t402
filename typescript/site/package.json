@@ -1,0 +1,51 @@
+{
+  "name": "@t402/site",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "format": "prettier -c .prettierrc --write \"**/*.{ts,tsx,js,json,md}\"",
+    "format:check": "prettier -c .prettierrc --check \"**/*.{ts,tsx,js,json,md}\"",
+    "lint": "eslint . --ext .ts,.tsx --fix",
+    "lint:check": "eslint . --ext .ts,.tsx"
+  },
+  "dependencies": {
+    "@heroicons/react": "^2.2.0",
+    "@scure/base": "^1.2.6",
+    "@solana/kit": "^2.1.1",
+    "@t402/core": "workspace:*",
+    "@t402/evm": "workspace:*",
+    "@t402/next": "workspace:*",
+    "@t402/paywall": "workspace:*",
+    "@t402/svm": "workspace:*",
+    "@vercel/functions": "^2.2.8",
+    "motion": "^11.18.0",
+    "next": "^16.0.10",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "viem": "^2.21.26",
+    "wagmi": "^2.15.6"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@eslint/js": "^9.24.0",
+    "@svgr/webpack": "^8.1.0",
+    "@tailwindcss/postcss": "^4.0.0",
+    "@types/node": "^22.13.4",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@typescript-eslint/eslint-plugin": "^8.29.1",
+    "@typescript-eslint/parser": "^8.29.1",
+    "eslint": "^9.24.0",
+    "eslint-config-next": "16.0.6",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsdoc": "^50.6.9",
+    "eslint-plugin-prettier": "^5.2.6",
+    "prettier": "3.5.2",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5"
+  }
+}

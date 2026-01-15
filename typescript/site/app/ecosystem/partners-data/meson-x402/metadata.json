@@ -1,0 +1,7 @@
+{
+  "name": "Meson t402",
+  "description": "Chrome extension to connect EVM & Solana wallets, test t402 interfaces, perform payments, and generate X Payment Headers",
+  "logoUrl": "/logos/meson.png",
+  "websiteUrl": "https://chromewebstore.google.com/detail/meson-t402/ppdppbgbdlnnmompceomhadjminblalp",
+  "category": "Infrastructure & Tooling"
+}
