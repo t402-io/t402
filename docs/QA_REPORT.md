@@ -20,7 +20,7 @@ This report documents the quality assurance findings for the T402 payment protoc
 | `@t402/tron` | 127 | ✅ Pass | Full coverage |
 | `@t402/ton` | 134 | ✅ Pass | Full coverage |
 | `@t402/mcp` | 32 | ✅ Pass | Schema validation & formatting |
-| `@t402/evm` | N/A | ✅ Build Pass | Needs integration tests |
+| `@t402/evm` | 304 + 56 integration | ✅ Pass | Full coverage with integration tests |
 | `@t402/svm` | N/A | ✅ Build Pass | Needs integration tests |
 | `@t402/cli` | 41 | ✅ Pass | Full coverage |
 | `@t402/wdk` | N/A | ✅ Build Pass | Build fixed |
@@ -96,6 +96,43 @@ The following build issues were identified and resolved:
 
 **Result**: All 127 TRON tests now pass (0 skipped).
 
+#### 3. EVM Integration Tests - ADDED
+
+**Status**: **ADDED** (Jan 15, 2026)
+
+**New Test Files** (4 files, 56 integration tests):
+- `typescript/packages/mechanisms/evm/test/integrations/multi-network.test.ts` - 24 tests
+  - Token registry verification
+  - Multi-network price parsing (Base Sepolia, Base, Ethereum, Arbitrum, Polygon)
+  - Client payload creation across networks
+  - Token selection with preferredToken configuration
+  - Full payment flow (verify + settle)
+
+- `typescript/packages/mechanisms/evm/test/integrations/cross-scheme.test.ts` - 11 tests
+  - Token type classification (EIP-3009 vs legacy)
+  - Scheme selection based on token capabilities
+  - Exact scheme (EIP-3009) payment flow
+  - Exact-legacy scheme payment flow
+  - Token fallback chain verification
+
+- `typescript/packages/mechanisms/evm/test/integrations/erc4337.test.ts` - 14 tests
+  - UserOperation building and batch operations
+  - GaslessT402Client configuration
+  - Smart account address and deployment checks
+  - Payment params validation
+  - Token configuration for gasless transfers
+  - EntryPoint v0.7 configuration
+  - Paymaster integration
+
+- `typescript/packages/mechanisms/evm/test/integrations/exact-evm.test.ts` - 7 tests (existing)
+  - Full t402 client/server/facilitator flow
+  - HTTP middleware integration
+  - Price parsing with custom MoneyParsers
+
+**Note**: Integration tests requiring private keys are automatically skipped when `CLIENT_PRIVATE_KEY` and `FACILITATOR_PRIVATE_KEY` environment variables are not set.
+
+**Result**: 304 unit tests + 56 integration tests = 360 total tests for @t402/evm.
+
 ### Low Priority Issues
 
 #### 4. Unused Import Warning in TRON Client Test
@@ -170,7 +207,7 @@ Total new tests: 68 tests (all passing)
 - [x] Verify all 21 packages build successfully - DONE
 - [x] Verify all tests pass - DONE (42 tasks successful)
 - [x] Fix TRON dynamic require issue in server scheme - DONE
-- [ ] Add integration tests for EVM mechanism
+- [x] Add integration tests for EVM mechanism - DONE (56 tests across 4 test files)
 - [ ] Add integration tests for SVM mechanism
 - [ ] Complete security audit with external firm
 
