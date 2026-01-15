@@ -27,7 +27,7 @@ Configure these secrets in your GitHub repository settings:
 
 1. Go to [pypi.org](https://pypi.org/) → Your projects → t402 → Publishing
 2. Add a new trusted publisher:
-   - Owner: `t402-io` (or your org)
+   - Owner: `t402-io`
    - Repository: `t402`
    - Workflow: `python_release.yml`
    - Environment: `pypi`
@@ -36,7 +36,60 @@ Configure these secrets in your GitHub repository settings:
 
 ## TypeScript Packages (@t402/*)
 
-### Automatic Release (Recommended)
+### All Packages (21 total)
+
+| Package | Path | Description |
+|---------|------|-------------|
+| `@t402/core` | `packages/core` | Core types and abstractions |
+| `@t402/extensions` | `packages/extensions` | Bazaar, Sign-In-With-X |
+| `@t402/evm` | `packages/mechanisms/evm` | EVM mechanisms |
+| `@t402/svm` | `packages/mechanisms/svm` | Solana mechanisms |
+| `@t402/ton` | `packages/mechanisms/ton` | TON mechanisms |
+| `@t402/tron` | `packages/mechanisms/tron` | TRON mechanisms |
+| `@t402/express` | `packages/http/express` | Express middleware |
+| `@t402/hono` | `packages/http/hono` | Hono middleware |
+| `@t402/fastify` | `packages/http/fastify` | Fastify middleware |
+| `@t402/next` | `packages/http/next` | Next.js integration |
+| `@t402/fetch` | `packages/http/fetch` | Fetch wrapper |
+| `@t402/axios` | `packages/http/axios` | Axios interceptor |
+| `@t402/paywall` | `packages/http/paywall` | Payment wall UI |
+| `@t402/react` | `packages/http/react` | React components |
+| `@t402/vue` | `packages/http/vue` | Vue components |
+| `@t402/wdk` | `packages/wdk` | Tether WDK integration |
+| `@t402/wdk-gasless` | `packages/wdk-gasless` | ERC-4337 gasless |
+| `@t402/wdk-bridge` | `packages/wdk-bridge` | Cross-chain bridge |
+| `@t402/wdk-multisig` | `packages/wdk-multisig` | Safe multi-sig |
+| `@t402/mcp` | `packages/mcp` | AI agent MCP server |
+| `@t402/cli` | `packages/cli` | CLI tools |
+
+### Using Changesets (Recommended)
+
+We use [Changesets](https://github.com/changesets/changesets) for version management:
+
+```bash
+cd typescript
+
+# 1. Create a changeset when making changes
+pnpm changeset
+
+# 2. Select packages that changed
+# 3. Choose semver bump (patch/minor/major)
+# 4. Write a summary of changes
+
+# The changeset file will be committed with your PR
+```
+
+**Automated Release:**
+
+When PRs with changesets are merged to main:
+1. A "Version Packages" PR is automatically created
+2. Merging that PR triggers npm publish for all changed packages
+
+**Package Groups:**
+- **Fixed** (version together): `@t402/core`, `@t402/evm`, `@t402/svm`, `@t402/ton`, `@t402/tron`
+- **Linked** (version together when any changes): `@t402/wdk`, `@t402/wdk-*`
+
+### Manual Release (Tag-based)
 
 1. Update version in the package's `package.json`
 2. Commit changes: `git commit -m "chore: bump @t402/xxx to x.y.z"`
@@ -45,14 +98,9 @@ Configure these secrets in your GitHub repository settings:
    git tag v2.1.0
    git push origin v2.1.0
    ```
-4. GitHub Actions will automatically:
-   - Run tests
-   - Build all packages
-   - Publish to npm
+4. GitHub Actions will automatically publish all packages
 
-### Manual Release
-
-Use the workflow dispatch:
+### Manual Release (Workflow Dispatch)
 
 1. Go to Actions → NPM Release → Run workflow
 2. Select package to publish (or "all")
@@ -60,31 +108,14 @@ Use the workflow dispatch:
 
 ### Release Order
 
-Packages must be published in dependency order:
+Packages are published in dependency order automatically:
 
 1. `@t402/core` - No dependencies
-2. `@t402/evm` - Depends on core
-3. `@t402/svm` - Depends on core
-4. `@t402/ton` - Depends on core
-5. `@t402/wdk` - Depends on core, evm
-6. `@t402/extensions` - Depends on core
-7. `@t402/http` - Depends on core
-
-### Version Bumping
-
-```bash
-# In the package directory
-cd typescript/packages/core
-
-# Bump patch version (2.0.0 → 2.0.1)
-npm version patch --no-git-tag-version
-
-# Bump minor version (2.0.0 → 2.1.0)
-npm version minor --no-git-tag-version
-
-# Bump major version (2.0.0 → 3.0.0)
-npm version major --no-git-tag-version
-```
+2. `@t402/evm`, `@t402/svm`, `@t402/ton`, `@t402/tron` - Depend on core
+3. `@t402/extensions`, `@t402/wdk` - Depend on core, mechanisms
+4. `@t402/express`, `@t402/hono`, etc. - Depend on core
+5. `@t402/wdk-gasless`, `@t402/wdk-bridge` - Depend on wdk, evm
+6. `@t402/mcp`, `@t402/cli` - Top-level tools
 
 ---
 
@@ -111,6 +142,12 @@ Users can install specific versions:
 go get github.com/t402-io/t402/go@v2.1.0
 ```
 
+### CLI Tool
+
+```bash
+go install github.com/t402-io/t402/go/cmd/t402@v2.1.0
+```
+
 ---
 
 ## Python SDK
@@ -121,8 +158,8 @@ go get github.com/t402-io/t402/go@v2.1.0
 2. Commit changes
 3. Create and push a tag with `python/` prefix:
    ```bash
-   git tag python/v1.1.0
-   git push origin python/v1.1.0
+   git tag python/v1.5.0
+   git push origin python/v1.5.0
    ```
 4. GitHub Actions will:
    - Run tests across Python 3.10, 3.11, 3.12
@@ -139,44 +176,75 @@ Use workflow dispatch for testing:
 
 ---
 
+## Java SDK
+
+### Automatic Release (Coming Soon)
+
+1. Update version in `java/t402/pom.xml`
+2. Create and push a tag with `java/` prefix:
+   ```bash
+   git tag java/v1.0.0
+   git push origin java/v1.0.0
+   ```
+
+### Maven Central
+
+Java packages will be published to Maven Central when the Java SDK is production-ready.
+
+---
+
 ## Release Checklist
 
 Before releasing:
 
 - [ ] All tests pass locally
-- [ ] CHANGELOG.md updated (if exists)
+- [ ] CHANGELOG.md updated (or changesets created)
 - [ ] Version bumped in appropriate files
 - [ ] No uncommitted changes
 - [ ] Main branch is up to date
 
-### Creating a Release
+### Creating a Coordinated Release
 
 ```bash
 # 1. Ensure you're on main and up to date
 git checkout main
 git pull origin main
 
-# 2. Run tests
+# 2. Run tests for all SDKs
 cd typescript && pnpm test
 cd ../go && go test ./...
 cd ../python/t402 && uv run pytest
 
-# 3. Bump versions (example for TypeScript)
-cd typescript/packages/core
-npm version minor --no-git-tag-version
-cd ../mechanisms/evm
-npm version minor --no-git-tag-version
-# ... repeat for other packages
+# 3. For TypeScript, use changesets
+cd typescript
+pnpm changeset
+# Follow prompts to create changeset
 
-# 4. Commit version bumps
+# 4. Commit and push
 git add -A
-git commit -m "chore: bump versions for v2.1.0 release"
-
-# 5. Create and push tag
-git tag v2.1.0
+git commit -m "chore: prepare release"
 git push origin main
-git push origin v2.1.0
+
+# 5. For Go/Python, create tags
+git tag go/v2.1.0
+git tag python/v1.5.0
+git push origin --tags
 ```
+
+---
+
+## CI/CD Workflows
+
+| Workflow | Trigger | Description |
+|----------|---------|-------------|
+| `npm_release.yml` | `v*` tags, manual | Publishes all 21 TypeScript packages to npm |
+| `changeset_release.yml` | Push to main | Creates version PRs, publishes on merge |
+| `go_release.yml` | `go/v*` tags, PRs | Tests Go and creates releases |
+| `python_release.yml` | `python/v*` tags, PRs | Publishes Python package to PyPI |
+| `unit_tests.yml` | PRs, push to main | Runs tests for all SDKs |
+| `integration_tests.yml` | PRs, push to main, daily | Runs cross-chain integration tests |
+| `check_lint.yml` | PRs | Lints TypeScript code |
+| `check_format.yml` | PRs | Checks code formatting |
 
 ---
 
@@ -206,15 +274,24 @@ Go modules are cached by the proxy. Wait 5-10 minutes or use:
 GOPROXY=direct go get github.com/t402-io/t402/go@v2.1.0
 ```
 
+### Changeset PR not created
+
+- Ensure `.changeset/config.json` is properly configured
+- Check that changeset files exist in the PR
+- Verify GitHub token has write permissions
+
 ---
 
-## CI/CD Workflows
+## Version Conventions
 
-| Workflow | Trigger | Description |
-|----------|---------|-------------|
-| `npm_release.yml` | `v*` tags, manual | Publishes TypeScript packages to npm |
-| `go_release.yml` | `go/v*` tags, PRs | Tests Go and creates releases |
-| `python_release.yml` | `python/v*` tags, PRs | Publishes Python package to PyPI |
-| `unit_tests.yml` | PRs | Runs TypeScript tests |
-| `check_lint.yml` | PRs | Lints TypeScript code |
-| `check_format.yml` | PRs | Checks code formatting |
+| SDK | Format | Example |
+|-----|--------|---------|
+| TypeScript | `vX.Y.Z` | `v2.1.0` |
+| Go | `go/vX.Y.Z` | `go/v2.1.0` |
+| Python | `python/vX.Y.Z` | `python/v1.5.0` |
+| Java | `java/vX.Y.Z` | `java/v1.0.0` |
+
+Semantic versioning:
+- **MAJOR**: Breaking changes
+- **MINOR**: New features, backwards compatible
+- **PATCH**: Bug fixes, backwards compatible
