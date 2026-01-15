@@ -1,3 +1,6 @@
+# Package version
+__version__ = "1.4.0"
+
 # Re-export commonly used items for convenience
 from t402.common import (
     parse_money,
@@ -152,6 +155,8 @@ def hello() -> str:
 
 
 __all__ = [
+    # Version
+    "__version__",
     # Core
     "hello",
     "t402_VERSION",
