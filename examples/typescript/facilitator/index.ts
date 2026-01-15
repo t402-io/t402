@@ -17,10 +17,20 @@ import { createWalletClient, http, publicActions } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { baseSepolia } from "viem/chains";
 
+// Import Prometheus metrics
+import {
+  register,
+  metricsMiddleware,
+  recordVerification,
+  recordSettlement,
+  recordError,
+} from "./metrics.js";
+
 dotenv.config();
 
 // Configuration
 const PORT = process.env.PORT || "4022";
+const METRICS_ENABLED = process.env.METRICS_ENABLED !== "false";
 
 // Validate required environment variables
 if (!process.env.EVM_PRIVATE_KEY) {
@@ -95,24 +105,100 @@ const evmSigner = toFacilitatorEvmSigner({
 // Facilitator can now handle all Solana networks with automatic RPC creation
 const svmSigner = toFacilitatorSvmSigner(svmAccount);
 
+// Track operation start times for duration metrics
+const operationTimers = new Map<string, number>();
+
+function getOperationKey(
+  operation: "verify" | "settle",
+  payload: PaymentPayload,
+): string {
+  // Use accepted network and resource URL for uniqueness
+  return `${operation}:${payload.accepted.network}:${payload.resource.url}:${Date.now()}`;
+}
+
 const facilitator = new t402Facilitator()
   .onBeforeVerify(async (context) => {
-    console.log("Before verify", context);
+    const key = getOperationKey("verify", context.paymentPayload);
+    operationTimers.set(key, Date.now());
+    // Store the key in the context for later retrieval
+    (context as { _metricsKey?: string })._metricsKey = key;
+    console.log("Before verify", context.requirements.network);
   })
   .onAfterVerify(async (context) => {
-    console.log("After verify", context);
+    const key = (context as { _metricsKey?: string })._metricsKey;
+    const startTime = key ? operationTimers.get(key) : undefined;
+    const duration = startTime ? Date.now() - startTime : 0;
+    if (key) operationTimers.delete(key);
+
+    const { network, scheme } = context.requirements;
+    const isValid = context.result.isValid;
+
+    if (METRICS_ENABLED) {
+      recordVerification(isValid, network, scheme, duration);
+    }
+
+    console.log(
+      `Verify ${isValid ? "success" : "failed"}: ${network} (${duration}ms)`,
+    );
   })
   .onVerifyFailure(async (context) => {
-    console.log("Verify failure", context);
+    const key = (context as { _metricsKey?: string })._metricsKey;
+    const startTime = key ? operationTimers.get(key) : undefined;
+    const duration = startTime ? Date.now() - startTime : 0;
+    if (key) operationTimers.delete(key);
+
+    const { network, scheme } = context.requirements;
+
+    if (METRICS_ENABLED) {
+      recordVerification(false, network, scheme, duration);
+      recordError("verification", network);
+    }
+
+    console.error(`Verify error: ${network}`, context.error.message);
   })
   .onBeforeSettle(async (context) => {
-    console.log("Before settle", context);
+    const key = getOperationKey("settle", context.paymentPayload);
+    operationTimers.set(key, Date.now());
+    (context as { _metricsKey?: string })._metricsKey = key;
+    console.log("Before settle", context.requirements.network);
   })
   .onAfterSettle(async (context) => {
-    console.log("After settle", context);
+    const key = (context as { _metricsKey?: string })._metricsKey;
+    const startTime = key ? operationTimers.get(key) : undefined;
+    const duration = startTime ? Date.now() - startTime : 0;
+    if (key) operationTimers.delete(key);
+
+    const { network, scheme } = context.requirements;
+    const success = context.result.success;
+
+    if (METRICS_ENABLED) {
+      // Extract payment amount from requirements if available
+      const amount = context.requirements.amount
+        ? BigInt(context.requirements.amount)
+        : undefined;
+      const token = context.requirements.asset;
+
+      recordSettlement(success, network, scheme, duration, amount, token);
+    }
+
+    console.log(
+      `Settle ${success ? "success" : "failed"}: ${network} (${duration}ms)`,
+    );
   })
   .onSettleFailure(async (context) => {
-    console.log("Settle failure", context);
+    const key = (context as { _metricsKey?: string })._metricsKey;
+    const startTime = key ? operationTimers.get(key) : undefined;
+    const duration = startTime ? Date.now() - startTime : 0;
+    if (key) operationTimers.delete(key);
+
+    const { network, scheme } = context.requirements;
+
+    if (METRICS_ENABLED) {
+      recordSettlement(false, network, scheme, duration);
+      recordError("settlement", network);
+    }
+
+    console.error(`Settle error: ${network}`, context.error.message);
   });
 
 // Register EVM and SVM schemes using the new register helpers
@@ -128,7 +214,43 @@ registerExactSvmScheme(facilitator, {
 
 // Initialize Express app
 const app = express();
+
+// Add metrics middleware before other middleware
+if (METRICS_ENABLED) {
+  app.use(metricsMiddleware);
+}
+
 app.use(express.json());
+
+/**
+ * GET /health
+ * Health check endpoint
+ */
+app.get("/health", (_req, res) => {
+  res.json({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
+});
+
+/**
+ * GET /metrics
+ * Prometheus metrics endpoint
+ */
+if (METRICS_ENABLED) {
+  app.get("/metrics", async (_req, res) => {
+    try {
+      res.set("Content-Type", register.contentType);
+      res.end(await register.metrics());
+    } catch (error) {
+      console.error("Metrics error:", error);
+      res.status(500).json({
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  });
+}
 
 /**
  * POST /verify
@@ -152,6 +274,7 @@ app.post("/verify", async (req, res) => {
     // Hooks will automatically:
     // - Track verified payment (onAfterVerify)
     // - Extract and catalog discovery info (onAfterVerify)
+    // - Record Prometheus metrics
     const response: VerifyResponse = await facilitator.verify(
       paymentPayload,
       paymentRequirements,
@@ -160,6 +283,9 @@ app.post("/verify", async (req, res) => {
     res.json(response);
   } catch (error) {
     console.error("Verify error:", error);
+    if (METRICS_ENABLED) {
+      recordError("internal", req.body?.paymentRequirements?.network);
+    }
     res.status(500).json({
       error: error instanceof Error ? error.message : "Unknown error",
     });
@@ -186,6 +312,7 @@ app.post("/settle", async (req, res) => {
     // - Validate payment was verified (onBeforeSettle - will abort if not)
     // - Check verification timeout (onBeforeSettle)
     // - Clean up tracking (onAfterSettle / onSettleFailure)
+    // - Record Prometheus metrics
     const response: SettleResponse = await facilitator.settle(
       paymentPayload as PaymentPayload,
       paymentRequirements as PaymentRequirements,
@@ -208,6 +335,9 @@ app.post("/settle", async (req, res) => {
       } as SettleResponse);
     }
 
+    if (METRICS_ENABLED) {
+      recordError("internal", req.body?.paymentRequirements?.network);
+    }
     res.status(500).json({
       error: error instanceof Error ? error.message : "Unknown error",
     });
@@ -218,12 +348,15 @@ app.post("/settle", async (req, res) => {
  * GET /supported
  * Get supported payment kinds and extensions
  */
-app.get("/supported", async (req, res) => {
+app.get("/supported", async (_req, res) => {
   try {
     const response = facilitator.getSupported();
     res.json(response);
   } catch (error) {
     console.error("Supported error:", error);
+    if (METRICS_ENABLED) {
+      recordError("internal");
+    }
     res.status(500).json({
       error: error instanceof Error ? error.message : "Unknown error",
     });
@@ -232,5 +365,7 @@ app.get("/supported", async (req, res) => {
 
 // Start the server
 app.listen(parseInt(PORT), () => {
-  console.log("Facilitator listening");
+  console.log(`Facilitator listening on port ${PORT}`);
+  console.log(`Metrics endpoint: http://localhost:${PORT}/metrics`);
+  console.log(`Health endpoint: http://localhost:${PORT}/health`);
 });
