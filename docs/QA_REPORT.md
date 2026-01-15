@@ -22,7 +22,7 @@ This report documents the quality assurance findings for the T402 payment protoc
 | `@t402/mcp` | 32 | ✅ Pass | Schema validation & formatting |
 | `@t402/evm` | 304 + 56 integration | ✅ Pass | Full coverage with integration tests |
 | `@t402/svm` | 105 + 62 integration | ✅ Pass | Full coverage with integration tests |
-| `@t402/cli` | 41 | ✅ Pass | Full coverage |
+| `@t402/cli` | 107 | ✅ Pass | Coverage improved 29% → 52% |
 | `@t402/wdk` | N/A | ✅ Build Pass | Build fixed |
 | `@t402/wdk-multisig` | 46 | ✅ Pass | Full coverage |
 
@@ -58,7 +58,7 @@ Coverage reporting enabled via `@vitest/coverage-v8`. Run with `pnpm test -- --c
 | `@t402/evm` | 360 | ~55% | ~75% | ~60% | ~55% |
 | `@t402/svm` | 167 | 32.53% | 73.14% | 55.76% | 32.53% |
 | `@t402/mcp` | 32 | 52.21% | 83.33% | 34.14% | 52.21% |
-| `@t402/cli` | 41 | 29.21% | 88.23% | 45.00% | 29.21% |
+| `@t402/cli` | 107 | 51.76% | 95.20% | 95.00% | 51.76% |
 | `@t402/wdk-multisig` | 46 | 40.95% | 82.89% | 33.73% | 40.95% |
 
 ### Key Source File Coverage
@@ -77,6 +77,10 @@ Coverage reporting enabled via `@vitest/coverage-v8`. Run with `pnpm test -- --c
 | `evm/src/exact-legacy/facilitator/scheme.ts` | 88.64% | 81.39% |
 | `evm/src/exact-legacy/server/scheme.ts` | 91.74% | 87.50% |
 | `evm/src/exact/server/scheme.ts` | 91.83% | 90.90% |
+| `cli/src/config/index.ts` | 100% | 100% |
+| `cli/src/utils/index.ts` | 100% | 97.72% |
+| `cli/src/commands/info.ts` | 100% | 100% |
+| `cli/src/commands/config.ts` | 100% | 93.10% |
 
 ### Coverage Analysis
 
@@ -295,9 +299,49 @@ The following build issues were identified and resolved:
 
 **Result**: 127 unit tests + 109 integration tests = 236 total tests for @t402/tron.
 
+#### 7. CLI Test Coverage Improvement - DONE
+
+**Status**: **DONE** (Jan 16, 2026)
+
+**Coverage Improvement**: 29.21% → 51.76% statements
+
+**New Test Files** (3 files, 66 new tests):
+- `typescript/packages/cli/src/config/config.test.ts` - 22 tests
+  - Config get/set/reset operations
+  - Seed management (store, retrieve, clear)
+  - RPC endpoint management
+  - Config path retrieval
+
+- `typescript/packages/cli/src/commands/info.test.ts` - 8 tests
+  - Info command registration and execution
+  - Network filtering (--testnet, --all flags)
+  - Version command output
+
+- `typescript/packages/cli/src/commands/config.test.ts` - 20 tests
+  - Config show/get/set/rpc/reset/path subcommands
+  - URL validation for facilitator and RPC endpoints
+  - Testnet mode switching with automatic network change
+  - Wallet preservation on config reset
+
+**Enhanced Test File**:
+- `typescript/packages/cli/src/utils/utils.test.ts` - 16 additional tests
+  - formatBalanceResult and formatPaymentResult
+  - Console output functions (printTable, printSuccess, printError, printWarning, printInfo, printHeader)
+  - Spinner creation
+
+**Module Coverage Results**:
+| Module | Before | After |
+|--------|--------|-------|
+| src/config/index.ts | 0% | 100% |
+| src/utils/index.ts | ~75% | 100% |
+| src/commands/info.ts | 19% | 100% |
+| src/commands/config.ts | 34% | 100% |
+
+**Result**: 107 total tests for @t402/cli (up from 41).
+
 ### Low Priority Issues
 
-#### 7. Unused Import Warning in TRON Client Test
+#### 8. Unused Import Warning in TRON Client Test
 
 **File**: `typescript/packages/mechanisms/tron/test/client.test.ts`
 **Issue**: `vi` imported but some mocking features unused due to test scope changes
@@ -376,6 +420,7 @@ Total new tests: 177 tests (all passing)
 - [x] Add integration tests for SVM mechanism - DONE (62 tests across 3 test files)
 - [x] Add integration tests for TON mechanism - DONE (88 tests across 2 test files)
 - [x] Add integration tests for TRON mechanism - DONE (109 tests across 2 test files)
+- [x] Improve CLI test coverage - DONE (29% → 52%, 107 tests)
 - [ ] Complete security audit with external firm
 
 ### Future Improvements
@@ -408,7 +453,7 @@ cd typescript/packages/mechanisms/svm && pnpm vitest run --coverage
 # @t402/tron: 236 passed (127 unit + 109 integration)
 # @t402/ton: 222 passed (134 unit + 88 integration)
 # @t402/mcp: 32 passed (32 total)
-# @t402/cli: 41 passed (41 total)
+# @t402/cli: 107 passed (107 total)
 # @t402/wdk-multisig: 46 passed (46 total)
 # @t402/evm: 360 passed (304 unit + 56 integration)
 # @t402/svm: 167 passed (105 unit + 62 integration)
