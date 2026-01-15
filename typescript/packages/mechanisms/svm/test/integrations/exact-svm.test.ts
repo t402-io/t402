@@ -23,22 +23,18 @@ import type { ExactSvmPayloadV2 } from "../../src/types";
 import { createKeyPairSignerFromBytes } from "@solana/kit";
 import { base58 } from "@scure/base";
 
-// Load private keys and addresses from environment
+// Load private keys and addresses from environment (optional - tests will skip if not provided)
 const CLIENT_PRIVATE_KEY = process.env.CLIENT_PRIVATE_KEY;
 const FACILITATOR_PRIVATE_KEY = process.env.FACILITATOR_PRIVATE_KEY;
 const FACILITATOR_ADDRESS = process.env.FACILITATOR_ADDRESS;
 const RESOURCE_SERVER_ADDRESS = process.env.RESOURCE_SERVER_ADDRESS;
 
-if (
-  !CLIENT_PRIVATE_KEY ||
-  !FACILITATOR_PRIVATE_KEY ||
-  !FACILITATOR_ADDRESS ||
-  !RESOURCE_SERVER_ADDRESS
-) {
-  throw new Error(
-    "CLIENT_PRIVATE_KEY, FACILITATOR_PRIVATE_KEY, FACILITATOR_ADDRESS and RESOURCE_SERVER_ADDRESS environment variables must be set for integration tests",
-  );
-}
+const HAS_ENV_VARS = Boolean(
+  CLIENT_PRIVATE_KEY &&
+  FACILITATOR_PRIVATE_KEY &&
+  FACILITATOR_ADDRESS &&
+  RESOURCE_SERVER_ADDRESS
+);
 
 /**
  * SVM Facilitator Client wrapper
@@ -122,7 +118,7 @@ function buildSvmPaymentRequirements(
   };
 }
 
-describe("SVM Integration Tests", () => {
+describe.skipIf(!HAS_ENV_VARS)("SVM Integration Tests", () => {
   describe("t402Client / t402ResourceServer / t402Facilitator - SVM Flow", () => {
     let client: t402Client;
     let server: t402ResourceServer;
