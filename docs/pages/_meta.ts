@@ -7,6 +7,10 @@ export default {
     title: 'Getting Started',
     type: 'page'
   },
+  'use-cases': {
+    title: 'Use Cases',
+    type: 'page'
+  },
   sdks: {
     title: 'SDKs',
     type: 'page'
@@ -23,6 +27,10 @@ export default {
     title: 'API Reference',
     type: 'page'
   },
+  faq: {
+    title: 'FAQ',
+    type: 'page'
+  },
   '---': {
     type: 'separator'
   },
@@ -33,7 +41,7 @@ export default {
   },
   npm: {
     title: 'npm',
-    href: 'https://www.npmjs.com/org/t402',
+    href: 'https://www.npmjs.com/org/t402-io',
     newWindow: true
   }
 }

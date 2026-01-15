@@ -20,7 +20,14 @@ const ALGOLIA_INDEX_NAME = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME
 
 const config: DocsThemeConfig = {
   logo: (
-    <span style={{ fontWeight: 700, fontSize: '1.2rem' }}>
+    <span style={{
+      fontWeight: 800,
+      fontSize: '1.3rem',
+      background: 'linear-gradient(135deg, #00D632 0%, #00A3FF 100%)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      backgroundClip: 'text',
+    }}>
       T402
     </span>
   ),
@@ -28,7 +35,12 @@ const config: DocsThemeConfig = {
     link: 'https://github.com/t402-io/t402'
   },
   chat: {
-    link: 'https://twitter.com/t402_io'
+    link: 'https://x.com/t402_io',
+    icon: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+      </svg>
+    )
   },
   // Algolia DocSearch - renders custom search if credentials are configured
   search: {
