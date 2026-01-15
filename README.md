@@ -16,28 +16,64 @@ app.use(
 // That's it! See examples/ for full details
 ```
 
+## Package Architecture
+
+```
+@t402/core              Core types, client, server, facilitator abstractions
+@t402/extensions        Bazaar, Sign-In-With-X extensions
+
+Mechanisms (Chain-specific payment implementations):
+@t402/evm               EIP-3009, ERC-4337, USDT0 bridge for EVM chains
+@t402/svm               Solana SPL token support
+@t402/ton               TON Jetton (TEP-74) support
+@t402/tron              TRON TRC-20 support
+
+HTTP Integrations:
+@t402/express           Express.js middleware
+@t402/hono              Hono middleware
+@t402/fastify           Fastify middleware
+@t402/next              Next.js integration
+@t402/fetch             Fetch API wrapper
+@t402/axios             Axios interceptor
+@t402/paywall           Payment wall UI components
+@t402/react             React hooks and components
+@t402/vue               Vue composables and components
+
+WDK (Wallet Development Kit):
+@t402/wdk               Tether WDK integration
+@t402/wdk-gasless       ERC-4337 gasless payments
+@t402/wdk-bridge        LayerZero cross-chain bridging
+@t402/wdk-multisig      Safe multi-sig support
+
+Tools:
+@t402/mcp               AI Agent MCP server (Claude, etc.)
+@t402/cli               Command-line tools
+```
+
 <details>
 <summary><b>Installation</b></summary>
 
 ### TypeScript
 
 ```shell
-# All available packages
-pnpm add @t402-io/core @t402-io/evm @t402-io/svm @t402-io/ton @t402-io/tron @t402-io/wdk @t402-io/wdk-gasless @t402-io/wdk-bridge @t402-io/extensions @t402-io/mcp
+# Core packages
+pnpm add @t402/core @t402/evm
 
-# Minimal client
-pnpm add @t402-io/core @t402-io/evm
+# With specific framework
+pnpm add @t402/express  # Express.js
+pnpm add @t402/next     # Next.js
+pnpm add @t402/hono     # Hono
+
+# Gasless payments
+pnpm add @t402/wdk-gasless
 
 # MCP Server for AI Agents
-pnpm add @t402-io/mcp
-# or run directly
-npx @t402-io/mcp
+pnpm add @t402/mcp
+npx @t402/mcp  # Run directly
 
-# WDK Gasless Payments (Tether WDK + ERC-4337)
-pnpm add @t402-io/wdk-gasless
-
-# Or with npm
-npm install @t402-io/core @t402-io/evm
+# CLI tool
+pnpm add -g @t402/cli
+t402 --help
 ```
 
 ### Python
@@ -47,16 +83,29 @@ pip install t402
 
 # Or with uv
 uv add t402
+
+# CLI tool included
+t402 --help
 ```
 
 ### Go
 
 ```shell
-# Set GOPRIVATE (one-time setup, required for private repo)
-go env -w GOPRIVATE=github.com/t402-io/t402
+go get github.com/t402-io/t402/go@latest
 
-# Install
-go get github.com/t402-io/t402/go@v1.0.0
+# CLI tool
+go install github.com/t402-io/t402/go/cmd/t402@latest
+t402 --help
+```
+
+### Java (Coming Soon)
+
+```xml
+<dependency>
+  <groupId>io.t402</groupId>
+  <artifactId>t402-core</artifactId>
+  <version>1.0.0</version>
+</dependency>
 ```
 
 </details>
@@ -67,8 +116,10 @@ go get github.com/t402-io/t402/go@v1.0.0
 ### EVM (Ethereum Virtual Machine)
 - Ethereum Mainnet (`eip155:1`)
 - Base (`eip155:8453`, `eip155:84532`)
-- Optimism, Arbitrum, Polygon, and more
-- Supports USDC, USDT, and native tokens
+- Arbitrum (`eip155:42161`)
+- Optimism (`eip155:10`)
+- Polygon (`eip155:137`)
+- Supports USDC, USDT, USDT0, and native tokens
 
 ### ERC-4337 Account Abstraction
 - **Gasless Transactions**: Users pay zero gas fees via paymaster sponsorship
@@ -76,7 +127,6 @@ go get github.com/t402-io/t402/go@v1.0.0
 - **Bundlers**: Pimlico, Alchemy, and generic bundler support
 - **Paymasters**: Pimlico, Biconomy, Stackup integrations
 - **EntryPoint v0.7**: Full support for latest ERC-4337 specification
-- Supported on all EVM networks above
 
 ### SVM (Solana Virtual Machine)
 - Solana Mainnet (`solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp`)
@@ -87,165 +137,112 @@ go get github.com/t402-io/t402/go@v1.0.0
 - TON Mainnet (`ton:mainnet`)
 - TON Testnet (`ton:testnet`)
 - Supports USDT Jetton (TEP-74 standard)
-- Pre-signed BOC message format
 
 ### TRON
 - TRON Mainnet (`tron:mainnet`)
 - TRON Nile Testnet (`tron:nile`)
 - TRON Shasta Testnet (`tron:shasta`)
 - Supports USDT TRC-20 (TIP-20 standard)
-- Pre-signed transaction format
 
 ### USDT0 Cross-Chain Bridge (LayerZero)
-- **Cross-chain USDT0 transfers** via LayerZero OFT standard
 - **Supported chains**: Ethereum, Arbitrum, Ink, Berachain, Unichain
 - **Message tracking** via LayerZero Scan API
-- **Cross-chain payment routing** for multi-chain payments
-
-### MCP Server for AI Agents
-- **Model Context Protocol (MCP)** server for AI agent payments
-- **Claude Desktop integration** with simple configuration
-- **6 payment tools**: getBalance, getAllBalances, pay, payGasless, getBridgeFee, bridge
-- **Demo mode** for testing without real transactions
-- **Multi-chain support**: All EVM networks + cross-chain bridging
-
-### WDK Gasless Payments
-- **Tether WDK integration** for gasless stablecoin payments
-- **ERC-4337 Account Abstraction** via Safe smart accounts
-- **Zero gas fees** for end users via paymaster sponsorship
-- **Supported tokens**: USDT0, USDC across 7 chains
-- **Batch payments** for multiple transfers in one transaction
-- **Bundler support**: Pimlico, Alchemy, Stackup, Biconomy
-
-### WDK Cross-Chain Bridge
-- **Multi-chain USDT0 bridging** with automatic source chain selection
-- **Tether WDK integration** for signing bridge transactions
-- **Fee-optimized routing**: cheapest, fastest, or preferred strategies
-- **LayerZero tracking**: Monitor delivery via LayerZero Scan API
-- **Supported chains**: Ethereum, Arbitrum, Ink, Berachain, Unichain
 
 </details>
+
+## CLI Tools
+
+All SDKs include CLI tools for payment operations.
+
+```bash
+# Verify a payment payload
+t402 verify <base64-payload>
+
+# Settle a payment
+t402 settle <base64-payload>
+
+# List supported networks
+t402 supported
+
+# Encode/decode payloads
+t402 encode payment.json
+t402 decode <base64-string>
+
+# Network information
+t402 info eip155:8453
+```
+
+**Available in**: TypeScript (`@t402/cli`), Python (`pip install t402`), Go (`go install .../cmd/t402`)
 
 ## Principles
 
 - **Open standard:** the t402 protocol will never force reliance on a single party
-- **HTTP Native:** t402 is meant to seamlessly complement the existing HTTP request made by traditional web services, it should not mandate additional requests outside the scope of a typical client / server flow.
-- **Chain and token agnostic:** we welcome contributions that add support for new chains, signing standards, or schemes, so long as they meet our acceptance criteria laid out in [CONTRIBUTING.md](https://github.com/t402-io/t402/blob/main/CONTRIBUTING.md)
+- **HTTP Native:** t402 is meant to seamlessly complement the existing HTTP request made by traditional web services
+- **Chain and token agnostic:** we welcome contributions that add support for new chains, signing standards, or schemes
 - **Trust minimizing:** all payment schemes must not allow for the facilitator or resource server to move funds, other than in accordance with client intentions
-- **Easy to use:** t402 needs to be 10x better than existing ways to pay on the internet. This means abstracting as many details of crypto as possible away from the client and resource server, and into the facilitator. This means the client/server should not need to think about gas, rpc, etc.
+- **Easy to use:** t402 needs to be 10x better than existing ways to pay on the internet
+
+## SDK Feature Matrix
+
+| Feature | TypeScript | Go | Python | Java |
+|---------|-----------|-----|--------|------|
+| Core Client | ✅ | ✅ | ✅ | ✅ |
+| Core Server | ✅ | ✅ | ✅ | ⚠️ |
+| Facilitator | ✅ | ✅ | ✅ | ❌ |
+| EVM Mechanism | ✅ | ✅ | ✅ | ❌ |
+| SVM Mechanism | ✅ | ✅ | ⚠️ | ❌ |
+| TON Mechanism | ✅ | ✅ | ✅ | ❌ |
+| TRON Mechanism | ✅ | ✅ | ✅ | ❌ |
+| ERC-4337 | ✅ | ✅ | ✅ | ❌ |
+| USDT0 Bridge | ✅ | ✅ | ⚠️ | ❌ |
+| WDK Integration | ✅ | ❌ | ✅ | ❌ |
+| MCP Server | ✅ | ❌ | ❌ | ❌ |
+| CLI Tool | ✅ | ✅ | ✅ | ❌ |
+
+Legend: ✅ Complete | ⚠️ Partial | ❌ Not Available
 
 ## Ecosystem
 
-The t402 ecosystem is growing! Check out our [ecosystem page](https://t402.org/ecosystem) to see projects building with t402, including:
-
-- Client-side integrations
-- Services and endpoints
-- Ecosystem infrastructure and tooling
-- Learning and community resources
-
-Want to add your project to the ecosystem? See our [demo site README](https://github.com/t402-io/t402/tree/main/typescript/site#adding-your-project-to-the-ecosystem) for detailed instructions on how to submit your project.
+The t402 ecosystem is growing! Check out our [ecosystem page](https://t402.org/ecosystem) to see projects building with t402.
 
 **Roadmap:** see [ROADMAP.md](https://github.com/t402-io/t402/blob/main/ROADMAP.md)
 
-## Terms:
+## Terms
 
-- `resource`: Something on the internet. This could be a webpage, file server, RPC service, API, any resource on the internet that accepts HTTP / HTTPS requests.
-- `client`: An entity wanting to pay for a resource.
-- `facilitator`: A server that facilitates verification and execution of payments for one or many networks.
-- `resource server`: An HTTP server that provides an API or other resource for a client.
+- `resource`: Something on the internet (webpage, API, RPC service, etc.)
+- `client`: An entity wanting to pay for a resource
+- `facilitator`: A server that facilitates verification and execution of payments
+- `resource server`: An HTTP server that provides an API or resource for a client
 
-## Technical Goals:
+## Typical t402 Flow
 
-- Permissionless and secure for clients, servers, and facilitators
-- Minimal friction to adopt for both client and resource servers
-- Minimal integration for the resource server and client (1 line for the server, 1 function for the client)
-- Ability to trade off speed of response for guarantee of payment
-- Extensible to different payment flows and networks
-
-## Specification
-
-See `specs/` for full documentation of the t402 standard/
-
-### Typical t402 flow
-
-t402 payments typically adhere to the following flow, but servers have a lot of flexibility. See `advanced` folders in `examples/`.
 ![](./static/flow.png)
 
-The following outlines the flow of a payment using the `t402` protocol. Note that steps (1) and (2) are optional if the client already knows the payment details accepted for a resource.
-
-1. `Client` makes an HTTP request to a `resource server`.
-
-2. `Resource server` responds with a `402 Payment Required` status and a `PaymentRequired` b64 object return as a `PAYMENT-REQUIRED` header.
-
-3. `Client` selects one of the `PaymentRequirements` returned by the server response and creates a `PaymentPayload` based on the `scheme` & `network` of the `PaymentRequirements` they have selected.
-
-4. `Client` sends the HTTP request with the `PAYMENT-SIGNATURE` header containing the `PaymentPayload` to the resource server.
-
-5. `Resource server` verifies the `PaymentPayload` is valid either via local verification or by POSTing the `PaymentPayload` and `PaymentRequirements` to the `/verify` endpoint of a `facilitator`.
-
-6. `Facilitator` performs verification of the object based on the `scheme` and `network` of the `PaymentPayload` and returns a `Verification Response`.
-
-7. If the `Verification Response` is valid, the resource server performs the work to fulfill the request. If the `Verification Response` is invalid, the resource server returns a `402 Payment Required` status and a `Payment Required Response` JSON object in the response body.
-
-8. `Resource server` either settles the payment by interacting with a blockchain directly, or by POSTing the `Payment Payload` and `Payment PaymentRequirements` to the `/settle` endpoint of a `facilitator server`.
-
-9. `Facilitator server` submits the payment to the blockchain based on the `scheme` and `network` of the `Payment Payload`.
-
-10. `Facilitator server` waits for the payment to be confirmed on the blockchain.
-
-11. `Facilitator server` returns a `Payment Execution Response` to the resource server.
-
-12. `Resource server` returns a `200 OK` response to the `Client` with the resource they requested as the body of the HTTP response, and a `PAYMENT-RESPONSE` header containing the `Settlement Response` as Base64 encoded JSON if the payment was executed successfully.
-
-### Schemes
-
-A scheme is a logical way of moving money.
-
-Blockchains allow for a large number of flexible ways to move money. To help facilitate an expanding number of payment use cases, the `t402` protocol is extensible to different ways of settling payments via its `scheme` field.
-
-Each payment scheme may have different operational functionality depending on what actions are necessary to fulfill the payment.
-For example `exact`, the first scheme shipping as part of the protocol, would have different behavior than `upto`. `exact` transfers a specific amount (ex: pay $1 to read an article), while a theoretical `upto` would transfer up to an amount, based on the resources consumed during a request (ex: generating tokens from an LLM).
-
-See `specs/schemes` for more details on schemes, and see `specs/schemes/exact/scheme_exact_evm.md` to see the first proposed scheme for exact payment on EVM chains.
-
-### Schemes vs Networks
-
-Because a scheme is a logical way of moving money, the way a scheme is implemented can be different for different blockchains. (ex: the way you need to implement `exact` on Ethereum is very different from the way you need to implement `exact` on Solana).
-
-Clients and facilitators must explicitly support different `(scheme, network)` pairs in order to be able to create proper payloads and verify / settle payments.
+1. `Client` makes an HTTP request to a `resource server`
+2. `Resource server` responds with `402 Payment Required` and `PaymentRequired` header
+3. `Client` creates a `PaymentPayload` based on selected `scheme` & `network`
+4. `Client` sends request with `PAYMENT-SIGNATURE` header
+5. `Resource server` verifies via facilitator's `/verify` endpoint
+6. `Facilitator` validates and returns verification response
+7. If valid, server fulfills request and settles payment via `/settle`
+8. `Resource server` returns `200 OK` with `PAYMENT-RESPONSE` header
 
 ## Quick Start Examples
 
 <details>
-<summary><b>TypeScript Client (Multi-Network)</b></summary>
+<summary><b>TypeScript Client</b></summary>
 
 ```typescript
-import { t402Client, wrapFetchWithPayment } from "@t402-io/fetch";
-import { registerExactEvmScheme } from "@t402-io/evm/exact/client";
-import { registerExactTonClientScheme } from "@t402-io/ton";
-import { registerExactTronClientScheme } from "@t402-io/tron";
+import { t402Client, wrapFetchWithPayment } from "@t402/fetch";
+import { registerExactEvmScheme } from "@t402/evm/exact/client";
 import { privateKeyToAccount } from "viem/accounts";
 
-// Create client and register payment schemes
 const client = new t402Client();
 
-// Register EVM networks
 registerExactEvmScheme(client, {
-  signer: privateKeyToAccount(process.env.EVM_PRIVATE_KEY as `0x${string}`),
+  signer: privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`),
 });
 
-// Register TON networks
-registerExactTonClientScheme(client, {
-  signer: tonSigner,
-  getJettonWalletAddress: async (owner, master) => jettonWalletAddress,
-});
-
-// Register TRON networks
-registerExactTronClientScheme(client, {
-  signer: tronSigner,
-});
-
-// Make payments automatically
 const fetchWithPayment = wrapFetchWithPayment(fetch, client);
 const response = await fetchWithPayment("https://api.example.com/data");
 ```
@@ -253,14 +250,12 @@ const response = await fetchWithPayment("https://api.example.com/data");
 </details>
 
 <details>
-<summary><b>TypeScript Server (Multi-Network)</b></summary>
+<summary><b>TypeScript Server (Express)</b></summary>
 
 ```typescript
 import express from "express";
-import { paymentMiddleware, t402ResourceServer } from "@t402-io/express";
-import { ExactEvmScheme } from "@t402-io/evm/exact/server";
-import { ExactTonScheme } from "@t402-io/ton/exact/server";
-import { ExactTronScheme } from "@t402-io/tron/exact/server";
+import { paymentMiddleware, t402ResourceServer } from "@t402/express";
+import { ExactEvmScheme } from "@t402/evm/exact/server";
 
 const app = express();
 
@@ -269,20 +264,13 @@ app.use(
     {
       "GET /api/data": {
         accepts: [
-          // Accept EVM payments
-          { scheme: "exact", price: "$0.01", network: "eip155:8453", payTo: evmAddress },
-          // Accept TON payments
-          { scheme: "exact", price: "$0.01", network: "ton:mainnet", payTo: tonAddress },
-          // Accept TRON payments
-          { scheme: "exact", price: "$0.01", network: "tron:mainnet", payTo: tronAddress },
+          { scheme: "exact", price: "$0.01", network: "eip155:8453", payTo: "0x..." },
         ],
         description: "Premium API data",
       },
     },
     new t402ResourceServer(facilitatorClient)
-      .register("eip155:8453", new ExactEvmScheme())
-      .register("ton:mainnet", new ExactTonScheme())
-      .register("tron:mainnet", new ExactTronScheme()),
+      .register("eip155:8453", new ExactEvmScheme()),
   ),
 );
 ```
@@ -290,32 +278,24 @@ app.use(
 </details>
 
 <details>
-<summary><b>Python Server (TON/TRON)</b></summary>
+<summary><b>Python Server (Flask)</b></summary>
 
 ```python
 from flask import Flask
 from t402.flask import create_paywall
-from t402.tron import TRON_MAINNET
 
 app = Flask(__name__)
 
-# Create paywall with TON and TRON support
 paywall = create_paywall(
     routes={
         "GET /api/data": {
             "price": "$0.01",
-            "network": "ton:mainnet",  # or TRON_MAINNET for TRON
-            "pay_to": "EQC...",  # TON or TRON address
+            "network": "eip155:8453",
+            "pay_to": "0x...",
             "description": "Premium API data",
         },
-        "GET /api/premium": {
-            "price": "$0.05",
-            "network": TRON_MAINNET,  # tron:mainnet
-            "pay_to": "TR7NHq...",  # TRON address
-            "description": "Premium content",
-        },
     },
-    facilitator_url="https://facilitator.example.com",
+    facilitator_url="https://facilitator.t402.io",
 )
 app.register_blueprint(paywall)
 
@@ -327,538 +307,140 @@ def get_data():
 </details>
 
 <details>
-<summary><b>Go Client (Multi-Network)</b></summary>
+<summary><b>Go Server</b></summary>
 
 ```go
 package main
 
 import (
+    "net/http"
     t402 "github.com/t402-io/t402/go"
-    tonclient "github.com/t402-io/t402/go/mechanisms/ton/exact/client"
-    tronclient "github.com/t402-io/t402/go/mechanisms/tron/exact/client"
+    t402http "github.com/t402-io/t402/go/http"
 )
 
 func main() {
-    // Create client
-    client := t402.NewClient()
+    server := t402.NewResourceServer(facilitatorClient)
 
-    // Register TON scheme
-    tonScheme := tonclient.NewExactTonScheme(tonSigner)
-    client.Register(t402.Network("ton:mainnet"), tonScheme)
+    mux := http.NewServeMux()
+    mux.Handle("/api/data", t402http.PaymentMiddleware(
+        server,
+        t402http.RouteConfig{
+            Path: "GET /api/data",
+            Accepts: []t402.PaymentRequirement{
+                {Scheme: "exact", Price: "$0.01", Network: "eip155:8453", PayTo: "0x..."},
+            },
+        },
+        http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+            w.Write([]byte(`{"data": "premium content"}`))
+        }),
+    ))
 
-    // Register TRON scheme
-    tronScheme := tronclient.NewExactTronScheme(tronSigner)
-    client.Register(t402.Network("tron:mainnet"), tronScheme)
-
-    // Make request with automatic payment
-    // The client will select the appropriate network based on server requirements
+    http.ListenAndServe(":8080", mux)
 }
 ```
 
 </details>
 
 <details>
-<summary><b>ERC-4337 Gasless Transactions (TypeScript)</b></summary>
+<summary><b>ERC-4337 Gasless Payments</b></summary>
 
 ```typescript
-import { SafeSmartAccount, createBundlerClient, createPaymaster } from "@t402-io/evm/erc4337";
+import { SafeSmartAccount, createBundlerClient, createPaymaster } from "@t402/evm/erc4337";
 
-// 1. Create Safe smart account
+// Create Safe smart account
 const safeAccount = new SafeSmartAccount({
   owner: privateKeyToAccount(ownerPrivateKey),
-  chainId: 8453, // Base
-  salt: 0n,
-});
-const smartAccountAddress = await safeAccount.getAddress();
-
-// 2. Connect to Pimlico bundler
-const bundler = createBundlerClient({
-  provider: "pimlico",
-  apiKey: process.env.PIMLICO_API_KEY,
   chainId: 8453,
 });
 
-// 3. Setup paymaster for gas sponsorship
-const paymaster = createPaymaster({
-  provider: "pimlico",
-  apiKey: process.env.PIMLICO_API_KEY,
-  chainId: 8453,
-});
+// Connect bundler and paymaster
+const bundler = createBundlerClient({ provider: "pimlico", apiKey, chainId: 8453 });
+const paymaster = createPaymaster({ provider: "pimlico", apiKey, chainId: 8453 });
 
-// 4. Build UserOperation
+// Build, sponsor, and submit UserOperation
 const callData = safeAccount.encodeExecute(targetAddress, 0n, data);
-const userOp = await bundler.buildUserOperation({
-  sender: smartAccountAddress,
-  callData,
-});
-
-// 5. Get paymaster sponsorship
+const userOp = await bundler.buildUserOperation({ sender: smartAccountAddress, callData });
 const paymasterData = await paymaster.sponsorUserOperation(userOp);
-
-// 6. Sign and submit
-const signature = await safeAccount.signUserOpHash(userOpHash);
 const hash = await bundler.sendUserOperation({ ...userOp, ...paymasterData, signature });
-const receipt = await bundler.waitForReceipt(hash);
 ```
 
 </details>
 
 <details>
-<summary><b>ERC-4337 Gasless Transactions (Python)</b></summary>
+<summary><b>MCP Server for AI Agents</b></summary>
 
-```python
-from t402.erc4337 import (
-    SafeSmartAccount, SafeAccountConfig,
-    create_bundler_client, create_paymaster,
-    ENTRYPOINT_V07_ADDRESS,
-)
+```bash
+# Install and run
+npx @t402/mcp
 
-# 1. Create Safe smart account
-safe_account = SafeSmartAccount(SafeAccountConfig(
-    owner_private_key="0x...",
-    chain_id=8453,  # Base
-    salt=0,
-))
-smart_account_address = safe_account.get_address()
-
-# 2. Connect to Pimlico bundler
-bundler = create_bundler_client(
-    provider="pimlico",
-    api_key=os.getenv("PIMLICO_API_KEY"),
-    chain_id=8453,
-)
-
-# 3. Setup paymaster for gas sponsorship
-paymaster = create_paymaster(
-    provider="pimlico",
-    api_key=os.getenv("PIMLICO_API_KEY"),
-    chain_id=8453,
-)
-
-# 4. Build UserOperation
-call_data = safe_account.encode_execute(target_address, 0, b"")
-user_op = UserOperation(
-    sender=smart_account_address,
-    call_data=call_data,
-    # ... gas limits
-)
-
-# 5. Get paymaster sponsorship
-paymaster_data = paymaster.get_paymaster_data(user_op, 8453, ENTRYPOINT_V07_ADDRESS)
-
-# 6. Submit to bundler
-user_op_hash = bundler.send_user_operation(user_op)
-receipt = bundler.wait_for_receipt(user_op_hash)
-```
-
-</details>
-
-<details>
-<summary><b>ERC-4337 Gasless Transactions (Go)</b></summary>
-
-```go
-import "github.com/t402-io/t402/go/mechanisms/evm/erc4337"
-
-// 1. Create Safe smart account
-safeAccount, _ := erc4337.NewSafeSmartAccount(erc4337.SafeAccountConfig{
-    Owner:   privateKey,
-    ChainID: 8453, // Base
-    Salt:    big.NewInt(0),
-})
-smartAccountAddress, _ := safeAccount.GetAddress()
-
-// 2. Connect to Pimlico bundler
-bundler := erc4337.NewPimlicoBundlerClient(erc4337.PimlicoConfig{
-    APIKey:  os.Getenv("PIMLICO_API_KEY"),
-    ChainID: 8453,
-})
-
-// 3. Setup paymaster for gas sponsorship
-paymaster := erc4337.NewPimlicoPaymaster(erc4337.PimlicoPaymasterConfig{
-    APIKey:  os.Getenv("PIMLICO_API_KEY"),
-    ChainID: 8453,
-})
-
-// 4. Build UserOperation
-callData, _ := safeAccount.EncodeExecute(targetAddress, big.NewInt(0), []byte{})
-userOp := &erc4337.UserOperation{
-    Sender:   smartAccountAddress,
-    CallData: callData,
-    // ... gas limits
+# Claude Desktop config (~/.config/claude/claude_desktop_config.json)
+{
+  "mcpServers": {
+    "t402": {
+      "command": "npx",
+      "args": ["@t402/mcp"],
+      "env": { "T402_DEMO_MODE": "true" }
+    }
+  }
 }
-
-// 5. Get paymaster sponsorship
-paymasterData, _ := paymaster.SponsorUserOperation(userOp)
-
-// 6. Submit to bundler
-hash, _ := bundler.SendUserOperation(userOp)
-receipt, _ := bundler.WaitForReceipt(hash, 60*time.Second, 2*time.Second)
 ```
+
+**Available Tools:**
+- `t402/getBalance` - Check wallet balance
+- `t402/getAllBalances` - Check all chain balances
+- `t402/pay` - Execute payment
+- `t402/payGasless` - Gasless payment via ERC-4337
+- `t402/getBridgeFee` - Get bridge fee quote
+- `t402/bridge` - Bridge USDT0 between chains
 
 </details>
 
 <details>
-<summary><b>USDT0 Cross-Chain Bridge (TypeScript)</b></summary>
+<summary><b>USDT0 Cross-Chain Bridge</b></summary>
 
 ```typescript
-import {
-  Usdt0Bridge,
-  LayerZeroScanClient,
-  getBridgeableChains,
-} from "@t402-io/evm";
+import { Usdt0Bridge, LayerZeroScanClient } from "@t402/evm";
 
-// Check supported chains
-console.log(getBridgeableChains()); // ['ethereum', 'arbitrum', 'ink', 'berachain', 'unichain']
-
-// Create bridge client
 const bridge = new Usdt0Bridge(signer, "arbitrum");
 
 // Get quote
 const quote = await bridge.quote({
   fromChain: "arbitrum",
   toChain: "ethereum",
-  amount: 100_000000n, // 100 USDT0
-  recipient: "0x...",
-});
-console.log(`Fee: ${quote.nativeFee} wei`);
-
-// Execute bridge
-const result = await bridge.send({
-  fromChain: "arbitrum",
-  toChain: "ethereum",
   amount: 100_000000n,
   recipient: "0x...",
 });
-console.log(`TX: ${result.txHash}`);
-console.log(`Message GUID: ${result.messageGuid}`);
-
-// Track delivery via LayerZero Scan
-const scanClient = new LayerZeroScanClient();
-const message = await scanClient.waitForDelivery(result.messageGuid, {
-  onStatusChange: (status) => console.log(`Status: ${status}`),
-});
-console.log(`Delivered! Dest TX: ${message.dstTxHash}`);
-```
-
-</details>
-
-<details>
-<summary><b>USDT0 Cross-Chain Bridge (Python)</b></summary>
-
-```python
-from t402.bridge import (
-    Usdt0Bridge,
-    LayerZeroScanClient,
-    BridgeQuoteParams,
-    BridgeExecuteParams,
-    get_bridgeable_chains,
-)
-
-# Check supported chains
-print(get_bridgeable_chains())  # ['ethereum', 'arbitrum', 'ink', ...]
-
-# Create bridge client
-bridge = Usdt0Bridge(signer, "arbitrum")
-
-# Get quote
-quote = await bridge.quote(BridgeQuoteParams(
-    from_chain="arbitrum",
-    to_chain="ethereum",
-    amount=100_000000,  # 100 USDT0
-    recipient="0x...",
-))
-print(f"Fee: {quote.native_fee} wei")
-
-# Execute bridge
-result = await bridge.send(BridgeExecuteParams(
-    from_chain="arbitrum",
-    to_chain="ethereum",
-    amount=100_000000,
-    recipient="0x...",
-))
-print(f"TX: {result.tx_hash}")
-print(f"Message GUID: {result.message_guid}")
-
-# Track delivery via LayerZero Scan
-scan_client = LayerZeroScanClient()
-message = await scan_client.wait_for_delivery(
-    result.message_guid,
-    on_status_change=lambda s: print(f"Status: {s}"),
-)
-print(f"Delivered! Dest TX: {message.dst_tx_hash}")
-```
-
-</details>
-
-<details>
-<summary><b>USDT0 Cross-Chain Bridge (Go)</b></summary>
-
-```go
-import (
-    "math/big"
-    "github.com/t402-io/t402/go/mechanisms/evm/bridge"
-)
-
-// Check supported chains
-chains := bridge.GetBridgeableChains() // [ethereum, arbitrum, ink, ...]
-
-// Create bridge client
-bridgeClient, _ := bridge.NewUsdt0Bridge(signer, "arbitrum")
-
-// Get quote
-quote, _ := bridgeClient.Quote(ctx, &bridge.BridgeQuoteParams{
-    FromChain: "arbitrum",
-    ToChain:   "ethereum",
-    Amount:    big.NewInt(100_000000), // 100 USDT0
-    Recipient: "0x...",
-})
-fmt.Printf("Fee: %s wei\n", quote.NativeFee)
 
 // Execute bridge
-result, _ := bridgeClient.Send(ctx, &bridge.BridgeExecuteParams{
-    BridgeQuoteParams: bridge.BridgeQuoteParams{
-        FromChain: "arbitrum",
-        ToChain:   "ethereum",
-        Amount:    big.NewInt(100_000000),
-        Recipient: "0x...",
-    },
-})
-fmt.Printf("TX: %s\n", result.TxHash)
-fmt.Printf("Message GUID: %s\n", result.MessageGUID)
+const result = await bridge.send({ ...quote });
 
-// Track delivery via LayerZero Scan
-scanClient := bridge.NewLayerZeroScanClient()
-message, _ := scanClient.WaitForDelivery(ctx, result.MessageGUID, &bridge.WaitForDeliveryOptions{
-    OnStatusChange: func(status bridge.LayerZeroMessageStatus) {
-        fmt.Printf("Status: %s\n", status)
-    },
-})
-fmt.Printf("Delivered! Dest TX: %s\n", message.DstTxHash)
+// Track delivery
+const scanClient = new LayerZeroScanClient();
+await scanClient.waitForDelivery(result.messageGuid);
 ```
 
 </details>
 
-<details>
-<summary><b>MCP Server for AI Agents (Claude Desktop)</b></summary>
+## Specification
 
-The `@t402-io/mcp` package enables AI agents like Claude to make stablecoin payments.
+See `specs/` for full documentation of the t402 standard.
 
-**Installation:**
-```bash
-npm install -g @t402-io/mcp
-# or run directly
-npx @t402-io/mcp
-```
+### Schemes
 
-**Claude Desktop Configuration** (`~/Library/Application Support/Claude/claude_desktop_config.json`):
-```json
-{
-  "mcpServers": {
-    "t402": {
-      "command": "npx",
-      "args": ["@t402-io/mcp"],
-      "env": {
-        "T402_DEMO_MODE": "true"
-      }
-    }
-  }
-}
-```
+A scheme is a logical way of moving money. Different schemes support different payment flows:
+- `exact` - Transfer a specific amount (e.g., pay $1 to read an article)
+- `upto` - Transfer up to an amount based on usage (e.g., LLM token generation)
 
-**Available MCP Tools:**
-| Tool | Description |
-|------|-------------|
-| `t402/getBalance` | Check wallet balance on a specific network |
-| `t402/getAllBalances` | Check balances across all networks |
-| `t402/pay` | Execute stablecoin payment (USDC/USDT/USDT0) |
-| `t402/payGasless` | Execute gasless payment via ERC-4337 |
-| `t402/getBridgeFee` | Get USDT0 bridge fee quote |
-| `t402/bridge` | Bridge USDT0 between chains |
+See `specs/schemes/` for detailed scheme specifications.
 
-**Example Prompts for Claude:**
-- "Check my USDC balance on Base"
-- "Show my balances across all chains"
-- "Send 10 USDC to 0x... on Arbitrum"
-- "How much does it cost to bridge 100 USDT0 from Arbitrum to Ethereum?"
+## Contributing
 
-**Environment Variables:**
-```bash
-T402_PRIVATE_KEY=0x...     # Wallet private key
-T402_DEMO_MODE=true        # Enable demo mode (no real transactions)
-T402_BUNDLER_URL=...       # ERC-4337 bundler URL
-T402_PAYMASTER_URL=...     # Paymaster URL for gasless
-T402_RPC_ETHEREUM=...      # Custom RPC URLs per network
-```
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
 
-**Programmatic Usage:**
-```typescript
-import { executeGetBalance, executePay } from "@t402-io/mcp";
+## Security
 
-// Check balance
-const balance = await executeGetBalance({
-  network: "base",
-  address: "0x...",
-});
+See [SECURITY.md](SECURITY.md) for security policy and vulnerability reporting.
 
-// Execute payment (demo mode)
-const result = await executePay(
-  { to: "0x...", amount: "10.00", token: "USDC", network: "base" },
-  { privateKey: "0x...", demoMode: true }
-);
-```
+## License
 
-</details>
-
-<details>
-<summary><b>WDK Gasless Payments (TypeScript)</b></summary>
-
-The `@t402-io/wdk-gasless` package enables gasless USDT0 payments using Tether WDK and ERC-4337.
-
-```typescript
-import { createWdkGaslessClient } from "@t402-io/wdk-gasless";
-import { createPublicClient, http } from "viem";
-import { arbitrum } from "viem/chains";
-
-// Create public client
-const publicClient = createPublicClient({
-  chain: arbitrum,
-  transport: http(),
-});
-
-// Create gasless client with WDK account
-const client = await createWdkGaslessClient({
-  wdkAccount: myWdkAccount, // From @tetherto/wdk
-  publicClient,
-  chainId: 42161, // Arbitrum
-  bundler: {
-    bundlerUrl: "https://api.pimlico.io/v2/arbitrum/rpc?apikey=...",
-    chainId: 42161,
-  },
-  paymaster: {
-    address: "0x...",
-    url: "https://api.pimlico.io/v2/arbitrum/rpc?apikey=...",
-    type: "sponsoring",
-  },
-});
-
-// Check smart account address
-const accountAddress = await client.getAccountAddress();
-console.log("Smart Account:", accountAddress);
-
-// Check USDT0 balance
-const balance = await client.getFormattedBalance();
-console.log("USDT0 Balance:", balance);
-
-// Check if payment can be sponsored (free gas)
-const sponsorInfo = await client.canSponsor({
-  to: "0x...",
-  amount: 1000000n, // 1 USDT0
-});
-console.log("Can Sponsor:", sponsorInfo.canSponsor);
-
-// Execute gasless payment
-const result = await client.pay({
-  to: "0x...",
-  amount: 1000000n, // 1 USDT0 (6 decimals)
-});
-
-console.log("UserOp Hash:", result.userOpHash);
-console.log("Sponsored:", result.sponsored);
-
-// Wait for confirmation
-const receipt = await result.wait();
-console.log("Transaction Hash:", receipt.txHash);
-```
-
-**Batch Payments:**
-```typescript
-// Send to multiple recipients in one transaction
-const result = await client.payBatch({
-  payments: [
-    { to: "0xAlice...", amount: 1000000n },  // 1 USDT0
-    { to: "0xBob...", amount: 2000000n },    // 2 USDT0
-    { to: "0xCharlie...", amount: 500000n }, // 0.5 USDT0
-  ],
-});
-```
-
-**Supported Chains:**
-| Chain | Chain ID | USDT0 | USDC |
-|-------|----------|-------|------|
-| Ethereum | 1 | ✅ | ✅ |
-| Arbitrum | 42161 | ✅ | ✅ |
-| Base | 8453 | ✅ | ✅ |
-| Optimism | 10 | ✅ | ✅ |
-| Ink | 57073 | ✅ | - |
-| Berachain | 80084 | ✅ | - |
-| Unichain | 130 | ✅ | - |
-
-</details>
-
-<details>
-<summary><b>WDK Cross-Chain Bridge (TypeScript)</b></summary>
-
-The `@t402-io/wdk-bridge` package enables cross-chain USDT0 bridging with automatic source chain selection.
-
-```typescript
-import { WdkBridgeClient } from "@t402-io/wdk-bridge";
-
-// Create bridge client with WDK accounts for multiple chains
-const bridge = new WdkBridgeClient({
-  accounts: {
-    ethereum: ethereumWdkAccount, // From @tetherto/wdk
-    arbitrum: arbitrumWdkAccount,
-    ink: inkWdkAccount,
-  },
-  defaultStrategy: "cheapest", // or 'fastest', 'preferred'
-});
-
-// Get multi-chain balance summary
-const summary = await bridge.getBalances();
-console.log("Total USDT0:", summary.totalUsdt0);
-console.log("Bridgeable chains:", summary.bridgeableChains);
-
-// Get available routes to a destination
-const routes = await bridge.getRoutes("ethereum", 100_000000n);
-routes.forEach((route) => {
-  console.log(`${route.fromChain} -> ${route.toChain}`);
-  console.log(`  Fee: ${route.nativeFee} wei`);
-  console.log(`  Available: ${route.available}`);
-});
-
-// Auto-bridge: automatically selects the best source chain
-const result = await bridge.autoBridge({
-  toChain: "ethereum",
-  amount: 100_000000n, // 100 USDT0
-  recipient: "0x...",
-});
-
-console.log("Bridge TX:", result.txHash);
-console.log("From chain:", result.fromChain);
-console.log("Message GUID:", result.messageGuid);
-
-// Wait for delivery with status updates
-const delivery = await result.waitForDelivery({
-  onStatusChange: (status) => console.log("Status:", status),
-  // INFLIGHT -> CONFIRMING -> DELIVERED
-});
-
-console.log("Delivery success:", delivery.success);
-console.log("Destination TX:", delivery.dstTxHash);
-```
-
-**Route Strategies:**
-- **cheapest** (default): Select route with lowest native fee
-- **fastest**: Select route with fastest estimated delivery
-- **preferred**: Use preferred source chain if available
-
-**Supported Chains:**
-| Chain | Chain ID | LayerZero EID |
-|-------|----------|---------------|
-| Ethereum | 1 | 30101 |
-| Arbitrum | 42161 | 30110 |
-| Ink | 57073 | 30291 |
-| Berachain | 80084 | 30362 |
-| Unichain | 130 | 30320 |
-
-</details>
+Apache 2.0 - See [LICENSE](LICENSE) for details.
