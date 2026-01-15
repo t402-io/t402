@@ -22,7 +22,7 @@ dependencies = [
 ]
 
 [project.scripts]
-
+t402 = "t402.cli:main"
 
 [build-system]
 requires = ["hatchling"]
