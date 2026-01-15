@@ -14,7 +14,7 @@ import type {
 } from "@t402/core/types";
 import { SCHEME_EXACT } from "../../constants.js";
 import { normalizeNetwork, convertToSmallestUnits } from "../../utils.js";
-import { getDefaultToken, getTRC20Config, isNetworkSupported } from "../../tokens.js";
+import { getDefaultToken, getTRC20Config, getTokenByAddress, isNetworkSupported } from "../../tokens.js";
 
 /**
  * Configuration for ExactTronScheme (server)
@@ -120,7 +120,7 @@ export class ExactTronScheme implements SchemeNetworkServer {
 
     // Get token config
     let tokenConfig = requirements.asset
-      ? getTRC20Config(network, requirements.asset) || this.getTokenByAddress(network, requirements.asset)
+      ? getTRC20Config(network, requirements.asset) || getTokenByAddress(network, requirements.asset)
       : getDefaultToken(network);
 
     if (!tokenConfig) {
@@ -224,12 +224,4 @@ export class ExactTronScheme implements SchemeNetworkServer {
     return tokenConfig.contractAddress;
   }
 
-  /**
-   * Get token config by contract address
-   */
-  private getTokenByAddress(network: string, address: string): { contractAddress: string; symbol: string; name: string; decimals: number } | undefined {
-    // Import dynamically to avoid circular deps
-    const { getTokenByAddress } = require("../../tokens.js");
-    return getTokenByAddress(network, address);
-  }
 }
