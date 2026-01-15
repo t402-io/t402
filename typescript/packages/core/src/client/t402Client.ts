@@ -112,7 +112,7 @@ export class t402Client {
    * @param paymentRequirementsSelector - Function to select payment requirements from available options
    */
   constructor(paymentRequirementsSelector?: SelectPaymentRequirements) {
-    this.paymentRequirementsSelector = paymentRequirementsSelector || ((t402Version, accepts) => accepts[0]);
+    this.paymentRequirementsSelector = paymentRequirementsSelector || ((_t402Version, accepts) => accepts[0]);
   }
 
   /**
