@@ -38,7 +38,21 @@ services:
       retries: 3
     restart: unless-stopped
 
-  # Optional: Prometheus for metrics collection
+  # Redis metrics exporter for Prometheus
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.55.0
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    profiles:
+      - monitoring
+    restart: unless-stopped
+
+  # Prometheus for metrics collection
   prometheus:
     image: prom/prometheus:v2.48.0
     ports:
@@ -50,22 +64,32 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
       - '--web.enable-lifecycle'
-    depends_on:
-      - facilitator
+    # Removed depends_on: facilitator - use host.docker.internal for local dev
     profiles:
       - monitoring
     restart: unless-stopped
 
-  # Optional: Grafana for metrics visualization
+  # Grafana for metrics visualization
   grafana:
     image: grafana/grafana:10.2.0
     ports:
-      - "3000:3000"
+      - "3001:3000"
     volumes:
       - grafana_data:/var/lib/grafana
+      # Provisioning configs
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana/provisioning/alerting:/etc/grafana/provisioning/alerting:ro
+      # Dashboard JSON files
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
     environment:
+      - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3001
+      # Enable unified alerting
+      - GF_UNIFIED_ALERTING_ENABLED=true
+      - GF_ALERTING_ENABLED=false
     depends_on:
       - prometheus
     profiles:
