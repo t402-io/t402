@@ -6,6 +6,7 @@ import { HowItWorks } from "./components/HowItWorks";
 import { CodeExamples } from "./components/CodeExamples";
 import { FeatureDeepDives } from "./components/FeatureDeepDives";
 import { EcosystemPreview } from "./components/EcosystemPreview";
+import { Testimonials } from "./components/Testimonials";
 import { UseCasesPreview } from "./components/UseCasesPreview";
 import { CTA } from "./components/CTA";
 import { Footer } from "./components/Footer";
@@ -21,6 +22,7 @@ export default function HomePage() {
       <CodeExamples />
       <FeatureDeepDives />
       <EcosystemPreview />
+      <Testimonials />
       <UseCasesPreview />
       <CTA />
       <Footer />
