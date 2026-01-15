@@ -43,6 +43,63 @@ This report documents the quality assurance findings for the T402 payment protoc
 
 ---
 
+## Code Coverage Metrics
+
+**Updated**: Jan 15, 2026
+
+Coverage reporting enabled via `@vitest/coverage-v8`. Run with `pnpm test -- --coverage`.
+
+### TypeScript SDK Coverage
+
+| Package | Tests | Statements | Branch | Functions | Lines |
+|---------|-------|------------|--------|-----------|-------|
+| `@t402/tron` | 236 | 84.95% | 90.90% | 89.58% | 84.95% |
+| `@t402/ton` | 222 | 44.04% | 83.33% | 84.44% | 44.04% |
+| `@t402/evm` | 360 | ~55% | ~75% | ~60% | ~55% |
+| `@t402/svm` | 167 | 32.53% | 73.14% | 55.76% | 32.53% |
+| `@t402/mcp` | 32 | 52.21% | 83.33% | 34.14% | 52.21% |
+| `@t402/cli` | 41 | 29.21% | 88.23% | 45.00% | 29.21% |
+| `@t402/wdk-multisig` | 46 | 40.95% | 82.89% | 33.73% | 40.95% |
+
+### Key Source File Coverage
+
+| File | Statements | Branch |
+|------|------------|--------|
+| `tron/src/constants.ts` | 100% | 100% |
+| `tron/src/tokens.ts` | 100% | 100% |
+| `tron/src/utils.ts` | 94.11% | 95.31% |
+| `tron/src/exact/facilitator/scheme.ts` | 97.27% | 92.30% |
+| `tron/src/exact/server/scheme.ts` | 92.37% | 80.00% |
+| `ton/src/constants.ts` | 100% | 100% |
+| `ton/src/tokens.ts` | 96.77% | 92.85% |
+| `ton/src/exact/server/scheme.ts` | 94.00% | 85.18% |
+| `evm/src/exact-legacy/client/scheme.ts` | 100% | 100% |
+| `evm/src/exact-legacy/facilitator/scheme.ts` | 88.64% | 81.39% |
+| `evm/src/exact-legacy/server/scheme.ts` | 91.74% | 87.50% |
+| `evm/src/exact/server/scheme.ts` | 91.83% | 90.90% |
+
+### Coverage Analysis
+
+**High Coverage Areas** (>80%):
+- Constants and type definitions
+- Token registries and utilities
+- Server-side price parsing
+- Network normalization functions
+- Address validation
+
+**Lower Coverage Areas** (requires live network/keys):
+- Client registration files (auto-registration code)
+- ERC-4337 bundlers/paymasters (~10%)
+- Facilitator settlement flows (transaction broadcasting)
+- Client signing flows (wallet integration)
+
+**Notes**:
+- Branch coverage is consistently high (73-91%) across all packages
+- Lower statement coverage in some packages is due to untested registration/initialization code
+- Integration tests with real networks would significantly improve facilitator coverage
+
+---
+
 ## Issues Found
 
 ### Critical Issues
@@ -326,7 +383,7 @@ Total new tests: 177 tests (all passing)
 - [ ] Add property-based testing (fast-check)
 - [ ] Add benchmark tests for performance monitoring
 - [ ] Add contract interaction tests with forked networks
-- [ ] Implement test coverage reporting
+- [x] Implement test coverage reporting - DONE (commit `c7c4320`)
 
 ---
 
@@ -340,6 +397,12 @@ pnpm build
 # Run all tests
 pnpm test
 # Result: Tasks: 42 successful, 42 total (builds + tests)
+
+# Run tests with coverage (per package)
+cd typescript/packages/mechanisms/tron && pnpm vitest run --coverage
+cd typescript/packages/mechanisms/ton && pnpm vitest run --coverage
+cd typescript/packages/mechanisms/evm && pnpm vitest run --coverage
+cd typescript/packages/mechanisms/svm && pnpm vitest run --coverage
 
 # Individual package results:
 # @t402/tron: 236 passed (127 unit + 109 integration)
