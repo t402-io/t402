@@ -79,9 +79,13 @@ export function decodePaymentResponseHeader(paymentResponseHeader: string): Sett
   return JSON.parse(safeBase64Decode(paymentResponseHeader)) as SettleResponse;
 }
 
-// Export HTTP service and types
-export {
-  t402HTTPResourceServer,
+// Export HTTP service classes (values)
+export { t402HTTPResourceServer, RouteConfigurationError } from "./t402HTTPResourceServer";
+export { HTTPFacilitatorClient } from "./httpFacilitatorClient";
+export { t402HTTPClient } from "./t402HTTPClient";
+
+// Export HTTP types (type-only exports for isolatedModules compatibility)
+export type {
   HTTPAdapter,
   HTTPRequestContext,
   HTTPResponseInstructions,
@@ -100,11 +104,5 @@ export {
   ProcessSettleSuccessResponse,
   ProcessSettleFailureResponse,
   RouteValidationError,
-  RouteConfigurationError,
 } from "./t402HTTPResourceServer";
-export {
-  HTTPFacilitatorClient,
-  FacilitatorClient,
-  FacilitatorConfig,
-} from "./httpFacilitatorClient";
-export { t402HTTPClient } from "./t402HTTPClient";
+export type { FacilitatorClient, FacilitatorConfig } from "./httpFacilitatorClient";
