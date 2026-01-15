@@ -13,7 +13,6 @@ import {
   BundlerClient,
   BundlerError,
 } from "../bundler.js";
-import type { BundlerConfig } from "../types.js";
 import type {
   UserOperation,
   UserOperationResult,
@@ -82,7 +81,6 @@ export interface AlchemyConfig {
  * Alchemy bundler client with extended methods
  */
 export class AlchemyBundlerClient extends BundlerClient {
-  private readonly apiKey: string;
   private readonly alchemyUrl: string;
   private readonly policy?: AlchemyPolicyConfig;
 
@@ -98,7 +96,6 @@ export class AlchemyBundlerClient extends BundlerClient {
       bundlerUrl,
     });
 
-    this.apiKey = config.apiKey;
     this.alchemyUrl = bundlerUrl;
     this.policy = config.policy;
   }

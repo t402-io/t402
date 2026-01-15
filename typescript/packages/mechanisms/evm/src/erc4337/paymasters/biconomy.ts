@@ -11,11 +11,9 @@
  */
 
 import type { Address, Hex } from "viem";
-import { concat, pad, toHex } from "viem";
 import type {
   UserOperation,
   PaymasterData,
-  GasEstimate,
 } from "../types.js";
 import { ENTRYPOINT_V07_ADDRESS, DEFAULT_GAS_LIMITS, packAccountGasLimits, packGasFees } from "../constants.js";
 
@@ -89,19 +87,15 @@ export interface BiconomySponsorResult {
  */
 export class BiconomyPaymaster {
   private readonly apiKey: string;
-  private readonly chainId: number;
   private readonly paymasterUrl: string;
   private readonly mode: BiconomyPaymasterMode;
   private readonly paymasterAddress?: Address;
-  private readonly spendingLimit?: BiconomySpendingLimit;
   private readonly erc20Config?: BiconomyErc20Config;
 
   constructor(config: BiconomyPaymasterConfig) {
     this.apiKey = config.apiKey;
-    this.chainId = config.chainId;
     this.mode = config.mode;
     this.paymasterAddress = config.paymasterAddress;
-    this.spendingLimit = config.spendingLimit;
     this.erc20Config = config.erc20Config;
     this.paymasterUrl = config.paymasterUrl ??
       `https://paymaster.biconomy.io/api/v1/${config.chainId}`;

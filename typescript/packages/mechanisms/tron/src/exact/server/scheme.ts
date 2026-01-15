@@ -12,7 +12,7 @@ import type {
   SchemeNetworkServer,
   MoneyParser,
 } from "@t402/core/types";
-import { SCHEME_EXACT, DEFAULT_USDT_DECIMALS } from "../../constants.js";
+import { SCHEME_EXACT } from "../../constants.js";
 import { normalizeNetwork, convertToSmallestUnits } from "../../utils.js";
 import { getDefaultToken, getTRC20Config, isNetworkSupported } from "../../tokens.js";
 
@@ -32,11 +32,11 @@ export type ExactTronSchemeConfig = {
  */
 export class ExactTronScheme implements SchemeNetworkServer {
   readonly scheme = SCHEME_EXACT;
-  private readonly config: ExactTronSchemeConfig;
+  private readonly _config: ExactTronSchemeConfig;
   private readonly moneyParsers: MoneyParser[] = []
 
   constructor(config?: ExactTronSchemeConfig) {
-    this.config = config ?? {};
+    this._config = config ?? {};
   }
 
   /**
@@ -182,10 +182,20 @@ export class ExactTronScheme implements SchemeNetworkServer {
   }
 
   /**
-   * Default money to asset conversion (USDT)
+   * Default money to asset conversion
+   * Uses preferredToken from config if set, otherwise falls back to network default
    */
   private defaultMoneyConversion(decimalAmount: number, network: string): AssetAmount {
-    const tokenConfig = getDefaultToken(network);
+    // Try preferred token first if configured
+    let tokenConfig = this._config.preferredToken
+      ? getTRC20Config(network, this._config.preferredToken)
+      : undefined;
+
+    // Fall back to network default
+    if (!tokenConfig) {
+      tokenConfig = getDefaultToken(network);
+    }
+
     if (!tokenConfig) {
       throw new Error(`No default token for network: ${network}`);
     }

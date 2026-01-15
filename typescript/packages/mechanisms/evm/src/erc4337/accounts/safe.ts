@@ -15,8 +15,6 @@ import {
   encodeFunctionData,
   encodeAbiParameters,
   concat,
-  pad,
-  toHex,
   keccak256,
   getContractAddress,
   hexToBytes,
@@ -173,7 +171,6 @@ export interface SafeSmartAccountConfig {
 export class SafeSmartAccount implements SmartAccountSigner {
   private readonly signer: WalletClient;
   private readonly publicClient: PublicClient;
-  private readonly chainId: number;
   private readonly owners: Address[];
   private readonly threshold: number;
   private readonly saltNonce: bigint;
@@ -187,7 +184,8 @@ export class SafeSmartAccount implements SmartAccountSigner {
   constructor(config: SafeSmartAccountConfig) {
     this.signer = config.signer;
     this.publicClient = config.publicClient;
-    this.chainId = config.chainId;
+    // Note: chainId from config is available for future use
+    void config.chainId;
     this.threshold = config.threshold ?? 1;
     this.saltNonce = config.saltNonce ?? 0n;
     this.addresses = {

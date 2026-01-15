@@ -7,7 +7,7 @@
  */
 
 import type { Address, Hex } from "viem";
-import { concat, pad, toHex, keccak256, encodeAbiParameters } from "viem";
+import { concat, pad, toHex } from "viem";
 import type {
   UserOperation,
   PaymasterData,
@@ -83,7 +83,7 @@ export class PaymasterClient {
    * Get gas estimates including paymaster gas
    */
   async estimatePaymasterGas(
-    userOp: Partial<UserOperation>,
+    _userOp: Partial<UserOperation>,
     _chainId: number,
   ): Promise<GasEstimate> {
     // For most paymasters, use default gas limits

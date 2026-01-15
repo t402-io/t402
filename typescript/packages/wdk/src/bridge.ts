@@ -6,14 +6,12 @@
  * 2. Direct LayerZero OFT integration (fallback)
  */
 
-import type { Address } from "viem";
 import type { WDKSigner } from "./signer.js";
-import type { BridgeParams, BridgeResult } from "./types.js";
+import type { BridgeResult } from "./types.js";
 import {
   Usdt0Bridge,
   supportsBridging,
   getBridgeableChains,
-  type BridgeQuote,
   type BridgeSigner,
 } from "@t402/evm";
 
@@ -46,19 +44,19 @@ export class WdkBridge {
   private createBridgeSigner(signer: WDKSigner): BridgeSigner {
     return {
       address: signer.address,
-      readContract: async (args) => {
+      readContract: async (_args) => {
         // WDK signer needs to be extended to support readContract
         // For now, throw an error indicating this needs WDK account
         throw new Error(
           "readContract not available on WDKSigner. Use T402WDK.bridgeUsdt0() instead.",
         );
       },
-      writeContract: async (args) => {
+      writeContract: async (_args) => {
         throw new Error(
           "writeContract not available on WDKSigner. Use T402WDK.bridgeUsdt0() instead.",
         );
       },
-      waitForTransactionReceipt: async (args) => {
+      waitForTransactionReceipt: async (_args) => {
         throw new Error(
           "waitForTransactionReceipt not available on WDKSigner. Use T402WDK.bridgeUsdt0() instead.",
         );
@@ -69,7 +67,7 @@ export class WdkBridge {
   /**
    * Get or create a bridge instance for a chain
    */
-  private getBridge(chain: string, signer: WDKSigner): Usdt0Bridge {
+  getBridge(chain: string, signer: WDKSigner): Usdt0Bridge {
     const cached = this.bridges.get(chain);
     if (cached) {
       return cached;

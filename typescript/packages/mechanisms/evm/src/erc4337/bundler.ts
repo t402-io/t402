@@ -65,13 +65,13 @@ export class BundlerError extends Error {
 export class BundlerClient {
   private readonly bundlerUrl: string;
   private readonly entryPoint: Address;
-  private readonly chainId: number;
   private requestId: number = 0;
 
   constructor(config: BundlerConfig) {
     this.bundlerUrl = config.bundlerUrl;
     this.entryPoint = config.entryPoint ?? ENTRYPOINT_V07_ADDRESS;
-    this.chainId = config.chainId;
+    // Note: chainId from config is available for future use but not currently needed
+    void config.chainId;
   }
 
   /**

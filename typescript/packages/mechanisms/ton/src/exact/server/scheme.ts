@@ -17,7 +17,6 @@ import { SCHEME_EXACT } from "../../constants.js";
 import {
   getDefaultJetton,
   getJettonConfig,
-  getJettonByAddress,
   JETTON_REGISTRY,
 } from "../../tokens.js";
 import { normalizeNetwork } from "../../utils.js";
@@ -234,44 +233,6 @@ export class ExactTonScheme implements SchemeNetworkServer {
     if (defaultJetton) return defaultJetton;
 
     throw new Error(`No Jettons configured for network ${network}`);
-  }
-
-  /**
-   * Get Jetton info for a given symbol on a network
-   *
-   * @param symbol - The Jetton symbol (e.g., "USDT")
-   * @param network - The network to use
-   * @returns The Jetton configuration
-   */
-  private getAssetInfo(
-    symbol: string,
-    network: Network,
-  ): { masterAddress: string; symbol: string; name: string; decimals: number } {
-    const jetton = getJettonConfig(network, symbol);
-    if (jetton) return jetton;
-
-    // Fallback: treat "USD" as request for default stablecoin
-    if (symbol.toUpperCase() === "USD") {
-      return this.getDefaultAsset(network);
-    }
-
-    throw new Error(`Unsupported Jetton: ${symbol} on network ${network}`);
-  }
-
-  /**
-   * Get the number of decimals for a Jetton on a network
-   *
-   * @param network - The network to use
-   * @param jettonAddress - Optional Jetton address to look up
-   * @returns The number of decimals for the Jetton
-   */
-  private getAssetDecimals(network: Network, jettonAddress?: string): number {
-    if (jettonAddress) {
-      const jetton = getJettonByAddress(network, jettonAddress);
-      if (jetton) return jetton.decimals;
-    }
-    // Default to 6 decimals (USDT standard)
-    return 6;
   }
 
   /**
