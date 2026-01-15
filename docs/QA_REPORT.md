@@ -46,17 +46,12 @@ None identified during QA phase.
 
 ### High Priority Issues
 
-#### 1. Core Package Build Error (TypeScript)
+#### 1. Core Package Build Error (TypeScript) - FIXED
 
 **File**: `typescript/packages/core/src/http/index.ts`
 **Issue**: Type re-exports violate `isolatedModules` TypeScript option
-**Error Message**:
-```
-error TS1205: Re-exporting a type when 'isolatedModules' is enabled
-requires using 'export type'.
-```
-**Lines Affected**: 85-108
-**Recommendation**: Change `export { TypeName }` to `export type { TypeName }` for all type-only exports
+**Status**: **FIXED** in commit `6022049`
+**Fix**: Changed `export { TypeName }` to `export type { TypeName }` for all type-only exports
 
 ### Medium Priority Issues
 
@@ -160,7 +155,7 @@ Total new tests: 68 tests (62 passing, 6 skipped)
 
 ### Before Production Release
 
-- [ ] Fix @t402/core build issue (type re-exports)
+- [x] Fix @t402/core build issue (type re-exports) - DONE
 - [ ] Fix TRON dynamic require issue in server scheme
 - [ ] Add integration tests for EVM mechanism
 - [ ] Add integration tests for SVM mechanism
