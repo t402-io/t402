@@ -1,46 +1,52 @@
 {
   "$schema": "https://turborepo.org/schema.json",
+  "globalDependencies": ["tsconfig.base.json", ".env*"],
+  "globalEnv": ["NODE_ENV", "CI"],
   "tasks": {
     "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        "dist/**"
-      ]
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"],
+      "env": ["NODE_ENV"]
     },
     "test": {
-      "dependsOn": [
-        "build"
-      ],
-      "inputs": [
-        "src/**/*.ts",
-        "test/**/*.ts"
-      ]
+      "dependsOn": ["build"],
+      "inputs": ["src/**", "test/**"],
+      "outputs": ["coverage/**"],
+      "env": ["CI", "VITEST_COVERAGE"]
+    },
+    "test:integration": {
+      "dependsOn": ["build"],
+      "inputs": ["src/**", "test/integrations/**"],
+      "outputs": [],
+      "env": ["TEST_NETWORK", "TEST_RPC_URL", "TEST_PRIVATE_KEY"],
+      "cache": false
+    },
+    "typecheck": {
+      "dependsOn": ["^typecheck"],
+      "outputs": []
     },
     "lint": {
-      "dependsOn": [
-        "^lint"
-      ],
-      "outputs": []
+      "outputs": [],
+      "cache": true
     },
     "lint:check": {
-      "dependsOn": [
-        "^lint:check"
-      ],
-      "outputs": []
+      "outputs": [],
+      "cache": true
     },
     "format": {
-      "dependsOn": [
-        "^format"
-      ],
-      "outputs": []
+      "outputs": [],
+      "cache": false
     },
     "format:check": {
-      "dependsOn": [
-        "^format:check"
-      ],
-      "outputs": []
+      "outputs": [],
+      "cache": true
+    },
+    "docs": {
+      "dependsOn": ["build"],
+      "outputs": ["docs/**"]
+    },
+    "clean": {
+      "cache": false
     }
   }
 }

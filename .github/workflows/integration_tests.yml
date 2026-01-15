@@ -1,0 +1,112 @@
+name: Integration Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - "typescript/packages/mechanisms/**"
+      - "typescript/packages/core/**"
+      - "go/mechanisms/**"
+      - ".github/workflows/integration_tests.yml"
+  workflow_dispatch:
+  schedule:
+    # Run daily at 00:00 UTC
+    - cron: "0 0 * * *"
+
+env:
+  # Testnet RPC URLs (public endpoints)
+  ETH_SEPOLIA_RPC: "https://rpc.sepolia.org"
+  ARB_SEPOLIA_RPC: "https://sepolia-rollup.arbitrum.io/rpc"
+  BASE_SEPOLIA_RPC: "https://sepolia.base.org"
+  SOLANA_DEVNET_RPC: "https://api.devnet.solana.com"
+  TON_TESTNET_RPC: "https://testnet.toncenter.com/api/v2/jsonRPC"
+  TRON_NILE_RPC: "https://nile.trongrid.io"
+
+jobs:
+  # TypeScript Integration Tests
+  integration-typescript:
+    name: TypeScript Integration
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        mechanism: [evm, svm, ton, tron]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: ./typescript
+
+      - name: Install dependencies
+        working-directory: ./typescript
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        working-directory: ./typescript
+        run: pnpm build
+
+      - name: Run ${{ matrix.mechanism }} integration tests
+        working-directory: ./typescript
+        run: pnpm --filter @t402/${{ matrix.mechanism }} test:integration
+        env:
+          TEST_NETWORK: testnet
+          CI: true
+        continue-on-error: true
+
+  # Go Integration Tests
+  integration-go:
+    name: Go Integration
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        mechanism: [evm, svm, ton, tron]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+          cache-dependency-path: go/go.sum
+
+      - name: Install dependencies
+        working-directory: ./go
+        run: go mod download
+
+      - name: Run ${{ matrix.mechanism }} integration tests
+        working-directory: ./go
+        run: go test -v -tags=integration ./mechanisms/${{ matrix.mechanism }}/...
+        env:
+          TEST_NETWORK: testnet
+          CI: true
+        continue-on-error: true
+
+  # Summary
+  integration-summary:
+    name: Integration Summary
+    needs: [integration-typescript, integration-go]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Check results
+        run: |
+          echo "TypeScript Integration: ${{ needs.integration-typescript.result }}"
+          echo "Go Integration: ${{ needs.integration-go.result }}"
+
+          # Integration tests are allowed to fail on schedule/manual runs
+          # But should be tracked for reliability
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            if [ "${{ needs.integration-typescript.result }}" == "failure" ] || \
+               [ "${{ needs.integration-go.result }}" == "failure" ]; then
+              echo "::warning::Some integration tests failed. Please review."
+            fi
+          fi

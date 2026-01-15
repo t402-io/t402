@@ -1,0 +1,22 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
+  "changelog": [
+    "@changesets/changelog-github",
+    { "repo": "t402-io/t402" }
+  ],
+  "commit": false,
+  "fixed": [
+    ["@t402/core", "@t402/evm", "@t402/svm", "@t402/ton", "@t402/tron"]
+  ],
+  "linked": [
+    ["@t402/wdk", "@t402/wdk-gasless", "@t402/wdk-bridge", "@t402/wdk-multisig"]
+  ],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "privatePackages": {
+    "version": false,
+    "tag": false
+  },
+  "ignore": []
+}
