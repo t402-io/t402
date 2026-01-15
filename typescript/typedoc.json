@@ -1,0 +1,56 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": [
+    "packages/core/src/index.ts",
+    "packages/extensions/src/index.ts",
+    "packages/mechanisms/evm/src/index.ts",
+    "packages/mechanisms/svm/src/index.ts",
+    "packages/mechanisms/ton/src/index.ts",
+    "packages/mechanisms/tron/src/index.ts",
+    "packages/http/express/src/index.ts",
+    "packages/http/next/src/index.ts",
+    "packages/http/hono/src/index.ts",
+    "packages/http/fastify/src/index.ts",
+    "packages/http/fetch/src/index.ts",
+    "packages/http/axios/src/index.ts",
+    "packages/http/paywall/src/index.ts",
+    "packages/http/react/src/index.ts",
+    "packages/http/vue/src/index.ts",
+    "packages/wdk/src/index.ts",
+    "packages/wdk-gasless/src/index.ts",
+    "packages/wdk-bridge/src/index.ts",
+    "packages/wdk-multisig/src/index.ts",
+    "packages/mcp/src/index.ts",
+    "packages/cli/src/index.ts"
+  ],
+  "entryPointStrategy": "expand",
+  "out": "api-docs",
+  "name": "T402 Payment Protocol",
+  "readme": "../README.md",
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeInternal": true,
+  "includeVersion": true,
+  "navigationLinks": {
+    "Website": "https://t402.io",
+    "Documentation": "https://docs.t402.io",
+    "GitHub": "https://github.com/t402-io/t402"
+  },
+  "plugin": ["typedoc-plugin-markdown"],
+  "theme": "default",
+  "categorizeByGroup": true,
+  "categoryOrder": [
+    "Core",
+    "Mechanisms",
+    "HTTP",
+    "WDK",
+    "Tools",
+    "*"
+  ],
+  "sort": ["source-order", "alphabetical"],
+  "validation": {
+    "notExported": true,
+    "invalidLink": true,
+    "notDocumented": false
+  }
+}
