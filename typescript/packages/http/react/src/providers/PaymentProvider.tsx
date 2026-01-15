@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useMemo } from "react";
+import { createContext, useContext, useState, useCallback, useMemo } from "react";
 import type { PaymentRequired, PaymentRequirements } from "@t402/core/types";
 import type {
   PaymentState,

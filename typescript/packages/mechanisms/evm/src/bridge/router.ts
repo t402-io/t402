@@ -24,7 +24,6 @@
  * ```
  */
 
-import type { Address } from "viem";
 import { Usdt0Bridge } from "./client.js";
 import { LayerZeroScanClient } from "./scan.js";
 import { getBridgeableChains, supportsBridging } from "./constants.js";
@@ -77,14 +76,6 @@ export class CrossChainPaymentRouter {
   ): Promise<CrossChainPaymentResult> {
     // Validate parameters
     this.validateParams(params);
-
-    // Get quote to estimate fees
-    const quote = await this.bridge.quote({
-      fromChain: params.sourceChain,
-      toChain: params.destinationChain,
-      amount: params.amount,
-      recipient: params.payer, // Bridge to payer's address
-    });
 
     // Execute bridge transaction
     const result = await this.bridge.send({

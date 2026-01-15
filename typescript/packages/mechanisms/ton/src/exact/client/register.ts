@@ -2,7 +2,6 @@ import { t402Client, PaymentPolicy } from "@t402/core/client";
 import { Network } from "@t402/core/types";
 import { ClientTonSigner } from "../../signer.js";
 import { ExactTonScheme, ExactTonSchemeConfig } from "./scheme.js";
-import { TON_NETWORKS } from "../../constants.js";
 
 /**
  * Configuration options for registering TON schemes to an t402Client

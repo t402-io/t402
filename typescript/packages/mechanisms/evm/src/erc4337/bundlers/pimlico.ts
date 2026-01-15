@@ -13,7 +13,6 @@ import {
   BundlerClient,
   BundlerError,
 } from "../bundler.js";
-import type { BundlerConfig } from "../types.js";
 import type {
   UserOperation,
   UserOperationResult,
@@ -55,7 +54,6 @@ export interface PimlicoConfig {
  * Pimlico bundler client with extended methods
  */
 export class PimlicoBundlerClient extends BundlerClient {
-  private readonly apiKey: string;
   private readonly pimlicoUrl: string;
 
   constructor(config: PimlicoConfig) {
@@ -69,7 +67,6 @@ export class PimlicoBundlerClient extends BundlerClient {
       bundlerUrl,
     });
 
-    this.apiKey = config.apiKey;
     this.pimlicoUrl = bundlerUrl;
   }
 

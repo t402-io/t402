@@ -6,7 +6,7 @@
  */
 
 import type { Address, Hex, PublicClient } from "viem";
-import { encodeFunctionData, concat, pad, toHex } from "viem";
+import { concat, pad, toHex } from "viem";
 import type {
   UserOperation,
   PackedUserOperation,
@@ -178,7 +178,7 @@ export class UserOpBuilder {
   async getUserOpHash(
     userOp: UserOperation,
     client: PublicClient,
-    chainId: number,
+    _chainId: number,
   ): Promise<Hex> {
     const packed = this.packUserOp(userOp);
 

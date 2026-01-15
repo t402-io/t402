@@ -94,7 +94,7 @@ export async function executePay(
   input: PayInput,
   options: PayOptions
 ): Promise<PaymentResult> {
-  const { to, amount, token, network, memo } = input;
+  const { to, amount, token, network, memo: _memo } = input;
   const { privateKey, rpcUrl, demoMode } = options;
 
   // Validate token support on network

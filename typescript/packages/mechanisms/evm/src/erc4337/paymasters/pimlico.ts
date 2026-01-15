@@ -76,19 +76,13 @@ export interface PimlicoSponsorResult {
  * Pimlico paymaster client
  */
 export class PimlicoPaymaster {
-  private readonly apiKey: string;
-  private readonly chainId: number;
   private readonly paymasterUrl: string;
   private readonly type: PimlicoPaymasterType;
   private readonly tokenAddress?: Address;
-  private readonly policy?: PimlicoPolicy;
 
   constructor(config: PimlicoPaymasterConfig) {
-    this.apiKey = config.apiKey;
-    this.chainId = config.chainId;
     this.type = config.type ?? "verifying";
     this.tokenAddress = config.tokenAddress;
-    this.policy = config.policy;
     this.paymasterUrl = config.paymasterUrl ??
       `https://api.pimlico.io/v2/${config.chainId}/rpc?apikey=${config.apiKey}`;
   }

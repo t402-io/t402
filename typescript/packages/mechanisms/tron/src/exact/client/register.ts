@@ -8,7 +8,6 @@ import { t402Client, PaymentPolicy } from "@t402/core/client";
 import { Network } from "@t402/core/types";
 import { ClientTronSigner } from "../../signer.js";
 import { ExactTronScheme, ExactTronSchemeConfig } from "./scheme.js";
-import { TRON_NETWORKS } from "../../constants.js";
 
 /**
  * Configuration options for registering TRON schemes to a t402Client

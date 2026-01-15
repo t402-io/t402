@@ -39,7 +39,6 @@ import {
   BalanceError,
   WDKErrorCode,
   wrapError,
-  withRetry,
   isWDKError,
 } from "./errors.js";
 
@@ -68,8 +67,6 @@ import {
  */
 export class T402WDK {
   private _wdk: WDKInstance | null = null;
-  private _config: T402WDKConfig;
-  private _options: T402WDKOptions;
   private _normalizedChains: Map<string, NormalizedChainConfig> = new Map();
   private _seedPhrase: string;
   private _signerCache: Map<string, WDKSigner> = new Map();
@@ -185,8 +182,6 @@ export class T402WDK {
     }
 
     this._seedPhrase = seedPhrase;
-    this._config = config;
-    this._options = options;
 
     // Initialize balance cache
     this._balanceCache = new BalanceCache(options.cache);

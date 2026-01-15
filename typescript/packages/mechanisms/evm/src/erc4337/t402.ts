@@ -8,7 +8,6 @@
 import type { Address, Hex, PublicClient } from "viem";
 import { encodeFunctionData } from "viem";
 import type {
-  UserOperation,
   SmartAccountSigner,
   TransactionIntent,
   PaymasterConfig,

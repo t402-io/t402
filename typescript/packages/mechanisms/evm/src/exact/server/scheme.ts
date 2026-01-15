@@ -217,25 +217,6 @@ export class ExactEvmScheme implements SchemeNetworkServer {
   }
 
   /**
-   * Get asset info for a given symbol on a network
-   *
-   * @param symbol - The asset symbol (e.g., "USDT0", "USDC", "USDT")
-   * @param network - The network to use
-   * @returns The token configuration
-   */
-  private getAssetInfo(symbol: string, network: Network): TokenConfig {
-    const token = getTokenConfig(network, symbol);
-    if (token) return token;
-
-    // Fallback: treat "USD" as request for default stablecoin
-    if (symbol.toUpperCase() === "USD") {
-      return this.getDefaultAsset(network);
-    }
-
-    throw new Error(`Unsupported asset: ${symbol} on network ${network}`);
-  }
-
-  /**
    * Get the number of decimals for the asset on a network
    *
    * @param network - The network to use

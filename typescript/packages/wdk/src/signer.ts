@@ -7,7 +7,7 @@
 
 import type { Address } from "viem";
 import type { ClientEvmSigner } from "@t402/evm";
-import type { WDKAccount, WDKInstance, TypedDataDomain, TypedDataTypes } from "./types.js";
+import type { WDKAccount, WDKInstance } from "./types.js";
 import { getChainId } from "./chains.js";
 import {
   SignerError,
@@ -590,11 +590,10 @@ export async function createWDKSigner(
  */
 export class MockWDKSigner implements ClientEvmSigner {
   readonly address: Address;
-  private _privateKey: `0x${string}`;
 
-  constructor(address: Address, privateKey: `0x${string}`) {
+  constructor(address: Address, _privateKey: `0x${string}`) {
     this.address = address;
-    this._privateKey = privateKey;
+    // Note: privateKey available for future signing implementation
   }
 
   async signTypedData(_message: {

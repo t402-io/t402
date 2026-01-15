@@ -121,7 +121,7 @@ export async function executePayGasless(
   options: PayGaslessOptions
 ): Promise<GaslessPaymentResult> {
   const { to, amount, token, network } = input;
-  const { privateKey, bundlerUrl, paymasterUrl, rpcUrl, demoMode } = options;
+  const { privateKey, bundlerUrl, paymasterUrl: _paymasterUrl, rpcUrl, demoMode } = options;
 
   // Validate network supports gasless
   if (!GASLESS_SUPPORTED_NETWORKS.includes(network)) {
