@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   formatAddress,
   formatAmount,
@@ -10,6 +10,15 @@ import {
   isValidUrl,
   encryptSeed,
   decryptSeed,
+  formatBalanceResult,
+  formatPaymentResult,
+  createSpinner,
+  printTable,
+  printSuccess,
+  printError,
+  printWarning,
+  printInfo,
+  printHeader,
 } from "./index.js";
 
 describe("formatAddress", () => {
@@ -165,5 +174,163 @@ describe("encryptSeed/decryptSeed", () => {
     const encrypted1 = encryptSeed(testSeed, "key1");
     const encrypted2 = encryptSeed(testSeed, "key2");
     expect(encrypted1).not.toBe(encrypted2);
+  });
+});
+
+describe("formatBalanceResult", () => {
+  it("formats balance with known network", () => {
+    const result = formatBalanceResult({
+      network: "eip155:8453",
+      asset: "usdt",
+      balance: "1000000",
+      formatted: "1.00",
+    });
+    expect(result).toContain("Base");
+    expect(result).toContain("1.00");
+    expect(result).toContain("USDT");
+  });
+
+  it("formats balance with unknown network", () => {
+    const result = formatBalanceResult({
+      network: "unknown:999",
+      asset: "usdc",
+      balance: "5000000",
+      formatted: "5.00",
+    });
+    expect(result).toContain("unknown:999");
+    expect(result).toContain("5.00");
+    expect(result).toContain("USDC");
+  });
+});
+
+describe("formatPaymentResult", () => {
+  it("formats successful payment with all details", () => {
+    const result = formatPaymentResult({
+      success: true,
+      txHash: "0x1234567890abcdef",
+      network: "eip155:8453",
+      amount: "10.00 USDT",
+    });
+    expect(result).toContain("Payment successful");
+    expect(result).toContain("0x1234567890abcdef");
+    expect(result).toContain("Base");
+    expect(result).toContain("10.00 USDT");
+  });
+
+  it("formats successful payment without optional fields", () => {
+    const result = formatPaymentResult({
+      success: true,
+    });
+    expect(result).toContain("Payment successful");
+  });
+
+  it("formats failed payment with error", () => {
+    const result = formatPaymentResult({
+      success: false,
+      error: "Insufficient balance",
+    });
+    expect(result).toContain("Payment failed");
+    expect(result).toContain("Insufficient balance");
+  });
+
+  it("formats failed payment without error message", () => {
+    const result = formatPaymentResult({
+      success: false,
+    });
+    expect(result).toContain("Payment failed");
+    expect(result).toContain("Unknown error");
+  });
+
+  it("formats successful payment with unknown network", () => {
+    const result = formatPaymentResult({
+      success: true,
+      network: "unknown:999",
+    });
+    expect(result).toContain("unknown:999");
+  });
+});
+
+describe("createSpinner", () => {
+  it("creates a spinner with text", () => {
+    const spinner = createSpinner("Loading...");
+    expect(spinner).toBeDefined();
+    expect(spinner.text).toBe("Loading...");
+  });
+});
+
+describe("Console output functions", () => {
+  let consoleLogSpy: ReturnType<typeof vi.spyOn>;
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    consoleLogSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
+  });
+
+  describe("printTable", () => {
+    it("prints key-value pairs", () => {
+      printTable({ Name: "Test", Value: "123" });
+      expect(consoleLogSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it("handles empty object", () => {
+      printTable({});
+      expect(consoleLogSpy).not.toHaveBeenCalled();
+    });
+
+    it("pads keys for alignment", () => {
+      printTable({ Short: "a", LongerKey: "b" });
+      expect(consoleLogSpy).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("printSuccess", () => {
+    it("prints success message with checkmark", () => {
+      printSuccess("Operation completed");
+      expect(consoleLogSpy).toHaveBeenCalled();
+      const output = consoleLogSpy.mock.calls[0][0];
+      expect(output).toContain("Operation completed");
+    });
+  });
+
+  describe("printError", () => {
+    it("prints error message to stderr", () => {
+      printError("Something went wrong");
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      const output = consoleErrorSpy.mock.calls[0][0];
+      expect(output).toContain("Something went wrong");
+    });
+  });
+
+  describe("printWarning", () => {
+    it("prints warning message", () => {
+      printWarning("Be careful");
+      expect(consoleLogSpy).toHaveBeenCalled();
+      const output = consoleLogSpy.mock.calls[0][0];
+      expect(output).toContain("Be careful");
+    });
+  });
+
+  describe("printInfo", () => {
+    it("prints info message", () => {
+      printInfo("FYI");
+      expect(consoleLogSpy).toHaveBeenCalled();
+      const output = consoleLogSpy.mock.calls[0][0];
+      expect(output).toContain("FYI");
+    });
+  });
+
+  describe("printHeader", () => {
+    it("prints header with title", () => {
+      printHeader("My Header");
+      expect(consoleLogSpy).toHaveBeenCalled();
+      // Should print empty line, title, empty line
+      expect(consoleLogSpy).toHaveBeenCalledTimes(3);
+    });
   });
 });
