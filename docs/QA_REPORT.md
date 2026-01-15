@@ -18,7 +18,7 @@ This report documents the quality assurance findings for the T402 payment protoc
 |---------|-------|--------|-------|
 | `@t402/core` | N/A | ✅ Pass | Build fixed |
 | `@t402/tron` | 127 | ✅ Pass | Full coverage |
-| `@t402/ton` | 134 | ✅ Pass | Full coverage |
+| `@t402/ton` | 134 + 88 integration | ✅ Pass | Full coverage with integration tests |
 | `@t402/mcp` | 32 | ✅ Pass | Schema validation & formatting |
 | `@t402/evm` | 304 + 56 integration | ✅ Pass | Full coverage with integration tests |
 | `@t402/svm` | 105 + 62 integration | ✅ Pass | Full coverage with integration tests |
@@ -169,9 +169,43 @@ The following build issues were identified and resolved:
 
 **Result**: 105 unit tests + 62 integration tests = 167 total tests for @t402/svm.
 
+#### 5. TON Integration Tests - ADDED
+
+**Status**: **ADDED** (Jan 15, 2026)
+
+**New Test Files** (2 files, 88 integration tests):
+- `typescript/packages/mechanisms/ton/test/integrations/multi-network.test.ts` - 57 tests
+  - Network identifier verification (CAIP-2 format)
+  - Legacy to CAIP-2 network normalization
+  - USDT Jetton addresses per network (mainnet/testnet)
+  - Jetton registry and helper functions
+  - Address validation (friendly and raw formats)
+  - Jetton amount conversion with decimal precision
+  - RPC endpoint configuration
+  - Gas constants and bounds validation
+  - Jetton transfer body building and parsing (TEP-74)
+  - Server price parsing (multi-network, legacy names, custom MoneyParsers)
+  - AssetAmount passthrough and validation
+
+- `typescript/packages/mechanisms/ton/test/integrations/verification.test.ts` - 31 tests
+  - Scheme and network matching
+  - BOC format validation
+  - Message verification
+  - Authorization expiry (with 30-second buffer)
+  - Balance verification
+  - Amount, recipient, and asset validation
+  - Seqno validation (replay protection)
+  - Wallet deployment check
+  - Facilitator configuration (single/multiple addresses)
+  - Gas sponsorship configuration
+  - Network support (mainnet/testnet)
+  - Payload structure validation
+
+**Result**: 134 unit tests + 88 integration tests = 222 total tests for @t402/ton.
+
 ### Low Priority Issues
 
-#### 5. Unused Import Warning in TRON Client Test
+#### 6. Unused Import Warning in TRON Client Test
 
 **File**: `typescript/packages/mechanisms/tron/test/client.test.ts`
 **Issue**: `vi` imported but some mocking features unused due to test scope changes
@@ -245,6 +279,7 @@ Total new tests: 68 tests (all passing)
 - [x] Fix TRON dynamic require issue in server scheme - DONE
 - [x] Add integration tests for EVM mechanism - DONE (56 tests across 4 test files)
 - [x] Add integration tests for SVM mechanism - DONE (62 tests across 3 test files)
+- [x] Add integration tests for TON mechanism - DONE (88 tests across 2 test files)
 - [ ] Complete security audit with external firm
 
 ### Future Improvements
@@ -269,7 +304,7 @@ pnpm test
 
 # Individual package results:
 # @t402/tron: 127 passed (127 total)
-# @t402/ton: 134 passed (134 total)
+# @t402/ton: 222 passed (134 unit + 88 integration)
 # @t402/mcp: 32 passed (32 total)
 # @t402/cli: 41 passed (41 total)
 # @t402/wdk-multisig: 46 passed (46 total)
