@@ -1,0 +1,202 @@
+# Frequently Asked Questions
+
+## General
+
+### What is T402?
+
+T402 is an open standard for HTTP-native stablecoin payments. It enables any HTTP resource to accept USDT payments using a simple header-based protocol, similar to how HTTP Basic Auth works.
+
+### Why the name "T402"?
+
+The name combines "T" (for Tether/USDT) with "402" (the HTTP status code for "Payment Required"). The HTTP 402 status code was reserved for future use in digital payment systems - T402 fulfills that vision.
+
+### What stablecoins are supported?
+
+Currently, T402 supports:
+- **USDT** - Tether USD on all supported networks
+- **USDT0** - Tether USD OFT (LayerZero) for cross-chain transfers
+
+### Which blockchains are supported?
+
+**EVM Chains:**
+- Ethereum, Arbitrum, Base, Optimism, Polygon, Ink, Berachain, Unichain
+
+**Non-EVM:**
+- TON (The Open Network)
+- TRON
+- Solana
+
+See [Chains](/chains) for the complete list.
+
+## Technical
+
+### How does T402 work?
+
+1. Client requests a protected resource
+2. Server returns `402 Payment Required` with payment details
+3. Client signs a payment authorization
+4. Client retries request with `X-Payment` header
+5. Server verifies payment and returns the resource
+
+```
+Client                    Server                    Facilitator
+  │                         │                           │
+  │─── GET /resource ──────▶│                           │
+  │◀── 402 + payment opts ──│                           │
+  │                         │                           │
+  │─── GET + X-Payment ────▶│── verify payment ────────▶│
+  │                         │◀── settlement tx ─────────│
+  │◀── 200 + resource ──────│                           │
+```
+
+### What is a Facilitator?
+
+The Facilitator is a trusted third party that:
+- Verifies payment authorizations
+- Settles payments on-chain
+- Provides atomic settlement guarantees
+
+T402 provides a default facilitator at `https://facilitator.t402.io`.
+
+### Can I run my own Facilitator?
+
+Yes! The facilitator is open source. You can run your own for:
+- Custom settlement logic
+- Private deployments
+- Specific compliance requirements
+
+### What are the fees?
+
+T402 itself has no protocol fees. Costs include:
+- **Network gas fees** (varies by chain, ~$0.001 on L2s)
+- **Facilitator fees** (default facilitator: free during beta)
+
+### Is T402 secure?
+
+Yes. T402 uses:
+- **Cryptographic signatures** for authorization
+- **On-chain settlement** for finality
+- **Time-limited authorizations** to prevent replay attacks
+- **EIP-3009 / EIP-712** typed data signing on EVM
+
+### What happens if payment fails?
+
+If payment verification fails, the server returns `402 Payment Required` again with an error message. The client can retry with a new payment authorization.
+
+## Integration
+
+### How long does integration take?
+
+Basic integration takes 15-30 minutes:
+1. Install SDK (~2 minutes)
+2. Add middleware (~5 minutes)
+3. Configure pricing (~5 minutes)
+4. Test (~10 minutes)
+
+### Do I need smart contracts?
+
+No. T402 uses existing token contracts (USDT). No custom smart contract deployment required.
+
+### Can I use T402 with my existing API?
+
+Yes! T402 integrates as middleware. Add it to Express, Next.js, Hono, or any HTTP server without changing your existing routes.
+
+### How do I handle failed payments?
+
+The middleware automatically returns 402 with error details:
+
+```typescript
+app.use(paymentMiddleware(config, {
+  onPaymentFailed: (error, req, res) => {
+    console.error('Payment failed:', error)
+    // Custom error handling
+  }
+}))
+```
+
+## Pricing
+
+### What's the minimum payment amount?
+
+Technically, any amount > 0. Practically:
+- **L2 chains** (Base, Arbitrum): ~$0.001 minimum (due to gas)
+- **L1 chains** (Ethereum): ~$1 minimum (due to gas)
+- **Gasless** (ERC-4337): ~$0.0001 minimum
+
+### How do I set dynamic pricing?
+
+Use a price resolver function:
+
+```typescript
+'GET /api/resource': {
+  price: (req) => {
+    // Dynamic pricing based on request
+    return `$${calculatePrice(req)}`
+  }
+}
+```
+
+### Can I offer free tier + paid tier?
+
+Yes! Use conditional pricing:
+
+```typescript
+'GET /api/data': {
+  price: (req) => {
+    if (isFreeTierUser(req)) return '$0'
+    return '$0.01'
+  }
+}
+```
+
+## Troubleshooting
+
+### "Payment Required" but payment was sent
+
+Check:
+1. **Network mismatch**: Payment network matches server expectation
+2. **Expired authorization**: Default expiry is 5 minutes
+3. **Amount mismatch**: Exact amount required (not more, not less)
+4. **Wrong recipient**: Payment sent to correct address
+
+### "Invalid signature" error
+
+Ensure:
+1. Client and server use same network ID format (CAIP-2)
+2. Typed data matches exactly
+3. Signature hasn't expired
+
+### Gasless payments not working
+
+Verify:
+1. Bundler URL is correct and accessible
+2. Paymaster has sufficient funds
+3. User has approved USDT for the smart account
+
+### Transaction pending for too long
+
+On-chain settlement typically takes:
+- **L2 chains**: 1-3 seconds
+- **Ethereum**: 12-30 seconds
+- **TON**: 5-10 seconds
+- **TRON**: 3-5 seconds
+
+If longer, check network congestion or RPC issues.
+
+## Support
+
+### Where can I get help?
+
+- **GitHub Issues**: [github.com/t402-io/t402/issues](https://github.com/t402-io/t402/issues)
+- **Twitter/X**: [@t402_io](https://x.com/t402_io)
+- **Documentation**: [docs.t402.io](https://docs.t402.io)
+
+### How do I report a security issue?
+
+For security issues, please email security@t402.io instead of creating a public GitHub issue.
+
+### Is T402 open source?
+
+Yes! T402 is fully open source under the MIT license:
+- [GitHub Repository](https://github.com/t402-io/t402)
+- [npm Packages](https://www.npmjs.com/org/t402-io)

@@ -2,51 +2,140 @@
 
 **The Official Payment Protocol for USDT**
 
-T402 is an open standard for HTTP-native stablecoin payments. It enables seamless USDT and USDT0 payments across multiple blockchains with a single HTTP header.
+T402 is an open standard for HTTP-native stablecoin payments. Enable seamless USDT payments across multiple blockchains with a single HTTP header.
+
+import { Callout, Steps, Tabs } from 'nextra/components'
 
 ## Why T402?
 
-- **HTTP Native**: Pay for any HTTP resource with a single header
-- **Multi-Chain**: Support for Ethereum, Arbitrum, Base, TON, TRON, Solana, and more
-- **Gasless**: ERC-4337 account abstraction for zero-gas user experience
-- **Cross-Chain**: LayerZero OFT bridging for USDT0 transfers
-- **AI Ready**: MCP server for AI agent payments
+| Feature | Description |
+|---------|-------------|
+| **HTTP Native** | Pay for any HTTP resource with a single header. No payment forms, no redirects. |
+| **Multi-Chain** | Ethereum, Arbitrum, Base, TON, TRON, Solana - one protocol, all chains. |
+| **Gasless** | ERC-4337 account abstraction for zero-gas user experience. |
+| **AI Ready** | MCP server enables AI agents to pay for APIs autonomously. |
 
-## Quick Install
+## Quick Start
 
+<Tabs items={['TypeScript', 'Python', 'Go']}>
+  <Tabs.Tab>
 ```bash
-# TypeScript
 pnpm add @t402/core @t402/evm
+```
 
-# Python
+```typescript
+import { t402Client } from '@t402/fetch'
+import { registerExactEvmScheme } from '@t402/evm/exact/client'
+
+const client = new t402Client()
+registerExactEvmScheme(client, { signer })
+
+// Payments handled automatically
+const response = await client.fetch('https://api.example.com/premium')
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
 pip install t402
+```
 
-# Go
+```python
+from t402 import T402Client
+
+client = T402Client(private_key="0x...")
+
+# Payments handled automatically
+response = client.get("https://api.example.com/premium")
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
 go get github.com/t402-io/t402/go
 ```
+
+```go
+import "github.com/t402-io/t402/go/client"
+
+c := client.New(privateKey)
+
+// Payments handled automatically
+resp, _ := c.Get("https://api.example.com/premium")
+```
+  </Tabs.Tab>
+</Tabs>
+
+## How It Works
+
+<Steps>
+### Client makes request
+
+```
+GET /api/premium HTTP/1.1
+Host: api.example.com
+```
+
+### Server returns 402 Payment Required
+
+```
+HTTP/1.1 402 Payment Required
+X-Payment: scheme="exact-evm";network="eip155:8453";amount="10000";...
+```
+
+### Client signs and retries
+
+```
+GET /api/premium HTTP/1.1
+X-Payment: signature="0x...";payload="..."
+```
+
+### Server verifies and responds
+
+```
+HTTP/1.1 200 OK
+Content-Type: application/json
+{"data": "Premium content!"}
+```
+</Steps>
+
+## Popular Use Cases
+
+| Use Case | Description | Link |
+|----------|-------------|------|
+| **AI Agent Payments** | Enable AI to pay for APIs autonomously | [Learn more →](/use-cases/ai-payments) |
+| **API Monetization** | Charge per-request for your APIs | [Learn more →](/use-cases/api-monetization) |
+| **Premium Content** | Gate content behind micro-payments | [Learn more →](/use-cases/content-access) |
+| **Micro-Payments** | Sub-cent payments on L2 networks | [Learn more →](/use-cases/micro-payments) |
 
 ## Packages
 
 | Package | Description |
 |---------|-------------|
-| [@t402/core](/sdks/typescript/core) | Protocol types and HTTP utilities |
-| [@t402/evm](/sdks/typescript/evm) | EVM chains (Ethereum, Arbitrum, Base, etc.) |
-| [@t402/ton](/sdks/typescript/ton) | TON blockchain support |
-| [@t402/tron](/sdks/typescript/tron) | TRON blockchain support |
-| [@t402/wdk](/sdks/typescript/wdk) | Tether WDK integration |
-| [@t402/wdk-gasless](/sdks/typescript/wdk-gasless) | Gasless payments with WDK + ERC-4337 |
-| [@t402/wdk-bridge](/sdks/typescript/wdk-bridge) | Cross-chain bridging with WDK + LayerZero |
-| [@t402/mcp](/sdks/typescript/mcp) | MCP server for AI agents |
+| [`@t402/core`](/reference/core) | Protocol types and HTTP utilities |
+| [`@t402/evm`](/reference/evm) | EVM chains (Ethereum, Arbitrum, Base) |
+| [`@t402/ton`](/reference/ton) | TON blockchain support |
+| [`@t402/tron`](/reference/tron) | TRON blockchain support |
+| [`@t402/wdk`](/reference/wdk) | Tether WDK integration |
+| [`@t402/wdk-gasless`](/sdks/typescript/wdk-gasless) | Gasless payments (ERC-4337) |
+| [`@t402/wdk-bridge`](/sdks/typescript/wdk-bridge) | Cross-chain bridging (LayerZero) |
+| [`@t402/mcp`](/sdks/typescript/mcp) | MCP server for AI agents |
 
 ## Supported Networks
 
-- **EVM**: Ethereum, Arbitrum, Base, Optimism, Polygon, Ink, Berachain, Unichain
-- **TON**: TON Mainnet and Testnet
-- **TRON**: TRON Mainnet and Testnets
-- **Solana**: Mainnet and Devnet
+**EVM Chains**
+- Ethereum, Arbitrum, Base, Optimism, Polygon, Ink, Berachain, Unichain
 
-See [Chains](/chains) for detailed information.
+**Non-EVM**
+- TON Mainnet and Testnet
+- TRON Mainnet, Nile, and Shasta
+- Solana Mainnet and Devnet
+
+<Callout type="info">
+See [Chains](/chains) for network IDs and configuration details.
+</Callout>
 
 ## Get Started
 
-Ready to integrate T402? Start with our [Quick Start Guide](/getting-started/quickstart).
+Ready to integrate T402?
+
+- [**Quick Start Guide →**](/getting-started/quickstart) - Get up and running in 5 minutes
+- [**Core Concepts →**](/getting-started/concepts) - Understand how T402 works

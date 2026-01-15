@@ -1,0 +1,212 @@
+# Premium Content Access
+
+Gate premium content behind micro-payments without subscription fatigue. Let users pay only for what they consume.
+
+## Overview
+
+Traditional content monetization has problems:
+
+- **Subscription fatigue**: Users don't want another monthly fee
+- **All-or-nothing**: No way to access single articles/videos
+- **High friction**: Credit card forms, account creation
+
+T402 solves this with pay-per-access:
+
+- **One-click payments**: Pay with a connected wallet
+- **No accounts needed**: Wallet is the identity
+- **Flexible pricing**: Charge per article, per minute, per page
+
+## Use Cases
+
+### Articles & Blog Posts
+
+```typescript
+app.use(paymentMiddleware({
+  'GET /article/:id': {
+    price: '$0.10',
+    network: 'eip155:8453',
+    payTo: process.env.WALLET_ADDRESS,
+    description: 'Premium article access'
+  }
+}))
+```
+
+### Video Content
+
+```typescript
+// Price per minute of video
+'GET /video/:id': {
+  price: (req) => {
+    const video = getVideoMetadata(req.params.id)
+    const pricePerMinute = 0.01
+    return `$${video.duration * pricePerMinute}`
+  },
+  network: 'eip155:8453',
+  payTo: process.env.WALLET_ADDRESS
+}
+```
+
+### E-books & Documents
+
+```typescript
+// Price per page or chapter
+'GET /book/:id/chapter/:chapter': {
+  price: '$0.25',
+  network: 'eip155:8453',
+  payTo: process.env.WALLET_ADDRESS,
+  description: 'Book chapter access'
+}
+```
+
+## Implementation Example
+
+### React Frontend with Paywall
+
+```tsx
+import { usePayment } from '@t402/react'
+
+function PremiumArticle({ articleId }) {
+  const { pay, isPaying, hasPaid } = usePayment()
+  const [content, setContent] = useState(null)
+
+  const accessArticle = async () => {
+    const response = await pay(`/api/article/${articleId}`)
+    if (response.ok) {
+      const data = await response.json()
+      setContent(data.content)
+    }
+  }
+
+  if (hasPaid && content) {
+    return <article>{content}</article>
+  }
+
+  return (
+    <div className="paywall">
+      <h2>Premium Article</h2>
+      <p>This article requires a one-time payment of $0.10</p>
+      <button onClick={accessArticle} disabled={isPaying}>
+        {isPaying ? 'Processing...' : 'Pay $0.10 to Read'}
+      </button>
+    </div>
+  )
+}
+```
+
+### Server-Side Access Control
+
+```typescript
+import express from 'express'
+import { paymentMiddleware, verifyPayment } from '@t402/express'
+
+const app = express()
+
+// Protect premium routes
+app.use('/premium/*', paymentMiddleware({
+  'GET /premium/article/:id': {
+    price: '$0.10',
+    network: 'eip155:8453',
+    payTo: process.env.WALLET_ADDRESS
+  }
+}))
+
+// Free preview
+app.get('/article/:id/preview', (req, res) => {
+  const article = getArticle(req.params.id)
+  res.json({
+    title: article.title,
+    excerpt: article.content.substring(0, 200),
+    price: '$0.10',
+    requiresPayment: true
+  })
+})
+
+// Full content (protected)
+app.get('/premium/article/:id', (req, res) => {
+  const article = getArticle(req.params.id)
+  res.json({
+    title: article.title,
+    content: article.content,
+    author: article.author
+  })
+})
+```
+
+## Pricing Strategies
+
+### Per-Item Pricing
+
+Simple, transparent pricing:
+
+| Content Type | Suggested Price |
+|--------------|-----------------|
+| Short article | $0.05 - $0.10 |
+| Long article | $0.10 - $0.25 |
+| Video (per min) | $0.01 - $0.05 |
+| E-book chapter | $0.25 - $0.50 |
+| Full e-book | $5.00 - $15.00 |
+
+### Bundle Pricing
+
+Offer discounts for multiple items:
+
+```typescript
+'GET /bundle/weekly': {
+  price: '$1.00', // 10 articles for price of 5
+  network: 'eip155:8453',
+  payTo: process.env.WALLET_ADDRESS,
+  description: 'Weekly content bundle (10 articles)'
+}
+```
+
+### Time-Based Access
+
+Grant temporary access:
+
+```typescript
+'GET /access/daily': {
+  price: '$0.50',
+  network: 'eip155:8453',
+  payTo: process.env.WALLET_ADDRESS,
+  description: '24-hour unlimited access',
+  // Store access grant with expiry
+  onPayment: (event) => {
+    grantAccess(event.payer, '24h')
+  }
+}
+```
+
+## User Experience Tips
+
+import { Callout } from 'nextra/components'
+
+<Callout type="info">
+**Show Value First**: Always show a preview or excerpt before asking for payment.
+</Callout>
+
+1. **Clear pricing**: Display price prominently before the paywall
+2. **Preview content**: Show enough to demonstrate value
+3. **One-click purchase**: Minimize friction with connected wallets
+4. **Receipt/proof**: Provide transaction confirmation
+
+## Multi-Chain Support
+
+Accept payments on user's preferred network:
+
+```typescript
+'GET /article/:id': {
+  price: '$0.10',
+  networks: ['eip155:8453', 'ton:-239', 'tron:728126428'],
+  payTo: {
+    'eip155:8453': '0x...',    // Base
+    'ton:-239': 'UQ...',        // TON
+    'tron:728126428': 'T...'    // TRON
+  }
+}
+```
+
+## Next Steps
+
+- [Client Integration](/getting-started/client) - Connect user wallets
+- [React Components](/sdks/typescript/react) - Pre-built UI components
+- [Micro-Payments](/use-cases/micro-payments) - Sub-cent pricing strategies

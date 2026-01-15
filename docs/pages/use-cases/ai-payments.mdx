@@ -1,0 +1,154 @@
+# AI Agent Payments
+
+Enable AI agents to pay for APIs and services autonomously using T402's MCP (Model Context Protocol) integration.
+
+## Overview
+
+AI agents need to access paid APIs, data sources, and compute resources. T402's MCP server enables:
+
+- **Autonomous payments**: Agents pay for resources without human intervention
+- **Budget controls**: Set spending limits per session or request
+- **Multi-chain support**: Pay with USDT on any supported network
+- **Seamless integration**: Works with Claude, GPT, and other MCP-compatible agents
+
+## Architecture
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   AI Agent  │────▶│  MCP Server │────▶│  Paid API   │
+│  (Claude)   │     │  (@t402/mcp)│     │  (T402)     │
+└─────────────┘     └─────────────┘     └─────────────┘
+                           │
+                           ▼
+                    ┌─────────────┐
+                    │   Wallet    │
+                    │  (Signer)   │
+                    └─────────────┘
+```
+
+## Setup MCP Server
+
+### 1. Install the Package
+
+```bash
+pnpm add @t402/mcp
+```
+
+### 2. Configure Claude Desktop
+
+Add to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "t402": {
+      "command": "npx",
+      "args": ["@t402/mcp"],
+      "env": {
+        "T402_PRIVATE_KEY": "0x...",
+        "T402_NETWORK": "eip155:8453",
+        "T402_MAX_AMOUNT": "1.00"
+      }
+    }
+  }
+}
+```
+
+### 3. Environment Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `T402_PRIVATE_KEY` | Wallet private key for signing payments | `0x...` |
+| `T402_NETWORK` | Default network for payments | `eip155:8453` (Base) |
+| `T402_MAX_AMOUNT` | Maximum payment per request | `1.00` (USDT) |
+| `T402_FACILITATOR_URL` | Custom facilitator URL (optional) | `https://facilitator.t402.io` |
+
+## Usage Examples
+
+### Basic API Access
+
+When Claude encounters a 402 Payment Required response, it will automatically:
+
+1. Parse the payment requirements from the response
+2. Sign a payment authorization
+3. Retry the request with the payment header
+4. Return the response to you
+
+```
+User: "Get the latest market data from api.example.com/premium/markets"
+
+Claude: I'll access that API for you. It requires a payment of $0.01 USDT.
+[Automatically pays and retrieves data]
+
+Here's the market data...
+```
+
+### Budget Management
+
+Set spending limits to control costs:
+
+```json
+{
+  "env": {
+    "T402_MAX_AMOUNT": "0.10",
+    "T402_DAILY_LIMIT": "10.00"
+  }
+}
+```
+
+## Building T402-Enabled APIs
+
+Create APIs that AI agents can pay to access:
+
+```typescript
+import express from 'express'
+import { paymentMiddleware } from '@t402/express'
+
+const app = express()
+
+app.use(paymentMiddleware({
+  'GET /api/market-data': {
+    price: '$0.01',
+    network: 'eip155:8453',
+    payTo: '0xYourAddress...',
+    description: 'Real-time market data'
+  },
+  'POST /api/analyze': {
+    price: '$0.05',
+    network: 'eip155:8453',
+    payTo: '0xYourAddress...',
+    description: 'AI-powered analysis'
+  }
+}))
+
+app.get('/api/market-data', (req, res) => {
+  res.json({ btc: 45000, eth: 2500 })
+})
+
+app.listen(3000)
+```
+
+## Security Considerations
+
+import { Callout } from 'nextra/components'
+
+<Callout type="warning">
+**Private Key Security**: Never commit private keys to version control. Use environment variables or secure secret management.
+</Callout>
+
+- **Spending Limits**: Always set `T402_MAX_AMOUNT` to prevent unexpected charges
+- **Network Selection**: Use testnets for development (`eip155:84532` for Base Sepolia)
+- **Key Rotation**: Regularly rotate wallet keys for production deployments
+
+## Best Practices
+
+1. **Start with testnets**: Use Base Sepolia or other testnets for development
+2. **Set conservative limits**: Start with low `T402_MAX_AMOUNT` values
+3. **Monitor spending**: Track payments in your wallet or via facilitator logs
+4. **Use dedicated wallets**: Create separate wallets for AI agent payments
+
+## Next Steps
+
+- [MCP Reference](/reference/mcp) - Full MCP server API documentation
+- [Gasless Payments](/advanced/gasless) - Zero-gas experience for users
+- [API Monetization](/use-cases/api-monetization) - Build paid APIs
