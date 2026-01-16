@@ -1,30 +1,35 @@
-apiVersion: 1
-
-policies:
-  - orgId: 1
-    receiver: T402 Default
-    group_by:
-      - alertname
-      - severity
-      - service
-    group_wait: 30s
-    group_interval: 5m
-    repeat_interval: 4h
-    routes:
-      # Critical alerts - immediate notification
-      - receiver: T402 Default
-        matchers:
-          - severity = critical
-        group_wait: 10s
-        group_interval: 1m
-        repeat_interval: 1h
-        continue: false
-
-      # Warning alerts - less urgent
-      - receiver: T402 Default
-        matchers:
-          - severity = warning
-        group_wait: 30s
-        group_interval: 5m
-        repeat_interval: 4h
-        continue: false
+# Notification Policies Configuration for T402 Facilitator Alerts
+# Configure after setting up contact points in contact-points.yml
+#
+# Example configuration:
+#
+# apiVersion: 1
+#
+# policies:
+#   - orgId: 1
+#     receiver: T402 Alerts
+#     group_by:
+#       - alertname
+#       - severity
+#       - service
+#     group_wait: 30s
+#     group_interval: 5m
+#     repeat_interval: 4h
+#     routes:
+#       # Critical alerts - immediate notification
+#       - receiver: T402 Alerts
+#         matchers:
+#           - severity = critical
+#         group_wait: 10s
+#         group_interval: 1m
+#         repeat_interval: 1h
+#         continue: false
+#
+#       # Warning alerts - less urgent
+#       - receiver: T402 Alerts
+#         matchers:
+#           - severity = warning
+#         group_wait: 30s
+#         group_interval: 5m
+#         repeat_interval: 4h
+#         continue: false
