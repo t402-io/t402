@@ -113,7 +113,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 - [x] Fix NPM release to include all packages (21 packages)
 
 **Week 3-4: TypeScript Package Alignment**
-- [ ] Align @t402/tron to v2.0.0
+- [x] Align @t402/tron to v2.0.0
 - [ ] Extract common viem dependency to peer dependency
 - [ ] Standardize workspace protocol usage
 - [x] Add missing packages to npm release workflow
