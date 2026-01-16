@@ -4,7 +4,7 @@ Type definitions for T402 WDK Python adapter.
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional, Dict, List, Any, TypedDict, Callable, Awaitable
+from typing import Optional, Dict, List, Any, TypedDict
 
 
 class NetworkType(Enum):
