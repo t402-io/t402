@@ -1,6 +1,8 @@
 # @t402/wdk-multisig
 
-Multi-sig Safe Smart Account support for Tether WDK with M-of-N threshold signatures.
+Multi-signature wallet support for T402 payments using Safe (formerly Gnosis Safe).
+
+import { Callout } from 'nextra/components'
 
 ## Installation
 
@@ -8,282 +10,114 @@ Multi-sig Safe Smart Account support for Tether WDK with M-of-N threshold signat
 pnpm add @t402/wdk-multisig
 ```
 
+## Overview
+
+The `@t402/wdk-multisig` package enables T402 payments from Safe multi-signature wallets. It supports:
+
+- **Safe Smart Accounts** - Industry-standard multi-sig wallets
+- **Threshold Signatures** - Configure M-of-N signing requirements
+- **Transaction Queuing** - Collect signatures before execution
+- **EIP-712 Signing** - Secure typed data signatures
+
+<Callout type="info">
+  Multi-sig payments require all required signers to approve before settlement can occur.
+</Callout>
+
 ## Features
 
-- **M-of-N threshold wallets** using Safe smart accounts
-- **Single seed setup** - multiple owners from one seed phrase
-- **Multi-party setup** - each participant controls their own seed
-- **Signature collection** for asynchronous multi-party signing
-- **ERC-4337 support** with Safe 4337 Module v0.3.0
-- **Gasless payments** via paymaster sponsorship
+| Feature | Description |
+|---------|-------------|
+| Safe Integration | Full Safe SDK integration |
+| Threshold Support | 1-of-N to N-of-N configurations |
+| Offline Signing | Collect signatures asynchronously |
+| Transaction Builder | Helper for creating Safe transactions |
 
-## Quick Start
-
-### Single Seed (Personal Multi-sig)
-
-Create a 2-of-3 multi-sig where you control all keys from one seed phrase:
+## Basic Usage
 
 ```typescript
-import { createMultiSigFromSingleSeed } from '@t402/wdk-multisig'
+import { SafeMultisigScheme } from '@t402/wdk-multisig'
 
-const client = await createMultiSigFromSingleSeed({
-  seedPhrase: 'word1 word2 ... word24',
-  accountIndices: [0, 1, 2], // 3 owners from HD indices 0, 1, 2
-  threshold: 2,              // 2-of-3 required
-  chainConfig: { arbitrum: 'https://arb1.arbitrum.io/rpc' },
-  chain: 'arbitrum',
-  bundler: {
-    bundlerUrl: 'https://api.pimlico.io/v2/arbitrum/rpc?apikey=...',
-    chainId: 42161
-  },
-  paymaster: {
-    address: '0x...',
-    url: 'https://api.pimlico.io/v2/arbitrum/rpc?apikey=...',
-    type: 'sponsoring'
-  }
+// Initialize with Safe address
+const scheme = new SafeMultisigScheme({
+  safeAddress: '0xYourSafeAddress...',
+  signers: [signer1, signer2], // Array of signers
+  threshold: 2, // Required signatures
+  rpcUrl: 'https://mainnet.base.org'
 })
 
-// Check multi-sig address
-const address = await client.getAccountAddress()
-console.log('Multi-sig Safe:', address)
-console.log('Owners:', client.getOwners())
-console.log('Threshold:', client.getThreshold())
-
-// Execute payment (auto-collects signatures)
-const result = await client.payWithAllSigners(
-  { to: '0xrecipient', amount: 1000000n },
-  client.getSigners()
-)
-
-const receipt = await result.wait()
-console.log('Payment confirmed:', receipt.txHash)
+// Create payment requires collecting signatures
+const payload = await scheme.createPaymentPayload(2, requirements)
 ```
-
-### Multiple Seeds (Multi-party)
-
-Create a multi-sig where each party controls their own key:
-
-```typescript
-import { createMultiSigFromMultipleSeeds } from '@t402/wdk-multisig'
-
-const client = await createMultiSigFromMultipleSeeds({
-  seedPhrases: [partyASeed, partyBSeed, partyCSeed],
-  threshold: 2, // 2-of-3
-  chainConfig: { arbitrum: 'https://arb1.arbitrum.io/rpc' },
-  chain: 'arbitrum',
-  bundler: { bundlerUrl: '...', chainId: 42161 }
-})
-
-// Initiate payment (creates pending request)
-const request = await client.initiatePayment({
-  to: '0xrecipient',
-  amount: 1000000n
-})
-
-console.log('Request ID:', request.requestId)
-console.log('Signatures needed:', request.threshold)
-```
-
-## Signature Collection
-
-For multi-party setups, signatures are collected asynchronously:
-
-```typescript
-// Party A signs
-await request.addSignature(0, partyASigner)
-console.log('Collected:', request.collectedCount, '/', request.threshold)
-
-// Party B signs
-await request.addSignature(1, partyBSigner)
-console.log('Ready:', request.isReady) // true when threshold met
-
-// Submit when threshold is met
-if (request.isReady) {
-  const result = await request.submit()
-  const receipt = await result.wait()
-  console.log('Transaction:', receipt.txHash)
-}
-```
-
-## Batch Payments
-
-Execute multiple payments in one multi-sig transaction:
-
-```typescript
-const result = await client.payBatchWithAllSigners({
-  payments: [
-    { to: '0xAlice...', amount: 1000000n },
-    { to: '0xBob...', amount: 2000000n },
-    { to: '0xCharlie...', amount: 500000n }
-  ]
-}, client.getSigners())
-
-const receipt = await result.wait()
-console.log('Batch confirmed:', receipt.txHash)
-```
-
-## Managing Pending Requests
-
-Track and manage pending signature requests:
-
-```typescript
-// Get all pending requests
-const pending = client.getPendingRequests()
-console.log('Pending requests:', pending.length)
-
-// Check who still needs to sign
-const requestId = 'msig_...'
-const pendingOwners = client.getPendingOwners(requestId)
-const signedOwners = client.getSignedOwners(requestId)
-
-console.log('Waiting for:', pendingOwners)
-console.log('Already signed:', signedOwners)
-
-// Clean up expired requests
-client.cleanup()
-```
-
-## Using Existing Signers
-
-Create a multi-sig from pre-existing WDK signers:
-
-```typescript
-import { createMultiSigFromSigners } from '@t402/wdk-multisig'
-import { createPublicClient, http } from 'viem'
-import { arbitrum } from 'viem/chains'
-
-const publicClient = createPublicClient({
-  chain: arbitrum,
-  transport: http('https://arb1.arbitrum.io/rpc')
-})
-
-const client = await createMultiSigFromSigners({
-  signers: [signer1, signer2, signer3],
-  threshold: 2,
-  chainId: 42161,
-  publicClient,
-  bundler: { bundlerUrl: '...', chainId: 42161 }
-})
-```
-
-## Supported Chains
-
-| Chain | Chain ID | Status |
-|-------|----------|--------|
-| Ethereum | 1 | ✅ |
-| Arbitrum | 42161 | ✅ |
-| Base | 8453 | ✅ |
-| Optimism | 10 | ✅ |
-| Polygon | 137 | ✅ |
-| Sepolia | 11155111 | ✅ |
 
 ## Configuration
 
-### Threshold Guidelines
+```typescript
+interface SafeMultisigConfig {
+  safeAddress: string;       // Safe wallet address
+  signers: Signer[];         // Array of signers
+  threshold: number;         // Required signature count
+  rpcUrl: string;           // RPC endpoint
+  network?: string;         // CAIP-2 network ID
+}
+```
 
-| Owners | Recommended Threshold | Use Case |
-|--------|----------------------|----------|
-| 2 | 2-of-2 | Personal backup |
-| 3 | 2-of-3 | Team wallet |
-| 5 | 3-of-5 | DAO treasury |
-| 7 | 4-of-7 | High-security vault |
+## Payment Flow
 
-### Request Expiration
+1. **Initiate** - First signer creates the payment request
+2. **Collect** - Other signers review and sign
+3. **Execute** - Once threshold reached, transaction is submitted
+4. **Settle** - Facilitator processes the multi-sig transaction
 
-Pending signature requests expire after 1 hour by default:
+## Supported Networks
+
+Multi-sig payments are supported on all EVM chains where Safe is deployed:
+
+- Ethereum Mainnet & Sepolia
+- Arbitrum One & Sepolia
+- Base & Base Sepolia
+- Optimism & OP Sepolia
+- Polygon
+
+## Example: 2-of-3 Multi-sig
 
 ```typescript
-import { SignatureCollector } from '@t402/wdk-multisig'
+import { SafeMultisigScheme } from '@t402/wdk-multisig'
+import { privateKeyToAccount } from 'viem/accounts'
 
-// Custom expiration (30 minutes)
-const collector = new SignatureCollector({
-  expirationMs: 30 * 60 * 1000
+// Create signers
+const signer1 = privateKeyToAccount('0x...')
+const signer2 = privateKeyToAccount('0x...')
+const signer3 = privateKeyToAccount('0x...')
+
+// Initialize scheme
+const scheme = new SafeMultisigScheme({
+  safeAddress: '0xYourSafe...',
+  signers: [signer1, signer2, signer3],
+  threshold: 2,
+  rpcUrl: 'https://mainnet.base.org'
 })
-```
 
-## API Reference
-
-### MultiSigWdkGaslessClient
-
-```typescript
-interface MultiSigWdkGaslessClient {
-  // Account
-  getAccountAddress(): Promise<Address>
-  isAccountDeployed(): Promise<boolean>
-  getOwners(): Address[]
-  getThreshold(): number
-
-  // Balances
-  getBalance(token?: string): Promise<bigint>
-  getFormattedBalance(token?: string): Promise<string>
-
-  // Payments (async signature collection)
-  initiatePayment(params: PayParams): Promise<MultiSigPaymentResult>
-  initiateBatchPayment(params: BatchPayParams): Promise<MultiSigPaymentResult>
-
-  // Payments (all signers available)
-  payWithAllSigners(params: PayParams, signers: WDKSigner[]): Promise<SubmitResult>
-  payBatchWithAllSigners(params: BatchPayParams, signers: WDKSigner[]): Promise<SubmitResult>
-
-  // Request management
-  getPendingRequests(): MultiSigTransactionRequest[]
-  getPendingOwners(requestId: string): Address[]
-  getSignedOwners(requestId: string): Address[]
-  cleanup(): void
-}
-```
-
-### MultiSigPaymentResult
-
-```typescript
-interface MultiSigPaymentResult {
-  requestId: string
-  sender: Address
-  userOpHash: Hex
-  sponsored: boolean
-  threshold: number
-  collectedCount: number
-  isReady: boolean
-
-  // Methods
-  addSignature(ownerIndex: number, signer: WDKSigner): Promise<void>
-  submit(): Promise<MultiSigSubmitResult>
+// Create payment (collects 2 signatures)
+const requirements = {
+  scheme: 'exact',
+  network: 'eip155:8453',
+  amount: '1000000',
+  payTo: '0xRecipient...',
+  asset: '0xUSDT0Address...'
 }
 
-interface MultiSigSubmitResult {
-  userOpHash: Hex
-  sender: Address
-  wait(): Promise<GaslessPaymentReceipt>
-}
-```
-
-## Error Handling
-
-```typescript
-import { MultiSigError, MultiSigErrorCode } from '@t402/wdk-multisig'
-
-try {
-  await request.submit()
-} catch (error) {
-  if (error instanceof MultiSigError) {
-    switch (error.code) {
-      case MultiSigErrorCode.THRESHOLD_NOT_MET:
-        console.log('Need more signatures:', error.context)
-        break
-      case MultiSigErrorCode.REQUEST_EXPIRED:
-        console.log('Request expired, create a new one')
-        break
-      case MultiSigErrorCode.ALREADY_SIGNED:
-        console.log('Owner already signed')
-        break
-    }
-  }
-}
+const payload = await scheme.createPaymentPayload(2, requirements)
 ```
 
 ## Security Considerations
 
-1. **Key Storage**: Each signer's seed phrase should be stored securely and separately
-2. **Threshold Selection**: Higher thresholds increase security but reduce availability
-3. **Request Verification**: Always verify transaction details before signing
-4. **Expiration**: Requests expire to prevent stale transactions from being submitted
+- Always verify Safe ownership before signing
+- Use hardware wallets for production signers
+- Implement proper access controls for signature collection
+- Consider time-locks for high-value transactions
+
+## Related
+
+- [@t402/wdk](/reference/wdk) - Base WDK integration
+- [@t402/wdk-gasless](/sdks/typescript/wdk-gasless) - Gasless payments
+- [@t402/evm](/reference/evm) - EVM mechanism details

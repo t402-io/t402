@@ -1,0 +1,155 @@
+# @t402/svm
+
+Solana Virtual Machine (SVM) implementation for T402 payments using SPL tokens.
+
+import { Callout, Tabs } from 'nextra/components'
+
+## Installation
+
+```bash
+pnpm add @t402/svm
+```
+
+## Overview
+
+The `@t402/svm` package enables T402 payments on Solana using SPL token transfers. It supports:
+
+- **USDC** on Solana Mainnet and Devnet
+- **Transaction simulation** before settlement
+- **Partial signing** for fee payer abstraction
+
+## Network IDs
+
+| Network | CAIP-2 ID |
+|---------|-----------|
+| Solana Mainnet | `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` |
+| Solana Devnet | `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` |
+
+## Client Usage
+
+```typescript
+import { ExactSvmScheme } from '@t402/svm/exact/client'
+
+// Create client scheme
+const scheme = new ExactSvmScheme({
+  address: 'YourPublicKey...',
+  signTransactions: async (txs) => {
+    // Sign transactions with your wallet
+    return signedTransactions
+  }
+})
+
+// Create payment payload
+const payload = await scheme.createPaymentPayload(2, requirements)
+```
+
+## Server Usage
+
+```typescript
+import { ExactSvmScheme } from '@t402/svm/exact/server'
+
+// Create server scheme for verification
+const scheme = new ExactSvmScheme({
+  rpcUrl: 'https://api.mainnet-beta.solana.com'
+})
+
+// Verify payment
+const result = await scheme.verify(payload, requirements)
+```
+
+## Facilitator Usage
+
+```typescript
+import { ExactSvmScheme } from '@t402/svm/exact/facilitator'
+
+// Create facilitator scheme
+const scheme = new ExactSvmScheme({
+  address: 'FacilitatorPublicKey...',
+  signTransactions: async (txs) => signedTxs,
+  getRpcForNetwork: (network) => rpc
+})
+
+// Verify and settle
+const verifyResult = await scheme.verify(payload, requirements)
+const settleResult = await scheme.settle(payload, requirements)
+```
+
+## PaymentRequirements
+
+```typescript
+const requirements = {
+  scheme: 'exact',
+  network: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
+  amount: '1000000', // 1 USDC (6 decimals)
+  asset: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', // USDC mint
+  payTo: 'RecipientPublicKey...',
+  maxTimeoutSeconds: 300,
+  extra: {
+    feePayer: 'FeePayerPublicKey...' // Optional, defaults to payer
+  }
+}
+```
+
+## Payment Flow
+
+1. **Client** creates a SPL token transfer transaction
+2. **Client** signs the transaction (partial signature)
+3. **Facilitator** verifies the transaction structure
+4. **Facilitator** adds fee payer signature and submits
+5. **Transaction** confirms on Solana
+
+## Token Addresses
+
+| Token | Network | Mint Address |
+|-------|---------|--------------|
+| USDC | Mainnet | `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v` |
+| USDC | Devnet | `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU` |
+
+<Callout type="warning">
+  Solana requires the recipient to have an Associated Token Account (ATA) for the token. The facilitator will create the ATA if needed.
+</Callout>
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `invalid_payload_structure` | Missing or malformed transaction data |
+| `network_mismatch` | Transaction network doesn't match requirements |
+| `unsupported_scheme` | Scheme not supported |
+| `invalid_exact_svm_payload_missing_fee_payer` | Fee payer not specified |
+| `invalid_exact_svm_payload_transaction` | Transaction parsing failed |
+
+## Example: Full Integration
+
+<Tabs items={['Client', 'Server']}>
+  <Tabs.Tab>
+```typescript
+import { t402Client } from '@t402/fetch'
+import { registerExactSvmScheme } from '@t402/svm/exact/client'
+
+const client = new t402Client()
+registerExactSvmScheme(client, {
+  address: wallet.publicKey.toBase58(),
+  signTransactions: wallet.signAllTransactions
+})
+
+const response = await client.fetch('https://api.example.com/premium')
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```typescript
+import { paymentMiddleware } from '@t402/express'
+import { ExactSvmScheme } from '@t402/svm/exact/server'
+
+app.use(paymentMiddleware({
+  'GET /api/premium': {
+    price: '$0.01',
+    network: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
+    asset: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+    payTo: 'YourSolanaAddress...',
+    description: 'Premium API access'
+  }
+}))
+```
+  </Tabs.Tab>
+</Tabs>
