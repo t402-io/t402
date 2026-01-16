@@ -1,6 +1,8 @@
 # T402 Roadmap
 
 > **The Official Payment Protocol for USDT**
+>
+> *Last Updated: 2026-01-16*
 
 This document outlines the development status and roadmap for T402, a payment protocol specifically designed for USDT and USDT0, with deep integration with [Tether WDK](https://wallet.tether.io/).
 
@@ -268,24 +270,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 
 ## SDK Feature Matrix
 
-| Feature | TypeScript | Go | Python | Java |
-|---------|-----------|-----|--------|------|
-| Core Client | ✅ | ✅ | ✅ | ✅ |
-| Core Server | ✅ | ✅ | ✅ | ✅ |
-| Facilitator | ✅ | ✅ | ✅ | ✅ |
-| EVM Mechanism | ✅ | ✅ | ✅ | ✅ |
-| SVM Mechanism | ✅ | ✅ | ✅ | ✅ |
-| TON Mechanism | ✅ | ✅ | ✅ | ✅ |
-| TRON Mechanism | ✅ | ✅ | ✅ | ✅ |
-| ERC-4337 | ✅ | ✅ | ✅ | ✅ |
-| USDT0 Bridge | ✅ | ✅ | ✅ | ✅ |
-| WDK Integration | ✅ | ✅ | ✅ | ✅ |
-| MCP Server | ✅ | ✅ | ✅ | ❌ |
-| CLI Tool | ✅ | ✅ | ✅ | ✅ |
-| HTTP Middleware | ✅ | ✅ | ✅ | ⚠️ |
-| React/Vue UI | ✅ | N/A | N/A | N/A |
-
-Legend: ✅ Complete | ⚠️ Partial | ❌ Missing | N/A Not Applicable
+See the [SDK Feature Matrix in README.md](README.md#sdk-feature-matrix) for the current status of all SDK features.
 
 ---
 

@@ -51,6 +51,7 @@ t402/
 |-------|---------|
 | EVM (all) | `0xC88f67e776f16DcFBf42e6bDda1B82604448899B` |
 | Solana | `8GGtWHRQ1wz5gDKE2KXZLktqzcfV1CBqSbeUZjA7hoWL` |
+| TON | `EQ5d11d21276ac6b5efdf179e654ff0c6eee34e0abfa263a` |
 | TRON | `TT1MqNNj2k5qdGA6nrrCodW6oyHbbAreQ5` |
 
 ## Skills
