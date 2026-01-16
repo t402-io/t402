@@ -7,9 +7,9 @@
 | SDK | Version | Registry Status | Core Features | CLI | Tests | Docs |
 |-----|---------|-----------------|---------------|-----|-------|------|
 | **TypeScript** | v2.0.0 | npm: 21 packages ✅ | Complete (reference impl) | @t402/cli | 669 files | ✅ |
-| **Python** | v1.5.3 | PyPI: t402 ✅ | Complete (EVM, TON, TRON, ERC-4337, WDK) | Built-in | 13 files | ✅ |
-| **Go** | v1.3.1 | Go Modules ✅ | Complete (EVM, TON, TRON, SVM) | cmd/t402 | 33 files | ✅ |
-| **Java** | 1.0.0-SNAPSHOT | **Not published** ❌ | Complete (EVM, SVM, TON, TRON, ERC-4337, WDK, Bridge) | T402Cli | 35+ files | ⚠️ |
+| **Python** | v1.6.1 | PyPI: t402 ✅ | Complete (EVM, TON, TRON, SVM, ERC-4337, WDK) | Built-in | 13 files | ✅ |
+| **Go** | v1.4.0 | Go Modules ✅ | Complete (EVM, TON, TRON, SVM) | cmd/t402 | 33 files | ✅ |
+| **Java** | 1.0.0 | Maven Central ✅ | Complete (EVM, SVM, TON, TRON, ERC-4337, WDK, Bridge) | T402Cli | 35+ files | ✅ |
 
 ---
 
@@ -35,12 +35,12 @@
 
 ## 2. Development Tasks by SDK
 
-### 2.1 Java SDK (Priority: HIGH - Publishing)
+### 2.1 Java SDK (Priority: LOW - Published)
 
 **Current Status:**
 - ✅ Package renamed to `io.t402`
 - ✅ All blockchain mechanisms implemented
-- ❌ Not published to Maven Central (needs secrets configuration)
+- ✅ Published to Maven Central v1.0.0
 - ⚠️ Spring Boot integration partial
 
 **Tasks:**
@@ -58,9 +58,9 @@
 | 9 | Add WDK integration | `java/.../wdk/` | Medium | ✅ Done |
 | 10 | Add CLI tool | `java/.../cli/T402Cli.java` | Low | ✅ Done |
 | 11 | Add Spring Boot starter | `java/.../spring/T402AutoConfiguration.java` | High | ⏳ Pending |
-| 12 | Add Maven Central workflow | `.github/workflows/java_release.yml` | High | ⏳ Pending |
-| 13 | Configure Maven secrets | GitHub Secrets | Critical | ⏳ Pending |
-| 14 | Publish v1.0.0 | Maven Central | Critical | ⏳ Pending |
+| 12 | Add Maven Central workflow | `.github/workflows/java_release.yml` | High | ✅ Done |
+| 13 | Configure Maven secrets | GitHub Secrets | Critical | ✅ Done |
+| 14 | Publish v1.0.0 | Maven Central | Critical | ✅ Done |
 
 ### 2.2 Python SDK (Priority: Low)
 
@@ -152,24 +152,25 @@ jobs:
 
 ## 5. Release Plan
 
-### Immediate (Blocking)
+### Completed Releases
+
+| SDK | Version | Action | Status |
+|-----|---------|--------|--------|
+| Java | 1.0.0 | Published to Maven Central | ✅ Released |
+| Python | 1.6.1 | Released with SVM, MCP | ✅ Released |
+| Go | 1.4.0 | Released with WDK, MCP | ✅ Released |
+
+### Next Release
 
 | SDK | Current | Target | Action | Status |
 |-----|---------|--------|--------|--------|
-| Java | 1.0.0-SNAPSHOT | 1.0.0 | Configure secrets + publish | ⏳ Needs Maven Central secrets |
-
-### Short-term (Next Release)
-
-| SDK | Current | Target | Action | Status |
-|-----|---------|--------|--------|--------|
-| Python | 1.5.3 | 1.6.0 | Release with SVM, MCP | ✅ Ready to release |
-| Go | 1.3.1 | 1.4.0 | Release with WDK, MCP | ✅ Ready to release |
+| Java | 1.0.0 | 1.1.0 | Add Spring Boot starter | ⏳ Pending |
 
 ---
 
 ## 6. Implementation Order
 
-### Phase 1: Java SDK Completion (Critical Path) - ✅ 90% Complete
+### Phase 1: Java SDK Completion (Critical Path) - ✅ Complete
 
 1. ✅ **Refactor package structure** - Renamed to `io.t402`
 2. ✅ **Add Web3j dependency** - For EVM signing
@@ -180,9 +181,9 @@ jobs:
 7. ✅ **Add WDK integration** - Wallet Development Kit
 8. ✅ **Add CLI tool** - T402Cli.java
 9. ⏳ **Add Spring Boot integration** - Auto-configuration
-10. ⏳ **Create release workflow** - Maven Central publishing
+10. ✅ **Create release workflow** - Maven Central publishing
 11. ⏳ **Add documentation** - `docs/pages/sdks/java.mdx`
-12. ⏳ **Publish v1.0.0** - Tag and release
+12. ✅ **Publish v1.0.0** - Tag and release
 
 ### Phase 2: Python/Go Enhancements - ✅ Complete
 
@@ -308,10 +309,10 @@ jobs:
 ### 8.4 優先順序建議
 
 **P0 - Critical（阻塞發布）**
-- [ ] Java SDK 發布到 Maven Central
+- [x] Java SDK 發布到 Maven Central ✅ v1.0.0 已發布
 
 **P1 - High（下個版本）**
-- [x] Python SVM 完整實現
+- [x] Python SVM 完整實現 ✅ v1.6.1 已發布
 - [ ] Java ERC-4337 Safe Account 整合
 
 **P2 - Medium（未來版本）**
@@ -333,25 +334,25 @@ jobs:
 - `.github/workflows/npm_release.yml` - Release workflow
 
 ### Python SDK
-- `python/t402/pyproject.toml` - Project config (v1.5.3)
+- `python/t402/pyproject.toml` - Project config (v1.6.1)
 - `python/t402/src/t402/__init__.py` - Main module
 - `.github/workflows/python_release.yml` - Release workflow
 
 ### Go SDK
-- `go/go.mod` - Module definition (v1.3.1)
+- `go/go.mod` - Module definition (v1.4.0)
 - `go/interfaces.go` - Core interfaces
 - `.github/workflows/go_release.yml` - Release workflow
 
 ### Java SDK
-- `java/pom.xml` - Maven config
-- `java/src/main/java/io/t402/` - Main code (renamed from com.coinbase.t402)
+- `java/pom.xml` - Maven config (v1.0.0)
+- `java/src/main/java/io/t402/` - Main code
 - `java/src/main/java/io/t402/crypto/` - All signers (EVM, SVM, TON, TRON)
 - `java/src/main/java/io/t402/erc4337/` - ERC-4337 support
 - `java/src/main/java/io/t402/bridge/` - USDT0 Bridge
 - `java/src/main/java/io/t402/wdk/` - WDK integration
 - `java/src/main/java/io/t402/cli/` - CLI tool
 - `.github/workflows/java.yml` - Test workflow
-- `.github/workflows/java_release.yml` - Release workflow (needs secrets)
+- `.github/workflows/java_release.yml` - Release workflow ✅
 
 ### Documentation
 - `docs/pages/sdks/` - SDK documentation
