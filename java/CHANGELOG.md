@@ -38,6 +38,23 @@ All notable changes to the T402 Java SDK will be documented in this file.
 - JSON and text output formats
 - Configurable facilitator URL
 
+#### MCP Server
+- `McpServer` - Model Context Protocol server for AI agent integration
+- `McpTools` - Tool handlers for payment operations
+- `McpTypes` - MCP type definitions (JSON-RPC, tools, inputs, results)
+- `McpConstants` - Network configuration, token addresses, utilities
+- `T402Mcp` - CLI entry point for running the MCP server
+- Tools:
+  - `t402/getBalance` - Get token balances for a wallet on specific network
+  - `t402/getAllBalances` - Get balances across all supported networks
+  - `t402/pay` - Execute stablecoin payments (USDC, USDT, USDT0)
+  - `t402/payGasless` - ERC-4337 gasless payments (no gas fees)
+  - `t402/getBridgeFee` - Get LayerZero bridge fee quotes
+  - `t402/bridge` - Bridge USDT0 between chains via LayerZero
+- Demo mode for testing without real transactions
+- Support for 9 EVM networks
+- Environment variable configuration
+
 ## [1.0.0] - 2026-01-16
 
 ### Added
