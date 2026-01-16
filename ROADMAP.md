@@ -76,7 +76,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 |-----|---------|--------|
 | Go | 1.5.0 | Production |
 | Python | 1.6.1 | Production |
-| Java | 1.0.0 | Production |
+| Java | 1.1.0 | Production |
 
 ---
 
@@ -149,15 +149,15 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 - [ ] Improve documentation
 - [ ] Release v1.25.0
 
-### Phase 4: Java SDK Completion (Month 4-5)
+### Phase 4: Java SDK Completion (Month 4-5) ✅
 
 > Focus: Java SDK Production Release
 
-- [ ] Implement EVM mechanism (EIP-3009 signing)
-- [ ] Add Spring Boot middleware
-- [ ] Add Maven Central publication workflow
-- [ ] Create comprehensive documentation
-- [ ] Release v1.0.0 stable
+- [x] Implement EVM mechanism (EIP-3009 signing)
+- [x] Add Spring Boot middleware
+- [x] Add Maven Central publication workflow
+- [x] Create comprehensive documentation
+- [x] Release v1.1.0 stable
 
 ### Phase 5: Security & Performance (Month 5-6)
 
