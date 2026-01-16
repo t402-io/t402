@@ -1,6 +1,7 @@
 package io.t402.erc4337.safe;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -316,7 +317,7 @@ public class SafeAccount {
     private byte[] computeDomainSeparator() {
         // EIP-712 domain: keccak256("EIP712Domain(uint256 chainId,address verifyingContract)")
         byte[] typeHash = Hash.sha3(
-            "EIP712Domain(uint256 chainId,address verifyingContract)".getBytes());
+            "EIP712Domain(uint256 chainId,address verifyingContract)".getBytes(StandardCharsets.UTF_8));
 
         byte[] encoded = new byte[32 + 32 + 32];
         System.arraycopy(typeHash, 0, encoded, 0, 32);
@@ -337,7 +338,7 @@ public class SafeAccount {
         byte[] typeHash = Hash.sha3(
             ("SafeTx(address to,uint256 value,bytes data,uint8 operation,"
             + "uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,"
-            + "address gasToken,address refundReceiver,uint256 nonce)").getBytes());
+            + "address gasToken,address refundReceiver,uint256 nonce)").getBytes(StandardCharsets.UTF_8));
 
         byte[] dataHash = Hash.sha3(Numeric.hexStringToByteArray(data));
 
