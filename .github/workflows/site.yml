@@ -44,7 +44,11 @@ jobs:
 
       - name: Deploy to Cloudflare Pages
         working-directory: ./typescript/site
-        run: wrangler pages deploy out --project-name t402-site
+        run: |
+          # Create project if it doesn't exist (will fail silently if already exists)
+          wrangler pages project create t402-site --production-branch main 2>/dev/null || true
+          # Deploy
+          wrangler pages deploy out --project-name t402-site
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
