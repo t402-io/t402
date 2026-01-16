@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **WDK Signer Enhancements**
   - `GetClient()`, `GetPrivateKeyBytes()`, `GetChainID()` methods
 
-### Python SDK v1.7.0
+### Python SDK v1.7.1
 - **Schemes Module** (`t402.schemes`) - Modular payment scheme implementations
   - EVM, TON, TRON exact payment schemes (client/server)
   - `SchemeRegistry` for registering and discovering schemes
