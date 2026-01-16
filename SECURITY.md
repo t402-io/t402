@@ -1,5 +1,7 @@
 # Security Policy
 
+> *Last Updated: 2026-01-16*
+
 The T402 team takes security seriously. This document outlines our security practices, threat model, and guidelines for secure deployment.
 
 ## Table of Contents

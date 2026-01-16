@@ -1,5 +1,7 @@
 # Transport: MCP (Model Context Protocol)
 
+> **DEPRECATED**: This is the v1 transport specification. For new implementations, please use [transports-v2/mcp.md](../transports-v2/mcp.md) instead.
+
 ## Summary
 
 The MCP transport implements t402 payment flows over the Model Context Protocol using JSON-RPC messages. This enables AI agents and MCP clients to seamlessly pay for tools and resources independent of the underlying MCP transport.

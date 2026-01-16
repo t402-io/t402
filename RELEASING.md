@@ -178,18 +178,35 @@ Use workflow dispatch for testing:
 
 ## Java SDK
 
-### Automatic Release (Coming Soon)
+### Automatic Release
 
-1. Update version in `java/t402/pom.xml`
-2. Create and push a tag with `java/` prefix:
+1. Update version in `java/pom.xml`
+2. Commit changes
+3. Create and push a tag with `java/` prefix:
    ```bash
-   git tag java/v1.0.0
-   git push origin java/v1.0.0
+   git tag java/v1.1.0
+   git push origin java/v1.1.0
    ```
+4. GitHub Actions will:
+   - Run tests
+   - Build JAR and sources
+   - Publish to Maven Central
+   - Create GitHub Release
 
 ### Maven Central
 
-Java packages will be published to Maven Central when the Java SDK is production-ready.
+Java packages are published to Maven Central:
+- Group ID: `io.t402`
+- Artifact ID: `t402`
+- Current version: `1.1.0`
+
+```xml
+<dependency>
+    <groupId>io.t402</groupId>
+    <artifactId>t402</artifactId>
+    <version>1.1.0</version>
+</dependency>
+```
 
 ---
 

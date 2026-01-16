@@ -1,5 +1,7 @@
 # Transport: A2A (Agent-to-Agent Protocol)
 
+> **DEPRECATED**: This is the v1 transport specification. For new implementations, please use [transports-v2/a2a.md](../transports-v2/a2a.md) instead.
+
 ## Summary
 
 The A2A transport implements t402 payment flows over the Agent-to-Agent protocol using JSON-RPC messages and task-based state management. This enables AI agents to monetize their services through on-chain cryptocurrency payments within the A2A framework, leveraging the protocol's task lifecycle and metadata system for payment coordination.

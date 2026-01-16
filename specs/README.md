@@ -46,6 +46,8 @@ The `exact` scheme transfers a specific amount for each request.
 | [Overview](./schemes/exact/scheme_exact.md) | Scheme specification |
 | [EVM](./schemes/exact/scheme_exact_evm.md) | Ethereum/EVM chains (EIP-3009) |
 | [SVM](./schemes/exact/scheme_exact_svm.md) | Solana (SPL tokens) |
+| [TON](./schemes/exact/scheme_exact_ton.md) | TON blockchain (Jettons) |
+| [TRON](./schemes/exact/scheme_exact_tron.md) | TRON blockchain (TRC20) |
 | [SUI](./schemes/exact/scheme_exact_sui.md) | Sui blockchain |
 
 ## Templates

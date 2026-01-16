@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation
+- Added TON wallet address to CLAUDE.md
+- Updated Java SDK section in RELEASING.md to reflect v1.1.0 release status
+- Fixed dead links in docs site (ai-payments.mdx, chains/index.mdx)
+- Added TRON and TON exact scheme specifications
+- Added CONTRIBUTING.md for Java SDK
+- Added CONTRIBUTING.md for Facilitator service
+- Added last updated timestamps to ROADMAP.md, SECURITY.md, BUG_BOUNTY.md
+
 ## [2.1.0] - 2026-01-16
 
 ### Go SDK v1.5.0
