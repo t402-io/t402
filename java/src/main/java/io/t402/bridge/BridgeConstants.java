@@ -130,7 +130,7 @@ public final class BridgeConstants {
      * @return Set of chain names
      */
     public static Set<String> getBridgeableChains() {
-        return USDT0_ADDRESSES.keySet();
+        return new java.util.HashSet<>(USDT0_ADDRESSES.keySet());
     }
 
     /**
