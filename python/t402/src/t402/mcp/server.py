@@ -10,36 +10,24 @@ from typing import Any, Optional, TextIO
 from .constants import (
     ALL_NETWORKS,
     LAYERZERO_SCAN_URL,
-    NATIVE_DECIMALS,
     NATIVE_SYMBOLS,
-    TOKEN_DECIMALS,
-    format_token_amount,
     get_explorer_tx_url,
-    get_rpc_url,
     get_token_address,
     is_bridgeable_chain,
     is_gasless_network,
     is_valid_network,
-    parse_token_amount,
 )
 from .tools import get_tool_definitions
 from .types import (
     BalanceInfo,
     BridgeFeeResult,
-    BridgeInput,
     BridgeResultData,
     ContentBlock,
-    GetAllBalancesInput,
-    GetBalanceInput,
-    GetBridgeFeeInput,
     JSONRPCError,
     JSONRPCResponse,
     NetworkBalance,
-    PayGaslessInput,
-    PayInput,
     PaymentResult,
     ServerConfig,
-    SupportedNetwork,
     ToolResult,
 )
 
@@ -187,7 +175,7 @@ class T402McpServer:
     async def _handle_get_balance(self, args: dict[str, Any]) -> ToolResult:
         """Handle t402/getBalance tool."""
         try:
-            address = args.get("address", "")
+            _address = args.get("address", "")  # noqa: F841 - reserved for future use
             network = args.get("network", "")
 
             if not is_valid_network(network):
@@ -212,7 +200,7 @@ class T402McpServer:
     async def _handle_get_all_balances(self, args: dict[str, Any]) -> ToolResult:
         """Handle t402/getAllBalances tool."""
         try:
-            address = args.get("address", "")
+            _address = args.get("address", "")  # noqa: F841 - reserved for future use
 
             results = []
             for network in ALL_NETWORKS:
