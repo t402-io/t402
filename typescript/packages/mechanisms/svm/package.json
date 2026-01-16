@@ -50,8 +50,8 @@
     "@solana-program/compute-budget": "^0.8.0",
     "@solana-program/token": "^0.5.1",
     "@solana-program/token-2022": "^0.4.2",
-    "@solana/kit": "^2.1.1",
-    "@solana/transaction-confirmation": "^2.1.1",
+    "@solana/kit": "^5.4.0",
+    "@solana/transaction-confirmation": "^5.4.0",
     "zod": "^3.24.2"
   },
   "exports": {
