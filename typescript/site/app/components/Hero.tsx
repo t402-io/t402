@@ -178,7 +178,8 @@ export function Hero() {
           >
             <Link
               href="https://docs.t402.io/quickstart"
-              className="inline-flex h-12 items-center justify-center rounded-lg bg-brand px-6 text-base font-medium text-[#0A0A0B] transition-all hover:bg-brand-secondary hover:shadow-glow"
+              className="inline-flex h-12 items-center justify-center rounded-lg bg-brand px-6 text-base font-medium transition-all hover:bg-brand-secondary hover:shadow-glow"
+              style={{ color: "#0A0A0B" }}
             >
               Get Started
             </Link>
