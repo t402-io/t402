@@ -7,9 +7,15 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+
+import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Spring Boot auto-configuration for T402 payment integration.
@@ -17,30 +23,48 @@ import org.springframework.context.annotation.Bean;
  * <p>This auto-configuration provides:</p>
  * <ul>
  *   <li>A {@link FacilitatorClient} bean for payment verification and settlement</li>
- *   <li>A {@link PaymentFilter} that can be registered for specific URL patterns</li>
+ *   <li>A {@link PaymentInterceptor} for handling {@code @RequirePayment} annotations</li>
+ *   <li>A {@link PaymentFilter} for legacy filter-based payment protection</li>
+ *   <li>Support for route-based pricing via {@code t402.routes} configuration</li>
  * </ul>
  *
- * <p>To enable, add the following to your application.yml:</p>
+ * <h3>Basic Configuration</h3>
  * <pre>{@code
  * t402:
  *   enabled: true
  *   facilitator-url: https://facilitator.t402.io
- *   pay-to: "0x..."
+ *   pay-to: "0xYourWalletAddress"
  *   asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
  * }</pre>
  *
- * <p>Example usage in a Spring Boot application:</p>
+ * <h3>Annotation-Based Usage</h3>
  * <pre>{@code
  * @RestController
  * public class ApiController {
  *
+ *     @RequirePayment(amount = "$0.01")
  *     @GetMapping("/api/premium")
- *     public ResponseEntity<String> premiumEndpoint() {
- *         // This endpoint is protected by the PaymentFilter
- *         return ResponseEntity.ok("Premium content");
+ *     public String premiumEndpoint() {
+ *         return "Premium content";
  *     }
  * }
  * }</pre>
+ *
+ * <h3>Route-Based Configuration</h3>
+ * <pre>{@code
+ * t402:
+ *   enabled: true
+ *   pay-to: "0xYourWalletAddress"
+ *   routes:
+ *     - path: /api/premium/**
+ *       amount: "$1.00"
+ *     - path: /api/basic/*
+ *       amount: "10000"
+ * }</pre>
+ *
+ * @see RequirePayment
+ * @see T402Properties
+ * @see RouteConfig
  */
 @AutoConfiguration
 @ConditionalOnClass(PaymentFilter.class)
@@ -61,39 +85,108 @@ public class T402AutoConfiguration {
     }
 
     /**
-     * Creates and registers the PaymentFilter.
+     * Creates the PaymentInterceptor for handling @RequirePayment annotations.
      *
-     * <p>By default, the filter is registered for /api/* URL patterns.
-     * Override this bean to customize the URL patterns or price table.</p>
+     * @param facilitatorClient the facilitator client
+     * @param properties T402 configuration properties
+     * @return A configured PaymentInterceptor
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+    public PaymentInterceptor paymentInterceptor(FacilitatorClient facilitatorClient, T402Properties properties) {
+        return new PaymentInterceptor(facilitatorClient, properties);
+    }
+
+    /**
+     * Creates the WebMvcConfigurer for registering the PaymentInterceptor.
+     *
+     * @param paymentInterceptor the payment interceptor to register
+     * @return A configured T402WebMvcConfigurer
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+    public T402WebMvcConfigurer t402WebMvcConfigurer(PaymentInterceptor paymentInterceptor) {
+        return new T402WebMvcConfigurer(paymentInterceptor);
+    }
+
+    /**
+     * Creates and registers the PaymentFilter for legacy filter-based protection.
+     *
+     * <p>This filter is registered but disabled by default when using annotation-based
+     * payment protection. It can be enabled for specific URL patterns that don't use
+     * controller methods (e.g., static resources).</p>
+     *
+     * <p>The price table is built from the {@code t402.routes} configuration.</p>
      *
      * @param facilitatorClient The facilitator client for payment verification
-     * @param properties        T402 configuration properties
+     * @param properties T402 configuration properties
      * @return A FilterRegistrationBean configured for T402 payments
      */
     @Bean
     @ConditionalOnMissingBean(name = "t402PaymentFilterRegistration")
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public FilterRegistrationBean<PaymentFilter> t402PaymentFilterRegistration(
             FacilitatorClient facilitatorClient,
             T402Properties properties) {
 
         FilterRegistrationBean<PaymentFilter> registration = new FilterRegistrationBean<>();
 
-        // Create a default price table - users should override this bean for custom pricing
-        java.util.Map<String, java.math.BigInteger> priceTable = new java.util.HashMap<>();
-        // Default: 1 USDC (1_000_000 atomic units with 6 decimals) for /api/* endpoints
-        priceTable.put("/api/*", java.math.BigInteger.valueOf(1_000_000));
+        // Build price table from route configuration
+        Map<String, BigInteger> priceTable = buildPriceTable(properties);
+
+        // Only create filter if there are routes configured
+        if (priceTable.isEmpty()) {
+            registration.setEnabled(false);
+            registration.setFilter(new PaymentFilter(
+                properties.getPayTo() != null ? properties.getPayTo() : "",
+                Map.of(),
+                facilitatorClient
+            ));
+            return registration;
+        }
 
         PaymentFilter filter = new PaymentFilter(
             properties.getPayTo(),
             priceTable,
-            facilitatorClient
+            facilitatorClient,
+            properties.getNetwork(),
+            properties.getAsset()
         );
 
         registration.setFilter(filter);
-        registration.addUrlPatterns("/api/*"); // Default: protect /api/* endpoints
+
+        // Register for configured route paths
+        for (String path : priceTable.keySet()) {
+            // Convert path patterns for servlet filter (** -> *)
+            String filterPath = path.replace("/**", "/*");
+            registration.addUrlPatterns(filterPath);
+        }
+
         registration.setName("t402PaymentFilter");
-        registration.setOrder(1);
+        registration.setOrder(100);  // Lower priority than interceptor
+        registration.setEnabled(false);  // Disabled by default, interceptor handles requests
 
         return registration;
+    }
+
+    /**
+     * Builds a price table from route configuration.
+     */
+    private Map<String, BigInteger> buildPriceTable(T402Properties properties) {
+        Map<String, BigInteger> priceTable = new HashMap<>();
+        List<RouteConfig> routes = properties.getRoutes();
+
+        if (routes != null) {
+            for (RouteConfig route : routes) {
+                if (route.isEnabled() && route.getPath() != null && route.getAmount() != null) {
+                    BigInteger amount = properties.parseAmount(route.getAmount());
+                    priceTable.put(route.getPath(), amount);
+                }
+            }
+        }
+
+        return priceTable;
     }
 }

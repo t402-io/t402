@@ -71,6 +71,14 @@
       <optional>true</optional>
     </dependency>
 
+    <!-- Spring WebFlux (optional, for reactive applications) -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webflux</artifactId>
+      <version>3.4.3</version>
+      <optional>true</optional>
+    </dependency>
+
     <!-- Test -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
