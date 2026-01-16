@@ -46,6 +46,11 @@ implementation 'io.t402:t402:2.0.0'
 - Tether WDK compatible
 - Multi-chain wallet support
 
+### MCP Server
+- Model Context Protocol server for AI agents
+- Balance, payment, and bridge tools
+- Demo mode for testing
+
 ### Additional Features
 - **Spring Boot**: Auto-configuration for Spring Boot 3.x
 - **Servlet Filter**: Jakarta Servlet filter for payment-protected endpoints
@@ -262,6 +267,16 @@ sequenceDiagram
 | `WDKSigner` | BIP-39 seed phrase wallet |
 | `WDKChains` | Chain configuration |
 | `WDKTypes` | Configuration and balance types |
+
+### MCP Classes
+
+| Class | Description |
+|-------|-------------|
+| `McpServer` | Model Context Protocol server |
+| `McpTools` | Tool handlers for payment operations |
+| `McpTypes` | MCP type definitions |
+| `McpConstants` | Network configuration and utilities |
+| `T402Mcp` | CLI entry point for MCP server |
 
 ### Spring Boot
 
