@@ -5,7 +5,7 @@ FROM grafana/grafana:11.4.0
 USER root
 
 # Create directories
-RUN mkdir -p /var/lib/grafana/dashboards \
+RUN mkdir -p /etc/grafana/dashboards \
     && mkdir -p /etc/grafana/provisioning/datasources \
     && mkdir -p /etc/grafana/provisioning/dashboards \
     && mkdir -p /etc/grafana/provisioning/alerting
@@ -17,13 +17,12 @@ COPY provisioning/alerting/alerts.yml /etc/grafana/provisioning/alerting/
 COPY provisioning/alerting/contact-points.yml /etc/grafana/provisioning/alerting/
 COPY provisioning/alerting/notification-policies.yml /etc/grafana/provisioning/alerting/
 
-# Copy dashboards
-COPY dashboards/facilitator.json /var/lib/grafana/dashboards/
+# Copy dashboards to /etc/grafana/dashboards (not overwritten by volume)
+COPY dashboards/facilitator.json /etc/grafana/dashboards/
 
 # Set correct permissions
-RUN chown -R grafana:root /var/lib/grafana \
-    && chown -R grafana:root /etc/grafana/provisioning \
-    && chmod -R 755 /var/lib/grafana/dashboards \
+RUN chown -R grafana:root /etc/grafana \
+    && chmod -R 755 /etc/grafana/dashboards \
     && chmod -R 755 /etc/grafana/provisioning
 
 # Switch back to grafana user
