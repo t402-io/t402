@@ -5,11 +5,13 @@ on:
     branches: [main]
     paths:
       - 'services/facilitator/grafana/**'
+      - 'services/facilitator/prometheus.yml'
       - '.github/workflows/grafana.yml'
   pull_request:
     branches: [main]
     paths:
       - 'services/facilitator/grafana/**'
+      - 'services/facilitator/prometheus.yml'
   workflow_dispatch:
 
 env:
@@ -89,10 +91,92 @@ jobs:
           cache-to: type=gha,mode=max
           platforms: linux/amd64,linux/arm64
 
+  smoke-test:
+    name: Smoke Test
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name != 'pull_request'
+    steps:
+      - name: Login to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Grafana container
+        run: |
+          docker run -d --name grafana-test \
+            -p 3000:3000 \
+            -e GF_AUTH_ANONYMOUS_ENABLED=true \
+            -e GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+          # Wait for Grafana to be ready
+          echo "Waiting for Grafana to start..."
+          for i in {1..30}; do
+            if curl -sf http://localhost:3000/api/health > /dev/null 2>&1; then
+              echo "Grafana is healthy!"
+              break
+            fi
+            echo "Attempt $i/30..."
+            sleep 2
+          done
+
+      - name: Verify health endpoint
+        run: |
+          response=$(curl -sf http://localhost:3000/api/health)
+          echo "Health response: $response"
+          if echo "$response" | grep -q "ok"; then
+            echo "✅ Health check passed"
+          else
+            echo "❌ Health check failed"
+            exit 1
+          fi
+
+      - name: Verify dashboard exists
+        run: |
+          response=$(curl -sf http://localhost:3000/api/dashboards/uid/t402-facilitator)
+          if echo "$response" | grep -q "T402 Facilitator"; then
+            echo "✅ Dashboard 't402-facilitator' found"
+          else
+            echo "❌ Dashboard not found"
+            exit 1
+          fi
+
+      - name: Verify datasource configured
+        run: |
+          response=$(curl -sf http://localhost:3000/api/datasources)
+          if echo "$response" | grep -q "Prometheus"; then
+            echo "✅ Prometheus datasource configured"
+          else
+            echo "❌ Prometheus datasource not found"
+            exit 1
+          fi
+
+      - name: Verify template variables
+        run: |
+          response=$(curl -sf http://localhost:3000/api/dashboards/uid/t402-facilitator)
+          vars=$(echo "$response" | jq -r '.dashboard.templating.list[].name' 2>/dev/null | tr '\n' ' ')
+          echo "Template variables: $vars"
+          if echo "$vars" | grep -q "network" && echo "$vars" | grep -q "interval"; then
+            echo "✅ Template variables configured"
+          else
+            echo "❌ Template variables missing"
+            exit 1
+          fi
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker logs grafana-test || true
+          docker stop grafana-test || true
+          docker rm grafana-test || true
+
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
-    needs: build
+    needs: [build, smoke-test]
     if: github.event_name != 'pull_request'
     permissions:
       contents: read
@@ -127,7 +211,7 @@ jobs:
   notify:
     name: Notify Build Complete
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [build, smoke-test, security-scan]
     if: github.ref == 'refs/heads/main' && always() && needs.build.result == 'success'
     steps:
       - name: Build summary
@@ -135,5 +219,24 @@ jobs:
           echo "## Grafana Build Complete! :bar_chart:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Image:** \`ghcr.io/t402-io/grafana:latest\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Digest:** \`${{ needs.build.outputs.image_digest }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Pipeline Status" >> $GITHUB_STEP_SUMMARY
+          echo "| Stage | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | ${{ needs.build.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Smoke Test | ${{ needs.smoke-test.result == 'success' && '✅ Passed' || needs.smoke-test.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security Scan | ${{ needs.security-scan.result == 'success' && '✅ Passed' || needs.security-scan.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Deployment" >> $GITHUB_STEP_SUMMARY
           echo "Watchtower will auto-deploy to production within 5 minutes." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Dashboard URL:** https://grafana.facilitator.t402.io" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Rollback" >> $GITHUB_STEP_SUMMARY
+          echo "If issues occur, rollback using:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ghcr.io/t402-io/grafana:<previous-sha>" >> $GITHUB_STEP_SUMMARY
+          echo "docker tag ghcr.io/t402-io/grafana:<previous-sha> ghcr.io/t402-io/grafana:latest" >> $GITHUB_STEP_SUMMARY
+          echo "docker compose -f docker-compose.prod.yaml up -d grafana" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
