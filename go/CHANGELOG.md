@@ -1,0 +1,71 @@
+# Changelog - Go SDK
+
+All notable changes to the T402 Go SDK will be documented in this file.
+
+## [Unreleased]
+
+## [1.3.1] - 2026-01-16
+
+### Fixed
+- Tidied go.mod dependencies
+- Moved `golang.org/x/crypto` from indirect to direct dependency
+
+## [1.3.0] - 2026-01-16
+
+### Added
+- **CLI Tool** (`cmd/t402/`)
+  - `t402 verify <payload>` - Verify payment payloads
+  - `t402 settle <payload>` - Settle payments
+  - `t402 supported` - List supported networks and schemes
+  - `t402 encode <json-file>` - Encode JSON to base64
+  - `t402 decode <base64>` - Decode base64 to JSON
+  - `t402 info <network>` - Show network information
+  - `t402 version` - Show version info
+  - Global flags: `--facilitator`, `--output` (json/text)
+
+- **TRON Support** (`mechanisms/tron/`)
+  - Full TRON blockchain integration
+  - Client, server, and facilitator schemes
+  - Support for Mainnet, Nile, and Shasta testnets
+  - TRC-20 USDT support
+  - Address validation utilities
+
+### Changed
+- CLI now supports all four blockchain families (EVM, TON, TRON, SVM)
+- Improved network detection in `info` command
+
+## [1.2.0] - 2026-01-01
+
+### Added
+- **TON Support** (`mechanisms/ton/`)
+  - TON blockchain integration
+  - Jetton (USDT) support
+  - BOC validation utilities
+
+- **Solana Support** (`mechanisms/svm/`)
+  - Solana blockchain integration
+  - SPL token support
+  - Transaction signing
+
+## [1.1.0] - 2025-06-01
+
+### Added
+- Gin middleware (`http/gin/`)
+- HTTP client wrapper
+- HTTP server implementation
+
+## [1.0.0] - 2025-01-01
+
+### Added
+- Initial release
+- Core client, server, facilitator interfaces
+- EVM mechanism with EIP-3009
+- EVM signers
+- Bazaar extension for API discovery
+
+[Unreleased]: https://github.com/t402-io/t402/compare/go/v1.3.1...HEAD
+[1.3.1]: https://github.com/t402-io/t402/compare/go/v1.3.0...go/v1.3.1
+[1.3.0]: https://github.com/t402-io/t402/compare/go/v1.2.0...go/v1.3.0
+[1.2.0]: https://github.com/t402-io/t402/compare/go/v1.1.0...go/v1.2.0
+[1.1.0]: https://github.com/t402-io/t402/compare/go/v1.0.0...go/v1.1.0
+[1.0.0]: https://github.com/t402-io/t402/releases/tag/go/v1.0.0
