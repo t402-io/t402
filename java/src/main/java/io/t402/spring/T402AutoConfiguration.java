@@ -63,8 +63,8 @@ public class T402AutoConfiguration {
     /**
      * Creates and registers the PaymentFilter.
      *
-     * <p>By default, the filter is registered for all URL patterns.
-     * Override this bean to customize the URL patterns.</p>
+     * <p>By default, the filter is registered for /api/* URL patterns.
+     * Override this bean to customize the URL patterns or price table.</p>
      *
      * @param facilitatorClient The facilitator client for payment verification
      * @param properties        T402 configuration properties
@@ -78,7 +78,16 @@ public class T402AutoConfiguration {
 
         FilterRegistrationBean<PaymentFilter> registration = new FilterRegistrationBean<>();
 
-        PaymentFilter filter = new PaymentFilter(facilitatorClient);
+        // Create a default price table - users should override this bean for custom pricing
+        java.util.Map<String, java.math.BigInteger> priceTable = new java.util.HashMap<>();
+        // Default: 1 USDC (1_000_000 atomic units with 6 decimals) for /api/* endpoints
+        priceTable.put("/api/*", java.math.BigInteger.valueOf(1_000_000));
+
+        PaymentFilter filter = new PaymentFilter(
+            properties.getPayTo(),
+            priceTable,
+            facilitatorClient
+        );
 
         registration.setFilter(filter);
         registration.addUrlPatterns("/api/*"); // Default: protect /api/* endpoints
