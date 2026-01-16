@@ -9,9 +9,8 @@
 docs
 *.md
 
-# Go services (not needed for site build)
-go
-services
+# Note: go/ and services/facilitator/ are NOT ignored
+# because they're needed for the facilitator Docker build
 
 # Python
 python
