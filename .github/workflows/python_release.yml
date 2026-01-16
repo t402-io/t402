@@ -92,13 +92,20 @@ jobs:
           name: python-dist
           path: dist/
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install twine
+        run: pip install twine
+
       - name: Publish to PyPI
         if: ${{ github.event.inputs.dry_run != 'true' }}
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: dist/
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: twine upload dist/*
 
       - name: Dry run - show what would be published
         if: ${{ github.event.inputs.dry_run == 'true' }}
