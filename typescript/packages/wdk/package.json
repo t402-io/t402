@@ -55,7 +55,7 @@
   "dependencies": {
     "@t402/core": "workspace:*",
     "@t402/evm": "workspace:*",
-    "viem": "^2.39.3"
+    "viem": "^2.44.2"
   },
   "peerDependencies": {
     "@ledgerhq/hw-app-eth": ">=6.0.0",
