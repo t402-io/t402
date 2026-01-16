@@ -7,7 +7,7 @@ Gin server demonstrating how to protect API endpoints with a paywall using the
 
 - Go 1.24 or higher
 - Valid EVM address for receiving payments
-- URL of a facilitator supporting the desired payment network, see [facilitator list](https://www.t402.org/ecosystem?category=facilitators)
+- URL of a facilitator supporting the desired payment network, see [facilitator list](https://t402.io/ecosystem?category=facilitators)
 
 ## Setup
 

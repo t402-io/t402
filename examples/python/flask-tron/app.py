@@ -31,7 +31,7 @@ if not tron_address:
 facilitator_url = os.getenv("FACILITATOR_URL")
 if not facilitator_url:
     print("❌ FACILITATOR_URL environment variable is required")
-    print("   Example: https://t402.org/facilitator")
+    print("   Example: https://facilitator.t402.io")
     exit(1)
 
 network = os.getenv("TRON_NETWORK", TRON_NILE)

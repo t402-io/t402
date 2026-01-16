@@ -6,14 +6,14 @@ Gin server demonstrating how to implement t402 payment handling manually without
 
 - Go 1.24 or higher
 - Valid EVM address for receiving payments
-- URL of a facilitator supporting the desired payment network, see [facilitator list](https://www.t402.org/ecosystem?category=facilitators)
+- URL of a facilitator supporting the desired payment network, see [facilitator list](https://t402.io/ecosystem?category=facilitators)
 
 ## Setup
 
 1. Create a `.env` file with required environment variables:
 
 ```bash
-FACILITATOR_URL=https://t402.org/facilitator
+FACILITATOR_URL=https://facilitator.t402.io
 EVM_PAYEE_ADDRESS=0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
 ```
 

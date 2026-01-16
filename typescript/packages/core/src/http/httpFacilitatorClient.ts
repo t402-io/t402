@@ -1,7 +1,7 @@
 import { PaymentPayload, PaymentRequirements } from "../types/payments";
 import { VerifyResponse, SettleResponse, SupportedResponse } from "../types/facilitator";
 
-const DEFAULT_FACILITATOR_URL = "https://t402.org/facilitator";
+const DEFAULT_FACILITATOR_URL = "https://facilitator.t402.io";
 
 export interface FacilitatorConfig {
   url?: string;
