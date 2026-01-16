@@ -1,65 +1,41 @@
-apiVersion: 1
-
-contactPoints:
-  - orgId: 1
-    name: T402 Default
-    receivers:
-      # Webhook receiver for external alerting systems
-      # Uncomment and configure your webhook URL
-      # - uid: t402-webhook
-      #   type: webhook
-      #   settings:
-      #     url: "${ALERT_WEBHOOK_URL}"
-      #     httpMethod: POST
-      #   disableResolveMessage: false
-
-      # Slack receiver
-      # Uncomment and configure your Slack webhook URL
-      # - uid: t402-slack
-      #   type: slack
-      #   settings:
-      #     url: "${SLACK_WEBHOOK_URL}"
-      #     recipient: "#t402-alerts"
-      #     title: |
-      #       {{ if eq .Status "firing" }}[FIRING]{{ else }}[RESOLVED]{{ end }} {{ .CommonLabels.alertname }}
-      #     text: |
-      #       {{ range .Alerts }}
-      #       *Alert:* {{ .Labels.alertname }}
-      #       *Severity:* {{ .Labels.severity }}
-      #       *Summary:* {{ .Annotations.summary }}
-      #       *Description:* {{ .Annotations.description }}
-      #       {{ end }}
-      #   disableResolveMessage: false
-
-      # Email receiver
-      # Uncomment and configure your SMTP settings
-      # - uid: t402-email
-      #   type: email
-      #   settings:
-      #     addresses: "${ALERT_EMAIL_ADDRESSES}"
-      #     singleEmail: true
-      #   disableResolveMessage: false
-
-      # Discord receiver
-      # Uncomment and configure your Discord webhook URL
-      # - uid: t402-discord
-      #   type: discord
-      #   settings:
-      #     url: "${DISCORD_WEBHOOK_URL}"
-      #     use_discord_username: true
-      #   disableResolveMessage: false
-
-      # Telegram receiver
-      # Uncomment and configure your Telegram bot token and chat ID
-      # - uid: t402-telegram
-      #   type: telegram
-      #   settings:
-      #     bottoken: "${TELEGRAM_BOT_TOKEN}"
-      #     chatid: "${TELEGRAM_CHAT_ID}"
-      #   disableResolveMessage: false
-
-      # Default: Grafana built-in alerting (no external notification)
-      - uid: t402-grafana-default
-        type: "grafana-default-email"
-        settings: {}
-        disableResolveMessage: false
+# Contact Points Configuration for T402 Facilitator Alerts
+# Uncomment and configure the appropriate receiver for your notification needs
+#
+# Available receiver types:
+# - webhook: Send alerts to a webhook URL
+# - slack: Send alerts to a Slack channel
+# - email: Send alerts via email (requires SMTP configuration in Grafana)
+# - discord: Send alerts to a Discord channel
+# - telegram: Send alerts to a Telegram chat
+#
+# Example configurations are provided below as comments.
+# Uncomment and modify the desired receiver.
+#
+# apiVersion: 1
+#
+# contactPoints:
+#   - orgId: 1
+#     name: T402 Alerts
+#     receivers:
+#       # Webhook receiver
+#       - uid: t402-webhook
+#         type: webhook
+#         settings:
+#           url: "https://your-webhook-url.com/alerts"
+#           httpMethod: POST
+#         disableResolveMessage: false
+#
+#       # Slack receiver
+#       - uid: t402-slack
+#         type: slack
+#         settings:
+#           url: "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+#           recipient: "#alerts"
+#         disableResolveMessage: false
+#
+#       # Discord receiver
+#       - uid: t402-discord
+#         type: discord
+#         settings:
+#           url: "https://discord.com/api/webhooks/YOUR/WEBHOOK"
+#         disableResolveMessage: false
