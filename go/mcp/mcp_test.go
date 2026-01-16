@@ -220,16 +220,20 @@ func TestToolDefinitionSchemas(t *testing.T) {
 func TestServerInitialize(t *testing.T) {
 	config := &ServerConfig{DemoMode: true}
 
-	input := bytes.NewBufferString(`{"jsonrpc":"2.0","id":1,"method":"initialize"}` + "\n")
-	output := &bytes.Buffer{}
+	inputData := `{"jsonrpc":"2.0","id":1,"method":"initialize"}` + "\n"
 
-	server := NewServerWithIO(config, input, output)
-
-	ctx, cancel := context.WithCancel(context.Background())
+	// Use a pipe to provide input that signals EOF after the request
+	pr, pw := io.Pipe()
 	go func() {
-		// Stop after processing
-		cancel()
+		pw.Write([]byte(inputData))
+		pw.Close() // Signal EOF after writing
 	}()
+
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	_ = server.Run(ctx)
 
@@ -252,13 +256,20 @@ func TestServerInitialize(t *testing.T) {
 func TestServerListTools(t *testing.T) {
 	config := &ServerConfig{DemoMode: true}
 
-	input := bytes.NewBufferString(`{"jsonrpc":"2.0","id":2,"method":"tools/list"}` + "\n")
+	inputData := `{"jsonrpc":"2.0","id":2,"method":"tools/list"}` + "\n"
+
+	// Use a pipe to provide input that signals EOF after the request
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close() // Signal EOF after writing
+	}()
+
 	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
 
-	server := NewServerWithIO(config, input, output)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	go func() { cancel() }()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	_ = server.Run(ctx)
 
