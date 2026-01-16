@@ -36,14 +36,14 @@ t402/
 |-----|---------|----------|
 | TypeScript | 2.0.0 | npm (@t402/*) |
 | Python | 1.6.0 | PyPI |
-| Go | 1.4.0 | Go Modules |
+| Go | 1.5.0 | Go Modules |
 | Java | 1.0.0-SNAPSHOT | Maven Central (not published) |
 
 ## Release Tags
 
 - TypeScript: `v*` (e.g., `v2.1.0`)
 - Python: `python/v*` (e.g., `python/v1.6.0`)
-- Go: `go/v*` (e.g., `go/v1.4.0`)
+- Go: `go/v*` (e.g., `go/v1.5.0`)
 - Java: `java/v*` (e.g., `java/v1.0.0`)
 
 ## Facilitator Wallets
@@ -75,7 +75,7 @@ git tag v2.1.0 && git push origin v2.1.0
 git tag python/v1.6.0 && git push origin python/v1.6.0
 
 # Go
-git tag go/v1.4.0 && git push origin go/v1.4.0
+git tag go/v1.5.0 && git push origin go/v1.5.0
 
 # Java
 git tag java/v1.0.0 && git push origin java/v1.0.0
