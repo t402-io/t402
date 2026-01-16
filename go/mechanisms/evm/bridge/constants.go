@@ -243,3 +243,39 @@ func Bytes32ToAddress(b [32]byte) string {
 	// Take last 20 bytes
 	return "0x" + hex.EncodeToString(b[12:])
 }
+
+// EstimatedBridgeTimes contains estimated bridge completion times in seconds
+// for each source->destination chain pair.
+// These estimates are based on LayerZero message delivery times.
+var EstimatedBridgeTimes = map[string]map[string]int{
+	"ethereum": {
+		"arbitrum":  180, // ~3 minutes (L1 to L2)
+		"ink":       300, // ~5 minutes
+		"berachain": 300, // ~5 minutes
+		"unichain":  300, // ~5 minutes
+	},
+	"arbitrum": {
+		"ethereum":  900, // ~15 minutes (L2 to L1, challenge period)
+		"ink":       300, // ~5 minutes
+		"berachain": 300, // ~5 minutes
+		"unichain":  300, // ~5 minutes
+	},
+	"ink": {
+		"ethereum":  900, // ~15 minutes (L2 to L1)
+		"arbitrum":  300, // ~5 minutes
+		"berachain": 300, // ~5 minutes
+		"unichain":  300, // ~5 minutes
+	},
+	"berachain": {
+		"ethereum": 900, // ~15 minutes (L2 to L1)
+		"arbitrum": 300, // ~5 minutes
+		"ink":      300, // ~5 minutes
+		"unichain": 300, // ~5 minutes
+	},
+	"unichain": {
+		"ethereum":  900, // ~15 minutes (L2 to L1)
+		"arbitrum":  300, // ~5 minutes
+		"ink":       300, // ~5 minutes
+		"berachain": 300, // ~5 minutes
+	},
+}
