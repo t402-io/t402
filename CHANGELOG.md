@@ -1,623 +1,195 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable changes to T402 will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.0.0] - 2026-01-16
 
-## [2026-01-09] - WDK Cross-Chain Bridge
+### Highlights
+
+T402 v2.0.0 is a major release that introduces a redesigned protocol, multi-chain support, and a complete SDK ecosystem for building payment-enabled applications with USDT/USDT0.
 
 ### Added
 
-#### @t402/wdk-bridge (`wdk-bridge/v1.0.0`)
+#### Multi-Chain Support
+- **EVM Chains**: Full support for Ethereum, Arbitrum, Base, Optimism, Ink, Berachain, and Unichain via EIP-3009 `transferWithAuthorization`
+- **Solana (SVM)**: Native SPL token transfers with transaction simulation
+- **TON**: USDT Jetton support with BOC-based transactions
+- **TRON**: TRC-20 USDT with energy-efficient transfers
 
-Cross-chain USDT0 bridging with automatic source chain selection for Tether WDK accounts using LayerZero OFT standard.
+#### New Packages
+- `@t402/core` - Protocol types, HTTP utilities, and shared functionality
+- `@t402/evm` - EVM chain mechanisms with EIP-3009, ERC-4337, and USDT0 support
+- `@t402/svm` - Solana mechanisms with SPL token transfers
+- `@t402/ton` - TON mechanisms with Jetton support
+- `@t402/tron` - TRON mechanisms with TRC-20 support
+- `@t402/wdk` - Tether Wallet Development Kit integration
+- `@t402/wdk-gasless` - ERC-4337 gasless payments with paymaster support
+- `@t402/wdk-bridge` - LayerZero USDT0 cross-chain bridging
+- `@t402/wdk-multisig` - Safe multi-signature wallet support
+- `@t402/mcp` - Model Context Protocol server for AI agent payments
+- `@t402/cli` - Command-line tools for testing and development
+- `@t402/extensions` - Protocol extensions and utilities
 
-#### Core Features
-- **WdkBridgeClient**: Multi-chain bridge client with automatic routing
-  - `getBalances()` - Get USDT0 balances across all configured chains
-  - `getRoutes()` - Get available bridge routes with fee quotes
-  - `autoBridge()` - Automatically select best source chain and execute bridge
-  - `bridge()` - Execute bridge from a specific chain
-  - `trackMessage()` - Track bridge transaction via LayerZero Scan
-  - `waitForDelivery()` - Wait for cross-chain delivery confirmation
+#### HTTP Framework Integrations
+- `@t402/express` - Express.js middleware with streaming support
+- `@t402/next` - Next.js App Router and Pages Router integration
+- `@t402/hono` - Hono middleware with reverse proxy support
+- `@t402/fastify` - Fastify plugin with schema validation
 
-- **WdkBridgeSigner**: Adapts WDK accounts to work with Usdt0Bridge
-  - Implements BridgeSigner interface from @t402/evm
-  - Handles contract reads/writes via WDK account
-  - Transaction receipt parsing with LayerZero event extraction
+#### HTTP Client Libraries
+- `@t402/fetch` - Fetch API wrapper with automatic 402 handling
+- `@t402/axios` - Axios interceptor for seamless payments
 
-#### Route Strategies
-- **cheapest** (default): Select route with lowest native fee
-- **fastest**: Select route with fastest estimated delivery
-- **preferred**: Use preferred source chain if available
+#### UI Components
+- `@t402/paywall` - Universal paywall component (framework-agnostic)
+- `@t402/react` - React hooks and components
+- `@t402/vue` - Vue 3 composables and components
 
-#### Supported Chains
-| Chain | Chain ID | LayerZero EID | USDT0 OFT |
-|-------|----------|---------------|-----------|
-| Ethereum | 1 | 30101 | `0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee` |
-| Arbitrum | 42161 | 30110 | `0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9` |
-| Ink | 57073 | 30291 | `0x0200C29006150606B650577BBE7B6248F58470c1` |
-| Berachain | 80084 | 30362 | `0x779Ded0c9e1022225f8E0630b35a9b54bE713736` |
-| Unichain | 130 | 30320 | `0x588ce4F028D8e7B53B687865d6A67b3A54C75518` |
+#### Infrastructure
+- Production facilitator service at `facilitator.t402.io`
+- Prometheus metrics instrumentation
+- Grafana dashboards for payment monitoring
+- Redis-based rate limiting
+- Docker deployment with auto-updates via Watchtower
+- GitHub Container Registry publishing
+- Trivy security scanning and SBOM generation
 
-#### Usage Example
-```typescript
-import { WdkBridgeClient } from '@t402/wdk-bridge';
+### Changed
 
-const bridge = new WdkBridgeClient({
-  accounts: {
-    ethereum: ethereumWdkAccount,
-    arbitrum: arbitrumWdkAccount,
-  },
-  defaultStrategy: 'cheapest',
-});
+#### Protocol v2 Specification
+- New `PaymentPayload` structure with `accepted` requirements field
+- New `PaymentRequirements` with CAIP-2 network identifiers (e.g., `eip155:1`, `solana:devnet`)
+- Replaced `maxAmountRequired` with `amount` for clearer semantics
+- Added `resource` field for protected content metadata
+- Standardized error response format across all mechanisms
 
-// Get multi-chain balances
-const summary = await bridge.getBalances();
-console.log('Total USDT0:', summary.totalUsdt0);
+#### Package Namespace
+- Migrated from `@x402/*` to `@t402/*` namespace
+- All packages now published under `@t402` organization on npm
+- Consolidated 23 legacy repositories into unified monorepo
 
-// Auto-bridge with best route selection
-const result = await bridge.autoBridge({
-  toChain: 'ethereum',
-  amount: 100_000000n, // 100 USDT0
-  recipient: '0x...',
-});
+#### Breaking Changes
+- `PaymentRequirementsV1` deprecated in favor of `PaymentRequirements`
+- `PaymentPayloadV1` deprecated in favor of `PaymentPayload`
+- Network identifiers changed from simple names (e.g., `base-sepolia`) to CAIP-2 format (e.g., `eip155:84532`)
+- Removed `scheme` and `network` from payload root; now in `accepted` object
 
-// Wait for delivery with status updates
-const delivery = await result.waitForDelivery({
-  onStatusChange: (status) => console.log('Status:', status),
-});
-console.log('Delivered!', delivery.dstTxHash);
-```
+### Fixed
 
-#### Dependencies
-- `@t402/evm` - Usdt0Bridge and LayerZeroScanClient
-- `@t402/wdk` - WDK account integration
+- Validate payload structure before accessing properties in all scheme handlers
+- Handle undefined payload gracefully with proper error messages
+- Fix streaming responses in Express middleware
+- Fix settlement failure handling in Next.js integration
+- Move undeployed smart wallet check to settle instead of verify
+- Fix error serialization in payment middleware responses
+- Fix resourceUrl when Hono server is behind reverse proxy
 
-#### Examples
-- `examples/typescript/wdk-bridge/` - Demo with mock WDK accounts
+### Security
+
+- Added payload structure validation to prevent crashes from malformed requests
+- Input validation for all external data before processing
+- Signature verification before any on-chain operations
+- Balance checks before settlement to prevent failed transactions
+
+### Documentation
+
+- Comprehensive API documentation at docs.t402.io
+- Quickstart guides for each framework
+- Migration guide from v1.x to v2.x
+- Interactive playground at t402.io/playground
 
 ---
 
-## [2026-01-09] - WDK Gasless Payments
+## Package Versions
 
-### Added
-
-#### @t402/wdk-gasless (`wdk-gasless/v1.0.0`)
-
-Gasless USDT0 payments using Tether WDK and ERC-4337 Account Abstraction. Enables users to send stablecoin payments without holding ETH for gas fees.
-
-#### Core Features
-- **WdkSmartAccount**: Wraps Tether WDK accounts in Safe smart accounts (4337 module v0.3.0)
-  - Counterfactual address computation
-  - EIP-712 typed data signing via WDK
-  - Multi-owner support with configurable threshold
-- **WdkGaslessClient**: High-level client for gasless payments
-  - `pay()` - Execute single gasless USDT0 transfer
-  - `payBatch()` - Execute multiple payments in one UserOperation
-  - `canSponsor()` - Check if payment can be gas-sponsored
-  - `getBalance()` / `getFormattedBalance()` - Check token balances
-  - `getAccountAddress()` / `isAccountDeployed()` - Account status
-
-#### Supported Tokens & Chains
-| Chain | Chain ID | USDT0 | USDC |
-|-------|----------|-------|------|
-| Ethereum | 1 | ✅ | ✅ |
-| Arbitrum | 42161 | ✅ | ✅ |
-| Base | 8453 | ✅ | ✅ |
-| Optimism | 10 | ✅ | ✅ |
-| Ink | 57073 | ✅ | - |
-| Berachain | 80084 | ✅ | - |
-| Unichain | 130 | ✅ | - |
-
-#### Usage Example
-```typescript
-import { createWdkGaslessClient } from '@t402/wdk-gasless';
-
-const client = await createWdkGaslessClient({
-  wdkAccount: myWdkAccount,
-  publicClient,
-  chainId: 42161,
-  bundler: {
-    bundlerUrl: 'https://api.pimlico.io/v2/arbitrum/rpc?apikey=...',
-    chainId: 42161,
-  },
-  paymaster: {
-    address: '0x...',
-    url: 'https://api.pimlico.io/v2/arbitrum/rpc?apikey=...',
-    type: 'sponsoring',
-  },
-});
-
-// Execute gasless payment
-const result = await client.pay({
-  to: '0x...',
-  amount: 1000000n, // 1 USDT0
-});
-
-const receipt = await result.wait();
-console.log('Confirmed:', receipt.txHash);
-```
-
-#### Bundler/Paymaster Support
-- Pimlico
-- Alchemy
-- Stackup
-- Biconomy
-
-#### Examples
-- `examples/typescript/wdk-gasless/` - Demo with mock WDK account
+| Package | Version |
+|---------|---------|
+| @t402/core | 2.0.0 |
+| @t402/evm | 2.2.0 |
+| @t402/svm | 2.0.0 |
+| @t402/ton | 2.1.0 |
+| @t402/tron | 2.0.0 |
+| @t402/wdk | 2.0.1 |
+| @t402/wdk-bridge | 1.0.0 |
+| @t402/wdk-gasless | 1.0.0 |
+| @t402/wdk-multisig | 1.0.0 |
+| @t402/mcp | 1.0.0 |
+| @t402/cli | 2.0.0 |
+| @t402/extensions | 2.0.0 |
+| @t402/next | 2.0.0 |
+| @t402/express | 2.0.0 |
+| @t402/fastify | 2.0.0 |
+| @t402/hono | 2.0.0 |
+| @t402/fetch | 2.0.0 |
+| @t402/axios | 2.0.0 |
+| @t402/react | 2.0.0 |
+| @t402/vue | 2.0.0 |
+| @t402/paywall | 2.0.0 |
 
 ---
 
-## [2026-01-09] - MCP Integration for AI Agent Payments
+## Migration from v1.x
 
-### Added
+### Package Names
 
-#### @t402/mcp (`mcp/v1.0.0`)
+```diff
+- import { ... } from "@x402/*"
++ import { ... } from "@t402/*"
+```
 
-Model Context Protocol (MCP) server enabling AI agents like Claude to make stablecoin payments across multiple blockchain networks.
+### Network Identifiers
 
-#### MCP Tools
-- **t402/getBalance**: Check wallet balance (native + stablecoins) on a specific network
-- **t402/getAllBalances**: Check balances across all supported networks with aggregated totals
-- **t402/pay**: Execute stablecoin payments (USDC, USDT, USDT0)
-- **t402/payGasless**: Execute gasless payments using ERC-4337 account abstraction
-- **t402/getBridgeFee**: Get fee quotes for USDT0 cross-chain bridging
-- **t402/bridge**: Bridge USDT0 between chains using LayerZero OFT
-
-#### Features
-- **Demo Mode**: Simulate transactions without real execution for testing
-- **Multi-Chain Support**: Ethereum, Base, Arbitrum, Optimism, Polygon, Avalanche, Ink, Berachain, Unichain
-- **Custom RPC URLs**: Configure custom endpoints per network
-- **ERC-4337 Support**: Gasless transactions with bundler/paymaster configuration
-- **CLI Entry Point**: `npx @t402/mcp` for Claude Desktop integration
-
-#### Claude Desktop Integration
-```json
-{
-  "mcpServers": {
-    "t402": {
-      "command": "npx",
-      "args": ["@t402/mcp"],
-      "env": {
-        "T402_DEMO_MODE": "true"
-      }
-    }
-  }
+```diff
+const requirements = {
+  scheme: "exact",
+-  network: "base-sepolia",
++  network: "eip155:84532",
+  ...
 }
 ```
 
-#### Environment Variables
-| Variable | Description |
-|----------|-------------|
-| `T402_PRIVATE_KEY` | Wallet private key for signing transactions |
-| `T402_DEMO_MODE` | Enable simulated transactions |
-| `T402_BUNDLER_URL` | ERC-4337 bundler URL |
-| `T402_PAYMASTER_URL` | Paymaster URL for sponsored gas |
-| `T402_RPC_*` | Custom RPC URLs per network |
-
-#### Examples
-- `examples/typescript/mcp/standalone.ts` - Programmatic usage without MCP server
-
----
-
-## [2026-01-09] - USDT0 Cross-Chain Bridge via LayerZero
-
-### Added
-
-#### USDT0 Bridge (`bridge/v1.0.0`)
-
-Cross-chain USDT0 transfers using LayerZero OFT standard with message tracking via LayerZero Scan API.
-
-#### TypeScript SDK (`@t402/evm`)
-- **Usdt0Bridge Client**: Quote and execute cross-chain USDT0 transfers
-  - `quote()` - Get bridge quote with fees and estimated time
-  - `send()` - Execute bridge transaction with GUID extraction
-  - Message GUID extraction from OFTSent event logs
-- **LayerZeroScanClient**: Track cross-chain message delivery
-  - `getMessage()` - Get message status by GUID
-  - `getMessagesByWallet()` - Get messages by wallet address
-  - `waitForDelivery()` - Poll until delivered with status callbacks
-  - `isDelivered()` - Quick delivery check
-- **CrossChainPaymentRouter**: High-level cross-chain payment routing
-  - `routePayment()` - Bridge funds to destination chain
-  - `estimateFees()` - Get fee estimates
-  - `trackMessage()` / `waitForDelivery()` - Delivery tracking
-
-#### Go SDK (`github.com/t402-io/t402/go/mechanisms/evm/bridge`)
-- **Usdt0Bridge**: `Quote()`, `Send()`, `GetSupportedDestinations()`
-- **LayerZeroScanClient**: `GetMessage()`, `GetMessagesByWallet()`, `WaitForDelivery()`
-- **CrossChainPaymentRouter**: `RoutePayment()`, `EstimateFees()`, `TrackMessage()`
-- **Types**: `BridgeQuoteParams`, `BridgeResult`, `LayerZeroMessage`, `SendParam`
-- **Constants**: Endpoint IDs, OFT addresses, utility functions
-- **Unit Tests**: Comprehensive test coverage
-
-#### Python SDK (`t402.bridge`)
-- **Usdt0Bridge**: Async client with `quote()` and `send()` methods
-- **LayerZeroScanClient**: Async message tracking with httpx
-- **CrossChainPaymentRouter**: Async payment routing
-- **Types**: Dataclasses for all bridge types
-- **Constants**: LayerZero endpoint IDs and USDT0 OFT addresses
-
-#### Examples
-- `examples/typescript/clients/bridge/` - TypeScript bridge example
-- `examples/go/clients/bridge/` - Go bridge example
-- `examples/python/bridge/` - Python bridge example
-
-### Technical Details
-
-#### Supported Chains
-| Chain | LayerZero EID | USDT0 OFT Address |
-|-------|---------------|-------------------|
-| Ethereum | 30101 | `0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee` |
-| Arbitrum | 30110 | `0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9` |
-| Ink | 30291 | `0x0200C29006150606B650577BBE7B6248F58470c1` |
-| Berachain | 30362 | `0x779Ded0c9e1022225f8E0630b35a9b54bE713736` |
-| Unichain | 30320 | `0x588ce4F028D8e7B53B687865d6A67b3A54C75518` |
-
-#### LayerZero Scan API
-- Base URL: `https://scan.layerzero-api.com/v1`
-- Message statuses: `INFLIGHT`, `CONFIRMING`, `DELIVERED`, `FAILED`, `BLOCKED`
-
-#### Bridge Flow
-1. Create bridge client for source chain
-2. Get quote with fees and estimated receive amount
-3. Execute bridge (handles approval if needed)
-4. Extract message GUID from OFTSent event
-5. Track delivery via LayerZero Scan API
-6. Receive funds on destination chain
-
----
-
-## [2026-01-09] - ERC-4337 Account Abstraction Support
-
-### Added
-
-#### ERC-4337 Gasless Transactions (`erc4337/v1.0.0`)
-
-Full ERC-4337 v0.7 Account Abstraction support across all SDKs, enabling gasless transactions with smart accounts and paymaster sponsorship.
-
-#### TypeScript SDK (`@t402/evm`)
-- **Bundler Clients**: Generic, Pimlico, and Alchemy bundler integrations
-  - `createBundlerClient()` - Factory function with provider auto-detection
-  - `PimlicoBundlerClient` - Extended methods: `getUserOperationGasPrice`, `sendCompressedUserOperation`
-  - `AlchemyBundlerClient` - Extended methods: `requestGasAndPaymasterAndData`, `simulateUserOperationAssetChanges`
-- **Paymaster Integrations**: Gas sponsorship with multiple providers
-  - `PimlicoPaymaster` - Sponsorship policies and token quotes
-  - `BiconomyPaymaster` - Sponsored and ERC-20 payment modes
-  - `StackupPaymaster` - Off-chain sponsorship support
-  - `createPaymaster()` - Unified factory function
-- **Safe Smart Account**: Safe 4337 module v0.3.0 integration
-  - `SafeSmartAccount` - Counterfactual address derivation
-  - `encodeExecute()` / `encodeExecuteBatch()` - Transaction encoding
-  - `signUserOpHash()` - EIP-712 typed data signing
-
-#### Go SDK (`github.com/t402-io/t402/go/mechanisms/evm/erc4337`)
-- **Core Types**: `UserOperation`, `PackedUserOperation`, `GasEstimate`, `UserOperationReceipt`
-- **Bundler Clients**: `GenericBundlerClient`, `PimlicoBundlerClient`, `AlchemyBundlerClient`
-- **Paymaster Clients**: `PimlicoPaymaster`, `BiconomyPaymaster`, `StackupPaymaster`
-- **Safe Account**: `SafeSmartAccount` with full 4337 module support
-- **Utilities**: Gas packing/unpacking, network detection, constants
-
-#### Python SDK (`t402.erc4337`)
-- **Types**: `UserOperation`, `PackedUserOperation`, `PaymasterData`, `GasEstimate`
-- **Bundler Clients**: `GenericBundlerClient`, `PimlicoBundlerClient`, `AlchemyBundlerClient`
-- **Paymaster Clients**: `PimlicoPaymaster`, `BiconomyPaymaster`, `StackupPaymaster`, `UnifiedPaymaster`
-- **Safe Account**: `SafeSmartAccount` with eth-account signing
-- **Factory Functions**: `create_bundler_client()`, `create_paymaster()`, `create_smart_account()`
-
-#### Documentation & Examples
-- **TypeScript Example**: `examples/typescript/clients/erc4337/`
-- **Go Example**: `examples/go/clients/erc4337/`
-- **Python Example**: `examples/python/erc4337-gasless/`
-
-### Technical Details
-
-#### Supported Chains
-| Chain | Chain ID | Pimlico | Alchemy |
-|-------|----------|---------|---------|
-| Ethereum Mainnet | 1 | ✓ | ✓ |
-| Ethereum Sepolia | 11155111 | ✓ | ✓ |
-| Base | 8453 | ✓ | ✓ |
-| Base Sepolia | 84532 | ✓ | ✓ |
-| Optimism | 10 | ✓ | ✓ |
-| Arbitrum One | 42161 | ✓ | ✓ |
-| Polygon | 137 | ✓ | ✓ |
-
-#### EntryPoint Addresses
-- v0.7: `0x0000000071727De22E5E9d8BAf0edAc6f37da032`
-- v0.6 (legacy): `0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789`
-
-#### Safe 4337 Module Addresses (v0.3.0)
-- Module: `0xa581c4A4DB7175302464fF3C06380BC3270b4037`
-- Module Setup: `0x2dd68b007B46fBe91B9A7c3EDa5A7a1063cB5b47`
-- Singleton: `0x29fcB43b46531BcA003ddC8FCB67FFE91900C762`
-- Proxy Factory: `0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67`
-
-#### Gasless Transaction Flow
-1. Create Safe smart account (counterfactual address)
-2. Build UserOperation with call data
-3. Estimate gas via bundler
-4. Request paymaster sponsorship
-5. Sign UserOperation hash
-6. Submit to bundler
-7. Wait for on-chain confirmation
-
----
-
-## [2026-01-09] - TRON Blockchain Support
-
-### Added
-
-#### TypeScript SDK (`@t402/tron` v1.0.0)
-- **TRON Network Support**: Full support for TRON mainnet (`tron:mainnet`), Nile testnet (`tron:nile`), and Shasta testnet (`tron:shasta`)
-- **USDT TRC-20 Payments**: TIP-20 compatible token transfers for USDT payments
-- **Register Functions**: Convenience functions for easy scheme integration
-  - `registerExactTronClientScheme` - Client-side registration with signer
-  - `registerExactTronServerScheme` - Resource server registration
-  - `registerExactTronFacilitatorScheme` - Facilitator registration
-- **Wildcard Network Registration**: Support for `tron:*` pattern matching
-- **Sub-path Exports**: Separate entry points for client, server, and facilitator modules
-- **Signer Interfaces**: `ClientTronSigner` and `FacilitatorTronSigner` for wallet integration
-- **Utility Functions**: Address validation (base58check), amount conversion, transaction building
-
-#### Python SDK (`t402` v1.2.0)
-- **TRON Network Support**: Full support for all three TRON networks
-- **Network Constants**: `TRON_MAINNET`, `TRON_NILE`, `TRON_SHASTA` identifiers
-- **USDT Addresses**: Pre-configured mainnet and testnet USDT TRC-20 addresses
-- **Pydantic Models**: Type-safe `TronAuthorization` and `TronPaymentPayload` models
-- **Network Detection**: `is_tron_network()` and updated `get_network_type()` functions
-- **Price Processing**: Automatic TRON handling in `parse_money()` and `process_price_to_atomic_amount()`
-- **Utility Functions**: Address validation, amount parsing/formatting
-
-#### Go SDK (`github.com/t402-io/t402/go` v1.2.0)
-- **TRON Mechanism**: Complete TRON payment mechanism implementation
-- **Client Scheme**: `ExactTronScheme` for creating TRON payment payloads
-- **Server Scheme**: Payment requirement enhancement with TRC-20 metadata
-- **Facilitator Scheme**: Transaction verification, settlement, and confirmation
-- **Type Definitions**: `ExactTronPayload`, `ExactTronAuthorization`, signer interfaces
-- **Network Configuration**: Pre-configured mainnet and testnet settings
-
-#### Documentation & Examples
-- **README Updates**: Added TRON to "Supported Networks" section
-- **Quick Start Examples**: Updated multi-network code samples for all SDKs
-- **Examples Directory**: Complete working examples for all SDKs
-  - TypeScript client (`examples/typescript/clients/tron/`)
-  - TypeScript server (`examples/typescript/servers/tron/`)
-  - Go client (`examples/go/clients/tron/`)
-  - Go server (`examples/go/servers/tron/`)
-  - Python Flask server (`examples/python/flask-tron/`)
-
-### Technical Details
-
-#### Network Identifiers (CAIP-2)
-- TRON Mainnet: `tron:mainnet`
-- TRON Nile Testnet: `tron:nile`
-- TRON Shasta Testnet: `tron:shasta`
-
-#### USDT TRC-20 Contract Addresses
-- Mainnet: `TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t`
-- Nile: `TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf`
-- Shasta: `TG3XXyExBkPp9nzdajDZsozEu4BkaSJozs`
-
-#### Address Format
-- Base58check encoded
-- 34 characters, starts with 'T'
-- Regex: `^T[1-9A-HJ-NP-Za-km-z]{33}$`
-
-#### Payment Flow
-1. Client receives 402 Payment Required with TRON payment details
-2. Client builds TRC-20 transfer transaction (TriggerSmartContract)
-3. Client signs the transaction with their wallet
-4. Client sends signed transaction JSON in `PAYMENT-SIGNATURE` header
-5. Server/Facilitator verifies the signature and transfer details
-6. Facilitator broadcasts the transaction to TRON network
-7. Server returns the requested resource
-
----
-
-## [2026-01-09] - TON Blockchain Support
-
-### Added
-
-#### TypeScript SDK (`@t402/ton` v2.1.0)
-- **TON Network Support**: Full support for TON mainnet (`ton:mainnet`) and testnet (`ton:testnet`)
-- **USDT Jetton Payments**: TEP-74 compatible Jetton transfers for USDT payments
-- **Register Functions**: Convenience functions for easy scheme integration
-  - `registerExactTonClientScheme` - Client-side registration with signer
-  - `registerExactTonServerScheme` - Resource server registration
-  - `registerExactTonFacilitatorScheme` - Facilitator registration
-- **Wildcard Network Registration**: Support for `ton:*` pattern matching
-- **Sub-path Exports**: Separate entry points for client, server, and facilitator modules
-- **Signer Interfaces**: `ClientTonSigner` and `FacilitatorTonSigner` for wallet integration
-- **Utility Functions**: Address validation, Jetton amount conversion, BOC message building
-
-#### Python SDK (`t402` v1.1.0)
-- **TON Network Support**: Full support for TON mainnet and testnet
-- **Network Constants**: `TON_MAINNET`, `TON_TESTNET` identifiers
-- **USDT Addresses**: Pre-configured mainnet and testnet USDT Jetton addresses
-- **Pydantic Models**: Type-safe `ExactTonPayload` and `ExactTonAuthorization` models
-- **Flask Integration**: TON paywall template with wallet connection UI
-- **FastAPI Integration**: Middleware support for TON networks
-- **Utility Functions**: Address validation, network detection, amount conversion
-
-#### Go SDK (`github.com/t402-io/t402/go` v1.1.0)
-- **TON Mechanism**: Complete TON payment mechanism implementation
-- **Client Scheme**: `ExactTonScheme` for creating TON payment payloads
-- **Server Scheme**: Payment verification and requirement enhancement
-- **Facilitator Scheme**: Transaction settlement and confirmation
-- **Type Definitions**: `ExactTonPayload`, `ExactTonAuthorization`, signer interfaces
-- **Network Configuration**: Pre-configured mainnet and testnet settings
-
-#### Documentation
-- **README Updates**: Added "Supported Networks" section with EVM, SVM, and TON
-- **Quick Start Examples**: Code samples for TypeScript, Python, and Go
-- **Examples Directory**: Complete working examples for all SDKs
-  - TypeScript client and server examples
-  - Go client and server examples
-  - Python Flask server example
-
-### Technical Details
-
-#### Network Identifiers (CAIP-2)
-- TON Mainnet: `ton:mainnet`
-- TON Testnet: `ton:testnet`
-
-#### USDT Jetton Addresses
-- Mainnet: `EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs`
-- Testnet: `kQBqSpvo4S87mX9tTc4FX3Sfqf4uSp3Tx-Fz4RBUfTRWBx`
-
-#### Payment Flow
-1. Client receives 402 Payment Required with TON payment details
-2. Client creates Jetton transfer message (BOC format)
-3. Client signs the message with their wallet
-4. Client sends signed BOC in `PAYMENT-SIGNATURE` header
-5. Server/Facilitator verifies the signature and transfer details
-6. Facilitator broadcasts the transaction to TON network
-7. Server returns the requested resource
-
----
-
-## [2026-01-09] - Go SDK v1.0.0
-
-### Added
-- Initial Go SDK release
-- EVM and SVM mechanism support
-- HTTP client with automatic payment handling
-- Gin middleware for payment-protected endpoints
-- HTTPFacilitatorClient for payment verification and settlement
-
----
-
-## [2026-01-08] - Python SDK v1.0.0
-
-### Added
-- Initial Python SDK release
-- Flask and FastAPI middleware support
-- EVM network support with USDC payments
-- Paywall templates for browser-based payments
-- Pydantic models for type-safe configurations
-
----
-
-## [2025-12-15] - TypeScript SDK v2.0.0
-
-### Added
-- Protocol v2 support with simplified payment flow
-- EVM mechanism with ERC-4337 gasless transactions
-- SVM mechanism for Solana payments
-- Express and Hono middleware
-- Facilitator server implementation
-- WDK (Wallet Development Kit) integration
-
-### Changed
-- Unified scheme registration API
-- Improved error handling and validation
-- Streamlined payment payload structure
-
----
-
-## Release Links
-
-### npm (TypeScript)
-- [@t402/core](https://www.npmjs.com/package/@t402/core)
-- [@t402/evm](https://www.npmjs.com/package/@t402/evm)
-- [@t402/svm](https://www.npmjs.com/package/@t402/svm)
-- [@t402/ton](https://www.npmjs.com/package/@t402/ton)
-- [@t402/tron](https://www.npmjs.com/package/@t402/tron)
-
-### PyPI (Python)
-- [t402](https://pypi.org/project/t402/)
-
-### Go
-- [github.com/t402-io/t402/go](https://github.com/t402-io/t402/tree/main/go)
-
----
-
-## Migration Guides
-
-### Upgrading to TON Support
-
-#### TypeScript
-```typescript
-// Add TON to your existing client
-import { registerExactTonClientScheme } from "@t402/ton";
-
-registerExactTonClientScheme(client, {
-  signer: tonSigner,
-  getJettonWalletAddress: async (owner, master) => jettonWalletAddress,
-});
+### Payload Structure
+
+```diff
+// v1.x
+const payload = {
+  t402Version: 1,
+  scheme: "exact",
+  network: "base-sepolia",
+  payload: { ... }
+}
+
+// v2.x
+const payload = {
+  t402Version: 2,
+  accepted: {
+    scheme: "exact",
+    network: "eip155:84532",
+    ...
+  },
+  payload: { ... },
+  resource: { url: "...", description: "...", mimeType: "..." }
+}
 ```
 
-#### Python
-```python
-# TON networks are automatically supported
-# Just use ton:mainnet or ton:testnet in your routes
-from t402.ton import TON_MAINNET
+### Amount Field
 
-paywall = create_paywall(
-    routes={
-        "GET /api": {
-            "price": "$0.01",
-            "network": TON_MAINNET,
-            "pay_to": ton_address,
-        },
-    },
-    facilitator_url=facilitator_url,
-)
+```diff
+const requirements = {
+-  maxAmountRequired: "1000000",
++  amount: "1000000",
+  ...
+}
 ```
 
-#### Go
-```go
-// Add TON scheme to your client
-import tonclient "github.com/t402-io/t402/go/mechanisms/ton/exact/client"
+---
 
-tonScheme := tonclient.NewExactTonScheme(signer)
-client.Register(t402.Network("ton:mainnet"), tonScheme)
-```
+## Links
 
-### Upgrading to TRON Support
-
-#### TypeScript
-```typescript
-// Install @t402/tron package
-// pnpm add @t402/tron
-
-import { registerExactTronClientScheme } from "@t402/tron";
-
-// Add TRON to your existing client
-registerExactTronClientScheme(client, {
-  signer: tronSigner,
-});
-```
-
-#### Python
-```python
-# TRON networks are automatically supported in t402 v1.2.0+
-# Just use tron:mainnet, tron:nile, or tron:shasta in your routes
-from t402.tron import TRON_MAINNET
-
-paywall = create_paywall(
-    routes={
-        "GET /api": {
-            "price": "$0.01",
-            "network": TRON_MAINNET,
-            "pay_to": tron_address,
-        },
-    },
-    facilitator_url=facilitator_url,
-)
-```
-
-#### Go
-```go
-// Add TRON scheme to your client
-import tronclient "github.com/t402-io/t402/go/mechanisms/tron/exact/client"
-
-tronScheme := tronclient.NewExactTronScheme(signer)
-client.Register(t402.Network("tron:mainnet"), tronScheme)
-```
+- **Website**: https://t402.io
+- **Documentation**: https://docs.t402.io
+- **GitHub**: https://github.com/t402-io/t402
+- **npm**: https://www.npmjs.com/org/t402
