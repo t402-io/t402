@@ -244,8 +244,9 @@ func (s *Signer) SignMessage(message []byte) ([]byte, error) {
 	return signature, nil
 }
 
-// getClient returns an Ethereum client for a chain.
-func (s *Signer) getClient(ctx context.Context, chain string) (*ethclient.Client, error) {
+// GetClient returns an Ethereum client for a chain.
+// This method is part of the WdkSigner interface for bridge integration.
+func (s *Signer) GetClient(ctx context.Context, chain string) (*ethclient.Client, error) {
 	// Check if client already exists
 	if client, ok := s.clients[chain]; ok {
 		return client, nil
@@ -267,13 +268,31 @@ func (s *Signer) getClient(ctx context.Context, chain string) (*ethclient.Client
 	return client, nil
 }
 
+// GetPrivateKeyBytes returns the private key bytes for signing transactions.
+// This method is part of the WdkSigner interface for bridge integration.
+func (s *Signer) GetPrivateKeyBytes() ([]byte, error) {
+	if !s.initialized {
+		return nil, SignerError(ErrorCodeSignerNotInitialized, "signer not initialized")
+	}
+	return crypto.FromECDSA(s.privateKey), nil
+}
+
+// GetChainID returns the chain ID for a chain name.
+// This method is part of the WdkSigner interface for bridge integration.
+func (s *Signer) GetChainID(chain string) int64 {
+	if config, ok := s.chains[chain]; ok {
+		return config.ChainID
+	}
+	return 1 // Default to Ethereum mainnet
+}
+
 // GetNativeBalance returns the native token balance for a chain.
 func (s *Signer) GetNativeBalance(ctx context.Context, chain string) (*big.Int, error) {
 	if !s.initialized {
 		return nil, SignerError(ErrorCodeSignerNotInitialized, "signer not initialized")
 	}
 
-	client, err := s.getClient(ctx, chain)
+	client, err := s.GetClient(ctx, chain)
 	if err != nil {
 		return nil, err
 	}
@@ -296,7 +315,7 @@ func (s *Signer) GetTokenBalance(ctx context.Context, chain, tokenAddress string
 		return nil, BalanceError(ErrorCodeInvalidTokenAddress, fmt.Sprintf("invalid token address: %s", tokenAddress), chain, tokenAddress, nil)
 	}
 
-	client, err := s.getClient(ctx, chain)
+	client, err := s.GetClient(ctx, chain)
 	if err != nil {
 		return nil, err
 	}
