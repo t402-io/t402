@@ -4,6 +4,17 @@ All notable changes to the T402 Go SDK will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- **WDK Package** (`wdk/`) - Wallet Development Kit integration
+  - `Signer` for BIP-39 seed phrase wallet derivation
+  - Multi-chain EVM support with HD wallet derivation
+  - EIP-712 typed data signing for T402 payments
+  - Personal message signing
+  - Token balance fetching (native, ERC20, USDT0, USDC)
+  - Chain configuration utilities
+  - `GenerateSeedPhrase()` and `ValidateSeedPhrase()` helpers
+  - `FormatTokenAmount()` for human-readable amounts
+
 ## [1.3.1] - 2026-01-16
 
 ### Fixed

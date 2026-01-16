@@ -12,6 +12,7 @@ from t402.networks import (
     is_ton_network,
     is_tron_network,
     is_evm_network,
+    is_svm_network,
     get_network_type,
 )
 from t402.types import (
@@ -61,6 +62,24 @@ from t402.tron import (
     parse_amount as parse_tron_amount,
     format_amount as format_tron_amount,
     is_testnet as is_tron_testnet,
+)
+from t402.svm import (
+    SOLANA_MAINNET,
+    SOLANA_DEVNET,
+    SOLANA_TESTNET,
+    USDC_MAINNET_ADDRESS as SVM_USDC_MAINNET_ADDRESS,
+    USDC_DEVNET_ADDRESS as SVM_USDC_DEVNET_ADDRESS,
+    validate_svm_address,
+    get_usdc_address as get_svm_usdc_address,
+    get_network_config as get_svm_network_config,
+    get_default_asset as get_svm_default_asset,
+    prepare_svm_payment_header,
+    parse_amount as parse_svm_amount,
+    format_amount as format_svm_amount,
+    is_testnet as is_svm_testnet,
+    validate_transaction as validate_svm_transaction,
+    normalize_network as normalize_svm_network,
+    get_rpc_url as get_svm_rpc_url,
 )
 from t402.paywall import (
     get_paywall_html,
@@ -168,6 +187,7 @@ __all__ = [
     "is_ton_network",
     "is_tron_network",
     "is_evm_network",
+    "is_svm_network",
     "get_network_type",
     # Types
     "PaymentRequirements",
@@ -215,6 +235,23 @@ __all__ = [
     "parse_tron_amount",
     "format_tron_amount",
     "is_tron_testnet",
+    # SVM (Solana) utilities
+    "SOLANA_MAINNET",
+    "SOLANA_DEVNET",
+    "SOLANA_TESTNET",
+    "SVM_USDC_MAINNET_ADDRESS",
+    "SVM_USDC_DEVNET_ADDRESS",
+    "validate_svm_address",
+    "get_svm_usdc_address",
+    "get_svm_network_config",
+    "get_svm_default_asset",
+    "prepare_svm_payment_header",
+    "parse_svm_amount",
+    "format_svm_amount",
+    "is_svm_testnet",
+    "validate_svm_transaction",
+    "normalize_svm_network",
+    "get_svm_rpc_url",
     # Paywall
     "get_paywall_html",
     "get_paywall_template",
