@@ -7,36 +7,42 @@ const languages = [
   { id: "typescript", label: "TypeScript", extension: ".ts" },
   { id: "python", label: "Python", extension: ".py" },
   { id: "go", label: "Go", extension: ".go" },
+  { id: "java", label: "Java", extension: ".java" },
 ];
 
 const codeExamples: Record<string, { server: string; client: string }> = {
   typescript: {
-    server: `import { t402 } from "@t402/sdk";
+    server: `import { paymentMiddleware } from "@t402/express";
 import express from "express";
 
 const app = express();
 
 // Protect any endpoint with USDT payments
-app.get("/api/premium", t402.middleware({
-  amount: "1.00",       // $1.00 USDT
-  recipient: "0x...",   // Your wallet
-  chains: ["base", "ethereum", "ton"]
-}), (req, res) => {
+app.use(paymentMiddleware({
+  "GET /api/premium": {
+    price: "$1.00",
+    network: "eip155:8453",  // Base
+    payTo: "0x..."
+  }
+}));
+
+app.get("/api/premium", (req, res) => {
   res.json({ data: "Premium content" });
 });`,
-    client: `import { t402 } from "@t402/sdk";
+    client: `import { wrapFetchWithPayment } from "@t402/fetch";
+import { registerExactEvmScheme } from "@t402/evm";
 
-// Initialize with user's wallet
-const client = t402.client({
-  wallet: window.ethereum,  // or TON/TRON wallet
-});
+// Register payment mechanism
+const client = new t402Client();
+registerExactEvmScheme(client, { signer });
 
-// Make authenticated request
-const response = await client.fetch(
+// Wrap fetch for automatic payments
+const fetchWithPayment = wrapFetchWithPayment(fetch, client);
+
+// Make request - payment handled automatically
+const response = await fetchWithPayment(
   "https://api.example.com/api/premium"
-);
-
-// Payment handled automatically via headers`,
+);`,
   },
   python: {
     server: `from t402 import T402Middleware
@@ -48,7 +54,7 @@ app = FastAPI()
 middleware = T402Middleware(
     amount="1.00",        # $1.00 USDT
     recipient="0x...",    # Your wallet
-    chains=["base", "ethereum", "ton"]
+    network="eip155:8453" # Base
 )
 
 @app.get("/api/premium")
@@ -60,7 +66,7 @@ async def premium_content():
 # Initialize with wallet
 client = T402Client(
     private_key="...",
-    chain="base"
+    network="eip155:8453"  # Base
 )
 
 # Make authenticated request
@@ -75,15 +81,15 @@ response = await client.fetch(
 
 import (
     "net/http"
-    "github.com/t402/go-sdk"
+    t402 "github.com/t402-io/t402/go"
 )
 
 func main() {
     // Create payment middleware
     middleware := t402.NewMiddleware(t402.Config{
-        Amount:    "1.00",      // $1.00 USDT
-        Recipient: "0x...",     // Your wallet
-        Chains:    []string{"base", "ethereum"},
+        Amount:    "1.00",
+        Recipient: "0x...",
+        Network:   "eip155:8453",  // Base
     })
 
     // Protect endpoint
@@ -93,14 +99,14 @@ func main() {
     client: `package main
 
 import (
-    "github.com/t402/go-sdk"
+    t402 "github.com/t402-io/t402/go"
 )
 
 func main() {
     // Initialize client
     client := t402.NewClient(t402.ClientConfig{
         PrivateKey: "...",
-        Chain:      "base",
+        Network:    "eip155:8453",  // Base
     })
 
     // Make authenticated request
@@ -109,6 +115,41 @@ func main() {
     )
     // Payment handled automatically
 }`,
+  },
+  java: {
+    server: `import io.t402.spring.EnableT402;
+import io.t402.spring.T402Payment;
+
+@EnableT402
+@SpringBootApplication
+public class App {
+    public static void main(String[] args) {
+        SpringApplication.run(App.class, args);
+    }
+}
+
+@RestController
+public class PremiumController {
+    @T402Payment(amount = "1.00", network = "eip155:8453")
+    @GetMapping("/api/premium")
+    public Map<String, String> premium() {
+        return Map.of("data", "Premium content");
+    }
+}`,
+    client: `import io.t402.client.T402HttpClient;
+
+// Initialize client
+T402HttpClient client = new T402HttpClient.Builder()
+    .privateKey("...")
+    .network("eip155:8453")  // Base
+    .build();
+
+// Make authenticated request
+HttpResponse<String> response = client.get(
+    "https://api.example.com/api/premium"
+);
+
+// Payment handled automatically`,
   },
 };
 
@@ -223,7 +264,7 @@ export function CodeExamples() {
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-foreground-secondary">
             Add USDT payments to your API in minutes with our SDKs for
-            TypeScript, Python, and Go.
+            TypeScript, Python, Go, and Java.
           </p>
         </motion.div>
 
@@ -316,9 +357,10 @@ export function CodeExamples() {
           </p>
           <div className="mx-auto inline-flex items-center gap-3 rounded-lg border border-border bg-background-secondary px-4 py-3">
             <span className="font-mono text-sm text-foreground-secondary">
-              {activeLanguage === "typescript" && "npm install @t402/sdk"}
+              {activeLanguage === "typescript" && "npm install @t402/express @t402/fetch"}
               {activeLanguage === "python" && "pip install t402"}
-              {activeLanguage === "go" && "go get github.com/t402/go-sdk"}
+              {activeLanguage === "go" && "go get github.com/t402-io/t402/go"}
+              {activeLanguage === "java" && "io.t402:t402-spring-boot-starter:1.1.0"}
             </span>
           </div>
         </motion.div>

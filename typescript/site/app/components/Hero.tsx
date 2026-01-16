@@ -142,7 +142,7 @@ export function Hero() {
           >
             <span className="h-2 w-2 rounded-full bg-brand animate-pulse" />
             <span className="text-sm text-foreground-secondary">
-              Now supporting TON blockchain
+              Production-ready across 10 blockchains
             </span>
           </motion.div>
 
@@ -216,22 +216,20 @@ export function Hero() {
                   {"\n"}
                   <span className="text-[#C586C0]">import</span>
                   <span className="text-foreground"> {"{ "}</span>
-                  <span className="text-[#9CDCFE]">t402</span>
+                  <span className="text-[#9CDCFE]">paymentMiddleware</span>
                   <span className="text-foreground">{" }"} </span>
                   <span className="text-[#C586C0]">from</span>
-                  <span className="text-[#CE9178]"> "@t402/sdk"</span>
+                  <span className="text-[#CE9178]"> "@t402/express"</span>
                   <span className="text-foreground">;</span>
                   {"\n\n"}
-                  <span className="text-[#569CD6]">const</span>
-                  <span className="text-[#9CDCFE]"> payment</span>
-                  <span className="text-foreground"> = </span>
-                  <span className="text-[#C586C0]">await</span>
-                  <span className="text-[#DCDCAA]"> t402</span>
+                  <span className="text-[#9CDCFE]">app</span>
                   <span className="text-foreground">.</span>
-                  <span className="text-[#DCDCAA]">verify</span>
+                  <span className="text-[#DCDCAA]">use</span>
                   <span className="text-foreground">(</span>
-                  <span className="text-[#9CDCFE]">request</span>
-                  <span className="text-foreground">);</span>
+                  <span className="text-[#DCDCAA]">paymentMiddleware</span>
+                  <span className="text-foreground">(</span>
+                  <span className="text-[#9CDCFE]">config</span>
+                  <span className="text-foreground">));</span>
                 </code>
               </pre>
             </div>

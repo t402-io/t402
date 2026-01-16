@@ -73,7 +73,7 @@ app.use(paymentMiddleware({
     icon: "python",
     installCommand: "pip install t402",
     packageManager: "pip",
-    version: "2.0.0",
+    version: "1.7.1",
     docsUrl: "https://docs.t402.io/sdks/python",
     githubUrl: "https://github.com/t402-io/t402/tree/main/python",
     features: [
@@ -112,7 +112,7 @@ app = middleware(app)`,
     icon: "go",
     installCommand: "go get github.com/t402-io/t402/go",
     packageManager: "go",
-    version: "2.0.0",
+    version: "1.5.0",
     docsUrl: "https://docs.t402.io/sdks/go",
     githubUrl: "https://github.com/t402-io/t402/tree/main/go",
     features: [
@@ -142,6 +142,47 @@ middleware := t402.NewMiddleware(t402.Config{
 
 http.Handle("/", middleware(handler))`,
     color: "#00ADD8",
+  },
+  {
+    id: "java",
+    name: "Java",
+    language: "Java 17+",
+    description:
+      "Enterprise-ready Java SDK with Spring Boot integration. Perfect for enterprise applications and microservices.",
+    icon: "java",
+    installCommand: "io.t402:t402-spring-boot-starter:1.1.0",
+    packageManager: "maven",
+    version: "1.1.0",
+    docsUrl: "https://docs.t402.io/sdks/java",
+    githubUrl: "https://github.com/t402-io/t402/tree/main/java",
+    features: [
+      "Spring Boot auto-config",
+      "Annotation-based payments",
+      "WebFlux reactive support",
+      "Kotlin coroutines",
+      "EVM chain support",
+      "Enterprise-grade security",
+    ],
+    codeExample: `import io.t402.spring.EnableT402;
+import io.t402.spring.T402Payment;
+
+@EnableT402
+@SpringBootApplication
+public class App {
+    public static void main(String[] args) {
+        SpringApplication.run(App.class, args);
+    }
+}
+
+@RestController
+public class ApiController {
+    @T402Payment(amount = "0.01", network = "base")
+    @GetMapping("/api/data")
+    public Map<String, String> getData() {
+        return Map.of("data", "Premium content");
+    }
+}`,
+    color: "#ED8B00",
   },
 ];
 
@@ -189,7 +230,9 @@ export const supportedChains = [
   { name: "Base", id: "base", color: "#0052FF" },
   { name: "Arbitrum", id: "arbitrum", color: "#28A0F0" },
   { name: "Optimism", id: "optimism", color: "#FF0420" },
-  { name: "Polygon", id: "polygon", color: "#8247E5" },
+  { name: "Ink", id: "ink", color: "#7B3FE4" },
+  { name: "Berachain", id: "berachain", color: "#FF8C00" },
+  { name: "Unichain", id: "unichain", color: "#FF007A" },
   { name: "Solana", id: "solana", color: "#9945FF" },
   { name: "TON", id: "ton", color: "#0098EA" },
   { name: "TRON", id: "tron", color: "#FF0000" },

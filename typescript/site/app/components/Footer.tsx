@@ -30,16 +30,17 @@ function XIcon({ className }: { className?: string }) {
 
 const footerLinks = {
   product: [
-    { label: "SDKs", href: "https://docs.t402.io/sdks" },
-    { label: "Documentation", href: "https://docs.t402.io" },
-    { label: "Ecosystem", href: "/ecosystem" },
-    { label: "Playground", href: "https://docs.t402.io/playground" },
+    { label: "SDKs", href: "/sdks" },
+    { label: "Chains", href: "/chains" },
+    { label: "Features", href: "/features" },
+    { label: "Playground", href: "/playground" },
   ],
   developers: [
-    { label: "Quickstart", href: "https://docs.t402.io/quickstart" },
+    { label: "Documentation", href: "https://docs.t402.io" },
     { label: "TypeScript SDK", href: "https://docs.t402.io/sdks/typescript" },
     { label: "Python SDK", href: "https://docs.t402.io/sdks/python" },
     { label: "Go SDK", href: "https://docs.t402.io/sdks/go" },
+    { label: "Java SDK", href: "https://docs.t402.io/sdks/java" },
   ],
   resources: [
     {
@@ -49,7 +50,7 @@ const footerLinks = {
     },
     {
       label: "Whitepaper",
-      href: "https://www.t402.org/t402-whitepaper.pdf",
+      href: "/x402-whitepaper.pdf",
       external: true,
     },
     { label: "Blog", href: "/writing" },
@@ -58,8 +59,10 @@ const footerLinks = {
   chains: [
     { label: "Ethereum", href: "https://docs.t402.io/chains/ethereum" },
     { label: "Base", href: "https://docs.t402.io/chains/base" },
+    { label: "Arbitrum", href: "https://docs.t402.io/chains/arbitrum" },
     { label: "TON", href: "https://docs.t402.io/chains/ton" },
     { label: "TRON", href: "https://docs.t402.io/chains/tron" },
+    { label: "Solana", href: "https://docs.t402.io/chains/solana" },
   ],
 };
 

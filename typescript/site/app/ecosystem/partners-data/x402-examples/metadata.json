@@ -1,7 +1,0 @@
-{
-  "name": "t402 Example Gallery",
-  "category": "Learning & Community Resources",
-  "logoUrl": "/logos/t402-examples.png",
-  "description": "A collection of t402 examples including Next.js integration, Go Proxy, agent use-cases, authentication flows, and more. Explore practical code samples to accelerate your t402 journey.",
-  "websiteUrl": "https://github.com/t402-io/t402/tree/main/examples/typescript"
-}

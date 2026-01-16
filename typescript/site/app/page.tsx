@@ -5,7 +5,6 @@ import { Stats } from "./components/Stats";
 import { HowItWorks } from "./components/HowItWorks";
 import { CodeExamples } from "./components/CodeExamples";
 import { FeatureDeepDives } from "./components/FeatureDeepDives";
-import { EcosystemPreview } from "./components/EcosystemPreview";
 import { Testimonials } from "./components/Testimonials";
 import { UseCasesPreview } from "./components/UseCasesPreview";
 import { CTA } from "./components/CTA";
@@ -21,7 +20,6 @@ export default function HomePage() {
       <HowItWorks />
       <CodeExamples />
       <FeatureDeepDives />
-      <EcosystemPreview />
       <Testimonials />
       <UseCasesPreview />
       <CTA />
