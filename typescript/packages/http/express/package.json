@@ -40,7 +40,7 @@
     "vitest": "^3.0.5"
   },
   "dependencies": {
-    "@solana/kit": "^2.1.1",
+    "@solana/kit": "^5.4.0",
     "@t402/core": "workspace:^",
     "@t402/extensions": "workspace:^",
     "viem": "^2.44.2",
