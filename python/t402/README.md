@@ -260,6 +260,39 @@ is_valid = validate_tron_address("T...")
 config = get_tron_network_config(TRON_MAINNET)
 ```
 
+### Solana (SVM) Network
+
+```python
+from t402 import (
+    SOLANA_MAINNET,
+    SOLANA_DEVNET,
+    SOLANA_TESTNET,
+    validate_svm_address,
+    prepare_svm_payment_header,
+    get_svm_network_config,
+    get_svm_usdc_address,
+    is_svm_network,
+)
+
+# Validate address
+is_valid = validate_svm_address("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v")
+
+# Get network config
+config = get_svm_network_config(SOLANA_MAINNET)
+
+# Get USDC mint address
+usdc_mint = get_svm_usdc_address(SOLANA_MAINNET)
+
+# Check if network is Solana
+is_solana = is_svm_network("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")
+```
+
+Install with optional Solana dependencies:
+
+```bash
+pip install t402[svm]
+```
+
 ## ERC-4337 Account Abstraction
 
 Gasless payments using smart accounts and paymasters:
@@ -383,6 +416,7 @@ signature = await signer.sign_payment(
 | `is_evm_network(network)` | Check if EVM network |
 | `is_ton_network(network)` | Check if TON network |
 | `is_tron_network(network)` | Check if TRON network |
+| `is_svm_network(network)` | Check if Solana SVM network |
 | `get_network_type(network)` | Get network type string |
 
 ### Facilitator Client

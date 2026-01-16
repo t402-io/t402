@@ -4,6 +4,18 @@ All notable changes to the T402 Python SDK will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- **SVM (Solana) Support**: Complete Solana blockchain integration
+  - `validate_svm_address()` for Solana address validation
+  - `prepare_svm_payment_header()` for payment header preparation
+  - `get_svm_network_config()` for network configuration
+  - `get_svm_usdc_address()` to get USDC mint address
+  - `normalize_svm_network()` for V1 to V2 network identifier conversion
+  - `validate_svm_transaction()` for transaction validation
+  - Support for Mainnet, Devnet, and Testnet (CAIP-2 format)
+  - USDC token mint addresses for all networks
+  - Optional `solana` and `solders` dependencies via `pip install t402[svm]`
+
 ## [1.5.3] - 2026-01-16
 
 ### Fixed
