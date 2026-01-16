@@ -1,5 +1,5 @@
 # Package version
-__version__ = "1.5.3"
+__version__ = "1.6.2"
 
 # Re-export commonly used items for convenience
 from t402.common import (
@@ -16,14 +16,59 @@ from t402.networks import (
     get_network_type,
 )
 from t402.types import (
+    # Protocol version constants
+    T402_VERSION,
+    T402_VERSION_V1,
+    T402_VERSION_V2,
+    Network,
+    # V1 Types (Legacy)
     PaymentRequirements,
+    PaymentRequirementsV1,
     PaymentPayload,
+    PaymentPayloadV1,
+    t402PaymentRequiredResponse,
+    t402PaymentRequiredResponseV1,
+    # V2 Types (Current)
+    ResourceInfo,
+    PaymentRequirementsV2,
+    PaymentRequiredV2,
+    PaymentPayloadV2,
+    PaymentResponseV2,
+    # Facilitator Types
+    SupportedKind,
+    SupportedResponse,
+    # Common Types
     VerifyResponse,
     SettleResponse,
     TonAuthorization,
     TonPaymentPayload,
     TronAuthorization,
     TronPaymentPayload,
+)
+from t402.encoding import (
+    # Base64 utilities
+    safe_base64_encode,
+    safe_base64_decode,
+    is_valid_base64,
+    # Header name constants
+    HEADER_PAYMENT_SIGNATURE,
+    HEADER_PAYMENT_REQUIRED,
+    HEADER_PAYMENT_RESPONSE,
+    HEADER_X_PAYMENT,
+    HEADER_X_PAYMENT_RESPONSE,
+    # Encoding/Decoding functions
+    encode_payment_signature_header,
+    decode_payment_signature_header,
+    encode_payment_required_header,
+    decode_payment_required_header,
+    encode_payment_response_header,
+    decode_payment_response_header,
+    # Header detection utilities
+    get_payment_header_name,
+    get_payment_response_header_name,
+    detect_protocol_version_from_headers,
+    extract_payment_from_headers,
+    extract_payment_required_from_response,
 )
 from t402.facilitator import FacilitatorClient, FacilitatorConfig
 from t402.exact import (
@@ -200,6 +245,50 @@ from t402.wdk import (
     BalanceError as WDKBalanceError,
     WDKErrorCode,
 )
+from t402.schemes import (
+    # Interfaces
+    SchemeNetworkClient,
+    SchemeNetworkServer,
+    SchemeNetworkFacilitator,
+    BaseSchemeNetworkClient,
+    BaseSchemeNetworkServer,
+    BaseSchemeNetworkFacilitator,
+    # Registry
+    SchemeRegistry,
+    ClientSchemeRegistry,
+    ServerSchemeRegistry,
+    FacilitatorSchemeRegistry,
+    get_client_registry,
+    get_server_registry,
+    get_facilitator_registry,
+    reset_global_registries,
+)
+from t402.schemes.evm import (
+    ExactEvmClientScheme,
+    ExactEvmServerScheme,
+    EvmSigner,
+)
+from t402.schemes.ton import (
+    ExactTonClientScheme,
+    ExactTonServerScheme,
+    TonSigner,
+)
+from t402.schemes.tron import (
+    ExactTronClientScheme,
+    ExactTronServerScheme,
+    TronSigner,
+)
+
+# FastAPI Integration
+from t402.fastapi import (
+    PaymentMiddleware as FastAPIPaymentMiddleware,
+    PaymentConfig as FastAPIPaymentConfig,
+    PaymentDetails as FastAPIPaymentDetails,
+    PaymentRequired,
+    require_payment as fastapi_require_payment,
+    get_payment_details,
+    settle_payment,
+)
 
 def hello() -> str:
     return "Hello from t402!"
@@ -211,6 +300,11 @@ __all__ = [
     # Core
     "hello",
     "t402_VERSION",
+    # Protocol Version Constants
+    "T402_VERSION",
+    "T402_VERSION_V1",
+    "T402_VERSION_V2",
+    "Network",
     # Common utilities
     "parse_money",
     "process_price_to_atomic_amount",
@@ -221,15 +315,52 @@ __all__ = [
     "is_evm_network",
     "is_svm_network",
     "get_network_type",
-    # Types
+    # V1 Types (Legacy)
     "PaymentRequirements",
+    "PaymentRequirementsV1",
     "PaymentPayload",
+    "PaymentPayloadV1",
+    "t402PaymentRequiredResponse",
+    "t402PaymentRequiredResponseV1",
+    # V2 Types (Current)
+    "ResourceInfo",
+    "PaymentRequirementsV2",
+    "PaymentRequiredV2",
+    "PaymentPayloadV2",
+    "PaymentResponseV2",
+    # Facilitator Types
+    "SupportedKind",
+    "SupportedResponse",
+    # Common Types
     "VerifyResponse",
     "SettleResponse",
     "TonAuthorization",
     "TonPaymentPayload",
     "TronAuthorization",
     "TronPaymentPayload",
+    # Encoding utilities
+    "safe_base64_encode",
+    "safe_base64_decode",
+    "is_valid_base64",
+    # Header constants
+    "HEADER_PAYMENT_SIGNATURE",
+    "HEADER_PAYMENT_REQUIRED",
+    "HEADER_PAYMENT_RESPONSE",
+    "HEADER_X_PAYMENT",
+    "HEADER_X_PAYMENT_RESPONSE",
+    # Header encoding/decoding
+    "encode_payment_signature_header",
+    "decode_payment_signature_header",
+    "encode_payment_required_header",
+    "decode_payment_required_header",
+    "encode_payment_response_header",
+    "decode_payment_response_header",
+    # Header detection
+    "get_payment_header_name",
+    "get_payment_response_header_name",
+    "detect_protocol_version_from_headers",
+    "extract_payment_from_headers",
+    "extract_payment_required_from_response",
     # Facilitator
     "FacilitatorClient",
     "FacilitatorConfig",
@@ -387,4 +518,40 @@ __all__ = [
     "SigningError",
     "WDKBalanceError",
     "WDKErrorCode",
+    # Scheme Interfaces
+    "SchemeNetworkClient",
+    "SchemeNetworkServer",
+    "SchemeNetworkFacilitator",
+    "BaseSchemeNetworkClient",
+    "BaseSchemeNetworkServer",
+    "BaseSchemeNetworkFacilitator",
+    # Scheme Registry
+    "SchemeRegistry",
+    "ClientSchemeRegistry",
+    "ServerSchemeRegistry",
+    "FacilitatorSchemeRegistry",
+    "get_client_registry",
+    "get_server_registry",
+    "get_facilitator_registry",
+    "reset_global_registries",
+    # EVM Schemes
+    "ExactEvmClientScheme",
+    "ExactEvmServerScheme",
+    "EvmSigner",
+    # TON Schemes
+    "ExactTonClientScheme",
+    "ExactTonServerScheme",
+    "TonSigner",
+    # TRON Schemes
+    "ExactTronClientScheme",
+    "ExactTronServerScheme",
+    "TronSigner",
+    # FastAPI Integration
+    "FastAPIPaymentMiddleware",
+    "FastAPIPaymentConfig",
+    "FastAPIPaymentDetails",
+    "PaymentRequired",
+    "fastapi_require_payment",
+    "get_payment_details",
+    "settle_payment",
 ]
