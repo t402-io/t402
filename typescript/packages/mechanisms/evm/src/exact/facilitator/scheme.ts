@@ -76,7 +76,16 @@ export class ExactEvmScheme implements SchemeNetworkFacilitator {
     payload: PaymentPayload,
     requirements: PaymentRequirements,
   ): Promise<VerifyResponse> {
-    const exactEvmPayload = payload.payload as ExactEvmPayloadV2;
+    const exactEvmPayload = payload.payload as ExactEvmPayloadV2 | undefined;
+
+    // Validate payload structure
+    if (!exactEvmPayload?.authorization?.from) {
+      return {
+        isValid: false,
+        invalidReason: "invalid_payload_structure",
+        payer: undefined,
+      };
+    }
 
     // Verify scheme matches
     if (payload.accepted.scheme !== "exact" || requirements.scheme !== "exact") {
@@ -268,7 +277,18 @@ export class ExactEvmScheme implements SchemeNetworkFacilitator {
     payload: PaymentPayload,
     requirements: PaymentRequirements,
   ): Promise<SettleResponse> {
-    const exactEvmPayload = payload.payload as ExactEvmPayloadV2;
+    const exactEvmPayload = payload.payload as ExactEvmPayloadV2 | undefined;
+
+    // Validate payload structure
+    if (!exactEvmPayload?.authorization?.from) {
+      return {
+        success: false,
+        network: payload.accepted.network,
+        transaction: "",
+        errorReason: "invalid_payload_structure",
+        payer: undefined,
+      };
+    }
 
     // Re-verify before settling
     const valid = await this.verify(payload, requirements);
