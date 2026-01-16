@@ -208,7 +208,7 @@ t402 info eip155:8453
 | ERC-4337 | ✅ | ✅ | ✅ | ❌ |
 | USDT0 Bridge | ✅ | ✅ | ⚠️ | ❌ |
 | WDK Integration | ✅ | ✅ | ✅ | ❌ |
-| MCP Server | ✅ | ❌ | ❌ | ❌ |
+| MCP Server | ✅ | ✅ | ✅ | ❌ |
 | CLI Tool | ✅ | ✅ | ✅ | ❌ |
 | Spring Boot | ❌ | ❌ | ❌ | ✅ |
 
@@ -225,7 +225,7 @@ Legend: ✅ Complete | ⚠️ Partial | ❌ Not Available
 
 ## Ecosystem
 
-The t402 ecosystem is growing! Check out our [ecosystem page](https://t402.org/ecosystem) to see projects building with t402.
+The t402 ecosystem is growing! Check out our [ecosystem page](https://t402.io/ecosystem) to see projects building with t402.
 
 **Roadmap:** see [ROADMAP.md](https://github.com/t402-io/t402/blob/main/ROADMAP.md)
 
@@ -238,7 +238,26 @@ The t402 ecosystem is growing! Check out our [ecosystem page](https://t402.org/e
 
 ## Typical t402 Flow
 
-![](./static/flow.png)
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server as Resource Server
+    participant Facilitator
+    participant Blockchain
+
+    Client->>Server: GET /api
+    Server->>Client: 402 Payment Required
+    Note over Client: Create payment payload
+    Client->>Server: GET /api + X-PAYMENT header
+    Server->>Facilitator: POST /verify
+    Facilitator->>Server: Verification result
+    Note over Server: Process request
+    Server->>Facilitator: POST /settle
+    Facilitator->>Blockchain: Submit transaction
+    Blockchain->>Facilitator: Confirmed
+    Facilitator->>Server: Settlement result
+    Server->>Client: 200 OK + Content
+```
 
 1. `Client` makes an HTTP request to a `resource server`
 2. `Resource server` responds with `402 Payment Required` and `PaymentRequired` header

@@ -6,7 +6,39 @@ The `exact` scheme on Sui relies on the `0x2::coin::Coin<T>` standard to transfe
 
 ## Protocol Sequencing
 
-![](../../../static/sui-exact-flow.png)
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+    participant Facilitator
+    participant Blockchain
+
+    Client->>Server: GET /api
+    Server->>Client: 402 Payment Required
+
+    rect rgb(240, 240, 240)
+        Note over Client,Blockchain: Optional: Fetch available coins
+        Client-->>Blockchain: List Coins API
+        Blockchain-->>Client: Coin<T> list
+    end
+
+    rect rgb(230, 245, 255)
+        Note over Client,Facilitator: Optional: Gas sponsorship
+        Client-->>Facilitator: Request sponsorship
+        Facilitator-->>Client: Gas payment data
+    end
+
+    Note over Client: Sign transaction
+    Client->>Server: X-PAYMENT header
+    Server->>Facilitator: /verify
+    Facilitator->>Server: Verified
+    Note over Server: Process request
+    Server->>Facilitator: /settle
+    Facilitator->>Blockchain: Submit tx
+    Blockchain->>Facilitator: Confirmed
+    Facilitator->>Server: Settled
+    Server->>Client: Response
+```
 
 The following outlines the flow of the `exact` scheme on `Sui`:
 
