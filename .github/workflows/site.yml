@@ -33,15 +33,16 @@ jobs:
         working-directory: ./typescript
         run: pnpm install --frozen-lockfile
 
-      - name: Build site for Cloudflare Pages
+      - name: Build site
         working-directory: ./typescript/site
-        run: pnpm build:cloudflare
+        run: pnpm build
         env:
           NODE_ENV: production
 
       - name: Deploy to Cloudflare Pages
-        working-directory: ./typescript/site
-        run: pnpm deploy
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy out --project-name t402-site
+          workingDirectory: ./typescript/site

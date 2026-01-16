@@ -1,0 +1,6 @@
+# Redirects for Cloudflare Pages
+/protocol / 302
+/foundation / 302
+/build / 302
+/build-with-us / 302
+/ecosystem / 301
