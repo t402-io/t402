@@ -75,7 +75,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 | SDK | Version | Status |
 |-----|---------|--------|
 | Go | 1.5.0 | Production |
-| Python | 1.6.1 | Production |
+| Python | 1.7.0 | Production |
 | Java | 1.1.0 | Production |
 
 ---

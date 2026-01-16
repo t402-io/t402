@@ -4,6 +4,32 @@ All notable changes to the T402 Python SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-01-16
+
+### Added
+- **Schemes Module** (`t402.schemes`) - Modular payment scheme implementations
+  - `t402.schemes.evm.exact` - EVM exact payment scheme (client/server)
+  - `t402.schemes.ton.exact` - TON exact payment scheme (client/server)
+  - `t402.schemes.tron.exact` - TRON exact payment scheme (client/server)
+  - `SchemeRegistry` for registering and discovering schemes
+  - `ClientScheme` and `ServerScheme` interfaces
+
+- **Enhanced FastAPI Middleware**
+  - Full protocol v2 `PaymentRequirements` support
+  - `ResourceInfo` integration for resource metadata
+  - Enhanced route configuration with dynamic pricing
+  - `PaymentDependencies` for dependency injection
+  - Improved async support for payment verification/settlement
+
+- **Protocol v2 Types**
+  - `ResourceInfo` class for v2 resources (url, description, mimeType)
+  - Enhanced `PaymentRequirements` with v2 fields
+  - Backward compatibility with v1 format
+
+### Changed
+- Improved type annotations throughout
+- Enhanced encoding/decoding for v2 payloads
+
 ## [1.6.0] - 2026-01-16
 
 ### Added
