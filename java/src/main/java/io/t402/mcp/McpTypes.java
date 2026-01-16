@@ -320,8 +320,10 @@ public final class McpTypes {
         public List<ContentBlock> getContent() { return content; }
         public void setContent(List<ContentBlock> content) { this.content = content; }
 
+        @JsonProperty("isError")
         public boolean isError() { return isError; }
-        public void setError(boolean error) { isError = error; }
+        @JsonProperty("isError")
+        public void setIsError(boolean isError) { this.isError = isError; }
     }
 
     /**
