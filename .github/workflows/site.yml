@@ -29,6 +29,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Install TypeScript workspace dependencies
+        working-directory: ./typescript
+        run: pnpm install --frozen-lockfile
+
       - name: Build site for Cloudflare Pages
         working-directory: ./typescript/site
         run: pnpm build:cloudflare
