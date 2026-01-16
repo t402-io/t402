@@ -39,7 +39,8 @@ export function CTA() {
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
               href="https://docs.t402.io/quickstart"
-              className="inline-flex h-12 items-center justify-center rounded-lg bg-brand px-8 text-base font-medium text-background transition-all hover:bg-brand-secondary hover:shadow-glow"
+              className="inline-flex h-12 items-center justify-center rounded-lg bg-brand px-8 text-base font-medium transition-all hover:bg-brand-secondary hover:shadow-glow"
+              style={{ color: "#0A0A0B" }}
             >
               Start Building
             </Link>
