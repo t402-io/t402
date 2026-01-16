@@ -692,7 +692,8 @@ export default function UseCasesClient() {
         <div className="flex flex-wrap justify-center gap-4">
           <Link
             href="/sdks"
-            className="inline-flex items-center gap-2 rounded-lg bg-brand px-6 py-3 text-base font-medium text-background transition-colors hover:bg-brand-secondary"
+            className="inline-flex items-center gap-2 rounded-lg bg-brand px-6 py-3 text-base font-medium transition-colors hover:bg-brand-secondary"
+            style={{ color: "#0A0A0B" }}
           >
             View SDKs
           </Link>

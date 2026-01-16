@@ -318,7 +318,8 @@ export default function SDKsClient() {
               href={selectedSDK.docsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-medium text-background transition-colors hover:bg-brand-secondary"
+              className="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-medium transition-colors hover:bg-brand-secondary"
+              style={{ color: "#0A0A0B" }}
             >
               View Documentation
               <ExternalLinkIcon />
@@ -414,7 +415,8 @@ export default function SDKsClient() {
           href="https://docs.t402.io/quickstart"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-lg bg-brand px-6 py-3 text-base font-medium text-background transition-colors hover:bg-brand-secondary"
+          className="inline-flex items-center gap-2 rounded-lg bg-brand px-6 py-3 text-base font-medium transition-colors hover:bg-brand-secondary"
+          style={{ color: "#0A0A0B" }}
         >
           Read the Quickstart Guide
           <ExternalLinkIcon />

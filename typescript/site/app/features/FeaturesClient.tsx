@@ -325,7 +325,8 @@ export default function FeaturesClient() {
             href="https://docs.t402.io/features"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg bg-brand px-6 py-3 text-base font-medium text-background transition-colors hover:bg-brand-secondary"
+            className="inline-flex items-center gap-2 rounded-lg bg-brand px-6 py-3 text-base font-medium transition-colors hover:bg-brand-secondary"
+            style={{ color: "#0A0A0B" }}
           >
             Read Documentation
             <ExternalLinkIcon />
