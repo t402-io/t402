@@ -95,7 +95,7 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-        run: mvn deploy -Prelease -DskipTests
+        run: mvn deploy -Prelease -DskipTests -DautoPublish=true
 
       - name: Dry run - show what would be published
         if: ${{ github.event.inputs.dry_run == 'true' }}
