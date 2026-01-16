@@ -1,7 +1,6 @@
 """Type definitions for T402 MCP Server."""
 
 from dataclasses import dataclass, field
-from enum import Enum
 from typing import Any, Literal, Optional
 
 
