@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:cloudflare": "npx @cloudflare/next-on-pages",
+    "preview": "pnpm build:cloudflare && wrangler pages dev",
     "start": "next start",
     "format": "prettier -c .prettierrc --write \"**/*.{ts,tsx,js,json,md}\"",
     "format:check": "prettier -c .prettierrc --check \"**/*.{ts,tsx,js,json,md}\"",
@@ -30,6 +32,7 @@
     "wagmi": "^2.15.6"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.7",
     "@eslint/eslintrc": "^3",
     "@eslint/js": "^9.24.0",
     "@svgr/webpack": "^8.1.0",
@@ -46,6 +49,7 @@
     "eslint-plugin-prettier": "^5.2.6",
     "prettier": "3.5.2",
     "tailwindcss": "^4.0.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.7.0"
   }
 }
