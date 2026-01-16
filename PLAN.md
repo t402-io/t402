@@ -228,7 +228,104 @@ jobs:
 
 ---
 
-## 8. Key Files Reference
+## 8. WDK / USDT0 功能完整性計劃
+
+### 8.1 功能差異矩陣
+
+| 功能 | TypeScript | Python | Go | Java |
+|------|------------|--------|-----|------|
+| **USDT 支援** |
+| EVM USDT | ✅ | ✅ | ✅ | ✅ |
+| TRON USDT | ✅ | ✅ | ✅ | ✅ |
+| TON USDT | ✅ | ✅ | ✅ | ✅ |
+| Solana USDC | ✅ | ⚠️ 部分 | ✅ | ❌ |
+| **USDT0 Bridge** |
+| 跨鏈報價 | ✅ | ✅ | ✅ | ✅ |
+| 跨鏈執行 | ✅ | ✅ | ✅ | ✅ |
+| LayerZero 追蹤 | ✅ | ✅ | ⚠️ 基礎 | ✅ |
+| Router 選路 | ✅ | ✅ | ❌ | ❌ |
+| **WDK 整合** |
+| 基礎 Signer | ✅ | ✅ | ✅ | ✅ |
+| 鏈配置 | ✅ | ✅ | ✅ | ✅ |
+| 餘額查詢 | ✅ | ✅ | ✅ | ⚠️ |
+| **WDK Gasless (ERC-4337)** |
+| Safe Smart Account | ✅ | ✅ | ✅ | ❌ |
+| Pimlico Bundler | ✅ | ✅ | ✅ | ❌ |
+| Alchemy Bundler | ✅ | ✅ | ✅ | ❌ |
+| Paymaster 贊助 | ✅ | ✅ | ✅ | ❌ |
+| **WDK Bridge** |
+| 專用套件 | ✅ `@t402/wdk-bridge` | ❌ | ❌ | ❌ |
+| **WDK Multisig** |
+| Safe 多簽 | ✅ `@t402/wdk-multisig` | ❌ | ⚠️ 基礎 | ❌ |
+| 簽名收集 | ✅ | ❌ | ❌ | ❌ |
+| **硬體錢包** |
+| Ledger | ✅ | ❌ | ❌ | ❌ |
+| Trezor | ✅ | ❌ | ❌ | ❌ |
+
+### 8.2 USDT0 支援的鏈
+
+| 鏈 | 狀態 | 備註 |
+|----|------|------|
+| Ethereum | ✅ | |
+| Arbitrum | ✅ | |
+| Ink | ✅ | |
+| Berachain | ✅ | |
+| Unichain | ✅ | |
+| Base | ❌ | 無 USDT0 合約 |
+| Polygon | ❌ | 無 USDT0 合約 |
+| Optimism | ❌ | 無 USDT0 合約 |
+
+### 8.3 待補齊任務
+
+#### Python SDK
+
+| # | Task | Priority | Status |
+|---|------|----------|--------|
+| 1 | 完善 SVM 機制（SPL Token 完整支援）| High | ⏳ Pending |
+| 2 | 添加 WDK Multisig 套件 | Medium | ⏳ Pending |
+| 3 | 添加 WDK Bridge 專用套件 | Medium | ⏳ Pending |
+| 4 | 添加硬體錢包支援（Ledger/Trezor）| Low | ⏳ Pending |
+
+#### Go SDK
+
+| # | Task | Priority | Status |
+|---|------|----------|--------|
+| 1 | 添加 Bridge Router 智能選路 | Medium | ⏳ Pending |
+| 2 | 完善 WDK Multisig（完整多簽工作流）| Medium | ⏳ Pending |
+| 3 | 添加 LayerZero 完整追蹤 | Low | ⏳ Pending |
+| 4 | 添加硬體錢包支援（Ledger/Trezor）| Low | ⏳ Pending |
+
+#### Java SDK
+
+| # | Task | Priority | Status |
+|---|------|----------|--------|
+| 1 | 實現 ERC-4337 完整整合（Safe Account）| High | ⏳ Pending |
+| 2 | 添加 MCP Server | Medium | ⏳ Pending |
+| 3 | 添加 WDK Multisig | Medium | ⏳ Pending |
+| 4 | 添加 SVM 機制（Solana）| Medium | ⏳ Pending |
+| 5 | 添加硬體錢包支援 | Low | ⏳ Pending |
+
+### 8.4 優先順序建議
+
+**P0 - Critical（阻塞發布）**
+- [ ] Java SDK 發布到 Maven Central
+
+**P1 - High（下個版本）**
+- [ ] Python SVM 完整實現
+- [ ] Java ERC-4337 Safe Account 整合
+
+**P2 - Medium（未來版本）**
+- [ ] Go/Python WDK Multisig
+- [ ] Go Bridge Router
+- [ ] Java MCP Server
+
+**P3 - Low（長期計劃）**
+- [ ] 所有 SDK 硬體錢包支援
+- [ ] 統一 WDK Bridge 套件命名
+
+---
+
+## 9. Key Files Reference
 
 ### TypeScript SDK
 - `typescript/packages/core/src/` - Core implementation
