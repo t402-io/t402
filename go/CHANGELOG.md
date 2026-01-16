@@ -4,6 +4,27 @@ All notable changes to the T402 Go SDK will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- **SmartBridgeRouter** (`mechanisms/evm/bridge/`) - Intelligent multi-chain bridge routing
+  - `SmartBridgeRouter` interface for automatic route selection across chains
+  - Route strategies: `cheapest`, `fastest`, `preferred`
+  - `GetBalances()` - Concurrent balance fetching across all configured chains
+  - `GetRoutes()` - Evaluate all possible routes to a destination chain
+  - `SelectBestRoute()` - Strategy-based route selection
+  - `AutoBridge()` - Automatic route selection and bridge execution
+  - Chain-specific estimated bridge times (L1↔L2 aware)
+
+- **MultiChainSigner** (`mechanisms/evm/bridge/`) - Multi-chain signing interface
+  - `MultiChainSigner` interface for cross-chain wallet operations
+  - `WdkMultiChainSigner` adapter for WDK Signer integration
+  - `WdkBridgeSignerAdapter` for per-chain BridgeSigner operations
+  - `SimpleBridgeSigner` for testing
+
+- **WDK Signer Enhancements** (`wdk/`)
+  - `GetClient()` - Get ethclient for a chain (now public)
+  - `GetPrivateKeyBytes()` - Get private key bytes for signing
+  - `GetChainID()` - Get chain ID for a chain name
+
 ## [1.4.0] - 2026-01-16
 
 ### Added
