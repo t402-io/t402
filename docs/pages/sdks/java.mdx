@@ -14,13 +14,13 @@ import { Tabs } from 'nextra/components'
 <dependency>
     <groupId>io.t402</groupId>
     <artifactId>t402</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 </Tabs.Tab>
 <Tabs.Tab>
 ```groovy
-implementation 'io.t402:t402:1.0.0'
+implementation 'io.t402:t402:1.1.0'
 ```
 </Tabs.Tab>
 </Tabs>
@@ -76,6 +76,94 @@ public class ApiController {
 ```
 
 The `PaymentFilter` is automatically registered for `/api/*` endpoints.
+
+### @RequirePayment Annotation (v1.1.0+)
+
+Use annotations for fine-grained payment protection:
+
+```java
+import io.t402.spring.RequirePayment;
+
+@RestController
+public class ApiController {
+
+    // Protect with annotation - $0.01 per request
+    @RequirePayment(amount = "$0.01", description = "Premium API access")
+    @GetMapping("/api/premium")
+    public Map<String, String> premiumContent() {
+        return Map.of("data", "Premium content!");
+    }
+
+    // Different price for different endpoints
+    @RequirePayment(amount = "1000000", description = "Heavy computation")
+    @PostMapping("/api/compute")
+    public ComputeResult compute(@RequestBody ComputeRequest request) {
+        return computeService.process(request);
+    }
+
+    // Class-level annotation applies to all methods
+    @RequirePayment(amount = "$0.05")
+    @RestController
+    @RequestMapping("/api/v2")
+    public class V2ApiController {
+        // All endpoints require $0.05
+    }
+}
+```
+
+**Amount formats supported:**
+- Dollar notation: `"$1.00"`, `"$0.01"`
+- Atomic units: `"1000000"` (6 decimals for USDC)
+- Decimal notation: `"1.00"`
+
+### Route-Based Configuration (v1.1.0+)
+
+Configure routes via YAML instead of annotations:
+
+```yaml
+t402:
+  enabled: true
+  facilitator-url: https://facilitator.t402.io
+  network: eip155:8453
+  pay-to: "0xYourAddress"
+  routes:
+    - path: "GET /api/data"
+      amount: "$0.01"
+      description: "Data access"
+    - path: "POST /api/compute"
+      amount: "$0.10"
+      description: "Heavy computation"
+    - path: "/api/premium/**"
+      amount: "$0.05"
+      description: "Premium endpoints"
+```
+
+### Spring WebFlux (Reactive) (v1.1.0+)
+
+For reactive Spring WebFlux applications:
+
+```java
+import io.t402.spring.reactive.PaymentWebFilter;
+
+@Configuration
+@EnableWebFlux
+public class WebFluxConfig {
+
+    @Bean
+    public PaymentWebFilter paymentWebFilter(FacilitatorClient facilitator) {
+        return new PaymentWebFilter(facilitator, routeConfigs);
+    }
+}
+```
+
+Or use auto-configuration:
+
+```yaml
+t402:
+  enabled: true
+  webflux: true  # Enable WebFlux support
+  facilitator-url: https://facilitator.t402.io
+```
 
 ### Manual Setup
 
@@ -188,25 +276,139 @@ byte[] signature = signer.sign(transactionBytes);
 
 ## ERC-4337 Account Abstraction
 
-The SDK includes full support for ERC-4337 gasless transactions.
+The SDK includes full support for ERC-4337 v0.7 gasless transactions.
 
-### UserOperation
+### UserOperation v0.7
 
 ```java
 import io.t402.erc4337.UserOperation;
 
-UserOperation userOp = new UserOperation();
-userOp.setSender("0xSmartAccountAddress");
-userOp.setNonce(BigInteger.ZERO);
-userOp.setCallData(callData);
-userOp.setCallGasLimit(BigInteger.valueOf(100000));
-userOp.setVerificationGasLimit(BigInteger.valueOf(100000));
-userOp.setPreVerificationGas(BigInteger.valueOf(50000));
-userOp.setMaxFeePerGas(maxFeePerGas);
-userOp.setMaxPriorityFeePerGas(maxPriorityFeePerGas);
+// Use builder pattern for v0.7
+UserOperation userOp = new UserOperation.Builder()
+    .sender("0xSmartAccountAddress")
+    .nonce(BigInteger.ZERO)
+    .callData(callData)
+    .callGasLimit(BigInteger.valueOf(100000))
+    .verificationGasLimit(BigInteger.valueOf(100000))
+    .preVerificationGas(BigInteger.valueOf(50000))
+    .maxFeePerGas(maxFeePerGas)
+    .maxPriorityFeePerGas(maxPriorityFeePerGas)
+    .build();
+
+// Compute UserOperation hash for signing
+byte[] userOpHash = userOp.getUserOpHash(
+    UserOperation.ENTRYPOINT_V07,  // 0x0000000071727De22E5E9d8BAf0edAc6f37da032
+    chainId
+);
+
+// Pack for v0.7 RPC format
+UserOperation.PackedUserOperation packed = userOp.pack();
 ```
 
-### Bundler Client
+### Safe Smart Account (v1.1.0+)
+
+```java
+import io.t402.erc4337.safe.SafeAccount;
+import io.t402.erc4337.safe.SafeCall;
+import io.t402.erc4337.safe.Operation;
+
+// Create Safe account
+SafeAccount safe = new SafeAccount(
+    safeAddress,
+    ownerAddress,
+    chainId
+);
+
+// Encode single call
+byte[] callData = safe.encodeExecTransaction(
+    targetAddress,
+    value,
+    data,
+    Operation.CALL
+);
+
+// Batch multiple calls
+List<SafeCall> calls = List.of(
+    new SafeCall(token1, BigInteger.ZERO, approveData, Operation.CALL),
+    new SafeCall(token2, BigInteger.ZERO, transferData, Operation.CALL)
+);
+byte[] batchData = safe.encodeBatchCalls(calls);
+
+// Create init code for new Safe deployment
+byte[] initCode = safe.createInitCode(owners, threshold);
+
+// Sign Safe transaction
+byte[] txHash = safe.getSafeTransactionHash(to, value, data, operation, nonce);
+byte[] signature = safe.signSafeTransaction(txHash, ownerPrivateKey);
+```
+
+### Bundler Providers (v1.1.0+)
+
+```java
+import io.t402.erc4337.bundler.*;
+
+// Create bundler using factory
+Bundler bundler = BundlerFactory.create(
+    BundlerProvider.PIMLICO,
+    "your-api-key",
+    chainId
+);
+
+// Or create specific bundler directly
+PimlicoBundler pimlico = new PimlicoBundler("api-key", chainId);
+AlchemyBundler alchemy = new AlchemyBundler("api-key", chainId);
+```
+
+### Pimlico Bundler (v1.1.0+)
+
+```java
+import io.t402.erc4337.bundler.PimlicoBundler;
+
+PimlicoBundler bundler = new PimlicoBundler(apiKey, chainId);
+
+// Get gas prices (slow/standard/fast)
+GasPrices prices = bundler.getUserOperationGasPrice();
+userOp.setMaxFeePerGas(prices.getFast().getMaxFeePerGas());
+
+// Sponsor with Pimlico paymaster
+SponsorResult sponsor = bundler.sponsorUserOperation(userOp, entryPoint);
+userOp.setPaymaster(sponsor.getPaymaster());
+userOp.setPaymasterData(sponsor.getPaymasterData());
+userOp.setPaymasterVerificationGasLimit(sponsor.getPaymasterVerificationGasLimit());
+userOp.setPaymasterPostOpGasLimit(sponsor.getPaymasterPostOpGasLimit());
+
+// Validate sponsorship policies
+boolean valid = bundler.validateSponsorshipPolicies(policyIds);
+
+// Get account nonce from bundler
+BigInteger nonce = bundler.getAccountNonce(sender, key);
+```
+
+### Alchemy Bundler (v1.1.0+)
+
+```java
+import io.t402.erc4337.bundler.AlchemyBundler;
+
+AlchemyBundler bundler = new AlchemyBundler(apiKey, chainId);
+
+// Get gas and paymaster data in one call
+GasAndPaymasterResult result = bundler.requestGasAndPaymasterAndData(
+    userOp,
+    entryPoint,
+    policyId
+);
+
+// Simulate UserOperation for error checking
+SimulationResult sim = bundler.simulateUserOperation(userOp, entryPoint);
+if (!sim.isSuccess()) {
+    System.err.println("Simulation failed: " + sim.getError());
+}
+
+// Get current priority fee
+BigInteger priorityFee = bundler.getMaxPriorityFeePerGas();
+```
+
+### Generic Bundler Client
 
 ```java
 import io.t402.erc4337.BundlerClient;
@@ -221,20 +423,6 @@ String userOpHash = bundler.sendUserOperation(userOp, entryPoint);
 
 // Get receipt
 UserOperationReceipt receipt = bundler.getUserOperationReceipt(userOpHash);
-```
-
-### Paymaster Client
-
-```java
-import io.t402.erc4337.PaymasterClient;
-
-PaymasterClient paymaster = new PaymasterClient("https://paymaster.example.com");
-
-// Get paymaster data for gas sponsorship
-PaymasterData data = paymaster.getPaymasterData(userOp, entryPoint);
-
-// Apply to UserOperation
-userOp.setPaymasterAndData(data.getPaymasterAndData());
 ```
 
 ## USDT0 Cross-Chain Bridge
@@ -305,7 +493,7 @@ The SDK includes a command-line interface.
 mvn exec:java -Dexec.mainClass="io.t402.cli.T402Cli" -Dexec.args="--help"
 
 # Or build and run
-java -jar t402-1.0.0.jar --help
+java -jar t402-1.1.0.jar --help
 ```
 
 ### Available Commands
@@ -423,9 +611,16 @@ String signature = signer.sign(payload);
 
 | Class | Description |
 |-------|-------------|
-| `UserOperation` | ERC-4337 v0.7 UserOperation structure |
-| `BundlerClient` | Bundler JSON-RPC client |
-| `PaymasterClient` | Paymaster integration |
+| `UserOperation` | ERC-4337 v0.7 UserOperation with `pack()` and `getUserOpHash()` |
+| `UserOperation.Builder` | Builder pattern for UserOperation creation |
+| `SafeAccount` | Safe smart account integration (v1.1.0+) |
+| `SafeCall` | Individual call for batch transactions |
+| `Operation` | CALL vs DELEGATECALL enum |
+| `BundlerClient` | Generic bundler JSON-RPC client |
+| `PimlicoBundler` | Pimlico bundler with gas sponsorship (v1.1.0+) |
+| `AlchemyBundler` | Alchemy bundler with simulation (v1.1.0+) |
+| `BundlerFactory` | Factory for creating bundler instances |
+| `BundlerProvider` | PIMLICO, ALCHEMY, CUSTOM enum |
 | `GasEstimate` | Gas estimation types |
 
 ### Bridge Classes
@@ -450,13 +645,26 @@ String signature = signer.sign(payload);
 |-------|-------------|
 | `T402AutoConfiguration` | Auto-configuration for Spring Boot |
 | `T402Properties` | Configuration properties (`t402.*`) |
+| `RequirePayment` | Annotation for payment protection (v1.1.0+) |
+| `RouteConfig` | YAML-based route configuration (v1.1.0+) |
+| `PaymentInterceptor` | HandlerInterceptor for annotation-based validation (v1.1.0+) |
+| `T402WebMvcConfigurer` | Auto-registers PaymentInterceptor (v1.1.0+) |
+
+### Spring WebFlux (v1.1.0+)
+
+| Class | Description |
+|-------|-------------|
+| `PaymentWebFilter` | WebFilter for reactive WebFlux applications |
+| `T402WebFluxConfiguration` | Auto-configuration for WebFlux |
 
 ### Models
 
 | Class | Description |
 |-------|-------------|
-| `PaymentPayload` | Payment header structure |
+| `PaymentPayload` | Payment header structure with Builder (v1.1.0+) |
 | `PaymentRequirements` | Payment requirements for an endpoint |
+| `ResourceInfo` | Resource metadata for v2 protocol (v1.1.0+) |
+| `SupportedResponse` | Full /supported endpoint response (v1.1.0+) |
 | `Authorization` | EIP-3009 authorization structure |
 | `VerificationResponse` | Facilitator verification response |
 | `SettlementResponse` | Facilitator settlement response |
