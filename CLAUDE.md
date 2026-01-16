@@ -9,6 +9,7 @@ T402 is an open-source HTTP-native payment protocol for USDT/USDT0 stablecoins. 
 ```
 t402/
 ├── typescript/          # TypeScript SDK (21 npm packages @t402/*)
+│   └── site/            # [SUBMODULE] Marketing website (t402.io)
 ├── python/              # Python SDK (PyPI: t402)
 ├── go/                  # Go SDK (github.com/t402-io/t402/go)
 ├── java/                # Java SDK (Maven: io.t402:t402)
@@ -18,6 +19,31 @@ t402/
 ├── .github/workflows/   # CI/CD pipelines
 ├── ROADMAP.md           # Long-term roadmap
 └── SECURITY.md          # Security policy
+```
+
+## Submodules
+
+The project uses git submodules:
+
+| Submodule | Repository | Description |
+|-----------|------------|-------------|
+| `typescript/site/` | [t402-io/t402-site](https://github.com/t402-io/t402-site) | Marketing website (t402.io) |
+
+### Working with Submodules
+
+```bash
+# Clone with submodules
+git clone --recurse-submodules https://github.com/t402-io/t402.git
+
+# Initialize submodules after cloning
+git submodule update --init --recursive
+
+# Update submodules to latest
+git submodule update --remote
+
+# Make changes in submodule
+cd typescript/site
+# ... make changes, commit, push to t402-site repo
 ```
 
 ## Key URLs
