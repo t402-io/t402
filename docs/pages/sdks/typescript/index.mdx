@@ -1,19 +1,68 @@
 # TypeScript SDK
 
-The T402 TypeScript SDK provides comprehensive support for HTTP-native stablecoin payments.
+The T402 TypeScript SDK provides comprehensive support for HTTP-native stablecoin payments across multiple blockchains.
 
-## Packages
+import { Callout } from 'nextra/components'
 
-| Package | Description | npm |
-|---------|-------------|-----|
-| `@t402/core` | Protocol types and HTTP utilities | [![npm](https://img.shields.io/npm/v/@t402/core)](https://npmjs.com/package/@t402/core) |
-| `@t402/evm` | EVM chains (Ethereum, Arbitrum, Base, etc.) | [![npm](https://img.shields.io/npm/v/@t402/evm)](https://npmjs.com/package/@t402/evm) |
-| `@t402/ton` | TON blockchain support | [![npm](https://img.shields.io/npm/v/@t402/ton)](https://npmjs.com/package/@t402/ton) |
-| `@t402/tron` | TRON blockchain support | [![npm](https://img.shields.io/npm/v/@t402/tron)](https://npmjs.com/package/@t402/tron) |
-| `@t402/wdk` | Tether WDK integration | [![npm](https://img.shields.io/npm/v/@t402/wdk)](https://npmjs.com/package/@t402/wdk) |
-| `@t402/wdk-gasless` | Gasless payments (WDK + ERC-4337) | [![npm](https://img.shields.io/npm/v/@t402/wdk-gasless)](https://npmjs.com/package/@t402/wdk-gasless) |
-| `@t402/wdk-bridge` | Cross-chain bridge (WDK + LayerZero) | [![npm](https://img.shields.io/npm/v/@t402/wdk-bridge)](https://npmjs.com/package/@t402/wdk-bridge) |
-| `@t402/mcp` | MCP server for AI agents | [![npm](https://img.shields.io/npm/v/@t402/mcp)](https://npmjs.com/package/@t402/mcp) |
+<Callout type="info">
+  **v2.0.0 Released** - All packages are now published under the `@t402` namespace on npm.
+</Callout>
+
+## Core Packages
+
+| Package | Version | Description |
+|---------|---------|-------------|
+| `@t402/core` | 2.0.0 | Protocol types and HTTP utilities |
+| `@t402/extensions` | 2.0.0 | Protocol extensions and helpers |
+
+## Blockchain Mechanisms
+
+| Package | Version | Description |
+|---------|---------|-------------|
+| `@t402/evm` | 2.2.0 | EVM chains (Ethereum, Arbitrum, Base, etc.) with EIP-3009 |
+| `@t402/svm` | 2.0.0 | Solana blockchain with SPL token transfers |
+| `@t402/ton` | 2.1.0 | TON blockchain with USDT Jetton support |
+| `@t402/tron` | 2.0.0 | TRON blockchain with TRC-20 USDT |
+
+## WDK Integration (Tether Wallet Development Kit)
+
+| Package | Version | Description |
+|---------|---------|-------------|
+| `@t402/wdk` | 2.0.1 | Tether WDK integration for self-custodial wallets |
+| `@t402/wdk-gasless` | 1.0.0 | Gasless payments via ERC-4337 account abstraction |
+| `@t402/wdk-bridge` | 1.0.0 | Cross-chain bridging via LayerZero OFT |
+| `@t402/wdk-multisig` | 1.0.0 | Safe multi-signature wallet support |
+
+## HTTP Server Frameworks
+
+| Framework | Package | Version |
+|-----------|---------|---------|
+| Express.js | `@t402/express` | 2.0.0 |
+| Next.js | `@t402/next` | 2.0.0 |
+| Hono | `@t402/hono` | 2.0.0 |
+| Fastify | `@t402/fastify` | 2.0.0 |
+
+## HTTP Client Libraries
+
+| Client | Package | Version |
+|--------|---------|---------|
+| Fetch API | `@t402/fetch` | 2.0.0 |
+| Axios | `@t402/axios` | 2.0.0 |
+
+## UI Components
+
+| Package | Version | Description |
+|---------|---------|-------------|
+| `@t402/paywall` | 2.0.0 | Universal paywall component (framework-agnostic) |
+| `@t402/react` | 2.0.0 | React hooks and components |
+| `@t402/vue` | 2.0.0 | Vue 3 composables and components |
+
+## Tools
+
+| Package | Version | Description |
+|---------|---------|-------------|
+| `@t402/cli` | 2.0.0 | Command-line tools for testing and development |
+| `@t402/mcp` | 1.0.0 | MCP server for AI agent payments |
 
 ## Quick Install
 
@@ -21,42 +70,37 @@ The T402 TypeScript SDK provides comprehensive support for HTTP-native stablecoi
 # Core + EVM (most common)
 pnpm add @t402/core @t402/evm
 
-# All packages
-pnpm add @t402/core @t402/evm @t402/ton @t402/tron @t402/wdk @t402/wdk-gasless @t402/wdk-bridge @t402/mcp
+# With Express middleware
+pnpm add @t402/core @t402/evm @t402/express
+
+# Full client setup with fetch wrapper
+pnpm add @t402/core @t402/evm @t402/fetch
+
+# Multi-chain support
+pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/tron
 ```
 
 ## Architecture
 
 ```
-@t402/core          Base types, HTTP utilities
+@t402/core              Base types, HTTP utilities
     │
-    ├── @t402/evm   EVM mechanism (EIP-3009, ERC-4337, LayerZero)
+    ├── @t402/evm       EVM mechanism (EIP-3009, ERC-4337, LayerZero)
     │
-    ├── @t402/ton   TON mechanism (Jettons)
+    ├── @t402/svm       Solana mechanism (SPL tokens)
     │
-    ├── @t402/tron  TRON mechanism (TRC-20)
+    ├── @t402/ton       TON mechanism (Jettons)
     │
-    └── @t402/wdk   Tether WDK integration
+    ├── @t402/tron      TRON mechanism (TRC-20)
+    │
+    └── @t402/wdk       Tether WDK integration
         │
-        ├── @t402/wdk-gasless  ERC-4337 gasless
+        ├── @t402/wdk-gasless   ERC-4337 gasless payments
         │
-        └── @t402/wdk-bridge   LayerZero bridge
+        ├── @t402/wdk-bridge    LayerZero cross-chain bridge
+        │
+        └── @t402/wdk-multisig  Safe multi-sig wallets
 ```
-
-## HTTP Framework Integrations
-
-| Framework | Package | Install |
-|-----------|---------|---------|
-| Express.js | `@t402/express` | `pnpm add @t402/express` |
-| Next.js | `@t402/next` | `pnpm add @t402/next` |
-| Hono | `@t402/hono` | `pnpm add @t402/hono` |
-
-## Client Wrappers
-
-| Client | Package | Install |
-|--------|---------|---------|
-| Fetch | `@t402/fetch` | `pnpm add @t402/fetch` |
-| Axios | `@t402/axios` | `pnpm add @t402/axios` |
 
 ## Requirements
 

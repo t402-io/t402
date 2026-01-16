@@ -41,7 +41,7 @@ export default {
   },
   npm: {
     title: 'npm',
-    href: 'https://www.npmjs.com/org/t402-io',
+    href: 'https://www.npmjs.com/org/t402',
     newWindow: true
   }
 }

@@ -8,6 +8,7 @@ Complete API documentation for T402 packages.
 |---------|-------------|
 | [@t402/core](/reference/core) | Protocol types, HTTP utilities, client/server framework |
 | [@t402/evm](/reference/evm) | EVM chains with EIP-3009, ERC-4337, and LayerZero bridge |
+| [@t402/svm](/reference/svm) | Solana blockchain with SPL token transfers |
 | [@t402/ton](/reference/ton) | TON blockchain with Jetton transfers |
 | [@t402/tron](/reference/tron) | TRON blockchain with TRC-20 tokens |
 | [@t402/wdk](/reference/wdk) | Tether WDK integration for self-custodial wallets |
@@ -71,15 +72,12 @@ Defines what payment is required for a resource:
 ```typescript
 interface PaymentRequirements {
   scheme: string;           // Payment scheme (e.g., "exact")
-  network: string;          // CAIP-2 network ID
-  maxAmountRequired: string; // Maximum amount in smallest units
-  resource: string;         // Resource identifier
-  description?: string;     // Human-readable description
-  mimeType?: string;        // Response MIME type
-  payTo: string;           // Recipient address
-  maxTimeoutSeconds?: number;
-  asset?: string;          // Token address (optional)
-  extra?: Record<string, unknown>;
+  network: string;          // CAIP-2 network ID (e.g., "eip155:8453")
+  amount: string;           // Amount in smallest units (e.g., "1000000" for 1 USDT)
+  payTo: string;            // Recipient address
+  asset?: string;           // Token address (optional, defaults to native USDT)
+  maxTimeoutSeconds?: number; // Maximum time for payment validity
+  extra?: Record<string, unknown>; // Mechanism-specific data
 }
 ```
 
@@ -89,10 +87,21 @@ The payment authorization sent by the client:
 
 ```typescript
 interface PaymentPayload {
-  x402Version: number;
-  scheme: string;
-  network: string;
-  payload: string; // Scheme-specific payload (base64 encoded)
+  t402Version: number;      // Protocol version (2)
+  accepted: {               // The requirements being paid
+    scheme: string;
+    network: string;
+    amount: string;
+    payTo: string;
+    asset?: string;
+    extra?: Record<string, unknown>;
+  };
+  payload: Record<string, unknown>; // Scheme-specific payload
+  resource?: {              // Resource metadata
+    url: string;
+    description: string;
+    mimeType: string;
+  };
 }
 ```
 
@@ -104,7 +113,7 @@ When payment is required, servers return HTTP 402:
 
 ```http
 HTTP/1.1 402 Payment Required
-X-Payment: {"x402Version":2,"schemes":[...]}
+X-Payment: {"t402Version":2,"accepts":[...]}
 Content-Type: application/json
 
 {
@@ -118,8 +127,8 @@ Content-Type: application/json
 Clients include payment in the `X-Payment` header:
 
 ```http
-GET /reference/resource HTTP/1.1
-X-Payment: {"x402Version":2,"scheme":"exact","network":"eip155:8453","payload":"..."}
+GET /api/resource HTTP/1.1
+X-Payment: {"t402Version":2,"accepted":{...},"payload":{...}}
 ```
 
 ## Error Handling
