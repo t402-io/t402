@@ -1,8 +1,8 @@
-package com.coinbase.t402.client;
+package io.t402.client;
 
-import com.coinbase.t402.crypto.CryptoSigner;
-import com.coinbase.t402.crypto.CryptoSignException;
-import com.coinbase.t402.model.PaymentPayload;
+import io.t402.crypto.CryptoSigner;
+import io.t402.crypto.CryptoSignException;
+import io.t402.model.PaymentPayload;
 
 import java.io.IOException;
 import java.math.BigInteger;

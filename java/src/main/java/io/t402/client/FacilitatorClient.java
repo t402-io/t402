@@ -1,6 +1,6 @@
-package com.coinbase.t402.client;
+package io.t402.client;
 
-import com.coinbase.t402.model.PaymentRequirements;
+import io.t402.model.PaymentRequirements;
 
 import java.io.IOException;
 import java.util.Set;

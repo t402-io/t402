@@ -1,4 +1,4 @@
-package com.coinbase.t402.client;
+package io.t402.client;
 
 /** JSON returned by POST /verify on the facilitator. */
 public class VerificationResponse {

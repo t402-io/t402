@@ -1,6 +1,6 @@
-package com.coinbase.t402.model;
+package io.t402.model;
 
-import com.coinbase.t402.util.Json;
+import io.t402.util.Json;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
