@@ -1,5 +1,10 @@
 # t402
 
+[![npm](https://img.shields.io/npm/v/@t402/core?label=npm%20%40t402%2Fcore)](https://www.npmjs.com/package/@t402/core)
+[![PyPI](https://img.shields.io/pypi/v/t402?label=pypi%20t402)](https://pypi.org/project/t402/)
+[![Go](https://img.shields.io/github/v/tag/t402-io/t402?filter=go%2F*&label=go)](https://pkg.go.dev/github.com/t402-io/t402/go)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+
 t402 is an open standard for internet native payments. It aims to support all networks (both crypto & fiat) and forms of value (stablecoins, tokens, fiat).
 
 ```typescript
@@ -53,7 +58,7 @@ Tools:
 <details>
 <summary><b>Installation</b></summary>
 
-### TypeScript
+### TypeScript (v2.0.0+)
 
 ```shell
 # Core packages
@@ -76,7 +81,7 @@ pnpm add -g @t402/cli
 t402 --help
 ```
 
-### Python
+### Python (v1.5.3)
 
 ```shell
 pip install t402
@@ -88,13 +93,13 @@ uv add t402
 t402 --help
 ```
 
-### Go
+### Go (v1.3.1)
 
 ```shell
-go get github.com/t402-io/t402/go@latest
+go get github.com/t402-io/t402/go@v1.3.1
 
 # CLI tool
-go install github.com/t402-io/t402/go/cmd/t402@latest
+go install github.com/t402-io/t402/go/cmd/t402@v1.3.1
 t402 --help
 ```
 
@@ -200,6 +205,14 @@ t402 info eip155:8453
 | CLI Tool | ✅ | ✅ | ✅ | ❌ |
 
 Legend: ✅ Complete | ⚠️ Partial | ❌ Not Available
+
+## Latest Releases
+
+| SDK | Version | Release Date | Changelog |
+|-----|---------|--------------|-----------|
+| TypeScript | v2.0.0 | 2026-01-16 | [CHANGELOG](typescript/CHANGELOG.md) |
+| Python | v1.5.3 | 2026-01-16 | [CHANGELOG](python/CHANGELOG.md) |
+| Go | v1.3.1 | 2026-01-16 | [CHANGELOG](go/CHANGELOG.md) |
 
 ## Ecosystem
 
