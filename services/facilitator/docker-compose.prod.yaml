@@ -166,6 +166,11 @@ services:
       - WATCHTOWER_REVIVE_STOPPED=false
       - WATCHTOWER_ROLLING_RESTART=true
       - WATCHTOWER_LABEL_ENABLE=true
+      # Notifications via shoutrrr (configure WATCHTOWER_NOTIFICATION_URL in .env.prod)
+      # Format: discord://token@id, slack://hook, telegram://token@telegram?chats=@channel
+      - WATCHTOWER_NOTIFICATIONS=shoutrrr
+      - WATCHTOWER_NOTIFICATION_URL=${WATCHTOWER_NOTIFICATION_URL:-}
+      - WATCHTOWER_NOTIFICATION_TEMPLATE={{range .}}{{.Time.Format "2006-01-02 15:04:05"}} ({{.Level}}): {{.Message}}{{println}}{{end}}
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
