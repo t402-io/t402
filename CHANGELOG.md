@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-01-16
+
+### Go SDK v1.5.0
+- **SmartBridgeRouter** - Intelligent multi-chain bridge routing
+  - Route strategies: `cheapest`, `fastest`, `preferred`
+  - Concurrent balance fetching across all configured chains
+  - Automatic route selection and bridge execution
+- **MultiChainSigner** - Multi-chain signing interface
+  - `WdkMultiChainSigner` adapter for WDK Signer integration
+  - `WdkBridgeSignerAdapter` for per-chain BridgeSigner operations
+- **WDK Signer Enhancements**
+  - `GetClient()`, `GetPrivateKeyBytes()`, `GetChainID()` methods
+
+### Python SDK v1.6.1
+- MCP Server for AI agents
+- Complete SVM (Solana) support
+- Bug fixes and stability improvements
+
+### Java SDK v1.0.0
+- Initial release on Maven Central
+- Core client, server, facilitator implementations
+- Full multi-chain support (EVM, SVM, TON, TRON)
+- Spring Boot auto-configuration
+
 ## [2.0.0] - 2026-01-16
 
 ### Added
@@ -24,20 +48,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - UI components: React, Vue, universal Paywall
 - WDK packages: gasless, bridge, multisig
 
-### Python SDK v1.5.3
-- Full multi-chain support (EVM, TON, TRON)
+### Python SDK v1.6.0
+- Full multi-chain support (EVM, TON, TRON, SVM)
 - FastAPI and Flask middleware
 - httpx and requests client adapters
 - ERC-4337 smart account support
 - USDT0 bridge integration
 - WDK signer implementation
+- MCP server for AI agents
 
-### Go SDK v1.3.1
+### Go SDK v1.4.0
 - Core client, server, and facilitator implementations
 - EVM, TON, TRON, Solana mechanisms
 - Gin middleware for HTTP servers
 - CLI tool with verify, settle, encode, decode commands
-- Comprehensive test coverage
+- WDK package with multi-chain support
+- MCP server for AI agents
 
 ### Changed
 - Protocol version updated to v2
@@ -55,6 +81,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - EVM support with EIP-3009 authorization
 - Basic client and server implementations
 
-[Unreleased]: https://github.com/t402-io/t402/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/t402-io/t402/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/t402-io/t402/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/t402-io/t402/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/t402-io/t402/releases/tag/v1.0.0
