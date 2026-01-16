@@ -2,26 +2,42 @@
 
 T402 supports multiple blockchain networks for stablecoin payments.
 
-## EVM Chains
+import { Callout } from 'nextra/components'
 
-| Chain | Network ID | USDT0 | USDC | USDT | Gasless |
-|-------|------------|-------|------|------|---------|
-| Ethereum | `eip155:1` | ✅ | ✅ | ✅ | ✅ |
-| Arbitrum | `eip155:42161` | ✅ | ✅ | - | ✅ |
-| Base | `eip155:8453` | ✅ | ✅ | - | ✅ |
-| Optimism | `eip155:10` | ✅ | ✅ | - | ✅ |
-| Polygon | `eip155:137` | - | ✅ | ✅ | ✅ |
-| Ink | `eip155:57073` | ✅ | - | - | ✅ |
-| Berachain | `eip155:80084` | ✅ | - | - | ✅ |
-| Unichain | `eip155:130` | ✅ | - | - | ✅ |
+## EVM Chains (Mainnet)
+
+| Chain | Network ID | USDT0 | USDC | Gasless |
+|-------|------------|-------|------|---------|
+| Ethereum | `eip155:1` | ✅ | ✅ | ✅ |
+| Arbitrum | `eip155:42161` | ✅ | ✅ | ✅ |
+| Base | `eip155:8453` | ✅ | ✅ | ✅ |
+| Optimism | `eip155:10` | ✅ | ✅ | ✅ |
+| Ink | `eip155:57073` | ✅ | - | ✅ |
+| Berachain | `eip155:80094` | ✅ | - | ✅ |
+| Unichain | `eip155:130` | ✅ | - | ✅ |
+
+## EVM Chains (Testnet)
+
+| Chain | Network ID | USDT0 | USDC | Gasless |
+|-------|------------|-------|------|---------|
+| Sepolia | `eip155:11155111` | ✅ | ✅ | ✅ |
+| Base Sepolia | `eip155:84532` | ✅ | ✅ | ✅ |
+| Arbitrum Sepolia | `eip155:421614` | ✅ | ✅ | ✅ |
+| Ink Sepolia | `eip155:763373` | ✅ | - | ✅ |
+| Berachain bArtio | `eip155:80084` | ✅ | - | ✅ |
+| Unichain Sepolia | `eip155:1301` | ✅ | - | ✅ |
 
 ## Non-EVM Chains
 
-| Chain | Network ID | Token | Status |
-|-------|------------|-------|--------|
-| TON | `ton:mainnet` | USDT Jetton | Production |
-| TRON | `tron:mainnet` | USDT TRC-20 | Production |
-| Solana | `solana:mainnet` | USDC SPL | Production |
+| Chain | Mainnet ID | Testnet ID | Token | Status |
+|-------|------------|------------|-------|--------|
+| TON | `ton:mainnet` | `ton:testnet` | USDT Jetton | Production |
+| TRON | `tron:mainnet` | `tron:nile`, `tron:shasta` | USDT TRC-20 | Production |
+| Solana | `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` | `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` | USDC SPL | Production |
+
+<Callout type="info">
+  Solana uses the genesis hash as the network identifier in CAIP-2 format.
+</Callout>
 
 ## USDT0 Addresses
 
