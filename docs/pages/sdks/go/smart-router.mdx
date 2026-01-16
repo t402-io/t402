@@ -1,0 +1,255 @@
+# Smart Bridge Router
+
+Cross-chain USDT0 bridging with automatic source chain selection using LayerZero OFT.
+
+## Installation
+
+```bash
+go get github.com/t402-io/t402/go@latest
+```
+
+## Features
+
+- **Multi-chain management**: View balances across all configured chains concurrently
+- **Automatic routing**: Select best source chain based on balances and fees
+- **Fee optimization**: Choose strategy - cheapest, fastest, or preferred
+- **LayerZero tracking**: Monitor delivery via LayerZero Scan API
+- **WDK integration**: Seamless integration with WDK Signer
+
+## Quick Start
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "math/big"
+
+    "github.com/t402-io/t402/go/mechanisms/evm/bridge"
+    "github.com/t402-io/t402/go/wdk"
+)
+
+func main() {
+    ctx := context.Background()
+
+    // 1. Create WDK Signer with multiple chains
+    signer, _ := wdk.NewSigner(seedPhrase, map[string]string{
+        "ethereum": "https://eth-rpc.example.com",
+        "arbitrum": "https://arb-rpc.example.com",
+        "ink":      "https://ink-rpc.example.com",
+    }, 0)
+    signer.Initialize(ctx)
+
+    // 2. Create MultiChainSigner adapter
+    multiSigner, _ := bridge.NewWdkMultiChainSigner(signer)
+
+    // 3. Create SmartBridgeRouter
+    router, _ := bridge.NewSmartBridgeRouter(multiSigner, nil)
+
+    // 4. Get multi-chain balances
+    summary, _ := router.GetBalances(ctx)
+    fmt.Printf("Total USDT0: %s\n", summary.TotalUSDT0)
+    fmt.Printf("Bridgeable chains: %v\n", summary.BridgeableChains)
+
+    // 5. Auto-bridge to Ethereum
+    result, _ := router.AutoBridge(ctx, &bridge.AutoBridgeParams{
+        ToChain:   "ethereum",
+        Amount:    big.NewInt(100_000000), // 100 USDT0
+        Recipient: "0x...",
+        Strategy:  bridge.StrategyCheapest,
+    })
+
+    fmt.Printf("Bridge TX: %s\n", result.TxHash)
+    fmt.Printf("From chain: %s\n", result.SelectedRoute.FromChain)
+    fmt.Printf("Message GUID: %s\n", result.MessageGUID)
+
+    // 6. Wait for delivery
+    msg, _ := router.WaitForDelivery(ctx, result.MessageGUID, &bridge.WaitForDeliveryOptions{
+        OnStatusChange: func(status bridge.LayerZeroMessageStatus) {
+            fmt.Printf("Status: %s\n", status)
+        },
+    })
+
+    fmt.Printf("Delivered! Dst TX: %s\n", msg.DstTxHash)
+}
+```
+
+## Route Selection
+
+Get available routes before bridging:
+
+```go
+routes, _ := router.GetRoutes(ctx, "ethereum", big.NewInt(100_000000))
+
+for _, route := range routes {
+    fmt.Printf("%s -> %s\n", route.FromChain, route.ToChain)
+    fmt.Printf("  Fee: %s wei\n", route.NativeFee)
+    fmt.Printf("  Time: ~%d minutes\n", route.EstimatedTime/60)
+    fmt.Printf("  Available: %v\n", route.Available)
+    if !route.Available {
+        fmt.Printf("  Reason: %s\n", route.UnavailableReason)
+    }
+}
+```
+
+## Route Strategies
+
+| Strategy | Description |
+|----------|-------------|
+| `StrategyCheapest` | Select route with lowest native fee (default) |
+| `StrategyFastest` | Select route with fastest estimated delivery |
+| `StrategyPreferred` | Use preferred source chain if available |
+
+```go
+// Use fastest route
+config := &bridge.SmartRouterConfig{
+    DefaultStrategy: bridge.StrategyFastest,
+}
+router, _ := bridge.NewSmartBridgeRouter(multiSigner, config)
+
+// Or specify per-request with preferred chain
+result, _ := router.AutoBridge(ctx, &bridge.AutoBridgeParams{
+    ToChain:              "ethereum",
+    Amount:               big.NewInt(100_000000),
+    Recipient:            "0x...",
+    Strategy:             bridge.StrategyPreferred,
+    PreferredSourceChain: "arbitrum",
+})
+```
+
+## Direct Bridge
+
+Bridge from a specific chain:
+
+```go
+result, _ := router.Bridge(ctx, &bridge.BridgeExecuteParams{
+    BridgeQuoteParams: bridge.BridgeQuoteParams{
+        FromChain: "arbitrum",
+        ToChain:   "ethereum",
+        Amount:    big.NewInt(50_000000), // 50 USDT0
+        Recipient: "0x...",
+    },
+    SlippageTolerance: 0.3, // 0.3%
+})
+```
+
+## Track Messages
+
+Track bridge transactions manually:
+
+```go
+// Get message status
+message, _ := router.TrackMessage(ctx, messageGUID)
+fmt.Printf("Status: %s\n", message.Status)
+// INFLIGHT -> CONFIRMING -> DELIVERED
+
+// Wait for delivery with options
+delivered, _ := router.WaitForDelivery(ctx, messageGUID, &bridge.WaitForDeliveryOptions{
+    Timeout:      600000, // 10 minutes (ms)
+    PollInterval: 10000,  // 10 seconds (ms)
+    OnStatusChange: func(status bridge.LayerZeroMessageStatus) {
+        fmt.Printf("Status: %s\n", status)
+    },
+})
+```
+
+## Supported Chains
+
+| Chain | Chain ID | LayerZero EID | USDT0 Address |
+|-------|----------|---------------|---------------|
+| Ethereum | 1 | 30101 | `0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee` |
+| Arbitrum | 42161 | 30110 | `0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9` |
+| Ink | 57073 | 30291 | `0x0200C29006150606B650577BBE7B6248F58470c1` |
+| Berachain | 80094 | 30362 | `0x779Ded0c9e1022225f8E0630b35a9b54bE713736` |
+| Unichain | 130 | 30320 | `0x588ce4F028D8e7B53B687865d6A67b3A54C75518` |
+
+## Estimated Bridge Times
+
+| Route | Time |
+|-------|------|
+| Ethereum → Arbitrum | ~3 minutes |
+| Arbitrum → Ethereum | ~15 minutes |
+| L2 → L2 | ~5 minutes |
+
+## API Reference
+
+### SmartBridgeRouter Interface
+
+```go
+type SmartBridgeRouter interface {
+    // GetBalances retrieves USDT0 and native balances across all configured chains.
+    GetBalances(ctx context.Context) (*BalanceSummary, error)
+
+    // GetRoutes evaluates all possible routes to bridge to a destination chain.
+    GetRoutes(ctx context.Context, toChain string, amount *big.Int) ([]BridgeRoute, error)
+
+    // SelectBestRoute selects the best route based on strategy.
+    SelectBestRoute(routes []BridgeRoute, strategy RouteStrategy, preferredChain string) *BridgeRoute
+
+    // AutoBridge automatically selects the best route and executes the bridge.
+    AutoBridge(ctx context.Context, params *AutoBridgeParams) (*SmartBridgeResult, error)
+
+    // Bridge executes a bridge transaction for a specific route.
+    Bridge(ctx context.Context, params *BridgeExecuteParams) (*BridgeResult, error)
+
+    // TrackMessage retrieves the current status of a LayerZero message.
+    TrackMessage(ctx context.Context, messageGUID string) (*LayerZeroMessage, error)
+
+    // WaitForDelivery waits for a message to be delivered on the destination chain.
+    WaitForDelivery(ctx context.Context, messageGUID string, opts *WaitForDeliveryOptions) (*LayerZeroMessage, error)
+}
+```
+
+### Types
+
+```go
+type AutoBridgeParams struct {
+    ToChain              string      // Destination chain name
+    Amount               *big.Int    // Amount to bridge (6 decimals)
+    Recipient            string      // Recipient address on destination
+    PreferredSourceChain string      // Preferred source chain (for StrategyPreferred)
+    SlippageTolerance    float64     // Slippage tolerance (default: 0.5%)
+    Strategy             RouteStrategy // Route selection strategy
+}
+
+type SmartBridgeResult struct {
+    BridgeResult
+    SelectedRoute *BridgeRoute   // The route that was selected
+    Strategy      RouteStrategy  // The strategy used
+}
+
+type BalanceSummary struct {
+    Balances         []SmartChainBalance // Per-chain balances
+    TotalUSDT0       *big.Int            // Total USDT0 across all chains
+    BridgeableChains []string            // Chains that can bridge
+}
+
+type BridgeRoute struct {
+    FromChain          string   // Source chain name
+    ToChain            string   // Destination chain name
+    NativeFee          *big.Int // Native token fee (wei)
+    EstimatedTime      int      // Estimated time (seconds)
+    Available          bool     // Route availability
+    UnavailableReason  string   // Why unavailable (if not available)
+    AvailableAmount    *big.Int // Max bridgeable amount
+}
+```
+
+### MultiChainSigner Interface
+
+```go
+type MultiChainSigner interface {
+    GetAddress() string
+    GetConfiguredChains() []string
+    IsChainConfigured(chain string) bool
+    GetBridgeSigner(chain string) (BridgeSigner, error)
+    GetNativeBalance(ctx context.Context, chain string) (*big.Int, error)
+    GetUSDT0Balance(ctx context.Context, chain string) (*big.Int, error)
+}
+```
+
+## Related Packages
+
+- [WDK Signer](/sdks/go#wdk-package) - Wallet Development Kit for Go
+- [Bridge Client](/sdks/go#facilitator-client) - Core bridge implementation
