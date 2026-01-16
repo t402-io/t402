@@ -14,8 +14,7 @@ scrape_configs:
 
   - job_name: 'facilitator'
     static_configs:
-      # Use host.docker.internal to reach the TypeScript facilitator on the host
-      - targets: ['host.docker.internal:4022']
+      - targets: ['facilitator:8080']
     metrics_path: /metrics
     scrape_interval: 10s
 
