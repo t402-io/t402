@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:cloudflare": "npx @cloudflare/next-on-pages",
-    "preview": "pnpm build:cloudflare && wrangler pages dev",
+    "build:cloudflare": "opennextjs-cloudflare build",
+    "preview": "opennextjs-cloudflare dev",
+    "deploy": "opennextjs-cloudflare deploy",
     "start": "next start",
     "format": "prettier -c .prettierrc --write \"**/*.{ts,tsx,js,json,md}\"",
     "format:check": "prettier -c .prettierrc --check \"**/*.{ts,tsx,js,json,md}\"",
@@ -32,7 +33,7 @@
     "wagmi": "^2.15.6"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^1.13.7",
+    "@opennextjs/cloudflare": "^1.2.0",
     "@eslint/eslintrc": "^3",
     "@eslint/js": "^9.24.0",
     "@svgr/webpack": "^8.1.0",
