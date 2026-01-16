@@ -1,4 +1,4 @@
-package com.coinbase.t402.crypto;
+package io.t402.crypto;
 
 import java.util.Map;
 
