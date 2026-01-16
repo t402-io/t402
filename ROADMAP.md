@@ -74,7 +74,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 
 | SDK | Version | Status |
 |-----|---------|--------|
-| Go | 1.4.0 | Production |
+| Go | 1.5.0 | Production |
 | Python | 1.6.1 | Production |
 | Java | 1.0.0 | Production |
 
@@ -271,18 +271,18 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 | Feature | TypeScript | Go | Python | Java |
 |---------|-----------|-----|--------|------|
 | Core Client | ✅ | ✅ | ✅ | ✅ |
-| Core Server | ✅ | ✅ | ✅ | ⚠️ |
-| Facilitator | ✅ | ✅ | ✅ | ❌ |
-| EVM Mechanism | ✅ | ✅ | ✅ | ❌ |
-| SVM Mechanism | ✅ | ✅ | ⚠️ | ❌ |
-| TON Mechanism | ✅ | ✅ | ✅ | ❌ |
-| TRON Mechanism | ✅ | ✅ | ✅ | ❌ |
-| ERC-4337 | ✅ | ✅ | ✅ | ❌ |
-| USDT0 Bridge | ✅ | ✅ | ⚠️ | ❌ |
-| WDK Integration | ✅ | ✅ | ✅ | ❌ |
+| Core Server | ✅ | ✅ | ✅ | ✅ |
+| Facilitator | ✅ | ✅ | ✅ | ✅ |
+| EVM Mechanism | ✅ | ✅ | ✅ | ✅ |
+| SVM Mechanism | ✅ | ✅ | ✅ | ✅ |
+| TON Mechanism | ✅ | ✅ | ✅ | ✅ |
+| TRON Mechanism | ✅ | ✅ | ✅ | ✅ |
+| ERC-4337 | ✅ | ✅ | ✅ | ✅ |
+| USDT0 Bridge | ✅ | ✅ | ✅ | ✅ |
+| WDK Integration | ✅ | ✅ | ✅ | ✅ |
 | MCP Server | ✅ | ✅ | ✅ | ❌ |
-| CLI Tool | ✅ | ✅ | ✅ | ❌ |
-| HTTP Middleware | ✅ | ✅ | ✅ | ❌ |
+| CLI Tool | ✅ | ✅ | ✅ | ✅ |
+| HTTP Middleware | ✅ | ✅ | ✅ | ⚠️ |
 | React/Vue UI | ✅ | N/A | N/A | N/A |
 
 Legend: ✅ Complete | ⚠️ Partial | ❌ Missing | N/A Not Applicable
@@ -382,7 +382,6 @@ We welcome contributions! See [CONTRIBUTING.md](./CONTRIBUTING.md) for guideline
 
 ## Related Documents
 
-- [UPGRADE_PLAN.md](./UPGRADE_PLAN.md) - Detailed upgrade and architecture plan
 - [CONTRIBUTING.md](./CONTRIBUTING.md) - Contribution guidelines
 - [SECURITY.md](./SECURITY.md) - Security policy
 - [BUG_BOUNTY.md](./BUG_BOUNTY.md) - Bug bounty program
