@@ -123,12 +123,11 @@ services:
 
   # Grafana for dashboards (internal only, accessed via Caddy)
   grafana:
-    image: grafana/grafana:10.2.2
+    image: ghcr.io/t402-io/grafana:latest
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     volumes:
-      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
-      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
-      - ./grafana/provisioning/alerting:/etc/grafana/provisioning/alerting:ro
-      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      # Only persist user data, provisioning is baked into the image
       - grafana_data:/var/lib/grafana
     environment:
       - GF_SECURITY_ADMIN_USER=admin

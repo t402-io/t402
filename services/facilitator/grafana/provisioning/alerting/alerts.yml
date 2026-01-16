@@ -388,7 +388,7 @@ groups:
               to: 0
             datasourceUid: PBFA97CFB590B2093
             model:
-              expr: sum(rate(facilitator_settlements_total{status="success"}[10m])) or vector(0)
+              expr: sum(rate(facilitator_settle_total{result="success"}[10m])) or vector(0)
               intervalMs: 1000
               maxDataPoints: 43200
               refId: A
@@ -398,7 +398,7 @@ groups:
               to: 0
             datasourceUid: PBFA97CFB590B2093
             model:
-              expr: sum(rate(facilitator_settlements_total[10m])) or vector(0)
+              expr: sum(rate(facilitator_settle_total[10m])) or vector(0)
               intervalMs: 1000
               maxDataPoints: 43200
               refId: B
@@ -447,7 +447,7 @@ groups:
               to: 0
             datasourceUid: PBFA97CFB590B2093
             model:
-              expr: sum(rate(facilitator_verifications_total{status="valid"}[10m])) or vector(0)
+              expr: sum(rate(facilitator_verify_total{result="success"}[10m])) or vector(0)
               intervalMs: 1000
               maxDataPoints: 43200
               refId: A
@@ -457,7 +457,7 @@ groups:
               to: 0
             datasourceUid: PBFA97CFB590B2093
             model:
-              expr: sum(rate(facilitator_verifications_total[10m])) or vector(0)
+              expr: sum(rate(facilitator_verify_total[10m])) or vector(0)
               intervalMs: 1000
               maxDataPoints: 43200
               refId: B
@@ -629,7 +629,7 @@ groups:
               to: 0
             datasourceUid: PBFA97CFB590B2093
             model:
-              expr: sum(rate(facilitator_settlements_total{network=~"eip155:.*",status="failed"}[5m])) or vector(0)
+              expr: sum(rate(facilitator_settle_total{network=~"eip155:.*",result="failure"}[5m])) or vector(0)
               intervalMs: 1000
               maxDataPoints: 43200
               refId: A
@@ -639,7 +639,7 @@ groups:
               to: 0
             datasourceUid: PBFA97CFB590B2093
             model:
-              expr: sum(rate(facilitator_settlements_total{network=~"eip155:.*"}[5m])) or vector(0)
+              expr: sum(rate(facilitator_settle_total{network=~"eip155:.*"}[5m])) or vector(0)
               intervalMs: 1000
               maxDataPoints: 43200
               refId: B
@@ -689,7 +689,7 @@ groups:
               to: 0
             datasourceUid: PBFA97CFB590B2093
             model:
-              expr: sum(rate(facilitator_settlements_total{network=~"solana:.*",status="failed"}[5m])) or vector(0)
+              expr: sum(rate(facilitator_settle_total{network=~"solana:.*",result="failure"}[5m])) or vector(0)
               intervalMs: 1000
               maxDataPoints: 43200
               refId: A
@@ -699,7 +699,7 @@ groups:
               to: 0
             datasourceUid: PBFA97CFB590B2093
             model:
-              expr: sum(rate(facilitator_settlements_total{network=~"solana:.*"}[5m])) or vector(0)
+              expr: sum(rate(facilitator_settle_total{network=~"solana:.*"}[5m])) or vector(0)
               intervalMs: 1000
               maxDataPoints: 43200
               refId: B

@@ -192,7 +192,7 @@
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 7 },
       "id": 105,
       "panels": [],
-      "title": "Payment Volume",
+      "title": "Operations Overview",
       "type": "row"
     },
     {
@@ -207,7 +207,7 @@
               { "color": "blue", "value": null }
             ]
           },
-          "unit": "currencyUSD"
+          "unit": "short"
         },
         "overrides": []
       },
@@ -228,12 +228,12 @@
       "pluginVersion": "10.2.0",
       "targets": [
         {
-          "expr": "sum(increase(facilitator_payment_volume_usd_total[24h]))",
-          "legendFormat": "Volume (24h)",
+          "expr": "sum(increase(facilitator_verify_total[24h]))",
+          "legendFormat": "Verifications (24h)",
           "refId": "A"
         }
       ],
-      "title": "Payment Volume (24h)",
+      "title": "Total Verifications (24h)",
       "type": "stat"
     },
     {
@@ -245,7 +245,7 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "purple", "value": null }
+              { "color": "green", "value": null }
             ]
           },
           "unit": "short"
@@ -269,7 +269,7 @@
       "pluginVersion": "10.2.0",
       "targets": [
         {
-          "expr": "sum(increase(facilitator_settlements_total{status=\"success\"}[24h]))",
+          "expr": "sum(increase(facilitator_settle_total{result=\"success\"}[24h]))",
           "legendFormat": "Settlements (24h)",
           "refId": "A"
         }
@@ -312,7 +312,7 @@
       "pluginVersion": "10.2.0",
       "targets": [
         {
-          "expr": "sum(rate(facilitator_settlements_total{status=\"success\"}[5m])) / sum(rate(facilitator_verifications_total{status=\"valid\"}[5m]))",
+          "expr": "sum(rate(facilitator_settle_total{result=\"success\"}[5m])) / sum(rate(facilitator_verify_total{result=\"success\"}[5m]))",
           "legendFormat": "Conversion",
           "refId": "A"
         }
@@ -329,10 +329,12 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "orange", "value": null }
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.1 },
+              { "color": "red", "value": 0.2 }
             ]
           },
-          "unit": "currencyUSD"
+          "unit": "percentunit"
         },
         "overrides": []
       },
@@ -340,11 +342,11 @@
       "id": 23,
       "options": {
         "colorMode": "value",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["mean"],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
@@ -353,12 +355,12 @@
       "pluginVersion": "10.2.0",
       "targets": [
         {
-          "expr": "sum(rate(facilitator_payment_volume_usd_total[5m])) / sum(rate(facilitator_settlements_total{status=\"success\"}[5m]))",
-          "legendFormat": "Avg Payment",
+          "expr": "sum(rate(facilitator_settle_total{result=\"failure\"}[5m])) / sum(rate(facilitator_settle_total[5m]))",
+          "legendFormat": "Failure Rate",
           "refId": "A"
         }
       ],
-      "title": "Avg Payment Size",
+      "title": "Settlement Failure Rate",
       "type": "stat"
     },
     {
@@ -479,7 +481,7 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(facilitator_settlements_total{status=\"success\"}[24h])) by (network)",
+          "expr": "sum(increase(facilitator_settle_total{result=\"success\"}[24h])) by (network)",
           "legendFormat": "{{network}}",
           "refId": "A"
         }
@@ -667,8 +669,8 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(facilitator_verifications_total[5m])) by (status)",
-          "legendFormat": "verify - {{status}}",
+          "expr": "sum(rate(facilitator_verify_total[5m])) by (result)",
+          "legendFormat": "verify - {{result}}",
           "refId": "A"
         }
       ],
@@ -727,8 +729,8 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(facilitator_settlements_total[5m])) by (status)",
-          "legendFormat": "settle - {{status}}",
+          "expr": "sum(rate(facilitator_settle_total[5m])) by (result)",
+          "legendFormat": "settle - {{result}}",
           "refId": "A"
         }
       ],
@@ -804,12 +806,12 @@
           "refId": "A"
         },
         {
-          "expr": "sum(increase(facilitator_verifications_total{status=\"valid\"}[1h]))",
+          "expr": "sum(increase(facilitator_verify_total{result=\"success\"}[1h]))",
           "legendFormat": "Valid Verifications",
           "refId": "B"
         },
         {
-          "expr": "sum(increase(facilitator_settlements_total{status=\"success\"}[1h]))",
+          "expr": "sum(increase(facilitator_settle_total{result=\"success\"}[1h]))",
           "legendFormat": "Successful Settlements",
           "refId": "C"
         }
@@ -941,11 +943,11 @@
         },
         "overrides": [
           {
-            "matcher": { "id": "byName", "options": "valid" },
+            "matcher": { "id": "byName", "options": "success" },
             "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }]
           },
           {
-            "matcher": { "id": "byName", "options": "invalid" },
+            "matcher": { "id": "byName", "options": "failure" },
             "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
           }
         ]
@@ -961,8 +963,8 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(facilitator_verifications_total[24h])) by (status)",
-          "legendFormat": "{{status}}",
+          "expr": "sum(increase(facilitator_verify_total[24h])) by (result)",
+          "legendFormat": "{{result}}",
           "refId": "A"
         }
       ],
@@ -987,7 +989,7 @@
             "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }]
           },
           {
-            "matcher": { "id": "byName", "options": "failed" },
+            "matcher": { "id": "byName", "options": "failure" },
             "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
           }
         ]
@@ -1003,8 +1005,8 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(facilitator_settlements_total[24h])) by (status)",
-          "legendFormat": "{{status}}",
+          "expr": "sum(increase(facilitator_settle_total[24h])) by (result)",
+          "legendFormat": "{{result}}",
           "refId": "A"
         }
       ],
