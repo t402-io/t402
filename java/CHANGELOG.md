@@ -4,6 +4,40 @@ All notable changes to the T402 Java SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-01-16
+
+### Added
+
+#### Multi-Chain Signers
+- `SvmSigner` - Solana (SVM) Ed25519 signing with Base58 encoding
+- `TonSigner` - TON Ed25519 signing with Base64 encoding
+- `TronSigner` - TRON ECDSA secp256k1 signing with Base58Check
+
+#### ERC-4337 Account Abstraction
+- `UserOperation` - ERC-4337 v0.7 UserOperation structure
+- `BundlerClient` - Bundler JSON-RPC client for UserOperation submission
+- `PaymasterClient` - Paymaster integration for gas sponsorship
+- `GasEstimate` - Gas estimation types
+- `PaymasterData` - Paymaster data encoding/decoding
+
+#### USDT0 Cross-Chain Bridge
+- `Usdt0Bridge` - LayerZero OFT bridge client
+- `LayerZeroScanClient` - Message tracking via LayerZero Scan API
+- `BridgeConstants` - Chain endpoints, USDT0 addresses, utilities
+- `BridgeTypes` - Quote, execute, result types
+- `BridgeSigner` - Interface for bridge transactions
+
+#### WDK Integration
+- `WDKSigner` - BIP-39 seed phrase derivation compatible with Tether WDK
+- `WDKChains` - Chain configuration, token addresses
+- `WDKTypes` - Configuration, balance, payment types
+
+#### CLI Tool
+- `T402Cli` - Command-line interface
+- Commands: verify, settle, supported, encode, decode, info, version
+- JSON and text output formats
+- Configurable facilitator URL
+
 ## [1.0.0] - 2026-01-16
 
 ### Added
