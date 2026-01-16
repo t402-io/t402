@@ -50,6 +50,95 @@ describe("ExactSvmScheme", () => {
   });
 
   describe("verify", () => {
+    describe("payload structure validation", () => {
+      it("should reject empty payload object", async () => {
+        const facilitator = new ExactSvmScheme(mockSigner);
+
+        const payload: PaymentPayload = {
+          t402Version: 2,
+          accepted: {
+            scheme: "exact",
+            network: SOLANA_DEVNET_CAIP2,
+          },
+          payload: {},
+        };
+
+        const requirements: PaymentRequirements = {
+          scheme: "exact",
+          network: SOLANA_DEVNET_CAIP2,
+          asset: USDC_DEVNET_ADDRESS,
+          amount: "100000",
+          payTo: "PayToAddress11111111111111111111111111",
+          maxTimeoutSeconds: 3600,
+          extra: { feePayer: "FeePayer1111111111111111111111111111" },
+        };
+
+        const result = await facilitator.verify(payload, requirements);
+
+        expect(result.isValid).toBe(false);
+        expect(result.invalidReason).toBe("invalid_payload_structure");
+        expect(result.payer).toBe("");
+      });
+
+      it("should reject null payload", async () => {
+        const facilitator = new ExactSvmScheme(mockSigner);
+
+        const payload: PaymentPayload = {
+          t402Version: 2,
+          accepted: {
+            scheme: "exact",
+            network: SOLANA_DEVNET_CAIP2,
+          },
+          payload: null as never,
+        };
+
+        const requirements: PaymentRequirements = {
+          scheme: "exact",
+          network: SOLANA_DEVNET_CAIP2,
+          asset: USDC_DEVNET_ADDRESS,
+          amount: "100000",
+          payTo: "PayToAddress11111111111111111111111111",
+          maxTimeoutSeconds: 3600,
+          extra: { feePayer: "FeePayer1111111111111111111111111111" },
+        };
+
+        const result = await facilitator.verify(payload, requirements);
+
+        expect(result.isValid).toBe(false);
+        expect(result.invalidReason).toBe("invalid_payload_structure");
+      });
+
+      it("should reject payload missing transaction field", async () => {
+        const facilitator = new ExactSvmScheme(mockSigner);
+
+        const payload: PaymentPayload = {
+          t402Version: 2,
+          accepted: {
+            scheme: "exact",
+            network: SOLANA_DEVNET_CAIP2,
+          },
+          payload: {
+            someOtherField: "value",
+          },
+        };
+
+        const requirements: PaymentRequirements = {
+          scheme: "exact",
+          network: SOLANA_DEVNET_CAIP2,
+          asset: USDC_DEVNET_ADDRESS,
+          amount: "100000",
+          payTo: "PayToAddress11111111111111111111111111",
+          maxTimeoutSeconds: 3600,
+          extra: { feePayer: "FeePayer1111111111111111111111111111" },
+        };
+
+        const result = await facilitator.verify(payload, requirements);
+
+        expect(result.isValid).toBe(false);
+        expect(result.invalidReason).toBe("invalid_payload_structure");
+      });
+    });
+
     it("should reject if scheme does not match", async () => {
       const facilitator = new ExactSvmScheme(mockSigner);
 
@@ -214,6 +303,65 @@ describe("ExactSvmScheme", () => {
   });
 
   describe("settle", () => {
+    describe("payload structure validation", () => {
+      it("should reject empty payload object", async () => {
+        const facilitator = new ExactSvmScheme(mockSigner);
+
+        const payload: PaymentPayload = {
+          t402Version: 2,
+          accepted: {
+            scheme: "exact",
+            network: SOLANA_DEVNET_CAIP2,
+          },
+          payload: {},
+        };
+
+        const requirements: PaymentRequirements = {
+          scheme: "exact",
+          network: SOLANA_DEVNET_CAIP2,
+          asset: USDC_DEVNET_ADDRESS,
+          amount: "100000",
+          payTo: "PayToAddress11111111111111111111111111",
+          maxTimeoutSeconds: 3600,
+          extra: { feePayer: "FeePayer1111111111111111111111111111" },
+        };
+
+        const result = await facilitator.settle(payload, requirements);
+
+        expect(result.success).toBe(false);
+        expect(result.errorReason).toBe("invalid_payload_structure");
+        expect(result.payer).toBe("");
+      });
+
+      it("should reject null payload", async () => {
+        const facilitator = new ExactSvmScheme(mockSigner);
+
+        const payload: PaymentPayload = {
+          t402Version: 2,
+          accepted: {
+            scheme: "exact",
+            network: SOLANA_DEVNET_CAIP2,
+          },
+          payload: null as never,
+        };
+
+        const requirements: PaymentRequirements = {
+          scheme: "exact",
+          network: SOLANA_DEVNET_CAIP2,
+          asset: USDC_DEVNET_ADDRESS,
+          amount: "100000",
+          payTo: "PayToAddress11111111111111111111111111",
+          maxTimeoutSeconds: 3600,
+          extra: { feePayer: "FeePayer1111111111111111111111111111" },
+        };
+
+        const result = await facilitator.settle(payload, requirements);
+
+        expect(result.success).toBe(false);
+        expect(result.errorReason).toBe("invalid_payload_structure");
+      });
+    });
+
     it("should fail settlement if verification fails", async () => {
       const facilitator = new ExactSvmScheme(mockSigner);
 

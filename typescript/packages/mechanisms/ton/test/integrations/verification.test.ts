@@ -92,6 +92,115 @@ function createMockPayload(overrides: Partial<PaymentPayload> = {}): PaymentPayl
 }
 
 describe("TON Verification Edge Cases", () => {
+  describe("Payload Structure Validation", () => {
+    let facilitator: ExactTonFacilitator;
+    let mockSigner: FacilitatorTonSigner;
+
+    beforeEach(() => {
+      mockSigner = createMockSigner("EQFacilitatorAddress11111111111111111111");
+      facilitator = new ExactTonFacilitator(mockSigner);
+    });
+
+    it("should reject empty payload object", async () => {
+      const requirements = createMockRequirements();
+      const payload = {
+        t402Version: 2,
+        accepted: {
+          scheme: SCHEME_EXACT,
+          network: TON_MAINNET_CAIP2,
+        },
+        payload: {},
+      } as never;
+
+      const result = await facilitator.verify(payload, requirements);
+
+      expect(result.isValid).toBe(false);
+      expect(result.invalidReason).toBe("invalid_payload_structure");
+      expect(result.payer).toBe("");
+    });
+
+    it("should reject null payload", async () => {
+      const requirements = createMockRequirements();
+      const payload = {
+        t402Version: 2,
+        accepted: {
+          scheme: SCHEME_EXACT,
+          network: TON_MAINNET_CAIP2,
+        },
+        payload: null,
+      } as never;
+
+      const result = await facilitator.verify(payload, requirements);
+
+      expect(result.isValid).toBe(false);
+      expect(result.invalidReason).toBe("invalid_payload_structure");
+    });
+
+    it("should reject payload missing authorization", async () => {
+      const requirements = createMockRequirements();
+      const payload = {
+        t402Version: 2,
+        accepted: {
+          scheme: SCHEME_EXACT,
+          network: TON_MAINNET_CAIP2,
+        },
+        payload: {
+          signedBoc: "someBase64Boc",
+        },
+      } as never;
+
+      const result = await facilitator.verify(payload, requirements);
+
+      expect(result.isValid).toBe(false);
+      expect(result.invalidReason).toBe("invalid_payload_structure");
+    });
+
+    it("should reject payload missing signedBoc", async () => {
+      const requirements = createMockRequirements();
+      const payload = {
+        t402Version: 2,
+        accepted: {
+          scheme: SCHEME_EXACT,
+          network: TON_MAINNET_CAIP2,
+        },
+        payload: {
+          authorization: {
+            from: VALID_SENDER,
+            to: VALID_RECIPIENT,
+            jettonAmount: "1000000",
+            jettonMaster: USDT_ADDRESSES[TON_MAINNET_CAIP2],
+            validUntil: Math.floor(Date.now() / 1000) + 3600,
+            seqno: 5,
+            queryId: "12345",
+          },
+        },
+      } as never;
+
+      const result = await facilitator.verify(payload, requirements);
+
+      expect(result.isValid).toBe(false);
+      expect(result.invalidReason).toBe("invalid_payload_structure");
+    });
+
+    it("should reject settle with empty payload", async () => {
+      const requirements = createMockRequirements();
+      const payload = {
+        t402Version: 2,
+        accepted: {
+          scheme: SCHEME_EXACT,
+          network: TON_MAINNET_CAIP2,
+        },
+        payload: {},
+      } as never;
+
+      const result = await facilitator.settle(payload, requirements);
+
+      expect(result.success).toBe(false);
+      expect(result.errorReason).toBe("invalid_payload_structure");
+      expect(result.payer).toBe("");
+    });
+  });
+
   describe("Scheme and Network Matching", () => {
     let facilitator: ExactTonFacilitator;
     let mockSigner: FacilitatorTonSigner;
