@@ -16,7 +16,7 @@ if (!tronAddress) {
 const facilitatorUrl = process.env.FACILITATOR_URL;
 if (!facilitatorUrl) {
   console.error("❌ FACILITATOR_URL environment variable is required");
-  console.error("   Example: https://t402.org/facilitator");
+  console.error("   Example: https://facilitator.t402.io");
   process.exit(1);
 }
 

@@ -58,7 +58,7 @@ type FacilitatorConfig struct {
 }
 
 // DefaultFacilitatorURL is the default public facilitator
-const DefaultFacilitatorURL = "https://t402.org/facilitator"
+const DefaultFacilitatorURL = "https://facilitator.t402.io"
 
 // NewHTTPFacilitatorClient creates a new HTTP facilitator client
 func NewHTTPFacilitatorClient(config *FacilitatorConfig) *HTTPFacilitatorClient {

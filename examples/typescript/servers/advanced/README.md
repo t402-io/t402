@@ -34,7 +34,7 @@ app.use(
 - Node.js v20+ (install via [nvm](https://github.com/nvm-sh/nvm))
 - pnpm v10 (install via [pnpm.io/installation](https://pnpm.io/installation))
 - Valid EVM for receiving payments
-- URL of a facilitator supporting the desired payment network, see [facilitator list](https://www.t402.org/ecosystem?category=facilitators)
+- URL of a facilitator supporting the desired payment network, see [facilitator list](https://t402.io/ecosystem?category=facilitators)
 
 ## Setup
 

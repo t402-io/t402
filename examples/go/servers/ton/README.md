@@ -15,7 +15,7 @@ This example demonstrates how to create a Gin server with t402 payment protectio
 ```env
 TON_PAYEE_ADDRESS=EQC...your-ton-address
 TON_NETWORK=ton:testnet
-FACILITATOR_URL=https://t402.org/facilitator
+FACILITATOR_URL=https://facilitator.t402.io
 PORT=4021
 ```
 
