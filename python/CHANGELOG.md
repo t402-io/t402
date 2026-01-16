@@ -5,6 +5,19 @@ All notable changes to the T402 Python SDK will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- **MCP Server** (`t402.mcp`) - Model Context Protocol server for AI agents
+  - `T402McpServer` class for handling MCP requests
+  - `t402/getBalance` - Get token balances for a wallet on specific network
+  - `t402/getAllBalances` - Get balances across all supported networks
+  - `t402/pay` - Execute stablecoin payments (USDC, USDT, USDT0)
+  - `t402/payGasless` - ERC-4337 gasless payments (no gas fees)
+  - `t402/getBridgeFee` - Get LayerZero bridge fee quotes
+  - `t402/bridge` - Bridge USDT0 between chains via LayerZero
+  - Demo mode for testing without real transactions
+  - Support for 9 EVM networks
+  - `load_config_from_env()` for environment variable configuration
+  - `run_server()` CLI entry point
+
 - **SVM (Solana) Support**: Complete Solana blockchain integration
   - `validate_svm_address()` for Solana address validation
   - `prepare_svm_payment_header()` for payment header preparation
