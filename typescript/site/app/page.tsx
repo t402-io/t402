@@ -5,7 +5,6 @@ import { Stats } from "./components/Stats";
 import { HowItWorks } from "./components/HowItWorks";
 import { CodeExamples } from "./components/CodeExamples";
 import { FeatureDeepDives } from "./components/FeatureDeepDives";
-import { Testimonials } from "./components/Testimonials";
 import { UseCasesPreview } from "./components/UseCasesPreview";
 import { CTA } from "./components/CTA";
 import { Footer } from "./components/Footer";
@@ -20,7 +19,6 @@ export default function HomePage() {
       <HowItWorks />
       <CodeExamples />
       <FeatureDeepDives />
-      <Testimonials />
       <UseCasesPreview />
       <CTA />
       <Footer />
