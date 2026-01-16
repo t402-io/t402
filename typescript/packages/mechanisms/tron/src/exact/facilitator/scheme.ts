@@ -85,10 +85,20 @@ export class ExactTronScheme implements SchemeNetworkFacilitator {
     payload: PaymentPayload,
     requirements: PaymentRequirements,
   ): Promise<VerifyResponse> {
-    const tronPayload = payload.payload as ExactTronPayload;
+    const tronPayload = payload.payload as ExactTronPayload | undefined;
+
+    // Step 1: Validate payload structure (must be first to avoid undefined access)
+    if (!tronPayload?.authorization?.from || !tronPayload?.signedTransaction) {
+      return {
+        isValid: false,
+        invalidReason: "invalid_payload_structure",
+        payer: "",
+      };
+    }
+
     const authorization = tronPayload.authorization;
 
-    // Step 1: Validate scheme
+    // Step 2: Validate scheme
     if (payload.accepted.scheme !== SCHEME_EXACT || requirements.scheme !== SCHEME_EXACT) {
       return {
         isValid: false,
@@ -97,7 +107,7 @@ export class ExactTronScheme implements SchemeNetworkFacilitator {
       };
     }
 
-    // Step 2: Validate network
+    // Step 3: Validate network
     let payloadNetwork: string;
     try {
       payloadNetwork = normalizeNetwork(String(payload.accepted.network));
@@ -115,15 +125,6 @@ export class ExactTronScheme implements SchemeNetworkFacilitator {
         isValid: false,
         invalidReason: "invalid_network",
         payer: authorization.from,
-      };
-    }
-
-    // Step 3: Validate payload structure
-    if (!tronPayload || !tronPayload.signedTransaction || !authorization) {
-      return {
-        isValid: false,
-        invalidReason: "invalid_payload_structure",
-        payer: authorization?.from || "",
       };
     }
 
@@ -259,7 +260,18 @@ export class ExactTronScheme implements SchemeNetworkFacilitator {
     payload: PaymentPayload,
     requirements: PaymentRequirements,
   ): Promise<SettleResponse> {
-    const tronPayload = payload.payload as ExactTronPayload;
+    const tronPayload = payload.payload as ExactTronPayload | undefined;
+
+    // Validate payload structure
+    if (!tronPayload?.authorization?.from || !tronPayload?.signedTransaction) {
+      return {
+        success: false,
+        network: payload.accepted.network,
+        transaction: "",
+        errorReason: "invalid_payload_structure",
+        payer: "",
+      };
+    }
 
     // Re-verify before settling
     const verifyResult = await this.verify(payload, requirements);
