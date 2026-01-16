@@ -121,7 +121,7 @@ jobs:
           echo "Released Java SDK version: $VERSION"
 
       - name: Download artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v6
         with:
           name: java-dist
           path: dist/
