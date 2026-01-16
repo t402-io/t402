@@ -82,7 +82,7 @@ pnpm add -g @t402/cli
 t402 --help
 ```
 
-### Python (v1.5.3)
+### Python (v1.6.0)
 
 ```shell
 pip install t402
@@ -219,7 +219,7 @@ Legend: ✅ Complete | ⚠️ Partial | ❌ Not Available
 | SDK | Version | Release Date | Changelog |
 |-----|---------|--------------|-----------|
 | TypeScript | v2.0.0 | 2026-01-16 | [CHANGELOG](typescript/CHANGELOG.md) |
-| Python | v1.5.3 | 2026-01-16 | [CHANGELOG](python/CHANGELOG.md) |
+| Python | v1.6.0 | 2026-01-16 | [CHANGELOG](python/CHANGELOG.md) |
 | Go | v1.3.1 | 2026-01-16 | [CHANGELOG](go/CHANGELOG.md) |
 | Java | v1.0.0 | 2026-01-16 | [CHANGELOG](java/CHANGELOG.md) |
 

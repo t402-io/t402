@@ -4,6 +4,8 @@ All notable changes to the T402 Python SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-01-16
+
 ### Added
 - **MCP Server** (`t402.mcp`) - Model Context Protocol server for AI agents
   - `T402McpServer` class for handling MCP requests
@@ -92,7 +94,8 @@ All notable changes to the T402 Python SDK will be documented in this file.
 - EVM support with EIP-3009
 - Core types and utilities
 
-[Unreleased]: https://github.com/t402-io/t402/compare/python/v1.5.3...HEAD
+[Unreleased]: https://github.com/t402-io/t402/compare/python/v1.6.0...HEAD
+[1.6.0]: https://github.com/t402-io/t402/compare/python/v1.5.3...python/v1.6.0
 [1.5.3]: https://github.com/t402-io/t402/compare/python/v1.5.0...python/v1.5.3
 [1.5.0]: https://github.com/t402-io/t402/compare/python/v1.4.0...python/v1.5.0
 [1.4.0]: https://github.com/t402-io/t402/compare/python/v1.0.0...python/v1.4.0
