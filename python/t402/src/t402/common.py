@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from t402.chains import (
     get_chain_id,
@@ -9,7 +9,19 @@ from t402.chains import (
     get_default_token_address,
 )
 from t402.networks import is_ton_network, is_tron_network
-from t402.types import Price, TokenAmount, PaymentRequirements, PaymentPayload
+from t402.types import (
+    Price,
+    TokenAmount,
+    PaymentRequirements,
+    PaymentRequirementsV1,
+    PaymentRequirementsV2,
+    PaymentPayload,
+    PaymentPayloadV1,
+    PaymentPayloadV2,
+    T402_VERSION,
+    T402_VERSION_V1,
+    T402_VERSION_V2,
+)
 
 
 def parse_money(amount: str | int, address: str, network: str) -> int:
@@ -147,23 +159,44 @@ def get_usdc_address(chain_id: int | str) -> str:
 
 
 def find_matching_payment_requirements(
-    payment_requirements: List[PaymentRequirements],
-    payment: PaymentPayload,
-) -> Optional[PaymentRequirements]:
+    payment_requirements: List[Union[PaymentRequirementsV1, PaymentRequirementsV2]],
+    payment: Union[PaymentPayloadV1, PaymentPayloadV2, dict],
+) -> Optional[Union[PaymentRequirementsV1, PaymentRequirementsV2]]:
     """
     Finds the matching payment requirements for the given payment.
 
+    Supports both V1 and V2 payment formats.
+
     Args:
         payment_requirements: The payment requirements to search through
-        payment: The payment to match against
+        payment: The payment to match against (V1, V2, or dict)
 
     Returns:
         The matching payment requirements or None if no match is found
     """
+    # Handle dict input
+    if isinstance(payment, dict):
+        payment_scheme = payment.get("scheme")
+        payment_network = payment.get("network")
+        # V2 format uses "accepted" field
+        if "accepted" in payment:
+            accepted = payment["accepted"]
+            payment_scheme = accepted.get("scheme")
+            payment_network = accepted.get("network")
+    elif hasattr(payment, "accepted"):
+        # V2 PaymentPayload
+        payment_scheme = payment.accepted.scheme
+        payment_network = payment.accepted.network
+    else:
+        # V1 PaymentPayload
+        payment_scheme = payment.scheme
+        payment_network = payment.network
+
     for req in payment_requirements:
-        if req.scheme == payment.scheme and req.network == payment.network:
+        if req.scheme == payment_scheme and req.network == payment_network:
             return req
     return None
 
 
-t402_VERSION = 1
+# Re-export version constant for backward compatibility
+t402_VERSION = T402_VERSION
