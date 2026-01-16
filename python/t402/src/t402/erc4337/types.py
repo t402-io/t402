@@ -7,8 +7,7 @@ bundler interactions, and paymaster integration.
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional, List, Union
-from eth_typing import HexStr, Address
+from typing import Optional, List
 
 # EntryPoint addresses (canonical deployments)
 ENTRYPOINT_V07_ADDRESS = "0x0000000071727De22E5E9d8BAf0edAc6f37da032"
