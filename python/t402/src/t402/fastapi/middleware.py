@@ -33,15 +33,12 @@ Usage:
 
 from __future__ import annotations
 
-import base64
-import json
 import logging
 from typing import Any, Callable, Dict, List, Optional, Union, cast
 
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse, HTMLResponse
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.types import ASGIApp
 from pydantic import validate_call
 
 from t402.common import (
@@ -49,17 +46,13 @@ from t402.common import (
     find_matching_payment_requirements,
 )
 from t402.encoding import (
-    safe_base64_decode,
-    safe_base64_encode,
     encode_payment_required_header,
     encode_payment_response_header,
     detect_protocol_version_from_headers,
     extract_payment_from_headers,
     decode_payment_signature_header,
-    HEADER_PAYMENT_SIGNATURE,
     HEADER_PAYMENT_REQUIRED,
     HEADER_PAYMENT_RESPONSE,
-    HEADER_X_PAYMENT,
     HEADER_X_PAYMENT_RESPONSE,
 )
 from t402.facilitator import FacilitatorClient, FacilitatorConfig
@@ -76,7 +69,6 @@ from t402.types import (
     t402PaymentRequiredResponse,
     PaywallConfig,
     HTTPInputSchema,
-    T402_VERSION,
     T402_VERSION_V1,
     T402_VERSION_V2,
     VerifyResponse,
@@ -299,7 +291,7 @@ class PaymentMiddleware:
 
         # Detect protocol version from request headers
         request_headers = dict(request.headers)
-        detected_version = detect_protocol_version_from_headers(request_headers)
+        detect_protocol_version_from_headers(request_headers)
 
         # Build payment requirements
         requirements = self._build_requirements(config, request, resource_url)
@@ -620,7 +612,7 @@ def require_payment(
 
         # Detect protocol version
         request_headers = dict(request.headers)
-        detected_version = detect_protocol_version_from_headers(request_headers)
+        detect_protocol_version_from_headers(request_headers)
 
         # Build requirements
         requirements = PaymentRequirements(
