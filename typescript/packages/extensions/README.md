@@ -191,7 +191,7 @@ import { HTTPFacilitatorClient } from "@t402/core/http";
 import { ExactEvmScheme } from "@t402/evm/exact/server";
 import { declareDiscoveryExtension } from "@t402/extensions/bazaar";
 
-const facilitatorClient = new HTTPFacilitatorClient({ url: "https://facilitator.t402.org" });
+const facilitatorClient = new HTTPFacilitatorClient({ url: "https://facilitator.t402.io" });
 const resourceServer = new t402ResourceServer(facilitatorClient)
   .register("eip155:84532", new ExactEvmScheme());
 

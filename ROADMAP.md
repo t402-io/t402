@@ -38,6 +38,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 | NPM | https://www.npmjs.com/org/t402 | ✅ Published |
 | PyPI | https://pypi.org/project/t402/ | ✅ Published |
 | Go Modules | github.com/t402-io/t402/go | ✅ Published |
+| Maven Central | https://central.sonatype.com/artifact/io.t402/t402 | ✅ Published |
 
 ---
 
@@ -73,9 +74,9 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 
 | SDK | Version | Status |
 |-----|---------|--------|
-| Go | 1.3.1 | Production |
-| Python | 1.5.3 | Production |
-| Java | 1.0.0-SNAPSHOT | Development |
+| Go | 1.4.0 | Production |
+| Python | 1.6.1 | Production |
+| Java | 1.0.0 | Production |
 
 ---
 

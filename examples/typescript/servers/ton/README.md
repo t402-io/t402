@@ -21,7 +21,7 @@ pnpm install
 ```env
 TON_ADDRESS=EQC...your-ton-address
 TON_NETWORK=ton:testnet
-FACILITATOR_URL=https://t402.org/facilitator
+FACILITATOR_URL=https://facilitator.t402.io
 PORT=4021
 ```
 

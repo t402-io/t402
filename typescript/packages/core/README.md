@@ -58,7 +58,7 @@ import { ExactEvmScheme } from '@t402/evm/exact/server';
 
 // Connect to facilitator
 const facilitatorClient = new HTTPFacilitatorClient({
-  url: 'https://t402.org/facilitator',
+  url: 'https://facilitator.t402.io',
 });
 
 // Create resource server with payment schemes

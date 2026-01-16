@@ -28,7 +28,7 @@ class FacilitatorConfig(TypedDict, total=False):
 class FacilitatorClient:
     def __init__(self, config: Optional[FacilitatorConfig] = None):
         if config is None:
-            config = {"url": "https://t402.org/facilitator"}
+            config = {"url": "https://facilitator.t402.io"}
 
         # Validate URL format
         url = config.get("url", "")

@@ -15,7 +15,7 @@ Create a `.env` file:
 ```bash
 # Required
 TRON_PAYEE_ADDRESS=TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t
-FACILITATOR_URL=https://t402.org/facilitator
+FACILITATOR_URL=https://facilitator.t402.io
 
 # Optional
 TRON_NETWORK=tron:nile  # or tron:mainnet, tron:shasta

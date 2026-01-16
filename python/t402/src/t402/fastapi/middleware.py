@@ -61,7 +61,7 @@ def require_payment(
         output_schema (Optional[Any], optional): Schema for the response. Defaults to None.
         discoverable (bool, optional): Whether the route is discoverable. Defaults to True.
         facilitator_config (Optional[Dict[str, Any]], optional): Configuration for the payment facilitator.
-            If not provided, defaults to the public t402.org facilitator.
+            If not provided, defaults to the public facilitator.t402.io.
         network (str, optional): Ethereum network ID. Defaults to "base-sepolia" (Base Sepolia testnet).
         resource (Optional[str], optional): Resource URL. Defaults to None (uses request URL).
         paywall_config (Optional[PaywallConfig], optional): Configuration for paywall UI customization.
