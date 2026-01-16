@@ -13,7 +13,6 @@ import {
   TOKEN_2022_PROGRAM_ADDRESS,
 } from "@solana-program/token-2022";
 import {
-  decompileTransactionMessage,
   getCompiledTransactionMessageDecoder,
   type Address,
   type CompiledTransactionMessage,
@@ -146,8 +145,18 @@ export class ExactSvmScheme implements SchemeNetworkFacilitator {
     const compiled = getCompiledTransactionMessageDecoder().decode(
       transaction.messageBytes,
     ) as CompiledTransactionMessage;
-    const decompiled = decompileTransactionMessage(compiled);
-    const instructions = decompiled.instructions ?? [];
+
+    const staticAccounts = compiled.staticAccounts ?? [];
+    const compiledInstructions = compiled.instructions ?? [];
+
+    // Map compiled instructions to decompiled format with resolved addresses
+    const instructions = compiledInstructions.map(ix => ({
+      programAddress: staticAccounts[ix.programAddressIndex] as Address,
+      accounts: (ix.accountIndices ?? []).map(idx => ({
+        address: staticAccounts[idx] as Address,
+      })),
+      data: ix.data,
+    }));
 
     // 3 instructions: ComputeLimit + ComputePrice + TransferChecked
     if (instructions.length !== 3) {
