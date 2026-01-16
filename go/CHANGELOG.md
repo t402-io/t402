@@ -5,6 +5,17 @@ All notable changes to the T402 Go SDK will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- **MCP Server** (`mcp/`, `cmd/t402-mcp/`) - Model Context Protocol server for AI agents
+  - `t402/getBalance` - Get token balances for a wallet on specific network
+  - `t402/getAllBalances` - Get balances across all supported networks
+  - `t402/pay` - Execute stablecoin payments (USDC, USDT, USDT0)
+  - `t402/payGasless` - ERC-4337 gasless payments (no gas fees)
+  - `t402/getBridgeFee` - Get LayerZero bridge fee quotes
+  - `t402/bridge` - Bridge USDT0 between chains via LayerZero
+  - Demo mode for testing without real transactions
+  - Support for 9 EVM networks
+  - Environment variable configuration
+
 - **WDK Package** (`wdk/`) - Wallet Development Kit integration
   - `Signer` for BIP-39 seed phrase wallet derivation
   - Multi-chain EVM support with HD wallet derivation
