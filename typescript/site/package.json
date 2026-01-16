@@ -15,7 +15,7 @@
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@scure/base": "^1.2.6",
-    "@solana/kit": "^2.1.1",
+    "@solana/kit": "^5.4.0",
     "@t402/core": "workspace:*",
     "@t402/evm": "workspace:*",
     "@t402/next": "workspace:*",
