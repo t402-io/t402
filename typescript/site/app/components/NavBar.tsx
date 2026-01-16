@@ -159,7 +159,8 @@ export function NavBar() {
             </Link>
             <Link
               href="https://docs.t402.io/quickstart"
-              className="inline-flex h-9 items-center justify-center rounded-lg bg-brand px-4 text-sm font-medium text-background transition-colors hover:bg-brand-secondary"
+              className="inline-flex h-9 items-center justify-center rounded-lg bg-brand px-4 text-sm font-medium transition-colors hover:bg-brand-secondary"
+              style={{ color: "#0A0A0B" }}
             >
               Get Started
             </Link>
@@ -206,7 +207,8 @@ export function NavBar() {
 
               <Link
                 href="https://docs.t402.io/quickstart"
-                className="flex h-12 w-full items-center justify-center rounded-lg bg-brand text-base font-medium text-background transition-colors hover:bg-brand-secondary"
+                className="flex h-12 w-full items-center justify-center rounded-lg bg-brand text-base font-medium transition-colors hover:bg-brand-secondary"
+                style={{ color: "#0A0A0B" }}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Get Started
