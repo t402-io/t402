@@ -1,11 +1,11 @@
-package com.coinbase.t402.server;
+package io.t402.server;
 
-import com.coinbase.t402.client.FacilitatorClient;
-import com.coinbase.t402.client.SettlementResponse;
-import com.coinbase.t402.client.VerificationResponse;
-import com.coinbase.t402.model.Authorization;
-import com.coinbase.t402.model.ExactSchemePayload;
-import com.coinbase.t402.model.PaymentPayload;
+import io.t402.client.FacilitatorClient;
+import io.t402.client.SettlementResponse;
+import io.t402.client.VerificationResponse;
+import io.t402.model.Authorization;
+import io.t402.model.ExactSchemePayload;
+import io.t402.model.PaymentPayload;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;

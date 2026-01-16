@@ -1,15 +1,13 @@
-# t402 Java SDK
+# Java SDK
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.t402/t402?label=maven%20central)](https://central.sonatype.com/artifact/io.t402/t402)
-[![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen.svg)](https://github.com/t402-io/t402/java)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/t402-io/t402/blob/main/LICENSE)
-[![Java Version](https://img.shields.io/badge/java-17%2B-orange)](https://github.com/t402-io/t402/java)
-
-Java implementation of the [t402 Payment Protocol](https://t402.io).
+The T402 Java SDK provides a complete implementation of the t402 payment protocol for Java applications, with first-class support for Spring Boot.
 
 ## Installation
 
-**Maven:**
+import { Tabs } from 'nextra/components'
+
+<Tabs items={['Maven', 'Gradle']}>
+<Tabs.Tab>
 ```xml
 <dependency>
     <groupId>io.t402</groupId>
@@ -17,24 +15,32 @@ Java implementation of the [t402 Payment Protocol](https://t402.io).
     <version>1.0.0</version>
 </dependency>
 ```
-
-**Gradle:**
+</Tabs.Tab>
+<Tabs.Tab>
 ```groovy
 implementation 'io.t402:t402:1.0.0'
 ```
+</Tabs.Tab>
+</Tabs>
 
 ## Features
 
-- **EVM Support**: EIP-3009 TransferWithAuthorization signing with Web3j
-- **Spring Boot**: Auto-configuration for Spring Boot 3.x applications
-- **Servlet Filter**: Jakarta Servlet filter for payment-protected endpoints
-- **Facilitator Client**: Built-in client for payment verification and settlement
+| Feature | Status |
+|---------|--------|
+| Core Client | ✅ |
+| Core Server | ✅ |
+| Facilitator Client | ✅ |
+| EVM Mechanism | ✅ |
+| Spring Boot Integration | ✅ |
+| Servlet Filter | ✅ |
 
 ## Quick Start
 
 ### Spring Boot (Recommended)
 
-Add configuration to `application.yml`:
+The easiest way to use T402 in a Spring Boot application is with auto-configuration.
+
+**1. Add configuration to `application.yml`:**
 
 ```yaml
 t402:
@@ -47,7 +53,7 @@ t402:
   token-version: "2"
 ```
 
-Create a protected endpoint:
+**2. Create a protected endpoint:**
 
 ```java
 @RestController
@@ -55,7 +61,8 @@ public class ApiController {
 
     @GetMapping("/api/premium")
     public Map<String, String> premiumContent() {
-        return Map.of("data", "This content requires payment!");
+        // This endpoint is automatically protected
+        return Map.of("data", "Premium content!");
     }
 }
 ```
@@ -64,24 +71,34 @@ The `PaymentFilter` is automatically registered for `/api/*` endpoints.
 
 ### Manual Setup
 
+For non-Spring applications or custom configurations:
+
 ```java
 import io.t402.server.PaymentFilter;
 import io.t402.client.HttpFacilitatorClient;
 
 // Create facilitator client
-FacilitatorClient facilitator = new HttpFacilitatorClient("https://facilitator.t402.io");
+FacilitatorClient facilitator = new HttpFacilitatorClient(
+    "https://facilitator.t402.io"
+);
 
-// Create and register the payment filter
+// Create payment filter
 PaymentFilter filter = new PaymentFilter(facilitator);
 
 // Register with your servlet container
 FilterRegistration.Dynamic registration = servletContext.addFilter("t402", filter);
-registration.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/api/*");
+registration.addMappingForUrlPatterns(
+    EnumSet.of(DispatcherType.REQUEST),
+    true,
+    "/api/*"
+);
 ```
 
 ## Client Usage
 
-### EVM Payments with EvmSigner
+### EVM Payments
+
+The `EvmSigner` class provides EIP-3009 TransferWithAuthorization signing:
 
 ```java
 import io.t402.crypto.EvmSigner;
@@ -96,11 +113,11 @@ EvmSigner signer = EvmSigner.fromPrivateKey(
     "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"       // USDC address
 );
 
-// Create the client
+// Create HTTP client
 T402HttpClient client = new T402HttpClient(signer);
 
 // Make a payment request
-BigInteger amount = BigInteger.valueOf(1_000_000); // 1 USDC (6 decimals)
+BigInteger amount = BigInteger.valueOf(1_000_000); // 1 USDC
 HttpResponse<String> response = client.get(
     URI.create("https://api.example.com/premium"),
     amount,
@@ -109,14 +126,18 @@ HttpResponse<String> response = client.get(
 );
 ```
 
-### Signing EIP-3009 Authorization
+### Manual Signing
+
+For more control over the signing process:
 
 ```java
 import io.t402.crypto.EvmSigner;
 import org.web3j.crypto.Credentials;
 
-// Create signer
+// Create credentials from private key
 Credentials credentials = Credentials.create("0xYourPrivateKey");
+
+// Create signer
 EvmSigner signer = new EvmSigner(
     credentials,
     8453,                                              // Chain ID
@@ -125,17 +146,18 @@ EvmSigner signer = new EvmSigner(
     "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"       // Token address
 );
 
-// Create authorization payload
+// Build authorization payload
 Map<String, Object> payload = new HashMap<>();
 payload.put("from", signer.getAddress());
 payload.put("to", "0xRecipientAddress");
-payload.put("value", "1000000");                       // 1 USDC
+payload.put("value", "1000000");                       // Amount in atomic units
 payload.put("validAfter", "0");
 payload.put("validBefore", String.valueOf(System.currentTimeMillis() / 1000 + 3600));
 payload.put("nonce", "0x" + generateRandomNonce());
 
 // Sign with EIP-712
 String signature = signer.sign(payload);
+// Returns: 0x-prefixed hex signature (r || s || v)
 ```
 
 ## Supported Networks
@@ -149,25 +171,6 @@ String signature = signer.sign(payload);
 | Optimism | 10 | `eip155:10` |
 | Polygon | 137 | `eip155:137` |
 
-## Payment Flow
-
-```mermaid
-sequenceDiagram
-    participant Client
-    participant Server
-    participant Facilitator
-
-    Client->>Server: GET /resource
-    Server->>Client: 402 Payment Required
-
-    Client->>Server: GET /resource (with X-PAYMENT header)
-    Server->>Facilitator: Verify payment
-    Facilitator->>Server: Payment verified
-
-    Server->>Client: 200 OK + content
-    Server->>Facilitator: Settle payment (async)
-```
-
 ## API Reference
 
 ### Core Classes
@@ -175,7 +178,7 @@ sequenceDiagram
 | Class | Description |
 |-------|-------------|
 | `T402HttpClient` | HTTP client with automatic payment header handling |
-| `PaymentFilter` | Servlet filter for payment-protected endpoints |
+| `PaymentFilter` | Jakarta Servlet filter for payment-protected endpoints |
 | `FacilitatorClient` | Interface for facilitator communication |
 | `HttpFacilitatorClient` | HTTP implementation of FacilitatorClient |
 
@@ -217,22 +220,6 @@ sequenceDiagram
 | `t402.scheme` | Payment scheme | `exact` |
 | `t402.max-timeout-seconds` | Max payment timeout | `3600` |
 
-## Development
-
-```bash
-# Build and test
-mvn clean install
-
-# Run tests with coverage
-mvn test -Pcoverage
-
-# Check code style
-mvn checkstyle:check
-
-# Run SpotBugs analysis
-mvn spotbugs:check
-```
-
 ## Error Handling
 
 ### Payment Required (402)
@@ -263,6 +250,21 @@ When payment is required but not provided:
 }
 ```
 
-## License
+## Requirements
 
-Apache 2.0 - See [LICENSE](../LICENSE) for details.
+- Java 17+
+- Jakarta Servlet API 6.0+ (for servlet filter)
+- Spring Boot 3.x (for auto-configuration)
+
+## Dependencies
+
+The SDK includes:
+- [Web3j](https://github.com/web3j/web3j) - Ethereum library for EIP-712 signing
+- [Jackson](https://github.com/FasterXML/jackson) - JSON processing
+- Spring Boot (optional) - Auto-configuration support
+
+## Resources
+
+- [GitHub Repository](https://github.com/t402-io/t402/tree/main/java)
+- [Maven Central](https://central.sonatype.com/artifact/io.t402/t402)
+- [Changelog](https://github.com/t402-io/t402/blob/main/java/CHANGELOG.md)

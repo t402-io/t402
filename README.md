@@ -3,6 +3,7 @@
 [![npm](https://img.shields.io/npm/v/@t402/core?label=npm%20%40t402%2Fcore)](https://www.npmjs.com/package/@t402/core)
 [![PyPI](https://img.shields.io/pypi/v/t402?label=pypi%20t402)](https://pypi.org/project/t402/)
 [![Go](https://img.shields.io/github/v/tag/t402-io/t402?filter=go%2F*&label=go)](https://pkg.go.dev/github.com/t402-io/t402/go)
+[![Maven Central](https://img.shields.io/maven-central/v/io.t402/t402?label=maven%20central)](https://central.sonatype.com/artifact/io.t402/t402)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 t402 is an open standard for internet native payments. It aims to support all networks (both crypto & fiat) and forms of value (stablecoins, tokens, fiat).
@@ -103,14 +104,20 @@ go install github.com/t402-io/t402/go/cmd/t402@v1.3.1
 t402 --help
 ```
 
-### Java (Coming Soon)
+### Java (v1.0.0)
 
 ```xml
 <dependency>
   <groupId>io.t402</groupId>
-  <artifactId>t402-core</artifactId>
+  <artifactId>t402</artifactId>
   <version>1.0.0</version>
 </dependency>
+```
+
+Or with Gradle:
+
+```groovy
+implementation 'io.t402:t402:1.0.0'
 ```
 
 </details>
@@ -192,9 +199,9 @@ t402 info eip155:8453
 | Feature | TypeScript | Go | Python | Java |
 |---------|-----------|-----|--------|------|
 | Core Client | ✅ | ✅ | ✅ | ✅ |
-| Core Server | ✅ | ✅ | ✅ | ⚠️ |
-| Facilitator | ✅ | ✅ | ✅ | ❌ |
-| EVM Mechanism | ✅ | ✅ | ✅ | ❌ |
+| Core Server | ✅ | ✅ | ✅ | ✅ |
+| Facilitator | ✅ | ✅ | ✅ | ✅ |
+| EVM Mechanism | ✅ | ✅ | ✅ | ✅ |
 | SVM Mechanism | ✅ | ✅ | ⚠️ | ❌ |
 | TON Mechanism | ✅ | ✅ | ✅ | ❌ |
 | TRON Mechanism | ✅ | ✅ | ✅ | ❌ |
@@ -203,6 +210,7 @@ t402 info eip155:8453
 | WDK Integration | ✅ | ❌ | ✅ | ❌ |
 | MCP Server | ✅ | ❌ | ❌ | ❌ |
 | CLI Tool | ✅ | ✅ | ✅ | ❌ |
+| Spring Boot | ❌ | ❌ | ❌ | ✅ |
 
 Legend: ✅ Complete | ⚠️ Partial | ❌ Not Available
 
@@ -213,6 +221,7 @@ Legend: ✅ Complete | ⚠️ Partial | ❌ Not Available
 | TypeScript | v2.0.0 | 2026-01-16 | [CHANGELOG](typescript/CHANGELOG.md) |
 | Python | v1.5.3 | 2026-01-16 | [CHANGELOG](python/CHANGELOG.md) |
 | Go | v1.3.1 | 2026-01-16 | [CHANGELOG](go/CHANGELOG.md) |
+| Java | v1.0.0 | 2026-01-16 | [CHANGELOG](java/CHANGELOG.md) |
 
 ## Ecosystem
 

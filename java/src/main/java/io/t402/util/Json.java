@@ -1,4 +1,4 @@
-package com.coinbase.t402.util;
+package io.t402.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;

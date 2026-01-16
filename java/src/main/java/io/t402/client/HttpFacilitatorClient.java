@@ -1,7 +1,7 @@
-package com.coinbase.t402.client;
+package io.t402.client;
 
-import com.coinbase.t402.model.PaymentRequirements;
-import com.coinbase.t402.util.Json;
+import io.t402.model.PaymentRequirements;
+import io.t402.util.Json;
 
 import java.io.IOException;
 import java.net.URI;

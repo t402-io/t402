@@ -1,4 +1,4 @@
-package com.coinbase.t402.model;
+package io.t402.model;
 
 /**
  * ERC-3009 authorization information within a payment payload.

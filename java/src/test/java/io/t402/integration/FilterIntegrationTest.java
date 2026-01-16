@@ -1,9 +1,9 @@
-package com.coinbase.t402.integration;
+package io.t402.integration;
 
-import com.coinbase.t402.client.FacilitatorClient;
-import com.coinbase.t402.client.VerificationResponse;
-import com.coinbase.t402.model.PaymentPayload;
-import com.coinbase.t402.server.PaymentFilter;
+import io.t402.client.FacilitatorClient;
+import io.t402.client.VerificationResponse;
+import io.t402.model.PaymentPayload;
+import io.t402.server.PaymentFilter;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,13 +37,13 @@ class FilterIntegrationTest {
     static void startJetty() throws Exception {
         // ----- stub facilitator -----------------------------------------
         FacilitatorClient stubFac = new FacilitatorClient() {
-            @Override public VerificationResponse verify(String hdr, com.coinbase.t402.model.PaymentRequirements r) {
+            @Override public VerificationResponse verify(String hdr, io.t402.model.PaymentRequirements r) {
                 VerificationResponse vr = new VerificationResponse();
                 vr.isValid = true;                       // always accept
                 return vr;
             }
-            @Override public com.coinbase.t402.client.SettlementResponse settle(String h, com.coinbase.t402.model.PaymentRequirements r) { return new com.coinbase.t402.client.SettlementResponse(); }
-            @Override public java.util.Set<com.coinbase.t402.client.Kind> supported() { return java.util.Set.of(); }
+            @Override public io.t402.client.SettlementResponse settle(String h, io.t402.model.PaymentRequirements r) { return new io.t402.client.SettlementResponse(); }
+            @Override public java.util.Set<io.t402.client.Kind> supported() { return java.util.Set.of(); }
         };
 
         // price-table: /private costs 1 (value irrelevant here)

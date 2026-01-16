@@ -1,7 +1,7 @@
-package com.coinbase.t402.client;
+package io.t402.client;
 
-import com.coinbase.t402.crypto.CryptoSigner;
-import com.coinbase.t402.crypto.CryptoSignException;
+import io.t402.crypto.CryptoSigner;
+import io.t402.crypto.CryptoSignException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;

@@ -1,4 +1,4 @@
-package com.coinbase.t402.model;
+package io.t402.model;
 
 import org.junit.jupiter.api.Test;
 

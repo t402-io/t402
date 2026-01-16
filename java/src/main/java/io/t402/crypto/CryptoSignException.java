@@ -1,4 +1,4 @@
-package com.coinbase.t402.crypto;
+package io.t402.crypto;
 
 /**
  * Exception thrown when cryptographic signing operations fail.
