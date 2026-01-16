@@ -1,0 +1,533 @@
+# Best Practices
+
+Guidelines for building robust t402-enabled applications.
+
+import { Callout } from 'nextra/components'
+
+## Payment Flow Design
+
+### Verify Before Processing
+
+Always verify payments before executing expensive operations:
+
+```typescript
+// Good: Verify first, then process
+app.post('/api/compute', async (req, res) => {
+  const payment = extractPayment(req);
+
+  // Verify payment BEFORE doing expensive work
+  const verified = await facilitator.verify(payment, requirements);
+  if (!verified.isValid) {
+    return res.status(402).json({ error: 'Invalid payment' });
+  }
+
+  // Now do the expensive computation
+  const result = await expensiveComputation(req.body);
+
+  // Settle after success
+  await facilitator.settle(payment, requirements);
+
+  return res.json(result);
+});
+```
+
+### Idempotent Settlements
+
+Handle duplicate settlement attempts gracefully:
+
+```typescript
+// Track processed payments
+const processedPayments = new Set();
+
+async function settlePayment(payment, requirements) {
+  const paymentId = `${payment.nonce}-${payment.from}`;
+
+  if (processedPayments.has(paymentId)) {
+    return { alreadyProcessed: true };
+  }
+
+  const result = await facilitator.settle(payment, requirements);
+  processedPayments.add(paymentId);
+
+  return result;
+}
+```
+
+### Atomic Operations
+
+Ensure payment and service delivery are atomic:
+
+```typescript
+// Use database transactions
+async function processPayment(payment, requirements) {
+  const tx = await db.beginTransaction();
+
+  try {
+    // Record payment intent
+    await tx.insert('payments', {
+      nonce: payment.nonce,
+      status: 'pending',
+    });
+
+    // Settle payment
+    const result = await facilitator.settle(payment, requirements);
+
+    // Update status
+    await tx.update('payments', {
+      status: 'completed',
+      txHash: result.transaction,
+    });
+
+    await tx.commit();
+    return result;
+  } catch (error) {
+    await tx.rollback();
+    throw error;
+  }
+}
+```
+
+## Error Handling
+
+### Graceful Degradation
+
+```typescript
+// Provide fallback for payment failures
+async function handleRequest(req, res) {
+  try {
+    const payment = extractPayment(req);
+    const result = await processWithPayment(payment);
+    return res.json(result);
+  } catch (error) {
+    if (error.code === 'FACILITATOR_UNAVAILABLE') {
+      // Fallback to queued processing
+      await queueForLaterProcessing(req);
+      return res.status(202).json({
+        message: 'Payment queued for processing',
+      });
+    }
+    throw error;
+  }
+}
+```
+
+### Informative Error Messages
+
+```typescript
+// Return helpful error information
+function handlePaymentError(error, res) {
+  const errorResponses = {
+    INVALID_SIGNATURE: {
+      status: 402,
+      message: 'Payment signature is invalid. Please sign again.',
+    },
+    EXPIRED_PAYMENT: {
+      status: 402,
+      message: 'Payment has expired. Create a new payment.',
+    },
+    INSUFFICIENT_FUNDS: {
+      status: 402,
+      message: 'Insufficient balance in payer wallet.',
+    },
+    NETWORK_MISMATCH: {
+      status: 400,
+      message: 'Payment network does not match required network.',
+    },
+  };
+
+  const response = errorResponses[error.code] || {
+    status: 500,
+    message: 'Payment processing failed',
+  };
+
+  return res.status(response.status).json({
+    error: response.message,
+    code: error.code,
+    retryable: error.retryable ?? false,
+  });
+}
+```
+
+### Retry Logic
+
+```typescript
+// Implement exponential backoff for transient failures
+async function settleWithRetry(payment, requirements, maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await facilitator.settle(payment, requirements);
+    } catch (error) {
+      if (!error.retryable || attempt === maxRetries) {
+        throw error;
+      }
+
+      // Exponential backoff
+      const delay = Math.min(1000 * Math.pow(2, attempt), 10000);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+}
+```
+
+## Security
+
+### Validate All Inputs
+
+```typescript
+import { z } from 'zod';
+
+// Define strict schemas
+const PaymentPayloadSchema = z.object({
+  t402Version: z.literal(2),
+  scheme: z.string().min(1),
+  network: z.string().regex(/^(eip155|solana|ton|tron):/),
+  payload: z.object({
+    authorization: z.object({
+      from: z.string(),
+      to: z.string(),
+      value: z.string(),
+      validAfter: z.string(),
+      validBefore: z.string(),
+      nonce: z.string(),
+    }),
+    signature: z.string(),
+  }),
+});
+
+function validatePayment(data: unknown) {
+  return PaymentPayloadSchema.parse(data);
+}
+```
+
+### Protect Against Replay Attacks
+
+<Callout type="warning">
+  Each payment nonce should only be usable once. Track used nonces to prevent replay attacks.
+</Callout>
+
+```typescript
+// Use Redis for nonce tracking
+import Redis from 'ioredis';
+
+const redis = new Redis();
+
+async function checkNonce(nonce: string, network: string) {
+  const key = `nonce:${network}:${nonce}`;
+
+  // Set with expiry (24 hours)
+  const set = await redis.set(key, '1', 'EX', 86400, 'NX');
+
+  if (!set) {
+    throw new Error('Payment nonce already used');
+  }
+}
+```
+
+### Amount Validation
+
+```typescript
+// Validate payment amounts match requirements
+function validateAmount(payment, requirements) {
+  const paymentAmount = BigInt(payment.payload.authorization.value);
+  const requiredAmount = BigInt(requirements.maxAmountRequired);
+
+  if (paymentAmount < requiredAmount) {
+    throw new Error(
+      `Insufficient payment: got ${paymentAmount}, need ${requiredAmount}`
+    );
+  }
+
+  // Optional: Check for overpayment
+  const maxOverpayment = requiredAmount * 2n;
+  if (paymentAmount > maxOverpayment) {
+    throw new Error('Payment amount suspiciously high');
+  }
+}
+```
+
+## Performance
+
+### Parallel Verification
+
+```typescript
+// Verify multiple payments in parallel when possible
+async function verifyBatch(payments) {
+  const results = await Promise.allSettled(
+    payments.map((p) => facilitator.verify(p.payload, p.requirements))
+  );
+
+  return results.map((r, i) => ({
+    payment: payments[i],
+    verified: r.status === 'fulfilled' && r.value.isValid,
+    error: r.status === 'rejected' ? r.reason : null,
+  }));
+}
+```
+
+### Connection Reuse
+
+```typescript
+// Create singleton facilitator client
+let facilitatorClient: FacilitatorClient | null = null;
+
+function getFacilitatorClient() {
+  if (!facilitatorClient) {
+    facilitatorClient = new HttpFacilitatorClient({
+      url: process.env.T402_FACILITATOR_URL,
+      timeout: 30000,
+      keepAlive: true,
+    });
+  }
+  return facilitatorClient;
+}
+```
+
+### Efficient Route Matching
+
+```typescript
+// Pre-compile route patterns
+const routePatterns = new Map();
+
+function compileRoutes(routes) {
+  for (const [pattern, config] of Object.entries(routes)) {
+    const [method, path] = pattern.split(' ');
+    const regex = pathToRegex(path);
+    routePatterns.set(pattern, { method, regex, config });
+  }
+}
+
+function matchRoute(method, path) {
+  for (const [pattern, { method: m, regex, config }] of routePatterns) {
+    if (m === method && regex.test(path)) {
+      return config;
+    }
+  }
+  return null;
+}
+```
+
+## User Experience
+
+### Clear Payment Requirements
+
+```typescript
+// Return detailed payment requirements
+function buildPaymentRequired(route, req) {
+  return {
+    t402Version: 2,
+    accepts: route.accepts.map((option) => ({
+      ...option,
+      // Include human-readable descriptions
+      description: route.description,
+      displayPrice: formatPrice(option.price),
+      networkName: getNetworkName(option.network),
+    })),
+    resource: {
+      path: req.path,
+      method: req.method,
+      description: route.description,
+    },
+    error: 'Payment required to access this resource',
+  };
+}
+```
+
+### Progress Indicators
+
+```typescript
+// For long-running settlements, provide status updates
+app.get('/api/payment/:id/status', async (req, res) => {
+  const status = await getPaymentStatus(req.params.id);
+
+  res.json({
+    status: status.state, // 'pending', 'verifying', 'settling', 'completed'
+    progress: status.progress, // 0-100
+    message: status.message,
+    estimatedTime: status.estimatedTime,
+  });
+});
+```
+
+### Helpful Error Pages
+
+```typescript
+// Custom 402 response handler
+function handle402(requirements, res) {
+  res.status(402).json({
+    ...requirements,
+    // Add helpful context
+    help: {
+      documentation: 'https://docs.t402.io/getting-started',
+      supportedWallets: ['MetaMask', 'Coinbase Wallet', 'WalletConnect'],
+      faucets: {
+        'eip155:84532': 'https://faucet.base.org',
+      },
+    },
+  });
+}
+```
+
+## Testing
+
+### Unit Tests
+
+```typescript
+import { describe, it, expect, vi } from 'vitest';
+
+describe('PaymentMiddleware', () => {
+  it('should return 402 when no payment provided', async () => {
+    const req = createMockRequest('/api/premium');
+    const res = createMockResponse();
+
+    await paymentMiddleware(req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(402);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        t402Version: 2,
+        accepts: expect.any(Array),
+      })
+    );
+  });
+
+  it('should proceed when valid payment provided', async () => {
+    const req = createMockRequest('/api/premium', {
+      headers: { 'x-payment': validPaymentHeader },
+    });
+    const res = createMockResponse();
+
+    vi.spyOn(facilitator, 'verify').mockResolvedValue({ isValid: true });
+
+    await paymentMiddleware(req, res, next);
+
+    expect(next).toHaveBeenCalled();
+  });
+});
+```
+
+### Integration Tests
+
+```typescript
+import { test, expect } from '@playwright/test';
+
+test('complete payment flow', async ({ request }) => {
+  // Step 1: Request without payment
+  const initial = await request.get('/api/premium');
+  expect(initial.status()).toBe(402);
+
+  const requirements = await initial.json();
+  expect(requirements.accepts).toHaveLength(1);
+
+  // Step 2: Create payment
+  const payment = await createTestPayment(requirements.accepts[0]);
+
+  // Step 3: Request with payment
+  const paid = await request.get('/api/premium', {
+    headers: { 'x-payment': encodePayment(payment) },
+  });
+
+  expect(paid.status()).toBe(200);
+  expect(paid.headers()['x-payment-response']).toBeDefined();
+});
+```
+
+### Load Testing
+
+```typescript
+// k6 load test script
+import http from 'k6/http';
+import { check, sleep } from 'k6';
+
+export const options = {
+  vus: 50,
+  duration: '5m',
+};
+
+export default function () {
+  // Test 402 response time
+  const res = http.get('https://api.example.com/premium');
+
+  check(res, {
+    'status is 402': (r) => r.status === 402,
+    'response time < 500ms': (r) => r.timings.duration < 500,
+  });
+
+  sleep(1);
+}
+```
+
+## Monitoring and Alerting
+
+### Key Metrics
+
+```typescript
+// Track these metrics
+const metrics = {
+  // Counters
+  paymentsTotal: new Counter('t402_payments_total'),
+  paymentsSuccess: new Counter('t402_payments_success'),
+  paymentsFailed: new Counter('t402_payments_failed'),
+
+  // Histograms
+  verificationLatency: new Histogram('t402_verification_latency'),
+  settlementLatency: new Histogram('t402_settlement_latency'),
+
+  // Gauges
+  pendingSettlements: new Gauge('t402_pending_settlements'),
+};
+```
+
+### Alert Thresholds
+
+| Metric | Warning | Critical |
+|--------|---------|----------|
+| Payment failure rate | >5% | >10% |
+| Verification latency p99 | >3s | >10s |
+| Settlement latency p99 | >30s | >60s |
+| Facilitator error rate | >1% | >5% |
+| Pending settlements | >100 | >500 |
+
+## Documentation
+
+### API Documentation
+
+```typescript
+/**
+ * Premium data endpoint
+ *
+ * @route GET /api/premium
+ * @group Premium - Premium data access
+ *
+ * @payment
+ * - scheme: exact
+ * - network: eip155:8453
+ * - price: $0.01
+ *
+ * @returns {object} 200 - Premium data
+ * @returns {PaymentRequired} 402 - Payment required
+ */
+app.get('/api/premium', handler);
+```
+
+### Changelog
+
+Maintain a changelog for payment-related changes:
+
+```markdown
+## [1.2.0] - 2026-01-15
+
+### Added
+- Support for TON payments on /api/premium endpoint
+
+### Changed
+- Increased price for /api/compute from $0.05 to $0.10
+
+### Fixed
+- Fixed race condition in settlement processing
+```
+
+## Next Steps
+
+- [Deployment Guide](/advanced/deployment) - Production deployment
+- [Gasless Payments](/advanced/gasless) - ERC-4337 configuration
+- [MCP Integration](/advanced/mcp) - AI agent setup

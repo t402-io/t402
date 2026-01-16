@@ -1,35 +1,106 @@
 # Use Cases
 
-T402 enables a wide variety of payment scenarios. Here are some common use cases:
+T402 enables a wide variety of payment scenarios across web services, AI agents, and digital content. The protocol's HTTP-native design makes it simple to add payments to any application.
 
-## Popular Use Cases
+## Use Case Categories
 
-| Use Case | Description |
-|----------|-------------|
-| [**AI Agent Payments**](/use-cases/ai-payments) | Enable AI agents to pay for APIs and services autonomously using MCP integration. |
-| [**API Monetization**](/use-cases/api-monetization) | Charge per-request fees for your API endpoints with simple middleware. |
-| [**Premium Content**](/use-cases/content-access) | Gate premium content behind micro-payments without subscription fatigue. |
-| [**Micro-Payments**](/use-cases/micro-payments) | Enable sub-cent payments for data, compute, or any digital resource. |
+| Use Case | Description | Typical Pricing |
+|----------|-------------|-----------------|
+| [AI Agent Payments](/use-cases/ai-payments) | Enable AI agents to pay for APIs and services autonomously | $0.001 - $0.10 per call |
+| [API Monetization](/use-cases/api-monetization) | Charge per-request fees for your API endpoints | $0.01 - $1.00 per request |
+| [Premium Content](/use-cases/content-access) | Gate content behind micro-payments | $0.10 - $10.00 per item |
+| [Micro-Payments](/use-cases/micro-payments) | Enable sub-cent payments for any digital resource | $0.0001 - $0.01 per tx |
+
+## AI Agent Payments
+
+AI agents need a way to pay for services programmatically. T402 enables autonomous payments through:
+
+- **MCP Integration**: Claude, GPT, and other AI agents can pay via the Model Context Protocol
+- **No human intervention**: Agents sign and submit payments automatically
+- **Budget controls**: Set spending limits and approval workflows
+
+**Typical pricing:** $0.001 - $0.10 per API call
+
+[Learn more about AI Payments →](/use-cases/ai-payments)
+
+## API Monetization
+
+Turn any API endpoint into a paid service with a single line of middleware:
+
+- **Per-request pricing**: Charge exactly what each request is worth
+- **No subscriptions needed**: Users pay only for what they use
+- **Global payments**: Accept USDT/USDC from anywhere in the world
+
+**Typical pricing:** $0.01 - $1.00 per request
+
+[Learn more about API Monetization →](/use-cases/api-monetization)
+
+## Premium Content Access
+
+Gate articles, media, or downloadable content without subscription fatigue:
+
+- **Micro-transactions**: Charge $0.10 for an article instead of $10/month
+- **No account required**: Pay with any supported wallet
+- **Instant access**: Content unlocks immediately after payment
+
+**Typical pricing:** $0.10 - $10.00 per item
+
+[Learn more about Content Access →](/use-cases/content-access)
+
+## Micro-Payments
+
+Enable payments as small as fractions of a cent for IoT, data, and compute:
+
+- **Sub-cent transactions**: Pay $0.0001 for a single data point
+- **Gasless payments**: ERC-4337 enables zero-gas transactions
+- **High throughput**: Process thousands of payments per second
+
+**Typical pricing:** $0.0001 - $0.01 per transaction
+
+[Learn more about Micro-Payments →](/use-cases/micro-payments)
 
 ## Why T402?
 
 | Traditional Payments | T402 |
 |---------------------|------|
-| Credit card fees (2.9% + $0.30) | Near-zero fees on L2s |
+| Credit card fees (2.9% + $0.30) | Near-zero fees on L2s (~$0.001) |
 | KYC/identity verification | Wallet-based, pseudonymous |
 | Chargebacks possible | Irreversible settlements |
 | Complex integration | Single HTTP header |
 | Subscription-only models | Pay-per-use enabled |
+| Days to receive funds | Instant settlement |
 
-## Quick Comparison
+## Network Recommendations
 
-| Use Case | Best Network | Typical Amount |
-|----------|--------------|----------------|
-| AI API calls | Base, Arbitrum | $0.001 - $0.10 |
-| Premium APIs | Any EVM | $0.01 - $1.00 |
-| Content access | TON, TRON | $0.10 - $10.00 |
-| Micro-payments | Base (gasless) | $0.0001 - $0.01 |
+| Use Case | Recommended Network | Why |
+|----------|---------------------|-----|
+| AI API calls | Base, Arbitrum | Low fees, fast finality |
+| Premium APIs | Base, Ethereum | Wide wallet support |
+| Content access | TON, TRON | Large user base in specific regions |
+| Micro-payments | Base (gasless) | ERC-4337 for zero-gas UX |
+| High-value transactions | Ethereum | Maximum security |
+| Cross-chain | Any USDT0 chain | LayerZero bridging |
+
+## Implementation Complexity
+
+| Scenario | Effort | Description |
+|----------|--------|-------------|
+| Add payments to existing API | Low | Add middleware, configure routes |
+| Build new paid service | Low | Use SDK from scratch |
+| Gasless payments | Medium | Set up ERC-4337 infrastructure |
+| Cross-chain support | Medium | Configure multiple networks |
+| Custom facilitator | High | Deploy and operate facilitator |
 
 ## Get Started
 
-Choose a use case above or jump to the [Quick Start](/getting-started/quickstart) guide.
+1. **Choose your use case** from the table above
+2. **Pick an SDK** ([TypeScript](/sdks/typescript), [Python](/sdks/python), [Go](/sdks/go), [Java](/sdks/java))
+3. **Follow the quickstart** to add payments in minutes
+
+[Quick Start Guide →](/getting-started/quickstart)
+
+## Resources
+
+- [Protocol Specification](/specs) - Technical details of the t402 protocol
+- [Supported Chains](/chains) - Full list of supported blockchains
+- [Advanced Configuration](/advanced) - MCP, extensions, and more
