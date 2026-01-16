@@ -64,11 +64,15 @@ from t402.tron import (
     is_testnet as is_tron_testnet,
 )
 from t402.svm import (
+    # Constants
     SOLANA_MAINNET,
     SOLANA_DEVNET,
     SOLANA_TESTNET,
     USDC_MAINNET_ADDRESS as SVM_USDC_MAINNET_ADDRESS,
     USDC_DEVNET_ADDRESS as SVM_USDC_DEVNET_ADDRESS,
+    TOKEN_PROGRAM_ADDRESS as SVM_TOKEN_PROGRAM_ADDRESS,
+    TOKEN_2022_PROGRAM_ADDRESS as SVM_TOKEN_2022_PROGRAM_ADDRESS,
+    # Address/Network utilities
     validate_svm_address,
     get_usdc_address as get_svm_usdc_address,
     get_network_config as get_svm_network_config,
@@ -80,6 +84,34 @@ from t402.svm import (
     validate_transaction as validate_svm_transaction,
     normalize_network as normalize_svm_network,
     get_rpc_url as get_svm_rpc_url,
+    # Transaction utilities
+    decode_transaction as decode_svm_transaction,
+    decode_versioned_transaction,
+    encode_transaction as encode_svm_transaction,
+    get_transaction_fee_payer as get_svm_fee_payer,
+    get_token_payer_from_transaction as get_svm_token_payer,
+    parse_transfer_checked_instruction,
+    TransferDetails as SvmTransferDetails,
+    # Signer interfaces and implementations
+    ClientSvmSigner,
+    FacilitatorSvmSigner,
+    KeypairSvmSigner,
+    RpcSvmSigner,
+    # Scheme implementations
+    ExactSvmClientScheme,
+    ExactSvmServerScheme,
+    ExactSvmFacilitatorScheme,
+    # Factory functions
+    create_client_scheme as create_svm_client_scheme,
+    create_server_scheme as create_svm_server_scheme,
+    create_facilitator_scheme as create_svm_facilitator_scheme,
+    check_solana_available,
+    # Types
+    SvmAuthorization,
+    SvmPaymentPayload,
+    SvmVerifyMessageResult,
+    SvmTransactionConfirmation,
+    ExactSvmPayloadV2,
 )
 from t402.paywall import (
     get_paywall_html,
@@ -235,12 +267,15 @@ __all__ = [
     "parse_tron_amount",
     "format_tron_amount",
     "is_tron_testnet",
-    # SVM (Solana) utilities
+    # SVM (Solana) utilities - Constants
     "SOLANA_MAINNET",
     "SOLANA_DEVNET",
     "SOLANA_TESTNET",
     "SVM_USDC_MAINNET_ADDRESS",
     "SVM_USDC_DEVNET_ADDRESS",
+    "SVM_TOKEN_PROGRAM_ADDRESS",
+    "SVM_TOKEN_2022_PROGRAM_ADDRESS",
+    # SVM - Address/Network utilities
     "validate_svm_address",
     "get_svm_usdc_address",
     "get_svm_network_config",
@@ -252,6 +287,34 @@ __all__ = [
     "validate_svm_transaction",
     "normalize_svm_network",
     "get_svm_rpc_url",
+    # SVM - Transaction utilities
+    "decode_svm_transaction",
+    "decode_versioned_transaction",
+    "encode_svm_transaction",
+    "get_svm_fee_payer",
+    "get_svm_token_payer",
+    "parse_transfer_checked_instruction",
+    "SvmTransferDetails",
+    # SVM - Signer interfaces
+    "ClientSvmSigner",
+    "FacilitatorSvmSigner",
+    "KeypairSvmSigner",
+    "RpcSvmSigner",
+    # SVM - Scheme implementations
+    "ExactSvmClientScheme",
+    "ExactSvmServerScheme",
+    "ExactSvmFacilitatorScheme",
+    # SVM - Factory functions
+    "create_svm_client_scheme",
+    "create_svm_server_scheme",
+    "create_svm_facilitator_scheme",
+    "check_solana_available",
+    # SVM - Types
+    "SvmAuthorization",
+    "SvmPaymentPayload",
+    "SvmVerifyMessageResult",
+    "SvmTransactionConfirmation",
+    "ExactSvmPayloadV2",
     # Paywall
     "get_paywall_html",
     "get_paywall_template",
