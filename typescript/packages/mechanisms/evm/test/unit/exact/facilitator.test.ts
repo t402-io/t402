@@ -38,6 +38,116 @@ describe("ExactEvmScheme (Facilitator)", () => {
   });
 
   describe("verify", () => {
+    describe("payload structure validation", () => {
+      it("should reject empty payload object", async () => {
+        const requirements: PaymentRequirements = {
+          scheme: "exact",
+          network: "eip155:84532",
+          amount: "1000000",
+          asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+          payTo: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
+          maxTimeoutSeconds: 300,
+          extra: { name: "USDC", version: "2" },
+        };
+
+        const payload: PaymentPayload = {
+          t402Version: 2,
+          payload: {},
+          accepted: requirements,
+          resource: { url: "", description: "", mimeType: "" },
+        };
+
+        const result = await facilitator.verify(payload, requirements);
+
+        expect(result.isValid).toBe(false);
+        expect(result.invalidReason).toBe("invalid_payload_structure");
+        expect(result.payer).toBeUndefined();
+      });
+
+      it("should reject null payload", async () => {
+        const requirements: PaymentRequirements = {
+          scheme: "exact",
+          network: "eip155:84532",
+          amount: "1000000",
+          asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+          payTo: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
+          maxTimeoutSeconds: 300,
+          extra: { name: "USDC", version: "2" },
+        };
+
+        const payload: PaymentPayload = {
+          t402Version: 2,
+          payload: null as never,
+          accepted: requirements,
+          resource: { url: "", description: "", mimeType: "" },
+        };
+
+        const result = await facilitator.verify(payload, requirements);
+
+        expect(result.isValid).toBe(false);
+        expect(result.invalidReason).toBe("invalid_payload_structure");
+      });
+
+      it("should reject payload missing authorization", async () => {
+        const requirements: PaymentRequirements = {
+          scheme: "exact",
+          network: "eip155:84532",
+          amount: "1000000",
+          asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+          payTo: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
+          maxTimeoutSeconds: 300,
+          extra: { name: "USDC", version: "2" },
+        };
+
+        const payload: PaymentPayload = {
+          t402Version: 2,
+          payload: {
+            signature: "0xmocksignature",
+          },
+          accepted: requirements,
+          resource: { url: "", description: "", mimeType: "" },
+        };
+
+        const result = await facilitator.verify(payload, requirements);
+
+        expect(result.isValid).toBe(false);
+        expect(result.invalidReason).toBe("invalid_payload_structure");
+      });
+
+      it("should reject payload with authorization missing from field", async () => {
+        const requirements: PaymentRequirements = {
+          scheme: "exact",
+          network: "eip155:84532",
+          amount: "1000000",
+          asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+          payTo: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
+          maxTimeoutSeconds: 300,
+          extra: { name: "USDC", version: "2" },
+        };
+
+        const payload: PaymentPayload = {
+          t402Version: 2,
+          payload: {
+            authorization: {
+              to: requirements.payTo,
+              value: requirements.amount,
+              validAfter: "0",
+              validBefore: "999999999999",
+              nonce: "0x00",
+            },
+            signature: "0x",
+          },
+          accepted: requirements,
+          resource: { url: "", description: "", mimeType: "" },
+        };
+
+        const result = await facilitator.verify(payload, requirements);
+
+        expect(result.isValid).toBe(false);
+        expect(result.invalidReason).toBe("invalid_payload_structure");
+      });
+    });
+
     it("should call verifyTypedData for signature verification", async () => {
       const requirements: PaymentRequirements = {
         scheme: "exact",
@@ -305,6 +415,118 @@ describe("ExactEvmScheme (Facilitator)", () => {
 
       // Signature validation handles checksummed addresses
       expect(result).toBeDefined();
+    });
+  });
+
+  describe("settle", () => {
+    describe("payload structure validation", () => {
+      it("should reject empty payload object", async () => {
+        const requirements: PaymentRequirements = {
+          scheme: "exact",
+          network: "eip155:84532",
+          amount: "1000000",
+          asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+          payTo: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
+          maxTimeoutSeconds: 300,
+          extra: { name: "USDC", version: "2" },
+        };
+
+        const payload: PaymentPayload = {
+          t402Version: 2,
+          payload: {},
+          accepted: requirements,
+          resource: { url: "", description: "", mimeType: "" },
+        };
+
+        const result = await facilitator.settle(payload, requirements);
+
+        expect(result.success).toBe(false);
+        expect(result.errorReason).toBe("invalid_payload_structure");
+        expect(result.payer).toBeUndefined();
+      });
+
+      it("should reject null payload", async () => {
+        const requirements: PaymentRequirements = {
+          scheme: "exact",
+          network: "eip155:84532",
+          amount: "1000000",
+          asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+          payTo: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
+          maxTimeoutSeconds: 300,
+          extra: { name: "USDC", version: "2" },
+        };
+
+        const payload: PaymentPayload = {
+          t402Version: 2,
+          payload: null as never,
+          accepted: requirements,
+          resource: { url: "", description: "", mimeType: "" },
+        };
+
+        const result = await facilitator.settle(payload, requirements);
+
+        expect(result.success).toBe(false);
+        expect(result.errorReason).toBe("invalid_payload_structure");
+      });
+
+      it("should reject payload missing authorization", async () => {
+        const requirements: PaymentRequirements = {
+          scheme: "exact",
+          network: "eip155:84532",
+          amount: "1000000",
+          asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+          payTo: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
+          maxTimeoutSeconds: 300,
+          extra: { name: "USDC", version: "2" },
+        };
+
+        const payload: PaymentPayload = {
+          t402Version: 2,
+          payload: {
+            signature: "0xmocksignature",
+          },
+          accepted: requirements,
+          resource: { url: "", description: "", mimeType: "" },
+        };
+
+        const result = await facilitator.settle(payload, requirements);
+
+        expect(result.success).toBe(false);
+        expect(result.errorReason).toBe("invalid_payload_structure");
+      });
+
+      it("should reject payload with authorization missing from field", async () => {
+        const requirements: PaymentRequirements = {
+          scheme: "exact",
+          network: "eip155:84532",
+          amount: "1000000",
+          asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+          payTo: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0",
+          maxTimeoutSeconds: 300,
+          extra: { name: "USDC", version: "2" },
+        };
+
+        const payload: PaymentPayload = {
+          t402Version: 2,
+          payload: {
+            authorization: {
+              to: requirements.payTo,
+              value: requirements.amount,
+              validAfter: "0",
+              validBefore: "999999999999",
+              nonce: "0x00",
+            },
+            signature: "0x",
+          },
+          accepted: requirements,
+          resource: { url: "", description: "", mimeType: "" },
+        };
+
+        const result = await facilitator.settle(payload, requirements);
+
+        expect(result.success).toBe(false);
+        expect(result.errorReason).toBe("invalid_payload_structure");
+      });
     });
   });
 });
