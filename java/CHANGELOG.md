@@ -4,11 +4,20 @@ All notable changes to the T402 Java SDK will be documented in this file.
 
 ## [Unreleased]
 
-## [2.0.0] - 2026-01-16
+## [1.0.0] - 2026-01-16
+
+Initial release of the T402 Java SDK, published to Maven Central.
 
 ### Added
 
+#### Core Features
+- `T402HttpClient` - HTTP client with automatic payment header handling
+- `FacilitatorClient` / `HttpFacilitatorClient` - Facilitator integration for verification and settlement
+- `PaymentFilter` - Jakarta Servlet filter for payment-protected endpoints
+- `PaymentPayload` / `PaymentRequirements` - Core payment types
+
 #### Multi-Chain Signers
+- `EvmSigner` - EIP-3009 TransferWithAuthorization signing with Web3j
 - `SvmSigner` - Solana (SVM) Ed25519 signing with Base58 encoding
 - `TonSigner` - TON Ed25519 signing with Base64 encoding
 - `TronSigner` - TRON ECDSA secp256k1 signing with Base58Check
@@ -38,38 +47,6 @@ All notable changes to the T402 Java SDK will be documented in this file.
 - JSON and text output formats
 - Configurable facilitator URL
 
-#### MCP Server
-- `McpServer` - Model Context Protocol server for AI agent integration
-- `McpTools` - Tool handlers for payment operations
-- `McpTypes` - MCP type definitions (JSON-RPC, tools, inputs, results)
-- `McpConstants` - Network configuration, token addresses, utilities
-- `T402Mcp` - CLI entry point for running the MCP server
-- Tools:
-  - `t402/getBalance` - Get token balances for a wallet on specific network
-  - `t402/getAllBalances` - Get balances across all supported networks
-  - `t402/pay` - Execute stablecoin payments (USDC, USDT, USDT0)
-  - `t402/payGasless` - ERC-4337 gasless payments (no gas fees)
-  - `t402/getBridgeFee` - Get LayerZero bridge fee quotes
-  - `t402/bridge` - Bridge USDT0 between chains via LayerZero
-- Demo mode for testing without real transactions
-- Support for 9 EVM networks
-- Environment variable configuration
-
-## [1.0.0] - 2026-01-16
-
-### Added
-
-#### Core Features
-- `T402HttpClient` - HTTP client with automatic payment header handling
-- `FacilitatorClient` / `HttpFacilitatorClient` - Facilitator integration for verification and settlement
-- `PaymentFilter` - Jakarta Servlet filter for payment-protected endpoints
-- `PaymentPayload` / `PaymentRequirements` - Core payment types
-
-#### EVM Support
-- `EvmSigner` - EIP-3009 TransferWithAuthorization signing with Web3j
-- EIP-712 typed data signing for USDC, USDT and other compatible tokens
-- Support for all EVM chains (Ethereum, Base, Arbitrum, Optimism, Polygon)
-
 #### Spring Boot Integration
 - `T402AutoConfiguration` - Auto-configuration for Spring Boot 3.x
 - `T402Properties` - Configuration properties (`t402.*`)
@@ -82,9 +59,27 @@ All notable changes to the T402 Java SDK will be documented in this file.
 
 ### Infrastructure
 - Maven Central publishing via Sonatype Central Portal
-- JaCoCo code coverage (85% instruction, 75% branch targets)
+- GPG signing for all artifacts
+- JaCoCo code coverage
 - Checkstyle and SpotBugs static analysis
 - GitHub Actions CI/CD workflows
+- Auto-publish on tag push (`java/v*`)
+
+### Installation
+
+**Maven:**
+```xml
+<dependency>
+  <groupId>io.t402</groupId>
+  <artifactId>t402</artifactId>
+  <version>1.0.0</version>
+</dependency>
+```
+
+**Gradle:**
+```groovy
+implementation 'io.t402:t402:1.0.0'
+```
 
 [Unreleased]: https://github.com/t402-io/t402/compare/java/v1.0.0...HEAD
 [1.0.0]: https://github.com/t402-io/t402/releases/tag/java/v1.0.0
