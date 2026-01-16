@@ -16,7 +16,6 @@ t402/
 ├── docs/                # Documentation site (Nextra)
 ├── specs/               # Protocol specifications
 ├── .github/workflows/   # CI/CD pipelines
-├── PLAN.md              # SDK development plan
 ├── ROADMAP.md           # Long-term roadmap
 └── SECURITY.md          # Security policy
 ```
@@ -42,9 +41,9 @@ t402/
 ## Release Tags
 
 - TypeScript: `v*` (e.g., `v2.1.0`)
-- Python: `python/v*` (e.g., `python/v1.6.0`)
+- Python: `python/v*` (e.g., `python/v1.7.1`)
 - Go: `go/v*` (e.g., `go/v1.5.0`)
-- Java: `java/v*` (e.g., `java/v1.0.0`)
+- Java: `java/v*` (e.g., `java/v1.1.0`)
 
 ## Facilitator Wallets
 
@@ -72,13 +71,13 @@ curl -s https://facilitator.t402.io/supported | jq '.kinds | length'
 git tag v2.1.0 && git push origin v2.1.0
 
 # Python
-git tag python/v1.6.0 && git push origin python/v1.6.0
+git tag python/v1.7.1 && git push origin python/v1.7.1
 
 # Go
 git tag go/v1.5.0 && git push origin go/v1.5.0
 
 # Java
-git tag java/v1.0.0 && git push origin java/v1.0.0
+git tag java/v1.1.0 && git push origin java/v1.1.0
 ```
 
 ### Check Wallet Balances
