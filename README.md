@@ -82,7 +82,7 @@ pnpm add -g @t402/cli
 t402 --help
 ```
 
-### Python (v1.6.0)
+### Python (v1.6.1)
 
 ```shell
 pip install t402
@@ -202,15 +202,15 @@ t402 info eip155:8453
 | Core Server | ✅ | ✅ | ✅ | ✅ |
 | Facilitator | ✅ | ✅ | ✅ | ✅ |
 | EVM Mechanism | ✅ | ✅ | ✅ | ✅ |
-| SVM Mechanism | ✅ | ✅ | ✅ | ❌ |
-| TON Mechanism | ✅ | ✅ | ✅ | ❌ |
-| TRON Mechanism | ✅ | ✅ | ✅ | ❌ |
-| ERC-4337 | ✅ | ✅ | ✅ | ❌ |
-| USDT0 Bridge | ✅ | ✅ | ⚠️ | ❌ |
-| WDK Integration | ✅ | ✅ | ✅ | ❌ |
+| SVM Mechanism | ✅ | ✅ | ✅ | ✅ |
+| TON Mechanism | ✅ | ✅ | ✅ | ✅ |
+| TRON Mechanism | ✅ | ✅ | ✅ | ✅ |
+| ERC-4337 | ✅ | ✅ | ✅ | ✅ |
+| USDT0 Bridge | ✅ | ✅ | ✅ | ✅ |
+| WDK Integration | ✅ | ✅ | ✅ | ✅ |
 | MCP Server | ✅ | ✅ | ✅ | ❌ |
-| CLI Tool | ✅ | ✅ | ✅ | ❌ |
-| Spring Boot | ❌ | ❌ | ❌ | ✅ |
+| CLI Tool | ✅ | ✅ | ✅ | ✅ |
+| Spring Boot | ❌ | ❌ | ❌ | ⚠️ |
 
 Legend: ✅ Complete | ⚠️ Partial | ❌ Not Available
 
@@ -219,7 +219,7 @@ Legend: ✅ Complete | ⚠️ Partial | ❌ Not Available
 | SDK | Version | Release Date | Changelog |
 |-----|---------|--------------|-----------|
 | TypeScript | v2.0.0 | 2026-01-16 | [CHANGELOG](typescript/CHANGELOG.md) |
-| Python | v1.6.0 | 2026-01-16 | [CHANGELOG](python/CHANGELOG.md) |
+| Python | v1.6.1 | 2026-01-16 | [CHANGELOG](python/CHANGELOG.md) |
 | Go | v1.4.0 | 2026-01-16 | [CHANGELOG](go/CHANGELOG.md) |
 | Java | v1.0.0 | 2026-01-16 | [CHANGELOG](java/CHANGELOG.md) |
 
