@@ -94,13 +94,13 @@ uv add t402
 t402 --help
 ```
 
-### Go (v1.4.0)
+### Go (v1.5.0)
 
 ```shell
-go get github.com/t402-io/t402/go@v1.4.0
+go get github.com/t402-io/t402/go@v1.5.0
 
 # CLI tool
-go install github.com/t402-io/t402/go/cmd/t402@v1.4.0
+go install github.com/t402-io/t402/go/cmd/t402@v1.5.0
 t402 --help
 ```
 
@@ -220,7 +220,7 @@ Legend: ✅ Complete | ⚠️ Partial | ❌ Not Available
 |-----|---------|--------------|-----------|
 | TypeScript | v2.0.0 | 2026-01-16 | [CHANGELOG](typescript/CHANGELOG.md) |
 | Python | v1.6.1 | 2026-01-16 | [CHANGELOG](python/CHANGELOG.md) |
-| Go | v1.4.0 | 2026-01-16 | [CHANGELOG](go/CHANGELOG.md) |
+| Go | v1.5.0 | 2026-01-16 | [CHANGELOG](go/CHANGELOG.md) |
 | Java | v1.0.0 | 2026-01-16 | [CHANGELOG](java/CHANGELOG.md) |
 
 ## Ecosystem
