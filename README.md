@@ -202,12 +202,12 @@ t402 info eip155:8453
 | Core Server | ✅ | ✅ | ✅ | ✅ |
 | Facilitator | ✅ | ✅ | ✅ | ✅ |
 | EVM Mechanism | ✅ | ✅ | ✅ | ✅ |
-| SVM Mechanism | ✅ | ✅ | ⚠️ | ❌ |
+| SVM Mechanism | ✅ | ✅ | ✅ | ❌ |
 | TON Mechanism | ✅ | ✅ | ✅ | ❌ |
 | TRON Mechanism | ✅ | ✅ | ✅ | ❌ |
 | ERC-4337 | ✅ | ✅ | ✅ | ❌ |
 | USDT0 Bridge | ✅ | ✅ | ⚠️ | ❌ |
-| WDK Integration | ✅ | ❌ | ✅ | ❌ |
+| WDK Integration | ✅ | ✅ | ✅ | ❌ |
 | MCP Server | ✅ | ❌ | ❌ | ❌ |
 | CLI Tool | ✅ | ✅ | ✅ | ❌ |
 | Spring Boot | ❌ | ❌ | ❌ | ✅ |
