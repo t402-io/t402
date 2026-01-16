@@ -522,7 +522,8 @@ Content-Type: application/json
                 <button
                   onClick={runDemo}
                   disabled={isRunning}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-medium text-background transition-colors hover:bg-brand-secondary disabled:opacity-50"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-medium transition-colors hover:bg-brand-secondary disabled:opacity-50"
+                  style={{ color: "#0A0A0B" }}
                 >
                   <PlayIcon className="h-4 w-4" />
                   {isRunning ? "Running..." : "Run Demo"}
@@ -693,7 +694,8 @@ Content-Type: application/json
         <div className="flex flex-wrap justify-center gap-4">
           <Link
             href="/sdks"
-            className="inline-flex items-center gap-2 rounded-lg bg-brand px-6 py-3 text-base font-medium text-background transition-colors hover:bg-brand-secondary"
+            className="inline-flex items-center gap-2 rounded-lg bg-brand px-6 py-3 text-base font-medium transition-colors hover:bg-brand-secondary"
+            style={{ color: "#0A0A0B" }}
           >
             View SDKs
             <ArrowRightIcon />
