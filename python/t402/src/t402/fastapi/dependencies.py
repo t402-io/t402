@@ -39,10 +39,9 @@ Usage:
 from __future__ import annotations
 
 import logging
-from typing import Any, Callable, List, Optional, Union
+from typing import List, Optional
 
-from fastapi import Depends, HTTPException, Request, Response
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi import HTTPException, Request
 
 from t402.common import (
     process_price_to_atomic_amount,
@@ -51,16 +50,12 @@ from t402.common import (
 from t402.encoding import (
     encode_payment_required_header,
     encode_payment_response_header,
-    detect_protocol_version_from_headers,
     extract_payment_from_headers,
     decode_payment_signature_header,
     HEADER_PAYMENT_REQUIRED,
-    HEADER_PAYMENT_RESPONSE,
-    HEADER_X_PAYMENT_RESPONSE,
 )
 from t402.facilitator import FacilitatorClient, FacilitatorConfig
-from t402.networks import get_all_supported_networks, SupportedNetworks
-from t402.paywall import is_browser_request, get_paywall_html
+from t402.networks import get_all_supported_networks
 from t402.types import (
     PaymentPayload,
     PaymentRequirements,
@@ -70,12 +65,10 @@ from t402.types import (
     Price,
     t402PaymentRequiredResponse,
     PaywallConfig,
-    HTTPInputSchema,
     T402_VERSION_V1,
     T402_VERSION_V2,
-    VerifyResponse,
 )
-from t402.fastapi.middleware import PaymentDetails, PaymentConfig
+from t402.fastapi.middleware import PaymentDetails
 
 logger = logging.getLogger(__name__)
 
@@ -296,7 +289,7 @@ class PaymentRequired:
         Raises:
             HTTPException: Always raises 402
         """
-        request_headers = dict(request.headers)
+        dict(request.headers)
         resource_url = str(request.url)
 
         # Build response content
@@ -378,7 +371,7 @@ async def settle_payment(request: Request) -> Optional[str]:
     # Get stored payment info
     payment = getattr(request.state, "_payment", None)
     selected = getattr(request.state, "_selected_requirements", None)
-    version = getattr(request.state, "_protocol_version", T402_VERSION_V2)
+    getattr(request.state, "_protocol_version", T402_VERSION_V2)
 
     if not payment or not selected:
         return None

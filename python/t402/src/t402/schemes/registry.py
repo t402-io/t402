@@ -11,25 +11,19 @@ The registry supports:
 
 from __future__ import annotations
 
-import fnmatch
 import re
 import threading
 from typing import (
     Any,
-    Callable,
     Dict,
     Generic,
     List,
     Optional,
-    Tuple,
-    Type,
     TypeVar,
-    Union,
 )
 
 from t402.types import (
     Network,
-    T402_VERSION,
     T402_VERSION_V1,
     T402_VERSION_V2,
 )

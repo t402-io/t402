@@ -4,6 +4,11 @@ All notable changes to the T402 Python SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [1.7.1] - 2026-01-16
+
+### Fixed
+- Fixed ruff linting errors (unused imports and variables)
+
 ## [1.7.0] - 2026-01-16
 
 ### Added

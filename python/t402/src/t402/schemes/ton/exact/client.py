@@ -314,7 +314,6 @@ class ExactTonClientScheme:
 
             # For now, return a placeholder that indicates the transfer params
             # Real signers should handle cell building internally
-            import struct
             import json
 
             # Encode as JSON for testing/mocking purposes

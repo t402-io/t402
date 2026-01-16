@@ -7,7 +7,7 @@ for TRON network.
 from __future__ import annotations
 
 from decimal import Decimal
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Union
 
 from t402.types import (
     PaymentRequirementsV2,
@@ -16,9 +16,6 @@ from t402.types import (
 from t402.schemes.interfaces import AssetAmount, SupportedKindDict
 from t402.tron import (
     SCHEME_EXACT,
-    TRON_MAINNET,
-    TRON_NILE,
-    TRON_SHASTA,
     DEFAULT_DECIMALS,
     get_network_config,
     get_default_asset,

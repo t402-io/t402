@@ -13,7 +13,7 @@ The three main interfaces are:
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Protocol, TypeVar, Union, runtime_checkable
+from typing import Any, Dict, List, Optional, Protocol, Union, runtime_checkable
 
 from t402.types import (
     Network,
@@ -21,7 +21,6 @@ from t402.types import (
     PaymentPayloadV2,
     VerifyResponse,
     SettleResponse,
-    T402_VERSION_V2,
 )
 
 
