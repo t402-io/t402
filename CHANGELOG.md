@@ -20,16 +20,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **WDK Signer Enhancements**
   - `GetClient()`, `GetPrivateKeyBytes()`, `GetChainID()` methods
 
-### Python SDK v1.6.1
-- MCP Server for AI agents
-- Complete SVM (Solana) support
-- Bug fixes and stability improvements
+### Python SDK v1.7.0
+- **Schemes Module** (`t402.schemes`) - Modular payment scheme implementations
+  - EVM, TON, TRON exact payment schemes (client/server)
+  - `SchemeRegistry` for registering and discovering schemes
+- **Enhanced FastAPI Middleware**
+  - Full protocol v2 `PaymentRequirements` support
+  - `ResourceInfo` integration for resource metadata
+  - `PaymentDependencies` for dependency injection
+- **Protocol v2 Types** - ResourceInfo, enhanced PaymentRequirements
 
-### Java SDK v1.0.0
-- Initial release on Maven Central
-- Core client, server, facilitator implementations
-- Full multi-chain support (EVM, SVM, TON, TRON)
-- Spring Boot auto-configuration
+### Java SDK v1.1.0
+- **Protocol v2 Support** - ResourceInfo, PaymentPayload.Builder, SupportedResponse
+- **Spring Boot Enhancements**
+  - `@RequirePayment` annotation for method/class-level protection
+  - `RouteConfig` for YAML-based route pricing
+  - `T402Properties.parseAmount()` with $1.00, 1000000 formats
+- **Spring WebFlux** - PaymentWebFilter for reactive applications
+- **ERC-4337 Enhancements**
+  - SafeAccount with execTransaction, executeUserOp, batchCalls
+  - PimlicoBundler and AlchemyBundler integrations
+  - UserOperation v0.7 with pack() and getUserOpHash()
 
 ## [2.0.0] - 2026-01-16
 
