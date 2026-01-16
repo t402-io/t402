@@ -6,15 +6,13 @@ gas sponsorship, including Pimlico, Biconomy, and Stackup clients.
 """
 
 import httpx
-from dataclasses import dataclass
-from typing import Optional, List, Dict, Any, Union
+from typing import Optional, List, Dict, Any
 from abc import ABC, abstractmethod
 
 from .types import (
     UserOperation,
     PaymasterData,
     TokenQuote,
-    GasEstimate,
     ENTRYPOINT_V07_ADDRESS,
     PIMLICO_NETWORKS,
     DEFAULT_GAS_LIMITS,

@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import argparse
 import asyncio
-import base64
 import json
 import sys
 from pathlib import Path
@@ -169,7 +168,7 @@ async def cmd_settle(args: argparse.Namespace) -> int:
             )
         else:
             if result.success:
-                print(f"Payment settled successfully!")
+                print("Payment settled successfully!")
                 print(f"Transaction hash: {result.transaction_hash}")
             else:
                 print(f"Settlement failed: {result.error}")

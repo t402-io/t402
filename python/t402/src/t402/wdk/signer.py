@@ -5,16 +5,13 @@ This module provides a Python implementation of the T402 WDK signer,
 supporting multi-chain wallets derived from a BIP-39 seed phrase.
 """
 
-import asyncio
-from typing import Optional, Dict, Any, List, Union
+from typing import Optional, Dict, List, Union
 from eth_account import Account
 from eth_account.messages import encode_typed_data, encode_defunct
 from eth_account.hdaccount import generate_mnemonic
 from web3 import Web3
-from web3.types import TxParams
 
 from .types import (
-    WDKConfig,
     ChainConfig,
     TokenBalance,
     ChainBalance,
@@ -26,22 +23,17 @@ from .types import (
 )
 from .chains import (
     DEFAULT_CHAINS,
-    CHAIN_TOKENS,
     USDT0_ADDRESSES,
     USDC_ADDRESSES,
     get_chain_config,
-    get_chain_id,
-    get_network_from_chain,
     get_chain_tokens,
 )
 from .errors import (
-    WDKError,
     WDKErrorCode,
     WDKInitializationError,
     SignerError,
     SigningError,
     BalanceError,
-    TransactionError,
     ChainError,
 )
 
@@ -135,7 +127,7 @@ class WDKSigner:
 
         if not validate_seed_phrase(seed_phrase):
             raise WDKInitializationError(
-                f"Invalid seed phrase: expected 12, 15, 18, 21, or 24 words",
+                "Invalid seed phrase: expected 12, 15, 18, 21, or 24 words",
                 code=WDKErrorCode.INVALID_SEED_PHRASE,
             )
 
@@ -168,7 +160,7 @@ class WDKSigner:
                     # Allow custom chains
                     self._chains[chain_name] = ChainConfig(
                         chain_id=1,
-                        network=f"eip155:1",
+                        network="eip155:1",
                         name=chain_name,
                         rpc_url=rpc_url,
                         network_type=NetworkType.EVM,
@@ -605,7 +597,7 @@ class WDKSigner:
                         total_usdt0 += token.balance
                     elif token.symbol == "USDC":
                         total_usdc += token.balance
-            except Exception as e:
+            except Exception:
                 if not continue_on_error:
                     raise
                 # Add empty balance for failed chain

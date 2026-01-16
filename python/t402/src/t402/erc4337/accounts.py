@@ -6,7 +6,7 @@ including Safe smart account with 4337 module support.
 """
 
 from dataclasses import dataclass
-from typing import Optional, List, Tuple
+from typing import Optional, List
 from abc import ABC, abstractmethod
 from eth_account import Account
 from eth_account.messages import encode_defunct
@@ -95,8 +95,6 @@ class SafeSmartAccount(SmartAccountSigner):
             return self._cached_address
 
         # Calculate counterfactual address via CREATE2
-        init_code = self.get_init_code()
-
         factory_address = bytes.fromhex(SAFE_4337_ADDRESSES["proxy_factory"][2:])
         salt_hash = self._calculate_salt()
         proxy_init_code = self._get_proxy_creation_code()

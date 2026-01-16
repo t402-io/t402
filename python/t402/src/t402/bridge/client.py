@@ -1,6 +1,5 @@
 """USDT0 Bridge Client for LayerZero OFT transfers."""
 
-from typing import Optional
 
 from .constants import (
     DEFAULT_EXTRA_OPTIONS,
