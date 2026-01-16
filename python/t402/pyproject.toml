@@ -1,6 +1,6 @@
 [project]
 name = "t402"
-version = "1.4.0"
+version = "1.5.0"
 description = "t402: An internet native payments protocol"
 readme = "README.md"
 license = { text = "Apache-2.0" }
