@@ -491,3 +491,441 @@ class TestNetworkUtilities:
         assert get_network_type("ton:mainnet") == "ton"
         assert get_network_type("base-sepolia") == "evm"
         assert get_network_type("unknown-network") == "unknown"
+
+
+# =============================================================================
+# New Tests for Signer Interfaces and Scheme Implementations
+# =============================================================================
+
+from t402.svm import (
+    # Transaction utilities
+    decode_transaction,
+    check_solana_available,
+    # Signer interfaces
+    ClientSvmSigner,
+    FacilitatorSvmSigner,
+    # Scheme implementations
+    ExactSvmClientScheme,
+    ExactSvmServerScheme,
+    ExactSvmFacilitatorScheme,
+    # Factory functions
+    create_client_scheme,
+    create_server_scheme,
+    create_facilitator_scheme,
+    # Types
+    SvmVerifyMessageResult,
+    SvmTransactionConfirmation,
+    ExactSvmPayloadV2,
+    TransferDetails,
+    SOLANA_AVAILABLE,
+)
+
+
+class TestTransactionUtilities:
+    """Test transaction utility functions."""
+
+    def test_decode_transaction_valid(self):
+        # Valid base64 encoding
+        original = b"test transaction data for decoding"
+        encoded = base64.b64encode(original).decode()
+        decoded = decode_transaction(encoded)
+        assert decoded == original
+
+    def test_decode_transaction_invalid(self):
+        with pytest.raises(ValueError, match="Failed to decode"):
+            decode_transaction("not-valid-base64!!!")
+
+    def test_check_solana_available(self):
+        # This should return a boolean regardless of installation
+        result = check_solana_available()
+        assert isinstance(result, bool)
+        assert result == SOLANA_AVAILABLE
+
+
+class TestExactSvmServerScheme:
+    """Test ExactSvmServerScheme implementation."""
+
+    def test_create_server_scheme(self):
+        scheme = create_server_scheme()
+        assert isinstance(scheme, ExactSvmServerScheme)
+        assert scheme.scheme == "exact"
+        assert scheme.caip_family == "solana:*"
+
+    def test_parse_price_decimal(self):
+        scheme = ExactSvmServerScheme()
+        result = scheme.parse_price("1.50", SOLANA_MAINNET)
+
+        assert result["amount"] == "1500000"
+        assert result["asset"] == USDC_MAINNET_ADDRESS
+        assert result["decimals"] == 6
+        assert result["symbol"] == "USDC"
+
+    def test_parse_price_atomic(self):
+        scheme = ExactSvmServerScheme()
+        result = scheme.parse_price("1500000", SOLANA_MAINNET)
+
+        assert result["amount"] == "1500000"
+
+    def test_parse_price_invalid_network(self):
+        scheme = ExactSvmServerScheme()
+        with pytest.raises(ValueError, match="Unsupported network"):
+            scheme.parse_price("1.00", "invalid-network")
+
+    def test_enhance_payment_requirements_basic(self):
+        scheme = ExactSvmServerScheme()
+        requirements = {
+            "network": SOLANA_MAINNET_V1,
+            "payTo": "recipient_address",
+        }
+
+        enhanced = scheme.enhance_payment_requirements(requirements)
+
+        # Network should be normalized to CAIP-2 format
+        assert enhanced["network"] == SOLANA_MAINNET
+        assert enhanced["payTo"] == "recipient_address"
+
+    def test_enhance_payment_requirements_with_fee_payer(self):
+        scheme = ExactSvmServerScheme()
+        requirements = {
+            "network": SOLANA_MAINNET,
+            "payTo": "recipient_address",
+        }
+
+        enhanced = scheme.enhance_payment_requirements(
+            requirements,
+            fee_payer="fee_payer_address"
+        )
+
+        assert enhanced["extra"]["feePayer"] == "fee_payer_address"
+
+
+class TestSvmTypes:
+    """Test new SVM types."""
+
+    def test_svm_verify_message_result(self):
+        result = SvmVerifyMessageResult(
+            valid=True,
+            reason=None,
+            transfer={"amount": 1000000, "mint": USDC_MAINNET_ADDRESS},
+        )
+
+        assert result.valid is True
+        assert result.reason is None
+        assert result.transfer["amount"] == 1000000
+
+    def test_svm_verify_message_result_invalid(self):
+        result = SvmVerifyMessageResult(
+            valid=False,
+            reason="amount_insufficient",
+        )
+
+        assert result.valid is False
+        assert result.reason == "amount_insufficient"
+
+    def test_svm_transaction_confirmation(self):
+        result = SvmTransactionConfirmation(
+            success=True,
+            signature="5nT1Lf...",
+            slot=12345,
+        )
+
+        assert result.success is True
+        assert result.signature == "5nT1Lf..."
+        assert result.slot == 12345
+        assert result.error is None
+
+    def test_svm_transaction_confirmation_failed(self):
+        result = SvmTransactionConfirmation(
+            success=False,
+            error="Transaction failed",
+        )
+
+        assert result.success is False
+        assert result.error == "Transaction failed"
+
+
+class TestSignerInterfaces:
+    """Test signer interface protocols."""
+
+    def test_client_signer_protocol(self):
+        """Verify ClientSvmSigner is a Protocol."""
+        # ClientSvmSigner should be a Protocol with required methods
+        assert hasattr(ClientSvmSigner, "get_address")
+        assert hasattr(ClientSvmSigner, "sign_transaction")
+
+    def test_facilitator_signer_protocol(self):
+        """Verify FacilitatorSvmSigner is a Protocol."""
+        # FacilitatorSvmSigner should have all required methods
+        assert hasattr(FacilitatorSvmSigner, "get_addresses")
+        assert hasattr(FacilitatorSvmSigner, "sign_transaction")
+        assert hasattr(FacilitatorSvmSigner, "simulate_transaction")
+        assert hasattr(FacilitatorSvmSigner, "send_transaction")
+        assert hasattr(FacilitatorSvmSigner, "confirm_transaction")
+
+
+class TestMockClientSigner:
+    """Test with a mock client signer implementation."""
+
+    class MockClientSigner:
+        """Mock implementation of ClientSvmSigner for testing."""
+
+        def __init__(self, address: str):
+            self._address = address
+
+        def get_address(self) -> str:
+            return self._address
+
+        async def sign_transaction(self, tx_base64: str, network: str) -> str:
+            # Mock signing by just returning the same transaction
+            return tx_base64
+
+    def test_mock_signer_get_address(self):
+        signer = self.MockClientSigner("TestAddress111111111111111111111111111")
+        assert signer.get_address() == "TestAddress111111111111111111111111111"
+
+    @pytest.mark.asyncio
+    async def test_mock_signer_sign_transaction(self):
+        signer = self.MockClientSigner("TestAddress111111111111111111111111111")
+        tx = base64.b64encode(b"test transaction").decode()
+        signed = await signer.sign_transaction(tx, SOLANA_MAINNET)
+        assert signed == tx  # Mock just returns same transaction
+
+
+class TestMockFacilitatorSigner:
+    """Test with a mock facilitator signer implementation."""
+
+    class MockFacilitatorSigner:
+        """Mock implementation of FacilitatorSvmSigner for testing."""
+
+        def __init__(self, addresses: list):
+            self._addresses = addresses
+
+        def get_addresses(self) -> list:
+            return self._addresses
+
+        async def sign_transaction(self, tx_base64: str, fee_payer: str, network: str) -> str:
+            if fee_payer not in self._addresses:
+                raise ValueError(f"Fee payer {fee_payer} not managed")
+            return tx_base64
+
+        async def simulate_transaction(self, tx_base64: str, network: str) -> bool:
+            return True
+
+        async def send_transaction(self, tx_base64: str, network: str) -> str:
+            return "mock_signature_12345"
+
+        async def confirm_transaction(self, signature: str, network: str) -> bool:
+            return True
+
+    def test_mock_facilitator_get_addresses(self):
+        addresses = ["Addr1", "Addr2"]
+        signer = self.MockFacilitatorSigner(addresses)
+        assert signer.get_addresses() == addresses
+
+    @pytest.mark.asyncio
+    async def test_mock_facilitator_sign_valid(self):
+        signer = self.MockFacilitatorSigner(["FeePayerAddr"])
+        tx = base64.b64encode(b"test").decode()
+        result = await signer.sign_transaction(tx, "FeePayerAddr", SOLANA_MAINNET)
+        assert result == tx
+
+    @pytest.mark.asyncio
+    async def test_mock_facilitator_sign_invalid_payer(self):
+        signer = self.MockFacilitatorSigner(["FeePayerAddr"])
+        tx = base64.b64encode(b"test").decode()
+        with pytest.raises(ValueError, match="not managed"):
+            await signer.sign_transaction(tx, "InvalidAddr", SOLANA_MAINNET)
+
+
+class TestExactSvmClientScheme:
+    """Test ExactSvmClientScheme with mock signer."""
+
+    class MockClientSigner:
+        def __init__(self, address: str):
+            self._address = address
+
+        def get_address(self) -> str:
+            return self._address
+
+        async def sign_transaction(self, tx_base64: str, network: str) -> str:
+            return tx_base64
+
+    def test_create_client_scheme(self):
+        signer = self.MockClientSigner("TestAddr")
+        scheme = create_client_scheme(signer)
+        assert isinstance(scheme, ExactSvmClientScheme)
+        assert scheme.scheme == "exact"
+
+    @pytest.mark.asyncio
+    async def test_create_payment_payload(self):
+        signer = self.MockClientSigner("SenderAddr11111111111111111111111111111")
+        scheme = ExactSvmClientScheme(signer)
+
+        requirements = {
+            "network": SOLANA_MAINNET,
+            "payTo": "RecipientAddr11111111111111111111111111",
+            "maxTimeoutSeconds": 3600,
+            "t402Version": 2,
+            "extra": {"feePayer": "FeePayer1111111111111111111111111111"},
+        }
+
+        async def mock_build_tx():
+            # Return a minimal valid-looking transaction
+            return base64.b64encode(b"mock_transaction_bytes").decode()
+
+        payload = await scheme.create_payment_payload(requirements, mock_build_tx)
+
+        assert payload["t402Version"] == 2
+        assert payload["scheme"] == "exact"
+        assert payload["network"] == SOLANA_MAINNET
+        assert "transaction" in payload["payload"]
+
+
+class TestExactSvmFacilitatorScheme:
+    """Test ExactSvmFacilitatorScheme with mock signer."""
+
+    class MockFacilitatorSigner:
+        def __init__(self, addresses: list):
+            self._addresses = addresses
+
+        def get_addresses(self) -> list:
+            return self._addresses
+
+        async def sign_transaction(self, tx_base64: str, fee_payer: str, network: str) -> str:
+            return tx_base64
+
+        async def simulate_transaction(self, tx_base64: str, network: str) -> bool:
+            return True
+
+        async def send_transaction(self, tx_base64: str, network: str) -> str:
+            return "mock_signature"
+
+        async def confirm_transaction(self, signature: str, network: str) -> bool:
+            return True
+
+    def test_create_facilitator_scheme(self):
+        signer = self.MockFacilitatorSigner(["FeePayer1"])
+        scheme = create_facilitator_scheme(signer)
+        assert isinstance(scheme, ExactSvmFacilitatorScheme)
+        assert scheme.scheme == "exact"
+
+    def test_get_extra(self):
+        addresses = ["FeePayerA", "FeePayerB", "FeePayerC"]
+        signer = self.MockFacilitatorSigner(addresses)
+        scheme = ExactSvmFacilitatorScheme(signer)
+
+        extra = scheme.get_extra(SOLANA_MAINNET)
+
+        assert extra is not None
+        assert "feePayer" in extra
+        assert extra["feePayer"] in addresses
+
+    def test_get_signers(self):
+        addresses = ["Addr1", "Addr2"]
+        signer = self.MockFacilitatorSigner(addresses)
+        scheme = ExactSvmFacilitatorScheme(signer)
+
+        signers = scheme.get_signers(SOLANA_MAINNET)
+
+        assert signers == addresses
+
+    @pytest.mark.asyncio
+    async def test_verify_invalid_payload_structure(self):
+        signer = self.MockFacilitatorSigner(["FeePayer"])
+        scheme = ExactSvmFacilitatorScheme(signer)
+
+        payload = {"scheme": "exact", "network": SOLANA_MAINNET, "payload": {}}
+        requirements = {"scheme": "exact", "network": SOLANA_MAINNET}
+
+        result = await scheme.verify(payload, requirements)
+
+        assert result["isValid"] is False
+        assert result["invalidReason"] == "invalid_payload_structure"
+
+    @pytest.mark.asyncio
+    async def test_verify_unsupported_scheme(self):
+        signer = self.MockFacilitatorSigner(["FeePayer"])
+        scheme = ExactSvmFacilitatorScheme(signer)
+
+        tx = base64.b64encode(b"x" * 200).decode()
+        payload = {"scheme": "other", "network": SOLANA_MAINNET, "payload": {"transaction": tx}}
+        requirements = {"scheme": "exact", "network": SOLANA_MAINNET}
+
+        result = await scheme.verify(payload, requirements)
+
+        assert result["isValid"] is False
+        assert result["invalidReason"] == "unsupported_scheme"
+
+    @pytest.mark.asyncio
+    async def test_verify_network_mismatch(self):
+        signer = self.MockFacilitatorSigner(["FeePayer"])
+        scheme = ExactSvmFacilitatorScheme(signer)
+
+        tx = base64.b64encode(b"x" * 200).decode()
+        payload = {"scheme": "exact", "network": SOLANA_MAINNET, "payload": {"transaction": tx}}
+        requirements = {"scheme": "exact", "network": SOLANA_DEVNET}
+
+        result = await scheme.verify(payload, requirements)
+
+        assert result["isValid"] is False
+        assert result["invalidReason"] == "network_mismatch"
+
+    @pytest.mark.asyncio
+    async def test_verify_missing_fee_payer(self):
+        signer = self.MockFacilitatorSigner(["FeePayer"])
+        scheme = ExactSvmFacilitatorScheme(signer)
+
+        tx = base64.b64encode(b"x" * 200).decode()
+        payload = {"scheme": "exact", "network": SOLANA_MAINNET, "payload": {"transaction": tx}}
+        requirements = {"scheme": "exact", "network": SOLANA_MAINNET, "extra": {}}
+
+        result = await scheme.verify(payload, requirements)
+
+        assert result["isValid"] is False
+        assert result["invalidReason"] == "invalid_exact_svm_payload_missing_fee_payer"
+
+    @pytest.mark.asyncio
+    async def test_verify_fee_payer_not_managed(self):
+        signer = self.MockFacilitatorSigner(["ManagedFeePayer"])
+        scheme = ExactSvmFacilitatorScheme(signer)
+
+        tx = base64.b64encode(b"x" * 200).decode()
+        payload = {"scheme": "exact", "network": SOLANA_MAINNET, "payload": {"transaction": tx}}
+        requirements = {
+            "scheme": "exact",
+            "network": SOLANA_MAINNET,
+            "extra": {"feePayer": "UnmanagedFeePayer"}
+        }
+
+        result = await scheme.verify(payload, requirements)
+
+        assert result["isValid"] is False
+        assert result["invalidReason"] == "fee_payer_not_managed_by_facilitator"
+
+
+class TestExactSvmPayloadV2:
+    """Test ExactSvmPayloadV2 TypedDict."""
+
+    def test_payload_structure(self):
+        payload: ExactSvmPayloadV2 = {
+            "transaction": "base64_encoded_tx",
+            "authorization": {
+                "from": "sender",
+                "to": "recipient",
+                "mint": USDC_MAINNET_ADDRESS,
+                "amount": "1000000",
+                "validUntil": 1234567890,
+            },
+        }
+
+        assert payload["transaction"] == "base64_encoded_tx"
+        assert payload["authorization"]["amount"] == "1000000"
+
+    def test_payload_without_authorization(self):
+        payload: ExactSvmPayloadV2 = {
+            "transaction": "base64_encoded_tx",
+            "authorization": None,
+        }
+
+        assert payload["transaction"] == "base64_encoded_tx"
+        assert payload["authorization"] is None

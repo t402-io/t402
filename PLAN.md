@@ -21,7 +21,7 @@
 | Core Server | ✅ | ✅ | ✅ | ✅ |
 | Facilitator | ✅ | ✅ | ✅ | ✅ |
 | EVM Mechanism | ✅ | ✅ | ✅ | ✅ |
-| SVM Mechanism | ✅ | ⚠️ Partial | ✅ | ✅ |
+| SVM Mechanism | ✅ | ✅ | ✅ | ✅ |
 | TON Mechanism | ✅ | ✅ | ✅ | ✅ |
 | TRON Mechanism | ✅ | ✅ | ✅ | ✅ |
 | ERC-4337 | ✅ | ✅ | ✅ | ✅ |
@@ -238,7 +238,7 @@ jobs:
 | EVM USDT | ✅ | ✅ | ✅ | ✅ |
 | TRON USDT | ✅ | ✅ | ✅ | ✅ |
 | TON USDT | ✅ | ✅ | ✅ | ✅ |
-| Solana USDC | ✅ | ⚠️ 部分 | ✅ | ❌ |
+| Solana USDC | ✅ | ✅ | ✅ | ❌ |
 | **USDT0 Bridge** |
 | 跨鏈報價 | ✅ | ✅ | ✅ | ✅ |
 | 跨鏈執行 | ✅ | ✅ | ✅ | ✅ |
@@ -281,7 +281,7 @@ jobs:
 
 | # | Task | Priority | Status |
 |---|------|----------|--------|
-| 1 | 完善 SVM 機制（SPL Token 完整支援）| High | ⏳ Pending |
+| 1 | 完善 SVM 機制（SPL Token 完整支援）| High | ✅ Done |
 | 2 | 添加 WDK Multisig 套件 | Medium | ⏳ Pending |
 | 3 | 添加 WDK Bridge 專用套件 | Medium | ⏳ Pending |
 | 4 | 添加硬體錢包支援（Ledger/Trezor）| Low | ⏳ Pending |
@@ -311,7 +311,7 @@ jobs:
 - [ ] Java SDK 發布到 Maven Central
 
 **P1 - High（下個版本）**
-- [ ] Python SVM 完整實現
+- [x] Python SVM 完整實現
 - [ ] Java ERC-4337 Safe Account 整合
 
 **P2 - Medium（未來版本）**
