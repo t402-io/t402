@@ -101,8 +101,15 @@ jobs:
         if: ${{ github.event.inputs.dry_run == 'true' }}
         working-directory: ./java
         run: |
-          echo "Would publish the following packages:"
+          echo "=== Dry Run Mode ==="
+          echo "Would publish the following artifacts to Maven Central:"
+          echo ""
+          mvn package -DskipTests -q
           ls -la target/*.jar
+          echo ""
+          echo "GroupId: io.t402"
+          echo "ArtifactId: t402"
+          echo "Version: $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
 
   release:
     needs: publish
