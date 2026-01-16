@@ -103,7 +103,17 @@ export class ExactTonScheme implements SchemeNetworkFacilitator {
     payload: PaymentPayload,
     requirements: PaymentRequirements,
   ): Promise<VerifyResponse> {
-    const tonPayload = payload.payload as ExactTonPayloadV2;
+    const tonPayload = payload.payload as ExactTonPayloadV2 | undefined;
+
+    // Validate payload structure
+    if (!tonPayload?.authorization?.from || !tonPayload?.signedBoc) {
+      return {
+        isValid: false,
+        invalidReason: "invalid_payload_structure",
+        payer: "",
+      };
+    }
+
     const authorization = tonPayload.authorization;
 
     // Step 1: Verify scheme matches
@@ -274,7 +284,18 @@ export class ExactTonScheme implements SchemeNetworkFacilitator {
     payload: PaymentPayload,
     requirements: PaymentRequirements,
   ): Promise<SettleResponse> {
-    const tonPayload = payload.payload as ExactTonPayloadV2;
+    const tonPayload = payload.payload as ExactTonPayloadV2 | undefined;
+
+    // Validate payload structure
+    if (!tonPayload?.authorization?.from || !tonPayload?.signedBoc) {
+      return {
+        success: false,
+        network: payload.accepted.network,
+        transaction: "",
+        errorReason: "invalid_payload_structure",
+        payer: "",
+      };
+    }
 
     // Re-verify before settling
     const verifyResult = await this.verify(payload, requirements);
