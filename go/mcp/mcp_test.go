@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"io"
 	"math/big"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -276,13 +278,20 @@ func TestServerCallToolGetBalance(t *testing.T) {
 	config := &ServerConfig{DemoMode: true}
 
 	params := `{"name":"t402/getBalance","arguments":{"address":"0x1234567890abcdef1234567890abcdef12345678","network":"ethereum"}}`
-	input := bytes.NewBufferString(`{"jsonrpc":"2.0","id":3,"method":"tools/call","params":` + params + `}` + "\n")
+	inputData := `{"jsonrpc":"2.0","id":3,"method":"tools/call","params":` + params + `}` + "\n"
+
+	// Use a pipe to provide input that signals EOF after the request
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close() // Signal EOF after writing
+	}()
+
 	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
 
-	server := NewServerWithIO(config, input, output)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	go func() { cancel() }()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	_ = server.Run(ctx)
 
@@ -308,13 +317,20 @@ func TestServerCallToolInvalidTool(t *testing.T) {
 	config := &ServerConfig{DemoMode: true}
 
 	params := `{"name":"t402/invalid","arguments":{}}`
-	input := bytes.NewBufferString(`{"jsonrpc":"2.0","id":4,"method":"tools/call","params":` + params + `}` + "\n")
+	inputData := `{"jsonrpc":"2.0","id":4,"method":"tools/call","params":` + params + `}` + "\n"
+
+	// Use a pipe to provide input that signals EOF after the request
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close() // Signal EOF after writing
+	}()
+
 	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
 
-	server := NewServerWithIO(config, input, output)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	go func() { cancel() }()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	_ = server.Run(ctx)
 
