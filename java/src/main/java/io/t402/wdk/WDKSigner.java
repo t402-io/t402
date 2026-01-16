@@ -55,6 +55,9 @@ public class WDKSigner {
     /** Ethereum coin type. */
     private static final int BIP44_COIN_TYPE = 0x8000003C;
 
+    /** Shared SecureRandom instance for entropy generation. */
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
     private final byte[] seed;
     private final WDKConfig config;
     private final Credentials credentials;
@@ -215,7 +218,7 @@ public class WDKSigner {
      */
     public static String generateSeedPhrase() {
         byte[] entropy = new byte[16]; // 128 bits = 12 words
-        new SecureRandom().nextBytes(entropy);
+        SECURE_RANDOM.nextBytes(entropy);
         return MnemonicUtils.generateMnemonic(entropy);
     }
 
@@ -249,7 +252,7 @@ public class WDKSigner {
         }
 
         byte[] entropy = new byte[entropyBits / 8];
-        new SecureRandom().nextBytes(entropy);
+        SECURE_RANDOM.nextBytes(entropy);
         return MnemonicUtils.generateMnemonic(entropy);
     }
 

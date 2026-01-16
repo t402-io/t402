@@ -129,8 +129,17 @@ jobs:
           java-version: "21"
           cache: "maven"
 
-      - name: Run tests
-        run: mvn test -B
+      - name: Run tests with coverage
+        run: mvn test jacoco:report -B
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./java/target/site/jacoco/jacoco.xml
+          flags: java
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   # Summary job
   tests-passed:

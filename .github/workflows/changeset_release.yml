@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "typescript/**"
+      - "typescript/.changeset/**"
       - ".github/workflows/changeset_release.yml"
   workflow_dispatch:
 
@@ -21,6 +21,9 @@ jobs:
       contents: write
       pull-requests: write
       id-token: write
+    defaults:
+      run:
+        working-directory: ./typescript
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -39,14 +42,23 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
-        working-directory: ./typescript
         run: pnpm install --frozen-lockfile
 
       - name: Build packages
-        working-directory: ./typescript
         run: pnpm build
 
+      - name: Check for changesets
+        id: changesets
+        run: |
+          if [ -d ".changeset" ] && [ -n "$(ls -A .changeset/*.md 2>/dev/null | grep -v README.md)" ]; then
+            echo "has_changesets=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_changesets=false" >> $GITHUB_OUTPUT
+            echo "No changesets found, skipping release"
+          fi
+
       - name: Create Release Pull Request or Publish
+        if: steps.changesets.outputs.has_changesets == 'true'
         uses: changesets/action@v1
         with:
           publish: pnpm changeset:publish
