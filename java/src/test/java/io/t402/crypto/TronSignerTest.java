@@ -140,9 +140,13 @@ class TronSignerTest {
 
     @Test
     void isValidAddressWithValidAddress() {
-        // Valid TRON addresses start with 'T' and are 34 chars
-        assertTrue(TronSigner.isValidAddress("TJRyWwFs9wTFGZg3JbrVriFbNfCug5tDeC"));
-        assertTrue(TronSigner.isValidAddress("TWd4WrZ9wn84f5x1hZhL4DHvk738ns5jwb"));
+        // Use derived addresses which have valid checksums
+        TronSigner signer = new TronSigner(TEST_PRIVATE_KEY, TronSigner.MAINNET);
+        String derivedAddress = signer.getAddress();
+
+        assertTrue(TronSigner.isValidAddress(derivedAddress));
+        assertTrue(derivedAddress.startsWith("T"));
+        assertEquals(34, derivedAddress.length());
     }
 
     @Test

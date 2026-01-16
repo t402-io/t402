@@ -214,25 +214,34 @@ public class TonSigner implements CryptoSigner {
             }
         }
 
-        // Check for user-friendly format (Base64, 48 chars)
-        if (address.length() == 48) {
+        // Check for user-friendly format (bounceable EQ... or non-bounceable UQ...)
+        // These use URL-safe Base64 encoding and are 48 chars
+        if (address.length() == 48 && (address.startsWith("EQ") || address.startsWith("UQ"))) {
             try {
-                Base64.getDecoder().decode(address);
-                return true;
+                // URL-safe Base64 decode
+                String normalized = address.replace('-', '+').replace('_', '/');
+                byte[] decoded = Base64.getDecoder().decode(normalized);
+                // Valid TON address decodes to 36 bytes (1 tag + 1 workchain + 32 hash + 2 crc)
+                return decoded.length == 36;
             } catch (IllegalArgumentException e) {
                 return false;
             }
         }
 
-        // Check for bounceable/non-bounceable format
-        if (address.length() >= 48 && (address.startsWith("EQ") || address.startsWith("UQ"))) {
+        // Check for standard Base64 format (48 chars)
+        if (address.length() == 48) {
             try {
-                // URL-safe Base64 decode
-                String normalized = address.replace('-', '+').replace('_', '/');
-                Base64.getDecoder().decode(normalized);
-                return true;
+                byte[] decoded = Base64.getDecoder().decode(address);
+                return decoded.length == 36;
             } catch (IllegalArgumentException e) {
-                return false;
+                // Try URL-safe as fallback
+                try {
+                    String normalized = address.replace('-', '+').replace('_', '/');
+                    byte[] decoded = Base64.getDecoder().decode(normalized);
+                    return decoded.length == 36;
+                } catch (IllegalArgumentException e2) {
+                    return false;
+                }
             }
         }
 

@@ -373,10 +373,14 @@ public class TronSigner implements CryptoSigner {
             j++;
         }
 
+        // Copy leading zeros and decoded bytes into result
         byte[] result = new byte[zeros + (temp.length - j)];
-        for (int i = zeros + (temp.length - j) - 1; i >= 0; i--) {
-            result[i] = i < zeros ? 0 : temp[j++];
+        // Fill leading zeros
+        for (int i = 0; i < zeros; i++) {
+            result[i] = 0;
         }
+        // Copy decoded bytes
+        System.arraycopy(temp, j, result, zeros, temp.length - j);
         return result;
     }
 
