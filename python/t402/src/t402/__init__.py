@@ -1,5 +1,5 @@
 # Package version
-__version__ = "1.5.1"
+__version__ = "1.5.2"
 
 # Re-export commonly used items for convenience
 from t402.common import (
