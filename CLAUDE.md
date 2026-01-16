@@ -36,7 +36,7 @@ t402/
 |-----|---------|----------|
 | TypeScript | 2.0.0 | npm (@t402/*) |
 | Python | 1.6.0 | PyPI |
-| Go | 1.3.1 | Go Modules |
+| Go | 1.4.0 | Go Modules |
 | Java | 1.0.0-SNAPSHOT | Maven Central (not published) |
 
 ## Release Tags

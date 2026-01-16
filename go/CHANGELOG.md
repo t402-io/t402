@@ -4,6 +4,8 @@ All notable changes to the T402 Go SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-01-16
+
 ### Added
 - **MCP Server** (`mcp/`, `cmd/t402-mcp/`) - Model Context Protocol server for AI agents
   - `t402/getBalance` - Get token balances for a wallet on specific network
@@ -85,7 +87,8 @@ All notable changes to the T402 Go SDK will be documented in this file.
 - EVM signers
 - Bazaar extension for API discovery
 
-[Unreleased]: https://github.com/t402-io/t402/compare/go/v1.3.1...HEAD
+[Unreleased]: https://github.com/t402-io/t402/compare/go/v1.4.0...HEAD
+[1.4.0]: https://github.com/t402-io/t402/compare/go/v1.3.1...go/v1.4.0
 [1.3.1]: https://github.com/t402-io/t402/compare/go/v1.3.0...go/v1.3.1
 [1.3.0]: https://github.com/t402-io/t402/compare/go/v1.2.0...go/v1.3.0
 [1.2.0]: https://github.com/t402-io/t402/compare/go/v1.1.0...go/v1.2.0
