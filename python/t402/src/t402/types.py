@@ -12,6 +12,14 @@ from pydantic.alias_generators import to_camel
 
 from t402.networks import SupportedNetworks
 
+# Protocol version constants
+T402_VERSION_V1 = 1
+T402_VERSION_V2 = 2
+T402_VERSION = T402_VERSION_V2  # Current default version
+
+# Network type alias (CAIP-2 format: "namespace:reference")
+Network = str  # e.g., "eip155:1", "solana:mainnet", "ton:mainnet"
+
 
 # Add HTTP request structure types
 class HTTPVerbs(str, Enum):
@@ -93,7 +101,14 @@ Money = Union[str, int]  # e.g., "$0.01", 0.01, "0.001"
 Price = Union[Money, TokenAmount]
 
 
-class PaymentRequirements(BaseModel):
+# =============================================================================
+# V1 Types (Legacy - for backward compatibility)
+# =============================================================================
+
+
+class PaymentRequirementsV1(BaseModel):
+    """V1 Payment Requirements - Legacy format."""
+
     scheme: str
     network: SupportedNetworks
     max_amount_required: str
@@ -123,11 +138,90 @@ class PaymentRequirements(BaseModel):
         return v
 
 
-# Returned by a server as json alongside a 402 response code
-class t402PaymentRequiredResponse(BaseModel):
-    t402_version: int
-    accepts: list[PaymentRequirements]
+# Alias for backward compatibility
+PaymentRequirements = PaymentRequirementsV1
+
+
+class t402PaymentRequiredResponseV1(BaseModel):
+    """V1 Payment Required Response - Legacy format (returned in response body)."""
+
+    t402_version: int = Field(default=T402_VERSION_V1, alias="t402Version")
+    accepts: list[PaymentRequirementsV1]
     error: str
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
+
+# Alias for backward compatibility
+t402PaymentRequiredResponse = t402PaymentRequiredResponseV1
+
+
+# =============================================================================
+# V2 Types (Current Protocol Version)
+# =============================================================================
+
+
+class ResourceInfo(BaseModel):
+    """Resource information for V2 protocol.
+
+    Contains metadata about the protected resource.
+    """
+
+    url: str
+    description: str = ""
+    mime_type: str = Field(default="", alias="mimeType")
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
+
+class PaymentRequirementsV2(BaseModel):
+    """V2 Payment Requirements - Current format.
+
+    Represents a single payment option that a client can use to pay for access.
+    """
+
+    scheme: str
+    network: Network
+    asset: str
+    amount: str
+    pay_to: str = Field(alias="payTo")
+    max_timeout_seconds: int = Field(alias="maxTimeoutSeconds")
+    extra: dict[str, Any] = Field(default_factory=dict)
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
+    @field_validator("amount")
+    def validate_amount(cls, v):
+        try:
+            int(v)
+        except ValueError:
+            raise ValueError("amount must be an integer encoded as a string")
+        return v
+
+
+class PaymentRequiredV2(BaseModel):
+    """V2 Payment Required Response - Current format.
+
+    Returned in the PAYMENT-REQUIRED header as base64-encoded JSON.
+    """
+
+    t402_version: int = Field(default=T402_VERSION_V2, alias="t402Version")
+    resource: ResourceInfo
+    accepts: list[PaymentRequirementsV2]
+    error: Optional[str] = None
+    extensions: Optional[dict[str, Any]] = None
 
     model_config = ConfigDict(
         alias_generator=to_camel,
@@ -258,10 +352,61 @@ class VerifyResponse(BaseModel):
 
 class SettleResponse(BaseModel):
     success: bool
-    error_reason: Optional[str] = None
+    error_reason: Optional[str] = Field(None, alias="errorReason")
     transaction: Optional[str] = None
     network: Optional[str] = None
     payer: Optional[str] = None
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
+
+class PaymentResponseV2(BaseModel):
+    """V2 Payment Response - returned in PAYMENT-RESPONSE header after settlement."""
+
+    success: bool
+    error_reason: Optional[str] = Field(None, alias="errorReason")
+    payer: Optional[str] = None
+    transaction: str
+    network: Network
+    requirements: PaymentRequirementsV2
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
+
+# =============================================================================
+# Facilitator Types
+# =============================================================================
+
+
+class SupportedKind(BaseModel):
+    """A single supported scheme/network combination from the facilitator."""
+
+    t402_version: int = Field(alias="t402Version")
+    scheme: str
+    network: Network
+    extra: Optional[dict[str, Any]] = None
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
+
+class SupportedResponse(BaseModel):
+    """Response from facilitator's /supported endpoint."""
+
+    kinds: list[SupportedKind]
+    extensions: list[str] = Field(default_factory=list)
+    signers: dict[str, list[str]] = Field(default_factory=dict)  # CAIP family → addresses
 
     model_config = ConfigDict(
         alias_generator=to_camel,
@@ -274,11 +419,36 @@ class SettleResponse(BaseModel):
 SchemePayloads = Union[ExactPaymentPayload, TonPaymentPayload, TronPaymentPayload]
 
 
-class PaymentPayload(BaseModel):
-    t402_version: int
+class PaymentPayloadV1(BaseModel):
+    """V1 Payment Payload - Legacy format."""
+
+    t402_version: int = Field(default=T402_VERSION_V1, alias="t402Version")
     scheme: str
     network: str
     payload: SchemePayloads
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
+
+# Alias for backward compatibility
+PaymentPayload = PaymentPayloadV1
+
+
+class PaymentPayloadV2(BaseModel):
+    """V2 Payment Payload - Current format.
+
+    Sent in the PAYMENT-SIGNATURE header as base64-encoded JSON.
+    """
+
+    t402_version: int = Field(default=T402_VERSION_V2, alias="t402Version")
+    resource: ResourceInfo
+    accepted: PaymentRequirementsV2
+    payload: dict[str, Any]
+    extensions: Optional[dict[str, Any]] = None
 
     model_config = ConfigDict(
         alias_generator=to_camel,

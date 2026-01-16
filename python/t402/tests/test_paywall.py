@@ -75,7 +75,7 @@ class TestCreateT402Config:
         assert config["currentUrl"] == "https://example.com/api/data"
         assert config["error"] == "Payment required"
         assert len(config["paymentRequirements"]) == 1
-        assert config["t402_version"] == 1
+        assert config["t402_version"] == 2  # V2 is now the default
 
     def test_create_config_with_mainnet(self):
         payment_req = PaymentRequirements(
