@@ -4,6 +4,8 @@ All notable changes to the T402 Go SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-01-16
+
 ### Added
 - **SmartBridgeRouter** (`mechanisms/evm/bridge/`) - Intelligent multi-chain bridge routing
   - `SmartBridgeRouter` interface for automatic route selection across chains
@@ -108,7 +110,8 @@ All notable changes to the T402 Go SDK will be documented in this file.
 - EVM signers
 - Bazaar extension for API discovery
 
-[Unreleased]: https://github.com/t402-io/t402/compare/go/v1.4.0...HEAD
+[Unreleased]: https://github.com/t402-io/t402/compare/go/v1.5.0...HEAD
+[1.5.0]: https://github.com/t402-io/t402/compare/go/v1.4.0...go/v1.5.0
 [1.4.0]: https://github.com/t402-io/t402/compare/go/v1.3.1...go/v1.4.0
 [1.3.1]: https://github.com/t402-io/t402/compare/go/v1.3.0...go/v1.3.1
 [1.3.0]: https://github.com/t402-io/t402/compare/go/v1.2.0...go/v1.3.0
