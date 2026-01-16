@@ -737,3 +737,237 @@ groups:
           service: facilitator
           team: payments
           network: solana
+
+      # Network-Specific Error Rate - TON
+      - uid: t402-ton-errors
+        title: High Error Rate on TON Networks
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: sum(rate(facilitator_settle_total{network=~"ton:.*",result="failure"}[5m])) or vector(0)
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: sum(rate(facilitator_settle_total{network=~"ton:.*"}[5m])) or vector(0)
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0.1
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - C
+                  reducer:
+                    type: last
+              expression: $A / $B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: math
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: High error rate on TON networks
+          description: "Settlement error rate on TON networks is above 10% (current: {{ $values.C | printf \"%.2f\" }}). Check TON RPC providers."
+        labels:
+          severity: warning
+          service: facilitator
+          team: payments
+          network: ton
+
+      # Network-Specific Error Rate - TRON
+      - uid: t402-tron-errors
+        title: High Error Rate on TRON Networks
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: sum(rate(facilitator_settle_total{network=~"tron:.*",result="failure"}[5m])) or vector(0)
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: sum(rate(facilitator_settle_total{network=~"tron:.*"}[5m])) or vector(0)
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0.1
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - C
+                  reducer:
+                    type: last
+              expression: $A / $B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: math
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: High error rate on TRON networks
+          description: "Settlement error rate on TRON networks is above 10% (current: {{ $values.C | printf \"%.2f\" }}). Check TRON RPC providers."
+        labels:
+          severity: warning
+          service: facilitator
+          team: payments
+          network: tron
+
+  - orgId: 1
+    name: T402 Facilitator - Security Alerts
+    folder: T402
+    interval: 30s
+    rules:
+      # API Key Authentication Attacks
+      - uid: t402-apikey-auth-attacks
+        title: API Key Authentication Attacks Detected
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: sum(rate(facilitator_api_key_auth_failed_total[5m])) * 300
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 10
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - B
+                  reducer:
+                    type: last
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 1m
+        annotations:
+          summary: Potential API key brute force attack detected
+          description: "More than 10 failed API key authentication attempts in 5 minutes. Possible brute force attack."
+          runbook_url: "https://docs.t402.io/runbooks/api-key-attacks"
+        labels:
+          severity: critical
+          service: facilitator
+          team: security
+
+      # Rate Limit Saturation
+      - uid: t402-rate-limit-saturation
+        title: Rate Limit Saturation
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: sum(rate(facilitator_requests_total{status="429"}[5m])) or vector(0)
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              expr: sum(rate(facilitator_requests_total[5m])) or vector(0)
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0.1
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - C
+                  reducer:
+                    type: last
+              expression: $A / $B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: math
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: High rate of rate-limited requests
+          description: "More than 10% of requests are being rate limited (current: {{ $values.C | printf \"%.2f\" }}). Consider adjusting rate limits or investigating traffic patterns."
+        labels:
+          severity: warning
+          service: facilitator
+          team: platform
