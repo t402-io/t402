@@ -104,20 +104,20 @@ go install github.com/t402-io/t402/go/cmd/t402@v1.5.0
 t402 --help
 ```
 
-### Java (v1.0.0)
+### Java (v1.1.0)
 
 ```xml
 <dependency>
   <groupId>io.t402</groupId>
   <artifactId>t402</artifactId>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
 </dependency>
 ```
 
 Or with Gradle:
 
 ```groovy
-implementation 'io.t402:t402:1.0.0'
+implementation 'io.t402:t402:1.1.0'
 ```
 
 </details>
@@ -221,7 +221,7 @@ Legend: ✅ Complete | ⚠️ Partial | ❌ Not Available
 | TypeScript | v2.0.0 | 2026-01-16 | [CHANGELOG](typescript/CHANGELOG.md) |
 | Python | v1.6.1 | 2026-01-16 | [CHANGELOG](python/CHANGELOG.md) |
 | Go | v1.5.0 | 2026-01-16 | [CHANGELOG](go/CHANGELOG.md) |
-| Java | v1.0.0 | 2026-01-16 | [CHANGELOG](java/CHANGELOG.md) |
+| Java | v1.1.0 | 2026-01-16 | [CHANGELOG](java/CHANGELOG.md) |
 
 ## Ecosystem
 
