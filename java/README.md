@@ -14,21 +14,42 @@ Java implementation of the [t402 Payment Protocol](https://t402.io).
 <dependency>
     <groupId>io.t402</groupId>
     <artifactId>t402</artifactId>
-    <version>1.0.0</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
 **Gradle:**
 ```groovy
-implementation 'io.t402:t402:1.0.0'
+implementation 'io.t402:t402:2.0.0'
 ```
 
 ## Features
 
-- **EVM Support**: EIP-3009 TransferWithAuthorization signing with Web3j
-- **Spring Boot**: Auto-configuration for Spring Boot 3.x applications
+### Multi-Chain Support
+- **EVM**: EIP-3009 TransferWithAuthorization with Web3j
+- **Solana (SVM)**: Ed25519 signing with Base58 encoding
+- **TON**: Ed25519 signing with Base64 encoding
+- **TRON**: ECDSA secp256k1 with Base58Check encoding
+
+### ERC-4337 Account Abstraction
+- UserOperation builder and submission
+- Bundler client integration
+- Paymaster support for gas sponsorship
+
+### USDT0 Cross-Chain Bridge
+- LayerZero OFT bridging
+- Message tracking via LayerZero Scan
+- Multi-chain USDT0 support
+
+### WDK Integration
+- BIP-39 seed phrase derivation
+- Tether WDK compatible
+- Multi-chain wallet support
+
+### Additional Features
+- **Spring Boot**: Auto-configuration for Spring Boot 3.x
 - **Servlet Filter**: Jakarta Servlet filter for payment-protected endpoints
-- **Facilitator Client**: Built-in client for payment verification and settlement
+- **CLI Tool**: Command-line interface for verification and settlement
 
 ## Quick Start
 
@@ -140,14 +161,40 @@ String signature = signer.sign(payload);
 
 ## Supported Networks
 
+### EVM Chains (EIP-155)
+
 | Network | Chain ID | CAIP-2 Identifier |
 |---------|----------|-------------------|
-| Ethereum Mainnet | 1 | `eip155:1` |
+| Ethereum | 1 | `eip155:1` |
 | Base | 8453 | `eip155:8453` |
-| Base Sepolia | 84532 | `eip155:84532` |
-| Arbitrum One | 42161 | `eip155:42161` |
+| Arbitrum | 42161 | `eip155:42161` |
 | Optimism | 10 | `eip155:10` |
 | Polygon | 137 | `eip155:137` |
+| BSC | 56 | `eip155:56` |
+| Avalanche | 43114 | `eip155:43114` |
+| Ink | 57073 | `eip155:57073` |
+
+### Solana (SVM)
+
+| Network | CAIP-2 Identifier |
+|---------|-------------------|
+| Mainnet | `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` |
+| Devnet | `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` |
+
+### TON
+
+| Network | CAIP-2 Identifier |
+|---------|-------------------|
+| Mainnet | `ton:mainnet` |
+| Testnet | `ton:testnet` |
+
+### TRON
+
+| Network | CAIP-2 Identifier |
+|---------|-------------------|
+| Mainnet | `tron:mainnet` |
+| Nile | `tron:nile` |
+| Shasta | `tron:shasta` |
 
 ## Payment Flow
 
@@ -184,7 +231,37 @@ sequenceDiagram
 | Class | Description |
 |-------|-------------|
 | `CryptoSigner` | Interface for signing payment payloads |
-| `EvmSigner` | EIP-3009 signing implementation using Web3j |
+| `EvmSigner` | EIP-3009 signing for EVM chains |
+| `SvmSigner` | Ed25519 signing for Solana |
+| `TonSigner` | Ed25519 signing for TON |
+| `TronSigner` | ECDSA secp256k1 signing for TRON |
+
+### ERC-4337 Classes
+
+| Class | Description |
+|-------|-------------|
+| `UserOperation` | ERC-4337 v0.7 UserOperation structure |
+| `BundlerClient` | Bundler JSON-RPC client |
+| `PaymasterClient` | Paymaster integration |
+| `GasEstimate` | Gas estimation types |
+| `PaymasterData` | Paymaster data encoding |
+
+### Bridge Classes
+
+| Class | Description |
+|-------|-------------|
+| `Usdt0Bridge` | LayerZero OFT bridge client |
+| `LayerZeroScanClient` | Message tracking API |
+| `BridgeConstants` | Chain endpoints and addresses |
+| `BridgeSigner` | Interface for bridge transactions |
+
+### WDK Classes
+
+| Class | Description |
+|-------|-------------|
+| `WDKSigner` | BIP-39 seed phrase wallet |
+| `WDKChains` | Chain configuration |
+| `WDKTypes` | Configuration and balance types |
 
 ### Spring Boot
 
