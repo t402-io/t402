@@ -1,6 +1,9 @@
 # t402 Python
 
-Python package for the t402 payments protocol.
+Python SDK for the T402 HTTP-native stablecoin payments protocol.
+
+[![PyPI version](https://badge.fury.io/py/t402.svg)](https://pypi.org/project/t402/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 
 ## Installation
 
@@ -11,14 +14,14 @@ pip install t402
 uv add t402
 ```
 
-## Overview
+## Features
 
-The t402 package provides the core building blocks for implementing the t402 Payment Protocol in Python. It's designed to be used by:
-
-- FastAPI middleware for accepting payments
-- Flask middleware for accepting payments
-- httpx client for paying resources
-- requests client for paying resources
+- **Multi-Chain Support**: EVM (Ethereum, Base, Polygon, etc.), TON, TRON, Solana
+- **Server Middleware**: FastAPI and Flask integrations
+- **Client Libraries**: httpx and requests adapters
+- **ERC-4337 Account Abstraction**: Gasless payments with smart accounts
+- **USDT0 Cross-Chain Bridge**: LayerZero-powered bridging
+- **WDK Integration**: Tether Wallet Development Kit support
 
 ## FastAPI Integration
 
@@ -218,3 +221,191 @@ async def foo(req: request: Request):
 ```
 
 For more examples and advanced usage patterns, check out our [examples directory](https://github.com/t402-io/t402/tree/main/examples/python).
+
+## Multi-Chain Support
+
+### TON Network
+
+```python
+from t402 import (
+    TON_MAINNET,
+    TON_TESTNET,
+    validate_ton_address,
+    prepare_ton_payment_header,
+    get_ton_network_config,
+)
+
+# Validate address
+is_valid = validate_ton_address("EQD...")
+
+# Get network config
+config = get_ton_network_config(TON_MAINNET)
+```
+
+### TRON Network
+
+```python
+from t402 import (
+    TRON_MAINNET,
+    TRON_NILE,
+    validate_tron_address,
+    prepare_tron_payment_header,
+    get_tron_network_config,
+)
+
+# Validate address
+is_valid = validate_tron_address("T...")
+
+# Get network config
+config = get_tron_network_config(TRON_MAINNET)
+```
+
+## ERC-4337 Account Abstraction
+
+Gasless payments using smart accounts and paymasters:
+
+```python
+from t402 import (
+    create_bundler_client,
+    create_paymaster,
+    create_smart_account,
+    SafeAccountConfig,
+)
+
+# Create bundler client
+bundler = create_bundler_client(
+    bundler_type="pimlico",
+    api_key="your_api_key",
+    chain_id=8453  # Base
+)
+
+# Create paymaster for sponsored transactions
+paymaster = create_paymaster(
+    paymaster_type="pimlico",
+    api_key="your_api_key",
+    chain_id=8453
+)
+
+# Create Safe smart account
+account = create_smart_account(
+    config=SafeAccountConfig(
+        owner_private_key="0x...",
+        chain_id=8453,
+    ),
+    bundler=bundler,
+    paymaster=paymaster,
+)
+```
+
+## USDT0 Cross-Chain Bridge
+
+Bridge USDT0 across chains using LayerZero:
+
+```python
+from t402 import (
+    create_usdt0_bridge,
+    create_cross_chain_payment_router,
+    get_bridgeable_chains,
+)
+
+# Check supported chains
+chains = get_bridgeable_chains()
+
+# Create bridge client
+bridge = create_usdt0_bridge(
+    private_key="0x...",
+    source_chain_id=1,  # Ethereum
+)
+
+# Get quote
+quote = await bridge.get_quote(
+    destination_chain_id=8453,  # Base
+    amount="1000000",  # 1 USDT0
+)
+
+# Execute bridge
+result = await bridge.bridge(
+    destination_chain_id=8453,
+    amount="1000000",
+    recipient="0x...",
+)
+```
+
+## WDK Integration
+
+Tether Wallet Development Kit support:
+
+```python
+from t402 import (
+    WDKSigner,
+    generate_seed_phrase,
+    WDKConfig,
+    get_wdk_usdt0_chains,
+)
+
+# Generate new wallet
+seed = generate_seed_phrase()
+
+# Create WDK signer
+signer = WDKSigner(
+    config=WDKConfig(
+        seed_phrase=seed,
+        chains=get_wdk_usdt0_chains(),
+    )
+)
+
+# Get address
+address = await signer.get_address(chain_id=8453)
+
+# Sign payment
+signature = await signer.sign_payment(
+    chain_id=8453,
+    amount="1000000",
+    recipient="0x...",
+)
+```
+
+## API Reference
+
+### Core Types
+
+| Type | Description |
+|------|-------------|
+| `PaymentRequirements` | Payment configuration |
+| `PaymentPayload` | Signed payment data |
+| `VerifyResponse` | Verification result |
+| `SettleResponse` | Settlement result |
+
+### Network Utilities
+
+| Function | Description |
+|----------|-------------|
+| `is_evm_network(network)` | Check if EVM network |
+| `is_ton_network(network)` | Check if TON network |
+| `is_tron_network(network)` | Check if TRON network |
+| `get_network_type(network)` | Get network type string |
+
+### Facilitator Client
+
+```python
+from t402 import FacilitatorClient, FacilitatorConfig
+
+client = FacilitatorClient(FacilitatorConfig(
+    url="https://facilitator.t402.io"
+))
+
+# Verify payment
+result = await client.verify(payload, requirements)
+
+# Settle payment
+result = await client.settle(payload, requirements)
+```
+
+## Requirements
+
+- Python 3.10+
+- pip or uv package manager
+
+## Documentation
+
+Full documentation available at [docs.t402.io](https://docs.t402.io/sdks/python)

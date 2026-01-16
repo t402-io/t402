@@ -8,72 +8,251 @@ The T402 Python SDK provides comprehensive support for HTTP-native stablecoin pa
 pip install t402
 ```
 
+## Features
+
+- **Multi-Chain Support**: EVM, TON, TRON, Solana
+- **Server Middleware**: FastAPI and Flask integrations
+- **Client Libraries**: httpx and requests adapters
+- **ERC-4337**: Gasless payments with smart accounts
+- **USDT0 Bridge**: LayerZero cross-chain bridging
+- **WDK**: Tether Wallet Development Kit
+
 ## Quick Start
 
+### Server (FastAPI)
+
 ```python
-from t402.client import T402Client
-from t402.evm import create_evm_signer
+from fastapi import FastAPI
+from t402.fastapi.middleware import require_payment
 
-# Create client
-client = T402Client()
+app = FastAPI()
 
-# Register signer
-signer = create_evm_signer(private_key="0x...")
-client.register("eip155:8453", signer)
+app.middleware("http")(
+    require_payment(
+        price="0.01",
+        pay_to_address="0x209693Bc6afc0C5328bA36FaF03C514EF312287C"
+    )
+)
 
-# Make request
-response = await client.fetch(url)
+@app.get("/")
+async def root():
+    return {"message": "Premium content!"}
+```
+
+### Client (httpx)
+
+```python
+from eth_account import Account
+from t402.clients.httpx import t402HttpxClient
+
+account = Account.from_key("your_private_key")
+
+async with t402HttpxClient(account=account) as client:
+    response = await client.get("https://api.example.com/protected")
+    print(await response.aread())
 ```
 
 ## Modules
 
 | Module | Description |
 |--------|-------------|
-| `t402.core` | Protocol types and utilities |
-| `t402.evm` | EVM mechanism |
-| `t402.ton` | TON mechanism |
-| `t402.tron` | TRON mechanism |
-| `t402.flask` | Flask integration |
-| `t402.fastapi` | FastAPI integration |
+| `t402` | Core types and utilities |
+| `t402.ton` | TON blockchain support |
+| `t402.tron` | TRON blockchain support |
+| `t402.erc4337` | ERC-4337 account abstraction |
+| `t402.bridge` | USDT0 cross-chain bridge |
+| `t402.wdk` | Tether WDK integration |
+| `t402.fastapi` | FastAPI middleware |
+| `t402.flask` | Flask middleware |
+| `t402.clients.httpx` | httpx client adapter |
+| `t402.clients.requests` | requests adapter |
 
-## Flask Integration
+## Server Integrations
 
-```python
-from flask import Flask
-from t402.flask import create_paywall
-
-app = Flask(__name__)
-
-paywall = create_paywall(
-    routes={
-        "GET /api/premium": {
-            "scheme": "exact",
-            "network": "eip155:8453",
-            "price": "$0.01",
-            "pay_to": "0x..."
-        }
-    },
-    facilitator_url="https://facilitator.t402.io"
-)
-app.register_blueprint(paywall)
-```
-
-## FastAPI Integration
+### FastAPI
 
 ```python
 from fastapi import FastAPI
-from t402.fastapi import PaymentMiddleware
+from t402.fastapi.middleware import require_payment
 
 app = FastAPI()
 
-app.add_middleware(
-    PaymentMiddleware,
-    config={ ... },
-    facilitator_url="https://facilitator.t402.io"
+# Protect all routes
+app.middleware("http")(
+    require_payment(
+        price="0.01",
+        pay_to_address="0x..."
+    )
+)
+
+# Protect specific routes
+app.middleware("http")(
+    require_payment(
+        price="0.001",
+        pay_to_address="0x...",
+        path=["/api/premium", "/api/exclusive"]
+    )
+)
+```
+
+### Flask
+
+```python
+from flask import Flask
+from t402.flask.middleware import PaymentMiddleware
+
+app = Flask(__name__)
+payment = PaymentMiddleware(app)
+
+# Protect all routes
+payment.add(
+    price="$0.01",
+    pay_to_address="0x..."
+)
+
+# Protect specific routes
+payment.add(
+    path="/api/premium",
+    price="$0.001",
+    pay_to_address="0x..."
+)
+```
+
+## Client Integrations
+
+### httpx (Async)
+
+```python
+from eth_account import Account
+from t402.clients.httpx import t402HttpxClient
+
+account = Account.from_key("0x...")
+
+async with t402HttpxClient(account=account) as client:
+    response = await client.get("https://api.example.com/protected")
+```
+
+### requests (Sync)
+
+```python
+from eth_account import Account
+from t402.clients.requests import t402_requests
+
+account = Account.from_key("0x...")
+session = t402_requests(account)
+
+response = session.get("https://api.example.com/protected")
+```
+
+## Multi-Chain Support
+
+### TON
+
+```python
+from t402 import (
+    TON_MAINNET,
+    TON_TESTNET,
+    validate_ton_address,
+    get_ton_network_config,
+)
+
+config = get_ton_network_config(TON_MAINNET)
+is_valid = validate_ton_address("EQD...")
+```
+
+### TRON
+
+```python
+from t402 import (
+    TRON_MAINNET,
+    TRON_NILE,
+    validate_tron_address,
+    get_tron_network_config,
+)
+
+config = get_tron_network_config(TRON_MAINNET)
+is_valid = validate_tron_address("T...")
+```
+
+## ERC-4337 Account Abstraction
+
+Gasless payments using smart accounts:
+
+```python
+from t402 import (
+    create_bundler_client,
+    create_paymaster,
+    create_smart_account,
+    SafeAccountConfig,
+)
+
+# Create bundler
+bundler = create_bundler_client(
+    bundler_type="pimlico",
+    api_key="your_api_key",
+    chain_id=8453
+)
+
+# Create paymaster for sponsored txs
+paymaster = create_paymaster(
+    paymaster_type="pimlico",
+    api_key="your_api_key",
+    chain_id=8453
+)
+
+# Create Safe smart account
+account = create_smart_account(
+    config=SafeAccountConfig(
+        owner_private_key="0x...",
+        chain_id=8453,
+    ),
+    bundler=bundler,
+    paymaster=paymaster,
+)
+```
+
+## USDT0 Cross-Chain Bridge
+
+```python
+from t402 import create_usdt0_bridge, get_bridgeable_chains
+
+# Check supported chains
+chains = get_bridgeable_chains()
+
+# Create bridge client
+bridge = create_usdt0_bridge(
+    private_key="0x...",
+    source_chain_id=1,  # Ethereum
+)
+
+# Bridge USDT0
+result = await bridge.bridge(
+    destination_chain_id=8453,  # Base
+    amount="1000000",  # 1 USDT0
+    recipient="0x...",
+)
+```
+
+## WDK Integration
+
+```python
+from t402 import WDKSigner, generate_seed_phrase, WDKConfig
+
+# Generate wallet
+seed = generate_seed_phrase()
+
+# Create signer
+signer = WDKSigner(config=WDKConfig(seed_phrase=seed))
+
+# Sign payment
+signature = await signer.sign_payment(
+    chain_id=8453,
+    amount="1000000",
+    recipient="0x...",
 )
 ```
 
 ## Requirements
 
-- Python 3.9+
+- Python 3.10+
 - pip or uv package manager
