@@ -8,7 +8,57 @@ The T402 Go SDK provides comprehensive support for HTTP-native stablecoin paymen
 go get github.com/t402-io/t402/go@latest
 ```
 
+## CLI Tool
+
+Install the CLI for quick operations:
+
+```bash
+go install github.com/t402-io/t402/go/cmd/t402@latest
+```
+
+### CLI Commands
+
+```bash
+# Verify a payment
+t402 verify <base64-payload>
+
+# Settle a payment
+t402 settle <base64-payload>
+
+# List supported networks
+t402 supported
+
+# Encode JSON to base64
+t402 encode payment.json
+
+# Decode base64 to JSON
+t402 decode <base64-string>
+
+# Show network info
+t402 info eip155:8453
+
+# Show version
+t402 version
+```
+
+### CLI Flags
+
+```bash
+-f, --facilitator URL    Facilitator URL (default: https://facilitator.t402.io)
+-o, --output FORMAT      Output format: json, text (default: text)
+```
+
+## Features
+
+- **Multi-Chain**: EVM, TON, TRON, Solana support
+- **Server**: Gin middleware for payment protection
+- **Client**: HTTP client with automatic 402 handling
+- **Facilitator**: Full facilitator implementation
+- **CLI**: Command-line tools for testing and debugging
+
 ## Quick Start
+
+### Client
 
 ```go
 package main
@@ -26,29 +76,18 @@ func main() {
     evmScheme := client.NewExactEvmScheme(privateKey)
     c.Register("eip155:8453", evmScheme)
 
-    // Make request
+    // Make request - 402 handled automatically
     resp, err := c.Fetch("https://api.example.com/premium")
 }
 ```
 
-## Modules
-
-| Module | Description |
-|--------|-------------|
-| `go` | Core client and server |
-| `go/mechanisms/evm` | EVM mechanism |
-| `go/mechanisms/ton` | TON mechanism |
-| `go/mechanisms/tron` | TRON mechanism |
-| `go/http/gin` | Gin middleware |
-
-## Gin Middleware
+### Server
 
 ```go
 package main
 
 import (
     "github.com/gin-gonic/gin"
-    t402 "github.com/t402-io/t402/go"
     t402gin "github.com/t402-io/t402/go/http/gin"
 )
 
@@ -56,7 +95,7 @@ func main() {
     r := gin.Default()
 
     r.Use(t402gin.PaymentMiddleware(t402gin.Config{
-        Routes: map[string]t402.PaymentRequirements{
+        Routes: map[string]t402gin.RouteConfig{
             "GET /api/premium": {
                 Scheme:  "exact",
                 Network: "eip155:8453",
@@ -72,6 +111,106 @@ func main() {
     })
 
     r.Run(":3000")
+}
+```
+
+## Modules
+
+| Module | Description |
+|--------|-------------|
+| `go` | Core client, server, facilitator |
+| `go/mechanisms/evm` | EVM chains (Ethereum, Base, etc.) |
+| `go/mechanisms/ton` | TON blockchain |
+| `go/mechanisms/tron` | TRON blockchain |
+| `go/mechanisms/svm` | Solana blockchain |
+| `go/http` | HTTP client and server |
+| `go/http/gin` | Gin middleware |
+| `go/signers/evm` | EVM wallet signers |
+| `go/signers/svm` | Solana wallet signers |
+| `go/extensions/bazaar` | API discovery extension |
+| `go/cmd/t402` | CLI tool |
+
+## Multi-Chain Support
+
+### EVM Networks
+
+```go
+import "github.com/t402-io/t402/go/mechanisms/evm"
+
+// Get network config
+config := evm.NetworkConfigs["eip155:8453"] // Base
+```
+
+### TON Network
+
+```go
+import "github.com/t402-io/t402/go/mechanisms/ton"
+
+// Get network config
+config := ton.NetworkConfigs[ton.TonMainnetCAIP2]
+```
+
+### TRON Network
+
+```go
+import "github.com/t402-io/t402/go/mechanisms/tron"
+
+// Get network config
+config := tron.NetworkConfigs[tron.TronMainnetCAIP2]
+```
+
+### Solana
+
+```go
+import "github.com/t402-io/t402/go/mechanisms/svm"
+
+// Get network config
+config := svm.NetworkConfigs[svm.SolanaMainnetCAIP2]
+```
+
+## Facilitator Client
+
+```go
+import t402http "github.com/t402-io/t402/go/http"
+
+client := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
+    URL:     "https://facilitator.t402.io",
+    Timeout: 30 * time.Second,
+})
+
+// Verify payment
+result, err := client.Verify(ctx, payload, requirements)
+
+// Settle payment
+result, err := client.Settle(ctx, payload, requirements)
+
+// Get supported networks
+supported, err := client.GetSupported(ctx)
+```
+
+## Core Interfaces
+
+```go
+// Client interface
+type X402Client interface {
+    Register(network string, scheme SchemeNetworkClient)
+    CreatePaymentPayload(requirements PaymentRequirements) (*PaymentPayload, error)
+    Fetch(url string, opts ...RequestOption) (*http.Response, error)
+}
+
+// Server interface
+type X402ResourceServer interface {
+    Register(network string, scheme SchemeNetworkServer)
+    Verify(payload *PaymentPayload, req PaymentRequirements) (*VerifyResponse, error)
+    Settle(payload *PaymentPayload, req PaymentRequirements) (*SettleResponse, error)
+}
+
+// Facilitator interface
+type X402Facilitator interface {
+    Register(network string, scheme SchemeNetworkFacilitator)
+    Verify(payload *PaymentPayload, req PaymentRequirements) (*VerifyResponse, error)
+    Settle(payload *PaymentPayload, req PaymentRequirements) (*SettleResponse, error)
+    GetSupported() *SupportedResponse
 }
 ```
 
