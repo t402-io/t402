@@ -1,6 +1,8 @@
 # Java SDK
 
-The T402 Java SDK provides a complete implementation of the t402 payment protocol for Java applications, with first-class support for Spring Boot.
+The T402 Java SDK provides a complete implementation of the t402 payment protocol for Java applications, with first-class support for Spring Boot and multi-chain payments.
+
+[![Maven Central](https://img.shields.io/maven-central/v/io.t402/t402?label=maven%20central)](https://central.sonatype.com/artifact/io.t402/t402)
 
 ## Installation
 
@@ -31,8 +33,14 @@ implementation 'io.t402:t402:1.0.0'
 | Core Server | ✅ |
 | Facilitator Client | ✅ |
 | EVM Mechanism | ✅ |
+| SVM Mechanism (Solana) | ✅ |
+| TON Mechanism | ✅ |
+| TRON Mechanism | ✅ |
+| ERC-4337 Account Abstraction | ✅ |
+| USDT0 Cross-Chain Bridge | ✅ |
+| WDK Integration | ✅ |
+| CLI Tool | ✅ |
 | Spring Boot Integration | ✅ |
-| Servlet Filter | ✅ |
 
 ## Quick Start
 
@@ -94,15 +102,16 @@ registration.addMappingForUrlPatterns(
 );
 ```
 
-## Client Usage
+## Multi-Chain Signers
 
-### EVM Payments
+The Java SDK supports multiple blockchain networks with dedicated signers.
 
-The `EvmSigner` class provides EIP-3009 TransferWithAuthorization signing:
+### EVM Signer
+
+EIP-3009 TransferWithAuthorization signing for Ethereum and EVM-compatible chains:
 
 ```java
 import io.t402.crypto.EvmSigner;
-import io.t402.client.T402HttpClient;
 
 // Create EVM signer for USDC on Base
 EvmSigner signer = EvmSigner.fromPrivateKey(
@@ -113,7 +122,224 @@ EvmSigner signer = EvmSigner.fromPrivateKey(
     "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"       // USDC address
 );
 
-// Create HTTP client
+// Sign a payment
+String signature = signer.sign(paymentPayload);
+```
+
+### SVM Signer (Solana)
+
+Ed25519 signing with Base58 encoding for Solana:
+
+```java
+import io.t402.crypto.SvmSigner;
+
+// Create from private key bytes
+SvmSigner signer = new SvmSigner(privateKeyBytes);
+
+// Or from Base58-encoded private key
+SvmSigner signer = SvmSigner.fromBase58("YourBase58PrivateKey");
+
+// Get public key (Base58)
+String publicKey = signer.getPublicKey();
+
+// Sign transaction
+byte[] signature = signer.sign(transactionBytes);
+```
+
+### TON Signer
+
+Ed25519 signing with Base64 encoding for TON:
+
+```java
+import io.t402.crypto.TonSigner;
+
+// Create from seed bytes
+TonSigner signer = new TonSigner(seedBytes);
+
+// Or from hex-encoded seed
+TonSigner signer = TonSigner.fromHex("YourHexSeed");
+
+// Get public key (hex)
+String publicKey = signer.getPublicKey();
+
+// Sign message
+byte[] signature = signer.sign(messageBytes);
+```
+
+### TRON Signer
+
+ECDSA secp256k1 signing with Base58Check encoding for TRON:
+
+```java
+import io.t402.crypto.TronSigner;
+
+// Create from private key
+TronSigner signer = new TronSigner(privateKeyBytes);
+
+// Or from hex-encoded private key
+TronSigner signer = TronSigner.fromHex("YourHexPrivateKey");
+
+// Get TRON address (T...)
+String address = signer.getAddress();
+
+// Sign transaction
+byte[] signature = signer.sign(transactionBytes);
+```
+
+## ERC-4337 Account Abstraction
+
+The SDK includes full support for ERC-4337 gasless transactions.
+
+### UserOperation
+
+```java
+import io.t402.erc4337.UserOperation;
+
+UserOperation userOp = new UserOperation();
+userOp.setSender("0xSmartAccountAddress");
+userOp.setNonce(BigInteger.ZERO);
+userOp.setCallData(callData);
+userOp.setCallGasLimit(BigInteger.valueOf(100000));
+userOp.setVerificationGasLimit(BigInteger.valueOf(100000));
+userOp.setPreVerificationGas(BigInteger.valueOf(50000));
+userOp.setMaxFeePerGas(maxFeePerGas);
+userOp.setMaxPriorityFeePerGas(maxPriorityFeePerGas);
+```
+
+### Bundler Client
+
+```java
+import io.t402.erc4337.BundlerClient;
+
+BundlerClient bundler = new BundlerClient("https://bundler.example.com");
+
+// Estimate gas
+GasEstimate estimate = bundler.estimateUserOperationGas(userOp, entryPoint);
+
+// Submit UserOperation
+String userOpHash = bundler.sendUserOperation(userOp, entryPoint);
+
+// Get receipt
+UserOperationReceipt receipt = bundler.getUserOperationReceipt(userOpHash);
+```
+
+### Paymaster Client
+
+```java
+import io.t402.erc4337.PaymasterClient;
+
+PaymasterClient paymaster = new PaymasterClient("https://paymaster.example.com");
+
+// Get paymaster data for gas sponsorship
+PaymasterData data = paymaster.getPaymasterData(userOp, entryPoint);
+
+// Apply to UserOperation
+userOp.setPaymasterAndData(data.getPaymasterAndData());
+```
+
+## USDT0 Cross-Chain Bridge
+
+Bridge USDT0 between chains using LayerZero.
+
+```java
+import io.t402.bridge.Usdt0Bridge;
+import io.t402.bridge.BridgeTypes.*;
+
+// Create bridge client
+Usdt0Bridge bridge = new Usdt0Bridge();
+
+// Get quote for bridging
+BridgeQuote quote = bridge.getQuote(
+    "eip155:1",        // Source chain (Ethereum)
+    "eip155:42161",    // Destination chain (Arbitrum)
+    "1000000000",      // Amount (1000 USDT0)
+    "0xRecipient"      // Recipient address
+);
+
+// Execute bridge with signer
+BridgeResult result = bridge.execute(quote, signer);
+
+// Track message status
+LayerZeroScanClient lzScan = new LayerZeroScanClient();
+MessageStatus status = lzScan.getMessageStatus(result.getMessageHash());
+```
+
+### Supported Bridge Routes
+
+| Source | Destination | Status |
+|--------|-------------|--------|
+| Ethereum | Arbitrum | ✅ |
+| Ethereum | Ink | ✅ |
+| Ethereum | Berachain | ✅ |
+| Ethereum | Unichain | ✅ |
+| Arbitrum | Ethereum | ✅ |
+| Arbitrum | Ink | ✅ |
+
+## WDK Integration
+
+Integration with Tether Wallet Development Kit.
+
+```java
+import io.t402.wdk.WDKSigner;
+import io.t402.wdk.WDKChains;
+import io.t402.wdk.WDKTypes.*;
+
+// Create signer from BIP-39 mnemonic
+WDKSigner signer = WDKSigner.fromMnemonic(
+    "your twelve word mnemonic phrase here..."
+);
+
+// Get chain configuration
+ChainConfig config = WDKChains.getConfig("eip155:8453");
+
+// Get token address
+String usdtAddress = WDKChains.getTokenAddress("eip155:8453", "USDT");
+```
+
+## CLI Tool
+
+The SDK includes a command-line interface.
+
+```bash
+# Run CLI via Maven
+mvn exec:java -Dexec.mainClass="io.t402.cli.T402Cli" -Dexec.args="--help"
+
+# Or build and run
+java -jar t402-1.0.0.jar --help
+```
+
+### Available Commands
+
+| Command | Description |
+|---------|-------------|
+| `verify` | Verify a payment payload |
+| `settle` | Settle a verified payment |
+| `supported` | List supported networks and schemes |
+| `encode` | Encode a payment payload |
+| `decode` | Decode a payment payload |
+| `info` | Show SDK version and info |
+
+### Examples
+
+```bash
+# Verify a payment
+t402 verify --payload '{"x-payment": "..."}' --facilitator https://facilitator.t402.io
+
+# List supported networks
+t402 supported --json
+
+# Decode payment header
+t402 decode --header "eyJ0NDAyVmVyc2lvbiI6..."
+```
+
+## Client Usage
+
+### Making Payment Requests
+
+```java
+import io.t402.client.T402HttpClient;
+
+// Create HTTP client with signer
 T402HttpClient client = new T402HttpClient(signer);
 
 // Make a payment request
@@ -121,46 +347,32 @@ BigInteger amount = BigInteger.valueOf(1_000_000); // 1 USDC
 HttpResponse<String> response = client.get(
     URI.create("https://api.example.com/premium"),
     amount,
-    "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-    "0xReceiverAddress"
+    "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",  // Asset
+    "0xReceiverAddress"                             // Pay to
 );
 ```
 
 ### Manual Signing
 
-For more control over the signing process:
-
 ```java
 import io.t402.crypto.EvmSigner;
-import org.web3j.crypto.Credentials;
-
-// Create credentials from private key
-Credentials credentials = Credentials.create("0xYourPrivateKey");
-
-// Create signer
-EvmSigner signer = new EvmSigner(
-    credentials,
-    8453,                                              // Chain ID
-    "USD Coin",                                        // Token name
-    "2",                                               // Version
-    "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"       // Token address
-);
 
 // Build authorization payload
 Map<String, Object> payload = new HashMap<>();
 payload.put("from", signer.getAddress());
 payload.put("to", "0xRecipientAddress");
-payload.put("value", "1000000");                       // Amount in atomic units
+payload.put("value", "1000000");
 payload.put("validAfter", "0");
 payload.put("validBefore", String.valueOf(System.currentTimeMillis() / 1000 + 3600));
-payload.put("nonce", "0x" + generateRandomNonce());
+payload.put("nonce", generateRandomNonce());
 
 // Sign with EIP-712
 String signature = signer.sign(payload);
-// Returns: 0x-prefixed hex signature (r || s || v)
 ```
 
 ## Supported Networks
+
+### EVM Networks
 
 | Network | Chain ID | CAIP-2 Identifier |
 |---------|----------|-------------------|
@@ -170,6 +382,21 @@ String signature = signer.sign(payload);
 | Arbitrum One | 42161 | `eip155:42161` |
 | Optimism | 10 | `eip155:10` |
 | Polygon | 137 | `eip155:137` |
+| Ink | 57073 | `eip155:57073` |
+| Berachain | 80094 | `eip155:80094` |
+| Unichain | 130 | `eip155:130` |
+
+### Other Networks
+
+| Network | Identifier |
+|---------|------------|
+| Solana Mainnet | `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` |
+| Solana Devnet | `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` |
+| TON Mainnet | `ton:mainnet` |
+| TON Testnet | `ton:testnet` |
+| TRON Mainnet | `tron:mainnet` |
+| TRON Nile | `tron:nile` |
+| TRON Shasta | `tron:shasta` |
 
 ## API Reference
 
@@ -187,7 +414,35 @@ String signature = signer.sign(payload);
 | Class | Description |
 |-------|-------------|
 | `CryptoSigner` | Interface for signing payment payloads |
-| `EvmSigner` | EIP-3009 signing implementation using Web3j |
+| `EvmSigner` | EIP-3009 signing for EVM chains |
+| `SvmSigner` | Ed25519 signing for Solana |
+| `TonSigner` | Ed25519 signing for TON |
+| `TronSigner` | ECDSA secp256k1 signing for TRON |
+
+### ERC-4337 Classes
+
+| Class | Description |
+|-------|-------------|
+| `UserOperation` | ERC-4337 v0.7 UserOperation structure |
+| `BundlerClient` | Bundler JSON-RPC client |
+| `PaymasterClient` | Paymaster integration |
+| `GasEstimate` | Gas estimation types |
+
+### Bridge Classes
+
+| Class | Description |
+|-------|-------------|
+| `Usdt0Bridge` | LayerZero OFT bridge client |
+| `LayerZeroScanClient` | Message tracking |
+| `BridgeConstants` | Chain endpoints and addresses |
+
+### WDK Classes
+
+| Class | Description |
+|-------|-------------|
+| `WDKSigner` | BIP-39 seed derivation signer |
+| `WDKChains` | Chain configuration |
+| `WDKTypes` | Configuration and payment types |
 
 ### Spring Boot
 
@@ -261,6 +516,7 @@ When payment is required but not provided:
 The SDK includes:
 - [Web3j](https://github.com/web3j/web3j) - Ethereum library for EIP-712 signing
 - [Jackson](https://github.com/FasterXML/jackson) - JSON processing
+- [TweetNaCl](https://github.com/AlicanAkkworlds/tweetnacl-java) - Ed25519 for Solana/TON
 - Spring Boot (optional) - Auto-configuration support
 
 ## Resources
@@ -268,3 +524,4 @@ The SDK includes:
 - [GitHub Repository](https://github.com/t402-io/t402/tree/main/java)
 - [Maven Central](https://central.sonatype.com/artifact/io.t402/t402)
 - [Changelog](https://github.com/t402-io/t402/blob/main/java/CHANGELOG.md)
+- [API Javadoc](https://javadoc.io/doc/io.t402/t402)
