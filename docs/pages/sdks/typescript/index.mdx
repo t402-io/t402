@@ -102,6 +102,232 @@ pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/tron
         └── @t402/wdk-multisig  Safe multi-sig wallets
 ```
 
+## Quick Start
+
+### Client (Make Payments)
+
+```typescript
+import { t402Client, wrapFetchWithPayment } from "@t402/fetch";
+import { registerExactEvmScheme } from "@t402/evm/exact/client";
+import { privateKeyToAccount } from "viem/accounts";
+
+// Create t402 client
+const client = new t402Client();
+
+// Register EVM payment mechanism
+registerExactEvmScheme(client, {
+  signer: privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`),
+});
+
+// Wrap fetch for automatic payment handling
+const fetchWithPayment = wrapFetchWithPayment(fetch, client);
+
+// Make request - 402 payments handled automatically
+const response = await fetchWithPayment("https://api.example.com/data");
+const data = await response.json();
+```
+
+### Server (Require Payments)
+
+```typescript
+import express from "express";
+import { paymentMiddleware, t402ResourceServer } from "@t402/express";
+import { ExactEvmScheme } from "@t402/evm/exact/server";
+
+const app = express();
+
+// Configure payment routes
+app.use(
+  paymentMiddleware(
+    {
+      "GET /api/data": {
+        accepts: [
+          {
+            scheme: "exact",
+            price: "$0.01",
+            network: "eip155:8453",
+            payTo: "0xYourAddress",
+          },
+        ],
+        description: "Premium API data",
+        mimeType: "application/json",
+      },
+    },
+    new t402ResourceServer(facilitatorClient)
+      .register("eip155:8453", new ExactEvmScheme()),
+  ),
+);
+
+// Protected endpoint
+app.get("/api/data", (req, res) => {
+  res.json({ message: "Premium content!" });
+});
+
+app.listen(3000);
+```
+
+## Gasless Payments (ERC-4337)
+
+Enable gasless payments using account abstraction:
+
+```typescript
+import {
+  SafeSmartAccount,
+  createBundlerClient,
+  createPaymaster,
+} from "@t402/evm/erc4337";
+import { privateKeyToAccount } from "viem/accounts";
+
+// Create Safe smart account
+const safeAccount = new SafeSmartAccount({
+  owner: privateKeyToAccount(ownerPrivateKey),
+  chainId: 8453, // Base
+});
+
+// Create bundler and paymaster clients
+const bundler = createBundlerClient({
+  provider: "pimlico",
+  apiKey: process.env.PIMLICO_API_KEY,
+  chainId: 8453,
+});
+
+const paymaster = createPaymaster({
+  provider: "pimlico",
+  apiKey: process.env.PIMLICO_API_KEY,
+  chainId: 8453,
+});
+
+// Build and send UserOperation
+const callData = safeAccount.encodeExecute(targetAddress, 0n, data);
+const userOp = await bundler.buildUserOperation({
+  sender: smartAccountAddress,
+  callData,
+});
+
+// Sponsor with paymaster
+const sponsoredOp = await paymaster.sponsor(userOp);
+
+// Send UserOperation
+const hash = await bundler.sendUserOperation({
+  ...sponsoredOp,
+  signature: await safeAccount.signUserOp(sponsoredOp),
+});
+
+// Wait for receipt
+const receipt = await bundler.waitForReceipt(hash);
+```
+
+## Cross-Chain Bridge (USDT0)
+
+Bridge USDT0 between chains using LayerZero:
+
+```typescript
+import { Usdt0Bridge, LayerZeroScanClient } from "@t402/evm";
+
+// Create bridge client
+const bridge = new Usdt0Bridge(signer, "arbitrum");
+
+// Get quote
+const quote = await bridge.quote({
+  fromChain: "arbitrum",
+  toChain: "ethereum",
+  amount: 100_000000n, // 100 USDT0
+  recipient: "0xRecipientAddress",
+});
+
+console.log(`Fee: ${quote.nativeFee}`);
+
+// Execute bridge
+const result = await bridge.send({ ...quote });
+console.log(`Message GUID: ${result.messageGuid}`);
+
+// Track status
+const scanClient = new LayerZeroScanClient();
+await scanClient.waitForDelivery(result.messageGuid);
+console.log("Bridge complete!");
+```
+
+## MCP Server (AI Agents)
+
+Run an MCP server for AI agent payments:
+
+```bash
+# Install and run MCP server
+npx @t402/mcp
+```
+
+Configure in Claude Desktop:
+
+```json
+{
+  "mcpServers": {
+    "t402": {
+      "command": "npx",
+      "args": ["@t402/mcp"],
+      "env": {
+        "T402_DEMO_MODE": "true"
+      }
+    }
+  }
+}
+```
+
+See [MCP Integration](/sdks/typescript/mcp) for full documentation.
+
+## Supported Networks
+
+| Chain | Token | CAIP-2 Identifier |
+|-------|-------|-------------------|
+| Ethereum | USDT0 | `eip155:1` |
+| Base | USDT0 | `eip155:8453` |
+| Arbitrum | USDT0 | `eip155:42161` |
+| Optimism | USDT0 | `eip155:10` |
+| Ink | USDT0 | `eip155:57073` |
+| Berachain | USDT0 | `eip155:80094` |
+| Unichain | USDT0 | `eip155:130` |
+| Solana | USDC | `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` |
+| TON | USDT | `ton:mainnet` |
+| TRON | USDT | `tron:mainnet` |
+
+## Development
+
+```bash
+# Clone and install
+git clone https://github.com/t402-io/t402.git
+cd t402/typescript
+pnpm install
+
+# Build all packages
+pnpm build
+
+# Run tests
+pnpm test
+
+# Type checking
+pnpm typecheck
+
+# Lint
+pnpm lint
+```
+
+## Monorepo Structure
+
+```
+typescript/
+├── packages/
+│   ├── core/           # @t402/core
+│   ├── extensions/     # @t402/extensions
+│   ├── mechanisms/     # @t402/evm, @t402/svm, @t402/ton, @t402/tron
+│   ├── http/           # @t402/express, @t402/next, @t402/hono, etc.
+│   ├── wdk/            # @t402/wdk
+│   ├── wdk-gasless/    # @t402/wdk-gasless
+│   ├── wdk-bridge/     # @t402/wdk-bridge
+│   ├── wdk-multisig/   # @t402/wdk-multisig
+│   ├── mcp/            # @t402/mcp
+│   └── cli/            # @t402/cli
+└── pnpm-workspace.yaml
+```
+
 ## Requirements
 
 - Node.js 18+ or Bun 1.0+

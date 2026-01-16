@@ -252,6 +252,295 @@ signature = await signer.sign_payment(
 )
 ```
 
+## Advanced Client Usage
+
+### httpx Extensible Example
+
+Use t402 hooks with any httpx client:
+
+```python
+import httpx
+from eth_account import Account
+from t402.clients.httpx import t402_payment_hooks
+
+# Initialize account
+account = Account.from_key("your_private_key")
+
+# Create httpx client with t402 payment hooks
+async with httpx.AsyncClient(base_url="https://api.example.com") as client:
+    # Add payment hooks directly to client
+    client.event_hooks = t402_payment_hooks(account)
+
+    # Make request - payment handling is automatic
+    response = await client.get("/protected-endpoint")
+    print(await response.aread())
+```
+
+### requests Session Extensible Example
+
+Use t402 adapter with any requests session:
+
+```python
+import requests
+from eth_account import Account
+from t402.clients.requests import t402_http_adapter
+
+# Initialize account
+account = Account.from_key("your_private_key")
+
+# Create session and mount the t402 adapter
+session = requests.Session()
+adapter = t402_http_adapter(account)
+
+# Mount the adapter for both HTTP and HTTPS
+session.mount("http://", adapter)
+session.mount("https://", adapter)
+
+# Make request - payment handling is automatic
+response = session.get("https://api.example.com/protected-endpoint")
+print(response.content)
+```
+
+## Manual Server Integration
+
+If you're not using the FastAPI/Flask middleware, you can implement the t402 protocol manually:
+
+```python
+from typing import Annotated
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from t402.types import PaymentRequiredResponse, PaymentRequirements, PaymentPayload
+from t402.encoding import safe_base64_decode
+from t402 import FacilitatorClient, FacilitatorConfig
+import base64
+import json
+
+app = FastAPI()
+
+# Configure payment requirements
+payment_requirements = PaymentRequirements(
+    scheme="exact",
+    network="eip155:8453",
+    max_amount_required="10000",
+    asset="0x833589fCD6eDb6E08f4c7C32D4f71b54bda02913",
+    pay_to="0x209693Bc6afc0C5328bA36FaF03C514EF312287C",
+)
+
+# Create facilitator client
+facilitator = FacilitatorClient(FacilitatorConfig(
+    url="https://facilitator.t402.io"
+))
+
+@app.get("/protected")
+async def protected_endpoint(request: Request):
+    payment_required = PaymentRequiredResponse(
+        t402_version=2,
+        accepts=[payment_requirements],
+        error="",
+    )
+
+    # Check for payment header
+    payment_header = request.headers.get("X-PAYMENT", "")
+
+    if payment_header == "":
+        payment_required.error = "X-PAYMENT header not set"
+        return JSONResponse(
+            content=payment_required.model_dump(by_alias=True),
+            status_code=402,
+        )
+
+    # Decode and parse payment
+    try:
+        payment = PaymentPayload(**json.loads(safe_base64_decode(payment_header)))
+    except Exception as e:
+        payment_required.error = f"Invalid payment format: {str(e)}"
+        return JSONResponse(
+            content=payment_required.model_dump(by_alias=True),
+            status_code=402,
+        )
+
+    # Verify payment
+    verify_response = await facilitator.verify(payment, payment_requirements)
+    if not verify_response.is_valid:
+        payment_required.error = f"Invalid payment: {verify_response.invalid_reason}"
+        return JSONResponse(
+            content=payment_required.model_dump(by_alias=True),
+            status_code=402,
+        )
+
+    # Settle payment
+    settle_response = await facilitator.settle(payment, payment_requirements)
+    if not settle_response.success:
+        payment_required.error = f"Settlement failed: {settle_response.error_reason}"
+        return JSONResponse(
+            content=payment_required.model_dump(by_alias=True),
+            status_code=402,
+        )
+
+    # Return success with settlement header
+    response = JSONResponse(
+        content={"message": "Premium content!", "data": "..."},
+        status_code=200,
+    )
+    response.headers["X-PAYMENT-RESPONSE"] = base64.b64encode(
+        settle_response.model_dump_json().encode("utf-8")
+    ).decode("utf-8")
+
+    return response
+```
+
+## Error Handling
+
+### Client-Side Error Handling
+
+```python
+from t402.clients.httpx import t402HttpxClient
+from t402.exceptions import PaymentError, InsufficientFundsError
+
+account = Account.from_key("your_private_key")
+
+async with t402HttpxClient(account=account) as client:
+    try:
+        response = await client.get("https://api.example.com/protected")
+        data = await response.aread()
+    except InsufficientFundsError as e:
+        print(f"Not enough balance: {e}")
+    except PaymentError as e:
+        print(f"Payment failed: {e}")
+```
+
+### Server-Side Error Handling
+
+```python
+from t402.fastapi.middleware import require_payment, PaymentErrorHandler
+
+def custom_error_handler(request, error):
+    # Custom logging or metrics
+    logger.error(f"Payment error: {error}")
+    return JSONResponse(
+        content={"error": str(error)},
+        status_code=402
+    )
+
+app.middleware("http")(
+    require_payment(
+        price="0.01",
+        pay_to_address="0x...",
+        error_handler=custom_error_handler
+    )
+)
+```
+
+## Async Patterns
+
+### Concurrent Requests
+
+```python
+import asyncio
+from t402.clients.httpx import t402HttpxClient
+
+account = Account.from_key("your_private_key")
+
+async def fetch_multiple():
+    async with t402HttpxClient(account=account) as client:
+        urls = [
+            "https://api.example.com/data1",
+            "https://api.example.com/data2",
+            "https://api.example.com/data3",
+        ]
+
+        # Make concurrent requests
+        tasks = [client.get(url) for url in urls]
+        responses = await asyncio.gather(*tasks)
+
+        return [await r.aread() for r in responses]
+```
+
+### Connection Pooling
+
+```python
+from t402.clients.httpx import t402HttpxClient
+
+# Configure connection limits
+client = t402HttpxClient(
+    account=account,
+    limits=httpx.Limits(
+        max_connections=100,
+        max_keepalive_connections=20
+    )
+)
+```
+
+## Facilitator Client
+
+```python
+from t402 import FacilitatorClient, FacilitatorConfig
+
+client = FacilitatorClient(FacilitatorConfig(
+    url="https://facilitator.t402.io",
+    timeout=30.0,
+))
+
+# Get supported networks
+supported = await client.get_supported()
+for kind in supported.kinds:
+    print(f"Supported: {kind.network} - {kind.scheme}")
+
+# Verify payment
+result = await client.verify(payload, requirements)
+if result.is_valid:
+    print("Payment is valid")
+else:
+    print(f"Invalid: {result.invalid_reason}")
+
+# Settle payment
+result = await client.settle(payload, requirements)
+if result.success:
+    print(f"Transaction: {result.transaction}")
+else:
+    print(f"Failed: {result.error_reason}")
+```
+
+## API Reference
+
+### Core Types
+
+| Type | Description |
+|------|-------------|
+| `PaymentRequirements` | Payment configuration (scheme, network, amount, etc.) |
+| `PaymentPayload` | Signed payment data |
+| `VerifyResponse` | Verification result with `is_valid` flag |
+| `SettleResponse` | Settlement result with transaction hash |
+| `PaymentRequiredResponse` | 402 response body structure |
+
+### Network Utilities
+
+| Function | Description |
+|----------|-------------|
+| `is_evm_network(network)` | Check if network is EVM-compatible |
+| `is_ton_network(network)` | Check if network is TON |
+| `is_tron_network(network)` | Check if network is TRON |
+| `is_svm_network(network)` | Check if network is Solana |
+| `get_network_type(network)` | Get network type string |
+| `validate_ton_address(addr)` | Validate TON address format |
+| `validate_tron_address(addr)` | Validate TRON address format |
+| `validate_svm_address(addr)` | Validate Solana address format |
+
+### Configuration
+
+```python
+# FastAPI middleware options
+require_payment(
+    price="0.01",              # Price in USD (string or float)
+    pay_to_address="0x...",    # Recipient address
+    network="eip155:8453",     # Network identifier (default: Base)
+    scheme="exact",            # Payment scheme (default: exact)
+    path=None,                 # Path(s) to protect (None = all)
+    facilitator_url=None,      # Custom facilitator URL
+    error_handler=None,        # Custom error handler
+)
+```
+
 ## Requirements
 
 - Python 3.10+

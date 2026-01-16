@@ -1,0 +1,434 @@
+# Deployment Guide
+
+This guide covers deploying t402-enabled applications to production environments.
+
+import { Callout, Tabs } from 'nextra/components'
+
+## Pre-Deployment Checklist
+
+Before deploying to production, ensure you have:
+
+- [ ] Configured production wallet addresses
+- [ ] Set up monitoring and alerting
+- [ ] Tested payment flows on testnet
+- [ ] Configured appropriate timeouts
+- [ ] Set up error handling and logging
+- [ ] Reviewed security considerations
+- [ ] Configured backup facilitator (optional)
+
+## Server Deployment
+
+### Environment Variables
+
+<Tabs items={['Required', 'Optional']}>
+<Tabs.Tab>
+```bash
+# Required for all deployments
+T402_FACILITATOR_URL=https://facilitator.t402.io
+T402_PAY_TO=0xYourReceiverAddress
+T402_NETWORK=eip155:8453
+T402_SCHEME=exact
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```bash
+# Optional configuration
+T402_TIMEOUT=30000
+T402_MAX_RETRIES=3
+T402_ASSET=0x833589fCD6eDb6E08f4c7C32D4f71b54bda02913
+T402_TOKEN_NAME="USD Coin"
+T402_TOKEN_VERSION=2
+T402_LOG_LEVEL=info
+```
+</Tabs.Tab>
+</Tabs>
+
+### Docker Deployment
+
+```dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+
+COPY . .
+RUN npm run build
+
+# Health check endpoint
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD curl -f http://localhost:3000/health || exit 1
+
+EXPOSE 3000
+CMD ["npm", "start"]
+```
+
+```yaml
+# docker-compose.yml
+version: '3.8'
+services:
+  api:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - T402_FACILITATOR_URL=https://facilitator.t402.io
+      - T402_PAY_TO=${PAY_TO_ADDRESS}
+      - T402_NETWORK=eip155:8453
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+```
+
+### Kubernetes Deployment
+
+```yaml
+# deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: t402-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: t402-api
+  template:
+    metadata:
+      labels:
+        app: t402-api
+    spec:
+      containers:
+      - name: api
+        image: your-registry/t402-api:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: T402_FACILITATOR_URL
+          value: "https://facilitator.t402.io"
+        - name: T402_PAY_TO
+          valueFrom:
+            secretKeyRef:
+              name: t402-secrets
+              key: pay-to-address
+        - name: T402_NETWORK
+          value: "eip155:8453"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: t402-api
+spec:
+  selector:
+    app: t402-api
+  ports:
+  - port: 80
+    targetPort: 3000
+  type: ClusterIP
+```
+
+## Client Deployment
+
+### Secure Key Management
+
+<Callout type="warning">
+  Never hardcode private keys in source code or environment variables in client-side code.
+</Callout>
+
+**Server-side signing (recommended):**
+
+```typescript
+// Client requests signature from your backend
+const response = await fetch('/api/sign-payment', {
+  method: 'POST',
+  body: JSON.stringify({ amount, recipient }),
+});
+const { signature } = await response.json();
+```
+
+**Hardware wallet integration:**
+
+```typescript
+import { createWalletClient, custom } from 'viem';
+
+// Use browser wallet (MetaMask, etc.)
+const walletClient = createWalletClient({
+  transport: custom(window.ethereum),
+});
+```
+
+### Browser Considerations
+
+```typescript
+// Check wallet connection
+if (!window.ethereum) {
+  throw new Error('No wallet detected. Please install MetaMask.');
+}
+
+// Request account access
+const accounts = await window.ethereum.request({
+  method: 'eth_requestAccounts',
+});
+```
+
+## Monitoring
+
+### Health Checks
+
+```typescript
+// Express health check endpoint
+app.get('/health', async (req, res) => {
+  try {
+    // Check facilitator connectivity
+    const facilitatorHealth = await fetch(`${facilitatorUrl}/health`);
+
+    if (!facilitatorHealth.ok) {
+      return res.status(503).json({
+        status: 'unhealthy',
+        facilitator: 'unreachable',
+      });
+    }
+
+    res.json({
+      status: 'healthy',
+      facilitator: 'connected',
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    res.status(503).json({
+      status: 'unhealthy',
+      error: error.message,
+    });
+  }
+});
+```
+
+### Metrics
+
+Key metrics to track:
+
+| Metric | Description | Alert Threshold |
+|--------|-------------|-----------------|
+| `t402_payments_total` | Total payment attempts | - |
+| `t402_payments_success` | Successful payments | - |
+| `t402_payments_failed` | Failed payments | >5% failure rate |
+| `t402_verification_latency` | Time to verify payment | >5s p99 |
+| `t402_settlement_latency` | Time to settle payment | >30s p99 |
+| `t402_facilitator_errors` | Facilitator communication errors | >1% |
+
+```typescript
+// Prometheus metrics example
+import { Counter, Histogram } from 'prom-client';
+
+const paymentsTotal = new Counter({
+  name: 't402_payments_total',
+  help: 'Total payment attempts',
+  labelNames: ['status', 'network'],
+});
+
+const verificationLatency = new Histogram({
+  name: 't402_verification_latency_seconds',
+  help: 'Payment verification latency',
+  buckets: [0.1, 0.5, 1, 2, 5, 10],
+});
+```
+
+### Logging
+
+```typescript
+// Structured logging for payments
+logger.info('Payment received', {
+  transactionId: result.transaction,
+  payer: result.payer,
+  amount: requirements.amount,
+  network: requirements.network,
+  duration: verificationTime,
+});
+
+logger.error('Payment failed', {
+  error: error.message,
+  errorCode: error.code,
+  payer: payload.payer,
+  network: requirements.network,
+});
+```
+
+## Security Considerations
+
+### HTTPS
+
+Always use HTTPS in production:
+
+```nginx
+# nginx.conf
+server {
+    listen 443 ssl http2;
+    server_name api.example.com;
+
+    ssl_certificate /etc/ssl/certs/cert.pem;
+    ssl_certificate_key /etc/ssl/private/key.pem;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+### Rate Limiting
+
+```typescript
+import rateLimit from 'express-rate-limit';
+
+// Rate limit payment endpoints
+const paymentLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 100, // 100 requests per minute
+  message: 'Too many payment requests',
+});
+
+app.use('/api', paymentLimiter);
+```
+
+### Input Validation
+
+```typescript
+// Validate payment headers
+function validatePaymentHeader(header: string): boolean {
+  if (!header || header.length > 10000) {
+    return false;
+  }
+
+  try {
+    const decoded = Buffer.from(header, 'base64').toString('utf8');
+    const payload = JSON.parse(decoded);
+
+    // Validate required fields
+    if (!payload.t402Version || !payload.scheme || !payload.network) {
+      return false;
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+```
+
+## High Availability
+
+### Facilitator Failover
+
+```typescript
+const facilitators = [
+  'https://facilitator.t402.io',
+  'https://backup-facilitator.example.com',
+];
+
+async function verifyWithFailover(payload, requirements) {
+  for (const url of facilitators) {
+    try {
+      const client = new HttpFacilitatorClient(url);
+      return await client.verify(payload, requirements);
+    } catch (error) {
+      console.warn(`Facilitator ${url} failed, trying next...`);
+    }
+  }
+  throw new Error('All facilitators unavailable');
+}
+```
+
+### Circuit Breaker
+
+```typescript
+import CircuitBreaker from 'opossum';
+
+const breaker = new CircuitBreaker(verifyPayment, {
+  timeout: 10000, // 10 seconds
+  errorThresholdPercentage: 50,
+  resetTimeout: 30000, // 30 seconds
+});
+
+breaker.on('open', () => {
+  console.warn('Circuit breaker opened - facilitator may be down');
+});
+```
+
+## Performance Optimization
+
+### Connection Pooling
+
+```typescript
+// Reuse HTTP connections
+import { Agent } from 'https';
+
+const agent = new Agent({
+  keepAlive: true,
+  maxSockets: 100,
+  maxFreeSockets: 10,
+});
+```
+
+### Caching
+
+```typescript
+// Cache supported networks response
+import NodeCache from 'node-cache';
+
+const cache = new NodeCache({ stdTTL: 300 }); // 5 minutes
+
+async function getSupportedNetworks() {
+  const cached = cache.get('supported');
+  if (cached) return cached;
+
+  const supported = await facilitator.getSupported();
+  cache.set('supported', supported);
+  return supported;
+}
+```
+
+## Rollback Strategy
+
+1. **Version your deployments** - Use semantic versioning for releases
+2. **Blue-green deployment** - Keep previous version running during rollout
+3. **Feature flags** - Toggle payment features without redeployment
+4. **Database migrations** - Ensure backward compatibility
+
+```typescript
+// Feature flag for new payment scheme
+if (featureFlags.isEnabled('new-payment-scheme')) {
+  // New implementation
+} else {
+  // Fallback to old implementation
+}
+```
+
+## Next Steps
+
+- [Best Practices](/advanced/best-practices) - Development guidelines
+- [MCP Integration](/advanced/mcp) - AI agent configuration
+- [Gasless Payments](/advanced/gasless) - ERC-4337 setup
