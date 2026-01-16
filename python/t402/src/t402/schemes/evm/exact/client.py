@@ -8,14 +8,12 @@ from __future__ import annotations
 
 import secrets
 import time
-from typing import Any, Dict, Optional, Protocol, Union, runtime_checkable
+from typing import Any, Dict, Protocol, Union, runtime_checkable
 
 from t402.types import (
     PaymentRequirementsV2,
     T402_VERSION_V1,
-    T402_VERSION_V2,
 )
-from t402.schemes.interfaces import SchemeNetworkClient
 from t402.chains import get_chain_id
 
 

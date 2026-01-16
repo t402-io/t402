@@ -12,15 +12,11 @@ from t402.networks import is_ton_network, is_tron_network
 from t402.types import (
     Price,
     TokenAmount,
-    PaymentRequirements,
     PaymentRequirementsV1,
     PaymentRequirementsV2,
-    PaymentPayload,
     PaymentPayloadV1,
     PaymentPayloadV2,
     T402_VERSION,
-    T402_VERSION_V1,
-    T402_VERSION_V2,
 )
 
 
