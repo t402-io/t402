@@ -35,7 +35,7 @@ t402/
 | SDK | Version | Registry |
 |-----|---------|----------|
 | TypeScript | 2.0.0 | npm (@t402/*) |
-| Python | 1.6.0 | PyPI |
+| Python | 1.7.0 | PyPI |
 | Go | 1.5.0 | Go Modules |
 | Java | 1.1.0 | Maven Central |
 
