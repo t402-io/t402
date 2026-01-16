@@ -3,7 +3,7 @@
 [![npm](https://img.shields.io/npm/v/@t402/core?label=npm%20%40t402%2Fcore)](https://www.npmjs.com/package/@t402/core)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/t402-io/t402/blob/main/LICENSE)
 
-TypeScript implementation of the [t402 Payment Protocol](https://t402.io).
+> **Version 2.0.0** - TypeScript implementation of the [t402 Payment Protocol](https://t402.io).
 
 ## Installation
 

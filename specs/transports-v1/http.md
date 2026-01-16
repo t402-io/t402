@@ -1,5 +1,7 @@
 # Transport: HTTP
 
+> **DEPRECATED**: This is the v1 transport specification. For new implementations, please use [transports-v2/http.md](../transports-v2/http.md) instead.
+
 ## Summary
 
 The HTTP transport implements t402 payment flows over standard HTTP/HTTPS protocols. This is the original transport for t402 and leverages existing HTTP status codes and headers for payment required signaling and payment payload transmission.

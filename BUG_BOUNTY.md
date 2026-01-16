@@ -1,5 +1,7 @@
 # T402 Bug Bounty Program
 
+> *Last Updated: 2026-01-16*
+
 We invite security researchers to help us identify vulnerabilities in the T402 protocol. This program rewards responsible disclosure of security issues.
 
 ## Rewards
