@@ -80,6 +80,113 @@ function createMockPayload(overrides: Partial<PaymentPayload> = {}): PaymentPayl
 }
 
 describe("TRON Verification Edge Cases", () => {
+  describe("Payload Structure Validation", () => {
+    let facilitator: ExactTronFacilitator;
+    let mockSigner: FacilitatorTronSigner;
+
+    beforeEach(() => {
+      mockSigner = createMockSigner(VALID_FACILITATOR);
+      facilitator = new ExactTronFacilitator(mockSigner);
+    });
+
+    it("should reject empty payload object", async () => {
+      const requirements = createMockRequirements();
+      const payload = {
+        t402Version: 2,
+        accepted: {
+          scheme: "exact",
+          network: TRON_MAINNET_CAIP2,
+        },
+        payload: {},
+      } as never;
+
+      const result = await facilitator.verify(payload, requirements);
+
+      expect(result.isValid).toBe(false);
+      expect(result.invalidReason).toBe("invalid_payload_structure");
+      expect(result.payer).toBe("");
+    });
+
+    it("should reject null payload", async () => {
+      const requirements = createMockRequirements();
+      const payload = {
+        t402Version: 2,
+        accepted: {
+          scheme: "exact",
+          network: TRON_MAINNET_CAIP2,
+        },
+        payload: null,
+      } as never;
+
+      const result = await facilitator.verify(payload, requirements);
+
+      expect(result.isValid).toBe(false);
+      expect(result.invalidReason).toBe("invalid_payload_structure");
+    });
+
+    it("should reject payload missing authorization", async () => {
+      const requirements = createMockRequirements();
+      const payload = {
+        t402Version: 2,
+        accepted: {
+          scheme: "exact",
+          network: TRON_MAINNET_CAIP2,
+        },
+        payload: {
+          signedTransaction: "mock-signed-transaction-hex",
+        },
+      } as never;
+
+      const result = await facilitator.verify(payload, requirements);
+
+      expect(result.isValid).toBe(false);
+      expect(result.invalidReason).toBe("invalid_payload_structure");
+    });
+
+    it("should reject payload missing signedTransaction", async () => {
+      const requirements = createMockRequirements();
+      const payload = {
+        t402Version: 2,
+        accepted: {
+          scheme: "exact",
+          network: TRON_MAINNET_CAIP2,
+        },
+        payload: {
+          authorization: {
+            from: VALID_SENDER,
+            to: VALID_RECIPIENT,
+            contractAddress: USDT_ADDRESSES[TRON_MAINNET_CAIP2],
+            amount: "1000000",
+            expiration: Date.now() + 3600 * 1000,
+          },
+        },
+      } as never;
+
+      const result = await facilitator.verify(payload, requirements);
+
+      expect(result.isValid).toBe(false);
+      expect(result.invalidReason).toBe("invalid_payload_structure");
+    });
+
+    it("should reject settle with empty payload", async () => {
+      const requirements = createMockRequirements();
+      const payload = {
+        t402Version: 2,
+        accepted: {
+          scheme: "exact",
+          network: TRON_MAINNET_CAIP2,
+        },
+        payload: {},
+      } as never;
+
+      const result = await facilitator.settle(payload, requirements);
+
+      expect(result.success).toBe(false);
+      expect(result.errorReason).toBe("invalid_payload_structure");
+      expect(result.payer).toBe("");
+    });
+  });
+
   describe("Scheme and Network Matching", () => {
     let facilitator: ExactTronFacilitator;
     let mockSigner: FacilitatorTronSigner;
