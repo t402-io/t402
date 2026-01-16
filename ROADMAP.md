@@ -51,7 +51,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 | @t402/evm | 2.2.0 | EVM chains (EIP-3009, USDT0) |
 | @t402/svm | 2.0.0 | Solana (SPL tokens) |
 | @t402/ton | 2.1.0 | TON (USDT Jetton) |
-| @t402/tron | 1.0.0 | TRON (TRC-20 USDT) |
+| @t402/tron | 2.0.0 | TRON (TRC-20 USDT) |
 | @t402/wdk | 2.0.1 | Tether WDK integration |
 | @t402/wdk-gasless | 1.0.0 | ERC-4337 gasless payments |
 | @t402/wdk-bridge | 1.0.0 | LayerZero bridging |
@@ -73,8 +73,8 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 
 | SDK | Version | Status |
 |-----|---------|--------|
-| Go | 1.24.0 | Production |
-| Python | 1.4.0 | Production |
+| Go | 1.3.1 | Production |
+| Python | 1.5.3 | Production |
 | Java | 1.0.0-SNAPSHOT | Development |
 
 ---
@@ -278,9 +278,9 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 | TRON Mechanism | ✅ | ✅ | ✅ | ❌ |
 | ERC-4337 | ✅ | ✅ | ✅ | ❌ |
 | USDT0 Bridge | ✅ | ✅ | ⚠️ | ❌ |
-| WDK Integration | ✅ | ❌ | ✅ | ❌ |
-| MCP Server | ✅ | ❌ | ❌ | ❌ |
-| CLI Tool | ✅ | ❌ | ❌ | ❌ |
+| WDK Integration | ✅ | ✅ | ✅ | ❌ |
+| MCP Server | ✅ | ✅ | ✅ | ❌ |
+| CLI Tool | ✅ | ✅ | ✅ | ❌ |
 | HTTP Middleware | ✅ | ✅ | ✅ | ❌ |
 | React/Vue UI | ✅ | N/A | N/A | N/A |
 

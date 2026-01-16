@@ -19,7 +19,7 @@ import { paymentProxy, t402ResourceServer } from "@t402/next";
 import { HTTPFacilitatorClient } from "@t402/core/server";
 import { ExactEvmScheme } from "@t402/evm/exact/server";
 
-const facilitatorClient = new HTTPFacilitatorClient({ url: "https://facilitator.t402.org" });
+const facilitatorClient = new HTTPFacilitatorClient({ url: "https://facilitator.t402.io" });
 const resourceServer = new t402ResourceServer(facilitatorClient)
   .register("eip155:84532", new ExactEvmScheme());
 

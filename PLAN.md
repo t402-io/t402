@@ -26,8 +26,8 @@
 | TRON Mechanism | ✅ | ✅ | ✅ | ❌ |
 | ERC-4337 | ✅ | ✅ | ✅ | ❌ |
 | USDT0 Bridge | ✅ | ⚠️ Partial | ✅ | ❌ |
-| WDK Integration | ✅ | ✅ | ❌ | ❌ |
-| MCP Server | ✅ | ❌ | ❌ | ❌ |
+| WDK Integration | ✅ | ✅ | ✅ | ❌ |
+| MCP Server | ✅ | ✅ | ✅ | ❌ |
 | CLI Tool | ✅ | ✅ | ✅ | ❌ |
 | Framework Integration | Express/Hono/Next/Fastify | FastAPI/Flask | Gin | ❌ |
 

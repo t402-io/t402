@@ -19,7 +19,7 @@ import { HTTPFacilitatorClient } from "@t402/core/server";
 
 const app = new Hono();
 
-const facilitatorClient = new HTTPFacilitatorClient({ url: "https://facilitator.t402.org" });
+const facilitatorClient = new HTTPFacilitatorClient({ url: "https://facilitator.t402.io" });
 const resourceServer = new t402ResourceServer(facilitatorClient)
   .register("eip155:84532", new ExactEvmScheme());
 
