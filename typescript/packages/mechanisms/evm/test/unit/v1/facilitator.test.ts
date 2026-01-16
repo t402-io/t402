@@ -26,6 +26,96 @@ describe("ExactEvmSchemeV1", () => {
   });
 
   describe("verify", () => {
+    describe("payload structure validation", () => {
+      it("should reject empty payload object", async () => {
+        const facilitator = new ExactEvmSchemeV1(mockSigner);
+
+        const payload = {
+          t402Version: 1,
+          scheme: "exact",
+          network: "base-sepolia",
+          payload: {},
+        } as never;
+
+        const requirements: PaymentRequirementsV1 = {
+          scheme: "exact",
+          network: "base-sepolia",
+          asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+          maxAmountRequired: "100000",
+          payTo: "0x9876543210987654321098765432109876543210",
+          maxTimeoutSeconds: 3600,
+          extra: { name: "USDC", version: "2" },
+        };
+
+        const result = await facilitator.verify(payload, requirements as never);
+
+        expect(result.isValid).toBe(false);
+        expect(result.invalidReason).toBe("invalid_payload_structure");
+        expect(result.payer).toBeUndefined();
+      });
+
+      it("should reject null payload", async () => {
+        const facilitator = new ExactEvmSchemeV1(mockSigner);
+
+        const payload = {
+          t402Version: 1,
+          scheme: "exact",
+          network: "base-sepolia",
+          payload: null,
+        } as never;
+
+        const requirements: PaymentRequirementsV1 = {
+          scheme: "exact",
+          network: "base-sepolia",
+          asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+          maxAmountRequired: "100000",
+          payTo: "0x9876543210987654321098765432109876543210",
+          maxTimeoutSeconds: 3600,
+          extra: { name: "USDC", version: "2" },
+        };
+
+        const result = await facilitator.verify(payload, requirements as never);
+
+        expect(result.isValid).toBe(false);
+        expect(result.invalidReason).toBe("invalid_payload_structure");
+      });
+
+      it("should reject payload missing authorization.from", async () => {
+        const facilitator = new ExactEvmSchemeV1(mockSigner);
+
+        const payload = {
+          t402Version: 1,
+          scheme: "exact",
+          network: "base-sepolia",
+          payload: {
+            signature: "0xsig",
+            authorization: {
+              to: "0x9876543210987654321098765432109876543210",
+              value: "100000",
+              validAfter: "0",
+              validBefore: "999999999999",
+              nonce: "0x00",
+            },
+          },
+        } as never;
+
+        const requirements: PaymentRequirementsV1 = {
+          scheme: "exact",
+          network: "base-sepolia",
+          asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+          maxAmountRequired: "100000",
+          payTo: "0x9876543210987654321098765432109876543210",
+          maxTimeoutSeconds: 3600,
+          extra: { name: "USDC", version: "2" },
+        };
+
+        const result = await facilitator.verify(payload, requirements as never);
+
+        expect(result.isValid).toBe(false);
+        expect(result.invalidReason).toBe("invalid_payload_structure");
+      });
+    });
+
     it("should verify valid V1 payment payload", async () => {
       const facilitator = new ExactEvmSchemeV1(mockSigner);
 
@@ -248,6 +338,96 @@ describe("ExactEvmSchemeV1", () => {
   });
 
   describe("settle", () => {
+    describe("payload structure validation", () => {
+      it("should reject empty payload object", async () => {
+        const facilitator = new ExactEvmSchemeV1(mockSigner);
+
+        const payload = {
+          t402Version: 1,
+          scheme: "exact",
+          network: "base-sepolia",
+          payload: {},
+        } as never;
+
+        const requirements: PaymentRequirementsV1 = {
+          scheme: "exact",
+          network: "base-sepolia",
+          asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+          maxAmountRequired: "100000",
+          payTo: "0x9876543210987654321098765432109876543210",
+          maxTimeoutSeconds: 3600,
+          extra: { name: "USDC", version: "2" },
+        };
+
+        const result = await facilitator.settle(payload, requirements as never);
+
+        expect(result.success).toBe(false);
+        expect(result.errorReason).toBe("invalid_payload_structure");
+        expect(result.payer).toBeUndefined();
+      });
+
+      it("should reject null payload", async () => {
+        const facilitator = new ExactEvmSchemeV1(mockSigner);
+
+        const payload = {
+          t402Version: 1,
+          scheme: "exact",
+          network: "base-sepolia",
+          payload: null,
+        } as never;
+
+        const requirements: PaymentRequirementsV1 = {
+          scheme: "exact",
+          network: "base-sepolia",
+          asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+          maxAmountRequired: "100000",
+          payTo: "0x9876543210987654321098765432109876543210",
+          maxTimeoutSeconds: 3600,
+          extra: { name: "USDC", version: "2" },
+        };
+
+        const result = await facilitator.settle(payload, requirements as never);
+
+        expect(result.success).toBe(false);
+        expect(result.errorReason).toBe("invalid_payload_structure");
+      });
+
+      it("should reject payload missing authorization.from", async () => {
+        const facilitator = new ExactEvmSchemeV1(mockSigner);
+
+        const payload = {
+          t402Version: 1,
+          scheme: "exact",
+          network: "base-sepolia",
+          payload: {
+            signature: "0xsig",
+            authorization: {
+              to: "0x9876543210987654321098765432109876543210",
+              value: "100000",
+              validAfter: "0",
+              validBefore: "999999999999",
+              nonce: "0x00",
+            },
+          },
+        } as never;
+
+        const requirements: PaymentRequirementsV1 = {
+          scheme: "exact",
+          network: "base-sepolia",
+          asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+          maxAmountRequired: "100000",
+          payTo: "0x9876543210987654321098765432109876543210",
+          maxTimeoutSeconds: 3600,
+          extra: { name: "USDC", version: "2" },
+        };
+
+        const result = await facilitator.settle(payload, requirements as never);
+
+        expect(result.success).toBe(false);
+        expect(result.errorReason).toBe("invalid_payload_structure");
+      });
+    });
+
     it("should settle valid V1 payment", async () => {
       const facilitator = new ExactEvmSchemeV1(mockSigner);
 
