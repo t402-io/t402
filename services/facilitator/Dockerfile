@@ -1,6 +1,9 @@
 # Build stage - Use latest Go for security patches
 FROM golang:1.24.4-alpine AS builder
 
+# Version passed at build time
+ARG VERSION=dev
+
 # Install build dependencies
 RUN apk add --no-cache git ca-certificates
 
@@ -19,9 +22,9 @@ WORKDIR /app
 COPY go/ ./go/
 COPY services/facilitator/ ./services/facilitator/
 
-# Build the binary
+# Build the binary with version
 WORKDIR /app/services/facilitator
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /facilitator ./cmd/facilitator
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w -X 'github.com/t402-io/t402/services/facilitator/internal/server.Version=${VERSION}'" -o /facilitator ./cmd/facilitator
 
 # Runtime stage
 FROM alpine:3.19
