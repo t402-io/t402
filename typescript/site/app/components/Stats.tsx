@@ -4,14 +4,14 @@ import { motion } from "motion/react";
 
 const stats = [
   {
-    value: "7",
+    value: "10",
     label: "Chains Supported",
     description: "EVM, TON, TRON, Solana",
   },
   {
     value: "4",
     label: "SDKs Available",
-    description: "TypeScript, Python, Go, Rust",
+    description: "TypeScript, Python, Go, Java",
   },
   {
     value: "$0",

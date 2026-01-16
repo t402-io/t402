@@ -48,6 +48,11 @@ const nextConfig: NextConfig = {
         destination: "/",
         permanent: false,
       },
+      {
+        source: "/ecosystem",
+        destination: "/",
+        permanent: true,
+      },
     ];
   },
   turbopack: {
