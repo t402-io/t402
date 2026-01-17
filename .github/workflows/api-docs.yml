@@ -45,7 +45,7 @@ jobs:
 
       - name: Generate TypeDoc API docs
         working-directory: typescript
-        run: pnpm docs
+        run: npx typedoc
 
       - name: Copy API docs to docs/public
         run: |
