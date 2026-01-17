@@ -34,6 +34,11 @@ export default {
   '---': {
     type: 'separator'
   },
+  whitepaper: {
+    title: 'Whitepaper',
+    href: '/t402-whitepaper.pdf',
+    newWindow: true
+  },
   github: {
     title: 'GitHub',
     href: 'https://github.com/t402-io/t402',
