@@ -5,6 +5,7 @@
 [![Go](https://img.shields.io/github/v/tag/t402-io/t402?filter=go%2F*&label=go)](https://pkg.go.dev/github.com/t402-io/t402/go)
 [![Maven Central](https://img.shields.io/maven-central/v/io.t402/t402?label=maven%20central)](https://central.sonatype.com/artifact/io.t402/t402)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Whitepaper](https://img.shields.io/badge/whitepaper-PDF-orange.svg)](https://docs.t402.io/t402-whitepaper.pdf)
 
 t402 is an open standard for internet native payments. It aims to support all networks (both crypto & fiat) and forms of value (stablecoins, tokens, fiat).
 
@@ -227,7 +228,9 @@ Legend: ✅ Complete | ⚠️ Partial | ❌ Not Available
 
 The t402 ecosystem is growing! Check out our [ecosystem page](https://t402.io/ecosystem) to see projects building with t402.
 
-**Roadmap:** see [ROADMAP.md](https://github.com/t402-io/t402/blob/main/ROADMAP.md)
+- **Whitepaper:** [T402 Protocol Whitepaper](https://docs.t402.io/t402-whitepaper.pdf) (PDF)
+- **Roadmap:** [ROADMAP.md](https://github.com/t402-io/t402/blob/main/ROADMAP.md)
+- **Documentation:** [docs.t402.io](https://docs.t402.io)
 
 ## Terms
 
