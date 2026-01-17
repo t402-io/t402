@@ -4,5 +4,6 @@ export default {
   mcp: 'MCP Integration',
   deployment: 'Deployment Guide',
   'best-practices': 'Best Practices',
+  troubleshooting: 'Troubleshooting',
   'migration-v1-to-v2': 'Migration Guide (v1→v2)'
 }
