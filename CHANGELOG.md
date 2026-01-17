@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- TypeScript/Python: `PaymentPayload.resource` now optional per v2 spec (section 5.2.2)
+- TypeScript: `ResourceInfo.description` and `mimeType` now optional per v2 spec
+
 ### Documentation
 - Added TON wallet address to CLAUDE.md
 - Updated Java SDK section in RELEASING.md to reflect v1.1.0 release status
