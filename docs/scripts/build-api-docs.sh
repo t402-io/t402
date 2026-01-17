@@ -13,18 +13,29 @@ echo "=== Building TypeDoc API Documentation ==="
 echo "Docs dir: $DOCS_DIR"
 echo "TypeScript dir: $TS_DIR"
 
-# Check if we're in CI or local
-if [ -d "$TS_DIR/node_modules" ]; then
+# Enable corepack for pnpm (needed in Cloudflare Pages)
+if command -v corepack &> /dev/null; then
+  echo "Enabling corepack..."
+  corepack enable
+fi
+
+# Install pnpm if not available
+if ! command -v pnpm &> /dev/null; then
+  echo "Installing pnpm..."
+  npm install -g pnpm@10
+fi
+
+# Install TypeScript dependencies
+cd "$TS_DIR"
+if [ -d "node_modules" ] && [ -d "node_modules/.pnpm" ]; then
   echo "Using existing TypeScript node_modules..."
 else
   echo "Installing TypeScript dependencies..."
-  cd "$TS_DIR"
   pnpm install --frozen-lockfile
 fi
 
 # Generate TypeDoc
 echo "Generating TypeDoc..."
-cd "$TS_DIR"
 pnpm docs
 
 # Copy to docs/public/api

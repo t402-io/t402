@@ -1,0 +1,20 @@
+# Cloudflare Pages Configuration for T402 Documentation
+# https://developers.cloudflare.com/pages/functions/wrangler-configuration/
+
+name = "t402-docs"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "out"
+
+[build]
+command = "bash scripts/build-api-docs.sh && npm run build"
+
+[build.environment]
+NODE_VERSION = "22"
+
+# Production environment (docs.t402.io)
+[env.production]
+name = "t402-docs"
+
+# Preview environment (for PRs)
+[env.preview]
+name = "t402-docs-preview"
