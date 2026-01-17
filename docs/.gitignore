@@ -9,6 +9,7 @@ out/
 # Build outputs
 dist/
 build/
+public/api/
 
 # Cache
 .cache/
