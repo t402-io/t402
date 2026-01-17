@@ -1,4 +1,4 @@
-name: API Documentation
+name: Documentation
 
 on:
   push:
@@ -17,12 +17,15 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Build Docs with API Reference
+  build-and-deploy:
+    name: Build and Deploy Docs
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -59,15 +62,18 @@ jobs:
         working-directory: docs
         run: npm run build
 
-      - name: Verify build output
-        run: |
-          echo "Checking build output..."
-          ls -la docs/out/
-          ls -la docs/out/api/ || echo "API docs not in output (expected for static export)"
-          echo "Build successful!"
+      - name: Deploy to Cloudflare Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy docs/out --project-name=t402-docs
 
-# Note: Deployment to docs.t402.io is handled by Cloudflare Pages
-# Configure Cloudflare Pages with:
-#   Build command: cd docs && npm install && bash scripts/build-api-docs.sh && npm run build
-#   Build output directory: docs/out
-#   Root directory: /
+      - name: Deploy Preview
+        if: github.event_name == 'pull_request'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy docs/out --project-name=t402-docs --branch=${{ github.head_ref }}
