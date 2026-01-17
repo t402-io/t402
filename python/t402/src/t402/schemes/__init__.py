@@ -71,6 +71,27 @@ from t402.schemes.evm import (
     ExactEvmClientScheme,
     ExactEvmServerScheme,
     EvmSigner,
+    # Upto EVM
+    UptoEvmClientScheme,
+    PermitSignature,
+    PermitAuthorization,
+    UptoEIP2612Payload,
+    UptoEvmExtra,
+)
+
+# Upto Core Types
+from t402.schemes.upto import (
+    SCHEME_UPTO,
+    UptoPaymentRequirements,
+    UptoExtra,
+    UptoSettlement,
+    UptoUsageDetails,
+    UptoSettlementResponse,
+    UptoValidationResult,
+    is_upto_payment_requirements,
+    is_valid_unit,
+    create_payment_requirements as create_upto_requirements,
+    create_settlement as create_upto_settlement,
 )
 
 # TON Schemes
@@ -110,10 +131,28 @@ __all__ = [
     "get_server_registry",
     "get_facilitator_registry",
     "reset_global_registries",
-    # EVM Schemes
+    # EVM Exact Schemes
     "ExactEvmClientScheme",
     "ExactEvmServerScheme",
     "EvmSigner",
+    # EVM Upto Schemes
+    "UptoEvmClientScheme",
+    "PermitSignature",
+    "PermitAuthorization",
+    "UptoEIP2612Payload",
+    "UptoEvmExtra",
+    # Upto Core Types
+    "SCHEME_UPTO",
+    "UptoPaymentRequirements",
+    "UptoExtra",
+    "UptoSettlement",
+    "UptoUsageDetails",
+    "UptoSettlementResponse",
+    "UptoValidationResult",
+    "is_upto_payment_requirements",
+    "is_valid_unit",
+    "create_upto_requirements",
+    "create_upto_settlement",
     # TON Schemes
     "ExactTonClientScheme",
     "ExactTonServerScheme",
