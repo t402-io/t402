@@ -1,5 +1,8 @@
 # Scheme: `exact` on `Sui`
 
+> **DRAFT**: This specification is a work in progress and not yet implemented in any SDK.
+> Do not use in production. Contributions welcome.
+
 ## Summary
 
 The `exact` scheme on Sui relies on the `0x2::coin::Coin<T>` standard to transfer a specific amount of a particular coin type `T` from the payer to the resource server. The current approach requires the payer to form a complete signed transaction which results in the facilitator having no ability to adjust the transaction and direct funds anywhere but the address specified by the resource server in PaymentRequirements.

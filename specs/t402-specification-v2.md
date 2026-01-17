@@ -704,6 +704,108 @@ _Note: Implementation details for specific patterns (such as budget management, 
 
 ---
 
+## 13. Error Codes
+
+The t402 protocol defines standardized error codes for consistent error handling across implementations.
+
+### 13.1 Error Code Structure
+
+Error codes follow the format `T402-CXXX` where:
+- `C` is the category (1-5)
+- `XXX` is the specific error number
+
+### 13.2 Error Categories
+
+| Category | Range | Description |
+|----------|-------|-------------|
+| Client Errors | T402-1xxx | Invalid input, malformed requests |
+| Server Errors | T402-2xxx | Internal failures, service unavailable |
+| Facilitator Errors | T402-3xxx | Verification/settlement failures |
+| Chain Errors | T402-4xxx | Blockchain-specific errors |
+| Bridge Errors | T402-5xxx | Cross-chain operation errors |
+
+### 13.3 Client Errors (T402-1xxx)
+
+| Code | Name | Description |
+|------|------|-------------|
+| T402-1001 | InvalidRequest | Malformed request body |
+| T402-1002 | MissingPayload | Missing paymentPayload field |
+| T402-1003 | MissingRequirements | Missing paymentRequirements field |
+| T402-1004 | InvalidPayload | Invalid paymentPayload format |
+| T402-1005 | InvalidRequirements | Invalid paymentRequirements format |
+| T402-1006 | InvalidSignature | Signature verification failed |
+| T402-1007 | InvalidNetwork | Unsupported network identifier |
+| T402-1008 | InvalidScheme | Unsupported payment scheme |
+| T402-1009 | InvalidAmount | Invalid payment amount |
+| T402-1010 | InvalidAddress | Invalid address format |
+| T402-1011 | ExpiredPayment | Payment deadline has passed |
+| T402-1012 | InvalidNonce | Invalid or reused nonce |
+
+### 13.4 Server Errors (T402-2xxx)
+
+| Code | Name | Description |
+|------|------|-------------|
+| T402-2001 | Internal | Internal server error |
+| T402-2002 | DatabaseUnavailable | Database connection failed |
+| T402-2003 | CacheUnavailable | Cache service unavailable |
+| T402-2004 | RPCUnavailable | Blockchain RPC unavailable |
+| T402-2005 | RateLimited | Rate limit exceeded |
+| T402-2006 | ServiceUnavailable | Service temporarily unavailable |
+
+### 13.5 Facilitator Errors (T402-3xxx)
+
+| Code | Name | Description |
+|------|------|-------------|
+| T402-3001 | VerificationFailed | Payment verification failed |
+| T402-3002 | SettlementFailed | Payment settlement failed |
+| T402-3003 | InsufficientBalance | Payer has insufficient balance |
+| T402-3004 | AllowanceInsufficient | Token allowance insufficient |
+| T402-3005 | PaymentMismatch | Payment doesn't match requirements |
+| T402-3006 | DuplicatePayment | Payment already processed |
+| T402-3007 | SettlementPending | Settlement is pending |
+| T402-3008 | SettlementTimeout | Settlement timed out |
+
+### 13.6 Chain Errors (T402-4xxx)
+
+| Code | Name | Description |
+|------|------|-------------|
+| T402-4001 | ChainUnavailable | Chain RPC not responding |
+| T402-4002 | TransactionFailed | Transaction execution failed |
+| T402-4003 | TransactionReverted | Transaction reverted on-chain |
+| T402-4004 | GasEstimationFailed | Failed to estimate gas |
+| T402-4005 | NonceConflict | Nonce conflict on chain |
+| T402-4006 | ChainCongested | Chain is congested |
+| T402-4007 | ContractError | Smart contract error |
+
+### 13.7 Bridge Errors (T402-5xxx)
+
+| Code | Name | Description |
+|------|------|-------------|
+| T402-5001 | BridgeUnavailable | Bridge service unavailable |
+| T402-5002 | BridgeQuoteFailed | Failed to get bridge quote |
+| T402-5003 | BridgeTransferFailed | Bridge transfer failed |
+| T402-5004 | BridgeTimeout | Bridge delivery timeout |
+| T402-5005 | UnsupportedRoute | Bridge route not supported |
+
+### 13.8 Error Response Format
+
+```json
+{
+  "code": "T402-1006",
+  "message": "Signature verification failed",
+  "details": "ECDSA recovery failed: invalid v value",
+  "retry": false
+}
+```
+
+Fields:
+- `code`: The standardized error code
+- `message`: Human-readable error message
+- `details`: Optional additional context
+- `retry`: Boolean indicating if the request can be retried
+
+---
+
 ## Version History
 
 | Version | Date        | Changes                                                           | Author                    |
