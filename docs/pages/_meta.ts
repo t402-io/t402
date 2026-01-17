@@ -11,6 +11,10 @@ export default {
     title: 'Use Cases',
     type: 'page'
   },
+  schemes: {
+    title: 'Payment Schemes',
+    type: 'page'
+  },
   sdks: {
     title: 'SDKs',
     type: 'page'
