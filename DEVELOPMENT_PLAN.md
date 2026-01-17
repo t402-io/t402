@@ -38,15 +38,15 @@ Existing files:
 - [x] `python/t402/src/t402/erc4337/types.py`
 
 ### 2.2 Java SDK Solana Support ✅
-**Status**: Complete - Real Ed25519 signing implemented with BouncyCastle
+**Status**: Complete - Ed25519 signing and SVM scheme types implemented
 
 Implemented:
-- [x] `java/src/main/java/io/t402/crypto/SvmSigner.java` (real Ed25519)
-- [x] BouncyCastle dependency added for Ed25519 signing
-- [x] Support for 32-byte seed and 64-byte keypair formats
-- [x] Signature verification method
-
-Note: Full SVM mechanism for transaction building is planned for future release.
+- [x] `java/src/main/java/io/t402/crypto/SvmSigner.java` (real Ed25519 with BouncyCastle)
+- [x] `java/src/main/java/io/t402/schemes/svm/SvmConstants.java` (network IDs, token addresses, RPC URLs)
+- [x] `java/src/main/java/io/t402/schemes/svm/SvmAuthorization.java` (transfer authorization metadata)
+- [x] `java/src/main/java/io/t402/schemes/svm/ExactSvmPayload.java` (payment payload with signed transaction)
+- [x] `java/src/main/java/io/t402/schemes/svm/SvmUtils.java` (address validation, amount parsing, base58 codec)
+- [x] Comprehensive test suite (29 tests)
 
 ### 2.3 E2E Test Suite ✅ ALREADY EXISTS
 **Status**: Comprehensive E2E suite exists at `/e2e/`
@@ -235,10 +235,11 @@ Progress tracked in:
 4. Contact security firms - Outreach (P0)
 
 ### Recently Completed
+- Java SVM scheme types: `io.t402.schemes.svm` package (constants, authorization, payload, utilities)
 - viem Peer Dependency extraction: `@t402/evm-core` package created
 - Security Audit Preparation documentation (cryptographic operations, threat model, audit scope)
 - Up-To Scheme SDK types: TypeScript, Go, Python, Java (all 4 SDKs)
 - Up-To Scheme documentation: schemes overview and detailed upto guide
 - PaymentPayload.resource optionality fix (TypeScript, Python)
 
-*Last updated: 2026-01-17*
+*Last updated: 2026-01-18*
