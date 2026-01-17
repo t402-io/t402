@@ -1,0 +1,275 @@
+# Troubleshooting
+
+Common issues and solutions when working with T402.
+
+import { Callout, Tabs } from 'nextra/components'
+
+## Payment Verification Failures
+
+### T402-1006: Invalid Signature
+
+**Symptoms**: Payment verification fails with "Signature verification failed"
+
+**Common Causes**:
+
+1. **Wrong signer**: The address signing doesn't match the `from` address
+2. **Chain ID mismatch**: Signing for wrong chain
+3. **Incorrect typed data**: Domain separator or message hash mismatch
+
+**Solutions**:
+
+<Tabs items={['TypeScript', 'Python', 'Go']}>
+  <Tabs.Tab>
+```typescript
+// Ensure signer address matches payload
+const signer = privateKeyToAccount(privateKey);
+console.log('Signer address:', signer.address);
+
+// Verify chain ID
+const chainId = await client.getChainId();
+console.log('Chain ID:', chainId);
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+# Check signer address
+from eth_account import Account
+account = Account.from_key(private_key)
+print(f"Signer: {account.address}")
+
+# Verify you're on the right network
+print(f"Network: {payment_requirements.network}")
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```go
+// Verify signer
+addr := crypto.PubkeyToAddress(privateKey.PublicKey)
+fmt.Printf("Signer: %s\n", addr.Hex())
+```
+  </Tabs.Tab>
+</Tabs>
+
+### T402-1011: Expired Payment
+
+**Symptoms**: "Payment has expired" error
+
+**Cause**: The `validBefore` timestamp has passed
+
+**Solution**: Generate a new payment with a fresh deadline:
+
+```typescript
+const deadline = Math.floor(Date.now() / 1000) + 3600; // 1 hour from now
+```
+
+<Callout type="warning">
+Always use server time, not client time, to avoid clock skew issues.
+</Callout>
+
+---
+
+## Settlement Failures
+
+### T402-3003: Insufficient Balance
+
+**Symptoms**: Settlement fails with "Insufficient balance"
+
+**Diagnostic Steps**:
+
+1. Check token balance on the source chain
+2. Verify the correct token contract is being used
+3. Ensure balance covers amount + gas (if paying gas)
+
+```bash
+# Using t402 CLI
+t402 balance 0xYourAddress --network eip155:8453
+```
+
+### T402-3002: Settlement Failed
+
+**Symptoms**: Generic settlement failure
+
+**Common Causes**:
+
+1. **Nonce already used**: Payment was already settled
+2. **Gas price spike**: Transaction underpriced
+3. **RPC issues**: Node connection problems
+
+**Solutions**:
+
+- Check transaction status on block explorer
+- Retry with fresh nonce
+- Try alternative RPC endpoint
+
+---
+
+## Network Connectivity
+
+### T402-4001: Chain Unavailable
+
+**Symptoms**: Cannot connect to blockchain RPC
+
+**Solutions**:
+
+1. **Check RPC URL**: Ensure endpoint is correct and accessible
+
+```typescript
+// Test RPC connection
+const blockNumber = await provider.getBlockNumber();
+console.log('Connected, block:', blockNumber);
+```
+
+2. **Use fallback RPCs**: Configure multiple providers
+
+```typescript
+const providers = [
+  'https://mainnet.base.org',
+  'https://base.llamarpc.com',
+  'https://base.drpc.org',
+];
+```
+
+3. **Check rate limits**: You may be hitting RPC rate limits
+
+### T402-2004: RPC Unavailable (Facilitator)
+
+**Symptoms**: Facilitator cannot reach blockchain
+
+**Action**: This is a server-side issue. Check:
+- https://facilitator.t402.io/health
+- https://status.t402.io (if available)
+
+---
+
+## Debug Logging
+
+### Enable Verbose Logging
+
+<Tabs items={['TypeScript', 'Python', 'Go']}>
+  <Tabs.Tab>
+```typescript
+// Enable debug mode
+process.env.T402_DEBUG = 'true';
+
+// Or use debug package
+import debug from 'debug';
+debug.enable('t402:*');
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+# Or specifically for t402
+import t402
+t402.set_log_level('DEBUG')
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```go
+import "github.com/t402-io/t402/go/log"
+
+log.SetLevel(log.DebugLevel)
+```
+  </Tabs.Tab>
+</Tabs>
+
+### Inspect Payment Payloads
+
+```bash
+# Decode a base64 payment payload
+t402 decode eyJzY2hlbWUiOiJleGFjdCIs...
+
+# Verify payload matches requirements
+t402 verify <payload> --requirements <requirements>
+```
+
+---
+
+## Common Integration Issues
+
+### CORS Errors (Browser)
+
+**Symptoms**: "CORS policy" errors in browser console
+
+**Solution**: The resource server must include CORS headers:
+
+```typescript
+// Express.js
+app.use(cors({
+  origin: ['https://your-frontend.com'],
+  exposedHeaders: ['X-Payment-Required', 'X-Payment-Response'],
+}));
+```
+
+### Missing Headers
+
+**Symptoms**: 402 response but no payment requirements
+
+**Check**: Ensure `X-Payment-Required` header is exposed:
+
+```typescript
+// Client-side: Check response headers
+console.log(response.headers.get('X-Payment-Required'));
+```
+
+### Framework Middleware Order
+
+**Symptoms**: Payments not being processed
+
+**Solution**: Ensure T402 middleware runs before route handlers:
+
+```typescript
+// CORRECT: Payment middleware before routes
+app.use(paymentMiddleware(config));
+app.get('/api/data', handler);
+
+// WRONG: Routes before middleware
+app.get('/api/data', handler);
+app.use(paymentMiddleware(config)); // Too late!
+```
+
+---
+
+## Gasless Payment Issues
+
+### ERC-4337: UserOperation Failed
+
+**Symptoms**: "AA" prefixed errors (AA21, AA25, etc.)
+
+| Error | Meaning | Solution |
+|-------|---------|----------|
+| AA21 | Didn't pay prefund | Paymaster rejected sponsorship |
+| AA23 | Reverted during validation | Check calldata and account |
+| AA25 | Invalid signature | Wrong owner or signature format |
+| AA31 | Paymaster stake too low | Use different paymaster |
+
+### Paymaster Rejection
+
+**Symptoms**: Paymaster refuses to sponsor
+
+**Common Causes**:
+- Daily limit exceeded
+- Token not on allowlist
+- Amount too high/low
+
+**Solution**: Check paymaster policies or use self-pay mode
+
+---
+
+## Getting Help
+
+If you can't resolve your issue:
+
+1. **Search existing issues**: [GitHub Issues](https://github.com/t402-io/t402/issues)
+2. **Check documentation**: [docs.t402.io](https://docs.t402.io)
+3. **Open a new issue** with:
+   - Error code and message
+   - SDK version
+   - Minimal reproduction code
+   - Network and chain details
+
+<Callout type="info">
+When reporting issues, never share private keys or production credentials.
+</Callout>
