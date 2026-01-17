@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:full": "bash scripts/build-api-docs.sh && next build",
+    "build:api": "bash scripts/build-api-docs.sh",
     "start": "next start",
     "lint": "next lint"
   },
