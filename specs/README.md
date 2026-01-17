@@ -27,13 +27,16 @@ The t402 standard separates three key concepts:
 | [MCP](./transports-v2/mcp.md) | Model Context Protocol for AI agents |
 | [A2A](./transports-v2/a2a.md) | Agent-to-Agent protocol |
 
-### v1 Transports (Legacy)
+### v1 Transports (Deprecated)
+
+> **Note**: v1 transports are deprecated. Please use v2 transports for new implementations.
+> See [Migration Guide](https://docs.t402.io/advanced/migration-v1-to-v2) for upgrading.
 
 | Transport | Description |
 |-----------|-------------|
-| [HTTP](./transports-v1/http.md) | Original HTTP transport |
-| [MCP](./transports-v1/mcp.md) | Original MCP transport |
-| [A2A](./transports-v1/a2a.md) | Original A2A transport |
+| [HTTP](./transports-v1/http.md) | Original HTTP transport (deprecated) |
+| [MCP](./transports-v1/mcp.md) | Original MCP transport (deprecated) |
+| [A2A](./transports-v1/a2a.md) | Original A2A transport (deprecated) |
 
 ## Payment Schemes
 
@@ -48,7 +51,7 @@ The `exact` scheme transfers a specific amount for each request.
 | [SVM](./schemes/exact/scheme_exact_svm.md) | Solana (SPL tokens) |
 | [TON](./schemes/exact/scheme_exact_ton.md) | TON blockchain (Jettons) |
 | [TRON](./schemes/exact/scheme_exact_tron.md) | TRON blockchain (TRC20) |
-| [SUI](./schemes/exact/scheme_exact_sui.md) | Sui blockchain |
+| [SUI](./schemes/exact/scheme_exact_sui.md) | Sui blockchain **(DRAFT)** |
 
 ## Templates
 
