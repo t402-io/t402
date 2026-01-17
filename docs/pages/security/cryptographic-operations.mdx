@@ -1,0 +1,482 @@
+# Cryptographic Operations
+
+This document provides a comprehensive overview of all cryptographic operations used in the T402 protocol across all supported blockchains.
+
+import { Callout, Tabs } from 'nextra/components'
+
+## Overview
+
+T402 implements cryptographic signing for four blockchain families, each with specific algorithms and standards:
+
+| Chain | Algorithm | Signature Size | Key Standard |
+|-------|-----------|----------------|--------------|
+| EVM | ECDSA (secp256k1) | 65 bytes (r, s, v) | EIP-712 |
+| Solana | Ed25519 | 64 bytes (R, S) | Solana standard |
+| TON | Ed25519 | 64 bytes (R, S) | TON TL-B |
+| TRON | ECDSA (secp256k1) | 65 bytes (r, s, v) | Protobuf |
+
+## EVM Networks
+
+### Signature Scheme: EIP-712 Typed Data
+
+EVM networks use ECDSA signatures over EIP-712 typed data structures for payment authorization.
+
+**Algorithm Details:**
+
+| Component | Value |
+|-----------|-------|
+| Curve | secp256k1 |
+| Hash Function | Keccak-256 |
+| Signature Format | (r: 32 bytes, s: 32 bytes, v: 1 byte) |
+| v Value | 27 or 28 (recovery ID + 27) |
+
+### EIP-712 Domain Separator
+
+The domain separator prevents cross-chain and cross-contract replay attacks:
+
+```typescript
+const domain = {
+  name: "USD Coin",        // Token name
+  version: "2",            // Token version
+  chainId: 8453n,          // Chain ID (prevents cross-chain replay)
+  verifyingContract: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"  // Token address
+};
+```
+
+**Domain Separator Hash:**
+```
+domainSeparator = keccak256(
+  abi.encode(
+    keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+    keccak256(bytes(name)),
+    keccak256(bytes(version)),
+    chainId,
+    verifyingContract
+  )
+)
+```
+
+### EIP-3009: TransferWithAuthorization
+
+T402 uses EIP-3009 for exact payment authorizations:
+
+```typescript
+const types = {
+  TransferWithAuthorization: [
+    { name: "from", type: "address" },
+    { name: "to", type: "address" },
+    { name: "value", type: "uint256" },
+    { name: "validAfter", type: "uint256" },
+    { name: "validBefore", type: "uint256" },
+    { name: "nonce", type: "bytes32" }
+  ]
+};
+
+const message = {
+  from: "0xPayer...",
+  to: "0xRecipient...",
+  value: 1000000n,        // Amount in atomic units
+  validAfter: 0n,         // Unix timestamp
+  validBefore: 1705000000n, // Unix timestamp
+  nonce: "0x..."          // Random 32 bytes
+};
+```
+
+**Message Hash Computation:**
+```
+structHash = keccak256(
+  abi.encode(
+    keccak256("TransferWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)"),
+    from,
+    to,
+    value,
+    validAfter,
+    validBefore,
+    nonce
+  )
+)
+
+messageHash = keccak256(0x19 || 0x01 || domainSeparator || structHash)
+```
+
+### Signature Verification
+
+<Tabs items={['EOA Verification', 'EIP-1271 (Smart Wallet)', 'ERC-6492 (Counterfactual)']}>
+  <Tabs.Tab>
+**EOA (Externally Owned Account) Verification:**
+
+```go
+// Recover public key from signature
+func VerifyEOASignature(hash []byte, signature []byte, expectedAddress common.Address) bool {
+    // Adjust v value for recovery
+    if signature[64] >= 27 {
+        signature[64] -= 27
+    }
+
+    // Recover public key
+    publicKey, err := crypto.SigToPub(hash, signature)
+    if err != nil {
+        return false
+    }
+
+    // Derive address and compare
+    recoveredAddress := crypto.PubkeyToAddress(*publicKey)
+    return recoveredAddress == expectedAddress
+}
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+**EIP-1271 Smart Contract Wallet Verification:**
+
+```solidity
+// Smart contract must implement:
+interface IERC1271 {
+    function isValidSignature(bytes32 hash, bytes signature)
+        external view returns (bytes4 magicValue);
+}
+
+// Magic value for valid signature
+bytes4 constant MAGIC_VALUE = 0x1626ba7e;
+```
+
+```go
+// Verification call
+result, err := contract.Call("isValidSignature", hash, signature)
+return result == MAGIC_VALUE
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+**ERC-6492 Counterfactual Wallet Support:**
+
+For wallets not yet deployed on-chain:
+
+```
+Wrapped Signature Format:
+┌──────────────────────────────────────────────────────────────┐
+│ abi.encode(address factory, bytes factoryCalldata, bytes sig)│
+│ + 32-byte magic suffix: 0x6492649264926492...                │
+└──────────────────────────────────────────────────────────────┘
+```
+
+```go
+// Detection
+func IsERC6492(signature []byte) bool {
+    if len(signature) < 32 {
+        return false
+    }
+    magic := signature[len(signature)-32:]
+    return bytes.Equal(magic, ERC6492_MAGIC_BYTES)
+}
+
+// Unwrapping
+func UnwrapERC6492(signature []byte) (factory, calldata, innerSig []byte) {
+    // Remove magic suffix
+    wrapped := signature[:len(signature)-32]
+    // ABI decode
+    factory, calldata, innerSig = abi.Decode(wrapped)
+    return
+}
+```
+  </Tabs.Tab>
+</Tabs>
+
+### Nonce Generation
+
+Nonces must be cryptographically random to prevent replay attacks:
+
+```python
+import secrets
+
+def create_nonce() -> bytes:
+    """Create a random 32-byte nonce for authorization signatures."""
+    return secrets.token_bytes(32)
+```
+
+<Callout type="warning">
+  Never use predictable nonces (timestamps, counters, etc.). Always use cryptographically secure random number generators.
+</Callout>
+
+## Solana (SVM)
+
+### Signature Scheme: Ed25519
+
+Solana uses Ed25519 for transaction signing, providing deterministic signatures without the k-parameter vulnerabilities of ECDSA.
+
+**Algorithm Details:**
+
+| Component | Value |
+|-----------|-------|
+| Curve | Edwards25519 |
+| Hash Function | SHA-512 (internal) |
+| Signature Format | (R: 32 bytes, S: 32 bytes) |
+| Public Key | 32 bytes |
+| Private Key | 64 bytes (seed + public key) |
+
+### Transaction Signing
+
+```go
+// Create and sign Solana transaction
+func SignTransaction(tx *solana.Transaction, privateKey solana.PrivateKey) error {
+    // Serialize message
+    messageBytes, err := tx.Message.MarshalBinary()
+    if err != nil {
+        return err
+    }
+
+    // Sign with Ed25519
+    signature, err := privateKey.Sign(messageBytes)
+    if err != nil {
+        return err
+    }
+
+    // Attach signature at correct index
+    tx.Signatures[accountIndex] = signature
+    return nil
+}
+```
+
+### Fee Payer Sponsorship
+
+T402 supports gasless Solana payments where a facilitator pays transaction fees:
+
+```
+Transaction Structure:
+┌────────────────────────────────────────────┐
+│ Signatures:                                │
+│   [0] Fee Payer (Facilitator)              │
+│   [1] Transfer Authority (Client)          │
+├────────────────────────────────────────────┤
+│ Instructions:                              │
+│   1. ComputeBudget.SetLimit                │
+│   2. ComputeBudget.SetPrice (≤5 lamports)  │
+│   3. SPL Token TransferChecked             │
+└────────────────────────────────────────────┘
+```
+
+**Security Validation:**
+
+The facilitator MUST verify:
+1. Fee payer is NOT in any instruction accounts
+2. Fee payer is NOT the transfer authority
+3. Fee payer is NOT the token source
+4. Compute budget price ≤ 5 lamports per compute unit
+5. Transfer amount equals requirement exactly
+
+### Address Derivation
+
+```typescript
+// Associated Token Account (ATA) derivation
+const ata = await getAssociatedTokenAddress(
+  mint,        // Token mint address
+  owner,       // Owner public key
+  false,       // Allow owner off curve
+  TOKEN_PROGRAM_ID,
+  ASSOCIATED_TOKEN_PROGRAM_ID
+);
+```
+
+## TON Blockchain
+
+### Signature Scheme: Ed25519
+
+TON uses Ed25519 for message signing with BOC (Bag of Cells) encoding.
+
+**Algorithm Details:**
+
+| Component | Value |
+|-----------|-------|
+| Curve | Edwards25519 |
+| Hash Function | SHA-256 (message hash) |
+| Message Format | Cell (BOC) |
+| Address Format | Base64 (workchain:hash) |
+
+### Jetton Transfer Signing
+
+```typescript
+// Build Jetton transfer message
+const transferBody = beginCell()
+  .storeUint(0xf8a7ea5, 32)        // transfer op code
+  .storeUint(queryId, 64)          // query ID
+  .storeCoins(amount)              // Jetton amount
+  .storeAddress(destination)       // Recipient
+  .storeAddress(responseDestination)
+  .storeMaybeRef(null)             // custom payload
+  .storeCoins(forwardTonAmount)    // TON for forward
+  .storeMaybeRef(forwardPayload)
+  .endCell();
+
+// Create external message
+const externalMessage = beginCell()
+  .storeUint(seqno, 32)            // Sequence number
+  .storeUint(expireAt, 32)         // Expiration
+  .storeRef(internalMessage)
+  .endCell();
+
+// Sign
+const signature = sign(externalMessage.hash(), privateKey);
+```
+
+### Replay Protection
+
+TON uses sequence numbers (seqno) for replay protection:
+
+```
+Wallet State:
+├─ seqno: Current sequence number
+├─ Each transaction increments seqno
+├─ Network rejects:
+│   ├─ seqno < expected (already processed)
+│   └─ seqno > expected (gap in sequence)
+└─ Valid only if seqno == expected
+```
+
+## TRON Blockchain
+
+### Signature Scheme: ECDSA (secp256k1)
+
+TRON uses the same ECDSA curve as Ethereum but with different hashing and encoding.
+
+**Algorithm Details:**
+
+| Component | Value |
+|-----------|-------|
+| Curve | secp256k1 |
+| Hash Function | SHA-256 |
+| Address Encoding | Base58Check (T prefix) |
+| Transaction Format | Protobuf |
+
+### Transaction Signing
+
+```java
+// Sign TRON transaction
+public byte[] signTransaction(Transaction tx) {
+    // Serialize raw data
+    byte[] rawData = tx.getRawData().toByteArray();
+
+    // Hash with SHA-256
+    byte[] txHash = Sha256.hash(rawData);
+
+    // Sign with ECDSA
+    ECDSASignature sig = ECKey.sign(txHash, privateKey);
+
+    // Encode as 65 bytes (r, s, v)
+    return encodeSignature(sig);
+}
+```
+
+### Address Recovery
+
+```java
+// Recover address from signature
+public String recoverAddress(byte[] txHash, byte[] signature) {
+    // Extract r, s, v
+    BigInteger r = new BigInteger(1, Arrays.copyOfRange(signature, 0, 32));
+    BigInteger s = new BigInteger(1, Arrays.copyOfRange(signature, 32, 64));
+    int v = signature[64] & 0xFF;
+
+    // Recover public key
+    ECKey.ECDSASignature ecSig = new ECKey.ECDSASignature(r, s);
+    ECKey recoveredKey = ECKey.recoverFromSignature(v - 27, ecSig, txHash);
+
+    // Derive TRON address
+    byte[] pubKeyHash = Hash.sha3(recoveredKey.getPubKey());
+    byte[] addressBytes = new byte[21];
+    addressBytes[0] = 0x41;  // TRON prefix
+    System.arraycopy(pubKeyHash, 12, addressBytes, 1, 20);
+
+    return Base58Check.encode(addressBytes);
+}
+```
+
+## Key Management
+
+### BIP-39 Seed Phrases
+
+All SDKs support BIP-39 mnemonic phrases for key derivation:
+
+```python
+from eth_account import Account
+
+# Enable HD wallet features
+Account.enable_unaudited_hdwallet_features()
+
+# Derive EVM account from mnemonic
+account = Account.from_mnemonic(
+    seed_phrase,
+    account_path="m/44'/60'/0'/0/0"  # BIP-44 path
+)
+```
+
+### BIP-44 Derivation Paths
+
+| Chain | Path | Coin Type |
+|-------|------|-----------|
+| EVM | `m/44'/60'/0'/0/n` | 60 (Ethereum) |
+| Solana | `m/44'/501'/0'/0'` | 501 |
+| TON | `m/44'/607'/0'` | 607 |
+| TRON | `m/44'/195'/0'/0/n` | 195 |
+
+### Security Best Practices
+
+<Callout type="error">
+  **Never expose private keys:**
+  - Do not log private keys or seed phrases
+  - Do not store in version control
+  - Use environment variables or secure vaults
+  - Consider hardware security modules (HSM) for production
+</Callout>
+
+```typescript
+// Good: Load from environment
+const privateKey = process.env.PRIVATE_KEY;
+
+// Bad: Hardcoded key
+const privateKey = "0x1234..."; // NEVER DO THIS
+```
+
+## External Dependencies
+
+### Go Dependencies
+
+| Package | Purpose | Security Notes |
+|---------|---------|----------------|
+| `go-ethereum` | ECDSA, Keccak-256 | Well-audited, Ethereum Foundation |
+| `solana-go` | Ed25519, Borsh | Gagliardetto, widely used |
+| `golang.org/x/crypto` | Ed25519 | Go standard library |
+| `go-bip39` | Mnemonic generation | Tyler Smith, well-tested |
+
+### Python Dependencies
+
+| Package | Purpose | Security Notes |
+|---------|---------|----------------|
+| `eth-account` | EVM signing | ConsenSys, audited |
+| `solana` | Solana signing | Solana Foundation |
+| `pynacl` | Ed25519 | libsodium bindings |
+
+### TypeScript Dependencies
+
+| Package | Purpose | Security Notes |
+|---------|---------|----------------|
+| `viem` | EVM signing | Wevm team, audited |
+| `@solana/web3.js` | Solana signing | Solana Foundation |
+| `@ton/ton` | TON signing | TON Foundation |
+
+### Java Dependencies
+
+| Package | Purpose | Security Notes |
+|---------|---------|----------------|
+| `web3j` | EVM signing | Web3 Labs, audited |
+| `bouncycastle` | Ed25519 | Legion of Bouncy Castle, industry standard |
+
+## Cryptographic Hygiene Checklist
+
+- [ ] Use cryptographically secure random number generators for nonces
+- [ ] Verify signature format before processing (length, v value)
+- [ ] Check domain separator matches expected values
+- [ ] Validate time windows are reasonable (not expired, not too far future)
+- [ ] Confirm amounts match requirements exactly
+- [ ] Verify recipient addresses match expected payTo
+- [ ] Check nonce has not been used before
+- [ ] Validate chain ID matches expected network
+- [ ] Use constant-time comparison for signature verification
+- [ ] Never log or expose private key material
