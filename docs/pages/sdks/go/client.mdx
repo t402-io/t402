@@ -485,6 +485,39 @@ func TestClientRegistration(t *testing.T) {
 }
 ```
 
+## Troubleshooting
+
+### Payment Not Created
+
+**Problem:** Client makes request but doesn't create payment on 402
+
+**Check:**
+- Is mechanism registered? `client.Register("eip155:*", ...)`
+- Does network match? Ensure server's network has a registered mechanism
+- Are there errors? Add hooks to log payment creation attempts
+
+### Wrong Network Selected
+
+**Problem:** Client uses wrong network for payment
+
+**Solution:** The server determines the network. Client must have that network registered:
+
+```go
+// If server requires eip155:84532, client needs:
+client.Register("eip155:84532", evm.NewExactEvmScheme(signer))
+// OR
+client.Register("eip155:*", evm.NewExactEvmScheme(signer))
+```
+
+### Signature Verification Fails
+
+**Problem:** Server/facilitator rejects payment signature
+
+**Check:**
+- Correct private key format
+- Signer address matches payment requirements
+- Clock synchronization (for time-based signatures)
+
 ## Migration from V1
 
 If you're migrating from t402 v1:
