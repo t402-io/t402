@@ -174,6 +174,38 @@ config = get_tron_network_config(TRON_MAINNET)
 is_valid = validate_tron_address("T...")
 ```
 
+### Solana (SVM)
+
+```python
+from t402 import (
+    SOLANA_MAINNET,
+    SOLANA_DEVNET,
+    SOLANA_TESTNET,
+    validate_svm_address,
+    get_svm_network_config,
+    get_svm_usdc_address,
+    is_svm_network,
+)
+
+# Validate address
+is_valid = validate_svm_address("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v")
+
+# Get network config
+config = get_svm_network_config(SOLANA_MAINNET)
+
+# Get USDC mint address
+usdc_mint = get_svm_usdc_address(SOLANA_MAINNET)
+
+# Check if network is Solana
+is_solana = is_svm_network("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")
+```
+
+Install with optional Solana dependencies:
+
+```bash
+pip install t402[svm]
+```
+
 ## ERC-4337 Account Abstraction
 
 Gasless payments using smart accounts:
@@ -213,8 +245,14 @@ account = create_smart_account(
 
 ## USDT0 Cross-Chain Bridge
 
+Bridge USDT0 across chains using LayerZero:
+
 ```python
-from t402 import create_usdt0_bridge, get_bridgeable_chains
+from t402 import (
+    create_usdt0_bridge,
+    create_cross_chain_payment_router,
+    get_bridgeable_chains,
+)
 
 # Check supported chains
 chains = get_bridgeable_chains()
@@ -225,24 +263,48 @@ bridge = create_usdt0_bridge(
     source_chain_id=1,  # Ethereum
 )
 
-# Bridge USDT0
+# Get quote before bridging
+quote = await bridge.get_quote(
+    destination_chain_id=8453,  # Base
+    amount="1000000",  # 1 USDT0
+)
+print(f"Fee: {quote.fee}, ETA: {quote.estimated_time}")
+
+# Execute bridge
 result = await bridge.bridge(
     destination_chain_id=8453,  # Base
     amount="1000000",  # 1 USDT0
     recipient="0x...",
 )
+print(f"Transaction: {result.transaction_hash}")
 ```
 
 ## WDK Integration
 
-```python
-from t402 import WDKSigner, generate_seed_phrase, WDKConfig
+Tether Wallet Development Kit support:
 
-# Generate wallet
+```python
+from t402 import (
+    WDKSigner,
+    generate_seed_phrase,
+    WDKConfig,
+    get_wdk_usdt0_chains,
+)
+
+# Generate new wallet
 seed = generate_seed_phrase()
 
-# Create signer
-signer = WDKSigner(config=WDKConfig(seed_phrase=seed))
+# Create WDK signer with multi-chain support
+signer = WDKSigner(
+    config=WDKConfig(
+        seed_phrase=seed,
+        chains=get_wdk_usdt0_chains(),
+    )
+)
+
+# Get address for specific chain
+address = await signer.get_address(chain_id=8453)
+print(f"Base address: {address}")
 
 # Sign payment
 signature = await signer.sign_payment(
