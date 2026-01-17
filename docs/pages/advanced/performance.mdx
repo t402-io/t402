@@ -1,0 +1,422 @@
+# Performance Tuning
+
+Optimize T402 for high-throughput payment processing.
+
+import { Callout, Tabs } from 'nextra/components'
+
+## Connection Management
+
+### HTTP Client Pooling
+
+Reuse HTTP connections to reduce latency and resource usage.
+
+<Tabs items={['TypeScript', 'Python', 'Go', 'Java']}>
+  <Tabs.Tab>
+```typescript
+import { Agent } from 'undici';
+
+// Create a connection pool
+const agent = new Agent({
+  keepAliveTimeout: 60_000,
+  keepAliveMaxTimeout: 120_000,
+  connections: 100,
+  pipelining: 1,
+});
+
+// Use with fetch
+const response = await fetch(url, { dispatcher: agent });
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+import httpx
+
+# Create a client with connection pooling
+client = httpx.Client(
+    timeout=30.0,
+    limits=httpx.Limits(
+        max_keepalive_connections=20,
+        max_connections=100,
+        keepalive_expiry=60.0,
+    ),
+)
+
+# Async version
+async_client = httpx.AsyncClient(
+    timeout=30.0,
+    limits=httpx.Limits(
+        max_keepalive_connections=20,
+        max_connections=100,
+    ),
+)
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```go
+import (
+    "net/http"
+    "time"
+)
+
+// Create optimized transport
+transport := &http.Transport{
+    MaxIdleConns:        100,
+    MaxIdleConnsPerHost: 20,
+    IdleConnTimeout:     90 * time.Second,
+    DisableCompression:  false,
+}
+
+client := &http.Client{
+    Transport: transport,
+    Timeout:   30 * time.Second,
+}
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```java
+import java.net.http.HttpClient;
+import java.time.Duration;
+
+HttpClient client = HttpClient.newBuilder()
+    .connectTimeout(Duration.ofSeconds(10))
+    .executor(Executors.newFixedThreadPool(10))
+    .version(HttpClient.Version.HTTP_2)
+    .build();
+```
+  </Tabs.Tab>
+</Tabs>
+
+### RPC Connection Management
+
+Use multiple RPC providers with fallback for reliability.
+
+```typescript
+import { createPublicClient, http, fallback } from 'viem';
+import { base } from 'viem/chains';
+
+const client = createPublicClient({
+  chain: base,
+  transport: fallback([
+    http('https://mainnet.base.org'),
+    http('https://base.llamarpc.com'),
+    http('https://base.drpc.org'),
+  ], {
+    rank: true,           // Automatically rank by latency
+    retryCount: 3,
+    retryDelay: 150,
+  }),
+});
+```
+
+---
+
+## Caching Strategies
+
+### Payment Requirements Cache
+
+Cache payment requirements to reduce 402 round-trips.
+
+```typescript
+import { LRUCache } from 'lru-cache';
+
+const requirementsCache = new LRUCache<string, PaymentRequirements[]>({
+  max: 1000,              // Maximum entries
+  ttl: 1000 * 60 * 5,     // 5 minute TTL
+});
+
+async function getRequirements(url: string): Promise<PaymentRequirements[]> {
+  const cached = requirementsCache.get(url);
+  if (cached) return cached;
+
+  // Fetch fresh requirements
+  const response = await fetch(url);
+  if (response.status === 402) {
+    const requirements = parseRequirements(response);
+    requirementsCache.set(url, requirements);
+    return requirements;
+  }
+  throw new Error('No payment required');
+}
+```
+
+### Token Balance Cache
+
+Cache wallet balances to avoid redundant RPC calls.
+
+```typescript
+const balanceCache = new Map<string, { balance: bigint; timestamp: number }>();
+const BALANCE_TTL = 30_000; // 30 seconds
+
+async function getCachedBalance(
+  address: string,
+  token: string,
+  chainId: number
+): Promise<bigint> {
+  const key = `${chainId}:${token}:${address}`;
+  const cached = balanceCache.get(key);
+
+  if (cached && Date.now() - cached.timestamp < BALANCE_TTL) {
+    return cached.balance;
+  }
+
+  const balance = await fetchBalance(address, token, chainId);
+  balanceCache.set(key, { balance, timestamp: Date.now() });
+  return balance;
+}
+```
+
+### Nonce Management
+
+Pre-fetch and cache nonces to avoid delays.
+
+```typescript
+class NonceManager {
+  private nonces = new Map<string, bigint>();
+  private locks = new Map<string, Promise<void>>();
+
+  async getNextNonce(address: string, chainId: number): Promise<bigint> {
+    const key = `${chainId}:${address}`;
+
+    // Wait for any pending nonce operation
+    const lock = this.locks.get(key);
+    if (lock) await lock;
+
+    let nonce = this.nonces.get(key);
+    if (nonce === undefined) {
+      nonce = await this.fetchOnChainNonce(address, chainId);
+    }
+
+    this.nonces.set(key, nonce + 1n);
+    return nonce;
+  }
+
+  resetNonce(address: string, chainId: number): void {
+    this.nonces.delete(`${chainId}:${address}`);
+  }
+}
+```
+
+---
+
+## Batch Operations
+
+### Batch Settlements
+
+Group multiple settlements into a single facilitator call (when supported).
+
+```typescript
+// Instead of settling one by one
+for (const payment of payments) {
+  await facilitator.settle(payment); // ❌ Slow
+}
+
+// Batch settle
+const results = await facilitator.settleBatch(payments); // ✅ Fast
+```
+
+<Callout type="info">
+Batch settlement support depends on the facilitator implementation. Check `/supported` endpoint for capabilities.
+</Callout>
+
+### Parallel Verification
+
+Verify multiple payments concurrently.
+
+```typescript
+// Sequential (slow)
+const results = [];
+for (const payment of payments) {
+  results.push(await facilitator.verify(payment));
+}
+
+// Parallel (fast)
+const results = await Promise.all(
+  payments.map(payment => facilitator.verify(payment))
+);
+```
+
+---
+
+## Rate Limiting
+
+### Client-Side Rate Limiting
+
+Implement rate limiting to avoid hitting API limits.
+
+```typescript
+import Bottleneck from 'bottleneck';
+
+const limiter = new Bottleneck({
+  maxConcurrent: 10,     // Max concurrent requests
+  minTime: 100,          // Min time between requests (ms)
+  reservoir: 100,        // Requests per interval
+  reservoirRefreshAmount: 100,
+  reservoirRefreshInterval: 60_000, // Refresh every minute
+});
+
+// Wrap your API calls
+const verify = limiter.wrap(async (payload: PaymentPayload) => {
+  return await facilitator.verify(payload);
+});
+```
+
+### Exponential Backoff
+
+Handle rate limit errors gracefully.
+
+```typescript
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxRetries = 3,
+  baseDelay = 1000
+): Promise<T> {
+  let lastError: Error;
+
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error as Error;
+
+      // Check if it's a rate limit error
+      if (error.code === 'T402-2005') {
+        const delay = baseDelay * Math.pow(2, i);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  throw lastError;
+}
+```
+
+---
+
+## Server-Side Optimization
+
+### Middleware Configuration
+
+Optimize payment middleware for high traffic.
+
+```typescript
+import { paymentMiddleware } from '@t402/express';
+
+app.use(paymentMiddleware(routes, resourceServer, {
+  // Skip payment check for health endpoints
+  skip: (req) => req.path === '/health' || req.path === '/metrics',
+
+  // Cache verification results
+  verificationCache: {
+    ttl: 60_000,  // 1 minute
+    max: 10_000,  // Max entries
+  },
+
+  // Concurrent verification limit
+  maxConcurrentVerifications: 50,
+}));
+```
+
+### Async Settlement
+
+Settle payments asynchronously after sending response.
+
+```typescript
+app.get('/api/data', paymentRequired(config), async (req, res) => {
+  // Send response immediately
+  res.json({ data: 'your content' });
+
+  // Settle payment in background
+  setImmediate(async () => {
+    try {
+      await resourceServer.settle(req.payment);
+    } catch (error) {
+      logger.error('Settlement failed', { error, paymentId: req.payment.id });
+      // Queue for retry
+      await settlementQueue.add(req.payment);
+    }
+  });
+});
+```
+
+<Callout type="warning">
+Async settlement improves response times but requires robust error handling and retry mechanisms.
+</Callout>
+
+---
+
+## Monitoring
+
+### Key Metrics to Track
+
+| Metric | Description | Target |
+|--------|-------------|--------|
+| `t402_verification_duration_ms` | Time to verify payment | < 100ms |
+| `t402_settlement_duration_ms` | Time to settle payment | < 500ms |
+| `t402_cache_hit_rate` | Requirements cache hit rate | > 80% |
+| `t402_rpc_latency_ms` | Blockchain RPC latency | < 200ms |
+| `t402_error_rate` | Payment error rate | < 1% |
+
+### Prometheus Integration
+
+```typescript
+import { Counter, Histogram } from 'prom-client';
+
+const verificationDuration = new Histogram({
+  name: 't402_verification_duration_seconds',
+  help: 'Payment verification duration',
+  labelNames: ['network', 'scheme', 'status'],
+  buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5],
+});
+
+const settlementCounter = new Counter({
+  name: 't402_settlements_total',
+  help: 'Total payment settlements',
+  labelNames: ['network', 'scheme', 'status'],
+});
+
+// Use in middleware
+const timer = verificationDuration.startTimer({ network, scheme });
+try {
+  const result = await verify(payment);
+  timer({ status: 'success' });
+  settlementCounter.inc({ network, scheme, status: 'success' });
+} catch (error) {
+  timer({ status: 'error' });
+  settlementCounter.inc({ network, scheme, status: 'error' });
+}
+```
+
+---
+
+## Hardware Recommendations
+
+### Production Server
+
+| Component | Minimum | Recommended |
+|-----------|---------|-------------|
+| CPU | 2 cores | 4+ cores |
+| RAM | 4 GB | 8+ GB |
+| Storage | SSD 50 GB | NVMe 100 GB |
+| Network | 100 Mbps | 1 Gbps |
+
+### Scaling Guidelines
+
+- **< 100 req/s**: Single instance
+- **100-1000 req/s**: 2-4 instances with load balancer
+- **> 1000 req/s**: Kubernetes with horizontal pod autoscaling
+
+---
+
+## Checklist
+
+Before going to production, verify:
+
+- [ ] Connection pooling configured
+- [ ] Caching implemented for requirements and balances
+- [ ] Rate limiting in place
+- [ ] Monitoring and alerting configured
+- [ ] Async settlement with retry queue (if using)
+- [ ] Load testing completed
+- [ ] Fallback RPC providers configured
