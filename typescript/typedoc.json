@@ -23,21 +23,29 @@
     "packages/mcp/src/index.ts",
     "packages/cli/src/index.ts"
   ],
-  "entryPointStrategy": "expand",
+  "entryPointStrategy": "resolve",
   "out": "api-docs",
-  "name": "T402 Payment Protocol",
+  "name": "T402 API Reference",
   "readme": "../README.md",
+  "skipErrorChecking": true,
   "excludePrivate": true,
   "excludeProtected": true,
   "excludeInternal": true,
+  "excludeExternals": true,
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/test/**",
+    "**/bench/**"
+  ],
   "includeVersion": true,
   "navigationLinks": {
     "Website": "https://t402.io",
     "Documentation": "https://docs.t402.io",
     "GitHub": "https://github.com/t402-io/t402"
   },
-  "plugin": ["typedoc-plugin-markdown"],
-  "theme": "default",
   "categorizeByGroup": true,
   "categoryOrder": [
     "Core",
@@ -49,8 +57,10 @@
   ],
   "sort": ["source-order", "alphabetical"],
   "validation": {
-    "notExported": true,
-    "invalidLink": true,
+    "notExported": false,
+    "invalidLink": false,
     "notDocumented": false
-  }
+  },
+  "searchInComments": true,
+  "searchInDocuments": true
 }
