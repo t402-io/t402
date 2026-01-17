@@ -1,0 +1,32 @@
+% T402 Logo - Standalone TikZ
+% Compile with: pdflatex t402-logo.tex
+
+\documentclass[tikz,border=10pt]{standalone}
+\usepackage{tikz}
+\usepackage{xcolor}
+
+% Define colors
+\definecolor{t402blue}{HTML}{3B82F6}
+\definecolor{t402green}{HTML}{10B981}
+\definecolor{t402purple}{HTML}{8B5CF6}
+
+\begin{document}
+\begin{tikzpicture}[scale=1]
+    % Background circle
+    \fill[t402blue!20] (0,0) circle (2cm);
+
+    % Outer ring
+    \draw[t402blue, line width=3pt] (0,0) circle (1.8cm);
+
+    % Inner elements - stylized "402"
+    \node[font=\fontfamily{phv}\selectfont\bfseries\Huge, t402blue] at (0,0.2) {T402};
+
+    % Subtitle
+    \node[font=\fontfamily{phv}\selectfont\small, t402purple] at (0,-0.5) {PROTOCOL};
+
+    % Decorative elements - payment flow arrows
+    \draw[t402green, line width=2pt, ->, >=stealth] (-1.3,1.3) arc (135:45:1.84cm);
+    \draw[t402green, line width=2pt, ->, >=stealth] (1.3,-1.3) arc (-45:-135:1.84cm);
+
+\end{tikzpicture}
+\end{document}

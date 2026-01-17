@@ -1,0 +1,79 @@
+% Appendix D: Glossary
+\chapter{Glossary}
+\label{app:glossary}
+
+\begin{description}[style=nextline]
+
+\item[A2A (Agent-to-Agent)]
+Protocol for direct communication between AI agents, enabling autonomous agent payments.
+
+\item[ATA (Associated Token Account)]
+Solana account derived from a wallet address and token mint, used for holding SPL tokens.
+
+\item[CAIP-2]
+Chain Agnostic Improvement Proposal 2, a standard for blockchain network identifiers (e.g., \code{eip155:8453}).
+
+\item[Client]
+Any application or agent that requests access to protected resources and submits payments.
+
+\item[EIP-3009]
+Ethereum Improvement Proposal enabling gasless token transfers via cryptographic signatures.
+
+\item[EIP-712]
+Ethereum standard for typed structured data signing, providing human-readable signing prompts.
+
+\item[ERC-4337]
+Account abstraction standard enabling smart contract wallets and gasless transactions.
+
+\item[Facilitator]
+Service that handles payment verification and blockchain settlement on behalf of Resource Servers.
+
+\item[HTTP 402]
+HTTP status code ``Payment Required,'' used by \tprotocol{} to signal payment requirements.
+
+\item[Jetton]
+TON blockchain's fungible token standard, analogous to ERC-20 on Ethereum.
+
+\item[LayerZero]
+Cross-chain messaging protocol used by USDT0 for omnichain transfers.
+
+\item[MCP (Model Context Protocol)]
+Protocol enabling AI agents to interact with tools and resources, with \tprotocol{} support for paid tools.
+
+\item[Nonce]
+Unique value used once to prevent replay attacks; in \tprotocol{}, a 32-byte random value.
+
+\item[OFT (Omnichain Fungible Token)]
+LayerZero token standard enabling native cross-chain transfers; USDT0 is an OFT.
+
+\item[PaymentPayload]
+JSON structure containing signed payment authorization sent by clients.
+
+\item[PaymentRequired]
+JSON structure returned by servers describing acceptable payment methods.
+
+\item[Resource Server]
+Service providing protected resources (APIs, content) that require payment for access.
+
+\item[Settlement]
+The process of executing a payment transaction on the blockchain.
+
+\item[SPL Token]
+Solana Program Library token standard, analogous to ERC-20 on Ethereum.
+
+\item[Stablecoin]
+Cryptocurrency designed to maintain stable value, typically pegged to fiat currency (e.g., USDT).
+
+\item[TRC-20]
+TRON blockchain's token standard, analogous to ERC-20 on Ethereum.
+
+\item[USDT]
+Tether USD, the most widely used stablecoin, available on multiple blockchains.
+
+\item[USDT0]
+Tether's omnichain USDT implementation using LayerZero OFT standard.
+
+\item[Verification]
+The process of validating a payment signature and parameters before settlement.
+
+\end{description}

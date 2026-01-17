@@ -1,0 +1,360 @@
+% T402 Whitepaper - Preamble
+% Package imports and document settings
+
+%--------------------------------------------------
+% Encoding and Fonts
+%--------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}  % Better typography
+
+%--------------------------------------------------
+% Page Layout
+%--------------------------------------------------
+\usepackage[
+    a4paper,
+    top=2.5cm,
+    bottom=2.5cm,
+    left=2.5cm,
+    right=2.5cm,
+    headheight=14pt
+]{geometry}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE,RO]{\thepage}
+\fancyhead[LO]{\nouppercase{\rightmark}}
+\fancyhead[RE]{\nouppercase{\leftmark}}
+\renewcommand{\headrulewidth}{0.4pt}
+
+%--------------------------------------------------
+% Mathematics
+%--------------------------------------------------
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+%--------------------------------------------------
+% Graphics and Colors
+%--------------------------------------------------
+\usepackage{graphicx}
+\usepackage{xcolor}
+
+% Define T402 brand colors
+\definecolor{t402blue}{HTML}{3B82F6}
+\definecolor{t402green}{HTML}{10B981}
+\definecolor{t402purple}{HTML}{8B5CF6}
+\definecolor{t402gray}{HTML}{6B7280}
+\definecolor{codebg}{HTML}{F8F9FA}
+
+%--------------------------------------------------
+% TikZ for Diagrams
+%--------------------------------------------------
+\usepackage{tikz}
+\usetikzlibrary{
+    arrows.meta,
+    shapes.geometric,
+    shapes.misc,
+    shapes.symbols,
+    positioning,
+    calc,
+    fit,
+    backgrounds,
+    chains,
+    decorations.pathreplacing
+}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+%--------------------------------------------------
+% Tables
+%--------------------------------------------------
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{array}
+
+% Custom column types
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+
+%--------------------------------------------------
+% Code Listings
+%--------------------------------------------------
+\usepackage{listings}
+
+% JSON style
+\lstdefinelanguage{json}{
+    basicstyle=\ttfamily\small,
+    stringstyle=\color{t402green},
+    numbers=left,
+    numberstyle=\tiny\color{t402gray},
+    stepnumber=1,
+    numbersep=8pt,
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{codebg},
+    literate=
+        *{:}{{{\color{t402purple}{:}}}}{1}
+        {,}{{{\color{t402purple}{,}}}}{1}
+        {\{}{{{\color{t402blue}{\{}}}}{1}
+        {\}}{{{\color{t402blue}{\}}}}}{1}
+        {[}{{{\color{t402blue}{[}}}}{1}
+        {]}{{{\color{t402blue}{]}}}}{1},
+    morestring=[b]",
+}
+
+% TypeScript style
+\lstdefinelanguage{typescript}{
+    keywords={import, from, export, const, let, var, function, async, await, return, if, else, for, while, class, interface, type, extends, implements, new, this, throw, try, catch, finally, true, false, null, undefined},
+    keywordstyle=\color{t402purple}\bfseries,
+    ndkeywords={string, number, boolean, any, void, Promise, Array, Object},
+    ndkeywordstyle=\color{t402blue},
+    identifierstyle=\color{black},
+    sensitive=true,
+    comment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    commentstyle=\color{t402gray}\itshape,
+    stringstyle=\color{t402green},
+    morestring=[b]',
+    morestring=[b]",
+    morestring=[b]`,
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    numberstyle=\tiny\color{t402gray},
+    stepnumber=1,
+    numbersep=8pt,
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{codebg},
+}
+
+% Solidity style
+\lstdefinelanguage{solidity}{
+    keywords={pragma, solidity, contract, function, public, private, external, internal, view, pure, payable, returns, return, if, else, for, while, mapping, address, uint256, uint, bytes32, bytes, string, bool, true, false, require, emit, event, modifier, constructor, struct, memory, storage, calldata},
+    keywordstyle=\color{t402purple}\bfseries,
+    identifierstyle=\color{black},
+    sensitive=true,
+    comment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    commentstyle=\color{t402gray}\itshape,
+    stringstyle=\color{t402green},
+    morestring=[b]',
+    morestring=[b]",
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    numberstyle=\tiny\color{t402gray},
+    stepnumber=1,
+    numbersep=8pt,
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{codebg},
+}
+
+% Go style
+\lstdefinelanguage{golang}{
+    keywords={break, case, chan, const, continue, default, defer, else, fallthrough, for, func, go, goto, if, import, interface, map, package, range, return, select, struct, switch, type, var},
+    keywordstyle=\color{t402purple}\bfseries,
+    ndkeywords={string, int, int64, uint64, bool, error, nil, true, false, byte, rune},
+    ndkeywordstyle=\color{t402blue},
+    identifierstyle=\color{black},
+    sensitive=true,
+    comment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    commentstyle=\color{t402gray}\itshape,
+    stringstyle=\color{t402green},
+    morestring=[b]',
+    morestring=[b]",
+    morestring=[b]`,
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    numberstyle=\tiny\color{t402gray},
+    stepnumber=1,
+    numbersep=8pt,
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{codebg},
+}
+
+% YAML style
+\lstdefinelanguage{yaml}{
+    keywords={true, false, null},
+    keywordstyle=\color{t402purple}\bfseries,
+    basicstyle=\ttfamily\small,
+    stringstyle=\color{t402green},
+    numbers=left,
+    numberstyle=\tiny\color{t402gray},
+    stepnumber=1,
+    numbersep=8pt,
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{codebg},
+    morestring=[b]",
+    morestring=[b]',
+    comment=[l]{\#},
+    commentstyle=\color{t402gray}\itshape,
+    sensitive=true,
+}
+
+% Protobuf style
+\lstdefinelanguage{protobuf}{
+    keywords={syntax, message, service, rpc, returns, repeated, optional, required, enum, oneof, map, import, package, option, reserved, extensions, extend},
+    keywordstyle=\color{t402purple}\bfseries,
+    ndkeywords={string, int32, int64, uint32, uint64, bool, bytes, float, double, fixed32, fixed64, sfixed32, sfixed64, sint32, sint64},
+    ndkeywordstyle=\color{t402blue},
+    identifierstyle=\color{black},
+    sensitive=true,
+    comment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    commentstyle=\color{t402gray}\itshape,
+    stringstyle=\color{t402green},
+    morestring=[b]",
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    numberstyle=\tiny\color{t402gray},
+    stepnumber=1,
+    numbersep=8pt,
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{codebg},
+}
+
+% Default listing style
+\lstset{
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    numberstyle=\tiny\color{t402gray},
+    stepnumber=1,
+    numbersep=8pt,
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{codebg},
+    captionpos=b,
+}
+
+%--------------------------------------------------
+% Algorithms
+%--------------------------------------------------
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\SetKwComment{Comment}{/* }{ */}
+
+%--------------------------------------------------
+% Lists
+%--------------------------------------------------
+\usepackage{enumitem}
+\setlist{noitemsep}
+
+%--------------------------------------------------
+% Hyperlinks and Cross-references
+%--------------------------------------------------
+\usepackage[
+    colorlinks=true,
+    linkcolor=t402blue,
+    citecolor=t402green,
+    urlcolor=t402purple,
+    bookmarks=true,
+    bookmarksnumbered=true,
+    pdfauthor={T402 Team},
+    pdftitle={T402 Protocol Whitepaper},
+    pdfsubject={HTTP-Native Stablecoin Payment Protocol},
+    pdfkeywords={cryptocurrency, payment protocol, HTTP 402, USDT, stablecoin}
+]{hyperref}
+
+\usepackage{cleveref}
+\crefname{figure}{Figure}{Figures}
+\crefname{table}{Table}{Tables}
+\crefname{listing}{Listing}{Listings}
+\crefname{algorithm}{Algorithm}{Algorithms}
+
+%--------------------------------------------------
+% Theorems and Definitions
+%--------------------------------------------------
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{example}{Example}[chapter]
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}[theorem]{Lemma}
+
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}[chapter]
+\newtheorem{note}{Note}[chapter]
+
+%--------------------------------------------------
+% Custom Commands
+%--------------------------------------------------
+% Protocol terms
+\newcommand{\tprotocol}{\textsc{t402}}
+\newcommand{\httpcode}[1]{\texttt{HTTP #1}}
+\newcommand{\header}[1]{\texttt{#1}}
+\newcommand{\field}[1]{\texttt{#1}}
+
+% Code inline
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\json}[1]{\lstinline[language=json]{#1}}
+
+% Emphasis
+\newcommand{\term}[1]{\textit{#1}}
+\newcommand{\concept}[1]{\textbf{#1}}
+
+% Network identifiers
+\newcommand{\network}[1]{\texttt{#1}}
+\newcommand{\evm}[1]{\network{eip155:#1}}
+\newcommand{\solana}{\network{solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp}}
+
+% Boxes for important content
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+
+\newtcolorbox{infobox}[1][]{
+    colback=t402blue!5,
+    colframe=t402blue,
+    title=#1,
+    fonttitle=\bfseries,
+    breakable
+}
+
+\newtcolorbox{warningbox}[1][]{
+    colback=orange!5,
+    colframe=orange!80!black,
+    title=#1,
+    fonttitle=\bfseries,
+    breakable
+}
+
+\newtcolorbox{securitybox}[1][]{
+    colback=red!5,
+    colframe=red!80!black,
+    title=#1,
+    fonttitle=\bfseries,
+    breakable
+}
+
+%--------------------------------------------------
+% Document Settings
+%--------------------------------------------------
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{2}
+
+% Paragraph settings
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{0pt}
+
+% Float placement
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\bottomfraction}{0.85}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.8}

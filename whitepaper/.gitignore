@@ -1,0 +1,23 @@
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lot
+*.out
+*.toc
+*.synctex.gz
+*.synctex(busy)
+
+# Generated PDF (can be rebuilt)
+# Uncomment if you want to track the PDF:
+# !main.pdf
+main.pdf
+
+# Editor files
+*.swp
+*~
+.DS_Store

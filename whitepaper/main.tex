@@ -1,0 +1,123 @@
+%!TEX program = xelatex
+% T402 Protocol Whitepaper
+% HTTP-Native Stablecoin Payment Protocol
+
+\documentclass[11pt,a4paper,twoside,openany]{book}
+
+% Load preamble with all packages and settings
+\input{preamble}
+
+% Document metadata
+\title{
+    \vspace{-2cm}
+    \includegraphics[width=0.3\textwidth]{figures/t402-logo.pdf}\\[1cm]
+    \textbf{T402 Protocol}\\[0.5cm]
+    \Large HTTP-Native Stablecoin Payment Protocol\\[0.3cm]
+    \large Technical Whitepaper v2.0
+}
+
+\author{
+    T402 Team\\
+    \texttt{https://t402.io}
+}
+
+\date{January 2026}
+
+\begin{document}
+
+%--------------------------------------------------
+% Front Matter
+%--------------------------------------------------
+\frontmatter
+
+% Title page
+\maketitle
+
+% Copyright and license
+\thispagestyle{empty}
+\vspace*{\fill}
+\begin{center}
+\textcopyright{} 2026 T402 Contributors\\[0.5cm]
+Licensed under Apache 2.0\\[1cm]
+\textbf{Version History}\\[0.3cm]
+\begin{tabular}{lll}
+\toprule
+Version & Date & Changes \\
+\midrule
+2.0 & January 2026 & Initial whitepaper release \\
+\bottomrule
+\end{tabular}
+\end{center}
+\vspace*{\fill}
+\newpage
+
+% Table of contents
+\tableofcontents
+
+% List of figures (optional)
+\listoffigures
+
+% List of tables (optional)
+\listoftables
+
+%--------------------------------------------------
+% Main Matter
+%--------------------------------------------------
+\mainmatter
+
+% Chapter 1: Abstract
+\input{chapters/01-abstract}
+
+% Chapter 2: Introduction
+\input{chapters/02-introduction}
+
+% Chapter 3: Protocol Architecture
+\input{chapters/03-architecture}
+
+% Chapter 4: Core Specifications
+\input{chapters/04-specifications}
+
+% Chapter 5: Payment Schemes
+\input{chapters/05-payment-schemes}
+
+% Chapter 6: Transport Layers
+\input{chapters/06-transport-layers}
+
+% Chapter 7: Facilitator Service
+\input{chapters/07-facilitator}
+
+% Chapter 8: Security Analysis
+\input{chapters/08-security}
+
+% Chapter 9: Implementation Guide
+\input{chapters/09-implementation}
+
+% Chapter 10: Use Cases
+\input{chapters/10-use-cases}
+
+% Chapter 11: Economic Model
+\input{chapters/11-economics}
+
+% Chapter 12: Future Work
+\input{chapters/12-future-work}
+
+% Chapter 13: Conclusion
+\input{chapters/13-conclusion}
+
+%--------------------------------------------------
+% Back Matter
+%--------------------------------------------------
+\backmatter
+
+% Appendices
+\appendix
+\input{appendices/A-schemas}
+\input{appendices/B-networks}
+\input{appendices/C-errors}
+\input{appendices/D-glossary}
+
+% Bibliography
+\bibliographystyle{plain}
+\bibliography{bibliography}
+
+\end{document}

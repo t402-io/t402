@@ -1,0 +1,77 @@
+% Appendix C: Error Code Reference
+\chapter{Error Code Reference}
+\label{app:errors}
+
+This appendix provides a complete reference of \tprotocol{} error codes.
+
+\section{Payment Errors}
+
+\begin{longtable}{>{\ttfamily\footnotesize}l p{5cm} p{4cm}}
+\caption{Payment Error Codes} \label{tab:payment-errors} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endfirsthead
+\multicolumn{3}{c}{\tablename\ \thetable\ -- continued} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endhead
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+insufficient\_funds & Payer lacks sufficient balance & Fund wallet \\
+invalid\_signature & Signature verification failed & Re-sign with correct key \\
+invalid\_amount & Amount below required & Increase amount \\
+invalid\_recipient & Recipient address mismatch & Use correct payTo \\
+expired\_authorization & Time window passed & Create new authorization \\
+nonce\_already\_used & Nonce used in prior tx & Generate new nonce \\
+\end{longtable}
+
+\section{Protocol Errors}
+
+\begin{longtable}{>{\ttfamily\footnotesize}l p{5cm} p{4cm}}
+\caption{Protocol Error Codes} \label{tab:protocol-errors} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endfirsthead
+\multicolumn{3}{c}{\tablename\ \thetable\ -- continued} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endhead
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+invalid\_network & Network not supported & Use supported network \\
+invalid\_scheme & Scheme not supported & Use supported scheme \\
+invalid\_t402\_version & Version not supported & Upgrade to v2 \\
+invalid\_payload & Malformed payload & Validate format \\
+invalid\_payment\_req & Invalid requirements & Validate requirements \\
+\end{longtable}
+
+\section{Settlement Errors}
+
+\begin{longtable}{>{\ttfamily\footnotesize}l p{5cm} p{4cm}}
+\caption{Settlement Error Codes} \label{tab:settlement-errors} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endfirsthead
+\multicolumn{3}{c}{\tablename\ \thetable\ -- continued} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endhead
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+simulation\_failed & Transaction simulation failed & Check balance/params \\
+settlement\_failed & On-chain settlement failed & Retry or contact support \\
+unexpected\_verify\_error & Unexpected verification error & Check logs, retry \\
+unexpected\_settle\_error & Unexpected settlement error & Check logs, retry \\
+\end{longtable}
