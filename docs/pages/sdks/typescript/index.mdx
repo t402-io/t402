@@ -20,9 +20,14 @@ import { Callout } from 'nextra/components'
 | Package | Version | Description |
 |---------|---------|-------------|
 | `@t402/evm` | 2.2.0 | EVM chains (Ethereum, Arbitrum, Base, etc.) with EIP-3009 |
+| `@t402/evm-core` | 2.2.0 | EVM types and utilities without viem dependency |
 | `@t402/svm` | 2.0.0 | Solana blockchain with SPL token transfers |
 | `@t402/ton` | 2.1.0 | TON blockchain with USDT Jetton support |
 | `@t402/tron` | 2.0.0 | TRON blockchain with TRC-20 USDT |
+
+<Callout type="info">
+  **Bundle Size Optimization**: Use `@t402/evm-core` instead of `@t402/evm` if you only need types and don't require viem. This significantly reduces bundle size for type-only consumers.
+</Callout>
 
 ## WDK Integration (Tether Wallet Development Kit)
 
@@ -83,17 +88,19 @@ pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/tron
 ## Architecture
 
 ```
-@t402/core              Base types, HTTP utilities
+@t402/core                  Base types, HTTP utilities
     │
-    ├── @t402/evm       EVM mechanism (EIP-3009, ERC-4337, LayerZero)
+    ├── @t402/evm-core      EVM types and constants (no viem dependency)
+    │       │
+    │       └── @t402/evm   EVM mechanism (EIP-3009, ERC-4337, LayerZero)
     │
-    ├── @t402/svm       Solana mechanism (SPL tokens)
+    ├── @t402/svm           Solana mechanism (SPL tokens)
     │
-    ├── @t402/ton       TON mechanism (Jettons)
+    ├── @t402/ton           TON mechanism (Jettons)
     │
-    ├── @t402/tron      TRON mechanism (TRC-20)
+    ├── @t402/tron          TRON mechanism (TRC-20)
     │
-    └── @t402/wdk       Tether WDK integration
+    └── @t402/wdk           Tether WDK integration
         │
         ├── @t402/wdk-gasless   ERC-4337 gasless payments
         │
