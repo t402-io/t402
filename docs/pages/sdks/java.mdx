@@ -165,6 +165,100 @@ t402:
   facilitator-url: https://facilitator.t402.io
 ```
 
+### Custom PaymentVerifier
+
+Implement custom verification logic for advanced use cases:
+
+```java
+import io.t402.server.PaymentVerifier;
+import io.t402.types.PaymentPayload;
+import io.t402.types.PaymentRequirements;
+import io.t402.types.VerificationResponse;
+
+public class CustomPaymentVerifier implements PaymentVerifier {
+
+    private final FacilitatorClient facilitator;
+    private final RateLimiter rateLimiter;
+    private final MetricsService metrics;
+
+    public CustomPaymentVerifier(FacilitatorClient facilitator) {
+        this.facilitator = facilitator;
+        this.rateLimiter = new RateLimiter(100, Duration.ofMinutes(1));
+        this.metrics = new MetricsService();
+    }
+
+    @Override
+    public VerificationResponse verify(PaymentPayload payload, PaymentRequirements requirements) {
+        // Rate limiting
+        if (!rateLimiter.tryAcquire(payload.getFrom())) {
+            return VerificationResponse.invalid("Rate limit exceeded");
+        }
+
+        // Custom validation before facilitator
+        if (isBlacklisted(payload.getFrom())) {
+            return VerificationResponse.invalid("Payer is blacklisted");
+        }
+
+        // Amount validation
+        if (new BigInteger(payload.getAmount()).compareTo(MAX_AMOUNT) > 0) {
+            return VerificationResponse.invalid("Amount exceeds maximum");
+        }
+
+        // Delegate to facilitator
+        VerificationResponse response = facilitator.verify(payload, requirements);
+
+        // Track metrics
+        metrics.recordVerification(payload.getFrom(), response.isValid());
+
+        return response;
+    }
+}
+```
+
+Register custom verifier with Spring Boot:
+
+```java
+@Configuration
+public class T402Config {
+
+    @Bean
+    public PaymentVerifier paymentVerifier(FacilitatorClient facilitator) {
+        return new CustomPaymentVerifier(facilitator);
+    }
+}
+```
+
+### Dynamic Payment Requirements
+
+Customize payment requirements per-request:
+
+```java
+import io.t402.server.PaymentRequirementsProvider;
+
+@Component
+public class DynamicPaymentProvider implements PaymentRequirementsProvider {
+
+    @Override
+    public PaymentRequirements getRequirements(HttpServletRequest request) {
+        String tier = getUserTier(request);
+
+        BigInteger amount = switch (tier) {
+            case "premium" -> BigInteger.valueOf(100_000);    // $0.10
+            case "enterprise" -> BigInteger.valueOf(10_000);  // $0.01
+            default -> BigInteger.valueOf(1_000_000);         // $1.00
+        };
+
+        return PaymentRequirements.builder()
+            .scheme("exact")
+            .network("eip155:8453")
+            .amount(amount.toString())
+            .asset("0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913")
+            .payTo(getPayToAddress(request))
+            .build();
+    }
+}
+```
+
 ### Manual Setup
 
 For non-Spring applications or custom configurations:
@@ -713,11 +807,202 @@ When payment is required but not provided:
 }
 ```
 
+## Kotlin Support
+
+The Java SDK works seamlessly with Kotlin, including coroutines support.
+
+### Basic Kotlin Usage
+
+```kotlin
+import io.t402.crypto.EvmSigner
+import io.t402.client.T402HttpClient
+
+// Create signer
+val signer = EvmSigner.fromPrivateKey(
+    "0xYourPrivateKey",
+    8453,
+    "USD Coin",
+    "2",
+    "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+)
+
+// Create client
+val client = T402HttpClient(signer)
+
+// Make request
+val response = client.get(
+    URI.create("https://api.example.com/premium"),
+    BigInteger.valueOf(1_000_000),
+    "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "0xReceiverAddress"
+)
+```
+
+### Spring Boot with Kotlin
+
+```kotlin
+import io.t402.spring.RequirePayment
+import org.springframework.web.bind.annotation.*
+
+@RestController
+class ApiController {
+
+    @RequirePayment(amount = "\$0.01", description = "Premium API")
+    @GetMapping("/api/premium")
+    fun premiumContent(): Map<String, String> {
+        return mapOf("data" to "Premium content!")
+    }
+}
+```
+
+### Coroutines with WebFlux
+
+```kotlin
+import io.t402.spring.reactive.PaymentWebFilter
+import kotlinx.coroutines.reactor.awaitSingle
+import org.springframework.web.bind.annotation.*
+
+@RestController
+class ReactiveApiController {
+
+    @GetMapping("/api/data")
+    suspend fun getData(): DataResponse {
+        // Coroutines work naturally with WebFlux
+        val result = dataService.fetchAsync().awaitSingle()
+        return DataResponse(result)
+    }
+}
+```
+
+### Kotlin DSL for Payment Requirements
+
+```kotlin
+import io.t402.types.PaymentRequirements
+
+fun paymentRequirements(block: PaymentRequirements.Builder.() -> Unit): PaymentRequirements {
+    return PaymentRequirements.builder().apply(block).build()
+}
+
+// Usage
+val requirements = paymentRequirements {
+    scheme("exact")
+    network("eip155:8453")
+    amount("1000000")
+    asset("0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913")
+    payTo("0xReceiverAddress")
+}
+```
+
+### Async Facilitator Client
+
+```kotlin
+import io.t402.client.HttpFacilitatorClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
+class AsyncFacilitatorClient(private val client: HttpFacilitatorClient) {
+
+    suspend fun verifyAsync(
+        payload: PaymentPayload,
+        requirements: PaymentRequirements
+    ): VerificationResponse = withContext(Dispatchers.IO) {
+        client.verify(payload, requirements)
+    }
+
+    suspend fun settleAsync(
+        payload: PaymentPayload,
+        requirements: PaymentRequirements
+    ): SettlementResponse = withContext(Dispatchers.IO) {
+        client.settle(payload, requirements)
+    }
+}
+```
+
+## Testing
+
+### Unit Testing with JUnit 5
+
+```java
+import io.t402.server.PaymentFilter;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import static org.mockito.Mockito.*;
+
+class PaymentFilterTest {
+
+    @Mock
+    FacilitatorClient facilitator;
+
+    @Test
+    void shouldReturn402WhenNoPayment() {
+        PaymentFilter filter = new PaymentFilter(facilitator);
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilter(request, response, chain);
+
+        assertEquals(402, response.getStatus());
+    }
+
+    @Test
+    void shouldVerifyPaymentAndContinue() {
+        when(facilitator.verify(any(), any()))
+            .thenReturn(VerificationResponse.valid());
+
+        PaymentFilter filter = new PaymentFilter(facilitator);
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("X-PAYMENT", validPaymentHeader);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilter(request, response, chain);
+
+        verify(chain).doFilter(request, response);
+    }
+}
+```
+
+### Spring Boot Integration Testing
+
+```java
+@SpringBootTest
+@AutoConfigureMockMvc
+class PaymentIntegrationTest {
+
+    @Autowired
+    MockMvc mockMvc;
+
+    @MockBean
+    FacilitatorClient facilitator;
+
+    @Test
+    void shouldRequirePayment() throws Exception {
+        mockMvc.perform(get("/api/premium"))
+            .andExpect(status().isPaymentRequired())
+            .andExpect(jsonPath("$.t402Version").value(2));
+    }
+
+    @Test
+    void shouldAcceptValidPayment() throws Exception {
+        when(facilitator.verify(any(), any()))
+            .thenReturn(VerificationResponse.valid());
+        when(facilitator.settle(any(), any()))
+            .thenReturn(SettlementResponse.success("0xTxHash"));
+
+        mockMvc.perform(get("/api/premium")
+                .header("X-PAYMENT", validPaymentHeader))
+            .andExpect(status().isOk());
+    }
+}
+```
+
 ## Requirements
 
 - Java 17+
 - Jakarta Servlet API 6.0+ (for servlet filter)
 - Spring Boot 3.x (for auto-configuration)
+- Kotlin 1.9+ (for Kotlin support)
 
 ## Dependencies
 
