@@ -137,21 +137,22 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 - [ ] Add API documentation generation (TypeDoc)
 - [ ] Create migration guide v1.x to v2.x
 
-### Phase 3: SDK Parity (Month 3)
+### Phase 3: SDK Parity (Month 3) ✅
 
 > Focus: Python and Go SDK Enhancement
 
-**Week 9-10: Python SDK Enhancement**
-- [ ] Add missing test coverage
-- [ ] Create Python CLI tool
-- [ ] Add SVM support documentation
-- [ ] Publish to PyPI v1.5.0
+**Week 9-10: Python SDK Enhancement** ✅
+- [x] Add missing test coverage (565 tests passing)
+- [x] Create Python CLI tool (`t402 verify/settle/supported/encode/decode/info`)
+- [x] Add SVM support (solana>=0.35.0, full Solana/SPL support)
+- [x] Published PyPI v1.7.1
 
-**Week 11-12: Go SDK Enhancement**
-- [ ] Add WDK-equivalent functionality
-- [ ] Create Go CLI tool
-- [ ] Improve documentation
-- [ ] Release v1.25.0
+**Week 11-12: Go SDK Enhancement** ✅
+- [x] Add WDK-equivalent functionality (BIP-39, HD wallet, multi-chain)
+- [x] Create Go CLI tool (`cmd/t402/` with full feature set)
+- [x] Create MCP server (`cmd/t402-mcp/` for AI agents)
+- [x] SmartBridgeRouter for multi-chain bridging
+- [x] Released v1.5.0 with advanced bridge routing
 
 ### Phase 4: Java SDK Completion (Month 4-5) ✅
 
