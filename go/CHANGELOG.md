@@ -4,6 +4,34 @@ All notable changes to the T402 Go SDK will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- **Up-To Scheme Types** (`schemes/upto`, `mechanisms/evm/upto`) - Usage-based billing scheme
+  - Core types (`schemes/upto`):
+    - `PaymentRequirements` - Payment requirements with `MaxAmount` for usage-based billing
+    - `Extra` - Extra fields for billing units and EIP-712 domain parameters
+    - `Settlement` - Settlement data with usage details
+    - `UsageDetails` - Usage tracking metrics
+    - `SettlementResponse` - Settlement transaction response
+    - `ValidationResult` - Payment validation result
+    - `IsUptoPaymentRequirements()` - Type guard for upto requirements
+    - `IsValidUnit()` - Validate billing unit types
+    - `NewPaymentRequirements()` - Factory function
+    - `NewSettlement()` - Factory function with builder pattern
+    - `NewUsageDetails()` - Factory function with builder pattern
+  - EVM types (`mechanisms/evm/upto`):
+    - `PermitSignature` - EIP-2612 signature (V, R, S)
+    - `PermitAuthorization` - Permit authorization parameters
+    - `EIP2612Payload` - Complete EIP-2612 permit payload
+    - `CompactPayload` - Compact signature format
+    - `Extra` - EVM-specific extra fields
+    - `Settlement` - EVM settlement with usage details
+    - `UsageDetails` - EVM usage tracking
+    - `IsEIP2612Payload()` - Type guard for EIP-2612 payloads
+    - `PayloadFromMap()` - Create payload from map
+    - `CreatePermitDomain()` - Create EIP-712 domain
+    - `CreatePermitMessage()` - Create EIP-712 message
+    - EIP-712 type definitions: `PermitTypes`, `PermitDomainTypes`
+
 ## [1.5.0] - 2026-01-16
 
 ### Added
