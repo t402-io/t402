@@ -135,7 +135,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 - [x] Expand SDK documentation (Go, Python, TypeScript)
 - [x] Add deployment and best practices guides
 - [x] Add API documentation generation (TypeDoc + GitHub Pages)
-- [ ] Create migration guide v1.x to v2.x
+- [x] Create migration guide v1.x to v2.x
 
 ### Phase 3: SDK Parity (Month 3) ✅
 
