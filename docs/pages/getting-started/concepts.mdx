@@ -41,7 +41,10 @@ A server that handles payment verification and settlement. Can be self-hosted or
 ### Scheme
 A logical way of moving money. T402 supports multiple schemes:
 - **exact**: Pay an exact amount (EIP-3009 for EVM, SPL for Solana)
+- **upto**: Pay up to a maximum amount based on usage (EIP-2612 for EVM)
 - **exact-legacy**: Legacy token transfers (USDT on Ethereum)
+
+See [Payment Schemes](/schemes) for detailed documentation.
 
 ### Network
 The blockchain network where payment occurs:
@@ -73,9 +76,14 @@ When a server responds with 402, it includes payment requirements:
 
 ```typescript
 interface PaymentRequirements {
-  scheme: 'exact' | 'exact-legacy'
+  scheme: 'exact' | 'upto'
   network: string           // e.g., 'eip155:8453'
-  maxAmountRequired: string // e.g., '1000000' (1 USDT)
+  // For 'exact' scheme:
+  amount?: string           // Fixed amount (e.g., '1000000' for 1 USDT)
+  // For 'upto' scheme:
+  maxAmount?: string        // Maximum authorized amount
+  minAmount?: string        // Minimum settlement amount
+  // Common fields:
   resource: string          // Resource identifier
   description?: string      // Human-readable description
   mimeType?: string         // Expected response type

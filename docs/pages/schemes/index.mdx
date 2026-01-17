@@ -1,0 +1,147 @@
+# Payment Schemes
+
+T402 supports multiple payment schemes to accommodate different billing models and use cases.
+
+## What is a Scheme?
+
+A **scheme** defines how payments are authorized, verified, and settled. Each scheme specifies:
+
+- Authorization format (how clients sign payment requests)
+- Verification requirements (what the facilitator checks)
+- Settlement mechanism (how funds are transferred on-chain)
+
+## Available Schemes
+
+| Scheme | Description | Use Case |
+|--------|-------------|----------|
+| [`exact`](#exact-scheme) | Fixed amount payments | One-time purchases, subscriptions |
+| [`upto`](/schemes/upto) | Usage-based billing | AI tokens, API calls, streaming |
+
+## Exact Scheme
+
+The `exact` scheme transfers a **fixed amount** specified upfront.
+
+```json
+{
+  "scheme": "exact",
+  "network": "eip155:8453",
+  "amount": "1000000",
+  "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+  "payTo": "0x..."
+}
+```
+
+**Characteristics:**
+- Amount known before request
+- Full amount transferred on settlement
+- Simpler implementation
+- Uses EIP-3009 TransferWithAuthorization (EVM)
+
+**Best for:**
+- Fixed-price API calls
+- Content purchases
+- Subscription payments
+- Any scenario where cost is predetermined
+
+## Up-To Scheme
+
+The [`upto`](/schemes/upto) scheme authorizes transfer of **up to** a maximum amount.
+
+```json
+{
+  "scheme": "upto",
+  "network": "eip155:8453",
+  "maxAmount": "1000000",
+  "minAmount": "10000",
+  "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+  "payTo": "0x...",
+  "extra": {
+    "unit": "token",
+    "unitPrice": "100"
+  }
+}
+```
+
+**Characteristics:**
+- Client authorizes maximum exposure
+- Settlement based on actual usage
+- Server tracks and reports consumption
+- Uses EIP-2612 Permit (EVM)
+
+**Best for:**
+- LLM token generation
+- Metered API usage
+- Streaming content
+- Compute resources
+
+[Learn more about the upto scheme →](/schemes/upto)
+
+## Scheme Comparison
+
+| Feature | `exact` | `upto` |
+|---------|---------|--------|
+| Amount field | `amount` | `maxAmount` |
+| Settlement | Fixed amount | Variable (≤ max) |
+| Client risk | Exact cost known | Maximum exposure known |
+| Server complexity | Lower | Higher (usage tracking) |
+| EVM implementation | EIP-3009 | EIP-2612 + Router |
+
+## Choosing a Scheme
+
+### Use `exact` when:
+- Price is known before the request
+- Simple pay-per-call model
+- Fixed content or service pricing
+- Lower implementation overhead desired
+
+### Use `upto` when:
+- Cost depends on request outcome
+- Usage-based or metered billing
+- Variable-length operations (streaming, generation)
+- Partial refunds may be needed
+
+## Network Support
+
+| Network | `exact` | `upto` |
+|---------|---------|--------|
+| EVM (Base, Ethereum, Arbitrum) | ✅ EIP-3009 | ✅ EIP-2612 |
+| Solana | ✅ SPL Transfer | 🚧 Planned |
+| TON | ✅ Jetton Transfer | 🚧 Planned |
+| TRON | ✅ TRC-20 Transfer | 🚧 Planned |
+
+## SDK Support
+
+All T402 SDKs support both schemes:
+
+```typescript
+// TypeScript - exact scheme
+import { ExactEvmScheme } from '@t402/evm';
+
+// TypeScript - upto scheme
+import { UptoEvmScheme } from '@t402/evm';
+```
+
+```python
+# Python - exact scheme
+from t402.schemes import ExactEvmClientScheme
+
+# Python - upto scheme
+from t402.schemes import UptoEvmClientScheme
+```
+
+```go
+// Go - exact scheme
+import "github.com/t402-io/t402/go/mechanisms/evm/exact"
+
+// Go - upto scheme
+import "github.com/t402-io/t402/go/mechanisms/evm/upto"
+```
+
+```java
+// Java - exact scheme
+import io.t402.model.ExactSchemePayload;
+
+// Java - upto scheme
+import io.t402.schemes.upto.UptoPaymentRequirements;
+import io.t402.schemes.evm.upto.UptoEIP2612Payload;
+```
