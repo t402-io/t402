@@ -1,0 +1,121 @@
+% Appendix A: Complete JSON Schemas
+\chapter{Complete JSON Schemas}
+\label{app:schemas}
+
+This appendix provides complete JSON Schema definitions for all \tprotocol{} data structures.
+
+\section{PaymentRequired Schema}
+
+\begin{lstlisting}[language=json,caption={PaymentRequired JSON Schema}]
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["t402Version", "resource", "accepts"],
+  "properties": {
+    "t402Version": {
+      "type": "integer",
+      "const": 2
+    },
+    "error": {
+      "type": "string"
+    },
+    "resource": {
+      "$ref": "#/$defs/ResourceInfo"
+    },
+    "accepts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/PaymentRequirements"
+      },
+      "minItems": 1
+    },
+    "extensions": {
+      "type": "object"
+    }
+  },
+  "$defs": {
+    "ResourceInfo": {
+      "type": "object",
+      "required": ["url"],
+      "properties": {
+        "url": { "type": "string", "format": "uri" },
+        "description": { "type": "string" },
+        "mimeType": { "type": "string" }
+      }
+    },
+    "PaymentRequirements": {
+      "type": "object",
+      "required": ["scheme", "network", "amount", "asset", "payTo", "maxTimeoutSeconds"],
+      "properties": {
+        "scheme": { "type": "string" },
+        "network": { "type": "string" },
+        "amount": { "type": "string" },
+        "asset": { "type": "string" },
+        "payTo": { "type": "string" },
+        "maxTimeoutSeconds": { "type": "integer" },
+        "extra": { "type": "object" }
+      }
+    }
+  }
+}
+\end{lstlisting}
+
+\section{PaymentPayload Schema}
+
+\begin{lstlisting}[language=json,caption={PaymentPayload JSON Schema}]
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["t402Version", "accepted", "payload"],
+  "properties": {
+    "t402Version": {
+      "type": "integer",
+      "const": 2
+    },
+    "resource": {
+      "$ref": "#/$defs/ResourceInfo"
+    },
+    "accepted": {
+      "$ref": "#/$defs/PaymentRequirements"
+    },
+    "payload": {
+      "type": "object"
+    },
+    "extensions": {
+      "type": "object"
+    }
+  }
+}
+\end{lstlisting}
+
+\section{SettlementResponse Schema}
+
+\begin{lstlisting}[language=json,caption={SettlementResponse JSON Schema}]
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["success", "transaction", "network"],
+  "properties": {
+    "success": { "type": "boolean" },
+    "errorReason": { "type": "string" },
+    "payer": { "type": "string" },
+    "transaction": { "type": "string" },
+    "network": { "type": "string" }
+  }
+}
+\end{lstlisting}
+
+\section{VerifyResponse Schema}
+
+\begin{lstlisting}[language=json,caption={VerifyResponse JSON Schema}]
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["isValid"],
+  "properties": {
+    "isValid": { "type": "boolean" },
+    "invalidReason": { "type": "string" },
+    "payer": { "type": "string" }
+  }
+}
+\end{lstlisting}
