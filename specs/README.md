@@ -53,6 +53,15 @@ The `exact` scheme transfers a specific amount for each request.
 | [TRON](./schemes/exact/scheme_exact_tron.md) | TRON blockchain (TRC20) |
 | [SUI](./schemes/exact/scheme_exact_sui.md) | Sui blockchain **(DRAFT)** |
 
+### Up-To Scheme (Draft)
+
+The `upto` scheme authorizes transfer of **up to** a maximum amount, enabling usage-based billing.
+
+| Implementation | Description |
+|----------------|-------------|
+| [Overview](./schemes/upto/scheme_upto.md) | Scheme specification **(DRAFT)** |
+| [EVM](./schemes/upto/scheme_upto_evm.md) | Ethereum/EVM chains (EIP-2612) **(DRAFT)** |
+
 ## Templates
 
 For contributors adding new schemes or transports:
