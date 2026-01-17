@@ -20,6 +20,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added CONTRIBUTING.md for Facilitator service
 - Added last updated timestamps to ROADMAP.md, SECURITY.md, BUG_BOUNTY.md
 
+## [2.1.1] - 2026-01-18
+
+### Java SDK v1.3.0
+- **SVM Scheme Types** (`io.t402.schemes.svm`) - Full Solana support
+  - `SvmConstants` - Network IDs (CAIP-2), USDC token addresses, RPC/WebSocket URLs
+  - `SvmAuthorization` - Transfer authorization metadata with builder pattern
+  - `ExactSvmPayload` - Payment payload containing base64-encoded signed transaction
+  - `SvmUtils` - Address validation, amount parsing/formatting, base58 codec
+- Comprehensive test suite (29 new tests, 330 total)
+
 ## [2.1.0] - 2026-01-16
 
 ### Go SDK v1.5.0
