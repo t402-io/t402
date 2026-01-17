@@ -1,0 +1,136 @@
+# Security
+
+T402 is designed with security as a core principle. This section documents the cryptographic foundations, threat model, and security audit scope for the protocol.
+
+import { Callout } from 'nextra/components'
+
+<Callout type="info">
+  T402 is preparing for a formal security audit. This documentation is designed to assist auditors and security researchers in understanding the protocol's security properties.
+</Callout>
+
+## Security Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Cryptographic Operations](/security/cryptographic-operations) | Complete documentation of all cryptographic algorithms, signature schemes, and key management across all supported blockchains. |
+| [Threat Model](/security/threat-model) | Analysis of trust assumptions, in-scope threats, attack vectors, and mitigation strategies. |
+| [Audit Scope](/security/audit-scope) | Detailed scope document for security auditors including critical code paths, testing recommendations, and focus areas. |
+
+## Security Principles
+
+### 1. No Custom Cryptography
+
+T402 uses only industry-standard cryptographic primitives:
+
+| Chain Family | Signature Algorithm | Hash Function | Standard |
+|--------------|--------------------|--------------|---------|
+| EVM | ECDSA (secp256k1) | Keccak-256 | EIP-712, EIP-3009 |
+| Solana | Ed25519 | SHA-512 | Solana standard |
+| TON | Ed25519 | SHA-256 | TON TL-B |
+| TRON | ECDSA (secp256k1) | SHA-256 | TRON protocol |
+
+### 2. Defense in Depth
+
+Multiple layers of protection prevent unauthorized payments:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    TRANSPORT LAYER                          │
+│  HTTPS/TLS encryption for all communication                │
+├─────────────────────────────────────────────────────────────┤
+│                    PROTOCOL LAYER                           │
+│  EIP-712 typed data prevents signature reuse               │
+├─────────────────────────────────────────────────────────────┤
+│                    APPLICATION LAYER                        │
+│  Nonces, time windows, amount validation                   │
+├─────────────────────────────────────────────────────────────┤
+│                    BLOCKCHAIN LAYER                         │
+│  Smart contract verification, finality guarantees          │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 3. Minimal Trust Requirements
+
+| Entity | Trust Level | Reason |
+|--------|-------------|--------|
+| Blockchain | High | Protocol security depends on blockchain consensus |
+| Token Contracts | High | USDT/USDC contracts must function correctly |
+| Facilitator | Medium | Can be self-hosted; cannot forge signatures |
+| Resource Server | Low | Cannot access funds without valid signature |
+| Client | None | Signatures are cryptographically verified |
+
+### 4. Fail-Safe Design
+
+- Invalid signatures are rejected before any funds move
+- Insufficient balance checks occur before settlement
+- Time windows prevent indefinite authorization validity
+- Nonce registry prevents double-spending
+
+## Security Features by Chain
+
+### EVM Networks
+
+| Feature | Implementation |
+|---------|----------------|
+| Replay Protection | EIP-712 domain separator (chainId, verifyingContract) |
+| Authorization | EIP-3009 TransferWithAuthorization |
+| Nonce Management | 32-byte random nonce, on-chain registry |
+| Time Bounds | validAfter / validBefore timestamps |
+| Smart Wallets | EIP-1271 signature verification |
+| Counterfactual | ERC-6492 wrapped signatures |
+
+### Solana (SVM)
+
+| Feature | Implementation |
+|---------|----------------|
+| Replay Protection | Recent blockhash (300 blocks validity) |
+| Authorization | TransferChecked instruction |
+| Fee Payer Safety | Instruction structure validation |
+| Amount Validation | Exact amount matching |
+
+### TON
+
+| Feature | Implementation |
+|---------|----------------|
+| Replay Protection | Wallet seqno (sequence number) |
+| Authorization | Jetton transfer message |
+| Address Derivation | Owner + Jetton master validation |
+
+### TRON
+
+| Feature | Implementation |
+|---------|----------------|
+| Replay Protection | Reference block + expiration |
+| Authorization | TRC-20 transfer |
+| Address Recovery | ECDSA public key recovery |
+
+## Reporting Security Issues
+
+If you discover a security vulnerability, please report it responsibly:
+
+1. **Email**: security@t402.io
+2. **Do not** disclose publicly until patched
+3. Include detailed reproduction steps
+4. We will acknowledge within 48 hours
+
+<Callout type="warning">
+  Never share real private keys or sensitive credentials when reporting issues. Use testnet funds and test accounts only.
+</Callout>
+
+## Security Audit Status
+
+| Component | Status | Auditor |
+|-----------|--------|---------|
+| Protocol Specification | Pending | TBD |
+| Facilitator Service | Pending | TBD |
+| TypeScript SDK | Pending | TBD |
+| Go SDK | Pending | TBD |
+| Python SDK | Pending | TBD |
+| Java SDK | Pending | TBD |
+
+## Resources
+
+- [Cryptographic Operations](/security/cryptographic-operations) - Detailed crypto documentation
+- [Threat Model](/security/threat-model) - Security analysis and mitigations
+- [Audit Scope](/security/audit-scope) - Auditor guidance
+- [GitHub Security Policy](https://github.com/t402-io/t402/security/policy) - Vulnerability reporting

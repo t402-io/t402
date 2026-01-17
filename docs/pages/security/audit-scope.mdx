@@ -1,0 +1,451 @@
+# Audit Scope
+
+This document defines the scope for security audits of the T402 protocol, including critical code paths, focus areas, and testing recommendations.
+
+import { Callout, Tabs } from 'nextra/components'
+
+## Executive Summary
+
+T402 is an HTTP-native payment protocol for USDT/USDT0 stablecoins across multiple blockchains. The audit should focus on:
+
+1. **Signature generation and verification** across all chains
+2. **Payment verification logic** in the facilitator
+3. **Replay protection mechanisms** (nonces, time windows)
+4. **Fee payer safety** for sponsored transactions (Solana)
+5. **SDK cryptographic implementations** in all four languages
+
+## Repository Structure
+
+```
+github.com/t402-io/t402/
+├── typescript/              # TypeScript SDK (21 npm packages)
+│   └── packages/
+│       ├── core/           # Protocol types
+│       ├── mechanisms/
+│       │   ├── evm/        # EVM signing (IN SCOPE)
+│       │   ├── svm/        # Solana signing (IN SCOPE)
+│       │   ├── ton/        # TON signing (IN SCOPE)
+│       │   └── tron/       # TRON signing (IN SCOPE)
+│       └── ...
+├── go/                      # Go SDK
+│   ├── signers/            # Signer implementations (IN SCOPE)
+│   │   ├── evm/
+│   │   └── svm/
+│   ├── mechanisms/         # Chain-specific logic (IN SCOPE)
+│   │   ├── evm/
+│   │   ├── svm/
+│   │   ├── ton/
+│   │   └── tron/
+│   └── ...
+├── python/                  # Python SDK
+│   └── t402/src/t402/
+│       ├── schemes/        # Scheme implementations (IN SCOPE)
+│       ├── wdk/            # Wallet signing (IN SCOPE)
+│       └── erc4337/        # Account abstraction (IN SCOPE)
+├── java/                    # Java SDK
+│   └── src/main/java/io/t402/
+│       └── crypto/         # Crypto signers (IN SCOPE)
+├── services/
+│   └── facilitator/        # Facilitator service (IN SCOPE)
+└── specs/                   # Protocol specifications (REFERENCE)
+```
+
+## In-Scope Components
+
+### Priority 1: Critical Path (Must Audit)
+
+| Component | Location | Description | Risk Level |
+|-----------|----------|-------------|-----------|
+| EVM Verification | `go/mechanisms/evm/exact/facilitator/` | Payment verification and settlement | Critical |
+| EVM Signers | `go/signers/evm/`, `java/crypto/EvmSigner.java` | EIP-712 signing | Critical |
+| Nonce Management | `go/mechanisms/evm/`, Facilitator DB | Replay prevention | Critical |
+| SVM Verification | `go/mechanisms/svm/exact/facilitator/` | Solana payment verification | Critical |
+| Fee Payer Validation | `go/mechanisms/svm/` | Instruction safety checks | Critical |
+
+### Priority 2: High Importance
+
+| Component | Location | Description | Risk Level |
+|-----------|----------|-------------|-----------|
+| EIP-712 Hashing | `go/mechanisms/evm/eip712.go` | Typed data hashing | High |
+| EIP-1271 Verification | `go/mechanisms/evm/verify_1271.go` | Smart wallet support | High |
+| ERC-6492 Parsing | `go/mechanisms/evm/erc6492.go` | Counterfactual wallets | High |
+| TON Signing | `typescript/packages/mechanisms/ton/` | TON message signing | High |
+| TRON Signing | `java/crypto/TronSigner.java` | TRON transaction signing | High |
+
+### Priority 3: Important
+
+| Component | Location | Description | Risk Level |
+|-----------|----------|-------------|-----------|
+| Python WDK | `python/t402/wdk/signer.py` | BIP-39 wallet signing | Medium |
+| Python ERC-4337 | `python/t402/erc4337/` | Account abstraction | Medium |
+| TypeScript Signers | `typescript/packages/mechanisms/*/src/signer.ts` | Client signing | Medium |
+| Java SVM Signer | `java/crypto/SvmSigner.java` | Ed25519 signing | Medium |
+
+## Out-of-Scope
+
+| Component | Reason |
+|-----------|--------|
+| UI Components | `@t402/react`, `@t402/vue` - No crypto operations |
+| HTTP Framework Adapters | `@t402/express`, `@t402/hono` - Wrapper code |
+| CLI Tools | User interfaces, no crypto logic |
+| Documentation Site | Static content |
+| CI/CD Pipelines | Infrastructure |
+
+## Critical Code Paths
+
+### 1. EVM Payment Verification
+
+```
+File: go/mechanisms/evm/exact/facilitator/scheme.go
+
+Function: Verify(ctx, payload, requirements)
+├─ 1. Validate scheme = "exact"
+├─ 2. Parse EVM payload from bytes
+├─ 3. Extract authorization from payload
+├─ 4. Get network configuration
+├─ 5. Validate recipient matches payTo
+├─ 6. Validate amount ≥ required
+├─ 7. Check nonce not already used          ← CRITICAL: Replay prevention
+├─ 8. Query payer balance                    ← CRITICAL: Sufficient funds
+├─ 9. Get token metadata (name, version)
+├─ 10. Compute EIP-712 hash                  ← CRITICAL: Correct hashing
+├─ 11. Recover signer from signature         ← CRITICAL: Signature validation
+├─ 12. Compare recovered address with from   ← CRITICAL: Authorization match
+└─ 13. Return VerifyResponse
+```
+
+### 2. EVM Payment Settlement
+
+```
+File: go/mechanisms/evm/exact/facilitator/scheme.go
+
+Function: Settle(ctx, payload, requirements)
+├─ 1. All verification steps (above)
+├─ 2. Build transferWithAuthorization call
+├─ 3. Estimate gas
+├─ 4. Submit transaction                     ← CRITICAL: Correct parameters
+├─ 5. Wait for confirmation
+├─ 6. Mark nonce as used                     ← CRITICAL: Prevent double-spend
+└─ 7. Return SettlementResponse
+```
+
+### 3. Solana Fee Payer Validation
+
+```
+File: go/mechanisms/svm/exact/facilitator/scheme.go
+
+Function: ValidateTransaction(tx, feePayer, requirements)
+├─ 1. Verify exactly 3 instructions
+│   ├─ [0] ComputeBudget.SetLimit
+│   ├─ [1] ComputeBudget.SetPrice
+│   └─ [2] SPL Token TransferChecked
+├─ 2. Verify compute price ≤ 5 lamports     ← CRITICAL: Fee limit
+├─ 3. For each instruction:
+│   └─ Verify feePayer NOT in accounts      ← CRITICAL: Fee payer safety
+├─ 4. Verify transfer authority ≠ feePayer  ← CRITICAL: Fee payer safety
+├─ 5. Verify token source ≠ feePayer        ← CRITICAL: Fee payer safety
+├─ 6. Verify transfer amount = required     ← CRITICAL: Exact amount
+└─ 7. Verify destination = payTo ATA        ← CRITICAL: Correct recipient
+```
+
+### 4. EIP-712 Hash Computation
+
+```
+File: go/mechanisms/evm/eip712.go
+
+Function: HashEIP3009Authorization(domain, authorization)
+├─ 1. Encode domain separator
+│   ├─ Hash type string
+│   ├─ Hash name
+│   ├─ Hash version
+│   ├─ Encode chainId
+│   └─ Encode verifyingContract
+├─ 2. Encode struct hash
+│   ├─ Hash type string
+│   ├─ Encode from
+│   ├─ Encode to
+│   ├─ Encode value
+│   ├─ Encode validAfter
+│   ├─ Encode validBefore
+│   └─ Encode nonce
+├─ 3. Compute final hash
+│   └─ keccak256(0x19 || 0x01 || domainSeparator || structHash)
+└─ 4. Return hash                           ← CRITICAL: Must match contract
+```
+
+## Focus Areas for Auditors
+
+### 1. Signature Verification
+
+**Review Checklist:**
+- [ ] ECDSA v value adjustment (27/28 conversion)
+- [ ] Ed25519 signature format validation
+- [ ] Public key recovery correctness
+- [ ] Constant-time comparison for signatures
+- [ ] Handling of malformed signatures (no panic)
+
+**Key Questions:**
+- Can an invalid signature cause verification to return true?
+- Are there edge cases in v value handling?
+- Is signature length validated before processing?
+
+### 2. Nonce Management
+
+**Review Checklist:**
+- [ ] Nonce uniqueness enforcement
+- [ ] Race condition handling in nonce checks
+- [ ] Nonce storage persistence
+- [ ] Nonce format validation (32 bytes)
+
+**Key Questions:**
+- Can the same nonce be used twice under any circumstances?
+- What happens if nonce storage fails after verification but before settlement?
+- Is there a time-of-check to time-of-use (TOCTOU) vulnerability?
+
+### 3. Time Window Validation
+
+**Review Checklist:**
+- [ ] `validAfter` checked correctly
+- [ ] `validBefore` checked correctly
+- [ ] Block timestamp vs. system time handling
+- [ ] Overflow/underflow in timestamp comparison
+
+**Key Questions:**
+- Can a signature with `validBefore = 0` be valid?
+- What is the maximum allowed validity window?
+- How is clock skew handled?
+
+### 4. Amount and Recipient Validation
+
+**Review Checklist:**
+- [ ] Amount comparison (≥ required, not just ==)
+- [ ] Recipient address validation
+- [ ] Checksum address handling
+- [ ] Integer overflow in amount calculations
+
+**Key Questions:**
+- Can an amount of 0 pass validation?
+- Are mixed-case addresses handled correctly?
+- What happens with very large amounts (near uint256 max)?
+
+### 5. Solana-Specific Checks
+
+**Review Checklist:**
+- [ ] Instruction count validation
+- [ ] Instruction order validation
+- [ ] Account list completeness check
+- [ ] Associated Token Account derivation
+- [ ] Compute budget price enforcement
+
+**Key Questions:**
+- Can additional instructions be added without detection?
+- Can instruction accounts be reordered?
+- Is the fee payer check exhaustive for all instruction types?
+
+### 6. EIP-1271 and ERC-6492
+
+**Review Checklist:**
+- [ ] Magic value hardcoded correctly (0x1626ba7e)
+- [ ] Contract call error handling
+- [ ] Gas limit for verification call
+- [ ] ERC-6492 magic suffix detection
+- [ ] ABI decoding for wrapped signatures
+
+**Key Questions:**
+- What if the contract returns a different value?
+- Can a malicious contract cause denial of service?
+- Is ERC-6492 unwrapping secure against malformed data?
+
+## Testing Recommendations
+
+### Unit Tests
+
+```go
+// Signature edge cases
+func TestVerifySignature_InvalidLength(t *testing.T) {
+    // Signatures shorter than 65 bytes
+    // Signatures longer than 65 bytes
+}
+
+func TestVerifySignature_InvalidV(t *testing.T) {
+    // v = 0, 1, 26, 29, 30, 255
+}
+
+func TestVerifySignature_MalleableS(t *testing.T) {
+    // s > n/2 (signature malleability)
+}
+```
+
+```go
+// Nonce tests
+func TestNonceUniqueness(t *testing.T) {
+    // Same nonce, same payer
+    // Same nonce, different payer
+    // Concurrent nonce usage
+}
+```
+
+```go
+// Time window tests
+func TestTimeWindow_BoundaryConditions(t *testing.T) {
+    // validAfter = now (exact boundary)
+    // validBefore = now (exact boundary)
+    // validAfter = validBefore
+    // validAfter > validBefore
+}
+```
+
+### Integration Tests
+
+```go
+// Full payment flow on testnet
+func TestFullPaymentFlow_EVM(t *testing.T) {
+    // 1. Generate valid payment
+    // 2. Verify payment
+    // 3. Settle payment
+    // 4. Verify nonce marked as used
+    // 5. Attempt replay (should fail)
+}
+```
+
+### Fuzzing Targets
+
+| Target | Input | Goal |
+|--------|-------|------|
+| `ParseEVMPayload` | Random bytes | No panic, graceful error |
+| `HashEIP3009Authorization` | Random domain/auth | Consistent output |
+| `VerifyEOASignature` | Random signature | No panic, correct result |
+| `ValidateTransaction` (Solana) | Random tx bytes | No panic, reject invalid |
+
+## Dependency Audit
+
+### Go Dependencies
+
+```bash
+# Check for known vulnerabilities
+go list -m all | nancy sleuth
+
+# Key dependencies to review:
+# - github.com/ethereum/go-ethereum (crypto)
+# - github.com/gagliardetto/solana-go (Ed25519)
+# - golang.org/x/crypto (Ed25519)
+```
+
+### Python Dependencies
+
+```bash
+# Check for known vulnerabilities
+pip audit
+
+# Key dependencies:
+# - eth-account (EIP-712 signing)
+# - web3 (RPC client)
+# - pynacl (Ed25519)
+```
+
+### TypeScript Dependencies
+
+```bash
+# Check for known vulnerabilities
+npm audit
+
+# Key dependencies:
+# - viem (EVM signing)
+# - @solana/web3.js (Solana)
+```
+
+### Java Dependencies
+
+```bash
+# Maven dependency check
+mvn dependency-check:check
+
+# Key dependencies:
+# - web3j (EVM)
+# - bouncycastle (Ed25519)
+```
+
+## Environment Setup
+
+### Local Development
+
+```bash
+# Clone repository
+git clone https://github.com/t402-io/t402
+cd t402
+
+# Go SDK
+cd go && go test ./...
+
+# Python SDK
+cd python && pip install -e ".[dev]" && pytest
+
+# TypeScript SDK
+cd typescript && pnpm install && pnpm test
+
+# Java SDK
+cd java && mvn test
+```
+
+### Testnet Configuration
+
+| Network | Chain ID | RPC | Faucet |
+|---------|----------|-----|--------|
+| Base Sepolia | 84532 | `https://sepolia.base.org` | [faucet.quicknode.com](https://faucet.quicknode.com/base/sepolia) |
+| Solana Devnet | - | `https://api.devnet.solana.com` | [solfaucet.com](https://solfaucet.com) |
+| TON Testnet | - | `https://testnet.toncenter.com` | [@testgiver_ton_bot](https://t.me/testgiver_ton_bot) |
+| TRON Nile | - | `https://nile.trongrid.io` | [nileex.io](https://nileex.io/join/getJoinPage) |
+
+## Deliverables
+
+### Expected Audit Report Sections
+
+1. **Executive Summary**
+   - Overall risk assessment
+   - Critical findings summary
+   - Recommendations overview
+
+2. **Methodology**
+   - Tools used
+   - Testing approach
+   - Coverage metrics
+
+3. **Findings**
+   - Severity classification (Critical, High, Medium, Low, Info)
+   - Detailed description
+   - Impact analysis
+   - Proof of concept (where applicable)
+   - Remediation recommendations
+
+4. **Code Quality**
+   - Architecture review
+   - Best practices compliance
+   - Documentation quality
+
+5. **Appendices**
+   - Test results
+   - Coverage reports
+   - Tool outputs
+
+## Timeline
+
+| Phase | Duration | Activities |
+|-------|----------|------------|
+| Kickoff | 1 day | Repository access, environment setup |
+| Code Review | 2-3 weeks | Manual review of in-scope components |
+| Testing | 1-2 weeks | Automated testing, fuzzing |
+| Report Draft | 1 week | Finding documentation |
+| Remediation Review | 1 week | Verify fixes |
+| Final Report | 2-3 days | Final documentation |
+
+## Contact Information
+
+| Role | Contact |
+|------|---------|
+| Technical Lead | engineering@t402.io |
+| Security Contact | security@t402.io |
+| Project Manager | pm@t402.io |
+
+<Callout type="info">
+  For audit engagement inquiries, please contact security@t402.io with your firm's credentials and proposed timeline.
+</Callout>
