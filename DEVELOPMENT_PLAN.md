@@ -103,12 +103,17 @@ Configuration:
 - [ ] Regional database replicas
 - [ ] Shared Redis cluster
 
-### 3.4 Extract viem Peer Dependency
+### 3.4 Extract viem Peer Dependency ✅
 **Goal**: Make viem optional in TypeScript packages
 
-- [ ] Create `@t402/evm-core` with no viem dependency
-- [ ] Keep `@t402/evm` as convenience package with viem
-- [ ] Update documentation
+- [x] Create `@t402/evm-core` with no viem dependency
+- [x] Keep `@t402/evm` as convenience package with viem
+- [x] Update documentation
+
+**Implementation**:
+- `@t402/evm-core` provides all types, constants, and utilities without viem dependency
+- `@t402/evm` re-exports everything from evm-core and adds viem-dependent implementations
+- Consumers can use `@t402/evm-core` for type-only imports (smaller bundle size)
 
 ---
 
@@ -219,18 +224,18 @@ Progress tracked in:
 |-------|-------|-----------|------------|
 | P0 | 2 | 2 | 100% |
 | P1 | 4 | 4 | 100% |
-| P2 | 4 | 2 | 50% |
+| P2 | 4 | 3 | 75% |
 | P3 | 3 | 2 | 67% |
-| **Total** | **13** | **10** | **77%** |
+| **Total** | **13** | **11** | **85%** |
 
 ### Remaining Items
 1. Up-To Scheme - Router contract deployment (P2) - SDK types + docs complete
 2. Multi-Region Facilitator - Infrastructure (P2)
-3. viem Peer Dependency - Package restructuring (P2)
-4. Video Tutorials - Educational content (P3)
-5. Contact security firms - Outreach (P0)
+3. Video Tutorials - Educational content (P3)
+4. Contact security firms - Outreach (P0)
 
 ### Recently Completed
+- viem Peer Dependency extraction: `@t402/evm-core` package created
 - Security Audit Preparation documentation (cryptographic operations, threat model, audit scope)
 - Up-To Scheme SDK types: TypeScript, Go, Python, Java (all 4 SDKs)
 - Up-To Scheme documentation: schemes overview and detailed upto guide

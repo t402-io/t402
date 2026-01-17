@@ -8,9 +8,16 @@
  * - exact: EIP-3009 transferWithAuthorization (gasless, recommended)
  * - exact-legacy: approve + transferFrom (legacy tokens like USDT)
  * - upto: EIP-2612 permit for usage-based billing (DRAFT)
+ *
+ * For types-only usage without viem, use @t402/evm-core instead.
  */
 
-// Export EVM implementation modules
+// Re-export everything from @t402/evm-core
+// This allows users to get all types from @t402/evm while @t402/evm-core
+// provides the same types without bundling viem
+export * from "@t402/evm-core";
+
+// Export EVM implementation modules (viem-dependent)
 export { ExactEvmScheme } from "./exact/index.js";
 export type { ExactEvmSchemeConfig } from "./exact/server/scheme.js";
 
@@ -25,54 +32,8 @@ export type {
   ExactLegacyEvmFacilitatorSchemeConfig,
 } from "./exact-legacy/index.js";
 
-// Export signer utilities
-export { toClientEvmSigner, toFacilitatorEvmSigner } from "./signer.js";
-export type { ClientEvmSigner, FacilitatorEvmSigner } from "./signer.js";
-
-// Export token configuration utilities
-export {
-  // Token addresses
-  USDT0_ADDRESSES,
-  USDC_ADDRESSES,
-  USDT_LEGACY_ADDRESSES,
-  // Token registry
-  TOKEN_REGISTRY,
-  TOKEN_PRIORITY,
-  // Utility functions
-  getTokenConfig,
-  getNetworkTokens,
-  getDefaultToken,
-  getTokenByAddress,
-  supportsEIP3009,
-  getNetworksForToken,
-  getUsdt0Networks,
-  getEIP712Domain,
-} from "./tokens.js";
-
-// Export token types
-export type { TokenConfig, TokenType, NetworkTokenRegistry } from "./tokens.js";
-
-// Export payload types
-export type {
-  ExactEvmPayloadV1,
-  ExactEvmPayloadV2,
-  ExactLegacyPayload,
-  // Up-To scheme types
-  UptoEIP2612Payload,
-  UptoEIP2612PayloadCompact,
-  UptoEvmPayloadV2,
-  UptoEvmExtra,
-  UptoEvmSettlement,
-  PermitSignature,
-  PermitAuthorization,
-} from "./types.js";
-export { permitTypes, isUptoEIP2612Payload } from "./types.js";
-
 // Export Up-To scheme (DRAFT)
 export { UptoEvmScheme, createUptoEvmScheme } from "./upto/index.js";
-
-// Export constants
-export { authorizationTypes, legacyAuthorizationTypes, eip3009ABI, erc20LegacyABI } from "./constants.js";
 
 // Export USDT0 bridge module
 export {
