@@ -656,6 +656,57 @@ server.OnBeforeSettle(func(ctx SettleContext) (*BeforeHookResult, error) {
 })
 ```
 
+## Testing
+
+### Testing Protected Endpoints
+
+```go
+func TestProtectedEndpoint(t *testing.T) {
+    // Create test server
+    r := gin.Default()
+
+    // Add mock middleware
+    r.Use(mockPaymentMiddleware())
+
+    r.GET("/protected", handler)
+
+    // Test with valid payment
+    req := httptest.NewRequest("GET", "/protected", nil)
+    req.Header.Set("X-PAYMENT", validPayment)
+
+    w := httptest.NewRecorder()
+    r.ServeHTTP(w, req)
+
+    if w.Code != 200 {
+        t.Errorf("Expected 200, got %d", w.Code)
+    }
+}
+```
+
+### Testing Without Payment
+
+```go
+func TestUnpaidRequest(t *testing.T) {
+    r := gin.Default()
+    r.Use(ginmw.X402Payment(ginmw.Config{
+        Routes: routes,
+        Facilitator: mockFacilitator,
+        Schemes: schemes,
+    }))
+
+    r.GET("/protected", handler)
+
+    req := httptest.NewRequest("GET", "/protected", nil)
+    w := httptest.NewRecorder()
+    r.ServeHTTP(w, req)
+
+    // Should return 402 Payment Required
+    if w.Code != 402 {
+        t.Errorf("Expected 402, got %d", w.Code)
+    }
+}
+```
+
 ## Deployment Considerations
 
 ### Production Checklist

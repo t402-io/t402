@@ -580,6 +580,44 @@ facilitator.
     OnAfterSettle(logSuccess("settle"))
 ```
 
+## Testing
+
+### Unit Tests
+
+```go
+func TestFacilitatorVerify(t *testing.T) {
+    facilitator := t402.Newt402Facilitator()
+    facilitator.Register(network, mockScheme)
+
+    result, err := facilitator.Verify(ctx, payloadBytes, requirementsBytes)
+
+    if err != nil {
+        t.Errorf("Verify failed: %v", err)
+    }
+    if !result.IsValid {
+        t.Errorf("Expected valid payment")
+    }
+}
+```
+
+### Integration Tests
+
+Test against real blockchain networks (testnet):
+
+```go
+// Create real signer with RPC connection
+signer := newRealFacilitatorSigner(privateKey, rpcURL)
+
+facilitator := t402.Newt402Facilitator()
+facilitator.Register(network, evm.NewExactEvmScheme(signer))
+
+// Test real verification and settlement
+result, _ := facilitator.Settle(ctx, payloadBytes, requirementsBytes)
+
+// Verify transaction on blockchain
+receipt, _ := rpcClient.TransactionReceipt(ctx, result.Transaction)
+```
+
 ## Monitoring
 
 ### Key Metrics
