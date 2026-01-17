@@ -1,0 +1,29 @@
+% Chapter 1: Abstract
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+
+\begin{quote}
+\textit{T402 is an open payment protocol that enables HTTP-native stablecoin payments. By leveraging the HTTP 402 ``Payment Required'' status code, T402 provides a standardized mechanism for web services to require and process cryptocurrency payments without intermediaries.}
+\end{quote}
+
+\vspace{1em}
+
+The proliferation of web services, APIs, and AI agents has created an unprecedented demand for seamless, programmable payments. Traditional payment systems, with their high fees, settlement delays, and geographic restrictions, are fundamentally incompatible with the pay-per-use economics of the digital age.
+
+\tprotocol{} addresses these challenges through a novel payment protocol that:
+
+\begin{itemize}
+    \item \textbf{Utilizes HTTP 402}: Implements the long-dormant HTTP 402 status code for payment signaling
+    \item \textbf{Supports Multiple Chains}: Works across EVM networks, Solana, TON, and TRON
+    \item \textbf{Enables Gasless Transactions}: Leverages EIP-3009 and ERC-4337 for zero-gas payments
+    \item \textbf{Integrates with AI}: Native support for MCP (Model Context Protocol) enabling autonomous agent payments
+    \item \textbf{Minimizes Trust}: The Facilitator cannot redirect funds---payments flow directly to merchants
+\end{itemize}
+
+The protocol separates concerns into three layers: \emph{Types} (transport-agnostic data structures), \emph{Logic} (chain-specific payment schemes), and \emph{Representation} (transport-layer encoding). This architecture enables extensibility across new blockchains and transport protocols while maintaining backward compatibility.
+
+Production deployments demonstrate sub-cent transaction costs on Layer 2 networks, immediate settlement, and seamless integration with existing HTTP infrastructure. The protocol is fully open-source under the Apache 2.0 license, with reference implementations available in TypeScript, Python, Go, and Java.
+
+\vspace{1em}
+
+\noindent\textbf{Keywords:} Payment Protocol, HTTP 402, Stablecoin, USDT, Cryptocurrency, API Monetization, Micropayments, AI Agents
