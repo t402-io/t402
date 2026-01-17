@@ -4,6 +4,29 @@ All notable changes to the T402 Java SDK will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- **Up-To Scheme Types** (`io.t402.schemes.upto`, `io.t402.schemes.evm.upto`) - Usage-based billing scheme
+  - Core types (`io.t402.schemes.upto`):
+    - `UptoPaymentRequirements` - Payment requirements with `maxAmount` for usage-based billing
+    - `UptoExtra` - Extra fields for billing units and EIP-712 domain parameters
+    - `UptoSettlement` - Settlement data with usage details
+    - `UptoUsageDetails` - Usage tracking metrics
+    - `UptoSettlementResponse` - Settlement transaction response with factory methods
+    - `UptoValidationResult` - Payment validation result with factory methods
+    - `UptoConstants` - Scheme constants and supported units
+    - `UptoUtils` - Helper functions (`isUptoPaymentRequirements()`, factories)
+  - EVM types (`io.t402.schemes.evm.upto`):
+    - `PermitSignature` - EIP-2612 signature (v, r, s)
+    - `PermitAuthorization` - Permit authorization parameters with builder
+    - `UptoEIP2612Payload` - Complete EIP-2612 permit payload with map conversion
+    - `UptoEvmExtra` - EVM-specific extra fields
+    - `UptoEvmSettlement` - EVM settlement with usage details
+    - `UptoEvmUsageDetails` - EVM usage tracking
+    - `UptoEvmTypes` - EIP-712 type definitions and helper functions
+      - `PERMIT_TYPE_FIELDS`, `DOMAIN_TYPE_FIELDS`
+      - `createPermitDomain()`, `createPermitMessage()`
+      - `isEIP2612Payload()` - Type guard for EIP-2612 payloads
+
 ## [1.1.0] - 2026-01-16
 
 ### Added

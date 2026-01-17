@@ -4,6 +4,20 @@ All notable changes to the T402 TypeScript SDK will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- **Up-To Scheme Types** (`@t402/core`, `@t402/evm`) - Usage-based billing scheme
+  - `UptoPaymentRequirements` - Payment requirements with `maxAmount` for usage-based billing
+  - `UptoExtra` - Extra fields for billing units and EIP-712 domain parameters
+  - `UptoSettlement` - Settlement data with usage details
+  - `UptoUsageDetails` - Usage tracking metrics (unitsConsumed, unitPrice, unitType)
+  - `UptoSettlementResponse` - Settlement transaction response
+  - `UptoValidationResult` - Payment validation result
+  - `isUptoPaymentRequirements()` - Type guard for upto requirements
+  - `isValidUnit()` - Validate billing unit types
+  - EVM types: `PermitSignature`, `PermitAuthorization`, `UptoEIP2612Payload`
+  - EIP-712 type definitions: `PERMIT_TYPES`, `PERMIT_DOMAIN_TYPES`
+  - Helper functions: `createPermitDomain()`, `createPermitMessage()`
+
 ## [2.0.0] - 2026-01-16
 
 ### Added
