@@ -445,7 +445,7 @@ class PaymentPayloadV2(BaseModel):
     """
 
     t402_version: int = Field(default=T402_VERSION_V2, alias="t402Version")
-    resource: ResourceInfo
+    resource: Optional[ResourceInfo] = None
     accepted: PaymentRequirementsV2
     payload: dict[str, Any]
     extensions: Optional[dict[str, Any]] = None
