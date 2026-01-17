@@ -5,5 +5,13 @@ export default {
   svm: '@t402/svm',
   ton: '@t402/ton',
   tron: '@t402/tron',
-  wdk: '@t402/wdk'
+  wdk: '@t402/wdk',
+  '---': {
+    type: 'separator'
+  },
+  typedoc: {
+    title: 'Full API Reference (TypeDoc)',
+    href: '/api/',
+    newWindow: false
+  }
 }
