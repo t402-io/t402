@@ -5,12 +5,6 @@ name = "t402-docs"
 compatibility_date = "2024-01-01"
 pages_build_output_dir = "out"
 
-[build]
-command = "bash scripts/build-api-docs.sh && npm run build"
-
-[build.environment]
-NODE_VERSION = "22"
-
 # Production environment (docs.t402.io)
 [env.production]
 name = "t402-docs"
@@ -19,3 +13,20 @@ name = "t402-docs"
 [env.preview]
 name = "t402-docs-preview"
 
+# =============================================================================
+# BUILD CONFIGURATION (Cloudflare Dashboard Settings)
+# =============================================================================
+# The build settings below must be configured in the Cloudflare Dashboard:
+#
+# 1. Go to: Workers & Pages > t402-docs > Settings > Builds & deployments
+# 2. Click "Configure production deployment"
+# 3. Set the following:
+#
+#    Build command:          bash scripts/build-api-docs.sh && npm run build
+#    Build output directory: out
+#    Root directory:         docs
+#    Node.js version:        22.x
+#
+# Note: The [build] section is NOT supported in wrangler.toml for Pages projects.
+# Build configuration must be set via the Dashboard or GitHub Actions.
+# =============================================================================
