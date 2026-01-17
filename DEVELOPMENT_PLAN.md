@@ -78,12 +78,16 @@ Specifications created:
 - [x] `specs/schemes/upto/scheme_upto.md` - Main specification
 - [x] `specs/schemes/upto/scheme_upto_evm.md` - EVM implementation (EIP-2612)
 
+Documentation:
+- [x] `docs/pages/schemes/index.mdx` - Schemes overview (exact vs upto comparison)
+- [x] `docs/pages/schemes/upto.mdx` - Detailed upto scheme documentation
+
 SDK implementation:
-- [x] TypeScript: `@t402/core` and `@t402/evm` upto types
-- [x] Go: `go/schemes/upto/` and `go/mechanisms/evm/upto/` types
-- [x] Python: `python/t402/src/t402/schemes/upto/` and `schemes/evm/upto/` types
-- [x] Java: `java/src/main/java/io/t402/schemes/upto/` and `schemes/evm/upto/` types
-- [ ] Router contract deployment
+- [x] TypeScript: `@t402/core` types and `@t402/evm` upto client
+- [x] Go: `go/types/` upto types (full implementation)
+- [x] Python: `t402.schemes.upto` and `t402.schemes.evm.upto` modules
+- [x] Java: `io.t402.schemes.upto` and `io.t402.schemes.evm.upto` packages
+- [ ] Router contract deployment (TBD)
 
 ### 3.3 Multi-Region Facilitator
 **Goal**: Deploy facilitator to multiple regions
@@ -164,7 +168,7 @@ swift/
 |-----------|-------------|--------|
 | P0 Complete | Week 1 | ✅ Complete |
 | P1 Complete | Week 3 | ✅ Complete |
-| P2 Complete | Week 5 | 🟡 75% (Up-To SDK complete, router pending) |
+| P2 Complete | Week 5 | 🟡 75% (Up-To SDK + docs complete, router pending) |
 | P3 Complete | Week 6 | 🟡 67% (Video tutorials pending) |
 | Security Audit Start | Week 4 | Pending |
 | Security Audit Complete | Week 8 | Pending |
@@ -220,10 +224,15 @@ Progress tracked in:
 | **Total** | **13** | **10** | **77%** |
 
 ### Remaining Items
-1. Up-To Scheme - Router contract deployment (P2) - All SDK types complete
+1. Up-To Scheme - Router contract deployment (P2) - SDK types + docs complete
 2. Multi-Region Facilitator - Infrastructure (P2)
 3. viem Peer Dependency - Package restructuring (P2)
 4. Video Tutorials - Educational content (P3)
 5. Security Audit Preparation - Documentation (P0)
+
+### Recently Completed
+- Up-To Scheme SDK types: TypeScript, Go, Python, Java (all 4 SDKs)
+- Up-To Scheme documentation: schemes overview and detailed upto guide
+- PaymentPayload.resource optionality fix (TypeScript, Python)
 
 *Last updated: 2026-01-17*
