@@ -1,0 +1,408 @@
+# Threat Model
+
+This document describes the security threat model for the T402 protocol, including trust assumptions, attack vectors, and mitigations.
+
+import { Callout, Tabs } from 'nextra/components'
+
+## System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              T402 PAYMENT FLOW                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌──────────┐    ┌──────────────────┐    ┌─────────────┐    ┌───────────┐  │
+│  │  Client  │───▶│  Resource Server │───▶│ Facilitator │───▶│ Blockchain│  │
+│  │ (Payer)  │◀───│    (Payee)       │◀───│  (Settler)  │◀───│  Network  │  │
+│  └──────────┘    └──────────────────┘    └─────────────┘    └───────────┘  │
+│       │                   │                     │                 │        │
+│       │  1. Request       │                     │                 │        │
+│       │─────────────────▶│                     │                 │        │
+│       │  2. 402 + Requirements                 │                 │        │
+│       │◀─────────────────│                     │                 │        │
+│       │  3. Sign Payment  │                     │                 │        │
+│       │  (local)          │                     │                 │        │
+│       │  4. Request + Payment Header            │                 │        │
+│       │─────────────────▶│                     │                 │        │
+│       │                   │  5. Verify          │                 │        │
+│       │                   │─────────────────────▶                 │        │
+│       │                   │  6. Valid/Invalid   │                 │        │
+│       │                   │◀─────────────────────                 │        │
+│       │                   │  7. Process Request │                 │        │
+│       │                   │                     │                 │        │
+│       │                   │  8. Settle          │                 │        │
+│       │                   │─────────────────────▶                 │        │
+│       │                   │                     │  9. Submit Tx   │        │
+│       │                   │                     │────────────────▶│        │
+│       │                   │                     │  10. Confirmed  │        │
+│       │                   │                     │◀────────────────│        │
+│       │                   │  11. Settlement Response               │        │
+│       │                   │◀─────────────────────                 │        │
+│       │  12. Response + Settlement Header       │                 │        │
+│       │◀─────────────────│                     │                 │        │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+## Trust Assumptions
+
+### High Trust Requirements
+
+| Entity | Trust Level | Assumption | Impact if Violated |
+|--------|-------------|------------|-------------------|
+| **Blockchain Network** | High | Consensus is secure, finality is achieved | Complete protocol failure |
+| **Token Contract** | High | USDT/USDC contracts execute correctly | Incorrect transfers |
+| **RPC Nodes** | Medium-High | Return valid blockchain state | False verification results |
+
+### Medium Trust Requirements
+
+| Entity | Trust Level | Assumption | Impact if Violated |
+|--------|-------------|------------|-------------------|
+| **Facilitator** | Medium | Executes payments honestly | Payments may not settle |
+| **Client Device** | Medium | Not compromised, keys secure | Unauthorized payments |
+| **TLS/PKI** | Medium | Certificate validation works | MITM attacks possible |
+
+### Low/No Trust Requirements
+
+| Entity | Trust Level | Reason |
+|--------|-------------|--------|
+| **Resource Server** | Low | Cannot forge signatures, cannot access funds |
+| **Network Observers** | None | Signatures are publicly verifiable |
+| **Client (for Server)** | None | All claims cryptographically verified |
+
+## Attack Vectors and Mitigations
+
+### 1. Replay Attacks
+
+**Threat:** Attacker captures a valid payment and resubmits it.
+
+<Tabs items={['EVM', 'Solana', 'TON', 'TRON']}>
+  <Tabs.Tab>
+**EVM Mitigations:**
+- **Nonce:** 32-byte random nonce included in signature
+- **Nonce Registry:** Smart contract tracks used nonces
+- **Domain Separator:** Chain ID prevents cross-chain replay
+- **Time Windows:** validAfter/validBefore bound validity
+
+```
+Replay Attempt:
+├─ Same chain, same contract → Blocked by nonce registry
+├─ Different chain → Blocked by chainId in domain separator
+├─ Same chain, different contract → Blocked by verifyingContract
+└─ After expiration → Blocked by validBefore check
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+**Solana Mitigations:**
+- **Recent Blockhash:** Transactions valid for ~300 blocks (~2 minutes)
+- **Network Rejection:** Stale transactions automatically rejected
+- **Single Use:** Each transaction can only be processed once
+
+```
+Replay Attempt:
+├─ Immediate replay → Blocked by duplicate transaction detection
+├─ Delayed replay → Blocked by blockhash expiration
+└─ Cross-cluster → Invalid blockhash for different cluster
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+**TON Mitigations:**
+- **Seqno:** Wallet sequence number must match expected
+- **Increment:** Each transaction increments seqno
+- **Order Enforcement:** Out-of-order transactions rejected
+
+```
+Replay Attempt:
+├─ Same seqno → Blocked by seqno already used
+├─ Future seqno → Blocked by gap in sequence
+└─ Different wallet → Different seqno counter
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+**TRON Mitigations:**
+- **Reference Block:** Transaction references recent block
+- **Expiration:** Explicit expiration timestamp
+- **Block Height:** Network validates reference block validity
+
+```
+Replay Attempt:
+├─ After expiration → Blocked by timestamp check
+├─ Invalid reference block → Blocked by network validation
+└─ Cross-chain → Different network entirely
+```
+  </Tabs.Tab>
+</Tabs>
+
+### 2. Signature Forgery
+
+**Threat:** Attacker creates fake signatures without private key.
+
+**Mitigations:**
+- ECDSA (secp256k1) and Ed25519 are computationally secure
+- 256-bit security level prevents brute force
+- No known practical attacks against these algorithms
+
+**Detection:**
+```go
+// Signature verification always performed
+if !crypto.VerifySignature(publicKey, hash, signature) {
+    return errors.New("invalid signature")
+}
+```
+
+### 3. Amount Manipulation
+
+**Threat:** Attacker modifies payment amount after signing.
+
+**Mitigations:**
+- Amount is included in signed data
+- Any modification invalidates signature
+- Facilitator verifies amount matches requirements
+
+```
+Signed Data Structure:
+├─ from: Payer address
+├─ to: Recipient address
+├─ value: Exact amount ← Modification invalidates signature
+├─ validAfter: Start time
+├─ validBefore: End time
+└─ nonce: Random value
+```
+
+### 4. Recipient Manipulation
+
+**Threat:** Attacker redirects payment to different address.
+
+**Mitigations:**
+- `to` address included in signed data
+- Facilitator verifies `to` matches `payTo` from requirements
+- Smart contract enforces recipient
+
+```go
+// Recipient validation
+if authorization.To != requirements.PayTo {
+    return errors.New("recipient mismatch")
+}
+```
+
+### 5. Man-in-the-Middle (MITM)
+
+**Threat:** Attacker intercepts and modifies communication.
+
+**Mitigations:**
+- HTTPS/TLS required for all communication
+- Signatures cover all payment parameters
+- Modified data results in invalid signature
+
+```
+MITM Attack Scenarios:
+├─ Modify requirements → Client signs wrong data, server rejects
+├─ Modify payment header → Invalid signature, facilitator rejects
+├─ Inject fake response → Client can verify settlement on-chain
+└─ Block communication → Payment times out, no funds lost
+```
+
+### 6. Double Spending
+
+**Threat:** Payer attempts to use same authorization twice.
+
+**Mitigations:**
+- **EVM:** Nonce registry in smart contract
+- **Solana:** Transaction deduplication by network
+- **TON:** Seqno enforcement
+- **TRON:** Transaction hash uniqueness
+
+```
+EVM Double Spend Prevention:
+├─ First settlement: nonce marked as used
+├─ Second attempt: contract checks nonce registry
+└─ Transaction reverts: "nonce already used"
+```
+
+### 7. Insufficient Balance
+
+**Threat:** Payer signs authorization but lacks funds.
+
+**Mitigations:**
+- Balance checked during verification
+- Balance re-checked during settlement
+- Transaction fails if insufficient
+
+```go
+// Balance verification
+balance, _ := tokenContract.BalanceOf(payer)
+if balance < requiredAmount {
+    return VerifyResponse{
+        IsValid: false,
+        InvalidReason: "insufficient balance",
+    }
+}
+```
+
+### 8. Fee Payer Exploitation (Solana)
+
+**Threat:** Malicious transaction drains facilitator funds.
+
+**Mitigations:**
+- Strict instruction structure validation
+- Fee payer must NOT appear in instruction accounts
+- Fee payer must NOT be transfer authority
+- Compute budget price capped at 5 lamports
+
+```go
+// Fee payer safety validation
+func ValidateFeePayer(tx *Transaction, feePayer PublicKey) error {
+    for _, ix := range tx.Instructions {
+        for _, acc := range ix.Accounts {
+            if acc.PublicKey == feePayer {
+                return errors.New("fee payer in instruction accounts")
+            }
+        }
+    }
+    return nil
+}
+```
+
+### 9. Time-Based Attacks
+
+**Threat:** Exploit clock skew or time windows.
+
+**Attack Vectors:**
+- Sign with very long `validBefore` (indefinite authorization)
+- Exploit clock differences between client and blockchain
+
+**Mitigations:**
+- Server enforces maximum validity window
+- Facilitator checks `validBefore` is reasonable
+- Blockchain uses block timestamp (not client time)
+
+```go
+// Time window validation
+maxValidity := 24 * time.Hour
+if validBefore > time.Now().Add(maxValidity).Unix() {
+    return errors.New("validity window too long")
+}
+```
+
+### 10. Smart Contract Wallet Impersonation
+
+**Threat:** Claim to be smart contract wallet to bypass EOA verification.
+
+**Mitigations:**
+- EIP-1271 call made to actual contract address
+- Contract must return magic value `0x1626ba7e`
+- Cannot fake contract response without contract deployment
+
+```go
+// EIP-1271 verification
+result, err := contract.Call("isValidSignature", hash, signature)
+if result != MAGIC_VALUE {
+    return false
+}
+```
+
+## Threat Matrix
+
+| Threat | Likelihood | Impact | Risk | Mitigation Status |
+|--------|------------|--------|------|-------------------|
+| Replay Attack | Medium | High | High | Mitigated (nonces, time windows) |
+| Signature Forgery | Very Low | Critical | Medium | Mitigated (cryptographic security) |
+| Amount Manipulation | Low | High | Medium | Mitigated (signed data) |
+| Recipient Manipulation | Low | High | Medium | Mitigated (signed data) |
+| MITM Attack | Low | Medium | Low | Mitigated (TLS, signatures) |
+| Double Spending | Medium | High | High | Mitigated (nonce registry) |
+| Insufficient Balance | Medium | Low | Low | Mitigated (balance checks) |
+| Fee Payer Exploitation | Medium | High | High | Mitigated (instruction validation) |
+| Time-Based Attack | Low | Medium | Low | Mitigated (window limits) |
+| Smart Wallet Impersonation | Low | Medium | Low | Mitigated (EIP-1271) |
+
+## Out-of-Scope Threats
+
+The following threats are outside the T402 protocol's security boundary:
+
+| Threat | Responsible Party | Reason |
+|--------|-------------------|--------|
+| Private key compromise | User/Integrator | Key management is user responsibility |
+| Phishing attacks | User education | Social engineering outside protocol |
+| Token contract bugs | Token issuer | USDT/USDC security is issuer's domain |
+| Blockchain consensus attacks | Network | 51% attacks are network-level |
+| DNS hijacking | Infrastructure | DNS security is infrastructure concern |
+| Client device malware | User | Endpoint security is user responsibility |
+
+## Security Invariants
+
+The following properties must always hold:
+
+### 1. Payment Integrity
+```
+∀ payment P:
+  P.settles ⟹ (P.amount = P.requirements.amount ∧
+               P.recipient = P.requirements.payTo ∧
+               P.signature.valid)
+```
+
+### 2. No Unauthorized Transfers
+```
+∀ transfer T:
+  T.executes ⟹ ∃ signature S:
+    (S.valid ∧ S.signer = T.from ∧ S.covers(T))
+```
+
+### 3. Single Use Authorization
+```
+∀ authorization A:
+  A.used_count ≤ 1
+```
+
+### 4. Time-Bounded Validity
+```
+∀ authorization A:
+  A.valid ⟹ (now ≥ A.validAfter ∧ now < A.validBefore)
+```
+
+### 5. Chain Isolation
+```
+∀ signature S on chain C1:
+  ¬S.valid(chain C2) where C1 ≠ C2
+```
+
+## Incident Response
+
+### Detection
+
+Monitor for:
+- Unusual verification failure rates
+- Settlement failures after successful verification
+- Duplicate nonce attempts
+- Time window violations
+- Balance check failures
+
+### Response Procedures
+
+1. **Signature Forgery Detected:**
+   - Immediately halt all settlements
+   - Investigate cryptographic implementation
+   - Check for key compromise
+
+2. **Double Spend Attempt:**
+   - Log and alert on duplicate nonce
+   - Block payer if repeated attempts
+   - Verify nonce registry integrity
+
+3. **Fee Payer Exploitation (Solana):**
+   - Pause Solana settlements
+   - Review instruction validation logic
+   - Check facilitator wallet balance
+
+4. **Mass Verification Failures:**
+   - Check RPC node connectivity
+   - Verify domain separator configuration
+   - Check for contract upgrades
+
+## Security Contact
+
+Report security vulnerabilities to: **security@t402.io**
+
+<Callout type="warning">
+  Please practice responsible disclosure. Do not publicly disclose vulnerabilities until they have been addressed.
+</Callout>
