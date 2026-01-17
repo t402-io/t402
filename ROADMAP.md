@@ -168,17 +168,23 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 
 > Focus: Security Audit and Optimization
 
+**Security Tooling:** ✅
+- [x] CodeQL SAST scanning (TypeScript, Go, Python, Java)
+- [x] Trivy vulnerability scanning (PRs and main branch)
+- [x] govulncheck for Go dependencies
+- [x] SBOM generation for container images
+
 **Security Audit:**
 - [ ] Complete internal security review
 - [ ] Fix all high/critical findings
 - [ ] Engage external auditor (Trail of Bits/OpenZeppelin)
 - [ ] Address audit findings
 
-**Performance Optimization:**
-- [ ] Add benchmarking suite
-- [ ] Optimize bundle sizes for browser packages
-- [ ] Implement lazy loading for chain-specific code
-- [ ] Add tree-shaking optimization
+**Performance Optimization:** ✅
+- [x] Add benchmarking suite (vitest bench for core, evm)
+- [x] Optimize bundle sizes for browser packages (analyzed, separate entry points)
+- [x] Implement lazy loading for chain-specific code (paywall evm/svm splits)
+- [x] Add tree-shaking optimization (enabled in tsup configs)
 
 ### Phase 6: New SDKs (Month 7-12)
 
