@@ -203,7 +203,7 @@ t402 info eip155:8453
 | Core Server | ✅ | ✅ | ✅ | ✅ |
 | Facilitator | ✅ | ✅ | ✅ | ✅ |
 | EVM Mechanism | ✅ | ✅ | ✅ | ✅ |
-| SVM Mechanism | ✅ | ✅ | ✅ | ✅ |
+| SVM Mechanism | ✅ | ✅ | ✅ | ❌ |
 | TON Mechanism | ✅ | ✅ | ✅ | ✅ |
 | TRON Mechanism | ✅ | ✅ | ✅ | ✅ |
 | ERC-4337 | ✅ | ✅ | ✅ | ✅ |
