@@ -7,6 +7,7 @@
  * Schemes:
  * - exact: EIP-3009 transferWithAuthorization (gasless, recommended)
  * - exact-legacy: approve + transferFrom (legacy tokens like USDT)
+ * - upto: EIP-2612 permit for usage-based billing (DRAFT)
  */
 
 // Export EVM implementation modules
@@ -52,7 +53,23 @@ export {
 export type { TokenConfig, TokenType, NetworkTokenRegistry } from "./tokens.js";
 
 // Export payload types
-export type { ExactEvmPayloadV1, ExactEvmPayloadV2, ExactLegacyPayload } from "./types.js";
+export type {
+  ExactEvmPayloadV1,
+  ExactEvmPayloadV2,
+  ExactLegacyPayload,
+  // Up-To scheme types
+  UptoEIP2612Payload,
+  UptoEIP2612PayloadCompact,
+  UptoEvmPayloadV2,
+  UptoEvmExtra,
+  UptoEvmSettlement,
+  PermitSignature,
+  PermitAuthorization,
+} from "./types.js";
+export { permitTypes, isUptoEIP2612Payload } from "./types.js";
+
+// Export Up-To scheme (DRAFT)
+export { UptoEvmScheme, createUptoEvmScheme } from "./upto/index.js";
 
 // Export constants
 export { authorizationTypes, legacyAuthorizationTypes, eip3009ABI, erc20LegacyABI } from "./constants.js";

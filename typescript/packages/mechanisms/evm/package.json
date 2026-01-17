@@ -119,6 +119,26 @@
         "types": "./dist/cjs/exact/v1/facilitator/index.d.ts",
         "default": "./dist/cjs/exact/v1/facilitator/index.js"
       }
+    },
+    "./upto": {
+      "import": {
+        "types": "./dist/esm/upto/index.d.mts",
+        "default": "./dist/esm/upto/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/upto/index.d.ts",
+        "default": "./dist/cjs/upto/index.js"
+      }
+    },
+    "./upto/client": {
+      "import": {
+        "types": "./dist/esm/upto/client/index.d.mts",
+        "default": "./dist/esm/upto/client/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/upto/client/index.d.ts",
+        "default": "./dist/cjs/upto/client/index.js"
+      }
     }
   },
   "files": [
