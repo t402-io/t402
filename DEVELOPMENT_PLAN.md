@@ -82,6 +82,7 @@ SDK implementation:
 - [x] TypeScript: `@t402/core` and `@t402/evm` upto types
 - [x] Go: `go/schemes/upto/` and `go/mechanisms/evm/upto/` types
 - [x] Python: `python/t402/src/t402/schemes/upto/` and `schemes/evm/upto/` types
+- [x] Java: `java/src/main/java/io/t402/schemes/upto/` and `schemes/evm/upto/` types
 - [ ] Router contract deployment
 
 ### 3.3 Multi-Region Facilitator
@@ -219,7 +220,7 @@ Progress tracked in:
 | **Total** | **13** | **10** | **77%** |
 
 ### Remaining Items
-1. Up-To Scheme - Router contract deployment (P2) - TypeScript, Go, Python done
+1. Up-To Scheme - Router contract deployment (P2) - All SDK types complete
 2. Multi-Region Facilitator - Infrastructure (P2)
 3. viem Peer Dependency - Package restructuring (P2)
 4. Video Tutorials - Educational content (P3)
