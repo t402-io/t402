@@ -81,7 +81,7 @@ Specifications created:
 SDK implementation:
 - [x] TypeScript: `@t402/core` and `@t402/evm` upto types
 - [x] Go: `go/schemes/upto/` and `go/mechanisms/evm/upto/` types
-- [ ] Python: `python/t402/schemes/upto.py`
+- [x] Python: `python/t402/src/t402/schemes/upto/` and `schemes/evm/upto/` types
 - [ ] Router contract deployment
 
 ### 3.3 Multi-Region Facilitator
@@ -163,7 +163,7 @@ swift/
 |-----------|-------------|--------|
 | P0 Complete | Week 1 | ✅ Complete |
 | P1 Complete | Week 3 | ✅ Complete |
-| P2 Complete | Week 5 | 🟡 60% (Up-To SDK impl pending) |
+| P2 Complete | Week 5 | 🟡 75% (Up-To SDK complete, router pending) |
 | P3 Complete | Week 6 | 🟡 67% (Video tutorials pending) |
 | Security Audit Start | Week 4 | Pending |
 | Security Audit Complete | Week 8 | Pending |
@@ -219,7 +219,7 @@ Progress tracked in:
 | **Total** | **13** | **10** | **77%** |
 
 ### Remaining Items
-1. Up-To Scheme - Python SDK implementation (P2) - TypeScript and Go done
+1. Up-To Scheme - Router contract deployment (P2) - TypeScript, Go, Python done
 2. Multi-Region Facilitator - Infrastructure (P2)
 3. viem Peer Dependency - Package restructuring (P2)
 4. Video Tutorials - Educational content (P3)
