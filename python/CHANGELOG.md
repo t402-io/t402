@@ -4,6 +4,31 @@ All notable changes to the T402 Python SDK will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- **Up-To Scheme Types** (`t402.schemes.upto`, `t402.schemes.evm.upto`) - Usage-based billing scheme
+  - Core types (`t402.schemes.upto`):
+    - `UptoPaymentRequirements` - Payment requirements with `maxAmount` for usage-based billing
+    - `UptoExtra` - Extra fields for billing units and EIP-712 domain parameters
+    - `UptoSettlement` - Settlement data with usage details
+    - `UptoUsageDetails` - Usage tracking metrics
+    - `UptoSettlementResponse` - Settlement transaction response
+    - `UptoValidationResult` - Payment validation result
+    - `is_upto_payment_requirements()` - Type guard for upto requirements
+    - `is_valid_unit()` - Validate billing unit types
+    - `create_payment_requirements()` - Factory function
+    - `create_settlement()` - Factory function
+  - EVM types (`t402.schemes.evm.upto`):
+    - `PermitSignature` - EIP-2612 signature (v, r, s)
+    - `PermitAuthorization` - Permit authorization parameters
+    - `UptoEIP2612Payload` - Complete EIP-2612 permit payload
+    - `UptoCompactPayload` - Compact signature format
+    - `UptoEvmExtra` - EVM-specific extra fields
+    - `UptoEvmClientScheme` - Client implementation
+    - `is_eip2612_payload()` - Type guard for EIP-2612 payloads
+    - `create_permit_domain()` - Create EIP-712 domain
+    - `create_permit_message()` - Create EIP-712 message
+    - EIP-712 type definitions: `PERMIT_TYPES`, `PERMIT_DOMAIN_TYPES`
+
 ## [1.7.1] - 2026-01-16
 
 ### Fixed
