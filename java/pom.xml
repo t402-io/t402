@@ -56,6 +56,13 @@
       <version>4.12.3</version>
     </dependency>
 
+    <!-- BouncyCastle for Ed25519 (Solana) signing -->
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk18on</artifactId>
+      <version>1.79</version>
+    </dependency>
+
     <!-- Spring Boot (optional) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
