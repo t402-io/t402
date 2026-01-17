@@ -78,8 +78,8 @@ Specifications created:
 - [x] `specs/schemes/upto/scheme_upto.md` - Main specification
 - [x] `specs/schemes/upto/scheme_upto_evm.md` - EVM implementation (EIP-2612)
 
-SDK implementation remaining:
-- [ ] TypeScript: `@t402/core` upto types
+SDK implementation:
+- [x] TypeScript: `@t402/core` and `@t402/evm` upto types
 - [ ] Go: `go/schemes/upto/`
 - [ ] Python: `python/t402/schemes/upto.py`
 - [ ] Router contract deployment
@@ -219,9 +219,10 @@ Progress tracked in:
 | **Total** | **13** | **10** | **77%** |
 
 ### Remaining Items
-1. Up-To Scheme - SDK implementations (P2) - Specs done
+1. Up-To Scheme - Go/Python SDK implementations (P2) - TypeScript done
 2. Multi-Region Facilitator - Infrastructure (P2)
 3. viem Peer Dependency - Package restructuring (P2)
 4. Video Tutorials - Educational content (P3)
+5. Security Audit Preparation - Documentation (P0)
 
 *Last updated: 2026-01-17*
