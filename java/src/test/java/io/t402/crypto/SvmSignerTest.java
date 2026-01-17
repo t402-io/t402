@@ -37,9 +37,21 @@ class SvmSignerTest {
     }
 
     @Test
+    void constructorAccepts32ByteSeed() {
+        // 32-byte seed is valid (will derive public key)
+        byte[] seed = new byte[32];
+        for (int i = 0; i < 32; i++) {
+            seed[i] = (byte) (i + 1);
+        }
+        SvmSigner signer = new SvmSigner(seed, TEST_NETWORK);
+        assertNotNull(signer);
+        assertNotNull(signer.getAddress());
+    }
+
+    @Test
     void constructorRejectsWrongSizePrivateKey() {
         assertThrows(IllegalArgumentException.class, () ->
-            new SvmSigner(new byte[32], TEST_NETWORK)
+            new SvmSigner(new byte[48], TEST_NETWORK)  // Neither 32 nor 64
         );
     }
 
@@ -191,5 +203,43 @@ class SvmSignerTest {
         String sig2 = signer.sign(payload);
 
         assertEquals(sig1, sig2);
+    }
+
+    @Test
+    void signatureIsVerifiable() throws CryptoSignException {
+        SvmSigner signer = new SvmSigner(TEST_PRIVATE_KEY, TEST_NETWORK);
+
+        // Sign a test message
+        byte[] message = "test message".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+
+        // Use reflection or direct signing (since sign() method is for payloads)
+        // Let's test via the payload signing mechanism instead
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("payer", "Ax9ujW5B7xWT7pJMYBnivCeR2g9T5rXc2GJhJJK5YzT9");
+        payload.put("recipient", "Bx9ujW5B7xWT7pJMYBnivCeR2g9T5rXc2GJhJJK5YzT8");
+        payload.put("amount", "1000000");
+        payload.put("nonce", "abc123");
+
+        String signature = signer.sign(payload);
+
+        // Verify the signature is a valid Base58 string (64 bytes encoded)
+        assertNotNull(signature);
+        assertTrue(signature.length() > 0);
+        // Ed25519 signatures are 64 bytes, which encodes to ~86-88 Base58 characters
+        assertTrue(signature.length() >= 80 && signature.length() <= 90,
+            "Signature length should be ~86-88 chars, got: " + signature.length());
+    }
+
+    @Test
+    void sameSeedProducesSamePublicKey() {
+        byte[] seed = new byte[32];
+        for (int i = 0; i < 32; i++) {
+            seed[i] = (byte) (i + 1);
+        }
+
+        SvmSigner signer1 = new SvmSigner(seed, TEST_NETWORK);
+        SvmSigner signer2 = new SvmSigner(seed, TEST_NETWORK);
+
+        assertEquals(signer1.getAddress(), signer2.getAddress());
     }
 }

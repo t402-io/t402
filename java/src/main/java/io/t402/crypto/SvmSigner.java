@@ -2,7 +2,13 @@ package io.t402.crypto;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.security.Security;
 import java.util.Map;
+
+import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
+import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
+import org.bouncycastle.crypto.signers.Ed25519Signer;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
  * Solana Virtual Machine (SVM) signer implementation.
@@ -21,28 +27,41 @@ public class SvmSigner implements CryptoSigner {
 
     private static final String BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
-    private final byte[] privateKey;
+    static {
+        // Register BouncyCastle provider if not already registered
+        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
+            Security.addProvider(new BouncyCastleProvider());
+        }
+    }
+
+    private final Ed25519PrivateKeyParameters privateKeyParams;
+    private final Ed25519PublicKeyParameters publicKeyParams;
     private final byte[] publicKey;
     private final String network;
 
     /**
      * Creates a new Solana signer.
      *
-     * @param privateKey 64-byte Ed25519 private key (seed + public key)
+     * @param privateKey 64-byte Ed25519 private key (seed + public key) or 32-byte seed
      * @param network Network identifier (CAIP-2 format)
      */
     public SvmSigner(byte[] privateKey, String network) {
-        if (privateKey == null || privateKey.length != 64) {
+        if (privateKey == null || (privateKey.length != 64 && privateKey.length != 32)) {
             throw new IllegalArgumentException(
-                "Private key must be 64 bytes (32-byte seed + 32-byte public key)");
+                "Private key must be 64 bytes (seed + public key) or 32 bytes (seed only)");
         }
         if (network == null || network.isEmpty()) {
             throw new IllegalArgumentException("Network must not be null or empty");
         }
 
-        this.privateKey = privateKey.clone();
-        this.publicKey = new byte[32];
-        System.arraycopy(privateKey, 32, this.publicKey, 0, 32);
+        // Extract the 32-byte seed (first 32 bytes)
+        byte[] seed = new byte[32];
+        System.arraycopy(privateKey, 0, seed, 0, 32);
+
+        // Create Ed25519 key parameters using BouncyCastle
+        this.privateKeyParams = new Ed25519PrivateKeyParameters(seed, 0);
+        this.publicKeyParams = privateKeyParams.generatePublicKey();
+        this.publicKey = publicKeyParams.getEncoded();
         this.network = network;
     }
 
@@ -136,28 +155,33 @@ public class SvmSigner implements CryptoSigner {
     }
 
     /**
-     * Signs a message using Ed25519.
+     * Signs a message using Ed25519 with BouncyCastle.
      *
-     * <p>Note: This is a simplified implementation. In production,
-     * use a proper Ed25519 library like Bouncy Castle or TweetNaCl.
+     * @param message The message to sign
+     * @return 64-byte Ed25519 signature
      */
-    private byte[] ed25519Sign(byte[] message) throws Exception {
-        // This is a placeholder implementation.
-        // In production, use a real Ed25519 signing library.
-        // The actual implementation would use the private key to create
-        // a 64-byte Ed25519 signature.
+    private byte[] ed25519Sign(byte[] message) {
+        Ed25519Signer signer = new Ed25519Signer();
+        signer.init(true, privateKeyParams);
+        signer.update(message, 0, message.length);
+        return signer.generateSignature();
+    }
 
-        // For now, we create a deterministic signature placeholder
-        // that can be verified to have the correct format.
-        MessageDigest digest = MessageDigest.getInstance("SHA-512");
-        digest.update(privateKey, 0, 32); // Use seed part
-        digest.update(message);
-        byte[] hash = digest.digest();
-
-        // Return first 64 bytes as signature placeholder
-        byte[] signature = new byte[64];
-        System.arraycopy(hash, 0, signature, 0, 64);
-        return signature;
+    /**
+     * Verifies an Ed25519 signature.
+     *
+     * @param message The original message
+     * @param signature The signature to verify
+     * @return true if the signature is valid
+     */
+    public boolean verify(byte[] message, byte[] signature) {
+        if (signature == null || signature.length != 64) {
+            return false;
+        }
+        Ed25519Signer verifier = new Ed25519Signer();
+        verifier.init(false, publicKeyParams);
+        verifier.update(message, 0, message.length);
+        return verifier.verifySignature(signature);
     }
 
     /**
