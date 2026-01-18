@@ -27,6 +27,73 @@ All notable changes to the T402 Java SDK will be documented in this file.
       - `createPermitDomain()`, `createPermitMessage()`
       - `isEIP2612Payload()` - Type guard for EIP-2612 payloads
 
+## [1.5.0] - 2026-01-18
+
+### Added
+- **SolanaJ Reference Implementation** - Production-ready Solana signer implementations
+  - `SolanajClientSigner` - Client-side Ed25519 signing using BouncyCastle
+    - Supports 32-byte seed and 64-byte full keypair formats
+    - `fromJson()` factory for Solana CLI keypair format (`[1,2,3,...64]`)
+    - `fromBase58()` factory for Base58-encoded secret keys
+    - Transaction message signing with proper signature slot detection
+  - `SolanajFacilitatorSigner` - Facilitator signer with SolanaJ RPC integration
+    - Multiple fee payer keypair support
+    - Builder pattern with `addKeypair()`, `addKeypairBase58()`, `addKeypairFromJson()`
+    - RPC configuration: `mainnetRpcUrl()`, `devnetRpcUrl()`, `testnetRpcUrl()`
+    - `useDefaultRpcEndpoints()` for quick setup with public Solana RPCs
+    - Transaction simulation via `simulateTransaction()`
+    - Transaction submission via `sendTransaction()`
+    - Confirmation polling via `confirmTransaction()`
+    - Custom executor support for async operations
+
+### Dependencies
+- Added `com.mmorrell:solanaj:1.27.3` as optional dependency for Solana RPC
+
+### Tests
+- Added 16 unit tests for SolanaJ signer implementations
+- Total Java test count: 370
+
+## [1.4.0] - 2026-01-18
+
+### Added
+- **Full SVM Signing and Settlement Schemes** (`io.t402.schemes.svm.exact`)
+  - `ExactSvmClientScheme` - Client-side payment payload creation
+    - `createPaymentPayload()` - Async payment creation with transaction builder
+    - `createPaymentPayloadSync()` - Synchronous variant
+    - `createPaymentPayloadFromTransaction()` - Direct creation from signed transaction
+  - `ExactSvmFacilitatorScheme` - Facilitator verification and settlement
+    - `verify()` / `verifySync()` - Payment verification with security checks
+    - `settle()` / `settleSync()` - Transaction submission and confirmation
+    - `getExtra()` - Returns randomly selected fee payer for load distribution
+    - `getSigners()` - Returns all available fee payer addresses
+    - Security: Rejects transactions where fee payer transfers their own funds
+    - Security: Validates amount, asset, network, and fee payer ownership
+  - `ExactSvmServerScheme` - Server-side price parsing and requirements
+    - `parsePrice()` - Parse decimal/integer amounts with network-aware USDC addresses
+    - `createPaymentRequirements()` - Build complete payment requirements
+    - `enhancePaymentRequirements()` - Add fee payer to existing requirements
+    - `validateRequirements()` - Validate scheme and network compatibility
+
+- **SVM Signer Interfaces**
+  - `ClientSvmSigner` - Interface for client-side transaction signing
+  - `FacilitatorSvmSigner` - Interface for facilitator operations with RPC methods
+    - `signTransaction()` - Sign as fee payer
+    - `simulateTransaction()` - Dry-run validation
+    - `sendTransaction()` - Submit to network
+    - `confirmTransaction()` - Wait for confirmation
+    - `sendAndConfirmTransaction()` - Combined send + confirm
+
+- **SVM Types and Utilities** (`io.t402.schemes.svm`)
+  - `SvmConstants` - Network IDs (CAIP-2), USDC addresses, RPC URLs
+  - `SvmAuthorization` - Transfer authorization metadata with builder
+  - `ExactSvmPayload` - Payment payload with transaction and authorization
+  - `SvmUtils` - Address validation, Base58 codec, amount parsing/formatting
+  - `SvmTransactionException` - SVM-specific transaction errors
+
+### Tests
+- Added 71 SVM scheme tests covering all verification edge cases
+- Total Java test count: 354
+
 ## [1.1.0] - 2026-01-16
 
 ### Added
@@ -375,6 +442,8 @@ Initial release of the T402 Java SDK, published to Maven Central.
 implementation 'io.t402:t402:1.0.0'
 ```
 
-[Unreleased]: https://github.com/t402-io/t402/compare/java/v1.1.0...HEAD
+[Unreleased]: https://github.com/t402-io/t402/compare/java/v1.5.0...HEAD
+[1.5.0]: https://github.com/t402-io/t402/compare/java/v1.4.0...java/v1.5.0
+[1.4.0]: https://github.com/t402-io/t402/compare/java/v1.1.0...java/v1.4.0
 [1.1.0]: https://github.com/t402-io/t402/compare/java/v1.0.0...java/v1.1.0
 [1.0.0]: https://github.com/t402-io/t402/releases/tag/java/v1.0.0
