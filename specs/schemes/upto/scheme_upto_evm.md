@@ -48,14 +48,24 @@ interface IT402UptoRouter {
 }
 ```
 
+### Contract Implementation
+
+The reference implementation is available at [`/contracts/src/T402UptoRouter.sol`](/contracts/src/T402UptoRouter.sol).
+
+Key features:
+- Facilitator access control (only authorized addresses can execute)
+- Settlement amount enforcement (`settleAmount ≤ maxAmount`)
+- Stateless design (contract holds no funds)
+- View functions for permit validation
+
 ### Contract Addresses
 
 | Chain | Router Address | Status |
 |-------|---------------|--------|
-| Base Mainnet | TBD | Planned |
-| Base Sepolia | TBD | Planned |
-| Ethereum Mainnet | TBD | Planned |
-| Arbitrum | TBD | Planned |
+| Base Mainnet | TBD | Pending Deployment |
+| Base Sepolia | TBD | Pending Deployment |
+| Ethereum Mainnet | TBD | Pending Deployment |
+| Arbitrum | TBD | Pending Deployment |
 
 ## PaymentPayload `payload` Field
 
