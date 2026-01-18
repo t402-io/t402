@@ -12,13 +12,7 @@ Based on comprehensive project analysis, T402 is **88% complete**. This plan add
 
 ## Phase 1: Critical Issues (P0) - Week 1 ✅ COMPLETE
 
-### 1.1 Security Audit Preparation ✅
-- [x] Document all cryptographic operations (`docs/pages/security/cryptographic-operations.mdx`)
-- [x] Create threat model documentation (`docs/pages/security/threat-model.mdx`)
-- [x] Prepare audit scope document (`docs/pages/security/audit-scope.mdx`)
-- [ ] Contact security firms (Trail of Bits, OpenZeppelin)
-
-### 1.2 Sui Implementation Status ✅
+### 1.1 Sui Implementation Status ✅
 - [x] Mark `scheme_exact_sui.md` as DRAFT in specs/README.md
 - [x] Add DRAFT notice to Sui spec document
 - [x] Update SDK feature matrices to show Sui as not yet available
@@ -180,19 +174,16 @@ swift/
 | P1 Complete | Week 3 | ✅ Complete |
 | P2 Complete | Week 5 | 🟡 75% (Up-To SDK + docs complete, router pending) |
 | P3 Complete | Week 6 | 🟡 67% (Video tutorials pending) |
-| Security Audit Start | Week 4 | Pending |
-| Security Audit Complete | Week 8 | Pending |
-| v2.0 Production Release | Week 9 | Pending |
+| v2.0 Production Release | Week 7 | Pending |
 
 ---
 
 ## Success Criteria
 
-1. **Security**: External audit completed with no critical findings
-2. **SDK Parity**: All 4 SDKs support EVM, SVM, TON, TRON, Gasless
-3. **Testing**: E2E tests pass for all payment flows
-4. **Documentation**: 100% API coverage, troubleshooting guide
-5. **Infrastructure**: <100ms latency globally (multi-region)
+1. **SDK Parity**: All 4 SDKs support EVM, SVM, TON, TRON, Gasless
+2. **Testing**: E2E tests pass for all payment flows
+3. **Documentation**: 100% API coverage, troubleshooting guide
+4. **Infrastructure**: <100ms latency globally (multi-region)
 
 ---
 
@@ -200,7 +191,6 @@ swift/
 
 | Risk | Impact | Mitigation |
 |------|--------|------------|
-| Security audit delays | High | Start process early, have backup firms |
 | Breaking changes in dependencies | Medium | Pin versions, automated updates |
 | Chain RPC instability | Medium | Multiple RPC providers, fallbacks |
 | Team availability | Medium | Document everything, async workflows |
@@ -209,9 +199,8 @@ swift/
 
 ## Resource Requirements
 
-- **Security Audit**: $50,000 - $150,000
 - **Infrastructure**: ~$2,000/month (multi-region)
-- **Development**: 1-2 engineers, 6-8 weeks
+- **Development**: 1-2 engineers, 4-6 weeks
 
 ---
 
@@ -227,17 +216,16 @@ Progress tracked in:
 
 | Phase | Items | Completed | Percentage |
 |-------|-------|-----------|------------|
-| P0 | 2 | 2 | 100% |
+| P0 | 1 | 1 | 100% |
 | P1 | 4 | 4 | 100% |
 | P2 | 4 | 3 | 75% |
 | P3 | 3 | 2 | 67% |
-| **Total** | **13** | **11** | **85%** |
+| **Total** | **12** | **10** | **83%** |
 
 ### Remaining Items
 1. Up-To Scheme - Router contract deployment (P2) - SDK types + docs complete
 2. Multi-Region Facilitator - Infrastructure (P2)
 3. Video Tutorials - Educational content (P3)
-4. Contact security firms - Outreach (P0)
 
 ### Recently Completed
 - **Java SDK v1.6.0 released** with upto scheme types (`io.t402.schemes.upto`, `io.t402.schemes.evm.upto`)
@@ -248,7 +236,6 @@ Progress tracked in:
 - Java SVM schemes: `ClientSvmSigner`, `FacilitatorSvmSigner`, `ExactSvmServerScheme`, `ExactSvmClientScheme`, `ExactSvmFacilitatorScheme`
 - Java SVM scheme types: `io.t402.schemes.svm` package (constants, authorization, payload, utilities)
 - viem Peer Dependency extraction: `@t402/evm-core` package created
-- Security Audit Preparation documentation (cryptographic operations, threat model, audit scope)
 - Up-To Scheme SDK types: TypeScript, Go, Python, Java (all 4 SDKs)
 - Up-To Scheme documentation: schemes overview and detailed upto guide
 - PaymentPayload.resource optionality fix (TypeScript, Python)
