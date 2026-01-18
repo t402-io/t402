@@ -78,9 +78,10 @@ class Usdt0BridgeTest {
         Usdt0Bridge bridge = new Usdt0Bridge(signer, "arbitrum");
 
         assertTrue(bridge.supportsDestination("ethereum"));
-        assertTrue(bridge.supportsDestination("base"));
+        assertTrue(bridge.supportsDestination("ink"));
         assertFalse(bridge.supportsDestination("arbitrum")); // Same chain
         assertFalse(bridge.supportsDestination("unknown"));
+        assertFalse(bridge.supportsDestination("base")); // Base does not have USDT0
     }
 
     @Test
@@ -90,7 +91,7 @@ class Usdt0BridgeTest {
 
         BridgeQuoteParams params = new BridgeQuoteParams(
             "ethereum", // Wrong source chain
-            "base",
+            "ink",
             BigInteger.valueOf(100_000000),
             "0xrecipient1234567890abcdef1234567890abcdef"
         );

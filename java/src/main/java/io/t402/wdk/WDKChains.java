@@ -25,6 +25,8 @@ public final class WDKChains {
         CHAIN_IDS.put("avalanche", 43114L);
         CHAIN_IDS.put("base", 8453L);
         CHAIN_IDS.put("ink", 57073L);
+        CHAIN_IDS.put("berachain", 80094L);
+        CHAIN_IDS.put("unichain", 130L);
         CHAIN_IDS.put("celo", 42220L);
         CHAIN_IDS.put("mantle", 5000L);
         // Testnets
@@ -33,20 +35,16 @@ public final class WDKChains {
         CHAIN_IDS.put("base-sepolia", 84532L);
     }
 
-    // USDT0 OFT addresses
+    // USDT0 OFT addresses (LayerZero Omnichain Fungible Token)
+    // Note: USDT0 is only deployed on specific chains with EIP-3009 support
     private static final Map<String, String> USDT0_ADDRESSES = new HashMap<>();
 
     static {
-        USDT0_ADDRESSES.put("ethereum", "0x566b40bd3a5063628f2200dc2e49a709a0e4a8e6");
-        USDT0_ADDRESSES.put("arbitrum", "0x3b0F096bd4CC59ce3dbD31bF4A0a28C81b5F5E60");
-        USDT0_ADDRESSES.put("optimism", "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58");
-        USDT0_ADDRESSES.put("polygon", "0xc2132D05D31c914a87C6611C10748AEb04B58e8F");
-        USDT0_ADDRESSES.put("bsc", "0x55d398326f99059fF775485246999027B3197955");
-        USDT0_ADDRESSES.put("avalanche", "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7");
-        USDT0_ADDRESSES.put("base", "0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2");
-        USDT0_ADDRESSES.put("ink", "0xbf8E2c5a71B1324C0bEDBaD35C8ED0BE0D22e4a0");
-        USDT0_ADDRESSES.put("celo", "0x48065fbBE25f71C9282ddf5e1cD6D6A887483D5e");
-        USDT0_ADDRESSES.put("mantle", "0x201EBa5CC46D216Ce6DC03F6a759e8E766e956aE");
+        USDT0_ADDRESSES.put("ethereum", "0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee");
+        USDT0_ADDRESSES.put("arbitrum", "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9");
+        USDT0_ADDRESSES.put("ink", "0x0200C29006150606B650577BBE7B6248F58470c1");
+        USDT0_ADDRESSES.put("berachain", "0x779Ded0c9e1022225f8E0630b35a9b54bE713736");
+        USDT0_ADDRESSES.put("unichain", "0x588ce4F028D8e7B53B687865d6A67b3A54C75518");
     }
 
     // USDC addresses
@@ -74,6 +72,8 @@ public final class WDKChains {
         CHAIN_TO_NETWORK.put("avalanche", "eip155:43114");
         CHAIN_TO_NETWORK.put("base", "eip155:8453");
         CHAIN_TO_NETWORK.put("ink", "eip155:57073");
+        CHAIN_TO_NETWORK.put("berachain", "eip155:80094");
+        CHAIN_TO_NETWORK.put("unichain", "eip155:130");
         CHAIN_TO_NETWORK.put("celo", "eip155:42220");
         CHAIN_TO_NETWORK.put("mantle", "eip155:5000");
     }
