@@ -1,0 +1,17 @@
+# Compiler files
+cache/
+out/
+
+# Ignores development broadcast logs
+/broadcast/**/dry-run/
+
+# Sensitive files
+.env
+.env.*
+
+# Dependencies
+lib/
+
+# Coverage
+lcov.info
+coverage/
