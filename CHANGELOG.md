@@ -20,6 +20,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added CONTRIBUTING.md for Facilitator service
 - Added last updated timestamps to ROADMAP.md, SECURITY.md, BUG_BOUNTY.md
 
+## [2.1.3] - 2026-01-18
+
+### Python SDK v1.9.0
+- **Up-To Scheme Implementation** (`t402.schemes.upto`) - Metered/usage-based billing
+  - `UptoPaymentRequirements` - Requirements with max amount cap
+  - `UptoPaymentPayload` - Payload with permit signature
+  - `UptoSettlementResult` - Settlement with actual amount used
+  - `PermitData` - EIP-2612 permit signature data
+- **EVM Up-To Client** (`t402.schemes.evm.upto`) - EIP-2612 permit support
+  - `EvmUptoClientScheme` - Client-side permit signing
+  - `create_permit_payload()` - Generate permit signatures for allowances
+- Comprehensive test suite (603 tests passing)
+
 ## [2.1.2] - 2026-01-18
 
 ### Java SDK v1.4.0
