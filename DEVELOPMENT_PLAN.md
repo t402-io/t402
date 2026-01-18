@@ -70,10 +70,10 @@ Features:
 - [x] Add deprecation notice to `specs/README.md`
 - [x] Migration guide exists at `docs/pages/advanced/migration-v1-to-v2.mdx`
 
-### 3.2 Up-To Scheme Implementation 🟡 PARTIAL
+### 3.2 Up-To Scheme Implementation ✅
 **Goal**: Implement metered/usage-based billing scheme
 
-Specifications created:
+Specifications:
 - [x] `specs/schemes/upto/scheme_upto.md` - Main specification
 - [x] `specs/schemes/upto/scheme_upto_evm.md` - EVM implementation (EIP-2612)
 
@@ -86,7 +86,13 @@ SDK implementation:
 - [x] Go: `go/types/` upto types (full implementation)
 - [x] Python: `t402.schemes.upto` and `t402.schemes.evm.upto` modules
 - [x] Java: `io.t402.schemes.upto` and `io.t402.schemes.evm.upto` packages
-- [ ] Router contract deployment (TBD)
+
+Router contract:
+- [x] `contracts/src/T402UptoRouter.sol` - Router implementation
+- [x] `contracts/src/interfaces/IT402UptoRouter.sol` - Interface
+- [x] `contracts/test/T402UptoRouter.t.sol` - Test suite (15 tests)
+- [x] `contracts/script/Deploy.s.sol` - Deployment scripts
+- [ ] Mainnet deployment (Base, Ethereum, Arbitrum)
 
 ### 3.3 Multi-Region Facilitator
 **Goal**: Deploy facilitator to multiple regions
@@ -182,7 +188,7 @@ swift/
 |-----------|-------------|--------|
 | P0 Complete | Week 1 | ✅ Complete |
 | P1 Complete | Week 3 | ✅ Complete |
-| P2 Complete | Week 5 | 🟡 75% (Up-To SDK complete, router + multi-region pending) |
+| P2 Complete | Week 5 | 🟡 88% (Router contract complete, deployment + multi-region pending) |
 | P3 Complete | Week 6 | 🟡 75% (Docs complete, video tutorials pending) |
 | v2.0 Production Release | Week 7 | Pending |
 
@@ -233,11 +239,12 @@ Progress tracked in:
 | **Total** | **13** | **11** | **85%** |
 
 ### Remaining Items
-1. Up-To Scheme - Router contract deployment (P2)
+1. Up-To Router - Mainnet deployment (P2) - Contract complete, needs deployment
 2. Multi-Region Facilitator - Infrastructure (P2)
 3. Video Tutorials - Educational content (P3)
 
 ### Recently Completed
+- **T402UptoRouter Contract** - Full implementation with tests and deployment scripts
 - **Docs Site Optimization** - All SDK docs comprehensive, deployment & best practices guides added
 - **Java SDK v1.6.0 released** with upto scheme types (`io.t402.schemes.upto`, `io.t402.schemes.evm.upto`)
 - **TypeScript SDK v2.3.0 released** with upto scheme types (`@t402/core`, `@t402/evm`)
