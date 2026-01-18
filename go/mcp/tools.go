@@ -8,9 +8,11 @@ import (
 	"math/big"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
@@ -285,14 +287,13 @@ func (s *Server) handlePayGasless(ctx context.Context, args json.RawMessage) *To
 		return textResult(formatPaymentResult(result))
 	}
 
-	// TODO: Implement real ERC-4337 gasless payment
-	// This would require:
-	// 1. Create UserOperation
-	// 2. Get paymaster sponsorship
-	// 3. Submit to bundler
-	// 4. Wait for receipt
+	// Execute real ERC-4337 gasless payment
+	result, err := ExecuteGaslessPayment(ctx, s.config, input)
+	if err != nil {
+		return errorResult(fmt.Sprintf("Gasless payment failed: %v", err))
+	}
 
-	return errorResult("Gasless payments require bundler/paymaster configuration (use demo mode to test)")
+	return textResult(formatGaslessPaymentResult(result))
 }
 
 // handleGetBridgeFee handles the t402/getBridgeFee tool.
@@ -319,7 +320,7 @@ func (s *Server) handleGetBridgeFee(ctx context.Context, args json.RawMessage) *
 	}
 
 	// Demo mode - return estimated fee
-	if s.config.DemoMode || s.config.PrivateKey == "" {
+	if s.config.DemoMode {
 		result := BridgeFeeResult{
 			NativeFee:     "0.001",
 			NativeSymbol:  NativeSymbols[SupportedNetwork(input.FromChain)],
@@ -331,19 +332,13 @@ func (s *Server) handleGetBridgeFee(ctx context.Context, args json.RawMessage) *
 		return textResult(formatBridgeFeeResult(result))
 	}
 
-	// TODO: Query actual LayerZero fee from contract
-	// This would call quoteSend() on the OFT contract
-
-	result := BridgeFeeResult{
-		NativeFee:     "0.001", // Placeholder
-		NativeSymbol:  NativeSymbols[SupportedNetwork(input.FromChain)],
-		FromChain:     input.FromChain,
-		ToChain:       input.ToChain,
-		Amount:        FormatTokenAmount(amount, TokenDecimals),
-		EstimatedTime: 300,
+	// Query actual LayerZero fee from contract
+	result, err := GetBridgeFee(ctx, s.config, input)
+	if err != nil {
+		return errorResult(fmt.Sprintf("Failed to get bridge fee: %v", err))
 	}
 
-	return textResult(formatBridgeFeeResult(result))
+	return textResult(formatBridgeFeeResult(*result))
 }
 
 // handleBridge handles the t402/bridge tool.
@@ -385,14 +380,13 @@ func (s *Server) handleBridge(ctx context.Context, args json.RawMessage) *ToolRe
 		return textResult(formatBridgeResult(result))
 	}
 
-	// TODO: Implement real LayerZero bridge
-	// This would:
-	// 1. Get quote from quoteSend()
-	// 2. Approve tokens if needed
-	// 3. Call send() on OFT contract
-	// 4. Extract message GUID from event logs
+	// Execute real LayerZero bridge
+	result, err := ExecuteBridge(ctx, s.config, input)
+	if err != nil {
+		return errorResult(fmt.Sprintf("Bridge failed: %v", err))
+	}
 
-	return errorResult("Bridge functionality requires private key configuration (use demo mode to test)")
+	return textResult(formatBridgeResult(*result))
 }
 
 // Helper functions
@@ -422,25 +416,79 @@ func getERC20Balance(ctx context.Context, client *ethclient.Client, tokenAddress
 }
 
 func sendERC20Transfer(ctx context.Context, client *ethclient.Client, config *ServerConfig, network SupportedNetwork, tokenAddress, toAddress string, amount *big.Int, privateKey *ecdsa.PrivateKey) (string, error) {
-	// This is a simplified implementation
-	// A full implementation would:
-	// 1. Get nonce
-	// 2. Estimate gas
-	// 3. Build transaction
-	// 4. Sign transaction
-	// 5. Send transaction
-	// 6. Wait for receipt
+	fromAddress := crypto.PubkeyToAddress(privateKey.PublicKey)
+	tokenAddr := common.HexToAddress(tokenAddress)
+	toAddr := common.HexToAddress(toAddress)
 
-	_ = ctx
-	_ = client
-	_ = config
-	_ = network
-	_ = tokenAddress
-	_ = toAddress
-	_ = amount
-	_ = privateKey
+	// Encode transfer(address,uint256) call data
+	callData := append(transferSelector,
+		common.LeftPadBytes(toAddr.Bytes(), 32)...)
+	callData = append(callData,
+		common.LeftPadBytes(amount.Bytes(), 32)...)
 
-	return "", fmt.Errorf("real transaction sending not yet implemented")
+	// Get nonce
+	nonce, err := client.PendingNonceAt(ctx, fromAddress)
+	if err != nil {
+		return "", fmt.Errorf("failed to get nonce: %w", err)
+	}
+
+	// Estimate gas
+	gasLimit, err := client.EstimateGas(ctx, ethereum.CallMsg{
+		From: fromAddress,
+		To:   &tokenAddr,
+		Data: callData,
+	})
+	if err != nil {
+		return "", fmt.Errorf("failed to estimate gas: %w", err)
+	}
+	gasLimit = gasLimit * 120 / 100 // Add 20% buffer
+
+	// Get gas price
+	gasPrice, err := client.SuggestGasPrice(ctx)
+	if err != nil {
+		return "", fmt.Errorf("failed to get gas price: %w", err)
+	}
+
+	// Get chain ID
+	chainID := big.NewInt(ChainIDs[network])
+
+	// Create transaction
+	tx := types.NewTransaction(nonce, tokenAddr, big.NewInt(0), gasLimit, gasPrice, callData)
+
+	// Sign transaction
+	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)
+	if err != nil {
+		return "", fmt.Errorf("failed to sign transaction: %w", err)
+	}
+
+	// Send transaction
+	err = client.SendTransaction(ctx, signedTx)
+	if err != nil {
+		return "", fmt.Errorf("failed to send transaction: %w", err)
+	}
+
+	txHash := signedTx.Hash().Hex()
+
+	// Wait for receipt
+	for i := 0; i < 60; i++ {
+		receipt, err := client.TransactionReceipt(ctx, signedTx.Hash())
+		if err == nil {
+			if receipt.Status != types.ReceiptStatusSuccessful {
+				return txHash, fmt.Errorf("transaction failed")
+			}
+			return txHash, nil
+		}
+		if err != ethereum.NotFound {
+			return txHash, fmt.Errorf("failed to get receipt: %w", err)
+		}
+		select {
+		case <-ctx.Done():
+			return txHash, ctx.Err()
+		case <-time.After(2 * time.Second):
+		}
+	}
+
+	return txHash, fmt.Errorf("timeout waiting for receipt")
 }
 
 // Result formatting functions
