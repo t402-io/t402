@@ -2,9 +2,18 @@
 
 All notable changes to the T402 Go SDK will be documented in this file.
 
-## [Unreleased]
+## [1.8.0] - 2026-01-18
 
 ### Added
+- **MCP Bridge & Gasless Implementation** (`mcp/`) - Real implementations for MCP tools
+  - `ExecuteBridge()` - Full LayerZero OFT bridging with real contract calls
+  - `GetBridgeFee()` - Real fee queries from LayerZero contracts
+  - `ExecuteGaslessPayment()` - ERC-4337 account abstraction implementation
+  - `getPaymasterSponsorship()` - Paymaster API integration
+  - `submitUserOperation()` - Bundler API integration
+  - `waitForUserOperationReceipt()` - Receipt polling
+  - Complete OFT ABI for LayerZero interactions
+
 - **Up-To Scheme Types** (`schemes/upto`, `mechanisms/evm/upto`) - Usage-based billing scheme
   - Core types (`schemes/upto`):
     - `PaymentRequirements` - Payment requirements with `MaxAmount` for usage-based billing
