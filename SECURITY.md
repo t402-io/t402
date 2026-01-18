@@ -376,20 +376,6 @@ We follow responsible disclosure practices:
 5. **Release**: We deploy the fix and publish a security advisory
 6. **Credit**: We credit the reporter (unless anonymity requested)
 
-### Bug Bounty
-
-We have an active bug bounty program. See **[BUG_BOUNTY.md](BUG_BOUNTY.md)** for:
-- Reward tiers ($50 - $10,000 in USDT)
-- Scope and vulnerability categories
-- Reporting guidelines
-- Response timeline
-
-### Hall of Fame
-
-Security researchers who have helped improve T402:
-
-*No submissions yet - be the first!*
-
 ---
 
 ## Contact
