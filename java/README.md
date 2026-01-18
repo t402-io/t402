@@ -135,6 +135,42 @@ HttpResponse<String> response = client.get(
 );
 ```
 
+### Solana (SVM) Payments
+
+```java
+import io.t402.schemes.svm.SolanajClientSigner;
+import io.t402.schemes.svm.SolanajFacilitatorSigner;
+import io.t402.schemes.svm.exact.ExactSvmClientScheme;
+import io.t402.schemes.svm.exact.ExactSvmFacilitatorScheme;
+
+// Client-side: Create a payment
+SolanajClientSigner clientSigner = SolanajClientSigner.fromJson(
+    Files.readString(Path.of("~/.config/solana/id.json"))
+);
+ExactSvmClientScheme clientScheme = new ExactSvmClientScheme(clientSigner);
+
+Map<String, Object> requirements = /* from 402 response */;
+Map<String, Object> payload = clientScheme.createPaymentPayloadFromTransaction(
+    requirements,
+    signedTransaction  // Base64-encoded signed SPL transfer
+);
+
+// Facilitator-side: Verify and settle
+SolanajFacilitatorSigner facilitatorSigner = new SolanajFacilitatorSigner.Builder()
+    .addKeypairFromJson(Files.readString(Path.of("fee-payer.json")))
+    .mainnetRpcUrl("https://api.mainnet-beta.solana.com")
+    .devnetRpcUrl("https://api.devnet.solana.com")
+    .build();
+
+ExactSvmFacilitatorScheme facilitatorScheme = new ExactSvmFacilitatorScheme(facilitatorSigner);
+
+// Verify payment
+CompletableFuture<VerificationResult> verification = facilitatorScheme.verify(payload, requirements);
+
+// Settle payment (submit to network)
+CompletableFuture<SettlementResult> settlement = facilitatorScheme.settle(payload, requirements);
+```
+
 ### Signing EIP-3009 Authorization
 
 ```java
@@ -238,6 +274,8 @@ sequenceDiagram
 | `CryptoSigner` | Interface for signing payment payloads |
 | `EvmSigner` | EIP-3009 signing for EVM chains |
 | `SvmSigner` | Ed25519 signing for Solana |
+| `SolanajClientSigner` | Client-side Solana signer (BouncyCastle) |
+| `SolanajFacilitatorSigner` | Facilitator Solana signer with RPC (SolanaJ) |
 | `TonSigner` | Ed25519 signing for TON |
 | `TronSigner` | ECDSA secp256k1 signing for TRON |
 

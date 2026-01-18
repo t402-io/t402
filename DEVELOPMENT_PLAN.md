@@ -38,7 +38,7 @@ Existing files:
 - [x] `python/t402/src/t402/erc4337/types.py`
 
 ### 2.2 Java SDK Solana Support ✅
-**Status**: Complete - Ed25519 signing and SVM scheme types implemented
+**Status**: Complete - Full SVM scheme implementation with Ed25519 signing
 
 Implemented:
 - [x] `java/src/main/java/io/t402/crypto/SvmSigner.java` (real Ed25519 with BouncyCastle)
@@ -46,7 +46,12 @@ Implemented:
 - [x] `java/src/main/java/io/t402/schemes/svm/SvmAuthorization.java` (transfer authorization metadata)
 - [x] `java/src/main/java/io/t402/schemes/svm/ExactSvmPayload.java` (payment payload with signed transaction)
 - [x] `java/src/main/java/io/t402/schemes/svm/SvmUtils.java` (address validation, amount parsing, base58 codec)
-- [x] Comprehensive test suite (29 tests)
+- [x] `java/src/main/java/io/t402/schemes/svm/ClientSvmSigner.java` (client signer interface)
+- [x] `java/src/main/java/io/t402/schemes/svm/FacilitatorSvmSigner.java` (facilitator signer interface with RPC ops)
+- [x] `java/src/main/java/io/t402/schemes/svm/exact/ExactSvmClientScheme.java` (client payment creation)
+- [x] `java/src/main/java/io/t402/schemes/svm/exact/ExactSvmFacilitatorScheme.java` (verify/settle with security checks)
+- [x] `java/src/main/java/io/t402/schemes/svm/exact/ExactSvmServerScheme.java` (server-side price parsing)
+- [x] Comprehensive test suite (71 tests)
 
 ### 2.3 E2E Test Suite ✅ ALREADY EXISTS
 **Status**: Comprehensive E2E suite exists at `/e2e/`
@@ -235,6 +240,9 @@ Progress tracked in:
 4. Contact security firms - Outreach (P0)
 
 ### Recently Completed
+- Java SVM SolanaJ reference implementation: `SolanajClientSigner` and `SolanajFacilitatorSigner` with RPC support
+- Java SVM test suite now at 87 tests (71 scheme + 16 solanaj signer tests)
+- Java SVM full implementation: `io.t402.schemes.svm.exact` package with complete client/facilitator/server schemes
 - Java SVM scheme types: `io.t402.schemes.svm` package (constants, authorization, payload, utilities)
 - viem Peer Dependency extraction: `@t402/evm-core` package created
 - Security Audit Preparation documentation (cryptographic operations, threat model, audit scope)
