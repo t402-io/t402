@@ -1,8 +1,21 @@
 package io.t402.crypto;
 
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.Map;
+
+import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.crypto.digests.KeccakDigest;
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.ec.CustomNamedCurves;
+import org.bouncycastle.crypto.params.ECDomainParameters;
+import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
+import org.bouncycastle.crypto.signers.ECDSASigner;
+import org.bouncycastle.crypto.signers.HMacDSAKCalculator;
+import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.math.ec.FixedPointCombMultiplier;
 
 /**
  * TRON signer implementation.
@@ -30,6 +43,15 @@ public class TronSigner implements CryptoSigner {
 
     private static final String BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
     private static final byte TRON_ADDRESS_PREFIX = 0x41;
+
+    // secp256k1 curve parameters
+    private static final X9ECParameters CURVE_PARAMS = CustomNamedCurves.getByName("secp256k1");
+    private static final ECDomainParameters CURVE = new ECDomainParameters(
+        CURVE_PARAMS.getCurve(),
+        CURVE_PARAMS.getG(),
+        CURVE_PARAMS.getN(),
+        CURVE_PARAMS.getH()
+    );
 
     private final byte[] privateKey;
     private final String network;
@@ -147,60 +169,163 @@ public class TronSigner implements CryptoSigner {
     /**
      * Computes Keccak-256 hash.
      *
-     * <p>Note: This is a simplified SHA-256 implementation for compatibility.
-     * In production, use the actual Keccak-256 algorithm.
+     * <p>Uses BouncyCastle KeccakDigest for proper Keccak-256 hashing.
      */
-    private byte[] keccak256(byte[] input) throws Exception {
-        // Using SHA-256 as a placeholder
-        // In production, use org.bouncycastle.crypto.digests.KeccakDigest
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        return digest.digest(input);
+    private byte[] keccak256(byte[] input) {
+        KeccakDigest digest = new KeccakDigest(256);
+        digest.update(input, 0, input.length);
+        byte[] hash = new byte[32];
+        digest.doFinal(hash, 0);
+        return hash;
     }
 
     /**
-     * Signs a message using ECDSA secp256k1.
+     * Signs a message using ECDSA secp256k1 with RFC 6979 deterministic k.
      *
-     * <p>Note: This is a placeholder implementation.
-     * In production, use a proper ECDSA library.
+     * <p>Uses BouncyCastle ECDSASigner with HMacDSAKCalculator for deterministic signing.
+     * Returns a 65-byte signature in the format [r (32 bytes), s (32 bytes), v (1 byte)].
      */
-    private byte[] ecdsaSign(byte[] messageHash) throws Exception {
-        // Placeholder - in production use real ECDSA signing
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        digest.update(privateKey);
-        digest.update(messageHash);
-        byte[] hash = digest.digest();
+    private byte[] ecdsaSign(byte[] messageHash) {
+        BigInteger privateKeyInt = new BigInteger(1, privateKey);
+        ECPrivateKeyParameters privKeyParams = new ECPrivateKeyParameters(privateKeyInt, CURVE);
 
-        // Return 65-byte signature (r=32, s=32, v=1)
+        // Use RFC 6979 deterministic k calculator for reproducible signatures
+        ECDSASigner signer = new ECDSASigner(new HMacDSAKCalculator(new SHA256Digest()));
+        signer.init(true, privKeyParams);
+        BigInteger[] components = signer.generateSignature(messageHash);
+
+        BigInteger r = components[0];
+        BigInteger s = components[1];
+
+        // Ensure s is in the lower half of the curve order (EIP-2)
+        BigInteger halfCurveOrder = CURVE.getN().shiftRight(1);
+        if (s.compareTo(halfCurveOrder) > 0) {
+            s = CURVE.getN().subtract(s);
+        }
+
+        // Build 65-byte signature: r (32) + s (32) + v (1)
         byte[] signature = new byte[65];
-        System.arraycopy(hash, 0, signature, 0, 32); // r
-        digest.reset();
-        digest.update(hash);
-        byte[] s = digest.digest();
-        System.arraycopy(s, 0, signature, 32, 32); // s
-        signature[64] = 27; // v
+
+        byte[] rBytes = r.toByteArray();
+        byte[] sBytes = s.toByteArray();
+
+        // Copy r (handle leading zero for positive BigInteger)
+        int rStart = rBytes.length > 32 ? rBytes.length - 32 : 0;
+        int rLen = Math.min(rBytes.length, 32);
+        System.arraycopy(rBytes, rStart, signature, 32 - rLen, rLen);
+
+        // Copy s (handle leading zero for positive BigInteger)
+        int sStart = sBytes.length > 32 ? sBytes.length - 32 : 0;
+        int sLen = Math.min(sBytes.length, 32);
+        System.arraycopy(sBytes, sStart, signature, 64 - sLen, sLen);
+
+        // Calculate recovery id (v)
+        // For TRON, v is typically 27 or 28
+        int recId = calculateRecoveryId(messageHash, r, s, privateKeyInt);
+        signature[64] = (byte) (27 + recId);
+
         return signature;
     }
 
     /**
+     * Calculates the recovery ID for ECDSA signature.
+     */
+    private int calculateRecoveryId(byte[] messageHash, BigInteger r, BigInteger s, BigInteger privateKey) {
+        // Derive public key from private key
+        ECPoint publicKeyPoint = new FixedPointCombMultiplier().multiply(CURVE.getG(), privateKey);
+        byte[] publicKeyBytes = publicKeyPoint.getEncoded(false);
+
+        // Try both recovery IDs (0 and 1)
+        for (int recId = 0; recId < 2; recId++) {
+            ECPoint recovered = recoverPublicKey(messageHash, r, s, recId);
+            if (recovered != null) {
+                byte[] recoveredBytes = recovered.getEncoded(false);
+                if (Arrays.equals(publicKeyBytes, recoveredBytes)) {
+                    return recId;
+                }
+            }
+        }
+
+        // Default to 0 if recovery ID not found
+        return 0;
+    }
+
+    /**
+     * Recovers public key from signature components.
+     */
+    private ECPoint recoverPublicKey(byte[] messageHash, BigInteger r, BigInteger s, int recId) {
+        BigInteger n = CURVE.getN();
+        BigInteger i = BigInteger.valueOf((long) recId / 2);
+        BigInteger x = r.add(i.multiply(n));
+
+        // Check x is within curve field
+        BigInteger prime = CURVE_PARAMS.getCurve().getField().getCharacteristic();
+        if (x.compareTo(prime) >= 0) {
+            return null;
+        }
+
+        // Decompress point
+        ECPoint R = decompressPoint(x, (recId & 1) == 1);
+        if (R == null || !R.multiply(n).isInfinity()) {
+            return null;
+        }
+
+        BigInteger e = new BigInteger(1, messageHash);
+        BigInteger eInv = BigInteger.ZERO.subtract(e).mod(n);
+        BigInteger rInv = r.modInverse(n);
+        BigInteger srInv = rInv.multiply(s).mod(n);
+        BigInteger eInvrInv = rInv.multiply(eInv).mod(n);
+
+        ECPoint q = CURVE.getG().multiply(eInvrInv).add(R.multiply(srInv));
+        return q;
+    }
+
+    /**
+     * Decompresses a point on the curve.
+     */
+    private ECPoint decompressPoint(BigInteger x, boolean yBit) {
+        try {
+            byte[] compressedKey = new byte[33];
+            compressedKey[0] = (byte) (yBit ? 0x03 : 0x02);
+            byte[] xBytes = x.toByteArray();
+            int xStart = xBytes.length > 32 ? xBytes.length - 32 : 0;
+            int xLen = Math.min(xBytes.length, 32);
+            System.arraycopy(xBytes, xStart, compressedKey, 33 - xLen, xLen);
+            return CURVE_PARAMS.getCurve().decodePoint(compressedKey);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
      * Derives TRON address from private key.
+     *
+     * <p>Uses proper EC point multiplication to derive the public key,
+     * then Keccak-256 hash to derive the address.
      */
     private String deriveAddress(byte[] privateKey) {
-        try {
-            // Placeholder - actual implementation would use EC point multiplication
-            // and then take the last 20 bytes of Keccak-256 hash of the public key
+        // Convert private key to BigInteger
+        BigInteger privateKeyInt = new BigInteger(1, privateKey);
 
-            MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-            byte[] hash = sha256.digest(privateKey);
+        // Derive public key point using EC multiplication
+        ECPoint publicKeyPoint = new FixedPointCombMultiplier().multiply(CURVE.getG(), privateKeyInt);
 
-            // Take last 20 bytes and prepend TRON address prefix
-            byte[] addressBytes = new byte[21];
-            addressBytes[0] = TRON_ADDRESS_PREFIX;
-            System.arraycopy(hash, hash.length - 20, addressBytes, 1, 20);
+        // Get uncompressed public key bytes (65 bytes: 0x04 + x + y)
+        byte[] publicKeyBytes = publicKeyPoint.getEncoded(false);
 
-            return base58CheckEncode(addressBytes);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to derive address", e);
-        }
+        // Take the x and y coordinates (skip the 0x04 prefix)
+        byte[] publicKeyXY = new byte[64];
+        System.arraycopy(publicKeyBytes, 1, publicKeyXY, 0, 64);
+
+        // Keccak-256 hash of the public key (x || y)
+        byte[] hash = keccak256(publicKeyXY);
+
+        // Take last 20 bytes and prepend TRON address prefix (0x41)
+        byte[] addressBytes = new byte[21];
+        addressBytes[0] = TRON_ADDRESS_PREFIX;
+        System.arraycopy(hash, hash.length - 20, addressBytes, 1, 20);
+
+        return base58CheckEncode(addressBytes);
     }
 
     /**
