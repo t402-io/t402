@@ -62,14 +62,14 @@ cd typescript/site
 | TypeScript | 2.1.0 | npm (@t402/*) |
 | Python | 1.8.0 | PyPI |
 | Go | 1.6.0 | Go Modules |
-| Java | 1.3.0 | Maven Central |
+| Java | 1.4.0 | Maven Central |
 
 ## Release Tags
 
 - TypeScript: `v*` (e.g., `v2.2.0`)
 - Python: `python/v*` (e.g., `python/v1.8.0`)
 - Go: `go/v*` (e.g., `go/v1.6.0`)
-- Java: `java/v*` (e.g., `java/v1.3.0`)
+- Java: `java/v*` (e.g., `java/v1.4.0`)
 
 ## Facilitator Wallets
 
