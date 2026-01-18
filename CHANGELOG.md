@@ -20,6 +20,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added CONTRIBUTING.md for Facilitator service
 - Added last updated timestamps to ROADMAP.md, SECURITY.md, BUG_BOUNTY.md
 
+## [2.1.6] - 2026-01-18
+
+### Java SDK v1.6.0
+- **Up-To Scheme Types** (`io.t402.schemes.upto`) - Metered/usage-based billing
+  - `UptoPaymentRequirements` - Requirements with max amount cap
+  - `UptoPaymentPayload` - Payload with permit signature
+  - `UptoSettlementResult` - Settlement with actual amount used
+  - `PermitData` - EIP-2612 permit signature data
+- **EVM Up-To Support** (`io.t402.schemes.evm.upto`) - EIP-2612 permit integration
+- 370 tests passing
+
 ## [2.1.5] - 2026-01-18
 
 ### TypeScript SDK v2.3.0
