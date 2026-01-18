@@ -20,6 +20,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added CONTRIBUTING.md for Facilitator service
 - Added last updated timestamps to ROADMAP.md, SECURITY.md, BUG_BOUNTY.md
 
+## [2.1.4] - 2026-01-18
+
+### Go SDK v1.7.0
+- **Up-To Scheme Types** (`go/schemes/upto`) - Metered/usage-based billing
+  - `UptoPaymentRequirements` - Requirements with max amount cap
+  - `UptoPaymentPayload` - Payload with permit signature
+  - `UptoSettlementResult` - Settlement with actual amount used
+  - `PermitData` - EIP-2612 permit signature data
+- Full type definitions in `go/types/` for upto scheme integration
+
 ## [2.1.3] - 2026-01-18
 
 ### Python SDK v1.9.0
