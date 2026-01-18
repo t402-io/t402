@@ -59,14 +59,14 @@ cd typescript/site
 
 | SDK | Version | Registry |
 |-----|---------|----------|
-| TypeScript | 2.1.0 | npm (@t402/*) |
+| TypeScript | 2.3.0 | npm (@t402/*) |
 | Python | 1.9.0 | PyPI |
 | Go | 1.7.0 | Go Modules |
 | Java | 1.5.0 | Maven Central |
 
 ## Release Tags
 
-- TypeScript: `v*` (e.g., `v2.2.0`)
+- TypeScript: `v*` (e.g., `v2.3.0`)
 - Python: `python/v*` (e.g., `python/v1.9.0`)
 - Go: `go/v*` (e.g., `go/v1.7.0`)
 - Java: `java/v*` (e.g., `java/v1.5.0`)
