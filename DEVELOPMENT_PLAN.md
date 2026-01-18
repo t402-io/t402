@@ -240,6 +240,7 @@ Progress tracked in:
 4. Contact security firms - Outreach (P0)
 
 ### Recently Completed
+- **Java SDK v1.6.0 released** with upto scheme types (`io.t402.schemes.upto`, `io.t402.schemes.evm.upto`)
 - **TypeScript SDK v2.3.0 released** with upto scheme types (`@t402/core`, `@t402/evm`)
 - **Go SDK v1.7.0 released** with upto scheme types (`go/schemes/upto`, `go/types/`)
 - **Python SDK v1.9.0 released** with upto scheme implementation (`t402.schemes.upto`, `t402.schemes.evm.upto`)
