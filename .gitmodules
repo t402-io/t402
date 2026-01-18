@@ -1,3 +1,6 @@
 [submodule "typescript/site"]
 	path = typescript/site
 	url = https://github.com/t402-io/t402-site.git
+[submodule "contracts/lib/forge-std"]
+	path = contracts/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
