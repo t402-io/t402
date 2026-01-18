@@ -1,7 +1,7 @@
 /**
  * Solana SVM blockchain support for the T402 payment protocol.
  * <p>
- * This package provides types and utilities for Solana payments
+ * This package provides types, utilities, and scheme implementations for Solana payments
  * using SPL token transfers.
  * </p>
  *
@@ -11,6 +11,15 @@
  *   <li>{@link io.t402.schemes.svm.SvmAuthorization} - Transfer authorization metadata</li>
  *   <li>{@link io.t402.schemes.svm.ExactSvmPayload} - Payment payload with signed transaction</li>
  *   <li>{@link io.t402.schemes.svm.SvmUtils} - Utility functions for address validation and amount parsing</li>
+ *   <li>{@link io.t402.schemes.svm.ClientSvmSigner} - Interface for client-side signing</li>
+ *   <li>{@link io.t402.schemes.svm.FacilitatorSvmSigner} - Interface for facilitator operations</li>
+ * </ul>
+ *
+ * <h2>Scheme Implementations</h2>
+ * <ul>
+ *   <li>{@link io.t402.schemes.svm.exact.ExactSvmServerScheme} - Server-side price parsing</li>
+ *   <li>{@link io.t402.schemes.svm.exact.ExactSvmClientScheme} - Client-side payload creation</li>
+ *   <li>{@link io.t402.schemes.svm.exact.ExactSvmFacilitatorScheme} - Verification and settlement</li>
  * </ul>
  *
  * <h2>Supported Networks</h2>
@@ -22,22 +31,24 @@
  *
  * <h2>Example Usage</h2>
  * <pre>{@code
- * // Create an authorization
- * SvmAuthorization auth = SvmAuthorization.builder()
- *     .from("9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM")
- *     .to("8GGtWHRQ1wz5gDKE2KXZLktqzcfV1CBqSbeUZjA7hoWL")
- *     .mint(SvmConstants.USDC_MAINNET_ADDRESS)
- *     .amount("1000000") // 1 USDC
- *     .validUntil(SvmUtils.calculateValidUntil(3600))
- *     .build();
+ * // Server: Create payment requirements
+ * ExactSvmServerScheme serverScheme = new ExactSvmServerScheme();
+ * Map<String, Object> requirements = serverScheme.createPaymentRequirements(
+ *     SvmConstants.SOLANA_MAINNET,
+ *     "8GGtWHRQ1wz5gDKE2KXZLktqzcfV1CBqSbeUZjA7hoWL",
+ *     "1000000", null, 3600, feePayer);
  *
- * // Validate an address
- * boolean valid = SvmUtils.isValidAddress("9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM");
+ * // Client: Create and sign payment
+ * ExactSvmClientScheme clientScheme = new ExactSvmClientScheme(signer);
+ * Map<String, Object> payload = clientScheme.createPaymentPayloadFromTransaction(
+ *     requirements, signedTransaction);
  *
- * // Parse amount
- * BigInteger amount = SvmUtils.parseAmount("1.50", 6); // 1500000
+ * // Facilitator: Verify and settle
+ * ExactSvmFacilitatorScheme facilitatorScheme = new ExactSvmFacilitatorScheme(facilitatorSigner);
+ * SettlementResult result = facilitatorScheme.settleSync(payload, requirements);
  * }</pre>
  *
  * @see io.t402.crypto.SvmSigner
+ * @see io.t402.schemes.svm.exact
  */
 package io.t402.schemes.svm;
