@@ -20,6 +20,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added CONTRIBUTING.md for Facilitator service
 - Added last updated timestamps to ROADMAP.md, SECURITY.md, BUG_BOUNTY.md
 
+## [2.1.2] - 2026-01-18
+
+### Java SDK v1.4.0
+- **SVM Scheme Implementations** (`io.t402.schemes.svm.exact`) - Full signing and settlement
+  - `ClientSvmSigner` - Interface for client-side transaction signing
+  - `FacilitatorSvmSigner` - Interface for facilitator RPC operations and settlement
+  - `ExactSvmServerScheme` - Price parsing and payment requirements creation
+  - `ExactSvmClientScheme` - Payment payload creation with async support
+  - `ExactSvmFacilitatorScheme` - Verification and settlement with CompletableFuture
+  - `SvmTransactionException` - Transaction failure handling
+- Comprehensive test suite (24 new scheme tests, 354 total)
+
 ## [2.1.1] - 2026-01-18
 
 ### Java SDK v1.3.0
