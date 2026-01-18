@@ -2,11 +2,36 @@
 
 > Generated: 2026-01-17
 > Last Updated: 2026-01-18
-> Status: **v2.0 SDK Development Complete**
+> Status: **Active - Crypto Implementation Phase**
 
 ## Overview
 
-T402 v2.0 SDK development is **complete**. All core functionality, SDKs, specifications, and documentation have been implemented.
+T402 v2.0 SDK development is complete for core functionality. This plan addresses remaining crypto implementation placeholders identified through deep analysis.
+
+---
+
+## Active Development
+
+### Phase 5: Crypto Implementation (P0) ✅ COMPLETE
+
+Real cryptographic operations implemented using BouncyCastle:
+
+#### 5.1 Java TonSigner - Ed25519 Signing ✅
+**File**: `java/src/main/java/io/t402/crypto/TonSigner.java`
+**Implementation**: BouncyCastle Ed25519Signer with Ed25519PrivateKeyParameters
+
+#### 5.2 Java TronSigner - Keccak-256 & ECDSA ✅
+**File**: `java/src/main/java/io/t402/crypto/TronSigner.java`
+**Implementation**:
+- `keccak256()`: BouncyCastle KeccakDigest(256)
+- `ecdsaSign()`: BouncyCastle ECDSASigner with RFC 6979 deterministic k (HMacDSAKCalculator)
+- `deriveAddress()`: Proper EC point multiplication with FixedPointCombMultiplier
+
+#### 5.3 Python TON - BOC Cell Building
+**File**: `python/t402/src/t402/schemes/ton/exact/client.py:299-315`
+**Status**: ⬜ Documented Placeholder (Acceptable)
+**Issue**: Returns JSON instead of BOC cells
+**Note**: Documented as requiring tonsdk/pytoniq - acceptable for MVP
 
 ---
 
@@ -73,9 +98,7 @@ Location: `/contracts/src/T402UptoRouter.sol`
 
 ---
 
-## Archived / Deferred Items
-
-The following items are deferred for future consideration:
+## Deferred Items
 
 ### Infrastructure
 
@@ -83,12 +106,6 @@ The following items are deferred for future consideration:
 |------|-------------|----------|
 | Router Mainnet Deployment | Deploy T402UptoRouter to Base, Ethereum, Arbitrum | On-demand |
 | Multi-Region Facilitator | EU-West (Frankfurt), APAC (Singapore) | Future |
-
-### Content
-
-| Item | Description | Priority |
-|------|-------------|----------|
-| Video Tutorials | Quick start, Server, Gasless, MCP guides | Future |
 
 ### Future SDKs
 
@@ -99,12 +116,11 @@ The following items are deferred for future consideration:
 
 ---
 
-## Success Criteria ✅
+## Progress Tracking
 
-1. **SDK Parity**: All 4 SDKs support EVM, SVM, TON, TRON, Gasless ✅
-2. **Testing**: E2E tests pass for all payment flows ✅
-3. **Documentation**: 100% API coverage, troubleshooting guide ✅
-4. **Smart Contracts**: Up-To router implemented and tested ✅
+- [x] Phase 5.1: Java TonSigner Ed25519 ✅
+- [x] Phase 5.2: Java TronSigner Keccak-256 + ECDSA ✅
+- [x] Phase 5.3: Python TON (Acceptable placeholder)
 
 ---
 
@@ -113,7 +129,3 @@ The following items are deferred for future consideration:
 - Documentation: https://docs.t402.io
 - Facilitator API: https://facilitator.t402.io
 - GitHub: https://github.com/t402-io/t402
-
----
-
-*Archived: 2026-01-18*
