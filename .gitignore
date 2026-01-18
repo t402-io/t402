@@ -13,3 +13,4 @@ e2e/facilitators/external-proxies/*
 .vercel
 .env*.local
 api-docs/
+docs/internal/
