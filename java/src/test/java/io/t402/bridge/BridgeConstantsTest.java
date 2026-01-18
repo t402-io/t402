@@ -47,7 +47,9 @@ class BridgeConstantsTest {
     void getUsdt0OftAddressForKnownChains() {
         assertNotNull(BridgeConstants.getUsdt0OftAddress("ethereum"));
         assertNotNull(BridgeConstants.getUsdt0OftAddress("arbitrum"));
-        assertNotNull(BridgeConstants.getUsdt0OftAddress("base"));
+        assertNotNull(BridgeConstants.getUsdt0OftAddress("ink"));
+        assertNotNull(BridgeConstants.getUsdt0OftAddress("berachain"));
+        assertNotNull(BridgeConstants.getUsdt0OftAddress("unichain"));
 
         assertTrue(BridgeConstants.getUsdt0OftAddress("ethereum").startsWith("0x"));
     }
@@ -61,8 +63,11 @@ class BridgeConstantsTest {
     void supportsBridgingForKnownChains() {
         assertTrue(BridgeConstants.supportsBridging("ethereum"));
         assertTrue(BridgeConstants.supportsBridging("arbitrum"));
-        assertTrue(BridgeConstants.supportsBridging("base"));
         assertTrue(BridgeConstants.supportsBridging("ink"));
+        assertTrue(BridgeConstants.supportsBridging("berachain"));
+        assertTrue(BridgeConstants.supportsBridging("unichain"));
+        // Base does not have USDT0 deployed
+        assertFalse(BridgeConstants.supportsBridging("base"));
     }
 
     @Test
