@@ -2,7 +2,23 @@
 
 All notable changes to the T402 Java SDK will be documented in this file.
 
-## [Unreleased]
+## [1.7.0] - 2026-01-18
+
+### Fixed
+- **USDT0 Token Addresses** - Corrected USDT0 OFT addresses across all chains
+  - `WDKChains` and `BridgeConstants` now use correct addresses matching TypeScript/Python SDKs
+  - Added berachain and unichain to supported chains
+
+### Changed
+- **TonSigner** - Real Ed25519 cryptographic signing
+  - Replaced placeholder with BouncyCastle `Ed25519Signer`
+  - Uses `Ed25519PrivateKeyParameters` for proper key handling
+
+- **TronSigner** - Real Keccak-256 and ECDSA secp256k1
+  - `keccak256()` now uses BouncyCastle `KeccakDigest(256)`
+  - `ecdsaSign()` uses `ECDSASigner` with RFC 6979 deterministic k (`HMacDSAKCalculator`)
+  - `deriveAddress()` uses proper EC point multiplication (`FixedPointCombMultiplier`)
+  - Includes full signature recovery ID calculation
 
 ### Added
 - **Up-To Scheme Types** (`io.t402.schemes.upto`, `io.t402.schemes.evm.upto`) - Usage-based billing scheme
