@@ -240,6 +240,7 @@ Progress tracked in:
 4. Contact security firms - Outreach (P0)
 
 ### Recently Completed
+- **Python SDK v1.9.0 released** with upto scheme implementation (`t402.schemes.upto`, `t402.schemes.evm.upto`)
 - **Java SDK v1.4.0 released** with full SVM signing and settlement schemes
 - Java SVM schemes: `ClientSvmSigner`, `FacilitatorSvmSigner`, `ExactSvmServerScheme`, `ExactSvmClientScheme`, `ExactSvmFacilitatorScheme`
 - Java SVM scheme types: `io.t402.schemes.svm` package (constants, authorization, payload, utilities)
