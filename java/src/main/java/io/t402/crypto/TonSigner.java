@@ -5,6 +5,9 @@ import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.Map;
 
+import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
+import org.bouncycastle.crypto.signers.Ed25519Signer;
+
 /**
  * TON (The Open Network) signer implementation.
  *
@@ -141,19 +144,22 @@ public class TonSigner implements CryptoSigner {
     /**
      * Signs a message using Ed25519.
      *
-     * <p>Note: This is a simplified implementation. In production,
-     * use a proper Ed25519 library.
+     * <p>Uses BouncyCastle Ed25519Signer for proper cryptographic signing.
      */
     private byte[] ed25519Sign(byte[] message) throws Exception {
-        // Placeholder implementation - in production use real Ed25519
-        MessageDigest digest = MessageDigest.getInstance("SHA-512");
-        digest.update(privateKey, 0, 32);
-        digest.update(message);
-        byte[] hash = digest.digest();
+        // Extract the 32-byte seed from the private key
+        byte[] seed = new byte[32];
+        System.arraycopy(privateKey, 0, seed, 0, 32);
 
-        byte[] signature = new byte[64];
-        System.arraycopy(hash, 0, signature, 0, 64);
-        return signature;
+        // Create Ed25519 private key parameters from seed
+        Ed25519PrivateKeyParameters privateKeyParams = new Ed25519PrivateKeyParameters(seed, 0);
+
+        // Create signer and sign
+        Ed25519Signer signer = new Ed25519Signer();
+        signer.init(true, privateKeyParams);
+        signer.update(message, 0, message.length);
+
+        return signer.generateSignature();
     }
 
     /**
