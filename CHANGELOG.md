@@ -20,6 +20,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added CONTRIBUTING.md for Facilitator service
 - Added last updated timestamps to ROADMAP.md, SECURITY.md, BUG_BOUNTY.md
 
+## [2.1.5] - 2026-01-18
+
+### TypeScript SDK v2.3.0
+- **Up-To Scheme Types** (`@t402/core`) - Metered/usage-based billing
+  - `UptoPaymentRequirements` - Requirements with max amount cap
+  - `UptoPaymentPayload` - Payload with permit signature
+  - `UptoSettlementResult` - Settlement with actual amount used
+  - `PermitData` - EIP-2612 permit signature data
+- **EVM Up-To Client** (`@t402/evm`) - EIP-2612 permit support
+  - `EvmUptoClientScheme` - Client-side permit signing
+  - Upto types test suite (11 tests)
+- 329 tests passing across all packages
+
 ## [2.1.4] - 2026-01-18
 
 ### Go SDK v1.7.0
