@@ -27,15 +27,15 @@ npm install @tetherto/wdk @tetherto/wdk-wallet-evm
 ## Quick Start
 
 ```typescript
-import { createWdkGaslessClient } from '@t402/wdk-gasless';
-import { createPublicClient, http } from 'viem';
-import { arbitrum } from 'viem/chains';
+import { createWdkGaslessClient } from '@t402/wdk-gasless'
+import { createPublicClient, http } from 'viem'
+import { arbitrum } from 'viem/chains'
 
 // Create a public client
 const publicClient = createPublicClient({
   chain: arbitrum,
   transport: http(),
-});
+})
 
 // Create the gasless client
 const client = await createWdkGaslessClient({
@@ -51,17 +51,17 @@ const client = await createWdkGaslessClient({
     url: 'https://api.pimlico.io/v2/arbitrum/rpc?apikey=YOUR_KEY',
     type: 'sponsoring',
   },
-});
+})
 
 // Execute a gasless payment
 const result = await client.pay({
   to: '0xRecipientAddress...',
   amount: 1000000n, // 1 USDT0 (6 decimals)
-});
+})
 
 // Wait for confirmation
-const receipt = await result.wait();
-console.log('Payment confirmed:', receipt.txHash);
+const receipt = await result.wait()
+console.log('Payment confirmed:', receipt.txHash)
 ```
 
 ## API Reference
@@ -72,12 +72,12 @@ Creates a new gasless payment client.
 
 ```typescript
 interface CreateWdkGaslessClientConfig {
-  wdkAccount: WdkAccount;        // WDK account from @tetherto/wdk
-  publicClient: PublicClient;    // Viem public client
-  chainId: number;               // Chain ID
-  bundler: BundlerConfig;        // Bundler configuration
-  paymaster?: PaymasterConfig;   // Optional paymaster for gas sponsorship
-  saltNonce?: bigint;            // Salt for address generation (default: 0n)
+  wdkAccount: WdkAccount // WDK account from @tetherto/wdk
+  publicClient: PublicClient // Viem public client
+  chainId: number // Chain ID
+  bundler: BundlerConfig // Bundler configuration
+  paymaster?: PaymasterConfig // Optional paymaster for gas sponsorship
+  saltNonce?: bigint // Salt for address generation (default: 0n)
 }
 ```
 
@@ -89,16 +89,16 @@ Execute a single gasless payment.
 
 ```typescript
 interface GaslessPaymentParams {
-  to: Address;                              // Recipient address
-  amount: bigint;                           // Amount in token decimals
-  token?: 'USDT0' | 'USDC' | Address;       // Token (default: 'USDT0')
+  to: Address // Recipient address
+  amount: bigint // Amount in token decimals
+  token?: 'USDT0' | 'USDC' | Address // Token (default: 'USDT0')
 }
 
 interface GaslessPaymentResult {
-  userOpHash: Hex;      // UserOperation hash
-  sender: Address;      // Smart account address
-  sponsored: boolean;   // Whether gas was sponsored
-  wait(): Promise<GaslessPaymentReceipt>;
+  userOpHash: Hex // UserOperation hash
+  sender: Address // Smart account address
+  sponsored: boolean // Whether gas was sponsored
+  wait(): Promise<GaslessPaymentReceipt>
 }
 ```
 
@@ -109,10 +109,10 @@ Execute multiple payments in a single transaction.
 ```typescript
 interface BatchPaymentParams {
   payments: Array<{
-    to: Address;
-    amount: bigint;
-    token?: 'USDT0' | 'USDC' | Address;
-  }>;
+    to: Address
+    amount: bigint
+    token?: 'USDT0' | 'USDC' | Address
+  }>
 }
 ```
 
@@ -122,9 +122,9 @@ Check if a payment can be gas-sponsored.
 
 ```typescript
 interface SponsorshipInfo {
-  canSponsor: boolean;
-  reason?: string;
-  estimatedGasCost?: bigint;
+  canSponsor: boolean
+  reason?: string
+  estimatedGasCost?: bigint
 }
 ```
 
@@ -146,15 +146,15 @@ Check if the smart account is deployed on-chain.
 
 ## Supported Chains
 
-| Chain | Chain ID | USDT0 | USDC |
-|-------|----------|-------|------|
-| Ethereum | 1 | ✅ | ✅ |
-| Arbitrum | 42161 | ✅ | ✅ |
-| Base | 8453 | ✅ | ✅ |
-| Optimism | 10 | ✅ | ✅ |
-| Ink | 57073 | ✅ | - |
-| Berachain | 80084 | ✅ | - |
-| Unichain | 130 | ✅ | - |
+| Chain     | Chain ID | USDT0 | USDC |
+| --------- | -------- | ----- | ---- |
+| Ethereum  | 1        | ✅    | ✅   |
+| Arbitrum  | 42161    | ✅    | ✅   |
+| Base      | 8453     | ✅    | ✅   |
+| Optimism  | 10       | ✅    | ✅   |
+| Ink       | 57073    | ✅    | -    |
+| Berachain | 80084    | ✅    | -    |
+| Unichain  | 130      | ✅    | -    |
 
 ## Constants
 
@@ -165,14 +165,14 @@ import {
   CHAIN_IDS,
   getTokenAddress,
   getChainName,
-} from '@t402/wdk-gasless';
+} from '@t402/wdk-gasless'
 
 // Get USDT0 address on Arbitrum
-const usdt0 = USDT0_ADDRESSES.arbitrum;
+const usdt0 = USDT0_ADDRESSES.arbitrum
 // '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9'
 
 // Get chain name from ID
-const chainName = getChainName(42161);
+const chainName = getChainName(42161)
 // 'arbitrum'
 ```
 
@@ -192,14 +192,14 @@ This package uses Safe smart accounts with ERC-4337 support:
 ```typescript
 const result = await client.payBatch({
   payments: [
-    { to: '0xAlice...', amount: 500000n },  // 0.5 USDT0
-    { to: '0xBob...', amount: 300000n },    // 0.3 USDT0
+    { to: '0xAlice...', amount: 500000n }, // 0.5 USDT0
+    { to: '0xBob...', amount: 300000n }, // 0.3 USDT0
     { to: '0xCharlie...', amount: 200000n }, // 0.2 USDT0
   ],
-});
+})
 
-const receipt = await result.wait();
-console.log(`Batch payment in tx: ${receipt.txHash}`);
+const receipt = await result.wait()
+console.log(`Batch payment in tx: ${receipt.txHash}`)
 ```
 
 ### Check Sponsorship
@@ -208,12 +208,12 @@ console.log(`Batch payment in tx: ${receipt.txHash}`);
 const sponsorship = await client.canSponsor({
   to: '0xRecipient...',
   amount: 1000000n,
-});
+})
 
 if (sponsorship.canSponsor) {
-  console.log('Payment will be free!');
+  console.log('Payment will be free!')
 } else {
-  console.log(`Gas cost: ${sponsorship.estimatedGasCost} wei`);
+  console.log(`Gas cost: ${sponsorship.estimatedGasCost} wei`)
 }
 ```
 
@@ -224,7 +224,7 @@ const result = await client.pay({
   to: '0xRecipient...',
   amount: 1000000n,
   token: 'USDC',
-});
+})
 ```
 
 ## License

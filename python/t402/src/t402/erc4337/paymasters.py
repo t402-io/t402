@@ -34,20 +34,14 @@ class PaymasterClient(ABC):
 
     @abstractmethod
     def get_paymaster_data(
-        self,
-        user_op: UserOperation,
-        chain_id: int,
-        entry_point: str
+        self, user_op: UserOperation, chain_id: int, entry_point: str
     ) -> PaymasterData:
         """Get paymaster data for a UserOperation."""
         pass
 
     @abstractmethod
     def will_sponsor(
-        self,
-        user_op: UserOperation,
-        chain_id: int,
-        entry_point: str
+        self, user_op: UserOperation, chain_id: int, entry_point: str
     ) -> bool:
         """Check if the paymaster will sponsor this operation."""
         pass
@@ -60,13 +54,27 @@ def _pack_user_op_for_paymaster(user_op: UserOperation) -> Dict[str, Any]:
         "nonce": hex(user_op.nonce),
         "initCode": "0x" + user_op.init_code.hex() if user_op.init_code else "0x",
         "callData": "0x" + user_op.call_data.hex() if user_op.call_data else "0x",
-        "verificationGasLimit": hex(user_op.verification_gas_limit or DEFAULT_GAS_LIMITS.verification_gas_limit),
-        "callGasLimit": hex(user_op.call_gas_limit or DEFAULT_GAS_LIMITS.call_gas_limit),
-        "preVerificationGas": hex(user_op.pre_verification_gas or DEFAULT_GAS_LIMITS.pre_verification_gas),
-        "maxFeePerGas": hex(user_op.max_fee_per_gas) if user_op.max_fee_per_gas else "0x0",
-        "maxPriorityFeePerGas": hex(user_op.max_priority_fee_per_gas) if user_op.max_priority_fee_per_gas else "0x0",
-        "paymasterAndData": "0x" + user_op.paymaster_and_data.hex() if user_op.paymaster_and_data else "0x",
-        "signature": "0x" + user_op.signature.hex() if user_op.signature else "0x" + get_dummy_signature().hex(),
+        "verificationGasLimit": hex(
+            user_op.verification_gas_limit or DEFAULT_GAS_LIMITS.verification_gas_limit
+        ),
+        "callGasLimit": hex(
+            user_op.call_gas_limit or DEFAULT_GAS_LIMITS.call_gas_limit
+        ),
+        "preVerificationGas": hex(
+            user_op.pre_verification_gas or DEFAULT_GAS_LIMITS.pre_verification_gas
+        ),
+        "maxFeePerGas": hex(user_op.max_fee_per_gas)
+        if user_op.max_fee_per_gas
+        else "0x0",
+        "maxPriorityFeePerGas": hex(user_op.max_priority_fee_per_gas)
+        if user_op.max_priority_fee_per_gas
+        else "0x0",
+        "paymasterAndData": "0x" + user_op.paymaster_and_data.hex()
+        if user_op.paymaster_and_data
+        else "0x",
+        "signature": "0x" + user_op.signature.hex()
+        if user_op.signature
+        else "0x" + get_dummy_signature().hex(),
     }
 
 
@@ -79,10 +87,12 @@ class PimlicoPaymaster(PaymasterClient):
         chain_id: int,
         paymaster_url: Optional[str] = None,
         entry_point: str = ENTRYPOINT_V07_ADDRESS,
-        sponsorship_policy_id: Optional[str] = None
+        sponsorship_policy_id: Optional[str] = None,
     ):
         network = PIMLICO_NETWORKS.get(chain_id, str(chain_id))
-        self.paymaster_url = paymaster_url or f"https://api.pimlico.io/v2/{network}/rpc?apikey={api_key}"
+        self.paymaster_url = (
+            paymaster_url or f"https://api.pimlico.io/v2/{network}/rpc?apikey={api_key}"
+        )
         self.api_key = api_key
         self.chain_id = chain_id
         self.entry_point = entry_point
@@ -91,19 +101,13 @@ class PimlicoPaymaster(PaymasterClient):
         self._client = httpx.Client(timeout=30.0)
 
     def get_paymaster_data(
-        self,
-        user_op: UserOperation,
-        chain_id: int,
-        entry_point: str
+        self, user_op: UserOperation, chain_id: int, entry_point: str
     ) -> PaymasterData:
         """Get paymaster data for sponsorship."""
         return self.sponsor_user_operation(user_op)
 
     def will_sponsor(
-        self,
-        user_op: UserOperation,
-        chain_id: int,
-        entry_point: str
+        self, user_op: UserOperation, chain_id: int, entry_point: str
     ) -> bool:
         """Check if the paymaster will sponsor this operation."""
         try:
@@ -125,27 +129,26 @@ class PimlicoPaymaster(PaymasterClient):
         return self._parse_paymaster_response(result)
 
     def get_token_quotes(
-        self,
-        user_op: UserOperation,
-        tokens: List[str]
+        self, user_op: UserOperation, tokens: List[str]
     ) -> List[TokenQuote]:
         """Get quotes for paying gas with tokens."""
         packed = _pack_user_op_for_paymaster(user_op)
 
         result = self._rpc_call(
-            "pimlico_getTokenQuotes",
-            [packed, self.entry_point, tokens]
+            "pimlico_getTokenQuotes", [packed, self.entry_point, tokens]
         )
 
         quotes = []
         for r in result:
-            quotes.append(TokenQuote(
-                token=r.get("token", ""),
-                symbol=r.get("symbol", ""),
-                decimals=r.get("decimals", 18),
-                fee=int(r.get("fee", "0x0"), 16),
-                exchange_rate=int(r.get("exchangeRate", "0x0"), 16),
-            ))
+            quotes.append(
+                TokenQuote(
+                    token=r.get("token", ""),
+                    symbol=r.get("symbol", ""),
+                    decimals=r.get("decimals", 18),
+                    fee=int(r.get("fee", "0x0"), 16),
+                    exchange_rate=int(r.get("exchangeRate", "0x0"), 16),
+                )
+            )
 
         return quotes
 
@@ -155,9 +158,15 @@ class PimlicoPaymaster(PaymasterClient):
         if result.get("paymaster"):
             return PaymasterData(
                 paymaster=result["paymaster"],
-                paymaster_verification_gas_limit=int(result.get("paymasterVerificationGasLimit", "0x0"), 16),
-                paymaster_post_op_gas_limit=int(result.get("paymasterPostOpGasLimit", "0x0"), 16),
-                paymaster_data=bytes.fromhex(result.get("paymasterData", "0x")[2:]) if result.get("paymasterData") else b"",
+                paymaster_verification_gas_limit=int(
+                    result.get("paymasterVerificationGasLimit", "0x0"), 16
+                ),
+                paymaster_post_op_gas_limit=int(
+                    result.get("paymasterPostOpGasLimit", "0x0"), 16
+                ),
+                paymaster_data=bytes.fromhex(result.get("paymasterData", "0x")[2:])
+                if result.get("paymasterData")
+                else b"",
             )
 
         # Fall back to v0.6 format (packed)
@@ -186,7 +195,7 @@ class PimlicoPaymaster(PaymasterClient):
         response = self._client.post(
             self.paymaster_url,
             json=request,
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
         )
 
         if response.status_code != 200:
@@ -199,7 +208,7 @@ class PimlicoPaymaster(PaymasterClient):
             raise PaymasterError(
                 error.get("message", "Unknown error"),
                 code=error.get("code"),
-                data=error.get("data")
+                data=error.get("data"),
             )
 
         return data.get("result")
@@ -213,7 +222,7 @@ class BiconomyPaymaster(PaymasterClient):
         api_key: str,
         chain_id: int,
         paymaster_url: str,
-        mode: str = "sponsored"  # "sponsored" or "erc20"
+        mode: str = "sponsored",  # "sponsored" or "erc20"
     ):
         self.api_key = api_key
         self.chain_id = chain_id
@@ -223,10 +232,7 @@ class BiconomyPaymaster(PaymasterClient):
         self._client = httpx.Client(timeout=30.0)
 
     def get_paymaster_data(
-        self,
-        user_op: UserOperation,
-        chain_id: int,
-        entry_point: str
+        self, user_op: UserOperation, chain_id: int, entry_point: str
     ) -> PaymasterData:
         """Get paymaster data for sponsorship."""
         packed = _pack_user_op_for_paymaster(user_op)
@@ -244,10 +250,7 @@ class BiconomyPaymaster(PaymasterClient):
         return self._parse_paymaster_response(result)
 
     def will_sponsor(
-        self,
-        user_op: UserOperation,
-        chain_id: int,
-        entry_point: str
+        self, user_op: UserOperation, chain_id: int, entry_point: str
     ) -> bool:
         """Check if the paymaster will sponsor this operation."""
         try:
@@ -257,9 +260,7 @@ class BiconomyPaymaster(PaymasterClient):
             return False
 
     def get_fee_quotes(
-        self,
-        user_op: UserOperation,
-        tokens: List[str]
+        self, user_op: UserOperation, tokens: List[str]
     ) -> List[TokenQuote]:
         """Get fee quotes for ERC20 token payment."""
         packed = _pack_user_op_for_paymaster(user_op)
@@ -268,21 +269,19 @@ class BiconomyPaymaster(PaymasterClient):
 
         quotes = []
         for r in result:
-            quotes.append(TokenQuote(
-                token=r.get("token", ""),
-                symbol=r.get("symbol", ""),
-                decimals=r.get("decimals", 18),
-                fee=int(r.get("fee", "0x0"), 16),
-                exchange_rate=int(r.get("exchangeRate", "0x0"), 16),
-            ))
+            quotes.append(
+                TokenQuote(
+                    token=r.get("token", ""),
+                    symbol=r.get("symbol", ""),
+                    decimals=r.get("decimals", 18),
+                    fee=int(r.get("fee", "0x0"), 16),
+                    exchange_rate=int(r.get("exchangeRate", "0x0"), 16),
+                )
+            )
 
         return quotes
 
-    def check_sponsorship(
-        self,
-        user_op: UserOperation,
-        entry_point: str
-    ) -> bool:
+    def check_sponsorship(self, user_op: UserOperation, entry_point: str) -> bool:
         """Check if the operation can be sponsored."""
         packed = _pack_user_op_for_paymaster(user_op)
 
@@ -297,9 +296,15 @@ class BiconomyPaymaster(PaymasterClient):
         if result.get("paymaster"):
             return PaymasterData(
                 paymaster=result["paymaster"],
-                paymaster_verification_gas_limit=int(result.get("paymasterVerificationGasLimit", "0x0"), 16),
-                paymaster_post_op_gas_limit=int(result.get("paymasterPostOpGasLimit", "0x0"), 16),
-                paymaster_data=bytes.fromhex(result.get("paymasterData", "0x")[2:]) if result.get("paymasterData") else b"",
+                paymaster_verification_gas_limit=int(
+                    result.get("paymasterVerificationGasLimit", "0x0"), 16
+                ),
+                paymaster_post_op_gas_limit=int(
+                    result.get("paymasterPostOpGasLimit", "0x0"), 16
+                ),
+                paymaster_data=bytes.fromhex(result.get("paymasterData", "0x")[2:])
+                if result.get("paymasterData")
+                else b"",
             )
 
         paymaster_and_data = result.get("paymasterAndData", "0x")
@@ -330,7 +335,7 @@ class BiconomyPaymaster(PaymasterClient):
             headers={
                 "Content-Type": "application/json",
                 "x-api-key": self.api_key,
-            }
+            },
         )
 
         if response.status_code != 200:
@@ -343,7 +348,7 @@ class BiconomyPaymaster(PaymasterClient):
             raise PaymasterError(
                 error.get("message", "Unknown error"),
                 code=error.get("code"),
-                data=error.get("data")
+                data=error.get("data"),
             )
 
         return data.get("result")
@@ -357,7 +362,7 @@ class StackupPaymaster(PaymasterClient):
         api_key: str,
         chain_id: int,
         paymaster_url: str,
-        paymaster_type: Optional[str] = None
+        paymaster_type: Optional[str] = None,
     ):
         self.api_key = api_key
         self.chain_id = chain_id
@@ -367,10 +372,7 @@ class StackupPaymaster(PaymasterClient):
         self._client = httpx.Client(timeout=30.0)
 
     def get_paymaster_data(
-        self,
-        user_op: UserOperation,
-        chain_id: int,
-        entry_point: str
+        self, user_op: UserOperation, chain_id: int, entry_point: str
     ) -> PaymasterData:
         """Get paymaster data for sponsorship."""
         packed = _pack_user_op_for_paymaster(user_op)
@@ -379,20 +381,14 @@ class StackupPaymaster(PaymasterClient):
         if self.paymaster_type:
             context["type"] = self.paymaster_type
 
-        result = self._rpc_call("pm_getPaymasterStubData", [
-            packed,
-            entry_point,
-            hex(chain_id),
-            context
-        ])
+        result = self._rpc_call(
+            "pm_getPaymasterStubData", [packed, entry_point, hex(chain_id), context]
+        )
 
         return self._parse_paymaster_response(result)
 
     def will_sponsor(
-        self,
-        user_op: UserOperation,
-        chain_id: int,
-        entry_point: str
+        self, user_op: UserOperation, chain_id: int, entry_point: str
     ) -> bool:
         """Check if the paymaster will sponsor this operation."""
         try:
@@ -406,9 +402,15 @@ class StackupPaymaster(PaymasterClient):
         if result.get("paymaster"):
             return PaymasterData(
                 paymaster=result["paymaster"],
-                paymaster_verification_gas_limit=int(result.get("paymasterVerificationGasLimit", "0x0"), 16),
-                paymaster_post_op_gas_limit=int(result.get("paymasterPostOpGasLimit", "0x0"), 16),
-                paymaster_data=bytes.fromhex(result.get("paymasterData", "0x")[2:]) if result.get("paymasterData") else b"",
+                paymaster_verification_gas_limit=int(
+                    result.get("paymasterVerificationGasLimit", "0x0"), 16
+                ),
+                paymaster_post_op_gas_limit=int(
+                    result.get("paymasterPostOpGasLimit", "0x0"), 16
+                ),
+                paymaster_data=bytes.fromhex(result.get("paymasterData", "0x")[2:])
+                if result.get("paymasterData")
+                else b"",
             )
 
         paymaster_and_data = result.get("paymasterAndData", "0x")
@@ -439,7 +441,7 @@ class StackupPaymaster(PaymasterClient):
             headers={
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {self.api_key}",
-            }
+            },
         )
 
         if response.status_code != 200:
@@ -452,17 +454,14 @@ class StackupPaymaster(PaymasterClient):
             raise PaymasterError(
                 error.get("message", "Unknown error"),
                 code=error.get("code"),
-                data=error.get("data")
+                data=error.get("data"),
             )
 
         return data.get("result")
 
 
 def create_paymaster(
-    provider: str,
-    api_key: str,
-    chain_id: int,
-    **kwargs
+    provider: str, api_key: str, chain_id: int, **kwargs
 ) -> PaymasterClient:
     """Factory function to create a paymaster client."""
     if provider == "pimlico":
@@ -471,21 +470,21 @@ def create_paymaster(
             chain_id=chain_id,
             paymaster_url=kwargs.get("paymaster_url"),
             entry_point=kwargs.get("entry_point", ENTRYPOINT_V07_ADDRESS),
-            sponsorship_policy_id=kwargs.get("sponsorship_policy_id")
+            sponsorship_policy_id=kwargs.get("sponsorship_policy_id"),
         )
     elif provider == "biconomy":
         return BiconomyPaymaster(
             api_key=api_key,
             chain_id=chain_id,
             paymaster_url=kwargs.get("paymaster_url", ""),
-            mode=kwargs.get("mode", "sponsored")
+            mode=kwargs.get("mode", "sponsored"),
         )
     elif provider == "stackup":
         return StackupPaymaster(
             api_key=api_key,
             chain_id=chain_id,
             paymaster_url=kwargs.get("paymaster_url", ""),
-            paymaster_type=kwargs.get("paymaster_type")
+            paymaster_type=kwargs.get("paymaster_type"),
         )
     else:
         raise PaymasterError(f"Unknown paymaster provider: {provider}")
@@ -498,10 +497,7 @@ class UnifiedPaymaster:
         self.paymasters = paymasters
 
     def get_paymaster_data(
-        self,
-        user_op: UserOperation,
-        chain_id: int,
-        entry_point: str
+        self, user_op: UserOperation, chain_id: int, entry_point: str
     ) -> PaymasterData:
         """Try each paymaster until one succeeds."""
         last_error: Optional[Exception] = None
@@ -513,15 +509,10 @@ class UnifiedPaymaster:
                 last_error = e
                 continue
 
-        raise PaymasterError(
-            f"All paymasters failed. Last error: {last_error}"
-        )
+        raise PaymasterError(f"All paymasters failed. Last error: {last_error}")
 
     def will_sponsor(
-        self,
-        user_op: UserOperation,
-        chain_id: int,
-        entry_point: str
+        self, user_op: UserOperation, chain_id: int, entry_point: str
     ) -> bool:
         """Check if any paymaster will sponsor."""
         for paymaster in self.paymasters:

@@ -47,34 +47,35 @@ class GenericBundlerClient:
     def send_user_operation(self, user_op: UserOperation) -> str:
         """Submit a UserOperation to the bundler."""
         packed = user_op.to_packed_dict()
-        result = self._rpc_call(
-            "eth_sendUserOperation",
-            [packed, self.entry_point]
-        )
+        result = self._rpc_call("eth_sendUserOperation", [packed, self.entry_point])
         return result
 
     def estimate_user_operation_gas(self, user_op: UserOperation) -> GasEstimate:
         """Estimate gas for a UserOperation."""
         packed = user_op.to_packed_dict()
         result = self._rpc_call(
-            "eth_estimateUserOperationGas",
-            [packed, self.entry_point]
+            "eth_estimateUserOperationGas", [packed, self.entry_point]
         )
 
         return GasEstimate(
             verification_gas_limit=int(result.get("verificationGasLimit", "0x0"), 16),
             call_gas_limit=int(result.get("callGasLimit", "0x0"), 16),
             pre_verification_gas=int(result.get("preVerificationGas", "0x0"), 16),
-            paymaster_verification_gas_limit=int(result.get("paymasterVerificationGasLimit", "0x0"), 16) if result.get("paymasterVerificationGasLimit") else None,
-            paymaster_post_op_gas_limit=int(result.get("paymasterPostOpGasLimit", "0x0"), 16) if result.get("paymasterPostOpGasLimit") else None,
+            paymaster_verification_gas_limit=int(
+                result.get("paymasterVerificationGasLimit", "0x0"), 16
+            )
+            if result.get("paymasterVerificationGasLimit")
+            else None,
+            paymaster_post_op_gas_limit=int(
+                result.get("paymasterPostOpGasLimit", "0x0"), 16
+            )
+            if result.get("paymasterPostOpGasLimit")
+            else None,
         )
 
     def get_user_operation_by_hash(self, user_op_hash: str) -> Optional[UserOperation]:
         """Retrieve a UserOperation by hash."""
-        result = self._rpc_call(
-            "eth_getUserOperationByHash",
-            [user_op_hash]
-        )
+        result = self._rpc_call("eth_getUserOperationByHash", [user_op_hash])
 
         if not result or not result.get("userOperation"):
             return None
@@ -94,12 +95,11 @@ class GenericBundlerClient:
             signature=bytes.fromhex(op.get("signature", "0x")[2:]),
         )
 
-    def get_user_operation_receipt(self, user_op_hash: str) -> Optional[UserOperationReceipt]:
+    def get_user_operation_receipt(
+        self, user_op_hash: str
+    ) -> Optional[UserOperationReceipt]:
         """Retrieve the receipt for a UserOperation."""
-        result = self._rpc_call(
-            "eth_getUserOperationReceipt",
-            [user_op_hash]
-        )
+        result = self._rpc_call("eth_getUserOperationReceipt", [user_op_hash])
 
         if not result or not result.get("userOpHash"):
             return None
@@ -115,7 +115,9 @@ class GenericBundlerClient:
             success=result.get("success", False),
             reason=result.get("reason"),
             transaction_hash=receipt.get("transactionHash"),
-            block_number=int(receipt.get("blockNumber", "0x0"), 16) if receipt.get("blockNumber") else None,
+            block_number=int(receipt.get("blockNumber", "0x0"), 16)
+            if receipt.get("blockNumber")
+            else None,
             block_hash=receipt.get("blockHash"),
         )
 
@@ -125,10 +127,7 @@ class GenericBundlerClient:
         return result or []
 
     def wait_for_receipt(
-        self,
-        user_op_hash: str,
-        timeout: float = 60.0,
-        polling_interval: float = 2.0
+        self, user_op_hash: str, timeout: float = 60.0, polling_interval: float = 2.0
     ) -> UserOperationReceipt:
         """Wait for a UserOperation receipt with polling."""
         deadline = time.time() + timeout
@@ -153,9 +152,7 @@ class GenericBundlerClient:
         }
 
         response = self._client.post(
-            self.bundler_url,
-            json=request,
-            headers={"Content-Type": "application/json"}
+            self.bundler_url, json=request, headers={"Content-Type": "application/json"}
         )
 
         if response.status_code != 200:
@@ -168,7 +165,7 @@ class GenericBundlerClient:
             raise BundlerError(
                 error.get("message", "Unknown error"),
                 code=error.get("code"),
-                data=error.get("data")
+                data=error.get("data"),
             )
 
         return data.get("result")
@@ -177,6 +174,7 @@ class GenericBundlerClient:
 @dataclass
 class PimlicoGasPrice:
     """Gas price estimates from Pimlico."""
+
     slow_max_fee: int
     slow_priority_fee: int
     standard_max_fee: int
@@ -193,16 +191,14 @@ class PimlicoBundlerClient(GenericBundlerClient):
         api_key: str,
         chain_id: int,
         bundler_url: Optional[str] = None,
-        entry_point: str = ENTRYPOINT_V07_ADDRESS
+        entry_point: str = ENTRYPOINT_V07_ADDRESS,
     ):
         network = PIMLICO_NETWORKS.get(chain_id, str(chain_id))
         url = bundler_url or f"https://api.pimlico.io/v2/{network}/rpc?apikey={api_key}"
 
-        super().__init__(BundlerConfig(
-            bundler_url=url,
-            chain_id=chain_id,
-            entry_point=entry_point
-        ))
+        super().__init__(
+            BundlerConfig(bundler_url=url, chain_id=chain_id, entry_point=entry_point)
+        )
 
         self.api_key = api_key
 
@@ -220,39 +216,32 @@ class PimlicoBundlerClient(GenericBundlerClient):
         )
 
     def send_compressed_user_operation(
-        self,
-        compressed_calldata: bytes,
-        inflator_address: str
+        self, compressed_calldata: bytes, inflator_address: str
     ) -> str:
         """Send a compressed UserOperation for gas savings."""
         result = self._rpc_call(
             "pimlico_sendCompressedUserOperation",
-            [
-                "0x" + compressed_calldata.hex(),
-                inflator_address,
-                self.entry_point
-            ]
+            ["0x" + compressed_calldata.hex(), inflator_address, self.entry_point],
         )
         return result
 
     def get_user_operation_status(self, user_op_hash: str) -> Dict[str, Any]:
         """Get the status of a UserOperation."""
-        result = self._rpc_call(
-            "pimlico_getUserOperationStatus",
-            [user_op_hash]
-        )
+        result = self._rpc_call("pimlico_getUserOperationStatus", [user_op_hash])
         return result
 
 
 @dataclass
 class AlchemyPolicyConfig:
     """Alchemy policy configuration for gas sponsorship."""
+
     policy_id: str
 
 
 @dataclass
 class GasAndPaymasterResult:
     """Combined gas and paymaster data from Alchemy."""
+
     gas_estimate: GasEstimate
     paymaster_data: Optional[PaymasterData]
     max_fee_per_gas: int
@@ -268,7 +257,7 @@ class AlchemyBundlerClient(GenericBundlerClient):
         chain_id: int,
         bundler_url: Optional[str] = None,
         entry_point: str = ENTRYPOINT_V07_ADDRESS,
-        policy: Optional[AlchemyPolicyConfig] = None
+        policy: Optional[AlchemyPolicyConfig] = None,
     ):
         network = ALCHEMY_NETWORKS.get(chain_id)
         if not network:
@@ -276,19 +265,15 @@ class AlchemyBundlerClient(GenericBundlerClient):
 
         url = bundler_url or f"https://{network}.g.alchemy.com/v2/{api_key}"
 
-        super().__init__(BundlerConfig(
-            bundler_url=url,
-            chain_id=chain_id,
-            entry_point=entry_point
-        ))
+        super().__init__(
+            BundlerConfig(bundler_url=url, chain_id=chain_id, entry_point=entry_point)
+        )
 
         self.api_key = api_key
         self.policy = policy
 
     def request_gas_and_paymaster_and_data(
-        self,
-        user_op: UserOperation,
-        overrides: Optional[Dict[str, int]] = None
+        self, user_op: UserOperation, overrides: Optional[Dict[str, int]] = None
     ) -> GasAndPaymasterResult:
         """Request gas estimates and paymaster data in a single call."""
         if not self.policy:
@@ -304,33 +289,42 @@ class AlchemyBundlerClient(GenericBundlerClient):
         }
 
         if overrides:
-            request_params["overrides"] = {
-                k: hex(v) for k, v in overrides.items()
-            }
+            request_params["overrides"] = {k: hex(v) for k, v in overrides.items()}
 
         result = self._rpc_call(
-            "alchemy_requestGasAndPaymasterAndData",
-            [request_params]
+            "alchemy_requestGasAndPaymasterAndData", [request_params]
         )
 
         # Parse paymaster data
         paymaster_data = None
         paymaster_and_data = result.get("paymasterAndData", "0x")
-        if paymaster_and_data and paymaster_and_data != "0x" and len(paymaster_and_data) >= 106:
+        if (
+            paymaster_and_data
+            and paymaster_and_data != "0x"
+            and len(paymaster_and_data) >= 106
+        ):
             paymaster_data = PaymasterData(
                 paymaster="0x" + paymaster_and_data[2:42],
                 paymaster_verification_gas_limit=int(paymaster_and_data[42:74], 16),
                 paymaster_post_op_gas_limit=int(paymaster_and_data[74:106], 16),
-                paymaster_data=bytes.fromhex(paymaster_and_data[106:]) if len(paymaster_and_data) > 106 else b"",
+                paymaster_data=bytes.fromhex(paymaster_and_data[106:])
+                if len(paymaster_and_data) > 106
+                else b"",
             )
 
         return GasAndPaymasterResult(
             gas_estimate=GasEstimate(
-                verification_gas_limit=int(result.get("verificationGasLimit", "0x0"), 16),
+                verification_gas_limit=int(
+                    result.get("verificationGasLimit", "0x0"), 16
+                ),
                 call_gas_limit=int(result.get("callGasLimit", "0x0"), 16),
                 pre_verification_gas=int(result.get("preVerificationGas", "0x0"), 16),
-                paymaster_verification_gas_limit=paymaster_data.paymaster_verification_gas_limit if paymaster_data else None,
-                paymaster_post_op_gas_limit=paymaster_data.paymaster_post_op_gas_limit if paymaster_data else None,
+                paymaster_verification_gas_limit=paymaster_data.paymaster_verification_gas_limit
+                if paymaster_data
+                else None,
+                paymaster_post_op_gas_limit=paymaster_data.paymaster_post_op_gas_limit
+                if paymaster_data
+                else None,
             ),
             paymaster_data=paymaster_data,
             max_fee_per_gas=int(result.get("maxFeePerGas", "0x0"), 16),
@@ -338,8 +332,7 @@ class AlchemyBundlerClient(GenericBundlerClient):
         )
 
     def simulate_user_operation_asset_changes(
-        self,
-        user_op: UserOperation
+        self, user_op: UserOperation
     ) -> SimulationResult:
         """Simulate asset changes from a UserOperation."""
         packed = user_op.to_packed_dict()
@@ -347,26 +340,34 @@ class AlchemyBundlerClient(GenericBundlerClient):
         try:
             result = self._rpc_call(
                 "alchemy_simulateUserOperationAssetChanges",
-                [{
-                    "entryPoint": self.entry_point,
-                    "userOperation": packed,
-                }]
+                [
+                    {
+                        "entryPoint": self.entry_point,
+                        "userOperation": packed,
+                    }
+                ],
             )
 
             changes = []
             for change in result.get("changes", []):
-                changes.append(AssetChange(
-                    asset_type=change.get("assetType", ""),
-                    change_type=change.get("changeType", ""),
-                    from_address=change.get("from", ""),
-                    to_address=change.get("to", ""),
-                    amount=int(change["amount"], 16) if change.get("amount") else None,
-                    token_id=int(change["tokenId"], 16) if change.get("tokenId") else None,
-                    contract_address=change.get("contractAddress"),
-                    symbol=change.get("symbol"),
-                    name=change.get("name"),
-                    decimals=change.get("decimals"),
-                ))
+                changes.append(
+                    AssetChange(
+                        asset_type=change.get("assetType", ""),
+                        change_type=change.get("changeType", ""),
+                        from_address=change.get("from", ""),
+                        to_address=change.get("to", ""),
+                        amount=int(change["amount"], 16)
+                        if change.get("amount")
+                        else None,
+                        token_id=int(change["tokenId"], 16)
+                        if change.get("tokenId")
+                        else None,
+                        contract_address=change.get("contractAddress"),
+                        symbol=change.get("symbol"),
+                        name=change.get("name"),
+                        decimals=change.get("decimals"),
+                    )
+                )
 
             return SimulationResult(success=True, changes=changes)
 
@@ -375,10 +376,7 @@ class AlchemyBundlerClient(GenericBundlerClient):
 
     def get_fee_history(self) -> Dict[str, int]:
         """Get fee history for gas estimation."""
-        result = self._rpc_call(
-            "eth_feeHistory",
-            ["0x5", "latest", [25, 50, 75]]
-        )
+        result = self._rpc_call("eth_feeHistory", ["0x5", "latest", [25, 50, 75]])
 
         base_fee_per_gas = result.get("baseFeePerGas", [])
         rewards = result.get("reward", [])
@@ -390,7 +388,12 @@ class AlchemyBundlerClient(GenericBundlerClient):
         if rewards:
             mid_idx = len(rewards) // 2
             if rewards[mid_idx]:
-                median_priority_fee = int(rewards[mid_idx][1] if len(rewards[mid_idx]) > 1 else rewards[mid_idx][0], 16)
+                median_priority_fee = int(
+                    rewards[mid_idx][1]
+                    if len(rewards[mid_idx]) > 1
+                    else rewards[mid_idx][0],
+                    16,
+                )
 
         max_fee_per_gas = latest_base_fee * 2 + median_priority_fee
 
@@ -407,8 +410,12 @@ class AlchemyBundlerClient(GenericBundlerClient):
             "nonce": hex(user_op.nonce),
             "initCode": "0x" + user_op.init_code.hex() if user_op.init_code else "0x",
             "callData": "0x" + user_op.call_data.hex() if user_op.call_data else "0x",
-            "paymasterAndData": "0x" + user_op.paymaster_and_data.hex() if user_op.paymaster_and_data else "0x",
-            "signature": "0x" + user_op.signature.hex() if user_op.signature else "0x" + get_dummy_signature().hex(),
+            "paymasterAndData": "0x" + user_op.paymaster_and_data.hex()
+            if user_op.paymaster_and_data
+            else "0x",
+            "signature": "0x" + user_op.signature.hex()
+            if user_op.signature
+            else "0x" + get_dummy_signature().hex(),
         }
 
         if user_op.verification_gas_limit:
@@ -426,10 +433,7 @@ class AlchemyBundlerClient(GenericBundlerClient):
 
 
 def create_bundler_client(
-    provider: str,
-    api_key: str,
-    chain_id: int,
-    **kwargs
+    provider: str, api_key: str, chain_id: int, **kwargs
 ) -> Union[GenericBundlerClient, PimlicoBundlerClient, AlchemyBundlerClient]:
     """Factory function to create a bundler client."""
     if provider == "pimlico":
@@ -437,7 +441,7 @@ def create_bundler_client(
             api_key=api_key,
             chain_id=chain_id,
             bundler_url=kwargs.get("bundler_url"),
-            entry_point=kwargs.get("entry_point", ENTRYPOINT_V07_ADDRESS)
+            entry_point=kwargs.get("entry_point", ENTRYPOINT_V07_ADDRESS),
         )
     elif provider == "alchemy":
         policy = None
@@ -448,11 +452,13 @@ def create_bundler_client(
             chain_id=chain_id,
             bundler_url=kwargs.get("bundler_url"),
             entry_point=kwargs.get("entry_point", ENTRYPOINT_V07_ADDRESS),
-            policy=policy
+            policy=policy,
         )
     else:
-        return GenericBundlerClient(BundlerConfig(
-            bundler_url=kwargs.get("bundler_url", ""),
-            chain_id=chain_id,
-            entry_point=kwargs.get("entry_point", ENTRYPOINT_V07_ADDRESS)
-        ))
+        return GenericBundlerClient(
+            BundlerConfig(
+                bundler_url=kwargs.get("bundler_url", ""),
+                chain_id=chain_id,
+                entry_point=kwargs.get("entry_point", ENTRYPOINT_V07_ADDRESS),
+            )
+        )

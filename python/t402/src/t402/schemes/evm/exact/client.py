@@ -123,7 +123,9 @@ class ExactEvmClientScheme:
         asset = req.get("asset", "")
 
         # Get timeout
-        max_timeout = req.get("maxTimeoutSeconds") or req.get("max_timeout_seconds", 300)
+        max_timeout = req.get("maxTimeoutSeconds") or req.get(
+            "max_timeout_seconds", 300
+        )
 
         # Get EIP-712 domain info from extra
         extra = req.get("extra", {})

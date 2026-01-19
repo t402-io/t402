@@ -1,34 +1,34 @@
-import { useState, useCallback, useRef } from "react";
-import type { PaymentStatus } from "../types/index.js";
+import { useState, useCallback, useRef } from 'react'
+import type { PaymentStatus } from '../types/index.js'
 
 interface UseAsyncPaymentOptions<T> {
   /** The async payment function to execute */
-  paymentFn: () => Promise<T>;
+  paymentFn: () => Promise<T>
   /** Callback on successful payment */
-  onSuccess?: (result: T) => void;
+  onSuccess?: (result: T) => void
   /** Callback on payment error */
-  onError?: (error: Error) => void;
+  onError?: (error: Error) => void
   /** Callback when payment starts */
-  onStart?: () => void;
+  onStart?: () => void
 }
 
 interface UseAsyncPaymentResult<T> {
   /** Execute the payment */
-  execute: () => Promise<T | null>;
+  execute: () => Promise<T | null>
   /** Current payment status */
-  status: PaymentStatus;
+  status: PaymentStatus
   /** Result of successful payment */
-  result: T | null;
+  result: T | null
   /** Error message if payment failed */
-  error: string | null;
+  error: string | null
   /** Whether payment is in progress */
-  isLoading: boolean;
+  isLoading: boolean
   /** Whether payment succeeded */
-  isSuccess: boolean;
+  isSuccess: boolean
   /** Whether payment failed */
-  isError: boolean;
+  isError: boolean
   /** Reset the state */
-  reset: () => void;
+  reset: () => void
 }
 
 /**
@@ -62,57 +62,57 @@ interface UseAsyncPaymentResult<T> {
  * ```
  */
 export function useAsyncPayment<T>(options: UseAsyncPaymentOptions<T>): UseAsyncPaymentResult<T> {
-  const { paymentFn, onSuccess, onError, onStart } = options;
+  const { paymentFn, onSuccess, onError, onStart } = options
 
-  const [status, setStatus] = useState<PaymentStatus>("idle");
-  const [result, setResult] = useState<T | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<PaymentStatus>('idle')
+  const [result, setResult] = useState<T | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   // Use ref to track if component is mounted
-  const isMountedRef = useRef(true);
+  const isMountedRef = useRef(true)
 
   const execute = useCallback(async (): Promise<T | null> => {
-    setStatus("loading");
-    setError(null);
-    onStart?.();
+    setStatus('loading')
+    setError(null)
+    onStart?.()
 
     try {
-      const paymentResult = await paymentFn();
+      const paymentResult = await paymentFn()
 
       if (isMountedRef.current) {
-        setResult(paymentResult);
-        setStatus("success");
-        onSuccess?.(paymentResult);
+        setResult(paymentResult)
+        setStatus('success')
+        onSuccess?.(paymentResult)
       }
 
-      return paymentResult;
+      return paymentResult
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Payment failed";
+      const errorMessage = err instanceof Error ? err.message : 'Payment failed'
 
       if (isMountedRef.current) {
-        setError(errorMessage);
-        setStatus("error");
+        setError(errorMessage)
+        setStatus('error')
       }
 
-      onError?.(err instanceof Error ? err : new Error(errorMessage));
-      return null;
+      onError?.(err instanceof Error ? err : new Error(errorMessage))
+      return null
     }
-  }, [paymentFn, onSuccess, onError, onStart]);
+  }, [paymentFn, onSuccess, onError, onStart])
 
   const reset = useCallback(() => {
-    setStatus("idle");
-    setResult(null);
-    setError(null);
-  }, []);
+    setStatus('idle')
+    setResult(null)
+    setError(null)
+  }, [])
 
   return {
     execute,
     status,
     result,
     error,
-    isLoading: status === "loading",
-    isSuccess: status === "success",
-    isError: status === "error",
+    isLoading: status === 'loading',
+    isSuccess: status === 'success',
+    isError: status === 'error',
     reset,
-  };
+  }
 }

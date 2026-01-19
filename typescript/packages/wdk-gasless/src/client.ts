@@ -5,14 +5,9 @@
  * Tether WDK accounts and ERC-4337 Account Abstraction.
  */
 
-import type { Address, Hex, PublicClient } from "viem";
-import { encodeFunctionData, parseUnits, formatUnits } from "viem";
-import {
-  BundlerClient,
-  PaymasterClient,
-  UserOpBuilder,
-  ENTRYPOINT_V07_ADDRESS,
-} from "@t402/evm";
+import type { Address, Hex, PublicClient } from 'viem'
+import { encodeFunctionData, parseUnits, formatUnits } from 'viem'
+import { BundlerClient, PaymasterClient, UserOpBuilder, ENTRYPOINT_V07_ADDRESS } from '@t402/evm'
 import type {
   SmartAccountSigner,
   BundlerConfig,
@@ -20,7 +15,7 @@ import type {
   TransactionIntent,
   GasEstimate,
   PaymasterData,
-} from "@t402/evm";
+} from '@t402/evm'
 import type {
   WdkGaslessClientConfig,
   GaslessPaymentParams,
@@ -29,9 +24,9 @@ import type {
   GaslessPaymentReceipt,
   SponsorshipInfo,
   WdkAccount,
-} from "./types.js";
-import { WdkSmartAccount, createWdkSmartAccount } from "./account.js";
-import { getTokenAddress, getChainName } from "./constants.js";
+} from './types.js'
+import { WdkSmartAccount, createWdkSmartAccount } from './account.js'
+import { getTokenAddress, getChainName } from './constants.js'
 
 /**
  * ERC20 transfer ABI
@@ -39,28 +34,28 @@ import { getTokenAddress, getChainName } from "./constants.js";
 const ERC20_TRANSFER_ABI = [
   {
     inputs: [
-      { name: "to", type: "address" },
-      { name: "amount", type: "uint256" },
+      { name: 'to', type: 'address' },
+      { name: 'amount', type: 'uint256' },
     ],
-    name: "transfer",
-    outputs: [{ name: "", type: "bool" }],
-    stateMutability: "nonpayable",
-    type: "function",
+    name: 'transfer',
+    outputs: [{ name: '', type: 'bool' }],
+    stateMutability: 'nonpayable',
+    type: 'function',
   },
-] as const;
+] as const
 
 /**
  * ERC20 balanceOf ABI
  */
 const ERC20_BALANCE_ABI = [
   {
-    inputs: [{ name: "account", type: "address" }],
-    name: "balanceOf",
-    outputs: [{ name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function",
+    inputs: [{ name: 'account', type: 'address' }],
+    name: 'balanceOf',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
   },
-] as const;
+] as const
 
 /**
  * WDK Gasless Client
@@ -69,24 +64,22 @@ const ERC20_BALANCE_ABI = [
  * WDK accounts and ERC-4337 smart accounts.
  */
 export class WdkGaslessClient {
-  private readonly signer: SmartAccountSigner;
-  private readonly builder: UserOpBuilder;
-  private readonly bundler: BundlerClient;
-  private readonly paymaster?: PaymasterClient;
-  private readonly chainId: number;
-  private readonly publicClient: PublicClient;
-  private readonly chainName: string;
+  private readonly signer: SmartAccountSigner
+  private readonly builder: UserOpBuilder
+  private readonly bundler: BundlerClient
+  private readonly paymaster?: PaymasterClient
+  private readonly chainId: number
+  private readonly publicClient: PublicClient
+  private readonly chainName: string
 
   constructor(config: WdkGaslessClientConfig) {
-    this.signer = config.signer;
-    this.builder = new UserOpBuilder();
-    this.bundler = new BundlerClient(config.bundler);
-    this.paymaster = config.paymaster
-      ? new PaymasterClient(config.paymaster)
-      : undefined;
-    this.chainId = config.chainId;
-    this.publicClient = config.publicClient;
-    this.chainName = getChainName(config.chainId);
+    this.signer = config.signer
+    this.builder = new UserOpBuilder()
+    this.bundler = new BundlerClient(config.bundler)
+    this.paymaster = config.paymaster ? new PaymasterClient(config.paymaster) : undefined
+    this.chainId = config.chainId
+    this.publicClient = config.publicClient
+    this.chainName = getChainName(config.chainId)
   }
 
   /**
@@ -96,29 +89,29 @@ export class WdkGaslessClient {
    * Gas is sponsored by a paymaster if configured.
    */
   async pay(params: GaslessPaymentParams): Promise<GaslessPaymentResult> {
-    const token = params.token ?? "USDT0";
-    const tokenAddress = getTokenAddress(token, this.chainName);
+    const token = params.token ?? 'USDT0'
+    const tokenAddress = getTokenAddress(token, this.chainName)
 
     // Build the transfer call data
     const callData = encodeFunctionData({
       abi: ERC20_TRANSFER_ABI,
-      functionName: "transfer",
+      functionName: 'transfer',
       args: [params.to, params.amount],
-    });
+    })
 
     // Create the transaction intent
     const intent: TransactionIntent = {
       to: tokenAddress,
       value: 0n,
       data: callData,
-    };
+    }
 
     // Estimate gas
-    const gasEstimate = await this.estimateGas(intent);
+    const gasEstimate = await this.estimateGas(intent)
 
     // Get paymaster data if configured
-    const paymasterData = await this.getPaymasterData(gasEstimate);
-    const sponsored = paymasterData !== undefined;
+    const paymasterData = await this.getPaymasterData(gasEstimate)
+    const sponsored = paymasterData !== undefined
 
     // Build the UserOperation
     const userOp = await this.builder.buildUserOp(
@@ -127,7 +120,7 @@ export class WdkGaslessClient {
       this.publicClient,
       gasEstimate,
       paymasterData,
-    );
+    )
 
     // Sign the UserOperation
     const signedUserOp = await this.builder.signUserOp(
@@ -135,18 +128,18 @@ export class WdkGaslessClient {
       this.signer,
       this.publicClient,
       this.chainId,
-    );
+    )
 
     // Submit to bundler
-    const result = await this.bundler.sendUserOperation(signedUserOp);
-    const sender = await this.signer.getAddress();
+    const result = await this.bundler.sendUserOperation(signedUserOp)
+    const sender = await this.signer.getAddress()
 
     return {
       userOpHash: result.userOpHash,
       sender,
       sponsored,
       wait: async (): Promise<GaslessPaymentReceipt> => {
-        const receipt = await result.wait();
+        const receipt = await result.wait()
         return {
           userOpHash: receipt.userOpHash,
           txHash: receipt.receipt.transactionHash,
@@ -155,9 +148,9 @@ export class WdkGaslessClient {
           gasUsed: receipt.actualGasUsed,
           gasCost: receipt.actualGasCost,
           reason: receipt.reason,
-        };
+        }
       },
-    };
+    }
   }
 
   /**
@@ -169,26 +162,26 @@ export class WdkGaslessClient {
   async payBatch(params: BatchPaymentParams): Promise<GaslessPaymentResult> {
     // Build transaction intents for all payments
     const intents: TransactionIntent[] = params.payments.map((payment) => {
-      const token = payment.token ?? "USDT0";
-      const tokenAddress = getTokenAddress(token, this.chainName);
+      const token = payment.token ?? 'USDT0'
+      const tokenAddress = getTokenAddress(token, this.chainName)
 
       return {
         to: tokenAddress,
         value: 0n,
         data: encodeFunctionData({
           abi: ERC20_TRANSFER_ABI,
-          functionName: "transfer",
+          functionName: 'transfer',
           args: [payment.to, payment.amount],
         }),
-      };
-    });
+      }
+    })
 
     // Estimate gas for batch
-    const gasEstimate = await this.estimateBatchGas(intents);
+    const gasEstimate = await this.estimateBatchGas(intents)
 
     // Get paymaster data
-    const paymasterData = await this.getPaymasterData(gasEstimate);
-    const sponsored = paymasterData !== undefined;
+    const paymasterData = await this.getPaymasterData(gasEstimate)
+    const sponsored = paymasterData !== undefined
 
     // Build batch UserOperation
     const userOp = await this.builder.buildBatchUserOp(
@@ -197,7 +190,7 @@ export class WdkGaslessClient {
       this.publicClient,
       gasEstimate,
       paymasterData,
-    );
+    )
 
     // Sign and submit
     const signedUserOp = await this.builder.signUserOp(
@@ -205,17 +198,17 @@ export class WdkGaslessClient {
       this.signer,
       this.publicClient,
       this.chainId,
-    );
+    )
 
-    const result = await this.bundler.sendUserOperation(signedUserOp);
-    const sender = await this.signer.getAddress();
+    const result = await this.bundler.sendUserOperation(signedUserOp)
+    const sender = await this.signer.getAddress()
 
     return {
       userOpHash: result.userOpHash,
       sender,
       sponsored,
       wait: async (): Promise<GaslessPaymentReceipt> => {
-        const receipt = await result.wait();
+        const receipt = await result.wait()
         return {
           userOpHash: receipt.userOpHash,
           txHash: receipt.receipt.transactionHash,
@@ -224,9 +217,9 @@ export class WdkGaslessClient {
           gasUsed: receipt.actualGasUsed,
           gasCost: receipt.actualGasCost,
           reason: receipt.reason,
-        };
+        }
       },
-    };
+    }
   }
 
   /**
@@ -236,57 +229,57 @@ export class WdkGaslessClient {
     if (!this.paymaster) {
       return {
         canSponsor: false,
-        reason: "No paymaster configured",
-      };
+        reason: 'No paymaster configured',
+      }
     }
 
-    const token = params.token ?? "USDT0";
-    const tokenAddress = getTokenAddress(token, this.chainName);
+    const token = params.token ?? 'USDT0'
+    const tokenAddress = getTokenAddress(token, this.chainName)
 
     const callData = encodeFunctionData({
       abi: ERC20_TRANSFER_ABI,
-      functionName: "transfer",
+      functionName: 'transfer',
       args: [params.to, params.amount],
-    });
+    })
 
-    const sender = await this.signer.getAddress();
-    const encodedCallData = this.signer.encodeExecute(tokenAddress, 0n, callData);
+    const sender = await this.signer.getAddress()
+    const encodedCallData = this.signer.encodeExecute(tokenAddress, 0n, callData)
 
     try {
       const canSponsor = await this.paymaster.willSponsor(
         { sender, callData: encodedCallData },
         this.chainId,
         ENTRYPOINT_V07_ADDRESS,
-      );
+      )
 
       if (canSponsor) {
-        return { canSponsor: true };
+        return { canSponsor: true }
       } else {
         // Estimate gas cost if not sponsored
         const intent: TransactionIntent = {
           to: tokenAddress,
           value: 0n,
           data: callData,
-        };
-        const gasEstimate = await this.estimateGas(intent);
-        const gasPrice = await this.publicClient.getGasPrice();
+        }
+        const gasEstimate = await this.estimateGas(intent)
+        const gasPrice = await this.publicClient.getGasPrice()
         const estimatedGasCost =
           (gasEstimate.verificationGasLimit +
             gasEstimate.callGasLimit +
             gasEstimate.preVerificationGas) *
-          gasPrice;
+          gasPrice
 
         return {
           canSponsor: false,
-          reason: "Payment not eligible for sponsorship",
+          reason: 'Payment not eligible for sponsorship',
           estimatedGasCost,
-        };
+        }
       }
     } catch (error) {
       return {
         canSponsor: false,
-        reason: error instanceof Error ? error.message : "Unknown error",
-      };
+        reason: error instanceof Error ? error.message : 'Unknown error',
+      }
     }
   }
 
@@ -294,113 +287,101 @@ export class WdkGaslessClient {
    * Get the smart account address
    */
   async getAccountAddress(): Promise<Address> {
-    return this.signer.getAddress();
+    return this.signer.getAddress()
   }
 
   /**
    * Check if the smart account is deployed
    */
   async isAccountDeployed(): Promise<boolean> {
-    return this.signer.isDeployed();
+    return this.signer.isDeployed()
   }
 
   /**
    * Get the token balance of the smart account
    */
-  async getBalance(token: "USDT0" | "USDC" | Address = "USDT0"): Promise<bigint> {
-    const tokenAddress = getTokenAddress(token, this.chainName);
-    const accountAddress = await this.signer.getAddress();
+  async getBalance(token: 'USDT0' | 'USDC' | Address = 'USDT0'): Promise<bigint> {
+    const tokenAddress = getTokenAddress(token, this.chainName)
+    const accountAddress = await this.signer.getAddress()
 
     const balance = await this.publicClient.readContract({
       address: tokenAddress,
       abi: ERC20_BALANCE_ABI,
-      functionName: "balanceOf",
+      functionName: 'balanceOf',
       args: [accountAddress],
-    });
+    })
 
-    return balance as bigint;
+    return balance as bigint
   }
 
   /**
    * Get the formatted token balance
    */
   async getFormattedBalance(
-    token: "USDT0" | "USDC" | Address = "USDT0",
+    token: 'USDT0' | 'USDC' | Address = 'USDT0',
     decimals = 6,
   ): Promise<string> {
-    const balance = await this.getBalance(token);
-    return formatUnits(balance, decimals);
+    const balance = await this.getBalance(token)
+    return formatUnits(balance, decimals)
   }
 
   /**
    * Estimate gas for a single transaction
    */
   private async estimateGas(intent: TransactionIntent): Promise<GasEstimate> {
-    const sender = await this.signer.getAddress();
-    const callData = this.signer.encodeExecute(
-      intent.to,
-      intent.value ?? 0n,
-      intent.data ?? "0x",
-    );
+    const sender = await this.signer.getAddress()
+    const callData = this.signer.encodeExecute(intent.to, intent.value ?? 0n, intent.data ?? '0x')
 
     try {
       return await this.bundler.estimateUserOperationGas({
         sender,
         callData,
-      });
+      })
     } catch {
       // Return defaults if estimation fails
       return {
         verificationGasLimit: 150000n,
         callGasLimit: 100000n,
         preVerificationGas: 50000n,
-      };
+      }
     }
   }
 
   /**
    * Estimate gas for a batch transaction
    */
-  private async estimateBatchGas(
-    intents: TransactionIntent[],
-  ): Promise<GasEstimate> {
-    const sender = await this.signer.getAddress();
+  private async estimateBatchGas(intents: TransactionIntent[]): Promise<GasEstimate> {
+    const sender = await this.signer.getAddress()
     const callData = this.signer.encodeExecuteBatch(
       intents.map((i) => i.to),
       intents.map((i) => i.value ?? 0n),
-      intents.map((i) => (i.data ?? "0x") as Hex),
-    );
+      intents.map((i) => (i.data ?? '0x') as Hex),
+    )
 
     try {
       return await this.bundler.estimateUserOperationGas({
         sender,
         callData,
-      });
+      })
     } catch {
       // Return defaults with multiplier for batch size
       return {
         verificationGasLimit: 150000n,
         callGasLimit: 100000n * BigInt(intents.length),
         preVerificationGas: 50000n,
-      };
+      }
     }
   }
 
   /**
    * Get paymaster data if configured
    */
-  private async getPaymasterData(
-    _gasEstimate: GasEstimate,
-  ): Promise<PaymasterData | undefined> {
-    if (!this.paymaster) return undefined;
+  private async getPaymasterData(_gasEstimate: GasEstimate): Promise<PaymasterData | undefined> {
+    if (!this.paymaster) return undefined
 
-    const sender = await this.signer.getAddress();
+    const sender = await this.signer.getAddress()
 
-    return this.paymaster.getPaymasterData(
-      { sender },
-      this.chainId,
-      ENTRYPOINT_V07_ADDRESS,
-    );
+    return this.paymaster.getPaymasterData({ sender }, this.chainId, ENTRYPOINT_V07_ADDRESS)
   }
 }
 
@@ -409,17 +390,17 @@ export class WdkGaslessClient {
  */
 export interface CreateWdkGaslessClientConfig {
   /** WDK account to use as the signer */
-  wdkAccount: WdkAccount;
+  wdkAccount: WdkAccount
   /** Public client for chain interactions */
-  publicClient: PublicClient;
+  publicClient: PublicClient
   /** Chain ID */
-  chainId: number;
+  chainId: number
   /** Bundler configuration */
-  bundler: BundlerConfig;
+  bundler: BundlerConfig
   /** Optional paymaster for gas sponsorship */
-  paymaster?: PaymasterConfig;
+  paymaster?: PaymasterConfig
   /** Salt nonce for address generation (defaults to 0) */
-  saltNonce?: bigint;
+  saltNonce?: bigint
 }
 
 /**
@@ -465,7 +446,7 @@ export async function createWdkGaslessClient(
     publicClient: config.publicClient,
     chainId: config.chainId,
     saltNonce: config.saltNonce,
-  });
+  })
 
   // Create the gasless client
   return new WdkGaslessClient({
@@ -474,5 +455,5 @@ export async function createWdkGaslessClient(
     paymaster: config.paymaster,
     chainId: config.chainId,
     publicClient: config.publicClient,
-  });
+  })
 }

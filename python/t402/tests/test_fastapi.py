@@ -1,11 +1,10 @@
 """Tests for FastAPI Middleware and Dependencies."""
 
 import pytest
-from unittest.mock import MagicMock, AsyncMock, patch
+from unittest.mock import MagicMock
 import json
-import base64
 
-from fastapi import FastAPI, Request, Depends
+from fastapi import FastAPI, Request
 from fastapi.testclient import TestClient
 
 from t402.fastapi import (
@@ -20,12 +19,9 @@ from t402.types import (
     T402_VERSION_V1,
     T402_VERSION_V2,
     VerifyResponse,
-    SettleResponse,
 )
 from t402.encoding import (
-    HEADER_PAYMENT_SIGNATURE,
     HEADER_PAYMENT_REQUIRED,
-    HEADER_X_PAYMENT,
     safe_base64_encode,
 )
 

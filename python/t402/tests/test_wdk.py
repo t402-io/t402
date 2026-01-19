@@ -3,16 +3,13 @@ Tests for T402 WDK Python adapter.
 """
 
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
 from t402.wdk import (
     WDKSigner,
     generate_seed_phrase,
     validate_seed_phrase,
     format_token_amount,
-    WDKConfig,
     ChainConfig,
     NetworkType,
-    TokenInfo,
     TokenBalance,
     ChainBalance,
     AggregatedBalance,
@@ -20,7 +17,6 @@ from t402.wdk import (
     PaymentResult,
     SignedTypedData,
     DEFAULT_CHAINS,
-    CHAIN_TOKENS,
     USDT0_ADDRESSES,
     USDC_ADDRESSES,
     get_chain_config,
@@ -35,7 +31,6 @@ from t402.wdk import (
     WDKError,
     WDKInitializationError,
     SignerError,
-    SigningError,
     ChainError,
     BalanceError,
     WDKErrorCode,

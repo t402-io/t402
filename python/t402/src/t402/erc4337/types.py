@@ -26,6 +26,7 @@ SAFE_4337_ADDRESSES = {
 
 class PaymasterType(str, Enum):
     """Type of paymaster for gas sponsorship."""
+
     NONE = "none"
     VERIFYING = "verifying"
     TOKEN = "token"
@@ -39,6 +40,7 @@ class UserOperation:
 
     This is the format used before packing for on-chain submission.
     """
+
     sender: str
     nonce: int = 0
     init_code: bytes = field(default_factory=bytes)
@@ -63,20 +65,18 @@ class UserOperation:
             "preVerificationGas": hex(self.pre_verification_gas),
             "maxPriorityFeePerGas": hex(self.max_priority_fee_per_gas),
             "maxFeePerGas": hex(self.max_fee_per_gas),
-            "paymasterAndData": "0x" + self.paymaster_and_data.hex() if self.paymaster_and_data else "0x",
+            "paymasterAndData": "0x" + self.paymaster_and_data.hex()
+            if self.paymaster_and_data
+            else "0x",
             "signature": "0x" + self.signature.hex() if self.signature else "0x",
         }
 
     def to_packed_dict(self) -> dict:
         """Convert to packed format for v0.7 submission."""
         account_gas_limits = pack_account_gas_limits(
-            self.verification_gas_limit,
-            self.call_gas_limit
+            self.verification_gas_limit, self.call_gas_limit
         )
-        gas_fees = pack_gas_fees(
-            self.max_priority_fee_per_gas,
-            self.max_fee_per_gas
-        )
+        gas_fees = pack_gas_fees(self.max_priority_fee_per_gas, self.max_fee_per_gas)
 
         return {
             "sender": self.sender,
@@ -86,7 +86,9 @@ class UserOperation:
             "accountGasLimits": "0x" + account_gas_limits.hex(),
             "preVerificationGas": hex(self.pre_verification_gas),
             "gasFees": "0x" + gas_fees.hex(),
-            "paymasterAndData": "0x" + self.paymaster_and_data.hex() if self.paymaster_and_data else "0x",
+            "paymasterAndData": "0x" + self.paymaster_and_data.hex()
+            if self.paymaster_and_data
+            else "0x",
             "signature": "0x" + self.signature.hex() if self.signature else "0x",
         }
 
@@ -98,6 +100,7 @@ class PackedUserOperation:
 
     Gas fields are packed into bytes32 for efficiency.
     """
+
     sender: str
     nonce: int
     init_code: bytes
@@ -112,6 +115,7 @@ class PackedUserOperation:
 @dataclass
 class PaymasterData:
     """Paymaster information for gas sponsorship."""
+
     paymaster: str
     paymaster_verification_gas_limit: int = 50000
     paymaster_post_op_gas_limit: int = 50000
@@ -120,14 +124,17 @@ class PaymasterData:
     def to_bytes(self) -> bytes:
         """Pack into paymasterAndData format."""
         paymaster_bytes = bytes.fromhex(self.paymaster[2:])
-        verification_bytes = self.paymaster_verification_gas_limit.to_bytes(16, 'big')
-        post_op_bytes = self.paymaster_post_op_gas_limit.to_bytes(16, 'big')
-        return paymaster_bytes + verification_bytes + post_op_bytes + self.paymaster_data
+        verification_bytes = self.paymaster_verification_gas_limit.to_bytes(16, "big")
+        post_op_bytes = self.paymaster_post_op_gas_limit.to_bytes(16, "big")
+        return (
+            paymaster_bytes + verification_bytes + post_op_bytes + self.paymaster_data
+        )
 
 
 @dataclass
 class GasEstimate:
     """Gas estimation results from the bundler."""
+
     verification_gas_limit: int
     call_gas_limit: int
     pre_verification_gas: int
@@ -138,6 +145,7 @@ class GasEstimate:
 @dataclass
 class UserOperationReceipt:
     """Receipt after UserOperation execution."""
+
     user_op_hash: str
     sender: str
     nonce: int
@@ -154,6 +162,7 @@ class UserOperationReceipt:
 @dataclass
 class BundlerConfig:
     """Configuration for bundler client."""
+
     bundler_url: str
     chain_id: int
     entry_point: str = ENTRYPOINT_V07_ADDRESS
@@ -162,6 +171,7 @@ class BundlerConfig:
 @dataclass
 class PaymasterConfig:
     """Configuration for paymaster integration."""
+
     address: str
     url: Optional[str] = None
     paymaster_type: PaymasterType = PaymasterType.SPONSORING
@@ -170,6 +180,7 @@ class PaymasterConfig:
 @dataclass
 class TokenQuote:
     """Quote for token paymaster."""
+
     token: str
     symbol: str
     decimals: int
@@ -180,6 +191,7 @@ class TokenQuote:
 @dataclass
 class AssetChange:
     """Asset change from simulation."""
+
     asset_type: str  # native, erc20, erc721, erc1155
     change_type: str  # transfer_in, transfer_out
     from_address: str
@@ -195,6 +207,7 @@ class AssetChange:
 @dataclass
 class SimulationResult:
     """Simulation result for UserOperation."""
+
     success: bool
     error: Optional[str] = None
     changes: List[AssetChange] = field(default_factory=list)
@@ -223,13 +236,13 @@ BUNDLER_METHODS = {
 
 # Supported chains for ERC-4337
 SUPPORTED_CHAINS = [
-    1,        # Ethereum Mainnet
-    11155111, # Ethereum Sepolia
-    8453,     # Base
-    84532,    # Base Sepolia
-    10,       # Optimism
-    42161,    # Arbitrum One
-    137,      # Polygon
+    1,  # Ethereum Mainnet
+    11155111,  # Ethereum Sepolia
+    8453,  # Base
+    84532,  # Base Sepolia
+    10,  # Optimism
+    42161,  # Arbitrum One
+    137,  # Polygon
 ]
 
 
@@ -265,29 +278,29 @@ PIMLICO_NETWORKS = {
 
 def pack_account_gas_limits(verification_gas_limit: int, call_gas_limit: int) -> bytes:
     """Pack verification and call gas limits into bytes32."""
-    verification_bytes = verification_gas_limit.to_bytes(16, 'big')
-    call_bytes = call_gas_limit.to_bytes(16, 'big')
+    verification_bytes = verification_gas_limit.to_bytes(16, "big")
+    call_bytes = call_gas_limit.to_bytes(16, "big")
     return verification_bytes + call_bytes
 
 
 def unpack_account_gas_limits(packed: bytes) -> tuple[int, int]:
     """Unpack account gas limits from bytes32."""
-    verification_gas_limit = int.from_bytes(packed[:16], 'big')
-    call_gas_limit = int.from_bytes(packed[16:], 'big')
+    verification_gas_limit = int.from_bytes(packed[:16], "big")
+    call_gas_limit = int.from_bytes(packed[16:], "big")
     return verification_gas_limit, call_gas_limit
 
 
 def pack_gas_fees(max_priority_fee_per_gas: int, max_fee_per_gas: int) -> bytes:
     """Pack max priority fee and max fee per gas into bytes32."""
-    priority_bytes = max_priority_fee_per_gas.to_bytes(16, 'big')
-    max_bytes = max_fee_per_gas.to_bytes(16, 'big')
+    priority_bytes = max_priority_fee_per_gas.to_bytes(16, "big")
+    max_bytes = max_fee_per_gas.to_bytes(16, "big")
     return priority_bytes + max_bytes
 
 
 def unpack_gas_fees(packed: bytes) -> tuple[int, int]:
     """Unpack gas fees from bytes32."""
-    max_priority_fee_per_gas = int.from_bytes(packed[:16], 'big')
-    max_fee_per_gas = int.from_bytes(packed[16:], 'big')
+    max_priority_fee_per_gas = int.from_bytes(packed[:16], "big")
+    max_fee_per_gas = int.from_bytes(packed[16:], "big")
     return max_priority_fee_per_gas, max_fee_per_gas
 
 

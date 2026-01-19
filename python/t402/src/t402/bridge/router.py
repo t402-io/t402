@@ -199,7 +199,7 @@ class CrossChainPaymentRouter:
             raise ValueError(
                 f'Cannot route payment from "{params.source_chain}" to '
                 f'"{params.destination_chain}". '
-                f'Supported chains: {", ".join(get_bridgeable_chains())}'
+                f"Supported chains: {', '.join(get_bridgeable_chains())}"
             )
 
         if params.amount <= 0:

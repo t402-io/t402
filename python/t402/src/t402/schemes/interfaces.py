@@ -25,9 +25,13 @@ from t402.types import (
 
 
 # Type aliases for clarity
-Price = Union[str, int, float, Dict[str, Any]]  # e.g., "$0.10", 0.10, {"amount": "100000", "asset": "..."}
+Price = Union[
+    str, int, float, Dict[str, Any]
+]  # e.g., "$0.10", 0.10, {"amount": "100000", "asset": "..."}
 AssetAmount = Dict[str, Any]  # {"amount": str, "asset": str, "extra"?: dict}
-SupportedKindDict = Dict[str, Any]  # {"t402Version": int, "scheme": str, "network": str, "extra"?: dict}
+SupportedKindDict = Dict[
+    str, Any
+]  # {"t402Version": int, "scheme": str, "network": str, "extra"?: dict}
 
 
 @runtime_checkable

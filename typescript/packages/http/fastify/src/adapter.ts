@@ -1,5 +1,5 @@
-import { HTTPAdapter } from "@t402/core/server";
-import type { FastifyRequest } from "fastify";
+import { HTTPAdapter } from '@t402/core/server'
+import type { FastifyRequest } from 'fastify'
 
 /**
  * Fastify adapter implementation
@@ -19,8 +19,8 @@ export class FastifyAdapter implements HTTPAdapter {
    * @returns The header value or undefined
    */
   getHeader(name: string): string | undefined {
-    const value = this.request.headers[name.toLowerCase()];
-    return Array.isArray(value) ? value[0] : value;
+    const value = this.request.headers[name.toLowerCase()]
+    return Array.isArray(value) ? value[0] : value
   }
 
   /**
@@ -29,7 +29,7 @@ export class FastifyAdapter implements HTTPAdapter {
    * @returns The HTTP method
    */
   getMethod(): string {
-    return this.request.method;
+    return this.request.method
   }
 
   /**
@@ -39,9 +39,9 @@ export class FastifyAdapter implements HTTPAdapter {
    */
   getPath(): string {
     // Split URL to remove query string
-    const url = this.request.url;
-    const queryIndex = url.indexOf("?");
-    return queryIndex === -1 ? url : url.substring(0, queryIndex);
+    const url = this.request.url
+    const queryIndex = url.indexOf('?')
+    return queryIndex === -1 ? url : url.substring(0, queryIndex)
   }
 
   /**
@@ -50,7 +50,7 @@ export class FastifyAdapter implements HTTPAdapter {
    * @returns The full request URL
    */
   getUrl(): string {
-    return `${this.request.protocol}://${this.request.hostname}${this.request.url}`;
+    return `${this.request.protocol}://${this.request.hostname}${this.request.url}`
   }
 
   /**
@@ -59,7 +59,7 @@ export class FastifyAdapter implements HTTPAdapter {
    * @returns The Accept header value or empty string
    */
   getAcceptHeader(): string {
-    return this.getHeader("accept") || "";
+    return this.getHeader('accept') || ''
   }
 
   /**
@@ -68,7 +68,7 @@ export class FastifyAdapter implements HTTPAdapter {
    * @returns The User-Agent header value or empty string
    */
   getUserAgent(): string {
-    return this.getHeader("user-agent") || "";
+    return this.getHeader('user-agent') || ''
   }
 
   /**
@@ -77,14 +77,14 @@ export class FastifyAdapter implements HTTPAdapter {
    * @returns Record of query parameter key-value pairs
    */
   getQueryParams(): Record<string, string | string[]> {
-    const query = this.request.query as Record<string, string | string[]> | undefined;
-    if (!query) return {};
+    const query = this.request.query as Record<string, string | string[]> | undefined
+    if (!query) return {}
 
-    const result: Record<string, string | string[]> = {};
+    const result: Record<string, string | string[]> = {}
     for (const [key, value] of Object.entries(query)) {
-      result[key] = value;
+      result[key] = value
     }
-    return result;
+    return result
   }
 
   /**
@@ -94,9 +94,9 @@ export class FastifyAdapter implements HTTPAdapter {
    * @returns The query parameter value(s) or undefined
    */
   getQueryParam(name: string): string | string[] | undefined {
-    const query = this.request.query as Record<string, string | string[]> | undefined;
-    if (!query) return undefined;
-    return query[name];
+    const query = this.request.query as Record<string, string | string[]> | undefined
+    if (!query) return undefined
+    return query[name]
   }
 
   /**
@@ -107,9 +107,9 @@ export class FastifyAdapter implements HTTPAdapter {
    */
   async getBody(): Promise<unknown> {
     try {
-      return this.request.body;
+      return this.request.body
     } catch {
-      return undefined;
+      return undefined
     }
   }
 }

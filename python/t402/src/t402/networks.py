@@ -32,6 +32,7 @@ def get_all_supported_networks() -> tuple[str, ...]:
     svm = get_args(SVMNetworks)
     return evm + ton + tron + svm
 
+
 EVM_NETWORK_TO_CHAIN_ID = {
     "base-sepolia": 84532,
     "base": 8453,

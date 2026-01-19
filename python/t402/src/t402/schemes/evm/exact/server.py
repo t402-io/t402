@@ -97,7 +97,7 @@ class ExactEvmServerScheme:
             amount_decimal = Decimal(str(price))
 
         # Convert to atomic units
-        atomic_amount = int(amount_decimal * Decimal(10 ** decimals))
+        atomic_amount = int(amount_decimal * Decimal(10**decimals))
 
         # Get EIP-712 domain info
         extra = {

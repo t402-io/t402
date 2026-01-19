@@ -1,34 +1,34 @@
-import { useState, useCallback } from "react";
-import type { PaymentStatus } from "../types/index.js";
+import { useState, useCallback } from 'react'
+import type { PaymentStatus } from '../types/index.js'
 
 interface StatusMessage {
   /** Message text */
-  text: string;
+  text: string
   /** Message type */
-  type: "info" | "success" | "error" | "warning";
+  type: 'info' | 'success' | 'error' | 'warning'
   /** Optional auto-dismiss timeout in ms */
-  timeout?: number;
+  timeout?: number
 }
 
 interface UsePaymentStatusResult {
   /** Current payment status */
-  status: PaymentStatus;
+  status: PaymentStatus
   /** Current status message */
-  message: StatusMessage | null;
+  message: StatusMessage | null
   /** Set the status */
-  setStatus: (status: PaymentStatus, message?: string) => void;
+  setStatus: (status: PaymentStatus, message?: string) => void
   /** Set a success message */
-  setSuccess: (message: string, timeout?: number) => void;
+  setSuccess: (message: string, timeout?: number) => void
   /** Set an error message */
-  setError: (message: string) => void;
+  setError: (message: string) => void
   /** Set an info message */
-  setInfo: (message: string, timeout?: number) => void;
+  setInfo: (message: string, timeout?: number) => void
   /** Set a warning message */
-  setWarning: (message: string, timeout?: number) => void;
+  setWarning: (message: string, timeout?: number) => void
   /** Clear the current message */
-  clearMessage: () => void;
+  clearMessage: () => void
   /** Reset to idle state */
-  reset: () => void;
+  reset: () => void
 }
 
 /**
@@ -71,66 +71,63 @@ interface UsePaymentStatusResult {
  * ```
  */
 export function usePaymentStatus(): UsePaymentStatusResult {
-  const [status, setStatusState] = useState<PaymentStatus>("idle");
-  const [message, setMessage] = useState<StatusMessage | null>(null);
+  const [status, setStatusState] = useState<PaymentStatus>('idle')
+  const [message, setMessage] = useState<StatusMessage | null>(null)
 
   const scheduleMessageClear = useCallback((timeout?: number) => {
     if (timeout && timeout > 0) {
       setTimeout(() => {
-        setMessage(null);
-      }, timeout);
+        setMessage(null)
+      }, timeout)
     }
-  }, []);
+  }, [])
 
-  const setStatus = useCallback(
-    (newStatus: PaymentStatus, messageText?: string) => {
-      setStatusState(newStatus);
-      if (messageText) {
-        const type = newStatus === "error" ? "error" : newStatus === "success" ? "success" : "info";
-        setMessage({ text: messageText, type });
-      }
-    },
-    [],
-  );
+  const setStatus = useCallback((newStatus: PaymentStatus, messageText?: string) => {
+    setStatusState(newStatus)
+    if (messageText) {
+      const type = newStatus === 'error' ? 'error' : newStatus === 'success' ? 'success' : 'info'
+      setMessage({ text: messageText, type })
+    }
+  }, [])
 
   const setSuccess = useCallback(
     (text: string, timeout?: number) => {
-      setStatusState("success");
-      setMessage({ text, type: "success", timeout });
-      scheduleMessageClear(timeout);
+      setStatusState('success')
+      setMessage({ text, type: 'success', timeout })
+      scheduleMessageClear(timeout)
     },
     [scheduleMessageClear],
-  );
+  )
 
   const setError = useCallback((text: string) => {
-    setStatusState("error");
-    setMessage({ text, type: "error" });
-  }, []);
+    setStatusState('error')
+    setMessage({ text, type: 'error' })
+  }, [])
 
   const setInfo = useCallback(
     (text: string, timeout?: number) => {
-      setMessage({ text, type: "info", timeout });
-      scheduleMessageClear(timeout);
+      setMessage({ text, type: 'info', timeout })
+      scheduleMessageClear(timeout)
     },
     [scheduleMessageClear],
-  );
+  )
 
   const setWarning = useCallback(
     (text: string, timeout?: number) => {
-      setMessage({ text, type: "warning", timeout });
-      scheduleMessageClear(timeout);
+      setMessage({ text, type: 'warning', timeout })
+      scheduleMessageClear(timeout)
     },
     [scheduleMessageClear],
-  );
+  )
 
   const clearMessage = useCallback(() => {
-    setMessage(null);
-  }, []);
+    setMessage(null)
+  }, [])
 
   const reset = useCallback(() => {
-    setStatusState("idle");
-    setMessage(null);
-  }, []);
+    setStatusState('idle')
+    setMessage(null)
+  }, [])
 
   return {
     status,
@@ -142,5 +139,5 @@ export function usePaymentStatus(): UsePaymentStatusResult {
     setWarning,
     clearMessage,
     reset,
-  };
+  }
 }
