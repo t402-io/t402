@@ -9,7 +9,7 @@ t402 is a protocol that enables HTTP resources to require cryptocurrency payment
 ## Installation
 
 ```bash
-go get github.com/t402-io/t402/go@v1.5.0
+go get github.com/t402-io/t402/go@v1.8.0
 ```
 
 ## What This Package Exports

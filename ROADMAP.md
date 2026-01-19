@@ -2,7 +2,7 @@
 
 > **The Official Payment Protocol for USDT**
 >
-> *Last Updated: 2026-01-16*
+> *Last Updated: 2026-01-19*
 
 This document outlines the development status and roadmap for T402, a payment protocol specifically designed for USDT and USDT0, with deep integration with [Tether WDK](https://wallet.tether.io/).
 
@@ -76,9 +76,9 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 
 | SDK | Version | Status |
 |-----|---------|--------|
-| Go | 1.5.0 | Production |
-| Python | 1.7.1 | Production |
-| Java | 1.1.0 | Production |
+| Go | 1.8.0 | Production |
+| Python | 1.9.0 | Production |
+| Java | 1.7.0 | Production |
 
 ---
 
@@ -145,14 +145,14 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 - [x] Add missing test coverage (565 tests passing)
 - [x] Create Python CLI tool (`t402 verify/settle/supported/encode/decode/info`)
 - [x] Add SVM support (solana>=0.35.0, full Solana/SPL support)
-- [x] Published PyPI v1.7.1
+- [x] Published PyPI v1.9.0
 
 **Week 11-12: Go SDK Enhancement** ✅
 - [x] Add WDK-equivalent functionality (BIP-39, HD wallet, multi-chain)
 - [x] Create Go CLI tool (`cmd/t402/` with full feature set)
 - [x] Create MCP server (`cmd/t402-mcp/` for AI agents)
 - [x] SmartBridgeRouter for multi-chain bridging
-- [x] Released v1.5.0 with advanced bridge routing
+- [x] Released v1.8.0 with advanced bridge routing
 
 ### Phase 4: Java SDK Completion (Month 4-5) ✅
 
@@ -162,7 +162,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 - [x] Add Spring Boot middleware
 - [x] Add Maven Central publication workflow
 - [x] Create comprehensive documentation
-- [x] Release v1.1.0 stable
+- [x] Release v1.7.0 stable
 
 ### Phase 5: Security & Performance (Month 5-6)
 
