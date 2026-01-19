@@ -1,4 +1,4 @@
-# X402 Client Protocol
+# T402 Client Protocol
 
 ## CLI Interface
 1. Must be runnable through a CLI command, which can be parsed from 'run.sh'
@@ -11,9 +11,9 @@ Clients must declare which protocol families they support in their test.config.j
 - **EVM**: Ethereum Virtual Machine compatible networks (Base, Ethereum, etc.)
 - **SVM**: Solana Virtual Machine compatible networks (Solana, etc.)
 
-## X402 Version Support
-Clients must declare which x402 protocol versions they support using the `x402Versions` field:
-- **x402Versions**: Array of supported x402 protocol versions (e.g., [1, 2])
+## T402 Version Support
+Clients must declare which t402 protocol versions they support using the `x402Versions` field:
+- **x402Versions**: Array of supported t402 protocol versions (e.g., [1, 2])
 
 Example configuration:
 ```json
@@ -56,7 +56,7 @@ The following parameters must be configurable:
 
 ### Success Case
 - Make HTTP request to the protected endpoint
-- Handle payment automatically (via x402 middleware)
+- Handle payment automatically (via t402 middleware)
 - **Exit Code**: 0
 - **Output**: JSON result as last line of stdout
   ```json

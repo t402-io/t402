@@ -20,9 +20,9 @@ This package provides modules to support the t402 protocol in Go applications.
 
 The package exports three core types that can be used by clients, servers, and facilitators:
 
-- **`t402.X402Client`** - Creates payment payloads for clients making paid requests
-- **`t402.X402ResourceServer`** - Verifies payments and builds requirements for servers accepting payments
-- **`t402.X402Facilitator`** - Verifies and settles payments for facilitator services
+- **`t402.T402Client`** - Creates payment payloads for clients making paid requests
+- **`t402.T402ResourceServer`** - Verifies payments and builds requirements for servers accepting payments
+- **`t402.T402Facilitator`** - Verifies and settles payments for facilitator services
 
 These core classes are **framework-agnostic** and can be used in any context (HTTP, gRPC, WebSockets, CLI tools, etc.).
 
@@ -107,9 +107,9 @@ The package is designed with extreme modularity:
        ▼          ▼          ▼
 ┌─────────────────────────────────────────┐
 │    Core Classes (Framework-Agnostic)    │
-│  - X402Client                           │
-│  - X402ResourceServer                   │
-│  - X402Facilitator                      │
+│  - T402Client                           │
+│  - T402ResourceServer                   │
+│  - T402Facilitator                      │
 └─────────────────────────────────────────┘
                   │
                   ▼
@@ -195,9 +195,9 @@ For payment processing services that verify and settle payments.
 github.com/t402-io/t402/go
 │
 ├── Core (framework-agnostic)
-│   ├── client.go              - t402.X402Client
-│   ├── server.go              - t402.X402ResourceServer
-│   ├── facilitator.go         - t402.X402Facilitator
+│   ├── client.go              - t402.T402Client
+│   ├── server.go              - t402.T402ResourceServer
+│   ├── facilitator.go         - t402.T402Facilitator
 │   ├── types.go               - Core types
 │   └── *_hooks.go             - Lifecycle hooks
 │

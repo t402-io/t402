@@ -290,12 +290,12 @@ func main() {
 
 ## Convenience Functions
 
-### X402Payment (Config Struct)
+### T402Payment (Config Struct)
 
 With struct-based configuration:
 
 ```go
-r.Use(ginmw.X402Payment(ginmw.Config{
+r.Use(ginmw.T402Payment(ginmw.Config{
 	Routes:      routes,
 	Facilitator: facilitator,
 	Schemes:     []ginmw.SchemeConfig{{Network: "eip155:*", Server: evm.NewExactEvmScheme()}},

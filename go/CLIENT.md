@@ -85,7 +85,7 @@ if err != nil {
 fmt.Println("Address:", signer.Address())
 ```
 
-### 2. Client Core (t402.X402Client)
+### 2. Client Core (t402.T402Client)
 
 The core client manages payment scheme registration and payload creation.
 
@@ -285,37 +285,37 @@ wg.Wait()
 
 ## API Reference
 
-### t402.X402Client
+### t402.T402Client
 
 **Constructor:**
 ```go
-func Newt402Client() *X402Client
+func Newt402Client() *T402Client
 ```
 
 **Registration Methods:**
 ```go
-func (c *X402Client) Register(network Network, scheme SchemeNetworkClient) *X402Client
+func (c *T402Client) Register(network Network, scheme SchemeNetworkClient) *T402Client
 ```
 
 **Hook Methods:**
 ```go
-func (c *X402Client) OnBeforePaymentCreation(hook BeforePaymentCreationHook) *X402Client
-func (c *X402Client) OnAfterPaymentCreation(hook AfterPaymentCreationHook) *X402Client
-func (c *X402Client) OnPaymentCreationFailure(hook PaymentCreationFailureHook) *X402Client
+func (c *T402Client) OnBeforePaymentCreation(hook BeforePaymentCreationHook) *T402Client
+func (c *T402Client) OnAfterPaymentCreation(hook AfterPaymentCreationHook) *T402Client
+func (c *T402Client) OnPaymentCreationFailure(hook PaymentCreationFailureHook) *T402Client
 ```
 
 **Payment Methods:**
 ```go
-func (c *X402Client) CreatePaymentPayload(ctx context.Context, requirements PaymentRequirements, resource *ResourceInfo, extensions map[string]interface{}) (PaymentPayload, error)
+func (c *T402Client) CreatePaymentPayload(ctx context.Context, requirements PaymentRequirements, resource *ResourceInfo, extensions map[string]interface{}) (PaymentPayload, error)
 
-func (c *X402Client) SelectPaymentRequirements(accepts []PaymentRequirements) (PaymentRequirements, error)
+func (c *T402Client) SelectPaymentRequirements(accepts []PaymentRequirements) (PaymentRequirements, error)
 ```
 
 ### t402http.HTTPClient
 
 **Constructor:**
 ```go
-func Newt402HTTPClient(client *X402Client) *t402HTTPClient
+func Newt402HTTPClient(client *T402Client) *t402HTTPClient
 ```
 
 **Wrapper:**

@@ -46,18 +46,18 @@ export const config = {
 
 ### Protecting API Routes
 
-API routes are protected using the `withX402` route wrapper. This is the recommended approach to protect API routes as it guarantees payment settlement only AFTER successful API responses (status < 400). API routes can also be protected by `paymentProxy`, however this will charge clients for failed API responses:
+API routes are protected using the `withT402` route wrapper. This is the recommended approach to protect API routes as it guarantees payment settlement only AFTER successful API responses (status < 400). API routes can also be protected by `paymentProxy`, however this will charge clients for failed API responses:
 
 ```typescript
 // app/api/your-endpoint/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { withX402 } from "@t402/next";
+import { withT402 } from "@t402/next";
 
 const handler = async (_: NextRequest) => {
   return NextResponse.json({ data: "your response" });
 };
 
-export const GET = withX402(
+export const GET = withT402(
   handler,
   {
     accepts: {
@@ -96,12 +96,12 @@ paymentProxy(
 4. **`paywall`** (optional): Custom paywall provider
 5. **`syncFacilitatorOnStart`** (optional): Whether to sync with facilitator on startup (defaults to true)
 
-### withX402
+### withT402
 
-The `withX402` function wraps API route handlers. This is the recommended approach to protect API routes as it guarantees payment settlement only AFTER successful API responses (status < 400).
+The `withT402` function wraps API route handlers. This is the recommended approach to protect API routes as it guarantees payment settlement only AFTER successful API responses (status < 400).
 
 ```typescript
-withX402(
+withT402(
   routeHandler: (request: NextRequest) => Promise<NextResponse>,
   routeConfig: RouteConfig,
   server: t402ResourceServer,

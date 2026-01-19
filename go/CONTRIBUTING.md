@@ -17,9 +17,9 @@ The Go SDK is a single Go module with modular subpackages.
 
 ```
 go/
-├── client.go              # t402.X402Client
-├── server.go              # t402.X402ResourceServer
-├── facilitator.go         # t402.X402Facilitator
+├── client.go              # t402.T402Client
+├── server.go              # t402.T402ResourceServer
+├── facilitator.go         # t402.T402Facilitator
 ├── types.go               # Core types
 ├── interfaces.go          # Interface definitions
 ├── *_hooks.go             # Lifecycle hooks

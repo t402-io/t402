@@ -238,7 +238,7 @@ evmScheme := evm.NewExactEvmScheme().RegisterMoneyParser(
     },
 )
 
-r.Use(ginmw.X402Payment(ginmw.Config{
+r.Use(ginmw.T402Payment(ginmw.Config{
     Routes:      routes,
     Facilitator: facilitatorClient,
     Schemes: []ginmw.SchemeConfig{

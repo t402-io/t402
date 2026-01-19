@@ -101,9 +101,9 @@ To add support for a new HTTP client library:
 
 ```python
 # src/t402/clients/your_client.py
-from t402.clients.base import BaseX402Client
+from t402.clients.base import BaseT402Client
 
-class t402YourClient(BaseX402Client):
+class t402YourClient(BaseT402Client):
     """t402 client wrapper for your-library."""
     
     def __init__(self, account, **kwargs):

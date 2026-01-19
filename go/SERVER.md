@@ -58,7 +58,7 @@ func main() {
     })
     
     // 3. Add payment middleware
-    r.Use(ginmw.X402Payment(ginmw.Config{
+    r.Use(ginmw.T402Payment(ginmw.Config{
         Routes:      routes,
         Facilitator: facilitator,
         Schemes: []ginmw.SchemeConfig{
@@ -110,7 +110,7 @@ routes := t402http.RoutesConfig{
 }
 ```
 
-### 2. Resource Server Core (t402.X402ResourceServer)
+### 2. Resource Server Core (t402.T402ResourceServer)
 
 The core server manages payment verification and requirements.
 
@@ -174,7 +174,7 @@ settleResp, err := facilitator.Settle(ctx, payloadBytes, requirementsBytes)
 ```go
 import ginmw "github.com/t402-io/t402/go/http/gin"
 
-r.Use(ginmw.X402Payment(ginmw.Config{
+r.Use(ginmw.T402Payment(ginmw.Config{
     Routes:      routes,
     Facilitator: facilitator,
     Schemes:     schemes,
@@ -344,11 +344,11 @@ routes := t402http.RoutesConfig{
 
 ## API Reference
 
-### t402.X402ResourceServer
+### t402.T402ResourceServer
 
 **Constructor:**
 ```go
-func Newt402ResourceServer(opts ...ResourceServerOption) *X402ResourceServer
+func Newt402ResourceServer(opts ...ResourceServerOption) *T402ResourceServer
 ```
 
 **Options:**
@@ -359,19 +359,19 @@ func WithSchemeServer(network Network, server SchemeNetworkServer) ResourceServe
 
 **Hook Methods:**
 ```go
-func (s *X402ResourceServer) OnBeforeVerify(hook BeforeVerifyHook) *X402ResourceServer
-func (s *X402ResourceServer) OnAfterVerify(hook AfterVerifyHook) *X402ResourceServer
-func (s *X402ResourceServer) OnVerifyFailure(hook OnVerifyFailureHook) *X402ResourceServer
-func (s *X402ResourceServer) OnBeforeSettle(hook BeforeSettleHook) *X402ResourceServer
-func (s *X402ResourceServer) OnAfterSettle(hook AfterSettleHook) *X402ResourceServer
-func (s *X402ResourceServer) OnSettleFailure(hook OnSettleFailureHook) *X402ResourceServer
+func (s *T402ResourceServer) OnBeforeVerify(hook BeforeVerifyHook) *T402ResourceServer
+func (s *T402ResourceServer) OnAfterVerify(hook AfterVerifyHook) *T402ResourceServer
+func (s *T402ResourceServer) OnVerifyFailure(hook OnVerifyFailureHook) *T402ResourceServer
+func (s *T402ResourceServer) OnBeforeSettle(hook BeforeSettleHook) *T402ResourceServer
+func (s *T402ResourceServer) OnAfterSettle(hook AfterSettleHook) *T402ResourceServer
+func (s *T402ResourceServer) OnSettleFailure(hook OnSettleFailureHook) *T402ResourceServer
 ```
 
 **Payment Methods:**
 ```go
-func (s *X402ResourceServer) BuildPaymentRequirements(ctx context.Context, config ResourceConfig) ([]PaymentRequirements, error)
-func (s *X402ResourceServer) VerifyPayment(ctx context.Context, payload PaymentPayload, requirements PaymentRequirements) (VerifyResponse, error)
-func (s *X402ResourceServer) SettlePayment(ctx context.Context, payload PaymentPayload, requirements PaymentRequirements) (SettleResponse, error)
+func (s *T402ResourceServer) BuildPaymentRequirements(ctx context.Context, config ResourceConfig) ([]PaymentRequirements, error)
+func (s *T402ResourceServer) VerifyPayment(ctx context.Context, payload PaymentPayload, requirements PaymentRequirements) (VerifyResponse, error)
+func (s *T402ResourceServer) SettlePayment(ctx context.Context, payload PaymentPayload, requirements PaymentRequirements) (SettleResponse, error)
 ```
 
 ### t402http.RoutesConfig
@@ -414,7 +414,7 @@ type Config struct {
 ### Custom Error Handler
 
 ```go
-r.Use(ginmw.X402Payment(ginmw.Config{
+r.Use(ginmw.T402Payment(ginmw.Config{
     // ... config ...
     ErrorHandler: func(c *gin.Context, err error) {
         log.Printf("Payment error: %v", err)
@@ -429,7 +429,7 @@ r.Use(ginmw.X402Payment(ginmw.Config{
 ### Settlement Handler
 
 ```go
-r.Use(ginmw.X402Payment(ginmw.Config{
+r.Use(ginmw.T402Payment(ginmw.Config{
     // ... config ...
     SettlementHandler: func(c *gin.Context, resp t402.SettleResponse) {
         log.Printf("Payment settled: tx=%s, payer=%s", resp.Transaction, resp.Payer)
@@ -447,7 +447,7 @@ r.Use(ginmw.X402Payment(ginmw.Config{
 Query facilitator capabilities during startup:
 
 ```go
-r.Use(ginmw.X402Payment(ginmw.Config{
+r.Use(ginmw.T402Payment(ginmw.Config{
     SyncFacilitatorOnStart: true,  // Query /supported endpoint on start
     // ...
 }))
@@ -456,7 +456,7 @@ r.Use(ginmw.X402Payment(ginmw.Config{
 ### 2. Set Appropriate Timeouts
 
 ```go
-r.Use(ginmw.X402Payment(ginmw.Config{
+r.Use(ginmw.T402Payment(ginmw.Config{
     Timeout: 30 * time.Second,  // Payment operations timeout
     // ...
 }))
@@ -479,7 +479,7 @@ routes := t402http.RoutesConfig{
 ### 4. Handle Both Success and Failure
 
 ```go
-r.Use(ginmw.X402Payment(ginmw.Config{
+r.Use(ginmw.T402Payment(ginmw.Config{
     ErrorHandler: func(c *gin.Context, err error) {
         // Log and notify on errors
     },
@@ -524,7 +524,7 @@ routes := t402http.RoutesConfig{
 Support payments on multiple blockchains:
 
 ```go
-r.Use(ginmw.X402Payment(ginmw.Config{
+r.Use(ginmw.T402Payment(ginmw.Config{
     Routes: routes,
     Facilitator: facilitator,
     Schemes: []ginmw.SchemeConfig{
