@@ -17,7 +17,16 @@ from __future__ import annotations
 import re
 import time
 import base64
-from typing import Any, Dict, Optional, List, Callable, Awaitable, Protocol, runtime_checkable
+from typing import (
+    Any,
+    Dict,
+    Optional,
+    List,
+    Callable,
+    Awaitable,
+    Protocol,
+    runtime_checkable,
+)
 from typing_extensions import TypedDict
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -33,6 +42,7 @@ try:
     from solders.instruction import CompiledInstruction
     from solana.rpc.async_api import AsyncClient
     from solana.rpc.commitment import Commitment, Confirmed
+
     SOLANA_AVAILABLE = True
 except ImportError:
     SOLANA_AVAILABLE = False
@@ -703,7 +713,9 @@ def get_token_payer_from_transaction(tx_base64: str) -> Optional[str]:
     try:
         tx = decode_versioned_transaction(tx_base64)
         message = tx.message
-        account_keys = list(message.account_keys) if hasattr(message, "account_keys") else []
+        account_keys = (
+            list(message.account_keys) if hasattr(message, "account_keys") else []
+        )
 
         # Look for token program instructions
         for ix in message.instructions:
@@ -729,6 +741,7 @@ def get_token_payer_from_transaction(tx_base64: str) -> Optional[str]:
 
 class TransferDetails(TypedDict):
     """Details of a token transfer instruction."""
+
     source: str
     mint: str
     destination: str
@@ -755,7 +768,9 @@ def parse_transfer_checked_instruction(
     try:
         tx = decode_versioned_transaction(tx_base64)
         message = tx.message
-        account_keys = list(message.account_keys) if hasattr(message, "account_keys") else []
+        account_keys = (
+            list(message.account_keys) if hasattr(message, "account_keys") else []
+        )
 
         for ix in message.instructions:
             program_idx = ix.program_id_index
@@ -789,10 +804,18 @@ def parse_transfer_checked_instruction(
             authority_idx = accounts[3]
 
             return {
-                "source": str(account_keys[source_idx]) if source_idx < len(account_keys) else "",
-                "mint": str(account_keys[mint_idx]) if mint_idx < len(account_keys) else "",
-                "destination": str(account_keys[dest_idx]) if dest_idx < len(account_keys) else "",
-                "authority": str(account_keys[authority_idx]) if authority_idx < len(account_keys) else "",
+                "source": str(account_keys[source_idx])
+                if source_idx < len(account_keys)
+                else "",
+                "mint": str(account_keys[mint_idx])
+                if mint_idx < len(account_keys)
+                else "",
+                "destination": str(account_keys[dest_idx])
+                if dest_idx < len(account_keys)
+                else "",
+                "authority": str(account_keys[authority_idx])
+                if authority_idx < len(account_keys)
+                else "",
                 "amount": amount,
                 "decimals": decimals,
             }
@@ -1101,12 +1124,14 @@ class RpcSvmSigner:
 
 class ExactSvmPayloadV2(TypedDict):
     """Exact SVM payment payload (V2 format)."""
+
     transaction: str
     authorization: Optional[Dict[str, Any]]
 
 
 class SvmPaymentRequirementsExtra(TypedDict, total=False):
     """Extra fields for SVM payment requirements."""
+
     feePayer: str
 
 
@@ -1159,7 +1184,9 @@ class ExactSvmClientScheme:
         transfer = parse_transfer_checked_instruction(signed_tx)
 
         now = int(time.time())
-        valid_until = now + requirements.get("maxTimeoutSeconds", DEFAULT_VALIDITY_DURATION)
+        valid_until = now + requirements.get(
+            "maxTimeoutSeconds", DEFAULT_VALIDITY_DURATION
+        )
 
         authorization = None
         if transfer:
@@ -1339,7 +1366,10 @@ class ExactSvmFacilitatorScheme:
             }
 
         # Validate scheme
-        if payload.get("scheme") != SCHEME_EXACT or requirements.get("scheme") != SCHEME_EXACT:
+        if (
+            payload.get("scheme") != SCHEME_EXACT
+            or requirements.get("scheme") != SCHEME_EXACT
+        ):
             return {
                 "isValid": False,
                 "invalidReason": "unsupported_scheme",
@@ -1474,7 +1504,9 @@ class ExactSvmFacilitatorScheme:
                 "success": False,
                 "network": network,
                 "transaction": "",
-                "errorReason": verify_result.get("invalidReason", "verification_failed"),
+                "errorReason": verify_result.get(
+                    "invalidReason", "verification_failed"
+                ),
                 "payer": verify_result.get("payer", ""),
             }
 
@@ -1539,7 +1571,9 @@ def create_server_scheme() -> ExactSvmServerScheme:
     return ExactSvmServerScheme()
 
 
-def create_facilitator_scheme(signer: FacilitatorSvmSigner) -> ExactSvmFacilitatorScheme:
+def create_facilitator_scheme(
+    signer: FacilitatorSvmSigner,
+) -> ExactSvmFacilitatorScheme:
     """
     Create a facilitator scheme for SVM payments.
 

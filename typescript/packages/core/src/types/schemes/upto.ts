@@ -233,9 +233,7 @@ export function isUptoPaymentRequirements(
 /**
  * Type guard for UptoEvmPayload.
  */
-export function isUptoEvmPayload(
-  payload: unknown,
-): payload is UptoEvmPayload {
+export function isUptoEvmPayload(payload: unknown): payload is UptoEvmPayload {
   if (typeof payload !== "object" || payload === null) return false;
   const p = payload as Record<string, unknown>;
   return (

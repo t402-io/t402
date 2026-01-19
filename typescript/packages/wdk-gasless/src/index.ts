@@ -87,18 +87,11 @@
  */
 
 // Main client
-export {
-  WdkGaslessClient,
-  createWdkGaslessClient,
-} from "./client.js";
-export type { CreateWdkGaslessClientConfig } from "./client.js";
+export { WdkGaslessClient, createWdkGaslessClient } from './client.js'
+export type { CreateWdkGaslessClientConfig } from './client.js'
 
 // Smart account
-export {
-  WdkSmartAccount,
-  createWdkSmartAccount,
-  SAFE_4337_ADDRESSES,
-} from "./account.js";
+export { WdkSmartAccount, createWdkSmartAccount, SAFE_4337_ADDRESSES } from './account.js'
 
 // Types
 export type {
@@ -111,7 +104,7 @@ export type {
   GaslessPaymentResult,
   GaslessPaymentReceipt,
   SponsorshipInfo,
-} from "./types.js";
+} from './types.js'
 
 // Constants
 export {
@@ -121,7 +114,7 @@ export {
   DEFAULT_BUNDLER_URLS,
   getTokenAddress,
   getChainName,
-} from "./constants.js";
+} from './constants.js'
 
 // Re-export essential types from @t402/evm for convenience
 export type {
@@ -129,4 +122,4 @@ export type {
   BundlerConfig,
   PaymasterConfig,
   UserOperationReceipt,
-} from "@t402/evm";
+} from '@t402/evm'

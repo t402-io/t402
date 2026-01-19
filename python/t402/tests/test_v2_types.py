@@ -17,8 +17,6 @@ from t402 import (
     SupportedResponse,
     # V1 Types (for compatibility)
     PaymentRequirements,
-    PaymentRequirementsV1,
-    PaymentPayload,
     PaymentPayloadV1,
     # Encoding functions
     encode_payment_signature_header,
@@ -30,7 +28,6 @@ from t402 import (
     # Header detection
     detect_protocol_version_from_headers,
     extract_payment_from_headers,
-    extract_payment_required_from_response,
     get_payment_header_name,
     get_payment_response_header_name,
     # Header constants

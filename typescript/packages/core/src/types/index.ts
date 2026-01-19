@@ -28,12 +28,7 @@ export type {
   UptoValidationResult,
   UptoUnit,
 } from "./schemes";
-export {
-  isUptoPaymentRequirements,
-  isUptoEvmPayload,
-  UPTO_SCHEME,
-  UPTO_DEFAULTS,
-} from "./schemes";
+export { isUptoPaymentRequirements, isUptoEvmPayload, UPTO_SCHEME, UPTO_DEFAULTS } from "./schemes";
 
 export type Network = `${string}:${string}`;
 

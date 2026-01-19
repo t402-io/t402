@@ -270,7 +270,9 @@ class SchemeRegistry(Generic[T]):
             for pattern in self._patterns.get(v, []):
                 if _matches_network_pattern(pattern, network):
                     # Don't override exact matches
-                    for scheme_name, scheme in self._schemes[v].get(pattern, {}).items():
+                    for scheme_name, scheme in (
+                        self._schemes[v].get(pattern, {}).items()
+                    ):
                         if scheme_name not in result:
                             result[scheme_name] = scheme
 
@@ -411,7 +413,9 @@ class FacilitatorSchemeRegistry(SchemeRegistry[SchemeNetworkFacilitator]):
         with self._lock:
             for network, schemes in self._schemes.get(version, {}).items():
                 for scheme_name, scheme in schemes.items():
-                    if not hasattr(scheme, "caip_family") or not hasattr(scheme, "get_signers"):
+                    if not hasattr(scheme, "caip_family") or not hasattr(
+                        scheme, "get_signers"
+                    ):
                         continue
 
                     family = scheme.caip_family

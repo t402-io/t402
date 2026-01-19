@@ -266,9 +266,7 @@ class PaymentMiddleware:
 
         return self
 
-    async def _dispatch(
-        self, request: Request, call_next: Callable
-    ) -> Response:
+    async def _dispatch(self, request: Request, call_next: Callable) -> Response:
         """Process request through payment middleware.
 
         Args:

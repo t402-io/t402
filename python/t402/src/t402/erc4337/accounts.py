@@ -20,6 +20,7 @@ from .types import (
 
 class SmartAccountError(Exception):
     """Error from smart account operations."""
+
     pass
 
 
@@ -53,10 +54,7 @@ class SmartAccountSigner(ABC):
 
     @abstractmethod
     def encode_execute_batch(
-        self,
-        targets: List[str],
-        values: List[int],
-        datas: List[bytes]
+        self, targets: List[str], values: List[int], datas: List[bytes]
     ) -> bytes:
         """Encode a batch call to the account's executeBatch function."""
         pass
@@ -65,6 +63,7 @@ class SmartAccountSigner(ABC):
 @dataclass
 class SafeAccountConfig:
     """Configuration for Safe smart account."""
+
     owner_private_key: str
     chain_id: int
     salt: int = 0
@@ -101,7 +100,7 @@ class SafeSmartAccount(SmartAccountSigner):
         init_code_hash = keccak(proxy_init_code)
 
         # CREATE2 address: keccak256(0xff ++ factory ++ salt ++ keccak256(initCode))[12:]
-        data = bytes([0xff]) + factory_address + salt_hash + init_code_hash
+        data = bytes([0xFF]) + factory_address + salt_hash + init_code_hash
         address_hash = keccak(data)
 
         self._cached_address = "0x" + address_hash[12:].hex()
@@ -113,9 +112,7 @@ class SafeSmartAccount(SmartAccountSigner):
         message_hash = self._get_safe_user_op_hash(user_op_hash)
 
         # Sign with owner key
-        signed = self.owner_account.sign_message(
-            encode_defunct(primitive=message_hash)
-        )
+        signed = self.owner_account.sign_message(encode_defunct(primitive=message_hash))
 
         return signed.signature
 
@@ -135,7 +132,9 @@ class SafeSmartAccount(SmartAccountSigner):
 
         # ABI encode the parameters
         singleton = bytes.fromhex(SAFE_4337_ADDRESSES["singleton"][2:])
-        encoded = self._encode_create_proxy_with_nonce(singleton, initializer, self.salt)
+        encoded = self._encode_create_proxy_with_nonce(
+            singleton, initializer, self.salt
+        )
 
         self._cached_init_code = factory_address + selector + encoded
         return self._cached_init_code
@@ -160,10 +159,7 @@ class SafeSmartAccount(SmartAccountSigner):
         return selector + encoded
 
     def encode_execute_batch(
-        self,
-        targets: List[str],
-        values: List[int],
-        datas: List[bytes]
+        self, targets: List[str], values: List[int], datas: List[bytes]
     ) -> bytes:
         """Encode a batch call using multiSend."""
         if len(targets) != len(values) or len(targets) != len(datas):
@@ -186,10 +182,7 @@ class SafeSmartAccount(SmartAccountSigner):
         operation = 1  # DELEGATECALL
 
         encoded = self._encode_execute_user_op(
-            self.MULTI_SEND_ADDRESS,
-            0,
-            multi_send_calldata,
-            operation
+            self.MULTI_SEND_ADDRESS, 0, multi_send_calldata, operation
         )
 
         return selector + encoded
@@ -232,7 +225,7 @@ class SafeSmartAccount(SmartAccountSigner):
             fallback_handler,
             payment_token,
             payment,
-            payment_receiver
+            payment_receiver,
         )
 
         return selector + encoded
@@ -243,7 +236,7 @@ class SafeSmartAccount(SmartAccountSigner):
         initializer = self._build_initializer()
         init_hash = keccak(initializer)
 
-        salt_bytes = self.salt.to_bytes(32, 'big')
+        salt_bytes = self.salt.to_bytes(32, "big")
         salt_data = init_hash + salt_bytes
 
         return keccak(salt_data)
@@ -267,10 +260,7 @@ class SafeSmartAccount(SmartAccountSigner):
         return user_op_hash
 
     def _encode_create_proxy_with_nonce(
-        self,
-        singleton: bytes,
-        initializer: bytes,
-        salt_nonce: int
+        self, singleton: bytes, initializer: bytes, salt_nonce: int
     ) -> bytes:
         """ABI encode createProxyWithNonce parameters."""
         # (address, bytes, uint256)
@@ -280,10 +270,10 @@ class SafeSmartAccount(SmartAccountSigner):
         result += singleton.rjust(32, b"\x00")
 
         # offset to initializer bytes (96)
-        result += (96).to_bytes(32, 'big')
+        result += (96).to_bytes(32, "big")
 
         # saltNonce
-        result += salt_nonce.to_bytes(32, 'big')
+        result += salt_nonce.to_bytes(32, "big")
 
         # initializer bytes
         result += self._encode_bytes(initializer)
@@ -291,11 +281,7 @@ class SafeSmartAccount(SmartAccountSigner):
         return result
 
     def _encode_execute_user_op(
-        self,
-        to: str,
-        value: int,
-        data: bytes,
-        operation: int
+        self, to: str, value: int, data: bytes, operation: int
     ) -> bytes:
         """ABI encode executeUserOp parameters."""
         # (address, uint256, bytes, uint8)
@@ -306,13 +292,13 @@ class SafeSmartAccount(SmartAccountSigner):
         result += to_bytes.rjust(32, b"\x00")
 
         # value
-        result += value.to_bytes(32, 'big')
+        result += value.to_bytes(32, "big")
 
         # offset to data bytes (128)
-        result += (128).to_bytes(32, 'big')
+        result += (128).to_bytes(32, "big")
 
         # operation
-        result += operation.to_bytes(32, 'big')
+        result += operation.to_bytes(32, "big")
 
         # data bytes
         result += self._encode_bytes(data)
@@ -325,7 +311,7 @@ class SafeSmartAccount(SmartAccountSigner):
         length = len(data)
         padded_length = ((length + 31) // 32) * 32
 
-        result = length.to_bytes(32, 'big')
+        result = length.to_bytes(32, "big")
         result += data.ljust(padded_length, b"\x00")
 
         return result
@@ -339,7 +325,7 @@ class SafeSmartAccount(SmartAccountSigner):
         fallback_handler: str,
         payment_token: str,
         payment: int,
-        payment_receiver: str
+        payment_receiver: str,
     ) -> bytes:
         """ABI encode Safe.setup parameters."""
         result = b""
@@ -349,37 +335,53 @@ class SafeSmartAccount(SmartAccountSigner):
         data_offset = 256 + owners_encoded_len
 
         # offset to owners array (256)
-        result += (256).to_bytes(32, 'big')
+        result += (256).to_bytes(32, "big")
 
         # threshold
-        result += threshold.to_bytes(32, 'big')
+        result += threshold.to_bytes(32, "big")
 
         # to
         to_bytes = bytes.fromhex(to[2:]) if to.startswith("0x") else bytes.fromhex(to)
         result += to_bytes.rjust(32, b"\x00")
 
         # data offset
-        result += data_offset.to_bytes(32, 'big')
+        result += data_offset.to_bytes(32, "big")
 
         # fallbackHandler
-        fh_bytes = bytes.fromhex(fallback_handler[2:]) if fallback_handler.startswith("0x") else bytes.fromhex(fallback_handler)
+        fh_bytes = (
+            bytes.fromhex(fallback_handler[2:])
+            if fallback_handler.startswith("0x")
+            else bytes.fromhex(fallback_handler)
+        )
         result += fh_bytes.rjust(32, b"\x00")
 
         # paymentToken
-        pt_bytes = bytes.fromhex(payment_token[2:]) if payment_token.startswith("0x") else bytes.fromhex(payment_token)
+        pt_bytes = (
+            bytes.fromhex(payment_token[2:])
+            if payment_token.startswith("0x")
+            else bytes.fromhex(payment_token)
+        )
         result += pt_bytes.rjust(32, b"\x00")
 
         # payment
-        result += payment.to_bytes(32, 'big')
+        result += payment.to_bytes(32, "big")
 
         # paymentReceiver
-        pr_bytes = bytes.fromhex(payment_receiver[2:]) if payment_receiver.startswith("0x") else bytes.fromhex(payment_receiver)
+        pr_bytes = (
+            bytes.fromhex(payment_receiver[2:])
+            if payment_receiver.startswith("0x")
+            else bytes.fromhex(payment_receiver)
+        )
         result += pr_bytes.rjust(32, b"\x00")
 
         # owners array
-        result += len(owners).to_bytes(32, 'big')
+        result += len(owners).to_bytes(32, "big")
         for owner in owners:
-            owner_bytes = bytes.fromhex(owner[2:]) if owner.startswith("0x") else bytes.fromhex(owner)
+            owner_bytes = (
+                bytes.fromhex(owner[2:])
+                if owner.startswith("0x")
+                else bytes.fromhex(owner)
+            )
             result += owner_bytes.rjust(32, b"\x00")
 
         # data bytes
@@ -394,14 +396,18 @@ class SafeSmartAccount(SmartAccountSigner):
         selector = bytes.fromhex("a3f4df7e")
 
         # offset to array (32)
-        encoded = (32).to_bytes(32, 'big')
+        encoded = (32).to_bytes(32, "big")
 
         # array length
-        encoded += len(modules).to_bytes(32, 'big')
+        encoded += len(modules).to_bytes(32, "big")
 
         # array elements
         for module in modules:
-            module_bytes = bytes.fromhex(module[2:]) if module.startswith("0x") else bytes.fromhex(module)
+            module_bytes = (
+                bytes.fromhex(module[2:])
+                if module.startswith("0x")
+                else bytes.fromhex(module)
+            )
             encoded += module_bytes.rjust(32, b"\x00")
 
         return selector + encoded
@@ -414,16 +420,15 @@ class SafeSmartAccount(SmartAccountSigner):
         to_bytes = bytes.fromhex(to[2:]) if to.startswith("0x") else bytes.fromhex(to)
         result += to_bytes
 
-        result += value.to_bytes(32, 'big')
-        result += len(data).to_bytes(32, 'big')
+        result += value.to_bytes(32, "big")
+        result += len(data).to_bytes(32, "big")
         result += data
 
         return result
 
 
 def create_smart_account(
-    account_type: str,
-    config: SafeAccountConfig
+    account_type: str, config: SafeAccountConfig
 ) -> SmartAccountSigner:
     """Factory function to create a smart account."""
     if account_type == "safe":

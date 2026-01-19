@@ -242,7 +242,9 @@ class TestPreparePaymentHeader:
             header["payload"]["authorization"]["to"]
             == "EQDxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_xxx"
         )
-        assert header["payload"]["authorization"]["jettonMaster"] == USDT_MAINNET_ADDRESS
+        assert (
+            header["payload"]["authorization"]["jettonMaster"] == USDT_MAINNET_ADDRESS
+        )
         assert header["payload"]["authorization"]["jettonAmount"] == "1000000"
         assert header["payload"]["authorization"]["tonAmount"] == str(
             DEFAULT_JETTON_TRANSFER_TON

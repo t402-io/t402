@@ -251,7 +251,9 @@ def address_to_bytes32(address: str) -> bytes:
     addr = address.lower().removeprefix("0x")
 
     if len(addr) != 40:
-        raise ValueError(f"Invalid address length: expected 40 hex chars, got {len(addr)}")
+        raise ValueError(
+            f"Invalid address length: expected 40 hex chars, got {len(addr)}"
+        )
 
     try:
         addr_bytes = bytes.fromhex(addr)

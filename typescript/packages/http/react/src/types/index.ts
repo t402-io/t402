@@ -1,24 +1,24 @@
-import type { PaymentRequired, PaymentRequirements } from "@t402/core/types";
+import type { PaymentRequired, PaymentRequirements } from '@t402/core/types'
 
 /**
  * Payment status states
  */
-export type PaymentStatus = "idle" | "loading" | "success" | "error";
+export type PaymentStatus = 'idle' | 'loading' | 'success' | 'error'
 
 /**
  * Payment context state
  */
 export interface PaymentState {
   /** Current payment status */
-  status: PaymentStatus;
+  status: PaymentStatus
   /** Error message if status is 'error' */
-  error: string | null;
+  error: string | null
   /** The payment required response from server */
-  paymentRequired: PaymentRequired | null;
+  paymentRequired: PaymentRequired | null
   /** Currently selected payment requirement */
-  selectedRequirement: PaymentRequirements | null;
+  selectedRequirement: PaymentRequirements | null
   /** Whether we're in testnet mode */
-  isTestnet: boolean;
+  isTestnet: boolean
 }
 
 /**
@@ -26,15 +26,15 @@ export interface PaymentState {
  */
 export interface PaymentActions {
   /** Set the payment required data */
-  setPaymentRequired: (data: PaymentRequired) => void;
+  setPaymentRequired: (data: PaymentRequired) => void
   /** Select a specific payment requirement */
-  selectRequirement: (requirement: PaymentRequirements) => void;
+  selectRequirement: (requirement: PaymentRequirements) => void
   /** Set the payment status */
-  setStatus: (status: PaymentStatus) => void;
+  setStatus: (status: PaymentStatus) => void
   /** Set an error message */
-  setError: (error: string | null) => void;
+  setError: (error: string | null) => void
   /** Reset the payment state */
-  reset: () => void;
+  reset: () => void
 }
 
 /**
@@ -47,11 +47,11 @@ export interface PaymentContextValue extends PaymentState, PaymentActions {}
  */
 export interface PaymentProviderProps {
   /** Child components */
-  children: React.ReactNode;
+  children: React.ReactNode
   /** Initial payment required data */
-  initialPaymentRequired?: PaymentRequired;
+  initialPaymentRequired?: PaymentRequired
   /** Whether to default to testnet mode */
-  testnet?: boolean;
+  testnet?: boolean
 }
 
 /**
@@ -59,19 +59,19 @@ export interface PaymentProviderProps {
  */
 export interface PaymentButtonProps {
   /** Click handler */
-  onClick?: () => void | Promise<void>;
+  onClick?: () => void | Promise<void>
   /** Whether the button is disabled */
-  disabled?: boolean;
+  disabled?: boolean
   /** Whether the button is in loading state */
-  loading?: boolean;
+  loading?: boolean
   /** Button text */
-  children?: React.ReactNode;
+  children?: React.ReactNode
   /** Additional CSS class names */
-  className?: string;
+  className?: string
   /** Button variant */
-  variant?: "primary" | "secondary" | "outline";
+  variant?: 'primary' | 'secondary' | 'outline'
   /** Button size */
-  size?: "sm" | "md" | "lg";
+  size?: 'sm' | 'md' | 'lg'
 }
 
 /**
@@ -79,11 +79,11 @@ export interface PaymentButtonProps {
  */
 export interface PaymentStatusProps {
   /** Current status */
-  status: PaymentStatus;
+  status: PaymentStatus
   /** Message to display */
-  message?: string;
+  message?: string
   /** Additional CSS class names */
-  className?: string;
+  className?: string
 }
 
 /**
@@ -91,15 +91,15 @@ export interface PaymentStatusProps {
  */
 export interface PaymentDetailsProps {
   /** Payment requirements to display */
-  requirement: PaymentRequirements;
+  requirement: PaymentRequirements
   /** Whether to show the network name */
-  showNetwork?: boolean;
+  showNetwork?: boolean
   /** Whether to show the asset */
-  showAsset?: boolean;
+  showAsset?: boolean
   /** Whether to show the recipient address */
-  showRecipient?: boolean;
+  showRecipient?: boolean
   /** Additional CSS class names */
-  className?: string;
+  className?: string
 }
 
 /**
@@ -107,9 +107,9 @@ export interface PaymentDetailsProps {
  */
 export interface SpinnerProps {
   /** Spinner size */
-  size?: "sm" | "md" | "lg";
+  size?: 'sm' | 'md' | 'lg'
   /** Additional CSS class names */
-  className?: string;
+  className?: string
 }
 
 /**
@@ -117,16 +117,16 @@ export interface SpinnerProps {
  */
 export interface AddressDisplayProps {
   /** The address to display */
-  address: string;
+  address: string
   /** Number of characters to show at start */
-  startChars?: number;
+  startChars?: number
   /** Number of characters to show at end */
-  endChars?: number;
+  endChars?: number
   /** Whether to show copy button */
-  copyable?: boolean;
+  copyable?: boolean
   /** Additional CSS class names */
-  className?: string;
+  className?: string
 }
 
 // Re-export core types for convenience
-export type { PaymentRequired, PaymentRequirements } from "@t402/core/types";
+export type { PaymentRequired, PaymentRequirements } from '@t402/core/types'

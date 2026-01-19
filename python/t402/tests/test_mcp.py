@@ -3,7 +3,6 @@
 import io
 import json
 import pytest
-from dataclasses import asdict
 
 from t402.mcp import (
     # Server
@@ -13,12 +12,7 @@ from t402.mcp import (
     CHAIN_IDS,
     NATIVE_SYMBOLS,
     EXPLORER_URLS,
-    DEFAULT_RPC_URLS,
     USDC_ADDRESSES,
-    USDT_ADDRESSES,
-    USDT0_ADDRESSES,
-    BRIDGEABLE_CHAINS,
-    GASLESS_NETWORKS,
     ALL_NETWORKS,
     is_valid_network,
     is_bridgeable_chain,
@@ -29,10 +23,6 @@ from t402.mcp import (
     format_token_amount,
     parse_token_amount,
     # Types
-    SupportedNetwork,
-    SupportedToken,
-    Tool,
-    ToolResult,
     GetBalanceInput,
     PayInput,
     GetBridgeFeeInput,

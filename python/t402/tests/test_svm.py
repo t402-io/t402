@@ -17,13 +17,11 @@ from t402.svm import (
     TOKEN_2022_PROGRAM_ADDRESS,
     MAINNET_RPC_URL,
     DEVNET_RPC_URL,
-    DEFAULT_COMPUTE_UNIT_LIMIT,
-    DEFAULT_VALIDITY_DURATION,
-    # V1 to V2 mapping
     V1_TO_V2_NETWORK_MAP,
     SOLANA_MAINNET_V1,
     SOLANA_DEVNET_V1,
     SOLANA_TESTNET_V1,
+    SOLANA_AVAILABLE,
     # Functions
     validate_svm_address,
     addresses_equal,
@@ -41,8 +39,26 @@ from t402.svm import (
     get_usdc_address,
     get_rpc_url,
     get_known_tokens,
+    decode_transaction,
+    check_solana_available,
+    # Signer interfaces
+    ClientSvmSigner,
+    FacilitatorSvmSigner,
+    # Scheme implementations
+    ExactSvmClientScheme,
+    ExactSvmServerScheme,
+    ExactSvmFacilitatorScheme,
+    # Factory functions
+    create_client_scheme,
+    create_server_scheme,
+    create_facilitator_scheme,
+    # Types
+    SvmVerifyMessageResult,
+    SvmTransactionConfirmation,
+    ExactSvmPayloadV2,
+    SvmAuthorization,
+    SvmPaymentPayload,
 )
-from t402.svm import SvmAuthorization, SvmPaymentPayload
 from t402.networks import is_svm_network as networks_is_svm_network, get_network_type
 
 
@@ -497,29 +513,6 @@ class TestNetworkUtilities:
 # New Tests for Signer Interfaces and Scheme Implementations
 # =============================================================================
 
-from t402.svm import (
-    # Transaction utilities
-    decode_transaction,
-    check_solana_available,
-    # Signer interfaces
-    ClientSvmSigner,
-    FacilitatorSvmSigner,
-    # Scheme implementations
-    ExactSvmClientScheme,
-    ExactSvmServerScheme,
-    ExactSvmFacilitatorScheme,
-    # Factory functions
-    create_client_scheme,
-    create_server_scheme,
-    create_facilitator_scheme,
-    # Types
-    SvmVerifyMessageResult,
-    SvmTransactionConfirmation,
-    ExactSvmPayloadV2,
-    TransferDetails,
-    SOLANA_AVAILABLE,
-)
-
 
 class TestTransactionUtilities:
     """Test transaction utility functions."""
@@ -592,8 +585,7 @@ class TestExactSvmServerScheme:
         }
 
         enhanced = scheme.enhance_payment_requirements(
-            requirements,
-            fee_payer="fee_payer_address"
+            requirements, fee_payer="fee_payer_address"
         )
 
         assert enhanced["extra"]["feePayer"] == "fee_payer_address"
@@ -703,7 +695,9 @@ class TestMockFacilitatorSigner:
         def get_addresses(self) -> list:
             return self._addresses
 
-        async def sign_transaction(self, tx_base64: str, fee_payer: str, network: str) -> str:
+        async def sign_transaction(
+            self, tx_base64: str, fee_payer: str, network: str
+        ) -> str:
             if fee_payer not in self._addresses:
                 raise ValueError(f"Fee payer {fee_payer} not managed")
             return tx_base64
@@ -791,7 +785,9 @@ class TestExactSvmFacilitatorScheme:
         def get_addresses(self) -> list:
             return self._addresses
 
-        async def sign_transaction(self, tx_base64: str, fee_payer: str, network: str) -> str:
+        async def sign_transaction(
+            self, tx_base64: str, fee_payer: str, network: str
+        ) -> str:
             return tx_base64
 
         async def simulate_transaction(self, tx_base64: str, network: str) -> bool:
@@ -848,7 +844,11 @@ class TestExactSvmFacilitatorScheme:
         scheme = ExactSvmFacilitatorScheme(signer)
 
         tx = base64.b64encode(b"x" * 200).decode()
-        payload = {"scheme": "other", "network": SOLANA_MAINNET, "payload": {"transaction": tx}}
+        payload = {
+            "scheme": "other",
+            "network": SOLANA_MAINNET,
+            "payload": {"transaction": tx},
+        }
         requirements = {"scheme": "exact", "network": SOLANA_MAINNET}
 
         result = await scheme.verify(payload, requirements)
@@ -862,7 +862,11 @@ class TestExactSvmFacilitatorScheme:
         scheme = ExactSvmFacilitatorScheme(signer)
 
         tx = base64.b64encode(b"x" * 200).decode()
-        payload = {"scheme": "exact", "network": SOLANA_MAINNET, "payload": {"transaction": tx}}
+        payload = {
+            "scheme": "exact",
+            "network": SOLANA_MAINNET,
+            "payload": {"transaction": tx},
+        }
         requirements = {"scheme": "exact", "network": SOLANA_DEVNET}
 
         result = await scheme.verify(payload, requirements)
@@ -876,7 +880,11 @@ class TestExactSvmFacilitatorScheme:
         scheme = ExactSvmFacilitatorScheme(signer)
 
         tx = base64.b64encode(b"x" * 200).decode()
-        payload = {"scheme": "exact", "network": SOLANA_MAINNET, "payload": {"transaction": tx}}
+        payload = {
+            "scheme": "exact",
+            "network": SOLANA_MAINNET,
+            "payload": {"transaction": tx},
+        }
         requirements = {"scheme": "exact", "network": SOLANA_MAINNET, "extra": {}}
 
         result = await scheme.verify(payload, requirements)
@@ -890,11 +898,15 @@ class TestExactSvmFacilitatorScheme:
         scheme = ExactSvmFacilitatorScheme(signer)
 
         tx = base64.b64encode(b"x" * 200).decode()
-        payload = {"scheme": "exact", "network": SOLANA_MAINNET, "payload": {"transaction": tx}}
+        payload = {
+            "scheme": "exact",
+            "network": SOLANA_MAINNET,
+            "payload": {"transaction": tx},
+        }
         requirements = {
             "scheme": "exact",
             "network": SOLANA_MAINNET,
-            "extra": {"feePayer": "UnmanagedFeePayer"}
+            "extra": {"feePayer": "UnmanagedFeePayer"},
         }
 
         result = await scheme.verify(payload, requirements)

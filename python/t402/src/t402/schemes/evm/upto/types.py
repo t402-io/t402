@@ -98,7 +98,9 @@ class UptoEIP2612Payload(BaseModel):
 class UptoCompactPayload(BaseModel):
     """Alternative payload with combined signature."""
 
-    signature: str = Field(description="Combined EIP-2612 permit signature (65 bytes hex)")
+    signature: str = Field(
+        description="Combined EIP-2612 permit signature (65 bytes hex)"
+    )
     authorization: PermitAuthorization = Field(description="Permit parameters")
     payment_nonce: str = Field(
         alias="paymentNonce",

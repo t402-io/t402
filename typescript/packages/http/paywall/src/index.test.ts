@@ -1,10 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  createPaywall,
-  PaywallBuilder,
-  evmPaywall,
-  svmPaywall,
-} from "./index";
+import { createPaywall, PaywallBuilder, evmPaywall, svmPaywall } from "./index";
 
 describe("@t402/paywall", () => {
   describe("exports", () => {
@@ -42,10 +37,7 @@ describe("@t402/paywall", () => {
     });
 
     it("builds a multi-chain paywall", () => {
-      const paywall = createPaywall()
-        .withNetwork(evmPaywall)
-        .withNetwork(svmPaywall)
-        .build();
+      const paywall = createPaywall().withNetwork(evmPaywall).withNetwork(svmPaywall).build();
 
       expect(paywall).toHaveProperty("generateHtml");
     });

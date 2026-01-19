@@ -280,7 +280,14 @@ class WDKSigner:
                 chain=chain,
             )
 
-        if not all([typed_data.domain, typed_data.types, typed_data.primary_type, typed_data.message]):
+        if not all(
+            [
+                typed_data.domain,
+                typed_data.types,
+                typed_data.primary_type,
+                typed_data.message,
+            ]
+        ):
             raise SigningError(
                 WDKErrorCode.INVALID_TYPED_DATA,
                 "Invalid typed data: domain, types, primary_type, and message are required",
@@ -309,7 +316,9 @@ class WDKSigner:
                 cause=e,
             )
 
-    async def sign_message(self, message: Union[str, bytes], chain: Optional[str] = None) -> str:
+    async def sign_message(
+        self, message: Union[str, bytes], chain: Optional[str] = None
+    ) -> str:
         """
         Sign a personal message.
 

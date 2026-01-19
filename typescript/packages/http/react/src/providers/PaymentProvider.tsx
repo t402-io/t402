@@ -1,22 +1,22 @@
-import { createContext, useContext, useState, useCallback, useMemo } from "react";
-import type { PaymentRequired, PaymentRequirements } from "@t402/core/types";
+import { createContext, useContext, useState, useCallback, useMemo } from 'react'
+import type { PaymentRequired, PaymentRequirements } from '@t402/core/types'
 import type {
   PaymentState,
   PaymentContextValue,
   PaymentProviderProps,
   PaymentStatus,
-} from "../types/index.js";
-import { choosePaymentRequirement, isTestnetNetwork } from "../utils/index.js";
+} from '../types/index.js'
+import { choosePaymentRequirement, isTestnetNetwork } from '../utils/index.js'
 
 const initialState: PaymentState = {
-  status: "idle",
+  status: 'idle',
   error: null,
   paymentRequired: null,
   selectedRequirement: null,
   isTestnet: false,
-};
+}
 
-const PaymentContext = createContext<PaymentContextValue | null>(null);
+const PaymentContext = createContext<PaymentContextValue | null>(null)
 
 /**
  * Payment context provider for t402 payment state management.
@@ -44,66 +44,63 @@ export function PaymentProvider({
 }: PaymentProviderProps) {
   const [state, setState] = useState<PaymentState>(() => {
     if (initialPaymentRequired) {
-      const selectedRequirement = choosePaymentRequirement(
-        initialPaymentRequired.accepts,
-        testnet,
-      );
-      const detectedTestnet = isTestnetNetwork(selectedRequirement.network);
+      const selectedRequirement = choosePaymentRequirement(initialPaymentRequired.accepts, testnet)
+      const detectedTestnet = isTestnetNetwork(selectedRequirement.network)
 
       return {
-        status: "idle",
+        status: 'idle',
         error: null,
         paymentRequired: initialPaymentRequired,
         selectedRequirement,
         isTestnet: testnet || detectedTestnet,
-      };
+      }
     }
-    return { ...initialState, isTestnet: testnet };
-  });
+    return { ...initialState, isTestnet: testnet }
+  })
 
   const setPaymentRequired = useCallback(
     (data: PaymentRequired) => {
-      const selectedRequirement = choosePaymentRequirement(data.accepts, state.isTestnet);
-      const detectedTestnet = isTestnetNetwork(selectedRequirement.network);
+      const selectedRequirement = choosePaymentRequirement(data.accepts, state.isTestnet)
+      const detectedTestnet = isTestnetNetwork(selectedRequirement.network)
 
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         paymentRequired: data,
         selectedRequirement,
         isTestnet: prev.isTestnet || detectedTestnet,
         error: null,
-      }));
+      }))
     },
     [state.isTestnet],
-  );
+  )
 
   const selectRequirement = useCallback((requirement: PaymentRequirements) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       selectedRequirement: requirement,
       isTestnet: isTestnetNetwork(requirement.network),
-    }));
-  }, []);
+    }))
+  }, [])
 
   const setStatus = useCallback((status: PaymentStatus) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       status,
-      error: status === "error" ? prev.error : null,
-    }));
-  }, []);
+      error: status === 'error' ? prev.error : null,
+    }))
+  }, [])
 
   const setError = useCallback((error: string | null) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       error,
-      status: error ? "error" : prev.status,
-    }));
-  }, []);
+      status: error ? 'error' : prev.status,
+    }))
+  }, [])
 
   const reset = useCallback(() => {
-    setState({ ...initialState, isTestnet: testnet });
-  }, [testnet]);
+    setState({ ...initialState, isTestnet: testnet })
+  }, [testnet])
 
   const value = useMemo<PaymentContextValue>(
     () => ({
@@ -115,9 +112,9 @@ export function PaymentProvider({
       reset,
     }),
     [state, setPaymentRequired, selectRequirement, setStatus, setError, reset],
-  );
+  )
 
-  return <PaymentContext.Provider value={value}>{children}</PaymentContext.Provider>;
+  return <PaymentContext.Provider value={value}>{children}</PaymentContext.Provider>
 }
 
 /**
@@ -143,13 +140,13 @@ export function PaymentProvider({
  * ```
  */
 export function usePaymentContext(): PaymentContextValue {
-  const context = useContext(PaymentContext);
+  const context = useContext(PaymentContext)
 
   if (!context) {
-    throw new Error("usePaymentContext must be used within a PaymentProvider");
+    throw new Error('usePaymentContext must be used within a PaymentProvider')
   }
 
-  return context;
+  return context
 }
 
-export { PaymentContext };
+export { PaymentContext }

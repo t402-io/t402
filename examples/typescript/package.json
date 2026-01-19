@@ -2,14 +2,14 @@
   "name": "t402_examples",
   "private": "true",
   "version": "0.0.2",
-  "description": "t402 Payment Protocol Monorepo",
+  "description": "t402 Payment Protocol Examples",
   "main": "index.js",
   "scripts": {
     "build": "turbo run build",
-    "lint": "turbo run lint",
-    "lint:check": "turbo run lint:check",
-    "format": "turbo run format",
-    "format:check": "turbo run format:check"
+    "lint": "turbo run lint --filter='./clients/*' --filter='./servers/*' --filter='./fullstack/*' --filter='./facilitator' --filter='./mcp' --filter='./wdk-gasless' --filter='./wdk-multisig' --filter='./wdk-bridge'",
+    "lint:check": "turbo run lint:check --filter='./clients/*' --filter='./servers/*' --filter='./fullstack/*' --filter='./facilitator' --filter='./mcp' --filter='./wdk-gasless' --filter='./wdk-multisig' --filter='./wdk-bridge'",
+    "format": "turbo run format --filter='./clients/*' --filter='./servers/*' --filter='./fullstack/*' --filter='./facilitator' --filter='./mcp' --filter='./wdk-gasless' --filter='./wdk-multisig' --filter='./wdk-bridge'",
+    "format:check": "turbo run format:check --filter='./clients/*' --filter='./servers/*' --filter='./fullstack/*' --filter='./facilitator' --filter='./mcp' --filter='./wdk-gasless' --filter='./wdk-multisig' --filter='./wdk-bridge'"
   },
   "keywords": [],
   "author": "",

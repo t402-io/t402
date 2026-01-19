@@ -34,10 +34,12 @@ def parse_money(amount: str | int, address: str, network: str) -> int:
         # Handle TON networks differently
         if is_ton_network(network):
             from t402.ton import DEFAULT_DECIMALS
+
             decimals = DEFAULT_DECIMALS  # USDT on TON uses 6 decimals
         # Handle TRON networks
         elif is_tron_network(network):
             from t402.tron import DEFAULT_DECIMALS
+
             decimals = DEFAULT_DECIMALS  # USDT on TRON uses 6 decimals
         else:
             chain_id = get_chain_id(network)

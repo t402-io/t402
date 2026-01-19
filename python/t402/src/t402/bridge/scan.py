@@ -206,7 +206,9 @@ class LayerZeroScanClient:
             dst_tx_hash=data.get("dstTxHash"),
             status=LayerZeroMessageStatus(data.get("status") or "INFLIGHT"),
             src_block_number=int(data.get("srcBlockNumber") or 0),
-            dst_block_number=int(data.get("dstBlockNumber")) if data.get("dstBlockNumber") else None,
+            dst_block_number=int(data.get("dstBlockNumber"))
+            if data.get("dstBlockNumber")
+            else None,
             created=data.get("created") or data.get("createdAt") or "",
             updated=data.get("updated") or data.get("updatedAt") or "",
         )
