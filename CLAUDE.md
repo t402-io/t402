@@ -48,12 +48,45 @@ cd typescript/site
 
 ## Key URLs
 
+### Public Services
+
 | Service | URL |
 |---------|-----|
-| Facilitator API | https://facilitator.t402.io |
-| Documentation | https://docs.t402.io |
 | Website | https://t402.io |
-| Grafana | https://grafana.facilitator.t402.io |
+| Documentation | https://docs.t402.io |
+| Whitepaper | https://docs.t402.io/t402-whitepaper.pdf |
+| Facilitator API | https://facilitator.t402.io |
+| Grafana Dashboard | https://grafana.facilitator.t402.io |
+
+### Facilitator API Endpoints
+
+| Endpoint | Description |
+|----------|-------------|
+| `/health` | Health check |
+| `/ready` | Readiness check |
+| `/metrics` | Prometheus metrics |
+| `/supported` | Supported networks/schemes |
+| `/verify` | Verify payment authorization |
+| `/settle` | Settle payment |
+
+### Source Code & Packages
+
+| Platform | URL |
+|----------|-----|
+| GitHub | https://github.com/t402-io/t402 |
+| GitHub (Site) | https://github.com/t402-io/t402-site |
+| npm | https://www.npmjs.com/org/t402 |
+| PyPI | https://pypi.org/project/t402 |
+| Go Modules | https://pkg.go.dev/github.com/t402-io/t402/go |
+| Maven Central | https://central.sonatype.com/artifact/io.t402/t402 |
+
+### Container Images
+
+| Image | Registry |
+|-------|----------|
+| Facilitator | `ghcr.io/t402-io/facilitator` |
+| Grafana | `ghcr.io/t402-io/grafana` |
+| Website | `ghcr.io/t402-io/site` |
 
 ## SDK Versions
 
