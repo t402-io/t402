@@ -17,6 +17,7 @@ services:
       - RATE_LIMIT_WINDOW=60
       - API_KEYS=${API_KEYS:-}
       - API_KEY_REQUIRED=${API_KEY_REQUIRED:-false}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-https://t402.io,https://docs.t402.io,https://facilitator.t402.io}
     env_file:
       - .env.prod
     depends_on:
