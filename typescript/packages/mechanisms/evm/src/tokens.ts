@@ -264,8 +264,9 @@ export const TOKEN_PRIORITY: Record<string, number> = {
 /**
  * Get token configuration for a specific token on a network
  *
- * @param network
- * @param symbol
+ * @param network - The network identifier in CAIP-2 format
+ * @param symbol - The token symbol (e.g., "USDT0", "USDC")
+ * @returns The token configuration if found, undefined otherwise
  */
 export function getTokenConfig(network: string, symbol: string): TokenConfig | undefined {
   return TOKEN_REGISTRY[network]?.[symbol.toUpperCase()];
@@ -274,7 +275,8 @@ export function getTokenConfig(network: string, symbol: string): TokenConfig | u
 /**
  * Get all tokens available on a network
  *
- * @param network
+ * @param network - The network identifier in CAIP-2 format
+ * @returns Array of token configurations sorted by priority
  */
 export function getNetworkTokens(network: string): TokenConfig[] {
   const tokens = TOKEN_REGISTRY[network];
@@ -286,7 +288,8 @@ export function getNetworkTokens(network: string): TokenConfig[] {
  * Get the default/preferred token for a network
  * Prefers USDT0 > USDC > others based on priority
  *
- * @param network
+ * @param network - The network identifier in CAIP-2 format
+ * @returns The highest priority token configuration, or undefined if none found
  */
 export function getDefaultToken(network: string): TokenConfig | undefined {
   const tokens = getNetworkTokens(network);
@@ -296,8 +299,9 @@ export function getDefaultToken(network: string): TokenConfig | undefined {
 /**
  * Get token by contract address on a network
  *
- * @param network
- * @param address
+ * @param network - The network identifier in CAIP-2 format
+ * @param address - The token contract address
+ * @returns The token configuration if found, undefined otherwise
  */
 export function getTokenByAddress(network: string, address: Address): TokenConfig | undefined {
   const tokens = TOKEN_REGISTRY[network];
@@ -310,8 +314,9 @@ export function getTokenByAddress(network: string, address: Address): TokenConfi
 /**
  * Check if a token supports EIP-3009 (gasless transfers)
  *
- * @param network
- * @param symbol
+ * @param network - The network identifier in CAIP-2 format
+ * @param symbol - The token symbol to check
+ * @returns True if the token supports EIP-3009 gasless transfers
  */
 export function supportsEIP3009(network: string, symbol: string): boolean {
   const config = getTokenConfig(network, symbol);
@@ -321,7 +326,8 @@ export function supportsEIP3009(network: string, symbol: string): boolean {
 /**
  * Get all networks that support a specific token
  *
- * @param symbol
+ * @param symbol - The token symbol to search for
+ * @returns Array of network identifiers that support the token
  */
 export function getNetworksForToken(symbol: string): string[] {
   const networks: string[] = [];
@@ -335,6 +341,8 @@ export function getNetworksForToken(symbol: string): string[] {
 
 /**
  * Get USDT0 networks (primary T402 token)
+ *
+ * @returns Array of network identifiers that support USDT0
  */
 export function getUsdt0Networks(): string[] {
   return getNetworksForToken("USDT0");
@@ -343,9 +351,10 @@ export function getUsdt0Networks(): string[] {
 /**
  * EIP-712 domain configuration for a token
  *
- * @param network
- * @param tokenAddress
- * @param chainId
+ * @param network - The network identifier in CAIP-2 format
+ * @param tokenAddress - The token contract address
+ * @param chainId - The numeric chain ID
+ * @returns The EIP-712 domain configuration, or undefined if token not found
  */
 export function getEIP712Domain(
   network: string,

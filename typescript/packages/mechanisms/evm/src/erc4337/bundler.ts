@@ -50,10 +50,11 @@ interface JsonRpcResponse<T = unknown> {
  */
 export class BundlerError extends Error {
   /**
+   * Create a new BundlerError
    *
-   * @param message
-   * @param code
-   * @param data
+   * @param message - The error message
+   * @param code - Optional JSON-RPC error code
+   * @param data - Optional additional error data
    */
   constructor(
     message: string,
@@ -74,8 +75,9 @@ export class BundlerClient {
   private requestId: number = 0;
 
   /**
+   * Create a new BundlerClient instance
    *
-   * @param config
+   * @param config - Configuration for the bundler client
    */
   constructor(config: BundlerConfig) {
     this.bundlerUrl = config.bundlerUrl;
@@ -87,7 +89,8 @@ export class BundlerClient {
   /**
    * Send a UserOperation to the bundler
    *
-   * @param userOp
+   * @param userOp - The UserOperation to send
+   * @returns The result containing the userOpHash and a wait function
    */
   async sendUserOperation(userOp: UserOperation): Promise<UserOperationResult> {
     const packed = this.packForRpc(userOp);
@@ -106,7 +109,8 @@ export class BundlerClient {
   /**
    * Estimate gas for a UserOperation
    *
-   * @param userOp
+   * @param userOp - Partial UserOperation with required sender and callData
+   * @returns Gas estimates for the UserOperation
    */
   async estimateUserOperationGas(
     userOp: Partial<UserOperation> & {
@@ -158,7 +162,8 @@ export class BundlerClient {
   /**
    * Get UserOperation by hash
    *
-   * @param userOpHash
+   * @param userOpHash - The hash of the UserOperation to retrieve
+   * @returns The UserOperation and EntryPoint, or null if not found
    */
   async getUserOperationByHash(
     userOpHash: Hex,
@@ -174,7 +179,8 @@ export class BundlerClient {
   /**
    * Get UserOperation receipt
    *
-   * @param userOpHash
+   * @param userOpHash - The hash of the UserOperation
+   * @returns The receipt, or null if not yet included
    */
   async getUserOperationReceipt(userOpHash: Hex): Promise<UserOperationReceipt | null> {
     const result = await this.rpcCall<{
@@ -214,6 +220,8 @@ export class BundlerClient {
 
   /**
    * Get supported EntryPoints
+   *
+   * @returns Array of supported EntryPoint addresses
    */
   async getSupportedEntryPoints(): Promise<Address[]> {
     return this.rpcCall<Address[]>(BUNDLER_METHODS.supportedEntryPoints, []);
@@ -221,6 +229,8 @@ export class BundlerClient {
 
   /**
    * Get chain ID from bundler
+   *
+   * @returns The chain ID
    */
   async getChainId(): Promise<number> {
     const result = await this.rpcCall<Hex>(BUNDLER_METHODS.chainId, []);
@@ -230,10 +240,11 @@ export class BundlerClient {
   /**
    * Wait for UserOperation receipt with polling
    *
-   * @param userOpHash
-   * @param options
-   * @param options.timeout
-   * @param options.pollingInterval
+   * @param userOpHash - The hash of the UserOperation to wait for
+   * @param options - Polling options
+   * @param options.timeout - Maximum time to wait in milliseconds (default: 60000)
+   * @param options.pollingInterval - Interval between polls in milliseconds (default: 2000)
+   * @returns The UserOperation receipt
    */
   async waitForReceipt(
     userOpHash: Hex,
@@ -260,7 +271,8 @@ export class BundlerClient {
   /**
    * Pack UserOperation for RPC (convert bigints to hex strings)
    *
-   * @param userOp
+   * @param userOp - The UserOperation to pack
+   * @returns The packed UserOperation for RPC transmission
    */
   private packForRpc(userOp: UserOperation): Record<string, unknown> {
     return {
@@ -279,7 +291,8 @@ export class BundlerClient {
   /**
    * Convert bigint to hex string
    *
-   * @param value
+   * @param value - The bigint value to convert
+   * @returns The hex string representation
    */
   private toHex(value: bigint): Hex {
     return `0x${value.toString(16)}` as Hex;
@@ -288,8 +301,9 @@ export class BundlerClient {
   /**
    * Make a JSON-RPC call to the bundler
    *
-   * @param method
-   * @param params
+   * @param method - The JSON-RPC method name
+   * @param params - The method parameters
+   * @returns The result from the bundler
    */
   private async rpcCall<T>(method: string, params: unknown[]): Promise<T> {
     const request: JsonRpcRequest = {
@@ -324,7 +338,8 @@ export class BundlerClient {
 /**
  * Create a BundlerClient instance
  *
- * @param config
+ * @param config - Configuration for the bundler client
+ * @returns A new BundlerClient instance
  */
 export function createBundlerClient(config: BundlerConfig): BundlerClient {
   return new BundlerClient(config);

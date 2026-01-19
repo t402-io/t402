@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { PublicClient } from "viem";
 import { UserOpBuilder, createUserOpBuilder } from "../../../src/erc4337/builder";
 import type { SmartAccountSigner, TransactionIntent } from "../../../src/erc4337/types";
-import { DEFAULT_GAS_LIMITS } from "../../../src/erc4337/constants";
 
 describe("UserOpBuilder", () => {
   let mockSigner: SmartAccountSigner;

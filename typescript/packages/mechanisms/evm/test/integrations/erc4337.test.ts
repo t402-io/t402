@@ -8,7 +8,6 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { encodeFunctionData, type Address, type Hex } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
 import { createPublicClient, http } from "viem";
 import { baseSepolia } from "viem/chains";
 import {
@@ -18,9 +17,7 @@ import {
   type GaslessClientConfig,
 } from "../../src/erc4337/t402";
 import { UserOpBuilder } from "../../src/erc4337/builder";
-import { BundlerClient } from "../../src/erc4337/bundler";
-import { PaymasterClient } from "../../src/erc4337/paymaster";
-import type { SmartAccountSigner, UserOperation, GasEstimate } from "../../src/erc4337/types";
+import type { SmartAccountSigner, GasEstimate } from "../../src/erc4337/types";
 import { ENTRYPOINT_V07_ADDRESS } from "../../src/erc4337/constants";
 import { getTokenConfig } from "../../src/tokens";
 
@@ -278,12 +275,6 @@ describe("ERC-4337 Integration Tests", () => {
       };
 
       const client = createGaslessT402Client(config);
-
-      const params: GaslessPaymentParams = {
-        tokenAddress: TEST_TOKEN_ADDRESS,
-        to: TEST_RECIPIENT,
-        amount: TEST_AMOUNT,
-      };
 
       // Execute would call bundler, but we can verify signer methods are called
       // For this test, we just verify the client is properly configured

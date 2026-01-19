@@ -68,8 +68,9 @@ export type AccountTypeClient<T extends AccountType> = T extends "safe" ? SafeSm
 /**
  * Create a smart account of the specified type
  *
- * @param type
- * @param config
+ * @param type - The type of smart account to create (e.g., "safe")
+ * @param config - Configuration options specific to the account type
+ * @returns A smart account instance of the specified type
  */
 export function createSmartAccount<T extends AccountType>(
   type: T,
@@ -87,9 +88,10 @@ export function createSmartAccount<T extends AccountType>(
  * Get the account type from an address
  * Checks bytecode to determine the smart account implementation
  *
- * @param _address
+ * @param _ - The address to check for smart account type
+ * @returns The detected account type, or null if unknown
  */
-export async function detectAccountType(_address: Address): Promise<AccountType | null> {
+export async function detectAccountType(_: Address): Promise<AccountType | null> {
   // Future: Add detection logic based on bytecode patterns
   // For now, return null (unknown)
   return null;

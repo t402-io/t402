@@ -31,17 +31,38 @@ export class ExactLegacyEvmScheme implements SchemeNetworkServer {
   private config: ExactLegacyEvmSchemeConfig;
 
   /**
+   * Creates a new ExactLegacyEvmScheme instance.
    *
-   * @param config
+   * @param config - Optional configuration options for the scheme
    */
   constructor(config: ExactLegacyEvmSchemeConfig = {}) {
     this.config = config;
   }
 
   /**
+   * Get all supported networks that have legacy tokens
+   *
+   * @returns Array of network identifiers with legacy token support
+   */
+  static getSupportedNetworks(): string[] {
+    return Object.keys(USDT_LEGACY_ADDRESSES);
+  }
+
+  /**
+   * Check if a network has legacy token support
+   *
+   * @param network - The network identifier to check
+   * @returns True if the network has legacy token support
+   */
+  static isNetworkSupported(network: string): boolean {
+    return network in USDT_LEGACY_ADDRESSES;
+  }
+
+  /**
    * Register a custom money parser in the parser chain.
    *
-   * @param parser
+   * @param parser - Custom function to convert amount to AssetAmount
+   * @returns The scheme instance for method chaining
    */
   registerMoneyParser(parser: MoneyParser): ExactLegacyEvmScheme {
     this.moneyParsers.push(parser);
@@ -51,8 +72,9 @@ export class ExactLegacyEvmScheme implements SchemeNetworkServer {
   /**
    * Parses a price into an asset amount for legacy tokens.
    *
-   * @param price
-   * @param network
+   * @param price - The price to parse (Money or AssetAmount)
+   * @param network - The network identifier in CAIP-2 format
+   * @returns Promise resolving to the parsed asset amount
    */
   async parsePrice(price: Price, network: Network): Promise<AssetAmount> {
     // If already an AssetAmount, return it directly
@@ -89,13 +111,14 @@ export class ExactLegacyEvmScheme implements SchemeNetworkServer {
    * Build payment requirements for this scheme/network combination.
    * Adds the spender (facilitator) address to the extra field.
    *
-   * @param paymentRequirements
-   * @param supportedKind
-   * @param supportedKind.t402Version
-   * @param supportedKind.scheme
-   * @param supportedKind.network
-   * @param supportedKind.extra
-   * @param extensionKeys
+   * @param paymentRequirements - The base payment requirements to enhance
+   * @param supportedKind - The supported kind from facilitator
+   * @param supportedKind.t402Version - The t402 protocol version
+   * @param supportedKind.scheme - The logical payment scheme identifier
+   * @param supportedKind.network - The network identifier in CAIP-2 format
+   * @param supportedKind.extra - Optional extra metadata with spender address
+   * @param extensionKeys - Extension keys supported by the facilitator (unused)
+   * @returns Promise resolving to enhanced payment requirements
    */
   enhancePaymentRequirements(
     paymentRequirements: PaymentRequirements,
@@ -126,7 +149,8 @@ export class ExactLegacyEvmScheme implements SchemeNetworkServer {
   /**
    * Parse Money (string | number) to a decimal number.
    *
-   * @param money
+   * @param money - The money value to parse (e.g., "$1.50" or 1.50)
+   * @returns The decimal number representation
    */
   private parseMoneyToDecimal(money: string | number): number {
     if (typeof money === "number") {
@@ -146,8 +170,9 @@ export class ExactLegacyEvmScheme implements SchemeNetworkServer {
   /**
    * Default money conversion implementation for legacy tokens.
    *
-   * @param amount
-   * @param network
+   * @param amount - The decimal amount to convert (e.g., 1.50)
+   * @param network - The network identifier in CAIP-2 format
+   * @returns The asset amount in token units
    */
   private defaultMoneyConversion(amount: number, network: Network): AssetAmount {
     const token = this.getDefaultAsset(network);
@@ -169,8 +194,9 @@ export class ExactLegacyEvmScheme implements SchemeNetworkServer {
   /**
    * Convert decimal amount to token units
    *
-   * @param decimalAmount
-   * @param decimals
+   * @param decimalAmount - The decimal amount as a string (e.g., "1.50")
+   * @param decimals - The number of decimal places for the token
+   * @returns The token amount as a string in smallest units
    */
   private convertToTokenAmount(decimalAmount: string, decimals: number): string {
     const amount = parseFloat(decimalAmount);
@@ -184,7 +210,8 @@ export class ExactLegacyEvmScheme implements SchemeNetworkServer {
   /**
    * Get the default legacy token for a network.
    *
-   * @param network
+   * @param network - The network identifier in CAIP-2 format
+   * @returns The token configuration for the default legacy token
    */
   private getDefaultAsset(network: Network): TokenConfig {
     // If a preferred token is configured, try to use it
@@ -209,21 +236,5 @@ export class ExactLegacyEvmScheme implements SchemeNetworkServer {
     }
 
     throw new Error(`No legacy tokens configured for network ${network}`);
-  }
-
-  /**
-   * Get all supported networks that have legacy tokens
-   */
-  static getSupportedNetworks(): string[] {
-    return Object.keys(USDT_LEGACY_ADDRESSES);
-  }
-
-  /**
-   * Check if a network has legacy token support
-   *
-   * @param network
-   */
-  static isNetworkSupported(network: string): boolean {
-    return network in USDT_LEGACY_ADDRESSES;
   }
 }

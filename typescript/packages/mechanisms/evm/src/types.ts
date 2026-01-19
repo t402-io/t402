@@ -141,7 +141,8 @@ export const permitTypes = {
 /**
  * Type guard for UptoEIP2612Payload
  *
- * @param payload
+ * @param payload - The payload to check
+ * @returns True if the payload is a valid UptoEIP2612Payload
  */
 export function isUptoEIP2612Payload(payload: unknown): payload is UptoEIP2612Payload {
   if (typeof payload !== "object" || payload === null) return false;

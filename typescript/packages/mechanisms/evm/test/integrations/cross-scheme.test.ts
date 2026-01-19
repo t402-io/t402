@@ -25,9 +25,8 @@ import { ExactLegacyEvmScheme as ExactLegacyEvmServer } from "../../src/exact-le
 import { ExactLegacyEvmScheme as ExactLegacyEvmFacilitator } from "../../src/exact-legacy/facilitator/scheme";
 import { privateKeyToAccount } from "viem/accounts";
 import { createWalletClient, createPublicClient, http } from "viem";
-import { mainnet, polygon, baseSepolia } from "viem/chains";
+import { mainnet, baseSepolia } from "viem/chains";
 import {
-  TOKEN_REGISTRY,
   getTokenConfig,
   getNetworkTokens,
   supportsEIP3009,

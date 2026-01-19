@@ -68,7 +68,8 @@ export class ExactLegacyEvmScheme implements SchemeNetworkFacilitator {
   /**
    * Get signer addresses used by this facilitator.
    *
-   * @param network
+   * @param network - The network identifier (unused, returns same addresses for all networks)
+   * @returns Array of signer addresses
    */
   getSigners(network: string): string[] {
     void network;
@@ -78,8 +79,9 @@ export class ExactLegacyEvmScheme implements SchemeNetworkFacilitator {
   /**
    * Verifies a payment payload.
    *
-   * @param payload
-   * @param requirements
+   * @param payload - The payment payload to verify
+   * @param requirements - The payment requirements to verify against
+   * @returns Promise resolving to verification response with validity status
    */
   async verify(
     payload: PaymentPayload,
@@ -263,8 +265,9 @@ export class ExactLegacyEvmScheme implements SchemeNetworkFacilitator {
   /**
    * Settles a payment by executing transferFrom.
    *
-   * @param payload
-   * @param requirements
+   * @param payload - The payment payload containing transfer authorization
+   * @param requirements - The payment requirements specifying amount and recipient
+   * @returns Promise resolving to settlement response with transaction hash
    */
   async settle(
     payload: PaymentPayload,

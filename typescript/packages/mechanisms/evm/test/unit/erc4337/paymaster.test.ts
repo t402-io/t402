@@ -83,7 +83,7 @@ describe("PaymasterClient", () => {
       };
       const client = new PaymasterClient(config);
 
-      const data = await client.getPaymasterData(
+      await client.getPaymasterData(
         { sender: "0x2222222222222222222222222222222222222222" },
         42161,
         "0x0000000071727De22E5E9d8BAf0edAc6f37da032",
