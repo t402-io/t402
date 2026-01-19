@@ -74,7 +74,8 @@ t402/
 ├── java/                    # Java SDK
 │   └── t402/
 ├── services/facilitator/    # Facilitator service (Go)
-├── docs/                    # Documentation site (Nextra)
+├── docs/                    # Documentation
+│   └── internal/            # [SUBMODULE:PRIVATE] Internal documents
 ├── specs/                   # Protocol specifications
 │   ├── t402-specification-v2.md  # Current spec
 │   ├── schemes/             # Payment scheme specs
@@ -581,6 +582,9 @@ git submodule update --init --recursive
 git submodule update --remote
 ```
 
-| Submodule | Repository | Description |
-|-----------|------------|-------------|
-| `typescript/site/` | t402-io/t402-site | Marketing website (t402.io) |
+| Submodule | Repository | Visibility | Description |
+|-----------|------------|------------|-------------|
+| `typescript/site/` | t402-io/t402-site | Public | Marketing website (t402.io) |
+| `docs/internal/` | t402-io/t402-internal | **Private** | Internal documents (patent strategy, etc.) |
+
+**Note**: `docs/internal/` requires authorized access. Contributors without access can still work on the main project.
