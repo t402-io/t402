@@ -1,11 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { PublicClient } from "viem";
 import { GaslessT402Client, createGaslessT402Client } from "../../../src/erc4337/t402";
-import type {
-  SmartAccountSigner,
-  PaymasterConfig,
-  BundlerConfig,
-} from "../../../src/erc4337/types";
+import type { SmartAccountSigner } from "../../../src/erc4337/types";
 
 describe("GaslessT402Client", () => {
   let mockSigner: SmartAccountSigner;

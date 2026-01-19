@@ -82,8 +82,9 @@ export class PimlicoPaymaster {
   private readonly tokenAddress?: Address;
 
   /**
+   * Creates a new Pimlico paymaster client
    *
-   * @param config
+   * @param config - Pimlico paymaster configuration including API key and type
    */
   constructor(config: PimlicoPaymasterConfig) {
     this.type = config.type ?? "verifying";
@@ -97,9 +98,10 @@ export class PimlicoPaymaster {
    * Sponsor a UserOperation
    * Returns paymaster data to include in the UserOp
    *
-   * @param userOp
-   * @param options
-   * @param options.gasOverrides
+   * @param userOp - Partial UserOperation with sender and callData required
+   * @param options - Optional sponsorship options
+   * @param options.gasOverrides - Override gas limit estimates
+   * @returns Sponsorship result with paymaster data and gas estimates
    */
   async sponsorUserOperation(
     userOp: Partial<UserOperation> & {
@@ -151,7 +153,8 @@ export class PimlicoPaymaster {
    * Get paymaster data without gas estimation
    * Useful when gas is already estimated
    *
-   * @param userOp
+   * @param userOp - The complete UserOperation to get paymaster data for
+   * @returns Paymaster data including address and gas limits
    */
   async getPaymasterData(userOp: UserOperation): Promise<PaymasterData> {
     const result = await this.sponsorUserOperation(userOp);
@@ -167,7 +170,8 @@ export class PimlicoPaymaster {
   /**
    * Check if an operation would be sponsored
    *
-   * @param userOp
+   * @param userOp - Partial UserOperation with sender and callData required
+   * @returns Object indicating whether sponsorship is available and optional reason
    */
   async willSponsor(
     userOp: Partial<UserOperation> & {
@@ -189,8 +193,9 @@ export class PimlicoPaymaster {
   /**
    * Get token quotes for ERC-20 paymaster
    *
-   * @param userOp
-   * @param tokens
+   * @param userOp - Partial UserOperation with sender and callData required
+   * @param tokens - Array of token addresses to get quotes for
+   * @returns Array of token quotes with max cost and token details
    */
   async getTokenQuotes(
     userOp: Partial<UserOperation> & {
@@ -238,7 +243,8 @@ export class PimlicoPaymaster {
   /**
    * Pack UserOp for sponsorship request
    *
-   * @param userOp
+   * @param userOp - Partial UserOperation with sender and callData required
+   * @returns Packed UserOperation object for RPC calls
    */
   private packUserOpForSponsorship(
     userOp: Partial<UserOperation> & { sender: Address; callData: Hex },
@@ -270,7 +276,8 @@ export class PimlicoPaymaster {
   /**
    * Convert bigint to hex
    *
-   * @param value
+   * @param value - The bigint value to convert
+   * @returns Hexadecimal string representation
    */
   private toHex(value: bigint): Hex {
     return `0x${value.toString(16)}` as Hex;
@@ -279,8 +286,9 @@ export class PimlicoPaymaster {
   /**
    * Make RPC call to Pimlico
    *
-   * @param method
-   * @param params
+   * @param method - The RPC method name to call
+   * @param params - Array of parameters for the RPC call
+   * @returns The typed result from the RPC call
    */
   private async rpcCall<T>(method: string, params: unknown[]): Promise<T> {
     const response = await fetch(this.paymasterUrl, {
@@ -315,6 +323,8 @@ export class PimlicoPaymaster {
 
 /**
  * Get dummy signature for sponsorship requests
+ *
+ * @returns A dummy signature hex string for gas estimation
  */
 function getDummySignature(): Hex {
   return "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c" as Hex;
@@ -323,7 +333,8 @@ function getDummySignature(): Hex {
 /**
  * Encode paymaster and data for UserOperation
  *
- * @param data
+ * @param data - Paymaster data to encode
+ * @returns Encoded paymasterAndData hex string
  */
 export function encodePaymasterAndData(data: PaymasterData): Hex {
   return concat([
@@ -337,7 +348,8 @@ export function encodePaymasterAndData(data: PaymasterData): Hex {
 /**
  * Create a Pimlico paymaster client
  *
- * @param config
+ * @param config - Pimlico paymaster configuration including API key and type
+ * @returns A new PimlicoPaymaster instance
  */
 export function createPimlicoPaymaster(config: PimlicoPaymasterConfig): PimlicoPaymaster {
   return new PimlicoPaymaster(config);

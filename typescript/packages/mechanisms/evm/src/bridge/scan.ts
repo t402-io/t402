@@ -188,7 +188,8 @@ export class LayerZeroScanClient {
   /**
    * Map API response to our interface
    *
-   * @param data
+   * @param data - The raw API response data
+   * @returns The mapped LayerZeroMessage object
    */
   private mapApiResponse(data: unknown): LayerZeroMessage {
     const msg = data as Record<string, unknown>;
@@ -211,7 +212,8 @@ export class LayerZeroScanClient {
   /**
    * Sleep helper
    *
-   * @param ms
+   * @param ms - The number of milliseconds to sleep
+   * @returns A promise that resolves after the specified delay
    */
   private sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -222,6 +224,7 @@ export class LayerZeroScanClient {
  * Create a LayerZero Scan client
  *
  * @param baseUrl - Optional custom API base URL
+ * @returns A new LayerZeroScanClient instance
  */
 export function createLayerZeroScanClient(baseUrl?: string): LayerZeroScanClient {
   return new LayerZeroScanClient(baseUrl);

@@ -214,7 +214,8 @@ export const ERC20_APPROVE_ABI = [
 /**
  * Get LayerZero endpoint ID for a chain
  *
- * @param chain
+ * @param chain - The chain name (e.g., 'ethereum', 'arbitrum')
+ * @returns The LayerZero endpoint ID, or undefined if chain not supported
  */
 export function getEndpointId(chain: string): number | undefined {
   return LAYERZERO_ENDPOINT_IDS[chain];
@@ -223,7 +224,8 @@ export function getEndpointId(chain: string): number | undefined {
 /**
  * Get LayerZero endpoint ID from CAIP-2 network
  *
- * @param network
+ * @param network - The CAIP-2 network identifier (e.g., 'eip155:1' for Ethereum)
+ * @returns The LayerZero endpoint ID, or undefined if network not supported
  */
 export function getEndpointIdFromNetwork(network: string): number | undefined {
   const chain = NETWORK_TO_CHAIN[network];
@@ -233,7 +235,8 @@ export function getEndpointIdFromNetwork(network: string): number | undefined {
 /**
  * Get USDT0 OFT contract address for a chain
  *
- * @param chain
+ * @param chain - The chain name (e.g., 'ethereum', 'arbitrum')
+ * @returns The USDT0 OFT contract address, or undefined if chain not supported
  */
 export function getUsdt0OftAddress(chain: string): Address | undefined {
   return USDT0_OFT_ADDRESSES[chain];
@@ -242,7 +245,8 @@ export function getUsdt0OftAddress(chain: string): Address | undefined {
 /**
  * Check if a chain supports USDT0 bridging
  *
- * @param chain
+ * @param chain - The chain name to check (e.g., 'ethereum', 'arbitrum')
+ * @returns True if the chain supports USDT0 bridging, false otherwise
  */
 export function supportsBridging(chain: string): boolean {
   return chain in USDT0_OFT_ADDRESSES && chain in LAYERZERO_ENDPOINT_IDS;
@@ -250,6 +254,8 @@ export function supportsBridging(chain: string): boolean {
 
 /**
  * Get all chains that support USDT0 bridging
+ *
+ * @returns Array of chain names that support USDT0 bridging
  */
 export function getBridgeableChains(): string[] {
   return Object.keys(USDT0_OFT_ADDRESSES).filter(chain => chain in LAYERZERO_ENDPOINT_IDS);
@@ -259,7 +265,8 @@ export function getBridgeableChains(): string[] {
  * Convert address to bytes32 format for LayerZero
  * Pads address with leading zeros to 32 bytes
  *
- * @param address
+ * @param address - The EVM address to convert
+ * @returns The address as a bytes32 hex string with leading zeros
  */
 export function addressToBytes32(address: Address): `0x${string}` {
   // Remove 0x prefix, pad to 64 chars (32 bytes), add 0x prefix
@@ -270,7 +277,8 @@ export function addressToBytes32(address: Address): `0x${string}` {
 /**
  * Convert bytes32 to address
  *
- * @param bytes32
+ * @param bytes32 - The bytes32 hex string to convert
+ * @returns The extracted EVM address from the last 20 bytes
  */
 export function bytes32ToAddress(bytes32: `0x${string}`): Address {
   // Take last 40 characters (20 bytes)

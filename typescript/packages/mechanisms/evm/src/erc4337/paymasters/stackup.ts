@@ -72,8 +72,9 @@ export class StackupPaymaster {
   private readonly paymasterUrl: string;
 
   /**
+   * Creates a new Stackup paymaster client
    *
-   * @param config
+   * @param config - Stackup paymaster configuration including API key and type
    */
   constructor(config: StackupPaymasterConfig) {
     this.paymasterUrl =
@@ -83,8 +84,9 @@ export class StackupPaymaster {
   /**
    * Sponsor a UserOperation using pm_oo (off-chain) method
    *
-   * @param userOp
-   * @param context
+   * @param userOp - Partial UserOperation with sender and callData required
+   * @param context - Optional context data for sponsorship validation
+   * @returns Sponsorship result with paymaster data and gas estimates
    */
   async sponsorUserOperation(
     userOp: Partial<UserOperation> & {
@@ -133,8 +135,9 @@ export class StackupPaymaster {
    * Get paymaster stub data for gas estimation
    * Returns dummy paymaster data that can be used for estimation
    *
-   * @param userOp
-   * @param context
+   * @param userOp - Partial UserOperation with sender and callData required
+   * @param context - Optional context data for the paymaster
+   * @returns Stub paymaster data for gas estimation
    */
   async getPaymasterStubData(
     userOp: Partial<UserOperation> & {
@@ -174,8 +177,9 @@ export class StackupPaymaster {
   /**
    * Get paymaster data after estimation
    *
-   * @param userOp
-   * @param context
+   * @param userOp - The complete UserOperation to get paymaster data for
+   * @param context - Optional context data for the paymaster
+   * @returns Paymaster data including address and gas limits
    */
   async getPaymasterData(userOp: UserOperation, context?: StackupContext): Promise<PaymasterData> {
     const result = await this.sponsorUserOperation(userOp, context);
@@ -194,7 +198,8 @@ export class StackupPaymaster {
   /**
    * Check account balance with paymaster
    *
-   * @param account
+   * @param account - The account address to check balance for
+   * @returns Balance and currency information
    */
   async getAccountBalance(account: Address): Promise<{
     balance: bigint;
@@ -213,6 +218,8 @@ export class StackupPaymaster {
 
   /**
    * Get supported entry points
+   *
+   * @returns Array of supported EntryPoint contract addresses
    */
   async getSupportedEntryPoints(): Promise<Address[]> {
     return this.rpcCall<Address[]>("pm_supportedEntryPoints", []);
@@ -221,7 +228,8 @@ export class StackupPaymaster {
   /**
    * Validate UserOperation with paymaster
    *
-   * @param userOp
+   * @param userOp - The complete UserOperation to validate
+   * @returns Validation result with validity status and optional time bounds
    */
   async validatePaymasterUserOp(userOp: UserOperation): Promise<{
     valid: boolean;
@@ -250,7 +258,8 @@ export class StackupPaymaster {
   /**
    * Pack partial UserOp for sponsorship request
    *
-   * @param userOp
+   * @param userOp - Partial UserOperation with sender and callData required
+   * @returns Packed UserOperation object for RPC calls
    */
   private packUserOpForSponsorship(
     userOp: Partial<UserOperation> & { sender: Address; callData: Hex },
@@ -282,7 +291,8 @@ export class StackupPaymaster {
   /**
    * Pack UserOp for RPC
    *
-   * @param userOp
+   * @param userOp - The complete UserOperation to pack
+   * @returns Packed UserOperation object for RPC calls
    */
   private packForRpc(userOp: UserOperation): Record<string, unknown> {
     return {
@@ -301,7 +311,8 @@ export class StackupPaymaster {
   /**
    * Convert bigint to hex
    *
-   * @param value
+   * @param value - The bigint value to convert
+   * @returns Hexadecimal string representation
    */
   private toHex(value: bigint): Hex {
     return `0x${value.toString(16)}` as Hex;
@@ -310,8 +321,9 @@ export class StackupPaymaster {
   /**
    * Make RPC call to Stackup
    *
-   * @param method
-   * @param params
+   * @param method - The RPC method name to call
+   * @param params - Array of parameters for the RPC call
+   * @returns The typed result from the RPC call
    */
   private async rpcCall<T>(method: string, params: unknown[]): Promise<T> {
     const response = await fetch(this.paymasterUrl, {
@@ -346,6 +358,8 @@ export class StackupPaymaster {
 
 /**
  * Get dummy signature for sponsorship requests
+ *
+ * @returns A dummy signature hex string for gas estimation
  */
 function getDummySignature(): Hex {
   return "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c" as Hex;
@@ -354,7 +368,8 @@ function getDummySignature(): Hex {
 /**
  * Create a Stackup paymaster client
  *
- * @param config
+ * @param config - Stackup paymaster configuration including API key and type
+ * @returns A new StackupPaymaster instance
  */
 export function createStackupPaymaster(config: StackupPaymasterConfig): StackupPaymaster {
   return new StackupPaymaster(config);

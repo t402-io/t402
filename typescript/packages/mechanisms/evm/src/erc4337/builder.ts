@@ -41,8 +41,9 @@ export class UserOpBuilder {
   private readonly gasMultiplier: number;
 
   /**
+   * Create a new UserOpBuilder instance
    *
-   * @param options
+   * @param options - Optional configuration for the builder
    */
   constructor(options: UserOpBuilderOptions = {}) {
     this.entryPoint = options.entryPoint ?? ENTRYPOINT_V07_ADDRESS;
@@ -52,11 +53,12 @@ export class UserOpBuilder {
   /**
    * Build a UserOperation from a transaction intent
    *
-   * @param signer
-   * @param intent
-   * @param client
-   * @param gasEstimate
-   * @param paymaster
+   * @param signer - The smart account signer
+   * @param intent - The transaction intent to execute
+   * @param client - The public client for chain interaction
+   * @param gasEstimate - Optional gas estimates (uses defaults if not provided)
+   * @param paymaster - Optional paymaster data for sponsored transactions
+   * @returns A UserOperation ready for signing
    */
   async buildUserOp(
     signer: SmartAccountSigner,
@@ -105,11 +107,12 @@ export class UserOpBuilder {
   /**
    * Build a batch UserOperation from multiple transaction intents
    *
-   * @param signer
-   * @param intents
-   * @param client
-   * @param gasEstimate
-   * @param paymaster
+   * @param signer - The smart account signer
+   * @param intents - Array of transaction intents to execute
+   * @param client - The public client for chain interaction
+   * @param gasEstimate - Optional gas estimates (uses defaults if not provided)
+   * @param paymaster - Optional paymaster data for sponsored transactions
+   * @returns A UserOperation ready for signing
    */
   async buildBatchUserOp(
     signer: SmartAccountSigner,
@@ -163,7 +166,8 @@ export class UserOpBuilder {
   /**
    * Pack a UserOperation for on-chain submission (v0.7 format)
    *
-   * @param userOp
+   * @param userOp - The UserOperation to pack
+   * @returns The packed UserOperation for on-chain submission
    */
   packUserOp(userOp: UserOperation): PackedUserOperation {
     return {
@@ -182,11 +186,12 @@ export class UserOpBuilder {
   /**
    * Compute the UserOperation hash for signing
    *
-   * @param userOp
-   * @param client
-   * @param _chainId
+   * @param userOp - The UserOperation to hash
+   * @param client - The public client for chain interaction
+   * @param _ - The chain ID (reserved for future use)
+   * @returns The UserOperation hash
    */
-  async getUserOpHash(userOp: UserOperation, client: PublicClient, _chainId: number): Promise<Hex> {
+  async getUserOpHash(userOp: UserOperation, client: PublicClient, _: number): Promise<Hex> {
     const packed = this.packUserOp(userOp);
 
     // Convert to the tuple format expected by the ABI
@@ -216,10 +221,11 @@ export class UserOpBuilder {
   /**
    * Sign a UserOperation
    *
-   * @param userOp
-   * @param signer
-   * @param client
-   * @param chainId
+   * @param userOp - The UserOperation to sign
+   * @param signer - The smart account signer
+   * @param client - The public client for chain interaction
+   * @param chainId - The chain ID for the signature
+   * @returns The UserOperation with signature attached
    */
   async signUserOp(
     userOp: UserOperation,
@@ -239,8 +245,9 @@ export class UserOpBuilder {
   /**
    * Get the nonce for an account from EntryPoint
    *
-   * @param client
-   * @param sender
+   * @param client - The public client for chain interaction
+   * @param sender - The smart account address
+   * @returns The current nonce for the account
    */
   private async getNonce(client: PublicClient, sender: Address): Promise<bigint> {
     try {
@@ -260,7 +267,8 @@ export class UserOpBuilder {
   /**
    * Get current gas prices from the chain
    *
-   * @param client
+   * @param client - The public client for chain interaction
+   * @returns The current gas prices for EIP-1559 transactions
    */
   private async getGasPrices(
     client: PublicClient,
@@ -278,7 +286,8 @@ export class UserOpBuilder {
   /**
    * Apply gas multiplier for safety margin
    *
-   * @param gas
+   * @param gas - The gas amount to multiply
+   * @returns The gas amount with safety margin applied
    */
   private applyMultiplier(gas: bigint): bigint {
     return BigInt(Math.ceil(Number(gas) * this.gasMultiplier));
@@ -287,7 +296,8 @@ export class UserOpBuilder {
   /**
    * Encode paymaster data for the UserOperation
    *
-   * @param paymaster
+   * @param paymaster - The paymaster configuration
+   * @returns The encoded paymaster data
    */
   private encodePaymasterData(paymaster: PaymasterData): Hex {
     // Pack: paymaster (20 bytes) + verification gas (16 bytes) + postOp gas (16 bytes) + data
@@ -304,7 +314,8 @@ export class UserOpBuilder {
 /**
  * Create a UserOpBuilder instance
  *
- * @param options
+ * @param options - Optional configuration for the builder
+ * @returns A new UserOpBuilder instance
  */
 export function createUserOpBuilder(options?: UserOpBuilderOptions): UserOpBuilder {
   return new UserOpBuilder(options);

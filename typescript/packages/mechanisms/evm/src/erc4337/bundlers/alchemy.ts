@@ -77,8 +77,9 @@ export class AlchemyBundlerClient extends BundlerClient {
   private readonly policy?: AlchemyPolicyConfig;
 
   /**
+   * Creates a new Alchemy bundler client
    *
-   * @param config
+   * @param config - Alchemy bundler configuration including API key and chain ID
    */
   constructor(config: AlchemyConfig) {
     // Construct Alchemy bundler URL
@@ -101,13 +102,14 @@ export class AlchemyBundlerClient extends BundlerClient {
    * Request gas estimates and paymaster data in a single call
    * This is more efficient than making separate calls
    *
-   * @param userOp
-   * @param overrides
-   * @param overrides.maxFeePerGas
-   * @param overrides.maxPriorityFeePerGas
-   * @param overrides.callGasLimit
-   * @param overrides.verificationGasLimit
-   * @param overrides.preVerificationGas
+   * @param userOp - Partial UserOperation with sender and callData required
+   * @param overrides - Optional gas limit overrides
+   * @param overrides.maxFeePerGas - Override for max fee per gas
+   * @param overrides.maxPriorityFeePerGas - Override for max priority fee per gas
+   * @param overrides.callGasLimit - Override for call gas limit
+   * @param overrides.verificationGasLimit - Override for verification gas limit
+   * @param overrides.preVerificationGas - Override for pre-verification gas
+   * @returns Gas estimates, paymaster data, and fee information
    */
   async requestGasAndPaymasterAndData(
     userOp: Partial<UserOperation> & {
@@ -179,7 +181,8 @@ export class AlchemyBundlerClient extends BundlerClient {
    * Simulate asset changes from a UserOperation
    * Useful for previewing what will happen before submitting
    *
-   * @param userOp
+   * @param userOp - The complete UserOperation to simulate
+   * @returns Simulation result with success status and asset changes
    */
   async simulateUserOperationAssetChanges(userOp: UserOperation): Promise<SimulationResult> {
     const packed = this.packUserOpForRpc(userOp);
@@ -209,6 +212,8 @@ export class AlchemyBundlerClient extends BundlerClient {
 
   /**
    * Get fee history for gas estimation
+   *
+   * @returns Base fee, priority fee, and max fee per gas from recent blocks
    */
   async getFeeHistory(): Promise<{
     baseFeePerGas: bigint;
@@ -234,7 +239,8 @@ export class AlchemyBundlerClient extends BundlerClient {
   /**
    * Send UserOperation with Alchemy optimizations
    *
-   * @param userOp
+   * @param userOp - The complete signed UserOperation to submit
+   * @returns Result containing the user operation hash and wait function
    */
   async sendUserOperationWithAlchemy(userOp: UserOperation): Promise<UserOperationResult> {
     const packed = this.packUserOpForRpc(userOp);
@@ -253,7 +259,8 @@ export class AlchemyBundlerClient extends BundlerClient {
   /**
    * Pack partial UserOperation for estimation
    *
-   * @param userOp
+   * @param userOp - Partial UserOperation with sender and callData required
+   * @returns Packed UserOperation object for RPC calls
    */
   private packPartialUserOp(
     userOp: Partial<UserOperation> & { sender: Address; callData: Hex },
@@ -287,7 +294,8 @@ export class AlchemyBundlerClient extends BundlerClient {
   /**
    * Pack UserOperation for RPC
    *
-   * @param userOp
+   * @param userOp - The complete UserOperation to pack
+   * @returns Packed UserOperation object for RPC calls
    */
   private packUserOpForRpc(userOp: UserOperation): Record<string, unknown> {
     return {
@@ -306,7 +314,8 @@ export class AlchemyBundlerClient extends BundlerClient {
   /**
    * Convert bigint to hex
    *
-   * @param value
+   * @param value - The bigint value to convert
+   * @returns Hexadecimal string representation
    */
   private bigintToHex(value: bigint): Hex {
     return `0x${value.toString(16)}` as Hex;
@@ -315,8 +324,9 @@ export class AlchemyBundlerClient extends BundlerClient {
   /**
    * Make Alchemy RPC call
    *
-   * @param method
-   * @param params
+   * @param method - The RPC method name to call
+   * @param params - Array of parameters for the RPC call
+   * @returns The typed result from the RPC call
    */
   private async alchemyRpcCall<T>(method: string, params: unknown[]): Promise<T> {
     const response = await fetch(this.alchemyUrl, {
@@ -352,7 +362,8 @@ export class AlchemyBundlerClient extends BundlerClient {
 /**
  * Get Alchemy network name from chain ID
  *
- * @param chainId
+ * @param chainId - The chain ID to get the network name for
+ * @returns The Alchemy network identifier string
  */
 function getAlchemyNetwork(chainId: number): string {
   const networks: Record<number, string> = {
@@ -378,6 +389,8 @@ function getAlchemyNetwork(chainId: number): string {
 
 /**
  * Get dummy signature for estimation
+ *
+ * @returns A dummy signature hex string for gas estimation
  */
 function getDummySignature(): Hex {
   return "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c" as Hex;
@@ -386,7 +399,8 @@ function getDummySignature(): Hex {
 /**
  * Create an Alchemy bundler client
  *
- * @param config
+ * @param config - Alchemy bundler configuration including API key and chain ID
+ * @returns A new AlchemyBundlerClient instance
  */
 export function createAlchemyBundlerClient(config: AlchemyConfig): AlchemyBundlerClient {
   return new AlchemyBundlerClient(config);

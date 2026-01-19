@@ -106,8 +106,9 @@ export class GaslessT402Client {
   private readonly publicClient: PublicClient;
 
   /**
+   * Creates a new GaslessT402Client instance
    *
-   * @param config
+   * @param config - Configuration including signer, bundler, paymaster, and chain settings
    */
   constructor(config: GaslessClientConfig) {
     this.signer = config.signer;
@@ -125,7 +126,8 @@ export class GaslessT402Client {
    * - Sponsored by a paymaster (truly gasless)
    * - Paid from the smart account's balance
    *
-   * @param params
+   * @param params - Payment parameters including token, recipient, and amount
+   * @returns Result containing the user operation hash and wait function
    */
   async executePayment(params: GaslessPaymentParams): Promise<UserOperationResult> {
     // Build the call data based on whether we have an authorization
@@ -170,7 +172,8 @@ export class GaslessT402Client {
   /**
    * Execute multiple T402 payments in a single UserOperation
    *
-   * @param payments
+   * @param payments - Array of payment parameters to batch together
+   * @returns Result containing the user operation hash and wait function
    */
   async executeBatchPayments(payments: GaslessPaymentParams[]): Promise<UserOperationResult> {
     // Build transaction intents for all payments
@@ -211,7 +214,8 @@ export class GaslessT402Client {
   /**
    * Check if a payment can be sponsored (gasless)
    *
-   * @param params
+   * @param params - Payment parameters to check for sponsorship eligibility
+   * @returns True if the payment can be sponsored by the paymaster
    */
   async canSponsor(params: GaslessPaymentParams): Promise<boolean> {
     if (!this.paymaster) return false;
@@ -233,6 +237,8 @@ export class GaslessT402Client {
 
   /**
    * Get the smart account address
+   *
+   * @returns The address of the smart account
    */
   async getAccountAddress(): Promise<Address> {
     return this.signer.getAddress();
@@ -240,6 +246,8 @@ export class GaslessT402Client {
 
   /**
    * Check if the smart account is deployed
+   *
+   * @returns True if the smart account contract is deployed on-chain
    */
   async isAccountDeployed(): Promise<boolean> {
     return this.signer.isDeployed();
@@ -248,7 +256,8 @@ export class GaslessT402Client {
   /**
    * Build call data for a simple ERC20 transfer
    *
-   * @param params
+   * @param params - Payment parameters including recipient and amount
+   * @returns Encoded call data for ERC20 transfer function
    */
   private buildTransferCallData(params: GaslessPaymentParams): Hex {
     return encodeFunctionData({
@@ -261,7 +270,8 @@ export class GaslessT402Client {
   /**
    * Build call data for an authorized transfer (EIP-3009)
    *
-   * @param params
+   * @param params - Payment parameters including authorization signature
+   * @returns Encoded call data for transferWithAuthorization function
    */
   private buildAuthorizedTransferCallData(params: GaslessPaymentParams): Hex {
     if (!params.authorization) {
@@ -294,7 +304,8 @@ export class GaslessT402Client {
   /**
    * Estimate gas for a single transaction
    *
-   * @param intent
+   * @param intent - Transaction intent with target, value, and data
+   * @returns Gas estimates for the UserOperation
    */
   private async estimateGas(intent: TransactionIntent): Promise<GasEstimate> {
     const sender = await this.signer.getAddress();
@@ -318,7 +329,8 @@ export class GaslessT402Client {
   /**
    * Estimate gas for a batch transaction
    *
-   * @param intents
+   * @param intents - Array of transaction intents to batch
+   * @returns Gas estimates for the batched UserOperation
    */
   private async estimateBatchGas(intents: TransactionIntent[]): Promise<GasEstimate> {
     const sender = await this.signer.getAddress();
@@ -346,9 +358,10 @@ export class GaslessT402Client {
   /**
    * Get paymaster data if configured
    *
-   * @param _gasEstimate
+   * @param _ - Gas estimates (unused but kept for potential future use)
+   * @returns Paymaster data or undefined if no paymaster configured
    */
-  private async getPaymasterData(_gasEstimate: GasEstimate): Promise<
+  private async getPaymasterData(_: GasEstimate): Promise<
     | {
         paymaster: Address;
         paymasterVerificationGasLimit: bigint;
@@ -368,7 +381,8 @@ export class GaslessT402Client {
 /**
  * Create a GaslessT402Client instance
  *
- * @param config
+ * @param config - Configuration including signer, bundler, paymaster, and chain settings
+ * @returns A new GaslessT402Client instance
  */
 export function createGaslessT402Client(config: GaslessClientConfig): GaslessT402Client {
   return new GaslessT402Client(config);

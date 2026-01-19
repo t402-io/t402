@@ -50,8 +50,9 @@ export class PimlicoBundlerClient extends BundlerClient {
   private readonly pimlicoUrl: string;
 
   /**
+   * Creates a new Pimlico bundler client
    *
-   * @param config
+   * @param config - Pimlico bundler configuration including API key and chain ID
    */
   constructor(config: PimlicoConfig) {
     // Construct Pimlico bundler URL
@@ -71,6 +72,8 @@ export class PimlicoBundlerClient extends BundlerClient {
   /**
    * Get current gas prices from Pimlico
    * Returns slow, standard, and fast gas price estimates
+   *
+   * @returns Gas price estimates for slow, standard, and fast tiers
    */
   async getUserOperationGasPrice(): Promise<PimlicoGasPrice> {
     const result = await this.pimlicoRpcCall<{
@@ -99,8 +102,9 @@ export class PimlicoBundlerClient extends BundlerClient {
    * Send a compressed UserOperation for lower gas costs
    * Pimlico compresses the calldata before submitting to reduce L1 costs
    *
-   * @param userOp
-   * @param inflatorAddress
+   * @param userOp - The complete signed UserOperation to submit
+   * @param inflatorAddress - Address of the inflator contract for decompression
+   * @returns Result containing the user operation hash and wait function
    */
   async sendCompressedUserOperation(
     userOp: UserOperation,
@@ -123,7 +127,8 @@ export class PimlicoBundlerClient extends BundlerClient {
   /**
    * Get user operation status from Pimlico
    *
-   * @param userOpHash
+   * @param userOpHash - The hash of the UserOperation to check
+   * @returns Status information including current state and transaction hash if included
    */
   async getUserOperationStatus(userOpHash: Hex): Promise<{
     status:
@@ -157,8 +162,9 @@ export class PimlicoBundlerClient extends BundlerClient {
   /**
    * Estimate gas with Pimlico-specific optimizations
    *
-   * @param userOp
-   * @param stateOverride
+   * @param userOp - Partial UserOperation with sender and callData required
+   * @param stateOverride - Optional state overrides for simulation
+   * @returns Gas estimates for the UserOperation
    */
   async estimateUserOperationGasWithPimlico(
     userOp: Partial<UserOperation> & {
@@ -216,7 +222,8 @@ export class PimlicoBundlerClient extends BundlerClient {
   /**
    * Pack UserOperation for RPC
    *
-   * @param userOp
+   * @param userOp - The complete UserOperation to pack
+   * @returns Packed UserOperation object for RPC calls
    */
   private packUserOpForRpc(userOp: UserOperation): Record<string, unknown> {
     return {
@@ -235,7 +242,8 @@ export class PimlicoBundlerClient extends BundlerClient {
   /**
    * Convert bigint to hex
    *
-   * @param value
+   * @param value - The bigint value to convert
+   * @returns Hexadecimal string representation
    */
   private bigintToHex(value: bigint): Hex {
     return `0x${value.toString(16)}` as Hex;
@@ -244,8 +252,9 @@ export class PimlicoBundlerClient extends BundlerClient {
   /**
    * Make Pimlico-specific RPC call
    *
-   * @param method
-   * @param params
+   * @param method - The RPC method name to call
+   * @param params - Array of parameters for the RPC call
+   * @returns The typed result from the RPC call
    */
   private async pimlicoRpcCall<T>(method: string, params: unknown[]): Promise<T> {
     const response = await fetch(this.pimlicoUrl, {
@@ -281,7 +290,8 @@ export class PimlicoBundlerClient extends BundlerClient {
 /**
  * Create a Pimlico bundler client
  *
- * @param config
+ * @param config - Pimlico bundler configuration including API key and chain ID
+ * @returns A new PimlicoBundlerClient instance
  */
 export function createPimlicoBundlerClient(config: PimlicoConfig): PimlicoBundlerClient {
   return new PimlicoBundlerClient(config);

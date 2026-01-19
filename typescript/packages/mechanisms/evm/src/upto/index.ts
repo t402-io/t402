@@ -19,7 +19,7 @@
  * });
  * ```
  *
- * @packageDocumentation
+ * @module
  */
 
 // Client exports

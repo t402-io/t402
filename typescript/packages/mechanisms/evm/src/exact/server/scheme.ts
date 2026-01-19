@@ -32,11 +32,31 @@ export class ExactEvmScheme implements SchemeNetworkServer {
   private config: ExactEvmSchemeConfig;
 
   /**
+   * Creates a new ExactEvmScheme instance.
    *
-   * @param config
+   * @param config - Optional configuration options for the scheme
    */
   constructor(config: ExactEvmSchemeConfig = {}) {
     this.config = config;
+  }
+
+  /**
+   * Get all supported networks
+   *
+   * @returns Array of network identifiers in CAIP-2 format
+   */
+  static getSupportedNetworks(): string[] {
+    return Object.keys(TOKEN_REGISTRY);
+  }
+
+  /**
+   * Check if a network is supported
+   *
+   * @param network - The network identifier to check
+   * @returns True if the network is supported
+   */
+  static isNetworkSupported(network: string): boolean {
+    return network in TOKEN_REGISTRY;
   }
 
   /**
@@ -234,21 +254,5 @@ export class ExactEvmScheme implements SchemeNetworkServer {
     }
     // Default to 6 decimals (USDC/USDT standard)
     return 6;
-  }
-
-  /**
-   * Get all supported networks
-   */
-  static getSupportedNetworks(): string[] {
-    return Object.keys(TOKEN_REGISTRY);
-  }
-
-  /**
-   * Check if a network is supported
-   *
-   * @param network
-   */
-  static isNetworkSupported(network: string): boolean {
-    return network in TOKEN_REGISTRY;
   }
 }

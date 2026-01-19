@@ -183,6 +183,25 @@ export class Usdt0Bridge {
   }
 
   /**
+   * Get all supported destination chains from current chain
+   *
+   * @returns Array of supported destination chain names
+   */
+  getSupportedDestinations(): string[] {
+    return getBridgeableChains().filter(chain => chain !== this.chain);
+  }
+
+  /**
+   * Check if a destination chain is supported
+   *
+   * @param toChain - The destination chain to check
+   * @returns True if the destination chain is supported
+   */
+  supportsDestination(toChain: string): boolean {
+    return toChain !== this.chain && supportsBridging(toChain);
+  }
+
+  /**
    * Extract LayerZero message GUID from OFTSent event logs
    *
    * @param receipt - Transaction receipt with logs
@@ -206,8 +225,8 @@ export class Usdt0Bridge {
   /**
    * Ensure sufficient token allowance for the OFT contract
    *
-   * @param oftAddress
-   * @param amount
+   * @param oftAddress - The OFT contract address
+   * @param amount - The amount to approve
    */
   private async ensureAllowance(oftAddress: Address, amount: bigint): Promise<void> {
     // Check current allowance
@@ -234,7 +253,8 @@ export class Usdt0Bridge {
   /**
    * Build SendParam struct for LayerZero
    *
-   * @param params
+   * @param params - Bridge parameters
+   * @returns SendParam struct for the OFT contract
    */
   private buildSendParam(params: BridgeQuoteParams | BridgeExecuteParams): SendParam {
     const dstEid = getEndpointId(params.toChain);
@@ -264,7 +284,7 @@ export class Usdt0Bridge {
   /**
    * Validate bridge parameters
    *
-   * @param params
+   * @param params - Bridge parameters to validate
    */
   private validateBridgeParams(params: BridgeQuoteParams): void {
     if (params.fromChain !== this.chain) {
@@ -289,29 +309,14 @@ export class Usdt0Bridge {
       throw new Error("Amount must be greater than 0");
     }
   }
-
-  /**
-   * Get all supported destination chains from current chain
-   */
-  getSupportedDestinations(): string[] {
-    return getBridgeableChains().filter(chain => chain !== this.chain);
-  }
-
-  /**
-   * Check if a destination chain is supported
-   *
-   * @param toChain
-   */
-  supportsDestination(toChain: string): boolean {
-    return toChain !== this.chain && supportsBridging(toChain);
-  }
 }
 
 /**
  * Create a bridge client for a specific chain
  *
- * @param signer
- * @param chain
+ * @param signer - Wallet signer with read/write capabilities
+ * @param chain - Source chain name
+ * @returns New Usdt0Bridge instance
  */
 export function createUsdt0Bridge(signer: BridgeSigner, chain: string): Usdt0Bridge {
   return new Usdt0Bridge(signer, chain);

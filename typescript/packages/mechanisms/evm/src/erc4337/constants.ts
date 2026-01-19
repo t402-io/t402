@@ -190,8 +190,9 @@ export enum PaymasterType {
 /**
  * Pack verification and call gas limits into bytes32
  *
- * @param verificationGasLimit
- * @param callGasLimit
+ * @param verificationGasLimit - The verification gas limit
+ * @param callGasLimit - The call gas limit
+ * @returns Packed bytes32 with gas limits
  */
 export function packAccountGasLimits(
   verificationGasLimit: bigint,
@@ -207,7 +208,8 @@ export function packAccountGasLimits(
 /**
  * Unpack account gas limits from bytes32
  *
- * @param packed
+ * @param packed - The packed bytes32 containing gas limits
+ * @returns Object containing verificationGasLimit and callGasLimit
  */
 export function unpackAccountGasLimits(packed: `0x${string}`): {
   verificationGasLimit: bigint;
@@ -225,8 +227,9 @@ export function unpackAccountGasLimits(packed: `0x${string}`): {
 /**
  * Pack max priority fee and max fee per gas into bytes32
  *
- * @param maxPriorityFeePerGas
- * @param maxFeePerGas
+ * @param maxPriorityFeePerGas - The max priority fee per gas (tip)
+ * @param maxFeePerGas - The max fee per gas
+ * @returns Packed bytes32 with gas fees
  */
 export function packGasFees(maxPriorityFeePerGas: bigint, maxFeePerGas: bigint): `0x${string}` {
   const priorityHex = maxPriorityFeePerGas.toString(16).padStart(32, "0");
@@ -237,7 +240,8 @@ export function packGasFees(maxPriorityFeePerGas: bigint, maxFeePerGas: bigint):
 /**
  * Unpack gas fees from bytes32
  *
- * @param packed
+ * @param packed - The packed bytes32 containing gas fees
+ * @returns Object containing maxPriorityFeePerGas and maxFeePerGas
  */
 export function unpackGasFees(packed: `0x${string}`): {
   maxPriorityFeePerGas: bigint;
