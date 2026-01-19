@@ -1,4 +1,4 @@
-# X402 Protocol Specification
+# T402 Protocol Specification
 
 **Protocol Version**: 2
 

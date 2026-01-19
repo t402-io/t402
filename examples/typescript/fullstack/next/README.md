@@ -102,14 +102,14 @@ export const config = {
 };
 ```
 
-### Weather API Route (using withX402)
+### Weather API Route (using withT402)
 
-The `/api/weather` route demonstrates the `withX402` wrapper for individual API routes:
+The `/api/weather` route demonstrates the `withT402` wrapper for individual API routes:
 
 ```typescript
 // app/api/weather/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { withX402 } from "@t402/next";
+import { withT402 } from "@t402/next";
 import { server, paywall, evmAddress, svmAddress } from "../../../proxy";
 
 const handler = async (_: NextRequest) => {
@@ -121,7 +121,7 @@ const handler = async (_: NextRequest) => {
   });
 };
 
-export const GET = withX402(
+export const GET = withT402(
   handler,
   {
     accepts: [
@@ -223,16 +223,16 @@ The `PAYMENT-RESPONSE` header contains base64-encoded JSON with the settlement d
 }
 ```
 
-## paymentProxy vs withX402
+## paymentProxy vs withT402
 
 The `paymentProxy` function is used to protect page routes. It can also protect API routes, however this will charge clients for failed API responses.
 
-The `withX402` function wraps API route handlers. This is the recommended approach to protect API routes as it guarantees payment settlement only AFTER successful API responses (status < 400).
+The `withT402` function wraps API route handlers. This is the recommended approach to protect API routes as it guarantees payment settlement only AFTER successful API responses (status < 400).
 
 | Approach | Use Case |
 |----------|----------|
 | `paymentProxy` | Protecting page routes or multiple routes with a single configuration |
-| `withX402` | Protecting individual API routes where you need precise control over settlement timing |
+| `withT402` | Protecting individual API routes where you need precise control over settlement timing |
 
 ## Extending the Example
 

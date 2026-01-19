@@ -24,14 +24,14 @@
     {
       "path": "/api/protected-witht402",
       "method": "GET",
-      "description": "Protected endpoint using withX402 wrapper",
+      "description": "Protected endpoint using withT402 wrapper",
       "requiresPayment": true,
       "protocolFamily": "evm"
     },
     {
       "path": "/api/protected-svm-witht402",
       "method": "GET",
-      "description": "Protected endpoint using withX402 wrapper on SVM",
+      "description": "Protected endpoint using withT402 wrapper on SVM",
       "requiresPayment": true,
       "protocolFamily": "svm"
     },

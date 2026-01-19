@@ -36,7 +36,7 @@ import (
     "github.com/t402-io/t402/go/mechanisms/solana/v1"
 )
 
-client := t402.NewX402Client()
+client := t402.NewT402Client()
 signer := &MySolanaSigner{...}
 
 // Register for V1 networks
@@ -51,7 +51,7 @@ import (
     "github.com/t402-io/t402/go/mechanisms/solana/v1"
 )
 
-facilitator := t402.NewX402Facilitator()
+facilitator := t402.NewT402Facilitator()
 signer := &MyFacilitatorSigner{...}
 
 // Register for V1 networks

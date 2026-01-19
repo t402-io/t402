@@ -1,4 +1,4 @@
-# X402 Protocol Specification
+# T402 Protocol Specification
 
 > **DEPRECATED**: This is the v1 protocol specification. For new implementations, please use [t402-specification-v2.md](t402-specification-v2.md) instead.
 

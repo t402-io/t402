@@ -65,7 +65,7 @@ routes := t402http.RoutesConfig{
 }
 
 // Apply payment middleware
-r.Use(ginmw.X402Payment(ginmw.Config{
+r.Use(ginmw.T402Payment(ginmw.Config{
     Routes:      routes,
     Facilitator: facilitatorClient,
     Schemes: []ginmw.SchemeConfig{
