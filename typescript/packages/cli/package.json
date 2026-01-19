@@ -2,7 +2,14 @@
   "name": "@t402/cli",
   "version": "2.0.0",
   "description": "Command-line interface for the T402 payment protocol",
-  "keywords": ["t402", "usdt", "payment", "cli", "tether", "wdk"],
+  "keywords": [
+    "t402",
+    "usdt",
+    "payment",
+    "cli",
+    "tether",
+    "wdk"
+  ],
   "license": "Apache-2.0",
   "author": "T402 Contributors",
   "type": "module",
@@ -19,7 +26,9 @@
   "bin": {
     "t402": "./dist/esm/bin.js"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "clean": "rm -rf dist",
@@ -41,10 +50,11 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
+    "glob": "^13.0.0",
     "tsup": "^8.5.0",
     "typescript": "^5.8.0",
     "vite-tsconfig-paths": "^5.1.0",
-    "vitest": "^3.1.0"
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": ">=18"
