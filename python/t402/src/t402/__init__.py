@@ -290,6 +290,7 @@ from t402.fastapi import (
     settle_payment,
 )
 
+
 def hello() -> str:
     return "Hello from t402!"
 

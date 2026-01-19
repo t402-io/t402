@@ -52,6 +52,7 @@ TON_RAW_ADDRESS_REGEX = re.compile(r"^-?[0-9]:[a-fA-F0-9]{64}$")
 
 class JettonConfig(TypedDict):
     """Configuration for a Jetton token."""
+
     master_address: str
     symbol: str
     name: str
@@ -60,6 +61,7 @@ class JettonConfig(TypedDict):
 
 class NetworkConfig(TypedDict):
     """Configuration for a TON network."""
+
     name: str
     endpoint: str
     is_testnet: bool
@@ -250,7 +252,9 @@ def get_default_asset(network: str) -> Optional[JettonConfig]:
     return None
 
 
-def get_asset_info(network: str, asset_symbol_or_address: str) -> Optional[JettonConfig]:
+def get_asset_info(
+    network: str, asset_symbol_or_address: str
+) -> Optional[JettonConfig]:
     """
     Get asset information by symbol or address.
 

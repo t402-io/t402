@@ -4,43 +4,35 @@
  * Type definitions for gasless payments using Tether WDK and ERC-4337.
  */
 
-import type { Address, Hex, PublicClient } from "viem";
-import type {
-  SmartAccountSigner,
-  BundlerConfig,
-  PaymasterConfig,
-} from "@t402/evm";
+import type { Address, Hex, PublicClient } from 'viem'
+import type { SmartAccountSigner, BundlerConfig, PaymasterConfig } from '@t402/evm'
 
 /**
  * WDK account interface (compatible with @tetherto/wdk)
  */
 export interface WdkAccount {
   /** Get the account's address */
-  getAddress(): Promise<string>;
+  getAddress(): Promise<string>
   /** Get the account's native balance */
-  getBalance(): Promise<bigint>;
+  getBalance(): Promise<bigint>
   /** Get the account's token balance */
-  getTokenBalance(tokenAddress: string): Promise<bigint>;
+  getTokenBalance(tokenAddress: string): Promise<bigint>
   /** Sign a message */
-  signMessage(message: string): Promise<string>;
+  signMessage(message: string): Promise<string>
   /** Sign typed data (EIP-712) */
   signTypedData(params: {
     domain: {
-      name?: string;
-      version?: string;
-      chainId?: number;
-      verifyingContract?: string;
-    };
-    types: Record<string, Array<{ name: string; type: string }>>;
-    primaryType: string;
-    message: Record<string, unknown>;
-  }): Promise<string>;
+      name?: string
+      version?: string
+      chainId?: number
+      verifyingContract?: string
+    }
+    types: Record<string, Array<{ name: string; type: string }>>
+    primaryType: string
+    message: Record<string, unknown>
+  }): Promise<string>
   /** Send a transaction */
-  sendTransaction(params: {
-    to: string;
-    value?: bigint;
-    data?: string;
-  }): Promise<string>;
+  sendTransaction(params: { to: string; value?: bigint; data?: string }): Promise<string>
 }
 
 /**
@@ -48,9 +40,9 @@ export interface WdkAccount {
  */
 export interface WdkInstance {
   /** Get accounts */
-  getAccounts(): WdkAccount[];
+  getAccounts(): WdkAccount[]
   /** Get account by index */
-  getAccount(index: number): WdkAccount;
+  getAccount(index: number): WdkAccount
 }
 
 /**
@@ -58,17 +50,17 @@ export interface WdkInstance {
  */
 export interface WdkSmartAccountConfig {
   /** WDK account to use as the signer */
-  wdkAccount: WdkAccount;
+  wdkAccount: WdkAccount
   /** Public client for chain interactions */
-  publicClient: PublicClient;
+  publicClient: PublicClient
   /** Chain ID */
-  chainId: number;
+  chainId: number
   /** Additional owners for multi-sig (optional) */
-  additionalOwners?: Address[];
+  additionalOwners?: Address[]
   /** Threshold for multi-sig (defaults to 1) */
-  threshold?: number;
+  threshold?: number
   /** Salt nonce for address generation (defaults to 0) */
-  saltNonce?: bigint;
+  saltNonce?: bigint
 }
 
 /**
@@ -76,15 +68,15 @@ export interface WdkSmartAccountConfig {
  */
 export interface WdkGaslessClientConfig {
   /** WDK smart account signer */
-  signer: SmartAccountSigner;
+  signer: SmartAccountSigner
   /** Bundler configuration */
-  bundler: BundlerConfig;
+  bundler: BundlerConfig
   /** Paymaster configuration for gas sponsorship */
-  paymaster?: PaymasterConfig;
+  paymaster?: PaymasterConfig
   /** Chain ID */
-  chainId: number;
+  chainId: number
   /** Public client */
-  publicClient: PublicClient;
+  publicClient: PublicClient
 }
 
 /**
@@ -92,11 +84,11 @@ export interface WdkGaslessClientConfig {
  */
 export interface GaslessPaymentParams {
   /** Recipient address */
-  to: Address;
+  to: Address
   /** Amount to send (in token decimals, e.g., 1000000 for 1 USDT) */
-  amount: bigint;
+  amount: bigint
   /** Token to send (defaults to USDT0) */
-  token?: "USDT0" | "USDC" | Address;
+  token?: 'USDT0' | 'USDC' | Address
 }
 
 /**
@@ -106,12 +98,12 @@ export interface BatchPaymentParams {
   /** List of payments to execute */
   payments: Array<{
     /** Recipient address */
-    to: Address;
+    to: Address
     /** Amount to send */
-    amount: bigint;
+    amount: bigint
     /** Token to send (defaults to USDT0) */
-    token?: "USDT0" | "USDC" | Address;
-  }>;
+    token?: 'USDT0' | 'USDC' | Address
+  }>
 }
 
 /**
@@ -119,13 +111,13 @@ export interface BatchPaymentParams {
  */
 export interface GaslessPaymentResult {
   /** UserOperation hash */
-  userOpHash: Hex;
+  userOpHash: Hex
   /** Smart account address */
-  sender: Address;
+  sender: Address
   /** Whether the payment was sponsored (free gas) */
-  sponsored: boolean;
+  sponsored: boolean
   /** Wait for the operation to be included */
-  wait(): Promise<GaslessPaymentReceipt>;
+  wait(): Promise<GaslessPaymentReceipt>
 }
 
 /**
@@ -133,19 +125,19 @@ export interface GaslessPaymentResult {
  */
 export interface GaslessPaymentReceipt {
   /** UserOperation hash */
-  userOpHash: Hex;
+  userOpHash: Hex
   /** Transaction hash (on-chain) */
-  txHash: Hex;
+  txHash: Hex
   /** Block number */
-  blockNumber: bigint;
+  blockNumber: bigint
   /** Whether the payment succeeded */
-  success: boolean;
+  success: boolean
   /** Gas used (in native token) */
-  gasUsed: bigint;
+  gasUsed: bigint
   /** Gas cost (in native token wei) */
-  gasCost: bigint;
+  gasCost: bigint
   /** Revert reason if failed */
-  reason?: string;
+  reason?: string
 }
 
 /**
@@ -153,11 +145,11 @@ export interface GaslessPaymentReceipt {
  */
 export interface SponsorshipInfo {
   /** Whether the payment can be sponsored */
-  canSponsor: boolean;
+  canSponsor: boolean
   /** Reason if cannot sponsor */
-  reason?: string;
+  reason?: string
   /** Maximum amount that can be sponsored (if applicable) */
-  maxAmount?: bigint;
+  maxAmount?: bigint
   /** Estimated gas cost if not sponsored */
-  estimatedGasCost?: bigint;
+  estimatedGasCost?: bigint
 }

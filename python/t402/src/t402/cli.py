@@ -10,6 +10,7 @@ Usage:
     t402 decode <base64-string>
     t402 version
 """
+
 from __future__ import annotations
 
 import argparse

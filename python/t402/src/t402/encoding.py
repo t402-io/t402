@@ -88,7 +88,9 @@ def is_valid_base64(data: str) -> bool:
 # =============================================================================
 
 
-def encode_payment_signature_header(payment_payload: Union[PaymentPayloadV1, PaymentPayloadV2, dict]) -> str:
+def encode_payment_signature_header(
+    payment_payload: Union[PaymentPayloadV1, PaymentPayloadV2, dict],
+) -> str:
     """Encode a payment payload as a base64 header value.
 
     Works with both V1 and V2 payment payloads.
@@ -129,7 +131,9 @@ def decode_payment_signature_header(header_value: str) -> dict[str, Any]:
         raise ValueError(f"Invalid payment signature header: invalid JSON - {e}")
 
 
-def encode_payment_required_header(payment_required: Union[PaymentRequiredV2, dict]) -> str:
+def encode_payment_required_header(
+    payment_required: Union[PaymentRequiredV2, dict],
+) -> str:
     """Encode a payment required object as a base64 header value.
 
     Args:
@@ -314,7 +318,9 @@ def extract_payment_required_from_response(
     # Check V2 header first
     if "payment-required" in lower_headers:
         try:
-            return T402_VERSION_V2, decode_payment_required_header(lower_headers["payment-required"])
+            return T402_VERSION_V2, decode_payment_required_header(
+                lower_headers["payment-required"]
+            )
         except ValueError:
             pass
 

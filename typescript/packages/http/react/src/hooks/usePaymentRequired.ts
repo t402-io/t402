@@ -1,25 +1,25 @@
-import { useState, useCallback } from "react";
-import type { PaymentRequired } from "@t402/core/types";
-import type { PaymentStatus } from "../types/index.js";
+import { useState, useCallback } from 'react'
+import type { PaymentRequired } from '@t402/core/types'
+import type { PaymentStatus } from '../types/index.js'
 
 interface UsePaymentRequiredOptions {
   /** Callback when payment is successful */
-  onSuccess?: (response: Response) => void;
+  onSuccess?: (response: Response) => void
   /** Callback when payment fails */
-  onError?: (error: Error) => void;
+  onError?: (error: Error) => void
 }
 
 interface UsePaymentRequiredResult {
   /** The payment required data from a 402 response */
-  paymentRequired: PaymentRequired | null;
+  paymentRequired: PaymentRequired | null
   /** Current status of the fetch operation */
-  status: PaymentStatus;
+  status: PaymentStatus
   /** Error message if status is 'error' */
-  error: string | null;
+  error: string | null
   /** Fetch a resource and capture 402 response */
-  fetchResource: (url: string, options?: RequestInit) => Promise<Response | null>;
+  fetchResource: (url: string, options?: RequestInit) => Promise<Response | null>
   /** Reset the state */
-  reset: () => void;
+  reset: () => void
 }
 
 /**
@@ -53,52 +53,54 @@ interface UsePaymentRequiredResult {
  * }
  * ```
  */
-export function usePaymentRequired(options: UsePaymentRequiredOptions = {}): UsePaymentRequiredResult {
-  const { onSuccess, onError } = options;
+export function usePaymentRequired(
+  options: UsePaymentRequiredOptions = {},
+): UsePaymentRequiredResult {
+  const { onSuccess, onError } = options
 
-  const [paymentRequired, setPaymentRequired] = useState<PaymentRequired | null>(null);
-  const [status, setStatus] = useState<PaymentStatus>("idle");
-  const [error, setError] = useState<string | null>(null);
+  const [paymentRequired, setPaymentRequired] = useState<PaymentRequired | null>(null)
+  const [status, setStatus] = useState<PaymentStatus>('idle')
+  const [error, setError] = useState<string | null>(null)
 
   const fetchResource = useCallback(
     async (url: string, fetchOptions?: RequestInit): Promise<Response | null> => {
-      setStatus("loading");
-      setError(null);
-      setPaymentRequired(null);
+      setStatus('loading')
+      setError(null)
+      setPaymentRequired(null)
 
       try {
-        const response = await fetch(url, fetchOptions);
+        const response = await fetch(url, fetchOptions)
 
         if (response.status === 402) {
-          const data = (await response.json()) as PaymentRequired;
-          setPaymentRequired(data);
-          setStatus("idle");
-          return null;
+          const data = (await response.json()) as PaymentRequired
+          setPaymentRequired(data)
+          setStatus('idle')
+          return null
         }
 
         if (response.ok) {
-          setStatus("success");
-          onSuccess?.(response);
-          return response;
+          setStatus('success')
+          onSuccess?.(response)
+          return response
         }
 
-        throw new Error(`Request failed with status ${response.status}`);
+        throw new Error(`Request failed with status ${response.status}`)
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Unknown error";
-        setError(errorMessage);
-        setStatus("error");
-        onError?.(err instanceof Error ? err : new Error(errorMessage));
-        return null;
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+        setError(errorMessage)
+        setStatus('error')
+        onError?.(err instanceof Error ? err : new Error(errorMessage))
+        return null
       }
     },
     [onSuccess, onError],
-  );
+  )
 
   const reset = useCallback(() => {
-    setPaymentRequired(null);
-    setStatus("idle");
-    setError(null);
-  }, []);
+    setPaymentRequired(null)
+    setStatus('idle')
+    setError(null)
+  }, [])
 
   return {
     paymentRequired,
@@ -106,5 +108,5 @@ export function usePaymentRequired(options: UsePaymentRequiredOptions = {}): Use
     error,
     fetchResource,
     reset,
-  };
+  }
 }

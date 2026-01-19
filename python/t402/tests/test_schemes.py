@@ -7,8 +7,6 @@ from t402 import (
     # Interfaces
     SchemeNetworkClient,
     SchemeNetworkServer,
-    SchemeNetworkFacilitator,
-    # Registry
     SchemeRegistry,
     ClientSchemeRegistry,
     ServerSchemeRegistry,
@@ -23,18 +21,10 @@ from t402 import (
     # TON Schemes
     ExactTonClientScheme,
     ExactTonServerScheme,
-    TonSigner,
-    # TRON Schemes
     ExactTronClientScheme,
     ExactTronServerScheme,
-    TronSigner,
-    # Types
     T402_VERSION_V1,
     T402_VERSION_V2,
-    TON_MAINNET,
-    TON_TESTNET,
-    TRON_MAINNET,
-    TRON_NILE,
 )
 
 
@@ -485,7 +475,9 @@ class TestProtocolCompliance:
 class TestExactTonClientScheme:
     """Test ExactTonClientScheme."""
 
-    def create_mock_signer(self, address="EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs"):
+    def create_mock_signer(
+        self, address="EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs"
+    ):
         """Create a mock TON signer."""
         signer = MagicMock()
         signer.address = address
@@ -502,8 +494,10 @@ class TestExactTonClientScheme:
 
     def create_mock_resolver(self, wallet_address="EQWalletAddress"):
         """Create a mock Jetton wallet resolver."""
+
         async def resolver(owner: str, jetton_master: str) -> str:
             return wallet_address
+
         return resolver
 
     def test_scheme_name(self):
@@ -805,11 +799,13 @@ class TestExactTronClientScheme:
         signer.address = address
 
         # Mock get_block_info
-        signer.get_block_info = AsyncMock(return_value={
-            "ref_block_bytes": "abcd",
-            "ref_block_hash": "12345678",
-            "expiration": 1700000000000,
-        })
+        signer.get_block_info = AsyncMock(
+            return_value={
+                "ref_block_bytes": "abcd",
+                "ref_block_hash": "12345678",
+                "expiration": 1700000000000,
+            }
+        )
 
         # Mock sign_transaction
         signer.sign_transaction = AsyncMock(return_value="0a020a2022080a...")

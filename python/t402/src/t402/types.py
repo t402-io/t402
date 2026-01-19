@@ -406,7 +406,9 @@ class SupportedResponse(BaseModel):
 
     kinds: list[SupportedKind]
     extensions: list[str] = Field(default_factory=list)
-    signers: dict[str, list[str]] = Field(default_factory=dict)  # CAIP family → addresses
+    signers: dict[str, list[str]] = Field(
+        default_factory=dict
+    )  # CAIP family → addresses
 
     model_config = ConfigDict(
         alias_generator=to_camel,

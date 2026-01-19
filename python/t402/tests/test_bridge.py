@@ -1,8 +1,7 @@
 """Tests for USDT0 Bridge module."""
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
-from dataclasses import dataclass
+from unittest.mock import patch
 
 from t402.bridge import (
     # Client
@@ -405,12 +404,14 @@ class TestUsdt0Bridge:
         signer = MockBridgeSigner()
         bridge = Usdt0Bridge(signer, "arbitrum")
 
-        quote = await bridge.quote(BridgeQuoteParams(
-            from_chain="arbitrum",
-            to_chain="ethereum",
-            amount=100_000000,
-            recipient="0x1234567890abcdef1234567890abcdef12345678",
-        ))
+        quote = await bridge.quote(
+            BridgeQuoteParams(
+                from_chain="arbitrum",
+                to_chain="ethereum",
+                amount=100_000000,
+                recipient="0x1234567890abcdef1234567890abcdef12345678",
+            )
+        )
 
         assert quote.native_fee > 0
         assert quote.amount_to_send == 100_000000
@@ -424,12 +425,14 @@ class TestUsdt0Bridge:
         bridge = Usdt0Bridge(signer, "arbitrum")
 
         with pytest.raises(ValueError, match="Source chain mismatch"):
-            await bridge.quote(BridgeQuoteParams(
-                from_chain="ethereum",  # wrong source
-                to_chain="ink",
-                amount=100_000000,
-                recipient="0x1234567890abcdef1234567890abcdef12345678",
-            ))
+            await bridge.quote(
+                BridgeQuoteParams(
+                    from_chain="ethereum",  # wrong source
+                    to_chain="ink",
+                    amount=100_000000,
+                    recipient="0x1234567890abcdef1234567890abcdef12345678",
+                )
+            )
 
     @pytest.mark.asyncio
     async def test_quote_same_chain(self):
@@ -438,12 +441,14 @@ class TestUsdt0Bridge:
         bridge = Usdt0Bridge(signer, "arbitrum")
 
         with pytest.raises(ValueError, match="must be different"):
-            await bridge.quote(BridgeQuoteParams(
-                from_chain="arbitrum",
-                to_chain="arbitrum",
-                amount=100_000000,
-                recipient="0x1234567890abcdef1234567890abcdef12345678",
-            ))
+            await bridge.quote(
+                BridgeQuoteParams(
+                    from_chain="arbitrum",
+                    to_chain="arbitrum",
+                    amount=100_000000,
+                    recipient="0x1234567890abcdef1234567890abcdef12345678",
+                )
+            )
 
     @pytest.mark.asyncio
     async def test_quote_zero_amount(self):
@@ -452,12 +457,14 @@ class TestUsdt0Bridge:
         bridge = Usdt0Bridge(signer, "arbitrum")
 
         with pytest.raises(ValueError, match="greater than 0"):
-            await bridge.quote(BridgeQuoteParams(
-                from_chain="arbitrum",
-                to_chain="ethereum",
-                amount=0,
-                recipient="0x1234567890abcdef1234567890abcdef12345678",
-            ))
+            await bridge.quote(
+                BridgeQuoteParams(
+                    from_chain="arbitrum",
+                    to_chain="ethereum",
+                    amount=0,
+                    recipient="0x1234567890abcdef1234567890abcdef12345678",
+                )
+            )
 
     @pytest.mark.asyncio
     async def test_send(self):
@@ -465,12 +472,14 @@ class TestUsdt0Bridge:
         signer = MockBridgeSigner()
         bridge = Usdt0Bridge(signer, "arbitrum")
 
-        result = await bridge.send(BridgeExecuteParams(
-            from_chain="arbitrum",
-            to_chain="ethereum",
-            amount=100_000000,
-            recipient="0x1234567890abcdef1234567890abcdef12345678",
-        ))
+        result = await bridge.send(
+            BridgeExecuteParams(
+                from_chain="arbitrum",
+                to_chain="ethereum",
+                amount=100_000000,
+                recipient="0x1234567890abcdef1234567890abcdef12345678",
+            )
+        )
 
         assert result.tx_hash is not None
         assert result.message_guid is not None
@@ -511,7 +520,7 @@ class TestLayerZeroScanClient:
         """Test is_delivered returns False for unknown message."""
         client = LayerZeroScanClient()
 
-        with patch.object(client, 'get_message', side_effect=ValueError("not found")):
+        with patch.object(client, "get_message", side_effect=ValueError("not found")):
             result = await client.is_delivered("0xunknown")
             assert result is False
 
@@ -565,13 +574,15 @@ class TestCrossChainPaymentRouter:
         signer = MockBridgeSigner()
         router = CrossChainPaymentRouter(signer, "arbitrum")
 
-        result = await router.route_payment(CrossChainPaymentParams(
-            source_chain="arbitrum",
-            destination_chain="ethereum",
-            amount=100_000000,
-            pay_to="0x1234567890abcdef1234567890abcdef12345678",
-            payer="0x5678567856785678567856785678567856785678",
-        ))
+        result = await router.route_payment(
+            CrossChainPaymentParams(
+                source_chain="arbitrum",
+                destination_chain="ethereum",
+                amount=100_000000,
+                pay_to="0x1234567890abcdef1234567890abcdef12345678",
+                payer="0x5678567856785678567856785678567856785678",
+            )
+        )
 
         assert result.bridge_tx_hash is not None
         assert result.message_guid is not None
@@ -585,13 +596,15 @@ class TestCrossChainPaymentRouter:
         router = CrossChainPaymentRouter(signer, "arbitrum")
 
         with pytest.raises(ValueError, match="Source chain mismatch"):
-            await router.route_payment(CrossChainPaymentParams(
-                source_chain="ethereum",  # wrong
-                destination_chain="arbitrum",
-                amount=100_000000,
-                pay_to="0x1234567890abcdef1234567890abcdef12345678",
-                payer="0x5678567856785678567856785678567856785678",
-            ))
+            await router.route_payment(
+                CrossChainPaymentParams(
+                    source_chain="ethereum",  # wrong
+                    destination_chain="arbitrum",
+                    amount=100_000000,
+                    pay_to="0x1234567890abcdef1234567890abcdef12345678",
+                    payer="0x5678567856785678567856785678567856785678",
+                )
+            )
 
     @pytest.mark.asyncio
     async def test_route_payment_invalid_route(self):
@@ -600,13 +613,15 @@ class TestCrossChainPaymentRouter:
         router = CrossChainPaymentRouter(signer, "arbitrum")
 
         with pytest.raises(ValueError, match="Cannot route"):
-            await router.route_payment(CrossChainPaymentParams(
-                source_chain="arbitrum",
-                destination_chain="nonexistent",
-                amount=100_000000,
-                pay_to="0x1234",
-                payer="0x5678",
-            ))
+            await router.route_payment(
+                CrossChainPaymentParams(
+                    source_chain="arbitrum",
+                    destination_chain="nonexistent",
+                    amount=100_000000,
+                    pay_to="0x1234",
+                    payer="0x5678",
+                )
+            )
 
     @pytest.mark.asyncio
     async def test_estimate_fees(self):
@@ -614,13 +629,15 @@ class TestCrossChainPaymentRouter:
         signer = MockBridgeSigner()
         router = CrossChainPaymentRouter(signer, "arbitrum")
 
-        quote = await router.estimate_fees(CrossChainPaymentParams(
-            source_chain="arbitrum",
-            destination_chain="ethereum",
-            amount=100_000000,
-            pay_to="0x1234567890abcdef1234567890abcdef12345678",
-            payer="0x5678567856785678567856785678567856785678",
-        ))
+        quote = await router.estimate_fees(
+            CrossChainPaymentParams(
+                source_chain="arbitrum",
+                destination_chain="ethereum",
+                amount=100_000000,
+                pay_to="0x1234567890abcdef1234567890abcdef12345678",
+                payer="0x5678567856785678567856785678567856785678",
+            )
+        )
 
         assert quote.native_fee > 0
         assert quote.from_chain == "arbitrum"
@@ -654,21 +671,25 @@ class TestBridgeIntegration:
         assert "ethereum" in destinations
 
         # Step 3: Get quote
-        quote = await bridge.quote(BridgeQuoteParams(
-            from_chain="arbitrum",
-            to_chain="ethereum",
-            amount=100_000000,
-            recipient="0x1234567890abcdef1234567890abcdef12345678",
-        ))
+        quote = await bridge.quote(
+            BridgeQuoteParams(
+                from_chain="arbitrum",
+                to_chain="ethereum",
+                amount=100_000000,
+                recipient="0x1234567890abcdef1234567890abcdef12345678",
+            )
+        )
         assert quote.native_fee > 0
 
         # Step 4: Execute bridge
-        result = await bridge.send(BridgeExecuteParams(
-            from_chain="arbitrum",
-            to_chain="ethereum",
-            amount=100_000000,
-            recipient="0x1234567890abcdef1234567890abcdef12345678",
-        ))
+        result = await bridge.send(
+            BridgeExecuteParams(
+                from_chain="arbitrum",
+                to_chain="ethereum",
+                amount=100_000000,
+                recipient="0x1234567890abcdef1234567890abcdef12345678",
+            )
+        )
         assert result.message_guid is not None
 
     @pytest.mark.asyncio
@@ -683,23 +704,27 @@ class TestBridgeIntegration:
         assert router.can_route("arbitrum", "ethereum")
 
         # Get fee estimate
-        quote = await router.estimate_fees(CrossChainPaymentParams(
-            source_chain="arbitrum",
-            destination_chain="ethereum",
-            amount=100_000000,
-            pay_to="0x1234567890abcdef1234567890abcdef12345678",
-            payer="0x5678567856785678567856785678567856785678",
-        ))
+        quote = await router.estimate_fees(
+            CrossChainPaymentParams(
+                source_chain="arbitrum",
+                destination_chain="ethereum",
+                amount=100_000000,
+                pay_to="0x1234567890abcdef1234567890abcdef12345678",
+                payer="0x5678567856785678567856785678567856785678",
+            )
+        )
         assert quote.native_fee > 0
 
         # Route payment
-        result = await router.route_payment(CrossChainPaymentParams(
-            source_chain="arbitrum",
-            destination_chain="ethereum",
-            amount=100_000000,
-            pay_to="0x1234567890abcdef1234567890abcdef12345678",
-            payer="0x5678567856785678567856785678567856785678",
-        ))
+        result = await router.route_payment(
+            CrossChainPaymentParams(
+                source_chain="arbitrum",
+                destination_chain="ethereum",
+                amount=100_000000,
+                pay_to="0x1234567890abcdef1234567890abcdef12345678",
+                payer="0x5678567856785678567856785678567856785678",
+            )
+        )
         assert result.message_guid is not None
 
         # Cleanup

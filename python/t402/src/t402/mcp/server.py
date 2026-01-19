@@ -170,7 +170,10 @@ class T402McpServer:
         else:
             result = self._error_result(f"Unknown tool: {tool_name}")
 
-        return {"content": [asdict(c) for c in result.content], "isError": result.isError}
+        return {
+            "content": [asdict(c) for c in result.content],
+            "isError": result.isError,
+        }
 
     async def _handle_get_balance(self, args: dict[str, Any]) -> ToolResult:
         """Handle t402/getBalance tool."""
@@ -255,7 +258,9 @@ class T402McpServer:
                 )
                 return self._text_result(self._format_payment_result(result))
 
-            return self._error_result("Real transactions require private key configuration")
+            return self._error_result(
+                "Real transactions require private key configuration"
+            )
 
         except Exception as e:
             return self._error_result(str(e))
@@ -266,7 +271,9 @@ class T402McpServer:
             network = args.get("network", "")
 
             if not is_gasless_network(network):
-                return self._error_result(f"Network {network} does not support gasless payments")
+                return self._error_result(
+                    f"Network {network} does not support gasless payments"
+                )
 
             if not self.config.bundler_url and not self.config.demo_mode:
                 return self._error_result(
@@ -300,11 +307,17 @@ class T402McpServer:
             amount = args.get("amount", "")
 
             if not is_bridgeable_chain(from_chain):
-                return self._error_result(f"Chain {from_chain} does not support USDT0 bridging")
+                return self._error_result(
+                    f"Chain {from_chain} does not support USDT0 bridging"
+                )
             if not is_bridgeable_chain(to_chain):
-                return self._error_result(f"Chain {to_chain} does not support USDT0 bridging")
+                return self._error_result(
+                    f"Chain {to_chain} does not support USDT0 bridging"
+                )
             if from_chain == to_chain:
-                return self._error_result("Source and destination chains must be different")
+                return self._error_result(
+                    "Source and destination chains must be different"
+                )
 
             result = BridgeFeeResult(
                 native_fee="0.001",
@@ -327,11 +340,17 @@ class T402McpServer:
             amount = args.get("amount", "")
 
             if not is_bridgeable_chain(from_chain):
-                return self._error_result(f"Chain {from_chain} does not support USDT0 bridging")
+                return self._error_result(
+                    f"Chain {from_chain} does not support USDT0 bridging"
+                )
             if not is_bridgeable_chain(to_chain):
-                return self._error_result(f"Chain {to_chain} does not support USDT0 bridging")
+                return self._error_result(
+                    f"Chain {to_chain} does not support USDT0 bridging"
+                )
             if from_chain == to_chain:
-                return self._error_result("Source and destination chains must be different")
+                return self._error_result(
+                    "Source and destination chains must be different"
+                )
 
             if not self.config.private_key and not self.config.demo_mode:
                 return self._error_result(
@@ -354,7 +373,9 @@ class T402McpServer:
                 )
                 return self._text_result(self._format_bridge_result(result))
 
-            return self._error_result("Bridge functionality requires private key configuration")
+            return self._error_result(
+                "Bridge functionality requires private key configuration"
+            )
 
         except Exception as e:
             return self._error_result(str(e))
@@ -408,7 +429,9 @@ class T402McpServer:
 
             lines.append(f"### {result.network}")
             if result.native:
-                lines.append(f"- Native ({result.native.token}): {result.native.balance}")
+                lines.append(
+                    f"- Native ({result.native.token}): {result.native.balance}"
+                )
             for token in result.tokens:
                 lines.append(f"- {token.token}: {token.balance}")
             lines.append("")
@@ -420,58 +443,68 @@ class T402McpServer:
         lines = []
 
         if result.demo_mode:
-            lines.extend([
-                "## Payment (Demo Mode)",
-                "",
-                "⚠️ This is a simulated transaction. No actual tokens were transferred.",
-                "",
-            ])
+            lines.extend(
+                [
+                    "## Payment (Demo Mode)",
+                    "",
+                    "⚠️ This is a simulated transaction. No actual tokens were transferred.",
+                    "",
+                ]
+            )
         else:
             lines.extend(["## Payment Successful", ""])
 
-        lines.extend([
-            f"- **Amount:** {result.amount} {result.token}",
-            f"- **To:** {result.to}",
-            f"- **Network:** {result.network}",
-            f"- **Transaction:** [{self._truncate_hash(result.tx_hash)}]({result.explorer_url})",
-        ])
+        lines.extend(
+            [
+                f"- **Amount:** {result.amount} {result.token}",
+                f"- **To:** {result.to}",
+                f"- **Network:** {result.network}",
+                f"- **Transaction:** [{self._truncate_hash(result.tx_hash)}]({result.explorer_url})",
+            ]
+        )
 
         return "\n".join(lines)
 
     def _format_bridge_fee_result(self, result: BridgeFeeResult) -> str:
         """Format bridge fee result as markdown."""
-        return "\n".join([
-            "## Bridge Fee Quote",
-            "",
-            f"- **From:** {result.from_chain}",
-            f"- **To:** {result.to_chain}",
-            f"- **Amount:** {result.amount} USDT0",
-            f"- **Fee:** {result.native_fee} {result.native_symbol}",
-            f"- **Estimated Time:** ~{result.estimated_time} seconds",
-        ])
+        return "\n".join(
+            [
+                "## Bridge Fee Quote",
+                "",
+                f"- **From:** {result.from_chain}",
+                f"- **To:** {result.to_chain}",
+                f"- **Amount:** {result.amount} USDT0",
+                f"- **Fee:** {result.native_fee} {result.native_symbol}",
+                f"- **Estimated Time:** ~{result.estimated_time} seconds",
+            ]
+        )
 
     def _format_bridge_result(self, result: BridgeResultData) -> str:
         """Format bridge result as markdown."""
         lines = []
 
         if result.demo_mode:
-            lines.extend([
-                "## Bridge (Demo Mode)",
-                "",
-                "⚠️ This is a simulated bridge. No actual tokens were transferred.",
-                "",
-            ])
+            lines.extend(
+                [
+                    "## Bridge (Demo Mode)",
+                    "",
+                    "⚠️ This is a simulated bridge. No actual tokens were transferred.",
+                    "",
+                ]
+            )
         else:
             lines.extend(["## Bridge Initiated", ""])
 
-        lines.extend([
-            f"- **Amount:** {result.amount} USDT0",
-            f"- **From:** {result.from_chain}",
-            f"- **To:** {result.to_chain}",
-            f"- **Transaction:** [{self._truncate_hash(result.tx_hash)}]({result.explorer_url})",
-            f"- **Track:** [LayerZero Scan]({result.tracking_url})",
-            f"- **Estimated Delivery:** ~{result.estimated_time} seconds",
-        ])
+        lines.extend(
+            [
+                f"- **Amount:** {result.amount} USDT0",
+                f"- **From:** {result.from_chain}",
+                f"- **To:** {result.to_chain}",
+                f"- **Transaction:** [{self._truncate_hash(result.tx_hash)}]({result.explorer_url})",
+                f"- **Track:** [LayerZero Scan]({result.tracking_url})",
+                f"- **Estimated Delivery:** ~{result.estimated_time} seconds",
+            ]
+        )
 
         return "\n".join(lines)
 

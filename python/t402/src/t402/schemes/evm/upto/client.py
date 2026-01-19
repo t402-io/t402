@@ -74,7 +74,9 @@ class UptoEvmClientScheme:
     async def create_payment_payload(
         self,
         t402_version: int,
-        requirements: Union[UptoPaymentRequirements, PaymentRequirementsV2, Dict[str, Any]],
+        requirements: Union[
+            UptoPaymentRequirements, PaymentRequirementsV2, Dict[str, Any]
+        ],
     ) -> Dict[str, Any]:
         """Create a payment payload for EVM upto scheme.
 
@@ -114,7 +116,9 @@ class UptoEvmClientScheme:
         asset = req.get("asset", "")
 
         # Get timeout
-        max_timeout = req.get("maxTimeoutSeconds") or req.get("max_timeout_seconds", 300)
+        max_timeout = req.get("maxTimeoutSeconds") or req.get(
+            "max_timeout_seconds", 300
+        )
 
         # Get EIP-712 domain info
         token_name = extra.get("name", "USD Coin")

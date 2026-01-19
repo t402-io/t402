@@ -1,6 +1,5 @@
 """Tests for Up-To Scheme Types."""
 
-import pytest
 from t402.schemes.upto import (
     SCHEME_UPTO,
     DEFAULT_MIN_AMOUNT,

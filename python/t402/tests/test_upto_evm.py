@@ -1,14 +1,10 @@
 """Tests for EVM Up-To Scheme Types."""
 
-import pytest
 from t402.schemes.evm.upto import (
-    SCHEME_UPTO,
     PERMIT_TYPES,
-    PERMIT_DOMAIN_TYPES,
     PermitSignature,
     PermitAuthorization,
     UptoEIP2612Payload,
-    UptoCompactPayload,
     UptoEvmExtra,
     UptoEvmSettlement,
     UptoEvmUsageDetails,
@@ -77,7 +73,9 @@ class TestUptoEIP2612Payload:
         )
 
         assert payload.signature.v == 28
-        assert payload.authorization.owner == "0x1234567890123456789012345678901234567890"
+        assert (
+            payload.authorization.owner == "0x1234567890123456789012345678901234567890"
+        )
         assert len(payload.payment_nonce) == 66
 
     def test_to_dict(self):

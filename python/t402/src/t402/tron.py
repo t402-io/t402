@@ -55,6 +55,7 @@ TRON_ADDRESS_REGEX = re.compile(r"^T[1-9A-HJ-NP-Za-km-z]{33}$")
 
 class TRC20Config(TypedDict):
     """Configuration for a TRC20 token."""
+
     contract_address: str
     symbol: str
     name: str
@@ -63,6 +64,7 @@ class TRC20Config(TypedDict):
 
 class NetworkConfig(TypedDict):
     """Configuration for a TRON network."""
+
     name: str
     endpoint: str
     is_testnet: bool

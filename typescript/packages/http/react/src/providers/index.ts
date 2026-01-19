@@ -1,1 +1,1 @@
-export { PaymentProvider, usePaymentContext, PaymentContext } from "./PaymentProvider.js";
+export { PaymentProvider, usePaymentContext, PaymentContext } from './PaymentProvider.js'

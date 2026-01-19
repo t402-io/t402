@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 import {
   authorizationTypes,
   eip3009ABI,
@@ -7,34 +7,34 @@ import {
   createNonce,
   bytesToHex,
   hexToBytes,
-} from './index';
+} from "./index";
 
-describe('@t402/evm-core', () => {
-  describe('constants', () => {
-    it('should export EIP-712 authorization types', () => {
+describe("@t402/evm-core", () => {
+  describe("constants", () => {
+    it("should export EIP-712 authorization types", () => {
       expect(authorizationTypes).toBeDefined();
       expect(authorizationTypes.TransferWithAuthorization).toHaveLength(6);
     });
 
-    it('should export EIP-3009 ABI', () => {
+    it("should export EIP-3009 ABI", () => {
       expect(eip3009ABI).toBeDefined();
       expect(Array.isArray(eip3009ABI)).toBe(true);
     });
 
-    it('should export ERC-20 legacy ABI', () => {
+    it("should export ERC-20 legacy ABI", () => {
       expect(erc20LegacyABI).toBeDefined();
       expect(Array.isArray(erc20LegacyABI)).toBe(true);
     });
   });
 
-  describe('utils', () => {
-    it('should get EVM chain ID from network', () => {
-      expect(getEvmChainId('base')).toBe(8453);
-      expect(getEvmChainId('ethereum')).toBe(1);
-      expect(getEvmChainId('polygon')).toBe(137);
+  describe("utils", () => {
+    it("should get EVM chain ID from network", () => {
+      expect(getEvmChainId("base")).toBe(8453);
+      expect(getEvmChainId("ethereum")).toBe(1);
+      expect(getEvmChainId("polygon")).toBe(137);
     });
 
-    it('should create random nonces', () => {
+    it("should create random nonces", () => {
       const nonce1 = createNonce();
       const nonce2 = createNonce();
 
@@ -44,14 +44,14 @@ describe('@t402/evm-core', () => {
     });
   });
 
-  describe('primitives', () => {
-    it('should convert bytes to hex', () => {
+  describe("primitives", () => {
+    it("should convert bytes to hex", () => {
       const bytes = new Uint8Array([0xde, 0xad, 0xbe, 0xef]);
-      expect(bytesToHex(bytes)).toBe('0xdeadbeef');
+      expect(bytesToHex(bytes)).toBe("0xdeadbeef");
     });
 
-    it('should convert hex to bytes', () => {
-      const hex = '0xdeadbeef';
+    it("should convert hex to bytes", () => {
+      const hex = "0xdeadbeef";
       const bytes = hexToBytes(hex);
       expect(bytes).toEqual(new Uint8Array([0xde, 0xad, 0xbe, 0xef]));
     });

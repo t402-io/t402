@@ -109,7 +109,9 @@ class SignerError(WDKError):
         cause: Optional[Exception] = None,
         context: Optional[Dict[str, Any]] = None,
     ):
-        super().__init__(code=code, message=message, chain=chain, cause=cause, context=context)
+        super().__init__(
+            code=code, message=message, chain=chain, cause=cause, context=context
+        )
 
 
 class SigningError(WDKError):
@@ -127,7 +129,9 @@ class SigningError(WDKError):
         self.operation = operation
         ctx = context or {}
         ctx["operation"] = operation
-        super().__init__(code=code, message=message, chain=chain, cause=cause, context=ctx)
+        super().__init__(
+            code=code, message=message, chain=chain, cause=cause, context=ctx
+        )
 
 
 class ChainError(WDKError):
@@ -141,7 +145,9 @@ class ChainError(WDKError):
         cause: Optional[Exception] = None,
         context: Optional[Dict[str, Any]] = None,
     ):
-        super().__init__(code=code, message=message, chain=chain, cause=cause, context=context)
+        super().__init__(
+            code=code, message=message, chain=chain, cause=cause, context=context
+        )
 
 
 class BalanceError(WDKError):
@@ -160,7 +166,9 @@ class BalanceError(WDKError):
         ctx = context or {}
         if token:
             ctx["token"] = token
-        super().__init__(code=code, message=message, chain=chain, cause=cause, context=ctx)
+        super().__init__(
+            code=code, message=message, chain=chain, cause=cause, context=ctx
+        )
 
 
 class TransactionError(WDKError):
@@ -179,7 +187,9 @@ class TransactionError(WDKError):
         ctx = context or {}
         if tx_hash:
             ctx["tx_hash"] = tx_hash
-        super().__init__(code=code, message=message, chain=chain, cause=cause, context=ctx)
+        super().__init__(
+            code=code, message=message, chain=chain, cause=cause, context=ctx
+        )
 
 
 class BridgeError(WDKError):

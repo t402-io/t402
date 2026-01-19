@@ -1,6 +1,5 @@
 """USDT0 Bridge Client for LayerZero OFT transfers."""
 
-
 from .constants import (
     DEFAULT_EXTRA_OPTIONS,
     DEFAULT_SLIPPAGE,
@@ -73,7 +72,7 @@ class Usdt0Bridge:
         if not supports_bridging(chain):
             raise ValueError(
                 f'Chain "{chain}" does not support USDT0 bridging. '
-                f'Supported chains: {", ".join(get_bridgeable_chains())}'
+                f"Supported chains: {', '.join(get_bridgeable_chains())}"
             )
 
         self._signer = signer
@@ -107,7 +106,9 @@ class Usdt0Bridge:
             False,
         )
 
-        native_fee = fee[0] if isinstance(fee, (list, tuple)) else fee.get("nativeFee", 0)
+        native_fee = (
+            fee[0] if isinstance(fee, (list, tuple)) else fee.get("nativeFee", 0)
+        )
 
         return BridgeQuote(
             native_fee=int(native_fee),
@@ -139,7 +140,11 @@ class Usdt0Bridge:
             )
         )
 
-        slippage = params.slippage_tolerance if params.slippage_tolerance > 0 else DEFAULT_SLIPPAGE
+        slippage = (
+            params.slippage_tolerance
+            if params.slippage_tolerance > 0
+            else DEFAULT_SLIPPAGE
+        )
         oft_address = get_usdt0_oft_address(params.from_chain)
         send_param = self._build_send_param(
             params.to_chain, params.amount, params.recipient, slippage
@@ -304,7 +309,10 @@ class Usdt0Bridge:
     def _extract_message_guid(self, receipt: BridgeTransactionReceipt) -> str:
         """Extract LayerZero message GUID from OFTSent event logs."""
         for log in receipt.logs:
-            if len(log.topics) >= 2 and log.topics[0].lower() == OFT_SENT_EVENT_TOPIC.lower():
+            if (
+                len(log.topics) >= 2
+                and log.topics[0].lower() == OFT_SENT_EVENT_TOPIC.lower()
+            ):
                 # GUID is the first indexed parameter (topics[1])
                 return log.topics[1]
 
