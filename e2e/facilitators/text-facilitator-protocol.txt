@@ -1,4 +1,4 @@
-# X402 Facilitator Protocol
+# T402 Facilitator Protocol
 
 ## CLI Interface
 1. Must be runnable through a CLI command, which can be parsed from 'run.sh'
@@ -11,9 +11,9 @@ Facilitators must declare which protocol families they support in their test.con
 - **EVM**: Ethereum Virtual Machine compatible networks (Base, Ethereum, etc.)
 - **SVM**: Solana Virtual Machine compatible networks (Solana, etc.)
 
-## X402 Version Support
-Facilitators must declare which x402 protocol versions they support using the `x402Versions` field:
-- **x402Versions**: Array of supported x402 protocol versions (e.g., [1, 2])
+## T402 Version Support
+Facilitators must declare which t402 protocol versions they support using the `x402Versions` field:
+- **x402Versions**: Array of supported t402 protocol versions (e.g., [1, 2])
 
 ## Extensions Support
 Facilitators must declare which protocol extensions they support using the `extensions` field:

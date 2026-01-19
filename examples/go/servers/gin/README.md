@@ -148,7 +148,7 @@ routes := t402http.RoutesConfig{
     },
 }
 
-r.Use(ginmw.X402Payment(ginmw.Config{
+r.Use(ginmw.T402Payment(ginmw.Config{
     Routes:      routes,
     Facilitator: facilitatorClient,
     Schemes: []ginmw.SchemeConfig{
@@ -176,7 +176,7 @@ r.GET("/your-endpoint", func(c *gin.Context) {
 The middleware uses scheme registrations to declare how payments for each network should be processed:
 
 ```go
-r.Use(ginmw.X402Payment(ginmw.Config{
+r.Use(ginmw.T402Payment(ginmw.Config{
     Routes:      routes,
     Facilitator: facilitatorClient,
     Schemes: []ginmw.SchemeConfig{

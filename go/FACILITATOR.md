@@ -65,7 +65,7 @@ func main() {
 
 ## Core Concepts
 
-### 1. Facilitator Core (t402.X402Facilitator)
+### 1. Facilitator Core (t402.T402Facilitator)
 
 The core facilitator manages verification and settlement.
 
@@ -284,37 +284,37 @@ facilitator.OnBeforeVerify(func(ctx FacilitatorVerifyContext) (*BeforeHookResult
 
 ## API Reference
 
-### t402.X402Facilitator
+### t402.T402Facilitator
 
 **Constructor:**
 ```go
-func Newt402Facilitator() *X402Facilitator
+func Newt402Facilitator() *T402Facilitator
 ```
 
 **Registration:**
 ```go
-func (f *X402Facilitator) Register(network Network, facilitator SchemeNetworkFacilitator) *X402Facilitator
+func (f *T402Facilitator) Register(network Network, facilitator SchemeNetworkFacilitator) *T402Facilitator
 ```
 
 **Verify Hooks:**
 ```go
-func (f *X402Facilitator) OnBeforeVerify(hook FacilitatorBeforeVerifyHook) *X402Facilitator
-func (f *X402Facilitator) OnAfterVerify(hook FacilitatorAfterVerifyHook) *X402Facilitator
-func (f *X402Facilitator) OnVerifyFailure(hook FacilitatorOnVerifyFailureHook) *X402Facilitator
+func (f *T402Facilitator) OnBeforeVerify(hook FacilitatorBeforeVerifyHook) *T402Facilitator
+func (f *T402Facilitator) OnAfterVerify(hook FacilitatorAfterVerifyHook) *T402Facilitator
+func (f *T402Facilitator) OnVerifyFailure(hook FacilitatorOnVerifyFailureHook) *T402Facilitator
 ```
 
 **Settle Hooks:**
 ```go
-func (f *X402Facilitator) OnBeforeSettle(hook FacilitatorBeforeSettleHook) *X402Facilitator
-func (f *X402Facilitator) OnAfterSettle(hook FacilitatorAfterSettleHook) *X402Facilitator
-func (f *X402Facilitator) OnSettleFailure(hook FacilitatorOnSettleFailureHook) *X402Facilitator
+func (f *T402Facilitator) OnBeforeSettle(hook FacilitatorBeforeSettleHook) *T402Facilitator
+func (f *T402Facilitator) OnAfterSettle(hook FacilitatorAfterSettleHook) *T402Facilitator
+func (f *T402Facilitator) OnSettleFailure(hook FacilitatorOnSettleFailureHook) *T402Facilitator
 ```
 
 **Payment Methods:**
 ```go
-func (f *X402Facilitator) Supported(ctx context.Context) (SupportedResponse, error)
-func (f *X402Facilitator) Verify(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (VerifyResponse, error)
-func (f *X402Facilitator) Settle(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (SettleResponse, error)
+func (f *T402Facilitator) Supported(ctx context.Context) (SupportedResponse, error)
+func (f *T402Facilitator) Verify(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (VerifyResponse, error)
+func (f *T402Facilitator) Settle(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (SettleResponse, error)
 ```
 
 ## Facilitator Signers
@@ -545,7 +545,7 @@ facilitator.OnSettleFailure(func(ctx FacilitatorSettleFailureContext) (*SettleFa
 ### HTTP Server Handler
 
 ```go
-func handleVerify(facilitator *t402.X402Facilitator) gin.HandlerFunc {
+func handleVerify(facilitator *t402.T402Facilitator) gin.HandlerFunc {
     return func(c *gin.Context) {
         ctx, cancel := context.WithTimeout(c.Request.Context(), 30*time.Second)
         defer cancel()
@@ -574,7 +574,7 @@ func handleVerify(facilitator *t402.X402Facilitator) gin.HandlerFunc {
 ### Settlement with Timeout
 
 ```go
-func handleSettle(facilitator *t402.X402Facilitator) gin.HandlerFunc {
+func handleSettle(facilitator *t402.T402Facilitator) gin.HandlerFunc {
     return func(c *gin.Context) {
         // Use longer timeout for blockchain operations
         ctx, cancel := context.WithTimeout(c.Request.Context(), 60*time.Second)

@@ -1,4 +1,4 @@
-# X402 Server Protocol
+# T402 Server Protocol
 
 ## CLI Interface
 1. Must be runnable through a CLI command, which can be parsed from 'run.sh'
@@ -10,9 +10,9 @@ Servers must declare which protocol family each payment endpoint requires in the
 - **EVM**: Ethereum Virtual Machine compatible networks (Base, Ethereum, etc.)
 - **SVM**: Solana Virtual Machine compatible networks (Solana, etc.)
 
-## X402 Version Support
-Servers must declare which x402 protocol version they implement using the `x402Version` field:
-- **x402Version**: The x402 protocol version implemented by the server (e.g., 1 or 2)
+## T402 Version Support
+Servers must declare which t402 protocol version they implement using the `x402Version` field:
+- **x402Version**: The t402 protocol version implemented by the server (e.g., 1 or 2)
 
 ## Extensions Support
 Servers may declare which protocol extensions they support using the `extensions` field:

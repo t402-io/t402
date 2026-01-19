@@ -34,7 +34,7 @@ for arg in "$@"; do
   esac
 done
 
-echo "🚀 X402 E2E Setup"
+echo "🚀 T402 E2E Setup"
 echo "=================="
 echo ""
 
