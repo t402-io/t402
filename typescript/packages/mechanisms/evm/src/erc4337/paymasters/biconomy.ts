@@ -11,11 +11,13 @@
  */
 
 import type { Address, Hex } from "viem";
-import type {
-  UserOperation,
-  PaymasterData,
-} from "../types.js";
-import { ENTRYPOINT_V07_ADDRESS, DEFAULT_GAS_LIMITS, packAccountGasLimits, packGasFees } from "../constants.js";
+import type { UserOperation, PaymasterData } from "../types.js";
+import {
+  ENTRYPOINT_V07_ADDRESS,
+  DEFAULT_GAS_LIMITS,
+  packAccountGasLimits,
+  packGasFees,
+} from "../constants.js";
 
 /**
  * Biconomy paymaster mode
@@ -92,17 +94,25 @@ export class BiconomyPaymaster {
   private readonly paymasterAddress?: Address;
   private readonly erc20Config?: BiconomyErc20Config;
 
+  /**
+   *
+   * @param config
+   */
   constructor(config: BiconomyPaymasterConfig) {
     this.apiKey = config.apiKey;
     this.mode = config.mode;
     this.paymasterAddress = config.paymasterAddress;
     this.erc20Config = config.erc20Config;
-    this.paymasterUrl = config.paymasterUrl ??
-      `https://paymaster.biconomy.io/api/v1/${config.chainId}`;
+    this.paymasterUrl =
+      config.paymasterUrl ?? `https://paymaster.biconomy.io/api/v1/${config.chainId}`;
   }
 
   /**
    * Sponsor a UserOperation
+   *
+   * @param userOp
+   * @param options
+   * @param options.webhookData
    */
   async sponsorUserOperation(
     userOp: Partial<UserOperation> & {
@@ -153,14 +163,16 @@ export class BiconomyPaymaster {
     }>(requestBody);
 
     // Parse paymaster data
-    const paymaster = this.paymasterAddress ??
-      (`0x${result.paymasterAndData.slice(2, 42)}` as Address);
-    const paymasterVerificationGasLimit = result.paymasterAndData.length >= 74
-      ? BigInt(`0x${result.paymasterAndData.slice(42, 74)}`)
-      : DEFAULT_GAS_LIMITS.paymasterVerificationGasLimit;
-    const paymasterPostOpGasLimit = result.paymasterAndData.length >= 106
-      ? BigInt(`0x${result.paymasterAndData.slice(74, 106)}`)
-      : DEFAULT_GAS_LIMITS.paymasterPostOpGasLimit;
+    const paymaster =
+      this.paymasterAddress ?? (`0x${result.paymasterAndData.slice(2, 42)}` as Address);
+    const paymasterVerificationGasLimit =
+      result.paymasterAndData.length >= 74
+        ? BigInt(`0x${result.paymasterAndData.slice(42, 74)}`)
+        : DEFAULT_GAS_LIMITS.paymasterVerificationGasLimit;
+    const paymasterPostOpGasLimit =
+      result.paymasterAndData.length >= 106
+        ? BigInt(`0x${result.paymasterAndData.slice(74, 106)}`)
+        : DEFAULT_GAS_LIMITS.paymasterPostOpGasLimit;
 
     return {
       paymaster,
@@ -175,31 +187,34 @@ export class BiconomyPaymaster {
 
   /**
    * Get paymaster data without gas estimation
+   *
+   * @param userOp
    */
-  async getPaymasterData(
-    userOp: UserOperation,
-  ): Promise<PaymasterData> {
+  async getPaymasterData(userOp: UserOperation): Promise<PaymasterData> {
     const result = await this.sponsorUserOperation(userOp);
 
     return {
       paymaster: result.paymaster,
       paymasterVerificationGasLimit: result.paymasterVerificationGasLimit,
       paymasterPostOpGasLimit: result.paymasterPostOpGasLimit,
-      paymasterData: result.paymasterAndData.length > 106
-        ? (`0x${result.paymasterAndData.slice(106)}` as Hex)
-        : "0x" as Hex,
+      paymasterData:
+        result.paymasterAndData.length > 106
+          ? (`0x${result.paymasterAndData.slice(106)}` as Hex)
+          : ("0x" as Hex),
     };
   }
 
   /**
    * Get supported tokens for ERC-20 mode
    */
-  async getSupportedTokens(): Promise<Array<{
-    address: Address;
-    symbol: string;
-    decimals: number;
-    exchangeRate: bigint;
-  }>> {
+  async getSupportedTokens(): Promise<
+    Array<{
+      address: Address;
+      symbol: string;
+      decimals: number;
+      exchangeRate: bigint;
+    }>
+  > {
     const result = await this.rpcCall<{
       tokens: Array<{
         address: Address;
@@ -212,7 +227,7 @@ export class BiconomyPaymaster {
       params: [ENTRYPOINT_V07_ADDRESS],
     });
 
-    return result.tokens.map((token) => ({
+    return result.tokens.map(token => ({
       address: token.address,
       symbol: token.symbol,
       decimals: token.decimals,
@@ -222,19 +237,23 @@ export class BiconomyPaymaster {
 
   /**
    * Get fee quotes for a UserOperation
+   *
+   * @param userOp
    */
   async getFeeQuotes(
     userOp: Partial<UserOperation> & {
       sender: Address;
       callData: Hex;
     },
-  ): Promise<Array<{
-    symbol: string;
-    tokenAddress: Address;
-    maxGasFee: bigint;
-    maxGasFeeUSD: string;
-    decimals: number;
-  }>> {
+  ): Promise<
+    Array<{
+      symbol: string;
+      tokenAddress: Address;
+      maxGasFee: bigint;
+      maxGasFeeUSD: string;
+      decimals: number;
+    }>
+  > {
     const packed = this.packUserOpForSponsorship(userOp);
 
     const result = await this.rpcCall<{
@@ -250,7 +269,7 @@ export class BiconomyPaymaster {
       params: [packed, ENTRYPOINT_V07_ADDRESS],
     });
 
-    return result.feeQuotes.map((quote) => ({
+    return result.feeQuotes.map(quote => ({
       symbol: quote.symbol,
       tokenAddress: quote.tokenAddress,
       maxGasFee: BigInt(quote.maxGasFee),
@@ -261,6 +280,8 @@ export class BiconomyPaymaster {
 
   /**
    * Check sponsorship eligibility
+   *
+   * @param userOp
    */
   async checkSponsorship(
     userOp: Partial<UserOperation> & {
@@ -304,6 +325,8 @@ export class BiconomyPaymaster {
 
   /**
    * Pack UserOp for sponsorship request
+   *
+   * @param userOp
    */
   private packUserOpForSponsorship(
     userOp: Partial<UserOperation> & { sender: Address; callData: Hex },
@@ -313,13 +336,20 @@ export class BiconomyPaymaster {
       nonce: this.toHex(userOp.nonce ?? 0n),
       initCode: userOp.initCode ?? "0x",
       callData: userOp.callData,
-      accountGasLimits: userOp.verificationGasLimit && userOp.callGasLimit
-        ? packAccountGasLimits(userOp.verificationGasLimit, userOp.callGasLimit)
-        : packAccountGasLimits(DEFAULT_GAS_LIMITS.verificationGasLimit, DEFAULT_GAS_LIMITS.callGasLimit),
-      preVerificationGas: this.toHex(userOp.preVerificationGas ?? DEFAULT_GAS_LIMITS.preVerificationGas),
-      gasFees: userOp.maxPriorityFeePerGas && userOp.maxFeePerGas
-        ? packGasFees(userOp.maxPriorityFeePerGas, userOp.maxFeePerGas)
-        : packGasFees(1000000000n, 10000000000n),
+      accountGasLimits:
+        userOp.verificationGasLimit && userOp.callGasLimit
+          ? packAccountGasLimits(userOp.verificationGasLimit, userOp.callGasLimit)
+          : packAccountGasLimits(
+              DEFAULT_GAS_LIMITS.verificationGasLimit,
+              DEFAULT_GAS_LIMITS.callGasLimit,
+            ),
+      preVerificationGas: this.toHex(
+        userOp.preVerificationGas ?? DEFAULT_GAS_LIMITS.preVerificationGas,
+      ),
+      gasFees:
+        userOp.maxPriorityFeePerGas && userOp.maxFeePerGas
+          ? packGasFees(userOp.maxPriorityFeePerGas, userOp.maxFeePerGas)
+          : packGasFees(1000000000n, 10000000000n),
       paymasterAndData: "0x",
       signature: userOp.signature ?? getDummySignature(),
     };
@@ -327,6 +357,8 @@ export class BiconomyPaymaster {
 
   /**
    * Convert bigint to hex
+   *
+   * @param value
    */
   private toHex(value: bigint): Hex {
     return `0x${value.toString(16)}` as Hex;
@@ -334,6 +366,8 @@ export class BiconomyPaymaster {
 
   /**
    * Make RPC call to Biconomy
+   *
+   * @param body
    */
   private async rpcCall<T>(body: Record<string, unknown>): Promise<T> {
     const response = await fetch(this.paymasterUrl, {
@@ -353,7 +387,7 @@ export class BiconomyPaymaster {
       throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
     }
 
-    const json = await response.json() as {
+    const json = (await response.json()) as {
       result?: T;
       error?: { code: number; message: string; data?: unknown };
     };
@@ -375,6 +409,8 @@ function getDummySignature(): Hex {
 
 /**
  * Create a Biconomy paymaster client
+ *
+ * @param config
  */
 export function createBiconomyPaymaster(config: BiconomyPaymasterConfig): BiconomyPaymaster {
   return new BiconomyPaymaster(config);

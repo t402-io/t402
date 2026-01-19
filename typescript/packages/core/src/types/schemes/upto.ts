@@ -221,6 +221,9 @@ export interface UptoValidationResult {
 
 /**
  * Type guard for UptoPaymentRequirements.
+ *
+ * @param requirements - The value to check
+ * @returns True if the value is UptoPaymentRequirements
  */
 export function isUptoPaymentRequirements(
   requirements: unknown,
@@ -232,6 +235,9 @@ export function isUptoPaymentRequirements(
 
 /**
  * Type guard for UptoEvmPayload.
+ *
+ * @param payload - The value to check
+ * @returns True if the value is UptoEvmPayload
  */
 export function isUptoEvmPayload(payload: unknown): payload is UptoEvmPayload {
   if (typeof payload !== "object" || payload === null) return false;

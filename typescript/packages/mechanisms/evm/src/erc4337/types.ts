@@ -159,11 +159,7 @@ export interface SmartAccountSigner {
   /** Encode a call to the account's execute function */
   encodeExecute(target: Address, value: bigint, data: Hex): Hex;
   /** Encode a batch call to the account's executeBatch function */
-  encodeExecuteBatch(
-    targets: Address[],
-    values: bigint[],
-    datas: Hex[],
-  ): Hex;
+  encodeExecuteBatch(targets: Address[], values: bigint[], datas: Hex[]): Hex;
 }
 
 /**

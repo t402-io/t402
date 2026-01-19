@@ -1,9 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import {
-  BundlerClient,
-  BundlerError,
-  createBundlerClient,
-} from "../../../src/erc4337/bundler";
+import { BundlerClient, BundlerError, createBundlerClient } from "../../../src/erc4337/bundler";
 import type { UserOperation } from "../../../src/erc4337/types";
 
 describe("BundlerClient", () => {
@@ -109,9 +105,7 @@ describe("BundlerClient", () => {
         signature: "0xsig",
       };
 
-      await expect(client.sendUserOperation(userOp)).rejects.toThrow(
-        "AA21 didn't pay prefund",
-      );
+      await expect(client.sendUserOperation(userOp)).rejects.toThrow("AA21 didn't pay prefund");
     });
   });
 

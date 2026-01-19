@@ -12,10 +12,6 @@ import {
   concat,
   keccak256,
   getContractAddress,
-  hexToBytes,
-  createWalletClient,
-  http,
-  custom,
 } from 'viem'
 import type { SmartAccountSigner } from '@t402/evm'
 import type { WdkAccount, WdkSmartAccountConfig } from './types.js'

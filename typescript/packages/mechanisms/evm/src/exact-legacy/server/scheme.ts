@@ -30,12 +30,18 @@ export class ExactLegacyEvmScheme implements SchemeNetworkServer {
   private moneyParsers: MoneyParser[] = [];
   private config: ExactLegacyEvmSchemeConfig;
 
+  /**
+   *
+   * @param config
+   */
   constructor(config: ExactLegacyEvmSchemeConfig = {}) {
     this.config = config;
   }
 
   /**
    * Register a custom money parser in the parser chain.
+   *
+   * @param parser
    */
   registerMoneyParser(parser: MoneyParser): ExactLegacyEvmScheme {
     this.moneyParsers.push(parser);
@@ -44,6 +50,9 @@ export class ExactLegacyEvmScheme implements SchemeNetworkServer {
 
   /**
    * Parses a price into an asset amount for legacy tokens.
+   *
+   * @param price
+   * @param network
    */
   async parsePrice(price: Price, network: Network): Promise<AssetAmount> {
     // If already an AssetAmount, return it directly
@@ -79,6 +88,14 @@ export class ExactLegacyEvmScheme implements SchemeNetworkServer {
   /**
    * Build payment requirements for this scheme/network combination.
    * Adds the spender (facilitator) address to the extra field.
+   *
+   * @param paymentRequirements
+   * @param supportedKind
+   * @param supportedKind.t402Version
+   * @param supportedKind.scheme
+   * @param supportedKind.network
+   * @param supportedKind.extra
+   * @param extensionKeys
    */
   enhancePaymentRequirements(
     paymentRequirements: PaymentRequirements,
@@ -108,6 +125,8 @@ export class ExactLegacyEvmScheme implements SchemeNetworkServer {
 
   /**
    * Parse Money (string | number) to a decimal number.
+   *
+   * @param money
    */
   private parseMoneyToDecimal(money: string | number): number {
     if (typeof money === "number") {
@@ -126,6 +145,9 @@ export class ExactLegacyEvmScheme implements SchemeNetworkServer {
 
   /**
    * Default money conversion implementation for legacy tokens.
+   *
+   * @param amount
+   * @param network
    */
   private defaultMoneyConversion(amount: number, network: Network): AssetAmount {
     const token = this.getDefaultAsset(network);
@@ -146,6 +168,9 @@ export class ExactLegacyEvmScheme implements SchemeNetworkServer {
 
   /**
    * Convert decimal amount to token units
+   *
+   * @param decimalAmount
+   * @param decimals
    */
   private convertToTokenAmount(decimalAmount: string, decimals: number): string {
     const amount = parseFloat(decimalAmount);
@@ -158,6 +183,8 @@ export class ExactLegacyEvmScheme implements SchemeNetworkServer {
 
   /**
    * Get the default legacy token for a network.
+   *
+   * @param network
    */
   private getDefaultAsset(network: Network): TokenConfig {
     // If a preferred token is configured, try to use it
@@ -177,7 +204,7 @@ export class ExactLegacyEvmScheme implements SchemeNetworkServer {
     // Fallback: find any legacy token on this network
     const tokens = TOKEN_REGISTRY[network];
     if (tokens) {
-      const legacyToken = Object.values(tokens).find((t) => t.tokenType === "legacy");
+      const legacyToken = Object.values(tokens).find(t => t.tokenType === "legacy");
       if (legacyToken) return legacyToken;
     }
 
@@ -193,6 +220,8 @@ export class ExactLegacyEvmScheme implements SchemeNetworkServer {
 
   /**
    * Check if a network has legacy token support
+   *
+   * @param network
    */
   static isNetworkSupported(network: string): boolean {
     return network in USDT_LEGACY_ADDRESSES;

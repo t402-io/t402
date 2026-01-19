@@ -8,10 +8,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { t402Client } from "@t402/core/client";
 import { t402Facilitator } from "@t402/core/facilitator";
-import {
-  t402ResourceServer,
-  FacilitatorClient,
-} from "@t402/core/server";
+import { t402ResourceServer, FacilitatorClient } from "@t402/core/server";
 import {
   Network,
   PaymentPayload,
@@ -20,10 +17,7 @@ import {
   SettleResponse,
   SupportedResponse,
 } from "@t402/core/types";
-import {
-  ExactEvmScheme as ExactEvmClient,
-  toFacilitatorEvmSigner,
-} from "../../src";
+import { ExactEvmScheme as ExactEvmClient, toFacilitatorEvmSigner } from "../../src";
 import { ExactEvmScheme as ExactEvmServer } from "../../src/exact/server/scheme";
 import { ExactEvmScheme as ExactEvmFacilitator } from "../../src/exact/facilitator/scheme";
 import { ExactLegacyEvmScheme as ExactLegacyEvmClient } from "../../src/exact-legacy/client/scheme";
@@ -109,9 +103,7 @@ describe("Cross-Scheme Integration Tests", () => {
 
     it("should have correct legacy USDT addresses", () => {
       // Verify legacy USDT is mapped correctly
-      expect(USDT_LEGACY_ADDRESSES["eip155:1"]).toBe(
-        "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-      );
+      expect(USDT_LEGACY_ADDRESSES["eip155:1"]).toBe("0xdAC17F958D2ee523a2206206994597C13D831ec7");
       expect(USDT_LEGACY_ADDRESSES["eip155:137"]).toBe(
         "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
       );
@@ -443,7 +435,10 @@ describe("Cross-Scheme Integration Tests", () => {
       expect(exactPayload.accepted.scheme).toBe("exact");
 
       // Exact payload should NOT have spender
-      const exactAuth = (exactPayload.payload as Record<string, unknown>).authorization as Record<string, unknown>;
+      const exactAuth = (exactPayload.payload as Record<string, unknown>).authorization as Record<
+        string,
+        unknown
+      >;
       expect(exactAuth.spender).toBeUndefined();
     });
   });

@@ -23,11 +23,7 @@
  * ```
  */
 
-import type {
-  LayerZeroMessage,
-  LayerZeroMessageStatus,
-  WaitForDeliveryOptions,
-} from "./types.js";
+import type { LayerZeroMessage, LayerZeroMessageStatus, WaitForDeliveryOptions } from "./types.js";
 
 /**
  * LayerZero Scan API base URL
@@ -96,10 +92,7 @@ export class LayerZeroScanClient {
    * @param limit - Maximum number of messages to return (default: 20)
    * @returns Array of messages
    */
-  async getMessagesByWallet(
-    address: string,
-    limit: number = 20,
-  ): Promise<LayerZeroMessage[]> {
+  async getMessagesByWallet(address: string, limit: number = 20): Promise<LayerZeroMessage[]> {
     const url = `${this.baseUrl}/messages/wallet/${address}?limit=${limit}`;
 
     const response = await fetch(url, {
@@ -194,6 +187,8 @@ export class LayerZeroScanClient {
 
   /**
    * Map API response to our interface
+   *
+   * @param data
    */
   private mapApiResponse(data: unknown): LayerZeroMessage {
     const msg = data as Record<string, unknown>;
@@ -215,9 +210,11 @@ export class LayerZeroScanClient {
 
   /**
    * Sleep helper
+   *
+   * @param ms
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
 
@@ -226,8 +223,6 @@ export class LayerZeroScanClient {
  *
  * @param baseUrl - Optional custom API base URL
  */
-export function createLayerZeroScanClient(
-  baseUrl?: string,
-): LayerZeroScanClient {
+export function createLayerZeroScanClient(baseUrl?: string): LayerZeroScanClient {
   return new LayerZeroScanClient(baseUrl);
 }

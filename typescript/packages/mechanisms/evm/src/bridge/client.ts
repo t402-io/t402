@@ -62,9 +62,7 @@ import type {
  * OFTSent event signature for GUID extraction
  * Event: OFTSent(bytes32 indexed guid, uint32 dstEid, address indexed from, uint256 amountSentLD, uint256 amountReceivedLD)
  */
-const OFT_SENT_EVENT_TOPIC = keccak256(
-  toBytes("OFTSent(bytes32,uint32,address,uint256,uint256)")
-);
+const OFT_SENT_EVENT_TOPIC = keccak256(toBytes("OFTSent(bytes32,uint32,address,uint256,uint256)"));
 
 /**
  * Default slippage tolerance (0.5%)
@@ -207,6 +205,9 @@ export class Usdt0Bridge {
 
   /**
    * Ensure sufficient token allowance for the OFT contract
+   *
+   * @param oftAddress
+   * @param amount
    */
   private async ensureAllowance(oftAddress: Address, amount: bigint): Promise<void> {
     // Check current allowance
@@ -232,6 +233,8 @@ export class Usdt0Bridge {
 
   /**
    * Build SendParam struct for LayerZero
+   *
+   * @param params
    */
   private buildSendParam(params: BridgeQuoteParams | BridgeExecuteParams): SendParam {
     const dstEid = getEndpointId(params.toChain);
@@ -239,9 +242,10 @@ export class Usdt0Bridge {
       throw new Error(`Unknown destination chain: ${params.toChain}`);
     }
 
-    const slippage = "slippageTolerance" in params
-      ? (params as BridgeExecuteParams).slippageTolerance ?? DEFAULT_SLIPPAGE
-      : DEFAULT_SLIPPAGE;
+    const slippage =
+      "slippageTolerance" in params
+        ? ((params as BridgeExecuteParams).slippageTolerance ?? DEFAULT_SLIPPAGE)
+        : DEFAULT_SLIPPAGE;
 
     // Calculate minimum amount with slippage
     const minAmount = params.amount - (params.amount * BigInt(Math.floor(slippage * 100))) / 10000n;
@@ -259,6 +263,8 @@ export class Usdt0Bridge {
 
   /**
    * Validate bridge parameters
+   *
+   * @param params
    */
   private validateBridgeParams(params: BridgeQuoteParams): void {
     if (params.fromChain !== this.chain) {
@@ -288,11 +294,13 @@ export class Usdt0Bridge {
    * Get all supported destination chains from current chain
    */
   getSupportedDestinations(): string[] {
-    return getBridgeableChains().filter((chain) => chain !== this.chain);
+    return getBridgeableChains().filter(chain => chain !== this.chain);
   }
 
   /**
    * Check if a destination chain is supported
+   *
+   * @param toChain
    */
   supportsDestination(toChain: string): boolean {
     return toChain !== this.chain && supportsBridging(toChain);
@@ -301,6 +309,9 @@ export class Usdt0Bridge {
 
 /**
  * Create a bridge client for a specific chain
+ *
+ * @param signer
+ * @param chain
  */
 export function createUsdt0Bridge(signer: BridgeSigner, chain: string): Usdt0Bridge {
   return new Usdt0Bridge(signer, chain);

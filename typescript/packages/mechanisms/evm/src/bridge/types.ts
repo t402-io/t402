@@ -186,9 +186,7 @@ export interface BridgeSigner {
     value?: bigint;
   }): Promise<`0x${string}`>;
   /** Wait for transaction receipt */
-  waitForTransactionReceipt(args: {
-    hash: `0x${string}`;
-  }): Promise<TransactionReceipt>;
+  waitForTransactionReceipt(args: { hash: `0x${string}` }): Promise<TransactionReceipt>;
 }
 
 // ============================================================================
@@ -199,11 +197,11 @@ export interface BridgeSigner {
  * LayerZero message status from Scan API
  */
 export type LayerZeroMessageStatus =
-  | "INFLIGHT"    // Message sent, in transit between chains
-  | "CONFIRMING"  // Awaiting confirmations
-  | "DELIVERED"   // Successfully delivered to destination chain
-  | "FAILED"      // Delivery failed
-  | "BLOCKED";    // Message blocked by DVN
+  | "INFLIGHT" // Message sent, in transit between chains
+  | "CONFIRMING" // Awaiting confirmations
+  | "DELIVERED" // Successfully delivered to destination chain
+  | "FAILED" // Delivery failed
+  | "BLOCKED"; // Message blocked by DVN
 
 /**
  * LayerZero message from Scan API

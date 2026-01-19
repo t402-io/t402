@@ -12,12 +12,13 @@
 
 import type { Address, Hex } from "viem";
 import { concat, pad, toHex } from "viem";
-import type {
-  UserOperation,
-  PaymasterData,
-  GasEstimate,
-} from "../types.js";
-import { ENTRYPOINT_V07_ADDRESS, DEFAULT_GAS_LIMITS, packAccountGasLimits, packGasFees } from "../constants.js";
+import type { UserOperation, PaymasterData, GasEstimate } from "../types.js";
+import {
+  ENTRYPOINT_V07_ADDRESS,
+  DEFAULT_GAS_LIMITS,
+  packAccountGasLimits,
+  packGasFees,
+} from "../constants.js";
 
 /**
  * Pimlico paymaster type
@@ -80,16 +81,25 @@ export class PimlicoPaymaster {
   private readonly type: PimlicoPaymasterType;
   private readonly tokenAddress?: Address;
 
+  /**
+   *
+   * @param config
+   */
   constructor(config: PimlicoPaymasterConfig) {
     this.type = config.type ?? "verifying";
     this.tokenAddress = config.tokenAddress;
-    this.paymasterUrl = config.paymasterUrl ??
+    this.paymasterUrl =
+      config.paymasterUrl ??
       `https://api.pimlico.io/v2/${config.chainId}/rpc?apikey=${config.apiKey}`;
   }
 
   /**
    * Sponsor a UserOperation
    * Returns paymaster data to include in the UserOp
+   *
+   * @param userOp
+   * @param options
+   * @param options.gasOverrides
    */
   async sponsorUserOperation(
     userOp: Partial<UserOperation> & {
@@ -128,8 +138,10 @@ export class PimlicoPaymaster {
       paymaster,
       paymasterAndData: result.paymasterAndData,
       callGasLimit: options?.gasOverrides?.callGasLimit ?? BigInt(result.callGasLimit),
-      verificationGasLimit: options?.gasOverrides?.verificationGasLimit ?? BigInt(result.verificationGasLimit),
-      preVerificationGas: options?.gasOverrides?.preVerificationGas ?? BigInt(result.preVerificationGas),
+      verificationGasLimit:
+        options?.gasOverrides?.verificationGasLimit ?? BigInt(result.verificationGasLimit),
+      preVerificationGas:
+        options?.gasOverrides?.preVerificationGas ?? BigInt(result.preVerificationGas),
       paymasterVerificationGasLimit,
       paymasterPostOpGasLimit,
     };
@@ -138,10 +150,10 @@ export class PimlicoPaymaster {
   /**
    * Get paymaster data without gas estimation
    * Useful when gas is already estimated
+   *
+   * @param userOp
    */
-  async getPaymasterData(
-    userOp: UserOperation,
-  ): Promise<PaymasterData> {
+  async getPaymasterData(userOp: UserOperation): Promise<PaymasterData> {
     const result = await this.sponsorUserOperation(userOp);
 
     return {
@@ -154,6 +166,8 @@ export class PimlicoPaymaster {
 
   /**
    * Check if an operation would be sponsored
+   *
+   * @param userOp
    */
   async willSponsor(
     userOp: Partial<UserOperation> & {
@@ -174,6 +188,9 @@ export class PimlicoPaymaster {
 
   /**
    * Get token quotes for ERC-20 paymaster
+   *
+   * @param userOp
+   * @param tokens
    */
   async getTokenQuotes(
     userOp: Partial<UserOperation> & {
@@ -181,24 +198,28 @@ export class PimlicoPaymaster {
       callData: Hex;
     },
     tokens: Address[],
-  ): Promise<Array<{
-    token: Address;
-    maxCost: bigint;
-    symbol: string;
-    decimals: number;
-  }>> {
+  ): Promise<
+    Array<{
+      token: Address;
+      maxCost: bigint;
+      symbol: string;
+      decimals: number;
+    }>
+  > {
     if (this.type !== "erc20") {
       throw new Error("Token quotes only available for ERC-20 paymaster");
     }
 
     const packed = this.packUserOpForSponsorship(userOp);
 
-    const result = await this.rpcCall<Array<{
-      token: Address;
-      maxCost: Hex;
-      symbol: string;
-      decimals: number;
-    }>>("pm_getTokenQuotes", [
+    const result = await this.rpcCall<
+      Array<{
+        token: Address;
+        maxCost: Hex;
+        symbol: string;
+        decimals: number;
+      }>
+    >("pm_getTokenQuotes", [
       {
         entryPoint: ENTRYPOINT_V07_ADDRESS,
         userOperation: packed,
@@ -206,7 +227,7 @@ export class PimlicoPaymaster {
       },
     ]);
 
-    return result.map((quote) => ({
+    return result.map(quote => ({
       token: quote.token,
       maxCost: BigInt(quote.maxCost),
       symbol: quote.symbol,
@@ -216,6 +237,8 @@ export class PimlicoPaymaster {
 
   /**
    * Pack UserOp for sponsorship request
+   *
+   * @param userOp
    */
   private packUserOpForSponsorship(
     userOp: Partial<UserOperation> & { sender: Address; callData: Hex },
@@ -225,13 +248,20 @@ export class PimlicoPaymaster {
       nonce: this.toHex(userOp.nonce ?? 0n),
       initCode: userOp.initCode ?? "0x",
       callData: userOp.callData,
-      accountGasLimits: userOp.verificationGasLimit && userOp.callGasLimit
-        ? packAccountGasLimits(userOp.verificationGasLimit, userOp.callGasLimit)
-        : packAccountGasLimits(DEFAULT_GAS_LIMITS.verificationGasLimit, DEFAULT_GAS_LIMITS.callGasLimit),
-      preVerificationGas: this.toHex(userOp.preVerificationGas ?? DEFAULT_GAS_LIMITS.preVerificationGas),
-      gasFees: userOp.maxPriorityFeePerGas && userOp.maxFeePerGas
-        ? packGasFees(userOp.maxPriorityFeePerGas, userOp.maxFeePerGas)
-        : packGasFees(1000000000n, 10000000000n),
+      accountGasLimits:
+        userOp.verificationGasLimit && userOp.callGasLimit
+          ? packAccountGasLimits(userOp.verificationGasLimit, userOp.callGasLimit)
+          : packAccountGasLimits(
+              DEFAULT_GAS_LIMITS.verificationGasLimit,
+              DEFAULT_GAS_LIMITS.callGasLimit,
+            ),
+      preVerificationGas: this.toHex(
+        userOp.preVerificationGas ?? DEFAULT_GAS_LIMITS.preVerificationGas,
+      ),
+      gasFees:
+        userOp.maxPriorityFeePerGas && userOp.maxFeePerGas
+          ? packGasFees(userOp.maxPriorityFeePerGas, userOp.maxFeePerGas)
+          : packGasFees(1000000000n, 10000000000n),
       paymasterAndData: "0x",
       signature: userOp.signature ?? getDummySignature(),
     };
@@ -239,6 +269,8 @@ export class PimlicoPaymaster {
 
   /**
    * Convert bigint to hex
+   *
+   * @param value
    */
   private toHex(value: bigint): Hex {
     return `0x${value.toString(16)}` as Hex;
@@ -246,6 +278,9 @@ export class PimlicoPaymaster {
 
   /**
    * Make RPC call to Pimlico
+   *
+   * @param method
+   * @param params
    */
   private async rpcCall<T>(method: string, params: unknown[]): Promise<T> {
     const response = await fetch(this.paymasterUrl, {
@@ -265,7 +300,7 @@ export class PimlicoPaymaster {
       throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
     }
 
-    const json = await response.json() as {
+    const json = (await response.json()) as {
       result?: T;
       error?: { code: number; message: string; data?: unknown };
     };
@@ -287,6 +322,8 @@ function getDummySignature(): Hex {
 
 /**
  * Encode paymaster and data for UserOperation
+ *
+ * @param data
  */
 export function encodePaymasterAndData(data: PaymasterData): Hex {
   return concat([
@@ -299,6 +336,8 @@ export function encodePaymasterAndData(data: PaymasterData): Hex {
 
 /**
  * Create a Pimlico paymaster client
+ *
+ * @param config
  */
 export function createPimlicoPaymaster(config: PimlicoPaymasterConfig): PimlicoPaymaster {
   return new PimlicoPaymaster(config);

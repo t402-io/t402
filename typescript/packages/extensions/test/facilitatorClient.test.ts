@@ -17,7 +17,7 @@ class MockHTTPFacilitatorClient {
     this.url = url;
   }
 
-  async createAuthHeaders(_scope: string): Promise<{ headers: Record<string, string> }> {
+  async createAuthHeaders(_: string): Promise<{ headers: Record<string, string> }> {
     return { headers: { Authorization: "Bearer test-token" } };
   }
 }

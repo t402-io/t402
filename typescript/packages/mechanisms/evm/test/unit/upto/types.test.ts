@@ -128,7 +128,7 @@ describe("Upto EVM Types", () => {
       expect(permitTypes.Permit).toBeDefined();
       expect(permitTypes.Permit).toHaveLength(5);
 
-      const fieldNames = permitTypes.Permit.map((f) => f.name);
+      const fieldNames = permitTypes.Permit.map(f => f.name);
       expect(fieldNames).toContain("owner");
       expect(fieldNames).toContain("spender");
       expect(fieldNames).toContain("value");
@@ -159,10 +159,12 @@ describe("Upto EVM Types", () => {
       expect(isUptoEIP2612Payload(undefined)).toBe(false);
       expect(isUptoEIP2612Payload({})).toBe(false);
       expect(isUptoEIP2612Payload({ signature: "0x123" })).toBe(false);
-      expect(isUptoEIP2612Payload({
-        signature: { v: 28 },
-        authorization: {},
-      })).toBe(false);
+      expect(
+        isUptoEIP2612Payload({
+          signature: { v: 28 },
+          authorization: {},
+        }),
+      ).toBe(false);
     });
 
     it("should return false for exact scheme payload", () => {

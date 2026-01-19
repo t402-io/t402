@@ -16,7 +16,7 @@ import {
 import type { WDKSigner } from "@t402/wdk";
 import type { MultiSigSmartAccountSigner, MultiSigWDKConfig } from "./types.js";
 import { SAFE_4337_ADDRESSES, DEFAULTS } from "./constants.js";
-import { MultiSigError } from "./errors.js";
+import { MultiSigError, MultiSigErrorCode } from "./errors.js";
 import {
   combineSignatures,
   formatSignatureForSafe,
@@ -146,7 +146,7 @@ export class MultiSigWdkSmartAccount implements MultiSigSmartAccountSigner {
 
     if (config.owners.length > DEFAULTS.MAX_OWNERS) {
       throw new MultiSigError(
-        "MULTISIG_INVALID_THRESHOLD" as any,
+        MultiSigErrorCode.INVALID_THRESHOLD,
         `Too many owners: ${config.owners.length} exceeds max ${DEFAULTS.MAX_OWNERS}`,
         { ownerCount: config.owners.length, maxOwners: DEFAULTS.MAX_OWNERS },
       );
@@ -184,7 +184,7 @@ export class MultiSigWdkSmartAccount implements MultiSigSmartAccountSigner {
     // Validate all addresses are unique
     if (!areAddressesUnique(addresses)) {
       throw new MultiSigError(
-        "MULTISIG_INVALID_THRESHOLD" as any,
+        MultiSigErrorCode.INVALID_THRESHOLD,
         "Duplicate owner addresses detected",
         { addresses },
       );

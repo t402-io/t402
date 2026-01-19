@@ -90,7 +90,8 @@ export const DEFAULT_GAS_LIMIT = 200000n;
  * Default extra options for LayerZero messages
  * Type 3 options with executor gas
  */
-export const DEFAULT_EXTRA_OPTIONS = "0x00030100110100000000000000000000000000030d40" as `0x${string}`;
+export const DEFAULT_EXTRA_OPTIONS =
+  "0x00030100110100000000000000000000000000030d40" as `0x${string}`;
 
 /**
  * OFT Send ABI for cross-chain transfers
@@ -212,6 +213,8 @@ export const ERC20_APPROVE_ABI = [
 
 /**
  * Get LayerZero endpoint ID for a chain
+ *
+ * @param chain
  */
 export function getEndpointId(chain: string): number | undefined {
   return LAYERZERO_ENDPOINT_IDS[chain];
@@ -219,6 +222,8 @@ export function getEndpointId(chain: string): number | undefined {
 
 /**
  * Get LayerZero endpoint ID from CAIP-2 network
+ *
+ * @param network
  */
 export function getEndpointIdFromNetwork(network: string): number | undefined {
   const chain = NETWORK_TO_CHAIN[network];
@@ -227,6 +232,8 @@ export function getEndpointIdFromNetwork(network: string): number | undefined {
 
 /**
  * Get USDT0 OFT contract address for a chain
+ *
+ * @param chain
  */
 export function getUsdt0OftAddress(chain: string): Address | undefined {
   return USDT0_OFT_ADDRESSES[chain];
@@ -234,6 +241,8 @@ export function getUsdt0OftAddress(chain: string): Address | undefined {
 
 /**
  * Check if a chain supports USDT0 bridging
+ *
+ * @param chain
  */
 export function supportsBridging(chain: string): boolean {
   return chain in USDT0_OFT_ADDRESSES && chain in LAYERZERO_ENDPOINT_IDS;
@@ -243,14 +252,14 @@ export function supportsBridging(chain: string): boolean {
  * Get all chains that support USDT0 bridging
  */
 export function getBridgeableChains(): string[] {
-  return Object.keys(USDT0_OFT_ADDRESSES).filter(
-    (chain) => chain in LAYERZERO_ENDPOINT_IDS,
-  );
+  return Object.keys(USDT0_OFT_ADDRESSES).filter(chain => chain in LAYERZERO_ENDPOINT_IDS);
 }
 
 /**
  * Convert address to bytes32 format for LayerZero
  * Pads address with leading zeros to 32 bytes
+ *
+ * @param address
  */
 export function addressToBytes32(address: Address): `0x${string}` {
   // Remove 0x prefix, pad to 64 chars (32 bytes), add 0x prefix
@@ -260,6 +269,8 @@ export function addressToBytes32(address: Address): `0x${string}` {
 
 /**
  * Convert bytes32 to address
+ *
+ * @param bytes32
  */
 export function bytes32ToAddress(bytes32: `0x${string}`): Address {
   // Take last 40 characters (20 bytes)

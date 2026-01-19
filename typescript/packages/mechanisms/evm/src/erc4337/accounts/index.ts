@@ -56,19 +56,20 @@ export type AccountType = "safe";
 /**
  * Account configuration by type
  */
-export type AccountTypeConfig<T extends AccountType> =
-  T extends "safe" ? SafeSmartAccountConfig :
-  never;
+export type AccountTypeConfig<T extends AccountType> = T extends "safe"
+  ? SafeSmartAccountConfig
+  : never;
 
 /**
  * Account client by type
  */
-export type AccountTypeClient<T extends AccountType> =
-  T extends "safe" ? SafeSmartAccount :
-  never;
+export type AccountTypeClient<T extends AccountType> = T extends "safe" ? SafeSmartAccount : never;
 
 /**
  * Create a smart account of the specified type
+ *
+ * @param type
+ * @param config
  */
 export function createSmartAccount<T extends AccountType>(
   type: T,
@@ -85,10 +86,10 @@ export function createSmartAccount<T extends AccountType>(
 /**
  * Get the account type from an address
  * Checks bytecode to determine the smart account implementation
+ *
+ * @param _address
  */
-export async function detectAccountType(
-  _address: Address,
-): Promise<AccountType | null> {
+export async function detectAccountType(_address: Address): Promise<AccountType | null> {
   // Future: Add detection logic based on bytecode patterns
   // For now, return null (unknown)
   return null;
