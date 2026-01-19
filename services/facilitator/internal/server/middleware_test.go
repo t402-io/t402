@@ -81,7 +81,7 @@ func TestGenerateRequestID(t *testing.T) {
 
 func TestCORSMiddleware(t *testing.T) {
 	router := gin.New()
-	router.Use(CORSMiddleware())
+	router.Use(CORSMiddleware("*"))
 	router.GET("/test", func(c *gin.Context) {
 		c.String(http.StatusOK, "ok")
 	})
@@ -105,7 +105,7 @@ func TestCORSMiddleware(t *testing.T) {
 
 func TestCORSMiddleware_OPTIONS(t *testing.T) {
 	router := gin.New()
-	router.Use(CORSMiddleware())
+	router.Use(CORSMiddleware("*"))
 	router.OPTIONS("/test", func(c *gin.Context) {
 		t.Error("handler should not be called for OPTIONS")
 	})
@@ -117,6 +117,64 @@ func TestCORSMiddleware_OPTIONS(t *testing.T) {
 
 	if w.Code != http.StatusNoContent {
 		t.Errorf("expected status 204, got %d", w.Code)
+	}
+}
+
+func TestCORSMiddleware_AllowedOrigins(t *testing.T) {
+	router := gin.New()
+	router.Use(CORSMiddleware("https://example.com,https://test.com"))
+	router.GET("/test", func(c *gin.Context) {
+		c.String(http.StatusOK, "ok")
+	})
+
+	// Test allowed origin
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	req.Header.Set("Origin", "https://example.com")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	if got := w.Header().Get("Access-Control-Allow-Origin"); got != "https://example.com" {
+		t.Errorf("Access-Control-Allow-Origin = %s, expected https://example.com", got)
+	}
+	if got := w.Header().Get("Vary"); got != "Origin" {
+		t.Errorf("Vary = %s, expected Origin", got)
+	}
+}
+
+func TestCORSMiddleware_DisallowedOrigin(t *testing.T) {
+	router := gin.New()
+	router.Use(CORSMiddleware("https://example.com"))
+	router.GET("/test", func(c *gin.Context) {
+		c.String(http.StatusOK, "ok")
+	})
+
+	// Test disallowed origin
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	req.Header.Set("Origin", "https://malicious.com")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	// Should not set Access-Control-Allow-Origin for disallowed origins
+	if got := w.Header().Get("Access-Control-Allow-Origin"); got != "" {
+		t.Errorf("Access-Control-Allow-Origin = %s, expected empty for disallowed origin", got)
+	}
+}
+
+func TestCORSMiddleware_OPTIONS_DisallowedOrigin(t *testing.T) {
+	router := gin.New()
+	router.Use(CORSMiddleware("https://example.com"))
+	router.OPTIONS("/test", func(c *gin.Context) {
+		t.Error("handler should not be called for OPTIONS")
+	})
+
+	req := httptest.NewRequest(http.MethodOptions, "/test", nil)
+	req.Header.Set("Origin", "https://malicious.com")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	// Should return 403 for disallowed origin on preflight
+	if w.Code != http.StatusForbidden {
+		t.Errorf("expected status 403, got %d", w.Code)
 	}
 }
 
