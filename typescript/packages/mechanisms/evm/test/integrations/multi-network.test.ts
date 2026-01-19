@@ -8,10 +8,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { t402Client } from "@t402/core/client";
 import { t402Facilitator } from "@t402/core/facilitator";
-import {
-  t402ResourceServer,
-  FacilitatorClient,
-} from "@t402/core/server";
+import { t402ResourceServer, FacilitatorClient } from "@t402/core/server";
 import {
   Network,
   PaymentPayload,
@@ -26,14 +23,7 @@ import { ExactEvmScheme as ExactEvmFacilitator } from "../../src/exact/facilitat
 import type { ExactEvmPayloadV2 } from "../../src/types";
 import { privateKeyToAccount } from "viem/accounts";
 import { createWalletClient, createPublicClient, http } from "viem";
-import {
-  mainnet,
-  arbitrum,
-  polygon,
-  base,
-  baseSepolia,
-  sepolia,
-} from "viem/chains";
+import { mainnet, arbitrum, polygon, base, baseSepolia, sepolia } from "viem/chains";
 import {
   TOKEN_REGISTRY,
   getDefaultToken,
@@ -168,10 +158,10 @@ describe("Multi-Network Integration Tests", () => {
   describe.skipIf(!HAS_PRIVATE_KEYS)("Server Price Parsing - Multi-Network", () => {
     const testNetworks: Network[] = [
       "eip155:84532", // Base Sepolia
-      "eip155:8453",  // Base
-      "eip155:1",     // Ethereum
+      "eip155:8453", // Base
+      "eip155:1", // Ethereum
       "eip155:42161", // Arbitrum
-      "eip155:137",   // Polygon
+      "eip155:137", // Polygon
     ];
 
     for (const network of testNetworks) {
@@ -583,7 +573,7 @@ describe("Multi-Network Integration Tests", () => {
         ...paymentPayload,
         payload: {
           ...(paymentPayload.payload as ExactEvmPayloadV2),
-          signature: "0x" + "00".repeat(65) as `0x${string}`,
+          signature: ("0x" + "00".repeat(65)) as `0x${string}`,
         },
       };
 

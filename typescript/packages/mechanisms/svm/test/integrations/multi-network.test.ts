@@ -201,9 +201,17 @@ describe("SVM Multi-Network Integration Tests", () => {
 
   describe("Server Price Parsing - Multi-Network", () => {
     const networks: Array<{ name: string; network: Network; usdcAddress: string }> = [
-      { name: "Mainnet", network: SOLANA_MAINNET_CAIP2 as Network, usdcAddress: USDC_MAINNET_ADDRESS },
+      {
+        name: "Mainnet",
+        network: SOLANA_MAINNET_CAIP2 as Network,
+        usdcAddress: USDC_MAINNET_ADDRESS,
+      },
       { name: "Devnet", network: SOLANA_DEVNET_CAIP2 as Network, usdcAddress: USDC_DEVNET_ADDRESS },
-      { name: "Testnet", network: SOLANA_TESTNET_CAIP2 as Network, usdcAddress: USDC_TESTNET_ADDRESS },
+      {
+        name: "Testnet",
+        network: SOLANA_TESTNET_CAIP2 as Network,
+        usdcAddress: USDC_TESTNET_ADDRESS,
+      },
     ];
 
     for (const { name, network, usdcAddress } of networks) {
@@ -257,7 +265,7 @@ describe("SVM Multi-Network Integration Tests", () => {
       const server = new ExactSvmServer();
 
       // Register parser that uses custom token for amounts > 50
-      server.registerMoneyParser(async (amount) => {
+      server.registerMoneyParser(async amount => {
         if (amount > 50) {
           return {
             amount: (amount * 1e9).toString(), // 9 decimals
@@ -282,7 +290,7 @@ describe("SVM Multi-Network Integration Tests", () => {
       const server = new ExactSvmServer();
 
       server
-        .registerMoneyParser(async (amount) => {
+        .registerMoneyParser(async amount => {
           if (amount > 1000) {
             return {
               amount: amount.toString(),
@@ -292,7 +300,7 @@ describe("SVM Multi-Network Integration Tests", () => {
           }
           return null;
         })
-        .registerMoneyParser(async (amount) => {
+        .registerMoneyParser(async amount => {
           if (amount > 100) {
             return {
               amount: amount.toString(),

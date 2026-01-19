@@ -179,9 +179,7 @@ describe("PaymasterClient", () => {
       );
 
       expect(data.paymaster).toBe("0x1234567890123456789012345678901234567890");
-      expect(data.paymasterData).toBe(
-        "0x3333333333333333333333333333333333333333",
-      );
+      expect(data.paymasterData).toBe("0x3333333333333333333333333333333333333333");
     });
   });
 
@@ -293,9 +291,7 @@ describe("decodePaymasterAndData", () => {
 
     expect(decoded).not.toBeNull();
     expect(decoded!.paymaster.toLowerCase()).toBe(original.paymaster.toLowerCase());
-    expect(decoded!.paymasterVerificationGasLimit).toBe(
-      original.paymasterVerificationGasLimit,
-    );
+    expect(decoded!.paymasterVerificationGasLimit).toBe(original.paymasterVerificationGasLimit);
     expect(decoded!.paymasterPostOpGasLimit).toBe(original.paymasterPostOpGasLimit);
   });
 });

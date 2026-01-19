@@ -9,15 +9,8 @@
  */
 
 import type { Address, Hex } from "viem";
-import {
-  BundlerClient,
-  BundlerError,
-} from "../bundler.js";
-import type {
-  UserOperation,
-  UserOperationResult,
-  GasEstimate,
-} from "../types.js";
+import { BundlerClient, BundlerError } from "../bundler.js";
+import type { UserOperation, UserOperationResult, GasEstimate } from "../types.js";
 import { ENTRYPOINT_V07_ADDRESS, packAccountGasLimits, packGasFees } from "../constants.js";
 
 /**
@@ -56,11 +49,16 @@ export interface PimlicoConfig {
 export class PimlicoBundlerClient extends BundlerClient {
   private readonly pimlicoUrl: string;
 
+  /**
+   *
+   * @param config
+   */
   constructor(config: PimlicoConfig) {
     // Construct Pimlico bundler URL
-    const bundlerUrl = config.bundlerUrl && config.bundlerUrl.includes("pimlico")
-      ? config.bundlerUrl
-      : `https://api.pimlico.io/v2/${config.chainId}/rpc?apikey=${config.apiKey}`;
+    const bundlerUrl =
+      config.bundlerUrl && config.bundlerUrl.includes("pimlico")
+        ? config.bundlerUrl
+        : `https://api.pimlico.io/v2/${config.chainId}/rpc?apikey=${config.apiKey}`;
 
     super({
       ...config,
@@ -100,6 +98,9 @@ export class PimlicoBundlerClient extends BundlerClient {
   /**
    * Send a compressed UserOperation for lower gas costs
    * Pimlico compresses the calldata before submitting to reduce L1 costs
+   *
+   * @param userOp
+   * @param inflatorAddress
    */
   async sendCompressedUserOperation(
     userOp: UserOperation,
@@ -107,10 +108,11 @@ export class PimlicoBundlerClient extends BundlerClient {
   ): Promise<UserOperationResult> {
     const packed = this.packUserOpForRpc(userOp);
 
-    const userOpHash = await this.pimlicoRpcCall<Hex>(
-      "pimlico_sendCompressedUserOperation",
-      [packed, inflatorAddress, ENTRYPOINT_V07_ADDRESS],
-    );
+    const userOpHash = await this.pimlicoRpcCall<Hex>("pimlico_sendCompressedUserOperation", [
+      packed,
+      inflatorAddress,
+      ENTRYPOINT_V07_ADDRESS,
+    ]);
 
     return {
       userOpHash,
@@ -120,9 +122,18 @@ export class PimlicoBundlerClient extends BundlerClient {
 
   /**
    * Get user operation status from Pimlico
+   *
+   * @param userOpHash
    */
   async getUserOperationStatus(userOpHash: Hex): Promise<{
-    status: "not_found" | "not_submitted" | "submitted" | "rejected" | "included" | "failed" | "reverted";
+    status:
+      | "not_found"
+      | "not_submitted"
+      | "submitted"
+      | "rejected"
+      | "included"
+      | "failed"
+      | "reverted";
     transactionHash?: Hex;
   }> {
     const result = await this.pimlicoRpcCall<{
@@ -131,13 +142,23 @@ export class PimlicoBundlerClient extends BundlerClient {
     }>("pimlico_getUserOperationStatus", [userOpHash]);
 
     return {
-      status: result.status as "not_found" | "not_submitted" | "submitted" | "rejected" | "included" | "failed" | "reverted",
+      status: result.status as
+        | "not_found"
+        | "not_submitted"
+        | "submitted"
+        | "rejected"
+        | "included"
+        | "failed"
+        | "reverted",
       transactionHash: result.transactionHash,
     };
   }
 
   /**
    * Estimate gas with Pimlico-specific optimizations
+   *
+   * @param userOp
+   * @param stateOverride
    */
   async estimateUserOperationGasWithPimlico(
     userOp: Partial<UserOperation> & {
@@ -194,6 +215,8 @@ export class PimlicoBundlerClient extends BundlerClient {
 
   /**
    * Pack UserOperation for RPC
+   *
+   * @param userOp
    */
   private packUserOpForRpc(userOp: UserOperation): Record<string, unknown> {
     return {
@@ -201,10 +224,7 @@ export class PimlicoBundlerClient extends BundlerClient {
       nonce: this.bigintToHex(userOp.nonce),
       initCode: userOp.initCode,
       callData: userOp.callData,
-      accountGasLimits: packAccountGasLimits(
-        userOp.verificationGasLimit,
-        userOp.callGasLimit,
-      ),
+      accountGasLimits: packAccountGasLimits(userOp.verificationGasLimit, userOp.callGasLimit),
       preVerificationGas: this.bigintToHex(userOp.preVerificationGas),
       gasFees: packGasFees(userOp.maxPriorityFeePerGas, userOp.maxFeePerGas),
       paymasterAndData: userOp.paymasterAndData,
@@ -214,6 +234,8 @@ export class PimlicoBundlerClient extends BundlerClient {
 
   /**
    * Convert bigint to hex
+   *
+   * @param value
    */
   private bigintToHex(value: bigint): Hex {
     return `0x${value.toString(16)}` as Hex;
@@ -221,6 +243,9 @@ export class PimlicoBundlerClient extends BundlerClient {
 
   /**
    * Make Pimlico-specific RPC call
+   *
+   * @param method
+   * @param params
    */
   private async pimlicoRpcCall<T>(method: string, params: unknown[]): Promise<T> {
     const response = await fetch(this.pimlicoUrl, {
@@ -237,12 +262,10 @@ export class PimlicoBundlerClient extends BundlerClient {
     });
 
     if (!response.ok) {
-      throw new BundlerError(
-        `HTTP error: ${response.status} ${response.statusText}`,
-      );
+      throw new BundlerError(`HTTP error: ${response.status} ${response.statusText}`);
     }
 
-    const json = await response.json() as {
+    const json = (await response.json()) as {
       result?: T;
       error?: { code: number; message: string; data?: unknown };
     };
@@ -257,6 +280,8 @@ export class PimlicoBundlerClient extends BundlerClient {
 
 /**
  * Create a Pimlico bundler client
+ *
+ * @param config
  */
 export function createPimlicoBundlerClient(config: PimlicoConfig): PimlicoBundlerClient {
   return new PimlicoBundlerClient(config);

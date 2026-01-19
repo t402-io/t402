@@ -8,12 +8,7 @@
 
 import type { Address, Hex } from "viem";
 import { concat, pad, toHex } from "viem";
-import type {
-  UserOperation,
-  PaymasterData,
-  PaymasterConfig,
-  GasEstimate,
-} from "./types.js";
+import type { UserOperation, PaymasterData, PaymasterConfig, GasEstimate } from "./types.js";
 import { DEFAULT_GAS_LIMITS } from "./constants.js";
 
 /**
@@ -49,12 +44,21 @@ export interface SponsorRequest {
 export class PaymasterClient {
   private readonly config: PaymasterConfig;
 
+  /**
+   *
+   * @param config
+   */
   constructor(config: PaymasterConfig) {
     this.config = config;
   }
 
   /**
    * Get paymaster data for a UserOperation
+   *
+   * @param userOp
+   * @param chainId
+   * @param entryPoint
+   * @param context
    */
   async getPaymasterData(
     userOp: Partial<UserOperation>,
@@ -66,12 +70,7 @@ export class PaymasterClient {
       case "verifying":
         return this.getVerifyingPaymasterData(userOp, chainId, entryPoint);
       case "sponsoring":
-        return this.getSponsoringPaymasterData(
-          userOp,
-          chainId,
-          entryPoint,
-          context,
-        );
+        return this.getSponsoringPaymasterData(userOp, chainId, entryPoint, context);
       case "token":
         return this.getTokenPaymasterData(userOp, chainId, entryPoint);
       default:
@@ -81,6 +80,9 @@ export class PaymasterClient {
 
   /**
    * Get gas estimates including paymaster gas
+   *
+   * @param _userOp
+   * @param _chainId
    */
   async estimatePaymasterGas(
     _userOp: Partial<UserOperation>,
@@ -92,14 +94,18 @@ export class PaymasterClient {
       verificationGasLimit: DEFAULT_GAS_LIMITS.verificationGasLimit,
       callGasLimit: DEFAULT_GAS_LIMITS.callGasLimit,
       preVerificationGas: DEFAULT_GAS_LIMITS.preVerificationGas,
-      paymasterVerificationGasLimit:
-        DEFAULT_GAS_LIMITS.paymasterVerificationGasLimit,
+      paymasterVerificationGasLimit: DEFAULT_GAS_LIMITS.paymasterVerificationGasLimit,
       paymasterPostOpGasLimit: DEFAULT_GAS_LIMITS.paymasterPostOpGasLimit,
     };
   }
 
   /**
    * Check if the paymaster will sponsor this operation
+   *
+   * @param userOp
+   * @param chainId
+   * @param entryPoint
+   * @param context
    */
   async willSponsor(
     userOp: Partial<UserOperation>,
@@ -135,6 +141,10 @@ export class PaymasterClient {
 
   /**
    * Get verifying paymaster data (off-chain signature)
+   *
+   * @param userOp
+   * @param chainId
+   * @param entryPoint
    */
   private async getVerifyingPaymasterData(
     userOp: Partial<UserOperation>,
@@ -150,8 +160,7 @@ export class PaymasterClient {
     // The signature would need to be added by the paymaster owner
     return {
       paymaster: this.config.address,
-      paymasterVerificationGasLimit:
-        DEFAULT_GAS_LIMITS.paymasterVerificationGasLimit,
+      paymasterVerificationGasLimit: DEFAULT_GAS_LIMITS.paymasterVerificationGasLimit,
       paymasterPostOpGasLimit: DEFAULT_GAS_LIMITS.paymasterPostOpGasLimit,
       paymasterData: "0x" as Hex,
     };
@@ -159,6 +168,11 @@ export class PaymasterClient {
 
   /**
    * Get sponsoring paymaster data (third-party pays)
+   *
+   * @param userOp
+   * @param chainId
+   * @param entryPoint
+   * @param context
    */
   private async getSponsoringPaymasterData(
     userOp: Partial<UserOperation>,
@@ -199,6 +213,10 @@ export class PaymasterClient {
 
   /**
    * Get token paymaster data (pay gas with ERC20)
+   *
+   * @param userOp
+   * @param chainId
+   * @param entryPoint
    */
   private async getTokenPaymasterData(
     userOp: Partial<UserOperation>,
@@ -221,8 +239,7 @@ export class PaymasterClient {
     // The actual rate and validation would be done on-chain
     return {
       paymaster: this.config.address,
-      paymasterVerificationGasLimit:
-        DEFAULT_GAS_LIMITS.paymasterVerificationGasLimit,
+      paymasterVerificationGasLimit: DEFAULT_GAS_LIMITS.paymasterVerificationGasLimit,
       paymasterPostOpGasLimit: DEFAULT_GAS_LIMITS.paymasterPostOpGasLimit,
       paymasterData: tokenAddress as Hex, // Token address as data
     };
@@ -230,6 +247,11 @@ export class PaymasterClient {
 
   /**
    * Call paymaster service API
+   *
+   * @param userOp
+   * @param chainId
+   * @param entryPoint
+   * @param context
    */
   private async callPaymasterService(
     userOp: Partial<UserOperation>,
@@ -269,15 +291,14 @@ export class PaymasterClient {
 
   /**
    * Serialize UserOperation for API calls
+   *
+   * @param userOp
    */
-  private serializeUserOp(
-    userOp: Partial<UserOperation>,
-  ): Record<string, string> {
+  private serializeUserOp(userOp: Partial<UserOperation>): Record<string, string> {
     const result: Record<string, string> = {};
 
     if (userOp.sender) result.sender = userOp.sender;
-    if (userOp.nonce !== undefined)
-      result.nonce = `0x${userOp.nonce.toString(16)}`;
+    if (userOp.nonce !== undefined) result.nonce = `0x${userOp.nonce.toString(16)}`;
     if (userOp.initCode) result.initCode = userOp.initCode;
     if (userOp.callData) result.callData = userOp.callData;
     if (userOp.verificationGasLimit !== undefined)
@@ -299,6 +320,8 @@ export class PaymasterClient {
 
 /**
  * Create a PaymasterClient instance
+ *
+ * @param config
  */
 export function createPaymasterClient(config: PaymasterConfig): PaymasterClient {
   return new PaymasterClient(config);
@@ -306,6 +329,8 @@ export function createPaymasterClient(config: PaymasterConfig): PaymasterClient 
 
 /**
  * Encode paymaster data for inclusion in UserOperation
+ *
+ * @param data
  */
 export function encodePaymasterAndData(data: PaymasterData): Hex {
   return concat([
@@ -318,6 +343,8 @@ export function encodePaymasterAndData(data: PaymasterData): Hex {
 
 /**
  * Decode paymaster and data from UserOperation
+ *
+ * @param paymasterAndData
  */
 export function decodePaymasterAndData(paymasterAndData: Hex): PaymasterData | null {
   if (paymasterAndData === "0x" || paymasterAndData.length < 86) {
@@ -326,9 +353,7 @@ export function decodePaymasterAndData(paymasterAndData: Hex): PaymasterData | n
 
   // 20 bytes address + 16 bytes verification gas + 16 bytes postOp gas = 52 bytes = 104 hex chars + 0x
   const paymaster = `0x${paymasterAndData.slice(2, 42)}` as Address;
-  const paymasterVerificationGasLimit = BigInt(
-    `0x${paymasterAndData.slice(42, 74)}`,
-  );
+  const paymasterVerificationGasLimit = BigInt(`0x${paymasterAndData.slice(42, 74)}`);
   const paymasterPostOpGasLimit = BigInt(`0x${paymasterAndData.slice(74, 106)}`);
   const paymasterData = `0x${paymasterAndData.slice(106)}` as Hex;
 

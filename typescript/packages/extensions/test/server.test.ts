@@ -41,10 +41,7 @@ describe("bazaarResourceServerExtension", () => {
         adapter: {},
       };
 
-      const enriched = bazaarResourceServerExtension.enrichDeclaration!(
-        declaration,
-        httpContext,
-      );
+      const enriched = bazaarResourceServerExtension.enrichDeclaration!(declaration, httpContext);
 
       expect(enriched.info.input.method).toBe("GET");
     });
@@ -77,10 +74,7 @@ describe("bazaarResourceServerExtension", () => {
         adapter: {},
       };
 
-      const enriched = bazaarResourceServerExtension.enrichDeclaration!(
-        declaration,
-        httpContext,
-      );
+      const enriched = bazaarResourceServerExtension.enrichDeclaration!(declaration, httpContext);
 
       expect(enriched.schema.properties.input.required).toContain("method");
     });
@@ -114,10 +108,7 @@ describe("bazaarResourceServerExtension", () => {
         adapter: {},
       };
 
-      const enriched = bazaarResourceServerExtension.enrichDeclaration!(
-        declaration,
-        httpContext,
-      );
+      const enriched = bazaarResourceServerExtension.enrichDeclaration!(declaration, httpContext);
 
       const methodCount = enriched.schema.properties.input.required.filter(
         (r: string) => r === "method",
@@ -142,10 +133,7 @@ describe("bazaarResourceServerExtension", () => {
         someOtherProperty: "value",
       };
 
-      const result = bazaarResourceServerExtension.enrichDeclaration!(
-        declaration,
-        nonHttpContext,
-      );
+      const result = bazaarResourceServerExtension.enrichDeclaration!(declaration, nonHttpContext);
 
       expect(result).toEqual(declaration);
     });
@@ -162,10 +150,7 @@ describe("bazaarResourceServerExtension", () => {
         },
       };
 
-      const result = bazaarResourceServerExtension.enrichDeclaration!(
-        declaration,
-        null,
-      );
+      const result = bazaarResourceServerExtension.enrichDeclaration!(declaration, null);
 
       expect(result).toEqual(declaration);
     });
@@ -198,10 +183,7 @@ describe("bazaarResourceServerExtension", () => {
         adapter: {},
       };
 
-      const enriched = bazaarResourceServerExtension.enrichDeclaration!(
-        declaration,
-        httpContext,
-      );
+      const enriched = bazaarResourceServerExtension.enrichDeclaration!(declaration, httpContext);
 
       expect(enriched.info.input.queryParams).toEqual({ limit: 10 });
       expect(enriched.info.output).toEqual({ type: "json", example: { data: [] } });
@@ -215,10 +197,7 @@ describe("bazaarResourceServerExtension", () => {
         adapter: {},
       };
 
-      const enriched = bazaarResourceServerExtension.enrichDeclaration!(
-        declaration,
-        httpContext,
-      );
+      const enriched = bazaarResourceServerExtension.enrichDeclaration!(declaration, httpContext);
 
       expect(enriched.info.input.method).toBe("DELETE");
     });
@@ -234,10 +213,7 @@ describe("bazaarResourceServerExtension", () => {
 
         const httpContext = { method, adapter: {} };
 
-        const enriched = bazaarResourceServerExtension.enrichDeclaration!(
-          declaration,
-          httpContext,
-        );
+        const enriched = bazaarResourceServerExtension.enrichDeclaration!(declaration, httpContext);
 
         expect(enriched.info.input.method).toBe(method);
       }

@@ -20,11 +20,7 @@ import {
 import { UserOpBuilder } from "../../src/erc4337/builder";
 import { BundlerClient } from "../../src/erc4337/bundler";
 import { PaymasterClient } from "../../src/erc4337/paymaster";
-import type {
-  SmartAccountSigner,
-  UserOperation,
-  GasEstimate,
-} from "../../src/erc4337/types";
+import type { SmartAccountSigner, UserOperation, GasEstimate } from "../../src/erc4337/types";
 import { ENTRYPOINT_V07_ADDRESS } from "../../src/erc4337/constants";
 import { getTokenConfig } from "../../src/tokens";
 
@@ -42,49 +38,51 @@ function createMockSigner(address: Address): SmartAccountSigner {
     isDeployed: vi.fn().mockResolvedValue(true),
     getInitCode: vi.fn().mockResolvedValue("0x" as Hex),
     getNonce: vi.fn().mockResolvedValue(0n),
-    signMessage: vi.fn().mockResolvedValue("0x" + "00".repeat(65) as Hex),
-    signTypedData: vi.fn().mockResolvedValue("0x" + "00".repeat(65) as Hex),
-    signUserOp: vi.fn().mockResolvedValue("0x" + "00".repeat(65) as Hex),
+    signMessage: vi.fn().mockResolvedValue(("0x" + "00".repeat(65)) as Hex),
+    signTypedData: vi.fn().mockResolvedValue(("0x" + "00".repeat(65)) as Hex),
+    signUserOp: vi.fn().mockResolvedValue(("0x" + "00".repeat(65)) as Hex),
     encodeExecute: vi.fn().mockImplementation((to: Address, value: bigint, data: Hex) => {
       // Simplified execute encoding
       return encodeFunctionData({
-        abi: [{
-          inputs: [
-            { name: "dest", type: "address" },
-            { name: "value", type: "uint256" },
-            { name: "func", type: "bytes" },
-          ],
-          name: "execute",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        }],
+        abi: [
+          {
+            inputs: [
+              { name: "dest", type: "address" },
+              { name: "value", type: "uint256" },
+              { name: "func", type: "bytes" },
+            ],
+            name: "execute",
+            outputs: [],
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+        ],
         functionName: "execute",
         args: [to, value, data],
       });
     }),
-    encodeExecuteBatch: vi.fn().mockImplementation((
-      targets: Address[],
-      values: bigint[],
-      datas: Hex[],
-    ) => {
-      // Simplified batch execute encoding
-      return encodeFunctionData({
-        abi: [{
-          inputs: [
-            { name: "dest", type: "address[]" },
-            { name: "value", type: "uint256[]" },
-            { name: "func", type: "bytes[]" },
+    encodeExecuteBatch: vi
+      .fn()
+      .mockImplementation((targets: Address[], values: bigint[], datas: Hex[]) => {
+        // Simplified batch execute encoding
+        return encodeFunctionData({
+          abi: [
+            {
+              inputs: [
+                { name: "dest", type: "address[]" },
+                { name: "value", type: "uint256[]" },
+                { name: "func", type: "bytes[]" },
+              ],
+              name: "executeBatch",
+              outputs: [],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
           ],
-          name: "executeBatch",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        }],
-        functionName: "executeBatch",
-        args: [targets, values, datas],
-      });
-    }),
+          functionName: "executeBatch",
+          args: [targets, values, datas],
+        });
+      }),
   };
 }
 
@@ -92,9 +90,7 @@ describe("ERC-4337 Integration Tests", () => {
   describe("UserOpBuilder", () => {
     it("should build a valid UserOperation structure", async () => {
       const builder = new UserOpBuilder();
-      const mockSigner = createMockSigner(
-        "0x1234567890123456789012345678901234567890" as Address,
-      );
+      const mockSigner = createMockSigner("0x1234567890123456789012345678901234567890" as Address);
       const publicClient = createPublicClient({
         chain: baseSepolia,
         transport: http(),
@@ -104,16 +100,18 @@ describe("ERC-4337 Integration Tests", () => {
         to: TEST_TOKEN_ADDRESS,
         value: 0n,
         data: encodeFunctionData({
-          abi: [{
-            inputs: [
-              { name: "to", type: "address" },
-              { name: "amount", type: "uint256" },
-            ],
-            name: "transfer",
-            outputs: [{ name: "", type: "bool" }],
-            stateMutability: "nonpayable",
-            type: "function",
-          }],
+          abi: [
+            {
+              inputs: [
+                { name: "to", type: "address" },
+                { name: "amount", type: "uint256" },
+              ],
+              name: "transfer",
+              outputs: [{ name: "", type: "bool" }],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+          ],
           functionName: "transfer",
           args: [TEST_RECIPIENT, TEST_AMOUNT],
         }),
@@ -125,12 +123,7 @@ describe("ERC-4337 Integration Tests", () => {
         preVerificationGas: 50000n,
       };
 
-      const userOp = await builder.buildUserOp(
-        mockSigner,
-        intent,
-        publicClient,
-        gasEstimate,
-      );
+      const userOp = await builder.buildUserOp(mockSigner, intent, publicClient, gasEstimate);
 
       // Verify UserOperation structure
       expect(userOp.sender).toBeDefined();
@@ -144,9 +137,7 @@ describe("ERC-4337 Integration Tests", () => {
 
     it("should build batch UserOperation for multiple payments", async () => {
       const builder = new UserOpBuilder();
-      const mockSigner = createMockSigner(
-        "0x1234567890123456789012345678901234567890" as Address,
-      );
+      const mockSigner = createMockSigner("0x1234567890123456789012345678901234567890" as Address);
       const publicClient = createPublicClient({
         chain: baseSepolia,
         transport: http(),
@@ -157,16 +148,18 @@ describe("ERC-4337 Integration Tests", () => {
           to: TEST_TOKEN_ADDRESS,
           value: 0n,
           data: encodeFunctionData({
-            abi: [{
-              inputs: [
-                { name: "to", type: "address" },
-                { name: "amount", type: "uint256" },
-              ],
-              name: "transfer",
-              outputs: [{ name: "", type: "bool" }],
-              stateMutability: "nonpayable",
-              type: "function",
-            }],
+            abi: [
+              {
+                inputs: [
+                  { name: "to", type: "address" },
+                  { name: "amount", type: "uint256" },
+                ],
+                name: "transfer",
+                outputs: [{ name: "", type: "bool" }],
+                stateMutability: "nonpayable",
+                type: "function",
+              },
+            ],
             functionName: "transfer",
             args: [TEST_RECIPIENT, TEST_AMOUNT],
           }),
@@ -175,16 +168,18 @@ describe("ERC-4337 Integration Tests", () => {
           to: TEST_TOKEN_ADDRESS,
           value: 0n,
           data: encodeFunctionData({
-            abi: [{
-              inputs: [
-                { name: "to", type: "address" },
-                { name: "amount", type: "uint256" },
-              ],
-              name: "transfer",
-              outputs: [{ name: "", type: "bool" }],
-              stateMutability: "nonpayable",
-              type: "function",
-            }],
+            abi: [
+              {
+                inputs: [
+                  { name: "to", type: "address" },
+                  { name: "amount", type: "uint256" },
+                ],
+                name: "transfer",
+                outputs: [{ name: "", type: "bool" }],
+                stateMutability: "nonpayable",
+                type: "function",
+              },
+            ],
             functionName: "transfer",
             args: ["0x1111111111111111111111111111111111111111" as Address, 2000000n],
           }),
@@ -197,12 +192,7 @@ describe("ERC-4337 Integration Tests", () => {
         preVerificationGas: 50000n,
       };
 
-      const userOp = await builder.buildBatchUserOp(
-        mockSigner,
-        intents,
-        publicClient,
-        gasEstimate,
-      );
+      const userOp = await builder.buildBatchUserOp(mockSigner, intents, publicClient, gasEstimate);
 
       // Verify batch UserOperation
       expect(userOp.sender).toBeDefined();
@@ -324,8 +314,8 @@ describe("ERC-4337 Integration Tests", () => {
         authorization: {
           validAfter: BigInt(now - 600),
           validBefore: BigInt(now + 3600),
-          nonce: "0x" + "00".repeat(32) as Hex,
-          signature: "0x" + "00".repeat(65) as Hex,
+          nonce: ("0x" + "00".repeat(32)) as Hex,
+          signature: ("0x" + "00".repeat(65)) as Hex,
         },
       };
 
@@ -360,39 +350,41 @@ describe("ERC-4337 Integration Tests", () => {
 
   describe("Batch Payments", () => {
     it("should support batching multiple payments", async () => {
-      const mockSigner = createMockSigner(
-        "0x1234567890123456789012345678901234567890" as Address,
-      );
+      const mockSigner = createMockSigner("0x1234567890123456789012345678901234567890" as Address);
 
       // Verify batch encoding is called with correct parameters
       const targets = [TEST_TOKEN_ADDRESS, TEST_TOKEN_ADDRESS];
       const values = [0n, 0n];
       const datas = [
         encodeFunctionData({
-          abi: [{
-            inputs: [
-              { name: "to", type: "address" },
-              { name: "amount", type: "uint256" },
-            ],
-            name: "transfer",
-            outputs: [{ name: "", type: "bool" }],
-            stateMutability: "nonpayable",
-            type: "function",
-          }],
+          abi: [
+            {
+              inputs: [
+                { name: "to", type: "address" },
+                { name: "amount", type: "uint256" },
+              ],
+              name: "transfer",
+              outputs: [{ name: "", type: "bool" }],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+          ],
           functionName: "transfer",
           args: [TEST_RECIPIENT, TEST_AMOUNT],
         }),
         encodeFunctionData({
-          abi: [{
-            inputs: [
-              { name: "to", type: "address" },
-              { name: "amount", type: "uint256" },
-            ],
-            name: "transfer",
-            outputs: [{ name: "", type: "bool" }],
-            stateMutability: "nonpayable",
-            type: "function",
-          }],
+          abi: [
+            {
+              inputs: [
+                { name: "to", type: "address" },
+                { name: "amount", type: "uint256" },
+              ],
+              name: "transfer",
+              outputs: [{ name: "", type: "bool" }],
+              stateMutability: "nonpayable",
+              type: "function",
+            },
+          ],
           functionName: "transfer",
           args: ["0x2222222222222222222222222222222222222222" as Address, 2000000n],
         }),
@@ -428,9 +420,7 @@ describe("ERC-4337 Integration Tests", () => {
 
   describe("Paymaster Integration", () => {
     it("should support optional paymaster configuration", () => {
-      const mockSigner = createMockSigner(
-        "0x1234567890123456789012345678901234567890" as Address,
-      );
+      const mockSigner = createMockSigner("0x1234567890123456789012345678901234567890" as Address);
       const publicClient = createPublicClient({
         chain: baseSepolia,
         transport: http(),

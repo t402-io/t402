@@ -3,7 +3,6 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { Address } from "viem";
 import {
   BRIDGE_CHAINS,
   CHAIN_IDS,

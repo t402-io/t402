@@ -69,11 +69,11 @@ export function createMockPublicClient(): PublicClient {
  * Create mock fetch for bundler/paymaster requests
  */
 export function createMockFetch() {
-  let requestCount = 0;
+  let _requestCount = 0;
 
   return vi.fn().mockImplementation(async (url: string, options: RequestInit) => {
     const body = JSON.parse(options.body as string);
-    requestCount++;
+    _requestCount++;
 
     // Handle different JSON-RPC methods
     switch (body.method) {

@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
   DEFAULT_CHAINS,
-  DEFAULT_RPC_ENDPOINTS,
   USDT0_ADDRESSES,
   USDC_ADDRESSES,
   USDT_LEGACY_ADDRESSES,

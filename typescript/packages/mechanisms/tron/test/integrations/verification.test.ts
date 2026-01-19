@@ -15,7 +15,6 @@ import {
   TRON_NILE_CAIP2,
   USDT_ADDRESSES,
   MIN_VALIDITY_BUFFER,
-  DEFAULT_FEE_LIMIT,
 } from "../../src/constants";
 
 // Valid TRON addresses for testing

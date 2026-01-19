@@ -140,10 +140,10 @@ export const permitTypes = {
 
 /**
  * Type guard for UptoEIP2612Payload
+ *
+ * @param payload
  */
-export function isUptoEIP2612Payload(
-  payload: unknown,
-): payload is UptoEIP2612Payload {
+export function isUptoEIP2612Payload(payload: unknown): payload is UptoEIP2612Payload {
   if (typeof payload !== "object" || payload === null) return false;
   const p = payload as Record<string, unknown>;
   return (

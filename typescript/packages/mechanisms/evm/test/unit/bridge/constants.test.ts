@@ -31,23 +31,15 @@ describe("Bridge Constants", () => {
 
   describe("USDT0_OFT_ADDRESSES", () => {
     it("should have addresses for USDT0 chains", () => {
-      expect(USDT0_OFT_ADDRESSES.ethereum).toBe(
-        "0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee",
-      );
-      expect(USDT0_OFT_ADDRESSES.arbitrum).toBe(
-        "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
-      );
-      expect(USDT0_OFT_ADDRESSES.ink).toBe(
-        "0x0200C29006150606B650577BBE7B6248F58470c1",
-      );
+      expect(USDT0_OFT_ADDRESSES.ethereum).toBe("0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee");
+      expect(USDT0_OFT_ADDRESSES.arbitrum).toBe("0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9");
+      expect(USDT0_OFT_ADDRESSES.ink).toBe("0x0200C29006150606B650577BBE7B6248F58470c1");
     });
   });
 
   describe("LAYERZERO_ENDPOINT_V2", () => {
     it("should be the canonical LayerZero V2 endpoint address", () => {
-      expect(LAYERZERO_ENDPOINT_V2).toBe(
-        "0x1a44076050125825900e736c501f859c50fE728c",
-      );
+      expect(LAYERZERO_ENDPOINT_V2).toBe("0x1a44076050125825900e736c501f859c50fE728c");
     });
   });
 
@@ -157,8 +149,7 @@ describe("Bridge Constants", () => {
 
   describe("bytes32ToAddress", () => {
     it("should extract address from bytes32", () => {
-      const bytes32 =
-        "0x0000000000000000000000001234567890123456789012345678901234567890";
+      const bytes32 = "0x0000000000000000000000001234567890123456789012345678901234567890";
       const address = bytes32ToAddress(bytes32);
 
       expect(address).toBe("0x1234567890123456789012345678901234567890");

@@ -181,6 +181,10 @@ export class SafeSmartAccount implements SmartAccountSigner {
   private deploymentChecked = false;
   private isAccountDeployed = false;
 
+  /**
+   *
+   * @param config
+   */
   constructor(config: SafeSmartAccountConfig) {
     this.signer = config.signer;
     this.publicClient = config.publicClient;
@@ -229,12 +233,12 @@ export class SafeSmartAccount implements SmartAccountSigner {
     );
 
     // Get proxy creation code
-    const proxyCreationCode = await this.publicClient.readContract({
+    const proxyCreationCode = (await this.publicClient.readContract({
       address: this.addresses.proxyFactory,
       abi: PROXY_FACTORY_ABI,
       functionName: "proxyCreationCode",
       args: [this.addresses.singleton, initializerData, this.saltNonce],
-    }) as Hex;
+    })) as Hex;
 
     // Compute CREATE2 address
     this.cachedAddress = getContractAddress({
@@ -249,6 +253,8 @@ export class SafeSmartAccount implements SmartAccountSigner {
 
   /**
    * Sign a UserOperation hash
+   *
+   * @param userOpHash
    */
   async signUserOpHash(userOpHash: Hex): Promise<Hex> {
     if (!this.signer.account) {
@@ -309,10 +315,7 @@ export class SafeSmartAccount implements SmartAccountSigner {
     });
 
     // Init code = factory address + factory call data
-    this.cachedInitCode = concat([
-      this.addresses.proxyFactory,
-      createProxyData,
-    ]) as Hex;
+    this.cachedInitCode = concat([this.addresses.proxyFactory, createProxyData]) as Hex;
 
     return this.cachedInitCode;
   }
@@ -325,7 +328,7 @@ export class SafeSmartAccount implements SmartAccountSigner {
       return this.isAccountDeployed;
     }
 
-    const address = this.cachedAddress ?? await this.getAddress();
+    const address = this.cachedAddress ?? (await this.getAddress());
     const code = await this.publicClient.getCode({ address });
 
     this.deploymentChecked = true;
@@ -336,6 +339,10 @@ export class SafeSmartAccount implements SmartAccountSigner {
 
   /**
    * Encode a call to the account's execute function
+   *
+   * @param target
+   * @param value
+   * @param data
    */
   encodeExecute(target: Address, value: bigint, data: Hex): Hex {
     return encodeFunctionData({
@@ -352,12 +359,12 @@ export class SafeSmartAccount implements SmartAccountSigner {
 
   /**
    * Encode a batch call to the account's executeBatch function
+   *
+   * @param targets
+   * @param values
+   * @param datas
    */
-  encodeExecuteBatch(
-    targets: Address[],
-    values: bigint[],
-    datas: Hex[],
-  ): Hex {
+  encodeExecuteBatch(targets: Address[], values: bigint[], datas: Hex[]): Hex {
     if (targets.length !== values.length || targets.length !== datas.length) {
       throw new Error("Array lengths must match");
     }
@@ -380,6 +387,9 @@ export class SafeSmartAccount implements SmartAccountSigner {
 
   /**
    * Get the account's nonce from EntryPoint
+   *
+   * @param entryPoint
+   * @param key
    */
   async getNonce(entryPoint: Address, key = 0n): Promise<bigint> {
     const address = await this.getAddress();
@@ -432,9 +442,9 @@ export class SafeSmartAccount implements SmartAccountSigner {
 
 /**
  * Create a Safe smart account
+ *
+ * @param config
  */
-export function createSafeSmartAccount(
-  config: SafeSmartAccountConfig,
-): SafeSmartAccount {
+export function createSafeSmartAccount(config: SafeSmartAccountConfig): SafeSmartAccount {
   return new SafeSmartAccount(config);
 }

@@ -55,9 +55,7 @@ export class UptoEvmScheme implements SchemeNetworkClient {
 
     const extra = paymentRequirements.extra as UptoEvmExtra;
     if (!extra?.name || !extra?.version) {
-      throw new Error(
-        "EIP-712 domain parameters (name, version) are required for upto scheme",
-      );
+      throw new Error("EIP-712 domain parameters (name, version) are required for upto scheme");
     }
 
     // Get maxAmount from the requirements

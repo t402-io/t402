@@ -49,21 +49,26 @@ export type BundlerProvider = "pimlico" | "alchemy" | "generic";
 /**
  * Bundler configuration by provider
  */
-export type BundlerProviderConfig<T extends BundlerProvider> =
-  T extends "pimlico" ? PimlicoConfig :
-  T extends "alchemy" ? AlchemyConfig :
-  BundlerConfig;
+export type BundlerProviderConfig<T extends BundlerProvider> = T extends "pimlico"
+  ? PimlicoConfig
+  : T extends "alchemy"
+    ? AlchemyConfig
+    : BundlerConfig;
 
 /**
  * Bundler client by provider
  */
-export type BundlerProviderClient<T extends BundlerProvider> =
-  T extends "pimlico" ? PimlicoBundlerClient :
-  T extends "alchemy" ? AlchemyBundlerClient :
-  BundlerClient;
+export type BundlerProviderClient<T extends BundlerProvider> = T extends "pimlico"
+  ? PimlicoBundlerClient
+  : T extends "alchemy"
+    ? AlchemyBundlerClient
+    : BundlerClient;
 
 /**
  * Create a bundler client for the specified provider
+ *
+ * @param provider
+ * @param config
  */
 export function createBundlerClient<T extends BundlerProvider>(
   provider: T,
@@ -82,6 +87,8 @@ export function createBundlerClient<T extends BundlerProvider>(
 
 /**
  * Auto-detect bundler provider from URL
+ *
+ * @param url
  */
 export function detectBundlerProvider(url: string): BundlerProvider {
   if (url.includes("pimlico")) {
@@ -95,6 +102,10 @@ export function detectBundlerProvider(url: string): BundlerProvider {
 
 /**
  * Create a bundler client with auto-detection
+ *
+ * @param bundlerUrl
+ * @param chainId
+ * @param apiKey
  */
 export function createBundlerClientFromUrl(
   bundlerUrl: string,

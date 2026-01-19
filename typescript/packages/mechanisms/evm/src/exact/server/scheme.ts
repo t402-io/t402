@@ -31,6 +31,10 @@ export class ExactEvmScheme implements SchemeNetworkServer {
   private moneyParsers: MoneyParser[] = [];
   private config: ExactEvmSchemeConfig;
 
+  /**
+   *
+   * @param config
+   */
   constructor(config: ExactEvmSchemeConfig = {}) {
     this.config = config;
   }
@@ -241,6 +245,8 @@ export class ExactEvmScheme implements SchemeNetworkServer {
 
   /**
    * Check if a network is supported
+   *
+   * @param network
    */
   static isNetworkSupported(network: string): boolean {
     return network in TOKEN_REGISTRY;

@@ -1,9 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { PublicClient } from "viem";
-import {
-  GaslessT402Client,
-  createGaslessT402Client,
-} from "../../../src/erc4337/t402";
+import { GaslessT402Client, createGaslessT402Client } from "../../../src/erc4337/t402";
 import type {
   SmartAccountSigner,
   PaymasterConfig,
@@ -22,11 +19,9 @@ describe("GaslessT402Client", () => {
 
     mockSigner = {
       getAddress: vi.fn().mockResolvedValue("0x1234567890123456789012345678901234567890"),
-      signUserOpHash: vi
-        .fn()
-        .mockResolvedValue(
-          "0x" + "ab".repeat(65), // 65 bytes = r(32) + s(32) + v(1)
-        ),
+      signUserOpHash: vi.fn().mockResolvedValue(
+        "0x" + "ab".repeat(65), // 65 bytes = r(32) + s(32) + v(1)
+      ),
       getInitCode: vi.fn().mockResolvedValue("0x"),
       isDeployed: vi.fn().mockResolvedValue(true),
       encodeExecute: vi.fn().mockReturnValue("0xencodedexecute"),
