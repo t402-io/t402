@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added TRON and TON exact scheme specifications
 - Added CONTRIBUTING.md for Java SDK
 - Added CONTRIBUTING.md for Facilitator service
-- Added last updated timestamps to ROADMAP.md, SECURITY.md, BUG_BOUNTY.md
+- Added last updated timestamps to ROADMAP.md, SECURITY.md
 
 ## [2.1.6] - 2026-01-18
 
