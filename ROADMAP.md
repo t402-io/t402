@@ -213,26 +213,47 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 
 > Focus: Next-Generation Payment Capabilities
 
-#### P0: Core Features (Month 7-9)
+#### P0: Core Features (Month 7-9) ✅
 
-- [ ] Agent Payment Authorization - Policy engine for AI agents
-- [ ] A2A Negotiation Protocol - Agent-to-agent payment flows
-- [ ] Smart Cross-chain Routing - Optimal path selection
+Internal packages implemented (575 tests passing):
 
-#### P1: Enhanced Features (Month 10-15)
+- [x] Agent Payment Authorization - `@t402-internal/agent-policy` (280 tests)
+- [x] A2A Negotiation Protocol - `@t402-internal/a2a-negotiation` (95 tests)
+- [x] Smart Cross-chain Routing - `@t402-internal/smart-router` (27 tests)
 
-- [ ] Privacy-preserving payments
+#### P1: Enhanced Features (Month 10-15) - In Progress
+
+- [x] Privacy-preserving payments - `@t402-internal/zk-payments` (79 tests)
 - [ ] MEV protection mechanisms
 - [ ] Atomic cross-chain swaps
-- [ ] Compliance engine
-- [ ] Intent-based payments
+- [x] Compliance engine - `@t402-internal/zk-payments` (compliance proofs)
+- [x] Intent-based payments - `@t402-internal/intent-payments` (57 tests)
 
-#### P2: Research (Month 16-18)
+#### P2: Research (Month 16-18) - In Progress
 
 - [ ] Advanced workflow engine
 - [ ] Subscription payments
 - [ ] Bitcoin L2 exploration
-- [ ] Payment channels
+- [x] Payment channels - `@t402-internal/streaming-payments` (37 tests)
+
+#### Internal Packages
+
+These features are implemented as internal packages in `docs/internal/typescript/`:
+
+| Package | Description | Tests |
+|---------|-------------|-------|
+| `@t402-internal/agent-policy` | AI agent spending policies and authorization | 280 |
+| `@t402-internal/a2a-negotiation` | Agent-to-agent negotiation and discovery | 95 |
+| `@t402-internal/intent-payments` | Intent-based payment system | 57 |
+| `@t402-internal/smart-router` | Multi-chain routing and optimization | 27 |
+| `@t402-internal/streaming-payments` | Per-second billing and payment channels | 37 |
+| `@t402-internal/zk-payments` | Zero-knowledge proofs for privacy | 79 |
+| `@t402-internal/demo-marketplace` | Integration demo (AI Agent Marketplace) | - |
+
+**Next Steps:**
+- [ ] Integrate internal packages into public SDK
+- [ ] Add public API documentation
+- [ ] Create migration guides for advanced features
 
 ---
 
@@ -261,6 +282,15 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 - [x] Safe multi-sig support
 - [x] MCP server for AI agents
 - [x] Hardware wallet support (Ledger, Trezor)
+
+### Internal Packages (Phase 8) ✅
+- [x] Agent policy engine (@t402-internal/agent-policy)
+- [x] A2A negotiation protocol (@t402-internal/a2a-negotiation)
+- [x] Intent-based payments (@t402-internal/intent-payments)
+- [x] Smart cross-chain routing (@t402-internal/smart-router)
+- [x] Streaming payments (@t402-internal/streaming-payments)
+- [x] Zero-knowledge proofs (@t402-internal/zk-payments)
+- [x] Integration demo (@t402-internal/demo-marketplace)
 
 ### Server Frameworks ✅
 - [x] Express.js middleware (@t402/express)
