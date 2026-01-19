@@ -403,7 +403,6 @@ We welcome contributions! See [CONTRIBUTING.md](./CONTRIBUTING.md) for guideline
 
 - [CONTRIBUTING.md](./CONTRIBUTING.md) - Contribution guidelines
 - [SECURITY.md](./SECURITY.md) - Security policy
-- [BUG_BOUNTY.md](./BUG_BOUNTY.md) - Bug bounty program
 
 ---
 
