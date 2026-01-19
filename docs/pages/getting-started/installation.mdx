@@ -72,17 +72,43 @@ The Python package includes:
 ## Go
 
 ```bash
-# Set GOPRIVATE for private repo (if needed)
-go env -w GOPRIVATE=github.com/t402-io/t402
-
 # Install
-go get github.com/t402-io/t402/go@latest
+go get github.com/t402-io/t402/go@v1.8.0
 ```
 
 The Go module includes:
 - Core protocol types
-- EVM, TON, and TRON mechanisms
+- EVM, SVM, TON, and TRON mechanisms
 - Gin middleware integration
+- MCP server for AI agents
+
+## Java
+
+import { Tabs } from 'nextra/components'
+
+<Tabs items={['Maven', 'Gradle']}>
+<Tabs.Tab>
+```xml
+<dependency>
+    <groupId>io.t402</groupId>
+    <artifactId>t402</artifactId>
+    <version>1.7.0</version>
+</dependency>
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```groovy
+implementation 'io.t402:t402:1.7.0'
+```
+</Tabs.Tab>
+</Tabs>
+
+The Java SDK includes:
+- Multi-chain support (EVM, SVM, TON, TRON)
+- Spring Boot 3.x auto-configuration
+- ERC-4337 Account Abstraction
+- USDT0 cross-chain bridge
+- CLI tool
 
 ## MCP Server (AI Agents)
 
@@ -105,8 +131,12 @@ See [MCP Integration](/advanced/mcp) for configuration details.
 - TypeScript 5.0+ (recommended)
 
 ### Python
-- Python 3.9+
+- Python 3.10+
 - pip or uv package manager
 
 ### Go
 - Go 1.21+
+
+### Java
+- Java 17+
+- Maven or Gradle
