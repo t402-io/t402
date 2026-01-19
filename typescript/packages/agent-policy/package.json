@@ -1,0 +1,115 @@
+{
+  "name": "@t402/agent-policy",
+  "version": "0.2.0",
+  "description": "AI Agent Payment Policy Engine for T402",
+  "type": "module",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/cjs/index.d.ts",
+  "bin": {
+    "agent-policy-mcp": "./bin/agent-policy-mcp.js"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.mts",
+        "default": "./dist/esm/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    },
+    "./policy": {
+      "import": {
+        "types": "./dist/esm/policy/index.d.mts",
+        "default": "./dist/esm/policy/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/policy/index.d.ts",
+        "default": "./dist/cjs/policy/index.js"
+      }
+    },
+    "./limits": {
+      "import": {
+        "types": "./dist/esm/limits/index.d.mts",
+        "default": "./dist/esm/limits/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/limits/index.d.ts",
+        "default": "./dist/cjs/limits/index.js"
+      }
+    },
+    "./rules": {
+      "import": {
+        "types": "./dist/esm/rules/index.d.mts",
+        "default": "./dist/esm/rules/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/rules/index.d.ts",
+        "default": "./dist/cjs/rules/index.js"
+      }
+    },
+    "./mcp": {
+      "import": {
+        "types": "./dist/esm/mcp/index.d.mts",
+        "default": "./dist/esm/mcp/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/mcp/index.d.ts",
+        "default": "./dist/cjs/mcp/index.js"
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "vitest run --testNamePattern='Integration'",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "format": "prettier -c .prettierrc --write \"**/*.{ts,js,cjs,json,md}\"",
+    "format:check": "prettier -c .prettierrc --check \"**/*.{ts,js,cjs,json,md}\"",
+    "lint": "eslint . --ext .ts --fix",
+    "lint:check": "eslint . --ext .ts"
+  },
+  "keywords": [
+    "t402",
+    "agent",
+    "policy",
+    "payment",
+    "ai",
+    "mcp",
+    "spending-limits",
+    "approval-workflow"
+  ],
+  "license": "Apache-2.0",
+  "author": "T402 Team",
+  "repository": "https://github.com/t402-io/t402",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "ioredis": "^5.4.0",
+    "uuid": "^11.0.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.24.0",
+    "@types/node": "^22.13.4",
+    "@types/uuid": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.29.1",
+    "@typescript-eslint/parser": "^8.29.1",
+    "eslint": "^9.24.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsdoc": "^50.6.9",
+    "eslint-plugin-prettier": "^5.2.6",
+    "prettier": "3.5.2",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3",
+    "vite": "^7.3.1",
+    "vitest": "^3.2.4"
+  },
+  "files": [
+    "dist",
+    "bin"
+  ]
+}

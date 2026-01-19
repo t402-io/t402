@@ -4,6 +4,7 @@ packages:
   - packages/http/*
   - packages/mechanisms/*
   - packages/mcp
+  - packages/agent-policy
   - packages/wdk
   - packages/wdk-gasless
   - packages/wdk-multisig
