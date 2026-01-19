@@ -2,11 +2,10 @@
  * Integration tests for MultiSigWdkGaslessClient
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import type { Address, Hex } from "viem";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { MultiSigWdkGaslessClient } from "../../src/client.js";
 import { createMultiSigWdkSmartAccount } from "../../src/account.js";
-import { MultiSigError, MultiSigErrorCode } from "../../src/errors.js";
+import { MultiSigError } from "../../src/errors.js";
 import {
   createMockWDKSigners,
   createMockPublicClient,

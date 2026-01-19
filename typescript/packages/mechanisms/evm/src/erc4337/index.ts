@@ -155,7 +155,4 @@ export {
 
 // T402 Integration
 export { GaslessT402Client, createGaslessT402Client } from "./t402.js";
-export type {
-  GaslessPaymentParams,
-  GaslessClientConfig,
-} from "./t402.js";
+export type { GaslessPaymentParams, GaslessClientConfig } from "./t402.js";

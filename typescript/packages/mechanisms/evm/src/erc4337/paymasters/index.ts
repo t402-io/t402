@@ -67,20 +67,24 @@ export type PaymasterProvider = "pimlico" | "biconomy" | "stackup";
 /**
  * Paymaster configuration by provider
  */
-export type PaymasterProviderConfig<T extends PaymasterProvider> =
-  T extends "pimlico" ? PimlicoPaymasterConfig :
-  T extends "biconomy" ? BiconomyPaymasterConfig :
-  T extends "stackup" ? StackupPaymasterConfig :
-  never;
+export type PaymasterProviderConfig<T extends PaymasterProvider> = T extends "pimlico"
+  ? PimlicoPaymasterConfig
+  : T extends "biconomy"
+    ? BiconomyPaymasterConfig
+    : T extends "stackup"
+      ? StackupPaymasterConfig
+      : never;
 
 /**
  * Paymaster client by provider
  */
-export type PaymasterProviderClient<T extends PaymasterProvider> =
-  T extends "pimlico" ? PimlicoPaymaster :
-  T extends "biconomy" ? BiconomyPaymaster :
-  T extends "stackup" ? StackupPaymaster :
-  never;
+export type PaymasterProviderClient<T extends PaymasterProvider> = T extends "pimlico"
+  ? PimlicoPaymaster
+  : T extends "biconomy"
+    ? BiconomyPaymaster
+    : T extends "stackup"
+      ? StackupPaymaster
+      : never;
 
 /**
  * Unified paymaster interface
@@ -112,6 +116,9 @@ export interface UnifiedPaymaster {
 
 /**
  * Create a paymaster client for the specified provider
+ *
+ * @param provider
+ * @param config
  */
 export function createPaymaster<T extends PaymasterProvider>(
   provider: T,
@@ -121,7 +128,9 @@ export function createPaymaster<T extends PaymasterProvider>(
     case "pimlico":
       return createPimlicoPaymaster(config as PimlicoPaymasterConfig) as PaymasterProviderClient<T>;
     case "biconomy":
-      return createBiconomyPaymaster(config as BiconomyPaymasterConfig) as PaymasterProviderClient<T>;
+      return createBiconomyPaymaster(
+        config as BiconomyPaymasterConfig,
+      ) as PaymasterProviderClient<T>;
     case "stackup":
       return createStackupPaymaster(config as StackupPaymasterConfig) as PaymasterProviderClient<T>;
     default:
@@ -131,6 +140,8 @@ export function createPaymaster<T extends PaymasterProvider>(
 
 /**
  * Auto-detect paymaster provider from URL
+ *
+ * @param url
  */
 export function detectPaymasterProvider(url: string): PaymasterProvider | null {
   if (url.includes("pimlico")) {
@@ -148,6 +159,9 @@ export function detectPaymasterProvider(url: string): PaymasterProvider | null {
 /**
  * Create a unified paymaster wrapper
  * Normalizes the interface across different providers
+ *
+ * @param provider
+ * @param config
  */
 export function createUnifiedPaymaster(
   provider: PaymasterProvider,
@@ -159,11 +173,20 @@ export function createUnifiedPaymaster(
     async sponsorUserOperation(userOp, options) {
       switch (provider) {
         case "pimlico":
-          return (client as PimlicoPaymaster).sponsorUserOperation(userOp, options as { gasOverrides?: Record<string, bigint> });
+          return (client as PimlicoPaymaster).sponsorUserOperation(
+            userOp,
+            options as { gasOverrides?: Record<string, bigint> },
+          );
         case "biconomy":
-          return (client as BiconomyPaymaster).sponsorUserOperation(userOp, options as { webhookData?: Record<string, unknown> });
+          return (client as BiconomyPaymaster).sponsorUserOperation(
+            userOp,
+            options as { webhookData?: Record<string, unknown> },
+          );
         case "stackup":
-          return (client as StackupPaymaster).sponsorUserOperation(userOp, options as StackupContext);
+          return (client as StackupPaymaster).sponsorUserOperation(
+            userOp,
+            options as StackupContext,
+          );
         default:
           throw new Error(`Unknown provider: ${provider}`);
       }

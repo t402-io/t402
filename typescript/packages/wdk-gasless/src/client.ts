@@ -6,7 +6,7 @@
  */
 
 import type { Address, Hex, PublicClient } from 'viem'
-import { encodeFunctionData, parseUnits, formatUnits } from 'viem'
+import { encodeFunctionData, formatUnits } from 'viem'
 import { BundlerClient, PaymasterClient, UserOpBuilder, ENTRYPOINT_V07_ADDRESS } from '@t402/evm'
 import type {
   SmartAccountSigner,
@@ -25,7 +25,7 @@ import type {
   SponsorshipInfo,
   WdkAccount,
 } from './types.js'
-import { WdkSmartAccount, createWdkSmartAccount } from './account.js'
+import { createWdkSmartAccount } from './account.js'
 import { getTokenAddress, getChainName } from './constants.js'
 
 /**

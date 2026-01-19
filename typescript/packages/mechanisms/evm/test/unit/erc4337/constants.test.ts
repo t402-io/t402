@@ -14,15 +14,11 @@ import {
 describe("ERC-4337 Constants", () => {
   describe("EntryPoint addresses", () => {
     it("should have correct v0.7 EntryPoint address", () => {
-      expect(ENTRYPOINT_V07_ADDRESS).toBe(
-        "0x0000000071727De22E5E9d8BAf0edAc6f37da032",
-      );
+      expect(ENTRYPOINT_V07_ADDRESS).toBe("0x0000000071727De22E5E9d8BAf0edAc6f37da032");
     });
 
     it("should have correct v0.6 EntryPoint address", () => {
-      expect(ENTRYPOINT_V06_ADDRESS).toBe(
-        "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
-      );
+      expect(ENTRYPOINT_V06_ADDRESS).toBe("0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789");
     });
   });
 
@@ -39,15 +35,9 @@ describe("ERC-4337 Constants", () => {
   describe("BUNDLER_METHODS", () => {
     it("should have all required bundler methods", () => {
       expect(BUNDLER_METHODS.sendUserOperation).toBe("eth_sendUserOperation");
-      expect(BUNDLER_METHODS.estimateUserOperationGas).toBe(
-        "eth_estimateUserOperationGas",
-      );
-      expect(BUNDLER_METHODS.getUserOperationByHash).toBe(
-        "eth_getUserOperationByHash",
-      );
-      expect(BUNDLER_METHODS.getUserOperationReceipt).toBe(
-        "eth_getUserOperationReceipt",
-      );
+      expect(BUNDLER_METHODS.estimateUserOperationGas).toBe("eth_estimateUserOperationGas");
+      expect(BUNDLER_METHODS.getUserOperationByHash).toBe("eth_getUserOperationByHash");
+      expect(BUNDLER_METHODS.getUserOperationReceipt).toBe("eth_getUserOperationReceipt");
       expect(BUNDLER_METHODS.supportedEntryPoints).toBe("eth_supportedEntryPoints");
       expect(BUNDLER_METHODS.chainId).toBe("eth_chainId");
     });
@@ -73,9 +63,7 @@ describe("ERC-4337 Constants", () => {
 
     it("should pack zero values correctly", () => {
       const packed = packAccountGasLimits(0n, 0n);
-      expect(packed).toBe(
-        "0x" + "0".repeat(64),
-      );
+      expect(packed).toBe("0x" + "0".repeat(64));
     });
 
     it("should pack max values correctly", () => {

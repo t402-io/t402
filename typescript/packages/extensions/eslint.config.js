@@ -69,4 +69,16 @@ export default [
       "jsdoc/require-hyphen-before-param-description": ["error", "always"],
     },
   },
+  // Test files config - relax JSDoc requirements
+  {
+    files: ["**/*.test.ts", "**/test/**/*.ts"],
+    rules: {
+      "jsdoc/require-jsdoc": "off",
+      "jsdoc/require-description": "off",
+      "jsdoc/require-param": "off",
+      "jsdoc/require-param-description": "off",
+      "jsdoc/require-returns": "off",
+      "jsdoc/require-returns-description": "off",
+    },
+  },
 ];

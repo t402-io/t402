@@ -3,9 +3,9 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import type { Address, Hex } from "viem";
+import type { Hex } from "viem";
 import { MultiSigWdkSmartAccount, createMultiSigWdkSmartAccount } from "../../src/account.js";
-import { MultiSigError, MultiSigErrorCode } from "../../src/errors.js";
+import { MultiSigError } from "../../src/errors.js";
 import { SAFE_4337_ADDRESSES } from "../../src/constants.js";
 import {
   createMockWDKSigners,

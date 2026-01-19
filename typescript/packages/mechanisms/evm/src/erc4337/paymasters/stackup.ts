@@ -10,11 +10,13 @@
  */
 
 import type { Address, Hex } from "viem";
-import type {
-  UserOperation,
-  PaymasterData,
-} from "../types.js";
-import { ENTRYPOINT_V07_ADDRESS, DEFAULT_GAS_LIMITS, packAccountGasLimits, packGasFees } from "../constants.js";
+import type { UserOperation, PaymasterData } from "../types.js";
+import {
+  ENTRYPOINT_V07_ADDRESS,
+  DEFAULT_GAS_LIMITS,
+  packAccountGasLimits,
+  packGasFees,
+} from "../constants.js";
 
 /**
  * Stackup paymaster type
@@ -69,13 +71,20 @@ export interface StackupSponsorResult {
 export class StackupPaymaster {
   private readonly paymasterUrl: string;
 
+  /**
+   *
+   * @param config
+   */
   constructor(config: StackupPaymasterConfig) {
-    this.paymasterUrl = config.paymasterUrl ??
-      `https://api.stackup.sh/v1/paymaster/${config.apiKey}`;
+    this.paymasterUrl =
+      config.paymasterUrl ?? `https://api.stackup.sh/v1/paymaster/${config.apiKey}`;
   }
 
   /**
    * Sponsor a UserOperation using pm_oo (off-chain) method
+   *
+   * @param userOp
+   * @param context
    */
   async sponsorUserOperation(
     userOp: Partial<UserOperation> & {
@@ -100,12 +109,14 @@ export class StackupPaymaster {
 
     // Parse paymaster data
     const paymaster = `0x${result.paymasterAndData.slice(2, 42)}` as Address;
-    const paymasterVerificationGasLimit = result.paymasterAndData.length >= 74
-      ? BigInt(`0x${result.paymasterAndData.slice(42, 74)}`)
-      : DEFAULT_GAS_LIMITS.paymasterVerificationGasLimit;
-    const paymasterPostOpGasLimit = result.paymasterAndData.length >= 106
-      ? BigInt(`0x${result.paymasterAndData.slice(74, 106)}`)
-      : DEFAULT_GAS_LIMITS.paymasterPostOpGasLimit;
+    const paymasterVerificationGasLimit =
+      result.paymasterAndData.length >= 74
+        ? BigInt(`0x${result.paymasterAndData.slice(42, 74)}`)
+        : DEFAULT_GAS_LIMITS.paymasterVerificationGasLimit;
+    const paymasterPostOpGasLimit =
+      result.paymasterAndData.length >= 106
+        ? BigInt(`0x${result.paymasterAndData.slice(74, 106)}`)
+        : DEFAULT_GAS_LIMITS.paymasterPostOpGasLimit;
 
     return {
       paymaster,
@@ -121,6 +132,9 @@ export class StackupPaymaster {
   /**
    * Get paymaster stub data for gas estimation
    * Returns dummy paymaster data that can be used for estimation
+   *
+   * @param userOp
+   * @param context
    */
   async getPaymasterStubData(
     userOp: Partial<UserOperation> & {
@@ -159,29 +173,30 @@ export class StackupPaymaster {
 
   /**
    * Get paymaster data after estimation
+   *
+   * @param userOp
+   * @param context
    */
-  async getPaymasterData(
-    userOp: UserOperation,
-    context?: StackupContext,
-  ): Promise<PaymasterData> {
+  async getPaymasterData(userOp: UserOperation, context?: StackupContext): Promise<PaymasterData> {
     const result = await this.sponsorUserOperation(userOp, context);
 
     return {
       paymaster: result.paymaster,
       paymasterVerificationGasLimit: result.paymasterVerificationGasLimit,
       paymasterPostOpGasLimit: result.paymasterPostOpGasLimit,
-      paymasterData: result.paymasterAndData.length > 106
-        ? (`0x${result.paymasterAndData.slice(106)}` as Hex)
-        : "0x" as Hex,
+      paymasterData:
+        result.paymasterAndData.length > 106
+          ? (`0x${result.paymasterAndData.slice(106)}` as Hex)
+          : ("0x" as Hex),
     };
   }
 
   /**
    * Check account balance with paymaster
+   *
+   * @param account
    */
-  async getAccountBalance(
-    account: Address,
-  ): Promise<{
+  async getAccountBalance(account: Address): Promise<{
     balance: bigint;
     currency: string;
   }> {
@@ -205,10 +220,10 @@ export class StackupPaymaster {
 
   /**
    * Validate UserOperation with paymaster
+   *
+   * @param userOp
    */
-  async validatePaymasterUserOp(
-    userOp: UserOperation,
-  ): Promise<{
+  async validatePaymasterUserOp(userOp: UserOperation): Promise<{
     valid: boolean;
     validAfter?: bigint;
     validUntil?: bigint;
@@ -234,6 +249,8 @@ export class StackupPaymaster {
 
   /**
    * Pack partial UserOp for sponsorship request
+   *
+   * @param userOp
    */
   private packUserOpForSponsorship(
     userOp: Partial<UserOperation> & { sender: Address; callData: Hex },
@@ -243,13 +260,20 @@ export class StackupPaymaster {
       nonce: this.toHex(userOp.nonce ?? 0n),
       initCode: userOp.initCode ?? "0x",
       callData: userOp.callData,
-      accountGasLimits: userOp.verificationGasLimit && userOp.callGasLimit
-        ? packAccountGasLimits(userOp.verificationGasLimit, userOp.callGasLimit)
-        : packAccountGasLimits(DEFAULT_GAS_LIMITS.verificationGasLimit, DEFAULT_GAS_LIMITS.callGasLimit),
-      preVerificationGas: this.toHex(userOp.preVerificationGas ?? DEFAULT_GAS_LIMITS.preVerificationGas),
-      gasFees: userOp.maxPriorityFeePerGas && userOp.maxFeePerGas
-        ? packGasFees(userOp.maxPriorityFeePerGas, userOp.maxFeePerGas)
-        : packGasFees(1000000000n, 10000000000n),
+      accountGasLimits:
+        userOp.verificationGasLimit && userOp.callGasLimit
+          ? packAccountGasLimits(userOp.verificationGasLimit, userOp.callGasLimit)
+          : packAccountGasLimits(
+              DEFAULT_GAS_LIMITS.verificationGasLimit,
+              DEFAULT_GAS_LIMITS.callGasLimit,
+            ),
+      preVerificationGas: this.toHex(
+        userOp.preVerificationGas ?? DEFAULT_GAS_LIMITS.preVerificationGas,
+      ),
+      gasFees:
+        userOp.maxPriorityFeePerGas && userOp.maxFeePerGas
+          ? packGasFees(userOp.maxPriorityFeePerGas, userOp.maxFeePerGas)
+          : packGasFees(1000000000n, 10000000000n),
       paymasterAndData: userOp.paymasterAndData ?? "0x",
       signature: userOp.signature ?? getDummySignature(),
     };
@@ -257,6 +281,8 @@ export class StackupPaymaster {
 
   /**
    * Pack UserOp for RPC
+   *
+   * @param userOp
    */
   private packForRpc(userOp: UserOperation): Record<string, unknown> {
     return {
@@ -264,10 +290,7 @@ export class StackupPaymaster {
       nonce: this.toHex(userOp.nonce),
       initCode: userOp.initCode,
       callData: userOp.callData,
-      accountGasLimits: packAccountGasLimits(
-        userOp.verificationGasLimit,
-        userOp.callGasLimit,
-      ),
+      accountGasLimits: packAccountGasLimits(userOp.verificationGasLimit, userOp.callGasLimit),
       preVerificationGas: this.toHex(userOp.preVerificationGas),
       gasFees: packGasFees(userOp.maxPriorityFeePerGas, userOp.maxFeePerGas),
       paymasterAndData: userOp.paymasterAndData,
@@ -277,6 +300,8 @@ export class StackupPaymaster {
 
   /**
    * Convert bigint to hex
+   *
+   * @param value
    */
   private toHex(value: bigint): Hex {
     return `0x${value.toString(16)}` as Hex;
@@ -284,6 +309,9 @@ export class StackupPaymaster {
 
   /**
    * Make RPC call to Stackup
+   *
+   * @param method
+   * @param params
    */
   private async rpcCall<T>(method: string, params: unknown[]): Promise<T> {
     const response = await fetch(this.paymasterUrl, {
@@ -303,7 +331,7 @@ export class StackupPaymaster {
       throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
     }
 
-    const json = await response.json() as {
+    const json = (await response.json()) as {
       result?: T;
       error?: { code: number; message: string; data?: unknown };
     };
@@ -325,6 +353,8 @@ function getDummySignature(): Hex {
 
 /**
  * Create a Stackup paymaster client
+ *
+ * @param config
  */
 export function createStackupPaymaster(config: StackupPaymasterConfig): StackupPaymaster {
   return new StackupPaymaster(config);

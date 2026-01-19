@@ -71,9 +71,7 @@ export class CrossChainPaymentRouter {
    * @param params - Payment routing parameters
    * @returns Result with transaction hash and tracking info
    */
-  async routePayment(
-    params: CrossChainPaymentParams,
-  ): Promise<CrossChainPaymentResult> {
+  async routePayment(params: CrossChainPaymentParams): Promise<CrossChainPaymentResult> {
     // Validate parameters
     this.validateParams(params);
 
@@ -177,6 +175,8 @@ export class CrossChainPaymentRouter {
 
   /**
    * Validate routing parameters
+   *
+   * @param params
    */
   private validateParams(params: CrossChainPaymentParams): void {
     if (params.sourceChain !== this.sourceChain) {

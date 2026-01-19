@@ -14,8 +14,6 @@ import {
   ENTRYPOINT_V07_ADDRESS,
 } from "@t402/evm";
 import type {
-  BundlerConfig,
-  PaymasterConfig,
   TransactionIntent,
   GasEstimate,
   PaymasterData,
@@ -30,9 +28,7 @@ import type {
   GaslessPaymentParams,
   BatchPaymentParams,
   GaslessPaymentReceipt,
-  PendingSignature,
 } from "./types.js";
-import { MultiSigWdkSmartAccount } from "./account.js";
 import { SignatureCollector } from "./collector.js";
 import { MultiSigError } from "./errors.js";
 

@@ -160,6 +160,9 @@ export function selectBestPaymentMethod(
 
 /**
  * Check if a payment requirement uses a gasless token (EIP-3009)
+ *
+ * @param requirement - The payment requirement to check
+ * @returns True if the payment is gasless
  */
 export function isGaslessPayment(requirement: PaymentRequirements): boolean {
   const tokenType = requirement.extra?.tokenType;
@@ -168,6 +171,9 @@ export function isGaslessPayment(requirement: PaymentRequirements): boolean {
 
 /**
  * Check if a payment requirement is for USDT0
+ *
+ * @param requirement - The payment requirement to check
+ * @returns True if the payment is for USDT0
  */
 export function isUsdt0Payment(requirement: PaymentRequirements): boolean {
   const symbol = requirement.extra?.symbol;
@@ -176,6 +182,10 @@ export function isUsdt0Payment(requirement: PaymentRequirements): boolean {
 
 /**
  * Get payment requirements for a specific token
+ *
+ * @param requirements - The payment requirements to filter
+ * @param symbol - The token symbol to filter by
+ * @returns Filtered payment requirements matching the token
  */
 export function filterByToken(requirements: PaymentRequirements[], symbol: string): PaymentRequirements[] {
   return requirements.filter((req) => {
@@ -186,6 +196,10 @@ export function filterByToken(requirements: PaymentRequirements[], symbol: strin
 
 /**
  * Get payment requirements for a specific network
+ *
+ * @param requirements - The payment requirements to filter
+ * @param network - The network to filter by
+ * @returns Filtered payment requirements matching the network
  */
 export function filterByNetwork(requirements: PaymentRequirements[], network: string): PaymentRequirements[] {
   return requirements.filter((req) => req.network === network);
@@ -193,6 +207,9 @@ export function filterByNetwork(requirements: PaymentRequirements[], network: st
 
 /**
  * Get all unique networks from payment requirements
+ *
+ * @param requirements - The payment requirements to extract networks from
+ * @returns Array of unique network identifiers
  */
 export function getAvailableNetworks(requirements: PaymentRequirements[]): string[] {
   return [...new Set(requirements.map((req) => req.network))];
@@ -200,6 +217,9 @@ export function getAvailableNetworks(requirements: PaymentRequirements[]): strin
 
 /**
  * Get all unique tokens from payment requirements
+ *
+ * @param requirements - The payment requirements to extract tokens from
+ * @returns Array of unique token symbols
  */
 export function getAvailableTokens(requirements: PaymentRequirements[]): string[] {
   return [

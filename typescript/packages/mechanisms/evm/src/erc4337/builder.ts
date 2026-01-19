@@ -40,6 +40,10 @@ export class UserOpBuilder {
   private readonly entryPoint: Address;
   private readonly gasMultiplier: number;
 
+  /**
+   *
+   * @param options
+   */
   constructor(options: UserOpBuilderOptions = {}) {
     this.entryPoint = options.entryPoint ?? ENTRYPOINT_V07_ADDRESS;
     this.gasMultiplier = options.gasMultiplier ?? 1.2;
@@ -47,6 +51,12 @@ export class UserOpBuilder {
 
   /**
    * Build a UserOperation from a transaction intent
+   *
+   * @param signer
+   * @param intent
+   * @param client
+   * @param gasEstimate
+   * @param paymaster
    */
   async buildUserOp(
     signer: SmartAccountSigner,
@@ -61,11 +71,7 @@ export class UserOpBuilder {
     const initCode = isDeployed ? "0x" : await signer.getInitCode();
 
     // Encode the call data for the smart account's execute function
-    const callData = signer.encodeExecute(
-      intent.to,
-      intent.value ?? 0n,
-      intent.data ?? "0x",
-    );
+    const callData = signer.encodeExecute(intent.to, intent.value ?? 0n, intent.data ?? "0x");
 
     // Get gas prices from the chain
     const { maxFeePerGas, maxPriorityFeePerGas } = await this.getGasPrices(client);
@@ -79,9 +85,7 @@ export class UserOpBuilder {
     const preVerificationGas = this.applyMultiplier(gas.preVerificationGas);
 
     // Build paymaster data if provided
-    const paymasterAndData = paymaster
-      ? this.encodePaymasterData(paymaster)
-      : ("0x" as Hex);
+    const paymasterAndData = paymaster ? this.encodePaymasterData(paymaster) : ("0x" as Hex);
 
     return {
       sender,
@@ -100,6 +104,12 @@ export class UserOpBuilder {
 
   /**
    * Build a batch UserOperation from multiple transaction intents
+   *
+   * @param signer
+   * @param intents
+   * @param client
+   * @param gasEstimate
+   * @param paymaster
    */
   async buildBatchUserOp(
     signer: SmartAccountSigner,
@@ -114,9 +124,9 @@ export class UserOpBuilder {
     const initCode = isDeployed ? "0x" : await signer.getInitCode();
 
     // Encode batch call data
-    const targets = intents.map((i) => i.to);
-    const values = intents.map((i) => i.value ?? 0n);
-    const datas = intents.map((i) => (i.data ?? "0x") as Hex);
+    const targets = intents.map(i => i.to);
+    const values = intents.map(i => i.value ?? 0n);
+    const datas = intents.map(i => (i.data ?? "0x") as Hex);
     const callData = signer.encodeExecuteBatch(targets, values, datas);
 
     // Get gas prices
@@ -133,9 +143,7 @@ export class UserOpBuilder {
     const callGasLimit = this.applyMultiplier(gas.callGasLimit);
     const preVerificationGas = this.applyMultiplier(gas.preVerificationGas);
 
-    const paymasterAndData = paymaster
-      ? this.encodePaymasterData(paymaster)
-      : ("0x" as Hex);
+    const paymasterAndData = paymaster ? this.encodePaymasterData(paymaster) : ("0x" as Hex);
 
     return {
       sender,
@@ -154,6 +162,8 @@ export class UserOpBuilder {
 
   /**
    * Pack a UserOperation for on-chain submission (v0.7 format)
+   *
+   * @param userOp
    */
   packUserOp(userOp: UserOperation): PackedUserOperation {
     return {
@@ -161,10 +171,7 @@ export class UserOpBuilder {
       nonce: userOp.nonce,
       initCode: userOp.initCode,
       callData: userOp.callData,
-      accountGasLimits: packAccountGasLimits(
-        userOp.verificationGasLimit,
-        userOp.callGasLimit,
-      ),
+      accountGasLimits: packAccountGasLimits(userOp.verificationGasLimit, userOp.callGasLimit),
       preVerificationGas: userOp.preVerificationGas,
       gasFees: packGasFees(userOp.maxPriorityFeePerGas, userOp.maxFeePerGas),
       paymasterAndData: userOp.paymasterAndData,
@@ -174,12 +181,12 @@ export class UserOpBuilder {
 
   /**
    * Compute the UserOperation hash for signing
+   *
+   * @param userOp
+   * @param client
+   * @param _chainId
    */
-  async getUserOpHash(
-    userOp: UserOperation,
-    client: PublicClient,
-    _chainId: number,
-  ): Promise<Hex> {
+  async getUserOpHash(userOp: UserOperation, client: PublicClient, _chainId: number): Promise<Hex> {
     const packed = this.packUserOp(userOp);
 
     // Convert to the tuple format expected by the ABI
@@ -208,6 +215,11 @@ export class UserOpBuilder {
 
   /**
    * Sign a UserOperation
+   *
+   * @param userOp
+   * @param signer
+   * @param client
+   * @param chainId
    */
   async signUserOp(
     userOp: UserOperation,
@@ -226,6 +238,9 @@ export class UserOpBuilder {
 
   /**
    * Get the nonce for an account from EntryPoint
+   *
+   * @param client
+   * @param sender
    */
   private async getNonce(client: PublicClient, sender: Address): Promise<bigint> {
     try {
@@ -244,6 +259,8 @@ export class UserOpBuilder {
 
   /**
    * Get current gas prices from the chain
+   *
+   * @param client
    */
   private async getGasPrices(
     client: PublicClient,
@@ -260,6 +277,8 @@ export class UserOpBuilder {
 
   /**
    * Apply gas multiplier for safety margin
+   *
+   * @param gas
    */
   private applyMultiplier(gas: bigint): bigint {
     return BigInt(Math.ceil(Number(gas) * this.gasMultiplier));
@@ -267,6 +286,8 @@ export class UserOpBuilder {
 
   /**
    * Encode paymaster data for the UserOperation
+   *
+   * @param paymaster
    */
   private encodePaymasterData(paymaster: PaymasterData): Hex {
     // Pack: paymaster (20 bytes) + verification gas (16 bytes) + postOp gas (16 bytes) + data
@@ -276,20 +297,15 @@ export class UserOpBuilder {
     });
     const postOpGas = pad(toHex(paymaster.paymasterPostOpGasLimit), { size: 16 });
 
-    return concat([
-      paymasterAddress,
-      verificationGas,
-      postOpGas,
-      paymaster.paymasterData,
-    ]) as Hex;
+    return concat([paymasterAddress, verificationGas, postOpGas, paymaster.paymasterData]) as Hex;
   }
 }
 
 /**
  * Create a UserOpBuilder instance
+ *
+ * @param options
  */
-export function createUserOpBuilder(
-  options?: UserOpBuilderOptions,
-): UserOpBuilder {
+export function createUserOpBuilder(options?: UserOpBuilderOptions): UserOpBuilder {
   return new UserOpBuilder(options);
 }

@@ -4,9 +4,7 @@ import { Usdt0Bridge, createUsdt0Bridge } from "../../../src/bridge/client";
 import type { BridgeSigner } from "../../../src/bridge/types";
 
 // OFTSent event topic for mock logs
-const OFT_SENT_EVENT_TOPIC = keccak256(
-  toBytes("OFTSent(bytes32,uint32,address,uint256,uint256)")
-);
+const OFT_SENT_EVENT_TOPIC = keccak256(toBytes("OFTSent(bytes32,uint32,address,uint256,uint256)"));
 
 // Mock message GUID
 const MOCK_MESSAGE_GUID = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";

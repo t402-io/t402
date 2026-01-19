@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { WDKSigner, createWDKSigner, MockWDKSigner } from "../../src/signer";
-import { SignerError, SigningError, BalanceError, TransactionError, WDKErrorCode } from "../../src/errors";
+import { SignerError, SigningError, BalanceError, TransactionError } from "../../src/errors";
 import type { WDKInstance, WDKAccount } from "../../src/types";
 
 // Create mock account

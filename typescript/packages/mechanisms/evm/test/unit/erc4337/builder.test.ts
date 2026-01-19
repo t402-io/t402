@@ -55,11 +55,7 @@ describe("UserOpBuilder", () => {
         data: "0x1234",
       };
 
-      const userOp = await builder.buildUserOp(
-        mockSigner,
-        intent,
-        mockClient,
-      );
+      const userOp = await builder.buildUserOp(mockSigner, intent, mockClient);
 
       expect(userOp.sender).toBe("0x1234567890123456789012345678901234567890");
       expect(userOp.nonce).toBe(5n);
@@ -82,11 +78,7 @@ describe("UserOpBuilder", () => {
         to: "0x9999999999999999999999999999999999999999",
       };
 
-      const userOp = await builder.buildUserOp(
-        mockSigner,
-        intent,
-        mockClient,
-      );
+      const userOp = await builder.buildUserOp(mockSigner, intent, mockClient);
 
       expect(userOp.initCode).toBe("0xfactory1234");
     });
@@ -103,12 +95,7 @@ describe("UserOpBuilder", () => {
         preVerificationGas: 60000n,
       };
 
-      const userOp = await builder.buildUserOp(
-        mockSigner,
-        intent,
-        mockClient,
-        gasEstimate,
-      );
+      const userOp = await builder.buildUserOp(mockSigner, intent, mockClient, gasEstimate);
 
       expect(userOp.verificationGasLimit).toBe(200000n);
       expect(userOp.callGasLimit).toBe(150000n);
@@ -150,11 +137,7 @@ describe("UserOpBuilder", () => {
         { to: "0x3333333333333333333333333333333333333333" },
       ];
 
-      const userOp = await builder.buildBatchUserOp(
-        mockSigner,
-        intents,
-        mockClient,
-      );
+      const userOp = await builder.buildBatchUserOp(mockSigner, intents, mockClient);
 
       expect(userOp.callData).toBe("0xbatchcalldata");
       expect(mockSigner.encodeExecuteBatch).toHaveBeenCalledWith(

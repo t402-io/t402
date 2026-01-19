@@ -53,17 +53,10 @@
 export { Usdt0Bridge, createUsdt0Bridge } from "./client.js";
 
 // LayerZero Scan client
-export {
-  LayerZeroScanClient,
-  createLayerZeroScanClient,
-  LAYERZERO_SCAN_BASE_URL,
-} from "./scan.js";
+export { LayerZeroScanClient, createLayerZeroScanClient, LAYERZERO_SCAN_BASE_URL } from "./scan.js";
 
 // Cross-chain payment router
-export {
-  CrossChainPaymentRouter,
-  createCrossChainPaymentRouter,
-} from "./router.js";
+export { CrossChainPaymentRouter, createCrossChainPaymentRouter } from "./router.js";
 
 // Constants
 export {

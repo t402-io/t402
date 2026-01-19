@@ -352,7 +352,9 @@ describe("ExactLegacyEvmScheme (Facilitator)", () => {
     });
 
     it("should handle writeContract error", async () => {
-      mockFacilitatorSigner.writeContract = vi.fn().mockRejectedValue(new Error("Gas estimation failed"));
+      mockFacilitatorSigner.writeContract = vi
+        .fn()
+        .mockRejectedValue(new Error("Gas estimation failed"));
 
       const paymentPayload = await client.createPaymentPayload(2, baseRequirements);
 

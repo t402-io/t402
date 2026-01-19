@@ -2,7 +2,7 @@
  * Integration tests for Factory Functions
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import type { Address } from "viem";
 import {
   createMultiSigFromSigners,

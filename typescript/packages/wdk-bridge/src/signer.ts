@@ -10,7 +10,6 @@ import {
   createPublicClient,
   http,
   encodeFunctionData,
-  decodeFunctionResult,
 } from "viem";
 import * as chains from "viem/chains";
 import type { BridgeSigner, TransactionReceipt, TransactionLog } from "@t402/evm";

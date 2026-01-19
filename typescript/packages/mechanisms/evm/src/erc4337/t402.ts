@@ -105,13 +105,15 @@ export class GaslessT402Client {
   private readonly chainId: number;
   private readonly publicClient: PublicClient;
 
+  /**
+   *
+   * @param config
+   */
   constructor(config: GaslessClientConfig) {
     this.signer = config.signer;
     this.builder = new UserOpBuilder();
     this.bundler = new BundlerClient(config.bundler);
-    this.paymaster = config.paymaster
-      ? new PaymasterClient(config.paymaster)
-      : undefined;
+    this.paymaster = config.paymaster ? new PaymasterClient(config.paymaster) : undefined;
     this.chainId = config.chainId;
     this.publicClient = config.publicClient;
   }
@@ -122,10 +124,10 @@ export class GaslessT402Client {
    * This submits the payment as a UserOperation which can be:
    * - Sponsored by a paymaster (truly gasless)
    * - Paid from the smart account's balance
+   *
+   * @param params
    */
-  async executePayment(
-    params: GaslessPaymentParams,
-  ): Promise<UserOperationResult> {
+  async executePayment(params: GaslessPaymentParams): Promise<UserOperationResult> {
     // Build the call data based on whether we have an authorization
     const callData = params.authorization
       ? this.buildAuthorizedTransferCallData(params)
@@ -167,12 +169,12 @@ export class GaslessT402Client {
 
   /**
    * Execute multiple T402 payments in a single UserOperation
+   *
+   * @param payments
    */
-  async executeBatchPayments(
-    payments: GaslessPaymentParams[],
-  ): Promise<UserOperationResult> {
+  async executeBatchPayments(payments: GaslessPaymentParams[]): Promise<UserOperationResult> {
     // Build transaction intents for all payments
-    const intents: TransactionIntent[] = payments.map((params) => ({
+    const intents: TransactionIntent[] = payments.map(params => ({
       to: params.tokenAddress,
       value: 0n,
       data: params.authorization
@@ -208,6 +210,8 @@ export class GaslessT402Client {
 
   /**
    * Check if a payment can be sponsored (gasless)
+   *
+   * @param params
    */
   async canSponsor(params: GaslessPaymentParams): Promise<boolean> {
     if (!this.paymaster) return false;
@@ -243,6 +247,8 @@ export class GaslessT402Client {
 
   /**
    * Build call data for a simple ERC20 transfer
+   *
+   * @param params
    */
   private buildTransferCallData(params: GaslessPaymentParams): Hex {
     return encodeFunctionData({
@@ -254,6 +260,8 @@ export class GaslessT402Client {
 
   /**
    * Build call data for an authorized transfer (EIP-3009)
+   *
+   * @param params
    */
   private buildAuthorizedTransferCallData(params: GaslessPaymentParams): Hex {
     if (!params.authorization) {
@@ -285,14 +293,12 @@ export class GaslessT402Client {
 
   /**
    * Estimate gas for a single transaction
+   *
+   * @param intent
    */
   private async estimateGas(intent: TransactionIntent): Promise<GasEstimate> {
     const sender = await this.signer.getAddress();
-    const callData = this.signer.encodeExecute(
-      intent.to,
-      intent.value ?? 0n,
-      intent.data ?? "0x",
-    );
+    const callData = this.signer.encodeExecute(intent.to, intent.value ?? 0n, intent.data ?? "0x");
 
     try {
       return await this.bundler.estimateUserOperationGas({
@@ -311,15 +317,15 @@ export class GaslessT402Client {
 
   /**
    * Estimate gas for a batch transaction
+   *
+   * @param intents
    */
-  private async estimateBatchGas(
-    intents: TransactionIntent[],
-  ): Promise<GasEstimate> {
+  private async estimateBatchGas(intents: TransactionIntent[]): Promise<GasEstimate> {
     const sender = await this.signer.getAddress();
     const callData = this.signer.encodeExecuteBatch(
-      intents.map((i) => i.to),
-      intents.map((i) => i.value ?? 0n),
-      intents.map((i) => (i.data ?? "0x") as Hex),
+      intents.map(i => i.to),
+      intents.map(i => i.value ?? 0n),
+      intents.map(i => (i.data ?? "0x") as Hex),
     );
 
     try {
@@ -339,10 +345,10 @@ export class GaslessT402Client {
 
   /**
    * Get paymaster data if configured
+   *
+   * @param _gasEstimate
    */
-  private async getPaymasterData(
-    _gasEstimate: GasEstimate,
-  ): Promise<
+  private async getPaymasterData(_gasEstimate: GasEstimate): Promise<
     | {
         paymaster: Address;
         paymasterVerificationGasLimit: bigint;
@@ -355,19 +361,15 @@ export class GaslessT402Client {
 
     const sender = await this.signer.getAddress();
 
-    return this.paymaster.getPaymasterData(
-      { sender },
-      this.chainId,
-      ENTRYPOINT_V07_ADDRESS,
-    );
+    return this.paymaster.getPaymasterData({ sender }, this.chainId, ENTRYPOINT_V07_ADDRESS);
   }
 }
 
 /**
  * Create a GaslessT402Client instance
+ *
+ * @param config
  */
-export function createGaslessT402Client(
-  config: GaslessClientConfig,
-): GaslessT402Client {
+export function createGaslessT402Client(config: GaslessClientConfig): GaslessT402Client {
   return new GaslessT402Client(config);
 }

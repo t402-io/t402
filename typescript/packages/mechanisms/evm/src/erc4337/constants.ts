@@ -15,14 +15,12 @@ import type { Address } from "viem";
  * EntryPoint v0.7 contract address (canonical deployment)
  * Deployed on all major EVM chains at the same address
  */
-export const ENTRYPOINT_V07_ADDRESS: Address =
-  "0x0000000071727De22E5E9d8BAf0edAc6f37da032";
+export const ENTRYPOINT_V07_ADDRESS: Address = "0x0000000071727De22E5E9d8BAf0edAc6f37da032";
 
 /**
  * EntryPoint v0.6 contract address (legacy)
  */
-export const ENTRYPOINT_V06_ADDRESS: Address =
-  "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789";
+export const ENTRYPOINT_V06_ADDRESS: Address = "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789";
 
 /**
  * Default gas limits for UserOperations
@@ -191,6 +189,9 @@ export enum PaymasterType {
 
 /**
  * Pack verification and call gas limits into bytes32
+ *
+ * @param verificationGasLimit
+ * @param callGasLimit
  */
 export function packAccountGasLimits(
   verificationGasLimit: bigint,
@@ -205,6 +206,8 @@ export function packAccountGasLimits(
 
 /**
  * Unpack account gas limits from bytes32
+ *
+ * @param packed
  */
 export function unpackAccountGasLimits(packed: `0x${string}`): {
   verificationGasLimit: bigint;
@@ -221,11 +224,11 @@ export function unpackAccountGasLimits(packed: `0x${string}`): {
 
 /**
  * Pack max priority fee and max fee per gas into bytes32
+ *
+ * @param maxPriorityFeePerGas
+ * @param maxFeePerGas
  */
-export function packGasFees(
-  maxPriorityFeePerGas: bigint,
-  maxFeePerGas: bigint,
-): `0x${string}` {
+export function packGasFees(maxPriorityFeePerGas: bigint, maxFeePerGas: bigint): `0x${string}` {
   const priorityHex = maxPriorityFeePerGas.toString(16).padStart(32, "0");
   const maxHex = maxFeePerGas.toString(16).padStart(32, "0");
   return `0x${priorityHex}${maxHex}` as `0x${string}`;
@@ -233,6 +236,8 @@ export function packGasFees(
 
 /**
  * Unpack gas fees from bytes32
+ *
+ * @param packed
  */
 export function unpackGasFees(packed: `0x${string}`): {
   maxPriorityFeePerGas: bigint;

@@ -263,6 +263,9 @@ export const TOKEN_PRIORITY: Record<string, number> = {
 
 /**
  * Get token configuration for a specific token on a network
+ *
+ * @param network
+ * @param symbol
  */
 export function getTokenConfig(network: string, symbol: string): TokenConfig | undefined {
   return TOKEN_REGISTRY[network]?.[symbol.toUpperCase()];
@@ -270,6 +273,8 @@ export function getTokenConfig(network: string, symbol: string): TokenConfig | u
 
 /**
  * Get all tokens available on a network
+ *
+ * @param network
  */
 export function getNetworkTokens(network: string): TokenConfig[] {
   const tokens = TOKEN_REGISTRY[network];
@@ -280,6 +285,8 @@ export function getNetworkTokens(network: string): TokenConfig[] {
 /**
  * Get the default/preferred token for a network
  * Prefers USDT0 > USDC > others based on priority
+ *
+ * @param network
  */
 export function getDefaultToken(network: string): TokenConfig | undefined {
   const tokens = getNetworkTokens(network);
@@ -288,17 +295,23 @@ export function getDefaultToken(network: string): TokenConfig | undefined {
 
 /**
  * Get token by contract address on a network
+ *
+ * @param network
+ * @param address
  */
 export function getTokenByAddress(network: string, address: Address): TokenConfig | undefined {
   const tokens = TOKEN_REGISTRY[network];
   if (!tokens) return undefined;
 
   const lowerAddress = address.toLowerCase();
-  return Object.values(tokens).find((t) => t.address.toLowerCase() === lowerAddress);
+  return Object.values(tokens).find(t => t.address.toLowerCase() === lowerAddress);
 }
 
 /**
  * Check if a token supports EIP-3009 (gasless transfers)
+ *
+ * @param network
+ * @param symbol
  */
 export function supportsEIP3009(network: string, symbol: string): boolean {
   const config = getTokenConfig(network, symbol);
@@ -307,6 +320,8 @@ export function supportsEIP3009(network: string, symbol: string): boolean {
 
 /**
  * Get all networks that support a specific token
+ *
+ * @param symbol
  */
 export function getNetworksForToken(symbol: string): string[] {
   const networks: string[] = [];
@@ -327,6 +342,10 @@ export function getUsdt0Networks(): string[] {
 
 /**
  * EIP-712 domain configuration for a token
+ *
+ * @param network
+ * @param tokenAddress
+ * @param chainId
  */
 export function getEIP712Domain(
   network: string,

@@ -8,7 +8,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { Cell } from "@ton/core";
 import { ExactTonScheme as ExactTonFacilitator } from "../../src/exact/facilitator/scheme";
-import type { FacilitatorTonSigner, VerifyMessageParams, WaitForTransactionParams } from "../../src/signer";
+import type { FacilitatorTonSigner } from "../../src/signer";
 import type { PaymentRequirements, PaymentPayload } from "@t402/core/types";
 import type { VerifyMessageResult, TransactionConfirmation } from "../../src/types";
 import {

@@ -9,16 +9,8 @@
  */
 
 import type { Address, Hex } from "viem";
-import {
-  BundlerClient,
-  BundlerError,
-} from "../bundler.js";
-import type {
-  UserOperation,
-  UserOperationResult,
-  GasEstimate,
-  PaymasterData,
-} from "../types.js";
+import { BundlerClient, BundlerError } from "../bundler.js";
+import type { UserOperation, UserOperationResult, GasEstimate, PaymasterData } from "../types.js";
 import { ENTRYPOINT_V07_ADDRESS, packAccountGasLimits, packGasFees } from "../constants.js";
 
 /**
@@ -84,12 +76,17 @@ export class AlchemyBundlerClient extends BundlerClient {
   private readonly alchemyUrl: string;
   private readonly policy?: AlchemyPolicyConfig;
 
+  /**
+   *
+   * @param config
+   */
   constructor(config: AlchemyConfig) {
     // Construct Alchemy bundler URL
     const network = getAlchemyNetwork(config.chainId);
-    const bundlerUrl = config.bundlerUrl && config.bundlerUrl.includes("alchemy")
-      ? config.bundlerUrl
-      : `https://${network}.g.alchemy.com/v2/${config.apiKey}`;
+    const bundlerUrl =
+      config.bundlerUrl && config.bundlerUrl.includes("alchemy")
+        ? config.bundlerUrl
+        : `https://${network}.g.alchemy.com/v2/${config.apiKey}`;
 
     super({
       ...config,
@@ -103,6 +100,14 @@ export class AlchemyBundlerClient extends BundlerClient {
   /**
    * Request gas estimates and paymaster data in a single call
    * This is more efficient than making separate calls
+   *
+   * @param userOp
+   * @param overrides
+   * @param overrides.maxFeePerGas
+   * @param overrides.maxPriorityFeePerGas
+   * @param overrides.callGasLimit
+   * @param overrides.verificationGasLimit
+   * @param overrides.preVerificationGas
    */
   async requestGasAndPaymasterAndData(
     userOp: Partial<UserOperation> & {
@@ -173,10 +178,10 @@ export class AlchemyBundlerClient extends BundlerClient {
   /**
    * Simulate asset changes from a UserOperation
    * Useful for previewing what will happen before submitting
+   *
+   * @param userOp
    */
-  async simulateUserOperationAssetChanges(
-    userOp: UserOperation,
-  ): Promise<SimulationResult> {
+  async simulateUserOperationAssetChanges(userOp: UserOperation): Promise<SimulationResult> {
     const packed = this.packUserOpForRpc(userOp);
 
     try {
@@ -228,16 +233,16 @@ export class AlchemyBundlerClient extends BundlerClient {
 
   /**
    * Send UserOperation with Alchemy optimizations
+   *
+   * @param userOp
    */
-  async sendUserOperationWithAlchemy(
-    userOp: UserOperation,
-  ): Promise<UserOperationResult> {
+  async sendUserOperationWithAlchemy(userOp: UserOperation): Promise<UserOperationResult> {
     const packed = this.packUserOpForRpc(userOp);
 
-    const userOpHash = await this.alchemyRpcCall<Hex>(
-      "eth_sendUserOperation",
-      [packed, ENTRYPOINT_V07_ADDRESS],
-    );
+    const userOpHash = await this.alchemyRpcCall<Hex>("eth_sendUserOperation", [
+      packed,
+      ENTRYPOINT_V07_ADDRESS,
+    ]);
 
     return {
       userOpHash,
@@ -247,6 +252,8 @@ export class AlchemyBundlerClient extends BundlerClient {
 
   /**
    * Pack partial UserOperation for estimation
+   *
+   * @param userOp
    */
   private packPartialUserOp(
     userOp: Partial<UserOperation> & { sender: Address; callData: Hex },
@@ -256,21 +263,22 @@ export class AlchemyBundlerClient extends BundlerClient {
       nonce: userOp.nonce !== undefined ? this.bigintToHex(userOp.nonce) : "0x0",
       initCode: userOp.initCode ?? "0x",
       callData: userOp.callData,
-      callGasLimit: userOp.callGasLimit !== undefined
-        ? this.bigintToHex(userOp.callGasLimit)
-        : undefined,
-      verificationGasLimit: userOp.verificationGasLimit !== undefined
-        ? this.bigintToHex(userOp.verificationGasLimit)
-        : undefined,
-      preVerificationGas: userOp.preVerificationGas !== undefined
-        ? this.bigintToHex(userOp.preVerificationGas)
-        : undefined,
-      maxFeePerGas: userOp.maxFeePerGas !== undefined
-        ? this.bigintToHex(userOp.maxFeePerGas)
-        : undefined,
-      maxPriorityFeePerGas: userOp.maxPriorityFeePerGas !== undefined
-        ? this.bigintToHex(userOp.maxPriorityFeePerGas)
-        : undefined,
+      callGasLimit:
+        userOp.callGasLimit !== undefined ? this.bigintToHex(userOp.callGasLimit) : undefined,
+      verificationGasLimit:
+        userOp.verificationGasLimit !== undefined
+          ? this.bigintToHex(userOp.verificationGasLimit)
+          : undefined,
+      preVerificationGas:
+        userOp.preVerificationGas !== undefined
+          ? this.bigintToHex(userOp.preVerificationGas)
+          : undefined,
+      maxFeePerGas:
+        userOp.maxFeePerGas !== undefined ? this.bigintToHex(userOp.maxFeePerGas) : undefined,
+      maxPriorityFeePerGas:
+        userOp.maxPriorityFeePerGas !== undefined
+          ? this.bigintToHex(userOp.maxPriorityFeePerGas)
+          : undefined,
       paymasterAndData: userOp.paymasterAndData ?? "0x",
       signature: userOp.signature ?? getDummySignature(),
     };
@@ -278,6 +286,8 @@ export class AlchemyBundlerClient extends BundlerClient {
 
   /**
    * Pack UserOperation for RPC
+   *
+   * @param userOp
    */
   private packUserOpForRpc(userOp: UserOperation): Record<string, unknown> {
     return {
@@ -285,10 +295,7 @@ export class AlchemyBundlerClient extends BundlerClient {
       nonce: this.bigintToHex(userOp.nonce),
       initCode: userOp.initCode,
       callData: userOp.callData,
-      accountGasLimits: packAccountGasLimits(
-        userOp.verificationGasLimit,
-        userOp.callGasLimit,
-      ),
+      accountGasLimits: packAccountGasLimits(userOp.verificationGasLimit, userOp.callGasLimit),
       preVerificationGas: this.bigintToHex(userOp.preVerificationGas),
       gasFees: packGasFees(userOp.maxPriorityFeePerGas, userOp.maxFeePerGas),
       paymasterAndData: userOp.paymasterAndData,
@@ -298,6 +305,8 @@ export class AlchemyBundlerClient extends BundlerClient {
 
   /**
    * Convert bigint to hex
+   *
+   * @param value
    */
   private bigintToHex(value: bigint): Hex {
     return `0x${value.toString(16)}` as Hex;
@@ -305,6 +314,9 @@ export class AlchemyBundlerClient extends BundlerClient {
 
   /**
    * Make Alchemy RPC call
+   *
+   * @param method
+   * @param params
    */
   private async alchemyRpcCall<T>(method: string, params: unknown[]): Promise<T> {
     const response = await fetch(this.alchemyUrl, {
@@ -321,12 +333,10 @@ export class AlchemyBundlerClient extends BundlerClient {
     });
 
     if (!response.ok) {
-      throw new BundlerError(
-        `HTTP error: ${response.status} ${response.statusText}`,
-      );
+      throw new BundlerError(`HTTP error: ${response.status} ${response.statusText}`);
     }
 
-    const json = await response.json() as {
+    const json = (await response.json()) as {
       result?: T;
       error?: { code: number; message: string; data?: unknown };
     };
@@ -341,6 +351,8 @@ export class AlchemyBundlerClient extends BundlerClient {
 
 /**
  * Get Alchemy network name from chain ID
+ *
+ * @param chainId
  */
 function getAlchemyNetwork(chainId: number): string {
   const networks: Record<number, string> = {
@@ -373,6 +385,8 @@ function getDummySignature(): Hex {
 
 /**
  * Create an Alchemy bundler client
+ *
+ * @param config
  */
 export function createAlchemyBundlerClient(config: AlchemyConfig): AlchemyBundlerClient {
   return new AlchemyBundlerClient(config);

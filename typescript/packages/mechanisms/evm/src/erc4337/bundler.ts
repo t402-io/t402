@@ -49,6 +49,12 @@ interface JsonRpcResponse<T = unknown> {
  * Bundler error class
  */
 export class BundlerError extends Error {
+  /**
+   *
+   * @param message
+   * @param code
+   * @param data
+   */
   constructor(
     message: string,
     public code?: number,
@@ -67,6 +73,10 @@ export class BundlerClient {
   private readonly entryPoint: Address;
   private requestId: number = 0;
 
+  /**
+   *
+   * @param config
+   */
   constructor(config: BundlerConfig) {
     this.bundlerUrl = config.bundlerUrl;
     this.entryPoint = config.entryPoint ?? ENTRYPOINT_V07_ADDRESS;
@@ -76,14 +86,16 @@ export class BundlerClient {
 
   /**
    * Send a UserOperation to the bundler
+   *
+   * @param userOp
    */
   async sendUserOperation(userOp: UserOperation): Promise<UserOperationResult> {
     const packed = this.packForRpc(userOp);
 
-    const userOpHash = await this.rpcCall<Hex>(
-      BUNDLER_METHODS.sendUserOperation,
-      [packed, this.entryPoint],
-    );
+    const userOpHash = await this.rpcCall<Hex>(BUNDLER_METHODS.sendUserOperation, [
+      packed,
+      this.entryPoint,
+    ]);
 
     return {
       userOpHash,
@@ -93,6 +105,8 @@ export class BundlerClient {
 
   /**
    * Estimate gas for a UserOperation
+   *
+   * @param userOp
    */
   async estimateUserOperationGas(
     userOp: Partial<UserOperation> & {
@@ -143,6 +157,8 @@ export class BundlerClient {
 
   /**
    * Get UserOperation by hash
+   *
+   * @param userOpHash
    */
   async getUserOperationByHash(
     userOpHash: Hex,
@@ -157,10 +173,10 @@ export class BundlerClient {
 
   /**
    * Get UserOperation receipt
+   *
+   * @param userOpHash
    */
-  async getUserOperationReceipt(
-    userOpHash: Hex,
-  ): Promise<UserOperationReceipt | null> {
+  async getUserOperationReceipt(userOpHash: Hex): Promise<UserOperationReceipt | null> {
     const result = await this.rpcCall<{
       userOpHash: Hex;
       sender: Address;
@@ -213,6 +229,11 @@ export class BundlerClient {
 
   /**
    * Wait for UserOperation receipt with polling
+   *
+   * @param userOpHash
+   * @param options
+   * @param options.timeout
+   * @param options.pollingInterval
    */
   async waitForReceipt(
     userOpHash: Hex,
@@ -230,16 +251,16 @@ export class BundlerClient {
         return receipt;
       }
 
-      await new Promise((resolve) => setTimeout(resolve, pollingInterval));
+      await new Promise(resolve => setTimeout(resolve, pollingInterval));
     }
 
-    throw new BundlerError(
-      `Timeout waiting for UserOperation receipt: ${userOpHash}`,
-    );
+    throw new BundlerError(`Timeout waiting for UserOperation receipt: ${userOpHash}`);
   }
 
   /**
    * Pack UserOperation for RPC (convert bigints to hex strings)
+   *
+   * @param userOp
    */
   private packForRpc(userOp: UserOperation): Record<string, unknown> {
     return {
@@ -247,10 +268,7 @@ export class BundlerClient {
       nonce: this.toHex(userOp.nonce),
       initCode: userOp.initCode,
       callData: userOp.callData,
-      accountGasLimits: packAccountGasLimits(
-        userOp.verificationGasLimit,
-        userOp.callGasLimit,
-      ),
+      accountGasLimits: packAccountGasLimits(userOp.verificationGasLimit, userOp.callGasLimit),
       preVerificationGas: this.toHex(userOp.preVerificationGas),
       gasFees: packGasFees(userOp.maxPriorityFeePerGas, userOp.maxFeePerGas),
       paymasterAndData: userOp.paymasterAndData,
@@ -260,6 +278,8 @@ export class BundlerClient {
 
   /**
    * Convert bigint to hex string
+   *
+   * @param value
    */
   private toHex(value: bigint): Hex {
     return `0x${value.toString(16)}` as Hex;
@@ -267,6 +287,9 @@ export class BundlerClient {
 
   /**
    * Make a JSON-RPC call to the bundler
+   *
+   * @param method
+   * @param params
    */
   private async rpcCall<T>(method: string, params: unknown[]): Promise<T> {
     const request: JsonRpcRequest = {
@@ -285,9 +308,7 @@ export class BundlerClient {
     });
 
     if (!response.ok) {
-      throw new BundlerError(
-        `HTTP error: ${response.status} ${response.statusText}`,
-      );
+      throw new BundlerError(`HTTP error: ${response.status} ${response.statusText}`);
     }
 
     const json = (await response.json()) as JsonRpcResponse<T>;
@@ -302,6 +323,8 @@ export class BundlerClient {
 
 /**
  * Create a BundlerClient instance
+ *
+ * @param config
  */
 export function createBundlerClient(config: BundlerConfig): BundlerClient {
   return new BundlerClient(config);
