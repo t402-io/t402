@@ -37,13 +37,14 @@
     "eslint-plugin-jsdoc": "^50.6.9",
     "eslint-plugin-prettier": "^5.2.6",
     "fastify": "^5.7.0",
+    "glob": "^13.0.0",
     "prettier": "3.5.2",
     "tsup": "^8.4.0",
     "tsx": "^4.21.0",
     "typescript": "^5.7.3",
     "vite": "^7.3.1",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.0.5"
+    "vitest": "^3.2.4"
   },
   "dependencies": {
     "@t402/core": "workspace:^",
@@ -51,8 +52,8 @@
     "zod": "^3.24.2"
   },
   "peerDependencies": {
-    "fastify": "^4.0.0 || ^5.0.0",
-    "@t402/paywall": "workspace:*"
+    "@t402/paywall": "workspace:*",
+    "fastify": "^4.0.0 || ^5.0.0"
   },
   "peerDependenciesMeta": {
     "@t402/paywall": {
