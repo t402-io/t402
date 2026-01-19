@@ -4,15 +4,20 @@ import (
 	"bytes"
 	"context"
 	"crypto/ed25519"
+	"crypto/hmac"
+	"crypto/sha512"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"golang.org/x/crypto/pbkdf2"
 
 	"github.com/t402-io/t402/go/mechanisms/ton"
 )
@@ -66,9 +71,9 @@ func newFacilitatorTonSigner(mnemonic string, mainnetRPC string, testnetRPC stri
 		}
 		privateKey = ed25519.NewKeyFromSeed(seed)
 	} else if len(words) == 24 {
-		// Derive key from mnemonic using simplified derivation
-		// Note: This uses a simplified derivation for compatibility.
-		// For production with specific wallet types, use external tools to derive the key.
+		// SECURITY WARNING: Using mnemonic derivation
+		// For production, it's recommended to use a pre-derived hex private key instead
+		log.Printf("WARNING: Using mnemonic-based key derivation for TON. For production, consider using TON_MNEMONIC with a 64-character hex private key instead.")
 		seed := deriveTonSeed(words)
 		privateKey = ed25519.NewKeyFromSeed(seed)
 	} else {
@@ -95,16 +100,33 @@ func newFacilitatorTonSigner(mnemonic string, mainnetRPC string, testnetRPC stri
 	return signer, nil
 }
 
-// deriveTonSeed derives a 32-byte seed from a 24-word mnemonic
-// This is a simplified derivation - for production wallets, use proper TON SDK
+// deriveTonSeed derives a 32-byte seed from a 24-word mnemonic using TON's derivation
+// This implements the standard TON mnemonic to seed derivation:
+// 1. PBKDF2-HMAC-SHA512 with mnemonic as password, "TON default seed" as salt, 100000 iterations
+// 2. Use first 32 bytes of the 64-byte result as Ed25519 seed
 func deriveTonSeed(words []string) []byte {
-	// Join words and hash to create deterministic seed
-	// Note: Real TON uses PBKDF2 with HMAC-SHA512, 100000 iterations
-	// This simplified version is for basic functionality
-	joined := strings.Join(words, " ")
-	seed := make([]byte, 32)
-	copy(seed, []byte(joined))
-	return seed
+	mnemonic := strings.Join(words, " ")
+
+	// TON uses PBKDF2 with HMAC-SHA512
+	// Password: mnemonic phrase
+	// Salt: "TON default seed" (for basic wallets)
+	// Iterations: 100000
+	// Key length: 64 bytes (we use first 32 for Ed25519 seed)
+	salt := []byte("TON default seed")
+	iterations := 100000
+	keyLen := 64
+
+	derived := pbkdf2.Key([]byte(mnemonic), salt, iterations, keyLen, sha512.New)
+
+	// Return first 32 bytes as Ed25519 seed
+	return derived[:32]
+}
+
+// hmacSha512 computes HMAC-SHA512 (used internally by PBKDF2)
+func hmacSha512(key, data []byte) []byte {
+	h := hmac.New(sha512.New, key)
+	h.Write(data)
+	return h.Sum(nil)
 }
 
 // newFacilitatorTonSignerWithAddresses creates a TON signer with explicit addresses

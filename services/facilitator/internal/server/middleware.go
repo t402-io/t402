@@ -1,9 +1,12 @@
 package server
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -23,9 +26,15 @@ func RequestIDMiddleware() gin.HandlerFunc {
 	}
 }
 
-// generateRequestID generates a unique request ID
+// generateRequestID generates a cryptographically secure unique request ID
+// Format: 16 random bytes encoded as 32 hex characters
 func generateRequestID() string {
-	return strconv.FormatInt(time.Now().UnixNano(), 36)
+	b := make([]byte, 16)
+	if _, err := rand.Read(b); err != nil {
+		// Fallback to timestamp if crypto/rand fails (should never happen)
+		return strconv.FormatInt(time.Now().UnixNano(), 36)
+	}
+	return hex.EncodeToString(b)
 }
 
 // LoggingMiddleware logs each request
@@ -50,16 +59,58 @@ func LoggingMiddleware() gin.HandlerFunc {
 	}
 }
 
-// CORSMiddleware handles Cross-Origin Resource Sharing
-func CORSMiddleware() gin.HandlerFunc {
+// CORSMiddleware handles Cross-Origin Resource Sharing with configurable allowed origins
+// allowedOrigins: comma-separated list of allowed origins, or "*" for all
+func CORSMiddleware(allowedOrigins string) gin.HandlerFunc {
+	// Parse allowed origins into a map for O(1) lookup
+	allowAll := allowedOrigins == "*" || allowedOrigins == ""
+	originsMap := make(map[string]bool)
+
+	if !allowAll {
+		for _, origin := range strings.Split(allowedOrigins, ",") {
+			origin = strings.TrimSpace(origin)
+			if origin != "" {
+				originsMap[origin] = true
+			}
+		}
+	}
+
 	return func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
+		origin := c.GetHeader("Origin")
+
+		// Determine the Access-Control-Allow-Origin value
+		var allowOrigin string
+		if allowAll {
+			allowOrigin = "*"
+		} else if originsMap[origin] {
+			allowOrigin = origin
+		} else if origin == "" {
+			// No Origin header (same-origin request or non-browser client)
+			allowOrigin = ""
+		} else {
+			// Origin not allowed - still set headers but with empty value
+			// This effectively blocks the request on the browser side
+			allowOrigin = ""
+		}
+
+		if allowOrigin != "" {
+			c.Header("Access-Control-Allow-Origin", allowOrigin)
+			if !allowAll {
+				// When not allowing all origins, add Vary header for proper caching
+				c.Header("Vary", "Origin")
+			}
+		}
+
 		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, X-Request-ID, X-API-Key")
 		c.Header("Access-Control-Max-Age", "86400")
 
 		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(http.StatusNoContent)
+			if allowOrigin != "" {
+				c.AbortWithStatus(http.StatusNoContent)
+			} else {
+				c.AbortWithStatus(http.StatusForbidden)
+			}
 			return
 		}
 

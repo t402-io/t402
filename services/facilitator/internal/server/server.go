@@ -99,8 +99,8 @@ func (s *Server) setupMiddleware() {
 	// Logging middleware
 	s.router.Use(LoggingMiddleware())
 
-	// CORS middleware
-	s.router.Use(CORSMiddleware())
+	// CORS middleware with configurable allowed origins
+	s.router.Use(CORSMiddleware(s.config.CORSAllowedOrigins))
 
 	// Metrics middleware
 	s.router.Use(s.metrics.Middleware())
