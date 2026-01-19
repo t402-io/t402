@@ -22,8 +22,11 @@ type Config struct {
 	RateLimitWindow   time.Duration
 
 	// API Key Authentication
-	APIKeys         string // Comma-separated list of "key:name" pairs
-	APIKeyRequired  bool   // If true, all requests require API key
+	APIKeys        string // Comma-separated list of "key:name" pairs
+	APIKeyRequired bool   // If true, all requests require API key
+
+	// CORS Configuration
+	CORSAllowedOrigins string // Comma-separated list of allowed origins, "*" for all
 
 	// EVM Configuration
 	EvmPrivateKey string
@@ -71,6 +74,11 @@ func Load() *Config {
 		// API Key Authentication
 		APIKeys:        getEnv("API_KEYS", ""),
 		APIKeyRequired: getEnvBool("API_KEY_REQUIRED", false),
+
+		// CORS Configuration
+		// Default: "*" (allow all) - for public APIs
+		// Production recommendation: set specific origins like "https://example.com,https://app.example.com"
+		CORSAllowedOrigins: getEnv("CORS_ALLOWED_ORIGINS", "*"),
 
 		// EVM Configuration
 		EvmPrivateKey: getEnv("EVM_PRIVATE_KEY", ""),

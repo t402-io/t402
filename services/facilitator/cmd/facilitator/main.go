@@ -397,6 +397,15 @@ func (s *facilitatorEvmSigner) ReadContract(
 	return nil, nil
 }
 
+// defaultGasLimit is used as fallback when gas estimation fails
+const defaultGasLimit = uint64(300000)
+
+// gasLimitMultiplier adds a safety margin to estimated gas (20% buffer)
+const gasLimitMultiplier = 1.2
+
+// maxGasLimit prevents excessive gas usage
+const maxGasLimit = uint64(3000000)
+
 func (s *facilitatorEvmSigner) WriteContract(
 	ctx context.Context,
 	contractAddress string,
@@ -428,13 +437,21 @@ func (s *facilitatorEvmSigner) WriteContract(
 		return "", fmt.Errorf("failed to get gas price: %w", err)
 	}
 
-	// Create transaction
+	// Estimate gas for the transaction
 	to := common.HexToAddress(contractAddress)
+	gasLimit, err := s.estimateGas(ctx, &to, data)
+	if err != nil {
+		// Fall back to default gas limit if estimation fails
+		log.Printf("Gas estimation failed, using default: %v", err)
+		gasLimit = defaultGasLimit
+	}
+
+	// Create transaction
 	tx := types.NewTransaction(
 		nonce,
 		to,
 		big.NewInt(0), // value
-		300000,        // gas limit
+		gasLimit,
 		gasPrice,
 		data,
 	)
@@ -454,6 +471,35 @@ func (s *facilitatorEvmSigner) WriteContract(
 	return signedTx.Hash().Hex(), nil
 }
 
+// estimateGas estimates the gas required for a transaction with a safety buffer
+func (s *facilitatorEvmSigner) estimateGas(ctx context.Context, to *common.Address, data []byte) (uint64, error) {
+	msg := ethereum.CallMsg{
+		From: s.address,
+		To:   to,
+		Data: data,
+	}
+
+	estimatedGas, err := s.client.EstimateGas(ctx, msg)
+	if err != nil {
+		return 0, fmt.Errorf("failed to estimate gas: %w", err)
+	}
+
+	// Add safety buffer (20%)
+	gasWithBuffer := uint64(float64(estimatedGas) * gasLimitMultiplier)
+
+	// Cap at max gas limit
+	if gasWithBuffer > maxGasLimit {
+		gasWithBuffer = maxGasLimit
+	}
+
+	// Ensure minimum gas limit
+	if gasWithBuffer < defaultGasLimit {
+		gasWithBuffer = defaultGasLimit
+	}
+
+	return gasWithBuffer, nil
+}
+
 func (s *facilitatorEvmSigner) SendTransaction(
 	ctx context.Context,
 	to string,
@@ -471,13 +517,21 @@ func (s *facilitatorEvmSigner) SendTransaction(
 		return "", fmt.Errorf("failed to get gas price: %w", err)
 	}
 
-	// Create transaction with raw data
+	// Estimate gas for the transaction
 	toAddr := common.HexToAddress(to)
+	gasLimit, err := s.estimateGas(ctx, &toAddr, data)
+	if err != nil {
+		// Fall back to default gas limit if estimation fails
+		log.Printf("Gas estimation failed, using default: %v", err)
+		gasLimit = defaultGasLimit
+	}
+
+	// Create transaction with raw data
 	tx := types.NewTransaction(
 		nonce,
 		toAddr,
 		big.NewInt(0), // value
-		300000,        // gas limit
+		gasLimit,
 		gasPrice,
 		data,
 	)
