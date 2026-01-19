@@ -95,8 +95,9 @@ export class BiconomyPaymaster {
   private readonly erc20Config?: BiconomyErc20Config;
 
   /**
+   * Creates a new Biconomy paymaster client
    *
-   * @param config
+   * @param config - Biconomy paymaster configuration including API key and mode
    */
   constructor(config: BiconomyPaymasterConfig) {
     this.apiKey = config.apiKey;
@@ -110,9 +111,10 @@ export class BiconomyPaymaster {
   /**
    * Sponsor a UserOperation
    *
-   * @param userOp
-   * @param options
-   * @param options.webhookData
+   * @param userOp - Partial UserOperation with sender and callData required
+   * @param options - Optional sponsorship options
+   * @param options.webhookData - Webhook data for custom policy validation
+   * @returns Sponsorship result with paymaster data and gas estimates
    */
   async sponsorUserOperation(
     userOp: Partial<UserOperation> & {
@@ -188,7 +190,8 @@ export class BiconomyPaymaster {
   /**
    * Get paymaster data without gas estimation
    *
-   * @param userOp
+   * @param userOp - The complete UserOperation to get paymaster data for
+   * @returns Paymaster data including address and gas limits
    */
   async getPaymasterData(userOp: UserOperation): Promise<PaymasterData> {
     const result = await this.sponsorUserOperation(userOp);
@@ -206,6 +209,8 @@ export class BiconomyPaymaster {
 
   /**
    * Get supported tokens for ERC-20 mode
+   *
+   * @returns Array of supported tokens with address, symbol, decimals, and exchange rate
    */
   async getSupportedTokens(): Promise<
     Array<{
@@ -238,7 +243,8 @@ export class BiconomyPaymaster {
   /**
    * Get fee quotes for a UserOperation
    *
-   * @param userOp
+   * @param userOp - Partial UserOperation with sender and callData required
+   * @returns Array of fee quotes for different tokens
    */
   async getFeeQuotes(
     userOp: Partial<UserOperation> & {
@@ -281,7 +287,8 @@ export class BiconomyPaymaster {
   /**
    * Check sponsorship eligibility
    *
-   * @param userOp
+   * @param userOp - Partial UserOperation with sender and callData required
+   * @returns Eligibility status with optional reason and remaining limits
    */
   async checkSponsorship(
     userOp: Partial<UserOperation> & {
@@ -326,7 +333,8 @@ export class BiconomyPaymaster {
   /**
    * Pack UserOp for sponsorship request
    *
-   * @param userOp
+   * @param userOp - Partial UserOperation with sender and callData required
+   * @returns Packed UserOperation object for RPC calls
    */
   private packUserOpForSponsorship(
     userOp: Partial<UserOperation> & { sender: Address; callData: Hex },
@@ -358,7 +366,8 @@ export class BiconomyPaymaster {
   /**
    * Convert bigint to hex
    *
-   * @param value
+   * @param value - The bigint value to convert
+   * @returns Hexadecimal string representation
    */
   private toHex(value: bigint): Hex {
     return `0x${value.toString(16)}` as Hex;
@@ -367,7 +376,8 @@ export class BiconomyPaymaster {
   /**
    * Make RPC call to Biconomy
    *
-   * @param body
+   * @param body - Request body containing method and params
+   * @returns The typed result from the RPC call
    */
   private async rpcCall<T>(body: Record<string, unknown>): Promise<T> {
     const response = await fetch(this.paymasterUrl, {
@@ -402,6 +412,8 @@ export class BiconomyPaymaster {
 
 /**
  * Get dummy signature for sponsorship requests
+ *
+ * @returns A dummy signature hex string for gas estimation
  */
 function getDummySignature(): Hex {
   return "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c" as Hex;
@@ -410,7 +422,8 @@ function getDummySignature(): Hex {
 /**
  * Create a Biconomy paymaster client
  *
- * @param config
+ * @param config - Biconomy paymaster configuration including API key and mode
+ * @returns A new BiconomyPaymaster instance
  */
 export function createBiconomyPaymaster(config: BiconomyPaymasterConfig): BiconomyPaymaster {
   return new BiconomyPaymaster(config);

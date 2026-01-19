@@ -67,8 +67,9 @@ export type BundlerProviderClient<T extends BundlerProvider> = T extends "pimlic
 /**
  * Create a bundler client for the specified provider
  *
- * @param provider
- * @param config
+ * @param provider - The bundler provider to use (pimlico, alchemy, or generic)
+ * @param config - Provider-specific configuration options
+ * @returns A bundler client instance for the specified provider
  */
 export function createBundlerClient<T extends BundlerProvider>(
   provider: T,
@@ -88,7 +89,8 @@ export function createBundlerClient<T extends BundlerProvider>(
 /**
  * Auto-detect bundler provider from URL
  *
- * @param url
+ * @param url - The bundler RPC URL to analyze
+ * @returns The detected bundler provider type
  */
 export function detectBundlerProvider(url: string): BundlerProvider {
   if (url.includes("pimlico")) {
@@ -103,9 +105,10 @@ export function detectBundlerProvider(url: string): BundlerProvider {
 /**
  * Create a bundler client with auto-detection
  *
- * @param bundlerUrl
- * @param chainId
- * @param apiKey
+ * @param bundlerUrl - The bundler RPC URL
+ * @param chainId - The chain ID for the bundler
+ * @param apiKey - Optional API key for authenticated bundlers
+ * @returns A bundler client instance appropriate for the detected provider
  */
 export function createBundlerClientFromUrl(
   bundlerUrl: string,

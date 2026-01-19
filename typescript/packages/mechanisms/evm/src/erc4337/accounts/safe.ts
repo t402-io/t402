@@ -182,8 +182,9 @@ export class SafeSmartAccount implements SmartAccountSigner {
   private isAccountDeployed = false;
 
   /**
+   * Create a new SafeSmartAccount instance
    *
-   * @param config
+   * @param config - Configuration options for the Safe smart account
    */
   constructor(config: SafeSmartAccountConfig) {
     this.signer = config.signer;
@@ -213,6 +214,8 @@ export class SafeSmartAccount implements SmartAccountSigner {
 
   /**
    * Get the smart account address (counterfactual)
+   *
+   * @returns The counterfactual address of the smart account
    */
   async getAddress(): Promise<Address> {
     if (this.cachedAddress) {
@@ -254,7 +257,8 @@ export class SafeSmartAccount implements SmartAccountSigner {
   /**
    * Sign a UserOperation hash
    *
-   * @param userOpHash
+   * @param userOpHash - The hash of the UserOperation to sign
+   * @returns The signature formatted for Safe validation
    */
   async signUserOpHash(userOpHash: Hex): Promise<Hex> {
     if (!this.signer.account) {
@@ -274,6 +278,8 @@ export class SafeSmartAccount implements SmartAccountSigner {
 
   /**
    * Get the account's init code for deployment
+   *
+   * @returns The init code for deploying the Safe, or "0x" if already deployed
    */
   async getInitCode(): Promise<Hex> {
     // Check if already deployed
@@ -322,6 +328,8 @@ export class SafeSmartAccount implements SmartAccountSigner {
 
   /**
    * Check if the account is deployed
+   *
+   * @returns True if the account is deployed on-chain, false otherwise
    */
   async isDeployed(): Promise<boolean> {
     if (this.deploymentChecked) {
@@ -340,9 +348,10 @@ export class SafeSmartAccount implements SmartAccountSigner {
   /**
    * Encode a call to the account's execute function
    *
-   * @param target
-   * @param value
-   * @param data
+   * @param target - The target address for the call
+   * @param value - The ETH value to send with the call
+   * @param data - The calldata to execute
+   * @returns The encoded function data for executeUserOp
    */
   encodeExecute(target: Address, value: bigint, data: Hex): Hex {
     return encodeFunctionData({
@@ -360,9 +369,10 @@ export class SafeSmartAccount implements SmartAccountSigner {
   /**
    * Encode a batch call to the account's executeBatch function
    *
-   * @param targets
-   * @param values
-   * @param datas
+   * @param targets - Array of target addresses for each call
+   * @param values - Array of ETH values to send with each call
+   * @param datas - Array of calldata for each call
+   * @returns The encoded function data for executeUserOpBatch
    */
   encodeExecuteBatch(targets: Address[], values: bigint[], datas: Hex[]): Hex {
     if (targets.length !== values.length || targets.length !== datas.length) {
@@ -380,6 +390,8 @@ export class SafeSmartAccount implements SmartAccountSigner {
 
   /**
    * Get the counterfactual address without caching
+   *
+   * @returns The counterfactual address of the smart account
    */
   async getCounterfactualAddress(): Promise<Address> {
     return this.getAddress();
@@ -388,8 +400,9 @@ export class SafeSmartAccount implements SmartAccountSigner {
   /**
    * Get the account's nonce from EntryPoint
    *
-   * @param entryPoint
-   * @param key
+   * @param entryPoint - The EntryPoint contract address
+   * @param key - The nonce key for parallel nonce spaces (defaults to 0n)
+   * @returns The current nonce for the account
    */
   async getNonce(entryPoint: Address, key = 0n): Promise<bigint> {
     const address = await this.getAddress();
@@ -417,6 +430,8 @@ export class SafeSmartAccount implements SmartAccountSigner {
 
   /**
    * Get the Safe's owners
+   *
+   * @returns A copy of the owners array
    */
   getOwners(): Address[] {
     return [...this.owners];
@@ -424,6 +439,8 @@ export class SafeSmartAccount implements SmartAccountSigner {
 
   /**
    * Get the Safe's threshold
+   *
+   * @returns The number of required signatures for transactions
    */
   getThreshold(): number {
     return this.threshold;
@@ -443,7 +460,8 @@ export class SafeSmartAccount implements SmartAccountSigner {
 /**
  * Create a Safe smart account
  *
- * @param config
+ * @param config - Configuration options for the Safe smart account
+ * @returns A new SafeSmartAccount instance
  */
 export function createSafeSmartAccount(config: SafeSmartAccountConfig): SafeSmartAccount {
   return new SafeSmartAccount(config);

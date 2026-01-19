@@ -59,6 +59,15 @@ export class CrossChainPaymentRouter {
   }
 
   /**
+   * Get all bridgeable chains
+   *
+   * @returns Array of all chain names that support USDT0 bridging
+   */
+  static getBridgeableChains(): string[] {
+    return getBridgeableChains();
+  }
+
+  /**
    * Route payment across chains
    *
    * This method:
@@ -161,22 +170,18 @@ export class CrossChainPaymentRouter {
 
   /**
    * Get all supported destination chains from source chain
+   *
+   * @returns Array of chain names that can receive bridged funds
    */
   getSupportedDestinations(): string[] {
     return this.bridge.getSupportedDestinations();
   }
 
   /**
-   * Get all bridgeable chains
-   */
-  static getBridgeableChains(): string[] {
-    return getBridgeableChains();
-  }
-
-  /**
    * Validate routing parameters
    *
-   * @param params
+   * @param params - The cross-chain payment parameters to validate
+   * @throws Error if parameters are invalid or routing is not supported
    */
   private validateParams(params: CrossChainPaymentParams): void {
     if (params.sourceChain !== this.sourceChain) {
@@ -201,8 +206,9 @@ export class CrossChainPaymentRouter {
 /**
  * Create a cross-chain payment router
  *
- * @param signer - Wallet signer
+ * @param signer - Wallet signer for bridge operations
  * @param sourceChain - Chain where funds are located
+ * @returns A new CrossChainPaymentRouter instance
  */
 export function createCrossChainPaymentRouter(
   signer: BridgeSigner,

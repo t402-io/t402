@@ -45,8 +45,9 @@ export class PaymasterClient {
   private readonly config: PaymasterConfig;
 
   /**
+   * Creates a new PaymasterClient instance
    *
-   * @param config
+   * @param config - Paymaster configuration including type, address, and optional URL
    */
   constructor(config: PaymasterConfig) {
     this.config = config;
@@ -55,10 +56,11 @@ export class PaymasterClient {
   /**
    * Get paymaster data for a UserOperation
    *
-   * @param userOp
-   * @param chainId
-   * @param entryPoint
-   * @param context
+   * @param userOp - Partial UserOperation to get paymaster data for
+   * @param chainId - The chain ID for the operation
+   * @param entryPoint - The EntryPoint contract address
+   * @param context - Optional context data for the paymaster
+   * @returns Paymaster data including address and gas limits
    */
   async getPaymasterData(
     userOp: Partial<UserOperation>,
@@ -81,12 +83,13 @@ export class PaymasterClient {
   /**
    * Get gas estimates including paymaster gas
    *
-   * @param _userOp
-   * @param _chainId
+   * @param _userOp - Partial UserOperation to estimate gas for (reserved for future use)
+   * @param _chainId - The chain ID for the operation (reserved for future use)
+   * @returns Gas estimates including paymaster verification and postOp gas
    */
   async estimatePaymasterGas(
-    _userOp: Partial<UserOperation>,
-    _chainId: number,
+    _userOp: Partial<UserOperation>, // eslint-disable-line @typescript-eslint/no-unused-vars
+    _chainId: number, // eslint-disable-line @typescript-eslint/no-unused-vars
   ): Promise<GasEstimate> {
     // For most paymasters, use default gas limits
     // This can be overridden by calling the paymaster service
@@ -102,10 +105,11 @@ export class PaymasterClient {
   /**
    * Check if the paymaster will sponsor this operation
    *
-   * @param userOp
-   * @param chainId
-   * @param entryPoint
-   * @param context
+   * @param userOp - Partial UserOperation to check sponsorship for
+   * @param chainId - The chain ID for the operation
+   * @param entryPoint - The EntryPoint contract address
+   * @param context - Optional context data for policy validation
+   * @returns True if the paymaster will sponsor the operation
    */
   async willSponsor(
     userOp: Partial<UserOperation>,
@@ -142,9 +146,10 @@ export class PaymasterClient {
   /**
    * Get verifying paymaster data (off-chain signature)
    *
-   * @param userOp
-   * @param chainId
-   * @param entryPoint
+   * @param userOp - Partial UserOperation to get paymaster data for
+   * @param chainId - The chain ID for the operation
+   * @param entryPoint - The EntryPoint contract address
+   * @returns Paymaster data with verification signature
    */
   private async getVerifyingPaymasterData(
     userOp: Partial<UserOperation>,
@@ -169,10 +174,11 @@ export class PaymasterClient {
   /**
    * Get sponsoring paymaster data (third-party pays)
    *
-   * @param userOp
-   * @param chainId
-   * @param entryPoint
-   * @param context
+   * @param userOp - Partial UserOperation to get sponsorship for
+   * @param chainId - The chain ID for the operation
+   * @param entryPoint - The EntryPoint contract address
+   * @param context - Optional context data for sponsorship validation
+   * @returns Paymaster data for sponsored operation
    */
   private async getSponsoringPaymasterData(
     userOp: Partial<UserOperation>,
@@ -214,9 +220,10 @@ export class PaymasterClient {
   /**
    * Get token paymaster data (pay gas with ERC20)
    *
-   * @param userOp
-   * @param chainId
-   * @param entryPoint
+   * @param userOp - Partial UserOperation to get token paymaster data for
+   * @param chainId - The chain ID for the operation
+   * @param entryPoint - The EntryPoint contract address
+   * @returns Paymaster data for ERC20 token payment
    */
   private async getTokenPaymasterData(
     userOp: Partial<UserOperation>,
@@ -248,10 +255,11 @@ export class PaymasterClient {
   /**
    * Call paymaster service API
    *
-   * @param userOp
-   * @param chainId
-   * @param entryPoint
-   * @param context
+   * @param userOp - Partial UserOperation to send to the service
+   * @param chainId - The chain ID for the operation
+   * @param entryPoint - The EntryPoint contract address
+   * @param context - Optional context data for the service
+   * @returns Paymaster data from the service response
    */
   private async callPaymasterService(
     userOp: Partial<UserOperation>,
@@ -292,7 +300,8 @@ export class PaymasterClient {
   /**
    * Serialize UserOperation for API calls
    *
-   * @param userOp
+   * @param userOp - Partial UserOperation to serialize
+   * @returns Serialized UserOperation with hex-encoded values
    */
   private serializeUserOp(userOp: Partial<UserOperation>): Record<string, string> {
     const result: Record<string, string> = {};
@@ -321,7 +330,8 @@ export class PaymasterClient {
 /**
  * Create a PaymasterClient instance
  *
- * @param config
+ * @param config - Paymaster configuration including type, address, and optional URL
+ * @returns A new PaymasterClient instance
  */
 export function createPaymasterClient(config: PaymasterConfig): PaymasterClient {
   return new PaymasterClient(config);
@@ -330,7 +340,8 @@ export function createPaymasterClient(config: PaymasterConfig): PaymasterClient 
 /**
  * Encode paymaster data for inclusion in UserOperation
  *
- * @param data
+ * @param data - Paymaster data to encode
+ * @returns Encoded paymasterAndData hex string
  */
 export function encodePaymasterAndData(data: PaymasterData): Hex {
   return concat([
@@ -344,7 +355,8 @@ export function encodePaymasterAndData(data: PaymasterData): Hex {
 /**
  * Decode paymaster and data from UserOperation
  *
- * @param paymasterAndData
+ * @param paymasterAndData - Encoded paymasterAndData hex string
+ * @returns Decoded PaymasterData or null if invalid/empty
  */
 export function decodePaymasterAndData(paymasterAndData: Hex): PaymasterData | null {
   if (paymasterAndData === "0x" || paymasterAndData.length < 86) {

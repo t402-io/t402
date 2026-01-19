@@ -117,8 +117,9 @@ export interface UnifiedPaymaster {
 /**
  * Create a paymaster client for the specified provider
  *
- * @param provider
- * @param config
+ * @param provider - The paymaster provider to use (pimlico, biconomy, or stackup)
+ * @param config - Provider-specific configuration options
+ * @returns A paymaster client instance for the specified provider
  */
 export function createPaymaster<T extends PaymasterProvider>(
   provider: T,
@@ -141,7 +142,8 @@ export function createPaymaster<T extends PaymasterProvider>(
 /**
  * Auto-detect paymaster provider from URL
  *
- * @param url
+ * @param url - The paymaster URL to analyze
+ * @returns The detected paymaster provider type or null if unknown
  */
 export function detectPaymasterProvider(url: string): PaymasterProvider | null {
   if (url.includes("pimlico")) {
@@ -160,8 +162,9 @@ export function detectPaymasterProvider(url: string): PaymasterProvider | null {
  * Create a unified paymaster wrapper
  * Normalizes the interface across different providers
  *
- * @param provider
- * @param config
+ * @param provider - The paymaster provider to use
+ * @param config - Provider-specific configuration options
+ * @returns A unified paymaster interface that works across providers
  */
 export function createUnifiedPaymaster(
   provider: PaymasterProvider,
