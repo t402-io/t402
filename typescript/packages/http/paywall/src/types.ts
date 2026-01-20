@@ -1,4 +1,33 @@
 /**
+ * Theme configuration for the paywall
+ */
+export interface PaywallTheme {
+  /**
+   * Color mode: light, dark, or auto (follows system preference)
+   */
+  mode?: "light" | "dark" | "auto";
+  /**
+   * Custom color overrides
+   */
+  colors?: {
+    primary?: string;
+    background?: string;
+    containerBackground?: string;
+    text?: string;
+    secondaryText?: string;
+    border?: string;
+  };
+  /**
+   * Custom border radius (e.g., "0.75rem", "8px")
+   */
+  borderRadius?: string;
+  /**
+   * Custom font family
+   */
+  fontFamily?: string;
+}
+
+/**
  * Configuration options for the paywall
  */
 export interface PaywallConfig {
@@ -6,6 +35,10 @@ export interface PaywallConfig {
   appLogo?: string;
   currentUrl?: string;
   testnet?: boolean;
+  /**
+   * Theme configuration for styling the paywall
+   */
+  theme?: PaywallTheme;
 }
 
 /**
