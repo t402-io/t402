@@ -6,6 +6,7 @@ import type { PaymentRequired } from "@t402/core/types";
 
 import { Spinner } from "./Spinner";
 import { getNetworkDisplayName } from "../paywallUtils";
+import { PaymentProgress, type PaymentStep } from "../components/PaymentProgress";
 import { useTronWallet, formatTronAddress } from "./tron/useTronWallet";
 import { useTronBalance } from "./tron/useTronBalance";
 import { useTronSigner } from "./tron/useTronSigner";
@@ -29,6 +30,8 @@ export function TronPaywall({ paymentRequired, onSuccessfulResponse }: TronPaywa
   const [status, setStatus] = useState<string>("");
   const [isPaying, setIsPaying] = useState(false);
   const [hideBalance, setHideBalance] = useState(true);
+  const [paymentStep, setPaymentStep] = useState<PaymentStep>("connect");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const t402 = window.t402;
   const amount = t402.amount;
@@ -73,6 +76,15 @@ export function TronPaywall({ paymentRequired, onSuccessfulResponse }: TronPaywa
     }
   }, [address, refreshBalance]);
 
+  // Update payment step based on connection state
+  useEffect(() => {
+    if (!isConnected) {
+      setPaymentStep("connect");
+    } else if (paymentStep === "connect") {
+      setPaymentStep("sign");
+    }
+  }, [isConnected, paymentStep]);
+
   const handleConnect = useCallback(async () => {
     await connect();
   }, [connect]);
@@ -94,6 +106,7 @@ export function TronPaywall({ paymentRequired, onSuccessfulResponse }: TronPaywa
     }
 
     setIsPaying(true);
+    setIsProcessing(true);
 
     try {
       // Check balance
@@ -105,6 +118,7 @@ export function TronPaywall({ paymentRequired, onSuccessfulResponse }: TronPaywa
         }
       }
 
+      setPaymentStep("sign");
       setStatus("Creating payment signature...");
 
       const client = new t402Client();
@@ -116,6 +130,7 @@ export function TronPaywall({ paymentRequired, onSuccessfulResponse }: TronPaywa
 
       const paymentHeader = btoa(JSON.stringify(paymentPayload));
 
+      setPaymentStep("submit");
       setStatus("Requesting content with payment...");
       const response = await fetch(t402.currentUrl, {
         headers: {
@@ -125,12 +140,15 @@ export function TronPaywall({ paymentRequired, onSuccessfulResponse }: TronPaywa
       });
 
       if (response.ok) {
+        setPaymentStep("confirm");
+        setIsProcessing(false);
         await onSuccessfulResponse(response);
       } else {
         throw new Error(`Request failed: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Payment failed.");
+      setIsProcessing(false);
     } finally {
       setIsPaying(false);
     }
@@ -171,6 +189,13 @@ export function TronPaywall({ paymentRequired, onSuccessfulResponse }: TronPaywa
       </div>
 
       <div className="content w-full">
+        {isConnected && (
+          <PaymentProgress
+            currentStep={paymentStep}
+            isProcessing={isProcessing}
+            hasError={!!status && !isPaying}
+          />
+        )}
         <div className="payment-details">
           <div className="payment-row">
             <span className="payment-label">Wallet:</span>

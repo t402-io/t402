@@ -8,6 +8,7 @@ import type { PaymentRequired } from "@t402/core/types";
 
 import { Spinner } from "./Spinner";
 import { getNetworkDisplayName, SOLANA_NETWORK_REFS } from "../paywallUtils";
+import { PaymentProgress, type PaymentStep } from "../components/PaymentProgress";
 import { getStandardConnectFeature, getStandardDisconnectFeature } from "./solana/features";
 import { useSolanaBalance } from "./solana/useSolanaBalance";
 import { useSolanaSigner } from "./solana/useSolanaSigner";
@@ -38,6 +39,8 @@ export function SolanaPaywall({ paymentRequired, onSuccessfulResponse }: SolanaP
   const [activeAccount, setActiveAccount] = useState<WalletAccount | null>(null);
   const [hideBalance, setHideBalance] = useState(true);
   const attemptedSilentConnectWalletsRef = useRef<Set<string>>(new Set());
+  const [paymentStep, setPaymentStep] = useState<PaymentStep>("connect");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const t402 = window.t402;
   const amount = t402.amount;
@@ -71,6 +74,15 @@ export function SolanaPaywall({ paymentRequired, onSuccessfulResponse }: SolanaP
       setSelectedWalletValue(walletOptions[0].value);
     }
   }, [walletOptions, selectedWalletValue]);
+
+  // Update payment step based on connection state
+  useEffect(() => {
+    if (!activeAccount) {
+      setPaymentStep("connect");
+    } else if (paymentStep === "connect") {
+      setPaymentStep("sign");
+    }
+  }, [activeAccount, paymentStep]);
 
   useEffect(() => {
     if (!activeWallet) {
@@ -168,6 +180,7 @@ export function SolanaPaywall({ paymentRequired, onSuccessfulResponse }: SolanaP
     }
 
     setIsPaying(true);
+    setIsProcessing(true);
 
     try {
       if (usdcBalance === null || usdcBalance === 0n) {
@@ -178,6 +191,7 @@ export function SolanaPaywall({ paymentRequired, onSuccessfulResponse }: SolanaP
         }
       }
 
+      setPaymentStep("sign");
       setStatus("Creating payment signature...");
 
       const client = new t402Client();
@@ -187,6 +201,7 @@ export function SolanaPaywall({ paymentRequired, onSuccessfulResponse }: SolanaP
 
       const paymentHeader = btoa(JSON.stringify(paymentPayload));
 
+      setPaymentStep("submit");
       setStatus("Requesting content with payment...");
       const response = await fetch(t402.currentUrl, {
         headers: {
@@ -196,12 +211,15 @@ export function SolanaPaywall({ paymentRequired, onSuccessfulResponse }: SolanaP
       });
 
       if (response.ok) {
+        setPaymentStep("confirm");
+        setIsProcessing(false);
         await onSuccessfulResponse(response);
       } else {
         throw new Error(`Request failed: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Payment failed.");
+      setIsProcessing(false);
     } finally {
       setIsPaying(false);
     }
@@ -235,6 +253,13 @@ export function SolanaPaywall({ paymentRequired, onSuccessfulResponse }: SolanaP
       </div>
 
       <div className="content w-full">
+        {activeAccount && (
+          <PaymentProgress
+            currentStep={paymentStep}
+            isProcessing={isProcessing}
+            hasError={!!status && !isPaying}
+          />
+        )}
         <div className="payment-details">
           <div className="payment-row">
             <span className="payment-label">Wallet:</span>

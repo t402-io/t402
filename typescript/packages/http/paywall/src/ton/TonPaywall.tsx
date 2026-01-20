@@ -8,6 +8,7 @@ import type { PaymentRequired } from "@t402/core/types";
 
 import { Spinner } from "./Spinner";
 import { getNetworkDisplayName } from "../paywallUtils";
+import { PaymentProgress, type PaymentStep } from "../components/PaymentProgress";
 import { useTonBalance } from "./ton/useTonBalance";
 import { useTonSigner, createGetJettonWalletAddress } from "./ton/useTonSigner";
 import { TON_NETWORKS, type TonNetwork } from "./ton/types";
@@ -26,6 +27,8 @@ function TonPaywallInner({ paymentRequired, onSuccessfulResponse }: TonPaywallPr
   const [status, setStatus] = useState<string>("");
   const [isPaying, setIsPaying] = useState(false);
   const [hideBalance, setHideBalance] = useState(true);
+  const [paymentStep, setPaymentStep] = useState<PaymentStep>("connect");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const t402 = window.t402;
   const amount = t402.amount;
@@ -61,6 +64,15 @@ function TonPaywallInner({ paymentRequired, onSuccessfulResponse }: TonPaywallPr
     }
   }, [walletAddress, refreshBalance]);
 
+  // Update payment step based on connection state
+  useEffect(() => {
+    if (!wallet) {
+      setPaymentStep("connect");
+    } else if (paymentStep === "connect") {
+      setPaymentStep("sign");
+    }
+  }, [wallet, paymentStep]);
+
   const handleConnect = useCallback(async () => {
     setStatus("Connecting to wallet...");
     try {
@@ -93,6 +105,7 @@ function TonPaywallInner({ paymentRequired, onSuccessfulResponse }: TonPaywallPr
     }
 
     setIsPaying(true);
+    setIsProcessing(true);
 
     try {
       // Check balance
@@ -104,6 +117,7 @@ function TonPaywallInner({ paymentRequired, onSuccessfulResponse }: TonPaywallPr
         }
       }
 
+      setPaymentStep("sign");
       setStatus("Creating payment signature...");
 
       const client = new t402Client();
@@ -116,6 +130,7 @@ function TonPaywallInner({ paymentRequired, onSuccessfulResponse }: TonPaywallPr
 
       const paymentHeader = btoa(JSON.stringify(paymentPayload));
 
+      setPaymentStep("submit");
       setStatus("Requesting content with payment...");
       const response = await fetch(t402.currentUrl, {
         headers: {
@@ -125,12 +140,15 @@ function TonPaywallInner({ paymentRequired, onSuccessfulResponse }: TonPaywallPr
       });
 
       if (response.ok) {
+        setPaymentStep("confirm");
+        setIsProcessing(false);
         await onSuccessfulResponse(response);
       } else {
         throw new Error(`Request failed: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Payment failed.");
+      setIsProcessing(false);
     } finally {
       setIsPaying(false);
     }
@@ -181,6 +199,13 @@ function TonPaywallInner({ paymentRequired, onSuccessfulResponse }: TonPaywallPr
       </div>
 
       <div className="content w-full">
+        {wallet && (
+          <PaymentProgress
+            currentStep={paymentStep}
+            isProcessing={isProcessing}
+            hasError={!!status && !isPaying}
+          />
+        )}
         <div className="payment-details">
           <div className="payment-row">
             <span className="payment-label">Wallet:</span>
