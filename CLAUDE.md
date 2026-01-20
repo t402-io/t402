@@ -128,7 +128,7 @@ t402/
 | TypeScript | 2.3.0 | npm (@t402/*) | `v*` (e.g., `v2.3.0`) |
 | Python | 1.9.0 | PyPI | `python/v*` |
 | Go | 1.8.0 | Go Modules | `go/v*` |
-| Java | 1.7.0 | Maven Central | `java/v*` |
+| Java | 1.8.0 | Maven Central | `java/v*` |
 
 ### Release Commands
 
@@ -143,7 +143,7 @@ git tag python/v1.9.1 && git push origin python/v1.9.1
 git tag go/v1.8.1 && git push origin go/v1.8.1
 
 # Java
-git tag java/v1.7.1 && git push origin java/v1.7.1
+git tag java/v1.8.1 && git push origin java/v1.8.1
 ```
 
 ---
