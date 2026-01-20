@@ -39,6 +39,11 @@ export interface PaywallConfig {
    * Theme configuration for styling the paywall
    */
   theme?: PaywallTheme;
+  /**
+   * WalletConnect project ID for mobile deep linking (EVM only)
+   * Get your project ID at https://cloud.walletconnect.com
+   */
+  walletConnectProjectId?: string;
 }
 
 /**

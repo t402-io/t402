@@ -44,6 +44,7 @@ interface EvmPaywallOptions {
   appName?: string;
   appLogo?: string;
   theme?: PaywallTheme;
+  walletConnectProjectId?: string;
 }
 
 /**
@@ -65,7 +66,7 @@ export function getEvmPaywallHtml(options: EvmPaywallOptions): string {
     return `<!DOCTYPE html><html><body><h1>EVM Paywall (run pnpm build:paywall to generate full template)</h1></body></html>`;
   }
 
-  const { amount, testnet, paymentRequired, currentUrl, appName, appLogo, theme } = options;
+  const { amount, testnet, paymentRequired, currentUrl, appName, appLogo, theme, walletConnectProjectId } = options;
 
   const logOnTestnet = testnet
     ? "console.log('EVM Payment required initialized:', window.t402);"
@@ -73,6 +74,11 @@ export function getEvmPaywallHtml(options: EvmPaywallOptions): string {
 
   const config = getChainConfig();
   const themeScript = generateThemeScript(theme);
+
+  // Only include walletConnectProjectId if provided
+  const walletConnectLine = walletConnectProjectId
+    ? `walletConnectProjectId: "${escapeString(walletConnectProjectId)}",`
+    : "";
 
   const configScript = `
   <script>
@@ -86,6 +92,7 @@ export function getEvmPaywallHtml(options: EvmPaywallOptions): string {
       },
       appName: "${escapeString(appName || "")}",
       appLogo: "${escapeString(appLogo || "")}",
+      ${walletConnectLine}
     };
     ${logOnTestnet}
   </script>`;

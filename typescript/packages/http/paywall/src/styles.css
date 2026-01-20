@@ -620,3 +620,51 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* QR Code Component */
+.qr-code-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background-color: var(--container-background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.qr-code-canvas {
+  border-radius: 0.5rem;
+  background-color: var(--container-background-color);
+}
+
+.qr-code-label {
+  font-size: 0.875rem;
+  color: var(--secondary-text-color);
+  text-align: center;
+  max-width: 200px;
+  word-break: break-all;
+}
+
+.qr-code-copy-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  min-height: 36px;
+  width: auto;
+}
+
+/* Mobile responsive for QR code */
+@media (max-width: 640px) {
+  .qr-code-container {
+    padding: 0.75rem;
+  }
+
+  .qr-code-canvas {
+    max-width: 160px;
+    max-height: 160px;
+  }
+}
