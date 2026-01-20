@@ -4,6 +4,7 @@ import io.t402.mcp.McpTypes.ServerConfig;
 import io.t402.mcp.McpTypes.SupportedNetwork;
 import io.t402.mcp.McpTypes.SupportedSvmNetwork;
 import io.t402.mcp.McpTypes.SupportedToken;
+import io.t402.mcp.McpTypes.SupportedTonNetwork;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -187,6 +188,43 @@ public final class McpConstants {
     /** Base58 address pattern for Solana addresses. */
     public static final String SOLANA_ADDRESS_PATTERN = "^[1-9A-HJ-NP-Za-km-z]{32,44}$";
 
+    // =========================================================================
+    // TON Network Constants
+    // =========================================================================
+
+    /** Native token symbol for TON. */
+    public static final String TON_SYMBOL = "TON";
+
+    /** Standard decimal count for TON native token. */
+    public static final int TON_DECIMALS = 9;
+
+    /** Standard decimal count for USDT on TON. */
+    public static final int TON_USDT_DECIMALS = 6;
+
+    // TON Explorer URLs
+    public static final Map<SupportedTonNetwork, String> TON_EXPLORER_URLS = new EnumMap<>(SupportedTonNetwork.class);
+    static {
+        TON_EXPLORER_URLS.put(SupportedTonNetwork.TON_MAINNET, "https://tonviewer.com");
+        TON_EXPLORER_URLS.put(SupportedTonNetwork.TON_TESTNET, "https://testnet.tonviewer.com");
+    }
+
+    // TON RPC URLs
+    public static final Map<SupportedTonNetwork, String> TON_RPC_URLS = new EnumMap<>(SupportedTonNetwork.class);
+    static {
+        TON_RPC_URLS.put(SupportedTonNetwork.TON_MAINNET, "https://toncenter.com/api/v2");
+        TON_RPC_URLS.put(SupportedTonNetwork.TON_TESTNET, "https://testnet.toncenter.com/api/v2");
+    }
+
+    // TON USDT addresses (jetton master)
+    public static final Map<SupportedTonNetwork, String> TON_USDT_ADDRESSES = new EnumMap<>(SupportedTonNetwork.class);
+    static {
+        TON_USDT_ADDRESSES.put(SupportedTonNetwork.TON_MAINNET, "EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs");
+        TON_USDT_ADDRESSES.put(SupportedTonNetwork.TON_TESTNET, "EQBynBO23ywHy_CgarY9NK9FTz0yDsG82PtcbSTQgGoXwiuA");
+    }
+
+    /** TON address pattern (raw or user-friendly format). */
+    public static final String TON_ADDRESS_PATTERN = "^(EQ|UQ|0:|kQ|kf:|-1:)[A-Za-z0-9_-]{46,48}$";
+
     /**
      * Returns all supported EVM networks.
      */
@@ -213,6 +251,20 @@ public final class McpConstants {
      */
     public static boolean isValidSvmNetwork(String network) {
         return SupportedSvmNetwork.fromString(network) != null;
+    }
+
+    /**
+     * Returns all supported TON networks.
+     */
+    public static List<SupportedTonNetwork> getAllTonNetworks() {
+        return Arrays.asList(SupportedTonNetwork.values());
+    }
+
+    /**
+     * Checks if a TON network string is valid.
+     */
+    public static boolean isValidTonNetwork(String network) {
+        return SupportedTonNetwork.fromString(network) != null;
     }
 
     /**
@@ -360,5 +412,50 @@ public final class McpConstants {
             return false;
         }
         return address.matches(SOLANA_ADDRESS_PATTERN);
+    }
+
+    // =========================================================================
+    // TON Utility Methods
+    // =========================================================================
+
+    /**
+     * Returns the explorer URL for a TON transaction.
+     */
+    public static String getTonExplorerTxUrl(SupportedTonNetwork network, String txHash) {
+        String baseUrl = TON_EXPLORER_URLS.get(network);
+        if (baseUrl == null) {
+            return "";
+        }
+        return baseUrl + "/transaction/" + txHash;
+    }
+
+    /**
+     * Returns the RPC URL for a TON network, using config override if available.
+     */
+    public static String getTonRpcUrl(ServerConfig config, SupportedTonNetwork network) {
+        if (config != null && config.getRpcUrls() != null) {
+            String url = config.getRpcUrls().get(network.getValue());
+            if (url != null && !url.isEmpty()) {
+                return url;
+            }
+        }
+        return TON_RPC_URLS.get(network);
+    }
+
+    /**
+     * Returns the USDT jetton address for a TON network.
+     */
+    public static String getTonUsdtAddress(SupportedTonNetwork network) {
+        return TON_USDT_ADDRESSES.get(network);
+    }
+
+    /**
+     * Validates a TON address format.
+     */
+    public static boolean isValidTonAddress(String address) {
+        if (address == null || address.isEmpty()) {
+            return false;
+        }
+        return address.matches(TON_ADDRESS_PATTERN);
     }
 }

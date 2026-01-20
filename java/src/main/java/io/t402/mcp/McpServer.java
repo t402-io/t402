@@ -335,6 +335,45 @@ public class McpServer {
             new InputSchema(paySvmProps, List.of("to", "amount", "token", "network"))
         ));
 
+        // ===== TON Tools =====
+
+        List<String> tonNetworks = new ArrayList<>();
+        for (SupportedTonNetwork net : McpConstants.getAllTonNetworks()) {
+            tonNetworks.add(net.getValue());
+        }
+
+        List<String> tonTokens = List.of("USDT");
+
+        // t402/getTonBalance
+        Map<String, Property> getTonBalanceProps = new LinkedHashMap<>();
+        Property tonAddressProp = new Property("string", "TON address (EQ/UQ format)");
+        tonAddressProp.setPattern(McpConstants.TON_ADDRESS_PATTERN);
+        getTonBalanceProps.put("address", tonAddressProp);
+        getTonBalanceProps.put("network", new Property("string", "TON network to query", tonNetworks));
+
+        toolDefs.add(new Tool(
+            "t402/getTonBalance",
+            "Get TON and jetton token balances for a TON wallet address",
+            new InputSchema(getTonBalanceProps, List.of("address", "network"))
+        ));
+
+        // t402/payTon
+        Map<String, Property> payTonProps = new LinkedHashMap<>();
+        Property tonToProp = new Property("string", "Recipient TON address (EQ/UQ format)");
+        tonToProp.setPattern(McpConstants.TON_ADDRESS_PATTERN);
+        payTonProps.put("to", tonToProp);
+        Property tonAmountProp = new Property("string", "Amount to send (e.g., '10.5')");
+        tonAmountProp.setPattern("^\\d+(\\.\\d+)?$");
+        payTonProps.put("amount", tonAmountProp);
+        payTonProps.put("token", new Property("string", "Jetton to send", tonTokens));
+        payTonProps.put("network", new Property("string", "TON network to use", tonNetworks));
+
+        toolDefs.add(new Tool(
+            "t402/payTon",
+            "Execute a USDT payment on TON (jetton transfer)",
+            new InputSchema(payTonProps, List.of("to", "amount", "token", "network"))
+        ));
+
         return toolDefs;
     }
 
