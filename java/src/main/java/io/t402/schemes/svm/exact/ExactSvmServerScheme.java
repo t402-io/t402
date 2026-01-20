@@ -35,6 +35,83 @@ public class ExactSvmServerScheme {
     /** CAIP family pattern for Solana networks. */
     public static final String CAIP_FAMILY = "solana:*";
 
+    private final String defaultNetwork;
+
+    /**
+     * Creates a new ExactSvmServerScheme with mainnet as default network.
+     */
+    public ExactSvmServerScheme() {
+        this(SvmConstants.SOLANA_MAINNET);
+    }
+
+    /**
+     * Creates a new ExactSvmServerScheme with specified default network.
+     *
+     * @param defaultNetwork Default network for payments (CAIP-2 format)
+     */
+    public ExactSvmServerScheme(String defaultNetwork) {
+        this.defaultNetwork = SvmConstants.normalizeNetwork(
+            defaultNetwork != null ? defaultNetwork : SvmConstants.SOLANA_MAINNET
+        );
+    }
+
+    /**
+     * Gets the default network for this server scheme.
+     *
+     * @return Default network identifier
+     */
+    public String getDefaultNetwork() {
+        return defaultNetwork;
+    }
+
+    /**
+     * Creates payment requirements with simplified parameters.
+     * <p>
+     * This is the recommended method for generating payment requirements.
+     * </p>
+     *
+     * @param price Price in decimal format (e.g., "1.50" for $1.50 USDC)
+     * @param payTo Recipient address
+     * @param description Resource description
+     * @return Payment requirements map ready to send to client
+     *
+     * @see #getPaymentRequirements(String, String, String, String)
+     */
+    public Map<String, Object> getPaymentRequirements(String price, String payTo, String description) {
+        return getPaymentRequirements(price, defaultNetwork, payTo, description);
+    }
+
+    /**
+     * Creates payment requirements with network override.
+     *
+     * @param price Price in decimal format (e.g., "1.50" for $1.50 USDC)
+     * @param network Network identifier (CAIP-2 format)
+     * @param payTo Recipient address
+     * @param description Resource description
+     * @return Payment requirements map ready to send to client
+     */
+    public Map<String, Object> getPaymentRequirements(
+            String price,
+            String network,
+            String payTo,
+            String description) {
+
+        String normalized = SvmConstants.normalizeNetwork(network);
+        Map<String, Object> priceInfo = parsePrice(price, normalized);
+
+        Map<String, Object> requirements = new HashMap<>();
+        requirements.put("t402Version", 2);
+        requirements.put("scheme", SCHEME);
+        requirements.put("network", normalized);
+        requirements.put("payTo", payTo);
+        requirements.put("maxAmountRequired", priceInfo.get("amount"));
+        requirements.put("asset", priceInfo.get("asset"));
+        requirements.put("maxTimeoutSeconds", SvmConstants.DEFAULT_VALIDITY_DURATION);
+        requirements.put("resource", description);
+
+        return requirements;
+    }
+
     /**
      * Parses a price string into amount and asset info.
      *
