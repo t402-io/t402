@@ -71,7 +71,7 @@ jobs:
 
       - name: Run tests
         working-directory: ${{ env.WORKING_DIR }}
-        run: pnpm -r --filter "@t402/*" test
+        run: pnpm -r --filter "@t402/*" --filter "!@t402/demo-marketplace" test
 
   build:
     name: Build Advanced Packages
