@@ -50,10 +50,10 @@
   "dependencies": {
     "@t402/core": "workspace:*",
     "@t402/evm": "workspace:*",
-    "@t402/wdk": "workspace:*",
-    "viem": "^2.44.2"
+    "@t402/wdk": "workspace:*"
   },
   "peerDependencies": {
+    "viem": "^2.0.0",
     "@tetherto/wdk": ">=1.0.0-beta.0",
     "@tetherto/wdk-wallet-evm": ">=1.0.0-beta.0"
   },

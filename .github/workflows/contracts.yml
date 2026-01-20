@@ -1,0 +1,107 @@
+name: Contracts
+
+on:
+  pull_request:
+    paths:
+      - "contracts/**"
+  push:
+    branches:
+      - main
+    paths:
+      - "contracts/**"
+
+jobs:
+  # Foundry Build & Test
+  test-contracts:
+    name: Foundry Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./contracts
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Check Foundry version
+        run: forge --version
+
+      - name: Install dependencies
+        run: forge install
+
+      - name: Build contracts
+        run: forge build
+
+      - name: Run tests
+        run: forge test -vvv
+
+      - name: Run tests with gas report
+        run: forge test --gas-report
+
+  # Solidity Linting
+  lint-contracts:
+    name: Solidity Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./contracts
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Check formatting
+        run: forge fmt --check
+
+  # Security Analysis
+  security-contracts:
+    name: Security Analysis
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./contracts
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Install dependencies
+        run: forge install
+
+      - name: Run Slither
+        uses: crytic/slither-action@v0.4.0
+        continue-on-error: true
+        with:
+          target: contracts/
+          slither-args: --filter-paths "lib/" --exclude-dependencies
+
+  # Summary job
+  contracts-passed:
+    name: All Contract Checks Passed
+    needs: [test-contracts, lint-contracts]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Check results
+        run: |
+          if [ "${{ needs.test-contracts.result }}" != "success" ] || \
+             [ "${{ needs.lint-contracts.result }}" != "success" ]; then
+            echo "Some contract checks failed"
+            exit 1
+          fi
+          echo "All contract checks passed!"
