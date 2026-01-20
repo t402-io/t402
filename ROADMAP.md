@@ -76,12 +76,12 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| @t402/agent-policy | 1.0.0-beta.1 | AI agent spending policies |
-| @t402/a2a-negotiation | 1.0.0-beta.1 | Agent-to-agent negotiation |
-| @t402/intent-payments | 1.0.0-beta.1 | Intent-based payment system |
-| @t402/smart-router | 1.0.0-beta.1 | Multi-chain routing engine |
-| @t402/streaming-payments | 1.0.0-beta.1 | Payment channels & streaming |
-| @t402/zk-payments | 1.0.0-beta.1 | Zero-knowledge proofs |
+| @t402/agent-policy | 1.0.0-beta.2 | AI agent spending policies |
+| @t402/a2a-negotiation | 1.0.0-beta.2 | Agent-to-agent negotiation |
+| @t402/intent-payments | 1.0.0-beta.2 | Intent-based payment system |
+| @t402/smart-router | 1.0.0-beta.2 | Multi-chain routing engine |
+| @t402/streaming-payments | 1.0.0-beta.2 | Payment channels & streaming |
+| @t402/zk-payments | 1.0.0-beta.2 | Zero-knowledge proofs |
 
 ### Other SDKs
 
@@ -269,10 +269,11 @@ These features are implemented as advanced packages ready for public release:
 
 **Status:**
 - [x] Renamed from `@t402-internal/*` to `@t402/*`
-- [x] Updated to version 1.0.0-beta.1
+- [x] Updated to version 1.0.0-beta.2
 - [x] MIT license and public publishConfig
 - [x] Migration guide created (`docs/internal/MIGRATION.md`)
-- [ ] Publish to npm (pending final review)
+- [x] Published to npm (2026-01-20)
+- [x] CI/CD workflow for automated releases
 
 ---
 
@@ -310,7 +311,7 @@ These features are implemented as advanced packages ready for public release:
 - [x] Streaming payments (@t402/streaming-payments)
 - [x] Zero-knowledge proofs (@t402/zk-payments)
 - [x] Integration demo (@t402/demo-marketplace)
-- [x] Migration to public namespace (1.0.0-beta.1)
+- [x] Migration to public namespace (1.0.0-beta.2)
 
 ### Server Frameworks ✅
 - [x] Express.js middleware (@t402/express)
