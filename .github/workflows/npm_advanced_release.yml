@@ -63,7 +63,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ${{ env.WORKING_DIR }}
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Run typecheck
         working-directory: ${{ env.WORKING_DIR }}
@@ -101,7 +101,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ${{ env.WORKING_DIR }}
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Build all packages
         working-directory: ${{ env.WORKING_DIR }}
@@ -163,7 +163,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ${{ env.WORKING_DIR }}
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Update version (if specified)
         if: ${{ github.event.inputs.version != '' }}
