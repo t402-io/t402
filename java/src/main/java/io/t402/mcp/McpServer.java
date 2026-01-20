@@ -374,6 +374,45 @@ public class McpServer {
             new InputSchema(payTonProps, List.of("to", "amount", "token", "network"))
         ));
 
+        // ===== TRON Tools =====
+
+        List<String> tronNetworks = new ArrayList<>();
+        for (SupportedTronNetwork net : McpConstants.getAllTronNetworks()) {
+            tronNetworks.add(net.getValue());
+        }
+
+        List<String> tronTokens = List.of("USDT");
+
+        // t402/getTronBalance
+        Map<String, Property> getTronBalanceProps = new LinkedHashMap<>();
+        Property tronAddressProp = new Property("string", "TRON address (Base58Check format, starts with T)");
+        tronAddressProp.setPattern(McpConstants.TRON_ADDRESS_PATTERN);
+        getTronBalanceProps.put("address", tronAddressProp);
+        getTronBalanceProps.put("network", new Property("string", "TRON network to query", tronNetworks));
+
+        toolDefs.add(new Tool(
+            "t402/getTronBalance",
+            "Get TRX and TRC-20 token balances for a TRON wallet address",
+            new InputSchema(getTronBalanceProps, List.of("address", "network"))
+        ));
+
+        // t402/payTron
+        Map<String, Property> payTronProps = new LinkedHashMap<>();
+        Property tronToProp = new Property("string", "Recipient TRON address (Base58Check format, starts with T)");
+        tronToProp.setPattern(McpConstants.TRON_ADDRESS_PATTERN);
+        payTronProps.put("to", tronToProp);
+        Property tronAmountProp = new Property("string", "Amount to send (e.g., '10.5')");
+        tronAmountProp.setPattern("^\\d+(\\.\\d+)?$");
+        payTronProps.put("amount", tronAmountProp);
+        payTronProps.put("token", new Property("string", "TRC-20 token to send", tronTokens));
+        payTronProps.put("network", new Property("string", "TRON network to use", tronNetworks));
+
+        toolDefs.add(new Tool(
+            "t402/payTron",
+            "Execute a USDT payment on TRON (TRC-20 token transfer)",
+            new InputSchema(payTronProps, List.of("to", "amount", "token", "network"))
+        ));
+
         return toolDefs;
     }
 

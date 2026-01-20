@@ -52,6 +52,11 @@ public class McpTools {
                     return handleGetTonBalance(arguments);
                 case "t402/payTon":
                     return handlePayTon(arguments);
+                // TRON tools
+                case "t402/getTronBalance":
+                    return handleGetTronBalance(arguments);
+                case "t402/payTron":
+                    return handlePayTron(arguments);
                 default:
                     return errorResult("Unknown tool: " + name);
             }
@@ -620,6 +625,169 @@ public class McpTools {
             sb.append("⚠️ This is a simulated transaction. No actual tokens were transferred.\n\n");
         } else {
             sb.append("## TON Payment Successful\n\n");
+        }
+
+        sb.append("- **Amount:** ").append(result.getAmount()).append(" ").append(result.getToken()).append("\n");
+        sb.append("- **To:** ").append(result.getTo()).append("\n");
+        sb.append("- **Network:** ").append(result.getNetwork()).append("\n");
+        sb.append("- **Transaction:** [").append(McpConstants.truncateHash(result.getTxHash()))
+          .append("](").append(result.getExplorerUrl()).append(")\n");
+
+        return sb.toString();
+    }
+
+    // ===== TRON Tool Handlers =====
+
+    /**
+     * Handles t402/getTronBalance tool.
+     */
+    private ToolResult handleGetTronBalance(JsonNode args) throws Exception {
+        GetTronBalanceInput input = Json.MAPPER.treeToValue(args, GetTronBalanceInput.class);
+
+        if (!McpConstants.isValidTronNetwork(input.getNetwork())) {
+            return errorResult("Invalid TRON network: " + input.getNetwork() +
+                ". Valid options: tron-mainnet, tron-nile, tron-shasta");
+        }
+
+        if (!McpConstants.isValidTronAddress(input.getAddress())) {
+            return errorResult("Invalid TRON address format: " + input.getAddress());
+        }
+
+        SupportedTronNetwork network = SupportedTronNetwork.fromString(input.getNetwork());
+
+        // Build result with demo data
+        NetworkBalance result = new NetworkBalance(input.getNetwork());
+        result.setNativeBalance(new BalanceInfo(
+            McpConstants.TRX_SYMBOL,
+            "0",
+            "0"
+        ));
+        result.setTokens(new ArrayList<>());
+
+        // In demo mode, return placeholder data
+        if (config.isDemoMode()) {
+            result.getNativeBalance().setBalance("100.0");
+            result.getNativeBalance().setRaw("100000000"); // 100 TRX in sun
+
+            // Add demo USDT balance
+            String usdtAddr = McpConstants.getTronUsdtAddress(network);
+            if (usdtAddr != null) {
+                result.getTokens().add(new BalanceInfo("USDT", "100", "100000000"));
+            }
+        } else {
+            result.setError("Real balance query requires RPC connection");
+        }
+
+        return textResult(formatTronBalanceResult(result));
+    }
+
+    /**
+     * Handles t402/payTron tool.
+     */
+    private ToolResult handlePayTron(JsonNode args) throws Exception {
+        PayTronInput input = Json.MAPPER.treeToValue(args, PayTronInput.class);
+
+        if (!McpConstants.isValidTronNetwork(input.getNetwork())) {
+            return errorResult("Invalid TRON network: " + input.getNetwork() +
+                ". Valid options: tron-mainnet, tron-nile, tron-shasta");
+        }
+
+        if (!McpConstants.isValidTronAddress(input.getTo())) {
+            return errorResult("Invalid TRON recipient address: " + input.getTo());
+        }
+
+        SupportedTronNetwork network = SupportedTronNetwork.fromString(input.getNetwork());
+
+        // Only USDT is supported for now
+        if (!"USDT".equalsIgnoreCase(input.getToken())) {
+            return errorResult("Only USDT token is supported on TRON currently");
+        }
+
+        // Validate amount
+        try {
+            McpConstants.parseTokenAmount(input.getAmount(), McpConstants.TRON_USDT_DECIMALS);
+        } catch (IllegalArgumentException e) {
+            return errorResult("Invalid amount: " + e.getMessage());
+        }
+
+        // Validate private key (unless demo mode)
+        if ((config.getPrivateKey() == null || config.getPrivateKey().isEmpty()) && !config.isDemoMode()) {
+            return errorResult("Private key not configured. Set T402_PRIVATE_KEY or enable T402_DEMO_MODE");
+        }
+
+        // Demo mode - simulate the transaction
+        if (config.isDemoMode()) {
+            // Generate a demo transaction hash
+            String demoTxHash = generateDemoTronTxHash();
+
+            PaymentResult result = new PaymentResult();
+            result.setTxHash(demoTxHash);
+            result.setFrom("T" + "0".repeat(33) + "_demo");
+            result.setTo(input.getTo());
+            result.setAmount(input.getAmount());
+            result.setToken(input.getToken());
+            result.setNetwork(input.getNetwork());
+            result.setExplorerUrl(McpConstants.getTronExplorerTxUrl(network, demoTxHash));
+            result.setDemoMode(true);
+
+            return textResult(formatTronPaymentResult(result));
+        }
+
+        // Real transaction would go here
+        return errorResult("Real TRON transactions require full implementation. Use demo mode to test.");
+    }
+
+    /**
+     * Generates a demo TRON transaction hash.
+     */
+    private static String generateDemoTronTxHash() {
+        String uuid = UUID.randomUUID().toString().replace("-", "");
+        return "demo_" + uuid + "_tron";
+    }
+
+    /**
+     * Formats TRON balance result.
+     */
+    private static String formatTronBalanceResult(NetworkBalance result) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("## TRON Balance on ").append(result.getNetwork()).append("\n\n");
+
+        if (result.getError() != null) {
+            sb.append("Error: ").append(result.getError()).append("\n");
+            return sb.toString();
+        }
+
+        BalanceInfo nativeBalance = result.getNativeBalance();
+        if (nativeBalance != null) {
+            sb.append("**Native (").append(nativeBalance.getToken()).append("):** ")
+              .append(nativeBalance.getBalance()).append(" TRX\n\n");
+        }
+
+        List<BalanceInfo> tokens = result.getTokens();
+        if (tokens != null && !tokens.isEmpty()) {
+            sb.append("**TRC-20 Tokens:**\n");
+            for (BalanceInfo token : tokens) {
+                sb.append("- ").append(token.getToken()).append(": ")
+                  .append(token.getBalance()).append("\n");
+            }
+        } else {
+            sb.append("No TRC-20 token balances found.\n");
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Formats TRON payment result.
+     */
+    private static String formatTronPaymentResult(PaymentResult result) {
+        StringBuilder sb = new StringBuilder();
+
+        if (result.isDemoMode()) {
+            sb.append("## TRON Payment (Demo Mode)\n\n");
+            sb.append("⚠️ This is a simulated transaction. No actual tokens were transferred.\n\n");
+        } else {
+            sb.append("## TRON Payment Successful\n\n");
         }
 
         sb.append("- **Amount:** ").append(result.getAmount()).append(" ").append(result.getToken()).append("\n");

@@ -163,6 +163,35 @@ public final class McpTypes {
         }
     }
 
+    /**
+     * Supported TRON networks.
+     */
+    public enum SupportedTronNetwork {
+        @JsonProperty("tron-mainnet") TRON_MAINNET("tron-mainnet", "tron:mainnet"),
+        @JsonProperty("tron-nile") TRON_NILE("tron-nile", "tron:nile"),
+        @JsonProperty("tron-shasta") TRON_SHASTA("tron-shasta", "tron:shasta");
+
+        private final String value;
+        private final String caip2;
+
+        SupportedTronNetwork(String value, String caip2) {
+            this.value = value;
+            this.caip2 = caip2;
+        }
+
+        public String getValue() { return value; }
+        public String getCaip2() { return caip2; }
+
+        public static SupportedTronNetwork fromString(String value) {
+            for (SupportedTronNetwork network : values()) {
+                if (network.value.equalsIgnoreCase(value) || network.caip2.equals(value)) {
+                    return network;
+                }
+            }
+            return null;
+        }
+    }
+
     // ===== JSON-RPC Types =====
 
     /**
@@ -591,6 +620,46 @@ public final class McpTypes {
      */
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class PayTonInput {
+        private String to;
+        private String amount;
+        private String token;
+        private String network;
+
+        public String getTo() { return to; }
+        public void setTo(String to) { this.to = to; }
+
+        public String getAmount() { return amount; }
+        public void setAmount(String amount) { this.amount = amount; }
+
+        public String getToken() { return token; }
+        public void setToken(String token) { this.token = token; }
+
+        public String getNetwork() { return network; }
+        public void setNetwork(String network) { this.network = network; }
+    }
+
+    // ===== TRON Tool Input Types =====
+
+    /**
+     * Input for t402/getTronBalance.
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class GetTronBalanceInput {
+        private String address;
+        private String network;
+
+        public String getAddress() { return address; }
+        public void setAddress(String address) { this.address = address; }
+
+        public String getNetwork() { return network; }
+        public void setNetwork(String network) { this.network = network; }
+    }
+
+    /**
+     * Input for t402/payTron.
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PayTronInput {
         private String to;
         private String amount;
         private String token;
