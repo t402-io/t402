@@ -7,7 +7,7 @@
  * Schemes:
  * - exact: EIP-3009 transferWithAuthorization (gasless, recommended)
  * - exact-legacy: approve + transferFrom (legacy tokens like USDT)
- * - upto: EIP-2612 permit for usage-based billing (DRAFT)
+ * - upto: EIP-2612 permit for usage-based billing
  *
  * For types-only usage without viem, use @t402/evm-core instead.
  */
@@ -32,8 +32,22 @@ export type {
   ExactLegacyEvmFacilitatorSchemeConfig,
 } from "./exact-legacy/index.js";
 
-// Export Up-To scheme (DRAFT)
-export { UptoEvmScheme, createUptoEvmScheme } from "./upto/index.js";
+// Export Up-To scheme
+export {
+  // Client
+  UptoEvmScheme,
+  createUptoEvmScheme,
+  // Server
+  UptoEvmServerScheme,
+  createUptoEvmServerScheme,
+  // Facilitator
+  UptoEvmFacilitatorScheme,
+  createUptoEvmFacilitatorScheme,
+} from "./upto/index.js";
+export type {
+  UptoEvmServerSchemeConfig,
+  UptoEvmFacilitatorSchemeConfig,
+} from "./upto/index.js";
 
 // Export USDT0 bridge module
 export {
