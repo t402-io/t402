@@ -695,6 +695,9 @@ importers:
       '@t402/ton':
         specifier: ^2.0.0
         version: 2.1.0
+      '@t402/tron':
+        specifier: ^2.0.0
+        version: 2.0.0
       '@types/node':
         specifier: ^22.13.4
         version: 22.18.0
@@ -4048,6 +4051,9 @@ packages:
 
   '@t402/ton@2.1.0':
     resolution: {integrity: sha512-BW2eKMOcjXzzIv1lNrCSzBwjnF0Adea54B1RkfsJwsfXq670lbhKGJ3ayalmlhq2engDHK/7uepx+MICB1rTPA==}
+
+  '@t402/tron@2.0.0':
+    resolution: {integrity: sha512-IqAX65LEhsfKDcHXqb52IHj1W+iqUT06KuieDVfo3mYMWeOaE/0YE04vJbK4y2ANUgbXmLbZGGQMntkuUBaLKw==}
 
   '@tanstack/query-core@5.90.11':
     resolution: {integrity: sha512-f9z/nXhCgWDF4lHqgIE30jxLe4sYv15QodfdPDKYAk7nAEjNcndy4dHz3ezhdUaR23BpWa4I2EH4/DZ0//Uf8A==}
@@ -12257,6 +12263,10 @@ snapshots:
       '@ton/ton': 15.4.0(@ton/core@0.62.1(@ton/crypto@3.3.0))(@ton/crypto@3.3.0)
     transitivePeerDependencies:
       - debug
+
+  '@t402/tron@2.0.0':
+    dependencies:
+      '@t402/core': 2.0.0
 
   '@tanstack/query-core@5.90.11': {}
 

@@ -22,6 +22,13 @@ export const TON_NETWORK_REFS = {
   TESTNET: "testnet",
 } as const;
 
+// TRON Network References (CAIP-2 format: tron:network)
+export const TRON_NETWORK_REFS = {
+  MAINNET: "mainnet",
+  NILE: "nile",
+  SHASTA: "shasta",
+} as const;
+
 /**
  * Normalizes the payment requirements into an array.
  *
@@ -107,6 +114,16 @@ export function isTonNetwork(network: string): boolean {
 }
 
 /**
+ * Determines if the provided network is a TRON network.
+ *
+ * @param network - The network to check (CAIP-2 format: tron:network).
+ * @returns True if the network is TRON based.
+ */
+export function isTronNetwork(network: string): boolean {
+  return network.startsWith("tron:");
+}
+
+/**
  * Provides a human-readable display name for a network.
  * Uses viem/chains for EVM chain metadata (based on ethereum-lists/chains).
  * See: https://github.com/ethereum-lists/chains
@@ -138,6 +155,13 @@ export function getNetworkDisplayName(network: string): string {
     return ref === TON_NETWORK_REFS.TESTNET ? "TON Testnet" : "TON Mainnet";
   }
 
+  if (network.startsWith("tron:")) {
+    const ref = network.split(":")[1];
+    if (ref === TRON_NETWORK_REFS.NILE) return "TRON Nile Testnet";
+    if (ref === TRON_NETWORK_REFS.SHASTA) return "TRON Shasta Testnet";
+    return "TRON Mainnet";
+  }
+
   return network;
 }
 
@@ -163,6 +187,11 @@ export function isTestnetNetwork(network: string): boolean {
   if (network.startsWith("ton:")) {
     const ref = network.split(":")[1];
     return ref === TON_NETWORK_REFS.TESTNET;
+  }
+
+  if (network.startsWith("tron:")) {
+    const ref = network.split(":")[1];
+    return ref === TRON_NETWORK_REFS.NILE || ref === TRON_NETWORK_REFS.SHASTA;
   }
 
   return false;
