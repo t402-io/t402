@@ -17,3 +17,4 @@ export { evmPaywall } from "./evm";
 export { svmPaywall } from "./svm";
 export { tonPaywall } from "./ton";
 export { tronPaywall } from "./tron";
+export { stacksPaywall } from "./stacks";
