@@ -7,6 +7,7 @@ const baseConfig = {
     "svm/index": "src/svm/index.ts",
     "ton/index": "src/ton/index.ts",
     "tron/index": "src/tron/index.ts",
+    "stacks/index": "src/stacks/index.ts",
   },
   dts: {
     resolve: true,

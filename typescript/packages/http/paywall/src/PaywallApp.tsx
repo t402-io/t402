@@ -2,11 +2,18 @@
 
 import { useCallback, useState } from "react";
 import type { PaymentRequired, PaymentRequirements } from "@t402/core/types";
-import { isEvmNetwork, isSvmNetwork, isTonNetwork, isTronNetwork } from "./paywallUtils";
+import {
+  isEvmNetwork,
+  isSvmNetwork,
+  isTonNetwork,
+  isTronNetwork,
+  isStacksNetwork,
+} from "./paywallUtils";
 import { EvmPaywall } from "./evm/EvmPaywall";
 import { SolanaPaywall } from "./svm/SolanaPaywall";
 import { TonPaywall } from "./ton/TonPaywall";
 import { TronPaywall } from "./tron/TronPaywall";
+import { StacksPaywall } from "./stacks/StacksPaywall";
 import { NetworkSelector } from "./components/NetworkSelector";
 
 /**
@@ -130,6 +137,18 @@ export function PaywallApp() {
       <>
         {BackButton}
         <TronPaywall
+          paymentRequired={filteredPaymentRequired}
+          onSuccessfulResponse={handleSuccessfulResponse}
+        />
+      </>
+    );
+  }
+
+  if (isStacksNetwork(network)) {
+    return (
+      <>
+        {BackButton}
+        <StacksPaywall
           paymentRequired={filteredPaymentRequired}
           onSuccessfulResponse={handleSuccessfulResponse}
         />
