@@ -646,6 +646,15 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.90.7
         version: 5.90.11(react@19.2.1)
+      '@ton/core':
+        specifier: ^0.62.1
+        version: 0.62.1(@ton/crypto@3.3.0)
+      '@ton/ton':
+        specifier: ^16.1.0
+        version: 16.1.0(@ton/core@0.62.1(@ton/crypto@3.3.0))(@ton/crypto@3.3.0)
+      '@tonconnect/ui-react':
+        specifier: ^2.0.12
+        version: 2.3.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@wagmi/connectors':
         specifier: ^7.1.2
         version: 7.1.2(46a99c5a451b96e28acdc5f5061c1c92)
@@ -683,6 +692,9 @@ importers:
       '@t402/svm':
         specifier: ^2.0.0
         version: 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2)(ws@8.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+      '@t402/ton':
+        specifier: ^2.0.0
+        version: 2.1.0
       '@types/node':
         specifier: ^22.13.4
         version: 22.18.0
@@ -4034,6 +4046,9 @@ packages:
   '@t402/svm@2.0.0':
     resolution: {integrity: sha512-egW/jh7+h2bt2kzblyr3XMHrPIHhIx6ghfKbohsC0zeGGUDxzqp18YgTw82aWMdM85tR8YrDUI10Sl6W/bRj7A==}
 
+  '@t402/ton@2.1.0':
+    resolution: {integrity: sha512-BW2eKMOcjXzzIv1lNrCSzBwjnF0Adea54B1RkfsJwsfXq670lbhKGJ3ayalmlhq2engDHK/7uepx+MICB1rTPA==}
+
   '@tanstack/query-core@5.90.11':
     resolution: {integrity: sha512-f9z/nXhCgWDF4lHqgIE30jxLe4sYv15QodfdPDKYAk7nAEjNcndy4dHz3ezhdUaR23BpWa4I2EH4/DZ0//Uf8A==}
 
@@ -4099,11 +4114,38 @@ packages:
   '@ton/crypto@3.3.0':
     resolution: {integrity: sha512-/A6CYGgA/H36OZ9BbTaGerKtzWp50rg67ZCH2oIjV1NcrBaCK9Z343M+CxedvM7Haf3f/Ee9EhxyeTp0GKMUpA==}
 
+  '@ton/ton@15.4.0':
+    resolution: {integrity: sha512-f19y2Rez88KZK+lv3CT3ghXi07LcToJtJhlgRSfK+3GzjdIcoW/wbmXG1ffi6fkc8W2LO5z6Q3gZaIEvNGnz6w==}
+    peerDependencies:
+      '@ton/core': '>=0.62.0 <1.0.0'
+      '@ton/crypto': '>=3.2.0'
+
   '@ton/ton@16.1.0':
     resolution: {integrity: sha512-vRlMZVJ0/JABFDTFInyLh3C4LRP6AF3VtOl2iwCEcPfqRxdPcHW4r+bJLkKvo5fCknaGS8CEVdBeu6ziXHv2Ig==}
     peerDependencies:
       '@ton/core': '>=0.62.0 <1.0.0'
       '@ton/crypto': '>=3.2.0'
+
+  '@tonconnect/isomorphic-eventsource@0.0.2':
+    resolution: {integrity: sha512-B4UoIjPi0QkvIzZH5fV3BQLWrqSYABdrzZQSI9sJA9aA+iC0ohOzFwVVGXanlxeDAy1bcvPbb29f6sVUk0UnnQ==}
+
+  '@tonconnect/isomorphic-fetch@0.0.3':
+    resolution: {integrity: sha512-jIg5nTrDwnite4fXao3dD83eCpTvInTjZon/rZZrIftIegh4XxyVb5G2mpMqXrVGk1e8SVXm3Kj5OtfMplQs0w==}
+
+  '@tonconnect/protocol@2.3.0':
+    resolution: {integrity: sha512-OxrmcXF/EsSdGeASP9VpTRojuMtTV87DKYFLRq4ZJvF/Hirfm2cgcxzzj2uksEGm5IIR010UWo6b38RuokNwFQ==}
+
+  '@tonconnect/sdk@3.3.1':
+    resolution: {integrity: sha512-lhXJu95VvbD36u5mMPg2sg+w4GQwkrYnHeJ8rVveu2N7UPwt0jvrEqKlvf7Ss1gh5RDtzs35SS3GbJlaIOAJNA==}
+
+  '@tonconnect/ui-react@2.3.1':
+    resolution: {integrity: sha512-dAMqNG5X8Llh1m3eIOvIQlXgMazrZrmnQGefJmlmyghwwGydR0O9NGpW7I7s2CN24usAaRGX8mVJPemsa2oHSQ==}
+    peerDependencies:
+      react: '>=17.0.0'
+      react-dom: '>=17.0.0'
+
+  '@tonconnect/ui@2.3.1':
+    resolution: {integrity: sha512-G1hKn5TrqFYztbR94EG8YuhGUpp7wY8PjC1Fu7/d8rFg7XnPGlUcGmuqH8+2lYrb9Ms0M7v6+5U6S4q4+yCQtQ==}
 
   '@trezor/analytics@1.5.0':
     resolution: {integrity: sha512-evILW5XJEmfPlf0TY1duOLtGJ47pdGeSKVE3P75ODEUsRNxtPVqlkOUBPmYpCxPnzS8XDmkatT8lf9/DF0G6nA==}
@@ -5428,6 +5470,9 @@ packages:
     resolution: {integrity: sha512-Mz9QMT5fJe7bKI7MH31UilT5cEK5EHHRCccw/YRFsRY47AuNgaV6HY3rscp0/I4Q+tTW/5zoqpSeRRI54TkDWA==}
     engines: {node: '>= 0.10'}
 
+  classnames@2.5.1:
+    resolution: {integrity: sha512-saHYOzhIQs6wy2sVxTM6bUDsQO4F50V9RQ22qBpEdCW+I+/Wmke2HOl6lS6dTpdxVhb88/I6+Hs+438c3lfUow==}
+
   cli-cursor@5.0.0:
     resolution: {integrity: sha512-aCj4O5wKyszjMmDT4tZj93kxyydN/K5zPWSCe6/0AV/AA1pqe5ZBIw0a2ZfPQV7lL5/yb5HsUreJ6UFAF1tEQw==}
     engines: {node: '>=18'}
@@ -5672,6 +5717,10 @@ packages:
 
   deep-is@0.1.4:
     resolution: {integrity: sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ==}
+
+  deepmerge@4.3.1:
+    resolution: {integrity: sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A==}
+    engines: {node: '>=0.10.0'}
 
   define-data-property@1.1.4:
     resolution: {integrity: sha512-rBMvIzlpA8v6E+SJZoo++HAYqsLrkg7MSfIinMPFhmkorw7X+dOXVJQs+QT69zGkzMyfDnIMN2Wid1+NbL3T+A==}
@@ -8226,6 +8275,9 @@ packages:
     resolution: {integrity: sha512-gxToHmi9oTBNB05UjUsrWf0OyN5ZXtD0apOarC1KIx232Vp3WimRNy3810QzeNSgyD5rsaIDXlxlbnOzlouo+w==}
     hasBin: true
 
+  tweetnacl-util@0.15.1:
+    resolution: {integrity: sha512-RKJBIj8lySrShN4w6i/BonWp2Z/uxwC3h4y7xsRrpP59ZboCd0GpEVsOnMDYLMmKBpYhb5TgHzZXy7wTfYFBRw==}
+
   tweetnacl@1.0.3:
     resolution: {integrity: sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw==}
 
@@ -8280,6 +8332,10 @@ packages:
 
   ua-is-frozen@0.1.2:
     resolution: {integrity: sha512-RwKDW2p3iyWn4UbaxpP2+VxwqXh0jpvdxsYpZ5j/MLLiQOfbsV5shpgQiw93+KMYQPcteeMQ289MaAFzs3G9pw==}
+
+  ua-parser-js@1.0.41:
+    resolution: {integrity: sha512-LbBDqdIC5s8iROCUjMbW1f5dJQTEFB1+KO9ogbvlb3nm9n4YHa5p4KTvFPWvh2Hs8gZMBuiB1/8+pdfe/tDPug==}
+    hasBin: true
 
   ua-parser-js@2.0.7:
     resolution: {integrity: sha512-CFdHVHr+6YfbktNZegH3qbYvYgC7nRNEUm2tk7nSFXSODUu4tDBpaFpP1jdXBUOKKwapVlWRfTtS8bCPzsQ47w==}
@@ -12193,6 +12249,15 @@ snapshots:
       - typescript
       - ws
 
+  '@t402/ton@2.1.0':
+    dependencies:
+      '@t402/core': 2.0.0
+      '@ton/core': 0.62.1(@ton/crypto@3.3.0)
+      '@ton/crypto': 3.3.0
+      '@ton/ton': 15.4.0(@ton/core@0.62.1(@ton/crypto@3.3.0))(@ton/crypto@3.3.0)
+    transitivePeerDependencies:
+      - debug
+
   '@tanstack/query-core@5.90.11': {}
 
   '@tanstack/react-query@5.90.11(react@19.2.1)':
@@ -12298,6 +12363,18 @@ snapshots:
       jssha: 3.2.0
       tweetnacl: 1.0.3
 
+  '@ton/ton@15.4.0(@ton/core@0.62.1(@ton/crypto@3.3.0))(@ton/crypto@3.3.0)':
+    dependencies:
+      '@ton/core': 0.62.1(@ton/crypto@3.3.0)
+      '@ton/crypto': 3.3.0
+      axios: 1.13.2
+      dataloader: 2.2.3
+      symbol.inspect: 1.0.1
+      teslabot: 1.5.0
+      zod: 3.25.76
+    transitivePeerDependencies:
+      - debug
+
   '@ton/ton@16.1.0(@ton/core@0.62.1(@ton/crypto@3.3.0))(@ton/crypto@3.3.0)':
     dependencies:
       '@ton/core': 0.62.1(@ton/crypto@3.3.0)
@@ -12309,6 +12386,47 @@ snapshots:
       zod: 3.25.76
     transitivePeerDependencies:
       - debug
+
+  '@tonconnect/isomorphic-eventsource@0.0.2':
+    dependencies:
+      eventsource: 2.0.2
+
+  '@tonconnect/isomorphic-fetch@0.0.3':
+    dependencies:
+      node-fetch: 2.7.0
+    transitivePeerDependencies:
+      - encoding
+
+  '@tonconnect/protocol@2.3.0':
+    dependencies:
+      tweetnacl: 1.0.3
+      tweetnacl-util: 0.15.1
+
+  '@tonconnect/sdk@3.3.1':
+    dependencies:
+      '@tonconnect/isomorphic-eventsource': 0.0.2
+      '@tonconnect/isomorphic-fetch': 0.0.3
+      '@tonconnect/protocol': 2.3.0
+    transitivePeerDependencies:
+      - encoding
+
+  '@tonconnect/ui-react@2.3.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
+    dependencies:
+      '@tonconnect/ui': 2.3.1
+      react: 19.2.1
+      react-dom: 19.2.1(react@19.2.1)
+    transitivePeerDependencies:
+      - encoding
+
+  '@tonconnect/ui@2.3.1':
+    dependencies:
+      '@tonconnect/sdk': 3.3.1
+      classnames: 2.5.1
+      csstype: 3.2.3
+      deepmerge: 4.3.1
+      ua-parser-js: 1.0.41
+    transitivePeerDependencies:
+      - encoding
 
   '@trezor/analytics@1.5.0(tslib@2.8.1)':
     dependencies:
@@ -14582,6 +14700,8 @@ snapshots:
       safe-buffer: 5.2.1
       to-buffer: 1.2.2
 
+  classnames@2.5.1: {}
+
   cli-cursor@5.0.0:
     dependencies:
       restore-cursor: 5.1.0
@@ -14828,6 +14948,8 @@ snapshots:
       which-typed-array: 1.1.19
 
   deep-is@0.1.4: {}
+
+  deepmerge@4.3.1: {}
 
   define-data-property@1.1.4:
     dependencies:
@@ -17840,6 +17962,8 @@ snapshots:
       turbo-windows-64: 2.5.6
       turbo-windows-arm64: 2.5.6
 
+  tweetnacl-util@0.15.1: {}
+
   tweetnacl@1.0.3: {}
 
   type-check@0.4.0:
@@ -17905,6 +18029,8 @@ snapshots:
   typescript@5.9.2: {}
 
   ua-is-frozen@0.1.2: {}
+
+  ua-parser-js@1.0.41: {}
 
   ua-parser-js@2.0.7:
     dependencies:

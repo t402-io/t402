@@ -10,7 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "build": "tsup",
-    "build:paywall": "tsx src/evm/build.ts && tsx src/svm/build.ts",
+    "build:paywall": "tsx src/evm/build.ts && tsx src/svm/build.ts && tsx src/ton/build.ts",
     "watch": "tsc --watch",
     "format": "prettier -c .prettierrc --write \"**/*.{ts,js,cjs,json,md}\"",
     "format:check": "prettier -c .prettierrc --check \"**/*.{ts,js,cjs,json,md}\"",
@@ -32,6 +32,7 @@
     "@eslint/js": "^9.24.0",
     "@t402/evm": "^2.2.0",
     "@t402/svm": "^2.0.0",
+    "@t402/ton": "^2.0.0",
     "@types/node": "^22.13.4",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -64,6 +65,9 @@
     "@solana/wallet-standard-features": "^1.3.0",
     "@t402/core": "workspace:*",
     "@tanstack/react-query": "^5.90.7",
+    "@ton/core": "^0.62.1",
+    "@ton/ton": "^16.1.0",
+    "@tonconnect/ui-react": "^2.0.12",
     "@wagmi/connectors": "^7.1.2",
     "@wagmi/core": "^3.2.2",
     "@wallet-standard/app": "^1.1.0",
@@ -106,6 +110,16 @@
       "require": {
         "types": "./dist/cjs/svm/index.d.cts",
         "default": "./dist/cjs/svm/index.cjs"
+      }
+    },
+    "./ton": {
+      "import": {
+        "types": "./dist/esm/ton/index.d.ts",
+        "default": "./dist/esm/ton/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/ton/index.d.cts",
+        "default": "./dist/cjs/ton/index.cjs"
       }
     }
   },
