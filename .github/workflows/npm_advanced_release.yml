@@ -71,13 +71,7 @@ jobs:
 
       - name: Run tests
         working-directory: ${{ env.WORKING_DIR }}
-        run: |
-          for pkg in agent-policy a2a-negotiation intent-payments smart-router streaming-payments zk-payments; do
-            echo "Testing @t402/$pkg..."
-            cd packages/$pkg
-            pnpm test:run || pnpm test
-            cd ../..
-          done
+        run: pnpm -r --filter "@t402/*" test
 
   build:
     name: Build Advanced Packages
