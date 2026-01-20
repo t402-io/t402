@@ -141,10 +141,33 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
+  # Solidity/Foundry Tests
+  test-contracts:
+    name: Solidity (Foundry)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./contracts
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Install dependencies
+        run: forge install
+
+      - name: Run tests
+        run: forge test -vvv
+
   # Summary job
   tests-passed:
     name: All Tests Passed
-    needs: [test-typescript, test-go, test-python, test-java]
+    needs: [test-typescript, test-go, test-python, test-java, test-contracts]
     runs-on: ubuntu-latest
     if: always()
     steps:
@@ -153,7 +176,8 @@ jobs:
           if [ "${{ needs.test-typescript.result }}" != "success" ] || \
              [ "${{ needs.test-go.result }}" != "success" ] || \
              [ "${{ needs.test-python.result }}" != "success" ] || \
-             [ "${{ needs.test-java.result }}" != "success" ]; then
+             [ "${{ needs.test-java.result }}" != "success" ] || \
+             [ "${{ needs.test-contracts.result }}" != "success" ]; then
             echo "Some tests failed"
             exit 1
           fi

@@ -40,8 +40,8 @@
   },
   "dependencies": {
     "@coinbase/cdp-sdk": "^1.22.0",
-    "@t402/core": "workspace:^",
-    "@t402/extensions": "workspace:^",
+    "@t402/core": "workspace:*",
+    "@t402/extensions": "workspace:*",
     "zod": "^3.24.2"
   },
   "peerDependencies": {
