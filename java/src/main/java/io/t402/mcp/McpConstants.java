@@ -5,6 +5,7 @@ import io.t402.mcp.McpTypes.SupportedNetwork;
 import io.t402.mcp.McpTypes.SupportedSvmNetwork;
 import io.t402.mcp.McpTypes.SupportedToken;
 import io.t402.mcp.McpTypes.SupportedTonNetwork;
+import io.t402.mcp.McpTypes.SupportedTronNetwork;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -224,6 +225,46 @@ public final class McpConstants {
 
     /** TON address pattern (raw or user-friendly format). */
     public static final String TON_ADDRESS_PATTERN = "^(EQ|UQ|0:|kQ|kf:|-1:)[A-Za-z0-9_-]{46,48}$";
+
+    // =========================================================================
+    // TRON Network Constants
+    // =========================================================================
+
+    /** Native token symbol for TRON. */
+    public static final String TRX_SYMBOL = "TRX";
+
+    /** Standard decimal count for TRX native token. */
+    public static final int TRX_DECIMALS = 6;
+
+    /** Standard decimal count for USDT on TRON. */
+    public static final int TRON_USDT_DECIMALS = 6;
+
+    // TRON Explorer URLs
+    public static final Map<SupportedTronNetwork, String> TRON_EXPLORER_URLS = new EnumMap<>(SupportedTronNetwork.class);
+    static {
+        TRON_EXPLORER_URLS.put(SupportedTronNetwork.TRON_MAINNET, "https://tronscan.org");
+        TRON_EXPLORER_URLS.put(SupportedTronNetwork.TRON_NILE, "https://nile.tronscan.org");
+        TRON_EXPLORER_URLS.put(SupportedTronNetwork.TRON_SHASTA, "https://shasta.tronscan.org");
+    }
+
+    // TRON RPC URLs
+    public static final Map<SupportedTronNetwork, String> TRON_RPC_URLS = new EnumMap<>(SupportedTronNetwork.class);
+    static {
+        TRON_RPC_URLS.put(SupportedTronNetwork.TRON_MAINNET, "https://api.trongrid.io");
+        TRON_RPC_URLS.put(SupportedTronNetwork.TRON_NILE, "https://nile.trongrid.io");
+        TRON_RPC_URLS.put(SupportedTronNetwork.TRON_SHASTA, "https://api.shasta.trongrid.io");
+    }
+
+    // TRON USDT addresses (TRC-20)
+    public static final Map<SupportedTronNetwork, String> TRON_USDT_ADDRESSES = new EnumMap<>(SupportedTronNetwork.class);
+    static {
+        TRON_USDT_ADDRESSES.put(SupportedTronNetwork.TRON_MAINNET, "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t");
+        TRON_USDT_ADDRESSES.put(SupportedTronNetwork.TRON_NILE, "TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf");
+        TRON_USDT_ADDRESSES.put(SupportedTronNetwork.TRON_SHASTA, "TG3XXyExBkPp9nzdajDZsozEu4BkaSJozs");
+    }
+
+    /** TRON address pattern (Base58Check format starting with T). */
+    public static final String TRON_ADDRESS_PATTERN = "^T[1-9A-HJ-NP-Za-km-z]{33}$";
 
     /**
      * Returns all supported EVM networks.
@@ -457,5 +498,64 @@ public final class McpConstants {
             return false;
         }
         return address.matches(TON_ADDRESS_PATTERN);
+    }
+
+    // =========================================================================
+    // TRON Utility Methods
+    // =========================================================================
+
+    /**
+     * Returns all supported TRON networks.
+     */
+    public static List<SupportedTronNetwork> getAllTronNetworks() {
+        return Arrays.asList(SupportedTronNetwork.values());
+    }
+
+    /**
+     * Checks if a TRON network string is valid.
+     */
+    public static boolean isValidTronNetwork(String network) {
+        return SupportedTronNetwork.fromString(network) != null;
+    }
+
+    /**
+     * Returns the explorer URL for a TRON transaction.
+     */
+    public static String getTronExplorerTxUrl(SupportedTronNetwork network, String txHash) {
+        String baseUrl = TRON_EXPLORER_URLS.get(network);
+        if (baseUrl == null) {
+            return "";
+        }
+        return baseUrl + "/#/transaction/" + txHash;
+    }
+
+    /**
+     * Returns the RPC URL for a TRON network, using config override if available.
+     */
+    public static String getTronRpcUrl(ServerConfig config, SupportedTronNetwork network) {
+        if (config != null && config.getRpcUrls() != null) {
+            String url = config.getRpcUrls().get(network.getValue());
+            if (url != null && !url.isEmpty()) {
+                return url;
+            }
+        }
+        return TRON_RPC_URLS.get(network);
+    }
+
+    /**
+     * Returns the USDT TRC-20 address for a TRON network.
+     */
+    public static String getTronUsdtAddress(SupportedTronNetwork network) {
+        return TRON_USDT_ADDRESSES.get(network);
+    }
+
+    /**
+     * Validates a TRON address format.
+     */
+    public static boolean isValidTronAddress(String address) {
+        if (address == null || address.isEmpty()) {
+            return false;
+        }
+        return address.matches(TRON_ADDRESS_PATTERN);
     }
 }
