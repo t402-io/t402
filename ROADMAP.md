@@ -89,7 +89,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 |-----|---------|--------|
 | Go | 1.8.0 | Production |
 | Python | 1.9.0 | Production |
-| Java | 1.7.0 | Production |
+| Java | 1.8.0 | Production |
 
 ---
 
@@ -174,6 +174,10 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 - [x] Add Maven Central publication workflow
 - [x] Create comprehensive documentation
 - [x] Release v1.7.0 stable
+- [x] Complete TON payment scheme (TonSchemes, ExactTonServerScheme, ExactTonFacilitatorScheme)
+- [x] Complete TRON payment scheme (TronSchemes, ExactTronServerScheme, ExactTronFacilitatorScheme)
+- [x] MCP server with 12 tools (6 EVM + 2 SVM + 2 TON + 2 TRON)
+- [x] Release v1.8.0 with full multi-chain support
 
 ### Phase 5: Security & Performance (Month 5-6)
 
@@ -335,6 +339,7 @@ These features are implemented as advanced packages ready for public release:
 - [x] TON payment scheme (Java SDK) - Ed25519 signatures
 - [x] TRON payment scheme (Java SDK) - ECDSA secp256k1
 - [x] Sign-In-With-X extension (CAIP-122) - wallet authentication
+- [x] Java v1.8.0 - Complete TON/TRON schemes with MCP tools (12 total)
 
 ### Infrastructure ✅
 - [x] Facilitator service (Go)
