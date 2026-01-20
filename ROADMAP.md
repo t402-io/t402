@@ -248,16 +248,16 @@ These features are implemented as advanced packages ready for public release:
 
 | Package | Description | Tests |
 |---------|-------------|-------|
-| `@t402-advanced/agent-policy` | AI agent spending policies and authorization | 280 |
-| `@t402-advanced/a2a-negotiation` | Agent-to-agent negotiation and discovery | 95 |
-| `@t402-advanced/intent-payments` | Intent-based payment system | 57 |
-| `@t402-advanced/smart-router` | Multi-chain routing and optimization | 27 |
-| `@t402-advanced/streaming-payments` | Per-second billing and payment channels | 37 |
-| `@t402-advanced/zk-payments` | Zero-knowledge proofs for privacy | 79 |
-| `@t402-advanced/demo-marketplace` | Integration demo (AI Agent Marketplace) | - |
+| `@t402/agent-policy` | AI agent spending policies and authorization | 280 |
+| `@t402/a2a-negotiation` | Agent-to-agent negotiation and discovery | 95 |
+| `@t402/intent-payments` | Intent-based payment system | 57 |
+| `@t402/smart-router` | Multi-chain routing and optimization | 27 |
+| `@t402/streaming-payments` | Per-second billing and payment channels | 37 |
+| `@t402/zk-payments` | Zero-knowledge proofs for privacy | 79 |
+| `@t402/demo-marketplace` | Integration demo (AI Agent Marketplace) | - |
 
 **Status:**
-- [x] Renamed from `@t402-internal/*` to `@t402-advanced/*`
+- [x] Renamed from `@t402-internal/*` to `@t402/*`
 - [x] Updated to version 1.0.0-beta.1
 - [x] MIT license and public publishConfig
 - [x] Migration guide created (`docs/internal/MIGRATION.md`)
@@ -292,13 +292,13 @@ These features are implemented as advanced packages ready for public release:
 - [x] Hardware wallet support (Ledger, Trezor)
 
 ### Advanced Packages (Phase 8) ✅
-- [x] Agent policy engine (@t402-advanced/agent-policy)
-- [x] A2A negotiation protocol (@t402-advanced/a2a-negotiation)
-- [x] Intent-based payments (@t402-advanced/intent-payments)
-- [x] Smart cross-chain routing (@t402-advanced/smart-router)
-- [x] Streaming payments (@t402-advanced/streaming-payments)
-- [x] Zero-knowledge proofs (@t402-advanced/zk-payments)
-- [x] Integration demo (@t402-advanced/demo-marketplace)
+- [x] Agent policy engine (@t402/agent-policy)
+- [x] A2A negotiation protocol (@t402/a2a-negotiation)
+- [x] Intent-based payments (@t402/intent-payments)
+- [x] Smart cross-chain routing (@t402/smart-router)
+- [x] Streaming payments (@t402/streaming-payments)
+- [x] Zero-knowledge proofs (@t402/zk-payments)
+- [x] Integration demo (@t402/demo-marketplace)
 - [x] Migration to public namespace (1.0.0-beta.1)
 
 ### Server Frameworks ✅
