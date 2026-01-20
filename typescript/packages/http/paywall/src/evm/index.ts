@@ -47,6 +47,7 @@ export const evmPaywall: PaywallNetworkHandler = {
       appName: config.appName,
       appLogo: config.appLogo,
       theme: config.theme,
+      walletConnectProjectId: config.walletConnectProjectId,
     });
   },
 };

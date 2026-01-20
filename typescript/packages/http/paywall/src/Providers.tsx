@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
 import { WagmiProvider, createConfig, http } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { injected, coinbaseWallet } from "wagmi/connectors";
+import { injected, coinbaseWallet, walletConnect } from "wagmi/connectors";
 import * as allChains from "viem/chains";
 import type { Chain } from "viem";
 import { isEvmNetwork } from "./paywallUtils";
+import { isMobile } from "./utils/mobile";
 
 type ProvidersProps = {
   children: ReactNode;
@@ -40,15 +41,44 @@ export function Providers({ children }: ProvidersProps) {
     }
   }
 
+  // Get app name and WalletConnect project ID from config
+  const appName = window.t402.appName || "t402 Paywall";
+  const walletConnectProjectId = window.t402.walletConnectProjectId;
+
+  // Build connectors based on device type and available config
+  const connectors = [];
+
+  // Always add injected connector (browser extension wallets)
+  connectors.push(injected());
+
+  // Add Coinbase Wallet
+  connectors.push(
+    coinbaseWallet({
+      appName,
+    }),
+  );
+
+  // Add WalletConnect if project ID is provided (required for WalletConnect v2)
+  // WalletConnect is especially useful on mobile for deep linking
+  if (walletConnectProjectId) {
+    connectors.push(
+      walletConnect({
+        projectId: walletConnectProjectId,
+        showQrModal: !isMobile(), // Show QR on desktop, use deep link on mobile
+        metadata: {
+          name: appName,
+          description: "Pay with crypto",
+          url: window.location.origin,
+          icons: window.t402.appLogo ? [window.t402.appLogo] : [],
+        },
+      }),
+    );
+  }
+
   // Create Wagmi config
   const config = createConfig({
     chains: [targetChain],
-    connectors: [
-      injected(),
-      coinbaseWallet({
-        appName: window.t402.appName || "t402 Paywall",
-      }),
-    ],
+    connectors,
     transports: {
       [targetChain.id]: http(),
     },
