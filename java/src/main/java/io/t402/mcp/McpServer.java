@@ -296,6 +296,45 @@ public class McpServer {
             new InputSchema(bridgeProps, List.of("fromChain", "toChain", "amount", "recipient"))
         ));
 
+        // ===== SVM (Solana) Tools =====
+
+        List<String> svmNetworks = new ArrayList<>();
+        for (SupportedSvmNetwork net : McpConstants.getAllSvmNetworks()) {
+            svmNetworks.add(net.getValue());
+        }
+
+        List<String> svmTokens = List.of("USDC");
+
+        // t402/getSvmBalance
+        Map<String, Property> getSvmBalanceProps = new LinkedHashMap<>();
+        Property svmAddressProp = new Property("string", "Solana address (Base58 encoded)");
+        svmAddressProp.setPattern(McpConstants.SOLANA_ADDRESS_PATTERN);
+        getSvmBalanceProps.put("address", svmAddressProp);
+        getSvmBalanceProps.put("network", new Property("string", "Solana network to query", svmNetworks));
+
+        toolDefs.add(new Tool(
+            "t402/getSvmBalance",
+            "Get SOL and SPL token balances for a Solana wallet address",
+            new InputSchema(getSvmBalanceProps, List.of("address", "network"))
+        ));
+
+        // t402/paySvm
+        Map<String, Property> paySvmProps = new LinkedHashMap<>();
+        Property svmToProp = new Property("string", "Recipient Solana address (Base58 encoded)");
+        svmToProp.setPattern(McpConstants.SOLANA_ADDRESS_PATTERN);
+        paySvmProps.put("to", svmToProp);
+        Property svmAmountProp = new Property("string", "Amount to send (e.g., '10.5')");
+        svmAmountProp.setPattern("^\\d+(\\.\\d+)?$");
+        paySvmProps.put("amount", svmAmountProp);
+        paySvmProps.put("token", new Property("string", "SPL token to send", svmTokens));
+        paySvmProps.put("network", new Property("string", "Solana network to use", svmNetworks));
+
+        toolDefs.add(new Tool(
+            "t402/paySvm",
+            "Execute a USDC payment on Solana (SPL token transfer)",
+            new InputSchema(paySvmProps, List.of("to", "amount", "token", "network"))
+        ));
+
         return toolDefs;
     }
 

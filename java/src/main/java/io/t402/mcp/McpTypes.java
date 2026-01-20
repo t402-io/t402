@@ -106,6 +106,35 @@ public final class McpTypes {
         }
     }
 
+    /**
+     * Supported Solana SVM networks.
+     */
+    public enum SupportedSvmNetwork {
+        @JsonProperty("solana-mainnet") SOLANA_MAINNET("solana-mainnet", "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"),
+        @JsonProperty("solana-devnet") SOLANA_DEVNET("solana-devnet", "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"),
+        @JsonProperty("solana-testnet") SOLANA_TESTNET("solana-testnet", "solana:4uhcVJyU9pJkvQyS88uRDiswHXSCkY3z");
+
+        private final String value;
+        private final String caip2;
+
+        SupportedSvmNetwork(String value, String caip2) {
+            this.value = value;
+            this.caip2 = caip2;
+        }
+
+        public String getValue() { return value; }
+        public String getCaip2() { return caip2; }
+
+        public static SupportedSvmNetwork fromString(String value) {
+            for (SupportedSvmNetwork network : values()) {
+                if (network.value.equalsIgnoreCase(value) || network.caip2.equals(value)) {
+                    return network;
+                }
+            }
+            return null;
+        }
+    }
+
     // ===== JSON-RPC Types =====
 
     /**
@@ -470,6 +499,46 @@ public final class McpTypes {
 
         public String getRecipient() { return recipient; }
         public void setRecipient(String recipient) { this.recipient = recipient; }
+    }
+
+    // ===== SVM (Solana) Tool Input Types =====
+
+    /**
+     * Input for t402/getSvmBalance.
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class GetSvmBalanceInput {
+        private String address;
+        private String network;
+
+        public String getAddress() { return address; }
+        public void setAddress(String address) { this.address = address; }
+
+        public String getNetwork() { return network; }
+        public void setNetwork(String network) { this.network = network; }
+    }
+
+    /**
+     * Input for t402/paySvm.
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PaySvmInput {
+        private String to;
+        private String amount;
+        private String token;
+        private String network;
+
+        public String getTo() { return to; }
+        public void setTo(String to) { this.to = to; }
+
+        public String getAmount() { return amount; }
+        public void setAmount(String amount) { this.amount = amount; }
+
+        public String getToken() { return token; }
+        public void setToken(String token) { this.token = token; }
+
+        public String getNetwork() { return network; }
+        public void setNetwork(String network) { this.network = network; }
     }
 
     // ===== Tool Result Types =====
