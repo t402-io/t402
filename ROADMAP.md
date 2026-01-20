@@ -2,7 +2,7 @@
 
 > **The Official Payment Protocol for USDT**
 >
-> *Last Updated: 2026-01-19*
+> *Last Updated: 2026-01-20*
 
 This document outlines the development status and roadmap for T402, a payment protocol specifically designed for USDT and USDT0, with deep integration with [Tether WDK](https://wallet.tether.io/).
 
@@ -51,7 +51,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 | Package | Version | Description |
 |---------|---------|-------------|
 | @t402/core | 2.0.0 | Protocol types, HTTP utilities |
-| @t402/evm | 2.2.0 | EVM chains (EIP-3009, USDT0) |
+| @t402/evm | 2.3.0 | EVM chains (EIP-3009, USDT0, upto scheme) |
 | @t402/svm | 2.0.0 | Solana (SPL tokens) |
 | @t402/ton | 2.1.0 | TON (USDT Jetton) |
 | @t402/tron | 2.0.0 | TRON (TRC-20 USDT) |
@@ -70,7 +70,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 | @t402/react | 2.0.0 | React components |
 | @t402/vue | 2.0.0 | Vue components |
 | @t402/cli | 2.0.0 | Command-line tools |
-| @t402/extensions | 2.0.0 | Protocol extensions |
+| @t402/extensions | 2.1.0 | Protocol extensions (SIWx, bazaar) |
 
 ### Other SDKs
 
@@ -200,14 +200,20 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 - [ ] SwiftUI components
 - [ ] WalletConnect integration
 
-### Phase 7: Infrastructure Scaling (Ongoing)
+### Phase 7: Infrastructure Scaling ✅
 
 > Focus: Multi-Region Deployment
 
-- [ ] Deploy to US, EU, APAC regions
-- [ ] Implement geographic load balancing
-- [ ] Add Redis Cluster for session management
-- [ ] Implement hot wallet rotation
+- [x] Kubernetes manifests with Kustomize (base + staging + production overlays)
+- [x] Multi-region support (US-East, EU-West, AP-Southeast configs)
+- [x] Horizontal Pod Autoscaler (3-20 replicas)
+- [x] Pod Disruption Budget for high availability
+- [x] Network policies for security isolation
+- [x] ServiceMonitor for Prometheus Operator
+- [x] CI/CD workflow for K8s deployments
+- [x] Disaster recovery plan documentation (RTO: 15min, RPO: 5min)
+- [x] Infrastructure documentation
+- [ ] Hot wallet rotation (requires operational process)
 
 ### Phase 8: Advanced Features (Month 7-18)
 
@@ -236,24 +242,26 @@ Internal packages implemented (575 tests passing):
 - [ ] Bitcoin L2 exploration
 - [x] Payment channels - `@t402-internal/streaming-payments` (37 tests)
 
-#### Internal Packages
+#### Advanced Packages ✅
 
-These features are implemented as internal packages in `docs/internal/typescript/`:
+These features are implemented as advanced packages ready for public release:
 
 | Package | Description | Tests |
 |---------|-------------|-------|
-| `@t402-internal/agent-policy` | AI agent spending policies and authorization | 280 |
-| `@t402-internal/a2a-negotiation` | Agent-to-agent negotiation and discovery | 95 |
-| `@t402-internal/intent-payments` | Intent-based payment system | 57 |
-| `@t402-internal/smart-router` | Multi-chain routing and optimization | 27 |
-| `@t402-internal/streaming-payments` | Per-second billing and payment channels | 37 |
-| `@t402-internal/zk-payments` | Zero-knowledge proofs for privacy | 79 |
-| `@t402-internal/demo-marketplace` | Integration demo (AI Agent Marketplace) | - |
+| `@t402-advanced/agent-policy` | AI agent spending policies and authorization | 280 |
+| `@t402-advanced/a2a-negotiation` | Agent-to-agent negotiation and discovery | 95 |
+| `@t402-advanced/intent-payments` | Intent-based payment system | 57 |
+| `@t402-advanced/smart-router` | Multi-chain routing and optimization | 27 |
+| `@t402-advanced/streaming-payments` | Per-second billing and payment channels | 37 |
+| `@t402-advanced/zk-payments` | Zero-knowledge proofs for privacy | 79 |
+| `@t402-advanced/demo-marketplace` | Integration demo (AI Agent Marketplace) | - |
 
-**Next Steps:**
-- [ ] Integrate internal packages into public SDK
-- [ ] Add public API documentation
-- [ ] Create migration guides for advanced features
+**Status:**
+- [x] Renamed from `@t402-internal/*` to `@t402-advanced/*`
+- [x] Updated to version 1.0.0-beta.1
+- [x] MIT license and public publishConfig
+- [x] Migration guide created (`docs/internal/MIGRATION.md`)
+- [ ] Publish to npm (pending final review)
 
 ---
 
@@ -283,14 +291,15 @@ These features are implemented as internal packages in `docs/internal/typescript
 - [x] MCP server for AI agents
 - [x] Hardware wallet support (Ledger, Trezor)
 
-### Internal Packages (Phase 8) ✅
-- [x] Agent policy engine (@t402-internal/agent-policy)
-- [x] A2A negotiation protocol (@t402-internal/a2a-negotiation)
-- [x] Intent-based payments (@t402-internal/intent-payments)
-- [x] Smart cross-chain routing (@t402-internal/smart-router)
-- [x] Streaming payments (@t402-internal/streaming-payments)
-- [x] Zero-knowledge proofs (@t402-internal/zk-payments)
-- [x] Integration demo (@t402-internal/demo-marketplace)
+### Advanced Packages (Phase 8) ✅
+- [x] Agent policy engine (@t402-advanced/agent-policy)
+- [x] A2A negotiation protocol (@t402-advanced/a2a-negotiation)
+- [x] Intent-based payments (@t402-advanced/intent-payments)
+- [x] Smart cross-chain routing (@t402-advanced/smart-router)
+- [x] Streaming payments (@t402-advanced/streaming-payments)
+- [x] Zero-knowledge proofs (@t402-advanced/zk-payments)
+- [x] Integration demo (@t402-advanced/demo-marketplace)
+- [x] Migration to public namespace (1.0.0-beta.1)
 
 ### Server Frameworks ✅
 - [x] Express.js middleware (@t402/express)
@@ -309,6 +318,12 @@ These features are implemented as internal packages in `docs/internal/typescript
 - [x] Vue components (@t402/vue)
 - [x] CLI tools (@t402/cli)
 
+### SDK Enhancements (2026-01) ✅
+- [x] Upto scheme server/facilitator (TypeScript EVM) - usage-based billing
+- [x] TON payment scheme (Java SDK) - Ed25519 signatures
+- [x] TRON payment scheme (Java SDK) - ECDSA secp256k1
+- [x] Sign-In-With-X extension (CAIP-122) - wallet authentication
+
 ### Infrastructure ✅
 - [x] Facilitator service (Go)
 - [x] Docker containerization
@@ -320,6 +335,10 @@ These features are implemented as internal packages in `docs/internal/typescript
 - [x] GitHub Container Registry publishing
 - [x] Trivy security scanning
 - [x] SBOM generation
+- [x] Kubernetes manifests (Kustomize)
+- [x] Multi-region deployment configs
+- [x] Horizontal Pod Autoscaler
+- [x] Disaster recovery plan
 
 ### Documentation & Community ✅
 - [x] Documentation site (docs.t402.io)
