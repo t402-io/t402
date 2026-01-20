@@ -19,11 +19,42 @@
  * });
  * ```
  *
+ * @example
+ * ```typescript
+ * // Server-side
+ * import { UptoEvmServerScheme } from "@t402/evm/upto/server";
+ *
+ * const scheme = new UptoEvmServerScheme({
+ *   routerAddress: "0x...",
+ *   defaultUnit: "token",
+ * });
+ * server.registerScheme("eip155:8453", scheme);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Facilitator-side
+ * import { UptoEvmFacilitatorScheme } from "@t402/evm/upto/facilitator";
+ *
+ * const scheme = new UptoEvmFacilitatorScheme(signer, {
+ *   routerAddresses: { "eip155:8453": "0x..." },
+ * });
+ * facilitator.registerScheme(scheme);
+ * ```
+ *
  * @module
  */
 
 // Client exports
-export { UptoEvmScheme, createUptoEvmScheme } from "./client";
+export { UptoEvmScheme, createUptoEvmScheme } from "./client/index.js";
+
+// Server exports
+export { UptoEvmServerScheme, createUptoEvmServerScheme } from "./server/index.js";
+export type { UptoEvmServerSchemeConfig } from "./server/index.js";
+
+// Facilitator exports
+export { UptoEvmFacilitatorScheme, createUptoEvmFacilitatorScheme } from "./facilitator/index.js";
+export type { UptoEvmFacilitatorSchemeConfig } from "./facilitator/index.js";
 
 // Re-export types
 export type {
@@ -34,6 +65,6 @@ export type {
   UptoEvmSettlement,
   PermitSignature,
   PermitAuthorization,
-} from "../types";
+} from "../types.js";
 
-export { permitTypes, isUptoEIP2612Payload } from "../types";
+export { permitTypes, isUptoEIP2612Payload } from "../types.js";
