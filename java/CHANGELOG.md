@@ -2,6 +2,102 @@
 
 All notable changes to the T402 Java SDK will be documented in this file.
 
+## [1.8.0] - 2026-01-20
+
+### Added
+
+#### Complete TON Payment Schemes (`io.t402.schemes.ton`)
+- **TonSchemes** - Factory class for creating TON payment schemes
+  - `createClient(ClientTonSigner)` - Create client scheme for paying
+  - `createServer()` / `createServer(defaultNetwork)` - Create server scheme for accepting payments
+  - `createFacilitator(FacilitatorTonSigner)` - Create facilitator scheme for verification/settlement
+  - `getScheme()`, `isValidNetwork()`, `getUsdtAddress()` - Utility methods
+
+- **ExactTonServerScheme** - Server-side payment requirements
+  - `getPaymentRequirements(price, payTo, description)` - Generate payment requirements
+  - `parsePrice(price, network)` - Parse decimal/atomic amounts
+  - `createPaymentRequirements()` - Full customization
+  - `validateRequirements()` - Validate scheme/network compatibility
+
+- **ExactTonFacilitatorScheme** - Facilitator verification and settlement
+  - `verify()` / `verifySync()` - Verify payment signatures and amounts
+  - `settle()` / `settleSync()` - Execute jetton transfers
+  - `VerificationResult` - Result with valid/invalid status
+  - `SettlementResult` - Result with SUCCESS/PENDING/FAILED status
+
+- **FacilitatorTonSigner** - Interface for facilitator-side TON operations
+  - `getAddresses()` - Get facilitator wallet addresses
+  - `verifySignature()` - Verify payment authorization signatures
+  - `sendTransaction()` - Send jetton transfers
+  - `confirmTransaction()` - Confirm transaction status
+  - `getBalance()` - Query token balances
+
+- **TonTransactionException** - Exception for TON transaction failures
+
+#### Complete TRON Payment Schemes (`io.t402.schemes.tron`)
+- **TronSchemes** - Factory class for creating TRON payment schemes
+  - `createClient(ClientTronSigner)` - Create client scheme for paying
+  - `createServer()` / `createServer(defaultNetwork)` - Create server scheme
+  - `createFacilitator(FacilitatorTronSigner)` - Create facilitator scheme
+  - `getScheme()`, `isValidNetwork()`, `getUsdtAddress()` - Utility methods
+
+- **ExactTronServerScheme** - Server-side payment requirements
+  - `getPaymentRequirements(price, payTo, description)` - Generate requirements
+  - `parsePrice(price, network)` - Parse decimal/atomic amounts
+  - `createPaymentRequirements()` - Full customization
+  - `validateRequirements()` - Validate scheme/network compatibility
+
+- **ExactTronFacilitatorScheme** - Facilitator verification and settlement
+  - `verify()` / `verifySync()` - Verify payment signatures and amounts
+  - `settle()` / `settleSync()` - Execute TRC-20 transfers
+  - `VerificationResult` - Result with valid/invalid status
+  - `SettlementResult` - Result with SUCCESS/PENDING/FAILED status
+
+- **FacilitatorTronSigner** - Interface for facilitator-side TRON operations
+  - `getAddresses()` - Get facilitator wallet addresses
+  - `verifySignature()` - Verify payment authorization signatures
+  - `sendTransaction()` - Send TRC-20 transfers
+  - `confirmTransaction()` - Confirm transaction status
+  - `getBalance()` - Query token balances
+
+- **TronTransactionException** - Exception for TRON transaction failures
+
+#### MCP Server Enhancements
+- **SVM (Solana) Tools** - Added to MCP server
+  - `t402/getSvmBalance` - Query SOL and SPL token balances
+  - `t402/paySvm` - Execute USDC payments on Solana
+  - Supported networks: solana-mainnet, solana-devnet, solana-testnet
+
+- **TON Tools** - Added to MCP server
+  - `t402/getTonBalance` - Query TON and jetton balances
+  - `t402/payTon` - Execute USDT payments on TON (jetton transfers)
+  - Supported networks: ton-mainnet, ton-testnet
+
+- **TRON Tools** - Added to MCP server
+  - `t402/getTronBalance` - Query TRX and TRC-20 balances
+  - `t402/payTron` - Execute USDT payments on TRON (TRC-20 transfers)
+  - Supported networks: tron-mainnet, tron-nile, tron-shasta
+
+- **McpTypes** - Added network enums
+  - `SupportedSvmNetwork` - solana-mainnet, solana-devnet, solana-testnet
+  - `SupportedTonNetwork` - ton-mainnet, ton-testnet
+  - `SupportedTronNetwork` - tron-mainnet, tron-nile, tron-shasta
+
+- **McpConstants** - Added chain constants
+  - SVM: SOL_SYMBOL, SOL_DECIMALS, SOLANA_ADDRESS_PATTERN, explorer/RPC URLs, USDC addresses
+  - TON: TON_SYMBOL, TON_DECIMALS, TON_ADDRESS_PATTERN, explorer/RPC URLs, USDT addresses
+  - TRON: TRX_SYMBOL, TRX_DECIMALS, TRON_ADDRESS_PATTERN, explorer/RPC URLs, USDT addresses
+
+#### SVM Convenience Methods
+- **SvmSchemes** - Added convenience builder for Spring Boot integration
+  - Fluent API for creating SVM schemes with injected signers
+
+### Changed
+- MCP Server now exposes 12 tools (6 EVM + 2 SVM + 2 TON + 2 TRON)
+
+### Tests
+- Total Java test count: 370
+
 ## [1.7.0] - 2026-01-18
 
 ### Fixed
@@ -458,7 +554,9 @@ Initial release of the T402 Java SDK, published to Maven Central.
 implementation 'io.t402:t402:1.0.0'
 ```
 
-[Unreleased]: https://github.com/t402-io/t402/compare/java/v1.5.0...HEAD
+[Unreleased]: https://github.com/t402-io/t402/compare/java/v1.8.0...HEAD
+[1.8.0]: https://github.com/t402-io/t402/compare/java/v1.7.0...java/v1.8.0
+[1.7.0]: https://github.com/t402-io/t402/compare/java/v1.5.0...java/v1.7.0
 [1.5.0]: https://github.com/t402-io/t402/compare/java/v1.4.0...java/v1.5.0
 [1.4.0]: https://github.com/t402-io/t402/compare/java/v1.1.0...java/v1.4.0
 [1.1.0]: https://github.com/t402-io/t402/compare/java/v1.0.0...java/v1.1.0
