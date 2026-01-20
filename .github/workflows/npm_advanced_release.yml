@@ -60,7 +60,7 @@ jobs:
         with:
           node-version: "20"
           cache: "pnpm"
-          cache-dependency-path: ${{ env.WORKING_DIR }}/pnpm-lock.yaml
+          cache-dependency-path: docs/internal/typescript/pnpm-lock.yaml
 
       - name: Install dependencies
         working-directory: ${{ env.WORKING_DIR }}
@@ -99,7 +99,7 @@ jobs:
         with:
           node-version: "20"
           cache: "pnpm"
-          cache-dependency-path: ${{ env.WORKING_DIR }}/pnpm-lock.yaml
+          cache-dependency-path: docs/internal/typescript/pnpm-lock.yaml
 
       - name: Install dependencies
         working-directory: ${{ env.WORKING_DIR }}
@@ -155,7 +155,7 @@ jobs:
         with:
           node-version: "20"
           cache: "pnpm"
-          cache-dependency-path: ${{ env.WORKING_DIR }}/pnpm-lock.yaml
+          cache-dependency-path: docs/internal/typescript/pnpm-lock.yaml
           registry-url: "https://registry.npmjs.org"
 
       - name: Download build artifacts
