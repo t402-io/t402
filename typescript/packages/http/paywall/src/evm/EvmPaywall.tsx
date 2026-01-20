@@ -11,6 +11,7 @@ import { getUSDCBalance } from "./utils";
 import { Spinner } from "./Spinner";
 import { getNetworkDisplayName, isTestnetNetwork } from "../paywallUtils";
 import { wagmiToClientSigner } from "./browserAdapter";
+import { PaymentProgress, type PaymentStep } from "../components/PaymentProgress";
 
 type EvmPaywallProps = {
   paymentRequired: PaymentRequired;
@@ -38,6 +39,8 @@ export function EvmPaywall({ paymentRequired, onSuccessfulResponse }: EvmPaywall
   const [formattedUsdcBalance, setFormattedUsdcBalance] = useState<string>("");
   const [hideBalance, setHideBalance] = useState(true);
   const [selectedConnectorId, setSelectedConnectorId] = useState<string>("");
+  const [paymentStep, setPaymentStep] = useState<PaymentStep>("connect");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const t402 = window.t402;
   const amount = t402.amount;
@@ -121,6 +124,15 @@ export function EvmPaywall({ paymentRequired, onSuccessfulResponse }: EvmPaywall
     }
   }, [connectors, selectedConnectorId]);
 
+  // Update payment step based on connection state
+  useEffect(() => {
+    if (!isConnected) {
+      setPaymentStep("connect");
+    } else if (paymentStep === "connect") {
+      setPaymentStep("sign");
+    }
+  }, [isConnected, paymentStep]);
+
   const handlePayment = useCallback(async () => {
     if (!address || !t402) {
       return;
@@ -135,6 +147,7 @@ export function EvmPaywall({ paymentRequired, onSuccessfulResponse }: EvmPaywall
     const walletClient = wagmiWalletClient.extend(publicActions);
 
     setIsPaying(true);
+    setIsProcessing(true);
 
     try {
       setStatus("Checking USDC balance...");
@@ -144,6 +157,7 @@ export function EvmPaywall({ paymentRequired, onSuccessfulResponse }: EvmPaywall
         throw new Error(`Insufficient balance. Make sure you have USDC on ${chainName}`);
       }
 
+      setPaymentStep("sign");
       setStatus("Creating payment signature...");
 
       // Create client and register EVM schemes (handles v1 and v2)
@@ -157,6 +171,7 @@ export function EvmPaywall({ paymentRequired, onSuccessfulResponse }: EvmPaywall
       // Encode as base64 JSON for v2 header
       const paymentHeader = btoa(JSON.stringify(paymentPayload));
 
+      setPaymentStep("submit");
       setStatus("Requesting content with payment...");
       const response = await fetch(t402.currentUrl, {
         headers: {
@@ -166,12 +181,15 @@ export function EvmPaywall({ paymentRequired, onSuccessfulResponse }: EvmPaywall
       });
 
       if (response.ok) {
+        setPaymentStep("confirm");
+        setIsProcessing(false);
         await onSuccessfulResponse(response);
       } else {
         throw new Error(`Request failed: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Payment failed");
+      setIsProcessing(false);
     } finally {
       setIsPaying(false);
     }
@@ -247,6 +265,11 @@ export function EvmPaywall({ paymentRequired, onSuccessfulResponse }: EvmPaywall
         )}
         {isConnected && (
           <div id="payment-section">
+            <PaymentProgress
+              currentStep={paymentStep}
+              isProcessing={isProcessing}
+              hasError={!!status && !isPaying}
+            />
             <div className="payment-details">
               <div className="payment-row">
                 <span className="payment-label">Wallet:</span>
