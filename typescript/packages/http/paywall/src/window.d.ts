@@ -9,6 +9,8 @@ declare global {
       currentUrl: string;
       appName?: string;
       appLogo?: string;
+      /** TonConnect manifest URL for TON wallet connection */
+      tonConnectManifestUrl?: string;
       config: {
         chainConfig: Record<
           string,

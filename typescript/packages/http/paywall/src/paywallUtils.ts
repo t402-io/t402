@@ -16,6 +16,12 @@ export const SOLANA_NETWORK_REFS = {
   DEVNET: "EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
 } as const;
 
+// TON Network References (CAIP-2 format: ton:network)
+export const TON_NETWORK_REFS = {
+  MAINNET: "mainnet",
+  TESTNET: "testnet",
+} as const;
+
 /**
  * Normalizes the payment requirements into an array.
  *
@@ -91,6 +97,16 @@ export function isSvmNetwork(network: string): boolean {
 }
 
 /**
+ * Determines if the provided network is a TON network.
+ *
+ * @param network - The network to check (CAIP-2 format: ton:network).
+ * @returns True if the network is TON based.
+ */
+export function isTonNetwork(network: string): boolean {
+  return network.startsWith("ton:");
+}
+
+/**
  * Provides a human-readable display name for a network.
  * Uses viem/chains for EVM chain metadata (based on ethereum-lists/chains).
  * See: https://github.com/ethereum-lists/chains
@@ -117,6 +133,11 @@ export function getNetworkDisplayName(network: string): string {
     return ref === SOLANA_NETWORK_REFS.DEVNET ? "Solana Devnet" : "Solana Mainnet";
   }
 
+  if (network.startsWith("ton:")) {
+    const ref = network.split(":")[1];
+    return ref === TON_NETWORK_REFS.TESTNET ? "TON Testnet" : "TON Mainnet";
+  }
+
   return network;
 }
 
@@ -137,6 +158,11 @@ export function isTestnetNetwork(network: string): boolean {
   if (network.startsWith("solana:")) {
     const ref = network.split(":")[1];
     return ref === SOLANA_NETWORK_REFS.DEVNET;
+  }
+
+  if (network.startsWith("ton:")) {
+    const ref = network.split(":")[1];
+    return ref === TON_NETWORK_REFS.TESTNET;
   }
 
   return false;

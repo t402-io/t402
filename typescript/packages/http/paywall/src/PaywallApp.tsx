@@ -2,9 +2,10 @@
 
 import { useCallback } from "react";
 import type { PaymentRequired } from "@t402/core/types";
-import { isEvmNetwork, isSvmNetwork } from "./paywallUtils";
+import { isEvmNetwork, isSvmNetwork, isTonNetwork } from "./paywallUtils";
 import { EvmPaywall } from "./evm/EvmPaywall";
 import { SolanaPaywall } from "./svm/SolanaPaywall";
+import { TonPaywall } from "./ton/TonPaywall";
 
 /**
  * Main Paywall App Component
@@ -52,6 +53,15 @@ export function PaywallApp() {
   if (isSvmNetwork(network)) {
     return (
       <SolanaPaywall
+        paymentRequired={paymentRequired}
+        onSuccessfulResponse={handleSuccessfulResponse}
+      />
+    );
+  }
+
+  if (isTonNetwork(network)) {
+    return (
+      <TonPaywall
         paymentRequired={paymentRequired}
         onSuccessfulResponse={handleSuccessfulResponse}
       />
