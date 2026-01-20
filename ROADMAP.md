@@ -348,6 +348,7 @@ These features are implemented as advanced packages ready for public release:
 - [x] Payment progress indicator (@t402/paywall) - Visual step tracker (Connect→Sign→Submit→Confirm)
 - [x] Mobile optimization (@t402/paywall) - WalletConnect deep linking, mobile detection
 - [x] QR code payment flow (@t402/paywall) - Scan-to-pay with payment URI generation
+- [x] Stacks paywall (@t402/paywall) - Leather/Xverse wallet integration, sUSDC support
 
 ### Infrastructure ✅
 - [x] Facilitator service (Go)
