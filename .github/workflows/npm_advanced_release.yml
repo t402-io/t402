@@ -71,8 +71,7 @@ jobs:
 
       - name: Run tests
         working-directory: ${{ env.WORKING_DIR }}
-        run: pnpm -r --filter "@t402/*" --filter "!@t402/streaming-payments" test
-        continue-on-error: true  # Allow workflow to continue if tests fail
+        run: pnpm -r --filter "@t402/*" test
 
   build:
     name: Build Advanced Packages
