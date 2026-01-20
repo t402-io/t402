@@ -345,6 +345,7 @@ These features are implemented as advanced packages ready for public release:
 - [x] Multi-network selector (@t402/paywall) - User chooses payment network
 - [x] Dark mode support (@t402/paywall) - Light/dark/auto themes
 - [x] Accessibility improvements (@t402/paywall) - ARIA labels, keyboard nav
+- [x] Payment progress indicator (@t402/paywall) - Visual step tracker (Connect→Sign→Submit→Confirm)
 
 ### Infrastructure ✅
 - [x] Facilitator service (Go)
