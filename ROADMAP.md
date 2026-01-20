@@ -342,6 +342,9 @@ These features are implemented as advanced packages ready for public release:
 - [x] Java v1.8.0 - Complete TON/TRON schemes with MCP tools (12 total)
 - [x] TON paywall (@t402/paywall) - TonConnect wallet integration
 - [x] TRON paywall (@t402/paywall) - TronLink wallet integration
+- [x] Multi-network selector (@t402/paywall) - User chooses payment network
+- [x] Dark mode support (@t402/paywall) - Light/dark/auto themes
+- [x] Accessibility improvements (@t402/paywall) - ARIA labels, keyboard nav
 
 ### Infrastructure ✅
 - [x] Facilitator service (Go)
