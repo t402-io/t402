@@ -7,6 +7,7 @@ import io.t402.util.Json;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * MCP tool handlers for T402 payment operations.
@@ -41,6 +42,11 @@ public class McpTools {
                     return handleGetBridgeFee(arguments);
                 case "t402/bridge":
                     return handleBridge(arguments);
+                // SVM (Solana) tools
+                case "t402/getSvmBalance":
+                    return handleGetSvmBalance(arguments);
+                case "t402/paySvm":
+                    return handlePaySvm(arguments);
                 default:
                     return errorResult("Unknown tool: " + name);
             }
@@ -291,6 +297,170 @@ public class McpTools {
         }
 
         return errorResult("Bridge functionality requires private key configuration (use demo mode to test)");
+    }
+
+    // ===== SVM (Solana) Tool Handlers =====
+
+    /**
+     * Handles t402/getSvmBalance tool.
+     */
+    private ToolResult handleGetSvmBalance(JsonNode args) throws Exception {
+        GetSvmBalanceInput input = Json.MAPPER.treeToValue(args, GetSvmBalanceInput.class);
+
+        if (!McpConstants.isValidSvmNetwork(input.getNetwork())) {
+            return errorResult("Invalid Solana network: " + input.getNetwork() +
+                ". Valid options: solana-mainnet, solana-devnet, solana-testnet");
+        }
+
+        if (!McpConstants.isValidSolanaAddress(input.getAddress())) {
+            return errorResult("Invalid Solana address format: " + input.getAddress());
+        }
+
+        SupportedSvmNetwork network = SupportedSvmNetwork.fromString(input.getNetwork());
+
+        // Build result with demo data
+        NetworkBalance result = new NetworkBalance(input.getNetwork());
+        result.setNativeBalance(new BalanceInfo(
+            McpConstants.SOL_SYMBOL,
+            "0",
+            "0"
+        ));
+        result.setTokens(new ArrayList<>());
+
+        // In demo mode, return placeholder data
+        if (config.isDemoMode()) {
+            result.getNativeBalance().setBalance("2.5");
+            result.getNativeBalance().setRaw("2500000000"); // 2.5 SOL in lamports
+
+            // Add demo USDC balance
+            String usdcAddr = McpConstants.getSvmUsdcAddress(network);
+            if (usdcAddr != null) {
+                result.getTokens().add(new BalanceInfo("USDC", "100", "100000000"));
+            }
+        } else {
+            result.setError("Real balance query requires RPC connection");
+        }
+
+        return textResult(formatSvmBalanceResult(result));
+    }
+
+    /**
+     * Handles t402/paySvm tool.
+     */
+    private ToolResult handlePaySvm(JsonNode args) throws Exception {
+        PaySvmInput input = Json.MAPPER.treeToValue(args, PaySvmInput.class);
+
+        if (!McpConstants.isValidSvmNetwork(input.getNetwork())) {
+            return errorResult("Invalid Solana network: " + input.getNetwork() +
+                ". Valid options: solana-mainnet, solana-devnet, solana-testnet");
+        }
+
+        if (!McpConstants.isValidSolanaAddress(input.getTo())) {
+            return errorResult("Invalid Solana recipient address: " + input.getTo());
+        }
+
+        SupportedSvmNetwork network = SupportedSvmNetwork.fromString(input.getNetwork());
+
+        // Only USDC is supported for now
+        if (!"USDC".equalsIgnoreCase(input.getToken())) {
+            return errorResult("Only USDC token is supported on Solana currently");
+        }
+
+        // Validate amount
+        try {
+            McpConstants.parseTokenAmount(input.getAmount(), McpConstants.TOKEN_DECIMALS);
+        } catch (IllegalArgumentException e) {
+            return errorResult("Invalid amount: " + e.getMessage());
+        }
+
+        // Validate private key (unless demo mode)
+        if ((config.getPrivateKey() == null || config.getPrivateKey().isEmpty()) && !config.isDemoMode()) {
+            return errorResult("Private key not configured. Set T402_PRIVATE_KEY or enable T402_DEMO_MODE");
+        }
+
+        // Demo mode - simulate the transaction
+        if (config.isDemoMode()) {
+            // Generate a demo transaction signature (Base58-like)
+            String demoSignature = generateDemoSolanaSignature();
+
+            PaymentResult result = new PaymentResult();
+            result.setTxHash(demoSignature);
+            result.setFrom("Demo" + input.getTo().substring(4, 8) + "..."); // Fake sender
+            result.setTo(input.getTo());
+            result.setAmount(input.getAmount());
+            result.setToken(input.getToken());
+            result.setNetwork(input.getNetwork());
+            result.setExplorerUrl(McpConstants.getSvmExplorerTxUrl(network, demoSignature));
+            result.setDemoMode(true);
+
+            return textResult(formatSvmPaymentResult(result));
+        }
+
+        // Real transaction would go here
+        return errorResult("Real Solana transactions require full implementation. Use demo mode to test.");
+    }
+
+    /**
+     * Generates a demo Solana transaction signature.
+     */
+    private static String generateDemoSolanaSignature() {
+        // Solana signatures are 88 characters Base58
+        String uuid = UUID.randomUUID().toString().replace("-", "");
+        return "Demo" + uuid + "SolTx";
+    }
+
+    /**
+     * Formats SVM balance result.
+     */
+    private static String formatSvmBalanceResult(NetworkBalance result) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("## Solana Balance on ").append(result.getNetwork()).append("\n\n");
+
+        if (result.getError() != null) {
+            sb.append("Error: ").append(result.getError()).append("\n");
+            return sb.toString();
+        }
+
+        BalanceInfo nativeBalance = result.getNativeBalance();
+        if (nativeBalance != null) {
+            sb.append("**Native (").append(nativeBalance.getToken()).append("):** ")
+              .append(nativeBalance.getBalance()).append(" SOL\n\n");
+        }
+
+        List<BalanceInfo> tokens = result.getTokens();
+        if (tokens != null && !tokens.isEmpty()) {
+            sb.append("**SPL Tokens:**\n");
+            for (BalanceInfo token : tokens) {
+                sb.append("- ").append(token.getToken()).append(": ")
+                  .append(token.getBalance()).append("\n");
+            }
+        } else {
+            sb.append("No SPL token balances found.\n");
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Formats SVM payment result.
+     */
+    private static String formatSvmPaymentResult(PaymentResult result) {
+        StringBuilder sb = new StringBuilder();
+
+        if (result.isDemoMode()) {
+            sb.append("## Solana Payment (Demo Mode)\n\n");
+            sb.append("⚠️ This is a simulated transaction. No actual tokens were transferred.\n\n");
+        } else {
+            sb.append("## Solana Payment Successful\n\n");
+        }
+
+        sb.append("- **Amount:** ").append(result.getAmount()).append(" ").append(result.getToken()).append("\n");
+        sb.append("- **To:** ").append(result.getTo()).append("\n");
+        sb.append("- **Network:** ").append(result.getNetwork()).append("\n");
+        sb.append("- **Transaction:** [").append(McpConstants.truncateHash(result.getTxHash()))
+          .append("](").append(result.getExplorerUrl()).append(")\n");
+
+        return sb.toString();
     }
 
     // ===== Result Formatting =====

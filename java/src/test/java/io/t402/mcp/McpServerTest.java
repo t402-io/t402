@@ -169,15 +169,19 @@ class McpServerTest {
     @Test
     void testGetToolDefinitions() {
         List<Tool> tools = McpServer.getToolDefinitions();
-        assertEquals(6, tools.size());
+        assertEquals(8, tools.size()); // 6 EVM + 2 SVM tools
 
         List<String> toolNames = tools.stream().map(Tool::getName).toList();
+        // EVM tools
         assertTrue(toolNames.contains("t402/getBalance"));
         assertTrue(toolNames.contains("t402/getAllBalances"));
         assertTrue(toolNames.contains("t402/pay"));
         assertTrue(toolNames.contains("t402/payGasless"));
         assertTrue(toolNames.contains("t402/getBridgeFee"));
         assertTrue(toolNames.contains("t402/bridge"));
+        // SVM (Solana) tools
+        assertTrue(toolNames.contains("t402/getSvmBalance"));
+        assertTrue(toolNames.contains("t402/paySvm"));
     }
 
     @Test
@@ -271,7 +275,7 @@ class McpServerTest {
         Map<String, Object> result = (Map<String, Object>) response.getResult();
         @SuppressWarnings("unchecked")
         List<Object> tools = (List<Object>) result.get("tools");
-        assertEquals(6, tools.size());
+        assertEquals(8, tools.size()); // 6 EVM + 2 SVM tools
     }
 
     @Test

@@ -2,6 +2,7 @@ package io.t402.mcp;
 
 import io.t402.mcp.McpTypes.ServerConfig;
 import io.t402.mcp.McpTypes.SupportedNetwork;
+import io.t402.mcp.McpTypes.SupportedSvmNetwork;
 import io.t402.mcp.McpTypes.SupportedToken;
 
 import java.math.BigDecimal;
@@ -149,18 +150,69 @@ public final class McpConstants {
         LAYERZERO_ENDPOINT_IDS.put(SupportedNetwork.UNICHAIN, 30320);
     }
 
+    // =========================================================================
+    // SVM (Solana) Network Constants
+    // =========================================================================
+
+    /** Native token symbol for Solana. */
+    public static final String SOL_SYMBOL = "SOL";
+
+    /** Standard decimal count for SOL native token. */
+    public static final int SOL_DECIMALS = 9;
+
+    // SVM Explorer URLs
+    public static final Map<SupportedSvmNetwork, String> SVM_EXPLORER_URLS = new EnumMap<>(SupportedSvmNetwork.class);
+    static {
+        SVM_EXPLORER_URLS.put(SupportedSvmNetwork.SOLANA_MAINNET, "https://explorer.solana.com");
+        SVM_EXPLORER_URLS.put(SupportedSvmNetwork.SOLANA_DEVNET, "https://explorer.solana.com?cluster=devnet");
+        SVM_EXPLORER_URLS.put(SupportedSvmNetwork.SOLANA_TESTNET, "https://explorer.solana.com?cluster=testnet");
+    }
+
+    // SVM RPC URLs
+    public static final Map<SupportedSvmNetwork, String> SVM_RPC_URLS = new EnumMap<>(SupportedSvmNetwork.class);
+    static {
+        SVM_RPC_URLS.put(SupportedSvmNetwork.SOLANA_MAINNET, "https://api.mainnet-beta.solana.com");
+        SVM_RPC_URLS.put(SupportedSvmNetwork.SOLANA_DEVNET, "https://api.devnet.solana.com");
+        SVM_RPC_URLS.put(SupportedSvmNetwork.SOLANA_TESTNET, "https://api.testnet.solana.com");
+    }
+
+    // SVM USDC addresses
+    public static final Map<SupportedSvmNetwork, String> SVM_USDC_ADDRESSES = new EnumMap<>(SupportedSvmNetwork.class);
+    static {
+        SVM_USDC_ADDRESSES.put(SupportedSvmNetwork.SOLANA_MAINNET, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
+        SVM_USDC_ADDRESSES.put(SupportedSvmNetwork.SOLANA_DEVNET, "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU");
+        SVM_USDC_ADDRESSES.put(SupportedSvmNetwork.SOLANA_TESTNET, "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU");
+    }
+
+    /** Base58 address pattern for Solana addresses. */
+    public static final String SOLANA_ADDRESS_PATTERN = "^[1-9A-HJ-NP-Za-km-z]{32,44}$";
+
     /**
-     * Returns all supported networks.
+     * Returns all supported EVM networks.
      */
     public static List<SupportedNetwork> getAllNetworks() {
         return Arrays.asList(SupportedNetwork.values());
     }
 
     /**
-     * Checks if a network string is valid.
+     * Returns all supported SVM (Solana) networks.
+     */
+    public static List<SupportedSvmNetwork> getAllSvmNetworks() {
+        return Arrays.asList(SupportedSvmNetwork.values());
+    }
+
+    /**
+     * Checks if an EVM network string is valid.
      */
     public static boolean isValidNetwork(String network) {
         return SupportedNetwork.fromString(network) != null;
+    }
+
+    /**
+     * Checks if a SVM network string is valid.
+     */
+    public static boolean isValidSvmNetwork(String network) {
+        return SupportedSvmNetwork.fromString(network) != null;
     }
 
     /**
@@ -260,5 +312,53 @@ public final class McpConstants {
             return hash;
         }
         return hash.substring(0, 8) + "..." + hash.substring(hash.length() - 6);
+    }
+
+    // =========================================================================
+    // SVM Utility Methods
+    // =========================================================================
+
+    /**
+     * Returns the explorer URL for a Solana transaction.
+     */
+    public static String getSvmExplorerTxUrl(SupportedSvmNetwork network, String txHash) {
+        String baseUrl = SVM_EXPLORER_URLS.get(network);
+        if (baseUrl == null) {
+            return "";
+        }
+        if (baseUrl.contains("?")) {
+            return baseUrl + "&tx=" + txHash;
+        }
+        return baseUrl + "/tx/" + txHash;
+    }
+
+    /**
+     * Returns the RPC URL for a Solana network, using config override if available.
+     */
+    public static String getSvmRpcUrl(ServerConfig config, SupportedSvmNetwork network) {
+        if (config != null && config.getRpcUrls() != null) {
+            String url = config.getRpcUrls().get(network.getValue());
+            if (url != null && !url.isEmpty()) {
+                return url;
+            }
+        }
+        return SVM_RPC_URLS.get(network);
+    }
+
+    /**
+     * Returns the USDC token address for a Solana network.
+     */
+    public static String getSvmUsdcAddress(SupportedSvmNetwork network) {
+        return SVM_USDC_ADDRESSES.get(network);
+    }
+
+    /**
+     * Validates a Solana address format.
+     */
+    public static boolean isValidSolanaAddress(String address) {
+        if (address == null || address.isEmpty()) {
+            return false;
+        }
+        return address.matches(SOLANA_ADDRESS_PATTERN);
     }
 }
