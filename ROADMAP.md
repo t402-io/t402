@@ -340,6 +340,8 @@ These features are implemented as advanced packages ready for public release:
 - [x] TRON payment scheme (Java SDK) - ECDSA secp256k1
 - [x] Sign-In-With-X extension (CAIP-122) - wallet authentication
 - [x] Java v1.8.0 - Complete TON/TRON schemes with MCP tools (12 total)
+- [x] TON paywall (@t402/paywall) - TonConnect wallet integration
+- [x] TRON paywall (@t402/paywall) - TronLink wallet integration
 
 ### Infrastructure ✅
 - [x] Facilitator service (Go)
