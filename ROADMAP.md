@@ -72,6 +72,17 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 | @t402/cli | 2.0.0 | Command-line tools |
 | @t402/extensions | 2.1.0 | Protocol extensions (SIWx, bazaar) |
 
+#### Advanced Packages (Beta)
+
+| Package | Version | Description |
+|---------|---------|-------------|
+| @t402/agent-policy | 1.0.0-beta.1 | AI agent spending policies |
+| @t402/a2a-negotiation | 1.0.0-beta.1 | Agent-to-agent negotiation |
+| @t402/intent-payments | 1.0.0-beta.1 | Intent-based payment system |
+| @t402/smart-router | 1.0.0-beta.1 | Multi-chain routing engine |
+| @t402/streaming-payments | 1.0.0-beta.1 | Payment channels & streaming |
+| @t402/zk-payments | 1.0.0-beta.1 | Zero-knowledge proofs |
+
 ### Other SDKs
 
 | SDK | Version | Status |
