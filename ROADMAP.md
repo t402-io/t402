@@ -346,6 +346,8 @@ These features are implemented as advanced packages ready for public release:
 - [x] Dark mode support (@t402/paywall) - Light/dark/auto themes
 - [x] Accessibility improvements (@t402/paywall) - ARIA labels, keyboard nav
 - [x] Payment progress indicator (@t402/paywall) - Visual step tracker (Connect→Sign→Submit→Confirm)
+- [x] Mobile optimization (@t402/paywall) - WalletConnect deep linking, mobile detection
+- [x] QR code payment flow (@t402/paywall) - Scan-to-pay with payment URI generation
 
 ### Infrastructure ✅
 - [x] Facilitator service (Go)
