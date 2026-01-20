@@ -29,6 +29,12 @@ export const TRON_NETWORK_REFS = {
   SHASTA: "shasta",
 } as const;
 
+// Stacks Network Chain IDs (CAIP-2 format: stacks:chainId)
+export const STACKS_CHAIN_IDS = {
+  MAINNET: "1",
+  TESTNET: "2147483648",
+} as const;
+
 /**
  * Normalizes the payment requirements into an array.
  *
@@ -124,6 +130,16 @@ export function isTronNetwork(network: string): boolean {
 }
 
 /**
+ * Determines if the provided network is a Stacks network.
+ *
+ * @param network - The network to check (CAIP-2 format: stacks:chainId).
+ * @returns True if the network is Stacks based.
+ */
+export function isStacksNetwork(network: string): boolean {
+  return network.startsWith("stacks:");
+}
+
+/**
  * Provides a human-readable display name for a network.
  * Uses viem/chains for EVM chain metadata (based on ethereum-lists/chains).
  * See: https://github.com/ethereum-lists/chains
@@ -162,6 +178,11 @@ export function getNetworkDisplayName(network: string): string {
     return "TRON Mainnet";
   }
 
+  if (network.startsWith("stacks:")) {
+    const chainId = network.split(":")[1];
+    return chainId === STACKS_CHAIN_IDS.TESTNET ? "Stacks Testnet" : "Stacks Mainnet";
+  }
+
   return network;
 }
 
@@ -192,6 +213,11 @@ export function isTestnetNetwork(network: string): boolean {
   if (network.startsWith("tron:")) {
     const ref = network.split(":")[1];
     return ref === TRON_NETWORK_REFS.NILE || ref === TRON_NETWORK_REFS.SHASTA;
+  }
+
+  if (network.startsWith("stacks:")) {
+    const chainId = network.split(":")[1];
+    return chainId === STACKS_CHAIN_IDS.TESTNET;
   }
 
   return false;
@@ -237,6 +263,10 @@ export function getNetworkIcon(network: string): string {
 
   if (network.startsWith("tron:")) {
     return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#FF0013"/><path d="M8 8l4 8 4-8H8z" fill="white"/></svg>`;
+  }
+
+  if (network.startsWith("stacks:")) {
+    return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#5546FF"/><path d="M8 9h8M8 12h8M8 15h8" stroke="white" stroke-width="1.5" stroke-linecap="round"/><path d="M10 7v10M14 7v10" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>`;
   }
 
   // Default icon
