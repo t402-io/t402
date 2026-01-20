@@ -47,6 +47,11 @@ public class McpTools {
                     return handleGetSvmBalance(arguments);
                 case "t402/paySvm":
                     return handlePaySvm(arguments);
+                // TON tools
+                case "t402/getTonBalance":
+                    return handleGetTonBalance(arguments);
+                case "t402/payTon":
+                    return handlePayTon(arguments);
                 default:
                     return errorResult("Unknown tool: " + name);
             }
@@ -452,6 +457,169 @@ public class McpTools {
             sb.append("⚠️ This is a simulated transaction. No actual tokens were transferred.\n\n");
         } else {
             sb.append("## Solana Payment Successful\n\n");
+        }
+
+        sb.append("- **Amount:** ").append(result.getAmount()).append(" ").append(result.getToken()).append("\n");
+        sb.append("- **To:** ").append(result.getTo()).append("\n");
+        sb.append("- **Network:** ").append(result.getNetwork()).append("\n");
+        sb.append("- **Transaction:** [").append(McpConstants.truncateHash(result.getTxHash()))
+          .append("](").append(result.getExplorerUrl()).append(")\n");
+
+        return sb.toString();
+    }
+
+    // ===== TON Tool Handlers =====
+
+    /**
+     * Handles t402/getTonBalance tool.
+     */
+    private ToolResult handleGetTonBalance(JsonNode args) throws Exception {
+        GetTonBalanceInput input = Json.MAPPER.treeToValue(args, GetTonBalanceInput.class);
+
+        if (!McpConstants.isValidTonNetwork(input.getNetwork())) {
+            return errorResult("Invalid TON network: " + input.getNetwork() +
+                ". Valid options: ton-mainnet, ton-testnet");
+        }
+
+        if (!McpConstants.isValidTonAddress(input.getAddress())) {
+            return errorResult("Invalid TON address format: " + input.getAddress());
+        }
+
+        SupportedTonNetwork network = SupportedTonNetwork.fromString(input.getNetwork());
+
+        // Build result with demo data
+        NetworkBalance result = new NetworkBalance(input.getNetwork());
+        result.setNativeBalance(new BalanceInfo(
+            McpConstants.TON_SYMBOL,
+            "0",
+            "0"
+        ));
+        result.setTokens(new ArrayList<>());
+
+        // In demo mode, return placeholder data
+        if (config.isDemoMode()) {
+            result.getNativeBalance().setBalance("5.0");
+            result.getNativeBalance().setRaw("5000000000"); // 5 TON in nanotons
+
+            // Add demo USDT balance
+            String usdtAddr = McpConstants.getTonUsdtAddress(network);
+            if (usdtAddr != null) {
+                result.getTokens().add(new BalanceInfo("USDT", "100", "100000000"));
+            }
+        } else {
+            result.setError("Real balance query requires RPC connection");
+        }
+
+        return textResult(formatTonBalanceResult(result));
+    }
+
+    /**
+     * Handles t402/payTon tool.
+     */
+    private ToolResult handlePayTon(JsonNode args) throws Exception {
+        PayTonInput input = Json.MAPPER.treeToValue(args, PayTonInput.class);
+
+        if (!McpConstants.isValidTonNetwork(input.getNetwork())) {
+            return errorResult("Invalid TON network: " + input.getNetwork() +
+                ". Valid options: ton-mainnet, ton-testnet");
+        }
+
+        if (!McpConstants.isValidTonAddress(input.getTo())) {
+            return errorResult("Invalid TON recipient address: " + input.getTo());
+        }
+
+        SupportedTonNetwork network = SupportedTonNetwork.fromString(input.getNetwork());
+
+        // Only USDT is supported for now
+        if (!"USDT".equalsIgnoreCase(input.getToken())) {
+            return errorResult("Only USDT token is supported on TON currently");
+        }
+
+        // Validate amount
+        try {
+            McpConstants.parseTokenAmount(input.getAmount(), McpConstants.TON_USDT_DECIMALS);
+        } catch (IllegalArgumentException e) {
+            return errorResult("Invalid amount: " + e.getMessage());
+        }
+
+        // Validate private key (unless demo mode)
+        if ((config.getPrivateKey() == null || config.getPrivateKey().isEmpty()) && !config.isDemoMode()) {
+            return errorResult("Private key not configured. Set T402_PRIVATE_KEY or enable T402_DEMO_MODE");
+        }
+
+        // Demo mode - simulate the transaction
+        if (config.isDemoMode()) {
+            // Generate a demo transaction hash
+            String demoTxHash = generateDemoTonTxHash();
+
+            PaymentResult result = new PaymentResult();
+            result.setTxHash(demoTxHash);
+            result.setFrom("EQ" + "0".repeat(46) + "_demo");
+            result.setTo(input.getTo());
+            result.setAmount(input.getAmount());
+            result.setToken(input.getToken());
+            result.setNetwork(input.getNetwork());
+            result.setExplorerUrl(McpConstants.getTonExplorerTxUrl(network, demoTxHash));
+            result.setDemoMode(true);
+
+            return textResult(formatTonPaymentResult(result));
+        }
+
+        // Real transaction would go here
+        return errorResult("Real TON transactions require full implementation. Use demo mode to test.");
+    }
+
+    /**
+     * Generates a demo TON transaction hash.
+     */
+    private static String generateDemoTonTxHash() {
+        String uuid = UUID.randomUUID().toString().replace("-", "");
+        return "demo_" + uuid + "_ton";
+    }
+
+    /**
+     * Formats TON balance result.
+     */
+    private static String formatTonBalanceResult(NetworkBalance result) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("## TON Balance on ").append(result.getNetwork()).append("\n\n");
+
+        if (result.getError() != null) {
+            sb.append("Error: ").append(result.getError()).append("\n");
+            return sb.toString();
+        }
+
+        BalanceInfo nativeBalance = result.getNativeBalance();
+        if (nativeBalance != null) {
+            sb.append("**Native (").append(nativeBalance.getToken()).append("):** ")
+              .append(nativeBalance.getBalance()).append(" TON\n\n");
+        }
+
+        List<BalanceInfo> tokens = result.getTokens();
+        if (tokens != null && !tokens.isEmpty()) {
+            sb.append("**Jettons:**\n");
+            for (BalanceInfo token : tokens) {
+                sb.append("- ").append(token.getToken()).append(": ")
+                  .append(token.getBalance()).append("\n");
+            }
+        } else {
+            sb.append("No jetton balances found.\n");
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Formats TON payment result.
+     */
+    private static String formatTonPaymentResult(PaymentResult result) {
+        StringBuilder sb = new StringBuilder();
+
+        if (result.isDemoMode()) {
+            sb.append("## TON Payment (Demo Mode)\n\n");
+            sb.append("⚠️ This is a simulated transaction. No actual tokens were transferred.\n\n");
+        } else {
+            sb.append("## TON Payment Successful\n\n");
         }
 
         sb.append("- **Amount:** ").append(result.getAmount()).append(" ").append(result.getToken()).append("\n");

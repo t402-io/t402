@@ -135,6 +135,34 @@ public final class McpTypes {
         }
     }
 
+    /**
+     * Supported TON networks.
+     */
+    public enum SupportedTonNetwork {
+        @JsonProperty("ton-mainnet") TON_MAINNET("ton-mainnet", "ton:mainnet"),
+        @JsonProperty("ton-testnet") TON_TESTNET("ton-testnet", "ton:testnet");
+
+        private final String value;
+        private final String caip2;
+
+        SupportedTonNetwork(String value, String caip2) {
+            this.value = value;
+            this.caip2 = caip2;
+        }
+
+        public String getValue() { return value; }
+        public String getCaip2() { return caip2; }
+
+        public static SupportedTonNetwork fromString(String value) {
+            for (SupportedTonNetwork network : values()) {
+                if (network.value.equalsIgnoreCase(value) || network.caip2.equals(value)) {
+                    return network;
+                }
+            }
+            return null;
+        }
+    }
+
     // ===== JSON-RPC Types =====
 
     /**
@@ -523,6 +551,46 @@ public final class McpTypes {
      */
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class PaySvmInput {
+        private String to;
+        private String amount;
+        private String token;
+        private String network;
+
+        public String getTo() { return to; }
+        public void setTo(String to) { this.to = to; }
+
+        public String getAmount() { return amount; }
+        public void setAmount(String amount) { this.amount = amount; }
+
+        public String getToken() { return token; }
+        public void setToken(String token) { this.token = token; }
+
+        public String getNetwork() { return network; }
+        public void setNetwork(String network) { this.network = network; }
+    }
+
+    // ===== TON Tool Input Types =====
+
+    /**
+     * Input for t402/getTonBalance.
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class GetTonBalanceInput {
+        private String address;
+        private String network;
+
+        public String getAddress() { return address; }
+        public void setAddress(String address) { this.address = address; }
+
+        public String getNetwork() { return network; }
+        public void setNetwork(String network) { this.network = network; }
+    }
+
+    /**
+     * Input for t402/payTon.
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PayTonInput {
         private String to;
         private String amount;
         private String token;
