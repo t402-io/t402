@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: facilitator
+  labels:
+    topology.kubernetes.io/region: us-east-1
+spec:
+  template:
+    metadata:
+      labels:
+        topology.kubernetes.io/region: us-east-1
+    spec:
+      nodeSelector:
+        topology.kubernetes.io/region: us-east-1
+      tolerations:
+        - key: "node.kubernetes.io/region"
+          operator: "Equal"
+          value: "us-east-1"
+          effect: "NoSchedule"

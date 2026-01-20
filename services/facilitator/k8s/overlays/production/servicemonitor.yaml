@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: facilitator
+  namespace: t402
+  labels:
+    app.kubernetes.io/name: facilitator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: facilitator
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s
+  namespaceSelector:
+    matchNames:
+      - t402

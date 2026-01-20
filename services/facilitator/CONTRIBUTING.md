@@ -47,7 +47,11 @@ services/facilitator/
 │   ├── dashboards/
 │   └── ROLLBACK.md
 │
-├── k8s/                     # Kubernetes manifests (WIP)
+├── k8s/                     # Kubernetes manifests
+│   ├── base/                # Common resources (Kustomize)
+│   └── overlays/            # Environment-specific configs
+│       ├── staging/
+│       └── production/
 │
 ├── docker-compose.yml       # Local development stack
 ├── Dockerfile               # Container build
@@ -320,13 +324,20 @@ docker-compose --profile monitoring up -d
 
 ### Kubernetes
 
-Kubernetes manifests are in the `k8s/` directory:
+Kubernetes manifests use Kustomize for multi-environment deployment:
 
-- `deployment.yaml` - Service deployment
-- `service.yaml` - ClusterIP service
-- `ingress.yaml` - Ingress configuration
-- `configmap.yaml` - Configuration
-- `secret.yaml` - Secrets template
+```bash
+# Validate manifests
+kubectl kustomize k8s/overlays/staging
+
+# Deploy to staging
+kubectl apply -k k8s/overlays/staging
+
+# Deploy to production
+kubectl apply -k k8s/overlays/production
+```
+
+See [INFRASTRUCTURE.md](INFRASTRUCTURE.md) for multi-region architecture and [DISASTER_RECOVERY.md](DISASTER_RECOVERY.md) for recovery procedures.
 
 ### Monitoring
 

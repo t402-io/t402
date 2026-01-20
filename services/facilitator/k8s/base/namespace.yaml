@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: t402
+  labels:
+    app.kubernetes.io/name: t402
+    app.kubernetes.io/component: facilitator
