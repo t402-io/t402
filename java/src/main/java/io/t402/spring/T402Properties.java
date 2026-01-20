@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Configuration properties for T402 payment integration.
  *
- * <h3>Basic Configuration</h3>
+ * <h3>EVM Configuration (Base, Ethereum, etc.)</h3>
  * <pre>{@code
  * t402:
  *   enabled: true
@@ -18,6 +18,16 @@ import java.util.List;
  *   network: eip155:8453
  *   pay-to: "0xYourWalletAddress"
  *   asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+ * }</pre>
+ *
+ * <h3>SVM Configuration (Solana)</h3>
+ * <pre>{@code
+ * t402:
+ *   enabled: true
+ *   facilitator-url: https://facilitator.t402.io
+ *   network: solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp  # mainnet
+ *   pay-to: "YourSolanaWalletAddress"
+ *   asset: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"  # USDC on Solana
  * }</pre>
  *
  * <h3>Route-Based Pricing</h3>
@@ -40,6 +50,14 @@ import java.util.List;
  *   <li>{@code "10000"} - Atomic units (10000 = 0.01 USDC with 6 decimals)</li>
  *   <li>{@code "$0.01"} - Dollar notation (automatically converted)</li>
  *   <li>{@code "0.01"} - Decimal notation (automatically converted)</li>
+ * </ul>
+ *
+ * <h3>Supported Networks</h3>
+ * <ul>
+ *   <li>EVM: {@code eip155:1} (Ethereum), {@code eip155:8453} (Base), {@code eip155:42161} (Arbitrum)</li>
+ *   <li>SVM: {@code solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp} (mainnet), {@code solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1} (devnet)</li>
+ *   <li>TON: {@code ton:-239} (mainnet)</li>
+ *   <li>TRON: {@code tron:0x2b6653dc} (mainnet)</li>
  * </ul>
  *
  * @see RouteConfig
