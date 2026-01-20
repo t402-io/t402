@@ -1,5 +1,6 @@
-import type { PaymentRequired } from "../types";
+import type { PaymentRequired, PaywallTheme } from "../types";
 import { getEvmTemplate } from "./template-loader";
+import { generateThemeScript } from "../themeUtils";
 
 /**
  * Escapes a string for safe injection into JavaScript string literals
@@ -42,6 +43,7 @@ interface EvmPaywallOptions {
   testnet: boolean;
   appName?: string;
   appLogo?: string;
+  theme?: PaywallTheme;
 }
 
 /**
@@ -63,13 +65,14 @@ export function getEvmPaywallHtml(options: EvmPaywallOptions): string {
     return `<!DOCTYPE html><html><body><h1>EVM Paywall (run pnpm build:paywall to generate full template)</h1></body></html>`;
   }
 
-  const { amount, testnet, paymentRequired, currentUrl, appName, appLogo } = options;
+  const { amount, testnet, paymentRequired, currentUrl, appName, appLogo, theme } = options;
 
   const logOnTestnet = testnet
     ? "console.log('EVM Payment required initialized:', window.t402);"
     : "";
 
   const config = getChainConfig();
+  const themeScript = generateThemeScript(theme);
 
   const configScript = `
   <script>
@@ -87,5 +90,5 @@ export function getEvmPaywallHtml(options: EvmPaywallOptions): string {
     ${logOnTestnet}
   </script>`;
 
-  return EVM_PAYWALL_TEMPLATE.replace("</head>", `${configScript}\n</head>`);
+  return EVM_PAYWALL_TEMPLATE.replace("</head>", `${themeScript}${configScript}\n</head>`);
 }
