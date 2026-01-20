@@ -59,8 +59,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "pnpm"
-          cache-dependency-path: docs/internal/typescript/pnpm-lock.yaml
+          # cache disabled due to submodule path resolution issues
 
       - name: Install dependencies
         working-directory: ${{ env.WORKING_DIR }}
@@ -98,8 +97,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "pnpm"
-          cache-dependency-path: docs/internal/typescript/pnpm-lock.yaml
+          # cache disabled due to submodule path resolution issues
 
       - name: Install dependencies
         working-directory: ${{ env.WORKING_DIR }}
@@ -154,8 +152,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "pnpm"
-          cache-dependency-path: docs/internal/typescript/pnpm-lock.yaml
+          # cache disabled due to submodule path resolution issues
           registry-url: "https://registry.npmjs.org"
 
       - name: Download build artifacts
