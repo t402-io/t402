@@ -1,5 +1,6 @@
-import type { PaymentRequired } from "../types";
+import type { PaymentRequired, PaywallTheme } from "../types";
 import { getTronTemplate } from "./template-loader";
+import { generateThemeScript } from "../themeUtils";
 
 /**
  * Escapes a string for safe injection into JavaScript string literals
@@ -24,6 +25,7 @@ interface TronPaywallOptions {
   testnet: boolean;
   appName?: string;
   appLogo?: string;
+  theme?: PaywallTheme;
 }
 
 /**
@@ -45,11 +47,13 @@ export function getTronPaywallHtml(options: TronPaywallOptions): string {
     return `<!DOCTYPE html><html><body><h1>TRON Paywall (run pnpm build:paywall to generate full template)</h1></body></html>`;
   }
 
-  const { amount, testnet, paymentRequired, currentUrl, appName, appLogo } = options;
+  const { amount, testnet, paymentRequired, currentUrl, appName, appLogo, theme } = options;
 
   const logOnTestnet = testnet
     ? "console.log('TRON Payment required initialized:', window.t402);"
     : "";
+
+  const themeScript = generateThemeScript(theme);
 
   const configScript = `
   <script>
@@ -67,5 +71,5 @@ export function getTronPaywallHtml(options: TronPaywallOptions): string {
     ${logOnTestnet}
   </script>`;
 
-  return TRON_PAYWALL_TEMPLATE.replace("</head>", `${configScript}\n</head>`);
+  return TRON_PAYWALL_TEMPLATE.replace("</head>", `${themeScript}${configScript}\n</head>`);
 }

@@ -196,3 +196,49 @@ export function isTestnetNetwork(network: string): boolean {
 
   return false;
 }
+
+/**
+ * Returns an SVG icon element for the given network.
+ * Icons are inline SVG strings for zero external dependencies.
+ *
+ * @param network - The network identifier (CAIP-2 format).
+ * @returns SVG element as a string.
+ */
+export function getNetworkIcon(network: string): string {
+  if (network.startsWith("eip155:")) {
+    const chainId = parseInt(network.split(":")[1]);
+
+    // Base
+    if (chainId === 8453 || chainId === 84532) {
+      return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#0052FF"/><path d="M12 6.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zm0 8.5a3 3 0 110-6 3 3 0 010 6z" fill="white"/></svg>`;
+    }
+
+    // Arbitrum
+    if (chainId === 42161 || chainId === 421614) {
+      return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#213147"/><path d="M15.5 8l-3.5 6-3.5-6h-2l4.5 8h2l4.5-8h-2z" fill="#28A0F0"/><path d="M8.5 8l3.5 6 3.5-6" stroke="#fff" stroke-width="1.5"/></svg>`;
+    }
+
+    // Optimism
+    if (chainId === 10 || chainId === 11155420) {
+      return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#FF0420"/><path d="M8 12a4 4 0 108 0 4 4 0 00-8 0z" fill="white"/></svg>`;
+    }
+
+    // Default Ethereum icon
+    return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#627EEA"/><path d="M12 4v6.5l5.5 2.5L12 4z" fill="white" fill-opacity="0.6"/><path d="M12 4L6.5 13l5.5-2.5V4z" fill="white"/><path d="M12 16.5v4L17.5 14 12 16.5z" fill="white" fill-opacity="0.6"/><path d="M12 20.5v-4L6.5 14l5.5 6.5z" fill="white"/></svg>`;
+  }
+
+  if (network.startsWith("solana:")) {
+    return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="url(#solana-gradient)"/><defs><linearGradient id="solana-gradient" x1="4" y1="4" x2="20" y2="20"><stop stop-color="#00FFA3"/><stop offset="1" stop-color="#DC1FFF"/></linearGradient></defs><path d="M7 15.5h8l2-2H7l-2 2h2zm0-3h10l-2-2H7l2 2h-2zm10-3H7l2 2h10l-2-2z" fill="white"/></svg>`;
+  }
+
+  if (network.startsWith("ton:")) {
+    return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#0088CC"/><path d="M12 6l-5 10h3l2-4 2 4h3l-5-10z" fill="white"/></svg>`;
+  }
+
+  if (network.startsWith("tron:")) {
+    return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#FF0013"/><path d="M8 8l4 8 4-8H8z" fill="white"/></svg>`;
+  }
+
+  // Default icon
+  return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#6B7280"/><path d="M12 7v10M7 12h10" stroke="white" stroke-width="2"/></svg>`;
+}

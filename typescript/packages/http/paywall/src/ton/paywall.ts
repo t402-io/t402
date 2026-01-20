@@ -1,5 +1,6 @@
-import type { PaymentRequired } from "../types";
+import type { PaymentRequired, PaywallTheme } from "../types";
 import { getTonTemplate } from "./template-loader";
+import { generateThemeScript } from "../themeUtils";
 
 /**
  * Escapes a string for safe injection into JavaScript string literals
@@ -25,6 +26,7 @@ interface TonPaywallOptions {
   appName?: string;
   appLogo?: string;
   tonConnectManifestUrl?: string;
+  theme?: PaywallTheme;
 }
 
 /**
@@ -55,6 +57,7 @@ export function getTonPaywallHtml(options: TonPaywallOptions): string {
     appName,
     appLogo,
     tonConnectManifestUrl,
+    theme,
   } = options;
 
   const logOnTestnet = testnet
@@ -62,6 +65,7 @@ export function getTonPaywallHtml(options: TonPaywallOptions): string {
     : "";
 
   const manifestUrl = tonConnectManifestUrl || "https://t402.io/tonconnect-manifest.json";
+  const themeScript = generateThemeScript(theme);
 
   const configScript = `
   <script>
@@ -80,5 +84,5 @@ export function getTonPaywallHtml(options: TonPaywallOptions): string {
     ${logOnTestnet}
   </script>`;
 
-  return TON_PAYWALL_TEMPLATE.replace("</head>", `${configScript}\n</head>`);
+  return TON_PAYWALL_TEMPLATE.replace("</head>", `${themeScript}${configScript}\n</head>`);
 }

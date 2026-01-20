@@ -47,6 +47,7 @@ export const tonPaywall: PaywallNetworkHandler = {
       testnet: config.testnet ?? true,
       appName: config.appName,
       appLogo: config.appLogo,
+      theme: config.theme,
     });
   },
 };
