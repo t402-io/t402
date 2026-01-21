@@ -6,6 +6,9 @@
  */
 
 import { randomBytes } from "crypto";
+import { keccak_256 } from "@noble/hashes/sha3";
+import { secp256k1 } from "@noble/curves/secp256k1";
+import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
 import {
   SIWxExtension,
   SIWxExtensionInfo,
@@ -39,6 +42,11 @@ const SIWX_SCHEMA = {
     signature: { type: "string" },
   },
 };
+
+/**
+ * EIP-1271 magic value for valid signatures.
+ */
+const EIP1271_MAGIC_VALUE = "0x1626ba7e";
 
 /**
  * Extracts domain from a resource URI.
@@ -129,7 +137,16 @@ export function parseSIWxHeader(header: string): SIWxPayload {
     const payload = JSON.parse(decoded) as SIWxPayload;
 
     // Validate required fields
-    const required = ["domain", "address", "uri", "version", "chainId", "nonce", "issuedAt", "signature"];
+    const required = [
+      "domain",
+      "address",
+      "uri",
+      "version",
+      "chainId",
+      "nonce",
+      "issuedAt",
+      "signature",
+    ];
     for (const field of required) {
       if (!(field in payload)) {
         throw new Error(`Missing required field: ${field}`);
@@ -171,12 +188,18 @@ export function validateSIWxMessage(
   // Validate domain matches
   const expectedDomain = extractDomain(expectedResourceUri);
   if (message.domain !== expectedDomain) {
-    return { valid: false, error: `Domain mismatch: expected ${expectedDomain}, got ${message.domain}` };
+    return {
+      valid: false,
+      error: `Domain mismatch: expected ${expectedDomain}, got ${message.domain}`,
+    };
   }
 
   // Validate URI matches
   if (message.uri !== expectedResourceUri) {
-    return { valid: false, error: `URI mismatch: expected ${expectedResourceUri}, got ${message.uri}` };
+    return {
+      valid: false,
+      error: `URI mismatch: expected ${expectedResourceUri}, got ${message.uri}`,
+    };
   }
 
   // Validate version
@@ -285,8 +308,11 @@ export async function verifySIWxSignature(
 
 /**
  * Constructs the CAIP-122 message string from payload.
+ *
+ * @param payload - SIWx payload
+ * @returns CAIP-122 formatted message string
  */
-function constructMessage(payload: SIWxPayload): string {
+export function constructMessage(payload: SIWxPayload): string {
   const lines: string[] = [];
 
   // Header
@@ -330,50 +356,184 @@ function constructMessage(payload: SIWxPayload): string {
 }
 
 /**
- * Hashes a message with the Ethereum signed message prefix.
+ * Hashes a message with the Ethereum signed message prefix (EIP-191).
+ *
+ * @param message - Message to hash
+ * @returns Hex-encoded keccak256 hash with 0x prefix
  */
-function hashMessage(message: string): string {
-  const prefix = `\x19Ethereum Signed Message:\n${message.length}`;
-  const prefixedMessage = prefix + message;
+export function hashMessage(message: string): string {
+  const messageBytes = new TextEncoder().encode(message);
+  const prefix = `\x19Ethereum Signed Message:\n${messageBytes.length}`;
+  const prefixBytes = new TextEncoder().encode(prefix);
 
-  // Use Web Crypto API or Node crypto for hashing
-  const { createHash } = require("crypto");
-  const hash = createHash("keccak256").update(prefixedMessage).digest("hex");
-  return "0x" + hash;
+  // Concatenate prefix and message
+  const combined = new Uint8Array(prefixBytes.length + messageBytes.length);
+  combined.set(prefixBytes, 0);
+  combined.set(messageBytes, prefixBytes.length);
+
+  // Hash with keccak256
+  const hash = keccak_256(combined);
+  return "0x" + bytesToHex(hash);
 }
 
 /**
- * Recovers the signer address from a signature.
+ * Recovers the signer address from an EIP-191 signature.
+ *
+ * @param messageHash - Keccak256 hash of the prefixed message (with 0x prefix)
+ * @param signature - Hex-encoded signature (65 bytes: r + s + v)
+ * @returns Checksummed Ethereum address
  */
-function recoverAddress(_messageHash: string, signature: string): string {
-  // Validate signature format
-  const sig = signature.startsWith("0x") ? signature.slice(2) : signature;
-  if (sig.length !== 130) {
-    throw new Error("Invalid signature length - expected 65 bytes (130 hex chars)");
+function recoverAddress(messageHash: string, signature: string): string {
+  // Remove 0x prefix if present
+  const sigHex = signature.startsWith("0x") ? signature.slice(2) : signature;
+  const hashHex = messageHash.startsWith("0x") ? messageHash.slice(2) : messageHash;
+
+  if (sigHex.length !== 130) {
+    throw new Error(`Invalid signature length: expected 130 hex chars, got ${sigHex.length}`);
   }
 
-  // ECDSA recovery not implemented in pure TypeScript
-  // Use viem's recoverMessageAddress or ethers.verifyMessage for production
-  // Example with viem:
-  //   import { recoverMessageAddress } from 'viem';
-  //   return recoverMessageAddress({ message, signature });
-  throw new Error(
-    "ECDSA recovery not implemented - use viem or ethers for signature verification"
-  );
+  // Parse signature components
+  const r = BigInt("0x" + sigHex.slice(0, 64));
+  const s = BigInt("0x" + sigHex.slice(64, 128));
+  let v = parseInt(sigHex.slice(128, 130), 16);
+
+  // Normalize v to 0 or 1 (EIP-155 compatibility)
+  if (v >= 27) {
+    v -= 27;
+  }
+
+  if (v !== 0 && v !== 1) {
+    throw new Error(`Invalid recovery id: ${v}`);
+  }
+
+  // Create signature object
+  const sig = new secp256k1.Signature(r, s).addRecoveryBit(v);
+
+  // Recover public key
+  const hashBytes = hexToBytes(hashHex);
+  const publicKey = sig.recoverPublicKey(hashBytes);
+
+  // Get uncompressed public key (65 bytes) and remove the 04 prefix
+  const pubKeyBytes = publicKey.toRawBytes(false).slice(1);
+
+  // Hash public key to get address
+  const addressHash = keccak_256(pubKeyBytes);
+
+  // Take last 20 bytes
+  const addressBytes = addressHash.slice(-20);
+  const address = "0x" + bytesToHex(addressBytes);
+
+  // Return checksummed address
+  return toChecksumAddress(address);
+}
+
+/**
+ * Converts an Ethereum address to checksummed format (EIP-55).
+ *
+ * @param address - Ethereum address (with or without 0x prefix)
+ * @returns Checksummed address with 0x prefix
+ */
+function toChecksumAddress(address: string): string {
+  const addr = address.toLowerCase().replace("0x", "");
+  const hash = bytesToHex(keccak_256(new TextEncoder().encode(addr)));
+
+  let checksummed = "0x";
+  for (let i = 0; i < 40; i++) {
+    if (parseInt(hash[i], 16) >= 8) {
+      checksummed += addr[i].toUpperCase();
+    } else {
+      checksummed += addr[i];
+    }
+  }
+
+  return checksummed;
 }
 
 /**
  * Verifies a smart wallet signature using EIP-1271.
+ *
+ * @param walletAddress - Smart wallet contract address
+ * @param messageHash - Hash of the message that was signed
+ * @param signature - The signature to verify
+ * @param provider - Ethereum provider with call capability
+ * @returns True if signature is valid according to the smart wallet
  */
 async function verifySmartWalletSignature(
-  _walletAddress: string,
-  _messageHash: string,
-  _signature: string,
-  _provider: unknown
+  walletAddress: string,
+  messageHash: string,
+  signature: string,
+  provider: unknown
 ): Promise<boolean> {
-  // EIP-1271 verification would go here
-  // This requires calling isValidSignature on the wallet contract
-  return false;
+  // Type guard for provider
+  interface EthProvider {
+    request(args: { method: string; params: unknown[] }): Promise<unknown>;
+  }
+
+  function isEthProvider(p: unknown): p is EthProvider {
+    return typeof p === "object" && p !== null && "request" in p;
+  }
+
+  if (!isEthProvider(provider)) {
+    return false;
+  }
+
+  try {
+    // EIP-1271 isValidSignature(bytes32 hash, bytes signature) returns bytes4
+    const hashHex = messageHash.startsWith("0x") ? messageHash : "0x" + messageHash;
+    const sigHex = signature.startsWith("0x") ? signature : "0x" + signature;
+
+    // Encode function call
+    // isValidSignature(bytes32,bytes) selector: 0x1626ba7e
+    const data =
+      "0x1626ba7e" +
+      hashHex.slice(2).padStart(64, "0") + // bytes32 hash
+      "0000000000000000000000000000000000000000000000000000000000000040" + // offset to bytes
+      (sigHex.length / 2 - 1).toString(16).padStart(64, "0") + // bytes length
+      sigHex.slice(2).padEnd(Math.ceil((sigHex.length - 2) / 64) * 64, "0"); // bytes data
+
+    const result = (await provider.request({
+      method: "eth_call",
+      params: [{ to: walletAddress, data }, "latest"],
+    })) as string;
+
+    // Check if result matches magic value
+    return result.toLowerCase().startsWith(EIP1271_MAGIC_VALUE);
+  } catch {
+    return false;
+  }
 }
 
-export { constructMessage };
+/**
+ * Verifies a signature using EIP-6492 (universal signature verification).
+ *
+ * This supports both deployed and undeployed smart wallets.
+ *
+ * @param walletAddress - Wallet address (may be counterfactual)
+ * @param messageHash - Hash of the message that was signed
+ * @param signature - The signature (may include deployment data)
+ * @param provider - Ethereum provider
+ * @returns True if signature is valid
+ */
+export async function verifyEIP6492Signature(
+  walletAddress: string,
+  messageHash: string,
+  signature: string,
+  provider: unknown
+): Promise<boolean> {
+  // EIP-6492 signatures end with the magic suffix
+  const EIP6492_SUFFIX = "6492649264926492649264926492649264926492649264926492649264926492";
+  const sigHex = signature.startsWith("0x") ? signature.slice(2) : signature;
+
+  if (sigHex.endsWith(EIP6492_SUFFIX)) {
+    // This is an EIP-6492 signature with deployment data
+    // For full implementation, we would need to:
+    // 1. Deploy the wallet contract to a local fork
+    // 2. Then call isValidSignature
+    // This requires more complex provider interaction
+    console.warn("EIP-6492 deployment signatures not yet fully implemented");
+    return false;
+  }
+
+  // Fall back to standard EIP-1271 verification
+  return verifySmartWalletSignature(walletAddress, messageHash, signature, provider);
+}

@@ -156,12 +156,21 @@ importers:
 
   packages/extensions:
     dependencies:
+      '@noble/curves':
+        specifier: ^1.8.1
+        version: 1.9.7
+      '@noble/hashes':
+        specifier: ^1.7.1
+        version: 1.8.0
       '@t402/core':
         specifier: workspace:*
         version: link:../core
       ajv:
         specifier: ^8.17.1
         version: 8.17.1
+      viem:
+        specifier: ^2.44.2
+        version: 2.44.2(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
       zod:
         specifier: ^3.24.2
         version: 3.25.76
