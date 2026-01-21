@@ -71,6 +71,69 @@ export function createSIWxMessage(serverInfo: SIWxExtensionInfo, address: string
 }
 
 /**
+ * Creates EIP-712 typed data for SIWx signing.
+ *
+ * @param serverInfo - Extension info from server
+ * @param address - Wallet address signing the message
+ * @returns EIP-712 typed data object
+ */
+export function createSIWxTypedData(
+  serverInfo: SIWxExtensionInfo,
+  address: string
+): {
+  domain: {
+    name: string;
+    version: string;
+    chainId: number;
+  };
+  types: {
+    SIWx: Array<{ name: string; type: string }>;
+  };
+  primaryType: "SIWx";
+  message: Record<string, unknown>;
+} {
+  // Extract chain ID number from CAIP-2 format (e.g., "eip155:8453" -> 8453)
+  const chainIdParts = serverInfo.chainId.split(":");
+  const chainIdNum =
+    chainIdParts.length > 1 ? parseInt(chainIdParts[1], 10) : parseInt(chainIdParts[0], 10);
+
+  return {
+    domain: {
+      name: serverInfo.domain,
+      version: serverInfo.version,
+      chainId: chainIdNum,
+    },
+    types: {
+      SIWx: [
+        { name: "domain", type: "string" },
+        { name: "address", type: "address" },
+        { name: "statement", type: "string" },
+        { name: "uri", type: "string" },
+        { name: "version", type: "string" },
+        { name: "chainId", type: "string" },
+        { name: "nonce", type: "string" },
+        { name: "issuedAt", type: "string" },
+        { name: "expirationTime", type: "string" },
+        { name: "resources", type: "string[]" },
+      ],
+    },
+    primaryType: "SIWx",
+    message: {
+      domain: serverInfo.domain,
+      address,
+      statement: serverInfo.statement || "",
+      uri: serverInfo.uri,
+      version: serverInfo.version,
+      chainId: serverInfo.chainId,
+      nonce: serverInfo.nonce,
+      issuedAt: serverInfo.issuedAt,
+      expirationTime: serverInfo.expirationTime || "",
+      resources: serverInfo.resources || [],
+    },
+  };
+}
+
+/**
  * Signs a SIWx message using the provided signer.
  *
  * @param message - CAIP-122 formatted message to sign
@@ -88,7 +151,7 @@ export function createSIWxMessage(serverInfo: SIWxExtensionInfo, address: string
 export async function signSIWxMessage(
   message: string,
   signer: SIWxSigner,
-  options?: { signatureScheme?: SignatureScheme }
+  options?: { signatureScheme?: SignatureScheme; serverInfo?: SIWxExtensionInfo }
 ): Promise<string> {
   const scheme = options?.signatureScheme || "eip191";
 
@@ -103,9 +166,11 @@ export async function signSIWxMessage(
       if (!signer.signTypedData) {
         throw new Error("Signer does not support signTypedData (EIP-712)");
       }
-      // EIP-712 requires structured data, not a plain message
-      // This would need a typed data wrapper
-      throw new Error("EIP-712 signing not yet implemented");
+      if (!options?.serverInfo) {
+        throw new Error("EIP-712 signing requires serverInfo in options");
+      }
+      const typedData = createSIWxTypedData(options.serverInfo, signer.address);
+      return signer.signTypedData(typedData);
 
     case "eip1271":
     case "eip6492":
@@ -117,8 +182,15 @@ export async function signSIWxMessage(
       return signer.signMessage(message);
 
     case "siws":
+      // Sign-In With Solana uses Ed25519 signatures
+      if (!signer.signMessage) {
+        throw new Error("Signer does not support signing");
+      }
+      // Solana wallets typically implement signMessage that handles the encoding
+      return signer.signMessage(message);
+
     case "sep10":
-      throw new Error(`Signature scheme ${scheme} not yet implemented`);
+      throw new Error("Stellar SEP-10 signing not yet implemented");
 
     default:
       throw new Error(`Unknown signature scheme: ${scheme}`);
@@ -162,6 +234,7 @@ export async function createSIWxPayload(
   // Sign the message
   const signature = await signSIWxMessage(message, signer, {
     signatureScheme: info.signatureScheme,
+    serverInfo: info,
   });
 
   // Assemble the complete payload
