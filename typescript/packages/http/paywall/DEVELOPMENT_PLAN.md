@@ -227,7 +227,7 @@ interface PaywallConfig {
 - [x] QR code payment flow
 
 ### Phase 3
-- [ ] Stacks paywall
+- [x] Stacks paywall (Leather/Xverse wallet support)
 - [ ] Cosmos/Noble paywall
 - [ ] Near paywall
 
