@@ -68,13 +68,16 @@ export {
   parseSIWxHeader,
   validateSIWxMessage,
   verifySIWxSignature,
+  verifyEIP6492Signature,
   constructMessage,
+  hashMessage,
 } from "./server.js";
 
 // Client exports
 export {
   encodeSIWxHeader,
   createSIWxMessage,
+  createSIWxTypedData,
   signSIWxMessage,
   createSIWxPayload,
   SIWX_EXTENSION_KEY,
