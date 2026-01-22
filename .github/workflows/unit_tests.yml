@@ -150,10 +150,13 @@ jobs:
         working-directory: ./contracts
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Initialize contracts submodules
         run: |
-          git submodule update --init contracts/lib/forge-std
+          git submodule init contracts/lib/forge-std
+          git submodule update --depth 1 contracts/lib/forge-std
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
