@@ -83,9 +83,12 @@ t402/
 │       └── src/t402/
 ├── java/                    # Java SDK
 │   └── t402/
-├── services/facilitator/    # Facilitator service (Go)
-├── docs/                    # Documentation
-│   └── internal/            # [SUBMODULE:PRIVATE] Internal documents
+├── services/                # Deployable services
+│   ├── site/                # t402.io marketing website
+│   ├── docs/                # docs.t402.io documentation
+│   │   └── internal/        # [SUBMODULE:PRIVATE] Internal documents
+│   ├── facilitator/         # facilitator.t402.io API service
+│   └── grafana/             # grafana.facilitator.t402.io monitoring
 ├── specs/                   # Protocol specifications
 │   ├── t402-specification-v2.md  # Current spec
 │   ├── schemes/             # Payment scheme specs
@@ -664,7 +667,7 @@ git submodule update --remote
 
 | Submodule | Repository | Visibility | Description |
 |-----------|------------|------------|-------------|
-| `typescript/site/` | t402-io/t402-site | Public | Marketing website (t402.io) |
-| `docs/internal/` | t402-io/t402-internal | **Private** | Internal documents (patent strategy, etc.) |
+| `contracts/lib/forge-std` | foundry-rs/forge-std | Public | Foundry standard library |
+| `services/docs/internal/` | t402-io/t402-internal | **Private** | Internal documents (patent strategy, etc.) |
 
-**Note**: `docs/internal/` requires authorized access. Contributors without access can still work on the main project.
+**Note**: `services/docs/internal/` requires authorized access. Contributors without access can still work on the main project.

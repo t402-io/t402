@@ -244,7 +244,7 @@ go/mechanisms/aptos/*_test.go
 
 ### 5.3 Archive Management
 
-**Files to Archive** (move to docs/archived-plans/):
+**Files to Archive** (move to services/docs/archived-plans/):
 - [x] DEVELOPMENT_PLAN.md (old Phase 5 plan)
 - [x] DOCUMENTATION_UPDATE_PLAN.md
 - [x] PAYWALL_DEVELOPMENT_PLAN.md
