@@ -121,8 +121,18 @@ export const USDC_ADDRESSES: Record<string, Address> = {
 export const USDT_LEGACY_ADDRESSES: Record<string, Address> = {
   // Ethereum Mainnet
   "eip155:1": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-  // Polygon Mainnet
+  // Polygon Mainnet (native USDT, not USDT0)
   "eip155:137": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+  // BNB Chain (BSC) - BEP-20 USDT
+  "eip155:56": "0x55d398326f99059fF775485246999027B3197955",
+  // Avalanche C-Chain
+  "eip155:43114": "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7",
+  // Fantom
+  "eip155:250": "0x049d68029688eabf473097a2fc38ef61633a3c7a",
+  // Celo
+  "eip155:42220": "0x48065fbBE25f71C9282ddf5e1cD6D6A887483D5e",
+  // Kaia (formerly Klaytn)
+  "eip155:8217": "0xcee8faf64bb97a73bb51e115aa89c17ffa8dd167",
 };
 
 /**
@@ -461,6 +471,73 @@ export const TOKEN_REGISTRY: NetworkTokenRegistry = {
       decimals: 6,
       tokenType: "eip3009",
       priority: 1,
+    },
+  },
+
+  // === Legacy USDT Networks (no EIP-3009 support) ===
+
+  // BNB Chain (BSC) - BEP-20 USDT
+  "eip155:56": {
+    USDT: {
+      address: USDT_LEGACY_ADDRESSES["eip155:56"],
+      symbol: "USDT",
+      name: "Tether USD",
+      version: "1",
+      decimals: 18, // BSC USDT uses 18 decimals
+      tokenType: "legacy",
+      priority: 10,
+    },
+  },
+
+  // Avalanche C-Chain
+  "eip155:43114": {
+    USDT: {
+      address: USDT_LEGACY_ADDRESSES["eip155:43114"],
+      symbol: "USDT",
+      name: "TetherToken",
+      version: "1",
+      decimals: 6,
+      tokenType: "legacy",
+      priority: 10,
+    },
+  },
+
+  // Fantom
+  "eip155:250": {
+    USDT: {
+      address: USDT_LEGACY_ADDRESSES["eip155:250"],
+      symbol: "USDT",
+      name: "Frapped USDT",
+      version: "1",
+      decimals: 6,
+      tokenType: "legacy",
+      priority: 10,
+    },
+  },
+
+  // Celo
+  "eip155:42220": {
+    USDT: {
+      address: USDT_LEGACY_ADDRESSES["eip155:42220"],
+      symbol: "USDT",
+      name: "Tether USD",
+      version: "1",
+      decimals: 18,
+      tokenType: "legacy",
+      priority: 10,
+    },
+  },
+
+  // Kaia (formerly Klaytn)
+  "eip155:8217": {
+    USDT: {
+      address: USDT_LEGACY_ADDRESSES["eip155:8217"],
+      symbol: "USDT",
+      name: "Tether USD",
+      version: "1",
+      decimals: 6,
+      tokenType: "legacy",
+      priority: 10,
     },
   },
 };
