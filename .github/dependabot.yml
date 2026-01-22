@@ -2,7 +2,7 @@ version: 2
 updates:
   # TypeScript/npm packages
   - package-ecosystem: "npm"
-    directory: "/typescript"
+    directory: "/sdks/typescript"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -22,7 +22,7 @@ updates:
 
   # Go modules
   - package-ecosystem: "gomod"
-    directory: "/go"
+    directory: "/sdks/go"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -42,7 +42,7 @@ updates:
 
   # Python packages
   - package-ecosystem: "pip"
-    directory: "/python"
+    directory: "/sdks/python"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -62,7 +62,7 @@ updates:
 
   # Java/Maven packages
   - package-ecosystem: "maven"
-    directory: "/java"
+    directory: "/sdks/java"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -113,7 +113,7 @@ updates:
 
   # Documentation site (Nextra/npm)
   - package-ecosystem: "npm"
-    directory: "/docs"
+    directory: "/services/docs"
     schedule:
       interval: "weekly"
       day: "monday"
