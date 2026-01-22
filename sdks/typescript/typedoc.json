@@ -26,7 +26,7 @@
   "entryPointStrategy": "resolve",
   "out": "api-docs",
   "name": "T402 API Reference",
-  "readme": "../README.md",
+  "readme": "./README.md",
   "skipErrorChecking": true,
   "excludePrivate": true,
   "excludeProtected": true,
