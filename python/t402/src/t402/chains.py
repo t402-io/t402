@@ -26,6 +26,13 @@ NETWORK_TO_ID = {
     "hyperevm": "999",
     "megaeth": "4326",
     "corn": "21000000",
+    # Legacy USDT Networks (no EIP-3009 support)
+    "bnb": "56",
+    "bsc": "56",
+    "fantom": "250",
+    "celo": "42220",
+    "kaia": "8217",
+    "klaytn": "8217",
 }
 
 
@@ -271,6 +278,48 @@ KNOWN_TOKENS = {
             "human_name": "usdt0",
             "address": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
             "name": "TetherToken",
+            "decimals": 6,
+            "version": "1",
+        }
+    ],
+    # === Legacy USDT Networks (no EIP-3009 support) ===
+    # BNB Chain (BSC)
+    "56": [
+        {
+            "human_name": "usdt",
+            "address": "0x55d398326f99059fF775485246999027B3197955",
+            "name": "Tether USD",
+            "decimals": 18,
+            "version": "1",
+        }
+    ],
+    # Avalanche C-Chain (already in KNOWN_TOKENS via "43114", add USDT)
+    # Fantom
+    "250": [
+        {
+            "human_name": "usdt",
+            "address": "0x049d68029688eabf473097a2fc38ef61633a3c7a",
+            "name": "Frapped USDT",
+            "decimals": 6,
+            "version": "1",
+        }
+    ],
+    # Celo
+    "42220": [
+        {
+            "human_name": "usdt",
+            "address": "0x48065fbBE25f71C9282ddf5e1cD6D6A887483D5e",
+            "name": "Tether USD",
+            "decimals": 18,
+            "version": "1",
+        }
+    ],
+    # Kaia (formerly Klaytn)
+    "8217": [
+        {
+            "human_name": "usdt",
+            "address": "0xcee8faf64bb97a73bb51e115aa89c17ffa8dd167",
+            "name": "Tether USD",
             "decimals": 6,
             "version": "1",
         }

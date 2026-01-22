@@ -179,6 +179,19 @@ export const corn: Chain = {
   },
 };
 
+// Kaia Mainnet (formerly Klaytn)
+export const kaia: Chain = {
+  id: 8217,
+  name: "Kaia",
+  nativeCurrency: { name: "KAIA", symbol: "KAIA", decimals: 18 },
+  rpcUrls: {
+    default: { http: ["https://public-en.node.kaia.io"] },
+  },
+  blockExplorers: {
+    default: { name: "Kaiascan", url: "https://kaiascan.io" },
+  },
+};
+
 /**
  * Map of chain IDs to chain definitions for commonly used EVM chains.
  * Only includes chains that are likely to be used with T402.
@@ -218,6 +231,8 @@ export const KNOWN_CHAINS: Record<number, Chain> = {
   [hyperEvm.id]: hyperEvm,
   [megaeth.id]: megaeth,
   [corn.id]: corn,
+  // Mainnets - Legacy USDT networks
+  [kaia.id]: kaia,
   // Testnets
   [sepolia.id]: sepolia,
   [baseSepolia.id]: baseSepolia,

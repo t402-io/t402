@@ -27,6 +27,79 @@ type ExactEvmPayloadV1 = ExactEIP3009Payload
 // ExactEvmPayloadV2 is an alias for ExactEIP3009Payload (v2 compatibility)
 type ExactEvmPayloadV2 = ExactEIP3009Payload
 
+// ExactLegacyAuthorization represents the authorization data for exact-legacy scheme
+// Used for legacy tokens without EIP-3009 support (approve + transferFrom pattern)
+type ExactLegacyAuthorization struct {
+	From        string `json:"from"`        // Payer address (hex)
+	To          string `json:"to"`          // Recipient address (hex)
+	Value       string `json:"value"`       // Amount in token units as string
+	ValidAfter  string `json:"validAfter"`  // Unix timestamp as string
+	ValidBefore string `json:"validBefore"` // Unix timestamp as string
+	Nonce       string `json:"nonce"`       // 32-byte nonce as hex string
+	Spender     string `json:"spender"`     // Facilitator address that will call transferFrom
+}
+
+// ExactLegacyPayload represents the exact-legacy payment payload for EVM networks
+// Used for legacy USDT and other tokens without EIP-3009 support
+type ExactLegacyPayload struct {
+	Signature     string                   `json:"signature,omitempty"`
+	Authorization ExactLegacyAuthorization `json:"authorization"`
+}
+
+// ToMap converts an ExactLegacyPayload to a map for JSON marshaling
+func (p *ExactLegacyPayload) ToMap() map[string]interface{} {
+	result := map[string]interface{}{
+		"authorization": map[string]interface{}{
+			"from":        p.Authorization.From,
+			"to":          p.Authorization.To,
+			"value":       p.Authorization.Value,
+			"validAfter":  p.Authorization.ValidAfter,
+			"validBefore": p.Authorization.ValidBefore,
+			"nonce":       p.Authorization.Nonce,
+			"spender":     p.Authorization.Spender,
+		},
+	}
+	if p.Signature != "" {
+		result["signature"] = p.Signature
+	}
+	return result
+}
+
+// LegacyPayloadFromMap creates an ExactLegacyPayload from a map
+func LegacyPayloadFromMap(data map[string]interface{}) (*ExactLegacyPayload, error) {
+	payload := &ExactLegacyPayload{}
+
+	if sig, ok := data["signature"].(string); ok {
+		payload.Signature = sig
+	}
+
+	if auth, ok := data["authorization"].(map[string]interface{}); ok {
+		if from, ok := auth["from"].(string); ok {
+			payload.Authorization.From = from
+		}
+		if to, ok := auth["to"].(string); ok {
+			payload.Authorization.To = to
+		}
+		if value, ok := auth["value"].(string); ok {
+			payload.Authorization.Value = value
+		}
+		if validAfter, ok := auth["validAfter"].(string); ok {
+			payload.Authorization.ValidAfter = validAfter
+		}
+		if validBefore, ok := auth["validBefore"].(string); ok {
+			payload.Authorization.ValidBefore = validBefore
+		}
+		if nonce, ok := auth["nonce"].(string); ok {
+			payload.Authorization.Nonce = nonce
+		}
+		if spender, ok := auth["spender"].(string); ok {
+			payload.Authorization.Spender = spender
+		}
+	}
+
+	return payload, nil
+}
+
 // ClientEvmSigner defines the interface for client-side EVM signing operations
 type ClientEvmSigner interface {
 	// Address returns the signer's Ethereum address

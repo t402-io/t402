@@ -52,6 +52,12 @@ type Config struct {
 	HyperEvmRPC  string
 	MegaEthRPC   string
 	CornRPC      string
+	// Legacy USDT Networks (no EIP-3009 support)
+	BnbRPC       string
+	AvalancheRPC string
+	FantomRPC    string
+	CeloRPC      string
+	KaiaRPC      string
 
 	// TON Configuration
 	TonMnemonic       string
@@ -119,6 +125,12 @@ func Load() *Config {
 		HyperEvmRPC:  getEnv("HYPEREVM_RPC", "https://rpc.hyperevm.xyz"),
 		MegaEthRPC:   getEnv("MEGAETH_RPC", "https://rpc.megaeth.com"),
 		CornRPC:      getEnv("CORN_RPC", "https://rpc.corn.xyz"),
+		// Legacy USDT Networks (no EIP-3009 support)
+		BnbRPC:       getEnv("BNB_RPC", "https://bsc-dataseed.binance.org"),
+		AvalancheRPC: getEnv("AVALANCHE_RPC", "https://api.avax.network/ext/bc/C/rpc"),
+		FantomRPC:    getEnv("FANTOM_RPC", "https://rpc.ftm.tools"),
+		CeloRPC:      getEnv("CELO_RPC", "https://forno.celo.org"),
+		KaiaRPC:      getEnv("KAIA_RPC", "https://public-en.node.kaia.io"),
 
 		// TON Configuration
 		TonMnemonic:       getEnv("TON_MNEMONIC", ""),
