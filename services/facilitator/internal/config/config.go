@@ -77,6 +77,10 @@ type Config struct {
 	// NEAR Configuration
 	NearRPC        string
 	NearTestnetRPC string
+
+	// Aptos Configuration
+	AptosRPC        string
+	AptosTestnetRPC string
 }
 
 // Load loads configuration from environment variables
@@ -154,6 +158,10 @@ func Load() *Config {
 		// NEAR Configuration
 		NearRPC:        getEnv("NEAR_RPC", "https://rpc.mainnet.near.org"),
 		NearTestnetRPC: getEnv("NEAR_TESTNET_RPC", "https://rpc.testnet.near.org"),
+
+		// Aptos Configuration
+		AptosRPC:        getEnv("APTOS_RPC", "https://fullnode.mainnet.aptoslabs.com/v1"),
+		AptosTestnetRPC: getEnv("APTOS_TESTNET_RPC", "https://fullnode.testnet.aptoslabs.com/v1"),
 	}
 }
 
