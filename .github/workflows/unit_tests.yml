@@ -24,21 +24,21 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "pnpm"
-          cache-dependency-path: ./typescript
+          cache-dependency-path: ./sdks/typescript
 
       - name: Install dependencies
-        working-directory: ./typescript
+        working-directory: ./sdks/typescript
         run: pnpm install --frozen-lockfile
 
       - name: Run tests with coverage
-        working-directory: ./typescript
+        working-directory: ./sdks/typescript
         run: pnpm test -- --coverage
 
       - name: Upload coverage to Codecov
         if: matrix.node-version == '20'
         uses: codecov/codecov-action@v5
         with:
-          files: ./typescript/coverage/lcov.info
+          files: ./sdks/typescript/coverage/lcov.info
           flags: typescript
           fail_ci_if_error: false
         env:
@@ -58,21 +58,21 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version: ${{ matrix.go-version }}
-          cache-dependency-path: go/go.sum
+          cache-dependency-path: sdks/go/go.sum
 
       - name: Install dependencies
-        working-directory: ./go
+        working-directory: ./sdks/go
         run: go mod download
 
       - name: Run tests with coverage
-        working-directory: ./go
+        working-directory: ./sdks/go
         run: go test -v -race -coverprofile=coverage.out ./...
 
       - name: Upload coverage to Codecov
         if: matrix.go-version == '1.24'
         uses: codecov/codecov-action@v5
         with:
-          files: ./go/coverage.out
+          files: ./sdks/go/coverage.out
           flags: go
           fail_ci_if_error: false
         env:
@@ -84,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./python/t402
+        working-directory: ./sdks/python/t402
     steps:
       - uses: actions/checkout@v6
 
@@ -92,7 +92,7 @@ jobs:
         uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
-          cache-dependency-glob: "python/t402/uv.lock"
+          cache-dependency-glob: "sdks/python/t402/uv.lock"
 
       - name: Set up Python
         run: uv python install
@@ -106,7 +106,7 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
-          files: ./python/t402/coverage.xml
+          files: ./sdks/python/t402/coverage.xml
           flags: python
           fail_ci_if_error: false
         env:
@@ -118,7 +118,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./java
+        working-directory: ./sdks/java
     steps:
       - uses: actions/checkout@v6
 
@@ -135,7 +135,7 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
-          files: ./java/target/site/jacoco/jacoco.xml
+          files: ./sdks/java/target/site/jacoco/jacoco.xml
           flags: java
           fail_ci_if_error: false
         env:

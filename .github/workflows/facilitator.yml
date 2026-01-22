@@ -5,13 +5,13 @@ on:
     branches: [main]
     paths:
       - 'services/facilitator/**'
-      - 'go/**'
+      - 'sdks/go/**'
       - '.github/workflows/facilitator.yml'
   pull_request:
     branches: [main]
     paths:
       - 'services/facilitator/**'
-      - 'go/**'
+      - 'sdks/go/**'
   workflow_dispatch:
     inputs:
       deploy:

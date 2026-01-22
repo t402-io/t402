@@ -10,9 +10,9 @@ import (
 	"sync"
 	"time"
 
-	t402 "github.com/t402-io/t402/go"
-	t402http "github.com/t402-io/t402/go/http"
-	evm "github.com/t402-io/t402/go/mechanisms/evm/exact/server"
+	t402 "github.com/t402-io/t402/sdks/go"
+	t402http "github.com/t402-io/t402/sdks/go/http"
+	evm "github.com/t402-io/t402/sdks/go/mechanisms/evm/exact/server"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )

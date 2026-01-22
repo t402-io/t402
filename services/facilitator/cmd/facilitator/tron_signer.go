@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/t402-io/t402/go/mechanisms/tron"
+	"github.com/t402-io/t402/sdks/go/mechanisms/tron"
 )
 
 // facilitatorTronSigner implements the FacilitatorTronSigner interface

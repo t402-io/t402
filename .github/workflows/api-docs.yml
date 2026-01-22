@@ -4,15 +4,15 @@ on:
   push:
     branches: [main]
     paths:
-      - 'typescript/packages/**/src/**'
-      - 'typescript/typedoc.json'
+      - 'sdks/typescript/packages/**/src/**'
+      - 'sdks/typescript/typedoc.json'
       - 'services/docs/**'
       - '.github/workflows/api-docs.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'typescript/packages/**/src/**'
-      - 'typescript/typedoc.json'
+      - 'sdks/typescript/packages/**/src/**'
+      - 'sdks/typescript/typedoc.json'
       - 'services/docs/**'
   workflow_dispatch:
 
@@ -36,21 +36,21 @@ jobs:
           node-version: '22'
           cache: 'pnpm'
           cache-dependency-path: |
-            typescript/pnpm-lock.yaml
+            sdks/typescript/pnpm-lock.yaml
             services/docs/pnpm-lock.yaml
 
       - name: Install TypeScript dependencies
-        working-directory: typescript
+        working-directory: sdks/typescript
         run: pnpm install --frozen-lockfile
 
       - name: Generate TypeDoc API docs
-        working-directory: typescript
+        working-directory: sdks/typescript
         run: npx typedoc
 
       - name: Copy API docs to services/docs/public
         run: |
           mkdir -p services/docs/public/api
-          cp -r typescript/api-docs/* services/docs/public/api/
+          cp -r sdks/typescript/api-docs/* services/docs/public/api/
 
       - name: Install docs dependencies
         working-directory: services/docs

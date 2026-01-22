@@ -14,9 +14,9 @@ jobs:
         with:
           node-version: "20"
           cache: "pnpm"
-          cache-dependency-path: ./typescript
+          cache-dependency-path: ./sdks/typescript
       - name: Ensure formatting
-        working-directory: ./typescript
+        working-directory: ./sdks/typescript
         run: |
           pnpm install --frozen-lockfile
           pnpm format:check

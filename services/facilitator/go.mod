@@ -11,7 +11,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/prometheus/client_golang v1.20.5
 	github.com/redis/go-redis/v9 v9.7.3
-	github.com/t402-io/t402/go v0.0.0
+	github.com/t402-io/t402/sdks/go v0.0.0
 	golang.org/x/crypto v0.41.0
 )
 
@@ -92,4 +92,4 @@ require (
 	google.golang.org/protobuf v1.36.9 // indirect
 )
 
-replace github.com/t402-io/t402/go => ../../go
+replace github.com/t402-io/t402/sdks/go => ../../sdks/go

@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/@t402/core?label=npm%20%40t402%2Fcore)](https://www.npmjs.com/package/@t402/core)
 [![PyPI](https://img.shields.io/pypi/v/t402?label=pypi%20t402)](https://pypi.org/project/t402/)
-[![Go](https://img.shields.io/github/v/tag/t402-io/t402?filter=go%2F*&label=go)](https://pkg.go.dev/github.com/t402-io/t402/go)
+[![Go](https://img.shields.io/github/v/tag/t402-io/t402?filter=go%2F*&label=go)](https://pkg.go.dev/github.com/t402-io/t402/sdks/go)
 [![Maven Central](https://img.shields.io/maven-central/v/io.t402/t402?label=maven%20central)](https://central.sonatype.com/artifact/io.t402/t402)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Whitepaper](https://img.shields.io/badge/whitepaper-PDF-orange.svg)](https://docs.t402.io/t402-whitepaper.pdf)
@@ -104,10 +104,10 @@ t402 --help
 ### Go (v1.8.0)
 
 ```shell
-go get github.com/t402-io/t402/go@v1.8.0
+go get github.com/t402-io/t402/sdks/go@v1.8.0
 
 # CLI tool
-go install github.com/t402-io/t402/go/cmd/t402@v1.8.0
+go install github.com/t402-io/t402/sdks/go/cmd/t402@v1.8.0
 t402 --help
 ```
 
@@ -260,10 +260,10 @@ Legend: ✅ Complete | ⚠️ Partial | ❌ Not Available
 
 | SDK | Version | Release Date | Changelog |
 |-----|---------|--------------|-----------|
-| TypeScript | v2.3.0 | 2026-01-22 | [CHANGELOG](typescript/CHANGELOG.md) |
-| Python | v1.9.0 | 2026-01-22 | [CHANGELOG](python/CHANGELOG.md) |
-| Go | v1.8.0 | 2026-01-22 | [CHANGELOG](go/CHANGELOG.md) |
-| Java | v1.8.0 | 2026-01-22 | [CHANGELOG](java/CHANGELOG.md) |
+| TypeScript | v2.3.0 | 2026-01-22 | [CHANGELOG](sdks/typescript/CHANGELOG.md) |
+| Python | v1.9.0 | 2026-01-22 | [CHANGELOG](sdks/python/CHANGELOG.md) |
+| Go | v1.8.0 | 2026-01-22 | [CHANGELOG](sdks/go/CHANGELOG.md) |
+| Java | v1.8.0 | 2026-01-22 | [CHANGELOG](sdks/java/CHANGELOG.md) |
 
 ## Ecosystem
 
@@ -399,8 +399,8 @@ package main
 
 import (
     "net/http"
-    t402 "github.com/t402-io/t402/go"
-    t402http "github.com/t402-io/t402/go/http"
+    t402 "github.com/t402-io/t402/sdks/go"
+    t402http "github.com/t402-io/t402/sdks/go/http"
 )
 
 func main() {

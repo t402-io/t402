@@ -10,7 +10,7 @@ import (
 
 	solana "github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/rpc"
-	"github.com/t402-io/t402/go/mechanisms/svm"
+	"github.com/t402-io/t402/sdks/go/mechanisms/svm"
 )
 
 // facilitatorSolanaSigner implements the FacilitatorSvmSigner interface

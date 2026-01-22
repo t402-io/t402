@@ -6,9 +6,9 @@ import (
 	"os"
 	"time"
 
-	t402http "github.com/t402-io/t402/go/http"
-	ginmw "github.com/t402-io/t402/go/http/gin"
-	tronserver "github.com/t402-io/t402/go/mechanisms/tron/exact/server"
+	t402http "github.com/t402-io/t402/sdks/go/http"
+	ginmw "github.com/t402-io/t402/sdks/go/http/gin"
+	tronserver "github.com/t402-io/t402/sdks/go/mechanisms/tron/exact/server"
 	ginfw "github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
