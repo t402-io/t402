@@ -9,7 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/joho/godotenv"
-	"github.com/t402-io/t402/go/mechanisms/evm/erc4337"
+	"github.com/t402-io/t402/sdks/go/mechanisms/evm/erc4337"
 )
 
 /**

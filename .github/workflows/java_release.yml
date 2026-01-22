@@ -3,10 +3,10 @@ name: Java Release
 on:
   push:
     tags:
-      - "java/v*"
+      - "sdks/java/v*"
   pull_request:
     paths:
-      - "java/**"
+      - "sdks/java/**"
       - ".github/workflows/java_release.yml"
   workflow_dispatch:
     inputs:
@@ -39,11 +39,11 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: Run tests
-        working-directory: ./java
+        working-directory: ./sdks/java
         run: mvn clean test -Pcoverage
 
       - name: Run checkstyle
-        working-directory: ./java
+        working-directory: ./sdks/java
         run: mvn checkstyle:check
 
   build:
@@ -59,14 +59,14 @@ jobs:
           distribution: "temurin"
 
       - name: Build package
-        working-directory: ./java
+        working-directory: ./sdks/java
         run: mvn package -DskipTests
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
         with:
           name: java-dist
-          path: java/target/*.jar
+          path: sdks/java/target/*.jar
 
   publish:
     needs: build
@@ -90,7 +90,7 @@ jobs:
 
       - name: Publish to Maven Central
         if: ${{ github.event.inputs.dry_run != 'true' }}
-        working-directory: ./java
+        working-directory: ./sdks/java
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
@@ -99,7 +99,7 @@ jobs:
 
       - name: Dry run - show what would be published
         if: ${{ github.event.inputs.dry_run == 'true' }}
-        working-directory: ./java
+        working-directory: ./sdks/java
         run: |
           echo "=== Dry Run Mode ==="
           echo "Would publish the following artifacts to Maven Central:"
@@ -158,7 +158,7 @@ jobs:
 
             ### Changelog
 
-            See [CHANGELOG.md](https://github.com/t402-io/t402/blob/main/java/CHANGELOG.md) for details.
+            See [CHANGELOG.md](https://github.com/t402-io/t402/blob/main/sdks/java/CHANGELOG.md) for details.
           files: dist/*
           draft: false
           prerelease: ${{ contains(steps.version.outputs.version, '-') }}

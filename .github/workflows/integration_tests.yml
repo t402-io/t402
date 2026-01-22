@@ -6,9 +6,9 @@ on:
       - main
   pull_request:
     paths:
-      - "typescript/packages/mechanisms/**"
-      - "typescript/packages/core/**"
-      - "go/mechanisms/**"
+      - "sdks/typescript/packages/mechanisms/**"
+      - "sdks/typescript/packages/core/**"
+      - "sdks/go/mechanisms/**"
       - ".github/workflows/integration_tests.yml"
   workflow_dispatch:
   schedule:
@@ -43,18 +43,18 @@ jobs:
         with:
           node-version: "20"
           cache: "pnpm"
-          cache-dependency-path: ./typescript
+          cache-dependency-path: ./sdks/typescript
 
       - name: Install dependencies
-        working-directory: ./typescript
+        working-directory: ./sdks/typescript
         run: pnpm install --frozen-lockfile
 
       - name: Build packages
-        working-directory: ./typescript
+        working-directory: ./sdks/typescript
         run: pnpm build
 
       - name: Run ${{ matrix.mechanism }} integration tests
-        working-directory: ./typescript
+        working-directory: ./sdks/typescript
         run: pnpm --filter @t402/${{ matrix.mechanism }} test:integration
         env:
           TEST_NETWORK: testnet
@@ -76,14 +76,14 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version: "1.24"
-          cache-dependency-path: go/go.sum
+          cache-dependency-path: sdks/go/go.sum
 
       - name: Install dependencies
-        working-directory: ./go
+        working-directory: ./sdks/go
         run: go mod download
 
       - name: Run ${{ matrix.mechanism }} integration tests
-        working-directory: ./go
+        working-directory: ./sdks/go
         run: go test -v -tags=integration ./mechanisms/${{ matrix.mechanism }}/...
         env:
           TEST_NETWORK: testnet

@@ -23,7 +23,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/t402-io/t402/go/mechanisms/evm/bridge"
+	"github.com/t402-io/t402/sdks/go/mechanisms/evm/bridge"
 )
 
 // demoMode - set to false to execute real transactions

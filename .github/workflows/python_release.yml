@@ -3,10 +3,10 @@ name: Python Release
 on:
   push:
     tags:
-      - "python/v*"
+      - "sdks/python/v*"
   pull_request:
     paths:
-      - "python/**"
+      - "sdks/python/**"
       - ".github/workflows/python_release.yml"
   workflow_dispatch:
     inputs:
@@ -36,17 +36,17 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        working-directory: ./python/t402
+        working-directory: ./sdks/python/t402
         run: |
           uv sync --all-extras --dev
 
       - name: Run linting
-        working-directory: ./python/t402
+        working-directory: ./sdks/python/t402
         run: |
           uv run ruff check src/
 
       - name: Run tests
-        working-directory: ./python/t402
+        working-directory: ./sdks/python/t402
         run: |
           uv run pytest tests/ -v
 
@@ -67,7 +67,7 @@ jobs:
           python-version: "3.12"
 
       - name: Build package
-        working-directory: ./python/t402
+        working-directory: ./sdks/python/t402
         run: |
           uv build
 
@@ -75,7 +75,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: python-dist
-          path: python/t402/dist/
+          path: sdks/python/t402/dist/
 
   publish:
     needs: build
@@ -150,7 +150,7 @@ jobs:
 
             ### Changelog
 
-            See [CHANGELOG.md](https://github.com/t402-io/t402/blob/main/python/CHANGELOG.md) for details.
+            See [CHANGELOG.md](https://github.com/t402-io/t402/blob/main/sdks/python/CHANGELOG.md) for details.
           files: dist/*
           draft: false
           prerelease: ${{ contains(steps.version.outputs.version, '-') }}

@@ -40,34 +40,34 @@ Configure these secrets in your GitHub repository settings:
 
 | Package | Path | Description |
 |---------|------|-------------|
-| `@t402/core` | `packages/core` | Core types and abstractions |
-| `@t402/extensions` | `packages/extensions` | Bazaar, Sign-In-With-X |
-| `@t402/evm` | `packages/mechanisms/evm` | EVM mechanisms |
-| `@t402/svm` | `packages/mechanisms/svm` | Solana mechanisms |
-| `@t402/ton` | `packages/mechanisms/ton` | TON mechanisms |
-| `@t402/tron` | `packages/mechanisms/tron` | TRON mechanisms |
-| `@t402/express` | `packages/http/express` | Express middleware |
-| `@t402/hono` | `packages/http/hono` | Hono middleware |
-| `@t402/fastify` | `packages/http/fastify` | Fastify middleware |
-| `@t402/next` | `packages/http/next` | Next.js integration |
-| `@t402/fetch` | `packages/http/fetch` | Fetch wrapper |
-| `@t402/axios` | `packages/http/axios` | Axios interceptor |
-| `@t402/paywall` | `packages/http/paywall` | Payment wall UI |
-| `@t402/react` | `packages/http/react` | React components |
-| `@t402/vue` | `packages/http/vue` | Vue components |
-| `@t402/wdk` | `packages/wdk` | Tether WDK integration |
-| `@t402/wdk-gasless` | `packages/wdk-gasless` | ERC-4337 gasless |
-| `@t402/wdk-bridge` | `packages/wdk-bridge` | Cross-chain bridge |
-| `@t402/wdk-multisig` | `packages/wdk-multisig` | Safe multi-sig |
-| `@t402/mcp` | `packages/mcp` | AI agent MCP server |
-| `@t402/cli` | `packages/cli` | CLI tools |
+| `@t402/core` | `sdks/typescript/packages/core` | Core types and abstractions |
+| `@t402/extensions` | `sdks/typescript/packages/extensions` | Bazaar, Sign-In-With-X |
+| `@t402/evm` | `sdks/typescript/packages/mechanisms/evm` | EVM mechanisms |
+| `@t402/svm` | `sdks/typescript/packages/mechanisms/svm` | Solana mechanisms |
+| `@t402/ton` | `sdks/typescript/packages/mechanisms/ton` | TON mechanisms |
+| `@t402/tron` | `sdks/typescript/packages/mechanisms/tron` | TRON mechanisms |
+| `@t402/express` | `sdks/typescript/packages/http/express` | Express middleware |
+| `@t402/hono` | `sdks/typescript/packages/http/hono` | Hono middleware |
+| `@t402/fastify` | `sdks/typescript/packages/http/fastify` | Fastify middleware |
+| `@t402/next` | `sdks/typescript/packages/http/next` | Next.js integration |
+| `@t402/fetch` | `sdks/typescript/packages/http/fetch` | Fetch wrapper |
+| `@t402/axios` | `sdks/typescript/packages/http/axios` | Axios interceptor |
+| `@t402/paywall` | `sdks/typescript/packages/http/paywall` | Payment wall UI |
+| `@t402/react` | `sdks/typescript/packages/http/react` | React components |
+| `@t402/vue` | `sdks/typescript/packages/http/vue` | Vue components |
+| `@t402/wdk` | `sdks/typescript/packages/wdk` | Tether WDK integration |
+| `@t402/wdk-gasless` | `sdks/typescript/packages/wdk-gasless` | ERC-4337 gasless |
+| `@t402/wdk-bridge` | `sdks/typescript/packages/wdk-bridge` | Cross-chain bridge |
+| `@t402/wdk-multisig` | `sdks/typescript/packages/wdk-multisig` | Safe multi-sig |
+| `@t402/mcp` | `sdks/typescript/packages/mcp` | AI agent MCP server |
+| `@t402/cli` | `sdks/typescript/packages/cli` | CLI tools |
 
 ### Using Changesets (Recommended)
 
 We use [Changesets](https://github.com/changesets/changesets) for version management:
 
 ```bash
-cd typescript
+cd sdks/typescript
 
 # 1. Create a changeset when making changes
 pnpm changeset
@@ -139,13 +139,13 @@ Packages are published in dependency order automatically:
 Users can install specific versions:
 
 ```bash
-go get github.com/t402-io/t402/go@v2.1.0
+go get github.com/t402-io/t402/sdks/go@v2.1.0
 ```
 
 ### CLI Tool
 
 ```bash
-go install github.com/t402-io/t402/go/cmd/t402@v2.1.0
+go install github.com/t402-io/t402/sdks/go/cmd/t402@v2.1.0
 ```
 
 ---
@@ -154,7 +154,7 @@ go install github.com/t402-io/t402/go/cmd/t402@v2.1.0
 
 ### Automatic Release
 
-1. Update version in `python/t402/pyproject.toml`
+1. Update version in `sdks/python/t402/pyproject.toml`
 2. Commit changes
 3. Create and push a tag with `python/` prefix:
    ```bash
@@ -180,7 +180,7 @@ Use workflow dispatch for testing:
 
 ### Automatic Release
 
-1. Update version in `java/pom.xml`
+1. Update version in `sdks/java/pom.xml`
 2. Commit changes
 3. Create and push a tag with `java/` prefix:
    ```bash
@@ -228,12 +228,12 @@ git checkout main
 git pull origin main
 
 # 2. Run tests for all SDKs
-cd typescript && pnpm test
+cd sdks/typescript && pnpm test
 cd ../go && go test ./...
 cd ../python/t402 && uv run pytest
 
 # 3. For TypeScript, use changesets
-cd typescript
+cd ../../sdks/typescript
 pnpm changeset
 # Follow prompts to create changeset
 
@@ -288,7 +288,7 @@ The npm token requires OTP. Create a new **Granular Access Token** which bypasse
 Go modules are cached by the proxy. Wait 5-10 minutes or use:
 
 ```bash
-GOPROXY=direct go get github.com/t402-io/t402/go@v2.1.0
+GOPROXY=direct go get github.com/t402-io/t402/sdks/go@v2.1.0
 ```
 
 ### Changeset PR not created

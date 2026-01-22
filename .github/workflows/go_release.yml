@@ -3,10 +3,10 @@ name: Go Release
 on:
   push:
     tags:
-      - "go/v*"
+      - "sdks/go/v*"
   pull_request:
     paths:
-      - "go/**"
+      - "sdks/go/**"
       - ".github/workflows/go_release.yml"
   workflow_dispatch:
     inputs:
@@ -29,21 +29,21 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version: ${{ matrix.go-version }}
-          cache-dependency-path: go/go.sum
+          cache-dependency-path: sdks/go/go.sum
 
       - name: Install dependencies
-        working-directory: ./go
+        working-directory: ./sdks/go
         run: go mod download
 
       - name: Run tests
-        working-directory: ./go
+        working-directory: ./sdks/go
         run: go test -v -race -coverprofile=coverage.out ./...
 
       - name: Upload coverage
         if: matrix.go-version == '1.24'
         uses: codecov/codecov-action@v5
         with:
-          files: ./go/coverage.out
+          files: ./sdks/go/coverage.out
           flags: go
           fail_ci_if_error: false
 
@@ -60,10 +60,10 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version: "1.24"
-          cache-dependency-path: go/go.sum
+          cache-dependency-path: sdks/go/go.sum
 
       - name: Verify module
-        working-directory: ./go
+        working-directory: ./sdks/go
         run: |
           go mod verify
           go mod tidy
@@ -86,12 +86,12 @@ jobs:
             ### Installation
 
             ```bash
-            go get github.com/t402-io/t402/go@${{ steps.version.outputs.version }}
+            go get github.com/t402-io/t402/sdks/go@${{ steps.version.outputs.version }}
             ```
 
             ### Changelog
 
-            See [CHANGELOG.md](https://github.com/t402-io/t402/blob/main/go/CHANGELOG.md) for details.
+            See [CHANGELOG.md](https://github.com/t402-io/t402/blob/main/sdks/go/CHANGELOG.md) for details.
           draft: false
           prerelease: ${{ contains(steps.version.outputs.version, '-') }}
         env:
