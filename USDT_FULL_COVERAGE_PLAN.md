@@ -6,7 +6,7 @@
 > Last Updated: 2026-01-22
 >
 > **Phase 1 & 2 Complete**: Legacy EVM USDT (BNB, Avalanche, Celo, Kaia, Fantom)
-> **Phase 3 Complete**: Near Protocol, Aptos, Tezos (spec + Go + TypeScript + Facilitator)
+> **Phase 3 Complete**: Near Protocol, Aptos, Tezos, Polkadot (spec + Go + TypeScript + Facilitator)
 
 ---
 
@@ -71,7 +71,7 @@ All LayerZero OFT USDT0 networks are now supported:
 | Near | NEP-141 | P1 | Medium |
 | Aptos | Move | P2 | High |
 | Tezos | FA2 | P2 | High |
-| Polkadot | Asset Hub | P2 | High |
+| Polkadot | Asset Hub | P2 | ✅ Complete |
 | Kaia (Klaytn) | KIP-7 | P1 | Low (EVM) |
 
 ---
@@ -200,16 +200,17 @@ python/t402/src/t402/near/ (NEW)
 
 **Implementation**: Complete (TypeScript @t402/tezos + Go mechanism + Facilitator)
 
-#### Polkadot Asset Hub (P2)
+#### Polkadot Asset Hub (P2) - ✅ COMPLETE
 
 | Item | Value |
 |------|-------|
-| Asset ID | TBD |
+| Asset ID | 1984 (USDT) |
 | Standard | Assets Pallet |
 | RPC | wss://polkadot-asset-hub-rpc.polkadot.io |
-| CAIP-2 | `polkadot:91b171bb158e2d3848fa23a9f1c25182` |
+| Indexer | https://assethub-polkadot.api.subscan.io |
+| CAIP-2 | `polkadot:68d56f15f85d3136970ec16946040bc1` |
 
-**Complexity**: High - requires Substrate/Polkadot.js
+**Implementation**: Complete (TypeScript @t402/polkadot + Go mechanism + Facilitator)
 
 ---
 
@@ -341,9 +342,11 @@ Add a new payment scheme for legacy tokens:
   - [x] Create `@t402/tezos` TypeScript package
   - [x] Implement exact-direct scheme (TypeScript + Go)
   - [x] Add to Facilitator with TzKT indexer
-- [ ] Polkadot (if prioritized)
-  - [ ] Research Assets Pallet
-  - [ ] Create `@t402/polkadot` package
+- [x] Polkadot ✅ Complete
+  - [x] Research Assets Pallet (Asset ID: 1984)
+  - [x] Create `@t402/polkadot` TypeScript package
+  - [x] Implement exact-direct scheme (TypeScript + Go)
+  - [x] Add to Facilitator with Subscan indexer
 
 ---
 
@@ -447,7 +450,7 @@ Add a new payment scheme for legacy tokens:
 | 28 | Near | - | NEP-141 | ✅ Complete |
 | 29 | Aptos | - | Move | ✅ Complete |
 | 30 | Tezos | - | FA2 | ✅ Complete |
-| 31 | Polkadot | - | Assets | ❌ Phase 3 |
+| 31 | Polkadot | - | Assets | ✅ Complete |
 | 32 | Cosmos/Noble | - | Native | ✅ (USDC) |
 | 33 | Stacks | - | sBTC | ✅ (sUSDC) |
 
