@@ -49,9 +49,7 @@ export function NearPaywall({ paymentRequired, onSuccessfulResponse }: NearPaywa
   const network = firstRequirement.network;
   const chainName = getNetworkDisplayName(network);
   const isMainnet = network === NEAR_NETWORKS.MAINNET;
-  const targetNetwork: NearNetwork = isMainnet
-    ? NEAR_NETWORKS.MAINNET
-    : NEAR_NETWORKS.TESTNET;
+  const targetNetwork: NearNetwork = isMainnet ? NEAR_NETWORKS.MAINNET : NEAR_NETWORKS.TESTNET;
 
   const {
     account,
@@ -63,8 +61,13 @@ export function NearPaywall({ paymentRequired, onSuccessfulResponse }: NearPaywa
     disconnect,
   } = useNearWallet(targetNetwork);
 
-  const { balance, formattedBalance, isFetching: isFetchingBalance, refreshBalance, resetBalance } =
-    useNearBalance(account?.accountId || null, targetNetwork, setStatus);
+  const {
+    balance,
+    formattedBalance,
+    isFetching: isFetchingBalance,
+    refreshBalance,
+    resetBalance,
+  } = useNearBalance(account?.accountId || null, targetNetwork, setStatus);
 
   const nearSigner = useNearSigner(account, walletId, targetNetwork);
 
@@ -219,11 +222,7 @@ export function NearPaywall({ paymentRequired, onSuccessfulResponse }: NearPaywa
         {!isMainnet && (
           <p className="instructions">
             This is a testnet payment. You can get testnet USDC from{" "}
-            <a
-              href="https://near-faucet.io"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href="https://near-faucet.io" target="_blank" rel="noopener noreferrer">
               NEAR Faucet
             </a>
             .
@@ -250,7 +249,7 @@ export function NearPaywall({ paymentRequired, onSuccessfulResponse }: NearPaywa
             <span className="payment-label">Available balance:</span>
             <span className="payment-value">
               {account?.accountId ? (
-                <button className="balance-button" onClick={() => setHideBalance((prev) => !prev)}>
+                <button className="balance-button" onClick={() => setHideBalance(prev => !prev)}>
                   {!hideBalance && formattedBalance
                     ? `$${formattedBalance} USDC`
                     : isFetchingBalance
@@ -297,7 +296,7 @@ export function NearPaywall({ paymentRequired, onSuccessfulResponse }: NearPaywa
                   wallet.
                 </p>
               ) : (
-                availableWallets.map((wallet) => (
+                availableWallets.map(wallet => (
                   <button
                     key={wallet}
                     className="button button-primary"

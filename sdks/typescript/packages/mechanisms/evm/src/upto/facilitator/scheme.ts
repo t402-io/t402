@@ -24,6 +24,7 @@ const T402_UPTO_ROUTER_ABI = parseAbi([
 export interface UptoEvmFacilitatorSchemeConfig {
   /**
    * Router contract addresses by network (CAIP-2 format)
+   *
    * @example { "eip155:8453": "0x..." }
    */
   routerAddresses?: Record<string, string>;

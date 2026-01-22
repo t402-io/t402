@@ -139,6 +139,10 @@ export class UptoEvmServerScheme implements SchemeNetworkServer {
    *
    * @param paymentRequirements - Base payment requirements
    * @param supportedKind - The supported kind from facilitator
+   * @param supportedKind.t402Version - T402 protocol version
+   * @param supportedKind.scheme - Payment scheme
+   * @param supportedKind.network - Network identifier
+   * @param supportedKind.extra - Extra configuration
    * @param facilitatorExtensions - Extensions supported by the facilitator
    * @returns Enhanced payment requirements for upto scheme
    */

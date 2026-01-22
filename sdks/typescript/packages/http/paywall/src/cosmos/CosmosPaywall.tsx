@@ -63,8 +63,13 @@ export function CosmosPaywall({ paymentRequired, onSuccessfulResponse }: CosmosP
     disconnect,
   } = useCosmosWallet(targetNetwork);
 
-  const { balance, formattedBalance, isFetching: isFetchingBalance, refreshBalance, resetBalance } =
-    useCosmosBalance(account?.address || null, targetNetwork, setStatus);
+  const {
+    balance,
+    formattedBalance,
+    isFetching: isFetchingBalance,
+    refreshBalance,
+    resetBalance,
+  } = useCosmosBalance(account?.address || null, targetNetwork, setStatus);
 
   const cosmosSigner = useCosmosSigner(account, walletId, targetNetwork);
 
@@ -240,7 +245,7 @@ export function CosmosPaywall({ paymentRequired, onSuccessfulResponse }: CosmosP
             <span className="payment-label">Available balance:</span>
             <span className="payment-value">
               {account?.address ? (
-                <button className="balance-button" onClick={() => setHideBalance((prev) => !prev)}>
+                <button className="balance-button" onClick={() => setHideBalance(prev => !prev)}>
                   {!hideBalance && formattedBalance
                     ? `$${formattedBalance} USDC`
                     : isFetchingBalance
@@ -287,7 +292,7 @@ export function CosmosPaywall({ paymentRequired, onSuccessfulResponse }: CosmosP
                   wallet.
                 </p>
               ) : (
-                availableWallets.map((wallet) => (
+                availableWallets.map(wallet => (
                   <button
                     key={wallet}
                     className="button button-primary"
