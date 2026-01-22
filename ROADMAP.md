@@ -99,14 +99,29 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 |-------|-------|-----------|---------|--------|
 | Ethereum | USDT0 | EIP-3009 | ERC-4337 | Production |
 | Arbitrum | USDT0 | EIP-3009 | ERC-4337 | Production |
-| Base | USDT0 | EIP-3009 | ERC-4337 | Production |
 | Optimism | USDT0 | EIP-3009 | ERC-4337 | Production |
+| Polygon | USDT0 | EIP-3009 | ERC-4337 | Production |
 | Ink | USDT0 | EIP-3009 | ERC-4337 | Production |
-| Berachain | USDT0 | EIP-3009 | ERC-4337 | Beta |
+| Berachain | USDT0 | EIP-3009 | ERC-4337 | Production |
 | Unichain | USDT0 | EIP-3009 | ERC-4337 | Production |
+| Mantle | USDT0 | EIP-3009 | ERC-4337 | Production |
+| Plasma | USDT0 | EIP-3009 | ERC-4337 | Production |
+| Sei | USDT0 | EIP-3009 | ERC-4337 | Production |
+| Conflux | USDT0 | EIP-3009 | ERC-4337 | Production |
+| Monad | USDT0 | EIP-3009 | ERC-4337 | Production |
+| Flare | USDT0 | EIP-3009 | ERC-4337 | Production |
+| Rootstock | USDT0 | EIP-3009 | ERC-4337 | Production |
+| XLayer | USDT0 | EIP-3009 | ERC-4337 | Production |
+| Stable | USDT0 | EIP-3009 | ERC-4337 | Production |
+| HyperEVM | USDT0 | EIP-3009 | ERC-4337 | Production |
+| MegaETH | USDT0 | EIP-3009 | ERC-4337 | Production |
+| Corn | USDT0 | EIP-3009 | ERC-4337 | Production |
 | TON | USDT | Jetton | - | Production |
 | TRON | USDT | TRC-20 | - | Production |
 | Solana | USDT | SPL | - | Production |
+| Cosmos/Noble | USDC | IBC | - | Production |
+| NEAR | USDC | NEP-141 | - | Production |
+| Stacks | sUSDC | SIP-010 | - | Production |
 
 ---
 
@@ -349,6 +364,11 @@ These features are implemented as advanced packages ready for public release:
 - [x] Mobile optimization (@t402/paywall) - WalletConnect deep linking, mobile detection
 - [x] QR code payment flow (@t402/paywall) - Scan-to-pay with payment URI generation
 - [x] Stacks paywall (@t402/paywall) - Leather/Xverse wallet integration, sUSDC support
+- [x] Cosmos/Noble paywall (@t402/paywall) - Keplr/Leap wallet integration
+- [x] NEAR paywall (@t402/paywall) - MyNearWallet/Meteor wallet integration
+- [x] USDT0 full coverage - All 19 LayerZero OFT networks (100%)
+- [x] TransactionStatus component - Block explorer links for all chains
+- [x] Bundle size optimization - Code splitting, production builds
 
 ### Infrastructure ✅
 - [x] Facilitator service (Go)
@@ -424,15 +444,29 @@ Production facilitator service for payment verification and settlement.
 
 ## Token Addresses
 
-### USDT0 (OFT Token)
+### USDT0 (OFT Token) - 19 Networks
 
 | Chain | Address |
 |-------|---------|
 | Ethereum | `0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee` |
 | Arbitrum | `0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9` |
+| Optimism | `0x01bFF41798a0BcF287b996046Ca68b395DbC1071` |
+| Polygon | `0xc2132D05D31c914a87C6611C10748AEb04B58e8F` |
 | Ink | `0x0200C29006150606B650577BBE7B6248F58470c1` |
 | Berachain | `0x779Ded0c9e1022225f8E0630b35a9b54bE713736` |
-| Unichain | `0x588ce4F028D8e7B53B687865d6A67b3A54C75518` |
+| Unichain | `0x9151434b16b9763660705744891fA906F660EcC5` |
+| Mantle | `0x779Ded0c9e1022225f8E0630b35a9b54bE713736` |
+| Plasma | `0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb` |
+| Sei | `0x9151434b16b9763660705744891fA906F660EcC5` |
+| Conflux | `0xaf37E8B6C9ED7f6318979f56Fc287d76c30847ff` |
+| Monad | `0xe7cd86e13AC4309349F30B3435a9d337750fC82D` |
+| Flare | `0xe7cd86e13AC4309349F30B3435a9d337750fC82D` |
+| Rootstock | `0x779dED0C9e1022225F8e0630b35A9B54Be713736` |
+| XLayer | `0x779Ded0c9e1022225f8E0630b35a9b54bE713736` |
+| Stable | `0x779Ded0c9e1022225f8E0630b35a9b54bE713736` |
+| HyperEVM | `0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb` |
+| MegaETH | `0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb` |
+| Corn | `0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb` |
 
 ### USDT (Legacy)
 
