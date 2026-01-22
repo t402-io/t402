@@ -40,7 +40,8 @@ t402/
 │   │   │   ├── svm/         # @t402/svm - Solana (SPL tokens)
 │   │   │   ├── ton/         # @t402/ton - TON (Jettons)
 │   │   │   ├── tron/        # @t402/tron - TRON (TRC-20)
-│   │   │   └── near/        # @t402/near - NEAR (NEP-141)
+│   │   │   ├── near/        # @t402/near - NEAR (NEP-141)
+│   │   │   └── aptos/       # @t402/aptos - Aptos (Fungible Asset)
 │   │   ├── http/
 │   │   │   ├── express/     # @t402/express - Express.js middleware
 │   │   │   ├── hono/        # @t402/hono - Hono middleware
@@ -66,7 +67,8 @@ t402/
 │   │   ├── svm/
 │   │   ├── ton/
 │   │   ├── tron/
-│   │   └── near/
+│   │   ├── near/
+│   │   └── aptos/
 │   ├── http/                # HTTP middleware (Gin)
 │   ├── cmd/t402/            # CLI tool
 │   └── cmd/t402-mcp/        # MCP server
@@ -277,6 +279,8 @@ Networks use CAIP-2 format: `namespace:reference`
 | TRON Mainnet | `tron:mainnet` |
 | NEAR Mainnet | `near:mainnet` |
 | NEAR Testnet | `near:testnet` |
+| Aptos Mainnet | `aptos:1` |
+| Aptos Testnet | `aptos:2` |
 
 ### Package Export Pattern (TypeScript)
 
@@ -348,6 +352,10 @@ SOLANA_RPC=https://api.mainnet-beta.solana.com
 # NEAR
 NEAR_RPC=https://rpc.mainnet.near.org
 NEAR_TESTNET_RPC=https://rpc.testnet.near.org
+
+# Aptos
+APTOS_RPC=https://fullnode.mainnet.aptoslabs.com/v1
+APTOS_TESTNET_RPC=https://fullnode.testnet.aptoslabs.com/v1
 ```
 
 ### TypeScript Testing
@@ -425,6 +433,12 @@ TEST_PRIVATE_KEY=0x...
 |---------|-------------|
 | Mainnet | `usdt.tether-token.near` |
 | Testnet | `usdt.fakes.testnet` |
+
+### Aptos USDT (Fungible Asset)
+
+| Network | Metadata Address |
+|---------|------------------|
+| Mainnet | `0xf73e887a8754f540ee6e1a93bdc6dde2af69fc7ca5de32013e89dd44244473cb` |
 
 ---
 
