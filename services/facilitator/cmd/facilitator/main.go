@@ -32,6 +32,8 @@ import (
 	svmfac "github.com/t402-io/t402/go/mechanisms/svm/exact/facilitator"
 	"github.com/t402-io/t402/go/mechanisms/near"
 	nearfac "github.com/t402-io/t402/go/mechanisms/near/exact-direct/facilitator"
+	"github.com/t402-io/t402/go/mechanisms/aptos"
+	aptosfac "github.com/t402-io/t402/go/mechanisms/aptos/exact-direct/facilitator"
 	"github.com/t402-io/t402/services/facilitator/internal/cache"
 	"github.com/t402-io/t402/services/facilitator/internal/config"
 	"github.com/t402-io/t402/services/facilitator/internal/server"
@@ -286,6 +288,28 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, error) {
 		log.Printf("NEAR facilitator configured for %d networks", len(nearNetworks))
 	} else {
 		log.Printf("Warning: NEAR_RPC not set, NEAR chains disabled")
+	}
+
+	// Setup Aptos chains if RPC is configured
+	if cfg.AptosRPC != "" {
+		aptosSigner := newFacilitatorAptosSigner(cfg.AptosRPC, cfg.AptosTestnetRPC)
+
+		var aptosNetworks []t402.Network
+
+		// Add mainnet
+		aptosNetworks = append(aptosNetworks, t402.Network(aptos.AptosMainnetCAIP2))
+		configuredNetworks = append(configuredNetworks, "Aptos Mainnet")
+
+		// Add testnet if configured
+		if cfg.AptosTestnetRPC != "" {
+			aptosNetworks = append(aptosNetworks, t402.Network(aptos.AptosTestnetCAIP2))
+			configuredNetworks = append(configuredNetworks, "Aptos Testnet")
+		}
+
+		facilitator.Register(aptosNetworks, aptosfac.NewExactDirectAptosScheme(aptosSigner, nil))
+		log.Printf("Aptos facilitator configured for %d networks", len(aptosNetworks))
+	} else {
+		log.Printf("Warning: APTOS_RPC not set, Aptos chains disabled")
 	}
 
 	// Log configured networks
@@ -801,4 +825,96 @@ func (s *facilitatorNearSigner) GetBalance(ctx context.Context, accountID string
 	// Parse the balance from the result bytes (JSON string)
 	balance := strings.Trim(string(rpcResp.Result.Result), "\"")
 	return balance, nil
+}
+
+// ============================================================================
+// Aptos Facilitator Signer
+// ============================================================================
+
+// facilitatorAptosSigner implements the FacilitatorAptosSigner interface
+type facilitatorAptosSigner struct {
+	mainnetRPC string
+	testnetRPC string
+}
+
+// newFacilitatorAptosSigner creates a new Aptos facilitator signer
+func newFacilitatorAptosSigner(mainnetRPC, testnetRPC string) *facilitatorAptosSigner {
+	return &facilitatorAptosSigner{
+		mainnetRPC: mainnetRPC,
+		testnetRPC: testnetRPC,
+	}
+}
+
+func (s *facilitatorAptosSigner) GetAddresses(ctx context.Context, network string) []string {
+	// Aptos exact-direct scheme doesn't require a facilitator address
+	// The client executes the transfer directly
+	return []string{}
+}
+
+func (s *facilitatorAptosSigner) QueryTransaction(ctx context.Context, txHash string) (*aptos.TransactionResult, error) {
+	// Determine RPC endpoint based on hash prefix or use mainnet by default
+	rpcURL := s.mainnetRPC
+
+	// Build REST API URL for transaction query
+	url := fmt.Sprintf("%s/transactions/by_hash/%s", strings.TrimSuffix(rpcURL, "/"), txHash)
+
+	// Make HTTP request
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query transaction: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("transaction not found")
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	// Parse response
+	var txResult aptos.TransactionResult
+	if err := json.NewDecoder(resp.Body).Decode(&txResult); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return &txResult, nil
+}
+
+func (s *facilitatorAptosSigner) GetBalance(ctx context.Context, address string, metadataAddress string) (string, error) {
+	// Determine RPC endpoint
+	rpcURL := s.mainnetRPC
+
+	// Build REST API URL for account resource
+	// For FA (Fungible Asset) balance, we need to query the primary fungible store
+	url := fmt.Sprintf("%s/accounts/%s/resource/0x1::fungible_asset::FungibleStore",
+		strings.TrimSuffix(rpcURL, "/"), address)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return "0", fmt.Errorf("failed to query balance: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		// Account or resource doesn't exist, balance is 0
+		return "0", nil
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "0", fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	var resource struct {
+		Data struct {
+			Balance string `json:"balance"`
+		} `json:"data"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&resource); err != nil {
+		return "0", fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return resource.Data.Balance, nil
 }
