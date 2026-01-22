@@ -34,6 +34,8 @@ import (
 	nearfac "github.com/t402-io/t402/go/mechanisms/near/exact-direct/facilitator"
 	"github.com/t402-io/t402/go/mechanisms/aptos"
 	aptosfac "github.com/t402-io/t402/go/mechanisms/aptos/exact-direct/facilitator"
+	"github.com/t402-io/t402/go/mechanisms/tezos"
+	tezosfac "github.com/t402-io/t402/go/mechanisms/tezos/exact-direct/facilitator"
 	"github.com/t402-io/t402/services/facilitator/internal/cache"
 	"github.com/t402-io/t402/services/facilitator/internal/config"
 	"github.com/t402-io/t402/services/facilitator/internal/server"
@@ -310,6 +312,28 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, error) {
 		log.Printf("Aptos facilitator configured for %d networks", len(aptosNetworks))
 	} else {
 		log.Printf("Warning: APTOS_RPC not set, Aptos chains disabled")
+	}
+
+	// Setup Tezos chains if RPC is configured
+	if cfg.TezosRPC != "" {
+		tezosSigner := newFacilitatorTezosSigner(cfg.TezosRPC, cfg.TezosTestnetRPC)
+
+		var tezosNetworks []t402.Network
+
+		// Add mainnet
+		tezosNetworks = append(tezosNetworks, t402.Network(tezos.TezosMainnetCAIP2))
+		configuredNetworks = append(configuredNetworks, "Tezos Mainnet")
+
+		// Add testnet (Ghostnet) if configured
+		if cfg.TezosTestnetRPC != "" {
+			tezosNetworks = append(tezosNetworks, t402.Network(tezos.TezosGhostnetCAIP2))
+			configuredNetworks = append(configuredNetworks, "Tezos Ghostnet")
+		}
+
+		facilitator.Register(tezosNetworks, tezosfac.NewExactDirectTezosScheme(tezosSigner, nil))
+		log.Printf("Tezos facilitator configured for %d networks", len(tezosNetworks))
+	} else {
+		log.Printf("Warning: TEZOS_RPC not set, Tezos chains disabled")
 	}
 
 	// Log configured networks
@@ -917,4 +941,104 @@ func (s *facilitatorAptosSigner) GetBalance(ctx context.Context, address string,
 	}
 
 	return resource.Data.Balance, nil
+}
+
+// ============================================================================
+// Tezos Facilitator Signer
+// ============================================================================
+
+// facilitatorTezosSigner implements the FacilitatorTezosSigner interface
+type facilitatorTezosSigner struct {
+	mainnetIndexer string
+	testnetIndexer string
+}
+
+// newFacilitatorTezosSigner creates a new Tezos facilitator signer
+func newFacilitatorTezosSigner(mainnetRPC, testnetRPC string) *facilitatorTezosSigner {
+	// Use TzKT indexer URLs based on RPC configuration
+	mainnetIndexer := "https://api.tzkt.io"
+	testnetIndexer := "https://api.ghostnet.tzkt.io"
+
+	return &facilitatorTezosSigner{
+		mainnetIndexer: mainnetIndexer,
+		testnetIndexer: testnetIndexer,
+	}
+}
+
+func (s *facilitatorTezosSigner) GetAddresses(ctx context.Context, network string) []string {
+	// Tezos exact-direct scheme doesn't require a facilitator address
+	// The client executes the transfer directly
+	return []string{}
+}
+
+func (s *facilitatorTezosSigner) QueryOperation(ctx context.Context, opHash string) (*tezos.OperationResult, error) {
+	// Use mainnet indexer by default
+	indexerURL := s.mainnetIndexer
+
+	// Build TzKT API URL for operation query
+	url := fmt.Sprintf("%s/v1/operations/transactions/%s", indexerURL, opHash)
+
+	// Make HTTP request
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query operation: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("operation not found")
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	// Parse response - TzKT returns an array of operations
+	var operations []tezos.OperationResult
+	if err := json.NewDecoder(resp.Body).Decode(&operations); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	if len(operations) == 0 {
+		return nil, fmt.Errorf("operation not found")
+	}
+
+	return &operations[0], nil
+}
+
+func (s *facilitatorTezosSigner) GetBalance(ctx context.Context, contractAddress string, tokenID int, address string) (string, error) {
+	// Use mainnet indexer by default
+	indexerURL := s.mainnetIndexer
+
+	// Build TzKT API URL for token balance
+	url := fmt.Sprintf("%s/v1/tokens/balances?token.contract=%s&token.tokenId=%d&account=%s",
+		indexerURL, contractAddress, tokenID, address)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return "0", fmt.Errorf("failed to query balance: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return "0", nil
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "0", fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	var balances []struct {
+		Balance string `json:"balance"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&balances); err != nil {
+		return "0", fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	if len(balances) == 0 {
+		return "0", nil
+	}
+
+	return balances[0].Balance, nil
 }
