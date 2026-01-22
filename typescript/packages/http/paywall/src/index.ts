@@ -18,3 +18,9 @@ export { svmPaywall } from "./svm";
 export { tonPaywall } from "./ton";
 export { tronPaywall } from "./tron";
 export { stacksPaywall } from "./stacks";
+export { cosmosPaywall } from "./cosmos";
+export { nearPaywall } from "./near";
+
+// Re-export UI components
+export { TransactionStatus, useTransactionStatus } from "./components/TransactionStatus";
+export type { TransactionStatusProps, TxStatus } from "./components/TransactionStatus";

@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import { WagmiProvider, createConfig, http } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { injected, coinbaseWallet, walletConnect } from "wagmi/connectors";
-import * as allChains from "viem/chains";
 import type { Chain } from "viem";
+import { defaultChain, getChainByIdOrCreate } from "./evmChains";
 import { isEvmNetwork } from "./paywallUtils";
 import { isMobile } from "./utils/mobile";
 
@@ -26,7 +26,7 @@ export function Providers({ children }: ProvidersProps) {
   const { paymentRequired } = window.t402;
 
   // Determine which chain to connect to
-  let targetChain: Chain = allChains.base; // Default to Base
+  let targetChain: Chain = defaultChain; // Default to Base
 
   if (paymentRequired?.accepts?.[0]) {
     const firstRequirement = paymentRequired.accepts[0];
@@ -34,10 +34,7 @@ export function Providers({ children }: ProvidersProps) {
 
     if (isEvmNetwork(network)) {
       const chainId = parseInt(network.split(":")[1]);
-      const chain: Chain | undefined = Object.values(allChains).find(c => c.id === chainId);
-      if (chain) {
-        targetChain = chain;
-      }
+      targetChain = getChainByIdOrCreate(chainId);
     }
   }
 

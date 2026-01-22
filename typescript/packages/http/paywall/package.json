@@ -10,7 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "build": "tsup",
-    "build:paywall": "tsx src/evm/build.ts && tsx src/svm/build.ts && tsx src/ton/build.ts && tsx src/tron/build.ts && tsx src/stacks/build.ts",
+    "build:paywall": "tsx src/evm/build.ts && tsx src/svm/build.ts && tsx src/ton/build.ts && tsx src/tron/build.ts && tsx src/stacks/build.ts && tsx src/cosmos/build.ts && tsx src/near/build.ts",
     "watch": "tsc --watch",
     "format": "prettier -c .prettierrc --write \"**/*.{ts,js,cjs,json,md}\"",
     "format:check": "prettier -c .prettierrc --check \"**/*.{ts,js,cjs,json,md}\"",
@@ -30,10 +30,10 @@
   "devDependencies": {
     "@craftamap/esbuild-plugin-html": "^0.9.0",
     "@eslint/js": "^9.24.0",
-    "@t402/evm": "^2.2.0",
-    "@t402/svm": "^2.0.0",
-    "@t402/ton": "^2.0.0",
-    "@t402/tron": "^2.0.0",
+    "@t402/evm": "workspace:*",
+    "@t402/svm": "workspace:*",
+    "@t402/ton": "workspace:*",
+    "@t402/tron": "workspace:*",
     "@types/node": "^22.13.4",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -141,6 +141,26 @@
       "require": {
         "types": "./dist/cjs/stacks/index.d.cts",
         "default": "./dist/cjs/stacks/index.cjs"
+      }
+    },
+    "./cosmos": {
+      "import": {
+        "types": "./dist/esm/cosmos/index.d.ts",
+        "default": "./dist/esm/cosmos/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/cosmos/index.d.cts",
+        "default": "./dist/cjs/cosmos/index.cjs"
+      }
+    },
+    "./near": {
+      "import": {
+        "types": "./dist/esm/near/index.d.ts",
+        "default": "./dist/esm/near/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/near/index.d.cts",
+        "default": "./dist/cjs/near/index.cjs"
       }
     }
   },
