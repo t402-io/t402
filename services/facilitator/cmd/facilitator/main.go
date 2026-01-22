@@ -1,11 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"crypto/ecdsa"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"log"
 	"math/big"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -26,6 +30,8 @@ import (
 	tronfac "github.com/t402-io/t402/go/mechanisms/tron/exact/facilitator"
 	"github.com/t402-io/t402/go/mechanisms/svm"
 	svmfac "github.com/t402-io/t402/go/mechanisms/svm/exact/facilitator"
+	"github.com/t402-io/t402/go/mechanisms/near"
+	nearfac "github.com/t402-io/t402/go/mechanisms/near/exact-direct/facilitator"
 	"github.com/t402-io/t402/services/facilitator/internal/cache"
 	"github.com/t402-io/t402/services/facilitator/internal/config"
 	"github.com/t402-io/t402/services/facilitator/internal/server"
@@ -258,6 +264,28 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, error) {
 		}
 	} else {
 		log.Printf("Warning: SVM_PRIVATE_KEY not set, Solana chains disabled")
+	}
+
+	// Setup NEAR chains if RPC is configured
+	if cfg.NearRPC != "" {
+		nearSigner := newFacilitatorNearSigner(cfg.NearRPC, cfg.NearTestnetRPC)
+
+		var nearNetworks []t402.Network
+
+		// Add mainnet
+		nearNetworks = append(nearNetworks, t402.Network(near.NearMainnetCAIP2))
+		configuredNetworks = append(configuredNetworks, "NEAR Mainnet")
+
+		// Add testnet if configured
+		if cfg.NearTestnetRPC != "" {
+			nearNetworks = append(nearNetworks, t402.Network(near.NearTestnetCAIP2))
+			configuredNetworks = append(configuredNetworks, "NEAR Testnet")
+		}
+
+		facilitator.Register(nearNetworks, nearfac.NewExactDirectNearScheme(nearSigner, nil))
+		log.Printf("NEAR facilitator configured for %d networks", len(nearNetworks))
+	} else {
+		log.Printf("Warning: NEAR_RPC not set, NEAR chains disabled")
 	}
 
 	// Log configured networks
@@ -645,4 +673,132 @@ func (s *facilitatorEvmSigner) GetCode(ctx context.Context, address string) ([]b
 		return nil, fmt.Errorf("failed to get code: %w", err)
 	}
 	return code, nil
+}
+
+// ============================================================================
+// NEAR Facilitator Signer
+// ============================================================================
+
+// facilitatorNearSigner implements the FacilitatorNearSigner interface
+type facilitatorNearSigner struct {
+	mainnetRPC string
+	testnetRPC string
+}
+
+// newFacilitatorNearSigner creates a new NEAR facilitator signer
+func newFacilitatorNearSigner(mainnetRPC, testnetRPC string) *facilitatorNearSigner {
+	return &facilitatorNearSigner{
+		mainnetRPC: mainnetRPC,
+		testnetRPC: testnetRPC,
+	}
+}
+
+func (s *facilitatorNearSigner) GetAddresses(ctx context.Context, network string) []string {
+	// NEAR exact-direct scheme doesn't require a facilitator address
+	// The client executes the transfer directly
+	return []string{}
+}
+
+func (s *facilitatorNearSigner) QueryTransaction(ctx context.Context, txHash string, senderID string) (*near.TransactionResult, error) {
+	// Determine RPC endpoint based on sender account
+	rpcURL := s.mainnetRPC
+	if strings.HasSuffix(senderID, ".testnet") {
+		rpcURL = s.testnetRPC
+	}
+
+	// Build RPC request
+	reqBody := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"id":      "t402",
+		"method":  "tx",
+		"params":  []interface{}{txHash, senderID},
+	}
+
+	body, err := json.Marshal(reqBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	// Make HTTP request
+	resp, err := http.Post(rpcURL, "application/json", bytes.NewReader(body))
+	if err != nil {
+		return nil, fmt.Errorf("failed to query transaction: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Parse response
+	var rpcResp struct {
+		Result near.TransactionResult `json:"result"`
+		Error  *struct {
+			Message string `json:"message"`
+		} `json:"error"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&rpcResp); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	if rpcResp.Error != nil {
+		return nil, fmt.Errorf("RPC error: %s", rpcResp.Error.Message)
+	}
+
+	return &rpcResp.Result, nil
+}
+
+func (s *facilitatorNearSigner) GetBalance(ctx context.Context, accountID string, tokenContract string) (string, error) {
+	// Determine RPC endpoint
+	rpcURL := s.mainnetRPC
+	if strings.HasSuffix(accountID, ".testnet") || strings.HasSuffix(tokenContract, ".testnet") {
+		rpcURL = s.testnetRPC
+	}
+
+	// Build ft_balance_of view call
+	args := map[string]string{"account_id": accountID}
+	argsJSON, _ := json.Marshal(args)
+	argsBase64 := base64.StdEncoding.EncodeToString(argsJSON)
+
+	reqBody := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"id":      "t402",
+		"method":  "query",
+		"params": map[string]interface{}{
+			"request_type": "call_function",
+			"finality":     "final",
+			"account_id":   tokenContract,
+			"method_name":  "ft_balance_of",
+			"args_base64":  argsBase64,
+		},
+	}
+
+	body, err := json.Marshal(reqBody)
+	if err != nil {
+		return "0", fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	resp, err := http.Post(rpcURL, "application/json", bytes.NewReader(body))
+	if err != nil {
+		return "0", fmt.Errorf("failed to query balance: %w", err)
+	}
+	defer resp.Body.Close()
+
+	var rpcResp struct {
+		Result struct {
+			Result []byte `json:"result"`
+		} `json:"result"`
+		Error *struct {
+			Message string `json:"message"`
+		} `json:"error"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&rpcResp); err != nil {
+		return "0", fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	if rpcResp.Error != nil {
+		return "0", fmt.Errorf("RPC error: %s", rpcResp.Error.Message)
+	}
+
+	// Parse the balance from the result bytes (JSON string)
+	balance := strings.Trim(string(rpcResp.Result.Result), "\"")
+	return balance, nil
 }

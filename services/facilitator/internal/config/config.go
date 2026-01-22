@@ -73,6 +73,10 @@ type Config struct {
 	// Solana Configuration
 	SvmPrivateKey string
 	SolanaRPC     string
+
+	// NEAR Configuration
+	NearRPC        string
+	NearTestnetRPC string
 }
 
 // Load loads configuration from environment variables
@@ -146,6 +150,10 @@ func Load() *Config {
 		// Solana Configuration
 		SvmPrivateKey: getEnv("SVM_PRIVATE_KEY", ""),
 		SolanaRPC:     getEnv("SOLANA_RPC", "https://api.mainnet-beta.solana.com"),
+
+		// NEAR Configuration
+		NearRPC:        getEnv("NEAR_RPC", "https://rpc.mainnet.near.org"),
+		NearTestnetRPC: getEnv("NEAR_TESTNET_RPC", "https://rpc.testnet.near.org"),
 	}
 }
 
