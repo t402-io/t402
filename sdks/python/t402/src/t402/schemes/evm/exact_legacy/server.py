@@ -38,8 +38,6 @@ from t402.schemes.interfaces import AssetAmount, SupportedKindDict
 from t402.chains import (
     get_chain_id,
     get_token_decimals,
-    get_token_name,
-    get_token_version,
     KNOWN_TOKENS,
 )
 
@@ -193,10 +191,8 @@ class ExactLegacyEvmServerScheme:
             req = dict(requirements)
 
         network = req.get("network", "")
-        asset = req.get("asset", "")
-
-        # Get chain ID as string
-        chain_id = str(self._get_chain_id(network))
+        _asset = req.get("asset", "")  # Reserved for future use
+        _chain_id = str(self._get_chain_id(network))  # Reserved for future use
 
         # Ensure extra exists
         if "extra" not in req or req["extra"] is None:

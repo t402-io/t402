@@ -1,7 +1,6 @@
 """Tests for USDT0 Bridge module."""
 
 import pytest
-import asyncio
 from unittest.mock import patch, MagicMock, AsyncMock
 
 from t402.bridge import (
