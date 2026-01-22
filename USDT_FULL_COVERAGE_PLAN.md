@@ -4,6 +4,9 @@
 >
 > Created: 2026-01-22
 > Last Updated: 2026-01-22
+>
+> **Phase 1 & 2 Complete**: Legacy EVM USDT (BNB, Avalanche, Celo, Kaia, Fantom)
+> **Phase 3 In Progress**: Near Protocol (spec + Go mechanism done)
 
 ---
 
@@ -14,9 +17,11 @@ This plan outlines T402's strategy to become the definitive payment protocol for
 | Category | Networks | T402 Status |
 |----------|----------|-------------|
 | USDT0 (LayerZero OFT) | 19 | ✅ 100% Complete |
-| Native USDT (Major) | 6 | ⚠️ 50% (3/6) |
-| Native USDT (Emerging) | 8+ | ❌ 0% |
-| **Total Target** | **33+** | **67% → 100%** |
+| Native USDT (Major) | 6 | ✅ 100% Complete |
+| Legacy EVM USDT | 5 | ✅ 100% Complete |
+| Near Protocol | 1 | ⚠️ In Progress (spec + Go done) |
+| Native USDT (Emerging) | 3+ | ❌ Planned |
+| **Total Target** | **33+** | **85% → 100%** |
 
 ---
 
@@ -429,12 +434,12 @@ Add a new payment scheme for legacy tokens:
 | 20 | TON | - | Native | ✅ |
 | 21 | TRON | - | Native | ✅ |
 | 22 | Solana | - | Native | ✅ |
-| 23 | BNB Chain | 56 | Legacy | ❌ Phase 1 |
-| 24 | Avalanche | 43114 | Legacy | ❌ Phase 1 |
-| 25 | Celo | 42220 | Legacy | ❌ Phase 2 |
-| 26 | Kaia | 8217 | Legacy | ❌ Phase 2 |
-| 27 | Fantom | 250 | Legacy | ❌ Phase 2 |
-| 28 | Near | - | NEP-141 | ❌ Phase 3 |
+| 23 | BNB Chain | 56 | Legacy | ✅ Complete |
+| 24 | Avalanche | 43114 | Legacy | ✅ Complete |
+| 25 | Celo | 42220 | Legacy | ✅ Complete |
+| 26 | Kaia | 8217 | Legacy | ✅ Complete |
+| 27 | Fantom | 250 | Legacy | ✅ Complete |
+| 28 | Near | - | NEP-141 | ⚠️ In Progress |
 | 29 | Aptos | - | Move | ❌ Phase 3 |
 | 30 | Tezos | - | FA2 | ❌ Phase 3 |
 | 31 | Polkadot | - | Assets | ❌ Phase 3 |
