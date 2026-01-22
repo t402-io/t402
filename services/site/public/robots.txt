@@ -1,0 +1,11 @@
+# T402 - The Official Payment Protocol for USDT
+# https://t402.io
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://t402.io/sitemap.xml
+
+# Crawl-delay for politeness
+Crawl-delay: 1
