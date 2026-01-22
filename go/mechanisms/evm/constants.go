@@ -41,6 +41,24 @@ var (
 	ChainIDMainnet     = big.NewInt(1)
 	ChainIDBase        = big.NewInt(8453)
 	ChainIDBaseSepolia = big.NewInt(84532)
+	ChainIDArbitrum    = big.NewInt(42161)
+	ChainIDOptimism    = big.NewInt(10)
+	ChainIDPolygon     = big.NewInt(137)
+	ChainIDInk         = big.NewInt(57073)
+	ChainIDBerachain   = big.NewInt(80094)
+	ChainIDUnichain    = big.NewInt(130)
+	ChainIDMantle      = big.NewInt(5000)
+	ChainIDPlasma      = big.NewInt(9745)
+	ChainIDSei         = big.NewInt(1329)
+	ChainIDConflux     = big.NewInt(1030)
+	ChainIDMonad       = big.NewInt(143)
+	ChainIDFlare       = big.NewInt(14)
+	ChainIDRootstock   = big.NewInt(30)
+	ChainIDXLayer      = big.NewInt(196)
+	ChainIDStable      = big.NewInt(988)
+	ChainIDHyperEVM    = big.NewInt(999)
+	ChainIDMegaETH     = big.NewInt(4326)
+	ChainIDCorn        = big.NewInt(21000000)
 
 	// Network configurations
 	NetworkConfigs = map[string]NetworkConfig{
@@ -142,6 +160,331 @@ var (
 					Address:  "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
 					Name:     "USDC",
 					Version:  "2",
+					Decimals: DefaultDecimals,
+				},
+			},
+		},
+		// === USDT0 Networks ===
+		// Arbitrum One
+		"eip155:42161": {
+			ChainID: ChainIDArbitrum,
+			DefaultAsset: AssetInfo{
+				Address:  "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+				Name:     "TetherToken",
+				Version:  "1",
+				Decimals: DefaultDecimals,
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDT0": {
+					Address:  "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+					Name:     "TetherToken",
+					Version:  "1",
+					Decimals: DefaultDecimals,
+				},
+			},
+		},
+		// Optimism
+		"eip155:10": {
+			ChainID: ChainIDOptimism,
+			DefaultAsset: AssetInfo{
+				Address:  "0x01bFF41798a0BcF287b996046Ca68b395DbC1071",
+				Name:     "TetherToken",
+				Version:  "1",
+				Decimals: DefaultDecimals,
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDT0": {
+					Address:  "0x01bFF41798a0BcF287b996046Ca68b395DbC1071",
+					Name:     "TetherToken",
+					Version:  "1",
+					Decimals: DefaultDecimals,
+				},
+			},
+		},
+		// Polygon
+		"eip155:137": {
+			ChainID: ChainIDPolygon,
+			DefaultAsset: AssetInfo{
+				Address:  "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+				Name:     "TetherToken",
+				Version:  "1",
+				Decimals: DefaultDecimals,
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDT0": {
+					Address:  "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+					Name:     "TetherToken",
+					Version:  "1",
+					Decimals: DefaultDecimals,
+				},
+			},
+		},
+		// Ink
+		"eip155:57073": {
+			ChainID: ChainIDInk,
+			DefaultAsset: AssetInfo{
+				Address:  "0x0200C29006150606B650577BBE7B6248F58470c1",
+				Name:     "TetherToken",
+				Version:  "1",
+				Decimals: DefaultDecimals,
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDT0": {
+					Address:  "0x0200C29006150606B650577BBE7B6248F58470c1",
+					Name:     "TetherToken",
+					Version:  "1",
+					Decimals: DefaultDecimals,
+				},
+			},
+		},
+		// Berachain
+		"eip155:80094": {
+			ChainID: ChainIDBerachain,
+			DefaultAsset: AssetInfo{
+				Address:  "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
+				Name:     "TetherToken",
+				Version:  "1",
+				Decimals: DefaultDecimals,
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDT0": {
+					Address:  "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
+					Name:     "TetherToken",
+					Version:  "1",
+					Decimals: DefaultDecimals,
+				},
+			},
+		},
+		// Unichain
+		"eip155:130": {
+			ChainID: ChainIDUnichain,
+			DefaultAsset: AssetInfo{
+				Address:  "0x9151434b16b9763660705744891fA906F660EcC5",
+				Name:     "TetherToken",
+				Version:  "1",
+				Decimals: DefaultDecimals,
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDT0": {
+					Address:  "0x9151434b16b9763660705744891fA906F660EcC5",
+					Name:     "TetherToken",
+					Version:  "1",
+					Decimals: DefaultDecimals,
+				},
+			},
+		},
+		// Mantle
+		"eip155:5000": {
+			ChainID: ChainIDMantle,
+			DefaultAsset: AssetInfo{
+				Address:  "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
+				Name:     "TetherToken",
+				Version:  "1",
+				Decimals: DefaultDecimals,
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDT0": {
+					Address:  "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
+					Name:     "TetherToken",
+					Version:  "1",
+					Decimals: DefaultDecimals,
+				},
+			},
+		},
+		// Plasma
+		"eip155:9745": {
+			ChainID: ChainIDPlasma,
+			DefaultAsset: AssetInfo{
+				Address:  "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
+				Name:     "TetherToken",
+				Version:  "1",
+				Decimals: DefaultDecimals,
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDT0": {
+					Address:  "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
+					Name:     "TetherToken",
+					Version:  "1",
+					Decimals: DefaultDecimals,
+				},
+			},
+		},
+		// Sei
+		"eip155:1329": {
+			ChainID: ChainIDSei,
+			DefaultAsset: AssetInfo{
+				Address:  "0x9151434b16b9763660705744891fA906F660EcC5",
+				Name:     "TetherToken",
+				Version:  "1",
+				Decimals: DefaultDecimals,
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDT0": {
+					Address:  "0x9151434b16b9763660705744891fA906F660EcC5",
+					Name:     "TetherToken",
+					Version:  "1",
+					Decimals: DefaultDecimals,
+				},
+			},
+		},
+		// Conflux eSpace
+		"eip155:1030": {
+			ChainID: ChainIDConflux,
+			DefaultAsset: AssetInfo{
+				Address:  "0xaf37E8B6C9ED7f6318979f56Fc287d76c30847ff",
+				Name:     "TetherToken",
+				Version:  "1",
+				Decimals: DefaultDecimals,
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDT0": {
+					Address:  "0xaf37E8B6C9ED7f6318979f56Fc287d76c30847ff",
+					Name:     "TetherToken",
+					Version:  "1",
+					Decimals: DefaultDecimals,
+				},
+			},
+		},
+		// Monad
+		"eip155:143": {
+			ChainID: ChainIDMonad,
+			DefaultAsset: AssetInfo{
+				Address:  "0xe7cd86e13AC4309349F30B3435a9d337750fC82D",
+				Name:     "TetherToken",
+				Version:  "1",
+				Decimals: DefaultDecimals,
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDT0": {
+					Address:  "0xe7cd86e13AC4309349F30B3435a9d337750fC82D",
+					Name:     "TetherToken",
+					Version:  "1",
+					Decimals: DefaultDecimals,
+				},
+			},
+		},
+		// Flare
+		"eip155:14": {
+			ChainID: ChainIDFlare,
+			DefaultAsset: AssetInfo{
+				Address:  "0xe7cd86e13AC4309349F30B3435a9d337750fC82D",
+				Name:     "TetherToken",
+				Version:  "1",
+				Decimals: DefaultDecimals,
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDT0": {
+					Address:  "0xe7cd86e13AC4309349F30B3435a9d337750fC82D",
+					Name:     "TetherToken",
+					Version:  "1",
+					Decimals: DefaultDecimals,
+				},
+			},
+		},
+		// Rootstock
+		"eip155:30": {
+			ChainID: ChainIDRootstock,
+			DefaultAsset: AssetInfo{
+				Address:  "0x779dED0C9e1022225F8e0630b35A9B54Be713736",
+				Name:     "TetherToken",
+				Version:  "1",
+				Decimals: DefaultDecimals,
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDT0": {
+					Address:  "0x779dED0C9e1022225F8e0630b35A9B54Be713736",
+					Name:     "TetherToken",
+					Version:  "1",
+					Decimals: DefaultDecimals,
+				},
+			},
+		},
+		// XLayer
+		"eip155:196": {
+			ChainID: ChainIDXLayer,
+			DefaultAsset: AssetInfo{
+				Address:  "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
+				Name:     "TetherToken",
+				Version:  "1",
+				Decimals: DefaultDecimals,
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDT0": {
+					Address:  "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
+					Name:     "TetherToken",
+					Version:  "1",
+					Decimals: DefaultDecimals,
+				},
+			},
+		},
+		// Stable
+		"eip155:988": {
+			ChainID: ChainIDStable,
+			DefaultAsset: AssetInfo{
+				Address:  "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
+				Name:     "TetherToken",
+				Version:  "1",
+				Decimals: DefaultDecimals,
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDT0": {
+					Address:  "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
+					Name:     "TetherToken",
+					Version:  "1",
+					Decimals: DefaultDecimals,
+				},
+			},
+		},
+		// HyperEVM
+		"eip155:999": {
+			ChainID: ChainIDHyperEVM,
+			DefaultAsset: AssetInfo{
+				Address:  "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
+				Name:     "TetherToken",
+				Version:  "1",
+				Decimals: DefaultDecimals,
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDT0": {
+					Address:  "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
+					Name:     "TetherToken",
+					Version:  "1",
+					Decimals: DefaultDecimals,
+				},
+			},
+		},
+		// MegaETH
+		"eip155:4326": {
+			ChainID: ChainIDMegaETH,
+			DefaultAsset: AssetInfo{
+				Address:  "0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb",
+				Name:     "TetherToken",
+				Version:  "1",
+				Decimals: DefaultDecimals,
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDT0": {
+					Address:  "0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb",
+					Name:     "TetherToken",
+					Version:  "1",
+					Decimals: DefaultDecimals,
+				},
+			},
+		},
+		// Corn
+		"eip155:21000000": {
+			ChainID: ChainIDCorn,
+			DefaultAsset: AssetInfo{
+				Address:  "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
+				Name:     "TetherToken",
+				Version:  "1",
+				Decimals: DefaultDecimals,
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDT0": {
+					Address:  "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
+					Name:     "TetherToken",
+					Version:  "1",
 					Decimals: DefaultDecimals,
 				},
 			},

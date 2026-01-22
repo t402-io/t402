@@ -50,6 +50,7 @@ export type NetworkTokenRegistry = Record<string, Record<string, TokenConfig>>;
  * - Native cross-chain via LayerZero
  */
 export const USDT0_ADDRESSES: Record<string, Address> = {
+  // === Existing Networks ===
   // Ethereum Mainnet - OFT Adapter (bridge endpoint)
   "eip155:1": "0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee",
   // Arbitrum One - Native USDT0
@@ -58,8 +59,40 @@ export const USDT0_ADDRESSES: Record<string, Address> = {
   "eip155:57073": "0x0200C29006150606B650577BBE7B6248F58470c1",
   // Berachain Mainnet
   "eip155:80094": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
-  // Unichain Mainnet
-  "eip155:130": "0x588ce4F028D8e7B53B687865d6A67b3A54C75518",
+  // Unichain Mainnet (updated address)
+  "eip155:130": "0x9151434b16b9763660705744891fA906F660EcC5",
+
+  // === Phase 1: High Priority Networks ===
+  // Polygon PoS
+  "eip155:137": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+  // Mantle
+  "eip155:5000": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
+  // Optimism
+  "eip155:10": "0x01bFF41798a0BcF287b996046Ca68b395DbC1071",
+  // Plasma
+  "eip155:9745": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
+  // Sei
+  "eip155:1329": "0x9151434b16b9763660705744891fA906F660EcC5",
+  // Conflux eSpace
+  "eip155:1030": "0xaf37E8B6C9ED7f6318979f56Fc287d76c30847ff",
+  // Monad
+  "eip155:143": "0xe7cd86e13AC4309349F30B3435a9d337750fC82D",
+
+  // === Phase 2: Medium Priority Networks ===
+  // Rootstock (Bitcoin sidechain)
+  "eip155:30": "0x779dED0C9e1022225F8e0630b35A9B54Be713736",
+  // XLayer (OKX L2)
+  "eip155:196": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
+  // Flare
+  "eip155:14": "0xe7cd86e13AC4309349F30B3435a9d337750fC82D",
+  // Corn
+  "eip155:21000000": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
+  // HyperEVM
+  "eip155:999": "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
+  // MegaETH
+  "eip155:4326": "0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb",
+  // Stable
+  "eip155:988": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
 };
 
 /**
@@ -229,6 +262,15 @@ export const TOKEN_REGISTRY: NetworkTokenRegistry = {
 
   // Polygon Mainnet
   "eip155:137": {
+    USDT0: {
+      address: USDT0_ADDRESSES["eip155:137"],
+      symbol: "USDT0",
+      name: "TetherToken",
+      version: "1",
+      decimals: 6,
+      tokenType: "eip3009",
+      priority: 1,
+    },
     USDC: {
       address: USDC_ADDRESSES["eip155:137"],
       symbol: "USDC",
@@ -246,6 +288,179 @@ export const TOKEN_REGISTRY: NetworkTokenRegistry = {
       decimals: 6,
       tokenType: "legacy",
       priority: 10,
+    },
+  },
+
+  // === Phase 1: High Priority USDT0 Networks ===
+
+  // Optimism Mainnet
+  "eip155:10": {
+    USDT0: {
+      address: USDT0_ADDRESSES["eip155:10"],
+      symbol: "USDT0",
+      name: "TetherToken",
+      version: "1",
+      decimals: 6,
+      tokenType: "eip3009",
+      priority: 1,
+    },
+  },
+
+  // Mantle Mainnet
+  "eip155:5000": {
+    USDT0: {
+      address: USDT0_ADDRESSES["eip155:5000"],
+      symbol: "USDT0",
+      name: "TetherToken",
+      version: "1",
+      decimals: 6,
+      tokenType: "eip3009",
+      priority: 1,
+    },
+  },
+
+  // Plasma Mainnet
+  "eip155:9745": {
+    USDT0: {
+      address: USDT0_ADDRESSES["eip155:9745"],
+      symbol: "USDT0",
+      name: "TetherToken",
+      version: "1",
+      decimals: 6,
+      tokenType: "eip3009",
+      priority: 1,
+    },
+  },
+
+  // Sei Mainnet
+  "eip155:1329": {
+    USDT0: {
+      address: USDT0_ADDRESSES["eip155:1329"],
+      symbol: "USDT0",
+      name: "TetherToken",
+      version: "1",
+      decimals: 6,
+      tokenType: "eip3009",
+      priority: 1,
+    },
+  },
+
+  // Conflux eSpace Mainnet
+  "eip155:1030": {
+    USDT0: {
+      address: USDT0_ADDRESSES["eip155:1030"],
+      symbol: "USDT0",
+      name: "TetherToken",
+      version: "1",
+      decimals: 6,
+      tokenType: "eip3009",
+      priority: 1,
+    },
+  },
+
+  // Monad Mainnet
+  "eip155:143": {
+    USDT0: {
+      address: USDT0_ADDRESSES["eip155:143"],
+      symbol: "USDT0",
+      name: "TetherToken",
+      version: "1",
+      decimals: 6,
+      tokenType: "eip3009",
+      priority: 1,
+    },
+  },
+
+  // === Phase 2: Medium Priority USDT0 Networks ===
+
+  // Flare Mainnet
+  "eip155:14": {
+    USDT0: {
+      address: USDT0_ADDRESSES["eip155:14"],
+      symbol: "USDT0",
+      name: "TetherToken",
+      version: "1",
+      decimals: 6,
+      tokenType: "eip3009",
+      priority: 1,
+    },
+  },
+
+  // Rootstock Mainnet (Bitcoin sidechain)
+  "eip155:30": {
+    USDT0: {
+      address: USDT0_ADDRESSES["eip155:30"],
+      symbol: "USDT0",
+      name: "TetherToken",
+      version: "1",
+      decimals: 6,
+      tokenType: "eip3009",
+      priority: 1,
+    },
+  },
+
+  // XLayer Mainnet (OKX L2)
+  "eip155:196": {
+    USDT0: {
+      address: USDT0_ADDRESSES["eip155:196"],
+      symbol: "USDT0",
+      name: "TetherToken",
+      version: "1",
+      decimals: 6,
+      tokenType: "eip3009",
+      priority: 1,
+    },
+  },
+
+  // Stable Mainnet
+  "eip155:988": {
+    USDT0: {
+      address: USDT0_ADDRESSES["eip155:988"],
+      symbol: "USDT0",
+      name: "TetherToken",
+      version: "1",
+      decimals: 6,
+      tokenType: "eip3009",
+      priority: 1,
+    },
+  },
+
+  // HyperEVM Mainnet
+  "eip155:999": {
+    USDT0: {
+      address: USDT0_ADDRESSES["eip155:999"],
+      symbol: "USDT0",
+      name: "TetherToken",
+      version: "1",
+      decimals: 6,
+      tokenType: "eip3009",
+      priority: 1,
+    },
+  },
+
+  // MegaETH Mainnet
+  "eip155:4326": {
+    USDT0: {
+      address: USDT0_ADDRESSES["eip155:4326"],
+      symbol: "USDT0",
+      name: "TetherToken",
+      version: "1",
+      decimals: 6,
+      tokenType: "eip3009",
+      priority: 1,
+    },
+  },
+
+  // Corn Mainnet
+  "eip155:21000000": {
+    USDT0: {
+      address: USDT0_ADDRESSES["eip155:21000000"],
+      symbol: "USDT0",
+      name: "TetherToken",
+      version: "1",
+      decimals: 6,
+      tokenType: "eip3009",
+      priority: 1,
     },
   },
 };
