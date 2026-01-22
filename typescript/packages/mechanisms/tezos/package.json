@@ -1,0 +1,100 @@
+{
+  "name": "@t402/tezos",
+  "version": "2.1.0",
+  "description": "Tezos (FA2) mechanism for T402 payment protocol",
+  "type": "module",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.mjs",
+  "types": "./dist/esm/index.d.mts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.mts",
+        "default": "./dist/esm/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    },
+    "./exact-direct/client": {
+      "import": {
+        "types": "./dist/esm/exact-direct/client/index.d.mts",
+        "default": "./dist/esm/exact-direct/client/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/exact-direct/client/index.d.ts",
+        "default": "./dist/cjs/exact-direct/client/index.js"
+      }
+    },
+    "./exact-direct/server": {
+      "import": {
+        "types": "./dist/esm/exact-direct/server/index.d.mts",
+        "default": "./dist/esm/exact-direct/server/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/exact-direct/server/index.d.ts",
+        "default": "./dist/cjs/exact-direct/server/index.js"
+      }
+    },
+    "./exact-direct/facilitator": {
+      "import": {
+        "types": "./dist/esm/exact-direct/facilitator/index.d.mts",
+        "default": "./dist/esm/exact-direct/facilitator/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/exact-direct/facilitator/index.d.ts",
+        "default": "./dist/cjs/exact-direct/facilitator/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@t402/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  },
+  "peerDependencies": {
+    "@taquito/taquito": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@taquito/taquito": {
+      "optional": true
+    }
+  },
+  "keywords": [
+    "t402",
+    "tezos",
+    "fa2",
+    "tzip-12",
+    "usdt",
+    "payment",
+    "blockchain"
+  ],
+  "author": "T402",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/t402-io/t402.git",
+    "directory": "typescript/packages/mechanisms/tezos"
+  },
+  "bugs": {
+    "url": "https://github.com/t402-io/t402/issues"
+  },
+  "homepage": "https://t402.io"
+}
