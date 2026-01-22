@@ -42,7 +42,9 @@ t402/
 │   │   │   ├── tron/        # @t402/tron - TRON (TRC-20)
 │   │   │   ├── near/        # @t402/near - NEAR (NEP-141)
 │   │   │   ├── aptos/       # @t402/aptos - Aptos (Fungible Asset)
-│   │   │   └── tezos/       # @t402/tezos - Tezos (FA2)
+│   │   │   ├── tezos/       # @t402/tezos - Tezos (FA2)
+│   │   │   ├── polkadot/    # @t402/polkadot - Polkadot Asset Hub
+│   │   │   └── stacks/      # @t402/stacks - Stacks (Bitcoin L2)
 │   │   ├── http/
 │   │   │   ├── express/     # @t402/express - Express.js middleware
 │   │   │   ├── hono/        # @t402/hono - Hono middleware
@@ -70,7 +72,9 @@ t402/
 │   │   ├── tron/
 │   │   ├── near/
 │   │   ├── aptos/
-│   │   └── tezos/
+│   │   ├── tezos/
+│   │   ├── polkadot/
+│   │   └── stacks/
 │   ├── http/                # HTTP middleware (Gin)
 │   ├── cmd/t402/            # CLI tool
 │   └── cmd/t402-mcp/        # MCP server
@@ -285,6 +289,10 @@ Networks use CAIP-2 format: `namespace:reference`
 | Aptos Testnet | `aptos:2` |
 | Tezos Mainnet | `tezos:NetXdQprcVkpaWU` |
 | Tezos Ghostnet | `tezos:NetXnHfVqm9iesp` |
+| Polkadot Asset Hub | `polkadot:68d56f15f85d3136970ec16946040bc1` |
+| Westend Asset Hub | `polkadot:e143f23803ac50e8f6f8e62695d1ce9e` |
+| Stacks Mainnet | `stacks:1` |
+| Stacks Testnet | `stacks:2147483648` |
 
 ### Package Export Pattern (TypeScript)
 
@@ -364,6 +372,10 @@ APTOS_TESTNET_RPC=https://fullnode.testnet.aptoslabs.com/v1
 # Tezos
 TEZOS_RPC=https://mainnet.api.tez.ie
 TEZOS_TESTNET_RPC=https://ghostnet.tezos.marigold.dev
+
+# Polkadot
+POLKADOT_ASSET_HUB_INDEXER=https://assethub-polkadot.api.subscan.io
+WESTEND_ASSET_HUB_INDEXER=https://assethub-westend.api.subscan.io
 ```
 
 ### TypeScript Testing
@@ -453,6 +465,19 @@ TEST_PRIVATE_KEY=0x...
 | Network | Contract Address | Token ID |
 |---------|------------------|----------|
 | Mainnet | `KT1XnTn74bUtxHfDtBmm2bGZAQfhPbvKWR8o` | 0 |
+
+### Polkadot Asset Hub USDT
+
+| Network | Asset ID | Decimals |
+|---------|----------|----------|
+| Polkadot Asset Hub | 1984 | 6 |
+| Westend Asset Hub | 1984 | 6 |
+
+### Stacks (Bitcoin L2)
+
+| Network | Contract |
+|---------|----------|
+| Mainnet | `SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.token-usdt` |
 
 ---
 
@@ -594,13 +619,22 @@ chore(ci): add integration tests
     ↓
 @t402/evm-core (shared EVM utilities)
     ↓
-@t402/evm, @t402/svm, @t402/ton, @t402/tron (mechanisms)
+Mechanisms (chain-specific implementations):
+├── @t402/evm (19 USDT0 networks + legacy USDT)
+├── @t402/svm (Solana)
+├── @t402/ton (TON)
+├── @t402/tron (TRON)
+├── @t402/near (NEAR)
+├── @t402/aptos (Aptos)
+├── @t402/tezos (Tezos)
+├── @t402/polkadot (Polkadot Asset Hub)
+└── @t402/stacks (Stacks/Bitcoin L2)
     ↓
 @t402/wdk (wallet integration)
     ↓
 @t402/wdk-gasless, @t402/wdk-bridge, @t402/wdk-multisig (advanced features)
     ↓
-@t402/express, @t402/hono, etc. (HTTP middleware)
+@t402/express, @t402/hono, @t402/fastify, @t402/next (HTTP middleware)
     ↓
 @t402/paywall, @t402/react, @t402/vue (UI components)
 ```
