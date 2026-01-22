@@ -370,7 +370,7 @@ func TestFormatAmount(t *testing.T) {
 			name:     "zero",
 			amount:   "0",
 			decimals: 6,
-			want:     "0.0",
+			want:     "0.000000",
 		},
 		{
 			name:     "large amount",
