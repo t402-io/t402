@@ -153,7 +153,7 @@ jobs:
 
       - name: Initialize contracts submodules
         run: |
-          git submodule update --init --recursive contracts/lib
+          git submodule update --init contracts/lib/forge-std
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
