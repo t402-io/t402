@@ -648,6 +648,9 @@ Mechanisms (chain-specific implementations):
 | `typescript/packages/core/src/types/` | TypeScript type definitions |
 | `services/facilitator/internal/` | Facilitator implementation |
 | `.github/workflows/` | CI/CD pipelines |
+| `ROADMAP.md` | High-level project roadmap |
+| `DEVELOPMENT_PLAN_2026.md` | Detailed 2026 development plan |
+| `USDT_FULL_COVERAGE_PLAN.md` | Network coverage strategy |
 
 ### Submodules
 
