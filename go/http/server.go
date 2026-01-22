@@ -42,6 +42,15 @@ type PaywallConfig struct {
 	SessionTokenEndpoint string `json:"sessionTokenEndpoint,omitempty"`
 	CurrentURL           string `json:"currentUrl,omitempty"`
 	Testnet              bool   `json:"testnet,omitempty"`
+
+	// Template configuration for pre-built React paywalls
+	// WalletConnectProjectID enables WalletConnect for mobile deep linking (EVM)
+	WalletConnectProjectID string `json:"walletConnectProjectId,omitempty"`
+	// TonConnectManifestURL is required for TON wallet connection
+	TonConnectManifestURL string `json:"tonConnectManifestUrl,omitempty"`
+	// UsePrebuiltTemplate enables the pre-built React paywall templates
+	// When false, falls back to basic HTML (default: true)
+	UsePrebuiltTemplate *bool `json:"usePrebuiltTemplate,omitempty"`
 }
 
 // DynamicPayToFunc is a function that resolves payTo address dynamically based on request context
@@ -629,12 +638,34 @@ func (s *t402HTTPResourceServer) generatePaywallHTMLV2(paymentRequired types.Pay
 	return s.generatePaywallHTML(genericRequired, config, customHTML)
 }
 
-// generatePaywallHTML generates HTML paywall for browsers
+// generatePaywallHTML generates HTML paywall for browsers.
+// By default, it uses pre-built React paywall templates with full wallet support.
+// Set config.UsePrebuiltTemplate to false to use basic fallback HTML.
 func (s *t402HTTPResourceServer) generatePaywallHTML(paymentRequired t402.PaymentRequired, config *PaywallConfig, customHTML string) string {
+	// Custom HTML takes precedence
 	if customHTML != "" {
 		return customHTML
 	}
 
+	// Check if pre-built templates should be used (default: true)
+	usePrebuilt := true
+	if config != nil && config.UsePrebuiltTemplate != nil {
+		usePrebuilt = *config.UsePrebuiltTemplate
+	}
+
+	// Use pre-built React paywall template
+	if usePrebuilt {
+		template := selectPaywallTemplate(paymentRequired)
+		return injectDataIntoTemplate(template, paymentRequired, config)
+	}
+
+	// Fallback to basic HTML (when UsePrebuiltTemplate is explicitly false)
+	return s.generateFallbackPaywallHTML(paymentRequired, config)
+}
+
+// generateFallbackPaywallHTML generates a basic HTML paywall without React.
+// This is used when pre-built templates are disabled.
+func (s *t402HTTPResourceServer) generateFallbackPaywallHTML(paymentRequired t402.PaymentRequired, config *PaywallConfig) string {
 	// Calculate display amount (assuming USDC with 6 decimals)
 	displayAmount := s.getDisplayAmount(paymentRequired)
 
@@ -672,15 +703,15 @@ func (s *t402HTTPResourceServer) generatePaywallHTML(paymentRequired t402.Paymen
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<style>
-		body { 
+		body {
 			font-family: system-ui, -apple-system, sans-serif;
 			margin: 0;
 			padding: 0;
 			background: #f5f5f5;
 		}
-		.container { 
-			max-width: 600px; 
-			margin: 50px auto; 
+		.container {
+			max-width: 600px;
+			margin: 50px auto;
 			padding: 20px;
 			background: white;
 			border-radius: 8px;
@@ -690,9 +721,9 @@ func (s *t402HTTPResourceServer) generatePaywallHTML(paymentRequired t402.Paymen
 		h1 { color: #333; }
 		.info { margin: 20px 0; }
 		.info p { margin: 10px 0; }
-		.amount { 
-			font-size: 24px; 
-			font-weight: bold; 
+		.amount {
+			font-size: 24px;
+			font-weight: bold;
 			color: #0066cc;
 			margin: 20px 0;
 		}
@@ -715,7 +746,7 @@ func (s *t402HTTPResourceServer) generatePaywallHTML(paymentRequired t402.Paymen
 			<p><strong>Resource:</strong> %s</p>
 			<p class="amount">Amount: $%.2f USDC</p>
 		</div>
-		<div id="payment-widget" 
+		<div id="payment-widget"
 			data-requirements='%s'
 			data-cdp-client-key="%s"
 			data-app-name="%s"
@@ -751,6 +782,113 @@ func (s *t402HTTPResourceServer) getDisplayAmount(paymentRequired t402.PaymentRe
 		}
 	}
 	return 0.0
+}
+
+// ============================================================================
+// Pre-built Template Functions
+// ============================================================================
+
+// selectPaywallTemplate selects the appropriate pre-built React paywall template
+// based on the network in the payment requirements.
+func selectPaywallTemplate(paymentRequired t402.PaymentRequired) string {
+	if len(paymentRequired.Accepts) == 0 {
+		return EVMPaywallTemplate // Default to EVM
+	}
+
+	network := paymentRequired.Accepts[0].Network
+	networkStr := string(network)
+
+	switch {
+	case strings.HasPrefix(networkStr, "eip155:"):
+		return EVMPaywallTemplate
+	case strings.HasPrefix(networkStr, "solana:"):
+		return SVMPaywallTemplate
+	case strings.HasPrefix(networkStr, "ton:"):
+		return TONPaywallTemplate
+	case strings.HasPrefix(networkStr, "tron:"):
+		return TRONPaywallTemplate
+	case strings.HasPrefix(networkStr, "stacks:"):
+		return StacksPaywallTemplate
+	case strings.HasPrefix(networkStr, "cosmos:"):
+		return CosmosPaywallTemplate
+	case strings.HasPrefix(networkStr, "near:"):
+		return NEARPaywallTemplate
+	default:
+		return EVMPaywallTemplate // Default to EVM for unknown networks
+	}
+}
+
+// t402WindowConfig represents the window.t402 configuration injected into the paywall
+type t402WindowConfig struct {
+	Amount                 float64                `json:"amount,omitempty"`
+	Testnet                bool                   `json:"testnet,omitempty"`
+	PaymentRequired        interface{}            `json:"paymentRequired"`
+	CurrentURL             string                 `json:"currentUrl"`
+	AppName                string                 `json:"appName,omitempty"`
+	AppLogo                string                 `json:"appLogo,omitempty"`
+	TonConnectManifestURL  string                 `json:"tonConnectManifestUrl,omitempty"`
+	WalletConnectProjectID string                 `json:"walletConnectProjectId,omitempty"`
+	Config                 t402WindowChainConfig  `json:"config"`
+}
+
+// t402WindowChainConfig contains chain-specific configuration
+type t402WindowChainConfig struct {
+	ChainConfig map[string]t402ChainInfo `json:"chainConfig"`
+}
+
+// t402ChainInfo contains USDC address info for a chain
+type t402ChainInfo struct {
+	USDCAddress string `json:"usdcAddress"`
+	USDCName    string `json:"usdcName"`
+}
+
+// injectDataIntoTemplate injects the window.t402 configuration into the pre-built template.
+// It inserts a <script> tag before </head> that initializes window.t402.
+func injectDataIntoTemplate(template string, paymentRequired t402.PaymentRequired, config *PaywallConfig) string {
+	// Build window.t402 configuration
+	windowConfig := t402WindowConfig{
+		Amount:          0,
+		Testnet:         false,
+		PaymentRequired: paymentRequired,
+		CurrentURL:      "",
+		Config: t402WindowChainConfig{
+			ChainConfig: make(map[string]t402ChainInfo),
+		},
+	}
+
+	// Calculate display amount
+	if len(paymentRequired.Accepts) > 0 {
+		firstReq := paymentRequired.Accepts[0]
+		if firstReq.Amount != "" {
+			amount, err := strconv.ParseFloat(firstReq.Amount, 64)
+			if err == nil {
+				windowConfig.Amount = amount / 1000000 // USDC has 6 decimals
+			}
+		}
+	}
+
+	// Apply config if provided
+	if config != nil {
+		windowConfig.Testnet = config.Testnet
+		windowConfig.CurrentURL = config.CurrentURL
+		windowConfig.AppName = config.AppName
+		windowConfig.AppLogo = config.AppLogo
+		windowConfig.TonConnectManifestURL = config.TonConnectManifestURL
+		windowConfig.WalletConnectProjectID = config.WalletConnectProjectID
+	}
+
+	// Convert to JSON
+	configJSON, err := json.Marshal(windowConfig)
+	if err != nil {
+		// Fallback to basic config on error
+		configJSON = []byte(`{"paymentRequired":{},"currentUrl":"","config":{"chainConfig":{}}}`)
+	}
+
+	// Create the script tag to inject
+	scriptTag := fmt.Sprintf(`<script>window.t402 = %s;</script>`, string(configJSON))
+
+	// Inject before </head>
+	return strings.Replace(template, "</head>", scriptTag+"</head>", 1)
 }
 
 // ============================================================================

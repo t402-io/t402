@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createPublicClient, formatUnits, http, publicActions, type Chain } from "viem";
-import * as allChains from "viem/chains";
 import { useAccount, useSwitchChain, useWalletClient, useConnect, useDisconnect } from "wagmi";
+
+import { getChainById } from "../evmChains";
 
 import { registerExactEvmScheme } from "@t402/evm/exact/client";
 import { t402Client } from "@t402/core/client";
@@ -56,11 +57,11 @@ export function EvmPaywall({ paymentRequired, onSuccessfulResponse }: EvmPaywall
 
   const chainId = parseInt(network.split(":")[1]);
 
-  // Find the chain from viem's chain definitions
-  const paymentChain: Chain | undefined = Object.values(allChains).find(c => c.id === chainId);
+  // Find the chain from optimized chain definitions
+  const paymentChain: Chain | undefined = getChainById(chainId);
 
   if (!paymentChain) {
-    throw new Error(`Unsupported chain ID: ${chainId}`);
+    throw new Error(`Unsupported chain ID: ${chainId}. Add it to evmChains.ts if needed.`);
   }
 
   const publicClient = useMemo(

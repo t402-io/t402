@@ -28,12 +28,14 @@ const options: esbuild.BuildOptions = {
   target: "es2020",
   jsx: "transform",
   define: {
-    "process.env.NODE_ENV": '"development"',
+    "process.env.NODE_ENV": '"production"',
     global: "globalThis",
     Buffer: "globalThis.Buffer",
   },
   mainFields: ["browser", "module", "main"],
   conditions: ["browser"],
+  drop: ["debugger"],
+  pure: ["console.log", "console.debug"],
   plugins: [
     htmlPlugin({
       files: [
