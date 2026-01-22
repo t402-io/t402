@@ -81,6 +81,10 @@ type Config struct {
 	// Aptos Configuration
 	AptosRPC        string
 	AptosTestnetRPC string
+
+	// Tezos Configuration
+	TezosRPC        string
+	TezosTestnetRPC string
 }
 
 // Load loads configuration from environment variables
@@ -162,6 +166,10 @@ func Load() *Config {
 		// Aptos Configuration
 		AptosRPC:        getEnv("APTOS_RPC", "https://fullnode.mainnet.aptoslabs.com/v1"),
 		AptosTestnetRPC: getEnv("APTOS_TESTNET_RPC", "https://fullnode.testnet.aptoslabs.com/v1"),
+
+		// Tezos Configuration
+		TezosRPC:        getEnv("TEZOS_RPC", "https://mainnet.api.tez.ie"),
+		TezosTestnetRPC: getEnv("TEZOS_TESTNET_RPC", "https://ghostnet.tezos.marigold.dev"),
 	}
 }
 
