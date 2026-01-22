@@ -2,6 +2,27 @@
 
 This module provides the server-side implementation of the exact-legacy payment scheme
 for EVM networks using the approve + transferFrom pattern.
+
+.. deprecated:: 2.3.0
+    The exact-legacy scheme is deprecated in favor of using USDT0 with the "exact" scheme.
+    USDT0 supports EIP-3009 for gasless transfers and is available on 19+ chains via LayerZero.
+
+    **Migration Guide:**
+    - Replace: `SCHEME_EXACT_LEGACY` with `SCHEME_EXACT`
+    - Replace: legacy USDT tokens with USDT0 tokens
+    - See https://docs.t402.io/migration/exact-legacy for full migration guide
+
+    **Why Migrate:**
+    1. Gasless transfers: USDT0 supports EIP-3009, eliminating gas costs for users
+    2. Cross-chain: USDT0 is available on 19+ chains with LayerZero bridging
+    3. Better UX: No separate approve transaction required
+    4. Future support: exact-legacy will be removed in v3.0.0
+
+    **Supported Chains for Migration:**
+    - Ethereum (1) - USDT0: 0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee
+    - Arbitrum (42161) - USDT0: 0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9
+    - Base (8453) - Use USDC: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+    - And 16+ more chains
 """
 
 from __future__ import annotations
