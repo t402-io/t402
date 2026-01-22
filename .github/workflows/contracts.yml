@@ -20,8 +20,11 @@ jobs:
         working-directory: ./contracts
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
+
+      - name: Initialize forge-std
+        run: |
+          rm -rf contracts/lib/forge-std
+          git clone --depth 1 https://github.com/foundry-rs/forge-std contracts/lib/forge-std
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
@@ -52,8 +55,11 @@ jobs:
         working-directory: ./contracts
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
+
+      - name: Initialize forge-std
+        run: |
+          rm -rf contracts/lib/forge-std
+          git clone --depth 1 https://github.com/foundry-rs/forge-std contracts/lib/forge-std
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
@@ -72,8 +78,11 @@ jobs:
         working-directory: ./contracts
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
+
+      - name: Initialize forge-std
+        run: |
+          rm -rf contracts/lib/forge-std
+          git clone --depth 1 https://github.com/foundry-rs/forge-std contracts/lib/forge-std
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
