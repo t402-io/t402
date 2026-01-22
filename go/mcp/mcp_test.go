@@ -1577,3 +1577,765 @@ func TestToolDefinitionJSON(t *testing.T) {
 	assert.Equal(t, "A test tool", decoded.Description)
 	assert.Equal(t, "object", decoded.InputSchema.Type)
 }
+
+// Additional tests for uncovered code paths
+
+func TestServerCallToolPayNoPrivateKey(t *testing.T) {
+	// Test pay without private key and not in demo mode
+	config := &ServerConfig{DemoMode: false, PrivateKey: ""}
+
+	params := `{"name":"t402/pay","arguments":{"to":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d","amount":"100","token":"USDC","network":"ethereum"}}`
+	inputData := `{"jsonrpc":"2.0","id":20,"method":"tools/call","params":` + params + `}` + "\n"
+
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close()
+	}()
+
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_ = server.Run(ctx)
+
+	var response JSONRPCResponse
+	err := json.Unmarshal(output.Bytes(), &response)
+	require.NoError(t, err)
+
+	resultMap, ok := response.Result.(map[string]any)
+	require.True(t, ok)
+	isError, _ := resultMap["isError"].(bool)
+	assert.True(t, isError)
+
+	// Check error message mentions private key
+	content, _ := resultMap["content"].([]any)
+	if len(content) > 0 {
+		firstContent, _ := content[0].(map[string]any)
+		text, _ := firstContent["text"].(string)
+		assert.Contains(t, text, "Private key")
+	}
+}
+
+func TestServerCallToolPayGaslessNoBundler(t *testing.T) {
+	// Test payGasless without bundler URL and not in demo mode
+	config := &ServerConfig{DemoMode: false, BundlerURL: ""}
+
+	params := `{"name":"t402/payGasless","arguments":{"to":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d","amount":"100","token":"USDC","network":"ethereum"}}`
+	inputData := `{"jsonrpc":"2.0","id":21,"method":"tools/call","params":` + params + `}` + "\n"
+
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close()
+	}()
+
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_ = server.Run(ctx)
+
+	var response JSONRPCResponse
+	err := json.Unmarshal(output.Bytes(), &response)
+	require.NoError(t, err)
+
+	resultMap, ok := response.Result.(map[string]any)
+	require.True(t, ok)
+	isError, _ := resultMap["isError"].(bool)
+	assert.True(t, isError)
+
+	// Check error message mentions bundler
+	content, _ := resultMap["content"].([]any)
+	if len(content) > 0 {
+		firstContent, _ := content[0].(map[string]any)
+		text, _ := firstContent["text"].(string)
+		assert.Contains(t, text, "Bundler URL")
+	}
+}
+
+func TestServerCallToolBridgeNoPrivateKey(t *testing.T) {
+	// Test bridge without private key and not in demo mode
+	config := &ServerConfig{DemoMode: false, PrivateKey: ""}
+
+	params := `{"name":"t402/bridge","arguments":{"fromChain":"arbitrum","toChain":"ethereum","amount":"100","recipient":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d"}}`
+	inputData := `{"jsonrpc":"2.0","id":22,"method":"tools/call","params":` + params + `}` + "\n"
+
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close()
+	}()
+
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_ = server.Run(ctx)
+
+	var response JSONRPCResponse
+	err := json.Unmarshal(output.Bytes(), &response)
+	require.NoError(t, err)
+
+	resultMap, ok := response.Result.(map[string]any)
+	require.True(t, ok)
+	isError, _ := resultMap["isError"].(bool)
+	assert.True(t, isError)
+
+	// Check error message mentions private key
+	content, _ := resultMap["content"].([]any)
+	if len(content) > 0 {
+		firstContent, _ := content[0].(map[string]any)
+		text, _ := firstContent["text"].(string)
+		assert.Contains(t, text, "Private key")
+	}
+}
+
+func TestServerCallToolGetBridgeFeeInvalidAmount(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+
+	params := `{"name":"t402/getBridgeFee","arguments":{"fromChain":"arbitrum","toChain":"ethereum","amount":"invalid_amount","recipient":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d"}}`
+	inputData := `{"jsonrpc":"2.0","id":23,"method":"tools/call","params":` + params + `}` + "\n"
+
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close()
+	}()
+
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_ = server.Run(ctx)
+
+	var response JSONRPCResponse
+	err := json.Unmarshal(output.Bytes(), &response)
+	require.NoError(t, err)
+
+	resultMap, ok := response.Result.(map[string]any)
+	require.True(t, ok)
+	isError, _ := resultMap["isError"].(bool)
+	assert.True(t, isError)
+}
+
+func TestServerCallToolGetBridgeFeeNonBridgeableToChain(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+
+	// From bridgeable chain to non-bridgeable chain
+	params := `{"name":"t402/getBridgeFee","arguments":{"fromChain":"arbitrum","toChain":"base","amount":"100","recipient":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d"}}`
+	inputData := `{"jsonrpc":"2.0","id":24,"method":"tools/call","params":` + params + `}` + "\n"
+
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close()
+	}()
+
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_ = server.Run(ctx)
+
+	var response JSONRPCResponse
+	err := json.Unmarshal(output.Bytes(), &response)
+	require.NoError(t, err)
+
+	resultMap, ok := response.Result.(map[string]any)
+	require.True(t, ok)
+	isError, _ := resultMap["isError"].(bool)
+	assert.True(t, isError)
+}
+
+func TestServerCallToolBridgeNonBridgeableToChain(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+
+	// From bridgeable chain to non-bridgeable chain
+	params := `{"name":"t402/bridge","arguments":{"fromChain":"arbitrum","toChain":"base","amount":"100","recipient":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d"}}`
+	inputData := `{"jsonrpc":"2.0","id":25,"method":"tools/call","params":` + params + `}` + "\n"
+
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close()
+	}()
+
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_ = server.Run(ctx)
+
+	var response JSONRPCResponse
+	err := json.Unmarshal(output.Bytes(), &response)
+	require.NoError(t, err)
+
+	resultMap, ok := response.Result.(map[string]any)
+	require.True(t, ok)
+	isError, _ := resultMap["isError"].(bool)
+	assert.True(t, isError)
+}
+
+func TestServerHandleRequestParseError(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+
+	// Invalid JSON
+	inputData := `{invalid json}` + "\n"
+
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close()
+	}()
+
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_ = server.Run(ctx)
+
+	var response JSONRPCResponse
+	err := json.Unmarshal(output.Bytes(), &response)
+	require.NoError(t, err)
+
+	// Should return parse error
+	assert.NotNil(t, response.Error)
+	assert.Equal(t, -32700, response.Error.Code)
+	assert.Contains(t, response.Error.Message, "Parse error")
+}
+
+func TestServerHandleRequestUnknownMethod(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+
+	inputData := `{"jsonrpc":"2.0","id":26,"method":"unknown/method"}` + "\n"
+
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close()
+	}()
+
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_ = server.Run(ctx)
+
+	var response JSONRPCResponse
+	err := json.Unmarshal(output.Bytes(), &response)
+	require.NoError(t, err)
+
+	// Should return method not found error
+	assert.NotNil(t, response.Error)
+	assert.Equal(t, -32601, response.Error.Code)
+}
+
+func TestGetExplorerTxURLMoreNetworks(t *testing.T) {
+	tests := []struct {
+		network  SupportedNetwork
+		txHash   string
+		expected string
+	}{
+		{NetworkEthereum, "0xabc", "https://etherscan.io/tx/0xabc"},
+		{NetworkBase, "0xdef", "https://basescan.org/tx/0xdef"},
+		{NetworkArbitrum, "0x123", "https://arbiscan.io/tx/0x123"},
+		{NetworkPolygon, "0x456", "https://polygonscan.com/tx/0x456"},
+		{NetworkAvalanche, "0x789", "https://snowtrace.io/tx/0x789"},
+		{NetworkInk, "0xink", "https://explorer.ink.xyz/tx/0xink"},
+		{NetworkBerachain, "0xbera", "https://berascan.com/tx/0xbera"},
+		{NetworkOptimism, "0xopt", "https://optimistic.etherscan.io/tx/0xopt"},
+		{NetworkUnichain, "0xuni", "https://uniscan.xyz/tx/0xuni"},
+	}
+
+	for _, tt := range tests {
+		t.Run(string(tt.network), func(t *testing.T) {
+			result := GetExplorerTxURL(tt.network, tt.txHash)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestGetExplorerTxURLUnknownNetwork(t *testing.T) {
+	// Unknown network should return empty string
+	result := GetExplorerTxURL("unknown_network", "0x123")
+	assert.Empty(t, result)
+}
+
+func TestServerEmptyLine(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+
+	// Send empty line followed by valid request
+	inputData := "\n\n" + `{"jsonrpc":"2.0","id":27,"method":"initialize"}` + "\n"
+
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close()
+	}()
+
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_ = server.Run(ctx)
+
+	// Should still get valid response (empty lines are skipped)
+	var response JSONRPCResponse
+	err := json.Unmarshal(output.Bytes(), &response)
+	require.NoError(t, err)
+	assert.Equal(t, "2.0", response.JSONRPC)
+}
+
+func TestServerContextCancellation(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+
+	pr, pw := io.Pipe()
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	// Start server in goroutine
+	done := make(chan error)
+	go func() {
+		done <- server.Run(ctx)
+	}()
+
+	// Cancel context immediately
+	cancel()
+
+	// Should exit with context error
+	err := <-done
+	assert.ErrorIs(t, err, context.Canceled)
+
+	// Clean up pipe
+	pw.Close()
+}
+
+func TestServerCallToolGetBalanceInvalidInput(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+
+	// Invalid JSON in arguments
+	params := `{"name":"t402/getBalance","arguments":"not valid json"}`
+	inputData := `{"jsonrpc":"2.0","id":28,"method":"tools/call","params":` + params + `}` + "\n"
+
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close()
+	}()
+
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_ = server.Run(ctx)
+
+	var response JSONRPCResponse
+	err := json.Unmarshal(output.Bytes(), &response)
+	require.NoError(t, err)
+
+	resultMap, ok := response.Result.(map[string]any)
+	require.True(t, ok)
+	isError, _ := resultMap["isError"].(bool)
+	assert.True(t, isError)
+}
+
+func TestServerCallToolPayInvalidInputJSON(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+
+	// Missing required fields
+	params := `{"name":"t402/pay","arguments":{}}`
+	inputData := `{"jsonrpc":"2.0","id":29,"method":"tools/call","params":` + params + `}` + "\n"
+
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close()
+	}()
+
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_ = server.Run(ctx)
+
+	var response JSONRPCResponse
+	err := json.Unmarshal(output.Bytes(), &response)
+	require.NoError(t, err)
+
+	resultMap, ok := response.Result.(map[string]any)
+	require.True(t, ok)
+	isError, _ := resultMap["isError"].(bool)
+	assert.True(t, isError)
+}
+
+func TestServerCallToolBridgeInvalidInputJSON(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+
+	// Invalid JSON structure
+	params := `{"name":"t402/bridge","arguments":"invalid"}`
+	inputData := `{"jsonrpc":"2.0","id":30,"method":"tools/call","params":` + params + `}` + "\n"
+
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close()
+	}()
+
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_ = server.Run(ctx)
+
+	var response JSONRPCResponse
+	err := json.Unmarshal(output.Bytes(), &response)
+	require.NoError(t, err)
+
+	resultMap, ok := response.Result.(map[string]any)
+	require.True(t, ok)
+	isError, _ := resultMap["isError"].(bool)
+	assert.True(t, isError)
+}
+
+func TestServerCallToolGetBridgeFeeInvalidInputJSON(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+
+	// Invalid JSON structure
+	params := `{"name":"t402/getBridgeFee","arguments":"invalid"}`
+	inputData := `{"jsonrpc":"2.0","id":31,"method":"tools/call","params":` + params + `}` + "\n"
+
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close()
+	}()
+
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_ = server.Run(ctx)
+
+	var response JSONRPCResponse
+	err := json.Unmarshal(output.Bytes(), &response)
+	require.NoError(t, err)
+
+	resultMap, ok := response.Result.(map[string]any)
+	require.True(t, ok)
+	isError, _ := resultMap["isError"].(bool)
+	assert.True(t, isError)
+}
+
+func TestServerCallToolPayGaslessInvalidInputJSON(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+
+	// Invalid JSON structure
+	params := `{"name":"t402/payGasless","arguments":"invalid"}`
+	inputData := `{"jsonrpc":"2.0","id":32,"method":"tools/call","params":` + params + `}` + "\n"
+
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close()
+	}()
+
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_ = server.Run(ctx)
+
+	var response JSONRPCResponse
+	err := json.Unmarshal(output.Bytes(), &response)
+	require.NoError(t, err)
+
+	resultMap, ok := response.Result.(map[string]any)
+	require.True(t, ok)
+	isError, _ := resultMap["isError"].(bool)
+	assert.True(t, isError)
+}
+
+func TestServerCallToolGetAllBalancesInvalidInput(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+
+	// Invalid JSON structure
+	params := `{"name":"t402/getAllBalances","arguments":"invalid"}`
+	inputData := `{"jsonrpc":"2.0","id":33,"method":"tools/call","params":` + params + `}` + "\n"
+
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close()
+	}()
+
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_ = server.Run(ctx)
+
+	var response JSONRPCResponse
+	err := json.Unmarshal(output.Bytes(), &response)
+	require.NoError(t, err)
+
+	resultMap, ok := response.Result.(map[string]any)
+	require.True(t, ok)
+	isError, _ := resultMap["isError"].(bool)
+	assert.True(t, isError)
+}
+
+func TestParseTokenAmountEdgeCases(t *testing.T) {
+	tests := []struct {
+		name     string
+		amount   string
+		decimals int
+		wantErr  bool
+	}{
+		{"empty string", "", 6, true},
+		{"negative", "-1", 6, false}, // ParseTokenAmount accepts negative (just parses the number)
+		{"very large", "999999999999999999999999", 6, false},
+		{"many decimals", "1.123456789", 6, false}, // Will truncate to 6 decimals
+		{"zero", "0", 6, false},
+		{"decimal only", ".5", 6, true}, // decimal only is invalid
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := ParseTokenAmount(tt.amount, tt.decimals)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestGetTokenAddressMoreCases(t *testing.T) {
+	// Test USDT0 on various networks
+	tests := []struct {
+		network SupportedNetwork
+		token   SupportedToken
+		wantOk  bool
+	}{
+		{NetworkEthereum, TokenUSDT0, true},
+		{NetworkArbitrum, TokenUSDT0, true},
+		{NetworkInk, TokenUSDT0, true},
+		{NetworkBerachain, TokenUSDT0, true},
+		{NetworkUnichain, TokenUSDT0, true},
+		// USDC availability
+		{NetworkEthereum, TokenUSDC, true},
+		{NetworkBase, TokenUSDC, true},
+		{NetworkPolygon, TokenUSDC, true},
+		// USDT availability (not on all networks)
+		{NetworkEthereum, TokenUSDT, true},
+		{NetworkArbitrum, TokenUSDT, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(string(tt.network)+"_"+string(tt.token), func(t *testing.T) {
+			_, ok := GetTokenAddress(tt.network, tt.token)
+			assert.Equal(t, tt.wantOk, ok)
+		})
+	}
+}
+
+func TestLoadConfigFromEnvWithRPCURLs(t *testing.T) {
+	// Test loading network-specific RPC URLs
+	t.Setenv("T402_RPC_ETHEREUM", "https://custom-eth.rpc.com")
+	t.Setenv("T402_RPC_BASE", "https://custom-base.rpc.com")
+	t.Setenv("T402_PRIVATE_KEY", "0xtest")
+
+	config := LoadConfigFromEnv()
+
+	assert.Equal(t, "https://custom-eth.rpc.com", config.RPCURLs["ethereum"])
+	assert.Equal(t, "https://custom-base.rpc.com", config.RPCURLs["base"])
+	assert.Equal(t, "0xtest", config.PrivateKey)
+}
+
+func TestFormatAllBalancesResultEmptyList(t *testing.T) {
+	results := []NetworkBalance{}
+
+	text := formatAllBalancesResult(results)
+	assert.Contains(t, text, "Balances Across All Networks")
+	assert.Contains(t, text, "Totals")
+}
+
+func TestFormatAllBalancesResultMixedTokens(t *testing.T) {
+	results := []NetworkBalance{
+		{
+			Network: "ethereum",
+			Native: BalanceInfo{
+				Token:   "ETH",
+				Balance: "1.0",
+				Raw:     "1000000000000000000",
+			},
+			Tokens: []BalanceInfo{
+				{Token: "USDT0", Balance: "100", Raw: "100000000"},
+				{Token: "USDC", Balance: "50", Raw: "50000000"},
+			},
+		},
+		{
+			Network: "arbitrum",
+			Native: BalanceInfo{
+				Token:   "ETH",
+				Balance: "0.5",
+				Raw:     "500000000000000000",
+			},
+			Tokens: []BalanceInfo{
+				{Token: "USDT0", Balance: "200", Raw: "200000000"},
+			},
+		},
+	}
+
+	text := formatAllBalancesResult(results)
+	assert.Contains(t, text, "USDT0: 300") // Total USDT0
+	assert.Contains(t, text, "USDC: 50")   // Total USDC
+}
+
+func TestServerMultipleRequests(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+
+	// Send multiple requests
+	requests := []string{
+		`{"jsonrpc":"2.0","id":1,"method":"initialize"}`,
+		`{"jsonrpc":"2.0","id":2,"method":"tools/list"}`,
+	}
+	inputData := strings.Join(requests, "\n") + "\n"
+
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close()
+	}()
+
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_ = server.Run(ctx)
+
+	// Should have two responses
+	lines := strings.Split(strings.TrimSpace(output.String()), "\n")
+	assert.Len(t, lines, 2)
+
+	// Verify first response (initialize)
+	var resp1 JSONRPCResponse
+	err := json.Unmarshal([]byte(lines[0]), &resp1)
+	require.NoError(t, err)
+	assert.Nil(t, resp1.Error)
+
+	// Verify second response (tools/list)
+	var resp2 JSONRPCResponse
+	err = json.Unmarshal([]byte(lines[1]), &resp2)
+	require.NoError(t, err)
+	assert.Nil(t, resp2.Error)
+}
+
+func TestServerCallToolMissingName(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+
+	// No name in params
+	params := `{"arguments":{"address":"0x123"}}`
+	inputData := `{"jsonrpc":"2.0","id":40,"method":"tools/call","params":` + params + `}` + "\n"
+
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close()
+	}()
+
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_ = server.Run(ctx)
+
+	var response JSONRPCResponse
+	err := json.Unmarshal(output.Bytes(), &response)
+	require.NoError(t, err)
+
+	// Should return error for invalid/missing tool name
+	resultMap, ok := response.Result.(map[string]any)
+	require.True(t, ok)
+	isError, _ := resultMap["isError"].(bool)
+	assert.True(t, isError)
+}
+
+func TestTokenConstantsExist(t *testing.T) {
+	// Verify all token constants are defined
+	assert.NotEmpty(t, TokenDecimals)
+	assert.Equal(t, 6, TokenDecimals) // USDT/USDC have 6 decimals
+}
+
+func TestNetworkChainIDs(t *testing.T) {
+	// Verify all networks have chain IDs
+	for _, network := range AllNetworks() {
+		chainID, ok := ChainIDs[network]
+		assert.True(t, ok, "Network %s should have a chain ID", network)
+		assert.Greater(t, chainID, int64(0), "Chain ID for %s should be positive", network)
+	}
+}
+
+func TestAllNetworksHaveNativeSymbols(t *testing.T) {
+	for _, network := range AllNetworks() {
+		symbol, ok := NativeSymbols[network]
+		assert.True(t, ok, "Network %s should have a native symbol", network)
+		assert.NotEmpty(t, symbol, "Native symbol for %s should not be empty", network)
+	}
+}
+
+func TestAllNetworksHaveExplorerURLs(t *testing.T) {
+	for _, network := range AllNetworks() {
+		url, ok := ExplorerURLs[network]
+		assert.True(t, ok, "Network %s should have an explorer URL", network)
+		assert.NotEmpty(t, url, "Explorer URL for %s should not be empty", network)
+		assert.True(t, strings.HasPrefix(url, "https://"), "Explorer URL for %s should be HTTPS", network)
+	}
+}
+
+func TestAllNetworksHaveRPCURLs(t *testing.T) {
+	for _, network := range AllNetworks() {
+		url, ok := DefaultRPCURLs[network]
+		assert.True(t, ok, "Network %s should have an RPC URL", network)
+		assert.NotEmpty(t, url, "RPC URL for %s should not be empty", network)
+		assert.True(t, strings.HasPrefix(url, "https://"), "RPC URL for %s should be HTTPS", network)
+	}
+}
