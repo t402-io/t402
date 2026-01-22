@@ -129,7 +129,7 @@ go/mechanisms/aptos/*_test.go
 **Current**: 65-80% coverage, production-ready
 
 **Action Items**:
-- [ ] Add CLI integration tests (currently 0%)
+- [x] Add CLI integration tests (40 tests added)
 - [ ] Improve ERC-4337 coverage (21-29% → 60%)
 - [ ] Improve bridge/scan coverage (29% → 60%)
 - [ ] Document legacy scheme deprecation
