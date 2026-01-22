@@ -46,14 +46,8 @@ export function TronPaywall({ paymentRequired, onSuccessfulResponse }: TronPaywa
   const isMainnet = isTronMainnet(network);
   const targetNetwork: TronNetwork = isMainnet ? TRON_NETWORKS.MAINNET : TRON_NETWORKS.NILE;
 
-  const {
-    address,
-    isConnected,
-    isInstalled,
-    isConnecting,
-    connect,
-    disconnect,
-  } = useTronWallet(setStatus);
+  const { address, isConnected, isInstalled, isConnecting, connect, disconnect } =
+    useTronWallet(setStatus);
 
   const {
     balance,
@@ -176,11 +170,7 @@ export function TronPaywall({ paymentRequired, onSuccessfulResponse }: TronPaywa
         {!isMainnet && (
           <p className="instructions">
             Need TRON Testnet USDT?{" "}
-            <a
-              href="https://nileex.io/join/getJoinPage"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href="https://nileex.io/join/getJoinPage" target="_blank" rel="noopener noreferrer">
               Get testnet TRX <u>here</u>
             </a>{" "}
             and swap for USDT.
@@ -251,11 +241,7 @@ export function TronPaywall({ paymentRequired, onSuccessfulResponse }: TronPaywa
         {!isInstalled && (
           <div className="status">
             Install{" "}
-            <a
-              href="https://www.tronlink.org/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href="https://www.tronlink.org/" target="_blank" rel="noopener noreferrer">
               TronLink wallet
             </a>{" "}
             to continue, then refresh this page.

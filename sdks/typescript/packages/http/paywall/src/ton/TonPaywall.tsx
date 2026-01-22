@@ -48,12 +48,17 @@ function TonPaywallInner({ paymentRequired, onSuccessfulResponse }: TonPaywallPr
     ? Address.parse(wallet.account.address).toString({ bounceable: false })
     : null;
 
-  const { balance, formattedBalance, isFetching: isFetchingBalance, refreshBalance, resetBalance } =
-    useTonBalance({
-      address: walletAddress,
-      paymentRequired,
-      onStatus: setStatus,
-    });
+  const {
+    balance,
+    formattedBalance,
+    isFetching: isFetchingBalance,
+    refreshBalance,
+    resetBalance,
+  } = useTonBalance({
+    address: walletAddress,
+    paymentRequired,
+    onStatus: setStatus,
+  });
 
   const tonSigner = useTonSigner(wallet, targetNetwork);
 
@@ -186,11 +191,7 @@ function TonPaywallInner({ paymentRequired, onSuccessfulResponse }: TonPaywallPr
         {!isMainnet && (
           <p className="instructions">
             Need TON Testnet USDT?{" "}
-            <a
-              href="https://t.me/testgiver_ton_bot"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href="https://t.me/testgiver_ton_bot" target="_blank" rel="noopener noreferrer">
               Get testnet TON <u>here</u>
             </a>{" "}
             and use a testnet DEX.

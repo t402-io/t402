@@ -29,7 +29,7 @@ const STEPS: { key: PaymentStep; label: string }[] = [
  * Get the index of a step
  */
 function getStepIndex(step: PaymentStep): number {
-  return STEPS.findIndex((s) => s.key === step);
+  return STEPS.findIndex(s => s.key === step);
 }
 
 /**
@@ -37,13 +37,7 @@ function getStepIndex(step: PaymentStep): number {
  */
 function CheckIcon() {
   return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 14 14"
-      fill="none"
-      aria-hidden="true"
-    >
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
       <path
         d="M11.5 4L5.5 10L2.5 7"
         stroke="currentColor"

@@ -7,6 +7,7 @@ export interface PaymentQRCodeProps {
   data: string;
   /**
    * Size of the QR code in pixels
+   *
    * @default 200
    */
   size?: number;
@@ -16,6 +17,7 @@ export interface PaymentQRCodeProps {
   label?: string;
   /**
    * Whether to show a copy button
+   *
    * @default true
    */
   showCopyButton?: boolean;
@@ -75,7 +77,7 @@ function generateQRMatrix(data: string): boolean[][] {
     for (let x = 9; x < size - 9; x++) {
       if (x !== 6 && y !== 6) {
         const seed = (hash + x * 31 + y * 17 + data.charCodeAt((x + y) % data.length)) | 0;
-        matrix[y][x] = (seed % 3) === 0;
+        matrix[y][x] = seed % 3 === 0;
       }
     }
   }
@@ -116,12 +118,7 @@ function renderQRToCanvas(
   for (let y = 0; y < moduleCount; y++) {
     for (let x = 0; x < moduleCount; x++) {
       if (matrix[y][x]) {
-        ctx.fillRect(
-          x * moduleSize,
-          y * moduleSize,
-          moduleSize,
-          moduleSize,
-        );
+        ctx.fillRect(x * moduleSize, y * moduleSize, moduleSize, moduleSize);
       }
     }
   }
@@ -148,7 +145,8 @@ export function PaymentQRCode({
       // Get colors from CSS variables
       const computedStyle = getComputedStyle(document.documentElement);
       const darkColor = computedStyle.getPropertyValue("--text-color").trim() || "#000000";
-      const lightColor = computedStyle.getPropertyValue("--container-background-color").trim() || "#ffffff";
+      const lightColor =
+        computedStyle.getPropertyValue("--container-background-color").trim() || "#ffffff";
 
       renderQRToCanvas(canvasRef.current, matrix, size, darkColor, lightColor);
     }
@@ -217,15 +215,7 @@ function CopyIcon() {
       aria-hidden="true"
       style={{ marginRight: "0.25rem" }}
     >
-      <rect
-        x="5"
-        y="5"
-        width="9"
-        height="9"
-        rx="1"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
+      <rect x="5" y="5" width="9" height="9" rx="1" stroke="currentColor" strokeWidth="1.5" />
       <path
         d="M11 5V3C11 2.44772 10.5523 2 10 2H3C2.44772 2 2 2.44772 2 3V10C2 10.5523 2.44772 11 3 11H5"
         stroke="currentColor"

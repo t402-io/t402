@@ -42,7 +42,9 @@ export function StacksPaywall({ paymentRequired, onSuccessfulResponse }: StacksP
   const network = firstRequirement.network;
   const chainName = getNetworkDisplayName(network);
   const isMainnet = isStacksMainnet(network);
-  const targetNetwork: StacksNetwork = isMainnet ? STACKS_NETWORKS.MAINNET : STACKS_NETWORKS.TESTNET;
+  const targetNetwork: StacksNetwork = isMainnet
+    ? STACKS_NETWORKS.MAINNET
+    : STACKS_NETWORKS.TESTNET;
 
   const {
     account,
@@ -274,19 +276,11 @@ export function StacksPaywall({ paymentRequired, onSuccessfulResponse }: StacksP
         {!isInstalled && (
           <div className="status">
             Install a Stacks wallet (
-            <a
-              href={STACKS_WALLETS.leather.installUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href={STACKS_WALLETS.leather.installUrl} target="_blank" rel="noopener noreferrer">
               Leather
             </a>
             {" or "}
-            <a
-              href={STACKS_WALLETS.xverse.installUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href={STACKS_WALLETS.xverse.installUrl} target="_blank" rel="noopener noreferrer">
               Xverse
             </a>
             ) to continue, then refresh this page.

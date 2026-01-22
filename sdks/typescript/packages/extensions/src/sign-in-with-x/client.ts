@@ -139,6 +139,8 @@ export function createSIWxTypedData(
  * @param message - CAIP-122 formatted message to sign
  * @param signer - Wallet/signer interface with signMessage
  * @param options - Signing options
+ * @param options.signatureScheme - Signature scheme to use
+ * @param options.serverInfo - Server info for verification
  * @returns Hex-encoded signature
  *
  * @example
