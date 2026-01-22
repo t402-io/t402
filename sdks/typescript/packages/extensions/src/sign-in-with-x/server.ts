@@ -469,6 +469,12 @@ async function verifySmartWalletSignature(
     request(args: { method: string; params: unknown[] }): Promise<unknown>;
   }
 
+  /**
+   * Type guard for Ethereum provider interface
+   *
+   * @param p - Value to check
+   * @returns True if value is an EthProvider
+   */
   function isEthProvider(p: unknown): p is EthProvider {
     return typeof p === "object" && p !== null && "request" in p;
   }

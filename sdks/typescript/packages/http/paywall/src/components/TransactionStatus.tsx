@@ -118,7 +118,12 @@ function CopyIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
       <rect x="4" y="4" width="8" height="8" rx="1" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M2 10V3a1 1 0 011-1h7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path
+        d="M2 10V3a1 1 0 011-1h7"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -227,7 +232,7 @@ export function TransactionStatus({
     // In production, this would poll the blockchain for actual confirmation status
     const timer = setTimeout(() => {
       if (confirmations < requiredConfirmations) {
-        setConfirmations((prev) => prev + 1);
+        setConfirmations(prev => prev + 1);
         setStatus("confirming");
       }
     }, 2000);
@@ -313,7 +318,12 @@ export function TransactionStatus({
       </div>
 
       {status === "confirming" && (
-        <div className="tx-confirmations-bar" role="progressbar" aria-valuenow={confirmations} aria-valuemax={requiredConfirmations}>
+        <div
+          className="tx-confirmations-bar"
+          role="progressbar"
+          aria-valuenow={confirmations}
+          aria-valuemax={requiredConfirmations}
+        >
           <div
             className="tx-confirmations-progress"
             style={{ width: `${(confirmations / requiredConfirmations) * 100}%` }}
