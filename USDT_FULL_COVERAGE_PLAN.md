@@ -6,7 +6,7 @@
 > Last Updated: 2026-01-22
 >
 > **Phase 1 & 2 Complete**: Legacy EVM USDT (BNB, Avalanche, Celo, Kaia, Fantom)
-> **Phase 3 Complete**: Near Protocol (spec + Go + TypeScript + Facilitator)
+> **Phase 3 Complete**: Near Protocol, Aptos (spec + Go + TypeScript + Facilitator)
 
 ---
 
@@ -176,16 +176,16 @@ typescript/packages/mechanisms/near/ (NEW)
 python/t402/src/t402/near/ (NEW)
 ```
 
-#### Aptos (P2)
+#### Aptos (P2) ✅ Complete
 
 | Item | Value |
 |------|-------|
-| USDT Address | `0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa::asset::USDT` |
-| Standard | Move Coin |
+| USDT Address | `0xf73e887a8754f540ee6e1a93bdc6dde2af69fc7ca5de32013e89dd44244473cb` |
+| Standard | Fungible Asset (FA) |
 | RPC | https://fullnode.mainnet.aptoslabs.com/v1 |
 | CAIP-2 | `aptos:1` |
 
-**Complexity**: High - requires Move VM understanding and Aptos SDK
+**Implementation**: Complete (TypeScript @t402/aptos + Go mechanism + Facilitator)
 
 #### Tezos (P2)
 
@@ -329,10 +329,11 @@ Add a new payment scheme for legacy tokens:
   - [ ] Implement client/server/facilitator
   - [ ] Wallet integration
   - [ ] Tests
-- [ ] Aptos (if prioritized)
-  - [ ] Research Move VM
-  - [ ] Create `@t402/aptos` package
-  - [ ] Implement mechanisms
+- [x] Aptos ✅ Complete
+  - [x] Research Move VM / Fungible Asset standard
+  - [x] Create `@t402/aptos` package
+  - [x] Implement exact-direct scheme (TypeScript + Go)
+  - [x] Add to Facilitator
 - [ ] Tezos (if prioritized)
   - [ ] Research FA2 standard
   - [ ] Create `@t402/tezos` package
@@ -440,7 +441,7 @@ Add a new payment scheme for legacy tokens:
 | 26 | Kaia | 8217 | Legacy | ✅ Complete |
 | 27 | Fantom | 250 | Legacy | ✅ Complete |
 | 28 | Near | - | NEP-141 | ✅ Complete |
-| 29 | Aptos | - | Move | ❌ Phase 3 |
+| 29 | Aptos | - | Move | ✅ Complete |
 | 30 | Tezos | - | FA2 | ❌ Phase 3 |
 | 31 | Polkadot | - | Assets | ❌ Phase 3 |
 | 32 | Cosmos/Noble | - | Native | ✅ (USDC) |
@@ -470,7 +471,7 @@ Add a new payment scheme for legacy tokens:
 | TRON Mainnet | `TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t` |
 | Solana | `Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB` |
 | Near | `usdt.tether-token.near` |
-| Aptos | `0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa::asset::USDT` |
+| Aptos | `0xf73e887a8754f540ee6e1a93bdc6dde2af69fc7ca5de32013e89dd44244473cb` (FA Metadata) |
 | Tezos | `KT1XnTn74bUtxHfDtBmm2bGZAQfhPbvKWR8o` |
 
 ---
