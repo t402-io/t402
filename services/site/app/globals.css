@@ -1,0 +1,330 @@
+@import "tailwindcss";
+
+/* =============================================================================
+   T402 Design System - Dark Theme
+   ============================================================================= */
+
+@theme {
+  /* Background Colors */
+  --color-background: #0A0A0B;
+  --color-background-secondary: #111113;
+  --color-background-tertiary: #18181B;
+  --color-background-elevated: #232326;
+  --color-background-inverse: #FAFAFA;
+
+  /* Text Colors */
+  --color-foreground: #FAFAFA;
+  --color-foreground-secondary: #A1A1AA;
+  --color-foreground-tertiary: #71717A;
+  --color-foreground-inverse: #0A0A0B;
+
+  /* Brand Colors - Tether Green */
+  --color-brand: #50AF95;
+  --color-brand-secondary: #26A17B;
+  --color-brand-accent: #1BA27A;
+  --color-brand-muted: rgba(80, 175, 149, 0.1);
+
+  /* Semantic Colors */
+  --color-success: #22C55E;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+
+  /* Chain Colors */
+  --color-chain-ethereum: #627EEA;
+  --color-chain-base: #0052FF;
+  --color-chain-arbitrum: #28A0F0;
+  --color-chain-optimism: #FF0420;
+  --color-chain-polygon: #8247E5;
+  --color-chain-ton: #0098EA;
+  --color-chain-tron: #FF0000;
+  --color-chain-solana: #9945FF;
+  --color-chain-berachain: #FF6B00;
+  --color-chain-unichain: #FF007A;
+  --color-chain-ink: #7B3FE4;
+
+  /* Border Colors */
+  --color-border: #27272A;
+  --color-border-secondary: #3F3F46;
+  --color-border-tertiary: #52525B;
+  --color-border-focus: #50AF95;
+  --color-border-muted: rgba(255, 255, 255, 0.1);
+
+  /* Overlay Colors */
+  --color-overlay-light: rgba(255, 255, 255, 0.05);
+  --color-overlay-medium: rgba(255, 255, 255, 0.1);
+  --color-overlay-dark: rgba(0, 0, 0, 0.5);
+  --color-overlay-backdrop: rgba(0, 0, 0, 0.8);
+
+  /* Typography */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", "SF Mono", Consolas, monospace;
+  --font-display: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Layout */
+  --max-width-container: 1440px;
+  --spacing-section: 6rem;
+
+  /* Shadows (dark theme optimized) */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 20px rgba(80, 175, 149, 0.4);
+
+  /* Motion */
+  --duration-fast: 100ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --easing-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* =============================================================================
+   Base Styles
+   ============================================================================= */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  color: var(--color-foreground);
+  background: var(--color-background);
+  font-family: var(--font-sans);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  container-type: inline-size;
+}
+
+/* Selection */
+::selection {
+  background: var(--color-brand);
+  color: var(--color-background);
+}
+
+/* =============================================================================
+   Typography
+   ============================================================================= */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+}
+
+code, pre, kbd, samp {
+  font-family: var(--font-mono);
+}
+
+/* =============================================================================
+   Links
+   ============================================================================= */
+
+a {
+  color: var(--color-brand);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--easing-default);
+}
+
+a:hover {
+  color: var(--color-brand-secondary);
+}
+
+/* =============================================================================
+   Focus States
+   ============================================================================= */
+
+:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+/* =============================================================================
+   Scrollbar (dark theme)
+   ============================================================================= */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-secondary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-tertiary);
+}
+
+/* =============================================================================
+   Accessibility
+   ============================================================================= */
+
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  z-index: 9999;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-brand);
+  color: var(--color-background);
+  font-weight: 500;
+  border-radius: 0 0 0.5rem 0;
+}
+
+.skip-to-content:focus {
+  left: 0;
+  top: 0;
+}
+
+/* Screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* =============================================================================
+   Utilities
+   ============================================================================= */
+
+@utility full-bleed {
+  width: 100cqw;
+  margin-left: calc(50% - 50cqw);
+}
+
+@utility unset-full-bleed {
+  width: unset;
+  margin-left: unset;
+}
+
+@utility max-w-container {
+  max-width: var(--max-width-container);
+}
+
+/* Text gradient utility */
+@utility text-gradient {
+  background: linear-gradient(135deg, var(--color-brand) 0%, var(--color-brand-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glow effect utility */
+@utility glow {
+  box-shadow: var(--shadow-glow);
+}
+
+/* Glass effect utility */
+@utility glass {
+  background: rgba(17, 17, 19, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border-muted);
+}
+
+/* =============================================================================
+   Code Blocks
+   ============================================================================= */
+
+pre {
+  background: var(--color-background-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+code {
+  background: var(--color-background-tertiary);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+}
+
+/* =============================================================================
+   Animations
+   ============================================================================= */
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(80, 175, 149, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(80, 175, 149, 0.4);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Animation utilities */
+.animate-fade-in {
+  animation: fade-in var(--duration-normal) var(--easing-default);
+}
+
+.animate-fade-up {
+  animation: fade-up var(--duration-slow) var(--easing-default);
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-background-tertiary) 0%,
+    var(--color-background-elevated) 50%,
+    var(--color-background-tertiary) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
