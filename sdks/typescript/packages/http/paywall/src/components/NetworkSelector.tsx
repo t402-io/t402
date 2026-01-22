@@ -73,7 +73,7 @@ function formatAmount(req: PaymentRequirements): string {
 /**
  * Get token decimals for a network
  */
-function getDecimals(network: string): number {
+function getDecimals(_network: string): number {
   // TON, TRON, Solana USDT all use 6 decimals
   // EVM USDT0 uses 6 decimals
   return 6;
