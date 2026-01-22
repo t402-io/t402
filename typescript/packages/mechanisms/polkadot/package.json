@@ -1,0 +1,98 @@
+{
+  "name": "@t402/polkadot",
+  "version": "2.1.0",
+  "description": "T402 Polkadot Asset Hub mechanism - USDT payments on Polkadot",
+  "type": "module",
+  "main": "./dist/cjs/index.cjs",
+  "module": "./dist/esm/index.mjs",
+  "types": "./dist/esm/index.d.mts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.mts",
+        "default": "./dist/esm/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.cts",
+        "default": "./dist/cjs/index.cjs"
+      }
+    },
+    "./exact-direct/client": {
+      "import": {
+        "types": "./dist/esm/exact-direct/client/index.d.mts",
+        "default": "./dist/esm/exact-direct/client/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/exact-direct/client/index.d.cts",
+        "default": "./dist/cjs/exact-direct/client/index.cjs"
+      }
+    },
+    "./exact-direct/server": {
+      "import": {
+        "types": "./dist/esm/exact-direct/server/index.d.mts",
+        "default": "./dist/esm/exact-direct/server/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/exact-direct/server/index.d.cts",
+        "default": "./dist/cjs/exact-direct/server/index.cjs"
+      }
+    },
+    "./exact-direct/facilitator": {
+      "import": {
+        "types": "./dist/esm/exact-direct/facilitator/index.d.mts",
+        "default": "./dist/esm/exact-direct/facilitator/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/exact-direct/facilitator/index.d.cts",
+        "default": "./dist/cjs/exact-direct/facilitator/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@t402/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "@polkadot/api": ">=12.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@polkadot/api": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@polkadot/api": "^14.0.0",
+    "@types/node": "^22.0.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2"
+  },
+  "keywords": [
+    "t402",
+    "polkadot",
+    "asset-hub",
+    "usdt",
+    "payments",
+    "cryptocurrency",
+    "web3"
+  ],
+  "author": "T402 Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/t402-io/t402.git",
+    "directory": "typescript/packages/mechanisms/polkadot"
+  },
+  "bugs": {
+    "url": "https://github.com/t402-io/t402/issues"
+  },
+  "homepage": "https://t402.io"
+}

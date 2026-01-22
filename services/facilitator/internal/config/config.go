@@ -85,6 +85,10 @@ type Config struct {
 	// Tezos Configuration
 	TezosRPC        string
 	TezosTestnetRPC string
+
+	// Polkadot Configuration
+	PolkadotAssetHubIndexer string
+	WestendAssetHubIndexer  string
 }
 
 // Load loads configuration from environment variables
@@ -170,6 +174,10 @@ func Load() *Config {
 		// Tezos Configuration
 		TezosRPC:        getEnv("TEZOS_RPC", "https://mainnet.api.tez.ie"),
 		TezosTestnetRPC: getEnv("TEZOS_TESTNET_RPC", "https://ghostnet.tezos.marigold.dev"),
+
+		// Polkadot Configuration
+		PolkadotAssetHubIndexer: getEnv("POLKADOT_ASSET_HUB_INDEXER", "https://assethub-polkadot.api.subscan.io"),
+		WestendAssetHubIndexer:  getEnv("WESTEND_ASSET_HUB_INDEXER", "https://assethub-westend.api.subscan.io"),
 	}
 }
 
