@@ -30,10 +30,16 @@ app.use(
 @t402/extensions        Bazaar, Sign-In-With-X extensions
 
 Mechanisms (Chain-specific payment implementations):
-@t402/evm               EIP-3009, ERC-4337, USDT0 bridge for EVM chains
+@t402/evm               EIP-3009, ERC-4337, USDT0 bridge for EVM chains (19 networks)
+@t402/evm-core          Shared EVM utilities
 @t402/svm               Solana SPL token support
 @t402/ton               TON Jetton (TEP-74) support
 @t402/tron              TRON TRC-20 support
+@t402/near              NEAR NEP-141 token support
+@t402/aptos             Aptos Fungible Asset support
+@t402/tezos             Tezos FA2 token support
+@t402/polkadot          Polkadot Asset Hub support
+@t402/stacks            Stacks (Bitcoin L2) SIP-010 support
 
 HTTP Integrations:
 @t402/express           Express.js middleware
@@ -105,20 +111,20 @@ go install github.com/t402-io/t402/go/cmd/t402@v1.8.0
 t402 --help
 ```
 
-### Java (v1.7.0)
+### Java (v1.8.0)
 
 ```xml
 <dependency>
   <groupId>io.t402</groupId>
   <artifactId>t402</artifactId>
-  <version>1.7.0</version>
+  <version>1.8.0</version>
 </dependency>
 ```
 
 Or with Gradle:
 
 ```groovy
-implementation 'io.t402:t402:1.7.0'
+implementation 'io.t402:t402:1.8.0'
 ```
 
 </details>
@@ -126,13 +132,15 @@ implementation 'io.t402:t402:1.7.0'
 <details>
 <summary><b>Supported Networks</b></summary>
 
-### EVM (Ethereum Virtual Machine)
-- Ethereum Mainnet (`eip155:1`)
-- Base (`eip155:8453`, `eip155:84532`)
-- Arbitrum (`eip155:42161`)
-- Optimism (`eip155:10`)
-- Polygon (`eip155:137`)
-- Supports USDC, USDT, USDT0, and native tokens
+### EVM (Ethereum Virtual Machine) - 19 USDT0 Networks
+- Ethereum (`eip155:1`), Arbitrum (`eip155:42161`), Optimism (`eip155:10`)
+- Base (`eip155:8453`), Polygon (`eip155:137`), Ink (`eip155:57073`)
+- Berachain (`eip155:80094`), Unichain (`eip155:130`), Mantle (`eip155:5000`)
+- Sei (`eip155:1329`), Conflux (`eip155:1030`), Monad (`eip155:143`)
+- Flare (`eip155:14`), Rootstock (`eip155:30`), XLayer (`eip155:196`)
+- Plasma (`eip155:9745`), HyperEVM (`eip155:999`), MegaETH (`eip155:4326`)
+- Corn (`eip155:21000000`)
+- Legacy USDT: BNB Chain, Avalanche, Fantom, Celo, Kaia
 
 ### ERC-4337 Account Abstraction
 - **Gasless Transactions**: Users pay zero gas fees via paymaster sponsorship
@@ -157,8 +165,33 @@ implementation 'io.t402:t402:1.7.0'
 - TRON Shasta Testnet (`tron:shasta`)
 - Supports USDT TRC-20 (TIP-20 standard)
 
+### NEAR Protocol
+- NEAR Mainnet (`near:mainnet`)
+- NEAR Testnet (`near:testnet`)
+- Supports USDT NEP-141 token
+
+### Aptos
+- Aptos Mainnet (`aptos:1`)
+- Aptos Testnet (`aptos:2`)
+- Supports USDT Fungible Asset
+
+### Tezos
+- Tezos Mainnet (`tezos:NetXdQprcVkpaWU`)
+- Tezos Ghostnet (`tezos:NetXnHfVqm9iesp`)
+- Supports USDt FA2 token
+
+### Polkadot
+- Polkadot Asset Hub (`polkadot:68d56f15f85d3136970ec16946040bc1`)
+- Westend Asset Hub (testnet)
+- Supports USDT (Asset ID: 1984)
+
+### Stacks (Bitcoin L2)
+- Stacks Mainnet (`stacks:1`)
+- Stacks Testnet (`stacks:2147483648`)
+- Supports sBTC and SIP-010 tokens
+
 ### USDT0 Cross-Chain Bridge (LayerZero)
-- **Supported chains**: Ethereum, Arbitrum, Ink, Berachain, Unichain
+- **All 19 USDT0 networks** fully supported
 - **Message tracking** via LayerZero Scan API
 
 </details>
@@ -202,27 +235,35 @@ t402 info eip155:8453
 | Core Client | ✅ | ✅ | ✅ | ✅ |
 | Core Server | ✅ | ✅ | ✅ | ✅ |
 | Facilitator | ✅ | ✅ | ✅ | ✅ |
-| EVM Mechanism | ✅ | ✅ | ✅ | ✅ |
+| EVM Mechanism (19 networks) | ✅ | ✅ | ✅ | ✅ |
 | SVM Mechanism | ✅ | ✅ | ✅ | ❌ |
 | TON Mechanism | ✅ | ✅ | ✅ | ✅ |
 | TRON Mechanism | ✅ | ✅ | ✅ | ✅ |
+| NEAR Mechanism | ✅ | ✅ | ⚠️ | ❌ |
+| Aptos Mechanism | ✅ | ✅ | ⚠️ | ❌ |
+| Tezos Mechanism | ✅ | ✅ | ⚠️ | ❌ |
+| Polkadot Mechanism | ✅ | ✅ | ⚠️ | ❌ |
+| Stacks Mechanism | ✅ | ⚠️ | ⚠️ | ❌ |
 | ERC-4337 | ✅ | ✅ | ✅ | ✅ |
 | USDT0 Bridge | ✅ | ✅ | ✅ | ✅ |
 | WDK Integration | ✅ | ✅ | ✅ | ✅ |
 | MCP Server | ✅ | ✅ | ✅ | ❌ |
 | CLI Tool | ✅ | ✅ | ✅ | ✅ |
+| Paywall UI | ✅ | ✅ | ✅ | ❌ |
 | Spring Boot | ❌ | ❌ | ❌ | ⚠️ |
 
 Legend: ✅ Complete | ⚠️ Partial | ❌ Not Available
+
+**Total Supported Networks: 32+** (19 USDT0 + 6 Legacy EVM + 7 Non-EVM)
 
 ## Latest Releases
 
 | SDK | Version | Release Date | Changelog |
 |-----|---------|--------------|-----------|
-| TypeScript | v2.3.0 | 2026-01-19 | [CHANGELOG](typescript/CHANGELOG.md) |
-| Python | v1.9.0 | 2026-01-19 | [CHANGELOG](python/CHANGELOG.md) |
-| Go | v1.8.0 | 2026-01-19 | [CHANGELOG](go/CHANGELOG.md) |
-| Java | v1.7.0 | 2026-01-19 | [CHANGELOG](java/CHANGELOG.md) |
+| TypeScript | v2.3.0 | 2026-01-22 | [CHANGELOG](typescript/CHANGELOG.md) |
+| Python | v1.9.0 | 2026-01-22 | [CHANGELOG](python/CHANGELOG.md) |
+| Go | v1.8.0 | 2026-01-22 | [CHANGELOG](go/CHANGELOG.md) |
+| Java | v1.8.0 | 2026-01-22 | [CHANGELOG](java/CHANGELOG.md) |
 
 ## Ecosystem
 
