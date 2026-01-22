@@ -126,12 +126,13 @@ go/mechanisms/aptos/*_test.go
 
 ### 2.2 Python SDK Improvements
 
-**Current**: 65-80% coverage, production-ready
+**Current**: 85-100% coverage (improved), production-ready
+**Tests**: 740 total tests (CLI: 40, ERC-4337: 80, Bridge: 72)
 
 **Action Items**:
 - [x] Add CLI integration tests (40 tests added)
-- [ ] Improve ERC-4337 coverage (21-29% → 60%)
-- [ ] Improve bridge/scan coverage (29% → 60%)
+- [x] Improve ERC-4337 coverage (80 tests added, full module coverage)
+- [x] Improve bridge/scan coverage (29% → 100%, 17 tests added)
 - [ ] Document legacy scheme deprecation
 
 ### 2.3 Security Audit Completion
