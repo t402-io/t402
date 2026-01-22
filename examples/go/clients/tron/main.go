@@ -8,9 +8,9 @@ import (
 	"os"
 	"time"
 
-	t402 "github.com/t402-io/t402/go"
-	"github.com/t402-io/t402/go/mechanisms/tron"
-	tronclient "github.com/t402-io/t402/go/mechanisms/tron/exact/client"
+	t402 "github.com/t402-io/t402/sdks/go"
+	"github.com/t402-io/t402/sdks/go/mechanisms/tron"
+	tronclient "github.com/t402-io/t402/sdks/go/mechanisms/tron/exact/client"
 	"github.com/joho/godotenv"
 )
 

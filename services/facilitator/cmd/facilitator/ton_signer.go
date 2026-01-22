@@ -19,7 +19,7 @@ import (
 
 	"golang.org/x/crypto/pbkdf2"
 
-	"github.com/t402-io/t402/go/mechanisms/ton"
+	"github.com/t402-io/t402/sdks/go/mechanisms/ton"
 )
 
 // facilitatorTonSigner implements the FacilitatorTonSigner interface

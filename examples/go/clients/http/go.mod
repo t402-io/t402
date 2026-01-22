@@ -4,11 +4,11 @@ go 1.24.0
 
 toolchain go1.24.1
 
-replace github.com/t402-io/t402/go => ../../../../go
+replace github.com/t402-io/t402/sdks/go => ../../../../sdks/go
 
 require (
-	github.com/t402-io/t402/go v0.0.0-00010101000000-000000000000
 	github.com/joho/godotenv v1.5.1
+	github.com/t402-io/t402/sdks/go v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -23,7 +23,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
 	github.com/ethereum/c-kzg-4844/v2 v2.1.5 // indirect
-	github.com/ethereum/go-ethereum v1.16.7 // indirect
+	github.com/ethereum/go-ethereum v1.16.8 // indirect
 	github.com/ethereum/go-verkle v0.2.2 // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/gagliardetto/binary v0.8.0 // indirect

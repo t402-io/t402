@@ -2,11 +2,11 @@ name: Java CI
 on:
   pull_request:
     paths:
-      - 'java/**'
+      - 'sdks/java/**'
   push:
     branches: [ main ]
     paths:
-      - 'java/**'
+      - 'sdks/java/**'
   workflow_dispatch:
 
 jobs:
@@ -30,13 +30,13 @@ jobs:
         restore-keys: ${{ runner.os }}-m2
         
     - name: Run tests with coverage
-      working-directory: ./java
+      working-directory: ./sdks/java
       run: mvn clean test -Pcoverage
       
     - name: Run checkstyle
-      working-directory: ./java
+      working-directory: ./sdks/java
       run: mvn checkstyle:check
       
     - name: Run SpotBugs
-      working-directory: ./java
+      working-directory: ./sdks/java
       run: mvn spotbugs:check

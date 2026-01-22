@@ -16,10 +16,10 @@ jobs:
         with:
           node-version: "20"
           cache: "pnpm"
-          cache-dependency-path: ./typescript
+          cache-dependency-path: ./sdks/typescript
 
       - name: Check if pnpm-lock.yaml changed
-        working-directory: ./typescript
+        working-directory: ./sdks/typescript
         run: |
           pnpm install
           if [ -n "$(git diff pnpm-lock.yaml)" ]; then

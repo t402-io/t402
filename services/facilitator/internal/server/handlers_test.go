@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	t402 "github.com/t402-io/t402/go"
+	t402 "github.com/t402-io/t402/sdks/go"
 	"github.com/t402-io/t402/services/facilitator/internal/config"
 	"github.com/t402-io/t402/services/facilitator/internal/metrics"
 )

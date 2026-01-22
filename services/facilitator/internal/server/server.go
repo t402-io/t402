@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	t402 "github.com/t402-io/t402/go"
+	t402 "github.com/t402-io/t402/sdks/go"
 	"github.com/t402-io/t402/services/facilitator/internal/auth"
 	"github.com/t402-io/t402/services/facilitator/internal/cache"
 	"github.com/t402-io/t402/services/facilitator/internal/config"

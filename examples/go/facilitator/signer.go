@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	evmmech "github.com/t402-io/t402/go/mechanisms/evm"
-	svmmech "github.com/t402-io/t402/go/mechanisms/svm"
+	evmmech "github.com/t402-io/t402/sdks/go/mechanisms/evm"
+	svmmech "github.com/t402-io/t402/sdks/go/mechanisms/svm"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"

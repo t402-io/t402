@@ -30,59 +30,59 @@ T402 is an open-source HTTP-native payment protocol for USDT/USDT0 stablecoins. 
 
 ```
 t402/
-├── typescript/              # TypeScript SDK (pnpm monorepo)
-│   ├── packages/
-│   │   ├── core/            # @t402/core - Protocol types, HTTP utilities
-│   │   ├── extensions/      # @t402/extensions - Protocol extensions
-│   │   ├── mechanisms/
-│   │   │   ├── evm/         # @t402/evm - EVM chains (EIP-3009)
-│   │   │   ├── evm-core/    # @t402/evm-core - Shared EVM utilities
-│   │   │   ├── svm/         # @t402/svm - Solana (SPL tokens)
-│   │   │   ├── ton/         # @t402/ton - TON (Jettons)
-│   │   │   ├── tron/        # @t402/tron - TRON (TRC-20)
-│   │   │   ├── near/        # @t402/near - NEAR (NEP-141)
-│   │   │   ├── aptos/       # @t402/aptos - Aptos (Fungible Asset)
-│   │   │   ├── tezos/       # @t402/tezos - Tezos (FA2)
-│   │   │   ├── polkadot/    # @t402/polkadot - Polkadot Asset Hub
-│   │   │   └── stacks/      # @t402/stacks - Stacks (Bitcoin L2)
-│   │   ├── http/
-│   │   │   ├── express/     # @t402/express - Express.js middleware
-│   │   │   ├── hono/        # @t402/hono - Hono middleware
-│   │   │   ├── fastify/     # @t402/fastify - Fastify middleware
-│   │   │   ├── next/        # @t402/next - Next.js integration
-│   │   │   ├── fetch/       # @t402/fetch - Fetch client wrapper
-│   │   │   ├── axios/       # @t402/axios - Axios interceptor
-│   │   │   ├── paywall/     # @t402/paywall - Universal paywall UI
-│   │   │   ├── react/       # @t402/react - React components
-│   │   │   └── vue/         # @t402/vue - Vue components
-│   │   ├── wdk/             # @t402/wdk - Tether WDK integration
-│   │   ├── wdk-gasless/     # @t402/wdk-gasless - ERC-4337 gasless payments
-│   │   ├── wdk-bridge/      # @t402/wdk-bridge - LayerZero bridging
-│   │   ├── wdk-multisig/    # @t402/wdk-multisig - Safe multi-sig
-│   │   ├── mcp/             # @t402/mcp - AI agent MCP server
-│   │   └── cli/             # @t402/cli - Command-line tools
-│   ├── site/                # [SUBMODULE] Marketing website
-│   ├── turbo.json           # Turborepo configuration
-│   └── package.json         # Monorepo root
-├── go/                      # Go SDK
-│   ├── mechanisms/          # Chain implementations
-│   │   ├── evm/
-│   │   ├── svm/
-│   │   ├── ton/
-│   │   ├── tron/
-│   │   ├── near/
-│   │   ├── aptos/
-│   │   ├── tezos/
-│   │   ├── polkadot/
-│   │   └── stacks/
-│   ├── http/                # HTTP middleware (Gin)
-│   ├── cmd/t402/            # CLI tool
-│   └── cmd/t402-mcp/        # MCP server
-├── python/                  # Python SDK
-│   └── t402/
-│       └── src/t402/
-├── java/                    # Java SDK
-│   └── t402/
+├── sdks/                    # All SDK implementations
+│   ├── typescript/          # TypeScript SDK (pnpm monorepo)
+│   │   ├── packages/
+│   │   │   ├── core/        # @t402/core - Protocol types, HTTP utilities
+│   │   │   ├── extensions/  # @t402/extensions - Protocol extensions
+│   │   │   ├── mechanisms/
+│   │   │   │   ├── evm/     # @t402/evm - EVM chains (EIP-3009)
+│   │   │   │   ├── evm-core/ # @t402/evm-core - Shared EVM utilities
+│   │   │   │   ├── svm/     # @t402/svm - Solana (SPL tokens)
+│   │   │   │   ├── ton/     # @t402/ton - TON (Jettons)
+│   │   │   │   ├── tron/    # @t402/tron - TRON (TRC-20)
+│   │   │   │   ├── near/    # @t402/near - NEAR (NEP-141)
+│   │   │   │   ├── aptos/   # @t402/aptos - Aptos (Fungible Asset)
+│   │   │   │   ├── tezos/   # @t402/tezos - Tezos (FA2)
+│   │   │   │   ├── polkadot/ # @t402/polkadot - Polkadot Asset Hub
+│   │   │   │   └── stacks/  # @t402/stacks - Stacks (Bitcoin L2)
+│   │   │   ├── http/
+│   │   │   │   ├── express/ # @t402/express - Express.js middleware
+│   │   │   │   ├── hono/    # @t402/hono - Hono middleware
+│   │   │   │   ├── fastify/ # @t402/fastify - Fastify middleware
+│   │   │   │   ├── next/    # @t402/next - Next.js integration
+│   │   │   │   ├── fetch/   # @t402/fetch - Fetch client wrapper
+│   │   │   │   ├── axios/   # @t402/axios - Axios interceptor
+│   │   │   │   ├── paywall/ # @t402/paywall - Universal paywall UI
+│   │   │   │   ├── react/   # @t402/react - React components
+│   │   │   │   └── vue/     # @t402/vue - Vue components
+│   │   │   ├── wdk/         # @t402/wdk - Tether WDK integration
+│   │   │   ├── wdk-gasless/ # @t402/wdk-gasless - ERC-4337 gasless payments
+│   │   │   ├── wdk-bridge/  # @t402/wdk-bridge - LayerZero bridging
+│   │   │   ├── wdk-multisig/ # @t402/wdk-multisig - Safe multi-sig
+│   │   │   ├── mcp/         # @t402/mcp - AI agent MCP server
+│   │   │   └── cli/         # @t402/cli - Command-line tools
+│   │   ├── turbo.json       # Turborepo configuration
+│   │   └── package.json     # Monorepo root
+│   ├── go/                  # Go SDK
+│   │   ├── mechanisms/      # Chain implementations
+│   │   │   ├── evm/
+│   │   │   ├── svm/
+│   │   │   ├── ton/
+│   │   │   ├── tron/
+│   │   │   ├── near/
+│   │   │   ├── aptos/
+│   │   │   ├── tezos/
+│   │   │   ├── polkadot/
+│   │   │   └── stacks/
+│   │   ├── http/            # HTTP middleware (Gin)
+│   │   ├── cmd/t402/        # CLI tool
+│   │   └── cmd/t402-mcp/    # MCP server
+│   ├── python/              # Python SDK
+│   │   └── t402/
+│   │       └── src/t402/
+│   └── java/                # Java SDK
+│       └── t402/
 ├── services/                # Deployable services
 │   ├── site/                # t402.io marketing website
 │   ├── docs/                # docs.t402.io documentation
@@ -128,7 +128,7 @@ t402/
 | GitHub | https://github.com/t402-io/t402 |
 | npm | https://www.npmjs.com/org/t402 |
 | PyPI | https://pypi.org/project/t402 |
-| Go Modules | https://pkg.go.dev/github.com/t402-io/t402/go |
+| Go Modules | https://pkg.go.dev/github.com/t402-io/t402/sdks/go |
 | Maven Central | https://central.sonatype.com/artifact/io.t402/t402 |
 | Container Registry | https://github.com/t402-io/t402/pkgs/container/facilitator |
 
@@ -183,30 +183,30 @@ git clone --recurse-submodules https://github.com/t402-io/t402.git
 cd t402
 
 # TypeScript
-cd typescript
+cd sdks/typescript
 pnpm install
 pnpm build
 pnpm test
 
 # Go
-cd go
+cd sdks/go
 go mod download
 go test ./...
 
 # Python
-cd python/t402
+cd sdks/python/t402
 uv sync
 uv run pytest
 
 # Java
-cd java/t402
+cd sdks/java/t402
 mvn clean install
 ```
 
 ### TypeScript Monorepo Commands
 
 ```bash
-cd typescript
+cd sdks/typescript
 
 # Build all packages
 pnpm build
@@ -609,9 +609,9 @@ chore(ci): add integration tests
 
 | Task | Command |
 |------|---------|
-| Run TypeScript tests | `cd typescript && pnpm test` |
-| Run Go tests | `cd go && go test ./...` |
-| Build all packages | `cd typescript && pnpm build` |
+| Run TypeScript tests | `cd sdks/typescript && pnpm test` |
+| Run Go tests | `cd sdks/go && go test ./...` |
+| Build all packages | `cd sdks/typescript && pnpm build` |
 | Check vulnerabilities | `govulncheck ./...` (Go) / `pnpm audit` (TS) |
 | Deploy facilitator | Push to main, Watchtower auto-deploys |
 
@@ -647,8 +647,8 @@ Mechanisms (chain-specific implementations):
 | File | Purpose |
 |------|---------|
 | `specs/t402-specification-v2.md` | Protocol specification |
-| `go/interfaces.go` | Core Go interfaces |
-| `typescript/packages/core/src/types/` | TypeScript type definitions |
+| `sdks/go/interfaces.go` | Core Go interfaces |
+| `sdks/typescript/packages/core/src/types/` | TypeScript type definitions |
 | `services/facilitator/internal/` | Facilitator implementation |
 | `.github/workflows/` | CI/CD pipelines |
 | `ROADMAP.md` | High-level project roadmap |
