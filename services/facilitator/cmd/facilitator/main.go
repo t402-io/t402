@@ -76,13 +76,29 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, error) {
 		}
 
 		networks := []networkInfo{
+			// Core Networks
 			{t402.Network("eip155:1"), cfg.EthRPC, "Ethereum"},
 			{t402.Network("eip155:42161"), cfg.ArbitrumRPC, "Arbitrum"},
 			{t402.Network("eip155:8453"), cfg.BaseRPC, "Base"},
 			{t402.Network("eip155:10"), cfg.OptimismRPC, "Optimism"},
 			{t402.Network("eip155:57073"), cfg.InkRPC, "Ink"},
-			{t402.Network("eip155:80084"), cfg.BerachainRPC, "Berachain"},
+			{t402.Network("eip155:80094"), cfg.BerachainRPC, "Berachain"},
 			{t402.Network("eip155:130"), cfg.UnichainRPC, "Unichain"},
+			// Phase 1: High Priority USDT0 Networks
+			{t402.Network("eip155:137"), cfg.PolygonRPC, "Polygon"},
+			{t402.Network("eip155:5000"), cfg.MantleRPC, "Mantle"},
+			{t402.Network("eip155:9745"), cfg.PlasmaRPC, "Plasma"},
+			{t402.Network("eip155:1329"), cfg.SeiRPC, "Sei"},
+			{t402.Network("eip155:1030"), cfg.ConfluxRPC, "Conflux"},
+			{t402.Network("eip155:143"), cfg.MonadRPC, "Monad"},
+			// Phase 2: Medium Priority USDT0 Networks
+			{t402.Network("eip155:14"), cfg.FlareRPC, "Flare"},
+			{t402.Network("eip155:30"), cfg.RootstockRPC, "Rootstock"},
+			{t402.Network("eip155:196"), cfg.XLayerRPC, "XLayer"},
+			{t402.Network("eip155:988"), cfg.StableRPC, "Stable"},
+			{t402.Network("eip155:999"), cfg.HyperEvmRPC, "HyperEVM"},
+			{t402.Network("eip155:4326"), cfg.MegaEthRPC, "MegaETH"},
+			{t402.Network("eip155:21000000"), cfg.CornRPC, "Corn"},
 		}
 
 		// Use Base RPC as default if available, otherwise use first available RPC

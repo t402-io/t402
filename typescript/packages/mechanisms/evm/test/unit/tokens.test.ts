@@ -33,7 +33,34 @@ describe("Token Configuration", () => {
     });
 
     it("should have Unichain USDT0 address", () => {
-      expect(USDT0_ADDRESSES["eip155:130"]).toBe("0x588ce4F028D8e7B53B687865d6A67b3A54C75518");
+      // Updated to official USDT0 address from https://docs.usdt0.to
+      expect(USDT0_ADDRESSES["eip155:130"]).toBe("0x9151434b16b9763660705744891fA906F660EcC5");
+    });
+
+    // Phase 1: High Priority USDT0 Networks
+    it("should have Polygon USDT0 address", () => {
+      expect(USDT0_ADDRESSES["eip155:137"]).toBe("0xc2132D05D31c914a87C6611C10748AEb04B58e8F");
+    });
+
+    it("should have Optimism USDT0 address", () => {
+      expect(USDT0_ADDRESSES["eip155:10"]).toBe("0x01bFF41798a0BcF287b996046Ca68b395DbC1071");
+    });
+
+    it("should have Mantle USDT0 address", () => {
+      expect(USDT0_ADDRESSES["eip155:5000"]).toBe("0x779Ded0c9e1022225f8E0630b35a9b54bE713736");
+    });
+
+    it("should have Sei USDT0 address", () => {
+      expect(USDT0_ADDRESSES["eip155:1329"]).toBe("0x9151434b16b9763660705744891fA906F660EcC5");
+    });
+
+    // Phase 2: Medium Priority USDT0 Networks
+    it("should have Flare USDT0 address", () => {
+      expect(USDT0_ADDRESSES["eip155:14"]).toBe("0xe7cd86e13AC4309349F30B3435a9d337750fC82D");
+    });
+
+    it("should have Rootstock USDT0 address", () => {
+      expect(USDT0_ADDRESSES["eip155:30"]).toBe("0x779dED0C9e1022225F8e0630b35A9B54Be713736");
     });
   });
 
@@ -201,9 +228,13 @@ describe("Token Configuration", () => {
   describe("getUsdt0Networks", () => {
     it("should return all USDT0 supported networks", () => {
       const networks = getUsdt0Networks();
-      expect(networks.length).toBeGreaterThanOrEqual(5);
+      // Now supports 19 USDT0 networks
+      expect(networks.length).toBeGreaterThanOrEqual(19);
       expect(networks).toContain("eip155:42161"); // Arbitrum
       expect(networks).toContain("eip155:57073"); // Ink
+      expect(networks).toContain("eip155:137"); // Polygon
+      expect(networks).toContain("eip155:10"); // Optimism
+      expect(networks).toContain("eip155:5000"); // Mantle
     });
   });
 

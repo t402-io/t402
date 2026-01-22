@@ -37,6 +37,21 @@ type Config struct {
 	InkRPC        string
 	BerachainRPC  string
 	UnichainRPC   string
+	// Phase 1: High Priority USDT0 Networks
+	PolygonRPC  string
+	MantleRPC   string
+	PlasmaRPC   string
+	SeiRPC      string
+	ConfluxRPC  string
+	MonadRPC    string
+	// Phase 2: Medium Priority USDT0 Networks
+	FlareRPC     string
+	RootstockRPC string
+	XLayerRPC    string
+	StableRPC    string
+	HyperEvmRPC  string
+	MegaEthRPC   string
+	CornRPC      string
 
 	// TON Configuration
 	TonMnemonic       string
@@ -87,8 +102,23 @@ func Load() *Config {
 		BaseRPC:       getEnv("BASE_RPC", "https://mainnet.base.org"),
 		OptimismRPC:   getEnv("OPTIMISM_RPC", "https://mainnet.optimism.io"),
 		InkRPC:        getEnv("INK_RPC", "https://rpc-gel.inkonchain.com"),
-		BerachainRPC:  getEnv("BERACHAIN_RPC", "https://bartio.rpc.berachain.com"),
+		BerachainRPC:  getEnv("BERACHAIN_RPC", "https://rpc.berachain.com"),
 		UnichainRPC:   getEnv("UNICHAIN_RPC", "https://mainnet.unichain.org"),
+		// Phase 1: High Priority USDT0 Networks
+		PolygonRPC:  getEnv("POLYGON_RPC", "https://polygon-rpc.com"),
+		MantleRPC:   getEnv("MANTLE_RPC", "https://rpc.mantle.xyz"),
+		PlasmaRPC:   getEnv("PLASMA_RPC", "https://rpc.plasma.io"),
+		SeiRPC:      getEnv("SEI_RPC", "https://evm-rpc.sei-apis.com"),
+		ConfluxRPC:  getEnv("CONFLUX_RPC", "https://evm.confluxrpc.com"),
+		MonadRPC:    getEnv("MONAD_RPC", "https://rpc.monad.xyz"),
+		// Phase 2: Medium Priority USDT0 Networks
+		FlareRPC:     getEnv("FLARE_RPC", "https://flare-api.flare.network/ext/C/rpc"),
+		RootstockRPC: getEnv("ROOTSTOCK_RPC", "https://public-node.rsk.co"),
+		XLayerRPC:    getEnv("XLAYER_RPC", "https://rpc.xlayer.tech"),
+		StableRPC:    getEnv("STABLE_RPC", "https://rpc.stable.io"),
+		HyperEvmRPC:  getEnv("HYPEREVM_RPC", "https://rpc.hyperevm.xyz"),
+		MegaEthRPC:   getEnv("MEGAETH_RPC", "https://rpc.megaeth.com"),
+		CornRPC:      getEnv("CORN_RPC", "https://rpc.corn.xyz"),
 
 		// TON Configuration
 		TonMnemonic:       getEnv("TON_MNEMONIC", ""),
