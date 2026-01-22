@@ -75,10 +75,7 @@ export function parseContractId(contractId: string): { address: string; name: st
  * @returns True if Leather is available
  */
 export function isLeatherInstalled(): boolean {
-  return (
-    typeof window !== "undefined" &&
-    (!!window.LeatherProvider || !!window.HiroWalletProvider)
-  );
+  return typeof window !== "undefined" && (!!window.LeatherProvider || !!window.HiroWalletProvider);
 }
 
 /**
@@ -87,10 +84,7 @@ export function isLeatherInstalled(): boolean {
  * @returns True if Xverse is available
  */
 export function isXverseInstalled(): boolean {
-  return (
-    typeof window !== "undefined" &&
-    !!window.XverseProviders?.StacksProvider
-  );
+  return typeof window !== "undefined" && !!window.XverseProviders?.StacksProvider;
 }
 
 /**
@@ -131,9 +125,7 @@ export async function fetchTokenBalance(
   const encodedContractId = encodeURIComponent(contractId);
 
   try {
-    const response = await fetch(
-      `${endpoint}/extended/v1/address/${address}/balances`,
-    );
+    const response = await fetch(`${endpoint}/extended/v1/address/${address}/balances`);
 
     if (!response.ok) {
       console.error("Failed to fetch balance:", response.status);

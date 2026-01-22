@@ -79,7 +79,7 @@ export function createSIWxMessage(serverInfo: SIWxExtensionInfo, address: string
  */
 export function createSIWxTypedData(
   serverInfo: SIWxExtensionInfo,
-  address: string
+  address: string,
 ): {
   domain: {
     name: string;
@@ -151,7 +151,7 @@ export function createSIWxTypedData(
 export async function signSIWxMessage(
   message: string,
   signer: SIWxSigner,
-  options?: { signatureScheme?: SignatureScheme; serverInfo?: SIWxExtensionInfo }
+  options?: { signatureScheme?: SignatureScheme; serverInfo?: SIWxExtensionInfo },
 ): Promise<string> {
   const scheme = options?.signatureScheme || "eip191";
 
@@ -224,7 +224,7 @@ export async function signSIWxMessage(
  */
 export async function createSIWxPayload(
   serverExtension: SIWxExtension,
-  signer: SIWxSigner
+  signer: SIWxSigner,
 ): Promise<SIWxPayload> {
   const { info } = serverExtension;
 

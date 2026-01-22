@@ -39,9 +39,7 @@ function buildTransferPayload(params: {
   contractName: string;
   args: string[];
 } {
-  const { address: contractAddress, name: contractName } = parseContractId(
-    params.tokenContract,
-  );
+  const { address: contractAddress, name: contractName } = parseContractId(params.tokenContract);
 
   return {
     functionName: "transfer",
@@ -142,8 +140,7 @@ export function useStacksSigner(
       },
 
       async signTokenTransfer(params) {
-        const tokenContract =
-          params.tokenContract || getUsdcContractAddress(network);
+        const tokenContract = params.tokenContract || getUsdcContractAddress(network);
 
         const payload = buildTransferPayload({
           recipient: params.recipient,

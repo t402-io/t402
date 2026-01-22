@@ -5,26 +5,26 @@
  * Builds and signs external messages for Jetton wallet interactions.
  */
 
-import { Address, SendMode } from "@ton/core";
-import type { PaymentPayload, PaymentRequirements, SchemeNetworkClient } from "@t402/core/types";
-import type { ClientTonSigner } from "../../signer.js";
-import type { ExactTonPayloadV2 } from "../../types.js";
-import { SCHEME_EXACT, DEFAULT_JETTON_TRANSFER_TON, DEFAULT_FORWARD_TON } from "../../constants.js";
+import { Address, SendMode } from '@ton/core'
+import type { PaymentPayload, PaymentRequirements, SchemeNetworkClient } from '@t402/core/types'
+import type { ClientTonSigner } from '../../signer.js'
+import type { ExactTonPayloadV2 } from '../../types.js'
+import { SCHEME_EXACT, DEFAULT_JETTON_TRANSFER_TON, DEFAULT_FORWARD_TON } from '../../constants.js'
 import {
   generateQueryId,
   buildJettonTransferBody,
   normalizeNetwork,
   parseTonAddress,
-} from "../../utils.js";
+} from '../../utils.js'
 
 /**
  * Configuration for ExactTonScheme client
  */
 export interface ExactTonSchemeConfig {
   /** Override the TON amount attached for gas (in nanoTON) */
-  gasAmount?: bigint;
+  gasAmount?: bigint
   /** Override the forward TON amount (in nanoTON) */
-  forwardAmount?: bigint;
+  forwardAmount?: bigint
 }
 
 /**
@@ -34,7 +34,7 @@ export interface ExactTonSchemeConfig {
  * by a facilitator to complete the payment.
  */
 export class ExactTonScheme implements SchemeNetworkClient {
-  readonly scheme = SCHEME_EXACT;
+  readonly scheme = SCHEME_EXACT
 
   /**
    * Creates a new ExactTonScheme instance.
@@ -65,44 +65,44 @@ export class ExactTonScheme implements SchemeNetworkClient {
   async createPaymentPayload(
     t402Version: number,
     paymentRequirements: PaymentRequirements,
-  ): Promise<Pick<PaymentPayload, "t402Version" | "payload">> {
+  ): Promise<Pick<PaymentPayload, 't402Version' | 'payload'>> {
     // Normalize and validate network
-    const network = normalizeNetwork(paymentRequirements.network);
+    const network = normalizeNetwork(paymentRequirements.network)
 
     // Validate required fields
     if (!paymentRequirements.asset) {
-      throw new Error("Asset (Jetton master address) is required");
+      throw new Error('Asset (Jetton master address) is required')
     }
     if (!paymentRequirements.payTo) {
-      throw new Error("PayTo address is required");
+      throw new Error('PayTo address is required')
     }
     if (!paymentRequirements.amount) {
-      throw new Error("Amount is required");
+      throw new Error('Amount is required')
     }
 
     // Parse addresses
-    const jettonMasterAddress = paymentRequirements.asset;
-    const destinationAddress = parseTonAddress(paymentRequirements.payTo);
+    const jettonMasterAddress = paymentRequirements.asset
+    const destinationAddress = parseTonAddress(paymentRequirements.payTo)
 
     // Get client's Jetton wallet address
     const senderJettonWalletAddress = await this.getJettonWalletAddress(
       this.signer.address.toString(),
       jettonMasterAddress,
-    );
-    const senderJettonWallet = Address.parse(senderJettonWalletAddress);
+    )
+    const senderJettonWallet = Address.parse(senderJettonWalletAddress)
 
     // Get current seqno for replay protection
-    const seqno = await this.signer.getSeqno();
+    const seqno = await this.signer.getSeqno()
 
     // Calculate validity period
-    const now = Math.floor(Date.now() / 1000);
-    const validUntil = now + paymentRequirements.maxTimeoutSeconds;
+    const now = Math.floor(Date.now() / 1000)
+    const validUntil = now + paymentRequirements.maxTimeoutSeconds
 
     // Generate unique query ID
-    const queryId = generateQueryId();
+    const queryId = generateQueryId()
 
     // Parse amount
-    const jettonAmount = BigInt(paymentRequirements.amount);
+    const jettonAmount = BigInt(paymentRequirements.amount)
 
     // Build Jetton transfer body
     const jettonTransferBody = buildJettonTransferBody({
@@ -111,10 +111,10 @@ export class ExactTonScheme implements SchemeNetworkClient {
       destination: destinationAddress,
       responseDestination: this.signer.address,
       forwardAmount: this.config.forwardAmount ?? DEFAULT_FORWARD_TON,
-    });
+    })
 
     // Gas amount for the transfer
-    const tonAmount = this.config.gasAmount ?? DEFAULT_JETTON_TRANSFER_TON;
+    const tonAmount = this.config.gasAmount ?? DEFAULT_JETTON_TRANSFER_TON
 
     // Sign the message
     const signedMessage = await this.signer.signMessage({
@@ -123,13 +123,13 @@ export class ExactTonScheme implements SchemeNetworkClient {
       body: jettonTransferBody,
       sendMode: SendMode.PAY_GAS_SEPARATELY,
       timeout: paymentRequirements.maxTimeoutSeconds,
-    });
+    })
 
     // Encode to base64
-    const signedBoc = signedMessage.toBoc().toString("base64");
+    const signedBoc = signedMessage.toBoc().toString('base64')
 
     // Build authorization metadata
-    const authorization: ExactTonPayloadV2["authorization"] = {
+    const authorization: ExactTonPayloadV2['authorization'] = {
       from: this.signer.address.toString({ bounceable: true }),
       to: paymentRequirements.payTo,
       jettonMaster: jettonMasterAddress,
@@ -138,20 +138,20 @@ export class ExactTonScheme implements SchemeNetworkClient {
       validUntil,
       seqno,
       queryId: queryId.toString(),
-    };
+    }
 
     // Create payload
     const payload: ExactTonPayloadV2 = {
       signedBoc,
       authorization,
-    };
+    }
 
     // Mark network as used
-    void network;
+    void network
 
     return {
       t402Version,
       payload,
-    };
+    }
   }
 }

@@ -66,7 +66,9 @@ describe("Sign-In-With-X Client", () => {
     it("should create CAIP-122 formatted message", () => {
       const message = createSIWxMessage(serverInfo, "0x1234567890123456789012345678901234567890");
 
-      expect(message).toContain("api.example.com wants you to sign in with your eip155:8453 account:");
+      expect(message).toContain(
+        "api.example.com wants you to sign in with your eip155:8453 account:",
+      );
       expect(message).toContain("0x1234567890123456789012345678901234567890");
       expect(message).toContain("Sign in to access premium content");
     });
@@ -97,7 +99,7 @@ describe("Sign-In-With-X Client", () => {
     it("should create valid EIP-712 typed data", () => {
       const typedData = createSIWxTypedData(
         serverInfo,
-        "0x1234567890123456789012345678901234567890"
+        "0x1234567890123456789012345678901234567890",
       );
 
       expect(typedData.domain.name).toBe("api.example.com");
@@ -109,7 +111,7 @@ describe("Sign-In-With-X Client", () => {
     it("should include correct types", () => {
       const typedData = createSIWxTypedData(
         serverInfo,
-        "0x1234567890123456789012345678901234567890"
+        "0x1234567890123456789012345678901234567890",
       );
 
       expect(typedData.types.SIWx).toBeDefined();
@@ -121,7 +123,7 @@ describe("Sign-In-With-X Client", () => {
     it("should include message with all fields", () => {
       const typedData = createSIWxTypedData(
         serverInfo,
-        "0x1234567890123456789012345678901234567890"
+        "0x1234567890123456789012345678901234567890",
       );
 
       expect(typedData.message.domain).toBe("api.example.com");
@@ -137,7 +139,7 @@ describe("Sign-In-With-X Client", () => {
       // For non-numeric chain IDs, it should still work (NaN or 0)
       const typedData = createSIWxTypedData(
         solanaInfo,
-        "0x1234567890123456789012345678901234567890"
+        "0x1234567890123456789012345678901234567890",
       );
 
       // Non-EVM chains may have NaN chainId, which is fine for signing
@@ -203,7 +205,7 @@ describe("Sign-In-With-X Client", () => {
       };
 
       await expect(
-        signSIWxMessage("Test message", mockSigner, { signatureScheme: "eip712" })
+        signSIWxMessage("Test message", mockSigner, { signatureScheme: "eip712" }),
       ).rejects.toThrow("serverInfo");
     });
 
@@ -213,9 +215,7 @@ describe("Sign-In-With-X Client", () => {
         // No signMessage or signTypedData
       };
 
-      await expect(signSIWxMessage("Test message", mockSigner)).rejects.toThrow(
-        "does not support"
-      );
+      await expect(signSIWxMessage("Test message", mockSigner)).rejects.toThrow("does not support");
     });
 
     it("should support SIWS (Solana) signing", async () => {
@@ -239,7 +239,7 @@ describe("Sign-In-With-X Client", () => {
       };
 
       await expect(
-        signSIWxMessage("Test message", mockSigner, { signatureScheme: "sep10" })
+        signSIWxMessage("Test message", mockSigner, { signatureScheme: "sep10" }),
       ).rejects.toThrow("not yet implemented");
     });
   });

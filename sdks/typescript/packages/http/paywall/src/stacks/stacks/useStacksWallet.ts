@@ -44,7 +44,11 @@ async function connectLeather(network: StacksNetwork): Promise<StacksAccount> {
   const response = await provider.request("getAddresses");
 
   // Response contains addresses array
-  const addresses = (response as { result: { addresses: Array<{ address: string; publicKey: string; type: string }> } }).result?.addresses;
+  const addresses = (
+    response as {
+      result: { addresses: Array<{ address: string; publicKey: string; type: string }> };
+    }
+  ).result?.addresses;
 
   if (!addresses || addresses.length === 0) {
     throw new Error("No addresses returned from wallet");
@@ -82,7 +86,9 @@ async function connectXverse(network: StacksNetwork): Promise<StacksAccount> {
     purposes: ["stacks"],
   });
 
-  const addresses = (response as { result: { addresses: Array<{ address: string; publicKey: string }> } }).result?.addresses;
+  const addresses = (
+    response as { result: { addresses: Array<{ address: string; publicKey: string }> } }
+  ).result?.addresses;
 
   if (!addresses || addresses.length === 0) {
     throw new Error("No addresses returned from wallet");

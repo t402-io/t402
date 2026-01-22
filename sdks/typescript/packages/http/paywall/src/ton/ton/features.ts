@@ -24,9 +24,10 @@ export function getWalletDisplayInfo(wallet: Wallet): WalletInfo | null {
   return {
     name: wallet.device.appName,
     appName: wallet.device.appName,
-    imageUrl: wallet.device.appName === "Tonkeeper"
-      ? "https://tonkeeper.com/assets/tonconnect-icon.png"
-      : undefined,
+    imageUrl:
+      wallet.device.appName === "Tonkeeper"
+        ? "https://tonkeeper.com/assets/tonconnect-icon.png"
+        : undefined,
     aboutUrl: "",
     tondns: undefined,
     platforms: [],

@@ -1,6 +1,6 @@
-import { t402ResourceServer } from "@t402/core/server";
-import { Network } from "@t402/core/types";
-import { ExactTonScheme, ExactTonSchemeConfig } from "./scheme.js";
+import { t402ResourceServer } from '@t402/core/server'
+import { Network } from '@t402/core/types'
+import { ExactTonScheme, ExactTonSchemeConfig } from './scheme.js'
 
 /**
  * Configuration options for registering TON schemes to an t402ResourceServer
@@ -10,12 +10,12 @@ export interface TonResourceServerConfig {
    * Optional specific networks to register
    * If not provided, registers wildcard support (ton:*)
    */
-  networks?: Network[];
+  networks?: Network[]
 
   /**
    * Optional scheme configuration (preferred Jetton, etc.)
    */
-  schemeConfig?: ExactTonSchemeConfig;
+  schemeConfig?: ExactTonSchemeConfig
 }
 
 /**
@@ -46,18 +46,18 @@ export function registerExactTonScheme(
   server: t402ResourceServer,
   config: TonResourceServerConfig = {},
 ): t402ResourceServer {
-  const scheme = new ExactTonScheme(config.schemeConfig);
+  const scheme = new ExactTonScheme(config.schemeConfig)
 
   // Register V2 scheme
   if (config.networks && config.networks.length > 0) {
     // Register specific networks
-    config.networks.forEach(network => {
-      server.register(network, scheme);
-    });
+    config.networks.forEach((network) => {
+      server.register(network, scheme)
+    })
   } else {
     // Register wildcard for all TON networks
-    server.register("ton:*", scheme);
+    server.register('ton:*', scheme)
   }
 
-  return server;
+  return server
 }

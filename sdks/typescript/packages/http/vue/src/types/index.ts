@@ -1,25 +1,25 @@
-import type { PaymentRequired, PaymentRequirements } from "@t402/core/types";
-import type { Ref, ComputedRef } from "vue";
+import type { PaymentRequired, PaymentRequirements } from '@t402/core/types'
+import type { Ref, ComputedRef } from 'vue'
 
 /**
  * Payment status states
  */
-export type PaymentStatus = "idle" | "loading" | "success" | "error";
+export type PaymentStatus = 'idle' | 'loading' | 'success' | 'error'
 
 /**
  * Payment state for composables
  */
 export interface PaymentState {
   /** Current payment status */
-  status: Ref<PaymentStatus>;
+  status: Ref<PaymentStatus>
   /** Error message if status is 'error' */
-  error: Ref<string | null>;
+  error: Ref<string | null>
   /** The payment required response from server */
-  paymentRequired: Ref<PaymentRequired | null>;
+  paymentRequired: Ref<PaymentRequired | null>
   /** Currently selected payment requirement */
-  selectedRequirement: Ref<PaymentRequirements | null>;
+  selectedRequirement: Ref<PaymentRequirements | null>
   /** Whether we're in testnet mode */
-  isTestnet: ComputedRef<boolean>;
+  isTestnet: ComputedRef<boolean>
 }
 
 /**
@@ -27,13 +27,13 @@ export interface PaymentState {
  */
 export interface PaymentButtonProps {
   /** Whether the button is disabled */
-  disabled?: boolean;
+  disabled?: boolean
   /** Whether the button is in loading state */
-  loading?: boolean;
+  loading?: boolean
   /** Button variant */
-  variant?: "primary" | "secondary" | "outline";
+  variant?: 'primary' | 'secondary' | 'outline'
   /** Button size */
-  size?: "sm" | "md" | "lg";
+  size?: 'sm' | 'md' | 'lg'
 }
 
 /**
@@ -41,9 +41,9 @@ export interface PaymentButtonProps {
  */
 export interface PaymentStatusDisplayProps {
   /** Current status */
-  status: PaymentStatus;
+  status: PaymentStatus
   /** Message to display */
-  message?: string;
+  message?: string
 }
 
 /**
@@ -51,13 +51,13 @@ export interface PaymentStatusDisplayProps {
  */
 export interface PaymentDetailsProps {
   /** Payment requirements to display */
-  requirement: PaymentRequirements;
+  requirement: PaymentRequirements
   /** Whether to show the network name */
-  showNetwork?: boolean;
+  showNetwork?: boolean
   /** Whether to show the asset */
-  showAsset?: boolean;
+  showAsset?: boolean
   /** Whether to show the recipient address */
-  showRecipient?: boolean;
+  showRecipient?: boolean
 }
 
 /**
@@ -65,7 +65,7 @@ export interface PaymentDetailsProps {
  */
 export interface SpinnerProps {
   /** Spinner size */
-  size?: "sm" | "md" | "lg";
+  size?: 'sm' | 'md' | 'lg'
 }
 
 /**
@@ -73,14 +73,14 @@ export interface SpinnerProps {
  */
 export interface AddressDisplayProps {
   /** The address to display */
-  address: string;
+  address: string
   /** Number of characters to show at start */
-  startChars?: number;
+  startChars?: number
   /** Number of characters to show at end */
-  endChars?: number;
+  endChars?: number
   /** Whether to show copy button */
-  copyable?: boolean;
+  copyable?: boolean
 }
 
 // Re-export core types for convenience
-export type { PaymentRequired, PaymentRequirements } from "@t402/core/types";
+export type { PaymentRequired, PaymentRequirements } from '@t402/core/types'

@@ -4,34 +4,29 @@
  * Type definitions for multi-sig Safe smart accounts using Tether WDK.
  */
 
-import type { Address, Hex, PublicClient } from "viem";
-import type {
-  SmartAccountSigner,
-  BundlerConfig,
-  PaymasterConfig,
-  UserOperation,
-} from "@t402/evm";
-import type { WDKSigner, T402WDKConfig } from "@t402/wdk";
+import type { Address, Hex, PublicClient } from 'viem'
+import type { SmartAccountSigner, BundlerConfig, PaymasterConfig, UserOperation } from '@t402/evm'
+import type { WDKSigner, T402WDKConfig } from '@t402/wdk'
 import type {
   GaslessPaymentParams,
   BatchPaymentParams,
   GaslessPaymentReceipt,
-} from "@t402/wdk-gasless";
+} from '@t402/wdk-gasless'
 
 /**
  * Configuration for multi-sig WDK smart account
  */
 export interface MultiSigWDKConfig {
   /** Multiple WDK signers as owners */
-  owners: WDKSigner[];
+  owners: WDKSigner[]
   /** M-of-N threshold requirement */
-  threshold: number;
+  threshold: number
   /** Chain ID for the Safe account */
-  chainId: number;
+  chainId: number
   /** Public client for chain interactions */
-  publicClient: PublicClient;
+  publicClient: PublicClient
   /** Salt nonce for deterministic address generation */
-  saltNonce?: bigint;
+  saltNonce?: bigint
 }
 
 /**
@@ -40,21 +35,21 @@ export interface MultiSigWDKConfig {
  */
 export interface SingleSeedConfig {
   /** Single seed phrase */
-  seedPhrase: string;
+  seedPhrase: string
   /** Account indices to use as owners (e.g., [0, 1, 2] for 3 owners) */
-  accountIndices: number[];
+  accountIndices: number[]
   /** M-of-N threshold */
-  threshold: number;
+  threshold: number
   /** Chain configuration */
-  chainConfig: T402WDKConfig;
+  chainConfig: T402WDKConfig
   /** Chain to use for the Safe account */
-  chain: string;
+  chain: string
   /** Salt nonce for address generation */
-  saltNonce?: bigint;
+  saltNonce?: bigint
   /** Bundler configuration */
-  bundler: BundlerConfig;
+  bundler: BundlerConfig
   /** Paymaster configuration for gas sponsorship */
-  paymaster?: PaymasterConfig;
+  paymaster?: PaymasterConfig
 }
 
 /**
@@ -63,19 +58,19 @@ export interface SingleSeedConfig {
  */
 export interface MultiSeedConfig {
   /** Array of seed phrases (one per owner) */
-  seedPhrases: string[];
+  seedPhrases: string[]
   /** M-of-N threshold */
-  threshold: number;
+  threshold: number
   /** Chain configuration */
-  chainConfig: T402WDKConfig;
+  chainConfig: T402WDKConfig
   /** Chain to use for the Safe account */
-  chain: string;
+  chain: string
   /** Salt nonce for address generation */
-  saltNonce?: bigint;
+  saltNonce?: bigint
   /** Bundler configuration */
-  bundler: BundlerConfig;
+  bundler: BundlerConfig
   /** Paymaster configuration for gas sponsorship */
-  paymaster?: PaymasterConfig;
+  paymaster?: PaymasterConfig
 }
 
 /**
@@ -83,13 +78,13 @@ export interface MultiSeedConfig {
  */
 export interface PendingSignature {
   /** Owner address that needs to sign */
-  owner: Address;
+  owner: Address
   /** Index of the owner in the Safe's owner list */
-  ownerIndex: number;
+  ownerIndex: number
   /** Whether this owner has signed */
-  signed: boolean;
+  signed: boolean
   /** The signature if signed */
-  signature?: Hex;
+  signature?: Hex
 }
 
 /**
@@ -97,23 +92,23 @@ export interface PendingSignature {
  */
 export interface MultiSigTransactionRequest {
   /** Unique identifier for this request */
-  id: string;
+  id: string
   /** The UserOperation to sign */
-  userOp: UserOperation;
+  userOp: UserOperation
   /** UserOperation hash for signing */
-  userOpHash: Hex;
+  userOpHash: Hex
   /** Current signatures collected */
-  signatures: PendingSignature[];
+  signatures: PendingSignature[]
   /** Number of signatures required */
-  threshold: number;
+  threshold: number
   /** Number of signatures collected so far */
-  collectedCount: number;
+  collectedCount: number
   /** Whether enough signatures are collected */
-  isReady: boolean;
+  isReady: boolean
   /** Creation timestamp */
-  createdAt: number;
+  createdAt: number
   /** Expiration timestamp */
-  expiresAt: number;
+  expiresAt: number
 }
 
 /**
@@ -121,25 +116,25 @@ export interface MultiSigTransactionRequest {
  */
 export interface MultiSigPaymentResult {
   /** Transaction request ID */
-  requestId: string;
+  requestId: string
   /** Smart account address */
-  sender: Address;
+  sender: Address
   /** UserOperation hash */
-  userOpHash: Hex;
+  userOpHash: Hex
   /** Whether gas is sponsored */
-  sponsored: boolean;
+  sponsored: boolean
   /** Signatures collected so far */
-  signatures: PendingSignature[];
+  signatures: PendingSignature[]
   /** Number of signatures required */
-  threshold: number;
+  threshold: number
   /** Number of signatures collected */
-  collectedCount: number;
+  collectedCount: number
   /** Whether ready to submit */
-  isReady: boolean;
+  isReady: boolean
   /** Add a signature from an owner */
-  addSignature(ownerIndex: number, signer: WDKSigner): Promise<void>;
+  addSignature(ownerIndex: number, signer: WDKSigner): Promise<void>
   /** Submit when ready */
-  submit(): Promise<MultiSigSubmitResult>;
+  submit(): Promise<MultiSigSubmitResult>
 }
 
 /**
@@ -147,11 +142,11 @@ export interface MultiSigPaymentResult {
  */
 export interface MultiSigSubmitResult {
   /** UserOperation hash */
-  userOpHash: Hex;
+  userOpHash: Hex
   /** Smart account address */
-  sender: Address;
+  sender: Address
   /** Wait for confirmation */
-  wait(): Promise<GaslessPaymentReceipt>;
+  wait(): Promise<GaslessPaymentReceipt>
 }
 
 /**
@@ -159,15 +154,15 @@ export interface MultiSigSubmitResult {
  */
 export interface MultiSigGaslessClientConfig {
   /** Multi-sig smart account signer */
-  signer: MultiSigSmartAccountSigner;
+  signer: MultiSigSmartAccountSigner
   /** Bundler configuration */
-  bundler: BundlerConfig;
+  bundler: BundlerConfig
   /** Paymaster configuration for gas sponsorship */
-  paymaster?: PaymasterConfig;
+  paymaster?: PaymasterConfig
   /** Chain ID */
-  chainId: number;
+  chainId: number
   /** Public client */
-  publicClient: PublicClient;
+  publicClient: PublicClient
 }
 
 /**
@@ -176,24 +171,20 @@ export interface MultiSigGaslessClientConfig {
  */
 export interface MultiSigSmartAccountSigner extends SmartAccountSigner {
   /** Get all owner addresses */
-  getOwners(): Address[];
+  getOwners(): Address[]
   /** Get threshold */
-  getThreshold(): number;
+  getThreshold(): number
   /** Get all WDK signers */
-  getSigners(): WDKSigner[];
+  getSigners(): WDKSigner[]
   /** Sign with a specific owner index */
-  signWithOwner(userOpHash: Hex, ownerIndex: number): Promise<Hex>;
+  signWithOwner(userOpHash: Hex, ownerIndex: number): Promise<Hex>
   /** Combine multiple signatures into final signature */
-  combineSignatures(signatures: Map<number, Hex>): Hex;
+  combineSignatures(signatures: Map<number, Hex>): Hex
   /** Check if we have enough signatures */
-  hasEnoughSignatures(signatures: Map<number, Hex>): boolean;
+  hasEnoughSignatures(signatures: Map<number, Hex>): boolean
 }
 
 /**
  * Re-export common types from wdk-gasless
  */
-export type {
-  GaslessPaymentParams,
-  BatchPaymentParams,
-  GaslessPaymentReceipt,
-};
+export type { GaslessPaymentParams, BatchPaymentParams, GaslessPaymentReceipt }

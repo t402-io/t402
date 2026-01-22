@@ -1,6 +1,11 @@
 import { useState, useCallback, useEffect } from "react";
 import type { CosmosAccount, CosmosNetwork, ChainInfo } from "./types";
-import { COSMOS_NETWORKS, NOBLE_RPC_ENDPOINTS, NOBLE_REST_ENDPOINTS, NOBLE_CHAIN_IDS } from "./types";
+import {
+  COSMOS_NETWORKS,
+  NOBLE_RPC_ENDPOINTS,
+  NOBLE_REST_ENDPOINTS,
+  NOBLE_CHAIN_IDS,
+} from "./types";
 
 export type CosmosWalletId = "keplr" | "leap";
 
@@ -95,8 +100,7 @@ export function useCosmosWallet(network: CosmosNetwork): UseCosmosWalletResult {
       setError(null);
 
       try {
-        const wallet =
-          selectedWalletId === "keplr" ? window.keplr : window.leap;
+        const wallet = selectedWalletId === "keplr" ? window.keplr : window.leap;
 
         if (!wallet) {
           throw new Error(
@@ -122,7 +126,7 @@ export function useCosmosWallet(network: CosmosNetwork): UseCosmosWalletResult {
         setAccount({
           address: key.bech32Address,
           pubKey: Array.from(key.pubKey)
-            .map((b) => b.toString(16).padStart(2, "0"))
+            .map(b => b.toString(16).padStart(2, "0"))
             .join(""),
           walletName: key.name,
         });

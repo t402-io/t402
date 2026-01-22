@@ -114,10 +114,7 @@ export function createTonConnectSigner(
  * @param network - Target TON network
  * @returns ClientTonSigner or null if not connected
  */
-export function useTonSigner(
-  wallet: Wallet | null,
-  network: TonNetwork,
-): ClientTonSigner | null {
+export function useTonSigner(wallet: Wallet | null, network: TonNetwork): ClientTonSigner | null {
   const [tonConnectUI] = useTonConnectUI();
 
   return useMemo(() => {

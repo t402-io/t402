@@ -6,81 +6,81 @@
  * allowing integration with various TRON wallets and signing mechanisms.
  */
 
-import type { VerifyMessageResult, TransactionConfirmation } from "./types.js";
+import type { VerifyMessageResult, TransactionConfirmation } from './types.js'
 
 /**
  * Parameters for signing a TRC20 transfer transaction
  */
 export type SignTransactionParams = {
   /** TRC20 contract address */
-  contractAddress: string;
+  contractAddress: string
 
   /** Recipient address (T-prefix base58check) */
-  to: string;
+  to: string
 
   /** Amount to transfer (in smallest units) */
-  amount: string;
+  amount: string
 
   /** Fee limit in SUN (optional, defaults to 100 TRX) */
-  feeLimit?: number;
+  feeLimit?: number
 
   /** Transaction expiration time in milliseconds (optional) */
-  expiration?: number;
-};
+  expiration?: number
+}
 
 /**
  * Parameters for verifying a signed transaction
  */
 export type VerifyTransactionParams = {
   /** Hex-encoded signed transaction */
-  signedTransaction: string;
+  signedTransaction: string
 
   /** Expected sender address */
-  expectedFrom: string;
+  expectedFrom: string
 
   /** Expected transfer details */
   expectedTransfer: {
     /** Expected recipient address */
-    to: string;
+    to: string
 
     /** Expected contract address */
-    contractAddress: string;
+    contractAddress: string
 
     /** Expected amount */
-    amount: string;
-  };
+    amount: string
+  }
 
   /** Network identifier */
-  network: string;
-};
+  network: string
+}
 
 /**
  * Parameters for waiting on transaction confirmation
  */
 export type WaitForTransactionParams = {
   /** Transaction ID to monitor */
-  txId: string;
+  txId: string
 
   /** Network identifier */
-  network: string;
+  network: string
 
   /** Timeout in milliseconds (optional) */
-  timeout?: number;
-};
+  timeout?: number
+}
 
 /**
  * Parameters for getting TRC20 balance
  */
 export type GetBalanceParams = {
   /** Owner address */
-  ownerAddress: string;
+  ownerAddress: string
 
   /** TRC20 contract address */
-  contractAddress: string;
+  contractAddress: string
 
   /** Network identifier */
-  network: string;
-};
+  network: string
+}
 
 /**
  * ClientTronSigner - Used by t402 clients to sign TRC20 transfer transactions
@@ -96,7 +96,7 @@ export type GetBalanceParams = {
  */
 export type ClientTronSigner = {
   /** The wallet address (T-prefix base58check) */
-  readonly address: string;
+  readonly address: string
 
   /**
    * Sign a TRC20 transfer transaction
@@ -105,7 +105,7 @@ export type ClientTronSigner = {
    * @param params - Transaction parameters
    * @returns Hex-encoded signed transaction
    */
-  signTransaction(params: SignTransactionParams): Promise<string>;
+  signTransaction(params: SignTransactionParams): Promise<string>
 
   /**
    * Get the current reference block info for transaction building
@@ -114,11 +114,11 @@ export type ClientTronSigner = {
    * @returns Reference block info
    */
   getBlockInfo(): Promise<{
-    refBlockBytes: string;
-    refBlockHash: string;
-    expiration: number;
-  }>;
-};
+    refBlockBytes: string
+    refBlockHash: string
+    expiration: number
+  }>
+}
 
 /**
  * FacilitatorTronSigner - Used by t402 facilitators to verify and settle payments
@@ -134,7 +134,7 @@ export type FacilitatorTronSigner = {
    * Get all addresses this facilitator can use
    * Enables dynamic address selection for load balancing
    */
-  getAddresses(): readonly string[];
+  getAddresses(): readonly string[]
 
   /**
    * Query TRC20 balance for an owner
@@ -142,7 +142,7 @@ export type FacilitatorTronSigner = {
    * @param params - Balance query parameters
    * @returns Balance in smallest units
    */
-  getBalance(params: GetBalanceParams): Promise<string>;
+  getBalance(params: GetBalanceParams): Promise<string>
 
   /**
    * Verify a signed transaction matches expected parameters
@@ -151,7 +151,7 @@ export type FacilitatorTronSigner = {
    * @param params - Verification parameters
    * @returns Verification result
    */
-  verifyTransaction(params: VerifyTransactionParams): Promise<VerifyMessageResult>;
+  verifyTransaction(params: VerifyTransactionParams): Promise<VerifyMessageResult>
 
   /**
    * Broadcast a signed transaction to the network
@@ -160,7 +160,7 @@ export type FacilitatorTronSigner = {
    * @param network - Network identifier
    * @returns Transaction ID
    */
-  broadcastTransaction(signedTransaction: string, network: string): Promise<string>;
+  broadcastTransaction(signedTransaction: string, network: string): Promise<string>
 
   /**
    * Wait for transaction confirmation
@@ -168,7 +168,7 @@ export type FacilitatorTronSigner = {
    * @param params - Transaction monitoring parameters
    * @returns Confirmation result
    */
-  waitForTransaction(params: WaitForTransactionParams): Promise<TransactionConfirmation>;
+  waitForTransaction(params: WaitForTransactionParams): Promise<TransactionConfirmation>
 
   /**
    * Check if an account is activated (has any transaction history)
@@ -177,8 +177,8 @@ export type FacilitatorTronSigner = {
    * @param network - Network identifier
    * @returns true if activated
    */
-  isActivated(address: string, network: string): Promise<boolean>;
-};
+  isActivated(address: string, network: string): Promise<boolean>
+}
 
 /**
  * Converts a TRON wallet to a ClientTronSigner
@@ -188,7 +188,7 @@ export type FacilitatorTronSigner = {
  * @returns The same signer with ClientTronSigner type
  */
 export function toClientTronSigner(signer: ClientTronSigner): ClientTronSigner {
-  return signer;
+  return signer
 }
 
 /**
@@ -199,10 +199,10 @@ export function toClientTronSigner(signer: ClientTronSigner): ClientTronSigner {
  * @returns FacilitatorTronSigner with getAddresses() support
  */
 export function toFacilitatorTronSigner(
-  client: Omit<FacilitatorTronSigner, "getAddresses"> & { address: string },
+  client: Omit<FacilitatorTronSigner, 'getAddresses'> & { address: string },
 ): FacilitatorTronSigner {
   return {
     ...client,
     getAddresses: () => [client.address],
-  };
+  }
 }

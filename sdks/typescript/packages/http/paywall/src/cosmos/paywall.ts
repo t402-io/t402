@@ -47,15 +47,7 @@ export function getCosmosPaywallHtml(options: CosmosPaywallOptions): string {
     return `<!DOCTYPE html><html><body><h1>Cosmos Paywall (run pnpm build:paywall to generate full template)</h1></body></html>`;
   }
 
-  const {
-    amount,
-    testnet,
-    paymentRequired,
-    currentUrl,
-    appName,
-    appLogo,
-    theme,
-  } = options;
+  const { amount, testnet, paymentRequired, currentUrl, appName, appLogo, theme } = options;
 
   const logOnTestnet = testnet
     ? "console.log('Cosmos Payment required initialized:', window.t402);"

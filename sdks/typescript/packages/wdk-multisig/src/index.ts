@@ -59,16 +59,16 @@
  */
 
 // Main classes
-export { MultiSigWdkSmartAccount, createMultiSigWdkSmartAccount } from "./account.js";
-export { MultiSigWdkGaslessClient } from "./client.js";
-export { SignatureCollector } from "./collector.js";
+export { MultiSigWdkSmartAccount, createMultiSigWdkSmartAccount } from './account.js'
+export { MultiSigWdkGaslessClient } from './client.js'
+export { SignatureCollector } from './collector.js'
 
 // Factory functions
 export {
   createMultiSigFromSingleSeed,
   createMultiSigFromMultipleSeeds,
   createMultiSigFromSigners,
-} from "./factory.js";
+} from './factory.js'
 
 // Types
 export type {
@@ -84,13 +84,18 @@ export type {
   GaslessPaymentParams,
   BatchPaymentParams,
   GaslessPaymentReceipt,
-} from "./types.js";
+} from './types.js'
 
 // Errors
-export { MultiSigError, MultiSigErrorCode } from "./errors.js";
+export { MultiSigError, MultiSigErrorCode } from './errors.js'
 
 // Constants
-export { SAFE_4337_ADDRESSES, SIGNATURE_TYPES, DEFAULTS, ENTRYPOINT_V07_ADDRESS } from "./constants.js";
+export {
+  SAFE_4337_ADDRESSES,
+  SIGNATURE_TYPES,
+  DEFAULTS,
+  ENTRYPOINT_V07_ADDRESS,
+} from './constants.js'
 
 // Utilities
 export {
@@ -101,4 +106,4 @@ export {
   sortAddresses,
   getOwnerIndex,
   areAddressesUnique,
-} from "./utils.js";
+} from './utils.js'

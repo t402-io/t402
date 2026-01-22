@@ -29,9 +29,7 @@ export interface UseTonWalletReturn {
  * @param onStatus - Callback for status updates
  * @returns Wallet connection state and methods
  */
-export function useTonWalletConnection(
-  onStatus?: (status: string) => void,
-): UseTonWalletReturn {
+export function useTonWalletConnection(onStatus?: (status: string) => void): UseTonWalletReturn {
   const [tonConnectUI] = useTonConnectUI();
   const wallet = useTonWallet();
   const [isConnecting, setIsConnecting] = useState(false);

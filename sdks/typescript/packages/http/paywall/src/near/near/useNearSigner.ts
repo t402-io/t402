@@ -38,11 +38,7 @@ export function useNearSigner(
       },
 
       async signAndBroadcastTransfer(params) {
-        const action = buildFtTransferAction(
-          params.recipient,
-          params.amount,
-          params.memo,
-        );
+        const action = buildFtTransferAction(params.recipient, params.amount, params.memo);
 
         let result: { transaction: { hash: string } };
 

@@ -5,22 +5,19 @@
  * from multiple owners.
  */
 
-import type { Address, Hex } from "viem";
-import type { UserOperation } from "@t402/evm";
-import type {
-  MultiSigTransactionRequest,
-  PendingSignature,
-} from "./types.js";
-import { DEFAULTS } from "./constants.js";
-import { MultiSigError } from "./errors.js";
-import { combineSignatures, generateRequestId, getOwnerIndex } from "./utils.js";
+import type { Address, Hex } from 'viem'
+import type { UserOperation } from '@t402/evm'
+import type { MultiSigTransactionRequest, PendingSignature } from './types.js'
+import { DEFAULTS } from './constants.js'
+import { MultiSigError } from './errors.js'
+import { combineSignatures, generateRequestId, getOwnerIndex } from './utils.js'
 
 /**
  * Configuration for SignatureCollector
  */
 export interface SignatureCollectorConfig {
   /** Request expiration time in milliseconds (default: 1 hour) */
-  expirationMs?: number;
+  expirationMs?: number
 }
 
 /**
@@ -30,12 +27,12 @@ export interface SignatureCollectorConfig {
  * Handles request lifecycle, signature aggregation, and expiration cleanup.
  */
 export class SignatureCollector {
-  private readonly pendingRequests: Map<string, MultiSigTransactionRequest>;
-  private readonly expirationMs: number;
+  private readonly pendingRequests: Map<string, MultiSigTransactionRequest>
+  private readonly expirationMs: number
 
   constructor(config?: SignatureCollectorConfig) {
-    this.pendingRequests = new Map();
-    this.expirationMs = config?.expirationMs ?? DEFAULTS.REQUEST_EXPIRATION_MS;
+    this.pendingRequests = new Map()
+    this.expirationMs = config?.expirationMs ?? DEFAULTS.REQUEST_EXPIRATION_MS
   }
 
   /**
@@ -53,15 +50,15 @@ export class SignatureCollector {
     owners: Address[],
     threshold: number,
   ): MultiSigTransactionRequest {
-    const now = Date.now();
-    const id = generateRequestId();
+    const now = Date.now()
+    const id = generateRequestId()
 
     // Initialize pending signatures for all owners
     const signatures: PendingSignature[] = owners.map((owner, index) => ({
       owner,
       ownerIndex: index,
       signed: false,
-    }));
+    }))
 
     const request: MultiSigTransactionRequest = {
       id,
@@ -73,10 +70,10 @@ export class SignatureCollector {
       isReady: false,
       createdAt: now,
       expiresAt: now + this.expirationMs,
-    };
+    }
 
-    this.pendingRequests.set(id, request);
-    return request;
+    this.pendingRequests.set(id, request)
+    return request
   }
 
   /**
@@ -92,22 +89,22 @@ export class SignatureCollector {
     ownerAddress: Address,
     signature: Hex,
   ): MultiSigTransactionRequest {
-    const request = this.pendingRequests.get(requestId);
+    const request = this.pendingRequests.get(requestId)
 
     if (!request) {
-      throw MultiSigError.requestNotFound(requestId);
+      throw MultiSigError.requestNotFound(requestId)
     }
 
     // Check expiration
     if (Date.now() > request.expiresAt) {
-      this.pendingRequests.delete(requestId);
-      throw MultiSigError.requestExpired(requestId);
+      this.pendingRequests.delete(requestId)
+      throw MultiSigError.requestExpired(requestId)
     }
 
     // Find the owner in the request
     const pendingSignature = request.signatures.find(
       (s) => s.owner.toLowerCase() === ownerAddress.toLowerCase(),
-    );
+    )
 
     if (!pendingSignature) {
       throw MultiSigError.ownerNotFound(
@@ -115,23 +112,23 @@ export class SignatureCollector {
           ownerAddress,
           request.signatures.map((s) => s.owner),
         ),
-      );
+      )
     }
 
     // Check if already signed
     if (pendingSignature.signed) {
-      throw MultiSigError.alreadySigned(pendingSignature.ownerIndex);
+      throw MultiSigError.alreadySigned(pendingSignature.ownerIndex)
     }
 
     // Add signature
-    pendingSignature.signed = true;
-    pendingSignature.signature = signature;
+    pendingSignature.signed = true
+    pendingSignature.signature = signature
 
     // Update counts
-    request.collectedCount = request.signatures.filter((s) => s.signed).length;
-    request.isReady = request.collectedCount >= request.threshold;
+    request.collectedCount = request.signatures.filter((s) => s.signed).length
+    request.isReady = request.collectedCount >= request.threshold
 
-    return request;
+    return request
   }
 
   /**
@@ -141,13 +138,13 @@ export class SignatureCollector {
    * @returns True if threshold is met
    */
   isComplete(requestId: string): boolean {
-    const request = this.pendingRequests.get(requestId);
+    const request = this.pendingRequests.get(requestId)
 
     if (!request) {
-      throw MultiSigError.requestNotFound(requestId);
+      throw MultiSigError.requestNotFound(requestId)
     }
 
-    return request.isReady;
+    return request.isReady
   }
 
   /**
@@ -157,28 +154,28 @@ export class SignatureCollector {
    * @returns Combined signature in Safe format
    */
   getCombinedSignature(requestId: string): Hex {
-    const request = this.pendingRequests.get(requestId);
+    const request = this.pendingRequests.get(requestId)
 
     if (!request) {
-      throw MultiSigError.requestNotFound(requestId);
+      throw MultiSigError.requestNotFound(requestId)
     }
 
     if (!request.isReady) {
-      throw MultiSigError.notReady(request.threshold, request.collectedCount);
+      throw MultiSigError.notReady(request.threshold, request.collectedCount)
     }
 
     // Build map of owner index to signature
-    const signatureMap = new Map<number, Hex>();
+    const signatureMap = new Map<number, Hex>()
 
     for (const sig of request.signatures) {
       if (sig.signed && sig.signature) {
-        signatureMap.set(sig.ownerIndex, sig.signature);
+        signatureMap.set(sig.ownerIndex, sig.signature)
       }
     }
 
     // Combine signatures
-    const owners = request.signatures.map((s) => s.owner);
-    return combineSignatures(signatureMap, owners);
+    const owners = request.signatures.map((s) => s.owner)
+    return combineSignatures(signatureMap, owners)
   }
 
   /**
@@ -188,15 +185,15 @@ export class SignatureCollector {
    * @returns Request or undefined
    */
   getRequest(requestId: string): MultiSigTransactionRequest | undefined {
-    const request = this.pendingRequests.get(requestId);
+    const request = this.pendingRequests.get(requestId)
 
     // Check expiration
     if (request && Date.now() > request.expiresAt) {
-      this.pendingRequests.delete(requestId);
-      return undefined;
+      this.pendingRequests.delete(requestId)
+      return undefined
     }
 
-    return request;
+    return request
   }
 
   /**
@@ -205,8 +202,8 @@ export class SignatureCollector {
    * @returns Array of pending requests
    */
   getPendingRequests(): MultiSigTransactionRequest[] {
-    this.cleanup();
-    return Array.from(this.pendingRequests.values());
+    this.cleanup()
+    return Array.from(this.pendingRequests.values())
   }
 
   /**
@@ -216,24 +213,24 @@ export class SignatureCollector {
    * @returns True if removed
    */
   removeRequest(requestId: string): boolean {
-    return this.pendingRequests.delete(requestId);
+    return this.pendingRequests.delete(requestId)
   }
 
   /**
    * Clean up expired requests
    */
   cleanup(): void {
-    const now = Date.now();
-    const expiredIds: string[] = [];
+    const now = Date.now()
+    const expiredIds: string[] = []
 
     for (const [id, request] of this.pendingRequests) {
       if (now > request.expiresAt) {
-        expiredIds.push(id);
+        expiredIds.push(id)
       }
     }
 
     for (const id of expiredIds) {
-      this.pendingRequests.delete(id);
+      this.pendingRequests.delete(id)
     }
   }
 
@@ -244,13 +241,13 @@ export class SignatureCollector {
    * @returns Number of pending signatures
    */
   getPendingCount(requestId: string): number {
-    const request = this.pendingRequests.get(requestId);
+    const request = this.pendingRequests.get(requestId)
 
     if (!request) {
-      throw MultiSigError.requestNotFound(requestId);
+      throw MultiSigError.requestNotFound(requestId)
     }
 
-    return request.signatures.filter((s) => !s.signed).length;
+    return request.signatures.filter((s) => !s.signed).length
   }
 
   /**
@@ -260,13 +257,13 @@ export class SignatureCollector {
    * @returns Array of pending owner addresses
    */
   getPendingOwners(requestId: string): Address[] {
-    const request = this.pendingRequests.get(requestId);
+    const request = this.pendingRequests.get(requestId)
 
     if (!request) {
-      throw MultiSigError.requestNotFound(requestId);
+      throw MultiSigError.requestNotFound(requestId)
     }
 
-    return request.signatures.filter((s) => !s.signed).map((s) => s.owner);
+    return request.signatures.filter((s) => !s.signed).map((s) => s.owner)
   }
 
   /**
@@ -276,19 +273,19 @@ export class SignatureCollector {
    * @returns Array of signed owner addresses
    */
   getSignedOwners(requestId: string): Address[] {
-    const request = this.pendingRequests.get(requestId);
+    const request = this.pendingRequests.get(requestId)
 
     if (!request) {
-      throw MultiSigError.requestNotFound(requestId);
+      throw MultiSigError.requestNotFound(requestId)
     }
 
-    return request.signatures.filter((s) => s.signed).map((s) => s.owner);
+    return request.signatures.filter((s) => s.signed).map((s) => s.owner)
   }
 
   /**
    * Clear all pending requests
    */
   clear(): void {
-    this.pendingRequests.clear();
+    this.pendingRequests.clear()
   }
 }

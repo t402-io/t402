@@ -238,8 +238,6 @@ export class UptoEvmServerScheme implements SchemeNetworkServer {
  * @param config - Configuration options
  * @returns A new UptoEvmServerScheme instance
  */
-export function createUptoEvmServerScheme(
-  config?: UptoEvmServerSchemeConfig,
-): UptoEvmServerScheme {
+export function createUptoEvmServerScheme(config?: UptoEvmServerSchemeConfig): UptoEvmServerScheme {
   return new UptoEvmServerScheme(config);
 }

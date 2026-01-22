@@ -11,18 +11,23 @@ import type {
   Price,
   SchemeNetworkServer,
   MoneyParser,
-} from "@t402/core/types";
-import { SCHEME_EXACT } from "../../constants.js";
-import { normalizeNetwork, convertToSmallestUnits } from "../../utils.js";
-import { getDefaultToken, getTRC20Config, getTokenByAddress, isNetworkSupported } from "../../tokens.js";
+} from '@t402/core/types'
+import { SCHEME_EXACT } from '../../constants.js'
+import { normalizeNetwork, convertToSmallestUnits } from '../../utils.js'
+import {
+  getDefaultToken,
+  getTRC20Config,
+  getTokenByAddress,
+  isNetworkSupported,
+} from '../../tokens.js'
 
 /**
  * Configuration for ExactTronScheme (server)
  */
 export type ExactTronSchemeConfig = {
   /** Preferred token symbol (default: highest priority) */
-  preferredToken?: string;
-};
+  preferredToken?: string
+}
 
 /**
  * Server-side implementation of the TRON exact payment scheme
@@ -31,12 +36,12 @@ export type ExactTronSchemeConfig = {
  * for TRC20 token transfers.
  */
 export class ExactTronScheme implements SchemeNetworkServer {
-  readonly scheme = SCHEME_EXACT;
-  private readonly _config: ExactTronSchemeConfig;
+  readonly scheme = SCHEME_EXACT
+  private readonly _config: ExactTronSchemeConfig
   private readonly moneyParsers: MoneyParser[] = []
 
   constructor(config?: ExactTronSchemeConfig) {
-    this._config = config ?? {};
+    this._config = config ?? {}
   }
 
   /**
@@ -48,8 +53,8 @@ export class ExactTronScheme implements SchemeNetworkServer {
    * @returns This scheme for chaining
    */
   registerMoneyParser(parser: MoneyParser): ExactTronScheme {
-    this.moneyParsers.push(parser);
-    return this;
+    this.moneyParsers.push(parser)
+    return this
   }
 
   /**
@@ -60,41 +65,41 @@ export class ExactTronScheme implements SchemeNetworkServer {
    * @returns Parsed asset amount
    */
   async parsePrice(price: Price, network: Network): Promise<AssetAmount> {
-    const normalizedNetwork = normalizeNetwork(String(network));
+    const normalizedNetwork = normalizeNetwork(String(network))
 
     // Validate network support
     if (!isNetworkSupported(normalizedNetwork)) {
-      throw new Error(`Unsupported network: ${network}`);
+      throw new Error(`Unsupported network: ${network}`)
     }
 
     // If already an AssetAmount, return it
-    if (typeof price === "object" && price !== null && "amount" in price) {
-      const assetAmount = price as AssetAmount;
+    if (typeof price === 'object' && price !== null && 'amount' in price) {
+      const assetAmount = price as AssetAmount
       return {
         amount: assetAmount.amount,
         asset: assetAmount.asset || this.getDefaultAsset(normalizedNetwork),
         extra: assetAmount.extra,
-      };
+      }
     }
 
     // Parse money to decimal
-    const decimalAmount = this.parseMoneyToDecimal(price);
+    const decimalAmount = this.parseMoneyToDecimal(price)
 
     // Try custom parsers first
     for (const parser of this.moneyParsers) {
       try {
-        const result = await parser(decimalAmount, network);
+        const result = await parser(decimalAmount, network)
         if (result !== null) {
-          return result;
+          return result
         }
       } catch {
         // Parser failed, try next one
-        continue;
+        continue
       }
     }
 
     // Use default conversion (USDT with 6 decimals)
-    return this.defaultMoneyConversion(decimalAmount, normalizedNetwork);
+    return this.defaultMoneyConversion(decimalAmount, normalizedNetwork)
   }
 
   /**
@@ -108,40 +113,41 @@ export class ExactTronScheme implements SchemeNetworkServer {
   async enhancePaymentRequirements(
     requirements: PaymentRequirements,
     supportedKind: {
-      t402Version: number;
-      scheme: string;
-      network: Network;
-      extra?: Record<string, unknown>;
+      t402Version: number
+      scheme: string
+      network: Network
+      extra?: Record<string, unknown>
     },
     extensionKeys: string[],
   ): Promise<PaymentRequirements> {
-    void extensionKeys;
-    const network = normalizeNetwork(String(requirements.network));
+    void extensionKeys
+    const network = normalizeNetwork(String(requirements.network))
 
     // Get token config
     let tokenConfig = requirements.asset
-      ? getTRC20Config(network, requirements.asset) || getTokenByAddress(network, requirements.asset)
-      : getDefaultToken(network);
+      ? getTRC20Config(network, requirements.asset) ||
+        getTokenByAddress(network, requirements.asset)
+      : getDefaultToken(network)
 
     if (!tokenConfig) {
-      tokenConfig = getDefaultToken(network);
+      tokenConfig = getDefaultToken(network)
     }
 
     // Initialize extra if needed
-    const extra: Record<string, unknown> = { ...requirements.extra };
+    const extra: Record<string, unknown> = { ...requirements.extra }
 
     // Add token metadata
     if (tokenConfig) {
-      extra.symbol = tokenConfig.symbol;
-      extra.name = tokenConfig.name;
-      extra.decimals = tokenConfig.decimals;
+      extra.symbol = tokenConfig.symbol
+      extra.name = tokenConfig.name
+      extra.decimals = tokenConfig.decimals
     }
 
     // Copy extension data
     if (supportedKind.extra) {
       for (const key of extensionKeys) {
         if (key in supportedKind.extra) {
-          extra[key] = supportedKind.extra[key];
+          extra[key] = supportedKind.extra[key]
         }
       }
     }
@@ -150,35 +156,35 @@ export class ExactTronScheme implements SchemeNetworkServer {
       ...requirements,
       asset: tokenConfig?.contractAddress || requirements.asset,
       extra,
-    };
+    }
   }
 
   /**
    * Parse money (string/number) to decimal number
    */
   private parseMoneyToDecimal(price: Price): number {
-    if (typeof price === "number") {
-      return price;
+    if (typeof price === 'number') {
+      return price
     }
 
-    if (typeof price === "string") {
+    if (typeof price === 'string') {
       // Remove currency symbols and whitespace
-      let cleanPrice = price.trim();
-      cleanPrice = cleanPrice.replace(/^\$/, "").trim();
+      let cleanPrice = price.trim()
+      cleanPrice = cleanPrice.replace(/^\$/, '').trim()
 
       // Parse the numeric part
-      const parts = cleanPrice.split(/\s+/);
-      const numericPart = parts[0];
-      const parsed = parseFloat(numericPart);
+      const parts = cleanPrice.split(/\s+/)
+      const numericPart = parts[0]
+      const parsed = parseFloat(numericPart)
 
       if (isNaN(parsed)) {
-        throw new Error(`Failed to parse price: ${price}`);
+        throw new Error(`Failed to parse price: ${price}`)
       }
 
-      return parsed;
+      return parsed
     }
 
-    throw new Error(`Invalid price type: ${typeof price}`);
+    throw new Error(`Invalid price type: ${typeof price}`)
   }
 
   /**
@@ -189,18 +195,18 @@ export class ExactTronScheme implements SchemeNetworkServer {
     // Try preferred token first if configured
     let tokenConfig = this._config.preferredToken
       ? getTRC20Config(network, this._config.preferredToken)
-      : undefined;
+      : undefined
 
     // Fall back to network default
     if (!tokenConfig) {
-      tokenConfig = getDefaultToken(network);
+      tokenConfig = getDefaultToken(network)
     }
 
     if (!tokenConfig) {
-      throw new Error(`No default token for network: ${network}`);
+      throw new Error(`No default token for network: ${network}`)
     }
 
-    const amount = convertToSmallestUnits(decimalAmount.toFixed(6), tokenConfig.decimals);
+    const amount = convertToSmallestUnits(decimalAmount.toFixed(6), tokenConfig.decimals)
 
     return {
       amount,
@@ -210,18 +216,17 @@ export class ExactTronScheme implements SchemeNetworkServer {
         name: tokenConfig.name,
         decimals: tokenConfig.decimals,
       },
-    };
+    }
   }
 
   /**
    * Get default asset address for network
    */
   private getDefaultAsset(network: string): string {
-    const tokenConfig = getDefaultToken(network);
+    const tokenConfig = getDefaultToken(network)
     if (!tokenConfig) {
-      throw new Error(`No default token for network: ${network}`);
+      throw new Error(`No default token for network: ${network}`)
     }
-    return tokenConfig.contractAddress;
+    return tokenConfig.contractAddress
   }
-
 }

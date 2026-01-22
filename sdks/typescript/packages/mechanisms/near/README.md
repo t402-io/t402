@@ -22,16 +22,17 @@ Three main components:
 
 ## Supported Networks
 
-| Network | CAIP-2 Identifier | USDT Contract | USDC Contract | Status |
-|---------|-------------------|---------------|---------------|--------|
-| NEAR Mainnet | `near:mainnet` | `usdt.tether-token.near` | `17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1` | Production |
-| NEAR Testnet | `near:testnet` | - | `usdc.fakes.testnet` | Testnet |
+| Network      | CAIP-2 Identifier | USDT Contract            | USDC Contract                                                      | Status     |
+| ------------ | ----------------- | ------------------------ | ------------------------------------------------------------------ | ---------- |
+| NEAR Mainnet | `near:mainnet`    | `usdt.tether-token.near` | `17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1` | Production |
+| NEAR Testnet | `near:testnet`    | -                        | `usdc.fakes.testnet`                                               | Testnet    |
 
 ## Package Exports
 
 ### Main Package (`@t402/near`)
 
 **Constants:**
+
 - `NEAR_MAINNET_CAIP2` - CAIP-2 identifier for mainnet
 - `NEAR_TESTNET_CAIP2` - CAIP-2 identifier for testnet
 - `NEAR_NETWORKS` - Array of supported networks
@@ -40,6 +41,7 @@ Three main components:
 - `DEFAULT_FT_TRANSFER_GAS` - Default gas for transfers (30 TGas)
 
 **Tokens:**
+
 - `TOKEN_REGISTRY` - Token configurations by network
 - `getTokenConfig(network, symbol)` - Get token by symbol
 - `getTokenByContract(network, contractId)` - Get token by contract
@@ -47,6 +49,7 @@ Three main components:
 - `isNetworkSupported(network)` - Check if network is supported
 
 **Utilities:**
+
 - `isValidAccountId(accountId)` - Validate NEAR account ID
 - `normalizeNetwork(network)` - Normalize to CAIP-2 format
 - `extractNetworkId(network)` - Extract network ID from CAIP-2
@@ -59,7 +62,7 @@ Three main components:
 ### Client (`@t402/near/exact-direct/client`)
 
 ```typescript
-import { createExactDirectNearClient } from '@t402/near/exact-direct/client';
+import { createExactDirectNearClient } from "@t402/near/exact-direct/client";
 
 const client = createExactDirectNearClient({
   signer: myNearSigner,
@@ -69,7 +72,7 @@ const client = createExactDirectNearClient({
 ### Server (`@t402/near/exact-direct/server`)
 
 ```typescript
-import { registerExactDirectNearServer } from '@t402/near/exact-direct/server';
+import { registerExactDirectNearServer } from "@t402/near/exact-direct/server";
 
 registerExactDirectNearServer(server);
 ```
@@ -77,7 +80,7 @@ registerExactDirectNearServer(server);
 ### Facilitator (`@t402/near/exact-direct/facilitator`)
 
 ```typescript
-import { createExactDirectNearFacilitator } from '@t402/near/exact-direct/facilitator';
+import { createExactDirectNearFacilitator } from "@t402/near/exact-direct/facilitator";
 
 const facilitator = createExactDirectNearFacilitator(signer);
 ```
@@ -95,21 +98,23 @@ const facilitator = createExactDirectNearFacilitator(signer);
 
 ```typescript
 interface ExactDirectNearPayload {
-  txHash: string;    // Transaction hash (Base58)
-  from: string;      // Sender account ID
-  to: string;        // Recipient account ID
-  amount: string;    // Amount in smallest units
+  txHash: string; // Transaction hash (Base58)
+  from: string; // Sender account ID
+  to: string; // Recipient account ID
+  amount: string; // Amount in smallest units
 }
 ```
 
 ## Account ID Format
 
 NEAR uses human-readable account IDs:
+
 - 2-64 characters
 - Lowercase alphanumeric, underscores, hyphens
 - Can have subaccounts (e.g., `sub.account.near`)
 
 Examples:
+
 ```
 alice.near
 merchant.near
@@ -119,6 +124,7 @@ usdt.tether-token.near
 ## NEP-141 Token Standard
 
 This package uses the NEP-141 fungible token standard:
+
 - `ft_transfer(receiver_id, amount, memo?)` - Transfer tokens
 - `ft_balance_of(account_id)` - Query balance
 - Requires 1 yoctoNEAR deposit for security
@@ -135,10 +141,12 @@ This package uses the NEP-141 fungible token standard:
 ## Gas Configuration
 
 Default gas amounts:
+
 - `ft_transfer`: 30 TGas (30,000,000,000,000 gas)
 - `storage_deposit`: 10 TGas
 
 Required deposits:
+
 - `ft_transfer`: 1 yoctoNEAR
 
 ## Development

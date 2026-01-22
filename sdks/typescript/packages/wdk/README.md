@@ -36,47 +36,47 @@ npm install @tetherto/wdk-protocol-bridge-usdt0-evm
 Before using T402WDK, register the Tether WDK modules once at app startup:
 
 ```typescript
-import WDK from '@tetherto/wdk';
-import WalletManagerEvm from '@tetherto/wdk-wallet-evm';
-import BridgeUsdt0Evm from '@tetherto/wdk-protocol-bridge-usdt0-evm'; // Optional
-import { T402WDK } from '@t402/wdk';
+import WDK from '@tetherto/wdk'
+import WalletManagerEvm from '@tetherto/wdk-wallet-evm'
+import BridgeUsdt0Evm from '@tetherto/wdk-protocol-bridge-usdt0-evm' // Optional
+import { T402WDK } from '@t402/wdk'
 
 // Register WDK modules (once at app startup)
-T402WDK.registerWDK(WDK, WalletManagerEvm, BridgeUsdt0Evm);
+T402WDK.registerWDK(WDK, WalletManagerEvm, BridgeUsdt0Evm)
 ```
 
 ### 2. Create a Wallet
 
 ```typescript
 // Generate a new seed phrase
-const seedPhrase = T402WDK.generateSeedPhrase();
+const seedPhrase = T402WDK.generateSeedPhrase()
 
 // Or use an existing seed phrase
-const seedPhrase = 'your twelve word seed phrase here ...';
+const seedPhrase = 'your twelve word seed phrase here ...'
 
 // Create wallet with chain configurations
 const wallet = new T402WDK(seedPhrase, {
   arbitrum: 'https://arb1.arbitrum.io/rpc',
   ethereum: 'https://eth.llamarpc.com',
   base: 'https://mainnet.base.org',
-});
+})
 ```
 
 ### 3. Get a Signer for T402 Payments
 
 ```typescript
-import { createT402HTTPClient } from '@t402/core';
+import { createT402HTTPClient } from '@t402/core'
 
 // Get signer for Arbitrum
-const signer = await wallet.getSigner('arbitrum');
+const signer = await wallet.getSigner('arbitrum')
 
 // Use with T402 HTTP client
 const client = createT402HTTPClient({
   signers: [{ scheme: 'exact', signer }],
-});
+})
 
 // Make paid requests
-const response = await client.fetch('https://api.example.com/premium');
+const response = await client.fetch('https://api.example.com/premium')
 ```
 
 ## API Reference
@@ -111,25 +111,29 @@ const wallet = new T402WDK(
 **Config Example:**
 
 ```typescript
-const wallet = new T402WDK(seedPhrase, {
-  // String shorthand (uses default chain settings)
-  arbitrum: 'https://arb1.arbitrum.io/rpc',
+const wallet = new T402WDK(
+  seedPhrase,
+  {
+    // String shorthand (uses default chain settings)
+    arbitrum: 'https://arb1.arbitrum.io/rpc',
 
-  // Full config object
-  ethereum: {
-    provider: 'https://eth.llamarpc.com',
-    chainId: 1,
-    network: 'eip155:1',
+    // Full config object
+    ethereum: {
+      provider: 'https://eth.llamarpc.com',
+      chainId: 1,
+      network: 'eip155:1',
+    },
   },
-}, {
-  // Optional cache configuration
-  cache: {
-    enabled: true,
-    tokenBalanceTTL: 30000,      // 30 seconds
-    nativeBalanceTTL: 15000,     // 15 seconds
-    aggregatedBalanceTTL: 60000, // 60 seconds
+  {
+    // Optional cache configuration
+    cache: {
+      enabled: true,
+      tokenBalanceTTL: 30000, // 30 seconds
+      nativeBalanceTTL: 15000, // 15 seconds
+      aggregatedBalanceTTL: 60000, // 60 seconds
+    },
   },
-});
+)
 ```
 
 #### Instance Properties
@@ -177,21 +181,21 @@ wallet.clearSignerCache();
 
 ```typescript
 // Get USDT0 balance on a chain
-const usdt0Balance = await wallet.getUsdt0Balance('arbitrum');
+const usdt0Balance = await wallet.getUsdt0Balance('arbitrum')
 
 // Get USDC balance on a chain
-const usdcBalance = await wallet.getUsdcBalance('base');
+const usdcBalance = await wallet.getUsdcBalance('base')
 
 // Get all balances for a chain
-const chainBalance = await wallet.getChainBalances('arbitrum');
+const chainBalance = await wallet.getChainBalances('arbitrum')
 // Returns: { chain, network, native, tokens: [...] }
 
 // Get aggregated balances across all chains
-const allBalances = await wallet.getAggregatedBalances();
+const allBalances = await wallet.getAggregatedBalances()
 // Returns: { totalUsdt0, totalUsdc, chains: [...] }
 
 // Find best chain for a payment amount
-const best = await wallet.findBestChainForPayment(1000000n, 'USDT0');
+const best = await wallet.findBestChainForPayment(1000000n, 'USDT0')
 // Returns: { chain: 'arbitrum', token: 'USDT0', balance: 5000000n } | null
 ```
 
@@ -242,36 +246,40 @@ The signer returned by `wallet.getSigner()` implements the T402 `ClientEvmSigner
 
 ```typescript
 interface WDKSigner {
-  readonly address: Address;
+  readonly address: Address
 
   // Sign EIP-712 typed data (used by T402 for EIP-3009)
   signTypedData(message: {
-    domain: Record<string, unknown>;
-    types: Record<string, unknown>;
-    primaryType: string;
-    message: Record<string, unknown>;
-  }): Promise<`0x${string}`>;
+    domain: Record<string, unknown>
+    types: Record<string, unknown>
+    primaryType: string
+    message: Record<string, unknown>
+  }): Promise<`0x${string}`>
 
   // Sign a personal message
-  signMessage(message: string | Uint8Array): Promise<`0x${string}`>;
+  signMessage(message: string | Uint8Array): Promise<`0x${string}`>
 
   // Get native token balance
-  getBalance(): Promise<bigint>;
+  getBalance(): Promise<bigint>
 
   // Get ERC20 token balance
-  getTokenBalance(tokenAddress: Address): Promise<bigint>;
+  getTokenBalance(tokenAddress: Address): Promise<bigint>
 
   // Estimate gas for a transaction
-  estimateGas(params: { to: Address; value?: bigint; data?: string }): Promise<bigint>;
+  estimateGas(params: { to: Address; value?: bigint; data?: string }): Promise<bigint>
 
   // Send a transaction
-  sendTransaction(params: { to: Address; value?: bigint; data?: string }): Promise<{ hash: `0x${string}` }>;
+  sendTransaction(params: {
+    to: Address
+    value?: bigint
+    data?: string
+  }): Promise<{ hash: `0x${string}` }>
 
   // Utility methods
-  getChain(): string;
-  getChainId(): number;
-  getAccountIndex(): number;
-  isInitialized: boolean;
+  getChain(): string
+  getChainId(): number
+  getAccountIndex(): number
+  isInitialized: boolean
 }
 ```
 
@@ -296,18 +304,18 @@ import {
   wrapError,
   withRetry,
   withTimeout,
-} from '@t402/wdk';
+} from '@t402/wdk'
 
 try {
-  const signer = await wallet.getSigner('polygon');
+  const signer = await wallet.getSigner('polygon')
 } catch (error) {
   if (isWDKError(error)) {
-    console.error(`Error code: ${error.code}`);
-    console.error(`Message: ${error.message}`);
-    console.error(`Context:`, error.context);
+    console.error(`Error code: ${error.code}`)
+    console.error(`Message: ${error.message}`)
+    console.error(`Context:`, error.context)
 
     if (hasErrorCode(error, WDKErrorCode.CHAIN_NOT_CONFIGURED)) {
-      console.error('Chain is not configured');
+      console.error('Chain is not configured')
     }
 
     if (error.isRetryable()) {
@@ -319,80 +327,77 @@ try {
 
 ### Error Codes
 
-| Code Range | Category |
-|------------|----------|
-| 1xxx | Initialization errors |
-| 2xxx | Chain configuration errors |
-| 3xxx | Signer errors |
-| 4xxx | Signing errors |
-| 5xxx | Balance errors |
-| 6xxx | Transaction errors |
-| 7xxx | Bridge errors |
-| 8xxx | RPC errors |
+| Code Range | Category                   |
+| ---------- | -------------------------- |
+| 1xxx       | Initialization errors      |
+| 2xxx       | Chain configuration errors |
+| 3xxx       | Signer errors              |
+| 4xxx       | Signing errors             |
+| 5xxx       | Balance errors             |
+| 6xxx       | Transaction errors         |
+| 7xxx       | Bridge errors              |
+| 8xxx       | RPC errors                 |
 
 ### Retry Utilities
 
 ```typescript
-import { withRetry, withTimeout } from '@t402/wdk';
+import { withRetry, withTimeout } from '@t402/wdk'
 
 // Retry an operation with exponential backoff
-const balance = await withRetry(
-  () => signer.getBalance(),
-  { maxRetries: 3, baseDelay: 500 }
-);
+const balance = await withRetry(() => signer.getBalance(), { maxRetries: 3, baseDelay: 500 })
 
 // Add timeout to a promise
 const result = await withTimeout(
   someAsyncOperation(),
-  30000,  // 30 second timeout
-  'Operation description'
-);
+  30000, // 30 second timeout
+  'Operation description',
+)
 ```
 
 ## Supported Chains
 
-| Chain | Chain ID | USDT0 | Bridging |
-|-------|----------|-------|----------|
-| Ethereum | 1 | ✅ | ✅ |
-| Arbitrum | 42161 | ✅ | ✅ |
-| Base | 8453 | ✅ | ✅ |
-| Ink | 57073 | ✅ | ✅ |
-| Berachain | 80094 | ✅ | ✅ |
-| Unichain | 130 | ✅ | ✅ |
+| Chain     | Chain ID | USDT0 | Bridging |
+| --------- | -------- | ----- | -------- |
+| Ethereum  | 1        | ✅    | ✅       |
+| Arbitrum  | 42161    | ✅    | ✅       |
+| Base      | 8453     | ✅    | ✅       |
+| Ink       | 57073    | ✅    | ✅       |
+| Berachain | 80094    | ✅    | ✅       |
+| Unichain  | 130      | ✅    | ✅       |
 
 ## Examples
 
 ### Complete Payment Flow
 
 ```typescript
-import WDK from '@tetherto/wdk';
-import WalletManagerEvm from '@tetherto/wdk-wallet-evm';
-import { T402WDK } from '@t402/wdk';
-import { createT402HTTPClient } from '@t402/core';
+import WDK from '@tetherto/wdk'
+import WalletManagerEvm from '@tetherto/wdk-wallet-evm'
+import { T402WDK } from '@t402/wdk'
+import { createT402HTTPClient } from '@t402/core'
 
 // 1. Setup (once at app startup)
-T402WDK.registerWDK(WDK, WalletManagerEvm);
+T402WDK.registerWDK(WDK, WalletManagerEvm)
 
 // 2. Create wallet
 const wallet = new T402WDK(seedPhrase, {
   arbitrum: 'https://arb1.arbitrum.io/rpc',
-});
+})
 
 // 3. Check balance before payment
-const balance = await wallet.getUsdt0Balance('arbitrum');
-console.log(`USDT0 Balance: ${balance / 1000000n} USDT0`);
+const balance = await wallet.getUsdt0Balance('arbitrum')
+console.log(`USDT0 Balance: ${balance / 1000000n} USDT0`)
 
 // 4. Get signer and create client
-const signer = await wallet.getSigner('arbitrum');
+const signer = await wallet.getSigner('arbitrum')
 const client = createT402HTTPClient({
   signers: [{ scheme: 'exact', signer }],
-});
+})
 
 // 5. Make paid request
-const response = await client.fetch('https://api.example.com/premium');
+const response = await client.fetch('https://api.example.com/premium')
 
 // 6. Invalidate cache after payment
-wallet.invalidateChainCache('arbitrum');
+wallet.invalidateChainCache('arbitrum')
 ```
 
 ### Multi-Chain Balance Check
@@ -402,19 +407,19 @@ const wallet = new T402WDK(seedPhrase, {
   arbitrum: 'https://arb1.arbitrum.io/rpc',
   ethereum: 'https://eth.llamarpc.com',
   base: 'https://mainnet.base.org',
-});
+})
 
 // Get all balances
-const balances = await wallet.getAggregatedBalances();
+const balances = await wallet.getAggregatedBalances()
 
-console.log(`Total USDT0: ${balances.totalUsdt0 / 1000000n}`);
-console.log(`Total USDC: ${balances.totalUsdc / 1000000n}`);
+console.log(`Total USDT0: ${balances.totalUsdt0 / 1000000n}`)
+console.log(`Total USDC: ${balances.totalUsdc / 1000000n}`)
 
 for (const chain of balances.chains) {
-  console.log(`\n${chain.chain}:`);
-  console.log(`  Native: ${chain.native}`);
+  console.log(`\n${chain.chain}:`)
+  console.log(`  Native: ${chain.native}`)
   for (const token of chain.tokens) {
-    console.log(`  ${token.symbol}: ${token.formatted}`);
+    console.log(`  ${token.symbol}: ${token.formatted}`)
   }
 }
 ```
@@ -422,32 +427,32 @@ for (const chain of balances.chains) {
 ### Auto-Select Best Chain
 
 ```typescript
-const amount = 50_000000n; // 50 USDT0
+const amount = 50_000000n // 50 USDT0
 
 // Find the best chain with sufficient balance
-const best = await wallet.findBestChainForPayment(amount);
+const best = await wallet.findBestChainForPayment(amount)
 
 if (best) {
-  console.log(`Use ${best.token} on ${best.chain}`);
-  const signer = await wallet.getSigner(best.chain);
+  console.log(`Use ${best.token} on ${best.chain}`)
+  const signer = await wallet.getSigner(best.chain)
   // Use signer for payment...
 } else {
-  console.log('Insufficient balance on all chains');
+  console.log('Insufficient balance on all chains')
 }
 ```
 
 ### Cross-Chain Bridge
 
 ```typescript
-import BridgeUsdt0Evm from '@tetherto/wdk-protocol-bridge-usdt0-evm';
+import BridgeUsdt0Evm from '@tetherto/wdk-protocol-bridge-usdt0-evm'
 
 // Register with bridge support
-T402WDK.registerWDK(WDK, WalletManagerEvm, BridgeUsdt0Evm);
+T402WDK.registerWDK(WDK, WalletManagerEvm, BridgeUsdt0Evm)
 
 const wallet = new T402WDK(seedPhrase, {
   ethereum: 'https://eth.llamarpc.com',
   arbitrum: 'https://arb1.arbitrum.io/rpc',
-});
+})
 
 // Check if bridging is possible
 if (wallet.canBridge('ethereum', 'arbitrum')) {
@@ -456,10 +461,10 @@ if (wallet.canBridge('ethereum', 'arbitrum')) {
     fromChain: 'ethereum',
     toChain: 'arbitrum',
     amount: 100_000000n,
-  });
+  })
 
-  console.log(`Bridge tx: ${result.txHash}`);
-  console.log(`Estimated time: ${result.estimatedTime}s`);
+  console.log(`Bridge tx: ${result.txHash}`)
+  console.log(`Estimated time: ${result.estimatedTime}s`)
 }
 ```
 
@@ -503,7 +508,7 @@ import type {
   BalanceCacheConfig,
   BalanceCacheStats,
   RetryConfig,
-} from '@t402/wdk';
+} from '@t402/wdk'
 ```
 
 ## License

@@ -25,10 +25,7 @@ export interface UseTronBalanceReturn {
  * @param contractAddress - TRC-20 contract address
  * @returns Balance in smallest units
  */
-async function fetchTRC20Balance(
-  userAddress: string,
-  contractAddress: string,
-): Promise<bigint> {
+async function fetchTRC20Balance(userAddress: string, contractAddress: string): Promise<bigint> {
   try {
     if (!window.tronWeb) {
       console.error("TronWeb not available");

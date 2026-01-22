@@ -66,7 +66,16 @@ export function getEvmPaywallHtml(options: EvmPaywallOptions): string {
     return `<!DOCTYPE html><html><body><h1>EVM Paywall (run pnpm build:paywall to generate full template)</h1></body></html>`;
   }
 
-  const { amount, testnet, paymentRequired, currentUrl, appName, appLogo, theme, walletConnectProjectId } = options;
+  const {
+    amount,
+    testnet,
+    paymentRequired,
+    currentUrl,
+    appName,
+    appLogo,
+    theme,
+    walletConnectProjectId,
+  } = options;
 
   const logOnTestnet = testnet
     ? "console.log('EVM Payment required initialized:', window.t402);"

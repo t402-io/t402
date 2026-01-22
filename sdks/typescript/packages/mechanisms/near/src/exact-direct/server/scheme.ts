@@ -177,9 +177,12 @@ export class ExactDirectNearServer implements SchemeNetworkServer {
    * Get the default asset info for a network.
    * Priority: configured preferredToken > network default
    */
-  private getDefaultAsset(
-    network: Network,
-  ): { contractId: string; symbol: string; name: string; decimals: number } {
+  private getDefaultAsset(network: Network): {
+    contractId: string;
+    symbol: string;
+    name: string;
+    decimals: number;
+  } {
     // If a preferred token is configured, try to use it
     if (this.config.preferredToken) {
       const preferred = getTokenConfig(network, this.config.preferredToken);
