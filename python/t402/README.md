@@ -364,6 +364,47 @@ result = await bridge.bridge(
 )
 ```
 
+## Deprecation Notice: exact-legacy Scheme
+
+> **⚠️ Deprecated in v2.3.0**: The `exact-legacy` scheme is deprecated and will be removed in v3.0.0.
+
+The `exact-legacy` scheme uses the traditional `approve + transferFrom` pattern for legacy USDT tokens. This has been superseded by the `exact` scheme with USDT0.
+
+### Why Migrate?
+
+| Feature | exact-legacy | exact (USDT0) |
+|---------|--------------|---------------|
+| Transactions | 2 (approve + transfer) | 1 (single signature) |
+| Gas Cost | User pays gas | Gasless (EIP-3009) |
+| Chains | ~5 chains | 19+ chains |
+| Cross-chain | ❌ | ✅ LayerZero bridge |
+
+### Migration Guide
+
+```python
+# Before (deprecated)
+from t402.schemes.evm import ExactLegacyEvmClientScheme, ExactLegacyEvmServerScheme
+
+client_scheme = ExactLegacyEvmClientScheme(signer)
+server_scheme = ExactLegacyEvmServerScheme()
+
+# After (recommended)
+from t402.schemes.evm import ExactEvmClientScheme, ExactEvmServerScheme
+
+client_scheme = ExactEvmClientScheme(signer)
+server_scheme = ExactEvmServerScheme()
+```
+
+### USDT0 Token Addresses
+
+| Chain | USDT0 Address |
+|-------|---------------|
+| Ethereum | `0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee` |
+| Arbitrum | `0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9` |
+| Ink | `0x0200C29006150606B650577BBE7B6248F58470c1` |
+| Berachain | `0x779Ded0c9e1022225f8E0630b35a9b54bE713736` |
+| And 15+ more... | See [USDT0 documentation](https://docs.t402.io/networks/usdt0) |
+
 ## WDK Integration
 
 Tether Wallet Development Kit support:
