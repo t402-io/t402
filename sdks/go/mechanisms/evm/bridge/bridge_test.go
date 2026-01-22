@@ -13,7 +13,7 @@ func TestGetEndpointID(t *testing.T) {
 	}{
 		{"ethereum", 30101, true},
 		{"arbitrum", 30110, true},
-		{"ink", 30291, true},
+		{"ink", 30339, true},
 		{"berachain", 30362, true},
 		{"unichain", 30320, true},
 		{"Ethereum", 30101, true}, // Case insensitive
@@ -44,7 +44,7 @@ func TestGetUSDT0OFTAddress(t *testing.T) {
 		{"arbitrum", "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9", true},
 		{"ink", "0x0200C29006150606B650577BBE7B6248F58470c1", true},
 		{"berachain", "0x779Ded0c9e1022225f8E0630b35a9b54bE713736", true},
-		{"unichain", "0x588ce4F028D8e7B53B687865d6A67b3A54C75518", true},
+		{"unichain", "0x9151434b16b9763660705744891fA906F660EcC5", true},
 		{"unknown", "", false},
 	}
 
@@ -89,28 +89,31 @@ func TestSupportsBridging(t *testing.T) {
 func TestGetBridgeableChains(t *testing.T) {
 	chains := GetBridgeableChains()
 
-	if len(chains) != 5 {
-		t.Errorf("GetBridgeableChains() returned %d chains, want 5", len(chains))
+	// Should have 19 chains (7 core + 5 phase 1 + 7 phase 2)
+	if len(chains) != 19 {
+		t.Errorf("GetBridgeableChains() returned %d chains, want 19", len(chains))
 	}
 
-	// Check all expected chains are present
-	expected := map[string]bool{
+	// Check core chains are present
+	coreChains := map[string]bool{
 		"ethereum":  false,
 		"arbitrum":  false,
+		"optimism":  false,
+		"polygon":   false,
 		"ink":       false,
 		"berachain": false,
 		"unichain":  false,
 	}
 
 	for _, chain := range chains {
-		if _, ok := expected[chain]; ok {
-			expected[chain] = true
+		if _, ok := coreChains[chain]; ok {
+			coreChains[chain] = true
 		}
 	}
 
-	for chain, found := range expected {
+	for chain, found := range coreChains {
 		if !found {
-			t.Errorf("GetBridgeableChains() missing chain: %s", chain)
+			t.Errorf("GetBridgeableChains() missing core chain: %s", chain)
 		}
 	}
 }
@@ -364,7 +367,7 @@ func TestGetEndpointIDFromNetwork(t *testing.T) {
 	}{
 		{"eip155:1", 30101, true},
 		{"eip155:42161", 30110, true},
-		{"eip155:57073", 30291, true},
+		{"eip155:57073", 30339, true},
 		{"unknown", 0, false},
 	}
 

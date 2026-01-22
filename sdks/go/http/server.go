@@ -826,6 +826,7 @@ type t402WindowConfig struct {
 	CurrentURL             string                 `json:"currentUrl"`
 	AppName                string                 `json:"appName,omitempty"`
 	AppLogo                string                 `json:"appLogo,omitempty"`
+	CDPClientKey           string                 `json:"cdpClientKey,omitempty"`
 	TonConnectManifestURL  string                 `json:"tonConnectManifestUrl,omitempty"`
 	WalletConnectProjectID string                 `json:"walletConnectProjectId,omitempty"`
 	Config                 t402WindowChainConfig  `json:"config"`
@@ -873,6 +874,7 @@ func injectDataIntoTemplate(template string, paymentRequired t402.PaymentRequire
 		windowConfig.CurrentURL = config.CurrentURL
 		windowConfig.AppName = config.AppName
 		windowConfig.AppLogo = config.AppLogo
+		windowConfig.CDPClientKey = config.CDPClientKey
 		windowConfig.TonConnectManifestURL = config.TonConnectManifestURL
 		windowConfig.WalletConnectProjectID = config.WalletConnectProjectID
 	}

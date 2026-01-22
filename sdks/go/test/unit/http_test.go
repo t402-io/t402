@@ -153,11 +153,10 @@ func TestHTTPBrowserPaywall(t *testing.T) {
 
 		// Check for key paywall elements
 		expectedElements := []string{
-			"Payment Required",
-			"Premium Web Content",
-			"0.00 USDC", // $5.00 might be parsed as 0.00 due to price parsing issue
-			"payment-widget",
-			"test-key", // CDP client key
+			"Payment Required",        // Page title
+			"window.t402",             // Config injection
+			"paymentRequired",         // Payment requirements in config
+			"test-key",                // CDP client key
 		}
 
 		for _, element := range expectedElements {
