@@ -6,14 +6,14 @@ on:
     paths:
       - 'typescript/packages/**/src/**'
       - 'typescript/typedoc.json'
-      - 'docs/**'
+      - 'services/docs/**'
       - '.github/workflows/api-docs.yml'
   pull_request:
     branches: [main]
     paths:
       - 'typescript/packages/**/src/**'
       - 'typescript/typedoc.json'
-      - 'docs/**'
+      - 'services/docs/**'
   workflow_dispatch:
 
 jobs:
@@ -37,7 +37,7 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: |
             typescript/pnpm-lock.yaml
-            docs/pnpm-lock.yaml
+            services/docs/pnpm-lock.yaml
 
       - name: Install TypeScript dependencies
         working-directory: typescript
@@ -47,17 +47,17 @@ jobs:
         working-directory: typescript
         run: npx typedoc
 
-      - name: Copy API docs to docs/public
+      - name: Copy API docs to services/docs/public
         run: |
-          mkdir -p docs/public/api
-          cp -r typescript/api-docs/* docs/public/api/
+          mkdir -p services/docs/public/api
+          cp -r typescript/api-docs/* services/docs/public/api/
 
       - name: Install docs dependencies
-        working-directory: docs
+        working-directory: services/docs
         run: npm install
 
       - name: Build documentation site
-        working-directory: docs
+        working-directory: services/docs
         run: npm run build
 
       - name: Deploy to Cloudflare Pages
@@ -66,7 +66,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy docs/out --project-name=t402-docs
+          command: pages deploy services/docs/out --project-name=t402-docs
 
       - name: Deploy Preview
         if: github.event_name == 'pull_request'
@@ -74,4 +74,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy docs/out --project-name=t402-docs --branch=${{ github.head_ref }}
+          command: pages deploy services/docs/out --project-name=t402-docs --branch=${{ github.head_ref }}

@@ -4,14 +4,14 @@ on:
   push:
     branches: [main]
     paths:
-      - 'services/facilitator/grafana/**'
-      - 'services/facilitator/prometheus.yml'
+      - 'services/grafana/**'
+      - 'services/grafana/prometheus.yml'
       - '.github/workflows/grafana.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'services/facilitator/grafana/**'
-      - 'services/facilitator/prometheus.yml'
+      - 'services/grafana/**'
+      - 'services/grafana/prometheus.yml'
   workflow_dispatch:
 
 env:
@@ -28,7 +28,7 @@ jobs:
 
       - name: Validate JSON dashboards
         run: |
-          for f in services/facilitator/grafana/dashboards/*.json; do
+          for f in services/grafana/dashboards/*.json; do
             echo "Validating $f..."
             jq empty "$f" || exit 1
           done
@@ -36,7 +36,7 @@ jobs:
 
       - name: Validate YAML configs
         run: |
-          for f in services/facilitator/grafana/provisioning/**/*.yml; do
+          for f in services/grafana/provisioning/**/*.yml; do
             echo "Validating $f..."
             python3 -c "import yaml; yaml.safe_load(open('$f'))" || exit 1
           done
@@ -82,8 +82,8 @@ jobs:
         id: build
         uses: docker/build-push-action@v6
         with:
-          context: services/facilitator/grafana
-          file: services/facilitator/grafana/Dockerfile
+          context: services/grafana
+          file: services/grafana/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

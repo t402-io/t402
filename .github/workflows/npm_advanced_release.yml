@@ -39,7 +39,7 @@ on:
         type: boolean
 
 env:
-  WORKING_DIR: ./docs/internal/typescript
+  WORKING_DIR: ./services/docs/internal/typescript
 
 jobs:
   test:
