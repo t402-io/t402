@@ -6,7 +6,7 @@
 > Last Updated: 2026-01-22
 >
 > **Phase 1 & 2 Complete**: Legacy EVM USDT (BNB, Avalanche, Celo, Kaia, Fantom)
-> **Phase 3 In Progress**: Near Protocol (spec + Go mechanism done)
+> **Phase 3 Complete**: Near Protocol (spec + Go + TypeScript + Facilitator)
 
 ---
 
@@ -19,7 +19,7 @@ This plan outlines T402's strategy to become the definitive payment protocol for
 | USDT0 (LayerZero OFT) | 19 | ✅ 100% Complete |
 | Native USDT (Major) | 6 | ✅ 100% Complete |
 | Legacy EVM USDT | 5 | ✅ 100% Complete |
-| Near Protocol | 1 | ⚠️ In Progress (spec + Go done) |
+| Near Protocol | 1 | ✅ 100% Complete |
 | Native USDT (Emerging) | 3+ | ❌ Planned |
 | **Total Target** | **33+** | **85% → 100%** |
 
@@ -439,7 +439,7 @@ Add a new payment scheme for legacy tokens:
 | 25 | Celo | 42220 | Legacy | ✅ Complete |
 | 26 | Kaia | 8217 | Legacy | ✅ Complete |
 | 27 | Fantom | 250 | Legacy | ✅ Complete |
-| 28 | Near | - | NEP-141 | ⚠️ In Progress |
+| 28 | Near | - | NEP-141 | ✅ Complete |
 | 29 | Aptos | - | Move | ❌ Phase 3 |
 | 30 | Tezos | - | FA2 | ❌ Phase 3 |
 | 31 | Polkadot | - | Assets | ❌ Phase 3 |
