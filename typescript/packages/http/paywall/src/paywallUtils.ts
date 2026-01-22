@@ -1,5 +1,64 @@
 import type { PaymentRequirements } from "@t402/core/types";
-import * as allChains from "viem/chains";
+
+/**
+ * Hardcoded EVM chain display names for common chains.
+ * This avoids importing viem/chains for non-EVM paywalls.
+ * For EVM paywalls, the evmChains module provides full lookup.
+ */
+const EVM_CHAIN_NAMES: Record<number, string> = {
+  // Mainnets
+  1: "Ethereum",
+  10: "Optimism",
+  56: "BNB Smart Chain",
+  100: "Gnosis",
+  137: "Polygon",
+  250: "Fantom",
+  324: "zkSync Era",
+  5000: "Mantle",
+  8453: "Base",
+  42161: "Arbitrum One",
+  42170: "Arbitrum Nova",
+  43114: "Avalanche",
+  42220: "Celo",
+  59144: "Linea",
+  534352: "Scroll",
+  81457: "Blast",
+  34443: "Mode",
+  7777777: "Zora",
+  // Testnets
+  11155111: "Sepolia",
+  84532: "Base Sepolia",
+  421614: "Arbitrum Sepolia",
+  11155420: "OP Sepolia",
+  80002: "Polygon Amoy",
+  97: "BNB Testnet",
+  43113: "Avalanche Fuji",
+  59141: "Linea Sepolia",
+  534351: "Scroll Sepolia",
+  300: "zkSync Sepolia",
+  5003: "Mantle Sepolia",
+  168587773: "Blast Sepolia",
+  999999999: "Zora Sepolia",
+};
+
+/**
+ * Hardcoded EVM testnet chain IDs.
+ */
+const EVM_TESTNET_CHAIN_IDS = new Set([
+  11155111, // Sepolia
+  84532, // Base Sepolia
+  421614, // Arbitrum Sepolia
+  11155420, // OP Sepolia
+  80002, // Polygon Amoy
+  97, // BNB Testnet
+  43113, // Avalanche Fuji
+  59141, // Linea Sepolia
+  534351, // Scroll Sepolia
+  300, // zkSync Sepolia
+  5003, // Mantle Sepolia
+  168587773, // Blast Sepolia
+  999999999, // Zora Sepolia
+]);
 
 // Chain configuration constants
 
@@ -33,6 +92,18 @@ export const TRON_NETWORK_REFS = {
 export const STACKS_CHAIN_IDS = {
   MAINNET: "1",
   TESTNET: "2147483648",
+} as const;
+
+// Cosmos Network References (CAIP-2 format: cosmos:chainId)
+export const COSMOS_NETWORK_REFS = {
+  NOBLE_MAINNET: "noble-1",
+  NOBLE_TESTNET: "grand-1",
+} as const;
+
+// NEAR Network References (CAIP-2 format: near:network)
+export const NEAR_NETWORK_REFS = {
+  MAINNET: "mainnet",
+  TESTNET: "testnet",
 } as const;
 
 /**
@@ -140,6 +211,26 @@ export function isStacksNetwork(network: string): boolean {
 }
 
 /**
+ * Determines if the provided network is a Cosmos network.
+ *
+ * @param network - The network to check (CAIP-2 format: cosmos:chainId).
+ * @returns True if the network is Cosmos based.
+ */
+export function isCosmosNetwork(network: string): boolean {
+  return network.startsWith("cosmos:");
+}
+
+/**
+ * Determines if the provided network is a NEAR network.
+ *
+ * @param network - The network to check (CAIP-2 format: near:network).
+ * @returns True if the network is NEAR based.
+ */
+export function isNearNetwork(network: string): boolean {
+  return network.startsWith("near:");
+}
+
+/**
  * Provides a human-readable display name for a network.
  * Uses viem/chains for EVM chain metadata (based on ethereum-lists/chains).
  * See: https://github.com/ethereum-lists/chains
@@ -150,15 +241,7 @@ export function isStacksNetwork(network: string): boolean {
 export function getNetworkDisplayName(network: string): string {
   if (network.startsWith("eip155:")) {
     const chainId = parseInt(network.split(":")[1]);
-
-    // Find matching chain in viem's chain definitions
-    const chain = Object.values(allChains).find(c => c.id === chainId);
-
-    if (chain) {
-      return chain.name;
-    }
-
-    return `Chain ${chainId}`;
+    return EVM_CHAIN_NAMES[chainId] ?? `Chain ${chainId}`;
   }
 
   if (network.startsWith("solana:")) {
@@ -183,6 +266,18 @@ export function getNetworkDisplayName(network: string): string {
     return chainId === STACKS_CHAIN_IDS.TESTNET ? "Stacks Testnet" : "Stacks Mainnet";
   }
 
+  if (network.startsWith("cosmos:")) {
+    const chainId = network.split(":")[1];
+    if (chainId === COSMOS_NETWORK_REFS.NOBLE_MAINNET) return "Noble";
+    if (chainId === COSMOS_NETWORK_REFS.NOBLE_TESTNET) return "Noble Testnet";
+    return `Cosmos ${chainId}`;
+  }
+
+  if (network.startsWith("near:")) {
+    const ref = network.split(":")[1];
+    return ref === NEAR_NETWORK_REFS.TESTNET ? "NEAR Testnet" : "NEAR Mainnet";
+  }
+
   return network;
 }
 
@@ -196,8 +291,7 @@ export function getNetworkDisplayName(network: string): string {
 export function isTestnetNetwork(network: string): boolean {
   if (network.startsWith("eip155:")) {
     const chainId = parseInt(network.split(":")[1]);
-    const chain = Object.values(allChains).find(c => c.id === chainId);
-    return chain?.testnet ?? false;
+    return EVM_TESTNET_CHAIN_IDS.has(chainId);
   }
 
   if (network.startsWith("solana:")) {
@@ -218,6 +312,16 @@ export function isTestnetNetwork(network: string): boolean {
   if (network.startsWith("stacks:")) {
     const chainId = network.split(":")[1];
     return chainId === STACKS_CHAIN_IDS.TESTNET;
+  }
+
+  if (network.startsWith("cosmos:")) {
+    const chainId = network.split(":")[1];
+    return chainId === COSMOS_NETWORK_REFS.NOBLE_TESTNET;
+  }
+
+  if (network.startsWith("near:")) {
+    const ref = network.split(":")[1];
+    return ref === NEAR_NETWORK_REFS.TESTNET;
   }
 
   return false;
@@ -267,6 +371,16 @@ export function getNetworkIcon(network: string): string {
 
   if (network.startsWith("stacks:")) {
     return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#5546FF"/><path d="M8 9h8M8 12h8M8 15h8" stroke="white" stroke-width="1.5" stroke-linecap="round"/><path d="M10 7v10M14 7v10" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+  }
+
+  if (network.startsWith("cosmos:")) {
+    // Cosmos atom icon (purple gradient)
+    return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#2E3148"/><ellipse cx="12" cy="12" rx="7" ry="3" stroke="#6F7390" stroke-width="1"/><ellipse cx="12" cy="12" rx="7" ry="3" transform="rotate(60 12 12)" stroke="#6F7390" stroke-width="1"/><ellipse cx="12" cy="12" rx="7" ry="3" transform="rotate(120 12 12)" stroke="#6F7390" stroke-width="1"/><circle cx="12" cy="12" r="2" fill="white"/></svg>`;
+  }
+
+  if (network.startsWith("near:")) {
+    // NEAR protocol icon (black/white)
+    return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#000000"/><path d="M8 16V8l3 4 5-6v10l-3-4-5 6z" fill="white"/></svg>`;
   }
 
   // Default icon

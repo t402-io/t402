@@ -287,9 +287,6 @@ importers:
 
   packages/http/express:
     dependencies:
-      '@solana/kit':
-        specifier: ^5.4.0
-        version: 5.4.0(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2)(utf-8-validate@5.0.10)
       '@t402/core':
         specifier: workspace:*
         version: link:../../core
@@ -299,9 +296,6 @@ importers:
       '@t402/paywall':
         specifier: workspace:*
         version: link:../paywall
-      viem:
-        specifier: ^2.44.2
-        version: 2.44.2(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
       zod:
         specifier: ^3.24.2
         version: 3.25.76
@@ -433,9 +427,6 @@ importers:
       '@t402/core':
         specifier: workspace:*
         version: link:../../core
-      viem:
-        specifier: ^2.44.2
-        version: 2.44.2(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
       zod:
         specifier: ^3.24.2
         version: 3.25.76
@@ -558,9 +549,6 @@ importers:
 
   packages/http/next:
     dependencies:
-      '@coinbase/cdp-sdk':
-        specifier: ^1.22.0
-        version: 1.36.1(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2)(utf-8-validate@5.0.10)
       '@t402/core':
         specifier: workspace:*
         version: link:../../core
@@ -696,17 +684,17 @@ importers:
         specifier: ^9.24.0
         version: 9.34.0
       '@t402/evm':
-        specifier: ^2.2.0
-        version: 2.2.0(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)
+        specifier: workspace:*
+        version: link:../../mechanisms/evm
       '@t402/svm':
-        specifier: ^2.0.0
-        version: 2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2)(ws@8.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: workspace:*
+        version: link:../../mechanisms/svm
       '@t402/ton':
-        specifier: ^2.0.0
-        version: 2.1.0
+        specifier: workspace:*
+        version: link:../../mechanisms/ton
       '@t402/tron':
-        specifier: ^2.0.0
-        version: 2.0.0
+        specifier: workspace:*
+        version: link:../../mechanisms/tron
       '@types/node':
         specifier: ^22.13.4
         version: 22.18.0
@@ -4049,21 +4037,6 @@ packages:
   '@swc/helpers@0.5.17':
     resolution: {integrity: sha512-5IKx/Y13RsYd+sauPb2x+U/xZikHjolzfuDgTAl/Tdf3Q8rslRvC19NKDLgAJQ6wsqADk10ntlv08nPFw/gO/A==}
 
-  '@t402/core@2.0.0':
-    resolution: {integrity: sha512-uCxJRhwl69osHTpzTuQqGqvOb2LK9pbMKdqhQBqBIdEvh/A3hgnsqcQO2Ude3rIdqBUyno0ZJTELuDFiVhE+jg==}
-
-  '@t402/evm@2.2.0':
-    resolution: {integrity: sha512-nSrmdpaUA04iW+VPzJIYygLfSRZUz7C2aNUafScF3U/s8jE34QJIwWJRVOnUorwLgLy8NUenIhvihODJJaIiEA==}
-
-  '@t402/svm@2.0.0':
-    resolution: {integrity: sha512-egW/jh7+h2bt2kzblyr3XMHrPIHhIx6ghfKbohsC0zeGGUDxzqp18YgTw82aWMdM85tR8YrDUI10Sl6W/bRj7A==}
-
-  '@t402/ton@2.1.0':
-    resolution: {integrity: sha512-BW2eKMOcjXzzIv1lNrCSzBwjnF0Adea54B1RkfsJwsfXq670lbhKGJ3ayalmlhq2engDHK/7uepx+MICB1rTPA==}
-
-  '@t402/tron@2.0.0':
-    resolution: {integrity: sha512-IqAX65LEhsfKDcHXqb52IHj1W+iqUT06KuieDVfo3mYMWeOaE/0YE04vJbK4y2ANUgbXmLbZGGQMntkuUBaLKw==}
-
   '@tanstack/query-core@5.90.11':
     resolution: {integrity: sha512-f9z/nXhCgWDF4lHqgIE30jxLe4sYv15QodfdPDKYAk7nAEjNcndy4dHz3ezhdUaR23BpWa4I2EH4/DZ0//Uf8A==}
 
@@ -4128,12 +4101,6 @@ packages:
 
   '@ton/crypto@3.3.0':
     resolution: {integrity: sha512-/A6CYGgA/H36OZ9BbTaGerKtzWp50rg67ZCH2oIjV1NcrBaCK9Z343M+CxedvM7Haf3f/Ee9EhxyeTp0GKMUpA==}
-
-  '@ton/ton@15.4.0':
-    resolution: {integrity: sha512-f19y2Rez88KZK+lv3CT3ghXi07LcToJtJhlgRSfK+3GzjdIcoW/wbmXG1ffi6fkc8W2LO5z6Q3gZaIEvNGnz6w==}
-    peerDependencies:
-      '@ton/core': '>=0.62.0 <1.0.0'
-      '@ton/crypto': '>=3.2.0'
 
   '@ton/ton@16.1.0':
     resolution: {integrity: sha512-vRlMZVJ0/JABFDTFInyLh3C4LRP6AF3VtOl2iwCEcPfqRxdPcHW4r+bJLkKvo5fCknaGS8CEVdBeu6ziXHv2Ig==}
@@ -12234,49 +12201,6 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@t402/core@2.0.0':
-    dependencies:
-      zod: 3.25.76
-
-  '@t402/evm@2.2.0(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)':
-    dependencies:
-      '@t402/core': 2.0.0
-      viem: 2.44.2(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
-      zod: 3.25.76
-    transitivePeerDependencies:
-      - bufferutil
-      - typescript
-      - utf-8-validate
-
-  '@t402/svm@2.0.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2)(ws@8.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
-    dependencies:
-      '@scure/base': 1.2.6
-      '@solana-program/compute-budget': 0.8.0(@solana/kit@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2)(ws@8.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
-      '@solana-program/token': 0.5.1(@solana/kit@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2)(ws@8.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
-      '@solana-program/token-2022': 0.4.2(@solana/kit@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2)(ws@8.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)))(@solana/sysvars@5.4.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))
-      '@solana/kit': 2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2)(ws@8.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      '@solana/transaction-confirmation': 2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2)(ws@8.19.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      '@t402/core': 2.0.0
-      zod: 3.25.76
-    transitivePeerDependencies:
-      - '@solana/sysvars'
-      - fastestsmallesttextencoderdecoder
-      - typescript
-      - ws
-
-  '@t402/ton@2.1.0':
-    dependencies:
-      '@t402/core': 2.0.0
-      '@ton/core': 0.62.1(@ton/crypto@3.3.0)
-      '@ton/crypto': 3.3.0
-      '@ton/ton': 15.4.0(@ton/core@0.62.1(@ton/crypto@3.3.0))(@ton/crypto@3.3.0)
-    transitivePeerDependencies:
-      - debug
-
-  '@t402/tron@2.0.0':
-    dependencies:
-      '@t402/core': 2.0.0
-
   '@tanstack/query-core@5.90.11': {}
 
   '@tanstack/react-query@5.90.11(react@19.2.1)':
@@ -12381,18 +12305,6 @@ snapshots:
       '@ton/crypto-primitives': 2.1.0
       jssha: 3.2.0
       tweetnacl: 1.0.3
-
-  '@ton/ton@15.4.0(@ton/core@0.62.1(@ton/crypto@3.3.0))(@ton/crypto@3.3.0)':
-    dependencies:
-      '@ton/core': 0.62.1(@ton/crypto@3.3.0)
-      '@ton/crypto': 3.3.0
-      axios: 1.13.2
-      dataloader: 2.2.3
-      symbol.inspect: 1.0.1
-      teslabot: 1.5.0
-      zod: 3.25.76
-    transitivePeerDependencies:
-      - debug
 
   '@ton/ton@16.1.0(@ton/core@0.62.1(@ton/crypto@3.3.0))(@ton/crypto@3.3.0)':
     dependencies:

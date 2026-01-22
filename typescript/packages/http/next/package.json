@@ -39,7 +39,6 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
-    "@coinbase/cdp-sdk": "^1.22.0",
     "@t402/core": "workspace:*",
     "@t402/extensions": "workspace:*",
     "zod": "^3.24.2"
