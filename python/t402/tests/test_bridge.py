@@ -1,7 +1,8 @@
 """Tests for USDT0 Bridge module."""
 
 import pytest
-from unittest.mock import patch
+import asyncio
+from unittest.mock import patch, MagicMock, AsyncMock
 
 from t402.bridge import (
     # Client
@@ -523,6 +524,444 @@ class TestLayerZeroScanClient:
         with patch.object(client, "get_message", side_effect=ValueError("not found")):
             result = await client.is_delivered("0xunknown")
             assert result is False
+
+    @pytest.mark.asyncio
+    async def test_get_client_creates_httpx_client(self):
+        """Test _get_client creates and caches an httpx.AsyncClient."""
+        client = LayerZeroScanClient()
+        assert client._client is None
+
+        http_client = await client._get_client()
+        assert http_client is not None
+        assert client._client is http_client
+
+        # Should return cached client
+        http_client2 = await client._get_client()
+        assert http_client is http_client2
+
+        await client.close()
+
+    @pytest.mark.asyncio
+    async def test_close_with_existing_client(self):
+        """Test close properly closes the HTTP client."""
+        client = LayerZeroScanClient()
+
+        # Create the client
+        await client._get_client()
+        assert client._client is not None
+
+        # Close it
+        await client.close()
+        assert client._client is None
+
+    @pytest.mark.asyncio
+    async def test_get_message_success(self):
+        """Test get_message with successful response."""
+        client = LayerZeroScanClient()
+
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "guid": "0x1234567890abcdef",
+            "srcEid": 30101,
+            "dstEid": 30110,
+            "srcUaAddress": "0xabc",
+            "dstUaAddress": "0xdef",
+            "srcTxHash": "0xtx123",
+            "dstTxHash": "0xtx456",
+            "status": "DELIVERED",
+            "srcBlockNumber": 100,
+            "dstBlockNumber": 200,
+            "created": "2026-01-01T00:00:00Z",
+            "updated": "2026-01-01T01:00:00Z",
+        }
+        mock_response.raise_for_status = MagicMock()
+
+        mock_http_client = AsyncMock()
+        mock_http_client.get = AsyncMock(return_value=mock_response)
+
+        with patch.object(client, "_get_client", return_value=mock_http_client):
+            message = await client.get_message("0x1234567890abcdef")
+
+        assert message.guid == "0x1234567890abcdef"
+        assert message.src_eid == 30101
+        assert message.dst_eid == 30110
+        assert message.status == LayerZeroMessageStatus.DELIVERED
+        assert message.dst_tx_hash == "0xtx456"
+
+    @pytest.mark.asyncio
+    async def test_get_message_not_found(self):
+        """Test get_message raises ValueError for 404."""
+        client = LayerZeroScanClient()
+
+        mock_response = MagicMock()
+        mock_response.status_code = 404
+
+        mock_http_client = AsyncMock()
+        mock_http_client.get = AsyncMock(return_value=mock_response)
+
+        with patch.object(client, "_get_client", return_value=mock_http_client):
+            with pytest.raises(ValueError) as exc_info:
+                await client.get_message("0xnonexistent")
+            assert "not found" in str(exc_info.value).lower()
+
+    @pytest.mark.asyncio
+    async def test_get_messages_by_wallet(self):
+        """Test get_messages_by_wallet returns list of messages."""
+        client = LayerZeroScanClient()
+
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "messages": [
+                {
+                    "guid": "0xmsg1",
+                    "srcEid": 30101,
+                    "dstEid": 30110,
+                    "srcUaAddress": "0xabc",
+                    "dstUaAddress": "0xdef",
+                    "srcTxHash": "0xtx1",
+                    "status": "DELIVERED",
+                    "srcBlockNumber": 100,
+                    "created": "2026-01-01T00:00:00Z",
+                    "updated": "2026-01-01T01:00:00Z",
+                },
+                {
+                    "guid": "0xmsg2",
+                    "srcEid": 30110,
+                    "dstEid": 30101,
+                    "srcUaAddress": "0xabc",
+                    "dstUaAddress": "0xdef",
+                    "srcTxHash": "0xtx2",
+                    "status": "INFLIGHT",
+                    "srcBlockNumber": 200,
+                    "created": "2026-01-02T00:00:00Z",
+                    "updated": "2026-01-02T01:00:00Z",
+                },
+            ]
+        }
+        mock_response.raise_for_status = MagicMock()
+
+        mock_http_client = AsyncMock()
+        mock_http_client.get = AsyncMock(return_value=mock_response)
+
+        with patch.object(client, "_get_client", return_value=mock_http_client):
+            messages = await client.get_messages_by_wallet("0xabc")
+
+        assert len(messages) == 2
+        assert messages[0].guid == "0xmsg1"
+        assert messages[0].status == LayerZeroMessageStatus.DELIVERED
+        assert messages[1].guid == "0xmsg2"
+        assert messages[1].status == LayerZeroMessageStatus.INFLIGHT
+
+    @pytest.mark.asyncio
+    async def test_get_messages_by_wallet_with_data_key(self):
+        """Test get_messages_by_wallet handles 'data' key in response."""
+        client = LayerZeroScanClient()
+
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "data": [
+                {
+                    "guid": "0xmsg1",
+                    "srcEid": 30101,
+                    "dstEid": 30110,
+                    "srcUaAddress": "0xabc",
+                    "dstUaAddress": "0xdef",
+                    "srcTxHash": "0xtx1",
+                    "status": "DELIVERED",
+                    "srcBlockNumber": 100,
+                    "created": "2026-01-01T00:00:00Z",
+                    "updated": "2026-01-01T01:00:00Z",
+                }
+            ]
+        }
+        mock_response.raise_for_status = MagicMock()
+
+        mock_http_client = AsyncMock()
+        mock_http_client.get = AsyncMock(return_value=mock_response)
+
+        with patch.object(client, "_get_client", return_value=mock_http_client):
+            messages = await client.get_messages_by_wallet("0xabc")
+
+        assert len(messages) == 1
+
+    @pytest.mark.asyncio
+    async def test_wait_for_delivery_success(self):
+        """Test wait_for_delivery returns when message is delivered."""
+        client = LayerZeroScanClient()
+
+        delivered_message = LayerZeroMessage(
+            guid="0xtest",
+            src_eid=30101,
+            dst_eid=30110,
+            src_ua_address="0xabc",
+            dst_ua_address="0xdef",
+            src_tx_hash="0xtx",
+            dst_tx_hash="0xdst",
+            status=LayerZeroMessageStatus.DELIVERED,
+            src_block_number=100,
+            dst_block_number=200,
+            created="2026-01-01",
+            updated="2026-01-01",
+        )
+
+        with patch.object(client, "get_message", return_value=delivered_message):
+            result = await client.wait_for_delivery("0xtest")
+
+        assert result.status == LayerZeroMessageStatus.DELIVERED
+
+    @pytest.mark.asyncio
+    async def test_wait_for_delivery_with_options(self):
+        """Test wait_for_delivery with custom options."""
+        client = LayerZeroScanClient()
+
+        delivered_message = LayerZeroMessage(
+            guid="0xtest",
+            src_eid=30101,
+            dst_eid=30110,
+            src_ua_address="0xabc",
+            dst_ua_address="0xdef",
+            src_tx_hash="0xtx",
+            status=LayerZeroMessageStatus.DELIVERED,
+            src_block_number=100,
+            created="2026-01-01",
+            updated="2026-01-01",
+        )
+
+        status_changes = []
+        options = WaitForDeliveryOptions(
+            timeout=5000,
+            poll_interval=100,
+            on_status_change=lambda s: status_changes.append(s),
+        )
+
+        with patch.object(client, "get_message", return_value=delivered_message):
+            result = await client.wait_for_delivery("0xtest", options)
+
+        assert result.status == LayerZeroMessageStatus.DELIVERED
+        assert LayerZeroMessageStatus.DELIVERED in status_changes
+
+    @pytest.mark.asyncio
+    async def test_wait_for_delivery_failed(self):
+        """Test wait_for_delivery raises when message fails."""
+        client = LayerZeroScanClient()
+
+        failed_message = LayerZeroMessage(
+            guid="0xtest",
+            src_eid=30101,
+            dst_eid=30110,
+            src_ua_address="0xabc",
+            dst_ua_address="0xdef",
+            src_tx_hash="0xtx",
+            status=LayerZeroMessageStatus.FAILED,
+            src_block_number=100,
+            created="2026-01-01",
+            updated="2026-01-01",
+        )
+
+        with patch.object(client, "get_message", return_value=failed_message):
+            with pytest.raises(ValueError) as exc_info:
+                await client.wait_for_delivery("0xtest")
+            assert "failed" in str(exc_info.value).lower()
+
+    @pytest.mark.asyncio
+    async def test_wait_for_delivery_blocked(self):
+        """Test wait_for_delivery raises when message is blocked."""
+        client = LayerZeroScanClient()
+
+        blocked_message = LayerZeroMessage(
+            guid="0xtest",
+            src_eid=30101,
+            dst_eid=30110,
+            src_ua_address="0xabc",
+            dst_ua_address="0xdef",
+            src_tx_hash="0xtx",
+            status=LayerZeroMessageStatus.BLOCKED,
+            src_block_number=100,
+            created="2026-01-01",
+            updated="2026-01-01",
+        )
+
+        with patch.object(client, "get_message", return_value=blocked_message):
+            with pytest.raises(ValueError) as exc_info:
+                await client.wait_for_delivery("0xtest")
+            assert "blocked" in str(exc_info.value).lower()
+
+    @pytest.mark.asyncio
+    async def test_wait_for_delivery_timeout(self):
+        """Test wait_for_delivery raises on timeout."""
+        client = LayerZeroScanClient()
+
+        inflight_message = LayerZeroMessage(
+            guid="0xtest",
+            src_eid=30101,
+            dst_eid=30110,
+            src_ua_address="0xabc",
+            dst_ua_address="0xdef",
+            src_tx_hash="0xtx",
+            status=LayerZeroMessageStatus.INFLIGHT,
+            src_block_number=100,
+            created="2026-01-01",
+            updated="2026-01-01",
+        )
+
+        options = WaitForDeliveryOptions(timeout=100, poll_interval=50)
+
+        with patch.object(client, "get_message", return_value=inflight_message):
+            with pytest.raises(ValueError) as exc_info:
+                await client.wait_for_delivery("0xtest", options)
+            assert "timeout" in str(exc_info.value).lower()
+
+    @pytest.mark.asyncio
+    async def test_wait_for_delivery_retries_on_not_found(self):
+        """Test wait_for_delivery retries when message not yet indexed."""
+        client = LayerZeroScanClient()
+
+        delivered_message = LayerZeroMessage(
+            guid="0xtest",
+            src_eid=30101,
+            dst_eid=30110,
+            src_ua_address="0xabc",
+            dst_ua_address="0xdef",
+            src_tx_hash="0xtx",
+            status=LayerZeroMessageStatus.DELIVERED,
+            src_block_number=100,
+            created="2026-01-01",
+            updated="2026-01-01",
+        )
+
+        call_count = 0
+
+        async def mock_get_message(guid):
+            nonlocal call_count
+            call_count += 1
+            if call_count < 3:
+                raise ValueError("Message not found: 0xtest")
+            return delivered_message
+
+        options = WaitForDeliveryOptions(timeout=5000, poll_interval=10)
+
+        with patch.object(client, "get_message", side_effect=mock_get_message):
+            result = await client.wait_for_delivery("0xtest", options)
+
+        assert result.status == LayerZeroMessageStatus.DELIVERED
+        assert call_count >= 3
+
+    @pytest.mark.asyncio
+    async def test_is_delivered_true(self):
+        """Test is_delivered returns True when message is delivered."""
+        client = LayerZeroScanClient()
+
+        delivered_message = LayerZeroMessage(
+            guid="0xtest",
+            src_eid=30101,
+            dst_eid=30110,
+            src_ua_address="0xabc",
+            dst_ua_address="0xdef",
+            src_tx_hash="0xtx",
+            status=LayerZeroMessageStatus.DELIVERED,
+            src_block_number=100,
+            created="2026-01-01",
+            updated="2026-01-01",
+        )
+
+        with patch.object(client, "get_message", return_value=delivered_message):
+            result = await client.is_delivered("0xtest")
+            assert result is True
+
+    @pytest.mark.asyncio
+    async def test_is_delivered_false_when_inflight(self):
+        """Test is_delivered returns False when message is inflight."""
+        client = LayerZeroScanClient()
+
+        inflight_message = LayerZeroMessage(
+            guid="0xtest",
+            src_eid=30101,
+            dst_eid=30110,
+            src_ua_address="0xabc",
+            dst_ua_address="0xdef",
+            src_tx_hash="0xtx",
+            status=LayerZeroMessageStatus.INFLIGHT,
+            src_block_number=100,
+            created="2026-01-01",
+            updated="2026-01-01",
+        )
+
+        with patch.object(client, "get_message", return_value=inflight_message):
+            result = await client.is_delivered("0xtest")
+            assert result is False
+
+    def test_map_api_response_full(self):
+        """Test _map_api_response with full data."""
+        client = LayerZeroScanClient()
+
+        data = {
+            "guid": "0xtest",
+            "srcEid": 30101,
+            "dstEid": 30110,
+            "srcUaAddress": "0xabc",
+            "dstUaAddress": "0xdef",
+            "srcTxHash": "0xtx1",
+            "dstTxHash": "0xtx2",
+            "status": "CONFIRMING",
+            "srcBlockNumber": 100,
+            "dstBlockNumber": 200,
+            "created": "2026-01-01",
+            "updated": "2026-01-02",
+        }
+
+        message = client._map_api_response(data)
+
+        assert message.guid == "0xtest"
+        assert message.src_eid == 30101
+        assert message.dst_eid == 30110
+        assert message.src_ua_address == "0xabc"
+        assert message.dst_ua_address == "0xdef"
+        assert message.src_tx_hash == "0xtx1"
+        assert message.dst_tx_hash == "0xtx2"
+        assert message.status == LayerZeroMessageStatus.CONFIRMING
+        assert message.src_block_number == 100
+        assert message.dst_block_number == 200
+
+    def test_map_api_response_alternative_keys(self):
+        """Test _map_api_response with alternative key names."""
+        client = LayerZeroScanClient()
+
+        data = {
+            "messageGuid": "0xalt",
+            "srcChainId": 30101,
+            "dstChainId": 30110,
+            "srcAddress": "0xsrc",
+            "dstAddress": "0xdst",
+            "srcTxHash": "0xtx",
+            "status": "DELIVERED",
+            "srcBlockNumber": 100,
+            "createdAt": "2026-01-01",
+            "updatedAt": "2026-01-02",
+        }
+
+        message = client._map_api_response(data)
+
+        assert message.guid == "0xalt"
+        assert message.src_eid == 30101
+        assert message.dst_eid == 30110
+        assert message.src_ua_address == "0xsrc"
+        assert message.dst_ua_address == "0xdst"
+
+    def test_map_api_response_minimal(self):
+        """Test _map_api_response with minimal data."""
+        client = LayerZeroScanClient()
+
+        data = {"status": "INFLIGHT"}
+
+        message = client._map_api_response(data)
+
+        assert message.guid == ""
+        assert message.src_eid == 0
+        assert message.dst_eid == 0
+        assert message.status == LayerZeroMessageStatus.INFLIGHT
 
 
 # =============================================================================
