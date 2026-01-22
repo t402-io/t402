@@ -41,7 +41,8 @@ t402/
 │   │   │   ├── ton/         # @t402/ton - TON (Jettons)
 │   │   │   ├── tron/        # @t402/tron - TRON (TRC-20)
 │   │   │   ├── near/        # @t402/near - NEAR (NEP-141)
-│   │   │   └── aptos/       # @t402/aptos - Aptos (Fungible Asset)
+│   │   │   ├── aptos/       # @t402/aptos - Aptos (Fungible Asset)
+│   │   │   └── tezos/       # @t402/tezos - Tezos (FA2)
 │   │   ├── http/
 │   │   │   ├── express/     # @t402/express - Express.js middleware
 │   │   │   ├── hono/        # @t402/hono - Hono middleware
@@ -68,7 +69,8 @@ t402/
 │   │   ├── ton/
 │   │   ├── tron/
 │   │   ├── near/
-│   │   └── aptos/
+│   │   ├── aptos/
+│   │   └── tezos/
 │   ├── http/                # HTTP middleware (Gin)
 │   ├── cmd/t402/            # CLI tool
 │   └── cmd/t402-mcp/        # MCP server
@@ -281,6 +283,8 @@ Networks use CAIP-2 format: `namespace:reference`
 | NEAR Testnet | `near:testnet` |
 | Aptos Mainnet | `aptos:1` |
 | Aptos Testnet | `aptos:2` |
+| Tezos Mainnet | `tezos:NetXdQprcVkpaWU` |
+| Tezos Ghostnet | `tezos:NetXnHfVqm9iesp` |
 
 ### Package Export Pattern (TypeScript)
 
@@ -356,6 +360,10 @@ NEAR_TESTNET_RPC=https://rpc.testnet.near.org
 # Aptos
 APTOS_RPC=https://fullnode.mainnet.aptoslabs.com/v1
 APTOS_TESTNET_RPC=https://fullnode.testnet.aptoslabs.com/v1
+
+# Tezos
+TEZOS_RPC=https://mainnet.api.tez.ie
+TEZOS_TESTNET_RPC=https://ghostnet.tezos.marigold.dev
 ```
 
 ### TypeScript Testing
@@ -439,6 +447,12 @@ TEST_PRIVATE_KEY=0x...
 | Network | Metadata Address |
 |---------|------------------|
 | Mainnet | `0xf73e887a8754f540ee6e1a93bdc6dde2af69fc7ca5de32013e89dd44244473cb` |
+
+### Tezos USDt (FA2)
+
+| Network | Contract Address | Token ID |
+|---------|------------------|----------|
+| Mainnet | `KT1XnTn74bUtxHfDtBmm2bGZAQfhPbvKWR8o` | 0 |
 
 ---
 

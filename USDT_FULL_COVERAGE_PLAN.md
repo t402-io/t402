@@ -6,7 +6,7 @@
 > Last Updated: 2026-01-22
 >
 > **Phase 1 & 2 Complete**: Legacy EVM USDT (BNB, Avalanche, Celo, Kaia, Fantom)
-> **Phase 3 Complete**: Near Protocol, Aptos (spec + Go + TypeScript + Facilitator)
+> **Phase 3 Complete**: Near Protocol, Aptos, Tezos (spec + Go + TypeScript + Facilitator)
 
 ---
 
@@ -187,16 +187,18 @@ python/t402/src/t402/near/ (NEW)
 
 **Implementation**: Complete (TypeScript @t402/aptos + Go mechanism + Facilitator)
 
-#### Tezos (P2)
+#### Tezos (P2) ✅ Complete
 
 | Item | Value |
 |------|-------|
 | USDT Address | `KT1XnTn74bUtxHfDtBmm2bGZAQfhPbvKWR8o` |
-| Standard | FA2 |
+| Token ID | 0 |
+| Standard | FA2 (TZIP-12) |
 | RPC | https://mainnet.api.tez.ie |
+| Indexer | https://api.tzkt.io |
 | CAIP-2 | `tezos:NetXdQprcVkpaWU` |
 
-**Complexity**: High - requires Michelson/LIGO understanding
+**Implementation**: Complete (TypeScript @t402/tezos + Go mechanism + Facilitator)
 
 #### Polkadot Asset Hub (P2)
 
@@ -334,9 +336,11 @@ Add a new payment scheme for legacy tokens:
   - [x] Create `@t402/aptos` package
   - [x] Implement exact-direct scheme (TypeScript + Go)
   - [x] Add to Facilitator
-- [ ] Tezos (if prioritized)
-  - [ ] Research FA2 standard
-  - [ ] Create `@t402/tezos` package
+- [x] Tezos ✅ Complete
+  - [x] Research FA2 standard (TZIP-12)
+  - [x] Create `@t402/tezos` TypeScript package
+  - [x] Implement exact-direct scheme (TypeScript + Go)
+  - [x] Add to Facilitator with TzKT indexer
 - [ ] Polkadot (if prioritized)
   - [ ] Research Assets Pallet
   - [ ] Create `@t402/polkadot` package
@@ -442,7 +446,7 @@ Add a new payment scheme for legacy tokens:
 | 27 | Fantom | 250 | Legacy | ✅ Complete |
 | 28 | Near | - | NEP-141 | ✅ Complete |
 | 29 | Aptos | - | Move | ✅ Complete |
-| 30 | Tezos | - | FA2 | ❌ Phase 3 |
+| 30 | Tezos | - | FA2 | ✅ Complete |
 | 31 | Polkadot | - | Assets | ❌ Phase 3 |
 | 32 | Cosmos/Noble | - | Native | ✅ (USDC) |
 | 33 | Stacks | - | sBTC | ✅ (sUSDC) |
