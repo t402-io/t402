@@ -8,7 +8,11 @@
 
 import type { PaymentPayload, PaymentRequirements, SchemeNetworkClient } from "@t402/core/types";
 import type { ClientNearSigner, ExactDirectNearPayload } from "../../types.js";
-import { SCHEME_EXACT_DIRECT, DEFAULT_FT_TRANSFER_GAS, FT_TRANSFER_DEPOSIT } from "../../constants.js";
+import {
+  SCHEME_EXACT_DIRECT,
+  DEFAULT_FT_TRANSFER_GAS,
+  FT_TRANSFER_DEPOSIT,
+} from "../../constants.js";
 import { normalizeNetwork, isValidAccountId } from "../../utils.js";
 
 /**

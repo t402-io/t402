@@ -44,10 +44,7 @@ export {
   UptoEvmFacilitatorScheme,
   createUptoEvmFacilitatorScheme,
 } from "./upto/index.js";
-export type {
-  UptoEvmServerSchemeConfig,
-  UptoEvmFacilitatorSchemeConfig,
-} from "./upto/index.js";
+export type { UptoEvmServerSchemeConfig, UptoEvmFacilitatorSchemeConfig } from "./upto/index.js";
 
 // Export USDT0 bridge module
 export {

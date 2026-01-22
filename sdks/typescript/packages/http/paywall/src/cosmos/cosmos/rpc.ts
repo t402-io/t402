@@ -1,9 +1,4 @@
-import {
-  type CosmosNetwork,
-  NOBLE_REST_ENDPOINTS,
-  NOBLE_CHAIN_IDS,
-  USDC_DENOM,
-} from "./types";
+import { type CosmosNetwork, NOBLE_REST_ENDPOINTS, NOBLE_CHAIN_IDS, USDC_DENOM } from "./types";
 
 /**
  * Get the REST endpoint for a Noble network
@@ -22,10 +17,7 @@ export function getChainId(network: CosmosNetwork): string {
 /**
  * Fetch USDC balance for an address on Noble
  */
-export async function fetchUsdcBalance(
-  address: string,
-  network: CosmosNetwork,
-): Promise<bigint> {
+export async function fetchUsdcBalance(address: string, network: CosmosNetwork): Promise<bigint> {
   const endpoint = getRestEndpoint(network);
   const url = `${endpoint}/cosmos/bank/v1beta1/balances/${address}/by_denom?denom=${USDC_DENOM}`;
 

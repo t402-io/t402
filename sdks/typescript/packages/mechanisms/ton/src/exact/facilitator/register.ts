@@ -1,7 +1,7 @@
-import { t402Facilitator } from "@t402/core/facilitator";
-import { Network } from "@t402/core/types";
-import { FacilitatorTonSigner } from "../../signer.js";
-import { ExactTonScheme, ExactTonSchemeConfig } from "./scheme.js";
+import { t402Facilitator } from '@t402/core/facilitator'
+import { Network } from '@t402/core/types'
+import { FacilitatorTonSigner } from '../../signer.js'
+import { ExactTonScheme, ExactTonSchemeConfig } from './scheme.js'
 
 /**
  * Configuration options for registering TON schemes to an t402Facilitator
@@ -10,18 +10,18 @@ export interface TonFacilitatorConfig {
   /**
    * The TON signer for facilitator operations (verify and settle)
    */
-  signer: FacilitatorTonSigner;
+  signer: FacilitatorTonSigner
 
   /**
    * Networks to register (single network or array of networks)
    * Examples: "ton:mainnet", ["ton:mainnet", "ton:testnet"]
    */
-  networks: Network | Network[];
+  networks: Network | Network[]
 
   /**
    * Optional scheme configuration (gas sponsorship, etc.)
    */
-  schemeConfig?: ExactTonSchemeConfig;
+  schemeConfig?: ExactTonSchemeConfig
 }
 
 /**
@@ -68,7 +68,7 @@ export function registerExactTonScheme(
   config: TonFacilitatorConfig,
 ): t402Facilitator {
   // Register V2 scheme with specified networks
-  facilitator.register(config.networks, new ExactTonScheme(config.signer, config.schemeConfig));
+  facilitator.register(config.networks, new ExactTonScheme(config.signer, config.schemeConfig))
 
-  return facilitator;
+  return facilitator
 }

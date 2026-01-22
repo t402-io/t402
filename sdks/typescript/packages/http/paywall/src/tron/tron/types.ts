@@ -47,7 +47,7 @@ export interface TronWeb {
       functionSelector: string,
       options: { feeLimit?: number; callValue?: number },
       parameters: Array<{ type: string; value: unknown }>,
-      issuerAddress: string
+      issuerAddress: string,
     ): Promise<{ transaction: unknown; result: { result: boolean } }>;
   };
   contract(): {

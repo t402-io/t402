@@ -1,29 +1,29 @@
-import { defineConfig } from "tsup";
+import { defineConfig } from 'tsup'
 
 const baseConfig = {
   entry: {
-    index: "src/index.ts",
+    index: 'src/index.ts',
   },
   dts: {
     resolve: true,
   },
   splitting: false,
   sourcemap: true,
-  external: ["vue"],
+  external: ['vue'],
   treeshake: true,
-};
+}
 
 export default defineConfig([
   {
     ...baseConfig,
-    format: "esm",
-    outDir: "dist/esm",
+    format: 'esm',
+    outDir: 'dist/esm',
     clean: true,
   },
   {
     ...baseConfig,
-    format: "cjs",
-    outDir: "dist/cjs",
+    format: 'cjs',
+    outDir: 'dist/cjs',
     clean: false,
   },
-]);
+])

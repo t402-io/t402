@@ -181,7 +181,7 @@ export function parseSIWxHeader(header: string): SIWxPayload {
 export function validateSIWxMessage(
   message: SIWxPayload,
   expectedResourceUri: string,
-  options: ValidateSIWxOptions = {}
+  options: ValidateSIWxOptions = {},
 ): SIWxValidationResult {
   const { maxAge = 5 * 60 * 1000, checkNonce } = options;
 
@@ -260,7 +260,7 @@ export function validateSIWxMessage(
 export async function verifySIWxSignature(
   message: SIWxPayload,
   signature: string,
-  options: VerifySIWxOptions = {}
+  options: VerifySIWxOptions = {},
 ): Promise<SIWxVerificationResult> {
   const { checkSmartWallet = false } = options;
 
@@ -282,7 +282,7 @@ export async function verifySIWxSignature(
           message.address,
           messageHash,
           signature,
-          options.provider
+          options.provider,
         );
 
         if (isValidSmartWallet) {
@@ -462,7 +462,7 @@ async function verifySmartWalletSignature(
   walletAddress: string,
   messageHash: string,
   signature: string,
-  provider: unknown
+  provider: unknown,
 ): Promise<boolean> {
   // Type guard for provider
   interface EthProvider {
@@ -518,7 +518,7 @@ export async function verifyEIP6492Signature(
   walletAddress: string,
   messageHash: string,
   signature: string,
-  provider: unknown
+  provider: unknown,
 ): Promise<boolean> {
   // EIP-6492 signatures end with the magic suffix
   const EIP6492_SUFFIX = "6492649264926492649264926492649264926492649264926492649264926492";

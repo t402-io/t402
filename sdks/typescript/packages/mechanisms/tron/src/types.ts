@@ -12,29 +12,29 @@
  */
 export type TronAuthorization = {
   /** Sender wallet address (T-prefix base58check) */
-  from: string;
+  from: string
 
   /** Recipient wallet address (T-prefix base58check) */
-  to: string;
+  to: string
 
   /** TRC20 contract address (e.g., USDT contract) */
-  contractAddress: string;
+  contractAddress: string
 
   /** Transfer amount in smallest units (as string for large numbers) */
-  amount: string;
+  amount: string
 
   /** Transaction expiration timestamp (milliseconds since epoch) */
-  expiration: number;
+  expiration: number
 
   /** Reference block bytes (hex string) */
-  refBlockBytes: string;
+  refBlockBytes: string
 
   /** Reference block hash (hex string) */
-  refBlockHash: string;
+  refBlockHash: string
 
   /** Transaction timestamp (milliseconds since epoch) */
-  timestamp: number;
-};
+  timestamp: number
+}
 
 /**
  * V2 TRON payment payload
@@ -44,90 +44,90 @@ export type TronAuthorization = {
  */
 export type ExactTronPayloadV2 = {
   /** Hex-encoded signed transaction */
-  signedTransaction: string;
+  signedTransaction: string
 
   /** Transaction authorization metadata */
-  authorization: TronAuthorization;
-};
+  authorization: TronAuthorization
+}
 
 /**
  * Current version alias
  */
-export type ExactTronPayload = ExactTronPayloadV2;
+export type ExactTronPayload = ExactTronPayloadV2
 
 /**
  * Result of verifying a signed TRON transaction
  */
 export type VerifyMessageResult = {
   /** Whether the message is valid */
-  valid: boolean;
+  valid: boolean
 
   /** Reason for invalidity (if not valid) */
-  reason?: string;
+  reason?: string
 
   /** Parsed transfer details (if valid) */
   transfer?: {
     /** Sender address */
-    from: string;
+    from: string
 
     /** Recipient address */
-    to: string;
+    to: string
 
     /** Contract address */
-    contractAddress: string;
+    contractAddress: string
 
     /** Transfer amount */
-    amount: string;
+    amount: string
 
     /** Transaction ID */
-    txId: string;
-  };
-};
+    txId: string
+  }
+}
 
 /**
  * Transaction confirmation result
  */
 export type TransactionConfirmation = {
   /** Whether the transaction was confirmed */
-  success: boolean;
+  success: boolean
 
   /** Transaction ID/hash */
-  txId?: string;
+  txId?: string
 
   /** Block number containing the transaction */
-  blockNumber?: number;
+  blockNumber?: number
 
   /** Error message if failed */
-  error?: string;
-};
+  error?: string
+}
 
 /**
  * TRC20 token configuration
  */
 export type TRC20Config = {
   /** Contract address (T-prefix) */
-  contractAddress: string;
+  contractAddress: string
 
   /** Token symbol (e.g., "USDT") */
-  symbol: string;
+  symbol: string
 
   /** Token name (e.g., "Tether USD") */
-  name: string;
+  name: string
 
   /** Token decimals */
-  decimals: number;
-};
+  decimals: number
+}
 
 /**
  * Network-specific token registry
  */
 export type NetworkTRC20Registry = {
   /** Network CAIP-2 identifier */
-  network: string;
+  network: string
 
   /** Default token for this network */
-  defaultToken: TRC20Config;
+  defaultToken: TRC20Config
 
   /** All supported tokens on this network */
-  tokens: Record<string, TRC20Config>;
-};
+  tokens: Record<string, TRC20Config>
+}

@@ -1,52 +1,52 @@
-import { defineComponent, h, type PropType, computed } from "vue";
-import type { PaymentRequirements } from "@t402/core/types";
+import { defineComponent, h, type PropType, computed } from 'vue'
+import type { PaymentRequirements } from '@t402/core/types'
 import {
   formatTokenAmount,
   getNetworkDisplayName,
   getAssetDisplayName,
   truncateAddress,
-} from "../utils/index.js";
+} from '../utils/index.js'
 
 const containerStyles = {
-  backgroundColor: "#f9fafb",
-  borderRadius: "12px",
-  padding: "16px",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderColor: "#e5e7eb",
-};
+  backgroundColor: '#f9fafb',
+  borderRadius: '12px',
+  padding: '16px',
+  borderWidth: '1px',
+  borderStyle: 'solid',
+  borderColor: '#e5e7eb',
+}
 
 const rowStyles = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  padding: "8px 0",
-  borderBottomWidth: "1px",
-  borderBottomStyle: "solid",
-  borderBottomColor: "#e5e7eb",
-};
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  padding: '8px 0',
+  borderBottomWidth: '1px',
+  borderBottomStyle: 'solid',
+  borderBottomColor: '#e5e7eb',
+}
 
 const lastRowStyles = {
   ...rowStyles,
-  borderBottomWidth: "0",
-};
+  borderBottomWidth: '0',
+}
 
 const labelStyles = {
-  color: "#6b7280",
-  fontSize: "14px",
-};
+  color: '#6b7280',
+  fontSize: '14px',
+}
 
 const valueStyles = {
-  color: "#111827",
-  fontSize: "14px",
-  fontWeight: "500",
-};
+  color: '#111827',
+  fontSize: '14px',
+  fontWeight: '500',
+}
 
 const amountStyles = {
-  color: "#111827",
-  fontSize: "20px",
-  fontWeight: "700",
-};
+  color: '#111827',
+  fontSize: '20px',
+  fontWeight: '700',
+}
 
 /**
  * A component to display payment requirement details.
@@ -64,7 +64,7 @@ const amountStyles = {
  * ```
  */
 export const PaymentDetails = defineComponent({
-  name: "T402PaymentDetails",
+  name: 'T402PaymentDetails',
   props: {
     requirement: {
       type: Object as PropType<PaymentRequirements>,
@@ -84,60 +84,60 @@ export const PaymentDetails = defineComponent({
     },
   },
   setup(props) {
-    const formattedAmount = computed(() => formatTokenAmount(props.requirement.amount));
-    const assetName = computed(() => getAssetDisplayName(props.requirement.asset));
-    const networkName = computed(() => getNetworkDisplayName(props.requirement.network));
-    const truncatedAddress = computed(() => truncateAddress(props.requirement.payTo));
+    const formattedAmount = computed(() => formatTokenAmount(props.requirement.amount))
+    const assetName = computed(() => getAssetDisplayName(props.requirement.asset))
+    const networkName = computed(() => getNetworkDisplayName(props.requirement.network))
+    const truncatedAddress = computed(() => truncateAddress(props.requirement.payTo))
 
     return () => {
-      const rows = [];
+      const rows = []
 
       // Amount row - always shown
       rows.push(
-        h("div", { style: rowStyles }, [
-          h("span", { style: labelStyles }, "Amount"),
-          h("span", { style: amountStyles }, `${formattedAmount.value} ${assetName.value}`),
+        h('div', { style: rowStyles }, [
+          h('span', { style: labelStyles }, 'Amount'),
+          h('span', { style: amountStyles }, `${formattedAmount.value} ${assetName.value}`),
         ]),
-      );
+      )
 
       // Network row
       if (props.showNetwork) {
         rows.push(
-          h("div", { style: rowStyles }, [
-            h("span", { style: labelStyles }, "Network"),
-            h("span", { style: valueStyles }, networkName.value),
+          h('div', { style: rowStyles }, [
+            h('span', { style: labelStyles }, 'Network'),
+            h('span', { style: valueStyles }, networkName.value),
           ]),
-        );
+        )
       }
 
       // Asset row
       if (props.showAsset) {
         rows.push(
-          h("div", { style: rowStyles }, [
-            h("span", { style: labelStyles }, "Asset"),
-            h("span", { style: valueStyles }, assetName.value),
+          h('div', { style: rowStyles }, [
+            h('span', { style: labelStyles }, 'Asset'),
+            h('span', { style: valueStyles }, assetName.value),
           ]),
-        );
+        )
       }
 
       // Recipient row
       if (props.showRecipient) {
         rows.push(
-          h("div", { style: lastRowStyles }, [
-            h("span", { style: labelStyles }, "Recipient"),
+          h('div', { style: lastRowStyles }, [
+            h('span', { style: labelStyles }, 'Recipient'),
             h(
-              "span",
+              'span',
               {
-                style: { ...valueStyles, fontFamily: "monospace" },
+                style: { ...valueStyles, fontFamily: 'monospace' },
                 title: props.requirement.payTo,
               },
               truncatedAddress.value,
             ),
           ]),
-        );
+        )
       }
 
-      return h("div", { style: containerStyles }, rows);
-    };
+      return h('div', { style: containerStyles }, rows)
+    }
   },
-});
+})

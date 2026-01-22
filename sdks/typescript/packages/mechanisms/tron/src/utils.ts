@@ -10,8 +10,8 @@ import {
   TRON_ADDRESS_PREFIX,
   NETWORK_ENDPOINTS,
   DEFAULT_USDT_DECIMALS,
-} from "./constants.js";
-import type { TronNetwork } from "./constants.js";
+} from './constants.js'
+import type { TronNetwork } from './constants.js'
 
 // =============================================================================
 // Network Utilities
@@ -27,22 +27,22 @@ import type { TronNetwork } from "./constants.js";
 export function normalizeNetwork(network: string): TronNetwork {
   // Already in correct format
   if (TRON_NETWORKS.includes(network as TronNetwork)) {
-    return network as TronNetwork;
+    return network as TronNetwork
   }
 
   // Handle shorthand formats
-  const lower = network.toLowerCase();
-  if (lower === "mainnet" || lower === "tron") {
-    return "tron:mainnet";
+  const lower = network.toLowerCase()
+  if (lower === 'mainnet' || lower === 'tron') {
+    return 'tron:mainnet'
   }
-  if (lower === "nile" || lower === "tron-nile") {
-    return "tron:nile";
+  if (lower === 'nile' || lower === 'tron-nile') {
+    return 'tron:nile'
   }
-  if (lower === "shasta" || lower === "tron-shasta") {
-    return "tron:shasta";
+  if (lower === 'shasta' || lower === 'tron-shasta') {
+    return 'tron:shasta'
   }
 
-  throw new Error(`Unsupported TRON network: ${network}`);
+  throw new Error(`Unsupported TRON network: ${network}`)
 }
 
 /**
@@ -53,12 +53,12 @@ export function normalizeNetwork(network: string): TronNetwork {
  * @throws Error if network is not supported
  */
 export function getEndpoint(network: string): string {
-  const normalized = normalizeNetwork(network);
-  const endpoint = NETWORK_ENDPOINTS[normalized];
+  const normalized = normalizeNetwork(network)
+  const endpoint = NETWORK_ENDPOINTS[normalized]
   if (!endpoint) {
-    throw new Error(`No endpoint configured for network: ${network}`);
+    throw new Error(`No endpoint configured for network: ${network}`)
   }
-  return endpoint;
+  return endpoint
 }
 
 /**
@@ -69,10 +69,10 @@ export function getEndpoint(network: string): string {
  */
 export function isTronNetwork(network: string): boolean {
   try {
-    normalizeNetwork(network);
-    return true;
+    normalizeNetwork(network)
+    return true
   } catch {
-    return false;
+    return false
   }
 }
 
@@ -83,7 +83,7 @@ export function isTronNetwork(network: string): boolean {
 /**
  * Base58 alphabet for TRON addresses
  */
-const BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
 /**
  * Validate a TRON address
@@ -99,22 +99,22 @@ const BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvw
 export function validateTronAddress(address: string): boolean {
   // Check length
   if (!address || address.length !== TRON_ADDRESS_LENGTH) {
-    return false;
+    return false
   }
 
   // Check prefix (mainnet addresses start with T)
   if (!address.startsWith(TRON_ADDRESS_PREFIX)) {
-    return false;
+    return false
   }
 
   // Check base58 characters
   for (const char of address) {
     if (!BASE58_ALPHABET.includes(char)) {
-      return false;
+      return false
     }
   }
 
-  return true;
+  return true
 }
 
 /**
@@ -127,11 +127,11 @@ export function validateTronAddress(address: string): boolean {
  * @returns true if addresses are equal
  */
 export function addressesEqual(addr1: string, addr2: string): boolean {
-  if (!addr1 || !addr2) return false;
+  if (!addr1 || !addr2) return false
 
   // TRON addresses are case-sensitive in base58, but we normalize for comparison
   // This handles potential mixed-case issues from different sources
-  return addr1 === addr2;
+  return addr1 === addr2
 }
 
 /**
@@ -145,16 +145,16 @@ export function formatAddress(
   address: string,
   options?: {
     /** Truncate to first/last N characters */
-    truncate?: number;
+    truncate?: number
   },
 ): string {
-  if (!address) return "";
+  if (!address) return ''
 
   if (options?.truncate && address.length > options.truncate * 2 + 3) {
-    return `${address.slice(0, options.truncate)}...${address.slice(-options.truncate)}`;
+    return `${address.slice(0, options.truncate)}...${address.slice(-options.truncate)}`
   }
 
-  return address;
+  return address
 }
 
 // =============================================================================
@@ -168,21 +168,24 @@ export function formatAddress(
  * @param decimals - Token decimals (default: 6 for USDT)
  * @returns Amount in smallest units as string
  */
-export function convertToSmallestUnits(decimalAmount: string, decimals: number = DEFAULT_USDT_DECIMALS): string {
-  const parts = decimalAmount.split(".");
-  const wholePart = parts[0] || "0";
-  let fractionalPart = parts[1] || "";
+export function convertToSmallestUnits(
+  decimalAmount: string,
+  decimals: number = DEFAULT_USDT_DECIMALS,
+): string {
+  const parts = decimalAmount.split('.')
+  const wholePart = parts[0] || '0'
+  let fractionalPart = parts[1] || ''
 
   // Pad or truncate fractional part to match decimals
   if (fractionalPart.length > decimals) {
-    fractionalPart = fractionalPart.slice(0, decimals);
+    fractionalPart = fractionalPart.slice(0, decimals)
   } else {
-    fractionalPart = fractionalPart.padEnd(decimals, "0");
+    fractionalPart = fractionalPart.padEnd(decimals, '0')
   }
 
   // Combine and remove leading zeros
-  const result = (wholePart + fractionalPart).replace(/^0+/, "") || "0";
-  return result;
+  const result = (wholePart + fractionalPart).replace(/^0+/, '') || '0'
+  return result
 }
 
 /**
@@ -192,18 +195,21 @@ export function convertToSmallestUnits(decimalAmount: string, decimals: number =
  * @param decimals - Token decimals (default: 6 for USDT)
  * @returns Amount as decimal string
  */
-export function convertFromSmallestUnits(smallestUnits: string, decimals: number = DEFAULT_USDT_DECIMALS): string {
-  const padded = smallestUnits.padStart(decimals + 1, "0");
-  const wholePart = padded.slice(0, -decimals) || "0";
-  const fractionalPart = padded.slice(-decimals);
+export function convertFromSmallestUnits(
+  smallestUnits: string,
+  decimals: number = DEFAULT_USDT_DECIMALS,
+): string {
+  const padded = smallestUnits.padStart(decimals + 1, '0')
+  const wholePart = padded.slice(0, -decimals) || '0'
+  const fractionalPart = padded.slice(-decimals)
 
   // Remove trailing zeros from fractional part
-  const trimmedFractional = fractionalPart.replace(/0+$/, "");
+  const trimmedFractional = fractionalPart.replace(/0+$/, '')
 
   if (trimmedFractional) {
-    return `${wholePart}.${trimmedFractional}`;
+    return `${wholePart}.${trimmedFractional}`
   }
-  return wholePart;
+  return wholePart
 }
 
 // =============================================================================
@@ -216,9 +222,9 @@ export function convertFromSmallestUnits(smallestUnits: string, decimals: number
  * @returns Unique reference string
  */
 export function generatePaymentReference(): string {
-  const timestamp = Date.now();
-  const random = Math.floor(Math.random() * 1000000);
-  return `t402_${timestamp}_${random}`;
+  const timestamp = Date.now()
+  const random = Math.floor(Math.random() * 1000000)
+  return `t402_${timestamp}_${random}`
 }
 
 /**
@@ -228,7 +234,7 @@ export function generatePaymentReference(): string {
  * @returns Expiration timestamp in milliseconds
  */
 export function calculateExpiration(validitySeconds: number): number {
-  return Date.now() + validitySeconds * 1000;
+  return Date.now() + validitySeconds * 1000
 }
 
 /**
@@ -238,10 +244,10 @@ export function calculateExpiration(validitySeconds: number): number {
  * @returns true if valid hex string
  */
 export function isValidHex(hex: string): boolean {
-  if (!hex) return false;
+  if (!hex) return false
   // Remove 0x prefix if present
-  const cleanHex = hex.startsWith("0x") ? hex.slice(2) : hex;
-  return /^[0-9a-fA-F]+$/.test(cleanHex);
+  const cleanHex = hex.startsWith('0x') ? hex.slice(2) : hex
+  return /^[0-9a-fA-F]+$/.test(cleanHex)
 }
 
 /**
@@ -256,7 +262,7 @@ export function isValidHex(hex: string): boolean {
 export function estimateTransactionFee(isActivated: boolean = true): number {
   // TRC20 transfer typically costs ~15-30 TRX in energy
   // New account activation adds ~1 TRX
-  const baseFee = 30_000_000; // 30 TRX
-  const activationFee = isActivated ? 0 : 1_000_000; // 1 TRX
-  return baseFee + activationFee;
+  const baseFee = 30_000_000 // 30 TRX
+  const activationFee = isActivated ? 0 : 1_000_000 // 1 TRX
+  return baseFee + activationFee
 }

@@ -20,34 +20,34 @@
  *   ... (other networks follow same pattern)
  */
 
-import { createT402McpServer, loadConfigFromEnv } from "../dist/esm/index.mjs";
+import { createT402McpServer, loadConfigFromEnv } from '../dist/esm/index.mjs'
 
 async function main() {
-  const config = loadConfigFromEnv();
+  const config = loadConfigFromEnv()
 
   // Log configuration status (to stderr so it doesn't interfere with stdio)
-  console.error("t402 MCP Server Configuration:");
-  console.error(`  Private Key: ${config.privateKey ? "configured" : "not set"}`);
-  console.error(`  Demo Mode: ${config.demoMode ? "enabled" : "disabled"}`);
-  console.error(`  Bundler URL: ${config.bundlerUrl ? "configured" : "not set"}`);
-  console.error(`  Paymaster URL: ${config.paymasterUrl ? "configured" : "not set"}`);
+  console.error('t402 MCP Server Configuration:')
+  console.error(`  Private Key: ${config.privateKey ? 'configured' : 'not set'}`)
+  console.error(`  Demo Mode: ${config.demoMode ? 'enabled' : 'disabled'}`)
+  console.error(`  Bundler URL: ${config.bundlerUrl ? 'configured' : 'not set'}`)
+  console.error(`  Paymaster URL: ${config.paymasterUrl ? 'configured' : 'not set'}`)
 
   if (config.rpcUrls) {
-    console.error(`  Custom RPC URLs: ${Object.keys(config.rpcUrls).join(", ")}`);
+    console.error(`  Custom RPC URLs: ${Object.keys(config.rpcUrls).join(', ')}`)
   }
 
   if (!config.privateKey && !config.demoMode) {
-    console.error("");
-    console.error("Warning: No private key configured.");
-    console.error("Set T402_PRIVATE_KEY env var or enable T402_DEMO_MODE=true");
-    console.error("");
+    console.error('')
+    console.error('Warning: No private key configured.')
+    console.error('Set T402_PRIVATE_KEY env var or enable T402_DEMO_MODE=true')
+    console.error('')
   }
 
-  const server = createT402McpServer(config);
-  await server.run();
+  const server = createT402McpServer(config)
+  await server.run()
 }
 
 main().catch((error) => {
-  console.error("Fatal error:", error);
-  process.exit(1);
-});
+  console.error('Fatal error:', error)
+  process.exit(1)
+})

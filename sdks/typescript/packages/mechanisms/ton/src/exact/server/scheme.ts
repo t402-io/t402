@@ -12,21 +12,17 @@ import type {
   Price,
   SchemeNetworkServer,
   MoneyParser,
-} from "@t402/core/types";
-import { SCHEME_EXACT } from "../../constants.js";
-import {
-  getDefaultJetton,
-  getJettonConfig,
-  JETTON_REGISTRY,
-} from "../../tokens.js";
-import { normalizeNetwork } from "../../utils.js";
+} from '@t402/core/types'
+import { SCHEME_EXACT } from '../../constants.js'
+import { getDefaultJetton, getJettonConfig, JETTON_REGISTRY } from '../../tokens.js'
+import { normalizeNetwork } from '../../utils.js'
 
 /**
  * Configuration options for ExactTonScheme server
  */
 export interface ExactTonSchemeConfig {
   /** Preferred Jetton symbol (e.g., "USDT"). Defaults to network's highest priority token. */
-  preferredJetton?: string;
+  preferredJetton?: string
 }
 
 /**
@@ -34,12 +30,12 @@ export interface ExactTonSchemeConfig {
  * Handles price parsing and converts user-friendly amounts to Jetton amounts.
  */
 export class ExactTonScheme implements SchemeNetworkServer {
-  readonly scheme = SCHEME_EXACT;
-  private moneyParsers: MoneyParser[] = [];
-  private config: ExactTonSchemeConfig;
+  readonly scheme = SCHEME_EXACT
+  private moneyParsers: MoneyParser[] = []
+  private config: ExactTonSchemeConfig
 
   constructor(config: ExactTonSchemeConfig = {}) {
-    this.config = config;
+    this.config = config
   }
 
   /**
@@ -66,8 +62,8 @@ export class ExactTonScheme implements SchemeNetworkServer {
    * });
    */
   registerMoneyParser(parser: MoneyParser): ExactTonScheme {
-    this.moneyParsers.push(parser);
-    return this;
+    this.moneyParsers.push(parser)
+    return this
   }
 
   /**
@@ -82,33 +78,33 @@ export class ExactTonScheme implements SchemeNetworkServer {
    */
   async parsePrice(price: Price, network: Network): Promise<AssetAmount> {
     // Normalize network to CAIP-2 format
-    const normalizedNetwork = normalizeNetwork(network);
+    const normalizedNetwork = normalizeNetwork(network)
 
     // If already an AssetAmount, return it directly
-    if (typeof price === "object" && price !== null && "amount" in price) {
+    if (typeof price === 'object' && price !== null && 'amount' in price) {
       if (!price.asset) {
-        throw new Error(`Asset address must be specified for AssetAmount on network ${network}`);
+        throw new Error(`Asset address must be specified for AssetAmount on network ${network}`)
       }
       return {
         amount: price.amount,
         asset: price.asset,
         extra: price.extra || {},
-      };
+      }
     }
 
     // Parse Money to decimal number
-    const amount = this.parseMoneyToDecimal(price);
+    const amount = this.parseMoneyToDecimal(price)
 
     // Try each custom money parser in order
     for (const parser of this.moneyParsers) {
-      const result = await parser(amount, normalizedNetwork);
+      const result = await parser(amount, normalizedNetwork)
       if (result !== null) {
-        return result;
+        return result
       }
     }
 
     // All custom parsers returned null, use default conversion
-    return this.defaultMoneyConversion(amount, normalizedNetwork);
+    return this.defaultMoneyConversion(amount, normalizedNetwork)
   }
 
   /**
@@ -123,28 +119,28 @@ export class ExactTonScheme implements SchemeNetworkServer {
   async enhancePaymentRequirements(
     paymentRequirements: PaymentRequirements,
     supportedKind: {
-      t402Version: number;
-      scheme: string;
-      network: Network;
-      extra?: Record<string, unknown>;
+      t402Version: number
+      scheme: string
+      network: Network
+      extra?: Record<string, unknown>
     },
     extensionKeys: string[],
   ): Promise<PaymentRequirements> {
     // Mark unused parameters to satisfy linter
-    void extensionKeys;
+    void extensionKeys
 
     // Start with existing extra fields
-    const extra = { ...paymentRequirements.extra };
+    const extra = { ...paymentRequirements.extra }
 
     // Add gas sponsor from facilitator if provided
     if (supportedKind.extra?.gasSponsor) {
-      extra.gasSponsor = supportedKind.extra.gasSponsor;
+      extra.gasSponsor = supportedKind.extra.gasSponsor
     }
 
     return {
       ...paymentRequirements,
       extra,
-    };
+    }
   }
 
   /**
@@ -155,19 +151,19 @@ export class ExactTonScheme implements SchemeNetworkServer {
    * @returns Decimal number
    */
   private parseMoneyToDecimal(money: string | number): number {
-    if (typeof money === "number") {
-      return money;
+    if (typeof money === 'number') {
+      return money
     }
 
     // Remove $ sign and whitespace, then parse
-    const cleanMoney = money.replace(/^\$/, "").trim();
-    const amount = parseFloat(cleanMoney);
+    const cleanMoney = money.replace(/^\$/, '').trim()
+    const amount = parseFloat(cleanMoney)
 
     if (isNaN(amount)) {
-      throw new Error(`Invalid money format: ${money}`);
+      throw new Error(`Invalid money format: ${money}`)
     }
 
-    return amount;
+    return amount
   }
 
   /**
@@ -179,10 +175,10 @@ export class ExactTonScheme implements SchemeNetworkServer {
    * @returns The parsed asset amount
    */
   private defaultMoneyConversion(amount: number, network: Network): AssetAmount {
-    const jetton = this.getDefaultAsset(network);
+    const jetton = this.getDefaultAsset(network)
 
     // Convert decimal amount to token amount
-    const tokenAmount = this.convertToTokenAmount(amount.toString(), jetton.decimals);
+    const tokenAmount = this.convertToTokenAmount(amount.toString(), jetton.decimals)
 
     return {
       amount: tokenAmount,
@@ -192,7 +188,7 @@ export class ExactTonScheme implements SchemeNetworkServer {
         name: jetton.name,
         decimals: jetton.decimals,
       },
-    };
+    }
   }
 
   /**
@@ -203,13 +199,13 @@ export class ExactTonScheme implements SchemeNetworkServer {
    * @returns The token amount as a string
    */
   private convertToTokenAmount(decimalAmount: string, decimals: number): string {
-    const amount = parseFloat(decimalAmount);
+    const amount = parseFloat(decimalAmount)
     if (isNaN(amount)) {
-      throw new Error(`Invalid amount: ${decimalAmount}`);
+      throw new Error(`Invalid amount: ${decimalAmount}`)
     }
     // Convert to smallest unit (e.g., for USDT with 6 decimals: 0.10 * 10^6 = 100000)
-    const tokenAmount = Math.floor(amount * Math.pow(10, decimals));
-    return tokenAmount.toString();
+    const tokenAmount = Math.floor(amount * Math.pow(10, decimals))
+    return tokenAmount.toString()
   }
 
   /**
@@ -219,33 +215,36 @@ export class ExactTonScheme implements SchemeNetworkServer {
    * @param network - The network to get asset info for
    * @returns The Jetton configuration
    */
-  private getDefaultAsset(
-    network: Network,
-  ): { masterAddress: string; symbol: string; name: string; decimals: number } {
+  private getDefaultAsset(network: Network): {
+    masterAddress: string
+    symbol: string
+    name: string
+    decimals: number
+  } {
     // If a preferred Jetton is configured, try to use it
     if (this.config.preferredJetton) {
-      const preferred = getJettonConfig(network, this.config.preferredJetton);
-      if (preferred) return preferred;
+      const preferred = getJettonConfig(network, this.config.preferredJetton)
+      if (preferred) return preferred
     }
 
     // Use the network's default token (sorted by priority)
-    const defaultJetton = getDefaultJetton(network);
-    if (defaultJetton) return defaultJetton;
+    const defaultJetton = getDefaultJetton(network)
+    if (defaultJetton) return defaultJetton
 
-    throw new Error(`No Jettons configured for network ${network}`);
+    throw new Error(`No Jettons configured for network ${network}`)
   }
 
   /**
    * Get all supported networks
    */
   static getSupportedNetworks(): string[] {
-    return Object.keys(JETTON_REGISTRY);
+    return Object.keys(JETTON_REGISTRY)
   }
 
   /**
    * Check if a network is supported
    */
   static isNetworkSupported(network: string): boolean {
-    return network in JETTON_REGISTRY;
+    return network in JETTON_REGISTRY
   }
 }

@@ -4,9 +4,9 @@
  * Utility functions for signature handling and validation.
  */
 
-import type { Address, Hex } from "viem";
-import { concat, hexToBigInt } from "viem";
-import { SIGNATURE_TYPES } from "./constants.js";
+import type { Address, Hex } from 'viem'
+import { concat, hexToBigInt } from 'viem'
+import { SIGNATURE_TYPES } from './constants.js'
 
 /**
  * Combine multiple signatures in Safe's expected format
@@ -18,34 +18,31 @@ import { SIGNATURE_TYPES } from "./constants.js";
  * @param owners - Array of owner addresses in order
  * @returns Combined signature in Safe format
  */
-export function combineSignatures(
-  signatures: Map<number, Hex>,
-  owners: Address[],
-): Hex {
+export function combineSignatures(signatures: Map<number, Hex>, owners: Address[]): Hex {
   // Create array of (address, signature) pairs
-  const pairs: Array<[Address, Hex]> = [];
+  const pairs: Array<[Address, Hex]> = []
 
   for (const [index, sig] of signatures) {
-    const owner = owners[index];
+    const owner = owners[index]
     if (owner) {
-      pairs.push([owner, sig]);
+      pairs.push([owner, sig])
     }
   }
 
   // Sort by address (Safe requirement)
   // Compare addresses as BigInt for proper sorting
   pairs.sort((a, b) => {
-    const addrA = hexToBigInt(a[0]);
-    const addrB = hexToBigInt(b[0]);
-    return addrA < addrB ? -1 : addrA > addrB ? 1 : 0;
-  });
+    const addrA = hexToBigInt(a[0])
+    const addrB = hexToBigInt(b[0])
+    return addrA < addrB ? -1 : addrA > addrB ? 1 : 0
+  })
 
   // Concatenate signatures
   if (pairs.length === 0) {
-    return "0x" as Hex;
+    return '0x' as Hex
   }
 
-  return concat(pairs.map(([, sig]) => sig)) as Hex;
+  return concat(pairs.map(([, sig]) => sig)) as Hex
 }
 
 /**
@@ -59,9 +56,9 @@ export function combineSignatures(
  */
 export function formatSignatureForSafe(
   signature: Hex,
-  type: keyof typeof SIGNATURE_TYPES = "EOA",
+  type: keyof typeof SIGNATURE_TYPES = 'EOA',
 ): Hex {
-  return concat([signature, SIGNATURE_TYPES[type]]) as Hex;
+  return concat([signature, SIGNATURE_TYPES[type]]) as Hex
 }
 
 /**
@@ -70,9 +67,9 @@ export function formatSignatureForSafe(
  * @returns Unique request ID
  */
 export function generateRequestId(): string {
-  const timestamp = Date.now().toString(36);
-  const random = Math.random().toString(36).substring(2, 10);
-  return `msig_${timestamp}_${random}`;
+  const timestamp = Date.now().toString(36)
+  const random = Math.random().toString(36).substring(2, 10)
+  return `msig_${timestamp}_${random}`
 }
 
 /**
@@ -82,11 +79,8 @@ export function generateRequestId(): string {
  * @param ownerCount - Number of owners
  * @returns True if valid
  */
-export function isValidThreshold(
-  threshold: number,
-  ownerCount: number,
-): boolean {
-  return threshold >= 1 && threshold <= ownerCount;
+export function isValidThreshold(threshold: number, ownerCount: number): boolean {
+  return threshold >= 1 && threshold <= ownerCount
 }
 
 /**
@@ -97,10 +91,10 @@ export function isValidThreshold(
  */
 export function sortAddresses(addresses: Address[]): Address[] {
   return [...addresses].sort((a, b) => {
-    const addrA = hexToBigInt(a);
-    const addrB = hexToBigInt(b);
-    return addrA < addrB ? -1 : addrA > addrB ? 1 : 0;
-  });
+    const addrA = hexToBigInt(a)
+    const addrB = hexToBigInt(b)
+    return addrA < addrB ? -1 : addrA > addrB ? 1 : 0
+  })
 }
 
 /**
@@ -111,9 +105,9 @@ export function sortAddresses(addresses: Address[]): Address[] {
  * @returns Index or -1 if not found
  */
 export function getOwnerIndex(owner: Address, owners: Address[]): number {
-  const sortedOwners = sortAddresses(owners);
-  const lowerOwner = owner.toLowerCase();
-  return sortedOwners.findIndex((o) => o.toLowerCase() === lowerOwner);
+  const sortedOwners = sortAddresses(owners)
+  const lowerOwner = owner.toLowerCase()
+  return sortedOwners.findIndex((o) => o.toLowerCase() === lowerOwner)
 }
 
 /**
@@ -123,6 +117,6 @@ export function getOwnerIndex(owner: Address, owners: Address[]): number {
  * @returns True if all unique
  */
 export function areAddressesUnique(addresses: Address[]): boolean {
-  const lowerAddresses = addresses.map((a) => a.toLowerCase());
-  return new Set(lowerAddresses).size === addresses.length;
+  const lowerAddresses = addresses.map((a) => a.toLowerCase())
+  return new Set(lowerAddresses).size === addresses.length
 }
