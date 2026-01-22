@@ -5,5 +5,5 @@
  * Use specific subpaths for server and facilitator imports.
  */
 
-export { ExactTonScheme } from "./client/index.js";
-export type { ExactTonSchemeConfig } from "./client/index.js";
+export { ExactTonScheme } from './client/index.js'
+export type { ExactTonSchemeConfig } from './client/index.js'

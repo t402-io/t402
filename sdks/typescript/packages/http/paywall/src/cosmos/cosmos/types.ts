@@ -71,11 +71,7 @@ export interface KeplrWindow {
     signed: SignDoc;
     signature: { signature: string; pub_key: { type: string; value: string } };
   }>;
-  sendTx(
-    chainId: string,
-    tx: Uint8Array,
-    mode: "sync" | "async" | "block",
-  ): Promise<Uint8Array>;
+  sendTx(chainId: string, tx: Uint8Array, mode: "sync" | "async" | "block"): Promise<Uint8Array>;
 }
 
 export interface LeapWindow {
@@ -97,11 +93,7 @@ export interface LeapWindow {
     signed: SignDoc;
     signature: { signature: string; pub_key: { type: string; value: string } };
   }>;
-  sendTx(
-    chainId: string,
-    tx: Uint8Array,
-    mode: "sync" | "async" | "block",
-  ): Promise<Uint8Array>;
+  sendTx(chainId: string, tx: Uint8Array, mode: "sync" | "async" | "block"): Promise<Uint8Array>;
 }
 
 export interface ChainInfo {

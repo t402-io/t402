@@ -8,7 +8,7 @@
  * - Cross-chain bridging (USDT0)
  */
 
-import type { Address } from "viem";
+import type { Address } from 'viem'
 import type {
   T402WDKConfig,
   NormalizedChainConfig,
@@ -20,17 +20,17 @@ import type {
   BridgeParams,
   BridgeResult,
   T402WDKOptions,
-} from "./types.js";
-import { BalanceCache, type BalanceCacheConfig, type BalanceCacheStats } from "./cache.js";
+} from './types.js'
+import { BalanceCache, type BalanceCacheConfig, type BalanceCacheStats } from './cache.js'
 import {
   normalizeChainConfig,
   CHAIN_TOKENS,
   USDT0_ADDRESSES,
   USDC_ADDRESSES,
   DEFAULT_RPC_ENDPOINTS,
-} from "./chains.js";
-import { WDKSigner, createWDKSigner } from "./signer.js";
-import { supportsBridging, getBridgeableChains } from "@t402/evm";
+} from './chains.js'
+import { WDKSigner, createWDKSigner } from './signer.js'
+import { supportsBridging, getBridgeableChains } from '@t402/evm'
 import {
   WDKError,
   WDKInitializationError,
@@ -40,7 +40,7 @@ import {
   WDKErrorCode,
   wrapError,
   isWDKError,
-} from "./errors.js";
+} from './errors.js'
 
 /**
  * T402WDK - Tether WDK integration for T402 payments
@@ -66,17 +66,17 @@ import {
  * ```
  */
 export class T402WDK {
-  private _wdk: WDKInstance | null = null;
-  private _normalizedChains: Map<string, NormalizedChainConfig> = new Map();
-  private _seedPhrase: string;
-  private _signerCache: Map<string, WDKSigner> = new Map();
-  private _balanceCache: BalanceCache;
-  private _initializationError: Error | null = null;
+  private _wdk: WDKInstance | null = null
+  private _normalizedChains: Map<string, NormalizedChainConfig> = new Map()
+  private _seedPhrase: string
+  private _signerCache: Map<string, WDKSigner> = new Map()
+  private _balanceCache: BalanceCache
+  private _initializationError: Error | null = null
 
   // WDK module references (set via registerWDK)
-  private static _WDK: WDKConstructor | null = null;
-  private static _WalletManagerEvm: unknown = null;
-  private static _BridgeUsdt0Evm: unknown = null;
+  private static _WDK: WDKConstructor | null = null
+  private static _WalletManagerEvm: unknown = null
+  private static _BridgeUsdt0Evm: unknown = null
 
   /**
    * Register the Tether WDK modules
@@ -101,37 +101,37 @@ export class T402WDK {
     BridgeUsdt0Evm?: unknown,
   ): void {
     if (!WDK) {
-      throw new WDKInitializationError("WDK constructor is required");
+      throw new WDKInitializationError('WDK constructor is required')
     }
 
-    if (typeof WDK !== "function") {
-      throw new WDKInitializationError("WDK must be a constructor function");
+    if (typeof WDK !== 'function') {
+      throw new WDKInitializationError('WDK must be a constructor function')
     }
 
-    T402WDK._WDK = WDK;
-    T402WDK._WalletManagerEvm = WalletManagerEvm ?? null;
-    T402WDK._BridgeUsdt0Evm = BridgeUsdt0Evm ?? null;
+    T402WDK._WDK = WDK
+    T402WDK._WalletManagerEvm = WalletManagerEvm ?? null
+    T402WDK._BridgeUsdt0Evm = BridgeUsdt0Evm ?? null
   }
 
   /**
    * Check if WDK is registered
    */
   static isWDKRegistered(): boolean {
-    return T402WDK._WDK !== null;
+    return T402WDK._WDK !== null
   }
 
   /**
    * Check if wallet manager is registered
    */
   static isWalletManagerRegistered(): boolean {
-    return T402WDK._WalletManagerEvm !== null;
+    return T402WDK._WalletManagerEvm !== null
   }
 
   /**
    * Check if bridge protocol is registered
    */
   static isBridgeRegistered(): boolean {
-    return T402WDK._BridgeUsdt0Evm !== null;
+    return T402WDK._BridgeUsdt0Evm !== null
   }
 
   /**
@@ -143,17 +143,17 @@ export class T402WDK {
   static generateSeedPhrase(): string {
     if (!T402WDK._WDK) {
       throw new WDKInitializationError(
-        "WDK not registered. Call T402WDK.registerWDK() first, or use a mock seed phrase for testing.",
-      );
+        'WDK not registered. Call T402WDK.registerWDK() first, or use a mock seed phrase for testing.',
+      )
     }
 
     try {
-      return T402WDK._WDK.getRandomSeedPhrase();
+      return T402WDK._WDK.getRandomSeedPhrase()
     } catch (error) {
       throw new WDKInitializationError(
         `Failed to generate seed phrase: ${error instanceof Error ? error.message : String(error)}`,
         { cause: error instanceof Error ? error : undefined },
-      );
+      )
     }
   }
 
@@ -167,46 +167,46 @@ export class T402WDK {
    */
   constructor(seedPhrase: string, config: T402WDKConfig = {}, options: T402WDKOptions = {}) {
     // Validate seed phrase
-    if (!seedPhrase || typeof seedPhrase !== "string") {
-      throw new WDKInitializationError("Seed phrase is required and must be a string");
+    if (!seedPhrase || typeof seedPhrase !== 'string') {
+      throw new WDKInitializationError('Seed phrase is required and must be a string')
     }
 
     // Basic seed phrase validation (BIP-39 has 12, 15, 18, 21, or 24 words)
-    const words = seedPhrase.trim().split(/\s+/);
-    const validWordCounts = [12, 15, 18, 21, 24];
+    const words = seedPhrase.trim().split(/\s+/)
+    const validWordCounts = [12, 15, 18, 21, 24]
     if (!validWordCounts.includes(words.length)) {
       throw new WDKInitializationError(
         `Invalid seed phrase: expected 12, 15, 18, 21, or 24 words, got ${words.length}`,
         { context: { wordCount: words.length } },
-      );
+      )
     }
 
-    this._seedPhrase = seedPhrase;
+    this._seedPhrase = seedPhrase
 
     // Initialize balance cache
-    this._balanceCache = new BalanceCache(options.cache);
+    this._balanceCache = new BalanceCache(options.cache)
 
     // Normalize chain configurations
     for (const [chain, chainConfig] of Object.entries(config)) {
       if (chainConfig) {
         try {
-          this._normalizedChains.set(chain, normalizeChainConfig(chain, chainConfig));
+          this._normalizedChains.set(chain, normalizeChainConfig(chain, chainConfig))
         } catch (error) {
           throw new ChainError(
             WDKErrorCode.INVALID_CHAIN_CONFIG,
             `Invalid configuration for chain "${chain}": ${error instanceof Error ? error.message : String(error)}`,
             { chain, cause: error instanceof Error ? error : undefined },
-          );
+          )
         }
       }
     }
 
     // Add default chains if not configured
-    this._addDefaultChainsIfNeeded();
+    this._addDefaultChainsIfNeeded()
 
     // Initialize WDK if registered
     if (T402WDK._WDK) {
-      this._initializeWDK();
+      this._initializeWDK()
     }
   }
 
@@ -216,12 +216,9 @@ export class T402WDK {
   private _addDefaultChainsIfNeeded(): void {
     // Add Arbitrum as default if no chains configured (USDT0 hub)
     if (this._normalizedChains.size === 0) {
-      const defaultEndpoint = DEFAULT_RPC_ENDPOINTS.arbitrum;
+      const defaultEndpoint = DEFAULT_RPC_ENDPOINTS.arbitrum
       if (defaultEndpoint) {
-        this._normalizedChains.set(
-          "arbitrum",
-          normalizeChainConfig("arbitrum", defaultEndpoint),
-        );
+        this._normalizedChains.set('arbitrum', normalizeChainConfig('arbitrum', defaultEndpoint))
       }
     }
   }
@@ -231,19 +228,19 @@ export class T402WDK {
    */
   private _initializeWDK(): void {
     if (!T402WDK._WDK) {
-      this._initializationError = new WDKInitializationError("WDK not registered");
-      return;
+      this._initializationError = new WDKInitializationError('WDK not registered')
+      return
     }
 
     if (!T402WDK._WalletManagerEvm) {
       this._initializationError = new WDKInitializationError(
-        "WalletManagerEvm not registered. Call T402WDK.registerWDK(WDK, WalletManagerEvm) to enable wallet functionality.",
-      );
-      return;
+        'WalletManagerEvm not registered. Call T402WDK.registerWDK(WDK, WalletManagerEvm) to enable wallet functionality.',
+      )
+      return
     }
 
     try {
-      let wdk = new T402WDK._WDK(this._seedPhrase);
+      let wdk = new T402WDK._WDK(this._seedPhrase)
 
       // Register EVM wallets for each configured chain
       for (const [chain, config] of this._normalizedChains) {
@@ -251,33 +248,33 @@ export class T402WDK {
           wdk = wdk.registerWallet(chain, T402WDK._WalletManagerEvm, {
             provider: config.provider,
             chainId: config.chainId,
-          });
+          })
         } catch (error) {
           throw new ChainError(
             WDKErrorCode.CHAIN_NOT_SUPPORTED,
             `Failed to register wallet for chain "${chain}": ${error instanceof Error ? error.message : String(error)}`,
             { chain, cause: error instanceof Error ? error : undefined },
-          );
+          )
         }
       }
 
       // Register USDT0 bridge protocol if available
       if (T402WDK._BridgeUsdt0Evm) {
         try {
-          wdk = wdk.registerProtocol("bridge-usdt0", T402WDK._BridgeUsdt0Evm);
+          wdk = wdk.registerProtocol('bridge-usdt0', T402WDK._BridgeUsdt0Evm)
         } catch (error) {
           // Bridge registration failure is non-fatal, just log it
           console.warn(
             `Failed to register USDT0 bridge protocol: ${error instanceof Error ? error.message : String(error)}`,
-          );
+          )
         }
       }
 
-      this._wdk = wdk;
-      this._initializationError = null;
+      this._wdk = wdk
+      this._initializationError = null
     } catch (error) {
-      this._initializationError = error instanceof Error ? error : new Error(String(error));
-      this._wdk = null;
+      this._initializationError = error instanceof Error ? error : new Error(String(error))
+      this._wdk = null
     }
   }
 
@@ -293,50 +290,50 @@ export class T402WDK {
         : new WDKInitializationError(
             `WDK initialization failed: ${this._initializationError.message}`,
             { cause: this._initializationError },
-          );
+          )
     }
 
     if (!this._wdk) {
       throw new WDKInitializationError(
-        "WDK not initialized. Call T402WDK.registerWDK() before creating instances.",
-      );
+        'WDK not initialized. Call T402WDK.registerWDK() before creating instances.',
+      )
     }
-    return this._wdk;
+    return this._wdk
   }
 
   /**
    * Check if WDK is properly initialized
    */
   get isInitialized(): boolean {
-    return this._wdk !== null && this._initializationError === null;
+    return this._wdk !== null && this._initializationError === null
   }
 
   /**
    * Get initialization error if any
    */
   get initializationError(): Error | null {
-    return this._initializationError;
+    return this._initializationError
   }
 
   /**
    * Get all configured chains
    */
   getConfiguredChains(): string[] {
-    return Array.from(this._normalizedChains.keys());
+    return Array.from(this._normalizedChains.keys())
   }
 
   /**
    * Get chain configuration
    */
   getChainConfig(chain: string): NormalizedChainConfig | undefined {
-    return this._normalizedChains.get(chain);
+    return this._normalizedChains.get(chain)
   }
 
   /**
    * Check if a chain is configured
    */
   isChainConfigured(chain: string): boolean {
-    return this._normalizedChains.has(chain);
+    return this._normalizedChains.has(chain)
   }
 
   /**
@@ -350,40 +347,40 @@ export class T402WDK {
    */
   async getSigner(chain: string, accountIndex = 0): Promise<WDKSigner> {
     // Validate chain parameter
-    if (!chain || typeof chain !== "string") {
+    if (!chain || typeof chain !== 'string') {
       throw new ChainError(
         WDKErrorCode.CHAIN_NOT_CONFIGURED,
-        "Chain name is required and must be a string",
+        'Chain name is required and must be a string',
         { chain },
-      );
+      )
     }
 
-    const cacheKey = `${chain}:${accountIndex}`;
+    const cacheKey = `${chain}:${accountIndex}`
 
     // Return cached signer if available
-    const cached = this._signerCache.get(cacheKey);
+    const cached = this._signerCache.get(cacheKey)
     if (cached) {
-      return cached;
+      return cached
     }
 
     // Validate chain is configured
     if (!this._normalizedChains.has(chain)) {
-      const availableChains = this.getConfiguredChains();
+      const availableChains = this.getConfiguredChains()
       throw new ChainError(
         WDKErrorCode.CHAIN_NOT_CONFIGURED,
-        `Chain "${chain}" not configured. Available chains: ${availableChains.length > 0 ? availableChains.join(", ") : "(none)"}`,
+        `Chain "${chain}" not configured. Available chains: ${availableChains.length > 0 ? availableChains.join(', ') : '(none)'}`,
         { chain, context: { availableChains } },
-      );
+      )
     }
 
     try {
-      const signer = await createWDKSigner(this.wdk, chain, accountIndex);
-      this._signerCache.set(cacheKey, signer);
-      return signer;
+      const signer = await createWDKSigner(this.wdk, chain, accountIndex)
+      this._signerCache.set(cacheKey, signer)
+      return signer
     } catch (error) {
       // Re-throw WDK errors as-is
       if (isWDKError(error)) {
-        throw error;
+        throw error
       }
 
       throw wrapError(
@@ -391,7 +388,7 @@ export class T402WDK {
         WDKErrorCode.SIGNER_NOT_INITIALIZED,
         `Failed to create signer for chain "${chain}"`,
         { chain, accountIndex },
-      );
+      )
     }
   }
 
@@ -400,7 +397,7 @@ export class T402WDK {
    * Useful for forcing re-initialization of signers
    */
   clearSignerCache(): void {
-    this._signerCache.clear();
+    this._signerCache.clear()
   }
 
   /**
@@ -412,8 +409,8 @@ export class T402WDK {
    * @throws {SignerError} If address fetch fails
    */
   async getAddress(chain: string, accountIndex = 0): Promise<Address> {
-    const signer = await this.getSigner(chain, accountIndex);
-    return signer.address;
+    const signer = await this.getSigner(chain, accountIndex)
+    return signer.address
   }
 
   /**
@@ -424,27 +421,27 @@ export class T402WDK {
    * @throws {BalanceError} If balance fetch fails
    */
   async getUsdt0Balance(chain: string, accountIndex = 0): Promise<bigint> {
-    const usdt0Address = USDT0_ADDRESSES[chain];
+    const usdt0Address = USDT0_ADDRESSES[chain]
     if (!usdt0Address) {
-      return 0n;
+      return 0n
     }
 
     try {
-      const signer = await this.getSigner(chain, accountIndex);
-      const address = signer.address;
+      const signer = await this.getSigner(chain, accountIndex)
+      const address = signer.address
 
       return await this._balanceCache.getOrFetchTokenBalance(
         chain,
         usdt0Address,
         address,
         async () => signer.getTokenBalance(usdt0Address),
-      );
+      )
     } catch (error) {
       // Return 0 for balance errors (chain might not support USDT0)
       if (isWDKError(error) && error.code === WDKErrorCode.TOKEN_BALANCE_FETCH_FAILED) {
-        return 0n;
+        return 0n
       }
-      throw error;
+      throw error
     }
   }
 
@@ -456,27 +453,27 @@ export class T402WDK {
    * @throws {BalanceError} If balance fetch fails
    */
   async getUsdcBalance(chain: string, accountIndex = 0): Promise<bigint> {
-    const usdcAddress = USDC_ADDRESSES[chain];
+    const usdcAddress = USDC_ADDRESSES[chain]
     if (!usdcAddress) {
-      return 0n;
+      return 0n
     }
 
     try {
-      const signer = await this.getSigner(chain, accountIndex);
-      const address = signer.address;
+      const signer = await this.getSigner(chain, accountIndex)
+      const address = signer.address
 
       return await this._balanceCache.getOrFetchTokenBalance(
         chain,
         usdcAddress,
         address,
         async () => signer.getTokenBalance(usdcAddress),
-      );
+      )
     } catch (error) {
       // Return 0 for balance errors (chain might not support USDC)
       if (isWDKError(error) && error.code === WDKErrorCode.TOKEN_BALANCE_FETCH_FAILED) {
-        return 0n;
+        return 0n
       }
-      throw error;
+      throw error
     }
   }
 
@@ -489,19 +486,17 @@ export class T402WDK {
    * @throws {BalanceError} If balance fetch fails
    */
   async getChainBalances(chain: string, accountIndex = 0): Promise<ChainBalance> {
-    const config = this._normalizedChains.get(chain);
+    const config = this._normalizedChains.get(chain)
     if (!config) {
-      throw new ChainError(
-        WDKErrorCode.CHAIN_NOT_CONFIGURED,
-        `Chain "${chain}" not configured`,
-        { chain },
-      );
+      throw new ChainError(WDKErrorCode.CHAIN_NOT_CONFIGURED, `Chain "${chain}" not configured`, {
+        chain,
+      })
     }
 
     try {
-      const signer = await this.getSigner(chain, accountIndex);
-      const address = signer.address;
-      const tokens = CHAIN_TOKENS[chain] || [];
+      const signer = await this.getSigner(chain, accountIndex)
+      const address = signer.address
+      const tokens = CHAIN_TOKENS[chain] || []
 
       // Fetch all token balances in parallel with caching and error handling
       const tokenBalanceResults = await Promise.allSettled(
@@ -511,43 +506,41 @@ export class T402WDK {
             token.address,
             address,
             async () => signer.getTokenBalance(token.address),
-          );
+          )
           return {
             token: token.address,
             symbol: token.symbol,
             balance,
             formatted: formatTokenAmount(balance, token.decimals),
             decimals: token.decimals,
-          };
+          }
         }),
-      );
+      )
 
       // Extract successful results, use 0 for failed ones
       const tokenBalances: TokenBalance[] = tokenBalanceResults.map((result, index) => {
-        if (result.status === "fulfilled") {
-          return result.value;
+        if (result.status === 'fulfilled') {
+          return result.value
         }
         // Return zero balance for failed fetches
-        const token = tokens[index];
+        const token = tokens[index]
         return {
           token: token.address,
           symbol: token.symbol,
           balance: 0n,
-          formatted: "0",
+          formatted: '0',
           decimals: token.decimals,
-        };
-      });
+        }
+      })
 
       // Get native balance with caching
-      let nativeBalance: bigint;
+      let nativeBalance: bigint
       try {
-        nativeBalance = await this._balanceCache.getOrFetchNativeBalance(
-          chain,
-          address,
-          async () => signer.getBalance(),
-        );
+        nativeBalance = await this._balanceCache.getOrFetchNativeBalance(chain, address, async () =>
+          signer.getBalance(),
+        )
       } catch {
-        nativeBalance = 0n;
+        nativeBalance = 0n
       }
 
       return {
@@ -555,17 +548,17 @@ export class T402WDK {
         network: config.network,
         native: nativeBalance,
         tokens: tokenBalances,
-      };
+      }
     } catch (error) {
       if (isWDKError(error)) {
-        throw error;
+        throw error
       }
 
       throw new BalanceError(
         WDKErrorCode.BALANCE_FETCH_FAILED,
         `Failed to get balances for chain "${chain}": ${error instanceof Error ? error.message : String(error)}`,
         { chain, cause: error instanceof Error ? error : undefined },
-      );
+      )
     }
   }
 
@@ -579,49 +572,49 @@ export class T402WDK {
     accountIndex = 0,
     options: { continueOnError?: boolean } = {},
   ): Promise<AggregatedBalance> {
-    const { continueOnError = true } = options;
-    const chains = this.getConfiguredChains();
+    const { continueOnError = true } = options
+    const chains = this.getConfiguredChains()
 
     // Fetch all chain balances in parallel
     const results = await Promise.allSettled(
       chains.map((chain) => this.getChainBalances(chain, accountIndex)),
-    );
+    )
 
-    const chainBalances: ChainBalance[] = [];
-    const errors: Error[] = [];
+    const chainBalances: ChainBalance[] = []
+    const errors: Error[] = []
 
     for (let i = 0; i < results.length; i++) {
-      const result = results[i];
-      if (result.status === "fulfilled") {
-        chainBalances.push(result.value);
+      const result = results[i]
+      if (result.status === 'fulfilled') {
+        chainBalances.push(result.value)
       } else {
-        errors.push(result.reason);
+        errors.push(result.reason)
         if (!continueOnError) {
-          throw result.reason;
+          throw result.reason
         }
         // Add empty balance for failed chain
-        const config = this._normalizedChains.get(chains[i]);
+        const config = this._normalizedChains.get(chains[i])
         if (config) {
           chainBalances.push({
             chain: chains[i],
             network: config.network,
             native: 0n,
             tokens: [],
-          });
+          })
         }
       }
     }
 
     // Calculate totals
-    let totalUsdt0 = 0n;
-    let totalUsdc = 0n;
+    let totalUsdt0 = 0n
+    let totalUsdc = 0n
 
     for (const chainBalance of chainBalances) {
       for (const token of chainBalance.tokens) {
-        if (token.symbol === "USDT0") {
-          totalUsdt0 += token.balance;
-        } else if (token.symbol === "USDC") {
-          totalUsdc += token.balance;
+        if (token.symbol === 'USDT0') {
+          totalUsdt0 += token.balance
+        } else if (token.symbol === 'USDC') {
+          totalUsdc += token.balance
         }
       }
     }
@@ -630,7 +623,7 @@ export class T402WDK {
       totalUsdt0,
       totalUsdc,
       chains: chainBalances,
-    };
+    }
   }
 
   /**
@@ -644,43 +637,46 @@ export class T402WDK {
    */
   async findBestChainForPayment(
     amount: bigint,
-    preferredToken: "USDT0" | "USDC" = "USDT0",
+    preferredToken: 'USDT0' | 'USDC' = 'USDT0',
   ): Promise<{ chain: string; token: string; balance: bigint } | null> {
     // Validate amount
     if (amount <= 0n) {
-      return null;
+      return null
     }
 
     try {
-      const balances = await this.getAggregatedBalances(0, { continueOnError: true });
+      const balances = await this.getAggregatedBalances(0, { continueOnError: true })
 
       // Priority order based on preferred token
-      const tokenPriority = preferredToken === "USDT0" ? ["USDT0", "USDC"] : ["USDC", "USDT0"];
+      const tokenPriority = preferredToken === 'USDT0' ? ['USDT0', 'USDC'] : ['USDC', 'USDT0']
 
       for (const tokenSymbol of tokenPriority) {
         for (const chainBalance of balances.chains) {
-          const tokenBalance = chainBalance.tokens.find((t) => t.symbol === tokenSymbol);
+          const tokenBalance = chainBalance.tokens.find((t) => t.symbol === tokenSymbol)
           if (tokenBalance && tokenBalance.balance >= amount) {
             return {
               chain: chainBalance.chain,
               token: tokenSymbol,
               balance: tokenBalance.balance,
-            };
+            }
           }
         }
       }
 
-      return null;
+      return null
     } catch (error) {
       if (isWDKError(error)) {
-        throw error;
+        throw error
       }
 
       throw new BalanceError(
         WDKErrorCode.BALANCE_FETCH_FAILED,
         `Failed to find best chain for payment: ${error instanceof Error ? error.message : String(error)}`,
-        { cause: error instanceof Error ? error : undefined, context: { amount: amount.toString() } },
-      );
+        {
+          cause: error instanceof Error ? error : undefined,
+          context: { amount: amount.toString() },
+        },
+      )
     }
   }
 
@@ -698,34 +694,32 @@ export class T402WDK {
     if (!T402WDK._BridgeUsdt0Evm) {
       throw new BridgeError(
         WDKErrorCode.BRIDGE_NOT_AVAILABLE,
-        "USDT0 bridge not available. Register BridgeUsdt0Evm with T402WDK.registerWDK().",
+        'USDT0 bridge not available. Register BridgeUsdt0Evm with T402WDK.registerWDK().',
         { fromChain: params.fromChain, toChain: params.toChain },
-      );
+      )
     }
 
     // Validate parameters
     if (!params.fromChain || !params.toChain) {
-      throw new BridgeError(
-        WDKErrorCode.BRIDGE_FAILED,
-        "Both fromChain and toChain are required",
-        { fromChain: params.fromChain, toChain: params.toChain },
-      );
+      throw new BridgeError(WDKErrorCode.BRIDGE_FAILED, 'Both fromChain and toChain are required', {
+        fromChain: params.fromChain,
+        toChain: params.toChain,
+      })
     }
 
     if (params.fromChain === params.toChain) {
-      throw new BridgeError(
-        WDKErrorCode.BRIDGE_NOT_SUPPORTED,
-        "Cannot bridge to the same chain",
-        { fromChain: params.fromChain, toChain: params.toChain },
-      );
+      throw new BridgeError(WDKErrorCode.BRIDGE_NOT_SUPPORTED, 'Cannot bridge to the same chain', {
+        fromChain: params.fromChain,
+        toChain: params.toChain,
+      })
     }
 
     if (!params.amount || params.amount <= 0n) {
-      throw new BridgeError(
-        WDKErrorCode.BRIDGE_FAILED,
-        "Amount must be greater than 0",
-        { fromChain: params.fromChain, toChain: params.toChain, context: { amount: params.amount?.toString() } },
-      );
+      throw new BridgeError(WDKErrorCode.BRIDGE_FAILED, 'Amount must be greater than 0', {
+        fromChain: params.fromChain,
+        toChain: params.toChain,
+        context: { amount: params.amount?.toString() },
+      })
     }
 
     // Check if bridging is supported
@@ -734,34 +728,34 @@ export class T402WDK {
         WDKErrorCode.BRIDGE_NOT_SUPPORTED,
         `Bridging from "${params.fromChain}" to "${params.toChain}" is not supported`,
         { fromChain: params.fromChain, toChain: params.toChain },
-      );
+      )
     }
 
     try {
-      const recipient = params.recipient ?? (await this.getAddress(params.toChain));
+      const recipient = params.recipient ?? (await this.getAddress(params.toChain))
 
-      const result = await this.wdk.executeProtocol("bridge-usdt0", {
+      const result = await this.wdk.executeProtocol('bridge-usdt0', {
         fromChain: params.fromChain,
         toChain: params.toChain,
         amount: params.amount,
         recipient,
-      });
+      })
 
       if (!result || !result.txHash) {
         throw new BridgeError(
           WDKErrorCode.BRIDGE_FAILED,
-          "Bridge transaction did not return a transaction hash",
+          'Bridge transaction did not return a transaction hash',
           { fromChain: params.fromChain, toChain: params.toChain },
-        );
+        )
       }
 
       return {
         txHash: result.txHash,
         estimatedTime: 300, // ~5 minutes typical for LayerZero
-      };
+      }
     } catch (error) {
       if (error instanceof BridgeError) {
-        throw error;
+        throw error
       }
 
       throw new BridgeError(
@@ -773,7 +767,7 @@ export class T402WDK {
           cause: error instanceof Error ? error : undefined,
           context: { amount: params.amount.toString() },
         },
-      );
+      )
     }
   }
 
@@ -781,7 +775,7 @@ export class T402WDK {
    * Get chains that support USDT0
    */
   getUsdt0Chains(): string[] {
-    return this.getConfiguredChains().filter((chain) => USDT0_ADDRESSES[chain]);
+    return this.getConfiguredChains().filter((chain) => USDT0_ADDRESSES[chain])
   }
 
   /**
@@ -790,7 +784,7 @@ export class T402WDK {
    * Returns configured chains that have LayerZero OFT bridge support.
    */
   getBridgeableChains(): string[] {
-    return this.getConfiguredChains().filter((chain) => supportsBridging(chain));
+    return this.getConfiguredChains().filter((chain) => supportsBridging(chain))
   }
 
   /**
@@ -802,7 +796,7 @@ export class T402WDK {
       supportsBridging(fromChain) &&
       supportsBridging(toChain) &&
       this._normalizedChains.has(fromChain)
-    );
+    )
   }
 
   /**
@@ -810,9 +804,9 @@ export class T402WDK {
    */
   getBridgeDestinations(fromChain: string): string[] {
     if (!supportsBridging(fromChain)) {
-      return [];
+      return []
     }
-    return getBridgeableChains().filter((chain) => chain !== fromChain);
+    return getBridgeableChains().filter((chain) => chain !== fromChain)
   }
 
   // ========== Cache Management ==========
@@ -821,21 +815,21 @@ export class T402WDK {
    * Check if balance caching is enabled
    */
   get isCacheEnabled(): boolean {
-    return this._balanceCache.enabled;
+    return this._balanceCache.enabled
   }
 
   /**
    * Get cache configuration
    */
   getCacheConfig(): BalanceCacheConfig {
-    return this._balanceCache.config;
+    return this._balanceCache.config
   }
 
   /**
    * Get cache statistics
    */
   getCacheStats(): BalanceCacheStats {
-    return this._balanceCache.getStats();
+    return this._balanceCache.getStats()
   }
 
   /**
@@ -844,7 +838,7 @@ export class T402WDK {
    * Call this after sending transactions to ensure fresh balance data.
    */
   invalidateBalanceCache(): void {
-    this._balanceCache.clear();
+    this._balanceCache.clear()
   }
 
   /**
@@ -854,7 +848,7 @@ export class T402WDK {
    * @returns Number of cache entries invalidated
    */
   invalidateChainCache(chain: string): number {
-    return this._balanceCache.invalidateChain(chain);
+    return this._balanceCache.invalidateChain(chain)
   }
 
   /**
@@ -864,7 +858,7 @@ export class T402WDK {
    * @returns Number of cache entries invalidated
    */
   invalidateAddressCache(address: string): number {
-    return this._balanceCache.invalidateAddress(address);
+    return this._balanceCache.invalidateAddress(address)
   }
 
   /**
@@ -873,8 +867,8 @@ export class T402WDK {
    * Call this when the T402WDK instance is no longer needed.
    */
   dispose(): void {
-    this._balanceCache.dispose();
-    this._signerCache.clear();
+    this._balanceCache.dispose()
+    this._signerCache.clear()
   }
 }
 
@@ -883,19 +877,19 @@ export class T402WDK {
  */
 function formatTokenAmount(amount: bigint, decimals: number): string {
   if (amount === 0n) {
-    return "0";
+    return '0'
   }
 
-  const divisor = BigInt(10 ** decimals);
-  const whole = amount / divisor;
-  const fraction = amount % divisor;
+  const divisor = BigInt(10 ** decimals)
+  const whole = amount / divisor
+  const fraction = amount % divisor
 
   if (fraction === 0n) {
-    return whole.toString();
+    return whole.toString()
   }
 
-  const fractionStr = fraction.toString().padStart(decimals, "0");
+  const fractionStr = fraction.toString().padStart(decimals, '0')
   // Trim trailing zeros
-  const trimmed = fractionStr.replace(/0+$/, "");
-  return `${whole}.${trimmed}`;
+  const trimmed = fractionStr.replace(/0+$/, '')
+  return `${whole}.${trimmed}`
 }

@@ -4,14 +4,14 @@
  * Registry of supported TRC20 tokens for each TRON network.
  */
 
-import type { TRC20Config, NetworkTRC20Registry } from "./types.js";
+import type { TRC20Config, NetworkTRC20Registry } from './types.js'
 import {
   TRON_MAINNET_CAIP2,
   TRON_NILE_CAIP2,
   TRON_SHASTA_CAIP2,
   USDT_ADDRESSES,
   DEFAULT_USDT_DECIMALS,
-} from "./constants.js";
+} from './constants.js'
 
 // =============================================================================
 // USDT Token Configurations
@@ -20,26 +20,26 @@ import {
 /** USDT on TRON Mainnet */
 const USDT_MAINNET: TRC20Config = {
   contractAddress: USDT_ADDRESSES[TRON_MAINNET_CAIP2],
-  symbol: "USDT",
-  name: "Tether USD",
+  symbol: 'USDT',
+  name: 'Tether USD',
   decimals: DEFAULT_USDT_DECIMALS,
-};
+}
 
 /** USDT on TRON Nile Testnet */
 const USDT_NILE: TRC20Config = {
   contractAddress: USDT_ADDRESSES[TRON_NILE_CAIP2],
-  symbol: "USDT",
-  name: "Tether USD",
+  symbol: 'USDT',
+  name: 'Tether USD',
   decimals: DEFAULT_USDT_DECIMALS,
-};
+}
 
 /** USDT on TRON Shasta Testnet */
 const USDT_SHASTA: TRC20Config = {
   contractAddress: USDT_ADDRESSES[TRON_SHASTA_CAIP2],
-  symbol: "USDT",
-  name: "Tether USD",
+  symbol: 'USDT',
+  name: 'Tether USD',
   decimals: DEFAULT_USDT_DECIMALS,
-};
+}
 
 // =============================================================================
 // Token Registry
@@ -70,7 +70,7 @@ export const TRC20_REGISTRY: Record<string, NetworkTRC20Registry> = {
       USDT: USDT_SHASTA,
     },
   },
-};
+}
 
 // =============================================================================
 // Utility Functions
@@ -84,9 +84,9 @@ export const TRC20_REGISTRY: Record<string, NetworkTRC20Registry> = {
  * @returns Token configuration or undefined if not found
  */
 export function getTRC20Config(network: string, symbol: string): TRC20Config | undefined {
-  const registry = TRC20_REGISTRY[network];
-  if (!registry) return undefined;
-  return registry.tokens[symbol];
+  const registry = TRC20_REGISTRY[network]
+  if (!registry) return undefined
+  return registry.tokens[symbol]
 }
 
 /**
@@ -96,9 +96,9 @@ export function getTRC20Config(network: string, symbol: string): TRC20Config | u
  * @returns Array of token configurations
  */
 export function getNetworkTokens(network: string): TRC20Config[] {
-  const registry = TRC20_REGISTRY[network];
-  if (!registry) return [];
-  return Object.values(registry.tokens);
+  const registry = TRC20_REGISTRY[network]
+  if (!registry) return []
+  return Object.values(registry.tokens)
 }
 
 /**
@@ -108,8 +108,8 @@ export function getNetworkTokens(network: string): TRC20Config[] {
  * @returns Default token configuration or undefined
  */
 export function getDefaultToken(network: string): TRC20Config | undefined {
-  const registry = TRC20_REGISTRY[network];
-  return registry?.defaultToken;
+  const registry = TRC20_REGISTRY[network]
+  return registry?.defaultToken
 }
 
 /**
@@ -119,14 +119,17 @@ export function getDefaultToken(network: string): TRC20Config | undefined {
  * @param contractAddress - TRC20 contract address
  * @returns Token configuration or undefined
  */
-export function getTokenByAddress(network: string, contractAddress: string): TRC20Config | undefined {
-  const registry = TRC20_REGISTRY[network];
-  if (!registry) return undefined;
+export function getTokenByAddress(
+  network: string,
+  contractAddress: string,
+): TRC20Config | undefined {
+  const registry = TRC20_REGISTRY[network]
+  if (!registry) return undefined
 
-  const upperAddress = contractAddress.toUpperCase();
+  const upperAddress = contractAddress.toUpperCase()
   return Object.values(registry.tokens).find(
-    token => token.contractAddress.toUpperCase() === upperAddress,
-  );
+    (token) => token.contractAddress.toUpperCase() === upperAddress,
+  )
 }
 
 /**
@@ -138,7 +141,7 @@ export function getTokenByAddress(network: string, contractAddress: string): TRC
 export function getNetworksForToken(symbol: string): string[] {
   return Object.entries(TRC20_REGISTRY)
     .filter(([_, registry]) => symbol in registry.tokens)
-    .map(([network]) => network);
+    .map(([network]) => network)
 }
 
 /**
@@ -147,7 +150,7 @@ export function getNetworksForToken(symbol: string): string[] {
  * @returns Array of network identifiers
  */
 export function getUsdtNetworks(): string[] {
-  return getNetworksForToken("USDT");
+  return getNetworksForToken('USDT')
 }
 
 /**
@@ -157,7 +160,7 @@ export function getUsdtNetworks(): string[] {
  * @returns true if network is supported
  */
 export function isNetworkSupported(network: string): boolean {
-  return network in TRC20_REGISTRY;
+  return network in TRC20_REGISTRY
 }
 
 /**
@@ -166,5 +169,5 @@ export function isNetworkSupported(network: string): boolean {
  * @returns Array of network identifiers
  */
 export function getSupportedNetworks(): string[] {
-  return Object.keys(TRC20_REGISTRY);
+  return Object.keys(TRC20_REGISTRY)
 }

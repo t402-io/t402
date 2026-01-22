@@ -68,10 +68,10 @@
  */
 
 // Main class
-export { T402WDK } from "./t402wdk.js";
+export { T402WDK } from './t402wdk.js'
 
 // Signer
-export { WDKSigner, createWDKSigner, MockWDKSigner } from "./signer.js";
+export { WDKSigner, createWDKSigner, MockWDKSigner } from './signer.js'
 
 // Types
 export type {
@@ -91,7 +91,7 @@ export type {
   WDKAccount,
   WDKInstance,
   WDKConstructor,
-} from "./types.js";
+} from './types.js'
 
 // Cache
 export {
@@ -99,13 +99,8 @@ export {
   BalanceCache,
   DEFAULT_CACHE_CONFIG,
   DEFAULT_BALANCE_CACHE_CONFIG,
-} from "./cache.js";
-export type {
-  CacheConfig,
-  CacheStats,
-  BalanceCacheConfig,
-  BalanceCacheStats,
-} from "./cache.js";
+} from './cache.js'
+export type { CacheConfig, CacheStats, BalanceCacheConfig, BalanceCacheStats } from './cache.js'
 
 // Chain configuration
 export {
@@ -121,8 +116,8 @@ export {
   getChainId,
   getUsdt0Chains,
   getPreferredToken,
-} from "./chains.js";
-export type { TokenInfo } from "./chains.js";
+} from './chains.js'
+export type { TokenInfo } from './chains.js'
 
 // Error types and utilities
 export {
@@ -145,12 +140,12 @@ export {
   withRetry,
   withTimeout,
   DEFAULT_RETRY_CONFIG,
-} from "./errors.js";
-export type { RetryConfig } from "./errors.js";
+} from './errors.js'
+export type { RetryConfig } from './errors.js'
 
 // Bridge utilities
-export { WdkBridge, createDirectBridge } from "./bridge.js";
-export type { BridgeQuoteResult, BridgeQuote, BridgeSigner } from "./bridge.js";
+export { WdkBridge, createDirectBridge } from './bridge.js'
+export type { BridgeQuoteResult, BridgeQuote, BridgeSigner } from './bridge.js'
 
 // Re-export bridge utilities from @t402/evm for convenience
 export {
@@ -159,7 +154,7 @@ export {
   LAYERZERO_ENDPOINT_IDS,
   USDT0_OFT_ADDRESSES,
   Usdt0Bridge,
-} from "@t402/evm";
+} from '@t402/evm'
 
 // Hardware wallet support
 export {
@@ -182,4 +177,4 @@ export {
   // Utilities
   detectHardwareWalletSupport,
   isHardwareWalletSupported,
-} from "./hardware/index.js";
+} from './hardware/index.js'

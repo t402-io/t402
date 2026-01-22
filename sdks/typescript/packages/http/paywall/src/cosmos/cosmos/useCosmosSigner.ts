@@ -92,11 +92,7 @@ function buildMsgSend(
 /**
  * Build a TxBody protobuf
  */
-function buildTxBody(
-  typeUrl: string,
-  msgBytes: Uint8Array,
-  memo: string,
-): Uint8Array {
+function buildTxBody(typeUrl: string, msgBytes: Uint8Array, memo: string): Uint8Array {
   // cosmos.tx.v1beta1.TxBody
   // field 1: messages (repeated Any)
   // field 2: memo (string)
@@ -253,24 +249,15 @@ export function useCosmosSigner(
         }
 
         // Build the message
-        const msgBytes = buildMsgSend(
-          account.address,
-          params.recipient,
-          params.amount,
-          USDC_DENOM,
-        );
+        const msgBytes = buildMsgSend(account.address, params.recipient, params.amount, USDC_DENOM);
 
         // Build tx body
-        const bodyBytes = buildTxBody(
-          "/cosmos.bank.v1beta1.MsgSend",
-          msgBytes,
-          params.memo || "",
-        );
+        const bodyBytes = buildTxBody("/cosmos.bank.v1beta1.MsgSend", msgBytes, params.memo || "");
 
         // Get public key bytes
         const pubKeyHex = account.pubKey || "";
         const pubKeyBytes = new Uint8Array(
-          pubKeyHex.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16)) || [],
+          pubKeyHex.match(/.{1,2}/g)?.map(byte => parseInt(byte, 16)) || [],
         );
 
         // Build auth info
@@ -292,17 +279,11 @@ export function useCosmosSigner(
           accountNumber: accountInfo.accountNumber,
         };
 
-        const signResult = await wallet.signDirect(
-          chainId,
-          account.address,
-          signDoc,
-        );
+        const signResult = await wallet.signDirect(chainId, account.address, signDoc);
 
         // Decode signature from base64
         const signatureBase64 = signResult.signature.signature;
-        const signatureBytes = Uint8Array.from(atob(signatureBase64), (c) =>
-          c.charCodeAt(0),
-        );
+        const signatureBytes = Uint8Array.from(atob(signatureBase64), c => c.charCodeAt(0));
 
         // Build final tx
         const txRaw = buildTxRaw(

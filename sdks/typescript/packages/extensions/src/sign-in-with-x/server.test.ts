@@ -194,7 +194,7 @@ describe("Sign-In-With-X Server", () => {
     it("should call custom nonce validator", () => {
       const usedNonces = new Set(["abc123"]);
       const result = validateSIWxMessage(basePayload, "https://api.example.com/resource", {
-        checkNonce: (nonce) => !usedNonces.has(nonce),
+        checkNonce: nonce => !usedNonces.has(nonce),
       });
       expect(result.valid).toBe(false);
       expect(result.error).toContain("replay attack");
@@ -217,7 +217,9 @@ describe("Sign-In-With-X Server", () => {
 
       const message = constructMessage(payload);
 
-      expect(message).toContain("api.example.com wants you to sign in with your eip155:8453 account:");
+      expect(message).toContain(
+        "api.example.com wants you to sign in with your eip155:8453 account:",
+      );
       expect(message).toContain("0x1234567890123456789012345678901234567890");
       expect(message).toContain("Sign in to access premium content");
       expect(message).toContain("URI: https://api.example.com/resource");

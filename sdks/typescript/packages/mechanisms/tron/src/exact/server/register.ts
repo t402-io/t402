@@ -4,9 +4,9 @@
  * Helper function to register TRON exact scheme with a t402 resource server.
  */
 
-import { t402ResourceServer } from "@t402/core/server";
-import { Network } from "@t402/core/types";
-import { ExactTronScheme, ExactTronSchemeConfig } from "./scheme.js";
+import { t402ResourceServer } from '@t402/core/server'
+import { Network } from '@t402/core/types'
+import { ExactTronScheme, ExactTronSchemeConfig } from './scheme.js'
 
 /**
  * Configuration options for registering TRON schemes to a t402ResourceServer
@@ -16,12 +16,12 @@ export interface TronResourceServerConfig {
    * Optional specific networks to register
    * If not provided, registers wildcard support (tron:*)
    */
-  networks?: Network[];
+  networks?: Network[]
 
   /**
    * Optional scheme configuration (preferred token, etc.)
    */
-  schemeConfig?: ExactTronSchemeConfig;
+  schemeConfig?: ExactTronSchemeConfig
 }
 
 /**
@@ -52,18 +52,18 @@ export function registerExactTronScheme(
   server: t402ResourceServer,
   config: TronResourceServerConfig = {},
 ): t402ResourceServer {
-  const scheme = new ExactTronScheme(config.schemeConfig);
+  const scheme = new ExactTronScheme(config.schemeConfig)
 
   // Register V2 scheme
   if (config.networks && config.networks.length > 0) {
     // Register specific networks
-    config.networks.forEach(network => {
-      server.register(network, scheme);
-    });
+    config.networks.forEach((network) => {
+      server.register(network, scheme)
+    })
   } else {
     // Register wildcard for all TRON networks
-    server.register("tron:*", scheme);
+    server.register('tron:*', scheme)
   }
 
-  return server;
+  return server
 }

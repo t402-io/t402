@@ -1,10 +1,6 @@
 import { useCallback, useState } from "react";
 import type { PaymentRequired } from "@t402/core/types";
-import {
-  fetchTokenBalance,
-  getUsdcContractAddress,
-  getTargetStacksNetwork,
-} from "./rpc";
+import { fetchTokenBalance, getUsdcContractAddress, getTargetStacksNetwork } from "./rpc";
 import type { StacksNetwork } from "./types";
 
 /**
@@ -57,11 +53,7 @@ export function useStacksBalance(options: {
 
       try {
         const contractId = getUsdcContractAddress(targetNetwork);
-        const balanceInfo = await fetchTokenBalance(
-          targetAddress,
-          contractId,
-          targetNetwork,
-        );
+        const balanceInfo = await fetchTokenBalance(targetAddress, contractId, targetNetwork);
 
         if (balanceInfo) {
           const rawBalance = BigInt(balanceInfo.balance);

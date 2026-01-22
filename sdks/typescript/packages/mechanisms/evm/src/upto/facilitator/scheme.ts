@@ -191,7 +191,8 @@ export class UptoEvmFacilitatorScheme implements SchemeNetworkFacilitator {
     };
 
     // Reconstruct signature
-    const signature = `0x${uptoPayload.signature.r.slice(2)}${uptoPayload.signature.s.slice(2)}${uptoPayload.signature.v.toString(16).padStart(2, "0")}` as Hex;
+    const signature =
+      `0x${uptoPayload.signature.r.slice(2)}${uptoPayload.signature.s.slice(2)}${uptoPayload.signature.v.toString(16).padStart(2, "0")}` as Hex;
 
     // Verify signature
     try {

@@ -5,17 +5,17 @@
  * single or multiple seed phrases.
  */
 
-import type { PublicClient, Chain, Transport } from "viem";
-import { createPublicClient, http } from "viem";
-import { arbitrum, mainnet, base, optimism, polygon, sepolia } from "viem/chains";
-import type { BundlerConfig, PaymasterConfig } from "@t402/evm";
-import { T402WDK } from "@t402/wdk";
-import type { WDKSigner, T402WDKConfig } from "@t402/wdk";
-import type { SingleSeedConfig, MultiSeedConfig } from "./types.js";
-import { createMultiSigWdkSmartAccount } from "./account.js";
-import { MultiSigWdkGaslessClient } from "./client.js";
-import { MultiSigError } from "./errors.js";
-import { isValidThreshold } from "./utils.js";
+import type { PublicClient, Chain, Transport } from 'viem'
+import { createPublicClient, http } from 'viem'
+import { arbitrum, mainnet, base, optimism, polygon, sepolia } from 'viem/chains'
+import type { BundlerConfig, PaymasterConfig } from '@t402/evm'
+import { T402WDK } from '@t402/wdk'
+import type { WDKSigner, T402WDKConfig } from '@t402/wdk'
+import type { SingleSeedConfig, MultiSeedConfig } from './types.js'
+import { createMultiSigWdkSmartAccount } from './account.js'
+import { MultiSigWdkGaslessClient } from './client.js'
+import { MultiSigError } from './errors.js'
+import { isValidThreshold } from './utils.js'
 
 /**
  * Chain ID mapping
@@ -23,17 +23,17 @@ import { isValidThreshold } from "./utils.js";
 const CHAIN_IDS: Record<string, number> = {
   ethereum: 1,
   arbitrum: 42161,
-  "arbitrum-sepolia": 421614,
+  'arbitrum-sepolia': 421614,
   base: 8453,
-  "base-sepolia": 84532,
+  'base-sepolia': 84532,
   optimism: 10,
-  "optimism-sepolia": 11155420,
+  'optimism-sepolia': 11155420,
   polygon: 137,
   ink: 57073,
   berachain: 80084,
   unichain: 130,
   sepolia: 11155111,
-};
+}
 
 /**
  * Chain configurations mapping
@@ -45,14 +45,14 @@ const CHAIN_CONFIGS: Record<string, Chain> = {
   optimism,
   polygon,
   sepolia,
-};
+}
 
 function getChainId(chain: string): number {
-  const chainId = CHAIN_IDS[chain.toLowerCase()];
+  const chainId = CHAIN_IDS[chain.toLowerCase()]
   if (!chainId) {
-    throw new Error(`Unknown chain: ${chain}`);
+    throw new Error(`Unknown chain: ${chain}`)
   }
-  return chainId;
+  return chainId
 }
 
 /**
@@ -92,28 +92,28 @@ export async function createMultiSigFromSingleSeed(
     saltNonce,
     bundler,
     paymaster,
-  } = config;
+  } = config
 
   // Validate
   if (accountIndices.length === 0) {
-    throw MultiSigError.insufficientSigners(1, 0);
+    throw MultiSigError.insufficientSigners(1, 0)
   }
 
   if (!isValidThreshold(threshold, accountIndices.length)) {
-    throw MultiSigError.invalidThreshold(threshold, accountIndices.length);
+    throw MultiSigError.invalidThreshold(threshold, accountIndices.length)
   }
 
   // Create WDK instance
-  const wdk = new T402WDK(seedPhrase, chainConfig);
+  const wdk = new T402WDK(seedPhrase, chainConfig)
 
   // Create public client for the chain
-  const publicClient = getPublicClient(chainConfig, chain);
-  const chainId = getChainId(chain);
+  const publicClient = getPublicClient(chainConfig, chain)
+  const chainId = getChainId(chain)
 
   // Create WDK signers for each account index using T402WDK's getSigner method
   const signers: WDKSigner[] = await Promise.all(
     accountIndices.map((index) => wdk.getSigner(chain, index)),
-  );
+  )
 
   // Create multi-sig smart account
   const smartAccount = await createMultiSigWdkSmartAccount({
@@ -122,7 +122,7 @@ export async function createMultiSigFromSingleSeed(
     chainId,
     publicClient,
     saltNonce,
-  });
+  })
 
   // Create and return the gasless client
   return new MultiSigWdkGaslessClient({
@@ -131,7 +131,7 @@ export async function createMultiSigFromSingleSeed(
     paymaster,
     chainId,
     publicClient,
-  });
+  })
 }
 
 /**
@@ -169,36 +169,28 @@ export async function createMultiSigFromSingleSeed(
 export async function createMultiSigFromMultipleSeeds(
   config: MultiSeedConfig,
 ): Promise<MultiSigWdkGaslessClient> {
-  const {
-    seedPhrases,
-    threshold,
-    chainConfig,
-    chain,
-    saltNonce,
-    bundler,
-    paymaster,
-  } = config;
+  const { seedPhrases, threshold, chainConfig, chain, saltNonce, bundler, paymaster } = config
 
   // Validate
   if (seedPhrases.length === 0) {
-    throw MultiSigError.insufficientSigners(1, 0);
+    throw MultiSigError.insufficientSigners(1, 0)
   }
 
   if (!isValidThreshold(threshold, seedPhrases.length)) {
-    throw MultiSigError.invalidThreshold(threshold, seedPhrases.length);
+    throw MultiSigError.invalidThreshold(threshold, seedPhrases.length)
   }
 
   // Create public client for the chain
-  const publicClient = getPublicClient(chainConfig, chain);
-  const chainId = getChainId(chain);
+  const publicClient = getPublicClient(chainConfig, chain)
+  const chainId = getChainId(chain)
 
   // Create WDK signers for each seed phrase
   const signers: WDKSigner[] = await Promise.all(
     seedPhrases.map(async (seedPhrase) => {
-      const wdk = new T402WDK(seedPhrase, chainConfig);
-      return wdk.getSigner(chain, 0);
+      const wdk = new T402WDK(seedPhrase, chainConfig)
+      return wdk.getSigner(chain, 0)
     }),
-  );
+  )
 
   // Create multi-sig smart account
   const smartAccount = await createMultiSigWdkSmartAccount({
@@ -207,7 +199,7 @@ export async function createMultiSigFromMultipleSeeds(
     chainId,
     publicClient,
     saltNonce,
-  });
+  })
 
   // Create and return the gasless client
   return new MultiSigWdkGaslessClient({
@@ -216,7 +208,7 @@ export async function createMultiSigFromMultipleSeeds(
     paymaster,
     chainId,
     publicClient,
-  });
+  })
 }
 
 /**
@@ -238,41 +230,33 @@ export async function createMultiSigFromMultipleSeeds(
  * ```
  */
 export async function createMultiSigFromSigners(config: {
-  signers: WDKSigner[];
-  threshold: number;
-  chainId: number;
-  publicClient: PublicClient;
-  saltNonce?: bigint;
-  bundler: BundlerConfig;
-  paymaster?: PaymasterConfig;
+  signers: WDKSigner[]
+  threshold: number
+  chainId: number
+  publicClient: PublicClient
+  saltNonce?: bigint
+  bundler: BundlerConfig
+  paymaster?: PaymasterConfig
 }): Promise<MultiSigWdkGaslessClient> {
-  const {
-    signers,
-    threshold,
-    chainId,
-    publicClient,
-    saltNonce,
-    bundler,
-    paymaster,
-  } = config;
+  const { signers, threshold, chainId, publicClient, saltNonce, bundler, paymaster } = config
 
   // Validate
   if (signers.length === 0) {
-    throw MultiSigError.insufficientSigners(1, 0);
+    throw MultiSigError.insufficientSigners(1, 0)
   }
 
   if (!isValidThreshold(threshold, signers.length)) {
-    throw MultiSigError.invalidThreshold(threshold, signers.length);
+    throw MultiSigError.invalidThreshold(threshold, signers.length)
   }
 
   // Ensure all signers are initialized
   await Promise.all(
     signers.map(async (signer) => {
       if (!signer.isInitialized) {
-        await signer.initialize();
+        await signer.initialize()
       }
     }),
-  );
+  )
 
   // Create multi-sig smart account
   const smartAccount = await createMultiSigWdkSmartAccount({
@@ -281,7 +265,7 @@ export async function createMultiSigFromSigners(config: {
     chainId,
     publicClient,
     saltNonce,
-  });
+  })
 
   // Create and return the gasless client
   return new MultiSigWdkGaslessClient({
@@ -290,7 +274,7 @@ export async function createMultiSigFromSigners(config: {
     paymaster,
     chainId,
     publicClient,
-  });
+  })
 }
 
 /**
@@ -301,22 +285,22 @@ function getPublicClient(
   chain: string,
 ): PublicClient<Transport, Chain> {
   // The chain config contains RPC URLs or EvmChainConfig objects
-  const config = chainConfig[chain];
+  const config = chainConfig[chain]
   if (!config) {
-    throw new Error(`No RPC URL configured for chain: ${chain}`);
+    throw new Error(`No RPC URL configured for chain: ${chain}`)
   }
 
   // Extract RPC URL from config (can be string or EvmChainConfig object)
-  const rpcUrl = typeof config === "string" ? config : config.provider;
+  const rpcUrl = typeof config === 'string' ? config : config.provider
   if (!rpcUrl) {
-    throw new Error(`No RPC URL found in chain config for: ${chain}`);
+    throw new Error(`No RPC URL found in chain config for: ${chain}`)
   }
 
   // Get viem chain config
-  const viemChain = CHAIN_CONFIGS[chain.toLowerCase()] ?? arbitrum;
+  const viemChain = CHAIN_CONFIGS[chain.toLowerCase()] ?? arbitrum
 
   return createPublicClient({
     chain: viemChain,
     transport: http(rpcUrl),
-  });
+  })
 }

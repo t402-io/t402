@@ -9,27 +9,27 @@
  */
 export enum MultiSigErrorCode {
   /** Threshold not met - need more signatures */
-  THRESHOLD_NOT_MET = "MULTISIG_THRESHOLD_NOT_MET",
+  THRESHOLD_NOT_MET = 'MULTISIG_THRESHOLD_NOT_MET',
   /** Not enough signers provided */
-  INSUFFICIENT_SIGNERS = "MULTISIG_INSUFFICIENT_SIGNERS",
+  INSUFFICIENT_SIGNERS = 'MULTISIG_INSUFFICIENT_SIGNERS',
   /** Signature aggregation failed */
-  SIGNATURE_AGGREGATION_FAILED = "MULTISIG_SIGNATURE_AGGREGATION_FAILED",
+  SIGNATURE_AGGREGATION_FAILED = 'MULTISIG_SIGNATURE_AGGREGATION_FAILED',
   /** Signer mismatch - wrong signer for owner */
-  SIGNER_MISMATCH = "MULTISIG_SIGNER_MISMATCH",
+  SIGNER_MISMATCH = 'MULTISIG_SIGNER_MISMATCH',
   /** Invalid threshold configuration */
-  INVALID_THRESHOLD = "MULTISIG_INVALID_THRESHOLD",
+  INVALID_THRESHOLD = 'MULTISIG_INVALID_THRESHOLD',
   /** Owner not found */
-  OWNER_NOT_FOUND = "MULTISIG_OWNER_NOT_FOUND",
+  OWNER_NOT_FOUND = 'MULTISIG_OWNER_NOT_FOUND',
   /** Request not found */
-  REQUEST_NOT_FOUND = "MULTISIG_REQUEST_NOT_FOUND",
+  REQUEST_NOT_FOUND = 'MULTISIG_REQUEST_NOT_FOUND',
   /** Request expired */
-  REQUEST_EXPIRED = "MULTISIG_REQUEST_EXPIRED",
+  REQUEST_EXPIRED = 'MULTISIG_REQUEST_EXPIRED',
   /** Already signed */
-  ALREADY_SIGNED = "MULTISIG_ALREADY_SIGNED",
+  ALREADY_SIGNED = 'MULTISIG_ALREADY_SIGNED',
   /** Not ready to submit */
-  NOT_READY = "MULTISIG_NOT_READY",
+  NOT_READY = 'MULTISIG_NOT_READY',
   /** Account not initialized */
-  NOT_INITIALIZED = "MULTISIG_NOT_INITIALIZED",
+  NOT_INITIALIZED = 'MULTISIG_NOT_INITIALIZED',
 }
 
 /**
@@ -37,19 +37,15 @@ export enum MultiSigErrorCode {
  */
 export class MultiSigError extends Error {
   /** Error code */
-  readonly code: MultiSigErrorCode;
+  readonly code: MultiSigErrorCode
   /** Additional context */
-  readonly context?: Record<string, unknown>;
+  readonly context?: Record<string, unknown>
 
-  constructor(
-    code: MultiSigErrorCode,
-    message: string,
-    context?: Record<string, unknown>,
-  ) {
-    super(message);
-    this.name = "MultiSigError";
-    this.code = code;
-    this.context = context;
+  constructor(code: MultiSigErrorCode, message: string, context?: Record<string, unknown>) {
+    super(message)
+    this.name = 'MultiSigError'
+    this.code = code
+    this.context = context
   }
 
   /**
@@ -60,21 +56,18 @@ export class MultiSigError extends Error {
       MultiSigErrorCode.THRESHOLD_NOT_MET,
       `Threshold not met: need ${required} signatures, have ${collected}`,
       { required, collected },
-    );
+    )
   }
 
   /**
    * Create an insufficient signers error
    */
-  static insufficientSigners(
-    required: number,
-    provided: number,
-  ): MultiSigError {
+  static insufficientSigners(required: number, provided: number): MultiSigError {
     return new MultiSigError(
       MultiSigErrorCode.INSUFFICIENT_SIGNERS,
       `Insufficient signers: need at least ${required}, provided ${provided}`,
       { required, provided },
-    );
+    )
   }
 
   /**
@@ -85,7 +78,7 @@ export class MultiSigError extends Error {
       MultiSigErrorCode.INVALID_THRESHOLD,
       `Invalid threshold: ${threshold} exceeds owner count ${ownerCount}`,
       { threshold, ownerCount },
-    );
+    )
   }
 
   /**
@@ -96,7 +89,7 @@ export class MultiSigError extends Error {
       MultiSigErrorCode.OWNER_NOT_FOUND,
       `Owner not found at index ${ownerIndex}`,
       { ownerIndex },
-    );
+    )
   }
 
   /**
@@ -107,18 +100,16 @@ export class MultiSigError extends Error {
       MultiSigErrorCode.REQUEST_NOT_FOUND,
       `Request not found: ${requestId}`,
       { requestId },
-    );
+    )
   }
 
   /**
    * Create a request expired error
    */
   static requestExpired(requestId: string): MultiSigError {
-    return new MultiSigError(
-      MultiSigErrorCode.REQUEST_EXPIRED,
-      `Request expired: ${requestId}`,
-      { requestId },
-    );
+    return new MultiSigError(MultiSigErrorCode.REQUEST_EXPIRED, `Request expired: ${requestId}`, {
+      requestId,
+    })
   }
 
   /**
@@ -129,7 +120,7 @@ export class MultiSigError extends Error {
       MultiSigErrorCode.ALREADY_SIGNED,
       `Owner at index ${ownerIndex} has already signed`,
       { ownerIndex },
-    );
+    )
   }
 
   /**
@@ -140,7 +131,7 @@ export class MultiSigError extends Error {
       MultiSigErrorCode.NOT_READY,
       `Not ready to submit: need ${required} signatures, have ${collected}`,
       { required, collected },
-    );
+    )
   }
 
   /**
@@ -149,22 +140,18 @@ export class MultiSigError extends Error {
   static notInitialized(): MultiSigError {
     return new MultiSigError(
       MultiSigErrorCode.NOT_INITIALIZED,
-      "Account not initialized. Call initialize() first.",
-    );
+      'Account not initialized. Call initialize() first.',
+    )
   }
 
   /**
    * Create a signer mismatch error
    */
-  static signerMismatch(
-    expected: string,
-    actual: string,
-    ownerIndex: number,
-  ): MultiSigError {
+  static signerMismatch(expected: string, actual: string, ownerIndex: number): MultiSigError {
     return new MultiSigError(
       MultiSigErrorCode.SIGNER_MISMATCH,
       `Signer mismatch at index ${ownerIndex}: expected ${expected}, got ${actual}`,
       { expected, actual, ownerIndex },
-    );
+    )
   }
 }

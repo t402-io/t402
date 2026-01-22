@@ -6,7 +6,12 @@
  */
 
 import { NEAR_CAIP2_NAMESPACE, NETWORK_RPC_ENDPOINTS, type NearNetwork } from "./constants.js";
-import type { NearRpcRequest, NearRpcResponse, TransactionResult, FtTransferArgs } from "./types.js";
+import type {
+  NearRpcRequest,
+  NearRpcResponse,
+  TransactionResult,
+  FtTransferArgs,
+} from "./types.js";
 
 /**
  * Normalize a network identifier to CAIP-2 format
@@ -170,7 +175,10 @@ export function parseFtTransferArgs(argsBase64: string): FtTransferArgs | null {
  * @param status - Transaction status
  * @returns Whether the transaction succeeded
  */
-export function isTransactionSuccessful(status: { SuccessValue?: string; Failure?: unknown }): boolean {
+export function isTransactionSuccessful(status: {
+  SuccessValue?: string;
+  Failure?: unknown;
+}): boolean {
   return status.SuccessValue !== undefined && status.Failure === undefined;
 }
 

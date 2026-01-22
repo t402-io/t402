@@ -6,26 +6,26 @@
  * allowing integration with various TON wallets and signing mechanisms.
  */
 
-import type { Address, Cell, SendMode } from "@ton/core";
-import type { VerifyMessageResult, TransactionConfirmation } from "./types.js";
+import type { Address, Cell, SendMode } from '@ton/core'
+import type { VerifyMessageResult, TransactionConfirmation } from './types.js'
 
 /**
  * Parameters for signing a TON internal message
  */
 export type SignMessageParams = {
   /** Destination address (typically Jetton wallet contract) */
-  to: Address;
+  to: Address
   /** Amount of TON to attach (for gas) in nanoTON */
-  value: bigint;
+  value: bigint
   /** Message body (Jetton transfer cell) */
-  body: Cell;
+  body: Cell
   /** Send mode flags (optional, defaults to PAY_GAS_SEPARATELY) */
-  sendMode?: SendMode;
+  sendMode?: SendMode
   /** Bounce flag (optional, defaults to true) */
-  bounce?: boolean;
+  bounce?: boolean
   /** Message validity timeout in seconds (optional) */
-  timeout?: number;
-};
+  timeout?: number
+}
 
 /**
  * ClientTonSigner - Used by t402 clients to sign Jetton transfer messages
@@ -41,7 +41,7 @@ export type SignMessageParams = {
  */
 export type ClientTonSigner = {
   /** The wallet address */
-  readonly address: Address;
+  readonly address: Address
 
   /**
    * Sign an internal message for Jetton transfer
@@ -50,7 +50,7 @@ export type ClientTonSigner = {
    * @param params - Message parameters
    * @returns Signed external message as Cell (BOC)
    */
-  signMessage(params: SignMessageParams): Promise<Cell>;
+  signMessage(params: SignMessageParams): Promise<Cell>
 
   /**
    * Get current seqno for the wallet
@@ -58,39 +58,39 @@ export type ClientTonSigner = {
    *
    * @returns Current sequence number
    */
-  getSeqno(): Promise<number>;
-};
+  getSeqno(): Promise<number>
+}
 
 /**
  * Parameters for verifying a signed message
  */
 export type VerifyMessageParams = {
   /** The signed BOC from client (base64) */
-  signedBoc: string;
+  signedBoc: string
   /** Expected sender address */
-  expectedFrom: string;
+  expectedFrom: string
   /** Expected Jetton transfer details */
   expectedTransfer: {
     /** Expected Jetton amount */
-    jettonAmount: bigint;
+    jettonAmount: bigint
     /** Expected destination address */
-    destination: string;
+    destination: string
     /** Jetton master address */
-    jettonMaster: string;
-  };
-};
+    jettonMaster: string
+  }
+}
 
 /**
  * Parameters for waiting on transaction confirmation
  */
 export type WaitForTransactionParams = {
   /** Address to monitor */
-  address: string;
+  address: string
   /** Expected seqno after transaction */
-  seqno: number;
+  seqno: number
   /** Timeout in milliseconds (optional) */
-  timeout?: number;
-};
+  timeout?: number
+}
 
 /**
  * FacilitatorTonSigner - Used by t402 facilitators to verify and settle payments
@@ -106,7 +106,7 @@ export type FacilitatorTonSigner = {
    * Get all addresses this facilitator can use for signing
    * Enables dynamic address selection for load balancing
    */
-  getAddresses(): readonly string[];
+  getAddresses(): readonly string[]
 
   /**
    * Query Jetton balance for an owner
@@ -114,7 +114,7 @@ export type FacilitatorTonSigner = {
    * @param params - Owner and Jetton master addresses
    * @returns Balance in smallest units
    */
-  getJettonBalance(params: { ownerAddress: string; jettonMasterAddress: string }): Promise<bigint>;
+  getJettonBalance(params: { ownerAddress: string; jettonMasterAddress: string }): Promise<bigint>
 
   /**
    * Get Jetton wallet address for an owner
@@ -124,9 +124,9 @@ export type FacilitatorTonSigner = {
    * @returns Jetton wallet address
    */
   getJettonWalletAddress(params: {
-    ownerAddress: string;
-    jettonMasterAddress: string;
-  }): Promise<string>;
+    ownerAddress: string
+    jettonMasterAddress: string
+  }): Promise<string>
 
   /**
    * Verify a signed message matches expected parameters
@@ -135,7 +135,7 @@ export type FacilitatorTonSigner = {
    * @param params - Verification parameters
    * @returns Verification result
    */
-  verifyMessage(params: VerifyMessageParams): Promise<VerifyMessageResult>;
+  verifyMessage(params: VerifyMessageParams): Promise<VerifyMessageResult>
 
   /**
    * Send a pre-signed external message to the network
@@ -143,7 +143,7 @@ export type FacilitatorTonSigner = {
    * @param signedBoc - Base64 encoded signed BOC
    * @returns Transaction hash or identifier
    */
-  sendExternalMessage(signedBoc: string): Promise<string>;
+  sendExternalMessage(signedBoc: string): Promise<string>
 
   /**
    * Wait for transaction confirmation
@@ -151,7 +151,7 @@ export type FacilitatorTonSigner = {
    * @param params - Transaction monitoring parameters
    * @returns Confirmation result
    */
-  waitForTransaction(params: WaitForTransactionParams): Promise<TransactionConfirmation>;
+  waitForTransaction(params: WaitForTransactionParams): Promise<TransactionConfirmation>
 
   /**
    * Get current seqno for an address
@@ -159,7 +159,7 @@ export type FacilitatorTonSigner = {
    * @param address - Wallet address to query
    * @returns Current seqno
    */
-  getSeqno(address: string): Promise<number>;
+  getSeqno(address: string): Promise<number>
 
   /**
    * Check if a wallet is deployed (active)
@@ -167,8 +167,8 @@ export type FacilitatorTonSigner = {
    * @param address - Address to check
    * @returns true if deployed
    */
-  isDeployed(address: string): Promise<boolean>;
-};
+  isDeployed(address: string): Promise<boolean>
+}
 
 /**
  * Converts a TON wallet to a ClientTonSigner
@@ -178,7 +178,7 @@ export type FacilitatorTonSigner = {
  * @returns The same signer with ClientTonSigner type
  */
 export function toClientTonSigner(signer: ClientTonSigner): ClientTonSigner {
-  return signer;
+  return signer
 }
 
 /**
@@ -189,10 +189,10 @@ export function toClientTonSigner(signer: ClientTonSigner): ClientTonSigner {
  * @returns FacilitatorTonSigner with getAddresses() support
  */
 export function toFacilitatorTonSigner(
-  client: Omit<FacilitatorTonSigner, "getAddresses"> & { address: string },
+  client: Omit<FacilitatorTonSigner, 'getAddresses'> & { address: string },
 ): FacilitatorTonSigner {
   return {
     ...client,
     getAddresses: () => [client.address],
-  };
+  }
 }

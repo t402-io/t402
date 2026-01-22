@@ -51,13 +51,13 @@ export {
   type TrezorOptions,
   HardwareWalletErrorCode,
   HardwareWalletError,
-} from "./types.js";
+} from './types.js'
 
 // Ledger
-export { LedgerSigner, createLedgerSigner } from "./ledger.js";
+export { LedgerSigner, createLedgerSigner } from './ledger.js'
 
 // Trezor
-export { TrezorSigner, createTrezorSigner } from "./trezor.js";
+export { TrezorSigner, createTrezorSigner } from './trezor.js'
 
 /**
  * Detect available hardware wallets
@@ -66,30 +66,27 @@ export { TrezorSigner, createTrezorSigner } from "./trezor.js";
  * doesn't actually probe for devices.
  */
 export function detectHardwareWalletSupport(): {
-  ledger: { webusb: boolean; webhid: boolean; bluetooth: boolean };
-  trezor: boolean;
+  ledger: { webusb: boolean; webhid: boolean; bluetooth: boolean }
+  trezor: boolean
 } {
-  const hasNavigator = typeof navigator !== "undefined";
+  const hasNavigator = typeof navigator !== 'undefined'
 
   return {
     ledger: {
-      webusb: hasNavigator && "usb" in navigator,
-      webhid: hasNavigator && "hid" in navigator,
-      bluetooth: hasNavigator && "bluetooth" in navigator,
+      webusb: hasNavigator && 'usb' in navigator,
+      webhid: hasNavigator && 'hid' in navigator,
+      bluetooth: hasNavigator && 'bluetooth' in navigator,
     },
-    trezor: hasNavigator && "usb" in navigator,
-  };
+    trezor: hasNavigator && 'usb' in navigator,
+  }
 }
 
 /**
  * Check if hardware wallet signing is supported in the current environment
  */
 export function isHardwareWalletSupported(): boolean {
-  const support = detectHardwareWalletSupport();
+  const support = detectHardwareWalletSupport()
   return (
-    support.ledger.webusb ||
-    support.ledger.webhid ||
-    support.ledger.bluetooth ||
-    support.trezor
-  );
+    support.ledger.webusb || support.ledger.webhid || support.ledger.bluetooth || support.trezor
+  )
 }

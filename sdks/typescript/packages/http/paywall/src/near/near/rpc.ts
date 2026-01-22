@@ -62,10 +62,7 @@ async function rpcCall<T>(
  * Fetch USDC balance for an account on NEAR
  * USDC on NEAR uses NEP-141 (fungible token standard)
  */
-export async function fetchUsdcBalance(
-  accountId: string,
-  network: NearNetwork,
-): Promise<bigint> {
+export async function fetchUsdcBalance(accountId: string, network: NearNetwork): Promise<bigint> {
   const contractId = getUsdcContractAddress(network);
 
   try {
@@ -92,10 +89,7 @@ export async function fetchUsdcBalance(
 /**
  * Check if an account exists on NEAR
  */
-export async function accountExists(
-  accountId: string,
-  network: NearNetwork,
-): Promise<boolean> {
+export async function accountExists(accountId: string, network: NearNetwork): Promise<boolean> {
   try {
     await rpcCall(network, "query", {
       request_type: "view_account",

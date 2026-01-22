@@ -7,28 +7,28 @@
  * - Helper functions for token lookups
  */
 
-import { TON_MAINNET_CAIP2, TON_TESTNET_CAIP2 } from "./constants.js";
+import { TON_MAINNET_CAIP2, TON_TESTNET_CAIP2 } from './constants.js'
 
 /**
  * Jetton token configuration
  */
 export interface JettonConfig {
   /** Jetton master contract address (friendly format) */
-  masterAddress: string;
+  masterAddress: string
   /** Token symbol */
-  symbol: string;
+  symbol: string
   /** Token name */
-  name: string;
+  name: string
   /** Number of decimal places */
-  decimals: number;
+  decimals: number
   /** Payment priority (lower = higher priority) */
-  priority: number;
+  priority: number
 }
 
 /**
  * Network token registry mapping network -> symbol -> config
  */
-export type NetworkJettonRegistry = Record<string, Record<string, JettonConfig>>;
+export type NetworkJettonRegistry = Record<string, Record<string, JettonConfig>>
 
 /**
  * USDT Jetton Master Contract Addresses by Network
@@ -38,10 +38,10 @@ export type NetworkJettonRegistry = Record<string, Record<string, JettonConfig>>
  */
 export const USDT_ADDRESSES: Record<string, string> = {
   // TON Mainnet - Official Tether USDT
-  [TON_MAINNET_CAIP2]: "EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs",
+  [TON_MAINNET_CAIP2]: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
   // TON Testnet - Test USDT (may vary)
-  [TON_TESTNET_CAIP2]: "kQBqSpvo4S87mX9tTc4FX3Sfqf4uSp3Tx-Fz4RBUfTRWBx",
-};
+  [TON_TESTNET_CAIP2]: 'kQBqSpvo4S87mX9tTc4FX3Sfqf4uSp3Tx-Fz4RBUfTRWBx',
+}
 
 /**
  * Complete Jetton registry with all supported tokens per network
@@ -51,8 +51,8 @@ export const JETTON_REGISTRY: NetworkJettonRegistry = {
   [TON_MAINNET_CAIP2]: {
     USDT: {
       masterAddress: USDT_ADDRESSES[TON_MAINNET_CAIP2],
-      symbol: "USDT",
-      name: "Tether USD",
+      symbol: 'USDT',
+      name: 'Tether USD',
       decimals: 6,
       priority: 1,
     },
@@ -62,13 +62,13 @@ export const JETTON_REGISTRY: NetworkJettonRegistry = {
   [TON_TESTNET_CAIP2]: {
     USDT: {
       masterAddress: USDT_ADDRESSES[TON_TESTNET_CAIP2],
-      symbol: "USDT",
-      name: "Tether USD (Testnet)",
+      symbol: 'USDT',
+      name: 'Tether USD (Testnet)',
       decimals: 6,
       priority: 1,
     },
   },
-};
+}
 
 /**
  * Get Jetton configuration for a specific token on a network
@@ -78,7 +78,7 @@ export const JETTON_REGISTRY: NetworkJettonRegistry = {
  * @returns Jetton configuration or undefined
  */
 export function getJettonConfig(network: string, symbol: string): JettonConfig | undefined {
-  return JETTON_REGISTRY[network]?.[symbol.toUpperCase()];
+  return JETTON_REGISTRY[network]?.[symbol.toUpperCase()]
 }
 
 /**
@@ -88,9 +88,9 @@ export function getJettonConfig(network: string, symbol: string): JettonConfig |
  * @returns Array of Jetton configurations sorted by priority
  */
 export function getNetworkJettons(network: string): JettonConfig[] {
-  const jettons = JETTON_REGISTRY[network];
-  if (!jettons) return [];
-  return Object.values(jettons).sort((a, b) => a.priority - b.priority);
+  const jettons = JETTON_REGISTRY[network]
+  if (!jettons) return []
+  return Object.values(jettons).sort((a, b) => a.priority - b.priority)
 }
 
 /**
@@ -101,8 +101,8 @@ export function getNetworkJettons(network: string): JettonConfig[] {
  * @returns Default Jetton configuration or undefined
  */
 export function getDefaultJetton(network: string): JettonConfig | undefined {
-  const jettons = getNetworkJettons(network);
-  return jettons[0]; // Already sorted by priority
+  const jettons = getNetworkJettons(network)
+  return jettons[0] // Already sorted by priority
 }
 
 /**
@@ -113,13 +113,11 @@ export function getDefaultJetton(network: string): JettonConfig | undefined {
  * @returns Jetton configuration or undefined
  */
 export function getJettonByAddress(network: string, address: string): JettonConfig | undefined {
-  const jettons = JETTON_REGISTRY[network];
-  if (!jettons) return undefined;
+  const jettons = JETTON_REGISTRY[network]
+  if (!jettons) return undefined
 
   // Normalize address comparison (case-insensitive for base64)
-  return Object.values(jettons).find(
-    (j) => j.masterAddress.toLowerCase() === address.toLowerCase(),
-  );
+  return Object.values(jettons).find((j) => j.masterAddress.toLowerCase() === address.toLowerCase())
 }
 
 /**
@@ -129,13 +127,13 @@ export function getJettonByAddress(network: string, address: string): JettonConf
  * @returns Array of network identifiers
  */
 export function getNetworksForJetton(symbol: string): string[] {
-  const networks: string[] = [];
+  const networks: string[] = []
   for (const [network, jettons] of Object.entries(JETTON_REGISTRY)) {
     if (jettons[symbol.toUpperCase()]) {
-      networks.push(network);
+      networks.push(network)
     }
   }
-  return networks;
+  return networks
 }
 
 /**
@@ -144,7 +142,7 @@ export function getNetworksForJetton(symbol: string): string[] {
  * @returns Array of networks supporting USDT
  */
 export function getUsdtNetworks(): string[] {
-  return getNetworksForJetton("USDT");
+  return getNetworksForJetton('USDT')
 }
 
 /**
@@ -154,7 +152,7 @@ export function getUsdtNetworks(): string[] {
  * @returns true if network has configured Jettons
  */
 export function isNetworkSupported(network: string): boolean {
-  return network in JETTON_REGISTRY;
+  return network in JETTON_REGISTRY
 }
 
 /**
@@ -163,5 +161,5 @@ export function isNetworkSupported(network: string): boolean {
  * @returns Array of all supported network identifiers
  */
 export function getSupportedNetworks(): string[] {
-  return Object.keys(JETTON_REGISTRY);
+  return Object.keys(JETTON_REGISTRY)
 }

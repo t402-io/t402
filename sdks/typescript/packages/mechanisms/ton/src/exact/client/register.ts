@@ -1,7 +1,7 @@
-import { t402Client, PaymentPolicy } from "@t402/core/client";
-import { Network } from "@t402/core/types";
-import { ClientTonSigner } from "../../signer.js";
-import { ExactTonScheme, ExactTonSchemeConfig } from "./scheme.js";
+import { t402Client, PaymentPolicy } from '@t402/core/client'
+import { Network } from '@t402/core/types'
+import { ClientTonSigner } from '../../signer.js'
+import { ExactTonScheme, ExactTonSchemeConfig } from './scheme.js'
 
 /**
  * Configuration options for registering TON schemes to an t402Client
@@ -10,29 +10,29 @@ export interface TonClientConfig {
   /**
    * The TON signer to use for creating payment payloads
    */
-  signer: ClientTonSigner;
+  signer: ClientTonSigner
 
   /**
    * Function to get Jetton wallet address for a given owner and Jetton master
    * This is required for building Jetton transfer messages
    */
-  getJettonWalletAddress: (ownerAddress: string, jettonMasterAddress: string) => Promise<string>;
+  getJettonWalletAddress: (ownerAddress: string, jettonMasterAddress: string) => Promise<string>
 
   /**
    * Optional policies to apply to the client
    */
-  policies?: PaymentPolicy[];
+  policies?: PaymentPolicy[]
 
   /**
    * Optional specific networks to register
    * If not provided, registers wildcard support (ton:*)
    */
-  networks?: Network[];
+  networks?: Network[]
 
   /**
    * Optional scheme configuration (gas amounts, etc.)
    */
-  schemeConfig?: ExactTonSchemeConfig;
+  schemeConfig?: ExactTonSchemeConfig
 }
 
 /**
@@ -69,25 +69,25 @@ export function registerExactTonScheme(client: t402Client, config: TonClientConf
     config.signer,
     config.getJettonWalletAddress,
     config.schemeConfig,
-  );
+  )
 
   // Register V2 scheme
   if (config.networks && config.networks.length > 0) {
     // Register specific networks
-    config.networks.forEach(network => {
-      client.register(network, scheme);
-    });
+    config.networks.forEach((network) => {
+      client.register(network, scheme)
+    })
   } else {
     // Register wildcard for all TON networks
-    client.register("ton:*", scheme);
+    client.register('ton:*', scheme)
   }
 
   // Apply policies if provided
   if (config.policies) {
-    config.policies.forEach(policy => {
-      client.registerPolicy(policy);
-    });
+    config.policies.forEach((policy) => {
+      client.registerPolicy(policy)
+    })
   }
 
-  return client;
+  return client
 }

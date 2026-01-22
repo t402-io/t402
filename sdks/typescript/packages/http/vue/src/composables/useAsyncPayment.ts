@@ -1,34 +1,34 @@
-import { ref, computed, type Ref, type ComputedRef } from "vue";
-import type { PaymentStatus } from "../types/index.js";
+import { ref, computed, type Ref, type ComputedRef } from 'vue'
+import type { PaymentStatus } from '../types/index.js'
 
 interface UseAsyncPaymentOptions<T> {
   /** The async payment function to execute */
-  paymentFn: () => Promise<T>;
+  paymentFn: () => Promise<T>
   /** Callback on successful payment */
-  onSuccess?: (result: T) => void;
+  onSuccess?: (result: T) => void
   /** Callback on payment error */
-  onError?: (error: Error) => void;
+  onError?: (error: Error) => void
   /** Callback when payment starts */
-  onStart?: () => void;
+  onStart?: () => void
 }
 
 interface UseAsyncPaymentReturn<T> {
   /** Execute the payment */
-  execute: () => Promise<T | null>;
+  execute: () => Promise<T | null>
   /** Current payment status */
-  status: Ref<PaymentStatus>;
+  status: Ref<PaymentStatus>
   /** Result of successful payment */
-  result: Ref<T | null>;
+  result: Ref<T | null>
   /** Error message if payment failed */
-  error: Ref<string | null>;
+  error: Ref<string | null>
   /** Whether payment is in progress */
-  isLoading: ComputedRef<boolean>;
+  isLoading: ComputedRef<boolean>
   /** Whether payment succeeded */
-  isSuccess: ComputedRef<boolean>;
+  isSuccess: ComputedRef<boolean>
   /** Whether payment failed */
-  isError: ComputedRef<boolean>;
+  isError: ComputedRef<boolean>
   /** Reset the state */
-  reset: () => void;
+  reset: () => void
 }
 
 /**
@@ -62,41 +62,41 @@ interface UseAsyncPaymentReturn<T> {
  * ```
  */
 export function useAsyncPayment<T>(options: UseAsyncPaymentOptions<T>): UseAsyncPaymentReturn<T> {
-  const { paymentFn, onSuccess, onError, onStart } = options;
+  const { paymentFn, onSuccess, onError, onStart } = options
 
-  const status = ref<PaymentStatus>("idle");
-  const result = ref<T | null>(null) as Ref<T | null>;
-  const error = ref<string | null>(null);
+  const status = ref<PaymentStatus>('idle')
+  const result = ref<T | null>(null) as Ref<T | null>
+  const error = ref<string | null>(null)
 
-  const isLoading = computed(() => status.value === "loading");
-  const isSuccess = computed(() => status.value === "success");
-  const isError = computed(() => status.value === "error");
+  const isLoading = computed(() => status.value === 'loading')
+  const isSuccess = computed(() => status.value === 'success')
+  const isError = computed(() => status.value === 'error')
 
   const execute = async (): Promise<T | null> => {
-    status.value = "loading";
-    error.value = null;
-    onStart?.();
+    status.value = 'loading'
+    error.value = null
+    onStart?.()
 
     try {
-      const paymentResult = await paymentFn();
-      result.value = paymentResult;
-      status.value = "success";
-      onSuccess?.(paymentResult);
-      return paymentResult;
+      const paymentResult = await paymentFn()
+      result.value = paymentResult
+      status.value = 'success'
+      onSuccess?.(paymentResult)
+      return paymentResult
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Payment failed";
-      error.value = errorMessage;
-      status.value = "error";
-      onError?.(err instanceof Error ? err : new Error(errorMessage));
-      return null;
+      const errorMessage = err instanceof Error ? err.message : 'Payment failed'
+      error.value = errorMessage
+      status.value = 'error'
+      onError?.(err instanceof Error ? err : new Error(errorMessage))
+      return null
     }
-  };
+  }
 
   const reset = () => {
-    status.value = "idle";
-    result.value = null;
-    error.value = null;
-  };
+    status.value = 'idle'
+    result.value = null
+    error.value = null
+  }
 
   return {
     execute,
@@ -107,5 +107,5 @@ export function useAsyncPayment<T>(options: UseAsyncPaymentOptions<T>): UseAsync
     isSuccess,
     isError,
     reset,
-  };
+  }
 }

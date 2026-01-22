@@ -13,20 +13,21 @@ Enable AI agents like Claude to make stablecoin payments across multiple blockch
 
 ## Available Tools
 
-| Tool | Description |
-|------|-------------|
-| `t402/getBalance` | Get token balances for a wallet on a specific network |
-| `t402/getAllBalances` | Get balances across all supported networks |
-| `t402/pay` | Execute a stablecoin payment |
-| `t402/payGasless` | Execute a gasless payment using ERC-4337 |
-| `t402/getBridgeFee` | Get fee quote for bridging USDT0 |
-| `t402/bridge` | Bridge USDT0 between chains |
+| Tool                  | Description                                           |
+| --------------------- | ----------------------------------------------------- |
+| `t402/getBalance`     | Get token balances for a wallet on a specific network |
+| `t402/getAllBalances` | Get balances across all supported networks            |
+| `t402/pay`            | Execute a stablecoin payment                          |
+| `t402/payGasless`     | Execute a gasless payment using ERC-4337              |
+| `t402/getBridgeFee`   | Get fee quote for bridging USDT0                      |
+| `t402/bridge`         | Bridge USDT0 between chains                           |
 
 ## Claude Desktop Integration
 
 ### Quick Start
 
 1. Install the package globally:
+
 ```bash
 npm install -g @t402/mcp
 ```
@@ -132,39 +133,40 @@ Configure custom RPC endpoints for better reliability:
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `T402_PRIVATE_KEY` | Wallet private key (hex with 0x prefix) |
-| `T402_DEMO_MODE` | Set to "true" for simulated transactions |
-| `T402_BUNDLER_URL` | ERC-4337 bundler URL for gasless transactions |
-| `T402_PAYMASTER_URL` | Paymaster URL for sponsored gas |
-| `T402_RPC_ETHEREUM` | Custom RPC URL for Ethereum |
-| `T402_RPC_BASE` | Custom RPC URL for Base |
-| `T402_RPC_ARBITRUM` | Custom RPC URL for Arbitrum |
-| `T402_RPC_OPTIMISM` | Custom RPC URL for Optimism |
-| `T402_RPC_POLYGON` | Custom RPC URL for Polygon |
-| `T402_RPC_AVALANCHE` | Custom RPC URL for Avalanche |
-| `T402_RPC_INK` | Custom RPC URL for Ink |
-| `T402_RPC_BERACHAIN` | Custom RPC URL for Berachain |
-| `T402_RPC_UNICHAIN` | Custom RPC URL for Unichain |
+| Variable             | Description                                   |
+| -------------------- | --------------------------------------------- |
+| `T402_PRIVATE_KEY`   | Wallet private key (hex with 0x prefix)       |
+| `T402_DEMO_MODE`     | Set to "true" for simulated transactions      |
+| `T402_BUNDLER_URL`   | ERC-4337 bundler URL for gasless transactions |
+| `T402_PAYMASTER_URL` | Paymaster URL for sponsored gas               |
+| `T402_RPC_ETHEREUM`  | Custom RPC URL for Ethereum                   |
+| `T402_RPC_BASE`      | Custom RPC URL for Base                       |
+| `T402_RPC_ARBITRUM`  | Custom RPC URL for Arbitrum                   |
+| `T402_RPC_OPTIMISM`  | Custom RPC URL for Optimism                   |
+| `T402_RPC_POLYGON`   | Custom RPC URL for Polygon                    |
+| `T402_RPC_AVALANCHE` | Custom RPC URL for Avalanche                  |
+| `T402_RPC_INK`       | Custom RPC URL for Ink                        |
+| `T402_RPC_BERACHAIN` | Custom RPC URL for Berachain                  |
+| `T402_RPC_UNICHAIN`  | Custom RPC URL for Unichain                   |
 
 ## Supported Networks
 
-| Network | Chain ID | Tokens |
-|---------|----------|--------|
-| Ethereum | 1 | USDC, USDT, USDT0 |
-| Base | 8453 | USDC |
-| Arbitrum | 42161 | USDC, USDT, USDT0 |
-| Optimism | 10 | USDC, USDT |
-| Polygon | 137 | USDC, USDT |
-| Avalanche | 43114 | USDC, USDT |
-| Ink | 57073 | USDT0 |
-| Berachain | 80094 | USDT0 |
-| Unichain | 130 | USDT0 |
+| Network   | Chain ID | Tokens            |
+| --------- | -------- | ----------------- |
+| Ethereum  | 1        | USDC, USDT, USDT0 |
+| Base      | 8453     | USDC              |
+| Arbitrum  | 42161    | USDC, USDT, USDT0 |
+| Optimism  | 10       | USDC, USDT        |
+| Polygon   | 137      | USDC, USDT        |
+| Avalanche | 43114    | USDC, USDT        |
+| Ink       | 57073    | USDT0             |
+| Berachain | 80094    | USDT0             |
+| Unichain  | 130      | USDT0             |
 
 ## Cross-Chain Bridging
 
 USDT0 can be bridged between these chains using LayerZero:
+
 - Ethereum
 - Arbitrum
 - Ink
@@ -184,23 +186,23 @@ Once configured, you can ask Claude to:
 ## Programmatic Usage
 
 ```typescript
-import { createT402McpServer, loadConfigFromEnv } from '@t402/mcp';
+import { createT402McpServer, loadConfigFromEnv } from '@t402/mcp'
 
-const config = loadConfigFromEnv();
-const server = createT402McpServer(config);
-await server.run();
+const config = loadConfigFromEnv()
+const server = createT402McpServer(config)
+await server.run()
 ```
 
 ## Using Individual Tools
 
 ```typescript
-import { executeGetBalance, executePay } from '@t402/mcp/tools';
+import { executeGetBalance, executePay } from '@t402/mcp/tools'
 
 // Check balance
 const balance = await executeGetBalance({
   network: 'base',
   address: '0x...',
-});
+})
 
 // Execute payment
 const result = await executePay(
@@ -212,8 +214,8 @@ const result = await executePay(
   },
   {
     privateKey: '0x...',
-  }
-);
+  },
+)
 ```
 
 ## Security Considerations

@@ -6,23 +6,18 @@
  * 2. Direct LayerZero OFT integration (fallback)
  */
 
-import type { WDKSigner } from "./signer.js";
-import type { BridgeResult } from "./types.js";
-import {
-  Usdt0Bridge,
-  supportsBridging,
-  getBridgeableChains,
-  type BridgeSigner,
-} from "@t402/evm";
+import type { WDKSigner } from './signer.js'
+import type { BridgeResult } from './types.js'
+import { Usdt0Bridge, supportsBridging, getBridgeableChains, type BridgeSigner } from '@t402/evm'
 
 /**
  * Extended bridge result with quote information
  */
 export interface BridgeQuoteResult extends BridgeResult {
   /** Native fee in wei */
-  nativeFee: bigint;
+  nativeFee: bigint
   /** Minimum amount to receive */
-  minAmountToReceive: bigint;
+  minAmountToReceive: bigint
 }
 
 /**
@@ -36,7 +31,7 @@ export interface BridgeQuoteResult extends BridgeResult {
  * - Receipt handling
  */
 export class WdkBridge {
-  private bridges: Map<string, Usdt0Bridge> = new Map();
+  private bridges: Map<string, Usdt0Bridge> = new Map()
 
   /**
    * Create bridge signer adapter from WDK signer
@@ -48,56 +43,56 @@ export class WdkBridge {
         // WDK signer needs to be extended to support readContract
         // For now, throw an error indicating this needs WDK account
         throw new Error(
-          "readContract not available on WDKSigner. Use T402WDK.bridgeUsdt0() instead.",
-        );
+          'readContract not available on WDKSigner. Use T402WDK.bridgeUsdt0() instead.',
+        )
       },
       writeContract: async (_args) => {
         throw new Error(
-          "writeContract not available on WDKSigner. Use T402WDK.bridgeUsdt0() instead.",
-        );
+          'writeContract not available on WDKSigner. Use T402WDK.bridgeUsdt0() instead.',
+        )
       },
       waitForTransactionReceipt: async (_args) => {
         throw new Error(
-          "waitForTransactionReceipt not available on WDKSigner. Use T402WDK.bridgeUsdt0() instead.",
-        );
+          'waitForTransactionReceipt not available on WDKSigner. Use T402WDK.bridgeUsdt0() instead.',
+        )
       },
-    };
+    }
   }
 
   /**
    * Get or create a bridge instance for a chain
    */
   getBridge(chain: string, signer: WDKSigner): Usdt0Bridge {
-    const cached = this.bridges.get(chain);
+    const cached = this.bridges.get(chain)
     if (cached) {
-      return cached;
+      return cached
     }
 
-    const bridgeSigner = this.createBridgeSigner(signer);
-    const bridge = new Usdt0Bridge(bridgeSigner, chain);
-    this.bridges.set(chain, bridge);
-    return bridge;
+    const bridgeSigner = this.createBridgeSigner(signer)
+    const bridge = new Usdt0Bridge(bridgeSigner, chain)
+    this.bridges.set(chain, bridge)
+    return bridge
   }
 
   /**
    * Check if a chain supports USDT0 bridging
    */
   static supportsBridging(chain: string): boolean {
-    return supportsBridging(chain);
+    return supportsBridging(chain)
   }
 
   /**
    * Get all chains that support USDT0 bridging
    */
   static getBridgeableChains(): string[] {
-    return getBridgeableChains();
+    return getBridgeableChains()
   }
 
   /**
    * Get supported destinations from a source chain
    */
   static getSupportedDestinations(fromChain: string): string[] {
-    return getBridgeableChains().filter((chain) => chain !== fromChain);
+    return getBridgeableChains().filter((chain) => chain !== fromChain)
   }
 }
 
@@ -106,9 +101,9 @@ export class WdkBridge {
  */
 export interface DirectBridgeConfig {
   /** RPC URL for the source chain */
-  rpcUrl: string;
+  rpcUrl: string
   /** Private key or signer */
-  signer: BridgeSigner;
+  signer: BridgeSigner
 }
 
 /**
@@ -146,8 +141,8 @@ export interface DirectBridgeConfig {
  * ```
  */
 export function createDirectBridge(signer: BridgeSigner, chain: string): Usdt0Bridge {
-  return new Usdt0Bridge(signer, chain);
+  return new Usdt0Bridge(signer, chain)
 }
 
 // Re-export types from @t402/evm for convenience
-export type { BridgeQuote, BridgeSigner } from "@t402/evm";
+export type { BridgeQuote, BridgeSigner } from '@t402/evm'

@@ -4,10 +4,10 @@
  * Helper function to register TRON exact scheme with a t402 facilitator.
  */
 
-import { t402Facilitator } from "@t402/core/facilitator";
-import { Network } from "@t402/core/types";
-import { ExactTronScheme, ExactTronSchemeConfig } from "./scheme.js";
-import { FacilitatorTronSigner } from "../../signer.js";
+import { t402Facilitator } from '@t402/core/facilitator'
+import { Network } from '@t402/core/types'
+import { ExactTronScheme, ExactTronSchemeConfig } from './scheme.js'
+import { FacilitatorTronSigner } from '../../signer.js'
 
 /**
  * Configuration options for registering TRON schemes to a t402Facilitator
@@ -16,18 +16,18 @@ export interface TronFacilitatorConfig {
   /**
    * The signer to use for verification and settlement
    */
-  signer: FacilitatorTronSigner;
+  signer: FacilitatorTronSigner
 
   /**
    * Optional specific networks to register
    * If not provided, registers wildcard support (tron:*)
    */
-  networks?: Network[];
+  networks?: Network[]
 
   /**
    * Optional scheme configuration
    */
-  schemeConfig?: ExactTronSchemeConfig;
+  schemeConfig?: ExactTronSchemeConfig
 }
 
 /**
@@ -61,18 +61,18 @@ export function registerExactTronScheme(
   facilitator: t402Facilitator,
   config: TronFacilitatorConfig,
 ): t402Facilitator {
-  const scheme = new ExactTronScheme(config.signer, config.schemeConfig);
+  const scheme = new ExactTronScheme(config.signer, config.schemeConfig)
 
   // Register V2 scheme
   if (config.networks && config.networks.length > 0) {
     // Register specific networks
-    config.networks.forEach(network => {
-      facilitator.register(network, scheme);
-    });
+    config.networks.forEach((network) => {
+      facilitator.register(network, scheme)
+    })
   } else {
     // Register wildcard for all TRON networks
-    facilitator.register("tron:*", scheme);
+    facilitator.register('tron:*', scheme)
   }
 
-  return facilitator;
+  return facilitator
 }
