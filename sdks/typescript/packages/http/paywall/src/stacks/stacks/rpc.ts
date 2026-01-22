@@ -122,7 +122,6 @@ export async function fetchTokenBalance(
   network: StacksNetwork,
 ): Promise<TokenBalance | null> {
   const endpoint = getStacksEndpoint(network);
-  const encodedContractId = encodeURIComponent(contractId);
 
   try {
     const response = await fetch(`${endpoint}/extended/v1/address/${address}/balances`);

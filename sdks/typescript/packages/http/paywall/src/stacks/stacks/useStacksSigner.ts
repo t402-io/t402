@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import type { StacksAccount, StacksNetwork } from "./types";
 import { STACKS_NETWORKS } from "./types";
 import { getUsdcContractAddress, parseContractId, fetchAccountInfo } from "./rpc";

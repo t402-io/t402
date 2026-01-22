@@ -35,7 +35,7 @@ export interface UseStacksWalletReturn {
 /**
  * Request accounts from Leather wallet
  */
-async function connectLeather(network: StacksNetwork): Promise<StacksAccount> {
+async function connectLeather(_network: StacksNetwork): Promise<StacksAccount> {
   const provider = window.LeatherProvider || window.HiroWalletProvider;
   if (!provider) {
     throw new Error("Leather wallet not found");
@@ -76,7 +76,7 @@ async function connectLeather(network: StacksNetwork): Promise<StacksAccount> {
 /**
  * Request accounts from Xverse wallet
  */
-async function connectXverse(network: StacksNetwork): Promise<StacksAccount> {
+async function connectXverse(_network: StacksNetwork): Promise<StacksAccount> {
   const provider = window.XverseProviders?.StacksProvider;
   if (!provider) {
     throw new Error("Xverse wallet not found");

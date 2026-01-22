@@ -50,12 +50,12 @@ export interface TronWeb {
       issuerAddress: string,
     ): Promise<{ transaction: unknown; result: { result: boolean } }>;
   };
-  contract(): {
-    at(address: string): Promise<TronContract>;
-  };
   address: {
     fromHex(hex: string): string;
     toHex(base58: string): string;
+  };
+  contract(): {
+    at(address: string): Promise<TronContract>;
   };
   toHex(str: string): string;
   fromUtf8(str: string): string;
