@@ -2,7 +2,16 @@ from typing import Literal, Union, get_args
 
 
 # EVM Networks
-EVMNetworks = Literal["base", "base-sepolia", "avalanche-fuji", "avalanche"]
+EVMNetworks = Literal[
+    # Standard networks
+    "base", "base-sepolia", "avalanche-fuji", "avalanche",
+    # Core USDT0 Networks
+    "ethereum", "arbitrum", "optimism", "polygon", "ink", "berachain", "unichain",
+    # Phase 1: High Priority USDT0 Networks
+    "mantle", "plasma", "sei", "conflux", "monad",
+    # Phase 2: Medium Priority USDT0 Networks
+    "flare", "rootstock", "xlayer", "stable", "hyperevm", "megaeth", "corn",
+]
 
 # TON Networks (CAIP-2 format)
 TONNetworks = Literal["ton:mainnet", "ton:testnet"]
@@ -34,10 +43,33 @@ def get_all_supported_networks() -> tuple[str, ...]:
 
 
 EVM_NETWORK_TO_CHAIN_ID = {
+    # Standard networks
     "base-sepolia": 84532,
     "base": 8453,
     "avalanche-fuji": 43113,
     "avalanche": 43114,
+    # Core USDT0 Networks
+    "ethereum": 1,
+    "arbitrum": 42161,
+    "optimism": 10,
+    "polygon": 137,
+    "ink": 57073,
+    "berachain": 80094,
+    "unichain": 130,
+    # Phase 1: High Priority USDT0 Networks
+    "mantle": 5000,
+    "plasma": 9745,
+    "sei": 1329,
+    "conflux": 1030,
+    "monad": 143,
+    # Phase 2: Medium Priority USDT0 Networks
+    "flare": 14,
+    "rootstock": 30,
+    "xlayer": 196,
+    "stable": 988,
+    "hyperevm": 999,
+    "megaeth": 4326,
+    "corn": 21000000,
 }
 
 # TON Network configurations

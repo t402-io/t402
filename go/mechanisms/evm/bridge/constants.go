@@ -24,39 +24,109 @@ const (
 )
 
 // LayerZero Endpoint IDs (v2)
+// Source: https://docs.layerzero.network/v2/deployments/mainnet
 var LayerZeroEndpointIDs = map[string]uint32{
+	// Core networks
 	"ethereum":  30101,
 	"arbitrum":  30110,
-	"ink":       30291,
+	"optimism":  30111,
+	"polygon":   30109,
+	"ink":       30339,
 	"berachain": 30362,
 	"unichain":  30320,
+	// Phase 1: High Priority
+	"mantle":   30181,
+	"plasma":   30383,
+	"sei":      30280,
+	"conflux":  30212,
+	"monad":    30390,
+	// Phase 2: Medium Priority
+	"flare":     30295,
+	"rootstock": 30333,
+	"xlayer":    30274,
+	"stable":    30396,
+	"hyperevm":  30367,
+	"megaeth":   30398,
+	"corn":      30331,
 }
 
 // USDT0 OFT Contract Addresses
+// Source: https://docs.usdt0.to/technical-documentation/deployments
 var USDT0OFTAddresses = map[string]string{
+	// Core networks
 	"ethereum":  "0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee",
 	"arbitrum":  "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+	"optimism":  "0x01bFF41798a0BcF287b996046Ca68b395DbC1071",
+	"polygon":   "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
 	"ink":       "0x0200C29006150606B650577BBE7B6248F58470c1",
 	"berachain": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
-	"unichain":  "0x588ce4F028D8e7B53B687865d6A67b3A54C75518",
+	"unichain":  "0x9151434b16b9763660705744891fA906F660EcC5",
+	// Phase 1: High Priority
+	"mantle":  "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
+	"plasma":  "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
+	"sei":     "0x9151434b16b9763660705744891fA906F660EcC5",
+	"conflux": "0xaf37E8B6C9ED7f6318979f56Fc287d76c30847ff",
+	"monad":   "0xe7cd86e13AC4309349F30B3435a9d337750fC82D",
+	// Phase 2: Medium Priority
+	"flare":     "0xe7cd86e13AC4309349F30B3435a9d337750fC82D",
+	"rootstock": "0x779dED0C9e1022225F8e0630b35A9B54Be713736",
+	"xlayer":    "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
+	"stable":    "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
+	"hyperevm":  "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
+	"megaeth":   "0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb",
+	"corn":      "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
 }
 
 // NetworkToChain maps network identifiers to chain names.
 var NetworkToChain = map[string]string{
-	"eip155:1":      "ethereum",
-	"eip155:42161":  "arbitrum",
-	"eip155:57073":  "ink",
-	"eip155:80094":  "berachain",
-	"eip155:130":    "unichain",
+	// Core networks
+	"eip155:1":     "ethereum",
+	"eip155:42161": "arbitrum",
+	"eip155:10":    "optimism",
+	"eip155:137":   "polygon",
+	"eip155:57073": "ink",
+	"eip155:80094": "berachain",
+	"eip155:130":   "unichain",
+	// Phase 1: High Priority
+	"eip155:5000": "mantle",
+	"eip155:9745": "plasma",
+	"eip155:1329": "sei",
+	"eip155:1030": "conflux",
+	"eip155:143":  "monad",
+	// Phase 2: Medium Priority
+	"eip155:14":       "flare",
+	"eip155:30":       "rootstock",
+	"eip155:196":      "xlayer",
+	"eip155:988":      "stable",
+	"eip155:999":      "hyperevm",
+	"eip155:4326":     "megaeth",
+	"eip155:21000000": "corn",
 }
 
 // ChainToNetwork maps chain names to network identifiers.
 var ChainToNetwork = map[string]string{
+	// Core networks
 	"ethereum":  "eip155:1",
 	"arbitrum":  "eip155:42161",
+	"optimism":  "eip155:10",
+	"polygon":   "eip155:137",
 	"ink":       "eip155:57073",
 	"berachain": "eip155:80094",
 	"unichain":  "eip155:130",
+	// Phase 1: High Priority
+	"mantle":  "eip155:5000",
+	"plasma":  "eip155:9745",
+	"sei":     "eip155:1329",
+	"conflux": "eip155:1030",
+	"monad":   "eip155:143",
+	// Phase 2: Medium Priority
+	"flare":     "eip155:14",
+	"rootstock": "eip155:30",
+	"xlayer":    "eip155:196",
+	"stable":    "eip155:988",
+	"hyperevm":  "eip155:999",
+	"megaeth":   "eip155:4326",
+	"corn":      "eip155:21000000",
 }
 
 // OFTSentEventTopic is the keccak256 hash of OFTSent event signature.
