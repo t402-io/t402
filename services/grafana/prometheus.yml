@@ -1,0 +1,25 @@
+# Prometheus configuration for standalone monitoring stack
+# Configure FACILITATOR_URL environment variable to point to your facilitator instance
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers: []
+
+rule_files: []
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Facilitator metrics
+  # For production, set FACILITATOR_URL to your facilitator instance
+  - job_name: 'facilitator'
+    static_configs:
+      - targets: ['${FACILITATOR_URL:-facilitator.t402.io}']
+    metrics_path: /metrics
+    scrape_interval: 10s
+    scheme: https
