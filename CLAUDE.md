@@ -39,7 +39,8 @@ t402/
 │   │   │   ├── evm-core/    # @t402/evm-core - Shared EVM utilities
 │   │   │   ├── svm/         # @t402/svm - Solana (SPL tokens)
 │   │   │   ├── ton/         # @t402/ton - TON (Jettons)
-│   │   │   └── tron/        # @t402/tron - TRON (TRC-20)
+│   │   │   ├── tron/        # @t402/tron - TRON (TRC-20)
+│   │   │   └── near/        # @t402/near - NEAR (NEP-141)
 │   │   ├── http/
 │   │   │   ├── express/     # @t402/express - Express.js middleware
 │   │   │   ├── hono/        # @t402/hono - Hono middleware
@@ -64,7 +65,8 @@ t402/
 │   │   ├── evm/
 │   │   ├── svm/
 │   │   ├── ton/
-│   │   └── tron/
+│   │   ├── tron/
+│   │   └── near/
 │   ├── http/                # HTTP middleware (Gin)
 │   ├── cmd/t402/            # CLI tool
 │   └── cmd/t402-mcp/        # MCP server
@@ -273,6 +275,8 @@ Networks use CAIP-2 format: `namespace:reference`
 | Solana Mainnet | `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` |
 | TON Mainnet | `ton:mainnet` |
 | TRON Mainnet | `tron:mainnet` |
+| NEAR Mainnet | `near:mainnet` |
+| NEAR Testnet | `near:testnet` |
 
 ### Package Export Pattern (TypeScript)
 
@@ -340,6 +344,10 @@ TRON_RPC=https://api.trongrid.io
 # Solana
 SVM_PRIVATE_KEY=
 SOLANA_RPC=https://api.mainnet-beta.solana.com
+
+# NEAR
+NEAR_RPC=https://rpc.mainnet.near.org
+NEAR_TESTNET_RPC=https://rpc.testnet.near.org
 ```
 
 ### TypeScript Testing
@@ -410,6 +418,13 @@ TEST_PRIVATE_KEY=0x...
 |---------|---------|
 | Mainnet | `TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t` |
 | Nile Testnet | `TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf` |
+
+### NEAR USDT (NEP-141)
+
+| Network | Contract ID |
+|---------|-------------|
+| Mainnet | `usdt.tether-token.near` |
+| Testnet | `usdt.fakes.testnet` |
 
 ---
 
