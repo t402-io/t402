@@ -36,6 +36,8 @@ import (
 	aptosfac "github.com/t402-io/t402/go/mechanisms/aptos/exact-direct/facilitator"
 	"github.com/t402-io/t402/go/mechanisms/tezos"
 	tezosfac "github.com/t402-io/t402/go/mechanisms/tezos/exact-direct/facilitator"
+	"github.com/t402-io/t402/go/mechanisms/polkadot"
+	polkadotfac "github.com/t402-io/t402/go/mechanisms/polkadot/exact-direct/facilitator"
 	"github.com/t402-io/t402/services/facilitator/internal/cache"
 	"github.com/t402-io/t402/services/facilitator/internal/config"
 	"github.com/t402-io/t402/services/facilitator/internal/server"
@@ -334,6 +336,28 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, error) {
 		log.Printf("Tezos facilitator configured for %d networks", len(tezosNetworks))
 	} else {
 		log.Printf("Warning: TEZOS_RPC not set, Tezos chains disabled")
+	}
+
+	// Setup Polkadot Asset Hub if indexer is configured
+	if cfg.PolkadotAssetHubIndexer != "" {
+		polkadotSigner := newFacilitatorPolkadotSigner(cfg.PolkadotAssetHubIndexer, cfg.WestendAssetHubIndexer)
+
+		var polkadotNetworks []t402.Network
+
+		// Add Polkadot Asset Hub (mainnet)
+		polkadotNetworks = append(polkadotNetworks, t402.Network(polkadot.PolkadotAssetHubCAIP2))
+		configuredNetworks = append(configuredNetworks, "Polkadot Asset Hub")
+
+		// Add Westend Asset Hub (testnet) if configured
+		if cfg.WestendAssetHubIndexer != "" {
+			polkadotNetworks = append(polkadotNetworks, t402.Network(polkadot.WestendAssetHubCAIP2))
+			configuredNetworks = append(configuredNetworks, "Westend Asset Hub")
+		}
+
+		facilitator.Register(polkadotNetworks, polkadotfac.NewExactDirectPolkadotScheme(polkadotSigner, nil))
+		log.Printf("Polkadot facilitator configured for %d networks", len(polkadotNetworks))
+	} else {
+		log.Printf("Warning: POLKADOT_ASSET_HUB_INDEXER not set, Polkadot chains disabled")
 	}
 
 	// Log configured networks
@@ -1041,4 +1065,152 @@ func (s *facilitatorTezosSigner) GetBalance(ctx context.Context, contractAddress
 	}
 
 	return balances[0].Balance, nil
+}
+
+// ============================================================================
+// Polkadot Facilitator Signer
+// ============================================================================
+
+// facilitatorPolkadotSigner implements the FacilitatorPolkadotSigner interface
+type facilitatorPolkadotSigner struct {
+	mainnetIndexer string
+	testnetIndexer string
+}
+
+// newFacilitatorPolkadotSigner creates a new Polkadot facilitator signer
+func newFacilitatorPolkadotSigner(mainnetIndexer, testnetIndexer string) *facilitatorPolkadotSigner {
+	return &facilitatorPolkadotSigner{
+		mainnetIndexer: mainnetIndexer,
+		testnetIndexer: testnetIndexer,
+	}
+}
+
+func (s *facilitatorPolkadotSigner) GetAddresses(ctx context.Context, network string) []string {
+	// Polkadot exact-direct scheme doesn't require a facilitator address
+	// The client executes the transfer directly
+	return []string{}
+}
+
+func (s *facilitatorPolkadotSigner) QueryExtrinsic(ctx context.Context, extrinsicHash string, blockHash string, extrinsicIndex int) (*polkadot.ExtrinsicResult, error) {
+	// Use mainnet indexer by default
+	indexerURL := s.mainnetIndexer
+
+	// Build Subscan API URL for extrinsic query
+	url := fmt.Sprintf("%s/api/scan/extrinsic", indexerURL)
+
+	// Build request body
+	requestBody := map[string]interface{}{}
+	if extrinsicHash != "" {
+		requestBody["hash"] = extrinsicHash
+	} else if blockHash != "" {
+		requestBody["block_hash"] = blockHash
+		requestBody["extrinsic_index"] = extrinsicIndex
+	} else {
+		return nil, fmt.Errorf("either extrinsicHash or blockHash must be provided")
+	}
+
+	jsonBody, err := json.Marshal(requestBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	// Make HTTP request
+	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(jsonBody))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query extrinsic: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	var response struct {
+		Code    int                      `json:"code"`
+		Message string                   `json:"message"`
+		Data    *polkadot.ExtrinsicResult `json:"data"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	if response.Code != 0 {
+		return nil, fmt.Errorf("Subscan API error: %s", response.Message)
+	}
+
+	if response.Data == nil {
+		return nil, nil
+	}
+
+	return response.Data, nil
+}
+
+func (s *facilitatorPolkadotSigner) GetBalance(ctx context.Context, assetID int, address string) (string, error) {
+	// Use mainnet indexer by default
+	indexerURL := s.mainnetIndexer
+
+	// Build Subscan API URL for asset balance query
+	url := fmt.Sprintf("%s/api/scan/account/tokens", indexerURL)
+
+	// Build request body
+	requestBody := map[string]interface{}{
+		"address": address,
+	}
+
+	jsonBody, err := json.Marshal(requestBody)
+	if err != nil {
+		return "0", fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	// Make HTTP request
+	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(jsonBody))
+	if err != nil {
+		return "0", fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "0", fmt.Errorf("failed to query balance: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "0", fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	var response struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+		Data    struct {
+			Assets []struct {
+				AssetID int    `json:"asset_id"`
+				Balance string `json:"balance"`
+			} `json:"assets"`
+		} `json:"data"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		return "0", fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	if response.Code != 0 {
+		return "0", nil // Account may not exist
+	}
+
+	// Find the specific asset
+	for _, asset := range response.Data.Assets {
+		if asset.AssetID == assetID {
+			return asset.Balance, nil
+		}
+	}
+
+	return "0", nil
 }
