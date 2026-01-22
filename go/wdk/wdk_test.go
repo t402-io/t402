@@ -396,6 +396,65 @@ func TestGetWDKError(t *testing.T) {
 	assert.False(t, ok)
 }
 
+func TestWDKErrorUnwrap(t *testing.T) {
+	cause := assert.AnError
+	err := NewWDKError(ErrorCodeSignMessageFailed, "signing failed").WithCause(cause)
+
+	unwrapped := err.Unwrap()
+	assert.Equal(t, cause, unwrapped)
+
+	// Without cause
+	errNoCause := NewWDKError(ErrorCodeSignMessageFailed, "no cause")
+	assert.Nil(t, errNoCause.Unwrap())
+}
+
+func TestWDKErrorWithCause(t *testing.T) {
+	cause := assert.AnError
+	err := NewWDKError(ErrorCodeChainNotConfigured, "chain not found").WithCause(cause)
+
+	assert.Equal(t, cause, err.Cause)
+	assert.Contains(t, err.Error(), "chain not found")
+}
+
+func TestSigningError(t *testing.T) {
+	cause := assert.AnError
+	err := SigningError(ErrorCodeSignMessageFailed, "failed to sign transaction", "arbitrum", cause)
+
+	assert.Equal(t, ErrorCodeSignMessageFailed, err.Code)
+	assert.Contains(t, err.Error(), "failed to sign transaction")
+	assert.Equal(t, cause, err.Cause)
+	assert.Equal(t, "arbitrum", err.Chain)
+	assert.Equal(t, "sign", err.Operation)
+}
+
+func TestChainError(t *testing.T) {
+	err := ChainError(ErrorCodeChainNotConfigured, "connection timeout", "arbitrum")
+
+	assert.Equal(t, ErrorCodeChainNotConfigured, err.Code)
+	assert.Contains(t, err.Error(), "connection timeout")
+	assert.Equal(t, "arbitrum", err.Chain)
+}
+
+func TestBalanceError(t *testing.T) {
+	cause := assert.AnError
+	err := BalanceError(ErrorCodeBalanceFetchFailed, "insufficient balance", "arbitrum", "USDT0", cause)
+
+	assert.Equal(t, ErrorCodeBalanceFetchFailed, err.Code)
+	assert.Contains(t, err.Error(), "insufficient balance")
+	assert.Equal(t, "arbitrum", err.Chain)
+	assert.Equal(t, "USDT0", err.Token)
+	assert.Equal(t, "balance", err.Operation)
+}
+
+func TestDefaultConfig(t *testing.T) {
+	config := DefaultConfig()
+
+	assert.NotNil(t, config)
+	assert.NotNil(t, config.Chains)
+	assert.Equal(t, 60, config.CacheTTL)
+	assert.Equal(t, 30, config.Timeout)
+}
+
 // Helper function
 func splitWords(s string) []string {
 	var words []string
