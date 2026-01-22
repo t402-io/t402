@@ -31,7 +31,7 @@
   "description": "Cross-chain USDT0 bridging with Tether WDK and LayerZero",
   "devDependencies": {
     "@eslint/js": "^9.24.0",
-    "@types/node": "^22.13.4",
+    "@types/node": "^25.0.10",
     "@typescript-eslint/eslint-plugin": "^8.29.1",
     "@typescript-eslint/parser": "^8.29.1",
     "eslint": "^9.24.0",
