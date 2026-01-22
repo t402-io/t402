@@ -120,9 +120,9 @@ go/mechanisms/aptos/*_test.go
 | mechanisms/aptos | 80%+ | 80% | ✅ Complete |
 | mechanisms/tezos | 80%+ | 80% | ✅ Complete |
 | mechanisms/polkadot | 80%+ | 80% | ✅ Complete |
-| mcp | 14% | 60% | In Progress |
-| wdk | 20% | 60% | In Progress |
-| extensions | 12% | 50% | In Progress |
+| mcp | 46% | 60% | ⚠️ Blocked (requires mock infra) |
+| wdk | 63% | 60% | ✅ Complete |
+| extensions | 86% | 50% | ✅ Complete |
 
 ### 2.2 Python SDK Improvements
 
@@ -133,7 +133,7 @@ go/mechanisms/aptos/*_test.go
 - [x] Add CLI integration tests (40 tests added)
 - [x] Improve ERC-4337 coverage (80 tests added, full module coverage)
 - [x] Improve bridge/scan coverage (29% → 100%, 17 tests added)
-- [ ] Document legacy scheme deprecation
+- [x] Document legacy scheme deprecation
 
 ### 2.3 Security Audit Completion
 
