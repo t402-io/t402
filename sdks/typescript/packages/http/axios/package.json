@@ -41,7 +41,7 @@
   "dependencies": {
     "@t402/core": "workspace:*",
     "axios": "^1.7.9",
-    "zod": "^3.24.2"
+    "zod": "^4.3.5"
   },
   "exports": {
     ".": {
