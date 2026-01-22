@@ -5,7 +5,6 @@ import {
   getDefaultToken,
   getNetworkTokens,
   isNetworkSupported,
-  TOKEN_REGISTRY,
 } from "../../src/tokens.js";
 import { NEAR_MAINNET_CAIP2, NEAR_TESTNET_CAIP2 } from "../../src/constants.js";
 
