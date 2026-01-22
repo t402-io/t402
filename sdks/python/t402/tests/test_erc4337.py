@@ -10,7 +10,6 @@ This module provides comprehensive tests for:
 
 import pytest
 from unittest.mock import MagicMock, patch
-from dataclasses import dataclass
 
 from t402.erc4337 import (
     # Constants
@@ -26,7 +25,6 @@ from t402.erc4337 import (
     PaymasterType,
     # Types
     UserOperation,
-    PackedUserOperation,
     PaymasterData,
     GasEstimate,
     UserOperationReceipt,
@@ -48,10 +46,8 @@ from t402.erc4337 import (
     BundlerError,
     GenericBundlerClient,
     PimlicoBundlerClient,
-    PimlicoGasPrice,
     AlchemyBundlerClient,
     AlchemyPolicyConfig,
-    GasAndPaymasterResult,
     create_bundler_client,
     # Paymasters
     PaymasterError,
@@ -63,7 +59,6 @@ from t402.erc4337 import (
     create_paymaster,
     # Accounts
     SmartAccountError,
-    SmartAccountSigner,
     SafeSmartAccount,
     SafeAccountConfig,
     create_smart_account,

@@ -4,9 +4,7 @@ import argparse
 import json
 import tempfile
 from pathlib import Path
-from io import StringIO
 from unittest.mock import AsyncMock, MagicMock, patch
-import sys
 
 import pytest
 
