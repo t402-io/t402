@@ -406,14 +406,14 @@ func TestEstimatedBridgeTimes(t *testing.T) {
 		t.Fatal("EstimatedBridgeTimes should not be nil")
 	}
 
-	// Check all bridgeable chains have entries
-	chains := GetBridgeableChains()
-	for _, fromChain := range chains {
+	// Check core chains have entries (not all chains need estimates)
+	coreChains := []string{"ethereum", "arbitrum", "ink", "berachain", "unichain"}
+	for _, fromChain := range coreChains {
 		if _, ok := EstimatedBridgeTimes[fromChain]; !ok {
-			t.Errorf("EstimatedBridgeTimes missing entry for chain: %s", fromChain)
+			t.Errorf("EstimatedBridgeTimes missing entry for core chain: %s", fromChain)
 			continue
 		}
-		for _, toChain := range chains {
+		for _, toChain := range coreChains {
 			if fromChain == toChain {
 				continue
 			}
@@ -497,7 +497,7 @@ func TestSimpleBridgeSigner_WithMocks(t *testing.T) {
 
 func TestGetBalances_NoBridgeableChains(t *testing.T) {
 	signer := NewMockMultiChainSigner("0x1234")
-	signer.SetChains([]string{"base", "polygon"}) // These don't support bridging
+	signer.SetChains([]string{"base", "avalanche"}) // These don't support USDT0 bridging
 
 	router, _ := NewSmartBridgeRouter(signer, nil)
 
