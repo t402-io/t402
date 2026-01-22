@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any
 
 from . import __version__
-from .encoding import decode_payment, encode_payment
+from .exact import decode_payment, encode_payment
 from .facilitator import FacilitatorClient, FacilitatorConfig
 from .types import PaymentPayload
 
@@ -264,7 +264,16 @@ def cmd_decode(args: argparse.Namespace) -> int:
 
 def cmd_info(args: argparse.Namespace) -> int:
     """Show information about a network."""
-    from .networks import is_evm_network, is_ton_network, is_tron_network
+    from .networks import (
+        is_evm_network,
+        is_ton_network,
+        is_tron_network,
+        is_svm_network,
+        EVM_NETWORK_TO_CHAIN_ID,
+        TON_NETWORKS,
+        TRON_NETWORKS,
+        SVM_NETWORKS,
+    )
 
     network = args.network
 
@@ -273,17 +282,29 @@ def cmd_info(args: argparse.Namespace) -> int:
         "is_evm": is_evm_network(network),
         "is_ton": is_ton_network(network),
         "is_tron": is_tron_network(network),
+        "is_svm": is_svm_network(network),
     }
 
     # Add chain-specific info
     if is_evm_network(network):
-        from .chains import EVM_CHAINS
+        chain_id = EVM_NETWORK_TO_CHAIN_ID.get(network)
+        if chain_id:
+            info["chain_id"] = chain_id
 
-        chain_id = network.split(":")[1] if ":" in network else network
-        if chain_id in EVM_CHAINS:
-            chain = EVM_CHAINS[chain_id]
-            info["chain_name"] = chain.get("name", "Unknown")
-            info["currency"] = chain.get("currency", "Unknown")
+    if is_ton_network(network) and network in TON_NETWORKS:
+        net_info = TON_NETWORKS[network]
+        info["name"] = net_info.get("name", "Unknown")
+        info["is_testnet"] = net_info.get("is_testnet", False)
+
+    if is_tron_network(network) and network in TRON_NETWORKS:
+        net_info = TRON_NETWORKS[network]
+        info["name"] = net_info.get("name", "Unknown")
+        info["is_testnet"] = net_info.get("is_testnet", False)
+
+    if is_svm_network(network) and network in SVM_NETWORKS:
+        net_info = SVM_NETWORKS[network]
+        info["name"] = net_info.get("name", "Unknown")
+        info["is_testnet"] = net_info.get("is_testnet", False)
 
     if args.output == "json":
         print(json.dumps(info, indent=2))
