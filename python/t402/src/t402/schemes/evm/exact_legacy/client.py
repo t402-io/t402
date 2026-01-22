@@ -4,6 +4,15 @@ This module provides the client-side implementation of the exact-legacy payment 
 for EVM networks using the approve + transferFrom pattern.
 
 This scheme is used for legacy USDT and other tokens without EIP-3009 support.
+
+.. deprecated:: 2.3.0
+    The exact-legacy scheme is deprecated in favor of using USDT0 with the "exact" scheme.
+    USDT0 supports EIP-3009 for gasless transfers on 19+ chains via LayerZero.
+
+    **Migration:**
+    Replace `ExactLegacyEvmClientScheme` with `ExactEvmClientScheme` and use USDT0 tokens.
+
+    See server.py docstring for full deprecation details and migration guide.
 """
 
 from __future__ import annotations
