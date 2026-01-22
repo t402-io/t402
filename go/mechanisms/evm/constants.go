@@ -5,8 +5,9 @@ import (
 )
 
 const (
-	// Scheme identifier
-	SchemeExact = "exact"
+	// Scheme identifiers
+	SchemeExact       = "exact"
+	SchemeExactLegacy = "exact-legacy"
 
 	// Default token decimals for USDC
 	DefaultDecimals = 6
@@ -59,6 +60,12 @@ var (
 	ChainIDHyperEVM    = big.NewInt(999)
 	ChainIDMegaETH     = big.NewInt(4326)
 	ChainIDCorn        = big.NewInt(21000000)
+	// Legacy USDT networks (no EIP-3009 support)
+	ChainIDBNB       = big.NewInt(56)
+	ChainIDAvalanche = big.NewInt(43114)
+	ChainIDFantom    = big.NewInt(250)
+	ChainIDCelo      = big.NewInt(42220)
+	ChainIDKaia      = big.NewInt(8217)
 
 	// Network configurations
 	NetworkConfigs = map[string]NetworkConfig{
@@ -489,6 +496,100 @@ var (
 				},
 			},
 		},
+
+		// === Legacy USDT Networks (no EIP-3009 support) ===
+		// These require the approve + transferFrom pattern (exact-legacy scheme)
+
+		// BNB Chain (BSC)
+		"eip155:56": {
+			ChainID: ChainIDBNB,
+			DefaultAsset: AssetInfo{
+				Address:  "0x55d398326f99059fF775485246999027B3197955",
+				Name:     "Tether USD",
+				Version:  "1",
+				Decimals: 18, // BSC USDT uses 18 decimals
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDT": {
+					Address:  "0x55d398326f99059fF775485246999027B3197955",
+					Name:     "Tether USD",
+					Version:  "1",
+					Decimals: 18,
+				},
+			},
+		},
+		// Avalanche C-Chain
+		"eip155:43114": {
+			ChainID: ChainIDAvalanche,
+			DefaultAsset: AssetInfo{
+				Address:  "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7",
+				Name:     "TetherToken",
+				Version:  "1",
+				Decimals: DefaultDecimals,
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDT": {
+					Address:  "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7",
+					Name:     "TetherToken",
+					Version:  "1",
+					Decimals: DefaultDecimals,
+				},
+			},
+		},
+		// Fantom
+		"eip155:250": {
+			ChainID: ChainIDFantom,
+			DefaultAsset: AssetInfo{
+				Address:  "0x049d68029688eabf473097a2fc38ef61633a3c7a",
+				Name:     "Frapped USDT",
+				Version:  "1",
+				Decimals: DefaultDecimals,
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDT": {
+					Address:  "0x049d68029688eabf473097a2fc38ef61633a3c7a",
+					Name:     "Frapped USDT",
+					Version:  "1",
+					Decimals: DefaultDecimals,
+				},
+			},
+		},
+		// Celo
+		"eip155:42220": {
+			ChainID: ChainIDCelo,
+			DefaultAsset: AssetInfo{
+				Address:  "0x48065fbBE25f71C9282ddf5e1cD6D6A887483D5e",
+				Name:     "Tether USD",
+				Version:  "1",
+				Decimals: 18,
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDT": {
+					Address:  "0x48065fbBE25f71C9282ddf5e1cD6D6A887483D5e",
+					Name:     "Tether USD",
+					Version:  "1",
+					Decimals: 18,
+				},
+			},
+		},
+		// Kaia (formerly Klaytn)
+		"eip155:8217": {
+			ChainID: ChainIDKaia,
+			DefaultAsset: AssetInfo{
+				Address:  "0xcee8faf64bb97a73bb51e115aa89c17ffa8dd167",
+				Name:     "Tether USD",
+				Version:  "1",
+				Decimals: DefaultDecimals,
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDT": {
+					Address:  "0xcee8faf64bb97a73bb51e115aa89c17ffa8dd167",
+					Name:     "Tether USD",
+					Version:  "1",
+					Decimals: DefaultDecimals,
+				},
+			},
+		},
 	}
 
 	// EIP-3009 ABI for transferWithAuthorization with v,r,s (EOA signatures)
@@ -547,4 +648,52 @@ var (
 			"type": "function"
 		}
 	]`)
+
+	// ERC20 Legacy ABI for approve + transferFrom pattern
+	ERC20LegacyABI = []byte(`[
+		{
+			"inputs": [{"name": "account", "type": "address"}],
+			"name": "balanceOf",
+			"outputs": [{"name": "", "type": "uint256"}],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{"name": "owner", "type": "address"},
+				{"name": "spender", "type": "address"}
+			],
+			"name": "allowance",
+			"outputs": [{"name": "", "type": "uint256"}],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{"name": "spender", "type": "address"},
+				{"name": "amount", "type": "uint256"}
+			],
+			"name": "approve",
+			"outputs": [{"name": "", "type": "bool"}],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{"name": "from", "type": "address"},
+				{"name": "to", "type": "address"},
+				{"name": "amount", "type": "uint256"}
+			],
+			"name": "transferFrom",
+			"outputs": [{"name": "", "type": "bool"}],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		}
+	]`)
+
+	// Function names for legacy ERC20 operations
+	FunctionBalanceOf    = "balanceOf"
+	FunctionAllowance    = "allowance"
+	FunctionApprove      = "approve"
+	FunctionTransferFrom = "transferFrom"
 )

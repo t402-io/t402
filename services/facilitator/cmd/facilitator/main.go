@@ -19,6 +19,7 @@ import (
 	t402 "github.com/t402-io/t402/go"
 	evmmech "github.com/t402-io/t402/go/mechanisms/evm"
 	evm "github.com/t402-io/t402/go/mechanisms/evm/exact/facilitator"
+	evmlegacy "github.com/t402-io/t402/go/mechanisms/evm/exact-legacy/facilitator"
 	"github.com/t402-io/t402/go/mechanisms/ton"
 	tonfac "github.com/t402-io/t402/go/mechanisms/ton/exact/facilitator"
 	"github.com/t402-io/t402/go/mechanisms/tron"
@@ -101,6 +102,15 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, error) {
 			{t402.Network("eip155:21000000"), cfg.CornRPC, "Corn"},
 		}
 
+		// Legacy USDT networks (no EIP-3009 support)
+		legacyNetworks := []networkInfo{
+			{t402.Network("eip155:56"), cfg.BnbRPC, "BNB Chain"},
+			{t402.Network("eip155:43114"), cfg.AvalancheRPC, "Avalanche"},
+			{t402.Network("eip155:250"), cfg.FantomRPC, "Fantom"},
+			{t402.Network("eip155:42220"), cfg.CeloRPC, "Celo"},
+			{t402.Network("eip155:8217"), cfg.KaiaRPC, "Kaia"},
+		}
+
 		// Use Base RPC as default if available, otherwise use first available RPC
 		defaultRPC := cfg.BaseRPC
 		if defaultRPC == "" {
@@ -132,6 +142,23 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, error) {
 				}
 				facilitator.Register(networkList, evm.NewExactEvmScheme(signer, evmConfig))
 				log.Printf("EVM facilitator address: %s", signer.GetAddresses()[0])
+			}
+
+			// Register legacy networks with exact-legacy scheme
+			var legacyNetworkList []t402.Network
+			for _, n := range legacyNetworks {
+				if n.rpc != "" {
+					legacyNetworkList = append(legacyNetworkList, n.network)
+					configuredNetworks = append(configuredNetworks, n.name+" (legacy)")
+				}
+			}
+
+			if len(legacyNetworkList) > 0 {
+				legacyConfig := &evmlegacy.ExactLegacyEvmSchemeConfig{
+					MinAllowanceRatio: 1.0,
+				}
+				facilitator.Register(legacyNetworkList, evmlegacy.NewExactLegacyEvmScheme(signer, legacyConfig))
+				log.Printf("EVM legacy facilitator registered for %d networks", len(legacyNetworkList))
 			}
 		}
 	} else {
