@@ -17,11 +17,11 @@ This plan outlines T402's strategy to become the definitive payment protocol for
 | Category | Networks | T402 Status |
 |----------|----------|-------------|
 | USDT0 (LayerZero OFT) | 19 | ✅ 100% Complete |
-| Native USDT (Major) | 6 | ✅ 100% Complete |
+| Native USDT (TON, TRON, Solana) | 3 | ✅ 100% Complete |
 | Legacy EVM USDT | 5 | ✅ 100% Complete |
-| Near Protocol | 1 | ✅ 100% Complete |
-| Native USDT (Emerging) | 3+ | ❌ Planned |
-| **Total Target** | **33+** | **85% → 100%** |
+| Non-EVM (NEAR, Aptos, Tezos, Polkadot) | 4 | ✅ 100% Complete |
+| Stacks (Bitcoin L2) | 1 | ✅ 100% Complete |
+| **Total Supported** | **32** | **✅ 100% Complete** |
 
 ---
 
@@ -61,18 +61,24 @@ All LayerZero OFT USDT0 networks are now supported:
 | TRON | TRC-20 | ✅ | ✅ |
 | Solana | SPL | ✅ | ✅ |
 
-### ❌ Native USDT - Not Yet Supported
+### ✅ Legacy EVM USDT - COMPLETE (5/5)
 
-| Network | Token Standard | Priority | Complexity |
-|---------|----------------|----------|------------|
-| BNB Chain | BEP-20 | P0 | Low (EVM) |
-| Avalanche | C-Chain | P0 | Low (EVM) |
-| Celo | ERC-20 | P1 | Low (EVM) |
-| Near | NEP-141 | P1 | Medium |
-| Aptos | Move | P2 | High |
-| Tezos | FA2 | P2 | High |
-| Polkadot | Asset Hub | P2 | ✅ Complete |
-| Kaia (Klaytn) | KIP-7 | P1 | Low (EVM) |
+| Network | Token Standard | Status | Paywall |
+|---------|----------------|--------|---------|
+| BNB Chain | BEP-20 | ✅ | ✅ |
+| Avalanche | C-Chain | ✅ | ✅ |
+| Celo | ERC-20 | ✅ | ✅ |
+| Fantom | ERC-20 | ✅ | ✅ |
+| Kaia (Klaytn) | KIP-7 | ✅ | ✅ |
+
+### ✅ Non-EVM Chains - COMPLETE (4/4)
+
+| Network | Token Standard | Status | Paywall |
+|---------|----------------|--------|---------|
+| Near | NEP-141 | ✅ | ✅ |
+| Aptos | Fungible Asset | ✅ | ✅ |
+| Tezos | FA2 | ✅ | ✅ |
+| Polkadot | Asset Hub | ✅ | ✅ |
 
 ---
 
