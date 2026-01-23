@@ -9,14 +9,23 @@ Supported schemes:
 from t402.schemes.tron.exact import (
     ExactTronClientScheme,
     ExactTronServerScheme,
+    ExactTronFacilitatorScheme,
+    ExactTronFacilitatorConfig,
     TronSigner,
+    FacilitatorTronSigner,
     SCHEME_EXACT,
 )
 
 __all__ = [
-    # Exact scheme
+    # Client
     "ExactTronClientScheme",
-    "ExactTronServerScheme",
     "TronSigner",
+    # Server
+    "ExactTronServerScheme",
+    # Facilitator
+    "ExactTronFacilitatorScheme",
+    "ExactTronFacilitatorConfig",
+    "FacilitatorTronSigner",
+    # Constants
     "SCHEME_EXACT",
 ]

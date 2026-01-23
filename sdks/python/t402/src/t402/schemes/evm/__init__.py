@@ -51,6 +51,8 @@ from t402.schemes.evm.exact_legacy import (
 
 from t402.schemes.evm.upto import (
     UptoEvmClientScheme,
+    UptoEvmServerScheme,
+    UptoEvmFacilitatorScheme,
     create_payment_nonce,
     SCHEME_UPTO,
     PermitSignature,
@@ -77,6 +79,8 @@ __all__ = [
     "SCHEME_EXACT_LEGACY",
     # Upto scheme
     "UptoEvmClientScheme",
+    "UptoEvmServerScheme",
+    "UptoEvmFacilitatorScheme",
     "create_payment_nonce",
     "SCHEME_UPTO",
     "PermitSignature",
