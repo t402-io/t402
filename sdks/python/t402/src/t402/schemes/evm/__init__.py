@@ -34,6 +34,10 @@ Supported schemes:
 from t402.schemes.evm.exact import (
     ExactEvmClientScheme,
     ExactEvmServerScheme,
+    ExactEvmFacilitatorScheme,
+    FacilitatorEvmSigner,
+    EvmVerifyResult,
+    EvmTransactionConfirmation,
     EvmSigner,
     create_nonce,
     SCHEME_EXACT,
@@ -60,6 +64,10 @@ __all__ = [
     # Exact scheme
     "ExactEvmClientScheme",
     "ExactEvmServerScheme",
+    "ExactEvmFacilitatorScheme",
+    "FacilitatorEvmSigner",
+    "EvmVerifyResult",
+    "EvmTransactionConfirmation",
     "EvmSigner",
     "create_nonce",
     "SCHEME_EXACT",

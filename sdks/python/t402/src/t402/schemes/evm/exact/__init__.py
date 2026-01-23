@@ -16,6 +16,12 @@ from t402.schemes.evm.exact.client import (
 from t402.schemes.evm.exact.server import (
     ExactEvmServerScheme,
 )
+from t402.schemes.evm.exact.facilitator import (
+    ExactEvmFacilitatorScheme,
+    FacilitatorEvmSigner,
+    EvmVerifyResult,
+    EvmTransactionConfirmation,
+)
 
 __all__ = [
     # Client
@@ -24,6 +30,11 @@ __all__ = [
     "create_nonce",
     # Server
     "ExactEvmServerScheme",
+    # Facilitator
+    "ExactEvmFacilitatorScheme",
+    "FacilitatorEvmSigner",
+    "EvmVerifyResult",
+    "EvmTransactionConfirmation",
     # Constants
     "SCHEME_EXACT",
 ]
