@@ -84,9 +84,9 @@ export const features: Feature[] = [
       },
     ],
     supportedChains: [
-      "Ethereum", "Base", "Arbitrum", "Optimism", "Polygon", "Berachain", "Unichain", "Ink",
-      "Avalanche", "BNB Chain", "zkSync Era", "Scroll", "Linea", "Mantle", "Blast",
-      "Manta Pacific", "Mode", "Sei", "Taiko",
+      "Ethereum", "Arbitrum", "Optimism", "Polygon", "Ink", "Berachain", "Unichain",
+      "Mantle", "Sei", "Conflux eSpace", "Monad", "Flare", "Rootstock", "XLayer",
+      "Stable", "HyperEVM", "MegaETH", "Corn", "Plasma",
     ],
     codeExample: {
       title: "Gasless USDT0 Transfer",
@@ -169,9 +169,9 @@ console.log("Transfer complete:", result.txHash);`,
       },
     ],
     supportedChains: [
-      "Ethereum", "Arbitrum", "Base", "Optimism", "Berachain", "Unichain", "Ink",
-      "Avalanche", "BNB Chain", "zkSync Era", "Scroll", "Linea", "Mantle", "Blast",
-      "Manta Pacific", "Mode", "Sei", "Taiko", "X Layer",
+      "Ethereum", "Arbitrum", "Optimism", "Polygon", "Ink", "Berachain", "Unichain",
+      "Mantle", "Sei", "Conflux eSpace", "Monad", "Flare", "Rootstock", "XLayer",
+      "Stable", "HyperEVM", "MegaETH", "Corn", "Plasma",
     ],
     codeExample: {
       title: "Bridge USDT0 from Arbitrum to Base",
@@ -339,7 +339,7 @@ const server = createMCPServer({
           "Social recovery and guardian systems for account recovery without compromising security.",
       },
     ],
-    supportedChains: ["Ethereum", "Base", "Arbitrum", "Optimism", "Polygon", "BNB Chain", "Avalanche"],
+    supportedChains: ["Ethereum", "Arbitrum", "Optimism", "Polygon", "Berachain", "Unichain", "Mantle"],
     codeExample: {
       title: "Configure Multi-sig Receiving",
       language: "typescript",
@@ -685,7 +685,7 @@ await stream.close(); // Refunds unused deposit`,
       },
     ],
     supportedChains: [
-      "Ethereum", "Base", "Arbitrum", "zkSync Era", "Scroll",
+      "Ethereum", "Arbitrum", "Optimism", "Polygon", "Ink",
     ],
     useCases: [
       "Private B2B transactions",
@@ -750,8 +750,8 @@ await stream.close(); // Refunds unused deposit`,
       },
     ],
     supportedChains: [
-      "Ethereum", "Base", "Arbitrum", "Optimism", "Polygon", "Avalanche", "BNB Chain",
-      "zkSync Era", "Scroll", "Linea", "Solana", "TON", "TRON",
+      "Ethereum", "Arbitrum", "Optimism", "Polygon", "Ink", "Berachain", "Unichain",
+      "Mantle", "Sei", "Solana", "TON", "TRON",
     ],
     codeExample: {
       title: "Auto-Route Payment Across Chains",

@@ -410,7 +410,7 @@ export const advancedPackages: Package[] = [
 ];
 
 export const supportedChains = [
-  // EVM - USDT0 chains
+  // EVM - USDT0 chains (live)
   { name: "Ethereum", id: "ethereum", color: "#627EEA" },
   { name: "Arbitrum", id: "arbitrum", color: "#28A0F0" },
   { name: "Base", id: "base", color: "#0052FF" },
@@ -419,21 +419,20 @@ export const supportedChains = [
   { name: "Ink", id: "ink", color: "#7B3FE4" },
   { name: "Berachain", id: "berachain", color: "#FF6B00" },
   { name: "Unichain", id: "unichain", color: "#FF007A" },
-  { name: "Avalanche", id: "avalanche", color: "#E84142" },
-  { name: "BNB Chain", id: "bnb", color: "#F0B90B" },
-  { name: "zkSync Era", id: "zksync", color: "#4E529A" },
-  { name: "Scroll", id: "scroll", color: "#FFDBB0" },
-  { name: "Linea", id: "linea", color: "#61DFFF" },
   { name: "Mantle", id: "mantle", color: "#000000" },
-  { name: "Blast", id: "blast", color: "#FCFC03" },
-  { name: "Manta Pacific", id: "manta", color: "#1A73E8" },
-  { name: "Mode", id: "mode", color: "#DFFE00" },
   { name: "Sei", id: "sei", color: "#9B1C2E" },
-  { name: "Taiko", id: "taiko", color: "#E81899" },
-  { name: "X Layer", id: "xlayer", color: "#000000" },
-  { name: "World Chain", id: "worldchain", color: "#000000" },
-  { name: "Soneium", id: "soneium", color: "#1A1A2E" },
-  // Non-EVM chains
+  { name: "Conflux eSpace", id: "conflux", color: "#1A1A2E" },
+  { name: "Flare", id: "flare", color: "#E42058" },
+  { name: "Rootstock", id: "rootstock", color: "#00B520" },
+  { name: "XLayer", id: "xlayer", color: "#1E1E1E" },
+  { name: "Corn", id: "corn", color: "#F5A623" },
+  // EVM - USDT0 chains (coming soon)
+  { name: "Plasma", id: "plasma", color: "#00D4AA" },
+  { name: "Monad", id: "monad", color: "#836EF9" },
+  { name: "Stable", id: "stable", color: "#2563EB" },
+  { name: "HyperEVM", id: "hyperevm", color: "#5AE4A8" },
+  { name: "MegaETH", id: "megaeth", color: "#FF4D6A" },
+  // Non-EVM chains (live)
   { name: "Solana", id: "solana", color: "#9945FF" },
   { name: "TON", id: "ton", color: "#0098EA" },
   { name: "TRON", id: "tron", color: "#FF0000" },
@@ -441,6 +440,7 @@ export const supportedChains = [
   { name: "Aptos", id: "aptos", color: "#2DD8A3" },
   { name: "Tezos", id: "tezos", color: "#2C7DF7" },
   { name: "Polkadot", id: "polkadot", color: "#E6007A" },
+  // Non-EVM chains (coming soon)
   { name: "Stacks", id: "stacks", color: "#5546FF" },
-  { name: "Cosmos (Noble)", id: "cosmos", color: "#2E3148" },
+  { name: "Cosmos (Noble)", id: "cosmos", color: "#6F7390" },
 ];

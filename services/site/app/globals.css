@@ -30,18 +30,37 @@
   --color-error: #EF4444;
   --color-info: #3B82F6;
 
-  /* Chain Colors */
+  /* Chain Colors - EVM */
   --color-chain-ethereum: #627EEA;
   --color-chain-base: #0052FF;
   --color-chain-arbitrum: #28A0F0;
   --color-chain-optimism: #FF0420;
   --color-chain-polygon: #8247E5;
-  --color-chain-ton: #0098EA;
-  --color-chain-tron: #FF0000;
-  --color-chain-solana: #9945FF;
+  --color-chain-ink: #7B3FE4;
   --color-chain-berachain: #FF6B00;
   --color-chain-unichain: #FF007A;
-  --color-chain-ink: #7B3FE4;
+  --color-chain-mantle: #000000;
+  --color-chain-plasma: #00D4AA;
+  --color-chain-sei: #9B1C2E;
+  --color-chain-conflux: #1A1A2E;
+  --color-chain-monad: #836EF9;
+  --color-chain-flare: #E42058;
+  --color-chain-rootstock: #00B520;
+  --color-chain-xlayer: #1E1E1E;
+  --color-chain-stable: #2563EB;
+  --color-chain-hyperevm: #5AE4A8;
+  --color-chain-megaeth: #FF4D6A;
+  --color-chain-corn: #F5A623;
+  /* Chain Colors - Non-EVM */
+  --color-chain-solana: #9945FF;
+  --color-chain-ton: #0098EA;
+  --color-chain-tron: #FF0000;
+  --color-chain-near: #00EC97;
+  --color-chain-aptos: #2DD8A3;
+  --color-chain-tezos: #2C7DF7;
+  --color-chain-polkadot: #E6007A;
+  --color-chain-stacks: #5546FF;
+  --color-chain-cosmos: #6F7390;
 
   /* Border Colors */
   --color-border: #27272A;
