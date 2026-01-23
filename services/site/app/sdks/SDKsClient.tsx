@@ -445,7 +445,7 @@ export default function SDKsClient() {
           Follow our quickstart guide to integrate t402 payments in under 5 minutes.
         </p>
         <Link
-          href="https://docs.t402.io/quickstart"
+          href="https://docs.t402.io/getting-started/quickstart"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 rounded-lg bg-brand px-6 py-3 text-base font-medium transition-colors hover:bg-brand-secondary"
