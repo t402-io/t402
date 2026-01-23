@@ -86,7 +86,7 @@ export function CodeBlock({
         </div>
       )}
       <pre
-        className="flex-1 overflow-auto p-4 text-[var(--text-code)] leading-relaxed"
+        className="flex-1 overflow-auto p-4 text-sm text-[var(--color-code-text)] leading-relaxed"
         style={{ maxHeight: maxHeight || undefined }}
       >
         <code>
