@@ -1,6 +1,7 @@
 "use client";
 
 import { useFacilitatorStatus } from "@/hooks/useFacilitatorStatus";
+import { Spinner } from "@/components/shared/Spinner";
 
 export function FacilitatorBadge() {
   const { online, supportedNetworks, loading } = useFacilitatorStatus();
@@ -8,7 +9,7 @@ export function FacilitatorBadge() {
   if (loading) {
     return (
       <div className="flex items-center gap-1.5 text-xs text-[var(--color-muted)]">
-        <span className="h-2 w-2 rounded-full bg-[var(--color-muted)] animate-pulse" />
+        <Spinner size="sm" color="var(--color-muted)" />
         Checking...
       </div>
     );
@@ -17,11 +18,10 @@ export function FacilitatorBadge() {
   return (
     <div className="flex items-center gap-1.5 text-xs">
       <span
-        className={`h-2 w-2 rounded-full ${
-          online ? "bg-green-400" : "bg-red-400"
-        }`}
+        className="h-2 w-2 rounded-full"
+        style={{ backgroundColor: online ? "var(--color-success)" : "var(--color-error)" }}
       />
-      <span className={online ? "text-green-400" : "text-red-400"}>
+      <span style={{ color: online ? "var(--color-success)" : "var(--color-error)" }}>
         {online ? `Facilitator (${supportedNetworks} networks)` : "Facilitator offline"}
       </span>
     </div>

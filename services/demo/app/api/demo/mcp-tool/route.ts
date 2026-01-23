@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
               asset: getAsset(),
               payTo: PAY_TO,
               maxTimeoutSeconds: 60,
-              extra: { name: "USDC", version: "2" },
+              extra: { name: "USDT", version: "2" },
             },
           ],
         },
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       asset: getAsset(),
       payTo: PAY_TO,
       maxTimeoutSeconds: 60,
-      extra: { name: "USDC", version: "2" },
+      extra: { name: "USDT", version: "2" },
     };
 
     const verifyResult = await verifyPayment(paymentPayload, requirements);

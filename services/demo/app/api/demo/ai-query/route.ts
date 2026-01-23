@@ -1,0 +1,155 @@
+import { NextRequest, NextResponse } from "next/server";
+import Anthropic from "@anthropic-ai/sdk";
+import { getNetwork, getAsset, PAY_TO } from "@/lib/config";
+import { encodeHeader, decodeHeader, verifyPayment, settlePayment } from "@/lib/t402-server";
+import { createMockSettleResponse } from "@/lib/mock-responses";
+
+const AI_AMOUNT = "1000"; // 0.001 USDT per query
+
+const RESOURCE = {
+  url: "/api/demo/ai-query",
+  description: "AI-powered query — pay per request with USDT",
+};
+
+function createAiPaymentRequired() {
+  return {
+    t402Version: 2,
+    error: "Payment required",
+    resource: { ...RESOURCE, mimeType: "application/json" },
+    accepts: [
+      {
+        scheme: "exact",
+        network: getNetwork(),
+        amount: AI_AMOUNT,
+        asset: getAsset(),
+        payTo: PAY_TO,
+        maxTimeoutSeconds: 60,
+        extra: { name: "USDT", version: "2" },
+      },
+    ],
+  };
+}
+
+export async function POST(request: NextRequest) {
+  const isDemoMode = request.headers.get("x-demo-mode") === "true";
+  const paymentHeader = request.headers.get("payment-signature");
+
+  // If no payment header, return 402
+  if (!paymentHeader) {
+    const paymentRequired = createAiPaymentRequired();
+    const response = NextResponse.json(paymentRequired, { status: 402 });
+    response.headers.set("Payment-Required", encodeHeader(paymentRequired));
+    response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
+    return response;
+  }
+
+  // Parse the request body for the query
+  let query = "What is HTTP 402?";
+  try {
+    const body = await request.json();
+    if (body.query) query = body.query;
+  } catch {
+    // Use default query
+  }
+
+  const paymentPayload = decodeHeader(paymentHeader);
+  const requirements = {
+    scheme: "exact",
+    network: getNetwork(),
+    amount: AI_AMOUNT,
+    asset: getAsset(),
+    payTo: PAY_TO,
+    maxTimeoutSeconds: 60,
+    extra: { name: "USDT", version: "2" },
+  };
+
+  if (isDemoMode) {
+    // Demo mode: use real LLM if API key available, else mock
+    await new Promise((r) => setTimeout(r, 300));
+
+    const aiResponse = await generateAiResponse(query);
+    const settleResponse = createMockSettleResponse(getNetwork());
+
+    const response = NextResponse.json({
+      query,
+      response: aiResponse,
+      model: process.env.ANTHROPIC_API_KEY ? "claude-haiku" : "mock",
+      cost: "0.001 USDT",
+    });
+    response.headers.set("Payment-Response", encodeHeader(settleResponse));
+    response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
+    return response;
+  }
+
+  // Live mode: verify and settle, then call LLM
+  try {
+    const verifyResult = await verifyPayment(paymentPayload, requirements);
+    if (!verifyResult.isValid) {
+      return NextResponse.json(
+        { error: "Payment verification failed", reason: verifyResult.invalidReason },
+        { status: 402 }
+      );
+    }
+
+    const settleResult = await settlePayment(paymentPayload, requirements);
+    if (!settleResult.success) {
+      return NextResponse.json(
+        { error: "Settlement failed", reason: settleResult.errorReason },
+        { status: 500 }
+      );
+    }
+
+    const aiResponse = await generateAiResponse(query);
+
+    const response = NextResponse.json({
+      query,
+      response: aiResponse,
+      model: process.env.ANTHROPIC_API_KEY ? "claude-haiku" : "mock",
+      cost: "0.001 USDT",
+    });
+    response.headers.set("Payment-Response", encodeHeader(settleResult));
+    response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
+    return response;
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Facilitator error", message: String(error) },
+      { status: 502 }
+    );
+  }
+}
+
+async function generateAiResponse(query: string): Promise<string> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return getMockResponse(query);
+  }
+
+  try {
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const message = await client.messages.create({
+      model: "claude-haiku-4-20250414",
+      max_tokens: 256,
+      messages: [
+        {
+          role: "user",
+          content: query,
+        },
+      ],
+      system: "You are a helpful AI assistant accessed via the T402 HTTP 402 payment protocol. Keep responses concise (2-3 sentences max). You are demonstrating pay-per-query AI API monetization.",
+    });
+
+    const textBlock = message.content.find((b) => b.type === "text");
+    return textBlock?.text ?? "No response generated.";
+  } catch {
+    return getMockResponse(query);
+  }
+}
+
+function getMockResponse(query: string): string {
+  if (query.toLowerCase().includes("402")) {
+    return "HTTP 402 is a status code meaning 'Payment Required'. T402 uses it to enable seamless micropayments — servers respond with payment requirements, clients sign USDT authorizations, and facilitators settle on-chain.";
+  }
+  if (query.toLowerCase().includes("t402")) {
+    return "T402 is an open-source HTTP-native payment protocol for USDT/USDT0 stablecoins. It enables web services to require cryptocurrency payments without intermediaries using a simple request-response pattern.";
+  }
+  return `This is a demonstration of pay-per-query AI monetization via T402. Your query "${query.slice(0, 50)}" would be processed by Claude and charged 0.001 USDT per request — no API keys, no subscriptions, just pay and use.`;
+}
