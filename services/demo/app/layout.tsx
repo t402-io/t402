@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { WagmiProviderWrapper } from "./providers/WagmiProvider";
 import { DemoProvider } from "./providers/DemoProvider";
-import { NavigationProvider } from "./providers/NavigationProvider";
 import "./globals.css";
 
 const inter = Inter({
@@ -18,9 +17,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "T402 Demo — Live Interactive Demo",
+  title: "T402 Demo — HTTP 402 Payments with USDT",
   description:
-    "Live demo of the t402 payment protocol. Connect your wallet, trigger HTTP 402 flows, and see real on-chain settlement.",
+    "Interactive demo of the T402 payment protocol. Experience HTTP 402 flows with USDT/USDT0 — from AI API monetization to content paywalls.",
 };
 
 export default function RootLayout({
@@ -33,9 +32,7 @@ export default function RootLayout({
       <body className="bg-[var(--color-background)] text-[var(--color-foreground)] antialiased">
         <WagmiProviderWrapper>
           <DemoProvider>
-            <NavigationProvider>
-              {children}
-            </NavigationProvider>
+            {children}
           </DemoProvider>
         </WagmiProviderWrapper>
       </body>

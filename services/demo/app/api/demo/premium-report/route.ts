@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     asset: getAsset(),
     payTo: PAY_TO,
     maxTimeoutSeconds: 60,
-    extra: { name: "USDC", version: "2" },
+    extra: { name: "USDT", version: "2" },
   };
 
   if (isDemoMode) {
