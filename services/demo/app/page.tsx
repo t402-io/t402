@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "motion/react";
 import { WalletButton } from "@/components/layout/WalletButton";
 import { ModeToggle } from "@/components/layout/ModeToggle";
 import { FacilitatorBadge } from "@/components/layout/FacilitatorBadge";
@@ -49,7 +48,7 @@ export default function DemoPage() {
   return (
     <div className="min-h-screen">
       {/* Sticky Header */}
-      <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-background)]/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[rgba(10,10,11,0.8)] backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <a href="https://t402.io" className="text-sm font-semibold text-[var(--color-brand)] hover:opacity-80 transition-opacity">
@@ -67,12 +66,7 @@ export default function DemoPage() {
 
       {/* Hero Section */}
       <section className="min-h-[calc(100vh-56px)] flex flex-col items-center justify-center px-4 sm:px-6 py-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-12"
-        >
+        <div className="text-center mb-12">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-4">
             <span className="text-[var(--color-brand)]">HTTP 402</span> Payments
           </h1>
@@ -82,26 +76,16 @@ export default function DemoPage() {
           <p className="text-sm text-[var(--color-muted)]">
             Request → 402 → Sign → Settle → Access. Under 3 seconds.
           </p>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="w-full"
-        >
+        <div className="w-full">
           <HeroPlayground />
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5 }}
-          className="mt-16 text-center"
-        >
+        <div className="mt-16 text-center">
           <p className="text-xs text-[var(--color-muted)] mb-2">Explore real-world scenarios</p>
           <div className="animate-bounce text-[var(--color-muted)]">↓</div>
-        </motion.div>
+        </div>
       </section>
 
       {/* Scenario Sections */}
@@ -111,16 +95,10 @@ export default function DemoPage() {
           <section
             key={scenario.id}
             id={scenario.id}
-            className={`py-20 px-4 sm:px-6 ${i % 2 === 0 ? "" : "bg-[var(--color-surface)]/30"}`}
+            className={`py-20 px-4 sm:px-6 ${i % 2 === 0 ? "" : "bg-[rgba(20,20,21,0.3)]"}`}
           >
             <div className="max-w-5xl mx-auto">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.4 }}
-                className="mb-10"
-              >
+              <div className="mb-10">
                 <div className="flex items-center gap-3 mb-3">
                   <h2 className="text-2xl sm:text-3xl font-bold">{scenario.title}</h2>
                   <span className="text-xs px-2.5 py-1 rounded-full bg-[var(--color-brand-dim)] text-[var(--color-brand)]">
@@ -130,16 +108,9 @@ export default function DemoPage() {
                 <p className="text-sm text-[var(--color-muted)] max-w-xl">
                   {scenario.description}
                 </p>
-              </motion.div>
+              </div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.4, delay: 0.1 }}
-              >
-                <Component />
-              </motion.div>
+              <Component />
             </div>
           </section>
         );
