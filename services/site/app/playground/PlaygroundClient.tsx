@@ -202,20 +202,28 @@ function CheckCircleIcon({ className = "" }: { className?: string }) {
   );
 }
 
-// Chain options - supports all 10 T402 chains
+// Chain options - supports all T402 chains across 9 blockchain families
 const chains = [
   // EVM Chains
   { id: "base", name: "Base", network: "eip155:8453", color: "#0052FF", type: "evm" as const },
   { id: "ethereum", name: "Ethereum", network: "eip155:1", color: "#627EEA", type: "evm" as const },
   { id: "arbitrum", name: "Arbitrum", network: "eip155:42161", color: "#28A0F0", type: "evm" as const },
+  { id: "optimism", name: "Optimism", network: "eip155:10", color: "#FF0420", type: "evm" as const },
   { id: "ink", name: "Ink", network: "eip155:57073", color: "#7B3FE4", type: "evm" as const },
   { id: "berachain", name: "Berachain", network: "eip155:80094", color: "#FF6B35", type: "evm" as const },
   { id: "unichain", name: "Unichain", network: "eip155:130", color: "#FF007A", type: "evm" as const },
   { id: "polygon", name: "Polygon", network: "eip155:137", color: "#8247E5", type: "evm" as const },
+  { id: "mantle", name: "Mantle", network: "eip155:5000", color: "#000000", type: "evm" as const },
+  { id: "sei", name: "Sei", network: "eip155:1329", color: "#9B1C2E", type: "evm" as const },
   // Non-EVM Chains
-  { id: "ton", name: "TON", network: "ton:-239", color: "#0098EA", type: "ton" as const },
-  { id: "tron", name: "TRON", network: "tron:0x2b6653dc", color: "#FF0013", type: "tron" as const },
   { id: "solana", name: "Solana", network: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", color: "#9945FF", type: "solana" as const },
+  { id: "ton", name: "TON", network: "ton:mainnet", color: "#0098EA", type: "ton" as const },
+  { id: "tron", name: "TRON", network: "tron:mainnet", color: "#FF0013", type: "tron" as const },
+  { id: "near", name: "NEAR", network: "near:mainnet", color: "#000000", type: "near" as const },
+  { id: "aptos", name: "Aptos", network: "aptos:1", color: "#000000", type: "aptos" as const },
+  { id: "tezos", name: "Tezos", network: "tezos:NetXdQprcVkpaWU", color: "#2C7DF7", type: "tezos" as const },
+  { id: "polkadot", name: "Polkadot", network: "polkadot:68d56f15f85d3136970ec16946040bc1", color: "#E6007A", type: "polkadot" as const },
+  { id: "stacks", name: "Stacks", network: "stacks:1", color: "#5546FF", type: "stacks" as const },
 ];
 
 const tokens = [
@@ -236,6 +244,16 @@ function generatePaymentHeader(config: PaymentConfig): string {
         return "TT1MqNNj2k5qdGA6nrrCodW6oyHbbAreQ5";
       case "solana":
         return "8GGtWHRQ1wz5gDKE2KXZLktqzcfV1CBqSbeUZjA7hoWL";
+      case "near":
+        return "facilitator.t402.near";
+      case "aptos":
+        return "0xc88f67e776f16dcfbf42e6bdda1b82604448899b000000000000000000000000";
+      case "tezos":
+        return "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb";
+      case "polkadot":
+        return "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY";
+      case "stacks":
+        return "SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9";
       default:
         return "0xC88f67e776f16DcFBf42e6bDda1B82604448899B";
     }

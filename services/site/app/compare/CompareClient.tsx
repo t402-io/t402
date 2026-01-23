@@ -64,7 +64,7 @@ const comparisonFeatures: ComparisonFeature[] = [
   {
     name: "Multi-Chain",
     description: "Support for multiple blockchains",
-    t402: "10 chains",
+    t402: "31+ chains",
     stripe: false,
     paypal: false,
     crypto: "1-3 chains",
@@ -270,8 +270,8 @@ export default function CompareClient() {
         />
         <HighlightCard
           title="Chains Supported"
-          value="10"
-          description="One SDK, all networks"
+          value="31+"
+          description="9 blockchain families"
         />
         <HighlightCard
           title="Chargebacks"
