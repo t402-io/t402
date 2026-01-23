@@ -33,6 +33,14 @@ from t402.schemes.evm.upto.client import (
     SCHEME_UPTO,
 )
 
+from t402.schemes.evm.upto.server import (
+    UptoEvmServerScheme,
+)
+
+from t402.schemes.evm.upto.facilitator import (
+    UptoEvmFacilitatorScheme,
+)
+
 __all__ = [
     # Constants
     "SCHEME_UPTO",
@@ -41,6 +49,10 @@ __all__ = [
     # Client
     "UptoEvmClientScheme",
     "create_payment_nonce",
+    # Server
+    "UptoEvmServerScheme",
+    # Facilitator
+    "UptoEvmFacilitatorScheme",
     # Types
     "PermitSignature",
     "PermitAuthorization",
