@@ -223,8 +223,8 @@ function CodeBlock({
         </button>
       </div>
       {/* Code */}
-      <pre className="overflow-x-auto border-none bg-transparent p-4">
-        <code className="bg-transparent font-mono text-sm leading-relaxed text-foreground-secondary">
+      <pre className="overflow-x-auto border-none bg-transparent p-3 sm:p-4">
+        <code className="bg-transparent font-mono text-xs sm:text-sm leading-relaxed text-foreground-secondary">
           {code}
         </code>
       </pre>

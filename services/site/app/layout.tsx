@@ -50,12 +50,21 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "T402",
     url: "https://t402.io",
+    images: [
+      {
+        url: "/t402-logo.png",
+        width: 512,
+        height: 512,
+        alt: "T402 - The Official Payment Protocol for USDT",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "T402 - The Official Payment Protocol for USDT",
     description:
       "HTTP-native stablecoin payments across 31+ blockchains. Zero fees. Instant settlement. Built for AI agents.",
+    images: ["/t402-logo.png"],
   },
   robots: {
     index: true,
