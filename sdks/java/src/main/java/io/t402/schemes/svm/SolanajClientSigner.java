@@ -166,6 +166,7 @@ public class SolanajClientSigner implements ClientSvmSigner {
      * @param network Network identifier (for compatibility, not used in signing)
      * @return Base64-encoded signed transaction
      */
+    @Override
     public String signTransactionSync(String txBase64, String network) {
         return signTransaction(txBase64, network).join();
     }
