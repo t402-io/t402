@@ -97,14 +97,14 @@ export default function DemoPage() {
           <HeroPlayground />
         </div>
 
-        <div className="mt-16 text-center">
-          <p className="text-xs text-[var(--color-muted)] mb-2">Explore real-world scenarios</p>
-          <div className="animate-bounce text-[var(--color-muted)]">↓</div>
-        </div>
+        <a href="#how-it-works" className="mt-16 text-center block group">
+          <p className="text-xs text-[var(--color-muted)] mb-2 group-hover:text-white transition-colors">Explore real-world scenarios</p>
+          <div className="animate-bounce text-[var(--color-muted)] group-hover:text-white transition-colors">↓</div>
+        </a>
       </section>
 
       {/* How It Works */}
-      <section className="py-16 px-4 sm:px-6 border-t border-[var(--color-border)]">
+      <section id="how-it-works" className="py-16 px-4 sm:px-6 border-t border-[var(--color-border)]">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-xl sm:text-2xl font-bold text-center mb-10">How T402 Works</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -120,6 +120,21 @@ export default function DemoPage() {
           </div>
         </div>
       </section>
+
+      {/* Scenario Quick Nav */}
+      <div className="sticky top-14 z-40 border-b border-[var(--color-border)] bg-[rgba(10,10,11,0.9)] backdrop-blur-md">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex items-center gap-1 overflow-x-auto py-2">
+          {SCENARIOS.map((s) => (
+            <a
+              key={s.id}
+              href={`#${s.id}`}
+              className="shrink-0 px-3 py-1.5 rounded-lg text-xs text-[var(--color-muted)] hover:text-white hover:bg-[var(--color-surface)] transition-colors"
+            >
+              {s.title}
+            </a>
+          ))}
+        </div>
+      </div>
 
       {/* Scenario Sections */}
       {SCENARIOS.map((scenario, i) => {
