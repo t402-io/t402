@@ -138,7 +138,7 @@ t402/
 
 | SDK | Version | Registry | Tag Pattern |
 |-----|---------|----------|-------------|
-| TypeScript | 2.3.0 | npm (@t402/*) | `v*` (e.g., `v2.3.0`) |
+| TypeScript | 2.3.1 | npm (@t402/*) | `v*` (e.g., `v2.3.1`) |
 | Python | 1.9.0 | PyPI | `python/v*` |
 | Go | 1.8.0 | Go Modules | `go/v*` |
 | Java | 1.8.0 | Maven Central | `java/v*` |
