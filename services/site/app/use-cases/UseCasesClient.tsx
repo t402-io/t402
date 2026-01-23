@@ -698,7 +698,7 @@ export default function UseCasesClient() {
             View SDKs
           </Link>
           <Link
-            href="https://docs.t402.io/quickstart"
+            href="https://docs.t402.io/getting-started/quickstart"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-lg border border-border bg-background-tertiary px-6 py-3 text-base font-medium text-foreground transition-colors hover:bg-border"

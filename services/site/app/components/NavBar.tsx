@@ -175,7 +175,7 @@ export function NavBar() {
               <GitHubIcon />
             </Link>
             <Link
-              href="https://docs.t402.io/quickstart"
+              href="https://docs.t402.io/getting-started/quickstart"
               className="inline-flex h-9 items-center justify-center rounded-lg bg-brand px-4 text-sm font-medium transition-colors hover:bg-brand-secondary"
               style={{ color: "#0A0A0B" }}
             >
@@ -231,7 +231,7 @@ export function NavBar() {
               <div className="my-4 border-t border-border" />
 
               <Link
-                href="https://docs.t402.io/quickstart"
+                href="https://docs.t402.io/getting-started/quickstart"
                 className="flex h-12 w-full items-center justify-center rounded-lg bg-brand text-base font-medium transition-colors hover:bg-brand-secondary"
                 style={{ color: "#0A0A0B" }}
                 onClick={() => setMobileMenuOpen(false)}
