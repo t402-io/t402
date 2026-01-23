@@ -17,20 +17,26 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "T402 - The Official Payment Protocol for USDT",
   description:
-    "T402 is the official payment protocol for USDT. HTTP-native stablecoin payments across Ethereum, TON, TRON, and Solana. Zero fees. Instant settlement. Built for AI agents.",
+    "T402 is the official payment protocol for USDT. HTTP-native stablecoin payments across 31+ blockchains including EVM, Solana, TON, TRON, NEAR, Aptos, and more. Zero fees. Instant settlement. Built for AI agents.",
   keywords: [
     "USDT",
+    "USDT0",
     "payment protocol",
     "stablecoin",
     "HTTP payments",
     "blockchain",
     "Ethereum",
+    "Solana",
     "TON",
     "TRON",
-    "Solana",
+    "NEAR",
+    "Aptos",
     "AI agents",
     "MCP",
+    "A2A",
     "gasless",
+    "cross-chain",
+    "LayerZero",
   ],
   authors: [{ name: "T402" }],
   metadataBase: new URL("https://t402.io"),
@@ -40,7 +46,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "T402 - The Official Payment Protocol for USDT",
     description:
-      "HTTP-native stablecoin payments across Ethereum, TON, TRON, and Solana. Zero fees. Instant settlement.",
+      "HTTP-native stablecoin payments across 31+ blockchains. Zero fees. Instant settlement. Built for AI agents.",
     type: "website",
     siteName: "T402",
     url: "https://t402.io",
@@ -49,7 +55,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "T402 - The Official Payment Protocol for USDT",
     description:
-      "HTTP-native stablecoin payments across Ethereum, TON, TRON, and Solana. Zero fees. Instant settlement.",
+      "HTTP-native stablecoin payments across 31+ blockchains. Zero fees. Instant settlement. Built for AI agents.",
   },
   robots: {
     index: true,
