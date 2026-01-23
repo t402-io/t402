@@ -108,6 +108,46 @@ from t402.schemes.tron import (
     TronSigner,
 )
 
+# NEAR Schemes
+from t402.schemes.near import (
+    ExactDirectNearClientScheme,
+    ExactDirectNearServerScheme,
+    ExactDirectNearFacilitatorScheme,
+    ClientNearSigner,
+    FacilitatorNearSigner,
+    SCHEME_EXACT_DIRECT as NEAR_SCHEME_EXACT_DIRECT,
+)
+
+# Aptos Schemes
+from t402.schemes.aptos import (
+    ExactDirectAptosClientScheme,
+    ExactDirectAptosServerScheme,
+    ExactDirectAptosFacilitatorScheme,
+    ClientAptosSigner,
+    FacilitatorAptosSigner,
+    SCHEME_EXACT_DIRECT,
+)
+
+# Polkadot Schemes
+from t402.schemes.polkadot import (
+    ExactDirectPolkadotClientScheme,
+    ExactDirectPolkadotServerScheme,
+    ExactDirectPolkadotFacilitatorScheme,
+    ClientPolkadotSigner,
+    FacilitatorPolkadotSigner,
+    SCHEME_EXACT_DIRECT as POLKADOT_SCHEME_EXACT_DIRECT,
+)
+
+# Tezos Schemes
+from t402.schemes.tezos import (
+    ExactDirectTezosClient,
+    ExactDirectTezosServer,
+    ExactDirectTezosFacilitator,
+    ClientTezosSigner,
+    FacilitatorTezosSigner,
+    SCHEME_EXACT_DIRECT as TEZOS_SCHEME_EXACT_DIRECT,
+)
+
 __all__ = [
     # Type aliases
     "Price",
@@ -161,4 +201,32 @@ __all__ = [
     "ExactTronClientScheme",
     "ExactTronServerScheme",
     "TronSigner",
+    # NEAR Schemes
+    "ExactDirectNearClientScheme",
+    "ExactDirectNearServerScheme",
+    "ExactDirectNearFacilitatorScheme",
+    "ClientNearSigner",
+    "FacilitatorNearSigner",
+    "NEAR_SCHEME_EXACT_DIRECT",
+    # Aptos Schemes
+    "ExactDirectAptosClientScheme",
+    "ExactDirectAptosServerScheme",
+    "ExactDirectAptosFacilitatorScheme",
+    "ClientAptosSigner",
+    "FacilitatorAptosSigner",
+    "SCHEME_EXACT_DIRECT",
+    # Polkadot Schemes
+    "ExactDirectPolkadotClientScheme",
+    "ExactDirectPolkadotServerScheme",
+    "ExactDirectPolkadotFacilitatorScheme",
+    "ClientPolkadotSigner",
+    "FacilitatorPolkadotSigner",
+    "POLKADOT_SCHEME_EXACT_DIRECT",
+    # Tezos Schemes
+    "ExactDirectTezosClient",
+    "ExactDirectTezosServer",
+    "ExactDirectTezosFacilitator",
+    "ClientTezosSigner",
+    "FacilitatorTezosSigner",
+    "TEZOS_SCHEME_EXACT_DIRECT",
 ]
