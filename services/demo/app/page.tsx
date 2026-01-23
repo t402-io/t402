@@ -13,7 +13,6 @@ const SCENARIOS = [
   {
     id: "ai-api",
     title: "AI API Monetization",
-    subtitle: "Pay-per-query AI with USDT micropayments",
     description: "No API keys. No subscriptions. Agents and users pay 0.001 USDT per query — instantly settled on-chain.",
     cost: "0.001 USDT/query",
     component: AiApiScenario,
@@ -21,7 +20,6 @@ const SCENARIOS = [
   {
     id: "content",
     title: "Content Paywall",
-    subtitle: "Unlock premium content with a single micropayment",
     description: "Replace subscription fatigue with one-time payments. Readers pay only for what they read.",
     cost: "0.01 USDT/article",
     component: ContentPaywall,
@@ -29,7 +27,6 @@ const SCENARIOS = [
   {
     id: "data",
     title: "Data Marketplace",
-    subtitle: "Purchase real-time data feeds on demand",
     description: "Pay-per-request market data. No monthly minimums, no rate limit keys — just USDT micropayments.",
     cost: "0.001 USDT/request",
     component: DataMarketplace,
@@ -37,10 +34,27 @@ const SCENARIOS = [
   {
     id: "a2a",
     title: "Agent-to-Agent",
-    subtitle: "Autonomous agent commerce via T402",
     description: "AI agents delegate tasks and pay each other automatically. No human in the loop — pure machine-to-machine payments.",
     cost: "0.001 USDT/task",
     component: AgentToAgent,
+  },
+];
+
+const HOW_IT_WORKS = [
+  {
+    step: "1",
+    title: "Request",
+    description: "Client requests a protected resource. Server responds with HTTP 402 and payment requirements.",
+  },
+  {
+    step: "2",
+    title: "Sign",
+    description: "Client signs a USDT transfer authorization off-chain (EIP-3009). No gas needed.",
+  },
+  {
+    step: "3",
+    title: "Settle",
+    description: "Facilitator verifies the signature and settles on-chain. Client receives the resource.",
   },
 ];
 
@@ -65,8 +79,9 @@ export default function DemoPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="min-h-[calc(100vh-56px)] flex flex-col items-center justify-center px-4 sm:px-6 py-16">
-        <div className="text-center mb-12">
+      <section className="relative min-h-[calc(100vh-56px)] flex flex-col items-center justify-center px-4 sm:px-6 py-16 overflow-hidden">
+        <div className="hero-glow" />
+        <div className="relative z-10 text-center mb-12">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-4">
             <span className="text-[var(--color-brand)]">HTTP 402</span> Payments
           </h1>
@@ -78,13 +93,31 @@ export default function DemoPage() {
           </p>
         </div>
 
-        <div className="w-full">
+        <div className="relative z-10 w-full">
           <HeroPlayground />
         </div>
 
         <div className="mt-16 text-center">
           <p className="text-xs text-[var(--color-muted)] mb-2">Explore real-world scenarios</p>
           <div className="animate-bounce text-[var(--color-muted)]">↓</div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-16 px-4 sm:px-6 border-t border-[var(--color-border)]">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-xl sm:text-2xl font-bold text-center mb-10">How T402 Works</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {HOW_IT_WORKS.map((item) => (
+              <div key={item.step} className="glass-card-interactive p-5 text-center">
+                <div className="w-10 h-10 rounded-full bg-[var(--color-brand-dim)] text-[var(--color-brand)] flex items-center justify-center text-sm font-bold mx-auto mb-3">
+                  {item.step}
+                </div>
+                <h3 className="text-sm font-semibold mb-2">{item.title}</h3>
+                <p className="text-xs text-[var(--color-muted)] leading-relaxed">{item.description}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -95,7 +128,7 @@ export default function DemoPage() {
           <section
             key={scenario.id}
             id={scenario.id}
-            className={`py-20 px-4 sm:px-6 ${i % 2 === 0 ? "" : "bg-[rgba(20,20,21,0.3)]"}`}
+            className={`py-20 px-4 sm:px-6 border-t border-[var(--color-border)] ${i % 2 !== 0 ? "bg-[rgba(20,20,21,0.3)]" : ""}`}
           >
             <div className="max-w-5xl mx-auto">
               <div className="mb-10">
@@ -118,10 +151,10 @@ export default function DemoPage() {
 
       {/* Footer */}
       <footer className="border-t border-[var(--color-border)] py-12 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="flex flex-col sm:flex-row items-center gap-3">
             <span className="text-sm font-semibold text-[var(--color-brand)]">T402</span>
-            <span className="text-xs text-[var(--color-muted)]">HTTP-native payments with USDT</span>
+            <span className="text-xs text-[var(--color-muted)]">HTTP-native payments with USDT/USDT0</span>
           </div>
           <div className="flex items-center gap-6">
             <a href="https://t402.io" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors">

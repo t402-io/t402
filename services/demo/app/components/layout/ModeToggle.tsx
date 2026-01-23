@@ -11,14 +11,14 @@ export function ModeToggle() {
         label="Demo"
         value="demo"
         active={mode === "demo"}
-        color="#F59E0B"
+        color="var(--color-warning)"
         onClick={() => setMode("demo")}
       />
       <ModeButton
         label="Live"
         value="live"
         active={mode === "live"}
-        color="#10B981"
+        color="var(--color-success)"
         onClick={() => setMode("live")}
       />
     </div>
