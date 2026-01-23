@@ -45,6 +45,20 @@
   --transition-normal: 250ms ease;
   --transition-spring: 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
 
+  /* Semantic status colors */
+  --color-success: #10B981;
+  --color-success-dim: #10B98120;
+  --color-warning: #F59E0B;
+  --color-warning-dim: #F59E0B20;
+  --color-error: #EF4444;
+  --color-error-dim: #EF444420;
+  --color-info: #3B82F6;
+  --color-info-dim: #3B82F620;
+
+  /* Code text */
+  --color-code-text: #D4D4D4;
+  --color-code-text-dim: #9CA3AF;
+
   /* Syntax highlighting */
   --syn-keyword: #C586C0;
   --syn-string: #CE9178;
@@ -69,8 +83,11 @@ html, body {
   font-family: "Inter", system-ui, sans-serif;
   font-size: var(--text-body);
   -webkit-font-smoothing: antialiased;
-  overflow: hidden;
-  height: 100%;
+  overflow-x: hidden;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 ::selection {

@@ -13,7 +13,7 @@ export function createPaymentRequired(resource: { url: string; description: stri
         asset: TESTNET_ASSET,
         payTo: PAY_TO,
         maxTimeoutSeconds: 60,
-        extra: { name: "USDC", version: "2" },
+        extra: { name: "USDT", version: "2" },
       },
     ],
   };

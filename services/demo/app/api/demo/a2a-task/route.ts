@@ -1,124 +1,116 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getNetwork, getAsset, PAY_TO, DEMO_AMOUNT } from "@/lib/config";
-import { verifyPayment, settlePayment } from "@/lib/t402-server";
-import { mockA2aTaskResult } from "@/lib/mock-responses";
+import { encodeHeader, decodeHeader, verifyPayment, settlePayment } from "@/lib/t402-server";
+import { createMockSettleResponse } from "@/lib/mock-responses";
 
-export async function POST(request: NextRequest) {
-  const isDemoMode = request.headers.get("x-demo-mode") === "true";
-  const body = await request.json();
+const RESOURCE = {
+  url: "/api/demo/a2a-task",
+  description: "Agent-to-agent task execution — pay per task with USDT",
+};
 
-  const { method, params, id } = body;
-  const taskId = params?.taskId || "task-demo-" + Date.now().toString(36);
-
-  // Check if this is a payment submission
-  const paymentPayload = params?.message?.metadata?.["t402.payment.payload"];
-
-  if (method === "tasks/send" && !paymentPayload) {
-    // First request: return payment-required state
-    return NextResponse.json({
-      jsonrpc: "2.0",
-      id,
-      result: {
-        kind: "task",
-        id: taskId,
-        status: {
-          state: "input-required",
-          message: {
-            kind: "message",
-            role: "agent",
-            parts: [{ kind: "text", text: "Payment is required to process this task." }],
-            metadata: {
-              "t402.payment.status": "payment-required",
-              "t402.payment.required": {
-                t402Version: 2,
-                accepts: [
-                  {
-                    scheme: "exact",
-                    network: getNetwork(),
-                    amount: DEMO_AMOUNT,
-                    asset: getAsset(),
-                    payTo: PAY_TO,
-                    maxTimeoutSeconds: 60,
-                    extra: { name: "USDC", version: "2" },
-                  },
-                ],
-              },
-            },
-          },
-        },
-      },
-    });
-  }
-
-  if (method === "tasks/send" && paymentPayload) {
-    // Payment submitted — verify and complete task
-    if (isDemoMode) {
-      await new Promise((r) => setTimeout(r, 1500));
-      return NextResponse.json({
-        jsonrpc: "2.0",
-        id,
-        result: {
-          kind: "task",
-          ...mockA2aTaskResult,
-        },
-      });
-    }
-
-    // Live mode
-    try {
-      const requirements = {
+function createA2aPaymentRequired() {
+  return {
+    t402Version: 2,
+    error: "Payment required",
+    resource: { ...RESOURCE, mimeType: "application/json" },
+    accepts: [
+      {
         scheme: "exact",
         network: getNetwork(),
         amount: DEMO_AMOUNT,
         asset: getAsset(),
         payTo: PAY_TO,
         maxTimeoutSeconds: 60,
-        extra: { name: "USDC", version: "2" },
-      };
+        extra: { name: "USDT", version: "2" },
+      },
+    ],
+  };
+}
 
-      const verifyResult = await verifyPayment(paymentPayload, requirements);
-      if (!verifyResult.isValid) {
-        return NextResponse.json({
-          jsonrpc: "2.0",
-          id,
-          result: {
-            kind: "task",
-            id: taskId,
-            status: {
-              state: "failed",
-              message: {
-                kind: "message",
-                role: "agent",
-                parts: [{ kind: "text", text: "Payment invalid: " + verifyResult.invalidReason }],
-              },
-            },
-          },
-        });
-      }
+const TASK_RESULTS: Record<string, string> = {
+  research: "Bitcoin adoption has grown 40% YoY among institutional investors. Key drivers: ETF approvals, corporate treasury adoption, and payment infrastructure maturation. USDT remains the dominant trading pair with 70% market share.",
+  summary: "DeFi TVL reached $180B in 2025, driven by RWA tokenization and cross-chain interoperability. T402-enabled micropayments are emerging as a key primitive for agent-to-agent commerce in DeFi protocols.",
+  monitor: "Protocol health: All 9 supported networks operational. Average settlement time: 2.1s (EVM), 0.4s (Solana), 3.2s (TON). Facilitator uptime: 99.97% over 30 days. 12,847 settlements processed this week.",
+};
 
-      await settlePayment(paymentPayload, requirements);
+export async function POST(request: NextRequest) {
+  const isDemoMode = request.headers.get("x-demo-mode") === "true";
+  const paymentHeader = request.headers.get("payment-signature");
 
-      return NextResponse.json({
-        jsonrpc: "2.0",
-        id,
-        result: {
-          kind: "task",
-          ...mockA2aTaskResult,
-        },
-      });
-    } catch (error) {
-      return NextResponse.json({
-        jsonrpc: "2.0",
-        id,
-        error: { code: -32000, message: "Facilitator error: " + String(error) },
-      });
-    }
+  let taskId = "research";
+  try {
+    const body = await request.json();
+    if (body.task) taskId = body.task;
+  } catch {
+    // Use default
   }
 
-  // Unknown method
-  return NextResponse.json({
-    jsonrpc: "2.0",
-    id,
-    error: { code: -32601, message: "Method not found" },
-  });
+  // If no payment header, return 402
+  if (!paymentHeader) {
+    const paymentRequired = createA2aPaymentRequired();
+    const response = NextResponse.json(paymentRequired, { status: 402 });
+    response.headers.set("Payment-Required", encodeHeader(paymentRequired));
+    response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
+    return response;
+  }
+
+  // Payment present — verify and execute task
+  const paymentPayload = decodeHeader(paymentHeader);
+  const requirements = {
+    scheme: "exact",
+    network: getNetwork(),
+    amount: DEMO_AMOUNT,
+    asset: getAsset(),
+    payTo: PAY_TO,
+    maxTimeoutSeconds: 60,
+    extra: { name: "USDT", version: "2" },
+  };
+
+  const taskResult = {
+    id: "task-" + Date.now().toString(36),
+    status: { state: "completed" },
+    artifacts: [
+      {
+        kind: "text",
+        parts: [{ kind: "text", text: TASK_RESULTS[taskId] || TASK_RESULTS.research }],
+      },
+    ],
+  };
+
+  if (isDemoMode) {
+    await new Promise((r) => setTimeout(r, 1200));
+    const settleResponse = createMockSettleResponse(getNetwork());
+    const response = NextResponse.json(taskResult);
+    response.headers.set("Payment-Response", encodeHeader(settleResponse));
+    response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
+    return response;
+  }
+
+  try {
+    const verifyResult = await verifyPayment(paymentPayload, requirements);
+    if (!verifyResult.isValid) {
+      return NextResponse.json(
+        { error: "Payment verification failed", reason: verifyResult.invalidReason },
+        { status: 402 }
+      );
+    }
+
+    const settleResult = await settlePayment(paymentPayload, requirements);
+    if (!settleResult.success) {
+      return NextResponse.json(
+        { error: "Settlement failed", reason: settleResult.errorReason },
+        { status: 500 }
+      );
+    }
+
+    const response = NextResponse.json(taskResult);
+    response.headers.set("Payment-Response", encodeHeader(settleResult));
+    response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
+    return response;
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Facilitator error", message: String(error) },
+      { status: 502 }
+    );
+  }
 }
