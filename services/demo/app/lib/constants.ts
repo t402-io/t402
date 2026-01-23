@@ -1,0 +1,15 @@
+export const COLORS = {
+  brand: "#50AF95",
+  brandDim: "#50AF9540",
+  background: "#0A0A0B",
+  surface: "#141415",
+  border: "#2A2A2D",
+  muted: "#71717A",
+  codeBg: "#0d1117",
+  http: "#3B82F6",
+  mcp: "#8B5CF6",
+  a2a: "#EC4899",
+  success: "#10B981",
+  warning: "#F59E0B",
+  error: "#EF4444",
+};
