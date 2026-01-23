@@ -256,8 +256,10 @@ console.log("Destination:", result.dstTxHash);`,
       },
     ],
     supportedChains: [
-      "Ethereum", "Base", "Arbitrum", "Optimism", "Solana", "TON", "TRON",
-      "NEAR", "Aptos", "Tezos", "Polkadot", "Stacks",
+      "Ethereum", "Base", "Arbitrum", "Optimism", "Polygon", "Avalanche",
+      "BNB Chain", "zkSync Era", "Linea", "Scroll", "Ink", "Berachain",
+      "Unichain", "Mantle", "Sei", "Corn", "Conflux eSpace",
+      "Solana", "TON", "TRON", "NEAR", "Aptos", "Tezos", "Polkadot", "Stacks",
     ],
     codeExample: {
       title: "MCP Server with Payment Tools",
@@ -422,8 +424,10 @@ app.use(paymentMiddleware({
       },
     ],
     supportedChains: [
-      "Ethereum", "Base", "Arbitrum", "Optimism", "Solana", "TON", "TRON",
-      "NEAR", "Aptos", "Tezos", "Polkadot", "Stacks",
+      "Ethereum", "Base", "Arbitrum", "Optimism", "Polygon", "Avalanche",
+      "BNB Chain", "zkSync Era", "Linea", "Scroll", "Ink", "Berachain",
+      "Unichain", "Mantle", "Sei", "Corn", "Conflux eSpace",
+      "Solana", "TON", "TRON", "NEAR", "Aptos", "Tezos", "Polkadot", "Stacks",
     ],
     codeExample: {
       title: "Define Agent Spending Policy",
@@ -511,8 +515,10 @@ const policy = definePolicy({
       },
     ],
     supportedChains: [
-      "Ethereum", "Base", "Arbitrum", "Solana", "TON",
-      "NEAR", "Aptos",
+      "Ethereum", "Base", "Arbitrum", "Optimism", "Polygon", "Avalanche",
+      "BNB Chain", "zkSync Era", "Linea", "Scroll", "Ink", "Berachain",
+      "Unichain", "Mantle", "Sei", "Corn", "Conflux eSpace",
+      "Solana", "TON", "TRON", "NEAR", "Aptos", "Tezos", "Polkadot", "Stacks",
     ],
     codeExample: {
       title: "A2A Agent with Payment Capability",

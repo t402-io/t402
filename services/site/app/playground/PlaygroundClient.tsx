@@ -202,7 +202,7 @@ function CheckCircleIcon({ className = "" }: { className?: string }) {
   );
 }
 
-// Chain options - supports all T402 chains across 9 blockchain families
+// Chain options - supports all T402 chains across 10 blockchain families
 const chains = [
   // EVM Chains
   { id: "base", name: "Base", network: "eip155:8453", color: "#0052FF", type: "evm" as const },
@@ -215,6 +215,13 @@ const chains = [
   { id: "polygon", name: "Polygon", network: "eip155:137", color: "#8247E5", type: "evm" as const },
   { id: "mantle", name: "Mantle", network: "eip155:5000", color: "#000000", type: "evm" as const },
   { id: "sei", name: "Sei", network: "eip155:1329", color: "#9B1C2E", type: "evm" as const },
+  { id: "avalanche", name: "Avalanche", network: "eip155:43114", color: "#E84142", type: "evm" as const },
+  { id: "bnb", name: "BNB Chain", network: "eip155:56", color: "#F0B90B", type: "evm" as const },
+  { id: "zksync", name: "zkSync Era", network: "eip155:324", color: "#4E529A", type: "evm" as const },
+  { id: "linea", name: "Linea", network: "eip155:59144", color: "#61DFFF", type: "evm" as const },
+  { id: "scroll", name: "Scroll", network: "eip155:534352", color: "#FFEEDA", type: "evm" as const },
+  { id: "corn", name: "Corn", network: "eip155:21000000", color: "#F5C842", type: "evm" as const },
+  { id: "conflux", name: "Conflux eSpace", network: "eip155:1030", color: "#1A1A2E", type: "evm" as const },
   // Non-EVM Chains
   { id: "solana", name: "Solana", network: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", color: "#9945FF", type: "solana" as const },
   { id: "ton", name: "TON", network: "ton:mainnet", color: "#0098EA", type: "ton" as const },
