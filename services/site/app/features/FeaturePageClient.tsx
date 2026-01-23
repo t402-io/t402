@@ -421,7 +421,7 @@ export default function FeaturePageClient({ feature }: { feature: Feature }) {
                 in minutes.
               </p>
               <Link
-                href="https://docs.t402.io/quickstart"
+                href="https://docs.t402.io/getting-started/quickstart"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
