@@ -9,14 +9,21 @@ Supported schemes:
 from t402.schemes.ton.exact import (
     ExactTonClientScheme,
     ExactTonServerScheme,
+    ExactTonFacilitatorScheme,
     TonSigner,
+    FacilitatorTonSigner,
     SCHEME_EXACT,
 )
 
 __all__ = [
-    # Exact scheme
+    # Client
     "ExactTonClientScheme",
-    "ExactTonServerScheme",
     "TonSigner",
+    # Server
+    "ExactTonServerScheme",
+    # Facilitator
+    "ExactTonFacilitatorScheme",
+    "FacilitatorTonSigner",
+    # Constants
     "SCHEME_EXACT",
 ]

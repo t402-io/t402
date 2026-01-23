@@ -77,6 +77,8 @@ from t402.schemes.evm import (
     EvmSigner,
     # Upto EVM
     UptoEvmClientScheme,
+    UptoEvmServerScheme,
+    UptoEvmFacilitatorScheme,
     PermitSignature,
     PermitAuthorization,
     UptoEIP2612Payload,
@@ -102,14 +104,29 @@ from t402.schemes.upto import (
 from t402.schemes.ton import (
     ExactTonClientScheme,
     ExactTonServerScheme,
+    ExactTonFacilitatorScheme,
     TonSigner,
+    FacilitatorTonSigner,
 )
 
 # TRON Schemes
 from t402.schemes.tron import (
     ExactTronClientScheme,
     ExactTronServerScheme,
+    ExactTronFacilitatorScheme,
+    ExactTronFacilitatorConfig,
     TronSigner,
+    FacilitatorTronSigner,
+)
+
+# SVM Schemes
+from t402.schemes.svm import (
+    ExactSvmClientScheme,
+    ExactSvmServerScheme,
+    ExactSvmFacilitatorScheme,
+    ClientSvmSigner as SvmClientSigner,
+    FacilitatorSvmSigner as SvmFacilitatorSigner,
+    SCHEME_EXACT as SVM_SCHEME_EXACT,
 )
 
 # NEAR Schemes
@@ -185,6 +202,8 @@ __all__ = [
     "EvmSigner",
     # EVM Upto Schemes
     "UptoEvmClientScheme",
+    "UptoEvmServerScheme",
+    "UptoEvmFacilitatorScheme",
     "PermitSignature",
     "PermitAuthorization",
     "UptoEIP2612Payload",
@@ -204,11 +223,23 @@ __all__ = [
     # TON Schemes
     "ExactTonClientScheme",
     "ExactTonServerScheme",
+    "ExactTonFacilitatorScheme",
     "TonSigner",
+    "FacilitatorTonSigner",
     # TRON Schemes
     "ExactTronClientScheme",
     "ExactTronServerScheme",
+    "ExactTronFacilitatorScheme",
+    "ExactTronFacilitatorConfig",
     "TronSigner",
+    "FacilitatorTronSigner",
+    # SVM Schemes
+    "ExactSvmClientScheme",
+    "ExactSvmServerScheme",
+    "ExactSvmFacilitatorScheme",
+    "SvmClientSigner",
+    "SvmFacilitatorSigner",
+    "SVM_SCHEME_EXACT",
     # NEAR Schemes
     "ExactDirectNearClientScheme",
     "ExactDirectNearServerScheme",
