@@ -37,7 +37,7 @@ export function WalletButton() {
         const injected = connectors.find((c) => c.id === "injected");
         if (injected) connect({ connector: injected });
       }}
-      className="rounded-lg bg-[var(--color-brand)] px-4 py-1.5 text-sm font-medium text-white hover:bg-[var(--color-brand)]/90 transition-colors cursor-pointer"
+      className="rounded-lg bg-[var(--color-brand)] px-4 py-1.5 text-sm font-medium text-white hover:opacity-90 transition-opacity cursor-pointer"
     >
       Connect Wallet
     </button>
