@@ -5,7 +5,7 @@ import { Footer } from "../../components/Footer";
 
 const pageTitle = "Introducing T402: The Official Payment Protocol for USDT";
 const pageDescription =
-  "T402 brings HTTP-native stablecoin payments to the internet. Zero fees, instant settlement, and support for 10 blockchain networks.";
+  "T402 brings HTTP-native stablecoin payments to the internet. Zero fees, instant settlement, and support for 31+ blockchains across 9 families.";
 
 export const metadata: Metadata = {
   title: pageTitle,
@@ -104,7 +104,7 @@ export default function T402LaunchPage() {
             {/* TL;DR */}
             <div className="rounded-xl border border-border bg-background-secondary p-6">
               <p className="text-base leading-relaxed text-foreground-secondary">
-                <strong className="text-foreground">TL;DR</strong>: T402 is an open-source payment protocol that embeds USDT payments directly into HTTP. It supports 10 blockchain networks, offers zero transaction fees, instant settlement, and is designed for both human users and AI agents. Start accepting payments in minutes with our production-ready SDKs.
+                <strong className="text-foreground">TL;DR</strong>: T402 is an open-source payment protocol that embeds USDT payments directly into HTTP. It supports 31+ blockchains across 9 families, offers zero transaction fees, instant settlement, and is designed for both human users and AI agents. Start accepting payments in minutes with our production-ready SDKs.
               </p>
             </div>
 
@@ -140,8 +140,8 @@ export default function T402LaunchPage() {
                 <div className="flex items-start gap-3 rounded-lg border border-border bg-background-secondary p-4">
                   <CheckIcon className="mt-0.5 text-brand flex-shrink-0" />
                   <div>
-                    <p className="font-medium text-foreground">10 Blockchain Networks</p>
-                    <p className="text-sm text-foreground-tertiary">Ethereum, Base, Arbitrum, Polygon, Ink, Berachain, Unichain, TON, TRON, and Solana.</p>
+                    <p className="font-medium text-foreground">31+ Blockchains</p>
+                    <p className="text-sm text-foreground-tertiary">EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, and Stacks across 9 blockchain families.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 rounded-lg border border-border bg-background-secondary p-4">
@@ -172,10 +172,10 @@ export default function T402LaunchPage() {
             <section className="space-y-4">
               <h2 className="text-2xl font-semibold mt-8">Supported Networks</h2>
               <p className="text-base leading-relaxed text-foreground-secondary">
-                T402 supports payments across 10 blockchain networks, spanning both EVM and non-EVM ecosystems:
+                T402 supports payments across 31+ blockchains, spanning 9 blockchain families:
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                {["Ethereum", "Base", "Arbitrum", "Polygon", "Ink", "Berachain", "Unichain", "TON", "TRON", "Solana"].map((chain) => (
+                {["Ethereum", "Base", "Arbitrum", "Optimism", "Solana", "TON", "TRON", "NEAR", "Aptos", "Tezos", "Polkadot", "Stacks", "Mantle", "Ink", "Berachain"].map((chain) => (
                   <div key={chain} className="rounded-lg border border-border bg-background-secondary px-3 py-2 text-center text-sm font-medium">
                     {chain}
                   </div>
