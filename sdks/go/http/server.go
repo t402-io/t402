@@ -747,7 +747,7 @@ func (s *t402HTTPResourceServer) generateFallbackPaywallHTML(paymentRequired t40
 			<p class="amount">Amount: $%.2f USDC</p>
 		</div>
 		<div id="payment-widget"
-			data-requirements='%s'
+			data-requirements="%s"
 			data-cdp-client-key="%s"
 			data-app-name="%s"
 			data-testnet="%t">

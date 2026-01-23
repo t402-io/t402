@@ -223,23 +223,19 @@ export function createRpcCapabilitiesFromRpc(
         .send();
     },
     confirmTransaction: async signature => {
-      let confirmed = false;
-      let attempts = 0;
       const maxAttempts = 30;
 
-      while (!confirmed && attempts < maxAttempts) {
+      for (let attempts = 0; attempts < maxAttempts; attempts++) {
         const status = await rpc.getSignatureStatuses([signature as never]).send();
 
         if (
           status.value[0]?.confirmationStatus === "confirmed" ||
           status.value[0]?.confirmationStatus === "finalized"
         ) {
-          confirmed = true;
           return status.value[0];
         }
 
         await new Promise(resolve => setTimeout(resolve, 1000));
-        attempts++;
       }
 
       throw new Error("Transaction confirmation timeout");

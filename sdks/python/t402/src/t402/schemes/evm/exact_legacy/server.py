@@ -191,8 +191,6 @@ class ExactLegacyEvmServerScheme:
             req = dict(requirements)
 
         network = req.get("network", "")
-        _asset = req.get("asset", "")  # Reserved for future use
-        _chain_id = str(self._get_chain_id(network))  # Reserved for future use
 
         # Ensure extra exists
         if "extra" not in req or req["extra"] is None:

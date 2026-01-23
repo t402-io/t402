@@ -377,6 +377,6 @@ export function formatBridgeResult(result: BridgeResult): string {
     `- [View on LayerZero Scan](${result.trackingUrl})`,
     `- [View Source TX](${getExplorerTxUrl(result.fromChain, result.txHash)})`,
     '',
-    '_Your USDT0 will arrive on ${result.toChain} once the LayerZero message is delivered._',
+    `_Your USDT0 will arrive on ${result.toChain} once the LayerZero message is delivered._`,
   ].join('\n')
 }
