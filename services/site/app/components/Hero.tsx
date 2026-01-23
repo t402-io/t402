@@ -188,18 +188,6 @@ function PolkadotLogo({ className = "" }: { className?: string }) {
   );
 }
 
-function StacksLogo({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 32 32" className={className} aria-label="Stacks">
-      <circle cx="16" cy="16" r="16" fill="#5546FF" />
-      <path
-        d="M10 12h12v2H10v-2zm0 6h12v2H10v-2zm3-4h6v2h-6v-2z"
-        fill="#fff"
-      />
-    </svg>
-  );
-}
-
 const chainLogos = [
   { name: "Ethereum", Logo: EthereumLogo },
   { name: "Base", Logo: BaseLogo },
@@ -215,7 +203,6 @@ const chainLogos = [
   { name: "Aptos", Logo: AptosLogo },
   { name: "Tezos", Logo: TezosLogo },
   { name: "Polkadot", Logo: PolkadotLogo },
-  { name: "Stacks", Logo: StacksLogo },
 ];
 
 const codeExample = `// Accept USDT payments in 3 lines
@@ -246,7 +233,7 @@ export function Hero() {
           >
             <span className="h-2 w-2 rounded-full bg-brand animate-pulse" />
             <span className="text-sm text-foreground-secondary">
-              Production-ready across 31+ blockchains
+              Production-ready across 28 blockchains
             </span>
           </motion.div>
 
@@ -269,7 +256,7 @@ export function Hero() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mx-auto mt-6 max-w-2xl text-lg text-foreground-secondary sm:text-xl"
           >
-            HTTP-native stablecoin payments across 31+ blockchains with HTTP,
+            HTTP-native stablecoin payments across 28 blockchains with HTTP,
             MCP, and A2A transports. Zero fees. Instant settlement. Built for AI
             agents.
           </motion.p>
@@ -368,7 +355,7 @@ export function Hero() {
                 className="flex flex-col items-center gap-1 sm:gap-2 group"
               >
                 <span className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-border bg-background-secondary text-xs sm:text-sm font-medium text-foreground-secondary opacity-60 transition-all group-hover:opacity-100 group-hover:scale-110 group-hover:border-brand">
-                  +16
+                  +14
                 </span>
                 <span className="hidden sm:block text-xs text-foreground-tertiary opacity-0 transition-opacity group-hover:opacity-100">
                   more

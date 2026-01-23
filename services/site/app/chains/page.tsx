@@ -5,11 +5,11 @@ import ChainsClient from "./ChainsClient";
 export const metadata = {
   title: "Supported Chains | t402",
   description:
-    "Accept USDT payments across 31+ blockchains including Ethereum, Base, Arbitrum, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, and Stacks. Gasless transactions on EVM networks.",
+    "Accept USDT payments across 28 blockchains including Ethereum, Arbitrum, Optimism, Solana, TON, TRON, NEAR, Aptos, Tezos, and Polkadot. Gasless transactions on EVM networks.",
   openGraph: {
     title: "t402 Supported Chains - Multi-Chain Payment Protocol",
     description:
-      "31+ chains supported across 9 blockchain families. EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, and Stacks.",
+      "28 chains supported across 10 blockchain families. EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, and more.",
   },
 };
 
