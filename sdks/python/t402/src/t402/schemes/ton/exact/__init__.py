@@ -15,6 +15,10 @@ from t402.schemes.ton.exact.client import (
 from t402.schemes.ton.exact.server import (
     ExactTonServerScheme,
 )
+from t402.schemes.ton.exact.facilitator import (
+    ExactTonFacilitatorScheme,
+    FacilitatorTonSigner,
+)
 
 __all__ = [
     # Client
@@ -22,6 +26,9 @@ __all__ = [
     "TonSigner",
     # Server
     "ExactTonServerScheme",
+    # Facilitator
+    "ExactTonFacilitatorScheme",
+    "FacilitatorTonSigner",
     # Constants
     "SCHEME_EXACT",
 ]

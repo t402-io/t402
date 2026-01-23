@@ -15,6 +15,11 @@ from t402.schemes.tron.exact.client import (
 from t402.schemes.tron.exact.server import (
     ExactTronServerScheme,
 )
+from t402.schemes.tron.exact.facilitator import (
+    ExactTronFacilitatorScheme,
+    ExactTronFacilitatorConfig,
+    FacilitatorTronSigner,
+)
 
 __all__ = [
     # Client
@@ -22,6 +27,10 @@ __all__ = [
     "TronSigner",
     # Server
     "ExactTronServerScheme",
+    # Facilitator
+    "ExactTronFacilitatorScheme",
+    "ExactTronFacilitatorConfig",
+    "FacilitatorTronSigner",
     # Constants
     "SCHEME_EXACT",
 ]
