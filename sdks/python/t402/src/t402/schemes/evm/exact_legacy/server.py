@@ -190,8 +190,6 @@ class ExactLegacyEvmServerScheme:
         else:
             req = dict(requirements)
 
-        network = req.get("network", "")
-
         # Ensure extra exists
         if "extra" not in req or req["extra"] is None:
             req["extra"] = {}
