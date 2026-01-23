@@ -84,7 +84,7 @@ export function HeroPlayground() {
                 </p>
                 <button
                   onClick={flow.execute}
-                  className="px-6 py-3 rounded-xl bg-[var(--color-brand)] text-white font-medium hover:opacity-90 transition-opacity cursor-pointer"
+                  className="btn-primary px-6 py-3"
                 >
                   Start Payment Flow
                 </button>
