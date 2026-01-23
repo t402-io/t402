@@ -95,7 +95,7 @@ public class McpTools {
             // Add some demo token balances
             String usdcAddr = McpConstants.getTokenAddress(network, SupportedToken.USDC);
             if (usdcAddr != null) {
-                result.getTokens().add(new BalanceInfo("USDC", "100", "100000000"));
+                result.addToken(new BalanceInfo("USDC", "100", "100000000"));
             }
         }
 
@@ -106,7 +106,7 @@ public class McpTools {
      * Handles t402/getAllBalances tool.
      */
     private ToolResult handleGetAllBalances(JsonNode args) throws Exception {
-        GetAllBalancesInput input = Json.MAPPER.treeToValue(args, GetAllBalancesInput.class);
+        Json.MAPPER.treeToValue(args, GetAllBalancesInput.class);
 
         List<NetworkBalance> results = new ArrayList<>();
 
@@ -123,7 +123,7 @@ public class McpTools {
 
                 String usdcAddr = McpConstants.getTokenAddress(network, SupportedToken.USDC);
                 if (usdcAddr != null) {
-                    balance.getTokens().add(new BalanceInfo("USDC", "50", "50000000"));
+                    balance.addToken(new BalanceInfo("USDC", "50", "50000000"));
                 }
             } else {
                 balance.setNativeBalance(new BalanceInfo(
@@ -345,7 +345,7 @@ public class McpTools {
             // Add demo USDC balance
             String usdcAddr = McpConstants.getSvmUsdcAddress(network);
             if (usdcAddr != null) {
-                result.getTokens().add(new BalanceInfo("USDC", "100", "100000000"));
+                result.addToken(new BalanceInfo("USDC", "100", "100000000"));
             }
         } else {
             result.setError("Real balance query requires RPC connection");
@@ -509,7 +509,7 @@ public class McpTools {
             // Add demo USDT balance
             String usdtAddr = McpConstants.getTonUsdtAddress(network);
             if (usdtAddr != null) {
-                result.getTokens().add(new BalanceInfo("USDT", "100", "100000000"));
+                result.addToken(new BalanceInfo("USDT", "100", "100000000"));
             }
         } else {
             result.setError("Real balance query requires RPC connection");
@@ -672,7 +672,7 @@ public class McpTools {
             // Add demo USDT balance
             String usdtAddr = McpConstants.getTronUsdtAddress(network);
             if (usdtAddr != null) {
-                result.getTokens().add(new BalanceInfo("USDT", "100", "100000000"));
+                result.addToken(new BalanceInfo("USDT", "100", "100000000"));
             }
         } else {
             result.setError("Real balance query requires RPC connection");

@@ -238,7 +238,7 @@ public class SafeAccount {
 
         // Adjust v for EIP-155 if needed
         if (signature[64] < 27) {
-            signature[64] += 27;
+            signature[64] = (byte) (signature[64] + 27);
         }
 
         return Numeric.toHexString(signature);

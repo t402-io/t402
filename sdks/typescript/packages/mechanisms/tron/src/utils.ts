@@ -204,7 +204,9 @@ export function convertFromSmallestUnits(
   const fractionalPart = padded.slice(-decimals)
 
   // Remove trailing zeros from fractional part
-  const trimmedFractional = fractionalPart.replace(/0+$/, '')
+  let end = fractionalPart.length
+  while (end > 0 && fractionalPart[end - 1] === '0') end--
+  const trimmedFractional = fractionalPart.slice(0, end)
 
   if (trimmedFractional) {
     return `${wholePart}.${trimmedFractional}`

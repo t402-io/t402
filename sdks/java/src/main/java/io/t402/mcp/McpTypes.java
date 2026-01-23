@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -729,8 +730,12 @@ public final class McpTypes {
         public BalanceInfo getNativeBalance() { return nativeBalance; }
         public void setNativeBalance(BalanceInfo nativeBalance) { this.nativeBalance = nativeBalance; }
 
-        public List<BalanceInfo> getTokens() { return tokens; }
-        public void setTokens(List<BalanceInfo> tokens) { this.tokens = tokens; }
+        public List<BalanceInfo> getTokens() { return tokens != null ? new ArrayList<>(tokens) : null; }
+        public void setTokens(List<BalanceInfo> tokens) { this.tokens = tokens != null ? new ArrayList<>(tokens) : null; }
+        public void addToken(BalanceInfo token) {
+            if (this.tokens == null) { this.tokens = new ArrayList<>(); }
+            this.tokens.add(token);
+        }
 
         public String getError() { return error; }
         public void setError(String error) { this.error = error; }

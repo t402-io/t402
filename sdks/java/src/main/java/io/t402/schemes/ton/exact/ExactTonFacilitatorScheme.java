@@ -268,7 +268,11 @@ public class ExactTonFacilitatorScheme {
         if (validUntil instanceof Number) {
             builder.validUntil(((Number) validUntil).longValue());
         } else if (validUntil instanceof String) {
-            builder.validUntil(Long.parseLong((String) validUntil));
+            try {
+                builder.validUntil(Long.parseLong((String) validUntil));
+            } catch (NumberFormatException e) {
+                // Invalid validUntil value, leave unset
+            }
         }
 
         return builder.build();
