@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "services/site/**"
   workflow_dispatch:
   repository_dispatch:
     types: [sdk-updated, deploy]
@@ -14,16 +16,22 @@ jobs:
     permissions:
       contents: read
       deployments: write
+    defaults:
+      run:
+        working-directory: services/site
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "pnpm"
+          cache-dependency-path: services/site/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -33,13 +41,10 @@ jobs:
         env:
           NODE_ENV: production
 
-      - name: Install Wrangler
-        run: pnpm add -g wrangler
-
       - name: Deploy to Cloudflare Pages
-        run: |
-          wrangler pages project create t402-site --production-branch main 2>/dev/null || true
-          wrangler pages deploy out --project-name t402-site
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy out --project-name t402-site
+          workingDirectory: services/site
