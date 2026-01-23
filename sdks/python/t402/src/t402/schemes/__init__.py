@@ -70,6 +70,10 @@ from t402.schemes.registry import (
 from t402.schemes.evm import (
     ExactEvmClientScheme,
     ExactEvmServerScheme,
+    ExactEvmFacilitatorScheme,
+    FacilitatorEvmSigner,
+    EvmVerifyResult,
+    EvmTransactionConfirmation,
     EvmSigner,
     # Upto EVM
     UptoEvmClientScheme,
@@ -174,6 +178,10 @@ __all__ = [
     # EVM Exact Schemes
     "ExactEvmClientScheme",
     "ExactEvmServerScheme",
+    "ExactEvmFacilitatorScheme",
+    "FacilitatorEvmSigner",
+    "EvmVerifyResult",
+    "EvmTransactionConfirmation",
     "EvmSigner",
     # EVM Upto Schemes
     "UptoEvmClientScheme",
