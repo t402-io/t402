@@ -11,7 +11,7 @@ export function WalletButton() {
     return (
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5">
-          <span className="h-2 w-2 rounded-full bg-green-400" />
+          <span className="h-2 w-2 rounded-full bg-[var(--color-success)]" />
           <span className="font-mono text-xs text-white">
             {address.slice(0, 6)}...{address.slice(-4)}
           </span>

@@ -31,12 +31,12 @@ export function HeroPlayground() {
     <div className="w-full max-w-5xl mx-auto">
       {/* Flow Progress Bar */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between">
           {FLOW_STEPS.map((step, i) => (
             <div key={step.state} className="flex items-center">
               <div className="flex flex-col items-center">
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-300 ${
+                  className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-medium transition-all duration-300 ${
                     i < currentStep
                       ? "bg-[var(--color-brand)] text-white"
                       : i === currentStep && flow.state !== "idle"
@@ -46,19 +46,27 @@ export function HeroPlayground() {
                 >
                   {i < currentStep ? "✓" : i + 1}
                 </div>
-                <span className={`text-[10px] mt-1.5 whitespace-nowrap ${
+                <span className={`hidden sm:block text-[10px] mt-1.5 whitespace-nowrap ${
                   i <= currentStep && flow.state !== "idle" ? "text-white" : "text-[var(--color-muted)]"
                 }`}>
                   {step.label}
                 </span>
               </div>
               {i < FLOW_STEPS.length - 1 && (
-                <div className={`w-8 sm:w-12 lg:w-16 h-px mx-1 transition-colors duration-300 ${
+                <div className={`w-4 sm:w-10 lg:w-14 h-px mx-0.5 sm:mx-1 transition-colors duration-300 ${
                   i < currentStep ? "bg-[var(--color-brand)]" : "bg-[var(--color-border)]"
                 }`} />
               )}
             </div>
           ))}
+        </div>
+        {/* Mobile: show current step label */}
+        <div className="sm:hidden text-center mt-2">
+          <span className="text-xs text-[var(--color-muted)]">
+            {flow.state !== "idle" && flow.state !== "error"
+              ? FLOW_STEPS[currentStep]?.description
+              : ""}
+          </span>
         </div>
       </div>
 
