@@ -19,7 +19,7 @@ const articles: Article[] = [
     slug: "t402-launch",
     title: "Introducing T402: The Official Payment Protocol for USDT",
     description:
-      "T402 brings HTTP-native stablecoin payments to the internet. Zero fees, instant settlement, and support for 10 blockchain networks including Ethereum, TON, TRON, and Solana.",
+      "T402 brings HTTP-native stablecoin payments to the internet. Zero fees, instant settlement, and support for 31+ blockchains across EVM, Solana, TON, TRON, NEAR, Aptos, and more.",
     date: "January 15, 2026",
     authors: ["T402 Team"],
     image: "", // No image

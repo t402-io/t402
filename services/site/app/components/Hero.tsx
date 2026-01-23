@@ -351,26 +351,26 @@ export function Hero() {
             <p className="mb-6 text-sm font-medium uppercase tracking-wider text-foreground-tertiary">
               Supported Chains
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-6">
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6">
               {chainLogos.map(({ name, Logo }) => (
                 <div
                   key={name}
-                  className="group flex flex-col items-center gap-2"
+                  className="group flex flex-col items-center gap-1 sm:gap-2"
                 >
-                  <Logo className="h-10 w-10 opacity-60 transition-all group-hover:opacity-100 group-hover:scale-110" />
-                  <span className="text-xs text-foreground-tertiary opacity-0 transition-opacity group-hover:opacity-100">
+                  <Logo className="h-8 w-8 sm:h-10 sm:w-10 opacity-60 transition-all group-hover:opacity-100 group-hover:scale-110" />
+                  <span className="hidden sm:block text-xs text-foreground-tertiary opacity-0 transition-opacity group-hover:opacity-100">
                     {name}
                   </span>
                 </div>
               ))}
               <Link
                 href="/chains"
-                className="flex flex-col items-center gap-2 group"
+                className="flex flex-col items-center gap-1 sm:gap-2 group"
               >
-                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background-secondary text-sm font-medium text-foreground-secondary opacity-60 transition-all group-hover:opacity-100 group-hover:scale-110 group-hover:border-brand">
+                <span className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-border bg-background-secondary text-xs sm:text-sm font-medium text-foreground-secondary opacity-60 transition-all group-hover:opacity-100 group-hover:scale-110 group-hover:border-brand">
                   +16
                 </span>
-                <span className="text-xs text-foreground-tertiary opacity-0 transition-opacity group-hover:opacity-100">
+                <span className="hidden sm:block text-xs text-foreground-tertiary opacity-0 transition-opacity group-hover:opacity-100">
                   more
                 </span>
               </Link>
