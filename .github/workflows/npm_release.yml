@@ -15,10 +15,15 @@ on:
           - all
           - core
           - extensions
+          - evm-core
           - evm
           - svm
           - ton
           - tron
+          - near
+          - aptos
+          - tezos
+          - polkadot
           - express
           - next
           - hono
@@ -39,9 +44,15 @@ on:
         required: false
         default: false
         type: boolean
+      skip_tests:
+        description: "Skip tests (use for re-publishing failed releases)"
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   test:
+    if: ${{ github.event.inputs.skip_tests != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -65,6 +76,7 @@ jobs:
 
   publish:
     needs: test
+    if: ${{ always() && (needs.test.result == 'success' || needs.test.result == 'skipped') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -79,6 +91,8 @@ jobs:
           - name: extensions
             path: packages/extensions
           # Mechanism packages
+          - name: evm-core
+            path: packages/mechanisms/evm-core
           - name: evm
             path: packages/mechanisms/evm
           - name: svm
@@ -87,6 +101,14 @@ jobs:
             path: packages/mechanisms/ton
           - name: tron
             path: packages/mechanisms/tron
+          - name: near
+            path: packages/mechanisms/near
+          - name: aptos
+            path: packages/mechanisms/aptos
+          - name: tezos
+            path: packages/mechanisms/tezos
+          - name: polkadot
+            path: packages/mechanisms/polkadot
           # HTTP server packages
           - name: express
             path: packages/http/express
@@ -147,10 +169,20 @@ jobs:
         if: ${{ github.event.inputs.package == 'all' || github.event.inputs.package == matrix.name || github.event_name == 'push' }}
         working-directory: ./sdks/typescript/${{ matrix.path }}
         run: |
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          echo "Publishing ${PACKAGE_NAME}@${PACKAGE_VERSION}"
+
+          # Check if this version already exists on npm
+          if npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version 2>/dev/null; then
+            echo "::warning::${PACKAGE_NAME}@${PACKAGE_VERSION} already exists on npm, skipping"
+            exit 0
+          fi
+
           if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
             pnpm publish --access public --no-git-checks --dry-run
           else
-            pnpm publish --access public --no-git-checks || echo "Package may already exist at this version"
+            pnpm publish --access public --no-git-checks
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
