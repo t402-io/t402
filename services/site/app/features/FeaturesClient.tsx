@@ -139,11 +139,88 @@ function ExternalLinkIcon({ className = "" }: { className?: string }) {
   );
 }
 
+function PolicyIcon({ className = "", style }: IconProps) {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style} aria-hidden="true">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  );
+}
+
+function A2AIcon({ className = "", style }: IconProps) {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style} aria-hidden="true">
+      <circle cx="7" cy="12" r="3" />
+      <circle cx="17" cy="12" r="3" />
+      <path d="M10 12h4" />
+      <path d="m14 10 2 2-2 2" />
+    </svg>
+  );
+}
+
+function StreamingIcon({ className = "", style }: IconProps) {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style} aria-hidden="true">
+      <path d="M2 12h4" />
+      <path d="M8 12h4" />
+      <path d="M14 12h4" />
+      <path d="M20 12h2" />
+      <path d="m6 8 2 4-2 4" />
+      <path d="m12 8 2 4-2 4" />
+      <path d="m18 8 2 4-2 4" />
+    </svg>
+  );
+}
+
+function ZKIcon({ className = "", style }: IconProps) {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style} aria-hidden="true">
+      <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20" />
+      <path d="M12 6v6l4 2" />
+      <path d="M8 14l4-4" />
+    </svg>
+  );
+}
+
+function RouterIcon({ className = "", style }: IconProps) {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style} aria-hidden="true">
+      <path d="M12 2v4" />
+      <path d="M12 18v4" />
+      <path d="m4.93 4.93 2.83 2.83" />
+      <path d="m16.24 16.24 2.83 2.83" />
+      <path d="M2 12h4" />
+      <path d="M18 12h4" />
+      <circle cx="12" cy="12" r="4" />
+    </svg>
+  );
+}
+
+function IntentIcon({ className = "", style }: IconProps) {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style} aria-hidden="true">
+      <path d="M4 4h16v16H4z" />
+      <path d="M9 9h6v6H9z" />
+      <path d="M4 12h5" />
+      <path d="M15 12h5" />
+      <path d="M12 4v5" />
+      <path d="M12 15v5" />
+    </svg>
+  );
+}
+
 const iconMap: Record<string, React.FC<IconProps>> = {
   gasless: GaslessIcon,
   bridge: BridgeIcon,
   mcp: MCPIcon,
   multisig: MultisigIcon,
+  policy: PolicyIcon,
+  a2a: A2AIcon,
+  streaming: StreamingIcon,
+  zk: ZKIcon,
+  router: RouterIcon,
+  intent: IntentIcon,
 };
 
 function FeatureCard({ feature, index }: { feature: Feature; index: number }) {
@@ -174,7 +251,22 @@ function FeatureCard({ feature, index }: { feature: Feature; index: number }) {
         </div>
 
         {/* Content */}
-        <h3 className="mb-2 text-xl font-semibold text-foreground">{feature.name}</h3>
+        <div className="mb-2 flex items-center gap-2">
+          <h3 className="text-xl font-semibold text-foreground">{feature.name}</h3>
+          {feature.badge && (
+            <span
+              className={`rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${
+                feature.badge === "beta"
+                  ? "border-amber-500/20 bg-amber-500/10 text-amber-400"
+                  : feature.badge === "coming-soon"
+                    ? "border-purple-500/20 bg-purple-500/10 text-purple-400"
+                    : "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+              }`}
+            >
+              {feature.badge}
+            </span>
+          )}
+        </div>
         <p className="mb-4 text-sm font-medium" style={{ color: feature.color }}>
           {feature.tagline}
         </p>
@@ -251,57 +343,62 @@ export default function FeaturesClient() {
         className="mb-20"
       >
         <h2 className="mb-8 text-center text-2xl font-semibold text-foreground">
-          Feature Comparison
+          Feature &times; Chain Support
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b border-border">
                 <th className="p-4 text-left text-sm font-semibold text-foreground">Feature</th>
-                <th className="p-4 text-center text-sm font-semibold text-foreground">
-                  EVM Chains
-                </th>
+                <th className="p-4 text-center text-sm font-semibold text-foreground">EVM</th>
                 <th className="p-4 text-center text-sm font-semibold text-foreground">Solana</th>
                 <th className="p-4 text-center text-sm font-semibold text-foreground">TON</th>
                 <th className="p-4 text-center text-sm font-semibold text-foreground">TRON</th>
+                <th className="p-4 text-center text-sm font-semibold text-foreground">NEAR</th>
+                <th className="p-4 text-center text-sm font-semibold text-foreground">Aptos</th>
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b border-border">
-                <td className="p-4 text-sm text-foreground">Gasless Transactions</td>
-                <td className="p-4 text-center text-brand">✓</td>
-                <td className="p-4 text-center text-foreground-tertiary">—</td>
-                <td className="p-4 text-center text-foreground-tertiary">—</td>
-                <td className="p-4 text-center text-foreground-tertiary">—</td>
-              </tr>
-              <tr className="border-b border-border">
-                <td className="p-4 text-sm text-foreground">Cross-Chain Bridge</td>
-                <td className="p-4 text-center text-brand">✓</td>
-                <td className="p-4 text-center text-foreground-tertiary">—</td>
-                <td className="p-4 text-center text-foreground-tertiary">—</td>
-                <td className="p-4 text-center text-foreground-tertiary">—</td>
-              </tr>
-              <tr className="border-b border-border">
-                <td className="p-4 text-sm text-foreground">AI Agent Payments (MCP)</td>
-                <td className="p-4 text-center text-brand">✓</td>
-                <td className="p-4 text-center text-brand">✓</td>
-                <td className="p-4 text-center text-foreground-tertiary">Soon</td>
-                <td className="p-4 text-center text-foreground-tertiary">Soon</td>
-              </tr>
-              <tr className="border-b border-border">
-                <td className="p-4 text-sm text-foreground">Multi-Sig Support</td>
-                <td className="p-4 text-center text-brand">✓</td>
-                <td className="p-4 text-center text-foreground-tertiary">—</td>
-                <td className="p-4 text-center text-foreground-tertiary">—</td>
-                <td className="p-4 text-center text-foreground-tertiary">—</td>
-              </tr>
-              <tr>
-                <td className="p-4 text-sm text-foreground">USDT/USDC Payments</td>
-                <td className="p-4 text-center text-brand">✓</td>
-                <td className="p-4 text-center text-brand">✓</td>
-                <td className="p-4 text-center text-brand">✓</td>
-                <td className="p-4 text-center text-brand">✓</td>
-              </tr>
+              {features.map((feature, i) => {
+                const chains = feature.supportedChains;
+                const hasEvm = chains.some((c) => ["Ethereum", "Base", "Arbitrum", "Optimism"].includes(c));
+                const hasSolana = chains.includes("Solana");
+                const hasTon = chains.includes("TON");
+                const hasTron = chains.includes("TRON");
+                const hasNear = chains.includes("NEAR");
+                const hasAptos = chains.includes("Aptos");
+
+                function Cell({ supported }: { supported: boolean }) {
+                  return supported ? (
+                    <td className="p-4 text-center text-brand">✓</td>
+                  ) : (
+                    <td className="p-4 text-center text-foreground-tertiary">—</td>
+                  );
+                }
+
+                return (
+                  <tr key={feature.id} className={i < features.length - 1 ? "border-b border-border" : ""}>
+                    <td className="p-4 text-sm text-foreground">
+                      <span className="flex items-center gap-2">
+                        {feature.name}
+                        {feature.badge && (
+                          <span className={`text-[10px] uppercase ${
+                            feature.badge === "beta" ? "text-amber-400" : "text-purple-400"
+                          }`}>
+                            {feature.badge}
+                          </span>
+                        )}
+                      </span>
+                    </td>
+                    <Cell supported={hasEvm} />
+                    <Cell supported={hasSolana} />
+                    <Cell supported={hasTon} />
+                    <Cell supported={hasTron} />
+                    <Cell supported={hasNear} />
+                    <Cell supported={hasAptos} />
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
