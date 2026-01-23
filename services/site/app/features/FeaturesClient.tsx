@@ -356,6 +356,9 @@ export default function FeaturesClient() {
                 <th className="p-4 text-center text-sm font-semibold text-foreground">TRON</th>
                 <th className="p-4 text-center text-sm font-semibold text-foreground">NEAR</th>
                 <th className="p-4 text-center text-sm font-semibold text-foreground">Aptos</th>
+                <th className="p-4 text-center text-sm font-semibold text-foreground">Tezos</th>
+                <th className="p-4 text-center text-sm font-semibold text-foreground">Polkadot</th>
+                <th className="p-4 text-center text-sm font-semibold text-foreground">Stacks</th>
               </tr>
             </thead>
             <tbody>
@@ -367,6 +370,9 @@ export default function FeaturesClient() {
                 const hasTron = chains.includes("TRON");
                 const hasNear = chains.includes("NEAR");
                 const hasAptos = chains.includes("Aptos");
+                const hasTezos = chains.includes("Tezos");
+                const hasPolkadot = chains.includes("Polkadot");
+                const hasStacks = chains.includes("Stacks");
 
                 function Cell({ supported }: { supported: boolean }) {
                   return supported ? (
@@ -396,6 +402,9 @@ export default function FeaturesClient() {
                     <Cell supported={hasTron} />
                     <Cell supported={hasNear} />
                     <Cell supported={hasAptos} />
+                    <Cell supported={hasTezos} />
+                    <Cell supported={hasPolkadot} />
+                    <Cell supported={hasStacks} />
                   </tr>
                 );
               })}

@@ -93,6 +93,14 @@ const comparisonFeatures: ComparisonFeature[] = [
     paypal: false,
     crypto: false,
   },
+  {
+    name: "Payment Transports",
+    description: "HTTP, MCP, and A2A support",
+    t402: "3 transports",
+    stripe: "HTTP only",
+    paypal: "HTTP only",
+    crypto: "HTTP only",
+  },
 ];
 
 function CheckIcon({ className = "" }: { className?: string }) {
