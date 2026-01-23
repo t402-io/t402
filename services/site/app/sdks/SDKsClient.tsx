@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { sdks, typescriptPackages, supportedChains, type SDK } from "./data";
+import { sdks, typescriptPackages, advancedPackages, supportedChains, type SDK, type Package } from "./data";
 
 // Icons
 function TypeScriptIcon({ className = "" }: { className?: string }) {
@@ -255,6 +255,31 @@ function InstallCommand({ command, packageManager }: { command: string; packageM
   );
 }
 
+const badgeStyles: Record<string, string> = {
+  new: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  beta: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  deprecated: "bg-red-500/10 text-red-400 border-red-500/20",
+};
+
+function PackageCard({ pkg }: { pkg: Package }) {
+  return (
+    <div className="rounded-lg border border-border bg-background-secondary p-4">
+      <div className="mb-2 flex items-center gap-2">
+        <PackageIcon className="h-4 w-4 text-brand" />
+        <code className="text-sm font-medium text-foreground">{pkg.name}</code>
+        {pkg.badge && (
+          <span
+            className={`rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${badgeStyles[pkg.badge]}`}
+          >
+            {pkg.badge}
+          </span>
+        )}
+      </div>
+      <p className="text-sm text-foreground-tertiary">{pkg.description}</p>
+    </div>
+  );
+}
+
 export default function SDKsClient() {
   const [selectedSDK, setSelectedSDK] = useState<SDK>(sdks[0]);
 
@@ -354,21 +379,29 @@ export default function SDKsClient() {
 
           {/* TypeScript Packages */}
           {selectedSDK.id === "typescript" && (
-            <div>
-              <h2 className="mb-4 text-xl font-semibold text-foreground">Packages</h2>
-              <div className="grid gap-3">
-                {typescriptPackages.map((pkg) => (
-                  <div
-                    key={pkg.name}
-                    className="rounded-lg border border-border bg-background-secondary p-4"
-                  >
-                    <div className="mb-2 flex items-center gap-2">
-                      <PackageIcon className="h-4 w-4 text-brand" />
-                      <code className="text-sm font-medium text-foreground">{pkg.name}</code>
-                    </div>
-                    <p className="text-sm text-foreground-tertiary">{pkg.description}</p>
-                  </div>
-                ))}
+            <div className="space-y-8">
+              <div>
+                <h2 className="mb-4 text-xl font-semibold text-foreground">
+                  Packages <span className="text-sm font-normal text-foreground-tertiary">({typescriptPackages.length})</span>
+                </h2>
+                <div className="grid gap-3">
+                  {typescriptPackages.map((pkg) => (
+                    <PackageCard key={pkg.name} pkg={pkg} />
+                  ))}
+                </div>
+              </div>
+              <div>
+                <h2 className="mb-2 text-xl font-semibold text-foreground">
+                  Advanced Packages <span className="text-sm font-normal text-foreground-tertiary">({advancedPackages.length})</span>
+                </h2>
+                <p className="mb-4 text-sm text-foreground-tertiary">
+                  Experimental packages for cutting-edge payment features.
+                </p>
+                <div className="grid gap-3">
+                  {advancedPackages.map((pkg) => (
+                    <PackageCard key={pkg.name} pkg={pkg} />
+                  ))}
+                </div>
               </div>
             </div>
           )}

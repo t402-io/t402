@@ -7,7 +7,7 @@ const features = [
   {
     slug: "gasless",
     title: "Gasless Transactions",
-    description: "ERC-4337 Account Abstraction enables gas-free payments. Users pay only in USDT, no ETH needed.",
+    description: "EIP-3009 and ERC-4337 enable gas-free USDT0 payments across 19+ EVM chains. Users pay only in stablecoins.",
     icon: (
       <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -19,7 +19,7 @@ const features = [
   {
     slug: "bridge",
     title: "Cross-Chain Bridge",
-    description: "LayerZero USDT0 integration enables seamless cross-chain payments across all supported networks.",
+    description: "LayerZero USDT0 OFT enables seamless cross-chain payments across 19+ networks with unified liquidity.",
     icon: (
       <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
@@ -30,8 +30,8 @@ const features = [
   },
   {
     slug: "mcp",
-    title: "AI Agent Ready",
-    description: "Model Context Protocol support enables AI agents to autonomously make payments via HTTP 402.",
+    title: "AI Agent Payments",
+    description: "MCP and A2A protocol support enables AI agents to autonomously discover, negotiate, and pay for services.",
     icon: (
       <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -39,6 +39,33 @@ const features = [
     ),
     gradient: "from-purple-500/20 to-pink-500/20",
     borderColor: "hover:border-purple-500/50",
+  },
+  {
+    slug: "streaming",
+    title: "Streaming Payments",
+    description: "Pay-per-second for continuous access. Real-time metering with auto-topup for AI inference and data feeds.",
+    badge: "beta",
+    icon: (
+      <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2 12h4M8 12h4M14 12h4M20 12h2M6 8l2 4-2 4M12 8l2 4-2 4M18 8l2 4-2 4" />
+      </svg>
+    ),
+    gradient: "from-cyan-500/20 to-teal-500/20",
+    borderColor: "hover:border-cyan-500/50",
+  },
+  {
+    slug: "smart-router",
+    title: "Smart Payment Router",
+    description: "Automatic cross-chain routing finds the cheapest path considering gas, bridge fees, and token availability.",
+    badge: "beta",
+    icon: (
+      <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4" />
+        <circle cx="12" cy="12" r="4" strokeWidth={1.5} />
+      </svg>
+    ),
+    gradient: "from-orange-500/20 to-red-500/20",
+    borderColor: "hover:border-orange-500/50",
   },
   {
     slug: "multisig",
@@ -73,7 +100,7 @@ export function FeatureDeepDives() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature, index) => (
             <motion.div
               key={feature.slug}
@@ -89,15 +116,22 @@ export function FeatureDeepDives() {
 
                   {/* Content */}
                   <div className="relative z-10">
-                    <div className="w-14 h-14 rounded-xl bg-background-tertiary border border-border flex items-center justify-center text-brand mb-6 group-hover:scale-110 transition-transform">
-                      {feature.icon}
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="w-14 h-14 rounded-xl bg-background-tertiary border border-border flex items-center justify-center text-brand group-hover:scale-110 transition-transform">
+                        {feature.icon}
+                      </div>
+                      {feature.badge && (
+                        <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-amber-400">
+                          {feature.badge}
+                        </span>
+                      )}
                     </div>
 
                     <h3 className="text-xl font-semibold text-foreground mb-3 group-hover:text-brand transition-colors">
                       {feature.title}
                     </h3>
 
-                    <p className="text-foreground-secondary mb-4">
+                    <p className="text-foreground-secondary text-sm mb-4">
                       {feature.description}
                     </p>
 
