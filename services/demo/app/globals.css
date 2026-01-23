@@ -116,6 +116,44 @@
     pointer-events: none;
     z-index: 0;
   }
+
+  .text-gradient-brand {
+    background: linear-gradient(135deg, #50AF95 0%, #7DD3C0 50%, #50AF95 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradient-shift 6s ease-in-out infinite;
+  }
+
+  @keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .btn-primary {
+    background: var(--color-brand);
+    color: white;
+    font-weight: 500;
+    border-radius: 12px;
+    transition: opacity 0.2s, transform 0.15s;
+    cursor: pointer;
+  }
+
+  .btn-primary:hover {
+    opacity: 0.9;
+    transform: translateY(-0.5px);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

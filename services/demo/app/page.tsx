@@ -83,7 +83,7 @@ export default function DemoPage() {
         <div className="hero-glow" />
         <div className="relative z-10 text-center mb-12">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-4">
-            <span className="text-[var(--color-brand)]">HTTP 402</span> Payments
+            <span className="text-gradient-brand">HTTP 402</span> Payments
           </h1>
           <p className="text-lg sm:text-xl text-[var(--color-muted)] max-w-2xl mx-auto mb-2">
             Pay for web resources with USDT — no API keys, no subscriptions.

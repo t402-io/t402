@@ -109,7 +109,7 @@ export function ContentPaywall() {
               </p>
               <button
                 onClick={unlock}
-                className="px-6 py-2.5 rounded-xl bg-[var(--color-brand)] text-white font-medium hover:opacity-90 transition-opacity cursor-pointer"
+                className="btn-primary px-6 py-2.5"
               >
                 Pay & Read
               </button>
