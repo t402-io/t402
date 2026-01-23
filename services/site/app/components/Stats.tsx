@@ -4,9 +4,9 @@ import { motion } from "motion/react";
 
 const stats = [
   {
-    value: "31+",
+    value: "28",
     label: "Chains Supported",
-    description: "EVM, Solana, TON, TRON, NEAR, Aptos & more",
+    description: "EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot & more",
   },
   {
     value: "4",

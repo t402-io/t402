@@ -633,7 +633,7 @@ export default function UseCasesClient() {
           <p className="text-sm text-foreground-tertiary">Categories</p>
         </div>
         <div className="rounded-xl border border-border bg-background-secondary p-4 text-center">
-          <p className="text-3xl font-bold text-foreground">31+</p>
+          <p className="text-3xl font-bold text-foreground">28</p>
           <p className="text-sm text-foreground-tertiary">Chains Supported</p>
         </div>
         <div className="rounded-xl border border-border bg-background-secondary p-4 text-center">

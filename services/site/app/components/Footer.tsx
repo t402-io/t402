@@ -69,7 +69,7 @@ const footerLinks = {
     { label: "Tezos", href: "https://docs.t402.io/chains/tezos" },
     { label: "Polkadot", href: "https://docs.t402.io/chains/polkadot" },
     { label: "Stacks", href: "https://docs.t402.io/chains/stacks" },
-    { label: "View All 31+", href: "/chains" },
+    { label: "View All 28", href: "/chains" },
   ],
 };
 
