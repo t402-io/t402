@@ -261,6 +261,11 @@ function ChainCard({ chain }: { chain: Chain }) {
             Live
           </span>
         )}
+        {chain.status === "coming_soon" && (
+          <span className="rounded-full bg-warning/10 px-2.5 py-1 text-xs font-medium text-warning">
+            Coming Soon
+          </span>
+        )}
       </div>
 
       {/* Description */}
