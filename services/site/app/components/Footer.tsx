@@ -64,6 +64,12 @@ const footerLinks = {
     { label: "TON", href: "https://docs.t402.io/chains/ton" },
     { label: "TRON", href: "https://docs.t402.io/chains/tron" },
     { label: "Solana", href: "https://docs.t402.io/chains/solana" },
+    { label: "NEAR", href: "https://docs.t402.io/chains/near" },
+    { label: "Aptos", href: "https://docs.t402.io/chains/aptos" },
+    { label: "Tezos", href: "https://docs.t402.io/chains/tezos" },
+    { label: "Polkadot", href: "https://docs.t402.io/chains/polkadot" },
+    { label: "Stacks", href: "https://docs.t402.io/chains/stacks" },
+    { label: "View All 31+", href: "/chains" },
   ],
 };
 

@@ -141,6 +141,65 @@ function UnichainLogo({ className = "" }: { className?: string }) {
   );
 }
 
+function NearLogo({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" className={className} aria-label="NEAR">
+      <circle cx="16" cy="16" r="16" fill="#000000" />
+      <path
+        d="M21.5 8.5l-4.5 6.7 4.5 8.3h-2.8l-3.2-5.9-3.2 5.9H9.5l4.5-8.3-4.5-6.7h2.8l3.2 4.7 3.2-4.7h2.8z"
+        fill="#fff"
+      />
+    </svg>
+  );
+}
+
+function AptosLogo({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" className={className} aria-label="Aptos">
+      <circle cx="16" cy="16" r="16" fill="#000000" />
+      <path
+        d="M22 12h-3l-1.5 2.5H22v2h-6l-1.5 2.5H22v2H13l-1.5 2.5h-2L16 12h6z"
+        fill="#fff"
+      />
+    </svg>
+  );
+}
+
+function TezosLogo({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" className={className} aria-label="Tezos">
+      <circle cx="16" cy="16" r="16" fill="#2C7DF7" />
+      <path
+        d="M19.5 18.5c0 2.2-1.8 4-4 4s-4-1.8-4-4v-5h2v5c0 1.1.9 2 2 2s2-.9 2-2v-3h-2v-2h4v5zm-2-9h-4v-2h4v2z"
+        fill="#fff"
+      />
+    </svg>
+  );
+}
+
+function PolkadotLogo({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" className={className} aria-label="Polkadot">
+      <circle cx="16" cy="16" r="16" fill="#E6007A" />
+      <ellipse cx="16" cy="10" rx="4" ry="2.5" fill="#fff" />
+      <ellipse cx="16" cy="22" rx="4" ry="2.5" fill="#fff" />
+      <ellipse cx="16" cy="16" rx="2.5" ry="1.5" fill="#fff" />
+    </svg>
+  );
+}
+
+function StacksLogo({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" className={className} aria-label="Stacks">
+      <circle cx="16" cy="16" r="16" fill="#5546FF" />
+      <path
+        d="M10 12h12v2H10v-2zm0 6h12v2H10v-2zm3-4h6v2h-6v-2z"
+        fill="#fff"
+      />
+    </svg>
+  );
+}
+
 const chainLogos = [
   { name: "Ethereum", Logo: EthereumLogo },
   { name: "Base", Logo: BaseLogo },
@@ -152,6 +211,11 @@ const chainLogos = [
   { name: "TON", Logo: TonLogo },
   { name: "TRON", Logo: TronLogo },
   { name: "Solana", Logo: SolanaLogo },
+  { name: "NEAR", Logo: NearLogo },
+  { name: "Aptos", Logo: AptosLogo },
+  { name: "Tezos", Logo: TezosLogo },
+  { name: "Polkadot", Logo: PolkadotLogo },
+  { name: "Stacks", Logo: StacksLogo },
 ];
 
 const codeExample = `// Accept USDT payments in 3 lines
@@ -182,7 +246,7 @@ export function Hero() {
           >
             <span className="h-2 w-2 rounded-full bg-brand animate-pulse" />
             <span className="text-sm text-foreground-secondary">
-              Production-ready across 10 blockchains
+              Production-ready across 31+ blockchains
             </span>
           </motion.div>
 
@@ -205,8 +269,9 @@ export function Hero() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mx-auto mt-6 max-w-2xl text-lg text-foreground-secondary sm:text-xl"
           >
-            HTTP-native stablecoin payments across Ethereum, TON, TRON, and
-            Solana. Zero fees. Instant settlement. Built for AI agents.
+            HTTP-native stablecoin payments across 31+ blockchains with HTTP,
+            MCP, and A2A transports. Zero fees. Instant settlement. Built for AI
+            agents.
           </motion.p>
 
           {/* CTA Buttons */}
@@ -298,6 +363,17 @@ export function Hero() {
                   </span>
                 </div>
               ))}
+              <Link
+                href="/chains"
+                className="flex flex-col items-center gap-2 group"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background-secondary text-sm font-medium text-foreground-secondary opacity-60 transition-all group-hover:opacity-100 group-hover:scale-110 group-hover:border-brand">
+                  +16
+                </span>
+                <span className="text-xs text-foreground-tertiary opacity-0 transition-opacity group-hover:opacity-100">
+                  more
+                </span>
+              </Link>
             </div>
           </motion.div>
         </div>

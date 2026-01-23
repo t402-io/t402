@@ -90,7 +90,7 @@ const valueProps = [
     icon: MultiChainIcon,
     title: "Multi-Chain",
     description:
-      "One SDK, ten chains. Ethereum, Base, Arbitrum, Ink, Berachain, Unichain, Polygon, TON, TRON, and Solana with unified payment flows.",
+      "One SDK, 31+ chains. EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, and Stacks with unified payment flows across 9 blockchain families.",
     color: "text-chain-ethereum",
   },
   {
