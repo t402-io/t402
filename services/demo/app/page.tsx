@@ -1,13 +1,17 @@
 "use client";
 
+import Link from "next/link";
 import { WalletButton } from "@/components/layout/WalletButton";
 import { ModeToggle } from "@/components/layout/ModeToggle";
 import { FacilitatorBadge } from "@/components/layout/FacilitatorBadge";
-import { HeroPlayground } from "@/components/playground/HeroPlayground";
-import { AiApiScenario } from "@/components/scenarios/AiApiScenario";
-import { ContentPaywall } from "@/components/scenarios/ContentPaywall";
-import { DataMarketplace } from "@/components/scenarios/DataMarketplace";
-import { AgentToAgent } from "@/components/scenarios/AgentToAgent";
+import { ScenarioCard } from "@/components/shared/ScenarioCard";
+import { ChainLogo } from "@/components/shared/ChainLogo";
+import { CHAIN_FAMILIES, CHAIN_CONFIGS } from "@/lib/testnet-config";
+import {
+  Brain, FileText, Database, Bot,
+  Cpu, Radio, Wand2, ArrowLeftRight, Zap,
+  ArrowRight,
+} from "lucide-react";
 
 const SCENARIOS = [
   {
@@ -15,59 +19,89 @@ const SCENARIOS = [
     title: "AI API Monetization",
     description: "No API keys. No subscriptions. Agents and users pay 0.001 USDT per query — instantly settled on-chain.",
     cost: "0.001 USDT/query",
-    component: AiApiScenario,
+    icon: <Brain size={18} />,
+    accentColor: "var(--color-scenario-ai)",
   },
   {
-    id: "content",
+    id: "content-paywall",
     title: "Content Paywall",
     description: "Replace subscription fatigue with one-time payments. Readers pay only for what they read.",
     cost: "0.01 USDT/article",
-    component: ContentPaywall,
+    icon: <FileText size={18} />,
+    accentColor: "var(--color-scenario-content)",
   },
   {
-    id: "data",
+    id: "data-marketplace",
     title: "Data Marketplace",
-    description: "Pay-per-request market data. No monthly minimums, no rate limit keys — just USDT micropayments.",
+    description: "Pay-per-request market data. No monthly minimums — just USDT micropayments.",
     cost: "0.001 USDT/request",
-    component: DataMarketplace,
+    icon: <Database size={18} />,
+    accentColor: "var(--color-scenario-data)",
   },
   {
-    id: "a2a",
+    id: "agent-to-agent",
     title: "Agent-to-Agent",
-    description: "AI agents delegate tasks and pay each other automatically. No human in the loop — pure machine-to-machine payments.",
+    description: "AI agents delegate tasks and pay each other automatically. Pure machine-to-machine payments.",
     cost: "0.001 USDT/task",
-    component: AgentToAgent,
+    icon: <Bot size={18} />,
+    accentColor: "var(--color-scenario-agent)",
+  },
+  {
+    id: "iot-micropayments",
+    title: "IoT Micropayments",
+    description: "Sensor data on demand. Pay per reading — temperature, humidity, GPS coordinates.",
+    cost: "0.0001 USDT/reading",
+    icon: <Cpu size={18} />,
+    accentColor: "var(--color-scenario-iot)",
+  },
+  {
+    id: "streaming-media",
+    title: "Streaming Media",
+    description: "Pay-per-second audio streaming. No subscriptions, just listen and pay as you go.",
+    cost: "0.001 USDT/10s",
+    icon: <Radio size={18} />,
+    accentColor: "var(--color-scenario-stream)",
+  },
+  {
+    id: "mcp-ai-agent",
+    title: "MCP AI Agent",
+    description: "AI agent autonomously pays for tools and resources via Model Context Protocol.",
+    cost: "0.001 USDT/tool",
+    icon: <Wand2 size={18} />,
+    accentColor: "var(--color-scenario-mcp)",
+  },
+  {
+    id: "cross-chain-bridge",
+    title: "Cross-Chain Bridge",
+    description: "Pay on one chain, settle on another. LayerZero USDT0 enables seamless cross-chain payments.",
+    cost: "0.01 USDT/bridge",
+    icon: <ArrowLeftRight size={18} />,
+    accentColor: "var(--color-scenario-bridge)",
+  },
+  {
+    id: "gasless-payment",
+    title: "Gasless Payment",
+    description: "No ETH needed. ERC-4337 account abstraction handles gas — users only pay USDT.",
+    cost: "0.001 USDT",
+    icon: <Zap size={18} />,
+    accentColor: "var(--color-scenario-gasless)",
   },
 ];
 
-const HOW_IT_WORKS = [
-  {
-    step: "1",
-    title: "Request",
-    description: "Client requests a protected resource. Server responds with HTTP 402 and payment requirements.",
-  },
-  {
-    step: "2",
-    title: "Sign",
-    description: "Client signs a USDT transfer authorization off-chain (EIP-3009). No gas needed.",
-  },
-  {
-    step: "3",
-    title: "Settle",
-    description: "Facilitator verifies the signature and settles on-chain. Client receives the resource.",
-  },
+const FLOW_STEPS = [
+  { step: "1", title: "Request", description: "Client requests a protected resource. Server responds HTTP 402." },
+  { step: "2", title: "Sign", description: "Client signs a USDT authorization off-chain. No gas needed." },
+  { step: "3", title: "Settle", description: "Facilitator verifies and settles on-chain. Client gets the resource." },
 ];
 
-export default function DemoPage() {
+export default function HomePage() {
   return (
     <div className="min-h-screen">
-      {/* Sticky Header */}
+      {/* Header */}
       <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[rgba(10,10,11,0.8)] backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <a href="https://t402.io" className="text-sm font-semibold text-[var(--color-brand)] hover:opacity-80 transition-opacity">
-              T402
-            </a>
+            <span className="text-sm font-semibold text-[var(--color-brand)]">T402</span>
             <span className="text-xs text-[var(--color-muted)]">demo</span>
             <FacilitatorBadge />
           </div>
@@ -78,37 +112,52 @@ export default function DemoPage() {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="relative min-h-[calc(100vh-56px)] flex flex-col items-center justify-center px-4 sm:px-6 py-16 overflow-hidden">
+      {/* Hero */}
+      <section className="relative min-h-[70vh] flex flex-col items-center justify-center px-4 sm:px-6 py-20 overflow-hidden">
         <div className="hero-glow" />
         <div className="relative z-10 text-center mb-12">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-4">
-            <span className="text-gradient-brand">HTTP 402</span> Payments
+          <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tight mb-4">
+            <span className="text-gradient-brand">32 Chains.</span>{" "}
+            <span className="text-white">1 Header.</span>
           </h1>
-          <p className="text-lg sm:text-xl text-[var(--color-muted)] max-w-2xl mx-auto mb-2">
-            Pay for web resources with USDT — no API keys, no subscriptions.
+          <p className="text-lg sm:text-xl text-[var(--color-muted)] max-w-2xl mx-auto mb-3">
+            HTTP-native USDT payments for APIs, content, AI agents, and IoT.
           </p>
           <p className="text-sm text-[var(--color-muted)]">
             Request → 402 → Sign → Settle → Access. Under 3 seconds.
           </p>
         </div>
 
-        <div className="relative z-10 w-full">
-          <HeroPlayground />
+        {/* Chain logos */}
+        <div className="relative z-10 flex items-center gap-4 mb-10">
+          {CHAIN_FAMILIES.map((family) => (
+            <div key={family} className="flex flex-col items-center gap-1">
+              <ChainLogo family={family} size={24} />
+              <span className="text-[9px] text-[var(--color-muted)]">{CHAIN_CONFIGS[family].label}</span>
+            </div>
+          ))}
         </div>
 
-        <a href="#how-it-works" className="mt-16 text-center block group">
-          <p className="text-xs text-[var(--color-muted)] mb-2 group-hover:text-white transition-colors">Explore real-world scenarios</p>
-          <div className="animate-bounce text-[var(--color-muted)] group-hover:text-white transition-colors">↓</div>
-        </a>
+        {/* CTA */}
+        <div className="relative z-10 flex items-center gap-4">
+          <Link href="/ai-api" className="btn-primary px-5 py-2.5 text-sm flex items-center gap-2">
+            Try a Scenario <ArrowRight size={14} />
+          </Link>
+          <a
+            href="https://docs.t402.io"
+            className="px-5 py-2.5 text-sm text-[var(--color-muted)] hover:text-white transition-colors border border-[var(--color-border)] rounded-xl"
+          >
+            Read Docs
+          </a>
+        </div>
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="py-16 px-4 sm:px-6 border-t border-[var(--color-border)]">
+      <section className="py-16 px-4 sm:px-6 border-t border-[var(--color-border)]">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-xl sm:text-2xl font-bold text-center mb-10">How T402 Works</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {HOW_IT_WORKS.map((item) => (
+            {FLOW_STEPS.map((item) => (
               <div key={item.step} className="glass-card-interactive p-5 text-center">
                 <div className="w-10 h-10 rounded-full bg-[var(--color-brand-dim)] text-[var(--color-brand)] flex items-center justify-center text-sm font-bold mx-auto mb-3">
                   {item.step}
@@ -121,69 +170,71 @@ export default function DemoPage() {
         </div>
       </section>
 
-      {/* Scenario Quick Nav */}
-      <div className="sticky top-14 z-40 border-b border-[var(--color-border)] bg-[rgba(10,10,11,0.9)] backdrop-blur-md">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex items-center gap-1 overflow-x-auto py-2">
-          {SCENARIOS.map((s) => (
-            <a
-              key={s.id}
-              href={`#${s.id}`}
-              className="shrink-0 px-3 py-1.5 rounded-lg text-xs text-[var(--color-muted)] hover:text-white hover:bg-[var(--color-surface)] transition-colors"
-            >
-              {s.title}
-            </a>
-          ))}
+      {/* Scenario Grid */}
+      <section className="py-16 px-4 sm:px-6 border-t border-[var(--color-border)] bg-[rgba(20,20,21,0.3)]">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-xl sm:text-2xl font-bold text-center mb-3">Interactive Scenarios</h2>
+          <p className="text-sm text-[var(--color-muted)] text-center mb-10">
+            Explore real-world payment flows across {CHAIN_FAMILIES.length} blockchain families
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {SCENARIOS.map((s) => (
+              <ScenarioCard
+                key={s.id}
+                id={s.id}
+                title={s.title}
+                description={s.description}
+                cost={s.cost}
+                icon={s.icon}
+                accentColor={s.accentColor}
+                href={`/${s.id}`}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* Scenario Sections */}
-      {SCENARIOS.map((scenario, i) => {
-        const Component = scenario.component;
-        return (
-          <section
-            key={scenario.id}
-            id={scenario.id}
-            className={`py-20 px-4 sm:px-6 border-t border-[var(--color-border)] ${i % 2 !== 0 ? "bg-[rgba(20,20,21,0.3)]" : ""}`}
-          >
-            <div className="max-w-5xl mx-auto">
-              <div className="mb-10">
-                <div className="flex items-center gap-3 mb-3">
-                  <h2 className="text-2xl sm:text-3xl font-bold">{scenario.title}</h2>
-                  <span className="text-xs px-2.5 py-1 rounded-full bg-[var(--color-brand-dim)] text-[var(--color-brand)]">
-                    {scenario.cost}
-                  </span>
-                </div>
-                <p className="text-sm text-[var(--color-muted)] max-w-xl">
-                  {scenario.description}
-                </p>
-              </div>
+      {/* Developer Quick Start */}
+      <section className="py-16 px-4 sm:px-6 border-t border-[var(--color-border)]">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-xl sm:text-2xl font-bold mb-4">Integrate in Minutes</h2>
+          <p className="text-sm text-[var(--color-muted)] mb-8">
+            Add T402 payments to any HTTP API with a single middleware.
+          </p>
+          <div className="glass-card p-5 text-left">
+            <pre className="text-xs text-[var(--color-code-text)] overflow-x-auto font-mono">
+{`import { t402 } from '@t402/express';
 
-              <Component />
-            </div>
-          </section>
-        );
-      })}
+app.get('/api/premium', t402({
+  scheme: 'exact',
+  network: 'eip155:8453',
+  amount: '1000',  // 0.001 USDT
+}), (req, res) => {
+  res.json({ data: 'Premium content' });
+});`}
+            </pre>
+          </div>
+          <div className="mt-6 flex items-center justify-center gap-4">
+            <a href="https://www.npmjs.com/org/t402" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors">npm</a>
+            <a href="https://pypi.org/project/t402" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors">PyPI</a>
+            <a href="https://pkg.go.dev/github.com/t402-io/t402/sdks/go" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors">Go</a>
+            <a href="https://central.sonatype.com/artifact/io.t402/t402" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors">Maven</a>
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="border-t border-[var(--color-border)] py-12 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex flex-col sm:flex-row items-center gap-3">
+          <div className="flex items-center gap-3">
             <span className="text-sm font-semibold text-[var(--color-brand)]">T402</span>
-            <span className="text-xs text-[var(--color-muted)]">HTTP-native payments with USDT/USDT0</span>
+            <span className="text-xs text-[var(--color-muted)]">HTTP-native payments for USDT/USDT0</span>
           </div>
           <div className="flex items-center gap-6">
-            <a href="https://t402.io" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors">
-              Website
-            </a>
-            <a href="https://docs.t402.io" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors">
-              Docs
-            </a>
-            <a href="https://github.com/t402-io/t402" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors">
-              GitHub
-            </a>
-            <a href="https://facilitator.t402.io" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors">
-              Facilitator
-            </a>
+            <a href="https://t402.io" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors">Website</a>
+            <a href="https://docs.t402.io" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors">Docs</a>
+            <a href="https://github.com/t402-io/t402" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors">GitHub</a>
+            <a href="https://facilitator.t402.io" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors">Facilitator</a>
           </div>
         </div>
       </footer>

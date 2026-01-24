@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import { getNetwork, getAsset, PAY_TO } from "@/lib/config";
+import { getPreferredChain, getAcceptsForChain, getNetwork, getAsset, PAY_TO } from "@/lib/config";
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 
@@ -11,22 +11,13 @@ const RESOURCE = {
   description: "AI-powered query — pay per request with USDT",
 };
 
-function createAiPaymentRequired() {
+function createAiPaymentRequired(request: NextRequest) {
+  const chain = getPreferredChain(request);
   return {
     t402Version: 2,
     error: "Payment required",
     resource: { ...RESOURCE, mimeType: "application/json" },
-    accepts: [
-      {
-        scheme: "exact",
-        network: getNetwork(),
-        amount: AI_AMOUNT,
-        asset: getAsset(),
-        payTo: PAY_TO,
-        maxTimeoutSeconds: 60,
-        extra: { name: "USDT", version: "2" },
-      },
-    ],
+    accepts: getAcceptsForChain(chain, AI_AMOUNT),
   };
 }
 
@@ -36,7 +27,7 @@ export async function POST(request: NextRequest) {
 
   // If no payment header, return 402
   if (!paymentHeader) {
-    const paymentRequired = createAiPaymentRequired();
+    const paymentRequired = createAiPaymentRequired(request);
     const response = NextResponse.json(paymentRequired, { status: 402 });
     response.headers.set("Payment-Required", encodeHeader(paymentRequired));
     response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
@@ -68,7 +59,8 @@ export async function POST(request: NextRequest) {
     await new Promise((r) => setTimeout(r, 300));
 
     const aiResponse = await generateAiResponse(query);
-    const settleResponse = createMockSettleResponse(getNetwork());
+    const chain = getPreferredChain(request);
+    const settleResponse = createMockSettleResponse(chain);
 
     const response = NextResponse.json({
       query,

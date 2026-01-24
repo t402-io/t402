@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getNetwork, getAsset, PAY_TO, DEMO_AMOUNT } from "@/lib/config";
+import { getPreferredChain, getAcceptsForChain, getNetwork, getAsset, PAY_TO, DEMO_AMOUNT } from "@/lib/config";
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment } from "@/lib/t402-server";
-import { createPaymentRequired, mockPremiumReport, createMockSettleResponse } from "@/lib/mock-responses";
+import { mockPremiumReport, createMockSettleResponse } from "@/lib/mock-responses";
 
 const RESOURCE = {
   url: "/api/demo/premium-report",
@@ -13,7 +13,13 @@ export async function GET(request: NextRequest) {
   const paymentHeader = request.headers.get("payment-signature");
 
   if (!paymentHeader) {
-    const paymentRequired = createPaymentRequired(RESOURCE);
+    const chain = getPreferredChain(request);
+    const paymentRequired = {
+      t402Version: 2,
+      error: "Payment required",
+      resource: { ...RESOURCE, mimeType: "application/json" },
+      accepts: getAcceptsForChain(chain, DEMO_AMOUNT),
+    };
     const response = NextResponse.json(paymentRequired, { status: 402 });
     response.headers.set("Payment-Required", encodeHeader(paymentRequired));
     response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
@@ -33,7 +39,8 @@ export async function GET(request: NextRequest) {
 
   if (isDemoMode) {
     await new Promise((r) => setTimeout(r, 800));
-    const settleResponse = createMockSettleResponse(getNetwork());
+    const chain = getPreferredChain(request);
+    const settleResponse = createMockSettleResponse(chain);
     const response = NextResponse.json(mockPremiumReport);
     response.headers.set("Payment-Response", encodeHeader(settleResponse));
     response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");

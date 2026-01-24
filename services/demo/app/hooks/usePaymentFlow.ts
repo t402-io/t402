@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useDemoContext } from "@/providers/DemoProvider";
-import { useEvmPayment } from "./useEvmPayment";
+import { useMultiChainPayment } from "./useMultiChainPayment";
 
 export type FlowState =
   | "idle"
@@ -48,7 +48,7 @@ interface FlowResult {
 
 export function usePaymentFlow(url: string) {
   const { isDemo } = useDemoContext();
-  const { signPayment, isConnected } = useEvmPayment();
+  const { signPayment, isConnected, activeFamily } = useMultiChainPayment();
 
   const [result, setResult] = useState<FlowResult>({
     state: "idle",
@@ -75,6 +75,7 @@ export function usePaymentFlow(url: string) {
       // Step 1: Initial request
       const headers: Record<string, string> = {
         Accept: "application/json",
+        "x-preferred-chain": activeFamily,
       };
       if (isDemo) {
         headers["x-demo-mode"] = "true";
@@ -107,7 +108,7 @@ export function usePaymentFlow(url: string) {
       await delay(500);
 
       // Step 3: Sign payment
-      if (!isConnected && !isDemo) {
+      if (!isConnected) {
         setResult((prev) => ({
           ...prev,
           state: "error",
@@ -119,30 +120,7 @@ export function usePaymentFlow(url: string) {
       setResult((prev) => ({ ...prev, state: "signing" }));
 
       const requirements = paymentRequired.accepts[0];
-      let paymentPayload: unknown;
-
-      if (isDemo) {
-        // Mock signing in demo mode
-        await delay(800);
-        paymentPayload = {
-          t402Version: 2,
-          scheme: "exact",
-          network: requirements.network,
-          payload: {
-            authorization: {
-              from: "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD68",
-              to: requirements.payTo,
-              value: requirements.amount,
-              validAfter: 0,
-              validBefore: Math.floor(Date.now() / 1000) + 60,
-              nonce: "0x" + Array(64).fill("0").map(() => Math.floor(Math.random() * 16).toString(16)).join(""),
-            },
-            signature: "0x" + Array(130).fill("0").map(() => Math.floor(Math.random() * 16).toString(16)).join(""),
-          },
-        };
-      } else {
-        paymentPayload = await signPayment(requirements);
-      }
+      const paymentPayload = await signPayment(requirements);
 
       // Step 4: Retry with payment
       setResult((prev) => ({ ...prev, state: "retrying" }));
@@ -150,6 +128,7 @@ export function usePaymentFlow(url: string) {
       const encodedPayment = btoa(JSON.stringify(paymentPayload));
       const retryHeaders: Record<string, string> = {
         Accept: "application/json",
+        "x-preferred-chain": activeFamily,
         "Payment-Signature": encodedPayment,
       };
       if (isDemo) {
@@ -191,7 +170,7 @@ export function usePaymentFlow(url: string) {
         error: error instanceof Error ? error.message : String(error),
       }));
     }
-  }, [url, isDemo, isConnected, signPayment]);
+  }, [url, isDemo, isConnected, activeFamily, signPayment]);
 
   const reset = useCallback(() => {
     setResult({
