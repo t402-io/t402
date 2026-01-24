@@ -38,6 +38,8 @@ import (
 	tezosfac "github.com/t402-io/t402/sdks/go/mechanisms/tezos/exact-direct/facilitator"
 	"github.com/t402-io/t402/sdks/go/mechanisms/polkadot"
 	polkadotfac "github.com/t402-io/t402/sdks/go/mechanisms/polkadot/exact-direct/facilitator"
+	"github.com/t402-io/t402/sdks/go/mechanisms/stacks"
+	stacksfac "github.com/t402-io/t402/sdks/go/mechanisms/stacks/exact-direct/facilitator"
 	"github.com/t402-io/t402/services/facilitator/internal/cache"
 	"github.com/t402-io/t402/services/facilitator/internal/config"
 	"github.com/t402-io/t402/services/facilitator/internal/server"
@@ -358,6 +360,28 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, error) {
 		log.Printf("Polkadot facilitator configured for %d networks", len(polkadotNetworks))
 	} else {
 		log.Printf("Warning: POLKADOT_ASSET_HUB_INDEXER not set, Polkadot chains disabled")
+	}
+
+	// Setup Stacks chains if address is configured
+	if cfg.StacksAddress != "" {
+		stacksSigner := newFacilitatorStacksSigner(cfg)
+
+		var stacksNetworks []t402.Network
+
+		// Add mainnet
+		stacksNetworks = append(stacksNetworks, t402.Network(stacks.StacksMainnetCAIP2))
+		configuredNetworks = append(configuredNetworks, "Stacks Mainnet")
+
+		// Add testnet if testnet API URL is configured
+		if cfg.StacksTestnetAPIURL != "" {
+			stacksNetworks = append(stacksNetworks, t402.Network(stacks.StacksTestnetCAIP2))
+			configuredNetworks = append(configuredNetworks, "Stacks Testnet")
+		}
+
+		facilitator.Register(stacksNetworks, stacksfac.NewExactDirectStacksScheme(stacksSigner, nil))
+		log.Printf("Stacks facilitator configured for %d networks (address: %s)", len(stacksNetworks), cfg.StacksAddress)
+	} else {
+		log.Printf("Warning: STACKS_ADDRESS not set, Stacks chains disabled")
 	}
 
 	// Log configured networks
