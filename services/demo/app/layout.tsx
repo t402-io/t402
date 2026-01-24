@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { WagmiProviderWrapper } from "./providers/WagmiProvider";
+import { ChainProvider } from "./providers/ChainProvider";
 import { DemoProvider } from "./providers/DemoProvider";
 import "./globals.css";
 
@@ -41,11 +42,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body className="bg-[var(--color-background)] text-[var(--color-foreground)] antialiased">
-        <WagmiProviderWrapper>
-          <DemoProvider>
-            {children}
-          </DemoProvider>
-        </WagmiProviderWrapper>
+        <ChainProvider>
+          <WagmiProviderWrapper>
+            <DemoProvider>
+              {children}
+            </DemoProvider>
+          </WagmiProviderWrapper>
+        </ChainProvider>
       </body>
     </html>
   );

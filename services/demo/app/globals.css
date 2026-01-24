@@ -21,6 +21,31 @@
   --color-info-dim: #3B82F620;
   --color-code-text: #D4D4D4;
   --color-code-text-dim: #9CA3AF;
+
+  /* Chain brand colors */
+  --color-chain-evm: #627EEA;
+  --color-chain-evm-dim: #627EEA20;
+  --color-chain-base: #0052FF;
+  --color-chain-base-dim: #0052FF20;
+  --color-chain-ton: #0098EA;
+  --color-chain-ton-dim: #0098EA20;
+  --color-chain-tron: #FF0013;
+  --color-chain-tron-dim: #FF001320;
+  --color-chain-solana: #9945FF;
+  --color-chain-solana-dim: #9945FF20;
+  --color-chain-stacks: #5546FF;
+  --color-chain-stacks-dim: #5546FF20;
+
+  /* Scenario accent colors */
+  --color-scenario-ai: #8B5CF6;
+  --color-scenario-content: #EC4899;
+  --color-scenario-data: #14B8A6;
+  --color-scenario-agent: #F97316;
+  --color-scenario-iot: #06B6D4;
+  --color-scenario-stream: #EF4444;
+  --color-scenario-mcp: #6366F1;
+  --color-scenario-bridge: #84CC16;
+  --color-scenario-gasless: #FBBF24;
 }
 
 :root {
@@ -154,6 +179,27 @@
     cursor: not-allowed;
     transform: none;
   }
+}
+
+/* Utility: hide scrollbar */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Utility: safe area for mobile bottom nav */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Focus indicators for accessibility */
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 @media (prefers-reduced-motion: reduce) {
