@@ -5,6 +5,9 @@ import { useChainContext } from "@/providers/ChainProvider";
 import { useDemoContext } from "@/providers/DemoProvider";
 import { useEvmPayment } from "./useEvmPayment";
 import { useTonPayment } from "./useTonPayment";
+import { useSolanaPayment } from "./useSolanaPayment";
+import { useTronPayment } from "./useTronPayment";
+import { useStacksPayment } from "./useStacksPayment";
 import type { ChainFamily } from "@/lib/testnet-config";
 
 interface PaymentRequirements {
@@ -58,44 +61,49 @@ export function useMultiChainPayment() {
   const { isDemo } = useDemoContext();
   const evm = useEvmPayment();
   const ton = useTonPayment();
+  const solana = useSolanaPayment();
+  const tron = useTronPayment();
+  const stacks = useStacksPayment();
 
   const isConnected =
     activeFamily === "evm" ? evm.isConnected :
     activeFamily === "ton" ? ton.isConnected :
+    activeFamily === "solana" ? solana.isConnected :
+    activeFamily === "tron" ? tron.isConnected :
+    activeFamily === "stacks" ? stacks.isConnected :
     false;
+
   const address =
     activeFamily === "evm" ? evm.address :
     activeFamily === "ton" ? ton.address :
+    activeFamily === "solana" ? solana.address :
+    activeFamily === "tron" ? tron.address :
+    activeFamily === "stacks" ? stacks.address :
     null;
 
   const signPayment = useCallback(
     async (requirements: PaymentRequirements): Promise<PaymentPayload> => {
-      // In demo mode, always use mock signing
       if (isDemo) {
         await new Promise((r) => setTimeout(r, 600));
         return createMockPayload(requirements, activeFamily);
       }
 
-      // In live mode, use real wallet signing
       switch (activeFamily) {
         case "evm":
           return evm.signPayment(requirements) as Promise<PaymentPayload>;
         case "ton":
           return ton.signPayment(requirements) as Promise<PaymentPayload>;
-        case "tron":
-          // TODO: Implement when TronLink provider is added
-          throw new Error("TRON live signing not yet implemented. Use demo mode.");
         case "solana":
-          // TODO: Implement when @solana/wallet-adapter is added
-          throw new Error("Solana live signing not yet implemented. Use demo mode.");
+          return solana.signPayment(requirements) as Promise<PaymentPayload>;
+        case "tron":
+          return tron.signPayment(requirements) as Promise<PaymentPayload>;
         case "stacks":
-          // TODO: Implement when @stacks/connect is added
-          throw new Error("Stacks live signing not yet implemented. Use demo mode.");
+          return stacks.signPayment(requirements) as Promise<PaymentPayload>;
         default:
           throw new Error(`Unsupported chain: ${activeFamily}`);
       }
     },
-    [activeFamily, isDemo, evm, ton]
+    [activeFamily, isDemo, evm, ton, solana, tron, stacks]
   );
 
   return {
