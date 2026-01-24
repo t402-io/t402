@@ -5,6 +5,7 @@ import { TonConnectProvider } from "./providers/TonConnectProvider";
 import { SolanaProvider } from "./providers/SolanaProvider";
 import { ChainProvider } from "./providers/ChainProvider";
 import { DemoProvider } from "./providers/DemoProvider";
+import { ToastProvider } from "./providers/ToastProvider";
 import "./globals.css";
 
 const inter = Inter({
@@ -49,7 +50,9 @@ export default function RootLayout({
             <SolanaProvider>
               <WagmiProviderWrapper>
                 <DemoProvider>
-                  {children}
+                  <ToastProvider>
+                    {children}
+                  </ToastProvider>
                 </DemoProvider>
               </WagmiProviderWrapper>
             </SolanaProvider>

@@ -9,6 +9,7 @@ import { ModeToggle } from "@/components/layout/ModeToggle";
 import { ChainSelector } from "@/components/shared/ChainSelector";
 import { useMultiChainPayment } from "@/hooks/useMultiChainPayment";
 import { useDemoContext } from "@/providers/DemoProvider";
+import { encodePaymentHeader } from "@/lib/t402-client";
 
 type FlowStep = "idle" | "requesting" | "got-402" | "signing" | "retrying" | "done";
 
@@ -118,7 +119,7 @@ export default function PlaygroundPage() {
       const paymentRequired = JSON.parse(responseBody);
       const requirements = paymentRequired.accepts[0];
       const payload = await signPayment(requirements);
-      const encodedPayload = btoa(JSON.stringify(payload));
+      const encodedPayload = encodePaymentHeader(payload);
       setPaymentPayload(JSON.stringify(payload, null, 2));
 
       // Step 3: Retry with payment

@@ -8,6 +8,7 @@ import { Spinner } from "@/components/shared/Spinner";
 import { useDemoContext } from "@/providers/DemoProvider";
 import { useMultiChainPayment } from "@/hooks/useMultiChainPayment";
 import { type ChainFamily, CHAIN_CONFIGS } from "@/lib/testnet-config";
+import { encodePaymentHeader } from "@/lib/t402-client";
 
 type BridgeState = "idle" | "selecting" | "paying" | "bridging" | "confirming" | "done";
 
@@ -44,7 +45,7 @@ export function CrossChainBridge() {
 
         const retryHeaders: Record<string, string> = {
           ...headers,
-          "Payment-Signature": btoa(JSON.stringify(paymentPayload)),
+          "Payment-Signature": encodePaymentHeader(paymentPayload),
         };
 
         setState("confirming");

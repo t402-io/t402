@@ -5,6 +5,7 @@ import { Play, Pause, Square } from "lucide-react";
 import { useDemoContext } from "@/providers/DemoProvider";
 import { useMultiChainPayment } from "@/hooks/useMultiChainPayment";
 import { CostTicker } from "@/components/shared/CostTicker";
+import { encodePaymentHeader } from "@/lib/t402-client";
 
 type StreamState = "idle" | "buffering" | "playing" | "paused" | "ended";
 
@@ -37,7 +38,7 @@ export function StreamingMedia() {
 
         const retryHeaders: Record<string, string> = {
           ...headers,
-          "Payment-Signature": btoa(JSON.stringify(paymentPayload)),
+          "Payment-Signature": encodePaymentHeader(paymentPayload),
         };
         await fetch("/api/demo/stream?segment=0", { headers: retryHeaders });
       }
