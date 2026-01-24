@@ -6,7 +6,7 @@
   },
   "packageManager": "pnpm@10.7.0",
   "private": "true",
-  "version": "0.0.2",
+  "version": "2.3.1",
   "pnpm": {
     "overrides": {
       "happy-dom": ">=20.0.0",
