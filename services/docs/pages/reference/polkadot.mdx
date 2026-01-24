@@ -1,0 +1,196 @@
+# @t402/polkadot
+
+Polkadot Asset Hub implementation for T402 payments using system assets.
+
+import { Callout, Tabs } from 'nextra/components'
+
+## Installation
+
+```bash
+pnpm add @t402/polkadot
+```
+
+## Overview
+
+The `@t402/polkadot` package enables T402 payments on Polkadot Asset Hub (formerly Statemint) using native system assets. It uses the **exact-direct** scheme — the client submits an asset transfer extrinsic directly on-chain.
+
+Key features:
+- **System assets** — USDT (Asset ID 1984) on Asset Hub
+- **Parachain native** — runs on Polkadot's Asset Hub parachain
+- **Subscan verification** — transaction verification via Subscan indexer
+- **Multi-network** — supports Polkadot, Kusama, and Westend Asset Hubs
+
+## Network IDs
+
+| Network | CAIP-2 ID | SS58 Prefix | RPC Endpoint |
+|---------|-----------|------------|--------------|
+| Polkadot Asset Hub | `polkadot:68d56f15f85d3136970ec16946040bc1` | 0 | `wss://polkadot-asset-hub-rpc.polkadot.io` |
+| Kusama Asset Hub | `polkadot:48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a` | 2 | `wss://kusama-asset-hub-rpc.polkadot.io` |
+| Westend Asset Hub | `polkadot:e143f23803ac50e8f6f8e62695d1ce9e` | 42 | `wss://westend-asset-hub-rpc.polkadot.io` |
+
+<Callout type="info">
+  CAIP-2 identifiers for Polkadot networks use the first 32 characters of the genesis block hash.
+  RPC uses WebSocket (`wss://`), not HTTP.
+</Callout>
+
+## Client Usage
+
+```typescript
+import { createExactDirectPolkadotClient } from '@t402/polkadot/exact-direct/client'
+
+const client = createExactDirectPolkadotClient({
+  address: '15oF4uVJwmo4TdGW7VfQxNLavjCXviqWrb9sGQgMT9kNNQjL',
+  signAndSubmitExtrinsic: async (call, network) => {
+    // Use your Polkadot wallet (Polkadot.js, Talisman, SubWallet)
+    const result = await wallet.signAndSubmit(call)
+    return {
+      extrinsicHash: result.hash,
+      extrinsicId: `${result.blockHash}-${result.index}`
+    }
+  }
+})
+
+const payload = await client.createPaymentPayload(2, requirements)
+```
+
+## Server Usage
+
+```typescript
+import { registerExactDirectPolkadotServer } from '@t402/polkadot/exact-direct/server'
+
+const server = registerExactDirectPolkadotServer({
+  rpcUrl: 'wss://polkadot-asset-hub-rpc.polkadot.io'
+})
+```
+
+## Facilitator Usage
+
+```typescript
+import { createExactDirectPolkadotFacilitator } from '@t402/polkadot/exact-direct/facilitator'
+
+const facilitator = createExactDirectPolkadotFacilitator({
+  indexerUrl: 'https://assethub-polkadot.api.subscan.io'
+})
+
+const result = await facilitator.verify(payload, requirements)
+const settled = await facilitator.settle(payload, requirements)
+```
+
+## PaymentRequirements
+
+```typescript
+const requirements = {
+  scheme: 'exact-direct',
+  network: 'polkadot:68d56f15f85d3136970ec16946040bc1',
+  amount: '1000000', // 1 USDT (6 decimals)
+  asset: '1984', // Asset ID for USDT on Asset Hub
+  payTo: '15oF4uVJwmo4TdGW7VfQxNLavjCXviqWrb9sGQgMT9kNNQjL',
+  maxTimeoutSeconds: 300
+}
+```
+
+## Payment Flow
+
+1. **Client** builds an `assets.transfer` extrinsic for the specified asset ID
+2. **Client** signs and submits to the Asset Hub parachain
+3. **Extrinsic** is included in a block
+4. **Client** returns the extrinsic hash and ID as proof
+5. **Facilitator** verifies via Subscan API
+
+## Token Addresses
+
+| Token | Network | Asset ID | Decimals |
+|-------|---------|----------|----------|
+| USDT | Polkadot Asset Hub | 1984 | 6 |
+| USDT | Kusama Asset Hub | 1984 | 6 |
+| Test USDT | Westend Asset Hub | 1984 | 6 |
+
+<Callout type="warning">
+  On Polkadot Asset Hub, tokens are identified by numeric Asset IDs, not contract addresses.
+  USDT is Asset ID `1984` across all Asset Hub networks.
+</Callout>
+
+## Payload Structure
+
+```typescript
+interface ExactDirectPolkadotPayload {
+  extrinsicHash: string;  // extrinsic hash
+  extrinsicId: string;    // format: "{blockHash}-{extrinsicIndex}"
+  from: string;           // sender SS58 address
+  to: string;             // recipient SS58 address
+  amount: string;         // amount in smallest units
+  assetId: number;        // Asset ID (1984 for USDT)
+}
+```
+
+## Address Format
+
+Polkadot uses SS58 encoding with network-specific prefixes:
+
+| Network | SS58 Prefix | Example |
+|---------|------------|---------|
+| Polkadot | 0 | `15oF4uVJwmo4...` |
+| Kusama | 2 | `HNZata7iMY...` |
+| Westend | 42 | `5GrwvaEF5...` |
+
+The same public key produces different SS58 addresses on different networks.
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `invalid_payload_structure` | Missing extrinsicHash or extrinsicId |
+| `network_mismatch` | Extrinsic network doesn't match |
+| `amount_mismatch` | Transferred amount less than required |
+| `recipient_mismatch` | Transfer recipient doesn't match payTo |
+| `asset_id_mismatch` | Asset ID doesn't match requirements |
+| `extrinsic_not_found` | Extrinsic not found on-chain |
+| `extrinsic_failed` | Extrinsic exists but failed |
+
+## Example: Full Integration
+
+<Tabs items={['Client', 'Server']}>
+  <Tabs.Tab>
+```typescript
+import { t402Client } from '@t402/fetch'
+import { registerExactDirectPolkadotClient } from '@t402/polkadot/exact-direct/client'
+
+const client = new t402Client()
+registerExactDirectPolkadotClient(client, {
+  address: wallet.address,
+  signAndSubmitExtrinsic: wallet.signAndSubmit
+})
+
+const response = await client.fetch('https://api.example.com/premium')
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```typescript
+import { paymentMiddleware } from '@t402/express'
+
+app.use(paymentMiddleware({
+  'GET /api/premium': {
+    price: '$0.01',
+    network: 'polkadot:68d56f15f85d3136970ec16946040bc1',
+    asset: '1984',
+    payTo: '15oF4uVJwmo4TdGW7VfQxNLavjCXviqWrb9sGQgMT9kNNQjL',
+    description: 'Premium API access'
+  }
+}))
+```
+  </Tabs.Tab>
+</Tabs>
+
+## Go SDK
+
+```go
+import "github.com/t402-io/t402/sdks/go/mechanisms/polkadot"
+
+// Client
+client := polkadot.NewExactDirectPolkadotScheme(signer, &polkadot.Config{})
+payload, err := client.CreatePaymentPayload(ctx, requirements)
+
+// Facilitator
+facilitator := polkadot.NewExactDirectPolkadotFacilitator(indexerURL)
+result, err := facilitator.Verify(ctx, payload, requirements)
+```
