@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
 import { type ChainFamily, CHAIN_CONFIGS, type ChainConfig } from "@/lib/testnet-config";
 
 interface ChainContextValue {
@@ -25,13 +25,18 @@ export function useChainContext() {
   return useContext(ChainContext);
 }
 
+const VALID_FAMILIES: ChainFamily[] = ["evm", "ton", "tron", "solana", "stacks"];
+
 export function ChainProvider({ children }: { children: ReactNode }) {
-  const [activeFamily, setActiveFamilyState] = useState<ChainFamily>(() => {
-    if (typeof window !== "undefined") {
-      return (localStorage.getItem("t402-chain-family") as ChainFamily) || "evm";
+  const [activeFamily, setActiveFamilyState] = useState<ChainFamily>("evm");
+
+  // Sync from localStorage after hydration
+  useEffect(() => {
+    const stored = localStorage.getItem("t402-chain-family") as ChainFamily | null;
+    if (stored && VALID_FAMILIES.includes(stored)) {
+      setActiveFamilyState(stored);
     }
-    return "evm";
-  });
+  }, []);
 
   const [walletState, setWalletStateInternal] = useState<{
     connected: boolean;
