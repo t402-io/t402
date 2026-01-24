@@ -1,7 +1,15 @@
-"use client";
-
+import type { Metadata } from "next";
 import { ScenarioShell } from "@/components/shared/ScenarioShell";
 import { AiApiScenario } from "@/components/scenarios/AiApiScenario";
+
+export const metadata: Metadata = {
+  title: "AI API Monetization | T402 Demo",
+  description: "Pay-per-query AI API with USDT micropayments. No API keys, no subscriptions — just HTTP 402 and instant on-chain settlement.",
+  openGraph: {
+    title: "AI API Monetization — T402",
+    description: "Pay 0.001 USDT per AI query. No API keys needed.",
+  },
+};
 
 export default function AiApiPage() {
   return (

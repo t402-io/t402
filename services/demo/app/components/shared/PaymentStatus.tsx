@@ -21,6 +21,17 @@ interface PaymentStatusProps {
   family: ChainFamily;
 }
 
+const FLOW_ANNOUNCEMENTS: Record<FlowState, string> = {
+  idle: "",
+  requesting: "Sending request to server",
+  "got-402": "Server requires payment. Preparing authorization.",
+  signing: "Signing payment authorization",
+  retrying: "Sending payment to server",
+  verifying: "Verifying payment on-chain",
+  done: "Payment settled successfully",
+  error: "Payment failed",
+};
+
 /**
  * Compact payment status display: animated FlowDiagram + TransactionLink.
  * Drop this into any scenario to show real-time payment progress.
@@ -29,7 +40,11 @@ export function PaymentStatus({ flowState, settle, family }: PaymentStatusProps)
   const showResult = flowState === "done" && settle?.transaction;
 
   return (
-    <div className="glass-card p-3 sm:p-4">
+    <div className="glass-card p-3 sm:p-4" aria-busy={flowState !== "idle" && flowState !== "done" && flowState !== "error"}>
+      {/* Screen reader announcement for payment progress */}
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {FLOW_ANNOUNCEMENTS[flowState]}
+      </div>
       <FlowDiagram state={flowState} compact />
       {showResult && (
         <div className="flex items-center justify-between mt-3 pt-3 border-t border-[var(--color-border)]">

@@ -1,7 +1,15 @@
-"use client";
-
+import type { Metadata } from "next";
 import { ScenarioShell } from "@/components/shared/ScenarioShell";
 import { IoTMicropayments } from "@/components/scenarios/IoTMicropayments";
+
+export const metadata: Metadata = {
+  title: "IoT Micropayments | T402 Demo",
+  description: "Sensor data on demand — pay 0.0001 USDT per reading. Temperature, humidity, GPS via HTTP 402 micropayments.",
+  openGraph: {
+    title: "IoT Micropayments — T402",
+    description: "Pay-per-reading IoT sensor data with USDT.",
+  },
+};
 
 export default function IoTMicropaymentsPage() {
   return (

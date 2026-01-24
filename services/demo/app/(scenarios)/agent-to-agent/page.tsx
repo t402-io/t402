@@ -1,7 +1,15 @@
-"use client";
-
+import type { Metadata } from "next";
 import { ScenarioShell } from "@/components/shared/ScenarioShell";
 import { AgentToAgent } from "@/components/scenarios/AgentToAgent";
+
+export const metadata: Metadata = {
+  title: "Agent-to-Agent Payments | T402 Demo",
+  description: "AI agents delegate tasks and pay each other via HTTP 402. Pure machine-to-machine USDT micropayments.",
+  openGraph: {
+    title: "Agent-to-Agent Payments — T402",
+    description: "Autonomous AI agents paying each other with USDT.",
+  },
+};
 
 export default function AgentToAgentPage() {
   return (
