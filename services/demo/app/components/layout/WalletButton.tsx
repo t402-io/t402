@@ -3,6 +3,7 @@
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { useChainContext } from "@/providers/ChainProvider";
 import { useDemoContext } from "@/providers/DemoProvider";
+import { useToast } from "@/providers/ToastProvider";
 import { useTonPayment } from "@/hooks/useTonPayment";
 import { useSolanaPayment } from "@/hooks/useSolanaPayment";
 import { useTronPayment } from "@/hooks/useTronPayment";
@@ -65,13 +66,14 @@ function ConnectedBadge({
   );
 }
 
-function ConnectButton({ label, onClick }: { label: string; onClick: () => void }) {
+function ConnectButton({ label, onClick, loading }: { label: string; onClick: () => void; loading?: boolean }) {
   return (
     <button
       onClick={onClick}
+      disabled={loading}
       className="btn-primary rounded-lg px-4 py-1.5 text-sm"
     >
-      Connect {label}
+      {loading ? "Connecting..." : `Connect ${label}`}
     </button>
   );
 }
@@ -93,8 +95,9 @@ function InstallButton({ label, url }: { label: string; url: string }) {
 
 function EvmWalletButton() {
   const { isDemo } = useDemoContext();
+  const { show } = useToast();
   const { address, isConnected, chain } = useAccount();
-  const { connect, connectors } = useConnect();
+  const { connect, connectors, isPending } = useConnect();
   const { disconnect } = useDisconnect();
 
   if (isDemo) return <DemoWalletBadge label="EVM" />;
@@ -104,29 +107,42 @@ function EvmWalletButton() {
       <ConnectedBadge
         address={address}
         label={chain?.name || "EVM"}
-        onDisconnect={() => disconnect()}
+        onDisconnect={() => {
+          disconnect();
+          show("info", "Wallet disconnected");
+        }}
       />
     );
   }
 
-  // Check if an injected provider (MetaMask, etc.) actually exists in the browser
   const hasInjectedProvider = typeof window !== "undefined" && !!window.ethereum;
 
   const handleConnect = () => {
     if (hasInjectedProvider) {
       const injected = connectors.find((c) => c.id === "injected");
       if (injected) {
-        connect({ connector: injected });
+        connect(
+          { connector: injected },
+          {
+            onSuccess: () => show("success", "EVM wallet connected"),
+            onError: (err) => show("error", `Connection failed: ${err.message}`),
+          }
+        );
         return;
       }
     }
-    // Try WalletConnect (shows QR modal)
     const wc = connectors.find((c) => c.id === "walletConnect");
     if (wc) {
-      connect({ connector: wc });
+      connect(
+        { connector: wc },
+        {
+          onSuccess: () => show("success", "EVM wallet connected via WalletConnect"),
+          onError: (err) => show("error", `WalletConnect failed: ${err.message}`),
+        }
+      );
       return;
     }
-    // No provider available — open install page
+    show("warning", "No EVM wallet detected. Opening MetaMask install page.");
     window.open("https://metamask.io/download/", "_blank");
   };
 
@@ -134,57 +150,131 @@ function EvmWalletButton() {
     return <InstallButton label="MetaMask" url="https://metamask.io/download/" />;
   }
 
-  return <ConnectButton label="Wallet" onClick={handleConnect} />;
+  return <ConnectButton label="Wallet" onClick={handleConnect} loading={isPending} />;
 }
 
 function TonWalletButton() {
   const { isDemo } = useDemoContext();
+  const { show } = useToast();
   const { address, isConnected, connect, disconnect } = useTonPayment();
 
   if (isDemo) return <DemoWalletBadge label="TON" />;
   if (isConnected && address) {
-    return <ConnectedBadge address={address} label="TON" onDisconnect={disconnect} />;
+    return (
+      <ConnectedBadge
+        address={address}
+        label="TON"
+        onDisconnect={() => {
+          disconnect();
+          show("info", "TON wallet disconnected");
+        }}
+      />
+    );
   }
-  // TonConnect always works — shows QR code / deep link modal
-  return <ConnectButton label="TON" onClick={connect} />;
+
+  const handleConnect = async () => {
+    try {
+      await connect();
+    } catch (err) {
+      show("error", `TON connection failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+    }
+  };
+
+  return <ConnectButton label="TON" onClick={handleConnect} />;
 }
 
 function SolanaWalletButton() {
   const { isDemo } = useDemoContext();
+  const { show } = useToast();
   const { address, isConnected, hasWallet, connect, disconnect } = useSolanaPayment();
 
   if (isDemo) return <DemoWalletBadge label="Solana" />;
   if (isConnected && address) {
-    return <ConnectedBadge address={address} label="Solana" onDisconnect={disconnect} />;
+    return (
+      <ConnectedBadge
+        address={address}
+        label="Solana"
+        onDisconnect={() => {
+          disconnect();
+          show("info", "Solana wallet disconnected");
+        }}
+      />
+    );
   }
   if (!hasWallet) {
     return <InstallButton label="Phantom" url="https://phantom.app/" />;
   }
-  return <ConnectButton label="Solana" onClick={connect} />;
+
+  const handleConnect = async () => {
+    try {
+      await connect();
+    } catch (err) {
+      show("error", `Solana connection failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+    }
+  };
+
+  return <ConnectButton label="Solana" onClick={handleConnect} />;
 }
 
 function TronWalletButton() {
   const { isDemo } = useDemoContext();
+  const { show } = useToast();
   const { address, isConnected, isInstalled, connect, disconnect } = useTronPayment();
 
   if (isDemo) return <DemoWalletBadge label="TRON" />;
   if (isConnected && address) {
-    return <ConnectedBadge address={address} label="TRON" onDisconnect={disconnect} />;
+    return (
+      <ConnectedBadge
+        address={address}
+        label="TRON"
+        onDisconnect={() => {
+          disconnect();
+          show("info", "TRON wallet disconnected");
+        }}
+      />
+    );
   }
   if (!isInstalled) {
     return <InstallButton label="TronLink" url="https://www.tronlink.org/" />;
   }
-  return <ConnectButton label="TronLink" onClick={connect} />;
+
+  const handleConnect = async () => {
+    try {
+      await connect();
+    } catch (err) {
+      show("error", `TronLink connection failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+    }
+  };
+
+  return <ConnectButton label="TronLink" onClick={handleConnect} />;
 }
 
 function StacksWalletButton() {
   const { isDemo } = useDemoContext();
+  const { show } = useToast();
   const { address, isConnected, connect, disconnect } = useStacksPayment();
 
   if (isDemo) return <DemoWalletBadge label="Stacks" />;
   if (isConnected && address) {
-    return <ConnectedBadge address={address} label="Stacks" onDisconnect={disconnect} />;
+    return (
+      <ConnectedBadge
+        address={address}
+        label="Stacks"
+        onDisconnect={() => {
+          disconnect();
+          show("info", "Stacks wallet disconnected");
+        }}
+      />
+    );
   }
-  // Stacks Connect works via popup — always available
-  return <ConnectButton label="Stacks" onClick={connect} />;
+
+  const handleConnect = async () => {
+    try {
+      await connect();
+    } catch (err) {
+      show("error", `Stacks connection failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+    }
+  };
+
+  return <ConnectButton label="Stacks" onClick={handleConnect} />;
 }

@@ -6,6 +6,7 @@ import { useDemoContext } from "@/providers/DemoProvider";
 import { useMultiChainPayment } from "@/hooks/useMultiChainPayment";
 import { CostTicker } from "@/components/shared/CostTicker";
 import { Spinner } from "@/components/shared/Spinner";
+import { encodePaymentHeader } from "@/lib/t402-client";
 
 type SensorType = "temperature" | "humidity" | "gps";
 
@@ -47,7 +48,7 @@ export function IoTMicropayments() {
 
         const retryHeaders: Record<string, string> = {
           ...headers,
-          "Payment-Signature": btoa(JSON.stringify(paymentPayload)),
+          "Payment-Signature": encodePaymentHeader(paymentPayload),
         };
         const retryRes = await fetch(`/api/demo/iot-data?type=${type}`, { headers: retryHeaders });
         const data = await retryRes.json();

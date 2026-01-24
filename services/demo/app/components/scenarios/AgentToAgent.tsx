@@ -6,6 +6,7 @@ import { useDemoContext } from "@/providers/DemoProvider";
 import { useMultiChainPayment } from "@/hooks/useMultiChainPayment";
 import { CodeBlock } from "@/components/shared/CodeBlock";
 import { Spinner } from "@/components/shared/Spinner";
+import { encodePaymentHeader } from "@/lib/t402-client";
 
 type State = "idle" | "delegating" | "paying" | "executing" | "done" | "error";
 
@@ -69,7 +70,7 @@ export function AgentToAgent() {
       const retryHeaders: Record<string, string> = {
         "Content-Type": "application/json",
         "x-preferred-chain": activeFamily,
-        "Payment-Signature": btoa(JSON.stringify(paymentPayload)),
+        "Payment-Signature": encodePaymentHeader(paymentPayload),
       };
       if (isDemo) retryHeaders["x-demo-mode"] = "true";
 

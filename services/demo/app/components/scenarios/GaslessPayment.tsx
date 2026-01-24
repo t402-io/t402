@@ -5,6 +5,7 @@ import { Zap, Fuel, CheckCircle } from "lucide-react";
 import { Spinner } from "@/components/shared/Spinner";
 import { useDemoContext } from "@/providers/DemoProvider";
 import { useMultiChainPayment } from "@/hooks/useMultiChainPayment";
+import { encodePaymentHeader } from "@/lib/t402-client";
 
 type GaslessState = "idle" | "creating-userop" | "bundling" | "settling" | "done";
 
@@ -35,7 +36,7 @@ export function GaslessPayment() {
 
         const retryHeaders: Record<string, string> = {
           ...headers,
-          "Payment-Signature": btoa(JSON.stringify(paymentPayload)),
+          "Payment-Signature": encodePaymentHeader(paymentPayload),
         };
 
         setState("settling");
