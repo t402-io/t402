@@ -62,7 +62,7 @@ function getAssociatedTokenAddress(mint: PublicKey, owner: PublicKey): PublicKey
 }
 
 export function useSolanaPayment() {
-  const { publicKey, signTransaction, connected, connect, disconnect } = useWallet();
+  const { publicKey, signTransaction, connected, connect, disconnect, wallets, select, wallet } = useWallet();
   const { connection } = useConnection();
 
   const signPayment = useCallback(
@@ -112,11 +112,28 @@ export function useSolanaPayment() {
     [publicKey, signTransaction, connection]
   );
 
+  const hasWallet = wallets.some((w) => w.readyState === "Installed");
+
+  const doConnect = useCallback(async () => {
+    // Select first installed wallet, or first in list
+    const installed = wallets.find((w) => w.readyState === "Installed");
+    if (installed) {
+      select(installed.adapter.name);
+      // Wait for selection to propagate then connect
+      await new Promise((r) => setTimeout(r, 100));
+      if (connect) await connect();
+    } else {
+      // No wallet installed — open Phantom install page
+      window.open("https://phantom.app/", "_blank");
+    }
+  }, [wallets, select, connect]);
+
   return {
     address: publicKey?.toBase58() || null,
     isConnected: connected,
+    hasWallet,
     signPayment,
-    connect: useCallback(async () => { if (connect) await connect(); }, [connect]),
+    connect: doConnect,
     disconnect: useCallback(async () => { if (disconnect) await disconnect(); }, [disconnect]),
   };
 }
