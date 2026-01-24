@@ -2,6 +2,7 @@ export default {
   gasless: 'Gasless Payments',
   bridge: 'Cross-Chain Bridge',
   mcp: 'MCP Integration',
+  a2a: 'A2A Transport',
   deployment: 'Deployment Guide',
   'best-practices': 'Best Practices',
   performance: 'Performance Tuning',

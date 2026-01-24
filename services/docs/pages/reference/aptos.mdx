@@ -1,0 +1,197 @@
+# @t402/aptos
+
+Aptos blockchain implementation for T402 payments using the Fungible Asset standard.
+
+import { Callout, Tabs } from 'nextra/components'
+
+## Installation
+
+```bash
+pnpm add @t402/aptos
+```
+
+## Overview
+
+The `@t402/aptos` package enables T402 payments on Aptos using the Move-based Fungible Asset (FA) standard. It uses the **exact-direct** scheme — the client executes the transfer directly on-chain via `primary_fungible_store::transfer`.
+
+Key features:
+- **Fungible Asset standard** — Move-native token transfers
+- **Direct settlement** — client submits the transfer directly
+- **Metadata-based addressing** — tokens identified by FA metadata address
+
+## Network IDs
+
+| Network | CAIP-2 ID | Chain ID | RPC Endpoint |
+|---------|-----------|----------|--------------|
+| Mainnet | `aptos:1` | 1 | `https://fullnode.mainnet.aptoslabs.com/v1` |
+| Testnet | `aptos:2` | 2 | `https://fullnode.testnet.aptoslabs.com/v1` |
+| Devnet | `aptos:149` | 149 | `https://fullnode.devnet.aptoslabs.com/v1` |
+
+## Client Usage
+
+```typescript
+import { ExactDirectAptosClient } from '@t402/aptos/exact-direct/client'
+
+const client = new ExactDirectAptosClient({
+  address: '0x1234...abcd',
+  signAndSubmitTransaction: async (payload) => {
+    // Use your Aptos wallet (Petra, Martian, etc.)
+    const result = await wallet.signAndSubmitTransaction(payload)
+    return result.hash
+  }
+})
+
+const payload = await client.createPaymentPayload(2, requirements)
+```
+
+## Server Usage
+
+```typescript
+import { ExactDirectAptosServer } from '@t402/aptos/exact-direct/server'
+
+const server = new ExactDirectAptosServer({
+  rpcUrl: 'https://fullnode.mainnet.aptoslabs.com/v1'
+})
+
+const enhanced = await server.enhancePaymentRequirements(baseRequirements)
+```
+
+## Facilitator Usage
+
+```typescript
+import { ExactDirectAptosFacilitator } from '@t402/aptos/exact-direct/facilitator'
+
+const facilitator = new ExactDirectAptosFacilitator({
+  rpcUrl: 'https://fullnode.mainnet.aptoslabs.com/v1'
+})
+
+const result = await facilitator.verify(payload, requirements)
+const settled = await facilitator.settle(payload, requirements)
+```
+
+## PaymentRequirements
+
+```typescript
+const requirements = {
+  scheme: 'exact-direct',
+  network: 'aptos:1',
+  amount: '1000000', // 1 USDT (6 decimals)
+  asset: '0xf73e887a8754f540ee6e1a93bdc6dde2af69fc7ca5de32013e89dd44244473cb', // FA metadata address
+  payTo: '0xRecipientAddress...',
+  maxTimeoutSeconds: 600
+}
+```
+
+## Payment Flow
+
+1. **Client** builds a `primary_fungible_store::transfer` transaction
+2. **Client** signs and submits to the Aptos network
+3. **Transaction** executes the Move entry function
+4. **Client** returns the `txHash` as proof
+5. **Facilitator** verifies the transaction via REST API
+
+<Callout type="info">
+  Aptos uses the Fungible Asset standard (not legacy Coin). The `asset` field in requirements
+  is the FA metadata address, not a module address.
+</Callout>
+
+## Token Addresses (FA Metadata)
+
+| Token | Network | Metadata Address | Decimals |
+|-------|---------|-----------------|----------|
+| USDT | Mainnet | `0xf73e887a8754f540ee6e1a93bdc6dde2af69fc7ca5de32013e89dd44244473cb` | 6 |
+| USDC | Mainnet | `0xbae207659db88bea0cbead6da0ed00aac12edcdda169e591cd41c94180b46f3b` | 6 |
+| USDT | Testnet | `0xf73e887a8754f540ee6e1a93bdc6dde2af69fc7ca5de32013e89dd44244473cb` | 6 |
+
+## Payload Structure
+
+```typescript
+interface ExactDirectAptosPayload {
+  txHash: string;           // Aptos transaction hash
+  from: string;             // sender address (0x format)
+  to: string;               // recipient address
+  amount: string;           // amount as string
+  metadataAddress: string;  // FA metadata address
+}
+```
+
+## Transaction Details
+
+The transfer uses Move's entry function:
+
+```
+0x1::primary_fungible_store::transfer
+```
+
+With arguments:
+1. `metadata_address` — FA metadata object address
+2. `recipient` — destination address
+3. `amount` — transfer amount (u64)
+
+Default gas configuration:
+- **Max gas**: 100,000 units
+- **Gas price**: 100 octas
+- **Expiration**: 600 seconds
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `invalid_payload_structure` | Missing txHash, from, to, amount, or metadataAddress |
+| `network_mismatch` | Chain ID doesn't match requirements |
+| `amount_mismatch` | Transferred amount less than required |
+| `recipient_mismatch` | Transfer recipient doesn't match payTo |
+| `asset_mismatch` | FA metadata address doesn't match |
+| `transaction_not_found` | Transaction hash not found |
+| `transaction_failed` | Transaction executed but failed (VM error) |
+
+## Example: Full Integration
+
+<Tabs items={['Client', 'Server']}>
+  <Tabs.Tab>
+```typescript
+import { t402Client } from '@t402/fetch'
+import { registerExactDirectAptosClient } from '@t402/aptos/exact-direct/client'
+
+const client = new t402Client()
+registerExactDirectAptosClient(client, {
+  address: wallet.address,
+  signAndSubmitTransaction: wallet.signAndSubmitTransaction
+})
+
+const response = await client.fetch('https://api.example.com/premium')
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```typescript
+import { paymentMiddleware } from '@t402/express'
+
+app.use(paymentMiddleware({
+  'GET /api/premium': {
+    price: '$0.01',
+    network: 'aptos:1',
+    asset: '0xf73e887a8754f540ee6e1a93bdc6dde2af69fc7ca5de32013e89dd44244473cb',
+    payTo: '0xMerchantAddress...',
+    description: 'Premium API access'
+  }
+}))
+```
+  </Tabs.Tab>
+</Tabs>
+
+## Go SDK
+
+```go
+import "github.com/t402-io/t402/sdks/go/mechanisms/aptos"
+
+// Client
+client := aptos.NewExactDirectAptosScheme(signer, &aptos.Config{
+    MaxGasAmount: 100000,
+    GasUnitPrice: 100,
+})
+payload, err := client.CreatePaymentPayload(ctx, requirements)
+
+// Facilitator
+facilitator := aptos.NewExactDirectAptosFacilitator(rpcURL)
+result, err := facilitator.Verify(ctx, payload, requirements)
+```

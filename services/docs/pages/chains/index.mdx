@@ -34,9 +34,15 @@ import { Callout } from 'nextra/components'
 | TON | `ton:mainnet` | `ton:testnet` | USDT Jetton | Production |
 | TRON | `tron:mainnet` | `tron:nile`, `tron:shasta` | USDT TRC-20 | Production |
 | Solana | `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` | `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` | USDC SPL | Production |
+| NEAR | `near:mainnet` | `near:testnet` | USDT NEP-141 | Production |
+| Aptos | `aptos:1` | `aptos:2` | USDT FA | Production |
+| Tezos | `tezos:NetXdQprcVkpaWU` | `tezos:NetXnHfVqm9iesp` | USDt FA2 | Production |
+| Polkadot Asset Hub | `polkadot:68d56f15f85d3136970ec16946040bc1` | `polkadot:e143f23803ac50e8f6f8e62695d1ce9e` | USDT (Asset 1984) | Production |
+| Stacks | `stacks:1` | `stacks:2147483648` | sUSDC SIP-010 | Production |
 
 <Callout type="info">
-  Solana uses the genesis hash as the network identifier in CAIP-2 format.
+  Network identifiers follow [CAIP-2](https://github.com/ChainAgnostic/CAIPs/blob/main/CAIPs/caip-2.md) format.
+  Some chains use genesis block hashes (Solana, Tezos, Polkadot) while others use chain IDs (EVM, Aptos, Stacks).
 </Callout>
 
 ## USDT0 Addresses
@@ -50,6 +56,42 @@ USDT0 is the new Omnichain Fungible Token (OFT) version of USDT with EIP-3009 su
 | Ink | `0x0200C29006150606B650577BBE7B6248F58470c1` |
 | Berachain | `0x779Ded0c9e1022225f8E0630b35a9b54bE713736` |
 | Unichain | `0x588ce4F028D8e7B53B687865d6A67b3A54C75518` |
+
+## NEAR Token Addresses
+
+| Token | Network | Contract ID | Decimals |
+|-------|---------|-------------|----------|
+| USDT | Mainnet | `usdt.tether-token.near` | 6 |
+| USDC | Mainnet | `17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1` | 6 |
+| USDC | Testnet | `usdc.fakes.testnet` | 6 |
+
+## Aptos Token Addresses (Fungible Asset)
+
+| Token | Network | Metadata Address | Decimals |
+|-------|---------|-----------------|----------|
+| USDT | Mainnet | `0xf73e887a8754f540ee6e1a93bdc6dde2af69fc7ca5de32013e89dd44244473cb` | 6 |
+| USDC | Mainnet | `0xbae207659db88bea0cbead6da0ed00aac12edcdda169e591cd41c94180b46f3b` | 6 |
+
+## Tezos Token Addresses (FA2)
+
+| Token | Network | Contract | Token ID | Decimals |
+|-------|---------|----------|----------|----------|
+| USDt | Mainnet | `KT1XnTn74bUtxHfDtBmm2bGZAQfhPbvKWR8o` | 0 | 6 |
+
+## Polkadot Asset Hub
+
+| Token | Network | Asset ID | Decimals |
+|-------|---------|----------|----------|
+| USDT | Polkadot Asset Hub | 1984 | 6 |
+| USDT | Kusama Asset Hub | 1984 | 6 |
+| USDT | Westend Asset Hub (testnet) | 1984 | 6 |
+
+## Stacks Token Addresses (SIP-010)
+
+| Token | Network | Contract | Decimals |
+|-------|---------|----------|----------|
+| sUSDC | Mainnet | `SP3Y2ZSH8P7D50B0VBTSX11S7XSG24M1VB9YFQA4K.token-susdc` | 6 |
+| sUSDC | Testnet | `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.token-susdc` | 6 |
 
 ## Cross-Chain Bridging
 

@@ -1,0 +1,769 @@
+import { Callout, Tabs } from 'nextra/components'
+
+# HTTP Framework Integrations
+
+T402 provides server middleware and client wrappers for all major HTTP frameworks. Each package shares a unified API pattern while adapting to framework-specific conventions.
+
+## Package Overview
+
+| Package | Type | Framework | Version |
+|---------|------|-----------|---------|
+| `@t402/express` | Server | Express 4–5 | 2.3.1 |
+| `@t402/hono` | Server | Hono 4+ | 2.3.1 |
+| `@t402/fastify` | Server | Fastify 4–5 | 2.3.1 |
+| `@t402/next` | Server | Next.js 14–16 | 2.3.1 |
+| `@t402/fetch` | Client | Fetch API | 2.3.1 |
+| `@t402/axios` | Client | Axios 1.7+ | 2.3.1 |
+
+## Installation
+
+```bash
+# Server middleware (pick one)
+pnpm add @t402/express @t402/core @t402/evm
+pnpm add @t402/hono @t402/core @t402/evm
+pnpm add @t402/fastify @t402/core @t402/evm
+pnpm add @t402/next @t402/core @t402/evm
+
+# Client wrapper (pick one)
+pnpm add @t402/fetch @t402/core @t402/evm
+pnpm add @t402/axios @t402/core @t402/evm
+```
+
+---
+
+## Server Middleware
+
+All server packages export two main functions with identical signatures:
+
+```typescript
+// Option 1: Pass a pre-configured t402ResourceServer
+paymentMiddleware(routes, server, paywallConfig?, paywall?, syncFacilitatorOnStart?)
+
+// Option 2: Build server from config
+paymentMiddlewareFromConfig(routes, facilitatorClients?, schemes?, paywallConfig?, paywall?, syncFacilitatorOnStart?)
+```
+
+### Route Configuration
+
+Routes define which endpoints require payment:
+
+```typescript
+import type { RoutesConfig } from '@t402/core'
+
+const routes: RoutesConfig = {
+  'GET /api/data': {
+    accepts: [{
+      scheme: 'exact',
+      network: 'eip155:8453',
+      price: '$0.01',
+      payTo: '0xYourAddress...'
+    }],
+    description: 'Premium API data',
+    mimeType: 'application/json'
+  },
+  'POST /api/generate': {
+    accepts: [{
+      scheme: 'upto',
+      network: 'eip155:8453',
+      maxAmount: '1000000',
+      minAmount: '10000',
+      payTo: '0xYourAddress...',
+      asset: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'
+    }],
+    description: 'AI text generation'
+  }
+}
+```
+
+### Multi-Chain Routes
+
+Accept payments on multiple chains for a single endpoint:
+
+```typescript
+const routes: RoutesConfig = {
+  'GET /api/data': {
+    accepts: [
+      { scheme: 'exact', network: 'eip155:8453', price: '$0.01', payTo: '0xEvmAddress...' },
+      { scheme: 'exact', network: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp', price: '$0.01', payTo: 'SolanaPublicKey...' },
+      { scheme: 'exact', network: 'ton:mainnet', price: '$0.01', payTo: 'EQTonAddress...' }
+    ]
+  }
+}
+```
+
+### Dynamic Pricing
+
+```typescript
+const routes: RoutesConfig = {
+  'GET /api/data': {
+    accepts: [{
+      scheme: 'exact',
+      network: 'eip155:8453',
+      payTo: '0xYourAddress...',
+      // Dynamic price based on request
+      price: (req) => {
+        const tier = getUserTier(req)
+        return tier === 'premium' ? '$0.001' : '$0.01'
+      }
+    }]
+  },
+  'GET /api/marketplace/:id': {
+    accepts: [{
+      scheme: 'exact',
+      network: 'eip155:8453',
+      price: '$10.00',
+      // Dynamic recipient
+      payTo: async (req) => {
+        const item = await db.getItem(req.params.id)
+        return item.sellerAddress
+      }
+    }]
+  }
+}
+```
+
+### Payment Flow
+
+All server middleware follows the same settlement flow:
+
+1. **Request arrives** → check if route requires payment
+2. **No payment header** → respond with `402 Payment Required` + requirements
+3. **Payment header present** → verify signature via facilitator
+4. **Verification passes** → execute route handler
+5. **Handler succeeds (status < 400)** → settle payment on-chain
+6. **Handler fails (status ≥ 400)** → skip settlement, return error
+7. **Settlement complete** → attach receipt headers to response
+
+<Callout type="info">
+  Settlement only occurs after the handler returns a successful response.
+  If your handler throws or returns a 4xx/5xx status, the payment is never settled
+  and the client's authorization remains unused.
+</Callout>
+
+---
+
+## Express.js
+
+### Basic Setup
+
+```typescript
+import express from 'express'
+import { paymentMiddleware, t402ResourceServer } from '@t402/express'
+import { ExactEvmScheme } from '@t402/evm/exact/server'
+import { FacilitatorClient } from '@t402/core'
+
+const app = express()
+
+const facilitator = new FacilitatorClient('https://facilitator.t402.io')
+const server = new t402ResourceServer(facilitator)
+  .register('eip155:8453', new ExactEvmScheme())
+
+app.use(paymentMiddleware(routes, server))
+
+app.get('/api/data', (req, res) => {
+  res.json({ data: 'Premium content!' })
+})
+
+app.listen(3000)
+```
+
+### From Config (Simplified)
+
+```typescript
+import express from 'express'
+import { paymentMiddlewareFromConfig } from '@t402/express'
+
+const app = express()
+
+app.use(paymentMiddlewareFromConfig(routes, facilitatorClient))
+
+app.get('/api/data', (req, res) => {
+  res.json({ data: 'Premium content!' })
+})
+```
+
+### Error Handling
+
+```typescript
+app.use(paymentMiddleware(routes, server))
+
+// Errors from payment verification are returned as 402/400 responses
+// Your route handlers are only called after successful verification
+app.get('/api/data', (req, res) => {
+  // This only runs if payment is verified
+  res.json({ data: 'Premium content!' })
+})
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err)
+  res.status(500).json({ error: 'Internal server error' })
+})
+```
+
+### Settlement Callbacks
+
+```typescript
+import { paymentMiddleware } from '@t402/express'
+
+app.use(paymentMiddleware(routes, server, {
+  onSettlement: (result, req) => {
+    console.log('Payment settled:', {
+      txHash: result.transaction,
+      payer: result.payer,
+      path: req.path
+    })
+  },
+  onError: (error, req, res) => {
+    console.error('Payment error:', error)
+    res.status(500).json({ error: 'Payment processing failed' })
+  }
+}))
+```
+
+---
+
+## Hono
+
+### Basic Setup
+
+```typescript
+import { Hono } from 'hono'
+import { paymentMiddleware } from '@t402/hono'
+
+const app = new Hono()
+
+app.use('/api/*', paymentMiddleware(routes, server))
+
+app.get('/api/data', (c) => {
+  return c.json({ data: 'Premium content!' })
+})
+
+export default app
+```
+
+### From Config
+
+```typescript
+import { Hono } from 'hono'
+import { paymentMiddlewareFromConfig } from '@t402/hono'
+
+const app = new Hono()
+
+app.use('/api/*', paymentMiddlewareFromConfig(routes, facilitatorClient))
+
+app.get('/api/data', (c) => c.json({ data: 'Premium!' }))
+```
+
+### Edge Runtime (Cloudflare Workers)
+
+```typescript
+import { Hono } from 'hono'
+import { paymentMiddlewareFromConfig } from '@t402/hono'
+
+const app = new Hono()
+
+app.use('/api/*', paymentMiddlewareFromConfig(routes, facilitatorClient))
+
+app.get('/api/data', (c) => c.json({ data: 'Edge content!' }))
+
+export default app  // Cloudflare Workers compatible
+```
+
+<Callout type="info">
+  `@t402/hono` is compatible with edge runtimes (Cloudflare Workers, Deno Deploy, Vercel Edge)
+  since it uses only standard Web APIs.
+</Callout>
+
+---
+
+## Fastify
+
+### Basic Setup
+
+```typescript
+import Fastify from 'fastify'
+import { paymentMiddleware } from '@t402/fastify'
+
+const fastify = Fastify()
+
+// Register as preHandler hook
+fastify.addHook('preHandler', paymentMiddleware(routes, server))
+
+fastify.get('/api/data', async () => {
+  return { data: 'Premium content!' }
+})
+
+await fastify.listen({ port: 3000 })
+```
+
+### From Config
+
+```typescript
+import Fastify from 'fastify'
+import { paymentMiddlewareFromConfig } from '@t402/fastify'
+
+const fastify = Fastify()
+
+fastify.addHook('preHandler', paymentMiddlewareFromConfig(routes, facilitatorClient))
+
+fastify.get('/api/data', async () => ({ data: 'Premium!' }))
+```
+
+### Route-Level Protection
+
+```typescript
+// Protect specific routes
+fastify.get('/api/premium', {
+  preHandler: paymentMiddleware(premiumRoutes, server)
+}, async () => {
+  return { data: 'Premium only!' }
+})
+
+// Public route - no middleware
+fastify.get('/api/public', async () => {
+  return { data: 'Free content' }
+})
+```
+
+<Callout type="warning">
+  Fastify settles payments via the `onSend` hook, which runs after the handler completes.
+  This means settlement happens just before the response is sent to the client.
+</Callout>
+
+---
+
+## Next.js
+
+`@t402/next` provides three patterns for Next.js App Router integration.
+
+### Pattern 1: Middleware (All Routes)
+
+```typescript
+// middleware.ts
+import { paymentProxy } from '@t402/next'
+
+export const middleware = paymentProxy(routes, server)
+
+export const config = {
+  matcher: ['/api/:path*']
+}
+```
+
+### Pattern 2: Handler Wrapper (Per Route)
+
+```typescript
+// app/api/data/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import { withT402 } from '@t402/next'
+
+const handler = async (req: NextRequest) => {
+  return NextResponse.json({ data: 'Premium content!' })
+}
+
+export const GET = withT402(handler, {
+  accepts: [{
+    scheme: 'exact',
+    network: 'eip155:8453',
+    price: '$0.01',
+    payTo: '0xYourAddress...'
+  }],
+  description: 'Premium API endpoint'
+}, server)
+```
+
+### Pattern 3: From Config
+
+```typescript
+// middleware.ts
+import { paymentProxyFromConfig } from '@t402/next'
+
+export const middleware = paymentProxyFromConfig(routes, facilitatorClient)
+
+export const config = {
+  matcher: ['/api/:path*']
+}
+```
+
+### Route Handler with Server Actions
+
+```typescript
+// app/api/generate/route.ts
+import { withT402 } from '@t402/next'
+
+export const POST = withT402(
+  async (req) => {
+    const body = await req.json()
+    const result = await generateText(body.prompt)
+    return NextResponse.json({ text: result })
+  },
+  {
+    accepts: [{
+      scheme: 'exact',
+      network: 'eip155:8453',
+      price: '$0.05',
+      payTo: '0xYourAddress...'
+    }]
+  },
+  server
+)
+```
+
+<Callout type="info">
+  Use `withT402` for per-route protection with App Router. It wraps your handler and handles
+  the full 402 flow including settlement after successful response.
+</Callout>
+
+---
+
+## Fetch Client
+
+`@t402/fetch` wraps the standard Fetch API to automatically handle 402 responses.
+
+### Basic Setup
+
+```typescript
+import { wrapFetchWithPayment, t402Client } from '@t402/fetch'
+import { ExactEvmScheme } from '@t402/evm/exact/client'
+import { privateKeyToAccount } from 'viem/accounts'
+
+const account = privateKeyToAccount('0x...')
+const client = new t402Client()
+client.register('eip155:*', new ExactEvmScheme(account))
+
+const fetchWithPay = wrapFetchWithPayment(fetch, client)
+
+// Automatic 402 handling — transparent to caller
+const response = await fetchWithPay('https://api.example.com/data')
+const data = await response.json()
+```
+
+### From Config
+
+```typescript
+import { wrapFetchWithPaymentFromConfig } from '@t402/fetch'
+
+const fetchWithPay = wrapFetchWithPaymentFromConfig(fetch, {
+  schemes: [
+    { network: 'eip155:*', client: new ExactEvmScheme(account) },
+    { network: 'solana:*', client: new ExactSvmScheme(keypair) }
+  ]
+})
+```
+
+### How It Works
+
+```
+Request → Server
+              ↓
+         200 OK? → Return response
+              ↓
+         402? → Parse requirements
+              ↓
+         Sign payment payload
+              ↓
+         Retry with X-PAYMENT header
+              ↓
+         Return final response
+```
+
+### Multi-Chain Client
+
+```typescript
+import { ExactEvmScheme } from '@t402/evm/exact/client'
+import { ExactSvmScheme } from '@t402/svm/exact/client'
+import { ExactTonScheme } from '@t402/ton/exact/client'
+
+const client = new t402Client()
+client.register('eip155:*', new ExactEvmScheme(evmAccount))
+client.register('solana:*', new ExactSvmScheme(solanaKeypair))
+client.register('ton:*', new ExactTonScheme(tonWallet))
+
+const fetchWithPay = wrapFetchWithPayment(fetch, client)
+
+// Client automatically selects the right scheme based on 402 response
+const response = await fetchWithPay('https://api.example.com/data')
+```
+
+### Error Handling
+
+```typescript
+import { PaymentError, PaymentAbortedError } from '@t402/core'
+
+try {
+  const response = await fetchWithPay('https://api.example.com/data')
+} catch (error) {
+  if (error instanceof PaymentAbortedError) {
+    console.log('Payment aborted:', error.reason)
+  } else if (error instanceof PaymentError) {
+    console.log('Payment failed:', error.message)
+  }
+}
+```
+
+### Settlement Receipt
+
+After successful payment, the response includes settlement headers:
+
+```typescript
+const response = await fetchWithPay('https://api.example.com/data')
+
+// Parse settlement receipt from response headers
+import { decodePaymentResponseHeader } from '@t402/fetch'
+
+const receipt = decodePaymentResponseHeader(response.headers)
+// { success: true, transaction: "0xabc...", network: "eip155:8453", payer: "0x..." }
+```
+
+---
+
+## Axios Client
+
+`@t402/axios` adds 402 handling via Axios response interceptors.
+
+### Basic Setup
+
+```typescript
+import axios from 'axios'
+import { wrapAxiosWithPayment, t402Client } from '@t402/axios'
+import { ExactEvmScheme } from '@t402/evm/exact/client'
+import { privateKeyToAccount } from 'viem/accounts'
+
+const account = privateKeyToAccount('0x...')
+const client = new t402Client()
+client.register('eip155:*', new ExactEvmScheme(account))
+
+const api = wrapAxiosWithPayment(axios.create(), client)
+
+// Automatic 402 handling
+const response = await api.get('https://api.example.com/data')
+console.log(response.data)
+```
+
+### From Config
+
+```typescript
+import { wrapAxiosWithPaymentFromConfig } from '@t402/axios'
+
+const api = wrapAxiosWithPaymentFromConfig(axios.create(), {
+  schemes: [
+    { network: 'eip155:*', client: new ExactEvmScheme(account) }
+  ]
+})
+```
+
+### With Base URL
+
+```typescript
+const api = wrapAxiosWithPayment(
+  axios.create({ baseURL: 'https://api.example.com' }),
+  client
+)
+
+const response = await api.get('/data')       // Protected endpoint
+const free = await api.get('/public/health')   // Free endpoint (no 402)
+```
+
+### Request Configuration
+
+```typescript
+// Custom headers alongside payment
+const response = await api.get('/data', {
+  headers: {
+    'Authorization': 'Bearer token',  // Your auth headers preserved
+    'X-Custom': 'value'
+  }
+})
+// X-PAYMENT header is added automatically only when 402 is received
+```
+
+---
+
+## Common Configuration
+
+### Facilitator Client
+
+All server middleware uses a facilitator client for verification and settlement:
+
+```typescript
+import { FacilitatorClient } from '@t402/core'
+
+const facilitator = new FacilitatorClient('https://facilitator.t402.io', {
+  apiKey: process.env.T402_API_KEY  // Optional API key
+})
+```
+
+### Resource Server
+
+The `t402ResourceServer` manages scheme registration and payment processing:
+
+```typescript
+import { t402ResourceServer } from '@t402/core'
+import { ExactEvmScheme } from '@t402/evm/exact/server'
+import { ExactSvmScheme } from '@t402/svm/exact/server'
+
+const server = new t402ResourceServer(facilitator)
+  .register('eip155:8453', new ExactEvmScheme())
+  .register('eip155:42161', new ExactEvmScheme())
+  .register('solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp', new ExactSvmScheme())
+```
+
+### Facilitator Sync
+
+On startup, middleware syncs with the facilitator to validate supported networks:
+
+```typescript
+// Enabled by default — validates your routes against facilitator capabilities
+app.use(paymentMiddleware(routes, server, { syncFacilitatorOnStart: true }))
+
+// Disable for faster startup (skip validation)
+app.use(paymentMiddleware(routes, server, { syncFacilitatorOnStart: false }))
+```
+
+### Paywall UI
+
+Server middleware can serve an HTML paywall page for browser requests:
+
+```typescript
+import { paymentMiddleware } from '@t402/express'
+
+app.use(paymentMiddleware(routes, server, {
+  paywallConfig: {
+    title: 'Premium Content',
+    description: 'Pay $0.01 to access this resource',
+    theme: 'dark'
+  }
+}))
+```
+
+<Callout type="info">
+  When a browser (non-API) client hits a protected route without payment,
+  the middleware can serve an interactive paywall page instead of raw JSON.
+  Install `@t402/paywall` for the built-in UI component.
+</Callout>
+
+---
+
+## Lifecycle Hooks
+
+Both client and server support hooks for monitoring and control:
+
+### Client Hooks
+
+```typescript
+const client = new t402Client()
+
+// Before payment creation — abort if price too high
+client.onBeforePaymentCreation((ctx) => {
+  if (BigInt(ctx.requirements.amount) > MAX_PRICE) {
+    return { abort: true, reason: 'Price exceeds limit' }
+  }
+})
+
+// After successful payment
+client.onAfterPaymentCreation((ctx) => {
+  metrics.increment('payments.created', { network: ctx.requirements.network })
+})
+
+// On payment failure
+client.onPaymentCreationFailure((ctx) => {
+  logger.error('Payment failed', { error: ctx.error })
+})
+```
+
+### Server Hooks
+
+```typescript
+const server = new t402ResourceServer(facilitator)
+
+// Before verification — block specific payers
+server.onBeforeVerify((ctx) => {
+  if (isBlocked(ctx.payload.authorization.from)) {
+    return { abort: true, reason: 'Payer is blocked' }
+  }
+})
+
+// After settlement — record payment
+server.onAfterSettle((ctx) => {
+  db.recordPayment({
+    txHash: ctx.result.transaction,
+    payer: ctx.result.payer,
+    amount: ctx.requirements.amount
+  })
+})
+```
+
+---
+
+## Testing
+
+### Mock Facilitator
+
+```typescript
+import { MockFacilitatorClient } from '@t402/core/testing'
+
+const mockFacilitator = new MockFacilitatorClient({
+  verifyResponse: { isValid: true },
+  settleResponse: { success: true, transaction: '0xmock...' }
+})
+
+const server = new t402ResourceServer(mockFacilitator)
+```
+
+### Integration Test
+
+```typescript
+import { describe, it, expect } from 'vitest'
+import express from 'express'
+import { paymentMiddlewareFromConfig } from '@t402/express'
+
+describe('Payment Middleware', () => {
+  const app = express()
+  app.use(paymentMiddlewareFromConfig(routes, mockFacilitator))
+  app.get('/api/data', (req, res) => res.json({ data: 'test' }))
+
+  it('returns 402 without payment', async () => {
+    const response = await fetch('http://localhost:3001/api/data')
+    expect(response.status).toBe(402)
+
+    const body = await response.json()
+    expect(body.t402Version).toBe(2)
+    expect(body.accepts).toHaveLength(1)
+  })
+
+  it('returns data with valid payment', async () => {
+    const response = await fetch('http://localhost:3001/api/data', {
+      headers: { 'X-Payment': JSON.stringify(validPayload) }
+    })
+    expect(response.status).toBe(200)
+  })
+})
+```
+
+---
+
+## Framework Comparison
+
+| Feature | Express | Hono | Fastify | Next.js |
+|---------|---------|------|---------|---------|
+| Middleware type | `RequestHandler` | `MiddlewareHandler` | `preHandlerHookHandler` | Route handler wrapper |
+| Settlement timing | Response buffered | After `c.res` | `onSend` hook | Before response return |
+| Edge compatible | No | Yes | No | Yes (middleware) |
+| Route-level control | Path matching | Path matching | Per-route hooks | `withT402` wrapper |
+| Streaming support | Buffered | Buffered | Buffered | Buffered |
+
+| Feature | Fetch | Axios |
+|---------|-------|-------|
+| Runtime | Browser + Node | Browser + Node |
+| Error handling | Thrown errors | Response interceptor |
+| Retry mechanism | Re-fetch with header | Re-request with header |
+| Configuration | Wrap function | Wrap instance |
+| TypeScript | Full types | Full types |
+
+## Further Reading
+
+- [TypeScript SDK Overview](/sdks/typescript) — Full SDK documentation
+- [Exact Scheme](/schemes/exact) — How payment authorization works
+- [EVM Reference](/reference/evm) — EVM mechanism details
+- [Getting Started: Server](/getting-started/server) — Server setup guide
+- [Getting Started: Client](/getting-started/client) — Client setup guide

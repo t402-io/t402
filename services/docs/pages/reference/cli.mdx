@@ -1,0 +1,539 @@
+import { Callout, Tabs } from 'nextra/components'
+
+# @t402/cli
+
+Command-line interface for the T402 payment protocol. Send payments, manage wallets, and make HTTP requests with automatic 402 handling.
+
+## Installation
+
+```bash
+# Global install
+pnpm add -g @t402/cli
+
+# Or run directly
+npx @t402/cli
+```
+
+After installation, the `t402` command is available globally.
+
+## Quick Start
+
+```bash
+# Create a new wallet
+t402 wallet create
+
+# Check balances
+t402 wallet balance
+
+# Make a paid HTTP request (automatic 402 handling)
+t402 request https://api.example.com/premium
+
+# Send a direct payment
+t402 pay 0xRecipientAddress 1.50 --network eip155:8453
+```
+
+---
+
+## Commands
+
+### wallet
+
+Manage your T402 wallet (seed phrase, addresses, balances).
+
+#### wallet create
+
+Generate a new wallet with a random seed phrase.
+
+```bash
+t402 wallet create
+```
+
+Generates a 12-word BIP-39 seed phrase, encrypts it, and stores it locally. Displays the seed phrase once for backup.
+
+<Callout type="warning">
+  Write down your seed phrase and store it securely. It will only be displayed once.
+  The CLI stores an encrypted copy locally, but losing access to both means losing funds.
+</Callout>
+
+#### wallet import
+
+Import an existing wallet from a seed phrase.
+
+```bash
+t402 wallet import "word1 word2 word3 ... word12"
+```
+
+Supports both 12-word and 24-word BIP-39 phrases.
+
+#### wallet show
+
+Display all wallet addresses derived from the stored seed.
+
+```bash
+t402 wallet show
+```
+
+Shows addresses for all supported networks (EVM, Solana, TON, TRON).
+
+#### wallet balance
+
+Check token balances across networks.
+
+```bash
+# Check default network
+t402 wallet balance
+
+# Check specific network
+t402 wallet balance --network eip155:42161
+
+# Show all networks including zero balances
+t402 wallet balance --all
+```
+
+| Flag | Description |
+|------|-------------|
+| `-n, --network <id>` | Check specific network (CAIP-2 format) |
+| `-a, --all` | Show all networks including zero balances |
+
+#### wallet export
+
+Display the stored seed phrase for backup.
+
+```bash
+t402 wallet export --force
+```
+
+| Flag | Description |
+|------|-------------|
+| `-f, --force` | Skip safety warning (required) |
+
+#### wallet clear
+
+Remove the wallet from this device.
+
+```bash
+t402 wallet clear --force
+```
+
+| Flag | Description |
+|------|-------------|
+| `-f, --force` | Skip confirmation prompt (required) |
+
+---
+
+### pay
+
+Send direct USDT0/USDC payments.
+
+```bash
+t402 pay <to> <amount> [options]
+```
+
+| Argument | Description |
+|----------|-------------|
+| `<to>` | Recipient address |
+| `<amount>` | Amount in human-readable format (e.g., `1.50`) |
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-n, --network <id>` | Network ID | Config default (`eip155:8453`) |
+| `-a, --asset <asset>` | Asset to send | `usdt0` |
+| `-g, --gasless` | Use ERC-4337 gasless transaction | `false` |
+
+Examples:
+
+```bash
+# Pay 1.50 USDT0 on Base
+t402 pay 0xRecipient... 1.50
+
+# Pay on Arbitrum
+t402 pay 0xRecipient... 0.50 --network eip155:42161
+
+# Gasless payment (no ETH needed)
+t402 pay 0xRecipient... 1.00 --gasless
+```
+
+### pay-invoice
+
+Pay a 402 Payment Required response from an HTTP endpoint.
+
+```bash
+t402 pay-invoice <url> [options]
+```
+
+| Argument | Description |
+|----------|-------------|
+| `<url>` | URL that returned 402 status |
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-g, --gasless` | Use gasless ERC-4337 mode | `false` |
+| `-i, --index <n>` | Select payment option index (if multiple) | `0` |
+
+```bash
+# Pay the first payment option
+t402 pay-invoice https://api.example.com/premium
+
+# Pay with gasless mode, selecting second option
+t402 pay-invoice https://api.example.com/data --gasless --index 1
+```
+
+---
+
+### request
+
+Make HTTP requests with automatic 402 payment handling. The CLI detects 402 responses, signs the payment, and retries automatically.
+
+```bash
+t402 request <url> [options]
+```
+
+| Argument | Description |
+|----------|-------------|
+| `<url>` | URL to request |
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-X, --method <method>` | HTTP method | `GET` |
+| `-H, --header <header>` | Additional header (`key:value`, repeatable) | - |
+| `-d, --data <data>` | Request body | - |
+| `-g, --gasless` | Use gasless payments | `false` |
+| `-n, --network <id>` | Preferred network for payment selection | Config default |
+| `-o, --output <file>` | Save response to file | - |
+| `-v, --verbose` | Show headers, hashes, and details | `false` |
+| `--dry-run` | Show requirements without executing payment | `false` |
+
+Examples:
+
+```bash
+# Simple GET with auto-payment
+t402 request https://api.example.com/data
+
+# POST with body
+t402 request https://api.example.com/generate \
+  -X POST \
+  -H "Content-Type:application/json" \
+  -d '{"prompt": "Hello world"}'
+
+# Verbose output (shows payment details)
+t402 request https://api.example.com/data -v
+
+# Dry run (inspect 402 response without paying)
+t402 request https://api.example.com/data --dry-run
+
+# Save response to file
+t402 request https://api.example.com/image -o output.png
+
+# Prefer specific network
+t402 request https://api.example.com/data --network eip155:42161
+
+# Gasless request
+t402 request https://api.example.com/data --gasless
+```
+
+#### Request Flow
+
+```
+1. GET https://api.example.com/data
+2. ← 402 Payment Required (accepts: exact, eip155:8453, $0.01)
+3. Sign payment authorization (EIP-3009)
+4. GET https://api.example.com/data + X-Payment header
+5. ← 200 OK + response body
+```
+
+---
+
+### config
+
+Manage CLI configuration.
+
+#### config show
+
+Display all current configuration values.
+
+```bash
+t402 config show
+```
+
+#### config get
+
+Get a specific configuration value.
+
+```bash
+t402 config get defaultNetwork
+t402 config get facilitatorUrl
+t402 config get testnet
+t402 config get rpcEndpoints
+```
+
+#### config set
+
+Set a configuration value.
+
+```bash
+t402 config set defaultNetwork eip155:42161
+t402 config set facilitatorUrl https://my-facilitator.example.com
+t402 config set testnet true
+```
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `defaultNetwork` | string | Default network for payments (CAIP-2) |
+| `facilitatorUrl` | string | Facilitator service URL |
+| `testnet` | boolean | Enable testnet mode (`true`/`false`) |
+
+#### config rpc
+
+Set a custom RPC endpoint for a network.
+
+```bash
+t402 config rpc eip155:8453 https://my-base-rpc.example.com
+t402 config rpc eip155:42161 https://my-arbitrum-rpc.example.com
+```
+
+#### config reset
+
+Reset all configuration to defaults.
+
+```bash
+t402 config reset --force
+```
+
+Preserves wallet data (encrypted seed). Only resets network/facilitator/RPC settings.
+
+#### config path
+
+Show the path to the configuration file.
+
+```bash
+t402 config path
+# ~/.config/t402/config.json (macOS/Linux)
+```
+
+---
+
+### info
+
+Display supported networks, assets, and features.
+
+```bash
+# Show mainnet networks
+t402 info
+
+# Show all networks (mainnet + testnet)
+t402 info --all
+
+# Show testnet networks only
+t402 info --testnet
+```
+
+| Flag | Description |
+|------|-------------|
+| `-a, --all` | Show all networks |
+| `-t, --testnet` | Show testnet networks only |
+
+Output includes:
+- Supported EVM chains (mainnet and testnet)
+- Solana, TON, TRON networks
+- Supported assets (USDT0, USDC)
+- Payment schemes (exact, upto)
+- Features (standard, gasless, bridging)
+
+---
+
+## Configuration
+
+### Default Configuration
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `defaultNetwork` | `eip155:8453` (Base) | Network for payments |
+| `facilitatorUrl` | `https://facilitator.t402.io` | Facilitator endpoint |
+| `testnet` | `false` | Testnet mode |
+| `rpcEndpoints` | `{}` | Custom RPC overrides |
+
+### Config File Location
+
+| Platform | Path |
+|----------|------|
+| macOS | `~/Library/Preferences/t402/config.json` |
+| Linux | `~/.config/t402/config.json` |
+| Windows | `%APPDATA%/t402/config.json` |
+
+### Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `T402_DEFAULT_NETWORK` | Override default network |
+| `T402_TESTNET` | Enable testnet mode |
+| `T402_CONFIG_PATH` | Custom config directory |
+
+---
+
+## Supported Networks
+
+### Mainnet
+
+| Network | ID | Asset |
+|---------|-----|-------|
+| Ethereum | `eip155:1` | USDT0 |
+| Arbitrum | `eip155:42161` | USDT0 |
+| Base | `eip155:8453` | USDT0 |
+| Optimism | `eip155:10` | USDT0 |
+| Ink | `eip155:57073` | USDT0 |
+| Berachain | `eip155:80094` | USDT0 |
+| Solana | `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` | USDC |
+| TON | `ton:-239` | USDT |
+| TRON | `tron:mainnet` | USDT |
+
+### Testnet
+
+| Network | ID | Asset |
+|---------|-----|-------|
+| Sepolia | `eip155:11155111` | USDT0 |
+| Arbitrum Sepolia | `eip155:421614` | USDT0 |
+| Base Sepolia | `eip155:84532` | USDT0 |
+| Solana Devnet | `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` | USDC |
+| TON Testnet | `ton:-3` | USDT |
+| TRON Nile | `tron:nile` | USDT |
+
+---
+
+## Gasless Payments (ERC-4337)
+
+The CLI supports gasless payments via account abstraction. Users don't need ETH for gas.
+
+```bash
+# Gasless direct payment
+t402 pay 0xRecipient... 1.00 --gasless
+
+# Gasless HTTP request
+t402 request https://api.example.com/data --gasless
+
+# Gasless invoice payment
+t402 pay-invoice https://api.example.com/premium --gasless
+```
+
+<Callout type="info">
+  Gasless mode uses ERC-4337 UserOperations with a paymaster.
+  The payment is wrapped in a UserOp, sponsored by a bundler, and submitted on-chain
+  without the user needing native gas tokens.
+</Callout>
+
+---
+
+## Testnet Development
+
+Switch to testnet mode for development and testing:
+
+```bash
+# Enable testnet mode
+t402 config set testnet true
+
+# Network auto-adjusts to testnet equivalent
+t402 wallet balance
+# Shows Base Sepolia balance instead of Base Mainnet
+
+# Make testnet payments
+t402 request https://staging.api.example.com/data
+
+# Switch back to mainnet
+t402 config set testnet false
+```
+
+---
+
+## Programmatic Usage
+
+The CLI exports utilities for use in scripts:
+
+```typescript
+import { getConfig, setConfig, formatAmount, parseAmount } from '@t402/cli'
+
+// Read configuration
+const network = getConfig('defaultNetwork')   // "eip155:8453"
+const isTestnet = getConfig('testnet')        // false
+
+// Set configuration
+setConfig('defaultNetwork', 'eip155:42161')
+
+// Format amounts
+formatAmount('1000000', 6)    // "1.00"
+parseAmount('1.50', 6)        // "1500000"
+```
+
+---
+
+## Security
+
+### Wallet Storage
+
+- Seed phrases are encrypted at rest using a machine-specific key
+- Private keys are derived on-demand and never stored
+- Wallet operations require explicit `--force` flags for destructive actions
+
+### Payment Safety
+
+- Testnet/mainnet mode is validated before every payment
+- Payment details are displayed before execution
+- Dry-run mode allows inspecting requirements without paying
+
+<Callout type="warning">
+  The CLI's seed encryption provides basic protection against casual file access.
+  For production wallets with significant funds, use a hardware wallet or dedicated
+  key management solution instead.
+</Callout>
+
+---
+
+## Examples
+
+### Daily Workflow
+
+```bash
+# Morning: Check balances
+t402 wallet balance --all
+
+# Make API calls throughout the day
+t402 request https://api.weather.com/forecast?city=tokyo
+t402 request https://api.ai.example.com/generate \
+  -X POST -d '{"prompt": "Summarize this article"}'
+
+# Pay a specific invoice
+t402 pay-invoice https://data.example.com/dataset/2024
+```
+
+### Multi-Network Operations
+
+```bash
+# Check balance on specific network
+t402 wallet balance --network eip155:42161
+
+# Pay on Arbitrum
+t402 pay 0xMerchant... 5.00 --network eip155:42161
+
+# Request preferring Optimism
+t402 request https://api.example.com/data --network eip155:10
+```
+
+### Scripting
+
+```bash
+# Batch payments from file
+while IFS=, read -r address amount; do
+  t402 pay "$address" "$amount" --network eip155:8453
+done < payments.csv
+
+# Check if endpoint requires payment
+t402 request https://api.example.com/data --dry-run 2>/dev/null
+if [ $? -eq 0 ]; then
+  echo "Payment required"
+fi
+```
+
+## Further Reading
+
+- [TypeScript SDK](/sdks/typescript) — Full SDK overview
+- [Exact Scheme](/schemes/exact) — How payment authorization works
+- [Supported Chains](/chains) — All supported networks
+- [Gasless Payments](/advanced/gasless) — ERC-4337 details
