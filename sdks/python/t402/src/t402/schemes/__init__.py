@@ -169,6 +169,16 @@ from t402.schemes.tezos import (
     SCHEME_EXACT_DIRECT as TEZOS_SCHEME_EXACT_DIRECT,
 )
 
+# Stacks Schemes
+from t402.schemes.stacks import (
+    ExactDirectStacksClientScheme,
+    ExactDirectStacksServerScheme,
+    ExactDirectStacksFacilitatorScheme,
+    ClientStacksSigner,
+    FacilitatorStacksSigner,
+    SCHEME_EXACT_DIRECT as STACKS_SCHEME_EXACT_DIRECT,
+)
+
 __all__ = [
     # Type aliases
     "Price",
@@ -268,4 +278,11 @@ __all__ = [
     "ClientTezosSigner",
     "FacilitatorTezosSigner",
     "TEZOS_SCHEME_EXACT_DIRECT",
+    # Stacks Schemes
+    "ExactDirectStacksClientScheme",
+    "ExactDirectStacksServerScheme",
+    "ExactDirectStacksFacilitatorScheme",
+    "ClientStacksSigner",
+    "FacilitatorStacksSigner",
+    "STACKS_SCHEME_EXACT_DIRECT",
 ]
