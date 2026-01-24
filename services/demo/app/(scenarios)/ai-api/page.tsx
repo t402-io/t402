@@ -10,6 +10,7 @@ export default function AiApiPage() {
       description="No API keys. No subscriptions. Agents and users pay 0.001 USDT per query — instantly settled on-chain."
       cost="0.001 USDT/query"
       accentColor="var(--color-scenario-ai)"
+      scenarioId="ai-api"
     >
       <AiApiScenario />
     </ScenarioShell>
