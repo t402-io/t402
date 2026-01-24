@@ -1,0 +1,581 @@
+import { Callout, Tabs } from 'nextra/components'
+
+# UI Components
+
+T402 provides UI packages for building payment flows in web applications. Three packages cover different use cases:
+
+| Package | Purpose | Framework |
+|---------|---------|-----------|
+| `@t402/paywall` | Server-rendered paywall page | Framework-agnostic (HTML) |
+| `@t402/react` | React components and hooks | React 18+ |
+| `@t402/vue` | Vue composables and components | Vue 3.3+ |
+
+## Installation
+
+```bash
+# Paywall (server-side, used with middleware)
+pnpm add @t402/paywall
+
+# React components
+pnpm add @t402/react
+
+# Vue components
+pnpm add @t402/vue
+```
+
+---
+
+## @t402/paywall
+
+A universal, server-rendered paywall component that generates standalone HTML pages for browser-based payment flows. Used with server middleware (`@t402/express`, `@t402/hono`, etc.) to serve a payment UI when browsers hit protected endpoints.
+
+### Builder Pattern
+
+```typescript
+import { createPaywall, evmPaywall, svmPaywall, tonPaywall } from '@t402/paywall'
+
+const paywall = createPaywall()
+  .withNetwork(evmPaywall)
+  .withNetwork(svmPaywall)
+  .withNetwork(tonPaywall)
+  .withConfig({
+    appName: 'My API',
+    appLogo: 'https://example.com/logo.png',
+    theme: { mode: 'dark' }
+  })
+  .build()
+```
+
+### Network Handlers
+
+| Handler | Networks | Wallet Support |
+|---------|----------|----------------|
+| `evmPaywall` | `eip155:*` | MetaMask, WalletConnect, Coinbase |
+| `svmPaywall` | `solana:*` | Phantom, Solflare |
+| `tonPaywall` | `ton:*` | TON Connect |
+| `tronPaywall` | `tron:*` | TronLink |
+| `stacksPaywall` | `stacks:*` | Hiro Wallet, Leather |
+| `nearPaywall` | `near:*` | NEAR Wallet, MyNearWallet |
+| `cosmosPaywall` | `cosmos:*` | Keplr |
+
+### Configuration
+
+```typescript
+interface PaywallConfig {
+  appName?: string;               // Display name in paywall header
+  appLogo?: string;               // Logo URL
+  currentUrl?: string;            // Current page URL (for redirect after payment)
+  testnet?: boolean;              // Show testnet indicators
+  walletConnectProjectId?: string; // WalletConnect v2 project ID (EVM mobile)
+  theme?: PaywallTheme;
+}
+
+interface PaywallTheme {
+  mode?: 'light' | 'dark' | 'auto';
+  colors?: {
+    primary?: string;
+    background?: string;
+    containerBackground?: string;
+    text?: string;
+    secondaryText?: string;
+    border?: string;
+  };
+  borderRadius?: string;
+  fontFamily?: string;
+}
+```
+
+### Integration with Middleware
+
+```typescript
+import { paymentMiddleware } from '@t402/express'
+import { createPaywall, evmPaywall, svmPaywall } from '@t402/paywall'
+
+const paywall = createPaywall()
+  .withNetwork(evmPaywall)
+  .withNetwork(svmPaywall)
+  .build()
+
+app.use(paymentMiddleware(routes, server, {
+  paywallConfig: {
+    appName: 'Premium API',
+    theme: { mode: 'dark' }
+  },
+  paywall  // PaywallProvider instance
+}))
+```
+
+When a browser (Accept: text/html) hits a protected endpoint without payment, the middleware returns the paywall HTML page instead of a JSON 402 response.
+
+### Generating HTML Directly
+
+```typescript
+const html = paywall.generateHtml(paymentRequired, {
+  appName: 'My Service',
+  currentUrl: 'https://example.com/premium',
+  testnet: false
+})
+
+// Serve as response
+res.setHeader('Content-Type', 'text/html')
+res.send(html)
+```
+
+<Callout type="info">
+  The paywall generates a self-contained HTML page with inline CSS and JavaScript.
+  No external dependencies are loaded at runtime — wallet SDKs are bundled in.
+</Callout>
+
+---
+
+## @t402/react
+
+React components, hooks, and utilities for building custom payment UIs.
+
+### PaymentProvider
+
+Wrap your app (or payment section) with `PaymentProvider` to share payment state:
+
+```tsx
+import { PaymentProvider } from '@t402/react'
+
+function App() {
+  return (
+    <PaymentProvider testnet={false}>
+      <PaymentFlow />
+    </PaymentProvider>
+  )
+}
+```
+
+Access shared state via `usePaymentContext`:
+
+```tsx
+import { usePaymentContext } from '@t402/react'
+
+function PaymentFlow() {
+  const {
+    status,
+    error,
+    paymentRequired,
+    selectedRequirement,
+    isTestnet,
+    setPaymentRequired,
+    selectRequirement,
+    setStatus,
+    reset
+  } = usePaymentContext()
+
+  // ...
+}
+```
+
+### Hooks
+
+#### usePaymentRequired
+
+Fetches a resource and handles 402 responses:
+
+```tsx
+import { usePaymentRequired } from '@t402/react'
+
+function ResourceFetcher() {
+  const {
+    paymentRequired,
+    status,
+    error,
+    fetchResource,
+    reset
+  } = usePaymentRequired({
+    onSuccess: (response) => console.log('Got resource!'),
+    onError: (err) => console.error('Failed:', err)
+  })
+
+  const handleFetch = async () => {
+    const response = await fetchResource('https://api.example.com/data')
+    if (response) {
+      const data = await response.json()
+      // Resource obtained (either free or after payment)
+    }
+  }
+
+  if (paymentRequired) {
+    return <div>Payment needed: {paymentRequired.accepts[0].amount}</div>
+  }
+
+  return <button onClick={handleFetch}>Fetch Data</button>
+}
+```
+
+#### usePaymentStatus
+
+Manages payment status with timed messages:
+
+```tsx
+import { usePaymentStatus } from '@t402/react'
+
+function PaymentUI() {
+  const {
+    status,
+    message,
+    setSuccess,
+    setError,
+    setInfo,
+    reset
+  } = usePaymentStatus()
+
+  const handlePay = async () => {
+    try {
+      setInfo('Signing payment...')
+      await signPayment()
+      setSuccess('Payment confirmed!', 5000) // Auto-clear after 5s
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  return (
+    <div>
+      {message && <div className={message.type}>{message.text}</div>}
+      <button onClick={handlePay}>Pay</button>
+    </div>
+  )
+}
+```
+
+#### useAsyncPayment
+
+Wraps async payment operations with loading/success/error states:
+
+```tsx
+import { useAsyncPayment } from '@t402/react'
+
+function PayButton({ requirement }) {
+  const {
+    execute,
+    isLoading,
+    isSuccess,
+    isError,
+    error,
+    result
+  } = useAsyncPayment({
+    paymentFn: () => submitPayment(requirement),
+    onSuccess: (receipt) => console.log('Tx:', receipt.hash),
+    onError: (err) => console.error(err)
+  })
+
+  return (
+    <button onClick={execute} disabled={isLoading}>
+      {isLoading ? 'Processing...' : isSuccess ? 'Done!' : 'Pay'}
+    </button>
+  )
+}
+```
+
+### Components
+
+#### PaymentButton
+
+```tsx
+import { PaymentButton } from '@t402/react'
+
+<PaymentButton
+  onClick={handlePayment}
+  loading={isProcessing}
+  disabled={!isConnected}
+  variant="primary"
+  size="md"
+>
+  Pay $0.01
+</PaymentButton>
+```
+
+Props:
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `onClick` | `() => void \| Promise<void>` | - | Click handler |
+| `loading` | `boolean` | `false` | Show loading spinner |
+| `disabled` | `boolean` | `false` | Disable interaction |
+| `variant` | `'primary' \| 'secondary' \| 'outline'` | `'primary'` | Visual style |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Button size |
+
+#### PaymentDetails
+
+```tsx
+import { PaymentDetails } from '@t402/react'
+
+<PaymentDetails
+  requirement={selectedRequirement}
+  showNetwork
+  showAsset
+  showRecipient
+/>
+```
+
+#### AddressDisplay
+
+```tsx
+import { AddressDisplay } from '@t402/react'
+
+<AddressDisplay
+  address="0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+  startChars={6}
+  endChars={4}
+  copyable
+/>
+// Renders: 0x8335...2913 [copy icon]
+```
+
+#### Spinner
+
+```tsx
+import { Spinner } from '@t402/react'
+
+<Spinner size="md" />
+```
+
+### Utilities
+
+```typescript
+import {
+  // Network detection
+  isEvmNetwork,
+  isSvmNetwork,
+  isTonNetwork,
+  isTronNetwork,
+  isTestnetNetwork,
+  getNetworkDisplayName,
+
+  // Payment helpers
+  normalizePaymentRequirements,
+  getPreferredNetworks,
+  choosePaymentRequirement,
+
+  // Formatters
+  truncateAddress,
+  formatTokenAmount,
+  getAssetDisplayName
+} from '@t402/react'
+
+// Examples
+isEvmNetwork('eip155:8453')           // true
+getNetworkDisplayName('eip155:8453')   // "Base"
+truncateAddress('0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913')  // "0x8335...2913"
+formatTokenAmount('1000000')           // "1.00"
+```
+
+### Full Example
+
+```tsx
+import {
+  PaymentProvider,
+  usePaymentContext,
+  useAsyncPayment,
+  PaymentButton,
+  PaymentDetails,
+  AddressDisplay
+} from '@t402/react'
+
+function PaymentFlow() {
+  const { paymentRequired, selectedRequirement, selectRequirement } = usePaymentContext()
+
+  const { execute, isLoading, isSuccess } = useAsyncPayment({
+    paymentFn: async () => {
+      // Sign and submit payment using your wallet SDK
+      return await walletClient.signPayment(selectedRequirement)
+    }
+  })
+
+  if (!paymentRequired) return null
+
+  return (
+    <div>
+      <h2>Payment Required</h2>
+
+      {/* Show available payment options */}
+      {paymentRequired.accepts.map((req, i) => (
+        <div key={i} onClick={() => selectRequirement(req)}>
+          <PaymentDetails requirement={req} showNetwork showAsset />
+        </div>
+      ))}
+
+      {/* Selected payment details */}
+      {selectedRequirement && (
+        <>
+          <p>Pay to: <AddressDisplay address={selectedRequirement.payTo} copyable /></p>
+          <PaymentButton onClick={execute} loading={isLoading}>
+            {isSuccess ? 'Paid!' : `Pay ${formatTokenAmount(selectedRequirement.amount)}`}
+          </PaymentButton>
+        </>
+      )}
+    </div>
+  )
+}
+
+export default function App() {
+  return (
+    <PaymentProvider>
+      <PaymentFlow />
+    </PaymentProvider>
+  )
+}
+```
+
+---
+
+## @t402/vue
+
+Vue 3 composables and components with the same API surface as `@t402/react`.
+
+### Composables
+
+#### usePaymentRequired
+
+```vue
+<script setup lang="ts">
+import { usePaymentRequired } from '@t402/vue'
+
+const { paymentRequired, status, error, fetchResource, reset } = usePaymentRequired({
+  onSuccess: (response) => console.log('Got resource!'),
+  onError: (err) => console.error(err)
+})
+
+async function handleFetch() {
+  const response = await fetchResource('https://api.example.com/data')
+  if (response) {
+    const data = await response.json()
+  }
+}
+</script>
+
+<template>
+  <div v-if="paymentRequired">
+    Payment required: {{ paymentRequired.accepts[0].amount }}
+  </div>
+  <button v-else @click="handleFetch">Fetch Data</button>
+</template>
+```
+
+#### usePaymentStatus
+
+```vue
+<script setup lang="ts">
+import { usePaymentStatus } from '@t402/vue'
+
+const { status, message, setSuccess, setError, setInfo } = usePaymentStatus()
+
+async function handlePay() {
+  setInfo('Signing payment...')
+  try {
+    await signPayment()
+    setSuccess('Payment confirmed!', 5000)
+  } catch (err) {
+    setError(err.message)
+  }
+}
+</script>
+
+<template>
+  <div v-if="message" :class="message.type">{{ message.text }}</div>
+  <button @click="handlePay">Pay</button>
+</template>
+```
+
+#### useAsyncPayment
+
+```vue
+<script setup lang="ts">
+import { useAsyncPayment } from '@t402/vue'
+
+const { execute, isLoading, isSuccess, error } = useAsyncPayment({
+  paymentFn: () => submitPayment(requirement),
+  onSuccess: (receipt) => console.log('Tx:', receipt.hash)
+})
+</script>
+
+<template>
+  <button @click="execute" :disabled="isLoading">
+    {{ isLoading ? 'Processing...' : isSuccess ? 'Done!' : 'Pay' }}
+  </button>
+</template>
+```
+
+### Components
+
+```vue
+<script setup lang="ts">
+import {
+  PaymentButton,
+  PaymentDetails,
+  AddressDisplay,
+  Spinner
+} from '@t402/vue'
+</script>
+
+<template>
+  <PaymentButton
+    @click="handlePay"
+    :loading="isProcessing"
+    :disabled="!isConnected"
+    variant="primary"
+  >
+    Pay $0.01
+  </PaymentButton>
+
+  <PaymentDetails
+    :requirement="selectedRequirement"
+    show-network
+    show-asset
+  />
+
+  <AddressDisplay
+    address="0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+    :start-chars="6"
+    :end-chars="4"
+    copyable
+  />
+
+  <Spinner size="md" />
+</template>
+```
+
+### Utilities
+
+Same utilities are exported from `@t402/vue`:
+
+```typescript
+import {
+  isEvmNetwork,
+  getNetworkDisplayName,
+  truncateAddress,
+  formatTokenAmount,
+  choosePaymentRequirement
+} from '@t402/vue'
+```
+
+---
+
+## API Comparison
+
+| Feature | @t402/paywall | @t402/react | @t402/vue |
+|---------|--------------|-------------|-----------|
+| Rendering | Server-side HTML | Client-side JSX | Client-side SFC |
+| Wallet integration | Built-in (all chains) | Bring your own | Bring your own |
+| Customization | Theme config | Full component control | Full component control |
+| Use case | Server middleware | Custom React apps | Custom Vue apps |
+| State management | Self-contained | Context + hooks | Composables |
+| Bundle size | Larger (includes wallets) | Smaller (UI only) | Smaller (UI only) |
+
+<Callout type="info">
+  **Choose `@t402/paywall`** when you want a turnkey solution that handles wallet connections
+  and payment execution. **Choose `@t402/react` or `@t402/vue`** when building a custom
+  payment UI with your own wallet integration.
+</Callout>
+
+## Further Reading
+
+- [HTTP Frameworks](/sdks/typescript/http-frameworks) — Server middleware that uses paywall
+- [TypeScript SDK](/sdks/typescript) — Full SDK overview
+- [Exact Scheme](/schemes/exact) — Payment authorization details
+- [Getting Started: Client](/getting-started/client) — Client-side setup

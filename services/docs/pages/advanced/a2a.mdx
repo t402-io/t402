@@ -1,0 +1,345 @@
+# A2A Transport (Agent-to-Agent)
+
+T402 payment flows over the Agent-to-Agent (A2A) protocol, enabling AI agents to pay each other for services.
+
+import { Callout, Steps, Tabs } from 'nextra/components'
+
+## Overview
+
+The A2A transport adapts the T402 payment protocol for [Google's Agent-to-Agent protocol](https://github.com/google/A2A), enabling autonomous AI agents to monetize their services through on-chain payments.
+
+Instead of HTTP status codes and headers, A2A uses **task state** and **message metadata** to signal payment requirements and submit payments.
+
+## Key Differences from HTTP
+
+| Aspect | HTTP Transport | A2A Transport |
+|--------|---------------|---------------|
+| Payment signal | `402` status code | Task state `input-required` |
+| Requirements location | Response body | Task metadata |
+| Payment submission | `Payment-Signature` header | Message metadata |
+| Settlement receipt | `Payment-Response` header | Task metadata |
+| State management | Stateless | Task lifecycle |
+| Error signaling | HTTP status codes | Task state `failed` |
+
+## Payment Flow
+
+<Steps>
+### Client sends task
+
+The client agent sends a `message/send` request to the server agent.
+
+### Server signals payment required
+
+Instead of HTTP 402, the server returns a task with `state: "input-required"` and payment requirements in metadata.
+
+### Client submits payment
+
+The client signs the payment authorization and sends it back as a message with `t402.payment.payload` metadata.
+
+### Server verifies and settles
+
+The server verifies the payment, settles on-chain, and completes the task with the response and settlement receipt.
+</Steps>
+
+## Payment Required Signal
+
+When a server agent requires payment, it returns a task in `input-required` state:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "req-001",
+  "result": {
+    "kind": "task",
+    "id": "task-123",
+    "status": {
+      "state": "input-required",
+      "message": {
+        "role": "agent",
+        "parts": [{ "text": "Payment required to access this service." }],
+        "metadata": {
+          "t402.payment.status": "payment-required",
+          "t402.payment.required": {
+            "t402Version": 2,
+            "error": "Payment required",
+            "resource": {
+              "url": "a2a://agent/weather-tool",
+              "description": "Weather data lookup",
+              "mimeType": "application/json"
+            },
+            "accepts": [{
+              "scheme": "exact",
+              "network": "eip155:8453",
+              "amount": "1000",
+              "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "payTo": "0xAgentAddress...",
+              "maxTimeoutSeconds": 300
+            }]
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+## Payment Submission
+
+The client signs the payment and sends it back with the task ID for correlation:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "message/send",
+  "id": "req-002",
+  "params": {
+    "message": {
+      "taskId": "task-123",
+      "role": "user",
+      "parts": [],
+      "metadata": {
+        "t402.payment.status": "payment-submitted",
+        "t402.payment.payload": {
+          "t402Version": 2,
+          "scheme": "exact",
+          "network": "eip155:8453",
+          "payload": {
+            "authorization": {
+              "from": "0xClientAddress...",
+              "to": "0xAgentAddress...",
+              "value": "1000",
+              "validAfter": 1700000000,
+              "validBefore": 1700000300,
+              "nonce": "0xabc..."
+            },
+            "signature": "0xdef..."
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+## Settlement Response
+
+After successful verification and settlement, the task completes with the receipt:
+
+```json
+{
+  "kind": "task",
+  "id": "task-123",
+  "status": {
+    "state": "completed",
+    "message": {
+      "role": "agent",
+      "parts": [{ "text": "Weather in Tokyo: 22°C, sunny." }],
+      "metadata": {
+        "t402.payment.status": "payment-completed",
+        "t402.payment.receipts": [{
+          "success": true,
+          "transaction": "0x1234abcd...",
+          "network": "eip155:8453",
+          "payer": "0xClientAddress..."
+        }]
+      }
+    }
+  }
+}
+```
+
+## Payment Status Lifecycle
+
+| Status | Task State | Description |
+|--------|-----------|-------------|
+| `payment-required` | `input-required` | Server needs payment |
+| `payment-submitted` | `working` | Client sent payment payload |
+| `payment-verified` | `working` | Payload verified |
+| `payment-completed` | `completed` | Settled on-chain |
+| `payment-rejected` | `failed` | Client declined to pay |
+| `payment-failed` | `failed` | Verification or settlement failed |
+
+## Extension Declaration
+
+### Agent Card
+
+Server agents advertise T402 support in their Agent Card:
+
+```json
+{
+  "name": "Weather Agent",
+  "capabilities": {
+    "extensions": [{
+      "uri": "https://github.com/google-a2a/a2a-t402/v0.1",
+      "description": "Accepts T402 USDT payments",
+      "required": true
+    }]
+  }
+}
+```
+
+### Client Activation
+
+Clients signal T402 support via an HTTP header on the A2A connection:
+
+```http
+X-A2A-Extensions: https://github.com/google-a2a/a2a-t402/v0.1
+```
+
+## Error Handling
+
+When payment fails, the task transitions to `failed` state with error details:
+
+```json
+{
+  "kind": "task",
+  "id": "task-123",
+  "status": {
+    "state": "failed",
+    "message": {
+      "role": "agent",
+      "parts": [{ "text": "Payment verification failed." }],
+      "metadata": {
+        "t402.payment.status": "payment-failed",
+        "t402.payment.error": "EXPIRED_PAYMENT",
+        "t402.payment.receipts": [{
+          "success": false,
+          "errorReason": "Payment authorization has expired",
+          "network": "eip155:8453"
+        }]
+      }
+    }
+  }
+}
+```
+
+### Error Codes
+
+| Error Code | Description | Recovery |
+|-----------|-------------|----------|
+| `EXPIRED_PAYMENT` | Authorization deadline passed | Retry with new signature |
+| `INSUFFICIENT_AMOUNT` | Amount less than required | Retry with correct amount |
+| `INVALID_SIGNATURE` | Signature verification failed | Check signer address |
+| `NETWORK_MISMATCH` | Wrong network | Use correct network from `accepts` |
+| `SETTLEMENT_FAILED` | On-chain settlement failed | Retry or try different network |
+
+## Metadata Fields Reference
+
+| Field | Location | Description |
+|-------|----------|-------------|
+| `t402.payment.status` | Message metadata | Current payment lifecycle state |
+| `t402.payment.required` | Message metadata | PaymentRequired object (same as HTTP 402 body) |
+| `t402.payment.payload` | Message metadata | Signed PaymentPayload |
+| `t402.payment.receipts` | Message metadata | Array of settlement receipts |
+| `t402.payment.error` | Message metadata | Error code string |
+
+## Implementation Example
+
+<Tabs items={['Server Agent', 'Client Agent']}>
+  <Tabs.Tab>
+```typescript
+import { A2AServer } from '@google/a2a'
+
+const server = new A2AServer({
+  agentCard: {
+    name: 'Premium Data Agent',
+    capabilities: {
+      extensions: [{
+        uri: 'https://github.com/google-a2a/a2a-t402/v0.1',
+        required: true
+      }]
+    }
+  }
+})
+
+server.onMessage(async (message, task) => {
+  // Check for payment
+  const paymentPayload = message.metadata?.['t402.payment.payload']
+
+  if (!paymentPayload) {
+    // Return payment required
+    return task.requireInput({
+      metadata: {
+        't402.payment.status': 'payment-required',
+        't402.payment.required': {
+          t402Version: 2,
+          accepts: [{
+            scheme: 'exact',
+            network: 'eip155:8453',
+            amount: '1000',
+            asset: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+            payTo: agentAddress,
+            maxTimeoutSeconds: 300
+          }]
+        }
+      }
+    })
+  }
+
+  // Verify and settle payment
+  const receipt = await facilitator.settle(paymentPayload)
+
+  // Return result with receipt
+  return task.complete({
+    parts: [{ text: 'Here is your data...' }],
+    metadata: {
+      't402.payment.status': 'payment-completed',
+      't402.payment.receipts': [receipt]
+    }
+  })
+})
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```typescript
+import { A2AClient } from '@google/a2a'
+import { ExactEVMClient } from '@t402/evm/exact/client'
+
+const a2a = new A2AClient('https://agent.example.com')
+const evmScheme = new ExactEVMClient({ signer })
+
+// Send initial request
+const task = await a2a.sendMessage({ text: 'Get weather for Tokyo' })
+
+if (task.status.state === 'input-required') {
+  const required = task.status.message.metadata['t402.payment.required']
+  const requirements = required.accepts[0]
+
+  // Sign payment
+  const payload = await evmScheme.createPaymentPayload(2, requirements)
+
+  // Submit payment
+  const result = await a2a.sendMessage({
+    taskId: task.id,
+    metadata: {
+      't402.payment.status': 'payment-submitted',
+      't402.payment.payload': payload
+    }
+  })
+
+  console.log(result.status.message.parts[0].text) // "Weather in Tokyo: 22°C"
+}
+```
+  </Tabs.Tab>
+</Tabs>
+
+## Comparison with MCP Transport
+
+| Feature | A2A Transport | MCP Transport |
+|---------|--------------|---------------|
+| Use case | Agent-to-agent services | Tool access for AI models |
+| Protocol | JSON-RPC + tasks | JSON-RPC + tool calls |
+| Payment signal | Task `input-required` | Tool result with 402 |
+| State | Task lifecycle | Stateless per call |
+| Discovery | Agent Card | MCP server manifest |
+
+<Callout type="info">
+  For AI agents accessing tools (like weather APIs), use the [MCP transport](/advanced/mcp).
+  For agents providing services to other agents, use A2A.
+</Callout>
+
+## Related
+
+- [MCP Transport](/advanced/mcp) — T402 over Model Context Protocol
+- [Agent-to-Agent Use Case](/use-cases/ai-payments) — AI agent payment patterns
+- [T402 Specification](https://github.com/t402-io/t402/blob/main/specs/transports-v2/a2a-transport-v2.md) — Full A2A transport spec

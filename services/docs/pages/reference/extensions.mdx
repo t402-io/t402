@@ -1,0 +1,516 @@
+import { Callout, Tabs } from 'nextra/components'
+
+# @t402/extensions
+
+Protocol extensions for enhanced T402 functionality beyond core payments.
+
+## Installation
+
+```bash
+pnpm add @t402/extensions
+```
+
+## Overview
+
+The `@t402/extensions` package provides optional protocol extensions that add capabilities on top of the base T402 payment flow. Extensions are declared in the 402 response and processed alongside payment verification.
+
+Currently available extensions:
+
+| Extension | Import Path | Purpose |
+|-----------|-------------|---------|
+| Bazaar Discovery | `@t402/extensions/bazaar` | Resource cataloging and indexing |
+| Sign-In-With-X | `@t402/extensions/sign-in-with-x` | CAIP-122 wallet-based authentication |
+
+## Extension Architecture
+
+Extensions follow a three-part pattern matching the core T402 architecture:
+
+```
+Server: declareExtension()     → 402 response includes extension info
+Client: processExtension()     → Client adds extension data to request
+Facilitator: validateExtension() → Verify extension data alongside payment
+```
+
+Extensions are included in the `extensions` field of PaymentRequirements:
+
+```json
+{
+  "scheme": "exact",
+  "network": "eip155:8453",
+  "amount": "10000",
+  "payTo": "0x...",
+  "extensions": {
+    "bazaar": { "info": {...}, "schema": {...} },
+    "siwx": { "info": {...}, "schema": {...} }
+  }
+}
+```
+
+---
+
+## Bazaar Discovery Extension
+
+The Bazaar extension enables automatic cataloging and indexing of T402-protected resources. Facilitators can discover, index, and serve a registry of available paid resources.
+
+### Import
+
+```typescript
+import {
+  declareDiscoveryExtension,
+  extractDiscoveryInfo,
+  validateDiscoveryExtension,
+  withBazaar,
+  BAZAAR
+} from '@t402/extensions/bazaar'
+```
+
+### Server: Declaring Discovery Info
+
+Add discovery metadata to your 402 response so facilitators can catalog your endpoint:
+
+```typescript
+import { declareDiscoveryExtension } from '@t402/extensions/bazaar'
+
+const routes = {
+  'GET /api/weather': {
+    accepts: [{
+      scheme: 'exact',
+      network: 'eip155:8453',
+      price: '$0.01',
+      payTo: '0xMerchant...'
+    }],
+    description: 'Weather data lookup',
+    extensions: declareDiscoveryExtension({
+      method: 'GET',
+      input: {
+        city: { type: 'string', description: 'City name' },
+        units: { type: 'string', enum: ['celsius', 'fahrenheit'] }
+      },
+      inputSchema: {
+        type: 'object',
+        required: ['city'],
+        properties: {
+          city: { type: 'string' },
+          units: { type: 'string', enum: ['celsius', 'fahrenheit'] }
+        }
+      },
+      output: {
+        example: { temperature: 22, condition: 'sunny', humidity: 45 },
+        schema: {
+          type: 'object',
+          properties: {
+            temperature: { type: 'number' },
+            condition: { type: 'string' },
+            humidity: { type: 'number' }
+          }
+        }
+      }
+    })
+  }
+}
+```
+
+For POST endpoints with request bodies:
+
+```typescript
+extensions: declareDiscoveryExtension({
+  method: 'POST',
+  bodyType: 'json',
+  input: {
+    prompt: { type: 'string', description: 'Text prompt' },
+    maxTokens: { type: 'number', description: 'Maximum tokens to generate' }
+  },
+  inputSchema: {
+    type: 'object',
+    required: ['prompt'],
+    properties: {
+      prompt: { type: 'string', maxLength: 4096 },
+      maxTokens: { type: 'number', minimum: 1, maximum: 8192 }
+    }
+  },
+  output: {
+    example: { text: 'Generated response...', tokensUsed: 150 }
+  }
+})
+```
+
+### Discovery Info Types
+
+```typescript
+// GET/HEAD/DELETE endpoints
+interface QueryDiscoveryInfo {
+  input: {
+    type: 'http';
+    method: 'GET' | 'HEAD' | 'DELETE';
+    queryParams?: Record<string, unknown>;
+    headers?: Record<string, string>;
+  };
+  output?: {
+    type?: string;
+    format?: string;
+    example?: unknown;
+  };
+}
+
+// POST/PUT/PATCH endpoints
+interface BodyDiscoveryInfo {
+  input: {
+    type: 'http';
+    method: 'POST' | 'PUT' | 'PATCH';
+    bodyType: 'json' | 'form-data' | 'text';
+    body: Record<string, unknown>;
+    queryParams?: Record<string, unknown>;
+    headers?: Record<string, string>;
+  };
+  output?: {
+    type?: string;
+    format?: string;
+    example?: unknown;
+  };
+}
+```
+
+### Facilitator: Extracting and Validating
+
+```typescript
+import {
+  extractDiscoveryInfo,
+  validateDiscoveryExtension
+} from '@t402/extensions/bazaar'
+
+// Validate extension structure
+const validation = validateDiscoveryExtension(extension)
+if (!validation.valid) {
+  console.error('Invalid extension:', validation.errors)
+}
+
+// Extract discovery info from payment flow
+const discoveryInfo = extractDiscoveryInfo(
+  paymentPayload,
+  paymentRequirements,
+  true  // validate
+)
+
+if (discoveryInfo) {
+  // Index this resource in the bazaar catalog
+  await catalog.addResource({
+    uri: paymentRequirements.resource?.url,
+    network: paymentRequirements.network,
+    price: paymentRequirements.amount,
+    discoveryInfo
+  })
+}
+```
+
+### Client: Querying the Bazaar
+
+```typescript
+import { withBazaar } from '@t402/extensions/bazaar'
+import { FacilitatorClient } from '@t402/core'
+
+const client = withBazaar(new FacilitatorClient('https://facilitator.t402.io'))
+
+// List discovered resources
+const { resources, total } = await client.extensions.listDiscoveryResources({
+  network: 'eip155:8453',
+  scheme: 'exact',
+  limit: 20,
+  cursor: undefined
+})
+
+resources.forEach(resource => {
+  console.log(`${resource.resourceUri} — ${resource.network} — discovered ${resource.discoveredAt}`)
+})
+```
+
+### V1 Compatibility
+
+The bazaar extension also supports extracting discovery info from V1 payment requirements:
+
+```typescript
+import { extractDiscoveryInfoV1, isDiscoverableV1 } from '@t402/extensions/bazaar'
+
+if (isDiscoverableV1(v1Requirements)) {
+  const info = extractDiscoveryInfoV1(v1Requirements)
+  // Transforms v1 outputSchema format to v2 DiscoveryInfo
+}
+```
+
+---
+
+## Sign-In-With-X Extension (SIWx)
+
+The SIWx extension implements [CAIP-122](https://github.com/ChainAgnostic/CAIPs/blob/main/CAIPs/caip-122.md) compliant wallet-based authentication. It allows servers to require proof of wallet ownership alongside payment, enabling access control based on blockchain identity.
+
+### Import
+
+```typescript
+import {
+  // Server
+  declareSIWxExtension,
+  parseSIWxHeader,
+  validateSIWxMessage,
+  verifySIWxSignature,
+
+  // Client
+  createSIWxPayload,
+  createSIWxMessage,
+  signSIWxMessage,
+  encodeSIWxHeader,
+
+  // Constants
+  SIWX_EXTENSION_KEY,
+  SIWX_HEADER_NAME
+} from '@t402/extensions/sign-in-with-x'
+```
+
+### Server: Requiring Wallet Authentication
+
+Declare the SIWx extension in your 402 response:
+
+```typescript
+import { declareSIWxExtension } from '@t402/extensions/sign-in-with-x'
+
+const routes = {
+  'GET /api/premium': {
+    accepts: [{
+      scheme: 'exact',
+      network: 'eip155:8453',
+      price: '$0.01',
+      payTo: '0xMerchant...'
+    }],
+    extensions: {
+      siwx: declareSIWxExtension({
+        resourceUri: 'https://api.example.com/premium',
+        network: 'eip155:8453',
+        statement: 'Sign in to access premium content',
+        signatureScheme: 'eip191'  // Personal sign
+      })
+    }
+  }
+}
+```
+
+### Server: Verifying Authentication
+
+```typescript
+import {
+  parseSIWxHeader,
+  validateSIWxMessage,
+  verifySIWxSignature,
+  SIWX_HEADER_NAME
+} from '@t402/extensions/sign-in-with-x'
+
+// 1. Parse the SIWx header from client request
+const headerValue = request.headers[SIWX_HEADER_NAME]
+const payload = parseSIWxHeader(headerValue)
+
+// 2. Validate message fields (expiration, nonce, domain, etc.)
+const validation = validateSIWxMessage(payload, 'https://api.example.com/premium', {
+  maxAge: 5 * 60 * 1000,  // 5 minutes
+  checkNonce: (nonce) => !usedNonces.has(nonce)
+})
+
+if (!validation.valid) {
+  return res.status(401).json({ error: validation.error })
+}
+
+// 3. Verify cryptographic signature
+const verification = await verifySIWxSignature(payload, {
+  checkSmartWallet: true  // Also check EIP-1271 contract signatures
+})
+
+if (!verification.valid) {
+  return res.status(401).json({ error: verification.error })
+}
+
+// 4. Use verified address for access control
+const userAddress = verification.address
+const hasAccess = await checkWhitelist(userAddress)
+```
+
+### Client: Creating Authentication
+
+```typescript
+import {
+  createSIWxPayload,
+  encodeSIWxHeader,
+  SIWX_HEADER_NAME
+} from '@t402/extensions/sign-in-with-x'
+
+// 1. Get SIWx extension from 402 response
+const siwxExtension = paymentRequired.accepts[0].extensions?.siwx
+
+// 2. Create and sign the authentication payload
+const siwxPayload = await createSIWxPayload(siwxExtension, {
+  address: walletAddress,
+  signMessage: (message) => wallet.signPersonalMessage(message)
+})
+
+// 3. Add to request headers alongside payment
+const response = await fetch(url, {
+  headers: {
+    'X-Payment': JSON.stringify(paymentPayload),
+    [SIWX_HEADER_NAME]: encodeSIWxHeader(siwxPayload)
+  }
+})
+```
+
+### Supported Signature Schemes
+
+| Scheme | Description | Networks |
+|--------|-------------|----------|
+| `eip191` | Personal sign (`eth_sign`) | All EVM |
+| `eip712` | Typed data signature | All EVM |
+| `eip1271` | Smart contract verification | All EVM (deployed wallets) |
+| `eip6492` | Universal signature (undeployed) | All EVM (counterfactual wallets) |
+| `siws` | Sign-In With Solana | Solana |
+| `sep10` | Stellar SEP-10 | Stellar |
+
+### SIWx Message Format
+
+The signed message follows CAIP-122 format:
+
+```
+api.example.com wants you to sign in with your Ethereum account:
+0x1234567890abcdef1234567890abcdef12345678
+
+Sign in to access premium content
+
+URI: https://api.example.com/premium
+Version: 1
+Chain ID: 8453
+Nonce: abc123def456
+Issued At: 2024-01-15T10:30:00.000Z
+Expiration Time: 2024-01-15T10:35:00.000Z
+Resources:
+- https://api.example.com/premium
+```
+
+### Extension Info Type
+
+```typescript
+interface SIWxExtensionInfo {
+  domain: string;              // From resourceUri host
+  uri: string;                 // Full resource URI
+  statement?: string;          // Human-readable purpose
+  version: string;             // "1"
+  chainId: string;             // CAIP-2 (e.g., "eip155:8453")
+  nonce: string;               // Server-generated, cryptographically random
+  issuedAt: string;            // ISO 8601
+  expirationTime?: string;     // ISO 8601 (default: +5 minutes)
+  notBefore?: string;          // ISO 8601
+  requestId?: string;          // Session correlation ID
+  resources: string[];         // Protected resource URIs
+  signatureScheme?: SignatureScheme;
+}
+```
+
+### Smart Wallet Support
+
+For ERC-4337 and Safe wallets, use `eip6492` signature scheme:
+
+```typescript
+// Server: require EIP-6492 compatible signature
+declareSIWxExtension({
+  resourceUri: 'https://api.example.com/premium',
+  network: 'eip155:8453',
+  signatureScheme: 'eip6492'
+})
+
+// Server: verify with smart wallet support
+const result = await verifySIWxSignature(payload, {
+  checkSmartWallet: true,
+  provider: ethersProvider  // For on-chain verification
+})
+```
+
+### Use Cases
+
+- **Whitelisted access**: Only allow specific wallet addresses to pay
+- **Tiered pricing**: Different prices based on token holdings
+- **Subscription verification**: Prove NFT or token ownership for discounts
+- **Identity linking**: Associate payments with on-chain identity
+- **Anti-sybil**: Prevent abuse by requiring unique wallet signatures
+
+<Callout type="warning">
+  SIWx adds an extra signature step for the client. Only use it when you need
+  proof of wallet ownership beyond what the payment signature provides.
+  The payment itself already proves the payer's identity.
+</Callout>
+
+---
+
+## Creating Custom Extensions
+
+Extensions follow a standard interface:
+
+```typescript
+interface ExtensionDeclaration {
+  info: Record<string, unknown>;   // Extension-specific data
+  schema: object;                  // JSON Schema for validation
+}
+
+// Server: declare in 402 response
+function declareMyExtension(config: MyConfig): Record<string, ExtensionDeclaration> {
+  return {
+    myExtension: {
+      info: { /* extension data */ },
+      schema: { /* JSON Schema */ }
+    }
+  }
+}
+
+// Facilitator: validate extension data
+function validateMyExtension(extension: ExtensionDeclaration): ValidationResult {
+  // Validate info against schema
+  return { valid: true }
+}
+```
+
+### Registration with Middleware
+
+Extensions are automatically loaded when declared in route config:
+
+```typescript
+const routes = {
+  'GET /api/data': {
+    accepts: [{ scheme: 'exact', network: 'eip155:8453', price: '$0.01', payTo: '0x...' }],
+    extensions: {
+      bazaar: declareDiscoveryExtension({ /* ... */ }),
+      siwx: declareSIWxExtension({ /* ... */ })
+    }
+  }
+}
+```
+
+The server middleware processes extensions alongside payment verification.
+
+---
+
+## Type Helpers
+
+The extensions package exports type utilities for TypeScript:
+
+```typescript
+import type { WithExtensions } from '@t402/extensions'
+
+// Add extension types to PaymentRequirements
+type RequirementsWithBazaar = WithExtensions<
+  PaymentRequirements,
+  { bazaar: DiscoveryExtension }
+>
+
+// Combines with existing extensions if present
+type RequirementsWithBoth = WithExtensions<
+  RequirementsWithBazaar,
+  { siwx: SIWxExtension }
+>
+```
+
+## Further Reading
+
+- [HTTP Frameworks](/sdks/typescript/http-frameworks) — Middleware that uses extensions
+- [TypeScript SDK](/sdks/typescript) — Full SDK overview
+- [A2A Transport](/advanced/a2a) — Extensions in A2A context
+- [MCP Integration](/advanced/mcp) — Extensions in MCP context

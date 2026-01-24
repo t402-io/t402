@@ -5,6 +5,13 @@ export default {
   svm: '@t402/svm',
   ton: '@t402/ton',
   tron: '@t402/tron',
+  near: '@t402/near',
+  aptos: '@t402/aptos',
+  tezos: '@t402/tezos',
+  polkadot: '@t402/polkadot',
+  stacks: '@t402/stacks',
+  extensions: '@t402/extensions',
+  cli: '@t402/cli',
   wdk: '@t402/wdk',
   '---': {
     type: 'separator'
