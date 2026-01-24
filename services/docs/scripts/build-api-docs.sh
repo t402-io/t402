@@ -6,8 +6,8 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOCS_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-ROOT_DIR="$(cd "$DOCS_DIR/.." && pwd)"
-TS_DIR="$ROOT_DIR/typescript"
+ROOT_DIR="$(cd "$DOCS_DIR/../.." && pwd)"
+TS_DIR="$ROOT_DIR/sdks/typescript"
 
 echo "=== Building TypeDoc API Documentation ==="
 echo "Docs dir: $DOCS_DIR"
