@@ -109,23 +109,30 @@ function EvmWalletButton() {
     );
   }
 
-  // Try connectors in order: injected (MetaMask), walletConnect, coinbaseWallet
-  const handleConnect = () => {
-    const injected = connectors.find((c) => c.id === "injected");
-    const wc = connectors.find((c) => c.id === "walletConnect");
-    const cb = connectors.find((c) => c.id === "coinbaseWalletSDK");
+  // Check if an injected provider (MetaMask, etc.) actually exists in the browser
+  const hasInjectedProvider = typeof window !== "undefined" && !!window.ethereum;
 
-    if (injected) {
-      connect({ connector: injected });
-    } else if (wc) {
-      connect({ connector: wc });
-    } else if (cb) {
-      connect({ connector: cb });
-    } else {
-      // No connectors available — open MetaMask install page
-      window.open("https://metamask.io/download/", "_blank");
+  const handleConnect = () => {
+    if (hasInjectedProvider) {
+      const injected = connectors.find((c) => c.id === "injected");
+      if (injected) {
+        connect({ connector: injected });
+        return;
+      }
     }
+    // Try WalletConnect (shows QR modal)
+    const wc = connectors.find((c) => c.id === "walletConnect");
+    if (wc) {
+      connect({ connector: wc });
+      return;
+    }
+    // No provider available — open install page
+    window.open("https://metamask.io/download/", "_blank");
   };
+
+  if (!hasInjectedProvider && !connectors.some((c) => c.id === "walletConnect")) {
+    return <InstallButton label="MetaMask" url="https://metamask.io/download/" />;
+  }
 
   return <ConnectButton label="Wallet" onClick={handleConnect} />;
 }

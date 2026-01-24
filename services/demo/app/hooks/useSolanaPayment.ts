@@ -115,18 +115,19 @@ export function useSolanaPayment() {
   const hasWallet = wallets.some((w) => w.readyState === "Installed");
 
   const doConnect = useCallback(async () => {
-    // Select first installed wallet, or first in list
     const installed = wallets.find((w) => w.readyState === "Installed");
     if (installed) {
-      select(installed.adapter.name);
-      // Wait for selection to propagate then connect
-      await new Promise((r) => setTimeout(r, 100));
-      if (connect) await connect();
+      // If already selected, just connect
+      if (wallet?.adapter.name === installed.adapter.name) {
+        if (connect) await connect();
+      } else {
+        // Select the wallet — autoConnect in SolanaProvider will handle connection
+        select(installed.adapter.name);
+      }
     } else {
-      // No wallet installed — open Phantom install page
       window.open("https://phantom.app/", "_blank");
     }
-  }, [wallets, select, connect]);
+  }, [wallets, wallet, select, connect]);
 
   return {
     address: publicKey?.toBase58() || null,
