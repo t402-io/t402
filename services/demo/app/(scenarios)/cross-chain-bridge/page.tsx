@@ -10,6 +10,7 @@ export default function CrossChainBridgePage() {
       description="Pay on one chain, settle on another. LayerZero USDT0 enables seamless cross-chain payments."
       cost="0.01 USDT/bridge"
       accentColor="var(--color-scenario-bridge)"
+      scenarioId="cross-chain-bridge"
     >
       <CrossChainBridge />
     </ScenarioShell>

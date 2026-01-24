@@ -3,6 +3,7 @@
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { useChainContext } from "@/providers/ChainProvider";
 import { useDemoContext } from "@/providers/DemoProvider";
+import { useTonPayment } from "@/hooks/useTonPayment";
 
 const CHAIN_LABELS: Record<string, string> = {
   evm: "EVM",
@@ -20,7 +21,11 @@ export function WalletButton() {
     return <EvmWalletButton />;
   }
 
-  // Non-EVM chains: show demo wallet or "coming soon"
+  if (activeFamily === "ton") {
+    return <TonWalletButton />;
+  }
+
+  // Other non-EVM chains: show demo wallet or "coming soon"
   if (isDemo) {
     return (
       <div className="flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5">
@@ -40,6 +45,50 @@ export function WalletButton() {
       title={`${CHAIN_LABELS[activeFamily]} wallet integration coming soon`}
     >
       {CHAIN_LABELS[activeFamily]} Wallet (Soon)
+    </button>
+  );
+}
+
+function TonWalletButton() {
+  const { isDemo } = useDemoContext();
+  const { address, isConnected, connect, disconnect } = useTonPayment();
+
+  if (isDemo) {
+    return (
+      <div className="flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5">
+        <span className="h-2 w-2 rounded-full bg-[var(--color-warning)]" />
+        <span className="font-mono text-xs text-white">Demo Wallet</span>
+        <span className="text-xs text-[var(--color-muted)]">TON</span>
+      </div>
+    );
+  }
+
+  if (isConnected && address) {
+    return (
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5">
+          <span className="h-2 w-2 rounded-full bg-[var(--color-success)]" />
+          <span className="font-mono text-xs text-white">
+            {address.slice(0, 6)}...{address.slice(-4)}
+          </span>
+          <span className="text-xs text-[var(--color-muted)]">TON</span>
+        </div>
+        <button
+          onClick={() => disconnect()}
+          className="rounded-lg border border-[var(--color-border)] px-2 py-1.5 text-xs text-[var(--color-muted)] hover:text-white transition-colors"
+        >
+          Disconnect
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={() => connect()}
+      className="btn-primary rounded-lg px-4 py-1.5 text-sm"
+    >
+      Connect TON
     </button>
   );
 }

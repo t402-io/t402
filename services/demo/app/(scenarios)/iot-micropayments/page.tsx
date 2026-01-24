@@ -10,6 +10,7 @@ export default function IoTMicropaymentsPage() {
       description="Sensor data on demand. Pay per reading — temperature, humidity, GPS coordinates."
       cost="0.0001 USDT/reading"
       accentColor="var(--color-scenario-iot)"
+      scenarioId="iot-micropayments"
     >
       <IoTMicropayments />
     </ScenarioShell>
