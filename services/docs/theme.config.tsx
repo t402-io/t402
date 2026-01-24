@@ -54,7 +54,7 @@ const config: DocsThemeConfig = {
         )
       : undefined // Falls back to Nextra's built-in search
   },
-  docsRepositoryBase: 'https://github.com/t402-io/t402/tree/main/docs',
+  docsRepositoryBase: 'https://github.com/t402-io/t402/tree/main/services/docs',
   footer: {
     content: (
       <span>
