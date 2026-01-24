@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { motion } from "motion/react";
 import { useDemoContext } from "@/providers/DemoProvider";
+import { useMultiChainPayment } from "@/hooks/useMultiChainPayment";
 import { CodeBlock } from "@/components/shared/CodeBlock";
 import { Spinner } from "@/components/shared/Spinner";
 
@@ -25,6 +26,7 @@ const AGENT_TASKS = [
 
 export function AgentToAgent() {
   const { isDemo } = useDemoContext();
+  const { signPayment, activeFamily } = useMultiChainPayment();
   const [selectedTask, setSelectedTask] = useState(AGENT_TASKS[0]);
   const [state, setState] = useState<State>("idle");
   const [result, setResult] = useState<A2AResult | null>(null);
@@ -38,6 +40,7 @@ export function AgentToAgent() {
     try {
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
+        "x-preferred-chain": activeFamily,
       };
       if (isDemo) headers["x-demo-mode"] = "true";
 
@@ -58,30 +61,14 @@ export function AgentToAgent() {
       const paymentRequired = await initialResponse.json();
       const requirements = paymentRequired.accepts[0];
 
-      await new Promise((r) => setTimeout(r, 400));
-
-      // Step 2: Auto-pay (agent signs autonomously)
-      const paymentPayload = {
-        t402Version: 2,
-        scheme: "exact",
-        network: requirements.network,
-        payload: {
-          authorization: {
-            from: "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD68",
-            to: requirements.payTo,
-            value: requirements.amount,
-            validAfter: 0,
-            validBefore: Math.floor(Date.now() / 1000) + 60,
-            nonce: "0x" + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join(""),
-          },
-          signature: "0x" + Array.from({ length: 130 }, () => Math.floor(Math.random() * 16).toString(16)).join(""),
-        },
-      };
+      // Step 2: Auto-pay (agent signs autonomously via multi-chain hook)
+      const paymentPayload = await signPayment(requirements);
 
       setState("executing");
 
       const retryHeaders: Record<string, string> = {
         "Content-Type": "application/json",
+        "x-preferred-chain": activeFamily,
         "Payment-Signature": btoa(JSON.stringify(paymentPayload)),
       };
       if (isDemo) retryHeaders["x-demo-mode"] = "true";
@@ -103,7 +90,7 @@ export function AgentToAgent() {
       setError(err instanceof Error ? err.message : String(err));
       setState("error");
     }
-  }, [isDemo, selectedTask]);
+  }, [isDemo, activeFamily, signPayment, selectedTask]);
 
   const getStepStatus = (step: number) => {
     const stateOrder: State[] = ["idle", "delegating", "paying", "executing", "done"];

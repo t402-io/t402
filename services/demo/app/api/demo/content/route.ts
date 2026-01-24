@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getNetwork, getAsset, PAY_TO } from "@/lib/config";
+import { getPreferredChain, getAcceptsForChain, getNetwork, getAsset, PAY_TO } from "@/lib/config";
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 
@@ -10,22 +10,13 @@ const RESOURCE = {
   description: "Premium article — pay to unlock with USDT",
 };
 
-function createContentPaymentRequired() {
+function createContentPaymentRequired(request: NextRequest) {
+  const chain = getPreferredChain(request);
   return {
     t402Version: 2,
     error: "Payment required",
     resource: { ...RESOURCE, mimeType: "application/json" },
-    accepts: [
-      {
-        scheme: "exact",
-        network: getNetwork(),
-        amount: CONTENT_AMOUNT,
-        asset: getAsset(),
-        payTo: PAY_TO,
-        maxTimeoutSeconds: 60,
-        extra: { name: "USDT", version: "2" },
-      },
-    ],
+    accepts: getAcceptsForChain(chain, CONTENT_AMOUNT),
   };
 }
 
@@ -77,7 +68,7 @@ export async function GET(request: NextRequest) {
 
   // If no payment header, return 402 with preview
   if (!paymentHeader) {
-    const paymentRequired = createContentPaymentRequired();
+    const paymentRequired = createContentPaymentRequired(request);
     const response = NextResponse.json(
       {
         ...paymentRequired,
@@ -108,7 +99,8 @@ export async function GET(request: NextRequest) {
 
   if (isDemoMode) {
     await new Promise((r) => setTimeout(r, 600));
-    const settleResponse = createMockSettleResponse(getNetwork());
+    const chain = getPreferredChain(request);
+    const settleResponse = createMockSettleResponse(chain);
     const response = NextResponse.json({ article: PREMIUM_ARTICLE });
     response.headers.set("Payment-Response", encodeHeader(settleResponse));
     response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");

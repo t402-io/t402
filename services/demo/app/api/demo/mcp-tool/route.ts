@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getNetwork, getAsset, PAY_TO, DEMO_AMOUNT } from "@/lib/config";
+import { getPreferredChain, getAcceptsForChain, getNetwork, getAsset, PAY_TO, DEMO_AMOUNT } from "@/lib/config";
 import { verifyPayment, settlePayment } from "@/lib/t402-server";
 import { mockMcpToolResult, createMockSettleResponse } from "@/lib/mock-responses";
 
@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
 
   if (!paymentPayload) {
     // Return 402 in MCP format
+    const chain = getPreferredChain(request);
     return NextResponse.json({
       jsonrpc: "2.0",
       id,
@@ -36,17 +37,7 @@ export async function POST(request: NextRequest) {
             description: `Premium tool: ${params?.name || "unknown"}`,
             mimeType: "application/json",
           },
-          accepts: [
-            {
-              scheme: "exact",
-              network: getNetwork(),
-              amount: DEMO_AMOUNT,
-              asset: getAsset(),
-              payTo: PAY_TO,
-              maxTimeoutSeconds: 60,
-              extra: { name: "USDT", version: "2" },
-            },
-          ],
+          accepts: getAcceptsForChain(chain, DEMO_AMOUNT),
         },
       },
     });

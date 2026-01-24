@@ -1,3 +1,5 @@
+import { type ChainFamily, CHAIN_CONFIGS } from "@/lib/testnet-config";
+
 export const FACILITATOR_URL =
   process.env.NEXT_PUBLIC_FACILITATOR_URL || "https://facilitator.t402.io";
 
@@ -20,4 +22,50 @@ export function getNetwork() {
 
 export function getAsset() {
   return process.env.NEXT_PUBLIC_TESTNET === "true" ? TESTNET_ASSET : MAINNET_ASSET;
+}
+
+/**
+ * Parse the X-Preferred-Chain header to determine which chain family the client wants.
+ * Falls back to "evm" if not specified or invalid.
+ */
+export function getPreferredChain(request: Request): ChainFamily {
+  const header = request.headers.get("x-preferred-chain");
+  if (header && header in CHAIN_CONFIGS) {
+    return header as ChainFamily;
+  }
+  return "evm";
+}
+
+/**
+ * Create the `accepts` array for a 402 response based on the preferred chain.
+ * Returns the preferred chain first, followed by all other chains.
+ */
+export function createMultiChainAccepts(amount: string, scheme = "exact") {
+  const families: ChainFamily[] = ["evm", "ton", "tron", "solana", "stacks"];
+  return families.map((family) => {
+    const config = CHAIN_CONFIGS[family];
+    return {
+      scheme,
+      network: config.network,
+      amount,
+      asset: config.asset,
+      payTo: config.payTo,
+      maxTimeoutSeconds: 60,
+    };
+  });
+}
+
+/**
+ * Create an `accepts` array with the preferred chain first.
+ */
+export function getAcceptsForChain(preferredChain: ChainFamily, amount: string, scheme = "exact") {
+  const all = createMultiChainAccepts(amount, scheme);
+  const preferredIndex = all.findIndex(
+    (a) => a.network === CHAIN_CONFIGS[preferredChain].network
+  );
+  if (preferredIndex > 0) {
+    const [preferred] = all.splice(preferredIndex, 1);
+    all.unshift(preferred);
+  }
+  return all;
 }

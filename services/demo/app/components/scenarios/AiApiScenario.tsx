@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { motion } from "motion/react";
 import { useDemoContext } from "@/providers/DemoProvider";
+import { useMultiChainPayment } from "@/hooks/useMultiChainPayment";
 import { CodeBlock } from "@/components/shared/CodeBlock";
 import { Spinner } from "@/components/shared/Spinner";
 
@@ -24,6 +25,7 @@ const EXAMPLE_QUERIES = [
 
 export function AiApiScenario() {
   const { isDemo } = useDemoContext();
+  const { signPayment, activeFamily } = useMultiChainPayment();
   const [query, setQuery] = useState(EXAMPLE_QUERIES[0]);
   const [state, setState] = useState<State>("idle");
   const [result, setResult] = useState<AiResult | null>(null);
@@ -38,6 +40,7 @@ export function AiApiScenario() {
     try {
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
+        "x-preferred-chain": activeFamily,
       };
       if (isDemo) headers["x-demo-mode"] = "true";
 
@@ -54,32 +57,16 @@ export function AiApiScenario() {
 
       const paymentRequired = await initialResponse.json();
 
-      // Step 2: Mock sign in demo mode
+      // Step 2: Sign payment via multi-chain hook
       const requirements = paymentRequired.accepts[0];
-      await new Promise((r) => setTimeout(r, 400));
-
-      const paymentPayload = {
-        t402Version: 2,
-        scheme: "exact",
-        network: requirements.network,
-        payload: {
-          authorization: {
-            from: "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD68",
-            to: requirements.payTo,
-            value: requirements.amount,
-            validAfter: 0,
-            validBefore: Math.floor(Date.now() / 1000) + 60,
-            nonce: "0x" + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join(""),
-          },
-          signature: "0x" + Array.from({ length: 130 }, () => Math.floor(Math.random() * 16).toString(16)).join(""),
-        },
-      };
+      const paymentPayload = await signPayment(requirements);
 
       setState("streaming");
 
       // Step 3: Retry with payment
       const retryHeaders: Record<string, string> = {
         "Content-Type": "application/json",
+        "x-preferred-chain": activeFamily,
         "Payment-Signature": btoa(JSON.stringify(paymentPayload)),
       };
       if (isDemo) retryHeaders["x-demo-mode"] = "true";
@@ -102,7 +89,7 @@ export function AiApiScenario() {
       setError(err instanceof Error ? err.message : String(err));
       setState("error");
     }
-  }, [query, isDemo]);
+  }, [query, isDemo, activeFamily, signPayment]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
