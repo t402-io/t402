@@ -3,8 +3,10 @@
 import { ChainSelector } from "./ChainSelector";
 import { ChainBadge } from "./ChainBadge";
 import { FaucetLink } from "./FaucetLink";
+import { SdkExamples } from "./SdkExamples";
 import { useChainContext } from "@/providers/ChainProvider";
 import { useDemoContext } from "@/providers/DemoProvider";
+import type { ScenarioId } from "@/lib/sdk-examples";
 import type { ReactNode } from "react";
 
 interface ScenarioShellProps {
@@ -12,10 +14,11 @@ interface ScenarioShellProps {
   description: string;
   cost: string;
   accentColor: string;
+  scenarioId?: ScenarioId;
   children: ReactNode;
 }
 
-export function ScenarioShell({ title, description, cost, accentColor, children }: ScenarioShellProps) {
+export function ScenarioShell({ title, description, cost, accentColor, scenarioId, children }: ScenarioShellProps) {
   const { activeFamily } = useChainContext();
   const { isLive } = useDemoContext();
 
@@ -43,6 +46,7 @@ export function ScenarioShell({ title, description, cost, accentColor, children 
         )}
       </div>
       {children}
+      {scenarioId && <SdkExamples scenarioId={scenarioId} />}
     </div>
   );
 }

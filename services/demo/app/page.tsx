@@ -139,9 +139,15 @@ export default function HomePage() {
         </div>
 
         {/* CTA */}
-        <div className="relative z-10 flex items-center gap-4">
+        <div className="relative z-10 flex flex-wrap items-center justify-center gap-3">
           <Link href="/ai-api" className="btn-primary px-5 py-2.5 text-sm flex items-center gap-2">
             Try a Scenario <ArrowRight size={14} />
+          </Link>
+          <Link
+            href="/playground"
+            className="px-5 py-2.5 text-sm text-white hover:text-[var(--color-brand)] transition-colors border border-[var(--color-border)] rounded-xl"
+          >
+            Playground
           </Link>
           <a
             href="https://docs.t402.io"

@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import { useChainContext } from "@/providers/ChainProvider";
 import { useDemoContext } from "@/providers/DemoProvider";
 import { useEvmPayment } from "./useEvmPayment";
+import { useTonPayment } from "./useTonPayment";
 import type { ChainFamily } from "@/lib/testnet-config";
 
 interface PaymentRequirements {
@@ -56,9 +57,16 @@ export function useMultiChainPayment() {
   const { activeFamily, activeConfig } = useChainContext();
   const { isDemo } = useDemoContext();
   const evm = useEvmPayment();
+  const ton = useTonPayment();
 
-  const isConnected = activeFamily === "evm" ? evm.isConnected : false;
-  const address = activeFamily === "evm" ? evm.address : null;
+  const isConnected =
+    activeFamily === "evm" ? evm.isConnected :
+    activeFamily === "ton" ? ton.isConnected :
+    false;
+  const address =
+    activeFamily === "evm" ? evm.address :
+    activeFamily === "ton" ? ton.address :
+    null;
 
   const signPayment = useCallback(
     async (requirements: PaymentRequirements): Promise<PaymentPayload> => {
@@ -73,8 +81,7 @@ export function useMultiChainPayment() {
         case "evm":
           return evm.signPayment(requirements) as Promise<PaymentPayload>;
         case "ton":
-          // TODO: Implement when @tonconnect/ui-react provider is added
-          throw new Error("TON live signing not yet implemented. Use demo mode.");
+          return ton.signPayment(requirements) as Promise<PaymentPayload>;
         case "tron":
           // TODO: Implement when TronLink provider is added
           throw new Error("TRON live signing not yet implemented. Use demo mode.");
@@ -88,7 +95,7 @@ export function useMultiChainPayment() {
           throw new Error(`Unsupported chain: ${activeFamily}`);
       }
     },
-    [activeFamily, isDemo, evm]
+    [activeFamily, isDemo, evm, ton]
   );
 
   return {

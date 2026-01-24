@@ -10,6 +10,7 @@ export default function McpAiAgentPage() {
       description="AI agent autonomously pays for tools and resources via Model Context Protocol."
       cost="0.001 USDT/tool"
       accentColor="var(--color-scenario-mcp)"
+      scenarioId="mcp-ai-agent"
     >
       <McpAiAgent />
     </ScenarioShell>

@@ -10,6 +10,7 @@ export default function StreamingMediaPage() {
       description="Pay-per-second audio streaming. No subscriptions, just listen and pay as you go."
       cost="0.001 USDT/10s"
       accentColor="var(--color-scenario-stream)"
+      scenarioId="streaming-media"
     >
       <StreamingMedia />
     </ScenarioShell>
