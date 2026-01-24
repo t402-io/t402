@@ -22,6 +22,9 @@ public final class EvmConstants {
     /** Exact payment scheme identifier. */
     public static final String SCHEME_EXACT = "exact";
 
+    /** Exact-Legacy payment scheme identifier (approve + transferFrom). */
+    public static final String SCHEME_EXACT_LEGACY = "exact-legacy";
+
     /** Up-To payment scheme identifier. */
     public static final String SCHEME_UPTO = "upto";
 

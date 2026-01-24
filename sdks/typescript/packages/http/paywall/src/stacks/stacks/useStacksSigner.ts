@@ -1,38 +1,17 @@
 import { useMemo } from "react";
 import type { StacksAccount, StacksNetwork } from "./types";
 import { STACKS_NETWORKS } from "./types";
-import { getUsdcContractAddress, parseContractId, fetchAccountInfo } from "./rpc";
-
-/**
- * Stacks client signer interface compatible with @t402/stacks (future)
- * For now, this provides the basic signing capability
- */
-export interface ClientStacksSigner {
-  /** Stacks address */
-  readonly address: string;
-  /** Public key if available */
-  readonly publicKey?: string;
-  /** Sign a SIP-010 token transfer */
-  signTokenTransfer(params: {
-    recipient: string;
-    amount: bigint;
-    tokenContract: string;
-    memo?: string;
-  }): Promise<string>;
-  /** Get current nonce for the account */
-  getNonce(): Promise<number>;
-}
+import { parseContractId } from "./rpc";
+import type { ClientStacksSigner } from "@t402/stacks";
 
 /**
  * Build a SIP-010 transfer function call payload
- * This is a simplified implementation - in production, use @stacks/transactions
  */
 function buildTransferPayload(params: {
   recipient: string;
-  amount: bigint;
+  amount: string;
   tokenContract: string;
   sender: string;
-  memo?: string;
 }): {
   functionName: string;
   contractAddress: string;
@@ -46,10 +25,10 @@ function buildTransferPayload(params: {
     contractAddress,
     contractName,
     args: [
-      params.amount.toString(), // amount (uint)
+      params.amount, // amount (uint)
       params.sender, // sender (principal)
       params.recipient, // recipient (principal)
-      params.memo || "", // memo (optional buff)
+      "", // memo (optional buff)
     ],
   };
 }
@@ -113,12 +92,14 @@ async function signWithXverse(
 }
 
 /**
- * Hook to create a Stacks signer from connected wallet
+ * Hook to create a Stacks signer from connected wallet.
+ *
+ * Returns a ClientStacksSigner compatible with @t402/stacks exact-direct client.
  *
  * @param account - Connected Stacks account
  * @param walletId - Which wallet is connected
  * @param network - Target network
- * @returns Client signer or null if not connected
+ * @returns Client signer compatible with @t402/stacks or null if not connected
  */
 export function useStacksSigner(
   account: StacksAccount | null,
@@ -131,35 +112,26 @@ export function useStacksSigner(
     }
 
     const clientSigner: ClientStacksSigner = {
-      get address() {
+      async getAddress() {
         return account.address;
       },
 
-      get publicKey() {
-        return account.publicKey;
-      },
-
-      async signTokenTransfer(params) {
-        const tokenContract = params.tokenContract || getUsdcContractAddress(network);
-
+      async transferToken(contractAddress: string, to: string, amount: string) {
         const payload = buildTransferPayload({
-          recipient: params.recipient,
-          amount: params.amount,
-          tokenContract,
+          recipient: to,
+          amount,
+          tokenContract: contractAddress,
           sender: account.address,
-          memo: params.memo,
         });
 
+        let txId: string;
         if (walletId === "leather") {
-          return signWithLeather(payload, network);
+          txId = await signWithLeather(payload, network);
         } else {
-          return signWithXverse(payload, network);
+          txId = await signWithXverse(payload, network);
         }
-      },
 
-      async getNonce() {
-        const info = await fetchAccountInfo(account.address, network);
-        return info?.nonce || 0;
+        return { txId };
       },
     };
 
@@ -167,32 +139,4 @@ export function useStacksSigner(
   }, [account, walletId, network]);
 
   return signer;
-}
-
-/**
- * Create a payment payload for T402 protocol
- * This will be used when @t402/stacks is implemented
- */
-export function createStacksPaymentPayload(params: {
-  signer: ClientStacksSigner;
-  payTo: string;
-  amount: string;
-  tokenContract: string;
-  network: StacksNetwork;
-}): {
-  scheme: string;
-  network: string;
-  from: string;
-  to: string;
-  amount: string;
-  asset: string;
-} {
-  return {
-    scheme: "exact",
-    network: params.network,
-    from: params.signer.address,
-    to: params.payTo,
-    amount: params.amount,
-    asset: params.tokenContract,
-  };
 }
