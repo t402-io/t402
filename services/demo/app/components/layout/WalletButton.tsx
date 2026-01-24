@@ -8,14 +8,6 @@ import { useSolanaPayment } from "@/hooks/useSolanaPayment";
 import { useTronPayment } from "@/hooks/useTronPayment";
 import { useStacksPayment } from "@/hooks/useStacksPayment";
 
-const CHAIN_LABELS: Record<string, string> = {
-  evm: "EVM",
-  ton: "TON",
-  tron: "TRON",
-  solana: "Solana",
-  stacks: "Stacks",
-};
-
 export function WalletButton() {
   const { activeFamily } = useChainContext();
 
@@ -84,6 +76,19 @@ function ConnectButton({ label, onClick }: { label: string; onClick: () => void 
   );
 }
 
+function InstallButton({ label, url }: { label: string; url: string }) {
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="rounded-lg border border-[var(--color-border)] px-4 py-1.5 text-xs text-[var(--color-muted)] hover:text-white hover:border-[var(--color-brand)] transition-colors"
+    >
+      Install {label}
+    </a>
+  );
+}
+
 // --- Chain-specific wallet buttons ---
 
 function EvmWalletButton() {
@@ -104,15 +109,25 @@ function EvmWalletButton() {
     );
   }
 
-  return (
-    <ConnectButton
-      label="Wallet"
-      onClick={() => {
-        const injected = connectors.find((c) => c.id === "injected");
-        if (injected) connect({ connector: injected });
-      }}
-    />
-  );
+  // Try connectors in order: injected (MetaMask), walletConnect, coinbaseWallet
+  const handleConnect = () => {
+    const injected = connectors.find((c) => c.id === "injected");
+    const wc = connectors.find((c) => c.id === "walletConnect");
+    const cb = connectors.find((c) => c.id === "coinbaseWalletSDK");
+
+    if (injected) {
+      connect({ connector: injected });
+    } else if (wc) {
+      connect({ connector: wc });
+    } else if (cb) {
+      connect({ connector: cb });
+    } else {
+      // No connectors available — open MetaMask install page
+      window.open("https://metamask.io/download/", "_blank");
+    }
+  };
+
+  return <ConnectButton label="Wallet" onClick={handleConnect} />;
 }
 
 function TonWalletButton() {
@@ -123,16 +138,20 @@ function TonWalletButton() {
   if (isConnected && address) {
     return <ConnectedBadge address={address} label="TON" onDisconnect={disconnect} />;
   }
+  // TonConnect always works — shows QR code / deep link modal
   return <ConnectButton label="TON" onClick={connect} />;
 }
 
 function SolanaWalletButton() {
   const { isDemo } = useDemoContext();
-  const { address, isConnected, connect, disconnect } = useSolanaPayment();
+  const { address, isConnected, hasWallet, connect, disconnect } = useSolanaPayment();
 
   if (isDemo) return <DemoWalletBadge label="Solana" />;
   if (isConnected && address) {
     return <ConnectedBadge address={address} label="Solana" onDisconnect={disconnect} />;
+  }
+  if (!hasWallet) {
+    return <InstallButton label="Phantom" url="https://phantom.app/" />;
   }
   return <ConnectButton label="Solana" onClick={connect} />;
 }
@@ -145,12 +164,10 @@ function TronWalletButton() {
   if (isConnected && address) {
     return <ConnectedBadge address={address} label="TRON" onDisconnect={disconnect} />;
   }
-  return (
-    <ConnectButton
-      label={isInstalled ? "TronLink" : "TRON"}
-      onClick={connect}
-    />
-  );
+  if (!isInstalled) {
+    return <InstallButton label="TronLink" url="https://www.tronlink.org/" />;
+  }
+  return <ConnectButton label="TronLink" onClick={connect} />;
 }
 
 function StacksWalletButton() {
@@ -161,5 +178,6 @@ function StacksWalletButton() {
   if (isConnected && address) {
     return <ConnectedBadge address={address} label="Stacks" onDisconnect={disconnect} />;
   }
+  // Stacks Connect works via popup — always available
   return <ConnectButton label="Stacks" onClick={connect} />;
 }
