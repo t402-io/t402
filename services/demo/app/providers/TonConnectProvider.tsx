@@ -1,14 +1,22 @@
 "use client";
 
 import { TonConnectUIProvider } from "@tonconnect/ui-react";
-import type { ReactNode } from "react";
-
-// TonConnect manifest for the demo app
-const MANIFEST_URL = "https://demo.t402.io/tonconnect-manifest.json";
+import { type ReactNode, useState, useEffect } from "react";
 
 export function TonConnectProvider({ children }: { children: ReactNode }) {
+  const [manifestUrl, setManifestUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    setManifestUrl(`${window.location.origin}/tonconnect-manifest.json`);
+  }, []);
+
+  // Render children without TonConnect until we have the manifest URL (avoids hydration mismatch)
+  if (!manifestUrl) {
+    return <>{children}</>;
+  }
+
   return (
-    <TonConnectUIProvider manifestUrl={MANIFEST_URL}>
+    <TonConnectUIProvider manifestUrl={manifestUrl}>
       {children}
     </TonConnectUIProvider>
   );
