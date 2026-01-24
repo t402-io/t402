@@ -3,7 +3,7 @@
 > **Goal**: Support 100% of all blockchains with USDT or USDT0 deployments
 >
 > Created: 2026-01-22
-> Last Updated: 2026-01-22
+> Last Updated: 2026-01-24
 >
 > **Phase 1 & 2 Complete**: Legacy EVM USDT (BNB, Avalanche, Celo, Kaia, Fantom)
 > **Phase 3 Complete**: Near Protocol, Aptos, Tezos, Polkadot (spec + Go + TypeScript + Facilitator)
