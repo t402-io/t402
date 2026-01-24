@@ -13,4 +13,6 @@ e2e/facilitators/external-proxies/*
 !e2e/facilitators/external-proxies/README.md
 .vercel
 .env*.local
+.wrangler/
+.claude/settings.local.json
 api-docs/

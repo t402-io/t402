@@ -2,7 +2,7 @@
 
 > **The Official Payment Protocol for USDT**
 >
-> *Last Updated: 2026-01-20*
+> *Last Updated: 2026-01-24*
 
 This document outlines the development status and roadmap for T402, a payment protocol specifically designed for USDT and USDT0, with deep integration with [Tether WDK](https://wallet.tether.io/).
 
@@ -50,27 +50,33 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| @t402/core | 2.0.0 | Protocol types, HTTP utilities |
-| @t402/evm | 2.3.0 | EVM chains (EIP-3009, USDT0, upto scheme) |
-| @t402/svm | 2.0.0 | Solana (SPL tokens) |
-| @t402/ton | 2.1.0 | TON (USDT Jetton) |
-| @t402/tron | 2.0.0 | TRON (TRC-20 USDT) |
-| @t402/wdk | 2.0.1 | Tether WDK integration |
-| @t402/wdk-gasless | 1.0.0 | ERC-4337 gasless payments |
-| @t402/wdk-bridge | 1.0.0 | LayerZero bridging |
-| @t402/wdk-multisig | 1.0.0 | Safe multi-sig wallets |
-| @t402/mcp | 1.0.0 | AI agent MCP server |
-| @t402/express | 2.0.0 | Express.js middleware |
-| @t402/next | 2.0.0 | Next.js integration |
-| @t402/hono | 2.0.0 | Hono middleware |
-| @t402/fastify | 2.0.0 | Fastify middleware |
-| @t402/fetch | 2.0.0 | Fetch client wrapper |
-| @t402/axios | 2.0.0 | Axios interceptor |
-| @t402/paywall | 2.0.0 | Universal paywall UI |
-| @t402/react | 2.0.0 | React components |
-| @t402/vue | 2.0.0 | Vue components |
-| @t402/cli | 2.0.0 | Command-line tools |
-| @t402/extensions | 2.1.0 | Protocol extensions (SIWx, bazaar) |
+| @t402/core | 2.3.1 | Protocol types, HTTP utilities |
+| @t402/evm | 2.3.1 | EVM chains (EIP-3009, USDT0, upto scheme) |
+| @t402/evm-core | 2.3.1 | Shared EVM utilities |
+| @t402/svm | 2.3.1 | Solana (SPL tokens) |
+| @t402/ton | 2.3.1 | TON (USDT Jetton) |
+| @t402/tron | 2.3.1 | TRON (TRC-20 USDT) |
+| @t402/near | 2.3.1 | NEAR (NEP-141) |
+| @t402/aptos | 2.3.1 | Aptos (Fungible Asset) |
+| @t402/tezos | 2.3.1 | Tezos (FA2) |
+| @t402/polkadot | 2.3.1 | Polkadot Asset Hub |
+| @t402/stacks | 2.3.1 | Stacks (Bitcoin L2) |
+| @t402/wdk | 2.3.1 | Tether WDK integration |
+| @t402/wdk-gasless | 2.0.0-beta.1 | ERC-4337 gasless payments |
+| @t402/wdk-bridge | 2.0.0-beta.1 | LayerZero bridging |
+| @t402/wdk-multisig | 2.0.0-beta.1 | Safe multi-sig wallets |
+| @t402/mcp | 2.0.0-beta.1 | AI agent MCP server |
+| @t402/express | 2.3.1 | Express.js middleware |
+| @t402/next | 2.3.1 | Next.js integration |
+| @t402/hono | 2.3.1 | Hono middleware |
+| @t402/fastify | 2.3.1 | Fastify middleware |
+| @t402/fetch | 2.3.1 | Fetch client wrapper |
+| @t402/axios | 2.3.1 | Axios interceptor |
+| @t402/paywall | 2.3.1 | Universal paywall UI |
+| @t402/react | 2.3.1 | React components |
+| @t402/vue | 2.3.1 | Vue components |
+| @t402/cli | 2.3.1 | Command-line tools |
+| @t402/extensions | 2.3.1 | Protocol extensions (SIWx, bazaar) |
 
 #### Advanced Packages (Beta)
 
@@ -93,35 +99,59 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 
 ---
 
-## Supported Blockchains
+## Supported Blockchains (32 Networks)
 
-| Chain | Token | Mechanism | Gasless | Status |
-|-------|-------|-----------|---------|--------|
-| Ethereum | USDT0 | EIP-3009 | ERC-4337 | Production |
-| Arbitrum | USDT0 | EIP-3009 | ERC-4337 | Production |
-| Optimism | USDT0 | EIP-3009 | ERC-4337 | Production |
-| Polygon | USDT0 | EIP-3009 | ERC-4337 | Production |
-| Ink | USDT0 | EIP-3009 | ERC-4337 | Production |
-| Berachain | USDT0 | EIP-3009 | ERC-4337 | Production |
-| Unichain | USDT0 | EIP-3009 | ERC-4337 | Production |
-| Mantle | USDT0 | EIP-3009 | ERC-4337 | Production |
-| Plasma | USDT0 | EIP-3009 | ERC-4337 | Production |
-| Sei | USDT0 | EIP-3009 | ERC-4337 | Production |
-| Conflux | USDT0 | EIP-3009 | ERC-4337 | Production |
-| Monad | USDT0 | EIP-3009 | ERC-4337 | Production |
-| Flare | USDT0 | EIP-3009 | ERC-4337 | Production |
-| Rootstock | USDT0 | EIP-3009 | ERC-4337 | Production |
-| XLayer | USDT0 | EIP-3009 | ERC-4337 | Production |
-| Stable | USDT0 | EIP-3009 | ERC-4337 | Production |
-| HyperEVM | USDT0 | EIP-3009 | ERC-4337 | Production |
-| MegaETH | USDT0 | EIP-3009 | ERC-4337 | Production |
-| Corn | USDT0 | EIP-3009 | ERC-4337 | Production |
-| TON | USDT | Jetton | - | Production |
-| TRON | USDT | TRC-20 | - | Production |
-| Solana | USDT | SPL | - | Production |
-| Cosmos/Noble | USDC | IBC | - | Production |
-| NEAR | USDC | NEP-141 | - | Production |
-| Stacks | sUSDC | SIP-010 | - | Production |
+### USDT0 (LayerZero OFT) - 19 Networks
+
+| Chain | Mechanism | Gasless | Status |
+|-------|-----------|---------|--------|
+| Ethereum | EIP-3009 | ERC-4337 | Production |
+| Arbitrum | EIP-3009 | ERC-4337 | Production |
+| Optimism | EIP-3009 | ERC-4337 | Production |
+| Polygon | EIP-3009 | ERC-4337 | Production |
+| Ink | EIP-3009 | ERC-4337 | Production |
+| Berachain | EIP-3009 | ERC-4337 | Production |
+| Unichain | EIP-3009 | ERC-4337 | Production |
+| Mantle | EIP-3009 | ERC-4337 | Production |
+| Plasma | EIP-3009 | ERC-4337 | Production |
+| Sei | EIP-3009 | ERC-4337 | Production |
+| Conflux | EIP-3009 | ERC-4337 | Production |
+| Monad | EIP-3009 | ERC-4337 | Production |
+| Flare | EIP-3009 | ERC-4337 | Production |
+| Rootstock | EIP-3009 | ERC-4337 | Production |
+| XLayer | EIP-3009 | ERC-4337 | Production |
+| Stable | EIP-3009 | ERC-4337 | Production |
+| HyperEVM | EIP-3009 | ERC-4337 | Production |
+| MegaETH | EIP-3009 | ERC-4337 | Production |
+| Corn | EIP-3009 | ERC-4337 | Production |
+
+### Legacy EVM USDT - 5 Networks
+
+| Chain | Mechanism | Status |
+|-------|-----------|--------|
+| BNB Chain | approve+transferFrom | Production |
+| Avalanche | approve+transferFrom | Production |
+| Celo | approve+transferFrom | Production |
+| Kaia | approve+transferFrom | Production |
+| Fantom | approve+transferFrom | Production |
+
+### Native USDT - 3 Networks
+
+| Chain | Token Standard | Status |
+|-------|---------------|--------|
+| TON | Jetton | Production |
+| TRON | TRC-20 | Production |
+| Solana | SPL | Production |
+
+### Non-EVM USDT - 5 Networks
+
+| Chain | Token Standard | Status |
+|-------|---------------|--------|
+| NEAR | NEP-141 | Production |
+| Aptos | Fungible Asset | Production |
+| Tezos | FA2 | Production |
+| Polkadot | Asset Hub | Production |
+| Stacks | SIP-010 | Production |
 
 ---
 

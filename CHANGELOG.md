@@ -7,17 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Stacks mechanism** (TypeScript, Go) - Bitcoin L2 support via SIP-010 token standard
+- **EVM exact-legacy** scheme (Java, Go) - Legacy USDT support on BNB, Avalanche, Celo, Kaia, Fantom
+- **EVM upto scheme** (Go, Python, Java) - Metered/usage-based billing with EIP-2612 Permit
+- **SVM scheme** for Python SDK with comprehensive server tests
+- **NEAR/Aptos/Tezos/Polkadot** mechanisms for Go (exact-direct Client/Server)
+- **TON/TRON facilitators** and NEAR/Aptos/Tezos/Polkadot mechanisms for Python
+- **Demo site** (demo.t402.io) - Interactive playground with USDT payment scenarios
+- **Site pages** - `/transports`, `/ecosystem`, `/status` pages
+
 ### Fixed
 - TypeScript/Python: `PaymentPayload.resource` now optional per v2 spec (section 5.2.2)
 - TypeScript: `ResourceInfo.description` and `mimeType` now optional per v2 spec
+- EVM: Corrected Unichain USDT0 address
+- Site: Removed stale redirects, fixed broken links, updated chain count
+- Demo: Resolved Tailwind 4 layout issues
 
 ### Documentation
 - Added TON wallet address to CLAUDE.md
 - Updated Java SDK section in RELEASING.md to reflect v1.1.0 release status
 - Fixed dead links in docs site (ai-payments.mdx, chains/index.mdx)
 - Added TRON and TON exact scheme specifications
-- Added CONTRIBUTING.md for Java SDK
-- Added CONTRIBUTING.md for Facilitator service
+- Added CONTRIBUTING.md for Java SDK and Facilitator service
 - Added last updated timestamps to ROADMAP.md, SECURITY.md
 
 ## [2.1.6] - 2026-01-18
