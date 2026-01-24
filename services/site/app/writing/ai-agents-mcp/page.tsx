@@ -23,9 +23,25 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: pageTitle,
+  description: pageDescription,
+  datePublished: "2026-01-22",
+  author: { "@type": "Organization", name: "T402 Team", url: "https://t402.io" },
+  publisher: { "@type": "Organization", name: "T402", url: "https://t402.io" },
+  url: "https://t402.io/writing/ai-agents-mcp",
+  keywords: ["AI", "MCP", "Agents", "Model Context Protocol"],
+};
+
 export default function AiAgentsMcpPage() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <NavBar />
 
       <div className="flex-1">
