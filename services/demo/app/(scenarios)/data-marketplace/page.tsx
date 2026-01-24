@@ -1,7 +1,15 @@
-"use client";
-
+import type { Metadata } from "next";
 import { ScenarioShell } from "@/components/shared/ScenarioShell";
 import { DataMarketplace } from "@/components/scenarios/DataMarketplace";
+
+export const metadata: Metadata = {
+  title: "Data Marketplace | T402 Demo",
+  description: "Pay-per-request market data with USDT micropayments. No monthly minimums, no API keys — instant on-chain settlement.",
+  openGraph: {
+    title: "Data Marketplace — T402",
+    description: "Pay 0.001 USDT per data request. No monthly minimums.",
+  },
+};
 
 export default function DataMarketplacePage() {
   return (
