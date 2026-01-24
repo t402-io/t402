@@ -40,9 +40,10 @@ A server that handles payment verification and settlement. Can be self-hosted or
 
 ### Scheme
 A logical way of moving money. T402 supports multiple schemes:
-- **exact**: Pay an exact amount (EIP-3009 for EVM, SPL for Solana)
-- **upto**: Pay up to a maximum amount based on usage (EIP-2612 for EVM)
-- **exact-legacy**: Legacy token transfers (USDT on Ethereum)
+- **exact**: Pay an exact amount via off-chain signature (EIP-3009 for EVM, SPL delegate for Solana, Jetton for TON, TRC-20 for TRON)
+- **exact-direct**: Pay an exact amount via on-chain transfer with tx hash proof (NEAR, Aptos, Tezos, Polkadot, Stacks)
+- **upto**: Authorize up to a maximum amount, pay based on actual usage (EIP-2612 for EVM)
+- **exact-legacy**: Legacy direct token transfers for EVM chains without EIP-3009 support
 
 See [Payment Schemes](/schemes) for detailed documentation.
 
