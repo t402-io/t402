@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import type { PaymentRequired } from "@t402/core/types";
+import { createExactDirectStacksClient } from "@t402/stacks/exact-direct/client";
 
 import { Spinner } from "./Spinner";
 import { getNetworkDisplayName } from "../paywallUtils";
@@ -9,7 +10,7 @@ import { useStacksWallet, formatStacksAddress } from "./stacks/useStacksWallet";
 import { useStacksBalance } from "./stacks/useStacksBalance";
 import { useStacksSigner } from "./stacks/useStacksSigner";
 import { STACKS_NETWORKS, STACKS_WALLETS, type StacksNetwork } from "./stacks/types";
-import { isStacksMainnet, getUsdcContractAddress } from "./stacks/rpc";
+import { isStacksMainnet } from "./stacks/rpc";
 
 type StacksPaywallProps = {
   paymentRequired: PaymentRequired;
@@ -124,22 +125,24 @@ export function StacksPaywall({ paymentRequired, onSuccessfulResponse }: StacksP
       }
 
       setPaymentStep("sign");
-      setStatus("Creating payment signature...");
+      setStatus("Executing token transfer...");
 
-      // For Stacks, we need to create the payment payload manually
-      // since @t402/stacks doesn't exist yet
+      // Create the @t402/stacks exact-direct client with the wallet signer
+      const stacksClient = createExactDirectStacksClient({ signer: stacksSigner });
+
+      // Use the client to execute the transfer and build the payment payload
+      const { t402Version, payload } = await stacksClient.createPaymentPayload(
+        2,
+        firstRequirement,
+      );
+
       const paymentPayload = {
-        t402Version: 2,
-        scheme: firstRequirement.scheme,
-        network: firstRequirement.network,
-        from: account.address,
-        payTo: firstRequirement.payTo,
-        amount: firstRequirement.amount || firstRequirement.maxAmountRequired,
-        asset: getUsdcContractAddress(targetNetwork),
-        timestamp: Date.now(),
-        // Note: In production, this would involve actual signature
-        // For now, we create a placeholder that the facilitator would verify
-        signature: "pending_stacks_implementation",
+        t402Version,
+        accepted: {
+          scheme: firstRequirement.scheme,
+          network: firstRequirement.network,
+        },
+        payload,
       };
 
       const paymentHeader = btoa(JSON.stringify(paymentPayload));
@@ -173,7 +176,6 @@ export function StacksPaywall({ paymentRequired, onSuccessfulResponse }: StacksP
     balance,
     refreshBalance,
     chainName,
-    targetNetwork,
     firstRequirement,
     onSuccessfulResponse,
   ]);

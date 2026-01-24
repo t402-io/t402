@@ -24,6 +24,7 @@ import (
 	evmmech "github.com/t402-io/t402/sdks/go/mechanisms/evm"
 	evm "github.com/t402-io/t402/sdks/go/mechanisms/evm/exact/facilitator"
 	evmlegacy "github.com/t402-io/t402/sdks/go/mechanisms/evm/exact-legacy/facilitator"
+	evmupto "github.com/t402-io/t402/sdks/go/mechanisms/evm/upto"
 	"github.com/t402-io/t402/sdks/go/mechanisms/ton"
 	tonfac "github.com/t402-io/t402/sdks/go/mechanisms/ton/exact/facilitator"
 	"github.com/t402-io/t402/sdks/go/mechanisms/tron"
@@ -173,6 +174,22 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, error) {
 				}
 				facilitator.Register(legacyNetworkList, evmlegacy.NewExactLegacyEvmScheme(signer, legacyConfig))
 				log.Printf("EVM legacy facilitator registered for %d networks", len(legacyNetworkList))
+			}
+
+			// Register upto scheme (EIP-2612 Permit) for all EVM networks
+			// The upto scheme supports gasless token approvals via permit
+			var uptoNetworkList []t402.Network
+			for _, n := range networks {
+				if n.rpc != "" {
+					uptoNetworkList = append(uptoNetworkList, n.network)
+				}
+			}
+			if len(uptoNetworkList) > 0 {
+				uptoConfig := &evmupto.UptoEvmFacilitatorConfig{
+					SettleFullAmount: false,
+				}
+				facilitator.Register(uptoNetworkList, evmupto.NewUptoEvmFacilitator(signer, uptoConfig))
+				log.Printf("EVM upto (EIP-2612 Permit) facilitator registered for %d networks", len(uptoNetworkList))
 			}
 		}
 	} else {
