@@ -2,7 +2,9 @@
 
 import { useState, useCallback } from "react";
 import { useDemoContext } from "@/providers/DemoProvider";
+import { useToast } from "@/providers/ToastProvider";
 import { useMultiChainPayment } from "./useMultiChainPayment";
+import { encodePaymentHeader } from "@/lib/t402-client";
 
 export type FlowState =
   | "idle"
@@ -48,6 +50,7 @@ interface FlowResult {
 
 export function usePaymentFlow(url: string) {
   const { isDemo } = useDemoContext();
+  const { show } = useToast();
   const { signPayment, isConnected, activeFamily } = useMultiChainPayment();
 
   const [result, setResult] = useState<FlowResult>({
@@ -109,6 +112,7 @@ export function usePaymentFlow(url: string) {
 
       // Step 3: Sign payment
       if (!isConnected) {
+        show("error", "Wallet not connected. Please connect your wallet first.");
         setResult((prev) => ({
           ...prev,
           state: "error",
@@ -125,7 +129,7 @@ export function usePaymentFlow(url: string) {
       // Step 4: Retry with payment
       setResult((prev) => ({ ...prev, state: "retrying" }));
 
-      const encodedPayment = btoa(JSON.stringify(paymentPayload));
+      const encodedPayment = encodePaymentHeader(paymentPayload);
       const retryHeaders: Record<string, string> = {
         Accept: "application/json",
         "x-preferred-chain": activeFamily,
@@ -164,13 +168,15 @@ export function usePaymentFlow(url: string) {
         responseStatus: retryResponse.status,
       });
     } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      show("error", message);
       setResult((prev) => ({
         ...prev,
         state: "error",
-        error: error instanceof Error ? error.message : String(error),
+        error: message,
       }));
     }
-  }, [url, isDemo, isConnected, activeFamily, signPayment]);
+  }, [url, isDemo, isConnected, activeFamily, signPayment, show]);
 
   const reset = useCallback(() => {
     setResult({

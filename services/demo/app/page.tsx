@@ -6,6 +6,7 @@ import { ModeToggle } from "@/components/layout/ModeToggle";
 import { FacilitatorBadge } from "@/components/layout/FacilitatorBadge";
 import { ScenarioCard } from "@/components/shared/ScenarioCard";
 import { ChainLogo } from "@/components/shared/ChainLogo";
+import { FlowDiagram } from "@/components/shared/FlowDiagram";
 import { CHAIN_FAMILIES, CHAIN_CONFIGS } from "@/lib/testnet-config";
 import {
   Brain, FileText, Database, Bot,
@@ -161,7 +162,10 @@ export default function HomePage() {
       {/* How It Works */}
       <section className="py-16 px-4 sm:px-6 border-t border-[var(--color-border)]">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-xl sm:text-2xl font-bold text-center mb-10">How T402 Works</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-center mb-6">How T402 Works</h2>
+          <div className="glass-card p-4 sm:p-6 mb-10">
+            <FlowDiagram autoPlay />
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {FLOW_STEPS.map((item) => (
               <div key={item.step} className="glass-card-interactive p-5 text-center">
