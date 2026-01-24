@@ -4,6 +4,8 @@ import { useState, useCallback } from "react";
 import { motion } from "motion/react";
 import { useDemoContext } from "@/providers/DemoProvider";
 import { useMultiChainPayment } from "@/hooks/useMultiChainPayment";
+import { PaymentStatus, parsePaymentResponse, type SettleInfo } from "@/components/shared/PaymentStatus";
+import type { FlowState } from "@/hooks/usePaymentFlow";
 import { CodeBlock } from "@/components/shared/CodeBlock";
 import { Spinner } from "@/components/shared/Spinner";
 import { encodePaymentHeader } from "@/lib/t402-client";
@@ -32,11 +34,15 @@ export function AgentToAgent() {
   const [state, setState] = useState<State>("idle");
   const [result, setResult] = useState<A2AResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [flowState, setFlowState] = useState<FlowState>("idle");
+  const [settle, setSettle] = useState<SettleInfo | null>(null);
 
   const execute = useCallback(async () => {
     setState("delegating");
     setResult(null);
     setError(null);
+    setFlowState("requesting");
+    setSettle(null);
 
     try {
       const headers: Record<string, string> = {
@@ -59,10 +65,12 @@ export function AgentToAgent() {
         throw new Error(`Unexpected status: ${initialResponse.status}`);
       }
 
+      setFlowState("got-402");
       const paymentRequired = await initialResponse.json();
       const requirements = paymentRequired.accepts[0];
 
       // Step 2: Auto-pay (agent signs autonomously via multi-chain hook)
+      setFlowState("signing");
       const paymentPayload = await signPayment(requirements);
 
       setState("executing");
@@ -74,11 +82,15 @@ export function AgentToAgent() {
       };
       if (isDemo) retryHeaders["x-demo-mode"] = "true";
 
+      setFlowState("retrying");
       const retryResponse = await fetch("/api/demo/a2a-task", {
         method: "POST",
         headers: retryHeaders,
         body: JSON.stringify({ task: selectedTask.id }),
       });
+
+      setFlowState("verifying");
+      setSettle(parsePaymentResponse(retryResponse));
 
       if (!retryResponse.ok) {
         throw new Error(`Request failed: ${retryResponse.status}`);
@@ -87,9 +99,11 @@ export function AgentToAgent() {
       const data = await retryResponse.json();
       setResult(data);
       setState("done");
+      setFlowState("done");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
       setState("error");
+      setFlowState("error");
     }
   }, [isDemo, activeFamily, signPayment, selectedTask]);
 
@@ -103,6 +117,10 @@ export function AgentToAgent() {
   };
 
   return (
+    <>
+    {flowState !== "idle" && (
+      <PaymentStatus flowState={flowState} settle={settle} family={activeFamily} />
+    )}
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Left: Agent selection + flow */}
       <div className="flex flex-col gap-4">
@@ -157,7 +175,7 @@ export function AgentToAgent() {
         </div>
 
         <button
-          onClick={state === "done" || state === "error" ? () => { setState("idle"); setResult(null); } : execute}
+          onClick={state === "done" || state === "error" ? () => { setState("idle"); setResult(null); setFlowState("idle"); setSettle(null); } : execute}
           disabled={state !== "idle" && state !== "done" && state !== "error"}
           className="btn-primary w-full py-3"
         >
@@ -235,5 +253,6 @@ export function AgentToAgent() {
         )}
       </div>
     </div>
+    </>
   );
 }

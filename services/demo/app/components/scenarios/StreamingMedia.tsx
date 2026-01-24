@@ -4,6 +4,8 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { Play, Pause, Square } from "lucide-react";
 import { useDemoContext } from "@/providers/DemoProvider";
 import { useMultiChainPayment } from "@/hooks/useMultiChainPayment";
+import { PaymentStatus, parsePaymentResponse, type SettleInfo } from "@/components/shared/PaymentStatus";
+import type { FlowState } from "@/hooks/usePaymentFlow";
 import { CostTicker } from "@/components/shared/CostTicker";
 import { encodePaymentHeader } from "@/lib/t402-client";
 
@@ -17,11 +19,15 @@ export function StreamingMedia() {
   const [totalCost, setTotalCost] = useState(0);
   const [waveform, setWaveform] = useState<number[]>([]);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [flowState, setFlowState] = useState<FlowState>("idle");
+  const [settle, setSettle] = useState<SettleInfo | null>(null);
 
   const COST_PER_10S = 0.001;
 
   const startStream = useCallback(async () => {
     setState("buffering");
+    setFlowState("requesting");
+    setSettle(null);
 
     try {
       const headers: Record<string, string> = {
@@ -32,21 +38,28 @@ export function StreamingMedia() {
 
       const res = await fetch("/api/demo/stream", { headers });
       if (res.status === 402) {
+        setFlowState("got-402");
         const paymentRequired = await res.json();
         const requirements = paymentRequired.accepts[0];
+        setFlowState("signing");
         const paymentPayload = await signPayment(requirements);
 
         const retryHeaders: Record<string, string> = {
           ...headers,
           "Payment-Signature": encodePaymentHeader(paymentPayload),
         };
-        await fetch("/api/demo/stream?segment=0", { headers: retryHeaders });
+        setFlowState("retrying");
+        const retryRes = await fetch("/api/demo/stream?segment=0", { headers: retryHeaders });
+        setFlowState("verifying");
+        setSettle(parsePaymentResponse(retryRes));
       }
 
       setTotalCost(COST_PER_10S);
       setState("playing");
+      setFlowState("done");
     } catch {
       setState("idle");
+      setFlowState("error");
     }
   }, [isDemo, activeFamily, signPayment]);
 
@@ -86,6 +99,8 @@ export function StreamingMedia() {
     setElapsed(0);
     setTotalCost(0);
     setWaveform([]);
+    setFlowState("idle");
+    setSettle(null);
   };
 
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
@@ -156,6 +171,10 @@ export function StreamingMedia() {
           {totalCost > 0 && <CostTicker totalCost={totalCost} />}
         </div>
       </div>
+
+      {flowState !== "idle" && (
+        <PaymentStatus flowState={flowState} settle={settle} family={activeFamily} />
+      )}
 
       {/* Info */}
       <div className="text-xs text-[var(--color-muted)] space-y-1">

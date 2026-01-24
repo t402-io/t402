@@ -4,6 +4,8 @@ import { useState, useCallback } from "react";
 import { motion } from "motion/react";
 import { useDemoContext } from "@/providers/DemoProvider";
 import { useMultiChainPayment } from "@/hooks/useMultiChainPayment";
+import { PaymentStatus, parsePaymentResponse, type SettleInfo } from "@/components/shared/PaymentStatus";
+import type { FlowState } from "@/hooks/usePaymentFlow";
 import { CodeBlock } from "@/components/shared/CodeBlock";
 import { Spinner } from "@/components/shared/Spinner";
 import { encodePaymentHeader } from "@/lib/t402-client";
@@ -35,11 +37,15 @@ export function DataMarketplace() {
   const [result, setResult] = useState<MarketData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [purchases, setPurchases] = useState(0);
+  const [flowState, setFlowState] = useState<FlowState>("idle");
+  const [settle, setSettle] = useState<SettleInfo | null>(null);
 
   const execute = useCallback(async () => {
     setState("paying");
     setResult(null);
     setError(null);
+    setFlowState("requesting");
+    setSettle(null);
 
     try {
       const headers: Record<string, string> = {
@@ -55,10 +61,12 @@ export function DataMarketplace() {
         throw new Error(`Unexpected status: ${initialResponse.status}`);
       }
 
+      setFlowState("got-402");
       const paymentRequired = await initialResponse.json();
       const requirements = paymentRequired.accepts[0];
 
       // Step 2: Sign via multi-chain hook & retry
+      setFlowState("signing");
       const paymentPayload = await signPayment(requirements);
 
       const retryHeaders: Record<string, string> = {
@@ -68,7 +76,11 @@ export function DataMarketplace() {
       };
       if (isDemo) retryHeaders["x-demo-mode"] = "true";
 
+      setFlowState("retrying");
       const retryResponse = await fetch(`/api/demo/${selectedEndpoint.id}`, { headers: retryHeaders });
+
+      setFlowState("verifying");
+      setSettle(parsePaymentResponse(retryResponse));
 
       if (!retryResponse.ok) {
         throw new Error(`Request failed: ${retryResponse.status}`);
@@ -78,13 +90,19 @@ export function DataMarketplace() {
       setResult(data);
       setPurchases((n) => n + 1);
       setState("done");
+      setFlowState("done");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
       setState("error");
+      setFlowState("error");
     }
   }, [isDemo, activeFamily, signPayment, selectedEndpoint]);
 
   return (
+    <>
+    {flowState !== "idle" && (
+      <PaymentStatus flowState={flowState} settle={settle} family={activeFamily} />
+    )}
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Left: Endpoint selection */}
       <div className="flex flex-col gap-4">
@@ -170,7 +188,7 @@ export function DataMarketplace() {
               maxHeight="300px"
             />
             <button
-              onClick={() => { setState("idle"); setResult(null); }}
+              onClick={() => { setState("idle"); setResult(null); setFlowState("idle"); setSettle(null); }}
               className="mt-3 text-xs text-[var(--color-muted)] hover:text-white cursor-pointer"
             >
               Purchase again
@@ -182,7 +200,7 @@ export function DataMarketplace() {
           <div className="glass-card p-6 text-center">
             <p className="text-sm text-[var(--color-error)]">{error}</p>
             <button
-              onClick={() => setState("idle")}
+              onClick={() => { setState("idle"); setFlowState("idle"); setSettle(null); }}
               className="mt-3 text-xs text-[var(--color-muted)] hover:text-white cursor-pointer"
             >
               Reset
@@ -191,5 +209,6 @@ export function DataMarketplace() {
         )}
       </div>
     </div>
+    </>
   );
 }

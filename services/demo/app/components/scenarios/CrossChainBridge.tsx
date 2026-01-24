@@ -7,6 +7,8 @@ import { ChainBadge } from "@/components/shared/ChainBadge";
 import { Spinner } from "@/components/shared/Spinner";
 import { useDemoContext } from "@/providers/DemoProvider";
 import { useMultiChainPayment } from "@/hooks/useMultiChainPayment";
+import { PaymentStatus, parsePaymentResponse, type SettleInfo } from "@/components/shared/PaymentStatus";
+import type { FlowState } from "@/hooks/usePaymentFlow";
 import { type ChainFamily, CHAIN_CONFIGS } from "@/lib/testnet-config";
 import { encodePaymentHeader } from "@/lib/t402-client";
 
@@ -21,9 +23,13 @@ export function CrossChainBridge() {
   const [targetChain, setTargetChain] = useState<ChainFamily>("ton");
   const [state, setState] = useState<BridgeState>("idle");
   const [txHash, setTxHash] = useState<string | null>(null);
+  const [flowState, setFlowState] = useState<FlowState>("idle");
+  const [settle, setSettle] = useState<SettleInfo | null>(null);
 
   const executeBridge = useCallback(async () => {
     setState("paying");
+    setFlowState("requesting");
+    setSettle(null);
 
     try {
       const headers: Record<string, string> = {
@@ -37,8 +43,10 @@ export function CrossChainBridge() {
       // Get 402 from bridge API
       const res = await fetch("/api/demo/bridge", { method: "POST", headers, body });
       if (res.status === 402) {
+        setFlowState("got-402");
         const paymentRequired = await res.json();
         const requirements = paymentRequired.accepts[0];
+        setFlowState("signing");
         const paymentPayload = await signPayment(requirements);
 
         setState("bridging");
@@ -49,21 +57,28 @@ export function CrossChainBridge() {
         };
 
         setState("confirming");
+        setFlowState("retrying");
         const retryRes = await fetch("/api/demo/bridge", { method: "POST", headers: retryHeaders, body });
+        setFlowState("verifying");
+        setSettle(parsePaymentResponse(retryRes));
         const data = await retryRes.json();
         setTxHash(data.bridge?.txHash || null);
       }
     } catch {
       // Fallback mock
       setTxHash("0x" + Array(64).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join(""));
+      setFlowState("error");
     }
 
     setState("done");
+    setFlowState("done");
   }, [isDemo, activeFamily, signPayment, sourceChain, targetChain]);
 
   const reset = () => {
     setState("idle");
     setTxHash(null);
+    setFlowState("idle");
+    setSettle(null);
   };
 
   const availableTargets = BRIDGEABLE.filter((c) => c !== sourceChain);
@@ -124,6 +139,10 @@ export function CrossChainBridge() {
           </div>
         </div>
       </div>
+
+      {flowState !== "idle" && (
+        <PaymentStatus flowState={flowState} settle={settle} family={activeFamily} />
+      )}
 
       {/* Bridge action */}
       <div className="glass-card p-6">

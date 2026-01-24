@@ -4,6 +4,8 @@ import { useState, useCallback } from "react";
 import { motion } from "motion/react";
 import { useDemoContext } from "@/providers/DemoProvider";
 import { useMultiChainPayment } from "@/hooks/useMultiChainPayment";
+import { PaymentStatus, parsePaymentResponse, type SettleInfo } from "@/components/shared/PaymentStatus";
+import type { FlowState } from "@/hooks/usePaymentFlow";
 import { CodeBlock } from "@/components/shared/CodeBlock";
 import { Spinner } from "@/components/shared/Spinner";
 import { encodePaymentHeader } from "@/lib/t402-client";
@@ -24,10 +26,14 @@ export function ContentPaywall() {
   const [article, setArticle] = useState<Article | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showProtocol, setShowProtocol] = useState(false);
+  const [flowState, setFlowState] = useState<FlowState>("idle");
+  const [settle, setSettle] = useState<SettleInfo | null>(null);
 
   const unlock = useCallback(async () => {
     setState("paying");
     setError(null);
+    setFlowState("requesting");
+    setSettle(null);
 
     try {
       const headers: Record<string, string> = {
@@ -43,10 +49,12 @@ export function ContentPaywall() {
         throw new Error(`Unexpected status: ${initialResponse.status}`);
       }
 
+      setFlowState("got-402");
       const paymentRequired = await initialResponse.json();
       const requirements = paymentRequired.accepts[0];
 
       // Step 2: Sign via multi-chain hook & retry
+      setFlowState("signing");
       const paymentPayload = await signPayment(requirements);
 
       const retryHeaders: Record<string, string> = {
@@ -56,7 +64,11 @@ export function ContentPaywall() {
       };
       if (isDemo) retryHeaders["x-demo-mode"] = "true";
 
+      setFlowState("retrying");
       const retryResponse = await fetch("/api/demo/content", { headers: retryHeaders });
+
+      setFlowState("verifying");
+      setSettle(parsePaymentResponse(retryResponse));
 
       if (!retryResponse.ok) {
         throw new Error(`Request failed: ${retryResponse.status}`);
@@ -65,14 +77,20 @@ export function ContentPaywall() {
       const data = await retryResponse.json();
       setArticle(data.article);
       setState("unlocked");
+      setFlowState("done");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
       setState("error");
+      setFlowState("error");
     }
   }, [isDemo, activeFamily, signPayment]);
 
   return (
     <div className="max-w-3xl mx-auto">
+      {flowState !== "idle" && (
+        <PaymentStatus flowState={flowState} settle={settle} family={activeFamily} />
+      )}
+
       {state === "locked" && (
         <div className="glass-card overflow-hidden">
           {/* Article preview */}
@@ -176,7 +194,7 @@ export function ContentPaywall() {
           )}
 
           <button
-            onClick={() => { setState("locked"); setArticle(null); }}
+            onClick={() => { setState("locked"); setArticle(null); setFlowState("idle"); setSettle(null); }}
             className="mt-4 text-xs text-[var(--color-muted)] hover:text-white cursor-pointer"
           >
             Reset demo
@@ -188,7 +206,7 @@ export function ContentPaywall() {
         <div className="glass-card p-8 text-center">
           <p className="text-sm text-[var(--color-error)]">{error}</p>
           <button
-            onClick={() => setState("locked")}
+            onClick={() => { setState("locked"); setFlowState("idle"); setSettle(null); }}
             className="mt-3 text-xs text-[var(--color-muted)] hover:text-white cursor-pointer"
           >
             Reset

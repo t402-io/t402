@@ -4,6 +4,8 @@ import { useState, useCallback } from "react";
 import { motion } from "motion/react";
 import { useDemoContext } from "@/providers/DemoProvider";
 import { useMultiChainPayment } from "@/hooks/useMultiChainPayment";
+import { PaymentStatus, parsePaymentResponse, type SettleInfo } from "@/components/shared/PaymentStatus";
+import type { FlowState } from "@/hooks/usePaymentFlow";
 import { CodeBlock } from "@/components/shared/CodeBlock";
 import { Spinner } from "@/components/shared/Spinner";
 import { encodePaymentHeader } from "@/lib/t402-client";
@@ -32,11 +34,15 @@ export function AiApiScenario() {
   const [result, setResult] = useState<AiResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [totalQueries, setTotalQueries] = useState(0);
+  const [flowState, setFlowState] = useState<FlowState>("idle");
+  const [settle, setSettle] = useState<SettleInfo | null>(null);
 
   const execute = useCallback(async () => {
     setState("paying");
     setResult(null);
     setError(null);
+    setFlowState("requesting");
+    setSettle(null);
 
     try {
       const headers: Record<string, string> = {
@@ -56,10 +62,12 @@ export function AiApiScenario() {
         throw new Error(`Unexpected status: ${initialResponse.status}`);
       }
 
+      setFlowState("got-402");
       const paymentRequired = await initialResponse.json();
 
       // Step 2: Sign payment via multi-chain hook
       const requirements = paymentRequired.accepts[0];
+      setFlowState("signing");
       const paymentPayload = await signPayment(requirements);
 
       setState("streaming");
@@ -72,11 +80,15 @@ export function AiApiScenario() {
       };
       if (isDemo) retryHeaders["x-demo-mode"] = "true";
 
+      setFlowState("retrying");
       const retryResponse = await fetch("/api/demo/ai-query", {
         method: "POST",
         headers: retryHeaders,
         body: JSON.stringify({ query }),
       });
+
+      setFlowState("verifying");
+      setSettle(parsePaymentResponse(retryResponse));
 
       if (!retryResponse.ok) {
         throw new Error(`Request failed: ${retryResponse.status}`);
@@ -86,13 +98,19 @@ export function AiApiScenario() {
       setResult(data);
       setTotalQueries((n) => n + 1);
       setState("done");
+      setFlowState("done");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
       setState("error");
+      setFlowState("error");
     }
   }, [query, isDemo, activeFamily, signPayment]);
 
   return (
+    <>
+    {flowState !== "idle" && (
+      <PaymentStatus flowState={flowState} settle={settle} family={activeFamily} />
+    )}
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Left: Input */}
       <div className="flex flex-col gap-4">
@@ -200,7 +218,7 @@ export function AiApiScenario() {
           <div className="glass-card p-6 text-center">
             <p className="text-sm text-[var(--color-error)]">{error}</p>
             <button
-              onClick={() => setState("idle")}
+              onClick={() => { setState("idle"); setFlowState("idle"); setSettle(null); }}
               className="mt-3 text-xs text-[var(--color-muted)] hover:text-white cursor-pointer"
             >
               Reset
@@ -209,5 +227,6 @@ export function AiApiScenario() {
         )}
       </div>
     </div>
+    </>
   );
 }

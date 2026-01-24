@@ -4,6 +4,8 @@ import { useState, useCallback } from "react";
 import { Thermometer, Droplets, MapPin } from "lucide-react";
 import { useDemoContext } from "@/providers/DemoProvider";
 import { useMultiChainPayment } from "@/hooks/useMultiChainPayment";
+import { PaymentStatus, parsePaymentResponse, type SettleInfo } from "@/components/shared/PaymentStatus";
+import type { FlowState } from "@/hooks/usePaymentFlow";
 import { CostTicker } from "@/components/shared/CostTicker";
 import { Spinner } from "@/components/shared/Spinner";
 import { encodePaymentHeader } from "@/lib/t402-client";
@@ -29,9 +31,13 @@ export function IoTMicropayments() {
   const [readings, setReadings] = useState<SensorReading[]>([]);
   const [loading, setLoading] = useState<SensorType | null>(null);
   const [totalCost, setTotalCost] = useState(0);
+  const [flowState, setFlowState] = useState<FlowState>("idle");
+  const [settle, setSettle] = useState<SettleInfo | null>(null);
 
   const getReading = useCallback(async (type: SensorType) => {
     setLoading(type);
+    setFlowState("requesting");
+    setSettle(null);
     try {
       const headers: Record<string, string> = {
         Accept: "application/json",
@@ -42,25 +48,33 @@ export function IoTMicropayments() {
       const res = await fetch(`/api/demo/iot-data?type=${type}`, { headers });
 
       if (res.status === 402) {
+        setFlowState("got-402");
         const paymentRequired = await res.json();
         const requirements = paymentRequired.accepts[0];
+        setFlowState("signing");
         const paymentPayload = await signPayment(requirements);
 
         const retryHeaders: Record<string, string> = {
           ...headers,
           "Payment-Signature": encodePaymentHeader(paymentPayload),
         };
+        setFlowState("retrying");
         const retryRes = await fetch(`/api/demo/iot-data?type=${type}`, { headers: retryHeaders });
+        setFlowState("verifying");
+        setSettle(parsePaymentResponse(retryRes));
         const data = await retryRes.json();
         setReadings((prev) => [data.reading, ...prev].slice(0, 10));
         setTotalCost((prev) => prev + 0.0001);
+        setFlowState("done");
       } else {
         const data = await res.json();
         setReadings((prev) => [data.reading, ...prev].slice(0, 10));
         setTotalCost((prev) => prev + 0.0001);
+        setFlowState("done");
       }
     } catch {
       // Handle error silently in demo
+      setFlowState("error");
     } finally {
       setLoading(null);
     }
@@ -92,6 +106,10 @@ export function IoTMicropayments() {
           );
         })}
       </div>
+
+      {flowState !== "idle" && (
+        <PaymentStatus flowState={flowState} settle={settle} family={activeFamily} />
+      )}
 
       {/* Cost ticker */}
       {totalCost > 0 && <CostTicker totalCost={totalCost} />}
