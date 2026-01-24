@@ -89,6 +89,11 @@ type Config struct {
 	// Polkadot Configuration
 	PolkadotAssetHubIndexer string
 	WestendAssetHubIndexer  string
+
+	// Stacks Configuration
+	StacksAPIURL        string
+	StacksTestnetAPIURL string
+	StacksAddress       string
 }
 
 // Load loads configuration from environment variables
@@ -178,6 +183,11 @@ func Load() *Config {
 		// Polkadot Configuration
 		PolkadotAssetHubIndexer: getEnv("POLKADOT_ASSET_HUB_INDEXER", "https://assethub-polkadot.api.subscan.io"),
 		WestendAssetHubIndexer:  getEnv("WESTEND_ASSET_HUB_INDEXER", "https://assethub-westend.api.subscan.io"),
+
+		// Stacks Configuration
+		StacksAPIURL:        getEnv("STACKS_API_URL", "https://api.mainnet.hiro.so"),
+		StacksTestnetAPIURL: getEnv("STACKS_TESTNET_API_URL", "https://api.testnet.hiro.so"),
+		StacksAddress:       getEnv("STACKS_ADDRESS", ""),
 	}
 }
 
