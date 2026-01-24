@@ -333,6 +333,12 @@ function ChainCard({ chain }: { chain: Chain }) {
       {/* Links */}
       <div className="flex gap-3 border-t border-border pt-4">
         <Link
+          href={`/chains/${chain.id}`}
+          className="flex items-center gap-1.5 text-sm font-medium text-brand transition-colors hover:text-brand-secondary"
+        >
+          Details
+        </Link>
+        <Link
           href={chain.explorerUrl}
           target="_blank"
           rel="noopener noreferrer"
