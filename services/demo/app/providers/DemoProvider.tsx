@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 
 export type DemoMode = "live" | "demo";
 
@@ -27,12 +27,17 @@ export function useDemoContext() {
 }
 
 export function DemoProvider({ children }: { children: ReactNode }) {
-  const [mode, setModeState] = useState<DemoMode>(() => {
-    if (typeof window !== "undefined") {
-      return (localStorage.getItem("t402-demo-mode") as DemoMode) || "demo";
+  const [mode, setModeState] = useState<DemoMode>(
+    (process.env.NEXT_PUBLIC_DEMO_MODE as DemoMode) || "demo"
+  );
+
+  // Sync from localStorage after hydration to avoid SSR mismatch
+  useEffect(() => {
+    const stored = localStorage.getItem("t402-demo-mode") as DemoMode | null;
+    if (stored && (stored === "live" || stored === "demo")) {
+      setModeState(stored);
     }
-    return (process.env.NEXT_PUBLIC_DEMO_MODE as DemoMode) || "demo";
-  });
+  }, []);
 
   const setMode = (newMode: DemoMode) => {
     setModeState(newMode);
