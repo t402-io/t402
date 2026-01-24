@@ -1,7 +1,15 @@
-"use client";
-
+import type { Metadata } from "next";
 import { ScenarioShell } from "@/components/shared/ScenarioShell";
 import { McpAiAgent } from "@/components/scenarios/McpAiAgent";
+
+export const metadata: Metadata = {
+  title: "MCP AI Agent | T402 Demo",
+  description: "AI agent autonomously pays for tools via Model Context Protocol. HTTP 402 enables machine-to-machine USDT payments.",
+  openGraph: {
+    title: "MCP AI Agent — T402",
+    description: "AI agents paying for tools autonomously via MCP + T402.",
+  },
+};
 
 export default function McpAiAgentPage() {
   return (

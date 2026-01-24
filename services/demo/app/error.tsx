@@ -1,0 +1,50 @@
+"use client";
+
+import { useEffect } from "react";
+
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  useEffect(() => {
+    console.error("Route error:", error);
+  }, [error]);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-6">
+      <div className="glass-card p-8 max-w-md w-full text-center">
+        <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-[var(--color-error-dim)] flex items-center justify-center">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M10 6v4m0 4h.01M18 10a8 8 0 11-16 0 8 8 0 0116 0z" stroke="var(--color-error)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+        <h2 className="text-lg font-semibold mb-2">Something went wrong</h2>
+        <p className="text-sm text-[var(--color-muted)] mb-1">
+          An unexpected error occurred while loading this page.
+        </p>
+        {error.digest && (
+          <p className="text-xs text-[var(--color-muted)] font-mono mb-4">
+            Error ID: {error.digest}
+          </p>
+        )}
+        <div className="flex gap-3 justify-center mt-6">
+          <button
+            onClick={reset}
+            className="btn-primary px-5 py-2 text-sm"
+          >
+            Try again
+          </button>
+          <a
+            href="/"
+            className="px-5 py-2 text-sm border border-[var(--color-border)] rounded-lg text-[var(--color-muted)] hover:text-white transition-colors"
+          >
+            Go home
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
