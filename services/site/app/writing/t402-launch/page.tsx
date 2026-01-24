@@ -23,6 +23,18 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: pageTitle,
+  description: pageDescription,
+  datePublished: "2026-01-15",
+  author: { "@type": "Organization", name: "T402 Team", url: "https://t402.io" },
+  publisher: { "@type": "Organization", name: "T402", url: "https://t402.io" },
+  url: "https://t402.io/writing/t402-launch",
+  keywords: ["Protocol", "Launch", "Announcement", "USDT", "Stablecoin"],
+};
+
 function CheckIcon({ className = "" }: { className?: string }) {
   return (
     <svg
@@ -63,6 +75,10 @@ function ArrowRightIcon({ className = "" }: { className?: string }) {
 export default function T402LaunchPage() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <NavBar />
 
       <div className="flex-1">
