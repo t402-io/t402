@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { WagmiProviderWrapper } from "./providers/WagmiProvider";
 import { TonConnectProvider } from "./providers/TonConnectProvider";
+import { SolanaProvider } from "./providers/SolanaProvider";
 import { ChainProvider } from "./providers/ChainProvider";
 import { DemoProvider } from "./providers/DemoProvider";
 import "./globals.css";
@@ -45,11 +46,13 @@ export default function RootLayout({
       <body className="bg-[var(--color-background)] text-[var(--color-foreground)] antialiased">
         <ChainProvider>
           <TonConnectProvider>
-            <WagmiProviderWrapper>
-              <DemoProvider>
-                {children}
-              </DemoProvider>
-            </WagmiProviderWrapper>
+            <SolanaProvider>
+              <WagmiProviderWrapper>
+                <DemoProvider>
+                  {children}
+                </DemoProvider>
+              </WagmiProviderWrapper>
+            </SolanaProvider>
           </TonConnectProvider>
         </ChainProvider>
       </body>
