@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 
 interface Article {
   slug: string;
@@ -12,7 +13,18 @@ interface Article {
   authors: string[];
   image: string;
   tags: string[];
+  category: Category;
 }
+
+type Category = "all" | "announcement" | "technical" | "ecosystem" | "guide";
+
+const categories: { id: Category; label: string }[] = [
+  { id: "all", label: "All" },
+  { id: "announcement", label: "Announcements" },
+  { id: "technical", label: "Technical" },
+  { id: "guide", label: "Guides" },
+  { id: "ecosystem", label: "Ecosystem" },
+];
 
 const articles: Article[] = [
   {
@@ -22,17 +34,64 @@ const articles: Article[] = [
       "T402 brings HTTP-native stablecoin payments to the internet. Zero fees, instant settlement, and support for 28 blockchains across EVM, Solana, TON, TRON, NEAR, Aptos, and more.",
     date: "January 15, 2026",
     authors: ["T402 Team"],
-    image: "", // No image
+    image: "",
     tags: ["Protocol", "Launch", "Announcement"],
+    category: "announcement",
+  },
+  {
+    slug: "multichain-architecture",
+    title: "How T402 Achieves Multi-Chain Payment Settlement",
+    description:
+      "A deep dive into the architecture behind T402's support for 28 blockchains across 10 families. Learn how CAIP-2 identifiers, scheme-network separation, and the facilitator pattern enable true multi-chain payments.",
+    date: "January 18, 2026",
+    authors: ["T402 Team"],
+    image: "",
+    tags: ["Architecture", "Multi-Chain", "Deep Dive"],
+    category: "technical",
+  },
+  {
+    slug: "gasless-payments",
+    title: "Gasless Payments with ERC-4337 Account Abstraction",
+    description:
+      "Users shouldn't need ETH to pay with USDT. Learn how T402 integrates ERC-4337 UserOperations and paymasters to enable gasless stablecoin transfers across EVM chains.",
+    date: "January 20, 2026",
+    authors: ["T402 Team"],
+    image: "",
+    tags: ["ERC-4337", "Gasless", "Account Abstraction"],
+    category: "technical",
+  },
+  {
+    slug: "ai-agents-mcp",
+    title: "AI Agent Payments with MCP Integration",
+    description:
+      "How autonomous AI agents use the Model Context Protocol to discover, authorize, and execute payments without human intervention. Build AI-powered services that monetize via T402.",
+    date: "January 22, 2026",
+    authors: ["T402 Team"],
+    image: "",
+    tags: ["AI", "MCP", "Agents"],
+    category: "ecosystem",
+  },
+  {
+    slug: "getting-started-express",
+    title: "Add Payments to Your Express.js API in 5 Minutes",
+    description:
+      "A step-by-step guide to integrating T402 payments into an existing Express.js application. From installation to accepting your first stablecoin payment.",
+    date: "January 23, 2026",
+    authors: ["T402 Team"],
+    image: "",
+    tags: ["Tutorial", "Express.js", "TypeScript"],
+    category: "guide",
   },
 ];
 
 function ArticleCard({ article }: { article: Article }) {
   return (
     <motion.article
+      layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.3 }}
       className="group"
     >
       <Link href={`/writing/${article.slug}`} className="block">
@@ -111,6 +170,13 @@ function ArrowRightIcon({ className = "" }: { className?: string }) {
 }
 
 export default function WritingClient() {
+  const [activeCategory, setActiveCategory] = useState<Category>("all");
+
+  const filteredArticles =
+    activeCategory === "all"
+      ? articles
+      : articles.filter((a) => a.category === activeCategory);
+
   return (
     <div className="mx-auto max-w-[1440px] px-4 py-16 sm:px-6 lg:px-8">
       {/* Header */}
@@ -118,30 +184,58 @@ export default function WritingClient() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mb-16 text-center"
+        className="mb-12 text-center"
       >
         <h1 className="mb-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
           Writing
         </h1>
         <p className="mx-auto max-w-2xl text-lg text-foreground-secondary">
-          Articles, announcements, and deep dives from the t402 team.
+          Articles, announcements, and deep dives from the T402 team.
           Learn about protocol updates, technical guides, and ecosystem developments.
         </p>
       </motion.div>
 
+      {/* Category Filter */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+        className="mb-12 flex flex-wrap justify-center gap-2"
+      >
+        {categories.map((cat) => (
+          <button
+            key={cat.id}
+            onClick={() => setActiveCategory(cat.id)}
+            className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+              activeCategory === cat.id
+                ? "bg-brand text-background"
+                : "bg-background-secondary text-foreground-secondary hover:bg-background-tertiary hover:text-foreground"
+            }`}
+          >
+            {cat.label}
+            {cat.id !== "all" && (
+              <span className="ml-1.5 text-xs opacity-70">
+                {articles.filter((a) => a.category === cat.id).length}
+              </span>
+            )}
+          </button>
+        ))}
+      </motion.div>
+
       {/* Articles Grid */}
       <div className="mb-20 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {articles.map((article, index) => (
-          <motion.div
-            key={article.slug}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: index * 0.1 }}
-          >
-            <ArticleCard article={article} />
-          </motion.div>
-        ))}
+        <AnimatePresence mode="popLayout">
+          {filteredArticles.map((article) => (
+            <ArticleCard key={article.slug} article={article} />
+          ))}
+        </AnimatePresence>
       </div>
+
+      {filteredArticles.length === 0 && (
+        <div className="mb-20 text-center py-12">
+          <p className="text-foreground-tertiary">No articles in this category yet.</p>
+        </div>
+      )}
 
       {/* Newsletter CTA */}
       <motion.div
@@ -154,7 +248,7 @@ export default function WritingClient() {
           Stay Updated
         </h2>
         <p className="mx-auto mb-8 max-w-xl text-foreground-secondary">
-          Join the t402 community to get the latest updates on protocol development,
+          Join the T402 community to get the latest updates on protocol development,
           new features, and ecosystem news.
         </p>
         <div className="flex flex-wrap justify-center gap-4">
