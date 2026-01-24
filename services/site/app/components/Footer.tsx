@@ -204,6 +204,20 @@ export function Footer() {
             {new Date().getFullYear()} T402. The official payment protocol for
             USDT.
           </p>
+          <div className="flex items-center gap-6">
+            <Link
+              href="/privacy"
+              className="text-sm text-foreground-tertiary transition-colors hover:text-foreground-secondary"
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              href="/terms"
+              className="text-sm text-foreground-tertiary transition-colors hover:text-foreground-secondary"
+            >
+              Terms of Service
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
