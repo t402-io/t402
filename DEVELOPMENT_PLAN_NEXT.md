@@ -58,7 +58,7 @@
 | 組件 | 當前覆蓋 | 目標 | 狀態 |
 |------|----------|------|------|
 | mechanisms/ton | 86.9% | 70% | ✅ |
-| mechanisms/tron | 86.5%* | 70% | ✅ |
+| mechanisms/tron | 86.5% | 70% | ✅ |
 | mechanisms/near | 100% | 70% | ✅ |
 | mechanisms/aptos | 93.8% | 70% | ✅ |
 | mechanisms/tezos | 96.1% | 70% | ✅ |
@@ -66,8 +66,10 @@
 | mechanisms/stacks | 100% | 70% | ✅ |
 | mechanisms/evm/erc4337 | 69.2% | 70% | ✅ (從 3.4% 提升) |
 | http/gin | 83.5% | 80% | ✅ |
-| mcp | 47.3% | 60% | 🔄 進行中 |
+| mcp | 46.6% | 60% | 🟡 需要 mock 測試 |
 | signers/* | 已修復 | - | ✅ 修復失敗測試 |
+
+**備註**: MCP 剩餘 0% 覆蓋函數需要 mock ethclient/HTTP 依賴才能測試。
 
 ### 4.2 Facilitator 測試覆蓋 (目標: 29% → 70%)
 
