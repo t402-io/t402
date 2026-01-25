@@ -25,7 +25,6 @@ from t402.types import (
 from t402.schemes.tezos.constants import (
     SCHEME_EXACT_DIRECT,
     FA2_TRANSFER_ENTRYPOINT,
-    is_tezos_network,
     is_valid_address,
     is_valid_operation_hash,
     parse_asset_identifier,
@@ -141,8 +140,8 @@ class ExactDirectTezosFacilitator:
             # Get the inner payload fields
             op_hash = payload_data.get("opHash", "")
             from_address = payload_data.get("from", "")
-            to_address = payload_data.get("to", "")
-            amount_str = payload_data.get("amount", "0")
+            _to_address = payload_data.get("to", "")  # noqa: F841
+            _amount_str = payload_data.get("amount", "0")  # noqa: F841
             contract_address = payload_data.get("contractAddress", "")
             token_id = payload_data.get("tokenId", 0)
 

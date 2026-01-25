@@ -29,7 +29,6 @@ from t402.schemes.aptos.constants import (
     CAIP_FAMILY,
     get_network_config,
     is_valid_tx_hash,
-    is_valid_address,
     compare_addresses,
 )
 from t402.schemes.aptos.types import (

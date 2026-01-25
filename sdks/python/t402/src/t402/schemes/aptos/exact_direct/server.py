@@ -8,7 +8,6 @@ and enhancing payment requirements with Aptos-specific metadata.
 from __future__ import annotations
 
 import logging
-from decimal import Decimal
 from typing import Any, Dict, List, Optional, Union
 
 from t402.types import (
@@ -23,7 +22,6 @@ from t402.schemes.aptos.constants import (
     get_network_config,
     get_token_by_address,
     get_token_info,
-    is_valid_network,
     parse_amount,
     TokenInfo,
 )

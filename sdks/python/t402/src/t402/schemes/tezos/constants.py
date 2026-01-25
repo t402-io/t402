@@ -323,7 +323,6 @@ def decimal_to_atomic(amount: float, decimals: int) -> str:
     Returns:
         Atomic amount as string (e.g., "1500000" for 6 decimals)
     """
-    import math
 
     multiplier = 10**decimals
     atomic = int(round(amount * multiplier))

@@ -12,7 +12,7 @@ The client:
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Union
 
 from t402.types import (
     PaymentRequirementsV2,

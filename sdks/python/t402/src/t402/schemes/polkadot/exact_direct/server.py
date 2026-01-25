@@ -11,8 +11,6 @@ The server:
 
 from __future__ import annotations
 
-import math
-from decimal import Decimal
 from typing import Any, Dict, List, Optional, Union
 
 from t402.types import (
@@ -22,7 +20,6 @@ from t402.types import (
 from t402.schemes.interfaces import AssetAmount, SupportedKindDict
 from t402.schemes.polkadot.constants import (
     SCHEME_EXACT_DIRECT,
-    NETWORKS,
     NetworkConfig,
     TokenInfo,
     get_network_config,
