@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { useChainContext } from "@/providers/ChainProvider";
 import { useDemoContext } from "@/providers/DemoProvider";
@@ -13,8 +14,28 @@ import { useAptosPayment } from "@/hooks/useAptosPayment";
 import { useTezosPayment } from "@/hooks/useTezosPayment";
 import { usePolkadotPayment } from "@/hooks/usePolkadotPayment";
 
+// Loading placeholder shown during SSR and initial hydration
+function WalletButtonSkeleton() {
+  return (
+    <div className="flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5">
+      <span className="h-2 w-2 rounded-full bg-[var(--color-muted)] animate-pulse" />
+      <span className="font-mono text-xs text-[var(--color-muted)]">...</span>
+    </div>
+  );
+}
+
 export function WalletButton() {
+  const [mounted, setMounted] = useState(false);
   const { activeFamily } = useChainContext();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // During SSR and initial hydration, show skeleton
+  if (!mounted) {
+    return <WalletButtonSkeleton />;
+  }
 
   switch (activeFamily) {
     case "evm":
