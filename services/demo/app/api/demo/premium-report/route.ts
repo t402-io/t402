@@ -65,6 +65,12 @@ export async function GET(request: NextRequest) {
     }
 
     const settleResult = await settlePayment(paymentPayload, requirements);
+    if (!settleResult.success) {
+      return NextResponse.json(
+        { error: "Settlement failed", reason: settleResult.errorReason },
+        { status: 500 }
+      );
+    }
 
     // Generate dynamic report based on real price data
     const priceData = await getBtcPrice();
