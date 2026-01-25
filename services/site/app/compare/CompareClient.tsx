@@ -9,7 +9,8 @@ interface ComparisonFeature {
   t402: string | boolean;
   stripe: string | boolean;
   paypal: string | boolean;
-  crypto: string | boolean;
+  coinbase: string | boolean;
+  btcpay: string | boolean;
 }
 
 const comparisonFeatures: ComparisonFeature[] = [
@@ -19,7 +20,8 @@ const comparisonFeatures: ComparisonFeature[] = [
     t402: "0%",
     stripe: "2.9% + $0.30",
     paypal: "2.9% + $0.49",
-    crypto: "1-3%",
+    coinbase: "1%",
+    btcpay: "0%",
   },
   {
     name: "Settlement Time",
@@ -27,7 +29,8 @@ const comparisonFeatures: ComparisonFeature[] = [
     t402: "Instant",
     stripe: "2-7 days",
     paypal: "1-3 days",
-    crypto: "Minutes-Hours",
+    coinbase: "1-3 days",
+    btcpay: "Instant",
   },
   {
     name: "Global Coverage",
@@ -35,7 +38,8 @@ const comparisonFeatures: ComparisonFeature[] = [
     t402: true,
     stripe: "47 countries",
     paypal: "200+ countries",
-    crypto: true,
+    coinbase: "100+ countries",
+    btcpay: true,
   },
   {
     name: "No KYC Required",
@@ -43,7 +47,8 @@ const comparisonFeatures: ComparisonFeature[] = [
     t402: true,
     stripe: false,
     paypal: false,
-    crypto: "Varies",
+    coinbase: false,
+    btcpay: true,
   },
   {
     name: "Chargebacks",
@@ -51,23 +56,26 @@ const comparisonFeatures: ComparisonFeature[] = [
     t402: "None",
     stripe: "Yes",
     paypal: "Yes",
-    crypto: "None",
+    coinbase: "None",
+    btcpay: "None",
   },
   {
     name: "AI Agent Support",
-    description: "Native support for autonomous agents",
+    description: "Native MCP/A2A integration",
     t402: true,
     stripe: false,
     paypal: false,
-    crypto: false,
+    coinbase: false,
+    btcpay: false,
   },
   {
     name: "Multi-Chain",
-    description: "Support for multiple blockchains",
+    description: "Blockchain support",
     t402: "28 chains",
     stripe: false,
     paypal: false,
-    crypto: "1-3 chains",
+    coinbase: "8 chains",
+    btcpay: "2 chains",
   },
   {
     name: "Gasless Transactions",
@@ -75,7 +83,8 @@ const comparisonFeatures: ComparisonFeature[] = [
     t402: true,
     stripe: "N/A",
     paypal: "N/A",
-    crypto: false,
+    coinbase: false,
+    btcpay: false,
   },
   {
     name: "Open Source",
@@ -83,23 +92,35 @@ const comparisonFeatures: ComparisonFeature[] = [
     t402: true,
     stripe: false,
     paypal: false,
-    crypto: "Varies",
+    coinbase: false,
+    btcpay: true,
   },
   {
     name: "HTTP Native",
-    description: "Built into web protocols",
+    description: "Built into web protocols (HTTP 402)",
     t402: true,
     stripe: false,
     paypal: false,
-    crypto: false,
+    coinbase: false,
+    btcpay: false,
   },
   {
-    name: "Payment Transports",
-    description: "HTTP, MCP, and A2A support",
-    t402: "3 transports",
-    stripe: "HTTP only",
-    paypal: "HTTP only",
-    crypto: "HTTP only",
+    name: "Stablecoin Focus",
+    description: "USDT/USDC native support",
+    t402: true,
+    stripe: false,
+    paypal: false,
+    coinbase: "Limited",
+    btcpay: false,
+  },
+  {
+    name: "Self-Hosted Option",
+    description: "Run your own infrastructure",
+    t402: true,
+    stripe: false,
+    paypal: false,
+    coinbase: false,
+    btcpay: true,
   },
 ];
 
@@ -155,7 +176,7 @@ function renderValue(value: string | boolean) {
 function ComparisonTable() {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[800px] border-collapse">
+      <table className="w-full min-w-[1000px] border-collapse">
         <thead>
           <tr className="border-b border-border">
             <th className="py-4 pr-4 text-left text-sm font-medium text-foreground-tertiary">
@@ -181,8 +202,14 @@ function ComparisonTable() {
             </th>
             <th className="px-4 py-4 text-center">
               <div className="inline-flex flex-col items-center">
-                <span className="text-lg font-semibold text-foreground">Crypto</span>
-                <span className="text-xs text-foreground-tertiary">Processors</span>
+                <span className="text-lg font-semibold text-foreground">Coinbase</span>
+                <span className="text-xs text-foreground-tertiary">Commerce</span>
+              </div>
+            </th>
+            <th className="px-4 py-4 text-center">
+              <div className="inline-flex flex-col items-center">
+                <span className="text-lg font-semibold text-foreground">BTCPay</span>
+                <span className="text-xs text-foreground-tertiary">Server</span>
               </div>
             </th>
           </tr>
@@ -212,7 +239,10 @@ function ComparisonTable() {
                 {renderValue(feature.paypal)}
               </td>
               <td className="px-4 py-4 text-center text-foreground-secondary">
-                {renderValue(feature.crypto)}
+                {renderValue(feature.coinbase)}
+              </td>
+              <td className="px-4 py-4 text-center text-foreground-secondary">
+                {renderValue(feature.btcpay)}
               </td>
             </motion.tr>
           ))}
