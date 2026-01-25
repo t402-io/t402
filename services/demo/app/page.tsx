@@ -1,8 +1,5 @@
 "use client";
 
-// Force dynamic rendering to avoid SSR issues with wallet SDKs
-export const dynamic = "force-dynamic";
-
 import Link from "next/link";
 import { WalletButton } from "@/components/layout/WalletButton";
 import { ModeToggle } from "@/components/layout/ModeToggle";
