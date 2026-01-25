@@ -1,221 +1,214 @@
 # T402 下一階段開發計劃
 
-> **基於 SDK 完整性分析的開發計劃**
+> **基於完整專案分析的開發計劃**
 >
 > 建立日期: 2026-01-26
-> 版本: 1.0
+> 更新日期: 2026-01-26
+> 版本: 2.0
 
 ---
 
 ## 概述
 
-根據對四個 SDK (TypeScript, Go, Python, Java) 的完整性分析，所有核心功能已開發完畢。
-本計劃專注於剩餘的優化項目和新功能開發。
+專案核心功能已完成約 95%。本計劃專注於：
+1. 測試覆蓋率提升
+2. Java SDK 機制擴充
+3. 安全審計準備
+4. 基礎設施優化
 
 ---
 
 ## 當前狀態總覽
 
-| SDK | 版本 | 區塊鏈機制 | HTTP 整合 | 進階功能 | 狀態 |
-|-----|------|-----------|-----------|----------|------|
-| TypeScript | 2.3.1 | 10/10 ✅ | 9 種 ✅ | 全部 ✅ | **完整** |
-| Go | 1.8.1 | 10/10 ✅ | 1 種 ✅ | 全部 ✅ | **完整** |
-| Python | 1.9.1 | 9/9 ✅ | 4 種 ✅ | 全部 ✅ | **完整** |
-| Java | 1.8.1 | 9/9 ✅ | 2 種 ✅ | 全部 ✅ | **完整** |
+| SDK | 版本 | 區塊鏈機制 | 測試覆蓋 | 狀態 |
+|-----|------|-----------|----------|------|
+| TypeScript | 2.3.1 | 10/10 ✅ | 85%+ | **完整** |
+| Go | 1.8.1 | 10/10 ✅ | **45-50%** ⚠️ | 需提升測試 |
+| Python | 1.9.1 | 9/9 ✅ | 85%+ | **完整** |
+| Java | 1.8.1 | **3/9** ⚠️ | 70% | 缺少機制 |
 
 ---
 
-## Phase 1: Go SDK Signer 補齊 ✅ 已完成
+## ✅ 已完成的階段
 
-### 1.1 問題描述
+### Phase 1: Go SDK Signers ✅
+- ✅ TON signer (Ed25519, tonutils-go)
+- ✅ TRON signer (secp256k1, TronGrid API)
+- ✅ NEAR signer (Ed25519, Borsh serialization)
+- ✅ Aptos signer (Ed25519, BCS serialization)
+- ✅ Tezos signer (Ed25519, FA2 transfers)
+- ✅ Polkadot signer (Ed25519, SS58 encoding)
+- ✅ Stacks signer (secp256k1, C32 encoding)
 
-Go SDK 目前只有 EVM 和 SVM 的 Signer Helper，其他 7 個鏈需要用戶自行實作。
+### Phase 2: Demo.t402.io 增強 ✅
+- ✅ 9 個區塊鏈支援
+- ✅ Gasless Payment 整合 (Pimlico)
+- ✅ CoinGecko 價格服務
 
-### 1.2 需要實作的 Signers
+### Phase 3: Java MCP 工具擴充 ✅
+- ✅ 18 個 MCP 工具 (NEAR, Aptos, Tezos 已添加)
+- ✅ 885 測試全部通過
 
-| 鏈 | Signer 類型 | 參考實作 | 狀態 |
-|----|-------------|----------|------|
-| TON | Ed25519 | TypeScript `@t402/ton` | ✅ 已完成 |
-| TRON | ECDSA secp256k1 | TypeScript `@t402/tron` | ✅ 已完成 |
-| NEAR | Ed25519 | TypeScript `@t402/near` | ✅ 已完成 |
-| Aptos | Ed25519 | TypeScript `@t402/aptos` | ✅ 已完成 |
-| Tezos | Ed25519 | TypeScript `@t402/tezos` | ✅ 已完成 |
-| Polkadot | Ed25519 | TypeScript `@t402/polkadot` | ✅ 已完成 |
-| Stacks | secp256k1 | TypeScript `@t402/stacks` | ✅ 已完成 |
+---
 
-### 1.3 檔案結構 ✅
+## 🔴 Phase 4: 高優先級 - 測試覆蓋提升
+
+### 4.1 Go SDK 測試覆蓋 (目標: 45% → 70%)
+
+| 組件 | 當前覆蓋 | 目標 | 狀態 |
+|------|----------|------|------|
+| mechanisms/ton | 86.9% | 70% | ✅ |
+| mechanisms/tron | 86.5%* | 70% | ✅ |
+| mechanisms/near | 100% | 70% | ✅ |
+| mechanisms/aptos | 93.8% | 70% | ✅ |
+| mechanisms/tezos | 96.1% | 70% | ✅ |
+| mechanisms/polkadot | 96.2% | 70% | ✅ |
+| mechanisms/stacks | 100% | 70% | ✅ |
+| mechanisms/evm/erc4337 | 69.2% | 70% | ✅ (從 3.4% 提升) |
+| http/gin | 83.5% | 80% | ✅ |
+| mcp | 47.3% | 60% | 🔄 進行中 |
+| signers/* | 已修復 | - | ✅ 修復失敗測試 |
+
+### 4.2 Facilitator 測試覆蓋 (目標: 29% → 70%)
+
+| 組件 | 當前覆蓋 | 目標 | 狀態 |
+|------|----------|------|------|
+| /verify endpoint | ~30% | 80% | ⬜ |
+| /settle endpoint | ~30% | 80% | ⬜ |
+| Settlement execution | ~20% | 70% | ⬜ |
+| Cross-chain E2E | 0% | 50% | ⬜ |
+
+---
+
+## 🟡 Phase 5: 中優先級 - Java SDK 機制擴充
+
+### 5.1 缺少的機制
+
+| 機制 | Token 標準 | 預估工時 | 狀態 |
+|------|-----------|----------|------|
+| SVM | SPL Token | 3-4 天 | ⬜ |
+| NEAR | NEP-141 | 2-3 天 | ⬜ |
+| Aptos | Fungible Asset | 2-3 天 | ⬜ |
+| Tezos | FA2 | 2-3 天 | ⬜ |
+| Polkadot | Asset Hub | 2-3 天 | ⬜ |
+| Stacks | SIP-010 | 2-3 天 | ⬜ |
+
+### 5.2 實作結構
 
 ```
-sdks/go/
-├── signers/
-│   ├── ton/
-│   │   ├── client.go ✅
-│   │   ├── client_test.go ✅
-│   │   └── README.md ✅
-│   ├── tron/
-│   │   ├── client.go ✅
-│   │   ├── client_test.go ✅
-│   │   └── README.md ✅
-│   ├── near/
-│   │   ├── client.go ✅
-│   │   ├── client_test.go ✅
-│   │   └── README.md ✅
-│   ├── aptos/
-│   │   ├── client.go ✅
-│   │   ├── client_test.go ✅
-│   │   └── README.md ✅
-│   ├── tezos/
-│   │   ├── client.go ✅
-│   │   ├── client_test.go ✅
-│   │   └── README.md ✅
-│   ├── polkadot/
-│   │   ├── client.go ✅
-│   │   ├── client_test.go ✅
-│   │   └── README.md ✅
-│   └── stacks/
-│       ├── client.go ✅
-│       ├── client_test.go ✅
-│       └── README.md ✅
+sdks/java/src/main/java/io/t402/schemes/
+├── svm/           ⬜ 待實作
+│   ├── SvmConstants.java
+│   ├── SvmSchemes.java
+│   ├── ClientSvmSigner.java
+│   ├── FacilitatorSvmSigner.java
+│   └── ExactPayload.java
+├── near/          ✅ 已有基礎 (需擴充)
+├── aptos/         ✅ 已有基礎 (需擴充)
+├── tezos/         ✅ 已有基礎 (需擴充)
+├── polkadot/      ⬜ 待實作
+└── stacks/        ⬜ 待實作
 ```
 
 ---
 
-## Phase 2: Demo.t402.io 增強 ✅ 已完成
+## 🟡 Phase 6: 中優先級 - 基礎設施
 
-### 2.1 新增區塊鏈支援 (4 chains) ✅
+### 6.1 TypeScript Monorepo 改進
 
-| Chain | Hook | Provider | 錢包 SDK | 狀態 |
-|-------|------|----------|----------|------|
-| NEAR | `useNearPayment.ts` | `NearProvider.tsx` | `@near-wallet-selector/core` | ✅ |
-| Aptos | `useAptosPayment.ts` | `AptosProvider.tsx` | `@aptos-labs/wallet-adapter-react` | ✅ |
-| Tezos | `useTezosPayment.ts` | `TezosProvider.tsx` | `@taquito/beacon-wallet` | ✅ |
-| Polkadot | `usePolkadotPayment.ts` | `PolkadotProvider.tsx` | `@polkadot/extension-dapp` | ✅ |
+| 項目 | 狀態 |
+|------|------|
+| ESLint root config | ⬜ |
+| vitest.workspace.ts | ⬜ |
+| CODEOWNERS | ⬜ |
+| Paywall bundle 優化 (2.7MB → <500KB) | ⬜ |
 
-### 2.2 Gasless Payment 真實整合 ✅
+### 6.2 Facilitator 基礎設施
 
-- [x] 更新 `.env.local` 配置 Pimlico bundler/paymaster
-- [x] 更新 `gasless/route.ts` 使用環境變數
-- [x] 更新 `GaslessPayment.tsx` 組件
-
-### 2.3 真實數據整合 ✅
-
-- [x] 建立 `price-service.ts` (CoinGecko API)
-- [x] 建立 `content-generator.ts` (動態報告)
-- [x] 更新 `market-data/route.ts`
-- [x] 更新 `premium-report/route.ts`
+| 項目 | 狀態 |
+|------|------|
+| 熱錢包輪換機制 | ⬜ |
+| 多區域部署 (US-East, EU-West, AP-Southeast) | ⬜ |
+| P95 延遲優化 (<200ms) | ⬜ |
 
 ---
 
-## Phase 3: Java SDK MCP 工具擴充 ✅ 已完成
+## 🟢 Phase 7: 低優先級 - 安全審計
 
-### 3.1 問題描述
+### 7.1 內部審計 (Q1 2026)
 
-Java SDK MCP Server 有 12 個工具，TypeScript 有 18+ 個。
+- [ ] 範圍定義
+- [ ] 風險評估
+- [ ] 設計審查
+- [ ] 修復高危發現
 
-### 3.2 需要新增的工具
+### 7.2 外部審計 (Q2 2026)
 
-| 工具 | 描述 | 狀態 |
-|------|------|------|
-| `t402/getNearBalance` | NEAR 餘額查詢 | ✅ 已完成 |
-| `t402/payNear` | NEAR 支付 | ✅ 已完成 |
-| `t402/getAptosBalance` | Aptos 餘額查詢 | ✅ 已完成 |
-| `t402/payAptos` | Aptos 支付 | ✅ 已完成 |
-| `t402/getTezosBalance` | Tezos 餘額查詢 | ✅ 已完成 |
-| `t402/payTezos` | Tezos 支付 | ✅ 已完成 |
-
-### 3.3 實作摘要
-
-更新了以下檔案:
-- `McpTypes.java` - 新增 SupportedNearNetwork, SupportedAptosNetwork, SupportedTezosNetwork 枚舉和輸入類型
-- `McpConstants.java` - 新增網絡常量、RPC URLs、Explorer URLs、地址驗證
-- `McpTools.java` - 新增 6 個工具處理器
-- `McpServer.java` - 新增 6 個工具定義
-- `McpServerTest.java` - 更新測試以驗證 18 個工具
+- [ ] 選擇審計公司 (Trail of Bits / OpenZeppelin)
+- [ ] 全面代碼審計
+- [ ] 密碼學審查
+- [ ] 發布安全聲明
 
 ---
 
-## Phase 4: 安全審計 (優先級: 高)
+## 🟢 Phase 8: 低優先級 - 新 SDK 開發
 
-### 4.1 內部審計
-
-- [ ] 完成內部安全審查
-- [ ] 修復所有高危/關鍵發現
-
-### 4.2 外部審計
-
-- [ ] 聘請 Trail of Bits 或 OpenZeppelin
-- [ ] 處理審計發現
-
----
-
-## Phase 5: 新 SDK 開發 (優先級: 低)
-
-### 5.1 Rust SDK (Q2-Q3 2026)
+### 8.1 Rust SDK (Q2-Q3 2026)
 
 - [ ] Core types and interfaces
 - [ ] EVM mechanism
 - [ ] SVM mechanism
 - [ ] TON/TRON mechanisms
 - [ ] Wasm builds
+- [ ] 85% 測試覆蓋
 
-### 5.2 Swift SDK (Q3-Q4 2026)
+### 8.2 Swift SDK (Q3-Q4 2026)
 
 - [ ] Core types and interfaces
 - [ ] EVM mechanism
 - [ ] SwiftUI components
 - [ ] WalletConnect integration
+- [ ] 80% 測試覆蓋
 
 ---
 
 ## 實作順序
 
-### ✅ 已完成
+### Week 1-2: Go SDK 測試覆蓋
+1. TON/TRON 機制整合測試
+2. HTTP Gin 中間件測試
+3. MCP Server 測試
 
-1. **Phase 2**: Demo.t402.io 增強 (全部完成)
-   - ✅ 9 個區塊鏈支援
-   - ✅ Gasless Payment 整合
-   - ✅ CoinGecko 價格服務
+### Week 3-4: Facilitator 測試
+1. /verify endpoint 測試
+2. /settle endpoint 測試
+3. 跨鏈結算 E2E 測試
 
-2. **Phase 1**: Go SDK Signers ✅ (全部完成)
-   - ✅ TON signer (Ed25519, tonutils-go)
-   - ✅ TRON signer (secp256k1, TronGrid API)
-   - ✅ NEAR signer (Ed25519, Borsh serialization)
-   - ✅ Aptos signer (Ed25519, BCS serialization)
-   - ✅ Tezos signer (Ed25519, FA2 transfers)
-   - ✅ Polkadot signer (Ed25519, SS58 encoding)
-   - ✅ Stacks signer (secp256k1, C32 encoding)
+### Week 5-6: Java SDK 機制
+1. SVM 機制實作
+2. Polkadot 機制實作
+3. Stacks 機制實作
 
-3. **Phase 3**: Java MCP 工具擴充 ✅ (全部完成)
-   - ✅ NEAR 工具 (getNearBalance, payNear)
-   - ✅ Aptos 工具 (getAptosBalance, payAptos)
-   - ✅ Tezos 工具 (getTezosBalance, payTezos)
-   - ✅ 總計 18 個工具，通過所有 885 測試
-
-### 中期 (1 個月)
-
-4. **Phase 4.1**: 內部安全審計
-
-### 長期 (Q2-Q4)
-
-5. **Phase 4.2**: 外部安全審計
-6. **Phase 5**: Rust/Swift SDK
+### Week 7-8: 基礎設施
+1. TypeScript monorepo 改進
+2. Facilitator 效能優化
 
 ---
 
 ## 驗收標準
 
-### Phase 1 完成標準 ✅
-- [x] 所有 7 個 Signer 通過單元測試
-- [ ] 與 TypeScript 實作互操作性測試
+### Phase 4 完成標準
+- [ ] Go SDK 測試覆蓋達到 70%
+- [ ] Facilitator 測試覆蓋達到 70%
+- [ ] 所有 CI 測試通過
 
-### Phase 2 完成標準 ✅
-- [x] 4 個新鏈在 demo.t402.io 可用 (實際已有 9 個鏈)
-- [x] Gasless 支付使用真實 bundler (Pimlico)
-- [x] 價格數據即時更新 (CoinGecko)
+### Phase 5 完成標準
+- [ ] Java SDK 支援 9/9 區塊鏈機制
+- [ ] 所有新機制通過測試
 
-### Phase 3 完成標準 ✅
-- [x] Java MCP 工具數量達到 18+ (已達到 18 個)
-- [x] 所有新工具通過測試 (885 測試全部通過)
+### Phase 6 完成標準
+- [ ] TypeScript monorepo 配置完整
+- [ ] Facilitator P95 < 200ms
 
 ---
 
@@ -223,4 +216,4 @@ Java SDK MCP Server 有 12 個工具，TypeScript 有 18+ 個。
 
 - [ROADMAP.md](./ROADMAP.md) - 高層級路線圖
 - [DEVELOPMENT_PLAN_2026.md](./DEVELOPMENT_PLAN_2026.md) - 2026 年度計劃
-- [DEVELOPMENT_PLAN_MULTISIG.md](./DEVELOPMENT_PLAN_MULTISIG.md) - Multi-sig 開發計劃 (已完成)
+- [CLAUDE.md](./CLAUDE.md) - 專案上下文
