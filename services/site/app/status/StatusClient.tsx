@@ -1,8 +1,16 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { serviceEndpoints, facilitatorWallets, networks } from "./data";
+
+interface HealthStatus {
+  status: "operational" | "degraded" | "down" | "loading";
+  latency?: number;
+  lastChecked?: Date;
+  supportedNetworks?: number;
+}
 
 function ExternalLinkIcon({ className = "" }: { className?: string }) {
   return (
@@ -54,7 +62,121 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
+function useHealthCheck() {
+  const [health, setHealth] = useState<HealthStatus>({ status: "loading" });
+
+  useEffect(() => {
+    async function checkHealth() {
+      const start = Date.now();
+      try {
+        const [healthRes, supportedRes] = await Promise.all([
+          fetch("https://facilitator.t402.io/health", { cache: "no-store" }),
+          fetch("https://facilitator.t402.io/supported", { cache: "no-store" }),
+        ]);
+
+        const latency = Date.now() - start;
+
+        if (healthRes.ok && supportedRes.ok) {
+          const supportedData = await supportedRes.json();
+          const networkCount = supportedData?.kinds?.length ?? 0;
+          setHealth({
+            status: "operational",
+            latency,
+            lastChecked: new Date(),
+            supportedNetworks: networkCount,
+          });
+        } else {
+          setHealth({
+            status: "degraded",
+            latency,
+            lastChecked: new Date(),
+          });
+        }
+      } catch {
+        setHealth({
+          status: "down",
+          lastChecked: new Date(),
+        });
+      }
+    }
+
+    checkHealth();
+    const interval = setInterval(checkHealth, 30000); // Check every 30 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  return health;
+}
+
+function HealthBanner({ health }: { health: HealthStatus }) {
+  const statusConfig = {
+    loading: {
+      bg: "bg-gray-500/10",
+      border: "border-gray-500/20",
+      dot: "bg-gray-500",
+      text: "text-gray-400",
+      label: "Checking...",
+    },
+    operational: {
+      bg: "bg-emerald-500/10",
+      border: "border-emerald-500/20",
+      dot: "bg-emerald-500",
+      text: "text-emerald-400",
+      label: "All Systems Operational",
+    },
+    degraded: {
+      bg: "bg-yellow-500/10",
+      border: "border-yellow-500/20",
+      dot: "bg-yellow-500",
+      text: "text-yellow-400",
+      label: "Partial Outage",
+    },
+    down: {
+      bg: "bg-red-500/10",
+      border: "border-red-500/20",
+      dot: "bg-red-500",
+      text: "text-red-400",
+      label: "Service Unavailable",
+    },
+  };
+
+  const config = statusConfig[health.status];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`mx-auto max-w-5xl rounded-xl border ${config.border} ${config.bg} p-4`}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <span className={`relative flex h-3 w-3`}>
+            {health.status === "operational" && (
+              <span className={`absolute inline-flex h-full w-full animate-ping rounded-full ${config.dot} opacity-75`} />
+            )}
+            <span className={`relative inline-flex h-3 w-3 rounded-full ${config.dot}`} />
+          </span>
+          <span className={`font-medium ${config.text}`}>{config.label}</span>
+        </div>
+        <div className="flex items-center gap-4 text-sm text-gray-500">
+          {health.latency !== undefined && (
+            <span>Latency: {health.latency}ms</span>
+          )}
+          {health.supportedNetworks !== undefined && (
+            <span>{health.supportedNetworks} networks</span>
+          )}
+          {health.lastChecked && (
+            <span>Updated: {health.lastChecked.toLocaleTimeString()}</span>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function StatusClient() {
+  const health = useHealthCheck();
+
   // Group networks by family
   const families = networks.reduce(
     (acc, n) => {
@@ -83,6 +205,11 @@ export default function StatusClient() {
             </p>
           </motion.div>
         </div>
+      </section>
+
+      {/* Health Status Banner */}
+      <section className="px-6 pb-8 md:px-12">
+        <HealthBanner health={health} />
       </section>
 
       {/* Service Endpoints */}

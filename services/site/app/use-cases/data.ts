@@ -102,6 +102,14 @@ export const useCases: UseCase[] = [
       title: "Crypto Price Oracle",
       description: "Access real-time price feeds for $0.0001 per query. Pay only for the data you need.",
     },
+    codeSnippet: `app.get("/api/prices/:symbol",
+  paymentRequired({
+    price: "$0.0001",
+    network: "eip155:8453",
+    resource: "Real-time price data",
+  }),
+  (req, res) => res.json(getPriceData(req.params.symbol))
+);`,
   },
 
   // Content Access
@@ -126,6 +134,16 @@ export const useCases: UseCase[] = [
       title: "Premium News Article",
       description: "Read this investigative report for $0.25. No subscription needed, instant access.",
     },
+    codeSnippet: `// Next.js API route with paywall
+export async function GET(req: Request) {
+  const payment = await verifyPayment(req, {
+    price: "$0.25",
+    network: "eip155:8453",
+    resource: "Premium article access",
+  });
+  if (!payment.verified) return payment.response;
+  return Response.json({ content: article });
+}`,
   },
   {
     id: "video-streaming",
@@ -223,6 +241,15 @@ export const useCases: UseCase[] = [
       title: "Research Agent",
       description: "Agent autonomously purchases access to research papers and datasets within $50/day budget.",
     },
+    codeSnippet: `// MCP server tool for AI agents
+server.tool("purchase_data", {
+  price: "$0.10",
+  network: "eip155:8453",
+  budgetLimit: "$50/day",
+}, async ({ datasetId }) => {
+  const data = await fetchDataset(datasetId);
+  return { content: data };
+});`,
   },
   {
     id: "agent-to-agent",
@@ -269,6 +296,18 @@ export const useCases: UseCase[] = [
       title: "Online Store",
       description: "Customer pays $99.99 in USDC for premium headphones. Instant confirmation, same-day shipping.",
     },
+    codeSnippet: `// Express checkout endpoint
+app.post("/checkout",
+  paymentRequired({
+    price: req => calculateTotal(req.body.items),
+    network: "eip155:8453",
+    resource: "Order checkout",
+  }),
+  async (req, res) => {
+    const order = await createOrder(req.body);
+    res.json({ orderId: order.id, status: "confirmed" });
+  }
+);`,
   },
   {
     id: "subscriptions",
@@ -337,6 +376,18 @@ export const useCases: UseCase[] = [
       title: "GPU Rental",
       description: "Rent an A100 GPU for $2.50/hour in USDC. Start training immediately.",
     },
+    codeSnippet: `// GPU rental API
+app.post("/api/gpu/provision",
+  paymentRequired({
+    price: "$2.50", // per hour, billed upfront
+    network: "eip155:42161", // Arbitrum
+    resource: "A100 GPU instance",
+  }),
+  async (req, res) => {
+    const instance = await provisionGPU("a100");
+    res.json({ instanceId: instance.id, ssh: instance.ssh });
+  }
+);`,
   },
   {
     id: "domain-hosting",
