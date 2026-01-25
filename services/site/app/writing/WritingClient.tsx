@@ -82,6 +82,28 @@ const articles: Article[] = [
     tags: ["Tutorial", "Express.js", "TypeScript"],
     category: "guide",
   },
+  {
+    slug: "sdk-comparison",
+    title: "Choosing the Right T402 SDK: TypeScript, Python, Go, or Java",
+    description:
+      "A comprehensive guide to T402's four official SDKs. Compare features, performance characteristics, and best use cases to choose the right SDK for your project.",
+    date: "January 25, 2026",
+    authors: ["T402 Team"],
+    image: "",
+    tags: ["SDK", "TypeScript", "Python", "Go", "Java"],
+    category: "guide",
+  },
+  {
+    slug: "non-evm-chains",
+    title: "Beyond EVM: Accepting Payments on TON, Solana, TRON, and More",
+    description:
+      "T402 isn't just for Ethereum. Learn how to accept USDT payments on TON (Telegram), Solana, TRON, NEAR, Aptos, Tezos, Polkadot, and Stacks with unified APIs.",
+    date: "January 26, 2026",
+    authors: ["T402 Team"],
+    image: "",
+    tags: ["TON", "Solana", "TRON", "Multi-Chain"],
+    category: "technical",
+  },
 ];
 
 function ArticleCard({ article }: { article: Article }) {
