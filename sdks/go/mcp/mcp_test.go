@@ -2339,3 +2339,418 @@ func TestAllNetworksHaveRPCURLs(t *testing.T) {
 		assert.True(t, strings.HasPrefix(url, "https://"), "RPC URL for %s should be HTTPS", network)
 	}
 }
+
+// Tests for NewServer function
+func TestNewServer(t *testing.T) {
+	config := &ServerConfig{
+		PrivateKey: "0x1234",
+		DemoMode:   true,
+		BundlerURL: "https://bundler.example.com",
+	}
+
+	server := NewServer(config)
+	require.NotNil(t, server)
+
+	// Verify config is stored
+	assert.Equal(t, config, server.config)
+	assert.NotNil(t, server.reader)
+	assert.NotNil(t, server.writer)
+}
+
+func TestNewServerWithDefaultConfig(t *testing.T) {
+	config := &ServerConfig{}
+
+	server := NewServer(config)
+	require.NotNil(t, server)
+
+	assert.False(t, server.config.DemoMode)
+	assert.Empty(t, server.config.PrivateKey)
+}
+
+func TestNewServerWithIO(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+
+	pr, pw := io.Pipe()
+	output := &bytes.Buffer{}
+
+	server := NewServerWithIO(config, pr, output)
+	require.NotNil(t, server)
+
+	assert.Equal(t, config, server.config)
+	assert.Equal(t, output, server.writer)
+
+	pw.Close()
+}
+
+// Server notification handler test
+func TestServerNotificationsInitialized(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+
+	inputData := `{"jsonrpc":"2.0","id":100,"method":"notifications/initialized"}` + "\n"
+
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close()
+	}()
+
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_ = server.Run(ctx)
+
+	var response JSONRPCResponse
+	err := json.Unmarshal(output.Bytes(), &response)
+	require.NoError(t, err)
+
+	// Should return empty result for notifications
+	assert.Nil(t, response.Error)
+	resultMap, ok := response.Result.(map[string]any)
+	assert.True(t, ok)
+	assert.Empty(t, resultMap)
+}
+
+// Property JSON test
+func TestPropertyJSON(t *testing.T) {
+	prop := Property{
+		Type:        "string",
+		Description: "A test property",
+		Pattern:     "^0x[a-fA-F0-9]+$",
+		Enum:        []string{"option1", "option2"},
+	}
+
+	data, err := json.Marshal(prop)
+	require.NoError(t, err)
+
+	var decoded Property
+	err = json.Unmarshal(data, &decoded)
+	require.NoError(t, err)
+
+	assert.Equal(t, prop.Type, decoded.Type)
+	assert.Equal(t, prop.Description, decoded.Description)
+	assert.Equal(t, prop.Pattern, decoded.Pattern)
+	assert.Equal(t, prop.Enum, decoded.Enum)
+}
+
+// CallToolParams JSON test
+func TestCallToolParamsJSON(t *testing.T) {
+	params := CallToolParams{
+		Name:      "t402/test",
+		Arguments: json.RawMessage(`{"key":"value"}`),
+	}
+
+	data, err := json.Marshal(params)
+	require.NoError(t, err)
+
+	var decoded CallToolParams
+	err = json.Unmarshal(data, &decoded)
+	require.NoError(t, err)
+
+	assert.Equal(t, params.Name, decoded.Name)
+	assert.Equal(t, string(params.Arguments), string(decoded.Arguments))
+}
+
+// ServerConfig JSON test
+func TestServerConfigJSON(t *testing.T) {
+	config := ServerConfig{
+		PrivateKey:   "0xtest",
+		DemoMode:     true,
+		BundlerURL:   "https://bundler.example.com",
+		PaymasterURL: "https://paymaster.example.com",
+		RPCURLs: map[string]string{
+			"ethereum": "https://eth.rpc.com",
+		},
+	}
+
+	data, err := json.Marshal(config)
+	require.NoError(t, err)
+
+	var decoded ServerConfig
+	err = json.Unmarshal(data, &decoded)
+	require.NoError(t, err)
+
+	assert.Equal(t, config.PrivateKey, decoded.PrivateKey)
+	assert.Equal(t, config.DemoMode, decoded.DemoMode)
+	assert.Equal(t, config.BundlerURL, decoded.BundlerURL)
+	assert.Equal(t, config.PaymasterURL, decoded.PaymasterURL)
+}
+
+// Test handleCallTool with invalid params JSON
+func TestServerCallToolInvalidParams(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+
+	// Completely invalid params
+	inputData := `{"jsonrpc":"2.0","id":101,"method":"tools/call","params":"invalid"}` + "\n"
+
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close()
+	}()
+
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_ = server.Run(ctx)
+
+	var response JSONRPCResponse
+	err := json.Unmarshal(output.Bytes(), &response)
+	require.NoError(t, err)
+
+	// Should return error in ToolResult
+	resultMap, ok := response.Result.(map[string]any)
+	require.True(t, ok)
+	isError, _ := resultMap["isError"].(bool)
+	assert.True(t, isError)
+}
+
+// Test pay with invalid network
+func TestServerCallToolPayInvalidNetwork(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+
+	params := `{"name":"t402/pay","arguments":{"to":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d","amount":"100","token":"USDC","network":"invalid_network"}}`
+	inputData := `{"jsonrpc":"2.0","id":102,"method":"tools/call","params":` + params + `}` + "\n"
+
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close()
+	}()
+
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_ = server.Run(ctx)
+
+	var response JSONRPCResponse
+	err := json.Unmarshal(output.Bytes(), &response)
+	require.NoError(t, err)
+
+	resultMap, ok := response.Result.(map[string]any)
+	require.True(t, ok)
+	isError, _ := resultMap["isError"].(bool)
+	assert.True(t, isError)
+
+	// Check error message
+	content, _ := resultMap["content"].([]any)
+	if len(content) > 0 {
+		firstContent, _ := content[0].(map[string]any)
+		text, _ := firstContent["text"].(string)
+		assert.Contains(t, text, "Invalid network")
+	}
+}
+
+// Test BridgeableChains list
+func TestBridgeableChainsList(t *testing.T) {
+	assert.NotEmpty(t, BridgeableChains)
+	assert.Contains(t, BridgeableChains, SupportedNetwork("ethereum"))
+	assert.Contains(t, BridgeableChains, SupportedNetwork("arbitrum"))
+	assert.Contains(t, BridgeableChains, SupportedNetwork("ink"))
+}
+
+// Test GaslessNetworks list
+func TestGaslessNetworksList(t *testing.T) {
+	assert.NotEmpty(t, GaslessNetworks)
+	assert.Contains(t, GaslessNetworks, SupportedNetwork("ethereum"))
+	assert.Contains(t, GaslessNetworks, SupportedNetwork("base"))
+}
+
+// Test formatBalanceResult with all token types
+func TestFormatBalanceResultWithUSDT(t *testing.T) {
+	result := NetworkBalance{
+		Network: "ethereum",
+		Native: BalanceInfo{
+			Token:   "ETH",
+			Balance: "1.0",
+			Raw:     "1000000000000000000",
+		},
+		Tokens: []BalanceInfo{
+			{Token: "USDT", Balance: "100", Raw: "100000000"},
+		},
+	}
+
+	text := formatBalanceResult(result)
+	assert.Contains(t, text, "USDT: 100")
+}
+
+// Test formatAllBalancesResult with USDT total
+func TestFormatAllBalancesResultWithUSDTTotal(t *testing.T) {
+	results := []NetworkBalance{
+		{
+			Network: "ethereum",
+			Native: BalanceInfo{
+				Token:   "ETH",
+				Balance: "1.0",
+				Raw:     "1000000000000000000",
+			},
+			Tokens: []BalanceInfo{
+				{Token: "USDT", Balance: "100", Raw: "100000000"},
+			},
+		},
+		{
+			Network: "arbitrum",
+			Native: BalanceInfo{
+				Token:   "ETH",
+				Balance: "0.5",
+				Raw:     "500000000000000000",
+			},
+			Tokens: []BalanceInfo{
+				{Token: "USDT", Balance: "200", Raw: "200000000"},
+			},
+		},
+	}
+
+	text := formatAllBalancesResult(results)
+	assert.Contains(t, text, "USDT: 300") // Total USDT
+}
+
+// Test GetRPCURL with nil config
+func TestGetRPCURLWithNilConfig(t *testing.T) {
+	url := GetRPCURL(nil, NetworkEthereum)
+	assert.Equal(t, "https://eth.llamarpc.com", url)
+
+	url = GetRPCURL(nil, NetworkBase)
+	assert.Equal(t, "https://mainnet.base.org", url)
+}
+
+// Test GetRPCURL with empty RPCURLs map
+func TestGetRPCURLWithEmptyRPCURLs(t *testing.T) {
+	config := &ServerConfig{
+		RPCURLs: nil,
+	}
+
+	url := GetRPCURL(config, NetworkEthereum)
+	assert.Equal(t, "https://eth.llamarpc.com", url)
+}
+
+// Test FormatTokenAmount edge cases
+func TestFormatTokenAmountEdgeCases(t *testing.T) {
+	tests := []struct {
+		name     string
+		amount   *big.Int
+		decimals int
+		want     string
+	}{
+		{"very large amount", new(big.Int).Exp(big.NewInt(10), big.NewInt(30), nil), 6, "1000000000000000000000000"},
+		{"tiny amount", big.NewInt(1), 18, "0.000000000000000001"},
+		{"zero decimals", big.NewInt(123), 0, "123"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := FormatTokenAmount(tt.amount, tt.decimals)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+// Test JSON-RPC error with data field
+func TestJSONRPCErrorWithData(t *testing.T) {
+	rpcErr := JSONRPCError{
+		Code:    -32000,
+		Message: "Server error",
+		Data:    "Additional details",
+	}
+
+	data, err := json.Marshal(rpcErr)
+	require.NoError(t, err)
+
+	var decoded JSONRPCError
+	err = json.Unmarshal(data, &decoded)
+	require.NoError(t, err)
+
+	assert.Equal(t, -32000, decoded.Code)
+	assert.Equal(t, "Server error", decoded.Message)
+	assert.Equal(t, "Additional details", decoded.Data)
+}
+
+// Test handleInitialize response structure
+func TestHandleInitializeResponseStructure(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+
+	inputData := `{"jsonrpc":"2.0","id":103,"method":"initialize"}` + "\n"
+
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close()
+	}()
+
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_ = server.Run(ctx)
+
+	var response JSONRPCResponse
+	err := json.Unmarshal(output.Bytes(), &response)
+	require.NoError(t, err)
+
+	result, ok := response.Result.(map[string]any)
+	require.True(t, ok)
+
+	// Verify protocol version
+	assert.Equal(t, "2024-11-05", result["protocolVersion"])
+
+	// Verify capabilities
+	capabilities, ok := result["capabilities"].(map[string]any)
+	require.True(t, ok)
+	_, hasTools := capabilities["tools"]
+	assert.True(t, hasTools)
+}
+
+// Test multiple networks in AllNetworks
+func TestAllNetworksCount(t *testing.T) {
+	networks := AllNetworks()
+	assert.Equal(t, 9, len(networks))
+}
+
+// Test tool definitions contain all required properties
+func TestToolDefinitionsComplete(t *testing.T) {
+	tools := GetToolDefinitions()
+
+	for _, tool := range tools {
+		t.Run(tool.Name, func(t *testing.T) {
+			// Each tool should have all required properties defined
+			for _, required := range tool.InputSchema.Required {
+				prop, exists := tool.InputSchema.Properties[required]
+				assert.True(t, exists, "Required property %s should exist", required)
+				assert.NotEmpty(t, prop.Type, "Property %s should have a type", required)
+				assert.NotEmpty(t, prop.Description, "Property %s should have a description", required)
+			}
+		})
+	}
+}
+
+// Test truncateHash edge cases
+func TestTruncateHashEdgeCases(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"", ""},
+		{"0x1234", "0x1234"},
+		{"0x123456", "0x123456"},
+		{"0x1234567890", "0x1234567890"},
+		{"0x12345678901234567890", "0x123456...567890"},
+		{"0x1234567890123456789012345678901234567890123456789012345678901234", "0x123456...901234"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			result := truncateHash(tt.input)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
