@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { useChainContext } from "@/providers/ChainProvider";
 import { useDemoContext } from "@/providers/DemoProvider";
 import { useToast } from "@/providers/ToastProvider";
+import { useWalletReady } from "@/providers/ClientProviders";
 import { useTonPayment } from "@/hooks/useTonPayment";
 import { useSolanaPayment } from "@/hooks/useSolanaPayment";
 import { useTronPayment } from "@/hooks/useTronPayment";
@@ -25,15 +25,11 @@ function WalletButtonSkeleton() {
 }
 
 export function WalletButton() {
-  const [mounted, setMounted] = useState(false);
+  const walletReady = useWalletReady();
   const { activeFamily } = useChainContext();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // During SSR and initial hydration, show skeleton
-  if (!mounted) {
+  // During SSR and before wallet providers are ready, show skeleton
+  if (!walletReady) {
     return <WalletButtonSkeleton />;
   }
 
