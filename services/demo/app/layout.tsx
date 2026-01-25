@@ -28,13 +28,11 @@ export const metadata: Metadata = {
     description: "Pay for web resources with USDT — no API keys, no subscriptions. Request → 402 → Sign → Settle → Access.",
     siteName: "T402",
     type: "website",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
     title: "T402 Demo — HTTP 402 Payments",
     description: "Pay for web resources with USDT — no API keys, no subscriptions.",
-    images: ["/og-image.png"],
   },
 };
 
