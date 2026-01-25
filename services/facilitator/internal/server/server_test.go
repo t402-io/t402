@@ -4,11 +4,46 @@ import (
 	"context"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	t402 "github.com/t402-io/t402/sdks/go"
+	"github.com/t402-io/t402/services/facilitator/internal/auth"
 	"github.com/t402-io/t402/services/facilitator/internal/config"
+	"github.com/t402-io/t402/services/facilitator/internal/health"
+	"github.com/t402-io/t402/services/facilitator/internal/ratelimit"
 )
 
-func TestNew(t *testing.T) {
+// createTestServer creates a server for testing without calling metrics.New()
+// to avoid duplicate prometheus registration
+func createTestServer(f Facilitator, cfg *config.Config) *Server {
+	if cfg == nil {
+		cfg = &config.Config{
+			Port:              8080,
+			Environment:       "test",
+			RateLimitRequests: 100,
+			RateLimitWindow:   60,
+		}
+	}
+
+	limiter := ratelimit.NewRedisLimiter(nil, cfg.RateLimitRequests, cfg.RateLimitWindow)
+	healthChecker := health.NewChecker(nil, Version)
+	authManager := auth.NewManager(nil)
+
+	if cfg.APIKeys != "" {
+		authManager.LoadFromEnv(cfg.APIKeys)
+	}
+
+	return &Server{
+		router:      gin.New(),
+		facilitator: f,
+		config:      cfg,
+		metrics:     getTestMetrics(), // Use shared metrics
+		limiter:     limiter,
+		health:      healthChecker,
+		authManager: authManager,
+	}
+}
+
+func TestCreateTestServer(t *testing.T) {
 	mock := &MockFacilitator{
 		VerifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error) {
 			return &t402.VerifyResponse{IsValid: true}, nil
@@ -29,7 +64,7 @@ func TestNew(t *testing.T) {
 		APIKeys:           "",
 	}
 
-	server := New(mock, nil, cfg)
+	server := createTestServer(mock, cfg)
 
 	if server == nil {
 		t.Fatal("expected non-nil server")
@@ -57,7 +92,7 @@ func TestNew(t *testing.T) {
 	}
 }
 
-func TestNew_WithAPIKeys(t *testing.T) {
+func TestCreateTestServer_WithAPIKeys(t *testing.T) {
 	mock := &MockFacilitator{
 		VerifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error) {
 			return &t402.VerifyResponse{IsValid: true}, nil
@@ -78,7 +113,7 @@ func TestNew_WithAPIKeys(t *testing.T) {
 		APIKeys:           "key1:app1,key2:app2",
 	}
 
-	server := New(mock, nil, cfg)
+	server := createTestServer(mock, cfg)
 
 	if server == nil {
 		t.Fatal("expected non-nil server")
@@ -93,7 +128,7 @@ func TestNew_WithAPIKeys(t *testing.T) {
 	}
 }
 
-func TestNew_ProductionMode(t *testing.T) {
+func TestCreateTestServer_DefaultConfig(t *testing.T) {
 	mock := &MockFacilitator{
 		VerifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error) {
 			return &t402.VerifyResponse{IsValid: true}, nil
@@ -106,17 +141,14 @@ func TestNew_ProductionMode(t *testing.T) {
 		},
 	}
 
-	cfg := &config.Config{
-		Port:              8080,
-		Environment:       "production",
-		RateLimitRequests: 100,
-		RateLimitWindow:   60,
-	}
-
-	server := New(mock, nil, cfg)
+	// Use nil config to get defaults
+	server := createTestServer(mock, nil)
 
 	if server == nil {
 		t.Fatal("expected non-nil server")
+	}
+	if server.config.Port != 8080 {
+		t.Errorf("expected default port=8080, got %d", server.config.Port)
 	}
 }
 
@@ -157,7 +189,7 @@ func TestServerFields(t *testing.T) {
 		CORSAllowedOrigins: "https://example.com",
 	}
 
-	server := New(mock, nil, cfg)
+	server := createTestServer(mock, cfg)
 
 	// Verify config is properly assigned
 	if server.config.Port != 8080 {
@@ -168,5 +200,35 @@ func TestServerFields(t *testing.T) {
 	}
 	if server.config.APIKeyRequired != true {
 		t.Error("expected APIKeyRequired=true")
+	}
+}
+
+func TestServerStruct(t *testing.T) {
+	// Test that Server struct has all required fields
+	s := &Server{}
+
+	if s.router != nil {
+		t.Error("expected nil router by default")
+	}
+	if s.httpServer != nil {
+		t.Error("expected nil httpServer by default")
+	}
+	if s.facilitator != nil {
+		t.Error("expected nil facilitator by default")
+	}
+	if s.config != nil {
+		t.Error("expected nil config by default")
+	}
+	if s.metrics != nil {
+		t.Error("expected nil metrics by default")
+	}
+	if s.limiter != nil {
+		t.Error("expected nil limiter by default")
+	}
+	if s.health != nil {
+		t.Error("expected nil health by default")
+	}
+	if s.authManager != nil {
+		t.Error("expected nil authManager by default")
 	}
 }
