@@ -3,6 +3,7 @@ import { getPreferredChain, getAcceptsForChain, getNetwork, getAsset, PAY_TO } f
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 
+
 const IOT_AMOUNT = "100"; // 0.0001 USDT per reading
 
 function createPaymentRequired(type: string, request: NextRequest) {

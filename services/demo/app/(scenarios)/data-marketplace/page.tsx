@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { ScenarioShell } from "@/components/shared/ScenarioShell";
 import { DataMarketplace } from "@/components/scenarios/DataMarketplace";
 
+// Force dynamic rendering to avoid SSR issues with wallet SDKs
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Data Marketplace | T402 Demo",
   description: "Pay-per-request market data with USDT micropayments. No monthly minimums, no API keys — instant on-chain settlement.",

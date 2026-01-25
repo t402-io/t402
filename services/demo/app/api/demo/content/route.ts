@@ -3,6 +3,7 @@ import { getPreferredChain, getAcceptsForChain, getNetwork, getAsset, PAY_TO } f
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 
+
 const CONTENT_AMOUNT = "10000"; // 0.01 USDT per article
 
 const RESOURCE = {

@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { ScenarioShell } from "@/components/shared/ScenarioShell";
 import { CrossChainBridge } from "@/components/scenarios/CrossChainBridge";
 
+// Force dynamic rendering to avoid SSR issues with wallet SDKs
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Cross-Chain Bridge | T402 Demo",
   description: "Pay on one chain, settle on another. LayerZero USDT0 enables seamless cross-chain HTTP 402 payments.",

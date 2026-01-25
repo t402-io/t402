@@ -5,6 +5,7 @@ import { createMockSettleResponse } from "@/lib/mock-responses";
 import { getBtcPrice } from "@/lib/price-service";
 import { generateMarketAnalysis } from "@/lib/content-generator";
 
+
 const RESOURCE = {
   url: "/api/demo/premium-report",
   description: "Premium market research report",

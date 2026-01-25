@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { FACILITATOR_URL, getNetwork, getAsset, PAY_TO } from "@/lib/config";
 
+
 export async function GET() {
   let facilitatorOnline = false;
   let supportedCount = 0;
