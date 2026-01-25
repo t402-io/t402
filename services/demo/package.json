@@ -5,9 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --port 3001",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "cf:build": "npx opennextjs-cloudflare build",
+    "cf:dev": "npx wrangler pages dev",
+    "cf:deploy": "npx wrangler pages deploy"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
@@ -47,13 +50,15 @@
     "zustand": "^5.0.0"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.0.0",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^22.13.4",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.0.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "wrangler": "^4.0.0"
   },
   "packageManager": "pnpm@10.0.0"
 }

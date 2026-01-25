@@ -3,6 +3,7 @@ import { getPreferredChain, getAcceptsForChain, getNetwork, getAsset, PAY_TO, DE
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 
+
 const RESOURCE = {
   url: "/api/demo/a2a-task",
   description: "Agent-to-agent task execution — pay per task with USDT",

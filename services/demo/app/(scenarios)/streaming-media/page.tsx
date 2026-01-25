@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { ScenarioShell } from "@/components/shared/ScenarioShell";
 import { StreamingMedia } from "@/components/scenarios/StreamingMedia";
 
+// Force dynamic rendering to avoid SSR issues with wallet SDKs
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Streaming Media | T402 Demo",
   description: "Pay-per-second audio streaming with USDT. No subscriptions — listen and pay as you go via HTTP 402.",

@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { ScenarioShell } from "@/components/shared/ScenarioShell";
 import { GaslessPayment } from "@/components/scenarios/GaslessPayment";
 
+// Force dynamic rendering to avoid SSR issues with wallet SDKs
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Gasless Payment | T402 Demo",
   description: "No ETH needed. ERC-4337 account abstraction handles gas — users only pay USDT via HTTP 402.",

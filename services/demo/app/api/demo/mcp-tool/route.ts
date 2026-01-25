@@ -3,6 +3,7 @@ import { getPreferredChain, getAcceptsForChain, getNetwork, getAsset, PAY_TO, DE
 import { verifyPayment, settlePayment } from "@/lib/t402-server";
 import { mockMcpToolResult, createMockSettleResponse } from "@/lib/mock-responses";
 
+
 export async function POST(request: NextRequest) {
   const isDemoMode = request.headers.get("x-demo-mode") === "true";
   const body = await request.json();

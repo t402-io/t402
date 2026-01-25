@@ -3,6 +3,7 @@ import { getPreferredChain, getAcceptsForChain, getNetwork, getAsset, PAY_TO } f
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 
+
 const GASLESS_AMOUNT = "1000"; // 0.001 USDT
 
 // ERC-4337 infrastructure configuration from environment

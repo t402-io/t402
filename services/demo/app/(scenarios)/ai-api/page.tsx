@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { ScenarioShell } from "@/components/shared/ScenarioShell";
 import { AiApiScenario } from "@/components/scenarios/AiApiScenario";
 
+// Force dynamic rendering to avoid SSR issues with wallet SDKs
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "AI API Monetization | T402 Demo",
   description: "Pay-per-query AI API with USDT micropayments. No API keys, no subscriptions — just HTTP 402 and instant on-chain settlement.",

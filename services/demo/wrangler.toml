@@ -1,0 +1,21 @@
+# Cloudflare Pages configuration for demo.t402.io
+# https://opennext.js.org/cloudflare
+
+name = "t402-demo"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# OpenNext build output directory for Pages
+pages_build_output_dir = ".open-next"
+
+# Environment variables
+[vars]
+NEXT_PUBLIC_FACILITATOR_URL = "https://facilitator.t402.io"
+
+# Production environment
+[env.production.vars]
+NEXT_PUBLIC_FACILITATOR_URL = "https://facilitator.t402.io"
+
+# Preview environment
+[env.preview.vars]
+NEXT_PUBLIC_FACILITATOR_URL = "https://facilitator.t402.io"

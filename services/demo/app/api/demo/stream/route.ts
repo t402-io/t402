@@ -3,6 +3,7 @@ import { getPreferredChain, getAcceptsForChain, getNetwork, getAsset, PAY_TO } f
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 
+
 const STREAM_MAX_AMOUNT = "10000"; // 0.01 USDT max (upto scheme)
 
 function createPaymentRequired(request: NextRequest) {

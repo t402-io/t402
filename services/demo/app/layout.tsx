@@ -1,16 +1,10 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
-import { ChainProvider } from "./providers/ChainProvider";
-import { DemoProvider } from "./providers/DemoProvider";
-import { ToastProvider } from "./providers/ToastProvider";
-import { WagmiProviderWrapper } from "./providers/WagmiProvider";
-import { TonConnectProvider } from "./providers/TonConnectProvider";
-import { SolanaProvider } from "./providers/SolanaProvider";
-import { NearProvider } from "./providers/NearProvider";
-import { AptosProvider } from "./providers/AptosProvider";
-import { TezosProvider } from "./providers/TezosProvider";
-import { PolkadotProvider } from "./providers/PolkadotProvider";
+import { ClientProviders } from "./providers/ClientProviders";
 import "./globals.css";
+
+// Force dynamic rendering for all pages - wallet SDKs require browser-only APIs
+export const dynamic = "force-dynamic";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -25,6 +19,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://demo.t402.io"),
   title: "T402 Demo — HTTP 402 Payments with USDT",
   description:
     "Interactive demo of the T402 payment protocol. Experience HTTP 402 flows with USDT/USDT0 — from AI API monetization to content paywalls.",
@@ -33,11 +28,13 @@ export const metadata: Metadata = {
     description: "Pay for web resources with USDT — no API keys, no subscriptions. Request → 402 → Sign → Settle → Access.",
     siteName: "T402",
     type: "website",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
     title: "T402 Demo — HTTP 402 Payments",
     description: "Pay for web resources with USDT — no API keys, no subscriptions.",
+    images: ["/og-image.png"],
   },
 };
 
@@ -49,27 +46,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body className="bg-[var(--color-background)] text-[var(--color-foreground)] antialiased">
-        <ChainProvider>
-          <DemoProvider>
-            <ToastProvider>
-              <WagmiProviderWrapper>
-                <TonConnectProvider>
-                  <SolanaProvider>
-                    <NearProvider>
-                      <AptosProvider>
-                        <TezosProvider>
-                          <PolkadotProvider>
-                            {children}
-                          </PolkadotProvider>
-                        </TezosProvider>
-                      </AptosProvider>
-                    </NearProvider>
-                  </SolanaProvider>
-                </TonConnectProvider>
-              </WagmiProviderWrapper>
-            </ToastProvider>
-          </DemoProvider>
-        </ChainProvider>
+        <ClientProviders>
+          {children}
+        </ClientProviders>
       </body>
     </html>
   );
