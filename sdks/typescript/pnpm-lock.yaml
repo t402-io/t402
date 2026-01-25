@@ -640,6 +640,9 @@ importers:
       '@t402/core':
         specifier: workspace:*
         version: link:../../core
+      '@t402/stacks':
+        specifier: workspace:*
+        version: link:../../mechanisms/stacks
       '@tanstack/react-query':
         specifier: ^5.90.7
         version: 5.90.11(react@19.2.1)
