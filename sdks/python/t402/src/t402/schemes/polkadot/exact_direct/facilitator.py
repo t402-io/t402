@@ -32,7 +32,6 @@ from t402.schemes.polkadot.types import (
     FacilitatorPolkadotSigner,
     ExactDirectPayload,
     ExtrinsicResult,
-    is_valid_ss58_address,
     is_valid_hash,
     extract_asset_transfer,
     parse_asset_identifier,

@@ -244,7 +244,7 @@ class ExactDirectNearServerScheme:
                     return Decimal(parts[0])
                 except Exception:
                     raise ValueError(f"Failed to parse price string: {price!r}")
-            raise ValueError(f"Empty price string after cleanup")
+            raise ValueError("Empty price string after cleanup")
         elif isinstance(price, (int, float)):
             return Decimal(str(price))
         else:

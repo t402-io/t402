@@ -6,7 +6,7 @@ addresses, and network configurations used by the exact-direct payment scheme.
 
 from __future__ import annotations
 
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional
 
 # Scheme identifier
 SCHEME_EXACT_DIRECT = "exact-direct"

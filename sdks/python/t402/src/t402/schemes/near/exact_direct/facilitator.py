@@ -16,7 +16,7 @@ from __future__ import annotations
 import logging
 import threading
 import time
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any, Dict, List, Optional, Union
 
 from t402.types import (
     PaymentRequirementsV2,
@@ -29,7 +29,6 @@ from t402.schemes.near.constants import (
     SCHEME_EXACT_DIRECT,
     CAIP_FAMILY,
     get_network_config,
-    is_valid_network,
 )
 from t402.schemes.near.types import (
     FacilitatorNearSigner,

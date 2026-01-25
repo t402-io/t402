@@ -25,16 +25,11 @@ from t402.types import (
 )
 from t402.ton import (
     SCHEME_EXACT,
-    TON_MAINNET,
-    TON_TESTNET,
     MIN_VALIDITY_BUFFER,
-    validate_ton_address,
     validate_boc,
     addresses_equal,
     is_valid_network,
     get_network_config,
-    TonPaymentPayload,
-    TonAuthorization,
     TonVerifyMessageResult,
     TonTransactionConfirmation,
 )
