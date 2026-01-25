@@ -58,6 +58,7 @@ const footerLinks = {
       external: true,
     },
     { label: "Blog", href: "/writing" },
+    { label: "FAQ", href: "/faq" },
     { label: "Brand", href: "/brand" },
   ],
   chains: [
