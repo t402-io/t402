@@ -1,104 +1,116 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useState, useEffect, createContext, useContext, useCallback } from "react";
+import { useState, useEffect, Suspense, createContext, useContext } from "react";
+import dynamic from "next/dynamic";
 import { ChainProvider } from "./ChainProvider";
 import { DemoProvider } from "./DemoProvider";
 import { ToastProvider } from "./ToastProvider";
 
-// Context to track if we're on the client and wallet providers are ready
+// Context to track if wallet providers are mounted
 const WalletReadyContext = createContext(false);
 export function useWalletReady() {
   return useContext(WalletReadyContext);
 }
 
-// Lazy-load wallet providers only when mounted
-function WalletProviders({ children, onReady }: { children: ReactNode; onReady: () => void }) {
-  const [providers, setProviders] = useState<{
-    Wagmi: React.ComponentType<{ children: ReactNode }> | null;
-    Ton: React.ComponentType<{ children: ReactNode }> | null;
-    Solana: React.ComponentType<{ children: ReactNode }> | null;
-    Near: React.ComponentType<{ children: ReactNode }> | null;
-    Aptos: React.ComponentType<{ children: ReactNode }> | null;
-    Tezos: React.ComponentType<{ children: ReactNode }> | null;
-    Polkadot: React.ComponentType<{ children: ReactNode }> | null;
-  }>({
-    Wagmi: null,
-    Ton: null,
-    Solana: null,
-    Near: null,
-    Aptos: null,
-    Tezos: null,
-    Polkadot: null,
-  });
+// Fallback component for loading states
+function ProviderFallback({ children }: { children: ReactNode }) {
+  return <>{children}</>;
+}
 
-  useEffect(() => {
-    Promise.all([
-      import("./WagmiProvider").then((m) => m.WagmiProviderWrapper),
-      import("./TonConnectProvider").then((m) => m.TonConnectProvider),
-      import("./SolanaProvider").then((m) => m.SolanaProvider),
-      import("./NearProvider").then((m) => m.NearProvider),
-      import("./AptosProvider").then((m) => m.AptosProvider),
-      import("./TezosProvider").then((m) => m.TezosProvider),
-      import("./PolkadotProvider").then((m) => m.PolkadotProvider),
-    ])
-      .then(([Wagmi, Ton, Solana, Near, Aptos, Tezos, Polkadot]) => {
-        setProviders({ Wagmi, Ton, Solana, Near, Aptos, Tezos, Polkadot });
-        onReady();
-      })
-      .catch(console.error);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+// Dynamic import wallet providers with ssr: false and loading fallbacks
+const WagmiProviderWrapper = dynamic(
+  () => import("./WagmiProvider").then((mod) => mod.WagmiProviderWrapper),
+  { ssr: false, loading: () => null }
+);
 
-  const { Wagmi, Ton, Solana, Near, Aptos, Tezos, Polkadot } = providers;
+const TonConnectProvider = dynamic(
+  () => import("./TonConnectProvider").then((mod) => mod.TonConnectProvider),
+  { ssr: false, loading: () => null }
+);
 
-  // Before providers are loaded, just render children
-  if (!Wagmi || !Ton || !Solana || !Near || !Aptos || !Tezos || !Polkadot) {
-    return <>{children}</>;
-  }
+const SolanaProvider = dynamic(
+  () => import("./SolanaProvider").then((mod) => mod.SolanaProvider),
+  { ssr: false, loading: () => null }
+);
 
-  // After providers are loaded, wrap children with all providers
+const NearProvider = dynamic(
+  () => import("./NearProvider").then((mod) => mod.NearProvider),
+  { ssr: false, loading: () => null }
+);
+
+const AptosProvider = dynamic(
+  () => import("./AptosProvider").then((mod) => mod.AptosProvider),
+  { ssr: false, loading: () => null }
+);
+
+const TezosProvider = dynamic(
+  () => import("./TezosProvider").then((mod) => mod.TezosProvider),
+  { ssr: false, loading: () => null }
+);
+
+const PolkadotProvider = dynamic(
+  () => import("./PolkadotProvider").then((mod) => mod.PolkadotProvider),
+  { ssr: false, loading: () => null }
+);
+
+// Wrapper that handles the wallet providers with error resilience
+function WalletProviders({ children }: { children: ReactNode }) {
   return (
-    <Wagmi>
-      <Ton>
-        <Solana>
-          <Near>
-            <Aptos>
-              <Tezos>
-                <Polkadot>{children}</Polkadot>
-              </Tezos>
-            </Aptos>
-          </Near>
-        </Solana>
-      </Ton>
-    </Wagmi>
+    <WagmiProviderWrapper>
+      <TonConnectProvider>
+        <SolanaProvider>
+          <NearProvider>
+            <AptosProvider>
+              <TezosProvider>
+                <PolkadotProvider>
+                  {children}
+                </PolkadotProvider>
+              </TezosProvider>
+            </AptosProvider>
+          </NearProvider>
+        </SolanaProvider>
+      </TonConnectProvider>
+    </WagmiProviderWrapper>
   );
 }
 
 export function ClientProviders({ children }: { children: ReactNode }) {
-  const [walletReady, setWalletReady] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const handleWalletReady = useCallback(() => {
-    setWalletReady(true);
-  }, []);
-
-  return (
-    <WalletReadyContext.Provider value={walletReady}>
+  // Core providers that work on both server and client
+  const coreProviders = (
+    <WalletReadyContext.Provider value={false}>
       <ChainProvider>
         <DemoProvider>
           <ToastProvider>
-            {mounted ? (
-              <WalletProviders onReady={handleWalletReady}>
+            {children}
+          </ToastProvider>
+        </DemoProvider>
+      </ChainProvider>
+    </WalletReadyContext.Provider>
+  );
+
+  // During SSR, render with core providers only
+  if (!mounted) {
+    return coreProviders;
+  }
+
+  // After mount, wrap with wallet providers
+  return (
+    <WalletReadyContext.Provider value={true}>
+      <ChainProvider>
+        <DemoProvider>
+          <ToastProvider>
+            <Suspense fallback={children}>
+              <WalletProviders>
                 {children}
               </WalletProviders>
-            ) : (
-              children
-            )}
+            </Suspense>
           </ToastProvider>
         </DemoProvider>
       </ChainProvider>
