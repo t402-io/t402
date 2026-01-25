@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPreferredChain, getAcceptsForChain, getNetwork, getAsset, PAY_TO, DEMO_AMOUNT } from "@/lib/config";
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment } from "@/lib/t402-server";
-import { mockPremiumReport, createMockSettleResponse } from "@/lib/mock-responses";
+import { createMockSettleResponse } from "@/lib/mock-responses";
+import { getBtcPrice } from "@/lib/price-service";
+import { generateMarketAnalysis } from "@/lib/content-generator";
 
 const RESOURCE = {
   url: "/api/demo/premium-report",
@@ -41,7 +43,12 @@ export async function GET(request: NextRequest) {
     await new Promise((r) => setTimeout(r, 800));
     const chain = getPreferredChain(request);
     const settleResponse = createMockSettleResponse(chain);
-    const response = NextResponse.json(mockPremiumReport);
+
+    // Generate dynamic report based on real price data
+    const priceData = await getBtcPrice();
+    const premiumReport = generateMarketAnalysis(priceData);
+
+    const response = NextResponse.json(premiumReport);
     response.headers.set("Payment-Response", encodeHeader(settleResponse));
     response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
     return response;
@@ -57,7 +64,12 @@ export async function GET(request: NextRequest) {
     }
 
     const settleResult = await settlePayment(paymentPayload, requirements);
-    const response = NextResponse.json(mockPremiumReport);
+
+    // Generate dynamic report based on real price data
+    const priceData = await getBtcPrice();
+    const premiumReport = generateMarketAnalysis(priceData);
+
+    const response = NextResponse.json(premiumReport);
     response.headers.set("Payment-Response", encodeHeader(settleResult));
     response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
     return response;
