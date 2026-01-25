@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPreferredChain, getAcceptsForChain } from "@/lib/config";
-import { encodeHeader } from "@/lib/t402-server";
+import { getPreferredChain, getAcceptsForChain, getNetwork, getAsset, PAY_TO } from "@/lib/config";
+import { encodeHeader, decodeHeader, verifyPayment, settlePayment } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 
 const STREAM_MAX_AMOUNT = "10000"; // 0.01 USDT max (upto scheme)
@@ -52,5 +52,43 @@ export async function GET(request: NextRequest) {
     return response;
   }
 
-  return NextResponse.json(responseData);
+  // Live mode: verify and settle with facilitator
+  const paymentPayload = decodeHeader(paymentHeader);
+  const requirements = {
+    scheme: "upto",
+    network: getNetwork(),
+    amount: STREAM_MAX_AMOUNT,
+    asset: getAsset(),
+    payTo: PAY_TO,
+    maxTimeoutSeconds: 60,
+    extra: { name: "USDT", version: "2" },
+  };
+
+  try {
+    const verifyResult = await verifyPayment(paymentPayload, requirements);
+    if (!verifyResult.isValid) {
+      return NextResponse.json(
+        { error: "Payment verification failed", reason: verifyResult.invalidReason },
+        { status: 402 }
+      );
+    }
+
+    const settleResult = await settlePayment(paymentPayload, requirements);
+    if (!settleResult.success) {
+      return NextResponse.json(
+        { error: "Settlement failed", reason: settleResult.errorReason },
+        { status: 500 }
+      );
+    }
+
+    const response = NextResponse.json(responseData);
+    response.headers.set("Payment-Response", encodeHeader(settleResult));
+    response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
+    return response;
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Facilitator error", message: String(error) },
+      { status: 502 }
+    );
+  }
 }
