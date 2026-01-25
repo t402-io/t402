@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPreferredChain, getAcceptsForChain, getNetwork, getAsset, PAY_TO, DEMO_AMOUNT } from "@/lib/config";
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment } from "@/lib/t402-server";
-import { mockMarketData, createMockSettleResponse } from "@/lib/mock-responses";
+import { createMockSettleResponse } from "@/lib/mock-responses";
+import { getBtcPrice } from "@/lib/price-service";
+import { generateMarketDisplayData } from "@/lib/content-generator";
 
 const RESOURCE = {
   url: "/api/demo/market-data",
@@ -41,11 +43,16 @@ export async function GET(request: NextRequest) {
   };
 
   if (isDemoMode) {
-    // Demo mode: simulate verify + settle
+    // Demo mode: simulate verify + settle, but use real prices
     await new Promise((r) => setTimeout(r, 800));
     const chain = getPreferredChain(request);
     const settleResponse = createMockSettleResponse(chain);
-    const response = NextResponse.json(mockMarketData);
+
+    // Fetch real price data from CoinGecko
+    const priceData = await getBtcPrice();
+    const marketData = { data: generateMarketDisplayData(priceData) };
+
+    const response = NextResponse.json(marketData);
     response.headers.set("Payment-Response", encodeHeader(settleResponse));
     response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
     return response;
@@ -69,7 +76,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const response = NextResponse.json(mockMarketData);
+    // Fetch real price data from CoinGecko
+    const priceData = await getBtcPrice();
+    const marketData = { data: generateMarketDisplayData(priceData) };
+
+    const response = NextResponse.json(marketData);
     response.headers.set("Payment-Response", encodeHeader(settleResult));
     response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
     return response;
