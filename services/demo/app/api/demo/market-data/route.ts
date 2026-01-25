@@ -5,6 +5,7 @@ import { createMockSettleResponse } from "@/lib/mock-responses";
 import { getBtcPrice } from "@/lib/price-service";
 import { generateMarketDisplayData } from "@/lib/content-generator";
 
+
 const RESOURCE = {
   url: "/api/demo/market-data",
   description: "Premium real-time market data feed",

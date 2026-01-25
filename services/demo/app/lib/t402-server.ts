@@ -41,15 +41,30 @@ export async function getFacilitatorSupported() {
 }
 
 /**
- * Base64 encode a JSON object for protocol headers.
+ * Base64url encode a JSON object for protocol headers.
+ * Uses Web APIs (compatible with Edge runtime).
  */
 export function encodeHeader(data: unknown): string {
-  return Buffer.from(JSON.stringify(data)).toString("base64url");
+  const json = JSON.stringify(data);
+  const bytes = new TextEncoder().encode(json);
+  const base64 = btoa(String.fromCharCode(...bytes));
+  // Convert base64 to base64url
+  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
 /**
  * Decode a base64url-encoded protocol header.
+ * Uses Web APIs (compatible with Edge runtime).
  */
 export function decodeHeader(header: string): unknown {
-  return JSON.parse(Buffer.from(header, "base64url").toString("utf-8"));
+  // Convert base64url to base64
+  let base64 = header.replace(/-/g, "+").replace(/_/g, "/");
+  // Add padding if needed
+  while (base64.length % 4) {
+    base64 += "=";
+  }
+  const decoded = atob(base64);
+  const bytes = Uint8Array.from(decoded, (c) => c.charCodeAt(0));
+  const json = new TextDecoder().decode(bytes);
+  return JSON.parse(json);
 }

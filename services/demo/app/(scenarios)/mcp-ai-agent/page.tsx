@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { ScenarioShell } from "@/components/shared/ScenarioShell";
 import { McpAiAgent } from "@/components/scenarios/McpAiAgent";
 
+// Force dynamic rendering to avoid SSR issues with wallet SDKs
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "MCP AI Agent | T402 Demo",
   description: "AI agent autonomously pays for tools via Model Context Protocol. HTTP 402 enables machine-to-machine USDT payments.",
