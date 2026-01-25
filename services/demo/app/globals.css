@@ -35,6 +35,14 @@
   --color-chain-solana-dim: #9945FF20;
   --color-chain-stacks: #5546FF;
   --color-chain-stacks-dim: #5546FF20;
+  --color-chain-near: #00C08B;
+  --color-chain-near-dim: #00C08B20;
+  --color-chain-aptos: #2DD4BF;
+  --color-chain-aptos-dim: #2DD4BF20;
+  --color-chain-tezos: #2C7DF7;
+  --color-chain-tezos-dim: #2C7DF720;
+  --color-chain-polkadot: #E6007A;
+  --color-chain-polkadot-dim: #E6007A20;
 
   /* Scenario accent colors */
   --color-scenario-ai: #8B5CF6;

@@ -35,6 +35,37 @@ const CHAIN_SVGS: Record<ChainFamily, (size: number) => React.ReactNode> = {
       <path d="M4 17L12 22L20 17" stroke="#5546FF" strokeWidth="2" strokeLinecap="round" />
     </svg>
   ),
+  near: (size) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="10" fill="#00C08B" />
+      <path d="M8 16V8L12 12L16 8V16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  aptos: (size) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="10" fill="#2DD4BF" />
+      <path d="M8 12H16M12 8V16" stroke="white" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="12" cy="12" r="4" stroke="white" strokeWidth="2" fill="none" />
+    </svg>
+  ),
+  tezos: (size) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M12 2L4 7V17L12 22L20 17V7L12 2Z" fill="#2C7DF7" />
+      <path d="M12 6V18M8 9L16 15M16 9L8 15" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  ),
+  polkadot: (size) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="10" fill="#E6007A" />
+      <circle cx="12" cy="6" r="2" fill="white" />
+      <circle cx="12" cy="12" r="2" fill="white" />
+      <circle cx="12" cy="18" r="2" fill="white" />
+      <circle cx="7" cy="9" r="1.5" fill="white" opacity="0.7" />
+      <circle cx="17" cy="9" r="1.5" fill="white" opacity="0.7" />
+      <circle cx="7" cy="15" r="1.5" fill="white" opacity="0.7" />
+      <circle cx="17" cy="15" r="1.5" fill="white" opacity="0.7" />
+    </svg>
+  ),
 };
 
 interface ChainLogoProps {

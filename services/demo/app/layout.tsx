@@ -6,6 +6,10 @@ import { ToastProvider } from "./providers/ToastProvider";
 import { WagmiProviderWrapper } from "./providers/WagmiProvider";
 import { TonConnectProvider } from "./providers/TonConnectProvider";
 import { SolanaProvider } from "./providers/SolanaProvider";
+import { NearProvider } from "./providers/NearProvider";
+import { AptosProvider } from "./providers/AptosProvider";
+import { TezosProvider } from "./providers/TezosProvider";
+import { PolkadotProvider } from "./providers/PolkadotProvider";
 import "./globals.css";
 
 const inter = Inter({
@@ -51,7 +55,15 @@ export default function RootLayout({
               <WagmiProviderWrapper>
                 <TonConnectProvider>
                   <SolanaProvider>
-                    {children}
+                    <NearProvider>
+                      <AptosProvider>
+                        <TezosProvider>
+                          <PolkadotProvider>
+                            {children}
+                          </PolkadotProvider>
+                        </TezosProvider>
+                      </AptosProvider>
+                    </NearProvider>
                   </SolanaProvider>
                 </TonConnectProvider>
               </WagmiProviderWrapper>

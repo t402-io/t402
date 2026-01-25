@@ -8,6 +8,10 @@ import { useTonPayment } from "./useTonPayment";
 import { useSolanaPayment } from "./useSolanaPayment";
 import { useTronPayment } from "./useTronPayment";
 import { useStacksPayment } from "./useStacksPayment";
+import { useNearPayment } from "./useNearPayment";
+import { useAptosPayment } from "./useAptosPayment";
+import { useTezosPayment } from "./useTezosPayment";
+import { usePolkadotPayment } from "./usePolkadotPayment";
 import type { ChainFamily } from "@/lib/testnet-config";
 
 interface PaymentRequirements {
@@ -28,15 +32,30 @@ interface PaymentPayload {
 }
 
 function createMockPayload(requirements: PaymentRequirements, family: ChainFamily): PaymentPayload {
-  const mockAddress = family === "evm"
-    ? "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD68"
-    : family === "ton"
-    ? "EQAbcdef1234567890abcdef1234567890abcdef12345"
-    : family === "tron"
-    ? "TAbcdefghijk1234567890abcdefghijk"
-    : family === "solana"
-    ? "7nYBs9EwPjhpBZNPDnqWrRcU9d1Q9jK5xN3xH8r4gVMp"
-    : "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM";
+  const mockAddress = (() => {
+    switch (family) {
+      case "evm":
+        return "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD68";
+      case "ton":
+        return "EQAbcdef1234567890abcdef1234567890abcdef12345";
+      case "tron":
+        return "TAbcdefghijk1234567890abcdefghijk";
+      case "solana":
+        return "7nYBs9EwPjhpBZNPDnqWrRcU9d1Q9jK5xN3xH8r4gVMp";
+      case "stacks":
+        return "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM";
+      case "near":
+        return "demo-user.testnet";
+      case "aptos":
+        return "0x742d35cc6634c0532925a3b844bc9e7595f2bd68742d35cc6634c0532925a3b8";
+      case "tezos":
+        return "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb";
+      case "polkadot":
+        return "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY";
+      default:
+        return "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD68";
+    }
+  })();
 
   return {
     t402Version: 2,
@@ -64,22 +83,40 @@ export function useMultiChainPayment() {
   const solana = useSolanaPayment();
   const tron = useTronPayment();
   const stacks = useStacksPayment();
+  const near = useNearPayment();
+  const aptos = useAptosPayment();
+  const tezos = useTezosPayment();
+  const polkadot = usePolkadotPayment();
 
-  const isConnected =
-    activeFamily === "evm" ? evm.isConnected :
-    activeFamily === "ton" ? ton.isConnected :
-    activeFamily === "solana" ? solana.isConnected :
-    activeFamily === "tron" ? tron.isConnected :
-    activeFamily === "stacks" ? stacks.isConnected :
-    false;
+  const isConnected = (() => {
+    switch (activeFamily) {
+      case "evm": return evm.isConnected;
+      case "ton": return ton.isConnected;
+      case "solana": return solana.isConnected;
+      case "tron": return tron.isConnected;
+      case "stacks": return stacks.isConnected;
+      case "near": return near.isConnected;
+      case "aptos": return aptos.isConnected;
+      case "tezos": return tezos.isConnected;
+      case "polkadot": return polkadot.isConnected;
+      default: return false;
+    }
+  })();
 
-  const address =
-    activeFamily === "evm" ? evm.address :
-    activeFamily === "ton" ? ton.address :
-    activeFamily === "solana" ? solana.address :
-    activeFamily === "tron" ? tron.address :
-    activeFamily === "stacks" ? stacks.address :
-    null;
+  const address = (() => {
+    switch (activeFamily) {
+      case "evm": return evm.address;
+      case "ton": return ton.address;
+      case "solana": return solana.address;
+      case "tron": return tron.address;
+      case "stacks": return stacks.address;
+      case "near": return near.address;
+      case "aptos": return aptos.address;
+      case "tezos": return tezos.address;
+      case "polkadot": return polkadot.address;
+      default: return null;
+    }
+  })();
 
   const signPayment = useCallback(
     async (requirements: PaymentRequirements): Promise<PaymentPayload> => {
@@ -99,11 +136,19 @@ export function useMultiChainPayment() {
           return tron.signPayment(requirements) as Promise<PaymentPayload>;
         case "stacks":
           return stacks.signPayment(requirements) as Promise<PaymentPayload>;
+        case "near":
+          return near.signPayment(requirements) as Promise<PaymentPayload>;
+        case "aptos":
+          return aptos.signPayment(requirements) as Promise<PaymentPayload>;
+        case "tezos":
+          return tezos.signPayment(requirements) as Promise<PaymentPayload>;
+        case "polkadot":
+          return polkadot.signPayment(requirements) as Promise<PaymentPayload>;
         default:
           throw new Error(`Unsupported chain: ${activeFamily}`);
       }
     },
-    [activeFamily, isDemo, evm, ton, solana, tron, stacks]
+    [activeFamily, isDemo, evm, ton, solana, tron, stacks, near, aptos, tezos, polkadot]
   );
 
   return {

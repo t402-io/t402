@@ -1,4 +1,4 @@
-export type ChainFamily = "evm" | "ton" | "tron" | "solana" | "stacks";
+export type ChainFamily = "evm" | "ton" | "tron" | "solana" | "stacks" | "near" | "aptos" | "tezos" | "polkadot";
 
 export interface ChainConfig {
   family: ChainFamily;
@@ -72,8 +72,8 @@ export const CHAIN_CONFIGS: Record<ChainFamily, ChainConfig> = {
   stacks: {
     family: "stacks",
     network: "stacks:2147483648",
-    asset: "ST...token-usdt",
-    payTo: "ST...",
+    asset: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usdt-token",
+    payTo: "ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG",
     explorer: "https://explorer.stacks.co/txid/",
     explorerSuffix: "?chain=testnet",
     faucet: "https://explorer.stacks.co/sandbox/faucet",
@@ -83,9 +83,62 @@ export const CHAIN_CONFIGS: Record<ChainFamily, ChainConfig> = {
     decimals: 6,
     tokenSymbol: "USDT",
   },
+  near: {
+    family: "near",
+    network: "near:testnet",
+    asset: "usdc.fakes.testnet",
+    payTo: "t402-facilitator.testnet",
+    explorer: "https://testnet.nearblocks.io/txns/",
+    faucet: "https://near-faucet.io",
+    name: "NEAR Testnet",
+    label: "NEAR",
+    color: "var(--color-chain-near)",
+    decimals: 6,
+    tokenSymbol: "USDC",
+  },
+  aptos: {
+    family: "aptos",
+    network: "aptos:2",
+    asset: "0xf73e887a8754f540ee6e1a93bdc6dde2af69fc7ca5de32013e89dd44244473cb",
+    payTo: "0xc88f67e776f16dcfbf42e6bdda1b82604448899b",
+    explorer: "https://explorer.aptoslabs.com/txn/",
+    explorerSuffix: "?network=testnet",
+    faucet: "https://aptoslabs.com/testnet-faucet",
+    name: "Aptos Testnet",
+    label: "Aptos",
+    color: "var(--color-chain-aptos)",
+    decimals: 6,
+    tokenSymbol: "USDT",
+  },
+  tezos: {
+    family: "tezos",
+    network: "tezos:NetXnHfVqm9iesp",
+    asset: "KT1P8RdJ5MfHMK5phKJ5JsfNfask5v2b2NQS",
+    payTo: "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb",
+    explorer: "https://ghostnet.tzkt.io/",
+    faucet: "https://faucet.ghostnet.teztnets.com",
+    name: "Tezos Ghostnet",
+    label: "Tezos",
+    color: "var(--color-chain-tezos)",
+    decimals: 6,
+    tokenSymbol: "USDt",
+  },
+  polkadot: {
+    family: "polkadot",
+    network: "polkadot:e143f23803ac50e8f6f8e62695d1ce9e",
+    asset: "1984",
+    payTo: "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+    explorer: "https://westend-asset-hub.subscan.io/extrinsic/",
+    faucet: "https://faucet.polkadot.io/?parachain=1000",
+    name: "Westend Asset Hub",
+    label: "Polkadot",
+    color: "var(--color-chain-polkadot)",
+    decimals: 6,
+    tokenSymbol: "USDT",
+  },
 };
 
-export const CHAIN_FAMILIES: ChainFamily[] = ["evm", "ton", "tron", "solana", "stacks"];
+export const CHAIN_FAMILIES: ChainFamily[] = ["evm", "ton", "tron", "solana", "stacks", "near", "aptos", "tezos", "polkadot"];
 
 export function getExplorerUrl(family: ChainFamily, txHash: string): string {
   const config = CHAIN_CONFIGS[family];

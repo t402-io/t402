@@ -8,6 +8,10 @@ import { useTonPayment } from "@/hooks/useTonPayment";
 import { useSolanaPayment } from "@/hooks/useSolanaPayment";
 import { useTronPayment } from "@/hooks/useTronPayment";
 import { useStacksPayment } from "@/hooks/useStacksPayment";
+import { useNearPayment } from "@/hooks/useNearPayment";
+import { useAptosPayment } from "@/hooks/useAptosPayment";
+import { useTezosPayment } from "@/hooks/useTezosPayment";
+import { usePolkadotPayment } from "@/hooks/usePolkadotPayment";
 
 export function WalletButton() {
   const { activeFamily } = useChainContext();
@@ -23,6 +27,14 @@ export function WalletButton() {
       return <TronWalletButton />;
     case "stacks":
       return <StacksWalletButton />;
+    case "near":
+      return <NearWalletButton />;
+    case "aptos":
+      return <AptosWalletButton />;
+    case "tezos":
+      return <TezosWalletButton />;
+    case "polkadot":
+      return <PolkadotWalletButton />;
     default:
       return null;
   }
@@ -277,4 +289,140 @@ function StacksWalletButton() {
   };
 
   return <ConnectButton label="Stacks" onClick={handleConnect} />;
+}
+
+function NearWalletButton() {
+  const { isDemo } = useDemoContext();
+  const { show } = useToast();
+  const { address, isConnected, hasWallet, connect, disconnect } = useNearPayment();
+
+  if (isDemo) return <DemoWalletBadge label="NEAR" />;
+  if (isConnected && address) {
+    return (
+      <ConnectedBadge
+        address={address}
+        label="NEAR"
+        onDisconnect={() => {
+          disconnect();
+          show("info", "NEAR wallet disconnected");
+        }}
+      />
+    );
+  }
+
+  const handleConnect = async () => {
+    try {
+      await connect();
+    } catch (err) {
+      show("error", `NEAR connection failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+    }
+  };
+
+  if (!hasWallet) {
+    return <InstallButton label="NEAR Wallet" url="https://wallet.near.org/" />;
+  }
+
+  return <ConnectButton label="NEAR" onClick={handleConnect} />;
+}
+
+function AptosWalletButton() {
+  const { isDemo } = useDemoContext();
+  const { show } = useToast();
+  const { address, isConnected, hasWallet, connect, disconnect } = useAptosPayment();
+
+  if (isDemo) return <DemoWalletBadge label="Aptos" />;
+  if (isConnected && address) {
+    return (
+      <ConnectedBadge
+        address={address}
+        label="Aptos"
+        onDisconnect={() => {
+          disconnect();
+          show("info", "Aptos wallet disconnected");
+        }}
+      />
+    );
+  }
+
+  const handleConnect = async () => {
+    try {
+      await connect();
+    } catch (err) {
+      show("error", `Aptos connection failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+    }
+  };
+
+  if (!hasWallet) {
+    return <InstallButton label="Petra" url="https://petra.app/" />;
+  }
+
+  return <ConnectButton label="Aptos" onClick={handleConnect} />;
+}
+
+function TezosWalletButton() {
+  const { isDemo } = useDemoContext();
+  const { show } = useToast();
+  const { address, isConnected, hasWallet, connect, disconnect } = useTezosPayment();
+
+  if (isDemo) return <DemoWalletBadge label="Tezos" />;
+  if (isConnected && address) {
+    return (
+      <ConnectedBadge
+        address={address}
+        label="Tezos"
+        onDisconnect={() => {
+          disconnect();
+          show("info", "Tezos wallet disconnected");
+        }}
+      />
+    );
+  }
+
+  const handleConnect = async () => {
+    try {
+      await connect();
+    } catch (err) {
+      show("error", `Tezos connection failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+    }
+  };
+
+  if (!hasWallet) {
+    return <InstallButton label="Temple" url="https://templewallet.com/" />;
+  }
+
+  return <ConnectButton label="Tezos" onClick={handleConnect} />;
+}
+
+function PolkadotWalletButton() {
+  const { isDemo } = useDemoContext();
+  const { show } = useToast();
+  const { address, isConnected, hasWallet, connect, disconnect } = usePolkadotPayment();
+
+  if (isDemo) return <DemoWalletBadge label="Polkadot" />;
+  if (isConnected && address) {
+    return (
+      <ConnectedBadge
+        address={address}
+        label="Polkadot"
+        onDisconnect={() => {
+          disconnect();
+          show("info", "Polkadot wallet disconnected");
+        }}
+      />
+    );
+  }
+
+  const handleConnect = async () => {
+    try {
+      await connect();
+    } catch (err) {
+      show("error", `Polkadot connection failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+    }
+  };
+
+  if (!hasWallet) {
+    return <InstallButton label="Polkadot.js" url="https://polkadot.js.org/extension/" />;
+  }
+
+  return <ConnectButton label="Polkadot" onClick={handleConnect} />;
 }
