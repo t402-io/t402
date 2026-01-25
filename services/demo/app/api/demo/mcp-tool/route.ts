@@ -74,7 +74,14 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    await settlePayment(paymentPayload, requirements);
+    const settleResult = await settlePayment(paymentPayload, requirements);
+    if (!settleResult.success) {
+      return NextResponse.json({
+        jsonrpc: "2.0",
+        id,
+        error: { code: -32000, message: "Settlement failed: " + settleResult.errorReason },
+      });
+    }
 
     return NextResponse.json({
       ...mockMcpToolResult,
