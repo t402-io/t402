@@ -15,6 +15,12 @@ from t402.schemes.evm.exact_legacy.client import (
 from t402.schemes.evm.exact_legacy.server import (
     ExactLegacyEvmServerScheme,
 )
+from t402.schemes.evm.exact_legacy.facilitator import (
+    ExactLegacyEvmFacilitatorScheme,
+    FacilitatorLegacyEvmSigner,
+    LegacyVerifyResult,
+    LegacyTransactionConfirmation,
+)
 
 __all__ = [
     # Client
@@ -22,6 +28,11 @@ __all__ = [
     "create_nonce",
     # Server
     "ExactLegacyEvmServerScheme",
+    # Facilitator
+    "ExactLegacyEvmFacilitatorScheme",
+    "FacilitatorLegacyEvmSigner",
+    "LegacyVerifyResult",
+    "LegacyTransactionConfirmation",
     # Constants
     "SCHEME_EXACT_LEGACY",
 ]
