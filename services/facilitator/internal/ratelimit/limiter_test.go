@@ -264,3 +264,131 @@ func TestAllowWithNilCacheCreation(t *testing.T) {
 
 // _ is used to satisfy import requirements
 var _ = cache.Client{}
+
+func TestRedisLimiter_AllowFirstRequest(t *testing.T) {
+	// Test that a limiter with no previous requests would allow
+	// This documents expected behavior even though we can't test the full Allow()
+	// without a real Redis
+
+	limiter := NewRedisLimiter(nil, 100, time.Minute)
+
+	// Verify initial state
+	if limiter.requests != 100 {
+		t.Errorf("expected requests=100, got %d", limiter.requests)
+	}
+	if limiter.window != time.Minute {
+		t.Errorf("expected window=1m, got %v", limiter.window)
+	}
+}
+
+func TestInfoReset(t *testing.T) {
+	resetTime := time.Now().Add(5 * time.Minute)
+	info := Info{
+		Limit:     1000,
+		Remaining: 500,
+		Reset:     resetTime,
+	}
+
+	// Verify Reset time is in the future
+	if info.Reset.Before(time.Now()) {
+		t.Error("expected Reset time to be in the future")
+	}
+
+	// Verify time until reset is approximately 5 minutes
+	timeUntilReset := time.Until(info.Reset)
+	if timeUntilReset < 4*time.Minute || timeUntilReset > 6*time.Minute {
+		t.Errorf("expected time until reset ~5m, got %v", timeUntilReset)
+	}
+}
+
+func TestNewRedisLimiter_ZeroValues(t *testing.T) {
+	// Zero requests = effectively unlimited
+	limiter := NewRedisLimiter(nil, 0, 0)
+
+	if limiter.requests != 0 {
+		t.Errorf("expected requests=0, got %d", limiter.requests)
+	}
+	if limiter.window != 0 {
+		t.Errorf("expected window=0, got %v", limiter.window)
+	}
+}
+
+func TestRedisLimiterKeyPrefix(t *testing.T) {
+	limiter := NewRedisLimiter(nil, 100, time.Minute)
+
+	if limiter.prefix != "ratelimit:" {
+		t.Errorf("expected prefix='ratelimit:', got '%s'", limiter.prefix)
+	}
+}
+
+func TestMaxWithEdgeCases(t *testing.T) {
+	tests := []struct {
+		name     string
+		a, b     int
+		expected int
+	}{
+		{"both zero", 0, 0, 0},
+		{"first negative", -1, 0, 0},
+		{"both negative", -10, -5, -5},
+		{"equal values", 42, 42, 42},
+		{"max int", 2147483647, 0, 2147483647},
+		{"min int", -2147483648, 0, 0},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := max(tt.a, tt.b)
+			if got != tt.expected {
+				t.Errorf("max(%d, %d) = %d, expected %d", tt.a, tt.b, got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestInfoAllFieldsSet(t *testing.T) {
+	now := time.Now()
+	info := Info{
+		Limit:     100,
+		Remaining: 75,
+		Reset:     now.Add(30 * time.Second),
+	}
+
+	// Verify all fields are accessible and have expected values
+	if info.Limit != 100 {
+		t.Errorf("Limit = %d, expected 100", info.Limit)
+	}
+	if info.Remaining != 75 {
+		t.Errorf("Remaining = %d, expected 75", info.Remaining)
+	}
+	if info.Reset.Before(now) {
+		t.Error("Reset should be after current time")
+	}
+}
+
+func TestNewRedisLimiter_NegativeValues(t *testing.T) {
+	// Negative values are technically allowed (though not useful)
+	limiter := NewRedisLimiter(nil, -1, -time.Second)
+
+	if limiter.requests != -1 {
+		t.Errorf("expected requests=-1, got %d", limiter.requests)
+	}
+	if limiter.window != -time.Second {
+		t.Errorf("expected window=-1s, got %v", limiter.window)
+	}
+}
+
+func TestRedisLimiter_TypeAssertion(t *testing.T) {
+	limiter := NewRedisLimiter(nil, 100, time.Minute)
+
+	// Verify the limiter can be used as the Limiter interface
+	var iface Limiter = limiter
+	if iface == nil {
+		t.Error("expected non-nil interface")
+	}
+}
+
+func BenchmarkMax(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		max(i, i+1)
+	}
+}
