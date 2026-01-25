@@ -2,35 +2,44 @@
 \chapter{Complete JSON Schemas}
 \label{app:schemas}
 
-This appendix provides complete JSON Schema definitions for all \tprotocol{} data structures.
+This appendix provides complete JSON Schema definitions for all \tprotocol{} data structures, including core protocol types and network-specific payload formats.
 
-\section{PaymentRequired Schema}
+\section{Core Protocol Schemas}
+
+\subsection{PaymentRequired Schema}
+
+The \code{PaymentRequired} structure is returned by servers in HTTP 402 responses, describing acceptable payment methods.
 
 \begin{lstlisting}[language=json,caption={PaymentRequired JSON Schema}]
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://t402.io/schemas/payment-required.json",
+  "title": "PaymentRequired",
+  "description": "Server response indicating payment requirements",
   "type": "object",
   "required": ["t402Version", "resource", "accepts"],
   "properties": {
     "t402Version": {
       "type": "integer",
-      "const": 2
+      "const": 2,
+      "description": "Protocol version (must be 2)"
     },
     "error": {
-      "type": "string"
+      "type": "string",
+      "description": "Human-readable error message"
     },
     "resource": {
       "$ref": "#/$defs/ResourceInfo"
     },
     "accepts": {
       "type": "array",
-      "items": {
-        "$ref": "#/$defs/PaymentRequirements"
-      },
-      "minItems": 1
+      "items": { "$ref": "#/$defs/PaymentRequirements" },
+      "minItems": 1,
+      "description": "Acceptable payment options"
     },
     "extensions": {
-      "type": "object"
+      "type": "object",
+      "description": "Protocol extensions"
     }
   },
   "$defs": {
@@ -38,33 +47,74 @@ This appendix provides complete JSON Schema definitions for all \tprotocol{} dat
       "type": "object",
       "required": ["url"],
       "properties": {
-        "url": { "type": "string", "format": "uri" },
-        "description": { "type": "string" },
-        "mimeType": { "type": "string" }
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Canonical URL of the resource"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable resource description"
+        },
+        "mimeType": {
+          "type": "string",
+          "description": "Expected response MIME type"
+        }
       }
     },
     "PaymentRequirements": {
       "type": "object",
       "required": ["scheme", "network", "amount", "asset", "payTo", "maxTimeoutSeconds"],
       "properties": {
-        "scheme": { "type": "string" },
-        "network": { "type": "string" },
-        "amount": { "type": "string" },
-        "asset": { "type": "string" },
-        "payTo": { "type": "string" },
-        "maxTimeoutSeconds": { "type": "integer" },
-        "extra": { "type": "object" }
+        "scheme": {
+          "type": "string",
+          "enum": ["exact", "upto"],
+          "description": "Payment scheme identifier"
+        },
+        "network": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+:[a-zA-Z0-9]+$",
+          "description": "CAIP-2 network identifier"
+        },
+        "amount": {
+          "type": "string",
+          "pattern": "^[0-9]+$",
+          "description": "Amount in smallest units (e.g., wei)"
+        },
+        "asset": {
+          "type": "string",
+          "description": "Token contract address"
+        },
+        "payTo": {
+          "type": "string",
+          "description": "Recipient address"
+        },
+        "maxTimeoutSeconds": {
+          "type": "integer",
+          "minimum": 60,
+          "maximum": 3600,
+          "description": "Maximum authorization validity"
+        },
+        "extra": {
+          "type": "object",
+          "description": "Network-specific parameters"
+        }
       }
     }
   }
 }
 \end{lstlisting}
 
-\section{PaymentPayload Schema}
+\subsection{PaymentPayload Schema}
+
+The \code{PaymentPayload} structure is sent by clients containing the signed payment authorization.
 
 \begin{lstlisting}[language=json,caption={PaymentPayload JSON Schema}]
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://t402.io/schemas/payment-payload.json",
+  "title": "PaymentPayload",
+  "description": "Client payment authorization",
   "type": "object",
   "required": ["t402Version", "accepted", "payload"],
   "properties": {
@@ -73,13 +123,15 @@ This appendix provides complete JSON Schema definitions for all \tprotocol{} dat
       "const": 2
     },
     "resource": {
-      "$ref": "#/$defs/ResourceInfo"
+      "$ref": "payment-required.json#/$defs/ResourceInfo"
     },
     "accepted": {
-      "$ref": "#/$defs/PaymentRequirements"
+      "$ref": "payment-required.json#/$defs/PaymentRequirements",
+      "description": "The accepted payment option"
     },
     "payload": {
-      "type": "object"
+      "type": "object",
+      "description": "Network-specific signed payload"
     },
     "extensions": {
       "type": "object"
@@ -88,34 +140,563 @@ This appendix provides complete JSON Schema definitions for all \tprotocol{} dat
 }
 \end{lstlisting}
 
-\section{SettlementResponse Schema}
-
-\begin{lstlisting}[language=json,caption={SettlementResponse JSON Schema}]
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
-  "required": ["success", "transaction", "network"],
-  "properties": {
-    "success": { "type": "boolean" },
-    "errorReason": { "type": "string" },
-    "payer": { "type": "string" },
-    "transaction": { "type": "string" },
-    "network": { "type": "string" }
-  }
-}
-\end{lstlisting}
-
-\section{VerifyResponse Schema}
+\subsection{Facilitator Response Schemas}
 
 \begin{lstlisting}[language=json,caption={VerifyResponse JSON Schema}]
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://t402.io/schemas/verify-response.json",
+  "title": "VerifyResponse",
+  "description": "Facilitator verification result",
   "type": "object",
   "required": ["isValid"],
   "properties": {
-    "isValid": { "type": "boolean" },
-    "invalidReason": { "type": "string" },
-    "payer": { "type": "string" }
+    "isValid": {
+      "type": "boolean",
+      "description": "Whether the payment authorization is valid"
+    },
+    "invalidReason": {
+      "type": "string",
+      "description": "Reason for invalidity (if isValid=false)"
+    },
+    "payer": {
+      "type": "string",
+      "description": "Recovered payer address"
+    }
   }
 }
 \end{lstlisting}
+
+\begin{lstlisting}[language=json,caption={SettleResponse JSON Schema}]
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://t402.io/schemas/settle-response.json",
+  "title": "SettleResponse",
+  "description": "Facilitator settlement result",
+  "type": "object",
+  "required": ["success"],
+  "properties": {
+    "success": {
+      "type": "boolean",
+      "description": "Whether settlement succeeded"
+    },
+    "errorReason": {
+      "type": "string",
+      "description": "Error reason (if success=false)"
+    },
+    "payer": {
+      "type": "string",
+      "description": "Payer address"
+    },
+    "transaction": {
+      "type": "string",
+      "description": "Transaction hash/signature"
+    },
+    "network": {
+      "type": "string",
+      "description": "Network where settlement occurred"
+    }
+  }
+}
+\end{lstlisting}
+
+\section{Network-Specific Payload Schemas}
+
+Each blockchain network has a unique payload format reflecting its signing mechanisms.
+
+\subsection{EVM Payload (EIP-3009)}
+
+\begin{lstlisting}[language=json,caption={EVM TransferWithAuthorization Payload}]
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://t402.io/schemas/evm-payload.json",
+  "title": "EVMPayload",
+  "description": "EIP-3009 TransferWithAuthorization payload",
+  "type": "object",
+  "required": ["from", "to", "value", "validAfter", "validBefore", "nonce", "signature"],
+  "properties": {
+    "from": {
+      "type": "string",
+      "pattern": "^0x[a-fA-F0-9]{40}$",
+      "description": "Payer address"
+    },
+    "to": {
+      "type": "string",
+      "pattern": "^0x[a-fA-F0-9]{40}$",
+      "description": "Recipient address"
+    },
+    "value": {
+      "type": "string",
+      "pattern": "^[0-9]+$",
+      "description": "Amount in token smallest units"
+    },
+    "validAfter": {
+      "type": "integer",
+      "description": "Unix timestamp after which authorization is valid"
+    },
+    "validBefore": {
+      "type": "integer",
+      "description": "Unix timestamp before which authorization is valid"
+    },
+    "nonce": {
+      "type": "string",
+      "pattern": "^0x[a-fA-F0-9]{64}$",
+      "description": "32-byte random nonce"
+    },
+    "signature": {
+      "type": "string",
+      "pattern": "^0x[a-fA-F0-9]{130}$",
+      "description": "EIP-712 signature (65 bytes)"
+    }
+  }
+}
+\end{lstlisting}
+
+\subsection{Solana Payload}
+
+\begin{lstlisting}[language=json,caption={Solana SPL Token Transfer Payload}]
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://t402.io/schemas/solana-payload.json",
+  "title": "SolanaPayload",
+  "description": "Solana SPL token transfer authorization",
+  "type": "object",
+  "required": ["payer", "recipient", "amount", "mint", "signature", "recentBlockhash"],
+  "properties": {
+    "payer": {
+      "type": "string",
+      "description": "Base58-encoded payer public key"
+    },
+    "recipient": {
+      "type": "string",
+      "description": "Base58-encoded recipient public key"
+    },
+    "amount": {
+      "type": "string",
+      "pattern": "^[0-9]+$",
+      "description": "Amount in lamports"
+    },
+    "mint": {
+      "type": "string",
+      "description": "SPL token mint address"
+    },
+    "signature": {
+      "type": "string",
+      "description": "Base58-encoded Ed25519 signature"
+    },
+    "recentBlockhash": {
+      "type": "string",
+      "description": "Recent blockhash for transaction freshness"
+    }
+  }
+}
+\end{lstlisting}
+
+\subsection{TON Payload}
+
+\begin{lstlisting}[language=json,caption={TON Jetton Transfer Payload}]
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://t402.io/schemas/ton-payload.json",
+  "title": "TONPayload",
+  "description": "TON Jetton transfer authorization",
+  "type": "object",
+  "required": ["sender", "recipient", "amount", "jettonMaster", "queryId", "signature"],
+  "properties": {
+    "sender": {
+      "type": "string",
+      "description": "Sender address (bounceable or non-bounceable)"
+    },
+    "recipient": {
+      "type": "string",
+      "description": "Recipient address"
+    },
+    "amount": {
+      "type": "string",
+      "pattern": "^[0-9]+$",
+      "description": "Amount in nano-units"
+    },
+    "jettonMaster": {
+      "type": "string",
+      "description": "Jetton master contract address"
+    },
+    "queryId": {
+      "type": "string",
+      "description": "64-bit query ID for message uniqueness"
+    },
+    "forwardPayload": {
+      "type": "string",
+      "description": "Optional forward payload (base64)"
+    },
+    "signature": {
+      "type": "string",
+      "description": "Ed25519 signature (base64)"
+    },
+    "validUntil": {
+      "type": "integer",
+      "description": "Message expiration timestamp"
+    }
+  }
+}
+\end{lstlisting}
+
+\subsection{TRON Payload}
+
+\begin{lstlisting}[language=json,caption={TRON TRC-20 Transfer Payload}]
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://t402.io/schemas/tron-payload.json",
+  "title": "TRONPayload",
+  "description": "TRON TRC-20 transfer authorization",
+  "type": "object",
+  "required": ["from", "to", "amount", "contract", "signature"],
+  "properties": {
+    "from": {
+      "type": "string",
+      "pattern": "^T[a-zA-Z0-9]{33}$",
+      "description": "Sender address (Base58Check)"
+    },
+    "to": {
+      "type": "string",
+      "pattern": "^T[a-zA-Z0-9]{33}$",
+      "description": "Recipient address"
+    },
+    "amount": {
+      "type": "string",
+      "pattern": "^[0-9]+$",
+      "description": "Amount in smallest units"
+    },
+    "contract": {
+      "type": "string",
+      "description": "TRC-20 contract address"
+    },
+    "expiration": {
+      "type": "integer",
+      "description": "Transaction expiration timestamp"
+    },
+    "signature": {
+      "type": "string",
+      "description": "ECDSA secp256k1 signature (hex)"
+    }
+  }
+}
+\end{lstlisting}
+
+\subsection{NEAR Payload}
+
+\begin{lstlisting}[language=json,caption={NEAR NEP-141 Transfer Payload}]
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://t402.io/schemas/near-payload.json",
+  "title": "NEARPayload",
+  "description": "NEAR NEP-141 fungible token transfer",
+  "type": "object",
+  "required": ["signerId", "receiverId", "amount", "tokenContract", "signature"],
+  "properties": {
+    "signerId": {
+      "type": "string",
+      "description": "Sender account ID (e.g., alice.near)"
+    },
+    "receiverId": {
+      "type": "string",
+      "description": "Recipient account ID"
+    },
+    "amount": {
+      "type": "string",
+      "pattern": "^[0-9]+$",
+      "description": "Amount in yoctoNEAR (10^-24)"
+    },
+    "tokenContract": {
+      "type": "string",
+      "description": "NEP-141 token contract ID"
+    },
+    "nonce": {
+      "type": "integer",
+      "description": "Access key nonce"
+    },
+    "blockHash": {
+      "type": "string",
+      "description": "Recent block hash (base58)"
+    },
+    "signature": {
+      "type": "string",
+      "description": "Ed25519 signature (base58)"
+    }
+  }
+}
+\end{lstlisting}
+
+\subsection{Aptos Payload}
+
+\begin{lstlisting}[language=json,caption={Aptos Fungible Asset Transfer Payload}]
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://t402.io/schemas/aptos-payload.json",
+  "title": "AptosPayload",
+  "description": "Aptos Fungible Asset transfer",
+  "type": "object",
+  "required": ["sender", "recipient", "amount", "metadata", "signature"],
+  "properties": {
+    "sender": {
+      "type": "string",
+      "pattern": "^0x[a-fA-F0-9]{64}$",
+      "description": "Sender address (32-byte hex)"
+    },
+    "recipient": {
+      "type": "string",
+      "pattern": "^0x[a-fA-F0-9]{64}$",
+      "description": "Recipient address"
+    },
+    "amount": {
+      "type": "string",
+      "pattern": "^[0-9]+$",
+      "description": "Amount in smallest units"
+    },
+    "metadata": {
+      "type": "string",
+      "description": "Fungible Asset metadata address"
+    },
+    "sequenceNumber": {
+      "type": "integer",
+      "description": "Account sequence number"
+    },
+    "expirationTimestamp": {
+      "type": "integer",
+      "description": "Transaction expiration (Unix seconds)"
+    },
+    "signature": {
+      "type": "string",
+      "description": "Ed25519 signature (hex)"
+    }
+  }
+}
+\end{lstlisting}
+
+\subsection{Tezos Payload}
+
+\begin{lstlisting}[language=json,caption={Tezos FA2 Transfer Payload}]
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://t402.io/schemas/tezos-payload.json",
+  "title": "TezosPayload",
+  "description": "Tezos FA2 token transfer",
+  "type": "object",
+  "required": ["source", "destination", "amount", "contract", "tokenId", "signature"],
+  "properties": {
+    "source": {
+      "type": "string",
+      "pattern": "^tz[123][a-zA-Z0-9]{33}$",
+      "description": "Source address (tz1/tz2/tz3)"
+    },
+    "destination": {
+      "type": "string",
+      "description": "Destination address"
+    },
+    "amount": {
+      "type": "string",
+      "pattern": "^[0-9]+$",
+      "description": "Token amount"
+    },
+    "contract": {
+      "type": "string",
+      "pattern": "^KT1[a-zA-Z0-9]{33}$",
+      "description": "FA2 contract address"
+    },
+    "tokenId": {
+      "type": "integer",
+      "description": "Token ID within FA2 contract"
+    },
+    "counter": {
+      "type": "integer",
+      "description": "Account operation counter"
+    },
+    "signature": {
+      "type": "string",
+      "description": "Ed25519/secp256k1 signature"
+    }
+  }
+}
+\end{lstlisting}
+
+\subsection{Polkadot Payload}
+
+\begin{lstlisting}[language=json,caption={Polkadot Asset Hub Transfer Payload}]
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://t402.io/schemas/polkadot-payload.json",
+  "title": "PolkadotPayload",
+  "description": "Polkadot Asset Hub transfer",
+  "type": "object",
+  "required": ["sender", "recipient", "amount", "assetId", "signature"],
+  "properties": {
+    "sender": {
+      "type": "string",
+      "description": "SS58-encoded sender address"
+    },
+    "recipient": {
+      "type": "string",
+      "description": "SS58-encoded recipient address"
+    },
+    "amount": {
+      "type": "string",
+      "pattern": "^[0-9]+$",
+      "description": "Amount in smallest units"
+    },
+    "assetId": {
+      "type": "integer",
+      "description": "Asset ID on Asset Hub (1984 for USDT)"
+    },
+    "nonce": {
+      "type": "integer",
+      "description": "Account nonce"
+    },
+    "era": {
+      "type": "string",
+      "description": "Transaction mortality (immortal or mortal)"
+    },
+    "signature": {
+      "type": "string",
+      "description": "Sr25519/Ed25519 signature (hex)"
+    }
+  }
+}
+\end{lstlisting}
+
+\subsection{Stacks Payload}
+
+\begin{lstlisting}[language=json,caption={Stacks SIP-010 Transfer Payload}]
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://t402.io/schemas/stacks-payload.json",
+  "title": "StacksPayload",
+  "description": "Stacks SIP-010 fungible token transfer",
+  "type": "object",
+  "required": ["sender", "recipient", "amount", "contract", "signature"],
+  "properties": {
+    "sender": {
+      "type": "string",
+      "pattern": "^S[PM][A-Z0-9]{38,39}$",
+      "description": "Stacks address (SP for mainnet, ST for testnet)"
+    },
+    "recipient": {
+      "type": "string",
+      "description": "Recipient Stacks address"
+    },
+    "amount": {
+      "type": "string",
+      "pattern": "^[0-9]+$",
+      "description": "Amount in micro-units"
+    },
+    "contract": {
+      "type": "string",
+      "description": "SIP-010 contract identifier"
+    },
+    "nonce": {
+      "type": "integer",
+      "description": "Account nonce"
+    },
+    "fee": {
+      "type": "string",
+      "description": "Transaction fee in microSTX"
+    },
+    "signature": {
+      "type": "string",
+      "description": "secp256k1 signature (hex)"
+    }
+  }
+}
+\end{lstlisting}
+
+\section{Extension Schemas}
+
+\subsection{Receipt Extension}
+
+\begin{lstlisting}[language=json,caption={Receipt Extension Schema}]
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://t402.io/schemas/extensions/receipt.json",
+  "title": "ReceiptExtension",
+  "description": "Payment receipt for record-keeping",
+  "type": "object",
+  "properties": {
+    "receipt": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique receipt identifier"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Payment timestamp (ISO 8601)"
+        },
+        "merchant": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "address": { "type": "string" },
+            "taxId": { "type": "string" }
+          }
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "description": { "type": "string" },
+              "quantity": { "type": "number" },
+              "unitPrice": { "type": "string" },
+              "total": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+\end{lstlisting}
+
+\subsection{Subscription Extension}
+
+\begin{lstlisting}[language=json,caption={Subscription Extension Schema}]
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://t402.io/schemas/extensions/subscription.json",
+  "title": "SubscriptionExtension",
+  "description": "Recurring payment parameters",
+  "type": "object",
+  "properties": {
+    "subscription": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Subscription identifier"
+        },
+        "interval": {
+          "type": "string",
+          "enum": ["daily", "weekly", "monthly", "yearly"],
+          "description": "Billing interval"
+        },
+        "startDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Subscription start date"
+        },
+        "endDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Subscription end date (optional)"
+        },
+        "maxPayments": {
+          "type": "integer",
+          "description": "Maximum number of payments"
+        }
+      }
+    }
+  }
+}
+\end{lstlisting}
+
