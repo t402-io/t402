@@ -193,6 +193,91 @@ public final class McpTypes {
         }
     }
 
+    /**
+     * Supported NEAR networks.
+     */
+    public enum SupportedNearNetwork {
+        @JsonProperty("near-mainnet") NEAR_MAINNET("near-mainnet", "near:mainnet"),
+        @JsonProperty("near-testnet") NEAR_TESTNET("near-testnet", "near:testnet");
+
+        private final String value;
+        private final String caip2;
+
+        SupportedNearNetwork(String value, String caip2) {
+            this.value = value;
+            this.caip2 = caip2;
+        }
+
+        public String getValue() { return value; }
+        public String getCaip2() { return caip2; }
+
+        public static SupportedNearNetwork fromString(String value) {
+            for (SupportedNearNetwork network : values()) {
+                if (network.value.equalsIgnoreCase(value) || network.caip2.equals(value)) {
+                    return network;
+                }
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Supported Aptos networks.
+     */
+    public enum SupportedAptosNetwork {
+        @JsonProperty("aptos-mainnet") APTOS_MAINNET("aptos-mainnet", "aptos:1"),
+        @JsonProperty("aptos-testnet") APTOS_TESTNET("aptos-testnet", "aptos:2"),
+        @JsonProperty("aptos-devnet") APTOS_DEVNET("aptos-devnet", "aptos:149");
+
+        private final String value;
+        private final String caip2;
+
+        SupportedAptosNetwork(String value, String caip2) {
+            this.value = value;
+            this.caip2 = caip2;
+        }
+
+        public String getValue() { return value; }
+        public String getCaip2() { return caip2; }
+
+        public static SupportedAptosNetwork fromString(String value) {
+            for (SupportedAptosNetwork network : values()) {
+                if (network.value.equalsIgnoreCase(value) || network.caip2.equals(value)) {
+                    return network;
+                }
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Supported Tezos networks.
+     */
+    public enum SupportedTezosNetwork {
+        @JsonProperty("tezos-mainnet") TEZOS_MAINNET("tezos-mainnet", "tezos:NetXdQprcVkpaWU"),
+        @JsonProperty("tezos-ghostnet") TEZOS_GHOSTNET("tezos-ghostnet", "tezos:NetXnHfVqm9iesp");
+
+        private final String value;
+        private final String caip2;
+
+        SupportedTezosNetwork(String value, String caip2) {
+            this.value = value;
+            this.caip2 = caip2;
+        }
+
+        public String getValue() { return value; }
+        public String getCaip2() { return caip2; }
+
+        public static SupportedTezosNetwork fromString(String value) {
+            for (SupportedTezosNetwork network : values()) {
+                if (network.value.equalsIgnoreCase(value) || network.caip2.equals(value)) {
+                    return network;
+                }
+            }
+            return null;
+        }
+    }
+
     // ===== JSON-RPC Types =====
 
     /**
@@ -661,6 +746,126 @@ public final class McpTypes {
      */
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class PayTronInput {
+        private String to;
+        private String amount;
+        private String token;
+        private String network;
+
+        public String getTo() { return to; }
+        public void setTo(String to) { this.to = to; }
+
+        public String getAmount() { return amount; }
+        public void setAmount(String amount) { this.amount = amount; }
+
+        public String getToken() { return token; }
+        public void setToken(String token) { this.token = token; }
+
+        public String getNetwork() { return network; }
+        public void setNetwork(String network) { this.network = network; }
+    }
+
+    // ===== NEAR Tool Input Types =====
+
+    /**
+     * Input for t402/getNearBalance.
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class GetNearBalanceInput {
+        private String address;
+        private String network;
+
+        public String getAddress() { return address; }
+        public void setAddress(String address) { this.address = address; }
+
+        public String getNetwork() { return network; }
+        public void setNetwork(String network) { this.network = network; }
+    }
+
+    /**
+     * Input for t402/payNear.
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PayNearInput {
+        private String to;
+        private String amount;
+        private String token;
+        private String network;
+
+        public String getTo() { return to; }
+        public void setTo(String to) { this.to = to; }
+
+        public String getAmount() { return amount; }
+        public void setAmount(String amount) { this.amount = amount; }
+
+        public String getToken() { return token; }
+        public void setToken(String token) { this.token = token; }
+
+        public String getNetwork() { return network; }
+        public void setNetwork(String network) { this.network = network; }
+    }
+
+    // ===== Aptos Tool Input Types =====
+
+    /**
+     * Input for t402/getAptosBalance.
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class GetAptosBalanceInput {
+        private String address;
+        private String network;
+
+        public String getAddress() { return address; }
+        public void setAddress(String address) { this.address = address; }
+
+        public String getNetwork() { return network; }
+        public void setNetwork(String network) { this.network = network; }
+    }
+
+    /**
+     * Input for t402/payAptos.
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PayAptosInput {
+        private String to;
+        private String amount;
+        private String token;
+        private String network;
+
+        public String getTo() { return to; }
+        public void setTo(String to) { this.to = to; }
+
+        public String getAmount() { return amount; }
+        public void setAmount(String amount) { this.amount = amount; }
+
+        public String getToken() { return token; }
+        public void setToken(String token) { this.token = token; }
+
+        public String getNetwork() { return network; }
+        public void setNetwork(String network) { this.network = network; }
+    }
+
+    // ===== Tezos Tool Input Types =====
+
+    /**
+     * Input for t402/getTezosBalance.
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class GetTezosBalanceInput {
+        private String address;
+        private String network;
+
+        public String getAddress() { return address; }
+        public void setAddress(String address) { this.address = address; }
+
+        public String getNetwork() { return network; }
+        public void setNetwork(String network) { this.network = network; }
+    }
+
+    /**
+     * Input for t402/payTezos.
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PayTezosInput {
         private String to;
         private String amount;
         private String token;
