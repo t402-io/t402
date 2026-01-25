@@ -1,92 +1,108 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import dynamic from "next/dynamic";
 import { ChainProvider } from "./ChainProvider";
 import { DemoProvider } from "./DemoProvider";
 import { ToastProvider } from "./ToastProvider";
 
-// Lazy load wallet providers only on client
-let WagmiProviderWrapper: React.ComponentType<{ children: ReactNode }> | null = null;
-let TonConnectProvider: React.ComponentType<{ children: ReactNode }> | null = null;
-let SolanaProvider: React.ComponentType<{ children: ReactNode }> | null = null;
-let NearProvider: React.ComponentType<{ children: ReactNode }> | null = null;
-let AptosProvider: React.ComponentType<{ children: ReactNode }> | null = null;
-let TezosProvider: React.ComponentType<{ children: ReactNode }> | null = null;
-let PolkadotProvider: React.ComponentType<{ children: ReactNode }> | null = null;
-
-// Passthrough component for when providers aren't loaded
-function Passthrough({ children }: { children: ReactNode }) {
+// Fallback component for loading states
+function ProviderFallback({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+// Dynamic import wallet providers with ssr: false and loading fallbacks
+const WagmiProviderWrapper = dynamic(
+  () => import("./WagmiProvider").then((mod) => mod.WagmiProviderWrapper),
+  { ssr: false, loading: () => null }
+);
+
+const TonConnectProvider = dynamic(
+  () => import("./TonConnectProvider").then((mod) => mod.TonConnectProvider),
+  { ssr: false, loading: () => null }
+);
+
+const SolanaProvider = dynamic(
+  () => import("./SolanaProvider").then((mod) => mod.SolanaProvider),
+  { ssr: false, loading: () => null }
+);
+
+const NearProvider = dynamic(
+  () => import("./NearProvider").then((mod) => mod.NearProvider),
+  { ssr: false, loading: () => null }
+);
+
+const AptosProvider = dynamic(
+  () => import("./AptosProvider").then((mod) => mod.AptosProvider),
+  { ssr: false, loading: () => null }
+);
+
+const TezosProvider = dynamic(
+  () => import("./TezosProvider").then((mod) => mod.TezosProvider),
+  { ssr: false, loading: () => null }
+);
+
+const PolkadotProvider = dynamic(
+  () => import("./PolkadotProvider").then((mod) => mod.PolkadotProvider),
+  { ssr: false, loading: () => null }
+);
+
+// Wrapper that handles the wallet providers with error resilience
+function WalletProviders({ children }: { children: ReactNode }) {
+  return (
+    <WagmiProviderWrapper>
+      <TonConnectProvider>
+        <SolanaProvider>
+          <NearProvider>
+            <AptosProvider>
+              <TezosProvider>
+                <PolkadotProvider>
+                  {children}
+                </PolkadotProvider>
+              </TezosProvider>
+            </AptosProvider>
+          </NearProvider>
+        </SolanaProvider>
+      </TonConnectProvider>
+    </WagmiProviderWrapper>
+  );
+}
+
 export function ClientProviders({ children }: { children: ReactNode }) {
-  const [walletProviders, setWalletProviders] = useState<{
-    Wagmi: React.ComponentType<{ children: ReactNode }>;
-    Ton: React.ComponentType<{ children: ReactNode }>;
-    Solana: React.ComponentType<{ children: ReactNode }>;
-    Near: React.ComponentType<{ children: ReactNode }>;
-    Aptos: React.ComponentType<{ children: ReactNode }>;
-    Tezos: React.ComponentType<{ children: ReactNode }>;
-    Polkadot: React.ComponentType<{ children: ReactNode }>;
-  }>({
-    Wagmi: Passthrough,
-    Ton: Passthrough,
-    Solana: Passthrough,
-    Near: Passthrough,
-    Aptos: Passthrough,
-    Tezos: Passthrough,
-    Polkadot: Passthrough,
-  });
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Load all wallet providers in parallel
-    Promise.all([
-      import("./WagmiProvider").then((m) => m.WagmiProviderWrapper),
-      import("./TonConnectProvider").then((m) => m.TonConnectProvider),
-      import("./SolanaProvider").then((m) => m.SolanaProvider),
-      import("./NearProvider").then((m) => m.NearProvider),
-      import("./AptosProvider").then((m) => m.AptosProvider),
-      import("./TezosProvider").then((m) => m.TezosProvider),
-      import("./PolkadotProvider").then((m) => m.PolkadotProvider),
-    ])
-      .then(([Wagmi, Ton, Solana, Near, Aptos, Tezos, Polkadot]) => {
-        setWalletProviders({
-          Wagmi,
-          Ton,
-          Solana,
-          Near,
-          Aptos,
-          Tezos,
-          Polkadot,
-        });
-      })
-      .catch((error) => {
-        console.error("Failed to load wallet providers:", error);
-      });
+    setMounted(true);
   }, []);
 
-  const { Wagmi, Ton, Solana, Near, Aptos, Tezos, Polkadot } = walletProviders;
+  // Core providers that work on both server and client
+  const coreProviders = (
+    <ChainProvider>
+      <DemoProvider>
+        <ToastProvider>
+          {children}
+        </ToastProvider>
+      </DemoProvider>
+    </ChainProvider>
+  );
 
+  // During SSR, render with core providers only
+  if (!mounted) {
+    return coreProviders;
+  }
+
+  // After mount, wrap with wallet providers
+  // Keep the same structure to avoid hydration mismatches
   return (
     <ChainProvider>
       <DemoProvider>
         <ToastProvider>
-          <Wagmi>
-            <Ton>
-              <Solana>
-                <Near>
-                  <Aptos>
-                    <Tezos>
-                      <Polkadot>
-                        {children}
-                      </Polkadot>
-                    </Tezos>
-                  </Aptos>
-                </Near>
-              </Solana>
-            </Ton>
-          </Wagmi>
+          <Suspense fallback={children}>
+            <WalletProviders>
+              {children}
+            </WalletProviders>
+          </Suspense>
         </ToastProvider>
       </DemoProvider>
     </ChainProvider>
