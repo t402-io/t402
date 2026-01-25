@@ -41,7 +41,10 @@ export function getPreferredChain(request: Request): ChainFamily {
  * Returns the preferred chain first, followed by all other chains.
  */
 export function createMultiChainAccepts(amount: string, scheme = "exact") {
-  const families: ChainFamily[] = ["evm", "ton", "tron", "solana", "stacks"];
+  const families: ChainFamily[] = [
+    "evm", "ton", "tron", "solana", "stacks",
+    "near", "aptos", "tezos", "polkadot"
+  ];
   return families.map((family) => {
     const config = CHAIN_CONFIGS[family];
     return {
