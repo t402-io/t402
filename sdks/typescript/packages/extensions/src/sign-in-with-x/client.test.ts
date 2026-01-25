@@ -232,15 +232,18 @@ describe("Sign-In-With-X Client", () => {
       expect(signature).toBe("base58signature");
     });
 
-    it("should throw for SEP-10 (Stellar) - not implemented", async () => {
+    it("should support SEP-10 (Stellar) signing", async () => {
       const mockSigner: SIWxSigner = {
-        address: "0x1234567890123456789012345678901234567890",
-        signMessage: vi.fn(),
+        address: "GDQP2KPQGKIHYJGXNUIYOMHARUARCA7DJT5FO2FFOOUJ3UBKTGWPE4PJ",
+        signMessage: vi.fn().mockResolvedValue("0xstellarsignature"),
       };
 
-      await expect(
-        signSIWxMessage("Test message", mockSigner, { signatureScheme: "sep10" }),
-      ).rejects.toThrow("not yet implemented");
+      const signature = await signSIWxMessage("Test message", mockSigner, {
+        signatureScheme: "sep10",
+      });
+
+      expect(mockSigner.signMessage).toHaveBeenCalled();
+      expect(signature).toBe("0xstellarsignature");
     });
   });
 

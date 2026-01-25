@@ -321,5 +321,45 @@ describe("Sign-In-With-X Server", () => {
       expect(result.valid).toBe(false);
       expect(result.error).toContain("Invalid signature length");
     });
+
+    it("should detect Solana chain and use Ed25519 verification", async () => {
+      // Test that Solana chains use Ed25519 verification path
+      const payload: SIWxPayload = {
+        domain: "api.example.com",
+        address: "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU", // Base58 Solana address
+        uri: "https://api.example.com/resource",
+        version: "1",
+        chainId: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+        nonce: "abc123",
+        issuedAt: "2025-01-01T00:00:00.000Z",
+        signature: "0x" + "00".repeat(64), // Invalid Ed25519 signature (64 bytes)
+      };
+
+      const result = await verifySIWxSignature(payload, payload.signature);
+
+      // Should fail because signature is invalid, but uses Ed25519 path
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain("Ed25519");
+    });
+
+    it("should detect Stellar chain and use Ed25519 verification", async () => {
+      // Test that Stellar chains use Ed25519 verification path
+      const payload: SIWxPayload = {
+        domain: "api.example.com",
+        address: "GDQP2KPQGKIHYJGXNUIYOMHARUARCA7DJT5FO2FFOOUJ3UBKTGWPE4PJ",
+        uri: "https://api.example.com/resource",
+        version: "1",
+        chainId: "stellar:pubnet",
+        nonce: "abc123",
+        issuedAt: "2025-01-01T00:00:00.000Z",
+        signature: "0x" + "00".repeat(64), // Invalid Ed25519 signature (64 bytes)
+      };
+
+      const result = await verifySIWxSignature(payload, payload.signature);
+
+      // Should fail because signature is invalid, but uses Ed25519 path
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain("Ed25519");
+    });
   });
 });

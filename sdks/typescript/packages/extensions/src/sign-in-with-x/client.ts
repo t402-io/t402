@@ -192,7 +192,13 @@ export async function signSIWxMessage(
       return signer.signMessage(message);
 
     case "sep10":
-      throw new Error("Stellar SEP-10 signing not yet implemented");
+      // Stellar SEP-10 uses Ed25519 signatures (same as Solana)
+      if (!signer.signMessage) {
+        throw new Error("Signer does not support signing");
+      }
+      // Stellar wallets implement signMessage for Ed25519 signing
+      // The wallet handles proper message encoding and returns hex signature
+      return signer.signMessage(message);
 
     default:
       throw new Error(`Unknown signature scheme: ${scheme}`);
