@@ -9,7 +9,7 @@ This chapter provides a comprehensive analysis of the economic properties, cost 
 
 \tprotocol{} introduces a fundamentally different cost model compared to traditional payment systems. The total cost of a payment consists of three components:
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     component/.style={
@@ -43,7 +43,7 @@ This chapter provides a comprehensive analysis of the economic properties, cost 
 \label{fig:cost-structure}
 \end{figure}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Cost Component Breakdown}
 \label{tab:cost-breakdown}
@@ -63,7 +63,7 @@ Protocol Fee & \$0.00 & N/A (open source) \\
 
 \subsection{Fee Structure Comparison}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Payment Provider Fee Comparison}
 \label{tab:provider-comparison}
@@ -83,7 +83,7 @@ T402 & \$0.00 & 0-1\% & 0\% & Instant \\
 
 \subsection{Cost by Transaction Size}
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}
 \begin{axis}[
@@ -92,41 +92,43 @@ T402 & \$0.00 & 0-1\% & 0\% & Instant \\
     xlabel={Transaction Amount (\$)},
     ylabel={Fee Percentage (\%)},
     xmin=0, xmax=100,
-    ymin=0, ymax=100,
+    ymin=0, ymax=40,
     legend pos=north east,
     grid=major,
-    legend style={font=\footnotesize}
+    legend style={font=\footnotesize},
+    restrict y to domain=0:40,
+    clip=true
 ]
 
 % Stripe: 2.9% + $0.30
-\addplot[color=blue, thick, domain=0.01:100, samples=100]
+\addplot[color=blue, thick, domain=1:100, samples=100]
     {(0.30 + 0.029*x) / x * 100};
-\addlegendentry{Stripe}
+\addlegendentry{Stripe (2.9\% + \$0.30)}
 
 % PayPal: 3.49% + $0.49
-\addplot[color=red, thick, domain=0.01:100, samples=100]
+\addplot[color=red, thick, domain=1:100, samples=100]
     {(0.49 + 0.0349*x) / x * 100};
-\addlegendentry{PayPal}
+\addlegendentry{PayPal (3.49\% + \$0.49)}
 
 % T402: 1% (flat)
-\addplot[color=green!60!black, thick, domain=0.01:100]
+\addplot[color=green!60!black, thick, domain=0:100]
     {1};
-\addlegendentry{T402 (1\%)}
+\addlegendentry{T402 (1\% flat)}
 
 % T402: 0% (self-host)
-\addplot[color=violet, thick, dashed, domain=0.01:100]
+\addplot[color=violet, thick, dashed, domain=0:100]
     {0.1};
-\addlegendentry{T402 (self-host)}
+\addlegendentry{T402 (self-host, gas only)}
 
 \end{axis}
 \end{tikzpicture}
-\caption{Fee percentage by transaction size}
+\caption{Fee percentage by transaction size (note: traditional providers exceed 40\% for amounts under \$1)}
 \label{fig:fee-comparison}
 \end{figure}
 
 \subsection{Break-Even Analysis}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Break-Even: T402 vs Stripe}
 \label{tab:breakeven}
@@ -156,7 +158,7 @@ Different blockchain networks offer varying cost profiles:
 
 \subsection{Gas Fee Comparison}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Network Gas Fee Comparison (EIP-3009 Transfer)}
 \label{tab:gas-comparison}
@@ -178,7 +180,7 @@ TRON & 30,000 & -- & \$0.10--0.50 \\
 
 \subsection{Network Selection Matrix}
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     cell/.style={
@@ -249,7 +251,7 @@ The Facilitator service operates as the economic bridge between users and blockc
 
 \subsection{Revenue Model}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Facilitator Revenue Sources}
 \label{tab:facilitator-revenue}
@@ -267,7 +269,7 @@ White-label & License & Self-hosted deployment \\
 
 \subsection{Cost Structure}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Facilitator Operating Costs}
 \label{tab:facilitator-costs}
@@ -286,7 +288,7 @@ Security & \$200--1,000 & Audits, HSM \\
 
 \subsection{Break-Even Volume}
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}
 \begin{axis}[
@@ -327,7 +329,7 @@ Security & \$200--1,000 & Audits, HSM \\
 
 \subsection{USDT vs USDC Comparison}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Stablecoin Comparison}
 \label{tab:stablecoin-comparison}
@@ -361,7 +363,7 @@ USDT0 provides native cross-chain transfers via LayerZero:
 
 \subsection{Economies of Scale}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Cost Optimization by Volume}
 \label{tab:volume-optimization}
@@ -401,7 +403,7 @@ const config = {
 
 \subsection{API Provider Example}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{ROI: Weather API Provider}
 \label{tab:roi-weather}
@@ -425,7 +427,7 @@ With Stripe's \$0.30 minimum fee, the weather API would need to charge at least 
 
 \subsection{Content Platform Example}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{ROI: News Platform Pay-Per-Article}
 \label{tab:roi-news}
@@ -449,7 +451,7 @@ Payment Fees & \$118 & \$56 \\
 
 \subsection{Total Addressable Market}
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     circle/.style={
@@ -481,7 +483,7 @@ Payment Fees & \$118 & \$56 \\
 
 \subsection{Growth Segments}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{High-Growth Market Segments}
 \label{tab:growth-segments}
@@ -514,7 +516,7 @@ Cross-border Freelance & \$50B & 15\% \\
 
 \subsection{Risk Mitigation}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Economic Risk Factors}
 \label{tab:economic-risks}

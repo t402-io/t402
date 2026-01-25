@@ -11,7 +11,7 @@ The internet economy has evolved dramatically over the past three decades. What 
 
 Web monetization has progressed through several distinct phases:
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     era/.style={
@@ -69,7 +69,7 @@ Each transition has increased the granularity and automation of payments:
 
 Traditional payment systems were designed for human-initiated, high-value transactions. They exhibit several characteristics that make them unsuitable for the modern web:
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Traditional Payment System Limitations}
 \label{tab:traditional-limitations}
@@ -106,7 +106,7 @@ Cryptocurrencies theoretically solve many of these problems:
 
 However, existing cryptocurrency payment approaches have their own limitations:
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Cryptocurrency Payment Challenges}
 \label{tab:crypto-challenges}
@@ -135,7 +135,7 @@ Integration & Complex blockchain-specific implementations \\
     \item \textbf{Regulatory Clarity}: Clearer compliance path than volatile tokens
 \end{enumerate}
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     coin/.style={
@@ -201,7 +201,7 @@ The advent of blockchain technology, stablecoins, and standardized signing schem
 
 Using HTTP 402 provides several advantages:
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Benefits of HTTP 402}
 \label{tab:http402-benefits}
@@ -229,7 +229,7 @@ Fallback & Graceful degradation for non-supporting clients \\
 
 The protocol minimizes trust requirements between parties:
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     party/.style={
@@ -278,7 +278,7 @@ The protocol minimizes trust requirements between parties:
 
 Payment logic is separated from transport concerns, enabling the same payment flow across different communication protocols:
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Supported Transport Layers}
 \label{tab:transports}
@@ -297,18 +297,23 @@ A2A & Agent Mesh & Agent-to-Agent communication \\
 
 The protocol abstracts blockchain-specific details behind a unified interface:
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Supported Blockchain Networks}
 \label{tab:chains-intro}
 \begin{tabular}{l l l}
 \toprule
-\textbf{Network} & \textbf{Mechanism} & \textbf{Signature} \\
+\textbf{Network Family} & \textbf{Mechanism} & \textbf{Signature} \\
 \midrule
-EVM Chains & EIP-3009 & ECDSA secp256k1 \\
+EVM Chains (19+) & EIP-3009 & ECDSA secp256k1 \\
 Solana & SPL Token & Ed25519 \\
 TON & Jetton & Ed25519 \\
 TRON & TRC-20 & ECDSA secp256k1 \\
+NEAR & NEP-141 & Ed25519 \\
+Aptos & Fungible Asset & Ed25519 \\
+Tezos & FA2 & Ed25519 \\
+Polkadot & Asset Hub & Sr25519 \\
+Stacks & SIP-010 & ECDSA secp256k1 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -350,7 +355,7 @@ const response = await client.fetch(
 \section{Comparison with Alternatives}
 \label{sec:comparison}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Protocol Comparison}
 \label{tab:protocol-comparison}

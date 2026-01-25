@@ -2,11 +2,26 @@
 % Package imports and document settings
 
 %--------------------------------------------------
-% Encoding and Fonts
+% Encoding and Fonts (XeLaTeX compatible)
 %--------------------------------------------------
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage{lmodern}
+\usepackage{iftex}
+\ifxetex
+    % XeLaTeX: use fontspec with default fonts
+    \usepackage{fontspec}
+    \defaultfontfeatures{Ligatures=TeX}
+    % Use lmodern package for Latin Modern fonts with XeLaTeX
+    \usepackage{lmodern}
+\else\ifluatex
+    % LuaLaTeX: use fontspec with default fonts
+    \usepackage{fontspec}
+    \defaultfontfeatures{Ligatures=TeX}
+    \usepackage{lmodern}
+\else
+    % pdfLaTeX fallback
+    \usepackage[utf8]{inputenc}
+    \usepackage[T1]{fontenc}
+    \usepackage{lmodern}
+\fi\fi
 \usepackage{microtype}  % Better typography
 
 %--------------------------------------------------
@@ -228,6 +243,25 @@
     breaklines=true,
     frame=single,
     backgroundcolor=\color{codebg},
+}
+
+% HTTP style (for HTTP request/response examples)
+\lstdefinelanguage{http}{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{t402purple}\bfseries,
+    stringstyle=\color{t402green},
+    keywords={GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, HTTP/1.1, HTTP/2},
+    morestring=[b]",
+    numbers=left,
+    numberstyle=\tiny\color{t402gray},
+    stepnumber=1,
+    numbersep=8pt,
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{codebg},
+    sensitive=true,
+    moredelim=[is][\color{t402blue}]{|}{|},
 }
 
 % Default listing style

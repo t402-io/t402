@@ -2,16 +2,28 @@
 \chapter{Use Cases}
 \label{ch:use-cases}
 
-\tprotocol{} enables diverse payment scenarios across web services, AI agents, digital content, and IoT devices. This chapter explores practical applications with detailed implementation patterns.
+\tprotocol{} enables diverse payment scenarios across web services, AI agents, digital content, and IoT devices. This chapter explores practical applications with detailed implementation patterns, examining both the business rationale and technical implementation for each use case.
 
 \section{AI Agent Payments}
 \label{sec:ai-payments}
 
-The emergence of autonomous AI agents creates unprecedented demand for machine-to-machine payments. Unlike humans, AI agents cannot use traditional payment methods that require manual intervention.
+The emergence of autonomous AI agents creates unprecedented demand for machine-to-machine payments. Unlike human users who can manually enter credit card details or authenticate through OAuth flows, AI agents operate programmatically and require payment mechanisms that integrate seamlessly into their execution loops.
 
 \subsection{The Agent Payment Problem}
 
-\begin{figure}[ht]
+Traditional payment systems assume human involvement at critical decision points: entering payment details, reviewing charges, and authorizing transactions. This assumption breaks down completely when the ``user'' is an AI agent executing hundreds of API calls per minute to complete a complex task.
+
+Consider a research agent tasked with analyzing market trends. To complete its work, the agent might need to:
+\begin{itemize}
+    \item Query financial data APIs for stock prices and trading volumes
+    \item Access news APIs for sentiment analysis on recent articles
+    \item Use specialized ML services for natural language processing
+    \item Retrieve historical datasets for trend comparison
+\end{itemize}
+
+Each of these services may be operated by different providers, each with their own payment requirements. Without a programmatic payment protocol, the agent would be blocked at the first paywall, unable to proceed without human intervention.
+
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     agent/.style={
@@ -68,13 +80,13 @@ The emergence of autonomous AI agents creates unprecedented demand for machine-t
 \node[font=\tiny, red, align=center] at (6.5,-2.5) {Traditional payments\\require human intervention};
 
 \end{tikzpicture}
-\caption{AI agents blocked by traditional paywalls}
+\caption{AI agents blocked by traditional paywalls requiring human interaction}
 \label{fig:agent-problem}
 \end{figure}
 
-AI agents require:
+\tprotocol{} solves this by providing a fully programmatic payment flow. When an agent encounters a 402 response, it can automatically parse the payment requirements, sign an authorization with its configured wallet, and retry the request---all without human involvement. The entire process completes in milliseconds, allowing agents to navigate paid services as easily as free ones.
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{AI Agent Payment Requirements}
 \label{tab:agent-requirements}
@@ -82,20 +94,24 @@ AI agents require:
 \toprule
 \textbf{Requirement} & \textbf{Description} \\
 \midrule
-Programmatic Access & No UI interaction, pure API \\
-Budget Control & Configurable spending limits \\
-Cost Visibility & Know price before execution \\
-Autonomous Execution & No human approval per transaction \\
-Failure Handling & Graceful degradation on payment failure \\
+Programmatic Access & Pure API integration without UI interaction or browser automation \\
+Budget Control & Configurable spending limits per call, per hour, and per day to prevent runaway costs \\
+Cost Visibility & Ability to inspect prices before execution for cost-benefit decisions \\
+Autonomous Execution & No human approval required for individual transactions within budget \\
+Failure Handling & Graceful degradation when payments fail or budgets are exceeded \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \subsection{MCP Tool Marketplace}
 
-The Model Context Protocol enables AI agents to discover and use paid tools:
+The Model Context Protocol (MCP), developed by Anthropic, provides a standardized way for AI models to discover and interact with external tools. \tprotocol{} extends MCP with payment capabilities, enabling a marketplace where tool providers can monetize their services while agents maintain full autonomy.
 
-\begin{lstlisting}[language=typescript,caption={AI agent with budget management}]
+In this model, tool providers register their services with pricing information. When an agent discovers available tools, it receives not just the tool's capabilities but also its cost. The agent can then make intelligent decisions about which tools to use based on both capability and cost-effectiveness.
+
+Budget management becomes crucial in this context. An agent operator might configure daily spending limits of \$10, with per-call maximums of \$0.10. The agent respects these limits automatically, choosing cheaper alternatives when available or gracefully declining tasks that would exceed its budget.
+
+\begin{lstlisting}[language=typescript,caption={AI agent with budget management for MCP tools}]
 import { Agent } from "@langchain/core";
 import { T402McpClient } from "@t402/mcp-client";
 
@@ -135,9 +151,13 @@ const result = await agent.run(
 );
 \end{lstlisting}
 
+The code above demonstrates several key patterns. First, the agent is configured with a hierarchical budget structure---per-call, hourly, and daily limits---providing multiple layers of cost control. Second, the agent can filter tools by price, excluding expensive options that don't fit its budget. Third, when budgets are exceeded, a callback notifies the operator, who can then decide whether to increase limits or accept the limitation.
+
 \subsection{Agent-to-Agent Economy}
 
-\begin{figure}[ht]
+As AI agents become more specialized, an ecosystem emerges where agents pay other agents for services. A research agent might pay a data collection agent for raw information, which then pays an analysis agent for insights, creating a value chain of specialized services.
+
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     agent/.style={
@@ -169,18 +189,26 @@ const result = await agent.run(
 \node[font=\tiny, gray] at (3,-3) {Agents pay each other for specialized services};
 
 \end{tikzpicture}
-\caption{Agent-to-agent payment flows}
+\caption{Agent-to-agent payment flows in a specialized service ecosystem}
 \label{fig:a2a-economy}
 \end{figure}
+
+This agent economy enables unprecedented specialization. Rather than building monolithic agents that handle every aspect of a task, developers can create focused agents that excel at specific functions. A data scraping agent might be optimized for web extraction, while a separate summarization agent excels at condensing information. By paying each other for services, these agents can collaborate to solve problems neither could handle alone.
+
+The economic implications are significant. Agent operators can monetize their agents' capabilities, creating a marketplace where the best-performing agents command premium prices. This creates incentives for continuous improvement and specialization, driving the overall quality of available agent services upward.
 
 \section{API Monetization}
 \label{sec:api-monetization}
 
-Transform any REST API into a paid service with per-request billing.
+API monetization traditionally requires significant infrastructure: user registration systems, subscription management, billing cycles, and payment processing integration. \tprotocol{} dramatically simplifies this by enabling per-request billing with a single middleware addition.
 
 \subsection{Traditional vs T402 Monetization}
 
-\begin{table}[ht]
+Traditional API monetization follows a subscription model. Users sign up, provide payment details, choose a plan, and then access the API within their plan's limits. This model works well for predictable, high-volume usage but creates friction for occasional users and barriers for experimentation.
+
+Consider a developer evaluating multiple weather APIs. Under the traditional model, they might need to create accounts and provide credit cards to four or five services just to compare response quality. With \tprotocol{}, they can make paid test calls to any API instantly, paying only for what they use.
+
+\begin{table}[htbp]
 \centering
 \caption{API Monetization Comparison}
 \label{tab:monetization-comparison}
@@ -189,45 +217,50 @@ Transform any REST API into a paid service with per-request billing.
 \toprule
 \textbf{Aspect} & \textbf{Traditional (Stripe)} & \textbf{T402} \\
 \midrule
-Setup & Create plans, pricing tiers & Add middleware \\
+Setup & Create plans, pricing tiers, billing integration & Add middleware (5 lines) \\
 User Flow & Sign up $\to$ Subscribe $\to$ Use & Use $\to$ Pay $\to$ Access \\
-Billing & Monthly invoices & Per-request instant \\
-Minimum & \$5-10/month subscription & \$0.001 per call \\
-Global & Credit card regions & Worldwide (crypto) \\
-Settlement & 2-3 business days & Instant \\
+Billing & Monthly invoices with reconciliation & Per-request instant settlement \\
+Minimum Viable & \$5-10/month subscription floor & \$0.001 per call possible \\
+Global Access & Credit card availability varies by region & Worldwide with crypto wallet \\
+Settlement & 2-3 business days to bank & Instant to wallet \\
+Chargeback Risk & Yes, 1-2\% typical & No, cryptographic finality \\
 \bottomrule
 \end{tabular}
 \end{table}
 
+The ``Use first, pay per use'' model fundamentally changes the relationship between API providers and consumers. Providers no longer need to convince users to commit to subscriptions; they simply need to provide value, and payment follows naturally. This lowers the barrier to adoption while ensuring providers are compensated for every request served.
+
 \subsection{Weather Data API Example}
 
-\begin{lstlisting}[language=typescript,caption={Weather API with tiered pricing}]
+Weather data demonstrates tiered pricing well. Current conditions require minimal computation, while extended forecasts demand sophisticated modeling. Historical data involves database queries proportional to the time range. \tprotocol{} allows pricing each endpoint according to its true cost and value.
+
+\begin{lstlisting}[language=typescript,caption={Weather API with tiered pricing reflecting computational cost}]
 import express from "express";
 import { paymentMiddleware } from "@t402/express";
 
 const app = express();
 
-// Tiered pricing based on data resolution
+// Tiered pricing based on data resolution and computation
 const pricingTiers = {
   "GET /api/weather/current": {
     price: "$0.001",
-    description: "Current weather"
+    description: "Current conditions - minimal computation"
   },
   "GET /api/weather/forecast/hourly": {
     price: "$0.005",
-    description: "48-hour hourly forecast"
+    description: "48-hour hourly forecast - moderate modeling"
   },
   "GET /api/weather/forecast/daily": {
     price: "$0.01",
-    description: "14-day daily forecast"
+    description: "14-day daily forecast - complex modeling"
   },
   "GET /api/weather/historical": {
     price: async (req) => {
-      // Price based on date range
+      // Price scales with data volume requested
       const days = calculateDays(req.query.start, req.query.end);
       return `$${(days * 0.001).toFixed(4)}`;
     },
-    description: "Historical weather data"
+    description: "Historical weather data - database intensive"
   }
 };
 
@@ -236,7 +269,7 @@ app.use(paymentMiddleware({
   payTo: "0xWeatherServiceWallet..."
 }));
 
-// Endpoints
+// Endpoints serve data after payment verification
 app.get("/api/weather/current", async (req, res) => {
   const { lat, lon } = req.query;
   const weather = await getWeather(lat, lon);
@@ -244,9 +277,13 @@ app.get("/api/weather/current", async (req, res) => {
 });
 \end{lstlisting}
 
-\subsection{Revenue Dashboard}
+The dynamic pricing for historical data demonstrates an important pattern. Rather than charging a flat rate regardless of the query scope, the price scales with the actual resources consumed. A query for one day of history costs \$0.001, while a year of data costs \$0.365. This fairness encourages usage while ensuring the provider covers their costs.
 
-\begin{figure}[ht]
+\subsection{Revenue Analytics}
+
+\tprotocol{} payments provide rich analytics data. Every payment includes the payer's address, the exact endpoint accessed, and the settlement transaction. Providers can analyze this data to understand usage patterns, identify high-value customers, and optimize pricing.
+
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     panel/.style={
@@ -283,25 +320,33 @@ app.get("/api/weather/current", async (req, res) => {
 };
 
 \end{tikzpicture}
-\caption{API monetization dashboard}
+\caption{API monetization dashboard showing real-time revenue metrics}
 \label{fig:api-dashboard}
 \end{figure}
+
+The network distribution data reveals which blockchain ecosystems your users prefer, informing decisions about which networks to prioritize for gas optimization. The endpoint breakdown helps identify which features drive revenue, guiding product development priorities.
 
 \section{Content Access}
 \label{sec:content-access}
 
-Enable pay-per-article, pay-per-video, and premium content access without subscriptions.
+Digital content---articles, videos, music, research papers---has traditionally been monetized through advertising or subscriptions. Both models have significant drawbacks: advertising compromises user experience and privacy, while subscriptions create commitment barriers and ``subscription fatigue.''
 
 \subsection{The Subscription Fatigue Problem}
 
+Modern consumers face an overwhelming array of subscription services. News outlets, streaming platforms, productivity tools, and specialized content providers each demand monthly commitments. The result is subscription fatigue: consumers either over-subscribe (paying for services they rarely use) or under-subscribe (missing valuable content behind paywalls they won't cross).
+
 \begin{infobox}[Subscription Fatigue]
-The average consumer subscribes to 6+ content services at \$10-15/month each. Most content goes unconsumed. \tprotocol{} enables pay-per-use: read one article for \$0.25 instead of subscribing for \$10/month.
+The average consumer subscribes to 6+ content services at \$10-15/month each, totaling \$60-90 monthly. Studies show most subscribed content goes unconsumed---users pay for access they don't use. \tprotocol{} enables pay-per-use: read one article for \$0.25 instead of subscribing for \$10/month, paying only for actual consumption.
 \end{infobox}
+
+Pay-per-access fundamentally changes this dynamic. A reader interested in a single investigative journalism piece shouldn't need to subscribe to an entire publication. A viewer wanting to watch one documentary shouldn't commit to a streaming platform. \tprotocol{} enables granular access where users pay precisely for what they consume.
 
 \subsection{News Article Paywall}
 
-\begin{lstlisting}[language=typescript,caption={News paywall implementation}]
-// Next.js API route with T402
+Implementing a pay-per-article news paywall demonstrates how content pricing can reflect value. Breaking news might command premium prices due to timeliness, while evergreen content could be priced lower. In-depth analysis and original research justify higher prices than commodity news.
+
+\begin{lstlisting}[language=typescript,caption={News paywall with value-based dynamic pricing}]
+// Next.js API route with T402 payment gate
 import { withPayment } from "@t402/next";
 
 export default withPayment(
@@ -309,50 +354,59 @@ export default withPayment(
     const { slug } = req.query;
     const article = await getArticle(slug);
 
+    // Full article delivered after payment
     res.json({
       title: article.title,
       content: article.content,
-      author: article.author
+      author: article.author,
+      publishedAt: article.publishedAt
     });
   },
   {
-    // Dynamic pricing by article type
+    // Dynamic pricing reflects article value
     price: async (req) => {
       const article = await getArticleMeta(req.query.slug);
       const prices = {
-        "breaking": "0.10",
-        "analysis": "0.25",
-        "research": "0.50",
-        "standard": "0.05"
+        "breaking": "0.10",    // Time-sensitive, high value
+        "analysis": "0.25",    // Expert insight
+        "research": "0.50",    // Original investigation
+        "standard": "0.05"     // General news
       };
       return prices[article.type] || "0.10";
     },
-    network: "eip155:8453"
+    network: "eip155:8453"  // Base network for low fees
   }
 );
 \end{lstlisting}
 
+This approach benefits both publishers and readers. Publishers can price content according to production cost and value, rather than averaging everything into a single subscription price. Readers pay fair prices for exactly what they read, without subsidizing content they'd never access.
+
 \subsection{Video Streaming}
 
-\begin{lstlisting}[language=typescript,caption={Pay-per-view video streaming}]
+Video content naturally lends itself to pay-per-view models. A two-hour film requires more infrastructure and delivers more value than a two-minute clip. Pricing by duration aligns cost with consumption.
+
+\begin{lstlisting}[language=typescript,caption={Pay-per-view video with duration-based pricing}]
 // Video access with time-based pricing
 app.get("/api/video/:id/access",
   paymentMiddleware.route({
     price: async (req) => {
       const video = await getVideoMeta(req.params.id);
       // $0.01 per minute of content
-      return `$${(video.duration / 60 * 0.01).toFixed(4)}`;
+      const pricePerMinute = 0.01;
+      const minutes = video.duration / 60;
+      return `$${(minutes * pricePerMinute).toFixed(4)}`;
     }
   }),
   async (req, res) => {
     const { payer, transaction } = req.t402Payment;
 
     // Generate time-limited access token
+    // Prevents sharing and ensures payment per view
     const accessToken = await generateAccessToken({
       videoId: req.params.id,
       payer,
       transaction,
-      expiresIn: "24h"
+      expiresIn: "24h"  // 24-hour viewing window
     });
 
     res.json({
@@ -363,16 +417,20 @@ app.get("/api/video/:id/access",
 );
 \end{lstlisting}
 
+The access token mechanism ensures that payment grants temporary access rather than permanent ownership. This mirrors the traditional rental model while providing the convenience of instant, global access without account creation.
+
 \section{Micropayments}
 \label{sec:micropayments}
 
-Enable payments below traditional minimums (\$0.50) for IoT, compute, and data services.
+Perhaps no use case demonstrates \tprotocol{}'s advantages more clearly than micropayments. Traditional payment processors impose minimum fees that make sub-dollar transactions economically impossible. A \$0.30 minimum fee on a \$0.01 transaction represents a 3,000\% overhead, rendering the payment absurd.
 
 \subsection{Economic Viability}
 
-\begin{table}[ht]
+\tprotocol{} enables true micropayments by reducing transaction costs to under 1\% even for tiny amounts. This unlocks entirely new business models that were previously impossible.
+
+\begin{table}[htbp]
 \centering
-\caption{Micropayment Economics}
+\caption{Micropayment Economics: Traditional vs T402}
 \label{tab:micropayment-economics}
 \footnotesize
 \begin{tabular}{l r r r}
@@ -387,15 +445,19 @@ Enable payments below traditional minimums (\$0.50) for IoT, compute, and data s
 \end{tabular}
 \end{table}
 
+The economic impact is transformative. Services that couldn't exist with traditional payments---per-sensor IoT data, per-millisecond compute, per-byte storage access---become viable. The long tail of small transactions, previously abandoned, becomes a significant revenue stream.
+
 \subsection{IoT Data Marketplace}
 
-\begin{lstlisting}[language=typescript,caption={IoT sensor data marketplace}]
-// Sensor data pricing: $0.0001 per reading
+Internet of Things devices generate continuous streams of valuable data: temperature readings, air quality measurements, traffic counts, energy consumption. This data has value, but each individual reading is worth fractions of a cent. \tprotocol{} enables monetizing this data at its natural granularity.
+
+\begin{lstlisting}[language=typescript,caption={IoT sensor data marketplace with granular pricing}]
+// Sensor data pricing: fraction of a cent per reading
 const sensorPricing = {
-  temperature: "0.0001",
+  temperature: "0.0001",     // $0.0001 per reading
   humidity: "0.0001",
-  air_quality: "0.0005",
-  traffic: "0.001",
+  air_quality: "0.0005",     // More valuable sensor type
+  traffic: "0.001",          // High-value infrastructure data
   energy: "0.0002"
 };
 
@@ -409,13 +471,14 @@ app.get("/api/sensors/:type/latest",
   }
 );
 
-// Bulk data: $0.05 per 1000 readings
+// Bulk data with volume discount
 app.get("/api/sensors/:type/bulk",
   paymentMiddleware.route({
     price: async (req) => {
       const count = Math.min(req.query.count || 100, 10000);
       const basePrice = parseFloat(sensorPricing[req.params.type]);
-      return `$${(count * basePrice * 0.8).toFixed(6)}`;  // 20% bulk discount
+      // 20% discount for bulk purchases
+      return `$${(count * basePrice * 0.8).toFixed(6)}`;
     }
   }),
   async (req, res) => {
@@ -428,9 +491,13 @@ app.get("/api/sensors/:type/bulk",
 );
 \end{lstlisting}
 
+This model enables entirely new IoT business models. A smart city might deploy thousands of environmental sensors, each generating revenue through data sales. The sensors pay for themselves through micro-transactions, creating sustainable infrastructure funding.
+
 \subsection{Compute-on-Demand}
 
-\begin{figure}[ht]
+Cloud computing typically bills by the hour or minute, with minimum commitments. \tprotocol{} enables billing at the actual resource consumption level: per CPU-second and per megabyte of memory.
+
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     node/.style={
@@ -456,18 +523,20 @@ app.get("/api/sensors/:type/bulk",
 \node[font=\tiny, gray, align=center] at (4,-1.5) {Price: \$0.001 per CPU-second\\+ \$0.0001 per MB memory};
 
 \end{tikzpicture}
-\caption{Pay-per-compute architecture}
+\caption{Pay-per-compute architecture with resource-based pricing}
 \label{fig:compute-architecture}
 \end{figure}
 
-\begin{lstlisting}[language=typescript,caption={Serverless compute pricing}]
+This granular billing enables new use cases. A developer running a quick script doesn't need to provision a server or commit to hourly billing---they pay for the 500 milliseconds of compute they actually used. Batch processing jobs pay exactly for their resource consumption without rounding up to billing intervals.
+
+\begin{lstlisting}[language=typescript,caption={Serverless compute with resource-based pricing}]
 // Price based on estimated compute resources
 app.post("/api/compute/run",
   paymentMiddleware.route({
     price: async (req) => {
       const { code, timeout, memory } = req.body;
 
-      // Estimate cost
+      // Calculate price from resource limits
       const cpuSeconds = timeout / 1000;
       const memoryMB = memory / (1024 * 1024);
 
@@ -483,7 +552,9 @@ app.post("/api/compute/run",
       result: result.output,
       metrics: {
         cpuTime: result.cpuTime,
-        memoryUsed: result.memoryUsed
+        memoryUsed: result.memoryUsed,
+        // Could refund difference if actual < estimated
+        actualCost: calculateActualCost(result)
       }
     });
   }
@@ -493,11 +564,13 @@ app.post("/api/compute/run",
 \section{Cross-Border Payments}
 \label{sec:cross-border}
 
-Enable instant global payments without currency conversion or banking restrictions.
+International payments remain one of the most friction-laden areas of traditional finance. Currency conversion, correspondent banking, regulatory compliance, and processing delays create barriers that especially impact small transactions and underserved regions.
 
 \subsection{Traditional Cross-Border Challenges}
 
-\begin{table}[ht]
+A freelancer in Southeast Asia completing a \$50 project for a client in Europe faces significant hurdles. Wire transfers cost \$25-50 in fees alone, making small payments impractical. PayPal may not operate in their country, or charges 4-5\% plus currency conversion fees. Even when payment succeeds, funds might take 3-5 business days to arrive.
+
+\begin{table}[htbp]
 \centering
 \caption{Cross-Border Payment Comparison}
 \label{tab:cross-border}
@@ -506,26 +579,30 @@ Enable instant global payments without currency conversion or banking restrictio
 \toprule
 \textbf{Method} & \textbf{Time} & \textbf{Fee} & \textbf{Access} \\
 \midrule
-Wire Transfer & 3-5 days & \$25-50 & Bank account \\
-PayPal & 1-3 days & 4-5\% & Limited countries \\
-Stripe & 2-7 days & 3.9\% + \$0.30 & Credit card \\
+Wire Transfer & 3-5 days & \$25-50 flat & Bank account required \\
+PayPal & 1-3 days & 4-5\% + FX & Limited countries \\
+Stripe & 2-7 days & 3.9\% + \$0.30 & Credit card required \\
 T402 & Instant & $<$1\% & Global (crypto wallet) \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Freelancer Platform}
+\tprotocol{} eliminates these barriers. USDT provides a stable value reference regardless of local currency volatility. Blockchain settlement is global by design---a transaction from Japan to Brazil settles as quickly as one within the same city. Fees remain minimal regardless of transaction geography or amount.
 
-\begin{lstlisting}[language=typescript,caption={Global freelancer payments}]
+\subsection{Freelancer Platform Example}
+
+Consider a platform connecting global freelancers with clients. Traditional payment processing requires integrating multiple payment methods for different regions, handling currency conversion, and managing payment disputes. With \tprotocol{}, payment flows directly from client to freelancer upon work acceptance.
+
+\begin{lstlisting}[language=typescript,caption={Global freelancer payments with direct settlement}]
 // Freelancer delivers work, client pays instantly
 app.post("/api/deliverables/:id/accept",
   paymentMiddleware.route({
     price: async (req) => {
       const deliverable = await getDeliverable(req.params.id);
-      return deliverable.agreedPrice;
+      return deliverable.agreedPrice;  // Price agreed upfront
     },
     payTo: async (req) => {
-      // Pay directly to freelancer's wallet
+      // Pay directly to freelancer's wallet - no intermediary
       const deliverable = await getDeliverable(req.params.id);
       return deliverable.freelancerWallet;
     }
@@ -533,13 +610,14 @@ app.post("/api/deliverables/:id/accept",
   async (req, res) => {
     const { transaction } = req.t402Payment;
 
-    // Mark as paid
+    // Mark as paid with on-chain proof
     await updateDeliverable(req.params.id, {
       status: "paid",
-      paymentTx: transaction
+      paymentTx: transaction,
+      paidAt: new Date()
     });
 
-    // Release to client
+    // Release deliverable to client
     const deliverable = await getDeliverable(req.params.id);
     res.json({
       files: deliverable.files,
@@ -549,18 +627,22 @@ app.post("/api/deliverables/:id/accept",
 );
 \end{lstlisting}
 
+This model provides significant advantages. The freelancer receives payment instantly upon work acceptance---no waiting days for bank transfers. The platform doesn't need to hold funds or manage escrow; payment flows directly between parties with on-chain proof. Disputes can reference the immutable transaction record.
+
 \section{Research Data Access}
 \label{sec:research-data}
 
-Academic and commercial research data marketplaces.
+Academic and commercial research increasingly depends on data. Researchers need access to datasets for analysis, model training, and validation. Data providers need sustainable revenue models. Traditional licensing involves lengthy negotiations, minimum commitments, and one-size-fits-all pricing.
 
-\begin{lstlisting}[language=typescript,caption={Research dataset marketplace}]
-// Dataset pricing tiers
+\tprotocol{} enables tiered data access where researchers pay for exactly the access level they need. A student exploring a dataset can access a free preview. A researcher validating a methodology can purchase a sample. A production system can access the full dataset. Each tier is priced appropriately.
+
+\begin{lstlisting}[language=typescript,caption={Research dataset marketplace with tiered access}]
+// Dataset pricing tiers reflecting access levels
 const datasetPricing = {
-  preview: { rows: 100, price: "0" },
-  sample: { rows: 1000, price: "1.00" },
-  standard: { rows: 10000, price: "5.00" },
-  full: { rows: -1, price: "25.00" }  // Unlimited
+  preview: { rows: 100, price: "0" },           // Free exploration
+  sample: { rows: 1000, price: "1.00" },        // Validation
+  standard: { rows: 10000, price: "5.00" },     // Research use
+  full: { rows: -1, price: "25.00" }            // Production access
 };
 
 app.get("/api/datasets/:id/download",
@@ -569,7 +651,7 @@ app.get("/api/datasets/:id/download",
       const tier = req.query.tier || "sample";
       return datasetPricing[tier]?.price || "5.00";
     },
-    // Free preview tier
+    // Free preview tier requires no payment
     skipPayment: (req) => req.query.tier === "preview"
   }),
   async (req, res) => {
@@ -585,19 +667,26 @@ app.get("/api/datasets/:id/download",
       metadata: dataset.metadata,
       data,
       tier,
-      totalRows: dataset.data.length
+      totalRows: dataset.data.length,
+      // Help users understand what they're getting
+      accessedRows: data.length,
+      fullAccessPrice: datasetPricing.full.price
     });
   }
 );
 \end{lstlisting}
 
+This model democratizes data access. Researchers in underfunded institutions can access data affordably at lower tiers. Data providers earn revenue proportional to the value delivered. The free preview tier encourages exploration and discovery while paid tiers support sustainable data curation.
+
 \section{Gaming and Virtual Goods}
 \label{sec:gaming}
 
-In-game purchases and virtual item trading.
+Video games have long experimented with digital economies: in-game purchases, virtual currencies, and item trading. \tprotocol{} brings several advantages: direct player-to-player payments, no platform fees on trades, and cross-game item portability potential.
 
-\begin{lstlisting}[language=typescript,caption={Game item marketplace}]
-// In-game item purchase
+In-game purchases through \tprotocol{} eliminate traditional app store fees (typically 30\%). Players pay directly for items, with the game developer receiving the full amount minus minimal blockchain fees. This either increases developer revenue or allows lower prices for players---or both.
+
+\begin{lstlisting}[language=typescript,caption={Game item marketplace with direct payments}]
+// In-game item purchase - no app store fees
 app.post("/api/game/items/purchase",
   paymentMiddleware.route({
     price: async (req) => {
@@ -609,10 +698,11 @@ app.post("/api/game/items/purchase",
     const { payer, transaction } = req.t402Payment;
     const { itemId, playerId } = req.body;
 
-    // Grant item to player
+    // Grant item to player with provenance
     await grantItem(playerId, itemId, {
       purchasedBy: payer,
-      transaction
+      transaction,
+      purchasedAt: new Date()
     });
 
     res.json({
@@ -622,35 +712,40 @@ app.post("/api/game/items/purchase",
   }
 );
 
-// Player-to-player trading
+// Player-to-player trading - direct P2P payment
 app.post("/api/game/trade/execute",
   paymentMiddleware.route({
     price: (req) => req.body.price,
     payTo: async (req) => {
-      // Pay seller directly
+      // Pay seller directly - platform takes no cut
       const seller = await getPlayer(req.body.sellerId);
       return seller.walletAddress;
     }
   }),
   async (req, res) => {
+    const { transaction } = req.t402Payment;
+
     // Transfer item between players
     await transferItem(
       req.body.sellerId,
       req.body.buyerId,
-      req.body.itemId
+      req.body.itemId,
+      { transaction }  // On-chain proof of sale
     );
 
-    res.json({ success: true });
+    res.json({ success: true, transaction });
   }
 );
 \end{lstlisting}
 
+Player-to-player trading demonstrates \tprotocol{}'s peer-to-peer capabilities. The \code{payTo} field dynamically routes payment to the seller's wallet, enabling true player economies without platform intermediation. The on-chain transaction provides proof of sale, enabling dispute resolution if needed.
+
 \section{Decision Framework}
 \label{sec:decision-framework}
 
-Use this framework to determine if \tprotocol{} is appropriate for your use case.
+Not every payment scenario is ideal for \tprotocol{}. Understanding when to use it---and when traditional methods might be more appropriate---helps developers make informed architectural decisions.
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     decision/.style={
@@ -704,38 +799,47 @@ Use this framework to determine if \tprotocol{} is appropriate for your use case
 \draw[arrow] (ai) -- node[below, font=\tiny] {No} (no);
 
 \end{tikzpicture}
-\caption{T402 decision framework}
+\caption{Decision framework for evaluating T402 fit}
 \label{fig:decision-framework}
 \end{figure}
 
 \subsection{Ideal Use Cases}
 
-\begin{table}[ht]
+Certain characteristics make a use case particularly well-suited for \tprotocol{}:
+
+\begin{table}[htbp]
 \centering
-\caption{T402 Fit Assessment}
+\caption{T402 Fit Assessment by Use Case}
 \label{tab:fit-assessment}
 \footnotesize
-\begin{tabular}{l c c}
+\begin{tabular}{l c p{5cm}}
 \toprule
 \textbf{Use Case} & \textbf{T402 Fit} & \textbf{Key Benefit} \\
 \midrule
-AI Agent Tools & Excellent & Autonomous payments \\
-API Micropayments & Excellent & Sub-cent transactions \\
-Global Content & Excellent & No geographic limits \\
-IoT Data & Excellent & High-volume micro-tx \\
-Freelance Platforms & Good & Instant settlement \\
-E-commerce & Moderate & User familiarity \\
-Recurring Billing & Limited & Use subscriptions \\
+AI Agent Tools & Excellent & Fully autonomous payments without human intervention \\
+API Micropayments & Excellent & Sub-cent transactions economically viable \\
+Global Content & Excellent & No geographic restrictions or currency barriers \\
+IoT Data & Excellent & High-volume micro-transactions at scale \\
+Freelance Platforms & Good & Instant settlement, no intermediary holding funds \\
+E-commerce & Moderate & Users may prefer familiar payment methods \\
+Recurring Billing & Limited & Use subscription extensions or traditional methods \\
 \bottomrule
 \end{tabular}
 \end{table}
 
+\subsection{When NOT to Use T402}
+
+Equally important is understanding scenarios where traditional payments may be more appropriate:
+
 \begin{warningbox}[When NOT to Use T402]
 \begin{itemize}
-    \item Users unfamiliar with crypto wallets
-    \item Strict regulatory compliance requirements
-    \item Recurring subscription billing (use extensions)
-    \item Refund-heavy business models
+    \item \textbf{Users unfamiliar with crypto wallets}: Consumer applications targeting mainstream users may face adoption friction
+    \item \textbf{Strict regulatory compliance}: Some jurisdictions have unclear cryptocurrency regulations
+    \item \textbf{Recurring subscription billing}: Monthly subscriptions are better served by traditional recurring billing (though \tprotocol{} extensions can help)
+    \item \textbf{Refund-heavy business models}: Blockchain transactions are irreversible; businesses requiring frequent refunds need additional infrastructure
+    \item \textbf{Fiat-only requirements}: Some business contexts legally require fiat currency settlement
 \end{itemize}
 \end{warningbox}
+
+The best implementations often combine \tprotocol{} with traditional payments, offering users choice. A content platform might accept both credit cards and \tprotocol{} payments, capturing users comfortable with either method while providing the benefits of each.
 

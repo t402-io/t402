@@ -2,78 +2,392 @@
 \chapter{Glossary}
 \label{app:glossary}
 
+This glossary provides definitions for technical terms used throughout the \tprotocol{} whitepaper, organized alphabetically.
+
+\section*{A}
+
 \begin{description}[style=nextline]
 
 \item[A2A (Agent-to-Agent)]
-Protocol for direct communication between AI agents, enabling autonomous agent payments.
+Protocol for direct communication between AI agents, enabling autonomous agent-to-agent payments without human intervention. T402 supports A2A as a transport layer.
+
+\item[Account Abstraction]
+Blockchain design pattern that separates transaction signing from account ownership, enabling features like gasless transactions, social recovery, and multi-signature wallets. ERC-4337 is the primary standard for EVM chains.
+
+\item[APT]
+Native token of the Aptos blockchain, used for gas fees and staking.
+
+\item[Aptos]
+Layer-1 blockchain using Move language for smart contracts, developed by former Meta engineers. Features parallel transaction execution and the Fungible Asset standard for tokens.
+
+\item[Asset Hub]
+Polkadot system parachain dedicated to asset management, where USDT is deployed as asset ID 1984.
 
 \item[ATA (Associated Token Account)]
-Solana account derived from a wallet address and token mint, used for holding SPL tokens.
-
-\item[CAIP-2]
-Chain Agnostic Improvement Proposal 2, a standard for blockchain network identifiers (e.g., \code{eip155:8453}).
-
-\item[Client]
-Any application or agent that requests access to protected resources and submits payments.
-
-\item[EIP-3009]
-Ethereum Improvement Proposal enabling gasless token transfers via cryptographic signatures.
-
-\item[EIP-712]
-Ethereum standard for typed structured data signing, providing human-readable signing prompts.
-
-\item[ERC-4337]
-Account abstraction standard enabling smart contract wallets and gasless transactions.
-
-\item[Facilitator]
-Service that handles payment verification and blockchain settlement on behalf of Resource Servers.
-
-\item[HTTP 402]
-HTTP status code ``Payment Required,'' used by \tprotocol{} to signal payment requirements.
-
-\item[Jetton]
-TON blockchain's fungible token standard, analogous to ERC-20 on Ethereum.
-
-\item[LayerZero]
-Cross-chain messaging protocol used by USDT0 for omnichain transfers.
-
-\item[MCP (Model Context Protocol)]
-Protocol enabling AI agents to interact with tools and resources, with \tprotocol{} support for paid tools.
-
-\item[Nonce]
-Unique value used once to prevent replay attacks; in \tprotocol{}, a 32-byte random value.
-
-\item[OFT (Omnichain Fungible Token)]
-LayerZero token standard enabling native cross-chain transfers; USDT0 is an OFT.
-
-\item[PaymentPayload]
-JSON structure containing signed payment authorization sent by clients.
-
-\item[PaymentRequired]
-JSON structure returned by servers describing acceptable payment methods.
-
-\item[Resource Server]
-Service providing protected resources (APIs, content) that require payment for access.
-
-\item[Settlement]
-The process of executing a payment transaction on the blockchain.
-
-\item[SPL Token]
-Solana Program Library token standard, analogous to ERC-20 on Ethereum.
-
-\item[Stablecoin]
-Cryptocurrency designed to maintain stable value, typically pegged to fiat currency (e.g., USDT).
-
-\item[TRC-20]
-TRON blockchain's token standard, analogous to ERC-20 on Ethereum.
-
-\item[USDT]
-Tether USD, the most widely used stablecoin, available on multiple blockchains.
-
-\item[USDT0]
-Tether's omnichain USDT implementation using LayerZero OFT standard.
-
-\item[Verification]
-The process of validating a payment signature and parameters before settlement.
+Solana account derived deterministically from a wallet address and token mint address. Required for holding SPL tokens; created automatically by the facilitator if needed.
 
 \end{description}
+
+\section*{B}
+
+\begin{description}[style=nextline]
+
+\item[Base58Check]
+Encoding format used by TRON for addresses, featuring a T-prefix and built-in checksum for error detection.
+
+\item[Blockhash]
+Solana's mechanism for transaction freshness, requiring a recent blockhash (within ~2 minutes) to prevent replay attacks.
+
+\item[Bounceable Address]
+TON address format that returns funds if the destination contract cannot process the message. Used for smart contracts.
+
+\end{description}
+
+\section*{C}
+
+\begin{description}[style=nextline]
+
+\item[CAIP-2]
+Chain Agnostic Improvement Proposal 2, a standard format for blockchain network identifiers. Format: \code{namespace:reference} (e.g., \code{eip155:8453} for Base, \code{solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp} for Solana mainnet).
+
+\item[CAIP-10]
+Chain Agnostic Improvement Proposal 10, extending CAIP-2 to include account addresses. Format: \code{namespace:reference:address}.
+
+\item[Clarity]
+Smart contract language for the Stacks blockchain, designed for predictability and security with decidable execution.
+
+\item[Client]
+Any application, service, or AI agent that requests access to protected resources and submits payment authorizations. Clients sign payments off-chain without needing native tokens for gas.
+
+\end{description}
+
+\section*{D}
+
+\begin{description}[style=nextline]
+
+\item[Deadline]
+Unix timestamp specifying when a payment authorization expires. Prevents stale authorizations from being settled after the client's intent has lapsed.
+
+\item[DOT]
+Native token of the Polkadot network, used for governance, staking, and parachain bonding.
+
+\end{description}
+
+\section*{E}
+
+\begin{description}[style=nextline]
+
+\item[EIP-712]
+Ethereum Improvement Proposal for typed structured data signing. Provides human-readable signing prompts in wallets, showing exactly what is being authorized rather than opaque hex data.
+
+\item[EIP-3009]
+Ethereum Improvement Proposal enabling gasless token transfers via cryptographic signatures. The payer signs an authorization; a third party (facilitator) submits and pays for the transaction.
+
+\item[ERC-20]
+Ethereum token standard defining a common interface for fungible tokens. USDT on Ethereum follows this standard.
+
+\item[ERC-4337]
+Ethereum account abstraction standard enabling smart contract wallets with features like gasless transactions, batched operations, and session keys.
+
+\item[Exact Scheme]
+The primary \tprotocol{} payment scheme where the payment amount exactly matches the required amount. The most common and simplest scheme.
+
+\item[Existential Deposit]
+Minimum balance required to keep an account alive on Substrate-based chains like Polkadot. Below this threshold, the account is reaped.
+
+\end{description}
+
+\section*{F}
+
+\begin{description}[style=nextline]
+
+\item[FA2 (TZIP-12)]
+Tezos token standard supporting fungible, non-fungible, and multi-asset tokens. USDt on Tezos is an FA2 token with token ID 0.
+
+\item[Facilitator]
+Central service in \tprotocol{} that handles payment verification and on-chain settlement. Maintains hot wallets on all supported networks, sponsors gas fees, and provides unified API for clients and servers.
+
+\item[Finality]
+The point at which a blockchain transaction becomes irreversible. Varies by network: Solana (~400ms), TON (~5s), EVM (~12s-15min), Stacks (~10min via Bitcoin).
+
+\item[Fungible Asset]
+Aptos's modern token standard replacing legacy Coin module. USDT on Aptos uses the Fungible Asset standard.
+
+\end{description}
+
+\section*{G}
+
+\begin{description}[style=nextline]
+
+\item[Gas]
+Computational unit measuring execution cost on blockchain networks. \tprotocol{} eliminates gas concerns for payers by having the facilitator sponsor all gas fees.
+
+\item[Gasless Transaction]
+Transaction where the end user does not pay gas fees. In \tprotocol{}, the facilitator pays gas using EIP-3009 (EVM), meta-transactions, or similar mechanisms.
+
+\item[Ghostnet]
+Tezos permanent testnet, identified by CAIP-2 as \code{tezos:NetXnHfVqm9iesp}.
+
+\end{description}
+
+\section*{H}
+
+\begin{description}[style=nextline]
+
+\item[Hot Wallet]
+Cryptocurrency wallet connected to the internet for immediate transaction execution. The facilitator maintains hot wallets for gas sponsorship.
+
+\item[HTTP 402]
+HTTP status code ``Payment Required,'' originally reserved in HTTP/1.1. \tprotocol{} implements the intended semantics: the server requires payment before granting access.
+
+\end{description}
+
+\section*{I--J}
+
+\begin{description}[style=nextline]
+
+\item[Jetton]
+TON blockchain's fungible token standard, analogous to ERC-20. USDT on TON is implemented as a Jetton with separate wallet contracts per holder.
+
+\item[Jetton Wallet]
+Per-user contract on TON that holds a specific Jetton balance. Created automatically when receiving Jettons for the first time.
+
+\end{description}
+
+\section*{K--L}
+
+\begin{description}[style=nextline]
+
+\item[LayerZero]
+Cross-chain messaging protocol enabling tokens to exist natively on multiple chains. USDT0 uses LayerZero's Omnichain Fungible Token (OFT) standard.
+
+\end{description}
+
+\section*{M}
+
+\begin{description}[style=nextline]
+
+\item[MCP (Model Context Protocol)]
+Anthropic's protocol enabling AI models to interact with external tools and resources. \tprotocol{} provides an MCP server allowing AI agents to make payments.
+
+\item[Mechanism]
+In \tprotocol{}, the combination of a payment scheme and network implementation. Example: ``exact scheme on EVM'' is a mechanism.
+
+\item[Meta-transaction]
+Transaction signed by one party but submitted and paid for by another. Core enabler of gasless user experiences.
+
+\item[Move]
+Smart contract language used by Aptos (and Sui), featuring resource-oriented programming and formal verification support.
+
+\end{description}
+
+\section*{N}
+
+\begin{description}[style=nextline]
+
+\item[NEAR]
+Layer-1 blockchain using sharding for scalability. Features human-readable account names and the NEP-141 token standard.
+
+\item[NEP-141]
+NEAR Enhancement Proposal 141, the fungible token standard for NEAR Protocol. USDT on NEAR follows this standard.
+
+\item[Nile Testnet]
+TRON's test network for development, identified by CAIP-2 as \code{tron:nile}.
+
+\item[Non-bounceable Address]
+TON address format that does not return funds if delivery fails. Used for externally owned accounts (wallets).
+
+\item[Nonce]
+Number used once to prevent replay attacks. In \tprotocol{}, a cryptographically random 32-byte value included in payment authorizations.
+
+\end{description}
+
+\section*{O}
+
+\begin{description}[style=nextline]
+
+\item[OFT (Omnichain Fungible Token)]
+LayerZero token standard enabling native cross-chain transfers without bridges. USDT0 is Tether's OFT implementation.
+
+\item[Off-chain Signing]
+Creating cryptographic signatures without submitting transactions to the blockchain. \tprotocol{} clients sign payment authorizations off-chain.
+
+\item[On-chain Settlement]
+Executing the actual token transfer on the blockchain. In \tprotocol{}, the facilitator performs settlement after verifying signatures.
+
+\item[Operator]
+In Tezos FA2, an address authorized to transfer tokens on behalf of the owner. The facilitator must be added as an operator.
+
+\end{description}
+
+\section*{P}
+
+\begin{description}[style=nextline]
+
+\item[Parachain]
+Independent blockchain connected to the Polkadot relay chain, benefiting from shared security. Asset Hub is Polkadot's system parachain for tokens.
+
+\item[PaymentPayload]
+JSON structure containing a signed payment authorization sent by clients in the \code{X-PAYMENT} header. Includes payer, signature, and authorization details.
+
+\item[PaymentRequired]
+JSON structure returned by servers in 402 responses, describing acceptable payment methods including network, scheme, amount, and recipient address.
+
+\item[Polkadot]
+Heterogeneous multi-chain protocol enabling cross-chain communication. USDT is deployed on the Asset Hub parachain.
+
+\end{description}
+
+\section*{Q}
+
+\begin{description}[style=nextline]
+
+\item[query\_id]
+TON's mechanism for transaction identification, a 64-bit value ensuring message uniqueness and enabling response correlation.
+
+\end{description}
+
+\section*{R}
+
+\begin{description}[style=nextline]
+
+\item[Replay Attack]
+Reusing a valid transaction or authorization to execute it multiple times. \tprotocol{} prevents replays via nonces and deadlines.
+
+\item[Resource Server]
+Service providing protected resources (APIs, content, compute) that require payment for access. Integrates \tprotocol{} middleware.
+
+\item[ResourceInfo]
+Optional metadata in \tprotocol{} v2 describing the protected resource, enabling client UIs to display meaningful payment context.
+
+\end{description}
+
+\section*{S}
+
+\begin{description}[style=nextline]
+
+\item[Scheme]
+Payment logic defining how amounts are calculated and validated. Currently \tprotocol{} supports ``exact'' (amount matches exactly); ``up-to'' (streaming/variable) planned.
+
+\item[Settlement]
+Process of executing a payment transaction on the blockchain, transferring tokens from payer to recipient.
+
+\item[SIP-010]
+Stacks Improvement Proposal 010, the fungible token standard for the Stacks blockchain, analogous to ERC-20.
+
+\item[SPL Token]
+Solana Program Library token standard for fungible and non-fungible tokens on Solana. USDT on Solana is an SPL token.
+
+\item[SS58]
+Substrate-based address format used by Polkadot, featuring a network prefix and checksum.
+
+\item[Stablecoin]
+Cryptocurrency designed to maintain a stable value relative to a reference asset, typically USD. USDT is the largest stablecoin by market capitalization.
+
+\item[Stacks]
+Bitcoin Layer-2 network enabling smart contracts secured by Bitcoin's proof-of-work through its Proof of Transfer consensus.
+
+\item[Storage Deposit]
+NEAR's mechanism for paying storage costs, required before an account can hold tokens. Part of NEP-141 registration.
+
+\end{description}
+
+\section*{T}
+
+\begin{description}[style=nextline]
+
+\item[Tezos]
+Self-amending blockchain with formal verification support. Uses the FA2 (TZIP-12) standard for tokens including USDt.
+
+\item[TL-B]
+Type Language - Binary, TON's binary serialization format for message encoding.
+
+\item[TON (The Open Network)]
+Layer-1 blockchain originally developed by Telegram, featuring high throughput and the Jetton token standard.
+
+\item[TRC-20]
+TRON blockchain's fungible token standard, modeled after ERC-20. USDT on TRON follows this standard.
+
+\item[Transport]
+In \tprotocol{}, the communication layer for exchanging payment data. Supported transports: HTTP (402 status), MCP (AI tools), A2A (agent communication).
+
+\item[TRON]
+High-throughput blockchain with delegated proof-of-stake consensus. Hosts the largest USDT circulation.
+
+\item[TRX]
+Native token of the TRON network, used for bandwidth, energy, and governance.
+
+\end{description}
+
+\section*{U}
+
+\begin{description}[style=nextline]
+
+\item[Up-To Scheme]
+Planned \tprotocol{} payment scheme for streaming or variable amounts, where the client authorizes up to a maximum and the server settles the actual consumed amount.
+
+\item[USDT]
+Tether USD, the most widely used stablecoin, maintaining approximate 1:1 parity with the US dollar. Available on 12+ blockchains.
+
+\item[USDT0]
+Tether's omnichain USDT implementation using LayerZero OFT standard, enabling native transfers across 19+ EVM chains.
+
+\item[USDt]
+Tether USD on Tezos, using the FA2 standard. Note the lowercase ``t'' distinguishing it from USDT on other chains.
+
+\end{description}
+
+\section*{V}
+
+\begin{description}[style=nextline]
+
+\item[Verification]
+Process of validating a payment signature and parameters before settlement. Checks signature validity, balance sufficiency, nonce freshness, and deadline.
+
+\item[V1 (Protocol Version 1)]
+Legacy \tprotocol{} format using simple chain identifiers. Still supported for backwards compatibility.
+
+\item[V2 (Protocol Version 2)]
+Current \tprotocol{} format using CAIP-2 network identifiers, ResourceInfo, and extension support.
+
+\end{description}
+
+\section*{W}
+
+\begin{description}[style=nextline]
+
+\item[Wallet]
+Software or hardware managing private keys and enabling blockchain interactions. In \tprotocol{}, client wallets sign payment authorizations.
+
+\item[WDK (Wallet Development Kit)]
+Tether's toolkit for building wallets with USDT/USDT0 support. \tprotocol{} provides WDK integration packages.
+
+\item[Westend]
+Polkadot's canary network for testing, with Asset Hub at CAIP-2 \code{polkadot:e143f23803ac50e8f6f8e62695d1ce9e}.
+
+\item[Workchain]
+TON's parallel blockchain shards. Workchain 0 (basechain) handles standard transactions and smart contracts.
+
+\end{description}
+
+\section*{X--Z}
+
+\begin{description}[style=nextline]
+
+\item[X-PAYMENT]
+HTTP header containing the base64url-encoded payment payload in \tprotocol{} requests.
+
+\item[X-PAYMENT-REQUIRED]
+HTTP header containing base64url-encoded payment requirements in 402 responses.
+
+\item[X-PAYMENT-RESPONSE]
+HTTP header containing settlement confirmation details after successful payment.
+
+\item[XCM (Cross-Consensus Messaging)]
+Polkadot's protocol for cross-chain communication between parachains and with external networks.
+
+\item[XTZ]
+Native token of the Tezos blockchain, used for gas fees, staking, and governance.
+
+\end{description}
+
