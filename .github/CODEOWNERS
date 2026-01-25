@@ -1,0 +1,65 @@
+# T402 CODEOWNERS
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repo
+* @t402-io/core
+
+# ============================================================
+# SDK Ownership
+# ============================================================
+
+# TypeScript SDK
+/sdks/typescript/ @t402-io/typescript
+
+# Go SDK
+/sdks/go/ @t402-io/go
+
+# Python SDK
+/sdks/python/ @t402-io/python
+
+# Java SDK
+/sdks/java/ @t402-io/java
+
+# ============================================================
+# Services
+# ============================================================
+
+# Facilitator service (critical infrastructure)
+/services/facilitator/ @t402-io/infrastructure @t402-io/go
+
+# Demo application
+/services/demo/ @t402-io/typescript
+
+# Documentation site
+/services/docs/ @t402-io/docs
+/services/site/ @t402-io/docs
+
+# ============================================================
+# Protocol Specifications
+# ============================================================
+
+/specs/ @t402-io/protocol
+
+# ============================================================
+# Infrastructure & CI/CD
+# ============================================================
+
+/.github/ @t402-io/infrastructure
+/docker-compose*.yml @t402-io/infrastructure
+/Dockerfile* @t402-io/infrastructure
+
+# ============================================================
+# Contracts
+# ============================================================
+
+/contracts/ @t402-io/contracts
+
+# ============================================================
+# Root Configuration Files
+# ============================================================
+
+/CLAUDE.md @t402-io/core
+/ROADMAP.md @t402-io/core
+/DEVELOPMENT_PLAN_2026.md @t402-io/core
+/SECURITY.md @t402-io/security
+/CONTRIBUTING.md @t402-io/core
