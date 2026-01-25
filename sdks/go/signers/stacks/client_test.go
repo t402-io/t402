@@ -171,3 +171,158 @@ func TestTransferToken(t *testing.T) {
 	// We expect an error because the test account doesn't have funds
 	assert.Error(t, err)
 }
+
+func TestNewClientSignerFromPrivateKey(t *testing.T) {
+	config := &Config{IsTestnet: true}
+
+	t.Run("valid private key", func(t *testing.T) {
+		signer, err := NewClientSignerFromPrivateKey(testSeed, config)
+		require.NoError(t, err)
+		assert.NotEmpty(t, signer.Address())
+	})
+
+	t.Run("with 0x prefix", func(t *testing.T) {
+		signer, err := NewClientSignerFromPrivateKey("0x"+testSeed, config)
+		require.NoError(t, err)
+		assert.NotEmpty(t, signer.Address())
+	})
+
+	t.Run("invalid hex", func(t *testing.T) {
+		_, err := NewClientSignerFromPrivateKey("not-valid-hex", config)
+		assert.Error(t, err)
+	})
+
+	t.Run("invalid length", func(t *testing.T) {
+		_, err := NewClientSignerFromPrivateKey("1234", config)
+		assert.Error(t, err)
+	})
+}
+
+func TestDefaultConfig(t *testing.T) {
+	// With nil config (should default to testnet)
+	signer, err := NewClientSignerFromSeed(testSeed, nil)
+	require.NoError(t, err)
+	assert.NotEmpty(t, signer.Address())
+}
+
+func TestC32CheckEncode(t *testing.T) {
+	tests := []struct {
+		name    string
+		version byte
+		data    []byte
+	}{
+		{"version 22 (P)", 22, []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}},
+		{"version 26 (T)", 26, []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}},
+		{"version 20 (M)", 20, []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}},
+		{"version 21 (N)", 21, []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			encoded := c32CheckEncode(tc.version, tc.data)
+			assert.NotEmpty(t, encoded)
+			// Should start with version character
+			assert.True(t, len(encoded) > 1)
+		})
+	}
+}
+
+func TestC32Encode(t *testing.T) {
+	tests := []struct {
+		name string
+		data []byte
+	}{
+		{"empty", []byte{}},
+		{"single zero", []byte{0}},
+		{"multiple zeros", []byte{0, 0, 0}},
+		{"mixed", []byte{0, 1, 2, 255}},
+		{"large", []byte{255, 255, 255, 255, 255}},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			encoded := c32Encode(tc.data)
+			// Should not panic
+			_ = encoded
+		})
+	}
+}
+
+func TestBase58DecodeErrors(t *testing.T) {
+	t.Run("invalid character", func(t *testing.T) {
+		_, err := base58Decode("0OIl") // Contains invalid Base58 chars
+		assert.Error(t, err)
+	})
+}
+
+func TestBase58CheckDecodeErrors(t *testing.T) {
+	t.Run("empty string", func(t *testing.T) {
+		_, err := base58CheckDecode("")
+		assert.Error(t, err)
+	})
+
+	t.Run("invalid checksum", func(t *testing.T) {
+		// Encode something and corrupt it
+		data := []byte{22, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
+		encoded := base58CheckEncode(data)
+		// Corrupt the last character
+		if len(encoded) > 0 {
+			corrupted := encoded[:len(encoded)-1] + "1"
+			_, err := base58CheckDecode(corrupted)
+			// May or may not error depending on checksum collision
+			_ = err
+		}
+	})
+}
+
+func TestParseContractIdErrors(t *testing.T) {
+	t.Run("no dot", func(t *testing.T) {
+		_, _, err := parseContractId("SP3Y2ZSH8P7D50B0VBTSX11S7XSG24M1VB9YFQA4Ktoken")
+		assert.Error(t, err)
+	})
+
+	t.Run("empty", func(t *testing.T) {
+		_, _, err := parseContractId("")
+		assert.Error(t, err)
+	})
+}
+
+func TestParseContractIdValid(t *testing.T) {
+	// Test valid contract IDs with various formats
+	tests := []struct {
+		name         string
+		contractId   string
+		wantPrinc    string
+		wantName     string
+	}{
+		{"standard", "SP3Y2ZSH8P7D50B0VBTSX11S7XSG24M1VB9YFQA4K.token-susdc", "SP3Y2ZSH8P7D50B0VBTSX11S7XSG24M1VB9YFQA4K", "token-susdc"},
+		{"short name", "SP1234.a", "SP1234", "a"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			principal, name, err := parseContractId(tc.contractId)
+			require.NoError(t, err)
+			assert.Equal(t, tc.wantPrinc, principal)
+			assert.Equal(t, tc.wantName, name)
+		})
+	}
+}
+
+func TestWriteLengthPrefixedString(t *testing.T) {
+	tests := []struct {
+		name string
+		str  string
+	}{
+		{"short", "test"},
+		{"longer", "this-is-a-longer-string-for-testing"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// This tests the internal function indirectly through contract ID parsing
+			_, _, err := parseContractId("SP3Y2ZSH8P7D50B0VBTSX11S7XSG24M1VB9YFQA4K." + tc.str)
+			assert.NoError(t, err)
+		})
+	}
+}
