@@ -8,6 +8,7 @@
 import { randomBytes } from "crypto";
 import { keccak_256 } from "@noble/hashes/sha3";
 import { secp256k1 } from "@noble/curves/secp256k1";
+import { ed25519 } from "@noble/curves/ed25519";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
 import {
   SIWxExtension,
@@ -239,10 +240,121 @@ export function validateSIWxMessage(
 }
 
 /**
+ * Detects the signature scheme from chain ID.
+ *
+ * @param chainId - CAIP-2 chain ID (e.g., "eip155:1", "solana:mainnet", "stellar:pubnet")
+ * @returns The signature scheme to use for verification
+ */
+function detectSignatureScheme(chainId: string): "evm" | "ed25519" {
+  const namespace = chainId.split(":")[0];
+
+  switch (namespace) {
+    case "solana":
+    case "stellar":
+      return "ed25519";
+    case "eip155":
+    default:
+      return "evm";
+  }
+}
+
+/**
+ * Verifies an Ed25519 signature (used by Solana and Stellar).
+ *
+ * @param message - The message that was signed
+ * @param signature - Hex-encoded Ed25519 signature (64 bytes)
+ * @param publicKey - The public key to verify against (hex or base58)
+ * @returns True if signature is valid
+ */
+function verifyEd25519Signature(
+  message: string,
+  signature: string,
+  publicKey: string,
+): boolean {
+  try {
+    // Remove 0x prefix if present
+    const sigHex = signature.startsWith("0x") ? signature.slice(2) : signature;
+    const sigBytes = hexToBytes(sigHex);
+
+    if (sigBytes.length !== 64) {
+      throw new Error(`Invalid Ed25519 signature length: expected 64 bytes, got ${sigBytes.length}`);
+    }
+
+    // Get public key bytes
+    let pubKeyBytes: Uint8Array;
+    const pubKeyHex = publicKey.startsWith("0x") ? publicKey.slice(2) : publicKey;
+
+    // Check if it's a hex string (64 chars = 32 bytes)
+    if (/^[0-9a-fA-F]{64}$/.test(pubKeyHex)) {
+      pubKeyBytes = hexToBytes(pubKeyHex);
+    } else {
+      // Try to decode as base58 (Solana format)
+      pubKeyBytes = decodeBase58(publicKey);
+    }
+
+    if (pubKeyBytes.length !== 32) {
+      throw new Error(`Invalid Ed25519 public key length: expected 32 bytes, got ${pubKeyBytes.length}`);
+    }
+
+    // Hash the message (Ed25519 signs the raw message or its hash depending on implementation)
+    const messageBytes = new TextEncoder().encode(message);
+
+    // Verify the signature
+    return ed25519.verify(sigBytes, messageBytes, pubKeyBytes);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Decodes a base58 string to bytes (for Solana addresses).
+ *
+ * @param str - Base58 encoded string
+ * @returns Decoded bytes
+ */
+function decodeBase58(str: string): Uint8Array {
+  const ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+  const ALPHABET_MAP = new Map<string, number>();
+  for (let i = 0; i < ALPHABET.length; i++) {
+    ALPHABET_MAP.set(ALPHABET[i], i);
+  }
+
+  if (str.length === 0) return new Uint8Array(0);
+
+  const bytes: number[] = [0];
+  for (const char of str) {
+    const value = ALPHABET_MAP.get(char);
+    if (value === undefined) {
+      throw new Error(`Invalid base58 character: ${char}`);
+    }
+
+    let carry = value;
+    for (let j = 0; j < bytes.length; j++) {
+      carry += bytes[j] * 58;
+      bytes[j] = carry & 0xff;
+      carry >>= 8;
+    }
+
+    while (carry > 0) {
+      bytes.push(carry & 0xff);
+      carry >>= 8;
+    }
+  }
+
+  // Add leading zeros
+  for (const char of str) {
+    if (char !== "1") break;
+    bytes.push(0);
+  }
+
+  return new Uint8Array(bytes.reverse());
+}
+
+/**
  * Verifies a SIWx signature.
  *
- * Supports EIP-191 personal signatures and can optionally verify
- * smart wallet signatures via EIP-1271/6492.
+ * Supports EIP-191 personal signatures for EVM chains, Ed25519 for Solana/Stellar,
+ * and can optionally verify smart wallet signatures via EIP-1271/6492.
  *
  * @param message - The SIWx payload to verify
  * @param signature - The signature to verify (hex-encoded)
@@ -268,6 +380,25 @@ export async function verifySIWxSignature(
     // Reconstruct the CAIP-122 message that was signed
     const messageText = constructMessage(message);
 
+    // Detect signature scheme based on chain ID
+    const scheme = detectSignatureScheme(message.chainId);
+
+    if (scheme === "ed25519") {
+      // Ed25519 verification for Solana and Stellar
+      // For Ed25519, the address IS the public key, so we verify directly
+      const isValid = verifyEd25519Signature(messageText, signature, message.address);
+
+      if (isValid) {
+        return { valid: true, address: message.address };
+      }
+
+      return {
+        valid: false,
+        error: "Ed25519 signature verification failed",
+      };
+    }
+
+    // EVM verification (secp256k1)
     // Hash the message with Ethereum prefix
     const messageHash = hashMessage(messageText);
 
