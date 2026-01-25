@@ -1,47 +1,73 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
 import { ChainProvider } from "./ChainProvider";
 import { DemoProvider } from "./DemoProvider";
 import { ToastProvider } from "./ToastProvider";
 
-// Dynamic import wallet providers with ssr: false
+// Fallback component for loading states
+function ProviderFallback({ children }: { children: ReactNode }) {
+  return <>{children}</>;
+}
+
+// Dynamic import wallet providers with ssr: false and loading fallbacks
 const WagmiProviderWrapper = dynamic(
   () => import("./WagmiProvider").then((mod) => mod.WagmiProviderWrapper),
-  { ssr: false }
+  { ssr: false, loading: () => null }
 );
 
 const TonConnectProvider = dynamic(
   () => import("./TonConnectProvider").then((mod) => mod.TonConnectProvider),
-  { ssr: false }
+  { ssr: false, loading: () => null }
 );
 
 const SolanaProvider = dynamic(
   () => import("./SolanaProvider").then((mod) => mod.SolanaProvider),
-  { ssr: false }
+  { ssr: false, loading: () => null }
 );
 
 const NearProvider = dynamic(
   () => import("./NearProvider").then((mod) => mod.NearProvider),
-  { ssr: false }
+  { ssr: false, loading: () => null }
 );
 
 const AptosProvider = dynamic(
   () => import("./AptosProvider").then((mod) => mod.AptosProvider),
-  { ssr: false }
+  { ssr: false, loading: () => null }
 );
 
 const TezosProvider = dynamic(
   () => import("./TezosProvider").then((mod) => mod.TezosProvider),
-  { ssr: false }
+  { ssr: false, loading: () => null }
 );
 
 const PolkadotProvider = dynamic(
   () => import("./PolkadotProvider").then((mod) => mod.PolkadotProvider),
-  { ssr: false }
+  { ssr: false, loading: () => null }
 );
+
+// Wrapper that handles the wallet providers with error resilience
+function WalletProviders({ children }: { children: ReactNode }) {
+  return (
+    <WagmiProviderWrapper>
+      <TonConnectProvider>
+        <SolanaProvider>
+          <NearProvider>
+            <AptosProvider>
+              <TezosProvider>
+                <PolkadotProvider>
+                  {children}
+                </PolkadotProvider>
+              </TezosProvider>
+            </AptosProvider>
+          </NearProvider>
+        </SolanaProvider>
+      </TonConnectProvider>
+    </WagmiProviderWrapper>
+  );
+}
 
 export function ClientProviders({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
@@ -50,39 +76,33 @@ export function ClientProviders({ children }: { children: ReactNode }) {
     setMounted(true);
   }, []);
 
-  // During SSR and initial hydration, just render children with basic providers
+  // Core providers that work on both server and client
+  const coreProviders = (
+    <ChainProvider>
+      <DemoProvider>
+        <ToastProvider>
+          {children}
+        </ToastProvider>
+      </DemoProvider>
+    </ChainProvider>
+  );
+
+  // During SSR, render with core providers only
   if (!mounted) {
-    return (
-      <ChainProvider>
-        <DemoProvider>
-          <ToastProvider>
-            {children}
-          </ToastProvider>
-        </DemoProvider>
-      </ChainProvider>
-    );
+    return coreProviders;
   }
 
-  // After hydration, wrap with all wallet providers
+  // After mount, wrap with wallet providers
+  // Keep the same structure to avoid hydration mismatches
   return (
     <ChainProvider>
       <DemoProvider>
         <ToastProvider>
-          <WagmiProviderWrapper>
-            <TonConnectProvider>
-              <SolanaProvider>
-                <NearProvider>
-                  <AptosProvider>
-                    <TezosProvider>
-                      <PolkadotProvider>
-                        {children}
-                      </PolkadotProvider>
-                    </TezosProvider>
-                  </AptosProvider>
-                </NearProvider>
-              </SolanaProvider>
-            </TonConnectProvider>
-          </WagmiProviderWrapper>
+          <Suspense fallback={children}>
+            <WalletProviders>
+              {children}
+            </WalletProviders>
+          </Suspense>
         </ToastProvider>
       </DemoProvider>
     </ChainProvider>
