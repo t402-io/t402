@@ -413,6 +413,123 @@ public class McpServer {
             new InputSchema(payTronProps, List.of("to", "amount", "token", "network"))
         ));
 
+        // ===== NEAR Tools =====
+
+        List<String> nearNetworks = new ArrayList<>();
+        for (McpTypes.SupportedNearNetwork net : McpConstants.getAllNearNetworks()) {
+            nearNetworks.add(net.getValue());
+        }
+
+        List<String> nearTokens = List.of("USDT");
+
+        // t402/getNearBalance
+        Map<String, Property> getNearBalanceProps = new LinkedHashMap<>();
+        Property nearAddressProp = new Property("string", "NEAR account ID (e.g., 'alice.near' or 64-char hex)");
+        nearAddressProp.setPattern(McpConstants.NEAR_ADDRESS_PATTERN);
+        getNearBalanceProps.put("address", nearAddressProp);
+        getNearBalanceProps.put("network", new Property("string", "NEAR network to query", nearNetworks));
+
+        toolDefs.add(new Tool(
+            "t402/getNearBalance",
+            "Get NEAR and NEP-141 token balances for a NEAR account",
+            new InputSchema(getNearBalanceProps, List.of("address", "network"))
+        ));
+
+        // t402/payNear
+        Map<String, Property> payNearProps = new LinkedHashMap<>();
+        Property nearToProp = new Property("string", "Recipient NEAR account ID");
+        nearToProp.setPattern(McpConstants.NEAR_ADDRESS_PATTERN);
+        payNearProps.put("to", nearToProp);
+        Property nearAmountProp = new Property("string", "Amount to send (e.g., '10.5')");
+        nearAmountProp.setPattern("^\\d+(\\.\\d+)?$");
+        payNearProps.put("amount", nearAmountProp);
+        payNearProps.put("token", new Property("string", "NEP-141 token to send", nearTokens));
+        payNearProps.put("network", new Property("string", "NEAR network to use", nearNetworks));
+
+        toolDefs.add(new Tool(
+            "t402/payNear",
+            "Execute a USDT payment on NEAR (NEP-141 token transfer)",
+            new InputSchema(payNearProps, List.of("to", "amount", "token", "network"))
+        ));
+
+        // ===== Aptos Tools =====
+
+        List<String> aptosNetworks = new ArrayList<>();
+        for (McpTypes.SupportedAptosNetwork net : McpConstants.getAllAptosNetworks()) {
+            aptosNetworks.add(net.getValue());
+        }
+
+        List<String> aptosTokens = List.of("USDT");
+
+        // t402/getAptosBalance
+        Map<String, Property> getAptosBalanceProps = new LinkedHashMap<>();
+        Property aptosAddressProp = new Property("string", "Aptos address (0x-prefixed hex)");
+        aptosAddressProp.setPattern(McpConstants.APTOS_ADDRESS_PATTERN);
+        getAptosBalanceProps.put("address", aptosAddressProp);
+        getAptosBalanceProps.put("network", new Property("string", "Aptos network to query", aptosNetworks));
+
+        toolDefs.add(new Tool(
+            "t402/getAptosBalance",
+            "Get APT and Fungible Asset balances for an Aptos address",
+            new InputSchema(getAptosBalanceProps, List.of("address", "network"))
+        ));
+
+        // t402/payAptos
+        Map<String, Property> payAptosProps = new LinkedHashMap<>();
+        Property aptosToProp = new Property("string", "Recipient Aptos address (0x-prefixed hex)");
+        aptosToProp.setPattern(McpConstants.APTOS_ADDRESS_PATTERN);
+        payAptosProps.put("to", aptosToProp);
+        Property aptosAmountProp = new Property("string", "Amount to send (e.g., '10.5')");
+        aptosAmountProp.setPattern("^\\d+(\\.\\d+)?$");
+        payAptosProps.put("amount", aptosAmountProp);
+        payAptosProps.put("token", new Property("string", "Fungible Asset to send", aptosTokens));
+        payAptosProps.put("network", new Property("string", "Aptos network to use", aptosNetworks));
+
+        toolDefs.add(new Tool(
+            "t402/payAptos",
+            "Execute a USDT payment on Aptos (Fungible Asset transfer)",
+            new InputSchema(payAptosProps, List.of("to", "amount", "token", "network"))
+        ));
+
+        // ===== Tezos Tools =====
+
+        List<String> tezosNetworks = new ArrayList<>();
+        for (McpTypes.SupportedTezosNetwork net : McpConstants.getAllTezosNetworks()) {
+            tezosNetworks.add(net.getValue());
+        }
+
+        List<String> tezosTokens = List.of("USDt");
+
+        // t402/getTezosBalance
+        Map<String, Property> getTezosBalanceProps = new LinkedHashMap<>();
+        Property tezosAddressProp = new Property("string", "Tezos address (tz1/tz2/tz3/KT1 format)");
+        tezosAddressProp.setPattern(McpConstants.TEZOS_ADDRESS_PATTERN);
+        getTezosBalanceProps.put("address", tezosAddressProp);
+        getTezosBalanceProps.put("network", new Property("string", "Tezos network to query", tezosNetworks));
+
+        toolDefs.add(new Tool(
+            "t402/getTezosBalance",
+            "Get XTZ and FA2 token balances for a Tezos address",
+            new InputSchema(getTezosBalanceProps, List.of("address", "network"))
+        ));
+
+        // t402/payTezos
+        Map<String, Property> payTezosProps = new LinkedHashMap<>();
+        Property tezosToProp = new Property("string", "Recipient Tezos address (tz1/tz2/tz3/KT1 format)");
+        tezosToProp.setPattern(McpConstants.TEZOS_ADDRESS_PATTERN);
+        payTezosProps.put("to", tezosToProp);
+        Property tezosAmountProp = new Property("string", "Amount to send (e.g., '10.5')");
+        tezosAmountProp.setPattern("^\\d+(\\.\\d+)?$");
+        payTezosProps.put("amount", tezosAmountProp);
+        payTezosProps.put("token", new Property("string", "FA2 token to send", tezosTokens));
+        payTezosProps.put("network", new Property("string", "Tezos network to use", tezosNetworks));
+
+        toolDefs.add(new Tool(
+            "t402/payTezos",
+            "Execute a USDt payment on Tezos (FA2 token transfer)",
+            new InputSchema(payTezosProps, List.of("to", "amount", "token", "network"))
+        ));
+
         return toolDefs;
     }
 

@@ -169,7 +169,7 @@ class McpServerTest {
     @Test
     void testGetToolDefinitions() {
         List<Tool> tools = McpServer.getToolDefinitions();
-        assertEquals(12, tools.size()); // 6 EVM + 2 SVM + 2 TON + 2 TRON tools
+        assertEquals(18, tools.size()); // 6 EVM + 2 SVM + 2 TON + 2 TRON + 2 NEAR + 2 Aptos + 2 Tezos tools
 
         List<String> toolNames = tools.stream().map(Tool::getName).toList();
         // EVM tools
@@ -188,6 +188,15 @@ class McpServerTest {
         // TRON tools
         assertTrue(toolNames.contains("t402/getTronBalance"));
         assertTrue(toolNames.contains("t402/payTron"));
+        // NEAR tools
+        assertTrue(toolNames.contains("t402/getNearBalance"));
+        assertTrue(toolNames.contains("t402/payNear"));
+        // Aptos tools
+        assertTrue(toolNames.contains("t402/getAptosBalance"));
+        assertTrue(toolNames.contains("t402/payAptos"));
+        // Tezos tools
+        assertTrue(toolNames.contains("t402/getTezosBalance"));
+        assertTrue(toolNames.contains("t402/payTezos"));
     }
 
     @Test
@@ -281,7 +290,7 @@ class McpServerTest {
         Map<String, Object> result = (Map<String, Object>) response.getResult();
         @SuppressWarnings("unchecked")
         List<Object> tools = (List<Object>) result.get("tools");
-        assertEquals(12, tools.size()); // 6 EVM + 2 SVM + 2 TON + 2 TRON tools
+        assertEquals(18, tools.size()); // 6 EVM + 2 SVM + 2 TON + 2 TRON + 2 NEAR + 2 Aptos + 2 Tezos tools
     }
 
     @Test

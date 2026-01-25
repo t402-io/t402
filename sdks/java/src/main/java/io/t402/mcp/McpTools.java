@@ -2,6 +2,9 @@ package io.t402.mcp;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.t402.mcp.McpTypes.*;
+import io.t402.mcp.McpTypes.SupportedNearNetwork;
+import io.t402.mcp.McpTypes.SupportedAptosNetwork;
+import io.t402.mcp.McpTypes.SupportedTezosNetwork;
 import io.t402.util.Json;
 
 import java.math.BigInteger;
@@ -57,6 +60,21 @@ public class McpTools {
                     return handleGetTronBalance(arguments);
                 case "t402/payTron":
                     return handlePayTron(arguments);
+                // NEAR tools
+                case "t402/getNearBalance":
+                    return handleGetNearBalance(arguments);
+                case "t402/payNear":
+                    return handlePayNear(arguments);
+                // Aptos tools
+                case "t402/getAptosBalance":
+                    return handleGetAptosBalance(arguments);
+                case "t402/payAptos":
+                    return handlePayAptos(arguments);
+                // Tezos tools
+                case "t402/getTezosBalance":
+                    return handleGetTezosBalance(arguments);
+                case "t402/payTezos":
+                    return handlePayTezos(arguments);
                 default:
                     return errorResult("Unknown tool: " + name);
             }
@@ -788,6 +806,495 @@ public class McpTools {
             sb.append("⚠️ This is a simulated transaction. No actual tokens were transferred.\n\n");
         } else {
             sb.append("## TRON Payment Successful\n\n");
+        }
+
+        sb.append("- **Amount:** ").append(result.getAmount()).append(" ").append(result.getToken()).append("\n");
+        sb.append("- **To:** ").append(result.getTo()).append("\n");
+        sb.append("- **Network:** ").append(result.getNetwork()).append("\n");
+        sb.append("- **Transaction:** [").append(McpConstants.truncateHash(result.getTxHash()))
+          .append("](").append(result.getExplorerUrl()).append(")\n");
+
+        return sb.toString();
+    }
+
+    // ===== NEAR Tool Handlers =====
+
+    /**
+     * Handles t402/getNearBalance tool.
+     */
+    private ToolResult handleGetNearBalance(JsonNode args) throws Exception {
+        GetNearBalanceInput input = Json.MAPPER.treeToValue(args, GetNearBalanceInput.class);
+
+        if (!McpConstants.isValidNearNetwork(input.getNetwork())) {
+            return errorResult("Invalid NEAR network: " + input.getNetwork() +
+                ". Valid options: near-mainnet, near-testnet");
+        }
+
+        if (!McpConstants.isValidNearAddress(input.getAddress())) {
+            return errorResult("Invalid NEAR account ID format: " + input.getAddress());
+        }
+
+        SupportedNearNetwork network = SupportedNearNetwork.fromString(input.getNetwork());
+
+        // Build result with demo data
+        NetworkBalance result = new NetworkBalance(input.getNetwork());
+        result.setNativeBalance(new BalanceInfo(
+            McpConstants.NEAR_SYMBOL,
+            "0",
+            "0"
+        ));
+        result.setTokens(new ArrayList<>());
+
+        // In demo mode, return placeholder data
+        if (config.isDemoMode()) {
+            result.getNativeBalance().setBalance("10.5");
+            result.getNativeBalance().setRaw("10500000000000000000000000"); // 10.5 NEAR in yoctoNEAR
+
+            // Add demo USDT balance
+            String usdtAddr = McpConstants.getNearUsdtAddress(network);
+            if (usdtAddr != null) {
+                result.addToken(new BalanceInfo("USDT", "100", "100000000"));
+            }
+        } else {
+            result.setError("Real balance query requires RPC connection");
+        }
+
+        return textResult(formatNearBalanceResult(result));
+    }
+
+    /**
+     * Handles t402/payNear tool.
+     */
+    private ToolResult handlePayNear(JsonNode args) throws Exception {
+        PayNearInput input = Json.MAPPER.treeToValue(args, PayNearInput.class);
+
+        if (!McpConstants.isValidNearNetwork(input.getNetwork())) {
+            return errorResult("Invalid NEAR network: " + input.getNetwork() +
+                ". Valid options: near-mainnet, near-testnet");
+        }
+
+        if (!McpConstants.isValidNearAddress(input.getTo())) {
+            return errorResult("Invalid NEAR recipient account ID: " + input.getTo());
+        }
+
+        SupportedNearNetwork network = SupportedNearNetwork.fromString(input.getNetwork());
+
+        // Only USDT is supported for now
+        if (!"USDT".equalsIgnoreCase(input.getToken())) {
+            return errorResult("Only USDT token is supported on NEAR currently");
+        }
+
+        // Validate amount
+        try {
+            McpConstants.parseTokenAmount(input.getAmount(), McpConstants.NEAR_USDT_DECIMALS);
+        } catch (IllegalArgumentException e) {
+            return errorResult("Invalid amount: " + e.getMessage());
+        }
+
+        // Validate private key (unless demo mode)
+        if ((config.getPrivateKey() == null || config.getPrivateKey().isEmpty()) && !config.isDemoMode()) {
+            return errorResult("Private key not configured. Set T402_PRIVATE_KEY or enable T402_DEMO_MODE");
+        }
+
+        // Demo mode - simulate the transaction
+        if (config.isDemoMode()) {
+            // Generate a demo transaction hash
+            String demoTxHash = generateDemoNearTxHash();
+
+            PaymentResult result = new PaymentResult();
+            result.setTxHash(demoTxHash);
+            result.setFrom("demo.near");
+            result.setTo(input.getTo());
+            result.setAmount(input.getAmount());
+            result.setToken(input.getToken());
+            result.setNetwork(input.getNetwork());
+            result.setExplorerUrl(McpConstants.getNearExplorerTxUrl(network, demoTxHash));
+            result.setDemoMode(true);
+
+            return textResult(formatNearPaymentResult(result));
+        }
+
+        // Real transaction would go here
+        return errorResult("Real NEAR transactions require full implementation. Use demo mode to test.");
+    }
+
+    /**
+     * Generates a demo NEAR transaction hash.
+     */
+    private static String generateDemoNearTxHash() {
+        String uuid = UUID.randomUUID().toString().replace("-", "");
+        return "Demo" + uuid + "NearTx";
+    }
+
+    /**
+     * Formats NEAR balance result.
+     */
+    private static String formatNearBalanceResult(NetworkBalance result) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("## NEAR Balance on ").append(result.getNetwork()).append("\n\n");
+
+        if (result.getError() != null) {
+            sb.append("Error: ").append(result.getError()).append("\n");
+            return sb.toString();
+        }
+
+        BalanceInfo nativeBalance = result.getNativeBalance();
+        if (nativeBalance != null) {
+            sb.append("**Native (").append(nativeBalance.getToken()).append("):** ")
+              .append(nativeBalance.getBalance()).append(" NEAR\n\n");
+        }
+
+        List<BalanceInfo> tokens = result.getTokens();
+        if (tokens != null && !tokens.isEmpty()) {
+            sb.append("**NEP-141 Tokens:**\n");
+            for (BalanceInfo token : tokens) {
+                sb.append("- ").append(token.getToken()).append(": ")
+                  .append(token.getBalance()).append("\n");
+            }
+        } else {
+            sb.append("No NEP-141 token balances found.\n");
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Formats NEAR payment result.
+     */
+    private static String formatNearPaymentResult(PaymentResult result) {
+        StringBuilder sb = new StringBuilder();
+
+        if (result.isDemoMode()) {
+            sb.append("## NEAR Payment (Demo Mode)\n\n");
+            sb.append("⚠️ This is a simulated transaction. No actual tokens were transferred.\n\n");
+        } else {
+            sb.append("## NEAR Payment Successful\n\n");
+        }
+
+        sb.append("- **Amount:** ").append(result.getAmount()).append(" ").append(result.getToken()).append("\n");
+        sb.append("- **To:** ").append(result.getTo()).append("\n");
+        sb.append("- **Network:** ").append(result.getNetwork()).append("\n");
+        sb.append("- **Transaction:** [").append(McpConstants.truncateHash(result.getTxHash()))
+          .append("](").append(result.getExplorerUrl()).append(")\n");
+
+        return sb.toString();
+    }
+
+    // ===== Aptos Tool Handlers =====
+
+    /**
+     * Handles t402/getAptosBalance tool.
+     */
+    private ToolResult handleGetAptosBalance(JsonNode args) throws Exception {
+        GetAptosBalanceInput input = Json.MAPPER.treeToValue(args, GetAptosBalanceInput.class);
+
+        if (!McpConstants.isValidAptosNetwork(input.getNetwork())) {
+            return errorResult("Invalid Aptos network: " + input.getNetwork() +
+                ". Valid options: aptos-mainnet, aptos-testnet, aptos-devnet");
+        }
+
+        if (!McpConstants.isValidAptosAddress(input.getAddress())) {
+            return errorResult("Invalid Aptos address format: " + input.getAddress());
+        }
+
+        SupportedAptosNetwork network = SupportedAptosNetwork.fromString(input.getNetwork());
+
+        // Build result with demo data
+        NetworkBalance result = new NetworkBalance(input.getNetwork());
+        result.setNativeBalance(new BalanceInfo(
+            McpConstants.APT_SYMBOL,
+            "0",
+            "0"
+        ));
+        result.setTokens(new ArrayList<>());
+
+        // In demo mode, return placeholder data
+        if (config.isDemoMode()) {
+            result.getNativeBalance().setBalance("5.0");
+            result.getNativeBalance().setRaw("500000000"); // 5 APT in octas
+
+            // Add demo USDT balance
+            String usdtAddr = McpConstants.getAptosUsdtAddress(network);
+            if (usdtAddr != null) {
+                result.addToken(new BalanceInfo("USDT", "100", "100000000"));
+            }
+        } else {
+            result.setError("Real balance query requires RPC connection");
+        }
+
+        return textResult(formatAptosBalanceResult(result));
+    }
+
+    /**
+     * Handles t402/payAptos tool.
+     */
+    private ToolResult handlePayAptos(JsonNode args) throws Exception {
+        PayAptosInput input = Json.MAPPER.treeToValue(args, PayAptosInput.class);
+
+        if (!McpConstants.isValidAptosNetwork(input.getNetwork())) {
+            return errorResult("Invalid Aptos network: " + input.getNetwork() +
+                ". Valid options: aptos-mainnet, aptos-testnet, aptos-devnet");
+        }
+
+        if (!McpConstants.isValidAptosAddress(input.getTo())) {
+            return errorResult("Invalid Aptos recipient address: " + input.getTo());
+        }
+
+        SupportedAptosNetwork network = SupportedAptosNetwork.fromString(input.getNetwork());
+
+        // Only USDT is supported for now
+        if (!"USDT".equalsIgnoreCase(input.getToken())) {
+            return errorResult("Only USDT token is supported on Aptos currently");
+        }
+
+        // Validate amount
+        try {
+            McpConstants.parseTokenAmount(input.getAmount(), McpConstants.APTOS_USDT_DECIMALS);
+        } catch (IllegalArgumentException e) {
+            return errorResult("Invalid amount: " + e.getMessage());
+        }
+
+        // Validate private key (unless demo mode)
+        if ((config.getPrivateKey() == null || config.getPrivateKey().isEmpty()) && !config.isDemoMode()) {
+            return errorResult("Private key not configured. Set T402_PRIVATE_KEY or enable T402_DEMO_MODE");
+        }
+
+        // Demo mode - simulate the transaction
+        if (config.isDemoMode()) {
+            // Generate a demo transaction hash
+            String demoTxHash = generateDemoAptosTxHash();
+
+            PaymentResult result = new PaymentResult();
+            result.setTxHash(demoTxHash);
+            result.setFrom("0x" + "0".repeat(64));
+            result.setTo(input.getTo());
+            result.setAmount(input.getAmount());
+            result.setToken(input.getToken());
+            result.setNetwork(input.getNetwork());
+            result.setExplorerUrl(McpConstants.getAptosExplorerTxUrl(network, demoTxHash));
+            result.setDemoMode(true);
+
+            return textResult(formatAptosPaymentResult(result));
+        }
+
+        // Real transaction would go here
+        return errorResult("Real Aptos transactions require full implementation. Use demo mode to test.");
+    }
+
+    /**
+     * Generates a demo Aptos transaction hash.
+     */
+    private static String generateDemoAptosTxHash() {
+        String uuid = UUID.randomUUID().toString().replace("-", "");
+        return "0x" + uuid + "0".repeat(32);
+    }
+
+    /**
+     * Formats Aptos balance result.
+     */
+    private static String formatAptosBalanceResult(NetworkBalance result) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("## Aptos Balance on ").append(result.getNetwork()).append("\n\n");
+
+        if (result.getError() != null) {
+            sb.append("Error: ").append(result.getError()).append("\n");
+            return sb.toString();
+        }
+
+        BalanceInfo nativeBalance = result.getNativeBalance();
+        if (nativeBalance != null) {
+            sb.append("**Native (").append(nativeBalance.getToken()).append("):** ")
+              .append(nativeBalance.getBalance()).append(" APT\n\n");
+        }
+
+        List<BalanceInfo> tokens = result.getTokens();
+        if (tokens != null && !tokens.isEmpty()) {
+            sb.append("**Fungible Assets:**\n");
+            for (BalanceInfo token : tokens) {
+                sb.append("- ").append(token.getToken()).append(": ")
+                  .append(token.getBalance()).append("\n");
+            }
+        } else {
+            sb.append("No fungible asset balances found.\n");
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Formats Aptos payment result.
+     */
+    private static String formatAptosPaymentResult(PaymentResult result) {
+        StringBuilder sb = new StringBuilder();
+
+        if (result.isDemoMode()) {
+            sb.append("## Aptos Payment (Demo Mode)\n\n");
+            sb.append("⚠️ This is a simulated transaction. No actual tokens were transferred.\n\n");
+        } else {
+            sb.append("## Aptos Payment Successful\n\n");
+        }
+
+        sb.append("- **Amount:** ").append(result.getAmount()).append(" ").append(result.getToken()).append("\n");
+        sb.append("- **To:** ").append(result.getTo()).append("\n");
+        sb.append("- **Network:** ").append(result.getNetwork()).append("\n");
+        sb.append("- **Transaction:** [").append(McpConstants.truncateHash(result.getTxHash()))
+          .append("](").append(result.getExplorerUrl()).append(")\n");
+
+        return sb.toString();
+    }
+
+    // ===== Tezos Tool Handlers =====
+
+    /**
+     * Handles t402/getTezosBalance tool.
+     */
+    private ToolResult handleGetTezosBalance(JsonNode args) throws Exception {
+        GetTezosBalanceInput input = Json.MAPPER.treeToValue(args, GetTezosBalanceInput.class);
+
+        if (!McpConstants.isValidTezosNetwork(input.getNetwork())) {
+            return errorResult("Invalid Tezos network: " + input.getNetwork() +
+                ". Valid options: tezos-mainnet, tezos-ghostnet");
+        }
+
+        if (!McpConstants.isValidTezosAddress(input.getAddress())) {
+            return errorResult("Invalid Tezos address format: " + input.getAddress());
+        }
+
+        SupportedTezosNetwork network = SupportedTezosNetwork.fromString(input.getNetwork());
+
+        // Build result with demo data
+        NetworkBalance result = new NetworkBalance(input.getNetwork());
+        result.setNativeBalance(new BalanceInfo(
+            McpConstants.XTZ_SYMBOL,
+            "0",
+            "0"
+        ));
+        result.setTokens(new ArrayList<>());
+
+        // In demo mode, return placeholder data
+        if (config.isDemoMode()) {
+            result.getNativeBalance().setBalance("50.0");
+            result.getNativeBalance().setRaw("50000000"); // 50 XTZ in mutez
+
+            // Add demo USDt balance
+            String usdtAddr = McpConstants.getTezosUsdtAddress(network);
+            if (usdtAddr != null) {
+                result.addToken(new BalanceInfo("USDt", "100", "100000000"));
+            }
+        } else {
+            result.setError("Real balance query requires RPC connection");
+        }
+
+        return textResult(formatTezosBalanceResult(result));
+    }
+
+    /**
+     * Handles t402/payTezos tool.
+     */
+    private ToolResult handlePayTezos(JsonNode args) throws Exception {
+        PayTezosInput input = Json.MAPPER.treeToValue(args, PayTezosInput.class);
+
+        if (!McpConstants.isValidTezosNetwork(input.getNetwork())) {
+            return errorResult("Invalid Tezos network: " + input.getNetwork() +
+                ". Valid options: tezos-mainnet, tezos-ghostnet");
+        }
+
+        if (!McpConstants.isValidTezosAddress(input.getTo())) {
+            return errorResult("Invalid Tezos recipient address: " + input.getTo());
+        }
+
+        SupportedTezosNetwork network = SupportedTezosNetwork.fromString(input.getNetwork());
+
+        // Only USDt is supported for now
+        if (!"USDT".equalsIgnoreCase(input.getToken()) && !"USDt".equalsIgnoreCase(input.getToken())) {
+            return errorResult("Only USDt token is supported on Tezos currently");
+        }
+
+        // Validate amount
+        try {
+            McpConstants.parseTokenAmount(input.getAmount(), McpConstants.TEZOS_USDT_DECIMALS);
+        } catch (IllegalArgumentException e) {
+            return errorResult("Invalid amount: " + e.getMessage());
+        }
+
+        // Validate private key (unless demo mode)
+        if ((config.getPrivateKey() == null || config.getPrivateKey().isEmpty()) && !config.isDemoMode()) {
+            return errorResult("Private key not configured. Set T402_PRIVATE_KEY or enable T402_DEMO_MODE");
+        }
+
+        // Demo mode - simulate the transaction
+        if (config.isDemoMode()) {
+            // Generate a demo operation hash
+            String demoOpHash = generateDemoTezosOpHash();
+
+            PaymentResult result = new PaymentResult();
+            result.setTxHash(demoOpHash);
+            result.setFrom("tz1" + "0".repeat(33));
+            result.setTo(input.getTo());
+            result.setAmount(input.getAmount());
+            result.setToken("USDt");
+            result.setNetwork(input.getNetwork());
+            result.setExplorerUrl(McpConstants.getTezosExplorerTxUrl(network, demoOpHash));
+            result.setDemoMode(true);
+
+            return textResult(formatTezosPaymentResult(result));
+        }
+
+        // Real transaction would go here
+        return errorResult("Real Tezos transactions require full implementation. Use demo mode to test.");
+    }
+
+    /**
+     * Generates a demo Tezos operation hash.
+     */
+    private static String generateDemoTezosOpHash() {
+        String uuid = UUID.randomUUID().toString().replace("-", "");
+        return "o" + uuid + "DemoTezos";
+    }
+
+    /**
+     * Formats Tezos balance result.
+     */
+    private static String formatTezosBalanceResult(NetworkBalance result) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("## Tezos Balance on ").append(result.getNetwork()).append("\n\n");
+
+        if (result.getError() != null) {
+            sb.append("Error: ").append(result.getError()).append("\n");
+            return sb.toString();
+        }
+
+        BalanceInfo nativeBalance = result.getNativeBalance();
+        if (nativeBalance != null) {
+            sb.append("**Native (").append(nativeBalance.getToken()).append("):** ")
+              .append(nativeBalance.getBalance()).append(" XTZ\n\n");
+        }
+
+        List<BalanceInfo> tokens = result.getTokens();
+        if (tokens != null && !tokens.isEmpty()) {
+            sb.append("**FA2 Tokens:**\n");
+            for (BalanceInfo token : tokens) {
+                sb.append("- ").append(token.getToken()).append(": ")
+                  .append(token.getBalance()).append("\n");
+            }
+        } else {
+            sb.append("No FA2 token balances found.\n");
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Formats Tezos payment result.
+     */
+    private static String formatTezosPaymentResult(PaymentResult result) {
+        StringBuilder sb = new StringBuilder();
+
+        if (result.isDemoMode()) {
+            sb.append("## Tezos Payment (Demo Mode)\n\n");
+            sb.append("⚠️ This is a simulated transaction. No actual tokens were transferred.\n\n");
+        } else {
+            sb.append("## Tezos Payment Successful\n\n");
         }
 
         sb.append("- **Amount:** ").append(result.getAmount()).append(" ").append(result.getToken()).append("\n");

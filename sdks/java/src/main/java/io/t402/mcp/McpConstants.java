@@ -6,6 +6,9 @@ import io.t402.mcp.McpTypes.SupportedSvmNetwork;
 import io.t402.mcp.McpTypes.SupportedToken;
 import io.t402.mcp.McpTypes.SupportedTonNetwork;
 import io.t402.mcp.McpTypes.SupportedTronNetwork;
+import io.t402.mcp.McpTypes.SupportedNearNetwork;
+import io.t402.mcp.McpTypes.SupportedAptosNetwork;
+import io.t402.mcp.McpTypes.SupportedTezosNetwork;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -557,5 +560,309 @@ public final class McpConstants {
             return false;
         }
         return address.matches(TRON_ADDRESS_PATTERN);
+    }
+
+    // =========================================================================
+    // NEAR Network Constants
+    // =========================================================================
+
+    /** Native token symbol for NEAR. */
+    public static final String NEAR_SYMBOL = "NEAR";
+
+    /** Standard decimal count for NEAR native token. */
+    public static final int NEAR_DECIMALS = 24;
+
+    /** Standard decimal count for USDT on NEAR. */
+    public static final int NEAR_USDT_DECIMALS = 6;
+
+    // NEAR Explorer URLs
+    public static final Map<SupportedNearNetwork, String> NEAR_EXPLORER_URLS = new EnumMap<>(SupportedNearNetwork.class);
+    static {
+        NEAR_EXPLORER_URLS.put(SupportedNearNetwork.NEAR_MAINNET, "https://nearblocks.io");
+        NEAR_EXPLORER_URLS.put(SupportedNearNetwork.NEAR_TESTNET, "https://testnet.nearblocks.io");
+    }
+
+    // NEAR RPC URLs
+    public static final Map<SupportedNearNetwork, String> NEAR_RPC_URLS = new EnumMap<>(SupportedNearNetwork.class);
+    static {
+        NEAR_RPC_URLS.put(SupportedNearNetwork.NEAR_MAINNET, "https://rpc.mainnet.near.org");
+        NEAR_RPC_URLS.put(SupportedNearNetwork.NEAR_TESTNET, "https://rpc.testnet.near.org");
+    }
+
+    // NEAR USDT addresses (NEP-141)
+    public static final Map<SupportedNearNetwork, String> NEAR_USDT_ADDRESSES = new EnumMap<>(SupportedNearNetwork.class);
+    static {
+        NEAR_USDT_ADDRESSES.put(SupportedNearNetwork.NEAR_MAINNET, "usdt.tether-token.near");
+        NEAR_USDT_ADDRESSES.put(SupportedNearNetwork.NEAR_TESTNET, "usdt.fakes.testnet");
+    }
+
+    /** NEAR address pattern (implicit 64 hex or named account). */
+    public static final String NEAR_ADDRESS_PATTERN = "^([a-z\\d]+[-_])*[a-z\\d]+(\\.([a-z\\d]+[-_])*[a-z\\d]+)*$|^[0-9a-f]{64}$";
+
+    // =========================================================================
+    // NEAR Utility Methods
+    // =========================================================================
+
+    /**
+     * Returns all supported NEAR networks.
+     */
+    public static List<SupportedNearNetwork> getAllNearNetworks() {
+        return Arrays.asList(SupportedNearNetwork.values());
+    }
+
+    /**
+     * Checks if a NEAR network string is valid.
+     */
+    public static boolean isValidNearNetwork(String network) {
+        return SupportedNearNetwork.fromString(network) != null;
+    }
+
+    /**
+     * Returns the explorer URL for a NEAR transaction.
+     */
+    public static String getNearExplorerTxUrl(SupportedNearNetwork network, String txHash) {
+        String baseUrl = NEAR_EXPLORER_URLS.get(network);
+        if (baseUrl == null) {
+            return "";
+        }
+        return baseUrl + "/txns/" + txHash;
+    }
+
+    /**
+     * Returns the RPC URL for a NEAR network, using config override if available.
+     */
+    public static String getNearRpcUrl(ServerConfig config, SupportedNearNetwork network) {
+        if (config != null && config.getRpcUrls() != null) {
+            String url = config.getRpcUrls().get(network.getValue());
+            if (url != null && !url.isEmpty()) {
+                return url;
+            }
+        }
+        return NEAR_RPC_URLS.get(network);
+    }
+
+    /**
+     * Returns the USDT NEP-141 address for a NEAR network.
+     */
+    public static String getNearUsdtAddress(SupportedNearNetwork network) {
+        return NEAR_USDT_ADDRESSES.get(network);
+    }
+
+    /**
+     * Validates a NEAR address format (implicit or named account).
+     */
+    public static boolean isValidNearAddress(String address) {
+        if (address == null || address.isEmpty()) {
+            return false;
+        }
+        return address.matches(NEAR_ADDRESS_PATTERN);
+    }
+
+    // =========================================================================
+    // Aptos Network Constants
+    // =========================================================================
+
+    /** Native token symbol for Aptos. */
+    public static final String APT_SYMBOL = "APT";
+
+    /** Standard decimal count for APT native token. */
+    public static final int APT_DECIMALS = 8;
+
+    /** Standard decimal count for USDT on Aptos. */
+    public static final int APTOS_USDT_DECIMALS = 6;
+
+    // Aptos Explorer URLs
+    public static final Map<SupportedAptosNetwork, String> APTOS_EXPLORER_URLS = new EnumMap<>(SupportedAptosNetwork.class);
+    static {
+        APTOS_EXPLORER_URLS.put(SupportedAptosNetwork.APTOS_MAINNET, "https://explorer.aptoslabs.com");
+        APTOS_EXPLORER_URLS.put(SupportedAptosNetwork.APTOS_TESTNET, "https://explorer.aptoslabs.com");
+        APTOS_EXPLORER_URLS.put(SupportedAptosNetwork.APTOS_DEVNET, "https://explorer.aptoslabs.com");
+    }
+
+    // Aptos RPC URLs
+    public static final Map<SupportedAptosNetwork, String> APTOS_RPC_URLS = new EnumMap<>(SupportedAptosNetwork.class);
+    static {
+        APTOS_RPC_URLS.put(SupportedAptosNetwork.APTOS_MAINNET, "https://fullnode.mainnet.aptoslabs.com/v1");
+        APTOS_RPC_URLS.put(SupportedAptosNetwork.APTOS_TESTNET, "https://fullnode.testnet.aptoslabs.com/v1");
+        APTOS_RPC_URLS.put(SupportedAptosNetwork.APTOS_DEVNET, "https://fullnode.devnet.aptoslabs.com/v1");
+    }
+
+    // Aptos USDT addresses (Fungible Asset metadata)
+    public static final Map<SupportedAptosNetwork, String> APTOS_USDT_ADDRESSES = new EnumMap<>(SupportedAptosNetwork.class);
+    static {
+        APTOS_USDT_ADDRESSES.put(SupportedAptosNetwork.APTOS_MAINNET, "0xf73e887a8754f540ee6e1a93bdc6dde2af69fc7ca5de32013e89dd44244473cb");
+        // Testnet/devnet may not have USDT, using placeholder
+        APTOS_USDT_ADDRESSES.put(SupportedAptosNetwork.APTOS_TESTNET, "0xf73e887a8754f540ee6e1a93bdc6dde2af69fc7ca5de32013e89dd44244473cb");
+        APTOS_USDT_ADDRESSES.put(SupportedAptosNetwork.APTOS_DEVNET, "0xf73e887a8754f540ee6e1a93bdc6dde2af69fc7ca5de32013e89dd44244473cb");
+    }
+
+    /** Aptos address pattern (0x-prefixed hex, up to 64 chars). */
+    public static final String APTOS_ADDRESS_PATTERN = "^0x[a-fA-F0-9]{1,64}$";
+
+    // =========================================================================
+    // Aptos Utility Methods
+    // =========================================================================
+
+    /**
+     * Returns all supported Aptos networks.
+     */
+    public static List<SupportedAptosNetwork> getAllAptosNetworks() {
+        return Arrays.asList(SupportedAptosNetwork.values());
+    }
+
+    /**
+     * Checks if an Aptos network string is valid.
+     */
+    public static boolean isValidAptosNetwork(String network) {
+        return SupportedAptosNetwork.fromString(network) != null;
+    }
+
+    /**
+     * Returns the explorer URL for an Aptos transaction.
+     */
+    public static String getAptosExplorerTxUrl(SupportedAptosNetwork network, String txHash) {
+        String baseUrl = APTOS_EXPLORER_URLS.get(network);
+        if (baseUrl == null) {
+            return "";
+        }
+        String networkSuffix = "";
+        switch (network) {
+            case APTOS_TESTNET:
+                networkSuffix = "?network=testnet";
+                break;
+            case APTOS_DEVNET:
+                networkSuffix = "?network=devnet";
+                break;
+            default:
+                break;
+        }
+        return baseUrl + "/txn/" + txHash + networkSuffix;
+    }
+
+    /**
+     * Returns the RPC URL for an Aptos network, using config override if available.
+     */
+    public static String getAptosRpcUrl(ServerConfig config, SupportedAptosNetwork network) {
+        if (config != null && config.getRpcUrls() != null) {
+            String url = config.getRpcUrls().get(network.getValue());
+            if (url != null && !url.isEmpty()) {
+                return url;
+            }
+        }
+        return APTOS_RPC_URLS.get(network);
+    }
+
+    /**
+     * Returns the USDT Fungible Asset address for an Aptos network.
+     */
+    public static String getAptosUsdtAddress(SupportedAptosNetwork network) {
+        return APTOS_USDT_ADDRESSES.get(network);
+    }
+
+    /**
+     * Validates an Aptos address format (0x-prefixed hex).
+     */
+    public static boolean isValidAptosAddress(String address) {
+        if (address == null || address.isEmpty()) {
+            return false;
+        }
+        return address.matches(APTOS_ADDRESS_PATTERN);
+    }
+
+    // =========================================================================
+    // Tezos Network Constants
+    // =========================================================================
+
+    /** Native token symbol for Tezos. */
+    public static final String XTZ_SYMBOL = "XTZ";
+
+    /** Standard decimal count for XTZ native token. */
+    public static final int XTZ_DECIMALS = 6;
+
+    /** Standard decimal count for USDt on Tezos. */
+    public static final int TEZOS_USDT_DECIMALS = 6;
+
+    // Tezos Explorer URLs
+    public static final Map<SupportedTezosNetwork, String> TEZOS_EXPLORER_URLS = new EnumMap<>(SupportedTezosNetwork.class);
+    static {
+        TEZOS_EXPLORER_URLS.put(SupportedTezosNetwork.TEZOS_MAINNET, "https://tzkt.io");
+        TEZOS_EXPLORER_URLS.put(SupportedTezosNetwork.TEZOS_GHOSTNET, "https://ghostnet.tzkt.io");
+    }
+
+    // Tezos RPC URLs
+    public static final Map<SupportedTezosNetwork, String> TEZOS_RPC_URLS = new EnumMap<>(SupportedTezosNetwork.class);
+    static {
+        TEZOS_RPC_URLS.put(SupportedTezosNetwork.TEZOS_MAINNET, "https://mainnet.api.tez.ie");
+        TEZOS_RPC_URLS.put(SupportedTezosNetwork.TEZOS_GHOSTNET, "https://ghostnet.tezos.marigold.dev");
+    }
+
+    // Tezos USDt addresses (FA2 contract)
+    public static final Map<SupportedTezosNetwork, String> TEZOS_USDT_ADDRESSES = new EnumMap<>(SupportedTezosNetwork.class);
+    static {
+        TEZOS_USDT_ADDRESSES.put(SupportedTezosNetwork.TEZOS_MAINNET, "KT1XnTn74bUtxHfDtBmm2bGZAQfhPbvKWR8o");
+        // Ghostnet may not have USDt, using placeholder
+        TEZOS_USDT_ADDRESSES.put(SupportedTezosNetwork.TEZOS_GHOSTNET, "KT1XnTn74bUtxHfDtBmm2bGZAQfhPbvKWR8o");
+    }
+
+    /** Tezos address pattern (tz1/tz2/tz3/KT1 prefix, 36 chars). */
+    public static final String TEZOS_ADDRESS_PATTERN = "^(tz1|tz2|tz3|KT1)[1-9A-HJ-NP-Za-km-z]{33}$";
+
+    // =========================================================================
+    // Tezos Utility Methods
+    // =========================================================================
+
+    /**
+     * Returns all supported Tezos networks.
+     */
+    public static List<SupportedTezosNetwork> getAllTezosNetworks() {
+        return Arrays.asList(SupportedTezosNetwork.values());
+    }
+
+    /**
+     * Checks if a Tezos network string is valid.
+     */
+    public static boolean isValidTezosNetwork(String network) {
+        return SupportedTezosNetwork.fromString(network) != null;
+    }
+
+    /**
+     * Returns the explorer URL for a Tezos transaction.
+     */
+    public static String getTezosExplorerTxUrl(SupportedTezosNetwork network, String opHash) {
+        String baseUrl = TEZOS_EXPLORER_URLS.get(network);
+        if (baseUrl == null) {
+            return "";
+        }
+        return baseUrl + "/" + opHash;
+    }
+
+    /**
+     * Returns the RPC URL for a Tezos network, using config override if available.
+     */
+    public static String getTezosRpcUrl(ServerConfig config, SupportedTezosNetwork network) {
+        if (config != null && config.getRpcUrls() != null) {
+            String url = config.getRpcUrls().get(network.getValue());
+            if (url != null && !url.isEmpty()) {
+                return url;
+            }
+        }
+        return TEZOS_RPC_URLS.get(network);
+    }
+
+    /**
+     * Returns the USDt FA2 contract address for a Tezos network.
+     */
+    public static String getTezosUsdtAddress(SupportedTezosNetwork network) {
+        return TEZOS_USDT_ADDRESSES.get(network);
+    }
+
+    /**
+     * Validates a Tezos address format (tz1/tz2/tz3/KT1 prefix).
+     */
+    public static boolean isValidTezosAddress(String address) {
+        if (address == null || address.isEmpty()) {
+            return false;
+        }
+        return address.matches(TEZOS_ADDRESS_PATTERN);
     }
 }
