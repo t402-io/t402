@@ -99,10 +99,10 @@ src/test/java/io/t402/multisig/
 ```
 
 ### 3.2 核心功能
-- [ ] Safe contract interaction via Web3j
-- [ ] Transaction builder pattern
-- [ ] Signature collection
-- [ ] Multi-sig execution
+- [x] Safe contract interaction via Web3j
+- [x] Transaction builder pattern
+- [x] Signature collection
+- [x] Multi-sig execution
 
 ### 3.3 API 設計
 ```java
@@ -151,4 +151,4 @@ TypeScript 參考: `sdks/typescript/packages/wdk-multisig/`
 
 - Phase 1 (Go): ✅ 完成
 - Phase 2 (Python): ✅ 完成
-- Phase 3 (Java): 待定
+- Phase 3 (Java): ✅ 完成
