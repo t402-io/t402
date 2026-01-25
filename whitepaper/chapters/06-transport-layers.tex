@@ -95,7 +95,7 @@ The HTTP transport is the canonical implementation, using standard HTTP mechanis
 \end{table}
 
 \begin{infobox}[Base64url Encoding]
-All header values use Base64url encoding (RFC 4648 \S5) without padding. This ensures compatibility with HTTP header character restrictions and avoids issues with \code{+}, \code{/}, and \code{=} characters.
+All header values use Base64url encoding (RFC 4648~\cite{base64} \S5) without padding. This ensures compatibility with HTTP header character restrictions and avoids issues with \code{+}, \code{/}, and \code{=} characters.
 \end{infobox}
 
 \subsection{Status Code Mapping}
@@ -281,7 +281,7 @@ Idempotent Resource & \code{Cache-Control: private, max-age=N} \\
 \section{MCP Transport}
 \label{sec:mcp-transport}
 
-The Model Context Protocol (MCP) transport enables AI agents to make payments when invoking tools. MCP uses JSON-RPC 2.0 over stdio or HTTP.
+The Model Context Protocol (MCP)~\cite{mcp} transport enables AI agents to make payments when invoking tools. MCP uses JSON-RPC 2.0 over stdio or HTTP.
 
 \subsection{Architecture Overview}
 

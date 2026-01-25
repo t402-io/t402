@@ -187,7 +187,7 @@ Under the Elliptic Curve Discrete Logarithm Problem (ECDLP) assumption, an adver
 \end{theorem}
 
 \begin{proof}[Proof Sketch]
-EIP-3009 uses ECDSA signatures over the secp256k1 curve. The security reduces to:
+EIP-3009~\cite{eip3009} uses ECDSA signatures over the secp256k1 curve. The security reduces to:
 
 \begin{enumerate}
     \item \textbf{ECDLP Hardness}: Given $G$ and $kG$, computing $k$ is computationally infeasible
@@ -295,7 +295,7 @@ A correctly signed EIP-3009 authorization cannot be settled to any address other
 \end{theorem}
 
 \begin{proof}
-The EIP-712 typed data includes the \field{to} parameter in the hash:
+The EIP-712~\cite{eip712} typed data includes the \field{to} parameter in the hash:
 
 \begin{lstlisting}[language=typescript]
 const types = {
