@@ -64,10 +64,10 @@ tests/
 ```
 
 ### 2.2 核心功能
-- [ ] Safe contract interaction via web3.py
-- [ ] Transaction proposal with EIP-712 hashing
-- [ ] Signature aggregation
-- [ ] Execution with collected signatures
+- [x] Safe contract interaction via web3.py
+- [x] Transaction proposal with EIP-712 hashing
+- [x] Signature aggregation
+- [x] Execution with collected signatures
 
 ### 2.3 API 設計
 ```python
@@ -150,5 +150,5 @@ TypeScript 參考: `sdks/typescript/packages/wdk-multisig/`
 ## 時程
 
 - Phase 1 (Go): ✅ 完成
-- Phase 2 (Python): 待定
+- Phase 2 (Python): ✅ 完成
 - Phase 3 (Java): 待定
