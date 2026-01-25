@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPreferredChain, getAcceptsForChain } from "@/lib/config";
-import { encodeHeader } from "@/lib/t402-server";
+import { getPreferredChain, getAcceptsForChain, getNetwork, getAsset, PAY_TO } from "@/lib/config";
+import { encodeHeader, decodeHeader, verifyPayment, settlePayment } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 
 const GASLESS_AMOUNT = "1000"; // 0.001 USDT
+
+// ERC-4337 infrastructure configuration from environment
+const BUNDLER_URL = process.env.NEXT_PUBLIC_BUNDLER_URL || "https://api.pimlico.io/v2/base-sepolia/rpc";
+const PAYMASTER_URL = process.env.NEXT_PUBLIC_PAYMASTER_URL || "https://api.pimlico.io/v2/base-sepolia/rpc";
+const PAYMASTER_ADDRESS = process.env.NEXT_PUBLIC_PAYMASTER_ADDRESS || "0x0000000000000000000000000000000000000000";
 
 function createPaymentRequired(request: NextRequest) {
   const chain = getPreferredChain(request);
@@ -19,8 +24,9 @@ function createPaymentRequired(request: NextRequest) {
       ...accept,
       extra: {
         gasless: true,
-        paymaster: "0xPaymasterAddress",
-        bundler: "https://bundler.t402.io",
+        paymaster: PAYMASTER_ADDRESS,
+        paymasterUrl: PAYMASTER_URL,
+        bundler: BUNDLER_URL,
       },
     })),
   };
@@ -58,6 +64,7 @@ export async function POST(request: NextRequest) {
   };
 
   if (isDemoMode) {
+    await new Promise((r) => setTimeout(r, 600));
     const settleResponse = createMockSettleResponse(chain);
     const response = NextResponse.json(responseData);
     response.headers.set("Payment-Response", encodeHeader(settleResponse));
@@ -65,5 +72,48 @@ export async function POST(request: NextRequest) {
     return response;
   }
 
-  return NextResponse.json(responseData);
+  // Live mode: verify and settle with facilitator
+  const paymentPayload = decodeHeader(paymentHeader);
+  const requirements = {
+    scheme: "exact",
+    network: getNetwork(),
+    amount: GASLESS_AMOUNT,
+    asset: getAsset(),
+    payTo: PAY_TO,
+    maxTimeoutSeconds: 60,
+    extra: {
+      name: "USDT",
+      version: "2",
+      gasless: true,
+      paymaster: PAYMASTER_ADDRESS,
+    },
+  };
+
+  try {
+    const verifyResult = await verifyPayment(paymentPayload, requirements);
+    if (!verifyResult.isValid) {
+      return NextResponse.json(
+        { error: "Payment verification failed", reason: verifyResult.invalidReason },
+        { status: 402 }
+      );
+    }
+
+    const settleResult = await settlePayment(paymentPayload, requirements);
+    if (!settleResult.success) {
+      return NextResponse.json(
+        { error: "Settlement failed", reason: settleResult.errorReason },
+        { status: 500 }
+      );
+    }
+
+    const response = NextResponse.json(responseData);
+    response.headers.set("Payment-Response", encodeHeader(settleResult));
+    response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
+    return response;
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Facilitator error", message: String(error) },
+      { status: 502 }
+    );
+  }
 }

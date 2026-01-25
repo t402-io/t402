@@ -14,7 +14,9 @@ import { encodePaymentHeader } from "@/lib/t402-client";
 
 type BridgeState = "idle" | "selecting" | "paying" | "bridging" | "confirming" | "done";
 
-const BRIDGEABLE: ChainFamily[] = ["evm", "ton", "tron", "solana"];
+// Chains that support cross-chain bridging via LayerZero USDT0 or similar protocols
+// Note: Full bridging support varies by chain - EVM chains have the best coverage
+const BRIDGEABLE: ChainFamily[] = ["evm", "ton", "tron", "solana", "stacks", "near", "aptos"];
 
 export function CrossChainBridge() {
   const { isDemo } = useDemoContext();
@@ -64,10 +66,12 @@ export function CrossChainBridge() {
         const data = await retryRes.json();
         setTxHash(data.bridge?.txHash || null);
       }
-    } catch {
-      // Fallback mock
-      setTxHash("0x" + Array(64).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join(""));
+    } catch (err) {
+      // Handle error - don't set fake tx hash on real errors
+      console.error("Bridge error:", err);
       setFlowState("error");
+      setState("idle");
+      return; // Exit early on error
     }
 
     setState("done");
@@ -156,9 +160,16 @@ export function CrossChainBridge() {
         </div>
 
         {state === "idle" && (
-          <button onClick={executeBridge} className="btn-primary px-4 py-2 text-sm w-full">
-            Bridge 1.00 USDT
-          </button>
+          <div className="space-y-2">
+            {flowState === "error" && (
+              <p className="text-xs text-[var(--color-error)]">
+                Bridge failed. Please try again.
+              </p>
+            )}
+            <button onClick={executeBridge} className="btn-primary px-4 py-2 text-sm w-full">
+              {flowState === "error" ? "Try Again" : "Bridge 1.00 USDT"}
+            </button>
+          </div>
         )}
 
         {state !== "idle" && state !== "done" && (
