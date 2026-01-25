@@ -20,7 +20,6 @@ from t402.types import (
 from t402.schemes.interfaces import AssetAmount, SupportedKindDict
 from t402.schemes.stacks.constants import (
     SCHEME_EXACT_DIRECT,
-    NETWORKS,
     NetworkConfig,
     TokenInfo,
     get_network_config,

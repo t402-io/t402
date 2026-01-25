@@ -33,7 +33,6 @@ from t402.schemes.stacks.types import (
     FacilitatorStacksSigner,
     ExactDirectPayload,
     TransactionResult,
-    is_valid_stacks_address,
     is_valid_tx_id,
     extract_token_transfer,
     parse_contract_identifier,

@@ -28,7 +28,6 @@ from t402.schemes.polkadot.types import (
     ClientPolkadotSigner,
     ExactDirectPayload,
     is_valid_ss58_address,
-    is_valid_hash,
     parse_asset_identifier,
 )
 

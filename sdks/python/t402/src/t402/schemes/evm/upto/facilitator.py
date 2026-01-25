@@ -540,8 +540,8 @@ class UptoEvmFacilitatorScheme:
             v_hex = format(v, "02x")
             sig_hex = f"0x{r_hex}{s_hex}{v_hex}"
 
-            # Encode EIP-712 typed data
-            full_types = {
+            # Encode EIP-712 typed data (full_types kept for reference)
+            _full_types = {
                 "EIP712Domain": [
                     {"name": "name", "type": "string"},
                     {"name": "version", "type": "string"},

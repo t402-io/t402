@@ -20,13 +20,10 @@ from t402.schemes.interfaces import AssetAmount, SupportedKindDict
 from t402.schemes.tezos.constants import (
     SCHEME_EXACT_DIRECT,
     is_tezos_network,
-    is_valid_address,
     get_network_config,
     get_token_info,
     create_asset_identifier,
-    parse_asset_identifier,
     parse_decimal_to_atomic,
-    decimal_to_atomic,
     TokenInfo,
 )
 
