@@ -2,66 +2,230 @@
 \chapter{Supported Networks}
 \label{app:networks}
 
-This appendix lists all supported networks and token addresses.
+This appendix provides comprehensive network configuration details for all supported chains.
 
 \section{EVM Networks}
 
-\begin{longtable}{l l >{\ttfamily\scriptsize}p{4.5cm}}
-\caption{Supported EVM Networks} \label{tab:evm-networks} \\
+T402 supports 19+ EVM-compatible networks through the unified EIP-3009 interface.
+
+\begin{longtable}{l l >{\ttfamily\scriptsize}p{4.2cm}}
+\caption{Supported EVM Networks with USDT0 (LayerZero OFT)} \label{tab:evm-networks} \\
 \toprule
-\textbf{Network} & \textbf{CAIP-2 ID} & \normalfont\textbf{USDT0 Address} \\
+\textbf{Network} & \textbf{CAIP-2 ID} & \normalfont\textbf{USDT0 Contract} \\
 \midrule
 \endfirsthead
 \multicolumn{3}{c}{\tablename\ \thetable\ -- continued} \\
 \toprule
-\textbf{Network} & \textbf{CAIP-2 ID} & \normalfont\textbf{USDT0 Address} \\
+\textbf{Network} & \textbf{CAIP-2 ID} & \normalfont\textbf{USDT0 Contract} \\
 \midrule
 \endhead
 \midrule
 \endfoot
 \bottomrule
 \endlastfoot
-Ethereum & eip155:1 & 0x6C96dE32CEa08842dcc...Fa41dee \\
-Arbitrum One & eip155:42161 & 0xFd086bC7CD5C481DCC...FCbb9 \\
-Base & eip155:8453 & 0x0200C29006150606B6...470c1 \\
-Optimism & eip155:10 & -- \\
-Ink & eip155:57073 & 0x0200C29006150606B6...470c1 \\
-Berachain & eip155:80094 & 0x779Ded0c9e1022225f...13736 \\
-Unichain & eip155:130 & 0x588ce4F028D8e7B53B...75518 \\
+Ethereum & eip155:1 & 0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee \\
+Arbitrum One & eip155:42161 & 0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9 \\
+Base & eip155:8453 & 0x0200C29006150606B650577BBE7B6248F58470c1 \\
+Optimism & eip155:10 & 0x0200C29006150606B650577BBE7B6248F58470c1 \\
+Ink & eip155:57073 & 0x0200C29006150606B650577BBE7B6248F58470c1 \\
+Berachain & eip155:80094 & 0x779Ded0c9e1022225f8E0630b35a9b54bE713736 \\
+Unichain & eip155:130 & 0x588ce4F028D8e7B53B687865d6A67b3A54C75518 \\
+Polygon & eip155:137 & 0xc2132D05D31c914a87C6611C10748AEb04B58e8F \\
+Avalanche & eip155:43114 & 0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7 \\
+BNB Chain & eip155:56 & 0x55d398326f99059fF775485246999027B3197955 \\
+Fantom & eip155:250 & 0x049d68029688eAbF473097a2fC38ef61633A3C7A \\
+Linea & eip155:59144 & 0xA219439258ca9da29E9Cc4cE5596924745e12B93 \\
+Scroll & eip155:534352 & 0xf55BEC9cafDbE8730f096Aa55dad6D22d44099Df \\
+zkSync Era & eip155:324 & 0x493257fD37EDB34451f62EDf8D2a0C418852bA4C \\
+Mantle & eip155:5000 & 0x201EBa5CC46D216Ce6DC03F6a759e8E766e956aE \\
+Celo & eip155:42220 & 0x48065fbBE25f71C9282ddf5e1cD6D6A887483D5e \\
+Gnosis & eip155:100 & 0x4ECaBa5870353805a9F068101A40E0f32ed605C6 \\
 \end{longtable}
 
-\section{Non-EVM Networks}
+\section{Solana}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
-\caption{Non-EVM Networks}
-\label{tab:non-evm-networks}
-\footnotesize
-\begin{tabular}{l >{\ttfamily\scriptsize}p{3.5cm} >{\ttfamily\scriptsize}p{4cm}}
+\caption{Solana Network Configuration}
+\label{tab:solana-config}
+\begin{tabular}{l l}
 \toprule
-\textbf{Network} & \normalfont\textbf{CAIP-2 ID} & \normalfont\textbf{Token Address} \\
+\textbf{Property} & \textbf{Value} \\
 \midrule
-Solana & solana:5eykt...Kvdp & EPjFWdd5Aufq...Dt1v \\
-TON & ton:-239 & EQCxE6mUtQJK...sDs \\
-TRON & tron:0x2b6653dc & TR7NHqjeKQxG...Lj6t \\
+CAIP-2 ID & \code{solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp} \\
+USDT Mint & \code{Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB} \\
+Token Program & \code{TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA} \\
+Decimals & 6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{TON}
+
+\begin{table}[htbp]
+\centering
+\caption{TON Network Configuration}
+\label{tab:ton-config}
+\begin{tabular}{l l}
+\toprule
+\textbf{Property} & \textbf{Value} \\
+\midrule
+CAIP-2 ID (Mainnet) & \code{ton:mainnet} \\
+CAIP-2 ID (Testnet) & \code{ton:testnet} \\
+USDT Jetton Master (Mainnet) & \code{EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id\_sDs} \\
+USDT Jetton Master (Testnet) & \code{kQBqSpvo4S87mX9tTc4FX3Sfqf4uSp3Tx-Fz4RBUfTRWBx} \\
+Workchain & 0 (basechain) \\
+Decimals & 6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{TRON}
+
+\begin{table}[htbp]
+\centering
+\caption{TRON Network Configuration}
+\label{tab:tron-config}
+\begin{tabular}{l l}
+\toprule
+\textbf{Property} & \textbf{Value} \\
+\midrule
+CAIP-2 ID (Mainnet) & \code{tron:mainnet} \\
+CAIP-2 ID (Testnet) & \code{tron:nile} \\
+USDT Contract (Mainnet) & \code{TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t} \\
+USDT Contract (Nile) & \code{TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf} \\
+Decimals & 6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{NEAR}
+
+\begin{table}[htbp]
+\centering
+\caption{NEAR Network Configuration}
+\label{tab:near-config}
+\begin{tabular}{l l}
+\toprule
+\textbf{Property} & \textbf{Value} \\
+\midrule
+CAIP-2 ID (Mainnet) & \code{near:mainnet} \\
+CAIP-2 ID (Testnet) & \code{near:testnet} \\
+USDT Contract (Mainnet) & \code{usdt.tether-token.near} \\
+USDT Contract (Testnet) & \code{usdt.fakes.testnet} \\
+Standard & NEP-141 \\
+Decimals & 6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Aptos}
+
+\begin{table}[htbp]
+\centering
+\caption{Aptos Network Configuration}
+\label{tab:aptos-config}
+\begin{tabular}{l p{7cm}}
+\toprule
+\textbf{Property} & \textbf{Value} \\
+\midrule
+CAIP-2 ID (Mainnet) & \code{aptos:1} \\
+CAIP-2 ID (Testnet) & \code{aptos:2} \\
+USDT Metadata (Mainnet) & \code{0xf73e887a8754f540ee6e1a93bdc6dde2af69fc7ca5de32013e89dd44244473cb} \\
+Standard & Fungible Asset \\
+Decimals & 6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Tezos}
+
+\begin{table}[htbp]
+\centering
+\caption{Tezos Network Configuration}
+\label{tab:tezos-config}
+\begin{tabular}{l l}
+\toprule
+\textbf{Property} & \textbf{Value} \\
+\midrule
+CAIP-2 ID (Mainnet) & \code{tezos:NetXdQprcVkpaWU} \\
+CAIP-2 ID (Ghostnet) & \code{tezos:NetXnHfVqm9iesp} \\
+USDt Contract (Mainnet) & \code{KT1XnTn74bUtxHfDtBmm2bGZAQfhPbvKWR8o} \\
+Token ID & 0 \\
+Standard & FA2 (TZIP-12) \\
+Decimals & 6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Polkadot Asset Hub}
+
+\begin{table}[htbp]
+\centering
+\caption{Polkadot Asset Hub Configuration}
+\label{tab:polkadot-config}
+\begin{tabular}{l l}
+\toprule
+\textbf{Property} & \textbf{Value} \\
+\midrule
+CAIP-2 ID (Asset Hub) & \code{polkadot:68d56f15f85d3136970ec16946040bc1} \\
+CAIP-2 ID (Westend) & \code{polkadot:e143f23803ac50e8f6f8e62695d1ce9e} \\
+USDT Asset ID & 1984 \\
+Parachain ID & 1000 \\
+Decimals & 6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Stacks}
+
+\begin{table}[htbp]
+\centering
+\caption{Stacks Network Configuration}
+\label{tab:stacks-config}
+\begin{tabular}{l p{6.5cm}}
+\toprule
+\textbf{Property} & \textbf{Value} \\
+\midrule
+CAIP-2 ID (Mainnet) & \code{stacks:1} \\
+CAIP-2 ID (Testnet) & \code{stacks:2147483648} \\
+USDT Contract & \code{SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.token-usdt} \\
+Standard & SIP-010 \\
+Decimals & 6 \\
+Bitcoin Finality & $\sim$10 minutes \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \section{Facilitator Wallet Addresses}
 
-\begin{table}[ht]
+The official T402 Facilitator service uses the following addresses for gas sponsorship:
+
+\begin{table}[htbp]
 \centering
 \caption{Official Facilitator Addresses}
 \label{tab:facilitator-addresses}
 \footnotesize
-\begin{tabular}{l >{\ttfamily\scriptsize}p{6.5cm}}
+\begin{tabular}{l >{\ttfamily\scriptsize}p{7cm}}
 \toprule
-\textbf{Chain Type} & \normalfont\textbf{Address} \\
+\textbf{Chain} & \normalfont\textbf{Address} \\
 \midrule
-EVM (all) & 0xC88f67e776f16DcFBf42e6bDda1B82604448899B \\
+EVM (all networks) & 0xC88f67e776f16DcFBf42e6bDda1B82604448899B \\
 Solana & 8GGtWHRQ1wz5gDKE2KXZLktqzcfV1CBqSbeUZjA7hoWL \\
+TON & EQ5d11d21276ac6b5efdf179e654ff0c6eee34e0abfa263a \\
 TRON & TT1MqNNj2k5qdGA6nrrCodW6oyHbbAreQ5 \\
+NEAR & facilitator.t402.near \\
+Aptos & 0x... (TBD) \\
+Tezos & tz1... (TBD) \\
+Polkadot & 14... (TBD) \\
+Stacks & SP... (TBD) \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{infobox}[Network Updates]
+For the most current network support and addresses, refer to the Facilitator's \code{/supported} endpoint:
+\begin{center}
+\url{https://facilitator.t402.io/supported}
+\end{center}
+\end{infobox}

@@ -9,7 +9,7 @@ This chapter defines the core data structures, schemas, and encoding rules used 
 
 All \tprotocol{} messages use JSON encoding with UTF-8 character set. The protocol defines three primary message types:
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     msg/.style={
@@ -54,19 +54,7 @@ All \tprotocol{} messages include a \field{t402Version} field indicating the pro
 }
 \end{lstlisting}
 
-\begin{table}[ht]
-\centering
-\caption{Protocol Version History}
-\label{tab:version-history}
-\begin{tabular}{c l p{6cm}}
-\toprule
-\textbf{Version} & \textbf{Status} & \textbf{Key Features} \\
-\midrule
-1 & Deprecated & Legacy network identifiers, limited extension support \\
-2 & Current & CAIP-2 networks, resource separation, extensions \\
-\bottomrule
-\end{tabular}
-\end{table}
+For a complete version history and migration guide, see \cref{tab:versions} in \cref{sec:versioning}.
 
 \subsection{Version Negotiation}
 
@@ -118,7 +106,7 @@ When a resource server requires payment, it responds with the \code{PaymentRequi
 
 \subsection{Field Definitions}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{PaymentRequired Fields}
 \label{tab:payment-required-fields}
@@ -138,7 +126,7 @@ When a resource server requires payment, it responds with the \code{PaymentRequi
 
 \subsection{ResourceInfo Object}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{ResourceInfo Fields}
 \label{tab:resource-info}
@@ -177,7 +165,7 @@ Each element in the \field{accepts} array specifies one acceptable payment metho
 
 \subsection{Field Definitions}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{PaymentRequirements Fields}
 \label{tab:requirements-fields}
@@ -206,7 +194,7 @@ Amounts are encoded as decimal strings representing the smallest unit of the tok
 An atomic unit is the smallest indivisible unit of a token. For tokens with $d$ decimals, the atomic amount equals the display amount multiplied by $10^d$.
 \end{definition}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Amount Encoding Examples}
 \label{tab:amount-encoding}
@@ -230,7 +218,7 @@ Amounts MUST be encoded as strings, not numbers. JSON numbers have limited preci
 
 Asset addresses follow chain-specific formatting rules:
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Asset Address Formats}
 \label{tab:asset-formats}
@@ -283,7 +271,7 @@ Clients construct a \code{PaymentPayload} to authorize payment for a resource.
 
 \subsection{Field Definitions}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{PaymentPayload Fields}
 \label{tab:payload-fields}
@@ -374,7 +362,7 @@ After successful on-chain settlement, the server returns a \code{SettlementRespo
 
 \subsection{Field Definitions}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{SettlementResponse Fields}
 \label{tab:settlement-fields}
@@ -413,7 +401,7 @@ where:
 
 \subsection{Namespace Registry}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{CAIP-2 Namespaces}
 \label{tab:namespaces}
@@ -431,24 +419,32 @@ where:
 
 \subsection{Supported Networks}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
-\caption{Supported Networks}
+\caption{Supported Networks (Partial List)}
 \label{tab:supported-networks}
 \footnotesize
 \begin{tabular}{l l l}
 \toprule
 \textbf{Network} & \textbf{CAIP-2 ID} & \textbf{Tokens} \\
 \midrule
+\multicolumn{3}{l}{\textit{EVM Networks (19+)}} \\
 Ethereum & \network{eip155:1} & USDT0 \\
 Base & \network{eip155:8453} & USDT0, USDC \\
 Arbitrum One & \network{eip155:42161} & USDT0 \\
 Optimism & \network{eip155:10} & USDT0 \\
 Ink & \network{eip155:57073} & USDT0 \\
 Berachain & \network{eip155:80094} & USDT0 \\
+\midrule
+\multicolumn{3}{l}{\textit{Non-EVM Networks}} \\
 Solana & \network{solana:5eykt...Kvdp} & USDT \\
-TON & \network{ton:-239} & USDT \\
-TRON & \network{tron:0x2b6653dc} & USDT \\
+TON Mainnet & \network{ton:mainnet} & USDT \\
+TRON Mainnet & \network{tron:mainnet} & USDT \\
+NEAR Mainnet & \network{near:mainnet} & USDT \\
+Aptos Mainnet & \network{aptos:1} & USDT \\
+Tezos Mainnet & \network{tezos:NetXdQprcVkpaWU} & USDt \\
+Polkadot Asset Hub & \network{polkadot:68d56f15...} & USDT \\
+Stacks Mainnet & \network{stacks:1} & USDT \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -460,7 +456,7 @@ TRON & \network{tron:0x2b6653dc} & USDT \\
 
 \subsection{Payment Errors}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Payment Error Codes}
 \label{tab:payment-errors-spec}
@@ -481,7 +477,7 @@ nonce\_already\_used & Nonce used in previous transaction \\
 
 \subsection{Protocol Errors}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Protocol Error Codes}
 \label{tab:protocol-errors-spec}
@@ -501,7 +497,7 @@ invalid\_payment\_requirements & Invalid requirements format \\
 
 \subsection{Settlement Errors}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Settlement Error Codes}
 \label{tab:settlement-errors-spec}
@@ -525,7 +521,7 @@ When using HTTP transport, \tprotocol{} uses custom headers for payment data.
 
 \subsection{Request Headers}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{HTTP Request Headers}
 \label{tab:request-headers}
@@ -541,7 +537,7 @@ When using HTTP transport, \tprotocol{} uses custom headers for payment data.
 
 \subsection{Response Headers}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{HTTP Response Headers}
 \label{tab:response-headers}
@@ -592,7 +588,7 @@ The \field{extensions} field enables optional functionality beyond core payment 
 
 \subsection{Standard Extensions}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Standard Extensions}
 \label{tab:standard-extensions}

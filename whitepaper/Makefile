@@ -8,6 +8,9 @@ BIB = bibtex
 # Output directory
 OUT = build
 
+# Ensure xelatex can find input files when using output-directory
+export TEXINPUTS := .:./chapters:./appendices:./figures:$(TEXINPUTS)
+
 # Default target
 all: $(MAIN).pdf
 
@@ -17,15 +20,15 @@ $(OUT):
 
 # Compile PDF
 $(MAIN).pdf: $(OUT) $(MAIN).tex preamble.tex chapters/*.tex appendices/*.tex bibliography.bib
-	$(TEX) -output-directory=$(OUT) $(MAIN).tex
+	$(TEX) -interaction=nonstopmode -output-directory=$(OUT) $(MAIN).tex
 	$(BIB) $(OUT)/$(MAIN)
-	$(TEX) -output-directory=$(OUT) $(MAIN).tex
-	$(TEX) -output-directory=$(OUT) $(MAIN).tex
+	$(TEX) -interaction=nonstopmode -output-directory=$(OUT) $(MAIN).tex
+	$(TEX) -interaction=nonstopmode -output-directory=$(OUT) $(MAIN).tex
 	cp $(OUT)/$(MAIN).pdf .
 
 # Quick compile (no bibliography)
 quick:
-	$(TEX) -output-directory=$(OUT) $(MAIN).tex
+	$(TEX) -interaction=nonstopmode -output-directory=$(OUT) $(MAIN).tex
 	cp $(OUT)/$(MAIN).pdf .
 
 # Clean auxiliary files

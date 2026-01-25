@@ -648,113 +648,48 @@ The Rust SDK targets high-performance applications and WebAssembly deployments:
 
 \subsubsection{Key Features}
 
-\begin{lstlisting}[language=golang, caption={Rust SDK Usage Example (Rust syntax)}]
-// Server middleware (Axum)
-use t402_axum::T402Layer;
-
-let app = Router::new()
-    .route("/api/data", get(handler))
-    .layer(T402Layer::new(config));
-
-// Client
-use t402_client::T402Client;
-
-let client = T402Client::new(wallet);
-let response = client
-    .get("https://api.example.com/weather")
-    .with_payment(usdt("0.01"))
-    .send()
-    .await?;
-\end{lstlisting}
-
-\subsubsection{WebAssembly Support}
-
-The Rust SDK compiles to WebAssembly for:
 \begin{itemize}
-    \item Browser-based T402 clients
-    \item Edge computing (Cloudflare Workers, Deno Deploy)
-    \item Node.js native addon performance
+    \item Native async/await support with Tokio
+    \item Server middleware for Axum and Actix-web
+    \item WebAssembly compilation for browsers and edge computing
+    \item Zero-copy parsing for high-performance scenarios
 \end{itemize}
 
 %------------------------------------------------------------------------------
 \subsection{Swift SDK}
 \label{subsec:swift-sdk}
 
-Native iOS and macOS support with modern Swift features:
-
-\begin{lstlisting}[language=typescript, caption={Swift SDK Example (Swift syntax)}]
-// Swift client usage
-import T402
-
-let client = T402Client(wallet: wallet)
-
-let weather = try await client
-    .request("https://api.example.com/weather")
-    .pay(.usdt(0.01, network: .ethereum))
-    .decode(WeatherResponse.self)
-
-// SwiftUI integration
-struct PaidContentView: View {
-    @StateObject var payment = T402Payment()
-
-    var body: some View {
-        PaidContent(payment: payment) {
-            ArticleView(article: article)
-        } paywall: {
-            PaywallView(amount: 0.10, asset: .usdt)
-        }
-    }
-}
-\end{lstlisting}
-
-\subsubsection{Platform Integration}
-
+Native iOS and macOS support targeting:
 \begin{itemize}
-    \item \textbf{WalletConnect}: Native mobile wallet integration
-    \item \textbf{Apple Pay Bridge}: Fiat-to-crypto via Apple Pay
-    \item \textbf{Keychain}: Secure key storage
-    \item \textbf{App Clips}: Lightweight payment flows
+    \item Swift Concurrency (async/await) for modern iOS development
+    \item SwiftUI components for declarative payment UIs
+    \item WalletConnect integration for mobile wallet connections
+    \item Keychain-based secure key storage
+    \item App Clips support for lightweight payment flows
 \end{itemize}
 
 %------------------------------------------------------------------------------
 \subsection{Kotlin SDK}
 \label{subsec:kotlin-sdk}
 
-Android-native SDK with Kotlin coroutines:
-
-\begin{lstlisting}[language=typescript, caption={Kotlin SDK Example}]
-// Kotlin Android usage
-val client = T402Client.create(wallet)
-
-val response = client.get("https://api.example.com/data")
-    .pay(USDT.amount("0.01").on(Network.POLYGON))
-    .await()
-
-// Jetpack Compose integration
-@Composable
-fun PaidScreen(url: String) {
-    val payment = rememberT402Payment()
-
-    T402Gate(
-        payment = payment,
-        amount = 0.10.usdt(),
-        content = { PremiumContent() },
-        paywall = { PaywallDialog(onPay = payment::initiate) }
-    )
-}
-\end{lstlisting}
+Android-native SDK featuring:
+\begin{itemize}
+    \item Kotlin Coroutines for seamless async operations
+    \item Jetpack Compose components for Material Design paywalls
+    \item Android Keystore integration for secure key management
+    \item OkHttp interceptor for automatic payment handling
+\end{itemize}
 
 %------------------------------------------------------------------------------
 \subsection{C++ SDK}
 \label{subsec:cpp-sdk}
 
-Embedded systems and IoT devices require a lightweight C++ implementation:
-
+Lightweight implementation for embedded systems and IoT:
 \begin{itemize}
-    \item \textbf{Minimal dependencies}: Only libcurl and OpenSSL
-    \item \textbf{No heap allocation}: Static memory for constrained devices
-    \item \textbf{FreeRTOS support}: IoT device integration
-    \item \textbf{Arduino library}: Maker-friendly API
+    \item Minimal dependencies (libcurl, OpenSSL)
+    \item Static memory allocation for constrained devices
+    \item FreeRTOS and Arduino support
+    \item Header-only option for easy integration
 \end{itemize}
 
 %==============================================================================
@@ -909,33 +844,12 @@ Production hot wallets will migrate to HSM-backed key management:
 
 \subsubsection{Rate Limiting Evolution}
 
-\begin{lstlisting}[language=yaml, caption={Advanced Rate Limiting Configuration}]
-rateLimiting:
-  tiers:
-    anonymous:
-      rps: 10
-      burst: 20
-      dailyLimit: 1000
-    authenticated:
-      rps: 100
-      burst: 200
-      dailyLimit: 50000
-    enterprise:
-      rps: 1000
-      burst: 5000
-      dailyLimit: unlimited
-
-  adaptive:
-    enabled: true
-    cpuThreshold: 80%
-    memoryThreshold: 85%
-    reductionFactor: 0.5
-
-  ddosProtection:
-    enabled: true
-    provider: cloudflare
-    challengeThreshold: 1000
-\end{lstlisting}
+Future rate limiting enhancements include:
+\begin{itemize}
+    \item \textbf{Tiered limits}: Different quotas for anonymous, authenticated, and enterprise clients
+    \item \textbf{Adaptive throttling}: Automatic adjustment based on system load
+    \item \textbf{DDoS integration}: Cloudflare and similar provider integration
+\end{itemize}
 
 %==============================================================================
 \section{Standardization}
