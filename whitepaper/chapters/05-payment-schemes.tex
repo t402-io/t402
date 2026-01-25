@@ -83,7 +83,7 @@ The exact scheme is identified by \code{"scheme": "exact"} in payment requiremen
 \section{EVM Implementation}
 \label{sec:evm-implementation}
 
-On EVM-compatible chains, the exact scheme uses EIP-3009 (Transfer with Authorization) for gasless, signature-based transfers.
+On EVM-compatible chains, the exact scheme uses EIP-3009~\cite{eip3009} (Transfer with Authorization) for gasless, signature-based transfers.
 
 \subsection{EIP-3009: Transfer with Authorization}
 
@@ -133,7 +133,7 @@ interface IEIP3009 {
 
 \subsection{EIP-712 Typed Data Signing}
 
-The authorization uses EIP-712 structured signing for security and user experience:
+The authorization uses EIP-712~\cite{eip712} structured signing for security and user experience:
 
 \begin{lstlisting}[language=typescript,caption={EIP-712 domain and types}]
 const domain = {
@@ -252,7 +252,7 @@ Upon successful verification, the Facilitator executes settlement:
 \section{Solana (SVM) Implementation}
 \label{sec:solana-implementation}
 
-On Solana, the exact scheme uses SPL Token \code{TransferChecked} instructions with Facilitator-sponsored fee payment.
+On Solana~\cite{solana}, the exact scheme uses SPL Token \code{TransferChecked} instructions with Facilitator-sponsored fee payment.
 
 \subsection{Transaction Structure}
 
@@ -311,7 +311,7 @@ The Facilitator \textbf{MUST} enforce all of the following:
 \section{TON Implementation}
 \label{sec:ton-implementation}
 
-On TON, payments use Jetton (TON's fungible token standard) transfers.
+On TON~\cite{ton}, payments use Jetton (TON's fungible token standard) transfers.
 
 \subsection{Jetton Transfer Message}
 
@@ -350,7 +350,7 @@ transfer#0f8a7ea5
 \section{TRON Implementation}
 \label{sec:tron-implementation}
 
-On TRON, payments use TRC-20 token transfers.
+On TRON~\cite{tron}, payments use TRC-20 token transfers.
 
 \subsection{Transaction Structure}
 
@@ -376,7 +376,7 @@ TRON uses Protobuf-encoded transactions with ECDSA secp256k1 signatures.
 \section{NEAR Implementation}
 \label{sec:near-implementation}
 
-On NEAR Protocol, the exact scheme uses NEP-141 fungible token transfers with function call access keys for gasless execution.
+On NEAR Protocol~\cite{near}, the exact scheme uses NEP-141~\cite{nep141} fungible token transfers with function call access keys for gasless execution.
 
 \subsection{NEP-141: Fungible Token Standard}
 
@@ -423,7 +423,7 @@ NEAR enables gasless payments through:
 \section{Aptos Implementation}
 \label{sec:aptos-implementation}
 
-On Aptos, the exact scheme uses the Fungible Asset standard (formerly Coin) for USDT transfers.
+On Aptos~\cite{aptos}, the exact scheme uses the Fungible Asset standard (formerly Coin) for USDT transfers.
 
 \subsection{Fungible Asset Standard}
 
@@ -480,7 +480,7 @@ Aptos supports fee sponsorship through:
 \section{Tezos Implementation}
 \label{sec:tezos-implementation}
 
-On Tezos, the exact scheme uses the FA2 (TZIP-12) token standard for USDt transfers.
+On Tezos~\cite{tezos}, the exact scheme uses the FA2~\cite{fa2} (TZIP-12) token standard for USDt transfers.
 
 \subsection{FA2: Multi-Asset Standard}
 
@@ -541,7 +541,7 @@ Tezos enables gasless transfers through TZIP-17 permits:
 \section{Polkadot Implementation}
 \label{sec:polkadot-implementation}
 
-On Polkadot, the exact scheme uses the Asset Hub parachain's Assets pallet for USDT transfers.
+On Polkadot~\cite{polkadot}, the exact scheme uses the Asset Hub~\cite{assethub} parachain's Assets pallet for USDT transfers.
 
 \subsection{Assets Pallet}
 
@@ -598,7 +598,7 @@ The Assets pallet provides fungible token functionality on Asset Hub:
 \section{Stacks Implementation}
 \label{sec:stacks-implementation}
 
-On Stacks (Bitcoin L2), the exact scheme uses SIP-010 fungible token transfers secured by Bitcoin.
+On Stacks~\cite{stacks} (Bitcoin L2), the exact scheme uses SIP-010~\cite{sip010} fungible token transfers secured by Bitcoin.
 
 \subsection{SIP-010: Fungible Token Standard}
 
@@ -702,8 +702,8 @@ Finality & $\sim$1s & $\sim$30s & $\sim$12s & $\sim$10min \\
 Beyond the \code{exact} scheme detailed in this chapter, T402 is designed to support additional payment patterns:
 
 \begin{itemize}
-    \item \textbf{Up-To Scheme}: Metered payments using EIP-2612 permits for usage-based billing
-    \item \textbf{Permit2 Integration}: Uniswap's universal approval system for improved gas efficiency
+    \item \textbf{Up-To Scheme}: Metered payments using EIP-2612~\cite{eip2612} permits for usage-based billing
+    \item \textbf{Permit2 Integration}: Uniswap's universal approval system~\cite{permit2} for improved gas efficiency
     \item \textbf{Subscription Scheme}: Recurring payments with automatic renewal
 \end{itemize}
 

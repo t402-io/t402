@@ -168,7 +168,7 @@ The \term{Facilitator} handles blockchain interactions on behalf of Resource Ser
 
     \item[Settlement] Broadcast the signed transaction to the blockchain and await confirmation
 
-    \item[Gas Sponsorship] Cover transaction fees for gasless payment flows (EIP-3009, ERC-4337)
+    \item[Gas Sponsorship] Cover transaction fees for gasless payment flows (EIP-3009~\cite{eip3009}, ERC-4337~\cite{eip4337})
 \end{description}
 
 \begin{securitybox}[Facilitator Security Property]
@@ -429,7 +429,7 @@ The EIP-712 typed signature covers all authorization parameters, including the r
 \label{fig:multichain}
 \end{figure}
 
-Each blockchain network is identified using CAIP-2 format (e.g., \code{eip155:8453} for Base), enabling:
+Each blockchain network is identified using CAIP-2 format~\cite{caip2} (e.g., \code{eip155:8453} for Base), enabling:
 
 \begin{itemize}
     \item Unambiguous network identification

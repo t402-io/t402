@@ -215,7 +215,7 @@ The ``up-to'' scheme enables metered, usage-based billing where clients authoriz
 
 \subsubsection{Implementation via EIP-2612 Permit}
 
-For EVM networks, the up-to scheme leverages EIP-2612 permits with batch settlement:
+For EVM networks, the up-to scheme leverages EIP-2612~\cite{eip2612} permits with batch settlement:
 
 \begin{lstlisting}[language=solidity, caption={Up-To Settlement Contract}]
 contract UpToSettlement {
@@ -278,7 +278,7 @@ contract UpToSettlement {
 \subsection{Permit2 Integration}
 \label{subsec:permit2}
 
-Uniswap's Permit2 contract provides significant improvements over traditional token approvals:
+Uniswap's Permit2~\cite{permit2} contract provides significant improvements over traditional token approvals:
 
 \begin{table}[htbp]
 \centering
@@ -341,7 +341,7 @@ async function createPermit2Payment(
 \subsection{Sign-In-With-X (SIWx)}
 \label{subsec:siwx}
 
-CAIP-122 defines a chain-agnostic authentication standard enabling wallet-based identity:
+CAIP-122~\cite{caip122} defines a chain-agnostic authentication standard enabling wallet-based identity:
 
 \begin{figure}[htbp]
 \centering
