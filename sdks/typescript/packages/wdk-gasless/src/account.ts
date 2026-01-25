@@ -137,7 +137,7 @@ const SAFE_4337_MODULE_ABI = [
 export class WdkSmartAccount implements SmartAccountSigner {
   private readonly wdkAccount: WdkAccount
   private readonly publicClient: PublicClient
-  private readonly chainId: number
+  private readonly _chainId: number
   private readonly owners: Address[]
   private readonly threshold: number
   private readonly saltNonce: bigint
@@ -151,7 +151,7 @@ export class WdkSmartAccount implements SmartAccountSigner {
   constructor(config: WdkSmartAccountConfig) {
     this.wdkAccount = config.wdkAccount
     this.publicClient = config.publicClient
-    this.chainId = config.chainId
+    this._chainId = config.chainId
     this.threshold = config.threshold ?? 1
     this.saltNonce = config.saltNonce ?? 0n
 
@@ -181,6 +181,13 @@ export class WdkSmartAccount implements SmartAccountSigner {
   async getOwnerAddress(): Promise<Address> {
     await this.initialize()
     return this.cachedOwnerAddress!
+  }
+
+  /**
+   * Get the chain ID
+   */
+  getChainId(): number {
+    return this._chainId
   }
 
   /**

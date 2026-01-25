@@ -205,6 +205,13 @@ export class MultiSigWdkSmartAccount implements MultiSigSmartAccountSigner {
   }
 
   /**
+   * Get the chain ID
+   */
+  getChainId(): number {
+    return this.chainId
+  }
+
+  /**
    * Get the smart account address (counterfactual)
    */
   async getAddress(): Promise<Address> {
