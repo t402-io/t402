@@ -15,7 +15,7 @@ Each payment scheme consists of three components:
     \item \textbf{Settlement Logic}: How to execute the on-chain transaction
 \end{enumerate}
 
-\begin{figure}[h]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     box/.style={
@@ -58,7 +58,7 @@ A payment scheme where the authorized transfer amount exactly equals the require
 
 \subsection{Properties}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Exact Scheme Properties}
 \label{tab:exact-properties}
@@ -112,7 +112,7 @@ interface IEIP3009 {
 
 \subsection{Authorization Parameters}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{EIP-3009 Authorization Parameters}
 \label{tab:eip3009-params}
@@ -258,7 +258,7 @@ On Solana, the exact scheme uses SPL Token \code{TransferChecked} instructions w
 
 Solana payments require a specific instruction layout:
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Required Solana Transaction Instructions}
 \label{tab:solana-instructions}
@@ -373,22 +373,325 @@ TRON uses Protobuf-encoded transactions with ECDSA secp256k1 signatures.
     \item \textbf{Contract Address}: Official USDT: \code{TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t}
 \end{itemize}
 
+\section{NEAR Implementation}
+\label{sec:near-implementation}
+
+On NEAR Protocol, the exact scheme uses NEP-141 fungible token transfers with function call access keys for gasless execution.
+
+\subsection{NEP-141: Fungible Token Standard}
+
+NEP-141 defines NEAR's fungible token interface:
+
+\begin{lstlisting}[language=json,caption={NEP-141 transfer call}]
+{
+  "receiver_id": "merchant.near",
+  "amount": "1000000",
+  "memo": "T402 payment"
+}
+\end{lstlisting}
+
+\subsection{Payload Structure}
+
+\begin{lstlisting}[language=json,caption={NEAR exact scheme payload}]
+{
+  "signedTransaction": "base64-encoded-signed-transaction",
+  "publicKey": "ed25519:...",
+  "accountId": "payer.near"
+}
+\end{lstlisting}
+
+\subsection{Gasless Architecture}
+
+NEAR enables gasless payments through:
+
+\begin{itemize}
+    \item \textbf{Function Call Access Keys}: Limited keys that can only call specific contract methods
+    \item \textbf{Relayer Pattern}: Facilitator submits transactions on behalf of users
+    \item \textbf{Meta Transactions}: NEP-366 enables signed actions without gas
+\end{itemize}
+
+\subsection{Verification Requirements}
+
+\begin{itemize}
+    \item Validate Ed25519 signature over serialized transaction
+    \item Verify \code{receiver\_id} matches \field{payTo} account
+    \item Check token contract is official USDT (\code{usdt.tether-token.near})
+    \item Validate \code{amount} meets requirements
+    \item Confirm account has sufficient balance
+\end{itemize}
+
+\section{Aptos Implementation}
+\label{sec:aptos-implementation}
+
+On Aptos, the exact scheme uses the Fungible Asset standard (formerly Coin) for USDT transfers.
+
+\subsection{Fungible Asset Standard}
+
+Aptos migrated from the legacy Coin module to the Fungible Asset framework:
+
+\begin{lstlisting}[language=json,caption={Aptos transfer entry function}]
+{
+  "function": "0x1::primary_fungible_store::transfer",
+  "type_arguments": ["0x...(usdt_metadata)"],
+  "arguments": ["recipient_address", "amount"]
+}
+\end{lstlisting}
+
+\subsection{Payload Structure}
+
+\begin{lstlisting}[language=json,caption={Aptos exact scheme payload}]
+{
+  "transaction": {
+    "sender": "0x1234...5678",
+    "sequence_number": "42",
+    "max_gas_amount": "2000",
+    "gas_unit_price": "100",
+    "expiration_timestamp_secs": "1740672154",
+    "payload": { ... }
+  },
+  "signature": {
+    "type": "ed25519_signature",
+    "public_key": "0x...",
+    "signature": "0x..."
+  }
+}
+\end{lstlisting}
+
+\subsection{Sponsored Transactions}
+
+Aptos supports fee sponsorship through:
+
+\begin{itemize}
+    \item \textbf{Fee Payer}: Secondary signer pays gas fees
+    \item \textbf{Multi-Agent}: Multiple signers with designated fee payer
+    \item \textbf{Simulation}: Pre-flight checks before broadcast
+\end{itemize}
+
+\subsection{Verification Requirements}
+
+\begin{itemize}
+    \item Validate Ed25519 signature
+    \item Verify \code{sequence\_number} is current (not replayed)
+    \item Check \code{expiration\_timestamp\_secs} is in the future
+    \item Validate recipient matches \field{payTo}
+    \item Confirm USDT metadata address: \code{0xf73e...473cb}
+\end{itemize}
+
+\section{Tezos Implementation}
+\label{sec:tezos-implementation}
+
+On Tezos, the exact scheme uses the FA2 (TZIP-12) token standard for USDt transfers.
+
+\subsection{FA2: Multi-Asset Standard}
+
+FA2 is Tezos's unified token standard supporting fungible and non-fungible tokens:
+
+\begin{lstlisting}[language=json,caption={FA2 transfer entrypoint}]
+{
+  "entrypoint": "transfer",
+  "value": [{
+    "from_": "tz1...",
+    "txs": [{
+      "to_": "tz1...",
+      "token_id": 0,
+      "amount": "1000000"
+    }]
+  }]
+}
+\end{lstlisting}
+
+\subsection{Payload Structure}
+
+\begin{lstlisting}[language=json,caption={Tezos exact scheme payload}]
+{
+  "operation": {
+    "branch": "BL...",
+    "contents": [{
+      "kind": "transaction",
+      "source": "tz1...",
+      "destination": "KT1XnTn74bUtxHfDtBmm2bGZAQfhPbvKWR8o",
+      "amount": "0",
+      "parameters": { ... }
+    }],
+    "signature": "edsig..."
+  }
+}
+\end{lstlisting}
+
+\subsection{Gasless via Permits}
+
+Tezos enables gasless transfers through TZIP-17 permits:
+
+\begin{itemize}
+    \item \textbf{Off-chain Signatures}: Users sign permit data off-chain
+    \item \textbf{Permit Entrypoint}: Relayer submits permit + transfer
+    \item \textbf{Nonce Management}: Per-user counters prevent replay
+\end{itemize}
+
+\subsection{Verification Requirements}
+
+\begin{itemize}
+    \item Validate Ed25519 signature (tz1) or secp256k1 (tz2)
+    \item Verify USDt contract: \code{KT1XnTn74bUtxHfDtBmm2bGZAQfhPbvKWR8o}
+    \item Check \code{token\_id} is 0 (USDt)
+    \item Validate counter for replay protection
+    \item Confirm sufficient balance
+\end{itemize}
+
+\section{Polkadot Implementation}
+\label{sec:polkadot-implementation}
+
+On Polkadot, the exact scheme uses the Asset Hub parachain's Assets pallet for USDT transfers.
+
+\subsection{Assets Pallet}
+
+The Assets pallet provides fungible token functionality on Asset Hub:
+
+\begin{lstlisting}[language=json,caption={Assets.transfer call}]
+{
+  "call": "Assets.transfer",
+  "args": {
+    "id": 1984,
+    "target": "14...",
+    "amount": "1000000"
+  }
+}
+\end{lstlisting}
+
+\subsection{Payload Structure}
+
+\begin{lstlisting}[language=json,caption={Polkadot exact scheme payload}]
+{
+  "extrinsic": {
+    "signature": {
+      "signer": "14...",
+      "signature": {
+        "Sr25519": "0x..."
+      },
+      "era": { "mortal": [64, 0] },
+      "nonce": 42,
+      "tip": 0
+    },
+    "method": { ... }
+  }
+}
+\end{lstlisting}
+
+\subsection{Cross-Chain Considerations}
+
+\begin{itemize}
+    \item \textbf{Relay Chain}: Polkadot relay for security
+    \item \textbf{Asset Hub}: Parachain 1000 hosts USDT (Asset ID 1984)
+    \item \textbf{XCM}: Cross-chain messaging for multi-chain operations
+\end{itemize}
+
+\subsection{Verification Requirements}
+
+\begin{itemize}
+    \item Validate Sr25519 signature
+    \item Verify Asset ID is 1984 (USDT)
+    \item Check era for transaction mortality
+    \item Validate nonce for replay protection
+    \item Confirm transfer target matches \field{payTo}
+\end{itemize}
+
+\section{Stacks Implementation}
+\label{sec:stacks-implementation}
+
+On Stacks (Bitcoin L2), the exact scheme uses SIP-010 fungible token transfers secured by Bitcoin.
+
+\subsection{SIP-010: Fungible Token Standard}
+
+SIP-010 defines Stacks' standard trait for fungible tokens:
+
+\begin{lstlisting}[language=json,caption={SIP-010 transfer call}]
+{
+  "contractAddress": "SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9",
+  "contractName": "token-usdt",
+  "functionName": "transfer",
+  "functionArgs": ["1000000", "sender", "recipient", "none"]
+}
+\end{lstlisting}
+
+\subsection{Payload Structure}
+
+\begin{lstlisting}[language=json,caption={Stacks exact scheme payload}]
+{
+  "transaction": {
+    "version": 0,
+    "chainId": 1,
+    "auth": {
+      "type": "standard",
+      "spendingCondition": {
+        "signer": "SP...",
+        "nonce": 42,
+        "fee": 1000,
+        "signature": "..."
+      }
+    },
+    "payload": {
+      "type": "contract_call",
+      ...
+    }
+  }
+}
+\end{lstlisting}
+
+\subsection{Bitcoin Anchoring}
+
+Stacks transactions are secured by Bitcoin:
+
+\begin{itemize}
+    \item \textbf{Proof of Transfer}: Miners commit to Bitcoin blockchain
+    \item \textbf{Bitcoin Finality}: Transactions finalize with Bitcoin blocks ($\sim$10 min)
+    \item \textbf{Clarity Language}: Smart contracts in decidable language
+\end{itemize}
+
+\subsection{Verification Requirements}
+
+\begin{itemize}
+    \item Validate ECDSA secp256k1 signature
+    \item Verify contract is official USDT: \code{SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.token-usdt}
+    \item Check nonce for replay protection
+    \item Validate recipient principal matches \field{payTo}
+    \item Consider Bitcoin confirmation requirements for high-value payments
+\end{itemize}
+
 \section{Scheme Comparison}
 \label{sec:scheme-comparison}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
-\caption{Exact Scheme Implementation Comparison}
+\caption{Exact Scheme Implementation Comparison (Primary Networks)}
 \label{tab:scheme-comparison}
+\footnotesize
+\begin{tabular}{llllll}
+\toprule
+\textbf{Aspect} & \textbf{EVM} & \textbf{Solana} & \textbf{TON} & \textbf{TRON} & \textbf{NEAR} \\
+\midrule
+Signature & ECDSA & Ed25519 & Ed25519 & ECDSA & Ed25519 \\
+Standard & EIP-3009 & SPL Token & Jetton & TRC-20 & NEP-141 \\
+Nonce & 32 bytes & N/A (tx) & query\_id & N/A & Nonce \\
+Gasless & Native & Fee sponsor & Fee sponsor & Energy & Fee sponsor \\
+Finality & $\sim$2s (L2) & $\sim$0.4s & $\sim$5s & $\sim$3s & $\sim$1s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Additional Network Implementations}
+\label{tab:scheme-comparison-additional}
+\footnotesize
 \begin{tabular}{lllll}
 \toprule
-\textbf{Aspect} & \textbf{EVM} & \textbf{Solana} & \textbf{TON} & \textbf{TRON} \\
+\textbf{Aspect} & \textbf{Aptos} & \textbf{Tezos} & \textbf{Polkadot} & \textbf{Stacks} \\
 \midrule
-Signature & ECDSA & Ed25519 & Ed25519 & ECDSA \\
-Standard & EIP-3009 & SPL Token & Jetton & TRC-20 \\
-Nonce & 32 bytes & N/A (tx sig) & query\_id & N/A \\
-Gasless & Native & Fee sponsor & Fee sponsor & Energy \\
-Finality & $\sim$2s (L2) & $\sim$0.4s & $\sim$5s & $\sim$3s \\
+Signature & Ed25519 & Ed25519 & Sr25519 & ECDSA \\
+Standard & Fungible Asset & FA2 & Asset Hub & SIP-010 \\
+Nonce & Seq number & Counter & Nonce & Nonce \\
+Gasless & Fee sponsor & Fee sponsor & Fee sponsor & Fee sponsor \\
+Finality & $\sim$1s & $\sim$30s & $\sim$12s & $\sim$10min \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -396,32 +699,12 @@ Finality & $\sim$2s (L2) & $\sim$0.4s & $\sim$5s & $\sim$3s \\
 \section{Future Schemes}
 \label{sec:future-schemes}
 
-\subsection{Up-To Scheme}
-
-The planned ``up-to'' scheme will support metered payments:
+Beyond the \code{exact} scheme detailed in this chapter, T402 is designed to support additional payment patterns:
 
 \begin{itemize}
-    \item \textbf{Mechanism}: EIP-2612 (Permit) for EVM
-    \item \textbf{Use Case}: Pay for actual usage up to a maximum
-    \item \textbf{Settlement}: Partial settlement of authorized amount
+    \item \textbf{Up-To Scheme}: Metered payments using EIP-2612 permits for usage-based billing
+    \item \textbf{Permit2 Integration}: Uniswap's universal approval system for improved gas efficiency
+    \item \textbf{Subscription Scheme}: Recurring payments with automatic renewal
 \end{itemize}
 
-\begin{lstlisting}[language=json,caption={Up-to scheme requirements (proposed)}]
-{
-  "scheme": "up-to",
-  "network": "eip155:8453",
-  "maxAmount": "1000000",
-  "asset": "0x...",
-  "payTo": "0x..."
-}
-\end{lstlisting}
-
-\subsection{Permit2 Integration}
-
-Uniswap's Permit2 offers improved efficiency:
-
-\begin{itemize}
-    \item Single approval for multiple protocols
-    \item Batch transfers
-    \item Expiring approvals for better security
-\end{itemize}
+For detailed specifications and implementation guides for these schemes, see \cref{ch:future-work}.

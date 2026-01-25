@@ -7,7 +7,7 @@ Transport layers define how \tprotocol{} messages are encoded and transmitted ac
 \section{Transport Architecture}
 \label{sec:transport-architecture}
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     layer/.style={
@@ -55,7 +55,7 @@ Transport layers define how \tprotocol{} messages are encoded and transmitted ac
 
 Each transport must implement three core operations:
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Transport Operations}
 \label{tab:transport-operations}
@@ -79,7 +79,7 @@ The HTTP transport is the canonical implementation, using standard HTTP mechanis
 
 \tprotocol{} defines three custom HTTP headers:
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{HTTP Headers for T402}
 \label{tab:http-headers-detail}
@@ -87,9 +87,9 @@ The HTTP transport is the canonical implementation, using standard HTTP mechanis
 \toprule
 \textbf{Header} & \textbf{Direction} & \textbf{Content} \\
 \midrule
-\header{PAYMENT-REQUIRED} & S $\to$ C & Base64url(PaymentRequirements) \\
-\header{PAYMENT-SIGNATURE} & C $\to$ S & Base64url(PaymentPayload) \\
-\header{PAYMENT-RESPONSE} & S $\to$ C & Base64url(SettlementResponse) \\
+\header{X-PAYMENT-REQUIRED} & S $\to$ C & Base64url(PaymentRequirements) \\
+\header{X-PAYMENT} & C $\to$ S & Base64url(PaymentPayload) \\
+\header{X-PAYMENT-RESPONSE} & S $\to$ C & Base64url(SettlementResponse) \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -100,7 +100,7 @@ All header values use Base64url encoding (RFC 4648 \S5) without padding. This en
 
 \subsection{Status Code Mapping}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{HTTP Status Code Mapping}
 \label{tab:status-codes}
@@ -108,11 +108,11 @@ All header values use Base64url encoding (RFC 4648 \S5) without padding. This en
 \toprule
 \textbf{T402 State} & \textbf{HTTP} & \textbf{Header} & \textbf{Body} \\
 \midrule
-Payment Required & 402 & PAYMENT-REQUIRED & Error JSON \\
+Payment Required & 402 & X-PAYMENT-REQUIRED & Error JSON \\
 Invalid Payload & 400 & -- & Error details \\
-Verification Failed & 402 & PAYMENT-RESPONSE & Error details \\
-Settlement Failed & 402 & PAYMENT-RESPONSE & Error details \\
-Success & 200 & PAYMENT-RESPONSE & Resource \\
+Verification Failed & 402 & X-PAYMENT-RESPONSE & Error details \\
+Settlement Failed & 402 & X-PAYMENT-RESPONSE & Error details \\
+Success & 200 & X-PAYMENT-RESPONSE & Resource \\
 Server Error & 500 & -- & Error details \\
 \bottomrule
 \end{tabular}
@@ -120,7 +120,7 @@ Server Error & 500 & -- & Error details \\
 
 \subsection{Request Flow}
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     actor/.style={
@@ -154,11 +154,11 @@ Server Error & 500 & -- & Error details \\
 
 % Messages
 \draw[msg] (0,-1) -- node[above, font=\tiny] {GET /resource} (6,-1);
-\draw[msg, red!70] (6,-1.8) -- node[above, font=\tiny] {402 + PAYMENT-REQUIRED} (0,-1.8);
+\draw[msg, red!70] (6,-1.8) -- node[above, font=\tiny] {402 + X-PAYMENT-REQUIRED} (0,-1.8);
 
 \draw[msg, blue!70] (0,-2.8) -- node[above, font=\tiny] {Sign authorization} (0,-3.2);
 
-\draw[msg] (0,-3.8) -- node[above, font=\tiny] {GET /resource + PAYMENT-SIGNATURE} (6,-3.8);
+\draw[msg] (0,-3.8) -- node[above, font=\tiny] {GET /resource + X-PAYMENT} (6,-3.8);
 
 \draw[msg, orange!70] (6,-4.6) -- node[above, font=\tiny] {POST /verify} (12,-4.6);
 \draw[msg, orange!70] (12,-5.2) -- node[above, font=\tiny] {\{isValid: true\}} (6,-5.2);
@@ -166,7 +166,7 @@ Server Error & 500 & -- & Error details \\
 \draw[msg, orange!70] (6,-6) -- node[above, font=\tiny] {POST /settle} (12,-6);
 \draw[msg, orange!70] (12,-6.6) -- node[above, font=\tiny] {\{success: true, tx\}} (6,-6.6);
 
-\draw[msg, green!60!black] (6,-7.4) -- node[above, font=\tiny] {200 + PAYMENT-RESPONSE + Body} (0,-7.4);
+\draw[msg, green!60!black] (6,-7.4) -- node[above, font=\tiny] {200 + X-PAYMENT-RESPONSE + Body} (0,-7.4);
 
 % Phase labels
 \node[note, violet] at (-1.5,-1.4) {Phase 1:\\Discovery};
@@ -190,7 +190,7 @@ User-Agent: T402-Client/2.0
 # Server responds with payment requirements
 HTTP/1.1 402 Payment Required
 Content-Type: application/json
-PAYMENT-REQUIRED: eyJ0NDAyVmVyc2lvbiI6Miwic...
+X-PAYMENT-REQUIRED: eyJ0NDAyVmVyc2lvbiI6Miwic...
 X-T402-Version: 2
 
 {
@@ -205,12 +205,12 @@ X-T402-Version: 2
 GET /api/premium/data HTTP/1.1
 Host: api.example.com
 Accept: application/json
-PAYMENT-SIGNATURE: eyJ0NDAyVmVyc2lvbiI6Miwi...
+X-PAYMENT: eyJ0NDAyVmVyc2lvbiI6Miwi...
 
 # Server returns resource with settlement confirmation
 HTTP/1.1 200 OK
 Content-Type: application/json
-PAYMENT-RESPONSE: eyJzdWNjZXNzIjp0cnVlLC...
+X-PAYMENT-RESPONSE: eyJzdWNjZXNzIjp0cnVlLC...
 X-T402-Transaction: 0x7a8b9c...
 
 {
@@ -223,7 +223,7 @@ X-T402-Transaction: 0x7a8b9c...
 \begin{lstlisting}[language=json,caption={Payment verification failed}]
 HTTP/1.1 402 Payment Required
 Content-Type: application/json
-PAYMENT-RESPONSE: eyJzdWNjZXNzIjpmYWxzZS...
+X-PAYMENT-RESPONSE: eyJzdWNjZXNzIjpmYWxzZS...
 
 {
   "error": "Payment verification failed",
@@ -235,7 +235,7 @@ PAYMENT-RESPONSE: eyJzdWNjZXNzIjpmYWxzZS...
 \begin{lstlisting}[language=json,caption={Insufficient funds}]
 HTTP/1.1 402 Payment Required
 Content-Type: application/json
-PAYMENT-RESPONSE: eyJzdWNjZXNzIjpmYWxzZS...
+X-PAYMENT-RESPONSE: eyJzdWNjZXNzIjpmYWxzZS...
 
 {
   "error": "Payment failed",
@@ -255,7 +255,7 @@ Accept-Payment: network=eip155:8453, network=eip155:42161
 
 # Server responds with filtered options
 HTTP/1.1 402 Payment Required
-PAYMENT-REQUIRED: eyJ0NDAyVmVyc2lvbiI6Mi...
+X-PAYMENT-REQUIRED: eyJ0NDAyVmVyc2lvbiI6Mi...
 Vary: Accept-Payment
 \end{lstlisting}
 
@@ -263,7 +263,7 @@ Vary: Accept-Payment
 
 Payment-protected resources require careful cache handling:
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Cache-Control Directives}
 \label{tab:cache-control}
@@ -285,7 +285,7 @@ The Model Context Protocol (MCP) transport enables AI agents to make payments wh
 
 \subsection{Architecture Overview}
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     box/.style={
@@ -439,7 +439,7 @@ Payments are included in the request's \code{\_meta} field:
 
 \subsection{Error Codes}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{MCP T402 Error Codes}
 \label{tab:mcp-errors}
@@ -508,7 +508,7 @@ Agents advertise payment requirements in their Agent Card:
 
 \subsection{Task Payment Flow}
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     agent/.style={
@@ -640,7 +640,7 @@ Sec-WebSocket-Protocol: t402.v2
 
 \subsection{Message Types}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{WebSocket Message Types}
 \label{tab:ws-messages}
@@ -727,7 +727,7 @@ message PaymentRequired {
 \section{Transport Comparison}
 \label{sec:transport-comparison}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Transport Layer Comparison}
 \label{tab:transport-comparison}

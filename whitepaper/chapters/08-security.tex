@@ -27,7 +27,7 @@ This chapter provides a comprehensive security analysis of \tprotocol{}, includi
 
 We consider adversaries with the following capabilities:
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Adversary Capability Matrix}
 \label{tab:adversary-capabilities}
@@ -56,7 +56,7 @@ The security model assumes adversaries \textbf{cannot}:
 
 \subsection{Threat Categories}
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     category/.style={
@@ -128,7 +128,7 @@ An adversary captures a valid payment authorization and attempts to reuse it for
 
 \tprotocol{} employs three-layer replay protection:
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Replay Attack Mitigations}
 \label{tab:replay-mitigations}
@@ -243,7 +243,7 @@ Clients MUST verify the \field{payTo} address belongs to the expected recipient 
     \item \textbf{Blockchain Finality}: Once settled, transaction is irreversible
 \end{enumerate}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Double Spend Window by Chain}
 \label{tab:double-spend-window}
@@ -323,7 +323,7 @@ require(
 
 \subsection{Signature Algorithms}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Cryptographic Primitive Security Levels}
 \label{tab:crypto-security}
@@ -341,7 +341,7 @@ TRON & ECDSA secp256k1 & 256 bits & 128 bits \\
 
 \subsection{Hash Functions}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Hash Function Properties}
 \label{tab:hash-security}
@@ -381,7 +381,7 @@ The Facilitator is a critical component that handles payment settlement. This se
 
 \subsection{Security Architecture}
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[scale=0.85,
     component/.style={
@@ -468,7 +468,7 @@ func loadPrivateKey() (*ecdsa.PrivateKey, error) {
 
 \subsection{API Security}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Facilitator API Security Controls}
 \label{tab:api-security}
@@ -603,7 +603,7 @@ services:
 
 \subsection{Secret Management}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Secret Management Requirements}
 \label{tab:secrets}
@@ -624,7 +624,7 @@ TLS Certificates & ACME Auto & 90 days (Let's Encrypt) \\
 
 \subsection{Severity Classification}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Security Incident Severity Levels}
 \label{tab:severity}
@@ -656,7 +656,7 @@ Low & 7 days & Best effort & Minor info leak \\
 
 \subsection{Completed Audits}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Security Audit History}
 \label{tab:audits}
@@ -693,7 +693,7 @@ External Audit & TBD & Planned & Pending \\
 \section{Summary}
 \label{sec:security-summary}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Security Property Summary}
 \label{tab:security-summary}

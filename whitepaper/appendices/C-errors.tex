@@ -2,9 +2,11 @@
 \chapter{Error Code Reference}
 \label{app:errors}
 
-This appendix provides a complete reference of \tprotocol{} error codes.
+This appendix provides a complete reference of \tprotocol{} error codes, organized by category. Each error includes a machine-readable code, human-readable description, and recommended resolution.
 
 \section{Payment Errors}
+
+Payment errors occur during the payment authorization phase, typically due to insufficient funds, invalid signatures, or parameter mismatches.
 
 \begin{longtable}{>{\ttfamily\footnotesize}l p{5cm} p{4cm}}
 \caption{Payment Error Codes} \label{tab:payment-errors} \\
@@ -21,15 +23,27 @@ This appendix provides a complete reference of \tprotocol{} error codes.
 \endfoot
 \bottomrule
 \endlastfoot
-insufficient\_funds & Payer lacks sufficient balance & Fund wallet \\
-invalid\_signature & Signature verification failed & Re-sign with correct key \\
-invalid\_amount & Amount below required & Increase amount \\
-invalid\_recipient & Recipient address mismatch & Use correct payTo \\
-expired\_authorization & Time window passed & Create new authorization \\
-nonce\_already\_used & Nonce used in prior tx & Generate new nonce \\
+insufficient\_funds & Payer's token balance is less than the required payment amount & Fund wallet with sufficient USDT/USDT0 \\
+insufficient\_allowance & Token allowance to facilitator is insufficient (EVM only) & Approve token spending or use EIP-3009 \\
+invalid\_signature & Cryptographic signature verification failed & Re-sign with correct private key \\
+signature\_mismatch & Recovered signer does not match claimed payer & Ensure signing key matches payer address \\
+invalid\_amount & Payment amount is below the required minimum & Increase amount to meet requirements \\
+amount\_overflow & Payment amount exceeds maximum safe value & Use smaller payment amount \\
+invalid\_recipient & Recipient address does not match payTo in requirements & Use exact payTo address from requirements \\
+recipient\_mismatch & Payment directed to wrong recipient & Verify payTo address before signing \\
+expired\_authorization & Authorization deadline has passed & Create new authorization with future deadline \\
+deadline\_too\_short & Deadline is too close to current time & Set deadline at least 60 seconds in future \\
+deadline\_too\_long & Deadline exceeds maximum allowed window & Set deadline within 1 hour of current time \\
+nonce\_already\_used & Nonce has been used in a previous transaction & Generate new random 32-byte nonce \\
+nonce\_invalid\_format & Nonce does not match expected format & Use valid hex-encoded 32-byte value \\
+invalid\_payer & Payer address is malformed or invalid & Use valid address for the target network \\
+payer\_blacklisted & Payer address is on USDT blacklist & Use different wallet address \\
+invalid\_asset & Asset address does not match expected token & Use correct USDT/USDT0 contract address \\
 \end{longtable}
 
 \section{Protocol Errors}
+
+Protocol errors indicate issues with the \tprotocol{} request format, unsupported features, or version incompatibilities.
 
 \begin{longtable}{>{\ttfamily\footnotesize}l p{5cm} p{4cm}}
 \caption{Protocol Error Codes} \label{tab:protocol-errors} \\
@@ -46,14 +60,253 @@ nonce\_already\_used & Nonce used in prior tx & Generate new nonce \\
 \endfoot
 \bottomrule
 \endlastfoot
-invalid\_network & Network not supported & Use supported network \\
-invalid\_scheme & Scheme not supported & Use supported scheme \\
-invalid\_t402\_version & Version not supported & Upgrade to v2 \\
-invalid\_payload & Malformed payload & Validate format \\
-invalid\_payment\_req & Invalid requirements & Validate requirements \\
+invalid\_network & Specified network is not supported by facilitator & Query \code{/supported} for available networks \\
+network\_mismatch & Payment network does not match requirements & Use network specified in PaymentRequired \\
+invalid\_scheme & Payment scheme is not supported & Use \code{exact} scheme (currently only supported) \\
+scheme\_mismatch & Payment scheme does not match requirements & Use scheme specified in PaymentRequired \\
+invalid\_t402\_version & Protocol version is not supported & Upgrade client to support v2 \\
+version\_mismatch & Payload version incompatible with server & Match version in requirements \\
+invalid\_payload & Payment payload is malformed or incomplete & Validate JSON structure against schema \\
+payload\_too\_large & Payload exceeds maximum allowed size & Reduce payload size (max 64KB) \\
+invalid\_payment\_req & Payment requirements are invalid & Server configuration error; contact provider \\
+missing\_required\_field & Required field is missing from payload & Include all required fields per spec \\
+invalid\_field\_format & Field value does not match expected format & Validate field formats against schema \\
+unsupported\_extension & Requested extension is not available & Remove unsupported extension from request \\
+invalid\_resource\_info & ResourceInfo structure is malformed & Validate ResourceInfo JSON structure \\
+\end{longtable}
+
+\section{Network-Specific Errors}
+
+Each supported blockchain network may return specific errors related to its unique characteristics.
+
+\subsection{EVM Errors}
+
+\begin{longtable}{>{\ttfamily\footnotesize}l p{5cm} p{4cm}}
+\caption{EVM-Specific Error Codes} \label{tab:evm-errors} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endfirsthead
+\multicolumn{3}{c}{\tablename\ \thetable\ -- continued} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endhead
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+evm\_invalid\_chain\_id & Chain ID does not match network & Use correct chain ID for target network \\
+evm\_contract\_not\_found & Token contract not deployed on network & Verify network supports USDT0/USDT \\
+evm\_eip3009\_not\_supported & Token does not support EIP-3009 & Use network with EIP-3009 compatible token \\
+evm\_domain\_separator\_mismatch & EIP-712 domain separator invalid & Verify contract address and chain ID \\
+evm\_gas\_estimation\_failed & Unable to estimate gas for transaction & Check contract state and parameters \\
+evm\_nonce\_too\_low & On-chain nonce higher than provided & Use fresh nonce from contract \\
+evm\_revert & Contract execution reverted & Check revert reason in transaction receipt \\
+\end{longtable}
+
+\subsection{Solana Errors}
+
+\begin{longtable}{>{\ttfamily\footnotesize}l p{5cm} p{4cm}}
+\caption{Solana-Specific Error Codes} \label{tab:solana-errors} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endfirsthead
+\multicolumn{3}{c}{\tablename\ \thetable\ -- continued} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endhead
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+svm\_invalid\_pubkey & Public key is not valid Ed25519 & Use valid Solana public key \\
+svm\_ata\_not\_found & Associated Token Account does not exist & Create ATA before payment \\
+svm\_ata\_creation\_failed & Failed to create Associated Token Account & Ensure payer has SOL for rent \\
+svm\_blockhash\_expired & Recent blockhash has expired & Fetch fresh blockhash and re-sign \\
+svm\_signature\_invalid & Ed25519 signature verification failed & Re-sign with correct keypair \\
+svm\_program\_error & SPL Token program returned error & Check program error code \\
+\end{longtable}
+
+\subsection{TON Errors}
+
+\begin{longtable}{>{\ttfamily\footnotesize}l p{5cm} p{4cm}}
+\caption{TON-Specific Error Codes} \label{tab:ton-errors} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endfirsthead
+\multicolumn{3}{c}{\tablename\ \thetable\ -- continued} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endhead
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+ton\_invalid\_address & Address is not valid TON format & Use valid bounceable/non-bounceable address \\
+ton\_jetton\_wallet\_not\_found & Jetton wallet not deployed & Deploy Jetton wallet first \\
+ton\_query\_id\_used & query\_id already used in prior message & Generate new unique query\_id \\
+ton\_insufficient\_ton & Insufficient TON for gas fees & Fund wallet with TON for fees \\
+ton\_message\_expired & Message validity period expired & Create new message with fresh timestamp \\
+ton\_workchain\_mismatch & Address workchain does not match & Use basechain (workchain 0) addresses \\
+\end{longtable}
+
+\subsection{TRON Errors}
+
+\begin{longtable}{>{\ttfamily\footnotesize}l p{5cm} p{4cm}}
+\caption{TRON-Specific Error Codes} \label{tab:tron-errors} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endfirsthead
+\multicolumn{3}{c}{\tablename\ \thetable\ -- continued} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endhead
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+tron\_invalid\_address & Address is not valid Base58Check format & Use valid T-prefixed address \\
+tron\_bandwidth\_exceeded & Account bandwidth limit exceeded & Wait or freeze TRX for bandwidth \\
+tron\_energy\_insufficient & Insufficient energy for contract call & Freeze TRX for energy or pay fees \\
+tron\_signature\_invalid & ECDSA signature verification failed & Re-sign with correct private key \\
+tron\_contract\_error & TRC-20 contract returned error & Check contract error message \\
+\end{longtable}
+
+\subsection{NEAR Errors}
+
+\begin{longtable}{>{\ttfamily\footnotesize}l p{5cm} p{4cm}}
+\caption{NEAR-Specific Error Codes} \label{tab:near-errors} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endfirsthead
+\multicolumn{3}{c}{\tablename\ \thetable\ -- continued} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endhead
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+near\_account\_not\_found & Account ID does not exist & Create account before payment \\
+near\_invalid\_account\_id & Account ID format is invalid & Use valid NEAR account ID format \\
+near\_not\_registered & Account not registered with token & Call storage\_deposit first \\
+near\_storage\_insufficient & Insufficient storage deposit & Add storage deposit to account \\
+near\_access\_key\_invalid & Access key not valid for account & Use correct access key \\
+near\_gas\_exceeded & Transaction exceeded gas limit & Reduce transaction complexity \\
+\end{longtable}
+
+\subsection{Aptos Errors}
+
+\begin{longtable}{>{\ttfamily\footnotesize}l p{5cm} p{4cm}}
+\caption{Aptos-Specific Error Codes} \label{tab:aptos-errors} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endfirsthead
+\multicolumn{3}{c}{\tablename\ \thetable\ -- continued} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endhead
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+aptos\_account\_not\_found & Account does not exist on-chain & Create account with initial funding \\
+aptos\_invalid\_address & Address is not valid 32-byte hex & Use valid 0x-prefixed address \\
+aptos\_sequence\_number\_invalid & Sequence number already used & Fetch current sequence number \\
+aptos\_fa\_store\_not\_found & Fungible Asset store not found & Register for asset first \\
+aptos\_gas\_insufficient & Insufficient APT for gas fees & Fund account with APT \\
+aptos\_module\_not\_found & Move module not deployed & Verify contract deployment \\
+\end{longtable}
+
+\subsection{Tezos Errors}
+
+\begin{longtable}{>{\ttfamily\footnotesize}l p{5cm} p{4cm}}
+\caption{Tezos-Specific Error Codes} \label{tab:tezos-errors} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endfirsthead
+\multicolumn{3}{c}{\tablename\ \thetable\ -- continued} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endhead
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+tezos\_invalid\_address & Address is not valid tz/KT format & Use valid Tezos address format \\
+tezos\_counter\_invalid & Operation counter already used & Fetch current counter from chain \\
+tezos\_balance\_too\_low & Insufficient XTZ for fees & Fund account with XTZ \\
+tezos\_fa2\_not\_operator & Facilitator not approved as operator & Call update\_operators first \\
+tezos\_token\_undefined & Token ID not defined in contract & Use correct token ID (0 for USDt) \\
+tezos\_gas\_exhausted & Operation exceeded gas limit & Reduce operation complexity \\
+\end{longtable}
+
+\subsection{Polkadot Errors}
+
+\begin{longtable}{>{\ttfamily\footnotesize}l p{5cm} p{4cm}}
+\caption{Polkadot Asset Hub Error Codes} \label{tab:polkadot-errors} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endfirsthead
+\multicolumn{3}{c}{\tablename\ \thetable\ -- continued} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endhead
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+dot\_invalid\_address & SS58 address is invalid & Use valid SS58 address format \\
+dot\_asset\_not\_found & Asset ID does not exist & Use correct asset ID (1984 for USDT) \\
+dot\_account\_not\_found & Account has no existential deposit & Fund account with minimum DOT \\
+dot\_frozen\_balance & Asset balance is frozen & Unfreeze balance or use different account \\
+dot\_nonce\_invalid & Transaction nonce already used & Fetch current nonce from chain \\
+dot\_xcm\_failed & Cross-chain message failed & Check XCM routing configuration \\
+\end{longtable}
+
+\subsection{Stacks Errors}
+
+\begin{longtable}{>{\ttfamily\footnotesize}l p{5cm} p{4cm}}
+\caption{Stacks-Specific Error Codes} \label{tab:stacks-errors} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endfirsthead
+\multicolumn{3}{c}{\tablename\ \thetable\ -- continued} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endhead
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+stx\_invalid\_address & Address is not valid Stacks format & Use valid SP/ST-prefixed address \\
+stx\_nonce\_invalid & Transaction nonce incorrect & Fetch current nonce from API \\
+stx\_fee\_insufficient & Transaction fee too low & Increase fee for faster confirmation \\
+stx\_contract\_not\_found & SIP-010 contract not deployed & Verify contract address \\
+stx\_clarity\_error & Clarity contract returned error & Check contract error code \\
+stx\_anchor\_block\_pending & Waiting for Bitcoin anchor block & Wait for Bitcoin finality \\
 \end{longtable}
 
 \section{Settlement Errors}
+
+Settlement errors occur when attempting to execute the on-chain transaction after verification succeeds.
 
 \begin{longtable}{>{\ttfamily\footnotesize}l p{5cm} p{4cm}}
 \caption{Settlement Error Codes} \label{tab:settlement-errors} \\
@@ -70,8 +323,97 @@ invalid\_payment\_req & Invalid requirements & Validate requirements \\
 \endfoot
 \bottomrule
 \endlastfoot
-simulation\_failed & Transaction simulation failed & Check balance/params \\
-settlement\_failed & On-chain settlement failed & Retry or contact support \\
-unexpected\_verify\_error & Unexpected verification error & Check logs, retry \\
-unexpected\_settle\_error & Unexpected settlement error & Check logs, retry \\
+simulation\_failed & Transaction simulation failed & Check balance, allowance, parameters \\
+settlement\_failed & On-chain transaction failed & Check transaction hash for details \\
+settlement\_timeout & Settlement did not confirm in time & Check transaction status manually \\
+settlement\_reverted & Transaction confirmed but reverted & Check revert reason in receipt \\
+gas\_price\_too\_low & Gas price below network minimum & Increase gas price and retry \\
+gas\_limit\_exceeded & Transaction exceeded gas limit & Optimize transaction or split \\
+facilitator\_balance\_low & Facilitator lacks gas funds & Contact T402 support \\
+network\_congestion & Network too congested for settlement & Retry during lower congestion \\
+rpc\_error & RPC node returned error & Retry or use alternate RPC \\
+rpc\_timeout & RPC request timed out & Retry with longer timeout \\
+unexpected\_verify\_error & Unexpected error during verification & Check logs, contact support \\
+unexpected\_settle\_error & Unexpected error during settlement & Check logs, contact support \\
 \end{longtable}
+
+\section{HTTP Transport Errors}
+
+HTTP-specific errors related to the transport layer when using the HTTP/402 protocol.
+
+\begin{longtable}{>{\ttfamily\footnotesize}l p{5cm} p{4cm}}
+\caption{HTTP Transport Error Codes} \label{tab:http-errors} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endfirsthead
+\multicolumn{3}{c}{\tablename\ \thetable\ -- continued} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endhead
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+missing\_payment\_header & X-PAYMENT header not present & Include signed payload in header \\
+invalid\_payment\_header & X-PAYMENT header malformed & Base64url encode JSON payload \\
+missing\_accept\_header & Client does not accept payment types & Include Accept header with payment types \\
+header\_too\_large & Payment header exceeds size limit & Reduce payload size \\
+invalid\_content\_type & Request Content-Type invalid & Use application/json \\
+\end{longtable}
+
+\section{Facilitator Errors}
+
+Errors specific to the T402 Facilitator service.
+
+\begin{longtable}{>{\ttfamily\footnotesize}l p{5cm} p{4cm}}
+\caption{Facilitator Error Codes} \label{tab:facilitator-errors} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endfirsthead
+\multicolumn{3}{c}{\tablename\ \thetable\ -- continued} \\
+\toprule
+\normalfont\textbf{Code} & \textbf{Description} & \textbf{Resolution} \\
+\midrule
+\endhead
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+rate\_limit\_exceeded & Too many requests from client & Implement backoff and retry \\
+api\_key\_invalid & API key is not valid & Use valid API key \\
+api\_key\_expired & API key has expired & Renew API key \\
+api\_key\_required & Endpoint requires API key & Include X-API-Key header \\
+facilitator\_unavailable & Facilitator service is down & Retry later or use fallback \\
+maintenance\_mode & Facilitator in maintenance & Wait for maintenance to complete \\
+network\_disabled & Network temporarily disabled & Use alternate network \\
+internal\_error & Internal server error & Retry or contact support \\
+\end{longtable}
+
+\section{Error Response Format}
+
+All \tprotocol{} errors are returned in a consistent JSON format:
+
+\begin{lstlisting}[language=json, caption={Error Response Structure}]
+{
+  "error": {
+    "code": "insufficient_funds",
+    "message": "Payer balance (1.50 USDT) is less than required (5.00 USDT)",
+    "details": {
+      "required": "5000000",
+      "available": "1500000",
+      "asset": "0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee",
+      "network": "eip155:1"
+    }
+  }
+}
+\end{lstlisting}
+
+\begin{itemize}
+\item \textbf{code}: Machine-readable error code from tables above
+\item \textbf{message}: Human-readable description
+\item \textbf{details}: Optional object with error-specific context
+\end{itemize}
+

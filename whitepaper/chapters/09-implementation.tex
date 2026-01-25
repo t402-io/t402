@@ -9,7 +9,7 @@ This chapter provides practical guidance for integrating \tprotocol{} into appli
 
 \tprotocol{} provides official SDKs for four major languages:
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Official SDK Comparison}
 \label{tab:sdk-comparison}
@@ -30,7 +30,7 @@ Java & 1.1.0 & Maven Central & Spring Boot, WebFlux & Apache 2.0 \\
 
 The TypeScript SDK is organized as a monorepo with 21 modular packages:
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     pkg/.style={
@@ -97,7 +97,7 @@ The TypeScript SDK is organized as a monorepo with 21 modular packages:
 \label{fig:ts-sdk-architecture}
 \end{figure}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{TypeScript Package Categories}
 \label{tab:ts-packages}
@@ -600,7 +600,7 @@ describe("Payment Middleware", () => {
 
     const response = await request(app)
       .get("/api/premium")
-      .set("PAYMENT-SIGNATURE", encodePayment(payment))
+      .set("X-PAYMENT", encodePayment(payment))
       .expect(200);
 
     expect(response.body.data).toBeDefined();
@@ -613,7 +613,7 @@ describe("Payment Middleware", () => {
 
     await request(app)
       .get("/api/premium")
-      .set("PAYMENT-SIGNATURE", encodePayment(payment))
+      .set("X-PAYMENT", encodePayment(payment))
       .expect(402);
   });
 });
@@ -737,7 +737,7 @@ app.use(T402ErrorHandler({
 
 \subsection{Security Checklist}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Security Best Practices}
 \label{tab:security-checklist}

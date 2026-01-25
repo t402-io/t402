@@ -7,7 +7,7 @@ The Facilitator is a critical infrastructure component that handles blockchain i
 \section{Architecture Overview}
 \label{sec:facilitator-architecture}
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     component/.style={
@@ -81,7 +81,7 @@ The Facilitator is a critical infrastructure component that handles blockchain i
 
 \subsection{Core Responsibilities}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Facilitator Responsibilities}
 \label{tab:facilitator-responsibilities}
@@ -109,7 +109,7 @@ The Facilitator exposes a RESTful API at \url{https://facilitator.t402.io}.
 
 Validates a payment authorization without executing on-chain settlement.
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{/verify Endpoint}
 \label{tab:verify-endpoint}
@@ -427,7 +427,7 @@ Register a resource for discovery.
 
 The Facilitator implements rate limiting to prevent abuse.
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Rate Limits}
 \label{tab:rate-limits}
@@ -460,7 +460,7 @@ Organizations can deploy their own Facilitator instance for enhanced control and
 
 \subsection{Requirements}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Self-Hosting Requirements}
 \label{tab:self-hosting-requirements}
@@ -622,7 +622,7 @@ spec:
 
 \subsection{Key Metrics}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Critical Monitoring Metrics}
 \label{tab:monitoring-metrics}
@@ -649,7 +649,7 @@ A pre-built Grafana dashboard is available at:
 \url{https://grafana.facilitator.t402.io}
 \end{center}
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     panel/.style={
@@ -761,7 +761,7 @@ All settlement operations are logged with:
 
 \subsection{Common Issues}
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering
 \caption{Troubleshooting Guide}
 \label{tab:troubleshooting}
