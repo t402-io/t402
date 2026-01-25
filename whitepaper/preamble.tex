@@ -103,6 +103,20 @@
 %--------------------------------------------------
 \usepackage{listings}
 
+% Global listing settings to prevent overfull boxes
+\lstset{
+    breaklines=true,
+    breakatwhitespace=true,
+    breakautoindent=true,
+    postbreak=\mbox{\textcolor{t402gray}{$\hookrightarrow$}\space},
+    columns=flexible,
+    keepspaces=true,
+    xleftmargin=2em,
+    xrightmargin=1em,
+    aboveskip=1em,
+    belowskip=1em,
+}
+
 % JSON style
 \lstdefinelanguage{json}{
     basicstyle=\ttfamily\small,
