@@ -25,7 +25,7 @@
 | TypeScript | 2.3.1 | 10/10 ✅ | 85%+ | **完整** |
 | Go | 1.8.1 | 10/10 ✅ | **45-50%** ⚠️ | 需提升測試 |
 | Python | 1.9.1 | 9/9 ✅ | 85%+ | **完整** |
-| Java | 1.8.1 | **3/9** ⚠️ | 70% | 缺少機制 |
+| Java | 1.8.1 | 9/9 ✅ | 70%+ | **完整** |
 
 ---
 
@@ -82,34 +82,37 @@
 
 ---
 
-## 🟡 Phase 5: 中優先級 - Java SDK 機制擴充
+## ✅ Phase 5: Java SDK 機制擴充 (已完成)
 
-### 5.1 缺少的機制
+> **更新**: 2026-01-26 確認 Java SDK 已實作全部 9 個機制，885 測試通過
 
-| 機制 | Token 標準 | 預估工時 | 狀態 |
-|------|-----------|----------|------|
-| SVM | SPL Token | 3-4 天 | ⬜ |
-| NEAR | NEP-141 | 2-3 天 | ⬜ |
-| Aptos | Fungible Asset | 2-3 天 | ⬜ |
-| Tezos | FA2 | 2-3 天 | ⬜ |
-| Polkadot | Asset Hub | 2-3 天 | ⬜ |
-| Stacks | SIP-010 | 2-3 天 | ⬜ |
+### 5.1 已完成的機制
+
+| 機制 | Token 標準 | 狀態 |
+|------|-----------|------|
+| EVM | EIP-3009 / ERC-20 | ✅ |
+| SVM | SPL Token | ✅ |
+| TON | Jetton | ✅ |
+| TRON | TRC-20 | ✅ |
+| NEAR | NEP-141 | ✅ |
+| Aptos | Fungible Asset | ✅ |
+| Tezos | FA2 | ✅ |
+| Polkadot | Asset Hub | ✅ |
+| Stacks | SIP-010 | ✅ |
 
 ### 5.2 實作結構
 
 ```
 sdks/java/src/main/java/io/t402/schemes/
-├── svm/           ⬜ 待實作
-│   ├── SvmConstants.java
-│   ├── SvmSchemes.java
-│   ├── ClientSvmSigner.java
-│   ├── FacilitatorSvmSigner.java
-│   └── ExactPayload.java
-├── near/          ✅ 已有基礎 (需擴充)
-├── aptos/         ✅ 已有基礎 (需擴充)
-├── tezos/         ✅ 已有基礎 (需擴充)
-├── polkadot/      ⬜ 待實作
-└── stacks/        ⬜ 待實作
+├── evm/           ✅ 完整 (exact, exact-legacy, upto)
+├── svm/           ✅ 完整 (exact)
+├── ton/           ✅ 完整 (exact)
+├── tron/          ✅ 完整 (exact)
+├── near/          ✅ 完整 (exact-direct)
+├── aptos/         ✅ 完整 (exact-direct)
+├── tezos/         ✅ 完整 (exact-direct)
+├── polkadot/      ✅ 完整 (exact-direct)
+└── stacks/        ✅ 完整 (exact-direct)
 ```
 
 ---
