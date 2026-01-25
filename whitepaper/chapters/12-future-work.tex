@@ -217,59 +217,25 @@ The ``up-to'' scheme enables metered, usage-based billing where clients authoriz
 
 For EVM networks, the up-to scheme leverages EIP-2612~\cite{eip2612} permits with batch settlement:
 
-\begin{lstlisting}[language=solidity, caption={Up-To Settlement Contract}]
+\begin{lstlisting}[language=solidity, caption={Up-To Settlement Contract (Simplified)}]
 contract UpToSettlement {
     struct Session {
         address client;
         uint256 maxAmount;
-        uint256 usedAmount;
         uint256 deadline;
         bool settled;
     }
-
     mapping(bytes32 => Session) public sessions;
-    IERC20Permit public usdt;
 
-    function initSession(
-        address client,
-        uint256 maxAmount,
-        uint256 deadline,
-        uint8 v, bytes32 r, bytes32 s
-    ) external {
-        // Permit for max amount approval
-        usdt.permit(client, address(this), maxAmount, deadline, v, r, s);
-
-        bytes32 sessionId = keccak256(abi.encodePacked(
-            client, maxAmount, deadline, block.timestamp
-        ));
-
-        sessions[sessionId] = Session({
-            client: client,
-            maxAmount: maxAmount,
-            usedAmount: 0,
-            deadline: deadline,
-            settled: false
-        });
-
-        emit SessionCreated(sessionId, client, maxAmount);
+    function initSession(address client, uint256 max,
+        uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
+        usdt.permit(client, address(this), max, deadline, v, r, s);
+        // Create session with max authorization
     }
 
-    function settle(
-        bytes32 sessionId,
-        uint256 actualAmount
-    ) external onlyProvider {
-        Session storage session = sessions[sessionId];
-        require(!session.settled, "Already settled");
-        require(actualAmount <= session.maxAmount, "Exceeds max");
-        require(block.timestamp <= session.deadline, "Expired");
-
-        session.usedAmount = actualAmount;
-        session.settled = true;
-
-        // Transfer only actual amount used
-        usdt.transferFrom(session.client, msg.sender, actualAmount);
-
-        emit SessionSettled(sessionId, actualAmount);
+    function settle(bytes32 id, uint256 actual) external {
+        require(actual <= sessions[id].maxAmount);
+        usdt.transferFrom(sessions[id].client, msg.sender, actual);
     }
 }
 \end{lstlisting}
@@ -300,40 +266,15 @@ Batch transfers & No & Yes \\
 \subsubsection{Permit2 Payment Flow}
 
 \begin{lstlisting}[language=typescript, caption={Permit2 T402 Integration}]
-import { Permit2, SignatureTransfer } from '@uniswap/permit2-sdk';
+import { SignatureTransfer } from '@uniswap/permit2-sdk';
 
-async function createPermit2Payment(
-  amount: bigint,
-  recipient: string,
-  deadline: number
-): Promise<T402PaymentHeader> {
-  const permit: SignatureTransfer.PermitTransferFrom = {
-    permitted: {
-      token: USDT_ADDRESS,
-      amount: amount,
-    },
-    spender: FACILITATOR_ADDRESS,
-    nonce: await getNextNonce(),
-    deadline: deadline,
+async function createPermit2Payment(amount: bigint, recipient: string) {
+  const permit = {
+    permitted: { token: USDT, amount },
+    spender: FACILITATOR, nonce: await getNextNonce(), deadline
   };
-
-  const signature = await wallet._signTypedData(
-    SignatureTransfer.DOMAIN(chainId),
-    SignatureTransfer.PERMIT_TRANSFER_FROM_TYPES,
-    permit
-  );
-
-  return {
-    scheme: 'permit2',
-    payload: encodeBase64({
-      permit,
-      signature,
-      transferDetails: {
-        to: recipient,
-        requestedAmount: amount,
-      }
-    })
-  };
+  const signature = await wallet._signTypedData(/*...*/);
+  return { scheme: 'permit2', payload: encodeBase64({ permit, signature }) };
 }
 \end{lstlisting}
 
@@ -430,31 +371,12 @@ SIWx complements \tprotocol{} by enabling:
     \item \textbf{Rate limiting}: Apply per-wallet rate limits
 \end{itemize}
 
-\begin{lstlisting}[language=typescript, caption={SIWx + T402 Middleware}]
-async function authMiddleware(req: Request): Promise<AuthResult> {
-  // Check for session token
-  const sessionToken = req.headers.get('Authorization');
-  if (sessionToken) {
-    const session = await verifySession(sessionToken);
-    if (session?.creditBalance > 0) {
-      return { type: 'credit', wallet: session.wallet };
-    }
-  }
-
-  // Check for T402 payment
-  const paymentHeader = req.headers.get('X-Payment');
-  if (paymentHeader) {
-    return { type: 'payment', payment: parsePayment(paymentHeader) };
-  }
-
-  // Check for SIWx authentication
-  const siwxHeader = req.headers.get('X-SIWx');
-  if (siwxHeader) {
-    const identity = await verifySIWx(siwxHeader);
-    return { type: 'identity', wallet: identity.address };
-  }
-
-  // Require payment
+\begin{lstlisting}[language=typescript, caption={SIWx + T402 Middleware (Conceptual)}]
+async function authMiddleware(req: Request) {
+  // Priority: 1) Session credit, 2) T402 payment, 3) SIWx identity
+  if (req.headers.get('Authorization')) return checkCredit(req);
+  if (req.headers.get('X-Payment')) return processPayment(req);
+  if (req.headers.get('X-SIWx')) return verifySIWx(req);
   throw new PaymentRequiredError();
 }
 \end{lstlisting}

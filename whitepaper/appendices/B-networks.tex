@@ -8,39 +8,43 @@ This appendix provides comprehensive network configuration details for all suppo
 
 T402 supports 19+ EVM-compatible networks through the unified EIP-3009 interface.
 
-\begin{longtable}{l l >{\ttfamily\scriptsize}p{4.2cm}}
+\begin{longtable}{l l l}
 \caption{Supported EVM Networks with USDT0 (LayerZero OFT)} \label{tab:evm-networks} \\
 \toprule
-\textbf{Network} & \textbf{CAIP-2 ID} & \normalfont\textbf{USDT0 Contract} \\
+\textbf{Network} & \textbf{CAIP-2 ID} & \textbf{USDT0 Contract} \\
 \midrule
 \endfirsthead
 \multicolumn{3}{c}{\tablename\ \thetable\ -- continued} \\
 \toprule
-\textbf{Network} & \textbf{CAIP-2 ID} & \normalfont\textbf{USDT0 Contract} \\
+\textbf{Network} & \textbf{CAIP-2 ID} & \textbf{USDT0 Contract} \\
 \midrule
 \endhead
 \midrule
 \endfoot
 \bottomrule
 \endlastfoot
-Ethereum & eip155:1 & 0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee \\
-Arbitrum One & eip155:42161 & 0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9 \\
-Base & eip155:8453 & 0x0200C29006150606B650577BBE7B6248F58470c1 \\
-Optimism & eip155:10 & 0x0200C29006150606B650577BBE7B6248F58470c1 \\
-Ink & eip155:57073 & 0x0200C29006150606B650577BBE7B6248F58470c1 \\
-Berachain & eip155:80094 & 0x779Ded0c9e1022225f8E0630b35a9b54bE713736 \\
-Unichain & eip155:130 & 0x588ce4F028D8e7B53B687865d6A67b3A54C75518 \\
-Polygon & eip155:137 & 0xc2132D05D31c914a87C6611C10748AEb04B58e8F \\
-Avalanche & eip155:43114 & 0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7 \\
-BNB Chain & eip155:56 & 0x55d398326f99059fF775485246999027B3197955 \\
-Fantom & eip155:250 & 0x049d68029688eAbF473097a2fC38ef61633A3C7A \\
-Linea & eip155:59144 & 0xA219439258ca9da29E9Cc4cE5596924745e12B93 \\
-Scroll & eip155:534352 & 0xf55BEC9cafDbE8730f096Aa55dad6D22d44099Df \\
-zkSync Era & eip155:324 & 0x493257fD37EDB34451f62EDf8D2a0C418852bA4C \\
-Mantle & eip155:5000 & 0x201EBa5CC46D216Ce6DC03F6a759e8E766e956aE \\
-Celo & eip155:42220 & 0x48065fbBE25f71C9282ddf5e1cD6D6A887483D5e \\
-Gnosis & eip155:100 & 0x4ECaBa5870353805a9F068101A40E0f32ed605C6 \\
+Ethereum & eip155:1 & \texttt{0x6C96...1dee} \\
+Arbitrum One & eip155:42161 & \texttt{0xFd08...Cbb9} \\
+Base & eip155:8453 & \texttt{0x0200...70c1} \\
+Optimism & eip155:10 & \texttt{0x0200...70c1} \\
+Ink & eip155:57073 & \texttt{0x0200...70c1} \\
+Berachain & eip155:80094 & \texttt{0x779D...3736} \\
+Unichain & eip155:130 & \texttt{0x588c...5518} \\
+Polygon & eip155:137 & \texttt{0xc213...8e8F} \\
+Avalanche & eip155:43114 & \texttt{0x9702...A8c7} \\
+BNB Chain & eip155:56 & \texttt{0x55d3...7955} \\
+Fantom & eip155:250 & \texttt{0x049d...3C7A} \\
+Linea & eip155:59144 & \texttt{0xA219...B93} \\
+Scroll & eip155:534352 & \texttt{0xf55B...9Df} \\
+zkSync Era & eip155:324 & \texttt{0x4932...bA4C} \\
+Mantle & eip155:5000 & \texttt{0x201E...56aE} \\
+Celo & eip155:42220 & \texttt{0x4806...D5e} \\
+Gnosis & eip155:100 & \texttt{0x4ECa...05C6} \\
 \end{longtable}
+
+\begin{infobox}[Full Contract Addresses]
+For complete contract addresses, see the official documentation at \url{https://docs.t402.io/networks} or query the Facilitator API at \code{/supported}.
+\end{infobox}
 
 \section{Solana}
 
