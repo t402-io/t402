@@ -49,6 +49,35 @@ jobs:
       - name: Run tests
         run: go test -v -race -coverprofile=coverage.out ./...
 
+      - name: Run internal package tests with coverage
+        run: go test -race -coverprofile=internal_coverage.out ./internal/...
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: services/facilitator/coverage.out
+          flags: facilitator
+          name: facilitator-coverage
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Check coverage threshold
+        run: |
+          # Check coverage for internal packages only (excludes cmd/ with blockchain signers)
+          COVERAGE=$(go tool cover -func=internal_coverage.out | grep total | awk '{print $3}' | sed 's/%//')
+          echo "Internal packages coverage: ${COVERAGE}%"
+
+          # Minimum threshold (70%)
+          THRESHOLD=70
+
+          # Compare using bc for floating point
+          if (( $(echo "$COVERAGE < $THRESHOLD" | bc -l) )); then
+            echo "::error::Coverage ${COVERAGE}% is below threshold ${THRESHOLD}%"
+            exit 1
+          else
+            echo "::notice::Coverage ${COVERAGE}% meets threshold ${THRESHOLD}%"
+          fi
+
       - name: Run govulncheck
         continue-on-error: true
         run: |
