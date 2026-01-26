@@ -388,7 +388,7 @@ func TestIntegration_APIKeyRequired(t *testing.T) {
 	}
 }
 
-func TestIntegration_APIKeyInQuery(t *testing.T) {
+func TestIntegration_APIKeyInQuery_DisabledByDefault(t *testing.T) {
 	mock := &MockFacilitator{
 		VerifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error) {
 			return &t402.VerifyResponse{IsValid: true}, nil
@@ -412,7 +412,7 @@ func TestIntegration_APIKeyInQuery(t *testing.T) {
 
 	server := createFullTestServer(mock, cfg)
 
-	// With API key in query parameter
+	// API key in query parameter is disabled by default for security
 	body := `{"paymentPayload":{"signature":"0x123"},"paymentRequirements":{"network":"eip155:1","scheme":"exact"}}`
 	req := httptest.NewRequest(http.MethodPost, "/verify?api_key=testkey123", bytes.NewBufferString(body))
 	req.Header.Set("Content-Type", "application/json")
@@ -420,8 +420,9 @@ func TestIntegration_APIKeyInQuery(t *testing.T) {
 
 	server.router.ServeHTTP(w, req)
 
-	if w.Code != http.StatusOK {
-		t.Errorf("expected status 200 with API key in query, got %d, body: %s", w.Code, w.Body.String())
+	// Query parameter auth is disabled by default - should return 401 Unauthorized
+	if w.Code != http.StatusUnauthorized {
+		t.Errorf("expected status 401 with API key in query (disabled by default), got %d, body: %s", w.Code, w.Body.String())
 	}
 }
 

@@ -262,3 +262,108 @@ func TestGetEnvBool(t *testing.T) {
 		})
 	}
 }
+
+func TestCORSDefaults_Development(t *testing.T) {
+	// Clear relevant env vars
+	os.Unsetenv("ENVIRONMENT")
+	os.Unsetenv("CORS_ALLOWED_ORIGINS")
+	defer func() {
+		os.Unsetenv("ENVIRONMENT")
+		os.Unsetenv("CORS_ALLOWED_ORIGINS")
+	}()
+
+	cfg := Load()
+
+	// In development (default), CORS should allow all origins
+	if cfg.CORSAllowedOrigins != "*" {
+		t.Errorf("expected CORS='*' in development, got %s", cfg.CORSAllowedOrigins)
+	}
+}
+
+func TestCORSDefaults_Production(t *testing.T) {
+	// Set production environment without explicit CORS
+	os.Setenv("ENVIRONMENT", "production")
+	os.Unsetenv("CORS_ALLOWED_ORIGINS")
+	defer func() {
+		os.Unsetenv("ENVIRONMENT")
+		os.Unsetenv("CORS_ALLOWED_ORIGINS")
+	}()
+
+	cfg := Load()
+
+	// In production, CORS should default to empty (restrictive)
+	if cfg.CORSAllowedOrigins != "" {
+		t.Errorf("expected CORS='' in production by default, got %s", cfg.CORSAllowedOrigins)
+	}
+}
+
+func TestCORSDefaults_ProductionWithExplicitConfig(t *testing.T) {
+	// Set production environment with explicit CORS
+	os.Setenv("ENVIRONMENT", "production")
+	os.Setenv("CORS_ALLOWED_ORIGINS", "https://example.com,https://app.example.com")
+	defer func() {
+		os.Unsetenv("ENVIRONMENT")
+		os.Unsetenv("CORS_ALLOWED_ORIGINS")
+	}()
+
+	cfg := Load()
+
+	// Explicit config should be respected
+	if cfg.CORSAllowedOrigins != "https://example.com,https://app.example.com" {
+		t.Errorf("expected explicit CORS config, got %s", cfg.CORSAllowedOrigins)
+	}
+}
+
+func TestTimeoutDefaults(t *testing.T) {
+	// Clear timeout env vars
+	os.Unsetenv("HTTP_READ_TIMEOUT")
+	os.Unsetenv("HTTP_WRITE_TIMEOUT")
+	os.Unsetenv("HTTP_IDLE_TIMEOUT")
+	os.Unsetenv("HTTP_SHUTDOWN_TIMEOUT")
+
+	cfg := Load()
+
+	// Check defaults
+	if cfg.ReadTimeout != 30*time.Second {
+		t.Errorf("expected ReadTimeout=30s, got %v", cfg.ReadTimeout)
+	}
+	if cfg.WriteTimeout != 30*time.Second {
+		t.Errorf("expected WriteTimeout=30s, got %v", cfg.WriteTimeout)
+	}
+	if cfg.IdleTimeout != 60*time.Second {
+		t.Errorf("expected IdleTimeout=60s, got %v", cfg.IdleTimeout)
+	}
+	if cfg.ShutdownTimeout != 30*time.Second {
+		t.Errorf("expected ShutdownTimeout=30s, got %v", cfg.ShutdownTimeout)
+	}
+}
+
+func TestTimeoutCustomConfig(t *testing.T) {
+	// Set custom timeout values
+	os.Setenv("HTTP_READ_TIMEOUT", "15")
+	os.Setenv("HTTP_WRITE_TIMEOUT", "45")
+	os.Setenv("HTTP_IDLE_TIMEOUT", "120")
+	os.Setenv("HTTP_SHUTDOWN_TIMEOUT", "60")
+	defer func() {
+		os.Unsetenv("HTTP_READ_TIMEOUT")
+		os.Unsetenv("HTTP_WRITE_TIMEOUT")
+		os.Unsetenv("HTTP_IDLE_TIMEOUT")
+		os.Unsetenv("HTTP_SHUTDOWN_TIMEOUT")
+	}()
+
+	cfg := Load()
+
+	// Check custom values
+	if cfg.ReadTimeout != 15*time.Second {
+		t.Errorf("expected ReadTimeout=15s, got %v", cfg.ReadTimeout)
+	}
+	if cfg.WriteTimeout != 45*time.Second {
+		t.Errorf("expected WriteTimeout=45s, got %v", cfg.WriteTimeout)
+	}
+	if cfg.IdleTimeout != 120*time.Second {
+		t.Errorf("expected IdleTimeout=120s, got %v", cfg.IdleTimeout)
+	}
+	if cfg.ShutdownTimeout != 60*time.Second {
+		t.Errorf("expected ShutdownTimeout=60s, got %v", cfg.ShutdownTimeout)
+	}
+}

@@ -211,6 +211,30 @@ describe("ExactEvmScheme (Server)", () => {
           "Invalid money format",
         );
       });
+
+      it("should throw for Infinity as number", async () => {
+        await expect(async () => await server.parsePrice(Infinity, "eip155:84532")).rejects.toThrow(
+          "must be a finite number",
+        );
+      });
+
+      it("should throw for -Infinity as number", async () => {
+        await expect(async () => await server.parsePrice(-Infinity, "eip155:84532")).rejects.toThrow(
+          "must be a finite number",
+        );
+      });
+
+      it("should throw for NaN as number", async () => {
+        await expect(async () => await server.parsePrice(NaN, "eip155:84532")).rejects.toThrow(
+          "must be a finite number",
+        );
+      });
+
+      it("should throw for Infinity as string", async () => {
+        await expect(async () => await server.parsePrice("Infinity", "eip155:84532")).rejects.toThrow(
+          "Invalid money format",
+        );
+      });
     });
   });
 

@@ -326,9 +326,9 @@ func TestRateLimitMiddleware_Error(t *testing.T) {
 
 	router.ServeHTTP(w, req)
 
-	// On error, should allow the request to proceed
-	if w.Code != http.StatusOK {
-		t.Errorf("expected status 200 on error (fail open), got %d", w.Code)
+	// On error, should fail closed (deny request) to prevent abuse during outages
+	if w.Code != http.StatusServiceUnavailable {
+		t.Errorf("expected status 503 on error (fail closed), got %d", w.Code)
 	}
 }
 

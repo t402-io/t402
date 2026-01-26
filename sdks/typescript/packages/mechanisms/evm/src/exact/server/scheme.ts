@@ -159,6 +159,10 @@ export class ExactEvmScheme implements SchemeNetworkServer {
    */
   private parseMoneyToDecimal(money: string | number): number {
     if (typeof money === "number") {
+      // Validate that the number is finite (not NaN, Infinity, or -Infinity)
+      if (!Number.isFinite(money)) {
+        throw new Error(`Invalid money value: ${money} (must be a finite number)`);
+      }
       return money;
     }
 
@@ -166,7 +170,8 @@ export class ExactEvmScheme implements SchemeNetworkServer {
     const cleanMoney = money.replace(/^\$/, "").trim();
     const amount = parseFloat(cleanMoney);
 
-    if (isNaN(amount)) {
+    // Validate that the parsed amount is finite (not NaN, Infinity, or -Infinity)
+    if (!Number.isFinite(amount)) {
       throw new Error(`Invalid money format: ${money}`);
     }
 
@@ -202,21 +207,36 @@ export class ExactEvmScheme implements SchemeNetworkServer {
 
   /**
    * Convert decimal amount to token units (e.g., 0.10 -> 100000 for 6-decimal tokens)
+   * Uses string manipulation to avoid floating-point precision loss.
    *
-   * @param decimalAmount - The decimal amount to convert
+   * @param decimalAmount - The decimal amount to convert (e.g., "1.50", "0.001")
    * @param network - The network to use
    * @param decimals - Optional number of decimals (defaults to network asset decimals)
    * @returns The token amount as a string
    */
   private convertToTokenAmount(decimalAmount: string, network: Network, decimals?: number): string {
     const tokenDecimals = decimals ?? this.getAssetDecimals(network);
-    const amount = parseFloat(decimalAmount);
-    if (isNaN(amount)) {
-      throw new Error(`Invalid amount: ${decimalAmount}`);
+
+    // Validate input format
+    if (!/^-?\d+(\.\d+)?$/.test(decimalAmount)) {
+      throw new Error(`Invalid amount format: ${decimalAmount}`);
     }
-    // Convert to smallest unit (e.g., for USDC/USDT with 6 decimals: 0.10 * 10^6 = 100000)
-    const tokenAmount = Math.floor(amount * Math.pow(10, tokenDecimals));
-    return tokenAmount.toString();
+
+    // Split into whole and fractional parts
+    const [wholePart, fracPart = ""] = decimalAmount.split(".");
+
+    // Pad or truncate the fractional part to match token decimals
+    // - If fracPart is shorter than tokenDecimals, pad with zeros on the right
+    // - If fracPart is longer than tokenDecimals, truncate (floor behavior)
+    const paddedFrac = fracPart.padEnd(tokenDecimals, "0").slice(0, tokenDecimals);
+
+    // Combine whole and fractional parts as a single integer string
+    const combined = wholePart + paddedFrac;
+
+    // Remove leading zeros while preserving "0" for zero values
+    const result = combined.replace(/^0+/, "") || "0";
+
+    return result;
   }
 
   /**

@@ -113,6 +113,12 @@ type Config struct {
 	OTELProtocol   string // grpc or http
 	OTELInsecure   bool
 	OTELSampleRate float64
+
+	// HTTP Server Timeouts
+	ReadTimeout     time.Duration
+	WriteTimeout    time.Duration
+	IdleTimeout     time.Duration
+	ShutdownTimeout time.Duration
 }
 
 // Load loads configuration from environment variables
@@ -120,10 +126,20 @@ func Load() *Config {
 	// Load .env file if it exists
 	_ = godotenv.Load()
 
+	env := getEnv("ENVIRONMENT", "development")
+
+	// CORS defaults: secure in production, permissive in development
+	// In production, require explicit CORS configuration (empty = no CORS)
+	// In development, default to "*" for easier local testing
+	corsDefault := "*"
+	if env == "production" {
+		corsDefault = "" // Require explicit configuration in production
+	}
+
 	return &Config{
 		// Server
 		Port:        getEnvInt("PORT", 8080),
-		Environment: getEnv("ENVIRONMENT", "development"),
+		Environment: env,
 
 		// Database
 		DatabaseURL:         getEnv("DATABASE_URL", ""),
@@ -143,9 +159,10 @@ func Load() *Config {
 		APIKeyRequired: getEnvBool("API_KEY_REQUIRED", false),
 
 		// CORS Configuration
-		// Default: "*" (allow all) - for public APIs
-		// Production recommendation: set specific origins like "https://example.com,https://app.example.com"
-		CORSAllowedOrigins: getEnv("CORS_ALLOWED_ORIGINS", "*"),
+		// Development: defaults to "*" (allow all)
+		// Production: defaults to "" (require explicit configuration for security)
+		// Set specific origins like "https://example.com,https://app.example.com"
+		CORSAllowedOrigins: getEnv("CORS_ALLOWED_ORIGINS", corsDefault),
 
 		// EVM Configuration
 		EvmPrivateKey: getEnv("EVM_PRIVATE_KEY", ""),
@@ -226,6 +243,12 @@ func Load() *Config {
 		OTELProtocol:   getEnv("OTEL_EXPORTER_OTLP_PROTOCOL", "grpc"),
 		OTELInsecure:   getEnvBool("OTEL_EXPORTER_OTLP_INSECURE", true),
 		OTELSampleRate: getEnvFloat("OTEL_TRACES_SAMPLER_ARG", 1.0),
+
+		// HTTP Server Timeouts (configurable for different deployment scenarios)
+		ReadTimeout:     time.Duration(getEnvInt("HTTP_READ_TIMEOUT", 30)) * time.Second,
+		WriteTimeout:    time.Duration(getEnvInt("HTTP_WRITE_TIMEOUT", 30)) * time.Second,
+		IdleTimeout:     time.Duration(getEnvInt("HTTP_IDLE_TIMEOUT", 60)) * time.Second,
+		ShutdownTimeout: time.Duration(getEnvInt("HTTP_SHUTDOWN_TIMEOUT", 30)) * time.Second,
 	}
 }
 

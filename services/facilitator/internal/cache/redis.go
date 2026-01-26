@@ -99,3 +99,30 @@ func (c *Client) Ping(ctx context.Context) error {
 func (c *Client) Close() error {
 	return c.client.Close()
 }
+
+// SetNX sets a key only if it doesn't exist (atomic operation)
+// Returns true if the key was set, false if it already existed
+func (c *Client) SetNX(ctx context.Context, key string, value interface{}, ttl time.Duration) (bool, error) {
+	return c.client.SetNX(ctx, key, value, ttl).Result()
+}
+
+// GetSet atomically sets a key and returns the old value
+func (c *Client) GetSet(ctx context.Context, key string, value interface{}) (string, error) {
+	return c.client.GetSet(ctx, key, value).Result()
+}
+
+// Eval executes a Lua script on Redis
+// Returns the script result as interface{} which can be type-asserted
+func (c *Client) Eval(ctx context.Context, script string, keys []string, args ...interface{}) (interface{}, error) {
+	return c.client.Eval(ctx, script, keys, args...).Result()
+}
+
+// EvalSha executes a cached Lua script by its SHA
+func (c *Client) EvalSha(ctx context.Context, sha string, keys []string, args ...interface{}) (interface{}, error) {
+	return c.client.EvalSha(ctx, sha, keys, args...).Result()
+}
+
+// ScriptLoad loads a Lua script into Redis and returns its SHA
+func (c *Client) ScriptLoad(ctx context.Context, script string) (string, error) {
+	return c.client.ScriptLoad(ctx, script).Result()
+}

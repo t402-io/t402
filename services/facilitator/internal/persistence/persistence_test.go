@@ -372,6 +372,138 @@ func TestSettlementStatus_Values(t *testing.T) {
 	assert.Equal(t, SettlementStatus("failed"), SettlementStatusFailed)
 }
 
+func TestSettlementStatus_ValidTransitions(t *testing.T) {
+	// Test valid transitions
+	tests := []struct {
+		from  SettlementStatus
+		to    SettlementStatus
+		valid bool
+	}{
+		// From pending
+		{SettlementStatusPending, SettlementStatusConfirmed, true},
+		{SettlementStatusPending, SettlementStatusFailed, true},
+		{SettlementStatusPending, SettlementStatusPending, false}, // Same state
+
+		// From confirmed (terminal state)
+		{SettlementStatusConfirmed, SettlementStatusPending, false},
+		{SettlementStatusConfirmed, SettlementStatusFailed, false},
+		{SettlementStatusConfirmed, SettlementStatusConfirmed, false},
+
+		// From failed (can retry)
+		{SettlementStatusFailed, SettlementStatusPending, true},
+		{SettlementStatusFailed, SettlementStatusConfirmed, false},
+		{SettlementStatusFailed, SettlementStatusFailed, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(string(tt.from)+"_to_"+string(tt.to), func(t *testing.T) {
+			result := isValidTransition(tt.from, tt.to)
+			assert.Equal(t, tt.valid, result)
+		})
+	}
+}
+
+func TestSettlementRepository_UpdateStatus_InvalidTransition(t *testing.T) {
+	db := skipIfNoDatabase(t)
+	defer db.Close()
+	defer cleanupDatabase(t, db)
+
+	repo := NewSettlementRepository(db)
+	ctx := context.Background()
+
+	// Create a settlement in confirmed state
+	settlement := &Settlement{
+		Network:     "eip155:1",
+		Scheme:      "exact",
+		FromAddress: "0x1234567890123456789012345678901234567890",
+		ToAddress:   "0x0987654321098765432109876543210987654321",
+		Amount:      "500000",
+		Asset:       "USDT",
+		Status:      SettlementStatusPending,
+		CreatedAt:   time.Now().UTC(),
+	}
+
+	err := repo.Create(ctx, settlement)
+	require.NoError(t, err)
+
+	// Confirm the settlement
+	err = repo.UpdateStatus(ctx, settlement.ID, SettlementStatusConfirmed, "")
+	require.NoError(t, err)
+
+	// Try to transition from confirmed to pending (should fail)
+	err = repo.UpdateStatus(ctx, settlement.ID, SettlementStatusPending, "")
+	assert.Error(t, err)
+	assert.ErrorIs(t, err, ErrInvalidStateTransition)
+
+	// Try to transition from confirmed to failed (should fail)
+	err = repo.UpdateStatus(ctx, settlement.ID, SettlementStatusFailed, "some error")
+	assert.Error(t, err)
+	assert.ErrorIs(t, err, ErrInvalidStateTransition)
+}
+
+func TestSettlementRepository_UpdateStatus_RetryFromFailed(t *testing.T) {
+	db := skipIfNoDatabase(t)
+	defer db.Close()
+	defer cleanupDatabase(t, db)
+
+	repo := NewSettlementRepository(db)
+	ctx := context.Background()
+
+	// Create a settlement
+	settlement := &Settlement{
+		Network:     "eip155:1",
+		Scheme:      "exact",
+		FromAddress: "0x1234567890123456789012345678901234567890",
+		ToAddress:   "0x0987654321098765432109876543210987654321",
+		Amount:      "500000",
+		Asset:       "USDT",
+		Status:      SettlementStatusPending,
+		CreatedAt:   time.Now().UTC(),
+	}
+
+	err := repo.Create(ctx, settlement)
+	require.NoError(t, err)
+
+	// Fail the settlement
+	err = repo.UpdateStatus(ctx, settlement.ID, SettlementStatusFailed, "transaction reverted")
+	require.NoError(t, err)
+
+	// Verify failed state
+	retrieved, err := repo.GetByID(ctx, settlement.ID)
+	require.NoError(t, err)
+	assert.Equal(t, SettlementStatusFailed, retrieved.Status)
+
+	// Retry (back to pending)
+	err = repo.UpdateStatus(ctx, settlement.ID, SettlementStatusPending, "")
+	require.NoError(t, err)
+
+	// Verify pending state
+	retrieved, err = repo.GetByID(ctx, settlement.ID)
+	require.NoError(t, err)
+	assert.Equal(t, SettlementStatusPending, retrieved.Status)
+
+	// Now it can be confirmed
+	err = repo.UpdateStatus(ctx, settlement.ID, SettlementStatusConfirmed, "")
+	require.NoError(t, err)
+
+	retrieved, err = repo.GetByID(ctx, settlement.ID)
+	require.NoError(t, err)
+	assert.Equal(t, SettlementStatusConfirmed, retrieved.Status)
+}
+
+func TestSettlementRepository_UpdateStatus_NotFound(t *testing.T) {
+	db := skipIfNoDatabase(t)
+	defer db.Close()
+	defer cleanupDatabase(t, db)
+
+	repo := NewSettlementRepository(db)
+	ctx := context.Background()
+
+	err := repo.UpdateStatus(ctx, "non-existent-id", SettlementStatusConfirmed, "")
+	assert.Error(t, err)
+	assert.ErrorIs(t, err, ErrSettlementNotFound)
+}
+
 func TestAuditAction_Values(t *testing.T) {
 	assert.Equal(t, AuditAction("verify"), AuditActionVerify)
 	assert.Equal(t, AuditAction("settle"), AuditActionSettle)
@@ -533,4 +665,13 @@ func TestSanitizeJSON(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGetAuditMetrics(t *testing.T) {
+	// Get current metrics - should return valid values (may be non-zero from other tests)
+	metrics := GetAuditMetrics()
+
+	// Metrics should be accessible without panic
+	assert.GreaterOrEqual(t, metrics.TotalLogged, uint64(0))
+	assert.GreaterOrEqual(t, metrics.TotalFailed, uint64(0))
 }

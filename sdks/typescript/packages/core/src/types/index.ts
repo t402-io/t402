@@ -39,3 +39,29 @@ export type AssetAmount = {
   extra?: Record<string, unknown>;
 };
 export type Price = Money | AssetAmount;
+
+// Zod schemas for runtime validation
+export {
+  NetworkSchema,
+  ResourceInfoSchema,
+  PaymentRequirementsSchema,
+  PaymentRequiredSchema,
+  PaymentPayloadSchema,
+  VerifyResponseSchema,
+  SettleResponseSchema,
+  PaymentRequirementsV1Schema,
+  PaymentPayloadV1Schema,
+  parsePaymentPayload,
+  parsePaymentRequired,
+  parsePaymentRequirements,
+  safeParsePaymentPayload,
+  safeParsePaymentRequired,
+  safeParsePaymentRequirements,
+} from "./schemas";
+export type {
+  ValidatedPaymentPayload,
+  ValidatedPaymentRequired,
+  ValidatedPaymentRequirements,
+  ValidatedVerifyResponse,
+  ValidatedSettleResponse,
+} from "./schemas";

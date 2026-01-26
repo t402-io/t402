@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"log"
 	"net/http"
 	"strings"
 
@@ -20,15 +21,25 @@ type Config struct {
 
 	// QueryParam is the query parameter to check for API key (default: api_key)
 	QueryParam string
+
+	// AllowQueryParam determines if API key can be passed via query parameter
+	// Default: false (disabled for security - prevents key leakage in logs/URLs)
+	AllowQueryParam bool
+
+	// WarnQueryParam logs a deprecation warning when query param auth is used
+	// Only applies when AllowQueryParam is true
+	WarnQueryParam bool
 }
 
 // DefaultConfig returns the default authentication configuration
 func DefaultConfig() *Config {
 	return &Config{
-		Required:   false,
-		SkipPaths:  []string{"/health", "/ready", "/metrics", "/supported"},
-		HeaderName: "X-API-Key",
-		QueryParam: "api_key",
+		Required:        false,
+		SkipPaths:       []string{"/health", "/ready", "/metrics", "/supported"},
+		HeaderName:      "X-API-Key",
+		QueryParam:      "api_key",
+		AllowQueryParam: false, // Disabled by default for security
+		WarnQueryParam:  true,  // Warn if enabled and used
 	}
 }
 
@@ -54,10 +65,21 @@ func Middleware(manager *Manager, cfg *Config) gin.HandlerFunc {
 			return
 		}
 
-		// Extract API key from header or query
+		// Extract API key from header
 		apiKey := c.GetHeader(cfg.HeaderName)
-		if apiKey == "" {
+
+		// Check query parameter only if explicitly allowed
+		if apiKey == "" && cfg.AllowQueryParam {
 			apiKey = c.Query(cfg.QueryParam)
+			if apiKey != "" {
+				// Log deprecation warning
+				if cfg.WarnQueryParam {
+					log.Printf("WARNING: API key provided via query parameter (deprecated). Client IP: %s, Path: %s",
+						c.ClientIP(), path)
+				}
+				// Add deprecation header
+				c.Header("X-Deprecated", "Query parameter authentication is deprecated and will be removed. Use X-API-Key header instead.")
+			}
 		}
 
 		// Also check Authorization header with Bearer scheme

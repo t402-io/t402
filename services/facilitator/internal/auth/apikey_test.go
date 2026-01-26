@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"encoding/json"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -467,5 +468,41 @@ func TestGetFromRedisNil(t *testing.T) {
 	}
 	if key != nil {
 		t.Error("Expected nil key with nil redis")
+	}
+}
+
+func TestRecordUsageConcurrent(t *testing.T) {
+	manager := NewManager(nil)
+
+	// Create an API key
+	_, apiKey, err := manager.CreateKey(context.Background(), "concurrent-test", 0, 0, nil)
+	if err != nil {
+		t.Fatalf("Failed to create key: %v", err)
+	}
+
+	// Get initial count using atomic load
+	initialCount := atomic.LoadInt64(&apiKey.UsageCount)
+
+	// Run concurrent usage recordings
+	const numGoroutines = 100
+	done := make(chan bool, numGoroutines)
+
+	for i := 0; i < numGoroutines; i++ {
+		go func() {
+			manager.recordUsage(context.Background(), apiKey)
+			done <- true
+		}()
+	}
+
+	// Wait for all goroutines to complete
+	for i := 0; i < numGoroutines; i++ {
+		<-done
+	}
+
+	// Check that usage count is correct using atomic load
+	finalCount := atomic.LoadInt64(&apiKey.UsageCount)
+	expectedCount := initialCount + numGoroutines
+	if finalCount != expectedCount {
+		t.Errorf("Expected usage count %d, got %d (race condition detected)", expectedCount, finalCount)
 	}
 }

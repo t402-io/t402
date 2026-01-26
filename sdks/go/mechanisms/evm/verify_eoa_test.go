@@ -1,6 +1,7 @@
 package evm
 
 import (
+	"math/big"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -138,6 +139,68 @@ func TestVerifyEOASignature_VValueAdjustment(t *testing.T) {
 		}
 		if !got {
 			t.Error("VerifyEOASignature() with v=27/28 should be valid")
+		}
+	})
+}
+
+// TestVerifyEOASignature_Malleability tests that high-s signatures are rejected
+func TestVerifyEOASignature_Malleability(t *testing.T) {
+	privateKey, _ := crypto.GenerateKey()
+	address := crypto.PubkeyToAddress(privateKey.PublicKey)
+	testHash := crypto.Keccak256([]byte("malleability test"))
+
+	// Generate a valid signature
+	sig, err := crypto.Sign(testHash, privateKey)
+	if err != nil {
+		t.Fatalf("failed to sign: %v", err)
+	}
+
+	// First, verify the original signature works (should have low s)
+	t.Run("accepts low-s signature", func(t *testing.T) {
+		// Make a copy with Ethereum v format
+		lowSSig := make([]byte, 65)
+		copy(lowSSig, sig)
+		lowSSig[64] += 27
+
+		got, err := VerifyEOASignature(testHash, lowSSig, address)
+		if err != nil {
+			t.Errorf("VerifyEOASignature() unexpected error for low-s: %v", err)
+			return
+		}
+		if !got {
+			t.Error("VerifyEOASignature() should accept low-s signature")
+		}
+	})
+
+	t.Run("rejects high-s signature (malleability)", func(t *testing.T) {
+		// Create a malleable signature by computing s' = n - s
+		// Original s is bytes 32-63
+		s := new(big.Int).SetBytes(sig[32:64])
+
+		// Compute s' = n - s (this creates the malleable counterpart)
+		sPrime := new(big.Int).Sub(secp256k1N, s)
+
+		// Create the malleable signature
+		malleableSig := make([]byte, 65)
+		copy(malleableSig, sig[:32])                       // Keep r
+		copy(malleableSig[32:64], sPrime.FillBytes(make([]byte, 32))) // Replace s with s'
+		malleableSig[64] = sig[64] + 27                    // Keep v with Ethereum format
+
+		// Flip the recovery bit since s changed
+		if malleableSig[64] == 27 {
+			malleableSig[64] = 28
+		} else {
+			malleableSig[64] = 27
+		}
+
+		// This should fail with malleability error
+		_, err := VerifyEOASignature(testHash, malleableSig, address)
+		if err == nil {
+			t.Error("VerifyEOASignature() should reject high-s signature")
+			return
+		}
+		if err != ErrSignatureMalleability {
+			t.Errorf("VerifyEOASignature() error = %v, want %v", err, ErrSignatureMalleability)
 		}
 	})
 }
