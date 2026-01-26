@@ -122,11 +122,11 @@ export function Footer() {
           </div>
 
           {/* Links Columns */}
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 lg:col-span-4">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-4 sm:gap-8 lg:col-span-4">
             {/* Product */}
             <div>
               <h3 className="text-sm font-semibold text-foreground">Product</h3>
-              <ul className="mt-4 space-y-3">
+              <ul className="mt-3 space-y-2.5 sm:mt-4 sm:space-y-3">
                 {footerLinks.product.map((link) => (
                   <li key={link.label}>
                     <Link
@@ -145,7 +145,7 @@ export function Footer() {
               <h3 className="text-sm font-semibold text-foreground">
                 Developers
               </h3>
-              <ul className="mt-4 space-y-3">
+              <ul className="mt-3 space-y-2.5 sm:mt-4 sm:space-y-3">
                 {footerLinks.developers.map((link) => (
                   <li key={link.label}>
                     <Link
@@ -164,7 +164,7 @@ export function Footer() {
               <h3 className="text-sm font-semibold text-foreground">
                 Resources
               </h3>
-              <ul className="mt-4 space-y-3">
+              <ul className="mt-3 space-y-2.5 sm:mt-4 sm:space-y-3">
                 {footerLinks.resources.map((link) => (
                   <li key={link.label}>
                     <Link
@@ -183,7 +183,7 @@ export function Footer() {
             {/* Chains */}
             <div>
               <h3 className="text-sm font-semibold text-foreground">Chains</h3>
-              <ul className="mt-4 space-y-3">
+              <ul className="mt-3 space-y-2.5 sm:mt-4 sm:space-y-3">
                 {footerLinks.chains.map((link) => (
                   <li key={link.label}>
                     <Link

@@ -87,9 +87,9 @@ export function HowItWorks() {
         {/* Flow Diagram */}
         <div className="relative">
           {/* Connection Line - Desktop */}
-          <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-brand to-transparent -translate-y-1/2 z-0" />
+          <div className="absolute left-0 right-0 top-1/2 z-0 hidden h-0.5 -translate-y-1/2 bg-gradient-to-r from-transparent via-brand to-transparent lg:block" />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
             {steps.map((step, index) => (
               <motion.div
                 key={step.number}
@@ -99,36 +99,45 @@ export function HowItWorks() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="relative"
               >
-                <div className="bg-background-tertiary border border-border rounded-xl p-6 h-full hover:border-brand/50 transition-colors group">
+                <div className="group h-full rounded-xl border border-border bg-background-tertiary p-5 transition-colors hover:border-brand/50 sm:p-6">
                   {/* Step Number */}
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-full bg-brand/10 border border-brand/30 flex items-center justify-center text-brand group-hover:bg-brand/20 transition-colors">
+                  <div className="mb-3 flex items-center gap-3 sm:mb-4 sm:gap-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full border border-brand/30 bg-brand/10 text-brand transition-colors group-hover:bg-brand/20 sm:h-12 sm:w-12">
                       {step.icon}
                     </div>
-                    <span className="text-sm font-mono text-foreground-tertiary">
+                    <span className="font-mono text-sm text-foreground-tertiary">
                       {step.number}
                     </span>
                   </div>
 
                   {/* Content */}
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                  <h3 className="mb-2 text-base font-semibold text-foreground sm:text-lg">
                     {step.title}
                   </h3>
-                  <p className="text-foreground-secondary text-sm">
+                  <p className="text-sm text-foreground-secondary">
                     {step.description}
                   </p>
 
                   {/* Arrow indicator for desktop */}
-                  {index < steps.length - 1 && (
-                    <div className="hidden lg:block absolute -right-4 top-1/2 -translate-y-1/2 z-10">
-                      <div className="w-8 h-8 rounded-full bg-background-tertiary border border-border flex items-center justify-center">
-                        <svg className="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  {index < steps.length - 1 && index !== 2 && (
+                    <div className="absolute -right-4 top-1/2 z-10 hidden -translate-y-1/2 lg:block">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background-tertiary">
+                        <svg className="h-4 w-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                       </div>
                     </div>
                   )}
                 </div>
+
+                {/* Mobile arrow indicator */}
+                {index < steps.length - 1 && (
+                  <div className="flex justify-center py-2 sm:hidden">
+                    <svg className="h-5 w-5 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                  </div>
+                )}
               </motion.div>
             ))}
           </div>

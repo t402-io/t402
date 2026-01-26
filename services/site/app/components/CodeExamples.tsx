@@ -276,12 +276,12 @@ export function CodeExamples() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="mt-12 flex justify-center"
         >
-          <div className="inline-flex gap-1 rounded-lg border border-border bg-background-secondary p-1">
+          <div className="flex w-full max-w-md gap-1 rounded-lg border border-border bg-background-secondary p-1 sm:inline-flex sm:w-auto">
             {languages.map((lang) => (
               <button
                 key={lang.id}
                 onClick={() => setActiveLanguage(lang.id)}
-                className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                className={`flex-1 rounded-md px-3 py-2.5 text-sm font-medium transition-colors sm:flex-none sm:px-4 sm:py-2 ${
                   activeLanguage === lang.id
                     ? "bg-background-tertiary text-foreground"
                     : "text-foreground-secondary hover:text-foreground"

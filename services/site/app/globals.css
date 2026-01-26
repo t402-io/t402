@@ -105,6 +105,7 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -115,6 +116,42 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   container-type: inline-size;
+  /* Prevent horizontal scroll on mobile */
+  overflow-x: hidden;
+}
+
+/* =============================================================================
+   Mobile Touch Improvements
+   ============================================================================= */
+
+/* Minimum touch target size (44x44px recommended by Apple/Google) */
+@media (pointer: coarse) {
+  button,
+  a,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Disable hover effects on touch devices */
+  .group:hover .group-hover\:opacity-100 {
+    opacity: inherit;
+  }
+}
+
+/* Prevent tap highlight on iOS */
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Improve scrolling on iOS */
+.overflow-y-auto,
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Selection */
