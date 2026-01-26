@@ -40,14 +40,15 @@ function ModeButton({
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium transition-all ${
+      className={`flex items-center gap-1 sm:gap-1.5 rounded-md px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-medium transition-all ${
         active
           ? "bg-white/10 text-white"
           : "text-[var(--color-muted)] hover:text-white/70"
       }`}
+      aria-pressed={active}
     >
       <span
-        className={`h-1.5 w-1.5 rounded-full ${active ? "animate-pulse" : ""}`}
+        className={`h-1.5 w-1.5 rounded-full shrink-0 ${active ? "animate-pulse" : ""}`}
         style={{ backgroundColor: active ? color : "var(--color-muted)" }}
       />
       {label}

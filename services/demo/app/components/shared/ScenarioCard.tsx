@@ -17,7 +17,7 @@ export function ScenarioCard({ title, description, cost, icon, accentColor, href
   return (
     <Link
       href={href}
-      className="glass-card-interactive p-5 block group"
+      className="glass-card-interactive p-4 sm:p-5 block group active:scale-[0.98] transition-transform"
     >
       <div className="flex items-start gap-3 mb-3">
         <div

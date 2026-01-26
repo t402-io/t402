@@ -77,19 +77,21 @@ function ConnectedBadge({
   onDisconnect: () => void;
 }) {
   return (
-    <div className="flex items-center gap-2">
-      <div className="flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5">
-        <span className="h-2 w-2 rounded-full bg-[var(--color-success)]" />
-        <span className="font-mono text-xs text-white">
-          {address.slice(0, 6)}...{address.slice(-4)}
+    <div className="flex items-center gap-1.5 sm:gap-2">
+      <div className="flex items-center gap-1.5 sm:gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2 sm:px-3 py-1.5">
+        <span className="h-2 w-2 shrink-0 rounded-full bg-[var(--color-success)]" />
+        <span className="font-mono text-[10px] sm:text-xs text-white">
+          {address.slice(0, 4)}...{address.slice(-3)}
         </span>
-        <span className="text-xs text-[var(--color-muted)]">{label}</span>
+        <span className="hidden sm:inline text-xs text-[var(--color-muted)]">{label}</span>
       </div>
       <button
         onClick={onDisconnect}
-        className="rounded-lg border border-[var(--color-border)] px-2 py-1.5 text-xs text-[var(--color-muted)] hover:text-white transition-colors"
+        className="rounded-lg border border-[var(--color-border)] px-2 py-1.5 text-[10px] sm:text-xs text-[var(--color-muted)] hover:text-white transition-colors"
+        aria-label={`Disconnect ${label} wallet`}
       >
-        Disconnect
+        <span className="hidden sm:inline">Disconnect</span>
+        <span className="sm:hidden">×</span>
       </button>
     </div>
   );

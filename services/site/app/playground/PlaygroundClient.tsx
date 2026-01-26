@@ -460,7 +460,7 @@ Content-Type: application/json
         </p>
       </motion.div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">
         {/* Configuration Panel */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -468,7 +468,7 @@ Content-Type: application/json
           transition={{ duration: 0.5, delay: 0.1 }}
           className="lg:col-span-1"
         >
-          <div className="sticky top-24 space-y-6">
+          <div className="space-y-6 lg:sticky lg:top-24">
             <div className="rounded-xl border border-border bg-background-secondary p-6">
               <h2 className="mb-4 text-lg font-semibold text-foreground">Configuration</h2>
 

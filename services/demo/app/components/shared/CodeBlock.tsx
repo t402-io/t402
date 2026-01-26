@@ -67,9 +67,9 @@ export function CodeBlock({
   return (
     <div className={`overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-code-bg)] flex flex-col ${className}`}>
       {showHeader && (
-        <div className="flex items-center justify-between border-b border-[var(--color-border)] px-4 py-2 shrink-0">
+        <div className="flex items-center justify-between border-b border-[var(--color-border)] px-3 sm:px-4 py-2 shrink-0">
           {label && (
-            <span className="text-xs font-medium" style={{ color: labelColor || "var(--color-muted)" }}>
+            <span className="text-[10px] sm:text-xs font-medium truncate mr-2" style={{ color: labelColor || "var(--color-muted)" }}>
               {label}
             </span>
           )}
@@ -77,16 +77,17 @@ export function CodeBlock({
           {showCopyButton && (
             <button
               onClick={handleCopy}
-              className="flex items-center gap-1 text-xs text-[var(--color-muted)] hover:text-white transition-colors"
+              className="flex items-center gap-1 text-[10px] sm:text-xs text-[var(--color-muted)] hover:text-white transition-colors shrink-0"
+              aria-label={copied ? "Copied to clipboard" : "Copy code"}
             >
               {copied ? <Check size={12} className="text-[var(--color-success)]" /> : <Copy size={12} />}
-              {copied ? "Copied" : "Copy"}
+              <span className="hidden sm:inline">{copied ? "Copied" : "Copy"}</span>
             </button>
           )}
         </div>
       )}
       <pre
-        className="flex-1 overflow-auto p-4 text-sm text-[var(--color-code-text)] leading-relaxed"
+        className="flex-1 overflow-auto p-3 sm:p-4 text-[11px] sm:text-sm text-[var(--color-code-text)] leading-relaxed"
         style={{ maxHeight: maxHeight || undefined }}
       >
         <code>
