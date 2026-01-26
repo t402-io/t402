@@ -65,10 +65,10 @@ export function FlowDiagram({ state = "idle", autoPlay = false, compact = false 
   const cy = height / 2;
 
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="w-full overflow-x-auto scrollbar-hide">
       <svg
         viewBox={`0 0 ${viewWidth} ${height}`}
-        className="w-full min-w-[400px]"
+        className="w-full min-w-[320px] sm:min-w-[400px]"
         role="img"
         aria-label="T402 protocol flow diagram"
       >

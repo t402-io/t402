@@ -128,18 +128,19 @@ export function AiApiScenario() {
             rows={3}
             placeholder="Ask anything..."
           />
-          <div className="flex flex-wrap gap-2 mt-3">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-3">
             {EXAMPLE_QUERIES.map((q) => (
               <button
                 key={q}
                 onClick={() => setQuery(q)}
-                className={`text-xs px-2.5 py-1 rounded-md border transition-colors cursor-pointer ${
+                className={`text-[10px] sm:text-xs px-2 sm:px-2.5 py-1 rounded-md border transition-colors cursor-pointer active:scale-95 ${
                   query === q
                     ? "border-[var(--color-brand)] text-[var(--color-brand)]"
                     : "border-[var(--color-border)] text-[var(--color-muted)] hover:text-white"
                 }`}
               >
-                {q.slice(0, 30)}...
+                <span className="sm:hidden">{q.slice(0, 20)}...</span>
+                <span className="hidden sm:inline">{q.slice(0, 30)}...</span>
               </button>
             ))}
           </div>

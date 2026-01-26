@@ -284,34 +284,36 @@ export function FAQClient() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.1 }}
-        className="mb-10 flex flex-wrap justify-center gap-2"
+        className="mb-10 overflow-x-auto pb-2"
       >
-        <button
-          onClick={() => setActiveCategory("all")}
-          className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-            activeCategory === "all"
-              ? "bg-brand text-background"
-              : "bg-background-secondary text-foreground-secondary hover:bg-background-tertiary hover:text-foreground"
-          }`}
-        >
-          All
-        </button>
-        {categories.map((cat) => (
+        <div className="flex w-max min-w-full justify-start gap-2 sm:w-auto sm:justify-center">
           <button
-            key={cat.id}
-            onClick={() => setActiveCategory(cat.id)}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-              activeCategory === cat.id
+            onClick={() => setActiveCategory("all")}
+            className={`whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-all sm:px-4 ${
+              activeCategory === "all"
                 ? "bg-brand text-background"
                 : "bg-background-secondary text-foreground-secondary hover:bg-background-tertiary hover:text-foreground"
             }`}
           >
-            {cat.label}
-            <span className="ml-1.5 text-xs opacity-70">
-              {faqs.filter((f) => f.category === cat.id).length}
-            </span>
+            All
           </button>
-        ))}
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.id)}
+              className={`whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-all sm:px-4 ${
+                activeCategory === cat.id
+                  ? "bg-brand text-background"
+                  : "bg-background-secondary text-foreground-secondary hover:bg-background-tertiary hover:text-foreground"
+              }`}
+            >
+              {cat.label}
+              <span className="ml-1 text-xs opacity-70 sm:ml-1.5">
+                {faqs.filter((f) => f.category === cat.id).length}
+              </span>
+            </button>
+          ))}
+        </div>
       </motion.div>
 
       {/* FAQ List */}

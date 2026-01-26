@@ -203,6 +203,18 @@
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+/* Prevent zoom on input focus (iOS) */
+@media screen and (max-width: 767px) {
+  input[type="text"], input[type="email"], input[type="password"], select, textarea {
+    font-size: 16px;
+  }
+}
+
+/* Momentum scrolling for iOS */
+.scroll-touch {
+  -webkit-overflow-scrolling: touch;
+}
+
 /* Focus indicators for accessibility */
 :focus-visible {
   outline: 2px solid var(--color-brand);

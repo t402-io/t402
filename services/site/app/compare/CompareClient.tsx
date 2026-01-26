@@ -173,82 +173,127 @@ function renderValue(value: string | boolean) {
   return <span className="text-sm font-medium">{value}</span>;
 }
 
+// Mobile comparison card for each feature
+function MobileComparisonCard({ feature, index }: { feature: ComparisonFeature; index: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.03 }}
+      className="rounded-lg border border-border bg-background-tertiary p-4"
+    >
+      <div className="mb-3">
+        <p className="font-medium text-foreground">{feature.name}</p>
+        <p className="text-xs text-foreground-tertiary">{feature.description}</p>
+      </div>
+      <div className="grid grid-cols-2 gap-2 text-sm">
+        <div className="rounded-md bg-brand/10 px-3 py-2">
+          <p className="text-xs text-foreground-tertiary">t402</p>
+          <div className="font-medium text-brand">{renderValue(feature.t402)}</div>
+        </div>
+        <div className="rounded-md bg-background-secondary px-3 py-2">
+          <p className="text-xs text-foreground-tertiary">Stripe</p>
+          <div className="text-foreground-secondary">{renderValue(feature.stripe)}</div>
+        </div>
+        <div className="rounded-md bg-background-secondary px-3 py-2">
+          <p className="text-xs text-foreground-tertiary">PayPal</p>
+          <div className="text-foreground-secondary">{renderValue(feature.paypal)}</div>
+        </div>
+        <div className="rounded-md bg-background-secondary px-3 py-2">
+          <p className="text-xs text-foreground-tertiary">Coinbase</p>
+          <div className="text-foreground-secondary">{renderValue(feature.coinbase)}</div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 function ComparisonTable() {
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[1000px] border-collapse">
-        <thead>
-          <tr className="border-b border-border">
-            <th className="py-4 pr-4 text-left text-sm font-medium text-foreground-tertiary">
-              Feature
-            </th>
-            <th className="px-4 py-4 text-center">
-              <div className="inline-flex flex-col items-center">
-                <span className="text-lg font-bold text-brand">t402</span>
-                <span className="text-xs text-foreground-tertiary">Protocol</span>
-              </div>
-            </th>
-            <th className="px-4 py-4 text-center">
-              <div className="inline-flex flex-col items-center">
-                <span className="text-lg font-semibold text-foreground">Stripe</span>
-                <span className="text-xs text-foreground-tertiary">Traditional</span>
-              </div>
-            </th>
-            <th className="px-4 py-4 text-center">
-              <div className="inline-flex flex-col items-center">
-                <span className="text-lg font-semibold text-foreground">PayPal</span>
-                <span className="text-xs text-foreground-tertiary">Traditional</span>
-              </div>
-            </th>
-            <th className="px-4 py-4 text-center">
-              <div className="inline-flex flex-col items-center">
-                <span className="text-lg font-semibold text-foreground">Coinbase</span>
-                <span className="text-xs text-foreground-tertiary">Commerce</span>
-              </div>
-            </th>
-            <th className="px-4 py-4 text-center">
-              <div className="inline-flex flex-col items-center">
-                <span className="text-lg font-semibold text-foreground">BTCPay</span>
-                <span className="text-xs text-foreground-tertiary">Server</span>
-              </div>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {comparisonFeatures.map((feature, index) => (
-            <motion.tr
-              key={feature.name}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
-              className="border-b border-border"
-            >
-              <td className="py-4 pr-4">
-                <div>
-                  <p className="font-medium text-foreground">{feature.name}</p>
-                  <p className="text-xs text-foreground-tertiary">{feature.description}</p>
+    <>
+      {/* Desktop Table */}
+      <div className="hidden overflow-x-auto lg:block">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="border-b border-border">
+              <th className="py-4 pr-4 text-left text-sm font-medium text-foreground-tertiary">
+                Feature
+              </th>
+              <th className="px-4 py-4 text-center">
+                <div className="inline-flex flex-col items-center">
+                  <span className="text-lg font-bold text-brand">t402</span>
+                  <span className="text-xs text-foreground-tertiary">Protocol</span>
                 </div>
-              </td>
-              <td className="px-4 py-4 text-center bg-brand/5">
-                {renderValue(feature.t402)}
-              </td>
-              <td className="px-4 py-4 text-center text-foreground-secondary">
-                {renderValue(feature.stripe)}
-              </td>
-              <td className="px-4 py-4 text-center text-foreground-secondary">
-                {renderValue(feature.paypal)}
-              </td>
-              <td className="px-4 py-4 text-center text-foreground-secondary">
-                {renderValue(feature.coinbase)}
-              </td>
-              <td className="px-4 py-4 text-center text-foreground-secondary">
-                {renderValue(feature.btcpay)}
-              </td>
-            </motion.tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+              </th>
+              <th className="px-4 py-4 text-center">
+                <div className="inline-flex flex-col items-center">
+                  <span className="text-lg font-semibold text-foreground">Stripe</span>
+                  <span className="text-xs text-foreground-tertiary">Traditional</span>
+                </div>
+              </th>
+              <th className="px-4 py-4 text-center">
+                <div className="inline-flex flex-col items-center">
+                  <span className="text-lg font-semibold text-foreground">PayPal</span>
+                  <span className="text-xs text-foreground-tertiary">Traditional</span>
+                </div>
+              </th>
+              <th className="px-4 py-4 text-center">
+                <div className="inline-flex flex-col items-center">
+                  <span className="text-lg font-semibold text-foreground">Coinbase</span>
+                  <span className="text-xs text-foreground-tertiary">Commerce</span>
+                </div>
+              </th>
+              <th className="px-4 py-4 text-center">
+                <div className="inline-flex flex-col items-center">
+                  <span className="text-lg font-semibold text-foreground">BTCPay</span>
+                  <span className="text-xs text-foreground-tertiary">Server</span>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {comparisonFeatures.map((feature, index) => (
+              <motion.tr
+                key={feature.name}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+                className="border-b border-border"
+              >
+                <td className="py-4 pr-4">
+                  <div>
+                    <p className="font-medium text-foreground">{feature.name}</p>
+                    <p className="text-xs text-foreground-tertiary">{feature.description}</p>
+                  </div>
+                </td>
+                <td className="bg-brand/5 px-4 py-4 text-center">
+                  {renderValue(feature.t402)}
+                </td>
+                <td className="px-4 py-4 text-center text-foreground-secondary">
+                  {renderValue(feature.stripe)}
+                </td>
+                <td className="px-4 py-4 text-center text-foreground-secondary">
+                  {renderValue(feature.paypal)}
+                </td>
+                <td className="px-4 py-4 text-center text-foreground-secondary">
+                  {renderValue(feature.coinbase)}
+                </td>
+                <td className="px-4 py-4 text-center text-foreground-secondary">
+                  {renderValue(feature.btcpay)}
+                </td>
+              </motion.tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="grid gap-3 lg:hidden">
+        {comparisonFeatures.map((feature, index) => (
+          <MobileComparisonCard key={feature.name} feature={feature} index={index} />
+        ))}
+      </div>
+    </>
   );
 }
 

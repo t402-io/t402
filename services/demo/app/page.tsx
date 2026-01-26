@@ -101,12 +101,14 @@ export default function HomePage() {
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[rgba(10,10,11,0.8)] backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <span className="text-sm font-semibold text-[var(--color-brand)]">T402</span>
-            <span className="text-xs text-[var(--color-muted)]">demo</span>
-            <FacilitatorBadge />
+            <span className="hidden sm:inline text-xs text-[var(--color-muted)]">demo</span>
+            <div className="hidden sm:block">
+              <FacilitatorBadge />
+            </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <ModeToggle />
             <WalletButton />
           </div>
@@ -130,11 +132,13 @@ export default function HomePage() {
         </div>
 
         {/* Chain logos */}
-        <div className="relative z-10 flex items-center gap-4 mb-10">
+        <div className="relative z-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-10 px-4 max-w-sm sm:max-w-none">
           {CHAIN_FAMILIES.map((family) => (
             <div key={family} className="flex flex-col items-center gap-1">
-              <ChainLogo family={family} size={24} />
-              <span className="text-[9px] text-[var(--color-muted)]">{CHAIN_CONFIGS[family].label}</span>
+              <div className="[&_svg]:w-5 [&_svg]:h-5 sm:[&_svg]:w-6 sm:[&_svg]:h-6">
+                <ChainLogo family={family} size={24} />
+              </div>
+              <span className="text-[8px] sm:text-[9px] text-[var(--color-muted)]">{CHAIN_CONFIGS[family].label}</span>
             </div>
           ))}
         </div>
