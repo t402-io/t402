@@ -248,8 +248,8 @@ function CodeBlock({ code, language }: { code: string; language: string }) {
 function InstallCommand({ command, packageManager }: { command: string; packageManager?: string }) {
   return (
     <div className="flex items-center gap-2 rounded-lg border border-border bg-background-tertiary p-3">
-      <span className="text-brand">$</span>
-      <code className="flex-1 text-sm text-foreground">{command}</code>
+      <span className="hidden text-brand sm:inline">$</span>
+      <code className="flex-1 overflow-x-auto text-sm text-foreground">{command}</code>
       <CopyButton text={command} />
     </div>
   );

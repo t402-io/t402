@@ -195,7 +195,7 @@ function CategoryTab({
   return (
     <button
       onClick={onClick}
-      className={`relative rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+      className={`relative whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors sm:px-4 ${
         isSelected
           ? "text-foreground"
           : "text-foreground-tertiary hover:text-foreground-secondary"
@@ -442,33 +442,35 @@ export default function ChainsClient() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.15 }}
-        className="mb-8 flex flex-wrap items-center justify-center gap-1 rounded-xl border border-border bg-background-secondary p-1.5"
+        className="mb-8 overflow-x-auto"
       >
-        <button
-          onClick={() => setSelectedCategory("all")}
-          className={`relative rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-            selectedCategory === "all"
-              ? "text-foreground"
-              : "text-foreground-tertiary hover:text-foreground-secondary"
-          }`}
-        >
-          {selectedCategory === "all" && (
-            <motion.div
-              layoutId="activeCategory"
-              className="absolute inset-0 rounded-lg bg-background-tertiary"
-              transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+        <div className="mx-auto flex w-max min-w-full items-center justify-start gap-1 rounded-xl border border-border bg-background-secondary p-1.5 sm:w-auto sm:justify-center">
+          <button
+            onClick={() => setSelectedCategory("all")}
+            className={`relative whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors sm:px-4 ${
+              selectedCategory === "all"
+                ? "text-foreground"
+                : "text-foreground-tertiary hover:text-foreground-secondary"
+            }`}
+          >
+            {selectedCategory === "all" && (
+              <motion.div
+                layoutId="activeCategory"
+                className="absolute inset-0 rounded-lg bg-background-tertiary"
+                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+              />
+            )}
+            <span className="relative z-10">All</span>
+          </button>
+          {categories.map((category) => (
+            <CategoryTab
+              key={category.id}
+              category={category}
+              isSelected={selectedCategory === category.id}
+              onClick={() => setSelectedCategory(category.id)}
             />
-          )}
-          <span className="relative z-10">All Chains</span>
-        </button>
-        {categories.map((category) => (
-          <CategoryTab
-            key={category.id}
-            category={category}
-            isSelected={selectedCategory === category.id}
-            onClick={() => setSelectedCategory(category.id)}
-          />
-        ))}
+          ))}
+        </div>
       </motion.div>
 
       {/* Chain Grid */}

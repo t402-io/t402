@@ -35,27 +35,29 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[rgba(10,10,11,0.9)] backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/"
-              className="flex items-center gap-2 text-[var(--color-muted)] hover:text-white transition-colors"
+              className="flex items-center gap-1.5 sm:gap-2 text-[var(--color-muted)] hover:text-white transition-colors"
               aria-label="Back to home"
             >
               <ArrowLeft size={14} />
               <span className="text-sm font-semibold text-[var(--color-brand)]">T402</span>
             </Link>
-            <FacilitatorBadge />
-          </div>
-          <div className="flex items-center gap-3">
             <div className="hidden sm:block">
+              <FacilitatorBadge />
+            </div>
+          </div>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="hidden md:block">
               <ChainSelector compact />
             </div>
             <ModeToggle />
             <WalletButton />
           </div>
         </div>
-        {/* Mobile chain selector */}
-        <div className="sm:hidden border-t border-[var(--color-border)] px-4 py-2">
+        {/* Mobile/Tablet chain selector */}
+        <div className="md:hidden border-t border-[var(--color-border)] px-4 py-2 overflow-x-auto scrollbar-hide">
           <ChainSelector compact />
         </div>
       </header>
@@ -106,10 +108,13 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
 
       {/* Bottom nav (mobile) */}
       <nav
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--color-border)] bg-[rgba(10,10,11,0.95)] backdrop-blur-xl safe-area-bottom"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--color-border)] bg-[rgba(10,10,11,0.97)] backdrop-blur-xl safe-area-bottom"
         aria-label="Scenario navigation"
       >
-        <div className="flex items-center overflow-x-auto px-2 py-2 gap-1 scrollbar-hide">
+        {/* Scroll fade indicators */}
+        <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-[rgba(10,10,11,0.97)] to-transparent pointer-events-none z-10" />
+        <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-[rgba(10,10,11,0.97)] to-transparent pointer-events-none z-10" />
+        <div className="flex items-center overflow-x-auto px-3 py-2.5 gap-1 scrollbar-hide scroll-smooth snap-x snap-mandatory">
           {SCENARIOS.map((s) => {
             const Icon = s.icon;
             const isActive = pathname === `/${s.id}`;
@@ -119,14 +124,14 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
                 href={`/${s.id}`}
                 aria-current={isActive ? "page" : undefined}
                 className={clsx(
-                  "shrink-0 flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-lg text-[9px] font-medium transition-all min-w-[52px]",
+                  "shrink-0 flex flex-col items-center gap-1 px-3 py-2 rounded-xl text-[10px] font-medium transition-all min-w-[56px] snap-center active:scale-95",
                   isActive
                     ? "text-white bg-[var(--color-surface-active)]"
-                    : "text-[var(--color-muted)]"
+                    : "text-[var(--color-muted)] active:bg-[var(--color-surface)]"
                 )}
               >
-                <Icon size={14} style={{ color: isActive ? s.color : undefined }} aria-hidden="true" />
-                <span className="truncate">{s.title}</span>
+                <Icon size={16} style={{ color: isActive ? s.color : undefined }} aria-hidden="true" />
+                <span className="truncate max-w-[48px]">{s.title}</span>
               </Link>
             );
           })}
