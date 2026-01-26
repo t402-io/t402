@@ -2754,3 +2754,618 @@ func TestTruncateHashEdgeCases(t *testing.T) {
 		})
 	}
 }
+
+// ===========================================================================
+// Additional tests for improved coverage
+// ===========================================================================
+
+// Test handlePay error cases
+func TestHandlePayErrorCases(t *testing.T) {
+	t.Run("invalid network", func(t *testing.T) {
+		config := &ServerConfig{DemoMode: true}
+		server := NewServerWithIO(config, nil, nil)
+
+		args := []byte(`{"to":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d","amount":"100","token":"USDC","network":"invalid_network"}`)
+		result := server.handlePay(context.Background(), args)
+
+		assert.True(t, result.IsError)
+		assert.Contains(t, result.Content[0].Text, "Invalid network")
+	})
+
+	t.Run("unsupported token on network", func(t *testing.T) {
+		config := &ServerConfig{DemoMode: true}
+		server := NewServerWithIO(config, nil, nil)
+
+		// Base doesn't have USDT
+		args := []byte(`{"to":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d","amount":"100","token":"USDT","network":"base"}`)
+		result := server.handlePay(context.Background(), args)
+
+		assert.True(t, result.IsError)
+		assert.Contains(t, result.Content[0].Text, "not supported")
+	})
+
+	t.Run("invalid amount", func(t *testing.T) {
+		config := &ServerConfig{DemoMode: true}
+		server := NewServerWithIO(config, nil, nil)
+
+		args := []byte(`{"to":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d","amount":"invalid","token":"USDC","network":"ethereum"}`)
+		result := server.handlePay(context.Background(), args)
+
+		assert.True(t, result.IsError)
+		assert.Contains(t, result.Content[0].Text, "Invalid amount")
+	})
+
+	t.Run("missing private key without demo mode", func(t *testing.T) {
+		config := &ServerConfig{DemoMode: false, PrivateKey: ""}
+		server := NewServerWithIO(config, nil, nil)
+
+		args := []byte(`{"to":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d","amount":"100","token":"USDC","network":"ethereum"}`)
+		result := server.handlePay(context.Background(), args)
+
+		assert.True(t, result.IsError)
+		assert.Contains(t, result.Content[0].Text, "Private key not configured")
+	})
+
+	t.Run("invalid JSON input", func(t *testing.T) {
+		config := &ServerConfig{DemoMode: true}
+		server := NewServerWithIO(config, nil, nil)
+
+		args := []byte(`{invalid json}`)
+		result := server.handlePay(context.Background(), args)
+
+		assert.True(t, result.IsError)
+		assert.Contains(t, result.Content[0].Text, "Invalid input")
+	})
+}
+
+// Test handlePayGasless error cases
+func TestHandlePayGaslessErrorCases(t *testing.T) {
+	t.Run("non-gasless network", func(t *testing.T) {
+		config := &ServerConfig{DemoMode: true}
+		server := NewServerWithIO(config, nil, nil)
+
+		// Ink doesn't support gasless
+		args := []byte(`{"to":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d","amount":"100","token":"USDC","network":"ink"}`)
+		result := server.handlePayGasless(context.Background(), args)
+
+		assert.True(t, result.IsError)
+		assert.Contains(t, result.Content[0].Text, "does not support gasless")
+	})
+
+	t.Run("missing bundler URL without demo mode", func(t *testing.T) {
+		config := &ServerConfig{DemoMode: false, BundlerURL: ""}
+		server := NewServerWithIO(config, nil, nil)
+
+		args := []byte(`{"to":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d","amount":"100","token":"USDC","network":"ethereum"}`)
+		result := server.handlePayGasless(context.Background(), args)
+
+		assert.True(t, result.IsError)
+		assert.Contains(t, result.Content[0].Text, "Bundler URL not configured")
+	})
+
+	t.Run("invalid JSON input", func(t *testing.T) {
+		config := &ServerConfig{DemoMode: true}
+		server := NewServerWithIO(config, nil, nil)
+
+		args := []byte(`{invalid json}`)
+		result := server.handlePayGasless(context.Background(), args)
+
+		assert.True(t, result.IsError)
+		assert.Contains(t, result.Content[0].Text, "Invalid input")
+	})
+
+	t.Run("demo mode success", func(t *testing.T) {
+		config := &ServerConfig{DemoMode: true}
+		server := NewServerWithIO(config, nil, nil)
+
+		args := []byte(`{"to":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d","amount":"100","token":"USDC","network":"ethereum"}`)
+		result := server.handlePayGasless(context.Background(), args)
+
+		assert.False(t, result.IsError)
+		assert.Contains(t, result.Content[0].Text, "Demo Mode")
+	})
+}
+
+// Test handleGetBridgeFee error cases
+func TestHandleGetBridgeFeeErrorCases(t *testing.T) {
+	t.Run("non-bridgeable source chain", func(t *testing.T) {
+		config := &ServerConfig{DemoMode: true}
+		server := NewServerWithIO(config, nil, nil)
+
+		// Base is not bridgeable
+		args := []byte(`{"fromChain":"base","toChain":"ethereum","amount":"100","recipient":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d"}`)
+		result := server.handleGetBridgeFee(context.Background(), args)
+
+		assert.True(t, result.IsError)
+		assert.Contains(t, result.Content[0].Text, "does not support USDT0 bridging")
+	})
+
+	t.Run("non-bridgeable destination chain", func(t *testing.T) {
+		config := &ServerConfig{DemoMode: true}
+		server := NewServerWithIO(config, nil, nil)
+
+		args := []byte(`{"fromChain":"arbitrum","toChain":"base","amount":"100","recipient":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d"}`)
+		result := server.handleGetBridgeFee(context.Background(), args)
+
+		assert.True(t, result.IsError)
+		assert.Contains(t, result.Content[0].Text, "does not support USDT0 bridging")
+	})
+
+	t.Run("same source and destination", func(t *testing.T) {
+		config := &ServerConfig{DemoMode: true}
+		server := NewServerWithIO(config, nil, nil)
+
+		args := []byte(`{"fromChain":"arbitrum","toChain":"arbitrum","amount":"100","recipient":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d"}`)
+		result := server.handleGetBridgeFee(context.Background(), args)
+
+		assert.True(t, result.IsError)
+		assert.Contains(t, result.Content[0].Text, "must be different")
+	})
+
+	t.Run("invalid amount", func(t *testing.T) {
+		config := &ServerConfig{DemoMode: true}
+		server := NewServerWithIO(config, nil, nil)
+
+		args := []byte(`{"fromChain":"arbitrum","toChain":"ethereum","amount":"invalid","recipient":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d"}`)
+		result := server.handleGetBridgeFee(context.Background(), args)
+
+		assert.True(t, result.IsError)
+		assert.Contains(t, result.Content[0].Text, "Invalid amount")
+	})
+
+	t.Run("invalid JSON input", func(t *testing.T) {
+		config := &ServerConfig{DemoMode: true}
+		server := NewServerWithIO(config, nil, nil)
+
+		args := []byte(`{invalid json}`)
+		result := server.handleGetBridgeFee(context.Background(), args)
+
+		assert.True(t, result.IsError)
+		assert.Contains(t, result.Content[0].Text, "Invalid input")
+	})
+
+	t.Run("demo mode success", func(t *testing.T) {
+		config := &ServerConfig{DemoMode: true}
+		server := NewServerWithIO(config, nil, nil)
+
+		args := []byte(`{"fromChain":"arbitrum","toChain":"ethereum","amount":"100","recipient":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d"}`)
+		result := server.handleGetBridgeFee(context.Background(), args)
+
+		assert.False(t, result.IsError)
+		assert.Contains(t, result.Content[0].Text, "Bridge Fee Quote")
+	})
+}
+
+// Test handleBridge error cases
+func TestHandleBridgeErrorCases(t *testing.T) {
+	t.Run("non-bridgeable source chain", func(t *testing.T) {
+		config := &ServerConfig{DemoMode: true}
+		server := NewServerWithIO(config, nil, nil)
+
+		args := []byte(`{"fromChain":"base","toChain":"ethereum","amount":"100","recipient":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d"}`)
+		result := server.handleBridge(context.Background(), args)
+
+		assert.True(t, result.IsError)
+		assert.Contains(t, result.Content[0].Text, "does not support USDT0 bridging")
+	})
+
+	t.Run("non-bridgeable destination chain", func(t *testing.T) {
+		config := &ServerConfig{DemoMode: true}
+		server := NewServerWithIO(config, nil, nil)
+
+		args := []byte(`{"fromChain":"arbitrum","toChain":"polygon","amount":"100","recipient":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d"}`)
+		result := server.handleBridge(context.Background(), args)
+
+		assert.True(t, result.IsError)
+		assert.Contains(t, result.Content[0].Text, "does not support USDT0 bridging")
+	})
+
+	t.Run("same source and destination", func(t *testing.T) {
+		config := &ServerConfig{DemoMode: true}
+		server := NewServerWithIO(config, nil, nil)
+
+		args := []byte(`{"fromChain":"ethereum","toChain":"ethereum","amount":"100","recipient":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d"}`)
+		result := server.handleBridge(context.Background(), args)
+
+		assert.True(t, result.IsError)
+		assert.Contains(t, result.Content[0].Text, "must be different")
+	})
+
+	t.Run("missing private key without demo mode", func(t *testing.T) {
+		config := &ServerConfig{DemoMode: false, PrivateKey: ""}
+		server := NewServerWithIO(config, nil, nil)
+
+		args := []byte(`{"fromChain":"arbitrum","toChain":"ethereum","amount":"100","recipient":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d"}`)
+		result := server.handleBridge(context.Background(), args)
+
+		assert.True(t, result.IsError)
+		assert.Contains(t, result.Content[0].Text, "Private key not configured")
+	})
+
+	t.Run("invalid JSON input", func(t *testing.T) {
+		config := &ServerConfig{DemoMode: true}
+		server := NewServerWithIO(config, nil, nil)
+
+		args := []byte(`{invalid json}`)
+		result := server.handleBridge(context.Background(), args)
+
+		assert.True(t, result.IsError)
+		assert.Contains(t, result.Content[0].Text, "Invalid input")
+	})
+
+	t.Run("demo mode success", func(t *testing.T) {
+		config := &ServerConfig{DemoMode: true}
+		server := NewServerWithIO(config, nil, nil)
+
+		args := []byte(`{"fromChain":"arbitrum","toChain":"ethereum","amount":"100","recipient":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d"}`)
+		result := server.handleBridge(context.Background(), args)
+
+		assert.False(t, result.IsError)
+		assert.Contains(t, result.Content[0].Text, "Demo Mode")
+	})
+}
+
+// Test handleGetBalance error cases
+func TestHandleGetBalanceErrorCases(t *testing.T) {
+	t.Run("invalid network", func(t *testing.T) {
+		config := &ServerConfig{DemoMode: true}
+		server := NewServerWithIO(config, nil, nil)
+
+		args := []byte(`{"address":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d","network":"invalid_network"}`)
+		result := server.handleGetBalance(context.Background(), args)
+
+		assert.True(t, result.IsError)
+		assert.Contains(t, result.Content[0].Text, "Invalid network")
+	})
+
+	t.Run("invalid JSON input", func(t *testing.T) {
+		config := &ServerConfig{DemoMode: true}
+		server := NewServerWithIO(config, nil, nil)
+
+		args := []byte(`{invalid json}`)
+		result := server.handleGetBalance(context.Background(), args)
+
+		assert.True(t, result.IsError)
+		assert.Contains(t, result.Content[0].Text, "Invalid input")
+	})
+}
+
+// Test handleGetAllBalances error cases
+func TestHandleGetAllBalancesErrorCases(t *testing.T) {
+	t.Run("invalid JSON input", func(t *testing.T) {
+		config := &ServerConfig{DemoMode: true}
+		server := NewServerWithIO(config, nil, nil)
+
+		args := []byte(`{invalid json}`)
+		result := server.handleGetAllBalances(context.Background(), args)
+
+		assert.True(t, result.IsError)
+		assert.Contains(t, result.Content[0].Text, "Invalid input")
+	})
+}
+
+// Test ParseTokenAmount additional cases
+func TestParseTokenAmountAdditional(t *testing.T) {
+	t.Run("zero value", func(t *testing.T) {
+		result, err := ParseTokenAmount("0", 6)
+		require.NoError(t, err)
+		assert.Equal(t, big.NewInt(0), result)
+	})
+
+	t.Run("very small decimal", func(t *testing.T) {
+		result, err := ParseTokenAmount("0.000001", 6)
+		require.NoError(t, err)
+		assert.Equal(t, big.NewInt(1), result)
+	})
+
+	t.Run("large number", func(t *testing.T) {
+		result, err := ParseTokenAmount("1000000000", 6)
+		require.NoError(t, err)
+		expected, _ := new(big.Int).SetString("1000000000000000", 10)
+		assert.Equal(t, expected, result)
+	})
+}
+
+// Test FormatTokenAmount additional cases
+func TestFormatTokenAmountAdditional(t *testing.T) {
+	t.Run("nil value returns zero", func(t *testing.T) {
+		result := FormatTokenAmount(nil, 6)
+		assert.Equal(t, "0", result)
+	})
+
+	t.Run("zero with 18 decimals", func(t *testing.T) {
+		result := FormatTokenAmount(big.NewInt(0), 18)
+		assert.Equal(t, "0", result)
+	})
+
+	t.Run("1 wei with 18 decimals", func(t *testing.T) {
+		result := FormatTokenAmount(big.NewInt(1), 18)
+		assert.Equal(t, "0.000000000000000001", result)
+	})
+}
+
+// Test GetTokenAddress comprehensive cases
+func TestGetTokenAddressComprehensive(t *testing.T) {
+	networks := AllNetworks()
+	tokens := []SupportedToken{TokenUSDC, TokenUSDT, TokenUSDT0}
+
+	for _, network := range networks {
+		for _, token := range tokens {
+			addr, ok := GetTokenAddress(network, token)
+			if ok {
+				t.Run(string(network)+"/"+string(token), func(t *testing.T) {
+					assert.True(t, strings.HasPrefix(addr, "0x"), "Address should start with 0x")
+					assert.Equal(t, 42, len(addr), "Address should be 42 characters")
+				})
+			}
+		}
+	}
+}
+
+// Test demo mode payment result format
+func TestDemoModePaymentResultFormat(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+	server := NewServerWithIO(config, nil, nil)
+
+	args := []byte(`{"to":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d","amount":"100","token":"USDC","network":"base"}`)
+	result := server.handlePay(context.Background(), args)
+
+	assert.False(t, result.IsError)
+	text := result.Content[0].Text
+	assert.Contains(t, text, "Demo Mode")
+	assert.Contains(t, text, "simulated")
+	assert.Contains(t, text, "100 USDC")
+	assert.Contains(t, text, "base")
+}
+
+// Test demo mode bridge result format
+func TestDemoModeBridgeResultFormat(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+	server := NewServerWithIO(config, nil, nil)
+
+	args := []byte(`{"fromChain":"arbitrum","toChain":"ink","amount":"50","recipient":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d"}`)
+	result := server.handleBridge(context.Background(), args)
+
+	assert.False(t, result.IsError)
+	text := result.Content[0].Text
+	assert.Contains(t, text, "Demo Mode")
+	assert.Contains(t, text, "simulated")
+	assert.Contains(t, text, "50 USDT0")
+	assert.Contains(t, text, "arbitrum")
+	assert.Contains(t, text, "ink")
+	assert.Contains(t, text, "LayerZero Scan")
+}
+
+// Test demo mode bridge fee result format
+func TestDemoModeBridgeFeeResultFormat(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+	server := NewServerWithIO(config, nil, nil)
+
+	args := []byte(`{"fromChain":"ink","toChain":"berachain","amount":"1000","recipient":"0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d"}`)
+	result := server.handleGetBridgeFee(context.Background(), args)
+
+	assert.False(t, result.IsError)
+	text := result.Content[0].Text
+	assert.Contains(t, text, "Bridge Fee Quote")
+	assert.Contains(t, text, "ink")
+	assert.Contains(t, text, "berachain")
+	assert.Contains(t, text, "1000")
+}
+
+// Test bridgeable chains validation
+func TestBridgeableChains(t *testing.T) {
+	bridgeableChains := []string{
+		"ethereum", "arbitrum", "ink", "berachain", "unichain",
+	}
+
+	for _, chain := range bridgeableChains {
+		t.Run(chain+" is bridgeable", func(t *testing.T) {
+			assert.True(t, IsBridgeableChain(chain))
+		})
+	}
+
+	nonBridgeableChains := []string{
+		"base", "polygon", "avalanche", "optimism",
+	}
+
+	for _, chain := range nonBridgeableChains {
+		t.Run(chain+" is not bridgeable", func(t *testing.T) {
+			assert.False(t, IsBridgeableChain(chain))
+		})
+	}
+}
+
+// Test gasless networks validation
+func TestGaslessNetworks(t *testing.T) {
+	gaslessNetworks := []string{
+		"ethereum", "base", "arbitrum", "polygon", "optimism", "avalanche",
+	}
+
+	for _, network := range gaslessNetworks {
+		t.Run(network+" supports gasless", func(t *testing.T) {
+			assert.True(t, IsGaslessNetwork(network))
+		})
+	}
+
+	nonGaslessNetworks := []string{
+		"ink", "berachain", "unichain",
+	}
+
+	for _, network := range nonGaslessNetworks {
+		t.Run(network+" does not support gasless", func(t *testing.T) {
+			assert.False(t, IsGaslessNetwork(network))
+		})
+	}
+}
+
+// Test server creation
+func TestServerCreation(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+	server := NewServerWithIO(config, nil, nil)
+	assert.NotNil(t, server)
+	assert.Equal(t, config, server.config)
+}
+
+// Test LoadConfigFromEnv with various combinations
+func TestLoadConfigFromEnvCombinations(t *testing.T) {
+	t.Run("all empty", func(t *testing.T) {
+		// Clear all env vars
+		t.Setenv("T402_PRIVATE_KEY", "")
+		t.Setenv("T402_DEMO_MODE", "")
+		t.Setenv("T402_BUNDLER_URL", "")
+		t.Setenv("T402_PAYMASTER_URL", "")
+
+		config := LoadConfigFromEnv()
+
+		assert.Empty(t, config.PrivateKey)
+		assert.False(t, config.DemoMode)
+		assert.Empty(t, config.BundlerURL)
+	})
+
+	t.Run("demo mode false", func(t *testing.T) {
+		t.Setenv("T402_DEMO_MODE", "false")
+
+		config := LoadConfigFromEnv()
+
+		assert.False(t, config.DemoMode)
+	})
+
+	t.Run("demo mode with true value", func(t *testing.T) {
+		// Note: implementation only checks for exact string "true"
+		t.Setenv("T402_DEMO_MODE", "true")
+		config := LoadConfigFromEnv()
+		assert.True(t, config.DemoMode)
+	})
+
+	t.Run("with paymaster URL", func(t *testing.T) {
+		t.Setenv("T402_PAYMASTER_URL", "https://paymaster.example.com")
+
+		config := LoadConfigFromEnv()
+
+		assert.Equal(t, "https://paymaster.example.com", config.PaymasterURL)
+	})
+
+	t.Run("with custom RPC URLs", func(t *testing.T) {
+		t.Setenv("T402_RPC_ETHEREUM", "https://custom-eth.example.com")
+		t.Setenv("T402_RPC_BASE", "https://custom-base.example.com")
+
+		config := LoadConfigFromEnv()
+
+		assert.Equal(t, "https://custom-eth.example.com", config.RPCURLs["ethereum"])
+		assert.Equal(t, "https://custom-base.example.com", config.RPCURLs["base"])
+	})
+}
+
+// Test chain ID mappings
+func TestChainIDMappings(t *testing.T) {
+	expectedChainIDs := map[SupportedNetwork]int64{
+		NetworkEthereum:  1,
+		NetworkBase:      8453,
+		NetworkArbitrum:  42161,
+		NetworkPolygon:   137,
+		NetworkOptimism:  10,
+		NetworkAvalanche: 43114,
+		NetworkInk:       57073,
+		NetworkBerachain: 80094,
+		NetworkUnichain:  130,
+	}
+
+	for network, expectedID := range expectedChainIDs {
+		t.Run(string(network), func(t *testing.T) {
+			assert.Equal(t, expectedID, ChainIDs[network])
+		})
+	}
+}
+
+// Test native symbols mappings
+func TestNativeSymbolMappings(t *testing.T) {
+	expectedSymbols := map[SupportedNetwork]string{
+		NetworkEthereum:  "ETH",
+		NetworkBase:      "ETH",
+		NetworkArbitrum:  "ETH",
+		NetworkPolygon:   "MATIC",
+		NetworkOptimism:  "ETH",
+		NetworkAvalanche: "AVAX",
+		NetworkInk:       "ETH",
+		NetworkBerachain: "BERA",
+		NetworkUnichain:  "ETH",
+	}
+
+	for network, expectedSymbol := range expectedSymbols {
+		t.Run(string(network), func(t *testing.T) {
+			assert.Equal(t, expectedSymbol, NativeSymbols[network])
+		})
+	}
+}
+
+// Test explorer URL generation for all networks
+func TestExplorerURLGeneration(t *testing.T) {
+	networks := AllNetworks()
+	testHash := "0x1234567890abcdef"
+
+	for _, network := range networks {
+		t.Run(string(network), func(t *testing.T) {
+			url := GetExplorerTxURL(network, testHash)
+			assert.Contains(t, url, testHash)
+			assert.Contains(t, url, "/tx/")
+		})
+	}
+}
+
+// Test JSON-RPC error response
+func TestServerInvalidJSONRPCMethod(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+
+	inputData := `{"jsonrpc":"2.0","id":999,"method":"invalid/method"}` + "\n"
+
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close()
+	}()
+
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_ = server.Run(ctx)
+
+	var response JSONRPCResponse
+	err := json.Unmarshal(output.Bytes(), &response)
+	require.NoError(t, err)
+
+	// Should have an error
+	assert.NotNil(t, response.Error)
+	assert.Equal(t, -32601, response.Error.Code) // Method not found
+}
+
+// Test server with invalid JSON input
+func TestServerInvalidJSONInput(t *testing.T) {
+	config := &ServerConfig{DemoMode: true}
+
+	inputData := `{invalid json}` + "\n"
+
+	pr, pw := io.Pipe()
+	go func() {
+		pw.Write([]byte(inputData))
+		pw.Close()
+	}()
+
+	output := &bytes.Buffer{}
+	server := NewServerWithIO(config, pr, output)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_ = server.Run(ctx)
+
+	var response JSONRPCResponse
+	err := json.Unmarshal(output.Bytes(), &response)
+	require.NoError(t, err)
+
+	// Should have a parse error
+	assert.NotNil(t, response.Error)
+	assert.Equal(t, -32700, response.Error.Code) // Parse error
+}
