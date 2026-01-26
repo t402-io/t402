@@ -117,8 +117,8 @@ export default async function Image() {
           </div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <span style={{ fontSize: "18px", color: "#71717A" }}>t402.io/writing/{slug}</span>
-            <div style={{ display: "flex", gap: "8px", flexDirection: "row" }}>
-              {["TON", "Solana", "TRON", "NEAR", "Aptos"].map((chain) => (
+            <div style={{ display: "flex", gap: "6px", flexDirection: "row", flexWrap: "wrap", justifyContent: "flex-end" }}>
+              {["TON", "Solana", "TRON", "NEAR", "Aptos", "Tezos", "Polkadot", "Stacks"].map((chain) => (
                 <div
                   key={chain}
                   style={{
