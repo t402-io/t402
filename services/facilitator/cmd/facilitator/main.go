@@ -41,9 +41,13 @@ import (
 	polkadotfac "github.com/t402-io/t402/sdks/go/mechanisms/polkadot/exact-direct/facilitator"
 	"github.com/t402-io/t402/sdks/go/mechanisms/stacks"
 	stacksfac "github.com/t402-io/t402/sdks/go/mechanisms/stacks/exact-direct/facilitator"
+	"github.com/t402-io/t402/sdks/go/mechanisms/cosmos"
+	cosmosfac "github.com/t402-io/t402/sdks/go/mechanisms/cosmos/exact-direct/facilitator"
 	"github.com/t402-io/t402/services/facilitator/internal/cache"
 	"github.com/t402-io/t402/services/facilitator/internal/config"
+	"github.com/t402-io/t402/services/facilitator/internal/persistence"
 	"github.com/t402-io/t402/services/facilitator/internal/server"
+	"github.com/t402-io/t402/services/facilitator/internal/tracing"
 )
 
 func main() {
@@ -64,6 +68,60 @@ func main() {
 		log.Printf("Redis connected: %s", cfg.RedisURL)
 	}
 
+	// Initialize Database (optional)
+	var db *persistence.DB
+	if cfg.DatabaseURL != "" {
+		dbConfig := &persistence.DBConfig{
+			URL:             cfg.DatabaseURL,
+			MaxConnections:  cfg.DatabaseMaxConns,
+			IdleConnections: cfg.DatabaseIdleConns,
+			AutoMigrate:     cfg.DatabaseAutoMigrate,
+		}
+		db, err = persistence.NewDB(dbConfig)
+		if err != nil {
+			log.Printf("Warning: Database connection failed: %v", err)
+			log.Printf("Continuing without database (audit logging disabled)")
+			db = nil
+		} else {
+			log.Printf("Database connected")
+			defer db.Close()
+		}
+	} else {
+		log.Printf("DATABASE_URL not set, audit logging disabled")
+	}
+
+	// Initialize OpenTelemetry tracing (optional)
+	var tracer *tracing.Provider
+	if cfg.OTELEnabled {
+		tracingConfig := &tracing.Config{
+			Enabled:        true,
+			ServiceName:    "facilitator",
+			ServiceVersion: server.Version,
+			Environment:    cfg.Environment,
+			Endpoint:       cfg.OTELEndpoint,
+			Protocol:       cfg.OTELProtocol,
+			Insecure:       cfg.OTELInsecure,
+			SampleRate:     cfg.OTELSampleRate,
+		}
+		tracer, err = tracing.NewProvider(context.Background(), tracingConfig)
+		if err != nil {
+			log.Printf("Warning: Failed to initialize tracing: %v", err)
+			log.Printf("Continuing without distributed tracing")
+			tracer = nil
+		} else {
+			log.Printf("OpenTelemetry tracing enabled (endpoint: %s)", cfg.OTELEndpoint)
+			defer func() {
+				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancel()
+				if err := tracer.Shutdown(ctx); err != nil {
+					log.Printf("Warning: Failed to shutdown tracer: %v", err)
+				}
+			}()
+		}
+	} else {
+		log.Printf("OpenTelemetry tracing disabled (set OTEL_ENABLED=true to enable)")
+	}
+
 	// Create facilitator
 	facilitator, err := setupFacilitator(cfg)
 	if err != nil {
@@ -71,7 +129,7 @@ func main() {
 	}
 
 	// Create and start server
-	srv := server.New(facilitator, redisClient, cfg)
+	srv := server.NewWithTracing(facilitator, redisClient, cfg, db, tracer)
 	srv.Start()
 }
 
@@ -399,6 +457,37 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, error) {
 		log.Printf("Stacks facilitator configured for %d networks (address: %s)", len(stacksNetworks), cfg.StacksAddress)
 	} else {
 		log.Printf("Warning: STACKS_ADDRESS not set, Stacks chains disabled")
+	}
+
+	// Setup Cosmos/Noble chains if address is configured
+	if cfg.CosmosMainnetAddress != "" || cfg.CosmosTestnetAddress != "" {
+		cosmosSigner := newFacilitatorCosmosSigner(
+			cfg.CosmosMainnetREST,
+			cfg.CosmosTestnetREST,
+			cfg.CosmosMainnetAddress,
+			cfg.CosmosTestnetAddress,
+		)
+
+		var cosmosNetworks []t402.Network
+
+		// Add mainnet if address configured
+		if cfg.CosmosMainnetAddress != "" {
+			cosmosNetworks = append(cosmosNetworks, t402.Network(cosmos.NobleMainnetCAIP2))
+			configuredNetworks = append(configuredNetworks, "Noble Mainnet")
+		}
+
+		// Add testnet if address configured
+		if cfg.CosmosTestnetAddress != "" {
+			cosmosNetworks = append(cosmosNetworks, t402.Network(cosmos.NobleTestnetCAIP2))
+			configuredNetworks = append(configuredNetworks, "Noble Testnet")
+		}
+
+		if len(cosmosNetworks) > 0 {
+			facilitator.Register(cosmosNetworks, cosmosfac.NewExactDirectCosmosScheme(cosmosSigner, nil))
+			log.Printf("Cosmos/Noble facilitator configured for %d networks", len(cosmosNetworks))
+		}
+	} else {
+		log.Printf("Warning: COSMOS_MAINNET_ADDRESS and COSMOS_TESTNET_ADDRESS not set, Cosmos/Noble chains disabled")
 	}
 
 	// Log configured networks

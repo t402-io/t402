@@ -17,7 +17,9 @@ import (
 	"github.com/t402-io/t402/services/facilitator/internal/config"
 	"github.com/t402-io/t402/services/facilitator/internal/health"
 	"github.com/t402-io/t402/services/facilitator/internal/metrics"
+	"github.com/t402-io/t402/services/facilitator/internal/persistence"
 	"github.com/t402-io/t402/services/facilitator/internal/ratelimit"
+	"github.com/t402-io/t402/services/facilitator/internal/tracing"
 )
 
 // Version is the service version (set at build time)
@@ -32,14 +34,18 @@ type Facilitator interface {
 
 // Server is the HTTP server for the facilitator
 type Server struct {
-	router      *gin.Engine
-	httpServer  *http.Server
-	facilitator Facilitator
-	config      *config.Config
-	metrics     *metrics.Metrics
-	limiter     ratelimit.Limiter
-	health      *health.Checker
-	authManager *auth.Manager
+	router         *gin.Engine
+	httpServer     *http.Server
+	facilitator    Facilitator
+	config         *config.Config
+	metrics        *metrics.Metrics
+	limiter        ratelimit.Limiter
+	health         *health.Checker
+	authManager    *auth.Manager
+	db             *persistence.DB
+	settlementRepo *persistence.SettlementRepository
+	auditRepo      *persistence.AuditRepository
+	tracer         *tracing.Provider
 }
 
 // New creates a new facilitator server
@@ -47,6 +53,27 @@ func New(
 	facilitator Facilitator,
 	redisClient *cache.Client,
 	cfg *config.Config,
+) *Server {
+	return NewWithDB(facilitator, redisClient, cfg, nil)
+}
+
+// NewWithDB creates a new facilitator server with database support
+func NewWithDB(
+	facilitator Facilitator,
+	redisClient *cache.Client,
+	cfg *config.Config,
+	db *persistence.DB,
+) *Server {
+	return NewWithTracing(facilitator, redisClient, cfg, db, nil)
+}
+
+// NewWithTracing creates a new facilitator server with full observability support
+func NewWithTracing(
+	facilitator Facilitator,
+	redisClient *cache.Client,
+	cfg *config.Config,
+	db *persistence.DB,
+	tracer *tracing.Provider,
 ) *Server {
 	// Set Gin mode
 	if cfg.IsProduction() {
@@ -79,6 +106,14 @@ func New(
 		limiter:     limiter,
 		health:      healthChecker,
 		authManager: authManager,
+		db:          db,
+		tracer:      tracer,
+	}
+
+	// Setup persistence repositories if database is available
+	if db != nil {
+		s.settlementRepo = persistence.NewSettlementRepository(db)
+		s.auditRepo = persistence.NewAuditRepository(db)
 	}
 
 	// Setup middleware and routes
@@ -95,6 +130,11 @@ func (s *Server) setupMiddleware() {
 
 	// Request ID middleware
 	s.router.Use(RequestIDMiddleware())
+
+	// Tracing middleware (if enabled)
+	if s.tracer != nil && s.tracer.IsEnabled() {
+		s.router.Use(tracing.Middleware(s.tracer, nil))
+	}
 
 	// Logging middleware
 	s.router.Use(LoggingMiddleware())
@@ -115,6 +155,11 @@ func (s *Server) setupMiddleware() {
 
 	// API key metrics middleware
 	s.router.Use(s.apiKeyMetricsMiddleware())
+
+	// Audit middleware (if database is configured)
+	if s.auditRepo != nil {
+		s.router.Use(persistence.AuditMiddleware(s.auditRepo, nil))
+	}
 }
 
 // apiKeyMetricsMiddleware records API key usage metrics
@@ -142,6 +187,14 @@ func (s *Server) setupRoutes() {
 	s.router.POST("/verify", s.handleVerify)
 	s.router.POST("/settle", s.handleSettle)
 	s.router.GET("/supported", s.handleSupported)
+
+	// Stats endpoints (if database is configured)
+	if s.auditRepo != nil {
+		s.router.GET("/stats/requests", persistence.RequestStatsHandler(s.auditRepo))
+	}
+	if s.settlementRepo != nil {
+		s.router.GET("/stats/settlements", persistence.SettlementStatsHandler(s.settlementRepo))
+	}
 }
 
 // Start starts the HTTP server
