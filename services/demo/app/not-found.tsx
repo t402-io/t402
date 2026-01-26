@@ -12,7 +12,7 @@ export default function NotFound() {
           </p>
         </div>
 
-        <div className="glass-card p-4 mb-6 text-left font-mono text-xs">
+        <div className="glass-card p-3 sm:p-4 mb-6 text-left font-mono text-[11px] sm:text-xs overflow-x-auto">
           <div className="text-[var(--color-muted)]">
             <span className="text-[var(--color-error)]">GET</span> /unknown-page
           </div>
@@ -21,7 +21,7 @@ export default function NotFound() {
             <span className="text-[var(--color-muted)]">Not Found</span>
           </div>
           <div className="mt-1.5 text-[var(--color-muted)] opacity-60">
-            — no matching route in T402 demo
+            — no matching route
           </div>
         </div>
 

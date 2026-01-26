@@ -102,7 +102,7 @@ function ConnectButton({ label, onClick, loading }: { label: string; onClick: ()
     <button
       onClick={onClick}
       disabled={loading}
-      className="btn-primary rounded-lg px-4 py-1.5 text-sm"
+      className="btn-primary rounded-lg px-4 py-2.5 text-sm min-h-[40px]"
     >
       {loading ? "Connecting..." : `Connect ${label}`}
     </button>
@@ -115,7 +115,7 @@ function InstallButton({ label, url }: { label: string; url: string }) {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="rounded-lg border border-[var(--color-border)] px-4 py-1.5 text-xs text-[var(--color-muted)] hover:text-white hover:border-[var(--color-brand)] transition-colors"
+      className="rounded-lg border border-[var(--color-border)] px-4 py-2.5 text-xs text-[var(--color-muted)] hover:text-white hover:border-[var(--color-brand)] transition-colors min-h-[40px] flex items-center"
     >
       Install {label}
     </a>

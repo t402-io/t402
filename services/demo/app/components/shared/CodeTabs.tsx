@@ -15,13 +15,13 @@ export function CodeTabs({ tabs, className }: CodeTabsProps) {
 
   return (
     <div className={clsx("rounded-xl overflow-hidden border border-[var(--color-border)]", className)}>
-      <div className="flex border-b border-[var(--color-border)] bg-[var(--color-code-bg)]">
+      <div className="flex overflow-x-auto scrollbar-hide border-b border-[var(--color-border)] bg-[var(--color-code-bg)]">
         {tabs.map((tab, i) => (
           <button
             key={tab.label}
             onClick={() => setActive(i)}
             className={clsx(
-              "px-3 py-2 text-xs font-medium transition-colors",
+              "shrink-0 px-3 py-2.5 text-xs font-medium transition-colors min-h-[40px]",
               i === active
                 ? "text-white bg-[var(--color-surface-active)]"
                 : "text-[var(--color-muted)] hover:text-white"

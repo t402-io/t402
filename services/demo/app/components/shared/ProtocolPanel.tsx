@@ -20,16 +20,16 @@ export function ProtocolPanel({ title = "Protocol Details", sections, className,
     <div className={clsx("border border-[var(--color-border)] rounded-xl overflow-hidden", className)}>
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-4 py-3 text-xs font-medium text-[var(--color-muted)] hover:text-white transition-colors bg-[var(--color-surface)]"
+        className="w-full flex items-center justify-between px-4 py-3.5 text-xs font-medium text-[var(--color-muted)] hover:text-white transition-colors bg-[var(--color-surface)] min-h-[44px]"
         aria-expanded={open}
       >
         <span>{title}</span>
-        {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        {open ? <ChevronUp size={14} aria-hidden="true" /> : <ChevronDown size={14} aria-hidden="true" />}
       </button>
       {open && (
         <div className="divide-y divide-[var(--color-border)]">
           {sections.map((section) => (
-            <div key={section.label} className="px-4 py-3">
+            <div key={section.label} className="px-3 sm:px-4 py-3">
               <p className="text-[10px] uppercase tracking-wider text-[var(--color-muted)] mb-2">{section.label}</p>
               <CodeBlock code={section.content} language={section.language || "json"} />
             </div>

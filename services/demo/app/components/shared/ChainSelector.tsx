@@ -9,7 +9,7 @@ export function ChainSelector({ compact = false }: { compact?: boolean }) {
   const { activeFamily, setActiveFamily } = useChainContext();
 
   return (
-    <div className="flex items-center gap-1 overflow-x-auto" role="tablist" aria-label="Blockchain selection">
+    <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide" role="tablist" aria-label="Blockchain selection">
       {CHAIN_FAMILIES.map((family) => {
         const config = CHAIN_CONFIGS[family];
         const isActive = activeFamily === family;
@@ -20,7 +20,7 @@ export function ChainSelector({ compact = false }: { compact?: boolean }) {
             aria-selected={isActive}
             onClick={() => setActiveFamily(family)}
             className={clsx(
-              "shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+              "shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all min-h-[36px]",
               isActive
                 ? "bg-[var(--color-surface-active)] text-white"
                 : "text-[var(--color-muted)] hover:text-white hover:bg-[var(--color-surface)]"
