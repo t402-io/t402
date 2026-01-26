@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"math/big"
 	"sync"
 	"time"
@@ -203,41 +204,57 @@ func (s *Service) OpenStream(ctx context.Context, req *OpenStreamRequest) (*Open
 }
 
 // UpdateStream updates a stream with new payment amount
+// SECURITY: Uses database transaction with row-level locking to prevent race conditions
+// and ensure atomic sequence number assignment
 func (s *Service) UpdateStream(ctx context.Context, req *UpdateStreamRequest) (*UpdateStreamResponse, error) {
-	// Get stream
-	stream, err := s.repo.GetByID(ctx, req.StreamID)
+	// Rate limiting check first (before acquiring lock)
+	if err := s.checkRateLimit(req.StreamID); err != nil {
+		return nil, err
+	}
+
+	// Validate new amount format early (before acquiring lock)
+	newAmount := new(big.Int)
+	if _, ok := newAmount.SetString(req.Amount, 10); !ok {
+		return nil, ErrInvalidAmount
+	}
+
+	// Start transaction for atomic operation
+	tx, err := s.repo.BeginTx(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to start transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	// Get stream with row-level lock (SELECT ... FOR UPDATE)
+	stream, err := s.repo.GetByIDForUpdate(ctx, tx, req.StreamID)
 	if err != nil {
 		return nil, err
 	}
 
-	// Check status
+	// Check status (now atomic with lock)
 	if stream.Status != StreamStatusActive {
 		return nil, ErrStreamNotActive
 	}
 
 	// Check expiry
 	if stream.ExpiresAt != nil && time.Now().After(*stream.ExpiresAt) {
-		// Mark as expired
-		s.repo.UpdateStatus(ctx, stream.ID, StreamStatusExpired)
+		// Mark as expired within transaction
+		stream.Status = StreamStatusExpired
+		s.repo.UpdateInTx(ctx, tx, stream)
+		tx.Commit()
 		return nil, ErrStreamExpired
 	}
 
-	// Rate limiting
-	if err := s.checkRateLimit(stream.ID); err != nil {
-		return nil, err
-	}
-
-	// Validate amount
-	newAmount := new(big.Int)
-	if _, ok := newAmount.SetString(req.Amount, 10); !ok {
-		return nil, ErrInvalidAmount
-	}
-
+	// SECURITY: Always check SetString return value to prevent invalid amounts being treated as 0
 	currentAmount := new(big.Int)
-	currentAmount.SetString(stream.CurrentAmount, 10)
+	if _, ok := currentAmount.SetString(stream.CurrentAmount, 10); !ok {
+		return nil, fmt.Errorf("invalid current amount in stream: %s", stream.CurrentAmount)
+	}
 
 	maxAmount := new(big.Int)
-	maxAmount.SetString(stream.MaxAmount, 10)
+	if _, ok := maxAmount.SetString(stream.MaxAmount, 10); !ok {
+		return nil, fmt.Errorf("invalid max amount in stream: %s", stream.MaxAmount)
+	}
 
 	// New amount must be >= current amount (no going backwards)
 	if newAmount.Cmp(currentAmount) < 0 {
@@ -249,13 +266,15 @@ func (s *Service) UpdateStream(ctx context.Context, req *UpdateStreamRequest) (*
 		return nil, ErrAmountExceeded
 	}
 
-	// Verify signature
-	latestUpdate, _ := s.repo.GetLatestUpdate(ctx, stream.ID)
+	// Get latest update with lock to ensure atomic sequence number calculation
+	// SECURITY: This prevents duplicate sequence numbers from concurrent updates
+	latestUpdate, _ := s.repo.GetLatestUpdateInTx(ctx, tx, stream.ID)
 	var seqNum uint64 = 1
 	if latestUpdate != nil {
 		seqNum = latestUpdate.SequenceNum + 1
 	}
 
+	// Verify signature (uses sequence number, so must be after calculation)
 	message := fmt.Sprintf("update_stream:%s:%s:%d", stream.ID, req.Amount, seqNum)
 	valid, err := s.verifier.VerifyStreamSignature(ctx, stream.Network, stream.Payer, message, req.Signature)
 	if err != nil {
@@ -265,7 +284,7 @@ func (s *Service) UpdateStream(ctx context.Context, req *UpdateStreamRequest) (*
 		return nil, ErrInvalidSignature
 	}
 
-	// Create update record
+	// Create update record within transaction
 	update := &StreamUpdate{
 		StreamID:      stream.ID,
 		Amount:        req.Amount,
@@ -274,17 +293,22 @@ func (s *Service) UpdateStream(ctx context.Context, req *UpdateStreamRequest) (*
 		ResourceUnits: req.ResourceUnits,
 	}
 
-	if err := s.repo.CreateUpdate(ctx, update); err != nil {
+	if err := s.repo.CreateUpdateInTx(ctx, tx, update); err != nil {
 		return nil, fmt.Errorf("failed to create update: %w", err)
 	}
 
-	// Update stream
+	// Update stream within transaction
 	stream.CurrentAmount = req.Amount
-	if err := s.repo.Update(ctx, stream); err != nil {
+	if err := s.repo.UpdateInTx(ctx, tx, stream); err != nil {
 		return nil, fmt.Errorf("failed to update stream: %w", err)
 	}
 
-	// Record event
+	// Commit transaction
+	if err := tx.Commit(); err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	// Record event (non-critical, outside transaction)
 	s.repo.CreateEvent(ctx, &StreamEvent{
 		StreamID: stream.ID,
 		Type:     StreamEventUpdated,
@@ -339,8 +363,11 @@ func (s *Service) CloseStream(ctx context.Context, req *CloseStreamRequest) (*Cl
 		return nil, ErrInvalidAmount
 	}
 
+	// SECURITY: Always check SetString return value
 	currentAmount := new(big.Int)
-	currentAmount.SetString(stream.CurrentAmount, 10)
+	if _, ok := currentAmount.SetString(stream.CurrentAmount, 10); !ok {
+		return nil, fmt.Errorf("invalid current amount in stream: %s", stream.CurrentAmount)
+	}
 
 	// Final amount should be >= current streamed amount
 	if finalAmount.Cmp(currentAmount) < 0 {
@@ -348,7 +375,9 @@ func (s *Service) CloseStream(ctx context.Context, req *CloseStreamRequest) (*Cl
 	}
 
 	maxAmount := new(big.Int)
-	maxAmount.SetString(stream.MaxAmount, 10)
+	if _, ok := maxAmount.SetString(stream.MaxAmount, 10); !ok {
+		return nil, fmt.Errorf("invalid max amount in stream: %s", stream.MaxAmount)
+	}
 
 	if finalAmount.Cmp(maxAmount) > 0 {
 		return nil, ErrAmountExceeded
@@ -377,8 +406,11 @@ func (s *Service) CloseStream(ctx context.Context, req *CloseStreamRequest) (*Cl
 	}
 
 	// Calculate amount to settle (final - already settled)
+	// SECURITY: Always check SetString return value
 	settledAmount := new(big.Int)
-	settledAmount.SetString(stream.SettledAmount, 10)
+	if _, ok := settledAmount.SetString(stream.SettledAmount, 10); !ok {
+		return nil, fmt.Errorf("invalid settled amount in stream: %s", stream.SettledAmount)
+	}
 	amountToSettle := new(big.Int).Sub(finalAmount, settledAmount)
 
 	var txHash string
@@ -502,8 +534,17 @@ func (s *Service) ListStreams(ctx context.Context, req ListStreamsRequest) (*Lis
 }
 
 // PauseStream pauses an active stream
+// SECURITY: Uses database transaction with row-level locking to prevent race conditions
 func (s *Service) PauseStream(ctx context.Context, streamID string, requester string) error {
-	stream, err := s.repo.GetByID(ctx, streamID)
+	// Start transaction for atomic operation
+	tx, err := s.repo.BeginTx(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to start transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	// Get stream with row-level lock (SELECT ... FOR UPDATE)
+	stream, err := s.repo.GetByIDForUpdate(ctx, tx, streamID)
 	if err != nil {
 		return err
 	}
@@ -513,15 +554,21 @@ func (s *Service) PauseStream(ctx context.Context, streamID string, requester st
 		return ErrUnauthorized
 	}
 
+	// Status check is now atomic with the lock
 	if stream.Status != StreamStatusActive {
 		return ErrStreamNotActive
 	}
 
 	stream.Status = StreamStatusPaused
-	if err := s.repo.Update(ctx, stream); err != nil {
+	if err := s.repo.UpdateInTx(ctx, tx, stream); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	// Record event (non-critical, outside transaction)
 	s.repo.CreateEvent(ctx, &StreamEvent{
 		StreamID: streamID,
 		Type:     StreamEventPaused,
@@ -531,8 +578,17 @@ func (s *Service) PauseStream(ctx context.Context, streamID string, requester st
 }
 
 // ResumeStream resumes a paused stream
+// SECURITY: Uses database transaction with row-level locking to prevent race conditions
 func (s *Service) ResumeStream(ctx context.Context, streamID string, requester string) error {
-	stream, err := s.repo.GetByID(ctx, streamID)
+	// Start transaction for atomic operation
+	tx, err := s.repo.BeginTx(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to start transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	// Get stream with row-level lock (SELECT ... FOR UPDATE)
+	stream, err := s.repo.GetByIDForUpdate(ctx, tx, streamID)
 	if err != nil {
 		return err
 	}
@@ -542,6 +598,7 @@ func (s *Service) ResumeStream(ctx context.Context, streamID string, requester s
 		return ErrUnauthorized
 	}
 
+	// Status check is now atomic with the lock
 	if stream.Status != StreamStatusPaused {
 		return fmt.Errorf("stream is not paused")
 	}
@@ -552,10 +609,15 @@ func (s *Service) ResumeStream(ctx context.Context, streamID string, requester s
 	}
 
 	stream.Status = StreamStatusActive
-	if err := s.repo.Update(ctx, stream); err != nil {
+	if err := s.repo.UpdateInTx(ctx, tx, stream); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	// Record event (non-critical, outside transaction)
 	s.repo.CreateEvent(ctx, &StreamEvent{
 		StreamID: streamID,
 		Type:     StreamEventResumed,
@@ -680,11 +742,18 @@ func (s *Service) processAutoSettle() {
 	}
 
 	for _, stream := range streams {
+		// SECURITY: Always check SetString return value - skip streams with invalid amounts
 		currentAmount := new(big.Int)
-		currentAmount.SetString(stream.CurrentAmount, 10)
+		if _, ok := currentAmount.SetString(stream.CurrentAmount, 10); !ok {
+			log.Printf("Warning: stream %s has invalid current amount: %s", stream.ID, stream.CurrentAmount)
+			continue
+		}
 
 		settledAmount := new(big.Int)
-		settledAmount.SetString(stream.SettledAmount, 10)
+		if _, ok := settledAmount.SetString(stream.SettledAmount, 10); !ok {
+			log.Printf("Warning: stream %s has invalid settled amount: %s", stream.ID, stream.SettledAmount)
+			continue
+		}
 
 		unsettled := new(big.Int).Sub(currentAmount, settledAmount)
 
@@ -693,13 +762,16 @@ func (s *Service) processAutoSettle() {
 			// Settle the unsettled amount
 			txHash, err := s.settler.SettleStream(ctx, stream.Network, stream.Scheme, stream.Payer, stream.Payee, stream.Asset, unsettled.String())
 			if err != nil {
+				log.Printf("Warning: failed to auto-settle stream %s: %v", stream.ID, err)
 				continue
 			}
 
 			// Update settled amount
 			stream.SettledAmount = currentAmount.String()
 			stream.SettlementTxHash = txHash
-			s.repo.Update(ctx, stream)
+			if err := s.repo.Update(ctx, stream); err != nil {
+				log.Printf("Warning: failed to update stream %s after settlement: %v", stream.ID, err)
+			}
 
 			// Record metrics
 			if s.metrics != nil {

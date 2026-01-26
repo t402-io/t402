@@ -35,6 +35,13 @@ func newFacilitatorSolanaSigner(privateKeyHex string, mainnetRPC string, devnetR
 		return nil, fmt.Errorf("failed to decode private key: %w", err)
 	}
 
+	// SECURITY: Clear private key bytes from memory after use
+	defer func() {
+		for i := range privateKeyBytes {
+			privateKeyBytes[i] = 0
+		}
+	}()
+
 	// Solana private keys are 64 bytes (32 bytes seed + 32 bytes public key)
 	// If we only have 32 bytes (seed), we need to derive the full keypair using ed25519
 	var privateKey solana.PrivateKey
@@ -45,6 +52,12 @@ func newFacilitatorSolanaSigner(privateKeyHex string, mainnetRPC string, devnetR
 		ed25519PrivateKey := ed25519.NewKeyFromSeed(privateKeyBytes)
 		privateKey = solana.PrivateKey(ed25519PrivateKey)
 		publicKey = solana.PublicKeyFromBytes(ed25519PrivateKey.Public().(ed25519.PublicKey))
+
+		// SECURITY: Clear the derived ed25519 private key bytes
+		// Note: The seed (privateKeyBytes) is already cleared by the outer defer
+		for i := range ed25519PrivateKey {
+			ed25519PrivateKey[i] = 0
+		}
 	} else if len(privateKeyBytes) == 64 {
 		privateKey = solana.PrivateKey(privateKeyBytes)
 		publicKey = privateKey.PublicKey()

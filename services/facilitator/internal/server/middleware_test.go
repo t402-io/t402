@@ -824,3 +824,146 @@ func TestDefaultRateLimitConfig(t *testing.T) {
 		t.Error("Default config should have empty trusted proxies")
 	}
 }
+
+// Tests for P0-2: CIDR validation fix
+// This tests the fix for the bug where string prefix matching was used instead of proper CIDR parsing
+// The old buggy code would match 192.168.100.1 to 192.168.1.0/24 because "192.168.1" is a prefix of "192.168.100"
+func TestIsTrustedProxy_CIDRValidation(t *testing.T) {
+	tests := []struct {
+		name           string
+		ip             string
+		trustedProxies []string
+		expected       bool
+	}{
+		// CIDR validation tests - these would fail with the old buggy code
+		{
+			name:           "CIDR exact match in range",
+			ip:             "192.168.1.50",
+			trustedProxies: []string{"192.168.1.0/24"},
+			expected:       true,
+		},
+		{
+			name:           "CIDR boundary start",
+			ip:             "192.168.1.0",
+			trustedProxies: []string{"192.168.1.0/24"},
+			expected:       true,
+		},
+		{
+			name:           "CIDR boundary end",
+			ip:             "192.168.1.255",
+			trustedProxies: []string{"192.168.1.0/24"},
+			expected:       true,
+		},
+		{
+			name:           "CIDR out of range - would match with string prefix bug",
+			ip:             "192.168.100.1",
+			trustedProxies: []string{"192.168.1.0/24"},
+			expected:       false, // CRITICAL: This is the bug fix - 192.168.100.1 should NOT match 192.168.1.0/24
+		},
+		{
+			name:           "CIDR out of range - similar prefix",
+			ip:             "192.168.10.1",
+			trustedProxies: []string{"192.168.1.0/24"},
+			expected:       false, // 192.168.10.1 should NOT match 192.168.1.0/24
+		},
+		{
+			name:           "CIDR /16 range",
+			ip:             "10.0.255.1",
+			trustedProxies: []string{"10.0.0.0/16"},
+			expected:       true,
+		},
+		{
+			name:           "CIDR /16 out of range",
+			ip:             "10.1.0.1",
+			trustedProxies: []string{"10.0.0.0/16"},
+			expected:       false,
+		},
+		{
+			name:           "CIDR /8 range",
+			ip:             "10.255.255.255",
+			trustedProxies: []string{"10.0.0.0/8"},
+			expected:       true,
+		},
+		{
+			name:           "CIDR /32 exact",
+			ip:             "192.168.1.1",
+			trustedProxies: []string{"192.168.1.1/32"},
+			expected:       true,
+		},
+		{
+			name:           "CIDR /32 no match",
+			ip:             "192.168.1.2",
+			trustedProxies: []string{"192.168.1.1/32"},
+			expected:       false,
+		},
+		// IPv6 CIDR tests
+		{
+			name:           "IPv6 CIDR match",
+			ip:             "2001:db8::1",
+			trustedProxies: []string{"2001:db8::/32"},
+			expected:       true,
+		},
+		{
+			name:           "IPv6 CIDR no match",
+			ip:             "2001:db9::1",
+			trustedProxies: []string{"2001:db8::/32"},
+			expected:       false,
+		},
+		// Invalid CIDR handling
+		{
+			name:           "Invalid CIDR format - should be skipped",
+			ip:             "192.168.1.1",
+			trustedProxies: []string{"invalid/cidr", "192.168.1.1"},
+			expected:       true, // Should match the exact IP
+		},
+		// Empty/invalid IP handling
+		{
+			name:           "Empty IP",
+			ip:             "",
+			trustedProxies: []string{"192.168.1.0/24"},
+			expected:       false,
+		},
+		{
+			name:           "Invalid IP format",
+			ip:             "not.an.ip",
+			trustedProxies: []string{"192.168.1.0/24"},
+			expected:       false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := isTrustedProxy(tt.ip, tt.trustedProxies)
+			if result != tt.expected {
+				t.Errorf("isTrustedProxy(%q, %v) = %v, expected %v", tt.ip, tt.trustedProxies, result, tt.expected)
+			}
+		})
+	}
+}
+
+// TestIsTrustedProxy_BugRegression specifically tests the bug that was fixed
+// where string prefix matching allowed IP spoofing
+func TestIsTrustedProxy_BugRegression(t *testing.T) {
+	// This is the specific scenario that the bug allowed:
+	// If trusted proxy is 192.168.1.0/24, the old code would:
+	// 1. Extract prefix "192.168.1"
+	// 2. Check if IP starts with "192.168.1"
+	// 3. "192.168.100.1" starts with "192.168.1" -> INCORRECTLY TRUSTED
+	//
+	// With the fix using net.ParseCIDR:
+	// 192.168.1.0/24 = 192.168.1.0 to 192.168.1.255
+	// 192.168.100.1 is NOT in this range -> CORRECTLY REJECTED
+
+	attackerIP := "192.168.100.1"    // Attacker's real IP
+	trustedCIDR := "192.168.1.0/24"  // Legitimate proxy CIDR
+
+	if isTrustedProxy(attackerIP, []string{trustedCIDR}) {
+		t.Error("SECURITY BUG: Attacker IP 192.168.100.1 was incorrectly matched to CIDR 192.168.1.0/24")
+	}
+
+	// Also test another similar case
+	attackerIP2 := "192.168.10.50"
+	if isTrustedProxy(attackerIP2, []string{trustedCIDR}) {
+		t.Error("SECURITY BUG: Attacker IP 192.168.10.50 was incorrectly matched to CIDR 192.168.1.0/24")
+	}
+}

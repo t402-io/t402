@@ -39,6 +39,13 @@ func newFacilitatorTronSigner(privateKeyHex string, mainnetRPC string) (*facilit
 		return nil, fmt.Errorf("failed to decode private key: %w", err)
 	}
 
+	// SECURITY: Clear private key bytes from memory after use
+	defer func() {
+		for i := range privateKeyBytes {
+			privateKeyBytes[i] = 0
+		}
+	}()
+
 	privateKey, err := crypto.ToECDSA(privateKeyBytes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse private key: %w", err)

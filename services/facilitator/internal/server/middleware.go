@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"log"
+	"net"
 	"net/http"
 	"strconv"
 	"strings"
@@ -286,17 +287,37 @@ func getSecureClientIP(c *gin.Context, config *RateLimitConfig) string {
 }
 
 // isTrustedProxy checks if an IP is in the trusted proxy list
+// SECURITY: Uses proper CIDR parsing to prevent IP spoofing attacks
+// The previous string prefix matching was vulnerable (e.g., 192.168.100.1 would match 192.168.1.0/24)
 func isTrustedProxy(ip string, trustedProxies []string) bool {
+	// Parse the IP address first
+	parsedIP := net.ParseIP(ip)
+	if parsedIP == nil {
+		// Invalid IP format - don't trust it
+		return false
+	}
+
 	for _, trusted := range trustedProxies {
+		// Check for exact match first
 		if trusted == ip {
 			return true
 		}
-		// Support CIDR notation (e.g., "10.0.0.0/8")
+
+		// Support CIDR notation (e.g., "10.0.0.0/8", "192.168.1.0/24")
 		if strings.Contains(trusted, "/") {
-			// Simple prefix match for common cases
-			// For production, consider using net.ParseCIDR
-			prefix := strings.Split(trusted, "/")[0]
-			if strings.HasPrefix(ip, strings.TrimSuffix(prefix, ".0")) {
+			_, cidr, err := net.ParseCIDR(trusted)
+			if err != nil {
+				// Invalid CIDR format - skip this entry
+				log.Printf("Warning: invalid CIDR format in trusted proxies: %s", trusted)
+				continue
+			}
+			if cidr.Contains(parsedIP) {
+				return true
+			}
+		} else {
+			// Non-CIDR format - try parsing as IP for comparison
+			trustedIP := net.ParseIP(trusted)
+			if trustedIP != nil && trustedIP.Equal(parsedIP) {
 				return true
 			}
 		}
@@ -304,20 +325,12 @@ func isTrustedProxy(ip string, trustedProxies []string) bool {
 	return false
 }
 
-// isValidIP validates that a string looks like an IP address
+// isValidIP validates that a string is a valid IP address
+// SECURITY: Uses net.ParseIP for proper validation instead of character checks
 func isValidIP(ip string) bool {
-	// Basic validation - must contain dots or colons (IPv4 or IPv6)
-	if !strings.Contains(ip, ".") && !strings.Contains(ip, ":") {
-		return false
-	}
-	// Must not contain dangerous characters
-	for _, c := range ip {
-		if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') ||
-			(c >= 'A' && c <= 'F') || c == '.' || c == ':') {
-			return false
-		}
-	}
-	return len(ip) <= 45 // Max IPv6 length
+	// Use standard library for proper IP validation
+	// This handles both IPv4 and IPv6 correctly
+	return net.ParseIP(ip) != nil
 }
 
 // APIKeyMiddleware validates API keys (optional - for future use)

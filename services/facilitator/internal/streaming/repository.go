@@ -20,6 +20,20 @@ var (
 	ErrInvalidSequence     = errors.New("invalid update sequence number")
 )
 
+// allowedOrderByColumns defines the whitelist of columns that can be used for ORDER BY
+// SECURITY: This prevents SQL injection attacks via the OrderBy parameter
+var allowedOrderByColumns = map[string]bool{
+	"created_at":      true,
+	"updated_at":      true,
+	"last_updated_at": true,
+	"status":          true,
+	"network":         true,
+	"payer":           true,
+	"payee":           true,
+	"current_amount":  true,
+	"max_amount":      true,
+}
+
 // Repository handles stream persistence
 type Repository struct {
 	db *sql.DB
@@ -353,10 +367,15 @@ func (r *Repository) List(ctx context.Context, filter ListStreamsRequest) ([]*St
 		return nil, 0, fmt.Errorf("failed to count streams: %w", err)
 	}
 
-	// Add ordering
+	// Add ordering with whitelist validation to prevent SQL injection
+	// SECURITY: Only allow columns in the whitelist to prevent ORDER BY injection
 	orderBy := "created_at"
 	if filter.OrderBy != "" {
-		orderBy = filter.OrderBy
+		if allowedOrderByColumns[filter.OrderBy] {
+			orderBy = filter.OrderBy
+		}
+		// If OrderBy is not in whitelist, silently use default (created_at)
+		// This prevents attackers from knowing which columns are allowed
 	}
 	orderDir := "ASC"
 	if filter.OrderDesc {
@@ -445,6 +464,58 @@ func (r *Repository) CreateUpdate(ctx context.Context, update *StreamUpdate) err
 	}
 
 	return nil
+}
+
+// CreateUpdateInTx records a stream update within a transaction
+// SECURITY: Use this method to ensure atomic sequence number assignment
+func (r *Repository) CreateUpdateInTx(ctx context.Context, tx *Tx, update *StreamUpdate) error {
+	if update.ID == "" {
+		update.ID = uuid.New().String()
+	}
+	update.Timestamp = time.Now().UTC()
+
+	query := `
+		INSERT INTO stream_updates (
+			id, stream_id, amount, signature, timestamp, sequence_num, resource_units
+		) VALUES ($1, $2, $3, $4, $5, $6, $7)
+	`
+
+	_, err := tx.tx.ExecContext(ctx, query,
+		update.ID, update.StreamID, update.Amount, update.Signature,
+		update.Timestamp, update.SequenceNum, update.ResourceUnits,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create stream update in transaction: %w", err)
+	}
+
+	return nil
+}
+
+// GetLatestUpdateInTx gets the latest update for a stream within a transaction
+// SECURITY: Use with FOR UPDATE to ensure atomic sequence number calculation
+func (r *Repository) GetLatestUpdateInTx(ctx context.Context, tx *Tx, streamID string) (*StreamUpdate, error) {
+	query := `
+		SELECT id, stream_id, amount, signature, timestamp, sequence_num, resource_units
+		FROM stream_updates
+		WHERE stream_id = $1
+		ORDER BY sequence_num DESC
+		LIMIT 1
+		FOR UPDATE
+	`
+
+	update := &StreamUpdate{}
+	err := tx.tx.QueryRowContext(ctx, query, streamID).Scan(
+		&update.ID, &update.StreamID, &update.Amount, &update.Signature,
+		&update.Timestamp, &update.SequenceNum, &update.ResourceUnits,
+	)
+	if err == sql.ErrNoRows {
+		return nil, nil // No updates yet
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get latest update in transaction: %w", err)
+	}
+
+	return update, nil
 }
 
 // GetUpdates retrieves updates for a stream
