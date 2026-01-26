@@ -226,7 +226,7 @@ export default function PlaygroundPage() {
               <button
                 onClick={executeFlow}
                 disabled={step !== "idle" && step !== "done"}
-                className="btn-primary flex items-center gap-2 px-4 py-2 text-sm"
+                className="btn-primary flex items-center gap-2 px-4 py-3 text-sm min-h-[44px]"
               >
                 <Play size={14} />
                 Execute Flow
@@ -234,7 +234,7 @@ export default function PlaygroundPage() {
               {step !== "idle" && (
                 <button
                   onClick={reset}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-[var(--color-muted)] hover:text-white border border-[var(--color-border)] rounded-lg transition-colors"
+                  className="flex items-center gap-2 px-3 py-3 text-sm text-[var(--color-muted)] hover:text-white border border-[var(--color-border)] rounded-lg transition-colors min-h-[44px]"
                 >
                   <RotateCcw size={14} />
                   Reset
