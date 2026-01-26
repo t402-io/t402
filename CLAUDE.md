@@ -106,7 +106,7 @@ t402/
 |---------|-----|
 | Website | https://t402.io |
 | Documentation | https://docs.t402.io |
-| Whitepaper | https://docs.t402.io/t402-whitepaper.pdf |
+| Whitepaper | https://t402.io/t402-whitepaper.pdf |
 | Facilitator API | https://facilitator.t402.io |
 | Grafana Dashboard | https://grafana.facilitator.t402.io |
 
