@@ -223,7 +223,7 @@ function ChainCard({ chain }: { chain: Chain }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
-      className="group relative overflow-hidden rounded-xl border border-border bg-background-secondary p-6 transition-all hover:border-border-secondary"
+      className="group relative overflow-hidden rounded-xl border border-border bg-background-secondary p-4 transition-all hover:border-border-secondary sm:p-6"
     >
       {/* Color accent */}
       <div
@@ -233,18 +233,18 @@ function ChainCard({ chain }: { chain: Chain }) {
 
       {/* Header */}
       <div className="mb-4 flex items-start justify-between">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <div
-            className="flex h-12 w-12 items-center justify-center rounded-xl"
+            className="flex h-10 w-10 items-center justify-center rounded-xl sm:h-12 sm:w-12"
             style={{ backgroundColor: `${chain.color}20` }}
           >
             <span
-              className="h-6 w-6 rounded-full"
+              className="h-5 w-5 rounded-full sm:h-6 sm:w-6"
               style={{ backgroundColor: chain.color }}
             />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-foreground">{chain.name}</h3>
+            <h3 className="text-base font-semibold text-foreground sm:text-lg">{chain.name}</h3>
             <div className="flex items-center gap-2">
               <span className="text-sm text-foreground-tertiary">{chain.shortName}</span>
               {chain.chainId && (
@@ -296,7 +296,7 @@ function ChainCard({ chain }: { chain: Chain }) {
       </div>
 
       {/* Stats */}
-      <div className="mb-4 grid grid-cols-2 gap-4">
+      <div className="mb-4 grid grid-cols-2 gap-2 sm:gap-4">
         <div className="flex items-center gap-2">
           <ClockIcon className="text-foreground-tertiary" />
           <div>
@@ -347,15 +347,6 @@ function ChainCard({ chain }: { chain: Chain }) {
           Explorer
           <ExternalLinkIcon className="h-3 w-3" />
         </Link>
-        <Link
-          href={chain.docsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-1.5 text-sm text-foreground-secondary transition-colors hover:text-foreground"
-        >
-          Docs
-          <ExternalLinkIcon className="h-3 w-3" />
-        </Link>
       </div>
     </motion.div>
   );
@@ -369,8 +360,8 @@ function FeatureCard({
   const Icon = featureIconMap[feature.icon] || GaslessIcon;
 
   return (
-    <div className="rounded-xl border border-border bg-background-secondary p-6">
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-brand/10">
+    <div className="rounded-xl border border-border bg-background-secondary p-4 sm:p-6">
+      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-brand/10 sm:mb-4 sm:h-12 sm:w-12">
         <Icon className="text-brand" />
       </div>
       <h3 className="mb-2 font-semibold text-foreground">{feature.name}</h3>
@@ -413,27 +404,27 @@ export default function ChainsClient() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="mb-12 grid grid-cols-2 gap-4 sm:grid-cols-4"
+        className="mb-12 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4"
       >
-        <div className="rounded-xl border border-border bg-background-secondary p-4 text-center">
-          <p className="text-3xl font-bold text-foreground">{chains.length}</p>
-          <p className="text-sm text-foreground-tertiary">Chains</p>
+        <div className="rounded-xl border border-border bg-background-secondary p-3 text-center sm:p-4">
+          <p className="text-2xl font-bold text-foreground sm:text-3xl">{chains.length}</p>
+          <p className="text-xs text-foreground-tertiary sm:text-sm">Chains</p>
         </div>
-        <div className="rounded-xl border border-border bg-background-secondary p-4 text-center">
-          <p className="text-3xl font-bold text-foreground">{evmChains.length}</p>
-          <p className="text-sm text-foreground-tertiary">EVM Networks</p>
+        <div className="rounded-xl border border-border bg-background-secondary p-3 text-center sm:p-4">
+          <p className="text-2xl font-bold text-foreground sm:text-3xl">{evmChains.length}</p>
+          <p className="text-xs text-foreground-tertiary sm:text-sm">EVM Networks</p>
         </div>
-        <div className="rounded-xl border border-border bg-background-secondary p-4 text-center">
-          <p className="text-3xl font-bold text-foreground">
+        <div className="rounded-xl border border-border bg-background-secondary p-3 text-center sm:p-4">
+          <p className="text-2xl font-bold text-foreground sm:text-3xl">
             {chains.filter((c) => c.tokens.some((t) => t.gasless)).length}
           </p>
-          <p className="text-sm text-foreground-tertiary">Gasless Chains</p>
+          <p className="text-xs text-foreground-tertiary sm:text-sm">Gasless Chains</p>
         </div>
-        <div className="rounded-xl border border-border bg-background-secondary p-4 text-center">
-          <p className="text-3xl font-bold text-foreground">
+        <div className="rounded-xl border border-border bg-background-secondary p-3 text-center sm:p-4">
+          <p className="text-2xl font-bold text-foreground sm:text-3xl">
             {chains.reduce((acc, c) => acc + c.tokens.length, 0)}
           </p>
-          <p className="text-sm text-foreground-tertiary">Token Pairs</p>
+          <p className="text-xs text-foreground-tertiary sm:text-sm">Token Pairs</p>
         </div>
       </motion.div>
 
@@ -476,7 +467,7 @@ export default function ChainsClient() {
       {/* Chain Grid */}
       <motion.div
         layout
-        className="mb-20 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+        className="mb-20 grid gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3"
       >
         <AnimatePresence mode="popLayout">
           {filteredChains.map((chain) => (
@@ -495,7 +486,7 @@ export default function ChainsClient() {
         <h2 className="mb-8 text-center text-2xl font-semibold text-foreground">
           Multi-Chain Features
         </h2>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
           {features.map((feature) => (
             <FeatureCard key={feature.id} feature={feature} />
           ))}
@@ -525,12 +516,12 @@ export default function ChainsClient() {
             View SDKs
           </Link>
           <Link
-            href="https://docs.t402.io/chains"
+            href="https://docs.t402.io/getting-started/quickstart"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-lg border border-border bg-background-tertiary px-6 py-3 text-base font-medium text-foreground transition-colors hover:bg-border"
           >
-            Chain Documentation
+            Get Started
             <ExternalLinkIcon />
           </Link>
         </div>
