@@ -419,7 +419,7 @@ function CategoryTab({
   return (
     <button
       onClick={onClick}
-      className={`relative flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+      className={`relative flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors sm:px-4 ${
         isSelected
           ? "text-foreground"
           : "text-foreground-tertiary hover:text-foreground-secondary"
@@ -556,7 +556,7 @@ function UseCaseCard({ useCase, index }: { useCase: UseCase; index: number }) {
                   <p className="mb-2 text-xs font-medium uppercase tracking-wider text-foreground-tertiary">
                     Features
                   </p>
-                  <ul className="grid grid-cols-2 gap-2">
+                  <ul className="grid gap-2 sm:grid-cols-2">
                     {useCase.features.map((feature) => (
                       <li
                         key={feature}
@@ -647,23 +647,25 @@ export default function UseCasesClient() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.15 }}
-        className="mb-8 flex flex-wrap items-center justify-center gap-1 rounded-xl border border-border bg-background-secondary p-1.5"
+        className="mb-8 overflow-x-auto"
       >
-        <CategoryTab
-          category={{ id: "all", name: "All" }}
-          isSelected={selectedCategory === "all"}
-          onClick={() => setSelectedCategory("all")}
-          count={useCases.length}
-        />
-        {categories.map((category) => (
+        <div className="mx-auto flex w-max min-w-full items-center justify-start gap-1 rounded-xl border border-border bg-background-secondary p-1.5 sm:w-auto sm:justify-center">
           <CategoryTab
-            key={category.id}
-            category={category}
-            isSelected={selectedCategory === category.id}
-            onClick={() => setSelectedCategory(category.id)}
-            count={getUseCasesByCategory(category.id).length}
+            category={{ id: "all", name: "All" }}
+            isSelected={selectedCategory === "all"}
+            onClick={() => setSelectedCategory("all")}
+            count={useCases.length}
           />
-        ))}
+          {categories.map((category) => (
+            <CategoryTab
+              key={category.id}
+              category={category}
+              isSelected={selectedCategory === category.id}
+              onClick={() => setSelectedCategory(category.id)}
+              count={getUseCasesByCategory(category.id).length}
+            />
+          ))}
+        </div>
       </motion.div>
 
       {/* Use Cases Grid */}
