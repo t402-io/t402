@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -845,15 +846,15 @@ func TestE2E_InsufficientAmount(t *testing.T) {
 func TestE2E_ConcurrentRequests(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	requestCount := 0
+	var requestCount atomic.Int64
 	mock := &MockFacilitator{
 		VerifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error) {
-			requestCount++
+			count := requestCount.Add(1)
 			// Simulate some processing time
 			time.Sleep(10 * time.Millisecond)
 			return &t402.VerifyResponse{
 				IsValid: true,
-				Payer:   fmt.Sprintf("payer-%d", requestCount),
+				Payer:   fmt.Sprintf("payer-%d", count),
 			}, nil
 		},
 		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
