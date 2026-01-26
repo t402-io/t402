@@ -100,7 +100,7 @@ export function FeatureDeepDives() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
           {features.map((feature, index) => (
             <motion.div
               key={feature.slug}
@@ -110,14 +110,14 @@ export function FeatureDeepDives() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
               <Link href={`/features/${feature.slug}`}>
-                <div className={`relative bg-background-secondary border border-border rounded-xl p-8 h-full transition-all duration-300 ${feature.borderColor} group cursor-pointer`}>
+                <div className={`relative h-full cursor-pointer rounded-xl border border-border bg-background-secondary p-5 transition-all duration-300 sm:p-8 ${feature.borderColor} group`}>
                   {/* Gradient Background */}
                   <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl`} />
 
                   {/* Content */}
                   <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="w-14 h-14 rounded-xl bg-background-tertiary border border-border flex items-center justify-center text-brand group-hover:scale-110 transition-transform">
+                    <div className="mb-4 flex items-center justify-between sm:mb-6">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-border bg-background-tertiary text-brand transition-transform group-hover:scale-110 sm:h-14 sm:w-14">
                         {feature.icon}
                       </div>
                       {feature.badge && (
@@ -127,17 +127,17 @@ export function FeatureDeepDives() {
                       )}
                     </div>
 
-                    <h3 className="text-xl font-semibold text-foreground mb-3 group-hover:text-brand transition-colors">
+                    <h3 className="mb-2 text-lg font-semibold text-foreground transition-colors group-hover:text-brand sm:mb-3 sm:text-xl">
                       {feature.title}
                     </h3>
 
-                    <p className="text-foreground-secondary text-sm mb-4">
+                    <p className="mb-4 text-sm text-foreground-secondary">
                       {feature.description}
                     </p>
 
-                    <div className="flex items-center gap-2 text-brand text-sm font-medium">
+                    <div className="flex items-center gap-2 text-sm font-medium text-brand">
                       Learn more
-                      <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                       </svg>
                     </div>

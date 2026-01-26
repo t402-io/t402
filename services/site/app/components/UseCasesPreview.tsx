@@ -55,7 +55,7 @@ export function UseCasesPreview() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
           {useCases.map((useCase, index) => (
             <motion.div
               key={useCase.title}
@@ -63,22 +63,22 @@ export function UseCasesPreview() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="bg-background-secondary border border-border rounded-xl p-8 hover:border-brand/50 transition-colors group"
+              className="group rounded-xl border border-border bg-background-secondary p-5 transition-colors hover:border-brand/50 sm:p-8"
             >
-              <div className="w-14 h-14 rounded-xl bg-brand/10 border border-brand/30 flex items-center justify-center text-brand mb-6 group-hover:scale-110 transition-transform">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-brand/30 bg-brand/10 text-brand transition-transform group-hover:scale-110 sm:mb-6 sm:h-14 sm:w-14">
                 {useCase.icon}
               </div>
 
-              <h3 className="text-xl font-semibold text-foreground mb-3">
+              <h3 className="mb-2 text-lg font-semibold text-foreground sm:mb-3 sm:text-xl">
                 {useCase.title}
               </h3>
 
-              <p className="text-foreground-secondary mb-6">
+              <p className="mb-4 text-sm text-foreground-secondary sm:mb-6 sm:text-base">
                 {useCase.description}
               </p>
 
               {/* Example Flow */}
-              <div className="px-4 py-3 bg-background-tertiary rounded-lg font-mono text-sm text-foreground-secondary">
+              <div className="overflow-x-auto rounded-lg bg-background-tertiary px-3 py-2.5 font-mono text-xs text-foreground-secondary sm:px-4 sm:py-3 sm:text-sm">
                 {useCase.example}
               </div>
             </motion.div>
