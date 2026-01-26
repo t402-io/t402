@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/alicebob/miniredis/v2"
+	"github.com/redis/go-redis/v9"
 	"github.com/t402-io/t402/services/facilitator/internal/cache"
 )
 
@@ -390,5 +392,401 @@ func TestRedisLimiter_TypeAssertion(t *testing.T) {
 func BenchmarkMax(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		max(i, i+1)
+	}
+}
+
+// Helper function to create a cache client with miniredis
+func newTestCacheClient(t *testing.T) (*cache.Client, *miniredis.Miniredis) {
+	t.Helper()
+
+	mr, err := miniredis.Run()
+	if err != nil {
+		t.Fatalf("Failed to start miniredis: %v", err)
+	}
+
+	redisClient := redis.NewClient(&redis.Options{
+		Addr: mr.Addr(),
+	})
+
+	return cache.NewClientFromRedis(redisClient), mr
+}
+
+func TestRedisLimiter_Allow_FirstRequest(t *testing.T) {
+	cacheClient, mr := newTestCacheClient(t)
+	defer mr.Close()
+
+	limiter := NewRedisLimiter(cacheClient, 100, time.Minute)
+	ctx := context.Background()
+
+	allowed, info, err := limiter.Allow(ctx, "client-1")
+	if err != nil {
+		t.Fatalf("Allow failed: %v", err)
+	}
+
+	if !allowed {
+		t.Error("First request should be allowed")
+	}
+	if info.Limit != 100 {
+		t.Errorf("Expected Limit=100, got %d", info.Limit)
+	}
+	if info.Remaining != 99 {
+		t.Errorf("Expected Remaining=99, got %d", info.Remaining)
+	}
+}
+
+func TestRedisLimiter_Allow_MultipleRequests(t *testing.T) {
+	cacheClient, mr := newTestCacheClient(t)
+	defer mr.Close()
+
+	limiter := NewRedisLimiter(cacheClient, 10, time.Minute)
+	ctx := context.Background()
+
+	// Make 5 requests
+	for i := 0; i < 5; i++ {
+		allowed, info, err := limiter.Allow(ctx, "client-1")
+		if err != nil {
+			t.Fatalf("Allow failed: %v", err)
+		}
+		if !allowed {
+			t.Errorf("Request %d should be allowed", i+1)
+		}
+		expectedRemaining := 10 - (i + 1)
+		if info.Remaining != expectedRemaining {
+			t.Errorf("Request %d: Expected Remaining=%d, got %d", i+1, expectedRemaining, info.Remaining)
+		}
+	}
+}
+
+func TestRedisLimiter_Allow_ExceedsLimit(t *testing.T) {
+	cacheClient, mr := newTestCacheClient(t)
+	defer mr.Close()
+
+	limiter := NewRedisLimiter(cacheClient, 3, time.Minute)
+	ctx := context.Background()
+
+	// Make 3 requests (should be allowed)
+	for i := 0; i < 3; i++ {
+		allowed, _, err := limiter.Allow(ctx, "client-1")
+		if err != nil {
+			t.Fatalf("Allow failed: %v", err)
+		}
+		if !allowed {
+			t.Errorf("Request %d should be allowed", i+1)
+		}
+	}
+
+	// 4th request should be denied
+	allowed, info, err := limiter.Allow(ctx, "client-1")
+	if err != nil {
+		t.Fatalf("Allow failed: %v", err)
+	}
+	if allowed {
+		t.Error("4th request should be denied")
+	}
+	if info.Remaining != 0 {
+		t.Errorf("Expected Remaining=0, got %d", info.Remaining)
+	}
+}
+
+func TestRedisLimiter_Allow_DifferentClients(t *testing.T) {
+	cacheClient, mr := newTestCacheClient(t)
+	defer mr.Close()
+
+	limiter := NewRedisLimiter(cacheClient, 2, time.Minute)
+	ctx := context.Background()
+
+	// Client 1 makes 2 requests
+	for i := 0; i < 2; i++ {
+		allowed, _, err := limiter.Allow(ctx, "client-1")
+		if err != nil {
+			t.Fatalf("Allow failed: %v", err)
+		}
+		if !allowed {
+			t.Error("Client 1 request should be allowed")
+		}
+	}
+
+	// Client 1's 3rd request should be denied
+	allowed, _, err := limiter.Allow(ctx, "client-1")
+	if err != nil {
+		t.Fatalf("Allow failed: %v", err)
+	}
+	if allowed {
+		t.Error("Client 1's 3rd request should be denied")
+	}
+
+	// Client 2 should still be able to make requests
+	allowed, info, err := limiter.Allow(ctx, "client-2")
+	if err != nil {
+		t.Fatalf("Allow failed: %v", err)
+	}
+	if !allowed {
+		t.Error("Client 2's first request should be allowed")
+	}
+	if info.Remaining != 1 {
+		t.Errorf("Expected Remaining=1 for client-2, got %d", info.Remaining)
+	}
+}
+
+func TestRedisLimiter_Allow_WindowExpiry(t *testing.T) {
+	cacheClient, mr := newTestCacheClient(t)
+	defer mr.Close()
+
+	// Use 2 seconds window (miniredis requires at least 1 second)
+	limiter := NewRedisLimiter(cacheClient, 2, 2*time.Second)
+	ctx := context.Background()
+
+	// Make 2 requests
+	for i := 0; i < 2; i++ {
+		allowed, _, err := limiter.Allow(ctx, "client-1")
+		if err != nil {
+			t.Fatalf("Allow failed: %v", err)
+		}
+		if !allowed {
+			t.Error("Request should be allowed")
+		}
+	}
+
+	// 3rd request should be denied
+	allowed, _, err := limiter.Allow(ctx, "client-1")
+	if err != nil {
+		t.Fatalf("Allow failed: %v", err)
+	}
+	if allowed {
+		t.Error("3rd request should be denied")
+	}
+
+	// Fast-forward time to expire the window
+	mr.FastForward(3 * time.Second)
+
+	// Now requests should be allowed again
+	allowed, info, err := limiter.Allow(ctx, "client-1")
+	if err != nil {
+		t.Fatalf("Allow failed: %v", err)
+	}
+	if !allowed {
+		t.Error("Request should be allowed after window expiry")
+	}
+	if info.Remaining != 1 {
+		t.Errorf("Expected Remaining=1 after reset, got %d", info.Remaining)
+	}
+}
+
+func TestRedisLimiter_Allow_ResetTime(t *testing.T) {
+	cacheClient, mr := newTestCacheClient(t)
+	defer mr.Close()
+
+	limiter := NewRedisLimiter(cacheClient, 10, time.Minute)
+	ctx := context.Background()
+
+	before := time.Now()
+	_, info, err := limiter.Allow(ctx, "client-1")
+	after := time.Now()
+
+	if err != nil {
+		t.Fatalf("Allow failed: %v", err)
+	}
+
+	// Reset time should be approximately 1 minute from now
+	expectedReset := before.Add(time.Minute)
+	if info.Reset.Before(before) {
+		t.Error("Reset time should be after request time")
+	}
+	if info.Reset.After(after.Add(2 * time.Minute)) {
+		t.Error("Reset time should be within reasonable range")
+	}
+	t.Logf("Reset time: %v, expected around: %v", info.Reset, expectedReset)
+}
+
+func TestRedisLimiter_Allow_ZeroRemaining(t *testing.T) {
+	cacheClient, mr := newTestCacheClient(t)
+	defer mr.Close()
+
+	limiter := NewRedisLimiter(cacheClient, 1, time.Minute)
+	ctx := context.Background()
+
+	// First request
+	allowed, info, err := limiter.Allow(ctx, "client-1")
+	if err != nil {
+		t.Fatalf("Allow failed: %v", err)
+	}
+	if !allowed {
+		t.Error("First request should be allowed")
+	}
+	if info.Remaining != 0 {
+		t.Errorf("Expected Remaining=0 after first request with limit=1, got %d", info.Remaining)
+	}
+}
+
+func TestRedisLimiter_Allow_ConcurrentRequests(t *testing.T) {
+	cacheClient, mr := newTestCacheClient(t)
+	defer mr.Close()
+
+	limiter := NewRedisLimiter(cacheClient, 100, time.Minute)
+	ctx := context.Background()
+
+	done := make(chan bool, 50)
+	allowedCount := 0
+	var mu = make(chan int, 1)
+	mu <- 0
+
+	// Make 50 concurrent requests
+	for i := 0; i < 50; i++ {
+		go func() {
+			allowed, _, err := limiter.Allow(ctx, "client-1")
+			if err != nil {
+				t.Errorf("Allow failed: %v", err)
+			}
+			if allowed {
+				<-mu
+				allowedCount++
+				mu <- 0
+			}
+			done <- true
+		}()
+	}
+
+	// Wait for all goroutines
+	for i := 0; i < 50; i++ {
+		<-done
+	}
+	<-mu
+
+	// All 50 should be allowed since limit is 100
+	if allowedCount != 50 {
+		t.Errorf("Expected 50 allowed requests, got %d", allowedCount)
+	}
+}
+
+func TestRedisLimiter_Allow_KeyPrefix(t *testing.T) {
+	cacheClient, mr := newTestCacheClient(t)
+	defer mr.Close()
+
+	limiter := NewRedisLimiter(cacheClient, 10, time.Minute)
+	ctx := context.Background()
+
+	// Make a request
+	limiter.Allow(ctx, "192.168.1.1")
+
+	// Check that the key in Redis has the correct prefix
+	keys := mr.Keys()
+	found := false
+	for _, key := range keys {
+		if key == "ratelimit:192.168.1.1" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("Expected key 'ratelimit:192.168.1.1', found keys: %v", keys)
+	}
+}
+
+func TestRedisLimiter_Allow_NegativeRemaining(t *testing.T) {
+	cacheClient, mr := newTestCacheClient(t)
+	defer mr.Close()
+
+	limiter := NewRedisLimiter(cacheClient, 2, time.Minute)
+	ctx := context.Background()
+
+	// Exhaust the limit
+	for i := 0; i < 2; i++ {
+		limiter.Allow(ctx, "client-1")
+	}
+
+	// Make more requests beyond the limit
+	for i := 0; i < 3; i++ {
+		allowed, info, err := limiter.Allow(ctx, "client-1")
+		if err != nil {
+			t.Fatalf("Allow failed: %v", err)
+		}
+		if allowed {
+			t.Error("Request should be denied")
+		}
+		// Remaining should be 0, not negative (due to max(0, ...) in code)
+		if info.Remaining != 0 {
+			t.Errorf("Expected Remaining=0, got %d", info.Remaining)
+		}
+	}
+}
+
+func TestRedisLimiter_Allow_LargeLimit(t *testing.T) {
+	cacheClient, mr := newTestCacheClient(t)
+	defer mr.Close()
+
+	limiter := NewRedisLimiter(cacheClient, 1000000, time.Minute)
+	ctx := context.Background()
+
+	allowed, info, err := limiter.Allow(ctx, "client-1")
+	if err != nil {
+		t.Fatalf("Allow failed: %v", err)
+	}
+	if !allowed {
+		t.Error("Request should be allowed")
+	}
+	if info.Limit != 1000000 {
+		t.Errorf("Expected Limit=1000000, got %d", info.Limit)
+	}
+	if info.Remaining != 999999 {
+		t.Errorf("Expected Remaining=999999, got %d", info.Remaining)
+	}
+}
+
+func TestRedisLimiter_Allow_EmptyKey(t *testing.T) {
+	cacheClient, mr := newTestCacheClient(t)
+	defer mr.Close()
+
+	limiter := NewRedisLimiter(cacheClient, 10, time.Minute)
+	ctx := context.Background()
+
+	// Empty key should still work (though not recommended in practice)
+	allowed, _, err := limiter.Allow(ctx, "")
+	if err != nil {
+		t.Fatalf("Allow failed: %v", err)
+	}
+	if !allowed {
+		t.Error("Request with empty key should be allowed")
+	}
+}
+
+func TestRedisLimiter_Allow_SpecialCharactersInKey(t *testing.T) {
+	cacheClient, mr := newTestCacheClient(t)
+	defer mr.Close()
+
+	limiter := NewRedisLimiter(cacheClient, 10, time.Minute)
+	ctx := context.Background()
+
+	keys := []string{
+		"192.168.1.1",
+		"user@example.com",
+		"api-key-123",
+		"client:with:colons",
+		"key with spaces",
+	}
+
+	for _, key := range keys {
+		allowed, _, err := limiter.Allow(ctx, key)
+		if err != nil {
+			t.Errorf("Allow failed for key '%s': %v", key, err)
+		}
+		if !allowed {
+			t.Errorf("Request for key '%s' should be allowed", key)
+		}
+	}
+}
+
+func TestRedisLimiter_Allow_ContextTimeout(t *testing.T) {
+	cacheClient, mr := newTestCacheClient(t)
+	defer mr.Close()
+
+	limiter := NewRedisLimiter(cacheClient, 10, time.Minute)
+
+	// Create a context that's already cancelled
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	_, _, err := limiter.Allow(ctx, "client-1")
+	if err == nil {
+		t.Error("Expected error with cancelled context")
 	}
 }
