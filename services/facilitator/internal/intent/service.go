@@ -180,21 +180,31 @@ func (s *Service) CreateIntent(ctx context.Context, req *CreateIntentRequest) (*
 }
 
 // SelectRoute selects a route for an intent
+// SECURITY: Uses database transaction with row-level locking to prevent race conditions
 func (s *Service) SelectRoute(ctx context.Context, req *SelectRouteRequest) (*SelectRouteResponse, error) {
-	// Get intent
-	intent, err := s.repo.GetByID(ctx, req.IntentID)
+	// Start transaction for atomic operation
+	tx, err := s.repo.BeginTx(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to start transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	// Get intent with row-level lock (SELECT ... FOR UPDATE)
+	intent, err := s.repo.GetByIDForUpdate(ctx, tx, req.IntentID)
 	if err != nil {
 		return nil, err
 	}
 
-	// Check status
+	// Check status - now atomic with lock
 	if intent.Status != IntentStatusPending {
 		return nil, ErrIntentNotPending
 	}
 
 	// Check expiry
 	if time.Now().After(intent.ExpiresAt) {
-		s.repo.UpdateStatus(ctx, intent.ID, IntentStatusExpired, "")
+		intent.Status = IntentStatusExpired
+		s.repo.UpdateInTx(ctx, tx, intent)
+		tx.Commit()
 		return nil, ErrIntentExpired
 	}
 
@@ -221,15 +231,20 @@ func (s *Service) SelectRoute(ctx context.Context, req *SelectRouteRequest) (*Se
 		selectedRoute = refreshed
 	}
 
-	// Update intent
+	// Update intent within transaction
 	intent.SelectedRoute = selectedRoute
 	intent.Status = IntentStatusRouted
 
-	if err := s.repo.Update(ctx, intent); err != nil {
+	if err := s.repo.UpdateInTx(ctx, tx, intent); err != nil {
 		return nil, fmt.Errorf("failed to update intent: %w", err)
 	}
 
-	// Record metrics
+	// Commit transaction
+	if err := tx.Commit(); err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	// Record metrics (outside transaction)
 	if s.metrics != nil {
 		s.metrics.RecordIntentRouted(selectedRoute.SourceNetwork, selectedRoute.TargetNetwork)
 	}
@@ -398,13 +413,22 @@ func (s *Service) ListIntents(ctx context.Context, req ListIntentsRequest) (*Lis
 }
 
 // CancelIntent cancels a pending intent
+// SECURITY: Uses database transaction with row-level locking to prevent race conditions
 func (s *Service) CancelIntent(ctx context.Context, req *CancelIntentRequest) error {
-	intent, err := s.repo.GetByID(ctx, req.IntentID)
+	// Start transaction for atomic operation
+	tx, err := s.repo.BeginTx(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to start transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	// Get intent with row-level lock (SELECT ... FOR UPDATE)
+	intent, err := s.repo.GetByIDForUpdate(ctx, tx, req.IntentID)
 	if err != nil {
 		return err
 	}
 
-	// Can only cancel pending or routed intents
+	// Can only cancel pending or routed intents - now atomic with lock
 	if intent.Status != IntentStatusPending && intent.Status != IntentStatusRouted {
 		return fmt.Errorf("cannot cancel intent in status: %s", intent.Status)
 	}
@@ -412,11 +436,16 @@ func (s *Service) CancelIntent(ctx context.Context, req *CancelIntentRequest) er
 	intent.Status = IntentStatusCancelled
 	intent.ErrorMessage = req.Reason
 
-	if err := s.repo.Update(ctx, intent); err != nil {
+	if err := s.repo.UpdateInTx(ctx, tx, intent); err != nil {
 		return fmt.Errorf("failed to cancel intent: %w", err)
 	}
 
-	// Record metrics
+	// Commit transaction
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	// Record metrics (outside transaction)
 	if s.metrics != nil {
 		s.metrics.RecordIntentCancelled(intent.TargetNetwork)
 	}

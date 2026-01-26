@@ -732,7 +732,7 @@ func (s *Service) processAutoSettle() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 
-	// Get active streams
+	// Get active streams (initial list without lock)
 	streams, _, err := s.repo.List(ctx, ListStreamsRequest{
 		Status: []StreamStatus{StreamStatusActive},
 		Limit:  100,
@@ -742,41 +742,129 @@ func (s *Service) processAutoSettle() {
 	}
 
 	for _, stream := range streams {
-		// SECURITY: Always check SetString return value - skip streams with invalid amounts
-		currentAmount := new(big.Int)
-		if _, ok := currentAmount.SetString(stream.CurrentAmount, 10); !ok {
-			log.Printf("Warning: stream %s has invalid current amount: %s", stream.ID, stream.CurrentAmount)
-			continue
+		// Process each stream with proper locking to prevent double-settlement
+		s.processAutoSettleStream(ctx, stream.ID)
+	}
+}
+
+// processAutoSettleStream handles auto-settlement for a single stream with proper locking
+// SECURITY: Uses database transaction with row-level locking to prevent double-settlement
+func (s *Service) processAutoSettleStream(ctx context.Context, streamID string) {
+	// Start transaction for atomic check and update
+	tx, err := s.repo.BeginTx(ctx)
+	if err != nil {
+		log.Printf("Warning: failed to start transaction for auto-settle stream %s: %v", streamID, err)
+		return
+	}
+	defer tx.Rollback()
+
+	// Get stream with row-level lock (SELECT ... FOR UPDATE)
+	// This prevents other workers from processing the same stream simultaneously
+	stream, err := s.repo.GetByIDForUpdate(ctx, tx, streamID)
+	if err != nil {
+		log.Printf("Warning: failed to get stream %s for auto-settle: %v", streamID, err)
+		return
+	}
+
+	// Verify stream is still active (may have changed since initial list)
+	if stream.Status != StreamStatusActive {
+		return
+	}
+
+	// SECURITY: Always check SetString return value - skip streams with invalid amounts
+	currentAmount := new(big.Int)
+	if _, ok := currentAmount.SetString(stream.CurrentAmount, 10); !ok {
+		log.Printf("Warning: stream %s has invalid current amount: %s", stream.ID, stream.CurrentAmount)
+		return
+	}
+
+	settledAmount := new(big.Int)
+	if _, ok := settledAmount.SetString(stream.SettledAmount, 10); !ok {
+		log.Printf("Warning: stream %s has invalid settled amount: %s", stream.ID, stream.SettledAmount)
+		return
+	}
+
+	unsettled := new(big.Int).Sub(currentAmount, settledAmount)
+
+	// Check if unsettled amount exceeds threshold
+	if unsettled.Cmp(s.config.AutoSettleThreshold) < 0 {
+		return
+	}
+
+	// SECURITY: Atomically update the settled amount BEFORE executing settlement
+	// This prevents double-settlement if another worker picks up this stream
+	previousSettledAmount := stream.SettledAmount
+	stream.SettledAmount = currentAmount.String()
+
+	if err := s.repo.UpdateInTx(ctx, tx, stream); err != nil {
+		log.Printf("Warning: failed to update stream %s settled amount: %v", stream.ID, err)
+		return
+	}
+
+	// Commit the transaction to release the lock and persist the settled amount update
+	if err := tx.Commit(); err != nil {
+		log.Printf("Warning: failed to commit auto-settle transaction for stream %s: %v", stream.ID, err)
+		return
+	}
+
+	// Execute settlement OUTSIDE the transaction (to avoid long locks)
+	txHash, err := s.settler.SettleStream(ctx, stream.Network, stream.Scheme, stream.Payer, stream.Payee, stream.Asset, unsettled.String())
+	if err != nil {
+		log.Printf("Warning: failed to auto-settle stream %s: %v", stream.ID, err)
+
+		// SECURITY: Revert the settled amount on settlement failure
+		revertTx, txErr := s.repo.BeginTx(ctx)
+		if txErr != nil {
+			log.Printf("Error: failed to start revert transaction for stream %s: %v", stream.ID, txErr)
+			return
+		}
+		defer revertTx.Rollback()
+
+		revertStream, getErr := s.repo.GetByIDForUpdate(ctx, revertTx, streamID)
+		if getErr != nil {
+			log.Printf("Error: failed to get stream %s for revert: %v", stream.ID, getErr)
+			return
 		}
 
-		settledAmount := new(big.Int)
-		if _, ok := settledAmount.SetString(stream.SettledAmount, 10); !ok {
-			log.Printf("Warning: stream %s has invalid settled amount: %s", stream.ID, stream.SettledAmount)
-			continue
+		revertStream.SettledAmount = previousSettledAmount
+		if updateErr := s.repo.UpdateInTx(ctx, revertTx, revertStream); updateErr != nil {
+			log.Printf("Error: failed to revert settled amount for stream %s: %v", stream.ID, updateErr)
+			return
 		}
 
-		unsettled := new(big.Int).Sub(currentAmount, settledAmount)
-
-		// Check if unsettled amount exceeds threshold
-		if unsettled.Cmp(s.config.AutoSettleThreshold) >= 0 {
-			// Settle the unsettled amount
-			txHash, err := s.settler.SettleStream(ctx, stream.Network, stream.Scheme, stream.Payer, stream.Payee, stream.Asset, unsettled.String())
-			if err != nil {
-				log.Printf("Warning: failed to auto-settle stream %s: %v", stream.ID, err)
-				continue
-			}
-
-			// Update settled amount
-			stream.SettledAmount = currentAmount.String()
-			stream.SettlementTxHash = txHash
-			if err := s.repo.Update(ctx, stream); err != nil {
-				log.Printf("Warning: failed to update stream %s after settlement: %v", stream.ID, err)
-			}
-
-			// Record metrics
-			if s.metrics != nil {
-				s.metrics.RecordStreamSettlement(stream.Network, stream.Scheme)
-			}
+		if commitErr := revertTx.Commit(); commitErr != nil {
+			log.Printf("Error: failed to commit revert transaction for stream %s: %v", stream.ID, commitErr)
 		}
+		return
+	}
+
+	// Update the settlement transaction hash
+	updateTx, err := s.repo.BeginTx(ctx)
+	if err != nil {
+		log.Printf("Warning: failed to start update transaction for stream %s tx hash: %v", stream.ID, err)
+		return
+	}
+	defer updateTx.Rollback()
+
+	updatedStream, err := s.repo.GetByIDForUpdate(ctx, updateTx, streamID)
+	if err != nil {
+		log.Printf("Warning: failed to get stream %s for tx hash update: %v", stream.ID, err)
+		return
+	}
+
+	updatedStream.SettlementTxHash = txHash
+	if err := s.repo.UpdateInTx(ctx, updateTx, updatedStream); err != nil {
+		log.Printf("Warning: failed to update stream %s tx hash: %v", stream.ID, err)
+		return
+	}
+
+	if err := updateTx.Commit(); err != nil {
+		log.Printf("Warning: failed to commit tx hash update for stream %s: %v", stream.ID, err)
+		return
+	}
+
+	// Record metrics
+	if s.metrics != nil {
+		s.metrics.RecordStreamSettlement(stream.Network, stream.Scheme)
 	}
 }
