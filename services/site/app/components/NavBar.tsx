@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
@@ -116,6 +116,23 @@ export function NavBar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
   // Check if a link is active (exact match or starts with path for nested routes)
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -202,44 +219,56 @@ export function NavBar() {
         {mobileMenuOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
+            animate={{ opacity: 1, height: "calc(100dvh - 4rem)" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="overflow-hidden border-t border-border bg-background md:hidden"
+            className="overflow-y-auto border-t border-border bg-background md:hidden"
           >
-            <div className="space-y-1 px-4 py-4">
-              {navLinks.map((link) => {
-                const active = !link.external && isActive(link.href);
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    target={link.external ? "_blank" : undefined}
-                    rel={link.external ? "noopener noreferrer" : undefined}
-                    aria-current={active ? "page" : undefined}
-                    className={`flex items-center justify-between rounded-lg px-3 py-3 text-base font-medium transition-colors ${
-                      active
-                        ? "bg-background-secondary text-brand"
-                        : "text-foreground-secondary hover:bg-background-secondary hover:text-foreground"
-                    }`}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {link.label}
-                    {link.external && <ExternalLinkIcon />}
-                  </Link>
-                );
-              })}
+            <div className="flex min-h-full flex-col px-4 py-4">
+              <div className="flex-1 space-y-1">
+                {navLinks.map((link) => {
+                  const active = !link.external && isActive(link.href);
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      target={link.external ? "_blank" : undefined}
+                      rel={link.external ? "noopener noreferrer" : undefined}
+                      aria-current={active ? "page" : undefined}
+                      className={`flex items-center justify-between rounded-lg px-4 py-3.5 text-base font-medium transition-colors ${
+                        active
+                          ? "bg-background-secondary text-brand"
+                          : "text-foreground-secondary hover:bg-background-secondary hover:text-foreground"
+                      }`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {link.label}
+                      {link.external && <ExternalLinkIcon />}
+                    </Link>
+                  );
+                })}
+              </div>
 
-              <div className="my-4 border-t border-border" />
-
-              <Link
-                href="https://docs.t402.io/getting-started/quickstart"
-                className="flex h-12 w-full items-center justify-center rounded-lg bg-brand text-base font-medium transition-colors hover:bg-brand-secondary"
-                style={{ color: "#0A0A0B" }}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Get Started
-              </Link>
+              <div className="mt-auto space-y-3 border-t border-border pt-4">
+                <Link
+                  href="https://github.com/t402-io/t402"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium text-foreground-secondary transition-colors hover:bg-background-secondary hover:text-foreground"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <GitHubIcon />
+                  GitHub
+                </Link>
+                <Link
+                  href="https://docs.t402.io/getting-started/quickstart"
+                  className="flex h-12 w-full items-center justify-center rounded-lg bg-brand text-base font-medium transition-colors hover:bg-brand-secondary"
+                  style={{ color: "#0A0A0B" }}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Get Started
+                </Link>
+              </div>
             </div>
           </motion.div>
         )}
