@@ -94,8 +94,8 @@ export function ContentPaywall() {
       {state === "locked" && (
         <div className="glass-card overflow-hidden">
           {/* Article preview */}
-          <div className="p-6 pb-4">
-            <div className="flex items-center gap-3 mb-4">
+          <div className="p-4 sm:p-6 pb-4">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4">
               <span className="text-xs px-2.5 py-1 rounded-full bg-[var(--color-info-dim)] text-[var(--color-info)]">
                 Premium Article
               </span>
@@ -109,8 +109,8 @@ export function ContentPaywall() {
 
           {/* Paywall overlay */}
           <div className="relative">
-            <div className="h-24 bg-gradient-to-b from-transparent to-[var(--color-surface)]" />
-            <div className="bg-[var(--color-surface)] p-6 text-center border-t border-[var(--color-border)]">
+            <div className="h-20 sm:h-24 bg-gradient-to-b from-transparent to-[var(--color-surface)]" />
+            <div className="bg-[var(--color-surface)] p-4 sm:p-6 text-center border-t border-[var(--color-border)]">
               <div className="text-3xl mb-3">🔒</div>
               <p className="text-sm text-[var(--color-muted)] mb-4">
                 Unlock this article for <span className="text-white font-medium">0.01 USDT</span>
@@ -130,7 +130,7 @@ export function ContentPaywall() {
       )}
 
       {state === "paying" && (
-        <div className="glass-card p-12 text-center">
+        <div className="glass-card p-8 sm:p-12 text-center">
           <Spinner size="lg" color="var(--color-brand)" />
           <p className="text-sm text-[var(--color-muted)] mt-4">Processing payment...</p>
           <p className="text-xs text-[var(--color-muted)] mt-1">Signing USDT authorization & settling on-chain</p>

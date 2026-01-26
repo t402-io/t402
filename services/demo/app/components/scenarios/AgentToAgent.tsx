@@ -186,7 +186,7 @@ export function AgentToAgent() {
       {/* Right: Result */}
       <div>
         {state === "idle" && (
-          <div className="glass-card p-6 flex flex-col items-center justify-center min-h-[340px] text-center">
+          <div className="glass-card p-4 sm:p-6 flex flex-col items-center justify-center min-h-[280px] sm:min-h-[340px] text-center">
             <div className="text-4xl mb-3">🤝</div>
             <h4 className="text-sm font-medium mb-2">Agent-to-Agent Protocol</h4>
             <p className="text-xs text-[var(--color-muted)] max-w-xs">
@@ -196,7 +196,7 @@ export function AgentToAgent() {
         )}
 
         {(state === "delegating" || state === "paying" || state === "executing") && (
-          <div className="glass-card p-6 flex flex-col items-center justify-center min-h-[340px]">
+          <div className="glass-card p-4 sm:p-6 flex flex-col items-center justify-center min-h-[280px] sm:min-h-[340px]">
             <div className="relative">
               <motion.div
                 animate={{ rotate: 360 }}
@@ -247,7 +247,7 @@ export function AgentToAgent() {
         )}
 
         {state === "error" && (
-          <div className="glass-card p-6 text-center">
+          <div className="glass-card p-4 sm:p-6 text-center">
             <p className="text-sm text-[var(--color-error)]">{error}</p>
           </div>
         )}
