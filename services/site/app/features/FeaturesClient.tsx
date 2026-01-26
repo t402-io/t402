@@ -234,7 +234,7 @@ function FeatureCard({ feature, index }: { feature: Feature; index: number }) {
     >
       <Link
         href={`/features/${feature.slug}`}
-        className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-background-secondary p-8 transition-all hover:border-border-secondary hover:shadow-lg"
+        className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-background-secondary p-5 transition-all hover:border-border-secondary hover:shadow-lg sm:p-8"
       >
         {/* Color accent line */}
         <div
@@ -244,15 +244,15 @@ function FeatureCard({ feature, index }: { feature: Feature; index: number }) {
 
         {/* Icon */}
         <div
-          className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl transition-transform group-hover:scale-110"
+          className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl transition-transform group-hover:scale-110 sm:mb-6 sm:h-14 sm:w-14"
           style={{ backgroundColor: `${feature.color}20` }}
         >
-          <Icon className="h-7 w-7" style={{ color: feature.color }} />
+          <Icon className="h-6 w-6 sm:h-7 sm:w-7" style={{ color: feature.color }} />
         </div>
 
         {/* Content */}
-        <div className="mb-2 flex items-center gap-2">
-          <h3 className="text-xl font-semibold text-foreground">{feature.name}</h3>
+        <div className="mb-2 flex flex-wrap items-center gap-2">
+          <h3 className="text-lg font-semibold text-foreground sm:text-xl">{feature.name}</h3>
           {feature.badge && (
             <span
               className={`rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${
@@ -345,7 +345,9 @@ export default function FeaturesClient() {
         <h2 className="mb-8 text-center text-2xl font-semibold text-foreground">
           Feature &times; Chain Support
         </h2>
-        <div className="overflow-x-auto">
+
+        {/* Desktop Table */}
+        <div className="hidden overflow-x-auto lg:block">
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b border-border">
@@ -410,6 +412,52 @@ export default function FeaturesClient() {
               })}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="grid gap-3 lg:hidden">
+          {features.map((feature) => {
+            const chains = feature.supportedChains;
+            const supportedChains = [
+              chains.some((c) => ["Ethereum", "Base", "Arbitrum", "Optimism"].includes(c)) && "EVM",
+              chains.includes("Solana") && "Solana",
+              chains.includes("TON") && "TON",
+              chains.includes("TRON") && "TRON",
+              chains.includes("NEAR") && "NEAR",
+              chains.includes("Aptos") && "Aptos",
+              chains.includes("Tezos") && "Tezos",
+              chains.includes("Polkadot") && "Polkadot",
+              chains.includes("Stacks") && "Stacks",
+            ].filter(Boolean);
+
+            return (
+              <div
+                key={feature.id}
+                className="rounded-lg border border-border bg-background-secondary p-4"
+              >
+                <div className="mb-2 flex items-center gap-2">
+                  <span className="font-medium text-foreground">{feature.name}</span>
+                  {feature.badge && (
+                    <span className={`text-[10px] uppercase ${
+                      feature.badge === "beta" ? "text-amber-400" : "text-purple-400"
+                    }`}>
+                      {feature.badge}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {supportedChains.map((chain) => (
+                    <span
+                      key={chain}
+                      className="rounded-md bg-brand/10 px-2 py-1 text-xs font-medium text-brand"
+                    >
+                      {chain}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </motion.div>
 
