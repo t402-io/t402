@@ -369,3 +369,117 @@ func TestNewExactLegacyEvmScheme_CustomConfig(t *testing.T) {
 		t.Errorf("MinAllowanceRatio = %v, want 0.9", scheme.config.MinAllowanceRatio)
 	}
 }
+
+// TestCalculateMinAllowance tests the calculateMinAllowance function for precision
+func TestCalculateMinAllowance(t *testing.T) {
+	tests := []struct {
+		name           string
+		requiredAmount *big.Int
+		minRatio       float64
+		expected       *big.Int
+	}{
+		{
+			name:           "normal ratio 1.0",
+			requiredAmount: big.NewInt(1000000),
+			minRatio:       1.0,
+			expected:       big.NewInt(1000000),
+		},
+		{
+			name:           "ratio 0.9",
+			requiredAmount: big.NewInt(1000000),
+			minRatio:       0.9,
+			expected:       big.NewInt(900000),
+		},
+		{
+			name:           "ratio 0.5",
+			requiredAmount: big.NewInt(1000000),
+			minRatio:       0.5,
+			expected:       big.NewInt(500000),
+		},
+		{
+			name:           "ratio 0.0 returns 0",
+			requiredAmount: big.NewInt(1000000),
+			minRatio:       0.0,
+			expected:       big.NewInt(0),
+		},
+		{
+			name:           "negative ratio returns 0",
+			requiredAmount: big.NewInt(1000000),
+			minRatio:       -0.5,
+			expected:       big.NewInt(0),
+		},
+		{
+			name:           "nil amount returns 0",
+			requiredAmount: nil,
+			minRatio:       1.0,
+			expected:       big.NewInt(0),
+		},
+		{
+			name:           "zero amount returns 0",
+			requiredAmount: big.NewInt(0),
+			minRatio:       1.0,
+			expected:       big.NewInt(0),
+		},
+		{
+			name:           "ratio > 1.0 returns full amount",
+			requiredAmount: big.NewInt(1000000),
+			minRatio:       1.5,
+			expected:       big.NewInt(1000000),
+		},
+		{
+			name:           "fractional result truncated",
+			requiredAmount: big.NewInt(100),
+			minRatio:       0.33,
+			expected:       big.NewInt(33),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := calculateMinAllowance(tt.requiredAmount, tt.minRatio)
+			if result.Cmp(tt.expected) != 0 {
+				t.Errorf("calculateMinAllowance(%v, %v) = %v, want %v",
+					tt.requiredAmount, tt.minRatio, result, tt.expected)
+			}
+		})
+	}
+}
+
+// TestCalculateMinAllowance_LargeValues tests precision for large values
+// that would overflow int64 or lose precision with float64
+func TestCalculateMinAllowance_LargeValues(t *testing.T) {
+	// Create a value larger than 2^63-1 (max int64)
+	// This would overflow if we used int64 conversion
+	largeAmount, _ := new(big.Int).SetString("100000000000000000000000000", 10) // 10^26
+
+	// Test with ratio 0.9
+	expected, _ := new(big.Int).SetString("90000000000000000000000000", 10) // 9 * 10^25
+	result := calculateMinAllowance(largeAmount, 0.9)
+
+	if result.Cmp(expected) != 0 {
+		t.Errorf("Large value precision test failed: got %v, want %v", result, expected)
+	}
+
+	// Test with ratio 0.5
+	expected, _ = new(big.Int).SetString("50000000000000000000000000", 10) // 5 * 10^25
+	result = calculateMinAllowance(largeAmount, 0.5)
+
+	if result.Cmp(expected) != 0 {
+		t.Errorf("Large value precision test (0.5) failed: got %v, want %v", result, expected)
+	}
+
+	// Test with a value that would lose precision in float64
+	// float64 can only represent integers exactly up to 2^53
+	precisionAmount, _ := new(big.Int).SetString("9007199254740993", 10) // 2^53 + 1
+	expectedPrecision, _ := new(big.Int).SetString("8106479329266893", 10) // 9007199254740993 * 0.9 truncated
+
+	result = calculateMinAllowance(precisionAmount, 0.9)
+
+	// The result should be close to expected (within 1 due to truncation)
+	diff := new(big.Int).Sub(result, expectedPrecision)
+	diff.Abs(diff)
+	if diff.Cmp(big.NewInt(1)) > 0 {
+		t.Errorf("Precision test failed: got %v, want approximately %v (diff: %v)",
+			result, expectedPrecision, diff)
+	}
+}
