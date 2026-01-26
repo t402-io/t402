@@ -10,7 +10,7 @@ RUN apk add --no-cache git ca-certificates
 WORKDIR /app
 
 # Copy go mod files from root (for replace directive to work)
-COPY go/go.mod go/go.sum ./go/
+COPY sdks/go/go.mod sdks/go/go.sum ./sdks/go/
 COPY services/facilitator/go.mod ./services/facilitator/
 
 # Download dependencies
@@ -19,7 +19,7 @@ RUN go mod download
 
 # Copy source code
 WORKDIR /app
-COPY go/ ./go/
+COPY sdks/go/ ./sdks/go/
 COPY services/facilitator/ ./services/facilitator/
 
 # Build the binary with version
