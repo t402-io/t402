@@ -107,7 +107,7 @@ See [@t402/wdk-bridge](/sdks/typescript/wdk-bridge) for bridging integration.
 
 ## Network Selection
 
-When configuring T402, use the network ID format:
+When configuring T402, use the CAIP-2 network ID format:
 
 ```typescript
 // EVM chains
@@ -116,9 +116,14 @@ When configuring T402, use the network ID format:
 'eip155:42161'  // Arbitrum
 
 // Non-EVM chains
-'ton:mainnet'   // TON
-'tron:mainnet'  // TRON
-'solana:mainnet' // Solana
+'ton:mainnet'                                    // TON
+'tron:mainnet'                                   // TRON
+'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp'       // Solana Mainnet
+'near:mainnet'                                   // NEAR
+'aptos:1'                                        // Aptos Mainnet
+'tezos:NetXdQprcVkpaWU'                         // Tezos Mainnet
+'polkadot:68d56f15f85d3136970ec16946040bc1'    // Polkadot Asset Hub
+'stacks:1'                                       // Stacks Mainnet
 ```
 
 ## Adding New Chains

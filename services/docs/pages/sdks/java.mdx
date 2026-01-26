@@ -14,13 +14,13 @@ import { Tabs } from 'nextra/components'
 <dependency>
     <groupId>io.t402</groupId>
     <artifactId>t402</artifactId>
-    <version>1.7.0</version>
+    <version>1.8.0</version>
 </dependency>
 ```
 </Tabs.Tab>
 <Tabs.Tab>
 ```groovy
-implementation 'io.t402:t402:1.7.0'
+implementation 'io.t402:t402:1.8.0'
 ```
 </Tabs.Tab>
 </Tabs>
@@ -77,7 +77,7 @@ public class ApiController {
 
 The `PaymentFilter` is automatically registered for `/api/*` endpoints.
 
-### @RequirePayment Annotation (v1.7.0+)
+### @RequirePayment Annotation (v1.8.0+)
 
 Use annotations for fine-grained payment protection:
 
@@ -116,7 +116,7 @@ public class ApiController {
 - Atomic units: `"1000000"` (6 decimals for USDC)
 - Decimal notation: `"1.00"`
 
-### Route-Based Configuration (v1.7.0+)
+### Route-Based Configuration (v1.8.0+)
 
 Configure routes via YAML instead of annotations:
 
@@ -138,7 +138,7 @@ t402:
       description: "Premium endpoints"
 ```
 
-### Spring WebFlux (Reactive) (v1.7.0+)
+### Spring WebFlux (Reactive) (v1.8.0+)
 
 For reactive Spring WebFlux applications:
 
@@ -399,7 +399,7 @@ byte[] userOpHash = userOp.getUserOpHash(
 UserOperation.PackedUserOperation packed = userOp.pack();
 ```
 
-### Safe Smart Account (v1.7.0+)
+### Safe Smart Account (v1.8.0+)
 
 ```java
 import io.t402.erc4337.safe.SafeAccount;
@@ -436,7 +436,7 @@ byte[] txHash = safe.getSafeTransactionHash(to, value, data, operation, nonce);
 byte[] signature = safe.signSafeTransaction(txHash, ownerPrivateKey);
 ```
 
-### Bundler Providers (v1.7.0+)
+### Bundler Providers (v1.8.0+)
 
 ```java
 import io.t402.erc4337.bundler.*;
@@ -453,7 +453,7 @@ PimlicoBundler pimlico = new PimlicoBundler("api-key", chainId);
 AlchemyBundler alchemy = new AlchemyBundler("api-key", chainId);
 ```
 
-### Pimlico Bundler (v1.7.0+)
+### Pimlico Bundler (v1.8.0+)
 
 ```java
 import io.t402.erc4337.bundler.PimlicoBundler;
@@ -478,7 +478,7 @@ boolean valid = bundler.validateSponsorshipPolicies(policyIds);
 BigInteger nonce = bundler.getAccountNonce(sender, key);
 ```
 
-### Alchemy Bundler (v1.7.0+)
+### Alchemy Bundler (v1.8.0+)
 
 ```java
 import io.t402.erc4337.bundler.AlchemyBundler;
@@ -587,7 +587,7 @@ The SDK includes a command-line interface.
 mvn exec:java -Dexec.mainClass="io.t402.cli.T402Cli" -Dexec.args="--help"
 
 # Or build and run
-java -jar t402-1.7.0.jar --help
+java -jar t402-1.8.0.jar --help
 ```
 
 ### Available Commands
@@ -707,12 +707,12 @@ String signature = signer.sign(payload);
 |-------|-------------|
 | `UserOperation` | ERC-4337 v0.7 UserOperation with `pack()` and `getUserOpHash()` |
 | `UserOperation.Builder` | Builder pattern for UserOperation creation |
-| `SafeAccount` | Safe smart account integration (v1.7.0+) |
+| `SafeAccount` | Safe smart account integration (v1.8.0+) |
 | `SafeCall` | Individual call for batch transactions |
 | `Operation` | CALL vs DELEGATECALL enum |
 | `BundlerClient` | Generic bundler JSON-RPC client |
-| `PimlicoBundler` | Pimlico bundler with gas sponsorship (v1.7.0+) |
-| `AlchemyBundler` | Alchemy bundler with simulation (v1.7.0+) |
+| `PimlicoBundler` | Pimlico bundler with gas sponsorship (v1.8.0+) |
+| `AlchemyBundler` | Alchemy bundler with simulation (v1.8.0+) |
 | `BundlerFactory` | Factory for creating bundler instances |
 | `BundlerProvider` | PIMLICO, ALCHEMY, CUSTOM enum |
 | `GasEstimate` | Gas estimation types |
@@ -739,12 +739,12 @@ String signature = signer.sign(payload);
 |-------|-------------|
 | `T402AutoConfiguration` | Auto-configuration for Spring Boot |
 | `T402Properties` | Configuration properties (`t402.*`) |
-| `RequirePayment` | Annotation for payment protection (v1.7.0+) |
-| `RouteConfig` | YAML-based route configuration (v1.7.0+) |
-| `PaymentInterceptor` | HandlerInterceptor for annotation-based validation (v1.7.0+) |
-| `T402WebMvcConfigurer` | Auto-registers PaymentInterceptor (v1.7.0+) |
+| `RequirePayment` | Annotation for payment protection (v1.8.0+) |
+| `RouteConfig` | YAML-based route configuration (v1.8.0+) |
+| `PaymentInterceptor` | HandlerInterceptor for annotation-based validation (v1.8.0+) |
+| `T402WebMvcConfigurer` | Auto-registers PaymentInterceptor (v1.8.0+) |
 
-### Spring WebFlux (v1.7.0+)
+### Spring WebFlux (v1.8.0+)
 
 | Class | Description |
 |-------|-------------|
@@ -755,10 +755,10 @@ String signature = signer.sign(payload);
 
 | Class | Description |
 |-------|-------------|
-| `PaymentPayload` | Payment header structure with Builder (v1.7.0+) |
+| `PaymentPayload` | Payment header structure with Builder (v1.8.0+) |
 | `PaymentRequirements` | Payment requirements for an endpoint |
-| `ResourceInfo` | Resource metadata for v2 protocol (v1.7.0+) |
-| `SupportedResponse` | Full /supported endpoint response (v1.7.0+) |
+| `ResourceInfo` | Resource metadata for v2 protocol (v1.8.0+) |
+| `SupportedResponse` | Full /supported endpoint response (v1.8.0+) |
 | `Authorization` | EIP-3009 authorization structure |
 | `VerificationResponse` | Facilitator verification response |
 | `SettlementResponse` | Facilitator settlement response |

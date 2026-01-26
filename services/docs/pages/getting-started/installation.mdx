@@ -10,23 +10,39 @@ Install T402 packages for your preferred language.
 # Core packages
 pnpm add @t402/core @t402/evm
 
-# All available packages
-pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/tron @t402/wdk @t402/wdk-gasless @t402/wdk-bridge @t402/mcp
+# All mechanism packages
+pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/tron @t402/near @t402/aptos @t402/tezos @t402/polkadot @t402/stacks
+
+# Full stack with WDK
+pnpm add @t402/core @t402/evm @t402/wdk @t402/wdk-gasless @t402/wdk-bridge @t402/mcp
 ```
 
 ### Individual Packages
 
+**Core & Mechanisms**
+
 | Package | Description | Install |
 |---------|-------------|---------|
 | `@t402/core` | Protocol types, HTTP utilities | `pnpm add @t402/core` |
-| `@t402/evm` | EVM chains support | `pnpm add @t402/evm` |
-| `@t402/svm` | Solana support | `pnpm add @t402/svm` |
-| `@t402/ton` | TON support | `pnpm add @t402/ton` |
-| `@t402/tron` | TRON support | `pnpm add @t402/tron` |
-| `@t402/wdk` | Tether WDK integration | `pnpm add @t402/wdk` |
-| `@t402/wdk-gasless` | Gasless payments | `pnpm add @t402/wdk-gasless` |
-| `@t402/wdk-bridge` | Cross-chain bridge | `pnpm add @t402/wdk-bridge` |
-| `@t402/mcp` | MCP server for AI | `pnpm add @t402/mcp` |
+| `@t402/evm` | EVM chains (Ethereum, Base, etc.) | `pnpm add @t402/evm` |
+| `@t402/svm` | Solana | `pnpm add @t402/svm` |
+| `@t402/ton` | TON | `pnpm add @t402/ton` |
+| `@t402/tron` | TRON | `pnpm add @t402/tron` |
+| `@t402/near` | NEAR Protocol | `pnpm add @t402/near` |
+| `@t402/aptos` | Aptos | `pnpm add @t402/aptos` |
+| `@t402/tezos` | Tezos | `pnpm add @t402/tezos` |
+| `@t402/polkadot` | Polkadot Asset Hub | `pnpm add @t402/polkadot` |
+| `@t402/stacks` | Stacks (Bitcoin L2) | `pnpm add @t402/stacks` |
+
+**WDK Integration**
+
+| Package | Description | Install |
+|---------|-------------|---------|
+| `@t402/wdk` | Tether WDK (EVM, TON, Solana, TRON) | `pnpm add @t402/wdk` |
+| `@t402/wdk-gasless` | Gasless payments (ERC-4337) | `pnpm add @t402/wdk-gasless` |
+| `@t402/wdk-bridge` | Cross-chain bridge (LayerZero) | `pnpm add @t402/wdk-bridge` |
+| `@t402/wdk-multisig` | Safe multi-sig wallets | `pnpm add @t402/wdk-multisig` |
+| `@t402/mcp` | MCP server for AI agents | `pnpm add @t402/mcp` |
 
 ### HTTP Framework Integrations
 
@@ -66,19 +82,20 @@ poetry add t402
 
 The Python package includes:
 - Core protocol types
-- EVM, TON, and TRON mechanisms
+- Multi-chain mechanisms (EVM, Solana, TON, TRON)
 - Flask and FastAPI integrations
+- HTTPX client wrapper
 
 ## Go
 
 ```bash
 # Install
-go get github.com/t402-io/t402/go@v1.8.0
+go get github.com/t402-io/t402/sdks/go@v1.8.0
 ```
 
 The Go module includes:
 - Core protocol types
-- EVM, SVM, TON, and TRON mechanisms
+- All 10 blockchain mechanisms (EVM, SVM, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks)
 - Gin middleware integration
 - MCP server for AI agents
 
@@ -92,22 +109,22 @@ import { Tabs } from 'nextra/components'
 <dependency>
     <groupId>io.t402</groupId>
     <artifactId>t402</artifactId>
-    <version>1.7.0</version>
+    <version>1.8.0</version>
 </dependency>
 ```
 </Tabs.Tab>
 <Tabs.Tab>
 ```groovy
-implementation 'io.t402:t402:1.7.0'
+implementation 'io.t402:t402:1.8.0'
 ```
 </Tabs.Tab>
 </Tabs>
 
 The Java SDK includes:
-- Multi-chain support (EVM, SVM, TON, TRON)
+- Multi-chain support (EVM, SVM, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks)
 - Spring Boot 3.x auto-configuration
 - ERC-4337 Account Abstraction
-- USDT0 cross-chain bridge
+- USDT0 cross-chain bridge (LayerZero)
 - CLI tool
 
 ## MCP Server (AI Agents)

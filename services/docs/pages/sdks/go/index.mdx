@@ -5,7 +5,7 @@ The T402 Go SDK provides comprehensive support for HTTP-native stablecoin paymen
 ## Installation
 
 ```bash
-go get github.com/t402-io/t402/go@latest
+go get github.com/t402-io/t402/sdks/go@latest
 ```
 
 ## CLI Tool
@@ -13,7 +13,7 @@ go get github.com/t402-io/t402/go@latest
 Install the CLI for quick operations:
 
 ```bash
-go install github.com/t402-io/t402/go/cmd/t402@latest
+go install github.com/t402-io/t402/sdks/go/cmd/t402@latest
 ```
 
 ### CLI Commands
@@ -50,11 +50,12 @@ t402 version
 
 ## Features
 
-- **Multi-Chain**: EVM, TON, TRON, Solana support
+- **Multi-Chain**: All 10 blockchain families (EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks)
 - **Server**: Gin middleware for payment protection
 - **Client**: HTTP client with automatic 402 handling
 - **Facilitator**: Full facilitator implementation
 - **CLI**: Command-line tools for testing and debugging
+- **MCP Server**: AI agent payment integration
 
 ## Quick Start
 
@@ -64,8 +65,8 @@ t402 version
 package main
 
 import (
-    t402 "github.com/t402-io/t402/go"
-    "github.com/t402-io/t402/go/mechanisms/evm/exact/client"
+    t402 "github.com/t402-io/t402/sdks/go"
+    "github.com/t402-io/t402/sdks/go/mechanisms/evm/exact/client"
 )
 
 func main() {
@@ -88,7 +89,7 @@ package main
 
 import (
     "github.com/gin-gonic/gin"
-    t402gin "github.com/t402-io/t402/go/http/gin"
+    t402gin "github.com/t402-io/t402/sdks/go/http/gin"
 )
 
 func main() {
@@ -118,24 +119,36 @@ func main() {
 
 | Module | Description |
 |--------|-------------|
-| `go` | Core client, server, facilitator |
-| `go/mechanisms/evm` | EVM chains (Ethereum, Base, etc.) |
-| `go/mechanisms/ton` | TON blockchain |
-| `go/mechanisms/tron` | TRON blockchain |
-| `go/mechanisms/svm` | Solana blockchain |
-| `go/http` | HTTP client and server |
-| `go/http/gin` | Gin middleware |
-| `go/signers/evm` | EVM wallet signers |
-| `go/signers/svm` | Solana wallet signers |
-| `go/extensions/bazaar` | API discovery extension |
-| `go/cmd/t402` | CLI tool |
+| `sdks/go` | Core client, server, facilitator |
+| `sdks/go/mechanisms/evm` | EVM chains (Ethereum, Base, etc.) |
+| `sdks/go/mechanisms/svm` | Solana blockchain |
+| `sdks/go/mechanisms/ton` | TON blockchain |
+| `sdks/go/mechanisms/tron` | TRON blockchain |
+| `sdks/go/mechanisms/near` | NEAR Protocol |
+| `sdks/go/mechanisms/aptos` | Aptos blockchain |
+| `sdks/go/mechanisms/tezos` | Tezos blockchain |
+| `sdks/go/mechanisms/polkadot` | Polkadot Asset Hub |
+| `sdks/go/mechanisms/stacks` | Stacks (Bitcoin L2) |
+| `sdks/go/http` | HTTP client and server |
+| `sdks/go/http/gin` | Gin middleware |
+| `sdks/go/signers/evm` | EVM wallet signers |
+| `sdks/go/signers/svm` | Solana wallet signers |
+| `sdks/go/signers/ton` | TON wallet signers |
+| `sdks/go/signers/tron` | TRON wallet signers |
+| `sdks/go/signers/near` | NEAR wallet signers |
+| `sdks/go/signers/aptos` | Aptos wallet signers |
+| `sdks/go/signers/tezos` | Tezos wallet signers |
+| `sdks/go/signers/polkadot` | Polkadot wallet signers |
+| `sdks/go/signers/stacks` | Stacks wallet signers |
+| `sdks/go/extensions/bazaar` | API discovery extension |
+| `sdks/go/cmd/t402` | CLI tool |
 
 ## Multi-Chain Support
 
 ### EVM Networks
 
 ```go
-import "github.com/t402-io/t402/go/mechanisms/evm"
+import "github.com/t402-io/t402/sdks/go/mechanisms/evm"
 
 // Get network config
 config := evm.NetworkConfigs["eip155:8453"] // Base
@@ -144,7 +157,7 @@ config := evm.NetworkConfigs["eip155:8453"] // Base
 ### TON Network
 
 ```go
-import "github.com/t402-io/t402/go/mechanisms/ton"
+import "github.com/t402-io/t402/sdks/go/mechanisms/ton"
 
 // Get network config
 config := ton.NetworkConfigs[ton.TonMainnetCAIP2]
@@ -153,7 +166,7 @@ config := ton.NetworkConfigs[ton.TonMainnetCAIP2]
 ### TRON Network
 
 ```go
-import "github.com/t402-io/t402/go/mechanisms/tron"
+import "github.com/t402-io/t402/sdks/go/mechanisms/tron"
 
 // Get network config
 config := tron.NetworkConfigs[tron.TronMainnetCAIP2]
@@ -162,16 +175,61 @@ config := tron.NetworkConfigs[tron.TronMainnetCAIP2]
 ### Solana
 
 ```go
-import "github.com/t402-io/t402/go/mechanisms/svm"
+import "github.com/t402-io/t402/sdks/go/mechanisms/svm"
 
 // Get network config
 config := svm.NetworkConfigs[svm.SolanaMainnetCAIP2]
 ```
 
+### NEAR Protocol
+
+```go
+import "github.com/t402-io/t402/sdks/go/mechanisms/near"
+
+// Get network config
+config := near.NetworkConfigs[near.NearMainnetCAIP2]
+```
+
+### Aptos
+
+```go
+import "github.com/t402-io/t402/sdks/go/mechanisms/aptos"
+
+// Get network config
+config := aptos.NetworkConfigs[aptos.AptosMainnetCAIP2]
+```
+
+### Tezos
+
+```go
+import "github.com/t402-io/t402/sdks/go/mechanisms/tezos"
+
+// Get network config
+config := tezos.NetworkConfigs[tezos.TezosMainnetCAIP2]
+```
+
+### Polkadot Asset Hub
+
+```go
+import "github.com/t402-io/t402/sdks/go/mechanisms/polkadot"
+
+// Get network config
+config := polkadot.NetworkConfigs[polkadot.PolkadotAssetHubCAIP2]
+```
+
+### Stacks (Bitcoin L2)
+
+```go
+import "github.com/t402-io/t402/sdks/go/mechanisms/stacks"
+
+// Get network config
+config := stacks.NetworkConfigs[stacks.StacksMainnetCAIP2]
+```
+
 ## Facilitator Client
 
 ```go
-import t402http "github.com/t402-io/t402/go/http"
+import t402http "github.com/t402-io/t402/sdks/go/http"
 
 client := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
     URL:     "https://facilitator.t402.io",

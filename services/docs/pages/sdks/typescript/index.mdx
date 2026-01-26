@@ -1,29 +1,34 @@
 # TypeScript SDK
 
-The T402 TypeScript SDK provides comprehensive support for HTTP-native stablecoin payments across multiple blockchains.
+The T402 TypeScript SDK provides comprehensive support for HTTP-native stablecoin payments across 10 blockchain families.
 
 import { Callout } from 'nextra/components'
 
 <Callout type="info">
-  **v2.0.0 Released** - All packages are now published under the `@t402` namespace on npm.
+  **v2.3.1 Released** - All packages are now published under the `@t402` namespace on npm.
 </Callout>
 
 ## Core Packages
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| `@t402/core` | 2.0.0 | Protocol types and HTTP utilities |
-| `@t402/extensions` | 2.0.0 | Protocol extensions and helpers |
+| `@t402/core` | 2.3.1 | Protocol types and HTTP utilities |
+| `@t402/extensions` | 2.3.1 | Protocol extensions and helpers |
 
 ## Blockchain Mechanisms
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| `@t402/evm` | 2.2.0 | EVM chains (Ethereum, Arbitrum, Base, etc.) with EIP-3009 |
-| `@t402/evm-core` | 2.2.0 | EVM types and utilities without viem dependency |
-| `@t402/svm` | 2.0.0 | Solana blockchain with SPL token transfers |
-| `@t402/ton` | 2.1.0 | TON blockchain with USDT Jetton support |
-| `@t402/tron` | 2.0.0 | TRON blockchain with TRC-20 USDT |
+| `@t402/evm` | 2.3.1 | EVM chains (Ethereum, Arbitrum, Base, etc.) with EIP-3009 |
+| `@t402/evm-core` | 2.3.1 | EVM types and utilities without viem dependency |
+| `@t402/svm` | 2.3.1 | Solana blockchain with SPL token transfers |
+| `@t402/ton` | 2.3.1 | TON blockchain with USDT Jetton support |
+| `@t402/tron` | 2.3.1 | TRON blockchain with TRC-20 USDT |
+| `@t402/near` | 2.3.1 | NEAR Protocol with NEP-141 USDT |
+| `@t402/aptos` | 2.3.1 | Aptos blockchain with Fungible Asset USDT |
+| `@t402/tezos` | 2.3.1 | Tezos blockchain with FA2 USDt |
+| `@t402/polkadot` | 2.3.1 | Polkadot Asset Hub with USDT |
+| `@t402/stacks` | 2.3.1 | Stacks (Bitcoin L2) with SIP-010 USDT |
 
 <Callout type="info">
   **Bundle Size Optimization**: Use `@t402/evm-core` instead of `@t402/evm` if you only need types and don't require viem. This significantly reduces bundle size for type-only consumers.
@@ -33,41 +38,41 @@ import { Callout } from 'nextra/components'
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| `@t402/wdk` | 2.0.1 | Tether WDK integration for self-custodial wallets |
-| `@t402/wdk-gasless` | 1.0.0 | Gasless payments via ERC-4337 account abstraction |
-| `@t402/wdk-bridge` | 1.0.0 | Cross-chain bridging via LayerZero OFT |
-| `@t402/wdk-multisig` | 1.0.0 | Safe multi-signature wallet support |
+| `@t402/wdk` | 2.3.1 | Tether WDK integration for EVM, TON, Solana, TRON |
+| `@t402/wdk-gasless` | 2.3.1 | Gasless payments via ERC-4337 account abstraction |
+| `@t402/wdk-bridge` | 2.3.1 | Cross-chain bridging via LayerZero OFT |
+| `@t402/wdk-multisig` | 2.3.1 | Safe multi-signature wallet support |
 
 ## HTTP Server Frameworks
 
 | Framework | Package | Version |
 |-----------|---------|---------|
-| Express.js | `@t402/express` | 2.0.0 |
-| Next.js | `@t402/next` | 2.0.0 |
-| Hono | `@t402/hono` | 2.0.0 |
-| Fastify | `@t402/fastify` | 2.0.0 |
+| Express.js | `@t402/express` | 2.3.1 |
+| Next.js | `@t402/next` | 2.3.1 |
+| Hono | `@t402/hono` | 2.3.1 |
+| Fastify | `@t402/fastify` | 2.3.1 |
 
 ## HTTP Client Libraries
 
 | Client | Package | Version |
 |--------|---------|---------|
-| Fetch API | `@t402/fetch` | 2.0.0 |
-| Axios | `@t402/axios` | 2.0.0 |
+| Fetch API | `@t402/fetch` | 2.3.1 |
+| Axios | `@t402/axios` | 2.3.1 |
 
 ## UI Components
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| `@t402/paywall` | 2.0.0 | Universal paywall component (framework-agnostic) |
-| `@t402/react` | 2.0.0 | React hooks and components |
-| `@t402/vue` | 2.0.0 | Vue 3 composables and components |
+| `@t402/paywall` | 2.3.1 | Universal paywall component (framework-agnostic) |
+| `@t402/react` | 2.3.1 | React hooks and components |
+| `@t402/vue` | 2.3.1 | Vue 3 composables and components |
 
 ## Tools
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| `@t402/cli` | 2.0.0 | Command-line tools for testing and development |
-| `@t402/mcp` | 1.0.0 | MCP server for AI agent payments |
+| `@t402/cli` | 2.3.1 | Command-line tools for testing and development |
+| `@t402/mcp` | 2.3.1 | MCP server for AI agent payments |
 
 ## Quick Install
 
@@ -81,8 +86,8 @@ pnpm add @t402/core @t402/evm @t402/express
 # Full client setup with fetch wrapper
 pnpm add @t402/core @t402/evm @t402/fetch
 
-# Multi-chain support
-pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/tron
+# Multi-chain support (all 10 blockchain families)
+pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/tron @t402/near @t402/aptos @t402/tezos @t402/polkadot @t402/stacks
 ```
 
 ## Architecture
@@ -100,7 +105,17 @@ pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/tron
     │
     ├── @t402/tron          TRON mechanism (TRC-20)
     │
-    └── @t402/wdk           Tether WDK integration
+    ├── @t402/near          NEAR mechanism (NEP-141)
+    │
+    ├── @t402/aptos         Aptos mechanism (Fungible Asset)
+    │
+    ├── @t402/tezos         Tezos mechanism (FA2)
+    │
+    ├── @t402/polkadot      Polkadot mechanism (Asset Hub)
+    │
+    ├── @t402/stacks        Stacks mechanism (SIP-010)
+    │
+    └── @t402/wdk           Tether WDK integration (EVM, TON, Solana, TRON)
         │
         ├── @t402/wdk-gasless   ERC-4337 gasless payments
         │
@@ -577,18 +592,31 @@ const server = new t402ResourceServer(mockFacilitator);
 
 ## Supported Networks
 
-| Chain | Token | CAIP-2 Identifier |
-|-------|-------|-------------------|
-| Ethereum | USDT0 | `eip155:1` |
-| Base | USDT0 | `eip155:8453` |
-| Arbitrum | USDT0 | `eip155:42161` |
-| Optimism | USDT0 | `eip155:10` |
-| Ink | USDT0 | `eip155:57073` |
-| Berachain | USDT0 | `eip155:80094` |
-| Unichain | USDT0 | `eip155:130` |
-| Solana | USDC | `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` |
-| TON | USDT | `ton:mainnet` |
-| TRON | USDT | `tron:mainnet` |
+### EVM Chains (USDT0)
+
+| Chain | CAIP-2 Identifier |
+|-------|-------------------|
+| Ethereum | `eip155:1` |
+| Base | `eip155:8453` |
+| Arbitrum | `eip155:42161` |
+| Optimism | `eip155:10` |
+| Polygon | `eip155:137` |
+| Ink | `eip155:57073` |
+| Berachain | `eip155:80094` |
+| Unichain | `eip155:130` |
+
+### Non-EVM Chains
+
+| Chain | Token Standard | CAIP-2 Identifier |
+|-------|----------------|-------------------|
+| Solana | SPL Token | `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` |
+| TON | Jetton | `ton:mainnet` |
+| TRON | TRC-20 | `tron:mainnet` |
+| NEAR | NEP-141 | `near:mainnet` |
+| Aptos | Fungible Asset | `aptos:1` |
+| Tezos | FA2 | `tezos:NetXdQprcVkpaWU` |
+| Polkadot | Asset Hub | `polkadot:68d56f15f85d3136970ec16946040bc1` |
+| Stacks | SIP-010 | `stacks:1` |
 
 ## Development
 
@@ -614,12 +642,31 @@ pnpm lint
 ## Monorepo Structure
 
 ```
-typescript/
+sdks/typescript/
 ├── packages/
 │   ├── core/           # @t402/core
 │   ├── extensions/     # @t402/extensions
-│   ├── mechanisms/     # @t402/evm, @t402/svm, @t402/ton, @t402/tron
-│   ├── http/           # @t402/express, @t402/next, @t402/hono, etc.
+│   ├── mechanisms/
+│   │   ├── evm/        # @t402/evm
+│   │   ├── evm-core/   # @t402/evm-core
+│   │   ├── svm/        # @t402/svm (Solana)
+│   │   ├── ton/        # @t402/ton
+│   │   ├── tron/       # @t402/tron
+│   │   ├── near/       # @t402/near
+│   │   ├── aptos/      # @t402/aptos
+│   │   ├── tezos/      # @t402/tezos
+│   │   ├── polkadot/   # @t402/polkadot
+│   │   └── stacks/     # @t402/stacks
+│   ├── http/
+│   │   ├── express/    # @t402/express
+│   │   ├── hono/       # @t402/hono
+│   │   ├── fastify/    # @t402/fastify
+│   │   ├── next/       # @t402/next
+│   │   ├── fetch/      # @t402/fetch
+│   │   ├── axios/      # @t402/axios
+│   │   ├── paywall/    # @t402/paywall
+│   │   ├── react/      # @t402/react
+│   │   └── vue/        # @t402/vue
 │   ├── wdk/            # @t402/wdk
 │   ├── wdk-gasless/    # @t402/wdk-gasless
 │   ├── wdk-bridge/     # @t402/wdk-bridge

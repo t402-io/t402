@@ -1,8 +1,8 @@
 # T402 Documentation
 
-**The Official Payment Protocol for USDT** · v2.0.0
+**The Official Payment Protocol for USDT** · v2.3.1
 
-T402 is an open standard for HTTP-native stablecoin payments. Enable seamless USDT payments across multiple blockchains with a single HTTP header.
+T402 is an open standard for HTTP-native stablecoin payments. Enable seamless USDT payments across 10 blockchain families with a single HTTP header.
 
 import { Callout, Steps, Tabs } from 'nextra/components'
 
@@ -11,7 +11,7 @@ import { Callout, Steps, Tabs } from 'nextra/components'
 | Feature | Description |
 |---------|-------------|
 | **HTTP Native** | Pay for any HTTP resource with a single header. No payment forms, no redirects. |
-| **Multi-Chain** | Ethereum, Arbitrum, Base, TON, TRON, Solana - one protocol, all chains. |
+| **Multi-Chain** | 10 blockchain families: EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, and more. |
 | **Gasless** | ERC-4337 account abstraction for zero-gas user experience. |
 | **AI Ready** | MCP server enables AI agents to pay for APIs autonomously. |
 
@@ -50,11 +50,11 @@ response = client.get("https://api.example.com/premium")
   </Tabs.Tab>
   <Tabs.Tab>
 ```bash
-go get github.com/t402-io/t402/go
+go get github.com/t402-io/t402/sdks/go
 ```
 
 ```go
-import "github.com/t402-io/t402/go/client"
+import "github.com/t402-io/t402/sdks/go/client"
 
 c := client.New(privateKey)
 
@@ -108,13 +108,21 @@ Content-Type: application/json
 
 **Core & Blockchain**
 - [`@t402/core`](/reference/core) - Protocol types and HTTP utilities
-- [`@t402/evm`](/reference/evm) - EVM chains (Ethereum, Arbitrum, Base, etc.)
-- [`@t402/svm`](/reference/svm), [`@t402/ton`](/reference/ton), [`@t402/tron`](/reference/tron) - Non-EVM chains
+- [`@t402/evm`](/reference/evm) - EVM chains (Ethereum, Arbitrum, Base, Optimism, Ink, Berachain, Unichain, Polygon)
+- [`@t402/svm`](/reference/svm) - Solana
+- [`@t402/ton`](/reference/ton) - TON
+- [`@t402/tron`](/reference/tron) - TRON
+- [`@t402/near`](/reference/near) - NEAR Protocol
+- [`@t402/aptos`](/reference/aptos) - Aptos
+- [`@t402/tezos`](/reference/tezos) - Tezos
+- [`@t402/polkadot`](/reference/polkadot) - Polkadot Asset Hub
+- [`@t402/stacks`](/reference/stacks) - Stacks (Bitcoin L2)
 
 **WDK Integration**
-- [`@t402/wdk`](/reference/wdk) - Tether WDK integration
+- [`@t402/wdk`](/reference/wdk) - Tether WDK integration (EVM, TON, Solana, TRON)
 - [`@t402/wdk-gasless`](/sdks/typescript/wdk-gasless) - Gasless payments (ERC-4337)
-- [`@t402/wdk-bridge`](/sdks/typescript/wdk-bridge) - Cross-chain bridging
+- [`@t402/wdk-bridge`](/sdks/typescript/wdk-bridge) - Cross-chain bridging (LayerZero)
+- [`@t402/wdk-multisig`](/sdks/typescript/wdk-multisig) - Safe multi-sig wallets
 
 **HTTP Middleware & Clients**
 - Server: `@t402/express`, `@t402/next`, `@t402/hono`, `@t402/fastify`
@@ -126,16 +134,21 @@ Content-Type: application/json
 
 ## Supported Networks
 
-**EVM Chains**
+**EVM Chains (USDT0)**
 - Ethereum, Arbitrum, Base, Optimism, Polygon, Ink, Berachain, Unichain
 
-**Non-EVM**
-- TON Mainnet and Testnet
-- TRON Mainnet, Nile, and Shasta
-- Solana Mainnet and Devnet
+**Non-EVM Chains**
+- **Solana** - SPL Token USDC (mainnet, devnet)
+- **TON** - USDT Jetton (mainnet, testnet)
+- **TRON** - TRC-20 USDT (mainnet, nile, shasta)
+- **NEAR** - NEP-141 USDT (mainnet, testnet)
+- **Aptos** - Fungible Asset USDT (mainnet, testnet)
+- **Tezos** - FA2 USDt (mainnet, ghostnet)
+- **Polkadot** - Asset Hub USDT (polkadot, westend)
+- **Stacks** - SIP-010 USDT (mainnet, testnet)
 
 <Callout type="info">
-See [Chains](/chains) for network IDs and configuration details.
+See [Chains](/chains) for network IDs, token addresses, and configuration details.
 </Callout>
 
 ## Get Started
