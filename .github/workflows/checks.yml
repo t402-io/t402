@@ -1,0 +1,89 @@
+name: Checks
+on: [pull_request]
+
+jobs:
+  typescript:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        workspace:
+          - path: ./sdks/typescript
+            name: sdk
+          - path: ./examples/typescript
+            name: examples
+        check: [format, lint, lockfile]
+    name: ts-${{ matrix.workspace.name }}-${{ matrix.check }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: ${{ matrix.workspace.path }}
+
+      - name: Install dependencies
+        working-directory: ${{ matrix.workspace.path }}
+        run: pnpm install ${{ matrix.check == 'lockfile' && '' || '--frozen-lockfile' }}
+
+      - name: Check format
+        if: matrix.check == 'format'
+        working-directory: ${{ matrix.workspace.path }}
+        run: pnpm format:check
+
+      - name: Check lint
+        if: matrix.check == 'lint'
+        working-directory: ${{ matrix.workspace.path }}
+        run: pnpm lint:check
+
+      - name: Check lockfile
+        if: matrix.check == 'lockfile'
+        working-directory: ${{ matrix.workspace.path }}
+        run: |
+          if [ -n "$(git diff pnpm-lock.yaml)" ]; then
+            echo "Error: pnpm-lock.yaml was modified after running pnpm install."
+            echo "Please commit the updated pnpm-lock.yaml file."
+            git diff pnpm-lock.yaml
+            exit 1
+          fi
+
+  python:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        check: [test, lint]
+    name: python-${{ matrix.check }}
+    defaults:
+      run:
+        working-directory: ./sdks/python/t402
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: "sdks/python/t402/uv.lock"
+
+      - name: Set up Python
+        if: matrix.check == 'test'
+        run: uv python install
+
+      - name: Install dependencies
+        if: matrix.check == 'test'
+        run: uv sync --all-extras --dev
+
+      - name: Run tests
+        if: matrix.check == 'test'
+        run: uv run python -m pytest
+
+      - name: Run lint
+        if: matrix.check == 'lint'
+        run: uvx ruff check
