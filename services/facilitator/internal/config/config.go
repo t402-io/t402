@@ -14,6 +14,12 @@ type Config struct {
 	Port        int
 	Environment string
 
+	// Database
+	DatabaseURL         string
+	DatabaseMaxConns    int
+	DatabaseIdleConns   int
+	DatabaseAutoMigrate bool
+
 	// Redis
 	RedisURL string
 
@@ -94,6 +100,19 @@ type Config struct {
 	StacksAPIURL        string
 	StacksTestnetAPIURL string
 	StacksAddress       string
+
+	// Cosmos/Noble Configuration
+	CosmosMainnetREST    string
+	CosmosTestnetREST    string
+	CosmosMainnetAddress string
+	CosmosTestnetAddress string
+
+	// OpenTelemetry Configuration
+	OTELEnabled    bool
+	OTELEndpoint   string
+	OTELProtocol   string // grpc or http
+	OTELInsecure   bool
+	OTELSampleRate float64
 }
 
 // Load loads configuration from environment variables
@@ -105,6 +124,12 @@ func Load() *Config {
 		// Server
 		Port:        getEnvInt("PORT", 8080),
 		Environment: getEnv("ENVIRONMENT", "development"),
+
+		// Database
+		DatabaseURL:         getEnv("DATABASE_URL", ""),
+		DatabaseMaxConns:    getEnvInt("DATABASE_MAX_CONNS", 25),
+		DatabaseIdleConns:   getEnvInt("DATABASE_IDLE_CONNS", 5),
+		DatabaseAutoMigrate: getEnvBool("DATABASE_AUTO_MIGRATE", true),
 
 		// Redis
 		RedisURL: getEnv("REDIS_URL", "redis://localhost:6379"),
@@ -188,6 +213,19 @@ func Load() *Config {
 		StacksAPIURL:        getEnv("STACKS_API_URL", "https://api.mainnet.hiro.so"),
 		StacksTestnetAPIURL: getEnv("STACKS_TESTNET_API_URL", "https://api.testnet.hiro.so"),
 		StacksAddress:       getEnv("STACKS_ADDRESS", ""),
+
+		// Cosmos/Noble Configuration
+		CosmosMainnetREST:    getEnv("COSMOS_MAINNET_REST", "https://noble-api.polkachu.com"),
+		CosmosTestnetREST:    getEnv("COSMOS_TESTNET_REST", "https://api.testnet.noble.strange.love"),
+		CosmosMainnetAddress: getEnv("COSMOS_MAINNET_ADDRESS", ""),
+		CosmosTestnetAddress: getEnv("COSMOS_TESTNET_ADDRESS", ""),
+
+		// OpenTelemetry Configuration
+		OTELEnabled:    getEnvBool("OTEL_ENABLED", false),
+		OTELEndpoint:   getEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "localhost:4317"),
+		OTELProtocol:   getEnv("OTEL_EXPORTER_OTLP_PROTOCOL", "grpc"),
+		OTELInsecure:   getEnvBool("OTEL_EXPORTER_OTLP_INSECURE", true),
+		OTELSampleRate: getEnvFloat("OTEL_TRACES_SAMPLER_ARG", 1.0),
 	}
 }
 
@@ -222,6 +260,15 @@ func getEnvInt(key string, defaultValue int) int {
 func getEnvBool(key string, defaultValue bool) bool {
 	if value := os.Getenv(key); value != "" {
 		return value == "true" || value == "1" || value == "yes"
+	}
+	return defaultValue
+}
+
+func getEnvFloat(key string, defaultValue float64) float64 {
+	if value := os.Getenv(key); value != "" {
+		if floatValue, err := strconv.ParseFloat(value, 64); err == nil {
+			return floatValue
+		}
 	}
 	return defaultValue
 }

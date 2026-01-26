@@ -1,0 +1,121 @@
+# T402 Facilitator Alertmanager Configuration Template
+# Customize this file for your deployment
+
+global:
+  # How long to wait before sending a notification again if it has already been sent
+  resolve_timeout: 5m
+
+  # SMTP configuration for email alerts
+  # smtp_smarthost: 'smtp.example.com:587'
+  # smtp_from: 'alerts@t402.io'
+  # smtp_auth_username: 'alertmanager'
+  # smtp_auth_password: '{{ .SMTPPassword }}'
+
+  # Slack webhook URL
+  # slack_api_url: '{{ .SlackWebhookURL }}'
+
+  # PagerDuty configuration
+  # pagerduty_url: 'https://events.pagerduty.com/v2/enqueue'
+
+# Route tree
+route:
+  # Default receiver
+  receiver: 'default-receiver'
+
+  # Group alerts by these labels
+  group_by: ['alertname', 'service', 'network']
+
+  # Wait before sending initial notification for a group
+  group_wait: 30s
+
+  # Wait before sending updated notification for a group
+  group_interval: 5m
+
+  # Wait before resending a notification
+  repeat_interval: 4h
+
+  # Route specific alerts to different receivers
+  routes:
+    # Critical alerts - immediate notification
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 10s
+      repeat_interval: 1h
+      continue: true
+
+    # Warning alerts
+    - match:
+        severity: warning
+      receiver: 'warning-alerts'
+      group_wait: 1m
+      repeat_interval: 4h
+
+    # Info alerts - daily digest
+    - match:
+        severity: info
+      receiver: 'info-alerts'
+      group_wait: 5m
+      repeat_interval: 24h
+
+# Inhibition rules
+inhibit_rules:
+  # If service is down, don't alert on individual component failures
+  - source_match:
+      alertname: 'FacilitatorDown'
+    target_match_re:
+      alertname: 'Facilitator.*'
+    equal: ['instance']
+
+  # If all RPCs are down for a network, don't alert on individual RPCs
+  - source_match:
+      alertname: 'FacilitatorAllRPCsUnhealthy'
+    target_match:
+      alertname: 'FacilitatorRPCUnhealthy'
+    equal: ['network']
+
+# Receivers
+receivers:
+  - name: 'default-receiver'
+    # Add your notification configs here
+
+  - name: 'critical-alerts'
+    # Example: Slack notification for critical alerts
+    # slack_configs:
+    #   - channel: '#t402-critical'
+    #     title: '🚨 Critical Alert: {{ .GroupLabels.alertname }}'
+    #     text: |
+    #       *Alert:* {{ .CommonAnnotations.summary }}
+    #       *Details:* {{ .CommonAnnotations.description }}
+    #       *Severity:* {{ .CommonLabels.severity }}
+    #       {{ if .CommonAnnotations.runbook_url }}*Runbook:* {{ .CommonAnnotations.runbook_url }}{{ end }}
+    #     send_resolved: true
+    #
+    # Example: PagerDuty for critical alerts
+    # pagerduty_configs:
+    #   - service_key: '{{ .PagerDutyServiceKey }}'
+    #     severity: critical
+    #     description: '{{ .CommonAnnotations.summary }}'
+    #     details:
+    #       description: '{{ .CommonAnnotations.description }}'
+    #       runbook_url: '{{ .CommonAnnotations.runbook_url }}'
+
+  - name: 'warning-alerts'
+    # Example: Slack notification for warnings
+    # slack_configs:
+    #   - channel: '#t402-alerts'
+    #     title: '⚠️ Warning: {{ .GroupLabels.alertname }}'
+    #     text: |
+    #       *Alert:* {{ .CommonAnnotations.summary }}
+    #       *Details:* {{ .CommonAnnotations.description }}
+    #     send_resolved: true
+
+  - name: 'info-alerts'
+    # Example: Email digest for info alerts
+    # email_configs:
+    #   - to: 'ops-team@t402.io'
+    #     send_resolved: false
+
+# Templates for notification messages
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'

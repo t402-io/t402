@@ -4,7 +4,7 @@ Production-ready facilitator service for the T402 payment protocol.
 
 ## Features
 
-- **Multi-chain support**: 32 networks across EVM (Ethereum, Arbitrum, Base, Optimism, Polygon, etc.), TON, TRON, Solana, NEAR, Aptos, Tezos, Polkadot, and Stacks
+- **Multi-chain support**: 34 networks across EVM (Ethereum, Arbitrum, Base, Optimism, Polygon, etc.), TON, TRON, Solana, NEAR, Aptos, Tezos, Polkadot, Stacks, and Cosmos/Noble
 - **Smart wallet support**: EIP-6492 and EIP-1271 for smart contract wallets (Safe, ERC-4337, etc.)
 - **Rate limiting**: Redis-based rate limiting with configurable limits
 - **Metrics**: Prometheus metrics for monitoring
@@ -147,6 +147,10 @@ curl http://localhost:8080/metrics
 | `ETH_RPC` | Ethereum RPC endpoint | `https://eth.llamarpc.com` |
 | `ARBITRUM_RPC` | Arbitrum RPC endpoint | `https://arb1.arbitrum.io/rpc` |
 | `BASE_RPC` | Base RPC endpoint | `https://mainnet.base.org` |
+| `COSMOS_MAINNET_REST` | Noble mainnet REST API | `https://noble-api.polkachu.com` |
+| `COSMOS_TESTNET_REST` | Noble testnet REST API | `https://api.testnet.noble.strange.love` |
+| `COSMOS_MAINNET_ADDRESS` | Facilitator address on Noble mainnet | - |
+| `COSMOS_TESTNET_ADDRESS` | Facilitator address on Noble testnet | - |
 
 ## API Key Authentication
 
