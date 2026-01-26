@@ -211,3 +211,199 @@ export interface T402WDKOptions {
   /** Balance cache configuration */
   cache?: T402BalanceCacheConfig
 }
+
+// ============================================================
+// Multi-Chain Support Types
+// ============================================================
+
+/**
+ * Supported blockchain families
+ */
+export type ChainFamily = 'evm' | 'svm' | 'ton' | 'tron'
+
+/**
+ * Solana chain configuration
+ */
+export interface SvmChainConfig {
+  /** RPC endpoint URL */
+  rpcUrl: string
+  /** Commitment level */
+  commitment?: 'processed' | 'confirmed' | 'finalized'
+  /** Network type */
+  network?: 'mainnet' | 'testnet' | 'devnet'
+}
+
+/**
+ * TON chain configuration
+ */
+export interface TonChainConfig {
+  /** API endpoint URL */
+  endpoint: string
+  /** Network type */
+  network?: 'mainnet' | 'testnet'
+  /** API key for TON Center */
+  apiKey?: string
+}
+
+/**
+ * TRON chain configuration
+ */
+export interface TronChainConfig {
+  /** Full host URL (e.g., https://api.trongrid.io) */
+  fullHost: string
+  /** Network type */
+  network?: 'mainnet' | 'shasta' | 'nile'
+  /** API key for TronGrid */
+  apiKey?: string
+}
+
+/**
+ * Multi-chain configuration
+ */
+export interface MultiChainConfig {
+  /** EVM chains configuration */
+  evm?: Record<string, EvmChainConfig | string>
+  /** Solana configuration */
+  svm?: SvmChainConfig
+  /** TON configuration */
+  ton?: TonChainConfig
+  /** TRON configuration */
+  tron?: TronChainConfig
+}
+
+/**
+ * WDK wallet modules registry
+ * All modules are optional - only register what you need
+ */
+export interface WDKWalletModules {
+  /** EVM wallet manager (@tetherto/wdk-wallet-evm) */
+  evm?: unknown
+  /** EVM ERC-4337 wallet manager (@tetherto/wdk-wallet-evm-erc4337) */
+  evmErc4337?: unknown
+  /** Solana wallet manager (@tetherto/wdk-wallet-solana) */
+  solana?: unknown
+  /** TON wallet manager (@tetherto/wdk-wallet-ton) */
+  ton?: unknown
+  /** TON gasless wallet manager (@tetherto/wdk-wallet-ton-gasless) */
+  tonGasless?: unknown
+  /** TRON wallet manager (@tetherto/wdk-wallet-tron) */
+  tron?: unknown
+  /** Bitcoin wallet manager (@tetherto/wdk-wallet-btc) */
+  btc?: unknown
+}
+
+/**
+ * WDK protocol modules registry
+ * All modules are optional - only register what you need
+ */
+export interface WDKProtocolModules {
+  /** USDT0 bridge for EVM (@tetherto/wdk-protocol-bridge-usdt0-evm) */
+  bridgeUsdt0Evm?: unknown
+  /** USDT0 bridge for TON (@tetherto/wdk-protocol-bridge-usdt0-ton) */
+  bridgeUsdt0Ton?: unknown
+  /** Velora swap for EVM (@tetherto/wdk-protocol-swap-velora-evm) */
+  swapVeloraEvm?: unknown
+  /** Aave lending for EVM (@tetherto/wdk-protocol-lending-aave-evm) */
+  lendingAaveEvm?: unknown
+}
+
+/**
+ * Unified WDK modules registration
+ */
+export interface WDKModulesConfig {
+  /** Wallet modules */
+  wallets?: WDKWalletModules
+  /** Protocol modules */
+  protocols?: WDKProtocolModules
+}
+
+/**
+ * WDK TON account interface (compatible with @tetherto/wdk-wallet-ton)
+ */
+export interface WDKTonAccount {
+  /** Get wallet address */
+  getAddress(): Promise<string>
+  /** Get TON balance */
+  getBalance(): Promise<bigint>
+  /** Get Jetton balance */
+  getJettonBalance(jettonMaster: string): Promise<bigint>
+  /** Sign a message */
+  signMessage(message: Uint8Array): Promise<Uint8Array>
+  /** Send TON transaction */
+  sendTransaction(params: {
+    to: string
+    value: bigint
+    body?: string // BOC base64
+    bounce?: boolean
+  }): Promise<string>
+  /** Get current sequence number */
+  getSeqno(): Promise<number>
+  /** Transfer Jettons */
+  transferJetton?(params: {
+    jettonMaster: string
+    to: string
+    amount: bigint
+    forwardPayload?: string
+  }): Promise<string>
+}
+
+/**
+ * WDK Solana account interface (compatible with @tetherto/wdk-wallet-solana)
+ */
+export interface WDKSolanaAccount {
+  /** Get wallet address (base58) */
+  getAddress(): Promise<string>
+  /** Get SOL balance */
+  getBalance(): Promise<bigint>
+  /** Get SPL token balance */
+  getTokenBalance(mint: string): Promise<bigint>
+  /** Sign a message */
+  sign(message: Uint8Array): Promise<Uint8Array>
+  /** Sign a transaction */
+  signTransaction(transaction: Uint8Array): Promise<Uint8Array>
+  /** Send SOL */
+  sendTransaction(params: {
+    recipient: string
+    value: bigint
+  }): Promise<string>
+  /** Transfer SPL token */
+  transfer(params: {
+    token: string
+    recipient: string
+    amount: bigint
+  }): Promise<string>
+}
+
+/**
+ * WDK TRON account interface (compatible with @tetherto/wdk-wallet-tron)
+ */
+export interface WDKTronAccount {
+  /** Get wallet address (base58) */
+  getAddress(): Promise<string>
+  /** Get TRX balance */
+  getBalance(): Promise<bigint>
+  /** Get TRC20 token balance */
+  getTrc20Balance(contractAddress: string): Promise<bigint>
+  /** Sign a transaction */
+  signTransaction(transaction: unknown): Promise<unknown>
+  /** Send signed transaction */
+  sendTransaction(signedTx: unknown): Promise<string>
+  /** Transfer TRC20 token */
+  transferTrc20?(params: {
+    contractAddress: string
+    to: string
+    amount: bigint
+  }): Promise<string>
+}
+
+/**
+ * Extended WDK instance interface with multi-chain support
+ */
+export interface WDKInstanceMultiChain extends WDKInstance {
+  /** Get TON account */
+  getTonAccount?(index: number): Promise<WDKTonAccount>
+  /** Get Solana account */
+  getSolanaAccount?(index: number): Promise<WDKSolanaAccount>
+  /** Get TRON account */
+  getTronAccount?(index: number): Promise<WDKTronAccount>
+}

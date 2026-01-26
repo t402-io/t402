@@ -4,12 +4,12 @@
  * This package provides seamless integration between T402 payment protocol
  * and Tether's WDK (Wallet Development Kit), enabling:
  *
- * - Multi-chain self-custodial wallets
+ * - Multi-chain self-custodial wallets (EVM, TON, Solana, TRON)
  * - USDT0 and USDC payments with EIP-3009 support
  * - Cross-chain bridging via LayerZero
  * - T402-compatible signers for payment authorization
  *
- * @example Basic Usage
+ * @example Basic EVM Usage
  * ```typescript
  * import WDK from '@tetherto/wdk';
  * import WalletManagerEvm from '@tetherto/wdk-wallet-evm';
@@ -36,6 +36,47 @@
  *
  * // Make a paid request
  * const response = await client.fetch('https://api.example.com/premium');
+ * ```
+ *
+ * @example Multi-Chain Registration
+ * ```typescript
+ * import WDK from '@tetherto/wdk';
+ * import WalletManagerEvm from '@tetherto/wdk-wallet-evm';
+ * import WalletManagerTon from '@tetherto/wdk-wallet-ton';
+ * import WalletManagerSolana from '@tetherto/wdk-wallet-solana';
+ * import WalletManagerTron from '@tetherto/wdk-wallet-tron';
+ * import { T402WDK } from '@t402/wdk';
+ *
+ * // Register all chain wallet modules at once
+ * T402WDK.registerWDK(WDK, {
+ *   wallets: {
+ *     evm: WalletManagerEvm,
+ *     ton: WalletManagerTon,
+ *     solana: WalletManagerSolana,
+ *     tron: WalletManagerTron,
+ *   },
+ *   protocols: {
+ *     bridgeUsdt0Evm: BridgeUsdt0Evm,
+ *   }
+ * });
+ *
+ * const wallet = new T402WDK(seedPhrase, { arbitrum: 'https://arb1.arbitrum.io/rpc' });
+ *
+ * // Get signers for different chains
+ * const evmSigner = await wallet.getSigner('arbitrum');   // EVM
+ * const tonSigner = await wallet.getTonSigner();          // TON
+ * const svmSigner = await wallet.getSvmSigner();          // Solana
+ * const tronSigner = await wallet.getTronSigner();        // TRON
+ *
+ * // Use with multi-chain T402 client
+ * const client = createT402HTTPClient({
+ *   signers: [
+ *     { scheme: 'exact', network: 'eip155:42161', signer: evmSigner },
+ *     { scheme: 'exact', network: 'ton:mainnet', signer: tonSigner },
+ *     { scheme: 'exact', network: 'solana:mainnet', signer: svmSigner },
+ *     { scheme: 'exact', network: 'tron:mainnet', signer: tronSigner },
+ *   ]
+ * });
  * ```
  *
  * @example Balance Checking
@@ -91,7 +132,41 @@ export type {
   WDKAccount,
   WDKInstance,
   WDKConstructor,
+  // Multi-chain types
+  ChainFamily,
+  SvmChainConfig,
+  TonChainConfig,
+  TronChainConfig,
+  MultiChainConfig,
+  WDKWalletModules,
+  WDKProtocolModules,
+  WDKModulesConfig,
+  WDKTonAccount,
+  WDKSolanaAccount,
+  WDKTronAccount,
+  WDKInstanceMultiChain,
 } from './types.js'
+
+// Multi-chain adapters
+export {
+  WDKTonSignerAdapter,
+  createWDKTonSigner,
+  type ClientTonSigner,
+  type SignMessageParams as TonSignMessageParams,
+} from './adapters/ton-adapter.js'
+export {
+  WDKSvmSignerAdapter,
+  createWDKSvmSigner,
+  type TransactionSigner as ClientSvmSigner,
+  type SolanaAddress,
+} from './adapters/svm-adapter.js'
+export {
+  WDKTronSignerAdapter,
+  createWDKTronSigner,
+  type ClientTronSigner,
+  type SignTransactionParams as TronSignTransactionParams,
+  type BlockInfo as TronBlockInfo,
+} from './adapters/tron-adapter.js'
 
 // Cache
 export {

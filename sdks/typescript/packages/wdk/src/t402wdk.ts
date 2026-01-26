@@ -20,7 +20,29 @@ import type {
   BridgeParams,
   BridgeResult,
   T402WDKOptions,
+  ChainFamily,
+  WDKWalletModules,
+  WDKProtocolModules,
+  WDKModulesConfig,
+  WDKTonAccount,
+  WDKSolanaAccount,
+  WDKTronAccount,
 } from './types.js'
+import {
+  WDKTonSignerAdapter,
+  createWDKTonSigner,
+  type ClientTonSigner,
+} from './adapters/ton-adapter.js'
+import {
+  WDKSvmSignerAdapter,
+  createWDKSvmSigner,
+  type TransactionSigner as ClientSvmSigner,
+} from './adapters/svm-adapter.js'
+import {
+  WDKTronSignerAdapter,
+  createWDKTronSigner,
+  type ClientTronSigner,
+} from './adapters/tron-adapter.js'
 import { BalanceCache, type BalanceCacheConfig, type BalanceCacheStats } from './cache.js'
 import {
   normalizeChainConfig,
@@ -78,26 +100,49 @@ export class T402WDK {
   private static _WalletManagerEvm: unknown = null
   private static _BridgeUsdt0Evm: unknown = null
 
+  // Multi-chain wallet module storage
+  private static _WalletModules: WDKWalletModules = {}
+  private static _ProtocolModules: WDKProtocolModules = {}
+
+  // Multi-chain signer caches
+  private _tonSignerCache: Map<number, WDKTonSignerAdapter> = new Map()
+  private _svmSignerCache: Map<number, WDKSvmSignerAdapter> = new Map()
+  private _tronSignerCache: Map<number, WDKTronSignerAdapter> = new Map()
+
   /**
    * Register the Tether WDK modules
    *
    * This must be called before creating T402WDK instances if you want
    * to use the actual WDK. Otherwise, a mock implementation is used.
    *
+   * Supports two registration patterns:
+   *
+   * 1. Legacy (EVM-only):
+   *    ```typescript
+   *    T402WDK.registerWDK(WDK, WalletManagerEvm, BridgeUsdt0Evm);
+   *    ```
+   *
+   * 2. Unified (multi-chain):
+   *    ```typescript
+   *    T402WDK.registerWDK(WDK, {
+   *      wallets: {
+   *        evm: WalletManagerEvm,
+   *        ton: WalletManagerTon,
+   *        solana: WalletManagerSolana,
+   *        tron: WalletManagerTron,
+   *      },
+   *      protocols: {
+   *        bridgeUsdt0Evm: BridgeUsdt0Evm,
+   *        bridgeUsdt0Ton: BridgeUsdt0Ton,
+   *      }
+   *    });
+   *    ```
+   *
    * @throws {WDKInitializationError} If registration fails
-   *
-   * @example
-   * ```typescript
-   * import WDK from '@tetherto/wdk';
-   * import WalletManagerEvm from '@tetherto/wdk-wallet-evm';
-   * import BridgeUsdt0Evm from '@tetherto/wdk-protocol-bridge-usdt0-evm';
-   *
-   * T402WDK.registerWDK(WDK, WalletManagerEvm, BridgeUsdt0Evm);
-   * ```
    */
   static registerWDK(
     WDK: WDKConstructor,
-    WalletManagerEvm?: unknown,
+    modulesOrWalletManager?: WDKModulesConfig | unknown,
     BridgeUsdt0Evm?: unknown,
   ): void {
     if (!WDK) {
@@ -109,8 +154,26 @@ export class T402WDK {
     }
 
     T402WDK._WDK = WDK
-    T402WDK._WalletManagerEvm = WalletManagerEvm ?? null
-    T402WDK._BridgeUsdt0Evm = BridgeUsdt0Evm ?? null
+
+    // Check if using new unified registration pattern
+    if (
+      modulesOrWalletManager &&
+      typeof modulesOrWalletManager === 'object' &&
+      ('wallets' in modulesOrWalletManager || 'protocols' in modulesOrWalletManager)
+    ) {
+      const modules = modulesOrWalletManager as WDKModulesConfig
+      T402WDK._WalletModules = modules.wallets ?? {}
+      T402WDK._ProtocolModules = modules.protocols ?? {}
+      // Backward compatibility: set legacy fields
+      T402WDK._WalletManagerEvm = modules.wallets?.evm ?? null
+      T402WDK._BridgeUsdt0Evm = modules.protocols?.bridgeUsdt0Evm ?? null
+    } else {
+      // Legacy registration pattern
+      T402WDK._WalletManagerEvm = modulesOrWalletManager ?? null
+      T402WDK._BridgeUsdt0Evm = BridgeUsdt0Evm ?? null
+      T402WDK._WalletModules = { evm: modulesOrWalletManager as unknown }
+      T402WDK._ProtocolModules = { bridgeUsdt0Evm: BridgeUsdt0Evm as unknown }
+    }
   }
 
   /**
@@ -132,6 +195,45 @@ export class T402WDK {
    */
   static isBridgeRegistered(): boolean {
     return T402WDK._BridgeUsdt0Evm !== null
+  }
+
+  /**
+   * Check if TON wallet manager is registered
+   */
+  static isTonRegistered(): boolean {
+    return T402WDK._WalletModules.ton !== undefined
+  }
+
+  /**
+   * Check if Solana wallet manager is registered
+   */
+  static isSolanaRegistered(): boolean {
+    return T402WDK._WalletModules.solana !== undefined
+  }
+
+  /**
+   * Check if TRON wallet manager is registered
+   */
+  static isTronRegistered(): boolean {
+    return T402WDK._WalletModules.tron !== undefined
+  }
+
+  /**
+   * Get all registered wallet modules
+   */
+  static getRegisteredWalletModules(): (keyof WDKWalletModules)[] {
+    return Object.keys(T402WDK._WalletModules).filter(
+      (key) => T402WDK._WalletModules[key as keyof WDKWalletModules] !== undefined,
+    ) as (keyof WDKWalletModules)[]
+  }
+
+  /**
+   * Get all registered protocol modules
+   */
+  static getRegisteredProtocolModules(): (keyof WDKProtocolModules)[] {
+    return Object.keys(T402WDK._ProtocolModules).filter(
+      (key) => T402WDK._ProtocolModules[key as keyof WDKProtocolModules] !== undefined,
+    ) as (keyof WDKProtocolModules)[]
   }
 
   /**
@@ -398,6 +500,239 @@ export class T402WDK {
    */
   clearSignerCache(): void {
     this._signerCache.clear()
+    this._tonSignerCache.clear()
+    this._svmSignerCache.clear()
+    this._tronSignerCache.clear()
+  }
+
+  // ========== Multi-Chain Signers ==========
+
+  /**
+   * Get a TON signer for T402 payments
+   *
+   * @param accountIndex - HD wallet account index (default: 0)
+   * @throws {ChainError} If TON wallet manager is not registered
+   * @returns An initialized ClientTonSigner
+   *
+   * @example
+   * ```typescript
+   * const tonSigner = await wallet.getTonSigner();
+   *
+   * const client = createT402HTTPClient({
+   *   signers: [{ scheme: 'exact', network: 'ton:mainnet', signer: tonSigner }]
+   * });
+   * ```
+   */
+  async getTonSigner(accountIndex = 0): Promise<ClientTonSigner> {
+    // Check cache first
+    const cached = this._tonSignerCache.get(accountIndex)
+    if (cached) {
+      return cached
+    }
+
+    // Validate TON wallet manager is registered
+    if (!T402WDK._WalletModules.ton) {
+      throw new ChainError(
+        WDKErrorCode.CHAIN_NOT_SUPPORTED,
+        'TON wallet manager not registered. Call T402WDK.registerWDK(WDK, { wallets: { ton: WalletManagerTon } }).',
+        { chain: 'ton' },
+      )
+    }
+
+    try {
+      // Get TON account from WDK
+      const account = (await this.wdk.getAccount('ton', accountIndex)) as unknown as WDKTonAccount
+
+      // Create and cache the signer adapter
+      const signer = await createWDKTonSigner(account)
+      this._tonSignerCache.set(accountIndex, signer)
+      return signer
+    } catch (error) {
+      if (isWDKError(error)) {
+        throw error
+      }
+
+      throw wrapError(
+        error,
+        WDKErrorCode.SIGNER_NOT_INITIALIZED,
+        'Failed to create TON signer',
+        { chain: 'ton', accountIndex },
+      )
+    }
+  }
+
+  /**
+   * Get a Solana (SVM) signer for T402 payments
+   *
+   * @param accountIndex - HD wallet account index (default: 0)
+   * @throws {ChainError} If Solana wallet manager is not registered
+   * @returns An initialized TransactionSigner (ClientSvmSigner)
+   *
+   * @example
+   * ```typescript
+   * const svmSigner = await wallet.getSvmSigner();
+   *
+   * const client = createT402HTTPClient({
+   *   signers: [{ scheme: 'exact', network: 'solana:mainnet', signer: svmSigner }]
+   * });
+   * ```
+   */
+  async getSvmSigner(accountIndex = 0): Promise<ClientSvmSigner> {
+    // Check cache first
+    const cached = this._svmSignerCache.get(accountIndex)
+    if (cached) {
+      return cached
+    }
+
+    // Validate Solana wallet manager is registered
+    if (!T402WDK._WalletModules.solana) {
+      throw new ChainError(
+        WDKErrorCode.CHAIN_NOT_SUPPORTED,
+        'Solana wallet manager not registered. Call T402WDK.registerWDK(WDK, { wallets: { solana: WalletManagerSolana } }).',
+        { chain: 'solana' },
+      )
+    }
+
+    try {
+      // Get Solana account from WDK
+      const account = (await this.wdk.getAccount(
+        'solana',
+        accountIndex,
+      )) as unknown as WDKSolanaAccount
+
+      // Create and cache the signer adapter
+      const signer = await createWDKSvmSigner(account)
+      this._svmSignerCache.set(accountIndex, signer)
+      return signer
+    } catch (error) {
+      if (isWDKError(error)) {
+        throw error
+      }
+
+      throw wrapError(
+        error,
+        WDKErrorCode.SIGNER_NOT_INITIALIZED,
+        'Failed to create Solana signer',
+        { chain: 'solana', accountIndex },
+      )
+    }
+  }
+
+  /**
+   * Get a TRON signer for T402 payments
+   *
+   * @param accountIndex - HD wallet account index (default: 0)
+   * @param rpcUrl - Optional custom RPC URL (default: https://api.trongrid.io)
+   * @throws {ChainError} If TRON wallet manager is not registered
+   * @returns An initialized ClientTronSigner
+   *
+   * @example
+   * ```typescript
+   * const tronSigner = await wallet.getTronSigner();
+   *
+   * const client = createT402HTTPClient({
+   *   signers: [{ scheme: 'exact', network: 'tron:mainnet', signer: tronSigner }]
+   * });
+   * ```
+   */
+  async getTronSigner(accountIndex = 0, rpcUrl?: string): Promise<ClientTronSigner> {
+    // Check cache first (only if no custom RPC)
+    if (!rpcUrl) {
+      const cached = this._tronSignerCache.get(accountIndex)
+      if (cached) {
+        return cached
+      }
+    }
+
+    // Validate TRON wallet manager is registered
+    if (!T402WDK._WalletModules.tron) {
+      throw new ChainError(
+        WDKErrorCode.CHAIN_NOT_SUPPORTED,
+        'TRON wallet manager not registered. Call T402WDK.registerWDK(WDK, { wallets: { tron: WalletManagerTron } }).',
+        { chain: 'tron' },
+      )
+    }
+
+    try {
+      // Get TRON account from WDK
+      const account = (await this.wdk.getAccount('tron', accountIndex)) as unknown as WDKTronAccount
+
+      // Create the signer adapter
+      const signer = await createWDKTronSigner(account, rpcUrl)
+
+      // Cache only if using default RPC
+      if (!rpcUrl) {
+        this._tronSignerCache.set(accountIndex, signer)
+      }
+
+      return signer
+    } catch (error) {
+      if (isWDKError(error)) {
+        throw error
+      }
+
+      throw wrapError(
+        error,
+        WDKErrorCode.SIGNER_NOT_INITIALIZED,
+        'Failed to create TRON signer',
+        { chain: 'tron', accountIndex },
+      )
+    }
+  }
+
+  /**
+   * Get a signer for a specific chain family
+   *
+   * @param family - Chain family (evm, svm, ton, tron)
+   * @param chainOrIndex - Chain name for EVM, or account index for others
+   * @param accountIndex - Account index (only used for EVM)
+   * @throws {ChainError} If chain family is not supported or not configured
+   * @returns An appropriate signer for the chain family
+   *
+   * @example
+   * ```typescript
+   * // Get EVM signer for Arbitrum
+   * const evmSigner = await wallet.getSignerByFamily('evm', 'arbitrum');
+   *
+   * // Get TON signer
+   * const tonSigner = await wallet.getSignerByFamily('ton');
+   *
+   * // Get Solana signer with account index 1
+   * const svmSigner = await wallet.getSignerByFamily('svm', 1);
+   * ```
+   */
+  async getSignerByFamily(
+    family: ChainFamily,
+    chainOrIndex?: string | number,
+    accountIndex = 0,
+  ): Promise<WDKSigner | ClientTonSigner | ClientSvmSigner | ClientTronSigner> {
+    switch (family) {
+      case 'evm':
+        if (typeof chainOrIndex !== 'string') {
+          throw new ChainError(
+            WDKErrorCode.INVALID_CHAIN_CONFIG,
+            'EVM signers require a chain name (e.g., "arbitrum", "ethereum")',
+            { chain: family },
+          )
+        }
+        return this.getSigner(chainOrIndex, accountIndex)
+
+      case 'ton':
+        return this.getTonSigner(typeof chainOrIndex === 'number' ? chainOrIndex : accountIndex)
+
+      case 'svm':
+        return this.getSvmSigner(typeof chainOrIndex === 'number' ? chainOrIndex : accountIndex)
+
+      case 'tron':
+        return this.getTronSigner(typeof chainOrIndex === 'number' ? chainOrIndex : accountIndex)
+
+      default:
+        throw new ChainError(
+          WDKErrorCode.CHAIN_NOT_SUPPORTED,
+          `Chain family "${family}" is not supported. Available: evm, ton, svm, tron`,
+          { chain: family },
+        )
+    }
   }
 
   /**
@@ -869,6 +1204,9 @@ export class T402WDK {
   dispose(): void {
     this._balanceCache.dispose()
     this._signerCache.clear()
+    this._tonSignerCache.clear()
+    this._svmSignerCache.clear()
+    this._tronSignerCache.clear()
   }
 }
 
