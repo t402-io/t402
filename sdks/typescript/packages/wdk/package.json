@@ -65,13 +65,35 @@
     "@ledgerhq/hw-transport-webusb": ">=6.0.0",
     "@tetherto/wdk": ">=1.0.0-beta.0",
     "@tetherto/wdk-wallet-evm": ">=1.0.0-beta.0",
-    "@trezor/connect": ">=9.0.0"
+    "@tetherto/wdk-wallet-solana": ">=1.0.0-beta.0",
+    "@tetherto/wdk-wallet-ton": ">=1.0.0-beta.0",
+    "@tetherto/wdk-wallet-tron": ">=1.0.0-beta.0",
+    "@tetherto/wdk-protocol-bridge-usdt0-evm": ">=1.0.0-beta.0",
+    "@tetherto/wdk-protocol-bridge-usdt0-ton": ">=1.0.0-beta.0",
+    "@trezor/connect": ">=9.0.0",
+    "@ton/core": ">=0.53.0",
+    "@solana/kit": ">=2.0.0"
   },
   "peerDependenciesMeta": {
     "@tetherto/wdk": {
       "optional": true
     },
     "@tetherto/wdk-wallet-evm": {
+      "optional": true
+    },
+    "@tetherto/wdk-wallet-solana": {
+      "optional": true
+    },
+    "@tetherto/wdk-wallet-ton": {
+      "optional": true
+    },
+    "@tetherto/wdk-wallet-tron": {
+      "optional": true
+    },
+    "@tetherto/wdk-protocol-bridge-usdt0-evm": {
+      "optional": true
+    },
+    "@tetherto/wdk-protocol-bridge-usdt0-ton": {
       "optional": true
     },
     "@ledgerhq/hw-app-eth": {
@@ -88,6 +110,12 @@
     },
     "@trezor/connect": {
       "optional": true
+    },
+    "@ton/core": {
+      "optional": true
+    },
+    "@solana/kit": {
+      "optional": true
     }
   },
   "exports": {
@@ -99,6 +127,46 @@
       "require": {
         "types": "./dist/cjs/index.d.ts",
         "default": "./dist/cjs/index.js"
+      }
+    },
+    "./adapters": {
+      "import": {
+        "types": "./dist/esm/adapters/index.d.mts",
+        "default": "./dist/esm/adapters/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/adapters/index.d.ts",
+        "default": "./dist/cjs/adapters/index.js"
+      }
+    },
+    "./adapters/ton": {
+      "import": {
+        "types": "./dist/esm/adapters/ton-adapter.d.mts",
+        "default": "./dist/esm/adapters/ton-adapter.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/adapters/ton-adapter.d.ts",
+        "default": "./dist/cjs/adapters/ton-adapter.js"
+      }
+    },
+    "./adapters/svm": {
+      "import": {
+        "types": "./dist/esm/adapters/svm-adapter.d.mts",
+        "default": "./dist/esm/adapters/svm-adapter.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/adapters/svm-adapter.d.ts",
+        "default": "./dist/cjs/adapters/svm-adapter.js"
+      }
+    },
+    "./adapters/tron": {
+      "import": {
+        "types": "./dist/esm/adapters/tron-adapter.d.mts",
+        "default": "./dist/esm/adapters/tron-adapter.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/adapters/tron-adapter.d.ts",
+        "default": "./dist/cjs/adapters/tron-adapter.js"
       }
     }
   },
