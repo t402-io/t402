@@ -24,6 +24,7 @@ import type {
   SettleResponse,
   VerifyResponse,
 } from "@t402/core/types";
+import { cryptoRandomInt } from "@t402/core/utils";
 import { MAX_COMPUTE_UNIT_PRICE_MICROLAMPORTS } from "../../constants";
 import type { FacilitatorSvmSigner } from "../../signer";
 import type { ExactSvmPayloadV2 } from "../../types";
@@ -53,9 +54,9 @@ export class ExactSvmScheme implements SchemeNetworkFacilitator {
    * @returns Extra data with feePayer address
    */
   getExtra(_: string): Record<string, unknown> | undefined {
-    // Randomly select from available signers to distribute load
+    // Cryptographically secure random selection to distribute load
     const addresses = this.signer.getAddresses();
-    const randomIndex = Math.floor(Math.random() * addresses.length);
+    const randomIndex = cryptoRandomInt(addresses.length);
 
     return {
       feePayer: addresses[randomIndex],

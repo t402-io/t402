@@ -7,6 +7,7 @@
 
 import { Address, beginCell, Cell } from '@ton/core'
 import type { Network } from '@t402/core/types'
+import { cryptoRandomBigInt } from '@t402/core/utils'
 import {
   TON_MAINNET_CAIP2,
   TON_TESTNET_CAIP2,
@@ -178,14 +179,15 @@ export function convertFromJettonAmount(jettonAmount: string | bigint, decimals:
 
 /**
  * Generate a unique query ID for Jetton transfer
- * Uses timestamp + random component for uniqueness
+ * Uses timestamp + cryptographically secure random component for uniqueness
  *
- * @returns BigInt query ID
+ * @returns BigInt query ID (64-bit)
  */
 export function generateQueryId(): bigint {
   const timestamp = BigInt(Date.now())
-  const random = BigInt(Math.floor(Math.random() * 1000000))
-  return timestamp * 1000000n + random
+  // Use 20 bits of cryptographic randomness (0-1048575)
+  const random = cryptoRandomBigInt(20)
+  return timestamp * 1048576n + random
 }
 
 /**

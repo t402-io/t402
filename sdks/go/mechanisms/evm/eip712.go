@@ -138,11 +138,26 @@ func HashEIP3009Authorization(
 		},
 	}
 
-	// Parse values for message
-	value, _ := new(big.Int).SetString(authorization.Value, 10)
-	validAfter, _ := new(big.Int).SetString(authorization.ValidAfter, 10)
-	validBefore, _ := new(big.Int).SetString(authorization.ValidBefore, 10)
-	nonceBytes, _ := HexToBytes(authorization.Nonce)
+	// Parse values for message with explicit error checking
+	value, ok := new(big.Int).SetString(authorization.Value, 10)
+	if !ok {
+		return nil, fmt.Errorf("invalid authorization value: %q is not a valid integer", authorization.Value)
+	}
+
+	validAfter, ok := new(big.Int).SetString(authorization.ValidAfter, 10)
+	if !ok {
+		return nil, fmt.Errorf("invalid validAfter: %q is not a valid integer", authorization.ValidAfter)
+	}
+
+	validBefore, ok := new(big.Int).SetString(authorization.ValidBefore, 10)
+	if !ok {
+		return nil, fmt.Errorf("invalid validBefore: %q is not a valid integer", authorization.ValidBefore)
+	}
+
+	nonceBytes, err := HexToBytes(authorization.Nonce)
+	if err != nil {
+		return nil, fmt.Errorf("invalid nonce: %w", err)
+	}
 
 	// Ensure addresses are checksummed
 	from := common.HexToAddress(authorization.From).Hex()

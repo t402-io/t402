@@ -1,5 +1,108 @@
 import { Network } from "../types";
 
+// ============================================================================
+// Cryptographically Secure Random Utilities
+// ============================================================================
+
+/**
+ * Get the crypto object, works in both browser and Node.js (19+)
+ * @throws Error if crypto API is not available
+ */
+function getCrypto(): Crypto {
+  const cryptoObj = globalThis.crypto;
+
+  if (!cryptoObj || typeof cryptoObj.getRandomValues !== "function") {
+    throw new Error(
+      "Crypto API not available. " +
+        "Node.js 19+ or a browser with Web Crypto API is required.",
+    );
+  }
+
+  return cryptoObj;
+}
+
+/**
+ * Generate a cryptographically secure random integer in range [0, max)
+ *
+ * Uses rejection sampling to ensure uniform distribution.
+ *
+ * @param max - Exclusive upper bound (must be > 0 and <= 2^32)
+ * @returns Random integer in [0, max)
+ * @throws Error if max is invalid or crypto unavailable
+ */
+export function cryptoRandomInt(max: number): number {
+  if (max <= 0 || max > 0xffffffff || !Number.isInteger(max)) {
+    throw new Error(`Invalid max value: ${max}. Must be positive integer <= 2^32`);
+  }
+
+  const crypto = getCrypto();
+  const array = new Uint32Array(1);
+
+  // Rejection sampling to avoid modulo bias
+  const limit = Math.floor(0xffffffff / max) * max;
+  let value: number;
+
+  do {
+    crypto.getRandomValues(array);
+    value = array[0];
+  } while (value >= limit);
+
+  return value % max;
+}
+
+/**
+ * Generate a cryptographically secure random BigInt
+ *
+ * @param bits - Number of bits (default 64, max 256)
+ * @returns Random BigInt with specified number of bits
+ * @throws Error if bits is invalid or crypto unavailable
+ */
+export function cryptoRandomBigInt(bits: number = 64): bigint {
+  if (bits <= 0 || bits > 256) {
+    throw new Error(`Invalid bits value: ${bits}. Must be 1-256`);
+  }
+
+  const crypto = getCrypto();
+  const bytes = Math.ceil(bits / 8);
+  const array = new Uint8Array(bytes);
+  crypto.getRandomValues(array);
+
+  // Convert bytes to BigInt
+  let result = 0n;
+  for (let i = 0; i < bytes; i++) {
+    result = (result << 8n) | BigInt(array[i]);
+  }
+
+  // Mask to exact bit count
+  const mask = (1n << BigInt(bits)) - 1n;
+  return result & mask;
+}
+
+/**
+ * Generate a cryptographically secure random hex string
+ *
+ * @param bytes - Number of random bytes (default 16)
+ * @returns Hex-encoded random string
+ * @throws Error if bytes is invalid or crypto unavailable
+ */
+export function cryptoRandomHex(bytes: number = 16): string {
+  if (bytes <= 0 || bytes > 128) {
+    throw new Error(`Invalid bytes value: ${bytes}. Must be 1-128`);
+  }
+
+  const crypto = getCrypto();
+  const array = new Uint8Array(bytes);
+  crypto.getRandomValues(array);
+
+  return Array.from(array)
+    .map(b => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+// ============================================================================
+// Network and Scheme Utilities
+// ============================================================================
+
 /**
  * Scheme data structure for facilitator storage
  */

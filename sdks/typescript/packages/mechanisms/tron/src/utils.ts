@@ -4,6 +4,7 @@
  * Address validation, amount conversion, and network utilities.
  */
 
+import { cryptoRandomHex } from '@t402/core/utils'
 import {
   TRON_NETWORKS,
   TRON_ADDRESS_LENGTH,
@@ -220,12 +221,14 @@ export function convertFromSmallestUnits(
 
 /**
  * Generate a unique memo/reference for payment tracking
+ * Uses cryptographically secure random bytes for uniqueness
  *
  * @returns Unique reference string
  */
 export function generatePaymentReference(): string {
   const timestamp = Date.now()
-  const random = Math.floor(Math.random() * 1000000)
+  // Use 8 bytes (64 bits) of cryptographic randomness
+  const random = cryptoRandomHex(8)
   return `t402_${timestamp}_${random}`
 }
 

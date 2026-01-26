@@ -150,13 +150,21 @@ func (f *ExactEvmSchemeV1) Verify(
 
 	// V1 specific: Check validBefore is in the future (with 6 second buffer for block time)
 	now := time.Now().Unix()
-	validBefore, _ := new(big.Int).SetString(evmPayload.Authorization.ValidBefore, 10)
+	validBefore, ok := new(big.Int).SetString(evmPayload.Authorization.ValidBefore, 10)
+	if !ok {
+		return nil, t402.NewVerifyError("invalid_exact_evm_payload_authorization_valid_before", evmPayload.Authorization.From, network,
+			fmt.Errorf("invalid validBefore: %q", evmPayload.Authorization.ValidBefore))
+	}
 	if validBefore.Cmp(big.NewInt(now+6)) < 0 {
 		return nil, t402.NewVerifyError("invalid_exact_evm_payload_authorization_valid_before", evmPayload.Authorization.From, network, nil)
 	}
 
 	// V1 specific: Check validAfter is not in the future
-	validAfter, _ := new(big.Int).SetString(evmPayload.Authorization.ValidAfter, 10)
+	validAfter, ok := new(big.Int).SetString(evmPayload.Authorization.ValidAfter, 10)
+	if !ok {
+		return nil, t402.NewVerifyError("invalid_exact_evm_payload_authorization_valid_after", evmPayload.Authorization.From, network,
+			fmt.Errorf("invalid validAfter: %q", evmPayload.Authorization.ValidAfter))
+	}
 	if validAfter.Cmp(big.NewInt(now)) > 0 {
 		return nil, t402.NewVerifyError("invalid_exact_evm_payload_authorization_valid_after", evmPayload.Authorization.From, network, nil)
 	}
@@ -270,11 +278,23 @@ func (f *ExactEvmSchemeV1) Settle(
 	// Use inner signature for settlement
 	signatureBytes = sigData.InnerSignature
 
-	// Parse values
-	value, _ := new(big.Int).SetString(evmPayload.Authorization.Value, 10)
-	validAfter, _ := new(big.Int).SetString(evmPayload.Authorization.ValidAfter, 10)
-	validBefore, _ := new(big.Int).SetString(evmPayload.Authorization.ValidBefore, 10)
-	nonceBytes, _ := evm.HexToBytes(evmPayload.Authorization.Nonce)
+	// Parse values with explicit error checking
+	value, ok := new(big.Int).SetString(evmPayload.Authorization.Value, 10)
+	if !ok {
+		return nil, fmt.Errorf("invalid authorization value: %q", evmPayload.Authorization.Value)
+	}
+	validAfter, ok := new(big.Int).SetString(evmPayload.Authorization.ValidAfter, 10)
+	if !ok {
+		return nil, fmt.Errorf("invalid validAfter: %q", evmPayload.Authorization.ValidAfter)
+	}
+	validBefore, ok := new(big.Int).SetString(evmPayload.Authorization.ValidBefore, 10)
+	if !ok {
+		return nil, fmt.Errorf("invalid validBefore: %q", evmPayload.Authorization.ValidBefore)
+	}
+	nonceBytes, err := evm.HexToBytes(evmPayload.Authorization.Nonce)
+	if err != nil {
+		return nil, fmt.Errorf("invalid nonce: %w", err)
+	}
 
 	// Determine signature type: ECDSA (65 bytes) or smart wallet (longer)
 	isECDSA := len(signatureBytes) == 65

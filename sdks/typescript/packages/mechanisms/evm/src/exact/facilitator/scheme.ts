@@ -246,8 +246,15 @@ export class ExactEvmScheme implements SchemeNetworkFacilitator {
           payer: exactEvmPayload.authorization.from,
         };
       }
-    } catch {
-      // If we can't check balance, continue with other validations
+    } catch (error) {
+      // Balance check failed - this is a critical validation
+      // Return error instead of silently continuing
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return {
+        isValid: false,
+        invalidReason: `balance_check_failed: ${errorMessage}`,
+        payer: exactEvmPayload.authorization.from,
+      };
     }
 
     // Verify amount is sufficient
