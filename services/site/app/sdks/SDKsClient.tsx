@@ -192,7 +192,7 @@ function SDKCard({ sdk, isSelected, onSelect }: { sdk: SDK; isSelected: boolean;
   return (
     <motion.button
       onClick={onSelect}
-      className={`group relative flex w-full flex-col items-start gap-4 rounded-xl border p-6 text-left transition-all ${
+      className={`group relative flex w-full flex-col items-start gap-3 rounded-xl border p-4 text-left transition-all sm:gap-4 sm:p-6 ${
         isSelected
           ? "border-brand bg-brand-muted"
           : "border-border bg-background-secondary hover:border-border-secondary"
@@ -200,30 +200,30 @@ function SDKCard({ sdk, isSelected, onSelect }: { sdk: SDK; isSelected: boolean;
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
     >
-      <div className="flex w-full items-start justify-between">
-        <div className="flex items-center gap-3">
-          {Icon && <Icon className="h-10 w-10" />}
-          <div>
-            <h3 className="text-lg font-semibold text-foreground">{sdk.name}</h3>
-            <p className="text-sm text-foreground-tertiary">{sdk.language}</p>
+      <div className="flex w-full items-start justify-between gap-2">
+        <div className="flex items-center gap-2 sm:gap-3">
+          {Icon && <Icon className="h-8 w-8 shrink-0 sm:h-10 sm:w-10" />}
+          <div className="min-w-0">
+            <h3 className="text-base font-semibold text-foreground sm:text-lg">{sdk.name}</h3>
+            <p className="text-xs text-foreground-tertiary sm:text-sm">{sdk.language}</p>
           </div>
         </div>
-        <span className="rounded-full bg-background-tertiary px-2.5 py-1 text-xs font-medium text-foreground-secondary">
+        <span className="shrink-0 rounded-full bg-background-tertiary px-2 py-0.5 text-[10px] font-medium text-foreground-secondary sm:px-2.5 sm:py-1 sm:text-xs">
           v{sdk.version}
         </span>
       </div>
       <p className="text-sm leading-relaxed text-foreground-secondary">{sdk.description}</p>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5 sm:gap-2">
         {sdk.features.slice(0, 3).map((feature) => (
           <span
             key={feature}
-            className="rounded-md bg-background-tertiary px-2 py-1 text-xs text-foreground-tertiary"
+            className="rounded-md bg-background-tertiary px-1.5 py-0.5 text-[10px] text-foreground-tertiary sm:px-2 sm:py-1 sm:text-xs"
           >
             {feature}
           </span>
         ))}
         {sdk.features.length > 3 && (
-          <span className="rounded-md bg-background-tertiary px-2 py-1 text-xs text-foreground-tertiary">
+          <span className="rounded-md bg-background-tertiary px-1.5 py-0.5 text-[10px] text-foreground-tertiary sm:px-2 sm:py-1 sm:text-xs">
             +{sdk.features.length - 3} more
           </span>
         )}
@@ -235,11 +235,11 @@ function SDKCard({ sdk, isSelected, onSelect }: { sdk: SDK; isSelected: boolean;
 function CodeBlock({ code, language }: { code: string; language: string }) {
   return (
     <div className="relative">
-      <div className="absolute right-3 top-3">
+      <div className="absolute right-2 top-2 sm:right-3 sm:top-3">
         <CopyButton text={code} />
       </div>
-      <pre className="overflow-x-auto rounded-lg border border-border bg-background-tertiary p-4 pr-14">
-        <code className="text-sm leading-relaxed text-foreground-secondary">{code}</code>
+      <pre className="overflow-x-auto rounded-lg border border-border bg-background-tertiary p-3 pr-12 sm:p-4 sm:pr-14">
+        <code className="text-xs leading-relaxed text-foreground-secondary sm:text-sm">{code}</code>
       </pre>
     </div>
   );
@@ -247,9 +247,9 @@ function CodeBlock({ code, language }: { code: string; language: string }) {
 
 function InstallCommand({ command, packageManager }: { command: string; packageManager?: string }) {
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-border bg-background-tertiary p-3">
+    <div className="flex items-center gap-2 rounded-lg border border-border bg-background-tertiary p-2.5 sm:p-3">
       <span className="hidden text-brand sm:inline">$</span>
-      <code className="flex-1 overflow-x-auto text-sm text-foreground">{command}</code>
+      <code className="flex-1 overflow-x-auto whitespace-nowrap text-xs text-foreground sm:text-sm">{command}</code>
       <CopyButton text={command} />
     </div>
   );
@@ -263,19 +263,19 @@ const badgeStyles: Record<string, string> = {
 
 function PackageCard({ pkg }: { pkg: Package }) {
   return (
-    <div className="rounded-lg border border-border bg-background-secondary p-4">
-      <div className="mb-2 flex items-center gap-2">
-        <PackageIcon className="h-4 w-4 text-brand" />
-        <code className="text-sm font-medium text-foreground">{pkg.name}</code>
+    <div className="rounded-lg border border-border bg-background-secondary p-3 sm:p-4">
+      <div className="mb-2 flex flex-wrap items-center gap-1.5 sm:gap-2">
+        <PackageIcon className="h-4 w-4 shrink-0 text-brand" />
+        <code className="break-all text-xs font-medium text-foreground sm:text-sm">{pkg.name}</code>
         {pkg.badge && (
           <span
-            className={`rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${badgeStyles[pkg.badge]}`}
+            className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider sm:px-2 sm:text-[10px] ${badgeStyles[pkg.badge]}`}
           >
             {pkg.badge}
           </span>
         )}
       </div>
-      <p className="text-sm text-foreground-tertiary">{pkg.description}</p>
+      <p className="text-xs text-foreground-tertiary sm:text-sm">{pkg.description}</p>
     </div>
   );
 }
@@ -327,23 +327,23 @@ export default function SDKsClient() {
         className="grid gap-8 lg:grid-cols-2"
       >
         {/* Installation & Links */}
-        <div className="space-y-6">
+        <div className="space-y-5 sm:space-y-6">
           <div>
-            <h2 className="mb-4 text-xl font-semibold text-foreground">Installation</h2>
+            <h2 className="mb-3 text-lg font-semibold text-foreground sm:mb-4 sm:text-xl">Installation</h2>
             <InstallCommand command={selectedSDK.installCommand} packageManager={selectedSDK.packageManager} />
           </div>
 
           <div>
-            <h2 className="mb-4 text-xl font-semibold text-foreground">Quick Start</h2>
+            <h2 className="mb-3 text-lg font-semibold text-foreground sm:mb-4 sm:text-xl">Quick Start</h2>
             <CodeBlock code={selectedSDK.codeExample} language={selectedSDK.language} />
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3">
             <Link
               href={selectedSDK.docsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-medium transition-colors hover:bg-brand-secondary"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-medium transition-colors hover:bg-brand-secondary"
               style={{ color: "#0A0A0B" }}
             >
               View Documentation
@@ -353,7 +353,7 @@ export default function SDKsClient() {
               href={selectedSDK.githubUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg border border-border bg-background-secondary px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-background-tertiary"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-background-secondary px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-background-tertiary"
             >
               <GitHubIcon className="h-4 w-4" />
               View on GitHub
@@ -364,11 +364,11 @@ export default function SDKsClient() {
         {/* Features */}
         <div className="space-y-6">
           <div>
-            <h2 className="mb-4 text-xl font-semibold text-foreground">Features</h2>
-            <ul className="grid gap-3 sm:grid-cols-2">
+            <h2 className="mb-3 text-lg font-semibold text-foreground sm:mb-4 sm:text-xl">Features</h2>
+            <ul className="grid gap-2 sm:grid-cols-2 sm:gap-3">
               {selectedSDK.features.map((feature) => (
-                <li key={feature} className="flex items-center gap-2 text-foreground-secondary">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand/20 text-brand">
+                <li key={feature} className="flex items-center gap-2 text-sm text-foreground-secondary">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand/20 text-brand">
                     <CheckIcon className="h-3 w-3" />
                   </span>
                   {feature}
@@ -379,25 +379,25 @@ export default function SDKsClient() {
 
           {/* TypeScript Packages */}
           {selectedSDK.id === "typescript" && (
-            <div className="space-y-8">
+            <div className="space-y-6 sm:space-y-8">
               <div>
-                <h2 className="mb-4 text-xl font-semibold text-foreground">
-                  Packages <span className="text-sm font-normal text-foreground-tertiary">({typescriptPackages.length})</span>
+                <h2 className="mb-3 text-lg font-semibold text-foreground sm:mb-4 sm:text-xl">
+                  Packages <span className="text-xs font-normal text-foreground-tertiary sm:text-sm">({typescriptPackages.length})</span>
                 </h2>
-                <div className="grid gap-3">
+                <div className="grid gap-2 sm:gap-3">
                   {typescriptPackages.map((pkg) => (
                     <PackageCard key={pkg.name} pkg={pkg} />
                   ))}
                 </div>
               </div>
               <div>
-                <h2 className="mb-2 text-xl font-semibold text-foreground">
-                  Advanced Packages <span className="text-sm font-normal text-foreground-tertiary">({advancedPackages.length})</span>
+                <h2 className="mb-2 text-lg font-semibold text-foreground sm:text-xl">
+                  Advanced Packages <span className="text-xs font-normal text-foreground-tertiary sm:text-sm">({advancedPackages.length})</span>
                 </h2>
-                <p className="mb-4 text-sm text-foreground-tertiary">
+                <p className="mb-3 text-xs text-foreground-tertiary sm:mb-4 sm:text-sm">
                   Experimental packages for cutting-edge payment features.
                 </p>
-                <div className="grid gap-3">
+                <div className="grid gap-2 sm:gap-3">
                   {advancedPackages.map((pkg) => (
                     <PackageCard key={pkg.name} pkg={pkg} />
                   ))}
@@ -413,21 +413,21 @@ export default function SDKsClient() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
-        className="mt-20"
+        className="mt-16 sm:mt-20"
       >
-        <h2 className="mb-6 text-center text-2xl font-semibold text-foreground">Supported Chains</h2>
-        <div className="flex flex-wrap justify-center gap-4">
+        <h2 className="mb-4 text-center text-xl font-semibold text-foreground sm:mb-6 sm:text-2xl">Supported Chains</h2>
+        <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
           {supportedChains.map((chain) => (
             <div
               key={chain.id}
-              className="flex items-center gap-2 rounded-full border border-border bg-background-secondary px-4 py-2"
+              className="flex items-center gap-1.5 rounded-full border border-border bg-background-secondary px-2.5 py-1.5 sm:gap-2 sm:px-4 sm:py-2"
             >
               <span
-                className="h-3 w-3 rounded-full"
+                className="h-2.5 w-2.5 rounded-full sm:h-3 sm:w-3"
                 style={{ backgroundColor: chain.color }}
                 aria-hidden="true"
               />
-              <span className="text-sm font-medium text-foreground">{chain.name}</span>
+              <span className="text-xs font-medium text-foreground sm:text-sm">{chain.name}</span>
             </div>
           ))}
         </div>
