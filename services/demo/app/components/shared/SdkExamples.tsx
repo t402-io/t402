@@ -29,29 +29,29 @@ export function SdkExamples({ scenarioId, className }: SdkExamplesProps) {
           SDK Integration
         </h3>
         {hasServer && (
-          <div className="flex items-center gap-1 rounded-lg bg-[var(--color-surface)] p-0.5">
+          <div className="flex items-center gap-0.5 rounded-lg bg-[var(--color-surface)] p-0.5">
             <button
               onClick={() => setView("client")}
               className={clsx(
-                "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors",
+                "flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-colors min-h-[36px]",
                 view === "client"
                   ? "bg-[var(--color-surface-active)] text-white"
                   : "text-[var(--color-muted)] hover:text-white"
               )}
             >
-              <Code2 size={11} />
+              <Code2 size={12} aria-hidden="true" />
               Client
             </button>
             <button
               onClick={() => setView("server")}
               className={clsx(
-                "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors",
+                "flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-colors min-h-[36px]",
                 view === "server"
                   ? "bg-[var(--color-surface-active)] text-white"
                   : "text-[var(--color-muted)] hover:text-white"
               )}
             >
-              <Server size={11} />
+              <Server size={12} aria-hidden="true" />
               Server
             </button>
           </div>
