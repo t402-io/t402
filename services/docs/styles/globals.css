@@ -1,3 +1,139 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Mobile Experience Improvements */
+@layer utilities {
+  /* Better touch targets for mobile */
+  @media (max-width: 768px) {
+    /* Increase touch target size for links in tables */
+    table a {
+      display: inline-block;
+      padding: 0.25rem 0;
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    /* Better spacing for table cells on mobile */
+    table td,
+    table th {
+      padding: 0.75rem 0.5rem !important;
+      font-size: 0.875rem;
+    }
+
+    /* Stack table content better on very small screens */
+    table code {
+      font-size: 0.75rem;
+      word-break: break-word;
+    }
+
+    /* Improve code block readability */
+    pre {
+      font-size: 0.8rem !important;
+    }
+
+    /* Better Steps component spacing */
+    .nextra-steps {
+      padding-left: 1rem;
+    }
+
+    /* Larger tap targets for navigation */
+    nav a,
+    nav button {
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Better callout spacing */
+    .nextra-callout {
+      padding: 0.75rem !important;
+    }
+
+    /* Reduce heading sizes on mobile */
+    h1 {
+      font-size: 1.75rem !important;
+    }
+
+    h2 {
+      font-size: 1.375rem !important;
+    }
+
+    h3 {
+      font-size: 1.125rem !important;
+    }
+  }
+
+  /* Very small screens (< 375px) */
+  @media (max-width: 374px) {
+    table td,
+    table th {
+      padding: 0.5rem 0.25rem !important;
+      font-size: 0.8rem;
+    }
+
+    table code {
+      font-size: 0.7rem;
+    }
+
+    /* Hide less important table columns on very small screens */
+    table th:nth-child(3),
+    table td:nth-child(3) {
+      display: none;
+    }
+  }
+
+  /* Smooth sidebar animation */
+  .nextra-sidebar-container {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Better scroll behavior */
+  html {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent horizontal overflow on mobile */
+  @media (max-width: 768px) {
+    body {
+      overflow-x: hidden;
+    }
+
+    /* Ensure tables scroll within container */
+    table {
+      max-width: 100%;
+    }
+  }
+}
+
+/* Improve DocSearch on mobile */
+@media (max-width: 768px) {
+  .DocSearch-Button {
+    width: 100%;
+    margin: 0 !important;
+    padding: 0.75rem 1rem !important;
+  }
+
+  .DocSearch-Button-Placeholder {
+    display: block !important;
+  }
+
+  .DocSearch-Modal {
+    margin: 0 !important;
+    max-width: 100% !important;
+    border-radius: 0 !important;
+  }
+}
+
+/* Better Tabs component on mobile */
+@media (max-width: 768px) {
+  [role="tablist"] {
+    gap: 0.25rem !important;
+  }
+
+  [role="tab"] {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.875rem;
+  }
+}
