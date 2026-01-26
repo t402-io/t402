@@ -863,6 +863,62 @@ func TestHandleVerify_ContextCancellation(t *testing.T) {
 	}
 }
 
+func TestHandleInfo(t *testing.T) {
+	mock := &MockFacilitator{}
+	server := newTestServer(mock)
+	router := gin.New()
+	router.GET("/", server.handleInfo)
+	router.GET("/info", server.handleInfo)
+
+	tests := []struct {
+		name string
+		path string
+	}{
+		{"root path", "/"},
+		{"info path", "/info"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, tt.path, nil)
+			w := httptest.NewRecorder()
+
+			router.ServeHTTP(w, req)
+
+			if w.Code != http.StatusOK {
+				t.Errorf("expected status 200, got %d", w.Code)
+			}
+
+			var info APIInfo
+			if err := json.Unmarshal(w.Body.Bytes(), &info); err != nil {
+				t.Fatalf("failed to parse response: %v", err)
+			}
+
+			if info.Name != "T402 Facilitator API" {
+				t.Errorf("expected Name='T402 Facilitator API', got %s", info.Name)
+			}
+			if info.Version == "" {
+				t.Error("expected Version to be set")
+			}
+			if info.Docs != "https://docs.t402.io" {
+				t.Errorf("expected Docs='https://docs.t402.io', got %s", info.Docs)
+			}
+			if len(info.Endpoints) < 5 {
+				t.Errorf("expected at least 5 endpoints, got %d", len(info.Endpoints))
+			}
+			if info.Features == nil {
+				t.Error("expected Features to be set")
+			}
+			if !info.Features["verification"] {
+				t.Error("expected verification feature to be enabled")
+			}
+			if !info.Features["settlement"] {
+				t.Error("expected settlement feature to be enabled")
+			}
+		})
+	}
+}
+
 func TestHandleSettle_FullResponse(t *testing.T) {
 	mock := &MockFacilitator{
 		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
