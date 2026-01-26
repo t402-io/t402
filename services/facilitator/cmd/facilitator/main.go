@@ -587,6 +587,18 @@ func newFacilitatorEvmSigner(privateKeyHex string, rpcURL string) (*facilitatorE
 	}, nil
 }
 
+// Zeroize securely clears the private key from memory
+// Should be called when the signer is no longer needed
+func (s *facilitatorEvmSigner) Zeroize() {
+	if s.privateKey != nil {
+		// Clear the private key's D value (the actual secret)
+		if s.privateKey.D != nil {
+			s.privateKey.D.SetInt64(0)
+		}
+		s.privateKey = nil
+	}
+}
+
 func (s *facilitatorEvmSigner) GetAddresses() []string {
 	return []string{s.address.Hex()}
 }

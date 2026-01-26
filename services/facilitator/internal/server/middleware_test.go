@@ -605,3 +605,222 @@ func TestRateLimitMiddleware_HeaderValues(t *testing.T) {
 		t.Error("X-RateLimit-Reset header not set")
 	}
 }
+
+// Tests for P0-7: X-Request-ID validation
+func TestIsValidRequestID(t *testing.T) {
+	tests := []struct {
+		name     string
+		id       string
+		expected bool
+	}{
+		// Valid IDs
+		{"alphanumeric", "abc123XYZ", true},
+		{"with hyphens", "abc-123-xyz", true},
+		{"with underscores", "abc_123_xyz", true},
+		{"uuid format", "550e8400-e29b-41d4-a716-446655440000", true},
+		{"short id", "a1", true},
+		{"max length", string(make([]byte, 64)), false}, // all zeros = invalid chars
+
+		// Invalid IDs
+		{"empty", "", false},
+		{"too long", string(make([]byte, 65)), false},
+		{"with spaces", "abc 123", false},
+		{"with newline", "abc\n123", false},
+		{"with tab", "abc\t123", false},
+		{"with carriage return", "abc\r123", false},
+		{"with null byte", "abc\x00123", false},
+		{"with special chars", "abc!@#$%", false},
+		{"with unicode", "abc日本語", false},
+		{"log injection attempt", "abc\nINFO: fake log entry", false},
+		{"html injection", "<script>alert(1)</script>", false},
+		{"path traversal", "../../../etc/passwd", false},
+		{"sql injection", "'; DROP TABLE users; --", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := isValidRequestID(tt.id)
+			if result != tt.expected {
+				t.Errorf("isValidRequestID(%q) = %v, expected %v", tt.id, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestRequestIDMiddleware_RejectsInvalidID(t *testing.T) {
+	router := gin.New()
+	router.Use(RequestIDMiddleware())
+	router.GET("/test", func(c *gin.Context) {
+		requestID, _ := c.Get("request_id")
+		// Invalid IDs should be replaced with generated ones
+		if requestID == "invalid\nlog-injection" {
+			t.Error("Invalid request ID was accepted")
+		}
+		c.String(http.StatusOK, "ok")
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	req.Header.Set("X-Request-ID", "invalid\nlog-injection")
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	// Should generate a new valid ID
+	responseID := w.Header().Get("X-Request-ID")
+	if responseID == "invalid\nlog-injection" {
+		t.Error("Invalid request ID was echoed back")
+	}
+	if !isValidRequestID(responseID) {
+		t.Errorf("Generated request ID is not valid: %q", responseID)
+	}
+}
+
+// Tests for P0-5: Client IP spoofing prevention
+func TestIsValidIP(t *testing.T) {
+	tests := []struct {
+		name     string
+		ip       string
+		expected bool
+	}{
+		// Valid IPs
+		{"ipv4", "192.168.1.1", true},
+		{"ipv4 localhost", "127.0.0.1", true},
+		{"ipv6 full", "2001:0db8:85a3:0000:0000:8a2e:0370:7334", true},
+		{"ipv6 short", "::1", true},
+
+		// Invalid IPs
+		{"empty", "", false},
+		{"no separator", "192168001001", false},
+		{"with spaces", "192.168.1.1 ", false},
+		{"injection attempt", "192.168.1.1\n", false},
+		{"too long", string(make([]byte, 50)), false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := isValidIP(tt.ip)
+			if result != tt.expected {
+				t.Errorf("isValidIP(%q) = %v, expected %v", tt.ip, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestIsTrustedProxy(t *testing.T) {
+	trustedProxies := []string{"10.0.0.1", "192.168.1.0/24"}
+
+	tests := []struct {
+		name     string
+		ip       string
+		expected bool
+	}{
+		{"exact match", "10.0.0.1", true},
+		{"cidr match", "192.168.1.100", true},
+		{"not trusted", "8.8.8.8", false},
+		{"empty", "", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := isTrustedProxy(tt.ip, trustedProxies)
+			if result != tt.expected {
+				t.Errorf("isTrustedProxy(%q) = %v, expected %v", tt.ip, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestGetSecureClientIP_NoProxyTrust(t *testing.T) {
+	config := &RateLimitConfig{
+		TrustProxy:     false,
+		TrustedProxies: []string{},
+	}
+
+	router := gin.New()
+	var capturedIP string
+
+	router.GET("/test", func(c *gin.Context) {
+		capturedIP = getSecureClientIP(c, config)
+		c.String(http.StatusOK, "ok")
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	// Try to spoof IP via X-Forwarded-For
+	req.Header.Set("X-Forwarded-For", "1.2.3.4")
+	req.RemoteAddr = "192.168.1.100:12345"
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	// Should use RemoteAddr, not the spoofed X-Forwarded-For
+	if capturedIP == "1.2.3.4" {
+		t.Error("Spoofed IP was accepted when TrustProxy=false")
+	}
+}
+
+func TestGetSecureClientIP_WithTrustedProxy(t *testing.T) {
+	config := &RateLimitConfig{
+		TrustProxy:     true,
+		TrustedProxies: []string{"192.168.1.1"},
+	}
+
+	router := gin.New()
+	var capturedIP string
+
+	router.GET("/test", func(c *gin.Context) {
+		capturedIP = getSecureClientIP(c, config)
+		c.String(http.StatusOK, "ok")
+	})
+
+	// Request from trusted proxy
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	req.Header.Set("X-Forwarded-For", "8.8.8.8, 192.168.1.1")
+	req.RemoteAddr = "192.168.1.1:12345"
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	// Should trust X-Forwarded-For from trusted proxy
+	if capturedIP != "8.8.8.8" {
+		t.Errorf("Expected IP 8.8.8.8 from trusted proxy, got %s", capturedIP)
+	}
+}
+
+func TestGetSecureClientIP_UntrustedProxySpoofAttempt(t *testing.T) {
+	config := &RateLimitConfig{
+		TrustProxy:     true,
+		TrustedProxies: []string{"10.0.0.1"},
+	}
+
+	router := gin.New()
+	var capturedIP string
+
+	router.GET("/test", func(c *gin.Context) {
+		capturedIP = getSecureClientIP(c, config)
+		c.String(http.StatusOK, "ok")
+	})
+
+	// Request NOT from trusted proxy, trying to spoof
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	req.Header.Set("X-Forwarded-For", "1.2.3.4")
+	req.RemoteAddr = "8.8.8.8:12345"
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	// Should NOT trust X-Forwarded-For from untrusted source
+	if capturedIP == "1.2.3.4" {
+		t.Error("Spoofed IP was accepted from untrusted proxy")
+	}
+}
+
+func TestDefaultRateLimitConfig(t *testing.T) {
+	config := DefaultRateLimitConfig()
+
+	if config.TrustProxy {
+		t.Error("Default config should not trust proxies")
+	}
+	if len(config.TrustedProxies) != 0 {
+		t.Error("Default config should have empty trusted proxies")
+	}
+}

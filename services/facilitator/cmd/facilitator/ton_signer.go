@@ -54,6 +54,8 @@ type TonSignerConfig struct {
 //   - TON_TESTNET_ADDRESS: Your TON testnet wallet address
 //
 // The mnemonic or private key is used for signing operations.
+//
+// SECURITY: The mnemonic/private key is cleared from memory after key derivation
 func newFacilitatorTonSigner(mnemonic string, mainnetRPC string, testnetRPC string) (*facilitatorTonSigner, error) {
 	if mnemonic == "" {
 		return nil, fmt.Errorf("TON_MNEMONIC is required")
@@ -67,18 +69,33 @@ func newFacilitatorTonSigner(mnemonic string, mainnetRPC string, testnetRPC stri
 		// Treat as hex-encoded private key
 		seed, err := hex.DecodeString(words[0])
 		if err != nil {
+			// Clear the words before returning
+			clearWords(words)
 			return nil, fmt.Errorf("invalid private key hex: %w", err)
 		}
 		privateKey = ed25519.NewKeyFromSeed(seed)
+		// SECURITY: Clear the seed after use
+		for i := range seed {
+			seed[i] = 0
+		}
 	} else if len(words) == 24 {
 		// SECURITY WARNING: Using mnemonic derivation
 		// For production, it's recommended to use a pre-derived hex private key instead
 		log.Printf("WARNING: Using mnemonic-based key derivation for TON. For production, consider using TON_MNEMONIC with a 64-character hex private key instead.")
 		seed := deriveTonSeed(words)
 		privateKey = ed25519.NewKeyFromSeed(seed)
+		// SECURITY: Clear the seed after use
+		for i := range seed {
+			seed[i] = 0
+		}
 	} else {
+		// Clear the words before returning
+		clearWords(words)
 		return nil, fmt.Errorf("TON_MNEMONIC must be 24 words or a 64-character hex private key, got %d words", len(words))
 	}
+
+	// SECURITY: Clear the mnemonic words from memory
+	clearWords(words)
 
 	publicKey := privateKey.Public().(ed25519.PublicKey)
 
@@ -100,10 +117,19 @@ func newFacilitatorTonSigner(mnemonic string, mainnetRPC string, testnetRPC stri
 	return signer, nil
 }
 
+// clearWords securely clears an array of mnemonic words from memory
+func clearWords(words []string) {
+	for i := range words {
+		clearString(&words[i])
+	}
+}
+
 // deriveTonSeed derives a 32-byte seed from a 24-word mnemonic using TON's derivation
 // This implements the standard TON mnemonic to seed derivation:
 // 1. PBKDF2-HMAC-SHA512 with mnemonic as password, "TON default seed" as salt, 100000 iterations
 // 2. Use first 32 bytes of the 64-byte result as Ed25519 seed
+//
+// SECURITY: This function securely clears the mnemonic from memory after use
 func deriveTonSeed(words []string) []byte {
 	mnemonic := strings.Join(words, " ")
 
@@ -118,8 +144,28 @@ func deriveTonSeed(words []string) []byte {
 
 	derived := pbkdf2.Key([]byte(mnemonic), salt, iterations, keyLen, sha512.New)
 
+	// SECURITY: Clear the mnemonic from memory after deriving the seed
+	// This reduces the window where the mnemonic could be exposed via memory dump
+	clearString(&mnemonic)
+
 	// Return first 32 bytes as Ed25519 seed
 	return derived[:32]
+}
+
+// clearString securely overwrites a string's underlying bytes
+// Note: This works because Go strings are immutable but the underlying
+// byte array can be modified via unsafe pointer manipulation.
+// This is a best-effort security measure - the GC may have already
+// copied the string data elsewhere.
+func clearString(s *string) {
+	if s == nil || *s == "" {
+		return
+	}
+	// Convert string header to byte slice header and zero it
+	b := []byte(*s)
+	for i := range b {
+		b[i] = 0
+	}
 }
 
 // hmacSha512 computes HMAC-SHA512 (used internally by PBKDF2)

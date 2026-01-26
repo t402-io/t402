@@ -25,9 +25,128 @@ type Repository struct {
 	db *sql.DB
 }
 
+// Tx wraps a database transaction for atomic operations
+type Tx struct {
+	tx *sql.Tx
+}
+
 // NewRepository creates a new stream repository
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{db: db}
+}
+
+// BeginTx starts a new database transaction
+func (r *Repository) BeginTx(ctx context.Context) (*Tx, error) {
+	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{
+		Isolation: sql.LevelSerializable,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	return &Tx{tx: tx}, nil
+}
+
+// Commit commits the transaction
+func (t *Tx) Commit() error {
+	return t.tx.Commit()
+}
+
+// Rollback rolls back the transaction
+func (t *Tx) Rollback() error {
+	return t.tx.Rollback()
+}
+
+// GetByIDForUpdate retrieves a stream by ID with a row-level lock (FOR UPDATE)
+// This prevents concurrent modifications and race conditions
+func (r *Repository) GetByIDForUpdate(ctx context.Context, tx *Tx, id string) (*Stream, error) {
+	query := `
+		SELECT
+			id, network, scheme, payer, payee, asset,
+			max_amount, current_amount, settled_amount, rate_per_second,
+			status, created_at, activated_at, last_updated_at, expires_at,
+			closed_at, deposit_tx_hash, settlement_tx_hash, metadata
+		FROM streams
+		WHERE id = $1
+		FOR UPDATE
+	`
+
+	stream := &Stream{}
+	var metadataJSON []byte
+	var activatedAt, expiresAt, closedAt sql.NullTime
+
+	err := tx.tx.QueryRowContext(ctx, query, id).Scan(
+		&stream.ID, &stream.Network, &stream.Scheme, &stream.Payer, &stream.Payee, &stream.Asset,
+		&stream.MaxAmount, &stream.CurrentAmount, &stream.SettledAmount, &stream.RatePerSecond,
+		&stream.Status, &stream.CreatedAt, &activatedAt, &stream.LastUpdatedAt, &expiresAt,
+		&closedAt, &stream.DepositTxHash, &stream.SettlementTxHash, &metadataJSON,
+	)
+	if err == sql.ErrNoRows {
+		return nil, ErrStreamNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get stream for update: %w", err)
+	}
+
+	if activatedAt.Valid {
+		stream.ActivatedAt = &activatedAt.Time
+	}
+	if expiresAt.Valid {
+		stream.ExpiresAt = &expiresAt.Time
+	}
+	if closedAt.Valid {
+		stream.ClosedAt = &closedAt.Time
+	}
+
+	if len(metadataJSON) > 0 {
+		if err := json.Unmarshal(metadataJSON, &stream.Metadata); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal metadata: %w", err)
+		}
+	}
+
+	return stream, nil
+}
+
+// UpdateInTx updates a stream within a transaction
+func (r *Repository) UpdateInTx(ctx context.Context, tx *Tx, stream *Stream) error {
+	stream.LastUpdatedAt = time.Now().UTC()
+
+	metadataJSON, err := json.Marshal(stream.Metadata)
+	if err != nil {
+		return fmt.Errorf("failed to marshal metadata: %w", err)
+	}
+
+	query := `
+		UPDATE streams SET
+			current_amount = $2,
+			settled_amount = $3,
+			status = $4,
+			activated_at = $5,
+			last_updated_at = $6,
+			closed_at = $7,
+			deposit_tx_hash = $8,
+			settlement_tx_hash = $9,
+			metadata = $10
+		WHERE id = $1
+	`
+
+	result, err := tx.tx.ExecContext(ctx, query,
+		stream.ID, stream.CurrentAmount, stream.SettledAmount, stream.Status,
+		stream.ActivatedAt, stream.LastUpdatedAt, stream.ClosedAt,
+		stream.DepositTxHash, stream.SettlementTxHash, metadataJSON,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to update stream in transaction: %w", err)
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+	if rows == 0 {
+		return ErrStreamNotFound
+	}
+
+	return nil
 }
 
 // Create creates a new stream

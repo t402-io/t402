@@ -251,8 +251,9 @@ func (f *ExactLegacyEvmScheme) Verify(
 	}
 
 	// Calculate required allowance based on minAllowanceRatio
-	requiredAllowanceFloat := float64(requiredAmount.Int64()) * f.config.MinAllowanceRatio
-	requiredAllowance := big.NewInt(int64(requiredAllowanceFloat))
+	// SECURITY: Use big.Rat for precise calculation to avoid float64 precision loss
+	// which could cause incorrect verification for large amounts (> 2^53)
+	requiredAllowance := calculateMinAllowance(requiredAmount, f.config.MinAllowanceRatio)
 	if allowance.Cmp(requiredAllowance) < 0 {
 		return nil, t402.NewVerifyError("insufficient_allowance", legacyPayload.Authorization.From, network, nil)
 	}
@@ -362,4 +363,42 @@ func (f *ExactLegacyEvmScheme) checkAllowance(ctx context.Context, owner string,
 	}
 
 	return allowance, nil
+}
+
+// calculateMinAllowance calculates the minimum required allowance using big.Rat
+// for precise calculation without float64 precision loss.
+// This is important for large amounts where float64 would lose precision.
+//
+// The calculation: requiredAmount * minRatio (truncated towards zero)
+func calculateMinAllowance(requiredAmount *big.Int, minRatio float64) *big.Int {
+	// Handle edge cases
+	if requiredAmount == nil || requiredAmount.Sign() <= 0 {
+		return big.NewInt(0)
+	}
+	if minRatio <= 0 {
+		return big.NewInt(0)
+	}
+	if minRatio >= 1.0 {
+		return new(big.Int).Set(requiredAmount)
+	}
+
+	// Use big.Rat for precise calculation
+	// Convert requiredAmount to Rat
+	requiredRat := new(big.Rat).SetInt(requiredAmount)
+
+	// Convert minRatio to Rat
+	// Use a high precision conversion: multiply by 10^18 and use as numerator
+	// This gives us 18 decimal places of precision
+	precision := new(big.Int).Exp(big.NewInt(10), big.NewInt(18), nil)
+	ratioNumerator := new(big.Int).SetInt64(int64(minRatio * 1e18))
+	minRatioRat := new(big.Rat).SetFrac(ratioNumerator, precision)
+
+	// Calculate result: requiredAmount * minRatio
+	resultRat := new(big.Rat).Mul(requiredRat, minRatioRat)
+
+	// Convert back to big.Int (truncate towards zero)
+	// result = numerator / denominator
+	result := new(big.Int).Div(resultRat.Num(), resultRat.Denom())
+
+	return result
 }

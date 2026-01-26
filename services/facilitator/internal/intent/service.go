@@ -241,21 +241,32 @@ func (s *Service) SelectRoute(ctx context.Context, req *SelectRouteRequest) (*Se
 }
 
 // ExecuteIntent executes a routed intent
+// Uses database-level locking to prevent race conditions and duplicate payments
 func (s *Service) ExecuteIntent(ctx context.Context, req *ExecuteIntentRequest) (*ExecuteIntentResponse, error) {
-	// Get intent
-	intent, err := s.repo.GetByID(ctx, req.IntentID)
+	// Start transaction for atomic status check and update
+	tx, err := s.repo.BeginTx(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to start transaction: %w", err)
+	}
+	defer tx.Rollback() // Will be no-op if committed
+
+	// Get intent with row-level lock (SELECT ... FOR UPDATE)
+	// This prevents concurrent ExecuteIntent calls from proceeding simultaneously
+	intent, err := s.repo.GetByIDForUpdate(ctx, tx, req.IntentID)
 	if err != nil {
 		return nil, err
 	}
 
-	// Check status
+	// Check status - this check is now atomic with the lock acquisition
 	if intent.Status != IntentStatusRouted && intent.Status != IntentStatusPending {
 		return nil, fmt.Errorf("intent cannot be executed in status: %s", intent.Status)
 	}
 
 	// Check expiry
 	if time.Now().After(intent.ExpiresAt) {
-		s.repo.UpdateStatus(ctx, intent.ID, IntentStatusExpired, "")
+		intent.Status = IntentStatusExpired
+		s.repo.UpdateInTx(ctx, tx, intent)
+		tx.Commit()
 		return nil, ErrIntentExpired
 	}
 
@@ -290,17 +301,42 @@ func (s *Service) ExecuteIntent(ctx context.Context, req *ExecuteIntentRequest) 
 		return nil, ErrInvalidSignature
 	}
 
-	// Mark as executing
+	// Atomically mark as executing within the transaction
+	// This prevents any concurrent attempts from proceeding
 	intent.Status = IntentStatusExecuting
 	intent.SelectedRoute = route
-	if err := s.repo.Update(ctx, intent); err != nil {
+	if err := s.repo.UpdateInTx(ctx, tx, intent); err != nil {
 		return nil, fmt.Errorf("failed to update intent status: %w", err)
 	}
 
-	// Execute payment
+	// Commit the transaction to release the lock before payment execution
+	// This ensures other requests will see the "executing" status
+	if err := tx.Commit(); err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	// Execute payment (outside transaction to avoid long locks)
 	txHashes, execErr := s.executor.ExecutePayment(ctx, route, intent.Payer, intent.Payee)
 
-	// Update intent based on result
+	// Update intent based on result using a new transaction
+	finalizeTx, err := s.repo.BeginTx(ctx)
+	if err != nil {
+		// Log the error but don't fail - payment may have succeeded
+		// The intent is in "executing" status which can be manually resolved
+		return nil, fmt.Errorf("payment executed but failed to start finalize transaction: %w", err)
+	}
+	defer finalizeTx.Rollback()
+
+	intent, err = s.repo.GetByIDForUpdate(ctx, finalizeTx, req.IntentID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get intent for finalization: %w", err)
+	}
+
+	// Verify it's still in executing status
+	if intent.Status != IntentStatusExecuting {
+		return nil, fmt.Errorf("intent status changed unexpectedly: %s", intent.Status)
+	}
+
 	now := time.Now()
 	if execErr != nil {
 		intent.Status = IntentStatusFailed
@@ -317,8 +353,12 @@ func (s *Service) ExecuteIntent(ctx context.Context, req *ExecuteIntentRequest) 
 		}
 	}
 
-	if err := s.repo.Update(ctx, intent); err != nil {
+	if err := s.repo.UpdateInTx(ctx, finalizeTx, intent); err != nil {
 		return nil, fmt.Errorf("failed to finalize intent: %w", err)
+	}
+
+	if err := finalizeTx.Commit(); err != nil {
+		return nil, fmt.Errorf("failed to commit finalize transaction: %w", err)
 	}
 
 	return &ExecuteIntentResponse{

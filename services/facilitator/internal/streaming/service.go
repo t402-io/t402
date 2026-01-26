@@ -311,14 +311,24 @@ func (s *Service) UpdateStream(ctx context.Context, req *UpdateStreamRequest) (*
 }
 
 // CloseStream closes a stream and settles the final amount
+// Uses database-level locking to prevent race conditions and double settlement
 func (s *Service) CloseStream(ctx context.Context, req *CloseStreamRequest) (*CloseStreamResponse, error) {
-	// Get stream
-	stream, err := s.repo.GetByID(ctx, req.StreamID)
+	// Start transaction for atomic operation
+	tx, err := s.repo.BeginTx(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to start transaction: %w", err)
+	}
+	defer tx.Rollback() // Will be no-op if committed
+
+	// Get stream with row-level lock (SELECT ... FOR UPDATE)
+	// This prevents concurrent CloseStream calls from proceeding simultaneously
+	stream, err := s.repo.GetByIDForUpdate(ctx, tx, req.StreamID)
 	if err != nil {
 		return nil, err
 	}
 
 	// Check status - can only close active, paused, or pending streams
+	// This check is now atomic with the lock acquisition
 	if stream.Status != StreamStatusActive && stream.Status != StreamStatusPaused && stream.Status != StreamStatusPending {
 		return nil, fmt.Errorf("cannot close stream with status: %s", stream.Status)
 	}
@@ -354,10 +364,16 @@ func (s *Service) CloseStream(ctx context.Context, req *CloseStreamRequest) (*Cl
 		return nil, ErrInvalidSignature
 	}
 
-	// Mark as closing
+	// Mark as closing within the transaction
 	stream.Status = StreamStatusClosing
-	if err := s.repo.Update(ctx, stream); err != nil {
+	if err := s.repo.UpdateInTx(ctx, tx, stream); err != nil {
 		return nil, fmt.Errorf("failed to update stream status: %w", err)
+	}
+
+	// Commit the transaction to release the lock before settlement
+	// This ensures other requests will see the "closing" status
+	if err := tx.Commit(); err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	// Calculate amount to settle (final - already settled)
@@ -367,28 +383,57 @@ func (s *Service) CloseStream(ctx context.Context, req *CloseStreamRequest) (*Cl
 
 	var txHash string
 	if amountToSettle.Sign() > 0 {
-		// Settle on-chain
+		// Settle on-chain (outside transaction to avoid long locks)
 		txHash, err = s.settler.SettleStream(ctx, stream.Network, stream.Scheme, stream.Payer, stream.Payee, stream.Asset, amountToSettle.String())
 		if err != nil {
-			// Revert status on failure
-			stream.Status = StreamStatusActive
-			s.repo.Update(ctx, stream)
+			// Revert status on failure using a new transaction
+			revertTx, txErr := s.repo.BeginTx(ctx)
+			if txErr == nil {
+				revertStream, getErr := s.repo.GetByIDForUpdate(ctx, revertTx, req.StreamID)
+				if getErr == nil && revertStream.Status == StreamStatusClosing {
+					revertStream.Status = StreamStatusActive
+					s.repo.UpdateInTx(ctx, revertTx, revertStream)
+					revertTx.Commit()
+				} else {
+					revertTx.Rollback()
+				}
+			}
 			return nil, fmt.Errorf("failed to settle: %w", err)
 		}
 	}
 
-	// Update stream as closed
+	// Update stream as closed using a new transaction
+	closeTx, err := s.repo.BeginTx(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to start close transaction: %w", err)
+	}
+	defer closeTx.Rollback()
+
+	stream, err = s.repo.GetByIDForUpdate(ctx, closeTx, req.StreamID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Verify it's still in closing status (should be unless something went wrong)
+	if stream.Status != StreamStatusClosing {
+		return nil, fmt.Errorf("stream status changed unexpectedly: %s", stream.Status)
+	}
+
 	now := time.Now()
 	stream.Status = StreamStatusClosed
 	stream.ClosedAt = &now
 	stream.SettledAmount = finalAmount.String()
 	stream.SettlementTxHash = txHash
 
-	if err := s.repo.Update(ctx, stream); err != nil {
+	if err := s.repo.UpdateInTx(ctx, closeTx, stream); err != nil {
 		return nil, fmt.Errorf("failed to finalize stream: %w", err)
 	}
 
-	// Record event
+	if err := closeTx.Commit(); err != nil {
+		return nil, fmt.Errorf("failed to commit close transaction: %w", err)
+	}
+
+	// Record event (non-critical, don't fail the operation)
 	s.repo.CreateEvent(ctx, &StreamEvent{
 		StreamID: stream.ID,
 		Type:     StreamEventClosed,

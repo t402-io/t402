@@ -26,9 +26,153 @@ type Repository struct {
 	db *sql.DB
 }
 
+// Tx wraps a database transaction for atomic operations
+type Tx struct {
+	tx *sql.Tx
+}
+
 // NewRepository creates a new intent repository
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{db: db}
+}
+
+// BeginTx starts a new database transaction
+func (r *Repository) BeginTx(ctx context.Context) (*Tx, error) {
+	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{
+		Isolation: sql.LevelSerializable,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	return &Tx{tx: tx}, nil
+}
+
+// Commit commits the transaction
+func (t *Tx) Commit() error {
+	return t.tx.Commit()
+}
+
+// Rollback rolls back the transaction
+func (t *Tx) Rollback() error {
+	return t.tx.Rollback()
+}
+
+// GetByIDForUpdate retrieves an intent by ID with a row-level lock (FOR UPDATE)
+// This prevents concurrent modifications and race conditions
+func (r *Repository) GetByIDForUpdate(ctx context.Context, tx *Tx, id string) (*Intent, error) {
+	query := `
+		SELECT
+			id, payer, payee, amount, asset,
+			source_networks, target_network, max_slippage, max_gas_cost,
+			priority, status, selected_route, available_routes,
+			created_at, expires_at, executed_at, tx_hashes, error_message, metadata
+		FROM intents
+		WHERE id = $1
+		FOR UPDATE
+	`
+
+	intent := &Intent{}
+	var sourceNetworks, txHashes pq.StringArray
+	var selectedRouteJSON, routesJSON, metadataJSON []byte
+	var executedAt sql.NullTime
+	var targetNetwork, maxGasCost, errorMessage sql.NullString
+
+	err := tx.tx.QueryRowContext(ctx, query, id).Scan(
+		&intent.ID, &intent.Payer, &intent.Payee, &intent.Amount, &intent.Asset,
+		&sourceNetworks, &targetNetwork, &intent.MaxSlippage, &maxGasCost,
+		&intent.Priority, &intent.Status, &selectedRouteJSON, &routesJSON,
+		&intent.CreatedAt, &intent.ExpiresAt, &executedAt, &txHashes, &errorMessage, &metadataJSON,
+	)
+	if err == sql.ErrNoRows {
+		return nil, ErrIntentNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get intent for update: %w", err)
+	}
+
+	intent.SourceNetworks = sourceNetworks
+	intent.TxHashes = txHashes
+	if targetNetwork.Valid {
+		intent.TargetNetwork = targetNetwork.String
+	}
+	if maxGasCost.Valid {
+		intent.MaxGasCost = maxGasCost.String
+	}
+	if errorMessage.Valid {
+		intent.ErrorMessage = errorMessage.String
+	}
+	if executedAt.Valid {
+		intent.ExecutedAt = &executedAt.Time
+	}
+
+	if len(selectedRouteJSON) > 0 && string(selectedRouteJSON) != "null" {
+		intent.SelectedRoute = &Route{}
+		if err := json.Unmarshal(selectedRouteJSON, intent.SelectedRoute); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal selected route: %w", err)
+		}
+	}
+
+	if len(routesJSON) > 0 {
+		if err := json.Unmarshal(routesJSON, &intent.AvailableRoutes); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal routes: %w", err)
+		}
+	}
+
+	if len(metadataJSON) > 0 {
+		if err := json.Unmarshal(metadataJSON, &intent.Metadata); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal metadata: %w", err)
+		}
+	}
+
+	return intent, nil
+}
+
+// UpdateInTx updates an intent within a transaction
+func (r *Repository) UpdateInTx(ctx context.Context, tx *Tx, intent *Intent) error {
+	routesJSON, err := json.Marshal(intent.AvailableRoutes)
+	if err != nil {
+		return fmt.Errorf("failed to marshal routes: %w", err)
+	}
+
+	selectedRouteJSON, err := json.Marshal(intent.SelectedRoute)
+	if err != nil {
+		return fmt.Errorf("failed to marshal selected route: %w", err)
+	}
+
+	metadataJSON, err := json.Marshal(intent.Metadata)
+	if err != nil {
+		return fmt.Errorf("failed to marshal metadata: %w", err)
+	}
+
+	query := `
+		UPDATE intents SET
+			status = $2,
+			selected_route = $3,
+			available_routes = $4,
+			executed_at = $5,
+			tx_hashes = $6,
+			error_message = $7,
+			metadata = $8
+		WHERE id = $1
+	`
+
+	result, err := tx.tx.ExecContext(ctx, query,
+		intent.ID, intent.Status, selectedRouteJSON, routesJSON,
+		intent.ExecutedAt, pq.Array(intent.TxHashes), intent.ErrorMessage, metadataJSON,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to update intent in transaction: %w", err)
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+	if rows == 0 {
+		return ErrIntentNotFound
+	}
+
+	return nil
 }
 
 // Create creates a new intent
