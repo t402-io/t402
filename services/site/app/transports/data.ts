@@ -50,7 +50,7 @@ app.use(paymentMiddleware({
   },
 }));`,
     },
-    specUrl: "https://docs.t402.io/transports/http",
+    specUrl: "https://docs.t402.io/getting-started/quickstart",
   },
   {
     id: "mcp",
@@ -86,7 +86,7 @@ const server = new T402McpServer({
   },
 });`,
     },
-    specUrl: "https://docs.t402.io/transports/mcp",
+    specUrl: "https://docs.t402.io/sdks/typescript/mcp",
     badge: "new",
   },
   {
@@ -122,7 +122,7 @@ const agent = new T402A2AAgent({
   }],
 });`,
     },
-    specUrl: "https://docs.t402.io/transports/a2a",
+    specUrl: "https://docs.t402.io/getting-started/quickstart",
     badge: "new",
   },
 ];

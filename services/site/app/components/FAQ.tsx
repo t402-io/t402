@@ -27,7 +27,7 @@ const faqData: FAQItem[] = [
         Check our{" "}
         <a
           className="underline"
-          href="https://t402.gitbook.io/t402/getting-started/quickstart-for-sellers#id-2.-add-payment-middleware"
+          href="https://docs.t402.io/getting-started/quickstart"
           target="_blank"
           rel="noreferrer"
         >

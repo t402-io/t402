@@ -1,18 +1,47 @@
+# Environment
 .env
+.env*.local
+
+# Dependencies
 node_modules/
+
+# Build outputs
 dist/
-coverage/
-.turbo/
 .next/
-proxy
-.env
-__pycache__/
+.turbo/
+.vercel
+.wrangler/
+api-docs/
+
+# Test coverage
+coverage/
 .coverage
+coverage.out
+*.coverprofile
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+
+# LaTeX build artifacts
+whitepaper/build/
+*.aux
+*.bbl
+*.blg
+*.lof
+*.lot
+*.out
+*.toc
+
+# OS files
 **/.DS_Store
+
+# Editor
+.claude/settings.local.json
+
+# Project specific
+proxy
 e2e/facilitators/external-proxies/*
 !e2e/facilitators/external-proxies/README.md
-.vercel
-.env*.local
-.wrangler/
-.claude/settings.local.json
-api-docs/

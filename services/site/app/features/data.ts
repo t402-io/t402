@@ -366,7 +366,7 @@ app.use(paymentMiddleware({
       "Enterprise payment receiving",
       "Escrow and milestone payments",
     ],
-    docsUrl: "https://docs.t402.io/advanced/multisig",
+    docsUrl: "https://docs.t402.io/getting-started/quickstart",
   },
   // New features
   {
@@ -458,7 +458,7 @@ const policy = definePolicy({
       "Compliance-friendly autonomous spending",
       "Delegated treasury management",
     ],
-    docsUrl: "https://docs.t402.io/advanced/agent-policy",
+    docsUrl: "https://docs.t402.io/getting-started/quickstart",
   },
   {
     id: "a2a",
@@ -634,7 +634,7 @@ await stream.close(); // Refunds unused deposit`,
       "Real-time data feed subscriptions",
       "Compute resource metering",
     ],
-    docsUrl: "https://docs.t402.io/advanced/streaming",
+    docsUrl: "https://docs.t402.io/getting-started/quickstart",
   },
   {
     id: "zk-payments",
@@ -699,7 +699,7 @@ await stream.close(); // Refunds unused deposit`,
       "Competitive bid submissions",
       "Medical payment confidentiality",
     ],
-    docsUrl: "https://docs.t402.io/advanced/zk-payments",
+    docsUrl: "https://docs.t402.io/getting-started/quickstart",
   },
   {
     id: "smart-router",
@@ -790,7 +790,7 @@ await route.execute();`,
       "Merchant payment flexibility",
       "Automatic chain selection for lowest fees",
     ],
-    docsUrl: "https://docs.t402.io/advanced/smart-router",
+    docsUrl: "https://docs.t402.io/getting-started/quickstart",
   },
   {
     id: "intent-payments",
@@ -855,7 +855,7 @@ await route.execute();`,
       "Multi-source balance spending",
       "Deadline-based payment scheduling",
     ],
-    docsUrl: "https://docs.t402.io/advanced/intents",
+    docsUrl: "https://docs.t402.io/getting-started/quickstart",
   },
 ];
 

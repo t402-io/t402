@@ -230,7 +230,7 @@ export default function EcosystemClient() {
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <Link
-                href="https://docs.t402.io/quickstart"
+                href="https://docs.t402.io/getting-started/quickstart"
                 className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-500"
               >
                 Quickstart Guide
