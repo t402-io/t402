@@ -427,3 +427,181 @@ func TestAPIKeyMiddleware_InvalidKey(t *testing.T) {
 		t.Errorf("expected status 401, got %d", w.Code)
 	}
 }
+
+func TestCORSMiddleware_OPTIONS_NoOrigin(t *testing.T) {
+	router := gin.New()
+	router.Use(CORSMiddleware("https://example.com"))
+	router.OPTIONS("/test", func(c *gin.Context) {
+		t.Error("handler should not be called for OPTIONS")
+	})
+
+	// OPTIONS request without Origin header
+	req := httptest.NewRequest(http.MethodOptions, "/test", nil)
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	// Should return 403 for OPTIONS without origin when origins are restricted
+	if w.Code != http.StatusForbidden {
+		t.Errorf("expected status 403, got %d", w.Code)
+	}
+}
+
+func TestCORSMiddleware_EmptyOriginsList(t *testing.T) {
+	router := gin.New()
+	router.Use(CORSMiddleware(""))
+	router.GET("/test", func(c *gin.Context) {
+		c.String(http.StatusOK, "ok")
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	req.Header.Set("Origin", "https://anyorigin.com")
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	// Empty string should be treated as allow all
+	if got := w.Header().Get("Access-Control-Allow-Origin"); got != "*" {
+		t.Errorf("Access-Control-Allow-Origin = %s, expected * for empty config", got)
+	}
+}
+
+func TestCORSMiddleware_WhitespaceInOrigins(t *testing.T) {
+	router := gin.New()
+	// Origins with whitespace
+	router.Use(CORSMiddleware(" https://example.com , https://test.com "))
+	router.GET("/test", func(c *gin.Context) {
+		c.String(http.StatusOK, "ok")
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	req.Header.Set("Origin", "https://example.com")
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	// Should still work with trimmed whitespace
+	if got := w.Header().Get("Access-Control-Allow-Origin"); got != "https://example.com" {
+		t.Errorf("Access-Control-Allow-Origin = %s, expected https://example.com", got)
+	}
+}
+
+func TestCORSMiddleware_NoOriginHeader(t *testing.T) {
+	router := gin.New()
+	router.Use(CORSMiddleware("https://example.com"))
+	router.GET("/test", func(c *gin.Context) {
+		c.String(http.StatusOK, "ok")
+	})
+
+	// Request without Origin header (same-origin or non-browser)
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	// Should succeed but not set CORS origin header
+	if w.Code != http.StatusOK {
+		t.Errorf("expected status 200, got %d", w.Code)
+	}
+	// No origin header should result in no Access-Control-Allow-Origin
+	if got := w.Header().Get("Access-Control-Allow-Origin"); got != "" {
+		t.Errorf("Access-Control-Allow-Origin = %s, expected empty for no origin", got)
+	}
+}
+
+func TestGenerateRequestID_Format(t *testing.T) {
+	id := generateRequestID()
+
+	// Should be 32 hex characters (16 bytes * 2)
+	if len(id) != 32 {
+		t.Errorf("expected ID length 32, got %d", len(id))
+	}
+
+	// Should only contain hex characters
+	for _, c := range id {
+		if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')) {
+			t.Errorf("ID contains non-hex character: %c", c)
+		}
+	}
+}
+
+func TestGenerateRequestID_Uniqueness(t *testing.T) {
+	ids := make(map[string]bool)
+	count := 1000
+
+	for i := 0; i < count; i++ {
+		id := generateRequestID()
+		if ids[id] {
+			t.Errorf("duplicate ID generated: %s", id)
+		}
+		ids[id] = true
+	}
+}
+
+func TestLoggingMiddleware_WithDifferentStatuses(t *testing.T) {
+	tests := []struct {
+		name   string
+		status int
+	}{
+		{"success", http.StatusOK},
+		{"created", http.StatusCreated},
+		{"bad request", http.StatusBadRequest},
+		{"not found", http.StatusNotFound},
+		{"internal error", http.StatusInternalServerError},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			router := gin.New()
+			router.Use(RequestIDMiddleware())
+			router.Use(LoggingMiddleware())
+			router.GET("/test", func(c *gin.Context) {
+				c.String(tt.status, "response")
+			})
+
+			req := httptest.NewRequest(http.MethodGet, "/test", nil)
+			w := httptest.NewRecorder()
+
+			router.ServeHTTP(w, req)
+
+			if w.Code != tt.status {
+				t.Errorf("expected status %d, got %d", tt.status, w.Code)
+			}
+		})
+	}
+}
+
+func TestRateLimitMiddleware_HeaderValues(t *testing.T) {
+	resetTime := time.Now().Add(time.Minute)
+	limiter := &MockLimiter{
+		AllowFunc: func(ctx context.Context, key string) (bool, ratelimit.Info, error) {
+			return true, ratelimit.Info{
+				Limit:     1000,
+				Remaining: 500,
+				Reset:     resetTime,
+			}, nil
+		},
+	}
+
+	router := gin.New()
+	router.Use(RateLimitMiddleware(limiter))
+	router.GET("/test", func(c *gin.Context) {
+		c.String(http.StatusOK, "ok")
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	// Verify all rate limit headers
+	if w.Header().Get("X-RateLimit-Limit") != "1000" {
+		t.Errorf("X-RateLimit-Limit = %s, expected 1000", w.Header().Get("X-RateLimit-Limit"))
+	}
+	if w.Header().Get("X-RateLimit-Remaining") != "500" {
+		t.Errorf("X-RateLimit-Remaining = %s, expected 500", w.Header().Get("X-RateLimit-Remaining"))
+	}
+	if w.Header().Get("X-RateLimit-Reset") == "" {
+		t.Error("X-RateLimit-Reset header not set")
+	}
+}

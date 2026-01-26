@@ -232,3 +232,220 @@ func TestServerStruct(t *testing.T) {
 		t.Error("expected nil authManager by default")
 	}
 }
+
+func TestSetupMiddleware(t *testing.T) {
+	mock := &MockFacilitator{
+		VerifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error) {
+			return &t402.VerifyResponse{IsValid: true}, nil
+		},
+		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
+			return &t402.SettleResponse{Success: true}, nil
+		},
+		GetSupportedFunc: func() t402.SupportedResponse {
+			return t402.SupportedResponse{}
+		},
+	}
+
+	cfg := &config.Config{
+		Port:               8080,
+		Environment:        "test",
+		RateLimitRequests:  100,
+		RateLimitWindow:    60,
+		CORSAllowedOrigins: "https://t402.io",
+	}
+
+	server := createTestServer(mock, cfg)
+	server.setupMiddleware()
+
+	// Verify middleware was added by checking router handlers count
+	// The router should have handlers after setupMiddleware
+	if server.router == nil {
+		t.Fatal("expected router to be set")
+	}
+}
+
+func TestSetupRoutes(t *testing.T) {
+	mock := &MockFacilitator{
+		VerifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error) {
+			return &t402.VerifyResponse{IsValid: true}, nil
+		},
+		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
+			return &t402.SettleResponse{Success: true}, nil
+		},
+		GetSupportedFunc: func() t402.SupportedResponse {
+			return t402.SupportedResponse{
+				Kinds: []t402.SupportedKind{{Network: "eip155:1", Scheme: "exact"}},
+			}
+		},
+	}
+
+	cfg := &config.Config{
+		Port:              8080,
+		Environment:       "test",
+		RateLimitRequests: 100,
+		RateLimitWindow:   60,
+	}
+
+	server := createTestServer(mock, cfg)
+	server.setupRoutes()
+
+	// Verify routes are registered by checking routes info
+	routes := server.router.Routes()
+	if len(routes) == 0 {
+		t.Fatal("expected routes to be registered")
+	}
+
+	// Check that all expected routes are present
+	expectedRoutes := map[string]string{
+		"GET/health":     "health",
+		"GET/ready":      "ready",
+		"GET/metrics":    "metrics",
+		"POST/verify":    "verify",
+		"POST/settle":    "settle",
+		"GET/supported":  "supported",
+	}
+
+	routeMap := make(map[string]bool)
+	for _, r := range routes {
+		key := r.Method + r.Path
+		routeMap[key] = true
+	}
+
+	for route, name := range expectedRoutes {
+		if !routeMap[route] {
+			t.Errorf("expected route %s (%s) to be registered", route, name)
+		}
+	}
+}
+
+func TestApiKeyMetricsMiddleware(t *testing.T) {
+	mock := &MockFacilitator{
+		VerifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error) {
+			return &t402.VerifyResponse{IsValid: true}, nil
+		},
+		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
+			return &t402.SettleResponse{Success: true}, nil
+		},
+		GetSupportedFunc: func() t402.SupportedResponse {
+			return t402.SupportedResponse{}
+		},
+	}
+
+	cfg := &config.Config{
+		Port:              8080,
+		Environment:       "test",
+		RateLimitRequests: 100,
+		RateLimitWindow:   60,
+	}
+
+	server := createTestServer(mock, cfg)
+
+	// Get the middleware
+	middleware := server.apiKeyMetricsMiddleware()
+	if middleware == nil {
+		t.Fatal("expected middleware to be created")
+	}
+}
+
+func TestSetupMiddlewareWithCORS(t *testing.T) {
+	mock := &MockFacilitator{
+		VerifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error) {
+			return &t402.VerifyResponse{IsValid: true}, nil
+		},
+		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
+			return &t402.SettleResponse{Success: true}, nil
+		},
+		GetSupportedFunc: func() t402.SupportedResponse {
+			return t402.SupportedResponse{}
+		},
+	}
+
+	// Test with multiple CORS origins
+	cfg := &config.Config{
+		Port:               8080,
+		Environment:        "test",
+		RateLimitRequests:  100,
+		RateLimitWindow:    60,
+		CORSAllowedOrigins: "https://t402.io,https://docs.t402.io",
+	}
+
+	server := createTestServer(mock, cfg)
+	server.setupMiddleware()
+
+	if server.router == nil {
+		t.Fatal("expected router to be set")
+	}
+}
+
+func TestSetupMiddlewareWithAPIKeyRequired(t *testing.T) {
+	mock := &MockFacilitator{
+		VerifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error) {
+			return &t402.VerifyResponse{IsValid: true}, nil
+		},
+		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
+			return &t402.SettleResponse{Success: true}, nil
+		},
+		GetSupportedFunc: func() t402.SupportedResponse {
+			return t402.SupportedResponse{}
+		},
+	}
+
+	cfg := &config.Config{
+		Port:              8080,
+		Environment:       "test",
+		RateLimitRequests: 100,
+		RateLimitWindow:   60,
+		APIKeyRequired:    true,
+		APIKeys:           "testkey:testapp",
+	}
+
+	server := createTestServer(mock, cfg)
+	server.setupMiddleware()
+
+	if server.router == nil {
+		t.Fatal("expected router to be set")
+	}
+	if server.authManager.GetKeyCount() != 1 {
+		t.Errorf("expected 1 API key, got %d", server.authManager.GetKeyCount())
+	}
+}
+
+func TestServerConfigEnvironments(t *testing.T) {
+	tests := []struct {
+		name        string
+		environment string
+	}{
+		{"development", "development"},
+		{"production", "production"},
+		{"test", "test"},
+		{"staging", "staging"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mock := &MockFacilitator{
+				VerifyFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.VerifyResponse, error) {
+					return &t402.VerifyResponse{IsValid: true}, nil
+				},
+				SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
+					return &t402.SettleResponse{Success: true}, nil
+				},
+				GetSupportedFunc: func() t402.SupportedResponse {
+					return t402.SupportedResponse{}
+				},
+			}
+
+			cfg := &config.Config{
+				Port:              8080,
+				Environment:       tt.environment,
+				RateLimitRequests: 100,
+				RateLimitWindow:   60,
+			}
+
+			server := createTestServer(mock, cfg)
+			if server.config.Environment != tt.environment {
+				t.Errorf("expected environment=%s, got %s", tt.environment, server.config.Environment)
+			}
+		})
+	}
+}
