@@ -476,7 +476,7 @@ export default function FeaturesClient() {
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <Link
-            href="https://docs.t402.io/features"
+            href="https://docs.t402.io/getting-started/quickstart"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-lg bg-brand px-6 py-3 text-base font-medium transition-colors hover:bg-brand-secondary"

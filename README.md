@@ -66,7 +66,7 @@ Tools:
 <details>
 <summary><b>Installation</b></summary>
 
-### TypeScript (v2.3.0)
+### TypeScript (v2.3.1)
 
 ```shell
 # Core packages
@@ -235,32 +235,30 @@ t402 info eip155:8453
 | Core Client | ✅ | ✅ | ✅ | ✅ |
 | Core Server | ✅ | ✅ | ✅ | ✅ |
 | Facilitator | ✅ | ✅ | ✅ | ✅ |
-| EVM Mechanism (19 networks) | ✅ | ✅ | ✅ | ✅ |
-| SVM Mechanism | ✅ | ✅ | ✅ | ❌ |
-| TON Mechanism | ✅ | ✅ | ✅ | ✅ |
-| TRON Mechanism | ✅ | ✅ | ✅ | ✅ |
-| NEAR Mechanism | ✅ | ✅ | ⚠️ | ❌ |
-| Aptos Mechanism | ✅ | ✅ | ⚠️ | ❌ |
-| Tezos Mechanism | ✅ | ✅ | ⚠️ | ❌ |
-| Polkadot Mechanism | ✅ | ✅ | ⚠️ | ❌ |
-| Stacks Mechanism | ✅ | ⚠️ | ⚠️ | ❌ |
-| ERC-4337 | ✅ | ✅ | ✅ | ✅ |
+| EVM (19 USDT0 networks) | ✅ | ✅ | ✅ | ✅ |
+| SVM (Solana) | ✅ | ✅ | ✅ | ❌ |
+| TON | ✅ | ✅ | ✅ | ✅ |
+| TRON | ✅ | ✅ | ✅ | ✅ |
+| NEAR | ✅ | ✅ | ✅ | ✅ |
+| Aptos | ✅ | ✅ | ✅ | ✅ |
+| Tezos | ✅ | ✅ | ✅ | ✅ |
+| Polkadot | ✅ | ✅ | ✅ | ✅ |
+| Stacks | ✅ | ✅ | ✅ | ❌ |
+| ERC-4337 Gasless | ✅ | ✅ | ✅ | ✅ |
 | USDT0 Bridge | ✅ | ✅ | ✅ | ✅ |
 | WDK Integration | ✅ | ✅ | ✅ | ✅ |
-| MCP Server | ✅ | ✅ | ✅ | ❌ |
+| MCP Server | ✅ | ✅ | ✅ | ✅ |
 | CLI Tool | ✅ | ✅ | ✅ | ✅ |
-| Paywall UI | ✅ | ✅ | ✅ | ❌ |
-| Spring Boot | ❌ | ❌ | ❌ | ⚠️ |
 
-Legend: ✅ Complete | ⚠️ Partial | ❌ Not Available
+Legend: ✅ Complete | ❌ Not Available
 
-**Total Supported Networks: 32+** (19 USDT0 + 6 Legacy EVM + 7 Non-EVM)
+**Total Supported Networks: 28** across 10 blockchain families
 
 ## Latest Releases
 
 | SDK | Version | Release Date | Changelog |
 |-----|---------|--------------|-----------|
-| TypeScript | v2.3.0 | 2026-01-22 | [CHANGELOG](sdks/typescript/CHANGELOG.md) |
+| TypeScript | v2.3.1 | 2026-01-24 | [CHANGELOG](sdks/typescript/CHANGELOG.md) |
 | Python | v1.9.0 | 2026-01-22 | [CHANGELOG](sdks/python/CHANGELOG.md) |
 | Go | v1.8.0 | 2026-01-22 | [CHANGELOG](sdks/go/CHANGELOG.md) |
 | Java | v1.8.0 | 2026-01-22 | [CHANGELOG](sdks/java/CHANGELOG.md) |

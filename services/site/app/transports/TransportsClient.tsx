@@ -325,10 +325,10 @@ export default function TransportsClient() {
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <Link
-                href="https://docs.t402.io/transports"
+                href="https://docs.t402.io/getting-started/quickstart"
                 className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-500"
               >
-                Read the Docs
+                Get Started
                 <ExternalLinkIcon className="h-4 w-4" />
               </Link>
               <Link
