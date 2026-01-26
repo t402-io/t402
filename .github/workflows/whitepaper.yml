@@ -1,4 +1,4 @@
-name: Build Whitepaper
+name: Build and Deploy Whitepaper
 
 on:
   push:
@@ -9,10 +9,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
+      deployments: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,24 +30,30 @@ jobs:
       - name: Copy PDF to site
         run: cp whitepaper/build/main.pdf services/site/public/t402-whitepaper.pdf
 
-      - name: Commit and Push
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add services/site/public/t402-whitepaper.pdf
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-            echo "CHANGED=false" >> $GITHUB_ENV
-          else
-            git commit -m "docs: auto-update compiled whitepaper"
-            git push
-            echo "CHANGED=true" >> $GITHUB_ENV
-          fi
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
-      - name: Trigger Site Deployment
-        if: env.CHANGED == 'true'
-        run: |
-          gh api repos/${{ github.repository }}/dispatches \
-            -f event_type=deploy
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: services/site/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: services/site
+        run: pnpm install --frozen-lockfile
+
+      - name: Build site
+        working-directory: services/site
+        run: pnpm build
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_ENV: production
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy out --project-name t402-site
+          workingDirectory: services/site
