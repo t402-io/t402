@@ -39,8 +39,9 @@ export type NetworkJettonRegistry = Record<string, Record<string, JettonConfig>>
 export const USDT_ADDRESSES: Record<string, string> = {
   // TON Mainnet - Official Tether USDT
   [TON_MAINNET_CAIP2]: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
-  // TON Testnet - Test USDT (may vary)
-  [TON_TESTNET_CAIP2]: 'kQBqSpvo4S87mX9tTc4FX3Sfqf4uSp3Tx-Fz4RBUfTRWBx',
+  // TON Testnet - Test USDT from TON documentation
+  // @see https://docs.ton.org/v3/guidelines/dapps/cookbook
+  [TON_TESTNET_CAIP2]: 'kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy',
 }
 
 /**
