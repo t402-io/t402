@@ -36,12 +36,12 @@ export default function TezosWalletContextProvider({ children }: { children: Rea
         const { TezosToolkit } = await import("@taquito/taquito");
         const { BeaconWallet } = await import("@taquito/beacon-wallet");
 
-        const tezosClient = new TezosToolkit("https://ghostnet.tezos.marigold.dev");
+        const tezosClient = new TezosToolkit("https://rpc.ghostnet.teztnets.com");
         // Use custom network for ghostnet
         const beaconWallet = new BeaconWallet({
           name: "T402 Demo",
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          network: { type: "custom" as any, rpcUrl: "https://ghostnet.tezos.marigold.dev" },
+          network: { type: "custom" as any, rpcUrl: "https://rpc.ghostnet.teztnets.com" },
         });
 
         tezosClient.setWalletProvider(beaconWallet);
