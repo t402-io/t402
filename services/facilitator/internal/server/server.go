@@ -16,9 +16,11 @@ import (
 	"github.com/t402-io/t402/services/facilitator/internal/cache"
 	"github.com/t402-io/t402/services/facilitator/internal/config"
 	"github.com/t402-io/t402/services/facilitator/internal/health"
+	"github.com/t402-io/t402/services/facilitator/internal/intent"
 	"github.com/t402-io/t402/services/facilitator/internal/metrics"
 	"github.com/t402-io/t402/services/facilitator/internal/persistence"
 	"github.com/t402-io/t402/services/facilitator/internal/ratelimit"
+	"github.com/t402-io/t402/services/facilitator/internal/streaming"
 	"github.com/t402-io/t402/services/facilitator/internal/tracing"
 )
 
@@ -46,6 +48,10 @@ type Server struct {
 	settlementRepo *persistence.SettlementRepository
 	auditRepo      *persistence.AuditRepository
 	tracer         *tracing.Provider
+
+	// Advanced features (require database)
+	streamingHandlers *streaming.Handlers
+	intentHandlers    *intent.Handlers
 }
 
 // New creates a new facilitator server
@@ -114,6 +120,19 @@ func NewWithTracing(
 	if db != nil {
 		s.settlementRepo = persistence.NewSettlementRepository(db)
 		s.auditRepo = persistence.NewAuditRepository(db)
+
+		// Setup streaming service and handlers
+		streamingRepo := streaming.NewRepository(db.DB)
+		streamingService := streaming.NewService(streamingRepo, nil, nil, m, nil)
+		s.streamingHandlers = streaming.NewHandlers(streamingService)
+		log.Printf("Streaming payments enabled")
+
+		// Setup intent service and handlers
+		intentRepo := intent.NewRepository(db.DB)
+		intentRouter := intent.NewRouter(nil, nil, nil, nil, nil)
+		intentService := intent.NewService(intentRepo, intentRouter, nil, nil, m, nil)
+		s.intentHandlers = intent.NewHandlers(intentService)
+		log.Printf("Intent-based routing enabled")
 	}
 
 	// Setup middleware and routes
@@ -183,6 +202,10 @@ func (s *Server) setupRoutes() {
 	// Metrics endpoint
 	s.router.GET("/metrics", s.metrics.Handler())
 
+	// API info endpoint
+	s.router.GET("/", s.handleInfo)
+	s.router.GET("/info", s.handleInfo)
+
 	// Facilitator endpoints
 	s.router.POST("/verify", s.handleVerify)
 	s.router.POST("/settle", s.handleSettle)
@@ -195,6 +218,109 @@ func (s *Server) setupRoutes() {
 	if s.settlementRepo != nil {
 		s.router.GET("/stats/settlements", persistence.SettlementStatsHandler(s.settlementRepo))
 	}
+
+	// API v1 group for advanced features
+	v1 := s.router.Group("/v1")
+
+	// Streaming payments endpoints (if database is configured)
+	if s.streamingHandlers != nil {
+		s.streamingHandlers.RegisterRoutes(v1)
+	}
+
+	// Intent-based routing endpoints (if database is configured)
+	if s.intentHandlers != nil {
+		s.intentHandlers.RegisterRoutes(v1)
+	}
+}
+
+// APIInfo represents the API information response
+type APIInfo struct {
+	Name        string              `json:"name"`
+	Version     string              `json:"version"`
+	Description string              `json:"description"`
+	Docs        string              `json:"docs"`
+	Endpoints   []EndpointInfo      `json:"endpoints"`
+	Features    map[string]bool     `json:"features"`
+}
+
+// EndpointInfo describes an API endpoint
+type EndpointInfo struct {
+	Method      string `json:"method"`
+	Path        string `json:"path"`
+	Description string `json:"description"`
+}
+
+// handleInfo returns API information
+func (s *Server) handleInfo(c *gin.Context) {
+	info := APIInfo{
+		Name:        "T402 Facilitator API",
+		Version:     Version,
+		Description: "Payment verification and settlement service for T402 protocol",
+		Docs:        "https://docs.t402.io",
+		Endpoints: []EndpointInfo{
+			{Method: "GET", Path: "/health", Description: "Liveness probe"},
+			{Method: "GET", Path: "/ready", Description: "Readiness probe with dependency checks"},
+			{Method: "GET", Path: "/info", Description: "API information and available endpoints"},
+			{Method: "GET", Path: "/supported", Description: "List supported networks, schemes, and signers"},
+			{Method: "POST", Path: "/verify", Description: "Verify a payment authorization signature"},
+			{Method: "POST", Path: "/settle", Description: "Execute on-chain payment settlement"},
+			{Method: "GET", Path: "/metrics", Description: "Prometheus metrics endpoint"},
+		},
+		Features: map[string]bool{
+			"verification":       true,
+			"settlement":         true,
+			"rate_limiting":      s.limiter != nil,
+			"audit_logging":      s.auditRepo != nil,
+			"tracing":            s.tracer != nil && s.tracer.IsEnabled(),
+			"streaming_payments": s.streamingHandlers != nil,
+			"intent_routing":     s.intentHandlers != nil,
+		},
+	}
+
+	// Add stats endpoints if available
+	if s.auditRepo != nil {
+		info.Endpoints = append(info.Endpoints, EndpointInfo{
+			Method:      "GET",
+			Path:        "/stats/requests",
+			Description: "Request statistics",
+		})
+	}
+	if s.settlementRepo != nil {
+		info.Endpoints = append(info.Endpoints, EndpointInfo{
+			Method:      "GET",
+			Path:        "/stats/settlements",
+			Description: "Settlement statistics",
+		})
+	}
+
+	// Add streaming endpoints if available
+	if s.streamingHandlers != nil {
+		info.Endpoints = append(info.Endpoints,
+			EndpointInfo{Method: "POST", Path: "/v1/stream/open", Description: "Open a new payment stream"},
+			EndpointInfo{Method: "POST", Path: "/v1/stream/update", Description: "Update stream with new amount"},
+			EndpointInfo{Method: "POST", Path: "/v1/stream/close", Description: "Close and settle a stream"},
+			EndpointInfo{Method: "GET", Path: "/v1/stream/:id", Description: "Get stream status"},
+			EndpointInfo{Method: "POST", Path: "/v1/stream/:id/pause", Description: "Pause a stream"},
+			EndpointInfo{Method: "POST", Path: "/v1/stream/:id/resume", Description: "Resume a paused stream"},
+			EndpointInfo{Method: "GET", Path: "/v1/stream", Description: "List streams"},
+		)
+	}
+
+	// Add intent endpoints if available
+	if s.intentHandlers != nil {
+		info.Endpoints = append(info.Endpoints,
+			EndpointInfo{Method: "POST", Path: "/v1/intent", Description: "Create a payment intent"},
+			EndpointInfo{Method: "GET", Path: "/v1/intent/:id", Description: "Get intent status"},
+			EndpointInfo{Method: "POST", Path: "/v1/intent/:id/route", Description: "Select a route for the intent"},
+			EndpointInfo{Method: "POST", Path: "/v1/intent/:id/execute", Description: "Execute the intent payment"},
+			EndpointInfo{Method: "POST", Path: "/v1/intent/:id/cancel", Description: "Cancel the intent"},
+			EndpointInfo{Method: "POST", Path: "/v1/intent/:id/refresh", Description: "Refresh available routes"},
+			EndpointInfo{Method: "GET", Path: "/v1/intent", Description: "List intents"},
+			EndpointInfo{Method: "GET", Path: "/v1/intent/stats", Description: "Get intent statistics"},
+		)
+	}
+
+	c.JSON(http.StatusOK, info)
 }
 
 // Start starts the HTTP server
