@@ -144,19 +144,19 @@ export default function HomePage() {
         </div>
 
         {/* CTA */}
-        <div className="relative z-10 flex flex-wrap items-center justify-center gap-3">
-          <Link href="/ai-api" className="btn-primary px-5 py-2.5 text-sm flex items-center gap-2">
+        <div className="relative z-10 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+          <Link href="/ai-api" className="btn-primary px-5 py-3 text-sm flex items-center gap-2 min-h-[44px]">
             Try a Scenario <ArrowRight size={14} />
           </Link>
           <Link
             href="/playground"
-            className="px-5 py-2.5 text-sm text-white hover:text-[var(--color-brand)] transition-colors border border-[var(--color-border)] rounded-xl"
+            className="px-5 py-3 text-sm text-white hover:text-[var(--color-brand)] transition-colors border border-[var(--color-border)] rounded-xl min-h-[44px] flex items-center"
           >
             Playground
           </Link>
           <a
             href="https://docs.t402.io"
-            className="px-5 py-2.5 text-sm text-[var(--color-muted)] hover:text-white transition-colors border border-[var(--color-border)] rounded-xl"
+            className="px-5 py-3 text-sm text-[var(--color-muted)] hover:text-white transition-colors border border-[var(--color-border)] rounded-xl min-h-[44px] flex items-center"
           >
             Read Docs
           </a>
@@ -170,14 +170,14 @@ export default function HomePage() {
           <div className="glass-card p-4 sm:p-6 mb-10">
             <FlowDiagram autoPlay />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
             {FLOW_STEPS.map((item) => (
-              <div key={item.step} className="glass-card-interactive p-5 text-center">
+              <div key={item.step} className="glass-card-interactive p-4 sm:p-5 text-center">
                 <div className="w-10 h-10 rounded-full bg-[var(--color-brand-dim)] text-[var(--color-brand)] flex items-center justify-center text-sm font-bold mx-auto mb-3">
                   {item.step}
                 </div>
                 <h3 className="text-sm font-semibold mb-2">{item.title}</h3>
-                <p className="text-xs text-[var(--color-muted)] leading-relaxed">{item.description}</p>
+                <p className="text-[11px] sm:text-xs text-[var(--color-muted)] leading-relaxed">{item.description}</p>
               </div>
             ))}
           </div>
@@ -215,8 +215,8 @@ export default function HomePage() {
           <p className="text-sm text-[var(--color-muted)] mb-8">
             Add T402 payments to any HTTP API with a single middleware.
           </p>
-          <div className="glass-card p-5 text-left">
-            <pre className="text-xs text-[var(--color-code-text)] overflow-x-auto font-mono">
+          <div className="glass-card p-4 sm:p-5 text-left overflow-hidden">
+            <pre className="text-[11px] sm:text-xs text-[var(--color-code-text)] overflow-x-auto font-mono leading-relaxed">
 {`import { t402 } from '@t402/express';
 
 app.get('/api/premium', t402({
@@ -228,27 +228,27 @@ app.get('/api/premium', t402({
 });`}
             </pre>
           </div>
-          <div className="mt-6 flex items-center justify-center gap-4">
-            <a href="https://www.npmjs.com/org/t402" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors">npm</a>
-            <a href="https://pypi.org/project/t402" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors">PyPI</a>
-            <a href="https://pkg.go.dev/github.com/t402-io/t402/sdks/go" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors">Go</a>
-            <a href="https://central.sonatype.com/artifact/io.t402/t402" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors">Maven</a>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-1">
+            <a href="https://www.npmjs.com/org/t402" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center">npm</a>
+            <a href="https://pypi.org/project/t402" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center">PyPI</a>
+            <a href="https://pkg.go.dev/github.com/t402-io/t402/sdks/go" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center">Go</a>
+            <a href="https://central.sonatype.com/artifact/io.t402/t402" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center">Maven</a>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-[var(--color-border)] py-12 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
+      <footer className="border-t border-[var(--color-border)] py-8 sm:py-12 px-4 sm:px-6">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
+          <div className="flex items-center gap-2 sm:gap-3">
             <span className="text-sm font-semibold text-[var(--color-brand)]">T402</span>
-            <span className="text-xs text-[var(--color-muted)]">HTTP-native payments for USDT/USDT0</span>
+            <span className="text-[11px] sm:text-xs text-[var(--color-muted)]">HTTP-native payments</span>
           </div>
-          <div className="flex items-center gap-6">
-            <a href="https://t402.io" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors">Website</a>
-            <a href="https://docs.t402.io" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors">Docs</a>
-            <a href="https://github.com/t402-io/t402" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors">GitHub</a>
-            <a href="https://facilitator.t402.io" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors">Facilitator</a>
+          <div className="flex flex-wrap items-center justify-center gap-0">
+            <a href="https://t402.io" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center">Website</a>
+            <a href="https://docs.t402.io" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center">Docs</a>
+            <a href="https://github.com/t402-io/t402" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center">GitHub</a>
+            <a href="https://facilitator.t402.io" className="text-xs text-[var(--color-muted)] hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center">API</a>
           </div>
         </div>
       </footer>

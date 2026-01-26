@@ -177,7 +177,7 @@ export function AgentToAgent() {
         <button
           onClick={state === "done" || state === "error" ? () => { setState("idle"); setResult(null); setFlowState("idle"); setSettle(null); } : execute}
           disabled={state !== "idle" && state !== "done" && state !== "error"}
-          className="btn-primary w-full py-3"
+          className="btn-primary w-full py-3 min-h-[44px]"
         >
           {state === "done" || state === "error" ? "Run Again" : "Delegate Task"}
         </button>

@@ -110,7 +110,7 @@ export function GaslessPayment() {
         <h3 className="text-sm font-semibold mb-4">ERC-4337 Payment Flow</h3>
 
         {state === "idle" && (
-          <button onClick={execute} className="btn-primary px-4 py-2.5 text-sm w-full flex items-center justify-center gap-2">
+          <button onClick={execute} className="btn-primary px-4 py-3 text-sm w-full min-h-[44px] flex items-center justify-center gap-2">
             <Zap size={14} />
             Pay 0.001 USDT (Gasless)
           </button>

@@ -149,7 +149,7 @@ export function AiApiScenario() {
         <button
           onClick={execute}
           disabled={state === "paying" || state === "streaming"}
-          className="btn-primary w-full py-3 flex items-center justify-center gap-2"
+          className="btn-primary w-full py-3 min-h-[48px] flex items-center justify-center gap-2"
         >
           {state === "paying" || state === "streaming" ? (
             <>

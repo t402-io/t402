@@ -25,13 +25,13 @@ export default function NotFound() {
           </div>
         </div>
 
-        <div className="flex gap-3 justify-center">
-          <Link href="/" className="btn-primary px-5 py-2.5 text-sm">
+        <div className="flex flex-wrap gap-2 sm:gap-3 justify-center">
+          <Link href="/" className="btn-primary px-5 py-3 text-sm min-h-[44px] flex items-center">
             Go home
           </Link>
           <Link
             href="/ai-api"
-            className="px-5 py-2.5 text-sm border border-[var(--color-border)] rounded-lg text-[var(--color-muted)] hover:text-white transition-colors"
+            className="px-5 py-3 text-sm border border-[var(--color-border)] rounded-lg text-[var(--color-muted)] hover:text-white transition-colors min-h-[44px] flex items-center"
           >
             Try a scenario
           </Link>

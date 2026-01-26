@@ -166,7 +166,7 @@ export function CrossChainBridge() {
                 Bridge failed. Please try again.
               </p>
             )}
-            <button onClick={executeBridge} className="btn-primary px-4 py-2 text-sm w-full">
+            <button onClick={executeBridge} className="btn-primary px-4 py-3 text-sm w-full min-h-[44px]">
               {flowState === "error" ? "Try Again" : "Bridge 1.00 USDT"}
             </button>
           </div>
