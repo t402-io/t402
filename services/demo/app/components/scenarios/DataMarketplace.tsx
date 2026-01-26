@@ -134,7 +134,7 @@ export function DataMarketplace() {
         <button
           onClick={execute}
           disabled={state === "paying"}
-          className="btn-primary w-full py-3 flex items-center justify-center gap-2"
+          className="btn-primary w-full py-3 min-h-[44px] flex items-center justify-center gap-2"
         >
           {state === "paying" ? (
             <>

@@ -146,17 +146,19 @@ export function StreamingMedia() {
             {state === "idle" || state === "ended" ? (
               <button
                 onClick={state === "ended" ? reset : startStream}
-                className="btn-primary w-9 h-9 flex items-center justify-center rounded-full"
+                className="btn-primary w-11 h-11 flex items-center justify-center rounded-full"
+                aria-label={state === "ended" ? "Replay" : "Play"}
               >
-                <Play size={16} />
+                <Play size={18} />
               </button>
             ) : (
               <>
                 <button
                   onClick={togglePause}
-                  className="w-9 h-9 flex items-center justify-center rounded-full bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] transition-colors"
+                  className="w-11 h-11 flex items-center justify-center rounded-full bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] transition-colors"
+                  aria-label={state === "playing" ? "Pause" : "Play"}
                 >
-                  {state === "playing" ? <Pause size={16} /> : <Play size={16} />}
+                  {state === "playing" ? <Pause size={18} /> : <Play size={18} />}
                 </button>
                 <button
                   onClick={stop}

@@ -30,16 +30,16 @@ export default function Error({
             Error ID: {error.digest}
           </p>
         )}
-        <div className="flex gap-3 justify-center mt-6">
+        <div className="flex flex-wrap gap-2 sm:gap-3 justify-center mt-6">
           <button
             onClick={reset}
-            className="btn-primary px-5 py-2 text-sm"
+            className="btn-primary px-5 py-3 text-sm min-h-[44px]"
           >
             Try again
           </button>
           <a
             href="/"
-            className="px-5 py-2 text-sm border border-[var(--color-border)] rounded-lg text-[var(--color-muted)] hover:text-white transition-colors"
+            className="px-5 py-3 text-sm border border-[var(--color-border)] rounded-lg text-[var(--color-muted)] hover:text-white transition-colors min-h-[44px] flex items-center"
           >
             Go home
           </a>
