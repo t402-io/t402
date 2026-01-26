@@ -114,8 +114,8 @@ export function AiApiScenario() {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Left: Input */}
       <div className="flex flex-col gap-4">
-        <div className="glass-card p-5">
-          <div className="flex items-center gap-2 mb-3">
+        <div className="glass-card p-4 sm:p-5">
+          <div className="flex flex-wrap items-center gap-2 mb-3">
             <span className="text-sm font-medium">Query</span>
             <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--color-brand-dim)] text-[var(--color-brand)]">
               0.001 USDT/query
@@ -171,7 +171,7 @@ export function AiApiScenario() {
       {/* Right: Response */}
       <div className="flex flex-col gap-3">
         {state === "idle" && (
-          <div className="glass-card p-6 flex flex-col items-center justify-center min-h-[240px] text-center">
+          <div className="glass-card p-4 sm:p-6 flex flex-col items-center justify-center min-h-[200px] sm:min-h-[240px] text-center">
             <div className="text-4xl mb-3">🤖</div>
             <p className="text-sm text-[var(--color-muted)]">
               AI response will appear here after payment
@@ -180,7 +180,7 @@ export function AiApiScenario() {
         )}
 
         {(state === "paying" || state === "streaming") && (
-          <div className="glass-card p-6 flex flex-col items-center justify-center min-h-[240px]">
+          <div className="glass-card p-4 sm:p-6 flex flex-col items-center justify-center min-h-[200px] sm:min-h-[240px]">
             <Spinner size="lg" color="var(--color-brand)" />
             <p className="text-sm text-[var(--color-muted)] mt-4">
               {state === "paying" ? "Processing USDT payment..." : "Generating response..."}
@@ -216,11 +216,11 @@ export function AiApiScenario() {
         )}
 
         {state === "error" && (
-          <div className="glass-card p-6 text-center">
+          <div className="glass-card p-4 sm:p-6 text-center">
             <p className="text-sm text-[var(--color-error)]">{error}</p>
             <button
               onClick={() => { setState("idle"); setFlowState("idle"); setSettle(null); }}
-              className="mt-3 text-xs text-[var(--color-muted)] hover:text-white cursor-pointer"
+              className="mt-3 text-xs text-[var(--color-muted)] hover:text-white cursor-pointer min-h-[36px]"
             >
               Reset
             </button>

@@ -156,7 +156,7 @@ export function DataMarketplace() {
       {/* Right: Result */}
       <div>
         {state === "idle" && (
-          <div className="glass-card p-6 flex flex-col items-center justify-center min-h-[260px] text-center">
+          <div className="glass-card p-4 sm:p-6 flex flex-col items-center justify-center min-h-[220px] sm:min-h-[260px] text-center">
             <div className="text-4xl mb-3">📊</div>
             <p className="text-sm text-[var(--color-muted)]">
               Select a data feed and purchase access
@@ -168,7 +168,7 @@ export function DataMarketplace() {
         )}
 
         {state === "paying" && (
-          <div className="glass-card p-6 flex flex-col items-center justify-center min-h-[260px]">
+          <div className="glass-card p-4 sm:p-6 flex flex-col items-center justify-center min-h-[220px] sm:min-h-[260px]">
             <Spinner size="lg" color="var(--color-brand)" />
             <p className="text-sm text-[var(--color-muted)] mt-4">Processing micropayment...</p>
           </div>
@@ -197,11 +197,11 @@ export function DataMarketplace() {
         )}
 
         {state === "error" && (
-          <div className="glass-card p-6 text-center">
+          <div className="glass-card p-4 sm:p-6 text-center">
             <p className="text-sm text-[var(--color-error)]">{error}</p>
             <button
               onClick={() => { setState("idle"); setFlowState("idle"); setSettle(null); }}
-              className="mt-3 text-xs text-[var(--color-muted)] hover:text-white cursor-pointer"
+              className="mt-3 text-xs text-[var(--color-muted)] hover:text-white cursor-pointer min-h-[36px]"
             >
               Reset
             </button>
