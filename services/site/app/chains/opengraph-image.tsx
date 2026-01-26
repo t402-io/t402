@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const dynamic = "force-static";
-export const alt = "T402 - The Official Payment Protocol for USDT";
+export const alt = "Supported Chains - T402";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -20,7 +20,6 @@ export default async function Image() {
           padding: "60px",
         }}
       >
-        {/* Background gradient */}
         <div
           style={{
             position: "absolute",
@@ -28,13 +27,10 @@ export default async function Image() {
             left: 0,
             right: 0,
             bottom: 0,
-            background:
-              "radial-gradient(ellipse at 50% 30%, rgba(80,175,149,0.15) 0%, transparent 60%)",
+            background: "radial-gradient(ellipse at 50% 30%, rgba(80,175,149,0.15) 0%, transparent 60%)",
             display: "flex",
           }}
         />
-
-        {/* Border frame */}
         <div
           style={{
             position: "absolute",
@@ -47,8 +43,6 @@ export default async function Image() {
             display: "flex",
           }}
         />
-
-        {/* Content */}
         <div
           style={{
             display: "flex",
@@ -59,15 +53,7 @@ export default async function Image() {
             zIndex: 1,
           }}
         >
-          {/* Brand */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "14px",
-              marginBottom: "32px",
-            }}
-          >
+          <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "32px" }}>
             <div
               style={{
                 width: "56px",
@@ -84,22 +70,13 @@ export default async function Image() {
             >
               T4
             </div>
-            <span
-              style={{
-                fontSize: "42px",
-                fontWeight: 700,
-                color: "#FAFAFA",
-                letterSpacing: "-0.02em",
-              }}
-            >
+            <span style={{ fontSize: "42px", fontWeight: 700, color: "#FAFAFA", letterSpacing: "-0.02em" }}>
               T402
             </span>
           </div>
-
-          {/* Title */}
           <h1
             style={{
-              fontSize: "48px",
+              fontSize: "56px",
               fontWeight: 700,
               color: "#FAFAFA",
               lineHeight: 1.2,
@@ -107,47 +84,14 @@ export default async function Image() {
               letterSpacing: "-0.02em",
             }}
           >
-            The Official Payment Protocol
+            Supported Chains
           </h1>
-
-          {/* Subtitle */}
-          <p
-            style={{
-              fontSize: "48px",
-              fontWeight: 700,
-              color: "#50AF95",
-              lineHeight: 1.2,
-              marginBottom: "32px",
-              letterSpacing: "-0.02em",
-            }}
-          >
-            for USDT
+          <p style={{ fontSize: "24px", color: "#71717A", marginBottom: "40px" }}>
+            28 networks across 10 blockchain families
           </p>
-
-          {/* Description */}
-          <p
-            style={{
-              fontSize: "22px",
-              color: "#71717A",
-              marginBottom: "40px",
-            }}
-          >
-            HTTP-native stablecoin payments across 10 blockchain families
-          </p>
-
-          {/* Chain badges */}
-          <div
-            style={{
-              display: "flex",
-              gap: "8px",
-              alignItems: "center",
-              flexWrap: "wrap",
-              justifyContent: "center",
-              maxWidth: "900px",
-            }}
-          >
+          <div style={{ display: "flex", gap: "8px", alignItems: "center", flexDirection: "row", flexWrap: "wrap", justifyContent: "center", maxWidth: "800px" }}>
             {[
-              { name: "EVM", color: "#627EEA" },
+              { name: "Ethereum", color: "#627EEA" },
               { name: "Solana", color: "#9945FF" },
               { name: "TON", color: "#0098EA" },
               { name: "TRON", color: "#FF0000" },
@@ -156,7 +100,6 @@ export default async function Image() {
               { name: "Tezos", color: "#2C7DF7" },
               { name: "Polkadot", color: "#E6007A" },
               { name: "Stacks", color: "#5546FF" },
-              { name: "+19", color: "#71717A" },
             ].map((chain) => (
               <div
                 key={chain.name}
@@ -164,23 +107,14 @@ export default async function Image() {
                   display: "flex",
                   alignItems: "center",
                   gap: "6px",
-                  padding: "5px 12px",
+                  padding: "6px 14px",
                   borderRadius: "14px",
-                  border: `1px solid ${chain.color}40`,
                   backgroundColor: `${chain.color}15`,
+                  border: `1px solid ${chain.color}40`,
                 }}
               >
-                <div
-                  style={{
-                    width: "6px",
-                    height: "6px",
-                    borderRadius: "50%",
-                    backgroundColor: chain.color,
-                  }}
-                />
-                <span style={{ fontSize: "12px", color: chain.color, fontWeight: 500 }}>
-                  {chain.name}
-                </span>
+                <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: chain.color }} />
+                <span style={{ fontSize: "13px", color: chain.color, fontWeight: 500 }}>{chain.name}</span>
               </div>
             ))}
           </div>

@@ -328,7 +328,7 @@ export default async function ChainDetailPage({ params }: Props) {
                   <ExternalLinkIcon />
                 </Link>
                 <Link
-                  href={chain.docsUrl}
+                  href="https://docs.t402.io/chains"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-between rounded-lg border border-border bg-background-secondary px-4 py-3 text-sm font-medium text-foreground transition-colors hover:border-border-secondary"
