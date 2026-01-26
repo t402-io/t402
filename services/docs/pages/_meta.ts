@@ -44,7 +44,7 @@ export default {
   },
   whitepaper: {
     title: 'Whitepaper',
-    href: '/t402-whitepaper.pdf',
+    href: 'https://t402.io/t402-whitepaper.pdf',
     newWindow: true
   },
   github: {
