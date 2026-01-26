@@ -4,10 +4,29 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"log"
+	"sync/atomic"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
+
+// AuditMetrics tracks audit logging metrics
+type AuditMetrics struct {
+	TotalLogged uint64
+	TotalFailed uint64
+}
+
+// Global audit metrics for monitoring
+var auditMetrics AuditMetrics
+
+// GetAuditMetrics returns current audit logging metrics
+func GetAuditMetrics() AuditMetrics {
+	return AuditMetrics{
+		TotalLogged: atomic.LoadUint64(&auditMetrics.TotalLogged),
+		TotalFailed: atomic.LoadUint64(&auditMetrics.TotalFailed),
+	}
+}
 
 // AuditMiddlewareConfig configures the audit middleware
 type AuditMiddlewareConfig struct {
@@ -139,8 +158,12 @@ func AuditMiddleware(repo *AuditRepository, config *AuditMiddlewareConfig) gin.H
 			ctx := c.Request.Context()
 			if err := repo.Log(ctx, entry); err != nil {
 				// Log error but don't fail the request
-				// In production, you might want to use a proper logger
-				_ = err
+				// Track failure for monitoring
+				atomic.AddUint64(&auditMetrics.TotalFailed, 1)
+				log.Printf("ERROR: Audit log failed: %v (action=%s, requestID=%s)",
+					err, entry.Action, entry.RequestID)
+			} else {
+				atomic.AddUint64(&auditMetrics.TotalLogged, 1)
 			}
 		}()
 	}

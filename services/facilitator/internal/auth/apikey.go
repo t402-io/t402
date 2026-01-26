@@ -10,6 +10,7 @@ import (
 	"errors"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/t402-io/t402/services/facilitator/internal/cache"
@@ -221,15 +222,18 @@ func (m *Manager) HasKeys() bool {
 	return m.GetKeyCount() > 0
 }
 
-// recordUsage updates the usage statistics for a key
+// recordUsage updates the usage statistics for a key using atomic operations
+// to avoid race conditions when multiple requests use the same key concurrently
 func (m *Manager) recordUsage(ctx context.Context, apiKey *APIKey) {
+	// Use atomic increment for usage count to avoid race conditions
+	atomic.AddInt64(&apiKey.UsageCount, 1)
+
+	// Update last used time and save to Redis under lock to ensure consistency
 	m.mu.Lock()
 	apiKey.LastUsedAt = time.Now()
-	apiKey.UsageCount++
-	m.mu.Unlock()
-
-	// Update in Redis (non-blocking)
+	// Save while holding the lock to get consistent snapshot
 	_ = m.saveToRedis(ctx, apiKey)
+	m.mu.Unlock()
 }
 
 // saveToRedis saves an API key to Redis

@@ -141,11 +141,23 @@ func (c *ExactEvmScheme) signAuthorization(
 		},
 	}
 
-	// Parse values for message
-	value, _ := new(big.Int).SetString(authorization.Value, 10)
-	validAfter, _ := new(big.Int).SetString(authorization.ValidAfter, 10)
-	validBefore, _ := new(big.Int).SetString(authorization.ValidBefore, 10)
-	nonceBytes, _ := evm.HexToBytes(authorization.Nonce)
+	// Parse values for message with explicit error checking
+	value, ok := new(big.Int).SetString(authorization.Value, 10)
+	if !ok {
+		return nil, fmt.Errorf("invalid authorization value: %q", authorization.Value)
+	}
+	validAfter, ok := new(big.Int).SetString(authorization.ValidAfter, 10)
+	if !ok {
+		return nil, fmt.Errorf("invalid validAfter: %q", authorization.ValidAfter)
+	}
+	validBefore, ok := new(big.Int).SetString(authorization.ValidBefore, 10)
+	if !ok {
+		return nil, fmt.Errorf("invalid validBefore: %q", authorization.ValidBefore)
+	}
+	nonceBytes, err := evm.HexToBytes(authorization.Nonce)
+	if err != nil {
+		return nil, fmt.Errorf("invalid nonce: %w", err)
+	}
 
 	// Create message
 	message := map[string]interface{}{

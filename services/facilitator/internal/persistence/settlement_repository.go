@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -170,26 +171,85 @@ func (r *SettlementRepository) GetByTxHash(ctx context.Context, network, txHash 
 	return s, nil
 }
 
-// UpdateStatus updates the status of a settlement
+// ErrInvalidStateTransition is returned when an invalid state transition is attempted
+var ErrInvalidStateTransition = errors.New("invalid settlement state transition")
+
+// ErrSettlementNotFound is returned when a settlement is not found
+var ErrSettlementNotFound = errors.New("settlement not found")
+
+// validTransitions defines the allowed state transitions
+// - pending can transition to confirmed or failed
+// - confirmed is a terminal state (no transitions allowed)
+// - failed can transition back to pending (for retry)
+var validTransitions = map[SettlementStatus][]SettlementStatus{
+	SettlementStatusPending:   {SettlementStatusConfirmed, SettlementStatusFailed},
+	SettlementStatusConfirmed: {}, // Terminal state
+	SettlementStatusFailed:    {SettlementStatusPending}, // Allow retry
+}
+
+// isValidTransition checks if the transition from currentStatus to newStatus is valid
+func isValidTransition(currentStatus, newStatus SettlementStatus) bool {
+	allowedStatuses, exists := validTransitions[currentStatus]
+	if !exists {
+		return false
+	}
+	for _, allowed := range allowedStatuses {
+		if allowed == newStatus {
+			return true
+		}
+	}
+	return false
+}
+
+// UpdateStatus updates the status of a settlement with state machine validation
+// Uses SELECT FOR UPDATE to prevent race conditions
 func (r *SettlementRepository) UpdateStatus(ctx context.Context, id string, status SettlementStatus, errorMessage string) error {
-	var query string
+	// Start a transaction for atomic read-modify-write
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	// Get current status with row lock
+	var currentStatus SettlementStatus
+	lockQuery := `SELECT status FROM settlements WHERE id = $1 FOR UPDATE`
+	err = tx.QueryRowContext(ctx, lockQuery, id).Scan(&currentStatus)
+	if err == sql.ErrNoRows {
+		return ErrSettlementNotFound
+	}
+	if err != nil {
+		return fmt.Errorf("failed to get settlement status: %w", err)
+	}
+
+	// Validate state transition
+	if !isValidTransition(currentStatus, status) {
+		return fmt.Errorf("%w: cannot transition from %s to %s", ErrInvalidStateTransition, currentStatus, status)
+	}
+
+	// Perform the update
+	var updateQuery string
 	var args []interface{}
 
 	if status == SettlementStatusConfirmed {
-		query = `
+		updateQuery = `
 			UPDATE settlements
 			SET status = $1, confirmed_at = $2, error_message = $3
 			WHERE id = $4`
 		args = []interface{}{status, time.Now().UTC(), nullString(errorMessage), id}
 	} else {
-		query = `
+		updateQuery = `
 			UPDATE settlements
 			SET status = $1, error_message = $2
 			WHERE id = $3`
 		args = []interface{}{status, nullString(errorMessage), id}
 	}
 
-	result, err := r.db.ExecContext(ctx, query, args...)
+	result, err := tx.ExecContext(ctx, updateQuery, args...)
 	if err != nil {
 		return fmt.Errorf("failed to update settlement status: %w", err)
 	}
@@ -199,7 +259,12 @@ func (r *SettlementRepository) UpdateStatus(ctx context.Context, id string, stat
 		return fmt.Errorf("failed to get rows affected: %w", err)
 	}
 	if rows == 0 {
-		return fmt.Errorf("settlement not found: %s", id)
+		return ErrSettlementNotFound
+	}
+
+	// Commit the transaction
+	if err = tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return nil

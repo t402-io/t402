@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 
@@ -237,12 +238,22 @@ func (f *UptoEvmFacilitator) Verify(
 	// Validate deadline is in the future
 	deadline, ok := new(big.Int).SetString(permitPayload.Authorization.Deadline, 10)
 	if !ok {
-		return nil, t402.NewVerifyError("invalid_deadline", permitPayload.Authorization.Owner, network, nil)
+		return nil, t402.NewVerifyError("invalid_deadline", permitPayload.Authorization.Owner, network,
+			fmt.Errorf("invalid deadline format: %q", permitPayload.Authorization.Deadline))
 	}
-	// We don't strictly enforce current time here (clock skew is acceptable),
-	// but the chain will enforce it when permit() is called.
+
+	// Check deadline is positive
 	if deadline.Sign() <= 0 {
-		return nil, t402.NewVerifyError("invalid_deadline", permitPayload.Authorization.Owner, network, nil)
+		return nil, t402.NewVerifyError("invalid_deadline", permitPayload.Authorization.Owner, network,
+			fmt.Errorf("deadline must be positive"))
+	}
+
+	// Check deadline is in the future (with 30-second grace period for clock skew)
+	now := time.Now().Unix()
+	gracePeriod := int64(30)
+	if deadline.Int64() < now-gracePeriod {
+		return nil, t402.NewVerifyError("deadline_expired", permitPayload.Authorization.Owner, network,
+			fmt.Errorf("deadline %d is in the past (current time: %d)", deadline.Int64(), now))
 	}
 
 	// Verify the permit nonce matches the on-chain nonce

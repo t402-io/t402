@@ -59,6 +59,34 @@ func LoggingMiddleware() gin.HandlerFunc {
 	}
 }
 
+// MaxBodySize is the maximum allowed request body size (1 MB)
+const MaxBodySize = 1 << 20 // 1 MB
+
+// BodySizeLimitMiddleware limits the request body size to prevent DoS attacks
+func BodySizeLimitMiddleware(maxSize int64) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Skip for GET, HEAD, OPTIONS (no body)
+		if c.Request.Method == "GET" || c.Request.Method == "HEAD" || c.Request.Method == "OPTIONS" {
+			c.Next()
+			return
+		}
+
+		// Check Content-Length header first (if present)
+		if c.Request.ContentLength > maxSize {
+			c.AbortWithStatusJSON(http.StatusRequestEntityTooLarge, gin.H{
+				"code":    "REQUEST_TOO_LARGE",
+				"message": "Request body too large",
+			})
+			return
+		}
+
+		// Wrap the body with a size limiter to enforce limit during reading
+		c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, maxSize)
+
+		c.Next()
+	}
+}
+
 // CORSMiddleware handles Cross-Origin Resource Sharing with configurable allowed origins
 // allowedOrigins: comma-separated list of allowed origins, or "*" for all
 func CORSMiddleware(allowedOrigins string) gin.HandlerFunc {
@@ -133,8 +161,13 @@ func RateLimitMiddleware(limiter ratelimit.Limiter) gin.HandlerFunc {
 
 		allowed, info, err := limiter.Allow(c.Request.Context(), clientIP)
 		if err != nil {
-			log.Printf("Rate limit error: %v", err)
-			c.Next()
+			// Fail-closed: deny requests when rate limiter is unavailable
+			// This prevents potential abuse during Redis outages
+			log.Printf("Rate limit error (failing closed): %v", err)
+			c.AbortWithStatusJSON(http.StatusServiceUnavailable, gin.H{
+				"code":    "RATE_LIMITER_UNAVAILABLE",
+				"message": "Service temporarily unavailable, please retry",
+			})
 			return
 		}
 

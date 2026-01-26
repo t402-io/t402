@@ -86,12 +86,32 @@ func TestMiddlewareWithHeaderKey(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
-func TestMiddlewareWithQueryKey(t *testing.T) {
+func TestMiddlewareWithQueryKey_DisabledByDefault(t *testing.T) {
 	manager := NewManager(nil)
 	manager.LoadFromEnv("test-key:test-app")
 
 	router := gin.New()
-	router.Use(Middleware(manager, nil))
+	router.Use(Middleware(manager, nil)) // Default config has AllowQueryParam: false
+	router.GET("/verify", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/verify?api_key=test-key", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	// Query parameter auth is disabled by default for security
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+}
+
+func TestMiddlewareWithQueryKey_WhenEnabled(t *testing.T) {
+	manager := NewManager(nil)
+	manager.LoadFromEnv("test-key:test-app")
+
+	cfg := DefaultConfig()
+	cfg.AllowQueryParam = true // Explicitly enable query param auth
+
+	router := gin.New()
+	router.Use(Middleware(manager, cfg))
 	router.GET("/verify", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
@@ -100,6 +120,8 @@ func TestMiddlewareWithQueryKey(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
+	// Should have deprecation warning header
+	assert.Equal(t, "Query parameter authentication is deprecated and will be removed. Use X-API-Key header instead.", w.Header().Get("X-Deprecated"))
 }
 
 func TestMiddlewareWithBearerToken(t *testing.T) {

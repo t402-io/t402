@@ -16,6 +16,7 @@ import (
 	"github.com/t402-io/t402/services/facilitator/internal/cache"
 	"github.com/t402-io/t402/services/facilitator/internal/config"
 	"github.com/t402-io/t402/services/facilitator/internal/health"
+	"github.com/t402-io/t402/services/facilitator/internal/idempotency"
 	"github.com/t402-io/t402/services/facilitator/internal/intent"
 	"github.com/t402-io/t402/services/facilitator/internal/metrics"
 	"github.com/t402-io/t402/services/facilitator/internal/persistence"
@@ -36,18 +37,19 @@ type Facilitator interface {
 
 // Server is the HTTP server for the facilitator
 type Server struct {
-	router         *gin.Engine
-	httpServer     *http.Server
-	facilitator    Facilitator
-	config         *config.Config
-	metrics        *metrics.Metrics
-	limiter        ratelimit.Limiter
-	health         *health.Checker
-	authManager    *auth.Manager
-	db             *persistence.DB
-	settlementRepo *persistence.SettlementRepository
-	auditRepo      *persistence.AuditRepository
-	tracer         *tracing.Provider
+	router           *gin.Engine
+	httpServer       *http.Server
+	facilitator      Facilitator
+	config           *config.Config
+	metrics          *metrics.Metrics
+	limiter          ratelimit.Limiter
+	health           *health.Checker
+	authManager      *auth.Manager
+	db               *persistence.DB
+	settlementRepo   *persistence.SettlementRepository
+	auditRepo        *persistence.AuditRepository
+	tracer           *tracing.Provider
+	idempotencyStore *idempotency.Store
 
 	// Advanced features (require database)
 	streamingHandlers *streaming.Handlers
@@ -88,7 +90,9 @@ func NewWithTracing(
 
 	// Create components
 	m := metrics.New()
-	limiter := ratelimit.NewRedisLimiter(redisClient, cfg.RateLimitRequests, cfg.RateLimitWindow)
+	// Use fallback limiter that falls back to in-memory limiting when Redis is unavailable
+	redisLimiter := ratelimit.NewRedisLimiter(redisClient, cfg.RateLimitRequests, cfg.RateLimitWindow)
+	limiter := ratelimit.NewFallbackLimiter(redisLimiter, cfg.RateLimitRequests, cfg.RateLimitWindow)
 	healthChecker := health.NewChecker(redisClient, Version)
 
 	// Create auth manager and load API keys
@@ -101,19 +105,24 @@ func NewWithTracing(
 		}
 	}
 
+	// Create idempotency store (24 hour TTL by default)
+	idempotencyStore := idempotency.NewStore(redisClient, 24*time.Hour)
+	log.Printf("Idempotency protection enabled")
+
 	// Create router
 	router := gin.New()
 
 	s := &Server{
-		router:      router,
-		facilitator: facilitator,
-		config:      cfg,
-		metrics:     m,
-		limiter:     limiter,
-		health:      healthChecker,
-		authManager: authManager,
-		db:          db,
-		tracer:      tracer,
+		router:           router,
+		facilitator:      facilitator,
+		config:           cfg,
+		metrics:          m,
+		limiter:          limiter,
+		health:           healthChecker,
+		authManager:      authManager,
+		db:               db,
+		tracer:           tracer,
+		idempotencyStore: idempotencyStore,
 	}
 
 	// Setup persistence repositories if database is available
@@ -147,6 +156,9 @@ func (s *Server) setupMiddleware() {
 	// Recovery middleware
 	s.router.Use(gin.Recovery())
 
+	// Body size limit middleware (prevent DoS via large payloads)
+	s.router.Use(BodySizeLimitMiddleware(MaxBodySize))
+
 	// Request ID middleware
 	s.router.Use(RequestIDMiddleware())
 
@@ -159,6 +171,10 @@ func (s *Server) setupMiddleware() {
 	s.router.Use(LoggingMiddleware())
 
 	// CORS middleware with configurable allowed origins
+	// Warn if using wildcard CORS in production (security risk)
+	if s.config.IsProduction() && s.config.CORSAllowedOrigins == "*" {
+		log.Printf("WARNING: Wildcard CORS (*) enabled in production. Consider restricting to specific origins.")
+	}
 	s.router.Use(CORSMiddleware(s.config.CORSAllowedOrigins))
 
 	// Metrics middleware
@@ -328,9 +344,9 @@ func (s *Server) Start() {
 	s.httpServer = &http.Server{
 		Addr:         fmt.Sprintf(":%d", s.config.Port),
 		Handler:      s.router,
-		ReadTimeout:  30 * time.Second,
-		WriteTimeout: 30 * time.Second,
-		IdleTimeout:  60 * time.Second,
+		ReadTimeout:  s.config.ReadTimeout,
+		WriteTimeout: s.config.WriteTimeout,
+		IdleTimeout:  s.config.IdleTimeout,
 	}
 
 	// Start server in goroutine
@@ -353,7 +369,7 @@ func (s *Server) waitForShutdown() {
 
 	log.Println("Shutting down server...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), s.config.ShutdownTimeout)
 	defer cancel()
 
 	if err := s.httpServer.Shutdown(ctx); err != nil {

@@ -327,13 +327,21 @@ func parseContractOutput(value interface{}) (interface{}, error) {
 			if nf, ok := nativeFee.(*big.Int); ok {
 				fee.NativeFee = nf
 			} else if nf, ok := nativeFee.(string); ok {
-				fee.NativeFee, _ = new(big.Int).SetString(nf, 10)
+				parsed, success := new(big.Int).SetString(nf, 10)
+				if !success {
+					return nil, fmt.Errorf("invalid NativeFee format: %q", nf)
+				}
+				fee.NativeFee = parsed
 			}
 			if lzFee, ok := feeMap["LzTokenFee"]; ok {
 				if lf, ok := lzFee.(*big.Int); ok {
 					fee.LzTokenFee = lf
 				} else if lf, ok := lzFee.(string); ok {
-					fee.LzTokenFee, _ = new(big.Int).SetString(lf, 10)
+					parsed, success := new(big.Int).SetString(lf, 10)
+					if !success {
+						return nil, fmt.Errorf("invalid LzTokenFee format: %q", lf)
+					}
+					fee.LzTokenFee = parsed
 				}
 			}
 			return fee, nil
