@@ -26,6 +26,9 @@
     "lint:check": "turbo run lint:check",
     "format:check": "turbo run format:check",
     "test": "turbo run test",
+    "test:workspace": "vitest run",
+    "test:workspace:watch": "vitest",
+    "test:workspace:coverage": "vitest run --coverage",
     "test:integration": "turbo run test:integration",
     "test:all": "pnpm test && pnpm test:integration",
     "bench": "turbo run bench",
@@ -54,6 +57,7 @@
     "turbo": "^2.5.0",
     "typedoc": "^0.28.0",
     "typedoc-plugin-markdown": "^4.4.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
   }
 }
