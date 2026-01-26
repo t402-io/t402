@@ -69,7 +69,6 @@
     "@tetherto/wdk-wallet-ton": ">=1.0.0-beta.0",
     "@tetherto/wdk-wallet-tron": ">=1.0.0-beta.0",
     "@tetherto/wdk-protocol-bridge-usdt0-evm": ">=1.0.0-beta.0",
-    "@tetherto/wdk-protocol-bridge-usdt0-ton": ">=1.0.0-beta.0",
     "@trezor/connect": ">=9.0.0",
     "@ton/core": ">=0.53.0",
     "@solana/kit": ">=2.0.0"
@@ -91,9 +90,6 @@
       "optional": true
     },
     "@tetherto/wdk-protocol-bridge-usdt0-evm": {
-      "optional": true
-    },
-    "@tetherto/wdk-protocol-bridge-usdt0-ton": {
       "optional": true
     },
     "@ledgerhq/hw-app-eth": {
