@@ -146,9 +146,9 @@ function HealthBanner({ health }: { health: HealthStatus }) {
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`mx-auto max-w-5xl rounded-xl border ${config.border} ${config.bg} p-4`}
+      className={`mx-auto max-w-5xl rounded-xl border ${config.border} ${config.bg} p-3 sm:p-4`}
     >
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4">
         <div className="flex items-center gap-3">
           <span className={`relative flex h-3 w-3`}>
             {health.status === "operational" && (
@@ -156,9 +156,9 @@ function HealthBanner({ health }: { health: HealthStatus }) {
             )}
             <span className={`relative inline-flex h-3 w-3 rounded-full ${config.dot}`} />
           </span>
-          <span className={`font-medium ${config.text}`}>{config.label}</span>
+          <span className={`text-sm font-medium sm:text-base ${config.text}`}>{config.label}</span>
         </div>
-        <div className="flex items-center gap-4 text-sm text-gray-500">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 sm:text-sm">
           {health.latency !== undefined && (
             <span>Latency: {health.latency}ms</span>
           )}
@@ -166,7 +166,7 @@ function HealthBanner({ health }: { health: HealthStatus }) {
             <span>{health.supportedNetworks} networks</span>
           )}
           {health.lastChecked && (
-            <span>Updated: {health.lastChecked.toLocaleTimeString()}</span>
+            <span className="hidden sm:inline">Updated: {health.lastChecked.toLocaleTimeString()}</span>
           )}
         </div>
       </div>
@@ -190,17 +190,17 @@ export default function StatusClient() {
   return (
     <div className="relative overflow-hidden">
       {/* Header */}
-      <section className="relative px-6 pt-32 pb-16 md:px-12">
+      <section className="relative px-4 pb-12 pt-24 sm:px-6 sm:pt-32 sm:pb-16 md:px-12">
         <div className="mx-auto max-w-6xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
+            <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl lg:text-6xl">
               Network Status
             </h1>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-400">
+            <p className="mx-auto mt-3 max-w-2xl text-base text-gray-400 sm:mt-4 sm:text-lg">
               Facilitator service health and supported networks
             </p>
           </motion.div>
@@ -208,17 +208,17 @@ export default function StatusClient() {
       </section>
 
       {/* Health Status Banner */}
-      <section className="px-6 pb-8 md:px-12">
+      <section className="px-4 pb-6 sm:px-6 sm:pb-8 md:px-12">
         <HealthBanner health={health} />
       </section>
 
       {/* Service Endpoints */}
-      <section className="px-6 pb-12 md:px-12">
+      <section className="px-4 pb-10 sm:px-6 sm:pb-12 md:px-12">
         <div className="mx-auto max-w-5xl">
-          <h2 className="mb-4 text-lg font-semibold text-white">
+          <h2 className="mb-3 text-lg font-semibold text-white sm:mb-4">
             Service Endpoints
           </h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
             {serviceEndpoints.map((ep, i) => (
               <motion.a
                 key={ep.name}
@@ -228,15 +228,15 @@ export default function StatusClient() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: i * 0.05 }}
-                className="group flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.02] px-4 py-3 transition-colors hover:border-white/20 hover:bg-white/[0.04]"
+                className="group flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2.5 transition-colors hover:border-white/20 hover:bg-white/[0.04] sm:px-4 sm:py-3"
               >
-                <div>
+                <div className="min-w-0 flex-1">
                   <div className="text-sm font-medium text-white">
                     {ep.name}
                   </div>
-                  <div className="text-xs text-gray-500">{ep.description}</div>
+                  <div className="truncate text-xs text-gray-500">{ep.description}</div>
                 </div>
-                <ExternalLinkIcon className="h-4 w-4 shrink-0 text-gray-500 transition-colors group-hover:text-gray-300" />
+                <ExternalLinkIcon className="ml-2 h-4 w-4 shrink-0 text-gray-500 transition-colors group-hover:text-gray-300" />
               </motion.a>
             ))}
           </div>
@@ -244,16 +244,18 @@ export default function StatusClient() {
       </section>
 
       {/* Facilitator Wallets */}
-      <section className="px-6 pb-12 md:px-12">
+      <section className="px-4 pb-12 sm:px-6 md:px-12">
         <div className="mx-auto max-w-5xl">
           <h2 className="mb-4 text-lg font-semibold text-white">
             Facilitator Wallets
           </h2>
+
+          {/* Desktop Table */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.2 }}
-            className="overflow-hidden rounded-xl border border-white/10"
+            className="hidden overflow-hidden rounded-xl border border-white/10 md:block"
           >
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -311,16 +313,51 @@ export default function StatusClient() {
               </table>
             </div>
           </motion.div>
+
+          {/* Mobile Cards */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+            className="grid gap-3 md:hidden"
+          >
+            {facilitatorWallets.map((w) => (
+              <div
+                key={w.family}
+                className="rounded-xl border border-white/10 bg-white/[0.02] p-4"
+              >
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="font-medium text-white">{w.family}</span>
+                  <span className="text-xs text-gray-500">{w.chains}</span>
+                </div>
+                <div className="mb-3 flex items-center gap-1">
+                  <code className="flex-1 truncate text-xs text-gray-400">
+                    {w.address}
+                  </code>
+                  <CopyButton text={w.address} />
+                </div>
+                <a
+                  href={w.explorerUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300"
+                >
+                  View in Explorer
+                  <ExternalLinkIcon className="h-3 w-3" />
+                </a>
+              </div>
+            ))}
+          </motion.div>
         </div>
       </section>
 
       {/* Supported Networks */}
-      <section className="px-6 pb-16 md:px-12">
+      <section className="px-4 pb-16 sm:px-6 md:px-12">
         <div className="mx-auto max-w-5xl">
           <h2 className="mb-4 text-lg font-semibold text-white">
             Supported Networks
           </h2>
-          <div className="space-y-6">
+          <div className="space-y-5 sm:space-y-6">
             {Object.entries(families).map(([family, nets], fi) => (
               <motion.div
                 key={family}
@@ -336,13 +373,13 @@ export default function StatusClient() {
                   {nets.map((n) => (
                     <div
                       key={n.network}
-                      className="flex items-center justify-between rounded-lg border border-white/5 bg-white/[0.01] px-3 py-2"
+                      className="flex flex-col gap-1 rounded-lg border border-white/5 bg-white/[0.01] px-3 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-2"
                     >
                       <div className="flex items-center gap-2">
-                        <CheckCircleIcon className="h-4 w-4 text-emerald-400" />
+                        <CheckCircleIcon className="h-4 w-4 shrink-0 text-emerald-400" />
                         <span className="text-sm text-white">{n.name}</span>
                       </div>
-                      <code className="text-xs text-gray-500">{n.network}</code>
+                      <code className="truncate pl-6 text-[10px] text-gray-500 sm:pl-0 sm:text-xs">{n.network}</code>
                     </div>
                   ))}
                 </div>
@@ -353,15 +390,15 @@ export default function StatusClient() {
       </section>
 
       {/* Footer Note */}
-      <section className="px-6 pb-24 md:px-12">
+      <section className="px-4 pb-16 sm:px-6 sm:pb-24 md:px-12">
         <div className="mx-auto max-w-4xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="rounded-2xl border border-white/10 bg-white/[0.02] p-8"
+            className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-8"
           >
-            <p className="mb-4 text-gray-400">
+            <p className="mb-4 text-sm text-gray-400 sm:text-base">
               For real-time monitoring and historical metrics, visit the Grafana
               dashboard.
             </p>
@@ -369,7 +406,7 @@ export default function StatusClient() {
               href="https://grafana.facilitator.t402.io"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-500"
+              className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-500 sm:px-5"
             >
               Open Grafana Dashboard
               <ExternalLinkIcon className="h-4 w-4" />
