@@ -1,32 +1,21 @@
-% T402 Logo - Standalone TikZ
-% Compile with: pdflatex t402-logo.tex
+% T402 Logo - Standalone
+% This file is kept for reference but the actual logo is now t402-logo.pdf
+% Generated from t402-logo-official.svg using cairosvg
+%
+% Brand color: #058e8f
 
 \documentclass[tikz,border=10pt]{standalone}
 \usepackage{tikz}
 \usepackage{xcolor}
+\usepackage{graphicx}
 
-% Define colors
-\definecolor{t402blue}{HTML}{3B82F6}
-\definecolor{t402green}{HTML}{10B981}
-\definecolor{t402purple}{HTML}{8B5CF6}
+% Define T402 brand color
+\definecolor{t402teal}{HTML}{058E8F}
 
 \begin{document}
-\begin{tikzpicture}[scale=1]
-    % Background circle
-    \fill[t402blue!20] (0,0) circle (2cm);
-
-    % Outer ring
-    \draw[t402blue, line width=3pt] (0,0) circle (1.8cm);
-
-    % Inner elements - stylized "402"
-    \node[font=\fontfamily{phv}\selectfont\bfseries\Huge, t402blue] at (0,0.2) {T402};
-
-    % Subtitle
-    \node[font=\fontfamily{phv}\selectfont\small, t402purple] at (0,-0.5) {PROTOCOL};
-
-    % Decorative elements - payment flow arrows
-    \draw[t402green, line width=2pt, ->, >=stealth] (-1.3,1.3) arc (135:45:1.84cm);
-    \draw[t402green, line width=2pt, ->, >=stealth] (1.3,-1.3) arc (-45:-135:1.84cm);
-
+% The logo is now an SVG-derived PDF
+% Use: \includegraphics{figures/t402-logo.pdf}
+\begin{tikzpicture}
+    \node at (0,0) {\includegraphics[width=4cm]{t402-logo.pdf}};
 \end{tikzpicture}
 \end{document}
