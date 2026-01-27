@@ -68,7 +68,10 @@ const config: DocsThemeConfig = {
       <meta name="description" content="T402 - The Official Payment Protocol for USDT" />
       <meta property="og:title" content="T402 Documentation" />
       <meta property="og:description" content="HTTP-native stablecoin payments for USDT and USDT0" />
-      <link rel="icon" href="/favicon.ico" />
+      <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+      <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+      <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+      <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     </>
   ),
   sidebar: {
