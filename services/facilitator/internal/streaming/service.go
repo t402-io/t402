@@ -65,7 +65,7 @@ func DefaultServiceConfig() *ServiceConfig {
 
 // Service handles streaming payment operations
 type Service struct {
-	repo     *Repository
+	repo     RepositoryInterface
 	verifier SignatureVerifier
 	settler  Settler
 	metrics  *metrics.Metrics
@@ -87,7 +87,7 @@ type rateLimitState struct {
 }
 
 // NewService creates a new streaming service
-func NewService(repo *Repository, verifier SignatureVerifier, settler Settler, m *metrics.Metrics, config *ServiceConfig) *Service {
+func NewService(repo RepositoryInterface, verifier SignatureVerifier, settler Settler, m *metrics.Metrics, config *ServiceConfig) *Service {
 	if config == nil {
 		config = DefaultServiceConfig()
 	}

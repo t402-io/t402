@@ -1,7 +1,6 @@
 package streaming
 
 import (
-	"context"
 	"testing"
 	"time"
 )
@@ -156,78 +155,8 @@ func TestListStreamsRequest(t *testing.T) {
 	}
 }
 
-func TestDefaultServiceConfig(t *testing.T) {
-	config := DefaultServiceConfig()
-
-	if config.DefaultExpiry != 24*time.Hour {
-		t.Errorf("expected default expiry 24h, got %v", config.DefaultExpiry)
-	}
-	if config.MaxStreamDuration != 30*24*time.Hour {
-		t.Errorf("expected max duration 30 days, got %v", config.MaxStreamDuration)
-	}
-	if config.MinUpdateInterval != 100*time.Millisecond {
-		t.Errorf("expected min interval 100ms, got %v", config.MinUpdateInterval)
-	}
-	if config.MaxUpdatesPerSecond != 100 {
-		t.Errorf("expected max 100 updates/s, got %d", config.MaxUpdatesPerSecond)
-	}
-	if config.EnableAutoSettle {
-		t.Error("expected auto settle to be disabled by default")
-	}
-}
-
-// Mock implementations for testing
-
-type mockVerifier struct {
-	verifyResult bool
-	verifyErr    error
-}
-
-func (m *mockVerifier) VerifyStreamSignature(ctx context.Context, network, payer, message, signature string) (bool, error) {
-	return m.verifyResult, m.verifyErr
-}
-
-type mockSettler struct {
-	settleTxHash string
-	settleErr    error
-}
-
-func (m *mockSettler) SettleStream(ctx context.Context, network, scheme, from, to, asset, amount string) (string, error) {
-	return m.settleTxHash, m.settleErr
-}
-
-func TestServiceCreation(t *testing.T) {
-	verifier := &mockVerifier{verifyResult: true}
-	settler := &mockSettler{settleTxHash: "0xtx"}
-
-	service := NewService(nil, verifier, settler, nil, nil)
-	if service == nil {
-		t.Fatal("expected non-nil service")
-	}
-
-	// Check default config is applied
-	if service.config.DefaultExpiry != 24*time.Hour {
-		t.Errorf("expected default config to be applied")
-	}
-}
-
-func TestServiceWithCustomConfig(t *testing.T) {
-	config := &ServiceConfig{
-		DefaultExpiry:       48 * time.Hour,
-		MaxStreamDuration:   60 * 24 * time.Hour,
-		MinUpdateInterval:   50 * time.Millisecond,
-		MaxUpdatesPerSecond: 200,
-	}
-
-	service := NewService(nil, nil, nil, nil, config)
-
-	if service.config.DefaultExpiry != 48*time.Hour {
-		t.Errorf("expected custom expiry 48h, got %v", service.config.DefaultExpiry)
-	}
-	if service.config.MaxUpdatesPerSecond != 200 {
-		t.Errorf("expected custom rate 200, got %d", service.config.MaxUpdatesPerSecond)
-	}
-}
+// Note: mockVerifier, mockSettler, TestDefaultServiceConfig, TestServiceCreation,
+// and TestServiceWithCustomConfig are defined in service_test.go
 
 func TestStreamStats(t *testing.T) {
 	stats := &StreamStats{

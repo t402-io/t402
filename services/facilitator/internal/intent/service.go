@@ -55,7 +55,7 @@ func DefaultServiceConfig() *ServiceConfig {
 
 // Service handles payment intent operations
 type Service struct {
-	repo     *Repository
+	repo     RepositoryInterface
 	router   *Router
 	verifier SignatureVerifier
 	executor PaymentExecutor
@@ -69,7 +69,7 @@ type Service struct {
 
 // NewService creates a new intent service
 func NewService(
-	repo *Repository,
+	repo RepositoryInterface,
 	router *Router,
 	verifier SignatureVerifier,
 	executor PaymentExecutor,

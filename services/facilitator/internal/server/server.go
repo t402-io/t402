@@ -132,14 +132,16 @@ func NewWithTracing(
 
 		// Setup streaming service and handlers
 		streamingRepo := streaming.NewRepository(db.DB)
-		streamingService := streaming.NewService(streamingRepo, nil, nil, m, nil)
+		streamingRepoAdapter := streaming.NewRepositoryAdapter(streamingRepo)
+		streamingService := streaming.NewService(streamingRepoAdapter, nil, nil, m, nil)
 		s.streamingHandlers = streaming.NewHandlers(streamingService)
 		log.Printf("Streaming payments enabled")
 
 		// Setup intent service and handlers
 		intentRepo := intent.NewRepository(db.DB)
+		intentRepoAdapter := intent.NewRepositoryAdapter(intentRepo)
 		intentRouter := intent.NewRouter(nil, nil, nil, nil, nil)
-		intentService := intent.NewService(intentRepo, intentRouter, nil, nil, m, nil)
+		intentService := intent.NewService(intentRepoAdapter, intentRouter, nil, nil, m, nil)
 		s.intentHandlers = intent.NewHandlers(intentService)
 		log.Printf("Intent-based routing enabled")
 	}

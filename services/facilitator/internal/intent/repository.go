@@ -591,3 +591,66 @@ func (r *Repository) CountByStatus(ctx context.Context) (map[IntentStatus]int64,
 
 	return counts, nil
 }
+
+// RepositoryAdapter wraps *Repository to implement RepositoryInterface
+// This adapter converts concrete Tx types to the TxInterface
+type RepositoryAdapter struct {
+	repo *Repository
+}
+
+// NewRepositoryAdapter creates a new adapter wrapping the concrete repository
+func NewRepositoryAdapter(repo *Repository) *RepositoryAdapter {
+	return &RepositoryAdapter{repo: repo}
+}
+
+func (a *RepositoryAdapter) BeginTx(ctx context.Context) (TxInterface, error) {
+	return a.repo.BeginTx(ctx)
+}
+
+func (a *RepositoryAdapter) Create(ctx context.Context, intent *Intent) error {
+	return a.repo.Create(ctx, intent)
+}
+
+func (a *RepositoryAdapter) GetByID(ctx context.Context, id string) (*Intent, error) {
+	return a.repo.GetByID(ctx, id)
+}
+
+func (a *RepositoryAdapter) GetByIDForUpdate(ctx context.Context, tx TxInterface, id string) (*Intent, error) {
+	concreteTx, ok := tx.(*Tx)
+	if !ok {
+		return nil, fmt.Errorf("invalid transaction type: expected *Tx")
+	}
+	return a.repo.GetByIDForUpdate(ctx, concreteTx, id)
+}
+
+func (a *RepositoryAdapter) Update(ctx context.Context, intent *Intent) error {
+	return a.repo.Update(ctx, intent)
+}
+
+func (a *RepositoryAdapter) UpdateInTx(ctx context.Context, tx TxInterface, intent *Intent) error {
+	concreteTx, ok := tx.(*Tx)
+	if !ok {
+		return fmt.Errorf("invalid transaction type: expected *Tx")
+	}
+	return a.repo.UpdateInTx(ctx, concreteTx, intent)
+}
+
+func (a *RepositoryAdapter) UpdateStatus(ctx context.Context, id string, status IntentStatus, errorMsg string) error {
+	return a.repo.UpdateStatus(ctx, id, status, errorMsg)
+}
+
+func (a *RepositoryAdapter) List(ctx context.Context, filter ListIntentsRequest) ([]*Intent, int64, error) {
+	return a.repo.List(ctx, filter)
+}
+
+func (a *RepositoryAdapter) GetExpiredIntents(ctx context.Context) ([]*Intent, error) {
+	return a.repo.GetExpiredIntents(ctx)
+}
+
+func (a *RepositoryAdapter) GetPendingIntents(ctx context.Context, limit int) ([]*Intent, error) {
+	return a.repo.GetPendingIntents(ctx, limit)
+}
+
+func (a *RepositoryAdapter) CountByStatus(ctx context.Context) (map[IntentStatus]int64, error) {
+	return a.repo.CountByStatus(ctx)
+}

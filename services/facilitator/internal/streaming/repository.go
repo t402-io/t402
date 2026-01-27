@@ -689,3 +689,97 @@ func (r *Repository) CreateEvent(ctx context.Context, event *StreamEvent) error 
 
 	return nil
 }
+
+// RepositoryAdapter wraps *Repository and implements RepositoryInterface
+// This enables dependency injection for testing while preserving existing code
+type RepositoryAdapter struct {
+	repo *Repository
+}
+
+// NewRepositoryAdapter creates a new adapter that implements RepositoryInterface
+func NewRepositoryAdapter(repo *Repository) *RepositoryAdapter {
+	return &RepositoryAdapter{repo: repo}
+}
+
+// Ensure RepositoryAdapter implements RepositoryInterface
+var _ RepositoryInterface = (*RepositoryAdapter)(nil)
+
+func (a *RepositoryAdapter) BeginTx(ctx context.Context) (TxInterface, error) {
+	return a.repo.BeginTx(ctx)
+}
+
+func (a *RepositoryAdapter) Create(ctx context.Context, stream *Stream) error {
+	return a.repo.Create(ctx, stream)
+}
+
+func (a *RepositoryAdapter) GetByID(ctx context.Context, id string) (*Stream, error) {
+	return a.repo.GetByID(ctx, id)
+}
+
+func (a *RepositoryAdapter) GetByIDForUpdate(ctx context.Context, tx TxInterface, id string) (*Stream, error) {
+	concreteTx, ok := tx.(*Tx)
+	if !ok {
+		return nil, fmt.Errorf("invalid transaction type: expected *Tx")
+	}
+	return a.repo.GetByIDForUpdate(ctx, concreteTx, id)
+}
+
+func (a *RepositoryAdapter) Update(ctx context.Context, stream *Stream) error {
+	return a.repo.Update(ctx, stream)
+}
+
+func (a *RepositoryAdapter) UpdateInTx(ctx context.Context, tx TxInterface, stream *Stream) error {
+	concreteTx, ok := tx.(*Tx)
+	if !ok {
+		return fmt.Errorf("invalid transaction type: expected *Tx")
+	}
+	return a.repo.UpdateInTx(ctx, concreteTx, stream)
+}
+
+func (a *RepositoryAdapter) UpdateStatus(ctx context.Context, id string, status StreamStatus) error {
+	return a.repo.UpdateStatus(ctx, id, status)
+}
+
+func (a *RepositoryAdapter) List(ctx context.Context, filter ListStreamsRequest) ([]*Stream, int64, error) {
+	return a.repo.List(ctx, filter)
+}
+
+func (a *RepositoryAdapter) CreateUpdate(ctx context.Context, update *StreamUpdate) error {
+	return a.repo.CreateUpdate(ctx, update)
+}
+
+func (a *RepositoryAdapter) CreateUpdateInTx(ctx context.Context, tx TxInterface, update *StreamUpdate) error {
+	concreteTx, ok := tx.(*Tx)
+	if !ok {
+		return fmt.Errorf("invalid transaction type: expected *Tx")
+	}
+	return a.repo.CreateUpdateInTx(ctx, concreteTx, update)
+}
+
+func (a *RepositoryAdapter) GetUpdates(ctx context.Context, streamID string, limit int) ([]*StreamUpdate, error) {
+	return a.repo.GetUpdates(ctx, streamID, limit)
+}
+
+func (a *RepositoryAdapter) GetLatestUpdate(ctx context.Context, streamID string) (*StreamUpdate, error) {
+	return a.repo.GetLatestUpdate(ctx, streamID)
+}
+
+func (a *RepositoryAdapter) GetLatestUpdateInTx(ctx context.Context, tx TxInterface, streamID string) (*StreamUpdate, error) {
+	concreteTx, ok := tx.(*Tx)
+	if !ok {
+		return nil, fmt.Errorf("invalid transaction type: expected *Tx")
+	}
+	return a.repo.GetLatestUpdateInTx(ctx, concreteTx, streamID)
+}
+
+func (a *RepositoryAdapter) GetStreamStats(ctx context.Context, streamID string) (*StreamStats, error) {
+	return a.repo.GetStreamStats(ctx, streamID)
+}
+
+func (a *RepositoryAdapter) GetExpiredStreams(ctx context.Context) ([]*Stream, error) {
+	return a.repo.GetExpiredStreams(ctx)
+}
+
+func (a *RepositoryAdapter) CreateEvent(ctx context.Context, event *StreamEvent) error {
+	return a.repo.CreateEvent(ctx, event)
+}
