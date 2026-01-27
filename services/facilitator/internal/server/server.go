@@ -156,6 +156,9 @@ func (s *Server) setupMiddleware() {
 	// Recovery middleware
 	s.router.Use(gin.Recovery())
 
+	// Security headers middleware (XSS, clickjacking, MIME sniffing protection)
+	s.router.Use(SecurityHeadersMiddleware(s.config.IsProduction()))
+
 	// Body size limit middleware (prevent DoS via large payloads)
 	s.router.Use(BodySizeLimitMiddleware(MaxBodySize))
 
