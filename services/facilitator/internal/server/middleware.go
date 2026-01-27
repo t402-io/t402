@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"log"
@@ -446,5 +447,97 @@ func APIKeyMiddleware(validKeys map[string]bool) gin.HandlerFunc {
 		}
 
 		c.Next()
+	}
+}
+
+// MaxResponseSize is the maximum allowed response size (10 MB)
+// SECURITY: P2-5 fix - Prevents memory exhaustion from large responses
+const MaxResponseSize = 10 << 20 // 10 MB
+
+// ResponseSizeLimitMiddleware wraps the response writer to limit response size
+// SECURITY: Prevents memory exhaustion attacks via excessively large responses
+func ResponseSizeLimitMiddleware(maxSize int64) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Replace the response writer with a size-limited one
+		limitedWriter := &limitedResponseWriter{
+			ResponseWriter: c.Writer,
+			maxSize:        maxSize,
+			written:        0,
+		}
+		c.Writer = limitedWriter
+
+		c.Next()
+
+		// Check if we hit the limit (response may have been truncated)
+		if limitedWriter.limitExceeded {
+			log.Printf("WARNING: Response size limit exceeded for %s %s", c.Request.Method, c.Request.URL.Path)
+		}
+	}
+}
+
+// limitedResponseWriter wraps gin.ResponseWriter to limit response size
+type limitedResponseWriter struct {
+	gin.ResponseWriter
+	maxSize       int64
+	written       int64
+	limitExceeded bool
+}
+
+func (w *limitedResponseWriter) Write(data []byte) (int, error) {
+	remaining := w.maxSize - w.written
+	if remaining <= 0 {
+		// Already exceeded limit
+		w.limitExceeded = true
+		return 0, nil
+	}
+
+	if int64(len(data)) > remaining {
+		// Would exceed limit - truncate
+		data = data[:remaining]
+		w.limitExceeded = true
+	}
+
+	n, err := w.ResponseWriter.Write(data)
+	w.written += int64(n)
+	return n, err
+}
+
+// OperationTimeoutMiddleware adds per-operation context timeouts
+// SECURITY: P2-6 fix - Prevents resource exhaustion from hanging operations
+func OperationTimeoutMiddleware(timeout time.Duration) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Skip for endpoints that don't need strict timeouts
+		// (health checks, metrics)
+		path := c.Request.URL.Path
+		if path == "/health" || path == "/ready" || path == "/metrics" {
+			c.Next()
+			return
+		}
+
+		// Create a timeout context for this operation
+		ctx, cancel := context.WithTimeout(c.Request.Context(), timeout)
+		defer cancel()
+
+		// Replace the request context
+		c.Request = c.Request.WithContext(ctx)
+
+		// Handle timeout
+		done := make(chan struct{})
+		go func() {
+			c.Next()
+			close(done)
+		}()
+
+		select {
+		case <-done:
+			// Request completed normally
+		case <-ctx.Done():
+			// Timeout exceeded
+			log.Printf("Request timeout for %s %s", c.Request.Method, c.Request.URL.Path)
+			c.AbortWithStatusJSON(http.StatusGatewayTimeout, gin.H{
+				"code":    "REQUEST_TIMEOUT",
+				"message": "Request processing timed out",
+			})
+		}
 	}
 }

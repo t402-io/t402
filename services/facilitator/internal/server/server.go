@@ -164,6 +164,12 @@ func (s *Server) setupMiddleware() {
 	// Body size limit middleware (prevent DoS via large payloads)
 	s.router.Use(BodySizeLimitMiddleware(MaxBodySize))
 
+	// Response size limit middleware (P2-5: prevent memory exhaustion)
+	s.router.Use(ResponseSizeLimitMiddleware(MaxResponseSize))
+
+	// Operation timeout middleware (P2-6: prevent hanging requests)
+	s.router.Use(OperationTimeoutMiddleware(30 * time.Second))
+
 	// Request ID middleware
 	s.router.Use(RequestIDMiddleware())
 
@@ -176,9 +182,11 @@ func (s *Server) setupMiddleware() {
 	s.router.Use(LoggingMiddleware())
 
 	// CORS middleware with configurable allowed origins
-	// Warn if using wildcard CORS in production (security risk)
+	// SECURITY (P2-4): Strongly warn against wildcard CORS in production
 	if s.config.IsProduction() && s.config.CORSAllowedOrigins == "*" {
-		log.Printf("WARNING: Wildcard CORS (*) enabled in production. Consider restricting to specific origins.")
+		log.Printf("SECURITY WARNING: Wildcard CORS (*) is enabled in production!")
+		log.Printf("SECURITY WARNING: This allows any website to make cross-origin requests to this API.")
+		log.Printf("SECURITY WARNING: Configure CORS_ALLOWED_ORIGINS with specific trusted origins.")
 	}
 	s.router.Use(CORSMiddleware(s.config.CORSAllowedOrigins))
 

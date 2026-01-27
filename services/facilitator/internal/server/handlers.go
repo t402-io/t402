@@ -128,6 +128,10 @@ func (s *Server) handleSettle(c *gin.Context) {
 	}
 
 	// Atomic idempotency check-and-create to prevent TOCTOU race condition
+	// SECURITY: Warn when idempotency key is provided but store is unavailable
+	if idempotencyKey != "" && s.idempotencyStore == nil {
+		log.Printf("WARNING: Idempotency key provided but idempotency store is not configured. Request proceeding without idempotency protection.")
+	}
 	if idempotencyKey != "" && s.idempotencyStore != nil {
 		payloadHash := idempotency.ComputePayloadHash(req.PaymentPayload, req.PaymentRequirements)
 
