@@ -249,10 +249,11 @@ func RateLimitMiddlewareWithConfig(limiter ratelimit.Limiter, config *RateLimitC
 			return
 		}
 
-		// Get client IP using secure method
-		clientIP := getSecureClientIP(c, config)
+		// Get rate limit key - prefer API key ID over IP for authenticated requests
+		// This provides per-API-key rate limiting for authenticated clients
+		rateLimitKey := getRateLimitKey(c, config)
 
-		allowed, info, err := limiter.Allow(c.Request.Context(), clientIP)
+		allowed, info, err := limiter.Allow(c.Request.Context(), rateLimitKey)
 		if err != nil {
 			// Fail-closed: deny requests when rate limiter is unavailable
 			// This prevents potential abuse during Redis outages
@@ -280,6 +281,23 @@ func RateLimitMiddlewareWithConfig(limiter ratelimit.Limiter, config *RateLimitC
 
 		c.Next()
 	}
+}
+
+// getRateLimitKey returns the appropriate key for rate limiting
+// SECURITY: Uses API key ID for authenticated requests, IP address for anonymous
+// This provides proper per-API-key rate limiting while preventing spoofing
+func getRateLimitKey(c *gin.Context, config *RateLimitConfig) string {
+	// Check if request is authenticated with an API key
+	// API key ID is set by the auth middleware in context
+	if apiKeyID, exists := c.Get("api_key_id"); exists {
+		if keyID, ok := apiKeyID.(string); ok && keyID != "" {
+			// Use "apikey:" prefix to separate from IP-based keys
+			return "apikey:" + keyID
+		}
+	}
+
+	// Fall back to client IP for anonymous requests
+	return "ip:" + getSecureClientIP(c, config)
 }
 
 // getSecureClientIP returns the client IP with protection against spoofing

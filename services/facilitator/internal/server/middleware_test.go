@@ -941,6 +941,169 @@ func TestIsTrustedProxy_CIDRValidation(t *testing.T) {
 	}
 }
 
+// Tests for P1-18: Per-API-key rate limiting
+func TestGetRateLimitKey_WithAPIKey(t *testing.T) {
+	config := DefaultRateLimitConfig()
+
+	router := gin.New()
+	var capturedKey string
+
+	// Middleware to set API key ID (simulating auth middleware)
+	router.Use(func(c *gin.Context) {
+		c.Set("api_key_id", "test-api-key-id")
+		c.Next()
+	})
+
+	router.GET("/test", func(c *gin.Context) {
+		capturedKey = getRateLimitKey(c, config)
+		c.String(http.StatusOK, "ok")
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	req.RemoteAddr = "192.168.1.100:12345"
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	// Should use API key ID, not IP
+	if capturedKey != "apikey:test-api-key-id" {
+		t.Errorf("Expected rate limit key 'apikey:test-api-key-id', got '%s'", capturedKey)
+	}
+}
+
+func TestGetRateLimitKey_WithoutAPIKey(t *testing.T) {
+	config := DefaultRateLimitConfig()
+
+	router := gin.New()
+	var capturedKey string
+
+	router.GET("/test", func(c *gin.Context) {
+		capturedKey = getRateLimitKey(c, config)
+		c.String(http.StatusOK, "ok")
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	req.RemoteAddr = "192.168.1.100:12345"
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	// Should use IP address when no API key
+	// Note: gin may parse RemoteAddr differently in tests
+	if capturedKey == "" {
+		t.Error("Rate limit key should not be empty")
+	}
+	if capturedKey == "apikey:" {
+		t.Error("Should not have API key prefix without authentication")
+	}
+	// Key should start with "ip:" prefix
+	if len(capturedKey) < 3 || capturedKey[:3] != "ip:" {
+		t.Errorf("Expected rate limit key to start with 'ip:', got '%s'", capturedKey)
+	}
+}
+
+func TestGetRateLimitKey_EmptyAPIKeyID(t *testing.T) {
+	config := DefaultRateLimitConfig()
+
+	router := gin.New()
+	var capturedKey string
+
+	// Set empty API key ID
+	router.Use(func(c *gin.Context) {
+		c.Set("api_key_id", "")
+		c.Next()
+	})
+
+	router.GET("/test", func(c *gin.Context) {
+		capturedKey = getRateLimitKey(c, config)
+		c.String(http.StatusOK, "ok")
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	req.RemoteAddr = "192.168.1.100:12345"
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	// Empty API key ID should fall back to IP
+	if len(capturedKey) >= 7 && capturedKey[:7] == "apikey:" {
+		t.Error("Should fall back to IP when API key ID is empty")
+	}
+}
+
+func TestRateLimitMiddleware_PerAPIKeyRateLimiting(t *testing.T) {
+	// Track which keys are rate limited
+	keyRequests := make(map[string]int)
+
+	limiter := &MockLimiter{
+		AllowFunc: func(ctx context.Context, key string) (bool, ratelimit.Info, error) {
+			keyRequests[key]++
+			return true, ratelimit.Info{
+				Limit:     100,
+				Remaining: 99,
+				Reset:     time.Now().Add(time.Minute),
+			}, nil
+		},
+	}
+
+	router := gin.New()
+
+	// Different API keys for different requests
+	router.Use(func(c *gin.Context) {
+		apiKey := c.GetHeader("X-Test-API-Key")
+		if apiKey != "" {
+			c.Set("api_key_id", apiKey)
+		}
+		c.Next()
+	})
+
+	router.Use(RateLimitMiddleware(limiter))
+	router.GET("/test", func(c *gin.Context) {
+		c.String(http.StatusOK, "ok")
+	})
+
+	// Request with API key 1
+	req1 := httptest.NewRequest(http.MethodGet, "/test", nil)
+	req1.Header.Set("X-Test-API-Key", "key1")
+	req1.RemoteAddr = "192.168.1.1:12345"
+	w1 := httptest.NewRecorder()
+	router.ServeHTTP(w1, req1)
+
+	// Request with API key 2
+	req2 := httptest.NewRequest(http.MethodGet, "/test", nil)
+	req2.Header.Set("X-Test-API-Key", "key2")
+	req2.RemoteAddr = "192.168.1.1:12345"
+	w2 := httptest.NewRecorder()
+	router.ServeHTTP(w2, req2)
+
+	// Request without API key (same IP)
+	req3 := httptest.NewRequest(http.MethodGet, "/test", nil)
+	req3.RemoteAddr = "192.168.1.1:12345"
+	w3 := httptest.NewRecorder()
+	router.ServeHTTP(w3, req3)
+
+	// Verify different rate limit keys were used
+	if keyRequests["apikey:key1"] != 1 {
+		t.Errorf("Expected 1 request for apikey:key1, got %d", keyRequests["apikey:key1"])
+	}
+	if keyRequests["apikey:key2"] != 1 {
+		t.Errorf("Expected 1 request for apikey:key2, got %d", keyRequests["apikey:key2"])
+	}
+	// IP-based key should be used for unauthenticated request
+	ipKeyFound := false
+	for key := range keyRequests {
+		if len(key) >= 3 && key[:3] == "ip:" {
+			ipKeyFound = true
+			if keyRequests[key] != 1 {
+				t.Errorf("Expected 1 request for IP-based key, got %d", keyRequests[key])
+			}
+		}
+	}
+	if !ipKeyFound {
+		t.Error("No IP-based rate limit key found for unauthenticated request")
+	}
+}
+
 // TestIsTrustedProxy_BugRegression specifically tests the bug that was fixed
 // where string prefix matching allowed IP spoofing
 func TestIsTrustedProxy_BugRegression(t *testing.T) {
