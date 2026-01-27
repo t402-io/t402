@@ -88,14 +88,14 @@ export function CrossChainBridge() {
   const availableTargets = BRIDGEABLE.filter((c) => c !== sourceChain);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-hidden">
       {/* Chain selection */}
-      <div className="glass-card p-6">
+      <div className="glass-card p-6 overflow-hidden">
         <div className="flex flex-col sm:flex-row items-center gap-4">
           {/* Source */}
-          <div className="flex-1 w-full">
+          <div className="flex-1 w-full min-w-0">
             <label className="text-[10px] uppercase tracking-wider text-[var(--color-muted)] mb-2 block">Source Chain</label>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {BRIDGEABLE.map((chain) => (
                 <button
                   key={chain}
@@ -103,7 +103,7 @@ export function CrossChainBridge() {
                     setSourceChain(chain);
                     if (targetChain === chain) setTargetChain(availableTargets[0]);
                   }}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs transition-all ${
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs transition-all whitespace-nowrap ${
                     sourceChain === chain
                       ? "bg-[var(--color-surface-active)] text-white"
                       : "text-[var(--color-muted)] hover:text-white hover:bg-[var(--color-surface)]"
@@ -122,14 +122,14 @@ export function CrossChainBridge() {
           </div>
 
           {/* Target */}
-          <div className="flex-1 w-full">
+          <div className="flex-1 w-full min-w-0">
             <label className="text-[10px] uppercase tracking-wider text-[var(--color-muted)] mb-2 block">Target Chain</label>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {BRIDGEABLE.filter((c) => c !== sourceChain).map((chain) => (
                 <button
                   key={chain}
                   onClick={() => setTargetChain(chain)}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs transition-all ${
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs transition-all whitespace-nowrap ${
                     targetChain === chain
                       ? "bg-[var(--color-surface-active)] text-white"
                       : "text-[var(--color-muted)] hover:text-white hover:bg-[var(--color-surface)]"
