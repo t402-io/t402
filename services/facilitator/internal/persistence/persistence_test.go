@@ -675,3 +675,160 @@ func TestGetAuditMetrics(t *testing.T) {
 	assert.GreaterOrEqual(t, metrics.TotalLogged, uint64(0))
 	assert.GreaterOrEqual(t, metrics.TotalFailed, uint64(0))
 }
+
+func TestRedactSensitiveFields(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected map[string]interface{}
+	}{
+		{
+			name:  "redact signature field",
+			input: `{"amount": "1000", "signature": "0xabcdef123456"}`,
+			expected: map[string]interface{}{
+				"amount":    "1000",
+				"signature": "[REDACTED]",
+			},
+		},
+		{
+			name:  "redact multiple sensitive fields",
+			input: `{"amount": "1000", "signature": "sig123", "privateKey": "secret", "mnemonic": "word1 word2"}`,
+			expected: map[string]interface{}{
+				"amount":     "1000",
+				"signature":  "[REDACTED]",
+				"privateKey": "[REDACTED]",
+				"mnemonic":   "[REDACTED]",
+			},
+		},
+		{
+			name:  "redact nested sensitive fields",
+			input: `{"payment": {"amount": "1000", "payerSignature": "sig123"}}`,
+			expected: map[string]interface{}{
+				"payment": map[string]interface{}{
+					"amount":         "1000",
+					"payerSignature": "[REDACTED]",
+				},
+			},
+		},
+		{
+			name:  "redact in array",
+			input: `{"payments": [{"signature": "sig1"}, {"signature": "sig2"}]}`,
+			expected: map[string]interface{}{
+				"payments": []interface{}{
+					map[string]interface{}{"signature": "[REDACTED]"},
+					map[string]interface{}{"signature": "[REDACTED]"},
+				},
+			},
+		},
+		{
+			name:  "no sensitive fields",
+			input: `{"amount": "1000", "network": "eip155:1"}`,
+			expected: map[string]interface{}{
+				"amount":  "1000",
+				"network": "eip155:1",
+			},
+		},
+		{
+			name:  "redact password and token",
+			input: `{"user": "test", "password": "secret123", "token": "jwt-token"}`,
+			expected: map[string]interface{}{
+				"user":     "test",
+				"password": "[REDACTED]",
+				"token":    "[REDACTED]",
+			},
+		},
+		{
+			name:  "redact apiKey and api_key",
+			input: `{"apiKey": "key1", "api_key": "key2", "data": "public"}`,
+			expected: map[string]interface{}{
+				"apiKey":  "[REDACTED]",
+				"api_key": "[REDACTED]",
+				"data":    "public",
+			},
+		},
+		{
+			name:  "redact depositSignature and payeeSignature",
+			input: `{"depositSignature": "dep-sig", "payeeSignature": "payee-sig"}`,
+			expected: map[string]interface{}{
+				"depositSignature": "[REDACTED]",
+				"payeeSignature":   "[REDACTED]",
+			},
+		},
+		{
+			name:  "redact seed and secret",
+			input: `{"seed": "random-seed", "secret": "shared-secret"}`,
+			expected: map[string]interface{}{
+				"seed":   "[REDACTED]",
+				"secret": "[REDACTED]",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := redactSensitiveFields([]byte(tt.input))
+			require.NotNil(t, result)
+
+			var parsed map[string]interface{}
+			err := json.Unmarshal(result, &parsed)
+			require.NoError(t, err)
+			assert.Equal(t, tt.expected, parsed)
+		})
+	}
+}
+
+func TestRedactSensitiveFields_InvalidJSON(t *testing.T) {
+	result := redactSensitiveFields([]byte("not json"))
+	assert.Nil(t, result)
+}
+
+func TestRedactValue_PrimitiveTypes(t *testing.T) {
+	// String
+	assert.Equal(t, "test", redactValue("test"))
+
+	// Number
+	assert.Equal(t, float64(123), redactValue(float64(123)))
+
+	// Boolean
+	assert.Equal(t, true, redactValue(true))
+
+	// Nil
+	assert.Nil(t, redactValue(nil))
+}
+
+func TestSanitizeJSON_WithRedaction(t *testing.T) {
+	// Test that sanitizeJSON properly redacts sensitive fields
+	input := []byte(`{"amount": "1000", "signature": "secret-sig", "network": "eip155:1"}`)
+	result := sanitizeJSON(input)
+	require.NotNil(t, result)
+
+	var parsed map[string]interface{}
+	err := json.Unmarshal(result, &parsed)
+	require.NoError(t, err)
+
+	assert.Equal(t, "1000", parsed["amount"])
+	assert.Equal(t, "[REDACTED]", parsed["signature"])
+	assert.Equal(t, "eip155:1", parsed["network"])
+}
+
+func TestSensitiveFields_AllFieldsCovered(t *testing.T) {
+	// Verify all expected sensitive fields are in the map
+	expectedFields := []string{
+		"signature",
+		"payerSignature",
+		"payeeSignature",
+		"depositSignature",
+		"privateKey",
+		"mnemonic",
+		"seed",
+		"secret",
+		"password",
+		"token",
+		"apiKey",
+		"api_key",
+	}
+
+	for _, field := range expectedFields {
+		assert.True(t, sensitiveFields[field], "Field %s should be marked as sensitive", field)
+	}
+}

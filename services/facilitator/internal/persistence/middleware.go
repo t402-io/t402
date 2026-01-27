@@ -210,7 +210,25 @@ func extractNetworkFromBody(body []byte) string {
 	return ""
 }
 
-// sanitizeJSON validates that data is valid JSON, returns nil if not
+// sensitiveFields lists JSON fields that should be redacted from audit logs
+// SECURITY: These fields may contain signatures, keys, or other sensitive data
+var sensitiveFields = map[string]bool{
+	"signature":       true,
+	"payerSignature":  true,
+	"payeeSignature":  true,
+	"depositSignature": true,
+	"privateKey":      true,
+	"mnemonic":        true,
+	"seed":            true,
+	"secret":          true,
+	"password":        true,
+	"token":           true,
+	"apiKey":          true,
+	"api_key":         true,
+}
+
+// sanitizeJSON validates that data is valid JSON and redacts sensitive fields
+// SECURITY: P2-2 fix - Prevents sensitive data from being logged
 func sanitizeJSON(data []byte) json.RawMessage {
 	if len(data) == 0 {
 		return nil
@@ -221,7 +239,53 @@ func sanitizeJSON(data []byte) json.RawMessage {
 		return nil
 	}
 
+	// Try to redact sensitive fields
+	redacted := redactSensitiveFields(data)
+	if redacted != nil {
+		return json.RawMessage(redacted)
+	}
+
 	return json.RawMessage(data)
+}
+
+// redactSensitiveFields recursively redacts sensitive fields from JSON
+func redactSensitiveFields(data []byte) []byte {
+	var obj interface{}
+	if err := json.Unmarshal(data, &obj); err != nil {
+		return nil
+	}
+
+	redactedObj := redactValue(obj)
+	result, err := json.Marshal(redactedObj)
+	if err != nil {
+		return nil
+	}
+	return result
+}
+
+// redactValue recursively processes values to redact sensitive fields
+func redactValue(v interface{}) interface{} {
+	switch val := v.(type) {
+	case map[string]interface{}:
+		result := make(map[string]interface{})
+		for key, value := range val {
+			if sensitiveFields[key] {
+				// Redact the value but preserve the key to show it was present
+				result[key] = "[REDACTED]"
+			} else {
+				result[key] = redactValue(value)
+			}
+		}
+		return result
+	case []interface{}:
+		result := make([]interface{}, len(val))
+		for i, item := range val {
+			result[i] = redactValue(item)
+		}
+		return result
+	default:
+		return v
+	}
 }
 
 // RequestStatsHandler returns an HTTP handler that provides request statistics

@@ -1104,6 +1104,86 @@ func TestRateLimitMiddleware_PerAPIKeyRateLimiting(t *testing.T) {
 	}
 }
 
+// Tests for P2-1: Endpoint-level rate limiting configuration
+func TestDefaultEndpointRateLimitConfig(t *testing.T) {
+	config := DefaultEndpointRateLimitConfig()
+
+	// Check default limit
+	if config.DefaultLimit != 1000 {
+		t.Errorf("Expected default limit 1000, got %d", config.DefaultLimit)
+	}
+
+	// Check endpoint-specific limits
+	expectedLimits := map[string]int{
+		"/settle":            100,
+		"/v1/stream/open":    200,
+		"/v1/stream/close":   200,
+		"/v1/intent":         200,
+		"/v1/intent/execute": 100,
+	}
+
+	for endpoint, expectedLimit := range expectedLimits {
+		if limit, ok := config.EndpointLimits[endpoint]; !ok {
+			t.Errorf("Expected endpoint %s to have a limit", endpoint)
+		} else if limit != expectedLimit {
+			t.Errorf("Expected %s limit %d, got %d", endpoint, expectedLimit, limit)
+		}
+	}
+}
+
+func TestEndpointRateLimitConfig_GetEndpointLimit(t *testing.T) {
+	config := DefaultEndpointRateLimitConfig()
+
+	tests := []struct {
+		name          string
+		path          string
+		expectedLimit int
+	}{
+		{"settle endpoint", "/settle", 100},
+		{"stream open endpoint", "/v1/stream/open", 200},
+		{"stream close endpoint", "/v1/stream/close", 200},
+		{"intent create endpoint", "/v1/intent", 200},
+		{"intent execute endpoint", "/v1/intent/execute", 100},
+		{"unknown endpoint uses default", "/verify", 1000},
+		{"health endpoint uses default", "/health", 1000},
+		{"random path uses default", "/api/v2/something", 1000},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			limit := config.GetEndpointLimit(tt.path)
+			if limit != tt.expectedLimit {
+				t.Errorf("GetEndpointLimit(%s) = %d, expected %d", tt.path, limit, tt.expectedLimit)
+			}
+		})
+	}
+}
+
+func TestEndpointRateLimitConfig_CustomConfig(t *testing.T) {
+	config := &EndpointRateLimitConfig{
+		DefaultLimit: 500,
+		EndpointLimits: map[string]int{
+			"/custom/endpoint": 50,
+			"/another/path":    25,
+		},
+	}
+
+	// Test custom endpoint
+	if limit := config.GetEndpointLimit("/custom/endpoint"); limit != 50 {
+		t.Errorf("Expected limit 50 for /custom/endpoint, got %d", limit)
+	}
+
+	// Test another custom endpoint
+	if limit := config.GetEndpointLimit("/another/path"); limit != 25 {
+		t.Errorf("Expected limit 25 for /another/path, got %d", limit)
+	}
+
+	// Test fallback to custom default
+	if limit := config.GetEndpointLimit("/unknown"); limit != 500 {
+		t.Errorf("Expected default limit 500 for /unknown, got %d", limit)
+	}
+}
+
 // TestIsTrustedProxy_BugRegression specifically tests the bug that was fixed
 // where string prefix matching allowed IP spoofing
 func TestIsTrustedProxy_BugRegression(t *testing.T) {

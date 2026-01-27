@@ -384,6 +384,39 @@ func isValidIP(ip string) bool {
 	return net.ParseIP(ip) != nil
 }
 
+// EndpointRateLimitConfig holds per-endpoint rate limit configuration
+// SECURITY: P2-1 fix - Allows stricter rate limits for sensitive endpoints
+type EndpointRateLimitConfig struct {
+	// DefaultLimit is the default rate limit for unspecified endpoints
+	DefaultLimit int
+	// EndpointLimits maps endpoint paths to their specific rate limits
+	// Lower values mean stricter limits
+	EndpointLimits map[string]int
+}
+
+// DefaultEndpointRateLimitConfig returns secure default endpoint limits
+// /settle has stricter limits as it executes on-chain transactions
+func DefaultEndpointRateLimitConfig() *EndpointRateLimitConfig {
+	return &EndpointRateLimitConfig{
+		DefaultLimit: 1000, // Default: 1000 req/min
+		EndpointLimits: map[string]int{
+			"/settle":           100,  // Settle: 100 req/min (on-chain transactions)
+			"/v1/stream/open":   200,  // Stream open: 200 req/min
+			"/v1/stream/close":  200,  // Stream close: 200 req/min
+			"/v1/intent":        200,  // Intent create: 200 req/min
+			"/v1/intent/execute": 100, // Intent execute: 100 req/min
+		},
+	}
+}
+
+// GetEndpointLimit returns the rate limit for a specific endpoint
+func (c *EndpointRateLimitConfig) GetEndpointLimit(path string) int {
+	if limit, ok := c.EndpointLimits[path]; ok {
+		return limit
+	}
+	return c.DefaultLimit
+}
+
 // APIKeyMiddleware validates API keys (optional - for future use)
 func APIKeyMiddleware(validKeys map[string]bool) gin.HandlerFunc {
 	return func(c *gin.Context) {

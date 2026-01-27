@@ -148,8 +148,17 @@ func deriveTonSeed(words []string) []byte {
 	// This reduces the window where the mnemonic could be exposed via memory dump
 	clearString(&mnemonic)
 
-	// Return first 32 bytes as Ed25519 seed
-	return derived[:32]
+	// Copy first 32 bytes as Ed25519 seed
+	seed := make([]byte, 32)
+	copy(seed, derived[:32])
+
+	// SECURITY: Clear all 64 bytes of the derived key material
+	// P2-12 fix: Previously only returned first 32 bytes without clearing the rest
+	for i := range derived {
+		derived[i] = 0
+	}
+
+	return seed
 }
 
 // clearString securely overwrites a string's underlying bytes
@@ -511,4 +520,24 @@ func (s *facilitatorTonSigner) IsDeployed(ctx context.Context, address string, n
 	}
 
 	return addrInfo.State == "active", nil
+}
+
+// Zeroize clears sensitive data from memory
+// SECURITY: While the TON signer doesn't store private keys (only the public key),
+// this method is provided for consistency with other signers and to clear any
+// cached data structures
+func (s *facilitatorTonSigner) Zeroize() {
+	if s == nil {
+		return
+	}
+	// Clear the public key bytes
+	if len(s.publicKey) > 0 {
+		for i := range s.publicKey {
+			s.publicKey[i] = 0
+		}
+		s.publicKey = nil
+	}
+	// Clear address mappings
+	s.addresses = nil
+	s.endpoints = nil
 }
