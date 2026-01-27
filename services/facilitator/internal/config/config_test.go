@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"os"
 	"testing"
 	"time"
@@ -365,5 +366,282 @@ func TestTimeoutCustomConfig(t *testing.T) {
 	}
 	if cfg.ShutdownTimeout != 60*time.Second {
 		t.Errorf("expected ShutdownTimeout=60s, got %v", cfg.ShutdownTimeout)
+	}
+}
+
+func TestMarshalJSON_RedactsSensitiveFields(t *testing.T) {
+	cfg := &Config{
+		Port:           8080,
+		Environment:    "production",
+		EvmPrivateKey:  "0xsecretkey123456",
+		TonMnemonic:    "word1 word2 word3 word4",
+		TronPrivateKey: "tron-secret-key",
+		SvmPrivateKey:  "solana-secret-key",
+		DatabaseURL:    "postgres://user:pass@localhost/db",
+		RedisURL:       "redis://auth:pass@localhost:6379",
+		APIKeys:        "key1:app1,key2:app2",
+		EthRPC:         "https://eth.llamarpc.com",
+	}
+
+	data, err := json.Marshal(cfg)
+	if err != nil {
+		t.Fatalf("MarshalJSON failed: %v", err)
+	}
+
+	var result map[string]interface{}
+	if err := json.Unmarshal(data, &result); err != nil {
+		t.Fatalf("Unmarshal failed: %v", err)
+	}
+
+	// Check sensitive fields are redacted
+	if result["EvmPrivateKey"] != "[REDACTED]" {
+		t.Errorf("expected EvmPrivateKey to be redacted, got %v", result["EvmPrivateKey"])
+	}
+	if result["TonMnemonic"] != "[REDACTED]" {
+		t.Errorf("expected TonMnemonic to be redacted, got %v", result["TonMnemonic"])
+	}
+	if result["TronPrivateKey"] != "[REDACTED]" {
+		t.Errorf("expected TronPrivateKey to be redacted, got %v", result["TronPrivateKey"])
+	}
+	if result["SvmPrivateKey"] != "[REDACTED]" {
+		t.Errorf("expected SvmPrivateKey to be redacted, got %v", result["SvmPrivateKey"])
+	}
+	if result["DatabaseURL"] != "[REDACTED]" {
+		t.Errorf("expected DatabaseURL to be redacted, got %v", result["DatabaseURL"])
+	}
+	if result["RedisURL"] != "[REDACTED]" {
+		t.Errorf("expected RedisURL to be redacted, got %v", result["RedisURL"])
+	}
+	if result["APIKeys"] != "[REDACTED]" {
+		t.Errorf("expected APIKeys to be redacted, got %v", result["APIKeys"])
+	}
+
+	// Check non-sensitive fields are not redacted
+	if result["EthRPC"] != "https://eth.llamarpc.com" {
+		t.Errorf("expected EthRPC to be preserved, got %v", result["EthRPC"])
+	}
+	if result["Port"] != float64(8080) {
+		t.Errorf("expected Port to be preserved, got %v", result["Port"])
+	}
+}
+
+func TestMarshalJSON_EmptyFieldsNotRedacted(t *testing.T) {
+	cfg := &Config{
+		Port:        8080,
+		Environment: "development",
+		// All sensitive fields are empty
+	}
+
+	data, err := json.Marshal(cfg)
+	if err != nil {
+		t.Fatalf("MarshalJSON failed: %v", err)
+	}
+
+	var result map[string]interface{}
+	if err := json.Unmarshal(data, &result); err != nil {
+		t.Fatalf("Unmarshal failed: %v", err)
+	}
+
+	// Empty fields should remain empty, not "[REDACTED]"
+	if result["EvmPrivateKey"] != "" {
+		t.Errorf("expected empty EvmPrivateKey, got %v", result["EvmPrivateKey"])
+	}
+}
+
+func TestString_HidesSensitiveData(t *testing.T) {
+	cfg := &Config{
+		EvmPrivateKey: "0xsecretkey",
+		TonMnemonic:   "word1 word2",
+	}
+
+	str := cfg.String()
+
+	// Should not contain actual values
+	if str == "" {
+		t.Error("String() returned empty string")
+	}
+	if str != "[Config: use MarshalJSON for safe output]" {
+		t.Errorf("unexpected String() output: %s", str)
+	}
+}
+
+func TestContainsSensitiveData(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{"privateKey", true},
+		{"PRIVATE_KEY", true},
+		{"secret_token", true},
+		{"password123", true},
+		{"mnemonic", true},
+		{"seed phrase", true},
+		{"token_value", true},
+		{"credential", true},
+		{"auth_header", true},
+		{"public_data", false},
+		{"amount", false},
+		{"network", false},
+		{"address", false},
+		{"", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			if got := ContainsSensitiveData(tt.input); got != tt.expected {
+				t.Errorf("ContainsSensitiveData(%q) = %v, expected %v", tt.input, got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestGetEnvFloat(t *testing.T) {
+	tests := []struct {
+		name     string
+		envValue string
+		def      float64
+		expected float64
+	}{
+		{"valid float", "0.5", 1.0, 0.5},
+		{"integer as float", "1", 0.5, 1.0},
+		{"invalid float", "not_a_number", 0.75, 0.75},
+		{"empty string", "", 0.25, 0.25},
+		{"negative float", "-0.5", 0.0, -0.5},
+		{"zero", "0", 1.0, 0.0},
+		{"scientific notation", "1e-3", 1.0, 0.001},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.envValue != "" {
+				os.Setenv("TEST_FLOAT", tt.envValue)
+				defer os.Unsetenv("TEST_FLOAT")
+			} else {
+				os.Unsetenv("TEST_FLOAT")
+			}
+
+			if got := getEnvFloat("TEST_FLOAT", tt.def); got != tt.expected {
+				t.Errorf("getEnvFloat() = %v, expected %v", got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestOTELConfig(t *testing.T) {
+	// Set OTEL env vars
+	os.Setenv("OTEL_ENABLED", "true")
+	os.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "otel-collector:4317")
+	os.Setenv("OTEL_EXPORTER_OTLP_PROTOCOL", "http")
+	os.Setenv("OTEL_EXPORTER_OTLP_INSECURE", "false")
+	os.Setenv("OTEL_TRACES_SAMPLER_ARG", "0.1")
+	defer func() {
+		os.Unsetenv("OTEL_ENABLED")
+		os.Unsetenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+		os.Unsetenv("OTEL_EXPORTER_OTLP_PROTOCOL")
+		os.Unsetenv("OTEL_EXPORTER_OTLP_INSECURE")
+		os.Unsetenv("OTEL_TRACES_SAMPLER_ARG")
+	}()
+
+	cfg := Load()
+
+	if !cfg.OTELEnabled {
+		t.Error("expected OTELEnabled=true")
+	}
+	if cfg.OTELEndpoint != "otel-collector:4317" {
+		t.Errorf("expected OTELEndpoint=otel-collector:4317, got %s", cfg.OTELEndpoint)
+	}
+	if cfg.OTELProtocol != "http" {
+		t.Errorf("expected OTELProtocol=http, got %s", cfg.OTELProtocol)
+	}
+	if cfg.OTELInsecure {
+		t.Error("expected OTELInsecure=false")
+	}
+	if cfg.OTELSampleRate != 0.1 {
+		t.Errorf("expected OTELSampleRate=0.1, got %v", cfg.OTELSampleRate)
+	}
+}
+
+func TestDatabaseConfig(t *testing.T) {
+	os.Setenv("DATABASE_URL", "postgres://user:pass@localhost:5432/testdb")
+	os.Setenv("DATABASE_MAX_CONNS", "50")
+	os.Setenv("DATABASE_IDLE_CONNS", "10")
+	os.Setenv("DATABASE_AUTO_MIGRATE", "false")
+	defer func() {
+		os.Unsetenv("DATABASE_URL")
+		os.Unsetenv("DATABASE_MAX_CONNS")
+		os.Unsetenv("DATABASE_IDLE_CONNS")
+		os.Unsetenv("DATABASE_AUTO_MIGRATE")
+	}()
+
+	cfg := Load()
+
+	if cfg.DatabaseURL != "postgres://user:pass@localhost:5432/testdb" {
+		t.Errorf("expected DatabaseURL set, got %s", cfg.DatabaseURL)
+	}
+	if cfg.DatabaseMaxConns != 50 {
+		t.Errorf("expected DatabaseMaxConns=50, got %d", cfg.DatabaseMaxConns)
+	}
+	if cfg.DatabaseIdleConns != 10 {
+		t.Errorf("expected DatabaseIdleConns=10, got %d", cfg.DatabaseIdleConns)
+	}
+	if cfg.DatabaseAutoMigrate {
+		t.Error("expected DatabaseAutoMigrate=false")
+	}
+}
+
+func TestChainRPCConfigs(t *testing.T) {
+	// Test Phase 1 networks
+	os.Setenv("POLYGON_RPC", "https://custom-polygon.com")
+	os.Setenv("MANTLE_RPC", "https://custom-mantle.com")
+	os.Setenv("PLASMA_RPC", "https://custom-plasma.com")
+	os.Setenv("SEI_RPC", "https://custom-sei.com")
+	defer func() {
+		os.Unsetenv("POLYGON_RPC")
+		os.Unsetenv("MANTLE_RPC")
+		os.Unsetenv("PLASMA_RPC")
+		os.Unsetenv("SEI_RPC")
+	}()
+
+	cfg := Load()
+
+	if cfg.PolygonRPC != "https://custom-polygon.com" {
+		t.Errorf("expected custom PolygonRPC, got %s", cfg.PolygonRPC)
+	}
+	if cfg.MantleRPC != "https://custom-mantle.com" {
+		t.Errorf("expected custom MantleRPC, got %s", cfg.MantleRPC)
+	}
+	if cfg.PlasmaRPC != "https://custom-plasma.com" {
+		t.Errorf("expected custom PlasmaRPC, got %s", cfg.PlasmaRPC)
+	}
+	if cfg.SeiRPC != "https://custom-sei.com" {
+		t.Errorf("expected custom SeiRPC, got %s", cfg.SeiRPC)
+	}
+}
+
+func TestCosmosConfig(t *testing.T) {
+	os.Setenv("COSMOS_MAINNET_REST", "https://custom-noble.com")
+	os.Setenv("COSMOS_TESTNET_REST", "https://custom-testnet.com")
+	os.Setenv("COSMOS_MAINNET_ADDRESS", "noble1abc123")
+	os.Setenv("COSMOS_TESTNET_ADDRESS", "noble1xyz789")
+	defer func() {
+		os.Unsetenv("COSMOS_MAINNET_REST")
+		os.Unsetenv("COSMOS_TESTNET_REST")
+		os.Unsetenv("COSMOS_MAINNET_ADDRESS")
+		os.Unsetenv("COSMOS_TESTNET_ADDRESS")
+	}()
+
+	cfg := Load()
+
+	if cfg.CosmosMainnetREST != "https://custom-noble.com" {
+		t.Errorf("expected custom CosmosMainnetREST, got %s", cfg.CosmosMainnetREST)
+	}
+	if cfg.CosmosTestnetREST != "https://custom-testnet.com" {
+		t.Errorf("expected custom CosmosTestnetREST, got %s", cfg.CosmosTestnetREST)
+	}
+	if cfg.CosmosMainnetAddress != "noble1abc123" {
+		t.Errorf("expected CosmosMainnetAddress, got %s", cfg.CosmosMainnetAddress)
+	}
+	if cfg.CosmosTestnetAddress != "noble1xyz789" {
+		t.Errorf("expected CosmosTestnetAddress, got %s", cfg.CosmosTestnetAddress)
 	}
 }
