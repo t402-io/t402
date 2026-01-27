@@ -517,12 +517,46 @@ func (s *Service) processExpiredIntents() {
 	}
 
 	for _, intent := range intents {
-		if err := s.repo.UpdateStatus(ctx, intent.ID, IntentStatusExpired, ""); err != nil {
+		// SECURITY: Use transaction with FOR UPDATE lock to prevent race conditions
+		// with concurrent SelectRoute, ExecuteIntent, or CancelIntent operations
+		tx, err := s.repo.BeginTx(ctx)
+		if err != nil {
 			continue
 		}
 
+		// Get intent with row-level lock
+		lockedIntent, err := s.repo.GetByIDForUpdate(ctx, tx, intent.ID)
+		if err != nil {
+			tx.Rollback()
+			continue
+		}
+
+		// Re-check status - may have changed since GetExpiredIntents was called
+		// Skip if already in terminal state or actively being processed
+		if lockedIntent.Status == IntentStatusExpired ||
+			lockedIntent.Status == IntentStatusCompleted ||
+			lockedIntent.Status == IntentStatusFailed ||
+			lockedIntent.Status == IntentStatusCancelled ||
+			lockedIntent.Status == IntentStatusExecuting {
+			tx.Rollback()
+			continue
+		}
+
+		// Update status within transaction
+		lockedIntent.Status = IntentStatusExpired
+		if err := s.repo.UpdateInTx(ctx, tx, lockedIntent); err != nil {
+			tx.Rollback()
+			continue
+		}
+
+		// Commit transaction
+		if err := tx.Commit(); err != nil {
+			continue
+		}
+
+		// Record metrics (outside transaction)
 		if s.metrics != nil {
-			s.metrics.RecordIntentExpired(intent.TargetNetwork)
+			s.metrics.RecordIntentExpired(lockedIntent.TargetNetwork)
 		}
 	}
 }

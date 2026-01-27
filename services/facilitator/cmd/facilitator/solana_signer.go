@@ -107,6 +107,19 @@ func (s *facilitatorSolanaSigner) getClient(network string) (*rpc.Client, error)
 	return client, nil
 }
 
+// Zeroize securely clears the private key from memory
+// SECURITY: Should be called when the signer is no longer needed (e.g., on shutdown)
+func (s *facilitatorSolanaSigner) Zeroize() {
+	// SECURITY: Clear the 64-byte Solana private key
+	if len(s.privateKey) > 0 {
+		for i := range s.privateKey {
+			s.privateKey[i] = 0
+		}
+		s.privateKey = nil
+	}
+	// Note: publicKey is derived from privateKey, but is public info - no need to clear
+}
+
 func (s *facilitatorSolanaSigner) GetAddresses(ctx context.Context, network string) []solana.PublicKey {
 	return []solana.PublicKey{s.publicKey}
 }

@@ -69,6 +69,39 @@ func generateRequestID() string {
 	return hex.EncodeToString(b)
 }
 
+// SecurityHeadersMiddleware adds security-related HTTP headers to all responses
+// SECURITY: Protects against XSS, clickjacking, MIME-type sniffing, and other attacks
+func SecurityHeadersMiddleware(isProduction bool) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Prevent clickjacking attacks by disallowing framing
+		c.Header("X-Frame-Options", "DENY")
+
+		// Prevent MIME-type sniffing attacks
+		c.Header("X-Content-Type-Options", "nosniff")
+
+		// Enable browser XSS filter (legacy, but still useful for older browsers)
+		c.Header("X-XSS-Protection", "1; mode=block")
+
+		// Control how much referrer information is sent
+		c.Header("Referrer-Policy", "strict-origin-when-cross-origin")
+
+		// Prevent caching of sensitive API responses
+		c.Header("Cache-Control", "no-store, no-cache, must-revalidate, private")
+		c.Header("Pragma", "no-cache")
+
+		// Content Security Policy - restrict resource loading
+		c.Header("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'")
+
+		// Only add HSTS in production (requires HTTPS)
+		if isProduction {
+			// Strict Transport Security - force HTTPS for 1 year
+			c.Header("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload")
+		}
+
+		c.Next()
+	}
+}
+
 // LoggingMiddleware logs each request
 func LoggingMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {

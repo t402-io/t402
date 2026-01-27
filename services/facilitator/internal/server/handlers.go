@@ -39,6 +39,25 @@ type SettleRequest struct {
 	PaymentRequirements json.RawMessage `json:"paymentRequirements" binding:"required"`
 }
 
+// isValidIdempotencyKey validates that an idempotency key has a safe format
+// SECURITY: Prevents DoS attacks via large keys and Redis memory issues
+func isValidIdempotencyKey(key string) bool {
+	// Max length check to prevent Redis memory abuse
+	if len(key) > 64 || len(key) == 0 {
+		return false
+	}
+
+	// Only allow alphanumeric characters, hyphens, and underscores
+	for _, c := range key {
+		if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+			(c >= '0' && c <= '9') || c == '-' || c == '_') {
+			return false
+		}
+	}
+
+	return true
+}
+
 // handleVerify handles POST /verify
 func (s *Server) handleVerify(c *gin.Context) {
 	var req VerifyRequest
@@ -98,6 +117,15 @@ func (s *Server) handleSettle(c *gin.Context) {
 	// Get idempotency key from header
 	idempotencyKey := c.GetHeader("Idempotency-Key")
 	ctx := c.Request.Context()
+
+	// SECURITY: Validate idempotency key format to prevent DoS and Redis memory issues
+	if idempotencyKey != "" && !isValidIdempotencyKey(idempotencyKey) {
+		c.JSON(http.StatusBadRequest, APIError{
+			Code:    "INVALID_IDEMPOTENCY_KEY",
+			Message: "Invalid idempotency key format (max 64 chars, alphanumeric and hyphens only)",
+		})
+		return
+	}
 
 	// Atomic idempotency check-and-create to prevent TOCTOU race condition
 	if idempotencyKey != "" && s.idempotencyStore != nil {

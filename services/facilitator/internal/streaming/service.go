@@ -114,6 +114,10 @@ func (s *Service) Start() {
 		s.wg.Add(1)
 		go s.autoSettleWorker()
 	}
+
+	// SECURITY: Start rate limiter cleanup worker to prevent memory leak
+	s.wg.Add(1)
+	go s.rateLimiterCleanupWorker()
 }
 
 // Stop stops background workers
@@ -693,20 +697,54 @@ func (s *Service) processExpiredStreams() {
 	}
 
 	for _, stream := range streams {
-		// Update status
-		if err := s.repo.UpdateStatus(ctx, stream.ID, StreamStatusExpired); err != nil {
+		// SECURITY: Use transaction with FOR UPDATE lock to prevent race conditions
+		// with concurrent CloseStream, PauseStream, or UpdateStream operations
+		tx, err := s.repo.BeginTx(ctx)
+		if err != nil {
+			log.Printf("Warning: failed to start transaction for expiring stream %s: %v", stream.ID, err)
 			continue
 		}
 
-		// Record event
+		// Get stream with row-level lock
+		lockedStream, err := s.repo.GetByIDForUpdate(ctx, tx, stream.ID)
+		if err != nil {
+			tx.Rollback()
+			log.Printf("Warning: failed to lock stream %s for expiry: %v", stream.ID, err)
+			continue
+		}
+
+		// Re-check status - may have changed since GetExpiredStreams was called
+		// Skip if already in terminal state or actively being processed
+		if lockedStream.Status == StreamStatusExpired ||
+			lockedStream.Status == StreamStatusClosed ||
+			lockedStream.Status == StreamStatusCancelled ||
+			lockedStream.Status == StreamStatusClosing {
+			tx.Rollback()
+			continue
+		}
+
+		// Update status within transaction
+		lockedStream.Status = StreamStatusExpired
+		if err := s.repo.UpdateInTx(ctx, tx, lockedStream); err != nil {
+			tx.Rollback()
+			log.Printf("Warning: failed to update stream %s to expired: %v", stream.ID, err)
+			continue
+		}
+
+		// Commit transaction
+		if err := tx.Commit(); err != nil {
+			log.Printf("Warning: failed to commit expiry transaction for stream %s: %v", stream.ID, err)
+			continue
+		}
+
+		// Record event and metrics (outside transaction)
 		s.repo.CreateEvent(ctx, &StreamEvent{
 			StreamID: stream.ID,
 			Type:     StreamEventExpired,
 		})
 
-		// Record metrics
 		if s.metrics != nil {
-			s.metrics.RecordStreamClosed(stream.Network, stream.Scheme, false)
+			s.metrics.RecordStreamClosed(lockedStream.Network, lockedStream.Scheme, false)
 		}
 	}
 }
@@ -866,5 +904,45 @@ func (s *Service) processAutoSettleStream(ctx context.Context, streamID string) 
 	// Record metrics
 	if s.metrics != nil {
 		s.metrics.RecordStreamSettlement(stream.Network, stream.Scheme)
+	}
+}
+
+// rateLimiterCleanupWorker periodically cleans up stale rate limiter entries
+// SECURITY: Prevents memory leak from accumulating rate limit entries for closed/expired streams
+func (s *Service) rateLimiterCleanupWorker() {
+	defer s.wg.Done()
+
+	// Run cleanup every 10 minutes
+	ticker := time.NewTicker(10 * time.Minute)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-s.stopCh:
+			return
+		case <-ticker.C:
+			s.cleanupRateLimiter()
+		}
+	}
+}
+
+// cleanupRateLimiter removes rate limiter entries that haven't been used recently
+func (s *Service) cleanupRateLimiter() {
+	s.limitMu.Lock()
+	defer s.limitMu.Unlock()
+
+	// Remove entries that haven't been updated in the last hour
+	cutoff := time.Now().Add(-1 * time.Hour)
+	cleanedCount := 0
+
+	for streamID, state := range s.updateLimits {
+		if state.lastUpdate.Before(cutoff) {
+			delete(s.updateLimits, streamID)
+			cleanedCount++
+		}
+	}
+
+	if cleanedCount > 0 {
+		log.Printf("Rate limiter cleanup: removed %d stale entries, %d remaining", cleanedCount, len(s.updateLimits))
 	}
 }
