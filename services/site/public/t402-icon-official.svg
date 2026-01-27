@@ -1,0 +1,11 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Icon version without 402 text -->
+  <path d="M135 60H377L465 210L256 460L47 210L135 60Z" fill="#009393"/>
+
+  <!-- ₮ Symbol -->
+  <rect x="176" y="145" width="160" height="35" fill="white"/>
+  <rect x="236" y="180" width="40" height="130" fill="white"/>
+
+  <!-- 3D Ring -->
+  <ellipse cx="256" cy="215" rx="105" ry="30" stroke="white" stroke-width="12" fill="none"/>
+</svg>

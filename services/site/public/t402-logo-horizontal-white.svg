@@ -1,0 +1,19 @@
+<svg width="400" height="120" viewBox="0 0 400 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Horizontal lockup: White for dark backgrounds -->
+
+  <!-- Gem icon (scaled) -->
+  <g transform="translate(10, 5) scale(0.21)">
+    <path d="M135 60H377L465 210L256 460L47 210L135 60Z" fill="white"/>
+    <rect x="176" y="145" width="160" height="35" fill="#009393"/>
+    <rect x="236" y="180" width="40" height="130" fill="#009393"/>
+    <ellipse cx="256" cy="215" rx="105" ry="30" stroke="#009393" stroke-width="12" fill="none"/>
+  </g>
+
+  <!-- T402 text -->
+  <text x="140" y="75"
+        font-family="Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif"
+        font-size="52"
+        font-weight="700"
+        fill="white"
+        letter-spacing="-1">T402</text>
+</svg>
