@@ -2,9 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPreferredChain, getAcceptsForChain, getNetwork, getAsset, PAY_TO } from "@/lib/config";
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
-
+import { createBridgeTransaction, getEstimatedTimeRemaining } from "@/lib/bridge-state";
 
 const BRIDGE_FEE = "10000"; // 0.01 USDT bridge fee
+
+// Supported LayerZero bridge chains
+const BRIDGE_CHAINS = ["ethereum", "arbitrum", "base", "optimism", "ink", "berachain", "unichain"];
+
+// Estimated bridge times in seconds
+const ESTIMATED_TIMES: Record<string, Record<string, number>> = {
+  ethereum: { arbitrum: 180, base: 180, optimism: 180, ink: 300, berachain: 300, unichain: 300 },
+  arbitrum: { ethereum: 900, base: 300, optimism: 300, ink: 300, berachain: 300, unichain: 300 },
+  base: { ethereum: 900, arbitrum: 300, optimism: 300, ink: 300, berachain: 300, unichain: 300 },
+};
+
+function getEstimatedBridgeTime(source: string, target: string): number {
+  return ESTIMATED_TIMES[source]?.[target] ?? 300; // Default 5 minutes
+}
 
 function createPaymentRequired(sourceChain: string, targetChain: string, request: NextRequest) {
   const chain = getPreferredChain(request);
@@ -13,7 +27,7 @@ function createPaymentRequired(sourceChain: string, targetChain: string, request
     error: "Payment required",
     resource: {
       url: "/api/demo/bridge",
-      description: `Cross-chain bridge: ${sourceChain} → ${targetChain}`,
+      description: `Cross-chain USDT0 bridge: ${sourceChain} → ${targetChain} (LayerZero OFT)`,
       mimeType: "application/json",
     },
     accepts: getAcceptsForChain(chain, BRIDGE_FEE),
@@ -24,8 +38,32 @@ export async function POST(request: NextRequest) {
   const paymentHeader = request.headers.get("payment-signature");
   const isDemoMode = request.headers.get("x-demo-mode") === "true";
   const body = await request.json().catch(() => ({}));
-  const { sourceChain = "evm", targetChain = "ton", amount = "1000000" } = body;
+  const {
+    sourceChain = "arbitrum",
+    targetChain = "ethereum",
+    amount = "1000000",
+    recipient,
+  } = body;
 
+  // Validate chains
+  if (!BRIDGE_CHAINS.includes(sourceChain) || !BRIDGE_CHAINS.includes(targetChain)) {
+    return NextResponse.json(
+      {
+        error: "Unsupported chain",
+        message: `Supported chains: ${BRIDGE_CHAINS.join(", ")}`,
+      },
+      { status: 400 }
+    );
+  }
+
+  if (sourceChain === targetChain) {
+    return NextResponse.json(
+      { error: "Source and target chains must be different" },
+      { status: 400 }
+    );
+  }
+
+  // No payment - return 402
   if (!paymentHeader) {
     const paymentRequired = createPaymentRequired(sourceChain, targetChain, request);
     const response = NextResponse.json(paymentRequired, { status: 402 });
@@ -35,7 +73,16 @@ export async function POST(request: NextRequest) {
   }
 
   const chain = getPreferredChain(request);
-  const txHash = "0x" + Array(64).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join("");
+  const estimatedTime = getEstimatedBridgeTime(sourceChain, targetChain);
+
+  // Create bridge transaction with tracking
+  const bridgeState = createBridgeTransaction({
+    sourceChain,
+    targetChain,
+    amount,
+    fee: BRIDGE_FEE,
+    recipient: recipient || PAY_TO,
+  });
 
   const responseData = {
     success: true,
@@ -44,14 +91,24 @@ export async function POST(request: NextRequest) {
       targetChain,
       amount,
       fee: BRIDGE_FEE,
-      txHash,
-      status: "confirmed",
       protocol: "LayerZero",
+      version: "v2",
+    },
+    message: {
+      guid: bridgeState.guid,
+      srcTxHash: bridgeState.srcTxHash,
+      status: bridgeState.status,
+      estimatedTime,
+      estimatedTimeRemaining: getEstimatedTimeRemaining(bridgeState),
+    },
+    tracking: {
+      statusUrl: `/api/demo/bridge/status?guid=${bridgeState.guid}`,
+      layerZeroScan: `https://layerzeroscan.com/tx/${bridgeState.guid}`,
     },
   };
 
   if (isDemoMode) {
-    await new Promise((r) => setTimeout(r, 800));
+    await new Promise((r) => setTimeout(r, 500)); // Simulate processing
     const settleResponse = createMockSettleResponse(chain);
     const response = NextResponse.json(responseData);
     response.headers.set("Payment-Response", encodeHeader(settleResponse));
@@ -98,4 +155,40 @@ export async function POST(request: NextRequest) {
       { status: 502 }
     );
   }
+}
+
+/**
+ * GET /api/demo/bridge - Get supported chains and routes
+ */
+export async function GET() {
+  return NextResponse.json({
+    supportedChains: BRIDGE_CHAINS,
+    protocol: "LayerZero",
+    token: "USDT0",
+    fee: BRIDGE_FEE,
+    feeFormatted: "0.01 USDT",
+    routes: BRIDGE_CHAINS.flatMap((source) =>
+      BRIDGE_CHAINS.filter((target) => target !== source).map((target) => ({
+        source,
+        target,
+        estimatedTime: getEstimatedBridgeTime(source, target),
+        available: true,
+      }))
+    ),
+  });
+}
+
+/**
+ * Support CORS preflight
+ */
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Payment-Signature, X-Demo-Mode, X-Preferred-Chain",
+      "Access-Control-Expose-Headers": "Payment-Required, Payment-Response",
+    },
+  });
 }
