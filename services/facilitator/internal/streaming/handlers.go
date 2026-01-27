@@ -2,9 +2,44 @@ package streaming
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
+
+// Input validation constants
+// SECURITY: Prevents DoS attacks via oversized inputs
+const (
+	MaxStreamIDLength    = 64
+	MaxAddressLength     = 128
+	MaxAmountLength      = 78  // Max uint256 has 78 digits
+	MaxSignatureLength   = 256 // Base64 encoded signatures
+	MaxNetworkLength     = 64
+	MaxSchemeLength      = 32
+	MaxAssetLength       = 128
+	MaxReasonLength      = 256
+)
+
+// validateStringLength checks if a string exceeds the maximum allowed length
+func validateStringLength(s string, maxLen int) bool {
+	return len(s) <= maxLen
+}
+
+// sanitizeError returns a safe error message without leaking implementation details
+func sanitizeError(err error) string {
+	if err == nil {
+		return "unknown error"
+	}
+	errStr := err.Error()
+	// Don't expose internal details like SQL errors, file paths, etc.
+	if strings.Contains(errStr, "sql:") ||
+		strings.Contains(errStr, "pq:") ||
+		strings.Contains(errStr, "redis:") ||
+		strings.Contains(errStr, "/") {
+		return "internal error"
+	}
+	return errStr
+}
 
 // Handlers provides HTTP handlers for streaming API
 type Handlers struct {
@@ -46,7 +81,22 @@ func (h *Handlers) OpenStream(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "invalid_request",
-			Message: err.Error(),
+			Message: "Invalid request body",
+		})
+		return
+	}
+
+	// SECURITY: Validate input field lengths to prevent DoS
+	if !validateStringLength(req.Network, MaxNetworkLength) ||
+		!validateStringLength(req.Scheme, MaxSchemeLength) ||
+		!validateStringLength(req.Payer, MaxAddressLength) ||
+		!validateStringLength(req.Payee, MaxAddressLength) ||
+		!validateStringLength(req.Asset, MaxAssetLength) ||
+		!validateStringLength(req.MaxAmount, MaxAmountLength) ||
+		!validateStringLength(req.Signature, MaxSignatureLength) {
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Error:   "invalid_request",
+			Message: "One or more fields exceed maximum allowed length",
 		})
 		return
 	}
@@ -67,7 +117,7 @@ func (h *Handlers) OpenStream(c *gin.Context) {
 
 		c.JSON(status, ErrorResponse{
 			Error:   errCode,
-			Message: err.Error(),
+			Message: sanitizeError(err),
 		})
 		return
 	}
@@ -92,7 +142,18 @@ func (h *Handlers) UpdateStream(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "invalid_request",
-			Message: err.Error(),
+			Message: "Invalid request body",
+		})
+		return
+	}
+
+	// SECURITY: Validate input field lengths
+	if !validateStringLength(req.StreamID, MaxStreamIDLength) ||
+		!validateStringLength(req.Amount, MaxAmountLength) ||
+		!validateStringLength(req.Signature, MaxSignatureLength) {
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Error:   "invalid_request",
+			Message: "One or more fields exceed maximum allowed length",
 		})
 		return
 	}
@@ -128,7 +189,7 @@ func (h *Handlers) UpdateStream(c *gin.Context) {
 
 		c.JSON(status, ErrorResponse{
 			Error:   errCode,
-			Message: err.Error(),
+			Message: sanitizeError(err),
 		})
 		return
 	}
@@ -153,7 +214,20 @@ func (h *Handlers) CloseStream(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "invalid_request",
-			Message: err.Error(),
+			Message: "Invalid request body",
+		})
+		return
+	}
+
+	// SECURITY: Validate input field lengths
+	if !validateStringLength(req.StreamID, MaxStreamIDLength) ||
+		!validateStringLength(req.FinalAmount, MaxAmountLength) ||
+		!validateStringLength(req.PayerSignature, MaxSignatureLength) ||
+		!validateStringLength(req.PayeeSignature, MaxSignatureLength) ||
+		!validateStringLength(req.Reason, MaxReasonLength) {
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Error:   "invalid_request",
+			Message: "One or more fields exceed maximum allowed length",
 		})
 		return
 	}
@@ -180,7 +254,7 @@ func (h *Handlers) CloseStream(c *gin.Context) {
 
 		c.JSON(status, ErrorResponse{
 			Error:   errCode,
-			Message: err.Error(),
+			Message: sanitizeError(err),
 		})
 		return
 	}

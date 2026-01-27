@@ -1,8 +1,10 @@
 package config
 
 import (
+	"encoding/json"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -119,6 +121,61 @@ type Config struct {
 	WriteTimeout    time.Duration
 	IdleTimeout     time.Duration
 	ShutdownTimeout time.Duration
+}
+
+// MarshalJSON implements json.Marshaler to prevent sensitive fields from being serialized
+// SECURITY: Prevents private keys, mnemonics, and database credentials from appearing in logs or API responses
+func (c *Config) MarshalJSON() ([]byte, error) {
+	// Create a safe copy with sensitive fields redacted
+	type SafeConfig Config
+	safe := SafeConfig(*c)
+
+	// Redact sensitive fields
+	if safe.EvmPrivateKey != "" {
+		safe.EvmPrivateKey = "[REDACTED]"
+	}
+	if safe.TonMnemonic != "" {
+		safe.TonMnemonic = "[REDACTED]"
+	}
+	if safe.TronPrivateKey != "" {
+		safe.TronPrivateKey = "[REDACTED]"
+	}
+	if safe.SvmPrivateKey != "" {
+		safe.SvmPrivateKey = "[REDACTED]"
+	}
+	if safe.DatabaseURL != "" {
+		safe.DatabaseURL = "[REDACTED]"
+	}
+	if safe.RedisURL != "" {
+		safe.RedisURL = "[REDACTED]"
+	}
+	if safe.APIKeys != "" {
+		safe.APIKeys = "[REDACTED]"
+	}
+
+	return json.Marshal(safe)
+}
+
+// String implements fmt.Stringer to prevent sensitive fields from appearing in logs
+// SECURITY: Ensures fmt.Printf("%v", config) doesn't leak secrets
+func (c *Config) String() string {
+	return "[Config: use MarshalJSON for safe output]"
+}
+
+// ContainsSensitiveData checks if a string might contain sensitive configuration
+// SECURITY: Helper for log sanitization
+func ContainsSensitiveData(s string) bool {
+	lower := strings.ToLower(s)
+	sensitivePatterns := []string{
+		"private", "key", "secret", "password", "mnemonic", "seed",
+		"token", "credential", "auth",
+	}
+	for _, pattern := range sensitivePatterns {
+		if strings.Contains(lower, pattern) {
+			return true
+		}
+	}
+	return false
 }
 
 // Load loads configuration from environment variables

@@ -454,33 +454,49 @@ func (s *Service) CancelIntent(ctx context.Context, req *CancelIntentRequest) er
 }
 
 // RefreshRoutes refreshes available routes for an intent
+// SECURITY: Uses database transaction with row-level locking to prevent race conditions
 func (s *Service) RefreshRoutes(ctx context.Context, req *RefreshRoutesRequest) (*RefreshRoutesResponse, error) {
-	intent, err := s.repo.GetByID(ctx, req.IntentID)
+	// Start transaction for atomic operation
+	tx, err := s.repo.BeginTx(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to start transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	// Get intent with row-level lock (SELECT ... FOR UPDATE)
+	intent, err := s.repo.GetByIDForUpdate(ctx, tx, req.IntentID)
 	if err != nil {
 		return nil, err
 	}
 
-	// Can only refresh pending intents
+	// Can only refresh pending intents - now atomic with lock
 	if intent.Status != IntentStatusPending {
 		return nil, fmt.Errorf("cannot refresh routes for intent in status: %s", intent.Status)
 	}
 
 	// Check expiry
 	if time.Now().After(intent.ExpiresAt) {
-		s.repo.UpdateStatus(ctx, intent.ID, IntentStatusExpired, "")
+		intent.Status = IntentStatusExpired
+		s.repo.UpdateInTx(ctx, tx, intent)
+		tx.Commit()
 		return nil, ErrIntentExpired
 	}
 
-	// Find new routes
+	// Find new routes (this can be done while holding the lock since it's read-only)
 	routes, err := s.router.FindRoutes(ctx, intent)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find routes: %w", err)
 	}
 
-	// Update intent
+	// Update intent within transaction
 	intent.AvailableRoutes = routes
-	if err := s.repo.Update(ctx, intent); err != nil {
+	if err := s.repo.UpdateInTx(ctx, tx, intent); err != nil {
 		return nil, fmt.Errorf("failed to update intent: %w", err)
+	}
+
+	// Commit transaction
+	if err := tx.Commit(); err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return &RefreshRoutesResponse{
