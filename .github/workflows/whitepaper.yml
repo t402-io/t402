@@ -28,7 +28,7 @@ jobs:
         run: make all
 
       - name: Copy PDF to site
-        run: cp whitepaper/build/main.pdf services/site/public/t402-whitepaper.pdf
+        run: cp whitepaper/main.pdf services/site/public/t402-whitepaper.pdf
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4

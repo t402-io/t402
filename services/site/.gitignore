@@ -39,3 +39,6 @@ next-env.d.ts
 .vscode/
 *.swp
 *.swo
+
+# Whitepaper (built by CI from whitepaper/main.tex)
+public/t402-whitepaper.pdf

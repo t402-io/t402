@@ -16,11 +16,20 @@ jobs:
     permissions:
       contents: read
       deployments: write
-    defaults:
-      run:
-        working-directory: services/site
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install TeX Live
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y texlive-xetex texlive-fonts-recommended texlive-fonts-extra texlive-latex-extra texlive-bibtex-extra texlive-science biber
+
+      - name: Compile Whitepaper
+        working-directory: whitepaper
+        run: make all
+
+      - name: Copy PDF to site
+        run: cp whitepaper/main.pdf services/site/public/t402-whitepaper.pdf
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -32,9 +41,11 @@ jobs:
           cache-dependency-path: services/site/pnpm-lock.yaml
 
       - name: Install dependencies
+        working-directory: services/site
         run: pnpm install --frozen-lockfile
 
       - name: Build site
+        working-directory: services/site
         run: pnpm build
         env:
           NODE_ENV: production
