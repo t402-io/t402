@@ -45,3 +45,6 @@ whitepaper/build/
 proxy
 e2e/facilitators/external-proxies/*
 !e2e/facilitators/external-proxies/README.md
+
+# Archive
+.archive/
