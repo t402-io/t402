@@ -46,13 +46,13 @@
     "commander": "^12.1.0",
     "conf": "^13.0.1",
     "ora": "^8.1.0",
-    "viem": "^2.44.2"
+    "viem": "^2.45.1"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
     "glob": "^13.0.0",
-    "tsup": "^8.5.0",
-    "typescript": "^5.8.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
     "vite-tsconfig-paths": "^5.1.0",
     "vitest": "^3.2.4"
   },
