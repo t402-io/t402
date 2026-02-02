@@ -37,7 +37,7 @@
   "description": "Multi-sig Safe smart accounts with Tether WDK for M-of-N threshold payments",
   "devDependencies": {
     "@eslint/js": "^9.24.0",
-    "@types/node": "^22.13.4",
+    "@types/node": "^25.2.0",
     "@typescript-eslint/eslint-plugin": "^8.29.1",
     "@typescript-eslint/parser": "^8.29.1",
     "@vitest/coverage-v8": "^3.2.4",
