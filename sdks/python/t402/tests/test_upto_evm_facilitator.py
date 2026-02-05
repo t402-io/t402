@@ -3,14 +3,13 @@
 import time
 
 import pytest
-from unittest.mock import MagicMock, patch, PropertyMock
+from unittest.mock import MagicMock, patch
 
 from t402.schemes.evm.upto.facilitator import (
     UptoEvmFacilitatorScheme,
     ERC20_PERMIT_ABI,
 )
 from t402.schemes.interfaces import SchemeNetworkFacilitator
-from t402.types import VerifyResponse, SettleResponse
 
 
 # Test constants
