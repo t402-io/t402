@@ -45,7 +45,7 @@ Examples of different client implementations for interacting with T402 services:
 
 - `fullstack/next/` - Next.js app demonstrating route protection with `@t402/next` middleware.
 - `fullstack/mainnet/` - Next.js app configured for Base mainnet using the t402 hosted facilitator.
-- `fullstack/next-advanced/` - [WIP] Deep Next.js integration using a paywall + session cookie after verify/settle.
+- `fullstack/next-advanced/` - (Planned) Deep Next.js integration using a paywall + session cookie after verify/settle.
 - `fullstack/browser-wallet-example/` - Browser wallet template: Hono server + React client with session and one-time payments.
 - `fullstack/auth_based_pricing/` - SIWE + JWT with conditional pricing ($0.01 with JWT vs $0.10 without) using t402.
 

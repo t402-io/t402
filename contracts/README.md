@@ -80,6 +80,9 @@ forge verify-contract \
 
 ## Contract Addresses
 
+> **Note:** Contracts are pending external security audit before mainnet deployment.
+> Testnet deployment is available for integration testing once audit is complete.
+
 | Chain | Address | Status | Explorer |
 |-------|---------|--------|----------|
 | Base Mainnet | TBD | Pending Audit | - |
