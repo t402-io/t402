@@ -22,7 +22,7 @@ vi.mock('viem', () => ({
   getContractAddress: () => '0x00000000000000000000000000000000DeAdBeEf',
 }))
 
-import { WdkSmartAccount, SAFE_4337_ADDRESSES } from './account.js'
+import { WdkSmartAccount, SAFE_4337_ADDRESSES as _SAFE_4337_ADDRESSES } from './account.js'
 
 const MOCK_OWNER = '0xABCDEF0123456789ABCDEF0123456789ABCDEF01'
 const MOCK_SIG =
