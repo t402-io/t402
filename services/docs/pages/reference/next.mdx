@@ -1,6 +1,6 @@
 # @t402/next
 
-import { Callout, Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs } from 'nextra/components'
 
 Next.js integration for protecting routes with t402 payment requirements. Supports both App Router middleware and API route wrappers.
 
@@ -13,7 +13,7 @@ npm install @t402/next @t402/core
 ## Quick Start
 
 <Tabs items={['App Router (Middleware)', 'API Route Wrapper']}>
-  <Tab>
+  <Tabs.Tab>
 ```typescript
 // middleware.ts
 import { paymentProxy } from '@t402/next';
@@ -42,8 +42,8 @@ export const config = {
   matcher: '/api/premium/:path*',
 };
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```typescript
 // app/api/premium/route.ts
 import { NextRequest, NextResponse } from 'next/server';
@@ -71,7 +71,7 @@ async function handler(request: NextRequest) {
 
 export const GET = withT402(handler, routeConfig, server);
 ```
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ## API Reference

@@ -1,6 +1,6 @@
 # Facilitator API Reference
 
-import { Callout, Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs } from 'nextra/components'
 
 The T402 Facilitator API provides payment verification and on-chain settlement services. The public facilitator is available at `https://facilitator.t402.io`.
 
@@ -305,7 +305,7 @@ X-RateLimit-Reset: 1706745660
 ## Code Examples
 
 <Tabs items={['curl', 'TypeScript', 'Go', 'Python']}>
-  <Tab>
+  <Tabs.Tab>
 ```bash
 # Check supported networks
 curl https://facilitator.t402.io/supported
@@ -327,8 +327,8 @@ curl -X POST https://facilitator.t402.io/settle \
     "paymentRequirements": {...}
   }'
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```typescript
 import { createFacilitatorClient } from '@t402/core';
 
@@ -352,8 +352,8 @@ const settleResult = await facilitator.settle(
   { idempotencyKey: 'unique-key-123' },
 );
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```go
 import "github.com/t402-io/t402/sdks/go"
 
@@ -370,8 +370,8 @@ settleResult, err := client.Settle(ctx, paymentPayload, requirements, &t402.Sett
     IdempotencyKey: "unique-key-123",
 })
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```python
 from t402 import FacilitatorClient
 
@@ -390,7 +390,7 @@ result = client.settle(
     idempotency_key="unique-key-123"
 )
 ```
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ---

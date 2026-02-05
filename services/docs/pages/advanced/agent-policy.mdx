@@ -1,6 +1,6 @@
 # Agent Policy
 
-import { Callout, Tabs, Tab, Cards, Card, Steps } from 'nextra/components'
+import { Callout, Tabs, Cards, Steps } from 'nextra/components'
 
 <Callout type="warning">
   **Beta Package**: `@t402/agent-policy` is currently in beta (v1.0.0-beta.2). APIs may change.
@@ -44,7 +44,7 @@ AGENT_POLICY_REDIS_URL=redis://localhost:6379 npx agent-policy-mcp
 Add to your Claude Desktop config:
 
 <Tabs items={['macOS', 'Windows', 'Linux']}>
-  <Tab>
+  <Tabs.Tab>
     Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
     ```json
     {
@@ -59,8 +59,8 @@ Add to your Claude Desktop config:
       }
     }
     ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
     Edit `%APPDATA%\Claude\claude_desktop_config.json`:
     ```json
     {
@@ -75,8 +75,8 @@ Add to your Claude Desktop config:
       }
     }
     ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
     Edit `~/.config/Claude/claude_desktop_config.json`:
     ```json
     {
@@ -91,7 +91,7 @@ Add to your Claude Desktop config:
       }
     }
     ```
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ### Programmatic Usage
