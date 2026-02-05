@@ -266,18 +266,16 @@ function detectSignatureScheme(chainId: string): "evm" | "ed25519" {
  * @param publicKey - The public key to verify against (hex or base58)
  * @returns True if signature is valid
  */
-function verifyEd25519Signature(
-  message: string,
-  signature: string,
-  publicKey: string,
-): boolean {
+function verifyEd25519Signature(message: string, signature: string, publicKey: string): boolean {
   try {
     // Remove 0x prefix if present
     const sigHex = signature.startsWith("0x") ? signature.slice(2) : signature;
     const sigBytes = hexToBytes(sigHex);
 
     if (sigBytes.length !== 64) {
-      throw new Error(`Invalid Ed25519 signature length: expected 64 bytes, got ${sigBytes.length}`);
+      throw new Error(
+        `Invalid Ed25519 signature length: expected 64 bytes, got ${sigBytes.length}`,
+      );
     }
 
     // Get public key bytes
@@ -293,7 +291,9 @@ function verifyEd25519Signature(
     }
 
     if (pubKeyBytes.length !== 32) {
-      throw new Error(`Invalid Ed25519 public key length: expected 32 bytes, got ${pubKeyBytes.length}`);
+      throw new Error(
+        `Invalid Ed25519 public key length: expected 32 bytes, got ${pubKeyBytes.length}`,
+      );
     }
 
     // Hash the message (Ed25519 signs the raw message or its hash depending on implementation)
