@@ -439,8 +439,16 @@ export class WDKSigner implements ClientEvmSigner {
     try {
       const account = await this.getAccount()
 
+      if (!account.estimateGas) {
+        throw new TransactionError(
+          WDKErrorCode.GAS_ESTIMATION_FAILED,
+          `Gas estimation is not supported by this WDK account on ${this._chain}`,
+          { chain: this._chain, context: { to: params.to } },
+        )
+      }
+
       return await withRetry(async () => {
-        const estimatePromise = account.estimateGas({
+        const estimatePromise = account.estimateGas!({
           to: params.to,
           value: params.value,
           data: params.data,

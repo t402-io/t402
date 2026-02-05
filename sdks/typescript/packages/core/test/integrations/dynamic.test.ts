@@ -183,7 +183,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         const paymentRequired = decodePaymentRequiredHeader(
           premiumResult.response.headers["PAYMENT-REQUIRED"],
         );
-        expect(paymentRequired.accepts[0].amount).toBe("0.01"); // Premium price
+        expect(paymentRequired.accepts[0].amount).toBe("1"); // Premium price (cents)
       }
 
       // Test 2: Business tier
@@ -205,7 +205,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         const paymentRequired = decodePaymentRequiredHeader(
           businessResult.response.headers["PAYMENT-REQUIRED"],
         );
-        expect(paymentRequired.accepts[0].amount).toBe("0.05"); // Business price
+        expect(paymentRequired.accepts[0].amount).toBe("5"); // Business price (cents)
       }
 
       // Test 3: Default tier (no query param)
@@ -227,7 +227,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         const paymentRequired = decodePaymentRequiredHeader(
           defaultResult.response.headers["PAYMENT-REQUIRED"],
         );
-        expect(paymentRequired.accepts[0].amount).toBe("0.10"); // Default price
+        expect(paymentRequired.accepts[0].amount).toBe("10"); // Default price (cents)
       }
     });
 
@@ -274,8 +274,8 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         const paymentRequired = decodePaymentRequiredHeader(
           result.response.headers["PAYMENT-REQUIRED"],
         );
-        // 0.01 + (100 * 0.001) = 0.11
-        expect(paymentRequired.accepts[0].amount).toBe("0.110");
+        // 0.01 + (100 * 0.001) = 0.11 → 11 cents
+        expect(paymentRequired.accepts[0].amount).toBe("11");
       }
     });
   });
@@ -332,7 +332,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         const paymentRequired = decodePaymentRequiredHeader(
           highResult.response.headers["PAYMENT-REQUIRED"],
         );
-        expect(paymentRequired.accepts[0].amount).toBe("5.00"); // 1.00 * 5
+        expect(paymentRequired.accepts[0].amount).toBe("500"); // 1.00 * 5 (cents)
       }
 
       // Test 2: Low complexity, 2 minute job
@@ -357,7 +357,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         const paymentRequired = decodePaymentRequiredHeader(
           lowResult.response.headers["PAYMENT-REQUIRED"],
         );
-        expect(paymentRequired.accepts[0].amount).toBe("0.20"); // 0.10 * 2
+        expect(paymentRequired.accepts[0].amount).toBe("20"); // 0.10 * 2 (cents)
       }
     });
 
@@ -406,7 +406,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         const paymentRequired = decodePaymentRequiredHeader(
           result.response.headers["PAYMENT-REQUIRED"],
         );
-        expect(paymentRequired.accepts[0].amount).toBe("0.50"); // 50 * 0.01
+        expect(paymentRequired.accepts[0].amount).toBe("50"); // 50 * 0.01 (cents)
       }
     });
   });
@@ -471,7 +471,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         const paymentRequired = decodePaymentRequiredHeader(
           premiumResult.response.headers["PAYMENT-REQUIRED"],
         );
-        expect(paymentRequired.accepts[0].amount).toBe("0.01");
+        expect(paymentRequired.accepts[0].amount).toBe("1");
       }
 
       // Test 2: Standard user
@@ -491,7 +491,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         const paymentRequired = decodePaymentRequiredHeader(
           standardResult.response.headers["PAYMENT-REQUIRED"],
         );
-        expect(paymentRequired.accepts[0].amount).toBe("0.10");
+        expect(paymentRequired.accepts[0].amount).toBe("10");
       }
 
       // Test 3: No API key
@@ -511,7 +511,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         const paymentRequired = decodePaymentRequiredHeader(
           noKeyResult.response.headers["PAYMENT-REQUIRED"],
         );
-        expect(paymentRequired.accepts[0].amount).toBe("1.00"); // Highest price
+        expect(paymentRequired.accepts[0].amount).toBe("100"); // Highest price (cents)
       }
     });
 
@@ -560,7 +560,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         const paymentRequired = decodePaymentRequiredHeader(
           result.response.headers["PAYMENT-REQUIRED"],
         );
-        expect(paymentRequired.accepts[0].amount).toBe("1.00"); // 10 * 0.10
+        expect(paymentRequired.accepts[0].amount).toBe("100"); // 10 * 0.10 (cents)
       }
     });
 
@@ -609,7 +609,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         const paymentRequired = decodePaymentRequiredHeader(
           aiCacheResult.response.headers["PAYMENT-REQUIRED"],
         );
-        expect(paymentRequired.accepts[0].amount).toBe("0.60"); // 0.10 + 0.50
+        expect(paymentRequired.accepts[0].amount).toBe("60"); // 0.10 + 0.50 (cents)
       }
 
       // No AI, no cache
@@ -632,7 +632,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         const paymentRequired = decodePaymentRequiredHeader(
           basicResult.response.headers["PAYMENT-REQUIRED"],
         );
-        expect(paymentRequired.accepts[0].amount).toBe("0.30"); // 0.10 + 0.20
+        expect(paymentRequired.accepts[0].amount).toBe("30"); // 0.10 + 0.20 (cents)
       }
     });
   });
@@ -925,8 +925,8 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         // Verify dynamic payTo
         expect(paymentRequired.accepts[0].payTo).toBe("blockchain-provider@example.com");
 
-        // Verify dynamic price: 0.10 * 10 = 1.00
-        expect(paymentRequired.accepts[0].amount).toBe("1.00");
+        // Verify dynamic price: 0.10 * 10 = 1.00 → 100 cents
+        expect(paymentRequired.accepts[0].amount).toBe("100");
       }
 
       // Free subscription, 7-day data, market source
@@ -954,8 +954,8 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         // Verify dynamic payTo
         expect(paymentRequired.accepts[0].payTo).toBe("market-data-provider@example.com");
 
-        // Verify dynamic price: 0.50 * 3 = 1.50
-        expect(paymentRequired.accepts[0].amount).toBe("1.50");
+        // Verify dynamic price: 0.50 * 3 = 1.50 → 150 cents
+        expect(paymentRequired.accepts[0].amount).toBe("150");
       }
     });
   });
@@ -1010,7 +1010,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         const paymentRequired = decodePaymentRequiredHeader(
           result1.response.headers["PAYMENT-REQUIRED"],
         );
-        expect(paymentRequired.accepts[0].amount).toBe("0.01");
+        expect(paymentRequired.accepts[0].amount).toBe("1");
       }
 
       // Simulate 100 more requests
@@ -1026,7 +1026,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         const paymentRequired = decodePaymentRequiredHeader(
           result101.response.headers["PAYMENT-REQUIRED"],
         );
-        expect(paymentRequired.accepts[0].amount).toBe("0.05");
+        expect(paymentRequired.accepts[0].amount).toBe("5");
       }
     });
 
@@ -1144,7 +1144,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         const paymentRequired = decodePaymentRequiredHeader(
           peakResult.response.headers["PAYMENT-REQUIRED"],
         );
-        expect(paymentRequired.accepts[0].amount).toBe("0.20"); // Surge price
+        expect(paymentRequired.accepts[0].amount).toBe("20"); // Surge price (cents)
       }
 
       // Off-peak hour - use local time 10 PM (22:00)
@@ -1169,7 +1169,7 @@ describe("Dynamic Pricing & PayTo Integration Tests", () => {
         const paymentRequired = decodePaymentRequiredHeader(
           offPeakResult.response.headers["PAYMENT-REQUIRED"],
         );
-        expect(paymentRequired.accepts[0].amount).toBe("0.10"); // Normal price
+        expect(paymentRequired.accepts[0].amount).toBe("10"); // Normal price (cents)
       }
     });
   });

@@ -1,0 +1,371 @@
+# TON Integration Guide
+
+import { Callout, Tabs, Steps } from 'nextra/components'
+
+This tutorial shows how to integrate T402 payments with the TON blockchain using Jetton (TEP-74) tokens.
+
+## Overview
+
+TON uses Jettons for token transfers. The T402 TON implementation supports:
+
+- **USDT Jetton** on mainnet and testnet
+- **Ed25519 signatures** for payment authorization
+- **Query ID** based replay protection
+
+## Prerequisites
+
+- Node.js 18+ or Python 3.10+
+- TON wallet with testnet USDT
+- Basic understanding of TON concepts
+
+## Network Identifiers
+
+| Network | CAIP-2 Identifier |
+|---------|-------------------|
+| TON Mainnet | `ton:mainnet` |
+| TON Testnet | `ton:testnet` |
+
+## USDT Addresses
+
+| Network | Jetton Master Address |
+|---------|----------------------|
+| Mainnet | `EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs` |
+| Testnet | `kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy` |
+
+<Steps>
+
+### Install Dependencies
+
+<Tabs items={['TypeScript', 'Python', 'Go']}>
+  <Tabs.Tab>
+```bash
+npm install @t402/ton @t402/core @ton/ton @ton/crypto
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+pip install t402[ton]
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+go get github.com/t402-io/t402/sdks/go/mechanisms/ton
+```
+  </Tabs.Tab>
+</Tabs>
+
+### Client Setup
+
+Create a client that can sign TON payment authorizations.
+
+<Tabs items={['TypeScript', 'Python', 'Go']}>
+  <Tabs.Tab>
+```typescript
+import { t402Client } from '@t402/core/client';
+import { ExactTonScheme, toClientTonSigner } from '@t402/ton';
+import { mnemonicToPrivateKey } from '@ton/crypto';
+import { WalletContractV4 } from '@ton/ton';
+
+// Create wallet from mnemonic
+const mnemonic = 'your 24 word mnemonic phrase here...'.split(' ');
+const keyPair = await mnemonicToPrivateKey(mnemonic);
+
+const wallet = WalletContractV4.create({
+  publicKey: keyPair.publicKey,
+  workchain: 0,
+});
+
+// Create TON signer
+const tonSigner = toClientTonSigner({
+  wallet,
+  secretKey: keyPair.secretKey,
+});
+
+// Create t402 client
+const client = new t402Client()
+  .register('ton:mainnet', new ExactTonScheme(tonSigner))
+  .register('ton:testnet', new ExactTonScheme(tonSigner));
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+from t402 import t402Client
+from t402.ton import TonSigner, ExactTonScheme
+
+# Create TON signer from mnemonic
+signer = TonSigner.from_mnemonic(
+    "your 24 word mnemonic phrase here..."
+)
+
+# Create t402 client
+client = t402Client()
+client.register("ton:mainnet", ExactTonScheme(signer))
+client.register("ton:testnet", ExactTonScheme(signer))
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```go
+import (
+    "github.com/t402-io/t402/sdks/go/mechanisms/ton"
+    t402 "github.com/t402-io/t402/sdks/go"
+)
+
+// Create TON signer
+signer, err := ton.NewSignerFromMnemonic(mnemonic)
+if err != nil {
+    log.Fatal(err)
+}
+
+// Create t402 client
+client := t402.NewClient()
+client.Register("ton:mainnet", ton.NewExactScheme(signer))
+client.Register("ton:testnet", ton.NewExactScheme(signer))
+```
+  </Tabs.Tab>
+</Tabs>
+
+### Server Setup
+
+Configure your server to accept TON payments.
+
+<Tabs items={['TypeScript (Express)', 'Python (FastAPI)', 'Go']}>
+  <Tabs.Tab>
+```typescript
+import express from 'express';
+import { paymentMiddleware } from '@t402/express';
+import { t402ResourceServer, createFacilitatorClient } from '@t402/core/server';
+import { registerExactTonServerScheme } from '@t402/ton/exact/server';
+
+const app = express();
+
+// Create facilitator client
+const facilitator = createFacilitatorClient({
+  url: 'https://facilitator.t402.io',
+});
+
+// Create t402 server
+const server = new t402ResourceServer(facilitator);
+registerExactTonServerScheme(server, {});
+
+// Define routes with TON payment
+const routes = {
+  '/api/premium/*': {
+    accepts: {
+      scheme: 'exact',
+      network: 'ton:mainnet',
+      payTo: 'EQYourTonAddress',
+      price: '$0.01',
+    },
+    description: 'Premium API access',
+  },
+};
+
+// Apply middleware
+app.use(paymentMiddleware(routes, server));
+
+app.get('/api/premium/data', (req, res) => {
+  res.json({ data: 'Premium content' });
+});
+
+app.listen(3000);
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+from fastapi import FastAPI
+from t402.fastapi.middleware import require_payment
+
+app = FastAPI()
+
+app.middleware("http")(
+    require_payment(
+        price="0.01",
+        pay_to_address="EQYourTonAddress",
+        network="ton:mainnet",
+    )
+)
+
+@app.get("/api/premium")
+async def premium():
+    return {"data": "Premium content"}
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```go
+package main
+
+import (
+    "github.com/gin-gonic/gin"
+    "github.com/t402-io/t402/sdks/go/http"
+    "github.com/t402-io/t402/sdks/go/mechanisms/ton"
+)
+
+func main() {
+    r := gin.Default()
+
+    // Create t402 server
+    server := t402.NewResourceServer(facilitator)
+    ton.RegisterExactScheme(server)
+
+    // Configure routes
+    routes := http.Routes{
+        "/api/premium/*": {
+            Accepts: http.PaymentConfig{
+                Scheme:  "exact",
+                Network: "ton:mainnet",
+                PayTo:   "EQYourTonAddress",
+                Price:   "$0.01",
+            },
+        },
+    }
+
+    r.Use(http.PaymentMiddleware(routes, server))
+
+    r.GET("/api/premium/data", func(c *gin.Context) {
+        c.JSON(200, gin.H{"data": "Premium content"})
+    })
+
+    r.Run(":3000")
+}
+```
+  </Tabs.Tab>
+</Tabs>
+
+### Make Payment Requests
+
+<Tabs items={['TypeScript', 'Python', 'Go']}>
+  <Tabs.Tab>
+```typescript
+import { wrapFetchWithPayment } from '@t402/fetch';
+
+const fetchWithPay = wrapFetchWithPayment(fetch, client);
+
+// Automatic payment handling
+const response = await fetchWithPay('https://api.example.com/api/premium/data', {
+  method: 'GET',
+});
+
+const data = await response.json();
+console.log(data);
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+from t402.clients.httpx import t402HttpxClient
+
+async with t402HttpxClient(client=client) as http:
+    response = await http.get("https://api.example.com/api/premium/data")
+    data = await response.json()
+    print(data)
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```go
+httpClient := t402.NewHTTPClient(client)
+
+resp, err := httpClient.Get(ctx, "https://api.example.com/api/premium/data")
+if err != nil {
+    log.Fatal(err)
+}
+defer resp.Body.Close()
+
+var data map[string]interface{}
+json.NewDecoder(resp.Body).Decode(&data)
+fmt.Println(data)
+```
+  </Tabs.Tab>
+</Tabs>
+
+</Steps>
+
+## TON-Specific Concepts
+
+### Jetton Transfers
+
+TON uses Jettons (TEP-74 standard) for token transfers. The payment flow:
+
+1. Client signs a Jetton transfer message
+2. Message includes `query_id` for replay protection
+3. Facilitator submits the message to the network
+4. Jetton master contract processes the transfer
+
+### Query ID
+
+Each payment uses a unique `query_id` to prevent replay attacks:
+
+```typescript
+import { generateQueryId } from '@t402/ton';
+
+const queryId = generateQueryId();
+// Returns: BigInt with timestamp-based unique ID
+```
+
+### Gas Estimation
+
+TON requires TON coins for gas fees:
+
+```typescript
+import { estimateJettonTransferGas } from '@t402/ton';
+
+const gasEstimate = estimateJettonTransferGas({
+  amount: '1000000', // 1 USDT
+  network: 'ton:mainnet',
+});
+// Returns: { tonAmount: '0.05', forwardAmount: '0.01' }
+```
+
+## Address Formats
+
+TON supports multiple address formats:
+
+```typescript
+import { validateTonAddress, formatAddress } from '@t402/ton';
+
+// Validate address
+const isValid = validateTonAddress('EQDjv9CUEJ__D_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkEUe');
+
+// Format address (bounceable/non-bounceable)
+const formatted = formatAddress(address, { bounceable: true, testOnly: false });
+```
+
+## Testing on Testnet
+
+<Callout type="info">
+  Get testnet USDT from the [TON Testnet Faucet](https://testnet.toncenter.com/faucet).
+</Callout>
+
+1. Configure for testnet:
+
+```typescript
+const routes = {
+  '/api/test/*': {
+    accepts: {
+      scheme: 'exact',
+      network: 'ton:testnet',
+      payTo: 'kQYourTestnetAddress',
+      price: '$0.001',
+    },
+  },
+};
+```
+
+2. Use testnet wallet and USDT
+
+3. Verify transactions on [testnet.tonscan.org](https://testnet.tonscan.org)
+
+## Troubleshooting
+
+### Common Issues
+
+| Issue | Solution |
+|-------|----------|
+| Invalid signature | Ensure wallet address matches signer |
+| Insufficient gas | Add more TON to wallet for fees |
+| Query ID collision | Use `generateQueryId()` for unique IDs |
+| Network mismatch | Verify CAIP-2 identifier matches wallet |
+
+## Related
+
+- [@t402/ton Reference](/reference/ton) - API documentation
+- [TON Network Details](/chains/non-evm) - Chain configuration
+- [Multi-Chain App](/tutorials/multi-chain-app) - Cross-chain integration

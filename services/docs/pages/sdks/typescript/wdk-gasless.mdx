@@ -100,6 +100,22 @@ if (sponsorInfo.canSponsor) {
 }
 ```
 
+## React & Vue Integration
+
+Use the `useGaslessPayment` hook (React) or composable (Vue) for UI integration:
+
+```tsx
+import { useGaslessPayment } from '@t402/react'; // or '@t402/vue'
+
+const { pay, isLoading, txHash, sponsored, error } = useGaslessPayment({
+  payFn: (params) => gaslessClient.pay(params),
+  onSuccess: (receipt) => console.log('Paid:', receipt.txHash),
+  autoWait: true,
+});
+```
+
+See [@t402/react](/reference/react#usegasledsspayment) and [@t402/vue](/reference/vue#usegasledsspayment) for full API reference.
+
 ## Supported Chains
 
 | Chain | Chain ID | USDT0 | USDC |

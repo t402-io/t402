@@ -1,0 +1,153 @@
+# Java SDK
+
+import { Cards, Tabs } from 'nextra/components'
+
+The T402 Java SDK provides a complete implementation of the t402 payment protocol for Java applications, with first-class support for Spring Boot and multi-chain payments.
+
+[![Maven Central](https://img.shields.io/maven-central/v/io.t402/t402?label=maven%20central)](https://central.sonatype.com/artifact/io.t402/t402)
+
+## Installation
+
+<Tabs items={['Maven', 'Gradle']}>
+  <Tabs.Tab>
+```xml
+<dependency>
+    <groupId>io.t402</groupId>
+    <artifactId>t402</artifactId>
+    <version>1.8.0</version>
+</dependency>
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```groovy
+implementation 'io.t402:t402:1.8.0'
+```
+  </Tabs.Tab>
+</Tabs>
+
+## Features
+
+| Feature | Status |
+|---------|--------|
+| Core Client | ✅ |
+| Core Server | ✅ |
+| Facilitator Client | ✅ |
+| EVM Mechanism | ✅ |
+| SVM Mechanism (Solana) | ✅ |
+| TON Mechanism | ✅ |
+| TRON Mechanism | ✅ |
+| ERC-4337 Account Abstraction | ✅ |
+| USDT0 Cross-Chain Bridge | ✅ |
+| WDK Integration | ✅ |
+| CLI Tool | ✅ |
+| Spring Boot Integration | ✅ |
+| Spring WebFlux (Reactive) | ✅ |
+
+## Quick Start
+
+### Spring Boot (Recommended)
+
+**1. Add configuration to `application.yml`:**
+
+```yaml
+t402:
+  enabled: true
+  facilitator-url: https://facilitator.t402.io
+  network: eip155:8453
+  pay-to: "0xYourReceiverAddress"
+  asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+  token-name: "USD Coin"
+  token-version: "2"
+```
+
+**2. Create a protected endpoint:**
+
+```java
+@RestController
+public class ApiController {
+
+    @GetMapping("/api/premium")
+    public Map<String, String> premiumContent() {
+        return Map.of("data", "Premium content!");
+    }
+}
+```
+
+The `PaymentFilter` is automatically registered for `/api/*` endpoints.
+
+### Client Usage
+
+```java
+import io.t402.client.T402HttpClient;
+import io.t402.crypto.EvmSigner;
+
+// Create signer
+EvmSigner signer = EvmSigner.fromPrivateKey(
+    "0xYourPrivateKey",
+    8453,
+    "USD Coin",
+    "2",
+    "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+);
+
+// Create HTTP client
+T402HttpClient client = new T402HttpClient(signer);
+
+// Make payment request
+HttpResponse<String> response = client.get(
+    URI.create("https://api.example.com/premium"),
+    BigInteger.valueOf(1_000_000),
+    "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "0xReceiverAddress"
+);
+```
+
+## Documentation
+
+<Cards>
+  <Cards.Card title="Spring Boot" href="/sdks/java/spring-boot" />
+  <Cards.Card title="MCP Server" href="/sdks/java/mcp" />
+  <Cards.Card title="Examples" href="/sdks/java/examples" />
+</Cards>
+
+## Supported Networks
+
+### EVM Networks
+
+| Network | Chain ID | CAIP-2 |
+|---------|----------|--------|
+| Ethereum Mainnet | 1 | `eip155:1` |
+| Base | 8453 | `eip155:8453` |
+| Arbitrum One | 42161 | `eip155:42161` |
+| Optimism | 10 | `eip155:10` |
+| Ink | 57073 | `eip155:57073` |
+| Berachain | 80094 | `eip155:80094` |
+
+### Other Networks
+
+| Network | Identifier |
+|---------|------------|
+| Solana Mainnet | `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` |
+| TON Mainnet | `ton:mainnet` |
+| TRON Mainnet | `tron:mainnet` |
+
+## Requirements
+
+- Java 17+
+- Jakarta Servlet API 6.0+ (for servlet filter)
+- Spring Boot 3.x (for auto-configuration)
+- Kotlin 1.9+ (for Kotlin support)
+
+## Dependencies
+
+The SDK includes:
+- [Web3j](https://github.com/web3j/web3j) - Ethereum library for EIP-712 signing
+- [Jackson](https://github.com/FasterXML/jackson) - JSON processing
+- [TweetNaCl](https://github.com/AlicanAkkworlds/tweetnacl-java) - Ed25519 for Solana/TON
+- Spring Boot (optional) - Auto-configuration support
+
+## Links
+
+- [Maven Central](https://central.sonatype.com/artifact/io.t402/t402)
+- [GitHub Repository](https://github.com/t402-io/t402/tree/main/sdks/java)
+- [API Javadoc](https://javadoc.io/doc/io.t402/t402)

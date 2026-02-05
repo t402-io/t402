@@ -145,6 +145,16 @@ export class WDKTronSignerAdapter implements ClientTronSigner {
    * @returns Hex-encoded signed transaction
    */
   async signTransaction(params: SignTransactionParams): Promise<string> {
+    if (!params.contractAddress) {
+      throw new Error('contractAddress is required')
+    }
+    if (!params.to) {
+      throw new Error('recipient address (to) is required')
+    }
+    if (!params.amount || BigInt(params.amount) <= 0n) {
+      throw new Error('amount must be a positive value')
+    }
+
     // Get block info for transaction
     const blockInfo = await this.getBlockInfo()
 

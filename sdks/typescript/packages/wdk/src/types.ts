@@ -154,21 +154,36 @@ export interface T402WDKSigner {
 
 /**
  * WDK Account interface (matches @tetherto/wdk account structure)
+ *
+ * This is the canonical definition used across all @t402/wdk-* packages.
+ * Implementors (Tether WDK) provide these methods; T402 code consumes them.
  */
 export interface WDKAccount {
+  /** Get the account's address */
   getAddress(): Promise<string>
+  /** Get the account's native balance */
   getBalance(): Promise<bigint>
+  /** Get the account's token balance */
   getTokenBalance(tokenAddress: string): Promise<bigint>
+  /** Sign a message */
   signMessage(message: string): Promise<string>
+  /** Sign typed data (EIP-712) */
   signTypedData(params: {
     domain: Record<string, unknown>
     types: Record<string, unknown>
     primaryType: string
     message: Record<string, unknown>
   }): Promise<string>
-  sendTransaction(params: { to: string; value?: bigint | string; data?: string }): Promise<string>
-  estimateGas(params: { to: string; value?: bigint | string; data?: string }): Promise<bigint>
+  /** Send a transaction */
+  sendTransaction(params: { to: string; value?: bigint; data?: string }): Promise<string>
+  /** Estimate gas for a transaction (optional — not all implementations support this) */
+  estimateGas?(params: { to: string; value?: bigint; data?: string }): Promise<bigint>
 }
+
+/**
+ * Alias for WDKAccount — preferred naming for use in @t402/wdk-* packages.
+ */
+export type WdkAccount = WDKAccount
 
 /**
  * WDK instance interface (matches @tetherto/wdk structure)
@@ -406,4 +421,100 @@ export interface WDKInstanceMultiChain extends WDKInstance {
   getSolanaAccount?(index: number): Promise<WDKSolanaAccount>
   /** Get TRON account */
   getTronAccount?(index: number): Promise<WDKTronAccount>
+}
+
+// ============================================================
+// Factory Method Types
+// ============================================================
+
+/**
+ * Configuration for T402WDK.create() factory method
+ */
+export interface T402WDKCreateConfig {
+  /** BIP-39 mnemonic seed phrase */
+  seedPhrase: string
+  /** Chain name → RPC URL mapping for EVM chains */
+  chains: Record<string, string>
+  /** WDK modules to register */
+  modules: WDKModulesConfig
+  /** Additional options */
+  options?: T402WDKOptions
+}
+
+/**
+ * A signer entry for use with T402 HTTP clients
+ */
+export interface SignerEntry {
+  /** Payment scheme (e.g., "exact") */
+  scheme: string
+  /** CAIP-2 network identifier (e.g., "eip155:42161") */
+  network: string
+  /** The signer instance */
+  signer: unknown
+  /** Chain family (evm, ton, svm, tron) */
+  family: ChainFamily
+}
+
+/**
+ * Options for getAllSigners()
+ */
+export interface GetAllSignersOptions {
+  /** HD wallet account index (default: 0) */
+  accountIndex?: number
+  /** Filter by payment schemes (default: ["exact"]) */
+  schemes?: string[]
+  /** Include non-EVM chain signers (default: true) */
+  includeNonEvm?: boolean
+}
+
+/**
+ * Options for T402WDK.fromWDK()
+ */
+export interface FromWDKOptions {
+  /** HD wallet account index for auto-discovery (default: 0) */
+  defaultAccountIndex?: number
+}
+
+/**
+ * Swap quote result
+ */
+export interface SwapQuote {
+  /** Input token address */
+  inputToken: string
+  /** Output token address */
+  outputToken: string
+  /** Input amount in smallest units */
+  inputAmount: bigint
+  /** Expected output amount in smallest units */
+  outputAmount: bigint
+  /** Price impact percentage */
+  priceImpact: number
+  /** Swap route (token addresses) */
+  route: string[]
+}
+
+/**
+ * Swap execution result
+ */
+export interface SwapResult {
+  /** Transaction hash */
+  txHash: string
+  /** Actual input amount */
+  inputAmount: bigint
+  /** Actual output amount */
+  outputAmount: bigint
+}
+
+/**
+ * Parameters for swap operations
+ */
+export interface SwapParams {
+  /** Chain name (e.g., "ethereum", "arbitrum") */
+  chain: string
+  /** Input token address */
+  fromToken: string
+  /** Amount to swap in smallest units */
+  amount: bigint
+  /** Maximum slippage tolerance (0-1, default: 0.005 = 0.5%) */
+  maxSlippage?: number
 }
