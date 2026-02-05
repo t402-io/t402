@@ -1,0 +1,342 @@
+# @t402/express
+
+import { Callout, Tabs } from 'nextra/components'
+
+Express.js middleware for protecting routes with t402 payment requirements. Automatically handles payment verification, settlement, and paywall rendering.
+
+## Installation
+
+```bash npm2yarn
+npm install @t402/express @t402/core
+```
+
+## Quick Start
+
+```typescript
+import express from 'express';
+import { paymentMiddleware } from '@t402/express';
+import { t402ResourceServer, createFacilitatorClient } from '@t402/core/server';
+import { registerExactEvmScheme } from '@t402/evm/exact/server';
+
+const app = express();
+
+// Create and configure the t402 server
+const facilitator = createFacilitatorClient({ url: 'https://facilitator.t402.io' });
+const server = new t402ResourceServer(facilitator);
+registerExactEvmScheme(server, {});
+
+// Define protected routes
+const routes = {
+  '/api/premium/*': {
+    accepts: {
+      scheme: 'exact',
+      network: 'eip155:8453',
+      payTo: '0xYourAddress',
+      price: '$0.01',
+    },
+    description: 'Premium API access',
+  },
+};
+
+// Apply middleware
+app.use(paymentMiddleware(routes, server));
+
+// Protected route
+app.get('/api/premium/data', (req, res) => {
+  res.json({ data: 'Premium content' });
+});
+
+app.listen(3000);
+```
+
+## API Reference
+
+### paymentMiddleware
+
+Creates Express middleware with a pre-configured server instance.
+
+```typescript
+function paymentMiddleware(
+  routes: RoutesConfig,
+  server: t402ResourceServer,
+  paywallConfig?: PaywallConfig,
+  paywall?: PaywallProvider,
+  syncFacilitatorOnStart?: boolean
+): RequestHandler
+```
+
+**Parameters**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `routes` | `RoutesConfig` | Route configurations for protected endpoints |
+| `server` | `t402ResourceServer` | Pre-configured server instance |
+| `paywallConfig` | `PaywallConfig` | Optional paywall UI configuration |
+| `paywall` | `PaywallProvider` | Optional custom paywall provider |
+| `syncFacilitatorOnStart` | `boolean` | Sync with facilitator on startup (default: `true`) |
+
+**Example**
+
+```typescript
+import { paymentMiddleware } from '@t402/express';
+import { t402ResourceServer } from '@t402/core/server';
+
+const server = new t402ResourceServer(facilitatorClient);
+registerExactEvmScheme(server, {});
+
+app.use(paymentMiddleware(routes, server, {
+  title: 'Premium Content',
+  description: 'Pay to access this resource',
+}));
+```
+
+### paymentMiddlewareFromConfig
+
+Creates Express middleware with simple configuration (server created internally).
+
+```typescript
+function paymentMiddlewareFromConfig(
+  routes: RoutesConfig,
+  facilitatorClients?: FacilitatorClient | FacilitatorClient[],
+  schemes?: SchemeRegistration[],
+  paywallConfig?: PaywallConfig,
+  paywall?: PaywallProvider,
+  syncFacilitatorOnStart?: boolean
+): RequestHandler
+```
+
+**Parameters**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `routes` | `RoutesConfig` | Route configurations for protected endpoints |
+| `facilitatorClients` | `FacilitatorClient \| FacilitatorClient[]` | Facilitator client(s) for payment processing |
+| `schemes` | `SchemeRegistration[]` | Array of scheme registrations |
+| `paywallConfig` | `PaywallConfig` | Optional paywall UI configuration |
+| `paywall` | `PaywallProvider` | Optional custom paywall provider |
+| `syncFacilitatorOnStart` | `boolean` | Sync with facilitator on startup (default: `true`) |
+
+**Example**
+
+```typescript
+import { paymentMiddlewareFromConfig } from '@t402/express';
+import { createExactEvmServer } from '@t402/evm/exact/server';
+
+app.use(paymentMiddlewareFromConfig(
+  routes,
+  facilitatorClient,
+  [{ network: 'eip155:8453', server: createExactEvmServer({}) }],
+  { title: 'Premium Content' }
+));
+```
+
+## Route Configuration
+
+### RoutesConfig
+
+Define which routes require payment and their pricing:
+
+```typescript
+const routes: RoutesConfig = {
+  // Single price for route
+  '/api/premium/*': {
+    accepts: {
+      scheme: 'exact',
+      network: 'eip155:8453',
+      payTo: '0xRecipient',
+      price: '$0.01',
+    },
+    description: 'Premium API access',
+  },
+
+  // Multiple payment options
+  '/api/multi-chain/*': {
+    accepts: [
+      {
+        scheme: 'exact',
+        network: 'eip155:8453',
+        payTo: '0xRecipient',
+        price: '$0.01',
+      },
+      {
+        scheme: 'exact',
+        network: 'ton:mainnet',
+        payTo: 'EQRecipientAddress',
+        price: '$0.01',
+      },
+    ],
+    description: 'Multi-chain payment support',
+  },
+
+  // With extensions
+  '/api/bazaar/*': {
+    accepts: {
+      scheme: 'exact',
+      network: 'eip155:8453',
+      payTo: '0xRecipient',
+      price: '$0.01',
+    },
+    description: 'Dynamic pricing endpoint',
+    extensions: {
+      bazaar: {
+        endpoint: 'https://api.example.com/bazaar',
+      },
+    },
+  },
+};
+```
+
+### PaywallConfig
+
+Configure the built-in paywall UI:
+
+```typescript
+interface PaywallConfig {
+  title?: string;
+  description?: string;
+  logoUrl?: string;
+  theme?: 'light' | 'dark' | 'auto';
+  customCss?: string;
+}
+```
+
+**Example**
+
+```typescript
+const paywallConfig: PaywallConfig = {
+  title: 'Premium API',
+  description: 'Pay once to access this endpoint',
+  logoUrl: 'https://example.com/logo.png',
+  theme: 'dark',
+};
+
+app.use(paymentMiddleware(routes, server, paywallConfig));
+```
+
+## Multi-Network Support
+
+Accept payments from multiple blockchain networks:
+
+```typescript
+import { registerExactEvmScheme } from '@t402/evm/exact/server';
+import { registerExactTonScheme } from '@t402/ton/exact/server';
+import { registerExactSvmScheme } from '@t402/svm/exact/server';
+
+const server = new t402ResourceServer(facilitator);
+
+// Register multiple networks
+registerExactEvmScheme(server, {}); // All EVM chains
+registerExactTonScheme(server, {}); // TON
+registerExactSvmScheme(server, {}); // Solana
+
+const routes = {
+  '/api/data': {
+    accepts: [
+      { scheme: 'exact', network: 'eip155:8453', payTo: '0x...', price: '$0.01' },
+      { scheme: 'exact', network: 'ton:mainnet', payTo: 'EQ...', price: '$0.01' },
+      { scheme: 'exact', network: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp', payTo: '8GG...', price: '$0.01' },
+    ],
+    description: 'Multi-chain endpoint',
+  },
+};
+
+app.use(paymentMiddleware(routes, server));
+```
+
+## Settlement Behavior
+
+The middleware handles settlement atomically:
+
+1. **Request received** - Middleware checks if route requires payment
+2. **Payment verified** - Signature is validated before proceeding
+3. **Handler executes** - Your route handler runs
+4. **Settlement on success** - Payment is settled only if handler returns status < 400
+5. **Response sent** - Settlement confirmation headers are added
+
+```typescript
+app.get('/api/premium/data', (req, res) => {
+  try {
+    const data = fetchPremiumData();
+    res.json({ data }); // Status 200 -> Payment settles
+  } catch (error) {
+    res.status(500).json({ error: 'Failed' }); // Status 500 -> No settlement
+  }
+});
+```
+
+<Callout type="info">
+  Settlement only occurs after your handler returns a successful response (status < 400). If your handler throws an error or returns a 4xx/5xx status, the payment is not settled.
+</Callout>
+
+## Error Handling
+
+The middleware returns structured error responses:
+
+```typescript
+// 402 - Payment Required
+{
+  "error": "Payment required",
+  "paymentRequirements": { ... }
+}
+
+// 402 - Settlement Failed
+{
+  "error": "Settlement failed",
+  "details": "Insufficient balance"
+}
+```
+
+## Custom Paywall Provider
+
+Implement a custom paywall for branded experiences:
+
+```typescript
+import { PaywallProvider } from '@t402/core/server';
+
+const customPaywall: PaywallProvider = {
+  render: (paymentRequired, config) => {
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head><title>${config?.title || 'Payment Required'}</title></head>
+        <body>
+          <h1>Custom Paywall</h1>
+          <p>Amount: ${paymentRequired.requirements[0].maxAmountRequired}</p>
+          <button onclick="handlePayment()">Pay Now</button>
+        </body>
+      </html>
+    `;
+  },
+};
+
+app.use(paymentMiddleware(routes, server, paywallConfig, customPaywall));
+```
+
+## Type Exports
+
+```typescript
+// Server types
+export { t402ResourceServer, t402HTTPResourceServer } from '@t402/core/server';
+export type { PaywallProvider, PaywallConfig } from '@t402/core/server';
+export { RouteConfigurationError } from '@t402/core/server';
+export type { RouteValidationError } from '@t402/core/server';
+
+// Protocol types
+export type {
+  PaymentRequired,
+  PaymentRequirements,
+  PaymentPayload,
+  Network,
+  SchemeNetworkServer,
+} from '@t402/core/types';
+
+// Adapter
+export { ExpressAdapter } from '@t402/express';
+```
+
+## Related
+
+- [@t402/core](/reference/core) - Core protocol types
+- [@t402/hono](/reference/hono) - Hono middleware
+- [@t402/fastify](/reference/fastify) - Fastify plugin
+- [@t402/next](/reference/next) - Next.js integration

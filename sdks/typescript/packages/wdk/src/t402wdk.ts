@@ -27,6 +27,13 @@ import type {
   WDKTonAccount,
   WDKSolanaAccount,
   WDKTronAccount,
+  T402WDKCreateConfig,
+  SignerEntry,
+  GetAllSignersOptions,
+  FromWDKOptions,
+  SwapQuote,
+  SwapResult,
+  SwapParams,
 } from './types.js'
 import {
   WDKTonSignerAdapter,
@@ -260,6 +267,158 @@ export class T402WDK {
   }
 
   /**
+   * Quick setup: seed phrase + chains + modules → ready-to-use T402WDK.
+   *
+   * Registers all provided wallet/protocol modules and creates a fully
+   * configured instance in a single call.
+   *
+   * @example
+   * ```typescript
+   * import WDK from '@tetherto/wdk';
+   * import WalletManagerEvm from '@tetherto/wdk-wallet-evm';
+   * import BridgeUsdt0Evm from '@tetherto/wdk-protocol-bridge-usdt0-evm';
+   *
+   * const wallet = T402WDK.create({
+   *   seedPhrase: 'your twelve word seed phrase ...',
+   *   chains: {
+   *     arbitrum: 'https://arb1.arbitrum.io/rpc',
+   *     base: 'https://mainnet.base.org',
+   *   },
+   *   modules: {
+   *     wallets: { evm: WalletManagerEvm },
+   *     protocols: { bridgeUsdt0Evm: BridgeUsdt0Evm },
+   *   },
+   * });
+   * ```
+   */
+  static create(
+    WDK: WDKConstructor,
+    config: T402WDKCreateConfig,
+  ): T402WDK {
+    // Register modules
+    T402WDK.registerWDK(WDK, config.modules)
+
+    // Create and return configured instance
+    return new T402WDK(config.seedPhrase, config.chains, config.options)
+  }
+
+  /**
+   * Create a T402WDK from a pre-configured @tetherto/wdk instance.
+   *
+   * Wraps an existing WDK instance (already has wallets/protocols registered)
+   * into a T402WDK without re-registering modules.
+   *
+   * @param wdkInstance - A pre-configured WDK instance
+   * @param config - EVM chain configuration (RPC endpoints)
+   * @param options - Additional options
+   */
+  static fromWDK(
+    wdkInstance: WDKInstance,
+    config: T402WDKConfig = {},
+    options?: FromWDKOptions & T402WDKOptions,
+  ): T402WDK {
+    if (!wdkInstance) {
+      throw new WDKInitializationError('WDK instance is required')
+    }
+
+    // Create a T402WDK that uses the provided instance directly
+    // We use a dummy seed phrase since the WDK is already initialized
+    const instance = new T402WDK('__from_wdk__', config, options)
+
+    // Override the internal WDK with the provided instance
+    instance._wdk = wdkInstance
+    instance._initializationError = null
+
+    return instance
+  }
+
+  /**
+   * Get all signers as an array ready for T402 HTTP clients.
+   *
+   * Returns signer entries for all configured EVM chains, plus any
+   * registered non-EVM chains (TON, Solana, TRON).
+   *
+   * @example
+   * ```typescript
+   * const signers = await wallet.getAllSigners();
+   * const client = createT402HTTPClient({ signers });
+   * ```
+   */
+  async getAllSigners(options?: GetAllSignersOptions): Promise<SignerEntry[]> {
+    const accountIndex = options?.accountIndex ?? 0
+    const schemes = options?.schemes ?? ['exact']
+    const includeNonEvm = options?.includeNonEvm ?? true
+    const entries: SignerEntry[] = []
+
+    // Collect EVM signers for all configured chains
+    for (const chain of this.getConfiguredChains()) {
+      const config = this._normalizedChains.get(chain)
+      if (!config) continue
+
+      try {
+        const signer = await this.getSigner(chain, accountIndex)
+        for (const scheme of schemes) {
+          entries.push({
+            scheme,
+            network: config.network,
+            signer,
+            family: 'evm',
+          })
+        }
+      } catch {
+        // Skip chains that fail to create signers
+      }
+    }
+
+    if (!includeNonEvm) {
+      return entries
+    }
+
+    // TON signer
+    if (T402WDK.isTonRegistered()) {
+      try {
+        const signer = await this.getTonSigner(accountIndex)
+        for (const scheme of schemes) {
+          entries.push({ scheme, network: 'ton:mainnet', signer, family: 'ton' })
+        }
+      } catch {
+        // Skip if TON signer fails
+      }
+    }
+
+    // Solana signer
+    if (T402WDK.isSolanaRegistered()) {
+      try {
+        const signer = await this.getSvmSigner(accountIndex)
+        for (const scheme of schemes) {
+          entries.push({
+            scheme,
+            network: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
+            signer,
+            family: 'svm',
+          })
+        }
+      } catch {
+        // Skip if Solana signer fails
+      }
+    }
+
+    // TRON signer
+    if (T402WDK.isTronRegistered()) {
+      try {
+        const signer = await this.getTronSigner(accountIndex)
+        for (const scheme of schemes) {
+          entries.push({ scheme, network: 'tron:mainnet', signer, family: 'tron' })
+        }
+      } catch {
+        // Skip if TRON signer fails
+      }
+    }
+
+    return entries
+  }
+
+  /**
    * Create a new T402WDK instance
    *
    * @param seedPhrase - BIP-39 mnemonic seed phrase
@@ -268,19 +427,23 @@ export class T402WDK {
    * @throws {WDKInitializationError} If seed phrase is invalid
    */
   constructor(seedPhrase: string, config: T402WDKConfig = {}, options: T402WDKOptions = {}) {
-    // Validate seed phrase
-    if (!seedPhrase || typeof seedPhrase !== 'string') {
-      throw new WDKInitializationError('Seed phrase is required and must be a string')
-    }
+    // Validate seed phrase (skip for fromWDK internal usage)
+    const isFromWDK = seedPhrase === '__from_wdk__'
 
-    // Basic seed phrase validation (BIP-39 has 12, 15, 18, 21, or 24 words)
-    const words = seedPhrase.trim().split(/\s+/)
-    const validWordCounts = [12, 15, 18, 21, 24]
-    if (!validWordCounts.includes(words.length)) {
-      throw new WDKInitializationError(
-        `Invalid seed phrase: expected 12, 15, 18, 21, or 24 words, got ${words.length}`,
-        { context: { wordCount: words.length } },
-      )
+    if (!isFromWDK) {
+      if (!seedPhrase || typeof seedPhrase !== 'string') {
+        throw new WDKInitializationError('Seed phrase is required and must be a string')
+      }
+
+      // Basic seed phrase validation (BIP-39 has 12, 15, 18, 21, or 24 words)
+      const words = seedPhrase.trim().split(/\s+/)
+      const validWordCounts = [12, 15, 18, 21, 24]
+      if (!validWordCounts.includes(words.length)) {
+        throw new WDKInitializationError(
+          `Invalid seed phrase: expected 12, 15, 18, 21, or 24 words, got ${words.length}`,
+          { context: { wordCount: words.length } },
+        )
+      }
     }
 
     this._seedPhrase = seedPhrase
@@ -306,8 +469,8 @@ export class T402WDK {
     // Add default chains if not configured
     this._addDefaultChainsIfNeeded()
 
-    // Initialize WDK if registered
-    if (T402WDK._WDK) {
+    // Initialize WDK if registered (skip for fromWDK — it sets _wdk directly)
+    if (!isFromWDK && T402WDK._WDK) {
       this._initializeWDK()
     }
   }
@@ -1142,6 +1305,130 @@ export class T402WDK {
       return []
     }
     return getBridgeableChains().filter((chain) => chain !== fromChain)
+  }
+
+  // ========== Swap Protocol ==========
+
+  /**
+   * Check if the Velora swap protocol is registered and available
+   */
+  canSwap(): boolean {
+    return T402WDK._ProtocolModules.swapVeloraEvm !== undefined
+  }
+
+  /**
+   * Get a swap quote for converting a token to USDT0
+   *
+   * @param chain - Chain name (e.g., "ethereum", "arbitrum")
+   * @param fromToken - Input token address
+   * @param amount - Amount to swap in smallest units
+   * @throws {WDKError} If swap protocol is not registered or quote fails
+   */
+  async getSwapQuote(chain: string, fromToken: string, amount: bigint): Promise<SwapQuote> {
+    if (!this.canSwap()) {
+      throw new WDKError(
+        WDKErrorCode.PROTOCOL_NOT_REGISTERED,
+        'Velora swap protocol not registered. Call T402WDK.registerWDK(WDK, { protocols: { swapVeloraEvm: SwapVeloraEvm } }).',
+      )
+    }
+
+    const usdt0Address = USDT0_ADDRESSES[chain]
+    if (!usdt0Address) {
+      throw new ChainError(
+        WDKErrorCode.CHAIN_NOT_SUPPORTED,
+        `Chain "${chain}" does not have a known USDT0 address`,
+        { chain },
+      )
+    }
+
+    try {
+      const result = await this.wdk.executeProtocol('swap-velora', {
+        action: 'quote',
+        chain,
+        fromToken,
+        toToken: usdt0Address,
+        amount: amount.toString(),
+      })
+      return result as unknown as SwapQuote
+    } catch (error) {
+      throw wrapError(
+        error,
+        WDKErrorCode.PROTOCOL_EXECUTION_FAILED,
+        `Failed to get swap quote on ${chain}`,
+        { chain, fromToken, amount: amount.toString() },
+      )
+    }
+  }
+
+  /**
+   * Swap any token to USDT0 for payment
+   *
+   * Uses the Velora protocol to execute a token swap on the specified chain.
+   *
+   * @param params - Swap parameters
+   * @throws {WDKError} If swap protocol is not registered or swap fails
+   *
+   * @example
+   * ```typescript
+   * // Swap 0.1 WETH to USDT0 on Arbitrum
+   * const result = await wallet.swapAndPay({
+   *   chain: 'arbitrum',
+   *   fromToken: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1', // WETH
+   *   amount: 100000000000000000n, // 0.1 WETH
+   *   maxSlippage: 0.005,
+   * });
+   * ```
+   */
+  async swapAndPay(params: SwapParams): Promise<SwapResult> {
+    if (!this.canSwap()) {
+      throw new WDKError(
+        WDKErrorCode.PROTOCOL_NOT_REGISTERED,
+        'Velora swap protocol not registered. Call T402WDK.registerWDK(WDK, { protocols: { swapVeloraEvm: SwapVeloraEvm } }).',
+      )
+    }
+
+    const usdt0Address = USDT0_ADDRESSES[params.chain]
+    if (!usdt0Address) {
+      throw new ChainError(
+        WDKErrorCode.CHAIN_NOT_SUPPORTED,
+        `Chain "${params.chain}" does not have a known USDT0 address`,
+        { chain: params.chain },
+      )
+    }
+
+    if (params.maxSlippage !== undefined && (params.maxSlippage < 0 || params.maxSlippage > 0.5)) {
+      throw new WDKError(
+        WDKErrorCode.INVALID_PARAMETER,
+        'maxSlippage must be between 0 and 0.5 (0% to 50%)',
+      )
+    }
+
+    try {
+      const result = await this.wdk.executeProtocol('swap-velora', {
+        action: 'swap',
+        chain: params.chain,
+        fromToken: params.fromToken,
+        toToken: usdt0Address,
+        amount: params.amount.toString(),
+        maxSlippage: params.maxSlippage ?? 0.005,
+      })
+
+      // Invalidate balance cache for this chain after swap
+      this._balanceCache.invalidateChain(params.chain)
+
+      return result as unknown as SwapResult
+    } catch (error) {
+      throw wrapError(
+        error,
+        WDKErrorCode.PROTOCOL_EXECUTION_FAILED,
+        `Failed to execute swap on ${params.chain}`,
+        {
+          chain: params.chain,
+          fromToken: params.fromToken,
+          amount: params.amount.toString(),
+        },
+      )
+    }
   }
 
   // ========== Cache Management ==========

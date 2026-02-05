@@ -1,0 +1,251 @@
+# Comparison
+
+import { Callout, Tabs } from 'nextra/components'
+
+How T402 compares to other payment solutions.
+
+## Payment Solutions Overview
+
+| Feature | T402 | Stripe | PayPal | Crypto Wallets |
+|---------|------|--------|--------|----------------|
+| Protocol | HTTP 402 | Proprietary | Proprietary | Chain-specific |
+| Settlement | On-chain | Off-chain | Off-chain | On-chain |
+| Intermediary | Optional | Required | Required | None |
+| KYC Required | No | Yes | Yes | No |
+| Global Access | Yes | Limited | Limited | Yes |
+| Fees | Gas only | 2.9% + $0.30 | 2.9% + $0.30 | Gas only |
+| Settlement Time | Seconds-minutes | Days | Days | Seconds-minutes |
+| Chargebacks | None | Yes | Yes | None |
+
+## Detailed Comparisons
+
+### T402 vs Stripe
+
+<Tabs items={['Advantages', 'Disadvantages']}>
+  <Tabs.Tab>
+**T402 Advantages:**
+
+- **No intermediary fees** - Only pay blockchain gas
+- **Instant settlement** - Funds available immediately
+- **No chargebacks** - Cryptographic finality
+- **Global access** - No banking requirements
+- **Privacy** - No personal data required
+- **Open protocol** - No vendor lock-in
+
+</Tabs.Tab>
+<Tabs.Tab>
+**T402 Challenges:**
+
+- **User experience** - Requires crypto wallet
+- **Volatility exposure** - Stablecoins mitigate but don't eliminate
+- **Technical complexity** - More integration work
+- **Regulatory uncertainty** - Varies by jurisdiction
+
+</Tabs.Tab>
+</Tabs>
+
+**Best for**: Digital goods, API monetization, global services, privacy-focused apps
+
+### T402 vs Lightning Network
+
+| Aspect | T402 | Lightning Network |
+|--------|------|-------------------|
+| Currency | USDT/USDC stablecoins | Bitcoin |
+| Volatility | Minimal (stablecoin) | High (BTC) |
+| Channels | Not required | Required |
+| Liquidity | Direct settlement | Channel capacity limits |
+| Multi-chain | 12+ networks | Bitcoin only |
+| Integration | HTTP middleware | Lightning-specific |
+
+**Best choice**: T402 for stablecoin payments, Lightning for Bitcoin payments
+
+### T402 vs Request Network
+
+| Aspect | T402 | Request Network |
+|--------|------|-----------------|
+| Model | Pay-per-request | Invoice-based |
+| Use case | API micropayments | Invoicing & accounting |
+| Flow | Single HTTP request | Create → Pay → Confirm |
+| Complexity | Simple | More features |
+| Best for | Real-time access | B2B invoicing |
+
+### T402 vs Direct Wallet Transfer
+
+| Aspect | T402 | Direct Transfer |
+|--------|------|-----------------|
+| Integration | SDK + middleware | Manual implementation |
+| Verification | Automatic | Manual |
+| Idempotency | Built-in | Manual |
+| Multi-chain | Unified API | Per-chain code |
+| Off-chain signing | Yes | No |
+
+## Use Case Fit
+
+### API Monetization
+
+| Requirement | T402 | Traditional |
+|-------------|------|-------------|
+| Per-request pricing | ✅ Native | ❌ Complex |
+| Usage-based billing | ✅ Automatic | ⚠️ Manual tracking |
+| Global access | ✅ Permissionless | ⚠️ Bank dependent |
+| Instant access | ✅ Yes | ❌ Subscription delay |
+
+**Verdict**: T402 excels at API monetization
+
+### E-commerce
+
+| Requirement | T402 | Traditional |
+|-------------|------|-------------|
+| Consumer familiarity | ⚠️ Crypto-native users | ✅ Everyone |
+| Checkout UX | ⚠️ Wallet required | ✅ Card input |
+| Refunds | ⚠️ Manual | ✅ Built-in |
+| Disputes | ❌ No chargebacks | ✅ Buyer protection |
+
+**Verdict**: Traditional payments better for mainstream e-commerce
+
+### SaaS / Subscriptions
+
+| Requirement | T402 | Traditional |
+|-------------|------|-------------|
+| Recurring billing | ⚠️ Manual/streaming | ✅ Automatic |
+| Trial periods | ⚠️ Manual | ✅ Built-in |
+| Plan management | ⚠️ Manual | ✅ Dashboard |
+| Revenue recognition | ⚠️ On-chain tracking | ✅ Automated |
+
+**Verdict**: Depends on user base - T402 for crypto-native SaaS
+
+### AI Agent Payments
+
+| Requirement | T402 | Traditional |
+|-------------|------|-------------|
+| Machine-to-machine | ✅ MCP protocol | ❌ Human required |
+| Programmable | ✅ SDK integration | ⚠️ API calls |
+| Autonomous | ✅ Wallet signing | ❌ Manual auth |
+| Micropayments | ✅ Per-request | ❌ Minimum amounts |
+
+**Verdict**: T402 designed for AI agent payments
+
+## Cost Analysis
+
+### Transaction Costs
+
+| Chain | T402 Gas Cost | Stripe Fee |
+|-------|---------------|------------|
+| Base | ~$0.001 | $0.30 + 2.9% |
+| Arbitrum | ~$0.002 | $0.30 + 2.9% |
+| Solana | ~$0.0001 | $0.30 + 2.9% |
+| TON | ~$0.01 | $0.30 + 2.9% |
+
+**Break-even**: T402 cheaper for transactions under ~$10
+
+### Example: $1 Payment
+
+| Provider | Fee | Net to Merchant |
+|----------|-----|-----------------|
+| T402 (Base) | $0.001 | $0.999 |
+| Stripe | $0.329 | $0.671 |
+| PayPal | $0.329 | $0.671 |
+
+### Example: $100 Payment
+
+| Provider | Fee | Net to Merchant |
+|----------|-----|-----------------|
+| T402 (Base) | $0.001 | $99.999 |
+| Stripe | $3.20 | $96.80 |
+| PayPal | $3.20 | $96.80 |
+
+## Integration Complexity
+
+### Development Time
+
+| Task | T402 | Stripe |
+|------|------|--------|
+| Basic integration | 1-2 hours | 30 min |
+| Production setup | 4-8 hours | 1-2 hours |
+| Multi-currency | Included | Extra work |
+| Webhook handling | Not needed | Required |
+
+### Code Comparison
+
+<Tabs items={['T402', 'Stripe']}>
+  <Tabs.Tab>
+```typescript
+// T402 - Server
+app.use(paymentMiddleware({
+  '/api/premium/*': {
+    accepts: {
+      scheme: 'exact',
+      network: 'eip155:8453',
+      payTo: address,
+      price: '$0.01'
+    }
+  }
+}));
+
+// T402 - Client
+const response = await t402Fetch(url);
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```typescript
+// Stripe - Server
+app.post('/create-payment-intent', async (req, res) => {
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: 1000,
+    currency: 'usd',
+  });
+  res.json({ clientSecret: paymentIntent.client_secret });
+});
+
+// Stripe - Client
+const { error } = await stripe.confirmCardPayment(clientSecret, {
+  payment_method: { card: cardElement }
+});
+// Handle webhooks for confirmation
+```
+  </Tabs.Tab>
+</Tabs>
+
+## When to Use T402
+
+### Ideal Use Cases
+
+1. **API Monetization** - Pay-per-request pricing
+2. **Digital Content** - Instant access after payment
+3. **AI Services** - Machine-to-machine payments
+4. **Global Services** - No banking restrictions
+5. **Micropayments** - Sub-$1 transactions
+6. **Privacy-First** - No personal data required
+
+### Not Ideal For
+
+1. **Mainstream E-commerce** - Users expect card payments
+2. **Subscription Services** - Unless crypto-native audience
+3. **Physical Goods** - Shipping needs trust/disputes
+4. **Regulated Industries** - KYC/AML requirements
+
+## Migration Path
+
+### From Stripe to T402
+
+1. **Parallel deployment** - Offer both options
+2. **Crypto discount** - Incentivize T402 adoption
+3. **Gradual migration** - Start with tech-savvy users
+4. **Full migration** - When critical mass reached
+
+### Hybrid Approach
+
+```typescript
+// Offer both payment methods
+if (user.prefersCrypto) {
+  // T402 payment flow
+  return t402Response;
+} else {
+  // Stripe payment flow
+  return stripeCheckout;
+}
+```
+
+<Callout type="info">
+  Many successful projects offer both traditional and crypto payment options to maximize reach.
+</Callout>
