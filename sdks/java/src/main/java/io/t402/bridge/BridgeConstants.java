@@ -14,10 +14,10 @@ public final class BridgeConstants {
     }
 
     /** LayerZero Scan API base URL. */
-    public static final String LAYERZERO_SCAN_BASE_URL = "https://api.layerzero.scan/v1";
+    public static final String LAYERZERO_SCAN_BASE_URL = "https://scan.layerzero-api.com/v1";
 
     /** Default slippage tolerance (0.5%). */
-    public static final double DEFAULT_SLIPPAGE = 0.005;
+    public static final double DEFAULT_SLIPPAGE = 0.5;
 
     /** Estimated bridge time in seconds. */
     public static final int ESTIMATED_BRIDGE_TIME_SECONDS = 300;
