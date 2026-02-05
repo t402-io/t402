@@ -1,3 +1,6 @@
 export { usePaymentRequired } from './usePaymentRequired.js'
 export { usePaymentStatus } from './usePaymentStatus.js'
 export { useAsyncPayment } from './useAsyncPayment.js'
+export { useGaslessPayment } from './useGaslessPayment.js'
+export { useBridgePayment } from './useBridgePayment.js'
+export { useMultiSigPayment } from './useMultiSigPayment.js'
