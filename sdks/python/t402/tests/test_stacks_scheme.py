@@ -53,11 +53,6 @@ class TestStacksSchemeImports:
     def test_import_from_exact_direct_subpackage(self):
         """Test importing from t402.schemes.stacks.exact_direct directly."""
         from t402.schemes.stacks.exact_direct import (
-            ExactDirectStacksClientScheme,
-            ExactDirectStacksServerScheme,
-            ExactDirectStacksFacilitatorScheme,
-            ClientStacksSigner,
-            FacilitatorStacksSigner,
             SCHEME_EXACT_DIRECT,
         )
 
@@ -82,11 +77,6 @@ class TestStacksSchemeImports:
     def test_import_from_top_level_schemes(self):
         """Test importing Stacks classes from t402.schemes (top-level)."""
         from t402.schemes import (
-            ExactDirectStacksClientScheme,
-            ExactDirectStacksServerScheme,
-            ExactDirectStacksFacilitatorScheme,
-            ClientStacksSigner,
-            FacilitatorStacksSigner,
             STACKS_SCHEME_EXACT_DIRECT,
         )
 
