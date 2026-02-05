@@ -1,0 +1,419 @@
+# Facilitator API Reference
+
+import { Callout, Tabs } from 'nextra/components'
+
+The T402 Facilitator API provides payment verification and on-chain settlement services. The public facilitator is available at `https://facilitator.t402.io`.
+
+## Base URL
+
+```
+https://facilitator.t402.io
+```
+
+## Authentication
+
+The public facilitator does not require authentication for basic usage. For rate limit increases or enterprise features, contact the T402 team.
+
+## Endpoints
+
+### GET /health
+
+Health check endpoint for liveness probes.
+
+**Response**
+
+```json
+{
+  "status": "ok"
+}
+```
+
+---
+
+### GET /ready
+
+Readiness check endpoint. Returns 200 when the service is ready to accept requests.
+
+**Response**
+
+```json
+{
+  "status": "ready",
+  "checks": {
+    "redis": "ok",
+    "rpc": "ok"
+  }
+}
+```
+
+---
+
+### GET /metrics
+
+Prometheus metrics endpoint for monitoring.
+
+**Response**: Prometheus text format
+
+---
+
+### GET /supported
+
+Returns the supported networks, schemes, and signers.
+
+**Response**
+
+```json
+{
+  "kinds": [
+    {
+      "scheme": "exact",
+      "network": "eip155:8453",
+      "signers": [
+        "0xC88f67e776f16DcFBf42e6bDda1B82604448899B"
+      ]
+    },
+    {
+      "scheme": "exact",
+      "network": "ton:mainnet",
+      "signers": [
+        "EQDjv9CUEJ__D_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkEUe"
+      ]
+    }
+  ]
+}
+```
+
+**Response Fields**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `kinds` | array | List of supported scheme/network combinations |
+| `kinds[].scheme` | string | Payment scheme (e.g., `exact`, `upto`) |
+| `kinds[].network` | string | CAIP-2 network identifier |
+| `kinds[].signers` | array | Facilitator wallet addresses for this network |
+
+---
+
+### POST /verify
+
+Verify a signed payment authorization without executing settlement.
+
+**Request Body**
+
+```json
+{
+  "paymentPayload": {
+    "t402Version": 2,
+    "scheme": "exact",
+    "network": "eip155:8453",
+    "payload": {
+      "from": "0xPayerAddress",
+      "to": "0xRecipientAddress",
+      "value": "1000000",
+      "validAfter": 0,
+      "validBefore": 1706745600,
+      "nonce": "0x..."
+    },
+    "signature": "0x..."
+  },
+  "paymentRequirements": {
+    "scheme": "exact",
+    "network": "eip155:8453",
+    "maxAmountRequired": "1000000",
+    "resource": "https://api.example.com/premium",
+    "description": "Premium API access",
+    "payTo": "0xRecipientAddress",
+    "maxTimeoutSeconds": 600
+  }
+}
+```
+
+**Response (Success)**
+
+```json
+{
+  "isValid": true,
+  "invalidReason": null
+}
+```
+
+**Response (Invalid)**
+
+```json
+{
+  "isValid": false,
+  "invalidReason": "Signature verification failed"
+}
+```
+
+**Response Fields**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `isValid` | boolean | Whether the payment authorization is valid |
+| `invalidReason` | string | Reason for invalidity (null if valid) |
+
+---
+
+### POST /settle
+
+Execute on-chain settlement for a verified payment.
+
+**Headers**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| `Idempotency-Key` | Recommended | Unique key (max 64 chars, alphanumeric/hyphens) to prevent duplicate settlements |
+
+**Request Body**
+
+```json
+{
+  "paymentPayload": {
+    "t402Version": 2,
+    "scheme": "exact",
+    "network": "eip155:8453",
+    "payload": {
+      "from": "0xPayerAddress",
+      "to": "0xRecipientAddress",
+      "value": "1000000",
+      "validAfter": 0,
+      "validBefore": 1706745600,
+      "nonce": "0x..."
+    },
+    "signature": "0x..."
+  },
+  "paymentRequirements": {
+    "scheme": "exact",
+    "network": "eip155:8453",
+    "maxAmountRequired": "1000000",
+    "resource": "https://api.example.com/premium",
+    "description": "Premium API access",
+    "payTo": "0xRecipientAddress",
+    "maxTimeoutSeconds": 600
+  }
+}
+```
+
+**Response (Success)**
+
+```json
+{
+  "success": true,
+  "transactionHash": "0x...",
+  "network": "eip155:8453"
+}
+```
+
+**Response (Failure)**
+
+```json
+{
+  "success": false,
+  "errorReason": "Insufficient balance"
+}
+```
+
+**Response Fields**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `success` | boolean | Whether settlement was successful |
+| `transactionHash` | string | On-chain transaction hash (if successful) |
+| `network` | string | Network where settlement occurred |
+| `errorReason` | string | Reason for failure (if unsuccessful) |
+
+<Callout type="warning">
+  **Idempotency**: Always use the `Idempotency-Key` header for settlement requests to prevent double payments in case of network errors or retries.
+</Callout>
+
+---
+
+## Error Responses
+
+All endpoints return structured error responses:
+
+```json
+{
+  "code": "INVALID_REQUEST",
+  "message": "Invalid request body"
+}
+```
+
+### Error Codes
+
+| Code | HTTP Status | Description |
+|------|-------------|-------------|
+| `INVALID_REQUEST` | 400 | Malformed request body |
+| `INVALID_IDEMPOTENCY_KEY` | 400 | Invalid idempotency key format |
+| `VERIFICATION_FAILED` | 500 | Payment verification failed |
+| `SETTLEMENT_FAILED` | 500 | On-chain settlement failed |
+| `REQUEST_IN_PROGRESS` | 409 | Duplicate request still processing |
+| `PAYLOAD_MISMATCH` | 409 | Payload doesn't match previous request with same idempotency key |
+| `PREVIOUS_REQUEST_FAILED` | 409 | Previous request with this key failed |
+| `IDEMPOTENCY_UNAVAILABLE` | 503 | Idempotency service unavailable |
+
+---
+
+## Rate Limiting
+
+The public facilitator implements rate limiting:
+
+| Tier | Requests/Minute | Description |
+|------|-----------------|-------------|
+| Default | 60 | Standard public access |
+| Authenticated | 1000 | With API key |
+
+Rate limit headers are included in responses:
+
+```
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 45
+X-RateLimit-Reset: 1706745660
+```
+
+---
+
+## Supported Networks
+
+### EVM Networks
+
+| Network | Chain ID | CAIP-2 | Facilitator Address |
+|---------|----------|--------|---------------------|
+| Ethereum | 1 | `eip155:1` | `0xC88f67e776f16DcFBf42e6bDda1B82604448899B` |
+| Base | 8453 | `eip155:8453` | `0xC88f67e776f16DcFBf42e6bDda1B82604448899B` |
+| Arbitrum | 42161 | `eip155:42161` | `0xC88f67e776f16DcFBf42e6bDda1B82604448899B` |
+| Optimism | 10 | `eip155:10` | `0xC88f67e776f16DcFBf42e6bDda1B82604448899B` |
+| Ink | 57073 | `eip155:57073` | `0xC88f67e776f16DcFBf42e6bDda1B82604448899B` |
+| Berachain | 80084 | `eip155:80084` | `0xC88f67e776f16DcFBf42e6bDda1B82604448899B` |
+
+### Non-EVM Networks
+
+| Network | CAIP-2 | Facilitator Address |
+|---------|--------|---------------------|
+| Solana | `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` | `8GGtWHRQ1wz5gDKE2KXZLktqzcfV1CBqSbeUZjA7hoWL` |
+| TON | `ton:mainnet` | `EQDjv9CUEJ__D_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkEUe` |
+| TRON | `tron:mainnet` | `TT1MqNNj2k5qdGA6nrrCodW6oyHbbAreQ5` |
+| NEAR | `near:mainnet` | `facilitator.t402.near` |
+| Aptos | `aptos:1` | Coming soon |
+| Tezos | `tezos:NetXdQprcVkpaWU` | Coming soon |
+| Polkadot | `polkadot:68d56f15f85d3136970ec16946040bc1` | Coming soon |
+| Stacks | `stacks:1` | Coming soon |
+
+---
+
+## Code Examples
+
+<Tabs items={['curl', 'TypeScript', 'Go', 'Python']}>
+  <Tabs.Tab>
+```bash
+# Check supported networks
+curl https://facilitator.t402.io/supported
+
+# Verify payment
+curl -X POST https://facilitator.t402.io/verify \
+  -H "Content-Type: application/json" \
+  -d '{
+    "paymentPayload": {...},
+    "paymentRequirements": {...}
+  }'
+
+# Settle payment
+curl -X POST https://facilitator.t402.io/settle \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: unique-key-123" \
+  -d '{
+    "paymentPayload": {...},
+    "paymentRequirements": {...}
+  }'
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```typescript
+import { createFacilitatorClient } from '@t402/core';
+
+const facilitator = createFacilitatorClient({
+  url: 'https://facilitator.t402.io',
+});
+
+// Get supported networks
+const supported = await facilitator.getSupported();
+
+// Verify payment
+const verifyResult = await facilitator.verify(
+  paymentPayload,
+  paymentRequirements,
+);
+
+// Settle payment
+const settleResult = await facilitator.settle(
+  paymentPayload,
+  paymentRequirements,
+  { idempotencyKey: 'unique-key-123' },
+);
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```go
+import "github.com/t402-io/t402/sdks/go"
+
+client := t402.NewFacilitatorClient("https://facilitator.t402.io")
+
+// Get supported networks
+supported, err := client.GetSupported(ctx)
+
+// Verify payment
+verifyResult, err := client.Verify(ctx, paymentPayload, requirements)
+
+// Settle payment
+settleResult, err := client.Settle(ctx, paymentPayload, requirements, &t402.SettleOptions{
+    IdempotencyKey: "unique-key-123",
+})
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+from t402 import FacilitatorClient
+
+client = FacilitatorClient("https://facilitator.t402.io")
+
+# Get supported networks
+supported = client.get_supported()
+
+# Verify payment
+result = client.verify(payment_payload, requirements)
+
+# Settle payment
+result = client.settle(
+    payment_payload,
+    requirements,
+    idempotency_key="unique-key-123"
+)
+```
+  </Tabs.Tab>
+</Tabs>
+
+---
+
+## Self-Hosting
+
+You can run your own facilitator for greater control and privacy. See the [Deployment Guide](/advanced/deployment) for instructions.
+
+```bash
+# Docker
+docker run -p 8080:8080 ghcr.io/t402-io/facilitator:latest
+
+# Environment variables
+export EVM_PRIVATE_KEY=0x...
+export TON_MNEMONIC="word1 word2 ..."
+export REDIS_URL=redis://localhost:6379
+```
+
+---
+
+## Related
+
+- [Protocol Specification](/specs/t402-v2) - Full protocol details
+- [TypeScript SDK](/sdks/typescript) - Client library
+- [Go SDK](/sdks/go) - Server library
+- [Deployment](/advanced/deployment) - Self-hosting guide

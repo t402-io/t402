@@ -1,0 +1,334 @@
+# @t402/fetch
+
+import { Callout, Tabs } from 'nextra/components'
+
+Fetch API wrapper that automatically handles 402 Payment Required responses. Works in browsers, Node.js, and edge runtimes.
+
+## Installation
+
+```bash npm2yarn
+npm install @t402/fetch @t402/core
+```
+
+## Quick Start
+
+```typescript
+import { wrapFetchWithPayment, t402Client } from '@t402/fetch';
+import { ExactEvmClient } from '@t402/evm/exact/client';
+import { privateKeyToAccount } from 'viem/accounts';
+
+// Create a signer
+const account = privateKeyToAccount('0xYourPrivateKey');
+
+// Create t402 client with payment schemes
+const client = new t402Client()
+  .register('eip155:*', new ExactEvmClient(account));
+
+// Wrap fetch with payment handling
+const fetchWithPay = wrapFetchWithPayment(fetch, client);
+
+// Make requests - payments handled automatically
+const response = await fetchWithPay('https://api.example.com/premium', {
+  method: 'GET',
+});
+
+const data = await response.json();
+```
+
+## API Reference
+
+### wrapFetchWithPayment
+
+Wraps the native fetch API to handle 402 responses automatically.
+
+```typescript
+function wrapFetchWithPayment(
+  fetch: typeof globalThis.fetch,
+  client: t402Client | t402HTTPClient
+): typeof fetch
+```
+
+**Parameters**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `fetch` | `typeof globalThis.fetch` | The fetch function to wrap |
+| `client` | `t402Client \| t402HTTPClient` | Configured client for payment handling |
+
+**Returns**: Wrapped fetch function that handles 402 responses.
+
+**Example**
+
+```typescript
+import { wrapFetchWithPayment, t402Client } from '@t402/fetch';
+import { ExactEvmClient } from '@t402/evm/exact/client';
+
+const client = new t402Client()
+  .register('eip155:8453', new ExactEvmClient(signer));
+
+const fetchWithPay = wrapFetchWithPayment(fetch, client);
+
+// Automatic payment handling
+const response = await fetchWithPay('https://api.example.com/paid');
+```
+
+### wrapFetchWithPaymentFromConfig
+
+Creates a payment-enabled fetch from a configuration object.
+
+```typescript
+function wrapFetchWithPaymentFromConfig(
+  fetch: typeof globalThis.fetch,
+  config: t402ClientConfig
+): typeof fetch
+```
+
+**Parameters**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `fetch` | `typeof globalThis.fetch` | The fetch function to wrap |
+| `config` | `t402ClientConfig` | Configuration with scheme registrations |
+
+**Example**
+
+```typescript
+import { wrapFetchWithPaymentFromConfig } from '@t402/fetch';
+import { ExactEvmClient } from '@t402/evm/exact/client';
+
+const fetchWithPay = wrapFetchWithPaymentFromConfig(fetch, {
+  schemes: [
+    { network: 'eip155:*', client: new ExactEvmClient(signer) },
+  ],
+});
+```
+
+## How It Works
+
+The wrapper intercepts 402 responses and automatically:
+
+1. **Detects 402** - Checks if response status is 402 Payment Required
+2. **Parses requirements** - Extracts payment requirements from headers/body
+3. **Creates payment** - Signs a payment authorization using registered scheme
+4. **Retries request** - Sends original request with payment header
+5. **Returns response** - Returns the final response to caller
+
+```typescript
+// Internal flow (simplified)
+async function wrappedFetch(input, init) {
+  const response = await fetch(input, init);
+
+  if (response.status !== 402) {
+    return response; // No payment needed
+  }
+
+  // Parse payment requirements
+  const paymentRequired = parsePaymentRequired(response);
+
+  // Create signed payment
+  const paymentPayload = await client.createPaymentPayload(paymentRequired);
+
+  // Retry with payment header
+  return fetch(input, {
+    ...init,
+    headers: {
+      ...init.headers,
+      'X-Payment': encodePayment(paymentPayload),
+    },
+  });
+}
+```
+
+## Multi-Network Support
+
+Register multiple networks for cross-chain payment support:
+
+```typescript
+import { t402Client } from '@t402/fetch';
+import { ExactEvmClient } from '@t402/evm/exact/client';
+import { ExactTonClient } from '@t402/ton/exact/client';
+import { ExactSvmClient } from '@t402/svm/exact/client';
+
+const client = new t402Client()
+  // EVM chains (wildcard matches all EIP-155 networks)
+  .register('eip155:*', new ExactEvmClient(evmSigner))
+  // TON
+  .register('ton:mainnet', new ExactTonClient(tonWallet))
+  // Solana
+  .register('solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp', new ExactSvmClient(solanaWallet));
+
+const fetchWithPay = wrapFetchWithPayment(fetch, client);
+
+// Works with any supported network
+await fetchWithPay('https://evm-api.example.com/data');
+await fetchWithPay('https://ton-api.example.com/data');
+await fetchWithPay('https://solana-api.example.com/data');
+```
+
+## Protocol Version Support
+
+Support both v1 and v2 protocol versions:
+
+```typescript
+const client = new t402Client()
+  // v2 protocol (default)
+  .register('eip155:8453', new ExactEvmClient(signer))
+  // v1 protocol (legacy)
+  .register('eip155:1', new ExactEvmClient(signer), 1);
+```
+
+## Payment Selection
+
+When multiple payment options are available, select the preferred one:
+
+```typescript
+import { t402Client, SelectPaymentRequirements } from '@t402/fetch';
+
+// Custom selector: prefer Base network
+const selectPayment: SelectPaymentRequirements = (requirements) => {
+  const baseOption = requirements.find(r => r.network === 'eip155:8453');
+  return baseOption || requirements[0];
+};
+
+const client = new t402Client({ selectPaymentRequirements: selectPayment })
+  .register('eip155:*', new ExactEvmClient(signer));
+```
+
+## Payment Policy
+
+Apply spending limits and rules:
+
+```typescript
+import { t402Client, PaymentPolicy } from '@t402/fetch';
+
+const policy: PaymentPolicy = {
+  maxAmount: '1000000', // Max 1 USDT per request
+  maxAmountPerHour: '10000000', // Max 10 USDT per hour
+  allowedNetworks: ['eip155:8453', 'eip155:42161'],
+  requireConfirmation: (amount) => BigInt(amount) > 5000000n, // Confirm if > $5
+};
+
+const client = new t402Client({ policy })
+  .register('eip155:*', new ExactEvmClient(signer));
+```
+
+## Error Handling
+
+```typescript
+import { wrapFetchWithPayment, t402Client } from '@t402/fetch';
+
+const fetchWithPay = wrapFetchWithPayment(fetch, client);
+
+try {
+  const response = await fetchWithPay('https://api.example.com/paid');
+
+  if (!response.ok) {
+    console.error('Request failed:', response.status);
+  }
+
+  const data = await response.json();
+} catch (error) {
+  if (error.message.includes('Failed to parse payment requirements')) {
+    console.error('Invalid payment requirements from server');
+  } else if (error.message.includes('Failed to create payment payload')) {
+    console.error('Could not sign payment:', error);
+  } else if (error.message.includes('Payment already attempted')) {
+    console.error('Payment retry loop detected');
+  } else {
+    throw error;
+  }
+}
+```
+
+## Payment Response
+
+Access settlement information from the response:
+
+```typescript
+import { wrapFetchWithPayment, decodePaymentResponseHeader } from '@t402/fetch';
+
+const response = await fetchWithPay('https://api.example.com/paid');
+
+// Check payment response header
+const paymentResponse = decodePaymentResponseHeader(
+  response.headers.get('X-Payment-Response')
+);
+
+if (paymentResponse) {
+  console.log('Transaction hash:', paymentResponse.transactionHash);
+  console.log('Network:', paymentResponse.network);
+}
+```
+
+## Browser Usage
+
+```typescript
+// In browser environment
+import { wrapFetchWithPayment, t402Client } from '@t402/fetch';
+import { ExactEvmClient } from '@t402/evm/exact/client';
+
+// Use wallet signer (e.g., from wagmi/viem)
+const client = new t402Client()
+  .register('eip155:*', new ExactEvmClient(walletClient));
+
+const fetchWithPay = wrapFetchWithPayment(window.fetch, client);
+
+// Use in React component
+async function fetchPremiumData() {
+  const response = await fetchWithPay('/api/premium/data');
+  return response.json();
+}
+```
+
+## Node.js Usage
+
+```typescript
+// In Node.js environment
+import { wrapFetchWithPayment, t402Client } from '@t402/fetch';
+import { ExactEvmClient } from '@t402/evm/exact/client';
+import { privateKeyToAccount } from 'viem/accounts';
+
+const account = privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`);
+
+const client = new t402Client()
+  .register('eip155:*', new ExactEvmClient(account));
+
+const fetchWithPay = wrapFetchWithPayment(fetch, client);
+
+// Use in server code
+const response = await fetchWithPay('https://external-api.com/paid');
+```
+
+## Type Exports
+
+```typescript
+// Client
+export { t402Client, t402HTTPClient } from '@t402/core/client';
+
+// Configuration types
+export type {
+  PaymentPolicy,
+  SchemeRegistration,
+  SelectPaymentRequirements,
+  t402ClientConfig,
+} from '@t402/core/client';
+
+// Utilities
+export { decodePaymentResponseHeader } from '@t402/core/http';
+
+// Protocol types
+export type {
+  Network,
+  PaymentPayload,
+  PaymentRequired,
+  PaymentRequirements,
+  SchemeNetworkClient,
+} from '@t402/core/types';
+```
+
+## Related
+
+- [@t402/axios](/reference/axios) - Axios interceptor
+- [@t402/core](/reference/core) - Core protocol types
+- [@t402/evm](/reference/evm) - EVM payment scheme
+- [Client Guide](/getting-started/client) - Client implementation guide

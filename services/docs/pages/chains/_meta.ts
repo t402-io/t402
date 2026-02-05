@@ -1,3 +1,6 @@
 export default {
-  index: 'Overview'
+  index: 'Overview',
+  evm: 'EVM Chains',
+  'non-evm': 'Non-EVM Chains',
+  testnets: 'Testnets'
 }

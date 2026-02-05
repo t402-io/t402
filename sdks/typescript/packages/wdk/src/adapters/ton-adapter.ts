@@ -133,31 +133,37 @@ export class WDKTonSignerAdapter implements ClientTonSigner {
   /**
    * Sign an internal message for Jetton transfer
    *
-   * This method delegates to the WDK account for actual signing.
-   * The WDK handles building and signing the TON external message internally.
-   *
-   * Note: This is a simplified implementation. For full TON message building,
-   * use @t402/ton directly or ensure your WDK account supports the
-   * sendTransaction method with proper parameters.
+   * Attempts to build a proper signed Cell using @ton/core if available.
+   * Falls back to a simplified wrapper that embeds the raw signature.
    *
    * @param params - Message parameters
    * @returns Signed external message as Cell (BOC)
    */
   async signMessage(params: SignMessageParams): Promise<TonCell> {
-    // Use WDK account's sendTransaction which handles signing internally
-    // This returns the transaction hash, not the signed message
-    // For T402, we need the signed message before broadcast
-
-    // Sign the message body hash
     const msgHash = params.body.hash()
     const signature = await this._account.signMessage(msgHash)
 
-    // Return a wrapper that provides the signature
-    // In practice, the facilitator will use this signature to verify
-    // the payment authorization
-    return {
-      hash: () => msgHash,
-      toBoc: () => signature,
+    // Try to use @ton/core for proper Cell construction
+    try {
+      const tonCore = await import('@ton/core')
+      const sigBuffer = Buffer.from(signature.buffer, signature.byteOffset, signature.byteLength)
+      const bodyBoc = params.body.toBoc()
+      const bocBuffer = Buffer.from(bodyBoc.buffer, bodyBoc.byteOffset, bodyBoc.byteLength)
+      const signedCell = tonCore
+        .beginCell()
+        .storeBuffer(sigBuffer)
+        .storeSlice(tonCore.Cell.fromBoc(bocBuffer)[0]!.beginParse())
+        .endCell()
+      return signedCell as unknown as TonCell
+    } catch {
+      // @ton/core not available — return simplified wrapper.
+      // The signature is accessible via toBoc() and the original
+      // message hash via hash(), which is sufficient for T402
+      // facilitator verification.
+      return {
+        hash: () => msgHash,
+        toBoc: () => signature,
+      }
     }
   }
 
