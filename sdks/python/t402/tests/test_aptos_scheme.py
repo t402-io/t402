@@ -8,7 +8,6 @@ from __future__ import annotations
 import time
 import pytest
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from t402.schemes.aptos import (
     # Scheme classes
@@ -17,9 +16,6 @@ from t402.schemes.aptos import (
     ExactDirectAptosFacilitatorScheme,
     # Types
     ExactDirectPayload,
-    ClientAptosSigner,
-    FacilitatorAptosSigner,
-    # Constants
     SCHEME_EXACT_DIRECT,
     APTOS_MAINNET,
     APTOS_TESTNET,
