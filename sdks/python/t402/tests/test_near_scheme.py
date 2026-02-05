@@ -14,9 +14,7 @@ from __future__ import annotations
 
 import base64
 import json
-import time
-from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, patch
+from typing import Any, Dict, List, Optional
 
 import pytest
 
@@ -55,9 +53,6 @@ from t402.schemes.near import (
     USDC_MAINNET,
     USDC_TESTNET,
     # Data classes
-    TokenInfo,
-    NetworkConfig,
-    # Lookup functions
     get_network_config,
     get_token_info,
     get_token_by_contract,
@@ -145,8 +140,6 @@ class MockFacilitatorSigner:
         return self._tx_result
 
 
-# We need Optional imported for MockFacilitatorSigner
-from typing import Optional
 
 
 # =============================================================================
