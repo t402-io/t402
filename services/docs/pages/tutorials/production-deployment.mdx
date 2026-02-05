@@ -1,6 +1,6 @@
 # Production Deployment
 
-import { Callout, Tabs, Tab, Steps } from 'nextra/components'
+import { Callout, Tabs, Steps } from 'nextra/components'
 
 This tutorial covers best practices for deploying T402 payment integration in production environments.
 
@@ -50,7 +50,7 @@ Before going to production:
 Never hardcode secrets. Use a secret manager:
 
 <Tabs items={['AWS', 'GCP', 'Vault']}>
-  <Tab>
+  <Tabs.Tab>
 ```typescript
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
 
@@ -71,8 +71,8 @@ const facilitator = createFacilitatorClient({
   apiKey: secrets.T402_API_KEY,
 });
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```typescript
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 
@@ -89,8 +89,8 @@ async function getSecret(name: string) {
 // Usage
 const apiKey = await getSecret('t402-api-key');
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```typescript
 import vault from 'node-vault';
 
@@ -104,7 +104,7 @@ async function getSecrets() {
   return data.data;
 }
 ```
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ### Configure Rate Limiting
@@ -173,7 +173,7 @@ app.get('/ready', async (req, res) => {
 ### Set Up Monitoring
 
 <Tabs items={['Prometheus', 'DataDog', 'CloudWatch']}>
-  <Tab>
+  <Tabs.Tab>
 ```typescript
 import promClient from 'prom-client';
 
@@ -213,8 +213,8 @@ app.get('/metrics', async (req, res) => {
   res.send(await promClient.register.metrics());
 });
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```typescript
 import tracer from 'dd-trace';
 
@@ -230,8 +230,8 @@ tracer.trace('payment.process', { resource: '/api/premium' }, (span) => {
   // ... process payment
 });
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```typescript
 import { CloudWatch } from '@aws-sdk/client-cloudwatch';
 
@@ -254,7 +254,7 @@ async function trackPayment(network: string, success: boolean) {
   });
 }
 ```
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ### Configure Alerting

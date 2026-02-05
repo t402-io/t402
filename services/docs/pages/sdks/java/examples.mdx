@@ -1,6 +1,6 @@
 # Java Examples
 
-import { Callout, Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs } from 'nextra/components'
 
 Complete examples for common T402 Java SDK use cases.
 
@@ -108,7 +108,7 @@ byte[] signature = safe.signSafeTransaction(txHash, ownerPrivateKey);
 ### Bundler Integration
 
 <Tabs items={['Pimlico', 'Alchemy', 'Generic']}>
-  <Tab>
+  <Tabs.Tab>
 ```java
 import io.t402.erc4337.bundler.PimlicoBundler;
 
@@ -123,8 +123,8 @@ SponsorResult sponsor = bundler.sponsorUserOperation(userOp, entryPoint);
 userOp.setPaymaster(sponsor.getPaymaster());
 userOp.setPaymasterData(sponsor.getPaymasterData());
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```java
 import io.t402.erc4337.bundler.AlchemyBundler;
 
@@ -141,8 +141,8 @@ if (!sim.isSuccess()) {
     System.err.println("Simulation failed: " + sim.getError());
 }
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```java
 import io.t402.erc4337.BundlerClient;
 
@@ -152,7 +152,7 @@ GasEstimate estimate = bundler.estimateUserOperationGas(userOp, entryPoint);
 String userOpHash = bundler.sendUserOperation(userOp, entryPoint);
 UserOperationReceipt receipt = bundler.getUserOperationReceipt(userOpHash);
 ```
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ## USDT0 Cross-Chain Bridge

@@ -1,6 +1,6 @@
 # Multi-Chain Payment App
 
-import { Callout, Tabs, Tab, Steps } from 'nextra/components'
+import { Callout, Tabs, Steps } from 'nextra/components'
 
 This tutorial shows how to build an application that accepts payments from multiple blockchain networks simultaneously.
 
@@ -34,7 +34,7 @@ A multi-chain payment app allows users to pay with their preferred network:
 Configure your server to accept multiple payment networks.
 
 <Tabs items={['TypeScript', 'Go']}>
-  <Tab>
+  <Tabs.Tab>
 ```typescript
 import express from 'express';
 import { paymentMiddleware } from '@t402/express';
@@ -84,8 +84,8 @@ app.get('/api/premium/data', (req, res) => {
 
 app.listen(3000);
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```go
 package main
 
@@ -126,7 +126,7 @@ func main() {
     r.Run(":3000")
 }
 ```
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ### Client Setup with Multiple Wallets

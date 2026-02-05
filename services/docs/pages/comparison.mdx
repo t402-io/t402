@@ -1,6 +1,6 @@
 # Comparison
 
-import { Callout, Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs } from 'nextra/components'
 
 How T402 compares to other payment solutions.
 
@@ -22,7 +22,7 @@ How T402 compares to other payment solutions.
 ### T402 vs Stripe
 
 <Tabs items={['Advantages', 'Disadvantages']}>
-  <Tab>
+  <Tabs.Tab>
 **T402 Advantages:**
 
 - **No intermediary fees** - Only pay blockchain gas
@@ -31,15 +31,17 @@ How T402 compares to other payment solutions.
 - **Global access** - No banking requirements
 - **Privacy** - No personal data required
 - **Open protocol** - No vendor lock-in
-  </Tab>
-  <Tab>
+
+</Tabs.Tab>
+<Tabs.Tab>
 **T402 Challenges:**
 
 - **User experience** - Requires crypto wallet
 - **Volatility exposure** - Stablecoins mitigate but don't eliminate
 - **Technical complexity** - More integration work
 - **Regulatory uncertainty** - Varies by jurisdiction
-  </Tab>
+
+</Tabs.Tab>
 </Tabs>
 
 **Best for**: Digital goods, API monetization, global services, privacy-focused apps
@@ -166,7 +168,7 @@ How T402 compares to other payment solutions.
 ### Code Comparison
 
 <Tabs items={['T402', 'Stripe']}>
-  <Tab>
+  <Tabs.Tab>
 ```typescript
 // T402 - Server
 app.use(paymentMiddleware({
@@ -183,8 +185,8 @@ app.use(paymentMiddleware({
 // T402 - Client
 const response = await t402Fetch(url);
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```typescript
 // Stripe - Server
 app.post('/create-payment-intent', async (req, res) => {
@@ -201,7 +203,7 @@ const { error } = await stripe.confirmCardPayment(clientSecret, {
 });
 // Handle webhooks for confirmation
 ```
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ## When to Use T402

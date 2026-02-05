@@ -1,6 +1,6 @@
 # Solana Integration Guide
 
-import { Callout, Tabs, Tab, Steps } from 'nextra/components'
+import { Callout, Tabs, Steps } from 'nextra/components'
 
 This tutorial shows how to integrate T402 payments with Solana using SPL tokens.
 
@@ -39,21 +39,21 @@ Solana uses SPL tokens for USDT/USDC transfers. The T402 Solana implementation s
 ### Install Dependencies
 
 <Tabs items={['TypeScript', 'Python', 'Go']}>
-  <Tab>
+  <Tabs.Tab>
 ```bash
 npm install @t402/svm @t402/core @solana/web3.js @solana/spl-token
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```bash
 pip install t402[svm]
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```bash
 go get github.com/t402-io/t402/sdks/go/mechanisms/svm
 ```
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ### Client Setup
@@ -61,7 +61,7 @@ go get github.com/t402-io/t402/sdks/go/mechanisms/svm
 Create a client that can sign Solana payment authorizations.
 
 <Tabs items={['TypeScript', 'Python', 'Go']}>
-  <Tab>
+  <Tabs.Tab>
 ```typescript
 import { t402Client } from '@t402/core/client';
 import { ExactSvmScheme, toClientSvmSigner } from '@t402/svm';
@@ -85,8 +85,8 @@ const svmSigner = toClientSvmSigner({
 const client = new t402Client()
   .register('solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp', new ExactSvmScheme(svmSigner));
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```python
 from t402 import t402Client
 from t402.svm import SvmSigner, ExactSvmScheme
@@ -102,8 +102,8 @@ signer = SvmSigner(keypair)
 client = t402Client()
 client.register("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", ExactSvmScheme(signer))
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```go
 import (
     "github.com/t402-io/t402/sdks/go/mechanisms/svm"
@@ -120,7 +120,7 @@ if err != nil {
 client := t402.NewClient()
 client.Register("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", svm.NewExactScheme(signer))
 ```
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ### Server Setup
@@ -128,7 +128,7 @@ client.Register("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", svm.NewExactScheme(si
 Configure your server to accept Solana payments.
 
 <Tabs items={['TypeScript (Express)', 'Python (FastAPI)', 'Go']}>
-  <Tab>
+  <Tabs.Tab>
 ```typescript
 import express from 'express';
 import { paymentMiddleware } from '@t402/express';
@@ -168,8 +168,8 @@ app.get('/api/premium/data', (req, res) => {
 
 app.listen(3000);
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```python
 from fastapi import FastAPI
 from t402.fastapi.middleware import require_payment
@@ -188,8 +188,8 @@ app.middleware("http")(
 async def premium():
     return {"data": "Premium content"}
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```go
 package main
 
@@ -227,13 +227,13 @@ func main() {
     r.Run(":3000")
 }
 ```
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ### Make Payment Requests
 
 <Tabs items={['TypeScript', 'Python', 'Go']}>
-  <Tab>
+  <Tabs.Tab>
 ```typescript
 import { wrapFetchWithPayment } from '@t402/fetch';
 
@@ -247,8 +247,8 @@ const response = await fetchWithPay('https://api.example.com/api/premium/data', 
 const data = await response.json();
 console.log(data);
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```python
 from t402.clients.httpx import t402HttpxClient
 
@@ -257,8 +257,8 @@ async with t402HttpxClient(client=client) as http:
     data = await response.json()
     print(data)
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```go
 httpClient := t402.NewHTTPClient(client)
 
@@ -272,7 +272,7 @@ var data map[string]interface{}
 json.NewDecoder(resp.Body).Decode(&data)
 fmt.Println(data)
 ```
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 </Steps>

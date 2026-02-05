@@ -1,6 +1,6 @@
 # EVM Chains
 
-import { Callout, Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs } from 'nextra/components'
 
 Detailed guide for EVM (Ethereum Virtual Machine) compatible chains.
 
@@ -58,7 +58,7 @@ const routes = {
 ### Client Setup
 
 <Tabs items={['viem', 'ethers.js', 'web3.js']}>
-  <Tab>
+  <Tabs.Tab>
 ```typescript
 import { t402Client } from '@t402/core/client';
 import { ExactEvmScheme } from '@t402/evm/exact/client';
@@ -75,8 +75,8 @@ const walletClient = createWalletClient({
 const client = new t402Client();
 client.register('eip155:*', new ExactEvmScheme(walletClient));
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```typescript
 import { t402Client } from '@t402/core/client';
 import { ExactEvmScheme } from '@t402/evm/exact/client';
@@ -90,8 +90,8 @@ const signer = await provider.getSigner();
 const client = new t402Client();
 client.register('eip155:*', new ExactEvmScheme(signer));
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```typescript
 import { t402Client } from '@t402/core/client';
 import { ExactEvmScheme } from '@t402/evm/exact/client';
@@ -108,7 +108,7 @@ client.register('eip155:*', new ExactEvmScheme({
   signTypedData: (data) => web3.eth.signTypedData(accounts[0], data),
 }));
 ```
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ## EIP-3009 (TransferWithAuthorization)

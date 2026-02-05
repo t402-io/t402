@@ -1,6 +1,6 @@
 # @t402/hono
 
-import { Callout, Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs } from 'nextra/components'
 
 Hono middleware for protecting routes with t402 payment requirements. Lightweight and edge-compatible, perfect for Cloudflare Workers, Deno, and Bun.
 
@@ -119,7 +119,7 @@ app.use('*', paymentMiddlewareFromConfig(
 Hono runs on edge runtimes. Use appropriate configurations:
 
 <Tabs items={['Cloudflare Workers', 'Deno', 'Bun']}>
-  <Tab>
+  <Tabs.Tab>
 ```typescript
 // wrangler.toml
 // name = "t402-api"
@@ -147,8 +147,8 @@ app.use('*', paymentMiddleware(routes, server));
 
 export default app;
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```typescript
 // main.ts
 import { Hono } from 'hono';
@@ -160,8 +160,8 @@ app.use('*', paymentMiddleware(routes, server));
 
 Deno.serve(app.fetch);
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```typescript
 // index.ts
 import { Hono } from 'hono';
@@ -173,7 +173,7 @@ app.use('*', paymentMiddleware(routes, server));
 
 export default app;
 ```
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ## Route Configuration

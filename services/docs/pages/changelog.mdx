@@ -1,6 +1,6 @@
 # Changelog
 
-import { Callout, Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs } from 'nextra/components'
 
 This page documents the version history and release notes for T402 SDKs.
 
@@ -13,7 +13,7 @@ T402 follows [Semantic Versioning](https://semver.org/):
 - **Patch (0.0.X)**: Bug fixes, backward compatible
 
 <Tabs items={['TypeScript', 'Go', 'Python', 'Java']}>
-  <Tab>
+  <Tabs.Tab>
 ## TypeScript SDK
 
 ### v2.3.x (Current)
@@ -67,8 +67,8 @@ T402 follows [Semantic Versioning](https://semver.org/):
 <Callout type="warning">
   V1 is deprecated. Migrate to V2 for new features and security updates.
 </Callout>
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ## Go SDK
 
 ### v1.8.x (Current)
@@ -110,8 +110,9 @@ T402 follows [Semantic Versioning](https://semver.org/):
 - Added TRON TRC-20 mechanism
 - Improved CLI tool with interactive mode
 - Fixed EVM gas estimation on L2s
-  </Tab>
-  <Tab>
+
+</Tabs.Tab>
+<Tabs.Tab>
 ## Python SDK
 
 ### v1.9.x (Current)
@@ -145,8 +146,9 @@ T402 follows [Semantic Versioning](https://semver.org/):
 - Added TRON support
 - Added Solana support
 - Improved CLI with rich terminal output
-  </Tab>
-  <Tab>
+
+</Tabs.Tab>
+<Tabs.Tab>
 ## Java SDK
 
 ### v1.8.x (Current)
@@ -180,7 +182,8 @@ T402 follows [Semantic Versioning](https://semver.org/):
 - Added TRON support
 - Added Solana support
 - Improved Maven Central publishing
-  </Tab>
+
+</Tabs.Tab>
 </Tabs>
 
 ## Facilitator Service

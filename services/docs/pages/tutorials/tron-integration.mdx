@@ -1,6 +1,6 @@
 # TRON Integration Guide
 
-import { Callout, Tabs, Tab, Steps } from 'nextra/components'
+import { Callout, Tabs, Steps } from 'nextra/components'
 
 This tutorial shows how to integrate T402 payments with the TRON blockchain using TRC-20 tokens.
 
@@ -38,21 +38,21 @@ TRON uses TRC-20 tokens for USDT transfers. The T402 TRON implementation support
 ### Install Dependencies
 
 <Tabs items={['TypeScript', 'Python', 'Go']}>
-  <Tab>
+  <Tabs.Tab>
 ```bash
 npm install @t402/tron @t402/core tronweb
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```bash
 pip install t402[tron]
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```bash
 go get github.com/t402-io/t402/sdks/go/mechanisms/tron
 ```
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ### Client Setup
@@ -60,7 +60,7 @@ go get github.com/t402-io/t402/sdks/go/mechanisms/tron
 Create a client that can sign TRON payment authorizations.
 
 <Tabs items={['TypeScript', 'Python', 'Go']}>
-  <Tab>
+  <Tabs.Tab>
 ```typescript
 import { t402Client } from '@t402/core/client';
 import { ExactTronScheme, toClientTronSigner } from '@t402/tron';
@@ -83,8 +83,8 @@ const client = new t402Client()
   .register('tron:mainnet', new ExactTronScheme(tronSigner))
   .register('tron:nile', new ExactTronScheme(tronSigner));
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```python
 from t402 import t402Client
 from t402.tron import TronSigner, ExactTronScheme
@@ -97,8 +97,8 @@ client = t402Client()
 client.register("tron:mainnet", ExactTronScheme(signer))
 client.register("tron:nile", ExactTronScheme(signer))
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```go
 import (
     "github.com/t402-io/t402/sdks/go/mechanisms/tron"
@@ -116,7 +116,7 @@ client := t402.NewClient()
 client.Register("tron:mainnet", tron.NewExactScheme(signer))
 client.Register("tron:nile", tron.NewExactScheme(signer))
 ```
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ### Server Setup
@@ -124,7 +124,7 @@ client.Register("tron:nile", tron.NewExactScheme(signer))
 Configure your server to accept TRON payments.
 
 <Tabs items={['TypeScript (Express)', 'Python (FastAPI)', 'Go']}>
-  <Tab>
+  <Tabs.Tab>
 ```typescript
 import express from 'express';
 import { paymentMiddleware } from '@t402/express';
@@ -164,8 +164,8 @@ app.get('/api/premium/data', (req, res) => {
 
 app.listen(3000);
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```python
 from fastapi import FastAPI
 from t402.fastapi.middleware import require_payment
@@ -184,8 +184,8 @@ app.middleware("http")(
 async def premium():
     return {"data": "Premium content"}
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```go
 package main
 
@@ -223,13 +223,13 @@ func main() {
     r.Run(":3000")
 }
 ```
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ### Make Payment Requests
 
 <Tabs items={['TypeScript', 'Python', 'Go']}>
-  <Tab>
+  <Tabs.Tab>
 ```typescript
 import { wrapFetchWithPayment } from '@t402/fetch';
 
@@ -243,8 +243,8 @@ const response = await fetchWithPay('https://api.example.com/api/premium/data', 
 const data = await response.json();
 console.log(data);
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```python
 from t402.clients.httpx import t402HttpxClient
 
@@ -253,8 +253,8 @@ async with t402HttpxClient(client=client) as http:
     data = await response.json()
     print(data)
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```go
 httpClient := t402.NewHTTPClient(client)
 
@@ -268,7 +268,7 @@ var data map[string]interface{}
 json.NewDecoder(resp.Body).Decode(&data)
 fmt.Println(data)
 ```
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 </Steps>

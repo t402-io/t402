@@ -1,6 +1,6 @@
 # Intent Payments
 
-import { Callout, Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs } from 'nextra/components'
 
 <Callout type="warning">
   **Beta Package**: `@t402/intent-payments` is currently in beta (v1.0.0-beta.2). APIs may change.
@@ -171,13 +171,13 @@ createIntent()
 ## Execution Modes
 
 <Tabs items={['Direct', 'Auction', 'Best Effort']}>
-  <Tab>
+  <Tabs.Tab>
     Selects a single solver and executes immediately:
     ```typescript
     const result = await executor.submit(intent, { mode: 'direct' });
     ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
     Runs a competitive auction among solvers:
     ```typescript
     const result = await executor.submit(intent, {
@@ -185,8 +185,8 @@ createIntent()
       auctionDuration: 30000, // 30 seconds
     });
     ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
     Tries direct execution first, falls back to auction, with retries:
     ```typescript
     const result = await executor.submit(intent, {
@@ -194,7 +194,7 @@ createIntent()
       retryCount: 3,
     });
     ```
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ## Custom Solvers

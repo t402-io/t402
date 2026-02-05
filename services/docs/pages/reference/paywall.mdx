@@ -1,6 +1,6 @@
 # @t402/paywall
 
-import { Callout, Tabs, Tab } from 'nextra/components'
+import { Callout, Tabs } from 'nextra/components'
 
 Universal paywall extension for server-side 402 response rendering. Generates network-specific payment UIs with wallet connection and transaction signing.
 
@@ -259,7 +259,7 @@ type TxStatus = 'idle' | 'pending' | 'confirming' | 'confirmed' | 'failed';
 ## Server Integration
 
 <Tabs items={['Express', 'Hono', 'Fastify']}>
-  <Tab>
+  <Tabs.Tab>
 ```typescript
 import express from 'express';
 import { paymentMiddleware } from '@t402/express';
@@ -279,8 +279,8 @@ app.use(paymentMiddleware(
   paywall // custom paywall provider
 ));
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```typescript
 import { Hono } from 'hono';
 import { paymentMiddleware } from '@t402/hono';
@@ -294,8 +294,8 @@ const paywall = createPaywall()
 
 app.use('*', paymentMiddleware(routes, server, paywallConfig, paywall));
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```typescript
 import Fastify from 'fastify';
 import { paymentPlugin } from '@t402/fastify';
@@ -313,7 +313,7 @@ await fastify.register(paymentPlugin, {
   paywall,
 });
 ```
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ## Custom Network Handler

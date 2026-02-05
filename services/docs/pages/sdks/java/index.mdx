@@ -1,6 +1,6 @@
 # Java SDK
 
-import { Cards, Card, Tabs, Tab } from 'nextra/components'
+import { Cards, Tabs } from 'nextra/components'
 
 The T402 Java SDK provides a complete implementation of the t402 payment protocol for Java applications, with first-class support for Spring Boot and multi-chain payments.
 
@@ -9,7 +9,7 @@ The T402 Java SDK provides a complete implementation of the t402 payment protoco
 ## Installation
 
 <Tabs items={['Maven', 'Gradle']}>
-  <Tab>
+  <Tabs.Tab>
 ```xml
 <dependency>
     <groupId>io.t402</groupId>
@@ -17,12 +17,12 @@ The T402 Java SDK provides a complete implementation of the t402 payment protoco
     <version>1.8.0</version>
 </dependency>
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```groovy
 implementation 'io.t402:t402:1.8.0'
 ```
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ## Features
@@ -105,9 +105,9 @@ HttpResponse<String> response = client.get(
 ## Documentation
 
 <Cards>
-  <Card title="Spring Boot" href="/sdks/java/spring-boot" />
-  <Card title="MCP Server" href="/sdks/java/mcp" />
-  <Card title="Examples" href="/sdks/java/examples" />
+  <Cards.Card title="Spring Boot" href="/sdks/java/spring-boot" />
+  <Cards.Card title="MCP Server" href="/sdks/java/mcp" />
+  <Cards.Card title="Examples" href="/sdks/java/examples" />
 </Cards>
 
 ## Supported Networks

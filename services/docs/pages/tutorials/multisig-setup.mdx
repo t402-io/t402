@@ -1,6 +1,6 @@
 # Multi-Sig Wallet Setup
 
-import { Callout, Tabs, Tab, Steps } from 'nextra/components'
+import { Callout, Tabs, Steps } from 'nextra/components'
 
 This tutorial shows how to integrate T402 payments with multi-signature wallets for enhanced security using Safe (formerly Gnosis Safe).
 
@@ -52,12 +52,12 @@ Multi-sig wallets require multiple signatures to authorize transactions, providi
 ### Install Dependencies
 
 <Tabs items={['TypeScript', 'Java']}>
-  <Tab>
+  <Tabs.Tab>
 ```bash
 npm install @t402/wdk-multisig @t402/core @safe-global/protocol-kit
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```xml
 <dependency>
     <groupId>io.t402</groupId>
@@ -65,13 +65,13 @@ npm install @t402/wdk-multisig @t402/core @safe-global/protocol-kit
     <version>1.8.0</version>
 </dependency>
 ```
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ### Configure Multi-Sig Client
 
 <Tabs items={['TypeScript', 'Java']}>
-  <Tab>
+  <Tabs.Tab>
 ```typescript
 import { createMultisigClient } from '@t402/wdk-multisig';
 import { t402Client } from '@t402/core/client';
@@ -98,8 +98,8 @@ const multisigClient = await createMultisigClient({
 const client = new t402Client()
   .register('eip155:8453', multisigClient);
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```java
 import io.t402.multisig.*;
 import io.t402.client.T402HttpClient;
@@ -122,13 +122,13 @@ SafeTransaction tx = txBuilder
     .operation(Operation.CALL)
     .build();
 ```
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ### Implement Signature Collection
 
 <Tabs items={['TypeScript', 'Java']}>
-  <Tab>
+  <Tabs.Tab>
 ```typescript
 import { SignatureCollector } from '@t402/wdk-multisig';
 
@@ -157,8 +157,8 @@ async function collectSignatures(txHash: string) {
   throw new Error('Not enough signatures');
 }
 ```
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 ```java
 import io.t402.multisig.SignatureCollector;
 
@@ -186,7 +186,7 @@ public byte[] collectSignatures(byte[] txHash) throws Exception {
     throw new Exception("Not enough signatures");
 }
 ```
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ### Server Integration
