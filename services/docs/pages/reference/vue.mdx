@@ -1,0 +1,715 @@
+# @t402/vue
+
+import { Callout, Tabs } from 'nextra/components'
+
+Vue components and composables for building payment UIs with the t402 protocol. Pre-built components with customizable styling and composables for custom implementations.
+
+## Installation
+
+```bash npm2yarn
+npm install @t402/vue
+```
+
+## Quick Start
+
+```vue
+<script setup lang="ts">
+import { usePaymentRequired, PaymentButton, PaymentDetails } from '@t402/vue';
+
+const { paymentRequired, status, fetchResource } = usePaymentRequired({
+  onSuccess: () => console.log('Access granted!'),
+});
+
+const handleAccess = () => fetchResource('/api/premium');
+const handlePayment = () => processPayment(paymentRequired.value);
+</script>
+
+<template>
+  <div v-if="paymentRequired">
+    <PaymentDetails :requirements="paymentRequired.accepts" />
+    <PaymentButton @click="handlePayment">
+      Pay Now
+    </PaymentButton>
+  </div>
+  <button v-else @click="handleAccess">
+    Access Premium Content
+  </button>
+</template>
+```
+
+## Composables
+
+### usePaymentRequired
+
+Composable to fetch resources and capture 402 Payment Required responses.
+
+```typescript
+function usePaymentRequired(options?: UsePaymentRequiredOptions): UsePaymentRequiredResult
+```
+
+**Options**
+
+```typescript
+interface UsePaymentRequiredOptions {
+  onSuccess?: (response: Response) => void;
+  onError?: (error: Error) => void;
+}
+```
+
+**Returns**
+
+```typescript
+interface UsePaymentRequiredResult {
+  paymentRequired: Ref<PaymentRequired | null>;
+  status: Ref<PaymentStatus>;
+  error: Ref<string | null>;
+  fetchResource: (url: string, options?: RequestInit) => Promise<Response | null>;
+  reset: () => void;
+}
+```
+
+**Example**
+
+```vue
+<script setup lang="ts">
+import { usePaymentRequired } from '@t402/vue';
+
+const { paymentRequired, status, error, fetchResource, reset } = usePaymentRequired({
+  onSuccess: (response) => console.log('Access granted!'),
+  onError: (error) => console.error('Failed:', error),
+});
+
+async function handleFetch() {
+  const response = await fetchResource('/api/protected');
+  if (response?.ok) {
+    const data = await response.json();
+    // Handle data
+  }
+}
+</script>
+
+<template>
+  <div v-if="status === 'loading'">Loading...</div>
+  <div v-else-if="status === 'error'">Error: {{ error }}</div>
+  <PaymentUI v-else-if="paymentRequired" :data="paymentRequired" @paid="reset" />
+  <button v-else @click="handleFetch">Access Resource</button>
+</template>
+```
+
+### usePaymentStatus
+
+Track payment transaction status.
+
+```typescript
+function usePaymentStatus(): UsePaymentStatusResult
+```
+
+**Returns**
+
+```typescript
+interface UsePaymentStatusResult {
+  status: Ref<PaymentStatus>;
+  setStatus: (status: PaymentStatus) => void;
+  isLoading: ComputedRef<boolean>;
+  isSuccess: ComputedRef<boolean>;
+  isError: ComputedRef<boolean>;
+}
+```
+
+**Example**
+
+```vue
+<script setup lang="ts">
+import { usePaymentStatus } from '@t402/vue';
+
+const { status, setStatus, isLoading } = usePaymentStatus();
+
+async function handlePayment() {
+  setStatus('loading');
+  try {
+    await processPayment();
+    setStatus('success');
+  } catch {
+    setStatus('error');
+  }
+}
+</script>
+
+<template>
+  <div>
+    <p>Status: {{ status }}</p>
+    <button @click="handlePayment" :disabled="isLoading">
+      Pay
+    </button>
+  </div>
+</template>
+```
+
+### useAsyncPayment
+
+Handle async payment flows with retry logic.
+
+```typescript
+function useAsyncPayment(options: UseAsyncPaymentOptions): UseAsyncPaymentResult
+```
+
+**Example**
+
+```vue
+<script setup lang="ts">
+import { useAsyncPayment } from '@t402/vue';
+
+const props = defineProps<{ paymentRequired: PaymentRequired }>();
+
+const { execute, status, error, retry } = useAsyncPayment({
+  onSuccess: () => window.location.reload(),
+  maxRetries: 3,
+});
+</script>
+
+<template>
+  <div>
+    <button @click="execute(props.paymentRequired)" :disabled="status === 'loading'">
+      {{ status === 'loading' ? 'Processing...' : 'Pay Now' }}
+    </button>
+    <div v-if="status === 'error'">
+      <p>Error: {{ error }}</p>
+      <button @click="retry">Retry</button>
+    </div>
+  </div>
+</template>
+```
+
+### useGaslessPayment
+
+Composable for gasless ERC-4337 payments via WDK smart accounts.
+
+```typescript
+function useGaslessPayment(options: GaslessPaymentOptions): GaslessPaymentResult
+```
+
+**Options**
+
+```typescript
+interface GaslessPaymentOptions {
+  payFn: (params: { to: string; amount: bigint; token?: string }) => Promise<{
+    userOpHash: string;
+    sender: string;
+    sponsored: boolean;
+    wait: () => Promise<{ txHash: string; success: boolean }>;
+  }>;
+  onSuccess?: (receipt: { txHash: string; success: boolean }) => void;
+  onError?: (error: Error) => void;
+  autoWait?: boolean; // Default: true
+}
+```
+
+**Returns**
+
+```typescript
+interface GaslessPaymentResult {
+  pay: (params: { to: string; amount: bigint; token?: string }) => Promise<void>;
+  status: Ref<PaymentStatus>;
+  userOpHash: Ref<string | null>;
+  txHash: Ref<string | null>;
+  sponsored: Ref<boolean | null>;
+  error: Ref<string | null>;
+  isLoading: ComputedRef<boolean>;
+  isSuccess: ComputedRef<boolean>;
+  isError: ComputedRef<boolean>;
+  reset: () => void;
+}
+```
+
+**Example**
+
+```vue
+<script setup lang="ts">
+import { useGaslessPayment } from '@t402/vue';
+
+const props = defineProps<{ client: GaslessClient }>();
+
+const { pay, isLoading, isSuccess, txHash, sponsored, error } = useGaslessPayment({
+  payFn: (params) => props.client.pay(params),
+  onSuccess: (receipt) => console.log('Confirmed:', receipt.txHash),
+  autoWait: true,
+});
+</script>
+
+<template>
+  <div>
+    <button @click="pay({ to: '0x...', amount: 1000000n })" :disabled="isLoading">
+      {{ isLoading ? 'Processing...' : 'Pay Gasless' }}
+    </button>
+    <p v-if="isSuccess">TX: {{ txHash }} {{ sponsored ? '(Sponsored)' : '' }}</p>
+    <p v-if="error">Error: {{ error }}</p>
+  </div>
+</template>
+```
+
+### useBridgePayment
+
+Composable for cross-chain USDT0 bridging via LayerZero OFT.
+
+```typescript
+function useBridgePayment(options: BridgePaymentOptions): BridgePaymentResult
+```
+
+**Returns**
+
+```typescript
+type BridgeStatus = 'idle' | 'quoting' | 'bridging' | 'waiting' | 'success' | 'error';
+
+interface BridgePaymentResult {
+  bridge: (params: BridgeParams) => Promise<void>;
+  autoBridge: (params: AutoBridgeParams) => Promise<void>;
+  status: Ref<BridgeStatus>;
+  txHash: Ref<string | null>;
+  messageGuid: Ref<string | null>;
+  dstTxHash: Ref<string | null>;
+  error: Ref<string | null>;
+  isLoading: ComputedRef<boolean>;
+  isSuccess: ComputedRef<boolean>;
+  isError: ComputedRef<boolean>;
+  reset: () => void;
+}
+```
+
+**Example**
+
+```vue
+<script setup lang="ts">
+import { useBridgePayment } from '@t402/vue';
+
+const { autoBridge, isLoading, isSuccess, txHash, error } = useBridgePayment({
+  bridgeFn: (params) => bridgeClient.bridge(params),
+  autoBridgeFn: (params) => bridgeClient.autoBridge(params),
+  onSuccess: (result) => console.log('Bridged:', result),
+});
+</script>
+
+<template>
+  <button
+    @click="autoBridge({ toChain: 'arbitrum', amount: 100_000000n, recipient: '0x...' })"
+    :disabled="isLoading"
+  >
+    {{ isLoading ? 'Bridging...' : 'Bridge USDT0' }}
+  </button>
+</template>
+```
+
+### useMultiSigPayment
+
+Composable for multi-signature Safe payments with threshold signature collection.
+
+```typescript
+function useMultiSigPayment(options: MultiSigPaymentOptions): MultiSigPaymentResult
+```
+
+**Returns**
+
+```typescript
+type MultiSigStatus = 'idle' | 'initiating' | 'collecting' | 'submitting' | 'success' | 'error';
+
+interface MultiSigPaymentResult {
+  initiate: (params: { to: string; amount: bigint; token?: string }) => Promise<void>;
+  submit: () => Promise<void>;
+  status: Ref<MultiSigStatus>;
+  requestId: Ref<string | null>;
+  userOpHash: Ref<string | null>;
+  txHash: Ref<string | null>;
+  threshold: Ref<number>;
+  collectedCount: Ref<number>;
+  isReady: Ref<boolean>;
+  error: Ref<string | null>;
+  isLoading: ComputedRef<boolean>;
+  isSuccess: ComputedRef<boolean>;
+  isError: ComputedRef<boolean>;
+  reset: () => void;
+}
+```
+
+**Example**
+
+```vue
+<script setup lang="ts">
+import { useMultiSigPayment } from '@t402/vue';
+
+const { initiate, submit, status, isReady, threshold, collectedCount, error } =
+  useMultiSigPayment({
+    initiateFn: (params) => multiSigClient.initiatePayment(params),
+    submitFn: (id) => multiSigClient.submitRequest(id),
+    onSuccess: (receipt) => console.log('Confirmed:', receipt.txHash),
+    autoWait: true,
+  });
+</script>
+
+<template>
+  <div>
+    <button v-if="status === 'idle'" @click="initiate({ to: '0x...', amount: 1000000n })">
+      Initiate Payment
+    </button>
+    <p v-if="status === 'collecting'">
+      Collecting signatures: {{ collectedCount }}/{{ threshold }}
+    </p>
+    <button v-if="isReady" @click="submit">Submit Transaction</button>
+    <p v-if="error">Error: {{ error }}</p>
+  </div>
+</template>
+```
+
+## Components
+
+### PaymentButton
+
+Styled payment button with loading state.
+
+```typescript
+interface PaymentButtonProps {
+  disabled?: boolean;
+  loading?: boolean;
+  variant?: 'primary' | 'secondary' | 'outline';
+  size?: 'sm' | 'md' | 'lg';
+}
+```
+
+**Example**
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue';
+import { PaymentButton } from '@t402/vue';
+
+const loading = ref(false);
+
+async function handlePayment() {
+  loading.value = true;
+  await processPayment();
+  loading.value = false;
+}
+</script>
+
+<template>
+  <PaymentButton
+    @click="handlePayment"
+    :loading="loading"
+    variant="primary"
+    size="lg"
+  >
+    Pay $10.00
+  </PaymentButton>
+</template>
+```
+
+### PaymentDetails
+
+Display payment requirements.
+
+```typescript
+interface PaymentDetailsProps {
+  requirements: PaymentRequirements[];
+  selectedIndex?: number;
+  showNetworkSelector?: boolean;
+}
+```
+
+**Events**
+
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `select` | `number` | Emitted when a network is selected |
+
+**Example**
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue';
+import { PaymentDetails } from '@t402/vue';
+
+const props = defineProps<{ paymentRequired: PaymentRequired }>();
+const selected = ref(0);
+</script>
+
+<template>
+  <PaymentDetails
+    :requirements="props.paymentRequired.accepts"
+    :selected-index="selected"
+    @select="selected = $event"
+    show-network-selector
+  />
+</template>
+```
+
+### PaymentStatusDisplay
+
+Show payment status with icons.
+
+```typescript
+interface PaymentStatusDisplayProps {
+  status: PaymentStatus;
+  message?: string;
+  txHash?: string;
+  network?: string;
+}
+```
+
+**Example**
+
+```vue
+<script setup lang="ts">
+import { PaymentStatusDisplay } from '@t402/vue';
+
+const props = defineProps<{
+  status: PaymentStatus;
+  txHash?: string;
+}>();
+</script>
+
+<template>
+  <PaymentStatusDisplay
+    :status="props.status"
+    :tx-hash="props.txHash"
+    network="eip155:8453"
+    :message="props.status === 'success' ? 'Payment confirmed!' : undefined"
+  />
+</template>
+```
+
+### AddressDisplay
+
+Display blockchain addresses with truncation.
+
+```typescript
+interface AddressDisplayProps {
+  address: string;
+  network?: string;
+  showCopy?: boolean;
+  showExplorer?: boolean;
+}
+```
+
+**Example**
+
+```vue
+<script setup lang="ts">
+import { AddressDisplay } from '@t402/vue';
+
+const props = defineProps<{
+  payTo: string;
+  network: string;
+}>();
+</script>
+
+<template>
+  <AddressDisplay
+    :address="props.payTo"
+    :network="props.network"
+    show-copy
+    show-explorer
+  />
+</template>
+```
+
+### Spinner
+
+Loading spinner component.
+
+```typescript
+interface SpinnerProps {
+  size?: 'sm' | 'md' | 'lg';
+  color?: string;
+}
+```
+
+## Utilities
+
+### Network Detection
+
+```typescript
+import {
+  isEvmNetwork,
+  isSvmNetwork,
+  isTonNetwork,
+  isTronNetwork,
+  isTestnetNetwork,
+  getNetworkDisplayName,
+} from '@t402/vue';
+
+// Check network type
+isEvmNetwork('eip155:8453');        // true
+isSvmNetwork('solana:5eykt...');    // true
+isTonNetwork('ton:mainnet');        // true
+isTestnetNetwork('eip155:84532');   // true
+
+// Get display name
+getNetworkDisplayName('eip155:8453');  // "Base"
+getNetworkDisplayName('ton:mainnet');  // "TON"
+```
+
+### Payment Helpers
+
+```typescript
+import {
+  normalizePaymentRequirements,
+  getPreferredNetworks,
+  choosePaymentRequirement,
+} from '@t402/vue';
+
+// Normalize requirements to array
+const requirements = normalizePaymentRequirements(paymentRequired);
+
+// Get user's preferred networks
+const preferred = getPreferredNetworks();
+
+// Auto-select best requirement
+const selected = choosePaymentRequirement(requirements, preferred);
+```
+
+### Formatters
+
+```typescript
+import {
+  truncateAddress,
+  formatTokenAmount,
+  getAssetDisplayName,
+} from '@t402/vue';
+
+truncateAddress('0x1234...5678');           // "0x1234...5678"
+formatTokenAmount('1000000', 6);            // "1.00"
+getAssetDisplayName('eip155:8453', 'USDT'); // "USDT on Base"
+```
+
+## Complete Example
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue';
+import {
+  usePaymentRequired,
+  PaymentButton,
+  PaymentDetails,
+  PaymentStatusDisplay,
+} from '@t402/vue';
+import { t402Client } from '@t402/fetch';
+import { ExactEvmClient } from '@t402/evm/exact/client';
+
+// Create client
+const client = new t402Client()
+  .register('eip155:*', new ExactEvmClient(walletClient));
+
+const content = ref(null);
+
+const { paymentRequired, status, fetchResource, reset } = usePaymentRequired({
+  onSuccess: async (response) => {
+    content.value = await response.json();
+  },
+});
+
+async function handlePayment() {
+  // Process payment with client...
+  await client.createPaymentPayload(paymentRequired.value);
+  reset();
+  await fetchResource('/api/premium');
+}
+</script>
+
+<template>
+  <div v-if="content">
+    {{ JSON.stringify(content) }}
+  </div>
+
+  <div v-else-if="paymentRequired" class="payment-modal">
+    <h2>Payment Required</h2>
+    <PaymentDetails :requirements="paymentRequired.accepts" />
+    <PaymentButton @click="handlePayment" size="lg">
+      Pay Now
+    </PaymentButton>
+    <PaymentStatusDisplay :status="status" />
+  </div>
+
+  <button v-else @click="fetchResource('/api/premium')">
+    Access Premium Content
+  </button>
+</template>
+
+<style scoped>
+.payment-modal {
+  padding: 2rem;
+  border-radius: 8px;
+  background: #f5f5f5;
+}
+</style>
+```
+
+## Nuxt Integration
+
+For Nuxt 3, create a plugin:
+
+```typescript
+// plugins/t402.client.ts
+import { t402Client } from '@t402/fetch';
+import { ExactEvmClient } from '@t402/evm/exact/client';
+
+export default defineNuxtPlugin(() => {
+  const client = new t402Client()
+    .register('eip155:*', new ExactEvmClient(walletClient));
+
+  return {
+    provide: {
+      t402Client: client,
+    },
+  };
+});
+```
+
+```vue
+<script setup lang="ts">
+const { $t402Client } = useNuxtApp();
+</script>
+```
+
+## Type Exports
+
+```typescript
+// Components
+export {
+  Spinner,
+  PaymentButton,
+  PaymentStatusDisplay,
+  PaymentDetails,
+  AddressDisplay,
+} from '@t402/vue';
+
+// Composables
+export {
+  usePaymentRequired,
+  usePaymentStatus,
+  useAsyncPayment,
+  useGaslessPayment,
+  useBridgePayment,
+  useMultiSigPayment,
+} from '@t402/vue';
+
+// Types
+export type {
+  PaymentStatus,
+  PaymentState,
+  PaymentButtonProps,
+  PaymentStatusDisplayProps,
+  PaymentDetailsProps,
+  SpinnerProps,
+  AddressDisplayProps,
+  PaymentRequired,
+  PaymentRequirements,
+} from '@t402/vue';
+```
+
+## Related
+
+- [@t402/react](/reference/react) - React components
+- [@t402/paywall](/reference/paywall) - Server-side paywall
+- [@t402/fetch](/reference/fetch) - Fetch wrapper
+- [@t402/wdk-gasless](/sdks/typescript/wdk-gasless) - Gasless payments
+- [@t402/wdk-bridge](/sdks/typescript/wdk-bridge) - Cross-chain bridging
+- [@t402/wdk-multisig](/sdks/typescript/wdk-multisig) - Multi-sig payments
+- [Client Guide](/getting-started/client) - Client implementation

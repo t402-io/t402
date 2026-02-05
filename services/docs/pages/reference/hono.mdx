@@ -1,0 +1,332 @@
+# @t402/hono
+
+import { Callout, Tabs } from 'nextra/components'
+
+Hono middleware for protecting routes with t402 payment requirements. Lightweight and edge-compatible, perfect for Cloudflare Workers, Deno, and Bun.
+
+## Installation
+
+```bash npm2yarn
+npm install @t402/hono @t402/core
+```
+
+## Quick Start
+
+```typescript
+import { Hono } from 'hono';
+import { paymentMiddleware } from '@t402/hono';
+import { t402ResourceServer, createFacilitatorClient } from '@t402/core/server';
+import { registerExactEvmScheme } from '@t402/evm/exact/server';
+
+const app = new Hono();
+
+// Create and configure the t402 server
+const facilitator = createFacilitatorClient({ url: 'https://facilitator.t402.io' });
+const server = new t402ResourceServer(facilitator);
+registerExactEvmScheme(server, {});
+
+// Define protected routes
+const routes = {
+  '/api/premium/*': {
+    accepts: {
+      scheme: 'exact',
+      network: 'eip155:8453',
+      payTo: '0xYourAddress',
+      price: '$0.01',
+    },
+    description: 'Premium API access',
+  },
+};
+
+// Apply middleware
+app.use('*', paymentMiddleware(routes, server));
+
+// Protected route
+app.get('/api/premium/data', (c) => {
+  return c.json({ data: 'Premium content' });
+});
+
+export default app;
+```
+
+## API Reference
+
+### paymentMiddleware
+
+Creates Hono middleware with a pre-configured server instance.
+
+```typescript
+function paymentMiddleware(
+  routes: RoutesConfig,
+  server: t402ResourceServer,
+  paywallConfig?: PaywallConfig,
+  paywall?: PaywallProvider,
+  syncFacilitatorOnStart?: boolean
+): MiddlewareHandler
+```
+
+**Parameters**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `routes` | `RoutesConfig` | Route configurations for protected endpoints |
+| `server` | `t402ResourceServer` | Pre-configured server instance |
+| `paywallConfig` | `PaywallConfig` | Optional paywall UI configuration |
+| `paywall` | `PaywallProvider` | Optional custom paywall provider |
+| `syncFacilitatorOnStart` | `boolean` | Sync with facilitator on startup (default: `true`) |
+
+**Example**
+
+```typescript
+import { paymentMiddleware } from '@t402/hono';
+
+app.use('*', paymentMiddleware(routes, server, {
+  title: 'Premium API',
+  theme: 'dark',
+}));
+```
+
+### paymentMiddlewareFromConfig
+
+Creates Hono middleware with simple configuration.
+
+```typescript
+function paymentMiddlewareFromConfig(
+  routes: RoutesConfig,
+  facilitatorClients?: FacilitatorClient | FacilitatorClient[],
+  schemes?: SchemeRegistration[],
+  paywallConfig?: PaywallConfig,
+  paywall?: PaywallProvider,
+  syncFacilitatorOnStart?: boolean
+): MiddlewareHandler
+```
+
+**Example**
+
+```typescript
+import { paymentMiddlewareFromConfig } from '@t402/hono';
+import { createExactEvmServer } from '@t402/evm/exact/server';
+
+app.use('*', paymentMiddlewareFromConfig(
+  routes,
+  facilitatorClient,
+  [{ network: 'eip155:8453', server: createExactEvmServer({}) }]
+));
+```
+
+## Edge Runtime Support
+
+Hono runs on edge runtimes. Use appropriate configurations:
+
+<Tabs items={['Cloudflare Workers', 'Deno', 'Bun']}>
+  <Tabs.Tab>
+```typescript
+// wrangler.toml
+// name = "t402-api"
+// main = "src/index.ts"
+
+import { Hono } from 'hono';
+import { paymentMiddleware } from '@t402/hono';
+
+const app = new Hono();
+
+// Configure for edge environment
+const routes = {
+  '/api/*': {
+    accepts: {
+      scheme: 'exact',
+      network: 'eip155:8453',
+      payTo: '0xYourAddress',
+      price: '$0.001',
+    },
+    description: 'Edge API',
+  },
+};
+
+app.use('*', paymentMiddleware(routes, server));
+
+export default app;
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```typescript
+// main.ts
+import { Hono } from 'hono';
+import { paymentMiddleware } from '@t402/hono';
+
+const app = new Hono();
+
+app.use('*', paymentMiddleware(routes, server));
+
+Deno.serve(app.fetch);
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```typescript
+// index.ts
+import { Hono } from 'hono';
+import { paymentMiddleware } from '@t402/hono';
+
+const app = new Hono();
+
+app.use('*', paymentMiddleware(routes, server));
+
+export default app;
+```
+  </Tabs.Tab>
+</Tabs>
+
+## Route Configuration
+
+```typescript
+const routes: RoutesConfig = {
+  // Exact path match
+  '/api/premium': {
+    accepts: {
+      scheme: 'exact',
+      network: 'eip155:8453',
+      payTo: '0xRecipient',
+      price: '$0.01',
+    },
+    description: 'Single endpoint',
+  },
+
+  // Wildcard match
+  '/api/data/*': {
+    accepts: {
+      scheme: 'exact',
+      network: 'eip155:8453',
+      payTo: '0xRecipient',
+      price: '$0.005',
+    },
+    description: 'All data endpoints',
+  },
+
+  // Multiple payment options
+  '/api/multi': {
+    accepts: [
+      { scheme: 'exact', network: 'eip155:8453', payTo: '0x...', price: '$0.01' },
+      { scheme: 'exact', network: 'ton:mainnet', payTo: 'EQ...', price: '$0.01' },
+    ],
+    description: 'Multi-chain support',
+  },
+};
+```
+
+## Settlement Flow
+
+The middleware ensures atomic payment settlement:
+
+```typescript
+app.get('/api/premium/data', async (c) => {
+  // This handler only runs after payment is verified
+  const data = await fetchPremiumData();
+
+  // Settlement happens after successful response
+  return c.json({ data }); // Status 200 -> Payment settles
+});
+
+app.get('/api/premium/error', (c) => {
+  // Error responses prevent settlement
+  return c.json({ error: 'Not found' }, 404); // Status 404 -> No settlement
+});
+```
+
+<Callout type="info">
+  Payment settlement only occurs when your handler returns a successful response (status &lt; 400).
+</Callout>
+
+## Middleware Ordering
+
+Place the payment middleware appropriately:
+
+```typescript
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { logger } from 'hono/logger';
+import { paymentMiddleware } from '@t402/hono';
+
+const app = new Hono();
+
+// 1. CORS first
+app.use('*', cors());
+
+// 2. Logging
+app.use('*', logger());
+
+// 3. Payment middleware
+app.use('*', paymentMiddleware(routes, server));
+
+// 4. Routes
+app.get('/api/premium/data', (c) => c.json({ data: 'Premium' }));
+```
+
+## Group-Based Protection
+
+Protect route groups:
+
+```typescript
+const app = new Hono();
+
+// Public routes
+app.get('/api/public', (c) => c.json({ public: true }));
+
+// Premium route group
+const premium = new Hono();
+premium.use('*', paymentMiddleware(routes, server));
+premium.get('/data', (c) => c.json({ premium: true }));
+premium.get('/analytics', (c) => c.json({ analytics: [] }));
+
+app.route('/api/premium', premium);
+```
+
+## Custom Paywall
+
+```typescript
+import { PaywallProvider } from '@t402/core/server';
+
+const customPaywall: PaywallProvider = {
+  render: (paymentRequired, config) => {
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head><title>${config?.title || 'Pay'}</title></head>
+        <body>
+          <h1>Payment Required</h1>
+          <p>Amount: ${paymentRequired.requirements[0].maxAmountRequired}</p>
+        </body>
+      </html>
+    `;
+  },
+};
+
+app.use('*', paymentMiddleware(routes, server, paywallConfig, customPaywall));
+```
+
+## Type Exports
+
+```typescript
+// Server types
+export { t402ResourceServer, t402HTTPResourceServer } from '@t402/core/server';
+export type { PaywallProvider, PaywallConfig } from '@t402/core/server';
+export { RouteConfigurationError } from '@t402/core/server';
+
+// Protocol types
+export type {
+  PaymentRequired,
+  PaymentRequirements,
+  PaymentPayload,
+  Network,
+  SchemeNetworkServer,
+} from '@t402/core/types';
+
+// Adapter
+export { HonoAdapter } from '@t402/hono';
+```
+
+## Related
+
+- [@t402/core](/reference/core) - Core protocol types
+- [@t402/express](/reference/express) - Express middleware
+- [@t402/fastify](/reference/fastify) - Fastify plugin
+- [@t402/next](/reference/next) - Next.js integration
