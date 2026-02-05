@@ -1,0 +1,203 @@
+# OpenAPI Specification
+
+import { Callout } from 'nextra/components'
+
+The T402 Facilitator API follows the OpenAPI 3.1 specification for standardized API documentation.
+
+## Specification File
+
+The OpenAPI specification is available at:
+
+- **Raw YAML**: [/api/openapi.yaml](/api/openapi.yaml)
+- **Live API**: [https://facilitator.t402.io](https://facilitator.t402.io)
+
+## Using the Specification
+
+### Import into Postman
+
+1. Open Postman
+2. Click **Import** > **Link**
+3. Enter: `https://docs.t402.io/api/openapi.yaml`
+4. Click **Import**
+
+### Generate Client Code
+
+Use [OpenAPI Generator](https://openapi-generator.tech/) to generate client libraries:
+
+```bash
+# Install OpenAPI Generator
+npm install @openapitools/openapi-generator-cli -g
+
+# Generate TypeScript client
+openapi-generator-cli generate \
+  -i https://docs.t402.io/api/openapi.yaml \
+  -g typescript-fetch \
+  -o ./generated/client
+
+# Generate Python client
+openapi-generator-cli generate \
+  -i https://docs.t402.io/api/openapi.yaml \
+  -g python \
+  -o ./generated/python-client
+
+# Generate Go client
+openapi-generator-cli generate \
+  -i https://docs.t402.io/api/openapi.yaml \
+  -g go \
+  -o ./generated/go-client
+```
+
+### Swagger UI
+
+You can view the interactive API documentation using Swagger UI:
+
+```bash
+# Using Docker
+docker run -p 8080:8080 \
+  -e SWAGGER_JSON_URL=https://docs.t402.io/api/openapi.yaml \
+  swaggerapi/swagger-ui
+
+# Open http://localhost:8080
+```
+
+## API Overview
+
+### Base URL
+
+```
+https://facilitator.t402.io
+```
+
+### Authentication
+
+API key authentication is optional by default. When required, include the key in the `X-API-Key` header:
+
+```bash
+curl -H "X-API-Key: your-api-key" \
+  https://facilitator.t402.io/supported
+```
+
+### Rate Limiting
+
+| Endpoint | Limit |
+|----------|-------|
+| `/verify` | 1000/min |
+| `/settle` | 1000/min |
+| `/supported` | 1000/min |
+| `/health`, `/ready` | Unlimited |
+| `/metrics` | Unlimited |
+
+### Endpoints Summary
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/health` | Liveness probe |
+| GET | `/ready` | Readiness probe with dependency checks |
+| GET | `/info` | API information and available endpoints |
+| GET | `/supported` | List supported networks, schemes, and signers |
+| POST | `/verify` | Verify a payment authorization signature |
+| POST | `/settle` | Execute on-chain payment settlement |
+| GET | `/metrics` | Prometheus metrics |
+
+### Advanced Endpoints (v1)
+
+Streaming payments and intent-based routing require database configuration:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/v1/stream/open` | Open a payment stream |
+| POST | `/v1/stream/update` | Update stream with new amount |
+| POST | `/v1/stream/close` | Close and settle a stream |
+| GET | `/v1/stream/:id` | Get stream status |
+| POST | `/v1/intent` | Create a payment intent |
+| GET | `/v1/intent/:id` | Get intent status |
+| POST | `/v1/intent/:id/route` | Select a route |
+| POST | `/v1/intent/:id/execute` | Execute the intent |
+
+## Request Examples
+
+### Verify Payment
+
+```bash
+curl -X POST https://facilitator.t402.io/verify \
+  -H "Content-Type: application/json" \
+  -d '{
+    "paymentPayload": {
+      "t402Version": 2,
+      "scheme": "exact",
+      "network": "eip155:8453",
+      "payload": {
+        "from": "0x742d35Cc6634C0532925a3b844Bc9e7595f5b1A1",
+        "to": "0xC88f67e776f16DcFBf42e6bDda1B82604448899B",
+        "value": "1000000",
+        "validAfter": 0,
+        "validBefore": 1735689600,
+        "nonce": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+        "signature": "0x..."
+      }
+    },
+    "paymentRequirements": {
+      "scheme": "exact",
+      "network": "eip155:8453",
+      "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "payTo": "0xC88f67e776f16DcFBf42e6bDda1B82604448899B",
+      "maxAmountRequired": "1000000"
+    }
+  }'
+```
+
+### Settle Payment
+
+```bash
+curl -X POST https://facilitator.t402.io/settle \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: unique-request-id-123" \
+  -d '{
+    "paymentPayload": { ... },
+    "paymentRequirements": { ... }
+  }'
+```
+
+### Get Supported Networks
+
+```bash
+curl https://facilitator.t402.io/supported
+```
+
+Response:
+
+```json
+{
+  "kinds": [
+    {
+      "scheme": "exact",
+      "network": "eip155:8453",
+      "signers": ["0xC88f67e776f16DcFBf42e6bDda1B82604448899B"]
+    },
+    {
+      "scheme": "exact",
+      "network": "ton:mainnet",
+      "signers": ["EQDjv9CUEJ__D_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkEUe"]
+    }
+  ]
+}
+```
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `INVALID_REQUEST` | Request body is malformed or missing required fields |
+| `VERIFICATION_FAILED` | Payment signature verification failed |
+| `SETTLEMENT_FAILED` | On-chain settlement transaction failed |
+| `REQUEST_IN_PROGRESS` | Duplicate request with same idempotency key is processing |
+| `PAYLOAD_MISMATCH` | Payload differs from previous request with same idempotency key |
+| `INVALID_IDEMPOTENCY_KEY` | Idempotency key format is invalid |
+| `IDEMPOTENCY_UNAVAILABLE` | Idempotency service is temporarily unavailable |
+| `PREVIOUS_REQUEST_FAILED` | Previous request with this key failed |
+
+## Related
+
+- [Facilitator API](/reference/facilitator-api) - Detailed API documentation
+- [Self-Hosted Facilitator](/tutorials/self-hosted-facilitator) - Run your own facilitator
+- [TypeScript SDK](/sdks/typescript) - SDK documentation
