@@ -331,10 +331,7 @@ export class WdkBridgeClient {
     }
 
     // Validate recipient
-    if (
-      !params.recipient ||
-      params.recipient === '0x0000000000000000000000000000000000000000'
-    ) {
+    if (!params.recipient || params.recipient === '0x0000000000000000000000000000000000000000') {
       throw new Error('Recipient address must not be the zero address')
     }
 
@@ -402,10 +399,7 @@ export class WdkBridgeClient {
     }
 
     // Validate recipient (not zero address)
-    if (
-      !params.recipient ||
-      params.recipient === '0x0000000000000000000000000000000000000000'
-    ) {
+    if (!params.recipient || params.recipient === '0x0000000000000000000000000000000000000000') {
       throw new Error('Recipient address must not be the zero address')
     }
 

@@ -11,24 +11,24 @@ npm install @t402/react
 ## Quick Start
 
 ```tsx
-import { PaymentProvider, PaymentButton, usePaymentRequired } from "@t402/react";
+import { PaymentProvider, PaymentButton, usePaymentRequired } from '@t402/react'
 
 function App() {
   return (
     <PaymentProvider>
       <ProtectedContent />
     </PaymentProvider>
-  );
+  )
 }
 
 function ProtectedContent() {
-  const { paymentRequired, requirements, pay, status } = usePaymentRequired("/api/data");
+  const { paymentRequired, requirements, pay, status } = usePaymentRequired('/api/data')
 
   if (paymentRequired) {
-    return <PaymentButton requirements={requirements} onPay={pay} status={status} />;
+    return <PaymentButton requirements={requirements} onPay={pay} status={status} />
   }
 
-  return <div>Premium content loaded!</div>;
+  return <div>Premium content loaded!</div>
 }
 ```
 
@@ -39,13 +39,8 @@ function ProtectedContent() {
 Renders a payment action button with loading and status states.
 
 ```tsx
-import { PaymentButton } from "@t402/react";
-
-<PaymentButton
-  requirements={requirements}
-  onPay={handlePay}
-  status={status}
-/>
+import { PaymentButton } from '@t402/react'
+;<PaymentButton requirements={requirements} onPay={handlePay} status={status} />
 ```
 
 ### PaymentDetails
@@ -53,9 +48,8 @@ import { PaymentButton } from "@t402/react";
 Displays payment requirements (amount, network, recipient).
 
 ```tsx
-import { PaymentDetails } from "@t402/react";
-
-<PaymentDetails requirements={requirements} />
+import { PaymentDetails } from '@t402/react'
+;<PaymentDetails requirements={requirements} />
 ```
 
 ### PaymentStatusDisplay
@@ -63,9 +57,8 @@ import { PaymentDetails } from "@t402/react";
 Shows the current payment status with appropriate UI feedback.
 
 ```tsx
-import { PaymentStatusDisplay } from "@t402/react";
-
-<PaymentStatusDisplay status={status} />
+import { PaymentStatusDisplay } from '@t402/react'
+;<PaymentStatusDisplay status={status} />
 ```
 
 ### AddressDisplay
@@ -73,9 +66,8 @@ import { PaymentStatusDisplay } from "@t402/react";
 Renders a blockchain address with truncation and copy functionality.
 
 ```tsx
-import { AddressDisplay } from "@t402/react";
-
-<AddressDisplay address="0x1234...5678" />
+import { AddressDisplay } from '@t402/react'
+;<AddressDisplay address="0x1234...5678" />
 ```
 
 ## Hooks
@@ -86,11 +78,11 @@ Detects 402 responses and extracts payment requirements.
 
 ```tsx
 const {
-  paymentRequired,  // boolean - whether payment is needed
-  requirements,     // PaymentRequirements[] from 402 response
-  pay,             // () => Promise<void> - trigger payment
-  status,          // PaymentStatus - current state
-} = usePaymentRequired(url, options);
+  paymentRequired, // boolean - whether payment is needed
+  requirements, // PaymentRequirements[] from 402 response
+  pay, // () => Promise<void> - trigger payment
+  status, // PaymentStatus - current state
+} = usePaymentRequired(url, options)
 ```
 
 ### usePaymentStatus
@@ -98,7 +90,7 @@ const {
 Tracks the lifecycle of a payment (idle, pending, confirming, complete, error).
 
 ```tsx
-const { status, error, reset } = usePaymentStatus();
+const { status, error, reset } = usePaymentStatus()
 ```
 
 ### useAsyncPayment
@@ -106,7 +98,7 @@ const { status, error, reset } = usePaymentStatus();
 Manages async payment flows with automatic retry and status tracking.
 
 ```tsx
-const { execute, status, error } = useAsyncPayment(paymentFn);
+const { execute, status, error } = useAsyncPayment(paymentFn)
 ```
 
 ## Provider
@@ -116,9 +108,8 @@ const { execute, status, error } = useAsyncPayment(paymentFn);
 Wraps your app to provide payment context to all child components.
 
 ```tsx
-import { PaymentProvider } from "@t402/react";
-
-<PaymentProvider>
+import { PaymentProvider } from '@t402/react'
+;<PaymentProvider>
   <App />
 </PaymentProvider>
 ```
@@ -136,15 +127,15 @@ import {
   truncateAddress,
   formatTokenAmount,
   choosePaymentRequirement,
-} from "@t402/react";
+} from '@t402/react'
 
 // Network detection
-isEvmNetwork("eip155:8453"); // true
+isEvmNetwork('eip155:8453') // true
 
 // Display helpers
-getNetworkDisplayName("eip155:8453"); // "Base"
-truncateAddress("0x1234567890abcdef"); // "0x1234...cdef"
-formatTokenAmount(1500000n, 6); // "1.50"
+getNetworkDisplayName('eip155:8453') // "Base"
+truncateAddress('0x1234567890abcdef') // "0x1234...cdef"
+formatTokenAmount(1500000n, 6) // "1.50"
 ```
 
 ## Peer Dependencies
