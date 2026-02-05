@@ -153,7 +153,7 @@ Check if the smart account is deployed on-chain.
 | Base      | 8453     | ✅    | ✅   |
 | Optimism  | 10       | ✅    | ✅   |
 | Ink       | 57073    | ✅    | -    |
-| Berachain | 80084    | ✅    | -    |
+| Berachain | 80094    | ✅    | -    |
 | Unichain  | 130      | ✅    | -    |
 
 ## Constants

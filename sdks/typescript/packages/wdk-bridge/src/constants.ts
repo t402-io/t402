@@ -20,7 +20,7 @@ export const CHAIN_IDS: Record<string, number> = {
   ethereum: 1,
   arbitrum: 42161,
   ink: 57073,
-  berachain: 80084,
+  berachain: 80094,
   unichain: 130,
 } as const
 
