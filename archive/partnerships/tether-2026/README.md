@@ -352,6 +352,6 @@ const bridge = new WDKBridge(wdk);
 ## Appendix
 
 - [Full Technical Specification](../../specs/t402-specification-v2.md)
-- [WDK Integration Guide](../../docs/pages/advanced/wdk.mdx)
+- [WDK Integration Guide](../../../services/docs/pages/reference/wdk.mdx)
 - [Security Documentation](../../SECURITY.md)
 - [API Reference](https://docs.t402.io/api)

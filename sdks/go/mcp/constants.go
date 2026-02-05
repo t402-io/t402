@@ -53,8 +53,8 @@ var DefaultRPCURLs = map[SupportedNetwork]string{
 	NetworkOptimism:  "https://mainnet.optimism.io",
 	NetworkPolygon:   "https://polygon-rpc.com",
 	NetworkAvalanche: "https://api.avax.network/ext/bc/C/rpc",
-	NetworkInk:       "https://rpc-qnd.ink.xyz",
-	NetworkBerachain: "https://artio.rpc.berachain.com",
+	NetworkInk:       "https://rpc-gel.inkonchain.com",
+	NetworkBerachain: "https://rpc.berachain.com",
 	NetworkUnichain:  "https://mainnet.unichain.org",
 }
 

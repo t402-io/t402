@@ -73,8 +73,8 @@ var ExplorerURLs = map[string]string{
 var DefaultRPCURLs = map[string]string{
 	"ethereum":  "https://eth.llamarpc.com",
 	"arbitrum":  "https://arb1.arbitrum.io/rpc",
-	"ink":       "https://rpc-qnd.ink.xyz",
-	"berachain": "https://artio.rpc.berachain.com",
+	"ink":       "https://rpc-gel.inkonchain.com",
+	"berachain": "https://rpc.berachain.com",
 	"unichain":  "https://mainnet.unichain.org",
 }
 

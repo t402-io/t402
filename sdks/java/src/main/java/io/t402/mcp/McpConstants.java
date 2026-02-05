@@ -87,8 +87,8 @@ public final class McpConstants {
         DEFAULT_RPC_URLS.put(SupportedNetwork.OPTIMISM, "https://mainnet.optimism.io");
         DEFAULT_RPC_URLS.put(SupportedNetwork.POLYGON, "https://polygon-rpc.com");
         DEFAULT_RPC_URLS.put(SupportedNetwork.AVALANCHE, "https://api.avax.network/ext/bc/C/rpc");
-        DEFAULT_RPC_URLS.put(SupportedNetwork.INK, "https://rpc-qnd.ink.xyz");
-        DEFAULT_RPC_URLS.put(SupportedNetwork.BERACHAIN, "https://artio.rpc.berachain.com");
+        DEFAULT_RPC_URLS.put(SupportedNetwork.INK, "https://rpc-gel.inkonchain.com");
+        DEFAULT_RPC_URLS.put(SupportedNetwork.BERACHAIN, "https://rpc.berachain.com");
         DEFAULT_RPC_URLS.put(SupportedNetwork.UNICHAIN, "https://mainnet.unichain.org");
     }
 
@@ -101,9 +101,6 @@ public final class McpConstants {
         USDC_ADDRESSES.put(SupportedNetwork.OPTIMISM, "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85");
         USDC_ADDRESSES.put(SupportedNetwork.POLYGON, "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359");
         USDC_ADDRESSES.put(SupportedNetwork.AVALANCHE, "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E");
-        USDC_ADDRESSES.put(SupportedNetwork.INK, "0x0200C29006150606B650577BBE7B6248F58470c1");
-        USDC_ADDRESSES.put(SupportedNetwork.BERACHAIN, "0x779Ded0c9e1022225f8E0630b35a9b54bE713736");
-        USDC_ADDRESSES.put(SupportedNetwork.UNICHAIN, "0x9151434b16b9763660705744891fA906F660EcC5");
     }
 
     // USDT contract addresses by network

@@ -53,7 +53,7 @@ const CHAIN_IDS: Record<string, number> = {
   optimism: 10,
   polygon: 137,
   ink: 57073,
-  berachain: 80084,
+  berachain: 80094,
   unichain: 130,
 }
 

@@ -62,9 +62,9 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 | @t402/polkadot | 2.3.1 | Polkadot Asset Hub |
 | @t402/stacks | 2.3.1 | Stacks (Bitcoin L2) |
 | @t402/wdk | 2.3.1 | Tether WDK integration |
-| @t402/wdk-gasless | 2.0.0-beta.1 | ERC-4337 gasless payments |
-| @t402/wdk-bridge | 2.0.0-beta.1 | LayerZero bridging |
-| @t402/wdk-multisig | 2.0.0-beta.1 | Safe multi-sig wallets |
+| @t402/wdk-gasless | 2.4.0 | ERC-4337 gasless payments |
+| @t402/wdk-bridge | 2.4.0 | LayerZero bridging |
+| @t402/wdk-multisig | 2.4.0 | Safe multi-sig wallets |
 | @t402/mcp | 2.0.0-beta.1 | AI agent MCP server |
 | @t402/express | 2.3.1 | Express.js middleware |
 | @t402/next | 2.3.1 | Next.js integration |
@@ -93,9 +93,9 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 
 | SDK | Version | Status |
 |-----|---------|--------|
-| Go | 1.8.0 | Production |
-| Python | 1.9.0 | Production |
-| Java | 1.8.0 | Production |
+| Go | 1.8.1 | Production |
+| Python | 1.9.1 | Production |
+| Java | 1.8.1 | Production |
 
 ---
 

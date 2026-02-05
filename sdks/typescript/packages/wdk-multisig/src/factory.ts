@@ -30,7 +30,7 @@ const CHAIN_IDS: Record<string, number> = {
   'optimism-sepolia': 11155420,
   polygon: 137,
   ink: 57073,
-  berachain: 80084,
+  berachain: 80094,
   unichain: 130,
   sepolia: 11155111,
 }

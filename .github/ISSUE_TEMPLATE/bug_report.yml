@@ -51,7 +51,7 @@ body:
         - Base (eip155:8453)
         - Optimism (eip155:10)
         - Ink (eip155:57073)
-        - Berachain (eip155:80084)
+        - Berachain (eip155:80094)
         - Unichain (eip155:130)
         - TON Mainnet
         - TON Testnet
