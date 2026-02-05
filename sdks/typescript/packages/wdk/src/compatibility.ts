@@ -11,13 +11,25 @@ export const WDK_COMPATIBILITY = {
   /** Minimum supported @tetherto/wdk version */
   minVersion: '1.0.0-beta.0',
   /** Versions that have been tested */
-  testedVersions: ['1.0.0-beta.3', '1.0.0-beta.4'],
-  /** Feature availability by version */
+  testedVersions: ['1.0.0-beta.3', '1.0.0-beta.4', '1.0.0-beta.5'],
+  /** Tested wallet-evm module versions */
+  walletEvmVersions: ['1.0.0-beta.5', '2.0.0-rc.1'],
+  /** Feature availability by @tetherto/wdk core version */
   features: {
     signTypedData: '1.0.0-beta.0',
     estimateGas: '1.0.0-beta.3',
     multiChainWallets: '1.0.0-beta.0',
     bridgeProtocol: '1.0.0-beta.3',
+    swapProtocol: '1.0.0-beta.4',
+  },
+  /** Known wallet module minimum versions */
+  walletModuleVersions: {
+    evm: '1.0.0-beta.5',
+    ton: '1.0.0-beta.7',
+    btc: '1.0.0-beta.5',
+    tron: '1.0.0-beta.4',
+    solana: '1.0.0-beta.5',
+    spark: '1.0.0-beta.6',
   },
 } as const
 
@@ -123,4 +135,36 @@ export function checkWdkCompatibility(version: string): CompatibilityResult {
   }
 
   return { compatible: true, warnings }
+}
+
+/**
+ * Check if a @tetherto/wdk-wallet-evm version is compatible.
+ *
+ * @param version - The wallet-evm module version to check
+ * @returns Compatibility result with warnings
+ */
+export function checkWalletEvmCompatibility(version: string): CompatibilityResult {
+  const warnings: string[] = []
+
+  const isTested = (WDK_COMPATIBILITY.walletEvmVersions as readonly string[]).includes(version)
+  if (!isTested) {
+    warnings.push(
+      `@tetherto/wdk-wallet-evm ${version} has not been explicitly tested. ` +
+        `Tested versions: ${WDK_COMPATIBILITY.walletEvmVersions.join(', ')}`,
+    )
+  }
+
+  return { compatible: true, warnings }
+}
+
+/**
+ * Get the minimum required version for a specific wallet module.
+ *
+ * @param module - Wallet module name (e.g., "evm", "ton", "solana")
+ * @returns The minimum version string, or undefined if unknown
+ */
+export function getWalletModuleMinVersion(
+  module: keyof typeof WDK_COMPATIBILITY.walletModuleVersions,
+): string | undefined {
+  return WDK_COMPATIBILITY.walletModuleVersions[module]
 }

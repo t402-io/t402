@@ -25,11 +25,82 @@ const wallet = new T402WDK(seedPhrase, {
   base: 'https://mainnet.base.org'
 });
 
-// Initialize
-await wallet.initialize();
-
-// Get address
+// Get signer for T402 payments
+const signer = await wallet.getSigner('arbitrum');
 const address = await wallet.getAddress('arbitrum');
+```
+
+### One-Step Setup with `create()`
+
+```typescript
+import WDK from '@tetherto/wdk';
+import WalletManagerEvm from '@tetherto/wdk-wallet-evm';
+import BridgeUsdt0Evm from '@tetherto/wdk-protocol-bridge-usdt0-evm';
+import { T402WDK } from '@t402/wdk';
+
+// Create a fully configured wallet in one call
+const wallet = T402WDK.create(WDK, {
+  seedPhrase: 'your twelve word seed phrase ...',
+  chains: {
+    arbitrum: 'https://arb1.arbitrum.io/rpc',
+    base: 'https://mainnet.base.org',
+    ethereum: 'https://eth.llamarpc.com',
+  },
+  modules: {
+    wallets: { evm: WalletManagerEvm },
+    protocols: { bridgeUsdt0Evm: BridgeUsdt0Evm },
+  },
+});
+
+// Get all signers at once for multi-chain HTTP client
+const signers = await wallet.getAllSigners();
+const client = createT402HTTPClient({ signers });
+```
+
+### Multi-Chain Registration
+
+```typescript
+import WDK from '@tetherto/wdk';
+import WalletManagerEvm from '@tetherto/wdk-wallet-evm';
+import WalletManagerTon from '@tetherto/wdk-wallet-ton';
+import WalletManagerSolana from '@tetherto/wdk-wallet-solana';
+import WalletManagerTron from '@tetherto/wdk-wallet-tron';
+import { T402WDK } from '@t402/wdk';
+
+// Register all chain wallet modules at once
+T402WDK.registerWDK(WDK, {
+  wallets: {
+    evm: WalletManagerEvm,
+    ton: WalletManagerTon,
+    solana: WalletManagerSolana,
+    tron: WalletManagerTron,
+  },
+  protocols: {
+    bridgeUsdt0Evm: BridgeUsdt0Evm,
+    swapVeloraEvm: SwapVeloraEvm,
+  }
+});
+
+const wallet = new T402WDK(seedPhrase, {
+  arbitrum: 'https://arb1.arbitrum.io/rpc'
+});
+
+// Get signers for different chains
+const evmSigner = await wallet.getSigner('arbitrum');
+const tonSigner = await wallet.getTonSigner();
+const svmSigner = await wallet.getSvmSigner();
+const tronSigner = await wallet.getTronSigner();
+```
+
+### Wrap an Existing WDK Instance
+
+```typescript
+import { T402WDK } from '@t402/wdk';
+
+// If you already have a configured @tetherto/wdk instance
+const wallet = T402WDK.fromWDK(existingWdkInstance, {
+  arbitrum: 'https://arb1.arbitrum.io/rpc',
+});
 ```
 
 ## T402WDK Class
@@ -63,12 +134,39 @@ interface T402WDKOptions {
 
 ### Static Methods
 
+#### create
+
+One-step factory: register modules + create wallet.
+
+```typescript
+const wallet = T402WDK.create(WDK, {
+  seedPhrase: '...',
+  chains: { arbitrum: 'https://arb1.arbitrum.io/rpc' },
+  modules: { wallets: { evm: WalletManagerEvm } },
+});
+```
+
+#### fromWDK
+
+Wrap a pre-configured `@tetherto/wdk` instance.
+
+```typescript
+const wallet = T402WDK.fromWDK(wdkInstance, chainConfig);
+```
+
 #### registerWDK
 
 Register WDK modules (required before creating instances).
 
 ```typescript
+// Legacy (EVM-only)
 T402WDK.registerWDK(WDK, WalletManagerEvm);
+
+// Unified (multi-chain)
+T402WDK.registerWDK(WDK, {
+  wallets: { evm: WalletManagerEvm, ton: WalletManagerTon },
+  protocols: { bridgeUsdt0Evm: BridgeUsdt0Evm },
+});
 ```
 
 #### generateSeedPhrase
@@ -82,13 +180,21 @@ const seedPhrase = T402WDK.generateSeedPhrase();
 
 ### Instance Methods
 
-#### initialize
+#### getAllSigners
 
-Initialize the wallet and derive accounts.
+Get all signers as an array for T402 HTTP clients.
 
 ```typescript
-await wallet.initialize();
+const signers = await wallet.getAllSigners();
+// Returns: Array<{ scheme, network, signer, family }>
+
+const client = createT402HTTPClient({ signers });
 ```
+
+Options:
+- `accountIndex` - HD wallet account index (default: 0)
+- `schemes` - Payment schemes (default: `["exact"]`)
+- `includeNonEvm` - Include TON/Solana/TRON signers (default: true)
 
 #### getAddress
 
@@ -473,6 +579,77 @@ interface BridgeResult {
   amount: bigint;
   estimatedTime: number;
 }
+```
+
+## Swap Integration (Velora)
+
+Swap any ERC-20 token to USDT0 using Tether's Velora protocol.
+
+```typescript
+import SwapVeloraEvm from '@tetherto/wdk-protocol-swap-velora-evm';
+
+T402WDK.registerWDK(WDK, {
+  wallets: { evm: WalletManagerEvm },
+  protocols: { swapVeloraEvm: SwapVeloraEvm },
+});
+
+const wallet = new T402WDK(seedPhrase, { arbitrum: '...' });
+
+// Check availability
+wallet.canSwap(); // true
+
+// Get a quote
+const quote = await wallet.getSwapQuote(
+  'arbitrum',
+  '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1', // WETH
+  100000000000000000n // 0.1 WETH
+);
+
+// Execute swap to USDT0
+const result = await wallet.swapAndPay({
+  chain: 'arbitrum',
+  fromToken: '0x82aF...', // WETH
+  amount: 100000000000000000n,
+  maxSlippage: 0.005, // 0.5%
+});
+```
+
+## Version Compatibility
+
+### @tetherto/wdk Core
+
+| Version | Status | Notes |
+|---------|--------|-------|
+| 1.0.0-beta.3 | Tested | |
+| 1.0.0-beta.4 | Tested | +swapProtocol |
+| 1.0.0-beta.5 | Tested | Latest tested |
+
+### @tetherto/wdk-wallet-evm
+
+| Version | Status |
+|---------|--------|
+| 1.0.0-beta.5 | Tested |
+| 2.0.0-rc.1 | Tested |
+
+### Wallet Module Minimum Versions
+
+| Module | Min Version |
+|--------|-------------|
+| wdk-wallet-evm | 1.0.0-beta.5 |
+| wdk-wallet-ton | 1.0.0-beta.7 |
+| wdk-wallet-solana | 1.0.0-beta.5 |
+| wdk-wallet-tron | 1.0.0-beta.4 |
+| wdk-wallet-btc | 1.0.0-beta.5 |
+| wdk-wallet-spark | 1.0.0-beta.6 |
+
+```typescript
+import { checkWdkCompatibility, checkWalletEvmCompatibility } from '@t402/wdk';
+
+const result = checkWdkCompatibility('1.0.0-beta.5');
+if (!result.compatible) {
+  console.error('Incompatible version');
+}
+result.warnings.forEach(w => console.warn(w));
 ```
 
 ## Supported Chains

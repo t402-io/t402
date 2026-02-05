@@ -146,6 +146,15 @@ export type {
   WDKSolanaAccount,
   WDKTronAccount,
   WDKInstanceMultiChain,
+  // Factory method types
+  T402WDKCreateConfig,
+  SignerEntry,
+  GetAllSignersOptions,
+  FromWDKOptions,
+  // Swap types
+  SwapQuote,
+  SwapResult,
+  SwapParams,
 } from './types.js'
 
 // Multi-chain adapters
@@ -236,6 +245,8 @@ export {
 export {
   WDK_COMPATIBILITY,
   checkWdkCompatibility,
+  checkWalletEvmCompatibility,
+  getWalletModuleMinVersion,
 } from './compatibility.js'
 export type { CompatibilityResult } from './compatibility.js'
 
