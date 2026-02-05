@@ -10,7 +10,10 @@ import java.util.Base64;
 import java.util.Map;
 
 /**
- * Payment payload sent by clients in the X-PAYMENT header.
+ * Payment payload sent by clients in the payment header.
+ * <p>
+ * Uses {@code PAYMENT-SIGNATURE} header for v2, {@code X-PAYMENT} for v1.
+ * </p>
  * <p>
  * In the v2 protocol, PaymentPayload includes:
  * <ul>
@@ -135,7 +138,7 @@ public class PaymentPayload {
     }
 
     /**
-     * Serializes and base64-encodes for the X-PAYMENT header.
+     * Serializes and base64-encodes for the payment header (PAYMENT-SIGNATURE or X-PAYMENT).
      *
      * @return base64-encoded JSON string
      */
@@ -149,7 +152,7 @@ public class PaymentPayload {
     }
 
     /**
-     * Decodes a PaymentPayload from the X-PAYMENT header.
+     * Decodes a PaymentPayload from the payment header (PAYMENT-SIGNATURE or X-PAYMENT).
      *
      * @param header base64-encoded JSON string
      * @return decoded PaymentPayload

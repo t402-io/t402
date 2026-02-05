@@ -353,8 +353,8 @@ class VerifyResponse(BaseModel):
 class SettleResponse(BaseModel):
     success: bool
     error_reason: Optional[str] = Field(None, alias="errorReason")
-    transaction: Optional[str] = None
-    network: Optional[str] = None
+    transaction: Optional[str] = ""
+    network: Optional[str] = ""
     payer: Optional[str] = None
 
     model_config = ConfigDict(
