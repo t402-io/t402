@@ -11,7 +11,6 @@ from t402.schemes.ton.exact.facilitator import (
     FacilitatorTonSigner,
 )
 from t402.schemes.interfaces import SchemeNetworkFacilitator
-from t402.types import VerifyResponse, SettleResponse
 from t402.ton import (
     TON_MAINNET,
     TON_TESTNET,
