@@ -6,7 +6,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { WdkAccount, BridgeRoute } from './types.js'
+import type { Address } from 'viem'
+import type { WdkAccount } from './types.js'
 import { MIN_BRIDGE_AMOUNT, DEFAULT_SLIPPAGE } from './constants.js'
 
 // Mock the @t402/evm module
