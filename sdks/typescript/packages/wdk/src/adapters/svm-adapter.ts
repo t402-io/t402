@@ -151,11 +151,7 @@ export class WDKSvmSignerAdapter implements TransactionSigner {
    * @param params - Transfer parameters
    * @returns Transaction signature
    */
-  async transfer(params: {
-    token: string
-    recipient: string
-    amount: bigint
-  }): Promise<string> {
+  async transfer(params: { token: string; recipient: string; amount: bigint }): Promise<string> {
     return this._account.transfer(params)
   }
 }
@@ -179,9 +175,7 @@ export class WDKSvmSignerAdapter implements TransactionSigner {
  * });
  * ```
  */
-export async function createWDKSvmSigner(
-  account: WDKSolanaAccount,
-): Promise<WDKSvmSignerAdapter> {
+export async function createWDKSvmSigner(account: WDKSolanaAccount): Promise<WDKSvmSignerAdapter> {
   const adapter = new WDKSvmSignerAdapter(account)
   await adapter.initialize()
   return adapter

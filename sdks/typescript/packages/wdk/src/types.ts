@@ -377,16 +377,9 @@ export interface WDKSolanaAccount {
   /** Sign a transaction */
   signTransaction(transaction: Uint8Array): Promise<Uint8Array>
   /** Send SOL */
-  sendTransaction(params: {
-    recipient: string
-    value: bigint
-  }): Promise<string>
+  sendTransaction(params: { recipient: string; value: bigint }): Promise<string>
   /** Transfer SPL token */
-  transfer(params: {
-    token: string
-    recipient: string
-    amount: bigint
-  }): Promise<string>
+  transfer(params: { token: string; recipient: string; amount: bigint }): Promise<string>
 }
 
 /**
@@ -404,11 +397,7 @@ export interface WDKTronAccount {
   /** Send signed transaction */
   sendTransaction(signedTx: unknown): Promise<string>
   /** Transfer TRC20 token */
-  transferTrc20?(params: {
-    contractAddress: string
-    to: string
-    amount: bigint
-  }): Promise<string>
+  transferTrc20?(params: { contractAddress: string; to: string; amount: bigint }): Promise<string>
 }
 
 /**
