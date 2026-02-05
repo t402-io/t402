@@ -131,10 +131,7 @@ export function StacksPaywall({ paymentRequired, onSuccessfulResponse }: StacksP
       const stacksClient = createExactDirectStacksClient({ signer: stacksSigner });
 
       // Use the client to execute the transfer and build the payment payload
-      const { t402Version, payload } = await stacksClient.createPaymentPayload(
-        2,
-        firstRequirement,
-      );
+      const { t402Version, payload } = await stacksClient.createPaymentPayload(2, firstRequirement);
 
       const paymentPayload = {
         t402Version,
