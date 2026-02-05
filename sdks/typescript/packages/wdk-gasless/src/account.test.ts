@@ -4,7 +4,7 @@
  * Tests for WdkSmartAccount and createWdkSmartAccount
  */
 
-import { describe, it, expect, vi, beforeAll } from 'vitest'
+import { describe, it, expect, vi, beforeAll as _beforeAll } from 'vitest'
 
 // ============================================================
 // Mock viem at module level to avoid loading the real library
@@ -12,8 +12,8 @@ import { describe, it, expect, vi, beforeAll } from 'vitest'
 // ============================================================
 
 const MOCK_COMPUTED_ADDRESS = '0x00000000000000000000000000000000DeAdBeEf'
-let encodeFunctionDataCallCount = 0
-let encodeFunctionDataLastArgs: unknown = undefined
+let _encodeFunctionDataCallCount = 0
+let _encodeFunctionDataLastArgs: unknown = undefined
 
 vi.mock('viem', () => {
   // Lightweight mock counter
@@ -22,8 +22,8 @@ vi.mock('viem', () => {
   return {
     encodeFunctionData: (args: unknown) => {
       callCount++
-      encodeFunctionDataCallCount = callCount
-      encodeFunctionDataLastArgs = args
+      _encodeFunctionDataCallCount = callCount
+      _encodeFunctionDataLastArgs = args
       const a = args as { functionName: string }
       // Return different selectors based on function name
       if (a.functionName === 'executeUserOp') return '0x7bb37428' + '00'.repeat(128)
@@ -43,7 +43,7 @@ vi.mock('viem', () => {
       }
       return result
     },
-    keccak256: (data: string) => '0x' + 'ff'.repeat(32),
+    keccak256: (_data: string) => '0x' + 'ff'.repeat(32),
     getContractAddress: () => MOCK_COMPUTED_ADDRESS,
   }
 })
@@ -60,8 +60,7 @@ const MOCK_OWNER_2 = '0x1111111111111111111111111111111111111111'
 const MOCK_OWNER_3 = '0x2222222222222222222222222222222222222222'
 const MOCK_SIG =
   '0xaabbccdd00000000000000000000000000000000000000000000000000000000001111111111111111111111111111111111111111111111111111111111111111ab'
-const MOCK_CODE =
-  '0x608060405234801561001057600080fd5b506040516101e63803806101e68339818101604052'
+const MOCK_CODE = '0x608060405234801561001057600080fd5b506040516101e63803806101e68339818101604052'
 
 function mkWdk(overrides: Record<string, unknown> = {}) {
   return {

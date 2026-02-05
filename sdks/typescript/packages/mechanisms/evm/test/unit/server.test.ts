@@ -219,9 +219,9 @@ describe("ExactEvmScheme (Server)", () => {
       });
 
       it("should throw for -Infinity as number", async () => {
-        await expect(async () => await server.parsePrice(-Infinity, "eip155:84532")).rejects.toThrow(
-          "must be a finite number",
-        );
+        await expect(
+          async () => await server.parsePrice(-Infinity, "eip155:84532"),
+        ).rejects.toThrow("must be a finite number");
       });
 
       it("should throw for NaN as number", async () => {
@@ -231,9 +231,9 @@ describe("ExactEvmScheme (Server)", () => {
       });
 
       it("should throw for Infinity as string", async () => {
-        await expect(async () => await server.parsePrice("Infinity", "eip155:84532")).rejects.toThrow(
-          "Invalid money format",
-        );
+        await expect(
+          async () => await server.parsePrice("Infinity", "eip155:84532"),
+        ).rejects.toThrow("Invalid money format");
       });
     });
   });
