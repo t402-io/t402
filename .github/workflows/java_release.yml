@@ -3,7 +3,7 @@ name: Java Release
 on:
   push:
     tags:
-      - "sdks/java/v*"
+      - "java/v*"
   pull_request:
     paths:
       - "sdks/java/**"

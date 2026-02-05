@@ -3,7 +3,7 @@ name: Python Release
 on:
   push:
     tags:
-      - "sdks/python/v*"
+      - "python/v*"
   pull_request:
     paths:
       - "sdks/python/**"
