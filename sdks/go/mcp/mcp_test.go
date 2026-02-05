@@ -12,6 +12,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	wdkbridge "github.com/t402-io/t402/sdks/go/wdk/bridge"
+	"github.com/t402-io/t402/sdks/go/wdk/gasless"
 )
 
 func TestConstants(t *testing.T) {
@@ -692,7 +694,7 @@ func TestFormatBridgeResult(t *testing.T) {
 // Type JSON marshaling tests
 
 func TestUserOperationJSON(t *testing.T) {
-	userOp := UserOperation{
+	userOp := gasless.UserOperation{
 		Sender:               "0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d",
 		Nonce:                "0x1",
 		InitCode:             "0x",
@@ -709,7 +711,7 @@ func TestUserOperationJSON(t *testing.T) {
 	data, err := json.Marshal(userOp)
 	require.NoError(t, err)
 
-	var decoded UserOperation
+	var decoded gasless.UserOperation
 	err = json.Unmarshal(data, &decoded)
 	require.NoError(t, err)
 
@@ -751,7 +753,7 @@ func TestGaslessPaymentResultJSON(t *testing.T) {
 }
 
 func TestUserOperationReceiptJSON(t *testing.T) {
-	receipt := UserOperationReceipt{
+	receipt := gasless.UserOperationReceipt{
 		TransactionHash: "0x1234567890",
 		Success:         true,
 	}
@@ -759,7 +761,7 @@ func TestUserOperationReceiptJSON(t *testing.T) {
 	data, err := json.Marshal(receipt)
 	require.NoError(t, err)
 
-	var decoded UserOperationReceipt
+	var decoded gasless.UserOperationReceipt
 	err = json.Unmarshal(data, &decoded)
 	require.NoError(t, err)
 
@@ -936,44 +938,13 @@ func TestPayGaslessInputJSON(t *testing.T) {
 	assert.Equal(t, input.Network, decoded.Network)
 }
 
-// hashUserOperation test
-
-func TestHashUserOperation(t *testing.T) {
-	userOp := UserOperation{
-		Sender:               "0x742d35Cc6634C0532925a3b844Bc9e7595f3dF1d",
-		Nonce:                "0x1",
-		InitCode:             "0x",
-		CallData:             "0xabcdef",
-		CallGasLimit:         "0x186a0",
-		VerificationGasLimit: "0x186a0",
-		PreVerificationGas:   "0xc350",
-		MaxFeePerGas:         "0x3b9aca00",
-		MaxPriorityFeePerGas: "0x5f5e100",
-		PaymasterAndData:     "0x",
-		Signature:            "0x",
-	}
-
-	hash, err := hashUserOperation(userOp, 1)
-	require.NoError(t, err)
-	assert.Len(t, hash, 32) // Keccak256 produces 32 bytes
-
-	// Same input should produce same hash
-	hash2, err := hashUserOperation(userOp, 1)
-	require.NoError(t, err)
-	assert.Equal(t, hash, hash2)
-
-	// Different chain ID should produce different hash
-	hash3, err := hashUserOperation(userOp, 8453) // Base chain ID
-	require.NoError(t, err)
-	assert.NotEqual(t, hash, hash3)
-}
-
 // Constants and utility tests
 
 func TestEstimatedBridgeTimes(t *testing.T) {
-	assert.Equal(t, 900, EstimatedBridgeTimes[NetworkEthereum])
-	assert.Equal(t, 300, EstimatedBridgeTimes[NetworkArbitrum])
-	assert.Equal(t, 300, EstimatedBridgeTimes[NetworkInk])
+	// Bridge times are now in wdk/bridge package
+	assert.Equal(t, 900, wdkbridge.EstimatedBridgeTimes["ethereum"])
+	assert.Equal(t, 300, wdkbridge.EstimatedBridgeTimes["arbitrum"])
+	assert.Equal(t, 300, wdkbridge.EstimatedBridgeTimes["ink"])
 }
 
 func TestLayerZeroConstants(t *testing.T) {
@@ -991,11 +962,11 @@ func TestLayerZeroConstants(t *testing.T) {
 	assert.Contains(t, LayerZeroScanURL, "layerzeroscan")
 }
 
-func TestOftABIJSON(t *testing.T) {
-	// Verify the ABI JSON is valid
-	assert.NotEmpty(t, oftABIJSON)
-	assert.Contains(t, oftABIJSON, "quoteSend")
-	assert.Contains(t, oftABIJSON, "send")
+func TestWdkBridgeConstants(t *testing.T) {
+	// Verify bridgeable chains have USDT0 addresses in wdk/bridge
+	assert.True(t, wdkbridge.IsBridgeableChain("ethereum"))
+	assert.True(t, wdkbridge.IsBridgeableChain("arbitrum"))
+	assert.False(t, wdkbridge.IsBridgeableChain("base"))
 }
 
 // Server demo mode tool tests

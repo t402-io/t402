@@ -330,6 +330,14 @@ export class WdkBridgeClient {
       throw new Error(`Amount ${params.amount} is below minimum: ${MIN_BRIDGE_AMOUNT}`)
     }
 
+    // Validate recipient
+    if (
+      !params.recipient ||
+      params.recipient === '0x0000000000000000000000000000000000000000'
+    ) {
+      throw new Error('Recipient address must not be the zero address')
+    }
+
     // Get available routes
     const routes = await this.getRoutes(normalizedTo, params.amount)
 
@@ -375,6 +383,38 @@ export class WdkBridgeClient {
 
     if (normalizedFrom === normalizedTo) {
       throw new Error('Source and destination chains must be different')
+    }
+
+    if (!supportsBridging(normalizedTo)) {
+      throw new Error(
+        `Destination chain "${params.toChain}" does not support USDT0 bridging. ` +
+          `Supported chains: ${BRIDGE_CHAINS.join(', ')}`,
+      )
+    }
+
+    // Validate amount
+    if (params.amount <= 0n) {
+      throw new Error('Bridge amount must be greater than zero')
+    }
+
+    if (params.amount < MIN_BRIDGE_AMOUNT) {
+      throw new Error(`Amount ${params.amount} is below minimum: ${MIN_BRIDGE_AMOUNT}`)
+    }
+
+    // Validate recipient (not zero address)
+    if (
+      !params.recipient ||
+      params.recipient === '0x0000000000000000000000000000000000000000'
+    ) {
+      throw new Error('Recipient address must not be the zero address')
+    }
+
+    // Validate slippage tolerance bounds (0% < slippage <= 5%)
+    const slippage = params.slippageTolerance ?? this.defaultSlippage
+    if (!Number.isFinite(slippage) || slippage <= 0 || slippage > 5) {
+      throw new Error(
+        `Slippage tolerance must be between 0 and 5 (exclusive of 0), got: ${slippage}`,
+      )
     }
 
     // Get bridge and execute
