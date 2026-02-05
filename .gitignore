@@ -46,5 +46,14 @@ proxy
 e2e/facilitators/external-proxies/*
 !e2e/facilitators/external-proxies/README.md
 
+# Compiled Go binaries (e2e)
+e2e/clients/go-http/client
+e2e/clients/go-http/go-http
+e2e/clients/go-http/main
+e2e/facilitators/go/facilitator
+e2e/facilitators/go/go
+e2e/servers/gin/gin
+e2e/servers/gin/server
+
 # Archive
 .archive/
