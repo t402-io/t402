@@ -134,12 +134,11 @@ const paywall = createPaywall()
 ### Additional Handlers
 
 ```typescript
-import { nearPaywall, stacksPaywall, cosmosPaywall } from '@t402/paywall';
+import { nearPaywall, stacksPaywall } from '@t402/paywall';
 
 const paywall = createPaywall()
   .withNetwork(nearPaywall)    // NEAR Protocol
   .withNetwork(stacksPaywall)  // Stacks (Bitcoin L2)
-  .withNetwork(cosmosPaywall)  // Cosmos ecosystem
   .build();
 ```
 

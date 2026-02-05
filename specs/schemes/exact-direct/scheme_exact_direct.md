@@ -9,9 +9,11 @@ The `exact-direct` scheme is designed for blockchain networks that don't support
 | Network | Standard | Status |
 |---------|----------|--------|
 | Near | NEP-141 | Supported |
-| Aptos | Move Coin | Planned |
-| Tezos | FA2 | Planned |
-| Polkadot | Assets Pallet | Planned |
+| Aptos | Fungible Asset | Supported |
+| Tezos | FA2 | Supported |
+| Polkadot | Assets Pallet | Supported |
+| Stacks | SIP-010 | Supported |
+| Cosmos (Noble) | IBC Transfer | Supported (Go SDK) |
 
 ## Payment Flow
 
@@ -238,6 +240,9 @@ Different networks have different finality guarantees:
 | Near | 1-2 blocks (~1-2s) | 2 blocks |
 | Aptos | Instant finality | 1 block |
 | Tezos | ~30 blocks (~30 min) | 30 blocks |
+| Polkadot | ~12s per block | 2 blocks |
+| Stacks | ~10 min per block (Bitcoin anchor) | 1 block |
+| Cosmos (Noble) | Instant finality (Tendermint) | 1 block |
 
 ### Front-Running
 
