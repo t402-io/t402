@@ -22,26 +22,33 @@ export const PaymentRequirementsSchema = z.object({
   scheme: z.string().min(1, { message: "Scheme is required" }),
   network: NetworkSchema,
   asset: z.string().min(1, { message: "Asset address is required" }),
-  amount: z
-    .string()
-    .regex(/^\d+$/, { message: "Amount must be a non-negative integer string" }),
+  amount: z.string().regex(/^\d+$/, { message: "Amount must be a non-negative integer string" }),
   payTo: z.string().min(1, { message: "PayTo address is required" }),
-  maxTimeoutSeconds: z.number().int().positive({ message: "maxTimeoutSeconds must be a positive integer" }),
+  maxTimeoutSeconds: z
+    .number()
+    .int()
+    .positive({ message: "maxTimeoutSeconds must be a positive integer" }),
   extra: z.record(z.unknown()),
 });
 
 // Payment required response (402 response)
 export const PaymentRequiredSchema = z.object({
-  t402Version: z.literal(2, { errorMap: () => ({ message: "t402Version must be 2 for V2 protocol" }) }),
+  t402Version: z.literal(2, {
+    errorMap: () => ({ message: "t402Version must be 2 for V2 protocol" }),
+  }),
   error: z.string().optional(),
   resource: ResourceInfoSchema,
-  accepts: z.array(PaymentRequirementsSchema).min(1, { message: "At least one payment option is required" }),
+  accepts: z
+    .array(PaymentRequirementsSchema)
+    .min(1, { message: "At least one payment option is required" }),
   extensions: z.record(z.unknown()).optional(),
 });
 
 // Payment payload (client's signed payment)
 export const PaymentPayloadSchema = z.object({
-  t402Version: z.literal(2, { errorMap: () => ({ message: "t402Version must be 2 for V2 protocol" }) }),
+  t402Version: z.literal(2, {
+    errorMap: () => ({ message: "t402Version must be 2 for V2 protocol" }),
+  }),
   resource: ResourceInfoSchema.optional(),
   accepted: PaymentRequirementsSchema,
   payload: z.record(z.unknown()),
@@ -90,6 +97,9 @@ export type ValidatedSettleResponse = z.infer<typeof SettleResponseSchema>;
 
 /**
  * Parse and validate a PaymentPayload.
+ *
+ * @param data - The data to parse
+ * @returns The validated payment payload
  * @throws ZodError if validation fails
  */
 export function parsePaymentPayload(data: unknown): ValidatedPaymentPayload {
@@ -98,6 +108,9 @@ export function parsePaymentPayload(data: unknown): ValidatedPaymentPayload {
 
 /**
  * Parse and validate a PaymentRequired response.
+ *
+ * @param data - The data to parse
+ * @returns The validated payment required response
  * @throws ZodError if validation fails
  */
 export function parsePaymentRequired(data: unknown): ValidatedPaymentRequired {
@@ -106,6 +119,9 @@ export function parsePaymentRequired(data: unknown): ValidatedPaymentRequired {
 
 /**
  * Parse and validate PaymentRequirements.
+ *
+ * @param data - The data to parse
+ * @returns The validated payment requirements
  * @throws ZodError if validation fails
  */
 export function parsePaymentRequirements(data: unknown): ValidatedPaymentRequirements {
@@ -114,20 +130,33 @@ export function parsePaymentRequirements(data: unknown): ValidatedPaymentRequire
 
 /**
  * Safely parse a PaymentPayload, returning a result object.
+ *
+ * @param data - The data to parse
+ * @returns The safe parse result
  */
-export function safeParsePaymentPayload(data: unknown): z.SafeParseReturnType<unknown, ValidatedPaymentPayload> {
+export function safeParsePaymentPayload(
+  data: unknown,
+): z.SafeParseReturnType<unknown, ValidatedPaymentPayload> {
   return PaymentPayloadSchema.safeParse(data);
 }
 
 /**
  * Safely parse a PaymentRequired response, returning a result object.
+ *
+ * @param data - The data to parse
+ * @returns The safe parse result
  */
-export function safeParsePaymentRequired(data: unknown): z.SafeParseReturnType<unknown, ValidatedPaymentRequired> {
+export function safeParsePaymentRequired(
+  data: unknown,
+): z.SafeParseReturnType<unknown, ValidatedPaymentRequired> {
   return PaymentRequiredSchema.safeParse(data);
 }
 
 /**
  * Safely parse PaymentRequirements, returning a result object.
+ *
+ * @param data - The data to parse
+ * @returns The safe parse result
  */
 export function safeParsePaymentRequirements(
   data: unknown,

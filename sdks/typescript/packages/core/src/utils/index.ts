@@ -6,6 +6,8 @@ import { Network } from "../types";
 
 /**
  * Get the crypto object, works in both browser and Node.js (19+)
+ *
+ * @returns The crypto object
  * @throws Error if crypto API is not available
  */
 function getCrypto(): Crypto {
@@ -13,8 +15,7 @@ function getCrypto(): Crypto {
 
   if (!cryptoObj || typeof cryptoObj.getRandomValues !== "function") {
     throw new Error(
-      "Crypto API not available. " +
-        "Node.js 19+ or a browser with Web Crypto API is required.",
+      "Crypto API not available. " + "Node.js 19+ or a browser with Web Crypto API is required.",
     );
   }
 
