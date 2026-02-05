@@ -1,0 +1,258 @@
+# Java MCP Server
+
+import { Callout, Tabs } from 'nextra/components'
+
+The Java SDK includes an MCP (Model Context Protocol) server for AI agent integration, allowing language models to make payment-enabled API calls.
+
+## Overview
+
+The MCP server exposes T402 payment capabilities as tools that AI agents can use:
+
+- Query supported networks
+- Create payment payloads
+- Verify payments
+- Execute settlements
+
+## Quick Start
+
+```java
+import io.t402.mcp.T402Mcp;
+import io.t402.mcp.McpServer;
+
+// Create MCP server
+McpServer server = T402Mcp.createServer(
+    "https://facilitator.t402.io",
+    signer
+);
+
+// Start server (stdio transport)
+server.start();
+```
+
+## Available Tools
+
+### t402_supported
+
+Query supported networks and schemes:
+
+```json
+{
+  "name": "t402_supported",
+  "description": "Get supported payment networks and schemes",
+  "input_schema": {}
+}
+```
+
+**Response**
+
+```json
+{
+  "kinds": [
+    {
+      "scheme": "exact",
+      "network": "eip155:8453",
+      "signers": ["0xC88f67e776f16DcFBf42e6bDda1B82604448899B"]
+    }
+  ]
+}
+```
+
+### t402_create_payload
+
+Create a signed payment payload:
+
+```json
+{
+  "name": "t402_create_payload",
+  "description": "Create a signed payment authorization",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "scheme": { "type": "string" },
+      "network": { "type": "string" },
+      "amount": { "type": "string" },
+      "payTo": { "type": "string" },
+      "asset": { "type": "string" }
+    },
+    "required": ["scheme", "network", "amount", "payTo", "asset"]
+  }
+}
+```
+
+### t402_verify
+
+Verify a payment payload:
+
+```json
+{
+  "name": "t402_verify",
+  "description": "Verify a payment authorization",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "payload": { "type": "object" },
+      "requirements": { "type": "object" }
+    },
+    "required": ["payload", "requirements"]
+  }
+}
+```
+
+### t402_settle
+
+Execute on-chain settlement:
+
+```json
+{
+  "name": "t402_settle",
+  "description": "Settle a verified payment on-chain",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "payload": { "type": "object" },
+      "requirements": { "type": "object" },
+      "idempotencyKey": { "type": "string" }
+    },
+    "required": ["payload", "requirements"]
+  }
+}
+```
+
+## Configuration
+
+### Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `T402_FACILITATOR_URL` | Facilitator URL |
+| `T402_PRIVATE_KEY` | Signer private key (EVM) |
+| `T402_NETWORK` | Default network |
+
+### Programmatic Configuration
+
+```java
+import io.t402.mcp.McpServer;
+import io.t402.mcp.McpConstants;
+
+McpServer server = new McpServer.Builder()
+    .facilitatorUrl("https://facilitator.t402.io")
+    .signer(evmSigner)
+    .network(McpConstants.BASE_MAINNET)
+    .timeout(Duration.ofSeconds(30))
+    .build();
+```
+
+## Multi-Chain Support
+
+Register multiple signers for different networks:
+
+```java
+import io.t402.mcp.T402Mcp;
+import io.t402.crypto.*;
+
+// Create signers for different networks
+EvmSigner evmSigner = EvmSigner.fromPrivateKey("0x...", 8453, "USD Coin", "2", usdcAddress);
+TonSigner tonSigner = TonSigner.fromHex("...");
+SvmSigner svmSigner = SvmSigner.fromBase58("...");
+
+// Create MCP server with multiple signers
+McpServer server = T402Mcp.createMultiChainServer(
+    "https://facilitator.t402.io",
+    Map.of(
+        "eip155:8453", evmSigner,
+        "ton:mainnet", tonSigner,
+        "solana:5eykt...", svmSigner
+    )
+);
+```
+
+## Running the Server
+
+### Standalone
+
+```bash
+# Run MCP server
+java -jar t402-1.8.0.jar mcp-server
+
+# With configuration
+java -jar t402-1.8.0.jar mcp-server \
+  --facilitator https://facilitator.t402.io \
+  --network eip155:8453
+```
+
+### With Claude Desktop
+
+Add to `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "t402": {
+      "command": "java",
+      "args": ["-jar", "/path/to/t402-1.8.0.jar", "mcp-server"],
+      "env": {
+        "T402_FACILITATOR_URL": "https://facilitator.t402.io",
+        "T402_PRIVATE_KEY": "0x..."
+      }
+    }
+  }
+}
+```
+
+### Docker
+
+```dockerfile
+FROM eclipse-temurin:21-jre
+
+COPY t402-1.8.0.jar /app/t402.jar
+
+ENTRYPOINT ["java", "-jar", "/app/t402.jar", "mcp-server"]
+```
+
+```bash
+docker build -t t402-mcp .
+docker run -it t402-mcp
+```
+
+## Error Handling
+
+The MCP server returns structured errors:
+
+```json
+{
+  "error": {
+    "code": "VERIFICATION_FAILED",
+    "message": "Payment verification failed: invalid signature"
+  }
+}
+```
+
+### Error Codes
+
+| Code | Description |
+|------|-------------|
+| `INVALID_REQUEST` | Malformed request |
+| `UNSUPPORTED_NETWORK` | Network not supported |
+| `VERIFICATION_FAILED` | Payment verification failed |
+| `SETTLEMENT_FAILED` | On-chain settlement failed |
+| `SIGNER_NOT_FOUND` | No signer for network |
+
+## Integration with LangChain
+
+```java
+// Example LangChain4j integration
+import dev.langchain4j.mcp.McpClient;
+
+McpClient mcpClient = McpClient.builder()
+    .command("java", "-jar", "t402.jar", "mcp-server")
+    .build();
+
+// Use t402 tools in your agent
+String result = mcpClient.callTool("t402_supported", Map.of());
+```
+
+## Related
+
+- [TypeScript MCP](/sdks/typescript/mcp) - TypeScript MCP server
+- [A2A Negotiation](/advanced/a2a-negotiation) - Agent-to-agent payments
+- [Agent Policy](/advanced/agent-policy) - Spending policies
