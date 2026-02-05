@@ -10,7 +10,7 @@ import type { Address, Hex, PublicClient } from 'viem'
 import type { WDKSigner } from '@t402/wdk'
 import { MultiSigWdkSmartAccount, createMultiSigWdkSmartAccount } from './account.js'
 import { MultiSigError, MultiSigErrorCode } from './errors.js'
-import { DEFAULTS } from './constants.js'
+import { DEFAULTS as _DEFAULTS } from './constants.js'
 
 // ---------------------------------------------------------------------------
 // Helpers to build mock WDKSigners
@@ -28,9 +28,7 @@ function createMockWDKSigner(address: Address): WDKSigner {
     signMessage: vi.fn().mockResolvedValue(
       '0x' + 'ab'.repeat(65), // 65-byte mock signature
     ),
-    signTypedData: vi.fn().mockResolvedValue(
-      '0x' + 'cd'.repeat(65),
-    ),
+    signTypedData: vi.fn().mockResolvedValue('0x' + 'cd'.repeat(65)),
     getChain: vi.fn().mockReturnValue('arbitrum'),
     getChainId: vi.fn().mockReturnValue(42161),
     getAccountIndex: vi.fn().mockReturnValue(0),
@@ -95,8 +93,8 @@ function createMockPublicClient(): PublicClient {
 const ADDR_A = '0x1111111111111111111111111111111111111111' as Address
 const ADDR_B = '0x2222222222222222222222222222222222222222' as Address
 const ADDR_C = '0x3333333333333333333333333333333333333333' as Address
-const ADDR_D = '0x4444444444444444444444444444444444444444' as Address
-const ADDR_E = '0x5555555555555555555555555555555555555555' as Address
+const _ADDR_D = '0x4444444444444444444444444444444444444444' as Address
+const _ADDR_E = '0x5555555555555555555555555555555555555555' as Address
 
 describe('MultiSigWdkSmartAccount', () => {
   let mockPublicClient: PublicClient
@@ -131,9 +129,7 @@ describe('MultiSigWdkSmartAccount', () => {
 
     it('should throw INVALID_THRESHOLD when owner count exceeds MAX_OWNERS (10)', () => {
       const elevenSigners = Array.from({ length: 11 }, (_, i) =>
-        createMockWDKSigner(
-          `0x${(i + 1).toString(16).padStart(40, '0')}` as Address,
-        ),
+        createMockWDKSigner(`0x${(i + 1).toString(16).padStart(40, '0')}` as Address),
       )
 
       expect(
@@ -211,9 +207,7 @@ describe('MultiSigWdkSmartAccount', () => {
 
     it('should accept exactly 10 owners (MAX_OWNERS limit)', () => {
       const tenSigners = Array.from({ length: 10 }, (_, i) =>
-        createMockWDKSigner(
-          `0x${(i + 1).toString(16).padStart(40, '0')}` as Address,
-        ),
+        createMockWDKSigner(`0x${(i + 1).toString(16).padStart(40, '0')}` as Address),
       )
 
       expect(
@@ -980,10 +974,7 @@ describe('MultiSigWdkSmartAccount', () => {
 
 describe('createMultiSigWdkSmartAccount', () => {
   it('should create and initialize a smart account', async () => {
-    const signers = [
-      createMockWDKSigner(ADDR_A),
-      createMockWDKSigner(ADDR_B),
-    ]
+    const signers = [createMockWDKSigner(ADDR_A), createMockWDKSigner(ADDR_B)]
     const mockPublicClient = createMockPublicClient()
 
     const account = await createMultiSigWdkSmartAccount({
@@ -1101,7 +1092,8 @@ describe('Factory functions', () => {
       const uninitializedSigner = createUninitializedMockWDKSigner(ADDR_A)
       // Override isInitialized to false for this test
       Object.defineProperty(uninitializedSigner, 'isInitialized', {
-        get: vi.fn()
+        get: vi
+          .fn()
           .mockReturnValueOnce(false) // First check: not initialized
           .mockReturnValue(true), // After initialize: initialized
         configurable: true,
