@@ -75,21 +75,19 @@ describe('WdkBridgeClient - Extended Tests', () => {
     })
 
     it('should throw for unsupported chain name', () => {
-      expect(
-        () => new WdkBridgeClient({ accounts: { solana: mockAccount } }),
-      ).toThrow(/does not support USDT0 bridging/)
+      expect(() => new WdkBridgeClient({ accounts: { solana: mockAccount } })).toThrow(
+        /does not support USDT0 bridging/,
+      )
     })
 
     it('should throw for unknown chain name', () => {
-      expect(
-        () => new WdkBridgeClient({ accounts: { foochain: mockAccount } }),
-      ).toThrow(/does not support USDT0 bridging/)
+      expect(() => new WdkBridgeClient({ accounts: { foochain: mockAccount } })).toThrow(
+        /does not support USDT0 bridging/,
+      )
     })
 
     it('should list supported chains in error message', () => {
-      expect(
-        () => new WdkBridgeClient({ accounts: { solana: mockAccount } }),
-      ).toThrow(/ethereum/)
+      expect(() => new WdkBridgeClient({ accounts: { solana: mockAccount } })).toThrow(/ethereum/)
     })
 
     it('should accept all valid chains', () => {
@@ -215,9 +213,7 @@ describe('WdkBridgeClient - Extended Tests', () => {
         accounts: { ethereum: mockAccount },
       })
 
-      await expect(client.getChainBalance('arbitrum')).rejects.toThrow(
-        /No WDK account configured/,
-      )
+      await expect(client.getChainBalance('arbitrum')).rejects.toThrow(/No WDK account configured/)
     })
 
     it('should be case-insensitive when looking up chain', async () => {
@@ -1379,9 +1375,7 @@ describe('WdkBridgeClient - Extended Tests', () => {
     })
 
     it('should propagate failure errors', async () => {
-      mockScanWaitForDelivery.mockRejectedValue(
-        new Error('Bridge message failed: 0xguid'),
-      )
+      mockScanWaitForDelivery.mockRejectedValue(new Error('Bridge message failed: 0xguid'))
 
       const client = new WdkBridgeClient({
         accounts: { ethereum: mockAccount },
@@ -1391,9 +1385,7 @@ describe('WdkBridgeClient - Extended Tests', () => {
     })
 
     it('should propagate blocked errors', async () => {
-      mockScanWaitForDelivery.mockRejectedValue(
-        new Error('Bridge message blocked by DVN: 0xguid'),
-      )
+      mockScanWaitForDelivery.mockRejectedValue(new Error('Bridge message blocked by DVN: 0xguid'))
 
       const client = new WdkBridgeClient({
         accounts: { ethereum: mockAccount },
