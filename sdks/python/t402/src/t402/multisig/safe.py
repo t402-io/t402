@@ -2,13 +2,11 @@
 Safe client implementation for T402 Multi-sig support.
 """
 
-import asyncio
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 from eth_account import Account
-from eth_account.messages import encode_defunct
 from web3 import AsyncWeb3, Web3
-from web3.types import TxParams, Wei
+from web3.types import TxParams
 
 from .constants import (
     GET_OWNERS_SELECTOR,
