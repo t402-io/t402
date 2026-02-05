@@ -53,7 +53,7 @@ describe('Constants', () => {
       expect(CHAIN_IDS.ethereum).toBe(1)
       expect(CHAIN_IDS.arbitrum).toBe(42161)
       expect(CHAIN_IDS.ink).toBe(57073)
-      expect(CHAIN_IDS.berachain).toBe(80084)
+      expect(CHAIN_IDS.berachain).toBe(80094)
       expect(CHAIN_IDS.unichain).toBe(130)
     })
   })

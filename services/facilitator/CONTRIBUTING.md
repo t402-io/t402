@@ -19,45 +19,42 @@ The Facilitator service is a Go application that handles payment verification an
 ```
 services/facilitator/
 ├── cmd/
-│   └── facilitator/
-│       └── main.go          # Entry point
+│   ├── facilitator/           # Main service entry point
+│   │   └── main.go
+│   └── facilitator-cli/       # CLI tool (multi-chain signer management)
+│       └── main.go
 │
 ├── internal/
-│   ├── config/              # Configuration loading
-│   │   └── config.go
-│   │
-│   ├── server/              # HTTP server
-│   │   ├── server.go
-│   │   ├── handlers.go      # API handlers
-│   │   └── middleware.go    # Auth, rate limiting, etc.
-│   │
-│   ├── verify/              # Payment verification
-│   │   └── verify.go
-│   │
-│   ├── settle/              # Payment settlement
-│   │   └── settle.go
-│   │
-│   └── metrics/             # Prometheus metrics
-│       └── metrics.go
+│   ├── auth/                  # Authentication & authorization middleware
+│   ├── cache/                 # Redis caching layer
+│   ├── config/                # Configuration loading
+│   ├── errors/                # Error definitions & handling
+│   ├── health/                # Health & readiness probes
+│   ├── idempotency/           # Request deduplication
+│   ├── intent/                # Payment intent processing
+│   ├── metrics/               # Prometheus metrics
+│   ├── persistence/           # Data persistence (PostgreSQL)
+│   ├── ratelimit/             # Rate limiting
+│   ├── rpc/                   # RPC provider management & failover
+│   ├── server/                # HTTP server, handlers, middleware
+│   ├── streaming/             # Streaming payment support
+│   └── tracing/               # Distributed tracing (OpenTelemetry)
 │
-├── pkg/                     # Shared packages
-│   └── utils/
+├── alerting/                  # Monitoring & alerting
+│   ├── prometheus-rules.yml   # Prometheus alert rules
+│   └── alertmanager.yml       # AlertManager configuration
 │
-├── grafana/                 # Grafana dashboards
-│   ├── dashboards/
-│   └── ROLLBACK.md
-│
-├── k8s/                     # Kubernetes manifests
-│   ├── base/                # Common resources (Kustomize)
-│   └── overlays/            # Environment-specific configs
+├── k8s/                       # Kubernetes manifests (Kustomize)
+│   ├── base/
+│   └── overlays/
 │       ├── staging/
 │       └── production/
 │
-├── docker-compose.yml       # Local development stack
-├── Dockerfile               # Container build
-├── .env.example             # Environment template
-├── Makefile                 # Build commands
-└── README.md                # Documentation
+├── docker-compose.yml         # Local development stack
+├── Dockerfile                 # Container build
+├── .env.example               # Environment template
+├── Makefile                   # Build commands
+└── README.md                  # Documentation
 ```
 
 ## Development Setup
@@ -153,25 +150,13 @@ type ChainConfig struct {
 }
 ```
 
-2. Implement verification logic in `internal/verify/`:
+2. Implement the scheme interfaces (client/server/facilitator) in the Go SDK at `sdks/go/mechanisms/yourchain/`.
 
-```go
-func verifyYourChain(ctx context.Context, payload, requirements interface{}) (*VerifyResult, error) {
-    // Implement verification
-}
-```
-
-3. Implement settlement logic in `internal/settle/`:
-
-```go
-func settleYourChain(ctx context.Context, payload, requirements interface{}) (*SettleResult, error) {
-    // Implement settlement
-}
-```
+3. Register the chain's RPC configuration in `internal/rpc/`.
 
 4. Register handlers in `internal/server/handlers.go`.
 
-5. Add tests in `internal/verify/` and `internal/settle/`.
+5. Add tests for verification and settlement.
 
 ### Adding API Endpoints
 
@@ -374,8 +359,37 @@ readinessProbe:
 4. **HTTPS**: Use a reverse proxy (nginx, Traefik) for TLS termination.
 5. **Network**: Restrict access to internal services.
 
+## Facilitator CLI
+
+A CLI tool for managing signers and interacting with the facilitator:
+
+```bash
+go run ./cmd/facilitator-cli
+```
+
+Supports multi-chain signer operations (EVM, Solana, TON, TRON, NEAR, Stacks, Cosmos).
+
+## Module Reference
+
+| Module | Purpose |
+|--------|---------|
+| `internal/auth` | API key authentication and authorization |
+| `internal/cache` | Redis caching for payments and nonces |
+| `internal/config` | Environment-based configuration loading |
+| `internal/errors` | Structured error types and codes |
+| `internal/health` | Liveness and readiness probes |
+| `internal/idempotency` | Request deduplication for settlements |
+| `internal/intent` | Payment intent processing pipeline |
+| `internal/metrics` | Prometheus metrics collectors |
+| `internal/persistence` | PostgreSQL data persistence layer |
+| `internal/ratelimit` | Per-client and per-endpoint rate limiting |
+| `internal/rpc` | RPC provider management with failover |
+| `internal/server` | HTTP server, routing, handlers, middleware |
+| `internal/streaming` | Streaming payment channel support |
+| `internal/tracing` | OpenTelemetry distributed tracing |
+
 ## Getting Help
 
 - Open an issue on GitHub
 - Check the [README.md](README.md) for API documentation
-- Reference the [Go SDK](../../go/) for protocol details
+- Reference the [Go SDK](../../sdks/go/) for protocol details

@@ -245,7 +245,7 @@ describe('WdkBridgeClient - Extended Tests', () => {
       expect(ethBalance.chainId).toBe(1)
       expect(arbBalance.chainId).toBe(42161)
       expect(inkBalance.chainId).toBe(57073)
-      expect(beraBalance.chainId).toBe(80084)
+      expect(beraBalance.chainId).toBe(80094)
       expect(uniBalance.chainId).toBe(130)
     })
   })
