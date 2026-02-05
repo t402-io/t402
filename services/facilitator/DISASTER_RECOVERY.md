@@ -20,7 +20,8 @@ This document outlines the disaster recovery (DR) procedures for the T402 Facili
 |-----------|---------------|-------------------|
 | Facilitator Service | Payment processing halts | P0 - Immediate |
 | Hot Wallet Keys | Cannot settle transactions | P0 - Immediate |
-| Redis Cache | Rate limiting fails | P1 - High |
+| PostgreSQL Database | Persistence layer unavailable | P1 - High |
+| Redis Cache | Rate limiting, idempotency fails | P1 - High |
 | Prometheus Data | Lose historical metrics | P2 - Medium |
 | Grafana Dashboards | Lose monitoring visibility | P2 - Medium |
 
@@ -41,6 +42,7 @@ This document outlines the disaster recovery (DR) procedures for the T402 Facili
 
 | Data | Frequency | Retention | Storage |
 |------|-----------|-----------|---------|
+| PostgreSQL database | Every 15 min | 30 days | S3/GCS |
 | Redis data | Every 5 min | 7 days | S3/GCS |
 | Prometheus metrics | Every hour | 30 days | S3/GCS |
 | Grafana dashboards | On change | Forever | Git |
@@ -405,19 +407,23 @@ EOF
 
 ## Contacts
 
-| Role | Name | Contact |
-|------|------|---------|
-| On-call Primary | - | PagerDuty |
-| On-call Secondary | - | PagerDuty |
-| Engineering Lead | - | - |
-| Cloud Provider Support | AWS/GCP | Support portal |
+| Role | Contact Method |
+|------|---------------|
+| On-call Primary | PagerDuty escalation |
+| On-call Secondary | PagerDuty escalation |
+| Engineering Lead | Internal Slack #facilitator-oncall |
+| Cloud Provider Support | AWS/GCP support portal |
+| Security Incidents | security@t402.io |
 
 ## Document Control
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | 2026-01-20 | - | Initial version |
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.1 | 2026-02-05 | Added PostgreSQL recovery, updated contacts |
+| 1.0 | 2026-01-20 | Initial version |
 
 ---
 
 **Review Schedule:** Quarterly or after any major incident.
+**Last Review:** 2026-02-05
+**Next Review:** 2026-05-05

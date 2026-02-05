@@ -53,6 +53,9 @@ The `exact` scheme transfers a specific amount for each request.
 | [TRON](./schemes/exact/scheme_exact_tron.md) | TRON blockchain (TRC20) |
 | [SUI](./schemes/exact/scheme_exact_sui.md) | Sui blockchain **(DRAFT)** |
 
+Additional chains implemented in SDKs (exact-direct variant — on-chain transfer as proof):
+NEAR (NEP-141), Aptos (Fungible Asset), Tezos (FA2), Polkadot (Assets Pallet), Stacks (SIP-010).
+
 ### Up-To Scheme (Draft)
 
 The `upto` scheme authorizes transfer of **up to** a maximum amount, enabling usage-based billing.

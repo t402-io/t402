@@ -64,9 +64,11 @@ kubectl apply -k k8s/overlays/production
 | Component | Purpose | Scaling |
 |-----------|---------|---------|
 | Facilitator | Payment verification/settlement | HPA 3-20 pods |
-| Redis | Rate limiting, caching | StatefulSet with replication |
+| PostgreSQL | Persistence, intent state, idempotency | Primary-replica per region |
+| Redis | Rate limiting, caching, nonce tracking | StatefulSet with replication |
 | Ingress | TLS termination, routing | Per-cluster |
 | ServiceMonitor | Prometheus metrics | Per-cluster |
+| OpenTelemetry Collector | Distributed tracing | DaemonSet per-node |
 
 ## Kubernetes Directory Structure
 

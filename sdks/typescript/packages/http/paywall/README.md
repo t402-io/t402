@@ -17,15 +17,17 @@ Modular paywall UI for the t402 payment protocol with support for EVM and Solana
 pnpm add @t402/paywall
 ```
 
-## Bundle Sizes
+## Imports
 
 Choose the import that matches your needs:
 
-| Import | Size | Networks | Use Case |
-|--------|------|----------|----------|
-| `@t402/paywall` | 3.5MB | EVM + Solana | Multi-network apps |
-| `@t402/paywall/evm` | 3.4MB | EVM only | Base, Ethereum, Polygon, etc. |
-| `@t402/paywall/svm` | 1.0MB | Solana only | Solana apps |
+| Import | Networks | Use Case |
+|--------|----------|----------|
+| `@t402/paywall` | EVM + Solana | Multi-network apps |
+| `@t402/paywall/evm` | EVM only | Base, Ethereum, Polygon, etc. |
+| `@t402/paywall/svm` | Solana only | Solana apps |
+
+Tree-shakeable — only the network handlers you import are bundled.
 
 ## Usage
 
