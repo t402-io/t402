@@ -1,0 +1,333 @@
+# EVM Chains
+
+import { Callout, Tabs } from 'nextra/components'
+
+Detailed guide for EVM (Ethereum Virtual Machine) compatible chains.
+
+## Supported EVM Chains
+
+T402 supports all major EVM chains through the `@t402/evm` package.
+
+### Mainnet Chains
+
+| Chain | Network ID | USDT0 Address | Gasless |
+|-------|------------|---------------|---------|
+| Ethereum | `eip155:1` | `0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee` | ✅ |
+| Arbitrum | `eip155:42161` | `0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9` | ✅ |
+| Base | `eip155:8453` | `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` | ✅ |
+| Optimism | `eip155:10` | `0x94b008aA00579c1307B0EF2c499aD98a8ce58e58` | ✅ |
+| Ink | `eip155:57073` | `0x0200C29006150606B650577BBE7B6248F58470c1` | ✅ |
+| Berachain | `eip155:80094` | `0x779Ded0c9e1022225f8E0630b35a9b54bE713736` | ✅ |
+| Unichain | `eip155:130` | `0x588ce4F028D8e7B53B687865d6A67b3A54C75518` | ✅ |
+
+### Layer 2 Benefits
+
+| Benefit | Description |
+|---------|-------------|
+| Lower gas | ~100x cheaper than Ethereum mainnet |
+| Faster finality | Seconds vs minutes |
+| Same security | Secured by Ethereum |
+| Same addresses | Use same wallet across L2s |
+
+## Integration
+
+### Server Setup
+
+```typescript
+import { t402ResourceServer, createFacilitatorClient } from '@t402/core/server';
+import { registerExactEvmScheme } from '@t402/evm/exact/server';
+
+const facilitator = createFacilitatorClient({
+  url: 'https://facilitator.t402.io',
+});
+
+const server = new t402ResourceServer(facilitator);
+registerExactEvmScheme(server, {});
+
+// Configure routes
+const routes = {
+  '/api/premium/*': {
+    accepts: [
+      { scheme: 'exact', network: 'eip155:8453', payTo: '0x...', price: '$0.01' },
+      { scheme: 'exact', network: 'eip155:42161', payTo: '0x...', price: '$0.01' },
+    ],
+  },
+};
+```
+
+### Client Setup
+
+<Tabs items={['viem', 'ethers.js', 'web3.js']}>
+  <Tabs.Tab>
+```typescript
+import { t402Client } from '@t402/core/client';
+import { ExactEvmScheme } from '@t402/evm/exact/client';
+import { createWalletClient, custom } from 'viem';
+import { base } from 'viem/chains';
+
+// Create viem wallet client
+const walletClient = createWalletClient({
+  chain: base,
+  transport: custom(window.ethereum),
+});
+
+// Create T402 client
+const client = new t402Client();
+client.register('eip155:*', new ExactEvmScheme(walletClient));
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```typescript
+import { t402Client } from '@t402/core/client';
+import { ExactEvmScheme } from '@t402/evm/exact/client';
+import { ethers } from 'ethers';
+
+// Create ethers signer
+const provider = new ethers.BrowserProvider(window.ethereum);
+const signer = await provider.getSigner();
+
+// Create T402 client
+const client = new t402Client();
+client.register('eip155:*', new ExactEvmScheme(signer));
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```typescript
+import { t402Client } from '@t402/core/client';
+import { ExactEvmScheme } from '@t402/evm/exact/client';
+import Web3 from 'web3';
+
+// Create web3 instance
+const web3 = new Web3(window.ethereum);
+const accounts = await web3.eth.getAccounts();
+
+// Create T402 client with web3 adapter
+const client = new t402Client();
+client.register('eip155:*', new ExactEvmScheme({
+  address: accounts[0],
+  signTypedData: (data) => web3.eth.signTypedData(accounts[0], data),
+}));
+```
+  </Tabs.Tab>
+</Tabs>
+
+## EIP-3009 (TransferWithAuthorization)
+
+T402 uses EIP-3009 for gasless token transfers.
+
+### How It Works
+
+1. **User signs** an off-chain authorization message
+2. **Facilitator executes** the `transferWithAuthorization` on-chain
+3. **User pays no gas** - facilitator covers gas costs
+
+### Authorization Structure
+
+```typescript
+interface TransferWithAuthorization {
+  from: string;        // Payer address
+  to: string;          // Recipient address
+  value: bigint;       // Amount in smallest unit
+  validAfter: bigint;  // Unix timestamp (usually 0)
+  validBefore: bigint; // Deadline timestamp
+  nonce: bytes32;      // Random nonce
+}
+```
+
+### Signature Verification
+
+The EIP-712 typed data structure:
+
+```typescript
+const domain = {
+  name: 'USD0',
+  version: '1',
+  chainId: 8453,
+  verifyingContract: '0x...',
+};
+
+const types = {
+  TransferWithAuthorization: [
+    { name: 'from', type: 'address' },
+    { name: 'to', type: 'address' },
+    { name: 'value', type: 'uint256' },
+    { name: 'validAfter', type: 'uint256' },
+    { name: 'validBefore', type: 'uint256' },
+    { name: 'nonce', type: 'bytes32' },
+  ],
+};
+```
+
+## Gas Estimation
+
+### Average Costs by Chain
+
+| Chain | Transfer Cost | Settlement Cost |
+|-------|---------------|-----------------|
+| Ethereum | ~$5-50 | ~$10-100 |
+| Arbitrum | ~$0.01-0.10 | ~$0.02-0.20 |
+| Base | ~$0.001-0.01 | ~$0.002-0.02 |
+| Optimism | ~$0.01-0.10 | ~$0.02-0.20 |
+
+<Callout type="info">
+  Gas costs vary with network congestion. L2s are generally 100x cheaper than Ethereum mainnet.
+</Callout>
+
+### Programmatic Estimation
+
+```typescript
+import { estimateGas } from '@t402/evm';
+
+const estimate = await estimateGas({
+  network: 'eip155:8453',
+  operation: 'transferWithAuthorization',
+  rpcUrl: 'https://mainnet.base.org',
+});
+
+console.log(`Estimated gas: ${estimate.gasLimit}`);
+console.log(`Estimated cost: $${estimate.costUsd}`);
+```
+
+## Multi-Chain Support
+
+### Same Address Across Chains
+
+EVM addresses work across all EVM chains:
+
+```typescript
+const payToAddress = '0x742d35Cc6634C0532925a3b844Bc9e7595f5b1A1';
+
+const routes = {
+  '/api/premium/*': {
+    accepts: [
+      { scheme: 'exact', network: 'eip155:1', payTo: payToAddress, price: '$0.01' },
+      { scheme: 'exact', network: 'eip155:8453', payTo: payToAddress, price: '$0.01' },
+      { scheme: 'exact', network: 'eip155:42161', payTo: payToAddress, price: '$0.01' },
+    ],
+  },
+};
+```
+
+### User Network Selection
+
+Let users choose their preferred chain:
+
+```typescript
+import { getNetworkDisplayName, getChainConfig } from '@t402/evm';
+
+const supportedNetworks = [
+  'eip155:8453',   // Base
+  'eip155:42161',  // Arbitrum
+  'eip155:10',     // Optimism
+];
+
+// Display network options to user
+supportedNetworks.forEach(network => {
+  const config = getChainConfig(network);
+  console.log(`${getNetworkDisplayName(network)}: ~$${config.avgGasCost}`);
+});
+```
+
+## Wallet Integration
+
+### MetaMask
+
+```typescript
+// Request account access
+await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+// Get current chain
+const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+
+// Switch to Base
+await window.ethereum.request({
+  method: 'wallet_switchEthereumChain',
+  params: [{ chainId: '0x2105' }], // Base = 8453 = 0x2105
+});
+```
+
+### WalletConnect
+
+```typescript
+import { createWalletClient } from 'viem';
+import { WalletConnectConnector } from '@wagmi/connectors/walletConnect';
+
+const connector = new WalletConnectConnector({
+  options: {
+    projectId: 'your-project-id',
+    chains: [base, arbitrum, optimism],
+  },
+});
+
+await connector.connect();
+const walletClient = await connector.getWalletClient();
+```
+
+### Safe Multi-Sig
+
+```typescript
+import { createMultisigClient } from '@t402/wdk-multisig';
+
+const multisigClient = await createMultisigClient({
+  safeAddress: '0xYourSafeAddress',
+  chainId: 8453,
+  owners: ['0xOwner1', '0xOwner2', '0xOwner3'],
+  threshold: 2,
+});
+```
+
+## RPC Endpoints
+
+### Recommended Providers
+
+| Chain | Public RPC | Paid Options |
+|-------|------------|--------------|
+| Ethereum | `https://eth.llamarpc.com` | Alchemy, Infura |
+| Arbitrum | `https://arb1.arbitrum.io/rpc` | Alchemy, QuickNode |
+| Base | `https://mainnet.base.org` | Alchemy, QuickNode |
+| Optimism | `https://mainnet.optimism.io` | Alchemy, QuickNode |
+
+### Configuration
+
+```typescript
+const rpcConfig = {
+  'eip155:1': process.env.ETH_RPC_URL || 'https://eth.llamarpc.com',
+  'eip155:8453': process.env.BASE_RPC_URL || 'https://mainnet.base.org',
+  'eip155:42161': process.env.ARB_RPC_URL || 'https://arb1.arbitrum.io/rpc',
+};
+```
+
+## Troubleshooting
+
+### Common Issues
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| "Invalid signature" | Wrong chain ID | Verify network matches |
+| "Insufficient funds" | No USDT balance | Fund wallet with USDT |
+| "Nonce already used" | Replay attempt | Generate new nonce |
+| "Deadline passed" | Authorization expired | Sign new authorization |
+
+### Debugging
+
+```typescript
+import { verifySignature, decodePayment } from '@t402/evm';
+
+// Decode payment header
+const payment = decodePayment(xPaymentHeader);
+console.log('Payment details:', payment);
+
+// Verify signature locally
+const isValid = await verifySignature({
+  message: payment.message,
+  signature: payment.signature,
+  expectedSigner: payment.from,
+});
+console.log('Signature valid:', isValid);
+```
+
+## Related
+
+- [Gasless Payments](/sdks/typescript/wdk-gasless) - ERC-4337 integration
+- [Multi-Sig Setup](/tutorials/multisig-setup) - Safe integration
+- [Testnets](/chains/testnets) - Testing on testnets

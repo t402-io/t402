@@ -57,6 +57,11 @@ export enum WDKErrorCode {
   RPC_RATE_LIMITED = 8003,
   RPC_CONNECTION_FAILED = 8004,
 
+  // Protocol errors (8xxx - swap, lending, etc.)
+  PROTOCOL_NOT_REGISTERED = 8101,
+  PROTOCOL_EXECUTION_FAILED = 8102,
+  INVALID_PARAMETER = 8103,
+
   // Unknown errors (9xxx)
   UNKNOWN_ERROR = 9999,
 }
