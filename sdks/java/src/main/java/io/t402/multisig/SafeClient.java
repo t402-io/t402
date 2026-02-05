@@ -28,6 +28,7 @@ import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Numeric;
 
 import java.io.ByteArrayOutputStream;
+import java.security.SecureRandom;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -40,6 +41,8 @@ import java.util.concurrent.ExecutionException;
  * Client for interacting with Safe multi-sig contracts.
  */
 public class SafeClient {
+
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private final String address;
     private final Web3j web3j;
@@ -414,7 +417,7 @@ public class SafeClient {
     private String generateRequestId() {
         long timestamp = System.currentTimeMillis();
         byte[] randomBytes = new byte[4];
-        new java.security.SecureRandom().nextBytes(randomBytes);
+        SECURE_RANDOM.nextBytes(randomBytes);
         StringBuilder sb = new StringBuilder();
         for (byte b : randomBytes) {
             sb.append(String.format("%02x", b));
