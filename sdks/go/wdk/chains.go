@@ -53,6 +53,13 @@ var DefaultChains = map[string]ChainConfig{
 		RPCURL:      "https://mainnet.optimism.io",
 		NetworkType: NetworkTypeEVM,
 	},
+	"unichain": {
+		ChainID:     130,
+		Network:     "eip155:130",
+		Name:        "unichain",
+		RPCURL:      "https://mainnet.unichain.org",
+		NetworkType: NetworkTypeEVM,
+	},
 	// Testnets
 	"arbitrum-sepolia": {
 		ChainID:     421614,

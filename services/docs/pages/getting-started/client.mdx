@@ -66,15 +66,17 @@ const fetchWithPayment = wrapFetchWithPayment(fetch, client)
 
 ```typescript
 import axios from 'axios'
-import { t402AxiosInterceptor } from '@t402/axios'
+import { wrapAxiosWithPayment } from '@t402/axios'
 import { registerExactEvmScheme } from '@t402/evm/exact/client'
 
 const client = new t402Client()
 registerExactEvmScheme(client, { signer })
 
-// Add interceptor to axios instance
-const api = axios.create({ baseURL: 'https://api.example.com' })
-t402AxiosInterceptor(api, client)
+// Wrap axios instance with payment support
+const api = wrapAxiosWithPayment(
+  axios.create({ baseURL: 'https://api.example.com' }),
+  client
+)
 
 // Make requests
 const response = await api.get('/premium')

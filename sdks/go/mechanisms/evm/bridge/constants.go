@@ -31,7 +31,7 @@ var LayerZeroEndpointIDs = map[string]uint32{
 	"arbitrum":  30110,
 	"optimism":  30111,
 	"polygon":   30109,
-	"ink":       30339,
+	"ink":       30291,
 	"berachain": 30362,
 	"unichain":  30320,
 	// Phase 1: High Priority

@@ -39,6 +39,11 @@ export const DEFAULT_CHAINS: Record<string, Omit<NormalizedChainConfig, 'provide
     network: 'eip155:130',
     name: 'unichain',
   },
+  optimism: {
+    chainId: 10,
+    network: 'eip155:10',
+    name: 'optimism',
+  },
   polygon: {
     chainId: 137,
     network: 'eip155:137',
@@ -54,6 +59,7 @@ export const DEFAULT_RPC_ENDPOINTS: Record<string, string> = {
   arbitrum: 'https://arb1.arbitrum.io/rpc',
   base: 'https://mainnet.base.org',
   ink: 'https://rpc-gel.inkonchain.com',
+  optimism: 'https://mainnet.optimism.io',
   polygon: 'https://polygon-rpc.com',
 }
 

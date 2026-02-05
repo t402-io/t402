@@ -346,7 +346,7 @@ Bridge USDT0 between supported chains using LayerZero.
 | Ethereum | 1 | 30101 |
 | Arbitrum | 42161 | 30110 |
 | Ink | 57073 | 30291 |
-| Berachain | 80084 | 30362 |
+| Berachain | 80094 | 30362 |
 | Unichain | 130 | 30320 |
 
 ### Step 1: Install Dependencies

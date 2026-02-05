@@ -51,8 +51,8 @@ DEFAULT_RPC_URLS: dict[SupportedNetwork, str] = {
     "optimism": "https://mainnet.optimism.io",
     "polygon": "https://polygon-rpc.com",
     "avalanche": "https://api.avax.network/ext/bc/C/rpc",
-    "ink": "https://rpc-qnd.ink.xyz",
-    "berachain": "https://artio.rpc.berachain.com",
+    "ink": "https://rpc-gel.inkonchain.com",
+    "berachain": "https://rpc.berachain.com",
     "unichain": "https://mainnet.unichain.org",
 }
 
@@ -64,9 +64,6 @@ USDC_ADDRESSES: dict[SupportedNetwork, str] = {
     "optimism": "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85",
     "polygon": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
     "avalanche": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
-    "ink": "0x0200C29006150606B650577BBE7B6248F58470c1",
-    "berachain": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
-    "unichain": "0x9151434b16b9763660705744891fA906F660EcC5",
 }
 
 # USDT contract addresses by network

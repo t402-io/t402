@@ -13,7 +13,7 @@ func TestGetEndpointID(t *testing.T) {
 	}{
 		{"ethereum", 30101, true},
 		{"arbitrum", 30110, true},
-		{"ink", 30339, true},
+		{"ink", 30291, true},
 		{"berachain", 30362, true},
 		{"unichain", 30320, true},
 		{"Ethereum", 30101, true}, // Case insensitive
@@ -367,7 +367,7 @@ func TestGetEndpointIDFromNetwork(t *testing.T) {
 	}{
 		{"eip155:1", 30101, true},
 		{"eip155:42161", 30110, true},
-		{"eip155:57073", 30339, true},
+		{"eip155:57073", 30291, true},
 		{"unknown", 0, false},
 	}
 

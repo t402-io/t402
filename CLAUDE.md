@@ -139,14 +139,14 @@ t402/
 | SDK | Version | Registry | Tag Pattern |
 |-----|---------|----------|-------------|
 | TypeScript | 2.3.1 | npm (@t402/*) | `v*` (e.g., `v2.3.1`) |
-| Python | 1.9.0 | PyPI | `python/v*` |
-| Go | 1.8.0 | Go Modules | `go/v*` |
-| Java | 1.8.0 | Maven Central | `java/v*` |
+| Python | 1.9.1 | PyPI | `python/v*` |
+| Go | 1.8.1 | Go Modules | `go/v*` |
+| Java | 1.8.1 | Maven Central | `java/v*` |
 
 ### Release Commands
 
 ```bash
-# TypeScript (publishes all 21 packages)
+# TypeScript (publishes all 27 packages)
 git tag v2.3.1 && git push origin v2.3.1
 
 # Python
@@ -172,7 +172,7 @@ git tag java/v1.8.1 && git push origin java/v1.8.1
 | Go | 1.24+ | Go SDK, Facilitator |
 | Python | 3.10+ | Python SDK |
 | uv | Latest | Python package manager |
-| Java | 21+ | Java SDK |
+| Java | 17+ | Java SDK |
 | Maven | 3.9+ | Java build |
 
 ### Quick Start
@@ -480,7 +480,7 @@ TEST_PRIVATE_KEY=0x...
 
 | Network | Contract |
 |---------|----------|
-| Mainnet | `SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.token-usdt` |
+| Mainnet | `SP3Y2ZSH8P7D50B0VBTSX11S7XSG24M1VB9YFQA4K.token-susdc` |
 
 ---
 

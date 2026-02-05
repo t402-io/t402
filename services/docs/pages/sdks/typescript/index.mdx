@@ -302,10 +302,9 @@ See [MCP Integration](/sdks/typescript/mcp) for full documentation.
 
 ```typescript
 // app/api/premium/route.ts
-import { createT402Handler } from "@t402/next";
-import { ExactEvmScheme } from "@t402/evm/exact/server";
+import { withT402 } from "@t402/next";
 
-export const GET = createT402Handler(
+export const GET = withT402(
   async (req) => {
     return Response.json({ data: "Premium content!" });
   },
@@ -361,16 +360,15 @@ app.get("/api/data", async () => ({ data: "Premium!" }));
 
 ```typescript
 import axios from "axios";
-import { createT402Interceptor } from "@t402/axios";
+import { wrapAxiosWithPayment } from "@t402/axios";
 import { registerExactEvmScheme } from "@t402/evm/exact/client";
 
 const client = new t402Client();
 registerExactEvmScheme(client, { signer });
 
-const axiosInstance = axios.create();
-axiosInstance.interceptors.request.use(createT402Interceptor(client));
+const api = wrapAxiosWithPayment(axios.create(), client);
 
-const response = await axiosInstance.get("https://api.example.com/data");
+const response = await api.get("https://api.example.com/data");
 ```
 
 ## Lifecycle Hooks
