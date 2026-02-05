@@ -291,10 +291,7 @@ export class T402WDK {
    * });
    * ```
    */
-  static create(
-    WDK: WDKConstructor,
-    config: T402WDKCreateConfig,
-  ): T402WDK {
+  static create(WDK: WDKConstructor, config: T402WDKCreateConfig): T402WDK {
     // Register modules
     T402WDK.registerWDK(WDK, config.modules)
 
@@ -715,12 +712,10 @@ export class T402WDK {
         throw error
       }
 
-      throw wrapError(
-        error,
-        WDKErrorCode.SIGNER_NOT_INITIALIZED,
-        'Failed to create TON signer',
-        { chain: 'ton', accountIndex },
-      )
+      throw wrapError(error, WDKErrorCode.SIGNER_NOT_INITIALIZED, 'Failed to create TON signer', {
+        chain: 'ton',
+        accountIndex,
+      })
     }
   }
 
@@ -834,12 +829,10 @@ export class T402WDK {
         throw error
       }
 
-      throw wrapError(
-        error,
-        WDKErrorCode.SIGNER_NOT_INITIALIZED,
-        'Failed to create TRON signer',
-        { chain: 'tron', accountIndex },
-      )
+      throw wrapError(error, WDKErrorCode.SIGNER_NOT_INITIALIZED, 'Failed to create TRON signer', {
+        chain: 'tron',
+        accountIndex,
+      })
     }
   }
 

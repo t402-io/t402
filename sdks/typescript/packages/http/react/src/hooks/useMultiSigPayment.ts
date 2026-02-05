@@ -125,7 +125,8 @@ export function useMultiSigPayment(options: MultiSigPaymentOptions): MultiSigPay
           setStatus('collecting')
         }
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to initiate multi-sig payment'
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to initiate multi-sig payment'
 
         if (isMountedRef.current) {
           setError(errorMessage)
@@ -168,7 +169,8 @@ export function useMultiSigPayment(options: MultiSigPaymentOptions): MultiSigPay
         }
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to submit multi-sig transaction'
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to submit multi-sig transaction'
 
       if (isMountedRef.current) {
         setError(errorMessage)

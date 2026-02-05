@@ -82,9 +82,7 @@ describe('WDKTonSignerAdapter', () => {
   it('should initialize and set address', async () => {
     await adapter.initialize()
     expect(adapter.isInitialized).toBe(true)
-    expect(adapter.address.toString()).toBe(
-      'EQDjv9CUEJ__D_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkEUe',
-    )
+    expect(adapter.address.toString()).toBe('EQDjv9CUEJ__D_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkEUe')
   })
 
   it('should not re-initialize', async () => {
@@ -123,7 +121,9 @@ describe('WDKTonSignerAdapter', () => {
   })
 
   it('should get Jetton balance', async () => {
-    const balance = await adapter.getJettonBalance('EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs')
+    const balance = await adapter.getJettonBalance(
+      'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
+    )
     expect(balance).toBe(1000000n)
   })
 
@@ -137,9 +137,7 @@ describe('createWDKTonSigner', () => {
     const account = createMockTonAccount()
     const signer = await createWDKTonSigner(account)
     expect(signer.isInitialized).toBe(true)
-    expect(signer.address.toString()).toBe(
-      'EQDjv9CUEJ__D_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkEUe',
-    )
+    expect(signer.address.toString()).toBe('EQDjv9CUEJ__D_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkEUe')
   })
 })
 
