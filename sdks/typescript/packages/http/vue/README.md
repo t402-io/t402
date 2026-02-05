@@ -12,18 +12,16 @@ npm install @t402/vue
 
 ```vue
 <script setup lang="ts">
-import { PaymentButton, usePaymentRequired } from "@t402/vue";
+import { PaymentButton, usePaymentRequired } from '@t402/vue'
 
-const { paymentRequired, requirements, pay, status } = usePaymentRequired("/api/data");
+const { paymentRequired, requirements, pay, status } = usePaymentRequired('/api/data')
 </script>
 
 <template>
   <div v-if="paymentRequired">
     <PaymentButton :requirements="requirements" :status="status" @pay="pay" />
   </div>
-  <div v-else>
-    Premium content loaded!
-  </div>
+  <div v-else>Premium content loaded!</div>
 </template>
 ```
 
@@ -34,11 +32,7 @@ const { paymentRequired, requirements, pay, status } = usePaymentRequired("/api/
 Renders a payment action button with loading and status states.
 
 ```vue
-<PaymentButton
-  :requirements="requirements"
-  :status="status"
-  @pay="handlePay"
-/>
+<PaymentButton :requirements="requirements" :status="status" @pay="handlePay" />
 ```
 
 ### PaymentDetails
@@ -73,11 +67,11 @@ Detects 402 responses and extracts payment requirements.
 
 ```typescript
 const {
-  paymentRequired,  // Ref<boolean>
-  requirements,     // Ref<PaymentRequirements[]>
-  pay,             // () => Promise<void>
-  status,          // Ref<PaymentStatus>
-} = usePaymentRequired(url, options);
+  paymentRequired, // Ref<boolean>
+  requirements, // Ref<PaymentRequirements[]>
+  pay, // () => Promise<void>
+  status, // Ref<PaymentStatus>
+} = usePaymentRequired(url, options)
 ```
 
 ### usePaymentStatus
@@ -85,7 +79,7 @@ const {
 Tracks the lifecycle of a payment (idle, pending, confirming, complete, error).
 
 ```typescript
-const { status, error, reset } = usePaymentStatus();
+const { status, error, reset } = usePaymentStatus()
 ```
 
 ### useAsyncPayment
@@ -93,7 +87,7 @@ const { status, error, reset } = usePaymentStatus();
 Manages async payment flows with automatic retry and status tracking.
 
 ```typescript
-const { execute, status, error } = useAsyncPayment(paymentFn);
+const { execute, status, error } = useAsyncPayment(paymentFn)
 ```
 
 ## Utilities
@@ -107,15 +101,15 @@ import {
   truncateAddress,
   formatTokenAmount,
   choosePaymentRequirement,
-} from "@t402/vue";
+} from '@t402/vue'
 
 // Network detection
-isEvmNetwork("eip155:8453"); // true
+isEvmNetwork('eip155:8453') // true
 
 // Display helpers
-getNetworkDisplayName("eip155:8453"); // "Base"
-truncateAddress("0x1234567890abcdef"); // "0x1234...cdef"
-formatTokenAmount(1500000n, 6); // "1.50"
+getNetworkDisplayName('eip155:8453') // "Base"
+truncateAddress('0x1234567890abcdef') // "0x1234...cdef"
+formatTokenAmount(1500000n, 6) // "1.50"
 ```
 
 ## Peer Dependencies
