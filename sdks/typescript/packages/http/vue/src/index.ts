@@ -9,6 +9,9 @@ export { AddressDisplay } from './components/AddressDisplay.js'
 export { usePaymentRequired } from './composables/usePaymentRequired.js'
 export { usePaymentStatus } from './composables/usePaymentStatus.js'
 export { useAsyncPayment } from './composables/useAsyncPayment.js'
+export { useGaslessPayment } from './composables/useGaslessPayment.js'
+export { useBridgePayment } from './composables/useBridgePayment.js'
+export { useMultiSigPayment } from './composables/useMultiSigPayment.js'
 
 // Utilities
 export {
