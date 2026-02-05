@@ -10,11 +10,9 @@ from t402.schemes.evm.exact.facilitator import (
     FacilitatorEvmSigner,
     EvmVerifyResult,
     EvmTransactionConfirmation,
-    SCHEME_EXACT,
     MIN_VALIDITY_BUFFER,
 )
 from t402.schemes.interfaces import SchemeNetworkFacilitator
-from t402.types import VerifyResponse, SettleResponse
 
 
 # Test constants
