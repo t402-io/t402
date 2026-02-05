@@ -119,7 +119,8 @@ export function useMultiSigPayment(options: MultiSigPaymentOptions): MultiSigPay
       isReady.value = result.isReady
       status.value = 'collecting'
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to initiate multi-sig payment'
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to initiate multi-sig payment'
       error.value = errorMessage
       status.value = 'error'
       onError?.(err instanceof Error ? err : new Error(errorMessage))
@@ -151,7 +152,8 @@ export function useMultiSigPayment(options: MultiSigPaymentOptions): MultiSigPay
         onSuccess?.({ txHash: result.userOpHash, success: true })
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to submit multi-sig transaction'
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to submit multi-sig transaction'
       error.value = errorMessage
       status.value = 'error'
       onError?.(err instanceof Error ? err : new Error(errorMessage))

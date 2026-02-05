@@ -8,7 +8,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from t402.schemes.tron.exact.facilitator import (
     ExactTronFacilitatorScheme,
     ExactTronFacilitatorConfig,
-    FacilitatorTronSigner,
     DEFAULT_CONFIRMATION_TIMEOUT,
 )
 from t402.schemes.interfaces import SchemeNetworkFacilitator
@@ -21,7 +20,7 @@ from t402.tron import (
     TronVerifyResult,
     TronTransactionConfirmation,
 )
-from t402.types import VerifyResponse, SettleResponse, PaymentRequirementsV2
+from t402.types import PaymentRequirementsV2
 
 
 # Test constants
