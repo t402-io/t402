@@ -1,9 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { ExactDirectNearServer } from "../../src/exact-direct/server/scheme";
-import {
-  NEAR_MAINNET_CAIP2,
-  NEAR_TESTNET_CAIP2,
-} from "../../src/constants";
+import { NEAR_MAINNET_CAIP2, NEAR_TESTNET_CAIP2 } from "../../src/constants";
 
 describe("ExactDirectNearServer", () => {
   const server = new ExactDirectNearServer();
@@ -116,11 +113,7 @@ describe("ExactDirectNearServer", () => {
 
       it("should throw for price objects without asset", async () => {
         await expect(
-          async () =>
-            await server.parsePrice(
-              { amount: "123456" } as never,
-              NEAR_MAINNET_CAIP2,
-            ),
+          async () => await server.parsePrice({ amount: "123456" } as never, NEAR_MAINNET_CAIP2),
         ).rejects.toThrow("Asset address must be specified");
       });
     });
@@ -139,9 +132,9 @@ describe("ExactDirectNearServer", () => {
       });
 
       it("should throw for unsupported network with no tokens", async () => {
-        await expect(
-          async () => await server.parsePrice("1.00", "near:unknown"),
-        ).rejects.toThrow("No tokens configured");
+        await expect(async () => await server.parsePrice("1.00", "near:unknown")).rejects.toThrow(
+          "No tokens configured",
+        );
       });
     });
   });
@@ -241,9 +234,7 @@ describe("ExactDirectNearServer", () => {
 
       const result = await serverWithInvalid.parsePrice("1.00", NEAR_MAINNET_CAIP2);
       // Should fall back to default (USDC with highest priority)
-      expect(result.asset).toBe(
-        "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1",
-      );
+      expect(result.asset).toBe("17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1");
     });
   });
 
