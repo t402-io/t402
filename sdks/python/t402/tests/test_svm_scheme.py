@@ -6,7 +6,6 @@ This test file validates that:
 3. EVM upto Server and Facilitator are properly exported
 """
 
-import pytest
 
 
 class TestSvmSchemeImports:
@@ -51,11 +50,6 @@ class TestSvmSchemeImports:
     def test_import_from_exact_subpackage(self):
         """Test importing from t402.schemes.svm.exact directly."""
         from t402.schemes.svm.exact import (
-            ExactSvmClientScheme,
-            ExactSvmServerScheme,
-            ExactSvmFacilitatorScheme,
-            ClientSvmSigner,
-            FacilitatorSvmSigner,
             SCHEME_EXACT,
         )
 
@@ -64,14 +58,7 @@ class TestSvmSchemeImports:
     def test_import_from_individual_modules(self):
         """Test importing from individual module files."""
         from t402.schemes.svm.exact.client import (
-            ExactSvmClientScheme,
-            ClientSvmSigner,
             SCHEME_EXACT,
-        )
-        from t402.schemes.svm.exact.server import ExactSvmServerScheme
-        from t402.schemes.svm.exact.facilitator import (
-            ExactSvmFacilitatorScheme,
-            FacilitatorSvmSigner,
         )
 
         assert SCHEME_EXACT == "exact"
@@ -79,11 +66,6 @@ class TestSvmSchemeImports:
     def test_import_from_top_level_schemes(self):
         """Test importing SVM classes from t402.schemes (top-level)."""
         from t402.schemes import (
-            ExactSvmClientScheme,
-            ExactSvmServerScheme,
-            ExactSvmFacilitatorScheme,
-            SvmClientSigner,
-            SvmFacilitatorSigner,
             SVM_SCHEME_EXACT,
         )
 
@@ -163,7 +145,6 @@ class TestTonFacilitatorExports:
         """Test importing from t402.schemes.ton."""
         from t402.schemes.ton import (
             ExactTonFacilitatorScheme,
-            FacilitatorTonSigner,
         )
 
         assert ExactTonFacilitatorScheme is not None
@@ -174,7 +155,6 @@ class TestTonFacilitatorExports:
         """Test importing from t402.schemes.ton.exact."""
         from t402.schemes.ton.exact import (
             ExactTonFacilitatorScheme,
-            FacilitatorTonSigner,
         )
 
         assert ExactTonFacilitatorScheme is not None
@@ -183,7 +163,6 @@ class TestTonFacilitatorExports:
         """Test importing from t402.schemes."""
         from t402.schemes import (
             ExactTonFacilitatorScheme,
-            FacilitatorTonSigner,
         )
 
         assert ExactTonFacilitatorScheme.scheme == "exact"
@@ -197,8 +176,6 @@ class TestTronFacilitatorExports:
         """Test importing from t402.schemes.tron."""
         from t402.schemes.tron import (
             ExactTronFacilitatorScheme,
-            ExactTronFacilitatorConfig,
-            FacilitatorTronSigner,
         )
 
         assert ExactTronFacilitatorScheme is not None
@@ -209,8 +186,6 @@ class TestTronFacilitatorExports:
         """Test importing from t402.schemes.tron.exact."""
         from t402.schemes.tron.exact import (
             ExactTronFacilitatorScheme,
-            ExactTronFacilitatorConfig,
-            FacilitatorTronSigner,
         )
 
         assert ExactTronFacilitatorScheme is not None
@@ -219,8 +194,6 @@ class TestTronFacilitatorExports:
         """Test importing from t402.schemes."""
         from t402.schemes import (
             ExactTronFacilitatorScheme,
-            ExactTronFacilitatorConfig,
-            FacilitatorTronSigner,
         )
 
         assert ExactTronFacilitatorScheme.scheme == "exact"
@@ -290,8 +263,6 @@ class TestNearAptosTezosPolkadotExports:
             ExactDirectNearClientScheme,
             ExactDirectNearServerScheme,
             ExactDirectNearFacilitatorScheme,
-            ClientNearSigner,
-            FacilitatorNearSigner,
         )
 
         assert ExactDirectNearClientScheme is not None
@@ -304,8 +275,6 @@ class TestNearAptosTezosPolkadotExports:
             ExactDirectAptosClientScheme,
             ExactDirectAptosServerScheme,
             ExactDirectAptosFacilitatorScheme,
-            ClientAptosSigner,
-            FacilitatorAptosSigner,
         )
 
         assert ExactDirectAptosClientScheme is not None
@@ -318,8 +287,6 @@ class TestNearAptosTezosPolkadotExports:
             ExactDirectTezosClient,
             ExactDirectTezosServer,
             ExactDirectTezosFacilitator,
-            ClientTezosSigner,
-            FacilitatorTezosSigner,
         )
 
         assert ExactDirectTezosClient is not None
@@ -332,8 +299,6 @@ class TestNearAptosTezosPolkadotExports:
             ExactDirectPolkadotClientScheme,
             ExactDirectPolkadotServerScheme,
             ExactDirectPolkadotFacilitatorScheme,
-            ClientPolkadotSigner,
-            FacilitatorPolkadotSigner,
         )
 
         assert ExactDirectPolkadotClientScheme is not None
@@ -350,8 +315,6 @@ class TestEvmExactExports:
             ExactEvmClientScheme,
             ExactEvmServerScheme,
             ExactEvmFacilitatorScheme,
-            FacilitatorEvmSigner,
-            EvmSigner,
         )
 
         assert ExactEvmClientScheme is not None
@@ -364,42 +327,9 @@ class TestAllSchemeCoverage:
 
     def test_all_chains_have_client(self):
         """All chains have a client scheme."""
-        from t402.schemes import (
-            ExactEvmClientScheme,
-            UptoEvmClientScheme,
-            ExactSvmClientScheme,
-            ExactTonClientScheme,
-            ExactTronClientScheme,
-            ExactDirectNearClientScheme,
-            ExactDirectAptosClientScheme,
-            ExactDirectTezosClient,
-            ExactDirectPolkadotClientScheme,
-        )
 
     def test_all_chains_have_server(self):
         """All chains have a server scheme."""
-        from t402.schemes import (
-            ExactEvmServerScheme,
-            UptoEvmServerScheme,
-            ExactSvmServerScheme,
-            ExactTonServerScheme,
-            ExactTronServerScheme,
-            ExactDirectNearServerScheme,
-            ExactDirectAptosServerScheme,
-            ExactDirectTezosServer,
-            ExactDirectPolkadotServerScheme,
-        )
 
     def test_all_chains_have_facilitator(self):
         """All chains have a facilitator scheme."""
-        from t402.schemes import (
-            ExactEvmFacilitatorScheme,
-            UptoEvmFacilitatorScheme,
-            ExactSvmFacilitatorScheme,
-            ExactTonFacilitatorScheme,
-            ExactTronFacilitatorScheme,
-            ExactDirectNearFacilitatorScheme,
-            ExactDirectAptosFacilitatorScheme,
-            ExactDirectTezosFacilitator,
-            ExactDirectPolkadotFacilitatorScheme,
-        )

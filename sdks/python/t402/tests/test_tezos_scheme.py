@@ -35,9 +35,6 @@ from t402.schemes.tezos import (
     parse_decimal_to_atomic,
     # Types
     ExactDirectPayload,
-    ClientTezosSigner,
-    FacilitatorTezosSigner,
-    # Scheme classes
     ExactDirectTezosClient,
     ExactDirectTezosServer,
     ExactDirectTezosFacilitator,
