@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { T402WDK } from '../../src/t402wdk'
-import { WDKInitializationError, ChainError, BridgeError } from '../../src/errors'
+import { WDKInitializationError, ChainError, BridgeError, WDKError, WDKErrorCode } from '../../src/errors'
 import type { WDKConstructor, WDKInstance, WDKAccount } from '../../src/types'
 
 // Mock WDK Account
@@ -606,6 +606,274 @@ describe('T402WDK', () => {
       // Cache should be cleared
       const stats = wdk.getCacheStats()
       expect(stats.balanceCache.validSize).toBe(0)
+    })
+  })
+
+  describe('T402WDK.create() factory method', () => {
+    beforeEach(() => {
+      // @ts-expect-error - accessing private static for testing
+      T402WDK._WDK = null
+      // @ts-expect-error - accessing private static for testing
+      T402WDK._WalletManagerEvm = null
+      // @ts-expect-error - accessing private static for testing
+      T402WDK._BridgeUsdt0Evm = null
+    })
+
+    it('should create fully configured instance via create()', () => {
+      const wdk = T402WDK.create(MockWDKConstructor, {
+        seedPhrase: VALID_SEED_PHRASE,
+        chains: {
+          arbitrum: 'https://arb1.arbitrum.io/rpc',
+          base: 'https://mainnet.base.org',
+        },
+        modules: {
+          wallets: { evm: MockWalletManagerEvm },
+          protocols: { bridgeUsdt0Evm: MockBridgeUsdt0Evm },
+        },
+      })
+
+      expect(wdk).toBeDefined()
+      expect(wdk.isInitialized).toBe(true)
+      expect(wdk.getConfiguredChains()).toContain('arbitrum')
+      expect(wdk.getConfiguredChains()).toContain('base')
+      expect(T402WDK.isWDKRegistered()).toBe(true)
+      expect(T402WDK.isBridgeRegistered()).toBe(true)
+    })
+
+    it('should create instance with only wallet modules', () => {
+      const wdk = T402WDK.create(MockWDKConstructor, {
+        seedPhrase: VALID_SEED_PHRASE,
+        chains: { arbitrum: 'https://arb1.arbitrum.io/rpc' },
+        modules: { wallets: { evm: MockWalletManagerEvm } },
+      })
+
+      expect(wdk.isInitialized).toBe(true)
+      expect(T402WDK.isBridgeRegistered()).toBe(false)
+    })
+
+    it('should pass options through to constructor', () => {
+      const wdk = T402WDK.create(MockWDKConstructor, {
+        seedPhrase: VALID_SEED_PHRASE,
+        chains: { arbitrum: 'https://arb1.arbitrum.io/rpc' },
+        modules: { wallets: { evm: MockWalletManagerEvm } },
+        options: { cache: { enabled: false } },
+      })
+
+      expect(wdk.isCacheEnabled).toBe(false)
+    })
+  })
+
+  describe('T402WDK.fromWDK() factory method', () => {
+    beforeEach(() => {
+      // @ts-expect-error - accessing private static for testing
+      T402WDK._WDK = null
+      // @ts-expect-error - accessing private static for testing
+      T402WDK._WalletManagerEvm = null
+    })
+
+    it('should create instance from pre-configured WDK', () => {
+      const mockWdk = createMockWDK()
+      const wdk = T402WDK.fromWDK(mockWdk, {
+        arbitrum: 'https://arb1.arbitrum.io/rpc',
+      })
+
+      expect(wdk).toBeDefined()
+      expect(wdk.isInitialized).toBe(true)
+      expect(wdk.wdk).toBe(mockWdk)
+    })
+
+    it('should throw when given null WDK instance', () => {
+      expect(() => T402WDK.fromWDK(null as unknown as WDKInstance)).toThrow(
+        WDKInitializationError,
+      )
+    })
+
+    it('should work without explicit chain config', () => {
+      const mockWdk = createMockWDK()
+      const wdk = T402WDK.fromWDK(mockWdk)
+
+      expect(wdk.isInitialized).toBe(true)
+    })
+
+    it('should skip seed phrase validation for fromWDK', () => {
+      const mockWdk = createMockWDK()
+      // This should not throw despite invalid seed phrase
+      const wdk = T402WDK.fromWDK(mockWdk)
+      expect(wdk.isInitialized).toBe(true)
+    })
+  })
+
+  describe('getAllSigners()', () => {
+    let wdk: T402WDK
+
+    beforeEach(() => {
+      T402WDK.registerWDK(MockWDKConstructor, MockWalletManagerEvm)
+      wdk = new T402WDK(VALID_SEED_PHRASE, {
+        arbitrum: 'https://arb1.arbitrum.io/rpc',
+        ethereum: 'https://eth.llamarpc.com',
+      })
+    })
+
+    it('should return signers for all configured EVM chains', async () => {
+      const signers = await wdk.getAllSigners({ includeNonEvm: false })
+      expect(signers.length).toBe(2) // arbitrum + ethereum, 1 scheme each
+      expect(signers.every((s) => s.family === 'evm')).toBe(true)
+      expect(signers.every((s) => s.scheme === 'exact')).toBe(true)
+    })
+
+    it('should multiply signers by scheme count', async () => {
+      const signers = await wdk.getAllSigners({
+        schemes: ['exact', 'upto'],
+        includeNonEvm: false,
+      })
+      expect(signers.length).toBe(4) // 2 chains × 2 schemes
+    })
+
+    it('should include proper network identifiers', async () => {
+      const signers = await wdk.getAllSigners({ includeNonEvm: false })
+      const networks = signers.map((s) => s.network)
+      expect(networks).toContain('eip155:42161') // Arbitrum
+      expect(networks).toContain('eip155:1') // Ethereum
+    })
+
+    it('should default to exact scheme', async () => {
+      const signers = await wdk.getAllSigners({ includeNonEvm: false })
+      expect(signers.every((s) => s.scheme === 'exact')).toBe(true)
+    })
+  })
+
+  describe('Multi-chain module registration', () => {
+    beforeEach(() => {
+      // @ts-expect-error - accessing private static for testing
+      T402WDK._WDK = null
+      // @ts-expect-error - accessing private static for testing
+      T402WDK._WalletManagerEvm = null
+      // @ts-expect-error - accessing private static for testing
+      T402WDK._WalletModules = {}
+      // @ts-expect-error - accessing private static for testing
+      T402WDK._ProtocolModules = {}
+    })
+
+    it('should register unified multi-chain modules', () => {
+      T402WDK.registerWDK(MockWDKConstructor, {
+        wallets: {
+          evm: MockWalletManagerEvm,
+          ton: {},
+          solana: {},
+          tron: {},
+        },
+        protocols: {
+          bridgeUsdt0Evm: MockBridgeUsdt0Evm,
+          swapVeloraEvm: {},
+        },
+      })
+
+      expect(T402WDK.isTonRegistered()).toBe(true)
+      expect(T402WDK.isSolanaRegistered()).toBe(true)
+      expect(T402WDK.isTronRegistered()).toBe(true)
+      expect(T402WDK.getRegisteredWalletModules()).toEqual(
+        expect.arrayContaining(['evm', 'ton', 'solana', 'tron']),
+      )
+      expect(T402WDK.getRegisteredProtocolModules()).toEqual(
+        expect.arrayContaining(['bridgeUsdt0Evm', 'swapVeloraEvm']),
+      )
+    })
+
+    it('should report non-registered modules correctly', () => {
+      T402WDK.registerWDK(MockWDKConstructor, {
+        wallets: { evm: MockWalletManagerEvm },
+      })
+
+      expect(T402WDK.isTonRegistered()).toBe(false)
+      expect(T402WDK.isSolanaRegistered()).toBe(false)
+      expect(T402WDK.isTronRegistered()).toBe(false)
+    })
+  })
+
+  describe('Swap operations', () => {
+    let wdk: T402WDK
+
+    beforeEach(() => {
+      // @ts-expect-error - accessing private static for testing
+      T402WDK._WDK = null
+      // @ts-expect-error - accessing private static for testing
+      T402WDK._WalletManagerEvm = null
+      // @ts-expect-error - accessing private static for testing
+      T402WDK._WalletModules = {}
+      // @ts-expect-error - accessing private static for testing
+      T402WDK._ProtocolModules = {}
+    })
+
+    it('should report canSwap() false when protocol not registered', () => {
+      T402WDK.registerWDK(MockWDKConstructor, {
+        wallets: { evm: MockWalletManagerEvm },
+      })
+      wdk = new T402WDK(VALID_SEED_PHRASE, { arbitrum: 'https://arb1.arbitrum.io/rpc' })
+
+      expect(wdk.canSwap()).toBe(false)
+    })
+
+    it('should report canSwap() true when protocol registered', () => {
+      T402WDK.registerWDK(MockWDKConstructor, {
+        wallets: { evm: MockWalletManagerEvm },
+        protocols: { swapVeloraEvm: {} },
+      })
+      wdk = new T402WDK(VALID_SEED_PHRASE, { arbitrum: 'https://arb1.arbitrum.io/rpc' })
+
+      expect(wdk.canSwap()).toBe(true)
+    })
+
+    it('should throw on getSwapQuote when protocol not registered', async () => {
+      T402WDK.registerWDK(MockWDKConstructor, {
+        wallets: { evm: MockWalletManagerEvm },
+      })
+      wdk = new T402WDK(VALID_SEED_PHRASE, { arbitrum: 'https://arb1.arbitrum.io/rpc' })
+
+      await expect(
+        wdk.getSwapQuote('arbitrum', '0xtoken', 1000000n),
+      ).rejects.toThrow(WDKError)
+    })
+
+    it('should throw on swapAndPay when protocol not registered', async () => {
+      T402WDK.registerWDK(MockWDKConstructor, {
+        wallets: { evm: MockWalletManagerEvm },
+      })
+      wdk = new T402WDK(VALID_SEED_PHRASE, { arbitrum: 'https://arb1.arbitrum.io/rpc' })
+
+      await expect(
+        wdk.swapAndPay({ chain: 'arbitrum', fromToken: '0xtoken', amount: 1000000n }),
+      ).rejects.toThrow(WDKError)
+    })
+
+    it('should reject invalid slippage in swapAndPay', async () => {
+      T402WDK.registerWDK(MockWDKConstructor, {
+        wallets: { evm: MockWalletManagerEvm },
+        protocols: { swapVeloraEvm: {} },
+      })
+      wdk = new T402WDK(VALID_SEED_PHRASE, { arbitrum: 'https://arb1.arbitrum.io/rpc' })
+
+      await expect(
+        wdk.swapAndPay({
+          chain: 'arbitrum',
+          fromToken: '0xtoken',
+          amount: 1000000n,
+          maxSlippage: 0.6,
+        }),
+      ).rejects.toThrow('maxSlippage must be between 0 and 0.5')
+    })
+
+    it('should throw on getSwapQuote for chain without USDT0', async () => {
+      T402WDK.registerWDK(MockWDKConstructor, {
+        wallets: { evm: MockWalletManagerEvm },
+        protocols: { swapVeloraEvm: {} },
+      })
+      wdk = new T402WDK(VALID_SEED_PHRASE, {
+        base: 'https://mainnet.base.org',
+      })
+
+      await expect(
+        wdk.getSwapQuote('base', '0xtoken', 1000000n),
+      ).rejects.toThrow(ChainError)
     })
   })
 })
