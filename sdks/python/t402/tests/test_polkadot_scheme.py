@@ -13,9 +13,6 @@ from t402.schemes.polkadot import (
     ExactDirectPolkadotServerScheme,
     ExactDirectPolkadotFacilitatorScheme,
     # Signer protocols
-    ClientPolkadotSigner,
-    FacilitatorPolkadotSigner,
-    # Constants
     SCHEME_EXACT_DIRECT,
     POLKADOT_ASSET_HUB_CAIP2,
     WESTEND_ASSET_HUB_CAIP2,
@@ -34,7 +31,6 @@ from t402.schemes.polkadot import (
     # Types
     ExactDirectPayload,
     ExtrinsicResult,
-    ParsedAssetTransfer,
 )
 from t402.schemes.interfaces import (
     SchemeNetworkClient,
