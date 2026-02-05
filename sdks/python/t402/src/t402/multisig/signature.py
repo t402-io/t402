@@ -11,7 +11,7 @@ from .types import (
     SafeTransaction,
     TransactionRequest,
 )
-from .utils import generate_request_id, current_timestamp, sort_addresses, combine_signatures
+from .utils import generate_request_id, current_timestamp, combine_signatures
 
 
 class SignatureCollector:
