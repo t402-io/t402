@@ -308,11 +308,15 @@ export class WdkSmartAccount implements SmartAccountSigner {
       return this.isAccountDeployed
     }
 
+    // Set flag early to break infinite recursion:
+    // getAddress() → getInitCode() → isDeployed() → getAddress() → ...
+    // Default assumption (not deployed) is correct for init code computation.
+    this.deploymentChecked = true
+
     await this.initialize()
     const address = this.cachedAddress ?? (await this.getAddress())
     const code = await this.publicClient.getCode({ address })
 
-    this.deploymentChecked = true
     this.isAccountDeployed = code !== undefined && code !== '0x'
 
     return this.isAccountDeployed
