@@ -424,7 +424,7 @@ go run github.com/t402-io/t402/sdks/go/cmd/t402@latest supported
 
 ## Next Steps
 
-- [API Reference](https://docs.t402.io/api) - Full API documentation
+- [API Reference](https://docs.t402.io/reference/facilitator-api) - Full API documentation
 - [Examples](../examples/) - More code examples
 - [Specification](../specs/) - Protocol specification
 - [GitHub](https://github.com/t402-io/t402) - Source code and issues

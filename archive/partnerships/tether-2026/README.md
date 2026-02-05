@@ -265,7 +265,7 @@ const bridge = new WDKBridge(wdk);
 | Language | Package | Status |
 |----------|---------|--------|
 | TypeScript | `@t402/core`, `@t402/wdk`, `@t402/evm`, `@t402/ton`, `@t402/tron`, `@t402/svm` | Production |
-| Go | `github.com/t402-io/t402/go` | Production |
+| Go | `github.com/t402-io/t402/sdks/go` | Production |
 | Python | `t402` | Production |
 | Java | `io.t402:t402` | Beta |
 
@@ -354,4 +354,4 @@ const bridge = new WDKBridge(wdk);
 - [Full Technical Specification](../../specs/t402-specification-v2.md)
 - [WDK Integration Guide](../../../services/docs/pages/reference/wdk.mdx)
 - [Security Documentation](../../SECURITY.md)
-- [API Reference](https://docs.t402.io/api)
+- [API Reference](https://docs.t402.io/reference/facilitator-api)

@@ -192,7 +192,7 @@ For payment processing services that verify and settle payments.
 ## Package Structure
 
 ```
-github.com/t402-io/t402/go
+github.com/t402-io/t402/sdks/go
 │
 ├── Core (framework-agnostic)
 │   ├── client.go              - t402.T402Client

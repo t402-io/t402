@@ -54,7 +54,7 @@ go run main.go
 ### 1. Create Safe Smart Account
 
 ```go
-import "github.com/t402-io/t402/go/mechanisms/evm/erc4337"
+import "github.com/t402-io/t402/sdks/go/mechanisms/evm/erc4337"
 
 safeAccount, err := erc4337.NewSafeSmartAccount(erc4337.SafeAccountConfig{
     Owner:   privateKey,     // *ecdsa.PrivateKey

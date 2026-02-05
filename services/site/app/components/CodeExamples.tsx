@@ -81,7 +81,7 @@ response = await client.fetch(
 
 import (
     "net/http"
-    t402 "github.com/t402-io/t402/go"
+    t402 "github.com/t402-io/t402/sdks/go"
 )
 
 func main() {
@@ -99,7 +99,7 @@ func main() {
     client: `package main
 
 import (
-    t402 "github.com/t402-io/t402/go"
+    t402 "github.com/t402-io/t402/sdks/go"
 )
 
 func main() {
@@ -359,7 +359,7 @@ export function CodeExamples() {
             <span className="font-mono text-sm text-foreground-secondary">
               {activeLanguage === "typescript" && "npm install @t402/express @t402/fetch"}
               {activeLanguage === "python" && "pip install t402"}
-              {activeLanguage === "go" && "go get github.com/t402-io/t402/go"}
+              {activeLanguage === "go" && "go get github.com/t402-io/t402/sdks/go"}
               {activeLanguage === "java" && "io.t402:t402:1.8.0"}
             </span>
           </div>

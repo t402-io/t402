@@ -533,7 +533,7 @@ const bridgeResult = await executeBridge(
 
 ## Next Steps
 
-- [API Reference](https://docs.t402.io/api)
+- [API Reference](https://docs.t402.io/reference/facilitator-api)
 - [Example Projects](../examples/)
 - [Protocol Specification](../specs/)
 - [Contributing Guide](../CONTRIBUTING.md)

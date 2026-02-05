@@ -10,7 +10,7 @@ for EVM networks using the approve + transferFrom pattern.
     **Migration Guide:**
     - Replace: `SCHEME_EXACT_LEGACY` with `SCHEME_EXACT`
     - Replace: legacy USDT tokens with USDT0 tokens
-    - See https://docs.t402.io/migration/exact-legacy for full migration guide
+    - See https://docs.t402.io/advanced/migration-v1-to-v2 for full migration guide
 
     **Why Migrate:**
     1. Gasless transfers: USDT0 supports EIP-3009, eliminating gas costs for users

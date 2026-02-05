@@ -54,10 +54,10 @@ go run . mechanism-helper-registration
 
 ```go
 import (
-    t402 "github.com/t402-io/t402/go"
-    t402http "github.com/t402-io/t402/go/http"
-    evm "github.com/t402-io/t402/go/mechanisms/evm/exact/client"
-    evmsigners "github.com/t402-io/t402/go/signers/evm"
+    t402 "github.com/t402-io/t402/sdks/go"
+    t402http "github.com/t402-io/t402/sdks/go/http"
+    evm "github.com/t402-io/t402/sdks/go/mechanisms/evm/exact/client"
+    evmsigners "github.com/t402-io/t402/sdks/go/signers/evm"
 )
 
 // Create signer

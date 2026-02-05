@@ -1,9 +1,9 @@
 # t402 Java SDK
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.t402/t402?label=maven%20central)](https://central.sonatype.com/artifact/io.t402/t402)
-[![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen.svg)](https://github.com/t402-io/t402/java)
+[![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen.svg)](https://github.com/t402-io/t402/tree/main/sdks/java)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/t402-io/t402/blob/main/LICENSE)
-[![Java Version](https://img.shields.io/badge/java-17%2B-orange)](https://github.com/t402-io/t402/java)
+[![Java Version](https://img.shields.io/badge/java-17%2B-orange)](https://github.com/t402-io/t402/tree/main/sdks/java)
 
 Java implementation of the [t402 Payment Protocol](https://t402.io).
 
