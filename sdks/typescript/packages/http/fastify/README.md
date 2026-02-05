@@ -11,42 +11,44 @@ npm install @t402/fastify
 ## Quick Start
 
 ```typescript
-import Fastify from "fastify";
-import { paymentMiddleware, t402ResourceServer } from "@t402/fastify";
-import { ExactEvmScheme } from "@t402/evm/exact/server";
-import { HTTPFacilitatorClient } from "@t402/core/server";
+import Fastify from 'fastify'
+import { paymentMiddleware, t402ResourceServer } from '@t402/fastify'
+import { ExactEvmScheme } from '@t402/evm/exact/server'
+import { HTTPFacilitatorClient } from '@t402/core/server'
 
-const app = Fastify();
+const app = Fastify()
 
-const facilitatorClient = new HTTPFacilitatorClient({ url: "https://facilitator.t402.io" });
-const resourceServer = new t402ResourceServer(facilitatorClient)
-  .register("eip155:84532", new ExactEvmScheme());
+const facilitatorClient = new HTTPFacilitatorClient({ url: 'https://facilitator.t402.io' })
+const resourceServer = new t402ResourceServer(facilitatorClient).register(
+  'eip155:84532',
+  new ExactEvmScheme(),
+)
 
 // Apply the payment middleware with your configuration
 app.addHook(
-  "onRequest",
+  'onRequest',
   paymentMiddleware(
     {
-      "GET /protected-route": {
+      'GET /protected-route': {
         accepts: {
-          scheme: "exact",
-          price: "$0.10",
-          network: "eip155:84532",
-          payTo: "0xYourAddress",
+          scheme: 'exact',
+          price: '$0.10',
+          network: 'eip155:84532',
+          payTo: '0xYourAddress',
         },
-        description: "Access to premium content",
+        description: 'Access to premium content',
       },
     },
     resourceServer,
   ),
-);
+)
 
 // Implement your protected route
-app.get("/protected-route", async (request, reply) => {
-  return { message: "This content is behind a paywall" };
-});
+app.get('/protected-route', async (request, reply) => {
+  return { message: 'This content is behind a paywall' }
+})
 
-app.listen({ port: 3000 });
+app.listen({ port: 3000 })
 ```
 
 ## Configuration
@@ -75,49 +77,49 @@ paymentMiddleware(
 
 ```typescript
 const routes: RoutesConfig = {
-  "GET /api/protected": {
+  'GET /api/protected': {
     accepts: {
-      scheme: "exact",
-      price: "$0.10",
-      network: "eip155:84532",
-      payTo: "0xYourAddress",
+      scheme: 'exact',
+      price: '$0.10',
+      network: 'eip155:84532',
+      payTo: '0xYourAddress',
       maxTimeoutSeconds: 60,
     },
-    description: "Premium API access",
+    description: 'Premium API access',
   },
-};
+}
 ```
 
 ## Multiple Payment Networks
 
 ```typescript
 app.addHook(
-  "onRequest",
+  'onRequest',
   paymentMiddleware(
     {
-      "GET /api/data": {
+      'GET /api/data': {
         accepts: [
           {
-            scheme: "exact",
-            price: "$0.10",
-            network: "eip155:8453",
+            scheme: 'exact',
+            price: '$0.10',
+            network: 'eip155:8453',
             payTo: evmAddress,
           },
           {
-            scheme: "exact",
-            price: "$0.10",
-            network: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+            scheme: 'exact',
+            price: '$0.10',
+            network: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
             payTo: svmAddress,
           },
         ],
-        description: "Data API access",
+        description: 'Data API access',
       },
     },
     new t402ResourceServer(facilitatorClient)
-      .register("eip155:8453", new ExactEvmScheme())
-      .register("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", new ExactSvmScheme()),
+      .register('eip155:8453', new ExactEvmScheme())
+      .register('solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp', new ExactSvmScheme()),
   ),
-);
+)
 ```
 
 ## Paywall Configuration
@@ -132,12 +134,12 @@ pnpm add @t402/paywall
 
 ```typescript
 const paywallConfig: PaywallConfig = {
-  appName: "Your App Name",
-  appLogo: "/path/to/logo.svg",
+  appName: 'Your App Name',
+  appLogo: '/path/to/logo.svg',
   testnet: true,
-};
+}
 
-app.addHook("onRequest", paymentMiddleware(routes, resourceServer, paywallConfig));
+app.addHook('onRequest', paymentMiddleware(routes, resourceServer, paywallConfig))
 ```
 
 ## Peer Dependencies
