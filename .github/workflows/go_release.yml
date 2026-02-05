@@ -3,7 +3,7 @@ name: Go Release
 on:
   push:
     tags:
-      - "sdks/go/v*"
+      - "go/v*"
   pull_request:
     paths:
       - "sdks/go/**"

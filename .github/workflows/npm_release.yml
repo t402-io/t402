@@ -24,6 +24,7 @@ on:
           - aptos
           - tezos
           - polkadot
+          - stacks
           - express
           - next
           - hono
@@ -109,6 +110,8 @@ jobs:
             path: packages/mechanisms/tezos
           - name: polkadot
             path: packages/mechanisms/polkadot
+          - name: stacks
+            path: packages/mechanisms/stacks
           # HTTP server packages
           - name: express
             path: packages/http/express
