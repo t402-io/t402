@@ -403,7 +403,7 @@ server_scheme = ExactEvmServerScheme()
 | Arbitrum | `0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9` |
 | Ink | `0x0200C29006150606B650577BBE7B6248F58470c1` |
 | Berachain | `0x779Ded0c9e1022225f8E0630b35a9b54bE713736` |
-| And 15+ more... | See [USDT0 documentation](https://docs.t402.io/networks/usdt0) |
+| And 15+ more... | See [USDT0 documentation](https://docs.t402.io/chains) |
 
 ## WDK Integration
 

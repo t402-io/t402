@@ -114,7 +114,7 @@ if __name__ == "__main__":
 **1. Install package:**
 
 ```bash
-go get github.com/t402-io/t402/go@latest
+go get github.com/t402-io/t402/sdks/go@latest
 ```
 
 **2. Add payment middleware:**
@@ -126,8 +126,8 @@ import (
     "encoding/json"
     "net/http"
 
-    t402 "github.com/t402-io/t402/go"
-    t402http "github.com/t402-io/t402/go/http"
+    t402 "github.com/t402-io/t402/sdks/go"
+    t402http "github.com/t402-io/t402/sdks/go/http"
 )
 
 func main() {
@@ -222,8 +222,8 @@ package main
 import (
     "fmt"
 
-    t402 "github.com/t402-io/t402/go"
-    "github.com/t402-io/t402/go/mechanisms/evm/exact/client"
+    t402 "github.com/t402-io/t402/sdks/go"
+    "github.com/t402-io/t402/sdks/go/mechanisms/evm/exact/client"
 )
 
 func main() {
@@ -417,7 +417,7 @@ npx @t402/cli supported
 t402 supported
 
 # Go
-go run github.com/t402-io/t402/go/cmd/t402@latest supported
+go run github.com/t402-io/t402/sdks/go/cmd/t402@latest supported
 ```
 
 ---

@@ -54,7 +54,7 @@ The `exact` scheme transfers a specific amount for each request.
 | [SUI](./schemes/exact/scheme_exact_sui.md) | Sui blockchain **(DRAFT)** |
 
 Additional chains implemented in SDKs (exact-direct variant — on-chain transfer as proof):
-NEAR (NEP-141), Aptos (Fungible Asset), Tezos (FA2), Polkadot (Assets Pallet), Stacks (SIP-010).
+NEAR (NEP-141), Aptos (Fungible Asset), Tezos (FA2), Polkadot (Assets Pallet), Stacks (SIP-010), Cosmos/Noble (IBC Transfer, Go SDK only).
 
 ### Up-To Scheme (Draft)
 

@@ -558,7 +558,7 @@ export const chains: Chain[] = [
     ],
     features: ["IBC transfers", "50+ chains connected", "Native USDC", "Instant finality"],
     explorerUrl: "https://www.mintscan.io/noble",
-    status: "coming_soon",
+    status: "live",
     transactionSpeed: "~6 sec",
     avgFee: "<$0.01",
   },
