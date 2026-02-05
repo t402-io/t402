@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { T402WDK } from '../../src/t402wdk'
-import { WDKInitializationError, ChainError, BridgeError, WDKError, WDKErrorCode } from '../../src/errors'
+import { WDKInitializationError, ChainError, BridgeError, WDKError } from '../../src/errors'
 import type { WDKConstructor, WDKInstance, WDKAccount } from '../../src/types'
 
 // Mock WDK Account
@@ -683,9 +683,7 @@ describe('T402WDK', () => {
     })
 
     it('should throw when given null WDK instance', () => {
-      expect(() => T402WDK.fromWDK(null as unknown as WDKInstance)).toThrow(
-        WDKInitializationError,
-      )
+      expect(() => T402WDK.fromWDK(null as unknown as WDKInstance)).toThrow(WDKInitializationError)
     })
 
     it('should work without explicit chain config', () => {
@@ -829,9 +827,7 @@ describe('T402WDK', () => {
       })
       wdk = new T402WDK(VALID_SEED_PHRASE, { arbitrum: 'https://arb1.arbitrum.io/rpc' })
 
-      await expect(
-        wdk.getSwapQuote('arbitrum', '0xtoken', 1000000n),
-      ).rejects.toThrow(WDKError)
+      await expect(wdk.getSwapQuote('arbitrum', '0xtoken', 1000000n)).rejects.toThrow(WDKError)
     })
 
     it('should throw on swapAndPay when protocol not registered', async () => {
@@ -871,9 +867,7 @@ describe('T402WDK', () => {
         base: 'https://mainnet.base.org',
       })
 
-      await expect(
-        wdk.getSwapQuote('base', '0xtoken', 1000000n),
-      ).rejects.toThrow(ChainError)
+      await expect(wdk.getSwapQuote('base', '0xtoken', 1000000n)).rejects.toThrow(ChainError)
     })
   })
 })
