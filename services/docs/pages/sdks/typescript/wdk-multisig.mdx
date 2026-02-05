@@ -109,6 +109,22 @@ const requirements = {
 const payload = await scheme.createPaymentPayload(2, requirements)
 ```
 
+## React & Vue Integration
+
+Use the `useMultiSigPayment` hook (React) or composable (Vue) for UI integration:
+
+```tsx
+import { useMultiSigPayment } from '@t402/react'; // or '@t402/vue'
+
+const { initiate, submit, status, isReady, threshold, collectedCount } = useMultiSigPayment({
+  initiateFn: (params) => multiSigClient.initiatePayment(params),
+  submitFn: (id) => multiSigClient.submitRequest(id),
+  onSuccess: (receipt) => console.log('Confirmed:', receipt.txHash),
+});
+```
+
+See [@t402/react](/reference/react#usemultisigpayment) and [@t402/vue](/reference/vue#usemultisigpayment) for full API reference.
+
 ## Security Considerations
 
 - Always verify Safe ownership before signing

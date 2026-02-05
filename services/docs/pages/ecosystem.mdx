@@ -1,0 +1,174 @@
+# Ecosystem
+
+import { Cards, Callout } from 'nextra/components'
+
+T402 is part of a broader ecosystem of tools and services for web3 payments.
+
+## Core Components
+
+<Cards>
+  <Cards.Card title="T402 Protocol" href="/">
+    HTTP-native payment protocol specification
+  </Cards.Card>
+  <Cards.Card title="Facilitator Service" href="https://facilitator.t402.io">
+    Hosted settlement service for payment verification and execution
+  </Cards.Card>
+  <Cards.Card title="Documentation" href="https://docs.t402.io">
+    Comprehensive guides and API reference
+  </Cards.Card>
+  <Cards.Card title="Monitoring" href="https://grafana.facilitator.t402.io">
+    Real-time metrics and dashboards
+  </Cards.Card>
+</Cards>
+
+## Official SDKs
+
+| Language | Package | Registry |
+|----------|---------|----------|
+| TypeScript | `@t402/*` | [npm](https://www.npmjs.com/org/t402) |
+| Go | `github.com/t402-io/t402/sdks/go` | [pkg.go.dev](https://pkg.go.dev/github.com/t402-io/t402/sdks/go) |
+| Python | `t402` | [PyPI](https://pypi.org/project/t402) |
+| Java | `io.t402:t402` | [Maven Central](https://central.sonatype.com/artifact/io.t402/t402) |
+
+## Integrations
+
+### Blockchain Networks
+
+T402 supports 12+ blockchain networks:
+
+| Category | Networks |
+|----------|----------|
+| EVM Chains | Ethereum, Arbitrum, Base, Optimism, Ink, Berachain, Unichain |
+| Non-EVM | TON, TRON, Solana, NEAR, Aptos, Tezos, Polkadot, Stacks |
+
+### Stablecoins
+
+| Token | Standard | Networks |
+|-------|----------|----------|
+| USDT0 | ERC-20 + EIP-3009 | All EVM chains |
+| USDT | TRC-20 | TRON |
+| USDT | Jetton | TON |
+| USDT | NEP-141 | NEAR |
+| USDT | Fungible Asset | Aptos |
+| USDt | FA2 | Tezos |
+| USDT | Asset 1984 | Polkadot Asset Hub |
+| USDC | SPL Token | Solana |
+| sUSDC | SIP-010 | Stacks |
+
+### Web Frameworks
+
+| Framework | Package | Features |
+|-----------|---------|----------|
+| Express.js | `@t402/express` | Middleware, route config |
+| Hono | `@t402/hono` | Edge runtime support |
+| Fastify | `@t402/fastify` | Plugin system |
+| Next.js | `@t402/next` | App Router, API routes |
+| FastAPI | `t402` | Dependency injection |
+| Flask | `t402` | Decorator pattern |
+| Gin | `go/http` | Middleware |
+| Spring Boot | `io.t402:t402` | Annotations |
+
+### Wallet Integrations
+
+| Wallet Type | Package | Description |
+|-------------|---------|-------------|
+| Browser Extension | `@t402/wdk` | MetaMask, Rabby, etc. |
+| WalletConnect | `@t402/wdk` | Mobile wallet support |
+| TON Connect | `@t402/ton` | Tonkeeper, OpenMask |
+| TronLink | `@t402/tron` | TRON wallets |
+| Phantom | `@t402/svm` | Solana wallets |
+| Safe Multi-Sig | `@t402/wdk-multisig` | Multi-signature wallets |
+
+### Advanced Features
+
+| Feature | Package | Description |
+|---------|---------|-------------|
+| Gasless Payments | `@t402/wdk-gasless` | ERC-4337 account abstraction |
+| Cross-Chain Bridge | `@t402/wdk-bridge` | LayerZero USDT0 bridging |
+| AI Agents | `@t402/mcp` | MCP server for AI payments |
+| Paywall UI | `@t402/paywall` | Server-side rendered paywall |
+
+## Third-Party Tools
+
+### Monitoring & Analytics
+
+| Tool | Integration |
+|------|-------------|
+| Prometheus | `/metrics` endpoint |
+| Grafana | Pre-built dashboards |
+| DataDog | APM integration |
+| Sentry | Error tracking |
+
+### Infrastructure
+
+| Service | Use Case |
+|---------|----------|
+| Docker | Container deployment |
+| Kubernetes | Orchestration |
+| AWS | Cloud deployment |
+| GCP | Cloud deployment |
+| Cloudflare Workers | Edge deployment |
+
+## Community Resources
+
+### Official Channels
+
+- [GitHub Repository](https://github.com/t402-io/t402) - Source code and issues
+- [GitHub Discussions](https://github.com/t402-io/t402/discussions) - Community Q&A
+- [Discord](https://discord.gg/t402) - Real-time chat
+
+### Documentation
+
+- [Protocol Specification](https://github.com/t402-io/t402/blob/main/specs/t402-specification-v2.md)
+- [Whitepaper](https://t402.io/t402-whitepaper.pdf)
+- [API Reference](/reference)
+
+## Related Projects
+
+### Tether Ecosystem
+
+| Project | Description |
+|---------|-------------|
+| [USDT0](https://tether.to/usdt0) | Omnichain USDT with EIP-3009 |
+| [Tether WDK](https://wdk.tether.to) | Wallet Development Kit |
+
+### Standards
+
+| Standard | Purpose |
+|----------|---------|
+| [EIP-3009](https://eips.ethereum.org/EIPS/eip-3009) | Transfer with authorization |
+| [EIP-712](https://eips.ethereum.org/EIPS/eip-712) | Typed structured data signing |
+| [ERC-4337](https://eips.ethereum.org/EIPS/eip-4337) | Account abstraction |
+| [CAIP-2](https://github.com/ChainAgnostic/CAIPs/blob/main/CAIPs/caip-2.md) | Chain identifiers |
+| [MCP](https://modelcontextprotocol.io) | Model Context Protocol |
+
+### Payment Protocols
+
+| Protocol | Comparison |
+|----------|------------|
+| Lightning Network | Bitcoin L2, different use case |
+| Stripe Connect | Traditional payments, centralized |
+| Request Network | Invoice-based, different model |
+
+## Building on T402
+
+### Extension Points
+
+T402 is designed for extensibility:
+
+1. **Custom Payment Schemes** - Implement new payment logic
+2. **Chain Mechanisms** - Add support for new blockchains
+3. **Transport Adapters** - Beyond HTTP (MCP, A2A, WebSocket)
+4. **Middleware Plugins** - Custom validation and logging
+
+### Contributing
+
+We welcome contributions:
+
+1. Fork the [repository](https://github.com/t402-io/t402)
+2. Read the [Contributing Guide](https://github.com/t402-io/t402/blob/main/CONTRIBUTING.md)
+3. Submit a pull request
+
+<Callout type="info">
+  Looking to integrate T402? Start with the [Getting Started](/getting-started) guide.
+</Callout>
