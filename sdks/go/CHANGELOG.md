@@ -41,6 +41,37 @@ All notable changes to the T402 Go SDK will be documented in this file.
     - `CreatePermitMessage()` - Create EIP-712 message
     - EIP-712 type definitions: `PermitTypes`, `PermitDomainTypes`
 
+## [1.8.1] - 2026-01-25
+
+### Added
+- **Safe Multi-Sig SDK** (`wdk/multisig/`) - Multi-signature wallet support
+  - Safe M-of-N threshold signing
+  - Signature collection and ordering
+  - EIP-712 domain separator calculation
+
+### Fixed
+- Go facilitator `go.sum` sync after SDK dependency bumps
+
+## [1.7.0] - 2026-01-18
+
+### Added
+- **NEAR, Aptos, Tezos, Polkadot Exact-Direct** - Full multi-chain mechanism support
+- **Stacks Mechanism** - Stacks (Bitcoin L2) support
+- **EVM Exact-Legacy Client/Server** - Legacy USDT token support
+
+## [1.6.0] - 2026-01-17
+
+### Added
+- **EVM Up-To Scheme Registration** - Usage-based billing for EVM chains
+- **Missing Mechanism Implementations** - Expanded chain coverage
+- **Java Exact-Legacy** - Go facilitator tests for cross-SDK verification
+
+### Changed
+- SDKs reorganized into `sdks/` directory structure
+
+### Fixed
+- CodeQL security alerts resolved
+
 ## [1.5.0] - 2026-01-16
 
 ### Added

@@ -1,6 +1,6 @@
 # Security Policy
 
-> *Last Updated: 2026-01-16*
+> *Last Updated: 2026-02-05*
 
 The T402 team takes security seriously. This document outlines our security practices, threat model, and guidelines for secure deployment.
 
@@ -136,6 +136,46 @@ T402 is a payment protocol that enables HTTP-based payments using cryptocurrency
 | Signature | Ed25519 | Solana standard |
 | Address | Base58 | Solana pubkey |
 | Transaction | Borsh serialization | Solana protocol |
+
+### NEAR Protocol
+
+| Component | Algorithm | Standard |
+|-----------|-----------|----------|
+| Signature | Ed25519 | NEAR standard |
+| Address | Named accounts / implicit | NEAR account model |
+| Transaction | Borsh serialization | NEAR protocol |
+
+### Aptos
+
+| Component | Algorithm | Standard |
+|-----------|-----------|----------|
+| Signature | Ed25519 | Aptos standard |
+| Address | Hex (32 bytes) | Aptos account model |
+| Transaction | BCS serialization | Move VM |
+
+### Tezos
+
+| Component | Algorithm | Standard |
+|-----------|-----------|----------|
+| Signature | Ed25519 / secp256k1 / P-256 | Tezos multi-curve |
+| Address | tz1/tz2/tz3 (Base58Check) | Tezos address format |
+| Token | FA2 (TZIP-12) | Tezos token standard |
+
+### Polkadot Asset Hub
+
+| Component | Algorithm | Standard |
+|-----------|-----------|----------|
+| Signature | Sr25519 / Ed25519 | Substrate standard |
+| Address | SS58 encoding | Polkadot address format |
+| Token | Assets Pallet (ID: 1984) | Substrate runtime |
+
+### Stacks (Bitcoin L2)
+
+| Component | Algorithm | Standard |
+|-----------|-----------|----------|
+| Signature | ECDSA secp256k1 | Bitcoin-compatible |
+| Address | C32Check (Crockford base32) | Stacks address format |
+| Transaction | Clarity smart contracts | Stacks protocol |
 
 ---
 

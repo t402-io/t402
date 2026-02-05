@@ -48,15 +48,23 @@ For bugs and feature requests:
 
 ### TypeScript
 
-* Package: `@t402/core`, `@t402/evm`, `@t402/ton`, `@t402/tron`, `@t402/svm`
+* Core: `@t402/core`, `@t402/evm`, `@t402/svm`, `@t402/ton`, `@t402/tron`, `@t402/near`, `@t402/aptos`, `@t402/tezos`, `@t402/polkadot`, `@t402/stacks`
+* HTTP: `@t402/express`, `@t402/next`, `@t402/hono`, `@t402/fastify`, `@t402/fetch`, `@t402/axios`
+* WDK: `@t402/wdk`, `@t402/wdk-gasless`, `@t402/wdk-bridge`, `@t402/wdk-multisig`
 * [TypeScript Guide](https://docs.t402.io/sdks/typescript)
 * [NPM Packages](https://www.npmjs.com/org/t402)
 
 ### Go
 
-* Package: `github.com/t402-io/t402/go`
+* Package: `github.com/t402-io/t402/sdks/go`
 * [Go Guide](https://docs.t402.io/sdks/go)
-* [Go Reference](https://pkg.go.dev/github.com/t402-io/t402/go)
+* [Go Reference](https://pkg.go.dev/github.com/t402-io/t402/sdks/go)
+
+### Java
+
+* Package: `io.t402:t402`
+* [Java Guide](https://docs.t402.io/sdks/java)
+* [Maven Central](https://central.sonatype.com/artifact/io.t402/t402)
 
 ### Python
 

@@ -18,6 +18,47 @@ All notable changes to the T402 TypeScript SDK will be documented in this file.
   - EIP-712 type definitions: `PERMIT_TYPES`, `PERMIT_DOMAIN_TYPES`
   - Helper functions: `createPermitDomain()`, `createPermitMessage()`
 
+## [2.3.1] - 2026-01-25
+
+### Added
+- **NEAR, Aptos, Tezos, Polkadot, Stacks Mechanisms** - Full multi-chain coverage
+  - `@t402/near` - NEAR Protocol NEP-141 token support
+  - `@t402/aptos` - Aptos Fungible Asset support
+  - `@t402/tezos` - Tezos FA2 (TZIP-12) support
+  - `@t402/polkadot` - Polkadot Asset Hub support
+  - `@t402/stacks` - Stacks (Bitcoin L2) support
+- **WDK Deep Integration** - Enhanced Tether WDK support
+  - `T402WDK.create()` static factory method
+  - `T402WDK.fromWDK()` quick setup from existing WDK instance
+  - `getAllSigners()` for multi-chain signer discovery
+  - Swap integration via Velora protocol (`canSwap()`, `getSwapQuote()`, `swapAndPay()`)
+  - Updated version compatibility for WDK beta.5 and wallet-evm 2.0.0-rc.1
+- **TON Adapter Fix** - Uses `@ton/core` dynamic import for proper Cell construction
+- **SVM/TRON Adapter Hardening** - Input validation for edge cases
+- 69 new tests across WDK packages
+
+### Fixed
+- Fixed `as const` arrays needing `as readonly string[]` cast for `.includes()` checks
+
+## [2.3.0] - 2026-01-18
+
+### Added
+- **EVM-Core Package** - `@t402/evm-core` for shared EVM utilities
+- **Extensions Enhancement** - Stellar SEP-10 and Solana Ed25519 signing for SIWx
+- **Shared TypeScript Config** - `tsconfig.base.json` extended across all packages
+
+## [2.2.0] - 2026-01-17
+
+### Added
+- **EVM Exact-Legacy Scheme** - Support for legacy USDT (non-EIP-3009 tokens)
+- **SVM Exact Scheme** - Solana exact payment scheme improvements
+
+## [2.1.0] - 2026-01-16
+
+### Changed
+- SDKs reorganized into `sdks/` directory structure
+- Security fixes from CodeQL analysis
+
 ## [2.0.0] - 2026-01-16
 
 ### Added
