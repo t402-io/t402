@@ -22,7 +22,7 @@ Supported schemes:
     1. Replace `ExactLegacyEvmClientScheme` with `ExactEvmClientScheme`
     2. Replace `ExactLegacyEvmServerScheme` with `ExactEvmServerScheme`
     3. Use USDT0 token addresses instead of legacy USDT
-    4. See https://docs.t402.io/migration/exact-legacy for details
+    4. See https://docs.t402.io/advanced/migration-v1-to-v2 for details
 
     **USDT0 Advantages:**
     - Single signature (no approve transaction)

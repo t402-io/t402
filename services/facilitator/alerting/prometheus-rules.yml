@@ -15,7 +15,7 @@ groups:
         annotations:
           summary: "Facilitator service is down"
           description: "Facilitator instance {{ $labels.instance }} has been down for more than 1 minute."
-          runbook_url: "https://docs.t402.io/ops/runbooks/facilitator-down"
+          runbook_url: "https://github.com/t402-io/t402/blob/main/services/facilitator/DR_PLAN.md#facilitator-down"
 
       - alert: FacilitatorHighRestartRate
         expr: changes(process_start_time_seconds{job="facilitator"}[1h]) > 3
@@ -42,7 +42,7 @@ groups:
         annotations:
           summary: "High error rate detected"
           description: "Facilitator error rate is {{ $value | humanizePercentage }} on {{ $labels.instance }}."
-          runbook_url: "https://docs.t402.io/ops/runbooks/high-error-rate"
+          runbook_url: "https://github.com/t402-io/t402/blob/main/services/facilitator/DR_PLAN.md#high-error-rate"
 
       - alert: FacilitatorVerifyFailures
         expr: |
@@ -67,7 +67,7 @@ groups:
         annotations:
           summary: "High settle failure rate on {{ $labels.network }}"
           description: "Settle failure rate is {{ $value | humanizePercentage }} on network {{ $labels.network }}."
-          runbook_url: "https://docs.t402.io/ops/runbooks/settle-failures"
+          runbook_url: "https://github.com/t402-io/t402/blob/main/services/facilitator/DR_PLAN.md#settle-failures"
 
   - name: facilitator-performance
     interval: 30s
@@ -108,7 +108,7 @@ groups:
         annotations:
           summary: "Settlement critically slow on {{ $labels.network }}"
           description: "95th percentile settlement time exceeds 5 minutes on {{ $labels.network }}."
-          runbook_url: "https://docs.t402.io/ops/runbooks/slow-settlement"
+          runbook_url: "https://github.com/t402-io/t402/blob/main/services/facilitator/DR_PLAN.md#slow-settlement"
 
   - name: facilitator-resources
     interval: 30s
@@ -133,7 +133,7 @@ groups:
         annotations:
           summary: "Critical wallet balance on {{ $labels.network }}"
           description: "Wallet {{ $labels.address }} on {{ $labels.network }} is nearly empty ({{ $value }} {{ $labels.asset }})."
-          runbook_url: "https://docs.t402.io/ops/runbooks/low-balance"
+          runbook_url: "https://github.com/t402-io/t402/blob/main/services/facilitator/DR_PLAN.md#low-balance"
 
       # Rate limiting alerts
       - alert: FacilitatorHighRateLimiting
@@ -171,7 +171,7 @@ groups:
         annotations:
           summary: "All RPCs unhealthy for {{ $labels.network }}"
           description: "All RPC endpoints for network {{ $labels.network }} are unhealthy."
-          runbook_url: "https://docs.t402.io/ops/runbooks/rpc-failure"
+          runbook_url: "https://github.com/t402-io/t402/blob/main/services/facilitator/DR_PLAN.md#rpc-failure"
 
       # Database health alerts
       - alert: FacilitatorDBUnhealthy
@@ -183,7 +183,7 @@ groups:
         annotations:
           summary: "Database is unhealthy"
           description: "Facilitator cannot connect to the database."
-          runbook_url: "https://docs.t402.io/ops/runbooks/db-failure"
+          runbook_url: "https://github.com/t402-io/t402/blob/main/services/facilitator/DR_PLAN.md#db-failure"
 
       # Stale data alerts
       - alert: FacilitatorStaleSync

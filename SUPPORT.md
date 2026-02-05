@@ -6,7 +6,7 @@ Start with our comprehensive documentation:
 
 * **[docs.t402.io](https://docs.t402.io)** - Full documentation site
 * **[Getting Started](https://docs.t402.io/getting-started)** - Quick start guides
-* **[API Reference](https://docs.t402.io/api)** - Detailed API documentation
+* **[API Reference](https://docs.t402.io/reference/facilitator-api)** - Detailed API documentation
 
 ## Getting Help
 

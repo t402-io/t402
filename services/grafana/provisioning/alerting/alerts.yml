@@ -50,7 +50,7 @@ groups:
         annotations:
           summary: T402 Facilitator service is down
           description: "Facilitator service is not responding to health checks. Immediate action required."
-          runbook_url: "https://docs.t402.io/runbooks/facilitator-down"
+          runbook_url: "https://github.com/t402-io/t402/blob/main/services/facilitator/DR_PLAN.md#facilitator-down"
         labels:
           severity: critical
           service: facilitator
@@ -100,7 +100,7 @@ groups:
         annotations:
           summary: Redis service is down
           description: "Redis is not responding. Rate limiting and caching functionality is impacted."
-          runbook_url: "https://docs.t402.io/runbooks/redis-down"
+          runbook_url: "https://github.com/t402-io/t402/blob/main/services/facilitator/DR_PLAN.md#redis-down"
         labels:
           severity: critical
           service: redis
@@ -165,7 +165,7 @@ groups:
         annotations:
           summary: High error rate breaching 99.9% SLO
           description: "Error rate is above 0.1% (current: {{ $values.C | printf \"%.4f\" }}). SLO target: 99.9% availability."
-          runbook_url: "https://docs.t402.io/runbooks/high-error-rate"
+          runbook_url: "https://github.com/t402-io/t402/blob/main/services/facilitator/DR_PLAN.md#high-error-rate"
         labels:
           severity: critical
           service: facilitator
@@ -216,7 +216,7 @@ groups:
         annotations:
           summary: High P95 latency breaching SLO
           description: "P95 latency is above 500ms (current: {{ $values.A | printf \"%.3f\" }}s). SLO target: P95 < 500ms."
-          runbook_url: "https://docs.t402.io/runbooks/high-latency"
+          runbook_url: "https://github.com/t402-io/t402/blob/main/services/facilitator/DR_PLAN.md#high-latency"
         labels:
           severity: warning
           service: facilitator
@@ -321,7 +321,7 @@ groups:
         annotations:
           summary: Verify endpoint returning errors
           description: "The /verify endpoint is returning 5xx errors. Payment verification is failing."
-          runbook_url: "https://docs.t402.io/runbooks/verify-errors"
+          runbook_url: "https://github.com/t402-io/t402/blob/main/services/facilitator/DR_PLAN.md#verify-errors"
         labels:
           severity: critical
           service: facilitator
@@ -371,7 +371,7 @@ groups:
         annotations:
           summary: Settle endpoint returning errors
           description: "The /settle endpoint is returning 5xx errors. Payment settlement is failing - funds may not be transferred."
-          runbook_url: "https://docs.t402.io/runbooks/settle-errors"
+          runbook_url: "https://github.com/t402-io/t402/blob/main/services/facilitator/DR_PLAN.md#settle-errors"
         labels:
           severity: critical
           service: facilitator
@@ -907,7 +907,7 @@ groups:
         annotations:
           summary: Potential API key brute force attack detected
           description: "More than 10 failed API key authentication attempts in 5 minutes. Possible brute force attack."
-          runbook_url: "https://docs.t402.io/runbooks/api-key-attacks"
+          runbook_url: "https://github.com/t402-io/t402/blob/main/services/facilitator/DR_PLAN.md#api-key-attacks"
         labels:
           severity: critical
           service: facilitator

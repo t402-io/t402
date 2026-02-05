@@ -365,5 +365,5 @@ Releases are handled by maintainers. See [RELEASING.md](../RELEASING.md) for det
 ## Getting Help
 
 - Open an issue on GitHub
-- Check the [examples](../examples/java/) for usage patterns
+- Check the [tests](src/test/java/io/t402/) for usage patterns
 - Reference the [README.md](README.md) for API documentation
