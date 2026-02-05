@@ -128,6 +128,23 @@ const delivered = await bridge.waitForDelivery(messageGuid, {
 })
 ```
 
+## React & Vue Integration
+
+Use the `useBridgePayment` hook (React) or composable (Vue) for UI integration:
+
+```tsx
+import { useBridgePayment } from '@t402/react'; // or '@t402/vue'
+
+const { autoBridge, isLoading, txHash, messageGuid, error } = useBridgePayment({
+  bridgeFn: (params) => bridgeClient.bridge(params),
+  autoBridgeFn: (params) => bridgeClient.autoBridge(params),
+  onSuccess: (result) => console.log('Bridged:', result),
+  autoWaitForDelivery: true,
+});
+```
+
+See [@t402/react](/reference/react#usebridgepayment) and [@t402/vue](/reference/vue#usebridgepayment) for full API reference.
+
 ## Supported Chains
 
 | Chain | Chain ID | LayerZero EID | USDT0 Address |

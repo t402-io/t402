@@ -6,37 +6,13 @@
 
 import type { Address, Hex, PublicClient } from 'viem'
 import type { SmartAccountSigner, BundlerConfig, PaymasterConfig } from '@t402/evm'
+import type { WdkAccount } from '@t402/wdk'
+
+// Re-export the canonical WdkAccount type for consumers
+export type { WdkAccount } from '@t402/wdk'
 
 /**
- * WDK account interface (compatible with @tetherto/wdk)
- */
-export interface WdkAccount {
-  /** Get the account's address */
-  getAddress(): Promise<string>
-  /** Get the account's native balance */
-  getBalance(): Promise<bigint>
-  /** Get the account's token balance */
-  getTokenBalance(tokenAddress: string): Promise<bigint>
-  /** Sign a message */
-  signMessage(message: string): Promise<string>
-  /** Sign typed data (EIP-712) */
-  signTypedData(params: {
-    domain: {
-      name?: string
-      version?: string
-      chainId?: number
-      verifyingContract?: string
-    }
-    types: Record<string, Array<{ name: string; type: string }>>
-    primaryType: string
-    message: Record<string, unknown>
-  }): Promise<string>
-  /** Send a transaction */
-  sendTransaction(params: { to: string; value?: bigint; data?: string }): Promise<string>
-}
-
-/**
- * WDK instance interface
+ * WDK instance interface (simplified wrapper for gasless context)
  */
 export interface WdkInstance {
   /** Get accounts */

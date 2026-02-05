@@ -20,6 +20,7 @@ export { tronPaywall } from "./tron";
 export { stacksPaywall } from "./stacks";
 export { cosmosPaywall } from "./cosmos";
 export { nearPaywall } from "./near";
+export { gaslessPaywall } from "./gasless";
 
 // Re-export UI components
 export { TransactionStatus, useTransactionStatus } from "./components/TransactionStatus";
