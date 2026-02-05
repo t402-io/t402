@@ -61,7 +61,7 @@ export const USDT0_ADDRESSES: Record<string, Address> = {
   // Berachain Mainnet
   "eip155:80094": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
   // Unichain Mainnet
-  "eip155:130": "0x588ce4F028D8e7B53B687865d6A67b3A54C75518",
+  "eip155:130": "0x9151434b16b9763660705744891fA906F660EcC5",
 };
 
 /**

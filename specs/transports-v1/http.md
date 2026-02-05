@@ -155,7 +155,7 @@ HTTP transport maps t402 errors to standard HTTP status codes:
 
 ## References
 
-- [Core t402 Specification](../t402-specification.md)
+- [Core t402 Specification](../t402-specification-v1.md)
 - [HTTP/1.1 Specification (RFC 7231)](https://tools.ietf.org/html/rfc7231)
 - [HTTP 402 Status Code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402)
 - [Express.js t402 Integration](../../examples/typescript/servers/express.ts)

@@ -76,7 +76,7 @@ var USDT0Addresses = map[string]string{
 	"arbitrum":  "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
 	"ink":       "0x0200C29006150606B650577BBE7B6248F58470c1",
 	"berachain": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
-	"unichain":  "0x588ce4F028D8e7B53B687865d6A67b3A54C75518",
+	"unichain":  "0x9151434b16b9763660705744891fA906F660EcC5",
 }
 
 // USDCAddresses contains USDC token addresses by chain.

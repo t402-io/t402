@@ -38,5 +38,5 @@ Define transport-specific error handling:
 
 ## References
 
-- [Core t402 Specification](../t402-specification.md) - Contains all schema definitions (`PaymentRequirementsResponse`, `PaymentPayload`, `SettlementResponse`, etc.)
+- [Core t402 Specification](../t402-specification-v2.md) - Contains all schema definitions (`PaymentRequirementsResponse`, `PaymentPayload`, `SettlementResponse`, etc.)
 - Relevant transport protocol documentation
