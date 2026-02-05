@@ -1,0 +1,409 @@
+# Solana Integration Guide
+
+import { Callout, Tabs, Steps } from 'nextra/components'
+
+This tutorial shows how to integrate T402 payments with Solana using SPL tokens.
+
+## Overview
+
+Solana uses SPL tokens for USDT/USDC transfers. The T402 Solana implementation supports:
+
+- **SPL Token transfers** (USDT, USDC)
+- **Ed25519 signatures**
+- **Recent blockhash** based replay protection
+
+## Prerequisites
+
+- Node.js 18+ or Python 3.10+
+- Solana wallet with devnet SOL and tokens
+- Basic understanding of Solana concepts
+
+## Network Identifiers
+
+| Network | CAIP-2 Identifier |
+|---------|-------------------|
+| Solana Mainnet | `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` |
+| Solana Devnet | `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` |
+| Solana Testnet | `solana:4uhcVJyU9pJkvQyS88uRDiswHXSCkY3z` |
+
+## Token Addresses
+
+| Token | Network | Mint Address |
+|-------|---------|--------------|
+| USDC | Mainnet | `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v` |
+| USDT | Mainnet | `Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB` |
+| USDC | Devnet | `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU` |
+
+<Steps>
+
+### Install Dependencies
+
+<Tabs items={['TypeScript', 'Python', 'Go']}>
+  <Tabs.Tab>
+```bash
+npm install @t402/svm @t402/core @solana/web3.js @solana/spl-token
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+pip install t402[svm]
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+go get github.com/t402-io/t402/sdks/go/mechanisms/svm
+```
+  </Tabs.Tab>
+</Tabs>
+
+### Client Setup
+
+Create a client that can sign Solana payment authorizations.
+
+<Tabs items={['TypeScript', 'Python', 'Go']}>
+  <Tabs.Tab>
+```typescript
+import { t402Client } from '@t402/core/client';
+import { ExactSvmScheme, toClientSvmSigner } from '@t402/svm';
+import { Keypair, Connection } from '@solana/web3.js';
+import bs58 from 'bs58';
+
+// Create connection
+const connection = new Connection('https://api.mainnet-beta.solana.com');
+
+// Create keypair from secret key
+const secretKey = bs58.decode('your_base58_private_key');
+const keypair = Keypair.fromSecretKey(secretKey);
+
+// Create Solana signer
+const svmSigner = toClientSvmSigner({
+  keypair,
+  connection,
+});
+
+// Create t402 client
+const client = new t402Client()
+  .register('solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp', new ExactSvmScheme(svmSigner));
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+from t402 import t402Client
+from t402.svm import SvmSigner, ExactSvmScheme
+from solana.keypair import Keypair
+
+# Create keypair
+keypair = Keypair.from_base58_string("your_base58_private_key")
+
+# Create Solana signer
+signer = SvmSigner(keypair)
+
+# Create t402 client
+client = t402Client()
+client.register("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", ExactSvmScheme(signer))
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```go
+import (
+    "github.com/t402-io/t402/sdks/go/mechanisms/svm"
+    t402 "github.com/t402-io/t402/sdks/go"
+)
+
+// Create Solana signer
+signer, err := svm.NewSignerFromBase58(privateKeyBase58)
+if err != nil {
+    log.Fatal(err)
+}
+
+// Create t402 client
+client := t402.NewClient()
+client.Register("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", svm.NewExactScheme(signer))
+```
+  </Tabs.Tab>
+</Tabs>
+
+### Server Setup
+
+Configure your server to accept Solana payments.
+
+<Tabs items={['TypeScript (Express)', 'Python (FastAPI)', 'Go']}>
+  <Tabs.Tab>
+```typescript
+import express from 'express';
+import { paymentMiddleware } from '@t402/express';
+import { t402ResourceServer, createFacilitatorClient } from '@t402/core/server';
+import { registerExactSvmServerScheme } from '@t402/svm/exact/server';
+
+const app = express();
+
+// Create facilitator client
+const facilitator = createFacilitatorClient({
+  url: 'https://facilitator.t402.io',
+});
+
+// Create t402 server
+const server = new t402ResourceServer(facilitator);
+registerExactSvmServerScheme(server, {});
+
+// Define routes with Solana payment
+const routes = {
+  '/api/premium/*': {
+    accepts: {
+      scheme: 'exact',
+      network: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
+      payTo: 'YourSolanaAddress',
+      price: '$0.01',
+    },
+    description: 'Premium API access',
+  },
+};
+
+// Apply middleware
+app.use(paymentMiddleware(routes, server));
+
+app.get('/api/premium/data', (req, res) => {
+  res.json({ data: 'Premium content' });
+});
+
+app.listen(3000);
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+from fastapi import FastAPI
+from t402.fastapi.middleware import require_payment
+
+app = FastAPI()
+
+app.middleware("http")(
+    require_payment(
+        price="0.01",
+        pay_to_address="YourSolanaAddress",
+        network="solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+    )
+)
+
+@app.get("/api/premium")
+async def premium():
+    return {"data": "Premium content"}
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```go
+package main
+
+import (
+    "github.com/gin-gonic/gin"
+    "github.com/t402-io/t402/sdks/go/http"
+    "github.com/t402-io/t402/sdks/go/mechanisms/svm"
+)
+
+func main() {
+    r := gin.Default()
+
+    // Create t402 server
+    server := t402.NewResourceServer(facilitator)
+    svm.RegisterExactScheme(server)
+
+    // Configure routes
+    routes := http.Routes{
+        "/api/premium/*": {
+            Accepts: http.PaymentConfig{
+                Scheme:  "exact",
+                Network: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+                PayTo:   "YourSolanaAddress",
+                Price:   "$0.01",
+            },
+        },
+    }
+
+    r.Use(http.PaymentMiddleware(routes, server))
+
+    r.GET("/api/premium/data", func(c *gin.Context) {
+        c.JSON(200, gin.H{"data": "Premium content"})
+    })
+
+    r.Run(":3000")
+}
+```
+  </Tabs.Tab>
+</Tabs>
+
+### Make Payment Requests
+
+<Tabs items={['TypeScript', 'Python', 'Go']}>
+  <Tabs.Tab>
+```typescript
+import { wrapFetchWithPayment } from '@t402/fetch';
+
+const fetchWithPay = wrapFetchWithPayment(fetch, client);
+
+// Automatic payment handling
+const response = await fetchWithPay('https://api.example.com/api/premium/data', {
+  method: 'GET',
+});
+
+const data = await response.json();
+console.log(data);
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+from t402.clients.httpx import t402HttpxClient
+
+async with t402HttpxClient(client=client) as http:
+    response = await http.get("https://api.example.com/api/premium/data")
+    data = await response.json()
+    print(data)
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```go
+httpClient := t402.NewHTTPClient(client)
+
+resp, err := httpClient.Get(ctx, "https://api.example.com/api/premium/data")
+if err != nil {
+    log.Fatal(err)
+}
+defer resp.Body.Close()
+
+var data map[string]interface{}
+json.NewDecoder(resp.Body).Decode(&data)
+fmt.Println(data)
+```
+  </Tabs.Tab>
+</Tabs>
+
+</Steps>
+
+## Solana-Specific Concepts
+
+### SPL Token Transfers
+
+Solana uses SPL tokens for USDT/USDC. The payment flow:
+
+1. Client creates and signs SPL token transfer instruction
+2. Transaction includes recent blockhash for validity
+3. Facilitator submits transaction to network
+4. SPL program processes the transfer
+
+### Associated Token Accounts
+
+Each wallet needs an Associated Token Account (ATA) for each token:
+
+```typescript
+import { getAssociatedTokenAddress } from '@solana/spl-token';
+
+// Get ATA for USDC
+const ata = await getAssociatedTokenAddress(
+  new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'), // USDC mint
+  walletPublicKey,
+);
+```
+
+<Callout type="info">
+  The facilitator automatically creates ATAs if they don't exist, but this adds a small fee.
+</Callout>
+
+### Transaction Priority
+
+For faster confirmations, add priority fees:
+
+```typescript
+import { ComputeBudgetProgram } from '@solana/web3.js';
+
+// Add priority fee instruction
+const priorityFeeIx = ComputeBudgetProgram.setComputeUnitPrice({
+  microLamports: 1000, // Priority fee in micro-lamports
+});
+```
+
+### Blockhash Validity
+
+Transactions are valid for ~60 seconds:
+
+```typescript
+// Get recent blockhash
+const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+
+// Transaction is valid until lastValidBlockHeight
+```
+
+## Testing on Devnet
+
+<Callout type="info">
+  Get devnet SOL from the [Solana Faucet](https://faucet.solana.com/).
+</Callout>
+
+1. Configure for devnet:
+
+```typescript
+const connection = new Connection('https://api.devnet.solana.com');
+
+const routes = {
+  '/api/test/*': {
+    accepts: {
+      scheme: 'exact',
+      network: 'solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1',
+      payTo: 'YourDevnetAddress',
+      price: '$0.001',
+    },
+  },
+};
+```
+
+2. Use devnet wallet and tokens
+
+3. Verify transactions on [explorer.solana.com](https://explorer.solana.com/?cluster=devnet)
+
+## Phantom Wallet Integration
+
+For browser-based applications:
+
+```typescript
+// Check if Phantom is available
+if ('solana' in window) {
+  const phantom = window.solana;
+
+  if (phantom.isPhantom) {
+    // Connect to Phantom
+    const response = await phantom.connect();
+    const publicKey = response.publicKey;
+
+    // Create signer from Phantom
+    const signer = toClientSvmSigner({
+      publicKey,
+      signTransaction: (tx) => phantom.signTransaction(tx),
+    });
+
+    const client = new t402Client()
+      .register('solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp', new ExactSvmScheme(signer));
+  }
+}
+```
+
+## Troubleshooting
+
+### Common Issues
+
+| Issue | Solution |
+|-------|----------|
+| Blockhash expired | Retry with fresh blockhash |
+| Insufficient SOL | Add SOL for transaction fees |
+| Missing ATA | Create ATA before transfer |
+| Signature verification failed | Ensure keypair matches public key |
+
+### RPC Errors
+
+| Code | Description |
+|------|-------------|
+| `-32002` | Transaction simulation failed |
+| `-32003` | Transaction already processed |
+| `-32005` | Node unhealthy |
+
+## Related
+
+- [@t402/svm Reference](/reference/svm) - API documentation
+- [Solana Network Details](/chains/non-evm) - Chain configuration
+- [Multi-Chain App](/tutorials/multi-chain-app) - Cross-chain integration
