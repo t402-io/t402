@@ -99,9 +99,17 @@ export class WDKSvmSignerAdapter implements TransactionSigner {
   async signTransactions<
     T extends { messageBytes: Uint8Array; signatures: Record<string, unknown> },
   >(transactions: readonly T[]): Promise<readonly Record<string, Uint8Array>[]> {
+    if (!transactions || transactions.length === 0) {
+      return []
+    }
+
     const results: Record<string, Uint8Array>[] = []
 
     for (const tx of transactions) {
+      if (!tx.messageBytes || tx.messageBytes.length === 0) {
+        throw new Error('Transaction messageBytes must not be empty')
+      }
+
       // Sign the message bytes using WDK account
       const signature = await this._account.sign(tx.messageBytes)
 

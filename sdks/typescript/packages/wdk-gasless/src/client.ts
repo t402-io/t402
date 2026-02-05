@@ -89,6 +89,15 @@ export class WdkGaslessClient {
    * Gas is sponsored by a paymaster if configured.
    */
   async pay(params: GaslessPaymentParams): Promise<GaslessPaymentResult> {
+    // Validate payment params
+    if (!params.to || params.to === '0x0000000000000000000000000000000000000000') {
+      throw new Error('Recipient address must not be the zero address')
+    }
+
+    if (params.amount <= 0n) {
+      throw new Error('Payment amount must be greater than zero')
+    }
+
     const token = params.token ?? 'USDT0'
     const tokenAddress = getTokenAddress(token, this.chainName)
 
@@ -160,6 +169,24 @@ export class WdkGaslessClient {
    * All payments are executed atomically.
    */
   async payBatch(params: BatchPaymentParams): Promise<GaslessPaymentResult> {
+    // Validate batch params
+    if (!params.payments || params.payments.length === 0) {
+      throw new Error('Batch payments must contain at least one payment')
+    }
+
+    if (params.payments.length > 50) {
+      throw new Error('Batch payments must not exceed 50 payments')
+    }
+
+    for (const payment of params.payments) {
+      if (!payment.to || payment.to === '0x0000000000000000000000000000000000000000') {
+        throw new Error('Recipient address must not be the zero address')
+      }
+      if (payment.amount <= 0n) {
+        throw new Error('Payment amount must be greater than zero')
+      }
+    }
+
     // Build transaction intents for all payments
     const intents: TransactionIntent[] = params.payments.map((payment) => {
       const token = payment.token ?? 'USDT0'
