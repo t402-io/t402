@@ -115,7 +115,7 @@ describe('WdkGaslessClient type validation', () => {
 
 const MOCK_SMART_ACCOUNT_ADDRESS = '0xAAAABBBBCCCCDDDDEEEEFFFF0000111122223333' as Address
 const MOCK_RECIPIENT = '0x9999888877776666555544443333222211110000' as Address
-const MOCK_USER_OP_HASH =
+const _MOCK_USER_OP_HASH =
   '0xabcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789' as Hex
 
 function createMockSigner(overrides: Partial<SmartAccountSigner> = {}): SmartAccountSigner {
@@ -542,8 +542,8 @@ describe('WdkGaslessClient.payBatch()', () => {
 
   it('should construct correct transaction intents for each payment', () => {
     // Verify that the payBatch method creates the right token addresses for each payment
-    const recipient1 = '0xAAAA000000000000000000000000000000000001' as Address
-    const recipient2 = '0xBBBB000000000000000000000000000000000002' as Address
+    const _recipient1 = '0xAAAA000000000000000000000000000000000001' as Address
+    const _recipient2 = '0xBBBB000000000000000000000000000000000002' as Address
 
     // When payBatch is called with these payments on arbitrum:
     // - Payment 1: USDT0 default -> USDT0_ADDRESSES.arbitrum
@@ -694,9 +694,9 @@ describe('WdkGaslessClient.payBatch() input validation', () => {
       amount: 1000000n,
     }))
 
-    await expect(
-      client.payBatch({ payments }),
-    ).rejects.toThrow('Batch payments must not exceed 50 payments')
+    await expect(client.payBatch({ payments })).rejects.toThrow(
+      'Batch payments must not exceed 50 payments',
+    )
   })
 
   it('should reject zero address in batch payment', async () => {
