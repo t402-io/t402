@@ -1,0 +1,343 @@
+# Java Examples
+
+import { Callout, Tabs, Tab } from 'nextra/components'
+
+Complete examples for common T402 Java SDK use cases.
+
+## Multi-Chain Signers
+
+### EVM Signer
+
+```java
+import io.t402.crypto.EvmSigner;
+
+EvmSigner signer = EvmSigner.fromPrivateKey(
+    "0xYourPrivateKey",
+    8453,                                              // Base chain ID
+    "USD Coin",                                        // Token name
+    "2",                                               // Token version
+    "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"       // USDC address
+);
+
+String signature = signer.sign(paymentPayload);
+```
+
+### Solana Signer
+
+```java
+import io.t402.crypto.SvmSigner;
+
+SvmSigner signer = SvmSigner.fromBase58("YourBase58PrivateKey");
+
+String publicKey = signer.getPublicKey();
+byte[] signature = signer.sign(transactionBytes);
+```
+
+### TON Signer
+
+```java
+import io.t402.crypto.TonSigner;
+
+TonSigner signer = TonSigner.fromHex("YourHexSeed");
+
+String publicKey = signer.getPublicKey();
+byte[] signature = signer.sign(messageBytes);
+```
+
+### TRON Signer
+
+```java
+import io.t402.crypto.TronSigner;
+
+TronSigner signer = TronSigner.fromHex("YourHexPrivateKey");
+
+String address = signer.getAddress(); // T...
+byte[] signature = signer.sign(transactionBytes);
+```
+
+## ERC-4337 Account Abstraction
+
+### UserOperation v0.7
+
+```java
+import io.t402.erc4337.UserOperation;
+
+UserOperation userOp = new UserOperation.Builder()
+    .sender("0xSmartAccountAddress")
+    .nonce(BigInteger.ZERO)
+    .callData(callData)
+    .callGasLimit(BigInteger.valueOf(100000))
+    .verificationGasLimit(BigInteger.valueOf(100000))
+    .preVerificationGas(BigInteger.valueOf(50000))
+    .maxFeePerGas(maxFeePerGas)
+    .maxPriorityFeePerGas(maxPriorityFeePerGas)
+    .build();
+
+byte[] userOpHash = userOp.getUserOpHash(
+    UserOperation.ENTRYPOINT_V07,
+    chainId
+);
+
+UserOperation.PackedUserOperation packed = userOp.pack();
+```
+
+### Safe Smart Account
+
+```java
+import io.t402.erc4337.safe.*;
+
+SafeAccount safe = new SafeAccount(safeAddress, ownerAddress, chainId);
+
+// Single call
+byte[] callData = safe.encodeExecTransaction(
+    targetAddress, value, data, Operation.CALL
+);
+
+// Batch calls
+List<SafeCall> calls = List.of(
+    new SafeCall(token1, BigInteger.ZERO, approveData, Operation.CALL),
+    new SafeCall(token2, BigInteger.ZERO, transferData, Operation.CALL)
+);
+byte[] batchData = safe.encodeBatchCalls(calls);
+
+// Sign transaction
+byte[] txHash = safe.getSafeTransactionHash(to, value, data, operation, nonce);
+byte[] signature = safe.signSafeTransaction(txHash, ownerPrivateKey);
+```
+
+### Bundler Integration
+
+<Tabs items={['Pimlico', 'Alchemy', 'Generic']}>
+  <Tab>
+```java
+import io.t402.erc4337.bundler.PimlicoBundler;
+
+PimlicoBundler bundler = new PimlicoBundler(apiKey, chainId);
+
+// Get gas prices
+GasPrices prices = bundler.getUserOperationGasPrice();
+userOp.setMaxFeePerGas(prices.getFast().getMaxFeePerGas());
+
+// Sponsor with paymaster
+SponsorResult sponsor = bundler.sponsorUserOperation(userOp, entryPoint);
+userOp.setPaymaster(sponsor.getPaymaster());
+userOp.setPaymasterData(sponsor.getPaymasterData());
+```
+  </Tab>
+  <Tab>
+```java
+import io.t402.erc4337.bundler.AlchemyBundler;
+
+AlchemyBundler bundler = new AlchemyBundler(apiKey, chainId);
+
+// Get gas and paymaster data
+GasAndPaymasterResult result = bundler.requestGasAndPaymasterAndData(
+    userOp, entryPoint, policyId
+);
+
+// Simulate for error checking
+SimulationResult sim = bundler.simulateUserOperation(userOp, entryPoint);
+if (!sim.isSuccess()) {
+    System.err.println("Simulation failed: " + sim.getError());
+}
+```
+  </Tab>
+  <Tab>
+```java
+import io.t402.erc4337.BundlerClient;
+
+BundlerClient bundler = new BundlerClient("https://bundler.example.com");
+
+GasEstimate estimate = bundler.estimateUserOperationGas(userOp, entryPoint);
+String userOpHash = bundler.sendUserOperation(userOp, entryPoint);
+UserOperationReceipt receipt = bundler.getUserOperationReceipt(userOpHash);
+```
+  </Tab>
+</Tabs>
+
+## USDT0 Cross-Chain Bridge
+
+```java
+import io.t402.bridge.Usdt0Bridge;
+import io.t402.bridge.BridgeTypes.*;
+
+Usdt0Bridge bridge = new Usdt0Bridge();
+
+// Get quote
+BridgeQuote quote = bridge.getQuote(
+    "eip155:1",        // Ethereum
+    "eip155:42161",    // Arbitrum
+    "1000000000",      // 1000 USDT0
+    "0xRecipient"
+);
+
+// Execute bridge
+BridgeResult result = bridge.execute(quote, signer);
+
+// Track status
+LayerZeroScanClient lzScan = new LayerZeroScanClient();
+MessageStatus status = lzScan.getMessageStatus(result.getMessageHash());
+```
+
+## WDK Integration
+
+```java
+import io.t402.wdk.*;
+
+WDKSigner signer = WDKSigner.fromMnemonic(
+    "your twelve word mnemonic phrase here..."
+);
+
+ChainConfig config = WDKChains.getConfig("eip155:8453");
+String usdtAddress = WDKChains.getTokenAddress("eip155:8453", "USDT");
+```
+
+## Kotlin Examples
+
+### Basic Usage
+
+```kotlin
+import io.t402.crypto.EvmSigner
+import io.t402.client.T402HttpClient
+
+val signer = EvmSigner.fromPrivateKey(
+    "0xYourPrivateKey",
+    8453,
+    "USD Coin",
+    "2",
+    "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+)
+
+val client = T402HttpClient(signer)
+
+val response = client.get(
+    URI.create("https://api.example.com/premium"),
+    BigInteger.valueOf(1_000_000),
+    "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "0xReceiverAddress"
+)
+```
+
+### Spring Boot with Kotlin
+
+```kotlin
+import io.t402.spring.RequirePayment
+import org.springframework.web.bind.annotation.*
+
+@RestController
+class ApiController {
+
+    @RequirePayment(amount = "\$0.01", description = "Premium API")
+    @GetMapping("/api/premium")
+    fun premiumContent(): Map<String, String> {
+        return mapOf("data" to "Premium content!")
+    }
+}
+```
+
+### Coroutines with WebFlux
+
+```kotlin
+import io.t402.spring.reactive.PaymentWebFilter
+import kotlinx.coroutines.reactor.awaitSingle
+import org.springframework.web.bind.annotation.*
+
+@RestController
+class ReactiveApiController {
+
+    @GetMapping("/api/data")
+    suspend fun getData(): DataResponse {
+        val result = dataService.fetchAsync().awaitSingle()
+        return DataResponse(result)
+    }
+}
+```
+
+### Payment Requirements DSL
+
+```kotlin
+import io.t402.types.PaymentRequirements
+
+fun paymentRequirements(block: PaymentRequirements.Builder.() -> Unit): PaymentRequirements {
+    return PaymentRequirements.builder().apply(block).build()
+}
+
+val requirements = paymentRequirements {
+    scheme("exact")
+    network("eip155:8453")
+    amount("1000000")
+    asset("0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913")
+    payTo("0xReceiverAddress")
+}
+```
+
+## CLI Examples
+
+```bash
+# Verify payment
+java -jar t402.jar verify \
+  --payload '{"x-payment": "..."}' \
+  --facilitator https://facilitator.t402.io
+
+# List supported networks
+java -jar t402.jar supported --json
+
+# Decode payment header
+java -jar t402.jar decode --header "eyJ0NDAyVmVyc2lvbiI6..."
+```
+
+## Testing
+
+### Unit Testing
+
+```java
+import io.t402.server.PaymentFilter;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+
+class PaymentFilterTest {
+
+    @Mock
+    FacilitatorClient facilitator;
+
+    @Test
+    void shouldReturn402WhenNoPayment() {
+        PaymentFilter filter = new PaymentFilter(facilitator);
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilter(request, response, chain);
+
+        assertEquals(402, response.getStatus());
+    }
+}
+```
+
+### Integration Testing
+
+```java
+@SpringBootTest
+@AutoConfigureMockMvc
+class PaymentIntegrationTest {
+
+    @Autowired
+    MockMvc mockMvc;
+
+    @MockBean
+    FacilitatorClient facilitator;
+
+    @Test
+    void shouldRequirePayment() throws Exception {
+        mockMvc.perform(get("/api/premium"))
+            .andExpect(status().isPaymentRequired())
+            .andExpect(jsonPath("$.t402Version").value(2));
+    }
+}
+```
+
+## Related
+
+- [Java SDK Overview](/sdks/java) - Main documentation
+- [Spring Boot](/sdks/java/spring-boot) - Spring integration
+- [MCP Server](/sdks/java/mcp) - AI agent integration

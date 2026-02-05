@@ -1,0 +1,484 @@
+# A2A Negotiation
+
+import { Callout, Tabs, Tab, Steps } from 'nextra/components'
+
+<Callout type="warning">
+  **Beta Package**: `@t402/a2a-negotiation` is currently in beta (v1.0.0-beta.2). APIs may change.
+</Callout>
+
+The A2A Negotiation Protocol enables AI agents to negotiate payment terms, discover services, and settle payments atomically. It implements the Agent-to-Agent (A2A) protocol with T402 payment extensions.
+
+## Features
+
+- **Negotiation Protocol** - State machine for multi-round price negotiations
+- **Pricing Strategies** - Pluggable strategies for automated negotiation
+- **Agent Discovery** - Service registry with capability and pricing discovery
+- **Escrow System** - Conditional payments with multi-sig and time-lock support
+- **Atomic Settlement** - All-or-nothing payment settlement
+- **Dispute Resolution** - Evidence-based dispute handling
+
+## Installation
+
+```bash npm2yarn
+npm install @t402/a2a-negotiation
+```
+
+## Quick Start
+
+### Basic Negotiation
+
+```typescript
+import {
+  NegotiationProtocol,
+  StrategyFactory,
+} from '@t402/a2a-negotiation';
+
+// Create a negotiation session
+const negotiation = NegotiationProtocol.create({
+  initiator: 'client-agent',
+  counterparty: 'service-agent',
+  resource: {
+    url: 'https://api.example.com/generate-image',
+    description: 'AI Image Generation Service',
+  },
+  maxRounds: 5,
+  timeoutMs: 300000, // 5 minutes
+});
+
+// Submit a proposal
+const proposal = negotiation.propose({
+  terms: {
+    scheme: 'exact',
+    network: 'eip155:8453', // Base
+    asset: '0x833589fCD6eDb6E08f4c7C32D4f71b54bda02913', // USDC
+    amount: '1000000', // 1 USDC (6 decimals)
+    payTo: '0xServiceWallet',
+  },
+  slaTerms: {
+    maxResponseTimeMs: 5000,
+  },
+});
+
+// Use a pricing strategy to evaluate
+const strategy = StrategyFactory.priceRange(
+  '500000',  // min: 0.5 USDC
+  '2000000', // max: 2 USDC
+  ['eip155:8453'],
+  ['0x833589fCD6eDb6E08f4c7C32D4f71b54bda02913'],
+);
+
+const evaluation = strategy.evaluate({
+  proposal,
+  currentRound: negotiation.getSession().currentRound,
+  maxRounds: 5,
+  previousOffers: [],
+});
+
+if (evaluation.accept) {
+  negotiation.accept(proposal.proposedTerms);
+} else if (evaluation.counterTerms) {
+  negotiation.counter({
+    proposalId: proposal.id,
+    counterTerms: evaluation.counterTerms,
+    reason: evaluation.reason,
+  });
+}
+```
+
+## Negotiation Flow
+
+<Steps>
+### Initiate Negotiation
+Client agent creates a negotiation session with the service agent.
+
+### Submit Proposal
+Client proposes payment terms (amount, network, asset, SLA requirements).
+
+### Evaluate with Strategy
+Service agent uses a pricing strategy to evaluate the proposal.
+
+### Counter or Accept
+If terms are acceptable, accept. Otherwise, send a counter-offer.
+
+### Multiple Rounds
+Negotiation continues until agreement or max rounds reached.
+
+### Settlement
+Once accepted, proceed to atomic payment settlement.
+</Steps>
+
+## Agent Discovery
+
+### Register an Agent
+
+```typescript
+import {
+  AgentRegistry,
+  PriceDiscovery,
+  CommonCapabilities,
+} from '@t402/a2a-negotiation';
+
+const registry = new AgentRegistry();
+
+// Register an agent with capabilities
+registry.register({
+  id: 'image-gen-agent',
+  name: 'AI Image Generator',
+  version: '1.0.0',
+  endpoints: [{
+    url: 'https://api.imagegen.ai',
+    protocol: 'https',
+    transport: 'a2a',
+  }],
+  capabilities: [
+    CommonCapabilities.imageGeneration('Generate images from text prompts'),
+  ],
+  pricing: [{
+    capabilityType: 'image-generation',
+    config: {
+      model: 'per-request',
+      basePrice: '1000000', // 1 USDC
+      currency: {
+        network: 'eip155:8453',
+        asset: '0x833589fCD6eDb6E08f4c7C32D4f71b54bda02913',
+        decimals: 6,
+      },
+      negotiable: true,
+    },
+  }],
+  paymentAddress: '0xAgentWallet',
+  supportedNetworks: ['eip155:8453'],
+  supportedAssets: ['0x833589fCD6eDb6E08f4c7C32D4f71b54bda02913'],
+});
+```
+
+### Discover Agents
+
+```typescript
+// Find agents by capability
+const result = registry.discover({
+  capabilityType: 'image-generation',
+  networks: ['eip155:8453'],
+  maxPrice: '2000000',
+});
+
+// Get price quotes from discovered agents
+const quotes = result.agents.map(agent =>
+  PriceDiscovery.getQuote(agent, {
+    agentId: agent.id,
+    capabilityType: 'image-generation',
+    network: 'eip155:8453',
+    asset: '0x833589fCD6eDb6E08f4c7C32D4f71b54bda02913',
+  }),
+);
+
+// Find the cheapest option
+const cheapest = PriceDiscovery.findCheapest(quotes);
+```
+
+## Pricing Strategies
+
+### Built-in Strategies
+
+| Strategy | Description |
+|----------|-------------|
+| `AcceptAllStrategy` | Accepts any proposal (for testing) |
+| `FixedPriceStrategy` | Only accepts at fixed price |
+| `RangePricingStrategy` | Accepts within price range |
+| `DynamicPricingStrategy` | Adjusts based on demand |
+| `GraduatedDiscountStrategy` | Offers discounts per round |
+| `SLAAwareStrategy` | Prices based on SLA requirements |
+| `CompositeStrategy` | Combines multiple strategies |
+
+### Using Strategy Factory
+
+```typescript
+import { StrategyFactory } from '@t402/a2a-negotiation';
+
+// Fixed price strategy
+const fixed = StrategyFactory.fixedPrice('1000000');
+
+// Price range strategy
+const range = StrategyFactory.priceRange(
+  '500000',   // min
+  '2000000',  // max
+  ['eip155:8453'],
+  ['0xUSDC'],
+);
+
+// Graduated discount (10% per round, max 30%)
+const discount = StrategyFactory.graduatedDiscount(
+  '1000000',  // base price
+  0.1,        // discount per round
+  0.3,        // max discount
+);
+
+// SLA-aware pricing
+const sla = StrategyFactory.slaAware('1000000', {
+  priorityMultiplier: 1.5,
+  urgencyMultiplier: 2.0,
+});
+```
+
+### Custom Strategy
+
+```typescript
+import { NegotiationStrategy, StrategyContext, StrategyEvaluation } from '@t402/a2a-negotiation';
+
+class MyStrategy implements NegotiationStrategy {
+  name = 'my-strategy';
+
+  evaluate(context: StrategyContext): StrategyEvaluation {
+    const { proposal, currentRound, maxRounds } = context;
+
+    // Accept if price >= 1 USDC
+    if (BigInt(proposal.proposedTerms.amount) >= BigInt('1000000')) {
+      return { accept: true };
+    }
+
+    // Counter with minimum price
+    return {
+      accept: false,
+      counterTerms: {
+        ...proposal.proposedTerms,
+        amount: '1000000',
+      },
+      reason: 'Price below minimum',
+    };
+  }
+}
+```
+
+## Escrow System
+
+### Create Escrow with Confirmation Release
+
+```typescript
+import {
+  EscrowManager,
+  createConfirmationConditions,
+} from '@t402/a2a-negotiation';
+
+const escrow = new EscrowManager();
+
+// Create escrow
+const record = escrow.createEscrow({
+  negotiationId: 'neg-123',
+  payer: '0xClientWallet',
+  payee: '0xServiceWallet',
+  paymentTerms: {
+    scheme: 'exact',
+    network: 'eip155:8453',
+    asset: '0xUSDC',
+    amount: '1000000',
+    payTo: '0xServiceWallet',
+    maxTimeoutSeconds: 600,
+  },
+  releaseConditions: createConfirmationConditions('0xServiceWallet'),
+  expirationMs: 7 * 24 * 60 * 60 * 1000, // 7 days
+});
+
+// Fund the escrow
+escrow.fund(record.id, '0xFundingTxHash');
+
+// Service confirms delivery
+escrow.confirm(record.id, '0xServiceWallet', '0xSignature');
+
+// Release funds
+if (escrow.checkReleaseConditions(record.id)) {
+  escrow.release(record.id, '0xReleaseTxHash');
+}
+```
+
+### Multi-Sig Escrow
+
+```typescript
+import { createMultiSigConditions } from '@t402/a2a-negotiation';
+
+const record = escrow.createEscrow({
+  // ... other config
+  releaseConditions: createMultiSigConditions(
+    ['0xSigner1', '0xSigner2', '0xSigner3'],
+    2, // Required signatures
+  ),
+});
+```
+
+### Time-Locked Escrow
+
+```typescript
+import { createTimeLockConditions } from '@t402/a2a-negotiation';
+
+const record = escrow.createEscrow({
+  // ... other config
+  releaseConditions: createTimeLockConditions(
+    new Date('2026-02-01T00:00:00Z'),
+  ),
+});
+```
+
+## Atomic Settlement
+
+```typescript
+import { AtomicSettlement } from '@t402/a2a-negotiation';
+
+const settlement = new AtomicSettlement();
+
+// Register a settlement handler
+settlement.registerHandler({
+  network: 'eip155:8453',
+  async submit(request) {
+    // Submit transaction to blockchain
+    return { txHash: '0x...' };
+  },
+  async verify(txHash) {
+    // Check transaction confirmation
+    return { confirmed: true, confirmations: 3 };
+  },
+  async refund(request) {
+    // Process refund
+    return { txHash: '0x...' };
+  },
+});
+
+// Create settlement from negotiation
+const request = settlement.createFromNegotiation(
+  negotiation.getSession(),
+  paymentPayload,
+);
+
+// Execute settlement
+const result = await settlement.execute(request.id);
+
+if (result.state === 'completed') {
+  console.log('Payment settled:', result.transactionHash);
+}
+```
+
+## A2A Integration
+
+### Building AgentCard with T402 Extension
+
+```typescript
+import {
+  AgentCardBuilder,
+  CommonCapabilities,
+} from '@t402/a2a-negotiation';
+
+const agentCard = new AgentCardBuilder()
+  .setInfo(
+    'My AI Agent',
+    'https://api.myagent.ai',
+    'AI-powered service agent',
+    '1.0.0',
+  )
+  .setA2ACapabilities(true, true) // streaming, pushNotifications
+  .addT402Extension()
+  .withT402Capabilities()
+    .addCapability(
+      CommonCapabilities.textGeneration(),
+      {
+        model: 'per-token',
+        pricePerUnit: '10', // 0.00001 USDC per token
+        currency: {
+          network: 'eip155:8453',
+          asset: '0xUSDC',
+          decimals: 6,
+        },
+        negotiable: true,
+      },
+      { maxResponseTimeMs: 5000 },
+    )
+    .setPaymentAddress('0xMyWallet')
+    .addNetwork('eip155:8453')
+    .addAsset('0xUSDC')
+    .build();
+```
+
+### Processing A2A Messages
+
+```typescript
+import {
+  isNegotiationMessage,
+  extractNegotiationMetadata,
+} from '@t402/a2a-negotiation';
+
+function handleA2AMessage(message: any) {
+  const metadata = message.metadata ?? {};
+
+  if (isNegotiationMessage(metadata)) {
+    const negotiationMeta = extractNegotiationMetadata(metadata);
+
+    switch (negotiationMeta?.['t402.negotiation.status']) {
+      case 'negotiate-request':
+        // Handle negotiation request
+        break;
+      case 'negotiate-counter':
+        // Handle counter-offer
+        break;
+      case 'negotiate-accept':
+        // Handle acceptance
+        break;
+    }
+  }
+}
+```
+
+## Common Capabilities
+
+The package provides pre-defined capability types:
+
+```typescript
+import { CommonCapabilities } from '@t402/a2a-negotiation';
+
+// AI/ML Capabilities
+CommonCapabilities.textGeneration()
+CommonCapabilities.imageGeneration(description)
+CommonCapabilities.audioTranscription(description)
+CommonCapabilities.codeGeneration(description)
+
+// Data Capabilities
+CommonCapabilities.dataQuery(description)
+CommonCapabilities.dataStorage(description)
+
+// API Capabilities
+CommonCapabilities.apiAccess(description)
+CommonCapabilities.webhookDelivery(description)
+```
+
+## API Reference
+
+### Negotiation Module
+
+| Export | Description |
+|--------|-------------|
+| `NegotiationProtocol` | State machine for negotiations |
+| `NegotiationSession` | Session state type |
+| `NegotiationProposal` | Proposal schema |
+| `CounterOffer` | Counter-offer schema |
+| `PaymentTerms` | Payment terms schema |
+| `SLATerms` | SLA terms schema |
+
+### Discovery Module
+
+| Export | Description |
+|--------|-------------|
+| `AgentRegistry` | Agent service registry |
+| `PriceDiscovery` | Price quote and comparison |
+| `DynamicPricingManager` | Market-based pricing |
+| `AgentCardBuilder` | Build T402-enabled AgentCards |
+
+### Settlement Module
+
+| Export | Description |
+|--------|-------------|
+| `AtomicSettlement` | Atomic payment settlement |
+| `ConditionalPaymentManager` | Conditional payments |
+| `EscrowManager` | Escrow management |
+| `DisputeResolver` | Dispute resolution |
+
+## Related
+
+- [Agent Policy](/advanced/agent-policy) - AI agent spending policies
+- [MCP Integration](/advanced/mcp) - Model Context Protocol setup
+- [A2A Transport](/advanced/a2a) - A2A transport protocol

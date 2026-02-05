@@ -1,0 +1,270 @@
+# Python Facilitator Client
+
+import { Callout, Tabs, Tab } from 'nextra/components'
+
+The Python SDK provides a client for direct interaction with the T402 Facilitator API for payment verification and settlement.
+
+## Basic Usage
+
+```python
+from t402 import FacilitatorClient, FacilitatorConfig
+
+client = FacilitatorClient(FacilitatorConfig(
+    url="https://facilitator.t402.io",
+    timeout=30.0,
+))
+
+# Get supported networks
+supported = await client.get_supported()
+for kind in supported.kinds:
+    print(f"Supported: {kind.network} - {kind.scheme}")
+
+# Verify payment
+result = await client.verify(payload, requirements)
+if result.is_valid:
+    print("Payment is valid")
+else:
+    print(f"Invalid: {result.invalid_reason}")
+
+# Settle payment
+result = await client.settle(payload, requirements)
+if result.success:
+    print(f"Transaction: {result.transaction}")
+else:
+    print(f"Failed: {result.error_reason}")
+```
+
+## Configuration
+
+### FacilitatorConfig
+
+```python
+from t402 import FacilitatorConfig
+
+config = FacilitatorConfig(
+    url="https://facilitator.t402.io",  # Facilitator URL
+    timeout=30.0,                         # Request timeout in seconds
+    api_key=None,                         # Optional API key for rate limits
+)
+```
+
+## API Methods
+
+### get_supported
+
+Get supported networks, schemes, and signers:
+
+```python
+supported = await client.get_supported()
+
+for kind in supported.kinds:
+    print(f"Scheme: {kind.scheme}")
+    print(f"Network: {kind.network}")
+    print(f"Signers: {kind.signers}")
+```
+
+**Response**
+
+```python
+class SupportedResponse:
+    kinds: list[Kind]
+
+class Kind:
+    scheme: str       # "exact", "upto"
+    network: str      # "eip155:8453", "ton:mainnet"
+    signers: list[str]  # Facilitator addresses
+```
+
+### verify
+
+Verify a payment authorization without settlement:
+
+```python
+from t402.types import PaymentPayload, PaymentRequirements
+
+payload = PaymentPayload(
+    t402_version=2,
+    scheme="exact",
+    network="eip155:8453",
+    payload={
+        "from": "0xPayer",
+        "to": "0xRecipient",
+        "value": "1000000",
+        "validAfter": 0,
+        "validBefore": 1706745600,
+        "nonce": "0x...",
+    },
+    signature="0x...",
+)
+
+requirements = PaymentRequirements(
+    scheme="exact",
+    network="eip155:8453",
+    max_amount_required="1000000",
+    asset="0x833589fCD6eDb6E08f4c7C32D4f71b54bda02913",
+    pay_to="0xRecipient",
+)
+
+result = await client.verify(payload, requirements)
+```
+
+**Response**
+
+```python
+class VerifyResponse:
+    is_valid: bool
+    invalid_reason: Optional[str]
+```
+
+### settle
+
+Execute on-chain settlement:
+
+```python
+result = await client.settle(
+    payload,
+    requirements,
+    idempotency_key="unique-key-123"  # Recommended
+)
+
+if result.success:
+    print(f"Transaction hash: {result.transaction}")
+    print(f"Network: {result.network}")
+else:
+    print(f"Error: {result.error_reason}")
+```
+
+**Response**
+
+```python
+class SettleResponse:
+    success: bool
+    transaction: Optional[str]  # Transaction hash
+    network: Optional[str]      # Network where settled
+    error_reason: Optional[str]
+```
+
+<Callout type="warning">
+  **Idempotency**: Always use the `idempotency_key` parameter for settlement requests to prevent double payments in case of network errors or retries.
+</Callout>
+
+## Core Types
+
+### PaymentRequirements
+
+```python
+from t402.types import PaymentRequirements
+
+requirements = PaymentRequirements(
+    scheme="exact",                                    # Payment scheme
+    network="eip155:8453",                             # CAIP-2 network
+    max_amount_required="1000000",                     # Amount in smallest unit
+    asset="0x833589fCD6eDb6E08f4c7C32D4f71b54bda02913",  # Token address
+    pay_to="0xRecipient",                              # Recipient address
+    resource="https://api.example.com/premium",        # Optional resource URL
+    description="Premium API access",                  # Optional description
+    max_timeout_seconds=600,                           # Optional timeout
+)
+```
+
+### PaymentPayload
+
+```python
+from t402.types import PaymentPayload
+
+payload = PaymentPayload(
+    t402_version=2,
+    scheme="exact",
+    network="eip155:8453",
+    payload={
+        "from": "0xPayer",
+        "to": "0xRecipient",
+        "value": "1000000",
+        "validAfter": 0,
+        "validBefore": 1706745600,
+        "nonce": "0x...",
+    },
+    signature="0x...",
+)
+```
+
+### PaymentRequiredResponse
+
+```python
+from t402.types import PaymentRequiredResponse
+
+response = PaymentRequiredResponse(
+    t402_version=2,
+    accepts=[requirements],
+    error="",
+)
+```
+
+## Async Patterns
+
+### With asyncio
+
+```python
+import asyncio
+from t402 import FacilitatorClient, FacilitatorConfig
+
+async def main():
+    client = FacilitatorClient(FacilitatorConfig(
+        url="https://facilitator.t402.io"
+    ))
+
+    # Multiple verifications in parallel
+    tasks = [
+        client.verify(payload1, requirements1),
+        client.verify(payload2, requirements2),
+    ]
+    results = await asyncio.gather(*tasks)
+
+    for result in results:
+        print(f"Valid: {result.is_valid}")
+
+asyncio.run(main())
+```
+
+### With FastAPI
+
+```python
+from fastapi import FastAPI
+from t402 import FacilitatorClient, FacilitatorConfig
+
+app = FastAPI()
+
+# Create client at startup
+client = FacilitatorClient(FacilitatorConfig(
+    url="https://facilitator.t402.io"
+))
+
+@app.post("/verify")
+async def verify_payment(payload: dict, requirements: dict):
+    result = await client.verify(payload, requirements)
+    return {"valid": result.is_valid}
+```
+
+## Error Handling
+
+```python
+from t402 import FacilitatorClient, FacilitatorConfig
+from t402.exceptions import FacilitatorError, NetworkError
+
+client = FacilitatorClient(FacilitatorConfig(
+    url="https://facilitator.t402.io"
+))
+
+try:
+    result = await client.settle(payload, requirements)
+except NetworkError as e:
+    print(f"Network error: {e}")
+except FacilitatorError as e:
+    print(f"Facilitator error: {e}")
+```
+
+## Related
+
+- [Facilitator API](/reference/facilitator-api) - REST API reference
+- [Client Integration](/sdks/python/client) - httpx and requests clients
+- [Server Integration](/sdks/python/server) - FastAPI and Flask middleware

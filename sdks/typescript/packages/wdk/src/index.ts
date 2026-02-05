@@ -130,6 +130,7 @@ export type {
   TypedDataTypes,
   T402WDKSigner,
   WDKAccount,
+  WdkAccount,
   WDKInstance,
   WDKConstructor,
   // Multi-chain types
@@ -230,6 +231,13 @@ export {
   USDT0_OFT_ADDRESSES,
   Usdt0Bridge,
 } from '@t402/evm'
+
+// WDK version compatibility
+export {
+  WDK_COMPATIBILITY,
+  checkWdkCompatibility,
+} from './compatibility.js'
+export type { CompatibilityResult } from './compatibility.js'
 
 // Hardware wallet support
 export {

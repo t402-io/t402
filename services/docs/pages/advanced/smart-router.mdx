@@ -1,0 +1,329 @@
+# Smart Router
+
+import { Callout, Tabs, Tab } from 'nextra/components'
+
+<Callout type="warning">
+  **Beta Package**: `@t402/smart-router` is currently in beta (v1.0.0-beta.2). APIs may change.
+</Callout>
+
+Smart Payment Routing Engine for T402 Protocol. Find the most cost-effective or fastest route for cross-chain payments with optimal path finding, real-time pricing, liquidity aggregation, and MEV protection.
+
+## Features
+
+- **Path Finding** - Dijkstra, A*, k-shortest paths, and Pareto-optimal algorithms
+- **Real-time Pricing** - Gas oracle with predictive modeling
+- **Liquidity Aggregation** - Aggregate across DEXs and bridges
+- **MEV Protection** - Flashbots and private mempool support
+- **Route Validation** - Validate routes before execution
+
+## Installation
+
+```bash npm2yarn
+npm install @t402/smart-router
+```
+
+## Quick Start
+
+```typescript
+import {
+  RoutingEngine,
+  GasOracle,
+  LiquidityAggregator,
+  TransactionBuilder,
+} from '@t402/smart-router';
+
+// Set up routing engine
+const router = new RoutingEngine();
+
+// Add network graph edges (liquidity sources)
+router.updateGraph([
+  {
+    from: 'eip155:1',
+    to: 'eip155:8453',
+    fromAsset: '0xUSDT',
+    toAsset: '0xUSDT',
+    protocol: 'layerzero',
+    type: 'bridge',
+    cost: 50000,
+    liquidity: '50000000000',
+    estimatedTime: 120,
+  },
+]);
+
+// Find best route
+const routes = await router.findRoutes({
+  sourceChain: 'eip155:1',
+  sourceAsset: '0xUSDT',
+  sourceAmount: '1000000000', // 1000 USDT
+  destinationChain: 'eip155:8453',
+  destinationAsset: '0xUSDT',
+  recipient: '0xRecipient',
+  sender: '0xSender',
+  optimization: 'balanced',
+});
+
+console.log('Best route cost:', routes[0].totalCost);
+console.log('Estimated time:', routes[0].estimatedTime, 'seconds');
+```
+
+## Optimization Strategies
+
+| Strategy | Description |
+|----------|-------------|
+| `cost` | Minimize total fees and gas costs |
+| `speed` | Minimize execution time |
+| `balanced` | Balance cost, speed, and reliability |
+| `slippage` | Minimize price impact |
+| `privacy` | Prefer privacy-preserving routes |
+
+```typescript
+// Cost optimized
+const cheapest = await router.findRoutes({
+  ...request,
+  optimization: 'cost',
+});
+
+// Speed optimized
+const fastest = await router.findRoutes({
+  ...request,
+  optimization: 'speed',
+});
+```
+
+## Gas Oracle
+
+Real-time gas tracking with predictive modeling:
+
+```typescript
+import { GasOracle } from '@t402/smart-router/pricing';
+
+const gasOracle = new GasOracle({
+  cacheTtl: 15000,
+  enablePrediction: true,
+});
+
+// Get current gas prices
+const gasPrice = await gasOracle.getGasPrice('eip155:8453');
+console.log('Standard:', gasPrice.standard);
+console.log('Fast:', gasPrice.fast);
+
+// Calculate cost in USD
+const { costUsd } = await gasOracle.calculateGasCostUsd(
+  'eip155:8453',
+  '150000', // gas units
+  'fast',
+);
+
+// Predict future gas prices
+const prediction = gasOracle.predictGasPrice('eip155:8453', 5);
+```
+
+## Fee Estimator
+
+Estimate fees for operations:
+
+```typescript
+import { FeeEstimator } from '@t402/smart-router/pricing';
+
+const feeEstimator = new FeeEstimator(gasOracle);
+
+const estimate = await feeEstimator.estimateFees({
+  chain: 'eip155:8453',
+  operation: 'swap',
+  protocol: 'uniswap',
+  inputAsset: '0xUSDT',
+  outputAsset: '0xUSDC',
+  amount: '1000000000',
+  gasSpeed: 'standard',
+});
+
+console.log('Total fee (USD):', estimate.totalFeeUsd);
+```
+
+## Liquidity Aggregation
+
+Aggregate liquidity across DEXs and bridges:
+
+```typescript
+import { LiquidityAggregator } from '@t402/smart-router/liquidity';
+
+const aggregator = new LiquidityAggregator({
+  cacheTtl: 30000,
+  minLiquidity: '1000',
+});
+
+// Get aggregated liquidity
+const liquidity = await aggregator.getLiquidity(
+  'eip155:8453',
+  '0xUSDT',
+  '0xUSDC',
+);
+
+console.log('Total liquidity:', liquidity.totalLiquidity);
+console.log('Best price:', liquidity.bestPrice);
+
+// Calculate slippage
+const slippage = aggregator.calculateSlippage(
+  liquidity,
+  '100000000', // 100 USDT
+  '0.5',       // 0.5% tolerance
+);
+
+console.log('Price impact:', slippage.priceImpact);
+
+// Cross-chain liquidity
+const crossChain = await aggregator.getCrossChainLiquidity(
+  'eip155:1',
+  'eip155:8453',
+  '0xUSDT',
+);
+```
+
+## Transaction Building
+
+Build transactions from routes:
+
+```typescript
+import { TransactionBuilder } from '@t402/smart-router/execution';
+
+const builder = new TransactionBuilder(gasOracle);
+
+const transactions = await builder.buildRoute(route, '0xSender', {
+  gasSpeed: 'fast',
+  mevProtection: 'flashbots',
+  autoApprove: true,
+});
+
+// Get required approvals
+const approvals = builder.getRequiredApprovals(route, '0xSender');
+```
+
+## MEV Protection
+
+Protect transactions from MEV attacks:
+
+```typescript
+import { MevProtection } from '@t402/smart-router/execution';
+
+const mev = new MevProtection({
+  flashbotsRelay: 'https://relay.flashbots.net',
+});
+
+// Estimate MEV risk
+const risk = mev.estimateMevRisk(transaction, 'eip155:1');
+console.log('Risk level:', risk.riskLevel);
+console.log('Recommendations:', risk.recommendations);
+
+// Submit with protection
+const result = await mev.protect(
+  transaction,
+  signedTransaction,
+  'flashbots',
+  'eip155:1',
+);
+```
+
+### Protection Strategies
+
+| Strategy | Description |
+|----------|-------------|
+| `none` | No protection (public mempool) |
+| `flashbots` | Use Flashbots bundle (Ethereum) |
+| `private_mempool` | Use private RPC endpoints |
+| `timing` | Submit at optimal time |
+| `splitting` | Split into smaller transactions |
+
+## Path Finding Algorithms
+
+```typescript
+import {
+  dijkstra,
+  astar,
+  kShortestPaths,
+  paretoOptimalPaths,
+  COST_CONFIGS,
+} from '@t402/smart-router/routing';
+
+// Dijkstra's algorithm
+const path = dijkstra(
+  edges,
+  'eip155:1', '0xUSDT',
+  'eip155:8453', '0xUSDT',
+  COST_CONFIGS.balanced,
+  5, // max hops
+);
+
+// A* with heuristic
+const fastPath = astar(
+  edges,
+  'eip155:1', '0xUSDT',
+  'eip155:8453', '0xUSDT',
+  COST_CONFIGS.speed,
+  5,
+);
+
+// K-shortest paths (Yen's algorithm)
+const topPaths = kShortestPaths(edges, start, end, config, 5);
+
+// Pareto-optimal paths (multi-objective)
+const pareto = paretoOptimalPaths(edges, start, end);
+```
+
+## Route Types
+
+| Type | Description |
+|------|-------------|
+| `transfer` | Simple token transfer |
+| `swap` | DEX swap |
+| `bridge` | Cross-chain bridge |
+| `wrap` | Wrap native token (ETH -> WETH) |
+| `unwrap` | Unwrap to native (WETH -> ETH) |
+| `approve` | Token approval |
+
+## Supported Chains
+
+| Chain | ID |
+|-------|-----|
+| Ethereum | `eip155:1` |
+| Base | `eip155:8453` |
+| Arbitrum | `eip155:42161` |
+| Optimism | `eip155:10` |
+| Polygon | `eip155:137` |
+| BSC | `eip155:56` |
+| Solana | `solana:mainnet` |
+
+## API Reference
+
+### RoutingEngine
+
+| Method | Description |
+|--------|-------------|
+| `findRoutes()` | Find all routes matching request |
+| `getBestRoute()` | Get single best route |
+| `validateRoute()` | Validate route is executable |
+| `updateGraph()` | Update network graph |
+| `addEdge()` | Add single edge |
+
+### GasOracle
+
+| Method | Description |
+|--------|-------------|
+| `getGasPrice()` | Get current gas prices |
+| `getMultiChainGasPrices()` | Multi-chain prices |
+| `calculateGasCostUsd()` | Calculate cost in USD |
+| `predictGasPrice()` | Predict future prices |
+
+### LiquidityAggregator
+
+| Method | Description |
+|--------|-------------|
+| `getLiquidity()` | Get aggregated liquidity |
+| `getCrossChainLiquidity()` | Bridge liquidity |
+| `calculateSlippage()` | Calculate slippage |
+| `findBestRoute()` | Find best execution |
+
+## Related
+
+- [Intent Payments](/advanced/intent-payments) - Intent-based payments
+- [Bridge](/advanced/bridge) - Cross-chain bridging
+- [Gasless](/advanced/gasless) - Gasless transactions
