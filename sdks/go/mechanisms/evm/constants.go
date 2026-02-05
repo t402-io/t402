@@ -266,14 +266,14 @@ var (
 		"eip155:130": {
 			ChainID: ChainIDUnichain,
 			DefaultAsset: AssetInfo{
-				Address:  "0x588ce4F028D8e7B53B687865d6A67b3A54C75518",
+				Address:  "0x9151434b16b9763660705744891fA906F660EcC5",
 				Name:     "TetherToken",
 				Version:  "1",
 				Decimals: DefaultDecimals,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
-					Address:  "0x588ce4F028D8e7B53B687865d6A67b3A54C75518",
+					Address:  "0x9151434b16b9763660705744891fA906F660EcC5",
 					Name:     "TetherToken",
 					Version:  "1",
 					Decimals: DefaultDecimals,

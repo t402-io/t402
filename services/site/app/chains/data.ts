@@ -160,7 +160,7 @@ export const chains: Chain[] = [
     icon: "unichain",
     description: "Uniswap's dedicated L2 chain. Optimized for trading with MEV protection and fast finality.",
     tokens: [
-      { symbol: "USDT0", name: "Tether USD", type: "eip3009", address: "0x588ce4F028D8e7B53B687865d6A67b3A54C75518", gasless: true },
+      { symbol: "USDT0", name: "Tether USD", type: "eip3009", address: "0x9151434b16b9763660705744891fA906F660EcC5", gasless: true },
     ],
     features: ["EIP-3009 Gasless", "MEV protection", "Fast swaps", "Uniswap native"],
     explorerUrl: "https://uniscan.xyz",

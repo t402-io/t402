@@ -100,6 +100,6 @@ For production use:
 
 ## Related Documentation
 
-- [t402 Protocol Specification](../../../specs/t402-specification.md)
+- [t402 Protocol Specification](../../../specs/t402-specification-v2.md)
 - [Express Middleware Package](../../../typescript/packages/http/express/README.md)
 - [E2E Test Suite](../../README.md)

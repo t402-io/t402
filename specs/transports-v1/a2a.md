@@ -284,7 +284,7 @@ X-A2A-Extensions: https://github.com/google-a2a/a2a-t402/v0.1
 
 ## References
 
-- [Core t402 Specification](../t402-specification.md)
+- [Core t402 Specification](../t402-specification-v1.md)
 - [A2A Protocol Specification](https://a2a-protocol.org/latest/specification)
 - [A2A Extensions Documentation](https://github.com/a2aproject/A2A/blob/main/docs/topics/extensions.md)
 - [A2A t402 Extension Specification](https://github.com/google-agentic-commerce/a2a-t402/blob/main/spec/v0.1/spec.md)

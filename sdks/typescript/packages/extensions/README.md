@@ -472,7 +472,7 @@ Use discovery schemas to validate API requests and responses during development.
 ## Related Resources
 
 - [t402 Core Package](../core/README.md) - Core t402 protocol implementation
-- [t402 Specification](../../../specs/t402-specification.md) - Full protocol specification
+- [t402 Specification](../../../specs/t402-specification-v2.md) - Full protocol specification
 
 ## Version Support
 

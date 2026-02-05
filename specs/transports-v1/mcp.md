@@ -210,7 +210,7 @@ Technical errors use standard JSON-RPC error responses:
 
 ## References
 
-- [Core t402 Specification](../t402-specification.md)
+- [Core t402 Specification](../t402-specification-v1.md)
 - [MCP Specification](https://modelcontextprotocol.io/specification/)
 - [MCP \_meta Field Documentation](https://modelcontextprotocol.io/specification/2025-06-18/basic#meta)
 - [t402-mcp](https://github.com/ethanniser/t402-mcp)

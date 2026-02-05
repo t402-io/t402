@@ -66,7 +66,7 @@ USDC_ADDRESSES: dict[SupportedNetwork, str] = {
     "avalanche": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
     "ink": "0x0200C29006150606B650577BBE7B6248F58470c1",
     "berachain": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
-    "unichain": "0x588ce4F028D8e7B53B687865d6A67b3A54C75518",
+    "unichain": "0x9151434b16b9763660705744891fA906F660EcC5",
 }
 
 # USDT contract addresses by network
@@ -84,7 +84,7 @@ USDT0_ADDRESSES: dict[SupportedNetwork, str] = {
     "arbitrum": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
     "ink": "0x0200C29006150606B650577BBE7B6248F58470c1",
     "berachain": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
-    "unichain": "0x588ce4F028D8e7B53B687865d6A67b3A54C75518",
+    "unichain": "0x9151434b16b9763660705744891fA906F660EcC5",
 }
 
 # Networks that support USDT0 bridging via LayerZero
