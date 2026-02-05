@@ -1,0 +1,239 @@
+# Python CLI
+
+import { Callout, Tabs } from 'nextra/components'
+
+The Python SDK includes a command-line interface for testing and debugging t402 payments.
+
+## Installation
+
+The CLI is included with the t402 package:
+
+```bash
+pip install t402
+```
+
+## Usage
+
+```bash
+# Show help
+t402 --help
+
+# Or using Python module
+python -m t402 --help
+```
+
+## Commands
+
+### verify
+
+Verify a payment payload against requirements:
+
+```bash
+t402 verify \
+  --payload '{"t402Version": 2, "scheme": "exact", ...}' \
+  --requirements '{"scheme": "exact", "network": "eip155:8453", ...}' \
+  --facilitator https://facilitator.t402.io
+```
+
+**Options**
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--payload` | JSON payment payload | Required |
+| `--requirements` | JSON payment requirements | Required |
+| `--facilitator` | Facilitator URL | `https://facilitator.t402.io` |
+| `--json` | Output as JSON | `false` |
+
+### settle
+
+Settle a verified payment:
+
+```bash
+t402 settle \
+  --payload '{"t402Version": 2, ...}' \
+  --requirements '{"scheme": "exact", ...}' \
+  --idempotency-key "unique-key-123" \
+  --facilitator https://facilitator.t402.io
+```
+
+**Options**
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--payload` | JSON payment payload | Required |
+| `--requirements` | JSON payment requirements | Required |
+| `--idempotency-key` | Unique key for idempotency | None |
+| `--facilitator` | Facilitator URL | `https://facilitator.t402.io` |
+| `--json` | Output as JSON | `false` |
+
+### supported
+
+List supported networks and schemes:
+
+```bash
+t402 supported --facilitator https://facilitator.t402.io
+```
+
+**Output**
+
+```
+Supported Networks:
+  eip155:8453 (exact) - Signers: 0xC88f67e776f16DcFBf42e6bDda1B82604448899B
+  eip155:1 (exact) - Signers: 0xC88f67e776f16DcFBf42e6bDda1B82604448899B
+  ton:mainnet (exact) - Signers: EQDjv9CUEJ__D_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkEUe
+```
+
+With JSON output:
+
+```bash
+t402 supported --json
+```
+
+```json
+{
+  "kinds": [
+    {
+      "scheme": "exact",
+      "network": "eip155:8453",
+      "signers": ["0xC88f67e776f16DcFBf42e6bDda1B82604448899B"]
+    }
+  ]
+}
+```
+
+### encode
+
+Encode a payment payload to base64:
+
+```bash
+t402 encode --payload '{"t402Version": 2, "scheme": "exact", ...}'
+```
+
+**Output**
+
+```
+eyJ0NDAyVmVyc2lvbiI6Miwic2NoZW1lIjoiZXhhY3QiLC4uLn0=
+```
+
+### decode
+
+Decode a base64 payment header:
+
+```bash
+t402 decode --header "eyJ0NDAyVmVyc2lvbiI6Mi4uLn0="
+```
+
+**Output**
+
+```json
+{
+  "t402Version": 2,
+  "scheme": "exact",
+  "network": "eip155:8453",
+  ...
+}
+```
+
+### info
+
+Show SDK version and information:
+
+```bash
+t402 info
+```
+
+**Output**
+
+```
+T402 Python SDK
+Version: 1.9.0
+Python: 3.10.12
+Dependencies:
+  - httpx: 0.25.0
+  - eth-account: 0.9.0
+```
+
+## Examples
+
+### Testing Payment Flow
+
+1. First, get a 402 response from a protected endpoint:
+
+```bash
+curl -v https://api.example.com/protected
+```
+
+2. Decode the payment requirements:
+
+```bash
+t402 decode --header "$(curl -s https://api.example.com/protected | jq -r '.accepts[0]')"
+```
+
+3. Create and sign a payment (using your wallet):
+
+```python
+from eth_account import Account
+from t402.types import PaymentPayload
+import json
+
+account = Account.from_key("0x...")
+# ... create and sign payload
+print(json.dumps(payload.model_dump(by_alias=True)))
+```
+
+4. Verify the payment:
+
+```bash
+t402 verify \
+  --payload '{"t402Version": 2, ...}' \
+  --requirements '{"scheme": "exact", ...}'
+```
+
+5. Settle if valid:
+
+```bash
+t402 settle \
+  --payload '{"t402Version": 2, ...}' \
+  --requirements '{"scheme": "exact", ...}' \
+  --idempotency-key "test-$(date +%s)"
+```
+
+### Batch Verification
+
+```bash
+#!/bin/bash
+
+# Read payloads from file and verify each
+while IFS= read -r payload; do
+  result=$(t402 verify --payload "$payload" --requirements "$REQUIREMENTS" --json)
+  echo "$result"
+done < payloads.json
+```
+
+### Integration with jq
+
+```bash
+# Get supported EVM networks only
+t402 supported --json | jq '.kinds[] | select(.network | startswith("eip155:"))'
+
+# Count supported networks
+t402 supported --json | jq '.kinds | length'
+```
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `T402_FACILITATOR_URL` | Default facilitator URL |
+| `T402_API_KEY` | API key for rate limit increases |
+
+```bash
+export T402_FACILITATOR_URL=https://facilitator.t402.io
+t402 supported  # Uses environment variable
+```
+
+## Related
+
+- [Facilitator API](/reference/facilitator-api) - REST API reference
+- [Client Integration](/sdks/python/client) - Python client library
+- [Server Integration](/sdks/python/server) - Server middleware
