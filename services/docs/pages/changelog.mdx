@@ -1,0 +1,258 @@
+# Changelog
+
+import { Callout, Tabs } from 'nextra/components'
+
+This page documents the version history and release notes for T402 SDKs.
+
+## Version Strategy
+
+T402 follows [Semantic Versioning](https://semver.org/):
+
+- **Major (X.0.0)**: Breaking changes
+- **Minor (0.X.0)**: New features, backward compatible
+- **Patch (0.0.X)**: Bug fixes, backward compatible
+
+<Tabs items={['TypeScript', 'Go', 'Python', 'Java']}>
+  <Tabs.Tab>
+## TypeScript SDK
+
+### v2.3.x (Current)
+
+**v2.3.1** - January 2026
+- Added Stacks (Bitcoin L2) support via `@t402/stacks`
+- Added Polkadot Asset Hub support via `@t402/polkadot`
+- Improved TypeScript type exports for mechanism packages
+- Fixed NEAR mainnet contract ID configuration
+
+**v2.3.0** - January 2026
+- Added Tezos FA2 support via `@t402/tezos`
+- Added Aptos Fungible Asset support via `@t402/aptos`
+- Improved error messages for signature verification failures
+- Updated viem to v2.x
+
+### v2.2.x
+
+**v2.2.0** - December 2025
+- Added NEAR NEP-141 support via `@t402/near`
+- Added `@t402/vue` for Vue.js integration
+- Improved gasless payment reliability in `@t402/wdk-gasless`
+- Fixed Safari WebSocket connection issues in paywall
+
+### v2.1.x
+
+**v2.1.0** - November 2025
+- Added `@t402/wdk-multisig` for Safe multi-sig integration
+- Added `@t402/wdk-bridge` for LayerZero bridging
+- Improved Hono middleware edge runtime support
+- Fixed Next.js App Router streaming responses
+
+### v2.0.x
+
+**v2.0.0** - October 2025
+- **Breaking**: Migrated to CAIP-2 network identifiers
+- **Breaking**: Renamed payment schemes (exact, upto)
+- Added Protocol V2 with ResourceInfo and extensions
+- Added `@t402/extensions` for protocol extensions
+- Added multi-chain app support with smart routing
+- Improved tree-shaking with granular package exports
+
+### v1.x (Legacy)
+
+**v1.9.0** - September 2025
+- Last v1 release before v2 migration
+- Added TON Jetton support
+- Added TRON TRC-20 support
+- Fixed EIP-3009 signature encoding
+
+<Callout type="warning">
+  V1 is deprecated. Migrate to V2 for new features and security updates.
+</Callout>
+  </Tabs.Tab>
+  <Tabs.Tab>
+## Go SDK
+
+### v1.8.x (Current)
+
+**v1.8.0** - January 2026
+- Added Stacks mechanism with SIP-010 support
+- Added Polkadot Asset Hub mechanism
+- Improved facilitator connection pooling
+- Fixed NEAR balance verification edge cases
+
+### v1.7.x
+
+**v1.7.0** - December 2025
+- Added Tezos FA2 mechanism
+- Added Aptos Fungible Asset mechanism
+- Improved MCP server tool registration
+- Fixed concurrent map access in TON mechanism
+
+### v1.6.x
+
+**v1.6.0** - November 2025
+- Added NEAR NEP-141 mechanism
+- Improved Gin middleware error handling
+- Added context timeout configuration
+- Fixed TRON energy estimation
+
+### v1.5.x
+
+**v1.5.0** - October 2025
+- Added Protocol V2 support
+- Added CAIP-2 network parsing utilities
+- Improved signature verification performance
+- Fixed Solana SPL token decimals handling
+
+### v1.4.x
+
+**v1.4.0** - September 2025
+- Added TON Jetton mechanism
+- Added TRON TRC-20 mechanism
+- Improved CLI tool with interactive mode
+- Fixed EVM gas estimation on L2s
+
+</Tabs.Tab>
+<Tabs.Tab>
+## Python SDK
+
+### v1.9.x (Current)
+
+**v1.9.0** - January 2026
+- Added Stacks support
+- Added Polkadot Asset Hub support
+- Improved async/await patterns in facilitator client
+- Fixed httpx timeout configuration
+
+### v1.8.x
+
+**v1.8.0** - December 2025
+- Added Tezos support
+- Added Aptos support
+- Added NEAR support
+- Improved Flask integration with app factory pattern
+
+### v1.7.x
+
+**v1.7.0** - November 2025
+- Added Protocol V2 support
+- Added FastAPI dependency injection
+- Improved Pydantic model validation
+- Fixed requests session connection pooling
+
+### v1.6.x
+
+**v1.6.0** - October 2025
+- Added TON support
+- Added TRON support
+- Added Solana support
+- Improved CLI with rich terminal output
+
+</Tabs.Tab>
+<Tabs.Tab>
+## Java SDK
+
+### v1.8.x (Current)
+
+**v1.8.0** - January 2026
+- Added Stacks support
+- Added Polkadot Asset Hub support
+- Improved Spring Boot 3.2 compatibility
+- Fixed Kotlin coroutine bridge execution
+
+### v1.7.x
+
+**v1.7.0** - December 2025
+- Added Tezos support
+- Added Aptos support
+- Added NEAR support
+- Improved MCP tool annotations
+
+### v1.6.x
+
+**v1.6.0** - November 2025
+- Added Protocol V2 support
+- Added ERC-4337 account abstraction
+- Added LayerZero bridge integration
+- Fixed Spring WebFlux async handling
+
+### v1.5.x
+
+**v1.5.0** - October 2025
+- Added TON support
+- Added TRON support
+- Added Solana support
+- Improved Maven Central publishing
+
+</Tabs.Tab>
+</Tabs>
+
+## Facilitator Service
+
+### January 2026
+- Added Stacks settlement support
+- Added Polkadot Asset Hub settlement
+- Improved Redis cluster failover handling
+- Added Prometheus histogram metrics for latency tracking
+
+### December 2025
+- Added Tezos settlement support
+- Added Aptos settlement support
+- Added NEAR settlement support
+- Improved rate limiting with sliding window algorithm
+
+### November 2025
+- Added Protocol V2 endpoints
+- Added `/supported` endpoint for network discovery
+- Improved health check granularity
+- Added Grafana dashboard templates
+
+### October 2025
+- Added TON settlement support
+- Added TRON settlement support
+- Improved transaction retry logic
+- Added OpenTelemetry tracing
+
+## Migration Guides
+
+### V1 to V2 Migration
+
+The main changes in Protocol V2:
+
+1. **Network Identifiers**: Changed from short names to CAIP-2 format
+   ```typescript
+   // V1
+   network: 'ethereum'
+
+   // V2
+   network: 'eip155:1'
+   ```
+
+2. **Payment Schemes**: Renamed for clarity
+   ```typescript
+   // V1
+   scheme: 'eip3009'
+
+   // V2
+   scheme: 'exact'
+   ```
+
+3. **Package Imports**: Granular exports for tree-shaking
+   ```typescript
+   // V1
+   import { ExactEvmScheme } from '@t402/evm'
+
+   // V2
+   import { ExactEvmScheme } from '@t402/evm/exact/client'
+   ```
+
+See the [Migration Guide](/advanced/migration) for detailed instructions.
+
+## Deprecation Policy
+
+- **Major versions**: Supported for 12 months after next major release
+- **Minor versions**: Supported until next minor release
+- **Security patches**: Backported to current and previous major versions
+
+<Callout type="info">
+  Subscribe to [GitHub releases](https://github.com/t402-io/t402/releases) for update notifications.
+</Callout>

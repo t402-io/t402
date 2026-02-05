@@ -50,6 +50,19 @@ export class SignatureCollector {
     owners: Address[],
     threshold: number,
   ): MultiSigTransactionRequest {
+    // Validate inputs
+    if (!owners || owners.length === 0) {
+      throw MultiSigError.insufficientSigners(0, 1)
+    }
+
+    if (threshold < 1 || threshold > owners.length) {
+      throw MultiSigError.invalidThreshold(threshold, owners.length)
+    }
+
+    if (!userOpHash || !userOpHash.startsWith('0x')) {
+      throw new Error('Invalid userOpHash: must be a hex string starting with 0x')
+    }
+
     const now = Date.now()
     const id = generateRequestId()
 
@@ -118,6 +131,11 @@ export class SignatureCollector {
     // Check if already signed
     if (pendingSignature.signed) {
       throw MultiSigError.alreadySigned(pendingSignature.ownerIndex)
+    }
+
+    // Validate signature format
+    if (!signature || !signature.startsWith('0x') || signature.length < 4) {
+      throw new Error('Invalid signature: must be a non-empty hex string starting with 0x')
     }
 
     // Add signature
