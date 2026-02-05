@@ -8,6 +8,7 @@ import io.t402.model.PaymentRequiredResponse;
 import io.t402.model.ResourceInfo;
 import io.t402.spring.RouteConfig;
 import io.t402.spring.T402Properties;
+import io.t402.util.HttpConstants;
 import io.t402.util.Json;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -94,9 +95,12 @@ public class PaymentWebFilter implements WebFilter {
             return chain.filter(exchange);  // No payment required
         }
 
-        // Get payment header
-        String paymentHeader = request.getHeaders().getFirst("X-PAYMENT");
-        if (paymentHeader == null || paymentHeader.isEmpty()) {
+        // Check V2 header first, then fall back to V1
+        String v2Header = request.getHeaders().getFirst(HttpConstants.PAYMENT_SIGNATURE);
+        String v1Header = request.getHeaders().getFirst(HttpConstants.X_PAYMENT);
+        final String paymentHeader = (v2Header != null && !v2Header.isEmpty()) ? v2Header
+                : (v1Header != null && !v1Header.isEmpty()) ? v1Header : null;
+        if (paymentHeader == null) {
             return respond402(exchange, requirements, null);
         }
 
@@ -114,7 +118,7 @@ public class PaymentWebFilter implements WebFilter {
                 VerificationResponse vr = facilitator.verify(paymentHeader, requirements);
                 return new VerificationResult(vr.isValid, vr.invalidReason, paymentHeader);
             } catch (IllegalArgumentException ex) {
-                return new VerificationResult(false, "malformed X-PAYMENT header", null);
+                return new VerificationResult(false, "malformed payment header", null);
             } catch (Exception ex) {
                 return new VerificationResult(false, "verification error: " + ex.getMessage(), null);
             }

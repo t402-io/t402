@@ -80,7 +80,7 @@ class HttpFacilitatorClientTest {
         wm.stubFor(post(urlEqualTo("/settle"))
             .willReturn(aResponse()
                 .withHeader("Content-Type","application/json")
-                .withBody("{\"success\":true,\"txHash\":\"0xabc\",\"networkId\":\"eip155:84532\"}")));
+                .withBody("{\"success\":true,\"transaction\":\"0xabc\",\"network\":\"eip155:84532\"}")));
 
         String header = createV2PaymentHeader();
         PaymentRequirements req = new PaymentRequirements("exact", "eip155:84532", "USDC", "10000", "0xReceiver", 30);
@@ -90,7 +90,7 @@ class HttpFacilitatorClientTest {
 
         SettlementResponse sr = client.settle(header, req);
         assertTrue(sr.success);
-        assertEquals("0xabc", sr.txHash);
+        assertEquals("0xabc", sr.transaction);
     }
 
     @Test
@@ -234,8 +234,8 @@ class HttpFacilitatorClientTest {
         SettlementResponse response = client.settle(header, req);
 
         assertTrue(response.success);
-        assertNull(response.txHash);  // Should be null since it wasn't in the response
-        assertNull(response.networkId);
+        assertNull(response.transaction);  // Should be null since it wasn't in the response
+        assertNull(response.network);
     }
 
     @Test
@@ -244,14 +244,14 @@ class HttpFacilitatorClientTest {
         wm.stubFor(post(urlEqualTo("/settle"))
             .willReturn(aResponse()
                 .withHeader("Content-Type","application/json")
-                .withBody("{\"success\":false,\"error\":\"payment timed out\"}")));
+                .withBody("{\"success\":false,\"errorReason\":\"payment timed out\"}")));
 
         String header = createV2PaymentHeader();
         PaymentRequirements req = new PaymentRequirements();
         SettlementResponse response = client.settle(header, req);
 
         assertFalse(response.success);
-        assertEquals("payment timed out", response.error);
+        assertEquals("payment timed out", response.errorReason);
     }
 
     @Test

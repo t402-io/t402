@@ -98,7 +98,7 @@ export function registerConfigCommands(program: Command): void {
           printSuccess(`Facilitator URL set to ${value}`);
           break;
 
-        case "testnet":
+        case "testnet": {
           const isTestnet = value.toLowerCase() === "true" || value === "1";
           setConfig("testnet", isTestnet);
           printSuccess(`Testnet mode ${isTestnet ? "enabled" : "disabled"}`);
@@ -112,6 +112,7 @@ export function registerConfigCommands(program: Command): void {
             console.log(chalk.gray("  Default network changed to Base"));
           }
           break;
+        }
 
         default:
           printError(

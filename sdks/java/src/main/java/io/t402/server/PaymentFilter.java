@@ -9,6 +9,7 @@ import io.t402.model.PaymentRequirements;
 import io.t402.model.PaymentRequiredResponse;
 import io.t402.model.ResourceInfo;
 import io.t402.model.SettlementResponseHeader;
+import io.t402.util.HttpConstants;
 import io.t402.util.Json;
 
 import jakarta.servlet.Filter;
@@ -119,7 +120,11 @@ public class PaymentFilter implements Filter {
             return;
         }
 
-        String header = request.getHeader("X-PAYMENT");
+        // Check V2 header first, then fall back to V1
+        String header = request.getHeader(HttpConstants.PAYMENT_SIGNATURE);
+        if (header == null || header.isEmpty()) {
+            header = request.getHeader(HttpConstants.X_PAYMENT);
+        }
         if (header == null || header.isEmpty()) {
             respond402(response, request, null);
             return;
@@ -140,7 +145,7 @@ public class PaymentFilter implements Filter {
             vr = facilitator.verify(header, buildRequirements(path));
         } catch (IllegalArgumentException ex) {
             // Malformed payment header - client error
-            respond402(response, request, "malformed X-PAYMENT header");
+            respond402(response, request, "malformed payment header");
             return;
         } catch (IOException ex) {
             // Network/communication error with facilitator - server error
@@ -179,7 +184,7 @@ public class PaymentFilter implements Filter {
             if (sr == null || !sr.success) {
                 // Settlement failed - return 402 if headers not sent yet
                 if (!response.isCommitted()) {
-                    String errorMsg = sr != null && sr.error != null ? sr.error : "settlement failed";
+                    String errorMsg = sr != null && sr.errorReason != null ? sr.errorReason : "settlement failed";
                     respond402(response, request, errorMsg);
                 }
                 return;
@@ -191,10 +196,11 @@ public class PaymentFilter implements Filter {
                 String payer = extractPayerFromPayload(payload);
 
                 String base64Header = createPaymentResponseHeader(sr, payer);
-                response.setHeader("X-PAYMENT-RESPONSE", base64Header);
+                String responseHeaderName = HttpConstants.getResponseHeaderName(payload.t402Version);
+                response.setHeader(responseHeaderName, base64Header);
 
-                // Set CORS header to expose X-PAYMENT-RESPONSE to browser clients
-                response.setHeader("Access-Control-Expose-Headers", "X-PAYMENT-RESPONSE");
+                // Set CORS header to expose payment response to browser clients
+                response.setHeader("Access-Control-Expose-Headers", responseHeaderName);
             } catch (Exception ex) {
                 // If header creation fails, return 500
                 if (!response.isCommitted()) {
@@ -251,8 +257,8 @@ public class PaymentFilter implements Filter {
     private String createPaymentResponseHeader(SettlementResponse sr, String payer) throws Exception {
         SettlementResponseHeader settlementHeader = new SettlementResponseHeader(
             true,
-            sr.txHash != null ? sr.txHash : "",
-            sr.networkId != null ? sr.networkId : defaultNetwork,
+            sr.transaction != null ? sr.transaction : "",
+            sr.network != null ? sr.network : defaultNetwork,
             payer
         );
 

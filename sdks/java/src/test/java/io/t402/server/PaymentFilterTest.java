@@ -8,6 +8,7 @@ import io.t402.model.ExactSchemePayload;
 import io.t402.model.PaymentPayload;
 import io.t402.model.PaymentRequirements;
 import io.t402.model.ResourceInfo;
+import io.t402.util.HttpConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
@@ -69,7 +70,8 @@ class PaymentFilterTest {
     @Test
     void missingHeader() throws Exception {
         when(req.getRequestURI()).thenReturn("/private");
-        when(req.getHeader("X-PAYMENT")).thenReturn(null);
+        when(req.getHeader(HttpConstants.PAYMENT_SIGNATURE)).thenReturn(null);
+        when(req.getHeader(HttpConstants.X_PAYMENT)).thenReturn(null);
 
         filter.doFilter(req, resp, chain);
 
@@ -90,7 +92,7 @@ class PaymentFilterTest {
             .payload(Map.of("signature", "0x1234"))
             .build();
         String header = p.toHeader();
-        when(req.getHeader("X-PAYMENT")).thenReturn(header);
+        when(req.getHeader(HttpConstants.PAYMENT_SIGNATURE)).thenReturn(header);
 
         // facilitator says it's valid
         VerificationResponse vr = new VerificationResponse();
@@ -100,8 +102,8 @@ class PaymentFilterTest {
         // settlement succeeds
         SettlementResponse sr = new SettlementResponse();
         sr.success = true;
-        sr.txHash = "0xabcdef1234567890";
-        sr.networkId = "eip155:84532";
+        sr.transaction = "0xabcdef1234567890";
+        sr.network = "eip155:84532";
         when(fac.settle(eq(header), any())).thenReturn(sr);
 
         filter.doFilter(req, resp, chain);
@@ -124,7 +126,9 @@ class PaymentFilterTest {
         p.network = "base-sepolia";
         p.payload = Map.of("resource", "/private");
         String header = p.toHeader();
-        when(req.getHeader("X-PAYMENT")).thenReturn(header);
+        // V1 uses X-PAYMENT header
+        when(req.getHeader(HttpConstants.PAYMENT_SIGNATURE)).thenReturn(null);
+        when(req.getHeader(HttpConstants.X_PAYMENT)).thenReturn(header);
 
         // facilitator says it's valid
         VerificationResponse vr = new VerificationResponse();
@@ -134,8 +138,8 @@ class PaymentFilterTest {
         // settlement succeeds
         SettlementResponse sr = new SettlementResponse();
         sr.success = true;
-        sr.txHash = "0xabcdef1234567890";
-        sr.networkId = "base-sepolia";
+        sr.transaction = "0xabcdef1234567890";
+        sr.network = "base-sepolia";
         when(fac.settle(eq(header), any())).thenReturn(sr);
 
         filter.doFilter(req, resp, chain);
@@ -159,7 +163,7 @@ class PaymentFilterTest {
             .payload(Map.of())
             .build();
         String header = p.toHeader();
-        when(req.getHeader("X-PAYMENT")).thenReturn(header);
+        when(req.getHeader(HttpConstants.PAYMENT_SIGNATURE)).thenReturn(header);
 
         // facilitator response: invalid
         VerificationResponse vr = new VerificationResponse();
@@ -188,7 +192,7 @@ class PaymentFilterTest {
             .payload(Map.of())
             .build();
         String header = p.toHeader();
-        when(req.getHeader("X-PAYMENT")).thenReturn(header);
+        when(req.getHeader(HttpConstants.PAYMENT_SIGNATURE)).thenReturn(header);
 
         filter.doFilter(req, resp, chain);
 
@@ -210,7 +214,9 @@ class PaymentFilterTest {
         p.network = "base-sepolia";
         p.payload = Map.of("resource", "/other");
         String header = p.toHeader();
-        when(req.getHeader("X-PAYMENT")).thenReturn(header);
+        // V1 uses X-PAYMENT header
+        when(req.getHeader(HttpConstants.PAYMENT_SIGNATURE)).thenReturn(null);
+        when(req.getHeader(HttpConstants.X_PAYMENT)).thenReturn(header);
 
         filter.doFilter(req, resp, chain);
 
@@ -224,7 +230,8 @@ class PaymentFilterTest {
     @Test
     void emptyHeader() throws Exception {
         when(req.getRequestURI()).thenReturn("/private");
-        when(req.getHeader("X-PAYMENT")).thenReturn("");  // Empty string
+        when(req.getHeader(HttpConstants.PAYMENT_SIGNATURE)).thenReturn("");  // Empty string
+        when(req.getHeader(HttpConstants.X_PAYMENT)).thenReturn("");  // Empty string
 
         filter.doFilter(req, resp, chain);
 
@@ -250,7 +257,7 @@ class PaymentFilterTest {
     @Test
     void malformedHeader() throws Exception {
         when(req.getRequestURI()).thenReturn("/private");
-        when(req.getHeader("X-PAYMENT")).thenReturn("invalid-json-format");
+        when(req.getHeader(HttpConstants.PAYMENT_SIGNATURE)).thenReturn("invalid-json-format");
 
         filter.doFilter(req, resp, chain);
 
@@ -271,7 +278,7 @@ class PaymentFilterTest {
             .payload(Map.of())
             .build();
         String header = p.toHeader();
-        when(req.getHeader("X-PAYMENT")).thenReturn(header);
+        when(req.getHeader(HttpConstants.PAYMENT_SIGNATURE)).thenReturn(header);
 
         // Make facilitator throw exception during verify
         when(fac.verify(any(), any())).thenThrow(new IOException("Network error"));
@@ -297,7 +304,7 @@ class PaymentFilterTest {
             .payload(Map.of())
             .build();
         String header = p.toHeader();
-        when(req.getHeader("X-PAYMENT")).thenReturn(header);
+        when(req.getHeader(HttpConstants.PAYMENT_SIGNATURE)).thenReturn(header);
 
         // Verification succeeds
         VerificationResponse vr = new VerificationResponse();
@@ -331,7 +338,7 @@ class PaymentFilterTest {
             .payload(Map.of())
             .build();
         String header = p.toHeader();
-        when(req.getHeader("X-PAYMENT")).thenReturn(header);
+        when(req.getHeader(HttpConstants.PAYMENT_SIGNATURE)).thenReturn(header);
 
         // Verification succeeds
         VerificationResponse vr = new VerificationResponse();
@@ -341,7 +348,7 @@ class PaymentFilterTest {
         // Settlement fails (facilitator returns success=false)
         SettlementResponse sr = new SettlementResponse();
         sr.success = false;
-        sr.error = "insufficient balance";
+        sr.errorReason = "insufficient balance";
         when(fac.settle(eq(header), any())).thenReturn(sr);
 
         filter.doFilter(req, resp, chain);
@@ -380,7 +387,7 @@ class PaymentFilterTest {
             .build();
 
         String header = p.toHeader();
-        when(req.getHeader("X-PAYMENT")).thenReturn(header);
+        when(req.getHeader(HttpConstants.PAYMENT_SIGNATURE)).thenReturn(header);
 
         // Verification succeeds
         VerificationResponse vr = new VerificationResponse();
@@ -390,8 +397,8 @@ class PaymentFilterTest {
         // Settlement succeeds
         SettlementResponse sr = new SettlementResponse();
         sr.success = true;
-        sr.txHash = "0xabcdef1234567890";
-        sr.networkId = "eip155:84532";
+        sr.transaction = "0xabcdef1234567890";
+        sr.network = "eip155:84532";
         when(fac.settle(eq(header), any())).thenReturn(sr);
 
         filter.doFilter(req, resp, chain);
@@ -401,12 +408,12 @@ class PaymentFilterTest {
         verify(resp, never()).setStatus(HttpServletResponse.SC_PAYMENT_REQUIRED);
 
         // Verify X-PAYMENT-RESPONSE header was set
-        verify(resp).setHeader(eq("X-PAYMENT-RESPONSE"), any());
-        verify(resp).setHeader(eq("Access-Control-Expose-Headers"), eq("X-PAYMENT-RESPONSE"));
+        verify(resp).setHeader(eq(HttpConstants.PAYMENT_RESPONSE), any());
+        verify(resp).setHeader(eq("Access-Control-Expose-Headers"), eq(HttpConstants.PAYMENT_RESPONSE));
 
         // Capture the settlement response header to verify payer was included
         org.mockito.ArgumentCaptor<String> headerCaptor = org.mockito.ArgumentCaptor.forClass(String.class);
-        verify(resp).setHeader(eq("X-PAYMENT-RESPONSE"), headerCaptor.capture());
+        verify(resp).setHeader(eq(HttpConstants.PAYMENT_RESPONSE), headerCaptor.capture());
 
         // Decode and verify the settlement response contains the correct payer
         String base64Header = headerCaptor.getValue();
@@ -433,7 +440,7 @@ class PaymentFilterTest {
             .build();
 
         String header = p.toHeader();
-        when(req.getHeader("X-PAYMENT")).thenReturn(header);
+        when(req.getHeader(HttpConstants.PAYMENT_SIGNATURE)).thenReturn(header);
 
         // Verification succeeds
         VerificationResponse vr = new VerificationResponse();
@@ -443,8 +450,8 @@ class PaymentFilterTest {
         // Settlement succeeds
         SettlementResponse sr = new SettlementResponse();
         sr.success = true;
-        sr.txHash = "0xabcdef1234567890";
-        sr.networkId = "eip155:84532";
+        sr.transaction = "0xabcdef1234567890";
+        sr.network = "eip155:84532";
         when(fac.settle(eq(header), any())).thenReturn(sr);
 
         filter.doFilter(req, resp, chain);
@@ -455,7 +462,7 @@ class PaymentFilterTest {
 
         // Capture the settlement response header
         org.mockito.ArgumentCaptor<String> headerCaptor = org.mockito.ArgumentCaptor.forClass(String.class);
-        verify(resp).setHeader(eq("X-PAYMENT-RESPONSE"), headerCaptor.capture());
+        verify(resp).setHeader(eq(HttpConstants.PAYMENT_RESPONSE), headerCaptor.capture());
 
         // Decode and verify the settlement response has null payer
         String base64Header = headerCaptor.getValue();
@@ -479,7 +486,7 @@ class PaymentFilterTest {
             .payload(Map.of())
             .build();
         String header = p.toHeader();
-        when(req.getHeader("X-PAYMENT")).thenReturn(header);
+        when(req.getHeader(HttpConstants.PAYMENT_SIGNATURE)).thenReturn(header);
 
         // Make facilitator throw IOException during verify
         when(fac.verify(any(), any())).thenThrow(new IOException("Network timeout"));
@@ -508,7 +515,7 @@ class PaymentFilterTest {
             .payload(Map.of())
             .build();
         String header = p.toHeader();
-        when(req.getHeader("X-PAYMENT")).thenReturn(header);
+        when(req.getHeader(HttpConstants.PAYMENT_SIGNATURE)).thenReturn(header);
 
         // Make facilitator throw unexpected exception during verify
         when(fac.verify(any(), any())).thenThrow(new RuntimeException("Unexpected error"));
@@ -538,7 +545,8 @@ class PaymentFilterTest {
 
         when(req.getRequestURI()).thenReturn("/premium");
         when(req.getRequestURL()).thenReturn(new StringBuffer("http://localhost/premium"));
-        when(req.getHeader("X-PAYMENT")).thenReturn(null);
+        when(req.getHeader(HttpConstants.PAYMENT_SIGNATURE)).thenReturn(null);
+        when(req.getHeader(HttpConstants.X_PAYMENT)).thenReturn(null);
 
         customFilter.doFilter(req, resp, chain);
 

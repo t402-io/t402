@@ -3,6 +3,7 @@ package io.t402.client;
 import io.t402.crypto.CryptoSigner;
 import io.t402.crypto.CryptoSignException;
 import io.t402.model.PaymentPayload;
+import io.t402.util.HttpConstants;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -16,7 +17,10 @@ import java.util.UUID;
 
 /**
  * Convenience wrapper that builds an HTTP request with a properly-formed
- * X-PAYMENT header for the “exact” EVM scheme on Base Sepolia.
+ * payment header for the "exact" EVM scheme on Base Sepolia.
+ *
+ * <p>Uses {@code PAYMENT-SIGNATURE} header for v2 payloads and
+ * {@code X-PAYMENT} for v1 payloads.</p>
  *
  * You provide a {@link CryptoSigner} implementation to actually sign the
  * payment payload (e.g. using web3j). Everything else is generic JSON + Base64.
@@ -89,7 +93,7 @@ public class T402HttpClient {
 
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(uri)
-                .header("X-PAYMENT", p.toHeader())
+                .header(HttpConstants.getPaymentHeaderName(p.t402Version), p.toHeader())
                 .GET()
                 .build();
 

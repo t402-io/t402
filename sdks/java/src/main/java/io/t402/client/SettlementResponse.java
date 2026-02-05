@@ -4,13 +4,16 @@ package io.t402.client;
 public class SettlementResponse {
     /** Whether the payment settlement succeeded. */
     public boolean success;
-    
-    /** Error message if settlement failed. */
-    public String  error;
-    
+
+    /** Error reason if settlement failed. */
+    public String  errorReason;
+
+    /** Payer address. */
+    public String  payer;
+
     /** Transaction hash of the settled payment. */
-    public String  txHash;
-    
-    /** Network ID where the settlement occurred. */
-    public String  networkId;
+    public String  transaction;
+
+    /** Network where the settlement occurred (CAIP-2). */
+    public String  network;
 }

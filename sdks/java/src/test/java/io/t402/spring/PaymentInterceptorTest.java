@@ -5,6 +5,7 @@ import io.t402.client.SettlementResponse;
 import io.t402.client.VerificationResponse;
 import io.t402.model.PaymentPayload;
 import io.t402.model.PaymentRequirements;
+import io.t402.util.HttpConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -74,7 +75,8 @@ class PaymentInterceptorTest {
     void routeMatchWithoutPaymentReturns402() throws Exception {
         // Request matches route pattern
         when(request.getRequestURI()).thenReturn("/api/premium/data");
-        when(request.getHeader("X-PAYMENT")).thenReturn(null);
+        when(request.getHeader(HttpConstants.PAYMENT_SIGNATURE)).thenReturn(null);
+        when(request.getHeader(HttpConstants.X_PAYMENT)).thenReturn(null);
         when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost/api/premium/data"));
         when(request.getQueryString()).thenReturn(null);
 
@@ -96,7 +98,7 @@ class PaymentInterceptorTest {
             .payload(Map.of("signature", "0x1234"))
             .build();
         String header = payload.toHeader();
-        when(request.getHeader("X-PAYMENT")).thenReturn(header);
+        when(request.getHeader(HttpConstants.PAYMENT_SIGNATURE)).thenReturn(header);
 
         // Mock verification success
         VerificationResponse vr = new VerificationResponse();
@@ -111,7 +113,8 @@ class PaymentInterceptorTest {
     @Test
     void annotatedMethodWithoutPaymentReturns402() throws Exception {
         when(request.getRequestURI()).thenReturn("/some/path");
-        when(request.getHeader("X-PAYMENT")).thenReturn(null);
+        when(request.getHeader(HttpConstants.PAYMENT_SIGNATURE)).thenReturn(null);
+        when(request.getHeader(HttpConstants.X_PAYMENT)).thenReturn(null);
         when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost/some/path"));
         when(request.getQueryString()).thenReturn(null);
 
@@ -124,7 +127,8 @@ class PaymentInterceptorTest {
     @Test
     void classAnnotationAppliedToMethod() throws Exception {
         when(request.getRequestURI()).thenReturn("/premium/data");
-        when(request.getHeader("X-PAYMENT")).thenReturn(null);
+        when(request.getHeader(HttpConstants.PAYMENT_SIGNATURE)).thenReturn(null);
+        when(request.getHeader(HttpConstants.X_PAYMENT)).thenReturn(null);
         when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost/premium/data"));
         when(request.getQueryString()).thenReturn(null);
 
@@ -147,7 +151,7 @@ class PaymentInterceptorTest {
             .payload(Map.of())
             .build();
         String header = payload.toHeader();
-        when(request.getHeader("X-PAYMENT")).thenReturn(header);
+        when(request.getHeader(HttpConstants.PAYMENT_SIGNATURE)).thenReturn(header);
 
         VerificationResponse vr = new VerificationResponse();
         vr.isValid = true;
@@ -166,7 +170,7 @@ class PaymentInterceptorTest {
     @Test
     void malformedPaymentHeaderReturns402() throws Exception {
         when(request.getRequestURI()).thenReturn("/api/premium/data");
-        when(request.getHeader("X-PAYMENT")).thenReturn("invalid-header");
+        when(request.getHeader(HttpConstants.PAYMENT_SIGNATURE)).thenReturn("invalid-header");
         when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost/api/premium/data"));
         when(request.getQueryString()).thenReturn(null);
 
@@ -187,7 +191,7 @@ class PaymentInterceptorTest {
             .payload(Map.of())
             .build();
         String header = payload.toHeader();
-        when(request.getHeader("X-PAYMENT")).thenReturn(header);
+        when(request.getHeader(HttpConstants.PAYMENT_SIGNATURE)).thenReturn(header);
 
         // Mock verification failure
         VerificationResponse vr = new VerificationResponse();
@@ -212,7 +216,7 @@ class PaymentInterceptorTest {
 
         SettlementResponse sr = new SettlementResponse();
         sr.success = true;
-        sr.txHash = "0xabc123";
+        sr.transaction = "0xabc123";
         when(facilitator.settle(eq(header), any())).thenReturn(sr);
 
         interceptor.afterCompletion(request, response, null, null);

@@ -7,6 +7,7 @@ import io.t402.model.PaymentPayload;
 import io.t402.model.PaymentRequirements;
 import io.t402.model.PaymentRequiredResponse;
 import io.t402.model.ResourceInfo;
+import io.t402.util.HttpConstants;
 import io.t402.util.Json;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,8 +33,9 @@ import java.util.concurrent.ConcurrentHashMap;
  *   <li>Route configuration from {@code t402.routes} properties</li>
  * </ol>
  *
- * <p>If a payment requirement is found, the interceptor validates the X-PAYMENT header
- * against the facilitator and returns HTTP 402 if payment is invalid or missing.</p>
+ * <p>If a payment requirement is found, the interceptor validates the payment header
+ * (PAYMENT-SIGNATURE for v2, X-PAYMENT for v1) against the facilitator and returns
+ * HTTP 402 if payment is invalid or missing.</p>
  *
  * @see RequirePayment
  * @see RouteConfig
@@ -88,7 +90,11 @@ public class PaymentInterceptor implements HandlerInterceptor {
             return true;  // No payment required for this endpoint
         }
 
-        String paymentHeader = request.getHeader("X-PAYMENT");
+        // Check V2 header first, then fall back to V1
+        String paymentHeader = request.getHeader(HttpConstants.PAYMENT_SIGNATURE);
+        if (paymentHeader == null || paymentHeader.isEmpty()) {
+            paymentHeader = request.getHeader(HttpConstants.X_PAYMENT);
+        }
         if (paymentHeader == null || paymentHeader.isEmpty()) {
             respond402(response, request, requirements, null);
             return false;
@@ -120,7 +126,7 @@ public class PaymentInterceptor implements HandlerInterceptor {
             return true;
 
         } catch (IllegalArgumentException ex) {
-            respond402(response, request, requirements, "malformed X-PAYMENT header");
+            respond402(response, request, requirements, "malformed payment header");
             return false;
         } catch (IOException ex) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -284,18 +290,20 @@ public class PaymentInterceptor implements HandlerInterceptor {
         try {
             PaymentPayload payload = (PaymentPayload) request.getAttribute("t402.paymentPayload");
             String payer = extractPayer(payload);
+            int version = payload != null ? payload.t402Version : 2;
 
             io.t402.model.SettlementResponseHeader header = new io.t402.model.SettlementResponseHeader(
                 true,
-                sr.txHash != null ? sr.txHash : "",
-                sr.networkId != null ? sr.networkId : properties.getNetwork(),
+                sr.transaction != null ? sr.transaction : "",
+                sr.network != null ? sr.network : properties.getNetwork(),
                 payer
             );
 
             String json = Json.MAPPER.writeValueAsString(header);
             String base64 = java.util.Base64.getEncoder().encodeToString(json.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-            response.setHeader("X-PAYMENT-RESPONSE", base64);
-            response.setHeader("Access-Control-Expose-Headers", "X-PAYMENT-RESPONSE");
+            String responseHeaderName = HttpConstants.getResponseHeaderName(version);
+            response.setHeader(responseHeaderName, base64);
+            response.setHeader("Access-Control-Expose-Headers", responseHeaderName);
         } catch (Exception ex) {
             System.err.println("Failed to add settlement header: " + ex.getMessage());
         }
