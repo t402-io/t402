@@ -21,30 +21,32 @@ This package provides three main components for handling t402 payments on TRON:
 ### Client
 
 ```typescript
-import { ExactTronClient } from "@t402/tron/exact/client";
+import { ExactTronClient } from '@t402/tron/exact/client'
 
-const client = new ExactTronClient(signer);
-const payload = await client.createPaymentPayload(requirements);
+const client = new ExactTronClient(signer)
+const payload = await client.createPaymentPayload(requirements)
 ```
 
 ### Server
 
 ```typescript
-import { ExactTronServer } from "@t402/tron/exact/server";
-import { t402ResourceServer } from "@t402/express";
-import { HTTPFacilitatorClient } from "@t402/core/server";
+import { ExactTronServer } from '@t402/tron/exact/server'
+import { t402ResourceServer } from '@t402/express'
+import { HTTPFacilitatorClient } from '@t402/core/server'
 
-const facilitator = new HTTPFacilitatorClient({ url: "https://facilitator.t402.io" });
-const resourceServer = new t402ResourceServer(facilitator)
-  .register("tron:mainnet", new ExactTronServer());
+const facilitator = new HTTPFacilitatorClient({ url: 'https://facilitator.t402.io' })
+const resourceServer = new t402ResourceServer(facilitator).register(
+  'tron:mainnet',
+  new ExactTronServer(),
+)
 ```
 
 ### Facilitator
 
 ```typescript
-import { ExactTronFacilitator } from "@t402/tron/exact/facilitator";
+import { ExactTronFacilitator } from '@t402/tron/exact/facilitator'
 
-const facilitator = new ExactTronFacilitator(signer);
+const facilitator = new ExactTronFacilitator(signer)
 ```
 
 ## Package Exports
@@ -61,18 +63,18 @@ All constants, types, utilities, token registry, and scheme classes.
 
 ## Supported Networks
 
-| Network | CAIP-2 Identifier |
-|---------|-------------------|
-| TRON Mainnet | `tron:mainnet` |
-| TRON Nile Testnet | `tron:nile` |
-| TRON Shasta Testnet | `tron:shasta` |
+| Network             | CAIP-2 Identifier |
+| ------------------- | ----------------- |
+| TRON Mainnet        | `tron:mainnet`    |
+| TRON Nile Testnet   | `tron:nile`       |
+| TRON Shasta Testnet | `tron:shasta`     |
 
 ## Supported Assets
 
-| Token | Network | Contract Address |
-|-------|---------|-----------------|
-| USDT | Mainnet | `TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t` |
-| USDT | Nile | `TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf` |
+| Token | Network | Contract Address                     |
+| ----- | ------- | ------------------------------------ |
+| USDT  | Mainnet | `TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t` |
+| USDT  | Nile    | `TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf` |
 
 ## Token Utilities
 
@@ -83,16 +85,16 @@ import {
   getNetworkTokens,
   getSupportedNetworks,
   isNetworkSupported,
-} from "@t402/tron";
+} from '@t402/tron'
 
 // Check if a network is supported
-isNetworkSupported("tron:mainnet"); // true
+isNetworkSupported('tron:mainnet') // true
 
 // Get USDT config for mainnet
-const config = getTRC20Config("tron:mainnet", "USDT");
+const config = getTRC20Config('tron:mainnet', 'USDT')
 
 // Get all supported networks
-const networks = getSupportedNetworks();
+const networks = getSupportedNetworks()
 ```
 
 ## Address & Amount Utilities
@@ -104,14 +106,14 @@ import {
   convertFromSmallestUnits,
   estimateTransactionFee,
   formatAddress,
-} from "@t402/tron";
+} from '@t402/tron'
 
 // Validate TRON address (base58check T-prefix)
-validateTronAddress("TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"); // true
+validateTronAddress('TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t') // true
 
 // Convert amounts (6 decimals for USDT)
-convertToSmallestUnits("1.5", 6); // 1500000n
-convertFromSmallestUnits(1500000n, 6); // "1.5"
+convertToSmallestUnits('1.5', 6) // 1500000n
+convertFromSmallestUnits(1500000n, 6) // "1.5"
 ```
 
 ## Security

@@ -19,8 +19,18 @@ vi.mock('viem', async () => {
 })
 
 vi.mock('viem/chains', () => ({
-  mainnet: { id: 1, name: 'Ethereum', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: { default: { http: ['https://eth.example.com'] } } },
-  arbitrum: { id: 42161, name: 'Arbitrum One', nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 }, rpcUrls: { default: { http: ['https://arb.example.com'] } } },
+  mainnet: {
+    id: 1,
+    name: 'Ethereum',
+    nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+    rpcUrls: { default: { http: ['https://eth.example.com'] } },
+  },
+  arbitrum: {
+    id: 42161,
+    name: 'Arbitrum One',
+    nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+    rpcUrls: { default: { http: ['https://arb.example.com'] } },
+  },
 }))
 
 /**
@@ -41,7 +51,9 @@ function createMockWdkAccount(overrides?: Partial<WdkAccount>): WdkAccount {
     getTokenBalance: vi.fn().mockResolvedValue(500_000000n), // 500 USDT0
     signMessage: vi.fn().mockResolvedValue('0xsignature'),
     signTypedData: vi.fn().mockResolvedValue('0xsignature'),
-    sendTransaction: vi.fn().mockResolvedValue('0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890'),
+    sendTransaction: vi
+      .fn()
+      .mockResolvedValue('0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890'),
     ...overrides,
   }
 }
@@ -146,7 +158,14 @@ describe('WdkBridgeSigner', () => {
 
       const result = await signer.readContract({
         address: '0x1234567890123456789012345678901234567890',
-        abi: [{ name: 'balanceOf', type: 'function', inputs: [{ name: 'account', type: 'address' }], outputs: [{ type: 'uint256' }] }],
+        abi: [
+          {
+            name: 'balanceOf',
+            type: 'function',
+            inputs: [{ name: 'account', type: 'address' }],
+            outputs: [{ type: 'uint256' }],
+          },
+        ],
         functionName: 'balanceOf',
         args: ['0xABCDEF1234567890ABCDEF1234567890ABCDEF12'],
       })
@@ -194,7 +213,17 @@ describe('WdkBridgeSigner', () => {
 
       const txHash = await signer.writeContract({
         address: '0x1234567890123456789012345678901234567890',
-        abi: [{ name: 'transfer', type: 'function', inputs: [{ name: 'to', type: 'address' }, { name: 'amount', type: 'uint256' }], outputs: [{ type: 'bool' }] }],
+        abi: [
+          {
+            name: 'transfer',
+            type: 'function',
+            inputs: [
+              { name: 'to', type: 'address' },
+              { name: 'amount', type: 'uint256' },
+            ],
+            outputs: [{ type: 'bool' }],
+          },
+        ],
         functionName: 'transfer',
         args: ['0xABCDEF1234567890ABCDEF1234567890ABCDEF12', 100n],
       })
@@ -269,7 +298,10 @@ describe('WdkBridgeSigner', () => {
         logs: [
           {
             address: '0x1234567890123456789012345678901234567890' as `0x${string}`,
-            topics: ['0xtopic1' as `0x${string}`, '0xtopic2' as `0x${string}`] as readonly `0x${string}`[],
+            topics: [
+              '0xtopic1' as `0x${string}`,
+              '0xtopic2' as `0x${string}`,
+            ] as readonly `0x${string}`[],
             data: '0xdata' as `0x${string}`,
           },
         ],
@@ -313,9 +345,21 @@ describe('WdkBridgeSigner', () => {
         status: 'success' as const,
         transactionHash: '0xmultilog' as `0x${string}`,
         logs: [
-          { address: '0x1111111111111111111111111111111111111111' as `0x${string}`, topics: ['0xa' as `0x${string}`] as readonly `0x${string}`[], data: '0x01' as `0x${string}` },
-          { address: '0x2222222222222222222222222222222222222222' as `0x${string}`, topics: ['0xb' as `0x${string}`] as readonly `0x${string}`[], data: '0x02' as `0x${string}` },
-          { address: '0x3333333333333333333333333333333333333333' as `0x${string}`, topics: ['0xc' as `0x${string}`] as readonly `0x${string}`[], data: '0x03' as `0x${string}` },
+          {
+            address: '0x1111111111111111111111111111111111111111' as `0x${string}`,
+            topics: ['0xa' as `0x${string}`] as readonly `0x${string}`[],
+            data: '0x01' as `0x${string}`,
+          },
+          {
+            address: '0x2222222222222222222222222222222222222222' as `0x${string}`,
+            topics: ['0xb' as `0x${string}`] as readonly `0x${string}`[],
+            data: '0x02' as `0x${string}`,
+          },
+          {
+            address: '0x3333333333333333333333333333333333333333' as `0x${string}`,
+            topics: ['0xc' as `0x${string}`] as readonly `0x${string}`[],
+            data: '0x03' as `0x${string}`,
+          },
         ],
       })
 
@@ -385,7 +429,9 @@ describe('WdkBridgeSigner', () => {
         getTokenBalance: vi.fn().mockResolvedValue(0n),
       })
       const signer = new WdkBridgeSigner(emptyAccount, 'ethereum')
-      const balance = await signer.getTokenBalance('0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee' as `0x${string}`)
+      const balance = await signer.getTokenBalance(
+        '0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee' as `0x${string}`,
+      )
 
       expect(balance).toBe(0n)
     })
@@ -420,7 +466,11 @@ describe('createWdkBridgeSigner', () => {
   })
 
   it('should pass custom RPC URL to the signer', async () => {
-    const signer = await createWdkBridgeSigner(mockAccount, 'arbitrum', 'https://custom-rpc.example.com')
+    const signer = await createWdkBridgeSigner(
+      mockAccount,
+      'arbitrum',
+      'https://custom-rpc.example.com',
+    )
 
     expect(signer).toBeInstanceOf(WdkBridgeSigner)
     expect(signer.address).toBe('0xABCDEF1234567890ABCDEF1234567890ABCDEF12')
@@ -431,6 +481,8 @@ describe('createWdkBridgeSigner', () => {
       getAddress: vi.fn().mockRejectedValue(new Error('Account locked')),
     })
 
-    await expect(createWdkBridgeSigner(failingAccount, 'ethereum')).rejects.toThrow('Account locked')
+    await expect(createWdkBridgeSigner(failingAccount, 'ethereum')).rejects.toThrow(
+      'Account locked',
+    )
   })
 })
