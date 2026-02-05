@@ -183,13 +183,15 @@ export class CashSchemeNetworkServer implements SchemeNetworkServer {
     }
 
     // Parse string prices like "$10" or "10 USD"
+    // Convert to smallest unit (cents) since protocol amounts must be integer strings
     if (typeof price === "string") {
       const cleanPrice = price
         .replace(/^\$/, "")
         .replace(/\s+USD$/i, "")
         .trim();
+      const cents = Math.round(parseFloat(cleanPrice) * 100);
       return {
-        amount: cleanPrice,
+        amount: cents.toString(),
         asset: "USD",
         extra: {},
       };
@@ -197,8 +199,9 @@ export class CashSchemeNetworkServer implements SchemeNetworkServer {
 
     // Handle number input
     if (typeof price === "number") {
+      const cents = Math.round(price * 100);
       return {
-        amount: price.toString(),
+        amount: cents.toString(),
         asset: "USD",
         extra: {},
       };
