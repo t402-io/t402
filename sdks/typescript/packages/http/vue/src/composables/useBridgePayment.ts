@@ -42,7 +42,12 @@ interface BridgePaymentOptions {
     }>
   }>
   /** Callback on successful delivery */
-  onSuccess?: (result: { txHash: string; dstTxHash?: string; fromChain: string; toChain: string }) => void
+  onSuccess?: (result: {
+    txHash: string
+    dstTxHash?: string
+    fromChain: string
+    toChain: string
+  }) => void
   /** Callback on error */
   onError?: (error: Error) => void
   /** Whether to automatically wait for delivery (default: false) */
@@ -129,18 +134,20 @@ export function useBridgePayment(options: BridgePaymentOptions): BridgePaymentRe
   const isSuccess = computed(() => status.value === 'success')
   const isError = computed(() => status.value === 'error')
 
-  const executeBridge = async (bridgeCall: () => Promise<{
-    txHash: string
-    messageGuid: string
-    fromChain: string
-    toChain: string
-    amountSent: bigint
-    waitForDelivery: (options?: { timeout?: number }) => Promise<{
-      success: boolean
-      status: string
-      dstTxHash?: string
-    }>
-  }>) => {
+  const executeBridge = async (
+    bridgeCall: () => Promise<{
+      txHash: string
+      messageGuid: string
+      fromChain: string
+      toChain: string
+      amountSent: bigint
+      waitForDelivery: (options?: { timeout?: number }) => Promise<{
+        success: boolean
+        status: string
+        dstTxHash?: string
+      }>
+    }>,
+  ) => {
     status.value = 'bridging'
     error.value = null
     txHash.value = null
@@ -196,9 +203,11 @@ export function useBridgePayment(options: BridgePaymentOptions): BridgePaymentRe
     preferredSourceChain?: string
     slippageTolerance?: number
   }) => {
-    const fn = autoBridgeFn ?? (() => {
-      throw new Error('autoBridgeFn not provided')
-    })
+    const fn =
+      autoBridgeFn ??
+      (() => {
+        throw new Error('autoBridgeFn not provided')
+      })
     await executeBridge(() => fn(params))
   }
 
