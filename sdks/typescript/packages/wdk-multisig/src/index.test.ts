@@ -2,7 +2,7 @@
  * WDK Multi-sig Tests
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import type { Address, Hex } from 'viem'
 import {
   combineSignatures,
@@ -501,15 +501,15 @@ describe('SignatureCollector', () => {
     })
 
     it('should throw for invalid userOpHash (no 0x prefix)', () => {
-      expect(() =>
-        collector.createRequest(mockUserOp, 'abcdef1234' as Hex, owners, 2),
-      ).toThrow(/Invalid userOpHash/)
+      expect(() => collector.createRequest(mockUserOp, 'abcdef1234' as Hex, owners, 2)).toThrow(
+        /Invalid userOpHash/,
+      )
     })
 
     it('should throw for empty userOpHash', () => {
-      expect(() =>
-        collector.createRequest(mockUserOp, '' as Hex, owners, 2),
-      ).toThrow(/Invalid userOpHash/)
+      expect(() => collector.createRequest(mockUserOp, '' as Hex, owners, 2)).toThrow(
+        /Invalid userOpHash/,
+      )
     })
   })
 
@@ -626,9 +626,9 @@ describe('SignatureCollector', () => {
 
       return new Promise<void>((resolve) => {
         setTimeout(() => {
-          expect(() =>
-            shortCollector.addSignature(request.id, owners[0], '0x1111' as Hex),
-          ).toThrow(MultiSigError)
+          expect(() => shortCollector.addSignature(request.id, owners[0], '0x1111' as Hex)).toThrow(
+            MultiSigError,
+          )
           resolve()
         }, 10)
       })
@@ -1143,11 +1143,10 @@ describe('MultiSigError', () => {
   })
 
   it('should support custom context in constructor', () => {
-    const error = new MultiSigError(
-      MultiSigErrorCode.INVALID_THRESHOLD,
-      'Custom message',
-      { key1: 'value1', key2: 42 },
-    )
+    const error = new MultiSigError(MultiSigErrorCode.INVALID_THRESHOLD, 'Custom message', {
+      key1: 'value1',
+      key2: 42,
+    })
 
     expect(error.code).toBe(MultiSigErrorCode.INVALID_THRESHOLD)
     expect(error.message).toBe('Custom message')

@@ -21,38 +21,38 @@ This package provides three main components for handling t402 payments on TON:
 ### Client
 
 ```typescript
-import { ExactTonScheme, toClientTonSigner } from "@t402/ton";
-import { mnemonicToPrivateKey } from "@ton/crypto";
+import { ExactTonScheme, toClientTonSigner } from '@t402/ton'
+import { mnemonicToPrivateKey } from '@ton/crypto'
 
-const keyPair = await mnemonicToPrivateKey(mnemonic.split(" "));
-const signer = toClientTonSigner(keyPair);
+const keyPair = await mnemonicToPrivateKey(mnemonic.split(' '))
+const signer = toClientTonSigner(keyPair)
 
-const client = new ExactTonScheme(signer);
-const payload = await client.createPaymentPayload(requirements);
+const client = new ExactTonScheme(signer)
+const payload = await client.createPaymentPayload(requirements)
 ```
 
 ### Server
 
 ```typescript
-import { registerExactTonServerScheme } from "@t402/ton";
-import { t402ResourceServer } from "@t402/express";
-import { HTTPFacilitatorClient } from "@t402/core/server";
+import { registerExactTonServerScheme } from '@t402/ton'
+import { t402ResourceServer } from '@t402/express'
+import { HTTPFacilitatorClient } from '@t402/core/server'
 
-const facilitator = new HTTPFacilitatorClient({ url: "https://facilitator.t402.io" });
-const resourceServer = new t402ResourceServer(facilitator);
-registerExactTonServerScheme(resourceServer);
+const facilitator = new HTTPFacilitatorClient({ url: 'https://facilitator.t402.io' })
+const resourceServer = new t402ResourceServer(facilitator)
+registerExactTonServerScheme(resourceServer)
 ```
 
 ### Facilitator
 
 ```typescript
-import { registerExactTonFacilitatorScheme, toFacilitatorTonSigner } from "@t402/ton";
-import { mnemonicToPrivateKey } from "@ton/crypto";
+import { registerExactTonFacilitatorScheme, toFacilitatorTonSigner } from '@t402/ton'
+import { mnemonicToPrivateKey } from '@ton/crypto'
 
-const keyPair = await mnemonicToPrivateKey(mnemonic.split(" "));
-const signer = toFacilitatorTonSigner(keyPair);
+const keyPair = await mnemonicToPrivateKey(mnemonic.split(' '))
+const signer = toFacilitatorTonSigner(keyPair)
 
-registerExactTonFacilitatorScheme(facilitator, { signer });
+registerExactTonFacilitatorScheme(facilitator, { signer })
 ```
 
 ## Package Exports
@@ -73,17 +73,17 @@ registerExactTonFacilitatorScheme(facilitator, { signer });
 
 ## Supported Networks
 
-| Network | CAIP-2 Identifier |
-|---------|-------------------|
-| TON Mainnet | `ton:mainnet` |
-| TON Testnet | `ton:testnet` |
+| Network     | CAIP-2 Identifier |
+| ----------- | ----------------- |
+| TON Mainnet | `ton:mainnet`     |
+| TON Testnet | `ton:testnet`     |
 
 ## Supported Assets
 
-| Token | Network | Jetton Address |
-|-------|---------|----------------|
-| USDT | Mainnet | `EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs` |
-| USDT | Testnet | `kQBqSpvo4S87mX9tTc4FX3Sfqf4uSp3Tx-Fz4RBUfTRWBx` |
+| Token | Network | Jetton Address                                     |
+| ----- | ------- | -------------------------------------------------- |
+| USDT  | Mainnet | `EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs` |
+| USDT  | Testnet | `kQBqSpvo4S87mX9tTc4FX3Sfqf4uSp3Tx-Fz4RBUfTRWBx`   |
 
 ## Token Utilities
 
@@ -94,16 +94,16 @@ import {
   getDefaultJetton,
   getSupportedNetworks,
   isNetworkSupported,
-} from "@t402/ton";
+} from '@t402/ton'
 
 // Check if a network is supported
-isNetworkSupported("ton:mainnet"); // true
+isNetworkSupported('ton:mainnet') // true
 
 // Get USDT config for mainnet
-const config = getJettonConfig("ton:mainnet", "USDT");
+const config = getJettonConfig('ton:mainnet', 'USDT')
 
 // Get all supported networks
-const networks = getSupportedNetworks();
+const networks = getSupportedNetworks()
 ```
 
 ## Address & Amount Utilities
@@ -115,14 +115,14 @@ import {
   convertFromJettonAmount,
   buildJettonTransferBody,
   estimateJettonTransferGas,
-} from "@t402/ton";
+} from '@t402/ton'
 
 // Validate TON address
-validateTonAddress("EQ..."); // true/false
+validateTonAddress('EQ...') // true/false
 
 // Convert amounts (6 decimals for USDT)
-convertToJettonAmount("1.5", 6); // 1500000n
-convertFromJettonAmount(1500000n, 6); // "1.5"
+convertToJettonAmount('1.5', 6) // 1500000n
+convertFromJettonAmount(1500000n, 6) // "1.5"
 ```
 
 ## Security
