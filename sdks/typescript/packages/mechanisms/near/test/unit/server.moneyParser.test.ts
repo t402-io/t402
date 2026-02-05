@@ -102,9 +102,7 @@ describe("ExactDirectNearServer - registerMoneyParser", () => {
       });
 
       const result = await server.parsePrice(1, NEAR_MAINNET_CAIP2);
-      expect(result.asset).toBe(
-        "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1",
-      );
+      expect(result.asset).toBe("17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1");
       expect(result.amount).toBe("1000000");
     });
   });
@@ -167,9 +165,7 @@ describe("ExactDirectNearServer - registerMoneyParser", () => {
         .registerMoneyParser(async () => null);
 
       const result = await server.parsePrice(1, NEAR_MAINNET_CAIP2);
-      expect(result.asset).toBe(
-        "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1",
-      );
+      expect(result.asset).toBe("17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1");
       expect(result.amount).toBe("1000000");
     });
   });
@@ -182,9 +178,9 @@ describe("ExactDirectNearServer - registerMoneyParser", () => {
         throw new Error("Parser error: amount exceeds limit");
       });
 
-      await expect(
-        async () => await server.parsePrice(50, NEAR_MAINNET_CAIP2),
-      ).rejects.toThrow("Parser error: amount exceeds limit");
+      await expect(async () => await server.parsePrice(50, NEAR_MAINNET_CAIP2)).rejects.toThrow(
+        "Parser error: amount exceeds limit",
+      );
     });
 
     it("should throw for invalid money format", async () => {
@@ -204,9 +200,9 @@ describe("ExactDirectNearServer - registerMoneyParser", () => {
           throw new Error("Second parser failed");
         });
 
-      await expect(
-        async () => await server.parsePrice(50, NEAR_MAINNET_CAIP2),
-      ).rejects.toThrow("Second parser failed");
+      await expect(async () => await server.parsePrice(50, NEAR_MAINNET_CAIP2)).rejects.toThrow(
+        "Second parser failed",
+      );
     });
   });
 
