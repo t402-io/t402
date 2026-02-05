@@ -9,6 +9,9 @@ export { AddressDisplay } from './components/AddressDisplay.js'
 export { usePaymentRequired } from './hooks/usePaymentRequired.js'
 export { usePaymentStatus } from './hooks/usePaymentStatus.js'
 export { useAsyncPayment } from './hooks/useAsyncPayment.js'
+export { useGaslessPayment } from './hooks/useGaslessPayment.js'
+export { useBridgePayment } from './hooks/useBridgePayment.js'
+export { useMultiSigPayment } from './hooks/useMultiSigPayment.js'
 
 // Providers
 export { PaymentProvider, usePaymentContext, PaymentContext } from './providers/PaymentProvider.js'

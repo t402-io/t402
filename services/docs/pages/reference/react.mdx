@@ -1,0 +1,757 @@
+# @t402/react
+
+import { Callout, Tabs, Tab } from 'nextra/components'
+
+React components and hooks for building payment UIs with the t402 protocol. Pre-built components with customizable styling and hooks for custom implementations.
+
+## Installation
+
+```bash npm2yarn
+npm install @t402/react
+```
+
+## Quick Start
+
+```tsx
+import { usePaymentRequired, PaymentButton, PaymentDetails } from '@t402/react';
+
+function ProtectedContent() {
+  const { paymentRequired, status, fetchResource } = usePaymentRequired({
+    onSuccess: () => console.log('Access granted!'),
+  });
+
+  if (paymentRequired) {
+    return (
+      <div>
+        <PaymentDetails requirements={paymentRequired.accepts} />
+        <PaymentButton onClick={() => handlePayment(paymentRequired)}>
+          Pay Now
+        </PaymentButton>
+      </div>
+    );
+  }
+
+  return (
+    <button onClick={() => fetchResource('/api/premium')}>
+      Access Premium Content
+    </button>
+  );
+}
+```
+
+## Hooks
+
+### usePaymentRequired
+
+Hook to fetch resources and capture 402 Payment Required responses.
+
+```typescript
+function usePaymentRequired(options?: UsePaymentRequiredOptions): UsePaymentRequiredResult
+```
+
+**Options**
+
+```typescript
+interface UsePaymentRequiredOptions {
+  onSuccess?: (response: Response) => void;
+  onError?: (error: Error) => void;
+}
+```
+
+**Returns**
+
+```typescript
+interface UsePaymentRequiredResult {
+  paymentRequired: PaymentRequired | null;
+  status: PaymentStatus;
+  error: string | null;
+  fetchResource: (url: string, options?: RequestInit) => Promise<Response | null>;
+  reset: () => void;
+}
+```
+
+**Example**
+
+```tsx
+import { usePaymentRequired } from '@t402/react';
+
+function ProtectedResource() {
+  const { paymentRequired, status, error, fetchResource, reset } = usePaymentRequired({
+    onSuccess: (response) => console.log('Access granted!'),
+    onError: (error) => console.error('Failed:', error),
+  });
+
+  const handleFetch = async () => {
+    const response = await fetchResource('/api/protected');
+    if (response?.ok) {
+      const data = await response.json();
+      // Handle data
+    }
+  };
+
+  if (status === 'loading') return <div>Loading...</div>;
+  if (status === 'error') return <div>Error: {error}</div>;
+  if (paymentRequired) return <PaymentUI data={paymentRequired} onPaid={reset} />;
+
+  return <button onClick={handleFetch}>Access Resource</button>;
+}
+```
+
+### usePaymentStatus
+
+Track payment transaction status.
+
+```typescript
+function usePaymentStatus(): UsePaymentStatusResult
+```
+
+**Returns**
+
+```typescript
+interface UsePaymentStatusResult {
+  status: PaymentStatus;
+  setStatus: (status: PaymentStatus) => void;
+  isLoading: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+}
+```
+
+**Example**
+
+```tsx
+import { usePaymentStatus } from '@t402/react';
+
+function PaymentFlow() {
+  const { status, setStatus, isLoading } = usePaymentStatus();
+
+  const handlePayment = async () => {
+    setStatus('loading');
+    try {
+      await processPayment();
+      setStatus('success');
+    } catch {
+      setStatus('error');
+    }
+  };
+
+  return (
+    <div>
+      <p>Status: {status}</p>
+      <button onClick={handlePayment} disabled={isLoading}>
+        Pay
+      </button>
+    </div>
+  );
+}
+```
+
+### useAsyncPayment
+
+Handle async payment flows with retry logic.
+
+```typescript
+function useAsyncPayment(options: UseAsyncPaymentOptions): UseAsyncPaymentResult
+```
+
+**Example**
+
+```tsx
+import { useAsyncPayment } from '@t402/react';
+
+function PaymentComponent({ paymentRequired }) {
+  const { execute, status, error, retry } = useAsyncPayment({
+    onSuccess: () => window.location.reload(),
+    maxRetries: 3,
+  });
+
+  return (
+    <div>
+      <button onClick={() => execute(paymentRequired)} disabled={status === 'loading'}>
+        {status === 'loading' ? 'Processing...' : 'Pay Now'}
+      </button>
+      {status === 'error' && (
+        <div>
+          <p>Error: {error}</p>
+          <button onClick={retry}>Retry</button>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### useGaslessPayment
+
+Hook for gasless ERC-4337 payments via WDK smart accounts.
+
+```typescript
+function useGaslessPayment(options: GaslessPaymentOptions): GaslessPaymentResult
+```
+
+**Options**
+
+```typescript
+interface GaslessPaymentOptions {
+  payFn: (params: { to: string; amount: bigint; token?: string }) => Promise<{
+    userOpHash: string;
+    sender: string;
+    sponsored: boolean;
+    wait: () => Promise<{ txHash: string; success: boolean }>;
+  }>;
+  onSuccess?: (receipt: { txHash: string; success: boolean }) => void;
+  onError?: (error: Error) => void;
+  autoWait?: boolean; // Default: true
+}
+```
+
+**Returns**
+
+```typescript
+interface GaslessPaymentResult {
+  pay: (params: { to: string; amount: bigint; token?: string }) => Promise<void>;
+  status: PaymentStatus;
+  userOpHash: string | null;
+  txHash: string | null;
+  sponsored: boolean | null;
+  error: string | null;
+  isLoading: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+  reset: () => void;
+}
+```
+
+**Example**
+
+```tsx
+import { useGaslessPayment } from '@t402/react';
+
+function GaslessPayButton({ client }) {
+  const { pay, isLoading, isSuccess, txHash, sponsored, error } = useGaslessPayment({
+    payFn: (params) => client.pay(params),
+    onSuccess: (receipt) => console.log('Confirmed:', receipt.txHash),
+    autoWait: true,
+  });
+
+  return (
+    <div>
+      <button onClick={() => pay({ to: '0x...', amount: 1000000n })} disabled={isLoading}>
+        {isLoading ? 'Processing...' : 'Pay Gasless'}
+      </button>
+      {isSuccess && <p>TX: {txHash} {sponsored ? '(Sponsored)' : ''}</p>}
+      {error && <p>Error: {error}</p>}
+    </div>
+  );
+}
+```
+
+### useBridgePayment
+
+Hook for cross-chain USDT0 bridging via LayerZero OFT.
+
+```typescript
+function useBridgePayment(options: BridgePaymentOptions): BridgePaymentResult
+```
+
+**Options**
+
+```typescript
+interface BridgePaymentOptions {
+  bridgeFn: (params: BridgeParams) => Promise<BridgeResult>;
+  autoBridgeFn?: (params: AutoBridgeParams) => Promise<BridgeResult>;
+  onSuccess?: (result: { txHash: string; dstTxHash?: string; fromChain: string; toChain: string }) => void;
+  onError?: (error: Error) => void;
+  autoWaitForDelivery?: boolean; // Default: false
+}
+```
+
+**Returns**
+
+```typescript
+type BridgeStatus = 'idle' | 'quoting' | 'bridging' | 'waiting' | 'success' | 'error';
+
+interface BridgePaymentResult {
+  bridge: (params: BridgeParams) => Promise<void>;
+  autoBridge: (params: AutoBridgeParams) => Promise<void>;
+  status: BridgeStatus;
+  txHash: string | null;
+  messageGuid: string | null;
+  dstTxHash: string | null;
+  error: string | null;
+  isLoading: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+  reset: () => void;
+}
+```
+
+**Example**
+
+```tsx
+import { useBridgePayment } from '@t402/react';
+
+function BridgeButton({ bridgeClient }) {
+  const { autoBridge, isLoading, isSuccess, txHash, messageGuid, error } = useBridgePayment({
+    bridgeFn: (params) => bridgeClient.bridge(params),
+    autoBridgeFn: (params) => bridgeClient.autoBridge(params),
+    onSuccess: (result) => console.log('Bridged:', result),
+  });
+
+  return (
+    <button
+      onClick={() => autoBridge({ toChain: 'arbitrum', amount: 100_000000n, recipient: '0x...' })}
+      disabled={isLoading}
+    >
+      {isLoading ? 'Bridging...' : 'Bridge USDT0'}
+    </button>
+  );
+}
+```
+
+### useMultiSigPayment
+
+Hook for multi-signature Safe payments with threshold signature collection.
+
+```typescript
+function useMultiSigPayment(options: MultiSigPaymentOptions): MultiSigPaymentResult
+```
+
+**Options**
+
+```typescript
+interface MultiSigPaymentOptions {
+  initiateFn: (params: { to: string; amount: bigint; token?: string }) => Promise<{
+    requestId: string;
+    userOpHash: string;
+    threshold: number;
+    collectedCount: number;
+    isReady: boolean;
+  }>;
+  submitFn: (requestId: string) => Promise<{
+    userOpHash: string;
+    wait: () => Promise<{ txHash: string; success: boolean }>;
+  }>;
+  onSuccess?: (receipt: { txHash: string; success: boolean }) => void;
+  onError?: (error: Error) => void;
+  autoWait?: boolean; // Default: true
+}
+```
+
+**Returns**
+
+```typescript
+type MultiSigStatus = 'idle' | 'initiating' | 'collecting' | 'submitting' | 'success' | 'error';
+
+interface MultiSigPaymentResult {
+  initiate: (params: { to: string; amount: bigint; token?: string }) => Promise<void>;
+  submit: () => Promise<void>;
+  status: MultiSigStatus;
+  requestId: string | null;
+  userOpHash: string | null;
+  txHash: string | null;
+  threshold: number;
+  collectedCount: number;
+  isReady: boolean;
+  error: string | null;
+  isLoading: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+  reset: () => void;
+}
+```
+
+**Example**
+
+```tsx
+import { useMultiSigPayment } from '@t402/react';
+
+function MultiSigPay({ multiSigClient }) {
+  const { initiate, submit, status, isReady, threshold, collectedCount, error } =
+    useMultiSigPayment({
+      initiateFn: (params) => multiSigClient.initiatePayment(params),
+      submitFn: (id) => multiSigClient.submitRequest(id),
+      onSuccess: (receipt) => console.log('Confirmed:', receipt.txHash),
+      autoWait: true,
+    });
+
+  return (
+    <div>
+      {status === 'idle' && (
+        <button onClick={() => initiate({ to: '0x...', amount: 1000000n })}>
+          Initiate Payment
+        </button>
+      )}
+      {status === 'collecting' && (
+        <p>Collecting signatures: {collectedCount}/{threshold}</p>
+      )}
+      {isReady && <button onClick={submit}>Submit Transaction</button>}
+      {error && <p>Error: {error}</p>}
+    </div>
+  );
+}
+```
+
+## Components
+
+### PaymentButton
+
+Styled payment button with loading state.
+
+```typescript
+interface PaymentButtonProps {
+  onClick?: () => Promise<void> | void;
+  disabled?: boolean;
+  loading?: boolean;
+  children?: React.ReactNode;
+  className?: string;
+  variant?: 'primary' | 'secondary' | 'outline';
+  size?: 'sm' | 'md' | 'lg';
+}
+```
+
+**Example**
+
+```tsx
+import { PaymentButton } from '@t402/react';
+
+function Payment() {
+  const [loading, setLoading] = useState(false);
+
+  const handlePayment = async () => {
+    setLoading(true);
+    await processPayment();
+    setLoading(false);
+  };
+
+  return (
+    <PaymentButton
+      onClick={handlePayment}
+      loading={loading}
+      variant="primary"
+      size="lg"
+    >
+      Pay $10.00
+    </PaymentButton>
+  );
+}
+```
+
+### PaymentDetails
+
+Display payment requirements.
+
+```typescript
+interface PaymentDetailsProps {
+  requirements: PaymentRequirements[];
+  selectedIndex?: number;
+  onSelect?: (index: number) => void;
+  showNetworkSelector?: boolean;
+}
+```
+
+**Example**
+
+```tsx
+import { PaymentDetails } from '@t402/react';
+
+function PaymentPage({ paymentRequired }) {
+  const [selected, setSelected] = useState(0);
+
+  return (
+    <PaymentDetails
+      requirements={paymentRequired.accepts}
+      selectedIndex={selected}
+      onSelect={setSelected}
+      showNetworkSelector
+    />
+  );
+}
+```
+
+### PaymentStatusDisplay
+
+Show payment status with icons.
+
+```typescript
+interface PaymentStatusProps {
+  status: PaymentStatus;
+  message?: string;
+  txHash?: string;
+  network?: string;
+}
+```
+
+**Example**
+
+```tsx
+import { PaymentStatusDisplay } from '@t402/react';
+
+function PaymentConfirmation({ status, txHash }) {
+  return (
+    <PaymentStatusDisplay
+      status={status}
+      txHash={txHash}
+      network="eip155:8453"
+      message={status === 'success' ? 'Payment confirmed!' : undefined}
+    />
+  );
+}
+```
+
+### AddressDisplay
+
+Display blockchain addresses with truncation.
+
+```typescript
+interface AddressDisplayProps {
+  address: string;
+  network?: string;
+  showCopy?: boolean;
+  showExplorer?: boolean;
+}
+```
+
+**Example**
+
+```tsx
+import { AddressDisplay } from '@t402/react';
+
+function RecipientInfo({ payTo, network }) {
+  return (
+    <AddressDisplay
+      address={payTo}
+      network={network}
+      showCopy
+      showExplorer
+    />
+  );
+}
+```
+
+### Spinner
+
+Loading spinner component.
+
+```typescript
+interface SpinnerProps {
+  size?: 'sm' | 'md' | 'lg';
+  color?: string;
+}
+```
+
+## Providers
+
+### PaymentProvider
+
+Context provider for payment state management.
+
+```tsx
+import { PaymentProvider, usePaymentContext } from '@t402/react';
+
+function App() {
+  return (
+    <PaymentProvider
+      client={t402Client}
+      onPaymentSuccess={(result) => console.log('Paid:', result)}
+    >
+      <ProtectedContent />
+    </PaymentProvider>
+  );
+}
+
+function ProtectedContent() {
+  const { pay, status, paymentRequired } = usePaymentContext();
+
+  return (
+    <div>
+      <p>Status: {status}</p>
+      {paymentRequired && (
+        <PaymentButton onClick={() => pay(paymentRequired)}>
+          Pay Now
+        </PaymentButton>
+      )}
+    </div>
+  );
+}
+```
+
+## Utilities
+
+### Network Detection
+
+```typescript
+import {
+  isEvmNetwork,
+  isSvmNetwork,
+  isTonNetwork,
+  isTronNetwork,
+  isTestnetNetwork,
+  getNetworkDisplayName,
+} from '@t402/react';
+
+// Check network type
+isEvmNetwork('eip155:8453');        // true
+isSvmNetwork('solana:5eykt...');    // true
+isTonNetwork('ton:mainnet');        // true
+isTestnetNetwork('eip155:84532');   // true
+
+// Get display name
+getNetworkDisplayName('eip155:8453');  // "Base"
+getNetworkDisplayName('ton:mainnet');  // "TON"
+```
+
+### Payment Helpers
+
+```typescript
+import {
+  normalizePaymentRequirements,
+  getPreferredNetworks,
+  choosePaymentRequirement,
+} from '@t402/react';
+
+// Normalize requirements to array
+const requirements = normalizePaymentRequirements(paymentRequired);
+
+// Get user's preferred networks
+const preferred = getPreferredNetworks(); // ['eip155:8453', 'ton:mainnet']
+
+// Auto-select best requirement
+const selected = choosePaymentRequirement(requirements, preferred);
+```
+
+### Formatters
+
+```typescript
+import {
+  truncateAddress,
+  formatTokenAmount,
+  getAssetDisplayName,
+} from '@t402/react';
+
+truncateAddress('0x1234...5678');           // "0x1234...5678"
+formatTokenAmount('1000000', 6);            // "1.00"
+getAssetDisplayName('eip155:8453', 'USDT'); // "USDT on Base"
+```
+
+## Complete Example
+
+```tsx
+import { useState } from 'react';
+import {
+  PaymentProvider,
+  usePaymentRequired,
+  PaymentButton,
+  PaymentDetails,
+  PaymentStatusDisplay,
+} from '@t402/react';
+import { t402Client } from '@t402/fetch';
+import { ExactEvmClient } from '@t402/evm/exact/client';
+
+// Create client
+const client = new t402Client()
+  .register('eip155:*', new ExactEvmClient(walletClient));
+
+function App() {
+  return (
+    <PaymentProvider client={client}>
+      <PremiumContent />
+    </PaymentProvider>
+  );
+}
+
+function PremiumContent() {
+  const [content, setContent] = useState(null);
+  const { paymentRequired, status, error, fetchResource, reset } = usePaymentRequired({
+    onSuccess: async (response) => {
+      const data = await response.json();
+      setContent(data);
+    },
+  });
+
+  const handlePayment = async () => {
+    // Process payment...
+    reset();
+    await fetchResource('/api/premium');
+  };
+
+  if (content) {
+    return <div>{JSON.stringify(content)}</div>;
+  }
+
+  if (paymentRequired) {
+    return (
+      <div className="payment-modal">
+        <h2>Payment Required</h2>
+        <PaymentDetails requirements={paymentRequired.accepts} />
+        <PaymentButton onClick={handlePayment} size="lg">
+          Pay Now
+        </PaymentButton>
+        <PaymentStatusDisplay status={status} />
+      </div>
+    );
+  }
+
+  return (
+    <button onClick={() => fetchResource('/api/premium')}>
+      Access Premium Content
+    </button>
+  );
+}
+```
+
+## Type Exports
+
+```typescript
+// Components
+export {
+  Spinner,
+  PaymentButton,
+  PaymentStatusDisplay,
+  PaymentDetails,
+  AddressDisplay,
+} from '@t402/react';
+
+// Hooks
+export {
+  usePaymentRequired,
+  usePaymentStatus,
+  useAsyncPayment,
+  useGaslessPayment,
+  useBridgePayment,
+  useMultiSigPayment,
+} from '@t402/react';
+
+// Providers
+export {
+  PaymentProvider,
+  usePaymentContext,
+  PaymentContext,
+} from '@t402/react';
+
+// Types
+export type {
+  PaymentStatus,
+  PaymentState,
+  PaymentActions,
+  PaymentContextValue,
+  PaymentProviderProps,
+  PaymentButtonProps,
+  PaymentStatusProps,
+  PaymentDetailsProps,
+  SpinnerProps,
+  AddressDisplayProps,
+  PaymentRequired,
+  PaymentRequirements,
+} from '@t402/react';
+```
+
+## Related
+
+- [@t402/vue](/reference/vue) - Vue components
+- [@t402/paywall](/reference/paywall) - Server-side paywall
+- [@t402/fetch](/reference/fetch) - Fetch wrapper
+- [@t402/wdk-gasless](/sdks/typescript/wdk-gasless) - Gasless payments
+- [@t402/wdk-bridge](/sdks/typescript/wdk-bridge) - Cross-chain bridging
+- [@t402/wdk-multisig](/sdks/typescript/wdk-multisig) - Multi-sig payments
+- [Client Guide](/getting-started/client) - Client implementation

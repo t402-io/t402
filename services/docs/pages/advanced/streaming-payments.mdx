@@ -1,0 +1,398 @@
+# Streaming Payments
+
+import { Callout, Tabs, Tab, Steps } from 'nextra/components'
+
+<Callout type="warning">
+  **Beta Package**: `@t402/streaming-payments` is currently in beta (v1.0.0-beta.2). APIs may change.
+</Callout>
+
+Per-second settlement using payment channel technology. Enable continuous value transfer with off-chain state updates and on-chain settlement, similar to Lightning Network concepts adapted for stablecoin HTTP payments.
+
+## Features
+
+- **Payment Channels** - State machine-based channel lifecycle
+- **Per-Second Billing** - Continuous streaming with metering
+- **Checkpointing** - Periodic state commits with signatures
+- **Dispute Resolution** - Evidence-based dispute handling
+- **Tiered Rates** - Dynamic pricing based on usage
+
+## Installation
+
+```bash npm2yarn
+npm install @t402/streaming-payments
+```
+
+## Quick Start
+
+```typescript
+import {
+  ChannelOpener,
+  FlowController,
+  CheckpointManager,
+} from '@t402/streaming-payments';
+
+// Create a payment channel
+const opener = new ChannelOpener();
+const { channel, stateMachine } = opener.create({
+  chain: 'eip155:8453',
+  asset: '0xUSDT',
+  payerAddress: '0xPayer',
+  payeeAddress: '0xPayee',
+  depositAmount: '1000000000', // 1000 USDT
+  ratePerSecond: '1000',       // 0.001 USDT per second
+});
+
+// Fund the channel
+opener.processFunding(stateMachine, '0xTxHash', '1000000000');
+opener.confirmFunding(stateMachine, { /* confirmation */ });
+
+// Start streaming
+const flow = new FlowController(channel.id, channel.ratePerSecond);
+flow.start();
+
+// Get current streamed amount
+const currentAmount = flow.getCurrentAmount();
+
+// Pause/resume
+flow.pause();
+flow.resume();
+
+// Stop and get final amount
+const { finalAmount } = flow.stop();
+```
+
+## Payment Flow
+
+<Steps>
+### Channel Open
+Payer deposits funds into the channel. Channel enters 'open' state.
+
+### Streaming
+Continuous per-second billing with off-chain state updates. Periodic checkpoints are created.
+
+### Close Initiation
+Either party can initiate close by submitting the final checkpoint.
+
+### Challenge Period
+24-hour window where counter-party can dispute by submitting a newer checkpoint.
+
+### Finalization
+After challenge period, on-chain settlement distributes funds.
+</Steps>
+
+## Channel Management
+
+### Opening a Channel
+
+```typescript
+import { ChannelOpener, ChannelStateMachine } from '@t402/streaming-payments/channels';
+
+const opener = new ChannelOpener({
+  fundingTimeout: 3600000, // 1 hour
+  confirmations: 3,
+});
+
+const result = opener.create({
+  chain: 'eip155:8453',
+  asset: '0xUSDT',
+  payerAddress: '0xPayer',
+  payeeAddress: '0xPayee',
+  depositAmount: '1000000000',
+  ratePerSecond: '1000',
+});
+
+// Process state transitions
+const { stateMachine } = result;
+stateMachine.process({ type: 'FUND', txHash: '0x...', amount: '1000000000' });
+stateMachine.process({ type: 'CONFIRM_FUNDING' });
+```
+
+### Closing a Channel
+
+```typescript
+import { ChannelCloser } from '@t402/streaming-payments/channels';
+
+const closer = new ChannelCloser({
+  challengePeriod: 86400, // 24 hours
+});
+
+// Initiate close
+closer.initiateClose(stateMachine, '0xPayer', '0xSignature');
+
+// After challenge period
+closer.finalize(stateMachine);
+```
+
+### Channel States
+
+| State | Description |
+|-------|-------------|
+| `created` | Awaiting funding |
+| `funding` | Funding tx submitted |
+| `open` | Active and streaming |
+| `paused` | Temporarily paused |
+| `closing` | In challenge period |
+| `disputing` | Dispute in progress |
+| `closed` | Fully settled |
+| `expired` | Timed out |
+
+## Flow Control
+
+### Fixed Rate Streaming
+
+```typescript
+import { FlowController, createFixedRateFlow } from '@t402/streaming-payments/streaming';
+
+const flow = createFixedRateFlow('ch_123', '1000');
+flow.start();
+
+// Get current streamed amount
+console.log(flow.getCurrentAmount());
+
+// Subscribe to events
+flow.onEvent(event => {
+  switch (event.type) {
+    case 'started':
+      console.log('Started at rate:', event.rate);
+      break;
+    case 'checkpoint':
+      console.log('Checkpoint:', event.checkpointId);
+      break;
+    case 'completed':
+      console.log('Total:', event.totalAmount);
+      break;
+  }
+});
+```
+
+### Tiered Rate Streaming
+
+```typescript
+import { createTieredRateFlow } from '@t402/streaming-payments/streaming';
+
+const flow = createTieredRateFlow(
+  'ch_123',
+  '1000', // Base rate
+  [
+    { threshold: '1000000', rate: '800' },  // Discount after 1M
+    { threshold: '5000000', rate: '600' },  // Further discount after 5M
+  ],
+);
+```
+
+### Rate Adjustment
+
+```typescript
+import { RateController } from '@t402/streaming-payments/streaming';
+
+const rateController = new RateController({
+  type: 'fixed',
+  baseRate: '1000',
+  minRate: '500',
+  maxRate: '2000',
+});
+
+rateController.adjustRate({
+  sessionId: 'ss_123',
+  newRate: '1200',
+  reason: 'Peak demand',
+});
+```
+
+## Metering & Billing
+
+```typescript
+import { MeteringManager, BillingManager } from '@t402/streaming-payments/streaming';
+
+// Metering
+const metering = new MeteringManager('ss_123');
+metering.record(60, '60000', '1000'); // 60 seconds at 1000/s
+
+const metrics = metering.getMetrics();
+console.log('Total:', metrics.totalAmount);
+console.log('Average rate:', metrics.averageRate);
+
+// Billing
+const billing = new BillingManager(
+  'ch_123',
+  '0xPayer',
+  '0xPayee',
+  { period: 'hour', minimumCharge: '100000' },
+);
+
+const invoice = billing.generateInvoice(
+  metering.getRecords(),
+  startTime,
+  endTime,
+);
+```
+
+## Checkpoints & Settlement
+
+### Creating Checkpoints
+
+```typescript
+import { CheckpointManager } from '@t402/streaming-payments/settlement';
+
+const checkpointMgr = new CheckpointManager(config, {
+  autoCheckpoint: true,
+  intervalSeconds: 3600,
+});
+
+const checkpoint = checkpointMgr.create({
+  channelId: 'ch_123',
+  sequence: 0,
+  payerBalance: '900000000',
+  payeeBalance: '100000000',
+  totalStreamed: '100000000',
+  payerSignature: '0xsig',
+});
+
+// Verify checkpoint chain
+const validation = checkpointMgr.verifyCheckpointChain(checkpoints);
+```
+
+### Final Settlement
+
+```typescript
+import { FinalSettlementManager } from '@t402/streaming-payments/settlement';
+
+const settlementMgr = new FinalSettlementManager(checkpointMgr, config);
+
+// Unilateral close
+settlementMgr.initiate({
+  channelId: 'ch_123',
+  initiator: '0xPayer',
+  finalCheckpoint: checkpoint,
+  reason: 'unilateral',
+  signature: '0xsig',
+});
+
+// Mutual close (instant, no challenge)
+settlementMgr.processMutual(
+  'ch_123',
+  payerSignature,
+  payeeSignature,
+  finalCheckpoint,
+);
+
+// Check if can finalize
+const { canFinalize, timeRemaining } = settlementMgr.canFinalize('ch_123');
+if (canFinalize) {
+  settlementMgr.finalize('ch_123');
+}
+```
+
+## Dispute Resolution
+
+```typescript
+import { DisputeManager, createCheckpointEvidence } from '@t402/streaming-payments/settlement';
+
+const disputeMgr = new DisputeManager(checkpointMgr, config);
+
+// Raise dispute
+disputeMgr.raise({
+  channelId: 'ch_123',
+  initiator: '0xPayee',
+  respondent: '0xPayer',
+  reason: 'stale_state',
+  description: 'Payer submitted old checkpoint',
+  claimedPayerBalance: '800000000',
+  claimedPayeeBalance: '200000000',
+  claimedCheckpoint: newerCheckpoint,
+  evidence: [
+    createCheckpointEvidence(newerCheckpoint, 'Newer signed checkpoint'),
+  ],
+});
+
+// Respond to dispute
+disputeMgr.respond({
+  disputeId: 'dsp_123',
+  responder: '0xPayer',
+  evidence: [...],
+  signature: '0xsig',
+});
+
+// Resolve dispute
+disputeMgr.resolve(
+  'dsp_123',
+  '0xPayee',          // Winner
+  '800000000',        // Final payer balance
+  '200000000',        // Final payee balance
+  'Challenger had newer checkpoint',
+);
+```
+
+### Dispute Reasons
+
+| Reason | Description |
+|--------|-------------|
+| `invalid_checkpoint` | Signature/data invalid |
+| `stale_state` | Challenger has newer state |
+| `balance_mismatch` | Balance doesn't match |
+| `unauthorized_close` | Unauthorized party |
+| `fraud` | Fraudulent activity |
+
+## Configuration
+
+### Settlement Config
+
+```typescript
+const settlementConfig = {
+  challengePeriod: 86400,           // 24 hours
+  disputeResponsePeriod: 43200,     // 12 hours
+  disputeResolutionPeriod: 172800,  // 48 hours
+  minCheckpointInterval: 60,        // 60 seconds
+  maxCheckpointsStored: 100,
+  settlementFee: '0',
+  disputeBond: '0',
+};
+```
+
+### Billing Config
+
+```typescript
+const billingConfig = {
+  period: 'realtime',      // 'second' | 'minute' | 'hour' | 'day'
+  minimumCharge: '0',
+  roundingMode: 'floor',   // 'ceil' | 'round'
+  gracePeriod: 0,
+  invoiceInterval: 86400,  // Daily
+};
+```
+
+## API Reference
+
+### ChannelOpener
+
+| Method | Description |
+|--------|-------------|
+| `create()` | Create new channel |
+| `processFunding()` | Process funding tx |
+| `confirmFunding()` | Confirm funding |
+
+### FlowController
+
+| Method | Description |
+|--------|-------------|
+| `start()` | Start streaming |
+| `pause()` | Pause streaming |
+| `resume()` | Resume streaming |
+| `stop()` | Stop and get final |
+| `getCurrentAmount()` | Current streamed |
+| `createCheckpoint()` | Manual checkpoint |
+
+### CheckpointManager
+
+| Method | Description |
+|--------|-------------|
+| `create()` | Create checkpoint |
+| `getLatest()` | Get latest |
+| `validate()` | Validate checkpoint |
+| `verifyCheckpointChain()` | Verify chain |
+
+## Related
+
+- [Intent Payments](/advanced/intent-payments) - Intent-based payments
+- [Agent Policy](/advanced/agent-policy) - Spending policies
+- [A2A Negotiation](/advanced/a2a-negotiation) - Agent negotiation

@@ -1,0 +1,313 @@
+# Python Client
+
+import { Callout, Tabs, Tab } from 'nextra/components'
+
+The Python SDK provides client libraries for making payment-enabled HTTP requests using httpx (async) and requests (sync).
+
+## httpx Client (Async)
+
+### Basic Usage
+
+```python
+from eth_account import Account
+from t402.clients.httpx import t402HttpxClient
+
+account = Account.from_key("your_private_key")
+
+async with t402HttpxClient(account=account) as client:
+    response = await client.get("https://api.example.com/protected")
+    data = await response.aread()
+```
+
+### Extensible Hooks
+
+Use t402 hooks with any httpx client:
+
+```python
+import httpx
+from eth_account import Account
+from t402.clients.httpx import t402_payment_hooks
+
+account = Account.from_key("your_private_key")
+
+async with httpx.AsyncClient(base_url="https://api.example.com") as client:
+    client.event_hooks = t402_payment_hooks(account)
+    response = await client.get("/protected-endpoint")
+    print(await response.aread())
+```
+
+### Connection Pooling
+
+```python
+from t402.clients.httpx import t402HttpxClient
+import httpx
+
+client = t402HttpxClient(
+    account=account,
+    limits=httpx.Limits(
+        max_connections=100,
+        max_keepalive_connections=20
+    )
+)
+```
+
+### Concurrent Requests
+
+```python
+import asyncio
+from t402.clients.httpx import t402HttpxClient
+
+account = Account.from_key("your_private_key")
+
+async def fetch_multiple():
+    async with t402HttpxClient(account=account) as client:
+        urls = [
+            "https://api.example.com/data1",
+            "https://api.example.com/data2",
+            "https://api.example.com/data3",
+        ]
+        tasks = [client.get(url) for url in urls]
+        responses = await asyncio.gather(*tasks)
+        return [await r.aread() for r in responses]
+```
+
+## requests Client (Sync)
+
+### Basic Usage
+
+```python
+from eth_account import Account
+from t402.clients.requests import t402_requests
+
+account = Account.from_key("0x...")
+session = t402_requests(account)
+
+response = session.get("https://api.example.com/protected")
+print(response.content)
+```
+
+### Extensible Adapter
+
+Use the t402 adapter with any requests session:
+
+```python
+import requests
+from eth_account import Account
+from t402.clients.requests import t402_http_adapter
+
+account = Account.from_key("your_private_key")
+
+session = requests.Session()
+adapter = t402_http_adapter(account)
+
+session.mount("http://", adapter)
+session.mount("https://", adapter)
+
+response = session.get("https://api.example.com/protected-endpoint")
+print(response.content)
+```
+
+## Multi-Chain Support
+
+### EVM (Default)
+
+```python
+from eth_account import Account
+from t402.clients.httpx import t402HttpxClient
+
+account = Account.from_key("0x...")
+async with t402HttpxClient(account=account) as client:
+    response = await client.get("https://api.example.com/evm-protected")
+```
+
+### TON
+
+```python
+from t402 import (
+    TON_MAINNET,
+    TON_TESTNET,
+    validate_ton_address,
+    get_ton_network_config,
+)
+
+config = get_ton_network_config(TON_MAINNET)
+is_valid = validate_ton_address("EQD...")
+```
+
+### TRON
+
+```python
+from t402 import (
+    TRON_MAINNET,
+    TRON_NILE,
+    validate_tron_address,
+    get_tron_network_config,
+)
+
+config = get_tron_network_config(TRON_MAINNET)
+is_valid = validate_tron_address("T...")
+```
+
+### Solana (SVM)
+
+```python
+from t402 import (
+    SOLANA_MAINNET,
+    SOLANA_DEVNET,
+    SOLANA_TESTNET,
+    validate_svm_address,
+    get_svm_network_config,
+    get_svm_usdc_address,
+    is_svm_network,
+)
+
+# Validate address
+is_valid = validate_svm_address("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v")
+
+# Get network config
+config = get_svm_network_config(SOLANA_MAINNET)
+
+# Get USDC mint address
+usdc_mint = get_svm_usdc_address(SOLANA_MAINNET)
+
+# Check if network is Solana
+is_solana = is_svm_network("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")
+```
+
+Install with Solana dependencies:
+
+```bash
+pip install t402[svm]
+```
+
+## ERC-4337 Account Abstraction
+
+Gasless payments using smart accounts:
+
+```python
+from t402 import (
+    create_bundler_client,
+    create_paymaster,
+    create_smart_account,
+    SafeAccountConfig,
+)
+
+# Create bundler
+bundler = create_bundler_client(
+    bundler_type="pimlico",
+    api_key="your_api_key",
+    chain_id=8453
+)
+
+# Create paymaster for sponsored transactions
+paymaster = create_paymaster(
+    paymaster_type="pimlico",
+    api_key="your_api_key",
+    chain_id=8453
+)
+
+# Create Safe smart account
+account = create_smart_account(
+    config=SafeAccountConfig(
+        owner_private_key="0x...",
+        chain_id=8453,
+    ),
+    bundler=bundler,
+    paymaster=paymaster,
+)
+```
+
+## USDT0 Cross-Chain Bridge
+
+Bridge USDT0 across chains using LayerZero:
+
+```python
+from t402 import (
+    create_usdt0_bridge,
+    create_cross_chain_payment_router,
+    get_bridgeable_chains,
+)
+
+# Check supported chains
+chains = get_bridgeable_chains()
+
+# Create bridge client
+bridge = create_usdt0_bridge(
+    private_key="0x...",
+    source_chain_id=1,  # Ethereum
+)
+
+# Get quote before bridging
+quote = await bridge.get_quote(
+    destination_chain_id=8453,  # Base
+    amount="1000000",  # 1 USDT0
+)
+print(f"Fee: {quote.fee}, ETA: {quote.estimated_time}")
+
+# Execute bridge
+result = await bridge.bridge(
+    destination_chain_id=8453,  # Base
+    amount="1000000",  # 1 USDT0
+    recipient="0x...",
+)
+print(f"Transaction: {result.transaction_hash}")
+```
+
+## WDK Integration
+
+Tether Wallet Development Kit support:
+
+```python
+from t402 import (
+    WDKSigner,
+    generate_seed_phrase,
+    WDKConfig,
+    get_wdk_usdt0_chains,
+)
+
+# Generate new wallet
+seed = generate_seed_phrase()
+
+# Create WDK signer with multi-chain support
+signer = WDKSigner(
+    config=WDKConfig(
+        seed_phrase=seed,
+        chains=get_wdk_usdt0_chains(),
+    )
+)
+
+# Get address for specific chain
+address = await signer.get_address(chain_id=8453)
+print(f"Base address: {address}")
+
+# Sign payment
+signature = await signer.sign_payment(
+    chain_id=8453,
+    amount="1000000",
+    recipient="0x...",
+)
+```
+
+## Error Handling
+
+```python
+from t402.clients.httpx import t402HttpxClient
+from t402.exceptions import PaymentError, InsufficientFundsError
+
+account = Account.from_key("your_private_key")
+
+async with t402HttpxClient(account=account) as client:
+    try:
+        response = await client.get("https://api.example.com/protected")
+        data = await response.aread()
+    except InsufficientFundsError as e:
+        print(f"Not enough balance: {e}")
+    except PaymentError as e:
+        print(f"Payment failed: {e}")
+```
+
+## Related
+
+- [Server Integration](/sdks/python/server) - FastAPI and Flask middleware
+- [Facilitator Client](/sdks/python/facilitator) - Direct facilitator integration
+- [CLI](/sdks/python/cli) - Command-line tools

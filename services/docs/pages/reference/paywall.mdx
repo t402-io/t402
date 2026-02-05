@@ -1,0 +1,401 @@
+# @t402/paywall
+
+import { Callout, Tabs, Tab } from 'nextra/components'
+
+Universal paywall extension for server-side 402 response rendering. Generates network-specific payment UIs with wallet connection and transaction signing.
+
+## Installation
+
+```bash npm2yarn
+npm install @t402/paywall
+```
+
+## Quick Start
+
+```typescript
+import { createPaywall, evmPaywall, tonPaywall } from '@t402/paywall';
+import { paymentMiddleware } from '@t402/express';
+
+// Create paywall with network handlers
+const paywall = createPaywall()
+  .withNetwork(evmPaywall)
+  .withNetwork(tonPaywall)
+  .withConfig({
+    title: 'Premium Content',
+    description: 'Pay to access this resource',
+  })
+  .build();
+
+// Use with middleware
+app.use(paymentMiddleware(routes, server, paywallConfig, paywall));
+```
+
+## API Reference
+
+### createPaywall
+
+Creates a new PaywallBuilder for configuring paywall providers.
+
+```typescript
+function createPaywall(): PaywallBuilder
+```
+
+### PaywallBuilder
+
+Builder class for creating configured paywall providers.
+
+```typescript
+class PaywallBuilder {
+  withNetwork(handler: PaywallNetworkHandler): this;
+  withConfig(config: PaywallConfig): this;
+  build(): PaywallProvider;
+}
+```
+
+**Methods**
+
+| Method | Description |
+|--------|-------------|
+| `withNetwork(handler)` | Register a network-specific paywall handler |
+| `withConfig(config)` | Set paywall configuration options |
+| `build()` | Build the PaywallProvider instance |
+
+## Network Handlers
+
+### evmPaywall
+
+Handles all EVM-compatible networks (Ethereum, Base, Arbitrum, etc.).
+
+```typescript
+import { evmPaywall } from '@t402/paywall';
+
+const paywall = createPaywall()
+  .withNetwork(evmPaywall)
+  .build();
+```
+
+**Features**:
+- MetaMask, WalletConnect, Coinbase Wallet support
+- EIP-3009 transferWithAuthorization signing
+- Network switching prompt
+- Transaction status tracking
+
+### tonPaywall
+
+Handles TON network payments.
+
+```typescript
+import { tonPaywall } from '@t402/paywall';
+
+const paywall = createPaywall()
+  .withNetwork(tonPaywall)
+  .build();
+```
+
+**Features**:
+- TON Connect integration
+- Tonkeeper, OpenMask support
+- Jetton transfer signing
+- QR code connection option
+
+### svmPaywall
+
+Handles Solana network payments.
+
+```typescript
+import { svmPaywall } from '@t402/paywall';
+
+const paywall = createPaywall()
+  .withNetwork(svmPaywall)
+  .build();
+```
+
+**Features**:
+- Phantom, Solflare support
+- SPL token transfers
+- Transaction confirmation
+
+### tronPaywall
+
+Handles TRON network payments.
+
+```typescript
+import { tronPaywall } from '@t402/paywall';
+
+const paywall = createPaywall()
+  .withNetwork(tronPaywall)
+  .build();
+```
+
+**Features**:
+- TronLink integration
+- TRC-20 token transfers
+
+### Additional Handlers
+
+```typescript
+import { nearPaywall, stacksPaywall, cosmosPaywall } from '@t402/paywall';
+
+const paywall = createPaywall()
+  .withNetwork(nearPaywall)    // NEAR Protocol
+  .withNetwork(stacksPaywall)  // Stacks (Bitcoin L2)
+  .withNetwork(cosmosPaywall)  // Cosmos ecosystem
+  .build();
+```
+
+## Multi-Network Configuration
+
+Support multiple networks with a single paywall:
+
+```typescript
+import {
+  createPaywall,
+  evmPaywall,
+  tonPaywall,
+  svmPaywall,
+  tronPaywall,
+} from '@t402/paywall';
+
+const paywall = createPaywall()
+  .withNetwork(evmPaywall)
+  .withNetwork(tonPaywall)
+  .withNetwork(svmPaywall)
+  .withNetwork(tronPaywall)
+  .withConfig({
+    title: 'Multi-Chain API',
+    description: 'Pay with your preferred cryptocurrency',
+    theme: 'dark',
+  })
+  .build();
+```
+
+## PaywallConfig
+
+Configuration options for paywall appearance.
+
+```typescript
+interface PaywallConfig {
+  /** Title displayed on the paywall */
+  title?: string;
+  /** Description text */
+  description?: string;
+  /** Logo URL to display */
+  logoUrl?: string;
+  /** Color theme */
+  theme?: 'light' | 'dark' | 'auto';
+  /** Custom CSS to inject */
+  customCss?: string;
+  /** Callback URL after payment */
+  callbackUrl?: string;
+}
+```
+
+**Example**
+
+```typescript
+const paywall = createPaywall()
+  .withNetwork(evmPaywall)
+  .withConfig({
+    title: 'API Access',
+    description: 'One-time payment for unlimited access',
+    logoUrl: 'https://example.com/logo.png',
+    theme: 'dark',
+    customCss: `
+      .paywall-container { max-width: 400px; }
+      .pay-button { background: linear-gradient(135deg, #667eea, #764ba2); }
+    `,
+  })
+  .build();
+```
+
+## PaywallProvider Interface
+
+The built paywall implements the PaywallProvider interface:
+
+```typescript
+interface PaywallProvider {
+  generateHtml(
+    paymentRequired: PaymentRequired,
+    config?: PaywallConfig
+  ): string;
+}
+```
+
+## Transaction Status Component
+
+Track payment transaction status:
+
+```typescript
+import { TransactionStatus, useTransactionStatus } from '@t402/paywall';
+
+// React component
+function PaymentPage() {
+  const { status, txHash, error } = useTransactionStatus();
+
+  return (
+    <TransactionStatus
+      status={status}
+      txHash={txHash}
+      error={error}
+      network="eip155:8453"
+    />
+  );
+}
+```
+
+### TransactionStatusProps
+
+```typescript
+interface TransactionStatusProps {
+  status: TxStatus;
+  txHash?: string;
+  error?: string;
+  network: string;
+}
+
+type TxStatus = 'idle' | 'pending' | 'confirming' | 'confirmed' | 'failed';
+```
+
+## Server Integration
+
+<Tabs items={['Express', 'Hono', 'Fastify']}>
+  <Tab>
+```typescript
+import express from 'express';
+import { paymentMiddleware } from '@t402/express';
+import { createPaywall, evmPaywall } from '@t402/paywall';
+
+const app = express();
+
+const paywall = createPaywall()
+  .withNetwork(evmPaywall)
+  .withConfig({ title: 'Premium API' })
+  .build();
+
+app.use(paymentMiddleware(
+  routes,
+  server,
+  { title: 'Premium API' }, // paywallConfig
+  paywall // custom paywall provider
+));
+```
+  </Tab>
+  <Tab>
+```typescript
+import { Hono } from 'hono';
+import { paymentMiddleware } from '@t402/hono';
+import { createPaywall, evmPaywall } from '@t402/paywall';
+
+const app = new Hono();
+
+const paywall = createPaywall()
+  .withNetwork(evmPaywall)
+  .build();
+
+app.use('*', paymentMiddleware(routes, server, paywallConfig, paywall));
+```
+  </Tab>
+  <Tab>
+```typescript
+import Fastify from 'fastify';
+import { paymentPlugin } from '@t402/fastify';
+import { createPaywall, evmPaywall } from '@t402/paywall';
+
+const fastify = Fastify();
+
+const paywall = createPaywall()
+  .withNetwork(evmPaywall)
+  .build();
+
+await fastify.register(paymentPlugin, {
+  routes,
+  server,
+  paywall,
+});
+```
+  </Tab>
+</Tabs>
+
+## Custom Network Handler
+
+Create a custom handler for unsupported networks:
+
+```typescript
+import type { PaywallNetworkHandler } from '@t402/paywall';
+
+const customPaywall: PaywallNetworkHandler = {
+  supports: (requirement) => {
+    return requirement.network.startsWith('custom:');
+  },
+
+  generateHtml: (requirement, paymentRequired, config) => {
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${config?.title || 'Payment Required'}</title>
+        </head>
+        <body>
+          <h1>Custom Network Payment</h1>
+          <p>Amount: ${requirement.maxAmountRequired}</p>
+          <button onclick="initiatePayment()">Pay Now</button>
+          <script>
+            async function initiatePayment() {
+              // Custom wallet integration
+            }
+          </script>
+        </body>
+      </html>
+    `;
+  },
+};
+
+const paywall = createPaywall()
+  .withNetwork(customPaywall)
+  .build();
+```
+
+## Type Exports
+
+```typescript
+// Builder
+export { createPaywall, PaywallBuilder } from '@t402/paywall';
+
+// Types
+export type {
+  PaywallProvider,
+  PaywallConfig,
+  PaymentRequired,
+  PaywallNetworkHandler,
+  PaymentRequirements,
+} from '@t402/paywall';
+
+// Network handlers
+export {
+  evmPaywall,
+  svmPaywall,
+  tonPaywall,
+  tronPaywall,
+  stacksPaywall,
+  cosmosPaywall,
+  nearPaywall,
+} from '@t402/paywall';
+
+// Components
+export {
+  TransactionStatus,
+  useTransactionStatus,
+} from '@t402/paywall';
+
+export type {
+  TransactionStatusProps,
+  TxStatus,
+} from '@t402/paywall';
+```
+
+## Related
+
+- [@t402/react](/reference/react) - React payment components
+- [@t402/vue](/reference/vue) - Vue payment components
+- [@t402/express](/reference/express) - Express middleware
+- [@t402/hono](/reference/hono) - Hono middleware

@@ -1,0 +1,282 @@
+# Testnets
+
+import { Callout, Tabs, Tab } from 'nextra/components'
+
+Testing T402 integration on testnet networks before production deployment.
+
+## Why Use Testnets?
+
+- **Free tokens** - No real funds required
+- **Safe testing** - No financial risk
+- **Same behavior** - Identical to mainnet
+- **Debug easily** - Block explorers available
+
+## EVM Testnets
+
+### Supported Networks
+
+| Chain | Network ID | Faucet |
+|-------|------------|--------|
+| Sepolia | `eip155:11155111` | [sepoliafaucet.com](https://sepoliafaucet.com) |
+| Base Sepolia | `eip155:84532` | [base.org/faucet](https://www.base.org/faucet) |
+| Arbitrum Sepolia | `eip155:421614` | [faucet.arbitrum.io](https://faucet.arbitrum.io) |
+| Optimism Sepolia | `eip155:11155420` | [faucet.optimism.io](https://faucet.optimism.io) |
+| Ink Sepolia | `eip155:763373` | [faucet.ink.xyz](https://faucet.ink.xyz) |
+| Berachain bArtio | `eip155:80084` | [faucet.berachain.com](https://faucet.berachain.com) |
+| Unichain Sepolia | `eip155:1301` | [faucet.unichain.org](https://faucet.unichain.org) |
+
+### RPC Endpoints
+
+```typescript
+const testnetRpcs = {
+  'eip155:11155111': 'https://rpc.sepolia.org',
+  'eip155:84532': 'https://sepolia.base.org',
+  'eip155:421614': 'https://sepolia-rollup.arbitrum.io/rpc',
+  'eip155:11155420': 'https://sepolia.optimism.io',
+};
+```
+
+### Test USDT Addresses
+
+| Chain | Address |
+|-------|---------|
+| Sepolia | `0x...` (deploy your own) |
+| Base Sepolia | `0x...` (deploy your own) |
+
+<Callout type="info">
+  For EVM testnets, you may need to deploy your own test USDT contract or use existing test tokens.
+</Callout>
+
+### Configuration Example
+
+```typescript
+// testnet-config.ts
+const testnetRoutes = {
+  '/api/test/*': {
+    accepts: [
+      {
+        scheme: 'exact',
+        network: 'eip155:84532', // Base Sepolia
+        payTo: '0xYourTestAddress',
+        price: '$0.001',
+      },
+    ],
+  },
+};
+```
+
+## TON Testnet
+
+### Network Details
+
+| Property | Value |
+|----------|-------|
+| Network ID | `ton:testnet` |
+| RPC | `https://testnet.toncenter.com/api/v2/jsonRPC` |
+| Faucet | [@testgiver_ton_bot](https://t.me/testgiver_ton_bot) |
+
+### Test USDT Jetton
+
+| Property | Value |
+|----------|-------|
+| Jetton Master | `kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy` |
+| Decimals | 6 |
+
+### Configuration
+
+```typescript
+const tonTestnetConfig = {
+  network: 'ton:testnet',
+  jettonMaster: 'kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy',
+  rpcUrl: 'https://testnet.toncenter.com/api/v2/jsonRPC',
+};
+```
+
+## TRON Testnets
+
+### Nile Testnet
+
+| Property | Value |
+|----------|-------|
+| Network ID | `tron:nile` |
+| RPC | `https://nile.trongrid.io` |
+| Faucet | [nileex.io/faucet](https://nileex.io/faucet) |
+
+### Shasta Testnet
+
+| Property | Value |
+|----------|-------|
+| Network ID | `tron:shasta` |
+| RPC | `https://api.shasta.trongrid.io` |
+| Faucet | [shasta.tronscan.org](https://shasta.tronscan.org) |
+
+### Test USDT
+
+| Network | Contract |
+|---------|----------|
+| Nile | `TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf` |
+
+## Solana Testnets
+
+### Devnet
+
+| Property | Value |
+|----------|-------|
+| Network ID | `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` |
+| RPC | `https://api.devnet.solana.com` |
+| Faucet | `solana airdrop 1` (CLI) |
+
+### Test USDC
+
+```bash
+# Request devnet SOL
+solana airdrop 1 --url devnet
+
+# Test USDC on devnet
+# Mint: 4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU
+```
+
+## NEAR Testnet
+
+### Network Details
+
+| Property | Value |
+|----------|-------|
+| Network ID | `near:testnet` |
+| RPC | `https://rpc.testnet.near.org` |
+| Faucet | [near.org/wallet](https://wallet.testnet.near.org) |
+
+### Test USDT
+
+| Property | Value |
+|----------|-------|
+| Contract | `usdt.fakes.testnet` |
+| Decimals | 6 |
+
+### Configuration
+
+```typescript
+const nearTestnetConfig = {
+  network: 'near:testnet',
+  rpcUrl: 'https://rpc.testnet.near.org',
+  tokenContract: 'usdt.fakes.testnet',
+};
+```
+
+## Aptos Testnet
+
+### Network Details
+
+| Property | Value |
+|----------|-------|
+| Network ID | `aptos:2` |
+| RPC | `https://fullnode.testnet.aptoslabs.com/v1` |
+| Faucet | [aptoslabs.com/faucet](https://aptos.dev/en/network/faucet) |
+
+## Tezos Ghostnet
+
+### Network Details
+
+| Property | Value |
+|----------|-------|
+| Network ID | `tezos:NetXnHfVqm9iesp` |
+| RPC | `https://ghostnet.tezos.marigold.dev` |
+| Faucet | [faucet.ghostnet.teznet.xyz](https://faucet.ghostnet.teznet.xyz) |
+
+## Polkadot Westend
+
+### Network Details
+
+| Property | Value |
+|----------|-------|
+| Network ID | `polkadot:e143f23803ac50e8f6f8e62695d1ce9e` |
+| Asset ID | 1984 |
+| Faucet | [faucet.polkadot.io](https://faucet.polkadot.io) |
+
+## Stacks Testnet
+
+### Network Details
+
+| Property | Value |
+|----------|-------|
+| Network ID | `stacks:2147483648` |
+| RPC | `https://api.testnet.hiro.so` |
+| Faucet | [explorer.hiro.so/faucet](https://explorer.hiro.so/faucet?chain=testnet) |
+
+## Testing Best Practices
+
+### 1. Environment Variables
+
+```bash
+# .env.test
+NODE_ENV=test
+T402_NETWORK=eip155:84532
+T402_RPC_URL=https://sepolia.base.org
+T402_PAY_TO=0xYourTestAddress
+T402_FACILITATOR_URL=https://facilitator.t402.io
+```
+
+### 2. Conditional Configuration
+
+```typescript
+const isTestnet = process.env.NODE_ENV === 'test';
+
+const config = {
+  network: isTestnet ? 'eip155:84532' : 'eip155:8453',
+  facilitator: 'https://facilitator.t402.io', // Same for both
+};
+```
+
+### 3. Integration Tests
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import { t402Client } from '@t402/core/client';
+
+describe('T402 Integration', () => {
+  it('should complete payment flow', async () => {
+    const client = new t402Client();
+    // ... setup with testnet
+
+    const response = await client.fetch('https://api.example.com/test');
+    expect(response.ok).toBe(true);
+  });
+});
+```
+
+### 4. Faucet Automation
+
+```typescript
+// scripts/fund-test-wallet.ts
+async function fundWallet(address: string, network: string) {
+  switch (network) {
+    case 'eip155:84532':
+      // Base Sepolia faucet
+      await requestBaseSepolia(address);
+      break;
+    case 'ton:testnet':
+      console.log('Use @testgiver_ton_bot on Telegram');
+      break;
+    // ... other networks
+  }
+}
+```
+
+## Facilitator Testnet Support
+
+The public facilitator supports all testnets:
+
+```bash
+# Check supported networks
+curl -s https://facilitator.t402.io/supported | jq '.kinds[] | select(.network | contains("testnet") or contains("sepolia"))'
+```
+
+<Callout type="info">
+  The facilitator service handles both mainnet and testnet transactions. No separate testnet facilitator needed.
+</Callout>
+
+## Related
+
+- [EVM Chains](/chains/evm) - EVM mainnet details
+- [Non-EVM Chains](/chains/non-evm) - Non-EVM mainnet details
+- [Getting Started](/getting-started) - Quick start guide

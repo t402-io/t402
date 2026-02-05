@@ -1,0 +1,272 @@
+# Spring Boot Integration
+
+import { Callout, Tabs, Tab } from 'nextra/components'
+
+The Java SDK provides comprehensive Spring Boot integration with auto-configuration, annotations, and reactive support.
+
+## Auto-Configuration
+
+Add configuration to `application.yml`:
+
+```yaml
+t402:
+  enabled: true
+  facilitator-url: https://facilitator.t402.io
+  network: eip155:8453
+  pay-to: "0xYourReceiverAddress"
+  asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+  token-name: "USD Coin"
+  token-version: "2"
+```
+
+The `PaymentFilter` is automatically registered for `/api/*` endpoints.
+
+## @RequirePayment Annotation
+
+Use annotations for fine-grained payment protection:
+
+```java
+import io.t402.spring.RequirePayment;
+
+@RestController
+public class ApiController {
+
+    @RequirePayment(amount = "$0.01", description = "Premium API access")
+    @GetMapping("/api/premium")
+    public Map<String, String> premiumContent() {
+        return Map.of("data", "Premium content!");
+    }
+
+    @RequirePayment(amount = "1000000", description = "Heavy computation")
+    @PostMapping("/api/compute")
+    public ComputeResult compute(@RequestBody ComputeRequest request) {
+        return computeService.process(request);
+    }
+}
+```
+
+### Class-Level Annotation
+
+```java
+@RequirePayment(amount = "$0.05")
+@RestController
+@RequestMapping("/api/v2")
+public class V2ApiController {
+    // All endpoints require $0.05
+}
+```
+
+### Amount Formats
+
+| Format | Example | Description |
+|--------|---------|-------------|
+| Dollar notation | `"$1.00"`, `"$0.01"` | Parsed as USD |
+| Atomic units | `"1000000"` | 6 decimals for USDC |
+| Decimal notation | `"1.00"` | Converted to atomic |
+
+## Route-Based Configuration
+
+Configure routes via YAML instead of annotations:
+
+```yaml
+t402:
+  enabled: true
+  facilitator-url: https://facilitator.t402.io
+  network: eip155:8453
+  pay-to: "0xYourAddress"
+  routes:
+    - path: "GET /api/data"
+      amount: "$0.01"
+      description: "Data access"
+    - path: "POST /api/compute"
+      amount: "$0.10"
+      description: "Heavy computation"
+    - path: "/api/premium/**"
+      amount: "$0.05"
+      description: "Premium endpoints"
+```
+
+## Spring WebFlux (Reactive)
+
+For reactive Spring WebFlux applications:
+
+```java
+import io.t402.spring.reactive.PaymentWebFilter;
+
+@Configuration
+@EnableWebFlux
+public class WebFluxConfig {
+
+    @Bean
+    public PaymentWebFilter paymentWebFilter(FacilitatorClient facilitator) {
+        return new PaymentWebFilter(facilitator, routeConfigs);
+    }
+}
+```
+
+Or use auto-configuration:
+
+```yaml
+t402:
+  enabled: true
+  webflux: true
+  facilitator-url: https://facilitator.t402.io
+```
+
+## Custom PaymentVerifier
+
+Implement custom verification logic:
+
+```java
+import io.t402.server.PaymentVerifier;
+
+public class CustomPaymentVerifier implements PaymentVerifier {
+
+    private final FacilitatorClient facilitator;
+    private final RateLimiter rateLimiter;
+
+    public CustomPaymentVerifier(FacilitatorClient facilitator) {
+        this.facilitator = facilitator;
+        this.rateLimiter = new RateLimiter(100, Duration.ofMinutes(1));
+    }
+
+    @Override
+    public VerificationResponse verify(PaymentPayload payload, PaymentRequirements requirements) {
+        // Rate limiting
+        if (!rateLimiter.tryAcquire(payload.getFrom())) {
+            return VerificationResponse.invalid("Rate limit exceeded");
+        }
+
+        // Custom validation
+        if (isBlacklisted(payload.getFrom())) {
+            return VerificationResponse.invalid("Payer is blacklisted");
+        }
+
+        // Delegate to facilitator
+        return facilitator.verify(payload, requirements);
+    }
+}
+```
+
+Register with Spring Boot:
+
+```java
+@Configuration
+public class T402Config {
+
+    @Bean
+    public PaymentVerifier paymentVerifier(FacilitatorClient facilitator) {
+        return new CustomPaymentVerifier(facilitator);
+    }
+}
+```
+
+## Dynamic Payment Requirements
+
+Customize requirements per-request:
+
+```java
+import io.t402.server.PaymentRequirementsProvider;
+
+@Component
+public class DynamicPaymentProvider implements PaymentRequirementsProvider {
+
+    @Override
+    public PaymentRequirements getRequirements(HttpServletRequest request) {
+        String tier = getUserTier(request);
+
+        BigInteger amount = switch (tier) {
+            case "premium" -> BigInteger.valueOf(100_000);
+            case "enterprise" -> BigInteger.valueOf(10_000);
+            default -> BigInteger.valueOf(1_000_000);
+        };
+
+        return PaymentRequirements.builder()
+            .scheme("exact")
+            .network("eip155:8453")
+            .amount(amount.toString())
+            .asset("0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913")
+            .payTo(getPayToAddress(request))
+            .build();
+    }
+}
+```
+
+## Configuration Properties
+
+| Property | Description | Default |
+|----------|-------------|---------|
+| `t402.enabled` | Enable T402 integration | `false` |
+| `t402.facilitator-url` | Facilitator service URL | `https://facilitator.t402.io` |
+| `t402.network` | Network identifier (CAIP-2) | `eip155:8453` |
+| `t402.pay-to` | Payment receiver address | - |
+| `t402.asset` | Token contract address | - |
+| `t402.token-name` | EIP-712 token name | `USD Coin` |
+| `t402.token-version` | EIP-712 token version | `2` |
+| `t402.scheme` | Payment scheme | `exact` |
+| `t402.max-timeout-seconds` | Max payment timeout | `3600` |
+| `t402.webflux` | Enable WebFlux support | `false` |
+
+## Manual Setup
+
+For non-Spring applications:
+
+```java
+import io.t402.server.PaymentFilter;
+import io.t402.client.HttpFacilitatorClient;
+
+FacilitatorClient facilitator = new HttpFacilitatorClient(
+    "https://facilitator.t402.io"
+);
+
+PaymentFilter filter = new PaymentFilter(facilitator);
+
+FilterRegistration.Dynamic registration = servletContext.addFilter("t402", filter);
+registration.addMappingForUrlPatterns(
+    EnumSet.of(DispatcherType.REQUEST),
+    true,
+    "/api/*"
+);
+```
+
+## Testing
+
+### Integration Testing
+
+```java
+@SpringBootTest
+@AutoConfigureMockMvc
+class PaymentIntegrationTest {
+
+    @Autowired
+    MockMvc mockMvc;
+
+    @MockBean
+    FacilitatorClient facilitator;
+
+    @Test
+    void shouldRequirePayment() throws Exception {
+        mockMvc.perform(get("/api/premium"))
+            .andExpect(status().isPaymentRequired())
+            .andExpect(jsonPath("$.t402Version").value(2));
+    }
+
+    @Test
+    void shouldAcceptValidPayment() throws Exception {
+        when(facilitator.verify(any(), any()))
+            .thenReturn(VerificationResponse.valid());
+        when(facilitator.settle(any(), any()))
+            .thenReturn(SettlementResponse.success("0xTxHash"));
+
+        mockMvc.perform(get("/api/premium")
+                .header("X-PAYMENT", validPaymentHeader))
+            .andExpect(status().isOk());
+    }
+}
+```
+
+## Related
+
+- [Java SDK Overview](/sdks/java) - Main documentation
+- [MCP Server](/sdks/java/mcp) - AI agent integration
+- [Examples](/sdks/java/examples) - Code examples

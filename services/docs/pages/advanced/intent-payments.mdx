@@ -1,0 +1,362 @@
+# Intent Payments
+
+import { Callout, Tabs, Tab } from 'nextra/components'
+
+<Callout type="warning">
+  **Beta Package**: `@t402/intent-payments` is currently in beta (v1.0.0-beta.2). APIs may change.
+</Callout>
+
+Intent-Based Payment System for T402 Protocol. Instead of manually specifying transaction parameters, users express what they want to achieve (the intent), and solvers compete to fulfill them optimally.
+
+## Features
+
+- **Intent Builder** - Fluent API for constructing payment intents
+- **Solver Network** - Competitive solver selection and execution
+- **Auction System** - Sealed bid auctions for solver competition
+- **Execution Modes** - Direct, auction, and best-effort execution
+- **Rollback Support** - Handle failed executions gracefully
+- **Reputation System** - Track and rank solver performance
+
+## Installation
+
+```bash npm2yarn
+npm install @t402/intent-payments
+```
+
+## Quick Start
+
+```typescript
+import {
+  createIntent,
+  SolverRegistry,
+  IntentExecutor,
+} from '@t402/intent-payments';
+
+// 1. Create an intent
+const intent = createIntent()
+  .from('0xMyWallet')
+  .action('pay')
+  .to('0xRecipient')
+  .amount('1000000') // 1 USDC (6 decimals)
+  .asset('0xUSDC')
+  .network('eip155:8453') // Base
+  .maxSlippage('0.5')
+  .deadlineIn(300) // 5 minutes
+  .build();
+
+// 2. Set up solver registry
+const registry = new SolverRegistry();
+registry.register({
+  id: 'solver-1',
+  name: 'My Solver',
+  endpoint: 'https://solver.example.com',
+  capabilities: {
+    supportedActions: ['pay', 'swap'],
+    supportedNetworks: ['eip155:8453'],
+    supportedAssets: ['0xUSDC'],
+  },
+});
+
+// 3. Execute intent
+const executor = new IntentExecutor(registry);
+const result = await executor.submit(intent, { mode: 'best_effort' });
+
+console.log(result.state); // 'completed'
+```
+
+## Intent Builder
+
+The fluent builder API makes it easy to construct complex intents.
+
+### Simple Payment
+
+```typescript
+const intent = createIntent()
+  .from('0xPayer')
+  .action('pay')
+  .to('0xRecipient')
+  .amount('1000000')
+  .asset('0xUSDC')
+  .network('eip155:8453')
+  .build();
+```
+
+### Swap
+
+```typescript
+const intent = createIntent()
+  .from('0xUser')
+  .swap('0xETH', 'eip155:1') // Source asset & network
+  .to('0xUser')
+  .amount('500000000') // Output amount
+  .asset('0xUSDC')
+  .network('eip155:8453')
+  .maxSlippage('1.0')
+  .build();
+```
+
+### Bridge and Pay
+
+```typescript
+const intent = createIntent()
+  .from('0xUser')
+  .bridgeAndPay('eip155:1') // Bridge from Ethereum
+  .to('0xRecipient')
+  .amount('1000000')
+  .asset('0xUSDC')
+  .network('eip155:8453') // To Base
+  .build();
+```
+
+### Conditional Payment
+
+```typescript
+const intent = createIntent()
+  .from('0xPayer')
+  .action('pay')
+  .to('0xRecipient')
+  .amount('1000000')
+  .asset('0xUSDC')
+  .whenPriceIs('0xETH', 'gt', '3000', '0xChainlinkOracle')
+  .build();
+```
+
+### Recurring Payment
+
+```typescript
+const intent = createIntent()
+  .from('0xPayer')
+  .action('pay')
+  .to('0xRecipient')
+  .amount('1000000')
+  .asset('0xUSDC')
+  .monthly(Date.now())
+  .build();
+```
+
+### Batch Payment
+
+```typescript
+import { batchPayment } from '@t402/intent-payments';
+
+const intent = batchPayment(
+  '0xPayer',
+  [
+    { recipient: '0xAlice', amount: '500000' },
+    { recipient: '0xBob', amount: '300000' },
+    { recipient: '0xCharlie', amount: '200000' },
+  ],
+  '0xUSDC',
+);
+```
+
+## Constraints
+
+Add constraints to control execution:
+
+```typescript
+createIntent()
+  // ... basic intent setup
+  .maxSlippage('0.5')         // Max 0.5% slippage
+  .maxFees('100000')          // Max total fees
+  .maxGasFees('50000')        // Max gas fees
+  .deadline(timestamp)         // Absolute deadline
+  .deadlineIn(300)            // Relative deadline (seconds)
+  .privacy('shielded')        // Privacy level
+  .preferSolvers(['solver-1'])
+  .excludeSolvers(['solver-2'])
+  .build();
+```
+
+## Execution Modes
+
+<Tabs items={['Direct', 'Auction', 'Best Effort']}>
+  <Tab>
+    Selects a single solver and executes immediately:
+    ```typescript
+    const result = await executor.submit(intent, { mode: 'direct' });
+    ```
+  </Tab>
+  <Tab>
+    Runs a competitive auction among solvers:
+    ```typescript
+    const result = await executor.submit(intent, {
+      mode: 'auction',
+      auctionDuration: 30000, // 30 seconds
+    });
+    ```
+  </Tab>
+  <Tab>
+    Tries direct execution first, falls back to auction, with retries:
+    ```typescript
+    const result = await executor.submit(intent, {
+      mode: 'best_effort',
+      retryCount: 3,
+    });
+    ```
+  </Tab>
+</Tabs>
+
+## Custom Solvers
+
+Implement the `ISolver` interface to create custom solvers:
+
+```typescript
+import { ISolver, BaseSolver, PaymentIntent, IntentSolution } from '@t402/intent-payments';
+
+class MySolver extends BaseSolver {
+  async solve(intent: PaymentIntent): Promise<IntentSolution> {
+    // Calculate optimal execution path
+    return {
+      id: uuid(),
+      intentId: intent.id,
+      solverId: this.id,
+      steps: [...],
+      expectedOutput: '1000000',
+      costs: {
+        gasFees: '50000',
+        solverFees: '10000',
+        total: '60000',
+      },
+      estimatedTime: 15,
+      signature: 'solver-signature',
+    };
+  }
+
+  async execute(solution: IntentSolution): Promise<IntentExecutionResult> {
+    // Execute the solution on-chain
+    return {
+      id: uuid(),
+      solutionId: solution.id,
+      state: 'success',
+      transactions: [...],
+      actualOutput: '1000000',
+    };
+  }
+}
+```
+
+## Auction System
+
+Run competitive auctions for solver selection:
+
+```typescript
+import { AuctionManager, createSealedAuction } from '@t402/intent-payments';
+
+const auctionManager = new AuctionManager();
+
+// Create a sealed bid auction
+const auction = createSealedAuction(intent, auctionManager, 30000);
+
+// Solvers submit bids
+auctionManager.submitBid(auction.id, 'solver-1', solution, '50000', 'signature');
+
+// Close auction and get winner
+auctionManager.closeAuction(auction.id);
+const winner = auctionManager.selectWinner(auction.id);
+```
+
+## Solver Ranking
+
+Rank solvers based on configurable criteria:
+
+```typescript
+import { SolverRanking, reliabilityOptimizedRanking } from '@t402/intent-payments';
+
+// Use preset ranking strategy
+const ranking = reliabilityOptimizedRanking();
+
+// Or customize weights
+const customRanking = new SolverRanking({
+  reputationWeight: 0.3,
+  successRateWeight: 0.3,
+  speedWeight: 0.2,
+  costWeight: 0.1,
+  volumeWeight: 0.1,
+});
+
+const ranked = ranking.rank(registrations);
+```
+
+## Intent Types
+
+| Type | Description |
+|------|-------------|
+| `simple` | Basic single-step payment |
+| `conditional` | Payment triggered by conditions |
+| `recurring` | Scheduled repeated payments |
+| `batch` | Multiple payments in one intent |
+| `swap` | Asset exchange |
+| `bridge` | Cross-chain transfer and payment |
+
+## Intent States
+
+| State | Description |
+|-------|-------------|
+| `created` | Intent has been built |
+| `pending` | Waiting for solver selection |
+| `solving` | Solver is computing solution |
+| `solved` | Solution found, awaiting execution |
+| `executing` | Solution being executed on-chain |
+| `completed` | Successfully completed |
+| `failed` | Execution failed |
+| `expired` | Deadline passed |
+| `cancelled` | Cancelled by user |
+
+## Rollback Management
+
+Handle failed executions with rollback support:
+
+```typescript
+import { RollbackManager } from '@t402/intent-payments';
+
+const rollbackManager = new RollbackManager();
+rollbackManager.registerHandler(handler);
+
+if (await rollbackManager.canRollback(solution, result)) {
+  const record = await rollbackManager.rollback(
+    intent,
+    solution,
+    result,
+    'Execution failed',
+  );
+  console.log('Amount recovered:', record.amountRecovered);
+}
+```
+
+## API Reference
+
+### Intent Builder
+
+| Function | Description |
+|----------|-------------|
+| `createIntent()` | Start building an intent |
+| `simplePayment()` | Quick payment intent |
+| `swapIntent()` | Quick swap intent |
+| `batchPayment()` | Quick batch payment intent |
+
+### Solver Registry
+
+| Method | Description |
+|--------|-------------|
+| `register()` | Register a solver |
+| `getSolver()` | Get solver instance |
+| `findSolvers()` | Find solvers for intent |
+| `selectSolver()` | Select best solver |
+| `updateReputation()` | Update solver reputation |
+| `getLeaderboard()` | Get top solvers |
+
+### Intent Executor
+
+| Method | Description |
+|--------|-------------|
+| `submit()` | Execute an intent |
+| `cancel()` | Cancel pending execution |
+| `retry()` | Retry failed execution |
+| `getState()` | Get execution state |
+
+## Related
+
+- [Smart Router](/advanced/smart-router) - Multi-chain routing engine
+- [A2A Negotiation](/advanced/a2a-negotiation) - Agent negotiation
+- [Streaming Payments](/advanced/streaming-payments) - Payment channels

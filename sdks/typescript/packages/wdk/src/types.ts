@@ -154,21 +154,36 @@ export interface T402WDKSigner {
 
 /**
  * WDK Account interface (matches @tetherto/wdk account structure)
+ *
+ * This is the canonical definition used across all @t402/wdk-* packages.
+ * Implementors (Tether WDK) provide these methods; T402 code consumes them.
  */
 export interface WDKAccount {
+  /** Get the account's address */
   getAddress(): Promise<string>
+  /** Get the account's native balance */
   getBalance(): Promise<bigint>
+  /** Get the account's token balance */
   getTokenBalance(tokenAddress: string): Promise<bigint>
+  /** Sign a message */
   signMessage(message: string): Promise<string>
+  /** Sign typed data (EIP-712) */
   signTypedData(params: {
     domain: Record<string, unknown>
     types: Record<string, unknown>
     primaryType: string
     message: Record<string, unknown>
   }): Promise<string>
-  sendTransaction(params: { to: string; value?: bigint | string; data?: string }): Promise<string>
-  estimateGas(params: { to: string; value?: bigint | string; data?: string }): Promise<bigint>
+  /** Send a transaction */
+  sendTransaction(params: { to: string; value?: bigint; data?: string }): Promise<string>
+  /** Estimate gas for a transaction (optional — not all implementations support this) */
+  estimateGas?(params: { to: string; value?: bigint; data?: string }): Promise<bigint>
 }
+
+/**
+ * Alias for WDKAccount — preferred naming for use in @t402/wdk-* packages.
+ */
+export type WdkAccount = WDKAccount
 
 /**
  * WDK instance interface (matches @tetherto/wdk structure)

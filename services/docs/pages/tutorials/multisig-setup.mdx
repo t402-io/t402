@@ -1,0 +1,359 @@
+# Multi-Sig Wallet Setup
+
+import { Callout, Tabs, Tab, Steps } from 'nextra/components'
+
+This tutorial shows how to integrate T402 payments with multi-signature wallets for enhanced security using Safe (formerly Gnosis Safe).
+
+## Overview
+
+Multi-sig wallets require multiple signatures to authorize transactions, providing:
+
+- **Shared control** - Multiple parties must approve
+- **Security** - No single point of failure
+- **Accountability** - Audit trail of approvals
+
+## Prerequisites
+
+- EVM wallet with ETH for gas
+- Understanding of Safe multi-sig
+- Node.js 18+ or Java 17+
+
+## Architecture
+
+```
+┌─────────────┐     ┌──────────────┐     ┌─────────────┐
+│   Client    │────▶│  T402 Server │────▶│ Facilitator │
+└─────────────┘     └──────────────┘     └──────┬──────┘
+                                                │
+                                                ▼
+                                         ┌─────────────┐
+                                         │    Safe     │
+                                         │  Multi-Sig  │
+                                         └──────┬──────┘
+                                                │
+                           ┌────────────────────┼────────────────────┐
+                           ▼                    ▼                    ▼
+                    ┌───────────┐        ┌───────────┐        ┌───────────┐
+                    │  Owner 1  │        │  Owner 2  │        │  Owner 3  │
+                    └───────────┘        └───────────┘        └───────────┘
+```
+
+<Steps>
+
+### Create Safe Wallet
+
+1. Go to [app.safe.global](https://app.safe.global)
+2. Connect your wallet
+3. Create new Safe with:
+   - Network: Base (or preferred EVM chain)
+   - Owners: Add all signer addresses
+   - Threshold: Set required signatures (e.g., 2 of 3)
+
+### Install Dependencies
+
+<Tabs items={['TypeScript', 'Java']}>
+  <Tab>
+```bash
+npm install @t402/wdk-multisig @t402/core @safe-global/protocol-kit
+```
+  </Tab>
+  <Tab>
+```xml
+<dependency>
+    <groupId>io.t402</groupId>
+    <artifactId>t402</artifactId>
+    <version>1.8.0</version>
+</dependency>
+```
+  </Tab>
+</Tabs>
+
+### Configure Multi-Sig Client
+
+<Tabs items={['TypeScript', 'Java']}>
+  <Tab>
+```typescript
+import { createMultisigClient } from '@t402/wdk-multisig';
+import { t402Client } from '@t402/core/client';
+
+// Safe configuration
+const safeConfig = {
+  safeAddress: '0xYourSafeAddress',
+  chainId: 8453, // Base
+  owners: [
+    '0xOwner1Address',
+    '0xOwner2Address',
+    '0xOwner3Address',
+  ],
+  threshold: 2, // 2 of 3 required
+};
+
+// Create multi-sig client
+const multisigClient = await createMultisigClient({
+  safeConfig,
+  rpcUrl: 'https://mainnet.base.org',
+});
+
+// Create t402 client with multi-sig
+const client = new t402Client()
+  .register('eip155:8453', multisigClient);
+```
+  </Tab>
+  <Tab>
+```java
+import io.t402.multisig.*;
+import io.t402.client.T402HttpClient;
+
+// Safe configuration
+SafeClient safeClient = new SafeClient(
+    "0xYourSafeAddress",
+    8453, // Base chain ID
+    rpcUrl
+);
+
+// Create transaction builder
+SafeTransactionBuilder txBuilder = new SafeTransactionBuilder(safeClient);
+
+// Build payment transaction
+SafeTransaction tx = txBuilder
+    .to(recipientAddress)
+    .value(BigInteger.ZERO)
+    .data(transferData)
+    .operation(Operation.CALL)
+    .build();
+```
+  </Tab>
+</Tabs>
+
+### Implement Signature Collection
+
+<Tabs items={['TypeScript', 'Java']}>
+  <Tab>
+```typescript
+import { SignatureCollector } from '@t402/wdk-multisig';
+
+// Create signature collector
+const collector = new SignatureCollector({
+  safeAddress: safeConfig.safeAddress,
+  chainId: safeConfig.chainId,
+  threshold: safeConfig.threshold,
+});
+
+// Collect signatures from owners
+async function collectSignatures(txHash: string) {
+  // Owner 1 signs
+  const sig1 = await owner1Signer.signMessage(txHash);
+  collector.addSignature(owner1Address, sig1);
+
+  // Owner 2 signs
+  const sig2 = await owner2Signer.signMessage(txHash);
+  collector.addSignature(owner2Address, sig2);
+
+  // Check if threshold met
+  if (collector.hasEnoughSignatures()) {
+    return collector.getCombinedSignature();
+  }
+
+  throw new Error('Not enough signatures');
+}
+```
+  </Tab>
+  <Tab>
+```java
+import io.t402.multisig.SignatureCollector;
+
+// Create signature collector
+SignatureCollector collector = new SignatureCollector(
+    safeAddress,
+    threshold
+);
+
+// Collect signatures
+public byte[] collectSignatures(byte[] txHash) throws Exception {
+    // Owner 1 signs
+    byte[] sig1 = owner1Signer.sign(txHash);
+    collector.addSignature(owner1Address, sig1);
+
+    // Owner 2 signs
+    byte[] sig2 = owner2Signer.sign(txHash);
+    collector.addSignature(owner2Address, sig2);
+
+    // Get combined signature
+    if (collector.hasEnoughSignatures()) {
+        return collector.getCombinedSignature();
+    }
+
+    throw new Exception("Not enough signatures");
+}
+```
+  </Tab>
+</Tabs>
+
+### Server Integration
+
+Configure your server to receive payments to the Safe:
+
+```typescript
+import { paymentMiddleware } from '@t402/express';
+
+const routes = {
+  '/api/premium/*': {
+    accepts: {
+      scheme: 'exact',
+      network: 'eip155:8453',
+      payTo: '0xYourSafeAddress', // Safe receives payments
+      price: '$0.01',
+    },
+    description: 'Premium API',
+  },
+};
+
+app.use(paymentMiddleware(routes, server));
+```
+
+### Approve Pending Transactions
+
+Create a UI or CLI for owners to approve transactions:
+
+```typescript
+import { SafeApiKit } from '@safe-global/api-kit';
+
+// Initialize API kit
+const apiKit = new SafeApiKit({
+  chainId: 8453n,
+});
+
+// Get pending transactions
+const pending = await apiKit.getPendingTransactions(safeAddress);
+
+// Display for approval
+for (const tx of pending.results) {
+  console.log(`TX: ${tx.safeTxHash}`);
+  console.log(`To: ${tx.to}`);
+  console.log(`Value: ${tx.value}`);
+  console.log(`Confirmations: ${tx.confirmations.length}/${threshold}`);
+}
+
+// Owner approves
+async function approveTx(safeTxHash: string, signer: Signer) {
+  const signature = await signer.signMessage(safeTxHash);
+  await apiKit.confirmTransaction(safeTxHash, signature);
+}
+```
+
+</Steps>
+
+## ERC-4337 Integration
+
+Combine multi-sig with account abstraction for gasless payments:
+
+```typescript
+import { createSafeSmartAccount } from '@t402/wdk-multisig';
+import { createBundlerClient } from '@t402/wdk-gasless';
+
+// Create Safe smart account
+const safeAccount = await createSafeSmartAccount({
+  safeAddress: '0xYourSafeAddress',
+  owners: ownerAddresses,
+  threshold: 2,
+  chainId: 8453,
+});
+
+// Create bundler for gasless transactions
+const bundler = createBundlerClient({
+  bundlerUrl: 'https://bundler.pimlico.io/v2/8453/rpc',
+  apiKey: 'your-api-key',
+});
+
+// Execute gasless multi-sig payment
+const userOp = await safeAccount.createUserOperation({
+  target: recipientAddress,
+  data: transferCalldata,
+  value: 0n,
+});
+
+// Collect signatures for UserOperation
+const signedUserOp = await collectMultisigSignatures(userOp);
+
+// Submit via bundler
+const txHash = await bundler.sendUserOperation(signedUserOp);
+```
+
+## Workflow Options
+
+### On-Chain Approvals
+
+Traditional Safe workflow with on-chain signature storage:
+
+```
+Owner 1 proposes → Owner 2 confirms → Execute
+```
+
+### Off-Chain Signatures
+
+Collect signatures off-chain, execute in single transaction:
+
+```
+Collect all signatures → Single execution tx
+```
+
+### Hybrid Approach
+
+Mix of on-chain proposal with off-chain collection:
+
+```
+Propose → Collect off-chain → Execute
+```
+
+## Security Considerations
+
+<Callout type="warning">
+  Always verify transaction details before signing. Multi-sig doesn't prevent signing malicious transactions.
+</Callout>
+
+### Best Practices
+
+1. **Hardware wallets** for owner keys
+2. **Time locks** for large transactions
+3. **Spending limits** per transaction/period
+4. **Regular audits** of Safe configuration
+5. **Backup recovery** procedures
+
+### Recommended Thresholds
+
+| Owners | Recommended Threshold |
+|--------|----------------------|
+| 2 | 2 of 2 |
+| 3 | 2 of 3 |
+| 5 | 3 of 5 |
+| 7 | 4 of 7 |
+
+## Monitoring
+
+Track multi-sig activity:
+
+```typescript
+import { SafeApiKit } from '@safe-global/api-kit';
+
+// Watch for new transactions
+async function monitorSafe(safeAddress: string) {
+  const apiKit = new SafeApiKit({ chainId: 8453n });
+
+  setInterval(async () => {
+    const pending = await apiKit.getPendingTransactions(safeAddress);
+
+    for (const tx of pending.results) {
+      if (tx.confirmations.length >= threshold) {
+        console.log(`Ready to execute: ${tx.safeTxHash}`);
+        // Notify owners or auto-execute
+      }
+    }
+  }, 60000); // Check every minute
+}
+```
+
+## Related
+
+- [WDK Multi-Sig Reference](/sdks/typescript/wdk-multisig) - API documentation
+- [Gasless Payments](/advanced/gasless) - ERC-4337 integration
+- [Self-Hosted Facilitator](/tutorials/self-hosted-facilitator) - Run your own facilitator

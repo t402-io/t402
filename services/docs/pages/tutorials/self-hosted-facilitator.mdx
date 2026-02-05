@@ -1,0 +1,350 @@
+# Self-Hosted Facilitator
+
+import { Callout, Tabs, Tab, Steps } from 'nextra/components'
+
+This tutorial shows how to deploy and operate your own T402 facilitator for greater control, privacy, and customization.
+
+## Why Self-Host?
+
+| Feature | Public Facilitator | Self-Hosted |
+|---------|-------------------|-------------|
+| Setup | None required | Infrastructure needed |
+| Cost | Free tier available | Your infrastructure |
+| Privacy | Shared logs | Full control |
+| Customization | Limited | Full control |
+| Rate Limits | Shared | Your limits |
+| SLA | Best effort | Your guarantee |
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│                  Your Infrastructure            │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐   │
+│  │ Facilitator│  │   Redis   │  │  Grafana  │   │
+│  │  (Go API) │◀─│  (Cache)  │  │(Monitoring)│   │
+│  └─────┬─────┘  └───────────┘  └───────────┘   │
+│        │                                        │
+│        ▼                                        │
+│  ┌───────────────────────────────────────────┐ │
+│  │           Blockchain RPC Nodes            │ │
+│  │   EVM  │  TON  │  TRON  │  Solana  │ ...  │ │
+│  └───────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────┘
+```
+
+<Steps>
+
+### Prerequisites
+
+- Docker and Docker Compose
+- Domain with SSL certificate
+- RPC endpoints for each supported chain
+- Private keys for facilitator wallets
+
+### Clone Repository
+
+```bash
+git clone https://github.com/t402-io/t402.git
+cd t402/services/facilitator
+```
+
+### Configure Environment
+
+Create `.env` file:
+
+```bash
+# Server
+PORT=8080
+ENVIRONMENT=production
+CORS_ALLOWED_ORIGINS=https://yourdomain.com
+
+# Redis (required for idempotency)
+REDIS_URL=redis://redis:6379
+REDIS_PASSWORD=your_redis_password
+
+# Rate Limiting
+RATE_LIMIT_REQUESTS=1000
+RATE_LIMIT_WINDOW=60
+
+# API Keys (optional)
+API_KEYS=key1:client1,key2:client2
+API_KEY_REQUIRED=false
+
+# EVM Chains
+EVM_PRIVATE_KEY=0x...
+ETH_RPC=https://eth.llamarpc.com
+BASE_RPC=https://mainnet.base.org
+ARBITRUM_RPC=https://arb1.arbitrum.io/rpc
+OPTIMISM_RPC=https://mainnet.optimism.io
+
+# TON
+TON_MNEMONIC=word1 word2 ... word24
+TON_RPC=https://toncenter.com/api/v2/jsonRPC
+
+# TRON
+TRON_PRIVATE_KEY=your_tron_private_key_hex
+TRON_RPC=https://api.trongrid.io
+
+# Solana
+SVM_PRIVATE_KEY=your_solana_private_key_base58
+SOLANA_RPC=https://api.mainnet-beta.solana.com
+```
+
+### Docker Compose Setup
+
+Create `docker-compose.yaml`:
+
+```yaml
+version: '3.8'
+
+services:
+  facilitator:
+    image: ghcr.io/t402-io/facilitator:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - ENVIRONMENT=production
+      - REDIS_URL=redis://redis:6379
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+```
+
+### Deploy
+
+```bash
+# Pull latest images
+docker-compose pull
+
+# Start services
+docker-compose up -d
+
+# Check logs
+docker-compose logs -f facilitator
+
+# Verify health
+curl http://localhost:8080/health
+```
+
+### Configure Reverse Proxy
+
+Nginx configuration:
+
+```nginx
+server {
+    listen 443 ssl http2;
+    server_name facilitator.yourdomain.com;
+
+    ssl_certificate /etc/letsencrypt/live/facilitator.yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/facilitator.yourdomain.com/privkey.pem;
+
+    location / {
+        proxy_pass http://localhost:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # CORS headers
+        add_header Access-Control-Allow-Origin $http_origin;
+        add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
+        add_header Access-Control-Allow-Headers "Content-Type, X-Payment, Idempotency-Key";
+    }
+}
+```
+
+### Configure Your Application
+
+Update your application to use your facilitator:
+
+```typescript
+import { createFacilitatorClient } from '@t402/core/server';
+
+const facilitator = createFacilitatorClient({
+  url: 'https://facilitator.yourdomain.com',
+  // Optional: API key if required
+  apiKey: 'your-api-key',
+});
+```
+
+</Steps>
+
+## Wallet Management
+
+### Generate Wallets
+
+```bash
+# EVM - use any Ethereum wallet generator
+# The same address works on all EVM chains
+
+# TON - generate 24-word mnemonic
+# Use official TON wallet or tools
+
+# TRON - generate private key
+# Use TronLink or tronweb
+
+# Solana - generate keypair
+solana-keygen new --outfile facilitator-wallet.json
+```
+
+### Fund Wallets
+
+Each facilitator wallet needs funds for gas:
+
+| Chain | Minimum Balance | Recommended |
+|-------|-----------------|-------------|
+| Ethereum | 0.1 ETH | 0.5 ETH |
+| Base | 0.01 ETH | 0.1 ETH |
+| Arbitrum | 0.01 ETH | 0.1 ETH |
+| TON | 1 TON | 10 TON |
+| TRON | 100 TRX | 1000 TRX |
+| Solana | 0.1 SOL | 1 SOL |
+
+### Security Best Practices
+
+<Callout type="warning">
+  Never commit private keys to version control. Use secret management solutions.
+</Callout>
+
+- Use hardware wallets or HSMs for production
+- Implement key rotation procedures
+- Set up alerts for low balances
+- Use separate wallets per chain
+
+## Monitoring
+
+### Prometheus Metrics
+
+The facilitator exposes metrics at `/metrics`:
+
+```yaml
+# prometheus.yml
+scrape_configs:
+  - job_name: 'facilitator'
+    static_configs:
+      - targets: ['facilitator:8080']
+    metrics_path: /metrics
+```
+
+### Key Metrics
+
+| Metric | Description |
+|--------|-------------|
+| `t402_verify_total` | Total verification requests |
+| `t402_verify_success` | Successful verifications |
+| `t402_settle_total` | Total settlement requests |
+| `t402_settle_success` | Successful settlements |
+| `t402_settle_duration_seconds` | Settlement latency |
+
+### Grafana Dashboard
+
+Import the included dashboard or create custom panels:
+
+```json
+{
+  "panels": [
+    {
+      "title": "Settlements per Minute",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "rate(t402_settle_success[1m])"
+        }
+      ]
+    }
+  ]
+}
+```
+
+## Scaling
+
+### Horizontal Scaling
+
+```yaml
+services:
+  facilitator:
+    deploy:
+      replicas: 3
+```
+
+Use a load balancer with sticky sessions for idempotency.
+
+### Redis Cluster
+
+For high availability:
+
+```yaml
+services:
+  redis:
+    image: redis:7-alpine
+    command: redis-server --cluster-enabled yes
+```
+
+## Troubleshooting
+
+### Common Issues
+
+| Issue | Solution |
+|-------|----------|
+| Health check failing | Check Redis connection |
+| Settlement timeout | Verify RPC endpoints |
+| Signature invalid | Check private key format |
+| Rate limit exceeded | Increase limits or add API keys |
+
+### Logs
+
+```bash
+# View facilitator logs
+docker-compose logs -f facilitator
+
+# Filter by level
+docker-compose logs facilitator 2>&1 | grep ERROR
+```
+
+## Related
+
+- [Production Deployment](/tutorials/production-deployment) - Production best practices
+- [Facilitator API](/reference/facilitator-api) - API reference
+- [Deployment Guide](/advanced/deployment) - Detailed deployment options

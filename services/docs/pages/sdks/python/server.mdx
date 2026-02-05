@@ -1,0 +1,269 @@
+# Python Server
+
+import { Callout, Tabs, Tab } from 'nextra/components'
+
+The Python SDK provides server middleware for FastAPI and Flask to protect routes with payment requirements.
+
+## FastAPI Integration
+
+### Basic Middleware
+
+```python
+from fastapi import FastAPI
+from t402.fastapi.middleware import require_payment
+
+app = FastAPI()
+
+# Protect all routes
+app.middleware("http")(
+    require_payment(
+        price="0.01",
+        pay_to_address="0x..."
+    )
+)
+```
+
+### Path-Specific Protection
+
+```python
+from fastapi import FastAPI
+from t402.fastapi.middleware import require_payment
+
+app = FastAPI()
+
+# Protect specific routes
+app.middleware("http")(
+    require_payment(
+        price="0.001",
+        pay_to_address="0x...",
+        path=["/api/premium", "/api/exclusive"]
+    )
+)
+```
+
+### Configuration Options
+
+```python
+require_payment(
+    price="0.01",              # Price in USD (string or float)
+    pay_to_address="0x...",    # Recipient address
+    network="eip155:8453",     # Network identifier (default: Base)
+    scheme="exact",            # Payment scheme (default: exact)
+    path=None,                 # Path(s) to protect (None = all)
+    facilitator_url=None,      # Custom facilitator URL
+    error_handler=None,        # Custom error handler
+)
+```
+
+### Custom Error Handler
+
+```python
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
+from t402.fastapi.middleware import require_payment, PaymentErrorHandler
+
+app = FastAPI()
+
+def custom_error_handler(request, error):
+    # Custom logging or metrics
+    logger.error(f"Payment error: {error}")
+    return JSONResponse(
+        content={"error": str(error)},
+        status_code=402
+    )
+
+app.middleware("http")(
+    require_payment(
+        price="0.01",
+        pay_to_address="0x...",
+        error_handler=custom_error_handler
+    )
+)
+```
+
+## Flask Integration
+
+### Basic Middleware
+
+```python
+from flask import Flask
+from t402.flask.middleware import PaymentMiddleware
+
+app = Flask(__name__)
+payment = PaymentMiddleware(app)
+
+# Protect all routes
+payment.add(
+    price="$0.01",
+    pay_to_address="0x..."
+)
+```
+
+### Path-Specific Protection
+
+```python
+from flask import Flask
+from t402.flask.middleware import PaymentMiddleware
+
+app = Flask(__name__)
+payment = PaymentMiddleware(app)
+
+# Protect specific routes
+payment.add(
+    path="/api/premium",
+    price="$0.001",
+    pay_to_address="0x..."
+)
+```
+
+## Manual Server Integration
+
+For custom frameworks or full control:
+
+```python
+from typing import Annotated
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from t402.types import PaymentRequiredResponse, PaymentRequirements, PaymentPayload
+from t402.encoding import safe_base64_decode
+from t402 import FacilitatorClient, FacilitatorConfig
+import base64
+import json
+
+app = FastAPI()
+
+# Configure payment requirements
+payment_requirements = PaymentRequirements(
+    scheme="exact",
+    network="eip155:8453",
+    max_amount_required="10000",
+    asset="0x833589fCD6eDb6E08f4c7C32D4f71b54bda02913",
+    pay_to="0x209693Bc6afc0C5328bA36FaF03C514EF312287C",
+)
+
+# Create facilitator client
+facilitator = FacilitatorClient(FacilitatorConfig(
+    url="https://facilitator.t402.io"
+))
+
+@app.get("/protected")
+async def protected_endpoint(request: Request):
+    payment_required = PaymentRequiredResponse(
+        t402_version=2,
+        accepts=[payment_requirements],
+        error="",
+    )
+
+    # Check for payment header
+    payment_header = request.headers.get("X-PAYMENT", "")
+
+    if payment_header == "":
+        payment_required.error = "X-PAYMENT header not set"
+        return JSONResponse(
+            content=payment_required.model_dump(by_alias=True),
+            status_code=402,
+        )
+
+    # Decode and parse payment
+    try:
+        payment = PaymentPayload(**json.loads(safe_base64_decode(payment_header)))
+    except Exception as e:
+        payment_required.error = f"Invalid payment format: {str(e)}"
+        return JSONResponse(
+            content=payment_required.model_dump(by_alias=True),
+            status_code=402,
+        )
+
+    # Verify payment
+    verify_response = await facilitator.verify(payment, payment_requirements)
+    if not verify_response.is_valid:
+        payment_required.error = f"Invalid payment: {verify_response.invalid_reason}"
+        return JSONResponse(
+            content=payment_required.model_dump(by_alias=True),
+            status_code=402,
+        )
+
+    # Settle payment
+    settle_response = await facilitator.settle(payment, payment_requirements)
+    if not settle_response.success:
+        payment_required.error = f"Settlement failed: {settle_response.error_reason}"
+        return JSONResponse(
+            content=payment_required.model_dump(by_alias=True),
+            status_code=402,
+        )
+
+    # Return success with settlement header
+    response = JSONResponse(
+        content={"message": "Premium content!", "data": "..."},
+        status_code=200,
+    )
+    response.headers["X-PAYMENT-RESPONSE"] = base64.b64encode(
+        settle_response.model_dump_json().encode("utf-8")
+    ).decode("utf-8")
+
+    return response
+```
+
+## Error Handling
+
+```python
+from t402.fastapi.middleware import require_payment, PaymentErrorHandler
+
+def custom_error_handler(request, error):
+    logger.error(f"Payment error: {error}")
+    return JSONResponse(
+        content={"error": str(error)},
+        status_code=402
+    )
+
+app.middleware("http")(
+    require_payment(
+        price="0.01",
+        pay_to_address="0x...",
+        error_handler=custom_error_handler
+    )
+)
+```
+
+## Network Configuration
+
+### Multi-Network Support
+
+```python
+from t402 import (
+    is_evm_network,
+    is_ton_network,
+    is_tron_network,
+    is_svm_network,
+    get_network_type,
+)
+
+# Check network type
+is_evm_network("eip155:8453")     # True
+is_ton_network("ton:mainnet")     # True
+is_tron_network("tron:mainnet")   # True
+is_svm_network("solana:5eykt...")  # True
+
+# Get network type string
+network_type = get_network_type("eip155:8453")  # "evm"
+```
+
+### Address Validation
+
+```python
+from t402 import (
+    validate_ton_address,
+    validate_tron_address,
+    validate_svm_address,
+)
+
+validate_ton_address("EQD...")      # True/False
+validate_tron_address("T...")       # True/False
+validate_svm_address("EPjFWdd...")  # True/False
+```
+
+## Related
+
+- [Client Integration](/sdks/python/client) - httpx and requests clients
+- [Facilitator Client](/sdks/python/facilitator) - Direct facilitator access
+- [CLI](/sdks/python/cli) - Command-line tools
