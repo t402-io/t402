@@ -1,0 +1,342 @@
+# @t402/fastify
+
+import { Callout, Tabs } from 'nextra/components'
+
+Fastify plugin for protecting routes with t402 payment requirements. Uses Fastify's high-performance hook system for efficient payment processing.
+
+## Installation
+
+```bash npm2yarn
+npm install @t402/fastify @t402/core
+```
+
+## Quick Start
+
+```typescript
+import Fastify from 'fastify';
+import { paymentPlugin } from '@t402/fastify';
+import { t402ResourceServer, createFacilitatorClient } from '@t402/core/server';
+import { registerExactEvmScheme } from '@t402/evm/exact/server';
+
+const fastify = Fastify();
+
+// Create and configure the t402 server
+const facilitator = createFacilitatorClient({ url: 'https://facilitator.t402.io' });
+const server = new t402ResourceServer(facilitator);
+registerExactEvmScheme(server, {});
+
+// Define protected routes
+const routes = {
+  '/api/premium/*': {
+    accepts: {
+      scheme: 'exact',
+      network: 'eip155:8453',
+      payTo: '0xYourAddress',
+      price: '$0.01',
+    },
+    description: 'Premium API access',
+  },
+};
+
+// Register plugin
+await fastify.register(paymentPlugin, { routes, server });
+
+// Protected route
+fastify.get('/api/premium/data', async (request, reply) => {
+  return { data: 'Premium content' };
+});
+
+await fastify.listen({ port: 3000 });
+```
+
+## API Reference
+
+### paymentPlugin
+
+Fastify plugin that adds payment protection using preHandler hooks.
+
+```typescript
+const paymentPlugin: FastifyPluginAsync<PaymentPluginOptions>
+```
+
+**Options**
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `routes` | `RoutesConfig` | Route configurations for protected endpoints |
+| `server` | `t402ResourceServer` | Pre-configured server instance |
+| `paywallConfig` | `PaywallConfig` | Optional paywall UI configuration |
+| `paywall` | `PaywallProvider` | Optional custom paywall provider |
+| `syncFacilitatorOnStart` | `boolean` | Sync with facilitator on startup (default: `true`) |
+
+**Example**
+
+```typescript
+import { paymentPlugin } from '@t402/fastify';
+
+await fastify.register(paymentPlugin, {
+  routes,
+  server,
+  paywallConfig: {
+    title: 'Premium API',
+    theme: 'dark',
+  },
+});
+```
+
+### paymentPluginFromConfig
+
+Fastify plugin with simple configuration (server created internally).
+
+```typescript
+const paymentPluginFromConfig: FastifyPluginAsync<PaymentPluginFromConfigOptions>
+```
+
+**Options**
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `routes` | `RoutesConfig` | Route configurations for protected endpoints |
+| `facilitatorClients` | `FacilitatorClient \| FacilitatorClient[]` | Facilitator client(s) |
+| `schemes` | `SchemeRegistration[]` | Array of scheme registrations |
+| `paywallConfig` | `PaywallConfig` | Optional paywall UI configuration |
+| `paywall` | `PaywallProvider` | Optional custom paywall provider |
+| `syncFacilitatorOnStart` | `boolean` | Sync with facilitator on startup (default: `true`) |
+
+**Example**
+
+```typescript
+import { paymentPluginFromConfig } from '@t402/fastify';
+import { createExactEvmServer } from '@t402/evm/exact/server';
+
+await fastify.register(paymentPluginFromConfig, {
+  routes,
+  facilitatorClients: facilitatorClient,
+  schemes: [{ network: 'eip155:8453', server: createExactEvmServer({}) }],
+});
+```
+
+## Route Configuration
+
+```typescript
+const routes: RoutesConfig = {
+  // Single price
+  '/api/premium/*': {
+    accepts: {
+      scheme: 'exact',
+      network: 'eip155:8453',
+      payTo: '0xRecipient',
+      price: '$0.01',
+    },
+    description: 'Premium API',
+  },
+
+  // Multiple networks
+  '/api/multi/*': {
+    accepts: [
+      { scheme: 'exact', network: 'eip155:8453', payTo: '0x...', price: '$0.01' },
+      { scheme: 'exact', network: 'ton:mainnet', payTo: 'EQ...', price: '$0.01' },
+    ],
+    description: 'Multi-chain support',
+  },
+};
+```
+
+## Plugin Scoping
+
+Use Fastify's plugin system for scoped protection:
+
+```typescript
+import Fastify from 'fastify';
+import { paymentPlugin } from '@t402/fastify';
+
+const fastify = Fastify();
+
+// Public routes (no payment)
+fastify.get('/api/public', async () => ({ public: true }));
+
+// Premium routes (with payment)
+fastify.register(async (instance) => {
+  await instance.register(paymentPlugin, {
+    routes: {
+      '/*': {
+        accepts: {
+          scheme: 'exact',
+          network: 'eip155:8453',
+          payTo: '0xRecipient',
+          price: '$0.01',
+        },
+        description: 'Premium content',
+      },
+    },
+    server,
+  });
+
+  instance.get('/data', async () => ({ premium: true }));
+  instance.get('/analytics', async () => ({ analytics: [] }));
+}, { prefix: '/api/premium' });
+```
+
+## Hook-Based Architecture
+
+The plugin uses Fastify's preHandler hook for payment verification:
+
+```typescript
+// Internally, the plugin works like this:
+fastify.addHook('preHandler', async (request, reply) => {
+  // 1. Check if route requires payment
+  if (!httpServer.requiresPayment(context)) {
+    return; // Continue to handler
+  }
+
+  // 2. Process payment
+  const result = await httpServer.processHTTPRequest(context);
+
+  // 3. Handle result
+  switch (result.type) {
+    case 'no-payment-required':
+      return; // Continue
+    case 'payment-error':
+      reply.code(402).send(result.response);
+      return;
+    case 'payment-verified':
+      // Continue, settle after response
+      return;
+  }
+});
+```
+
+## Settlement Flow
+
+Payment settlement occurs after successful handler execution:
+
+```typescript
+fastify.get('/api/premium/data', async (request, reply) => {
+  const data = await fetchData();
+  return { data }; // 200 -> Payment settles
+});
+
+fastify.get('/api/premium/error', async (request, reply) => {
+  reply.code(500);
+  return { error: 'Failed' }; // 500 -> No settlement
+});
+```
+
+<Callout type="info">
+  Settlement only occurs when your handler returns a successful response (status &lt; 400). Error responses prevent payment settlement.
+</Callout>
+
+## With TypeBox Schema
+
+Combine with Fastify's schema validation:
+
+```typescript
+import { Type } from '@sinclair/typebox';
+
+fastify.get('/api/premium/data', {
+  schema: {
+    response: {
+      200: Type.Object({
+        data: Type.String(),
+        timestamp: Type.Number(),
+      }),
+    },
+  },
+}, async (request, reply) => {
+  return {
+    data: 'Premium content',
+    timestamp: Date.now(),
+  };
+});
+```
+
+## Paywall Configuration
+
+```typescript
+await fastify.register(paymentPlugin, {
+  routes,
+  server,
+  paywallConfig: {
+    title: 'API Access Required',
+    description: 'Pay to unlock this endpoint',
+    logoUrl: 'https://example.com/logo.png',
+    theme: 'auto',
+  },
+});
+```
+
+## Custom Paywall Provider
+
+```typescript
+import { PaywallProvider } from '@t402/core/server';
+
+const customPaywall: PaywallProvider = {
+  render: (paymentRequired, config) => {
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head><title>${config?.title || 'Pay'}</title></head>
+        <body>
+          <h1>Payment Required</h1>
+          <pre>${JSON.stringify(paymentRequired, null, 2)}</pre>
+        </body>
+      </html>
+    `;
+  },
+};
+
+await fastify.register(paymentPlugin, {
+  routes,
+  server,
+  paywall: customPaywall,
+});
+```
+
+## Error Handling
+
+```typescript
+fastify.setErrorHandler((error, request, reply) => {
+  if (error.statusCode === 402) {
+    // Payment-related error
+    reply.code(402).send({
+      error: 'Payment required',
+      message: error.message,
+    });
+    return;
+  }
+
+  // Other errors
+  reply.code(500).send({ error: 'Internal server error' });
+});
+```
+
+## Type Exports
+
+```typescript
+// Server types
+export { t402ResourceServer, t402HTTPResourceServer } from '@t402/core/server';
+export type { PaywallProvider, PaywallConfig } from '@t402/core/server';
+export { RouteConfigurationError } from '@t402/core/server';
+
+// Protocol types
+export type {
+  PaymentRequired,
+  PaymentRequirements,
+  PaymentPayload,
+  Network,
+  SchemeNetworkServer,
+} from '@t402/core/types';
+
+// Plugin types
+export type { PaymentPluginOptions, PaymentPluginFromConfigOptions } from '@t402/fastify';
+
+// Adapter
+export { FastifyAdapter } from '@t402/fastify';
+```
+
+## Related
+
+- [@t402/core](/reference/core) - Core protocol types
+- [@t402/express](/reference/express) - Express middleware
+- [@t402/hono](/reference/hono) - Hono middleware
+- [@t402/next](/reference/next) - Next.js integration
