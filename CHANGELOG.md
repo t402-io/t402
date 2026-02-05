@@ -8,29 +8,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Stacks mechanism** (TypeScript, Go) - Bitcoin L2 support via SIP-010 token standard
-- **EVM exact-legacy** scheme (Java, Go) - Legacy USDT support on BNB, Avalanche, Celo, Kaia, Fantom
-- **EVM upto scheme** (Go, Python, Java) - Metered/usage-based billing with EIP-2612 Permit
-- **SVM scheme** for Python SDK with comprehensive server tests
-- **NEAR/Aptos/Tezos/Polkadot** mechanisms for Go (exact-direct Client/Server)
-- **TON/TRON facilitators** and NEAR/Aptos/Tezos/Polkadot mechanisms for Python
-- **Demo site** (demo.t402.io) - Interactive playground with USDT payment scenarios
-- **Site pages** - `/transports`, `/ecosystem`, `/status` pages
+- **Up-To Scheme Types** - Usage-based billing across all SDKs (TypeScript, Go, Python, Java)
+
+## [2.3.1] - 2026-01-25
+
+### Added
+- **WDK Deep Integration** - Enhanced Tether WDK support with factory methods, swap integration, adapter fixes
+- **Safe Multi-Sig** - Multi-signature wallet support for Go and Python SDKs
+- **10 Blockchain Families** - Full coverage: EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks
+- **Advanced Packages** (beta) - Agent Policy, A2A Negotiation, Intent Payments, Smart Router, Streaming Payments, ZK Payments
 
 ### Fixed
-- TypeScript/Python: `PaymentPayload.resource` now optional per v2 spec (section 5.2.2)
-- TypeScript: `ResourceInfo.description` and `mimeType` now optional per v2 spec
-- EVM: Corrected Unichain USDT0 address
-- Site: Removed stale redirects, fixed broken links, updated chain count
-- Demo: Resolved Tailwind 4 layout issues
+- WDK gasless OOM (infinite recursion in `isDeployed()`)
+- TON adapter Cell construction (uses `@ton/core` dynamic import)
+- Mock `parsePrice` returns integer cent strings
+- Docs build fully clean (Nextra 3.x component fixes across 39 MDX files)
 
 ### Documentation
-- Added TON wallet address to CLAUDE.md
-- Updated Java SDK section in RELEASING.md to reflect v1.1.0 release status
-- Fixed dead links in docs site (ai-payments.mdx, chains/index.mdx)
-- Added TRON and TON exact scheme specifications
-- Added CONTRIBUTING.md for Java SDK and Facilitator service
-- Added last updated timestamps to ROADMAP.md, SECURITY.md
+- Comprehensive docs site with 96+ pages covering all features
+- 6 advanced package pages marked as "Coming Soon"
+- Updated SECURITY.md with NEAR, Aptos, Tezos, Polkadot, Stacks security info
+- Updated CONTRIBUTING.md with correct paths and all mechanism packages
+- All SDK CHANGELOGs updated with missing version entries
+
+### SDK Versions
+- TypeScript: v2.3.1 (27 packages)
+- Go: v1.8.1
+- Python: v1.9.1
+- Java: v1.8.1
 
 ## [2.1.6] - 2026-01-18
 

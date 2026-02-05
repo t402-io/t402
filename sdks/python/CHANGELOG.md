@@ -29,6 +29,39 @@ All notable changes to the T402 Python SDK will be documented in this file.
     - `create_permit_message()` - Create EIP-712 message
     - EIP-712 type definitions: `PERMIT_TYPES`, `PERMIT_DOMAIN_TYPES`
 
+## [1.9.1] - 2026-01-25
+
+### Added
+- **Safe Multi-Sig SDK** - Multi-signature wallet support for Python
+
+### Fixed
+- Ruff linting errors resolved for release
+
+## [1.9.0] - 2026-01-18
+
+### Added
+- **NEAR, Aptos, Tezos, Polkadot Mechanisms** - Full multi-chain coverage
+  - TON and TRON facilitator implementations
+  - NEAR, Aptos, Tezos, Polkadot exact-direct schemes
+- **SVM Scheme** - Solana exact payment scheme and comprehensive server tests
+- **EVM Exact-Legacy Facilitator** - Support for legacy USDT tokens
+- **Stacks Mechanism** - Stacks (Bitcoin L2) support
+
+### Fixed
+- Synced `__version__` with `pyproject.toml`
+
+## [1.8.0] - 2026-01-17
+
+### Added
+- **EVM Up-To Scheme** - Usage-based billing for EVM chains
+- **Missing Mechanism Implementations** - Expanded chain coverage across Go, Java, and Python
+
+### Changed
+- SDKs reorganized into `sdks/` directory structure
+
+### Fixed
+- CodeQL security alerts resolved
+
 ## [1.7.1] - 2026-01-16
 
 ### Fixed

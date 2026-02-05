@@ -2,6 +2,11 @@
 
 All notable changes to the T402 Java SDK will be documented in this file.
 
+## [1.8.1] - 2026-01-25
+
+### Fixed
+- **SpotBugs DMI_RANDOM_USED_ONLY_ONCE** - Extracted `SecureRandom` to static field in `SafeClient.generateRequestId()`
+
 ## [1.8.0] - 2026-01-20
 
 ### Added

@@ -36,16 +36,22 @@ Configure these secrets in your GitHub repository settings:
 
 ## TypeScript Packages (@t402/*)
 
-### All Packages (21 total)
+### All Packages (27 total)
 
 | Package | Path | Description |
 |---------|------|-------------|
 | `@t402/core` | `sdks/typescript/packages/core` | Core types and abstractions |
 | `@t402/extensions` | `sdks/typescript/packages/extensions` | Bazaar, Sign-In-With-X |
+| `@t402/evm-core` | `sdks/typescript/packages/mechanisms/evm-core` | Shared EVM utilities |
 | `@t402/evm` | `sdks/typescript/packages/mechanisms/evm` | EVM mechanisms |
 | `@t402/svm` | `sdks/typescript/packages/mechanisms/svm` | Solana mechanisms |
 | `@t402/ton` | `sdks/typescript/packages/mechanisms/ton` | TON mechanisms |
 | `@t402/tron` | `sdks/typescript/packages/mechanisms/tron` | TRON mechanisms |
+| `@t402/near` | `sdks/typescript/packages/mechanisms/near` | NEAR mechanisms |
+| `@t402/aptos` | `sdks/typescript/packages/mechanisms/aptos` | Aptos mechanisms |
+| `@t402/tezos` | `sdks/typescript/packages/mechanisms/tezos` | Tezos mechanisms |
+| `@t402/polkadot` | `sdks/typescript/packages/mechanisms/polkadot` | Polkadot Asset Hub |
+| `@t402/stacks` | `sdks/typescript/packages/mechanisms/stacks` | Stacks (Bitcoin L2) |
 | `@t402/express` | `sdks/typescript/packages/http/express` | Express middleware |
 | `@t402/hono` | `sdks/typescript/packages/http/hono` | Hono middleware |
 | `@t402/fastify` | `sdks/typescript/packages/http/fastify` | Fastify middleware |
@@ -111,11 +117,14 @@ When PRs with changesets are merged to main:
 Packages are published in dependency order automatically:
 
 1. `@t402/core` - No dependencies
-2. `@t402/evm`, `@t402/svm`, `@t402/ton`, `@t402/tron` - Depend on core
-3. `@t402/extensions`, `@t402/wdk` - Depend on core, mechanisms
-4. `@t402/express`, `@t402/hono`, etc. - Depend on core
-5. `@t402/wdk-gasless`, `@t402/wdk-bridge` - Depend on wdk, evm
-6. `@t402/mcp`, `@t402/cli` - Top-level tools
+2. `@t402/evm-core` - Depends on core
+3. `@t402/evm`, `@t402/svm`, `@t402/ton`, `@t402/tron`, `@t402/near`, `@t402/aptos`, `@t402/tezos`, `@t402/polkadot`, `@t402/stacks` - Depend on core (evm depends on evm-core)
+4. `@t402/extensions`, `@t402/wdk` - Depend on core, mechanisms
+5. `@t402/express`, `@t402/hono`, `@t402/fastify`, `@t402/next` - Depend on core
+6. `@t402/fetch`, `@t402/axios` - Depend on core
+7. `@t402/paywall`, `@t402/react`, `@t402/vue` - Depend on core
+8. `@t402/wdk-gasless`, `@t402/wdk-bridge`, `@t402/wdk-multisig` - Depend on wdk, evm
+9. `@t402/mcp`, `@t402/cli` - Top-level tools
 
 ---
 
@@ -184,8 +193,8 @@ Use workflow dispatch for testing:
 2. Commit changes
 3. Create and push a tag with `java/` prefix:
    ```bash
-   git tag java/v1.1.0
-   git push origin java/v1.1.0
+   git tag java/v1.8.1
+   git push origin java/v1.8.1
    ```
 4. GitHub Actions will:
    - Run tests
@@ -198,13 +207,13 @@ Use workflow dispatch for testing:
 Java packages are published to Maven Central:
 - Group ID: `io.t402`
 - Artifact ID: `t402`
-- Current version: `1.1.0`
+- Current version: `1.8.1`
 
 ```xml
 <dependency>
     <groupId>io.t402</groupId>
     <artifactId>t402</artifactId>
-    <version>1.1.0</version>
+    <version>1.8.1</version>
 </dependency>
 ```
 

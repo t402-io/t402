@@ -33,47 +33,65 @@ We take security seriously and will respond promptly to verified reports. See ou
 
 ```
 t402/
-├── typescript/              # TypeScript SDK (pnpm monorepo)
-│   ├── packages/
-│   │   ├── core/            # @t402/core
-│   │   ├── extensions/      # @t402/extensions
+├── sdks/
+│   ├── typescript/              # TypeScript SDK (pnpm monorepo, 27 packages)
+│   │   ├── packages/
+│   │   │   ├── core/            # @t402/core
+│   │   │   ├── extensions/      # @t402/extensions
+│   │   │   ├── mechanisms/
+│   │   │   │   ├── evm-core/    # @t402/evm-core
+│   │   │   │   ├── evm/         # @t402/evm
+│   │   │   │   ├── svm/         # @t402/svm
+│   │   │   │   ├── ton/         # @t402/ton
+│   │   │   │   ├── tron/        # @t402/tron
+│   │   │   │   ├── near/        # @t402/near
+│   │   │   │   ├── aptos/       # @t402/aptos
+│   │   │   │   ├── tezos/       # @t402/tezos
+│   │   │   │   ├── polkadot/    # @t402/polkadot
+│   │   │   │   └── stacks/      # @t402/stacks
+│   │   │   ├── http/
+│   │   │   │   ├── express/     # @t402/express
+│   │   │   │   ├── hono/        # @t402/hono
+│   │   │   │   ├── fastify/     # @t402/fastify
+│   │   │   │   ├── next/        # @t402/next
+│   │   │   │   ├── fetch/       # @t402/fetch
+│   │   │   │   ├── axios/       # @t402/axios
+│   │   │   │   ├── paywall/     # @t402/paywall
+│   │   │   │   ├── react/       # @t402/react
+│   │   │   │   └── vue/         # @t402/vue
+│   │   │   ├── wdk/             # @t402/wdk
+│   │   │   ├── wdk-gasless/     # @t402/wdk-gasless
+│   │   │   ├── wdk-bridge/      # @t402/wdk-bridge
+│   │   │   ├── wdk-multisig/    # @t402/wdk-multisig
+│   │   │   ├── mcp/             # @t402/mcp
+│   │   │   └── cli/             # @t402/cli
+│   │   └── turbo.json
+│   ├── go/                      # Go SDK
 │   │   ├── mechanisms/
-│   │   │   ├── evm/         # @t402/evm
-│   │   │   ├── svm/         # @t402/svm
-│   │   │   ├── ton/         # @t402/ton
-│   │   │   └── tron/        # @t402/tron
+│   │   │   ├── evm/
+│   │   │   ├── svm/
+│   │   │   ├── ton/
+│   │   │   ├── tron/
+│   │   │   ├── near/
+│   │   │   ├── aptos/
+│   │   │   ├── tezos/
+│   │   │   ├── polkadot/
+│   │   │   └── stacks/
 │   │   ├── http/
-│   │   │   ├── express/     # @t402/express
-│   │   │   ├── hono/        # @t402/hono
-│   │   │   ├── fastify/     # @t402/fastify
-│   │   │   ├── next/        # @t402/next
-│   │   │   ├── fetch/       # @t402/fetch
-│   │   │   ├── axios/       # @t402/axios
-│   │   │   ├── paywall/     # @t402/paywall
-│   │   │   ├── react/       # @t402/react
-│   │   │   └── vue/         # @t402/vue
-│   │   ├── wdk/             # @t402/wdk
-│   │   ├── wdk-gasless/     # @t402/wdk-gasless
-│   │   ├── wdk-bridge/      # @t402/wdk-bridge
-│   │   ├── wdk-multisig/    # @t402/wdk-multisig
-│   │   ├── mcp/             # @t402/mcp
-│   │   └── cli/             # @t402/cli
-│   └── turbo.json
-├── go/                      # Go SDK
-│   ├── mechanisms/
-│   │   ├── evm/
-│   │   ├── svm/
-│   │   ├── ton/
-│   │   └── tron/
-│   ├── http/
-│   └── cmd/t402/            # CLI tool
-├── python/                  # Python SDK
-│   └── t402/
-│       └── src/t402/
-├── java/                    # Java SDK
-│   └── t402/
-├── specs/                   # Protocol specifications
-└── examples/                # Example implementations
+│   │   ├── wdk/                 # WDK integration (gasless, bridge, multisig)
+│   │   └── cmd/t402/            # CLI tool
+│   ├── python/                  # Python SDK
+│   │   └── t402/
+│   │       └── src/t402/
+│   └── java/                    # Java SDK
+├── services/                    # Deployable services
+│   ├── facilitator/             # Payment facilitator API
+│   ├── docs/                    # Documentation site
+│   ├── site/                    # Marketing website
+│   └── grafana/                 # Monitoring dashboards
+├── specs/                       # Protocol specifications
+├── contracts/                   # Solidity smart contracts
+└── examples/                    # Example implementations
 ```
 
 ## Development Setup
@@ -82,7 +100,7 @@ t402/
 
 - **Node.js** 18+ (for TypeScript)
 - **pnpm** 10+ (for TypeScript monorepo)
-- **Go** 1.22+ (for Go SDK)
+- **Go** 1.24+ (for Go SDK)
 - **Python** 3.10+ with uv (for Python SDK)
 - **Java** 21+ with Maven (for Java SDK)
 
@@ -94,23 +112,23 @@ git clone https://github.com/t402-io/t402.git
 cd t402
 
 # TypeScript
-cd typescript
+cd sdks/typescript
 pnpm install
 pnpm build
 pnpm test
 
 # Go
-cd go
+cd sdks/go
 go mod download
 go test ./...
 
 # Python
-cd python/t402
+cd sdks/python/t402
 uv sync
 uv run pytest
 
 # Java
-cd java/t402
+cd sdks/java
 mvn install
 ```
 
@@ -121,7 +139,7 @@ mvn install
 The TypeScript SDK uses pnpm workspaces with Turborepo for monorepo management.
 
 ```bash
-cd typescript
+cd sdks/typescript
 
 # Install dependencies
 pnpm install
@@ -166,7 +184,7 @@ cd packages/my-package
 ### Go SDK
 
 ```bash
-cd go
+cd sdks/go
 
 # Run tests
 go test ./...
@@ -192,7 +210,7 @@ go build -o t402 ./cmd/t402
 ### Python SDK
 
 ```bash
-cd python/t402
+cd sdks/python/t402
 
 # Install with uv
 uv sync
@@ -222,7 +240,7 @@ uv run ruff check .
 ### Java SDK
 
 ```bash
-cd java/t402
+cd sdks/java
 
 # Build
 mvn clean install
@@ -268,13 +286,13 @@ Run tests for the packages you modified:
 
 ```bash
 # TypeScript
-cd typescript && pnpm test
+cd sdks/typescript && pnpm test
 
 # Go
-cd go && go test ./...
+cd sdks/go && go test ./...
 
 # Python
-cd python/t402 && uv run pytest
+cd sdks/python/t402 && uv run pytest
 ```
 
 ### 6. Commit
@@ -331,7 +349,7 @@ chore(ci): add integration tests
 If modifying paywall source files in TypeScript:
 
 ```bash
-cd typescript && pnpm --filter @t402/paywall build:paywall
+cd sdks/typescript && pnpm --filter @t402/paywall build:paywall
 ```
 
 This generates template files for all SDKs. Commit the generated files with your PR.
