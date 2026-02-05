@@ -1,0 +1,434 @@
+# Agent Policy
+
+import { Callout, Tabs, Cards, Steps } from 'nextra/components'
+
+<Callout type="warning">
+  **Beta Package**: `@t402/agent-policy` is currently in beta (v1.0.0-beta.2). APIs may change.
+</Callout>
+
+The Agent Policy Engine enables fine-grained control over autonomous AI agent payment authorizations. It provides spending limits, time-based rules, merchant restrictions, network policies, and multi-approver workflows.
+
+## Features
+
+- **Spending Limits** - Per-transaction, hourly, daily, weekly, and monthly limits
+- **Time Rules** - Allowed time windows and blocked periods
+- **Merchant Rules** - Whitelist/blacklist recipient addresses
+- **Network Rules** - Restrict payments to specific blockchain networks
+- **Category Rules** - Classify and restrict payments by category
+- **Approval Workflow** - Threshold-based multi-approver payment approvals
+- **Webhook Notifications** - HTTP webhooks for approval workflow events
+- **MCP Integration** - Full Model Context Protocol support for AI agents
+
+## Installation
+
+```bash npm2yarn
+npm install @t402/agent-policy
+```
+
+## Quick Start
+
+### As MCP Server
+
+Run the MCP server for Claude Desktop or other MCP clients:
+
+```bash
+# With demo mode (no real state changes)
+AGENT_POLICY_DEMO_MODE=true npx agent-policy-mcp
+
+# With Redis storage (production)
+AGENT_POLICY_REDIS_URL=redis://localhost:6379 npx agent-policy-mcp
+```
+
+### Claude Desktop Configuration
+
+Add to your Claude Desktop config:
+
+<Tabs items={['macOS', 'Windows', 'Linux']}>
+  <Tabs.Tab>
+    Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
+    ```json
+    {
+      "mcpServers": {
+        "agent-policy": {
+          "command": "npx",
+          "args": ["@t402/agent-policy"],
+          "env": {
+            "AGENT_POLICY_DEMO_MODE": "true"
+          }
+        }
+      }
+    }
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    Edit `%APPDATA%\Claude\claude_desktop_config.json`:
+    ```json
+    {
+      "mcpServers": {
+        "agent-policy": {
+          "command": "npx",
+          "args": ["@t402/agent-policy"],
+          "env": {
+            "AGENT_POLICY_DEMO_MODE": "true"
+          }
+        }
+      }
+    }
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    Edit `~/.config/Claude/claude_desktop_config.json`:
+    ```json
+    {
+      "mcpServers": {
+        "agent-policy": {
+          "command": "npx",
+          "args": ["@t402/agent-policy"],
+          "env": {
+            "AGENT_POLICY_DEMO_MODE": "true"
+          }
+        }
+      }
+    }
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### Programmatic Usage
+
+```typescript
+import { AgentPolicyMcpServer, createServerWithRedis } from '@t402/agent-policy/mcp';
+
+// In-memory storage (development)
+const server = new AgentPolicyMcpServer({ demoMode: true });
+
+// Redis storage (production)
+const productionServer = await createServerWithRedis('redis://localhost:6379', {
+  keyPrefix: 'my-app:agent-policy:',
+  demoMode: false,
+});
+```
+
+## Policy Configuration
+
+### Spending Limits
+
+Control how much an agent can spend across different time periods:
+
+```typescript
+{
+  limits: {
+    perTransaction: { value: '100000000', decimals: 6, symbol: 'USDT' }, // 100 USDT max per tx
+    hourly: { value: '500000000', decimals: 6, symbol: 'USDT' },         // 500 USDT/hour
+    daily: { value: '1000000000', decimals: 6, symbol: 'USDT' },         // 1,000 USDT/day
+    weekly: { value: '5000000000', decimals: 6, symbol: 'USDT' },        // 5,000 USDT/week
+    monthly: { value: '10000000000', decimals: 6, symbol: 'USDT' },      // 10,000 USDT/month
+  }
+}
+```
+
+### Time Rules
+
+Restrict when payments can be made:
+
+```typescript
+{
+  timeRules: {
+    // Allow payments Mon-Fri 9AM-5PM UTC
+    allowedWindows: [
+      { days: [1, 2, 3, 4, 5], startHour: 9, endHour: 17 }
+    ],
+    // Block payments during maintenance
+    blockedPeriods: [
+      {
+        start: new Date('2026-01-20T00:00:00Z'),
+        end: new Date('2026-01-21T00:00:00Z'),
+        reason: 'Scheduled maintenance'
+      }
+    ],
+    timezone: 'UTC'
+  }
+}
+```
+
+### Merchant Rules
+
+Control which addresses can receive payments:
+
+```typescript
+{
+  merchantRules: {
+    // Only allow payments to these addresses
+    whitelist: ['0xaddr1', '0xaddr2', '0xaddr3'],
+    requireWhitelist: true,
+    // Never allow payments to these addresses
+    blacklist: ['0xbadaddr1']
+  }
+}
+```
+
+### Network Rules
+
+Restrict which blockchain networks can be used:
+
+```typescript
+{
+  networkRules: {
+    // Only allow Base and Ethereum mainnet
+    allowedNetworks: ['eip155:8453', 'eip155:1'],
+    // Block specific networks
+    blockedNetworks: ['eip155:56'] // No BSC
+  }
+}
+```
+
+### Category Rules
+
+Classify and restrict payments by category:
+
+```typescript
+{
+  categoryRules: {
+    allowedCategories: ['api_usage', 'subscription', 'data_storage'],
+    blockedCategories: ['gambling', 'adult_content']
+  }
+}
+```
+
+## Approval Workflow
+
+For high-value payments, require human approval before execution.
+
+### Configuration
+
+```typescript
+{
+  approvalConfig: {
+    thresholds: [
+      {
+        // Payments >= 100 USDT require 1 approver
+        amount: { value: '100000000', decimals: 6, symbol: 'USDT' },
+        requiredApprovers: 1,
+        approvers: ['admin@example.com', 'manager@example.com']
+      },
+      {
+        // Payments >= 1000 USDT require 2 approvers
+        amount: { value: '1000000000', decimals: 6, symbol: 'USDT' },
+        requiredApprovers: 2,
+        approvers: ['admin@example.com', 'manager@example.com', 'cfo@example.com']
+      }
+    ],
+    timeout: 3600000 // 1 hour timeout for approvals
+  }
+}
+```
+
+### Approval Flow
+
+<Steps>
+### Agent Requests Payment
+The agent calls `agent-policy/authorize` with the payment details.
+
+### Policy Engine Evaluates
+The engine checks time rules, merchant rules, network rules, spending limits, and approval thresholds.
+
+### Approval Created (if needed)
+If the amount exceeds a threshold, a pending approval is created and the budget is reserved.
+
+### Approvers Notified
+Authorized approvers receive notifications (via webhook if configured).
+
+### Decision Submitted
+Approvers submit decisions via `agent-policy/approvals/decide`.
+
+### Payment Proceeds or Rejected
+Once enough approvals are collected, payment proceeds. If denied, budget is released.
+</Steps>
+
+### Example
+
+```typescript
+// 1. Set up policy with approval thresholds
+await server.handleToolCall('agent-policy/set', {
+  agentId: 'agent-123',
+  policy: {
+    enabled: true,
+    limits: { daily: { value: '10000000000', decimals: 6 } },
+    approvalConfig: {
+      thresholds: [{
+        amount: { value: '100000000', decimals: 6 },
+        requiredApprovers: 1,
+        approvers: ['admin@company.com'],
+      }],
+      timeout: 3600000,
+    },
+  },
+});
+
+// 2. Agent requests payment (500 USDT - needs approval)
+const result = await server.handleToolCall('agent-policy/authorize', {
+  agentId: 'agent-123',
+  amount: '500000000',
+  recipient: '0xvendor...',
+  network: 'eip155:8453',
+});
+// Returns: { requiresApproval: true, approvalId: 'uuid' }
+
+// 3. Approver submits decision
+await server.handleToolCall('agent-policy/approvals/decide', {
+  approvalId: result.data.approvalId,
+  decision: 'approve',
+  approver: 'admin@company.com',
+});
+```
+
+## MCP Tools Reference
+
+| Tool | Description |
+|------|-------------|
+| `agent-policy/authorize` | Check if a payment is authorized |
+| `agent-policy/budget` | Get remaining budget for an agent |
+| `agent-policy/get` | Get current policy configuration |
+| `agent-policy/set` | Set or update policy configuration |
+| `agent-policy/list` | List all policies |
+| `agent-policy/confirm` | Confirm a payment reservation |
+| `agent-policy/release` | Release a payment reservation |
+| `agent-policy/approvals/list` | List pending approvals |
+| `agent-policy/approvals/get` | Get approval details |
+| `agent-policy/approvals/decide` | Submit approval decision |
+
+## Webhook Notifications
+
+Get notified of approval events via HTTP webhooks:
+
+```typescript
+const server = await createServerWithRedis('redis://localhost:6379', {
+  webhookEndpoints: [
+    {
+      url: 'https://api.example.com/webhooks/approvals',
+      secret: 'your-hmac-secret',
+      events: ['approval.created', 'approval.approved', 'approval.denied'],
+    },
+  ],
+});
+```
+
+### Events
+
+| Event | Description |
+|-------|-------------|
+| `approval.created` | New approval request created |
+| `approval.decision_submitted` | Approver submitted decision |
+| `approval.approved` | Payment approved |
+| `approval.denied` | Payment denied |
+| `approval.expired` | Approval timed out |
+
+### Webhook Payload
+
+```json
+{
+  "event": "approval.created",
+  "timestamp": "2026-01-19T10:30:00.000Z",
+  "approval": {
+    "id": "approval-uuid",
+    "agentId": "agent-123",
+    "status": "pending",
+    "amount": "500 USDT",
+    "recipient": "0x1234...",
+    "network": "eip155:8453"
+  }
+}
+```
+
+### Signature Verification
+
+Webhooks include HMAC-SHA256 signature in `X-Webhook-Signature` header:
+
+```typescript
+import { createHmac } from 'crypto';
+
+function verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
+  const expected = 'sha256=' + createHmac('sha256', secret)
+    .update(payload)
+    .digest('hex');
+  return signature === expected;
+}
+```
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `AGENT_POLICY_DEMO_MODE` | Enable demo mode | `false` |
+| `AGENT_POLICY_REDIS_URL` | Redis URL | In-memory |
+| `AGENT_POLICY_WEBHOOK_URL` | Webhook endpoint | None |
+| `AGENT_POLICY_WEBHOOK_SECRET` | HMAC secret | None |
+| `AGENT_POLICY_WEBHOOK_EVENTS` | Event filter | All |
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   MCP Client (Claude)                        │
+└─────────────────────────────────────────────────────────────┘
+                            │ stdio
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 AgentPolicyMcpServer                         │
+│  ┌─────────────┐  ┌───────────────┐  ┌─────────────────┐    │
+│  │Tool Handler │──│ PolicyEngine  │──│ SpendingLimiter │    │
+│  └─────────────┘  └───────────────┘  └─────────────────┘    │
+│         │                │                    │              │
+│         │         ┌──────▼─────────┐         │              │
+│         │         │ApprovalManager │─────────┤              │
+│         │         └────────────────┘         │              │
+│         ▼                ▼                   ▼              │
+│  ┌─────────────┐  ┌───────────────┐  ┌─────────────────┐    │
+│  │ PolicyStore │  │ RuleEvaluator │  │   LimitStore    │    │
+│  │ (In-Memory  │  │               │  │ (In-Memory or   │    │
+│  │  or Redis)  │  │               │  │     Redis)      │    │
+│  └─────────────┘  └───────────────┘  └─────────────────┘    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## TypeScript Types
+
+```typescript
+interface AgentPolicy {
+  enabled: boolean;
+  limits?: SpendingLimits;
+  timeRules?: TimeRules;
+  merchantRules?: MerchantRules;
+  networkRules?: NetworkRules;
+  categoryRules?: CategoryRules;
+  approvalConfig?: ApprovalConfig;
+}
+
+interface SpendingLimits {
+  perTransaction?: Amount;
+  hourly?: Amount;
+  daily?: Amount;
+  weekly?: Amount;
+  monthly?: Amount;
+}
+
+interface Amount {
+  value: string;      // Raw value as string (bigint-safe)
+  decimals: number;   // Token decimals (e.g., 6 for USDT)
+  symbol?: string;    // Token symbol
+}
+
+interface PolicyDecision {
+  allowed: boolean;
+  reason?: string;
+  reservationId?: string;
+  requiresApproval?: boolean;
+  approvalId?: string;
+}
+```
+
+## Related
+
+- [MCP Integration](/advanced/mcp) - Model Context Protocol setup
+- [A2A Negotiation](/advanced/a2a-negotiation) - Agent-to-agent payment negotiation
+- [Gasless Payments](/advanced/gasless) - ERC-4337 gasless transactions

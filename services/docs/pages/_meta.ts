@@ -7,6 +7,10 @@ export default {
     title: 'Getting Started',
     type: 'page'
   },
+  tutorials: {
+    title: 'Tutorials',
+    type: 'page'
+  },
   'use-cases': {
     title: 'Use Cases',
     type: 'page'
@@ -39,7 +43,26 @@ export default {
     title: 'FAQ',
     type: 'page'
   },
+  glossary: {
+    title: 'Glossary',
+    type: 'page'
+  },
   '---': {
+    type: 'separator'
+  },
+  changelog: {
+    title: 'Changelog',
+    type: 'page'
+  },
+  ecosystem: {
+    title: 'Ecosystem',
+    type: 'page'
+  },
+  comparison: {
+    title: 'Comparison',
+    type: 'page'
+  },
+  '---2': {
     type: 'separator'
   },
   whitepaper: {
