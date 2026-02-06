@@ -38,6 +38,7 @@ on:
           - wdk-gasless
           - wdk-bridge
           - wdk-multisig
+          - a2a
           - mcp
           - cli
       dry_run:
@@ -142,6 +143,9 @@ jobs:
             path: packages/wdk-bridge
           - name: wdk-multisig
             path: packages/wdk-multisig
+          # Transport packages
+          - name: a2a
+            path: packages/a2a
           # Tool packages
           - name: mcp
             path: packages/mcp

@@ -15,6 +15,42 @@ export type {
 export type { PaymentRequirementsV1, PaymentRequiredV1, PaymentPayloadV1 } from "./v1";
 export type { ResourceServerExtension } from "./extensions";
 
+// A2A Transport types
+export type {
+  A2APaymentStatus,
+  A2ATaskState,
+  A2ATextPart,
+  A2AFilePart,
+  A2ADataPart,
+  A2AMessagePart,
+  A2APaymentMetadata,
+  A2AMessage,
+  A2AArtifact,
+  A2ATaskStatus,
+  A2ATask,
+  A2ARequest,
+  A2AResponse,
+  A2AError,
+  A2AExtension,
+  A2ACapabilities,
+  A2AAgentCard,
+  A2ASkill,
+} from "./a2a";
+export {
+  T402_A2A_EXTENSION_URI,
+  A2A_EXTENSIONS_HEADER,
+  isPaymentRequired,
+  isPaymentCompleted,
+  isPaymentFailed,
+  getPaymentRequired,
+  getPaymentReceipts,
+  createPaymentRequiredMessage,
+  createPaymentSubmissionMessage,
+  createPaymentCompletedMessage,
+  createPaymentFailedMessage,
+  createT402Extension,
+} from "./a2a";
+
 // Scheme-specific types
 export type {
   UptoPaymentRequirements,
