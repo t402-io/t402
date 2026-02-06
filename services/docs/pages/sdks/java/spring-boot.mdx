@@ -259,7 +259,7 @@ class PaymentIntegrationTest {
             .thenReturn(SettlementResponse.success("0xTxHash"));
 
         mockMvc.perform(get("/api/premium")
-                .header("X-PAYMENT", validPaymentHeader))
+                .header("Payment-Signature", validPaymentHeader))
             .andExpect(status().isOk());
     }
 }

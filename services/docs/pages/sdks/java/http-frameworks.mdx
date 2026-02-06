@@ -1,0 +1,239 @@
+# HTTP Framework Integrations
+
+import { Callout, Tabs } from 'nextra/components'
+
+The Java SDK provides payment filters for 5 HTTP frameworks: Jakarta Servlet, Spring MVC, Spring WebFlux, Micronaut, and Quarkus. Each filter implements the full T402 v2 payment lifecycle with V2-first header detection and V1 fallback.
+
+## Framework Overview
+
+| Framework | Package | Filter Class | Type |
+|-----------|---------|-------------|------|
+| Jakarta Servlet | `io.t402.server` | `PaymentFilter` | Synchronous |
+| Spring MVC | `io.t402.spring` | `PaymentInterceptor` | Synchronous |
+| Spring WebFlux | `io.t402.spring.reactive` | `PaymentWebFilter` | Reactive |
+| Micronaut | `io.t402.micronaut` | `PaymentFilter` | Reactive |
+| Quarkus | `io.t402.quarkus` | `PaymentFilter` | Synchronous (JAX-RS) |
+
+## Jakarta Servlet
+
+The base `PaymentFilter` works with any Jakarta Servlet 6.0+ container (Tomcat, Jetty, Undertow).
+
+```java
+import io.t402.server.PaymentFilter;
+import io.t402.client.HttpFacilitatorClient;
+
+FacilitatorClient facilitator = new HttpFacilitatorClient(
+    "https://facilitator.t402.io"
+);
+
+PaymentFilter filter = new PaymentFilter(facilitator);
+
+// Register with your servlet container
+FilterRegistration.Dynamic registration = servletContext.addFilter("t402", filter);
+registration.addMappingForUrlPatterns(
+    EnumSet.of(DispatcherType.REQUEST),
+    true,
+    "/api/*"
+);
+```
+
+## Spring MVC
+
+Spring Boot auto-configuration registers the payment filter automatically.
+
+```yaml
+t402:
+  enabled: true
+  facilitator-url: https://facilitator.t402.io
+  network: eip155:8453
+  pay-to: "0xYourReceiverAddress"
+  asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+  token-name: "USD Coin"
+  token-version: "2"
+```
+
+Use `@RequirePayment` for fine-grained control:
+
+```java
+import io.t402.spring.RequirePayment;
+
+@RestController
+public class ApiController {
+
+    @RequirePayment(amount = "$0.01", description = "Premium API")
+    @GetMapping("/api/premium")
+    public Map<String, String> premiumContent() {
+        return Map.of("data", "Premium content!");
+    }
+}
+```
+
+See the [Spring Boot](/sdks/java/spring-boot) page for full details.
+
+## Spring WebFlux
+
+For reactive applications using Spring WebFlux:
+
+```java
+import io.t402.spring.reactive.PaymentWebFilter;
+
+@Configuration
+@EnableWebFlux
+public class WebFluxConfig {
+
+    @Bean
+    public PaymentWebFilter paymentWebFilter(FacilitatorClient facilitator) {
+        return new PaymentWebFilter(facilitator, routeConfigs);
+    }
+}
+```
+
+Or enable via auto-configuration:
+
+```yaml
+t402:
+  enabled: true
+  webflux: true
+  facilitator-url: https://facilitator.t402.io
+```
+
+<Callout type="info">
+WebFlux uses route-based configuration only. The `@RequirePayment` annotation is not supported in reactive applications.
+</Callout>
+
+## Micronaut
+
+The Micronaut filter implements `HttpServerFilter` for reactive request handling.
+
+```java
+import io.t402.micronaut.PaymentFilter;
+import io.t402.client.HttpFacilitatorClient;
+import io.micronaut.context.annotation.Factory;
+import io.micronaut.context.annotation.Bean;
+
+@Factory
+public class T402Factory {
+
+    @Bean
+    public PaymentFilter paymentFilter() {
+        Map<String, BigInteger> priceTable = Map.of(
+            "/api/premium", BigInteger.valueOf(10000),   // 0.01 USDC
+            "/api/report",  BigInteger.valueOf(1000000)  // 1.00 USDC
+        );
+
+        return new PaymentFilter(
+            "0xYourWalletAddress",
+            priceTable,
+            new HttpFacilitatorClient("https://facilitator.t402.io"),
+            "eip155:8453",                                        // network
+            "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"          // asset
+        );
+    }
+}
+```
+
+### Micronaut Controller
+
+```java
+import io.micronaut.http.annotation.Controller;
+import io.micronaut.http.annotation.Get;
+
+@Controller("/api")
+public class ApiController {
+
+    @Get("/premium")
+    public Map<String, String> premium() {
+        return Map.of("data", "Premium content!");
+    }
+
+    @Get("/report")
+    public Map<String, String> report() {
+        return Map.of("report", "Full report data");
+    }
+}
+```
+
+## Quarkus
+
+The Quarkus filter implements JAX-RS `ContainerRequestFilter` and `ContainerResponseFilter` for the full payment lifecycle.
+
+```java
+import io.t402.quarkus.PaymentFilter;
+import io.t402.client.HttpFacilitatorClient;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
+
+@ApplicationScoped
+public class T402Producer {
+
+    @Produces
+    @ApplicationScoped
+    public PaymentFilter paymentFilter() {
+        Map<String, BigInteger> priceTable = Map.of(
+            "/api/premium", BigInteger.valueOf(10000),
+            "/api/report",  BigInteger.valueOf(1000000)
+        );
+
+        return new PaymentFilter(
+            "0xYourWalletAddress",
+            priceTable,
+            new HttpFacilitatorClient("https://facilitator.t402.io"),
+            "eip155:8453",
+            "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+        );
+    }
+}
+```
+
+### Quarkus Resource
+
+```java
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+
+@Path("/api")
+public class ApiResource {
+
+    @GET
+    @Path("/premium")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Map<String, String> premium() {
+        return Map.of("data", "Premium content!");
+    }
+}
+```
+
+## Common Configuration
+
+All filters share the same constructor pattern:
+
+```java
+// Basic constructor (uses default network and asset)
+new PaymentFilter(payTo, priceTable, facilitator);
+
+// With custom network and asset
+new PaymentFilter(payTo, priceTable, facilitator, network, asset);
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `payTo` | `String` | Your wallet address for receiving payments |
+| `priceTable` | `Map<String, BigInteger>` | Maps request paths to payment amounts (atomic units) |
+| `facilitator` | `FacilitatorClient` | Client for payment verification and settlement |
+| `network` | `String` | Blockchain network in CAIP-2 format (default: `eip155:84532`) |
+| `asset` | `String` | Token contract address |
+
+## V2 Header Detection
+
+All filters detect payment headers using V2-first ordering:
+
+1. Check `Payment-Signature` header (V2)
+2. Fall back to `X-Payment` header (V1)
+3. Response headers use the matching version (`Payment-Response` or `X-Payment-Response`)
+
+## Related
+
+- [Spring Boot](/sdks/java/spring-boot) - Full Spring Boot integration guide
+- [Examples](/sdks/java/examples) - Code examples for all frameworks
