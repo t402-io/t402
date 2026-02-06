@@ -2,6 +2,143 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Hero Section */
+.hero-section {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  margin: -1.5rem -1.5rem 2rem;
+  background: linear-gradient(135deg, rgba(0, 214, 50, 0.08) 0%, rgba(0, 163, 255, 0.08) 100%);
+  border-radius: 0 0 1.5rem 1.5rem;
+}
+
+:is(html[class~="dark"]) .hero-section {
+  background: linear-gradient(135deg, rgba(0, 214, 50, 0.12) 0%, rgba(0, 163, 255, 0.12) 100%);
+}
+
+.hero-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #00A3FF;
+  background: rgba(0, 163, 255, 0.1);
+  border: 1px solid rgba(0, 163, 255, 0.2);
+  border-radius: 9999px;
+  margin-bottom: 1rem;
+}
+
+.hero-title {
+  font-size: 2.5rem !important;
+  font-weight: 800 !important;
+  background: linear-gradient(135deg, #00D632 0%, #00A3FF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 0.5rem !important;
+  border: none !important;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.75rem;
+}
+
+:is(html[class~="dark"]) .hero-subtitle {
+  color: #D1D5DB;
+}
+
+.hero-description {
+  font-size: 1rem;
+  color: #6B7280;
+  max-width: 600px;
+  margin: 0 auto 1.5rem;
+}
+
+:is(html[class~="dark"]) .hero-description {
+  color: #9CA3AF;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.hero-cta {
+  display: inline-block;
+  padding: 0.625rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: white !important;
+  background: linear-gradient(135deg, #00D632 0%, #00A3FF 100%);
+  border-radius: 0.5rem;
+  text-decoration: none !important;
+  transition: opacity 0.2s;
+}
+
+.hero-cta:hover {
+  opacity: 0.9;
+}
+
+.hero-cta-secondary {
+  display: inline-block;
+  padding: 0.625rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #374151 !important;
+  background: transparent;
+  border: 1px solid #D1D5DB;
+  border-radius: 0.5rem;
+  text-decoration: none !important;
+  transition: border-color 0.2s;
+}
+
+:is(html[class~="dark"]) .hero-cta-secondary {
+  color: #D1D5DB !important;
+  border-color: #4B5563;
+}
+
+.hero-cta-secondary:hover {
+  border-color: #00A3FF;
+}
+
+/* Better table styling */
+table {
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+table tbody tr:nth-child(even) {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+:is(html[class~="dark"]) table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+table tbody tr:hover {
+  background: rgba(0, 163, 255, 0.04);
+}
+
+/* Mobile hero adjustments */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 2rem 1rem;
+    margin: -1rem -1rem 1.5rem;
+  }
+
+  .hero-title {
+    font-size: 1.75rem !important;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+}
+
 /* Mobile Experience Improvements */
 @layer utilities {
   /* Better touch targets for mobile */

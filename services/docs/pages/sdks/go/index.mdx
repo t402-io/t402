@@ -1,5 +1,7 @@
 # Go SDK
 
+import { Cards, FileTree } from 'nextra/components'
+
 The T402 Go SDK provides comprehensive support for HTTP-native stablecoin payments.
 
 ## Installation
@@ -146,6 +148,35 @@ func main() {
 | `sdks/go/extensions/bazaar` | API discovery extension |
 | `sdks/go/cmd/t402` | CLI tool |
 
+## Module Structure
+
+<FileTree>
+  <FileTree.Folder name="sdks/go" defaultOpen>
+    <FileTree.Folder name="mechanisms" defaultOpen>
+      <FileTree.Folder name="evm" />
+      <FileTree.Folder name="svm" />
+      <FileTree.Folder name="ton" />
+      <FileTree.Folder name="tron" />
+      <FileTree.Folder name="near" />
+      <FileTree.Folder name="aptos" />
+      <FileTree.Folder name="tezos" />
+      <FileTree.Folder name="polkadot" />
+      <FileTree.Folder name="stacks" />
+      <FileTree.Folder name="cosmos" />
+    </FileTree.Folder>
+    <FileTree.Folder name="http" defaultOpen>
+      <FileTree.Folder name="gin" />
+      <FileTree.Folder name="echo" />
+      <FileTree.Folder name="chi" />
+      <FileTree.Folder name="fiber" />
+    </FileTree.Folder>
+    <FileTree.Folder name="cmd" defaultOpen>
+      <FileTree.Folder name="t402" />
+      <FileTree.Folder name="t402-mcp" />
+    </FileTree.Folder>
+  </FileTree.Folder>
+</FileTree>
+
 ## Multi-Chain Support
 
 ### EVM Networks
@@ -274,6 +305,15 @@ type X402Facilitator interface {
     GetSupported() *SupportedResponse
 }
 ```
+
+## Documentation
+
+<Cards>
+  <Cards.Card title="Client SDK" href="/sdks/go/client" />
+  <Cards.Card title="Server SDK" href="/sdks/go/server" />
+  <Cards.Card title="Facilitator" href="/sdks/go/facilitator" />
+  <Cards.Card title="Smart Router" href="/sdks/go/smart-router" />
+</Cards>
 
 ## Requirements
 

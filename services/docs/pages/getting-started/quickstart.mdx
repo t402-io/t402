@@ -1,19 +1,29 @@
+import { Callout, Steps, Tabs } from 'nextra/components'
+
 # Quick Start
 
 Get up and running with T402 in under 5 minutes.
+
+<Callout type="info">
+**What You'll Build:** A payment-protected API endpoint and a client that pays for it automatically — in under 5 minutes.
+</Callout>
 
 ## Overview
 
 T402 enables HTTP-native payments using USDT and USDT0. Here's what a typical flow looks like:
 
-1. **Client** makes a request to a protected resource
-2. **Server** responds with `402 Payment Required` and payment options
-3. **Client** signs a payment authorization
-4. **Server** verifies and settles the payment
-5. **Client** receives the requested resource
+<Steps>
+### Client requests a protected resource
+### Server responds with 402 Payment Required
+### Client signs a payment authorization
+### Server verifies and settles the payment
+### Client receives the requested resource
+</Steps>
 
-## Server Setup (Express.js)
+## Server Setup
 
+<Tabs items={['Express', 'Hono', 'FastAPI', 'Gin', 'Spring Boot']}>
+  <Tabs.Tab>
 ```typescript
 import express from 'express'
 import { paymentMiddleware } from '@t402/express'
@@ -38,8 +48,99 @@ app.get('/api/premium', (req, res) => {
 app.listen(3000)
 ```
 
+  </Tabs.Tab>
+  <Tabs.Tab>
+```typescript
+import { Hono } from 'hono'
+import { paymentMiddleware } from '@t402/hono'
+
+const app = new Hono()
+
+app.use('/api/*', paymentMiddleware({
+  'GET /api/premium': {
+    price: '$0.01',
+    network: 'eip155:8453',
+    payTo: '0xYourAddress...',
+  }
+}))
+
+app.get('/api/premium', (c) => c.json({ data: 'Premium content!' }))
+
+export default app
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+from fastapi import FastAPI
+from t402.fastapi.middleware import require_payment
+
+app = FastAPI()
+
+app.middleware("http")(
+    require_payment(
+        price="0.01",
+        pay_to_address="0xYourAddress..."
+    )
+)
+
+@app.get("/api/premium")
+async def premium():
+    return {"data": "Premium content!"}
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+```go
+package main
+
+import (
+    "github.com/gin-gonic/gin"
+    t402gin "github.com/t402-io/t402/sdks/go/http/gin"
+)
+
+func main() {
+    r := gin.Default()
+    r.Use(t402gin.PaymentMiddleware(t402gin.Config{
+        PayTo:   "0xYourAddress...",
+        Network: "eip155:8453",
+    }))
+    r.GET("/api/premium", func(c *gin.Context) {
+        c.JSON(200, gin.H{"data": "Premium content!"})
+    })
+    r.Run(":3000")
+}
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+```yaml
+# application.yml
+t402:
+  enabled: true
+  facilitator-url: https://facilitator.t402.io
+  network: eip155:8453
+  pay-to: "0xYourAddress..."
+  asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+```
+
+```java
+@RestController
+public class ApiController {
+    @GetMapping("/api/premium")
+    public Map<String, String> premium() {
+        return Map.of("data", "Premium content!");
+    }
+}
+```
+
+  </Tabs.Tab>
+</Tabs>
+
 ## Client Setup
 
+<Tabs items={['TypeScript', 'Python', 'Go', 'Java']}>
+  <Tabs.Tab>
 ```typescript
 import { t402Client, wrapFetchWithPayment } from '@t402/fetch'
 import { registerExactEvmScheme } from '@t402/evm/exact/client'
@@ -58,6 +159,42 @@ const fetchWithPayment = wrapFetchWithPayment(fetch, client)
 const response = await fetchWithPayment('https://api.example.com/api/premium')
 const data = await response.json()
 ```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+from t402 import T402Client
+
+client = T402Client(private_key="0x...")
+
+response = client.get("https://api.example.com/api/premium")
+data = response.json()
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+```go
+import "github.com/t402-io/t402/sdks/go/client"
+
+c := client.New(privateKey)
+
+resp, err := c.Get("https://api.example.com/api/premium")
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+```java
+import io.t402.sdk.evm.EvmSigner;
+import io.t402.sdk.http.T402HttpClient;
+
+EvmSigner signer = EvmSigner.fromPrivateKey("0x...", 8453, "https://mainnet.base.org");
+T402HttpClient client = new T402HttpClient(signer);
+
+var response = client.get("https://api.example.com/api/premium");
+```
+
+  </Tabs.Tab>
+</Tabs>
 
 ## What's Next?
 

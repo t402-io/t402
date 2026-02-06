@@ -1,3 +1,5 @@
+import { FileTree, Tabs } from 'nextra/components'
+
 # Installation
 
 Install T402 packages for your preferred language.
@@ -101,8 +103,6 @@ The Go module includes:
 
 ## Java
 
-import { Tabs } from 'nextra/components'
-
 <Tabs items={['Maven', 'Gradle']}>
 <Tabs.Tab>
 ```xml
@@ -157,3 +157,48 @@ See [MCP Integration](/advanced/mcp) for configuration details.
 ### Java
 - Java 17+
 - Maven or Gradle
+
+## Project Structure
+
+After installation, a typical T402 project looks like:
+
+<FileTree>
+  <FileTree.Folder name="my-app" defaultOpen>
+    <FileTree.Folder name="src" defaultOpen>
+      <FileTree.File name="server.ts" />
+      <FileTree.File name="client.ts" />
+      <FileTree.File name="routes.ts" />
+    </FileTree.Folder>
+    <FileTree.File name="package.json" />
+    <FileTree.File name=".env" />
+  </FileTree.Folder>
+</FileTree>
+
+## Verify Installation
+
+<Tabs items={['TypeScript', 'Python', 'Go', 'Java']}>
+  <Tabs.Tab>
+```bash
+npx t402 --version
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+python -c "import t402; print(t402.__version__)"
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+go list -m github.com/t402-io/t402/sdks/go
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+mvn dependency:tree | grep t402
+```
+
+  </Tabs.Tab>
+</Tabs>
