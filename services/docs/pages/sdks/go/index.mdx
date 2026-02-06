@@ -51,7 +51,7 @@ t402 version
 ## Features
 
 - **Multi-Chain**: All 10 blockchain families (EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks)
-- **Server**: Gin middleware for payment protection
+- **Server**: HTTP middleware for payment protection (Gin, Echo, Chi, Fiber)
 - **Client**: HTTP client with automatic 402 handling
 - **Facilitator**: Full facilitator implementation
 - **CLI**: Command-line tools for testing and debugging
@@ -131,6 +131,9 @@ func main() {
 | `sdks/go/mechanisms/stacks` | Stacks (Bitcoin L2) |
 | `sdks/go/http` | HTTP client and server |
 | `sdks/go/http/gin` | Gin middleware |
+| `sdks/go/http/echo` | Echo middleware |
+| `sdks/go/http/chi` | Chi middleware |
+| `sdks/go/http/fiber` | Fiber middleware |
 | `sdks/go/signers/evm` | EVM wallet signers |
 | `sdks/go/signers/svm` | Solana wallet signers |
 | `sdks/go/signers/ton` | TON wallet signers |
@@ -274,4 +277,4 @@ type X402Facilitator interface {
 
 ## Requirements
 
-- Go 1.21+
+- Go 1.24+

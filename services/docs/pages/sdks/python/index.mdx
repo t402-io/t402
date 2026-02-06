@@ -22,9 +22,9 @@ pip install t402[all]     # All optional dependencies
 | Feature | Status |
 |---------|--------|
 | Core Types & Utilities | ✅ |
-| Server Middleware (FastAPI, Flask) | ✅ |
+| Server Middleware (FastAPI, Flask, Django, Starlette) | ✅ |
 | Client Libraries (httpx, requests) | ✅ |
-| Multi-Chain Support (EVM, TON, TRON, Solana) | ✅ |
+| Multi-Chain Support (EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos) | ✅ |
 | ERC-4337 Account Abstraction | ✅ |
 | USDT0 Cross-Chain Bridge | ✅ |
 | WDK Integration | ✅ |
@@ -72,11 +72,19 @@ async with t402HttpxClient(account=account) as client:
 | `t402` | Core types and utilities |
 | `t402.ton` | TON blockchain support |
 | `t402.tron` | TRON blockchain support |
+| `t402.near` | NEAR Protocol support |
+| `t402.aptos` | Aptos blockchain support |
+| `t402.tezos` | Tezos blockchain support |
+| `t402.polkadot` | Polkadot Asset Hub support |
+| `t402.stacks` | Stacks (Bitcoin L2) support |
+| `t402.cosmos` | Cosmos/Noble support |
 | `t402.erc4337` | ERC-4337 account abstraction |
 | `t402.bridge` | USDT0 cross-chain bridge |
 | `t402.wdk` | Tether WDK integration |
 | `t402.fastapi` | FastAPI middleware |
 | `t402.flask` | Flask middleware |
+| `t402.django` | Django middleware |
+| `t402.starlette` | Starlette middleware |
 | `t402.clients.httpx` | httpx client adapter |
 | `t402.clients.requests` | requests adapter |
 

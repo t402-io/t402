@@ -51,26 +51,26 @@ importers:
         specifier: ^7.3.1
         version: 7.3.1
       '@t402/core':
-        specifier: ^2.3.1
-        version: 2.3.1
+        specifier: ^2.4.0
+        version: 2.4.0
       '@t402/evm':
-        specifier: ^2.3.1
-        version: 2.3.1(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))
+        specifier: ^2.4.0
+        version: 2.4.0(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))
       '@t402/evm-core':
-        specifier: ^2.3.1
-        version: 2.3.1(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))
+        specifier: ^2.4.0
+        version: 2.4.0(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))
       '@t402/fetch':
-        specifier: ^2.3.1
-        version: 2.3.1
+        specifier: ^2.4.0
+        version: 2.4.0
       '@t402/next':
-        specifier: ^2.3.1
-        version: 2.3.1(@t402/paywall@2.3.1(f7a2a1d91d26626eaf1c04ee87b1aea8))(next@16.1.4(@babel/core@7.28.6)(@playwright/test@1.58.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))
+        specifier: ^2.4.0
+        version: 2.4.0(@t402/paywall@2.4.0(b2a9a943825d450065e976e43c033ad8))(next@16.1.4(@babel/core@7.28.6)(@playwright/test@1.58.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))
       '@t402/paywall':
-        specifier: ^2.3.1
-        version: 2.3.1(f7a2a1d91d26626eaf1c04ee87b1aea8)
+        specifier: ^2.4.0
+        version: 2.4.0(b2a9a943825d450065e976e43c033ad8)
       '@t402/react':
-        specifier: ^2.3.1
-        version: 2.3.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+        specifier: ^2.4.0
+        version: 2.4.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@tanstack/react-query':
         specifier: ^5.0.0
         version: 5.90.19(react@19.2.3)
@@ -4050,53 +4050,61 @@ packages:
     resolution: {integrity: sha512-4BAffykYOgO+5nzBWYwE3W90sBgLJoUPRWWcL8wlyiM8IB8ipJz3UMJ9KXQd1RKQXpKp8Tutn80HZtWsu2u76w==}
     engines: {node: '>=10'}
 
-  '@t402/core@2.3.1':
-    resolution: {integrity: sha512-8RTP+EHLpsBLBK9OH8ae2Rb/S1JbLR9/uKt3L0ou63D6O29r35f+v6GAep60dTeSkuIU2SCOoovoRB1zRReyJg==}
+  '@t402/core@2.4.0':
+    resolution: {integrity: sha512-S9xeITWAmcd6+mr9zSkNY1WpUXLAM+IJ10rRyXUJjVJe+U2xqQ0ncJWCTxEpLWeGBTy0KaMnPl1Gckx1nnTfgQ==}
 
-  '@t402/evm-core@2.3.1':
-    resolution: {integrity: sha512-jX9gu39WwFWJbVstPsGPIzRCavxONh7Ir8Mm+1BKN3sgsiQmeJ8yvwXFcxxmqTbl64JKOB366s+vNgh2SPuRJw==}
+  '@t402/evm-core@2.4.0':
+    resolution: {integrity: sha512-F5GvQCiiws1Iw0yVCScmyEp2nKfGckSqzuPBSdjFB1TjBqg8c6PYobgNBAsA2irZs1RnHqnxOMMrfnGx9CWb/Q==}
     peerDependencies:
       viem: ^2.0.0
     peerDependenciesMeta:
       viem:
         optional: true
 
-  '@t402/evm@2.3.1':
-    resolution: {integrity: sha512-G5aUohDGbIizgV867yy/mVn2TpVZmEFRWGRcKaqI/bvQwgMnBwBDA3yQ2EkJk5gvGT0PdpOLFXWQejwDpmJtiw==}
+  '@t402/evm@2.4.0':
+    resolution: {integrity: sha512-IlFPoDnxt6JaEZhH1AdieEX0GxzgpmoBvJYrgoWPaMvSBNJpCrxkN3qmP+uGbslm9EyxK0rH33VR5MW30NEbpA==}
     peerDependencies:
       viem: ^2.0.0
 
-  '@t402/extensions@2.3.1':
-    resolution: {integrity: sha512-ZAntauxT8HMtQ3mkd7iOsKnoJiDklJAon+yzg0Xdls0iYScoL46HdnAweyqTc8gVzjDJDlyXTsSODcGaP+/jbg==}
+  '@t402/extensions@2.4.0':
+    resolution: {integrity: sha512-X92PZIfWe7myupp53HhnzQMnwM+TnE/8wtiNWa4ATuIFBH2RL56mwlqN7UYOFH/YlSyVH+lroswvX5W2fB5LKA==}
     peerDependencies:
       viem: ^2.0.0
     peerDependenciesMeta:
       viem:
         optional: true
 
-  '@t402/fetch@2.3.1':
-    resolution: {integrity: sha512-h8T0GRGA76e8K6DLiuiUdPsrVrlOWnjQum82RalejSVZVINkoZVawVMVFv22Kvujdmz0ZDGnpC1zZyQatssvoA==}
+  '@t402/fetch@2.4.0':
+    resolution: {integrity: sha512-vammBty/YYzcTLoMd9X0CtfQaWPsGrBNqxBC8Zk4jHzFKCcdQ7NDC39zEIHgfp7wzsDCuoN/gDKjJRuSMBVdIw==}
 
-  '@t402/next@2.3.1':
-    resolution: {integrity: sha512-Y6nGAdtDFHEt/i3NJLzxoIcZ46fh9pvvmICD28tC6/Wtbhvq2RY/57xG9IDhJpM3A1pNy93rX2DUEJwkRqnqBQ==}
+  '@t402/next@2.4.0':
+    resolution: {integrity: sha512-zEKN6dmMhsj8c+5UAdVAfgTnrVqGevf8i6T45B+RwRLIYQcR9hSUMjVOwUU3AwXlYF85n1Hmlfnz5nDw5ZajbQ==}
     peerDependencies:
-      '@t402/paywall': 2.3.1
+      '@t402/paywall': 2.4.0
       next: ^15.0.0 || ^16.0.0
     peerDependenciesMeta:
       '@t402/paywall':
         optional: true
 
-  '@t402/paywall@2.3.1':
-    resolution: {integrity: sha512-WuDG0pngx4Swka1sPZZeSveTtOV5Ft7O1rC1aNuQWfUs+cruQJ+PNoEkhrTBy5foQgzfqdSAo+nDw5tFbEtFGA==}
+  '@t402/paywall@2.4.0':
+    resolution: {integrity: sha512-R3NNwQ801hMbshDNGUkeBk11br71dPTGC1VHXtE0Ws3S1MUOJNRm6WqOg5SrY6jC9Fy5kxnE0hUyPbw7OTI5hA==}
     peerDependencies:
       react: ^19.0.0
       react-dom: ^19.0.0
 
-  '@t402/react@2.3.1':
-    resolution: {integrity: sha512-7peGA9fywUnhK0a/GM4FgaQF/DPBRvH1MSrR81tAUf+47I7Fkbm7HPrpTNIYHGxOmqJoyafdzgC4dR8t7QOKOg==}
+  '@t402/react@2.4.0':
+    resolution: {integrity: sha512-0cdyfhmLrdWhsaN0A9fIPiOiepneMFvtnx7yq+qxT3s13cbLjqd2jSi3dCPly2ijUvC8PsWYjsDGoxa+wyXiPg==}
     peerDependencies:
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
+
+  '@t402/stacks@2.4.0':
+    resolution: {integrity: sha512-rwXl1QHM3oSz8XrKdxIZxD5UopcFMNcqR7/s0MGOrw3JlUSGwD2c8fAKhbjICw7hKS22HhW/tbMx+EoiqB4XwA==}
+    peerDependencies:
+      '@stacks/transactions': '>=7.0.0'
+    peerDependenciesMeta:
+      '@stacks/transactions':
+        optional: true
 
   '@tailwindcss/node@4.1.18':
     resolution: {integrity: sha512-DoR7U1P7iYhw16qJ49fgXUlry1t4CpXeErJHnQ44JgTSKMaZUdf17cfn5mHchfJ4KRBZRFA/Coo+MUF5+gOaCQ==}
@@ -6049,7 +6057,7 @@ packages:
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
-    deprecated: Glob versions prior to v9 are no longer supported
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   glob@9.3.5:
     resolution: {integrity: sha512-e1LleDykUz2Iu+MTYdkSsuWX8lvAjAcs0Xef0lNIu0S2wOAzuTxCJtcd9S3cijlwYF18EsU3rzb8jPVobxDh9Q==}
@@ -15461,50 +15469,50 @@ snapshots:
     dependencies:
       defer-to-connect: 2.0.1
 
-  '@t402/core@2.3.1':
+  '@t402/core@2.4.0':
     dependencies:
       zod: 3.25.76
 
-  '@t402/evm-core@2.3.1(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))':
+  '@t402/evm-core@2.4.0(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))':
     dependencies:
-      '@t402/core': 2.3.1
+      '@t402/core': 2.4.0
     optionalDependencies:
       viem: 2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
 
-  '@t402/evm@2.3.1(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))':
+  '@t402/evm@2.4.0(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))':
     dependencies:
-      '@t402/core': 2.3.1
-      '@t402/evm-core': 2.3.1(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))
+      '@t402/core': 2.4.0
+      '@t402/evm-core': 2.4.0(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))
       viem: 2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
       zod: 3.25.76
 
-  '@t402/extensions@2.3.1(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))':
+  '@t402/extensions@2.4.0(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))':
     dependencies:
       '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
-      '@t402/core': 2.3.1
+      '@t402/core': 2.4.0
       ajv: 8.17.1
       zod: 3.25.76
     optionalDependencies:
       viem: 2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
 
-  '@t402/fetch@2.3.1':
+  '@t402/fetch@2.4.0':
     dependencies:
-      '@t402/core': 2.3.1
+      '@t402/core': 2.4.0
       zod: 3.25.76
 
-  '@t402/next@2.3.1(@t402/paywall@2.3.1(f7a2a1d91d26626eaf1c04ee87b1aea8))(next@16.1.4(@babel/core@7.28.6)(@playwright/test@1.58.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))':
+  '@t402/next@2.4.0(@t402/paywall@2.4.0(b2a9a943825d450065e976e43c033ad8))(next@16.1.4(@babel/core@7.28.6)(@playwright/test@1.58.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))':
     dependencies:
-      '@t402/core': 2.3.1
-      '@t402/extensions': 2.3.1(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))
+      '@t402/core': 2.4.0
+      '@t402/extensions': 2.4.0(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))
       next: 16.1.4(@babel/core@7.28.6)(@playwright/test@1.58.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       zod: 3.25.76
     optionalDependencies:
-      '@t402/paywall': 2.3.1(f7a2a1d91d26626eaf1c04ee87b1aea8)
+      '@t402/paywall': 2.4.0(b2a9a943825d450065e976e43c033ad8)
     transitivePeerDependencies:
       - viem
 
-  '@t402/paywall@2.3.1(f7a2a1d91d26626eaf1c04ee87b1aea8)':
+  '@t402/paywall@2.4.0(b2a9a943825d450065e976e43c033ad8)':
     dependencies:
       '@scure/base': 1.2.6
       '@solana-program/compute-budget': 0.8.0(@solana/kit@5.4.0(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)(utf-8-validate@5.0.10))
@@ -15513,7 +15521,8 @@ snapshots:
       '@solana/kit': 5.4.0(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)(utf-8-validate@5.0.10)
       '@solana/transaction-confirmation': 5.4.0(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)(utf-8-validate@5.0.10)
       '@solana/wallet-standard-features': 1.3.0
-      '@t402/core': 2.3.1
+      '@t402/core': 2.4.0
+      '@t402/stacks': 2.4.0(@stacks/transactions@7.3.1)
       '@tanstack/react-query': 5.90.19(react@19.2.3)
       '@ton/core': 0.62.1(@ton/crypto@3.3.0)
       '@ton/ton': 16.1.0(@ton/core@0.62.1(@ton/crypto@3.3.0))(@ton/crypto@3.3.0)
@@ -15547,6 +15556,7 @@ snapshots:
       - '@safe-global/safe-apps-provider'
       - '@safe-global/safe-apps-sdk'
       - '@solana/sysvars'
+      - '@stacks/transactions'
       - '@tanstack/query-core'
       - '@ton/crypto'
       - '@types/react'
@@ -15575,11 +15585,17 @@ snapshots:
       - use-sync-external-store
       - utf-8-validate
 
-  '@t402/react@2.3.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+  '@t402/react@2.4.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
     dependencies:
-      '@t402/core': 2.3.1
+      '@t402/core': 2.4.0
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
+
+  '@t402/stacks@2.4.0(@stacks/transactions@7.3.1)':
+    dependencies:
+      '@t402/core': 2.4.0
+    optionalDependencies:
+      '@stacks/transactions': 7.3.1
 
   '@tailwindcss/node@4.1.18':
     dependencies:

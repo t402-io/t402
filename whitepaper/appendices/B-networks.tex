@@ -6,7 +6,7 @@ This appendix provides comprehensive network configuration details for all suppo
 
 \section{EVM Networks}
 
-T402 supports 19+ EVM-compatible networks through the unified EIP-3009 interface.
+T402 supports 25 EVM-compatible networks through the unified EIP-3009 interface.
 
 \begin{longtable}{l l l}
 \caption{Supported EVM Networks with USDT0 (LayerZero OFT)} \label{tab:evm-networks} \\
@@ -77,7 +77,7 @@ Decimals & 6 \\
 CAIP-2 ID (Mainnet) & \code{ton:mainnet} \\
 CAIP-2 ID (Testnet) & \code{ton:testnet} \\
 USDT Jetton Master (Mainnet) & \code{EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id\_sDs} \\
-USDT Jetton Master (Testnet) & \code{kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy} \\
+USDT Jetton Master (Testnet) & \code{kQD0GKBM8ZbryVk2aESmzfU6b9b\_8era\_IkvBSELujFZPsyy} \\
 Workchain & 0 (basechain) \\
 Decimals & 6 \\
 \bottomrule
@@ -193,10 +193,29 @@ Decimals & 6 \\
 \midrule
 CAIP-2 ID (Mainnet) & \code{stacks:1} \\
 CAIP-2 ID (Testnet) & \code{stacks:2147483648} \\
-USDT Contract & \code{SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.token-usdt} \\
+USDT Contract & \code{SP3Y2ZSH8P7D50B0VBTSX11S7XSG24M1VB9YFQA4K.token-susdc} \\
 Standard & SIP-010 \\
 Decimals & 6 \\
 Bitcoin Finality & $\sim$10 minutes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Cosmos}
+
+\begin{table}[htbp]
+\centering
+\caption{Cosmos/Noble Network Configuration}
+\label{tab:cosmos-config}
+\begin{tabular}{l l}
+\toprule
+\textbf{Property} & \textbf{Value} \\
+\midrule
+CAIP-2 ID (Mainnet) & \code{cosmos:noble-1} \\
+CAIP-2 ID (Testnet) & \code{cosmos:grand-1} \\
+USDT Asset & \code{uusdt} \\
+Standard & Native token \\
+Decimals & 6 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -216,13 +235,11 @@ The official T402 Facilitator service uses the following addresses for gas spons
 \midrule
 EVM (all networks) & 0xC88f67e776f16DcFBf42e6bDda1B82604448899B \\
 Solana & 8GGtWHRQ1wz5gDKE2KXZLktqzcfV1CBqSbeUZjA7hoWL \\
-TON & EQ5d11d21276ac6b5efdf179e654ff0c6eee34e0abfa263a \\
+TON (mainnet) & EQDjv9CUEJ\_\_D\_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkEUe \\
+TON (testnet) & kQDjv9CUEJ\_\_D\_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkP6U \\
 TRON & TT1MqNNj2k5qdGA6nrrCodW6oyHbbAreQ5 \\
-NEAR & facilitator.t402.near \\
-Aptos & \textit{Planned} \\
-Tezos & \textit{Planned} \\
-Polkadot & \textit{Planned} \\
-Stacks & \textit{Planned} \\
+Stacks & SP36B1B191JTQAZTRKKWRN7J0YHHM41W9P9P7EPR5 \\
+Cosmos/Noble & noble1ejc2c2gvk46h7kyulx9fus85vdpq0zdjwkfav0 \\
 \bottomrule
 \end{tabular}
 \end{table}
