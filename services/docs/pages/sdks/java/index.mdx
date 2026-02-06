@@ -1,6 +1,6 @@
 # Java SDK
 
-import { Cards, Tabs } from 'nextra/components'
+import { Cards, FileTree, Tabs } from 'nextra/components'
 
 The T402 Java SDK provides a complete implementation of the t402 payment protocol for Java applications, with first-class support for Spring Boot, multiple HTTP frameworks, and multi-chain payments across 10 blockchain families.
 
@@ -114,6 +114,32 @@ HttpResponse<String> response = client.get(
     "0xReceiverAddress"
 );
 ```
+
+## Package Structure
+
+<FileTree>
+  <FileTree.Folder name="io.t402" defaultOpen>
+    <FileTree.Folder name="server" />
+    <FileTree.Folder name="client" />
+    <FileTree.Folder name="crypto" />
+    <FileTree.Folder name="spring" defaultOpen>
+      <FileTree.Folder name="reactive" />
+    </FileTree.Folder>
+    <FileTree.Folder name="micronaut" />
+    <FileTree.Folder name="quarkus" />
+    <FileTree.Folder name="schemes" defaultOpen>
+      <FileTree.Folder name="svm" />
+      <FileTree.Folder name="ton" />
+      <FileTree.Folder name="tron" />
+      <FileTree.Folder name="near" />
+      <FileTree.Folder name="cosmos" />
+    </FileTree.Folder>
+    <FileTree.Folder name="erc4337" />
+    <FileTree.Folder name="bridge" />
+    <FileTree.Folder name="wdk" />
+    <FileTree.Folder name="mcp" />
+  </FileTree.Folder>
+</FileTree>
 
 ## Documentation
 

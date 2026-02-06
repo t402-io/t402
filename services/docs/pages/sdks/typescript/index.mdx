@@ -2,7 +2,7 @@
 
 The T402 TypeScript SDK provides comprehensive support for HTTP-native stablecoin payments across 10 blockchain families.
 
-import { Callout } from 'nextra/components'
+import { Cards, FileTree, Callout } from 'nextra/components'
 
 <Callout type="info">
   **v2.4.0 Released** - All packages are now published under the `@t402` namespace on npm.
@@ -73,6 +73,46 @@ import { Callout } from 'nextra/components'
 |---------|---------|-------------|
 | `@t402/cli` | 2.4.0 | Command-line tools for testing and development |
 | `@t402/mcp` | 2.4.0 | MCP server for AI agent payments |
+
+## Package Structure
+
+<FileTree>
+  <FileTree.Folder name="@t402" defaultOpen>
+    <FileTree.Folder name="core" />
+    <FileTree.Folder name="evm-core" />
+    <FileTree.Folder name="mechanisms" defaultOpen>
+      <FileTree.Folder name="evm" />
+      <FileTree.Folder name="svm" />
+      <FileTree.Folder name="ton" />
+      <FileTree.Folder name="tron" />
+      <FileTree.Folder name="near" />
+      <FileTree.Folder name="aptos" />
+      <FileTree.Folder name="tezos" />
+      <FileTree.Folder name="polkadot" />
+      <FileTree.Folder name="stacks" />
+      <FileTree.Folder name="cosmos" />
+    </FileTree.Folder>
+    <FileTree.Folder name="http" defaultOpen>
+      <FileTree.Folder name="express" />
+      <FileTree.Folder name="hono" />
+      <FileTree.Folder name="fastify" />
+      <FileTree.Folder name="next" />
+      <FileTree.Folder name="fetch" />
+      <FileTree.Folder name="axios" />
+    </FileTree.Folder>
+    <FileTree.Folder name="ui" defaultOpen>
+      <FileTree.Folder name="paywall" />
+      <FileTree.Folder name="react" />
+      <FileTree.Folder name="vue" />
+    </FileTree.Folder>
+    <FileTree.Folder name="wdk" />
+    <FileTree.Folder name="wdk-gasless" />
+    <FileTree.Folder name="wdk-bridge" />
+    <FileTree.Folder name="wdk-multisig" />
+    <FileTree.Folder name="mcp" />
+    <FileTree.Folder name="cli" />
+  </FileTree.Folder>
+</FileTree>
 
 ## Quick Install
 
@@ -673,6 +713,17 @@ sdks/typescript/
 │   └── cli/            # @t402/cli
 └── pnpm-workspace.yaml
 ```
+
+## Deep Dive
+
+<Cards>
+  <Cards.Card title="HTTP Frameworks" href="/sdks/typescript/http-frameworks" />
+  <Cards.Card title="UI Components" href="/sdks/typescript/ui-components" />
+  <Cards.Card title="Gasless Payments" href="/sdks/typescript/wdk-gasless" />
+  <Cards.Card title="Cross-Chain Bridge" href="/sdks/typescript/wdk-bridge" />
+  <Cards.Card title="Multi-Sig Wallets" href="/sdks/typescript/wdk-multisig" />
+  <Cards.Card title="MCP Server" href="/sdks/typescript/mcp" />
+</Cards>
 
 ## Requirements
 

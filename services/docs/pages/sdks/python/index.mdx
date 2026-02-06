@@ -1,6 +1,6 @@
 # Python SDK
 
-import { Cards } from 'nextra/components'
+import { Cards, FileTree } from 'nextra/components'
 
 The T402 Python SDK provides comprehensive support for HTTP-native stablecoin payments with multi-chain support.
 
@@ -88,6 +88,33 @@ async with t402HttpxClient(account=account) as client:
 | `t402.clients.httpx` | httpx client adapter |
 | `t402.clients.requests` | requests adapter |
 
+## Module Structure
+
+<FileTree>
+  <FileTree.Folder name="t402" defaultOpen>
+    <FileTree.File name="__init__.py" />
+    <FileTree.Folder name="ton" />
+    <FileTree.Folder name="tron" />
+    <FileTree.Folder name="near" />
+    <FileTree.Folder name="aptos" />
+    <FileTree.Folder name="tezos" />
+    <FileTree.Folder name="polkadot" />
+    <FileTree.Folder name="stacks" />
+    <FileTree.Folder name="cosmos" />
+    <FileTree.Folder name="erc4337" />
+    <FileTree.Folder name="bridge" />
+    <FileTree.Folder name="wdk" />
+    <FileTree.Folder name="fastapi" />
+    <FileTree.Folder name="flask" />
+    <FileTree.Folder name="django" />
+    <FileTree.Folder name="starlette" />
+    <FileTree.Folder name="clients" defaultOpen>
+      <FileTree.File name="httpx.py" />
+      <FileTree.File name="requests.py" />
+    </FileTree.Folder>
+  </FileTree.Folder>
+</FileTree>
+
 ## Documentation
 
 <Cards>
@@ -95,6 +122,7 @@ async with t402HttpxClient(account=account) as client:
   <Cards.Card title="Server" href="/sdks/python/server" />
   <Cards.Card title="Facilitator" href="/sdks/python/facilitator" />
   <Cards.Card title="CLI" href="/sdks/python/cli" />
+  <Cards.Card title="MCP Server" href="/advanced/mcp" />
 </Cards>
 
 ## Requirements
