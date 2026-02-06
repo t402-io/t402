@@ -62,15 +62,19 @@ This plan covers 5 phases:
 **Blocked Networks (pending audit):**
 - Ethereum/Base/Arbitrum Mainnet: T402UptoRouter
 
-### 1.4 Deploy Missing Facilitator Wallets
+### 1.4 Deploy Missing Facilitator Wallets — ✅ Complete
 **Priority:** P0 | **Effort:** 1 week
 
 | Network | CAIP-2 | Status |
 |---------|--------|--------|
-| Aptos | `aptos:1` | Pending deploy |
-| Tezos | `tezos:NetXdQprcVkpaWU` | Pending deploy |
-| Polkadot Asset Hub | `polkadot:68d56f15f85d3136970ec16946040bc1` | Pending deploy |
-| Stacks | `stacks:1` | Pending deploy |
+| Aptos | `aptos:1` | ✅ Live (exact-direct, auto-enabled) |
+| Tezos | `tezos:NetXdQprcVkpaWU` | ✅ Live (exact-direct, auto-enabled) |
+| Polkadot Asset Hub | `polkadot:68d56f15f85d3136970ec16946040bc1` | ✅ Live (exact-direct, auto-enabled) |
+| Stacks | `stacks:1` | ✅ Live (exact-direct, address derived from EVM key) |
+| TON | `ton:mainnet` + `ton:testnet` | ✅ Live (exact, addresses from mnemonic) |
+| Cosmos/Noble | `cosmos:noble-1` + `cosmos:grand-1` | ✅ Live (exact-direct, address derived from EVM key) |
+
+**Final count:** 44 networks, 64 kinds across 11 blockchain families.
 
 ---
 
@@ -187,7 +191,7 @@ Week 21-22: Phase 5 - Documentation & Polish            ✅
 | P1 Security Issues | 18 open | 0 open | 0 open | ✅ |
 | Test Coverage (UI) | 3-19% | 30-70% | 30-70% | ✅ |
 | SDK Feature Parity | 72-95% | 95%+ | 90%+ | ✅ |
-| Facilitator Wallets | 30/34 | 30/34 | 34/34 | ⏳ Pending deploy |
+| Facilitator Networks | 38 | 44 | 34+ | ✅ |
 | A2A Transport | 0% | 100% | 100% | ✅ |
 | Bazaar API | 0% | 100% | 100% | ✅ |
 
@@ -200,7 +204,6 @@ These items require external action or are deferred:
 | Item | Blocked By | Notes |
 |------|------------|-------|
 | Smart contract audit | External auditor | Required for mainnet upto router |
-| 4 facilitator wallets | Ops team deployment | Aptos, Tezos, Polkadot, Stacks |
 
 ---
 
