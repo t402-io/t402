@@ -151,9 +151,19 @@ func (r *AuditRepository) List(ctx context.Context, filter AuditFilter) ([]*Audi
 
 	query += " ORDER BY timestamp DESC"
 
-	if filter.Limit > 0 {
-		query += fmt.Sprintf(" LIMIT %d", filter.Limit)
+	// P1-14: Enforce maximum batch size to prevent memory exhaustion
+	const maxBatchSize = 1000
+	const defaultBatchSize = 100
+
+	limit := filter.Limit
+	if limit <= 0 {
+		limit = defaultBatchSize
 	}
+	if limit > maxBatchSize {
+		limit = maxBatchSize
+	}
+	query += fmt.Sprintf(" LIMIT %d", limit)
+
 	if filter.Offset > 0 {
 		query += fmt.Sprintf(" OFFSET %d", filter.Offset)
 	}

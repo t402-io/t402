@@ -1,0 +1,34 @@
+# T402 Code Owners
+# These owners will be requested for review when someone opens a pull request.
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repo
+* @t402-io/core
+
+# SDK owners
+/sdks/typescript/ @t402-io/sdk-typescript
+/sdks/go/ @t402-io/sdk-go
+/sdks/python/ @t402-io/sdk-python
+/sdks/java/ @t402-io/sdk-java
+
+# Facilitator service
+/services/facilitator/ @t402-io/infra @t402-io/core
+
+# Documentation
+/services/docs/ @t402-io/docs
+/services/site/ @t402-io/docs
+
+# Smart contracts
+/contracts/ @t402-io/security @t402-io/core
+
+# CI/CD and infrastructure
+/.github/ @t402-io/infra
+/services/grafana/ @t402-io/infra
+
+# Protocol specifications
+/specs/ @t402-io/core @t402-io/security
+
+# Security-sensitive files
+/SECURITY.md @t402-io/security
+**/crypto/ @t402-io/security
+**/auth/ @t402-io/security

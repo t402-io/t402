@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/big"
 	"sort"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -57,6 +58,13 @@ type BalanceChecker interface {
 	GetBalance(ctx context.Context, network, address, asset string) (string, error)
 }
 
+// RouteStats tracks success/failure statistics for routes
+type RouteStats struct {
+	SuccessCount int64
+	FailureCount int64
+	LastFailure  time.Time
+}
+
 // Router finds and scores routes for payment intents
 type Router struct {
 	config          *RouterConfig
@@ -64,6 +72,10 @@ type Router struct {
 	gasEstimator    GasEstimator
 	bridgeProvider  BridgeProvider
 	balanceChecker  BalanceChecker
+
+	// P1-9: Track route reliability to penalize failed paths
+	routeStats    map[string]*RouteStats // key: "protocol:sourceNetwork:targetNetwork"
+	routeStatsMu  sync.RWMutex
 }
 
 // NewRouter creates a new route finder
@@ -83,6 +95,7 @@ func NewRouter(
 		gasEstimator:    gasEstimator,
 		bridgeProvider:  bridgeProvider,
 		balanceChecker:  balanceChecker,
+		routeStats:      make(map[string]*RouteStats),
 	}
 }
 
@@ -335,6 +348,28 @@ func (r *Router) scoreRoute(route *Route, intent *Intent) float64 {
 		}
 	}
 
+	// P1-9: Factor 6: Historical reliability (penalize routes with high failure rate)
+	if route.RequiresBridge && route.BridgeProtocol != "" {
+		statsKey := fmt.Sprintf("%s:%s:%s", route.BridgeProtocol, route.SourceNetwork, route.TargetNetwork)
+		r.routeStatsMu.RLock()
+		stats := r.routeStats[statsKey]
+		r.routeStatsMu.RUnlock()
+
+		if stats != nil {
+			total := stats.SuccessCount + stats.FailureCount
+			if total >= 5 { // Only apply penalty if we have enough data
+				failureRate := float64(stats.FailureCount) / float64(total)
+				// Apply penalty based on failure rate (max 0.3 penalty for 100% failure)
+				score -= failureRate * 0.3
+
+				// Additional penalty for recent failures (within last hour)
+				if time.Since(stats.LastFailure) < time.Hour {
+					score -= 0.1
+				}
+			}
+		}
+	}
+
 	// Ensure score is between 0 and 1
 	if score < 0 {
 		score = 0
@@ -344,6 +379,51 @@ func (r *Router) scoreRoute(route *Route, intent *Intent) float64 {
 	}
 
 	return score
+}
+
+// P1-9: RecordRouteSuccess records a successful route execution
+func (r *Router) RecordRouteSuccess(route *Route) {
+	if route == nil || !route.RequiresBridge || route.BridgeProtocol == "" {
+		return
+	}
+
+	statsKey := fmt.Sprintf("%s:%s:%s", route.BridgeProtocol, route.SourceNetwork, route.TargetNetwork)
+	r.routeStatsMu.Lock()
+	defer r.routeStatsMu.Unlock()
+
+	stats := r.routeStats[statsKey]
+	if stats == nil {
+		stats = &RouteStats{}
+		r.routeStats[statsKey] = stats
+	}
+	stats.SuccessCount++
+}
+
+// P1-9: RecordRouteFailure records a failed route execution
+func (r *Router) RecordRouteFailure(route *Route) {
+	if route == nil || !route.RequiresBridge || route.BridgeProtocol == "" {
+		return
+	}
+
+	statsKey := fmt.Sprintf("%s:%s:%s", route.BridgeProtocol, route.SourceNetwork, route.TargetNetwork)
+	r.routeStatsMu.Lock()
+	defer r.routeStatsMu.Unlock()
+
+	stats := r.routeStats[statsKey]
+	if stats == nil {
+		stats = &RouteStats{}
+		r.routeStats[statsKey] = stats
+	}
+	stats.FailureCount++
+	stats.LastFailure = time.Now()
+}
+
+// P1-9: GetRouteStats returns reliability statistics for a route
+func (r *Router) GetRouteStats(protocol, sourceNetwork, targetNetwork string) *RouteStats {
+	statsKey := fmt.Sprintf("%s:%s:%s", protocol, sourceNetwork, targetNetwork)
+	r.routeStatsMu.RLock()
+	defer r.routeStatsMu.RUnlock()
+	return r.routeStats[statsKey]
 }
 
 // findBestTargetNetwork determines the best target network when not specified

@@ -569,7 +569,8 @@ func TestE2E_SettlementFlow(t *testing.T) {
 			}
 			server := createFullTestServer(mock, nil)
 
-			body := fmt.Sprintf(`{"paymentPayload":{"t402Version":2,"payload":{},"accepted":{"scheme":"%s","network":"%s"}},"paymentRequirements":{"network":"%s","scheme":"%s","asset":"usdt","amount":"1000000","payTo":"0xrecipient"}}`,
+			// P1-2: Include amount in payload to satisfy amount validation
+			body := fmt.Sprintf(`{"paymentPayload":{"t402Version":2,"payload":{"amount":"1000000"},"accepted":{"scheme":"%s","network":"%s"}},"paymentRequirements":{"network":"%s","scheme":"%s","asset":"usdt","amount":"1000000","payTo":"0xrecipient"}}`,
 				tt.scheme, tt.network, tt.network, tt.scheme)
 
 			req := httptest.NewRequest(http.MethodPost, "/settle", bytes.NewBufferString(body))

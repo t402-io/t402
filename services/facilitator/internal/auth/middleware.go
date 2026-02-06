@@ -151,7 +151,16 @@ func getPermissionForPath(path, method string) string {
 		return "settle"
 	case "/supported":
 		return "supported"
+	// P1-15: Stats endpoints require explicit stats permission
+	case "/stats/requests", "/stats/settlements":
+		return "stats"
+	case "/v1/intent/stats":
+		return "stats"
 	default:
+		// Check for path prefixes
+		if strings.HasPrefix(path, "/stats/") {
+			return "stats"
+		}
 		return "read"
 	}
 }

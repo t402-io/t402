@@ -2,11 +2,46 @@ package cache
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
 	"net/url"
+	"regexp"
 	"time"
 
 	"github.com/redis/go-redis/v9"
 )
+
+// P1-4: Cache key validation constants
+const (
+	maxKeyLength = 1024 // Maximum cache key length
+)
+
+// P1-4: validKeyPattern matches safe cache key characters
+// Only alphanumeric, colons, underscores, hyphens, and dots are allowed
+var validKeyPattern = regexp.MustCompile(`^[a-zA-Z0-9:_\-\.]+$`)
+
+// P1-4: ValidateCacheKey validates a cache key to prevent cache poisoning
+// Returns an error if the key is invalid or potentially malicious
+func ValidateCacheKey(key string) error {
+	if key == "" {
+		return fmt.Errorf("cache key cannot be empty")
+	}
+	if len(key) > maxKeyLength {
+		return fmt.Errorf("cache key exceeds maximum length of %d", maxKeyLength)
+	}
+	if !validKeyPattern.MatchString(key) {
+		return fmt.Errorf("cache key contains invalid characters")
+	}
+	return nil
+}
+
+// P1-4: SanitizeKey sanitizes a potentially unsafe string into a valid cache key
+// Uses SHA256 hash for untrusted input to ensure consistent, safe key format
+func SanitizeKey(prefix string, untrustedInput string) string {
+	h := sha256.Sum256([]byte(untrustedInput))
+	return prefix + hex.EncodeToString(h[:])
+}
 
 // Client wraps a Redis client with common operations
 type Client struct {

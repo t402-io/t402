@@ -7,6 +7,7 @@ import (
 	"log"
 	"math/big"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/t402-io/t402/services/facilitator/internal/metrics"
@@ -45,12 +46,22 @@ type ServiceConfig struct {
 	AutoSettleThreshold *big.Int
 	// AutoSettleInterval is the interval for auto-settlement checks
 	AutoSettleInterval time.Duration
+	// P1-11: MaxStreamAmount is the maximum allowed amount per stream
+	MaxStreamAmount *big.Int
+	// P1-6: SettlementTimeout is the timeout for settlement operations
+	SettlementTimeout time.Duration
+	// P1-18: LockTimeout is the timeout for database lock acquisition
+	LockTimeout time.Duration
 }
 
 // DefaultServiceConfig returns default configuration
 func DefaultServiceConfig() *ServiceConfig {
 	threshold := big.NewInt(0)
 	threshold.SetString("1000000000", 10) // 1000 USDT (6 decimals)
+
+	// P1-11: Max 100,000 USDT per stream (6 decimals)
+	maxAmount := big.NewInt(0)
+	maxAmount.SetString("100000000000", 10)
 
 	return &ServiceConfig{
 		DefaultExpiry:       24 * time.Hour,
@@ -60,6 +71,9 @@ func DefaultServiceConfig() *ServiceConfig {
 		EnableAutoSettle:    false,
 		AutoSettleThreshold: threshold,
 		AutoSettleInterval:  time.Hour,
+		MaxStreamAmount:     maxAmount,           // P1-11: 100,000 USDT limit
+		SettlementTimeout:   5 * time.Minute,     // P1-6: 5 minute settlement timeout
+		LockTimeout:         30 * time.Second,    // P1-18: 30 second lock timeout
 	}
 }
 
@@ -78,6 +92,9 @@ type Service struct {
 	// Background workers
 	stopCh chan struct{}
 	wg     sync.WaitGroup
+
+	// P1-16: Pause mechanism for auto-settlement worker
+	autoSettlePaused int32 // atomic: 0 = running, 1 = paused
 }
 
 type rateLimitState struct {
@@ -126,6 +143,23 @@ func (s *Service) Stop() {
 	s.wg.Wait()
 }
 
+// P1-16: PauseAutoSettle pauses the auto-settlement worker
+func (s *Service) PauseAutoSettle() {
+	atomic.StoreInt32(&s.autoSettlePaused, 1)
+	log.Println("Auto-settlement worker paused")
+}
+
+// P1-16: ResumeAutoSettle resumes the auto-settlement worker
+func (s *Service) ResumeAutoSettle() {
+	atomic.StoreInt32(&s.autoSettlePaused, 0)
+	log.Println("Auto-settlement worker resumed")
+}
+
+// P1-16: IsAutoSettlePaused returns whether auto-settlement is paused
+func (s *Service) IsAutoSettlePaused() bool {
+	return atomic.LoadInt32(&s.autoSettlePaused) == 1
+}
+
 // OpenStream opens a new payment stream
 func (s *Service) OpenStream(ctx context.Context, req *OpenStreamRequest) (*OpenStreamResponse, error) {
 	// Validate amount
@@ -135,6 +169,11 @@ func (s *Service) OpenStream(ctx context.Context, req *OpenStreamRequest) (*Open
 	}
 	if maxAmount.Sign() <= 0 {
 		return nil, ErrInvalidAmount
+	}
+
+	// P1-11: Validate maximum stream amount limit
+	if s.config.MaxStreamAmount != nil && maxAmount.Cmp(s.config.MaxStreamAmount) > 0 {
+		return nil, fmt.Errorf("stream amount exceeds maximum allowed: %s > %s", req.MaxAmount, s.config.MaxStreamAmount.String())
 	}
 
 	// Verify signature
@@ -222,8 +261,16 @@ func (s *Service) UpdateStream(ctx context.Context, req *UpdateStreamRequest) (*
 		return nil, ErrInvalidAmount
 	}
 
+	// P1-18: Add lock timeout to prevent indefinite blocking
+	lockTimeout := s.config.LockTimeout
+	if lockTimeout == 0 {
+		lockTimeout = 30 * time.Second // default
+	}
+	lockCtx, lockCancel := context.WithTimeout(ctx, lockTimeout)
+	defer lockCancel()
+
 	// Start transaction for atomic operation
-	tx, err := s.repo.BeginTx(ctx)
+	tx, err := s.repo.BeginTx(lockCtx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to start transaction: %w", err)
 	}
@@ -419,16 +466,27 @@ func (s *Service) CloseStream(ctx context.Context, req *CloseStreamRequest) (*Cl
 
 	var txHash string
 	if amountToSettle.Sign() > 0 {
+		// P1-6: Add settlement timeout to prevent hanging
+		settleTimeout := s.config.SettlementTimeout
+		if settleTimeout == 0 {
+			settleTimeout = 5 * time.Minute // default
+		}
+		settleCtx, settleCancel := context.WithTimeout(ctx, settleTimeout)
+		defer settleCancel()
+
 		// Settle on-chain (outside transaction to avoid long locks)
-		txHash, err = s.settler.SettleStream(ctx, stream.Network, stream.Scheme, stream.Payer, stream.Payee, stream.Asset, amountToSettle.String())
+		txHash, err = s.settler.SettleStream(settleCtx, stream.Network, stream.Scheme, stream.Payer, stream.Payee, stream.Asset, amountToSettle.String())
 		if err != nil {
 			// Revert status on failure using a new transaction
-			revertTx, txErr := s.repo.BeginTx(ctx)
+			revertCtx, revertCancel := context.WithTimeout(context.Background(), s.config.LockTimeout)
+			defer revertCancel()
+
+			revertTx, txErr := s.repo.BeginTx(revertCtx)
 			if txErr == nil {
-				revertStream, getErr := s.repo.GetByIDForUpdate(ctx, revertTx, req.StreamID)
+				revertStream, getErr := s.repo.GetByIDForUpdate(revertCtx, revertTx, req.StreamID)
 				if getErr == nil && revertStream.Status == StreamStatusClosing {
 					revertStream.Status = StreamStatusActive
-					s.repo.UpdateInTx(ctx, revertTx, revertStream)
+					s.repo.UpdateInTx(revertCtx, revertTx, revertStream)
 					revertTx.Commit()
 				} else {
 					revertTx.Rollback()
@@ -767,6 +825,12 @@ func (s *Service) autoSettleWorker() {
 }
 
 func (s *Service) processAutoSettle() {
+	// P1-16: Check if auto-settlement is paused
+	if atomic.LoadInt32(&s.autoSettlePaused) == 1 {
+		log.Println("Auto-settlement skipped: worker is paused")
+		return
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 
@@ -780,6 +844,11 @@ func (s *Service) processAutoSettle() {
 	}
 
 	for _, stream := range streams {
+		// P1-16: Check pause flag before each stream to allow mid-batch pause
+		if atomic.LoadInt32(&s.autoSettlePaused) == 1 {
+			log.Println("Auto-settlement interrupted: worker was paused")
+			return
+		}
 		// Process each stream with proper locking to prevent double-settlement
 		s.processAutoSettleStream(ctx, stream.ID)
 	}

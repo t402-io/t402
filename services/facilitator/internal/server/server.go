@@ -50,6 +50,7 @@ type Server struct {
 	auditRepo        *persistence.AuditRepository
 	tracer           *tracing.Provider
 	idempotencyStore *idempotency.Store
+	nonceStore       *idempotency.NonceStore // P1-1: Nonce tracking for replay protection
 
 	// Advanced features (require database)
 	streamingHandlers *streaming.Handlers
@@ -109,6 +110,10 @@ func NewWithTracing(
 	idempotencyStore := idempotency.NewStore(redisClient, 24*time.Hour)
 	log.Printf("Idempotency protection enabled")
 
+	// P1-1: Create nonce store for replay protection (24 hour TTL)
+	nonceStore := idempotency.NewNonceStore(redisClient, 24*time.Hour)
+	log.Printf("Nonce replay protection enabled")
+
 	// Create router
 	router := gin.New()
 
@@ -123,6 +128,7 @@ func NewWithTracing(
 		db:               db,
 		tracer:           tracer,
 		idempotencyStore: idempotencyStore,
+		nonceStore:       nonceStore, // P1-1: Nonce replay protection
 	}
 
 	// Setup persistence repositories if database is available

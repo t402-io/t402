@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"io"
 	"log"
+	"math/big"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/t402-io/t402/services/facilitator/internal/idempotency"
@@ -74,6 +76,19 @@ func (s *Server) handleVerify(c *gin.Context) {
 	// Extract network/scheme for metrics from requirements
 	network, scheme := extractNetworkScheme(req.PaymentRequirements)
 
+	// P1-10: Check signature expiration
+	if deadline, hasDeadline := extractDeadline(req.PaymentPayload); hasDeadline {
+		now := time.Now().Unix()
+		if deadline < now {
+			log.Printf("Signature expired for network=%s scheme=%s: deadline=%d now=%d", network, scheme, deadline, now)
+			c.JSON(http.StatusBadRequest, APIError{
+				Code:    "SIGNATURE_EXPIRED",
+				Message: "Payment signature has expired",
+			})
+			return
+		}
+	}
+
 	// Call facilitator verify
 	result, err := s.facilitator.Verify(
 		c.Request.Context(),
@@ -113,6 +128,50 @@ func (s *Server) handleSettle(c *gin.Context) {
 
 	// Extract network/scheme for metrics from requirements
 	network, scheme := extractNetworkScheme(req.PaymentRequirements)
+
+	// P1-10: Check signature expiration before settlement
+	if deadline, hasDeadline := extractDeadline(req.PaymentPayload); hasDeadline {
+		now := time.Now().Unix()
+		if deadline < now {
+			log.Printf("Signature expired for settlement network=%s scheme=%s: deadline=%d now=%d", network, scheme, deadline, now)
+			c.JSON(http.StatusBadRequest, APIError{
+				Code:    "SIGNATURE_EXPIRED",
+				Message: "Payment signature has expired",
+			})
+			return
+		}
+	}
+
+	// P1-2: Validate payment amount meets requirements
+	payloadAmount, requiredAmount, amountErr := extractAmounts(req.PaymentPayload, req.PaymentRequirements)
+	if amountErr == nil && payloadAmount != nil && requiredAmount != nil {
+		if payloadAmount.Cmp(requiredAmount) < 0 {
+			log.Printf("Insufficient payment amount for network=%s scheme=%s: payload=%s required=%s",
+				network, scheme, payloadAmount.String(), requiredAmount.String())
+			c.JSON(http.StatusBadRequest, APIError{
+				Code:    "INSUFFICIENT_AMOUNT",
+				Message: "Payment amount is less than required amount",
+			})
+			return
+		}
+	}
+
+	// P1-1: Check for nonce replay before settlement
+	if s.nonceStore != nil {
+		payloadHash := idempotency.ComputePayloadHash(req.PaymentPayload, req.PaymentRequirements)
+		if err := s.nonceStore.CheckAndMark(c.Request.Context(), network, scheme, payloadHash); err != nil {
+			if err == idempotency.ErrNonceAlreadyUsed {
+				log.Printf("Nonce replay detected for network=%s scheme=%s", network, scheme)
+				c.JSON(http.StatusConflict, APIError{
+					Code:    "NONCE_REPLAY",
+					Message: "This payment authorization has already been used",
+				})
+				return
+			}
+			// Log other errors but don't block - fail open for availability
+			log.Printf("Nonce check error for network=%s scheme=%s: %v", network, scheme, err)
+		}
+	}
 
 	// Get idempotency key from header
 	idempotencyKey := c.GetHeader("Idempotency-Key")
@@ -256,6 +315,107 @@ func extractNetworkScheme(requirements json.RawMessage) (string, string) {
 		return "unknown", "unknown"
 	}
 	return req.Network, req.Scheme
+}
+
+// P1-10: extractDeadline extracts the deadline/validBefore field from payment payload
+// Handles both T402 V1 (flat) and V2 (nested payload) formats
+func extractDeadline(payload json.RawMessage) (int64, bool) {
+	// T402 V2 format: {"t402Version":2,"payload":{"validBefore":...},...}
+	// T402 V1 format: {"validBefore":...}
+	var p struct {
+		T402Version int `json:"t402Version"`
+		Payload     struct {
+			Deadline    int64 `json:"deadline"`
+			ValidBefore int64 `json:"validBefore"`
+		} `json:"payload"`
+		// Top-level fields for V1 compatibility
+		Deadline    int64 `json:"deadline"`
+		ValidBefore int64 `json:"validBefore"`
+	}
+	if err := json.Unmarshal(payload, &p); err != nil {
+		return 0, false
+	}
+
+	// Check V2 nested payload first
+	if p.T402Version >= 2 {
+		if p.Payload.ValidBefore > 0 {
+			return p.Payload.ValidBefore, true
+		}
+		if p.Payload.Deadline > 0 {
+			return p.Payload.Deadline, true
+		}
+	}
+
+	// Fall back to top-level (V1 format)
+	// Check validBefore first (EIP-3009 format)
+	if p.ValidBefore > 0 {
+		return p.ValidBefore, true
+	}
+	// Then check deadline
+	if p.Deadline > 0 {
+		return p.Deadline, true
+	}
+	return 0, false
+}
+
+// P1-2: extractAmounts extracts and compares amounts from payload and requirements
+// Handles both T402 V1 (flat) and V2 (nested payload) formats
+func extractAmounts(payload, requirements json.RawMessage) (payloadAmount, requiredAmount *big.Int, err error) {
+	// T402 V2 format: {"t402Version":2,"payload":{"amount":"...",...},...}
+	// T402 V1 format: {"amount":"...",...}
+	var v2Payload struct {
+		T402Version int `json:"t402Version"`
+		Payload     struct {
+			Amount string `json:"amount"`
+			Value  string `json:"value"` // alternative field name
+		} `json:"payload"`
+		// Also check top level for V1 compatibility
+		Amount string `json:"amount"`
+		Value  string `json:"value"`
+	}
+	var r struct {
+		Amount string `json:"amount"`
+	}
+
+	if err := json.Unmarshal(payload, &v2Payload); err != nil {
+		return nil, nil, err
+	}
+	if err := json.Unmarshal(requirements, &r); err != nil {
+		return nil, nil, err
+	}
+
+	// Get payload amount - check V2 nested payload first, then fall back to V1 top-level
+	var amountStr string
+	if v2Payload.T402Version >= 2 {
+		// V2 format: look in nested payload
+		amountStr = v2Payload.Payload.Amount
+		if amountStr == "" {
+			amountStr = v2Payload.Payload.Value
+		}
+	}
+	// Fall back to top-level (V1 format or legacy)
+	if amountStr == "" {
+		amountStr = v2Payload.Amount
+		if amountStr == "" {
+			amountStr = v2Payload.Value
+		}
+	}
+
+	payloadAmt := new(big.Int)
+	if amountStr != "" {
+		if _, ok := payloadAmt.SetString(amountStr, 10); !ok {
+			return nil, nil, nil // Can't parse, let downstream handle
+		}
+	}
+
+	requiredAmt := new(big.Int)
+	if r.Amount != "" {
+		if _, ok := requiredAmt.SetString(r.Amount, 10); !ok {
+			return nil, nil, nil // Can't parse, let downstream handle
+		}
+	}
+
+	return payloadAmt, requiredAmt, nil
 }
 
 // readBody reads the request body (helper for raw body handling)

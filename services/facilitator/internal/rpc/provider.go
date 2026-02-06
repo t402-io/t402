@@ -45,10 +45,14 @@ func (p *Provider) GetHealth() (bool, time.Duration, time.Time) {
 
 // Manager manages multiple RPC providers with automatic failover.
 type Manager struct {
-	providers     map[string][]*Provider // network -> providers
+	providers      map[string][]*Provider // network -> providers
 	circuitBreaker *CircuitBreakerManager
 	healthChecker  *HealthChecker
 	config         *Config
+
+	// P1-17: Round-robin index per network for load distribution
+	rrIndex map[string]uint64
+	rrMu    sync.Mutex
 
 	mu sync.RWMutex
 }
@@ -59,6 +63,7 @@ func NewManager(config *Config) *Manager {
 		providers:      make(map[string][]*Provider),
 		circuitBreaker: NewCircuitBreakerManager(config),
 		config:         config,
+		rrIndex:        make(map[string]uint64),
 	}
 	m.healthChecker = NewHealthChecker(m, config)
 	return m
@@ -89,6 +94,8 @@ func (m *Manager) RegisterProvider(network, url string, priority int) {
 }
 
 // GetProvider returns the best available RPC URL for a network.
+// P1-17: Uses round-robin selection among same-priority healthy providers
+// to distribute load across multiple endpoints.
 func (m *Manager) GetProvider(ctx context.Context, network string) (string, error) {
 	m.mu.RLock()
 	providers, ok := m.providers[network]
@@ -98,12 +105,37 @@ func (m *Manager) GetProvider(ctx context.Context, network string) (string, erro
 		return "", ErrProviderNotFound
 	}
 
-	// Try providers in order of priority
+	// Collect healthy providers grouped by priority
+	healthyByPriority := make(map[int][]*Provider)
 	for _, p := range providers {
 		healthy, _, _ := p.GetHealth()
 		if healthy && m.circuitBreaker.IsAllowed(p.URL) {
-			return p.URL, nil
+			healthyByPriority[p.Priority] = append(healthyByPriority[p.Priority], p)
 		}
+	}
+
+	// Find the lowest (best) priority that has healthy providers
+	if len(healthyByPriority) > 0 {
+		bestPriority := -1
+		for priority := range healthyByPriority {
+			if bestPriority == -1 || priority < bestPriority {
+				bestPriority = priority
+			}
+		}
+
+		candidates := healthyByPriority[bestPriority]
+		if len(candidates) == 1 {
+			return candidates[0].URL, nil
+		}
+
+		// Round-robin among candidates at the same priority level
+		m.rrMu.Lock()
+		idx := m.rrIndex[network]
+		m.rrIndex[network] = idx + 1
+		m.rrMu.Unlock()
+
+		selected := candidates[idx%uint64(len(candidates))]
+		return selected.URL, nil
 	}
 
 	// If all providers are unhealthy, try the first one anyway
