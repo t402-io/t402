@@ -179,6 +179,17 @@ from t402.schemes.stacks import (
     SCHEME_EXACT_DIRECT as STACKS_SCHEME_EXACT_DIRECT,
 )
 
+# Cosmos Schemes
+from t402.schemes.cosmos import (
+    ExactDirectCosmosClientScheme,
+    ExactDirectCosmosServerScheme,
+    ExactDirectCosmosFacilitatorScheme,
+    ExactDirectCosmosFacilitatorConfig,
+    ClientCosmosSigner,
+    FacilitatorCosmosSigner,
+    SCHEME_EXACT_DIRECT as COSMOS_SCHEME_EXACT_DIRECT,
+)
+
 __all__ = [
     # Type aliases
     "Price",
@@ -285,4 +296,12 @@ __all__ = [
     "ClientStacksSigner",
     "FacilitatorStacksSigner",
     "STACKS_SCHEME_EXACT_DIRECT",
+    # Cosmos Schemes
+    "ExactDirectCosmosClientScheme",
+    "ExactDirectCosmosServerScheme",
+    "ExactDirectCosmosFacilitatorScheme",
+    "ExactDirectCosmosFacilitatorConfig",
+    "ClientCosmosSigner",
+    "FacilitatorCosmosSigner",
+    "COSMOS_SCHEME_EXACT_DIRECT",
 ]
