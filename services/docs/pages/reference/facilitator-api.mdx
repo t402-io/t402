@@ -66,20 +66,21 @@ Returns the supported networks, schemes, and signers.
 {
   "kinds": [
     {
+      "t402Version": 2,
       "scheme": "exact",
-      "network": "eip155:8453",
-      "signers": [
-        "0xC88f67e776f16DcFBf42e6bDda1B82604448899B"
-      ]
+      "network": "eip155:8453"
     },
     {
+      "t402Version": 2,
       "scheme": "exact",
-      "network": "ton:mainnet",
-      "signers": [
-        "EQDjv9CUEJ__D_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkEUe"
-      ]
+      "network": "ton:mainnet"
     }
-  ]
+  ],
+  "extensions": [],
+  "signers": {
+    "eip155:*": ["0xC88f67e776f16DcFBf42e6bDda1B82604448899B"],
+    "ton:*": ["EQDjv9CUEJ__D_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkEUe"]
+  }
 }
 ```
 
@@ -88,9 +89,11 @@ Returns the supported networks, schemes, and signers.
 | Field | Type | Description |
 |-------|------|-------------|
 | `kinds` | array | List of supported scheme/network combinations |
+| `kinds[].t402Version` | number | Protocol version supported (2 for v2) |
 | `kinds[].scheme` | string | Payment scheme (e.g., `exact`, `upto`) |
 | `kinds[].network` | string | CAIP-2 network identifier |
-| `kinds[].signers` | array | Facilitator wallet addresses for this network |
+| `extensions` | array | Extension identifiers the facilitator has implemented |
+| `signers` | object | Map of CAIP-2 patterns (e.g., `eip155:*`) to signer addresses |
 
 ---
 
@@ -104,26 +107,46 @@ Verify a signed payment authorization without executing settlement.
 {
   "paymentPayload": {
     "t402Version": 2,
-    "scheme": "exact",
-    "network": "eip155:8453",
-    "payload": {
-      "from": "0xPayerAddress",
-      "to": "0xRecipientAddress",
-      "value": "1000000",
-      "validAfter": 0,
-      "validBefore": 1706745600,
-      "nonce": "0x..."
+    "resource": {
+      "url": "https://api.example.com/premium",
+      "description": "Premium API access",
+      "mimeType": "application/json"
     },
-    "signature": "0x..."
+    "accepted": {
+      "scheme": "exact",
+      "network": "eip155:8453",
+      "amount": "1000000",
+      "asset": "0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee",
+      "payTo": "0xRecipientAddress",
+      "maxTimeoutSeconds": 600,
+      "extra": {
+        "name": "USDT0",
+        "version": "2"
+      }
+    },
+    "payload": {
+      "signature": "0x...",
+      "authorization": {
+        "from": "0xPayerAddress",
+        "to": "0xRecipientAddress",
+        "value": "1000000",
+        "validAfter": "0",
+        "validBefore": "1706745600",
+        "nonce": "0x..."
+      }
+    }
   },
   "paymentRequirements": {
     "scheme": "exact",
     "network": "eip155:8453",
-    "maxAmountRequired": "1000000",
-    "resource": "https://api.example.com/premium",
-    "description": "Premium API access",
+    "amount": "1000000",
+    "asset": "0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee",
     "payTo": "0xRecipientAddress",
-    "maxTimeoutSeconds": 600
+    "maxTimeoutSeconds": 600,
+    "extra": {
+      "name": "USDT0",
+      "version": "2"
+    }
   }
 }
 ```
@@ -133,7 +156,7 @@ Verify a signed payment authorization without executing settlement.
 ```json
 {
   "isValid": true,
-  "invalidReason": null
+  "payer": "0xPayerAddress"
 }
 ```
 
@@ -142,7 +165,8 @@ Verify a signed payment authorization without executing settlement.
 ```json
 {
   "isValid": false,
-  "invalidReason": "Signature verification failed"
+  "invalidReason": "Signature verification failed",
+  "payer": "0xPayerAddress"
 }
 ```
 
@@ -151,7 +175,8 @@ Verify a signed payment authorization without executing settlement.
 | Field | Type | Description |
 |-------|------|-------------|
 | `isValid` | boolean | Whether the payment authorization is valid |
-| `invalidReason` | string | Reason for invalidity (null if valid) |
+| `invalidReason` | string | Reason for invalidity (omitted if valid) |
+| `payer` | string | Address of the payer's wallet |
 
 ---
 
@@ -171,26 +196,46 @@ Execute on-chain settlement for a verified payment.
 {
   "paymentPayload": {
     "t402Version": 2,
-    "scheme": "exact",
-    "network": "eip155:8453",
-    "payload": {
-      "from": "0xPayerAddress",
-      "to": "0xRecipientAddress",
-      "value": "1000000",
-      "validAfter": 0,
-      "validBefore": 1706745600,
-      "nonce": "0x..."
+    "resource": {
+      "url": "https://api.example.com/premium",
+      "description": "Premium API access",
+      "mimeType": "application/json"
     },
-    "signature": "0x..."
+    "accepted": {
+      "scheme": "exact",
+      "network": "eip155:8453",
+      "amount": "1000000",
+      "asset": "0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee",
+      "payTo": "0xRecipientAddress",
+      "maxTimeoutSeconds": 600,
+      "extra": {
+        "name": "USDT0",
+        "version": "2"
+      }
+    },
+    "payload": {
+      "signature": "0x...",
+      "authorization": {
+        "from": "0xPayerAddress",
+        "to": "0xRecipientAddress",
+        "value": "1000000",
+        "validAfter": "0",
+        "validBefore": "1706745600",
+        "nonce": "0x..."
+      }
+    }
   },
   "paymentRequirements": {
     "scheme": "exact",
     "network": "eip155:8453",
-    "maxAmountRequired": "1000000",
-    "resource": "https://api.example.com/premium",
-    "description": "Premium API access",
+    "amount": "1000000",
+    "asset": "0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee",
     "payTo": "0xRecipientAddress",
-    "maxTimeoutSeconds": 600
+    "maxTimeoutSeconds": 600,
+    "extra": {
+      "name": "USDT0",
+      "version": "2"
+    }
   }
 }
 ```
@@ -200,8 +245,9 @@ Execute on-chain settlement for a verified payment.
 ```json
 {
   "success": true,
-  "transactionHash": "0x...",
-  "network": "eip155:8453"
+  "transaction": "0x...",
+  "network": "eip155:8453",
+  "payer": "0xPayerAddress"
 }
 ```
 
@@ -210,7 +256,10 @@ Execute on-chain settlement for a verified payment.
 ```json
 {
   "success": false,
-  "errorReason": "Insufficient balance"
+  "errorReason": "Insufficient balance",
+  "transaction": "",
+  "network": "eip155:8453",
+  "payer": "0xPayerAddress"
 }
 ```
 
@@ -219,9 +268,10 @@ Execute on-chain settlement for a verified payment.
 | Field | Type | Description |
 |-------|------|-------------|
 | `success` | boolean | Whether settlement was successful |
-| `transactionHash` | string | On-chain transaction hash (if successful) |
+| `transaction` | string | Blockchain transaction hash (empty string if failed) |
 | `network` | string | Network where settlement occurred |
-| `errorReason` | string | Reason for failure (if unsuccessful) |
+| `payer` | string | Address of the payer's wallet |
+| `errorReason` | string | Reason for failure (omitted if successful) |
 
 <Callout type="warning">
   **Idempotency**: Always use the `Idempotency-Key` header for settlement requests to prevent double payments in case of network errors or retries.
