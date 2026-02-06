@@ -195,6 +195,13 @@ pnpm format
 
 - `@t402/core` - Core protocol types and client
 - `@t402/fetch` - HTTP wrapper with automatic payment handling
-- `@t402/evm` - EVM/Ethereum implementation
-- `@solana/web3.js` - Solana JavaScript SDK (peer dependency)
+- `@t402/evm` - EVM implementation
+- `@t402/ton` - TON implementation
+- `@t402/tron` - TRON implementation
+- `@t402/near` - NEAR Protocol implementation
+- `@t402/aptos` - Aptos implementation
+- `@t402/tezos` - Tezos implementation
+- `@t402/polkadot` - Polkadot Asset Hub implementation
+- `@t402/stacks` - Stacks implementation
+- `@t402/cosmos` - Cosmos (Noble) implementation
 

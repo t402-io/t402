@@ -2,7 +2,7 @@
 
 > **The Official Payment Protocol for USDT**
 >
-> *Last Updated: 2026-01-24*
+> *Last Updated: 2026-02-06*
 
 This document outlines the development status and roadmap for T402, a payment protocol specifically designed for USDT and USDT0, with deep integration with [Tether WDK](https://wallet.tether.io/).
 
@@ -62,9 +62,9 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 | @t402/polkadot | 2.3.1 | Polkadot Asset Hub |
 | @t402/stacks | 2.3.1 | Stacks (Bitcoin L2) |
 | @t402/wdk | 2.3.1 | Tether WDK integration |
-| @t402/wdk-gasless | 2.4.0 | ERC-4337 gasless payments |
-| @t402/wdk-bridge | 2.4.0 | LayerZero bridging |
-| @t402/wdk-multisig | 2.4.0 | Safe multi-sig wallets |
+| @t402/wdk-gasless | 2.3.1 | ERC-4337 gasless payments |
+| @t402/wdk-bridge | 2.3.1 | LayerZero bridging |
+| @t402/wdk-multisig | 2.3.1 | Safe multi-sig wallets |
 | @t402/mcp | 2.0.0-beta.1 | AI agent MCP server |
 | @t402/express | 2.3.1 | Express.js middleware |
 | @t402/next | 2.3.1 | Next.js integration |
@@ -99,7 +99,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 
 ---
 
-## Supported Blockchains (32 Networks)
+## Supported Blockchains (33 Networks)
 
 ### USDT0 (LayerZero OFT) - 19 Networks
 
@@ -143,7 +143,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 | TRON | TRC-20 | Production |
 | Solana | SPL | Production |
 
-### Non-EVM USDT - 5 Networks
+### Non-EVM USDT - 6 Networks
 
 | Chain | Token Standard | Status |
 |-------|---------------|--------|
@@ -152,6 +152,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 | Tezos | FA2 | Production |
 | Polkadot | Asset Hub | Production |
 | Stacks | SIP-010 | Production |
+| Cosmos (Noble) | Bank MsgSend | Production |
 
 ---
 
@@ -166,7 +167,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 - [x] Add Python tests to CI pipeline with pytest
 - [x] Add code coverage reporting (Codecov) - TypeScript, Go, Python, Java
 - [x] Add dependency vulnerability scanning (Dependabot)
-- [x] Fix NPM release to include all packages (21 packages)
+- [x] Fix NPM release to include all packages (27 packages)
 
 **Week 3-4: TypeScript Package Alignment**
 - [x] Align @t402/tron to v2.0.0
@@ -340,10 +341,17 @@ These features are implemented as advanced packages ready for public release:
 - [x] Legacy npm packages deprecated
 
 ### Multi-Chain Support ✅
-- [x] EVM chains with EIP-3009/USDT0
+- [x] EVM chains with EIP-3009/USDT0 (19 networks)
+- [x] EVM legacy USDT with approve+transferFrom (5 networks)
 - [x] TON with USDT Jetton
 - [x] TRON with TRC-20 USDT
 - [x] Solana with SPL tokens
+- [x] NEAR with NEP-141
+- [x] Aptos with Fungible Asset
+- [x] Tezos with FA2
+- [x] Polkadot Asset Hub
+- [x] Stacks with SIP-010
+- [x] Cosmos (Noble) with native USDC
 
 ### Advanced Features ✅
 - [x] ERC-4337 gasless payments
@@ -367,9 +375,19 @@ These features are implemented as advanced packages ready for public release:
 - [x] Next.js integration (@t402/next)
 - [x] Hono middleware (@t402/hono)
 - [x] Fastify middleware (@t402/fastify)
+- [x] Gin middleware (Go)
+- [x] Echo middleware (Go)
+- [x] Chi middleware (Go)
+- [x] Fiber middleware (Go)
 - [x] FastAPI integration (Python)
 - [x] Flask integration (Python)
-- [x] Gin middleware (Go)
+- [x] Django middleware (Python)
+- [x] Starlette middleware (Python)
+- [x] Spring interceptor (Java)
+- [x] Servlet filter (Java)
+- [x] WebFlux filter (Java)
+- [x] Micronaut filter (Java)
+- [x] Quarkus filter (Java)
 
 ### Client Libraries ✅
 - [x] Fetch client wrapper (@t402/fetch)
@@ -455,13 +473,13 @@ Production facilitator service for payment verification and settlement.
 | Chain | Address |
 |-------|---------|
 | EVM | `0xC88f67e776f16DcFBf42e6bDda1B82604448899B` |
-| TON | `EQ5d11d21276ac6b5efdf179e654ff0c6eee34e0abfa263a` |
+| TON | `EQDjv9CUEJ__D_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkEUe` |
 | TRON | `TT1MqNNj2k5qdGA6nrrCodW6oyHbbAreQ5` |
 | Solana | `8GGtWHRQ1wz5gDKE2KXZLktqzcfV1CBqSbeUZjA7hoWL` |
 
 ### Features
 
-- Multi-chain support (EVM, TON, TRON, Solana)
+- Multi-chain support (EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos)
 - Redis-based rate limiting
 - Prometheus metrics & Grafana dashboards
 - API key authentication

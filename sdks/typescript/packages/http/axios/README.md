@@ -1,4 +1,4 @@
-# t402-axios
+# @t402/axios
 
 A utility package that extends Axios to automatically handle 402 Payment Required responses using the t402 payment protocol v2. This package enables seamless integration of payment functionality into your applications when making HTTP requests.
 
@@ -194,4 +194,11 @@ const api = wrapAxiosWithPaymentFromConfig(axios.create(), {
   paymentRequirementsSelector: selectCheapestOption,
 });
 ```
+
+## Related Packages
+
+- `@t402/core` - Core protocol types and client
+- `@t402/fetch` - Fetch wrapper with automatic payment handling
+- `@t402/evm` - EVM mechanism implementation
+- `@t402/svm` - Solana mechanism implementation
 

@@ -123,6 +123,12 @@ Use `@t402/evm` when:
 - `createNonce()` - Generate random 32-byte nonce
 - `getEvmChainId()` - Get chain ID from network name
 
+## Related Packages
+
+- `@t402/core` - Core protocol types and client
+- `@t402/evm` - Full EVM mechanism with viem integration
+- `@t402/fetch` - HTTP wrapper with automatic payment handling
+
 ## License
 
 Apache-2.0
