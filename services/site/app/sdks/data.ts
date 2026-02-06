@@ -36,7 +36,7 @@ export const sdks: SDK[] = [
     icon: "typescript",
     installCommand: "npm install @t402/core",
     packageManager: "npm",
-    version: "2.3.1",
+    version: "2.4.0",
     docsUrl: "https://docs.t402.io/sdks/typescript",
     githubUrl: "https://github.com/t402-io/t402/tree/main/sdks/typescript",
     features: [
@@ -74,7 +74,7 @@ app.use(paymentMiddleware({
     icon: "python",
     installCommand: "pip install t402",
     packageManager: "pip",
-    version: "1.9.1",
+    version: "1.10.0",
     docsUrl: "https://docs.t402.io/sdks/python",
     githubUrl: "https://github.com/t402-io/t402/tree/main/sdks/python",
     features: [
@@ -113,7 +113,7 @@ app = middleware(app)`,
     icon: "go",
     installCommand: "go get github.com/t402-io/t402/sdks/go",
     packageManager: "go",
-    version: "1.8.1",
+    version: "1.9.0",
     docsUrl: "https://docs.t402.io/sdks/go",
     githubUrl: "https://github.com/t402-io/t402/tree/main/sdks/go",
     features: [
@@ -151,9 +151,9 @@ http.Handle("/", middleware(handler))`,
     description:
       "Enterprise-ready Java SDK with Spring Boot integration. Supports EVM chains with annotation-based payment configuration.",
     icon: "java",
-    installCommand: "io.t402:t402:1.8.1",
+    installCommand: "io.t402:t402:1.9.0",
     packageManager: "maven",
-    version: "1.8.1",
+    version: "1.9.0",
     docsUrl: "https://docs.t402.io/sdks/java",
     githubUrl: "https://github.com/t402-io/t402/tree/main/sdks/java",
     features: [
