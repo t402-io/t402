@@ -564,6 +564,8 @@ curl -s https://facilitator.t402.io/supported | jq '.kinds[] | select(.network =
 ## Skills
 
 - `/pm` - Project Manager skill for release management, monitoring, and progress tracking
+- `/cross-sdk-check` - Compare core types, HTTP headers, network constants across all 4 SDKs and report inconsistencies
+- `/release` - Guided release process: version bump, CHANGELOG check, tag creation, CI verification
 
 ---
 
