@@ -535,3 +535,101 @@ class ListDiscoveryResourcesResponse(BaseModel):
         populate_by_name=True,
         from_attributes=True,
     )
+
+
+class DiscoveryPaymentOption(BaseModel):
+    """A single payment option for a discovery resource."""
+
+    scheme: str
+    network: str
+    amount: str
+    asset: str
+    pay_to: str = Field(..., alias="payTo")
+    max_timeout_seconds: int = Field(3600, alias="maxTimeoutSeconds")
+    extra: Optional[Dict[str, Any]] = None
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
+
+class DiscoveryResourceMetadata(BaseModel):
+    """Optional metadata about a discovery resource."""
+
+    category: Optional[str] = None
+    provider: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    custom: Optional[Dict[str, str]] = None
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
+
+class RegisterResourceRequest(BaseModel):
+    """Request body for registering a new resource in the Bazaar."""
+
+    resource: str
+    type: str
+    t402_version: int = Field(2, alias="t402Version")
+    accepts: List[DiscoveryPaymentOption]
+    metadata: Optional[DiscoveryResourceMetadata] = None
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
+
+class RegisterResourceResponse(BaseModel):
+    """Response after registering a resource."""
+
+    id: str
+    resource: str
+    type: str
+    t402_version: int = Field(..., alias="t402Version")
+    created_at: datetime = Field(..., alias="createdAt")
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
+
+class UpdateResourceRequest(BaseModel):
+    """Request body for updating a resource in the Bazaar."""
+
+    accepts: Optional[List[DiscoveryPaymentOption]] = None
+    metadata: Optional[DiscoveryResourceMetadata] = None
+    active: Optional[bool] = None
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
+
+
+class DiscoveryItem(BaseModel):
+    """A single resource item from the discovery API."""
+
+    id: str
+    resource: str
+    type: str
+    t402_version: int = Field(..., alias="t402Version")
+    accepts: List[DiscoveryPaymentOption]
+    last_updated: int = Field(..., alias="lastUpdated")
+    metadata: Optional[DiscoveryResourceMetadata] = None
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
