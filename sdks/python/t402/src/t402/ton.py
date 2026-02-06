@@ -43,7 +43,7 @@ MIN_VALIDITY_BUFFER = 30  # 30 seconds minimum validity
 
 # USDT Jetton master addresses
 USDT_MAINNET_ADDRESS = "EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs"
-USDT_TESTNET_ADDRESS = "kQBqSpvo4S87mX9tTc4FX3Sfqf4uSp3Tx-Fz4RBUfTRWBx"
+USDT_TESTNET_ADDRESS = "kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy"
 
 # Address regex patterns
 TON_FRIENDLY_ADDRESS_REGEX = re.compile(r"^[A-Za-z0-9_-]{46,48}$")

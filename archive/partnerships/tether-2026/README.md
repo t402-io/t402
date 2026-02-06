@@ -176,7 +176,7 @@ USDT0: 0x036CbD53842c5426634e7929541eC2318f3dCF7e
 
 # TON Testnet
 Network: ton:testnet
-USDT: kQBqSpvo4S87mX9tTc4FX3Sfqf4uSp3Tx-Fz4RBUfTRWBx
+USDT: kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy
 
 # TRON Nile Testnet
 Network: tron:nile
