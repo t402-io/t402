@@ -77,9 +77,6 @@ func TestIntegration_VerifyEndpoint(t *testing.T) {
 		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 			return &t402.SettleResponse{Success: true}, nil
 		},
-		GetSupportedFunc: func() t402.SupportedResponse {
-			return t402.SupportedResponse{}
-		},
 	}
 
 	cfg := &config.Config{
@@ -127,9 +124,6 @@ func TestIntegration_SettleEndpoint(t *testing.T) {
 				Transaction: "0xabc123",
 				Network:     "eip155:1",
 			}, nil
-		},
-		GetSupportedFunc: func() t402.SupportedResponse {
-			return t402.SupportedResponse{}
 		},
 	}
 
@@ -214,9 +208,6 @@ func TestIntegration_HealthEndpoint(t *testing.T) {
 		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 			return &t402.SettleResponse{Success: true}, nil
 		},
-		GetSupportedFunc: func() t402.SupportedResponse {
-			return t402.SupportedResponse{}
-		},
 	}
 
 	server := createFullTestServer(mock, nil)
@@ -248,9 +239,6 @@ func TestIntegration_ReadyEndpoint(t *testing.T) {
 		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 			return &t402.SettleResponse{Success: true}, nil
 		},
-		GetSupportedFunc: func() t402.SupportedResponse {
-			return t402.SupportedResponse{}
-		},
 	}
 
 	server := createFullTestServer(mock, nil)
@@ -273,9 +261,6 @@ func TestIntegration_MetricsEndpoint(t *testing.T) {
 		},
 		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 			return &t402.SettleResponse{Success: true}, nil
-		},
-		GetSupportedFunc: func() t402.SupportedResponse {
-			return t402.SupportedResponse{}
 		},
 	}
 
@@ -304,9 +289,6 @@ func TestIntegration_CORSPreflight(t *testing.T) {
 		},
 		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 			return &t402.SettleResponse{Success: true}, nil
-		},
-		GetSupportedFunc: func() t402.SupportedResponse {
-			return t402.SupportedResponse{}
 		},
 	}
 
@@ -346,9 +328,6 @@ func TestIntegration_APIKeyRequired(t *testing.T) {
 		},
 		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 			return &t402.SettleResponse{Success: true}, nil
-		},
-		GetSupportedFunc: func() t402.SupportedResponse {
-			return t402.SupportedResponse{}
 		},
 	}
 
@@ -396,9 +375,6 @@ func TestIntegration_APIKeyInQuery_DisabledByDefault(t *testing.T) {
 		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 			return &t402.SettleResponse{Success: true}, nil
 		},
-		GetSupportedFunc: func() t402.SupportedResponse {
-			return t402.SupportedResponse{}
-		},
 	}
 
 	cfg := &config.Config{
@@ -433,9 +409,6 @@ func TestIntegration_InvalidAPIKey(t *testing.T) {
 		},
 		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 			return &t402.SettleResponse{Success: true}, nil
-		},
-		GetSupportedFunc: func() t402.SupportedResponse {
-			return t402.SupportedResponse{}
 		},
 	}
 

@@ -736,9 +736,6 @@ func TestE2E_NetworkMismatchErrors(t *testing.T) {
 		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 			return &t402.SettleResponse{Success: true}, nil
 		},
-		GetSupportedFunc: func() t402.SupportedResponse {
-			return t402.SupportedResponse{}
-		},
 	}
 
 	server := createFullTestServer(mock, nil)
@@ -796,9 +793,6 @@ func TestE2E_InsufficientAmount(t *testing.T) {
 		},
 		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 			return &t402.SettleResponse{Success: true}, nil
-		},
-		GetSupportedFunc: func() t402.SupportedResponse {
-			return t402.SupportedResponse{}
 		},
 	}
 
@@ -860,9 +854,6 @@ func TestE2E_ConcurrentRequests(t *testing.T) {
 		},
 		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 			return &t402.SettleResponse{Success: true}, nil
-		},
-		GetSupportedFunc: func() t402.SupportedResponse {
-			return t402.SupportedResponse{}
 		},
 	}
 

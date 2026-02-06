@@ -51,9 +51,6 @@ func TestCreateTestServer(t *testing.T) {
 		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 			return &t402.SettleResponse{Success: true}, nil
 		},
-		GetSupportedFunc: func() t402.SupportedResponse {
-			return t402.SupportedResponse{}
-		},
 	}
 
 	cfg := &config.Config{
@@ -100,9 +97,6 @@ func TestCreateTestServer_WithAPIKeys(t *testing.T) {
 		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 			return &t402.SettleResponse{Success: true}, nil
 		},
-		GetSupportedFunc: func() t402.SupportedResponse {
-			return t402.SupportedResponse{}
-		},
 	}
 
 	cfg := &config.Config{
@@ -135,9 +129,6 @@ func TestCreateTestServer_DefaultConfig(t *testing.T) {
 		},
 		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 			return &t402.SettleResponse{Success: true}, nil
-		},
-		GetSupportedFunc: func() t402.SupportedResponse {
-			return t402.SupportedResponse{}
 		},
 	}
 
@@ -174,9 +165,6 @@ func TestServerFields(t *testing.T) {
 		},
 		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 			return &t402.SettleResponse{Success: true}, nil
-		},
-		GetSupportedFunc: func() t402.SupportedResponse {
-			return t402.SupportedResponse{}
 		},
 	}
 
@@ -240,9 +228,6 @@ func TestSetupMiddleware(t *testing.T) {
 		},
 		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 			return &t402.SettleResponse{Success: true}, nil
-		},
-		GetSupportedFunc: func() t402.SupportedResponse {
-			return t402.SupportedResponse{}
 		},
 	}
 
@@ -326,9 +311,6 @@ func TestApiKeyMetricsMiddleware(t *testing.T) {
 		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 			return &t402.SettleResponse{Success: true}, nil
 		},
-		GetSupportedFunc: func() t402.SupportedResponse {
-			return t402.SupportedResponse{}
-		},
 	}
 
 	cfg := &config.Config{
@@ -354,9 +336,6 @@ func TestSetupMiddlewareWithCORS(t *testing.T) {
 		},
 		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 			return &t402.SettleResponse{Success: true}, nil
-		},
-		GetSupportedFunc: func() t402.SupportedResponse {
-			return t402.SupportedResponse{}
 		},
 	}
 
@@ -384,9 +363,6 @@ func TestSetupMiddlewareWithAPIKeyRequired(t *testing.T) {
 		},
 		SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 			return &t402.SettleResponse{Success: true}, nil
-		},
-		GetSupportedFunc: func() t402.SupportedResponse {
-			return t402.SupportedResponse{}
 		},
 	}
 
@@ -429,9 +405,6 @@ func TestServerConfigEnvironments(t *testing.T) {
 				},
 				SettleFunc: func(ctx context.Context, payloadBytes []byte, requirementsBytes []byte) (*t402.SettleResponse, error) {
 					return &t402.SettleResponse{Success: true}, nil
-				},
-				GetSupportedFunc: func() t402.SupportedResponse {
-					return t402.SupportedResponse{}
 				},
 			}
 

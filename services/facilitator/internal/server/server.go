@@ -52,8 +52,10 @@ type Server struct {
 	tracer           *tracing.Provider
 	idempotencyStore *idempotency.Store
 	nonceStore       *idempotency.NonceStore // P1-1: Nonce tracking for replay protection
+	userLimiter      *ratelimit.UserRateLimiter // P1-7: Per-user rate limiting
 
 	// Advanced features (require database)
+	streamingService   *streaming.Service  // P1-16: Stored for admin handlers
 	streamingHandlers  *streaming.Handlers
 	intentHandlers     *intent.Handlers
 	discoveryHandlers  *discovery.Handlers
@@ -116,6 +118,10 @@ func NewWithTracing(
 	nonceStore := idempotency.NewNonceStore(redisClient, 24*time.Hour)
 	log.Printf("Nonce replay protection enabled")
 
+	// P1-7: Create per-user rate limiter (half of global limit per user)
+	userLimiter := ratelimit.NewUserRateLimiter(redisClient, cfg.RateLimitRequests, cfg.RateLimitRequests/2, cfg.RateLimitWindow)
+	log.Printf("Per-user rate limiting enabled (user limit: %d per %v)", cfg.RateLimitRequests/2, cfg.RateLimitWindow)
+
 	// Create router
 	router := gin.New()
 
@@ -131,6 +137,7 @@ func NewWithTracing(
 		tracer:           tracer,
 		idempotencyStore: idempotencyStore,
 		nonceStore:       nonceStore, // P1-1: Nonce replay protection
+		userLimiter:      userLimiter, // P1-7: Per-user rate limiting
 	}
 
 	// Setup persistence repositories if database is available
@@ -142,6 +149,7 @@ func NewWithTracing(
 		streamingRepo := streaming.NewRepository(db.DB)
 		streamingRepoAdapter := streaming.NewRepositoryAdapter(streamingRepo)
 		streamingService := streaming.NewService(streamingRepoAdapter, nil, nil, m, nil)
+		s.streamingService = streamingService // P1-16: Store for admin handlers
 		s.streamingHandlers = streaming.NewHandlers(streamingService)
 		log.Printf("Streaming payments enabled")
 
@@ -217,6 +225,11 @@ func (s *Server) setupMiddleware() {
 	authConfig.Required = s.config.APIKeyRequired
 	s.router.Use(auth.Middleware(s.authManager, authConfig))
 
+	// P1-7: Per-user rate limiting (runs after auth, so api_key_id is available)
+	if s.userLimiter != nil {
+		s.router.Use(UserRateLimitMiddleware(s.userLimiter))
+	}
+
 	// API key metrics middleware
 	s.router.Use(s.apiKeyMetricsMiddleware())
 
@@ -281,6 +294,10 @@ func (s *Server) setupRoutes() {
 	if s.discoveryHandlers != nil {
 		s.discoveryHandlers.RegisterRoutes(v1)
 	}
+
+	// P1-16: Admin endpoints for operational management
+	adminHandlers := NewAdminHandlers(s.streamingService)
+	adminHandlers.RegisterRoutes(s.router.Group(""))
 }
 
 // APIInfo represents the API information response

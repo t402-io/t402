@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"math/big"
@@ -44,6 +45,22 @@ func isValidIdempotencyKey(key string) bool {
 	return true
 }
 
+// P1-5: validateNetwork checks that the network is in the supported list.
+// Returns an error if the network is unknown, preventing silent failures
+// when GetSigners returns nil/empty for unrecognized networks.
+func (s *Server) validateNetwork(network string) *errors.APIError {
+	if network == "" || network == "unknown" {
+		return errors.NewUnsupportedNetworkError(network)
+	}
+	supported := s.facilitator.GetSupported()
+	for _, kind := range supported.Kinds {
+		if kind.Network == network {
+			return nil
+		}
+	}
+	return errors.NewUnsupportedNetworkError(network)
+}
+
 // handleVerify handles POST /verify
 func (s *Server) handleVerify(c *gin.Context) {
 	var req VerifyRequest
@@ -57,6 +74,13 @@ func (s *Server) handleVerify(c *gin.Context) {
 
 	// Extract network/scheme for metrics from requirements
 	network, scheme := extractNetworkScheme(req.PaymentRequirements)
+
+	// P1-5: Validate network is supported before proceeding
+	if apiErr := s.validateNetwork(network); apiErr != nil {
+		log.Printf("Unsupported network in verify request: %s", network)
+		c.JSON(apiErr.HTTPStatus(), apiErr)
+		return
+	}
 
 	// P1-10: Check signature expiration
 	if deadline, hasDeadline := extractDeadline(req.PaymentPayload); hasDeadline {
@@ -105,6 +129,13 @@ func (s *Server) handleSettle(c *gin.Context) {
 	// Extract network/scheme for metrics from requirements
 	network, scheme := extractNetworkScheme(req.PaymentRequirements)
 
+	// P1-5: Validate network is supported before proceeding
+	if apiErr := s.validateNetwork(network); apiErr != nil {
+		log.Printf("Unsupported network in settle request: %s", network)
+		c.JSON(apiErr.HTTPStatus(), apiErr)
+		return
+	}
+
 	// P1-10: Check signature expiration before settlement
 	if deadline, hasDeadline := extractDeadline(req.PaymentPayload); hasDeadline {
 		now := time.Now().Unix()
@@ -118,7 +149,14 @@ func (s *Server) handleSettle(c *gin.Context) {
 
 	// P1-2: Validate payment amount meets requirements
 	payloadAmount, requiredAmount, amountErr := extractAmounts(req.PaymentPayload, req.PaymentRequirements)
-	if amountErr == nil && payloadAmount != nil && requiredAmount != nil {
+	if amountErr != nil {
+		// P1-2: Reject malformed amounts instead of silently skipping validation
+		log.Printf("Invalid amount format for network=%s scheme=%s: %v", network, scheme, amountErr)
+		apiErr := errors.NewInvalidRequestError("invalid amount format in payload or requirements")
+		c.JSON(apiErr.HTTPStatus(), apiErr)
+		return
+	}
+	if payloadAmount != nil && requiredAmount != nil {
 		if payloadAmount.Cmp(requiredAmount) < 0 {
 			log.Printf("Insufficient payment amount for network=%s scheme=%s: payload=%s required=%s",
 				network, scheme, payloadAmount.String(), requiredAmount.String())
@@ -138,8 +176,11 @@ func (s *Server) handleSettle(c *gin.Context) {
 				c.JSON(http.StatusConflict, apiErr)
 				return
 			}
-			// Log other errors but don't block - fail open for availability
+			// P1-1: Fail closed for /settle to prevent double settlement
 			log.Printf("Nonce check error for network=%s scheme=%s: %v", network, scheme, err)
+			apiErr := errors.NewInternalError("nonce verification unavailable")
+			c.JSON(http.StatusServiceUnavailable, apiErr)
+			return
 		}
 	}
 
@@ -232,6 +273,13 @@ func (s *Server) handleSettle(c *gin.Context) {
 
 	// Record metrics
 	s.metrics.RecordSettle(network, scheme, settleResult.Success)
+
+	// P1-13: Set confirmations status for successful settlements.
+	// Receipt confirmation is done by the SDK, but full finality (block depth)
+	// is tracked asynchronously. Mark as "pending" to indicate finality not guaranteed.
+	if settleResult.Success && settleResult.Transaction != "" {
+		settleResult.Confirmations = "pending"
+	}
 
 	status := http.StatusOK
 	if !settleResult.Success {
@@ -362,14 +410,16 @@ func extractAmounts(payload, requirements json.RawMessage) (payloadAmount, requi
 	payloadAmt := new(big.Int)
 	if amountStr != "" {
 		if _, ok := payloadAmt.SetString(amountStr, 10); !ok {
-			return nil, nil, nil // Can't parse, let downstream handle
+			// P1-2: Return error instead of silently skipping validation
+			return nil, nil, fmt.Errorf("invalid payload amount: %s", amountStr)
 		}
 	}
 
 	requiredAmt := new(big.Int)
 	if r.Amount != "" {
 		if _, ok := requiredAmt.SetString(r.Amount, 10); !ok {
-			return nil, nil, nil // Can't parse, let downstream handle
+			// P1-2: Return error instead of silently skipping validation
+			return nil, nil, fmt.Errorf("invalid required amount: %s", r.Amount)
 		}
 	}
 

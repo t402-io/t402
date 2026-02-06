@@ -59,9 +59,18 @@ func Middleware(manager *Manager, cfg *Config) gin.HandlerFunc {
 			}
 		}
 
-		// If no keys configured and not required, skip
+		// If no keys configured and not required, skip — EXCEPT for admin/stats paths
+		// P1-15: Stats and admin endpoints always require authentication
 		if !manager.HasKeys() && !cfg.Required {
-			c.Next()
+			if !isProtectedPath(path) {
+				c.Next()
+				return
+			}
+			// Protected path but no keys configured — block access
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"error":   "unauthorized",
+				"message": "API key required for this endpoint. Configure API_KEYS to enable access.",
+			})
 			return
 		}
 
@@ -142,6 +151,22 @@ func Middleware(manager *Manager, cfg *Config) gin.HandlerFunc {
 	}
 }
 
+// P1-15: isProtectedPath returns true for paths that always require authentication,
+// regardless of whether API keys are configured or required globally.
+// This prevents stats and admin endpoints from being publicly accessible.
+func isProtectedPath(path string) bool {
+	if strings.HasPrefix(path, "/stats/") || path == "/stats" {
+		return true
+	}
+	if strings.HasPrefix(path, "/admin/") || path == "/admin" {
+		return true
+	}
+	if path == "/v1/intent/stats" {
+		return true
+	}
+	return false
+}
+
 // getPermissionForPath returns the required permission for a path
 func getPermissionForPath(path, method string) string {
 	switch path {
@@ -160,6 +185,10 @@ func getPermissionForPath(path, method string) string {
 		// Check for path prefixes
 		if strings.HasPrefix(path, "/stats/") {
 			return "stats"
+		}
+		// P1-16: Admin endpoints require admin permission
+		if strings.HasPrefix(path, "/admin/") {
+			return "admin"
 		}
 		return "read"
 	}

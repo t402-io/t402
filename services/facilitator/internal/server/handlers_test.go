@@ -48,7 +48,19 @@ func (m *MockFacilitator) Settle(ctx context.Context, payloadBytes []byte, requi
 }
 
 func (m *MockFacilitator) GetSupported() t402.SupportedResponse {
-	return m.GetSupportedFunc()
+	if m.GetSupportedFunc != nil {
+		return m.GetSupportedFunc()
+	}
+	// Default: return common test networks so P1-5 validateNetwork passes
+	return t402.SupportedResponse{
+		Kinds: []t402.SupportedKind{
+			{T402Version: 2, Scheme: "exact", Network: "eip155:1"},
+			{T402Version: 2, Scheme: "exact", Network: "eip155:8453"},
+			{T402Version: 2, Scheme: "exact", Network: "ton:mainnet"},
+			{T402Version: 2, Scheme: "exact", Network: "tron:mainnet"},
+			{T402Version: 2, Scheme: "exact", Network: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"},
+		},
+	}
 }
 
 func newTestServer(f Facilitator) *Server {

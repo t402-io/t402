@@ -314,6 +314,10 @@ func getSecureClientIP(c *gin.Context, config *RateLimitConfig) string {
 
 	// Check if the direct connection is from a trusted proxy
 	if !isTrustedProxy(remoteIP, config.TrustedProxies) {
+		// P1-12: Log proxy trust denial for security auditing
+		if config.TrustProxy {
+			log.Printf("SECURITY: proxy trust denied for remote_ip=%s path=%s", remoteIP, c.Request.URL.Path)
+		}
 		// Not from a trusted proxy - use direct IP to prevent spoofing
 		return remoteIP
 	}
@@ -331,6 +335,9 @@ func getSecureClientIP(c *gin.Context, config *RateLimitConfig) string {
 		clientIP := strings.TrimSpace(ips[0])
 		// Validate the IP format
 		if isValidIP(clientIP) {
+			// P1-12: Log proxy trust grant for security auditing
+			log.Printf("SECURITY: proxy trust granted remote_ip=%s forwarded_client=%s path=%s",
+				remoteIP, clientIP, c.Request.URL.Path)
 			return clientIP
 		}
 	}
@@ -418,6 +425,58 @@ func (c *EndpointRateLimitConfig) GetEndpointLimit(path string) int {
 	return c.DefaultLimit
 }
 
+// P1-7: UserRateLimitMiddleware applies per-user/API-key rate limiting.
+// This runs AFTER auth middleware so api_key_id is available in context.
+// Provides isolated rate limits per API key, preventing one key from exhausting global limits.
+func UserRateLimitMiddleware(userLimiter *ratelimit.UserRateLimiter) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Skip for health and metrics endpoints
+		path := c.Request.URL.Path
+		if path == "/health" || path == "/ready" || path == "/metrics" {
+			c.Next()
+			return
+		}
+
+		// Only apply to authenticated requests with an API key
+		apiKeyID, exists := c.Get("api_key_id")
+		if !exists {
+			c.Next()
+			return
+		}
+		keyID, ok := apiKeyID.(string)
+		if !ok || keyID == "" {
+			c.Next()
+			return
+		}
+
+		allowed, info, err := userLimiter.AllowUser(c.Request.Context(), keyID, path)
+		if err != nil {
+			// P1-7: Fail closed — deny if rate limiter is unavailable
+			log.Printf("User rate limit error for key=%s: %v", keyID, err)
+			c.AbortWithStatusJSON(http.StatusServiceUnavailable, gin.H{
+				"code":    "RATE_LIMITER_UNAVAILABLE",
+				"message": "Service temporarily unavailable, please retry",
+			})
+			return
+		}
+
+		// Set user-specific rate limit headers
+		c.Header("X-RateLimit-User-Limit", strconv.Itoa(info.Limit))
+		c.Header("X-RateLimit-User-Remaining", strconv.Itoa(info.Remaining))
+
+		if !allowed {
+			c.Header("Retry-After", strconv.FormatInt(int64(time.Until(info.Reset).Seconds()), 10))
+			c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{
+				"error":      "per-user rate limit exceeded",
+				"retryAfter": time.Until(info.Reset).Seconds(),
+			})
+			return
+		}
+
+		c.Next()
+	}
+}
+
 // APIKeyMiddleware validates API keys (optional - for future use)
 func APIKeyMiddleware(validKeys map[string]bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -502,9 +561,17 @@ func (w *limitedResponseWriter) Write(data []byte) (int, error) {
 	return n, err
 }
 
+// P1-6: endpointTimeouts provides per-endpoint timeout overrides.
+// Settlement needs more time because on-chain transactions vary by chain
+// (e.g., TON uses 60s confirmation, EVM varies by congestion).
+var endpointTimeouts = map[string]time.Duration{
+	"/settle": 60 * time.Second, // P1-6: Settlement needs more time for on-chain confirmation
+}
+
 // OperationTimeoutMiddleware adds per-operation context timeouts
 // SECURITY: P2-6 fix - Prevents resource exhaustion from hanging operations
-func OperationTimeoutMiddleware(timeout time.Duration) gin.HandlerFunc {
+// P1-6: Uses per-endpoint timeouts for settlement
+func OperationTimeoutMiddleware(defaultTimeout time.Duration) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Skip for endpoints that don't need strict timeouts
 		// (health checks, metrics)
@@ -512,6 +579,12 @@ func OperationTimeoutMiddleware(timeout time.Duration) gin.HandlerFunc {
 		if path == "/health" || path == "/ready" || path == "/metrics" {
 			c.Next()
 			return
+		}
+
+		// P1-6: Use per-endpoint timeout if configured, otherwise default
+		timeout := defaultTimeout
+		if t, ok := endpointTimeouts[path]; ok {
+			timeout = t
 		}
 
 		// Create a timeout context for this operation

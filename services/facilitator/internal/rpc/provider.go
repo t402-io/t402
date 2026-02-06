@@ -105,11 +105,17 @@ func (m *Manager) GetProvider(ctx context.Context, network string) (string, erro
 		return "", ErrProviderNotFound
 	}
 
-	// Collect healthy providers grouped by priority
+	// P1-4: Collect healthy providers, treating stale health status as unhealthy.
+	// If health checker stops running, stale status should not be trusted.
+	stalenessThreshold := m.config.HealthCheckInterval * 3
+	if stalenessThreshold == 0 {
+		stalenessThreshold = 90 * time.Second // default fallback
+	}
 	healthyByPriority := make(map[int][]*Provider)
 	for _, p := range providers {
-		healthy, _, _ := p.GetHealth()
-		if healthy && m.circuitBreaker.IsAllowed(p.URL) {
+		healthy, _, lastCheck := p.GetHealth()
+		isStale := time.Since(lastCheck) > stalenessThreshold
+		if healthy && !isStale && m.circuitBreaker.IsAllowed(p.URL) {
 			healthyByPriority[p.Priority] = append(healthyByPriority[p.Priority], p)
 		}
 	}
