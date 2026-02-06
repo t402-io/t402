@@ -57,9 +57,9 @@ describe("t402ResourceServer", () => {
     it("should create default client if empty array provided", async () => {
       const server = new t402ResourceServer([]);
 
-      // Should not throw - uses default client
+      // Should not throw - uses default client (hits real facilitator, needs longer timeout)
       await expect(server.initialize()).resolves.not.toThrow();
-    });
+    }, 15_000);
   });
 
   describe("register", () => {
