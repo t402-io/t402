@@ -1,32 +1,27 @@
 # Supported Chains
 
-T402 supports multiple blockchain networks for stablecoin payments.
+import { Callout } from 'nextra/components'
 
-import { Cards, Callout } from 'nextra/components'
+<div className="stats">
+  <div className="stat"><span className="stat-number">44</span> <span className="stat-label">Networks</span></div>
+  <div className="stat"><span className="stat-number">10</span> <span className="stat-label">Chain Families</span></div>
+  <div className="stat"><span className="stat-number">64</span> <span className="stat-label">Payment Kinds</span></div>
+</div>
 
-<Callout type="info">
-T402 supports **44 networks** across **10 blockchain families** with **64 payment kinds**.
-</Callout>
-
-## Chain Families
-
-<Cards>
-  <Cards.Card title="EVM Chains" href="/chains/evm" />
-  <Cards.Card title="Solana" href="/chains/non-evm#solana" />
-  <Cards.Card title="TON" href="/chains/non-evm#ton" />
-  <Cards.Card title="TRON" href="/chains/non-evm#tron" />
-  <Cards.Card title="NEAR" href="/chains/non-evm#near" />
-  <Cards.Card title="Aptos" href="/chains/non-evm#aptos" />
-  <Cards.Card title="Tezos" href="/chains/non-evm#tezos" />
-  <Cards.Card title="Polkadot" href="/chains/non-evm#polkadot" />
-  <Cards.Card title="Stacks" href="/chains/non-evm#stacks" />
-  <Cards.Card title="Cosmos" href="/chains/non-evm#cosmos" />
-</Cards>
-
-<Cards>
-  <Cards.Card title="Comparison Matrix" href="/chains/comparison" />
-  <Cards.Card title="Testnets & Faucets" href="/chains/testnets" />
-</Cards>
+<div className="chain-tags">
+  <a href="/chains/evm" className="chain-tag">🔷 EVM Chains</a>
+  <a href="/chains/non-evm#solana" className="chain-tag">🟣 Solana</a>
+  <a href="/chains/non-evm#ton" className="chain-tag">💎 TON</a>
+  <a href="/chains/non-evm#tron" className="chain-tag">🔴 TRON</a>
+  <a href="/chains/non-evm#near" className="chain-tag">🟢 NEAR</a>
+  <a href="/chains/non-evm#aptos" className="chain-tag">🟢 Aptos</a>
+  <a href="/chains/non-evm#tezos" className="chain-tag">🔵 Tezos</a>
+  <a href="/chains/non-evm#polkadot" className="chain-tag">⚪ Polkadot</a>
+  <a href="/chains/non-evm#stacks" className="chain-tag">🟠 Stacks</a>
+  <a href="/chains/non-evm#cosmos" className="chain-tag">⚛️ Cosmos</a>
+  <a href="/chains/comparison" className="chain-tag">📊 Comparison</a>
+  <a href="/chains/testnets" className="chain-tag">🧪 Testnets</a>
+</div>
 
 ## EVM Chains (Mainnet)
 

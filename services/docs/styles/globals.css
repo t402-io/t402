@@ -2,74 +2,201 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Hero Section */
-.hero-section {
-  text-align: center;
-  padding: 3rem 1.5rem;
-  margin: -1.5rem -1.5rem 2rem;
-  background: linear-gradient(135deg, rgba(0, 214, 50, 0.08) 0%, rgba(0, 163, 255, 0.08) 100%);
-  border-radius: 0 0 1.5rem 1.5rem;
+/* ============================================
+   T402 Design System
+   ============================================ */
+
+/* --- Feature Grid --- */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin: 1.5rem 0;
 }
 
-:is(html[class~="dark"]) .hero-section {
-  background: linear-gradient(135deg, rgba(0, 214, 50, 0.12) 0%, rgba(0, 163, 255, 0.12) 100%);
+.feature-card {
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid #e5e7eb;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.hero-badge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #00A3FF;
-  background: rgba(0, 163, 255, 0.1);
-  border: 1px solid rgba(0, 163, 255, 0.2);
+.feature-card:hover {
+  border-color: #00A3FF;
+  box-shadow: 0 0 0 1px rgba(0, 163, 255, 0.1);
+}
+
+:is(html[class~="dark"]) .feature-card {
+  border-color: #374151;
+}
+
+:is(html[class~="dark"]) .feature-card:hover {
+  border-color: #00A3FF;
+}
+
+.feature-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.feature-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  color: #111827;
+}
+
+:is(html[class~="dark"]) .feature-title {
+  color: #F3F4F6;
+}
+
+.feature-desc {
+  font-size: 0.8125rem;
+  color: #6B7280;
+  line-height: 1.5;
+  margin: 0;
+}
+
+:is(html[class~="dark"]) .feature-desc {
+  color: #9CA3AF;
+}
+
+/* --- SDK Grid --- */
+.sdk-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.sdk-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.25rem 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid #e5e7eb;
+  text-decoration: none !important;
+  color: inherit !important;
+  transition: border-color 0.2s, transform 0.15s;
+}
+
+.sdk-card:hover {
+  border-color: #00A3FF;
+  transform: translateY(-2px);
+}
+
+:is(html[class~="dark"]) .sdk-card {
+  border-color: #374151;
+}
+
+:is(html[class~="dark"]) .sdk-card:hover {
+  border-color: #00A3FF;
+}
+
+.sdk-card-icon {
+  font-size: 1.75rem;
+}
+
+.sdk-card-name {
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+.sdk-card-version {
+  font-size: 0.6875rem;
+  color: #6B7280;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+:is(html[class~="dark"]) .sdk-card-version {
+  color: #9CA3AF;
+}
+
+/* --- Chain Tags --- */
+.chain-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.chain-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
   border-radius: 9999px;
-  margin-bottom: 1rem;
+  border: 1px solid #e5e7eb;
+  color: #374151 !important;
+  text-decoration: none !important;
+  transition: all 0.15s;
+  white-space: nowrap;
 }
 
-.hero-title {
-  font-size: 2.5rem !important;
-  font-weight: 800 !important;
+.chain-tag:hover {
+  border-color: #00A3FF;
+  background: rgba(0, 163, 255, 0.05);
+}
+
+:is(html[class~="dark"]) .chain-tag {
+  border-color: #4B5563;
+  color: #D1D5DB !important;
+}
+
+:is(html[class~="dark"]) .chain-tag:hover {
+  border-color: #00A3FF;
+  background: rgba(0, 163, 255, 0.1);
+}
+
+/* --- Stat Pills --- */
+.stats {
+  display: flex;
+  gap: 1.5rem;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+}
+
+.stat-number {
+  font-size: 1.5rem;
+  font-weight: 800;
   background: linear-gradient(135deg, #00D632 0%, #00A3FF 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin: 0 0 0.5rem !important;
-  border: none !important;
 }
 
-.hero-subtitle {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #374151;
-  margin: 0 0 0.75rem;
-}
-
-:is(html[class~="dark"]) .hero-subtitle {
-  color: #D1D5DB;
-}
-
-.hero-description {
-  font-size: 1rem;
+.stat-label {
+  font-size: 0.8125rem;
   color: #6B7280;
-  max-width: 600px;
-  margin: 0 auto 1.5rem;
 }
 
-:is(html[class~="dark"]) .hero-description {
+:is(html[class~="dark"]) .stat-label {
   color: #9CA3AF;
 }
 
-.hero-buttons {
+/* --- CTA Buttons --- */
+.cta-row {
   display: flex;
   gap: 0.75rem;
-  justify-content: center;
+  margin: 1.5rem 0;
   flex-wrap: wrap;
 }
 
-.hero-cta {
-  display: inline-block;
-  padding: 0.625rem 1.5rem;
+.cta-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
   font-weight: 600;
   font-size: 0.875rem;
   color: white !important;
@@ -79,33 +206,45 @@
   transition: opacity 0.2s;
 }
 
-.hero-cta:hover {
-  opacity: 0.9;
-}
+.cta-primary:hover { opacity: 0.9; }
 
-.hero-cta-secondary {
-  display: inline-block;
-  padding: 0.625rem 1.5rem;
+.cta-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
   font-weight: 600;
   font-size: 0.875rem;
   color: #374151 !important;
-  background: transparent;
   border: 1px solid #D1D5DB;
   border-radius: 0.5rem;
   text-decoration: none !important;
   transition: border-color 0.2s;
 }
 
-:is(html[class~="dark"]) .hero-cta-secondary {
+.cta-secondary:hover { border-color: #00A3FF; }
+
+:is(html[class~="dark"]) .cta-secondary {
   color: #D1D5DB !important;
   border-color: #4B5563;
 }
 
-.hero-cta-secondary:hover {
+:is(html[class~="dark"]) .cta-secondary:hover {
   border-color: #00A3FF;
 }
 
-/* Better table styling */
+/* --- Divider --- */
+.section-divider {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 2.5rem 0;
+}
+
+:is(html[class~="dark"]) .section-divider {
+  border-color: #374151;
+}
+
+/* --- Better table styling --- */
 table {
   border-radius: 0.5rem;
   overflow: hidden;
@@ -123,27 +262,23 @@ table tbody tr:hover {
   background: rgba(0, 163, 255, 0.04);
 }
 
-/* Mobile hero adjustments */
+/* ============================================
+   Responsive
+   ============================================ */
+
 @media (max-width: 768px) {
-  .hero-section {
-    padding: 2rem 1rem;
-    margin: -1rem -1rem 1.5rem;
-  }
-
-  .hero-title {
-    font-size: 1.75rem !important;
-  }
-
-  .hero-subtitle {
-    font-size: 1rem;
-  }
+  .feature-grid { grid-template-columns: 1fr; }
+  .sdk-grid { grid-template-columns: repeat(2, 1fr); }
+  .stats { gap: 1rem; }
+  .stat-number { font-size: 1.25rem; }
 }
 
-/* Mobile Experience Improvements */
+/* ============================================
+   Mobile Experience (existing)
+   ============================================ */
+
 @layer utilities {
-  /* Better touch targets for mobile */
   @media (max-width: 768px) {
-    /* Increase touch target size for links in tables */
     table a {
       display: inline-block;
       padding: 0.25rem 0;
@@ -151,30 +286,25 @@ table tbody tr:hover {
       min-width: 44px;
     }
 
-    /* Better spacing for table cells on mobile */
     table td,
     table th {
       padding: 0.75rem 0.5rem !important;
       font-size: 0.875rem;
     }
 
-    /* Stack table content better on very small screens */
     table code {
       font-size: 0.75rem;
       word-break: break-word;
     }
 
-    /* Improve code block readability */
     pre {
       font-size: 0.8rem !important;
     }
 
-    /* Better Steps component spacing */
     .nextra-steps {
       padding-left: 1rem;
     }
 
-    /* Larger tap targets for navigation */
     nav a,
     nav button {
       min-height: 44px;
@@ -182,26 +312,15 @@ table tbody tr:hover {
       align-items: center;
     }
 
-    /* Better callout spacing */
     .nextra-callout {
       padding: 0.75rem !important;
     }
 
-    /* Reduce heading sizes on mobile */
-    h1 {
-      font-size: 1.75rem !important;
-    }
-
-    h2 {
-      font-size: 1.375rem !important;
-    }
-
-    h3 {
-      font-size: 1.125rem !important;
-    }
+    h1 { font-size: 1.75rem !important; }
+    h2 { font-size: 1.375rem !important; }
+    h3 { font-size: 1.125rem !important; }
   }
 
-  /* Very small screens (< 375px) */
   @media (max-width: 374px) {
     table td,
     table th {
@@ -209,53 +328,36 @@ table tbody tr:hover {
       font-size: 0.8rem;
     }
 
-    table code {
-      font-size: 0.7rem;
-    }
+    table code { font-size: 0.7rem; }
 
-    /* Hide less important table columns on very small screens */
     table th:nth-child(3),
     table td:nth-child(3) {
       display: none;
     }
   }
 
-  /* Smooth sidebar animation */
   .nextra-sidebar-container {
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* Better scroll behavior */
   html {
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Prevent horizontal overflow on mobile */
   @media (max-width: 768px) {
-    body {
-      overflow-x: hidden;
-    }
-
-    /* Ensure tables scroll within container */
-    table {
-      max-width: 100%;
-    }
+    body { overflow-x: hidden; }
+    table { max-width: 100%; }
   }
 }
 
-/* Improve DocSearch on mobile */
 @media (max-width: 768px) {
   .DocSearch-Button {
     width: 100%;
     margin: 0 !important;
     padding: 0.75rem 1rem !important;
   }
-
-  .DocSearch-Button-Placeholder {
-    display: block !important;
-  }
-
+  .DocSearch-Button-Placeholder { display: block !important; }
   .DocSearch-Modal {
     margin: 0 !important;
     max-width: 100% !important;
@@ -263,12 +365,8 @@ table tbody tr:hover {
   }
 }
 
-/* Better Tabs component on mobile */
 @media (max-width: 768px) {
-  [role="tablist"] {
-    gap: 0.25rem !important;
-  }
-
+  [role="tablist"] { gap: 0.25rem !important; }
   [role="tab"] {
     padding: 0.5rem 0.75rem !important;
     font-size: 0.875rem;

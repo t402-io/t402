@@ -158,7 +158,7 @@ When payment is required, servers return HTTP 402:
 
 ```http
 HTTP/1.1 402 Payment Required
-X-Payment: {"t402Version":2,"accepts":[...]}
+Payment-Required: scheme="exact";network="eip155:8453";amount="10000";...
 Content-Type: application/json
 
 {
@@ -169,11 +169,11 @@ Content-Type: application/json
 
 ### Payment Header
 
-Clients include payment in the `X-Payment` header:
+Clients include payment in the `Payment-Signature` header:
 
 ```http
 GET /api/resource HTTP/1.1
-X-Payment: {"t402Version":2,"accepted":{...},"payload":{...}}
+Payment-Signature: signature="0x...";payload="..."
 ```
 
 ## Error Handling
