@@ -138,25 +138,25 @@ t402/
 
 | SDK | Version | Registry | Tag Pattern |
 |-----|---------|----------|-------------|
-| TypeScript | 2.3.1 | npm (@t402/*) | `v*` (e.g., `v2.3.1`) |
-| Python | 1.9.1 | PyPI | `python/v*` |
-| Go | 1.8.1 | Go Modules | `go/v*` |
-| Java | 1.8.1 | Maven Central | `java/v*` |
+| TypeScript | 2.4.0 | npm (@t402/*) | `v*` (e.g., `v2.4.0`) |
+| Python | 1.10.0 | PyPI | `python/v*` |
+| Go | 1.9.0 | Go Modules | `go/v*` |
+| Java | 1.9.0 | Maven Central | `java/v*` |
 
 ### Release Commands
 
 ```bash
 # TypeScript (publishes all 29 packages)
-git tag v2.3.1 && git push origin v2.3.1
+git tag v2.4.0 && git push origin v2.4.0
 
 # Python
-git tag python/v1.9.1 && git push origin python/v1.9.1
+git tag python/v1.10.0 && git push origin python/v1.10.0
 
 # Go
-git tag go/v1.8.1 && git push origin go/v1.8.1
+git tag go/v1.9.0 && git push origin go/v1.9.0
 
 # Java
-git tag java/v1.8.1 && git push origin java/v1.8.1
+git tag java/v1.9.0 && git push origin java/v1.9.0
 ```
 
 ---

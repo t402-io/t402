@@ -8,10 +8,10 @@ Ask the user which SDK(s) to release using AskUserQuestion:
 
 | SDK | Current Version | Tag Pattern | Registry |
 |-----|----------------|-------------|----------|
-| TypeScript (29 packages) | 2.3.1 | `v{VERSION}` | npm `@t402/*` |
-| Go | 1.8.1 | `go/v{VERSION}` | Go Modules (auto) |
-| Python | 1.9.1 | `python/v{VERSION}` | PyPI `t402` |
-| Java | 1.8.1 | `java/v{VERSION}` | Maven Central `io.t402:t402` |
+| TypeScript (29 packages) | 2.4.0 | `v{VERSION}` | npm `@t402/*` |
+| Go | 1.9.0 | `go/v{VERSION}` | Go Modules (auto) |
+| Python | 1.10.0 | `python/v{VERSION}` | PyPI `t402` |
+| Java | 1.9.0 | `java/v{VERSION}` | Maven Central `io.t402:t402` |
 
 If the user already specified the SDK in their invocation args, skip the question.
 
