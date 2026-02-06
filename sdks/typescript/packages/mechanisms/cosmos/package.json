@@ -1,0 +1,96 @@
+{
+  "name": "@t402/cosmos",
+  "version": "2.3.1",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/cjs/index.d.ts",
+  "scripts": {
+    "start": "tsx --env-file=.env index.ts",
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "watch": "tsc --watch",
+    "format": "prettier -c .prettierrc --write \"**/*.{ts,js,cjs,json,md}\"",
+    "format:check": "prettier -c .prettierrc --check \"**/*.{ts,js,cjs,json,md}\"",
+    "lint": "eslint . --ext .ts --fix",
+    "lint:check": "eslint . --ext .ts"
+  },
+  "keywords": [
+    "t402",
+    "payment",
+    "protocol",
+    "cosmos",
+    "noble",
+    "usdc"
+  ],
+  "license": "Apache-2.0",
+  "author": "T402 Team",
+  "repository": "https://github.com/t402-io/t402",
+  "description": "t402 Payment Protocol Cosmos (Noble USDC) Implementation",
+  "devDependencies": {
+    "@eslint/js": "^9.24.0",
+    "@types/node": "^25.2.0",
+    "@typescript-eslint/eslint-plugin": "^8.29.1",
+    "@typescript-eslint/parser": "^8.29.1",
+    "eslint": "^9.24.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsdoc": "^62.5.0",
+    "eslint-plugin-prettier": "^5.2.6",
+    "glob": "^13.0.0",
+    "prettier": "3.5.2",
+    "tsup": "^8.4.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.7.3",
+    "vite": "^7.3.1",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "@t402/core": "workspace:*"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.mts",
+        "default": "./dist/esm/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    },
+    "./exact-direct/client": {
+      "import": {
+        "types": "./dist/esm/exact-direct/client/index.d.mts",
+        "default": "./dist/esm/exact-direct/client/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/exact-direct/client/index.d.ts",
+        "default": "./dist/cjs/exact-direct/client/index.js"
+      }
+    },
+    "./exact-direct/server": {
+      "import": {
+        "types": "./dist/esm/exact-direct/server/index.d.mts",
+        "default": "./dist/esm/exact-direct/server/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/exact-direct/server/index.d.ts",
+        "default": "./dist/cjs/exact-direct/server/index.js"
+      }
+    },
+    "./exact-direct/facilitator": {
+      "import": {
+        "types": "./dist/esm/exact-direct/facilitator/index.d.mts",
+        "default": "./dist/esm/exact-direct/facilitator/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/exact-direct/facilitator/index.d.ts",
+        "default": "./dist/cjs/exact-direct/facilitator/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ]
+}
