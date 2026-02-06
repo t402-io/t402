@@ -8,7 +8,7 @@ Ask the user which SDK(s) to release using AskUserQuestion:
 
 | SDK | Current Version | Tag Pattern | Registry |
 |-----|----------------|-------------|----------|
-| TypeScript (27 packages) | 2.3.1 | `v{VERSION}` | npm `@t402/*` |
+| TypeScript (29 packages) | 2.3.1 | `v{VERSION}` | npm `@t402/*` |
 | Go | 1.8.1 | `go/v{VERSION}` | Go Modules (auto) |
 | Python | 1.9.1 | `python/v{VERSION}` | PyPI `t402` |
 | Java | 1.8.1 | `java/v{VERSION}` | Maven Central `io.t402:t402` |
@@ -93,7 +93,7 @@ Read the workflow file and confirm the `on.push.tags` pattern matches the tag yo
 
 ## Step 4: Version Bump
 
-### TypeScript (27 packages)
+### TypeScript (29 packages)
 Update version in ALL `package.json` files. Use a script approach:
 ```bash
 # Find all @t402/* package.json files and update version
@@ -103,7 +103,7 @@ done
 ```
 Also update the monorepo root `sdks/typescript/package.json`.
 
-**Important:** All 27 packages MUST have the same version number.
+**Important:** All 29 packages MUST have the same version number.
 
 ### Go
 No file to update. Version comes from the git tag.
@@ -204,13 +204,13 @@ gh run view RUN_ID
 - Maven Central: Cannot unpublish; publish a new patch version
 - Go: Cannot unpublish; publish a new patch version
 
-## TypeScript Package Matrix (27 packages)
+## TypeScript Package Matrix (29 packages)
 
 For reference, these are ALL packages that must be published:
 
 **Core (2):** `@t402/core`, `@t402/extensions`
 
-**Mechanisms (10):** `@t402/evm-core`, `@t402/evm`, `@t402/svm`, `@t402/ton`, `@t402/tron`, `@t402/near`, `@t402/aptos`, `@t402/tezos`, `@t402/polkadot`, `@t402/stacks`
+**Mechanisms (11):** `@t402/evm-core`, `@t402/evm`, `@t402/svm`, `@t402/ton`, `@t402/tron`, `@t402/near`, `@t402/aptos`, `@t402/tezos`, `@t402/polkadot`, `@t402/stacks`, `@t402/cosmos`
 
 **HTTP Server (4):** `@t402/express`, `@t402/next`, `@t402/hono`, `@t402/fastify`
 
@@ -219,5 +219,7 @@ For reference, these are ALL packages that must be published:
 **UI (3):** `@t402/paywall`, `@t402/react`, `@t402/vue`
 
 **WDK (4):** `@t402/wdk`, `@t402/wdk-gasless`, `@t402/wdk-bridge`, `@t402/wdk-multisig`
+
+**Transport (1):** `@t402/a2a`
 
 **Tools (2):** `@t402/mcp`, `@t402/cli`

@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All SDK CHANGELOGs updated with missing version entries
 
 ### SDK Versions
-- TypeScript: v2.3.1 (27 packages)
+- TypeScript: v2.3.1 (29 packages)
 - Go: v1.8.1
 - Python: v1.9.1
 - Java: v1.8.1
