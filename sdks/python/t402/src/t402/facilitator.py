@@ -10,6 +10,10 @@ from t402.types import (
     SettleResponse,
     ListDiscoveryResourcesRequest,
     ListDiscoveryResourcesResponse,
+    DiscoveryItem,
+    RegisterResourceRequest,
+    RegisterResourceResponse,
+    UpdateResourceRequest,
 )
 
 
@@ -133,3 +137,124 @@ class FacilitatorClient:
 
             data = response.json()
             return ListDiscoveryResourcesResponse(**data)
+
+    async def get_resource(self, resource_id: str) -> DiscoveryItem:
+        """Get details of a specific discoverable resource.
+
+        Args:
+            resource_id: The unique ID of the resource
+
+        Returns:
+            DiscoveryItem with resource details
+        """
+        headers = {"Content-Type": "application/json"}
+
+        if self.config.get("create_headers"):
+            custom_headers = await self.config["create_headers"]()
+            headers.update(custom_headers.get("discovery", {}))
+
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{self.config['url']}/discovery/resources/{resource_id}",
+                headers=headers,
+                follow_redirects=True,
+            )
+
+            if response.status_code != 200:
+                raise ValueError(
+                    f"Failed to get resource: {response.status_code} {response.text}"
+                )
+
+            data = response.json()
+            return DiscoveryItem(**data)
+
+    async def register_resource(
+        self, request: RegisterResourceRequest
+    ) -> RegisterResourceResponse:
+        """Register a new resource in the Bazaar.
+
+        Args:
+            request: Resource registration data
+
+        Returns:
+            RegisterResourceResponse with the new resource ID and metadata
+        """
+        headers = {"Content-Type": "application/json"}
+
+        if self.config.get("create_headers"):
+            custom_headers = await self.config["create_headers"]()
+            headers.update(custom_headers.get("discovery", {}))
+
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{self.config['url']}/discovery/register",
+                json=request.model_dump(by_alias=True, exclude_none=True),
+                headers=headers,
+                follow_redirects=True,
+            )
+
+            if response.status_code != 201:
+                raise ValueError(
+                    f"Failed to register resource: {response.status_code} {response.text}"
+                )
+
+            data = response.json()
+            return RegisterResourceResponse(**data)
+
+    async def update_resource(
+        self, resource_id: str, request: UpdateResourceRequest
+    ) -> DiscoveryItem:
+        """Update an existing resource in the Bazaar.
+
+        Args:
+            resource_id: The unique ID of the resource to update
+            request: Resource update data
+
+        Returns:
+            DiscoveryItem with updated resource details
+        """
+        headers = {"Content-Type": "application/json"}
+
+        if self.config.get("create_headers"):
+            custom_headers = await self.config["create_headers"]()
+            headers.update(custom_headers.get("discovery", {}))
+
+        async with httpx.AsyncClient() as client:
+            response = await client.put(
+                f"{self.config['url']}/discovery/resources/{resource_id}",
+                json=request.model_dump(by_alias=True, exclude_none=True),
+                headers=headers,
+                follow_redirects=True,
+            )
+
+            if response.status_code != 200:
+                raise ValueError(
+                    f"Failed to update resource: {response.status_code} {response.text}"
+                )
+
+            data = response.json()
+            return DiscoveryItem(**data)
+
+    async def delete_resource(self, resource_id: str) -> None:
+        """Delete a resource from the Bazaar.
+
+        Args:
+            resource_id: The unique ID of the resource to delete
+        """
+        headers = {"Content-Type": "application/json"}
+
+        if self.config.get("create_headers"):
+            custom_headers = await self.config["create_headers"]()
+            headers.update(custom_headers.get("discovery", {}))
+
+        async with httpx.AsyncClient() as client:
+            response = await client.delete(
+                f"{self.config['url']}/discovery/resources/{resource_id}",
+                headers=headers,
+                follow_redirects=True,
+            )
+
+            if response.status_code != 204:
+                raise ValueError(
+                    f"Failed to delete resource: {response.status_code} {response.text}"
+                )
