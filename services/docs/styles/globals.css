@@ -34,11 +34,6 @@
   border-color: #00A3FF;
 }
 
-.feature-icon {
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
-}
-
 .feature-title {
   font-size: 0.9375rem;
   font-weight: 700;
@@ -93,10 +88,6 @@
 
 :is(html[class~="dark"]) .sdk-card:hover {
   border-color: #00A3FF;
-}
-
-.sdk-card-icon {
-  font-size: 1.75rem;
 }
 
 .sdk-card-name {
