@@ -190,6 +190,11 @@ implementation 'io.t402:t402:1.8.1'
 - Stacks Testnet (`stacks:2147483648`)
 - Supports sBTC and SIP-010 tokens
 
+### Cosmos (Noble)
+- Noble Mainnet (`cosmos:noble-1`)
+- Noble Testnet (`cosmos:grand-1`)
+- Supports native USDC via MsgSend
+
 ### USDT0 Cross-Chain Bridge (LayerZero)
 - **All 19 USDT0 networks** fully supported
 - **Message tracking** via LayerZero Scan API
@@ -243,7 +248,8 @@ t402 info eip155:8453
 | Aptos | ✅ | ✅ | ✅ | ✅ |
 | Tezos | ✅ | ✅ | ✅ | ✅ |
 | Polkadot | ✅ | ✅ | ✅ | ✅ |
-| Stacks | ✅ | ✅ | ✅ | ❌ |
+| Stacks | ✅ | ✅ | ✅ | ✅ |
+| Cosmos | ✅ | ✅ | ✅ | ✅ |
 | ERC-4337 Gasless | ✅ | ✅ | ✅ | ✅ |
 | USDT0 Bridge | ✅ | ✅ | ✅ | ✅ |
 | WDK Integration | ✅ | ✅ | ✅ | ✅ |
@@ -252,7 +258,7 @@ t402 info eip155:8453
 
 Legend: ✅ Complete | ❌ Not Available
 
-**Total Supported Networks: 28** across 10 blockchain families
+**Total Supported Networks: 33** across 10 blockchain families
 
 ## Latest Releases
 

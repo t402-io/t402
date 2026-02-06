@@ -366,7 +366,7 @@ result = await bridge.bridge(
 
 ## Deprecation Notice: exact-legacy Scheme
 
-> **⚠️ Deprecated in v2.3.0**: The `exact-legacy` scheme is deprecated and will be removed in v3.0.0.
+> **⚠️ Deprecated**: The `exact-legacy` scheme is deprecated and will be removed in a future major version.
 
 The `exact-legacy` scheme uses the traditional `approve + transferFrom` pattern for legacy USDT tokens. This has been superseded by the `exact` scheme with USDT0.
 
