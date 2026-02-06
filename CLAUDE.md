@@ -419,8 +419,11 @@ TEST_PRIVATE_KEY=0x...
 |-------|---------|
 | EVM (all) | `0xC88f67e776f16DcFBf42e6bDda1B82604448899B` |
 | Solana | `8GGtWHRQ1wz5gDKE2KXZLktqzcfV1CBqSbeUZjA7hoWL` |
-| TON | `EQDjv9CUEJ__D_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkEUe` |
+| TON (mainnet) | `EQDjv9CUEJ__D_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkEUe` |
+| TON (testnet) | `kQDjv9CUEJ__D_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkP6U` |
 | TRON | `TT1MqNNj2k5qdGA6nrrCodW6oyHbbAreQ5` |
+| Stacks | `SP36B1B191JTQAZTRKKWRN7J0YHHM41W9P9P7EPR5` |
+| Cosmos/Noble | `noble1ejc2c2gvk46h7kyulx9fus85vdpq0zdjwkfav0` |
 
 ---
 
