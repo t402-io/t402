@@ -34,3 +34,6 @@ export * from "./utils.js";
 
 // Exact-Direct scheme exports
 export * from "./exact-direct/index.js";
+
+// Upto scheme exports
+export * from "./upto/index.js";

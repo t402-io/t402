@@ -20,6 +20,10 @@ export type {
 // Export payload types
 export type { ExactSvmPayloadV1, ExactSvmPayloadV2 } from "./types";
 
+// Export upto types
+export type { UptoSvmPayload, UptoSvmAuthorization, UptoSvmExtra } from "./upto/index";
+export { isUptoSvmPayload } from "./upto/index";
+
 // Export constants
 export * from "./constants";
 

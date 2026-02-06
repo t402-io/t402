@@ -4,6 +4,7 @@ This package provides payment scheme implementations for Solana blockchain.
 
 Supported schemes:
 - exact: SPL Token TransferChecked with facilitator fee payer
+- upto: SPL Token ApproveChecked with delegated transferFrom
 """
 
 from t402.schemes.svm.exact import (
@@ -13,6 +14,14 @@ from t402.schemes.svm.exact import (
     ClientSvmSigner,
     FacilitatorSvmSigner,
     SCHEME_EXACT,
+)
+
+from t402.schemes.svm.upto import (
+    UptoSvmAuthorization,
+    UptoSvmPayload,
+    UptoSvmExtra,
+    is_upto_svm_payload,
+    upto_payload_from_dict,
 )
 
 __all__ = [
@@ -26,4 +35,10 @@ __all__ = [
     "FacilitatorSvmSigner",
     # Constants
     "SCHEME_EXACT",
+    # Upto types
+    "UptoSvmAuthorization",
+    "UptoSvmPayload",
+    "UptoSvmExtra",
+    "is_upto_svm_payload",
+    "upto_payload_from_dict",
 ]
