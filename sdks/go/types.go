@@ -89,11 +89,16 @@ type VerifyResponse struct {
 // SettleResponse contains the settlement result
 // If settlement fails, an error (typically *SettleError) is returned and this will be nil
 type SettleResponse struct {
-	Success     bool    `json:"success"`
-	ErrorReason string  `json:"errorReason,omitempty"`
-	Payer       string  `json:"payer,omitempty"`
-	Transaction string  `json:"transaction"`
-	Network     Network `json:"network"`
+	Success       bool    `json:"success"`
+	ErrorReason   string  `json:"errorReason,omitempty"`
+	Payer         string  `json:"payer,omitempty"`
+	Transaction   string  `json:"transaction"`
+	Network       Network `json:"network"`
+	// P1-13: Confirmations indicates the transaction finality status.
+	// Values: "pending" (receipt confirmed, finality not yet reached),
+	// "confirmed" (sufficient block depth), or empty for non-applicable chains.
+	// Full async finality tracking is handled by the persistence layer.
+	Confirmations string `json:"confirmations,omitempty"`
 }
 
 // ResourceConfig defines payment configuration for a protected resource
