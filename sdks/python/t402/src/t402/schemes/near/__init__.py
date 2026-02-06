@@ -4,6 +4,7 @@ This package provides payment scheme implementations for the NEAR blockchain.
 
 Supported schemes:
 - exact-direct: Client executes NEP-141 ft_transfer, tx hash used as proof.
+- upto: Escrow-based pattern for usage-based billing (ft_transfer to facilitator).
 
 Usage:
     ```python
@@ -24,6 +25,13 @@ Usage:
         SCHEME_EXACT_DIRECT,
         NEAR_MAINNET,
         NEAR_TESTNET,
+        # Upto types
+        UptoNearAuthorization,
+        UptoNearPayload,
+        UptoNearExtra,
+        UptoNearSettlement,
+        is_upto_near_payload,
+        upto_payload_from_dict,
     )
     ```
 """
@@ -42,6 +50,14 @@ from t402.schemes.near.types import (
     ExactDirectPayload,
     FtTransferArgs,
     is_valid_account_id,
+)
+from t402.schemes.near.upto import (
+    UptoNearAuthorization,
+    UptoNearPayload,
+    UptoNearExtra,
+    UptoNearSettlement,
+    is_upto_near_payload,
+    upto_payload_from_dict,
 )
 from t402.schemes.near.constants import (
     SCHEME_EXACT_DIRECT,
@@ -82,6 +98,15 @@ __all__ = [
     # Payload types
     "ExactDirectPayload",
     "FtTransferArgs",
+    # Upto types
+    "UptoNearAuthorization",
+    "UptoNearPayload",
+    "UptoNearExtra",
+    "UptoNearSettlement",
+    # Upto type guards
+    "is_upto_near_payload",
+    # Upto factory functions
+    "upto_payload_from_dict",
     # Validation
     "is_valid_account_id",
     "is_valid_network",

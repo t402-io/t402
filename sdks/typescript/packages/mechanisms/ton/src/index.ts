@@ -57,6 +57,10 @@ export type {
   TransactionConfirmation,
 } from './types.js'
 
+// Export upto scheme types
+export type { UptoTonAuthorization, UptoTonPayload, UptoTonExtra } from './upto/index.js'
+export { isUptoTonPayload } from './upto/index.js'
+
 // Export constants
 export {
   // Network identifiers

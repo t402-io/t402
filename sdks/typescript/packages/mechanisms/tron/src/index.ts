@@ -80,3 +80,6 @@ export {
 
 // Exact scheme exports (for convenience)
 export * from './exact/index.js'
+
+// Upto scheme exports
+export * from './upto/index.js'

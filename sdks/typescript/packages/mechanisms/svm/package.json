@@ -125,6 +125,16 @@
         "types": "./dist/cjs/exact/v1/facilitator/index.d.ts",
         "default": "./dist/cjs/exact/v1/facilitator/index.js"
       }
+    },
+    "./upto": {
+      "import": {
+        "types": "./dist/esm/upto/index.d.mts",
+        "default": "./dist/esm/upto/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/upto/index.d.ts",
+        "default": "./dist/cjs/upto/index.js"
+      }
     }
   },
   "files": [

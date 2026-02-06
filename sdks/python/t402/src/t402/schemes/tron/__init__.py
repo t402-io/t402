@@ -4,6 +4,7 @@ This package provides payment scheme implementations for TRON blockchain.
 
 Supported schemes:
 - exact: TRC-20 token transfers with signed transactions
+- upto: TRC-20 approve + transferFrom for authorized maximum-amount payments
 """
 
 from t402.schemes.tron.exact import (
@@ -16,16 +17,32 @@ from t402.schemes.tron.exact import (
     SCHEME_EXACT,
 )
 
+from t402.schemes.tron.upto import (
+    UptoTronAuthorization,
+    UptoTronPayload,
+    UptoTronExtra,
+    is_upto_tron_payload,
+    upto_payload_from_dict,
+)
+
 __all__ = [
-    # Client
+    # Exact - Client
     "ExactTronClientScheme",
     "TronSigner",
-    # Server
+    # Exact - Server
     "ExactTronServerScheme",
-    # Facilitator
+    # Exact - Facilitator
     "ExactTronFacilitatorScheme",
     "ExactTronFacilitatorConfig",
     "FacilitatorTronSigner",
-    # Constants
+    # Exact - Constants
     "SCHEME_EXACT",
+    # Upto - Types
+    "UptoTronAuthorization",
+    "UptoTronPayload",
+    "UptoTronExtra",
+    # Upto - Type guards
+    "is_upto_tron_payload",
+    # Upto - Helpers
+    "upto_payload_from_dict",
 ]
