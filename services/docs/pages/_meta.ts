@@ -1,22 +1,10 @@
 export default {
   index: {
-    title: 'Introduction',
+    title: 'Docs',
     type: 'page'
   },
   'getting-started': {
     title: 'Getting Started',
-    type: 'page'
-  },
-  tutorials: {
-    title: 'Tutorials',
-    type: 'page'
-  },
-  'use-cases': {
-    title: 'Use Cases',
-    type: 'page'
-  },
-  schemes: {
-    title: 'Payment Schemes',
     type: 'page'
   },
   sdks: {
@@ -27,42 +15,52 @@ export default {
     title: 'Chains',
     type: 'page'
   },
-  advanced: {
-    title: 'Advanced',
+  reference: {
+    title: 'Reference',
     type: 'page'
   },
-  reference: {
-    title: 'API Reference',
+  advanced: {
+    title: 'Advanced',
     type: 'page'
   },
   security: {
     title: 'Security',
     type: 'page'
   },
+  // Accessible via links but hidden from navbar
+  tutorials: {
+    title: 'Tutorials',
+    display: 'hidden'
+  },
+  'use-cases': {
+    title: 'Use Cases',
+    display: 'hidden'
+  },
+  schemes: {
+    title: 'Payment Schemes',
+    display: 'hidden'
+  },
   faq: {
     title: 'FAQ',
-    type: 'page'
+    display: 'hidden'
   },
   glossary: {
     title: 'Glossary',
-    type: 'page'
-  },
-  '---': {
-    type: 'separator'
+    display: 'hidden'
   },
   changelog: {
     title: 'Changelog',
-    type: 'page'
+    display: 'hidden'
   },
   ecosystem: {
     title: 'Ecosystem',
-    type: 'page'
+    display: 'hidden'
   },
   comparison: {
     title: 'Comparison',
-    type: 'page'
+    display: 'hidden'
   },
-  '---2': {
+  '---': {
     type: 'separator'
   },
   whitepaper: {
@@ -73,11 +71,6 @@ export default {
   github: {
     title: 'GitHub',
     href: 'https://github.com/t402-io/t402',
-    newWindow: true
-  },
-  npm: {
-    title: 'npm',
-    href: 'https://www.npmjs.com/org/t402',
     newWindow: true
   }
 }
