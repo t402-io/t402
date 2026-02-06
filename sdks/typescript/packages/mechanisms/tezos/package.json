@@ -1,6 +1,6 @@
 {
   "name": "@t402/tezos",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "description": "Tezos (FA2) mechanism for T402 payment protocol",
   "type": "module",
   "main": "./dist/cjs/index.js",

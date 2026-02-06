@@ -1,6 +1,6 @@
 {
   "name": "@t402/stacks",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "description": "T402 Stacks mechanism - SIP-010 token transfers on Bitcoin L2",
   "type": "module",
   "main": "./dist/cjs/index.cjs",
