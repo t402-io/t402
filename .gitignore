@@ -38,8 +38,8 @@ whitepaper/build/
 # OS files
 **/.DS_Store
 
-# Editor
-.claude/settings.local.json
+# Claude Code
+.claude/
 
 # Project specific
 proxy
@@ -57,3 +57,8 @@ e2e/servers/gin/server
 
 # Archive
 .archive/
+archive/
+
+# Internal docs
+CLAUDE.md
+DEVELOPMENT_PLAN*.md
