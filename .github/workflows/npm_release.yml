@@ -25,6 +25,7 @@ on:
           - tezos
           - polkadot
           - stacks
+          - cosmos
           - express
           - next
           - hono

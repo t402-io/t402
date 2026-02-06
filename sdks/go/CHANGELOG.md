@@ -2,6 +2,35 @@
 
 All notable changes to the T402 Go SDK will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- **Hardware Wallet Support** (`wdk/hardware/`) - Types, interfaces, and mock implementation
+- **Echo, Chi, Fiber Middleware** (`http/echo/`, `http/chi/`, `http/fiber/`) - Additional HTTP framework adapters
+- **A2A Transport** - Agent-to-Agent message types and helpers
+- **Bazaar Discovery Client** (`extensions/bazaar/`) - API discovery client
+- **Standardized Error Codes** - T402 error code constants
+- **Upto Scheme for SVM, TON, TRON, NEAR** - Usage-based billing for non-EVM chains
+- **Cosmos/Noble Chain Support** (`mechanisms/cosmos/`) - Native USDC via MsgSend
+- **Additional Signers** - TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks client signers
+- **WDK Integration** - Complete WDK phases 1-5, MCP gasless/bridge as thin WDK wrappers
+
+### Fixed
+- P0/P1 security fixes across facilitator and SDKs
+- Unified testnet USDT jetton address across all SDKs
+- Corrected Unichain USDT0 address
+
+## [1.8.1] - 2026-01-25
+
+### Added
+- **Safe Multi-Sig SDK** (`wdk/multisig/`) - Multi-signature wallet support
+  - Safe M-of-N threshold signing
+  - Signature collection and ordering
+  - EIP-712 domain separator calculation
+
+### Fixed
+- Go facilitator `go.sum` sync after SDK dependency bumps
+
 ## [1.8.0] - 2026-01-18
 
 ### Added
@@ -40,17 +69,6 @@ All notable changes to the T402 Go SDK will be documented in this file.
     - `CreatePermitDomain()` - Create EIP-712 domain
     - `CreatePermitMessage()` - Create EIP-712 message
     - EIP-712 type definitions: `PermitTypes`, `PermitDomainTypes`
-
-## [1.8.1] - 2026-01-25
-
-### Added
-- **Safe Multi-Sig SDK** (`wdk/multisig/`) - Multi-signature wallet support
-  - Safe M-of-N threshold signing
-  - Signature collection and ordering
-  - EIP-712 domain separator calculation
-
-### Fixed
-- Go facilitator `go.sum` sync after SDK dependency bumps
 
 ## [1.7.0] - 2026-01-18
 
@@ -178,7 +196,11 @@ All notable changes to the T402 Go SDK will be documented in this file.
 - EVM signers
 - Bazaar extension for API discovery
 
-[Unreleased]: https://github.com/t402-io/t402/compare/go/v1.5.0...HEAD
+[Unreleased]: https://github.com/t402-io/t402/compare/go/v1.8.1...HEAD
+[1.8.1]: https://github.com/t402-io/t402/compare/go/v1.8.0...go/v1.8.1
+[1.8.0]: https://github.com/t402-io/t402/compare/go/v1.7.0...go/v1.8.0
+[1.7.0]: https://github.com/t402-io/t402/compare/go/v1.6.0...go/v1.7.0
+[1.6.0]: https://github.com/t402-io/t402/compare/go/v1.5.0...go/v1.6.0
 [1.5.0]: https://github.com/t402-io/t402/compare/go/v1.4.0...go/v1.5.0
 [1.4.0]: https://github.com/t402-io/t402/compare/go/v1.3.1...go/v1.4.0
 [1.3.1]: https://github.com/t402-io/t402/compare/go/v1.3.0...go/v1.3.1

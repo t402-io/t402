@@ -34,7 +34,7 @@ We take security seriously and will respond promptly to verified reports. See ou
 ```
 t402/
 ├── sdks/
-│   ├── typescript/              # TypeScript SDK (pnpm monorepo, 27 packages)
+│   ├── typescript/              # TypeScript SDK (pnpm monorepo, 29 packages)
 │   │   ├── packages/
 │   │   │   ├── core/            # @t402/core
 │   │   │   ├── extensions/      # @t402/extensions

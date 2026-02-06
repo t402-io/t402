@@ -146,7 +146,7 @@ t402/
 ### Release Commands
 
 ```bash
-# TypeScript (publishes all 27 packages)
+# TypeScript (publishes all 29 packages)
 git tag v2.3.1 && git push origin v2.3.1
 
 # Python
@@ -633,7 +633,8 @@ Mechanisms (chain-specific implementations):
 ├── @t402/aptos (Aptos)
 ├── @t402/tezos (Tezos)
 ├── @t402/polkadot (Polkadot Asset Hub)
-└── @t402/stacks (Stacks/Bitcoin L2)
+├── @t402/stacks (Stacks/Bitcoin L2)
+└── @t402/cosmos (Cosmos/Noble)
     ↓
 @t402/wdk (wallet integration)
     ↓
