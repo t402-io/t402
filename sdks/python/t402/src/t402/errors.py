@@ -6,7 +6,7 @@ and YYY is the specific error within that category.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 # Client Errors (T402-1xxx): Invalid input, malformed requests

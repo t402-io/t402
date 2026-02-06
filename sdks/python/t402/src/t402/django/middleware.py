@@ -47,7 +47,6 @@ Usage:
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 from typing import Any, Callable, Dict, List, Optional, Union, cast
 
@@ -60,7 +59,6 @@ from t402.common import (
 from t402.encoding import (
     encode_payment_required_header,
     encode_payment_response_header,
-    detect_protocol_version_from_headers,
     extract_payment_from_headers,
     decode_payment_signature_header,
     HEADER_PAYMENT_REQUIRED,
