@@ -30,7 +30,7 @@
     "eslint-plugin-jsdoc": "^62.5.0",
     "eslint-plugin-prettier": "^5.2.6",
     "glob": "^13.0.0",
-    "hono": "^4.11.4",
+    "hono": "^4.11.7",
     "prettier": "3.5.2",
     "tsup": "^8.4.0",
     "tsx": "^4.21.0",
