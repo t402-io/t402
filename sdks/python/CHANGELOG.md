@@ -4,6 +4,8 @@ All notable changes to the T402 Python SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [1.10.0] - 2026-02-06
+
 ### Added
 - **Up-To Scheme Types** (`t402.schemes.upto`, `t402.schemes.evm.upto`) - Usage-based billing scheme
   - Core types (`t402.schemes.upto`):
@@ -28,6 +30,20 @@ All notable changes to the T402 Python SDK will be documented in this file.
     - `create_permit_domain()` - Create EIP-712 domain
     - `create_permit_message()` - Create EIP-712 message
     - EIP-712 type definitions: `PERMIT_TYPES`, `PERMIT_DOMAIN_TYPES`
+- **Up-To Scheme for SVM, TON, TRON, NEAR** - Usage-based billing for non-EVM chains
+- **Cosmos/Noble Chain Support** (`t402.schemes.cosmos`) - Native USDC via exact-direct scheme
+- **Django Middleware** (`t402.http.django`) - Payment middleware for Django applications
+- **Starlette Middleware** (`t402.http.starlette`) - Payment middleware for Starlette/ASGI
+- **MCP Real Implementations** - 6 real tools (getBalance, getAllBalances, pay, payGasless, getBridgeFee, bridge)
+- **A2A Transport** - Agent-to-Agent message types and helpers
+- **Bazaar Discovery Client** - API discovery client for resource marketplace
+- **Standardized Error Codes** - T402 error code constants
+
+### Fixed
+- P0/P1 security fixes across facilitator and SDKs
+- Unified testnet USDT jetton address across all SDKs
+- Corrected Unichain USDT0 address
+- SettleResponse: Optional defaults `""` not `None`
 
 ## [1.9.1] - 2026-01-25
 
@@ -183,7 +199,11 @@ All notable changes to the T402 Python SDK will be documented in this file.
 - EVM support with EIP-3009
 - Core types and utilities
 
-[Unreleased]: https://github.com/t402-io/t402/compare/python/v1.7.1...HEAD
+[Unreleased]: https://github.com/t402-io/t402/compare/python/v1.10.0...HEAD
+[1.10.0]: https://github.com/t402-io/t402/compare/python/v1.9.1...python/v1.10.0
+[1.9.1]: https://github.com/t402-io/t402/compare/python/v1.9.0...python/v1.9.1
+[1.9.0]: https://github.com/t402-io/t402/compare/python/v1.8.0...python/v1.9.0
+[1.8.0]: https://github.com/t402-io/t402/compare/python/v1.7.1...python/v1.8.0
 [1.7.1]: https://github.com/t402-io/t402/compare/python/v1.7.0...python/v1.7.1
 [1.7.0]: https://github.com/t402-io/t402/compare/python/v1.6.0...python/v1.7.0
 [1.6.0]: https://github.com/t402-io/t402/compare/python/v1.5.3...python/v1.6.0
