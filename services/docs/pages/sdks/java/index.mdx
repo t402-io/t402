@@ -2,7 +2,7 @@
 
 import { Cards, Tabs } from 'nextra/components'
 
-The T402 Java SDK provides a complete implementation of the t402 payment protocol for Java applications, with first-class support for Spring Boot and multi-chain payments.
+The T402 Java SDK provides a complete implementation of the t402 payment protocol for Java applications, with first-class support for Spring Boot, multiple HTTP frameworks, and multi-chain payments across 10 blockchain families.
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.t402/t402?label=maven%20central)](https://central.sonatype.com/artifact/io.t402/t402)
 
@@ -14,13 +14,13 @@ The T402 Java SDK provides a complete implementation of the t402 payment protoco
 <dependency>
     <groupId>io.t402</groupId>
     <artifactId>t402</artifactId>
-    <version>1.8.1</version>
+    <version>1.9.0</version>
 </dependency>
 ```
   </Tabs.Tab>
   <Tabs.Tab>
 ```groovy
-implementation 'io.t402:t402:1.8.1'
+implementation 'io.t402:t402:1.9.0'
 ```
   </Tabs.Tab>
 </Tabs>
@@ -36,12 +36,25 @@ implementation 'io.t402:t402:1.8.1'
 | SVM Mechanism (Solana) | ✅ |
 | TON Mechanism | ✅ |
 | TRON Mechanism | ✅ |
+| NEAR Mechanism | ✅ |
+| Aptos Mechanism | ✅ |
+| Tezos Mechanism | ✅ |
+| Polkadot Mechanism | ✅ |
+| Stacks Mechanism | ✅ |
+| Cosmos/Noble Mechanism | ✅ |
+| Up-To Scheme (EVM, SVM, TON, TRON, NEAR) | ✅ |
 | ERC-4337 Account Abstraction | ✅ |
 | USDT0 Cross-Chain Bridge | ✅ |
+| Multi-sig (Safe) | ✅ |
 | WDK Integration | ✅ |
+| MCP Server (6 tools) | ✅ |
 | CLI Tool | ✅ |
-| Spring Boot Integration | ✅ |
+| A2A Transport | ✅ |
+| Spring Boot / Spring MVC | ✅ |
 | Spring WebFlux (Reactive) | ✅ |
+| Jakarta Servlet Filter | ✅ |
+| Micronaut Filter | ✅ |
+| Quarkus Filter | ✅ |
 
 ## Quick Start
 
@@ -105,6 +118,7 @@ HttpResponse<String> response = client.get(
 ## Documentation
 
 <Cards>
+  <Cards.Card title="HTTP Frameworks" href="/sdks/java/http-frameworks" />
   <Cards.Card title="Spring Boot" href="/sdks/java/spring-boot" />
   <Cards.Card title="MCP Server" href="/sdks/java/mcp" />
   <Cards.Card title="Examples" href="/sdks/java/examples" />
@@ -122,6 +136,7 @@ HttpResponse<String> response = client.get(
 | Optimism | 10 | `eip155:10` |
 | Ink | 57073 | `eip155:57073` |
 | Berachain | 80094 | `eip155:80094` |
+| Unichain | 130 | `eip155:130` |
 
 ### Other Networks
 
@@ -130,6 +145,39 @@ HttpResponse<String> response = client.get(
 | Solana Mainnet | `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` |
 | TON Mainnet | `ton:mainnet` |
 | TRON Mainnet | `tron:mainnet` |
+| NEAR Mainnet | `near:mainnet` |
+| Aptos Mainnet | `aptos:1` |
+| Tezos Mainnet | `tezos:NetXdQprcVkpaWU` |
+| Polkadot Asset Hub | `polkadot:68d56f15f85d3136970ec16946040bc1` |
+| Stacks Mainnet | `stacks:1` |
+| Cosmos/Noble Mainnet | `cosmos:noble-1` |
+
+## Packages
+
+| Package | Description |
+|---------|-------------|
+| `io.t402` | Core types, client, server, facilitator |
+| `io.t402.crypto` | Multi-chain signers (EVM, SVM, TON, TRON) |
+| `io.t402.schemes.evm` | EVM exact and upto schemes |
+| `io.t402.schemes.svm` | Solana exact and upto schemes |
+| `io.t402.schemes.ton` | TON exact and upto schemes |
+| `io.t402.schemes.tron` | TRON exact and upto schemes |
+| `io.t402.schemes.near` | NEAR exact-direct and upto schemes |
+| `io.t402.schemes.aptos` | Aptos exact-direct scheme |
+| `io.t402.schemes.tezos` | Tezos exact-direct scheme |
+| `io.t402.schemes.polkadot` | Polkadot exact-direct scheme |
+| `io.t402.schemes.stacks` | Stacks exact-direct scheme |
+| `io.t402.schemes.cosmos` | Cosmos/Noble exact-direct scheme |
+| `io.t402.erc4337` | ERC-4337 account abstraction |
+| `io.t402.bridge` | USDT0 cross-chain bridge |
+| `io.t402.multisig` | Safe multi-sig support |
+| `io.t402.wdk` | Tether WDK integration |
+| `io.t402.mcp` | MCP server for AI agents |
+| `io.t402.a2a` | A2A transport helpers |
+| `io.t402.spring` | Spring Boot auto-configuration |
+| `io.t402.micronaut` | Micronaut payment filter |
+| `io.t402.quarkus` | Quarkus payment filter |
+| `io.t402.cli` | Command-line tools |
 
 ## Requirements
 
@@ -143,7 +191,8 @@ HttpResponse<String> response = client.get(
 The SDK includes:
 - [Web3j](https://github.com/web3j/web3j) - Ethereum library for EIP-712 signing
 - [Jackson](https://github.com/FasterXML/jackson) - JSON processing
-- [TweetNaCl](https://github.com/AlicanAkkworlds/tweetnacl-java) - Ed25519 for Solana/TON
+- [BouncyCastle](https://www.bouncycastle.org/) - Ed25519, ECDSA, and cryptographic primitives
+- [SolanaJ](https://github.com/skynetcap/solanaj) (optional) - Solana RPC integration
 - Spring Boot (optional) - Auto-configuration support
 
 ## Links
