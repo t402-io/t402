@@ -511,6 +511,14 @@ import type {
 } from '@t402/wdk'
 ```
 
+## Related Packages
+
+- `@t402/core` - Core protocol types and client
+- `@t402/evm` - EVM mechanism implementation
+- `@t402/wdk-gasless` - ERC-4337 gasless payments
+- `@t402/wdk-bridge` - Cross-chain LayerZero bridging
+- `@t402/wdk-multisig` - Safe multi-sig wallets
+
 ## License
 
 Apache 2.0

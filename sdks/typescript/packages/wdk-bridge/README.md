@@ -289,6 +289,14 @@ const bridge = new WdkBridgeClient({
 bridge.setRpcUrl('arbitrum', 'https://arb1.arbitrum.io/rpc')
 ```
 
+## Related Packages
+
+- `@t402/core` - Core protocol types and client
+- `@t402/wdk` - Tether WDK integration
+- `@t402/wdk-gasless` - ERC-4337 gasless payments
+- `@t402/wdk-multisig` - Safe multi-sig wallets
+- `@t402/evm` - EVM mechanism implementation
+
 ## License
 
 Apache-2.0

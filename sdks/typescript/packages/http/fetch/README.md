@@ -1,4 +1,4 @@
-# t402-fetch
+# @t402/fetch
 
 A utility package that extends the native `fetch` API to automatically handle 402 Payment Required responses using the t402 payment protocol v2. This package enables seamless integration of payment functionality into your applications when making HTTP requests.
 
@@ -193,4 +193,11 @@ const fetchWithPayment = wrapFetchWithPaymentFromConfig(fetch, {
   paymentRequirementsSelector: selectCheapestOption,
 });
 ```
+
+## Related Packages
+
+- `@t402/core` - Core protocol types and client
+- `@t402/axios` - Axios interceptor with automatic payment handling
+- `@t402/evm` - EVM mechanism implementation
+- `@t402/svm` - Solana mechanism implementation
 

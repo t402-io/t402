@@ -227,6 +227,14 @@ const result = await client.pay({
 })
 ```
 
+## Related Packages
+
+- `@t402/core` - Core protocol types and client
+- `@t402/wdk` - Tether WDK integration
+- `@t402/wdk-bridge` - Cross-chain LayerZero bridging
+- `@t402/wdk-multisig` - Safe multi-sig wallets
+- `@t402/evm` - EVM mechanism implementation
+
 ## License
 
 Apache-2.0

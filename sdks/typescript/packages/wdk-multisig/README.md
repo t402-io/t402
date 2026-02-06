@@ -334,6 +334,14 @@ try {
 └─────────────────────────────────────────────────────────────┘
 ```
 
+## Related Packages
+
+- `@t402/core` - Core protocol types and client
+- `@t402/wdk` - Tether WDK integration
+- `@t402/wdk-gasless` - ERC-4337 gasless payments
+- `@t402/wdk-bridge` - Cross-chain LayerZero bridging
+- `@t402/evm` - EVM mechanism implementation
+
 ## License
 
 Apache-2.0

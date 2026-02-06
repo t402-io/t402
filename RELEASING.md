@@ -263,7 +263,7 @@ git push origin --tags
 
 | Workflow | Trigger | Description |
 |----------|---------|-------------|
-| `npm_release.yml` | `v*` tags, manual | Publishes all 21 TypeScript packages to npm |
+| `npm_release.yml` | `v*` tags, manual | Publishes all 27 TypeScript packages to npm |
 | `changeset_release.yml` | Push to main | Creates version PRs, publishes on merge |
 | `go_release.yml` | `go/v*` tags, PRs | Tests Go and creates releases |
 | `python_release.yml` | `python/v*` tags, PRs | Publishes Python package to PyPI |

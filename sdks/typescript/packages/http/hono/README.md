@@ -253,3 +253,12 @@ const resourceServer = new t402ResourceServer(customFacilitator)
 
 app.use(paymentMiddleware(routes, resourceServer, paywallConfig));
 ```
+
+## Related Packages
+
+- `@t402/core` - Core protocol types and client
+- `@t402/evm` - EVM mechanism implementation
+- `@t402/paywall` - Universal paywall UI component
+- `@t402/express` - Express.js middleware
+- `@t402/fastify` - Fastify middleware
+- `@t402/next` - Next.js integration

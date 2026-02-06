@@ -279,3 +279,12 @@ app.use(
 ```
 
 Note: The `payTo` address is now specified within each route configuration rather than as a separate parameter.
+
+## Related Packages
+
+- `@t402/core` - Core protocol types and client
+- `@t402/evm` - EVM mechanism implementation
+- `@t402/paywall` - Universal paywall UI component
+- `@t402/hono` - Hono middleware
+- `@t402/fastify` - Fastify middleware
+- `@t402/next` - Next.js integration
