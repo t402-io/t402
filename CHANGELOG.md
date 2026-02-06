@@ -7,8 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-02-06
+
 ### Added
 - **Up-To Scheme Types** - Usage-based billing across all SDKs (TypeScript, Go, Python, Java)
+- **@t402/cosmos** - Cosmos/Noble chain support with exact-direct scheme for native USDC
+- **@t402/a2a** - A2A transport types and helpers for agent-to-agent payments
+- **Standardized Error Codes** - T402 error code constants across all 4 SDKs
+- **Test Coverage** - Paywall (+55), React (+31), Vue (+31), mechanism tests for 5 chains, SVM integration tests
+
+### Fixed
+- `@t402/mcp` version aligned to 2.3.1 (was 2.0.0-beta.1)
+- Facilitator CI/CD go.sum missing entries
+- Unified testnet USDT jetton address across all SDKs
+- Corrected Unichain USDT0 address
+
+### Documentation
+- Cosmos README, v2.2→v2.3 migration guide, network comparison matrix
+- Comprehensive .md audit across 70+ files
+- Package count updated: 27→29
+
+### SDK Versions
+- TypeScript: v2.4.0 (29 packages)
+- Go: v1.9.0
+- Python: v1.10.0
+- Java: v1.9.0
 
 ## [2.3.1] - 2026-01-25
 
@@ -191,7 +214,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - EVM support with EIP-3009 authorization
 - Basic client and server implementations
 
-[Unreleased]: https://github.com/t402-io/t402/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/t402-io/t402/compare/v2.4.0...HEAD
+[2.4.0]: https://github.com/t402-io/t402/compare/v2.3.1...v2.4.0
+[2.3.1]: https://github.com/t402-io/t402/compare/v2.1.0...v2.3.1
 [2.1.0]: https://github.com/t402-io/t402/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/t402-io/t402/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/t402-io/t402/releases/tag/v1.0.0

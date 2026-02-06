@@ -26,7 +26,7 @@ Ask the user for the version bump type (patch/minor/major) or exact version numb
 | TypeScript | `sdks/typescript/packages/core/package.json` | `"version"` |
 | Go | Git tags only (no file to update) | — |
 | Python | `sdks/python/t402/pyproject.toml` | `version = "..."` |
-| Java | `sdks/java/t402/pom.xml` | `<version>...</version>` |
+| Java | `sdks/java/pom.xml` | `<version>...</version>` |
 
 Read the current version from the source file and confirm the new version with the user.
 
@@ -115,7 +115,7 @@ version = "NEW_VERSION"
 ```
 
 ### Java
-Update `sdks/java/t402/pom.xml`:
+Update `sdks/java/pom.xml`:
 ```xml
 <version>NEW_VERSION</version>
 ```

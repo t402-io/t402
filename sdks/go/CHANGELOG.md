@@ -4,6 +4,8 @@ All notable changes to the T402 Go SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-02-06
+
 ### Added
 - **Hardware Wallet Support** (`wdk/hardware/`) - Types, interfaces, and mock implementation
 - **Echo, Chi, Fiber Middleware** (`http/echo/`, `http/chi/`, `http/fiber/`) - Additional HTTP framework adapters
@@ -196,7 +198,8 @@ All notable changes to the T402 Go SDK will be documented in this file.
 - EVM signers
 - Bazaar extension for API discovery
 
-[Unreleased]: https://github.com/t402-io/t402/compare/go/v1.8.1...HEAD
+[Unreleased]: https://github.com/t402-io/t402/compare/go/v1.9.0...HEAD
+[1.9.0]: https://github.com/t402-io/t402/compare/go/v1.8.1...go/v1.9.0
 [1.8.1]: https://github.com/t402-io/t402/compare/go/v1.8.0...go/v1.8.1
 [1.8.0]: https://github.com/t402-io/t402/compare/go/v1.7.0...go/v1.8.0
 [1.7.0]: https://github.com/t402-io/t402/compare/go/v1.6.0...go/v1.7.0

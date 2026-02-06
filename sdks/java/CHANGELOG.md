@@ -2,6 +2,29 @@
 
 All notable changes to the T402 Java SDK will be documented in this file.
 
+## [Unreleased]
+
+## [1.9.0] - 2026-02-06
+
+### Added
+- **Up-To Scheme for SVM, TON, TRON, NEAR** - Usage-based billing for non-EVM chains
+- **Cosmos/Noble Chain Support** (`io.t402.schemes.cosmos`) - Native USDC via exact-direct scheme
+- **Micronaut Filter** (`io.t402.http.micronaut`) - Payment filter for Micronaut framework
+- **Quarkus Filter** (`io.t402.http.quarkus`) - Payment filter for Quarkus framework
+- **MCP Real Implementations** - 6 real tools with full blockchain integration
+- **A2A Transport** - Agent-to-Agent message types and helpers
+- **Bazaar Discovery Client** - API discovery client for resource marketplace
+- **Standardized Error Codes** - T402 error code constants
+- **V2 HTTP Headers** - `HttpConstants` with V2-first detection and V1 fallback
+
+### Fixed
+- P0/P1 security fixes across facilitator and SDKs
+- `SettlementResponse` field alignment: `error`→`errorReason`, `txHash`→`transaction`, `networkId`→`network`, added `payer`
+- `VerificationResponse`: added `payer` field for cross-SDK consistency
+- `BridgeConstants`: fixed LayerZero Scan URL, corrected slippage (0.005→0.5)
+- Unified testnet USDT jetton address across all SDKs
+- Corrected Unichain USDT0 address
+
 ## [1.8.1] - 2026-01-25
 
 ### Fixed
@@ -559,7 +582,9 @@ Initial release of the T402 Java SDK, published to Maven Central.
 implementation 'io.t402:t402:1.0.0'
 ```
 
-[Unreleased]: https://github.com/t402-io/t402/compare/java/v1.8.0...HEAD
+[Unreleased]: https://github.com/t402-io/t402/compare/java/v1.9.0...HEAD
+[1.9.0]: https://github.com/t402-io/t402/compare/java/v1.8.1...java/v1.9.0
+[1.8.1]: https://github.com/t402-io/t402/compare/java/v1.8.0...java/v1.8.1
 [1.8.0]: https://github.com/t402-io/t402/compare/java/v1.7.0...java/v1.8.0
 [1.7.0]: https://github.com/t402-io/t402/compare/java/v1.5.0...java/v1.7.0
 [1.5.0]: https://github.com/t402-io/t402/compare/java/v1.4.0...java/v1.5.0

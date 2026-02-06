@@ -15,11 +15,11 @@
 | TypeScript | `sdks/typescript/packages/core/package.json` | `"version"` |
 | Go | 執行 `git tag -l 'go/v*' --sort=-v:refname \| head -1` | 去除 `go/v` 前綴 |
 | Python | `sdks/python/t402/pyproject.toml` | `version = "..."` |
-| Java | `sdks/java/t402/pom.xml` | `<version>...</version>` |
+| Java | `sdks/java/pom.xml` | `<version>...</version>` |
 
 ### 1b. TypeScript 套件版本一致性
 
-確認所有 27 個 `@t402/*` 套件的 `package.json` 版本號一致：
+確認所有 29 個 `@t402/*` 套件的 `package.json` 版本號一致：
 
 ```bash
 find sdks/typescript/packages -name "package.json" -not -path "*/node_modules/*" -not -path "*/dist/*"

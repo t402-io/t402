@@ -114,6 +114,8 @@ jobs:
             path: packages/mechanisms/polkadot
           - name: stacks
             path: packages/mechanisms/stacks
+          - name: cosmos
+            path: packages/mechanisms/cosmos
           # HTTP server packages
           - name: express
             path: packages/http/express
