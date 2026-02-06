@@ -212,19 +212,19 @@ export default function T402LaunchPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-border">
                   <div className="p-4 text-center">
                     <p className="font-mono text-sm text-foreground-tertiary">TypeScript</p>
-                    <p className="font-semibold text-foreground">v2.3.1</p>
+                    <p className="font-semibold text-foreground">v2.4.0</p>
                   </div>
                   <div className="p-4 text-center">
                     <p className="font-mono text-sm text-foreground-tertiary">Python</p>
-                    <p className="font-semibold text-foreground">v1.9.1</p>
+                    <p className="font-semibold text-foreground">v1.10.0</p>
                   </div>
                   <div className="p-4 text-center">
                     <p className="font-mono text-sm text-foreground-tertiary">Go</p>
-                    <p className="font-semibold text-foreground">v1.8.1</p>
+                    <p className="font-semibold text-foreground">v1.9.0</p>
                   </div>
                   <div className="p-4 text-center">
                     <p className="font-mono text-sm text-foreground-tertiary">Java</p>
-                    <p className="font-semibold text-foreground">v1.8.1</p>
+                    <p className="font-semibold text-foreground">v1.9.0</p>
                   </div>
                 </div>
               </div>

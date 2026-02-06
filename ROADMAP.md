@@ -50,33 +50,33 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| @t402/core | 2.3.1 | Protocol types, HTTP utilities |
-| @t402/evm | 2.3.1 | EVM chains (EIP-3009, USDT0, upto scheme) |
-| @t402/evm-core | 2.3.1 | Shared EVM utilities |
-| @t402/svm | 2.3.1 | Solana (SPL tokens) |
-| @t402/ton | 2.3.1 | TON (USDT Jetton) |
-| @t402/tron | 2.3.1 | TRON (TRC-20 USDT) |
-| @t402/near | 2.3.1 | NEAR (NEP-141) |
-| @t402/aptos | 2.3.1 | Aptos (Fungible Asset) |
-| @t402/tezos | 2.3.1 | Tezos (FA2) |
-| @t402/polkadot | 2.3.1 | Polkadot Asset Hub |
-| @t402/stacks | 2.3.1 | Stacks (Bitcoin L2) |
-| @t402/wdk | 2.3.1 | Tether WDK integration |
-| @t402/wdk-gasless | 2.3.1 | ERC-4337 gasless payments |
-| @t402/wdk-bridge | 2.3.1 | LayerZero bridging |
-| @t402/wdk-multisig | 2.3.1 | Safe multi-sig wallets |
+| @t402/core | 2.4.0 | Protocol types, HTTP utilities |
+| @t402/evm | 2.4.0 | EVM chains (EIP-3009, USDT0, upto scheme) |
+| @t402/evm-core | 2.4.0 | Shared EVM utilities |
+| @t402/svm | 2.4.0 | Solana (SPL tokens) |
+| @t402/ton | 2.4.0 | TON (USDT Jetton) |
+| @t402/tron | 2.4.0 | TRON (TRC-20 USDT) |
+| @t402/near | 2.4.0 | NEAR (NEP-141) |
+| @t402/aptos | 2.4.0 | Aptos (Fungible Asset) |
+| @t402/tezos | 2.4.0 | Tezos (FA2) |
+| @t402/polkadot | 2.4.0 | Polkadot Asset Hub |
+| @t402/stacks | 2.4.0 | Stacks (Bitcoin L2) |
+| @t402/wdk | 2.4.0 | Tether WDK integration |
+| @t402/wdk-gasless | 2.4.0 | ERC-4337 gasless payments |
+| @t402/wdk-bridge | 2.4.0 | LayerZero bridging |
+| @t402/wdk-multisig | 2.4.0 | Safe multi-sig wallets |
 | @t402/mcp | 2.0.0-beta.1 | AI agent MCP server |
-| @t402/express | 2.3.1 | Express.js middleware |
-| @t402/next | 2.3.1 | Next.js integration |
-| @t402/hono | 2.3.1 | Hono middleware |
-| @t402/fastify | 2.3.1 | Fastify middleware |
-| @t402/fetch | 2.3.1 | Fetch client wrapper |
-| @t402/axios | 2.3.1 | Axios interceptor |
-| @t402/paywall | 2.3.1 | Universal paywall UI |
-| @t402/react | 2.3.1 | React components |
-| @t402/vue | 2.3.1 | Vue components |
-| @t402/cli | 2.3.1 | Command-line tools |
-| @t402/extensions | 2.3.1 | Protocol extensions (SIWx, bazaar) |
+| @t402/express | 2.4.0 | Express.js middleware |
+| @t402/next | 2.4.0 | Next.js integration |
+| @t402/hono | 2.4.0 | Hono middleware |
+| @t402/fastify | 2.4.0 | Fastify middleware |
+| @t402/fetch | 2.4.0 | Fetch client wrapper |
+| @t402/axios | 2.4.0 | Axios interceptor |
+| @t402/paywall | 2.4.0 | Universal paywall UI |
+| @t402/react | 2.4.0 | React components |
+| @t402/vue | 2.4.0 | Vue components |
+| @t402/cli | 2.4.0 | Command-line tools |
+| @t402/extensions | 2.4.0 | Protocol extensions (SIWx, bazaar) |
 
 #### Advanced Packages (Beta)
 
@@ -93,9 +93,9 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 
 | SDK | Version | Status |
 |-----|---------|--------|
-| Go | 1.8.1 | Production |
-| Python | 1.9.1 | Production |
-| Java | 1.8.1 | Production |
+| Go | 1.9.0 | Production |
+| Python | 1.10.0 | Production |
+| Java | 1.9.0 | Production |
 
 ---
 
