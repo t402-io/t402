@@ -220,7 +220,7 @@ public final class McpConstants {
     public static final Map<SupportedTonNetwork, String> TON_USDT_ADDRESSES = new EnumMap<>(SupportedTonNetwork.class);
     static {
         TON_USDT_ADDRESSES.put(SupportedTonNetwork.TON_MAINNET, "EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs");
-        TON_USDT_ADDRESSES.put(SupportedTonNetwork.TON_TESTNET, "EQBynBO23ywHy_CgarY9NK9FTz0yDsG82PtcbSTQgGoXwiuA");
+        TON_USDT_ADDRESSES.put(SupportedTonNetwork.TON_TESTNET, "kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy");
     }
 
     /** TON address pattern (raw or user-friendly format). */

@@ -36,7 +36,7 @@ public final class TonConstants {
      * USDT on TON Testnet.
      * Test jetton for development.
      */
-    public static final String USDT_TESTNET = "EQBynBO23ywHy_CgarY9NK9FTz0yDsG82PtcbSTQgGoXwiuA";
+    public static final String USDT_TESTNET = "kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy";
 
     // ============================================================
     // Scheme Identifiers

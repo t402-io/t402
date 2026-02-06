@@ -15,7 +15,7 @@ export type TonNetwork = (typeof TON_NETWORKS)[keyof typeof TON_NETWORKS];
  */
 export const USDT_JETTON_ADDRESSES = {
   [TON_NETWORKS.MAINNET]: "EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs",
-  [TON_NETWORKS.TESTNET]: "kQBqSpvo4S87mX9tTc4FX3Sfqf4uSp3Tx-Fz4RBUfTRWBx",
+  [TON_NETWORKS.TESTNET]: "kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy",
 } as const;
 
 /**

@@ -96,4 +96,4 @@ func (s *TonSigner) SignMessage(ctx context.Context, params ton.SignMessageParam
 
 Currently supports USDT Jetton (TEP-74 standard):
 - Mainnet: `EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs`
-- Testnet: `kQBqSpvo4S87mX9tTc4FX3Sfqf4uSp3Tx-Fz4RBUfTRWBx`
+- Testnet: `kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy`

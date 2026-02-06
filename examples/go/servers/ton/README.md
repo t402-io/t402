@@ -59,7 +59,7 @@ You'll receive a 402 response with payment requirements:
   "accepts": [{
     "scheme": "exact",
     "network": "ton:testnet",
-    "asset": "kQBqSpvo4S87mX9tTc4FX3Sfqf4uSp3Tx-Fz4RBUfTRWBx",
+    "asset": "kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy",
     "amount": "1000",
     "payTo": "EQC..."
   }]
@@ -76,7 +76,7 @@ You'll receive a 402 response with payment requirements:
 TON_NETWORK=ton:testnet
 ```
 
-Uses testnet USDT Jetton at `kQBqSpvo4S87mX9tTc4FX3Sfqf4uSp3Tx-Fz4RBUfTRWBx`
+Uses testnet USDT Jetton at `kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy`
 
 ### Mainnet
 

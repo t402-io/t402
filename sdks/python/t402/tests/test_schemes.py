@@ -665,7 +665,7 @@ class TestExactTonServerScheme:
 
         assert result["amount"] == "500000"
         # Should return testnet USDT address
-        assert result["asset"] == "kQBqSpvo4S87mX9tTc4FX3Sfqf4uSp3Tx-Fz4RBUfTRWBx"
+        assert result["asset"] == "kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy"
 
     @pytest.mark.asyncio
     async def test_parse_price_invalid_network(self):

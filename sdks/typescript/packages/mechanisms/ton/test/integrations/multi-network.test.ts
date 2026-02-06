@@ -246,7 +246,7 @@ describe('TON Multi-Network Integration Tests', () => {
 
     it('should return false for different addresses', () => {
       const addr1 = 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs'
-      const addr2 = 'kQBqSpvo4S87mX9tTc4FX3Sfqf4uSp3Tx-Fz4RBUfTRWBx'
+      const addr2 = 'kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy'
       expect(addressesEqual(addr1, addr2)).toBe(false)
     })
 
