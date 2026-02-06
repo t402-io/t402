@@ -9,25 +9,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/t402-io/t402/services/facilitator/internal/errors"
 	"github.com/t402-io/t402/services/facilitator/internal/idempotency"
 )
-
-// ErrorCode represents a structured error code for API responses
-type ErrorCode string
-
-const (
-	ErrCodeInvalidRequest     ErrorCode = "INVALID_REQUEST"
-	ErrCodeVerificationFailed ErrorCode = "VERIFICATION_FAILED"
-	ErrCodeSettlementFailed   ErrorCode = "SETTLEMENT_FAILED"
-	ErrCodeRequestInProgress  ErrorCode = "REQUEST_IN_PROGRESS"
-	ErrCodePayloadMismatch    ErrorCode = "PAYLOAD_MISMATCH"
-)
-
-// APIError represents a structured error response
-type APIError struct {
-	Code    ErrorCode `json:"code"`
-	Message string    `json:"message"`
-}
 
 // VerifyRequest is the request body for /verify
 type VerifyRequest struct {
@@ -66,10 +50,8 @@ func (s *Server) handleVerify(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		// Log detailed error internally
 		log.Printf("Invalid verify request body: %v", err)
-		c.JSON(http.StatusBadRequest, APIError{
-			Code:    ErrCodeInvalidRequest,
-			Message: "Invalid request body",
-		})
+		apiErr := errors.NewInvalidRequestError(err.Error())
+		c.JSON(apiErr.HTTPStatus(), apiErr)
 		return
 	}
 
@@ -81,10 +63,8 @@ func (s *Server) handleVerify(c *gin.Context) {
 		now := time.Now().Unix()
 		if deadline < now {
 			log.Printf("Signature expired for network=%s scheme=%s: deadline=%d now=%d", network, scheme, deadline, now)
-			c.JSON(http.StatusBadRequest, APIError{
-				Code:    "SIGNATURE_EXPIRED",
-				Message: "Payment signature has expired",
-			})
+			apiErr := errors.NewSignatureExpiredError()
+			c.JSON(apiErr.HTTPStatus(), apiErr)
 			return
 		}
 	}
@@ -100,10 +80,8 @@ func (s *Server) handleVerify(c *gin.Context) {
 		s.metrics.RecordVerify(network, scheme, false)
 		// Log detailed error internally, return generic message to client
 		log.Printf("Verification failed for network=%s scheme=%s: %v", network, scheme, err)
-		c.JSON(http.StatusInternalServerError, APIError{
-			Code:    ErrCodeVerificationFailed,
-			Message: "Payment verification failed",
-		})
+		apiErr := errors.NewInternalError("verification service error")
+		c.JSON(http.StatusInternalServerError, apiErr)
 		return
 	}
 
@@ -119,10 +97,8 @@ func (s *Server) handleSettle(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		// Log detailed error internally
 		log.Printf("Invalid settle request body: %v", err)
-		c.JSON(http.StatusBadRequest, APIError{
-			Code:    ErrCodeInvalidRequest,
-			Message: "Invalid request body",
-		})
+		apiErr := errors.NewInvalidRequestError(err.Error())
+		c.JSON(apiErr.HTTPStatus(), apiErr)
 		return
 	}
 
@@ -134,10 +110,8 @@ func (s *Server) handleSettle(c *gin.Context) {
 		now := time.Now().Unix()
 		if deadline < now {
 			log.Printf("Signature expired for settlement network=%s scheme=%s: deadline=%d now=%d", network, scheme, deadline, now)
-			c.JSON(http.StatusBadRequest, APIError{
-				Code:    "SIGNATURE_EXPIRED",
-				Message: "Payment signature has expired",
-			})
+			apiErr := errors.NewSignatureExpiredError()
+			c.JSON(apiErr.HTTPStatus(), apiErr)
 			return
 		}
 	}
@@ -148,10 +122,8 @@ func (s *Server) handleSettle(c *gin.Context) {
 		if payloadAmount.Cmp(requiredAmount) < 0 {
 			log.Printf("Insufficient payment amount for network=%s scheme=%s: payload=%s required=%s",
 				network, scheme, payloadAmount.String(), requiredAmount.String())
-			c.JSON(http.StatusBadRequest, APIError{
-				Code:    "INSUFFICIENT_AMOUNT",
-				Message: "Payment amount is less than required amount",
-			})
+			apiErr := errors.NewInsufficientAmountError(payloadAmount.String(), requiredAmount.String())
+			c.JSON(apiErr.HTTPStatus(), apiErr)
 			return
 		}
 	}
@@ -162,10 +134,8 @@ func (s *Server) handleSettle(c *gin.Context) {
 		if err := s.nonceStore.CheckAndMark(c.Request.Context(), network, scheme, payloadHash); err != nil {
 			if err == idempotency.ErrNonceAlreadyUsed {
 				log.Printf("Nonce replay detected for network=%s scheme=%s", network, scheme)
-				c.JSON(http.StatusConflict, APIError{
-					Code:    "NONCE_REPLAY",
-					Message: "This payment authorization has already been used",
-				})
+				apiErr := errors.NewNonceReplayError()
+				c.JSON(http.StatusConflict, apiErr)
 				return
 			}
 			// Log other errors but don't block - fail open for availability
@@ -179,10 +149,8 @@ func (s *Server) handleSettle(c *gin.Context) {
 
 	// SECURITY: Validate idempotency key format to prevent DoS and Redis memory issues
 	if idempotencyKey != "" && !isValidIdempotencyKey(idempotencyKey) {
-		c.JSON(http.StatusBadRequest, APIError{
-			Code:    "INVALID_IDEMPOTENCY_KEY",
-			Message: "Invalid idempotency key format (max 64 chars, alphanumeric and hyphens only)",
-		})
+		apiErr := errors.NewInvalidIdempotencyKeyError()
+		c.JSON(apiErr.HTTPStatus(), apiErr)
 		return
 	}
 
@@ -199,18 +167,14 @@ func (s *Server) handleSettle(c *gin.Context) {
 		if err != nil {
 			if err == idempotency.ErrPayloadMismatch {
 				log.Printf("Idempotency payload mismatch for key=%s", idempotencyKey)
-				c.JSON(http.StatusConflict, APIError{
-					Code:    ErrCodePayloadMismatch,
-					Message: "Request payload does not match previous request with this idempotency key",
-				})
+				apiErr := errors.NewIdempotencyConflictError()
+				c.JSON(http.StatusConflict, apiErr)
 				return
 			}
 			// Idempotency store error - fail closed to prevent double settlement
 			log.Printf("Idempotency check-and-create failed for key=%s: %v", idempotencyKey, err)
-			c.JSON(http.StatusServiceUnavailable, APIError{
-				Code:    "IDEMPOTENCY_UNAVAILABLE",
-				Message: "Idempotency service temporarily unavailable",
-			})
+			apiErr := errors.NewIdempotencyUnavailableError()
+			c.JSON(http.StatusServiceUnavailable, apiErr)
 			return
 		}
 
@@ -226,19 +190,15 @@ func (s *Server) handleSettle(c *gin.Context) {
 			case idempotency.StatusPending:
 				// Request still in progress
 				log.Printf("Request in progress for idempotency key=%s", idempotencyKey)
-				c.JSON(http.StatusConflict, APIError{
-					Code:    ErrCodeRequestInProgress,
-					Message: "A request with this idempotency key is already being processed",
-				})
+				apiErr := errors.NewRequestInProgressError()
+				c.JSON(http.StatusConflict, apiErr)
 				return
 			case idempotency.StatusFailed:
 				// Previous request failed - for now, still reject to be safe
 				// A separate retry mechanism should handle failed entries
 				log.Printf("Previous request failed for idempotency key=%s, rejecting duplicate", idempotencyKey)
-				c.JSON(http.StatusConflict, APIError{
-					Code:    "PREVIOUS_REQUEST_FAILED",
-					Message: "Previous request with this idempotency key failed. Use a new key to retry.",
-				})
+				apiErr := errors.NewPreviousRequestFailedError()
+				c.JSON(http.StatusConflict, apiErr)
 				return
 			}
 		}
@@ -265,10 +225,8 @@ func (s *Server) handleSettle(c *gin.Context) {
 			}
 		}
 
-		c.JSON(http.StatusInternalServerError, APIError{
-			Code:    ErrCodeSettlementFailed,
-			Message: "Payment settlement failed",
-		})
+		apiErr := errors.NewSettlementFailedError(err.Error())
+		c.JSON(apiErr.HTTPStatus(), apiErr)
 		return
 	}
 

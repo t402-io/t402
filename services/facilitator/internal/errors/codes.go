@@ -30,6 +30,9 @@ const (
 	ErrInvalidAddress       ErrorCode = "T402-1010" // Invalid address format
 	ErrExpiredPayment       ErrorCode = "T402-1011" // Payment deadline expired
 	ErrInvalidNonce         ErrorCode = "T402-1012" // Invalid or reused nonce
+	ErrInsufficientAmount   ErrorCode = "T402-1013" // Payment amount less than required
+	ErrInvalidIdempotencyKey ErrorCode = "T402-1014" // Invalid idempotency key format
+	ErrSignatureExpired     ErrorCode = "T402-1015" // Signature has expired
 )
 
 // Server Errors (T402-2xxx)
@@ -44,14 +47,19 @@ const (
 
 // Facilitator Errors (T402-3xxx)
 const (
-	ErrVerificationFailed   ErrorCode = "T402-3001" // Payment verification failed
-	ErrSettlementFailed     ErrorCode = "T402-3002" // Payment settlement failed
-	ErrInsufficientBalance  ErrorCode = "T402-3003" // Payer has insufficient balance
+	ErrVerificationFailed    ErrorCode = "T402-3001" // Payment verification failed
+	ErrSettlementFailed      ErrorCode = "T402-3002" // Payment settlement failed
+	ErrInsufficientBalance   ErrorCode = "T402-3003" // Payer has insufficient balance
 	ErrAllowanceInsufficient ErrorCode = "T402-3004" // Token allowance insufficient
-	ErrPaymentMismatch      ErrorCode = "T402-3005" // Payment doesn't match requirements
-	ErrDuplicatePayment     ErrorCode = "T402-3006" // Payment already processed
-	ErrSettlementPending    ErrorCode = "T402-3007" // Settlement is pending
-	ErrSettlementTimeout    ErrorCode = "T402-3008" // Settlement timed out
+	ErrPaymentMismatch       ErrorCode = "T402-3005" // Payment doesn't match requirements
+	ErrDuplicatePayment      ErrorCode = "T402-3006" // Payment already processed
+	ErrSettlementPending     ErrorCode = "T402-3007" // Settlement is pending
+	ErrSettlementTimeout     ErrorCode = "T402-3008" // Settlement timed out
+	ErrNonceReplay           ErrorCode = "T402-3009" // Nonce already used (replay attack)
+	ErrIdempotencyConflict   ErrorCode = "T402-3010" // Idempotency key conflict
+	ErrIdempotencyUnavailable ErrorCode = "T402-3011" // Idempotency service unavailable
+	ErrPreviousRequestFailed ErrorCode = "T402-3012" // Previous request with key failed
+	ErrRequestInProgress     ErrorCode = "T402-3013" // Request already in progress
 )
 
 // Chain-Specific Errors (T402-4xxx)
@@ -72,6 +80,30 @@ const (
 	ErrBridgeTransferFailed ErrorCode = "T402-5003" // Bridge transfer failed
 	ErrBridgeTimeout        ErrorCode = "T402-5004" // Bridge delivery timeout
 	ErrUnsupportedRoute     ErrorCode = "T402-5005" // Bridge route not supported
+)
+
+// Streaming Errors (T402-6xxx)
+const (
+	ErrStreamNotFound       ErrorCode = "T402-6001" // Stream not found
+	ErrStreamAlreadyClosed  ErrorCode = "T402-6002" // Stream already closed
+	ErrStreamAlreadyPaused  ErrorCode = "T402-6003" // Stream already paused
+	ErrStreamNotPaused      ErrorCode = "T402-6004" // Stream is not paused
+	ErrStreamAmountExceeded ErrorCode = "T402-6005" // Stream amount exceeds maximum
+	ErrStreamExpired        ErrorCode = "T402-6006" // Stream has expired
+	ErrStreamInvalidState   ErrorCode = "T402-6007" // Invalid stream state transition
+	ErrStreamRateLimited    ErrorCode = "T402-6008" // Stream update rate limited
+)
+
+// Intent Errors (T402-7xxx)
+const (
+	ErrIntentNotFound       ErrorCode = "T402-7001" // Intent not found
+	ErrIntentAlreadyExecuted ErrorCode = "T402-7002" // Intent already executed
+	ErrIntentCancelled      ErrorCode = "T402-7003" // Intent was cancelled
+	ErrIntentExpired        ErrorCode = "T402-7004" // Intent has expired
+	ErrNoRoutesAvailable    ErrorCode = "T402-7005" // No routes available for intent
+	ErrRouteExpired         ErrorCode = "T402-7006" // Selected route has expired
+	ErrRouteNotSelected     ErrorCode = "T402-7007" // No route selected for intent
+	ErrIntentInvalidState   ErrorCode = "T402-7008" // Invalid intent state transition
 )
 
 // APIError represents a structured error response
@@ -202,6 +234,139 @@ func NewInsufficientBalanceError(details string) *APIError {
 		Code:    ErrInsufficientBalance,
 		Message: "Insufficient balance",
 		Details: details,
+		Retry:   false,
+	}
+}
+
+func NewInsufficientAmountError(payloadAmount, requiredAmount string) *APIError {
+	return &APIError{
+		Code:    ErrInsufficientAmount,
+		Message: "Payment amount is less than required amount",
+		Details: fmt.Sprintf("payload=%s required=%s", payloadAmount, requiredAmount),
+		Retry:   false,
+	}
+}
+
+func NewSignatureExpiredError() *APIError {
+	return &APIError{
+		Code:    ErrSignatureExpired,
+		Message: "Payment signature has expired",
+		Details: "The signature deadline has passed",
+		Retry:   false,
+	}
+}
+
+func NewInvalidIdempotencyKeyError() *APIError {
+	return &APIError{
+		Code:    ErrInvalidIdempotencyKey,
+		Message: "Invalid idempotency key format",
+		Details: "Max 64 chars, alphanumeric and hyphens only",
+		Retry:   false,
+	}
+}
+
+func NewNonceReplayError() *APIError {
+	return &APIError{
+		Code:    ErrNonceReplay,
+		Message: "This payment authorization has already been used",
+		Details: "Nonce replay detected",
+		Retry:   false,
+	}
+}
+
+func NewIdempotencyConflictError() *APIError {
+	return &APIError{
+		Code:    ErrIdempotencyConflict,
+		Message: "Request payload does not match previous request with this idempotency key",
+		Retry:   false,
+	}
+}
+
+func NewIdempotencyUnavailableError() *APIError {
+	return &APIError{
+		Code:    ErrIdempotencyUnavailable,
+		Message: "Idempotency service temporarily unavailable",
+		Retry:   true,
+	}
+}
+
+func NewRequestInProgressError() *APIError {
+	return &APIError{
+		Code:    ErrRequestInProgress,
+		Message: "A request with this idempotency key is already being processed",
+		Retry:   true,
+	}
+}
+
+func NewPreviousRequestFailedError() *APIError {
+	return &APIError{
+		Code:    ErrPreviousRequestFailed,
+		Message: "Previous request with this idempotency key failed. Use a new key to retry.",
+		Retry:   false,
+	}
+}
+
+// Streaming error constructors
+
+func NewStreamNotFoundError(streamID string) *APIError {
+	return &APIError{
+		Code:    ErrStreamNotFound,
+		Message: fmt.Sprintf("Stream %s not found", streamID),
+		Retry:   false,
+	}
+}
+
+func NewStreamAmountExceededError(maxAmount string) *APIError {
+	return &APIError{
+		Code:    ErrStreamAmountExceeded,
+		Message: "Stream amount exceeds maximum allowed",
+		Details: fmt.Sprintf("Maximum amount: %s", maxAmount),
+		Retry:   false,
+	}
+}
+
+func NewStreamInvalidStateError(currentState, expectedState string) *APIError {
+	return &APIError{
+		Code:    ErrStreamInvalidState,
+		Message: "Invalid stream state for this operation",
+		Details: fmt.Sprintf("current=%s, expected=%s", currentState, expectedState),
+		Retry:   false,
+	}
+}
+
+// Intent error constructors
+
+func NewIntentNotFoundError(intentID string) *APIError {
+	return &APIError{
+		Code:    ErrIntentNotFound,
+		Message: fmt.Sprintf("Intent %s not found", intentID),
+		Retry:   false,
+	}
+}
+
+func NewNoRoutesAvailableError(details string) *APIError {
+	return &APIError{
+		Code:    ErrNoRoutesAvailable,
+		Message: "No routes available for this intent",
+		Details: details,
+		Retry:   true, // Routes may become available later
+	}
+}
+
+func NewRouteExpiredError() *APIError {
+	return &APIError{
+		Code:    ErrRouteExpired,
+		Message: "Selected route has expired",
+		Details: "Please refresh routes and select a new one",
+		Retry:   true,
+	}
+}
+
+func NewIntentInvalidStateError(currentState, expectedState string) *APIError {
+	return &APIError{
+		Code:    ErrIntentInvalidState,
+		Message: "Invalid intent state for this operation",
+		Details: fmt.Sprintf("current=%s, expected=%s", currentState, expectedState),
 		Retry:   false,
 	}
 }
