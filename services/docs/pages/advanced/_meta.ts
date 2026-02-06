@@ -21,5 +21,6 @@ export default {
   'best-practices': 'Best Practices',
   performance: 'Performance Tuning',
   troubleshooting: 'Troubleshooting',
-  'migration-v1-to-v2': 'Migration Guide (v1→v2)'
+  'migration-v1-to-v2': 'Migration Guide (v1→v2)',
+  'migration-v2.2-to-v2.3': 'Migration Guide (v2.2→v2.3)'
 }
