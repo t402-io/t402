@@ -1,50 +1,70 @@
-import { Callout, Steps, Tabs, Cards } from 'nextra/components'
+import { Callout, Steps, Tabs } from 'nextra/components'
 
-<div className="hero-section">
-  <div className="hero-badge">v2.4.0</div>
-  <h1 className="hero-title">T402 Documentation</h1>
-  <p className="hero-subtitle">The Official Payment Protocol for USDT</p>
-  <p className="hero-description">Enable seamless stablecoin payments across 10 blockchain families with a single HTTP header.</p>
-  <div className="hero-buttons">
-    <a href="/getting-started/quickstart" className="hero-cta">Get Started</a>
-    <a href="https://github.com/t402-io/t402" className="hero-cta-secondary">GitHub</a>
-  </div>
+# T402 Documentation
+
+<div className="stats">
+  <div className="stat"><span className="stat-number">v2.4.0</span> <span className="stat-label">Latest</span></div>
+  <div className="stat"><span className="stat-number">44</span> <span className="stat-label">Networks</span></div>
+  <div className="stat"><span className="stat-number">10</span> <span className="stat-label">Chains</span></div>
+  <div className="stat"><span className="stat-number">29</span> <span className="stat-label">Packages</span></div>
 </div>
+
+The open payment protocol for USDT — enable seamless stablecoin payments across 10 blockchain families with a single HTTP header.
+
+<div className="cta-row">
+  <a href="/getting-started/quickstart" className="cta-primary">Get Started →</a>
+  <a href="https://github.com/t402-io/t402" className="cta-secondary">GitHub</a>
+  <a href="/reference/facilitator-api" className="cta-secondary">API Reference</a>
+</div>
+
+<hr className="section-divider" />
 
 ## Why T402?
 
-<Cards>
-  <Cards.Card title="HTTP Native" href="/getting-started/concepts">
-    Pay for any HTTP resource with a single header. No payment forms, no redirects, no SDKs required.
-  </Cards.Card>
-  <Cards.Card title="Multi-Chain" href="/chains">
-    10 blockchain families: EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos.
-  </Cards.Card>
-  <Cards.Card title="Gasless" href="/advanced/gasless">
-    ERC-4337 account abstraction. Users pay without holding native tokens for gas fees.
-  </Cards.Card>
-  <Cards.Card title="AI Ready" href="/advanced/mcp">
-    MCP server enables AI agents to discover and pay for APIs autonomously.
-  </Cards.Card>
-</Cards>
+<div className="feature-grid">
+  <div className="feature-card">
+    <div className="feature-icon">🌐</div>
+    <div className="feature-title">HTTP Native</div>
+    <p className="feature-desc">Pay for any HTTP resource with a single header. No payment forms, no redirects, no SDKs required on the client.</p>
+  </div>
+  <div className="feature-card">
+    <div className="feature-icon">⛓️</div>
+    <div className="feature-title">Multi-Chain</div>
+    <p className="feature-desc">10 blockchain families: EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos.</p>
+  </div>
+  <div className="feature-card">
+    <div className="feature-icon">⚡</div>
+    <div className="feature-title">Gasless Payments</div>
+    <p className="feature-desc">ERC-4337 account abstraction lets users pay without holding native tokens for gas fees.</p>
+  </div>
+  <div className="feature-card">
+    <div className="feature-icon">🤖</div>
+    <div className="feature-title">AI Ready</div>
+    <p className="feature-desc">MCP server enables AI agents to discover and pay for APIs autonomously via Model Context Protocol.</p>
+  </div>
+</div>
+
+<hr className="section-divider" />
 
 ## Quick Start
 
 <Tabs items={['TypeScript', 'Python', 'Go', 'Java']}>
   <Tabs.Tab>
 ```bash
-pnpm add @t402/core @t402/evm
+pnpm add @t402/core @t402/evm @t402/fetch
 ```
 
 ```typescript
-import { t402Client } from '@t402/fetch'
+import { t402Client, wrapFetchWithPayment } from '@t402/fetch'
 import { registerExactEvmScheme } from '@t402/evm/exact/client'
 
 const client = new t402Client()
 registerExactEvmScheme(client, { signer })
 
-// Payments handled automatically
-const response = await client.fetch('https://api.example.com/premium')
+// Payments handled automatically on 402
+const response = await wrapFetchWithPayment(fetch, client)(
+  'https://api.example.com/premium'
+)
 ```
 
   </Tabs.Tab>
@@ -58,7 +78,7 @@ from t402 import T402Client
 
 client = T402Client(private_key="0x...")
 
-# Payments handled automatically
+# Payments handled automatically on 402
 response = client.get("https://api.example.com/premium")
 ```
 
@@ -73,54 +93,62 @@ import "github.com/t402-io/t402/sdks/go/client"
 
 c := client.New(privateKey)
 
-// Payments handled automatically
+// Payments handled automatically on 402
 resp, _ := c.Get("https://api.example.com/premium")
 ```
 
   </Tabs.Tab>
   <Tabs.Tab>
+```xml
+<!-- Maven: io.t402:t402:1.9.0 -->
+```
+
 ```java
-// Maven: io.t402:t402:1.9.0
 import io.t402.client.T402HttpClient;
 import io.t402.crypto.EvmSigner;
 
-EvmSigner signer = EvmSigner.fromPrivateKey("0x...", 8453, "USD Coin", "2", "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913");
+EvmSigner signer = EvmSigner.fromPrivateKey("0x...", 8453,
+    "USD Coin", "2", "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913");
 T402HttpClient client = new T402HttpClient(signer);
 
-// Payments handled automatically
-HttpResponse<String> response = client.get(URI.create("https://api.example.com/premium"), amount, asset, payTo);
+// Payments handled automatically on 402
+HttpResponse<String> response = client.get(
+    URI.create("https://api.example.com/premium"),
+    amount, asset, payTo);
 ```
 
   </Tabs.Tab>
 </Tabs>
+
+<hr className="section-divider" />
 
 ## How It Works
 
 <Steps>
 ### Client makes request
 
-```
+```http
 GET /api/premium HTTP/1.1
 Host: api.example.com
 ```
 
 ### Server returns 402 Payment Required
 
-```
+```http
 HTTP/1.1 402 Payment Required
 Payment-Required: scheme="exact";network="eip155:8453";amount="10000";...
 ```
 
 ### Client signs and retries
 
-```
+```http
 GET /api/premium HTTP/1.1
 Payment-Signature: signature="0x...";payload="..."
 ```
 
 ### Server verifies and responds
 
-```
+```http
 HTTP/1.1 200 OK
 Content-Type: application/json
 {"data": "Premium content!"}
@@ -128,93 +156,91 @@ Content-Type: application/json
 
 </Steps>
 
-## Popular Use Cases
+<hr className="section-divider" />
 
-- **[AI Agent Payments](/use-cases/ai-payments)** - Enable AI to pay for APIs autonomously
-- **[API Monetization](/use-cases/api-monetization)** - Charge per-request for your APIs
-- **[Premium Content](/use-cases/content-access)** - Gate content behind micro-payments
-- **[Micro-Payments](/use-cases/micro-payments)** - Sub-cent payments on L2 networks
+## SDKs
 
-## Packages
+<div className="sdk-grid">
+  <a href="/sdks/typescript" className="sdk-card">
+    <span className="sdk-card-icon">🟦</span>
+    <span className="sdk-card-name">TypeScript</span>
+    <span className="sdk-card-version">v2.4.0 · 29 packages</span>
+  </a>
+  <a href="/sdks/python" className="sdk-card">
+    <span className="sdk-card-icon">🐍</span>
+    <span className="sdk-card-name">Python</span>
+    <span className="sdk-card-version">v1.10.0 · PyPI</span>
+  </a>
+  <a href="/sdks/go" className="sdk-card">
+    <span className="sdk-card-icon">🔵</span>
+    <span className="sdk-card-name">Go</span>
+    <span className="sdk-card-version">v1.9.0 · Go Modules</span>
+  </a>
+  <a href="/sdks/java" className="sdk-card">
+    <span className="sdk-card-icon">☕</span>
+    <span className="sdk-card-name">Java</span>
+    <span className="sdk-card-version">v1.9.0 · Maven Central</span>
+  </a>
+</div>
 
-**Core & Blockchain**
-
-<Cards>
-  <Cards.Card title="@t402/core" href="/reference/core" />
-  <Cards.Card title="@t402/evm" href="/reference/evm" />
-  <Cards.Card title="@t402/svm" href="/reference/svm" />
-  <Cards.Card title="@t402/ton" href="/reference/ton" />
-  <Cards.Card title="@t402/tron" href="/reference/tron" />
-  <Cards.Card title="@t402/near" href="/reference/near" />
-  <Cards.Card title="@t402/aptos" href="/reference/aptos" />
-  <Cards.Card title="@t402/tezos" href="/reference/tezos" />
-  <Cards.Card title="@t402/polkadot" href="/reference/polkadot" />
-  <Cards.Card title="@t402/stacks" href="/reference/stacks" />
-</Cards>
-
-**WDK Integration**
-
-<Cards>
-  <Cards.Card title="@t402/wdk" href="/reference/wdk" />
-  <Cards.Card title="@t402/wdk-gasless" href="/sdks/typescript/wdk-gasless" />
-  <Cards.Card title="@t402/wdk-bridge" href="/sdks/typescript/wdk-bridge" />
-  <Cards.Card title="@t402/wdk-multisig" href="/sdks/typescript/wdk-multisig" />
-</Cards>
-
-**HTTP Middleware & Clients**
-
-<Cards>
-  <Cards.Card title="@t402/express" href="/sdks/typescript/express" />
-  <Cards.Card title="@t402/next" href="/sdks/typescript/next" />
-  <Cards.Card title="@t402/hono" href="/sdks/typescript/hono" />
-  <Cards.Card title="@t402/fastify" href="/sdks/typescript/fastify" />
-  <Cards.Card title="@t402/fetch" href="/sdks/typescript/fetch" />
-  <Cards.Card title="@t402/axios" href="/sdks/typescript/axios" />
-</Cards>
-
-**UI & Tools**
-
-<Cards>
-  <Cards.Card title="@t402/paywall" href="/sdks/typescript/paywall" />
-  <Cards.Card title="@t402/react" href="/sdks/typescript/react" />
-  <Cards.Card title="@t402/vue" href="/sdks/typescript/vue" />
-  <Cards.Card title="@t402/mcp" href="/sdks/typescript/mcp" />
-  <Cards.Card title="@t402/cli" href="/sdks/typescript/cli" />
-</Cards>
+<hr className="section-divider" />
 
 ## Supported Networks
 
-**EVM Chains (USDT0)**
-- Ethereum, Arbitrum, Base, Optimism, Polygon, Ink, Berachain, Unichain
-
-**Non-EVM Chains**
-- **Solana** - SPL Token USDC (mainnet, devnet)
-- **TON** - USDT Jetton (mainnet, testnet)
-- **TRON** - TRC-20 USDT (mainnet, nile, shasta)
-- **NEAR** - NEP-141 USDT (mainnet, testnet)
-- **Aptos** - Fungible Asset USDT (mainnet, testnet)
-- **Tezos** - FA2 USDt (mainnet, ghostnet)
-- **Polkadot** - Asset Hub USDT (polkadot, westend)
-- **Stacks** - SIP-010 USDT (mainnet, testnet)
-- **Cosmos** - Noble USDT (mainnet, testnet)
+<div className="chain-tags">
+  <a href="/chains/evm" className="chain-tag">🔷 Ethereum</a>
+  <a href="/chains/evm" className="chain-tag">🔷 Arbitrum</a>
+  <a href="/chains/evm" className="chain-tag">🔷 Base</a>
+  <a href="/chains/evm" className="chain-tag">🔷 Optimism</a>
+  <a href="/chains/evm" className="chain-tag">🔷 Polygon</a>
+  <a href="/chains/evm" className="chain-tag">🔷 Ink</a>
+  <a href="/chains/evm" className="chain-tag">🔷 Berachain</a>
+  <a href="/chains/evm" className="chain-tag">🔷 Unichain</a>
+  <a href="/chains/non-evm#solana" className="chain-tag">🟣 Solana</a>
+  <a href="/chains/non-evm#ton" className="chain-tag">💎 TON</a>
+  <a href="/chains/non-evm#tron" className="chain-tag">🔴 TRON</a>
+  <a href="/chains/non-evm#near" className="chain-tag">🟢 NEAR</a>
+  <a href="/chains/non-evm#aptos" className="chain-tag">🟢 Aptos</a>
+  <a href="/chains/non-evm#tezos" className="chain-tag">🔵 Tezos</a>
+  <a href="/chains/non-evm#polkadot" className="chain-tag">⚪ Polkadot</a>
+  <a href="/chains/non-evm#stacks" className="chain-tag">🟠 Stacks</a>
+  <a href="/chains/non-evm#cosmos" className="chain-tag">⚛️ Cosmos</a>
+</div>
 
 <Callout type="info">
 See [Chains](/chains) for network IDs, token addresses, and configuration details.
 </Callout>
 
-## SDKs
+<hr className="section-divider" />
 
-<Cards>
-  <Cards.Card title="TypeScript" href="https://www.npmjs.com/org/t402" />
-  <Cards.Card title="Python" href="https://pypi.org/project/t402" />
-  <Cards.Card title="Go" href="https://pkg.go.dev/github.com/t402-io/t402/sdks/go" />
-  <Cards.Card title="Java" href="https://central.sonatype.com/artifact/io.t402/t402" />
-</Cards>
+## Use Cases
+
+| Use Case | Description | Price Range |
+|----------|-------------|-------------|
+| [**AI Agent Payments**](/use-cases/ai-payments) | AI agents pay for APIs via MCP | $0.001 - $0.10/call |
+| [**API Monetization**](/use-cases/api-monetization) | Charge per-request for endpoints | $0.01 - $1.00/req |
+| [**Premium Content**](/use-cases/content-access) | Gate content behind micro-payments | $0.10 - $10.00/item |
+| [**Micro-Payments**](/use-cases/micro-payments) | Sub-cent payments on L2 networks | $0.0001 - $0.01/tx |
+
+<hr className="section-divider" />
+
+## Packages
+
+**Core & Blockchain** — `@t402/core` · `@t402/evm` · `@t402/svm` · `@t402/ton` · `@t402/tron` · `@t402/near` · `@t402/aptos` · `@t402/tezos` · `@t402/polkadot` · `@t402/stacks` · `@t402/cosmos`
+
+**WDK Integration** — `@t402/wdk` · `@t402/wdk-gasless` · `@t402/wdk-bridge` · `@t402/wdk-multisig`
+
+**HTTP Server** — `@t402/express` · `@t402/next` · `@t402/hono` · `@t402/fastify`
+
+**HTTP Client** — `@t402/fetch` · `@t402/axios`
+
+**UI & Tools** — `@t402/paywall` · `@t402/react` · `@t402/vue` · `@t402/mcp` · `@t402/cli`
+
+<hr className="section-divider" />
 
 ## Get Started
 
-Ready to integrate T402?
-
-- [**Quick Start Guide**](/getting-started/quickstart) - Get up and running in 5 minutes
-- [**Core Concepts**](/getting-started/concepts) - Understand how T402 works
-- [**API Reference**](/reference/facilitator-api) - Facilitator API documentation
+- [**Quick Start Guide**](/getting-started/quickstart) — Get up and running in 5 minutes
+- [**Core Concepts**](/getting-started/concepts) — Understand how T402 works
+- [**Installation**](/getting-started/installation) — Detailed setup for all languages
+- [**API Reference**](/reference/facilitator-api) — Facilitator API documentation
