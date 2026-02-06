@@ -94,6 +94,30 @@
       <optional>true</optional>
     </dependency>
 
+    <!-- Micronaut HTTP (optional, for Micronaut applications) -->
+    <dependency>
+      <groupId>io.micronaut</groupId>
+      <artifactId>micronaut-http</artifactId>
+      <version>4.8.1</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- JAX-RS API (optional, for Quarkus/JAX-RS applications) -->
+    <dependency>
+      <groupId>jakarta.ws.rs</groupId>
+      <artifactId>jakarta.ws.rs-api</artifactId>
+      <version>3.1.0</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- JAX-RS runtime implementation (test only, for Quarkus filter tests) -->
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-common</artifactId>
+      <version>3.1.10</version>
+      <scope>test</scope>
+    </dependency>
+
     <!-- Test -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
