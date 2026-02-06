@@ -45,7 +45,7 @@
   },
   "peerDependencies": {
     "@t402/paywall": "workspace:*",
-    "next": "^15.0.0 || ^16.0.0"
+    "next": "^15.0.0 || ^16.1.5"
   },
   "peerDependenciesMeta": {
     "@t402/paywall": {
