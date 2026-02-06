@@ -1,0 +1,144 @@
+# Network Comparison Matrix
+
+This page provides a comprehensive comparison of all supported blockchain mechanisms across T402 SDKs.
+
+## Mechanism Support
+
+| Mechanism | Scheme | Token Standard | TypeScript | Go | Python | Java |
+|-----------|--------|----------------|:---:|:---:|:---:|:---:|
+| EVM (19 chains) | exact | EIP-3009 | ✅ | ✅ | ✅ | ✅ |
+| EVM (legacy) | exact-legacy | ERC-20 approve | ✅ | ✅ | ✅ | ✅ |
+| EVM | upto | EIP-2612 permit | ✅ | ✅ | ✅ | ✅ |
+| Solana | exact | SPL Token | ✅ | ✅ | ✅ | ✅ |
+| Solana | upto | SPL Token approve | ✅ | ✅ | ✅ | ✅ |
+| TON | exact | Jetton (TEP-74) | ✅ | ✅ | ✅ | ✅ |
+| TON | upto | Jetton approve | ✅ | ✅ | ✅ | ✅ |
+| TRON | exact | TRC-20 | ✅ | ✅ | ✅ | ✅ |
+| TRON | upto | TRC-20 approve | ✅ | ✅ | ✅ | ✅ |
+| NEAR | exact-direct | NEP-141 | ✅ | ✅ | ✅ | ✅ |
+| NEAR | upto | NEP-141 approve | ✅ | ✅ | ✅ | ✅ |
+| Aptos | exact-direct | Fungible Asset | ✅ | ✅ | ✅ | ✅ |
+| Tezos | exact-direct | FA2 (TZIP-12) | ✅ | ✅ | ✅ | ✅ |
+| Polkadot | exact-direct | Asset Hub | ✅ | ✅ | ✅ | ✅ |
+| Stacks | exact-direct | SIP-010 | ✅ | ✅ | ✅ | ✅ |
+| Cosmos | exact-direct | Bank MsgSend | ✅ | ✅ | ✅ | ✅ |
+
+## Network Identifiers (CAIP-2)
+
+### EVM Chains
+
+| Chain | Mainnet | Testnet | USDT0 Address |
+|-------|---------|---------|---------------|
+| Ethereum | `eip155:1` | `eip155:11155111` | `0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee` |
+| Arbitrum | `eip155:42161` | `eip155:421614` | `0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9` |
+| Base | `eip155:8453` | `eip155:84532` | USDT0 via LayerZero |
+| Optimism | `eip155:10` | `eip155:11155420` | USDT0 via LayerZero |
+| Ink | `eip155:57073` | — | `0x0200C29006150606B650577BBE7B6248F58470c1` |
+| Berachain | `eip155:80094` | `eip155:80084` | `0x779Ded0c9e1022225f8E0630b35a9b54bE713736` |
+| Unichain | `eip155:130` | — | `0x9151434b16b9763660705744891fA906F660EcC5` |
+| Polygon | `eip155:137` | — | USDT0 via LayerZero |
+| Mantle | `eip155:5000` | — | USDT0 via LayerZero |
+| Sei | `eip155:1329` | — | USDT0 via LayerZero |
+
+### Non-EVM Chains
+
+| Chain | Mainnet | Testnet | Token |
+|-------|---------|---------|-------|
+| Solana | `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` | `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` | USDT SPL |
+| TON | `ton:mainnet` | `ton:testnet` | USDT Jetton |
+| TRON | `tron:mainnet` | `tron:nile` | USDT TRC-20 |
+| NEAR | `near:mainnet` | `near:testnet` | USDT NEP-141 |
+| Aptos | `aptos:1` | `aptos:2` | USDT Fungible Asset |
+| Tezos | `tezos:NetXdQprcVkpaWU` | `tezos:NetXnHfVqm9iesp` | USDt FA2 |
+| Polkadot | `polkadot:68d56f15f85d3136970ec16946040bc1` | `polkadot:e143f23803ac50e8f6f8e62695d1ce9e` | USDT Asset Hub |
+| Stacks | `stacks:1` | `stacks:2147483648` | sUSDC SIP-010 |
+| Cosmos (Noble) | `cosmos:noble-1` | `cosmos:grand-1` | USDC native |
+
+## Choosing a Scheme
+
+T402 supports three payment schemes. Choose based on your use case:
+
+### exact
+
+**Best for:** Fixed-price resources, one-time payments
+
+The client signs an off-chain authorization. The facilitator executes the transfer on-chain. Supported on EVM (via EIP-3009), Solana, TON, and TRON.
+
+```
+Client signs → Facilitator settles on-chain
+```
+
+### exact-direct
+
+**Best for:** Chains without off-chain authorization standards
+
+The client executes the transfer directly on-chain, then submits the transaction hash as proof. Used on NEAR, Aptos, Tezos, Polkadot, Stacks, and Cosmos.
+
+```
+Client transfers on-chain → Submits tx hash → Facilitator verifies
+```
+
+### upto
+
+**Best for:** Usage-based billing, metered APIs, streaming
+
+The client pre-authorizes a maximum amount. The server charges only what is consumed. Currently supported on EVM (EIP-2612 permit), Solana, TON, TRON, and NEAR.
+
+```
+Client authorizes max → Server tracks usage → Facilitator settles actual amount
+```
+
+## Choosing a Mechanism
+
+Use this decision tree to pick the right mechanism:
+
+1. **What blockchain does your user have funds on?**
+   - Ethereum, Arbitrum, Base, Optimism, or other EVM → Use `@t402/evm`
+   - Solana → Use `@t402/svm`
+   - TON → Use `@t402/ton`
+   - TRON → Use `@t402/tron`
+   - NEAR → Use `@t402/near`
+   - Aptos → Use `@t402/aptos`
+   - Tezos → Use `@t402/tezos`
+   - Polkadot → Use `@t402/polkadot`
+   - Stacks → Use `@t402/stacks`
+   - Cosmos/Noble → Use `@t402/cosmos`
+
+2. **Do you need usage-based billing?**
+   - Yes → Use the `upto` scheme (available on EVM, Solana, TON, TRON, NEAR)
+   - No → Use `exact` (EVM/Solana/TON/TRON) or `exact-direct` (all others)
+
+3. **Do you need to accept payments from multiple chains?**
+   - Yes → Register multiple mechanisms with your server and use `@t402/wdk-bridge` for cross-chain bridging
+   - No → Use a single mechanism package
+
+## HTTP Framework Support
+
+| Framework | TypeScript | Go | Python | Java |
+|-----------|:---:|:---:|:---:|:---:|
+| Express | ✅ | — | — | — |
+| Next.js | ✅ | — | — | — |
+| Hono | ✅ | — | — | — |
+| Fastify | ✅ | — | — | — |
+| Gin | — | ✅ | — | — |
+| Echo | — | ✅ | — | — |
+| Chi | — | ✅ | — | — |
+| Fiber | — | ✅ | — | — |
+| FastAPI | — | — | ✅ | — |
+| Flask | — | — | ✅ | — |
+| Django | — | — | ✅ | — |
+| Starlette | — | — | ✅ | — |
+| Spring | — | — | — | ✅ |
+| Servlet | — | — | — | ✅ |
+| WebFlux | — | — | — | ✅ |
+| Micronaut | — | — | — | ✅ |
+| Quarkus | — | — | — | ✅ |
+
+## SDK Versions
+
+| SDK | Version | Registry |
+|-----|---------|----------|
+| TypeScript | 2.3.1 | [npm](https://www.npmjs.com/org/t402) |
+| Go | 1.8.1 | [pkg.go.dev](https://pkg.go.dev/github.com/t402-io/t402/sdks/go) |
+| Python | 1.9.1 | [PyPI](https://pypi.org/project/t402) |
+| Java | 1.8.1 | [Maven Central](https://central.sonatype.com/artifact/io.t402/t402) |
