@@ -15,6 +15,7 @@ import (
 	"github.com/t402-io/t402/services/facilitator/internal/auth"
 	"github.com/t402-io/t402/services/facilitator/internal/cache"
 	"github.com/t402-io/t402/services/facilitator/internal/config"
+	"github.com/t402-io/t402/services/facilitator/internal/discovery"
 	"github.com/t402-io/t402/services/facilitator/internal/health"
 	"github.com/t402-io/t402/services/facilitator/internal/idempotency"
 	"github.com/t402-io/t402/services/facilitator/internal/intent"
@@ -53,8 +54,9 @@ type Server struct {
 	nonceStore       *idempotency.NonceStore // P1-1: Nonce tracking for replay protection
 
 	// Advanced features (require database)
-	streamingHandlers *streaming.Handlers
-	intentHandlers    *intent.Handlers
+	streamingHandlers  *streaming.Handlers
+	intentHandlers     *intent.Handlers
+	discoveryHandlers  *discovery.Handlers
 }
 
 // New creates a new facilitator server
@@ -150,6 +152,14 @@ func NewWithTracing(
 		intentService := intent.NewService(intentRepoAdapter, intentRouter, nil, nil, m, nil)
 		s.intentHandlers = intent.NewHandlers(intentService)
 		log.Printf("Intent-based routing enabled")
+
+		// Setup discovery service and handlers
+		discoveryRepo := discovery.NewRepository(db.DB)
+		if err := discoveryRepo.AutoMigrate(); err != nil {
+			log.Printf("Warning: failed to migrate discovery schema: %v", err)
+		}
+		s.discoveryHandlers = discovery.NewHandlers(discoveryRepo)
+		log.Printf("Bazaar discovery API enabled")
 	}
 
 	// Setup middleware and routes
@@ -266,6 +276,11 @@ func (s *Server) setupRoutes() {
 	if s.intentHandlers != nil {
 		s.intentHandlers.RegisterRoutes(v1)
 	}
+
+	// Discovery/Bazaar endpoints (if database is configured)
+	if s.discoveryHandlers != nil {
+		s.discoveryHandlers.RegisterRoutes(v1)
+	}
 }
 
 // APIInfo represents the API information response
@@ -352,6 +367,18 @@ func (s *Server) handleInfo(c *gin.Context) {
 			EndpointInfo{Method: "POST", Path: "/v1/intent/:id/refresh", Description: "Refresh available routes"},
 			EndpointInfo{Method: "GET", Path: "/v1/intent", Description: "List intents"},
 			EndpointInfo{Method: "GET", Path: "/v1/intent/stats", Description: "Get intent statistics"},
+		)
+	}
+
+	// Add discovery/Bazaar endpoints if available
+	if s.discoveryHandlers != nil {
+		info.Features["bazaar_discovery"] = true
+		info.Endpoints = append(info.Endpoints,
+			EndpointInfo{Method: "GET", Path: "/v1/discovery/resources", Description: "List discoverable resources"},
+			EndpointInfo{Method: "GET", Path: "/v1/discovery/resources/:id", Description: "Get resource details"},
+			EndpointInfo{Method: "POST", Path: "/v1/discovery/register", Description: "Register a new resource"},
+			EndpointInfo{Method: "PUT", Path: "/v1/discovery/resources/:id", Description: "Update a resource"},
+			EndpointInfo{Method: "DELETE", Path: "/v1/discovery/resources/:id", Description: "Delete a resource"},
 		)
 	}
 

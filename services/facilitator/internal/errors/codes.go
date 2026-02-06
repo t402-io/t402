@@ -106,6 +106,23 @@ const (
 	ErrIntentInvalidState   ErrorCode = "T402-7008" // Invalid intent state transition
 )
 
+// Discovery Errors (T402-8xxx)
+const (
+	ErrResourceNotFound     ErrorCode = "T402-8001" // Discoverable resource not found
+	ErrResourceAlreadyExists ErrorCode = "T402-8002" // Resource already registered
+	ErrInvalidParameters    ErrorCode = "T402-8003" // Invalid query parameters
+	ErrNotAuthorized        ErrorCode = "T402-8004" // Not authorized for this operation
+)
+
+// Additional error code aliases for handler convenience
+const (
+	InvalidParameters     = ErrInvalidParameters
+	InvalidPayload        = ErrInvalidPayload
+	ResourceNotFound      = ErrResourceNotFound
+	ResourceAlreadyExists = ErrResourceAlreadyExists
+	NotAuthorized         = ErrNotAuthorized
+)
+
 // APIError represents a structured error response
 type APIError struct {
 	Code    ErrorCode `json:"code"`
@@ -124,7 +141,7 @@ func (e *APIError) Error() string {
 
 // HTTPStatus returns the appropriate HTTP status code for the error
 func (e *APIError) HTTPStatus() int {
-	switch e.Code[5] { // Check the category digit (1-5)
+	switch e.Code[5] { // Check the category digit (1-8)
 	case '1': // Client errors
 		return http.StatusBadRequest
 	case '2': // Server errors
@@ -141,6 +158,27 @@ func (e *APIError) HTTPStatus() int {
 		return http.StatusBadGateway
 	case '5': // Bridge errors
 		return http.StatusBadGateway
+	case '6': // Streaming errors
+		if e.Code == ErrStreamNotFound {
+			return http.StatusNotFound
+		}
+		return http.StatusBadRequest
+	case '7': // Intent errors
+		if e.Code == ErrIntentNotFound {
+			return http.StatusNotFound
+		}
+		return http.StatusBadRequest
+	case '8': // Discovery errors
+		if e.Code == ErrResourceNotFound {
+			return http.StatusNotFound
+		}
+		if e.Code == ErrResourceAlreadyExists {
+			return http.StatusConflict
+		}
+		if e.Code == ErrNotAuthorized {
+			return http.StatusForbidden
+		}
+		return http.StatusBadRequest
 	default:
 		return http.StatusInternalServerError
 	}
@@ -370,3 +408,48 @@ func NewIntentInvalidStateError(currentState, expectedState string) *APIError {
 		Retry:   false,
 	}
 }
+
+// Discovery error constructors
+
+// NewClientError creates a new client error with the specified code and message.
+func NewClientError(code ErrorCode, message, details string) *APIError {
+	return &APIError{
+		Code:    code,
+		Message: message,
+		Details: details,
+		Retry:   false,
+	}
+}
+
+// NewResourceNotFoundError creates a new resource not found error.
+func NewResourceNotFoundError(resourceID string) *APIError {
+	return &APIError{
+		Code:    ErrResourceNotFound,
+		Message: "Resource not found",
+		Details: resourceID,
+		Retry:   false,
+	}
+}
+
+// NewResourceAlreadyExistsError creates a new resource already exists error.
+func NewResourceAlreadyExistsError(resourceURL string) *APIError {
+	return &APIError{
+		Code:    ErrResourceAlreadyExists,
+		Message: "Resource already exists",
+		Details: resourceURL,
+		Retry:   false,
+	}
+}
+
+// NewNotAuthorizedError creates a new not authorized error.
+func NewNotAuthorizedError(operation string) *APIError {
+	return &APIError{
+		Code:    ErrNotAuthorized,
+		Message: "Not authorized for this operation",
+		Details: operation,
+		Retry:   false,
+	}
+}
+
+// Error is an alias for APIError for backwards compatibility with handlers.
+type Error = APIError
