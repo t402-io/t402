@@ -606,8 +606,8 @@ SIP-010 defines Stacks' standard trait for fungible tokens:
 
 \begin{lstlisting}[language=json,caption={SIP-010 transfer call}]
 {
-  "contractAddress": "SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9",
-  "contractName": "token-usdt",
+  "contractAddress": "SP3Y2ZSH8P7D50B0VBTSX11S7XSG24M1VB9YFQA4K",
+  "contractName": "token-susdc",
   "functionName": "transfer",
   "functionArgs": ["1000000", "sender", "recipient", "none"]
 }
@@ -651,7 +651,7 @@ Stacks transactions are secured by Bitcoin:
 
 \begin{itemize}
     \item Validate ECDSA secp256k1 signature
-    \item Verify contract is official USDT: \code{SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.token-usdt}
+    \item Verify contract is official USDT: \code{SP3Y2ZSH8P7D50B0VBTSX11S7XSG24M1VB9YFQA4K.token-susdc}
     \item Check nonce for replay protection
     \item Validate recipient principal matches \field{payTo}
     \item Consider Bitcoin confirmation requirements for high-value payments

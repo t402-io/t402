@@ -11,7 +11,7 @@ Install T402 packages for your preferred language.
 pnpm add @t402/core @t402/evm
 
 # All mechanism packages
-pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/tron @t402/near @t402/aptos @t402/tezos @t402/polkadot @t402/stacks
+pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/tron @t402/near @t402/aptos @t402/tezos @t402/polkadot @t402/stacks @t402/cosmos
 
 # Full stack with WDK
 pnpm add @t402/core @t402/evm @t402/wdk @t402/wdk-gasless @t402/wdk-bridge @t402/mcp
@@ -82,8 +82,8 @@ poetry add t402
 
 The Python package includes:
 - Core protocol types
-- Multi-chain mechanisms (EVM, Solana, TON, TRON)
-- Flask and FastAPI integrations
+- Multi-chain mechanisms (EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos)
+- FastAPI, Flask, Django, and Starlette integrations
 - HTTPX client wrapper
 
 ## Go
@@ -96,7 +96,7 @@ go get github.com/t402-io/t402/sdks/go@v1.9.0
 The Go module includes:
 - Core protocol types
 - All 10 blockchain mechanisms (EVM, SVM, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks)
-- Gin middleware integration
+- HTTP middleware (Gin, Echo, Chi, Fiber)
 - MCP server for AI agents
 
 ## Java
@@ -152,7 +152,7 @@ See [MCP Integration](/advanced/mcp) for configuration details.
 - pip or uv package manager
 
 ### Go
-- Go 1.21+
+- Go 1.24+
 
 ### Java
 - Java 17+
