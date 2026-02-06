@@ -12,9 +12,12 @@ import { Callout } from 'nextra/components'
 | Arbitrum | `eip155:42161` | ✅ | ✅ | ✅ |
 | Base | `eip155:8453` | ✅ | ✅ | ✅ |
 | Optimism | `eip155:10` | ✅ | ✅ | ✅ |
+| Polygon | `eip155:137` | ✅ | ✅ | ✅ |
 | Ink | `eip155:57073` | ✅ | - | ✅ |
 | Berachain | `eip155:80094` | ✅ | - | ✅ |
 | Unichain | `eip155:130` | ✅ | - | ✅ |
+| Mantle | `eip155:5000` | ✅ | - | ✅ |
+| Sei | `eip155:1329` | ✅ | - | ✅ |
 
 ## EVM Chains (Testnet)
 
@@ -39,6 +42,7 @@ import { Callout } from 'nextra/components'
 | Tezos | `tezos:NetXdQprcVkpaWU` | `tezos:NetXnHfVqm9iesp` | USDt FA2 | Production |
 | Polkadot Asset Hub | `polkadot:68d56f15f85d3136970ec16946040bc1` | `polkadot:e143f23803ac50e8f6f8e62695d1ce9e` | USDT (Asset 1984) | Production |
 | Stacks | `stacks:1` | `stacks:2147483648` | sUSDC SIP-010 | Production |
+| Cosmos (Noble) | `cosmos:noble-1` | `cosmos:grand-1` | USDC native | Production |
 
 <Callout type="info">
   Network identifiers follow [CAIP-2](https://github.com/ChainAgnostic/CAIPs/blob/main/CAIPs/caip-2.md) format.
@@ -124,6 +128,7 @@ When configuring T402, use the CAIP-2 network ID format:
 'tezos:NetXdQprcVkpaWU'                         // Tezos Mainnet
 'polkadot:68d56f15f85d3136970ec16946040bc1'    // Polkadot Asset Hub
 'stacks:1'                                       // Stacks Mainnet
+'cosmos:noble-1'                                 // Noble (Cosmos)
 ```
 
 ## Adding New Chains

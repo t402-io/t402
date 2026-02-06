@@ -297,9 +297,16 @@ Transfer an exact amount to access a resource:
 
 ### Component Documentation
 - **[signers/](signers/README.md)** - Signer helper utilities
-- **[mechanisms/evm/](mechanisms/evm/README.md)** - EVM payment mechanisms
-- **[mechanisms/svm/](mechanisms/svm/README.md)** - SVM payment mechanisms
+- **[mechanisms/evm/](mechanisms/evm/)** - EVM payment mechanisms
+- **[mechanisms/svm/](mechanisms/svm/)** - SVM (Solana) payment mechanisms
 - **[mechanisms/ton/](mechanisms/ton/)** - TON payment mechanisms
+- **[mechanisms/tron/](mechanisms/tron/)** - TRON payment mechanisms
+- **[mechanisms/near/](mechanisms/near/)** - NEAR payment mechanisms
+- **[mechanisms/aptos/](mechanisms/aptos/)** - Aptos payment mechanisms
+- **[mechanisms/tezos/](mechanisms/tezos/)** - Tezos payment mechanisms
+- **[mechanisms/polkadot/](mechanisms/polkadot/)** - Polkadot Asset Hub mechanisms
+- **[mechanisms/stacks/](mechanisms/stacks/)** - Stacks payment mechanisms
+- **[mechanisms/cosmos/](mechanisms/cosmos/)** - Cosmos (Noble) payment mechanisms
 - **[extensions/](extensions/)** - Protocol extensions
 
 ### Examples
