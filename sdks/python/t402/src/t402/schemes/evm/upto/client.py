@@ -130,9 +130,10 @@ class UptoEvmClientScheme:
         # Calculate deadline
         deadline = int(time.time()) + max_timeout
 
-        # Get permit nonce from token contract (would need RPC call in production)
-        # For now, use 0 as placeholder - real implementation needs contract call
-        permit_nonce = 0
+        # The permit nonce should be provided by the caller via extra["permitNonce"].
+        # This is the owner's current nonce from the token contract's nonces(owner) function.
+        # If not provided, defaults to 0 (valid only for the first permit from this owner).
+        permit_nonce = extra.get("permitNonce", 0) if extra else 0
 
         # Create authorization
         authorization = {
