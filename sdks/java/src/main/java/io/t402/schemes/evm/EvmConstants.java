@@ -62,6 +62,18 @@ public final class EvmConstants {
     /** Polygon PoS. */
     public static final String POLYGON_MAINNET = "eip155:137";
 
+    /** Mantle Mainnet. */
+    public static final String MANTLE_MAINNET = "eip155:5000";
+
+    /** Plasma Mainnet. */
+    public static final String PLASMA_MAINNET = "eip155:9745";
+
+    /** Sei Mainnet. */
+    public static final String SEI_MAINNET = "eip155:1329";
+
+    /** Conflux eSpace. */
+    public static final String CONFLUX_MAINNET = "eip155:1030";
+
     /** Sepolia Testnet. */
     public static final String SEPOLIA = "eip155:11155111";
 
@@ -77,7 +89,11 @@ public final class EvmConstants {
         Map.entry(BERACHAIN_MAINNET, "0x779Ded0c9e1022225f8E0630b35a9b54bE713736"),
         Map.entry(UNICHAIN_MAINNET, "0x9151434b16b9763660705744891fA906F660EcC5"),
         Map.entry(POLYGON_MAINNET, "0xc2132D05D31c914a87C6611C10748AEb04B58e8F"),
-        Map.entry(OPTIMISM_MAINNET, "0x01bFF41798a0BcF287b996046Ca68b395DbC1071")
+        Map.entry(OPTIMISM_MAINNET, "0x01bFF41798a0BcF287b996046Ca68b395DbC1071"),
+        Map.entry(MANTLE_MAINNET, "0x779Ded0c9e1022225f8E0630b35a9b54bE713736"),
+        Map.entry(PLASMA_MAINNET, "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb"),
+        Map.entry(SEI_MAINNET, "0x9151434b16b9763660705744891fA906F660EcC5"),
+        Map.entry(CONFLUX_MAINNET, "0xaf37E8B6C9ED7f6318979f56Fc287d76c30847ff")
     );
 
     // ============================================================
@@ -155,6 +171,10 @@ public final class EvmConstants {
             BERACHAIN_MAINNET,
             UNICHAIN_MAINNET,
             POLYGON_MAINNET,
+            MANTLE_MAINNET,
+            PLASMA_MAINNET,
+            SEI_MAINNET,
+            CONFLUX_MAINNET,
             SEPOLIA
         );
     }
@@ -174,6 +194,10 @@ public final class EvmConstants {
         Map.entry(BERACHAIN_MAINNET, 80094L),
         Map.entry(UNICHAIN_MAINNET, 130L),
         Map.entry(POLYGON_MAINNET, 137L),
+        Map.entry(MANTLE_MAINNET, 5000L),
+        Map.entry(PLASMA_MAINNET, 9745L),
+        Map.entry(SEI_MAINNET, 1329L),
+        Map.entry(CONFLUX_MAINNET, 1030L),
         Map.entry(SEPOLIA, 11155111L)
     );
 
