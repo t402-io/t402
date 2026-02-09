@@ -91,6 +91,88 @@ class ExactDirectTezosSchemeTest {
                 TezosConstants.TEZOS_MAINNET, CONTRACT_ADDRESS, 0);
             assertEquals("tezos:NetXdQprcVkpaWU/fa2:KT1XnTn74bUtxHfDtBmm2bGZAQfhPbvKWR8o/0", asset);
         }
+
+        @Test
+        @DisplayName("should check isSupportedNetwork correctly")
+        void testIsSupportedNetwork() {
+            assertTrue(TezosConstants.isSupportedNetwork(TezosConstants.TEZOS_MAINNET));
+            assertTrue(TezosConstants.isSupportedNetwork(TezosConstants.TEZOS_GHOSTNET));
+            assertFalse(TezosConstants.isSupportedNetwork("tezos:custom"));
+            // null normalizes to mainnet, so isSupportedNetwork(null) is true
+            assertTrue(TezosConstants.isSupportedNetwork(null));
+            // Aliases resolve to supported networks
+            assertTrue(TezosConstants.isSupportedNetwork("mainnet"));
+            assertTrue(TezosConstants.isSupportedNetwork("ghostnet"));
+            // Non-tezos network
+            assertFalse(TezosConstants.isSupportedNetwork("eip155:1"));
+        }
+
+        @Test
+        @DisplayName("should get USDT contract for mainnet")
+        void testGetUsdtContract() {
+            assertEquals(TezosConstants.USDT_MAINNET_CONTRACT,
+                TezosConstants.getUsdtContract(TezosConstants.TEZOS_MAINNET));
+            assertThrows(IllegalArgumentException.class, () ->
+                TezosConstants.getUsdtContract(TezosConstants.TEZOS_GHOSTNET));
+            assertThrows(IllegalArgumentException.class, () ->
+                TezosConstants.getUsdtContract("tezos:unknown"));
+        }
+
+        @Test
+        @DisplayName("should get USDT token ID")
+        void testGetUsdtTokenId() {
+            assertEquals(0, TezosConstants.getUsdtTokenId(TezosConstants.TEZOS_MAINNET));
+            assertEquals(0, TezosConstants.getUsdtTokenId(TezosConstants.TEZOS_GHOSTNET));
+            assertEquals(0, TezosConstants.getUsdtTokenId("any-network"));
+        }
+
+        @Test
+        @DisplayName("should validate addresses with all prefixes")
+        void testAddressValidation_AllPrefixes() {
+            // tz1 prefix (Ed25519) - already tested via SENDER_ADDRESS
+            assertTrue(TezosConstants.isValidAddress(SENDER_ADDRESS));
+
+            // tz2 prefix (secp256k1) - 36 chars with valid Base58
+            assertTrue(TezosConstants.isValidAddress("tz2AjBNJQyR7CUzFmJGPxqSMQrkBHqv2fVYb"));
+
+            // tz3 prefix (P-256) - 36 chars with valid Base58
+            assertTrue(TezosConstants.isValidAddress("tz3WXYtyDUNL91qfiCJtVUX746QpNv5i5ve5"));
+
+            // KT1 prefix (contract)
+            assertTrue(TezosConstants.isValidAddress(CONTRACT_ADDRESS));
+        }
+
+        @Test
+        @DisplayName("should reject addresses with edge cases")
+        void testAddressValidation_EdgeCases() {
+            // Wrong length: 35 chars (too short)
+            assertFalse(TezosConstants.isValidAddress("tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcj"));
+
+            // Wrong length: 37 chars (too long)
+            assertFalse(TezosConstants.isValidAddress("tz1VSUr8wwNhLAzempoch5d6hLRiTh8CjcjbX"));
+
+            // Invalid Base58 chars: 0, O, I, l
+            assertFalse(TezosConstants.isValidAddress("tz10SUr8wwNhLAzempoch5d6hLRiTh8Cjcjb")); // '0' is invalid
+            assertFalse(TezosConstants.isValidAddress("tz1OSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb")); // 'O' is invalid
+            assertFalse(TezosConstants.isValidAddress("tz1ISUr8wwNhLAzempoch5d6hLRiTh8Cjcjb")); // 'I' is invalid
+            assertFalse(TezosConstants.isValidAddress("tz1lSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb")); // 'l' is invalid
+
+            // Empty and null
+            assertFalse(TezosConstants.isValidAddress(""));
+            assertFalse(TezosConstants.isValidAddress(null));
+        }
+
+        @Test
+        @DisplayName("should have correct constant values")
+        void testConstantValues() {
+            assertEquals("exact-direct", TezosConstants.SCHEME_EXACT_DIRECT);
+            assertEquals("tezos:*", TezosConstants.CAIP_FAMILY);
+            assertEquals(6, TezosConstants.USDT_DECIMALS);
+            assertEquals(36, TezosConstants.ADDRESS_LENGTH);
+            assertEquals(51, TezosConstants.OP_HASH_LENGTH);
+            assertEquals(300, TezosConstants.DEFAULT_VALIDITY_DURATION);
+            assertEquals("transfer", TezosConstants.FA2_TRANSFER_ENTRYPOINT);
+        }
     }
 
     @Nested
@@ -164,6 +246,85 @@ class ExactDirectTezosSchemeTest {
                     .amount("1000000")
                     .contractAddress(CONTRACT_ADDRESS)
                     .build());
+        }
+
+        @Test
+        @DisplayName("should reject missing to address")
+        void testBuilderMissingTo() {
+            assertThrows(IllegalArgumentException.class, () ->
+                ExactDirectPayload.builder()
+                    .opHash(SAMPLE_OP_HASH)
+                    .from(SENDER_ADDRESS)
+                    .amount("1000000")
+                    .contractAddress(CONTRACT_ADDRESS)
+                    .build());
+        }
+
+        @Test
+        @DisplayName("should reject missing amount")
+        void testBuilderMissingAmount() {
+            assertThrows(IllegalArgumentException.class, () ->
+                ExactDirectPayload.builder()
+                    .opHash(SAMPLE_OP_HASH)
+                    .from(SENDER_ADDRESS)
+                    .to(RECIPIENT_ADDRESS)
+                    .contractAddress(CONTRACT_ADDRESS)
+                    .build());
+        }
+
+        @Test
+        @DisplayName("should reject missing contract address")
+        void testBuilderMissingContractAddress() {
+            assertThrows(IllegalArgumentException.class, () ->
+                ExactDirectPayload.builder()
+                    .opHash(SAMPLE_OP_HASH)
+                    .from(SENDER_ADDRESS)
+                    .to(RECIPIENT_ADDRESS)
+                    .amount("1000000")
+                    .build());
+        }
+
+        @Test
+        @DisplayName("should throw when fromMap has null opHash")
+        void testFromMapWithNullFields() {
+            Map<String, Object> map = new HashMap<>();
+            map.put("opHash", null);
+            map.put("from", SENDER_ADDRESS);
+            map.put("to", RECIPIENT_ADDRESS);
+            map.put("amount", "1000000");
+            map.put("contractAddress", CONTRACT_ADDRESS);
+            map.put("tokenId", 0);
+
+            assertThrows(IllegalArgumentException.class, () ->
+                ExactDirectPayload.fromMap(map));
+        }
+
+        @Test
+        @DisplayName("should handle tokenId as String and Number in fromMap")
+        void testTokenIdHandling() {
+            // String tokenId
+            Map<String, Object> mapWithString = new HashMap<>();
+            mapWithString.put("opHash", SAMPLE_OP_HASH);
+            mapWithString.put("from", SENDER_ADDRESS);
+            mapWithString.put("to", RECIPIENT_ADDRESS);
+            mapWithString.put("amount", "1000000");
+            mapWithString.put("contractAddress", CONTRACT_ADDRESS);
+            mapWithString.put("tokenId", "0");
+
+            ExactDirectPayload fromString = ExactDirectPayload.fromMap(mapWithString);
+            assertEquals(0, fromString.getTokenId());
+
+            // Number tokenId
+            Map<String, Object> mapWithNumber = new HashMap<>();
+            mapWithNumber.put("opHash", SAMPLE_OP_HASH);
+            mapWithNumber.put("from", SENDER_ADDRESS);
+            mapWithNumber.put("to", RECIPIENT_ADDRESS);
+            mapWithNumber.put("amount", "1000000");
+            mapWithNumber.put("contractAddress", CONTRACT_ADDRESS);
+            mapWithNumber.put("tokenId", 5);
+
+            ExactDirectPayload fromNumber = ExactDirectPayload.fromMap(mapWithNumber);
+            assertEquals(5, fromNumber.getTokenId());
         }
     }
 
@@ -498,6 +659,77 @@ class ExactDirectTezosSchemeTest {
             assertNotNull(result.errorReason);
         }
 
+        @Test
+        @DisplayName("should reject payload with wrong recipient")
+        void testVerifyWrongRecipient() {
+            Map<String, Object> payload = createValidPayload();
+            Map<String, Object> requirements = createValidRequirements();
+            // Change payTo to a different address
+            requirements.put("payTo", "tz1burnburnburnburnburnburnburjAYjjX");
+
+            Map<String, Object> op = createAppliedOperation();
+            mockSigner.setOperation(op);
+
+            ExactDirectTezosFacilitatorScheme.VerificationResult result =
+                scheme.verifySync(payload, requirements);
+
+            assertFalse(result.isValid);
+            assertTrue(result.invalidReason.contains("recipient_mismatch"));
+        }
+
+        @Test
+        @DisplayName("should reject payload with wrong contract address")
+        void testVerifyWrongContractAddress() {
+            Map<String, Object> payload = createValidPayload();
+            Map<String, Object> requirements = createValidRequirements();
+            // Change the asset to point to a different contract
+            requirements.put("asset", "tezos:NetXdQprcVkpaWU/fa2:KT1PWx2mnDueood7fEmfbBDKx1D9BAnnXitn/0");
+
+            Map<String, Object> op = createAppliedOperation();
+            mockSigner.setOperation(op);
+
+            ExactDirectTezosFacilitatorScheme.VerificationResult result =
+                scheme.verifySync(payload, requirements);
+
+            assertFalse(result.isValid);
+            assertTrue(result.invalidReason.contains("contract_mismatch"));
+        }
+
+        @Test
+        @DisplayName("should verify asynchronously via CompletableFuture")
+        void testVerifyAsync() {
+            Map<String, Object> payload = createValidPayload();
+            Map<String, Object> requirements = createValidRequirements();
+
+            mockSigner.setOperation(createAppliedOperation());
+
+            CompletableFuture<ExactDirectTezosFacilitatorScheme.VerificationResult> future =
+                scheme.verify(payload, requirements);
+
+            assertNotNull(future);
+            ExactDirectTezosFacilitatorScheme.VerificationResult result = future.join();
+            assertTrue(result.isValid);
+            assertEquals(SENDER_ADDRESS, result.payer);
+        }
+
+        @Test
+        @DisplayName("should settle asynchronously via CompletableFuture")
+        void testSettleAsync() {
+            Map<String, Object> payload = createValidPayload();
+            Map<String, Object> requirements = createValidRequirements();
+
+            mockSigner.setOperation(createAppliedOperation());
+
+            CompletableFuture<ExactDirectTezosFacilitatorScheme.SettlementResult> future =
+                scheme.settle(payload, requirements);
+
+            assertNotNull(future);
+            ExactDirectTezosFacilitatorScheme.SettlementResult result = future.join();
+            assertTrue(result.success);
+            assertEquals(SAMPLE_OP_HASH, result.transaction);
+            assertEquals(SENDER_ADDRESS, result.payer);
+        }
+
         private Map<String, Object> createValidPayload() {
             Map<String, Object> inner = new HashMap<>();
             inner.put("opHash", SAMPLE_OP_HASH);
@@ -552,6 +784,94 @@ class ExactDirectTezosSchemeTest {
             operation.put("parameter", List.of(batch));
 
             return operation;
+        }
+    }
+
+    @Nested
+    @DisplayName("TezosSchemes Factory")
+    class SchemesFactoryTest {
+
+        @Test
+        @DisplayName("should create client")
+        void testCreateClient() {
+            MockClientTezosSigner mockSigner = new MockClientTezosSigner(SENDER_ADDRESS, SAMPLE_OP_HASH);
+            ExactDirectTezosClientScheme client = TezosSchemes.createClient(mockSigner);
+            assertNotNull(client);
+            assertEquals(SENDER_ADDRESS, client.getAddress());
+        }
+
+        @Test
+        @DisplayName("should throw for null signer on createClient")
+        void testCreateClientNullSigner() {
+            assertThrows(IllegalArgumentException.class, () ->
+                TezosSchemes.createClient(null));
+        }
+
+        @Test
+        @DisplayName("should create server with defaults")
+        void testCreateServer() {
+            ExactDirectTezosServerScheme server = TezosSchemes.createServer();
+            assertNotNull(server);
+            assertEquals(TezosConstants.TEZOS_MAINNET, server.getDefaultNetwork());
+        }
+
+        @Test
+        @DisplayName("should create server with ghostnet")
+        void testCreateServerWithNetwork() {
+            ExactDirectTezosServerScheme server = TezosSchemes.createServer(TezosConstants.TEZOS_GHOSTNET);
+            assertNotNull(server);
+            assertEquals(TezosConstants.TEZOS_GHOSTNET, server.getDefaultNetwork());
+        }
+
+        @Test
+        @DisplayName("should create facilitator")
+        void testCreateFacilitator() {
+            MockFacilitatorTezosSigner mockSigner = new MockFacilitatorTezosSigner();
+            ExactDirectTezosFacilitatorScheme facilitator = TezosSchemes.createFacilitator(mockSigner);
+            assertNotNull(facilitator);
+        }
+
+        @Test
+        @DisplayName("should create facilitator with addresses")
+        void testCreateFacilitatorWithAddresses() {
+            MockFacilitatorTezosSigner mockSigner = new MockFacilitatorTezosSigner();
+            Map<String, String> addresses = new HashMap<>();
+            addresses.put(TezosConstants.TEZOS_MAINNET, RECIPIENT_ADDRESS);
+            ExactDirectTezosFacilitatorScheme facilitator =
+                TezosSchemes.createFacilitator(mockSigner, addresses);
+            assertNotNull(facilitator);
+            List<String> signers = facilitator.getSigners(TezosConstants.TEZOS_MAINNET);
+            assertEquals(1, signers.size());
+            assertEquals(RECIPIENT_ADDRESS, signers.get(0));
+        }
+
+        @Test
+        @DisplayName("should return correct scheme identifier")
+        void testGetScheme() {
+            assertEquals("exact-direct", TezosSchemes.getScheme());
+        }
+
+        @Test
+        @DisplayName("should delegate isValidNetwork to TezosConstants")
+        void testIsValidNetwork() {
+            assertTrue(TezosSchemes.isValidNetwork(TezosConstants.TEZOS_MAINNET));
+            assertTrue(TezosSchemes.isValidNetwork(TezosConstants.TEZOS_GHOSTNET));
+            assertFalse(TezosSchemes.isValidNetwork("eip155:1"));
+            assertFalse(TezosSchemes.isValidNetwork(null));
+        }
+
+        @Test
+        @DisplayName("should have both networks in SUPPORTED_NETWORKS")
+        void testSupportedNetworks() {
+            assertTrue(TezosSchemes.SUPPORTED_NETWORKS.contains(TezosConstants.TEZOS_MAINNET));
+            assertTrue(TezosSchemes.SUPPORTED_NETWORKS.contains(TezosConstants.TEZOS_GHOSTNET));
+            assertEquals(2, TezosSchemes.SUPPORTED_NETWORKS.size());
+        }
+
+        @Test
+        @DisplayName("should have correct NETWORK_PATTERN")
+        void testNetworkPattern() {
+            assertEquals("tezos:*", TezosSchemes.NETWORK_PATTERN);
         }
     }
 

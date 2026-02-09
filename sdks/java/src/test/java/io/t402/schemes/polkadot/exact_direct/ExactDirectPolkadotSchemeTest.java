@@ -105,6 +105,75 @@ class ExactDirectPolkadotSchemeTest {
             assertEquals(-1, PolkadotConstants.parseAssetIdentifier("invalid"));
             assertEquals(-1, PolkadotConstants.parseAssetIdentifier(null));
         }
+
+        @Test
+        @DisplayName("should check isSupportedNetwork correctly")
+        void testIsSupportedNetwork() {
+            assertTrue(PolkadotConstants.isSupportedNetwork(PolkadotConstants.POLKADOT_ASSET_HUB));
+            assertTrue(PolkadotConstants.isSupportedNetwork(PolkadotConstants.WESTEND_ASSET_HUB));
+            assertFalse(PolkadotConstants.isSupportedNetwork("polkadot:custom"));
+            // null normalizes to POLKADOT_ASSET_HUB, so isSupportedNetwork(null) is true
+            assertTrue(PolkadotConstants.isSupportedNetwork(null));
+            // Aliases resolve to supported networks
+            assertTrue(PolkadotConstants.isSupportedNetwork("polkadot"));
+            assertTrue(PolkadotConstants.isSupportedNetwork("westend"));
+            // Non-polkadot network
+            assertFalse(PolkadotConstants.isSupportedNetwork("eip155:1"));
+        }
+
+        @Test
+        @DisplayName("should get USDT asset ID for any network")
+        void testGetUsdtAssetId() {
+            assertEquals(1984, PolkadotConstants.getUsdtAssetId(PolkadotConstants.POLKADOT_ASSET_HUB));
+            assertEquals(1984, PolkadotConstants.getUsdtAssetId(PolkadotConstants.WESTEND_ASSET_HUB));
+            assertEquals(1984, PolkadotConstants.getUsdtAssetId("any-network"));
+        }
+
+        @Test
+        @DisplayName("should get indexer URL for supported networks")
+        void testGetIndexerUrl() {
+            assertEquals(PolkadotConstants.POLKADOT_ASSET_HUB_INDEXER,
+                PolkadotConstants.getIndexerUrl(PolkadotConstants.POLKADOT_ASSET_HUB));
+            assertEquals(PolkadotConstants.WESTEND_ASSET_HUB_INDEXER,
+                PolkadotConstants.getIndexerUrl(PolkadotConstants.WESTEND_ASSET_HUB));
+            assertThrows(IllegalArgumentException.class, () ->
+                PolkadotConstants.getIndexerUrl("polkadot:unsupported"));
+        }
+
+        @Test
+        @DisplayName("should parse asset identifier edge cases")
+        void testParseAssetIdentifier_EdgeCases() {
+            assertEquals(-1, PolkadotConstants.parseAssetIdentifier(""));
+            assertEquals(-1, PolkadotConstants.parseAssetIdentifier("polkadot:68d56f15f85d3136970ec16946040bc1"));
+            assertEquals(-1, PolkadotConstants.parseAssetIdentifier("/asset:notanumber"));
+        }
+
+        @Test
+        @DisplayName("should validate SS58 address edge cases")
+        void testSS58Validation_EdgeCases() {
+            // 44 chars (too short for 45-50 range)
+            assertFalse(PolkadotConstants.isValidSS58Address(
+                "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGK"));
+            // 51 chars (too long for 45-50 range)
+            assertFalse(PolkadotConstants.isValidSS58Address(
+                "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQYxyz"));
+            // Invalid Base58 char '0' at start (48 chars but with invalid char)
+            assertFalse(PolkadotConstants.isValidSS58Address(
+                "0GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"));
+            // Invalid Base58 char 'O' (capital O)
+            assertFalse(PolkadotConstants.isValidSS58Address(
+                "5OrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"));
+        }
+
+        @Test
+        @DisplayName("should have correct constant values")
+        void testConstantValues() {
+            assertEquals("exact-direct", PolkadotConstants.SCHEME_EXACT_DIRECT);
+            assertEquals("polkadot:*", PolkadotConstants.CAIP_FAMILY);
+            assertEquals(6, PolkadotConstants.USDT_DECIMALS);
+            assertEquals(1984, PolkadotConstants.USDT_ASSET_ID);
+            assertEquals(300, PolkadotConstants.DEFAULT_VALIDITY_DURATION);
+        }
     }
 
     @Nested
@@ -183,6 +252,69 @@ class ExactDirectPolkadotSchemeTest {
                     .amount("1000000")
                     .assetId(1984)
                     .build()); // Missing from
+        }
+
+        @Test
+        @DisplayName("should reject missing to address")
+        void testBuilderMissingTo() {
+            assertThrows(IllegalArgumentException.class, () ->
+                ExactDirectPayload.builder()
+                    .extrinsicHash(SAMPLE_EXTRINSIC_HASH)
+                    .from(SENDER_ADDRESS)
+                    .amount("1000000")
+                    .assetId(1984)
+                    .build());
+        }
+
+        @Test
+        @DisplayName("should reject missing amount")
+        void testBuilderMissingAmount() {
+            assertThrows(IllegalArgumentException.class, () ->
+                ExactDirectPayload.builder()
+                    .extrinsicHash(SAMPLE_EXTRINSIC_HASH)
+                    .from(SENDER_ADDRESS)
+                    .to(RECIPIENT_ADDRESS)
+                    .assetId(1984)
+                    .build());
+        }
+
+        @Test
+        @DisplayName("should handle snake_case keys in fromMap")
+        void testFromMapWithSnakeCaseKeys() {
+            Map<String, Object> map = new HashMap<>();
+            map.put("extrinsic_hash", SAMPLE_EXTRINSIC_HASH);
+            map.put("block_hash", SAMPLE_BLOCK_HASH);
+            map.put("extrinsic_index", 3);
+            map.put("from_address", SENDER_ADDRESS);
+            map.put("to_address", RECIPIENT_ADDRESS);
+            map.put("amount", "2000000");
+            map.put("asset_id", 1984);
+
+            ExactDirectPayload payload = ExactDirectPayload.fromMap(map);
+            assertEquals(SAMPLE_EXTRINSIC_HASH, payload.getExtrinsicHash());
+            assertEquals(SAMPLE_BLOCK_HASH, payload.getBlockHash());
+            assertEquals(3, payload.getExtrinsicIndex());
+            assertEquals(SENDER_ADDRESS, payload.getFrom());
+            assertEquals(RECIPIENT_ADDRESS, payload.getTo());
+            assertEquals("2000000", payload.getAmount());
+            assertEquals(1984, payload.getAssetId());
+        }
+
+        @Test
+        @DisplayName("should handle string numbers in fromMap")
+        void testFromMapWithStringNumbers() {
+            Map<String, Object> map = new HashMap<>();
+            map.put("extrinsicHash", SAMPLE_EXTRINSIC_HASH);
+            map.put("blockHash", SAMPLE_BLOCK_HASH);
+            map.put("extrinsicIndex", "5");
+            map.put("from", SENDER_ADDRESS);
+            map.put("to", RECIPIENT_ADDRESS);
+            map.put("amount", "1000000");
+            map.put("assetId", "1984");
+
+            ExactDirectPayload payload = ExactDirectPayload.fromMap(map);
+            assertEquals(5, payload.getExtrinsicIndex());
+            assertEquals(1984, payload.getAssetId());
         }
     }
 
@@ -572,6 +704,76 @@ class ExactDirectPolkadotSchemeTest {
             assertNotNull(result.errorReason);
         }
 
+        @Test
+        @DisplayName("should reject payload with wrong recipient")
+        void testVerifyWrongRecipient() {
+            Map<String, Object> payload = createValidPayload();
+            Map<String, Object> requirements = createValidRequirements();
+            // Change payTo to a different address
+            requirements.put("payTo", "5DAAnrj7VHTznn2AWBemMuyBwZWs6FNFjdyVXUeYum3PTXFy");
+
+            mockSigner.setExtrinsicData(createSuccessfulExtrinsic());
+
+            ExactDirectPolkadotFacilitatorScheme.VerificationResult result =
+                scheme.verifySync(payload, requirements);
+
+            assertFalse(result.isValid);
+            assertTrue(result.invalidReason.contains("recipient_mismatch"));
+        }
+
+        @Test
+        @DisplayName("should reject payload with wrong sender")
+        void testVerifyWrongSender() {
+            Map<String, Object> payload = createValidPayload();
+            Map<String, Object> requirements = createValidRequirements();
+
+            // Create extrinsic with a different account_id
+            Map<String, Object> ext = createSuccessfulExtrinsic();
+            ext.put("account_id", "5DAAnrj7VHTznn2AWBemMuyBwZWs6FNFjdyVXUeYum3PTXFy");
+            mockSigner.setExtrinsicData(ext);
+
+            ExactDirectPolkadotFacilitatorScheme.VerificationResult result =
+                scheme.verifySync(payload, requirements);
+
+            assertFalse(result.isValid);
+            assertTrue(result.invalidReason.contains("sender_mismatch"));
+        }
+
+        @Test
+        @DisplayName("should verify asynchronously via CompletableFuture")
+        void testVerifyAsync() {
+            Map<String, Object> payload = createValidPayload();
+            Map<String, Object> requirements = createValidRequirements();
+
+            mockSigner.setExtrinsicData(createSuccessfulExtrinsic());
+
+            CompletableFuture<ExactDirectPolkadotFacilitatorScheme.VerificationResult> future =
+                scheme.verify(payload, requirements);
+
+            assertNotNull(future);
+            ExactDirectPolkadotFacilitatorScheme.VerificationResult result = future.join();
+            assertTrue(result.isValid);
+            assertEquals(SENDER_ADDRESS, result.payer);
+        }
+
+        @Test
+        @DisplayName("should settle asynchronously via CompletableFuture")
+        void testSettleAsync() {
+            Map<String, Object> payload = createValidPayload();
+            Map<String, Object> requirements = createValidRequirements();
+
+            mockSigner.setExtrinsicData(createSuccessfulExtrinsic());
+
+            CompletableFuture<ExactDirectPolkadotFacilitatorScheme.SettlementResult> future =
+                scheme.settle(payload, requirements);
+
+            assertNotNull(future);
+            ExactDirectPolkadotFacilitatorScheme.SettlementResult result = future.join();
+            assertTrue(result.success);
+            assertEquals(SAMPLE_EXTRINSIC_HASH, result.transaction);
+            assertEquals(SENDER_ADDRESS, result.payer);
+        }
+
         private Map<String, Object> createValidPayload() {
             Map<String, Object> inner = new HashMap<>();
             inner.put("extrinsicHash", SAMPLE_EXTRINSIC_HASH);
@@ -631,6 +833,96 @@ class ExactDirectPolkadotSchemeTest {
             extrinsic.put("params", params);
 
             return extrinsic;
+        }
+    }
+
+    @Nested
+    @DisplayName("PolkadotSchemes Factory")
+    class SchemesFactoryTest {
+
+        @Test
+        @DisplayName("should create client")
+        void testCreateClient() {
+            MockClientPolkadotSigner mockSigner = new MockClientPolkadotSigner(SENDER_ADDRESS);
+            ExactDirectPolkadotClientScheme client = PolkadotSchemes.createClient(mockSigner);
+            assertNotNull(client);
+            assertEquals(SENDER_ADDRESS, client.getAddress());
+        }
+
+        @Test
+        @DisplayName("should throw for null signer on createClient")
+        void testCreateClientNullSigner() {
+            assertThrows(IllegalArgumentException.class, () ->
+                PolkadotSchemes.createClient(null));
+        }
+
+        @Test
+        @DisplayName("should create server with defaults")
+        void testCreateServer() {
+            ExactDirectPolkadotServerScheme server = PolkadotSchemes.createServer();
+            assertNotNull(server);
+            assertEquals(PolkadotConstants.POLKADOT_ASSET_HUB, server.getDefaultNetwork());
+        }
+
+        @Test
+        @DisplayName("should create server with westend")
+        void testCreateServerWithNetwork() {
+            ExactDirectPolkadotServerScheme server =
+                PolkadotSchemes.createServer(PolkadotConstants.WESTEND_ASSET_HUB);
+            assertNotNull(server);
+            assertEquals(PolkadotConstants.WESTEND_ASSET_HUB, server.getDefaultNetwork());
+        }
+
+        @Test
+        @DisplayName("should create facilitator")
+        void testCreateFacilitator() {
+            MockFacilitatorPolkadotSigner mockSigner = new MockFacilitatorPolkadotSigner();
+            ExactDirectPolkadotFacilitatorScheme facilitator =
+                PolkadotSchemes.createFacilitator(mockSigner);
+            assertNotNull(facilitator);
+        }
+
+        @Test
+        @DisplayName("should create facilitator with addresses")
+        void testCreateFacilitatorWithAddresses() {
+            MockFacilitatorPolkadotSigner mockSigner = new MockFacilitatorPolkadotSigner();
+            Map<String, List<String>> addresses = new HashMap<>();
+            addresses.put(PolkadotConstants.POLKADOT_ASSET_HUB, List.of(RECIPIENT_ADDRESS));
+            ExactDirectPolkadotFacilitatorScheme facilitator =
+                PolkadotSchemes.createFacilitator(mockSigner, addresses);
+            assertNotNull(facilitator);
+            List<String> signers = facilitator.getSigners(PolkadotConstants.POLKADOT_ASSET_HUB);
+            assertEquals(1, signers.size());
+            assertEquals(RECIPIENT_ADDRESS, signers.get(0));
+        }
+
+        @Test
+        @DisplayName("should return correct scheme identifier")
+        void testGetScheme() {
+            assertEquals("exact-direct", PolkadotSchemes.getScheme());
+        }
+
+        @Test
+        @DisplayName("should delegate isValidNetwork to PolkadotConstants")
+        void testIsValidNetwork() {
+            assertTrue(PolkadotSchemes.isValidNetwork(PolkadotConstants.POLKADOT_ASSET_HUB));
+            assertTrue(PolkadotSchemes.isValidNetwork(PolkadotConstants.WESTEND_ASSET_HUB));
+            assertFalse(PolkadotSchemes.isValidNetwork("eip155:1"));
+            assertFalse(PolkadotSchemes.isValidNetwork(null));
+        }
+
+        @Test
+        @DisplayName("should have both networks in SUPPORTED_NETWORKS")
+        void testSupportedNetworks() {
+            assertTrue(PolkadotSchemes.SUPPORTED_NETWORKS.contains(PolkadotConstants.POLKADOT_ASSET_HUB));
+            assertTrue(PolkadotSchemes.SUPPORTED_NETWORKS.contains(PolkadotConstants.WESTEND_ASSET_HUB));
+            assertEquals(2, PolkadotSchemes.SUPPORTED_NETWORKS.size());
+        }
+
+        @Test
+        @DisplayName("should have correct NETWORK_PATTERN")
+        void testNetworkPattern() {
+            assertEquals("polkadot:*", PolkadotSchemes.NETWORK_PATTERN);
         }
     }
 
