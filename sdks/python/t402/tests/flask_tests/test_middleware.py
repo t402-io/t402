@@ -35,7 +35,7 @@ def test_payment_required_for_protected_route():
         assert resp.status_code == 402
         assert resp.json is not None
         assert "accepts" in resp.json
-        assert resp.json["error"].startswith("No X-PAYMENT header provided")
+        assert resp.json["error"].startswith("No payment header provided")
 
 
 def test_unprotected_route():
@@ -208,6 +208,51 @@ def test_api_client_request_returns_json():
         assert resp.json is not None
         assert "accepts" in resp.json
         assert "error" in resp.json
+
+
+def test_v2_payment_required_header():
+    """Test that V2 PAYMENT-REQUIRED header is set on 402 responses."""
+    app = create_app_with_middleware(
+        [
+            {
+                "price": "$1.00",
+                "pay_to_address": "0x1",
+                "path": "/protected",
+                "network": "base-sepolia",
+            }
+        ]
+    )
+
+    with app.test_client() as client:
+        resp = client.get("/protected")
+        assert resp.status_code == 402
+        # V2 should include PAYMENT-REQUIRED header
+        assert "PAYMENT-REQUIRED" in resp.headers
+        # Body should have V2 format with resource info
+        assert resp.json is not None
+        assert "resource" in resp.json
+        assert "accepts" in resp.json
+        assert resp.json["t402Version"] == 2
+
+
+def test_v1_x_payment_header_accepted():
+    """Test that V1 X-PAYMENT header is still accepted for backward compat."""
+    app = create_app_with_middleware(
+        [
+            {
+                "price": "$1.00",
+                "pay_to_address": "0x1",
+                "path": "/protected",
+                "network": "base-sepolia",
+            }
+        ]
+    )
+
+    with app.test_client() as client:
+        # Send with V1 X-PAYMENT header (invalid payload, but tests header detection)
+        resp = client.get("/protected", headers={"X-PAYMENT": "not_valid_base64!"})
+        assert resp.status_code == 402
+        assert "Invalid payment header format" in resp.json["error"]
 
 
 def test_paywall_config_injection():
