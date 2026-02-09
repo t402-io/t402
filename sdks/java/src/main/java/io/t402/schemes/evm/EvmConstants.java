@@ -81,6 +81,15 @@ public final class EvmConstants {
     );
 
     // ============================================================
+    // USAT Token Addresses (Tether America USD — no EIP-3009, has EIP-2612)
+    // ============================================================
+
+    /** USAT addresses indexed by network. */
+    public static final Map<String, String> USAT_ADDRESSES = Map.of(
+        ETHEREUM_MAINNET, "0x07041776f5007aca2a54844f50503a18a72a8b68"
+    );
+
+    // ============================================================
     // USDC Token Addresses (EIP-3009 supported)
     // ============================================================
 
@@ -103,6 +112,12 @@ public final class EvmConstants {
 
     /** USDT0 EIP-712 domain version. */
     public static final String USDT0_TOKEN_VERSION = "1";
+
+    /** USAT EIP-712 domain name. */
+    public static final String USAT_TOKEN_NAME = "Tether America USD";
+
+    /** USAT EIP-712 domain version. */
+    public static final String USAT_TOKEN_VERSION = "1";
 
     /** USDC EIP-712 domain name. */
     public static final String USDC_TOKEN_NAME = "USD Coin";
@@ -197,6 +212,21 @@ public final class EvmConstants {
     }
 
     /**
+     * Gets the USAT address for a given network.
+     *
+     * @param network Network identifier (CAIP-2 format)
+     * @return USAT contract address
+     * @throws IllegalArgumentException if network is not supported for USAT
+     */
+    public static String getUsatAddress(String network) {
+        String address = USAT_ADDRESSES.get(network);
+        if (address == null) {
+            throw new IllegalArgumentException("USAT not available on network: " + network);
+        }
+        return address;
+    }
+
+    /**
      * Gets the default token address for a network, preferring USDT0.
      *
      * @param network Network identifier (CAIP-2 format)
@@ -227,6 +257,10 @@ public final class EvmConstants {
         if (usdt0 != null && usdt0.equalsIgnoreCase(tokenAddress)) {
             return USDT0_TOKEN_NAME;
         }
+        String usat = USAT_ADDRESSES.get(network);
+        if (usat != null && usat.equalsIgnoreCase(tokenAddress)) {
+            return USAT_TOKEN_NAME;
+        }
         String usdc = USDC_ADDRESSES.get(network);
         if (usdc != null && usdc.equalsIgnoreCase(tokenAddress)) {
             return USDC_TOKEN_NAME;
@@ -242,6 +276,10 @@ public final class EvmConstants {
      * @return EIP-712 domain version
      */
     public static String getTokenVersion(String network, String tokenAddress) {
+        String usat = USAT_ADDRESSES.get(network);
+        if (usat != null && usat.equalsIgnoreCase(tokenAddress)) {
+            return USAT_TOKEN_VERSION;
+        }
         String usdc = USDC_ADDRESSES.get(network);
         if (usdc != null && usdc.equalsIgnoreCase(tokenAddress)) {
             return USDC_TOKEN_VERSION;

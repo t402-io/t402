@@ -84,6 +84,12 @@ var (
 					Version:  "2",
 					Decimals: DefaultDecimals,
 				},
+				"USAT": {
+					Address:  "0x07041776f5007aca2a54844f50503a18a72a8b68",
+					Name:     "Tether America USD",
+					Version:  "1",
+					Decimals: DefaultDecimals,
+				},
 			},
 		},
 		"eip155:8453": {

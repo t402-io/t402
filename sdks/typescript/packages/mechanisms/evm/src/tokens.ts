@@ -115,6 +115,17 @@ export const USDC_ADDRESSES: Record<string, Address> = {
 };
 
 /**
+ * USAT (Tether America USD) Addresses
+ * Tether's federally-regulated US stablecoin.
+ * - Supports EIP-2612 permit (can use `upto` scheme)
+ * - Does NOT support EIP-3009 (must use `exact-legacy` scheme)
+ */
+export const USAT_ADDRESSES: Record<string, Address> = {
+  // Ethereum Mainnet
+  "eip155:1": "0x07041776f5007aca2a54844f50503a18a72a8b68",
+};
+
+/**
  * Traditional USDT Addresses (Legacy - no EIP-3009 support)
  * These require the approve + transferFrom pattern
  */
@@ -158,6 +169,15 @@ export const TOKEN_REGISTRY: NetworkTokenRegistry = {
       decimals: 6,
       tokenType: "eip3009",
       priority: 2,
+    },
+    USAT: {
+      address: USAT_ADDRESSES["eip155:1"],
+      symbol: "USAT",
+      name: "Tether America USD",
+      version: "1",
+      decimals: 6,
+      tokenType: "legacy",
+      priority: 3,
     },
     USDT: {
       address: USDT_LEGACY_ADDRESSES["eip155:1"],
@@ -549,6 +569,7 @@ export const TOKEN_REGISTRY: NetworkTokenRegistry = {
 export const TOKEN_PRIORITY: Record<string, number> = {
   USDT0: 1, // Highest priority - gasless, cross-chain
   USDC: 2, // Second - wide support, EIP-3009
+  USAT: 3, // Third - US-regulated, EIP-2612 permit
   USDT: 10, // Lower - requires approval transaction
   DAI: 5, // Medium - good support
 };
