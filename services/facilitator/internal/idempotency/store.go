@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/t402-io/t402/services/facilitator/internal/cache"
 )
 
@@ -109,10 +110,14 @@ func (s *Store) CheckAndCreate(ctx context.Context, idempotencyKey string, paylo
 	// Execute atomic Lua script
 	result, err := s.cache.Eval(ctx, checkAndCreateScript, []string{key}, ttlSeconds, string(data))
 	if err != nil {
+		// redis.Nil means the Lua script returned nil, i.e. a new entry was created
+		if errors.Is(err, redis.Nil) {
+			return &CheckAndCreateResult{Created: true, Entry: nil}, nil
+		}
 		return nil, fmt.Errorf("failed to execute idempotency check-and-create: %w", err)
 	}
 
-	// nil result means we created a new entry
+	// nil result means we created a new entry (mock cache path)
 	if result == nil {
 		return &CheckAndCreateResult{Created: true, Entry: nil}, nil
 	}

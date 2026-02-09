@@ -5,8 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"math/big"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"sync"
 	"testing"
 
@@ -974,5 +976,344 @@ func TestHandleSettle_FullResponse(t *testing.T) {
 	}
 	if resp.Network != "eip155:8453" {
 		t.Errorf("expected Network=eip155:8453, got %s", resp.Network)
+	}
+}
+
+// --- Tests for isValidIdempotencyKey ---
+
+func TestIsValidIdempotencyKey(t *testing.T) {
+	tests := []struct {
+		name     string
+		key      string
+		expected bool
+	}{
+		// Valid keys
+		{"valid alphanumeric with hyphens and underscores", "abc-123_def", true},
+		{"valid single char", "a", true},
+		{"valid all lowercase", "abcdef", true},
+		{"valid all uppercase", "ABCDEF", true},
+		{"valid all digits", "123456", true},
+		{"valid mixed", "aA1-_bB2", true},
+		{"exactly 64 chars", strings.Repeat("a", 64), true},
+
+		// Invalid keys
+		{"empty string", "", false},
+		{"too long 65 chars", strings.Repeat("a", 65), false},
+		{"special chars at", "abc@def", false},
+		{"special chars bang", "abc!def", false},
+		{"special chars dot", "abc.def", false},
+		{"spaces", "abc def", false},
+		{"newlines", "abc\ndef", false},
+		{"carriage return", "abc\rdef", false},
+		{"tab", "abc\tdef", false},
+		{"unicode chars", "abc\u00e9def", false},
+		{"unicode japanese", "abc\u65e5\u672c\u8a9edef", false},
+		{"slash", "abc/def", false},
+		{"html injection", "<script>alert(1)</script>", false},
+		{"sql injection", "'; DROP TABLE;--", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := isValidIdempotencyKey(tt.key)
+			if result != tt.expected {
+				t.Errorf("isValidIdempotencyKey(%q) = %v, expected %v", tt.key, result, tt.expected)
+			}
+		})
+	}
+}
+
+// --- Tests for extractDeadline ---
+
+func TestExtractDeadline(t *testing.T) {
+	tests := []struct {
+		name             string
+		payload          string
+		expectedDeadline int64
+		expectedFound    bool
+	}{
+		// V1 format
+		{
+			name:             "V1 validBefore",
+			payload:          `{"validBefore":1700000000}`,
+			expectedDeadline: 1700000000,
+			expectedFound:    true,
+		},
+		{
+			name:             "V1 deadline",
+			payload:          `{"deadline":1700000000}`,
+			expectedDeadline: 1700000000,
+			expectedFound:    true,
+		},
+		{
+			name:             "V1 validBefore takes precedence over deadline",
+			payload:          `{"validBefore":1700000000,"deadline":1600000000}`,
+			expectedDeadline: 1700000000,
+			expectedFound:    true,
+		},
+
+		// V2 format
+		{
+			name:             "V2 nested validBefore",
+			payload:          `{"t402Version":2,"payload":{"validBefore":1800000000}}`,
+			expectedDeadline: 1800000000,
+			expectedFound:    true,
+		},
+		{
+			name:             "V2 nested deadline",
+			payload:          `{"t402Version":2,"payload":{"deadline":1800000000}}`,
+			expectedDeadline: 1800000000,
+			expectedFound:    true,
+		},
+		{
+			name:             "V2 nested validBefore takes precedence over nested deadline",
+			payload:          `{"t402Version":2,"payload":{"validBefore":1800000000,"deadline":1700000000}}`,
+			expectedDeadline: 1800000000,
+			expectedFound:    true,
+		},
+		{
+			name:             "V2 takes precedence over V1 top-level",
+			payload:          `{"t402Version":2,"payload":{"validBefore":1800000000},"validBefore":1600000000}`,
+			expectedDeadline: 1800000000,
+			expectedFound:    true,
+		},
+		{
+			name:             "V2 falls back to V1 when nested is empty",
+			payload:          `{"t402Version":2,"payload":{},"validBefore":1600000000}`,
+			expectedDeadline: 1600000000,
+			expectedFound:    true,
+		},
+
+		// No deadline
+		{
+			name:             "no deadline fields",
+			payload:          `{"signature":"0x123"}`,
+			expectedDeadline: 0,
+			expectedFound:    false,
+		},
+		{
+			name:             "empty object",
+			payload:          `{}`,
+			expectedDeadline: 0,
+			expectedFound:    false,
+		},
+
+		// Invalid JSON
+		{
+			name:             "invalid JSON",
+			payload:          `{invalid`,
+			expectedDeadline: 0,
+			expectedFound:    false,
+		},
+		{
+			name:             "empty string",
+			payload:          ``,
+			expectedDeadline: 0,
+			expectedFound:    false,
+		},
+
+		// Zero values (treated as no deadline since > 0 check)
+		{
+			name:             "zero validBefore",
+			payload:          `{"validBefore":0}`,
+			expectedDeadline: 0,
+			expectedFound:    false,
+		},
+		{
+			name:             "zero deadline",
+			payload:          `{"deadline":0}`,
+			expectedDeadline: 0,
+			expectedFound:    false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			deadline, found := extractDeadline(json.RawMessage(tt.payload))
+			if deadline != tt.expectedDeadline {
+				t.Errorf("extractDeadline(%s) deadline = %d, expected %d", tt.payload, deadline, tt.expectedDeadline)
+			}
+			if found != tt.expectedFound {
+				t.Errorf("extractDeadline(%s) found = %v, expected %v", tt.payload, found, tt.expectedFound)
+			}
+		})
+	}
+}
+
+// --- Tests for extractAmounts ---
+
+func TestExtractAmounts(t *testing.T) {
+	tests := []struct {
+		name               string
+		payload            string
+		requirements       string
+		expectedPayload    string // string representation of big.Int, or "" for zero
+		expectedRequired   string
+		expectError        bool
+	}{
+		// V1 format
+		{
+			name:             "V1 amounts",
+			payload:          `{"amount":"1000000"}`,
+			requirements:     `{"amount":"500000"}`,
+			expectedPayload:  "1000000",
+			expectedRequired: "500000",
+			expectError:      false,
+		},
+		{
+			name:             "V1 value field",
+			payload:          `{"value":"2000000"}`,
+			requirements:     `{"amount":"1000000"}`,
+			expectedPayload:  "2000000",
+			expectedRequired: "1000000",
+			expectError:      false,
+		},
+		{
+			name:             "V1 amount takes precedence over value",
+			payload:          `{"amount":"3000000","value":"2000000"}`,
+			requirements:     `{"amount":"1000000"}`,
+			expectedPayload:  "3000000",
+			expectedRequired: "1000000",
+			expectError:      false,
+		},
+
+		// V2 format
+		{
+			name:             "V2 nested amount",
+			payload:          `{"t402Version":2,"payload":{"amount":"5000000"}}`,
+			requirements:     `{"amount":"3000000"}`,
+			expectedPayload:  "5000000",
+			expectedRequired: "3000000",
+			expectError:      false,
+		},
+		{
+			name:             "V2 nested value",
+			payload:          `{"t402Version":2,"payload":{"value":"4000000"}}`,
+			requirements:     `{"amount":"2000000"}`,
+			expectedPayload:  "4000000",
+			expectedRequired: "2000000",
+			expectError:      false,
+		},
+		{
+			name:             "V2 nested amount takes precedence over nested value",
+			payload:          `{"t402Version":2,"payload":{"amount":"6000000","value":"5000000"}}`,
+			requirements:     `{"amount":"3000000"}`,
+			expectedPayload:  "6000000",
+			expectedRequired: "3000000",
+			expectError:      false,
+		},
+		{
+			name:             "V2 falls back to top-level amount when nested is empty",
+			payload:          `{"t402Version":2,"payload":{},"amount":"7000000"}`,
+			requirements:     `{"amount":"4000000"}`,
+			expectedPayload:  "7000000",
+			expectedRequired: "4000000",
+			expectError:      false,
+		},
+
+		// Empty amounts
+		{
+			name:             "empty amounts yield zero big.Int",
+			payload:          `{}`,
+			requirements:     `{}`,
+			expectedPayload:  "0",
+			expectedRequired: "0",
+			expectError:      false,
+		},
+		{
+			name:             "only payload amount set",
+			payload:          `{"amount":"1000000"}`,
+			requirements:     `{}`,
+			expectedPayload:  "1000000",
+			expectedRequired: "0",
+			expectError:      false,
+		},
+		{
+			name:             "only required amount set",
+			payload:          `{}`,
+			requirements:     `{"amount":"500000"}`,
+			expectedPayload:  "0",
+			expectedRequired: "500000",
+			expectError:      false,
+		},
+
+		// Invalid amounts
+		{
+			name:         "invalid payload amount string",
+			payload:      `{"amount":"not_a_number"}`,
+			requirements: `{"amount":"1000000"}`,
+			expectError:  true,
+		},
+		{
+			name:         "invalid required amount string",
+			payload:      `{"amount":"1000000"}`,
+			requirements: `{"amount":"not_a_number"}`,
+			expectError:  true,
+		},
+		{
+			name:         "invalid payload JSON",
+			payload:      `{invalid`,
+			requirements: `{"amount":"1000000"}`,
+			expectError:  true,
+		},
+		{
+			name:         "invalid requirements JSON",
+			payload:      `{"amount":"1000000"}`,
+			requirements: `{invalid`,
+			expectError:  true,
+		},
+
+		// Large numbers
+		{
+			name:             "large amount",
+			payload:          `{"amount":"999999999999999999999"}`,
+			requirements:     `{"amount":"1"}`,
+			expectedPayload:  "999999999999999999999",
+			expectedRequired: "1",
+			expectError:      false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			payloadAmt, requiredAmt, err := extractAmounts(
+				json.RawMessage(tt.payload),
+				json.RawMessage(tt.requirements),
+			)
+
+			if tt.expectError {
+				if err == nil {
+					t.Errorf("expected error but got nil")
+				}
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			if payloadAmt == nil {
+				t.Fatal("expected payloadAmt to be non-nil")
+			}
+			if requiredAmt == nil {
+				t.Fatal("expected requiredAmt to be non-nil")
+			}
+
+			expectedPayload := new(big.Int)
+			if tt.expectedPayload != "" {
+				expectedPayload.SetString(tt.expectedPayload, 10)
+			}
+			expectedRequired := new(big.Int)
+			if tt.expectedRequired != "" {
+				expectedRequired.SetString(tt.expectedRequired, 10)
+			}
+
+			if payloadAmt.Cmp(expectedPayload) != 0 {
+				t.Errorf("payloadAmt = %s, expected %s", payloadAmt.String(), expectedPayload.String())
+			}
+			if requiredAmt.Cmp(expectedRequired) != 0 {
+				t.Errorf("requiredAmt = %s, expected %s", requiredAmt.String(), expectedRequired.String())
+			}
+		})
 	}
 }

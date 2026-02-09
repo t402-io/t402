@@ -3,12 +3,17 @@ package idempotency
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
+	"github.com/alicebob/miniredis/v2"
+	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/t402-io/t402/services/facilitator/internal/cache"
 )
 
 // ============== Mock Cache Client ==============
@@ -806,3 +811,470 @@ func TestMockCache_ConcurrentReads(t *testing.T) {
 		assert.Equal(t, "test-value", result)
 	}
 }
+
+// ============== Redis-backed tests for CheckAndCreate and Create ==============
+
+// newTestStoreClient creates a cache.Client backed by miniredis for testing
+func newTestStoreClient(t *testing.T) (*cache.Client, *miniredis.Miniredis) {
+	t.Helper()
+	mr, err := miniredis.Run()
+	if err != nil {
+		t.Fatalf("Failed to start miniredis: %v", err)
+	}
+	rc := redis.NewClient(&redis.Options{Addr: mr.Addr()})
+	return cache.NewClientFromRedis(rc), mr
+}
+
+func TestCheckAndCreate_NewEntry_Redis(t *testing.T) {
+	cacheClient, mr := newTestStoreClient(t)
+	defer mr.Close()
+
+	store := NewStore(cacheClient, time.Hour)
+	ctx := context.Background()
+
+	result, err := store.CheckAndCreate(ctx, "new-key-1", "hash-abc")
+	if err != nil {
+		t.Fatalf("CheckAndCreate returned unexpected error: %v", err)
+	}
+	if result == nil {
+		t.Fatal("CheckAndCreate returned nil result")
+	}
+	if !result.Created {
+		t.Error("expected Created to be true for new entry")
+	}
+	if result.Entry != nil {
+		t.Error("expected Entry to be nil for new entry")
+	}
+}
+
+func TestCheckAndCreate_ExistingEntry_Redis(t *testing.T) {
+	cacheClient, mr := newTestStoreClient(t)
+	defer mr.Close()
+
+	store := NewStore(cacheClient, time.Hour)
+	ctx := context.Background()
+
+	// First call creates the entry
+	result1, err := store.CheckAndCreate(ctx, "existing-key-1", "hash-xyz")
+	if err != nil {
+		t.Fatalf("first CheckAndCreate returned error: %v", err)
+	}
+	if !result1.Created {
+		t.Fatal("first call should have created the entry")
+	}
+
+	// Second call with the same key and hash should return existing entry
+	result2, err := store.CheckAndCreate(ctx, "existing-key-1", "hash-xyz")
+	if err != nil {
+		t.Fatalf("second CheckAndCreate returned error: %v", err)
+	}
+	if result2.Created {
+		t.Error("second call should not have created a new entry")
+	}
+	if result2.Entry == nil {
+		t.Fatal("second call should return the existing entry")
+	}
+	if result2.Entry.Key != "existing-key-1" {
+		t.Errorf("expected entry key 'existing-key-1', got %q", result2.Entry.Key)
+	}
+	if result2.Entry.PayloadHash != "hash-xyz" {
+		t.Errorf("expected payload hash 'hash-xyz', got %q", result2.Entry.PayloadHash)
+	}
+	if result2.Entry.Status != StatusPending {
+		t.Errorf("expected status %q, got %q", StatusPending, result2.Entry.Status)
+	}
+}
+
+func TestCheckAndCreate_PayloadMismatch_Redis(t *testing.T) {
+	cacheClient, mr := newTestStoreClient(t)
+	defer mr.Close()
+
+	store := NewStore(cacheClient, time.Hour)
+	ctx := context.Background()
+
+	// First call creates entry with hash1
+	_, err := store.CheckAndCreate(ctx, "mismatch-key-1", "hash-one")
+	if err != nil {
+		t.Fatalf("first CheckAndCreate returned error: %v", err)
+	}
+
+	// Second call with different hash should return ErrPayloadMismatch
+	_, err = store.CheckAndCreate(ctx, "mismatch-key-1", "hash-two")
+	if err == nil {
+		t.Fatal("expected ErrPayloadMismatch, got nil")
+	}
+	if !errors.Is(err, ErrPayloadMismatch) {
+		t.Errorf("expected ErrPayloadMismatch, got: %v", err)
+	}
+}
+
+func TestCheckAndCreate_NilCache_Redis(t *testing.T) {
+	store := NewStore(nil, time.Hour)
+	ctx := context.Background()
+
+	result, err := store.CheckAndCreate(ctx, "any-key", "any-hash")
+	if err != nil {
+		t.Fatalf("CheckAndCreate with nil cache returned error: %v", err)
+	}
+	if result == nil {
+		t.Fatal("expected non-nil result")
+	}
+	if !result.Created {
+		t.Error("expected Created=true when cache is nil (passthrough)")
+	}
+	if result.Entry != nil {
+		t.Error("expected Entry=nil when cache is nil (passthrough)")
+	}
+}
+
+func TestCheckAndCreate_EmptyKey_Redis(t *testing.T) {
+	cacheClient, mr := newTestStoreClient(t)
+	defer mr.Close()
+
+	store := NewStore(cacheClient, time.Hour)
+	ctx := context.Background()
+
+	result, err := store.CheckAndCreate(ctx, "", "any-hash")
+	if err != nil {
+		t.Fatalf("CheckAndCreate with empty key returned error: %v", err)
+	}
+	if result == nil {
+		t.Fatal("expected non-nil result")
+	}
+	if !result.Created {
+		t.Error("expected Created=true when key is empty (passthrough)")
+	}
+	if result.Entry != nil {
+		t.Error("expected Entry=nil when key is empty (passthrough)")
+	}
+}
+
+func TestCheckAndCreate_Lifecycle_Redis(t *testing.T) {
+	cacheClient, mr := newTestStoreClient(t)
+	defer mr.Close()
+
+	store := NewStore(cacheClient, time.Hour)
+	ctx := context.Background()
+
+	idempotencyKey := "lifecycle-key-1"
+	payloadHash := "lifecycle-hash"
+
+	// Step 1: CheckAndCreate creates a new pending entry
+	result1, err := store.CheckAndCreate(ctx, idempotencyKey, payloadHash)
+	if err != nil {
+		t.Fatalf("CheckAndCreate step 1 returned error: %v", err)
+	}
+	if !result1.Created {
+		t.Fatal("step 1 should have created the entry")
+	}
+
+	// Step 2: Complete the entry
+	completeResult := []byte(`{"txHash":"0xdeadbeef","status":"settled"}`)
+	err = store.Complete(ctx, idempotencyKey, completeResult)
+	if err != nil {
+		t.Fatalf("Complete returned error: %v", err)
+	}
+
+	// Step 3: CheckAndCreate again should return the completed entry
+	result2, err := store.CheckAndCreate(ctx, idempotencyKey, payloadHash)
+	if err != nil {
+		t.Fatalf("CheckAndCreate step 3 returned error: %v", err)
+	}
+	if result2.Created {
+		t.Error("step 3 should not create a new entry")
+	}
+	if result2.Entry == nil {
+		t.Fatal("step 3 should return the existing completed entry")
+	}
+	if result2.Entry.Status != StatusCompleted {
+		t.Errorf("expected status %q, got %q", StatusCompleted, result2.Entry.Status)
+	}
+	if string(result2.Entry.Result) != string(completeResult) {
+		t.Errorf("expected result %q, got %q", string(completeResult), string(result2.Entry.Result))
+	}
+}
+
+func TestCheckAndCreate_ConcurrentAccess_Redis(t *testing.T) {
+	cacheClient, mr := newTestStoreClient(t)
+	defer mr.Close()
+
+	store := NewStore(cacheClient, time.Hour)
+	ctx := context.Background()
+
+	idempotencyKey := "concurrent-key-1"
+	payloadHash := "concurrent-hash"
+
+	const goroutines = 10
+	var createdCount atomic.Int32
+	var wg sync.WaitGroup
+
+	for i := 0; i < goroutines; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			result, err := store.CheckAndCreate(ctx, idempotencyKey, payloadHash)
+			if err != nil {
+				t.Errorf("CheckAndCreate returned error: %v", err)
+				return
+			}
+			if result.Created {
+				createdCount.Add(1)
+			}
+		}()
+	}
+
+	wg.Wait()
+
+	count := createdCount.Load()
+	if count != 1 {
+		t.Errorf("expected exactly 1 goroutine to get Created=true, got %d", count)
+	}
+}
+
+func TestStore_Create_DuplicateRequest_Redis(t *testing.T) {
+	cacheClient, mr := newTestStoreClient(t)
+	defer mr.Close()
+
+	store := NewStore(cacheClient, time.Hour)
+	ctx := context.Background()
+
+	idempotencyKey := "create-dup-key"
+	payloadHash := "create-dup-hash"
+
+	// First Create should succeed
+	err := store.Create(ctx, idempotencyKey, payloadHash)
+	if err != nil {
+		t.Fatalf("first Create returned error: %v", err)
+	}
+
+	// Second Create with the same key should return ErrDuplicateRequest
+	err = store.Create(ctx, idempotencyKey, payloadHash)
+	if err == nil {
+		t.Fatal("expected ErrDuplicateRequest, got nil")
+	}
+	if !errors.Is(err, ErrDuplicateRequest) {
+		t.Errorf("expected ErrDuplicateRequest, got: %v", err)
+	}
+
+	// Verify the stored entry is the original one
+	entry, checkErr := store.Check(ctx, idempotencyKey, payloadHash)
+	if checkErr != nil {
+		t.Fatalf("Check returned error: %v", checkErr)
+	}
+	if entry == nil {
+		t.Fatal("Check should return the existing entry")
+	}
+	if entry.Key != idempotencyKey {
+		t.Errorf("expected key %q, got %q", idempotencyKey, entry.Key)
+	}
+	if entry.PayloadHash != payloadHash {
+		t.Errorf("expected payload hash %q, got %q", payloadHash, entry.PayloadHash)
+	}
+	if entry.Status != StatusPending {
+		t.Errorf("expected status %q, got %q", StatusPending, entry.Status)
+	}
+}
+
+func TestStore_Create_NilCache_Redis(t *testing.T) {
+	store := NewStore(nil, time.Hour)
+	ctx := context.Background()
+
+	err := store.Create(ctx, "any-key", "any-hash")
+	if err != nil {
+		t.Fatalf("Create with nil cache returned error: %v", err)
+	}
+
+	// Calling again should also succeed (no tracking without cache)
+	err = store.Create(ctx, "any-key", "any-hash")
+	if err != nil {
+		t.Fatalf("second Create with nil cache returned error: %v", err)
+	}
+}
+
+// ============== Redis-backed tests for Check, Complete, and Fail ==============
+
+func TestCheck_ExistingEntry_Redis(t *testing.T) {
+	cacheClient, mr := newTestStoreClient(t)
+	defer mr.Close()
+
+	store := NewStore(cacheClient, time.Hour)
+	ctx := context.Background()
+
+	// Create an entry first
+	err := store.Create(ctx, "check-existing", "check-hash")
+	if err != nil {
+		t.Fatalf("Create returned error: %v", err)
+	}
+
+	// Check should find it
+	entry, err := store.Check(ctx, "check-existing", "check-hash")
+	if err != nil {
+		t.Fatalf("Check returned error: %v", err)
+	}
+	if entry == nil {
+		t.Fatal("Check should return the existing entry")
+	}
+	if entry.Key != "check-existing" {
+		t.Errorf("expected key 'check-existing', got %q", entry.Key)
+	}
+	if entry.Status != StatusPending {
+		t.Errorf("expected status %q, got %q", StatusPending, entry.Status)
+	}
+}
+
+func TestCheck_PayloadMismatch_Redis(t *testing.T) {
+	cacheClient, mr := newTestStoreClient(t)
+	defer mr.Close()
+
+	store := NewStore(cacheClient, time.Hour)
+	ctx := context.Background()
+
+	// Create entry with hash1
+	err := store.Create(ctx, "mismatch-check", "hash-original")
+	if err != nil {
+		t.Fatalf("Create returned error: %v", err)
+	}
+
+	// Check with different hash
+	_, err = store.Check(ctx, "mismatch-check", "hash-different")
+	if err == nil {
+		t.Fatal("expected ErrPayloadMismatch, got nil")
+	}
+	if !errors.Is(err, ErrPayloadMismatch) {
+		t.Errorf("expected ErrPayloadMismatch, got: %v", err)
+	}
+}
+
+func TestCheck_NotFound_Redis(t *testing.T) {
+	cacheClient, mr := newTestStoreClient(t)
+	defer mr.Close()
+
+	store := NewStore(cacheClient, time.Hour)
+	ctx := context.Background()
+
+	entry, err := store.Check(ctx, "nonexistent-key", "any-hash")
+	if err != nil {
+		t.Fatalf("Check returned error for non-existent key: %v", err)
+	}
+	if entry != nil {
+		t.Error("Check should return nil for non-existent key")
+	}
+}
+
+func TestComplete_Redis(t *testing.T) {
+	cacheClient, mr := newTestStoreClient(t)
+	defer mr.Close()
+
+	store := NewStore(cacheClient, time.Hour)
+	ctx := context.Background()
+
+	// Create a pending entry
+	err := store.Create(ctx, "complete-key", "complete-hash")
+	if err != nil {
+		t.Fatalf("Create returned error: %v", err)
+	}
+
+	// Complete it
+	resultData := []byte(`{"txHash":"0x123","status":"settled"}`)
+	err = store.Complete(ctx, "complete-key", resultData)
+	if err != nil {
+		t.Fatalf("Complete returned error: %v", err)
+	}
+
+	// Verify it's completed
+	entry, err := store.Check(ctx, "complete-key", "complete-hash")
+	if err != nil {
+		t.Fatalf("Check returned error: %v", err)
+	}
+	if entry == nil {
+		t.Fatal("Check should return the completed entry")
+	}
+	if entry.Status != StatusCompleted {
+		t.Errorf("expected status %q, got %q", StatusCompleted, entry.Status)
+	}
+	if string(entry.Result) != string(resultData) {
+		t.Errorf("expected result %q, got %q", string(resultData), string(entry.Result))
+	}
+}
+
+func TestFail_Redis(t *testing.T) {
+	cacheClient, mr := newTestStoreClient(t)
+	defer mr.Close()
+
+	store := NewStore(cacheClient, time.Hour)
+	ctx := context.Background()
+
+	// Create a pending entry
+	err := store.Create(ctx, "fail-key", "fail-hash")
+	if err != nil {
+		t.Fatalf("Create returned error: %v", err)
+	}
+
+	// Fail it
+	err = store.Fail(ctx, "fail-key", "transaction reverted")
+	if err != nil {
+		t.Fatalf("Fail returned error: %v", err)
+	}
+
+	// Verify it's failed
+	entry, err := store.Check(ctx, "fail-key", "fail-hash")
+	if err != nil {
+		t.Fatalf("Check returned error: %v", err)
+	}
+	if entry == nil {
+		t.Fatal("Check should return the failed entry")
+	}
+	if entry.Status != StatusFailed {
+		t.Errorf("expected status %q, got %q", StatusFailed, entry.Status)
+	}
+	if entry.Error != "transaction reverted" {
+		t.Errorf("expected error 'transaction reverted', got %q", entry.Error)
+	}
+}
+
+func TestCheckAndCreate_FailedThenRetry_Redis(t *testing.T) {
+	cacheClient, mr := newTestStoreClient(t)
+	defer mr.Close()
+
+	store := NewStore(cacheClient, time.Hour)
+	ctx := context.Background()
+
+	idempotencyKey := "fail-retry-key"
+	payloadHash := "fail-retry-hash"
+
+	// Step 1: Create entry
+	result1, err := store.CheckAndCreate(ctx, idempotencyKey, payloadHash)
+	if err != nil {
+		t.Fatalf("CheckAndCreate step 1 returned error: %v", err)
+	}
+	if !result1.Created {
+		t.Fatal("step 1 should create the entry")
+	}
+
+	// Step 2: Fail the entry
+	err = store.Fail(ctx, idempotencyKey, "temporary error")
+	if err != nil {
+		t.Fatalf("Fail returned error: %v", err)
+	}
+
+	// Step 3: CheckAndCreate again returns the failed entry
+	result2, err := store.CheckAndCreate(ctx, idempotencyKey, payloadHash)
+	if err != nil {
+		t.Fatalf("CheckAndCreate step 3 returned error: %v", err)
+	}
+	if result2.Created {
+		t.Error("step 3 should not create a new entry")
+	}
+	if result2.Entry == nil {
+		t.Fatal("step 3 should return the existing failed entry")
+	}
+	if result2.Entry.Status != StatusFailed {
+		t.Errorf("expected status %q, got %q", StatusFailed, result2.Entry.Status)
+	}
+	if result2.Entry.Error != "temporary error" {
+		t.Errorf("expected error 'temporary error', got %q", result2.Entry.Error)
+	}
+}
+
+// Ensure unused imports are referenced to avoid compile errors.
+var _ = json.Marshal

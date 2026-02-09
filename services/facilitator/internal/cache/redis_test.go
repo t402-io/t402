@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
@@ -661,4 +662,476 @@ func TestClient_ConcurrentOperations(t *testing.T) {
 	if value != "100" {
 		t.Errorf("Expected '100', got '%s'", value)
 	}
+}
+
+func TestValidateCacheKey(t *testing.T) {
+	tests := []struct {
+		name    string
+		key     string
+		wantErr string
+	}{
+		{
+			name:    "empty string",
+			key:     "",
+			wantErr: "cache key cannot be empty",
+		},
+		{
+			name:    "valid key with colons underscores hyphens dots",
+			key:     "my-key:123_test.value",
+			wantErr: "",
+		},
+		{
+			name:    "key with spaces",
+			key:     "my key",
+			wantErr: "invalid characters",
+		},
+		{
+			name:    "key with newlines",
+			key:     "my\nkey",
+			wantErr: "invalid characters",
+		},
+		{
+			name:    "key with null bytes",
+			key:     "my\x00key",
+			wantErr: "invalid characters",
+		},
+		{
+			name:    "key at max length",
+			key:     strings.Repeat("a", 1024),
+			wantErr: "",
+		},
+		{
+			name:    "key over max length",
+			key:     strings.Repeat("a", 1025),
+			wantErr: "exceeds maximum length",
+		},
+		{
+			name:    "key with special chars",
+			key:     "key@#$",
+			wantErr: "invalid characters",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := ValidateCacheKey(tt.key)
+			if tt.wantErr == "" {
+				if err != nil {
+					t.Errorf("Expected no error, got: %v", err)
+				}
+			} else {
+				if err == nil {
+					t.Errorf("Expected error containing %q, got nil", tt.wantErr)
+					return
+				}
+				if !strings.Contains(err.Error(), tt.wantErr) {
+					t.Errorf("Expected error containing %q, got: %v", tt.wantErr, err)
+				}
+			}
+		})
+	}
+}
+
+func TestSanitizeKey(t *testing.T) {
+	t.Run("basic sanitization with prefix", func(t *testing.T) {
+		result := SanitizeKey("prefix:", "some untrusted input")
+		if !strings.HasPrefix(result, "prefix:") {
+			t.Errorf("Expected result to start with 'prefix:', got %q", result)
+		}
+		// prefix (7 chars) + sha256 hex (64 chars) = 71 chars
+		if len(result) != 7+64 {
+			t.Errorf("Expected length %d, got %d", 7+64, len(result))
+		}
+	})
+
+	t.Run("deterministic same input same output", func(t *testing.T) {
+		result1 := SanitizeKey("p:", "input")
+		result2 := SanitizeKey("p:", "input")
+		if result1 != result2 {
+			t.Errorf("Same input produced different outputs: %q vs %q", result1, result2)
+		}
+	})
+
+	t.Run("different inputs produce different outputs", func(t *testing.T) {
+		result1 := SanitizeKey("p:", "input1")
+		result2 := SanitizeKey("p:", "input2")
+		if result1 == result2 {
+			t.Errorf("Different inputs produced same output: %q", result1)
+		}
+	})
+
+	t.Run("empty prefix works", func(t *testing.T) {
+		result := SanitizeKey("", "test")
+		// Should be just the 64-char hex hash
+		if len(result) != 64 {
+			t.Errorf("Expected length 64 with empty prefix, got %d", len(result))
+		}
+	})
+
+	t.Run("empty input produces consistent hash", func(t *testing.T) {
+		result1 := SanitizeKey("k:", "")
+		result2 := SanitizeKey("k:", "")
+		if result1 != result2 {
+			t.Errorf("Empty input produced inconsistent hashes: %q vs %q", result1, result2)
+		}
+		if len(result1) != 2+64 {
+			t.Errorf("Expected length %d, got %d", 2+64, len(result1))
+		}
+	})
+
+	t.Run("result always passes ValidateCacheKey", func(t *testing.T) {
+		inputs := []string{
+			"normal",
+			"has spaces and @#$ symbols",
+			"newline\n\ttabs",
+			"\x00null\x00bytes",
+			strings.Repeat("x", 2000),
+			"",
+		}
+		for _, input := range inputs {
+			result := SanitizeKey("safe:", input)
+			if err := ValidateCacheKey(result); err != nil {
+				t.Errorf("SanitizeKey(%q) produced invalid key %q: %v", input, result, err)
+			}
+		}
+	})
+}
+
+func TestSetNX(t *testing.T) {
+	t.Run("set new key returns true", func(t *testing.T) {
+		client, mr := newTestClient(t)
+		defer mr.Close()
+		defer client.Close()
+
+		ctx := context.Background()
+
+		ok, err := client.SetNX(ctx, "nx-key", "value1", 0)
+		if err != nil {
+			t.Fatalf("SetNX failed: %v", err)
+		}
+		if !ok {
+			t.Error("Expected SetNX to return true for new key")
+		}
+
+		// Verify value was set
+		val, err := client.Get(ctx, "nx-key")
+		if err != nil {
+			t.Fatalf("Get failed: %v", err)
+		}
+		if val != "value1" {
+			t.Errorf("Expected 'value1', got %q", val)
+		}
+	})
+
+	t.Run("set existing key returns false", func(t *testing.T) {
+		client, mr := newTestClient(t)
+		defer mr.Close()
+		defer client.Close()
+
+		ctx := context.Background()
+
+		// Set key first
+		err := client.Set(ctx, "nx-key", "original", 0)
+		if err != nil {
+			t.Fatalf("Set failed: %v", err)
+		}
+
+		// SetNX should return false since key exists
+		ok, err := client.SetNX(ctx, "nx-key", "new-value", 0)
+		if err != nil {
+			t.Fatalf("SetNX failed: %v", err)
+		}
+		if ok {
+			t.Error("Expected SetNX to return false for existing key")
+		}
+
+		// Value should remain the original
+		val, err := client.Get(ctx, "nx-key")
+		if err != nil {
+			t.Fatalf("Get failed: %v", err)
+		}
+		if val != "original" {
+			t.Errorf("Expected 'original', got %q", val)
+		}
+	})
+
+	t.Run("set with TTL works", func(t *testing.T) {
+		client, mr := newTestClient(t)
+		defer mr.Close()
+		defer client.Close()
+
+		ctx := context.Background()
+
+		ok, err := client.SetNX(ctx, "nx-ttl-key", "value", 2*time.Second)
+		if err != nil {
+			t.Fatalf("SetNX failed: %v", err)
+		}
+		if !ok {
+			t.Error("Expected SetNX to return true for new key")
+		}
+
+		// Key should exist
+		val, err := client.Get(ctx, "nx-ttl-key")
+		if err != nil {
+			t.Fatalf("Get failed: %v", err)
+		}
+		if val != "value" {
+			t.Errorf("Expected 'value', got %q", val)
+		}
+
+		// Fast-forward past TTL
+		mr.FastForward(3 * time.Second)
+
+		// Key should be expired
+		_, err = client.Get(ctx, "nx-ttl-key")
+		if err == nil {
+			t.Error("Expected error for expired key")
+		}
+	})
+}
+
+func TestGetSet(t *testing.T) {
+	t.Run("get and set atomically", func(t *testing.T) {
+		client, mr := newTestClient(t)
+		defer mr.Close()
+		defer client.Close()
+
+		ctx := context.Background()
+
+		// Set initial value
+		err := client.Set(ctx, "gs-key", "old-value", 0)
+		if err != nil {
+			t.Fatalf("Set failed: %v", err)
+		}
+
+		// GetSet should return old value and store new value
+		oldVal, err := client.GetSet(ctx, "gs-key", "new-value")
+		if err != nil {
+			t.Fatalf("GetSet failed: %v", err)
+		}
+		if oldVal != "old-value" {
+			t.Errorf("Expected old value 'old-value', got %q", oldVal)
+		}
+
+		// Verify new value is stored
+		newVal, err := client.Get(ctx, "gs-key")
+		if err != nil {
+			t.Fatalf("Get failed: %v", err)
+		}
+		if newVal != "new-value" {
+			t.Errorf("Expected new value 'new-value', got %q", newVal)
+		}
+	})
+
+	t.Run("get set on non-existent key returns redis.Nil", func(t *testing.T) {
+		client, mr := newTestClient(t)
+		defer mr.Close()
+		defer client.Close()
+
+		ctx := context.Background()
+
+		_, err := client.GetSet(ctx, "non-existent", "value")
+		if err != redis.Nil {
+			t.Errorf("Expected redis.Nil error, got: %v", err)
+		}
+
+		// The new value should still be set
+		val, err := client.Get(ctx, "non-existent")
+		if err != nil {
+			t.Fatalf("Get failed: %v", err)
+		}
+		if val != "value" {
+			t.Errorf("Expected 'value', got %q", val)
+		}
+	})
+}
+
+func TestEval(t *testing.T) {
+	t.Run("simple script return 1", func(t *testing.T) {
+		client, mr := newTestClient(t)
+		defer mr.Close()
+		defer client.Close()
+
+		ctx := context.Background()
+
+		result, err := client.Eval(ctx, "return 1", nil)
+		if err != nil {
+			t.Fatalf("Eval failed: %v", err)
+		}
+		// Redis returns integers as int64
+		val, ok := result.(int64)
+		if !ok {
+			t.Fatalf("Expected int64 result, got %T", result)
+		}
+		if val != 1 {
+			t.Errorf("Expected 1, got %d", val)
+		}
+	})
+
+	t.Run("script with keys and args", func(t *testing.T) {
+		client, mr := newTestClient(t)
+		defer mr.Close()
+		defer client.Close()
+
+		ctx := context.Background()
+
+		// Set a key first
+		err := client.Set(ctx, "eval-key", "hello", 0)
+		if err != nil {
+			t.Fatalf("Set failed: %v", err)
+		}
+
+		// Script that gets a key and appends an argument
+		script := `
+			local val = redis.call('GET', KEYS[1])
+			return val .. ARGV[1]
+		`
+		result, err := client.Eval(ctx, script, []string{"eval-key"}, " world")
+		if err != nil {
+			t.Fatalf("Eval failed: %v", err)
+		}
+		strVal, ok := result.(string)
+		if !ok {
+			t.Fatalf("Expected string result, got %T", result)
+		}
+		if strVal != "hello world" {
+			t.Errorf("Expected 'hello world', got %q", strVal)
+		}
+	})
+
+	t.Run("error on bad script", func(t *testing.T) {
+		client, mr := newTestClient(t)
+		defer mr.Close()
+		defer client.Close()
+
+		ctx := context.Background()
+
+		_, err := client.Eval(ctx, "this is not valid lua", nil)
+		if err == nil {
+			t.Error("Expected error for invalid Lua script")
+		}
+	})
+}
+
+func TestScriptLoad_And_EvalSha(t *testing.T) {
+	client, mr := newTestClient(t)
+	defer mr.Close()
+	defer client.Close()
+
+	ctx := context.Background()
+
+	// Load a script
+	script := "return 42"
+	sha, err := client.ScriptLoad(ctx, script)
+	if err != nil {
+		t.Fatalf("ScriptLoad failed: %v", err)
+	}
+	if sha == "" {
+		t.Fatal("Expected non-empty SHA")
+	}
+
+	// Execute using the SHA
+	result, err := client.EvalSha(ctx, sha, nil)
+	if err != nil {
+		t.Fatalf("EvalSha failed: %v", err)
+	}
+	val, ok := result.(int64)
+	if !ok {
+		t.Fatalf("Expected int64 result, got %T", result)
+	}
+	if val != 42 {
+		t.Errorf("Expected 42, got %d", val)
+	}
+
+	// EvalSha with wrong SHA should fail
+	_, err = client.EvalSha(ctx, "0000000000000000000000000000000000000000", nil)
+	if err == nil {
+		t.Error("Expected error for invalid SHA")
+	}
+}
+
+func TestNewClientFromRedis(t *testing.T) {
+	t.Run("creates client from redis.Client", func(t *testing.T) {
+		mr, err := miniredis.Run()
+		if err != nil {
+			t.Fatalf("Failed to start miniredis: %v", err)
+		}
+		defer mr.Close()
+
+		rc := redis.NewClient(&redis.Options{
+			Addr: mr.Addr(),
+		})
+		defer rc.Close()
+
+		client := NewClientFromRedis(rc)
+		if client == nil {
+			t.Fatal("Expected non-nil client")
+		}
+	})
+
+	t.Run("operations work", func(t *testing.T) {
+		mr, err := miniredis.Run()
+		if err != nil {
+			t.Fatalf("Failed to start miniredis: %v", err)
+		}
+		defer mr.Close()
+
+		rc := redis.NewClient(&redis.Options{
+			Addr: mr.Addr(),
+		})
+		defer rc.Close()
+
+		client := NewClientFromRedis(rc)
+		ctx := context.Background()
+
+		// Ping
+		if err := client.Ping(ctx); err != nil {
+			t.Fatalf("Ping failed: %v", err)
+		}
+
+		// Set
+		if err := client.Set(ctx, "from-redis-key", "from-redis-value", time.Minute); err != nil {
+			t.Fatalf("Set failed: %v", err)
+		}
+
+		// Get
+		val, err := client.Get(ctx, "from-redis-key")
+		if err != nil {
+			t.Fatalf("Get failed: %v", err)
+		}
+		if val != "from-redis-value" {
+			t.Errorf("Expected 'from-redis-value', got %q", val)
+		}
+
+		// Exists
+		exists, err := client.Exists(ctx, "from-redis-key")
+		if err != nil {
+			t.Fatalf("Exists failed: %v", err)
+		}
+		if !exists {
+			t.Error("Expected key to exist")
+		}
+
+		// Delete
+		if err := client.Delete(ctx, "from-redis-key"); err != nil {
+			t.Fatalf("Delete failed: %v", err)
+		}
+
+		exists, err = client.Exists(ctx, "from-redis-key")
+		if err != nil {
+			t.Fatalf("Exists failed: %v", err)
+		}
+		if exists {
+			t.Error("Expected key to not exist after delete")
+		}
+
+		// Incr
+		count, err := client.Incr(ctx, "from-redis-counter")
+		if err != nil {
+			t.Fatalf("Incr failed: %v", err)
+		}
+		if count != 1 {
+			t.Errorf("Expected count 1, got %d", count)
+		}
+	})
 }
