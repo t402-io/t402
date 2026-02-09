@@ -118,6 +118,14 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- Spring Test (for MockServerWebExchange in WebFlux tests) -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+      <version>6.2.3</version>
+      <scope>test</scope>
+    </dependency>
+
     <!-- Test -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
