@@ -100,7 +100,14 @@ KNOWN_TOKENS = {
             "name": "TetherToken",
             "decimals": 6,
             "version": "1",
-        }
+        },
+        {
+            "human_name": "usat",
+            "address": "0x07041776f5007aca2a54844f50503a18a72a8b68",
+            "name": "Tether America USD",
+            "decimals": 6,
+            "version": "1",
+        },
     ],
     # Arbitrum One
     "42161": [
