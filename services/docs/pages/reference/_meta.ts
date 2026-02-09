@@ -16,6 +16,7 @@ export default {
   tezos: '@t402/tezos',
   polkadot: '@t402/polkadot',
   stacks: '@t402/stacks',
+  cosmos: '@t402/cosmos',
   extensions: '@t402/extensions',
   cli: '@t402/cli',
   wdk: '@t402/wdk',
