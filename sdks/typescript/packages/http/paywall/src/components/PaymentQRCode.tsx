@@ -28,59 +28,226 @@ export interface PaymentQRCodeProps {
 }
 
 /**
- * Simple QR Code matrix generator
- * Generates a QR code matrix from input data
+ * QR Code matrix generator using byte-mode encoding with Level L error correction.
+ *
+ * Supports QR versions 1-6 (data up to 134 bytes). For longer data, the input
+ * is truncated. Uses mask pattern 0 (checkerboard) for simplicity.
  */
 function generateQRMatrix(data: string): boolean[][] {
-  // This is a simplified QR code generator for display purposes
-  // In production, you might want to use a proper library like 'qrcode'
+  // Version capacities for byte mode, Level L error correction
+  const versionCapacities = [
+    { version: 1, size: 21, dataBytes: 17, ecBytes: 7, ecBlockCount: 1 },
+    { version: 2, size: 25, dataBytes: 32, ecBytes: 10, ecBlockCount: 1 },
+    { version: 3, size: 29, dataBytes: 53, ecBytes: 15, ecBlockCount: 1 },
+    { version: 4, size: 33, dataBytes: 78, ecBytes: 20, ecBlockCount: 1 },
+    { version: 5, size: 37, dataBytes: 106, ecBytes: 26, ecBlockCount: 1 },
+    { version: 6, size: 41, dataBytes: 134, ecBytes: 18, ecBlockCount: 2 },
+  ];
 
-  // For now, we'll generate a placeholder pattern
-  // The actual implementation would need a proper QR encoding algorithm
-  const size = Math.max(21, Math.ceil(Math.sqrt(data.length * 8)) + 10);
-  const matrix: boolean[][] = [];
+  // Convert data to bytes (UTF-8)
+  const encoder = new TextEncoder();
+  let dataBytes = encoder.encode(data);
 
-  // Create empty matrix
-  for (let i = 0; i < size; i++) {
-    matrix[i] = new Array(size).fill(false);
+  // Select smallest version that fits
+  let cfg = versionCapacities[versionCapacities.length - 1];
+  for (const v of versionCapacities) {
+    if (dataBytes.length <= v.dataBytes) {
+      cfg = v;
+      break;
+    }
   }
 
-  // Add finder patterns (the three corner squares)
-  const addFinderPattern = (startX: number, startY: number) => {
-    for (let y = 0; y < 7; y++) {
-      for (let x = 0; x < 7; x++) {
-        const isOuter = y === 0 || y === 6 || x === 0 || x === 6;
-        const isInner = y >= 2 && y <= 4 && x >= 2 && x <= 4;
-        matrix[startY + y][startX + x] = isOuter || isInner;
+  // Truncate if still too long
+  if (dataBytes.length > cfg.dataBytes) {
+    dataBytes = dataBytes.slice(0, cfg.dataBytes);
+  }
+
+  const size = cfg.size;
+  const matrix: boolean[][] = Array.from({ length: size }, () => new Array(size).fill(false));
+  const reserved: boolean[][] = Array.from({ length: size }, () => new Array(size).fill(false));
+
+  // --- Place function patterns ---
+
+  const setModule = (y: number, x: number, val: boolean, reserve = true) => {
+    if (y >= 0 && y < size && x >= 0 && x < size) {
+      matrix[y][x] = val;
+      if (reserve) reserved[y][x] = true;
+    }
+  };
+
+  // Finder patterns
+  const addFinder = (cy: number, cx: number) => {
+    for (let dy = -4; dy <= 4; dy++) {
+      for (let dx = -4; dx <= 4; dx++) {
+        const y = cy + dy;
+        const x = cx + dx;
+        if (y < 0 || y >= size || x < 0 || x >= size) continue;
+        const adx = Math.abs(dx);
+        const ady = Math.abs(dy);
+        const ring = Math.max(adx, ady);
+        setModule(y, x, ring !== 3 && ring !== 4);
       }
     }
   };
 
-  addFinderPattern(0, 0);
-  addFinderPattern(size - 7, 0);
-  addFinderPattern(0, size - 7);
+  addFinder(3, 3);
+  addFinder(3, size - 4);
+  addFinder(size - 4, 3);
 
-  // Add timing patterns
+  // Separators (already handled by finder's ring 3/4 being false)
+
+  // Timing patterns
   for (let i = 8; i < size - 8; i++) {
-    matrix[6][i] = i % 2 === 0;
-    matrix[i][6] = i % 2 === 0;
+    setModule(6, i, i % 2 === 0);
+    setModule(i, 6, i % 2 === 0);
   }
 
-  // Add data pattern (simplified - uses hash of data)
-  let hash = 0;
-  for (let i = 0; i < data.length; i++) {
-    hash = ((hash << 5) - hash + data.charCodeAt(i)) | 0;
-  }
-
-  // Fill in data area with pseudo-random pattern based on data
-  for (let y = 9; y < size - 9; y++) {
-    for (let x = 9; x < size - 9; x++) {
-      if (x !== 6 && y !== 6) {
-        const seed = (hash + x * 31 + y * 17 + data.charCodeAt((x + y) % data.length)) | 0;
-        matrix[y][x] = seed % 3 === 0;
+  // Alignment pattern (version >= 2)
+  if (cfg.version >= 2) {
+    const alignPos = size - 7;
+    for (let dy = -2; dy <= 2; dy++) {
+      for (let dx = -2; dx <= 2; dx++) {
+        const ring = Math.max(Math.abs(dx), Math.abs(dy));
+        setModule(alignPos + dy, alignPos + dx, ring !== 1);
       }
     }
   }
+
+  // Reserve format info areas
+  for (let i = 0; i < 8; i++) {
+    reserved[8][i] = true;
+    reserved[i][8] = true;
+    reserved[8][size - 1 - i] = true;
+    reserved[size - 1 - i][8] = true;
+  }
+  reserved[8][8] = true;
+  // Dark module
+  setModule(size - 8, 8, true);
+
+  // --- Encode data ---
+
+  // Build data codewords: mode=0100 (byte), char count, data, terminator, padding
+  const totalDataCodewords = cfg.dataBytes;
+  const bits: number[] = [];
+
+  const pushBits = (val: number, count: number) => {
+    for (let i = count - 1; i >= 0; i--) bits.push((val >> i) & 1);
+  };
+
+  pushBits(0b0100, 4); // Byte mode indicator
+  pushBits(dataBytes.length, cfg.version >= 10 ? 16 : 8); // Character count
+  for (const b of dataBytes) pushBits(b, 8);
+  pushBits(0, Math.min(4, totalDataCodewords * 8 - bits.length)); // Terminator
+
+  // Pad to byte boundary
+  while (bits.length % 8 !== 0) bits.push(0);
+
+  // Pad with alternating 0xEC, 0x11
+  const padBytes = [0xec, 0x11];
+  let padIdx = 0;
+  while (bits.length < totalDataCodewords * 8) {
+    pushBits(padBytes[padIdx % 2], 8);
+    padIdx++;
+  }
+
+  // Convert bits to codewords
+  const codewords: number[] = [];
+  for (let i = 0; i < bits.length; i += 8) {
+    let byte = 0;
+    for (let j = 0; j < 8; j++) byte = (byte << 1) | (bits[i + j] || 0);
+    codewords.push(byte);
+  }
+
+  // Simple Reed-Solomon EC generation using GF(256) with primitive polynomial 0x11D
+  const gfExp = new Uint8Array(512);
+  const gfLog = new Uint8Array(256);
+  let x = 1;
+  for (let i = 0; i < 255; i++) {
+    gfExp[i] = x;
+    gfLog[x] = i;
+    x = x << 1;
+    if (x >= 256) x ^= 0x11d;
+  }
+  for (let i = 255; i < 512; i++) gfExp[i] = gfExp[i - 255];
+
+  const gfMul = (a: number, b: number) =>
+    a === 0 || b === 0 ? 0 : gfExp[gfLog[a] + gfLog[b]];
+
+  // Build generator polynomial
+  const ecCount = cfg.ecBytes;
+  let gen = [1];
+  for (let i = 0; i < ecCount; i++) {
+    const newGen = new Array(gen.length + 1).fill(0);
+    for (let j = 0; j < gen.length; j++) {
+      newGen[j] ^= gen[j];
+      newGen[j + 1] ^= gfMul(gen[j], gfExp[i]);
+    }
+    gen = newGen;
+  }
+
+  // Compute EC codewords
+  const msgPoly = new Array(codewords.length + ecCount).fill(0);
+  for (let i = 0; i < codewords.length; i++) msgPoly[i] = codewords[i];
+
+  for (let i = 0; i < codewords.length; i++) {
+    const coef = msgPoly[i];
+    if (coef !== 0) {
+      for (let j = 0; j < gen.length; j++) {
+        msgPoly[i + j] ^= gfMul(gen[j], coef);
+      }
+    }
+  }
+
+  const ecCodewords = msgPoly.slice(codewords.length);
+  const allCodewords = [...codewords, ...ecCodewords];
+
+  // --- Place data modules ---
+
+  let bitIndex = 0;
+  const totalBits = allCodewords.length * 8;
+
+  // Data placement: right-to-left, alternating upward/downward columns
+  let upward = true;
+  for (let col = size - 1; col >= 1; col -= 2) {
+    if (col === 6) col = 5; // Skip timing column
+    const rows = upward
+      ? Array.from({ length: size }, (_, i) => size - 1 - i)
+      : Array.from({ length: size }, (_, i) => i);
+
+    for (const row of rows) {
+      for (const dc of [0, -1]) {
+        const c = col + dc;
+        if (c < 0 || c >= size) continue;
+        if (reserved[row][c]) continue;
+        if (bitIndex < totalBits) {
+          const codewordIdx = Math.floor(bitIndex / 8);
+          const bitPos = 7 - (bitIndex % 8);
+          const bit = (allCodewords[codewordIdx] >> bitPos) & 1;
+          // Apply mask pattern 0: (row + col) % 2 === 0
+          const masked = bit ^ (((row + c) % 2 === 0) ? 1 : 0);
+          matrix[row][c] = masked === 1;
+        }
+        bitIndex++;
+      }
+    }
+    upward = !upward;
+  }
+
+  // --- Place format information ---
+  // Format: ECC level L (01) + mask pattern 0 (000) = 01000
+  // Pre-computed format bits for L-0: 0x77C0 = 0111011111000000 (after BCH)
+  const formatBits = 0x77c0;
+
+  // Horizontal: modules around top-left finder
+  for (let i = 0; i <= 5; i++) matrix[8][i] = ((formatBits >> (14 - i)) & 1) === 1;
+  matrix[8][7] = ((formatBits >> 8) & 1) === 1;
+  matrix[8][8] = ((formatBits >> 7) & 1) === 1;
+  matrix[7][8] = ((formatBits >> 6) & 1) === 1;
+  for (let i = 0; i <= 5; i++) matrix[5 - i][8] = ((formatBits >> (i)) & 1) === 1;
+
+  // Second copy
+  for (let i = 0; i <= 7; i++) matrix[size - 1 - i][8] = ((formatBits >> (14 - i)) & 1) === 1;
+  for (let i = 0; i <= 7; i++) matrix[8][size - 8 + i] = ((formatBits >> (7 - i)) & 1) === 1;
 
   return matrix;
 }

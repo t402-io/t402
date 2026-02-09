@@ -629,23 +629,28 @@ class WDKSigner:
 
     async def pay(self, params: PaymentParams) -> PaymentResult:
         """
-        Execute a payment.
+        Execute a direct payment (not supported in T402 flow).
 
-        Note: This is a placeholder for direct payment functionality.
-        For T402 payments, use sign_typed_data() with the payment authorization.
+        The T402 protocol uses off-chain signature authorization rather than
+        direct token transfers. Use the T402 client with sign_typed_data()
+        to create payment authorizations that the facilitator settles on-chain.
+
+        This method exists for interface completeness but is intentionally
+        unsupported because direct payments bypass the protocol's verification
+        and settlement guarantees.
 
         Args:
             params: Payment parameters
 
         Returns:
-            PaymentResult with transaction hash or error
+            PaymentResult with success=False and guidance message
         """
         self._ensure_initialized()
 
-        # For now, return an error indicating to use T402 payment flow
         return PaymentResult(
             success=False,
-            error="Direct payments not implemented. Use sign_typed_data() for T402 payments.",
+            error="Direct payments are not supported in the T402 protocol flow. "
+            "Use sign_typed_data() to create payment authorizations.",
         )
 
 

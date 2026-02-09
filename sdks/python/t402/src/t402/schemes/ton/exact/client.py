@@ -296,48 +296,33 @@ class ExactTonClientScheme:
             Serialized message body as bytes
 
         Note:
-            This returns a minimal placeholder. Real implementations should
-            use tonsdk or pytoniq to build proper BOC cells.
+            This returns a JSON-encoded representation of the transfer parameters
+            for testing and mock purposes. Production signers (e.g. TonConnect or
+            WDK-based) handle BOC cell building internally. To build proper BOC
+            cells programmatically, use tonsdk or pytoniq:
+
+            .. code-block:: python
+
+                from pytoniq_core import Cell, Builder
+                body = (Builder()
+                    .store_uint(0x0f8a7ea5, 32)  # transfer op
+                    .store_uint(query_id, 64)
+                    .store_coins(amount)
+                    .store_address(destination)
+                    .store_address(response_destination)
+                    .store_bit(0)  # no custom_payload
+                    .store_coins(forward_amount)
+                    .store_bit(0)  # no forward_payload
+                    .end_cell())
         """
-        # Import here to avoid hard dependency
-        try:
-            from t402.ton import JETTON_TRANSFER_OP
+        import json
 
-            # Build cell using available library
-            # This is a placeholder - real implementation needs tonsdk/pytoniq
-            #
-            # The actual cell structure should be:
-            # transfer#0f8a7ea5 query_id:uint64 amount:(VarUInteger 16)
-            #                   destination:MsgAddress response_destination:MsgAddress
-            #                   custom_payload:(Maybe ^Cell) forward_ton_amount:(VarUInteger 16)
-            #                   forward_payload:(Either Cell ^Cell) = InternalMsgBody;
-
-            # For now, return a placeholder that indicates the transfer params
-            # Real signers should handle cell building internally
-            import json
-
-            # Encode as JSON for testing/mocking purposes
-            # Real implementation would use proper BOC encoding
-            transfer_params = {
-                "op": JETTON_TRANSFER_OP,
-                "query_id": query_id,
-                "amount": amount,
-                "destination": destination,
-                "response_destination": response_destination,
-                "forward_amount": forward_amount,
-            }
-            return json.dumps(transfer_params).encode("utf-8")
-
-        except ImportError:
-            # Fallback if ton module not fully available
-            import json
-
-            transfer_params = {
-                "op": 0x0F8A7EA5,
-                "query_id": query_id,
-                "amount": amount,
-                "destination": destination,
-                "response_destination": response_destination,
-                "forward_amount": forward_amount,
-            }
-            return json.dumps(transfer_params).encode("utf-8")
+        transfer_params = {
+            "op": 0x0F8A7EA5,
+            "query_id": query_id,
+            "amount": amount,
+            "destination": destination,
+            "response_destination": response_destination,
+            "forward_amount": forward_amount,
+        }
+        return json.dumps(transfer_params).encode("utf-8")

@@ -73,9 +73,9 @@ export class UptoEvmScheme implements SchemeNetworkClient {
     const now = Math.floor(Date.now() / 1000);
     const deadline = now + paymentRequirements.maxTimeoutSeconds;
 
-    // Get the permit nonce from the token contract
-    // Note: In a real implementation, this would query the token contract
-    // For now, we'll use 0 and expect the caller to provide it via extra
+    // The permit nonce must be provided by the caller via extra.permitNonce.
+    // This is the owner's current nonce from the token contract's nonces(owner) function.
+    // If not provided, defaults to 0 (valid only for the first permit from this owner).
     const permitNonce = (extra as { permitNonce?: number }).permitNonce ?? 0;
 
     // Create the permit authorization
