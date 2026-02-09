@@ -67,9 +67,8 @@ jobs:
           COVERAGE=$(go tool cover -func=internal_coverage.out | grep total | awk '{print $3}' | sed 's/%//')
           echo "Internal packages coverage: ${COVERAGE}%"
 
-          # Minimum threshold (55% - raised from 30% after test expansion)
-          # Remaining gap to 70% requires DB integration tests for repository code
-          THRESHOLD=55
+          # Minimum threshold (75% - raised from 55% after sqlmock DB repository tests)
+          THRESHOLD=75
 
           # Compare using bc for floating point
           if (( $(echo "$COVERAGE < $THRESHOLD" | bc -l) )); then

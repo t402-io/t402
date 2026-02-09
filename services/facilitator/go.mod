@@ -5,6 +5,7 @@ go 1.24.0
 toolchain go1.24.13
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/alicebob/miniredis/v2 v2.36.1
 	github.com/ethereum/go-ethereum v1.16.8
 	github.com/gagliardetto/solana-go v1.14.0
