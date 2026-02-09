@@ -1404,3 +1404,180 @@ func TestListStreams_EmptyResult(t *testing.T) {
 	assert.Empty(t, resp.Streams)
 	assert.Equal(t, int64(0), resp.Total)
 }
+
+// ============== Auto-Settle Pause/Resume Tests ==============
+
+func TestPauseAutoSettle(t *testing.T) {
+	ts := newTestableService()
+
+	// Initially not paused
+	assert.False(t, ts.IsAutoSettlePaused(), "auto-settle should not be paused initially")
+
+	// Pause
+	ts.PauseAutoSettle()
+	assert.True(t, ts.IsAutoSettlePaused(), "auto-settle should be paused after PauseAutoSettle")
+}
+
+func TestResumeAutoSettle(t *testing.T) {
+	ts := newTestableService()
+
+	// Pause first
+	ts.PauseAutoSettle()
+	assert.True(t, ts.IsAutoSettlePaused())
+
+	// Resume
+	ts.ResumeAutoSettle()
+	assert.False(t, ts.IsAutoSettlePaused(), "auto-settle should not be paused after ResumeAutoSettle")
+}
+
+func TestPauseResumeAutoSettle_Cycle(t *testing.T) {
+	ts := newTestableService()
+
+	// Initial state: not paused
+	assert.False(t, ts.IsAutoSettlePaused(), "initial state should be not paused")
+
+	// Pause
+	ts.PauseAutoSettle()
+	assert.True(t, ts.IsAutoSettlePaused(), "should be paused after first pause")
+
+	// Pause again (idempotent)
+	ts.PauseAutoSettle()
+	assert.True(t, ts.IsAutoSettlePaused(), "should still be paused after second pause")
+
+	// Resume
+	ts.ResumeAutoSettle()
+	assert.False(t, ts.IsAutoSettlePaused(), "should not be paused after resume")
+
+	// Resume again (idempotent)
+	ts.ResumeAutoSettle()
+	assert.False(t, ts.IsAutoSettlePaused(), "should still not be paused after second resume")
+
+	// Pause-Resume-Pause cycle
+	ts.PauseAutoSettle()
+	assert.True(t, ts.IsAutoSettlePaused())
+	ts.ResumeAutoSettle()
+	assert.False(t, ts.IsAutoSettlePaused())
+	ts.PauseAutoSettle()
+	assert.True(t, ts.IsAutoSettlePaused())
+}
+
+func TestPauseAutoSettle_ConcurrentAccess(t *testing.T) {
+	ts := newTestableService()
+
+	var wg sync.WaitGroup
+
+	// Launch concurrent pause/resume/check operations
+	for i := 0; i < 50; i++ {
+		wg.Add(3)
+		go func() {
+			defer wg.Done()
+			ts.PauseAutoSettle()
+		}()
+		go func() {
+			defer wg.Done()
+			ts.ResumeAutoSettle()
+		}()
+		go func() {
+			defer wg.Done()
+			_ = ts.IsAutoSettlePaused()
+		}()
+	}
+
+	wg.Wait()
+
+	// After all goroutines complete, the state should be deterministic
+	// (either paused or not). The important thing is no data race or panic.
+	_ = ts.IsAutoSettlePaused()
+}
+
+func TestProcessAutoSettle_PausedSkipsSettlement(t *testing.T) {
+	ts := newTestableService()
+	ts.config.AutoSettleThreshold = big.NewInt(1000000) // 1 USDT
+	ts.config.EnableAutoSettle = true
+	ctx := context.Background()
+
+	// Create an active stream with enough unsettled amount
+	expiry := time.Now().Add(24 * time.Hour)
+	stream := ts.createTestStream(StreamStatusActive, &expiry)
+	stream.CurrentAmount = "5000000" // 5 USDT
+	stream.SettledAmount = "0"
+	ts.mockRepo.Update(ctx, stream)
+
+	// Pause auto-settlement
+	ts.PauseAutoSettle()
+
+	// Reset settler mock
+	ts.mockSettler.settleCalled = false
+
+	// Process auto-settle
+	ts.processAutoSettle()
+
+	// Settler should NOT be called because auto-settle is paused
+	assert.False(t, ts.mockSettler.settleCalled, "settler should not be called when auto-settle is paused")
+
+	// Resume and process again
+	ts.ResumeAutoSettle()
+	ts.processAutoSettle()
+
+	// Now settler should be called
+	assert.True(t, ts.mockSettler.settleCalled, "settler should be called after resuming auto-settle")
+}
+
+func TestOpenStream_ExceedsMaxStreamAmount(t *testing.T) {
+	config := DefaultServiceConfig()
+	config.MaxStreamAmount = big.NewInt(1000000000) // 1000 USDT
+	ts := newTestableServiceWithConfig(config)
+	ctx := context.Background()
+
+	req := &OpenStreamRequest{
+		Network:   "eip155:1",
+		Scheme:    "exact",
+		Payer:     "0x1234567890abcdef1234567890abcdef12345678",
+		Payee:     "0xabcdef1234567890abcdef1234567890abcdef12",
+		Asset:     "0x6B175474E89094C44Da98b954EecdFEFC",
+		MaxAmount: "999999999999", // Exceeds max stream amount
+		Signature: "valid-signature",
+	}
+
+	_, err := ts.OpenStream(ctx, req)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "stream amount exceeds maximum allowed")
+}
+
+func TestOpenStream_ExpiryClampedToMax(t *testing.T) {
+	ts := newTestableService()
+	ctx := context.Background()
+
+	// Set expiry far in the future, beyond MaxStreamDuration (30 days)
+	farFuture := time.Now().Add(365 * 24 * time.Hour) // 1 year
+
+	req := &OpenStreamRequest{
+		Network:   "eip155:1",
+		Scheme:    "exact",
+		Payer:     "0x1234567890abcdef1234567890abcdef12345678",
+		Payee:     "0xabcdef1234567890abcdef1234567890abcdef12",
+		Asset:     "0x6B175474E89094C44Da98b954EecdFEFC",
+		MaxAmount: "1000000000",
+		Signature: "valid-signature",
+		ExpiresAt: &farFuture,
+	}
+
+	resp, err := ts.OpenStream(ctx, req)
+	require.NoError(t, err)
+
+	// Expiry should be clamped to MaxStreamDuration (30 days)
+	stream, _ := ts.mockRepo.GetByID(ctx, resp.Stream.ID)
+	maxExpiry := time.Now().Add(ts.config.MaxStreamDuration)
+	assert.WithinDuration(t, maxExpiry, *stream.ExpiresAt, 5*time.Second,
+		"expiry should be clamped to max stream duration")
+}
+
+func TestDefaultServiceConfig_AllFields(t *testing.T) {
+	config := DefaultServiceConfig()
+
+	assert.NotNil(t, config.MaxStreamAmount, "MaxStreamAmount should be set")
+	assert.Equal(t, "100000000000", config.MaxStreamAmount.String(), "MaxStreamAmount should be 100,000 USDT")
+	assert.Equal(t, 5*time.Minute, config.SettlementTimeout, "SettlementTimeout should be 5 minutes")
+	assert.Equal(t, 30*time.Second, config.LockTimeout, "LockTimeout should be 30 seconds")
+	assert.Equal(t, time.Hour, config.AutoSettleInterval, "AutoSettleInterval should be 1 hour")
+}
