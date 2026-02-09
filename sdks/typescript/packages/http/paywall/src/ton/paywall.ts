@@ -27,6 +27,8 @@ interface TonPaywallOptions {
   appLogo?: string;
   tonConnectManifestUrl?: string;
   theme?: PaywallTheme;
+  deliveryMode?: "cdn" | "inline";
+  cdnBaseUrl?: string;
 }
 
 /**
@@ -43,7 +45,8 @@ interface TonPaywallOptions {
  * @returns HTML string for the paywall page
  */
 export function getTonPaywallHtml(options: TonPaywallOptions): string {
-  const TON_PAYWALL_TEMPLATE = getTonTemplate();
+  const mode = options.deliveryMode ?? "cdn";
+  const TON_PAYWALL_TEMPLATE = getTonTemplate(mode);
 
   if (!TON_PAYWALL_TEMPLATE) {
     return `<!DOCTYPE html><html><body><h1>TON Paywall (run pnpm build:paywall to generate full template)</h1></body></html>`;

@@ -44,6 +44,18 @@ export interface PaywallConfig {
    * Get your project ID at https://cloud.walletconnect.com
    */
   walletConnectProjectId?: string;
+  /**
+   * Delivery mode for the paywall HTML.
+   * - "cdn" (default): Lightweight HTML shell that loads JS/CSS from jsDelivr CDN (~1KB response).
+   * - "inline": All JS/CSS inlined into the HTML (legacy behavior, ~2.7MB response).
+   */
+  deliveryMode?: "cdn" | "inline";
+  /**
+   * Custom CDN base URL for loading paywall assets.
+   * Only used when deliveryMode is "cdn".
+   * Defaults to jsDelivr: https://cdn.jsdelivr.net/npm/@t402/paywall@{VERSION}/dist/browser
+   */
+  cdnBaseUrl?: string;
 }
 
 /**

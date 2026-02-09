@@ -26,6 +26,8 @@ interface NearPaywallOptions {
   appName?: string;
   appLogo?: string;
   theme?: PaywallTheme;
+  deliveryMode?: "cdn" | "inline";
+  cdnBaseUrl?: string;
 }
 
 /**
@@ -41,7 +43,8 @@ interface NearPaywallOptions {
  * @returns HTML string for the paywall page
  */
 export function getNearPaywallHtml(options: NearPaywallOptions): string {
-  const NEAR_PAYWALL_TEMPLATE = getNearTemplate();
+  const mode = options.deliveryMode ?? "cdn";
+  const NEAR_PAYWALL_TEMPLATE = getNearTemplate(mode);
 
   if (!NEAR_PAYWALL_TEMPLATE) {
     return `<!DOCTYPE html><html><body><h1>NEAR Paywall (run pnpm build:paywall to generate full template)</h1></body></html>`;

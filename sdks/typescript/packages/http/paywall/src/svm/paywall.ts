@@ -26,6 +26,8 @@ interface SvmPaywallOptions {
   appName?: string;
   appLogo?: string;
   theme?: PaywallTheme;
+  deliveryMode?: "cdn" | "inline";
+  cdnBaseUrl?: string;
 }
 
 /**
@@ -41,7 +43,8 @@ interface SvmPaywallOptions {
  * @returns HTML string for the paywall page
  */
 export function getSvmPaywallHtml(options: SvmPaywallOptions): string {
-  const SVM_PAYWALL_TEMPLATE = getSvmTemplate();
+  const mode = options.deliveryMode ?? "cdn";
+  const SVM_PAYWALL_TEMPLATE = getSvmTemplate(mode);
 
   if (!SVM_PAYWALL_TEMPLATE) {
     return `<!DOCTYPE html><html><body><h1>SVM Paywall (run pnpm build:paywall to generate full template)</h1></body></html>`;

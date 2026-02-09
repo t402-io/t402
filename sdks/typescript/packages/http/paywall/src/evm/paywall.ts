@@ -45,6 +45,8 @@ interface EvmPaywallOptions {
   appLogo?: string;
   theme?: PaywallTheme;
   walletConnectProjectId?: string;
+  deliveryMode?: "cdn" | "inline";
+  cdnBaseUrl?: string;
 }
 
 /**
@@ -60,7 +62,8 @@ interface EvmPaywallOptions {
  * @returns HTML string for the paywall page
  */
 export function getEvmPaywallHtml(options: EvmPaywallOptions): string {
-  const EVM_PAYWALL_TEMPLATE = getEvmTemplate();
+  const mode = options.deliveryMode ?? "cdn";
+  const EVM_PAYWALL_TEMPLATE = getEvmTemplate(mode);
 
   if (!EVM_PAYWALL_TEMPLATE) {
     return `<!DOCTYPE html><html><body><h1>EVM Paywall (run pnpm build:paywall to generate full template)</h1></body></html>`;

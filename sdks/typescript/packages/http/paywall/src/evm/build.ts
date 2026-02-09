@@ -3,17 +3,22 @@ import { htmlPlugin } from "@craftamap/esbuild-plugin-html";
 import fs from "fs";
 import path from "path";
 import { getBaseTemplate } from "../baseTemplate";
+import { buildBrowserBundle, writeTemplates, type BuildConfig } from "../build-utils";
+
+const config: BuildConfig = {
+  network: "evm",
+  entryPoint: "src/evm/entry.tsx",
+  templateConstName: "EVM_PAYWALL_TEMPLATE",
+  goConstName: "EVMPaywallTemplate",
+};
 
 // EVM-specific build - only bundles EVM dependencies
 const DIST_DIR = "src/evm/dist";
 const OUTPUT_HTML = path.join(DIST_DIR, "evm-paywall.html");
-const OUTPUT_TS = path.join("src/evm/gen", "template.ts");
 
 // Cross-language template output paths (relative to package root where build runs)
 const PYTHON_DIR = path.join("..", "..", "..", "..", "python", "t402", "src", "t402");
 const GO_DIR = path.join("..", "..", "..", "..", "go", "http");
-const OUTPUT_PY = path.join(PYTHON_DIR, "evm_paywall_template.py");
-const OUTPUT_GO = path.join(GO_DIR, "evm_paywall_template.go");
 
 const options: esbuild.BuildOptions = {
   entryPoints: ["src/evm/entry.tsx", "src/styles.css"],
@@ -34,9 +39,7 @@ const options: esbuild.BuildOptions = {
   },
   mainFields: ["browser", "module", "main"],
   conditions: ["browser"],
-  // Drop console and debugger statements in production
   drop: ["debugger"],
-  // Pure annotations help tree-shaking
   pure: ["console.log", "console.debug"],
   plugins: [
     htmlPlugin({
@@ -59,69 +62,34 @@ const options: esbuild.BuildOptions = {
   external: ["crypto"],
 };
 
-/**
- * Builds the EVM paywall HTML template with bundled JS and CSS.
- * Also generates Python and Go template files for cross-language support.
- */
 async function build() {
   try {
     if (!fs.existsSync(DIST_DIR)) {
       fs.mkdirSync(DIST_DIR, { recursive: true });
     }
 
-    const genDir = path.dirname(OUTPUT_TS);
+    const genDir = path.join("src/evm/gen");
     if (!fs.existsSync(genDir)) {
       fs.mkdirSync(genDir, { recursive: true });
     }
 
+    // Build standalone browser bundle for CDN delivery
+    await buildBrowserBundle(config);
+    console.log("[EVM] Browser bundle built successfully!");
+
+    // Build inline HTML template (existing behavior)
     await esbuild.build(options);
-    console.log("[EVM] Build completed successfully!");
+    console.log("[EVM] Inline HTML build completed!");
 
     if (fs.existsSync(OUTPUT_HTML)) {
-      const html = fs.readFileSync(OUTPUT_HTML, "utf8");
+      const inlineHtml = fs.readFileSync(OUTPUT_HTML, "utf8");
 
-      const tsContent = `// THIS FILE IS AUTO-GENERATED - DO NOT EDIT
-/**
- * The pre-built EVM paywall template with inlined CSS and JS
- */
-export const EVM_PAYWALL_TEMPLATE = ${JSON.stringify(html)};
-`;
-
-      // Generate Python template file
-      const pyContent = `# THIS FILE IS AUTO-GENERATED - DO NOT EDIT
-EVM_PAYWALL_TEMPLATE = ${JSON.stringify(html)}
-`;
-
-      // Generate Go template file
-      const goContent = `// THIS FILE IS AUTO-GENERATED - DO NOT EDIT
-package http
-
-// EVMPaywallTemplate is the pre-built EVM paywall template with inlined CSS and JS
-const EVMPaywallTemplate = ${JSON.stringify(html)}
-`;
-
-      fs.writeFileSync(OUTPUT_TS, tsContent);
-      console.log(`[EVM] Generated template.ts (${(html.length / 1024 / 1024).toFixed(2)} MB)`);
-
-      // Write the Python template file
-      if (fs.existsSync(PYTHON_DIR)) {
-        fs.writeFileSync(OUTPUT_PY, pyContent);
-        console.log(
-          `[EVM] Generated Python evm_paywall_template.py (${(html.length / 1024 / 1024).toFixed(2)} MB)`,
-        );
-      } else {
-        console.warn(`[EVM] Python directory not found: ${PYTHON_DIR}`);
-      }
-
-      // Write the Go template file
-      if (fs.existsSync(GO_DIR)) {
-        fs.writeFileSync(OUTPUT_GO, goContent);
-        console.log(
-          `[EVM] Generated Go evm_paywall_template.go (${(html.length / 1024 / 1024).toFixed(2)} MB)`,
-        );
-      } else {
-        console.warn(`[EVM] Go directory not found: ${GO_DIR}`);
-      }
+      // Write CDN + inline templates for TS, Python, Go
+      writeTemplates(config, inlineHtml, {
+        genDir,
+        pythonDir: PYTHON_DIR,
+        goDir: GO_DIR,
+      });
     } else {
       throw new Error(`EVM bundled HTML not found at ${OUTPUT_HTML}`);
     }

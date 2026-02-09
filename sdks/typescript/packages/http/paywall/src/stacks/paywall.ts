@@ -26,6 +26,8 @@ interface StacksPaywallOptions {
   appName?: string;
   appLogo?: string;
   theme?: PaywallTheme;
+  deliveryMode?: "cdn" | "inline";
+  cdnBaseUrl?: string;
 }
 
 /**
@@ -41,7 +43,8 @@ interface StacksPaywallOptions {
  * @returns HTML string for the paywall page
  */
 export function getStacksPaywallHtml(options: StacksPaywallOptions): string {
-  const STACKS_PAYWALL_TEMPLATE = getStacksTemplate();
+  const mode = options.deliveryMode ?? "cdn";
+  const STACKS_PAYWALL_TEMPLATE = getStacksTemplate(mode);
 
   if (!STACKS_PAYWALL_TEMPLATE) {
     return `<!DOCTYPE html><html><body><h1>Stacks Paywall (run pnpm build:paywall to generate full template)</h1></body></html>`;

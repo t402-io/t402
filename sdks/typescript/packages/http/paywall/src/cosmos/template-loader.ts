@@ -1,29 +1,36 @@
-/**
- * Lazy loader for Cosmos paywall template
- * The template is generated during build via `pnpm build:paywall`
- */
-
-let cachedTemplate: string | null = null;
+let cachedCdnTemplate: string | null = null;
+let cachedInlineTemplate: string | null = null;
 
 /**
- * Get the Cosmos paywall template HTML.
- * Returns null if the template has not been generated yet.
+ * Loads the Cosmos paywall template.
  *
- * @returns The template HTML string or null
+ * @param mode - "cdn" for lightweight CDN shell (default), "inline" for full embedded HTML
+ * @returns The template HTML string, or null if not found
  */
-export function getCosmosTemplate(): string | null {
-  if (cachedTemplate !== null) {
-    return cachedTemplate;
+export function getCosmosTemplate(mode: "cdn" | "inline" = "cdn"): string | null {
+  if (mode === "inline") {
+    if (cachedInlineTemplate !== null) {
+      return cachedInlineTemplate;
+    }
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const template = require("./gen/template-inline");
+      cachedInlineTemplate = template.COSMOS_PAYWALL_TEMPLATE_INLINE;
+      return cachedInlineTemplate;
+    } catch {
+      return null;
+    }
   }
 
+  if (cachedCdnTemplate !== null) {
+    return cachedCdnTemplate;
+  }
   try {
-    // Dynamic import to handle cases where template hasn't been built
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { COSMOS_PAYWALL_TEMPLATE } = require("./gen/template");
-    cachedTemplate = COSMOS_PAYWALL_TEMPLATE;
-    return cachedTemplate;
+    const template = require("./gen/template");
+    cachedCdnTemplate = template.COSMOS_PAYWALL_TEMPLATE;
+    return cachedCdnTemplate;
   } catch {
-    // Template not yet generated - return null
     return null;
   }
 }
