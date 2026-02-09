@@ -74,6 +74,30 @@ public final class EvmConstants {
     /** Conflux eSpace. */
     public static final String CONFLUX_MAINNET = "eip155:1030";
 
+    /** Monad Mainnet. */
+    public static final String MONAD_MAINNET = "eip155:143";
+
+    /** Flare Mainnet. */
+    public static final String FLARE_MAINNET = "eip155:14";
+
+    /** Rootstock (Bitcoin sidechain). */
+    public static final String ROOTSTOCK_MAINNET = "eip155:30";
+
+    /** XLayer (OKX L2). */
+    public static final String XLAYER_MAINNET = "eip155:196";
+
+    /** Stable Mainnet. */
+    public static final String STABLE_MAINNET = "eip155:988";
+
+    /** HyperEVM Mainnet. */
+    public static final String HYPEREVM_MAINNET = "eip155:999";
+
+    /** MegaETH Mainnet. */
+    public static final String MEGAETH_MAINNET = "eip155:4326";
+
+    /** Corn Mainnet. */
+    public static final String CORN_MAINNET = "eip155:21000000";
+
     /** Sepolia Testnet. */
     public static final String SEPOLIA = "eip155:11155111";
 
@@ -93,7 +117,15 @@ public final class EvmConstants {
         Map.entry(MANTLE_MAINNET, "0x779Ded0c9e1022225f8E0630b35a9b54bE713736"),
         Map.entry(PLASMA_MAINNET, "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb"),
         Map.entry(SEI_MAINNET, "0x9151434b16b9763660705744891fA906F660EcC5"),
-        Map.entry(CONFLUX_MAINNET, "0xaf37E8B6C9ED7f6318979f56Fc287d76c30847ff")
+        Map.entry(CONFLUX_MAINNET, "0xaf37E8B6C9ED7f6318979f56Fc287d76c30847ff"),
+        Map.entry(MONAD_MAINNET, "0xe7cd86e13AC4309349F30B3435a9d337750fC82D"),
+        Map.entry(FLARE_MAINNET, "0xe7cd86e13AC4309349F30B3435a9d337750fC82D"),
+        Map.entry(ROOTSTOCK_MAINNET, "0x779dED0C9e1022225F8e0630b35A9B54Be713736"),
+        Map.entry(XLAYER_MAINNET, "0x779Ded0c9e1022225f8E0630b35a9b54bE713736"),
+        Map.entry(STABLE_MAINNET, "0x779Ded0c9e1022225f8E0630b35a9b54bE713736"),
+        Map.entry(HYPEREVM_MAINNET, "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb"),
+        Map.entry(MEGAETH_MAINNET, "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb"),
+        Map.entry(CORN_MAINNET, "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb")
     );
 
     // ============================================================
@@ -175,6 +207,14 @@ public final class EvmConstants {
             PLASMA_MAINNET,
             SEI_MAINNET,
             CONFLUX_MAINNET,
+            MONAD_MAINNET,
+            FLARE_MAINNET,
+            ROOTSTOCK_MAINNET,
+            XLAYER_MAINNET,
+            STABLE_MAINNET,
+            HYPEREVM_MAINNET,
+            MEGAETH_MAINNET,
+            CORN_MAINNET,
             SEPOLIA
         );
     }
@@ -198,6 +238,14 @@ public final class EvmConstants {
         Map.entry(PLASMA_MAINNET, 9745L),
         Map.entry(SEI_MAINNET, 1329L),
         Map.entry(CONFLUX_MAINNET, 1030L),
+        Map.entry(MONAD_MAINNET, 143L),
+        Map.entry(FLARE_MAINNET, 14L),
+        Map.entry(ROOTSTOCK_MAINNET, 30L),
+        Map.entry(XLAYER_MAINNET, 196L),
+        Map.entry(STABLE_MAINNET, 988L),
+        Map.entry(HYPEREVM_MAINNET, 999L),
+        Map.entry(MEGAETH_MAINNET, 4326L),
+        Map.entry(CORN_MAINNET, 21000000L),
         Map.entry(SEPOLIA, 11155111L)
     );
 
