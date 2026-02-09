@@ -26,6 +26,8 @@ interface CosmosPaywallOptions {
   appName?: string;
   appLogo?: string;
   theme?: PaywallTheme;
+  deliveryMode?: "cdn" | "inline";
+  cdnBaseUrl?: string;
 }
 
 /**
@@ -41,7 +43,8 @@ interface CosmosPaywallOptions {
  * @returns HTML string for the paywall page
  */
 export function getCosmosPaywallHtml(options: CosmosPaywallOptions): string {
-  const COSMOS_PAYWALL_TEMPLATE = getCosmosTemplate();
+  const mode = options.deliveryMode ?? "cdn";
+  const COSMOS_PAYWALL_TEMPLATE = getCosmosTemplate(mode);
 
   if (!COSMOS_PAYWALL_TEMPLATE) {
     return `<!DOCTYPE html><html><body><h1>Cosmos Paywall (run pnpm build:paywall to generate full template)</h1></body></html>`;

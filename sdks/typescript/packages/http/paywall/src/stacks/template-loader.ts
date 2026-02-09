@@ -1,28 +1,36 @@
-/**
- * Lazy loader for the Stacks paywall HTML template.
- * The template is generated at build time via `pnpm build:paywall`
- */
-
-let cachedTemplate: string | null = null;
+let cachedCdnTemplate: string | null = null;
+let cachedInlineTemplate: string | null = null;
 
 /**
- * Get the Stacks paywall HTML template
+ * Loads the Stacks paywall template.
  *
- * @returns HTML template string or null if not built yet
+ * @param mode - "cdn" for lightweight CDN shell (default), "inline" for full embedded HTML
+ * @returns The template HTML string, or null if not found
  */
-export function getStacksTemplate(): string | null {
-  if (cachedTemplate) {
-    return cachedTemplate;
+export function getStacksTemplate(mode: "cdn" | "inline" = "cdn"): string | null {
+  if (mode === "inline") {
+    if (cachedInlineTemplate !== null) {
+      return cachedInlineTemplate;
+    }
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const template = require("./gen/template-inline");
+      cachedInlineTemplate = template.STACKS_PAYWALL_TEMPLATE_INLINE;
+      return cachedInlineTemplate;
+    } catch {
+      return null;
+    }
   }
 
+  if (cachedCdnTemplate !== null) {
+    return cachedCdnTemplate;
+  }
   try {
-    // Dynamic require to avoid bundling issues
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const templateModule = require("./gen/template");
-    cachedTemplate = templateModule.STACKS_PAYWALL_TEMPLATE;
-    return cachedTemplate;
+    const template = require("./gen/template");
+    cachedCdnTemplate = template.STACKS_PAYWALL_TEMPLATE;
+    return cachedCdnTemplate;
   } catch {
-    // Template not built yet - this is expected during development
     return null;
   }
 }

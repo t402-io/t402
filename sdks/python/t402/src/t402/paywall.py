@@ -6,14 +6,59 @@ from t402.common import t402_VERSION
 from t402.evm_paywall_template import EVM_PAYWALL_TEMPLATE
 from t402.svm_paywall_template import SVM_PAYWALL_TEMPLATE
 from t402.ton_paywall_template import TON_PAYWALL_TEMPLATE
+from t402.tron_paywall_template import TRON_PAYWALL_TEMPLATE
+from t402.stacks_paywall_template import STACKS_PAYWALL_TEMPLATE
+from t402.cosmos_paywall_template import COSMOS_PAYWALL_TEMPLATE
+from t402.near_paywall_template import NEAR_PAYWALL_TEMPLATE
 
 
-def get_paywall_template(network: str) -> str:
-    """Get the appropriate paywall template for the given network."""
+def _get_inline_template(network: str) -> str:
+    """Get the inline (full embedded) template for the given network."""
+    if network.startswith("solana:"):
+        from t402.svm_paywall_template_inline import SVM_PAYWALL_TEMPLATE_INLINE
+        return SVM_PAYWALL_TEMPLATE_INLINE
+    if network.startswith("ton:"):
+        from t402.ton_paywall_template_inline import TON_PAYWALL_TEMPLATE_INLINE
+        return TON_PAYWALL_TEMPLATE_INLINE
+    if network.startswith("tron:"):
+        from t402.tron_paywall_template_inline import TRON_PAYWALL_TEMPLATE_INLINE
+        return TRON_PAYWALL_TEMPLATE_INLINE
+    if network.startswith("stacks:"):
+        from t402.stacks_paywall_template_inline import STACKS_PAYWALL_TEMPLATE_INLINE
+        return STACKS_PAYWALL_TEMPLATE_INLINE
+    if network.startswith("cosmos:"):
+        from t402.cosmos_paywall_template_inline import COSMOS_PAYWALL_TEMPLATE_INLINE
+        return COSMOS_PAYWALL_TEMPLATE_INLINE
+    if network.startswith("near:"):
+        from t402.near_paywall_template_inline import NEAR_PAYWALL_TEMPLATE_INLINE
+        return NEAR_PAYWALL_TEMPLATE_INLINE
+    from t402.evm_paywall_template_inline import EVM_PAYWALL_TEMPLATE_INLINE
+    return EVM_PAYWALL_TEMPLATE_INLINE
+
+
+def get_paywall_template(network: str, delivery_mode: str = "cdn") -> str:
+    """Get the appropriate paywall template for the given network.
+
+    Args:
+        network: CAIP-2 network identifier (e.g. "eip155:1")
+        delivery_mode: "cdn" (default) for lightweight CDN shell,
+                       "inline" for full embedded HTML
+    """
+    if delivery_mode == "inline":
+        return _get_inline_template(network)
+
     if network.startswith("solana:"):
         return SVM_PAYWALL_TEMPLATE
     if network.startswith("ton:"):
         return TON_PAYWALL_TEMPLATE
+    if network.startswith("tron:"):
+        return TRON_PAYWALL_TEMPLATE
+    if network.startswith("stacks:"):
+        return STACKS_PAYWALL_TEMPLATE
+    if network.startswith("cosmos:"):
+        return COSMOS_PAYWALL_TEMPLATE
+    if network.startswith("near:"):
+        return NEAR_PAYWALL_TEMPLATE
     return EVM_PAYWALL_TEMPLATE
 
 
@@ -126,5 +171,6 @@ def get_paywall_html(
     if not payment_requirements:
         raise ValueError("payment_requirements cannot be empty")
     network = payment_requirements[0].network
-    template = get_paywall_template(network)
+    delivery_mode = (paywall_config or {}).get("delivery_mode", "cdn")
+    template = get_paywall_template(network, delivery_mode)
     return inject_payment_data(template, error, payment_requirements, paywall_config)

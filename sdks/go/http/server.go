@@ -51,6 +51,10 @@ type PaywallConfig struct {
 	// UsePrebuiltTemplate enables the pre-built React paywall templates
 	// When false, falls back to basic HTML (default: true)
 	UsePrebuiltTemplate *bool `json:"usePrebuiltTemplate,omitempty"`
+	// DeliveryMode controls how paywall JS/CSS is loaded.
+	// "cdn" (default): lightweight HTML shell, JS/CSS loaded from jsDelivr CDN.
+	// "inline": full JS/CSS embedded in the HTML response (~2-3MB).
+	DeliveryMode string `json:"deliveryMode,omitempty"`
 }
 
 // DynamicPayToFunc is a function that resolves payTo address dynamically based on request context
@@ -655,7 +659,11 @@ func (s *t402HTTPResourceServer) generatePaywallHTML(paymentRequired t402.Paymen
 
 	// Use pre-built React paywall template
 	if usePrebuilt {
-		template := selectPaywallTemplate(paymentRequired)
+		deliveryMode := ""
+		if config != nil {
+			deliveryMode = config.DeliveryMode
+		}
+		template := selectPaywallTemplate(paymentRequired, deliveryMode)
 		return injectDataIntoTemplate(template, paymentRequired, config)
 	}
 
@@ -789,10 +797,17 @@ func (s *t402HTTPResourceServer) getDisplayAmount(paymentRequired t402.PaymentRe
 // ============================================================================
 
 // selectPaywallTemplate selects the appropriate pre-built React paywall template
-// based on the network in the payment requirements.
-func selectPaywallTemplate(paymentRequired t402.PaymentRequired) string {
+// based on the network in the payment requirements and the delivery mode.
+// When deliveryMode is "inline", returns the full inline template with all JS/CSS embedded.
+// Otherwise (default), returns the CDN shell template (~500 bytes).
+func selectPaywallTemplate(paymentRequired t402.PaymentRequired, deliveryMode string) string {
+	inline := deliveryMode == "inline"
+
 	if len(paymentRequired.Accepts) == 0 {
-		return EVMPaywallTemplate // Default to EVM
+		if inline {
+			return EVMPaywallTemplateInline
+		}
+		return EVMPaywallTemplate
 	}
 
 	network := paymentRequired.Accepts[0].Network
@@ -800,21 +815,45 @@ func selectPaywallTemplate(paymentRequired t402.PaymentRequired) string {
 
 	switch {
 	case strings.HasPrefix(networkStr, "eip155:"):
+		if inline {
+			return EVMPaywallTemplateInline
+		}
 		return EVMPaywallTemplate
 	case strings.HasPrefix(networkStr, "solana:"):
+		if inline {
+			return SVMPaywallTemplateInline
+		}
 		return SVMPaywallTemplate
 	case strings.HasPrefix(networkStr, "ton:"):
+		if inline {
+			return TONPaywallTemplateInline
+		}
 		return TONPaywallTemplate
 	case strings.HasPrefix(networkStr, "tron:"):
+		if inline {
+			return TRONPaywallTemplateInline
+		}
 		return TRONPaywallTemplate
 	case strings.HasPrefix(networkStr, "stacks:"):
+		if inline {
+			return StacksPaywallTemplateInline
+		}
 		return StacksPaywallTemplate
 	case strings.HasPrefix(networkStr, "cosmos:"):
+		if inline {
+			return CosmosPaywallTemplateInline
+		}
 		return CosmosPaywallTemplate
 	case strings.HasPrefix(networkStr, "near:"):
+		if inline {
+			return NEARPaywallTemplateInline
+		}
 		return NEARPaywallTemplate
 	default:
-		return EVMPaywallTemplate // Default to EVM for unknown networks
+		if inline {
+			return EVMPaywallTemplateInline
+		}
+		return EVMPaywallTemplate
 	}
 }
 

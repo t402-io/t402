@@ -2,8 +2,7 @@
   "name": "@t402/stacks",
   "version": "2.4.0",
   "description": "T402 Stacks mechanism - SIP-010 token transfers on Bitcoin L2",
-  "type": "module",
-  "main": "./dist/cjs/index.cjs",
+  "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.mjs",
   "types": "./dist/esm/index.d.mts",
   "exports": {
@@ -13,8 +12,8 @@
         "default": "./dist/esm/index.mjs"
       },
       "require": {
-        "types": "./dist/cjs/index.d.cts",
-        "default": "./dist/cjs/index.cjs"
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
       }
     },
     "./exact-direct/client": {
@@ -23,8 +22,8 @@
         "default": "./dist/esm/exact-direct/client/index.mjs"
       },
       "require": {
-        "types": "./dist/cjs/exact-direct/client/index.d.cts",
-        "default": "./dist/cjs/exact-direct/client/index.cjs"
+        "types": "./dist/cjs/exact-direct/client/index.d.ts",
+        "default": "./dist/cjs/exact-direct/client/index.js"
       }
     },
     "./exact-direct/server": {
@@ -33,8 +32,8 @@
         "default": "./dist/esm/exact-direct/server/index.mjs"
       },
       "require": {
-        "types": "./dist/cjs/exact-direct/server/index.d.cts",
-        "default": "./dist/cjs/exact-direct/server/index.cjs"
+        "types": "./dist/cjs/exact-direct/server/index.d.ts",
+        "default": "./dist/cjs/exact-direct/server/index.js"
       }
     },
     "./exact-direct/facilitator": {
@@ -43,8 +42,8 @@
         "default": "./dist/esm/exact-direct/facilitator/index.mjs"
       },
       "require": {
-        "types": "./dist/cjs/exact-direct/facilitator/index.d.cts",
-        "default": "./dist/cjs/exact-direct/facilitator/index.cjs"
+        "types": "./dist/cjs/exact-direct/facilitator/index.d.ts",
+        "default": "./dist/cjs/exact-direct/facilitator/index.js"
       }
     }
   },

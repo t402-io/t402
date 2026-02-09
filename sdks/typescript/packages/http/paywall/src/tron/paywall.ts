@@ -26,6 +26,8 @@ interface TronPaywallOptions {
   appName?: string;
   appLogo?: string;
   theme?: PaywallTheme;
+  deliveryMode?: "cdn" | "inline";
+  cdnBaseUrl?: string;
 }
 
 /**
@@ -41,7 +43,8 @@ interface TronPaywallOptions {
  * @returns HTML string for the paywall page
  */
 export function getTronPaywallHtml(options: TronPaywallOptions): string {
-  const TRON_PAYWALL_TEMPLATE = getTronTemplate();
+  const mode = options.deliveryMode ?? "cdn";
+  const TRON_PAYWALL_TEMPLATE = getTronTemplate(mode);
 
   if (!TRON_PAYWALL_TEMPLATE) {
     return `<!DOCTYPE html><html><body><h1>TRON Paywall (run pnpm build:paywall to generate full template)</h1></body></html>`;
