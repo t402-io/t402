@@ -1,7 +1,6 @@
 # Scheme: `upto` on `EVM`
 
-> **DRAFT**: This specification is a work in progress. Implementation details may change.
-> Contributions and feedback welcome.
+> Implemented in TypeScript SDK (`@t402/evm/upto`). Smart contract audit pending before mainnet deployment.
 
 ## Summary
 
