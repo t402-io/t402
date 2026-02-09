@@ -1,6 +1,6 @@
 # T402 Remaining Development Plan — 2026 Q1 Remaining
 
-> Generated: 2026-02-09 | Updated: 2026-02-09 | Status: Weeks 1-9 Complete, Week 10 In Progress
+> Generated: 2026-02-09 | Updated: 2026-02-09 | Status: Weeks 1-10 Complete
 
 ## Overview
 
@@ -92,28 +92,29 @@ Items are grouped by priority and include estimated effort.
   - [x] Multisig test coverage — verified 14 test functions with 30+ cases covering all components
 
 ### P1-6: Fix Version Inconsistencies
-- **Status**: 🔄 Week 10
+- **Status**: ✅ Complete (Week 10)
 - **Effort**: 10 minutes
 - **Tasks**:
-  - [ ] TS: Update root `package.json` version 2.3.1 → 2.4.0
-  - [ ] TS: Update root `README.md` version reference 2.3.1 → 2.4.0
-  - [ ] Go: Update `sdks/go/README.md` version 1.8.1 → 1.9.0
+  - [x] TS: Update root `package.json` version 2.3.1 → 2.4.0
+  - [x] TS: Update root `README.md` version reference 2.3.1 → 2.4.0
+  - [x] Go: Update `sdks/go/README.md` version 1.8.1 → 1.9.0
 
 ### P1-7: Go SDK SVM Upto Missing Tests
-- **Status**: 🔄 Week 10
+- **Status**: ✅ Complete (Week 10) — 102 tests
 - **Effort**: 1 day
-- **Details**: SVM upto scheme has complete implementation (client/server/facilitator) but zero test files. Only upto scheme without tests.
+- **Details**: All 4 test files created with comprehensive coverage.
 - **Tasks**:
-  - [ ] Write `sdks/go/mechanisms/svm/upto/client/scheme_test.go`
-  - [ ] Write `sdks/go/mechanisms/svm/upto/server/scheme_test.go`
-  - [ ] Write `sdks/go/mechanisms/svm/upto/facilitator/scheme_test.go`
+  - [x] Write `sdks/go/mechanisms/svm/upto/types_test.go` — 7 tests
+  - [x] Write `sdks/go/mechanisms/svm/upto/client/scheme_test.go` — 18 tests
+  - [x] Write `sdks/go/mechanisms/svm/upto/server/scheme_test.go` — 39 tests
+  - [x] Write `sdks/go/mechanisms/svm/upto/facilitator/scheme_test.go` — 38 tests
 
 ### P1-8: Java Spring WebFlux Missing Test
-- **Status**: 🔄 Week 10
+- **Status**: ✅ Complete (Week 10) — 28 tests
 - **Effort**: 2 hours
-- **Details**: `PaymentWebFilter.java` is fully implemented but has no test file. Only HTTP framework without test coverage.
+- **Details**: Full coverage of PaymentWebFilter including V2/V1 headers, route config, settlement.
 - **Tasks**:
-  - [ ] Write `sdks/java/src/test/java/io/t402/spring/reactive/PaymentWebFilterTest.java`
+  - [x] Write `PaymentWebFilterTest.java` — 28 tests (Java total: 1341→1369)
 
 ---
 
@@ -161,12 +162,12 @@ Items are grouped by priority and include estimated effort.
   - Note: Placeholder signers are intentional — examples show interface pattern without heavy deps
 
 ### P2-5: Spec Gaps
-- **Status**: 🔄 Week 10
+- **Status**: ✅ Complete (Week 10)
 - **Effort**: 30 minutes
 - **Tasks**:
-  - [ ] Mark `specs/schemes/upto/scheme_upto_evm.md` as non-DRAFT (TS implementation exists)
-  - [ ] Note: `specs/schemes/exact/scheme_exact_sui.md` remains DRAFT (no SDK implementation, deferred to Q3)
-  - [ ] Note: `specs/schemes/exact-direct/scheme_exact_direct_stacks.md` token address TBD (awaiting mainnet stablecoin)
+  - [x] Mark `specs/schemes/upto/scheme_upto_evm.md` as non-DRAFT (TS implementation exists)
+  - Note: `specs/schemes/exact/scheme_exact_sui.md` remains DRAFT (no SDK implementation, deferred to Q3)
+  - Note: `specs/schemes/exact-direct/scheme_exact_direct_stacks.md` token address TBD (awaiting mainnet stablecoin)
 
 ---
 
@@ -212,7 +213,7 @@ Week 5-6: ✅ P2-3 (Go upto 223 tests + Java Tezos/Polkadot +49 tests)
 Week 7: ✅ P0-2 (facilitator 50.1% → 57.2%, CI threshold 30% → 55%, bug fix in CheckAndCreate)
 Week 8: ✅ P1-5 (Go TON + multisig verified complete) + P2-3 (Java Micronaut/Quarkus verified complete)
 Week 9: ✅ P0-2 (facilitator 57.2% → 77.4%, CI threshold 55% → 75%, sqlmock DB tests for all 3 repos)
-Week 10: 🔄 P1-6 (version fixes) + P1-7 (SVM upto tests) + P1-8 (WebFlux test) + P2-5 (spec updates)
+Week 10: ✅ P1-6 (version fixes) + P1-7 (SVM upto 102 tests) + P1-8 (WebFlux 28 tests) + P2-5 (spec updates)
 Week 11+: P2-1 (infrastructure) — requires ops planning
 ```
 
@@ -250,6 +251,6 @@ Week 11+: P2-1 (infrastructure) — requires ops planning
 | CLI test coverage | 5/5 commands | 5/5 | ✅ Complete |
 | SDK placeholders resolved | 6/6 | 6/6 | ✅ Complete |
 | Documentation gaps fixed | 4/4 | 4/4 | ✅ Complete |
-| Version consistency | 2/4 SDKs | 4/4 | 🔄 Week 10 |
-| SVM upto test coverage | 0 tests | ~90 tests | 🔄 Week 10 |
-| Java HTTP framework tests | 4/5 | 5/5 | 🔄 Week 10 |
+| Version consistency | 4/4 SDKs | 4/4 | ✅ Complete |
+| SVM upto test coverage | 102 tests | ~90 tests | ✅ Exceeded |
+| Java HTTP framework tests | 5/5 | 5/5 | ✅ Complete (1369 total) |
