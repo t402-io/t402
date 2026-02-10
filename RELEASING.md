@@ -36,7 +36,7 @@ Configure these secrets in your GitHub repository settings:
 
 ## TypeScript Packages (@t402/*)
 
-### All Packages (27 total)
+### All Packages (29 total)
 
 | Package | Path | Description |
 |---------|------|-------------|
@@ -52,6 +52,7 @@ Configure these secrets in your GitHub repository settings:
 | `@t402/tezos` | `sdks/typescript/packages/mechanisms/tezos` | Tezos mechanisms |
 | `@t402/polkadot` | `sdks/typescript/packages/mechanisms/polkadot` | Polkadot Asset Hub |
 | `@t402/stacks` | `sdks/typescript/packages/mechanisms/stacks` | Stacks (Bitcoin L2) |
+| `@t402/cosmos` | `sdks/typescript/packages/mechanisms/cosmos` | Cosmos (Noble) |
 | `@t402/express` | `sdks/typescript/packages/http/express` | Express middleware |
 | `@t402/hono` | `sdks/typescript/packages/http/hono` | Hono middleware |
 | `@t402/fastify` | `sdks/typescript/packages/http/fastify` | Fastify middleware |
@@ -65,6 +66,7 @@ Configure these secrets in your GitHub repository settings:
 | `@t402/wdk-gasless` | `sdks/typescript/packages/wdk-gasless` | ERC-4337 gasless |
 | `@t402/wdk-bridge` | `sdks/typescript/packages/wdk-bridge` | Cross-chain bridge |
 | `@t402/wdk-multisig` | `sdks/typescript/packages/wdk-multisig` | Safe multi-sig |
+| `@t402/a2a` | `sdks/typescript/packages/a2a` | Agent-to-Agent transport |
 | `@t402/mcp` | `sdks/typescript/packages/mcp` | AI agent MCP server |
 | `@t402/cli` | `sdks/typescript/packages/cli` | CLI tools |
 
@@ -118,13 +120,13 @@ Packages are published in dependency order automatically:
 
 1. `@t402/core` - No dependencies
 2. `@t402/evm-core` - Depends on core
-3. `@t402/evm`, `@t402/svm`, `@t402/ton`, `@t402/tron`, `@t402/near`, `@t402/aptos`, `@t402/tezos`, `@t402/polkadot`, `@t402/stacks` - Depend on core (evm depends on evm-core)
+3. `@t402/evm`, `@t402/svm`, `@t402/ton`, `@t402/tron`, `@t402/near`, `@t402/aptos`, `@t402/tezos`, `@t402/polkadot`, `@t402/stacks`, `@t402/cosmos` - Depend on core (evm depends on evm-core)
 4. `@t402/extensions`, `@t402/wdk` - Depend on core, mechanisms
 5. `@t402/express`, `@t402/hono`, `@t402/fastify`, `@t402/next` - Depend on core
 6. `@t402/fetch`, `@t402/axios` - Depend on core
 7. `@t402/paywall`, `@t402/react`, `@t402/vue` - Depend on core
 8. `@t402/wdk-gasless`, `@t402/wdk-bridge`, `@t402/wdk-multisig` - Depend on wdk, evm
-9. `@t402/mcp`, `@t402/cli` - Top-level tools
+9. `@t402/a2a`, `@t402/mcp`, `@t402/cli` - Top-level tools
 
 ---
 
@@ -193,8 +195,8 @@ Use workflow dispatch for testing:
 2. Commit changes
 3. Create and push a tag with `java/` prefix:
    ```bash
-   git tag java/v1.8.1
-   git push origin java/v1.8.1
+   git tag java/v1.10.0
+   git push origin java/v1.10.0
    ```
 4. GitHub Actions will:
    - Run tests
@@ -207,13 +209,13 @@ Use workflow dispatch for testing:
 Java packages are published to Maven Central:
 - Group ID: `io.t402`
 - Artifact ID: `t402`
-- Current version: `1.8.1`
+- Current version: `1.10.0`
 
 ```xml
 <dependency>
     <groupId>io.t402</groupId>
     <artifactId>t402</artifactId>
-    <version>1.8.1</version>
+    <version>1.10.0</version>
 </dependency>
 ```
 
@@ -263,7 +265,7 @@ git push origin --tags
 
 | Workflow | Trigger | Description |
 |----------|---------|-------------|
-| `npm_release.yml` | `v*` tags, manual | Publishes all 27 TypeScript packages to npm |
+| `npm_release.yml` | `v*` tags, manual | Publishes all 29 TypeScript packages to npm |
 | `changeset_release.yml` | Push to main | Creates version PRs, publishes on merge |
 | `go_release.yml` | `go/v*` tags, PRs | Tests Go and creates releases |
 | `python_release.yml` | `python/v*` tags, PRs | Publishes Python package to PyPI |

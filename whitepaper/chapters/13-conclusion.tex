@@ -16,7 +16,7 @@ This whitepaper has presented \tprotocol{}, an HTTP-native payment protocol for 
 
     \item \textbf{Transport Agnosticism}: The protocol cleanly separates payment logic from transport mechanisms. Whether payments flow over HTTP headers, MCP tool calls, or A2A agent messages, the underlying verification and settlement logic remains consistent. This separation enables future transport protocols without requiring changes to the core payment infrastructure.
 
-    \item \textbf{Chain Agnosticism}: \tprotocol{} provides a unified interface across nine distinct blockchain ecosystems: EVM (19+ networks), Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, and Stacks. Each chain's unique signing and token mechanisms are abstracted behind consistent interfaces, allowing developers to support multiple chains without chain-specific code paths.
+    \item \textbf{Chain Agnosticism}: \tprotocol{} provides a unified interface across ten distinct blockchain ecosystems: EVM (19+ networks), Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, and Cosmos. Each chain's unique signing and token mechanisms are abstracted behind consistent interfaces, allowing developers to support multiple chains without chain-specific code paths.
 
     \item \textbf{Gasless User Experience}: By leveraging EIP-3009 (Transfer with Authorization) for EVM chains and similar mechanisms on other networks, \tprotocol{} eliminates the need for end users to hold native tokens for gas. The facilitator sponsors all transaction fees, creating a seamless payment experience comparable to traditional credit cards.
 
@@ -37,10 +37,10 @@ The \tprotocol{} ecosystem has achieved significant milestones:
 \toprule
 \textbf{Metric} & \textbf{Value} \\
 \midrule
-Supported Blockchain Networks & 9 families (25+ networks) \\
+Supported Blockchain Networks & 10 families (44+ networks) \\
 SDK Languages & 4 (TypeScript, Go, Python, Java) \\
-TypeScript Packages & 21 packages \\
-HTTP Framework Integrations & 6 (Express, Hono, Fastify, Next.js, Fetch, Axios) \\
+TypeScript Packages & 29 packages \\
+HTTP Framework Integrations & 17 (across 4 SDKs) \\
 Frontend Component Libraries & 3 (React, Vue, Paywall) \\
 Protocol Version & v2 \\
 \bottomrule
@@ -140,7 +140,7 @@ We invite the developer community, enterprises, and researchers to participate i
 \begin{description}
     \item[Build] Integrate \tprotocol{} into your applications using our SDKs. Start with a single endpoint and expand as you validate the model with your users.
 
-    \item[Contribute] Submit improvements, bug fixes, and new features via GitHub. The protocol is open source under the MIT license, and we welcome contributions across all SDKs.
+    \item[Contribute] Submit improvements, bug fixes, and new features via GitHub. The protocol is open source under the Apache 2.0 license, and we welcome contributions across all SDKs.
 
     \item[Extend] Develop new payment schemes, transport bindings, or chain mechanisms. The modular architecture supports extension without core protocol changes.
 

@@ -41,6 +41,9 @@ These wrappers handle HTTP-specific concerns like headers, status codes, and req
 Framework-specific middleware packages for easy server integration:
 
 - **`http/gin`** - Gin framework middleware
+- **`http/echo`** - Echo framework middleware
+- **`http/chi`** - Chi router middleware
+- **`http/fiber`** - Fiber framework middleware
 
 Additional framework middleware can be built using the HTTP transport wrappers as a foundation.
 
@@ -57,22 +60,18 @@ These eliminate 95-99% of boilerplate code for creating signers.
 
 Payment scheme implementations that can be registered by clients, servers, and facilitators:
 
-- **`mechanisms/evm/exact`** - Ethereum/Base exact payment using EIP-3009
-  - `client/` - Client-side payment creation
-  - `server/` - Server-side payment verification
-  - `facilitator/` - Facilitator-side payment settlement
-
-- **`mechanisms/svm/exact`** - Solana exact payment using token transfers
-  - `client/` - Client-side payment creation
-  - `server/` - Server-side payment verification
-  - `facilitator/` - Facilitator-side payment settlement
-
+- **`mechanisms/evm/exact`** - Ethereum/Base exact payment using EIP-3009 (19 USDT0 networks)
+- **`mechanisms/svm/exact`** - Solana exact payment using SPL token transfers
 - **`mechanisms/ton/exact`** - TON exact payment using Jetton transfers (USDT)
-  - `client/` - Client-side payment creation
-  - `server/` - Server-side payment verification
-  - `facilitator/` - Facilitator-side payment settlement
+- **`mechanisms/tron/exact`** - TRON exact payment using TRC-20 transfers
+- **`mechanisms/near/exact`** - NEAR exact payment using NEP-141 transfers
+- **`mechanisms/aptos/exact`** - Aptos exact payment using Fungible Asset transfers
+- **`mechanisms/tezos/exact`** - Tezos exact payment using FA2 transfers
+- **`mechanisms/polkadot/exact`** - Polkadot Asset Hub exact payment
+- **`mechanisms/stacks/exact`** - Stacks (Bitcoin L2) SIP-010 payment
+- **`mechanisms/cosmos/exact`** - Cosmos (Noble) exact payment using MsgSend
 
-Each role (client, server, facilitator) has its own mechanism implementation with appropriate functionality for that role.
+Each mechanism provides `client/`, `server/`, and `facilitator/` sub-packages with role-specific implementations.
 
 ### Extensions
 
@@ -115,9 +114,8 @@ The package is designed with extreme modularity:
                   ▼
 ┌─────────────────────────────────────────┐
 │         Mechanisms (Pluggable)          │
-│  - EVM exact (client/server/facil.)    │
-│  - SVM exact (client/server/facil.)    │
-│  - TON exact (client/server/facil.)    │
+│  - EVM, SVM, TON, TRON, NEAR, Aptos   │
+│  - Tezos, Polkadot, Stacks, Cosmos    │
 └─────────────────────────────────────────┘
                   │
                   ▼
@@ -206,21 +204,22 @@ github.com/t402-io/t402/sdks/go
 │   ├── client.go              - HTTP client wrapper
 │   ├── server.go              - HTTP server integration
 │   ├── facilitator_client.go  - Facilitator HTTP client
-│   └── gin/                   - Gin middleware
+│   ├── gin/                   - Gin middleware
+│   ├── echo/                  - Echo middleware
+│   ├── chi/                   - Chi middleware
+│   └── fiber/                 - Fiber middleware
 │
-├── mechanisms/                - Payment schemes
-│   ├── evm/exact/
-│   │   ├── client/            - EVM client mechanism
-│   │   ├── server/            - EVM server mechanism
-│   │   └── facilitator/       - EVM facilitator mechanism
-│   ├── svm/exact/
-│   │   ├── client/            - SVM client mechanism
-│   │   ├── server/            - SVM server mechanism
-│   │   └── facilitator/       - SVM facilitator mechanism
-│   └── ton/exact/
-│       ├── client/            - TON client mechanism
-│       ├── server/            - TON server mechanism
-│       └── facilitator/       - TON facilitator mechanism
+├── mechanisms/                - Payment schemes (10 chains)
+│   ├── evm/exact/             - EVM (19 USDT0 networks)
+│   ├── svm/exact/             - Solana
+│   ├── ton/exact/             - TON
+│   ├── tron/exact/            - TRON
+│   ├── near/exact/            - NEAR
+│   ├── aptos/exact/           - Aptos
+│   ├── tezos/exact/           - Tezos
+│   ├── polkadot/exact/        - Polkadot Asset Hub
+│   ├── stacks/exact/          - Stacks
+│   └── cosmos/exact/          - Cosmos (Noble)
 │
 ├── signers/                   - Signer helpers
 │   ├── evm/                   - EVM client signers
@@ -260,25 +259,64 @@ Use `solana:*` wildcard to support all Solana networks.
 
 ### TON (The Open Network)
 
-TON networks using CAIP-2 identifiers:
 - TON Mainnet (`ton:mainnet`)
 - TON Testnet (`ton:testnet`)
 
-Use `ton:*` wildcard to support all TON networks.
+### TRON
+
+- TRON Mainnet (`tron:mainnet`)
+- TRON Nile Testnet (`tron:nile`)
+
+### NEAR Protocol
+
+- NEAR Mainnet (`near:mainnet`)
+- NEAR Testnet (`near:testnet`)
+
+### Aptos
+
+- Aptos Mainnet (`aptos:1`)
+- Aptos Testnet (`aptos:2`)
+
+### Tezos
+
+- Tezos Mainnet (`tezos:NetXdQprcVkpaWU`)
+- Tezos Ghostnet (`tezos:NetXnHfVqm9iesp`)
+
+### Polkadot
+
+- Polkadot Asset Hub (`polkadot:68d56f15f85d3136970ec16946040bc1`)
+- Westend Asset Hub (testnet)
+
+### Stacks (Bitcoin L2)
+
+- Stacks Mainnet (`stacks:1`)
+- Stacks Testnet (`stacks:2147483648`)
+
+### Cosmos (Noble)
+
+- Noble Mainnet (`cosmos:noble-1`)
+- Noble Testnet (`cosmos:grand-1`)
 
 ## Supported Schemes
 
 ### Exact Payment
 
 Transfer an exact amount to access a resource:
-- **EVM**: Uses EIP-3009 `transferWithAuthorization` (USDC compatible tokens)
-- **SVM**: Uses Solana token transfers (USDC SPL token)
+- **EVM**: Uses EIP-3009 `transferWithAuthorization` for USDT0 (19 networks)
+- **SVM**: Uses Solana SPL token transfers (USDT)
 - **TON**: Uses Jetton transfers (USDT)
+- **TRON**: Uses TRC-20 transfers (USDT)
+- **NEAR**: Uses NEP-141 transfers (USDT)
+- **Aptos**: Uses Fungible Asset transfers (USDT)
+- **Tezos**: Uses FA2 transfers (USDt)
+- **Polkadot**: Uses Asset Hub transfers (USDT, Asset ID 1984)
+- **Stacks**: Uses SIP-010 transfers
+- **Cosmos**: Uses Noble MsgSend (native USDT)
 
 ## Features
 
 - ✅ Protocol v2 with v1 backward compatibility
-- ✅ Multi-chain support (EVM and SVM)
+- ✅ Multi-chain support (EVM, SVM, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos)
 - ✅ Modular architecture - use core primitives directly or with helpers
 - ✅ Type safe with strong typing throughout
 - ✅ Framework agnostic core

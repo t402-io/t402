@@ -92,7 +92,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/t402-io/t402.git",
-    "directory": "typescript/packages/mechanisms/stacks"
+    "directory": "sdks/typescript/packages/mechanisms/stacks"
   },
   "bugs": {
     "url": "https://github.com/t402-io/t402/issues"

@@ -13,6 +13,12 @@ from t402.networks import (
     is_tron_network,
     is_evm_network,
     is_svm_network,
+    is_near_network,
+    is_aptos_network,
+    is_tezos_network,
+    is_polkadot_network,
+    is_stacks_network,
+    is_cosmos_network,
     get_network_type,
 )
 from t402.types import (

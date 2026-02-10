@@ -42,7 +42,7 @@ updates:
 
   # Python packages
   - package-ecosystem: "pip"
-    directory: "/sdks/python"
+    directory: "/sdks/python/t402"
     schedule:
       interval: "weekly"
       day: "monday"

@@ -587,14 +587,18 @@ export class t402HTTPResourceServer {
    * @returns Decoded payment payload or null
    */
   private extractPayment(adapter: HTTPAdapter): PaymentPayload | null {
-    // Check v2 header first (PAYMENT-SIGNATURE)
-    const header = adapter.getHeader("payment-signature") || adapter.getHeader("PAYMENT-SIGNATURE");
+    // Check v2 header first (PAYMENT-SIGNATURE), then v1 fallback (X-PAYMENT)
+    const header =
+      adapter.getHeader("payment-signature") ||
+      adapter.getHeader("PAYMENT-SIGNATURE") ||
+      adapter.getHeader("x-payment") ||
+      adapter.getHeader("X-PAYMENT");
 
     if (header) {
       try {
         return decodePaymentSignatureHeader(header);
       } catch (error) {
-        console.warn("Failed to decode PAYMENT-SIGNATURE header:", error);
+        console.warn("Failed to decode payment header:", error);
       }
     }
 

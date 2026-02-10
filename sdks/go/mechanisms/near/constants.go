@@ -74,6 +74,13 @@ var (
 		},
 	}
 
+	// USDT on NEAR Testnet
+	USDTTestnet = TokenInfo{
+		ContractID: "usdt.fakes.testnet",
+		Symbol:     "USDT",
+		Decimals:   6,
+	}
+
 	// Token registry by network
 	TokenRegistry = map[string]map[string]TokenInfo{
 		NearMainnetCAIP2: {
@@ -82,6 +89,7 @@ var (
 		},
 		NearTestnetCAIP2: {
 			"USDC": USDCTestnet,
+			"USDT": USDTTestnet,
 		},
 	}
 )

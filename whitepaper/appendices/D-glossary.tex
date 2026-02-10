@@ -56,6 +56,9 @@ Chain Agnostic Improvement Proposal 10, extending CAIP-2 to include account addr
 \item[Clarity]
 Smart contract language for the Stacks blockchain, designed for predictability and security with decidable execution.
 
+\item[Cosmos/Noble]
+Cosmos ecosystem blockchain focused on native asset issuance. Noble hosts native USDT with the \code{uusdt} denomination. Uses CAIP-2 identifiers \code{cosmos:noble-1} (mainnet) and \code{cosmos:grand-1} (testnet).
+
 \item[Client]
 Any application, service, or AI agent that requests access to protected resources and submits payment authorizations. Clients sign payments off-chain without needing native tokens for gas.
 
@@ -228,7 +231,7 @@ In Tezos FA2, an address authorized to transfer tokens on behalf of the owner. T
 Independent blockchain connected to the Polkadot relay chain, benefiting from shared security. Asset Hub is Polkadot's system parachain for tokens.
 
 \item[PaymentPayload]
-JSON structure containing a signed payment authorization sent by clients in the \code{X-PAYMENT} header. Includes payer, signature, and authorization details.
+JSON structure containing a signed payment authorization sent by clients in the \code{PAYMENT-SIGNATURE} header. Includes payer, signature, and authorization details.
 
 \item[PaymentRequired]
 JSON structure returned by servers in 402 responses, describing acceptable payment methods including network, scheme, amount, and recipient address.
@@ -267,7 +270,7 @@ Optional metadata in \tprotocol{} v2 describing the protected resource, enabling
 \begin{description}[style=nextline]
 
 \item[Scheme]
-Payment logic defining how amounts are calculated and validated. Currently \tprotocol{} supports ``exact'' (amount matches exactly); ``up-to'' (streaming/variable) planned.
+Payment logic defining how amounts are calculated and validated. \tprotocol{} supports ``exact'' (fixed amount) and ``up-to'' (metered/variable, available on Solana, TON, TRON, NEAR).
 
 \item[Settlement]
 Process of executing a payment transaction on the blockchain, transferring tokens from payer to recipient.
@@ -324,7 +327,7 @@ Native token of the TRON network, used for bandwidth, energy, and governance.
 \begin{description}[style=nextline]
 
 \item[Up-To Scheme]
-Planned \tprotocol{} payment scheme for streaming or variable amounts, where the client authorizes up to a maximum and the server settles the actual consumed amount.
+\tprotocol{} payment scheme for streaming or variable amounts, where the client authorizes up to a maximum and the server settles the actual consumed amount. Implemented for Solana, TON, TRON, and NEAR.
 
 \item[USDT]
 Tether USD, the most widely used stablecoin, maintaining approximate 1:1 parity with the US dollar. Available on 12+ blockchains.
@@ -374,14 +377,14 @@ TON's parallel blockchain shards. Workchain 0 (basechain) handles standard trans
 
 \begin{description}[style=nextline]
 
-\item[X-PAYMENT]
-HTTP header containing the base64url-encoded payment payload in \tprotocol{} requests.
+\item[PAYMENT-SIGNATURE]
+HTTP header (V2) containing the base64url-encoded payment payload in \tprotocol{} requests. V1 alias: \code{X-PAYMENT}.
 
-\item[X-PAYMENT-REQUIRED]
-HTTP header containing base64url-encoded payment requirements in 402 responses.
+\item[PAYMENT-REQUIRED]
+HTTP header (V2) containing base64url-encoded payment requirements in 402 responses. V1 alias: \code{X-PAYMENT-REQUIRED}.
 
-\item[X-PAYMENT-RESPONSE]
-HTTP header containing settlement confirmation details after successful payment.
+\item[PAYMENT-RESPONSE]
+HTTP header (V2) containing settlement confirmation details after successful payment. V1 alias: \code{X-PAYMENT-RESPONSE}.
 
 \item[XCM (Cross-Consensus Messaging)]
 Polkadot's protocol for cross-chain communication between parachains and with external networks.

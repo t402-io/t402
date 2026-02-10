@@ -70,10 +70,11 @@ The \tprotocol{} protocol involves three primary actors, each with distinct resp
 \node[blockchain, below=2.5cm of server] (blockchain) {Blockchain};
 
 % Blockchain sub-elements
-\node[subcomponent, draw=orange, fill=orange!5] at ([xshift=-2.5cm]blockchain.center) (evm) {EVM};
-\node[subcomponent, draw=orange, fill=orange!5] at ([xshift=-0.8cm]blockchain.center) (solana) {Solana};
-\node[subcomponent, draw=orange, fill=orange!5] at ([xshift=0.8cm]blockchain.center) (ton) {TON};
-\node[subcomponent, draw=orange, fill=orange!5] at ([xshift=2.5cm]blockchain.center) (tron) {TRON};
+\node[subcomponent, draw=orange, fill=orange!5] at ([xshift=-3.5cm]blockchain.center) (evm) {EVM};
+\node[subcomponent, draw=orange, fill=orange!5] at ([xshift=-1.8cm]blockchain.center) (solana) {Solana};
+\node[subcomponent, draw=orange, fill=orange!5] at ([xshift=0cm]blockchain.center) (ton) {TON};
+\node[subcomponent, draw=orange, fill=orange!5] at ([xshift=1.8cm]blockchain.center) (tron) {TRON};
+\node[subcomponent, draw=orange, fill=orange!5] at ([xshift=3.5cm]blockchain.center) (more) {+6 more};
 
 % Arrows with labels
 \draw[arrow] (client) -- node[label, above] {1. Request} (server);
@@ -250,14 +251,14 @@ Without a valid payment, the server responds with HTTP 402 and includes payment 
 \begin{lstlisting}[language=json,caption={HTTP 402 response with payment requirements}]
 HTTP/1.1 402 Payment Required
 Content-Type: application/json
-X-PAYMENT-REQUIRED: eyJ0NDAyVmVyc2lvbiI6Mi4uLn0=
+PAYMENT-REQUIRED: eyJ0NDAyVmVyc2lvbiI6Mi4uLn0=
 
 {
   "error": "Payment required to access this resource"
 }
 \end{lstlisting}
 
-The Base64-encoded \code{X-PAYMENT-REQUIRED} header contains the full \code{PaymentRequired} schema (see \cref{sec:payment-required}).
+The Base64-encoded \code{PAYMENT-REQUIRED} header contains the full \code{PaymentRequired} schema (see \cref{sec:payment-required}).
 
 \subsection{Step 3: Payment Signing}
 
@@ -278,7 +279,7 @@ The client re-submits with the signed payment:
 GET /api/premium-data HTTP/1.1
 Host: api.example.com
 Accept: application/json
-X-PAYMENT: eyJ0NDAyVmVyc2lvbiI6Mi4uLn0=
+PAYMENT-SIGNATURE: eyJ0NDAyVmVyc2lvbiI6Mi4uLn0=
 \end{lstlisting}
 
 \subsection{Step 5: Verification and Settlement}
@@ -298,14 +299,14 @@ Upon successful settlement:
 \begin{lstlisting}[language=json,caption={Successful response with settlement proof}]
 HTTP/1.1 200 OK
 Content-Type: application/json
-X-PAYMENT-RESPONSE: eyJzdWNjZXNzIjp0cnVlLC4uLn0=
+PAYMENT-RESPONSE: eyJzdWNjZXNzIjp0cnVlLC4uLn0=
 
 {
   "data": "premium content..."
 }
 \end{lstlisting}
 
-The \code{X-PAYMENT-RESPONSE} header contains the blockchain transaction hash, providing cryptographic proof of payment.
+The \code{PAYMENT-RESPONSE} header contains the blockchain transaction hash, providing cryptographic proof of payment.
 
 \section{Trust Model}
 \label{sec:trust-model}
@@ -392,11 +393,12 @@ The EIP-712 typed signature covers all authorization parameters, including the r
 \node[chainbox, draw=red!70, fill=red!15] (tron) at (2.75,0) {TRON};
 \node[chainbox, draw=green!70, fill=green!15] (near) at (5.5,0) {NEAR};
 
-% Bottom row chains (4)
-\node[chainbox, draw=orange!70, fill=orange!15] (aptos) at (-4.1,-1.5) {Aptos};
-\node[chainbox, draw=teal!70, fill=teal!15] (tezos) at (-1.37,-1.5) {Tezos};
-\node[chainbox, draw=pink!70, fill=pink!15] (polkadot) at (1.37,-1.5) {Polkadot};
-\node[chainbox, draw=brown!70, fill=brown!15] (stacks) at (4.1,-1.5) {Stacks};
+% Bottom row chains (5)
+\node[chainbox, draw=orange!70, fill=orange!15] (aptos) at (-5.5,-1.5) {Aptos};
+\node[chainbox, draw=teal!70, fill=teal!15] (tezos) at (-2.75,-1.5) {Tezos};
+\node[chainbox, draw=pink!70, fill=pink!15] (polkadot) at (0,-1.5) {Polkadot};
+\node[chainbox, draw=brown!70, fill=brown!15] (stacks) at (2.75,-1.5) {Stacks};
+\node[chainbox, draw=olive!70, fill=olive!15] (cosmos) at (5.5,-1.5) {Cosmos};
 
 % Features (top row)
 \node[font=\tiny] at (-5.5,-0.6) {EIP-3009};
@@ -406,10 +408,11 @@ The EIP-712 typed signature covers all authorization parameters, including the r
 \node[font=\tiny] at (5.5,-0.6) {NEP-141};
 
 % Features (bottom row)
-\node[font=\tiny] at (-4.1,-2.1) {FA};
-\node[font=\tiny] at (-1.37,-2.1) {FA2};
-\node[font=\tiny] at (1.37,-2.1) {Asset Hub};
-\node[font=\tiny] at (4.1,-2.1) {SIP-010};
+\node[font=\tiny] at (-5.5,-2.1) {FA};
+\node[font=\tiny] at (-2.75,-2.1) {FA2};
+\node[font=\tiny] at (0,-2.1) {Asset Hub};
+\node[font=\tiny] at (2.75,-2.1) {SIP-010};
+\node[font=\tiny] at (5.5,-2.1) {Native};
 
 % Connections - top row
 \draw[->, thick, violet] (t402.south) ++(-4.2,0) -- (evm.north);
@@ -421,11 +424,12 @@ The EIP-712 typed signature covers all authorization parameters, including the r
 % Connections - bottom row (through top row)
 \draw[->, thick, violet!60] (evm.south) -- (aptos.north);
 \draw[->, thick, violet!60] (sol.south) -- (tezos.north);
-\draw[->, thick, violet!60] (tron.south) -- (polkadot.north);
-\draw[->, thick, violet!60] (near.south) -- (stacks.north);
+\draw[->, thick, violet!60] (ton.south) -- (polkadot.north);
+\draw[->, thick, violet!60] (tron.south) -- (stacks.north);
+\draw[->, thick, violet!60] (near.south) -- (cosmos.north);
 
 \end{tikzpicture}
-\caption{T402 multi-chain architecture: 9 blockchain families, 30+ networks}
+\caption{T402 multi-chain architecture: 10 blockchain families, 44+ networks}
 \label{fig:multichain}
 \end{figure}
 

@@ -536,8 +536,8 @@ When using HTTP transport, \tprotocol{} uses custom headers for payment data.
 \toprule
 \textbf{Header} & \textbf{Description} \\
 \midrule
-\code{X-PAYMENT-SIGNATURE} & Base64-encoded PaymentPayload JSON \\
-\code{X-PAYMENT} & Alias for X-PAYMENT-SIGNATURE \\
+\code{PAYMENT-SIGNATURE} & Base64-encoded PaymentPayload JSON \\
+\code{X-PAYMENT} & V1 alias for PAYMENT-SIGNATURE \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -552,8 +552,8 @@ When using HTTP transport, \tprotocol{} uses custom headers for payment data.
 \toprule
 \textbf{Header} & \textbf{Description} \\
 \midrule
-\code{X-PAYMENT-REQUIRED} & Base64-encoded PaymentRequired JSON \\
-\code{X-PAYMENT-RESPONSE} & Base64-encoded SettlementResponse JSON \\
+\code{PAYMENT-REQUIRED} & Base64-encoded PaymentRequired JSON \\
+\code{PAYMENT-RESPONSE} & Base64-encoded SettlementResponse JSON \\
 \bottomrule
 \end{tabular}
 \end{table}

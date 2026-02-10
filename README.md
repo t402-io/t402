@@ -40,6 +40,7 @@ Mechanisms (Chain-specific payment implementations):
 @t402/tezos             Tezos FA2 token support
 @t402/polkadot          Polkadot Asset Hub support
 @t402/stacks            Stacks (Bitcoin L2) SIP-010 support
+@t402/cosmos            Cosmos (Noble) native USDT support
 
 HTTP Integrations:
 @t402/express           Express.js middleware
@@ -57,6 +58,9 @@ WDK (Wallet Development Kit):
 @t402/wdk-gasless       ERC-4337 gasless payments
 @t402/wdk-bridge        LayerZero cross-chain bridging
 @t402/wdk-multisig      Safe multi-sig support
+
+Transports:
+@t402/a2a               Agent-to-Agent transport
 
 Tools:
 @t402/mcp               AI Agent MCP server (Claude, etc.)
@@ -241,7 +245,7 @@ t402 info eip155:8453
 | Core Server | ✅ | ✅ | ✅ | ✅ |
 | Facilitator | ✅ | ✅ | ✅ | ✅ |
 | EVM (19 USDT0 networks) | ✅ | ✅ | ✅ | ✅ |
-| SVM (Solana) | ✅ | ✅ | ✅ | ❌ |
+| SVM (Solana) | ✅ | ✅ | ✅ | ✅ |
 | TON | ✅ | ✅ | ✅ | ✅ |
 | TRON | ✅ | ✅ | ✅ | ✅ |
 | NEAR | ✅ | ✅ | ✅ | ✅ |
@@ -258,16 +262,16 @@ t402 info eip155:8453
 
 Legend: ✅ Complete | ❌ Not Available
 
-**Total Supported Networks: 33** across 10 blockchain families
+**Total Supported Networks: 44+** across 10 blockchain families
 
 ## Latest Releases
 
 | SDK | Version | Release Date | Changelog |
 |-----|---------|--------------|-----------|
 | TypeScript | v2.4.0 | 2026-02-06 | [CHANGELOG](sdks/typescript/CHANGELOG.md) |
-| Python | v1.10.0 | 2026-02-06 | [CHANGELOG](sdks/python/CHANGELOG.md) |
+| Python | v1.10.1 | 2026-02-06 | [CHANGELOG](sdks/python/CHANGELOG.md) |
 | Go | v1.9.0 | 2026-02-06 | [CHANGELOG](sdks/go/CHANGELOG.md) |
-| Java | v1.9.0 | 2026-02-06 | [CHANGELOG](sdks/java/CHANGELOG.md) |
+| Java | v1.10.0 | 2026-02-06 | [CHANGELOG](sdks/java/CHANGELOG.md) |
 
 ## Ecosystem
 
@@ -296,7 +300,7 @@ sequenceDiagram
     Client->>Server: GET /api
     Server->>Client: 402 Payment Required
     Note over Client: Create payment payload
-    Client->>Server: GET /api + X-PAYMENT header
+    Client->>Server: GET /api + PAYMENT-SIGNATURE header
     Server->>Facilitator: POST /verify
     Facilitator->>Server: Verification result
     Note over Server: Process request
@@ -308,7 +312,7 @@ sequenceDiagram
 ```
 
 1. `Client` makes an HTTP request to a `resource server`
-2. `Resource server` responds with `402 Payment Required` and `PaymentRequired` header
+2. `Resource server` responds with `402 Payment Required` and `PAYMENT-REQUIRED` header
 3. `Client` creates a `PaymentPayload` based on selected `scheme` & `network`
 4. `Client` sends request with `PAYMENT-SIGNATURE` header
 5. `Resource server` verifies via facilitator's `/verify` endpoint
