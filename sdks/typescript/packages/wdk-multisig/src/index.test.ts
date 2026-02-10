@@ -2,7 +2,7 @@
  * WDK Multi-sig Tests
  */
 
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import type { Address, Hex } from 'viem'
 import {
   combineSignatures,
@@ -956,21 +956,24 @@ describe('SignatureCollector', () => {
     })
 
     it('should remove only expired requests from mixed set', () => {
-      const shortCollector = new SignatureCollector({ expirationMs: 1 })
-      const expiredRequest = shortCollector.createRequest(mockUserOp, mockUserOpHash, owners, 2)
+      vi.useFakeTimers()
+      try {
+        const shortCollector = new SignatureCollector({ expirationMs: 100 })
+        const expiredRequest = shortCollector.createRequest(mockUserOp, mockUserOpHash, owners, 2)
 
-      return new Promise<void>((resolve) => {
-        setTimeout(() => {
-          // Create a fresh request after the first has expired
-          const freshRequest = shortCollector.createRequest(mockUserOp, mockUserOpHash, owners, 2)
+        // Advance past expiration
+        vi.advanceTimersByTime(150)
 
-          shortCollector.cleanup()
+        // Create a fresh request after the first has expired
+        const freshRequest = shortCollector.createRequest(mockUserOp, mockUserOpHash, owners, 2)
 
-          expect(shortCollector.getRequest(expiredRequest.id)).toBeUndefined()
-          expect(shortCollector.getRequest(freshRequest.id)).toBeDefined()
-          resolve()
-        }, 10)
-      })
+        shortCollector.cleanup()
+
+        expect(shortCollector.getRequest(expiredRequest.id)).toBeUndefined()
+        expect(shortCollector.getRequest(freshRequest.id)).toBeDefined()
+      } finally {
+        vi.useRealTimers()
+      }
     })
   })
 
