@@ -4,6 +4,16 @@ All notable changes to the T402 Java SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [1.10.0] - 2026-02-09
+
+### Added
+- **Full EVM Network Coverage** - All 22 USDT0 networks now supported (added Plasma, Mantle, Sei, Conflux, Monad, Flare, Rootstock, XLayer, Stable, HyperEVM, MegaETH, Corn)
+- **Legacy USDT Networks** - 5 legacy USDT networks with `exact-legacy` scheme (BNB, Avalanche, Fantom, Celo, Kaia)
+  - `USDT_LEGACY_ADDRESSES` map with contract addresses
+  - `USDT_LEGACY_TOKEN_NAMES` map with per-network EIP-712 domain names
+  - `USDT_LEGACY_DECIMALS` map (BNB and Celo use 18 decimals)
+  - `getLegacyUsdtAddress()` and `getTokenDecimals()` utility methods
+
 ## [1.9.0] - 2026-02-06
 
 ### Added
@@ -582,7 +592,8 @@ Initial release of the T402 Java SDK, published to Maven Central.
 implementation 'io.t402:t402:1.0.0'
 ```
 
-[Unreleased]: https://github.com/t402-io/t402/compare/java/v1.9.0...HEAD
+[Unreleased]: https://github.com/t402-io/t402/compare/java/v1.10.0...HEAD
+[1.10.0]: https://github.com/t402-io/t402/compare/java/v1.9.0...java/v1.10.0
 [1.9.0]: https://github.com/t402-io/t402/compare/java/v1.8.1...java/v1.9.0
 [1.8.1]: https://github.com/t402-io/t402/compare/java/v1.8.0...java/v1.8.1
 [1.8.0]: https://github.com/t402-io/t402/compare/java/v1.7.0...java/v1.8.0
