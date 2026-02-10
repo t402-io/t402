@@ -98,6 +98,23 @@ public final class EvmConstants {
     /** Corn Mainnet. */
     public static final String CORN_MAINNET = "eip155:21000000";
 
+    // Legacy USDT Networks (no EIP-3009 support, use exact-legacy scheme)
+
+    /** BNB Chain (BSC). */
+    public static final String BSC_MAINNET = "eip155:56";
+
+    /** Avalanche C-Chain. */
+    public static final String AVALANCHE_MAINNET = "eip155:43114";
+
+    /** Fantom Opera. */
+    public static final String FANTOM_MAINNET = "eip155:250";
+
+    /** Celo. */
+    public static final String CELO_MAINNET = "eip155:42220";
+
+    /** Kaia (formerly Klaytn). */
+    public static final String KAIA_MAINNET = "eip155:8217";
+
     /** Sepolia Testnet. */
     public static final String SEPOLIA = "eip155:11155111";
 
@@ -126,6 +143,34 @@ public final class EvmConstants {
         Map.entry(HYPEREVM_MAINNET, "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb"),
         Map.entry(MEGAETH_MAINNET, "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb"),
         Map.entry(CORN_MAINNET, "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb")
+    );
+
+    // ============================================================
+    // Legacy USDT Token Addresses (no EIP-3009, use approve+transferFrom)
+    // ============================================================
+
+    /** Legacy USDT addresses indexed by network. */
+    public static final Map<String, String> USDT_LEGACY_ADDRESSES = Map.of(
+        BSC_MAINNET, "0x55d398326f99059fF775485246999027B3197955",
+        AVALANCHE_MAINNET, "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7",
+        FANTOM_MAINNET, "0x049d68029688eabf473097a2fc38ef61633a3c7a",
+        CELO_MAINNET, "0x48065fbBE25f71C9282ddf5e1cD6D6A887483D5e",
+        KAIA_MAINNET, "0xcee8faf64bb97a73bb51e115aa89c17ffa8dd167"
+    );
+
+    /** Legacy USDT EIP-712 domain names (varies per network). */
+    public static final Map<String, String> USDT_LEGACY_TOKEN_NAMES = Map.of(
+        BSC_MAINNET, "Tether USD",
+        AVALANCHE_MAINNET, "TetherToken",
+        FANTOM_MAINNET, "Frapped USDT",
+        CELO_MAINNET, "Tether USD",
+        KAIA_MAINNET, "Tether USD"
+    );
+
+    /** Legacy USDT decimals override (BNB and Celo use 18 instead of 6). */
+    public static final Map<String, Integer> USDT_LEGACY_DECIMALS = Map.of(
+        BSC_MAINNET, 18,
+        CELO_MAINNET, 18
     );
 
     // ============================================================
@@ -215,6 +260,11 @@ public final class EvmConstants {
             HYPEREVM_MAINNET,
             MEGAETH_MAINNET,
             CORN_MAINNET,
+            BSC_MAINNET,
+            AVALANCHE_MAINNET,
+            FANTOM_MAINNET,
+            CELO_MAINNET,
+            KAIA_MAINNET,
             SEPOLIA
         );
     }
@@ -246,6 +296,11 @@ public final class EvmConstants {
         Map.entry(HYPEREVM_MAINNET, 999L),
         Map.entry(MEGAETH_MAINNET, 4326L),
         Map.entry(CORN_MAINNET, 21000000L),
+        Map.entry(BSC_MAINNET, 56L),
+        Map.entry(AVALANCHE_MAINNET, 43114L),
+        Map.entry(FANTOM_MAINNET, 250L),
+        Map.entry(CELO_MAINNET, 42220L),
+        Map.entry(KAIA_MAINNET, 8217L),
         Map.entry(SEPOLIA, 11155111L)
     );
 
@@ -314,6 +369,10 @@ public final class EvmConstants {
         if (usdc != null) {
             return usdc;
         }
+        String legacy = USDT_LEGACY_ADDRESSES.get(network);
+        if (legacy != null) {
+            return legacy;
+        }
         throw new IllegalArgumentException("No supported token on network: " + network);
     }
 
@@ -336,6 +395,11 @@ public final class EvmConstants {
         String usdc = USDC_ADDRESSES.get(network);
         if (usdc != null && usdc.equalsIgnoreCase(tokenAddress)) {
             return USDC_TOKEN_NAME;
+        }
+        String legacy = USDT_LEGACY_ADDRESSES.get(network);
+        if (legacy != null && legacy.equalsIgnoreCase(tokenAddress)) {
+            String legacyName = USDT_LEGACY_TOKEN_NAMES.get(network);
+            return legacyName != null ? legacyName : "Tether USD";
         }
         return USDT0_TOKEN_NAME; // Default fallback
     }
@@ -380,6 +444,37 @@ public final class EvmConstants {
             }
         }
         throw new IllegalArgumentException("Not an EVM network: " + network);
+    }
+
+    /**
+     * Gets the legacy USDT address for a given network.
+     *
+     * @param network Network identifier (CAIP-2 format)
+     * @return Legacy USDT contract address
+     * @throws IllegalArgumentException if network is not supported for legacy USDT
+     */
+    public static String getLegacyUsdtAddress(String network) {
+        String address = USDT_LEGACY_ADDRESSES.get(network);
+        if (address == null) {
+            throw new IllegalArgumentException("Legacy USDT not available on network: " + network);
+        }
+        return address;
+    }
+
+    /**
+     * Gets the token decimals for a given token address on a network.
+     *
+     * @param network Network identifier (CAIP-2 format)
+     * @param tokenAddress Token contract address
+     * @return Token decimals (6 for most tokens, 18 for BNB/Celo legacy USDT)
+     */
+    public static int getTokenDecimals(String network, String tokenAddress) {
+        String legacy = USDT_LEGACY_ADDRESSES.get(network);
+        if (legacy != null && legacy.equalsIgnoreCase(tokenAddress)) {
+            Integer decimals = USDT_LEGACY_DECIMALS.get(network);
+            return decimals != null ? decimals : TOKEN_DECIMALS;
+        }
+        return TOKEN_DECIMALS;
     }
 
     /**

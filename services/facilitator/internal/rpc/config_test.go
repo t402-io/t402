@@ -252,7 +252,14 @@ func TestEVMNetworkPrefixes(t *testing.T) {
 		"eip155:57073":   "INK",
 		"eip155:80094":   "BERACHAIN",
 		"eip155:130":     "UNICHAIN",
-		"eip155:1030":    "CONFLUX",
+		"eip155:1030":     "CONFLUX",
+		"eip155:143":      "MONAD",
+		"eip155:9745":     "PLASMA",
+		"eip155:1329":     "SEI",
+		"eip155:196":      "XLAYER",
+		"eip155:988":      "STABLE",
+		"eip155:999":      "HYPEREVM",
+		"eip155:4326":     "MEGAETH",
 		"eip155:21000000": "CORN",
 	}
 
