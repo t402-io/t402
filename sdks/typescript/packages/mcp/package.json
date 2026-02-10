@@ -32,7 +32,7 @@
   "repository": "https://github.com/t402-io/t402",
   "devDependencies": {
     "@eslint/js": "^9.39.2",
-    "@types/node": "^25.2.0",
+    "@types/node": "^25.2.2",
     "@typescript-eslint/eslint-plugin": "^8.29.1",
     "@typescript-eslint/parser": "^8.29.1",
     "eslint": "^9.24.0",
