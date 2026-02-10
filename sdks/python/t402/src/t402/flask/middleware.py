@@ -13,7 +13,6 @@ from t402.types import (
     t402PaymentRequiredResponse,
     PaywallConfig,
     HTTPInputSchema,
-    T402_VERSION_V1,
     T402_VERSION_V2,
 )
 from t402.common import (
