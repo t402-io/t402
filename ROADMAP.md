@@ -236,9 +236,9 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 - [x] SBOM generation for container images
 
 **Security Audit:**
-- [ ] Complete internal security review
-- [ ] Fix all high/critical findings
-- [ ] Engage external auditor (Trail of Bits/OpenZeppelin)
+- [x] Complete internal security review (18 P1 issues found and fixed)
+- [x] Fix all high/critical findings
+- [ ] **Engage external auditor — P0 BLOCKER** (vendor not yet engaged)
 - [ ] Address audit findings
 
 **Performance Optimization:** ✅
@@ -434,8 +434,23 @@ These features are implemented as advanced packages ready for public release:
 - [x] Horizontal Pod Autoscaler
 - [x] Disaster recovery plan
 
+### Three-Site Redesign (2026-02-10) ✅
+- [x] t402.io — Full visual overhaul (hero, features, SDK grid, ecosystem, CTA)
+- [x] docs.t402.io — Nextra theme overhaul (branded navbar, sidebar, code blocks, footer)
+- [x] demo.t402.io — Card system, alternating sections, developer quick start
+
+### Q1-Q2 2026 Development Plan ✅
+- [x] All 18 P1 security issues fixed
+- [x] Facilitator: 44 networks, 64 kinds live (77.4% test coverage)
+- [x] Full SDK parity: 10 mechanisms × 4 SDKs, 18 HTTP frameworks
+- [x] MCP 6/6 tools across all 4 SDKs
+- [x] 7,100+ tests across all SDKs, zero failures
+- [x] Full documentation audit (34 files, +720/-177 lines)
+- [x] Dependabot backlog cleared (15 PRs merged)
+- [x] Project-wide audit (70+ files, 6 commits)
+
 ### Documentation & Community ✅
-- [x] Documentation site (docs.t402.io)
+- [x] Documentation site (docs.t402.io) — 100 pages
 - [x] Algolia search integration
 - [x] Bug bounty program
 - [x] Security policy
@@ -548,11 +563,11 @@ We welcome contributions! See [CONTRIBUTING.md](./CONTRIBUTING.md) for guideline
 
 ### Priority Areas
 
-1. **CI/CD**: Improving test coverage and automation
-2. **Language SDKs**: Completing Go, Python, Java implementations
-3. **Documentation**: Tutorials, examples, API docs
-4. **Testing**: Integration tests, E2E tests, security tests
-5. **MCP**: Expanding AI agent capabilities
+1. **External Security Audit**: Smart contract audit (P0 blocker)
+2. **Rust SDK**: Wasm-compatible SDK for browser and Node.js
+3. **Swift SDK**: iOS/macOS native support
+4. **Infrastructure**: Multi-region K8s deployment activation
+5. **New Chains**: Sui and other USDT0 expansion networks
 
 ---
 
