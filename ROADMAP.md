@@ -2,7 +2,7 @@
 
 > **The Official Payment Protocol for USDT**
 >
-> *Last Updated: 2026-02-06*
+> *Last Updated: 2026-02-10*
 
 This document outlines the development status and roadmap for T402, a payment protocol specifically designed for USDT and USDT0, with deep integration with [Tether WDK](https://wallet.tether.io/).
 
@@ -169,10 +169,10 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 - [x] Add dependency vulnerability scanning (Dependabot)
 - [x] Fix NPM release to include all packages (27 packages)
 
-**Week 3-4: TypeScript Package Alignment**
+**Week 3-4: TypeScript Package Alignment** ✅
 - [x] Align @t402/tron to v2.0.0
-- [ ] Extract common viem dependency to peer dependency
-- [ ] Standardize workspace protocol usage
+- [x] Extract common viem dependency to peer dependency
+- [x] Standardize workspace protocol usage
 - [x] Add missing packages to npm release workflow
 
 ### Phase 2: Quality & Documentation (Month 2) ✅
