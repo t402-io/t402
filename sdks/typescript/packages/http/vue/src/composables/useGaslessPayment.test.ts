@@ -3,7 +3,10 @@ import { useGaslessPayment } from './useGaslessPayment'
 
 const mockParams = { to: '0x1234', amount: 1000000n }
 
-function createMockPayFn(overrides?: { sponsored?: boolean; waitResult?: { txHash: string; success: boolean } }) {
+function createMockPayFn(overrides?: {
+  sponsored?: boolean
+  waitResult?: { txHash: string; success: boolean }
+}) {
   const waitResult = overrides?.waitResult ?? { txHash: '0xabc', success: true }
   const waitFn = vi.fn().mockResolvedValue(waitResult)
   const payFn = vi.fn().mockResolvedValue({

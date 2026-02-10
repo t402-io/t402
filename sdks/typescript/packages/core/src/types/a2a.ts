@@ -253,6 +253,9 @@ export const A2A_EXTENSIONS_HEADER = "X-A2A-Extensions";
 
 /**
  * Check if a task is in a payment-required state
+ *
+ * @param task - The A2A task to check
+ * @returns Whether the task requires payment
  */
 export function isPaymentRequired(task: A2ATask): boolean {
   return (
@@ -263,6 +266,9 @@ export function isPaymentRequired(task: A2ATask): boolean {
 
 /**
  * Check if a task has completed payment
+ *
+ * @param task - The A2A task to check
+ * @returns Whether the task has completed payment
  */
 export function isPaymentCompleted(task: A2ATask): boolean {
   return (
@@ -273,6 +279,9 @@ export function isPaymentCompleted(task: A2ATask): boolean {
 
 /**
  * Check if a task has failed payment
+ *
+ * @param task - The A2A task to check
+ * @returns Whether the task has failed payment
  */
 export function isPaymentFailed(task: A2ATask): boolean {
   return (
@@ -283,6 +292,9 @@ export function isPaymentFailed(task: A2ATask): boolean {
 
 /**
  * Extract payment requirements from a task
+ *
+ * @param task - The A2A task to extract requirements from
+ * @returns The payment requirements if the task requires payment
  */
 export function getPaymentRequired(task: A2ATask): PaymentRequired | undefined {
   if (isPaymentRequired(task)) {
@@ -293,6 +305,9 @@ export function getPaymentRequired(task: A2ATask): PaymentRequired | undefined {
 
 /**
  * Extract payment receipts from a task
+ *
+ * @param task - The A2A task to extract receipts from
+ * @returns The settlement receipts if available
  */
 export function getPaymentReceipts(task: A2ATask): SettleResponse[] | undefined {
   return task.status.message?.metadata?.["t402.payment.receipts"];
@@ -300,6 +315,10 @@ export function getPaymentReceipts(task: A2ATask): SettleResponse[] | undefined 
 
 /**
  * Create a payment-required message
+ *
+ * @param paymentRequired - The payment requirements
+ * @param text - Optional message text
+ * @returns An A2A message with payment-required metadata
  */
 export function createPaymentRequiredMessage(
   paymentRequired: PaymentRequired,
@@ -318,6 +337,10 @@ export function createPaymentRequiredMessage(
 
 /**
  * Create a payment submission message
+ *
+ * @param paymentPayload - The payment payload to submit
+ * @param text - Optional message text
+ * @returns An A2A message with payment-submitted metadata
  */
 export function createPaymentSubmissionMessage(
   paymentPayload: PaymentPayload,
@@ -336,6 +359,10 @@ export function createPaymentSubmissionMessage(
 
 /**
  * Create a payment completed message
+ *
+ * @param receipts - The settlement receipts
+ * @param text - Optional message text
+ * @returns An A2A message with payment-completed metadata
  */
 export function createPaymentCompletedMessage(
   receipts: SettleResponse[],
@@ -354,6 +381,11 @@ export function createPaymentCompletedMessage(
 
 /**
  * Create a payment failed message
+ *
+ * @param receipts - The settlement receipts
+ * @param errorCode - The error code
+ * @param text - Optional message text
+ * @returns An A2A message with payment-failed metadata
  */
 export function createPaymentFailedMessage(
   receipts: SettleResponse[],
@@ -374,6 +406,9 @@ export function createPaymentFailedMessage(
 
 /**
  * Create a T402 extension declaration for agent cards
+ *
+ * @param required - Whether the extension is required
+ * @returns An A2A extension declaration
  */
 export function createT402Extension(required: boolean = false): A2AExtension {
   return {

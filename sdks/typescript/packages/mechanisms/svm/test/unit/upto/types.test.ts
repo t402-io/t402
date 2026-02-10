@@ -1,9 +1,5 @@
 import { describe, it, expect } from "vitest";
-import type {
-  UptoSvmPayload,
-  UptoSvmAuthorization,
-  UptoSvmExtra,
-} from "../../../src/upto/types";
+import type { UptoSvmPayload, UptoSvmAuthorization, UptoSvmExtra } from "../../../src/upto/types";
 import { isUptoSvmPayload } from "../../../src/upto/types";
 
 // Sample valid Solana addresses (base58)

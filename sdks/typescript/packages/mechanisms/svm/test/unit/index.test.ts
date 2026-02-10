@@ -38,10 +38,8 @@ vi.mock("../../src/utils", async () => {
   const actual = await vi.importActual<typeof import("../../src/utils")>("../../src/utils");
   return {
     ...actual,
-    decodeTransactionFromPayload: (...args: unknown[]) =>
-      mockDecodeTransactionFromPayload(...args),
-    getTokenPayerFromTransaction: (...args: unknown[]) =>
-      mockGetTokenPayerFromTransaction(...args),
+    decodeTransactionFromPayload: (...args: unknown[]) => mockDecodeTransactionFromPayload(...args),
+    getTokenPayerFromTransaction: (...args: unknown[]) => mockGetTokenPayerFromTransaction(...args),
   };
 });
 
@@ -76,9 +74,8 @@ vi.mock("@solana-program/compute-budget", async () => {
 const mockParseTransferCheckedInstructionToken = vi.fn();
 
 vi.mock("@solana-program/token", async () => {
-  const actual = await vi.importActual<typeof import("@solana-program/token")>(
-    "@solana-program/token",
-  );
+  const actual =
+    await vi.importActual<typeof import("@solana-program/token")>("@solana-program/token");
   return {
     ...actual,
     parseTransferCheckedInstruction: (...args: unknown[]) =>
@@ -348,9 +345,7 @@ describe("@t402/svm", () => {
      * @param overrides - Partial overrides
      * @returns PaymentRequirements
      */
-    function createRequirements(
-      overrides: Partial<PaymentRequirements> = {},
-    ): PaymentRequirements {
+    function createRequirements(overrides: Partial<PaymentRequirements> = {}): PaymentRequirements {
       return {
         scheme: "exact",
         network: SOLANA_DEVNET_CAIP2,
@@ -369,9 +364,7 @@ describe("@t402/svm", () => {
      * @param overrides - Optional overrides for the accepted field
      * @returns PaymentPayload
      */
-    function createPayload(
-      overrides: Partial<PaymentPayload["accepted"]> = {},
-    ): PaymentPayload {
+    function createPayload(overrides: Partial<PaymentPayload["accepted"]> = {}): PaymentPayload {
       return {
         t402Version: 2,
         accepted: {
@@ -395,14 +388,16 @@ describe("@t402/svm", () => {
      * @param opts - Customization options
      * @returns Compiled message structure with staticAccounts and instructions
      */
-    function buildCompiledMessage(opts: {
-      tokenProgram?: string;
-      mint?: string;
-      owner?: string;
-      destATA?: string;
-      sourceATA?: string;
-      feePayer?: string;
-    } = {}) {
+    function buildCompiledMessage(
+      opts: {
+        tokenProgram?: string;
+        mint?: string;
+        owner?: string;
+        destATA?: string;
+        sourceATA?: string;
+        feePayer?: string;
+      } = {},
+    ) {
       const tokenProg = opts.tokenProgram ?? TOKEN_PROGRAM_ADDRESS;
       const mint = opts.mint ?? USDC_DEVNET_ADDRESS;
       const owner = opts.owner ?? CLIENT_ADDRESS;
@@ -411,10 +406,26 @@ describe("@t402/svm", () => {
       const feePayer = opts.feePayer ?? FEE_PAYER_ADDRESS;
 
       return {
-        staticAccounts: [feePayer, COMPUTE_BUDGET_PROGRAM_ADDRESS, tokenProg, sourceAta, mint, destAta, owner],
+        staticAccounts: [
+          feePayer,
+          COMPUTE_BUDGET_PROGRAM_ADDRESS,
+          tokenProg,
+          sourceAta,
+          mint,
+          destAta,
+          owner,
+        ],
         instructions: [
-          { programAddressIndex: 1, accountIndices: [], data: new Uint8Array([2, 0x64, 0x19, 0, 0]) },
-          { programAddressIndex: 1, accountIndices: [], data: new Uint8Array([3, 1, 0, 0, 0, 0, 0, 0, 0]) },
+          {
+            programAddressIndex: 1,
+            accountIndices: [],
+            data: new Uint8Array([2, 0x64, 0x19, 0, 0]),
+          },
+          {
+            programAddressIndex: 1,
+            accountIndices: [],
+            data: new Uint8Array([3, 1, 0, 0, 0, 0, 0, 0, 0]),
+          },
           { programAddressIndex: 2, accountIndices: [3, 4, 5, 6], data: new Uint8Array([12]) },
         ],
       };
@@ -430,20 +441,27 @@ describe("@t402/svm", () => {
      * @param opts.owner - Token authority/payer address
      * @param opts.mint - SPL token mint address
      */
-    function setupSuccessfulVerifyMocks(opts: {
-      transferAmount?: bigint;
-      tokenProgram?: string;
-      destATA?: string;
-      owner?: string;
-      mint?: string;
-    } = {}) {
+    function setupSuccessfulVerifyMocks(
+      opts: {
+        transferAmount?: bigint;
+        tokenProgram?: string;
+        destATA?: string;
+        owner?: string;
+        mint?: string;
+      } = {},
+    ) {
       const tokenProg = opts.tokenProgram ?? TOKEN_PROGRAM_ADDRESS;
       const owner = opts.owner ?? CLIENT_ADDRESS;
       const mint = opts.mint ?? USDC_DEVNET_ADDRESS;
       const destAta = opts.destATA ?? DEST_ATA;
       const transferAmount = opts.transferAmount ?? 1000000n;
 
-      const compiled = buildCompiledMessage({ tokenProgram: tokenProg, mint, owner, destATA: destAta });
+      const compiled = buildCompiledMessage({
+        tokenProgram: tokenProg,
+        mint,
+        owner,
+        destATA: destAta,
+      });
 
       // Mock transaction decode
       mockDecodeTransactionFromPayload.mockReturnValue({
@@ -488,9 +506,9 @@ describe("@t402/svm", () => {
     it("should create a valid payment payload with ExactSvmScheme", async () => {
       const mockSigner: ClientSvmSigner = {
         address: CLIENT_ADDRESS as unknown as Address,
-        signTransactions: vi.fn().mockResolvedValue([
-          { messageBytes: new Uint8Array(64), signatures: {} },
-        ]),
+        signTransactions: vi
+          .fn()
+          .mockResolvedValue([{ messageBytes: new Uint8Array(64), signatures: {} }]),
       } as unknown as ClientSvmSigner;
 
       const client = new ClientExactSvmScheme(mockSigner, {

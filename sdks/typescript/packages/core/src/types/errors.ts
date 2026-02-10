@@ -88,31 +88,72 @@ export const ERR_NOT_AUTHORIZED = "T402-8004" as const;
 
 /** Union type of all T402 error codes */
 export type ErrorCode =
-  | typeof ERR_INVALID_REQUEST | typeof ERR_MISSING_PAYLOAD | typeof ERR_MISSING_REQUIREMENTS
-  | typeof ERR_INVALID_PAYLOAD | typeof ERR_INVALID_REQUIREMENTS | typeof ERR_INVALID_SIGNATURE
-  | typeof ERR_INVALID_NETWORK | typeof ERR_INVALID_SCHEME | typeof ERR_INVALID_AMOUNT
-  | typeof ERR_INVALID_ADDRESS | typeof ERR_EXPIRED_PAYMENT | typeof ERR_INVALID_NONCE
-  | typeof ERR_INSUFFICIENT_AMOUNT | typeof ERR_INVALID_IDEMPOTENCY_KEY | typeof ERR_SIGNATURE_EXPIRED
-  | typeof ERR_INTERNAL | typeof ERR_DATABASE_UNAVAILABLE | typeof ERR_CACHE_UNAVAILABLE
-  | typeof ERR_RPC_UNAVAILABLE | typeof ERR_RATE_LIMITED | typeof ERR_SERVICE_UNAVAILABLE
-  | typeof ERR_VERIFICATION_FAILED | typeof ERR_SETTLEMENT_FAILED | typeof ERR_INSUFFICIENT_BALANCE
-  | typeof ERR_ALLOWANCE_INSUFFICIENT | typeof ERR_PAYMENT_MISMATCH | typeof ERR_DUPLICATE_PAYMENT
-  | typeof ERR_SETTLEMENT_PENDING | typeof ERR_SETTLEMENT_TIMEOUT | typeof ERR_NONCE_REPLAY
-  | typeof ERR_IDEMPOTENCY_CONFLICT | typeof ERR_IDEMPOTENCY_UNAVAILABLE
-  | typeof ERR_PREVIOUS_REQUEST_FAILED | typeof ERR_REQUEST_IN_PROGRESS
-  | typeof ERR_CHAIN_UNAVAILABLE | typeof ERR_TRANSACTION_FAILED | typeof ERR_TRANSACTION_REVERTED
-  | typeof ERR_GAS_ESTIMATION_FAILED | typeof ERR_NONCE_CONFLICT | typeof ERR_CHAIN_CONGESTED
+  | typeof ERR_INVALID_REQUEST
+  | typeof ERR_MISSING_PAYLOAD
+  | typeof ERR_MISSING_REQUIREMENTS
+  | typeof ERR_INVALID_PAYLOAD
+  | typeof ERR_INVALID_REQUIREMENTS
+  | typeof ERR_INVALID_SIGNATURE
+  | typeof ERR_INVALID_NETWORK
+  | typeof ERR_INVALID_SCHEME
+  | typeof ERR_INVALID_AMOUNT
+  | typeof ERR_INVALID_ADDRESS
+  | typeof ERR_EXPIRED_PAYMENT
+  | typeof ERR_INVALID_NONCE
+  | typeof ERR_INSUFFICIENT_AMOUNT
+  | typeof ERR_INVALID_IDEMPOTENCY_KEY
+  | typeof ERR_SIGNATURE_EXPIRED
+  | typeof ERR_INTERNAL
+  | typeof ERR_DATABASE_UNAVAILABLE
+  | typeof ERR_CACHE_UNAVAILABLE
+  | typeof ERR_RPC_UNAVAILABLE
+  | typeof ERR_RATE_LIMITED
+  | typeof ERR_SERVICE_UNAVAILABLE
+  | typeof ERR_VERIFICATION_FAILED
+  | typeof ERR_SETTLEMENT_FAILED
+  | typeof ERR_INSUFFICIENT_BALANCE
+  | typeof ERR_ALLOWANCE_INSUFFICIENT
+  | typeof ERR_PAYMENT_MISMATCH
+  | typeof ERR_DUPLICATE_PAYMENT
+  | typeof ERR_SETTLEMENT_PENDING
+  | typeof ERR_SETTLEMENT_TIMEOUT
+  | typeof ERR_NONCE_REPLAY
+  | typeof ERR_IDEMPOTENCY_CONFLICT
+  | typeof ERR_IDEMPOTENCY_UNAVAILABLE
+  | typeof ERR_PREVIOUS_REQUEST_FAILED
+  | typeof ERR_REQUEST_IN_PROGRESS
+  | typeof ERR_CHAIN_UNAVAILABLE
+  | typeof ERR_TRANSACTION_FAILED
+  | typeof ERR_TRANSACTION_REVERTED
+  | typeof ERR_GAS_ESTIMATION_FAILED
+  | typeof ERR_NONCE_CONFLICT
+  | typeof ERR_CHAIN_CONGESTED
   | typeof ERR_CONTRACT_ERROR
-  | typeof ERR_BRIDGE_UNAVAILABLE | typeof ERR_BRIDGE_QUOTE_FAILED | typeof ERR_BRIDGE_TRANSFER_FAILED
-  | typeof ERR_BRIDGE_TIMEOUT | typeof ERR_UNSUPPORTED_ROUTE
-  | typeof ERR_STREAM_NOT_FOUND | typeof ERR_STREAM_ALREADY_CLOSED | typeof ERR_STREAM_ALREADY_PAUSED
-  | typeof ERR_STREAM_NOT_PAUSED | typeof ERR_STREAM_AMOUNT_EXCEEDED | typeof ERR_STREAM_EXPIRED
-  | typeof ERR_STREAM_INVALID_STATE | typeof ERR_STREAM_RATE_LIMITED
-  | typeof ERR_INTENT_NOT_FOUND | typeof ERR_INTENT_ALREADY_EXECUTED | typeof ERR_INTENT_CANCELLED
-  | typeof ERR_INTENT_EXPIRED | typeof ERR_NO_ROUTES_AVAILABLE | typeof ERR_ROUTE_EXPIRED
-  | typeof ERR_ROUTE_NOT_SELECTED | typeof ERR_INTENT_INVALID_STATE
-  | typeof ERR_RESOURCE_NOT_FOUND | typeof ERR_RESOURCE_ALREADY_EXISTS
-  | typeof ERR_INVALID_PARAMETERS | typeof ERR_NOT_AUTHORIZED;
+  | typeof ERR_BRIDGE_UNAVAILABLE
+  | typeof ERR_BRIDGE_QUOTE_FAILED
+  | typeof ERR_BRIDGE_TRANSFER_FAILED
+  | typeof ERR_BRIDGE_TIMEOUT
+  | typeof ERR_UNSUPPORTED_ROUTE
+  | typeof ERR_STREAM_NOT_FOUND
+  | typeof ERR_STREAM_ALREADY_CLOSED
+  | typeof ERR_STREAM_ALREADY_PAUSED
+  | typeof ERR_STREAM_NOT_PAUSED
+  | typeof ERR_STREAM_AMOUNT_EXCEEDED
+  | typeof ERR_STREAM_EXPIRED
+  | typeof ERR_STREAM_INVALID_STATE
+  | typeof ERR_STREAM_RATE_LIMITED
+  | typeof ERR_INTENT_NOT_FOUND
+  | typeof ERR_INTENT_ALREADY_EXECUTED
+  | typeof ERR_INTENT_CANCELLED
+  | typeof ERR_INTENT_EXPIRED
+  | typeof ERR_NO_ROUTES_AVAILABLE
+  | typeof ERR_ROUTE_EXPIRED
+  | typeof ERR_ROUTE_NOT_SELECTED
+  | typeof ERR_INTENT_INVALID_STATE
+  | typeof ERR_RESOURCE_NOT_FOUND
+  | typeof ERR_RESOURCE_ALREADY_EXISTS
+  | typeof ERR_INVALID_PARAMETERS
+  | typeof ERR_NOT_AUTHORIZED;
 
 /** Structured error response from the facilitator API */
 export interface APIError {
@@ -122,7 +163,12 @@ export interface APIError {
   retry?: boolean;
 }
 
-/** Returns the HTTP status code for a given error code */
+/**
+ * Returns the HTTP status code for a given error code
+ *
+ * @param code - The T402 error code
+ * @returns The corresponding HTTP status code
+ */
 export function httpStatusForCode(code: ErrorCode): number {
   const category = code.charAt(5);
   switch (category) {
@@ -154,27 +200,52 @@ export function httpStatusForCode(code: ErrorCode): number {
   }
 }
 
-/** Returns true if the error code is a client error (T402-1xxx) */
+/**
+ * Returns true if the error code is a client error (T402-1xxx)
+ *
+ * @param code - The T402 error code
+ * @returns Whether the error is a client error
+ */
 export function isClientError(code: ErrorCode): boolean {
   return code.charAt(5) === "1";
 }
 
-/** Returns true if the error code is a server error (T402-2xxx) */
+/**
+ * Returns true if the error code is a server error (T402-2xxx)
+ *
+ * @param code - The T402 error code
+ * @returns Whether the error is a server error
+ */
 export function isServerError(code: ErrorCode): boolean {
   return code.charAt(5) === "2";
 }
 
-/** Returns true if the error code is a facilitator error (T402-3xxx) */
+/**
+ * Returns true if the error code is a facilitator error (T402-3xxx)
+ *
+ * @param code - The T402 error code
+ * @returns Whether the error is a facilitator error
+ */
 export function isFacilitatorError(code: ErrorCode): boolean {
   return code.charAt(5) === "3";
 }
 
-/** Returns true if the error code is a chain error (T402-4xxx) */
+/**
+ * Returns true if the error code is a chain error (T402-4xxx)
+ *
+ * @param code - The T402 error code
+ * @returns Whether the error is a chain error
+ */
 export function isChainError(code: ErrorCode): boolean {
   return code.charAt(5) === "4";
 }
 
-/** Returns true if the error code is a bridge error (T402-5xxx) */
+/**
+ * Returns true if the error code is a bridge error (T402-5xxx)
+ *
+ * @param code - The T402 error code
+ * @returns Whether the error is a bridge error
+ */
 export function isBridgeError(code: ErrorCode): boolean {
   return code.charAt(5) === "5";
 }

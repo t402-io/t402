@@ -83,7 +83,7 @@ registerExactTonFacilitatorScheme(facilitator, { signer })
 | Token | Network | Jetton Address                                     |
 | ----- | ------- | -------------------------------------------------- |
 | USDT  | Mainnet | `EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs` |
-| USDT  | Testnet | `kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy`   |
+| USDT  | Testnet | `kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy` |
 
 ## Token Utilities
 

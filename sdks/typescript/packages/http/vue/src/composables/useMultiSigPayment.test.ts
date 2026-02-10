@@ -55,8 +55,10 @@ describe('useMultiSigPayment', () => {
   it('transitions to collecting state after initiate', async () => {
     const initiateFn = vi.fn().mockResolvedValue(createMockInitiateResult())
     const submitFn = vi.fn()
-    const { initiate, status, requestId, threshold, collectedCount, isReady } =
-      useMultiSigPayment({ initiateFn, submitFn })
+    const { initiate, status, requestId, threshold, collectedCount, isReady } = useMultiSigPayment({
+      initiateFn,
+      submitFn,
+    })
 
     await initiate(initiateParams)
 
@@ -142,9 +144,7 @@ describe('useMultiSigPayment', () => {
     expect(status.value).toBe('error')
     expect(isError.value).toBe(true)
     expect(error.value).toBe('Safe not deployed')
-    expect(onError).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'Safe not deployed' }),
-    )
+    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ message: 'Safe not deployed' }))
   })
 
   it('handles error during submit', async () => {

@@ -33,9 +33,7 @@ describe('useGaslessPayment', () => {
     const payFn = mockPayFn({ wait: waitFn })
     const onSuccess = vi.fn()
 
-    const { result } = renderHook(() =>
-      useGaslessPayment({ payFn, onSuccess, autoWait: true }),
-    )
+    const { result } = renderHook(() => useGaslessPayment({ payFn, onSuccess, autoWait: true }))
 
     await act(async () => {
       await result.current.pay(payParams)
@@ -55,9 +53,7 @@ describe('useGaslessPayment', () => {
     const payFn = mockPayFn({ wait: waitFn })
     const onSuccess = vi.fn()
 
-    const { result } = renderHook(() =>
-      useGaslessPayment({ payFn, onSuccess, autoWait: false }),
-    )
+    const { result } = renderHook(() => useGaslessPayment({ payFn, onSuccess, autoWait: false }))
 
     await act(async () => {
       await result.current.pay(payParams)
@@ -83,15 +79,15 @@ describe('useGaslessPayment', () => {
     expect(result.current.status).toBe('error')
     expect(result.current.error).toBe('Bundler unavailable')
     expect(result.current.isError).toBe(true)
-    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ message: 'Bundler unavailable' }))
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Bundler unavailable' }),
+    )
   })
 
   it('propagates sponsored flag', async () => {
     const payFn = mockPayFn({ sponsored: true })
 
-    const { result } = renderHook(() =>
-      useGaslessPayment({ payFn, autoWait: true }),
-    )
+    const { result } = renderHook(() => useGaslessPayment({ payFn, autoWait: true }))
 
     await act(async () => {
       await result.current.pay(payParams)
@@ -129,9 +125,7 @@ describe('useGaslessPayment', () => {
     const payFn = mockPayFn({ wait: waitFn })
     const onError = vi.fn()
 
-    const { result } = renderHook(() =>
-      useGaslessPayment({ payFn, onError, autoWait: true }),
-    )
+    const { result } = renderHook(() => useGaslessPayment({ payFn, onError, autoWait: true }))
 
     await act(async () => {
       await result.current.pay(payParams)

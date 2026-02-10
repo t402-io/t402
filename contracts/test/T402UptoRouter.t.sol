@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.24;
 
-import {Test, console2} from "forge-std/Test.sol";
-import {T402UptoRouter} from "../src/T402UptoRouter.sol";
-import {IT402UptoRouter} from "../src/interfaces/IT402UptoRouter.sol";
-import {MockERC20Permit} from "./mocks/MockERC20Permit.sol";
+import { Test, console2 } from "forge-std/Test.sol";
+import { T402UptoRouter } from "../src/T402UptoRouter.sol";
+import { IT402UptoRouter } from "../src/interfaces/IT402UptoRouter.sol";
+import { MockERC20Permit } from "./mocks/MockERC20Permit.sol";
 
 contract T402UptoRouterTest is Test {
     T402UptoRouter public router;
@@ -63,26 +63,13 @@ contract T402UptoRouterTest is Test {
         uint256 deadline = block.timestamp + 1 hours;
 
         // Create permit signature
-        (uint8 v, bytes32 r, bytes32 s) = _createPermitSignature(
-            payer,
-            payerPrivateKey,
-            address(router),
-            MAX_AMOUNT,
-            deadline
-        );
+        (uint8 v, bytes32 r, bytes32 s) =
+            _createPermitSignature(payer, payerPrivateKey, address(router), MAX_AMOUNT, deadline);
 
         // Execute as facilitator
         vm.prank(facilitator);
         router.executeUptoTransfer(
-            address(token),
-            payer,
-            recipient,
-            MAX_AMOUNT,
-            SETTLE_AMOUNT,
-            deadline,
-            v,
-            r,
-            s
+            address(token), payer, recipient, MAX_AMOUNT, SETTLE_AMOUNT, deadline, v, r, s
         );
 
         // Verify transfer
@@ -94,25 +81,12 @@ contract T402UptoRouterTest is Test {
         uint256 deadline = block.timestamp + 1 hours;
         uint256 partialAmount = 10e6; // Only 10 USDC
 
-        (uint8 v, bytes32 r, bytes32 s) = _createPermitSignature(
-            payer,
-            payerPrivateKey,
-            address(router),
-            MAX_AMOUNT,
-            deadline
-        );
+        (uint8 v, bytes32 r, bytes32 s) =
+            _createPermitSignature(payer, payerPrivateKey, address(router), MAX_AMOUNT, deadline);
 
         vm.prank(facilitator);
         router.executeUptoTransfer(
-            address(token),
-            payer,
-            recipient,
-            MAX_AMOUNT,
-            partialAmount,
-            deadline,
-            v,
-            r,
-            s
+            address(token), payer, recipient, MAX_AMOUNT, partialAmount, deadline, v, r, s
         );
 
         assertEq(token.balanceOf(recipient), partialAmount);
@@ -121,47 +95,25 @@ contract T402UptoRouterTest is Test {
     function test_executeUptoTransfer_emitsEvent() public {
         uint256 deadline = block.timestamp + 1 hours;
 
-        (uint8 v, bytes32 r, bytes32 s) = _createPermitSignature(
-            payer,
-            payerPrivateKey,
-            address(router),
-            MAX_AMOUNT,
-            deadline
-        );
+        (uint8 v, bytes32 r, bytes32 s) =
+            _createPermitSignature(payer, payerPrivateKey, address(router), MAX_AMOUNT, deadline);
 
         vm.expectEmit(true, true, true, true);
         emit IT402UptoRouter.TransferExecuted(
-            address(token),
-            payer,
-            recipient,
-            SETTLE_AMOUNT,
-            MAX_AMOUNT
+            address(token), payer, recipient, SETTLE_AMOUNT, MAX_AMOUNT
         );
 
         vm.prank(facilitator);
         router.executeUptoTransfer(
-            address(token),
-            payer,
-            recipient,
-            MAX_AMOUNT,
-            SETTLE_AMOUNT,
-            deadline,
-            v,
-            r,
-            s
+            address(token), payer, recipient, MAX_AMOUNT, SETTLE_AMOUNT, deadline, v, r, s
         );
     }
 
     function test_executeUptoTransfer_revertsOnUnauthorized() public {
         uint256 deadline = block.timestamp + 1 hours;
 
-        (uint8 v, bytes32 r, bytes32 s) = _createPermitSignature(
-            payer,
-            payerPrivateKey,
-            address(router),
-            MAX_AMOUNT,
-            deadline
-        );
+        (uint8 v, bytes32 r, bytes32 s) =
+            _createPermitSignature(payer, payerPrivateKey, address(router), MAX_AMOUNT, deadline);
 
         address unauthorized = makeAddr("unauthorized");
         vm.expectRevert(
@@ -170,15 +122,7 @@ contract T402UptoRouterTest is Test {
 
         vm.prank(unauthorized);
         router.executeUptoTransfer(
-            address(token),
-            payer,
-            recipient,
-            MAX_AMOUNT,
-            SETTLE_AMOUNT,
-            deadline,
-            v,
-            r,
-            s
+            address(token), payer, recipient, MAX_AMOUNT, SETTLE_AMOUNT, deadline, v, r, s
         );
     }
 
@@ -186,106 +130,56 @@ contract T402UptoRouterTest is Test {
         uint256 deadline = block.timestamp + 1 hours;
         uint256 excessAmount = MAX_AMOUNT + 1;
 
-        (uint8 v, bytes32 r, bytes32 s) = _createPermitSignature(
-            payer,
-            payerPrivateKey,
-            address(router),
-            MAX_AMOUNT,
-            deadline
-        );
+        (uint8 v, bytes32 r, bytes32 s) =
+            _createPermitSignature(payer, payerPrivateKey, address(router), MAX_AMOUNT, deadline);
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                T402UptoRouter.SettleAmountExceedsMax.selector,
-                excessAmount,
-                MAX_AMOUNT
+                T402UptoRouter.SettleAmountExceedsMax.selector, excessAmount, MAX_AMOUNT
             )
         );
 
         vm.prank(facilitator);
         router.executeUptoTransfer(
-            address(token),
-            payer,
-            recipient,
-            MAX_AMOUNT,
-            excessAmount,
-            deadline,
-            v,
-            r,
-            s
+            address(token), payer, recipient, MAX_AMOUNT, excessAmount, deadline, v, r, s
         );
     }
 
     function test_executeUptoTransfer_revertsOnZeroAmount() public {
         uint256 deadline = block.timestamp + 1 hours;
 
-        (uint8 v, bytes32 r, bytes32 s) = _createPermitSignature(
-            payer,
-            payerPrivateKey,
-            address(router),
-            MAX_AMOUNT,
-            deadline
-        );
+        (uint8 v, bytes32 r, bytes32 s) =
+            _createPermitSignature(payer, payerPrivateKey, address(router), MAX_AMOUNT, deadline);
 
         vm.expectRevert(T402UptoRouter.ZeroAmount.selector);
 
         vm.prank(facilitator);
         router.executeUptoTransfer(
-            address(token),
-            payer,
-            recipient,
-            MAX_AMOUNT,
-            0,
-            deadline,
-            v,
-            r,
-            s
+            address(token), payer, recipient, MAX_AMOUNT, 0, deadline, v, r, s
         );
     }
 
     function test_executeUptoTransfer_revertsOnExpiredDeadline() public {
         uint256 deadline = block.timestamp - 1; // Already expired
 
-        (uint8 v, bytes32 r, bytes32 s) = _createPermitSignature(
-            payer,
-            payerPrivateKey,
-            address(router),
-            MAX_AMOUNT,
-            deadline
-        );
+        (uint8 v, bytes32 r, bytes32 s) =
+            _createPermitSignature(payer, payerPrivateKey, address(router), MAX_AMOUNT, deadline);
 
         vm.expectRevert(
-            abi.encodeWithSelector(
-                T402UptoRouter.PermitExpired.selector,
-                deadline,
-                block.timestamp
-            )
+            abi.encodeWithSelector(T402UptoRouter.PermitExpired.selector, deadline, block.timestamp)
         );
 
         vm.prank(facilitator);
         router.executeUptoTransfer(
-            address(token),
-            payer,
-            recipient,
-            MAX_AMOUNT,
-            SETTLE_AMOUNT,
-            deadline,
-            v,
-            r,
-            s
+            address(token), payer, recipient, MAX_AMOUNT, SETTLE_AMOUNT, deadline, v, r, s
         );
     }
 
     function test_executeUptoTransfer_revertsOnZeroAddress() public {
         uint256 deadline = block.timestamp + 1 hours;
 
-        (uint8 v, bytes32 r, bytes32 s) = _createPermitSignature(
-            payer,
-            payerPrivateKey,
-            address(router),
-            MAX_AMOUNT,
-            deadline
-        );
+        (uint8 v, bytes32 r, bytes32 s) =
+            _createPermitSignature(payer, payerPrivateKey, address(router), MAX_AMOUNT, deadline);
 
         vm.expectRevert(T402UptoRouter.ZeroAddress.selector);
 
@@ -323,9 +217,7 @@ contract T402UptoRouterTest is Test {
         address newFacilitator = makeAddr("newFacilitator");
         address nonOwner = makeAddr("nonOwner");
 
-        vm.expectRevert(
-            abi.encodeWithSelector(T402UptoRouter.UnauthorizedOwner.selector, nonOwner)
-        );
+        vm.expectRevert(abi.encodeWithSelector(T402UptoRouter.UnauthorizedOwner.selector, nonOwner));
 
         vm.prank(nonOwner);
         router.addFacilitator(newFacilitator);
@@ -352,9 +244,7 @@ contract T402UptoRouterTest is Test {
     function test_removeFacilitator_revertsOnNonOwner() public {
         address nonOwner = makeAddr("nonOwner");
 
-        vm.expectRevert(
-            abi.encodeWithSelector(T402UptoRouter.UnauthorizedOwner.selector, nonOwner)
-        );
+        vm.expectRevert(abi.encodeWithSelector(T402UptoRouter.UnauthorizedOwner.selector, nonOwner));
 
         vm.prank(nonOwner);
         router.removeFacilitator(facilitator);
@@ -375,22 +265,16 @@ contract T402UptoRouterTest is Test {
     //////////////////////////////////////////////////////////////*/
 
     function test_checkPermitValidity_validBalance() public view {
-        (bool valid, uint256 balance) = router.checkPermitValidity(
-            address(token),
-            payer,
-            MAX_AMOUNT
-        );
+        (bool valid, uint256 balance) =
+            router.checkPermitValidity(address(token), payer, MAX_AMOUNT);
 
         assertTrue(valid);
         assertEq(balance, INITIAL_BALANCE);
     }
 
     function test_checkPermitValidity_insufficientBalance() public view {
-        (bool valid, uint256 balance) = router.checkPermitValidity(
-            address(token),
-            payer,
-            INITIAL_BALANCE + 1
-        );
+        (bool valid, uint256 balance) =
+            router.checkPermitValidity(address(token), payer, INITIAL_BALANCE + 1);
 
         assertFalse(valid);
         assertEq(balance, INITIAL_BALANCE);
@@ -414,25 +298,12 @@ contract T402UptoRouterTest is Test {
         settleAmount = bound(settleAmount, 1, MAX_AMOUNT);
         uint256 deadline = block.timestamp + 1 hours;
 
-        (uint8 v, bytes32 r, bytes32 s) = _createPermitSignature(
-            payer,
-            payerPrivateKey,
-            address(router),
-            MAX_AMOUNT,
-            deadline
-        );
+        (uint8 v, bytes32 r, bytes32 s) =
+            _createPermitSignature(payer, payerPrivateKey, address(router), MAX_AMOUNT, deadline);
 
         vm.prank(facilitator);
         router.executeUptoTransfer(
-            address(token),
-            payer,
-            recipient,
-            MAX_AMOUNT,
-            settleAmount,
-            deadline,
-            v,
-            r,
-            s
+            address(token), payer, recipient, MAX_AMOUNT, settleAmount, deadline, v, r, s
         );
 
         assertEq(token.balanceOf(recipient), settleAmount);
@@ -462,9 +333,8 @@ contract T402UptoRouterTest is Test {
             )
         );
 
-        bytes32 digest = keccak256(
-            abi.encodePacked("\x19\x01", token.DOMAIN_SEPARATOR(), structHash)
-        );
+        bytes32 digest =
+            keccak256(abi.encodePacked("\x19\x01", token.DOMAIN_SEPARATOR(), structHash));
 
         (v, r, s) = vm.sign(_privateKey, digest);
     }
