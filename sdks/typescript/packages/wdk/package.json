@@ -30,7 +30,7 @@
   "repository": "https://github.com/t402-io/t402",
   "description": "T402 Payment Protocol integration with Tether Wallet Development Kit (WDK)",
   "devDependencies": {
-    "@eslint/js": "^9.24.0",
+    "@eslint/js": "^9.39.2",
     "@ledgerhq/hw-app-eth": "^7.1.1",
     "@ledgerhq/hw-transport-web-ble": "^6.30.0",
     "@ledgerhq/hw-transport-webhid": "^6.30.11",
