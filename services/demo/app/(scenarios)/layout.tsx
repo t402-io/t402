@@ -33,8 +33,8 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[rgba(10,10,11,0.9)] backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+      <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[rgba(10,10,11,0.9)] backdrop-blur-xl" style={{ boxShadow: "0 1px 0 rgba(80, 175, 149, 0.08)" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/"
@@ -64,7 +64,7 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
 
       <div className="flex flex-1">
         {/* Sidebar (desktop) */}
-        <aside className="hidden lg:block w-56 shrink-0 border-r border-[var(--color-border)] bg-[var(--color-surface)] overflow-y-auto">
+        <aside className="hidden lg:block w-56 shrink-0 border-r border-[var(--color-border)] bg-[#0A0A0B] overflow-y-auto">
           <nav className="p-3 space-y-0.5" aria-label="Scenarios">
             {SCENARIOS.map((s) => {
               const Icon = s.icon;
@@ -80,8 +80,9 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
                       ? "bg-[var(--color-surface-active)] text-white"
                       : "text-[var(--color-muted)] hover:text-white hover:bg-[var(--color-surface-hover)]"
                   )}
+                  style={isActive ? { borderLeft: "2px solid #50AF95", paddingLeft: "10px" } : undefined}
                 >
-                  <Icon size={14} style={{ color: isActive ? s.color : undefined }} aria-hidden="true" />
+                  <Icon size={14} style={{ color: isActive ? "#50AF95" : undefined }} aria-hidden="true" />
                   <span>{s.title}</span>
                 </Link>
               );
@@ -114,7 +115,7 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
         {/* Scroll fade indicators */}
         <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-[rgba(10,10,11,0.97)] to-transparent pointer-events-none z-10" />
         <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-[rgba(10,10,11,0.97)] to-transparent pointer-events-none z-10" />
-        <div className="flex items-center overflow-x-auto px-3 py-2.5 gap-1 scrollbar-hide scroll-smooth snap-x snap-mandatory">
+        <div className="flex items-center overflow-x-auto px-3 py-3 gap-1.5 scrollbar-hide scroll-smooth snap-x snap-mandatory">
           {SCENARIOS.map((s) => {
             const Icon = s.icon;
             const isActive = pathname === `/${s.id}`;
@@ -124,14 +125,14 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
                 href={`/${s.id}`}
                 aria-current={isActive ? "page" : undefined}
                 className={clsx(
-                  "shrink-0 flex flex-col items-center gap-1 px-3 py-2 rounded-xl text-[10px] font-medium transition-all min-w-[56px] snap-center active:scale-95",
+                  "shrink-0 flex flex-col items-center gap-1 px-3.5 py-2.5 rounded-xl text-[10px] font-medium transition-all min-w-[60px] snap-center active:scale-95",
                   isActive
                     ? "text-white bg-[var(--color-surface-active)]"
                     : "text-[var(--color-muted)] active:bg-[var(--color-surface)]"
                 )}
               >
-                <Icon size={16} style={{ color: isActive ? s.color : undefined }} aria-hidden="true" />
-                <span className="truncate max-w-[48px]">{s.title}</span>
+                <Icon size={18} style={{ color: isActive ? "#50AF95" : undefined }} aria-hidden="true" />
+                <span className="truncate max-w-[52px]">{s.title}</span>
               </Link>
             );
           })}

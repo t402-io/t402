@@ -8,6 +8,10 @@ interface FAQItem {
   answer?: ReactNode;
 }
 
+interface FAQProps {
+  variant?: "light" | "dark";
+}
+
 const faqData: FAQItem[] = [
   {
     question: "What is t402 used for?",
@@ -43,100 +47,73 @@ const faqData: FAQItem[] = [
   },
 ];
 
-function PlusIcon() {
+function ToggleIcon({ open, variant }: { open: boolean; variant: "light" | "dark" }) {
+  const color = "#50AF95";
   return (
-    <svg
-      width="46"
-      height="46"
-      viewBox="0 0 46 46"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
+    <div
+      className="w-10 h-10 flex items-center justify-center flex-shrink-0 transition-transform duration-300"
+      style={{ transform: open ? "rotate(45deg)" : "rotate(0deg)" }}
     >
-      <path
-        d="M26.0145 24.6213H38.5361L38.5276 21.3749H26.006L24.6232 19.9836V7.46631H21.3769V19.9836L19.9856 21.3749H7.46399V24.653H19.9856L21.3451 26.0126V38.5341H24.6232V26.0126L26.0145 24.6213Z"
-        fill="black"
-      />
-    </svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" stroke={color} strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    </div>
   );
 }
 
-function MinusIcon() {
-  return (
-    <svg
-      width="46"
-      height="46"
-      viewBox="0 0 46 46"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <path
-        d="M7.46399 21.727C7.46399 21.5261 7.78389 21.3633 8.1785 21.3633L37.8216 21.3633C38.2162 21.3633 38.5361 21.5261 38.5361 21.727V24.2731C38.5361 24.474 38.2162 24.6368 37.8216 24.6368L8.1785 24.6368C7.78389 24.6368 7.46399 24.474 7.46399 24.2731L7.46399 21.727Z"
-        fill="black"
-      />
-    </svg>
-  );
-}
-
-export function FAQ() {
+export function FAQ({ variant = "dark" }: FAQProps) {
   const [openIndex, setOpenIndex] = useState<number>(-1);
+  const isLight = variant === "light";
 
   const toggleItem = (index: number) => {
     setOpenIndex((current) => (current === index ? -1 : index));
   };
 
+  const borderColor = isLight
+    ? "border-[rgba(0,0,0,0.08)]"
+    : "border-white/[0.06]";
+  const hoverBg = isLight ? "hover:bg-[#F7FAF9]" : "hover:bg-white/[0.02]";
+  const questionColor = isLight ? "text-[#1A1A2E]" : "text-white";
+  const answerColor = isLight ? "text-[#4A5568]" : "text-[#A1A1AA]";
+
   return (
-    <section className="w-full max-w-container mx-auto px-4 sm:px-6 md:px-10 py-16 md:py-20" aria-label="Frequently asked questions">
-      <h2 className="text-3xl sm:text-4xl md:text-5xl font-display tracking-tighter mb-8 sm:mb-10 md:mb-12">FAQs</h2>
-
-      <div className="bg-white">
+    <div className="w-full" aria-label="Frequently asked questions">
+      <div>
         {faqData.map((item, index) => (
-          <div key={index}>
-            <div
-              className="border-t border-black cursor-pointer"
-              onClick={(event) => {
-                const target = event.target as HTMLElement;
-                // Make entire open item clickable to toggle, but don't interfere with button or links
-                if (target.closest("button, a")) return;
-                toggleItem(index);
-              }}
+          <div key={index} className={`border-b ${borderColor}`}>
+            <button
+              onClick={() => toggleItem(index)}
+              className={`w-full flex cursor-pointer justify-between items-center py-6 px-2 ${hoverBg} transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#50AF95]`}
+              aria-expanded={openIndex === index}
+              aria-controls={`faq-answer-${index}`}
             >
-              <button
-                onClick={() => toggleItem(index)}
-                className="w-full flex cursor-pointer justify-between items-center py-4 sm:py-5 px-4 sm:px-6 md:px-10 hover:bg-gray-10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-black"
-                aria-expanded={openIndex === index}
-                aria-controls={`faq-answer-${index}`}
-              >
-                <h3 className="text-lg sm:text-xl md:text-2xl font-medium text-left">
-                  {item.question}
-                </h3>
-                <div className="flex-shrink-0 ml-4">
-                  {openIndex === index ? <MinusIcon /> : <PlusIcon />}
-                </div>
-              </button>
+              <h3 className={`text-lg font-semibold text-left ${questionColor}`}>
+                {item.question}
+              </h3>
+              <ToggleIcon open={openIndex === index} variant={variant} />
+            </button>
 
-              <AnimatePresence initial={false}>
-                {openIndex === index && item.answer && (
-                  <motion.div
-                    id={`faq-answer-${index}`}
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2, ease: "easeOut" }}
-                    className="overflow-hidden"
-                  >
-                    <div className="px-4 sm:px-6 md:px-10 pb-4 sm:pb-6">
-                      <p className="text-sm sm:text-base leading-relaxed">{item.answer}</p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            <AnimatePresence initial={false}>
+              {openIndex === index && item.answer && (
+                <motion.div
+                  id={`faq-answer-${index}`}
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
+                  className="overflow-hidden"
+                >
+                  <div className="px-2 pb-6">
+                    <p className={`text-base leading-relaxed ${answerColor}`}>
+                      {item.answer}
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         ))}
-        <div className="border-t border-black" />
       </div>
-    </section>
+    </div>
   );
 }

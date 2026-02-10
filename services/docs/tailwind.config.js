@@ -7,7 +7,16 @@ module.exports = {
     './theme.config.tsx'
   ],
   theme: {
-    extend: {}
+    extend: {
+      colors: {
+        brand: {
+          DEFAULT: '#50AF95',
+          secondary: '#26A17B',
+          accent: '#1BA27A',
+          muted: 'rgba(80, 175, 149, 0.1)',
+        }
+      }
+    }
   },
   plugins: [],
   darkMode: 'class'

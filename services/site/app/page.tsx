@@ -1,9 +1,9 @@
 import { NavBar } from "./components/NavBar";
 import { Hero } from "./components/Hero";
-import { ValueProps } from "./components/ValueProps";
-import { Stats } from "./components/Stats";
+import { WhatsT402Section } from "./components/WhatsT402Section";
 import { HowItWorks } from "./components/HowItWorks";
 import { CodeExamples } from "./components/CodeExamples";
+import { Stats } from "./components/Stats";
 import { FeatureDeepDives } from "./components/FeatureDeepDives";
 import { UseCasesPreview } from "./components/UseCasesPreview";
 import { CTA } from "./components/CTA";
@@ -14,10 +14,10 @@ export default function HomePage() {
     <div className="min-h-screen bg-background text-foreground">
       <NavBar />
       <Hero />
-      <ValueProps />
-      <Stats />
+      <WhatsT402Section />
       <HowItWorks />
       <CodeExamples />
+      <Stats />
       <FeatureDeepDives />
       <UseCasesPreview />
       <CTA />

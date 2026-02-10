@@ -369,7 +369,7 @@ function ExternalLinkIcon({ className = "" }: { className?: string }) {
   );
 }
 
-function CheckIcon({ className = "" }: { className?: string }) {
+function CheckIcon({ className = "", style }: { className?: string; style?: React.CSSProperties }) {
   return (
     <svg
       width="14"
@@ -381,6 +381,7 @@ function CheckIcon({ className = "" }: { className?: string }) {
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
+      style={style}
       aria-hidden="true"
     >
       <polyline points="20 6 9 17 4 12" />
@@ -405,42 +406,6 @@ const iconMap: Record<string, React.FC<IconProps>> = {
   code: CodeIcon,
 };
 
-function CategoryTab({
-  category,
-  isSelected,
-  onClick,
-  count,
-}: {
-  category: { id: UseCaseCategory | "all"; name: string };
-  isSelected: boolean;
-  onClick: () => void;
-  count: number;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`relative flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors sm:px-4 ${
-        isSelected
-          ? "text-foreground"
-          : "text-foreground-tertiary hover:text-foreground-secondary"
-      }`}
-      aria-pressed={isSelected}
-    >
-      {isSelected && (
-        <motion.div
-          layoutId="activeCategory"
-          className="absolute inset-0 rounded-lg bg-background-tertiary"
-          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-        />
-      )}
-      <span className="relative z-10">{category.name}</span>
-      <span className="relative z-10 rounded-full bg-background-elevated px-2 py-0.5 text-xs">
-        {count}
-      </span>
-    </button>
-  );
-}
-
 function UseCaseCard({ useCase, index }: { useCase: UseCase; index: number }) {
   const Icon = iconMap[useCase.icon] || ApiIcon;
   const [isExpanded, setIsExpanded] = useState(false);
@@ -451,33 +416,33 @@ function UseCaseCard({ useCase, index }: { useCase: UseCase; index: number }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
-      className="group relative overflow-hidden rounded-xl border border-border bg-background-secondary transition-all hover:border-border-secondary"
+      className="card-elevated overflow-hidden"
     >
       {/* Color accent */}
       <div
-        className="absolute left-0 top-0 h-1 w-full"
+        className="h-1 w-full"
         style={{ backgroundColor: useCase.color }}
       />
 
-      <div className="p-6">
+      <div className="p-7">
         {/* Header */}
         <div className="mb-4 flex items-start gap-4">
           <div
             className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
-            style={{ backgroundColor: `${useCase.color}20` }}
+            style={{ backgroundColor: `${useCase.color}15` }}
           >
             <Icon className="h-6 w-6" style={{ color: useCase.color }} />
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-foreground">{useCase.title}</h3>
-            <p className="text-sm text-foreground-tertiary">
+            <h3 className="text-lg font-semibold" style={{ color: "var(--text-on-light)" }}>{useCase.title}</h3>
+            <p className="text-sm" style={{ color: "var(--text-on-light-tertiary)" }}>
               {categories.find((c) => c.id === useCase.category)?.name}
             </p>
           </div>
         </div>
 
         {/* Description */}
-        <p className="mb-4 text-sm leading-relaxed text-foreground-secondary">
+        <p className="mb-4 text-sm leading-relaxed" style={{ color: "var(--text-on-light-secondary)" }}>
           {useCase.description}
         </p>
 
@@ -486,9 +451,10 @@ function UseCaseCard({ useCase, index }: { useCase: UseCase; index: number }) {
           {useCase.benefits.slice(0, 3).map((benefit) => (
             <span
               key={benefit}
-              className="flex items-center gap-1 rounded-md bg-background-tertiary px-2 py-1 text-xs text-foreground-tertiary"
+              className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs"
+              style={{ backgroundColor: "var(--bg-section-light-alt)", color: "var(--text-on-light-secondary)" }}
             >
-              <CheckIcon className="h-3 w-3 text-brand" />
+              <CheckIcon className="h-3 w-3" style={{ color: "#50AF95" }} />
               {benefit}
             </span>
           ))}
@@ -496,20 +462,20 @@ function UseCaseCard({ useCase, index }: { useCase: UseCase; index: number }) {
 
         {/* Example */}
         <div
-          className="mb-4 rounded-lg p-4"
-          style={{ backgroundColor: `${useCase.color}10` }}
+          className="mb-4 rounded-xl p-4"
+          style={{ backgroundColor: `${useCase.color}08` }}
         >
-          <p className="mb-1 text-xs font-medium uppercase tracking-wider text-foreground-tertiary">
+          <p className="mb-1 text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-on-light-tertiary)" }}>
             Example
           </p>
-          <p className="text-sm font-medium text-foreground">{useCase.example.title}</p>
-          <p className="text-sm text-foreground-secondary">{useCase.example.description}</p>
+          <p className="text-sm font-medium" style={{ color: "var(--text-on-light)" }}>{useCase.example.title}</p>
+          <p className="text-sm" style={{ color: "var(--text-on-light-secondary)" }}>{useCase.example.description}</p>
         </div>
 
         {/* Expand button */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center gap-2 text-sm font-medium transition-colors hover:text-brand"
+          className="flex items-center gap-2 text-sm font-medium transition-colors"
           style={{ color: useCase.color }}
         >
           {isExpanded ? "Show less" : "Learn more"}
@@ -529,21 +495,22 @@ function UseCaseCard({ useCase, index }: { useCase: UseCase; index: number }) {
               transition={{ duration: 0.3 }}
               className="overflow-hidden"
             >
-              <div className="mt-4 border-t border-border pt-4">
-                <p className="mb-4 text-sm text-foreground-secondary">
+              <div className="mt-4 pt-4" style={{ borderTop: "1px solid var(--border-light)" }}>
+                <p className="mb-4 text-sm" style={{ color: "var(--text-on-light-secondary)" }}>
                   {useCase.longDescription}
                 </p>
 
                 {/* Industries */}
                 <div className="mb-4">
-                  <p className="mb-2 text-xs font-medium uppercase tracking-wider text-foreground-tertiary">
+                  <p className="mb-2 text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-on-light-tertiary)" }}>
                     Industries
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {useCase.industries.map((industry) => (
                       <span
                         key={industry}
-                        className="rounded-full bg-background-tertiary px-3 py-1 text-xs text-foreground-secondary"
+                        className="rounded-full px-3 py-1 text-xs"
+                        style={{ backgroundColor: "var(--bg-section-light-alt)", color: "var(--text-on-light-secondary)" }}
                       >
                         {industry}
                       </span>
@@ -553,16 +520,17 @@ function UseCaseCard({ useCase, index }: { useCase: UseCase; index: number }) {
 
                 {/* Features */}
                 <div className="mb-4">
-                  <p className="mb-2 text-xs font-medium uppercase tracking-wider text-foreground-tertiary">
+                  <p className="mb-2 text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-on-light-tertiary)" }}>
                     Features
                   </p>
                   <ul className="grid gap-2 sm:grid-cols-2">
                     {useCase.features.map((feature) => (
                       <li
                         key={feature}
-                        className="flex items-center gap-2 text-sm text-foreground-secondary"
+                        className="flex items-center gap-2 text-sm"
+                        style={{ color: "var(--text-on-light-secondary)" }}
                       >
-                        <CheckIcon className="h-3 w-3 shrink-0 text-brand" />
+                        <CheckIcon className="h-3 w-3 shrink-0" style={{ color: "#50AF95" }} />
                         {feature}
                       </li>
                     ))}
@@ -571,14 +539,20 @@ function UseCaseCard({ useCase, index }: { useCase: UseCase; index: number }) {
 
                 {/* Code snippet */}
                 {useCase.codeSnippet && (
-                  <div className="overflow-hidden rounded-lg border border-border bg-background-tertiary">
-                    <div className="border-b border-border bg-background-secondary px-4 py-2">
-                      <span className="text-xs font-medium text-foreground-tertiary">
+                  <div
+                    className="overflow-hidden rounded-xl"
+                    style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "#0d1117" }}
+                  >
+                    <div
+                      className="px-4 py-2"
+                      style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
+                    >
+                      <span className="text-xs font-medium" style={{ color: "#A1A1AA" }}>
                         Implementation
                       </span>
                     </div>
-                    <pre className="overflow-x-auto p-4">
-                      <code className="text-xs text-foreground-secondary">
+                    <pre className="overflow-x-auto p-4" style={{ background: "transparent", border: "none" }}>
+                      <code className="text-xs" style={{ color: "#A1A1AA", background: "transparent", padding: 0 }}>
                         {useCase.codeSnippet}
                       </code>
                     </pre>
@@ -600,116 +574,156 @@ export default function UseCasesClient() {
     selectedCategory === "all" ? useCases : getUseCasesByCategory(selectedCategory);
 
   return (
-    <div className="mx-auto max-w-[1440px] px-4 py-16 sm:px-6 lg:px-8">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-16 text-center"
-      >
-        <h1 className="mb-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-          Use Cases
-        </h1>
-        <p className="mx-auto max-w-2xl text-lg text-foreground-secondary">
-          Discover how t402 enables new payment models across industries. From API monetization
-          to AI agent payments, see what's possible with HTTP-native stablecoin payments.
-        </p>
-      </motion.div>
-
-      {/* Stats */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="mb-12 grid grid-cols-2 gap-4 sm:grid-cols-4"
-      >
-        <div className="rounded-xl border border-border bg-background-secondary p-4 text-center">
-          <p className="text-3xl font-bold text-foreground">{useCases.length}</p>
-          <p className="text-sm text-foreground-tertiary">Use Cases</p>
-        </div>
-        <div className="rounded-xl border border-border bg-background-secondary p-4 text-center">
-          <p className="text-3xl font-bold text-foreground">{categories.length}</p>
-          <p className="text-sm text-foreground-tertiary">Categories</p>
-        </div>
-        <div className="rounded-xl border border-border bg-background-secondary p-4 text-center">
-          <p className="text-3xl font-bold text-foreground">28</p>
-          <p className="text-sm text-foreground-tertiary">Chains Supported</p>
-        </div>
-        <div className="rounded-xl border border-border bg-background-secondary p-4 text-center">
-          <p className="text-3xl font-bold text-foreground">$0.001</p>
-          <p className="text-sm text-foreground-tertiary">Min Payment</p>
-        </div>
-      </motion.div>
-
-      {/* Category Filter */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.15 }}
-        className="mb-8 overflow-x-auto"
-      >
-        <div className="mx-auto flex w-max min-w-full items-center justify-start gap-1 rounded-xl border border-border bg-background-secondary p-1.5 sm:w-auto sm:justify-center">
-          <CategoryTab
-            category={{ id: "all", name: "All" }}
-            isSelected={selectedCategory === "all"}
-            onClick={() => setSelectedCategory("all")}
-            count={useCases.length}
-          />
-          {categories.map((category) => (
-            <CategoryTab
-              key={category.id}
-              category={category}
-              isSelected={selectedCategory === category.id}
-              onClick={() => setSelectedCategory(category.id)}
-              count={getUseCasesByCategory(category.id).length}
-            />
-          ))}
-        </div>
-      </motion.div>
-
-      {/* Use Cases Grid */}
-      <motion.div layout className="mb-20 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <AnimatePresence mode="popLayout">
-          {filteredUseCases.map((useCase, index) => (
-            <UseCaseCard key={useCase.id} useCase={useCase} index={index} />
-          ))}
-        </AnimatePresence>
-      </motion.div>
-
-      {/* CTA */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-        className="rounded-2xl border border-border bg-background-secondary p-8 text-center sm:p-12"
-      >
-        <h2 className="mb-4 text-2xl font-bold text-foreground sm:text-3xl">
-          Build your use case
-        </h2>
-        <p className="mx-auto mb-8 max-w-xl text-foreground-secondary">
-          Have a unique payment model in mind? Our SDKs make it easy to implement any of these
-          use cases and more. Get started in minutes.
-        </p>
-        <div className="flex flex-wrap justify-center gap-4">
-          <Link
-            href="/sdks"
-            className="inline-flex items-center gap-2 rounded-lg bg-brand px-6 py-3 text-base font-medium transition-colors hover:bg-brand-secondary"
-            style={{ color: "#0A0A0B" }}
+    <div className="relative overflow-hidden">
+      {/* Dark Header */}
+      <section className="section-dark py-24 md:py-32">
+        <div className="mx-auto max-w-7xl px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            View SDKs
-          </Link>
-          <Link
-            href="https://docs.t402.io/getting-started/quickstart"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-background-tertiary px-6 py-3 text-base font-medium text-foreground transition-colors hover:bg-border"
+            <span
+              className="text-xs font-semibold uppercase tracking-widest"
+              style={{ color: "#50AF95" }}
+            >
+              Use Cases
+            </span>
+            <h1 className="mt-4 text-4xl font-bold tracking-tight md:text-5xl" style={{ color: "#FAFAFA" }}>
+              Real-World Applications
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-lg" style={{ color: "#A1A1AA" }}>
+              Discover how t402 enables new payment models across industries. From API monetization
+              to AI agent payments, see what&apos;s possible with HTTP-native stablecoin payments.
+            </p>
+          </motion.div>
+
+          {/* Stats row in dark header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="mx-auto mt-12 grid max-w-4xl grid-cols-2 gap-4 sm:grid-cols-4"
           >
-            Quickstart Guide
-            <ExternalLinkIcon />
-          </Link>
+            <div
+              className="rounded-2xl p-5 text-center"
+              style={{ backgroundColor: "#111113", border: "1px solid rgba(255,255,255,0.08)" }}
+            >
+              <p className="text-2xl font-bold" style={{ color: "#50AF95" }}>{useCases.length}</p>
+              <p className="mt-1 text-sm" style={{ color: "#A1A1AA" }}>Use Cases</p>
+            </div>
+            <div
+              className="rounded-2xl p-5 text-center"
+              style={{ backgroundColor: "#111113", border: "1px solid rgba(255,255,255,0.08)" }}
+            >
+              <p className="text-2xl font-bold" style={{ color: "#50AF95" }}>{categories.length}</p>
+              <p className="mt-1 text-sm" style={{ color: "#A1A1AA" }}>Categories</p>
+            </div>
+            <div
+              className="rounded-2xl p-5 text-center"
+              style={{ backgroundColor: "#111113", border: "1px solid rgba(255,255,255,0.08)" }}
+            >
+              <p className="text-2xl font-bold" style={{ color: "#50AF95" }}>28</p>
+              <p className="mt-1 text-sm" style={{ color: "#A1A1AA" }}>Chains Supported</p>
+            </div>
+            <div
+              className="rounded-2xl p-5 text-center"
+              style={{ backgroundColor: "#111113", border: "1px solid rgba(255,255,255,0.08)" }}
+            >
+              <p className="text-2xl font-bold" style={{ color: "#50AF95" }}>$0.001</p>
+              <p className="mt-1 text-sm" style={{ color: "#A1A1AA" }}>Min Payment</p>
+            </div>
+          </motion.div>
         </div>
-      </motion.div>
+      </section>
+
+      {/* Light Section: Category Filter + Grid */}
+      <section className="section-light py-24 md:py-32">
+        <div className="mx-auto max-w-7xl px-6">
+          {/* Category Filter */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+            className="mb-12 overflow-x-auto"
+          >
+            <div className="flex flex-wrap justify-center gap-2">
+              <button
+                onClick={() => setSelectedCategory("all")}
+                className="rounded-xl px-4 py-2 text-sm font-medium transition-all duration-300"
+                style={{
+                  backgroundColor: selectedCategory === "all" ? "#50AF95" : "var(--bg-section-light-alt)",
+                  color: selectedCategory === "all" ? "#0A0A0B" : "var(--text-on-light-secondary)",
+                }}
+              >
+                All
+                <span className="ml-1.5 text-xs" style={{ opacity: 0.7 }}>{useCases.length}</span>
+              </button>
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => setSelectedCategory(category.id)}
+                  className="rounded-xl px-4 py-2 text-sm font-medium transition-all duration-300"
+                  style={{
+                    backgroundColor: selectedCategory === category.id ? "#50AF95" : "var(--bg-section-light-alt)",
+                    color: selectedCategory === category.id ? "#0A0A0B" : "var(--text-on-light-secondary)",
+                  }}
+                >
+                  {category.name}
+                  <span className="ml-1.5 text-xs" style={{ opacity: 0.7 }}>{getUseCasesByCategory(category.id).length}</span>
+                </button>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Use Cases Grid */}
+          <motion.div layout className="mb-20 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <AnimatePresence mode="popLayout">
+              {filteredUseCases.map((useCase, index) => (
+                <UseCaseCard key={useCase.id} useCase={useCase} index={index} />
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Dark CTA */}
+      <section className="section-dark py-24 md:py-32">
+        <div className="mx-auto max-w-4xl px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl" style={{ color: "#FAFAFA" }}>
+              Build your use case
+            </h2>
+            <p className="mx-auto mb-8 max-w-xl text-lg" style={{ color: "#A1A1AA" }}>
+              Have a unique payment model in mind? Our SDKs make it easy to implement any of these
+              use cases and more. Get started in minutes.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link
+                href="/sdks"
+                className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-base font-medium transition-all duration-300 hover:opacity-90"
+                style={{ backgroundColor: "#50AF95", color: "#0A0A0B" }}
+              >
+                View SDKs
+              </Link>
+              <Link
+                href="https://docs.t402.io/getting-started/quickstart"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-base font-medium transition-all duration-300 hover:bg-white/5"
+                style={{ border: "1px solid rgba(255,255,255,0.2)", color: "#FAFAFA" }}
+              >
+                Quickstart Guide
+                <ExternalLinkIcon />
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </section>
     </div>
   );
 }

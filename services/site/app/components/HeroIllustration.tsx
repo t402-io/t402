@@ -3,7 +3,6 @@ import Image from "next/image";
 export function HeroIllustration() {
   return (
     <div className="relative w-[700px] h-[1000px] flex-shrink-0 overflow-visible">
-      {/* Halftone hand - emerges from bottom-right */}
       <Image
         src="/images/home_hand_halftone.svg"
         alt=""
@@ -13,7 +12,6 @@ export function HeroIllustration() {
         aria-hidden="true"
         className="absolute bottom-[20px] right-[20px] pointer-events-none select-none z-0"
       />
-      {/* Phone positioned in palm area */}
       <a
         href="/protected"
         className="absolute bottom-[260px] right-[190px] z-10"

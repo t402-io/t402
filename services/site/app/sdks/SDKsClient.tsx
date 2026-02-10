@@ -90,7 +90,7 @@ function CopyIcon({ className = "" }: { className?: string }) {
   );
 }
 
-function CheckIcon({ className = "" }: { className?: string }) {
+function CheckIcon({ className = "", style }: { className?: string; style?: React.CSSProperties }) {
   return (
     <svg
       width="16"
@@ -102,6 +102,7 @@ function CheckIcon({ className = "" }: { className?: string }) {
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
+      style={style}
       aria-hidden="true"
     >
       <polyline points="20 6 9 17 4 12" />
@@ -138,7 +139,7 @@ function GitHubIcon({ className = "" }: { className?: string }) {
   );
 }
 
-function PackageIcon({ className = "" }: { className?: string }) {
+function PackageIcon({ className = "", style }: { className?: string; style?: React.CSSProperties }) {
   return (
     <svg
       width="20"
@@ -150,6 +151,7 @@ function PackageIcon({ className = "" }: { className?: string }) {
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
+      style={style}
       aria-hidden="true"
     >
       <path d="M16.5 9.4 7.5 4.21" />
@@ -178,10 +180,11 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="flex h-8 w-8 items-center justify-center rounded-md bg-background-elevated text-foreground-secondary transition-colors hover:bg-border hover:text-foreground"
+      className="flex h-8 w-8 items-center justify-center rounded-md transition-colors"
+      style={{ background: "rgba(255,255,255,0.1)", color: "#A1A1AA" }}
       aria-label={copied ? "Copied" : "Copy to clipboard"}
     >
-      {copied ? <CheckIcon className="text-brand" /> : <CopyIcon />}
+      {copied ? <CheckIcon style={{ color: "#50AF95" }} /> : <CopyIcon />}
     </button>
   );
 }
@@ -192,38 +195,45 @@ function SDKCard({ sdk, isSelected, onSelect }: { sdk: SDK; isSelected: boolean;
   return (
     <motion.button
       onClick={onSelect}
-      className={`group relative flex w-full flex-col items-start gap-3 rounded-xl border p-4 text-left transition-all sm:gap-4 sm:p-6 ${
-        isSelected
-          ? "border-brand bg-brand-muted"
-          : "border-border bg-background-secondary hover:border-border-secondary"
-      }`}
-      whileHover={{ scale: 1.02 }}
+      className="group relative flex w-full flex-col items-start gap-3 rounded-2xl p-4 text-left transition-all duration-300 sm:gap-4 sm:p-6"
+      style={{
+        background: isSelected ? "rgba(80, 175, 149, 0.08)" : "#111113",
+        border: isSelected ? "1px solid rgba(80, 175, 149, 0.3)" : "1px solid rgba(255,255,255,0.08)",
+      }}
+      whileHover={{ y: -2 }}
       whileTap={{ scale: 0.98 }}
     >
       <div className="flex w-full items-start justify-between gap-2">
         <div className="flex items-center gap-2 sm:gap-3">
           {Icon && <Icon className="h-8 w-8 shrink-0 sm:h-10 sm:w-10" />}
           <div className="min-w-0">
-            <h3 className="text-base font-semibold text-foreground sm:text-lg">{sdk.name}</h3>
-            <p className="text-xs text-foreground-tertiary sm:text-sm">{sdk.language}</p>
+            <h3 className="text-base font-semibold sm:text-lg" style={{ color: "#FAFAFA" }}>{sdk.name}</h3>
+            <p className="text-xs sm:text-sm" style={{ color: "#71717A" }}>{sdk.language}</p>
           </div>
         </div>
-        <span className="shrink-0 rounded-full bg-background-tertiary px-2 py-0.5 text-[10px] font-medium text-foreground-secondary sm:px-2.5 sm:py-1 sm:text-xs">
+        <span
+          className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium sm:px-2.5 sm:py-1 sm:text-xs"
+          style={{ background: "rgba(255,255,255,0.06)", color: "#A1A1AA" }}
+        >
           v{sdk.version}
         </span>
       </div>
-      <p className="text-sm leading-relaxed text-foreground-secondary">{sdk.description}</p>
+      <p className="text-sm leading-relaxed" style={{ color: "#A1A1AA" }}>{sdk.description}</p>
       <div className="flex flex-wrap gap-1.5 sm:gap-2">
         {sdk.features.slice(0, 3).map((feature) => (
           <span
             key={feature}
-            className="rounded-md bg-background-tertiary px-1.5 py-0.5 text-[10px] text-foreground-tertiary sm:px-2 sm:py-1 sm:text-xs"
+            className="rounded-md px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs"
+            style={{ background: "rgba(255,255,255,0.06)", color: "#71717A" }}
           >
             {feature}
           </span>
         ))}
         {sdk.features.length > 3 && (
-          <span className="rounded-md bg-background-tertiary px-1.5 py-0.5 text-[10px] text-foreground-tertiary sm:px-2 sm:py-1 sm:text-xs">
+          <span
+            className="rounded-md px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs"
+            style={{ background: "rgba(255,255,255,0.06)", color: "#71717A" }}
+          >
             +{sdk.features.length - 3} more
           </span>
         )}
@@ -238,8 +248,11 @@ function CodeBlock({ code, language }: { code: string; language: string }) {
       <div className="absolute right-2 top-2 sm:right-3 sm:top-3">
         <CopyButton text={code} />
       </div>
-      <pre className="overflow-x-auto rounded-lg border border-border bg-background-tertiary p-3 pr-12 sm:p-4 sm:pr-14">
-        <code className="text-xs leading-relaxed text-foreground-secondary sm:text-sm">{code}</code>
+      <pre
+        className="overflow-x-auto rounded-xl p-3 pr-12 sm:p-4 sm:pr-14"
+        style={{ background: "#111113", border: "1px solid rgba(255,255,255,0.08)" }}
+      >
+        <code className="text-xs leading-relaxed sm:text-sm" style={{ color: "#A1A1AA" }}>{code}</code>
       </pre>
     </div>
   );
@@ -247,35 +260,46 @@ function CodeBlock({ code, language }: { code: string; language: string }) {
 
 function InstallCommand({ command, packageManager }: { command: string; packageManager?: string }) {
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-border bg-background-tertiary p-2.5 sm:p-3">
-      <span className="hidden text-brand sm:inline">$</span>
-      <code className="flex-1 overflow-x-auto whitespace-nowrap text-xs text-foreground sm:text-sm">{command}</code>
+    <div
+      className="flex items-center gap-2 rounded-xl p-2.5 sm:p-3"
+      style={{ background: "#111113", border: "1px solid rgba(255,255,255,0.08)" }}
+    >
+      <span className="hidden sm:inline" style={{ color: "#50AF95" }}>$</span>
+      <code className="flex-1 overflow-x-auto whitespace-nowrap text-xs sm:text-sm" style={{ color: "#FAFAFA" }}>{command}</code>
       <CopyButton text={command} />
     </div>
   );
 }
 
-const badgeStyles: Record<string, string> = {
-  new: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  beta: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  deprecated: "bg-red-500/10 text-red-400 border-red-500/20",
+const badgeStyles: Record<string, { bg: string; color: string; border: string }> = {
+  new: { bg: "rgba(16, 185, 129, 0.1)", color: "#34D399", border: "rgba(16, 185, 129, 0.2)" },
+  beta: { bg: "rgba(245, 158, 11, 0.1)", color: "#FBBF24", border: "rgba(245, 158, 11, 0.2)" },
+  deprecated: { bg: "rgba(239, 68, 68, 0.1)", color: "#F87171", border: "rgba(239, 68, 68, 0.2)" },
 };
 
 function PackageCard({ pkg }: { pkg: Package }) {
   return (
-    <div className="rounded-lg border border-border bg-background-secondary p-3 sm:p-4">
+    <div
+      className="rounded-xl p-3 sm:p-4"
+      style={{ background: "#111113", border: "1px solid rgba(255,255,255,0.08)" }}
+    >
       <div className="mb-2 flex flex-wrap items-center gap-1.5 sm:gap-2">
-        <PackageIcon className="h-4 w-4 shrink-0 text-brand" />
-        <code className="break-all text-xs font-medium text-foreground sm:text-sm">{pkg.name}</code>
+        <PackageIcon className="h-4 w-4 shrink-0" style={{ color: "#50AF95" }} />
+        <code className="break-all text-xs font-medium sm:text-sm" style={{ color: "#FAFAFA" }}>{pkg.name}</code>
         {pkg.badge && (
           <span
-            className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider sm:px-2 sm:text-[10px] ${badgeStyles[pkg.badge]}`}
+            className="shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider sm:px-2 sm:text-[10px]"
+            style={{
+              background: badgeStyles[pkg.badge].bg,
+              color: badgeStyles[pkg.badge].color,
+              border: `1px solid ${badgeStyles[pkg.badge].border}`,
+            }}
           >
             {pkg.badge}
           </span>
         )}
       </div>
-      <p className="text-xs text-foreground-tertiary sm:text-sm">{pkg.description}</p>
+      <p className="text-xs sm:text-sm" style={{ color: "#71717A" }}>{pkg.description}</p>
     </div>
   );
 }
@@ -284,177 +308,288 @@ export default function SDKsClient() {
   const [selectedSDK, setSelectedSDK] = useState<SDK>(sdks[0]);
 
   return (
-    <div className="mx-auto max-w-[1440px] px-4 py-16 sm:px-6 lg:px-8">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-16 text-center"
-      >
-        <h1 className="mb-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-          Official SDKs
-        </h1>
-        <p className="mx-auto max-w-2xl text-lg text-foreground-secondary">
-          Production-ready SDKs for integrating t402 payments into your applications.
-          Choose your language and start accepting payments in minutes.
-        </p>
-      </motion.div>
+    <>
+      {/* Hero Section - Dark */}
+      <section className="section-dark py-24 md:py-32">
+        <div className="mx-auto max-w-7xl px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-center"
+          >
+            <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#50AF95" }}>
+              SDKs
+            </span>
+            <h1 className="mt-4 text-4xl font-bold tracking-tight md:text-5xl" style={{ color: "#FAFAFA" }}>
+              Build with T402
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-lg" style={{ color: "#A1A1AA" }}>
+              Production-ready SDKs for integrating t402 payments into your applications.
+              Choose your language and start accepting payments in minutes.
+            </p>
+          </motion.div>
+        </div>
+      </section>
 
-      {/* SDK Selection */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-      >
-        {sdks.map((sdk) => (
-          <SDKCard
-            key={sdk.id}
-            sdk={sdk}
-            isSelected={selectedSDK.id === sdk.id}
-            onSelect={() => setSelectedSDK(sdk)}
-          />
-        ))}
-      </motion.div>
+      {/* SDK Selection - Light Section */}
+      <section className="section-light py-24 md:py-32">
+        <div className="mx-auto max-w-7xl px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="mb-12"
+          >
+            <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#50AF95" }}>
+              Choose Your Language
+            </span>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl" style={{ color: "#1A1A2E" }}>
+              Official Libraries
+            </h2>
+          </motion.div>
 
-      {/* Selected SDK Details */}
-      <motion.div
-        key={selectedSDK.id}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="grid gap-8 lg:grid-cols-2"
-      >
-        {/* Installation & Links */}
-        <div className="space-y-5 sm:space-y-6">
-          <div>
-            <h2 className="mb-3 text-lg font-semibold text-foreground sm:mb-4 sm:text-xl">Installation</h2>
-            <InstallCommand command={selectedSDK.installCommand} packageManager={selectedSDK.packageManager} />
-          </div>
-
-          <div>
-            <h2 className="mb-3 text-lg font-semibold text-foreground sm:mb-4 sm:text-xl">Quick Start</h2>
-            <CodeBlock code={selectedSDK.codeExample} language={selectedSDK.language} />
-          </div>
-
-          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3">
-            <Link
-              href={selectedSDK.docsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-medium transition-colors hover:bg-brand-secondary"
-              style={{ color: "#0A0A0B" }}
-            >
-              View Documentation
-              <ExternalLinkIcon />
-            </Link>
-            <Link
-              href={selectedSDK.githubUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-background-secondary px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-background-tertiary"
-            >
-              <GitHubIcon className="h-4 w-4" />
-              View on GitHub
-            </Link>
+          <div className="grid gap-6 sm:grid-cols-2">
+            {sdks.map((sdk, index) => (
+              <motion.div
+                key={sdk.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <button
+                  onClick={() => setSelectedSDK(sdk)}
+                  className="card-elevated group relative flex w-full flex-col items-start gap-4 p-8 text-left"
+                  style={{
+                    borderColor: selectedSDK.id === sdk.id ? "#50AF95" : undefined,
+                    boxShadow: selectedSDK.id === sdk.id ? "0 0 0 1px #50AF95" : undefined,
+                  }}
+                >
+                  <div className="flex w-full items-start justify-between gap-2">
+                    <div className="flex items-center gap-3">
+                      {(() => { const Ic = iconMap[sdk.icon]; return Ic ? <Ic className="h-10 w-10 shrink-0" /> : null; })()}
+                      <div className="min-w-0">
+                        <h3 className="text-lg font-semibold" style={{ color: "#1A1A2E" }}>{sdk.name}</h3>
+                        <p className="text-sm" style={{ color: "#718096" }}>{sdk.language}</p>
+                      </div>
+                    </div>
+                    <span
+                      className="shrink-0 rounded-full px-2.5 py-1 text-xs font-medium"
+                      style={{ background: "#F7FAF9", color: "#4A5568" }}
+                    >
+                      v{sdk.version}
+                    </span>
+                  </div>
+                  <p className="text-sm leading-relaxed" style={{ color: "#4A5568" }}>{sdk.description}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {sdk.features.slice(0, 3).map((feature) => (
+                      <span
+                        key={feature}
+                        className="rounded-md px-2 py-1 text-xs"
+                        style={{ background: "#F7FAF9", color: "#718096" }}
+                      >
+                        {feature}
+                      </span>
+                    ))}
+                    {sdk.features.length > 3 && (
+                      <span
+                        className="rounded-md px-2 py-1 text-xs"
+                        style={{ background: "#F7FAF9", color: "#718096" }}
+                      >
+                        +{sdk.features.length - 3} more
+                      </span>
+                    )}
+                  </div>
+                </button>
+              </motion.div>
+            ))}
           </div>
         </div>
+      </section>
 
-        {/* Features */}
-        <div className="space-y-6">
-          <div>
-            <h2 className="mb-3 text-lg font-semibold text-foreground sm:mb-4 sm:text-xl">Features</h2>
-            <ul className="grid gap-2 sm:grid-cols-2 sm:gap-3">
-              {selectedSDK.features.map((feature) => (
-                <li key={feature} className="flex items-center gap-2 text-sm text-foreground-secondary">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand/20 text-brand">
-                    <CheckIcon className="h-3 w-3" />
-                  </span>
-                  {feature}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* TypeScript Packages */}
-          {selectedSDK.id === "typescript" && (
-            <div className="space-y-6 sm:space-y-8">
+      {/* Selected SDK Details - Dark Section */}
+      <section className="section-dark py-24 md:py-32">
+        <div className="mx-auto max-w-7xl px-6">
+          <motion.div
+            key={selectedSDK.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="grid gap-12 lg:grid-cols-2"
+          >
+            {/* Installation & Links */}
+            <div className="space-y-6">
               <div>
-                <h2 className="mb-3 text-lg font-semibold text-foreground sm:mb-4 sm:text-xl">
-                  Packages <span className="text-xs font-normal text-foreground-tertiary sm:text-sm">({typescriptPackages.length})</span>
+                <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#50AF95" }}>
+                  Get Started
+                </span>
+                <h2 className="mt-4 text-3xl font-bold tracking-tight" style={{ color: "#FAFAFA" }}>
+                  {selectedSDK.name} SDK
                 </h2>
-                <div className="grid gap-2 sm:gap-3">
-                  {typescriptPackages.map((pkg) => (
-                    <PackageCard key={pkg.name} pkg={pkg} />
-                  ))}
-                </div>
               </div>
+
               <div>
-                <h2 className="mb-2 text-lg font-semibold text-foreground sm:text-xl">
-                  Advanced Packages <span className="text-xs font-normal text-foreground-tertiary sm:text-sm">({advancedPackages.length})</span>
-                </h2>
-                <p className="mb-3 text-xs text-foreground-tertiary sm:mb-4 sm:text-sm">
-                  Experimental packages for cutting-edge payment features.
-                </p>
-                <div className="grid gap-2 sm:gap-3">
-                  {advancedPackages.map((pkg) => (
-                    <PackageCard key={pkg.name} pkg={pkg} />
-                  ))}
-                </div>
+                <h3 className="mb-3 text-lg font-semibold" style={{ color: "#FAFAFA" }}>Installation</h3>
+                <InstallCommand command={selectedSDK.installCommand} packageManager={selectedSDK.packageManager} />
+              </div>
+
+              <div>
+                <h3 className="mb-3 text-lg font-semibold" style={{ color: "#FAFAFA" }}>Quick Start</h3>
+                <CodeBlock code={selectedSDK.codeExample} language={selectedSDK.language} />
+              </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <Link
+                  href={selectedSDK.docsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all hover:shadow-glow"
+                  style={{ background: "#50AF95", color: "#0A0A0B" }}
+                >
+                  View Documentation
+                  <ExternalLinkIcon />
+                </Link>
+                <Link
+                  href={selectedSDK.githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-all"
+                  style={{ border: "1px solid rgba(255,255,255,0.2)", color: "#FAFAFA" }}
+                >
+                  <GitHubIcon className="h-4 w-4" />
+                  View on GitHub
+                </Link>
               </div>
             </div>
-          )}
-        </div>
-      </motion.div>
 
-      {/* Supported Chains */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-        className="mt-16 sm:mt-20"
-      >
-        <h2 className="mb-4 text-center text-xl font-semibold text-foreground sm:mb-6 sm:text-2xl">Supported Chains</h2>
-        <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
-          {supportedChains.map((chain) => (
-            <div
-              key={chain.id}
-              className="flex items-center gap-1.5 rounded-full border border-border bg-background-secondary px-2.5 py-1.5 sm:gap-2 sm:px-4 sm:py-2"
-            >
-              <span
-                className="h-2.5 w-2.5 rounded-full sm:h-3 sm:w-3"
-                style={{ backgroundColor: chain.color }}
-                aria-hidden="true"
-              />
-              <span className="text-xs font-medium text-foreground sm:text-sm">{chain.name}</span>
+            {/* Features */}
+            <div className="space-y-6">
+              <div>
+                <h3 className="mb-4 text-lg font-semibold" style={{ color: "#FAFAFA" }}>Features</h3>
+                <ul className="grid gap-3 sm:grid-cols-2">
+                  {selectedSDK.features.map((feature) => (
+                    <li key={feature} className="flex items-center gap-2 text-sm" style={{ color: "#A1A1AA" }}>
+                      <span
+                        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
+                        style={{ background: "rgba(80, 175, 149, 0.15)" }}
+                      >
+                        <CheckIcon className="h-3 w-3" style={{ color: "#50AF95" }} />
+                      </span>
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* TypeScript Packages */}
+              {selectedSDK.id === "typescript" && (
+                <div className="space-y-8">
+                  <div>
+                    <h3 className="mb-4 text-lg font-semibold" style={{ color: "#FAFAFA" }}>
+                      Packages <span className="text-sm font-normal" style={{ color: "#71717A" }}>({typescriptPackages.length})</span>
+                    </h3>
+                    <div className="grid gap-3">
+                      {typescriptPackages.map((pkg) => (
+                        <PackageCard key={pkg.name} pkg={pkg} />
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="mb-2 text-lg font-semibold" style={{ color: "#FAFAFA" }}>
+                      Advanced Packages <span className="text-sm font-normal" style={{ color: "#71717A" }}>({advancedPackages.length})</span>
+                    </h3>
+                    <p className="mb-4 text-xs sm:text-sm" style={{ color: "#71717A" }}>
+                      Experimental packages for cutting-edge payment features.
+                    </p>
+                    <div className="grid gap-3">
+                      {advancedPackages.map((pkg) => (
+                        <PackageCard key={pkg.name} pkg={pkg} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-          ))}
+          </motion.div>
         </div>
-      </motion.div>
+      </section>
 
-      {/* CTA */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-        className="mt-20 rounded-2xl border border-border bg-background-secondary p-8 text-center sm:p-12"
-      >
-        <h2 className="mb-4 text-2xl font-bold text-foreground sm:text-3xl">Ready to get started?</h2>
-        <p className="mx-auto mb-8 max-w-xl text-foreground-secondary">
-          Follow our quickstart guide to integrate t402 payments in under 5 minutes.
-        </p>
-        <Link
-          href="https://docs.t402.io/getting-started/quickstart"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-lg bg-brand px-6 py-3 text-base font-medium transition-colors hover:bg-brand-secondary"
-          style={{ color: "#0A0A0B" }}
-        >
-          Read the Quickstart Guide
-          <ExternalLinkIcon />
-        </Link>
-      </motion.div>
-    </div>
+      {/* Supported Chains - Light Alt Section */}
+      <section className="section-light-alt py-24 md:py-32">
+        <div className="mx-auto max-w-7xl px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="text-center"
+          >
+            <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#50AF95" }}>
+              Multi-Chain
+            </span>
+            <h2 className="mt-4 mb-8 text-3xl font-bold tracking-tight md:text-4xl" style={{ color: "#1A1A2E" }}>
+              Supported Chains
+            </h2>
+          </motion.div>
+
+          <div className="flex flex-wrap justify-center gap-3">
+            {supportedChains.map((chain) => (
+              <div
+                key={chain.id}
+                className="flex items-center gap-2 rounded-full px-4 py-2"
+                style={{ background: "white", border: "1px solid rgba(0,0,0,0.08)" }}
+              >
+                <span
+                  className="h-3 w-3 rounded-full"
+                  style={{ backgroundColor: chain.color }}
+                  aria-hidden="true"
+                />
+                <span className="text-sm font-medium" style={{ color: "#1A1A2E" }}>{chain.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA - Dark Section */}
+      <section className="section-dark relative overflow-hidden py-24 md:py-32">
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(80, 175, 149, 0.08), transparent)",
+          }}
+        />
+        <div className="relative mx-auto max-w-7xl px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="mx-auto max-w-3xl text-center"
+          >
+            <h2 className="text-3xl font-bold tracking-tight md:text-4xl" style={{ color: "#FAFAFA" }}>
+              Ready to get started?
+            </h2>
+            <p className="mx-auto mt-6 max-w-xl text-lg" style={{ color: "#A1A1AA" }}>
+              Follow our quickstart guide to integrate t402 payments in under 5 minutes.
+            </p>
+            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Link
+                href="https://docs.t402.io/getting-started/quickstart"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl px-8 py-4 text-lg font-semibold transition-all hover:shadow-glow"
+                style={{ background: "#50AF95", color: "#0A0A0B" }}
+              >
+                Read the Quickstart Guide
+                <ExternalLinkIcon />
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+    </>
   );
 }

@@ -4,18 +4,52 @@ interface FeatureCardProps {
   icon: React.ReactNode;
   title: string;
   description: string;
+  variant?: "light" | "dark";
+  href?: string;
 }
 
-export function FeatureCard({ icon, title, description }: FeatureCardProps) {
+export function FeatureCard({
+  icon,
+  title,
+  description,
+  variant = "dark",
+  href,
+}: FeatureCardProps) {
+  const cardClass =
+    variant === "light" ? "card-elevated" : "card-elevated-dark";
+
+  const titleColor =
+    variant === "light" ? "text-[#1A1A2E]" : "text-white";
+
+  const descriptionColor =
+    variant === "light" ? "text-[#4A5568]" : "text-[#A1A1AA]";
+
   return (
-    <div className="flex flex-col gap-6">
-      <div className="w-12 h-12 flex items-center justify-center" aria-hidden="true">
+    <div className={`${cardClass} p-8 flex flex-col gap-6`}>
+      <div
+        className={`w-12 h-12 flex items-center justify-center rounded-xl ${
+          variant === "light"
+            ? "bg-[#50AF95]/10"
+            : "bg-[#50AF95]/10"
+        }`}
+        aria-hidden="true"
+      >
         {icon}
       </div>
       <div className="flex flex-col gap-3">
-        <h3 className="text-2xl font-medium">{title}</h3>
-        <p className="text-base text-black">{description}</p>
+        <h3 className={`text-xl font-semibold ${titleColor}`}>{title}</h3>
+        <p className={`text-base leading-relaxed ${descriptionColor}`}>
+          {description}
+        </p>
       </div>
+      {href && (
+        <a
+          href={href}
+          className="text-sm font-medium text-[#50AF95] hover:text-[#26A17B] transition-colors mt-auto"
+        >
+          Learn more &rarr;
+        </a>
+      )}
     </div>
   );
 }

@@ -24,14 +24,7 @@ interface Step {
 // Icons
 function PlayIcon({ className = "" }: { className?: string }) {
   return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className={className}
-      aria-hidden="true"
-    >
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
       <polygon points="5 3 19 12 5 21 5 3" />
     </svg>
   );
@@ -39,18 +32,7 @@ function PlayIcon({ className = "" }: { className?: string }) {
 
 function RefreshIcon({ className = "" }: { className?: string }) {
   return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
       <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
       <path d="M3 3v5h5" />
       <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
@@ -61,38 +43,16 @@ function RefreshIcon({ className = "" }: { className?: string }) {
 
 function CopyIcon({ className = "" }: { className?: string }) {
   return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
       <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
       <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
     </svg>
   );
 }
 
-function CheckIcon({ className = "" }: { className?: string }) {
+function CheckIcon({ className = "", style }: { className?: string; style?: React.CSSProperties }) {
   return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style} aria-hidden="true">
       <polyline points="20 6 9 17 4 12" />
     </svg>
   );
@@ -100,18 +60,7 @@ function CheckIcon({ className = "" }: { className?: string }) {
 
 function ArrowRightIcon({ className = "" }: { className?: string }) {
   return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
       <path d="M5 12h14" />
       <path d="m12 5 7 7-7 7" />
     </svg>
@@ -120,18 +69,7 @@ function ArrowRightIcon({ className = "" }: { className?: string }) {
 
 function ExternalLinkIcon({ className = "" }: { className?: string }) {
   return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
       <polyline points="15 3 21 3 21 9" />
       <line x1="10" y1="14" x2="21" y2="3" />
@@ -139,20 +77,9 @@ function ExternalLinkIcon({ className = "" }: { className?: string }) {
   );
 }
 
-function ServerIcon({ className = "" }: { className?: string }) {
+function ServerIcon({ className = "", style }: { className?: string; style?: React.CSSProperties }) {
   return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style} aria-hidden="true">
       <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
       <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
       <line x1="6" y1="6" x2="6.01" y2="6" />
@@ -161,20 +88,9 @@ function ServerIcon({ className = "" }: { className?: string }) {
   );
 }
 
-function WalletIcon({ className = "" }: { className?: string }) {
+function WalletIcon({ className = "", style }: { className?: string; style?: React.CSSProperties }) {
   return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style} aria-hidden="true">
       <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
       <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
       <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
@@ -182,29 +98,17 @@ function WalletIcon({ className = "" }: { className?: string }) {
   );
 }
 
-function CheckCircleIcon({ className = "" }: { className?: string }) {
+function CheckCircleIcon({ className = "", style }: { className?: string; style?: React.CSSProperties }) {
   return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style} aria-hidden="true">
       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
       <polyline points="22 4 12 14.01 9 11.01" />
     </svg>
   );
 }
 
-// Chain options - supports all T402 chains across 10 blockchain families
+// Chain options
 const chains = [
-  // EVM Chains
   { id: "base", name: "Base", network: "eip155:8453", color: "#0052FF", type: "evm" as const },
   { id: "ethereum", name: "Ethereum", network: "eip155:1", color: "#627EEA", type: "evm" as const },
   { id: "arbitrum", name: "Arbitrum", network: "eip155:42161", color: "#28A0F0", type: "evm" as const },
@@ -222,7 +126,6 @@ const chains = [
   { id: "scroll", name: "Scroll", network: "eip155:534352", color: "#FFEEDA", type: "evm" as const },
   { id: "corn", name: "Corn", network: "eip155:21000000", color: "#F5C842", type: "evm" as const },
   { id: "conflux", name: "Conflux eSpace", network: "eip155:1030", color: "#1A1A2E", type: "evm" as const },
-  // Non-EVM Chains
   { id: "solana", name: "Solana", network: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", color: "#9945FF", type: "solana" as const },
   { id: "ton", name: "TON", network: "ton:mainnet", color: "#0098EA", type: "ton" as const },
   { id: "tron", name: "TRON", network: "tron:mainnet", color: "#FF0013", type: "tron" as const },
@@ -238,107 +141,88 @@ const tokens = [
   { id: "USDT0", name: "USDT0 (Omnichain)" },
 ];
 
-// Helper to generate payment header
 function generatePaymentHeader(config: PaymentConfig): string {
   const chain = chains.find((c) => c.id === config.chain);
-
-  // Get appropriate payTo address based on chain type
   const getPayToAddress = () => {
     switch (chain?.type) {
-      case "ton":
-        return "EQ5d11d21276ac6b5efdf179e654ff0c6eee34e0abfa263a";
-      case "tron":
-        return "TT1MqNNj2k5qdGA6nrrCodW6oyHbbAreQ5";
-      case "solana":
-        return "8GGtWHRQ1wz5gDKE2KXZLktqzcfV1CBqSbeUZjA7hoWL";
-      case "near":
-        return "facilitator.t402.near";
-      case "aptos":
-        return "0xc88f67e776f16dcfbf42e6bdda1b82604448899b000000000000000000000000";
-      case "tezos":
-        return "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb";
-      case "polkadot":
-        return "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY";
-      case "stacks":
-        return "SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9";
-      default:
-        return "0xC88f67e776f16DcFBf42e6bDda1B82604448899B";
+      case "ton": return "EQ5d11d21276ac6b5efdf179e654ff0c6eee34e0abfa263a";
+      case "tron": return "TT1MqNNj2k5qdGA6nrrCodW6oyHbbAreQ5";
+      case "solana": return "8GGtWHRQ1wz5gDKE2KXZLktqzcfV1CBqSbeUZjA7hoWL";
+      case "near": return "facilitator.t402.near";
+      case "aptos": return "0xc88f67e776f16dcfbf42e6bdda1b82604448899b000000000000000000000000";
+      case "tezos": return "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb";
+      case "polkadot": return "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY";
+      case "stacks": return "SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9";
+      default: return "0xC88f67e776f16DcFBf42e6bDda1B82604448899B";
     }
   };
-
   const payload = {
     version: "1",
-    accepts: [
-      {
-        scheme: "exact",
-        network: chain?.network || "eip155:8453",
-        maxAmountRequired: (parseFloat(config.price.replace("$", "")) * 1000000).toString(),
-        resource: config.resource,
-        payTo: getPayToAddress(),
-        token: config.token,
-      },
-    ],
+    accepts: [{
+      scheme: "exact",
+      network: chain?.network || "eip155:8453",
+      maxAmountRequired: (parseFloat(config.price.replace("$", "")) * 1000000).toString(),
+      resource: config.resource,
+      payTo: getPayToAddress(),
+      token: config.token,
+    }],
   };
-
   return JSON.stringify(payload, null, 2);
 }
 
-// Copy button component
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
-
   const handleCopy = async () => {
     await navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
   return (
     <button
       onClick={handleCopy}
-      className="flex h-7 w-7 items-center justify-center rounded-md bg-background-elevated text-foreground-tertiary transition-colors hover:bg-border hover:text-foreground"
+      className="flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:opacity-70"
+      style={{ backgroundColor: "rgba(255,255,255,0.06)", color: "#A1A1AA" }}
       aria-label={copied ? "Copied" : "Copy to clipboard"}
     >
-      {copied ? <CheckIcon className="text-brand" /> : <CopyIcon />}
+      {copied ? <CheckIcon style={{ color: "#50AF95" } as React.CSSProperties} /> : <CopyIcon />}
     </button>
   );
 }
 
-// Step indicator component
 function StepIndicator({ step, isActive, isCompleted }: { step: Step; isActive: boolean; isCompleted: boolean }) {
   return (
     <div className="flex items-center gap-3">
       <div
-        className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-colors ${
+        className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-colors"
+        style={
           isCompleted
-            ? "bg-brand text-background"
+            ? { backgroundColor: "#50AF95", color: "#0A0A0B" }
             : isActive
-            ? "bg-brand/20 text-brand"
-            : "bg-background-tertiary text-foreground-tertiary"
-        }`}
+            ? { backgroundColor: "rgba(80,175,149,0.2)", color: "#50AF95" }
+            : { backgroundColor: "rgba(255,255,255,0.06)", color: "#A1A1AA" }
+        }
       >
         {isCompleted ? <CheckIcon className="h-4 w-4" /> : step.id}
       </div>
       <div>
-        <p className={`text-sm font-medium ${isActive || isCompleted ? "text-foreground" : "text-foreground-tertiary"}`}>
+        <p className="text-sm font-medium" style={{ color: isActive || isCompleted ? "#FAFAFA" : "#A1A1AA" }}>
           {step.title}
         </p>
-        <p className="text-xs text-foreground-tertiary">{step.description}</p>
+        <p className="text-xs" style={{ color: "#A1A1AA" }}>{step.description}</p>
       </div>
     </div>
   );
 }
 
-// Code block component
-function CodeBlock({ code, language, title }: { code: string; language: string; title: string }) {
+function CodeBlock({ code, title }: { code: string; language: string; title: string }) {
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-background-tertiary">
-      <div className="flex items-center justify-between border-b border-border bg-background-secondary px-4 py-2">
-        <span className="text-xs font-medium text-foreground-tertiary">{title}</span>
+    <div className="overflow-hidden rounded-xl" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
+      <div className="flex items-center justify-between px-4 py-2" style={{ backgroundColor: "rgba(255,255,255,0.03)", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+        <span className="text-xs font-medium" style={{ color: "#A1A1AA" }}>{title}</span>
         <CopyButton text={code} />
       </div>
-      <pre className="overflow-x-auto p-4">
-        <code className="text-xs leading-relaxed text-foreground-secondary">{code}</code>
+      <pre className="overflow-x-auto p-4" style={{ backgroundColor: "#111113" }}>
+        <code className="text-xs leading-relaxed" style={{ color: "#A1A1AA" }}>{code}</code>
       </pre>
     </div>
   );
@@ -369,24 +253,15 @@ export default function PlaygroundClient() {
     setIsRunning(true);
     setShowResponse(false);
     setCurrentStep(0);
-
-    // Step 1: Client request
     await new Promise((r) => setTimeout(r, 800));
     setCurrentStep(1);
-
-    // Step 2: 402 Response
     await new Promise((r) => setTimeout(r, 1000));
     setCurrentStep(2);
     setShowResponse(true);
-
-    // Step 3: User pays
     await new Promise((r) => setTimeout(r, 1200));
     setCurrentStep(3);
-
-    // Step 4: Verified access
     await new Promise((r) => setTimeout(r, 1000));
     setCurrentStep(4);
-
     setIsRunning(false);
   };
 
@@ -442,348 +317,259 @@ Content-Type: application/json
   }
 }`;
 
+  const inputStyle: React.CSSProperties = {
+    backgroundColor: "rgba(255,255,255,0.04)",
+    border: "1px solid rgba(255,255,255,0.1)",
+    color: "#FAFAFA",
+  };
+
   return (
-    <div className="mx-auto max-w-[1440px] px-4 py-16 sm:px-6 lg:px-8">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-12 text-center"
-      >
-        <h1 className="mb-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-          Interactive Playground
-        </h1>
-        <p className="mx-auto max-w-2xl text-lg text-foreground-secondary">
-          See how t402 payments work in real-time. Configure your payment settings and watch
-          the HTTP 402 flow in action.
-        </p>
-      </motion.div>
+    <>
+      {/* Dark Header */}
+      <section style={{ backgroundColor: "#0A0A0B" }} className="py-24 md:py-32">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <p className="uppercase text-xs tracking-widest font-semibold mb-4" style={{ color: "#50AF95" }}>
+              Demo
+            </p>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6" style={{ color: "#FAFAFA" }}>
+              Interactive Playground
+            </h1>
+            <p className="mx-auto max-w-2xl text-lg" style={{ color: "#A1A1AA" }}>
+              See how t402 payments work in real-time. Configure your payment settings and watch
+              the HTTP 402 flow in action.
+            </p>
+          </motion.div>
+        </div>
+      </section>
 
-      <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">
-        {/* Configuration Panel */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="lg:col-span-1"
-        >
-          <div className="space-y-6 lg:sticky lg:top-24">
-            <div className="rounded-xl border border-border bg-background-secondary p-6">
-              <h2 className="mb-4 text-lg font-semibold text-foreground">Configuration</h2>
-
-              {/* Endpoint */}
-              <div className="mb-4">
-                <label className="mb-1.5 block text-sm font-medium text-foreground-secondary">
-                  Endpoint
-                </label>
-                <input
-                  type="text"
-                  value={config.endpoint}
-                  onChange={(e) => setConfig({ ...config, endpoint: e.target.value })}
-                  className="w-full rounded-lg border border-border bg-background-tertiary px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-                />
-              </div>
-
-              {/* Method */}
-              <div className="mb-4">
-                <label className="mb-1.5 block text-sm font-medium text-foreground-secondary">
-                  Method
-                </label>
-                <select
-                  value={config.method}
-                  onChange={(e) => setConfig({ ...config, method: e.target.value })}
-                  className="w-full rounded-lg border border-border bg-background-tertiary px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-                >
-                  <option value="GET">GET</option>
-                  <option value="POST">POST</option>
-                  <option value="PUT">PUT</option>
-                </select>
-              </div>
-
-              {/* Price */}
-              <div className="mb-4">
-                <label className="mb-1.5 block text-sm font-medium text-foreground-secondary">
-                  Price
-                </label>
-                <input
-                  type="text"
-                  value={config.price}
-                  onChange={(e) => setConfig({ ...config, price: e.target.value })}
-                  className="w-full rounded-lg border border-border bg-background-tertiary px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-                />
-              </div>
-
-              {/* Chain */}
-              <div className="mb-4">
-                <label className="mb-1.5 block text-sm font-medium text-foreground-secondary">
-                  Chain
-                </label>
-                <select
-                  value={config.chain}
-                  onChange={(e) => setConfig({ ...config, chain: e.target.value })}
-                  className="w-full rounded-lg border border-border bg-background-tertiary px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-                >
-                  {chains.map((chain) => (
-                    <option key={chain.id} value={chain.id}>
-                      {chain.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Token */}
-              <div className="mb-6">
-                <label className="mb-1.5 block text-sm font-medium text-foreground-secondary">
-                  Token
-                </label>
-                <select
-                  value={config.token}
-                  onChange={(e) => setConfig({ ...config, token: e.target.value })}
-                  className="w-full rounded-lg border border-border bg-background-tertiary px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-                >
-                  {tokens.map((token) => (
-                    <option key={token.id} value={token.id}>
-                      {token.id} - {token.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Resource */}
-              <div className="mb-6">
-                <label className="mb-1.5 block text-sm font-medium text-foreground-secondary">
-                  Resource Description
-                </label>
-                <input
-                  type="text"
-                  value={config.resource}
-                  onChange={(e) => setConfig({ ...config, resource: e.target.value })}
-                  className="w-full rounded-lg border border-border bg-background-tertiary px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-                />
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-3">
-                <button
-                  onClick={runDemo}
-                  disabled={isRunning}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-medium transition-colors hover:bg-brand-secondary disabled:opacity-50"
-                  style={{ color: "#0A0A0B" }}
-                >
-                  <PlayIcon className="h-4 w-4" />
-                  {isRunning ? "Running..." : "Run Demo"}
-                </button>
-                <button
-                  onClick={resetDemo}
-                  className="flex items-center justify-center rounded-lg border border-border bg-background-tertiary px-3 py-2.5 text-foreground-secondary transition-colors hover:bg-border hover:text-foreground"
-                >
-                  <RefreshIcon />
-                </button>
-              </div>
-            </div>
-
-            {/* Step Progress */}
-            <div className="rounded-xl border border-border bg-background-secondary p-6">
-              <h3 className="mb-4 text-sm font-semibold text-foreground">Payment Flow</h3>
-              <div className="space-y-4">
-                {steps.map((step, index) => (
-                  <StepIndicator
-                    key={step.id}
-                    step={step}
-                    isActive={currentStep === index + 1}
-                    isCompleted={currentStep > index + 1}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Demo Panel */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="lg:col-span-2"
-        >
-          <div className="space-y-6">
-            {/* Step 1: Client Request */}
-            <div
-              className={`rounded-xl border p-6 transition-all ${
-                currentStep >= 1
-                  ? "border-brand/50 bg-brand/5"
-                  : "border-border bg-background-secondary"
-              }`}
+      {/* Interactive Area on Dark BG */}
+      <section style={{ backgroundColor: "#111113" }} className="py-24 md:py-32">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">
+            {/* Configuration Panel */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="lg:col-span-1"
             >
-              <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/20">
-                  <ServerIcon className="text-blue-500" />
+              <div className="space-y-6 lg:sticky lg:top-24">
+                <div className="rounded-2xl p-6" style={{ backgroundColor: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  <h2 className="mb-4 text-lg font-semibold" style={{ color: "#FAFAFA" }}>Configuration</h2>
+
+                  <div className="mb-4">
+                    <label className="mb-1.5 block text-sm font-medium" style={{ color: "#A1A1AA" }}>Endpoint</label>
+                    <input type="text" value={config.endpoint} onChange={(e) => setConfig({ ...config, endpoint: e.target.value })} className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1" style={{ ...inputStyle, "--tw-ring-color": "#50AF95" } as React.CSSProperties} />
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="mb-1.5 block text-sm font-medium" style={{ color: "#A1A1AA" }}>Method</label>
+                    <select value={config.method} onChange={(e) => setConfig({ ...config, method: e.target.value })} className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1" style={inputStyle}>
+                      <option value="GET">GET</option>
+                      <option value="POST">POST</option>
+                      <option value="PUT">PUT</option>
+                    </select>
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="mb-1.5 block text-sm font-medium" style={{ color: "#A1A1AA" }}>Price</label>
+                    <input type="text" value={config.price} onChange={(e) => setConfig({ ...config, price: e.target.value })} className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1" style={inputStyle} />
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="mb-1.5 block text-sm font-medium" style={{ color: "#A1A1AA" }}>Chain</label>
+                    <select value={config.chain} onChange={(e) => setConfig({ ...config, chain: e.target.value })} className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1" style={inputStyle}>
+                      {chains.map((chain) => (
+                        <option key={chain.id} value={chain.id}>{chain.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="mb-1.5 block text-sm font-medium" style={{ color: "#A1A1AA" }}>Token</label>
+                    <select value={config.token} onChange={(e) => setConfig({ ...config, token: e.target.value })} className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1" style={inputStyle}>
+                      {tokens.map((token) => (
+                        <option key={token.id} value={token.id}>{token.id} - {token.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="mb-6">
+                    <label className="mb-1.5 block text-sm font-medium" style={{ color: "#A1A1AA" }}>Resource Description</label>
+                    <input type="text" value={config.resource} onChange={(e) => setConfig({ ...config, resource: e.target.value })} className="w-full rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1" style={inputStyle} />
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button onClick={runDemo} disabled={isRunning} className="flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all hover:opacity-90 disabled:opacity-50" style={{ backgroundColor: "#50AF95", color: "#0A0A0B" }}>
+                      <PlayIcon className="h-4 w-4" />
+                      {isRunning ? "Running..." : "Run Demo"}
+                    </button>
+                    <button onClick={resetDemo} className="flex items-center justify-center rounded-xl px-3 py-2.5 transition-colors hover:opacity-70" style={{ border: "1px solid rgba(255,255,255,0.1)", color: "#A1A1AA" }}>
+                      <RefreshIcon />
+                    </button>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">1. Client Request</h3>
-                  <p className="text-sm text-foreground-tertiary">
-                    Client makes HTTP request to protected endpoint
-                  </p>
+
+                <div className="rounded-2xl p-6" style={{ backgroundColor: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  <h3 className="mb-4 text-sm font-semibold" style={{ color: "#FAFAFA" }}>Payment Flow</h3>
+                  <div className="space-y-4">
+                    {steps.map((step, index) => (
+                      <StepIndicator key={step.id} step={step} isActive={currentStep === index + 1} isCompleted={currentStep > index + 1} />
+                    ))}
+                  </div>
                 </div>
               </div>
-              <CodeBlock code={requestCode} language="javascript" title="request.js" />
-            </div>
+            </motion.div>
 
-            {/* Step 2: 402 Response */}
-            <AnimatePresence>
-              {(currentStep >= 2 || showResponse) && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className={`rounded-xl border p-6 transition-all ${
-                    currentStep >= 2
-                      ? "border-yellow-500/50 bg-yellow-500/5"
-                      : "border-border bg-background-secondary"
-                  }`}
-                >
+            {/* Demo Panel */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="lg:col-span-2"
+            >
+              <div className="space-y-6">
+                {/* Step 1 */}
+                <div className="rounded-2xl p-6 transition-all" style={{ border: currentStep >= 1 ? "1px solid rgba(80,175,149,0.4)" : "1px solid rgba(255,255,255,0.08)", backgroundColor: currentStep >= 1 ? "rgba(80,175,149,0.05)" : "rgba(255,255,255,0.03)" }}>
                   <div className="mb-4 flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-500/20">
-                      <span className="text-lg font-bold text-yellow-500">402</span>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: "rgba(59,130,246,0.2)" }}>
+                      <ServerIcon style={{ color: "#3B82F6" }} />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-foreground">2. Payment Required</h3>
-                      <p className="text-sm text-foreground-tertiary">
-                        Server returns 402 with payment instructions
-                      </p>
+                      <h3 className="font-semibold" style={{ color: "#FAFAFA" }}>1. Client Request</h3>
+                      <p className="text-sm" style={{ color: "#A1A1AA" }}>Client makes HTTP request to protected endpoint</p>
                     </div>
                   </div>
-                  <CodeBlock code={responseCode} language="http" title="response" />
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  <CodeBlock code={requestCode} language="javascript" title="request.js" />
+                </div>
 
-            {/* Step 3: Payment */}
-            <AnimatePresence>
-              {currentStep >= 3 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="rounded-xl border border-purple-500/50 bg-purple-500/5 p-6"
-                >
-                  <div className="mb-4 flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/20">
-                      <WalletIcon className="text-purple-500" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground">3. User Signs Payment</h3>
-                      <p className="text-sm text-foreground-tertiary">
-                        Wallet signs payment authorization (gasless)
-                      </p>
-                    </div>
-                  </div>
-                  <CodeBlock code={paymentCode} language="javascript" title="payment.js" />
-                </motion.div>
-              )}
-            </AnimatePresence>
+                {/* Step 2 */}
+                <AnimatePresence>
+                  {(currentStep >= 2 || showResponse) && (
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="rounded-2xl p-6 transition-all" style={{ border: "1px solid rgba(234,179,8,0.4)", backgroundColor: "rgba(234,179,8,0.05)" }}>
+                      <div className="mb-4 flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: "rgba(234,179,8,0.2)" }}>
+                          <span className="text-lg font-bold" style={{ color: "#EAB308" }}>402</span>
+                        </div>
+                        <div>
+                          <h3 className="font-semibold" style={{ color: "#FAFAFA" }}>2. Payment Required</h3>
+                          <p className="text-sm" style={{ color: "#A1A1AA" }}>Server returns 402 with payment instructions</p>
+                        </div>
+                      </div>
+                      <CodeBlock code={responseCode} language="http" title="response" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
-            {/* Step 4: Success */}
-            <AnimatePresence>
-              {currentStep >= 4 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="rounded-xl border border-brand/50 bg-brand/5 p-6"
-                >
-                  <div className="mb-4 flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand/20">
-                      <CheckCircleIcon className="text-brand" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground">4. Access Granted</h3>
-                      <p className="text-sm text-foreground-tertiary">
-                        Payment verified, content delivered
-                      </p>
-                    </div>
-                  </div>
-                  <CodeBlock code={successCode} language="http" title="success response" />
+                {/* Step 3 */}
+                <AnimatePresence>
+                  {currentStep >= 3 && (
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="rounded-2xl p-6" style={{ border: "1px solid rgba(147,51,234,0.4)", backgroundColor: "rgba(147,51,234,0.05)" }}>
+                      <div className="mb-4 flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: "rgba(147,51,234,0.2)" }}>
+                          <WalletIcon style={{ color: "#9333EA" }} />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold" style={{ color: "#FAFAFA" }}>3. User Signs Payment</h3>
+                          <p className="text-sm" style={{ color: "#A1A1AA" }}>Wallet signs payment authorization (gasless)</p>
+                        </div>
+                      </div>
+                      <CodeBlock code={paymentCode} language="javascript" title="payment.js" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
-                  {/* Success message */}
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="mt-4 rounded-lg bg-brand/10 p-4"
-                  >
-                    <p className="text-center text-sm font-medium text-brand">
-                      Payment complete! User received access to {config.resource}
-                    </p>
-                  </motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                {/* Step 4 */}
+                <AnimatePresence>
+                  {currentStep >= 4 && (
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="rounded-2xl p-6" style={{ border: "1px solid rgba(80,175,149,0.4)", backgroundColor: "rgba(80,175,149,0.05)" }}>
+                      <div className="mb-4 flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: "rgba(80,175,149,0.2)" }}>
+                          <CheckCircleIcon style={{ color: "#50AF95" }} />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold" style={{ color: "#FAFAFA" }}>4. Access Granted</h3>
+                          <p className="text-sm" style={{ color: "#A1A1AA" }}>Payment verified, content delivered</p>
+                        </div>
+                      </div>
+                      <CodeBlock code={successCode} language="http" title="success response" />
+                      <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="mt-4 rounded-xl p-4" style={{ backgroundColor: "rgba(80,175,149,0.1)" }}>
+                        <p className="text-center text-sm font-medium" style={{ color: "#50AF95" }}>
+                          Payment complete! User received access to {config.resource}
+                        </p>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
           </div>
-        </motion.div>
-      </div>
+        </div>
+      </section>
 
-      {/* Quick Start CTA */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-        className="mt-16 rounded-2xl border border-border bg-background-secondary p-8 text-center sm:p-12"
-      >
-        <h2 className="mb-4 text-2xl font-bold text-foreground sm:text-3xl">
-          Ready to integrate?
-        </h2>
-        <p className="mx-auto mb-8 max-w-xl text-foreground-secondary">
-          Add t402 payments to your API in minutes. Our SDKs handle all the complexity -
-          you just define your pricing.
-        </p>
-        <div className="flex flex-wrap justify-center gap-4">
-          <Link
-            href="/sdks"
-            className="inline-flex items-center gap-2 rounded-lg bg-brand px-6 py-3 text-base font-medium transition-colors hover:bg-brand-secondary"
-            style={{ color: "#0A0A0B" }}
+      {/* CTA on Light BG */}
+      <section style={{ backgroundColor: "#F7FAF9" }} className="py-24 md:py-32">
+        <div className="max-w-7xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="rounded-2xl p-8 sm:p-12 text-center"
+            style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(0,0,0,0.08)" }}
           >
-            View SDKs
-            <ArrowRightIcon />
-          </Link>
-          <Link
-            href="https://docs.t402.io/getting-started/quickstart"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-background-tertiary px-6 py-3 text-base font-medium text-foreground transition-colors hover:bg-border"
-          >
-            Quickstart Guide
-            <ExternalLinkIcon />
-          </Link>
-        </div>
-      </motion.div>
+            <h2 className="mb-4 text-2xl font-bold sm:text-3xl" style={{ color: "#1A1A2E" }}>
+              Ready to integrate?
+            </h2>
+            <p className="mx-auto mb-8 max-w-xl" style={{ color: "#4A5568" }}>
+              Add t402 payments to your API in minutes. Our SDKs handle all the complexity -
+              you just define your pricing.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link
+                href="/sdks"
+                className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-base font-medium transition-all hover:opacity-90"
+                style={{ backgroundColor: "#50AF95", color: "#0A0A0B" }}
+              >
+                View SDKs
+                <ArrowRightIcon />
+              </Link>
+              <Link
+                href="https://docs.t402.io/getting-started/quickstart"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-base font-medium transition-all hover:opacity-80"
+                style={{ backgroundColor: "#FFFFFF", color: "#1A1A2E", border: "1px solid rgba(0,0,0,0.08)" }}
+              >
+                Quickstart Guide
+                <ExternalLinkIcon />
+              </Link>
+            </div>
+          </motion.div>
 
-      {/* Info Cards */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.5 }}
-        className="mt-12 grid gap-6 sm:grid-cols-3"
-      >
-        <div className="rounded-xl border border-border bg-background-secondary p-6">
-          <h3 className="mb-2 font-semibold text-foreground">HTTP Native</h3>
-          <p className="text-sm text-foreground-secondary">
-            Uses standard HTTP 402 status code. Works with any HTTP client, any programming language.
-          </p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            className="mt-12 grid gap-6 sm:grid-cols-3"
+          >
+            {[
+              { title: "HTTP Native", desc: "Uses standard HTTP 402 status code. Works with any HTTP client, any programming language." },
+              { title: "Gasless Payments", desc: "Users sign a message, not a transaction. No gas fees required for EIP-3009 compatible tokens." },
+              { title: "Instant Settlement", desc: "Payments are verified and settled in real-time. No waiting for confirmations on supported chains." },
+            ].map((card) => (
+              <div key={card.title} className="rounded-2xl p-8" style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(0,0,0,0.08)" }}>
+                <h3 className="mb-2 font-semibold" style={{ color: "#1A1A2E" }}>{card.title}</h3>
+                <p className="text-sm" style={{ color: "#4A5568" }}>{card.desc}</p>
+              </div>
+            ))}
+          </motion.div>
         </div>
-        <div className="rounded-xl border border-border bg-background-secondary p-6">
-          <h3 className="mb-2 font-semibold text-foreground">Gasless Payments</h3>
-          <p className="text-sm text-foreground-secondary">
-            Users sign a message, not a transaction. No gas fees required for EIP-3009 compatible tokens.
-          </p>
-        </div>
-        <div className="rounded-xl border border-border bg-background-secondary p-6">
-          <h3 className="mb-2 font-semibold text-foreground">Instant Settlement</h3>
-          <p className="text-sm text-foreground-secondary">
-            Payments are verified and settled in real-time. No waiting for confirmations on supported chains.
-          </p>
-        </div>
-      </motion.div>
-    </div>
+      </section>
+    </>
   );
 }

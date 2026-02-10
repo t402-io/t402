@@ -24,23 +24,28 @@ export function ScenarioShell({ title, description, cost, accentColor, scenarioI
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">
-          <h1 className="text-2xl sm:text-3xl font-bold">{title}</h1>
+      {/* Brand accent line */}
+      <div
+        className="h-0.5 w-16 rounded-full mb-8"
+        style={{ background: "linear-gradient(90deg, #50AF95, transparent)" }}
+      />
+      <div className="mb-10">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{title}</h1>
           <span
-            className="text-xs px-2.5 py-1 rounded-full w-fit"
-            style={{ background: `${accentColor}20`, color: accentColor }}
+            className="text-xs font-medium px-2.5 py-1 rounded-full w-fit"
+            style={{ background: `${accentColor}15`, color: accentColor }}
           >
             {cost}
           </span>
         </div>
-        <p className="text-sm text-[var(--color-muted)] max-w-xl mb-4">{description}</p>
+        <p className="text-sm max-w-xl mb-5 leading-relaxed" style={{ color: "#A1A1AA" }}>{description}</p>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <ChainSelector />
           <ChainBadge family={activeFamily} showNetwork />
         </div>
         {isLive && (
-          <div className="mt-3">
+          <div className="mt-4">
             <FaucetLink family={activeFamily} />
           </div>
         )}

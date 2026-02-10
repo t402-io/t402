@@ -78,136 +78,162 @@ export default function TransportsClient() {
 
   return (
     <div className="relative overflow-hidden">
-      {/* Header */}
-      <section className="relative px-6 pt-32 pb-16 md:px-12">
-        <div className="mx-auto max-w-6xl text-center">
+      {/* Dark Header */}
+      <section className="section-dark py-24 md:py-32">
+        <div className="mx-auto max-w-7xl px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
-              Payment Transports
+            <span
+              className="text-xs font-semibold uppercase tracking-widest"
+              style={{ color: "#50AF95" }}
+            >
+              Transports
+            </span>
+            <h1 className="mt-4 text-4xl font-bold tracking-tight md:text-5xl" style={{ color: "#FAFAFA" }}>
+              Multiple Transport Protocols
             </h1>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-400">
+            <p className="mx-auto mt-6 max-w-2xl text-lg" style={{ color: "#A1A1AA" }}>
               HTTP, MCP, and A2A — one protocol, three transports. From web APIs
-              to autonomous AI agents.
+              to autonomous AI agents, choose the transport that fits your use case.
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Transport Cards */}
-      <section className="px-6 pb-16 md:px-12">
-        <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-3">
-          {transports.map((transport, i) => {
-            const Icon = iconMap[transport.icon];
-            return (
-              <motion.div
-                key={transport.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
-                className="group relative rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition-colors hover:border-white/20 hover:bg-white/[0.04]"
-              >
-                <div className="mb-4 flex items-center gap-3">
-                  <div
-                    className="flex h-10 w-10 items-center justify-center rounded-lg"
-                    style={{ backgroundColor: `${transport.color}20` }}
-                  >
-                    <Icon
-                      className="h-5 w-5"
-                    />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">
-                      {transport.name}
-                    </h3>
-                    {transport.badge && (
-                      <span className="ml-2 inline-block rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-emerald-400">
-                        {transport.badge}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <p className="mb-3 text-sm font-medium" style={{ color: transport.color }}>
-                  {transport.tagline}
-                </p>
-                <p className="mb-4 text-sm text-gray-400">
-                  {transport.description}
-                </p>
-
-                <div className="mb-4 space-y-2">
-                  <div className="flex items-start gap-2 text-xs text-gray-500">
-                    <span className="mt-0.5 font-medium text-gray-400">
-                      Signal:
-                    </span>
-                    <span>{transport.mechanism}</span>
-                  </div>
-                  <div className="flex items-start gap-2 text-xs text-gray-500">
-                    <span className="mt-0.5 font-medium text-gray-400">
-                      Format:
-                    </span>
-                    <span>{transport.dataFormat}</span>
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <p className="mb-2 text-xs font-medium text-gray-400">
-                    Use cases
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {transport.useCases.map((uc) => (
-                      <span
-                        key={uc}
-                        className="rounded-full bg-white/5 px-2 py-0.5 text-xs text-gray-400"
+      {/* Light Section: Transport Cards */}
+      <section className="section-light py-24 md:py-32">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="grid gap-8 md:grid-cols-3">
+            {transports.map((transport, i) => {
+              const Icon = iconMap[transport.icon];
+              return (
+                <motion.div
+                  key={transport.id}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                  className="card-elevated p-8"
+                >
+                  <div className="mb-5 flex items-center gap-4">
+                    <div
+                      className="flex h-12 w-12 items-center justify-center rounded-xl"
+                      style={{ backgroundColor: `${transport.color}15` }}
+                    >
+                      <Icon className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <h3
+                        className="text-xl font-semibold"
+                        style={{ color: "var(--text-on-light)" }}
                       >
-                        {uc}
+                        {transport.name}
+                      </h3>
+                      {transport.badge && (
+                        <span
+                          className="ml-2 inline-block rounded-full px-2 py-0.5 text-xs font-medium"
+                          style={{ backgroundColor: "rgba(80,175,149,0.1)", color: "#50AF95" }}
+                        >
+                          {transport.badge}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <p className="mb-2 text-sm font-medium" style={{ color: transport.color }}>
+                    {transport.tagline}
+                  </p>
+                  <p className="mb-5 text-sm leading-relaxed" style={{ color: "var(--text-on-light-secondary)" }}>
+                    {transport.description}
+                  </p>
+
+                  <div className="mb-5 space-y-2">
+                    <div className="flex items-start gap-2 text-xs" style={{ color: "var(--text-on-light-tertiary)" }}>
+                      <span className="mt-0.5 font-medium" style={{ color: "var(--text-on-light-secondary)" }}>
+                        Signal:
+                      </span>
+                      <span>{transport.mechanism}</span>
+                    </div>
+                    <div className="flex items-start gap-2 text-xs" style={{ color: "var(--text-on-light-tertiary)" }}>
+                      <span className="mt-0.5 font-medium" style={{ color: "var(--text-on-light-secondary)" }}>
+                        Format:
+                      </span>
+                      <span>{transport.dataFormat}</span>
+                    </div>
+                  </div>
+
+                  <div className="mb-5">
+                    <p className="mb-2 text-xs font-medium" style={{ color: "var(--text-on-light-secondary)" }}>
+                      Use cases
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {transport.useCases.map((uc) => (
+                        <span
+                          key={uc}
+                          className="rounded-full px-2 py-0.5 text-xs"
+                          style={{ backgroundColor: "var(--bg-section-light-alt)", color: "var(--text-on-light-secondary)" }}
+                        >
+                          {uc}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-1.5">
+                    {transport.sdkSupport.map((sdk) => (
+                      <span
+                        key={sdk}
+                        className="rounded-full px-2 py-0.5 text-xs"
+                        style={{ border: "1px solid var(--border-light)", color: "var(--text-on-light-secondary)" }}
+                      >
+                        {sdk}
                       </span>
                     ))}
                   </div>
-                </div>
-
-                <div className="flex flex-wrap gap-1.5">
-                  {transport.sdkSupport.map((sdk) => (
-                    <span
-                      key={sdk}
-                      className="rounded-full border border-white/10 px-2 py-0.5 text-xs text-gray-300"
-                    >
-                      {sdk}
-                    </span>
-                  ))}
-                </div>
-              </motion.div>
-            );
-          })}
+                </motion.div>
+              );
+            })}
+          </div>
         </div>
       </section>
 
-      {/* Code Examples */}
-      <section className="px-6 pb-16 md:px-12">
-        <div className="mx-auto max-w-4xl">
-          <motion.h2
+      {/* Dark Section: Code Examples */}
+      <section className="section-dark-alt py-24 md:py-32">
+        <div className="mx-auto max-w-4xl px-6">
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-8 text-center text-2xl font-bold text-white md:text-3xl"
+            className="text-center"
           >
-            Integration Examples
-          </motion.h2>
+            <span
+              className="text-xs font-semibold uppercase tracking-widest"
+              style={{ color: "#50AF95" }}
+            >
+              Integration
+            </span>
+            <h2
+              className="mt-4 text-3xl font-bold tracking-tight md:text-4xl"
+              style={{ color: "#FAFAFA" }}
+            >
+              Integration Examples
+            </h2>
+          </motion.div>
 
           {/* Tabs */}
-          <div className="mb-6 flex justify-center gap-2">
+          <div className="mt-10 mb-6 flex justify-center gap-2">
             {transports.map((t) => (
               <button
                 key={t.id}
                 onClick={() => setActiveTab(t.id)}
-                className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                  activeTab === t.id
-                    ? "bg-white/10 text-white"
-                    : "text-gray-400 hover:text-white"
-                }`}
+                className="rounded-xl px-5 py-2.5 text-sm font-medium transition-all duration-300"
+                style={{
+                  backgroundColor: activeTab === t.id ? "rgba(255,255,255,0.1)" : "transparent",
+                  color: activeTab === t.id ? "#FAFAFA" : "#A1A1AA",
+                }}
               >
                 {t.name}
               </button>
@@ -222,14 +248,18 @@ export default function TransportsClient() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.2 }}
-                className="overflow-hidden rounded-xl border border-white/10 bg-[#0d1117]"
+                className="overflow-hidden rounded-2xl"
+                style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "#0d1117" }}
               >
-                <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-                  <span className="text-sm text-gray-400">
+                <div
+                  className="flex items-center justify-between px-5 py-3"
+                  style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
+                >
+                  <span className="text-sm" style={{ color: "#A1A1AA" }}>
                     {t.codeExample.title}
                   </span>
                   <span
-                    className="rounded-full px-2 py-0.5 text-xs"
+                    className="rounded-full px-2.5 py-0.5 text-xs font-medium"
                     style={{
                       backgroundColor: `${t.color}20`,
                       color: t.color,
@@ -238,7 +268,7 @@ export default function TransportsClient() {
                     {t.codeExample.language}
                   </span>
                 </div>
-                <pre className="overflow-x-auto p-4 text-sm leading-relaxed text-gray-300">
+                <pre className="overflow-x-auto p-5 text-sm leading-relaxed" style={{ color: "#A1A1AA", background: "transparent", border: "none" }}>
                   <code>{t.codeExample.code}</code>
                 </pre>
               </motion.div>
@@ -247,35 +277,51 @@ export default function TransportsClient() {
         </div>
       </section>
 
-      {/* Comparison Table */}
-      <section className="px-6 pb-16 md:px-12">
-        <div className="mx-auto max-w-4xl">
-          <motion.h2
+      {/* Light Section: Comparison Table */}
+      <section className="section-light py-24 md:py-32">
+        <div className="mx-auto max-w-4xl px-6">
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-8 text-center text-2xl font-bold text-white md:text-3xl"
+            className="text-center"
           >
-            Transport Comparison
-          </motion.h2>
+            <span
+              className="text-xs font-semibold uppercase tracking-widest"
+              style={{ color: "#50AF95" }}
+            >
+              Comparison
+            </span>
+            <h2
+              className="mt-4 mb-10 text-3xl font-bold tracking-tight md:text-4xl"
+              style={{ color: "var(--text-on-light)" }}
+            >
+              Transport Comparison
+            </h2>
+          </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="overflow-hidden rounded-xl border border-white/10"
+            className="overflow-hidden rounded-2xl"
+            style={{ border: "1px solid var(--border-light)" }}
           >
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-white/10 bg-white/[0.02]">
-                    <th className="px-4 py-3 text-left font-medium text-gray-400">
+                  <tr style={{ borderBottom: "1px solid var(--border-light)", backgroundColor: "var(--bg-section-light-alt)" }}>
+                    <th
+                      className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider"
+                      style={{ color: "var(--text-on-light-tertiary)" }}
+                    >
                       &nbsp;
                     </th>
                     {transports.map((t) => (
                       <th
                         key={t.id}
-                        className="px-4 py-3 text-left font-semibold text-white"
+                        className="px-5 py-4 text-left font-semibold"
+                        style={{ color: "var(--text-on-light)" }}
                       >
                         {t.name}
                       </th>
@@ -286,18 +332,17 @@ export default function TransportsClient() {
                   {comparisonRows.map((row, i) => (
                     <tr
                       key={row.label}
-                      className={
-                        i < comparisonRows.length - 1
-                          ? "border-b border-white/5"
-                          : ""
-                      }
+                      style={{
+                        borderBottom: i < comparisonRows.length - 1 ? "1px solid var(--border-light)" : "none",
+                        backgroundColor: i % 2 === 1 ? "var(--bg-section-light-alt)" : "#FFFFFF",
+                      }}
                     >
-                      <td className="px-4 py-3 font-medium text-gray-300">
+                      <td className="px-5 py-4 font-medium" style={{ color: "var(--text-on-light)" }}>
                         {row.label}
                       </td>
-                      <td className="px-4 py-3 text-gray-400">{row.http}</td>
-                      <td className="px-4 py-3 text-gray-400">{row.mcp}</td>
-                      <td className="px-4 py-3 text-gray-400">{row.a2a}</td>
+                      <td className="px-5 py-4" style={{ color: "var(--text-on-light-secondary)" }}>{row.http}</td>
+                      <td className="px-5 py-4" style={{ color: "var(--text-on-light-secondary)" }}>{row.mcp}</td>
+                      <td className="px-5 py-4" style={{ color: "var(--text-on-light-secondary)" }}>{row.a2a}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -307,33 +352,34 @@ export default function TransportsClient() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="px-6 pb-24 md:px-12">
-        <div className="mx-auto max-w-4xl text-center">
+      {/* Dark CTA */}
+      <section className="section-dark py-24 md:py-32">
+        <div className="mx-auto max-w-4xl px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="rounded-2xl border border-white/10 bg-white/[0.02] p-8 md:p-12"
           >
-            <h3 className="mb-3 text-2xl font-bold text-white">
+            <h3 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl" style={{ color: "#FAFAFA" }}>
               Get Started with Any Transport
             </h3>
-            <p className="mb-6 text-gray-400">
+            <p className="mx-auto mb-8 max-w-xl text-lg" style={{ color: "#A1A1AA" }}>
               All transports share the same payment verification and settlement
               logic. Choose the transport that fits your use case.
             </p>
-            <div className="flex flex-wrap justify-center gap-3">
+            <div className="flex flex-wrap justify-center gap-4">
               <Link
                 href="https://docs.t402.io/getting-started/quickstart"
-                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-500"
+                className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-medium transition-all duration-300 hover:opacity-90"
+                style={{ backgroundColor: "#50AF95", color: "#0A0A0B" }}
               >
                 Get Started
                 <ExternalLinkIcon className="h-4 w-4" />
               </Link>
               <Link
                 href="/sdks"
-                className="inline-flex items-center gap-2 rounded-lg border border-white/20 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/5"
+                className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-medium transition-all duration-300 hover:bg-white/5"
+                style={{ border: "1px solid rgba(255,255,255,0.2)", color: "#FAFAFA" }}
               >
                 View SDKs
               </Link>

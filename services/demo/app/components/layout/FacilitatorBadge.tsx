@@ -8,8 +8,8 @@ export function FacilitatorBadge() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-1.5 text-xs text-[var(--color-muted)]">
-        <Spinner size="sm" color="var(--color-muted)" />
+      <div className="flex items-center gap-1.5 text-xs" style={{ color: "#71717A" }}>
+        <Spinner size="sm" color="#71717A" />
         Checking...
       </div>
     );
@@ -19,9 +19,9 @@ export function FacilitatorBadge() {
     <div className="flex items-center gap-1.5 text-xs">
       <span
         className="h-2 w-2 rounded-full"
-        style={{ backgroundColor: online ? "var(--color-success)" : "var(--color-error)" }}
+        style={{ backgroundColor: online ? "#10B981" : "#EF4444" }}
       />
-      <span style={{ color: online ? "var(--color-success)" : "var(--color-error)" }}>
+      <span style={{ color: online ? "#10B981" : "#EF4444" }}>
         {online ? `Facilitator (${supportedNetworks} networks)` : "Facilitator offline"}
       </span>
     </div>

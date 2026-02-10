@@ -4,30 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
-
-// T402 Logo component
-function T402Logo({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 120 32"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      aria-label="T402"
-    >
-      <text
-        x="0"
-        y="24"
-        fill="currentColor"
-        fontFamily="Inter, sans-serif"
-        fontWeight="700"
-        fontSize="24"
-      >
-        T402
-      </text>
-    </svg>
-  );
-}
+import { T402Logo } from "./Logo";
 
 // Icons
 function MenuIcon() {
@@ -38,13 +15,13 @@ function MenuIcon() {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth="1.5"
       strokeLinecap="round"
       aria-hidden="true"
     >
-      <line x1="3" y1="6" x2="21" y2="6" />
-      <line x1="3" y1="12" x2="21" y2="12" />
-      <line x1="3" y1="18" x2="21" y2="18" />
+      <line x1="4" y1="7" x2="20" y2="7" />
+      <line x1="4" y1="12" x2="20" y2="12" />
+      <line x1="4" y1="17" x2="20" y2="17" />
     </svg>
   );
 }
@@ -57,7 +34,7 @@ function CloseIcon() {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth="1.5"
       strokeLinecap="round"
       aria-hidden="true"
     >
@@ -93,7 +70,7 @@ function ExternalLinkIcon() {
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
-      className="opacity-50"
+      className="opacity-40"
     >
       <path d="M3.5 8.5L8.5 3.5M8.5 3.5H4.5M8.5 3.5V7.5" />
     </svg>
@@ -114,7 +91,17 @@ const navLinks = [
 
 export function NavBar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+
+  // Track scroll position for enhanced header styling
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -133,7 +120,7 @@ export function NavBar() {
     setMobileMenuOpen(false);
   }, [pathname]);
 
-  // Check if a link is active (exact match or starts with path for nested routes)
+  // Check if a link is active
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
     return pathname === href || pathname.startsWith(`${href}/`);
@@ -141,25 +128,30 @@ export function NavBar() {
 
   return (
     <nav
-      className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-xl"
+      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+        scrolled
+          ? "border-b border-white/[0.06]"
+          : "border-b border-transparent"
+      }`}
+      style={{ background: "rgba(10, 10, 11, 0.8)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}
       role="navigation"
       aria-label="Main navigation"
     >
-      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1440px] px-6 md:px-8 lg:px-12">
         <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center">
+          {/* Logo - left aligned */}
+          <div className="flex shrink-0 items-center">
             <Link
               href="/"
-              className="flex items-center gap-2 text-foreground transition-colors hover:text-brand"
+              className="flex items-center text-foreground transition-colors duration-300 hover:text-brand"
               aria-label="T402 home"
             >
-              <span className="text-xl font-bold tracking-tight">T402</span>
+              <T402Logo title="T402" className="h-9 w-auto" />
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex md:items-center md:gap-1">
+          {/* Desktop Navigation - centered */}
+          <div className="hidden items-center gap-0.5 lg:flex">
             {navLinks.map((link) => {
               const active = !link.external && isActive(link.href);
               return (
@@ -169,34 +161,51 @@ export function NavBar() {
                   target={link.external ? "_blank" : undefined}
                   rel={link.external ? "noopener noreferrer" : undefined}
                   aria-current={active ? "page" : undefined}
-                  className={`flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                    active
-                      ? "bg-background-secondary text-brand"
-                      : "text-foreground-secondary hover:bg-background-secondary hover:text-foreground"
-                  }`}
+                  className="group relative flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors duration-300"
+                  style={{
+                    color: active ? "#50AF95" : "#A1A1AA",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!active) e.currentTarget.style.color = "#FAFAFA";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!active) e.currentTarget.style.color = "#A1A1AA";
+                  }}
                 >
                   {link.label}
                   {link.external && <ExternalLinkIcon />}
+                  {/* Active/hover underline indicator */}
+                  <span
+                    className={`absolute bottom-0 left-3 right-3 h-px transition-all duration-300 ${
+                      active
+                        ? "opacity-100"
+                        : "opacity-0 group-hover:opacity-100"
+                    }`}
+                    style={{ background: "#50AF95" }}
+                  />
                 </Link>
               );
             })}
           </div>
 
-          {/* Desktop CTA */}
-          <div className="hidden md:flex md:items-center md:gap-3">
+          {/* Desktop right side - GitHub + CTA */}
+          <div className="hidden items-center gap-3 lg:flex">
             <Link
               href="https://github.com/t402-io/t402"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground-secondary transition-colors hover:bg-background-secondary hover:text-foreground"
+              className="flex h-9 w-9 items-center justify-center rounded-xl text-foreground-secondary transition-all duration-300 hover:text-foreground"
               aria-label="GitHub"
             >
               <GitHubIcon />
             </Link>
             <Link
               href="https://docs.t402.io/getting-started/quickstart"
-              className="inline-flex h-9 items-center justify-center rounded-lg bg-brand px-4 text-sm font-medium transition-colors hover:bg-brand-secondary"
-              style={{ color: "#0A0A0B" }}
+              className="inline-flex h-9 items-center justify-center rounded-xl px-5 py-2.5 text-sm font-medium transition-all duration-300 hover:brightness-110"
+              style={{
+                background: "#50AF95",
+                color: "#0A0A0B",
+              }}
             >
               Get Started
             </Link>
@@ -205,7 +214,7 @@ export function NavBar() {
           {/* Mobile menu button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground-secondary transition-colors hover:bg-background-secondary hover:text-foreground md:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-xl text-foreground-secondary transition-all duration-300 hover:text-foreground lg:hidden"
             aria-expanded={mobileMenuOpen}
             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
           >
@@ -214,63 +223,98 @@ export function NavBar() {
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile menu - slide-in drawer from right */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "calc(100dvh - 4rem)" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-y-auto border-t border-border bg-background md:hidden"
-          >
-            <div className="flex min-h-full flex-col px-4 py-4">
-              <div className="flex-1 space-y-1">
-                {navLinks.map((link) => {
-                  const active = !link.external && isActive(link.href);
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      target={link.external ? "_blank" : undefined}
-                      rel={link.external ? "noopener noreferrer" : undefined}
-                      aria-current={active ? "page" : undefined}
-                      className={`flex items-center justify-between rounded-lg px-4 py-3.5 text-base font-medium transition-colors ${
-                        active
-                          ? "bg-background-secondary text-brand"
-                          : "text-foreground-secondary hover:bg-background-secondary hover:text-foreground"
-                      }`}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {link.label}
-                      {link.external && <ExternalLinkIcon />}
-                    </Link>
-                  );
-                })}
-              </div>
+          <>
+            {/* Backdrop overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 top-16 z-40 lg:hidden"
+              style={{ background: "rgba(0, 0, 0, 0.6)" }}
+              onClick={() => setMobileMenuOpen(false)}
+              aria-hidden="true"
+            />
 
-              <div className="mt-auto space-y-3 border-t border-border pt-4">
-                <Link
-                  href="https://github.com/t402-io/t402"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium text-foreground-secondary transition-colors hover:bg-background-secondary hover:text-foreground"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <GitHubIcon />
-                  GitHub
-                </Link>
-                <Link
-                  href="https://docs.t402.io/getting-started/quickstart"
-                  className="flex h-12 w-full items-center justify-center rounded-lg bg-brand text-base font-medium transition-colors hover:bg-brand-secondary"
-                  style={{ color: "#0A0A0B" }}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Get Started
-                </Link>
+            {/* Drawer panel */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+              className="fixed right-0 top-16 z-50 h-[calc(100dvh-4rem)] w-full max-w-sm overflow-y-auto lg:hidden"
+              style={{ background: "#0A0A0B", borderLeft: "1px solid rgba(255, 255, 255, 0.06)" }}
+            >
+              <div className="flex h-full flex-col px-6 py-6">
+                <div className="flex-1 space-y-1">
+                  {navLinks.map((link, index) => {
+                    const active = !link.external && isActive(link.href);
+                    return (
+                      <motion.div
+                        key={link.href}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3, delay: index * 0.04 }}
+                      >
+                        <Link
+                          href={link.href}
+                          target={link.external ? "_blank" : undefined}
+                          rel={link.external ? "noopener noreferrer" : undefined}
+                          aria-current={active ? "page" : undefined}
+                          className="flex items-center justify-between rounded-xl px-4 py-3.5 text-base font-medium transition-all duration-300"
+                          style={{
+                            color: active ? "#50AF95" : "#A1A1AA",
+                            background: active ? "rgba(80, 175, 149, 0.08)" : "transparent",
+                          }}
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          <span className="flex items-center gap-2">
+                            {link.label}
+                            {link.external && <ExternalLinkIcon />}
+                          </span>
+                          {active && (
+                            <span
+                              className="h-1.5 w-1.5 rounded-full"
+                              style={{ background: "#50AF95" }}
+                            />
+                          )}
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+
+                {/* Mobile bottom actions */}
+                <div className="mt-auto space-y-3 pt-6" style={{ borderTop: "1px solid rgba(255, 255, 255, 0.06)" }}>
+                  <Link
+                    href="https://github.com/t402-io/t402"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 rounded-xl px-4 py-3.5 text-base font-medium transition-all duration-300"
+                    style={{ color: "#A1A1AA" }}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <GitHubIcon />
+                    GitHub
+                  </Link>
+                  <Link
+                    href="https://docs.t402.io/getting-started/quickstart"
+                    className="flex h-12 w-full items-center justify-center rounded-xl text-base font-medium transition-all duration-300 hover:brightness-110"
+                    style={{
+                      background: "#50AF95",
+                      color: "#0A0A0B",
+                    }}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Get Started
+                  </Link>
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </nav>

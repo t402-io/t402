@@ -110,9 +110,12 @@ const sdks: SdkInfo[] = [
 
 function SdkCard({ sdk }: { sdk: SdkInfo }) {
   return (
-    <div className="rounded-xl border border-border bg-background-secondary p-6">
+    <div
+      className="rounded-2xl p-6"
+      style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(0,0,0,0.08)" }}
+    >
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-xl font-bold text-foreground">{sdk.name}</h3>
+        <h3 className="text-xl font-bold" style={{ color: "#1A1A2E" }}>{sdk.name}</h3>
         <span
           className="rounded-full px-3 py-1 text-xs font-medium text-white"
           style={{ backgroundColor: sdk.color }}
@@ -122,25 +125,28 @@ function SdkCard({ sdk }: { sdk: SdkInfo }) {
       </div>
       <div className="space-y-3 text-sm">
         <div>
-          <p className="text-foreground-tertiary">Package Manager</p>
-          <p className="font-medium text-foreground">{sdk.packageManager}</p>
+          <p style={{ color: "#A1A1AA" }}>Package Manager</p>
+          <p className="font-medium" style={{ color: "#1A1A2E" }}>{sdk.packageManager}</p>
         </div>
         <div>
-          <p className="text-foreground-tertiary">Runtime</p>
-          <p className="font-medium text-foreground">{sdk.runtime}</p>
+          <p style={{ color: "#A1A1AA" }}>Runtime</p>
+          <p className="font-medium" style={{ color: "#1A1A2E" }}>{sdk.runtime}</p>
         </div>
         <div>
-          <p className="text-foreground-tertiary">Best For</p>
+          <p style={{ color: "#A1A1AA" }}>Best For</p>
           <ul className="mt-1 space-y-1">
             {sdk.bestFor.map((use) => (
-              <li key={use} className="text-foreground-secondary">
+              <li key={use} style={{ color: "#4A5568" }}>
                 {use}
               </li>
             ))}
           </ul>
         </div>
       </div>
-      <div className="mt-4 rounded-lg border border-border bg-background-tertiary p-3 font-mono text-xs text-foreground-secondary">
+      <div
+        className="mt-4 rounded-xl p-3 font-mono text-xs"
+        style={{ backgroundColor: "#111113", color: "#A1A1AA" }}
+      >
         {sdk.installCommand}
       </div>
     </div>
@@ -149,7 +155,7 @@ function SdkCard({ sdk }: { sdk: SdkInfo }) {
 
 export default function SdkComparisonPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#0A0A0B", color: "#FAFAFA" }}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -157,179 +163,210 @@ export default function SdkComparisonPage() {
       <NavBar />
 
       <div className="flex-1">
-        <article className="pb-20">
-          {/* Header */}
-          <header className="max-w-4xl mx-auto px-4 sm:px-6 md:px-10 lg:px-16 pt-12 sm:pt-16 md:pt-20">
-            <div className="mb-6 flex flex-wrap gap-2">
-              <span className="rounded-md bg-brand/10 px-3 py-1 text-sm font-medium text-brand">
-                SDK
-              </span>
-              <span className="rounded-md bg-brand/10 px-3 py-1 text-sm font-medium text-brand">
-                Guide
-              </span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight mb-4">
-              Choosing the Right T402 SDK
-            </h1>
-            <p className="text-base text-foreground-tertiary mb-2">January 25, 2026</p>
-            <p className="text-base text-foreground-tertiary mb-8">By: T402 Team</p>
-          </header>
-
-          {/* Article Body */}
-          <section className="max-w-4xl mx-auto px-4 sm:px-6 md:px-10 lg:px-16 space-y-8">
-            {/* TL;DR */}
-            <div className="rounded-xl border border-border bg-background-secondary p-6">
-              <p className="text-base leading-relaxed text-foreground-secondary">
-                <strong className="text-foreground">TL;DR</strong>: T402 offers official SDKs in TypeScript, Python, Go, and Java. All SDKs support the same 28 blockchains and payment schemes. Choose TypeScript for web apps, Python for AI/ML, Go for high-performance services, and Java for enterprise systems.
-              </p>
-            </div>
-
-            {/* Overview */}
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold mt-8">Overview</h2>
-              <p className="text-base leading-relaxed text-foreground-secondary">
-                T402 provides four official SDKs to match your technology stack. Each SDK implements the full T402 protocol specification, supporting all 28 blockchains across 10 families with identical payment flows.
-              </p>
-              <p className="text-base leading-relaxed text-foreground-secondary">
-                The core functionality is consistent across all SDKs: create payment requirements, sign payment payloads, verify signatures, and settle on-chain. The difference lies in language idioms, ecosystem integration, and performance characteristics.
-              </p>
-            </section>
-
-            {/* SDK Cards */}
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold mt-8">SDK Comparison</h2>
-              <div className="grid gap-6 sm:grid-cols-2">
-                {sdks.map((sdk) => (
-                  <SdkCard key={sdk.name} sdk={sdk} />
+        <article>
+          {/* Dark Header */}
+          <header className="py-24 md:py-32" style={{ backgroundColor: "#0A0A0B" }}>
+            <div className="max-w-3xl mx-auto px-6">
+              <div className="mb-6 flex flex-wrap gap-2">
+                {["SDK", "Guide"].map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-md px-3 py-1 text-sm font-medium"
+                    style={{ backgroundColor: "rgba(80,175,149,0.1)", color: "#50AF95" }}
+                  >
+                    {tag}
+                  </span>
                 ))}
               </div>
-            </section>
-
-            {/* Feature Matrix */}
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold mt-8">Feature Matrix</h2>
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[600px] border-collapse text-sm">
-                  <thead>
-                    <tr className="border-b border-border">
-                      <th className="py-3 pr-4 text-left font-medium text-foreground-tertiary">Feature</th>
-                      <th className="px-4 py-3 text-center font-medium">TypeScript</th>
-                      <th className="px-4 py-3 text-center font-medium">Python</th>
-                      <th className="px-4 py-3 text-center font-medium">Go</th>
-                      <th className="px-4 py-3 text-center font-medium">Java</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-foreground-secondary">
-                    <tr className="border-b border-border">
-                      <td className="py-3 pr-4">Supported Chains</td>
-                      <td className="px-4 py-3 text-center">28</td>
-                      <td className="px-4 py-3 text-center">28</td>
-                      <td className="px-4 py-3 text-center">28</td>
-                      <td className="px-4 py-3 text-center">28</td>
-                    </tr>
-                    <tr className="border-b border-border">
-                      <td className="py-3 pr-4">HTTP Middleware</td>
-                      <td className="px-4 py-3 text-center text-brand">Express, Hono, Fastify, Next.js</td>
-                      <td className="px-4 py-3 text-center text-brand">FastAPI, Flask</td>
-                      <td className="px-4 py-3 text-center text-brand">Gin, Echo</td>
-                      <td className="px-4 py-3 text-center text-brand">Spring Boot</td>
-                    </tr>
-                    <tr className="border-b border-border">
-                      <td className="py-3 pr-4">MCP Server</td>
-                      <td className="px-4 py-3 text-center text-brand">Yes</td>
-                      <td className="px-4 py-3 text-center">Planned</td>
-                      <td className="px-4 py-3 text-center text-brand">Yes</td>
-                      <td className="px-4 py-3 text-center">Planned</td>
-                    </tr>
-                    <tr className="border-b border-border">
-                      <td className="py-3 pr-4">CLI Tool</td>
-                      <td className="px-4 py-3 text-center text-brand">@t402/cli</td>
-                      <td className="px-4 py-3 text-center text-brand">t402 CLI</td>
-                      <td className="px-4 py-3 text-center text-brand">t402 binary</td>
-                      <td className="px-4 py-3 text-center">N/A</td>
-                    </tr>
-                    <tr className="border-b border-border">
-                      <td className="py-3 pr-4">Type Safety</td>
-                      <td className="px-4 py-3 text-center">Full (Zod)</td>
-                      <td className="px-4 py-3 text-center">Full (Pydantic)</td>
-                      <td className="px-4 py-3 text-center">Full (native)</td>
-                      <td className="px-4 py-3 text-center">Full (native)</td>
-                    </tr>
-                  </tbody>
-                </table>
+              <h1
+                className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-tight mb-6"
+                style={{ color: "#FAFAFA" }}
+              >
+                Choosing the Right T402 SDK
+              </h1>
+              <div className="flex items-center gap-4 text-sm" style={{ color: "#A1A1AA" }}>
+                <span>January 25, 2026</span>
+                <span style={{ color: "rgba(255,255,255,0.2)" }}>|</span>
+                <span>T402 Team</span>
               </div>
-            </section>
+            </div>
+          </header>
 
-            {/* Recommendations */}
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold mt-8">Recommendations</h2>
-
-              <div className="rounded-xl border border-border bg-background-secondary p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-2">Choose TypeScript if...</h3>
-                <ul className="list-disc pl-5 space-y-1 text-foreground-secondary">
-                  <li>You&apos;re building a web application (React, Vue, Next.js)</li>
-                  <li>You want the most complete ecosystem with 21 packages</li>
-                  <li>You need React/Vue components for payment UIs</li>
-                  <li>You&apos;re deploying to serverless platforms (Vercel, Cloudflare Workers)</li>
-                </ul>
+          {/* Light Article Body */}
+          <section style={{ backgroundColor: "#F7FAF9" }} className="py-16 md:py-20">
+            <div className="max-w-3xl mx-auto px-6 space-y-10" style={{ lineHeight: "1.8" }}>
+              {/* TL;DR */}
+              <div
+                className="rounded-2xl p-6"
+                style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(0,0,0,0.08)" }}
+              >
+                <p className="text-base" style={{ color: "#4A5568" }}>
+                  <strong style={{ color: "#1A1A2E" }}>TL;DR</strong>: T402 offers official SDKs in TypeScript, Python, Go, and Java. All SDKs support the same 28 blockchains and payment schemes. Choose TypeScript for web apps, Python for AI/ML, Go for high-performance services, and Java for enterprise systems.
+                </p>
               </div>
 
-              <div className="rounded-xl border border-border bg-background-secondary p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-2">Choose Python if...</h3>
-                <ul className="list-disc pl-5 space-y-1 text-foreground-secondary">
-                  <li>You&apos;re building AI/ML services that need payment capabilities</li>
-                  <li>Your backend is FastAPI or Flask</li>
-                  <li>You want easy integration with data science workflows</li>
-                  <li>You prefer async/await with native asyncio support</li>
-                </ul>
-              </div>
+              {/* Overview */}
+              <section className="space-y-4">
+                <h2 className="text-2xl font-semibold mt-4" style={{ color: "#1A1A2E" }}>Overview</h2>
+                <p className="text-base" style={{ color: "#4A5568" }}>
+                  T402 provides four official SDKs to match your technology stack. Each SDK implements the full T402 protocol specification, supporting all 28 blockchains across 10 families with identical payment flows.
+                </p>
+                <p className="text-base" style={{ color: "#4A5568" }}>
+                  The core functionality is consistent across all SDKs: create payment requirements, sign payment payloads, verify signatures, and settle on-chain. The difference lies in language idioms, ecosystem integration, and performance characteristics.
+                </p>
+              </section>
 
-              <div className="rounded-xl border border-border bg-background-secondary p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-2">Choose Go if...</h3>
-                <ul className="list-disc pl-5 space-y-1 text-foreground-secondary">
-                  <li>Performance is critical (high-throughput APIs)</li>
-                  <li>You&apos;re building microservices or infrastructure</li>
-                  <li>You want a single static binary deployment</li>
-                  <li>You need the lowest memory footprint</li>
-                </ul>
-              </div>
+              {/* SDK Cards */}
+              <section className="space-y-4">
+                <h2 className="text-2xl font-semibold mt-4" style={{ color: "#1A1A2E" }}>SDK Comparison</h2>
+                <div className="grid gap-6 sm:grid-cols-2">
+                  {sdks.map((sdk) => (
+                    <SdkCard key={sdk.name} sdk={sdk} />
+                  ))}
+                </div>
+              </section>
 
-              <div className="rounded-xl border border-border bg-background-secondary p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-2">Choose Java if...</h3>
-                <ul className="list-disc pl-5 space-y-1 text-foreground-secondary">
-                  <li>You&apos;re in an enterprise environment with existing Java infrastructure</li>
-                  <li>You&apos;re using Spring Boot or Jakarta EE</li>
-                  <li>You need JVM ecosystem compatibility (Kotlin, Scala)</li>
-                  <li>You&apos;re building Android applications</li>
-                </ul>
-              </div>
-            </section>
+              {/* Feature Matrix */}
+              <section className="space-y-4">
+                <h2 className="text-2xl font-semibold mt-4" style={{ color: "#1A1A2E" }}>Feature Matrix</h2>
+                <div className="overflow-x-auto">
+                  <table
+                    className="w-full min-w-[600px] border-collapse text-sm"
+                    style={{ color: "#4A5568" }}
+                  >
+                    <thead>
+                      <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
+                        <th className="py-3 pr-4 text-left font-medium" style={{ color: "#A1A1AA" }}>Feature</th>
+                        <th className="px-4 py-3 text-center font-medium" style={{ color: "#1A1A2E" }}>TypeScript</th>
+                        <th className="px-4 py-3 text-center font-medium" style={{ color: "#1A1A2E" }}>Python</th>
+                        <th className="px-4 py-3 text-center font-medium" style={{ color: "#1A1A2E" }}>Go</th>
+                        <th className="px-4 py-3 text-center font-medium" style={{ color: "#1A1A2E" }}>Java</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
+                        <td className="py-3 pr-4">Supported Chains</td>
+                        <td className="px-4 py-3 text-center">28</td>
+                        <td className="px-4 py-3 text-center">28</td>
+                        <td className="px-4 py-3 text-center">28</td>
+                        <td className="px-4 py-3 text-center">28</td>
+                      </tr>
+                      <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
+                        <td className="py-3 pr-4">HTTP Middleware</td>
+                        <td className="px-4 py-3 text-center" style={{ color: "#50AF95" }}>Express, Hono, Fastify, Next.js</td>
+                        <td className="px-4 py-3 text-center" style={{ color: "#50AF95" }}>FastAPI, Flask</td>
+                        <td className="px-4 py-3 text-center" style={{ color: "#50AF95" }}>Gin, Echo</td>
+                        <td className="px-4 py-3 text-center" style={{ color: "#50AF95" }}>Spring Boot</td>
+                      </tr>
+                      <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
+                        <td className="py-3 pr-4">MCP Server</td>
+                        <td className="px-4 py-3 text-center" style={{ color: "#50AF95" }}>Yes</td>
+                        <td className="px-4 py-3 text-center">Planned</td>
+                        <td className="px-4 py-3 text-center" style={{ color: "#50AF95" }}>Yes</td>
+                        <td className="px-4 py-3 text-center">Planned</td>
+                      </tr>
+                      <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
+                        <td className="py-3 pr-4">CLI Tool</td>
+                        <td className="px-4 py-3 text-center" style={{ color: "#50AF95" }}>@t402/cli</td>
+                        <td className="px-4 py-3 text-center" style={{ color: "#50AF95" }}>t402 CLI</td>
+                        <td className="px-4 py-3 text-center" style={{ color: "#50AF95" }}>t402 binary</td>
+                        <td className="px-4 py-3 text-center">N/A</td>
+                      </tr>
+                      <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
+                        <td className="py-3 pr-4">Type Safety</td>
+                        <td className="px-4 py-3 text-center">Full (Zod)</td>
+                        <td className="px-4 py-3 text-center">Full (Pydantic)</td>
+                        <td className="px-4 py-3 text-center">Full (native)</td>
+                        <td className="px-4 py-3 text-center">Full (native)</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
 
-            {/* Get Started */}
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold mt-8">Get Started</h2>
-              <p className="text-base leading-relaxed text-foreground-secondary">
-                All T402 SDKs are open source and available on their respective package registries. Start accepting stablecoin payments in minutes:
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Link
-                  href="/sdks"
-                  className="inline-flex items-center gap-2 rounded-lg bg-brand px-6 py-3 text-base font-medium transition-colors hover:bg-brand-secondary"
-                  style={{ color: "#0A0A0B" }}
-                >
-                  View All SDKs
-                  <ArrowRightIcon />
-                </Link>
-                <Link
-                  href="https://docs.t402.io/getting-started/quickstart"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-lg border border-border bg-background-tertiary px-6 py-3 text-base font-medium text-foreground transition-colors hover:bg-border"
-                >
-                  Read Documentation
-                </Link>
-              </div>
-            </section>
+              {/* Recommendations */}
+              <section className="space-y-4">
+                <h2 className="text-2xl font-semibold mt-4" style={{ color: "#1A1A2E" }}>Recommendations</h2>
+                {[
+                  {
+                    title: "Choose TypeScript if...",
+                    items: [
+                      "You\u2019re building a web application (React, Vue, Next.js)",
+                      "You want the most complete ecosystem with 21 packages",
+                      "You need React/Vue components for payment UIs",
+                      "You\u2019re deploying to serverless platforms (Vercel, Cloudflare Workers)",
+                    ],
+                  },
+                  {
+                    title: "Choose Python if...",
+                    items: [
+                      "You\u2019re building AI/ML services that need payment capabilities",
+                      "Your backend is FastAPI or Flask",
+                      "You want easy integration with data science workflows",
+                      "You prefer async/await with native asyncio support",
+                    ],
+                  },
+                  {
+                    title: "Choose Go if...",
+                    items: [
+                      "Performance is critical (high-throughput APIs)",
+                      "You\u2019re building microservices or infrastructure",
+                      "You want a single static binary deployment",
+                      "You need the lowest memory footprint",
+                    ],
+                  },
+                  {
+                    title: "Choose Java if...",
+                    items: [
+                      "You\u2019re in an enterprise environment with existing Java infrastructure",
+                      "You\u2019re using Spring Boot or Jakarta EE",
+                      "You need JVM ecosystem compatibility (Kotlin, Scala)",
+                      "You\u2019re building Android applications",
+                    ],
+                  },
+                ].map((rec) => (
+                  <div
+                    key={rec.title}
+                    className="rounded-2xl p-6"
+                    style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(0,0,0,0.08)" }}
+                  >
+                    <h3 className="text-lg font-semibold mb-2" style={{ color: "#1A1A2E" }}>{rec.title}</h3>
+                    <ul className="list-disc pl-5 space-y-1" style={{ color: "#4A5568" }}>
+                      {rec.items.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </section>
+
+              {/* Get Started */}
+              <section className="space-y-4">
+                <h2 className="text-2xl font-semibold mt-4" style={{ color: "#1A1A2E" }}>Get Started</h2>
+                <p className="text-base" style={{ color: "#4A5568" }}>
+                  All T402 SDKs are open source and available on their respective package registries. Start accepting stablecoin payments in minutes:
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  <Link
+                    href="/sdks"
+                    className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-base font-medium transition-all hover:opacity-90"
+                    style={{ backgroundColor: "#50AF95", color: "#0A0A0B" }}
+                  >
+                    View All SDKs
+                    <ArrowRightIcon />
+                  </Link>
+                  <Link
+                    href="https://docs.t402.io/getting-started/quickstart"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-base font-medium transition-all hover:opacity-90"
+                    style={{ backgroundColor: "#FFFFFF", color: "#1A1A2E", border: "1px solid rgba(0,0,0,0.08)" }}
+                  >
+                    Read Documentation
+                  </Link>
+                </div>
+              </section>
+            </div>
           </section>
         </article>
       </div>
