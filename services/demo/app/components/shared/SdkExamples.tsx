@@ -25,31 +25,32 @@ export function SdkExamples({ scenarioId, className }: SdkExamplesProps) {
     <div className={clsx("mt-8", className)}>
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-medium text-white flex items-center gap-2">
-          <Code2 size={14} className="text-[var(--color-brand)]" />
+          <Code2 size={14} style={{ color: "#50AF95" }} />
           SDK Integration
         </h3>
         {hasServer && (
-          <div className="flex items-center gap-0.5 rounded-lg bg-[var(--color-surface)] p-0.5">
+          <div
+            className="flex items-center gap-0.5 rounded-xl p-0.5"
+            style={{ background: "#111113" }}
+          >
             <button
               onClick={() => setView("client")}
-              className={clsx(
-                "flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-colors min-h-[36px]",
-                view === "client"
-                  ? "bg-[var(--color-surface-active)] text-white"
-                  : "text-[var(--color-muted)] hover:text-white"
-              )}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors min-h-[36px]"
+              style={{
+                background: view === "client" ? "#222224" : "transparent",
+                color: view === "client" ? "#FAFAFA" : "#71717A",
+              }}
             >
               <Code2 size={12} aria-hidden="true" />
               Client
             </button>
             <button
               onClick={() => setView("server")}
-              className={clsx(
-                "flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-colors min-h-[36px]",
-                view === "server"
-                  ? "bg-[var(--color-surface-active)] text-white"
-                  : "text-[var(--color-muted)] hover:text-white"
-              )}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors min-h-[36px]"
+              style={{
+                background: view === "server" ? "#222224" : "transparent",
+                color: view === "server" ? "#FAFAFA" : "#71717A",
+              }}
             >
               <Server size={12} aria-hidden="true" />
               Server

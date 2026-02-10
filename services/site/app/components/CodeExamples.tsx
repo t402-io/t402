@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import Link from "next/link";
 
 const languages = [
   { id: "typescript", label: "TypeScript", extension: ".ts" },
@@ -155,16 +156,7 @@ HttpResponse<String> response = client.get(
 
 function CopyIcon({ className = "" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
       <rect x="9" y="9" width="13" height="13" rx="2" />
       <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
     </svg>
@@ -173,28 +165,13 @@ function CopyIcon({ className = "" }: { className?: string }) {
 
 function CheckIcon({ className = "" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
       <path d="M20 6L9 17l-5-5" />
     </svg>
   );
 }
 
-function CodeBlock({
-  code,
-  filename,
-}: {
-  code: string;
-  filename: string;
-}) {
+function CodeBlock({ code, filename }: { code: string; filename: string }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -204,27 +181,21 @@ function CodeBlock({
   };
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-background-secondary">
+    <div className="overflow-hidden rounded-2xl border border-white/[0.06] bg-[#111113]">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border px-4 py-2">
-        <span className="font-mono text-xs text-foreground-tertiary">
-          {filename}
-        </span>
+      <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3">
+        <span className="font-mono text-xs text-foreground-tertiary">{filename}</span>
         <button
           onClick={handleCopy}
-          className="flex h-7 w-7 items-center justify-center rounded-md text-foreground-tertiary transition-colors hover:bg-background-tertiary hover:text-foreground"
+          className="flex h-7 w-7 items-center justify-center rounded-md text-foreground-tertiary transition-colors hover:bg-white/5 hover:text-foreground"
           aria-label={copied ? "Copied" : "Copy code"}
         >
-          {copied ? (
-            <CheckIcon className="h-4 w-4 text-success" />
-          ) : (
-            <CopyIcon className="h-4 w-4" />
-          )}
+          {copied ? <CheckIcon className="h-4 w-4 text-success" /> : <CopyIcon className="h-4 w-4" />}
         </button>
       </div>
       {/* Code */}
-      <pre className="overflow-x-auto border-none bg-transparent p-3 sm:p-4">
-        <code className="bg-transparent font-mono text-xs sm:text-sm leading-relaxed text-foreground-secondary">
+      <pre className="overflow-x-auto border-none bg-transparent p-5">
+        <code className="bg-transparent font-mono text-sm leading-relaxed text-foreground-secondary">
           {code}
         </code>
       </pre>
@@ -240,18 +211,9 @@ export function CodeExamples() {
   const currentLang = languages.find((l) => l.id === activeLanguage);
 
   return (
-    <section className="relative py-24">
-      {/* Background gradient */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 60% 50% at 50% 100%, rgba(80, 175, 149, 0.1), transparent)",
-        }}
-      />
-
-      <div className="relative mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
+    <section className="section-dark py-24 md:py-32">
+      <div className="mx-auto max-w-7xl px-6">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -259,12 +221,11 @@ export function CodeExamples() {
           transition={{ duration: 0.5 }}
           className="text-center"
         >
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Simple Integration
+          <h2 className="text-4xl font-bold tracking-tight text-white md:text-5xl">
+            Start Building in Minutes
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-foreground-secondary">
-            Add USDT payments to your API in minutes with our SDKs for
-            TypeScript, Python, Go, and Java.
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-foreground-secondary">
+            Add payments to any HTTP service with just a few lines of code.
           </p>
         </motion.div>
 
@@ -276,15 +237,15 @@ export function CodeExamples() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="mt-12 flex justify-center"
         >
-          <div className="flex w-full max-w-md gap-1 rounded-lg border border-border bg-background-secondary p-1 sm:inline-flex sm:w-auto">
+          <div className="inline-flex gap-1 rounded-xl border border-white/[0.06] bg-[#111113] p-1">
             {languages.map((lang) => (
               <button
                 key={lang.id}
                 onClick={() => setActiveLanguage(lang.id)}
-                className={`flex-1 rounded-md px-3 py-2.5 text-sm font-medium transition-colors sm:flex-none sm:px-4 sm:py-2 ${
+                className={`rounded-lg px-5 py-2.5 text-sm font-medium transition-colors ${
                   activeLanguage === lang.id
-                    ? "bg-background-tertiary text-foreground"
-                    : "text-foreground-secondary hover:text-foreground"
+                    ? "bg-brand text-[#0A0A0B]"
+                    : "text-foreground-secondary hover:text-white"
                 }`}
               >
                 {lang.label}
@@ -293,7 +254,7 @@ export function CodeExamples() {
           </div>
         </motion.div>
 
-        {/* Code Examples */}
+        {/* Server/Client Toggle + Code */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -301,9 +262,9 @@ export function CodeExamples() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="mt-8"
         >
-          <div className="mx-auto max-w-5xl">
-            {/* Server/Client Tabs */}
-            <div className="mb-4 flex gap-4">
+          <div className="mx-auto max-w-4xl">
+            {/* Server/Client tabs */}
+            <div className="mb-4 flex gap-6">
               <button
                 onClick={() => setActiveTab("server")}
                 className={`text-sm font-medium transition-colors ${
@@ -326,7 +287,6 @@ export function CodeExamples() {
               </button>
             </div>
 
-            {/* Code Block */}
             <AnimatePresence mode="wait">
               <motion.div
                 key={`${activeLanguage}-${activeTab}`}
@@ -344,25 +304,23 @@ export function CodeExamples() {
           </div>
         </motion.div>
 
-        {/* Install Command */}
+        {/* Docs link */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="mt-12 text-center"
+          className="mt-10 text-center"
         >
-          <p className="mb-4 text-sm text-foreground-tertiary">
-            Install the SDK
-          </p>
-          <div className="mx-auto inline-flex items-center gap-3 rounded-lg border border-border bg-background-secondary px-4 py-3">
-            <span className="font-mono text-sm text-foreground-secondary">
-              {activeLanguage === "typescript" && "npm install @t402/express @t402/fetch"}
-              {activeLanguage === "python" && "pip install t402"}
-              {activeLanguage === "go" && "go get github.com/t402-io/t402/sdks/go"}
-              {activeLanguage === "java" && "io.t402:t402:1.8.0"}
-            </span>
-          </div>
+          <Link
+            href="https://docs.t402.io"
+            className="inline-flex items-center gap-2 text-brand transition-colors hover:text-brand-secondary font-medium"
+          >
+            View full documentation
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </Link>
         </motion.div>
       </div>
     </section>

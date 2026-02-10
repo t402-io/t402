@@ -12,18 +12,17 @@ export function BackgroundVideo({ src }: BackgroundVideoProps) {
   const isDesktop = useMediaQuery('(min-width: 1280px)');
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
 
-  // Extract the base name without extension to construct placeholder path
   const baseName = src.replace(/\.[^/.]+$/, '');
 
   if (!isDesktop) {
     return (
-      <div className="fixed inset-0">
+      <div className="absolute inset-0">
         <Image
           src={`${baseName}-placeholder.jpg`}
           alt="Background placeholder"
           fill
           priority
-          className="object-cover opacity-30 blur-md"
+          className="object-cover opacity-15 blur-md"
           sizes="100vw"
         />
       </div>
@@ -31,7 +30,7 @@ export function BackgroundVideo({ src }: BackgroundVideoProps) {
   }
 
   return (
-    <div className="fixed inset-0">
+    <div className="absolute inset-0">
       {/* Placeholder image */}
       <Image
         src={`${baseName}-placeholder.jpg`}
@@ -40,7 +39,7 @@ export function BackgroundVideo({ src }: BackgroundVideoProps) {
         priority
         sizes="100vw"
         className={`object-cover transition-opacity duration-500 ${
-          isVideoLoaded ? 'opacity-0' : 'opacity-30'
+          isVideoLoaded ? 'opacity-0' : 'opacity-15'
         } blur-md`}
       />
 
@@ -52,8 +51,8 @@ export function BackgroundVideo({ src }: BackgroundVideoProps) {
         playsInline
         onLoadedData={() => setIsVideoLoaded(true)}
         className={`w-full h-full object-cover transition-opacity duration-500 ${
-          isVideoLoaded ? 'opacity-30' : 'opacity-0'
-        } blur-md`}
+          isVideoLoaded ? 'opacity-15' : 'opacity-0'
+        }`}
       >
         <source src={src} type="video/mp4" />
       </video>

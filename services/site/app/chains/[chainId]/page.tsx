@@ -33,19 +33,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const styles = {
-    live: "bg-success/10 text-success",
-    coming_soon: "bg-warning/10 text-warning",
-    testnet: "bg-info/10 text-info",
+  const styles: Record<string, { bg: string; color: string }> = {
+    live: { bg: "rgba(80, 175, 149, 0.1)", color: "#50AF95" },
+    coming_soon: { bg: "rgba(245, 158, 11, 0.1)", color: "#F59E0B" },
+    testnet: { bg: "rgba(59, 130, 246, 0.1)", color: "#3B82F6" },
   };
-  const labels = {
+  const labels: Record<string, string> = {
     live: "Live",
     coming_soon: "Coming Soon",
     testnet: "Testnet",
   };
+  const s = styles[status] || { bg: "transparent", color: "#A1A1AA" };
   return (
-    <span className={`rounded-md px-3 py-1 text-sm font-medium ${styles[status as keyof typeof styles] || ""}`}>
-      {labels[status as keyof typeof labels] || status}
+    <span className="rounded-md px-3 py-1 text-sm font-medium" style={{ background: s.bg, color: s.color }}>
+      {labels[status] || status}
     </span>
   );
 }
@@ -69,7 +70,7 @@ function TokenTypeLabel({ type }: { type: string }) {
 
 function ExternalLinkIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block ml-1" aria-hidden="true">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 inline-block" aria-hidden="true">
       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
       <polyline points="15 3 21 3 21 9" />
       <line x1="10" y1="14" x2="21" y2="3" />
@@ -200,171 +201,215 @@ export default async function ChainDetailPage({ params }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: "#0A0A0B", color: "#FAFAFA" }}>
       <NavBar />
 
       <div className="flex-1">
-        <article className="pb-20">
-          {/* Header */}
-          <header className="max-w-4xl mx-auto px-4 sm:px-6 md:px-10 lg:px-16 pt-12 sm:pt-16 md:pt-20">
-            <div className="mb-4 flex items-center gap-3">
-              <Link href="/chains" className="text-sm text-foreground-tertiary hover:text-foreground-secondary transition-colors">
-                All Chains
-              </Link>
-              <span className="text-foreground-tertiary">/</span>
-              <span className="text-sm text-foreground-secondary">{categoryLabels[chain.category]}</span>
-            </div>
-
-            <div className="flex items-start gap-4 mb-6">
-              <div
-                className="flex h-14 w-14 items-center justify-center rounded-xl text-xl font-bold"
-                style={{ backgroundColor: `${chain.color}20`, color: chain.color }}
-              >
-                {chain.shortName.slice(0, 3)}
+        <article>
+          {/* Hero Header - Dark with chain color accent */}
+          <header className="section-dark py-24 md:py-32">
+            <div className="mx-auto max-w-7xl px-6">
+              <div className="mb-6 flex items-center gap-3">
+                <Link href="/chains" className="text-sm transition-colors" style={{ color: "#71717A" }}>
+                  All Chains
+                </Link>
+                <span style={{ color: "#71717A" }}>/</span>
+                <span className="text-sm" style={{ color: "#A1A1AA" }}>{categoryLabels[chain.category]}</span>
               </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <h1 className="text-3xl sm:text-4xl font-bold">{chain.name}</h1>
-                  <StatusBadge status={chain.status} />
+
+              <div className="flex items-start gap-5">
+                <div
+                  className="flex h-16 w-16 items-center justify-center rounded-2xl text-xl font-bold"
+                  style={{ backgroundColor: `${chain.color}20`, color: chain.color }}
+                >
+                  {chain.shortName.slice(0, 3)}
                 </div>
-                <p className="mt-2 text-lg text-foreground-secondary">{chain.description}</p>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <h1 className="text-4xl font-bold tracking-tight md:text-5xl" style={{ color: "#FAFAFA" }}>{chain.name}</h1>
+                    <StatusBadge status={chain.status} />
+                  </div>
+                  <p className="mt-3 max-w-2xl text-lg" style={{ color: "#A1A1AA" }}>{chain.description}</p>
+                </div>
+              </div>
+
+              {/* Key Stats */}
+              <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-4">
+                {[
+                  { label: "Network ID", value: chain.caip2 || "—", mono: true },
+                  { label: "Speed", value: chain.transactionSpeed },
+                  { label: "Avg Fee", value: chain.avgFee },
+                  { label: "Family", value: categoryLabels[chain.category] },
+                ].map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="rounded-2xl p-4 text-center"
+                    style={{ background: "#111113", border: "1px solid rgba(255,255,255,0.08)" }}
+                  >
+                    <p className="text-sm" style={{ color: "#71717A" }}>{stat.label}</p>
+                    <p
+                      className={`mt-1 text-lg font-semibold ${stat.mono ? "font-mono text-sm break-all" : ""}`}
+                      style={{ color: "#FAFAFA" }}
+                    >
+                      {stat.value}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
           </header>
 
-          <section className="max-w-4xl mx-auto px-4 sm:px-6 md:px-10 lg:px-16 space-y-8">
-            {/* Key Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="rounded-xl border border-border bg-background-secondary p-4 text-center">
-                <p className="text-sm text-foreground-tertiary">Network ID</p>
-                <p className="mt-1 font-mono text-sm font-medium text-foreground break-all">{chain.caip2}</p>
-              </div>
-              <div className="rounded-xl border border-border bg-background-secondary p-4 text-center">
-                <p className="text-sm text-foreground-tertiary">Speed</p>
-                <p className="mt-1 text-lg font-semibold text-foreground">{chain.transactionSpeed}</p>
-              </div>
-              <div className="rounded-xl border border-border bg-background-secondary p-4 text-center">
-                <p className="text-sm text-foreground-tertiary">Avg Fee</p>
-                <p className="mt-1 text-lg font-semibold text-foreground">{chain.avgFee}</p>
-              </div>
-              <div className="rounded-xl border border-border bg-background-secondary p-4 text-center">
-                <p className="text-sm text-foreground-tertiary">Family</p>
-                <p className="mt-1 text-lg font-semibold text-foreground">{categoryLabels[chain.category]}</p>
+          {/* Features & Tokens - Light Section */}
+          <section className="section-light py-24 md:py-32">
+            <div className="mx-auto max-w-7xl px-6">
+              <div className="grid gap-12 lg:grid-cols-2">
+                {/* Features */}
+                <div>
+                  <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#50AF95" }}>
+                    Capabilities
+                  </span>
+                  <h2 className="mt-4 mb-6 text-2xl font-bold tracking-tight" style={{ color: "#1A1A2E" }}>Features</h2>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {chain.features.map((feature) => (
+                      <div
+                        key={feature}
+                        className="card-elevated flex items-center gap-3 px-5 py-4"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0" style={{ color: "#50AF95" }} aria-hidden="true">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        <span className="text-sm font-medium" style={{ color: "#1A1A2E" }}>{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Supported Tokens */}
+                <div>
+                  <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#50AF95" }}>
+                    Assets
+                  </span>
+                  <h2 className="mt-4 mb-6 text-2xl font-bold tracking-tight" style={{ color: "#1A1A2E" }}>Supported Tokens</h2>
+                  <div className="space-y-3">
+                    {chain.tokens.map((token) => (
+                      <div key={token.symbol} className="card-elevated p-6">
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                          <div>
+                            <p className="text-lg font-semibold" style={{ color: "#1A1A2E" }}>{token.symbol}</p>
+                            <p className="text-sm" style={{ color: "#718096" }}>{token.name}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {token.gasless && (
+                              <span
+                                className="rounded-md px-2 py-1 text-xs font-medium"
+                                style={{ background: "rgba(80, 175, 149, 0.1)", color: "#50AF95" }}
+                              >
+                                Gasless
+                              </span>
+                            )}
+                            <span
+                              className="rounded-md px-2 py-1 text-xs font-medium"
+                              style={{ background: "#F7FAF9", color: "#4A5568" }}
+                            >
+                              <TokenTypeLabel type={token.type} />
+                            </span>
+                          </div>
+                        </div>
+                        {token.address && (
+                          <div className="mt-3 rounded-lg px-3 py-2" style={{ background: "#F7FAF9" }}>
+                            <p className="mb-1 text-xs" style={{ color: "#718096" }}>Contract Address</p>
+                            <p className="break-all font-mono text-xs" style={{ color: "#4A5568" }}>{token.address}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
+          </section>
 
-            {/* Features */}
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold">Features</h2>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {chain.features.map((feature) => (
-                  <div key={feature} className="flex items-center gap-3 rounded-lg border border-border bg-background-secondary px-4 py-3">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-brand flex-shrink-0" aria-hidden="true">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                    <span className="text-sm font-medium text-foreground">{feature}</span>
+          {/* Code Example - Dark Section */}
+          <section className="section-dark-alt py-24 md:py-32">
+            <div className="mx-auto max-w-7xl px-6">
+              <div className="mx-auto max-w-3xl">
+                <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#50AF95" }}>
+                  Integration
+                </span>
+                <h2 className="mt-4 mb-8 text-2xl font-bold tracking-tight" style={{ color: "#FAFAFA" }}>Code Example</h2>
+                <div className="overflow-hidden rounded-2xl" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
+                  <div className="px-4 py-3" style={{ background: "#111113", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                    <p className="text-sm font-medium" style={{ color: "#A1A1AA" }}>{codeExample.title}</p>
                   </div>
-                ))}
-              </div>
-            </section>
-
-            {/* Supported Tokens */}
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold">Supported Tokens</h2>
-              <div className="space-y-3">
-                {chain.tokens.map((token) => (
-                  <div key={token.symbol} className="rounded-xl border border-border bg-background-secondary p-5">
-                    <div className="flex items-center justify-between flex-wrap gap-2">
-                      <div>
-                        <p className="text-lg font-semibold text-foreground">{token.symbol}</p>
-                        <p className="text-sm text-foreground-tertiary">{token.name}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {token.gasless && (
-                          <span className="rounded-md bg-brand/10 px-2 py-1 text-xs font-medium text-brand">
-                            Gasless
-                          </span>
-                        )}
-                        <span className="rounded-md bg-background-tertiary px-2 py-1 text-xs font-medium text-foreground-secondary">
-                          <TokenTypeLabel type={token.type} />
-                        </span>
-                      </div>
-                    </div>
-                    {token.address && (
-                      <div className="mt-3 rounded-lg bg-background-tertiary px-3 py-2">
-                        <p className="text-xs text-foreground-tertiary mb-1">Contract Address</p>
-                        <p className="font-mono text-xs text-foreground-secondary break-all">{token.address}</p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* Code Example */}
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold">Integration Example</h2>
-              <div className="rounded-xl border border-border bg-background-tertiary overflow-hidden">
-                <div className="border-b border-border px-4 py-2">
-                  <p className="text-sm font-medium text-foreground-secondary">{codeExample.title}</p>
+                  <pre className="overflow-x-auto p-4 text-sm leading-relaxed" style={{ background: "#0A0A0B" }}>
+                    <code style={{ color: "#A1A1AA" }}>{codeExample.code}</code>
+                  </pre>
                 </div>
-                <pre className="p-4 overflow-x-auto text-sm leading-relaxed">
-                  <code className="text-foreground-secondary">{codeExample.code}</code>
-                </pre>
               </div>
-            </section>
+            </div>
+          </section>
 
-            {/* Links */}
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold">Resources</h2>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Link
-                  href={chain.explorerUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between rounded-lg border border-border bg-background-secondary px-4 py-3 text-sm font-medium text-foreground transition-colors hover:border-border-secondary"
-                >
-                  Block Explorer
-                  <ExternalLinkIcon />
-                </Link>
-                <Link
-                  href="https://docs.t402.io/chains"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between rounded-lg border border-border bg-background-secondary px-4 py-3 text-sm font-medium text-foreground transition-colors hover:border-border-secondary"
-                >
-                  T402 Documentation
-                  <ExternalLinkIcon />
-                </Link>
-              </div>
-            </section>
+          {/* Resources & CTA - Light Alt Section */}
+          <section className="section-light-alt py-24 md:py-32">
+            <div className="mx-auto max-w-7xl px-6">
+              <div className="mx-auto max-w-3xl">
+                {/* Resources */}
+                <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#50AF95" }}>
+                  Resources
+                </span>
+                <h2 className="mt-4 mb-6 text-2xl font-bold tracking-tight" style={{ color: "#1A1A2E" }}>Explore Further</h2>
+                <div className="mb-16 grid gap-3 sm:grid-cols-2">
+                  <Link
+                    href={chain.explorerUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="card-elevated flex items-center justify-between px-5 py-4 text-sm font-medium"
+                    style={{ color: "#1A1A2E" }}
+                  >
+                    Block Explorer
+                    <ExternalLinkIcon />
+                  </Link>
+                  <Link
+                    href="https://docs.t402.io/chains"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="card-elevated flex items-center justify-between px-5 py-4 text-sm font-medium"
+                    style={{ color: "#1A1A2E" }}
+                  >
+                    T402 Documentation
+                    <ExternalLinkIcon />
+                  </Link>
+                </div>
 
-            {/* CTA */}
-            <section className="mt-12 rounded-2xl border border-border bg-background-secondary p-8 text-center">
-              <h2 className="mb-4 text-2xl font-bold text-foreground">
-                Start Building on {chain.name}
-              </h2>
-              <p className="mx-auto mb-6 max-w-xl text-foreground-secondary">
-                Accept {chain.tokens[0]?.symbol || "stablecoin"} payments on {chain.name} with the T402 SDK. Zero protocol fees, instant settlement.
-              </p>
-              <div className="flex flex-wrap justify-center gap-4">
-                <Link
-                  href="https://docs.t402.io/getting-started/quickstart"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-lg bg-brand px-6 py-3 text-base font-medium transition-colors hover:bg-brand-secondary"
-                  style={{ color: "#0A0A0B" }}
-                >
-                  Get Started
-                </Link>
-                <Link
-                  href="/chains"
-                  className="inline-flex items-center gap-2 rounded-lg border border-border bg-background-tertiary px-6 py-3 text-base font-medium text-foreground transition-colors hover:bg-border"
-                >
-                  All Chains
-                </Link>
+                {/* CTA */}
+                <div className="text-center">
+                  <h2 className="text-3xl font-bold tracking-tight" style={{ color: "#1A1A2E" }}>
+                    Start Building on {chain.name}
+                  </h2>
+                  <p className="mx-auto mt-4 max-w-xl text-lg" style={{ color: "#4A5568" }}>
+                    Accept {chain.tokens[0]?.symbol || "stablecoin"} payments on {chain.name} with the T402 SDK. Zero protocol fees, instant settlement.
+                  </p>
+                  <div className="mt-8 flex flex-wrap justify-center gap-4">
+                    <Link
+                      href="https://docs.t402.io/getting-started/quickstart"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-xl px-8 py-4 text-lg font-semibold transition-all"
+                      style={{ background: "#50AF95", color: "#0A0A0B" }}
+                    >
+                      Get Started
+                    </Link>
+                    <Link
+                      href="/chains"
+                      className="inline-flex items-center gap-2 rounded-xl px-8 py-4 text-lg font-semibold transition-all"
+                      style={{ border: "1px solid rgba(0,0,0,0.1)", color: "#1A1A2E" }}
+                    >
+                      All Chains
+                    </Link>
+                  </div>
+                </div>
               </div>
-            </section>
+            </div>
           </section>
         </article>
       </div>

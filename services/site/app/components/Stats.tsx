@@ -1,59 +1,54 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useMotionValue, useTransform, animate, useInView } from "motion/react";
+import { useEffect, useRef } from "react";
 
 const stats = [
-  {
-    value: "28",
-    label: "Chains Supported",
-    description: "EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot & more",
-  },
-  {
-    value: "4",
-    label: "SDKs Available",
-    description: "TypeScript, Python, Go, Java",
-  },
-  {
-    value: "$0",
-    label: "Protocol Fees",
-    description: "Only network gas fees",
-  },
-  {
-    value: "< 1s",
-    label: "Verification Time",
-    description: "Instant payment validation",
-  },
+  { value: 33, suffix: "", label: "Blockchains" },
+  { value: 29, suffix: "", label: "Packages" },
+  { value: 22, suffix: "", label: "Frameworks" },
+  { value: 4, suffix: "", label: "SDKs" },
 ];
+
+function AnimatedNumber({ value, suffix }: { value: number; suffix: string }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true });
+  const count = useMotionValue(0);
+  const rounded = useTransform(count, (latest) => Math.round(latest));
+
+  useEffect(() => {
+    if (isInView) {
+      animate(count, value, { duration: 1.5, ease: [0.16, 1, 0.3, 1] });
+    }
+  }, [isInView, count, value]);
+
+  return (
+    <span ref={ref} className="tabular-nums">
+      <motion.span>{rounded}</motion.span>
+      {suffix}
+    </span>
+  );
+}
 
 export function Stats() {
   return (
-    <section className="relative border-y border-border bg-background-secondary py-20">
-      {/* Background pattern */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-30"
-        style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(80, 175, 149, 0.15) 1px, transparent 0)`,
-          backgroundSize: "40px 40px",
-        }}
-      />
-
-      <div className="relative mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+    <section className="section-light py-24 md:py-32">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat, index) => (
             <motion.div
               key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="text-center"
             >
-              <div className="text-4xl font-bold text-brand sm:text-5xl">
-                {stat.value}
+              <div className="text-6xl font-bold text-[var(--text-on-light)] md:text-7xl">
+                <AnimatedNumber value={stat.value} suffix={stat.suffix} />
               </div>
-              <div className="mt-2 text-lg font-medium">{stat.label}</div>
-              <div className="mt-1 text-sm text-foreground-tertiary">
-                {stat.description}
+              <div className="mt-3 text-lg text-[var(--text-on-light-secondary)]">
+                {stat.label}
               </div>
             </motion.div>
           ))}

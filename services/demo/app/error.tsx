@@ -16,17 +16,20 @@ export default function Error({
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
       <div className="glass-card p-8 max-w-md w-full text-center">
-        <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-[var(--color-error-dim)] flex items-center justify-center">
+        <div
+          className="w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center"
+          style={{ background: "rgba(239, 68, 68, 0.1)" }}
+        >
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-            <path d="M10 6v4m0 4h.01M18 10a8 8 0 11-16 0 8 8 0 0116 0z" stroke="var(--color-error)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M10 6v4m0 4h.01M18 10a8 8 0 11-16 0 8 8 0 0116 0z" stroke="#EF4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
         <h2 className="text-lg font-semibold mb-2">Something went wrong</h2>
-        <p className="text-sm text-[var(--color-muted)] mb-1">
+        <p className="text-sm mb-1" style={{ color: "#A1A1AA" }}>
           An unexpected error occurred while loading this page.
         </p>
         {error.digest && (
-          <p className="text-xs text-[var(--color-muted)] font-mono mb-4">
+          <p className="text-xs font-mono mb-4" style={{ color: "#71717A" }}>
             Error ID: {error.digest}
           </p>
         )}
@@ -39,7 +42,8 @@ export default function Error({
           </button>
           <a
             href="/"
-            className="px-5 py-3 text-sm border border-[var(--color-border)] rounded-lg text-[var(--color-muted)] hover:text-white transition-colors min-h-[44px] flex items-center"
+            className="px-5 py-3 text-sm rounded-xl hover:text-white transition-colors min-h-[44px] flex items-center"
+            style={{ border: "1px solid rgba(255, 255, 255, 0.15)", color: "#A1A1AA" }}
           >
             Go home
           </a>

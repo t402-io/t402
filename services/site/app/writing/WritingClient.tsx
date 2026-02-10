@@ -117,9 +117,15 @@ function ArticleCard({ article }: { article: Article }) {
       className="group"
     >
       <Link href={`/writing/${article.slug}`} className="block">
-        <div className="overflow-hidden rounded-xl border border-border bg-background-secondary transition-all hover:border-border-secondary">
+        <div
+          className="overflow-hidden rounded-2xl transition-all"
+          style={{
+            backgroundColor: "#FFFFFF",
+            border: "1px solid rgba(0,0,0,0.08)",
+          }}
+        >
           {/* Image or Placeholder */}
-          <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-brand/20 to-background-tertiary">
+          <div className="relative aspect-video overflow-hidden" style={{ backgroundColor: "#F7FAF9" }}>
             {article.image ? (
               <Image
                 src={article.image}
@@ -130,7 +136,7 @@ function ArticleCard({ article }: { article: Article }) {
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-5xl font-bold text-brand/40">T402</span>
+                <span className="text-5xl font-bold" style={{ color: "rgba(80,175,149,0.3)" }}>T402</span>
               </div>
             )}
           </div>
@@ -142,7 +148,8 @@ function ArticleCard({ article }: { article: Article }) {
               {article.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-md bg-brand/10 px-2 py-1 text-xs font-medium text-brand"
+                  className="rounded-md px-2 py-1 text-xs font-medium"
+                  style={{ backgroundColor: "rgba(80,175,149,0.1)", color: "#50AF95" }}
                 >
                   {tag}
                 </span>
@@ -150,17 +157,20 @@ function ArticleCard({ article }: { article: Article }) {
             </div>
 
             {/* Title */}
-            <h2 className="mb-2 text-xl font-semibold text-foreground transition-colors group-hover:text-brand">
+            <h2
+              className="mb-2 text-xl font-semibold transition-colors group-hover:opacity-80"
+              style={{ color: "#1A1A2E" }}
+            >
               {article.title}
             </h2>
 
             {/* Description */}
-            <p className="mb-4 line-clamp-2 text-sm text-foreground-secondary">
+            <p className="mb-4 line-clamp-2 text-sm" style={{ color: "#4A5568" }}>
               {article.description}
             </p>
 
             {/* Meta */}
-            <div className="flex items-center justify-between text-sm text-foreground-tertiary">
+            <div className="flex items-center justify-between text-sm" style={{ color: "#A1A1AA" }}>
               <span>{article.date}</span>
               <span>{article.authors.join(", ")}</span>
             </div>
@@ -200,94 +210,111 @@ export default function WritingClient() {
       : articles.filter((a) => a.category === activeCategory);
 
   return (
-    <div className="mx-auto max-w-[1440px] px-4 py-16 sm:px-6 lg:px-8">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-12 text-center"
-      >
-        <h1 className="mb-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-          Writing
-        </h1>
-        <p className="mx-auto max-w-2xl text-lg text-foreground-secondary">
-          Articles, announcements, and deep dives from the T402 team.
-          Learn about protocol updates, technical guides, and ecosystem developments.
-        </p>
-      </motion.div>
-
-      {/* Category Filter */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
-        className="mb-12 overflow-x-auto pb-2"
-      >
-        <div className="flex w-max min-w-full justify-start gap-2 sm:w-auto sm:justify-center">
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-all sm:px-4 ${
-                activeCategory === cat.id
-                  ? "bg-brand text-background"
-                  : "bg-background-secondary text-foreground-secondary hover:bg-background-tertiary hover:text-foreground"
-              }`}
-            >
-              {cat.label}
-              {cat.id !== "all" && (
-                <span className="ml-1 text-xs opacity-70 sm:ml-1.5">
-                  {articles.filter((a) => a.category === cat.id).length}
-                </span>
-              )}
-            </button>
-          ))}
+    <>
+      {/* Dark Header */}
+      <section style={{ backgroundColor: "#0A0A0B" }} className="py-24 md:py-32">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <p className="uppercase text-xs tracking-widest font-semibold mb-4" style={{ color: "#50AF95" }}>
+              Blog
+            </p>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6" style={{ color: "#FAFAFA" }}>
+              Writing
+            </h1>
+            <p className="mx-auto max-w-2xl text-lg" style={{ color: "#A1A1AA" }}>
+              Articles, announcements, and deep dives from the T402 team.
+              Learn about protocol updates, technical guides, and ecosystem developments.
+            </p>
+          </motion.div>
         </div>
-      </motion.div>
+      </section>
 
-      {/* Articles Grid */}
-      <div className="mb-20 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        <AnimatePresence mode="popLayout">
-          {filteredArticles.map((article) => (
-            <ArticleCard key={article.slug} article={article} />
-          ))}
-        </AnimatePresence>
-      </div>
+      {/* Light Article Grid */}
+      <section style={{ backgroundColor: "#F7FAF9" }} className="py-24 md:py-32">
+        <div className="max-w-7xl mx-auto px-6">
+          {/* Category Filter */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="mb-12 overflow-x-auto pb-2"
+          >
+            <div className="flex w-max min-w-full justify-start gap-2 sm:w-auto sm:justify-center">
+              {categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveCategory(cat.id)}
+                  className="whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium transition-all"
+                  style={
+                    activeCategory === cat.id
+                      ? { backgroundColor: "#50AF95", color: "#0A0A0B" }
+                      : { backgroundColor: "#FFFFFF", color: "#4A5568", border: "1px solid rgba(0,0,0,0.08)" }
+                  }
+                >
+                  {cat.label}
+                  {cat.id !== "all" && (
+                    <span className="ml-1.5 text-xs opacity-70">
+                      {articles.filter((a) => a.category === cat.id).length}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </motion.div>
 
-      {filteredArticles.length === 0 && (
-        <div className="mb-20 text-center py-12">
-          <p className="text-foreground-tertiary">No articles in this category yet.</p>
+          {/* Articles Grid */}
+          <div className="mb-20 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <AnimatePresence mode="popLayout">
+              {filteredArticles.map((article) => (
+                <ArticleCard key={article.slug} article={article} />
+              ))}
+            </AnimatePresence>
+          </div>
+
+          {filteredArticles.length === 0 && (
+            <div className="mb-20 text-center py-12">
+              <p style={{ color: "#A1A1AA" }}>No articles in this category yet.</p>
+            </div>
+          )}
         </div>
-      )}
+      </section>
 
       {/* Newsletter CTA */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-        className="rounded-2xl border border-border bg-background-secondary p-8 text-center sm:p-12"
-      >
-        <h2 className="mb-4 text-2xl font-bold text-foreground sm:text-3xl">
-          Stay Updated
-        </h2>
-        <p className="mx-auto mb-8 max-w-xl text-foreground-secondary">
-          Join the T402 community to get the latest updates on protocol development,
-          new features, and ecosystem news.
-        </p>
-        <div className="flex flex-wrap justify-center gap-4">
-          <Link
-            href="https://t.me/t402_community"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg bg-brand px-6 py-3 text-base font-medium transition-colors hover:bg-brand-secondary"
-            style={{ color: "#0A0A0B" }}
+      <section style={{ backgroundColor: "#FFFFFF" }} className="py-24 md:py-32">
+        <div className="max-w-3xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="rounded-2xl p-8 sm:p-12 text-center"
+            style={{ backgroundColor: "#F7FAF9", border: "1px solid rgba(0,0,0,0.08)" }}
           >
-            Join Telegram
-            <ArrowRightIcon />
-          </Link>
+            <h2 className="mb-4 text-2xl font-bold sm:text-3xl" style={{ color: "#1A1A2E" }}>
+              Stay Updated
+            </h2>
+            <p className="mx-auto mb-8 max-w-xl" style={{ color: "#4A5568" }}>
+              Join the T402 community to get the latest updates on protocol development,
+              new features, and ecosystem news.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link
+                href="https://t.me/t402_community"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-base font-medium transition-all hover:opacity-90"
+                style={{ backgroundColor: "#50AF95", color: "#0A0A0B" }}
+              >
+                Join Telegram
+                <ArrowRightIcon />
+              </Link>
+            </div>
+          </motion.div>
         </div>
-      </motion.div>
-    </div>
+      </section>
+    </>
   );
 }

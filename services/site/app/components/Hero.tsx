@@ -2,369 +2,126 @@
 
 import Link from "next/link";
 import { motion } from "motion/react";
+import { BackgroundVideo } from "./BackgroundVideo";
 
-// Chain logo components
-function EthereumLogo({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 32 32" className={className} aria-label="Ethereum">
-      <circle cx="16" cy="16" r="16" fill="#627EEA" />
-      <path
-        d="M16.498 4v8.87l7.497 3.35L16.498 4z"
-        fill="#fff"
-        fillOpacity="0.6"
-      />
-      <path d="M16.498 4L9 16.22l7.498-3.35V4z" fill="#fff" />
-      <path
-        d="M16.498 21.968v6.027L24 17.616l-7.502 4.352z"
-        fill="#fff"
-        fillOpacity="0.6"
-      />
-      <path d="M16.498 27.995v-6.028L9 17.616l7.498 10.379z" fill="#fff" />
-      <path
-        d="M16.498 20.573l7.497-4.353-7.497-3.348v7.701z"
-        fill="#fff"
-        fillOpacity="0.2"
-      />
-      <path
-        d="M9 16.22l7.498 4.353v-7.701L9 16.22z"
-        fill="#fff"
-        fillOpacity="0.6"
-      />
-    </svg>
-  );
-}
-
-function BaseLogo({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 32 32" className={className} aria-label="Base">
-      <circle cx="16" cy="16" r="16" fill="#0052FF" />
-      <path
-        d="M16 26c5.523 0 10-4.477 10-10S21.523 6 16 6c-5.22 0-9.48 3.997-9.962 9.1h13.13v1.8H6.038C6.52 22.003 10.78 26 16 26z"
-        fill="#fff"
-      />
-    </svg>
-  );
-}
-
-function ArbitrumLogo({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 32 32" className={className} aria-label="Arbitrum">
-      <circle cx="16" cy="16" r="16" fill="#28A0F0" />
-      <path d="M16 6l8 14h-16l8-14z" fill="#fff" />
-      <path d="M16 26l-8-6h16l-8 6z" fill="#fff" fillOpacity="0.6" />
-    </svg>
-  );
-}
-
-function TonLogo({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 32 32" className={className} aria-label="TON">
-      <circle cx="16" cy="16" r="16" fill="#0098EA" />
-      <path
-        d="M22.4 10.4H9.6c-.9 0-1.4 1-1 1.7l7.1 11.2c.2.3.6.3.8 0l7.1-11.2c.4-.7-.1-1.7-1.2-1.7zm-8.3 2.3h3.8v6.8l-3.8-6.8zm5.6 0h3.8l-3.8 6.8v-6.8z"
-        fill="#fff"
-      />
-    </svg>
-  );
-}
-
-function TronLogo({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 32 32" className={className} aria-label="TRON">
-      <circle cx="16" cy="16" r="16" fill="#FF0000" />
-      <path
-        d="M22.8 9.6L9.2 12.8l8 10.4 5.6-13.6zm-11.6 3l8-2-4.4 8.4-3.6-6.4zm8.8-1l-3.6 8.8 4.8-7.6-1.2-1.2z"
-        fill="#fff"
-      />
-    </svg>
-  );
-}
-
-function SolanaLogo({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 32 32" className={className} aria-label="Solana">
-      <circle cx="16" cy="16" r="16" fill="#9945FF" />
-      <path
-        d="M10 19.5l2-2h10l-2 2H10zm0-5l2 2h10l-2-2H10zm0-3l2-2h10l-2 2H10z"
-        fill="#fff"
-      />
-    </svg>
-  );
-}
-
-function PolygonLogo({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 32 32" className={className} aria-label="Polygon">
-      <circle cx="16" cy="16" r="16" fill="#8247E5" />
-      <path
-        d="M21 13.5l-3-1.7-3 1.7v3.5l3 1.7 3-1.7v-3.5zm-6 6.8l-3-1.7v-3.5l3 1.7v3.5zm0-10.6l-3 1.7v3.5l3-1.7V9.7zm6 10.6l-3 1.7v-3.5l3-1.7v3.5z"
-        fill="#fff"
-      />
-    </svg>
-  );
-}
-
-function InkLogo({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 32 32" className={className} aria-label="Ink">
-      <circle cx="16" cy="16" r="16" fill="#7B3FE4" />
-      <path
-        d="M16 8c-4.4 0-8 3.6-8 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8zm0 14c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z"
-        fill="#fff"
-      />
-      <circle cx="16" cy="16" r="3" fill="#fff" />
-    </svg>
-  );
-}
-
-function BerachainLogo({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 32 32" className={className} aria-label="Berachain">
-      <circle cx="16" cy="16" r="16" fill="#FF8C00" />
-      <path
-        d="M16 7c-2 0-3.5 1-4 2.5-.5 1.5 0 3 1 4-2 .5-3 2-3 3.5 0 2 1.5 3.5 3.5 4 1 .5 2.5.5 3.5 0h2c2 0 3.5-1.5 3.5-3.5 0-1.5-1-3-3-3.5 1-1 1.5-2.5 1-4-.5-1.5-2-2.5-4-2.5h-.5z"
-        fill="#fff"
-      />
-    </svg>
-  );
-}
-
-function UnichainLogo({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 32 32" className={className} aria-label="Unichain">
-      <circle cx="16" cy="16" r="16" fill="#FF007A" />
-      <path
-        d="M12 10v12c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2zm3 2h2v8h-2v-8z"
-        fill="#fff"
-      />
-    </svg>
-  );
-}
-
-function NearLogo({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 32 32" className={className} aria-label="NEAR">
-      <circle cx="16" cy="16" r="16" fill="#000000" />
-      <path
-        d="M21.5 8.5l-4.5 6.7 4.5 8.3h-2.8l-3.2-5.9-3.2 5.9H9.5l4.5-8.3-4.5-6.7h2.8l3.2 4.7 3.2-4.7h2.8z"
-        fill="#fff"
-      />
-    </svg>
-  );
-}
-
-function AptosLogo({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 32 32" className={className} aria-label="Aptos">
-      <circle cx="16" cy="16" r="16" fill="#000000" />
-      <path
-        d="M22 12h-3l-1.5 2.5H22v2h-6l-1.5 2.5H22v2H13l-1.5 2.5h-2L16 12h6z"
-        fill="#fff"
-      />
-    </svg>
-  );
-}
-
-function TezosLogo({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 32 32" className={className} aria-label="Tezos">
-      <circle cx="16" cy="16" r="16" fill="#2C7DF7" />
-      <path
-        d="M19.5 18.5c0 2.2-1.8 4-4 4s-4-1.8-4-4v-5h2v5c0 1.1.9 2 2 2s2-.9 2-2v-3h-2v-2h4v5zm-2-9h-4v-2h4v2z"
-        fill="#fff"
-      />
-    </svg>
-  );
-}
-
-function PolkadotLogo({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 32 32" className={className} aria-label="Polkadot">
-      <circle cx="16" cy="16" r="16" fill="#E6007A" />
-      <ellipse cx="16" cy="10" rx="4" ry="2.5" fill="#fff" />
-      <ellipse cx="16" cy="22" rx="4" ry="2.5" fill="#fff" />
-      <ellipse cx="16" cy="16" rx="2.5" ry="1.5" fill="#fff" />
-    </svg>
-  );
-}
-
-const chainLogos = [
-  { name: "Ethereum", Logo: EthereumLogo },
-  { name: "Base", Logo: BaseLogo },
-  { name: "Arbitrum", Logo: ArbitrumLogo },
-  { name: "Ink", Logo: InkLogo },
-  { name: "Berachain", Logo: BerachainLogo },
-  { name: "Unichain", Logo: UnichainLogo },
-  { name: "Polygon", Logo: PolygonLogo },
-  { name: "TON", Logo: TonLogo },
-  { name: "TRON", Logo: TronLogo },
-  { name: "Solana", Logo: SolanaLogo },
-  { name: "NEAR", Logo: NearLogo },
-  { name: "Aptos", Logo: AptosLogo },
-  { name: "Tezos", Logo: TezosLogo },
-  { name: "Polkadot", Logo: PolkadotLogo },
+const stats = [
+  { value: "33", label: "Chains" },
+  { value: "4", label: "SDKs" },
+  { value: "$0", label: "Fees" },
+  { value: "<1s", label: "Settlement" },
 ];
-
-const codeExample = `// Accept USDT payments in 3 lines
-import { t402 } from "@t402/sdk";
-
-const payment = await t402.verify(request);`;
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden pt-20 pb-32">
-      {/* Background gradient */}
+    <section className="section-dark relative flex min-h-screen items-center justify-center overflow-hidden">
+      {/* Video background */}
+      <BackgroundVideo src="/videos/neonblobs.mp4" />
+
+      {/* Dark overlay gradient */}
       <div
-        className="pointer-events-none absolute inset-0"
+        className="pointer-events-none absolute inset-0 z-[1]"
         style={{
           background:
-            "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(80, 175, 149, 0.15), transparent)",
+            "linear-gradient(180deg, rgba(10,10,11,0.6) 0%, rgba(10,10,11,0.4) 40%, rgba(10,10,11,0.7) 100%)",
         }}
       />
 
-      <div className="relative mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-4xl text-center">
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-8 inline-flex items-center gap-2 rounded-full border border-border bg-background-secondary px-4 py-1.5"
-          >
-            <span className="h-2 w-2 rounded-full bg-brand animate-pulse" />
-            <span className="text-sm text-foreground-secondary">
-              Production-ready across 28 blockchains
-            </span>
-          </motion.div>
+      {/* Content */}
+      <div className="relative z-[2] mx-auto max-w-7xl px-6 py-32 text-center">
+        {/* Main heading */}
+        <motion.h1
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="text-5xl font-bold tracking-tight text-white md:text-7xl lg:text-8xl"
+        >
+          The Payment Protocol
+          <br />
+          <span className="text-gradient">for USDT</span>
+        </motion.h1>
 
-          {/* Headline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl"
-          >
-            The Official Payment Protocol
-            <br />
-            <span className="text-gradient">for USDT</span>
-          </motion.h1>
+        {/* Subtitle */}
+        <motion.p
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+          className="mx-auto mt-6 max-w-2xl text-lg text-foreground-secondary md:text-xl"
+        >
+          HTTP-native stablecoin payments across 33 blockchains. Zero fees.
+          Instant settlement. Built for AI agents.
+        </motion.p>
 
-          {/* Subheadline */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="mx-auto mt-6 max-w-2xl text-lg text-foreground-secondary sm:text-xl"
+        {/* CTA Buttons */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
+        >
+          <Link
+            href="https://docs.t402.io/getting-started/quickstart"
+            className="inline-flex items-center justify-center rounded-xl bg-brand px-8 py-4 text-lg font-semibold text-[#0A0A0B] transition-all hover:bg-brand-secondary hover:shadow-glow"
           >
-            HTTP-native stablecoin payments across 28 blockchains with HTTP,
-            MCP, and A2A transports. Zero fees. Instant settlement. Built for AI
-            agents.
-          </motion.p>
+            Get Started
+          </Link>
+          <Link
+            href="https://t402.io/t402-whitepaper.pdf"
+            className="inline-flex items-center justify-center rounded-xl border border-white/20 px-8 py-4 text-lg font-semibold text-white backdrop-blur transition-all hover:border-white/40 hover:bg-white/5"
+          >
+            Read Whitepaper
+          </Link>
+        </motion.div>
 
-          {/* CTA Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
-          >
-            <Link
-              href="https://docs.t402.io/getting-started/quickstart"
-              className="inline-flex h-12 items-center justify-center rounded-lg bg-brand px-6 text-base font-medium transition-all hover:bg-brand-secondary hover:shadow-glow"
-              style={{ color: "#0A0A0B" }}
-            >
-              Get Started
-            </Link>
-            <Link
-              href="https://docs.t402.io"
-              className="inline-flex h-12 items-center justify-center rounded-lg border border-border bg-background-secondary px-6 text-base font-medium text-foreground transition-colors hover:bg-background-tertiary"
-            >
-              View Documentation
-            </Link>
-          </motion.div>
-
-          {/* Code Preview */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="mt-16"
-          >
-            <div className="mx-auto max-w-2xl overflow-hidden rounded-xl border border-border bg-background-secondary shadow-xl">
-              {/* Window Header */}
-              <div className="flex items-center gap-2 border-b border-border px-4 py-3">
-                <div className="h-3 w-3 rounded-full bg-error" />
-                <div className="h-3 w-3 rounded-full bg-warning" />
-                <div className="h-3 w-3 rounded-full bg-success" />
-                <span className="ml-2 font-mono text-xs text-foreground-tertiary">
-                  payment.ts
-                </span>
-              </div>
-              {/* Code */}
-              <pre className="overflow-x-auto border-none bg-transparent p-6 text-left">
-                <code className="bg-transparent font-mono text-sm leading-relaxed">
-                  <span className="text-foreground-tertiary">
-                    {"// Accept USDT payments in 3 lines"}
-                  </span>
-                  {"\n"}
-                  <span className="text-[#C586C0]">import</span>
-                  <span className="text-foreground"> {"{ "}</span>
-                  <span className="text-[#9CDCFE]">paymentMiddleware</span>
-                  <span className="text-foreground">{" }"} </span>
-                  <span className="text-[#C586C0]">from</span>
-                  <span className="text-[#CE9178]"> "@t402/express"</span>
-                  <span className="text-foreground">;</span>
-                  {"\n\n"}
-                  <span className="text-[#9CDCFE]">app</span>
-                  <span className="text-foreground">.</span>
-                  <span className="text-[#DCDCAA]">use</span>
-                  <span className="text-foreground">(</span>
-                  <span className="text-[#DCDCAA]">paymentMiddleware</span>
-                  <span className="text-foreground">(</span>
-                  <span className="text-[#9CDCFE]">config</span>
-                  <span className="text-foreground">));</span>
-                </code>
-              </pre>
-            </div>
-          </motion.div>
-
-          {/* Supported Chains */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            className="mt-16"
-          >
-            <p className="mb-6 text-sm font-medium uppercase tracking-wider text-foreground-tertiary">
-              Supported Chains
-            </p>
-            <div className="mx-auto grid max-w-lg grid-cols-5 gap-4 sm:flex sm:max-w-none sm:flex-wrap sm:items-center sm:justify-center sm:gap-6">
-              {chainLogos.map(({ name, Logo }) => (
-                <div
-                  key={name}
-                  className="group flex flex-col items-center gap-1 sm:gap-2"
-                >
-                  <Logo className="h-9 w-9 sm:h-10 sm:w-10 opacity-60 transition-all group-hover:opacity-100 group-hover:scale-110" />
-                  <span className="hidden text-xs text-foreground-tertiary opacity-0 transition-opacity group-hover:opacity-100 sm:block">
-                    {name}
-                  </span>
+        {/* Stats bar */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
+          className="mt-16 flex items-center justify-center"
+        >
+          <div className="flex items-center divide-x divide-white/20">
+            {stats.map((stat) => (
+              <div key={stat.label} className="px-6 text-center sm:px-10">
+                <div className="text-2xl font-bold text-white">{stat.value}</div>
+                <div className="mt-1 text-sm text-foreground-secondary">
+                  {stat.label}
                 </div>
-              ))}
-              <Link
-                href="/chains"
-                className="group flex flex-col items-center gap-1 sm:gap-2"
-              >
-                <span className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background-secondary text-xs font-medium text-foreground-secondary opacity-60 transition-all group-hover:scale-110 group-hover:border-brand group-hover:opacity-100 sm:h-10 sm:w-10 sm:text-sm">
-                  +14
-                </span>
-                <span className="hidden text-xs text-foreground-tertiary opacity-0 transition-opacity group-hover:opacity-100 sm:block">
-                  more
-                </span>
-              </Link>
-            </div>
-          </motion.div>
-        </div>
+              </div>
+            ))}
+          </div>
+        </motion.div>
       </div>
+
+      {/* Scroll indicator */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.2, duration: 0.8 }}
+        className="absolute bottom-8 left-1/2 z-[2] -translate-x-1/2"
+      >
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          className="flex flex-col items-center gap-2"
+        >
+          <span className="text-xs tracking-widest text-foreground-tertiary uppercase">
+            Scroll
+          </span>
+          <svg
+            className="h-5 w-5 text-foreground-tertiary"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M19 14l-7 7m0 0l-7-7"
+            />
+          </svg>
+        </motion.div>
+      </motion.div>
     </section>
   );
 }

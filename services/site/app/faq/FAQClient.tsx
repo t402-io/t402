@@ -194,7 +194,7 @@ const faqs: FAQItem[] = [
   },
 ];
 
-function ChevronIcon({ isOpen, className = "" }: { isOpen: boolean; className?: string }) {
+function ChevronIcon({ isOpen }: { isOpen: boolean }) {
   return (
     <svg
       width="20"
@@ -205,7 +205,8 @@ function ChevronIcon({ isOpen, className = "" }: { isOpen: boolean; className?: 
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""} ${className}`}
+      className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+      style={{ color: isOpen ? "#50AF95" : "#A1A1AA" }}
     >
       <polyline points="6 9 12 15 18 9" />
     </svg>
@@ -214,13 +215,13 @@ function ChevronIcon({ isOpen, className = "" }: { isOpen: boolean; className?: 
 
 function FAQAccordion({ item, isOpen, onToggle }: { item: FAQItem; isOpen: boolean; onToggle: () => void }) {
   return (
-    <div className="border-b border-border">
+    <div style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
       <button
         onClick={onToggle}
-        className="w-full py-5 flex items-center justify-between text-left hover:text-brand transition-colors"
+        className="w-full py-6 flex items-center justify-between text-left transition-colors"
       >
-        <span className="text-base font-medium text-foreground pr-4">{item.question}</span>
-        <ChevronIcon isOpen={isOpen} className="text-foreground-tertiary flex-shrink-0" />
+        <span className="text-base font-medium pr-4" style={{ color: "#1A1A2E" }}>{item.question}</span>
+        <ChevronIcon isOpen={isOpen} />
       </button>
       <AnimatePresence>
         {isOpen && (
@@ -231,7 +232,7 @@ function FAQAccordion({ item, isOpen, onToggle }: { item: FAQItem; isOpen: boole
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <p className="pb-5 text-foreground-secondary leading-relaxed">{item.answer}</p>
+            <p className="pb-6 text-base leading-relaxed" style={{ color: "#4A5568" }}>{item.answer}</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -259,111 +260,132 @@ export function FAQClient() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-12 text-center"
-      >
-        <h1 className="mb-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-          Frequently Asked Questions
-        </h1>
-        <p className="mx-auto max-w-2xl text-lg text-foreground-secondary">
-          Everything you need to know about T402. Can&apos;t find an answer?{" "}
-          <Link href="https://t.me/t402_community" className="text-brand hover:underline">
-            Ask in our Telegram
-          </Link>
-          .
-        </p>
-      </motion.div>
-
-      {/* Category Filter */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
-        className="mb-10 overflow-x-auto pb-2"
-      >
-        <div className="flex w-max min-w-full justify-start gap-2 sm:w-auto sm:justify-center">
-          <button
-            onClick={() => setActiveCategory("all")}
-            className={`whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-all sm:px-4 ${
-              activeCategory === "all"
-                ? "bg-brand text-background"
-                : "bg-background-secondary text-foreground-secondary hover:bg-background-tertiary hover:text-foreground"
-            }`}
+    <>
+      {/* Dark Header */}
+      <section style={{ backgroundColor: "#0A0A0B" }} className="py-24 md:py-32">
+        <div className="max-w-7xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-center"
           >
-            All
-          </button>
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-all sm:px-4 ${
-                activeCategory === cat.id
-                  ? "bg-brand text-background"
-                  : "bg-background-secondary text-foreground-secondary hover:bg-background-tertiary hover:text-foreground"
-              }`}
-            >
-              {cat.label}
-              <span className="ml-1 text-xs opacity-70 sm:ml-1.5">
-                {faqs.filter((f) => f.category === cat.id).length}
-              </span>
-            </button>
-          ))}
+            <p className="uppercase text-xs tracking-widest font-semibold mb-4" style={{ color: "#50AF95" }}>
+              Support
+            </p>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6" style={{ color: "#FAFAFA" }}>
+              Frequently Asked Questions
+            </h1>
+            <p className="mx-auto max-w-2xl text-lg" style={{ color: "#A1A1AA" }}>
+              Everything you need to know about T402. Can&apos;t find an answer?{" "}
+              <Link href="https://t.me/t402_community" style={{ color: "#50AF95" }} className="hover:underline">
+                Ask in our Telegram
+              </Link>
+              .
+            </p>
+          </motion.div>
         </div>
-      </motion.div>
+      </section>
 
-      {/* FAQ List */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="rounded-xl border border-border bg-background-secondary p-6 sm:p-8"
-      >
-        {filteredFaqs.map((faq) => (
-          <FAQAccordion
-            key={faq.id}
-            item={faq}
-            isOpen={openItems.has(faq.id)}
-            onToggle={() => toggleItem(faq.id)}
-          />
-        ))}
-      </motion.div>
+      {/* Light FAQ Section */}
+      <section style={{ backgroundColor: "#F7FAF9" }} className="py-24 md:py-32">
+        <div className="max-w-3xl mx-auto px-6">
+          {/* Category Filter */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="mb-12 overflow-x-auto pb-2"
+          >
+            <div className="flex w-max min-w-full justify-start gap-2 sm:w-auto sm:justify-center">
+              <button
+                onClick={() => setActiveCategory("all")}
+                className="whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium transition-all"
+                style={
+                  activeCategory === "all"
+                    ? { backgroundColor: "#50AF95", color: "#0A0A0B" }
+                    : { backgroundColor: "#FFFFFF", color: "#4A5568", border: "1px solid rgba(0,0,0,0.08)" }
+                }
+              >
+                All
+              </button>
+              {categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveCategory(cat.id)}
+                  className="whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium transition-all"
+                  style={
+                    activeCategory === cat.id
+                      ? { backgroundColor: "#50AF95", color: "#0A0A0B" }
+                      : { backgroundColor: "#FFFFFF", color: "#4A5568", border: "1px solid rgba(0,0,0,0.08)" }
+                  }
+                >
+                  {cat.label}
+                  <span className="ml-1.5 text-xs opacity-70">
+                    {faqs.filter((f) => f.category === cat.id).length}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </motion.div>
 
-      {/* CTA */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-        className="mt-16 rounded-2xl border border-border bg-background-secondary p-8 text-center"
-      >
-        <h2 className="mb-4 text-2xl font-bold text-foreground">Still have questions?</h2>
-        <p className="mx-auto mb-6 max-w-xl text-foreground-secondary">
-          Join our community to get help from the T402 team and other developers.
-        </p>
-        <div className="flex flex-wrap justify-center gap-4">
-          <Link
-            href="https://t.me/t402_community"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg bg-brand px-6 py-3 text-base font-medium transition-colors hover:bg-brand-secondary"
-            style={{ color: "#0A0A0B" }}
+          {/* FAQ List */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="rounded-2xl p-8"
+            style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(0,0,0,0.08)" }}
           >
-            Join Telegram
-          </Link>
-          <Link
-            href="https://docs.t402.io"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-background-tertiary px-6 py-3 text-base font-medium text-foreground transition-colors hover:bg-border"
-          >
-            Read Documentation
-          </Link>
+            {filteredFaqs.map((faq) => (
+              <FAQAccordion
+                key={faq.id}
+                item={faq}
+                isOpen={openItems.has(faq.id)}
+                onToggle={() => toggleItem(faq.id)}
+              />
+            ))}
+          </motion.div>
         </div>
-      </motion.div>
-    </div>
+      </section>
+
+      {/* CTA Section */}
+      <section style={{ backgroundColor: "#FFFFFF" }} className="py-24 md:py-32">
+        <div className="max-w-3xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="rounded-2xl p-8 sm:p-12 text-center"
+            style={{ backgroundColor: "#F7FAF9", border: "1px solid rgba(0,0,0,0.08)" }}
+          >
+            <h2 className="mb-4 text-2xl font-bold" style={{ color: "#1A1A2E" }}>Still have questions?</h2>
+            <p className="mx-auto mb-8 max-w-xl" style={{ color: "#4A5568" }}>
+              Join our community to get help from the T402 team and other developers.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link
+                href="https://t.me/t402_community"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-base font-medium transition-all hover:opacity-90"
+                style={{ backgroundColor: "#50AF95", color: "#0A0A0B" }}
+              >
+                Join Telegram
+              </Link>
+              <Link
+                href="https://docs.t402.io"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-base font-medium transition-all hover:opacity-80"
+                style={{ backgroundColor: "#FFFFFF", color: "#1A1A2E", border: "1px solid rgba(0,0,0,0.08)" }}
+              >
+                Read Documentation
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+    </>
   );
 }

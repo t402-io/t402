@@ -56,17 +56,20 @@ function PackageCard({ pkg }: { pkg: (typeof packages)[0] }) {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.2 }}
-      className="group relative rounded-xl border border-white/10 bg-white/[0.02] p-5 transition-colors hover:border-white/20 hover:bg-white/[0.04]"
+      className="card-elevated p-6"
     >
       <div className="mb-3 flex items-start justify-between">
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-sm font-semibold text-white">
+          <h3
+            className="truncate text-sm font-semibold"
+            style={{ color: "var(--text-on-light)" }}
+          >
             {pkg.name}
           </h3>
           <span
             className="mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium"
             style={{
-              backgroundColor: `${langColor}20`,
+              backgroundColor: `${langColor}15`,
               color: langColor,
             }}
           >
@@ -75,20 +78,31 @@ function PackageCard({ pkg }: { pkg: (typeof packages)[0] }) {
         </div>
         {pkg.badge && (
           <span
-            className={`ml-2 shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
-              pkg.badge === "new"
-                ? "bg-emerald-500/20 text-emerald-400"
-                : pkg.badge === "beta"
-                  ? "bg-amber-500/20 text-amber-400"
-                  : "bg-gray-500/20 text-gray-400"
-            }`}
+            className="ml-2 shrink-0 rounded-full px-2 py-0.5 text-xs font-medium"
+            style={{
+              backgroundColor:
+                pkg.badge === "new"
+                  ? "rgba(80,175,149,0.1)"
+                  : pkg.badge === "beta"
+                    ? "rgba(245,158,11,0.1)"
+                    : "rgba(113,113,122,0.1)",
+              color:
+                pkg.badge === "new"
+                  ? "#50AF95"
+                  : pkg.badge === "beta"
+                    ? "#F59E0B"
+                    : "#71717A",
+            }}
           >
             {pkg.badge}
           </span>
         )}
       </div>
 
-      <p className="mb-3 text-xs text-gray-400 line-clamp-2">
+      <p
+        className="mb-3 text-xs leading-relaxed line-clamp-2"
+        style={{ color: "var(--text-on-light-secondary)" }}
+      >
         {pkg.description}
       </p>
 
@@ -96,7 +110,8 @@ function PackageCard({ pkg }: { pkg: (typeof packages)[0] }) {
         {pkg.features.slice(0, 3).map((f) => (
           <span
             key={f}
-            className="rounded-full bg-white/5 px-2 py-0.5 text-xs text-gray-500"
+            className="rounded-full px-2 py-0.5 text-xs"
+            style={{ backgroundColor: "var(--bg-section-light-alt)", color: "var(--text-on-light-tertiary)" }}
           >
             {f}
           </span>
@@ -104,8 +119,11 @@ function PackageCard({ pkg }: { pkg: (typeof packages)[0] }) {
       </div>
 
       {pkg.npmPackage && (
-        <div className="mt-3 border-t border-white/5 pt-3">
-          <code className="text-xs text-gray-500">
+        <div className="mt-3 pt-3" style={{ borderTop: "1px solid var(--border-light)" }}>
+          <code
+            className="text-xs"
+            style={{ color: "var(--text-on-light-tertiary)", background: "transparent", padding: 0 }}
+          >
             npm i {pkg.npmPackage}
           </code>
         </div>
@@ -133,59 +151,68 @@ export default function EcosystemClient() {
 
   return (
     <div className="relative overflow-hidden">
-      {/* Header */}
-      <section className="relative px-6 pt-32 pb-16 md:px-12">
-        <div className="mx-auto max-w-6xl text-center">
+      {/* Dark Header */}
+      <section className="section-dark py-24 md:py-32">
+        <div className="mx-auto max-w-7xl px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
+            <span
+              className="text-xs font-semibold uppercase tracking-widest"
+              style={{ color: "#50AF95" }}
+            >
               Ecosystem
+            </span>
+            <h1 className="mt-4 text-4xl font-bold tracking-tight md:text-5xl" style={{ color: "#FAFAFA" }}>
+              Built with T402
             </h1>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-400">
+            <p className="mx-auto mt-6 max-w-2xl text-lg" style={{ color: "#A1A1AA" }}>
               {packages.length}+ packages across TypeScript, Go, Python, and
               Java. From chain mechanisms to UI components.
             </p>
           </motion.div>
+
+          {/* Stats row inside dark header */}
+          <div className="mx-auto mt-12 grid max-w-4xl grid-cols-2 gap-4 md:grid-cols-4">
+            {stats.map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.2 + i * 0.05 }}
+                className="rounded-2xl p-5 text-center"
+                style={{ backgroundColor: "#111113", border: "1px solid rgba(255,255,255,0.08)" }}
+              >
+                <div className="text-2xl font-bold" style={{ color: "#50AF95" }}>{stat.value}</div>
+                <div className="mt-1 text-sm" style={{ color: "#A1A1AA" }}>{stat.label}</div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="px-6 pb-12 md:px-12">
-        <div className="mx-auto grid max-w-4xl grid-cols-2 gap-4 md:grid-cols-4">
-          {stats.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: i * 0.05 }}
-              className="rounded-xl border border-white/10 bg-white/[0.02] p-4 text-center"
-            >
-              <div className="text-2xl font-bold text-white">{stat.value}</div>
-              <div className="mt-1 text-sm text-gray-400">{stat.label}</div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* Category Filter */}
-      <section className="px-6 pb-8 md:px-12">
-        <div className="mx-auto max-w-6xl">
-          <div className="flex flex-wrap justify-center gap-2">
+      {/* Light Section: Category Filter + Package Grid */}
+      <section className="section-light py-24 md:py-32">
+        <div className="mx-auto max-w-7xl px-6">
+          {/* Category Filter */}
+          <div className="mb-12 flex flex-wrap justify-center gap-2">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-                  activeCategory === cat
-                    ? "bg-white/10 text-white"
-                    : "text-gray-400 hover:text-white"
-                }`}
+                className="rounded-xl px-4 py-2 text-sm font-medium transition-all duration-300"
+                style={{
+                  backgroundColor: activeCategory === cat ? "#50AF95" : "var(--bg-section-light-alt)",
+                  color: activeCategory === cat ? "#0A0A0B" : "var(--text-on-light-secondary)",
+                }}
               >
                 {categoryDisplayLabels[cat]}
-                <span className="ml-1.5 text-xs text-gray-500">
+                <span
+                  className="ml-1.5 text-xs"
+                  style={{ opacity: 0.7 }}
+                >
                   {cat === "all"
                     ? packages.length
                     : packages.filter((p) => p.category === cat).length}
@@ -193,16 +220,12 @@ export default function EcosystemClient() {
               </button>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* Package Grid */}
-      <section className="px-6 pb-16 md:px-12">
-        <div className="mx-auto max-w-6xl">
+          {/* Package Grid */}
           <AnimatePresence mode="popLayout">
             <motion.div
               layout
-              className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+              className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
             >
               {filteredPackages.map((pkg) => (
                 <PackageCard key={pkg.id} pkg={pkg} />
@@ -212,33 +235,34 @@ export default function EcosystemClient() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="px-6 pb-24 md:px-12">
-        <div className="mx-auto max-w-4xl text-center">
+      {/* Dark CTA */}
+      <section className="section-dark py-24 md:py-32">
+        <div className="mx-auto max-w-4xl px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="rounded-2xl border border-white/10 bg-white/[0.02] p-8 md:p-12"
           >
-            <h3 className="mb-3 text-2xl font-bold text-white">
+            <h3 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl" style={{ color: "#FAFAFA" }}>
               Start Building
             </h3>
-            <p className="mb-6 text-gray-400">
+            <p className="mx-auto mb-8 max-w-xl text-lg" style={{ color: "#A1A1AA" }}>
               Install any package and start accepting payments in minutes. All
               packages work together seamlessly.
             </p>
-            <div className="flex flex-wrap justify-center gap-3">
+            <div className="flex flex-wrap justify-center gap-4">
               <Link
                 href="https://docs.t402.io/getting-started/quickstart"
-                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-500"
+                className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-medium transition-all duration-300 hover:opacity-90"
+                style={{ backgroundColor: "#50AF95", color: "#0A0A0B" }}
               >
                 Quickstart Guide
                 <ExternalLinkIcon className="h-4 w-4" />
               </Link>
               <Link
                 href="/sdks"
-                className="inline-flex items-center gap-2 rounded-lg border border-white/20 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/5"
+                className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-medium transition-all duration-300 hover:bg-white/5"
+                style={{ border: "1px solid rgba(255,255,255,0.2)", color: "#FAFAFA" }}
               >
                 View SDKs
               </Link>

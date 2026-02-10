@@ -19,12 +19,12 @@ export function ChainSelector({ compact = false }: { compact?: boolean }) {
             role="tab"
             aria-selected={isActive}
             onClick={() => setActiveFamily(family)}
-            className={clsx(
-              "shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all min-h-[36px]",
-              isActive
-                ? "bg-[var(--color-surface-active)] text-white"
-                : "text-[var(--color-muted)] hover:text-white hover:bg-[var(--color-surface)]"
-            )}
+            className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all min-h-[36px]"
+            style={{
+              background: isActive ? "#222224" : "transparent",
+              color: isActive ? "#FAFAFA" : "#71717A",
+              borderLeft: isActive ? `2px solid ${config.color}` : "2px solid transparent",
+            }}
           >
             <ChainLogo family={family} size={14} />
             {!compact && <span>{config.label}</span>}

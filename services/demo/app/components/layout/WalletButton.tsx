@@ -17,9 +17,12 @@ import { usePolkadotPayment } from "@/hooks/usePolkadotPayment";
 // Loading placeholder shown during SSR and initial hydration
 function WalletButtonSkeleton() {
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5">
-      <span className="h-2 w-2 rounded-full bg-[var(--color-muted)] animate-pulse" />
-      <span className="font-mono text-xs text-[var(--color-muted)]">...</span>
+    <div
+      className="flex items-center gap-2 rounded-xl px-3 py-1.5"
+      style={{ background: "#111113", border: "1px solid rgba(255, 255, 255, 0.08)" }}
+    >
+      <span className="h-2 w-2 rounded-full animate-pulse" style={{ background: "#71717A" }} />
+      <span className="font-mono text-xs" style={{ color: "#71717A" }}>...</span>
     </div>
   );
 }
@@ -59,10 +62,13 @@ export function WalletButton() {
 
 function DemoWalletBadge({ label }: { label: string }) {
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5">
-      <span className="h-2 w-2 rounded-full bg-[var(--color-warning)]" />
+    <div
+      className="flex items-center gap-2 rounded-xl px-3 py-1.5"
+      style={{ background: "#111113", border: "1px solid rgba(255, 255, 255, 0.08)" }}
+    >
+      <span className="h-2 w-2 rounded-full" style={{ background: "#F59E0B" }} />
       <span className="font-mono text-xs text-white">Demo Wallet</span>
-      <span className="text-xs text-[var(--color-muted)]">{label}</span>
+      <span className="text-xs" style={{ color: "#71717A" }}>{label}</span>
     </div>
   );
 }
@@ -78,20 +84,24 @@ function ConnectedBadge({
 }) {
   return (
     <div className="flex items-center gap-1.5 sm:gap-2">
-      <div className="flex items-center gap-1.5 sm:gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2 sm:px-3 py-1.5">
-        <span className="h-2 w-2 shrink-0 rounded-full bg-[var(--color-success)]" />
+      <div
+        className="flex items-center gap-1.5 sm:gap-2 rounded-xl px-2 sm:px-3 py-1.5"
+        style={{ background: "#111113", border: "1px solid rgba(255, 255, 255, 0.08)" }}
+      >
+        <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: "#10B981" }} />
         <span className="font-mono text-[10px] sm:text-xs text-white">
           {address.slice(0, 4)}...{address.slice(-3)}
         </span>
-        <span className="hidden sm:inline text-xs text-[var(--color-muted)]">{label}</span>
+        <span className="hidden sm:inline text-xs" style={{ color: "#71717A" }}>{label}</span>
       </div>
       <button
         onClick={onDisconnect}
-        className="rounded-lg border border-[var(--color-border)] px-2 py-1.5 text-[10px] sm:text-xs text-[var(--color-muted)] hover:text-white transition-colors"
+        className="rounded-xl px-2 py-1.5 text-[10px] sm:text-xs hover:text-white transition-colors"
+        style={{ border: "1px solid rgba(255, 255, 255, 0.08)", color: "#A1A1AA" }}
         aria-label={`Disconnect ${label} wallet`}
       >
         <span className="hidden sm:inline">Disconnect</span>
-        <span className="sm:hidden">×</span>
+        <span className="sm:hidden">&times;</span>
       </button>
     </div>
   );
@@ -102,7 +112,7 @@ function ConnectButton({ label, onClick, loading }: { label: string; onClick: ()
     <button
       onClick={onClick}
       disabled={loading}
-      className="btn-primary rounded-lg px-4 py-2.5 text-sm min-h-[40px]"
+      className="btn-primary rounded-xl px-4 py-2.5 text-sm min-h-[40px]"
     >
       {loading ? "Connecting..." : `Connect ${label}`}
     </button>
@@ -115,7 +125,8 @@ function InstallButton({ label, url }: { label: string; url: string }) {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="rounded-lg border border-[var(--color-border)] px-4 py-2.5 text-xs text-[var(--color-muted)] hover:text-white hover:border-[var(--color-brand)] transition-colors min-h-[40px] flex items-center"
+      className="rounded-xl px-4 py-2.5 text-xs hover:text-white transition-colors min-h-[40px] flex items-center"
+      style={{ border: "1px solid rgba(255, 255, 255, 0.15)", color: "#A1A1AA" }}
     >
       Install {label}
     </a>

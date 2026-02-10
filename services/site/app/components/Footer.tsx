@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { T402Logo } from "./Logo";
 
 function GitHubIcon({ className }: { className?: string }) {
   return (
@@ -29,192 +32,168 @@ function TelegramIcon({ className }: { className?: string }) {
 }
 
 const footerLinks = {
-  product: [
-    { label: "SDKs", href: "/sdks" },
-    { label: "Chains", href: "/chains" },
+  protocol: [
+    { label: "Specification", href: "/features" },
+    { label: "Whitepaper", href: "/t402-whitepaper.pdf", external: true },
     { label: "Features", href: "/features" },
     { label: "Transports", href: "/transports" },
-    { label: "Ecosystem", href: "/ecosystem" },
-    { label: "Status", href: "/status" },
-    { label: "Playground", href: "/playground" },
-    { label: "Compare", href: "/compare" },
   ],
   developers: [
-    { label: "Documentation", href: "https://docs.t402.io" },
-    { label: "TypeScript SDK", href: "https://docs.t402.io/sdks/typescript" },
-    { label: "Python SDK", href: "https://docs.t402.io/sdks/python" },
-    { label: "Go SDK", href: "https://docs.t402.io/sdks/go" },
-    { label: "Java SDK", href: "https://docs.t402.io/sdks/java" },
+    { label: "Documentation", href: "https://docs.t402.io", external: true },
+    { label: "TypeScript SDK", href: "https://docs.t402.io/sdks/typescript", external: true },
+    { label: "Go SDK", href: "https://docs.t402.io/sdks/go", external: true },
+    { label: "Python SDK", href: "https://docs.t402.io/sdks/python", external: true },
+    { label: "Java SDK", href: "https://docs.t402.io/sdks/java", external: true },
   ],
   resources: [
-    {
-      label: "GitHub",
-      href: "https://github.com/t402-io/t402",
-      external: true,
-    },
-    {
-      label: "Whitepaper",
-      href: "/t402-whitepaper.pdf",
-      external: true,
-    },
+    { label: "GitHub", href: "https://github.com/t402-io/t402", external: true },
     { label: "Blog", href: "/writing" },
     { label: "FAQ", href: "/faq" },
-    { label: "Brand", href: "/brand" },
+    { label: "Brand Kit", href: "/brand" },
+    { label: "Status", href: "/status" },
   ],
   chains: [
     { label: "Ethereum", href: "/chains/ethereum" },
-    { label: "Base", href: "/chains/base" },
-    { label: "Arbitrum", href: "/chains/arbitrum" },
+    { label: "Solana", href: "/chains/solana" },
     { label: "TON", href: "/chains/ton" },
     { label: "TRON", href: "/chains/tron" },
-    { label: "Solana", href: "/chains/solana" },
     { label: "NEAR", href: "/chains/near" },
-    { label: "Aptos", href: "/chains/aptos" },
-    { label: "Tezos", href: "/chains/tezos" },
-    { label: "Polkadot", href: "/chains/polkadot" },
-    { label: "Stacks", href: "/chains/stacks" },
-    { label: "View All 28", href: "/chains" },
+    { label: "View All 33", href: "/chains" },
   ],
 };
+
+function FooterColumn({
+  title,
+  links,
+}: {
+  title: string;
+  links: { label: string; href: string; external?: boolean }[];
+}) {
+  return (
+    <div>
+      <h3
+        className="text-xs font-semibold uppercase"
+        style={{
+          color: "#50AF95",
+          letterSpacing: "0.1em",
+          fontSize: "0.75rem",
+        }}
+      >
+        {title}
+      </h3>
+      <ul className="mt-5 space-y-3">
+        {links.map((link) => (
+          <li key={link.label}>
+            <Link
+              href={link.href}
+              target={link.external ? "_blank" : undefined}
+              rel={link.external ? "noopener noreferrer" : undefined}
+              className="text-sm transition-colors duration-300"
+              style={{ color: "#A1A1AA" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#FAFAFA"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#A1A1AA"; }}
+            >
+              {link.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export function Footer() {
   return (
     <footer
-      className="border-t border-border bg-background"
+      style={{ background: "#0A0A0B" }}
       role="contentinfo"
     >
-      <div className="mx-auto max-w-[1440px] px-4 py-16 sm:px-6 lg:px-8">
-        {/* Main Footer Content */}
-        <div className="grid gap-12 lg:grid-cols-6">
-          {/* Brand Column */}
-          <div className="lg:col-span-2">
-            <Link href="/" className="inline-block">
-              <span className="text-2xl font-bold tracking-tight text-foreground">
-                T402
-              </span>
-            </Link>
-            <p className="mt-4 max-w-xs text-sm leading-relaxed text-foreground-secondary">
-              The official payment protocol for USDT. HTTP-native stablecoin
-              payments across multiple blockchains.
-            </p>
+      {/* Gradient top border */}
+      <div className="divider-subtle" />
 
-            {/* Social Links */}
-            <div className="mt-6 flex items-center gap-4">
-              <Link
-                href="https://github.com/t402-io/t402"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground-secondary transition-colors hover:bg-background-secondary hover:text-foreground"
-                aria-label="GitHub"
-              >
-                <GitHubIcon className="h-5 w-5" />
+      <div className="mx-auto max-w-[1440px] px-6 md:px-8 lg:px-12">
+        {/* Top section: Logo + tagline + columns */}
+        <div className="py-20">
+          <div className="grid gap-12 lg:grid-cols-6 lg:gap-8">
+            {/* Brand column */}
+            <div className="lg:col-span-2">
+              <Link href="/" className="inline-block text-foreground">
+                <T402Logo title="T402" className="h-7 w-auto" />
               </Link>
-              <Link
-                href="https://t.me/t402_io"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground-secondary transition-colors hover:bg-background-secondary hover:text-foreground"
-                aria-label="Telegram"
+              <p
+                className="mt-4 max-w-xs text-sm leading-relaxed"
+                style={{ color: "#71717A" }}
               >
-                <TelegramIcon className="h-5 w-5" />
-              </Link>
-            </div>
-          </div>
-
-          {/* Links Columns */}
-          <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-4 sm:gap-8 lg:col-span-4">
-            {/* Product */}
-            <div>
-              <h3 className="text-sm font-semibold text-foreground">Product</h3>
-              <ul className="mt-3 space-y-2.5 sm:mt-4 sm:space-y-3">
-                {footerLinks.product.map((link) => (
-                  <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-foreground-secondary transition-colors hover:text-foreground"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+                The Official Payment Protocol for USDT. HTTP-native stablecoin
+                payments across multiple blockchains.
+              </p>
             </div>
 
-            {/* Developers */}
-            <div>
-              <h3 className="text-sm font-semibold text-foreground">
-                Developers
-              </h3>
-              <ul className="mt-3 space-y-2.5 sm:mt-4 sm:space-y-3">
-                {footerLinks.developers.map((link) => (
-                  <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-foreground-secondary transition-colors hover:text-foreground"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Resources */}
-            <div>
-              <h3 className="text-sm font-semibold text-foreground">
-                Resources
-              </h3>
-              <ul className="mt-3 space-y-2.5 sm:mt-4 sm:space-y-3">
-                {footerLinks.resources.map((link) => (
-                  <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      target={link.external ? "_blank" : undefined}
-                      rel={link.external ? "noopener noreferrer" : undefined}
-                      className="text-sm text-foreground-secondary transition-colors hover:text-foreground"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Chains */}
-            <div>
-              <h3 className="text-sm font-semibold text-foreground">Chains</h3>
-              <ul className="mt-3 space-y-2.5 sm:mt-4 sm:space-y-3">
-                {footerLinks.chains.map((link) => (
-                  <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-foreground-secondary transition-colors hover:text-foreground"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+            {/* Link columns */}
+            <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-4 sm:gap-8 lg:col-span-4">
+              <FooterColumn title="Protocol" links={footerLinks.protocol} />
+              <FooterColumn title="Developers" links={footerLinks.developers} />
+              <FooterColumn title="Resources" links={footerLinks.resources} />
+              <FooterColumn title="Chains" links={footerLinks.chains} />
             </div>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 sm:flex-row">
-          <p className="text-sm text-foreground-tertiary">
-            {new Date().getFullYear()} T402. The official payment protocol for
-            USDT.
+        {/* Bottom bar */}
+        <div
+          className="flex flex-col items-center justify-between gap-6 py-6 sm:flex-row"
+          style={{ borderTop: "1px solid rgba(255, 255, 255, 0.06)" }}
+        >
+          {/* Copyright - left */}
+          <p className="text-sm" style={{ color: "#52525B" }}>
+            &copy; {new Date().getFullYear()} T402 Protocol. Apache 2.0 License.
           </p>
+
+          {/* Social icons - center */}
+          <div className="flex items-center gap-4">
+            <Link
+              href="https://github.com/t402-io/t402"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex h-9 w-9 items-center justify-center rounded-xl transition-all duration-300"
+              style={{ color: "#52525B" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#50AF95"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#52525B"; }}
+              aria-label="GitHub"
+            >
+              <GitHubIcon className="h-5 w-5" />
+            </Link>
+            <Link
+              href="https://t.me/t402_io"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex h-9 w-9 items-center justify-center rounded-xl transition-all duration-300"
+              style={{ color: "#52525B" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#50AF95"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#52525B"; }}
+              aria-label="Telegram"
+            >
+              <TelegramIcon className="h-5 w-5" />
+            </Link>
+          </div>
+
+          {/* Legal links - right */}
           <div className="flex items-center gap-6">
             <Link
               href="/privacy"
-              className="text-sm text-foreground-tertiary transition-colors hover:text-foreground-secondary"
+              className="text-sm transition-colors duration-300"
+              style={{ color: "#52525B" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#A1A1AA"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#52525B"; }}
             >
               Privacy Policy
             </Link>
             <Link
               href="/terms"
-              className="text-sm text-foreground-tertiary transition-colors hover:text-foreground-secondary"
+              className="text-sm transition-colors duration-300"
+              style={{ color: "#52525B" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#A1A1AA"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#52525B"; }}
             >
               Terms of Service
             </Link>

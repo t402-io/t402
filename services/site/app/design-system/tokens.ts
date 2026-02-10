@@ -2,7 +2,8 @@
  * T402 Design System Tokens
  *
  * A comprehensive design token system for the t402.io website.
- * Uses Tether-inspired green as the primary brand color with a dark theme.
+ * Uses Tether-inspired green as the primary brand color.
+ * Supports both dark and light section variants for a premium corporate aesthetic.
  */
 
 // =============================================================================
@@ -19,13 +20,25 @@ export const colors = {
     inverse: '#FAFAFA',      // Light background for contrast sections
   },
 
+  // Section backgrounds (light + dark variants)
+  section: {
+    light: '#FFFFFF',
+    lightAlt: '#F7FAF9',       // Slight green tint
+    dark: '#0A0A0B',
+    darkAlt: '#111113',
+  },
+
   // Text colors
   text: {
-    primary: '#FAFAFA',      // Primary text - near white
-    secondary: '#A1A1AA',    // Secondary text - muted
-    tertiary: '#71717A',     // Tertiary text - more muted
-    inverse: '#0A0A0B',      // Text on light backgrounds
-    link: '#50AF95',         // Link color - brand green
+    primary: '#FAFAFA',        // Primary text - near white
+    secondary: '#A1A1AA',      // Secondary text - muted
+    tertiary: '#71717A',       // Tertiary text - more muted
+    inverse: '#0A0A0B',        // Text on light backgrounds
+    link: '#50AF95',           // Link color - brand green
+    // Text on light sections
+    onLight: '#1A1A2E',        // Dark text for light sections
+    onLightSecondary: '#4A5568',
+    onLightTertiary: '#718096',
   },
 
   // Brand colors - Tether inspired
@@ -86,6 +99,9 @@ export const colors = {
     tertiary: '#52525B',     // Strong borders
     focus: '#50AF95',        // Focus ring color
     muted: 'rgba(255, 255, 255, 0.1)', // Subtle borders
+    // Light section borders
+    light: 'rgba(0, 0, 0, 0.08)',
+    lightHover: 'rgba(0, 0, 0, 0.15)',
   },
 
   // Overlay colors
@@ -113,25 +129,25 @@ export const typography = {
   sizes: {
     xs: '0.75rem',     // 12px
     sm: '0.875rem',    // 14px
-    base: '1rem',      // 16px
-    lg: '1.125rem',    // 18px
+    base: '1rem',      // 16px - body small
+    lg: '1.125rem',    // 18px - body
     xl: '1.25rem',     // 20px
     '2xl': '1.5rem',   // 24px
-    '3xl': '1.875rem', // 30px
+    '3xl': '2rem',     // 32px - H3
     '4xl': '2.25rem',  // 36px
-    '5xl': '3rem',     // 48px
-    '6xl': '3.75rem',  // 60px
-    '7xl': '4.5rem',   // 72px
+    '5xl': '3rem',     // 48px - H2
+    '6xl': '4rem',     // 64px - H1
+    '7xl': '5rem',     // 80px - Display
   },
 
   // Line heights
   lineHeights: {
     none: '1',
-    tight: '1.25',
-    snug: '1.375',
+    tight: '1.1',      // Display/H1 headings
+    snug: '1.25',      // H2/H3 headings
     normal: '1.5',
-    relaxed: '1.625',
-    loose: '2',
+    relaxed: '1.6',    // Body small
+    loose: '1.7',      // Body text
   },
 
   // Font weights
@@ -144,6 +160,7 @@ export const typography = {
 
   // Letter spacing
   tracking: {
+    display: '-0.03em',  // Display headings
     tighter: '-0.05em',
     tight: '-0.025em',
     normal: '0',
@@ -184,6 +201,9 @@ export const spacing = {
   32: '8rem',        // 128px
   36: '9rem',        // 144px
   40: '10rem',       // 160px
+  // Section spacing
+  sectionSm: '6rem',      // 96px - medium sections
+  sectionLg: '7.5rem',    // 120px - large sections
 } as const;
 
 // =============================================================================
@@ -203,7 +223,7 @@ export const layout = {
     '4xl': '56rem',    // 896px
     '5xl': '64rem',    // 1024px
     '6xl': '72rem',    // 1152px
-    '7xl': '80rem',    // 1280px
+    '7xl': '80rem',    // 1280px - section content max-width
     container: '90rem', // 1440px
     full: '100%',
   },
@@ -245,10 +265,12 @@ export const borders = {
     default: '0.25rem', // 4px
     md: '0.375rem',    // 6px
     lg: '0.5rem',      // 8px
-    xl: '0.75rem',     // 12px
+    xl: '0.75rem',     // 12px - button
     '2xl': '1rem',     // 16px
+    card: '1.25rem',   // 20px - card
     '3xl': '1.5rem',   // 24px
-    full: '9999px',
+    full: '9999px',    // badge / pill
+    input: '0.625rem', // 10px - input
   },
 
   // Border widths
@@ -267,6 +289,7 @@ export const borders = {
 
 export const shadows = {
   none: 'none',
+  // Dark theme shadows (heavier, for dark backgrounds)
   sm: '0 1px 2px 0 rgba(0, 0, 0, 0.3)',
   default: '0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.4)',
   md: '0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4)',
@@ -274,11 +297,19 @@ export const shadows = {
   xl: '0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4)',
   '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
   inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.3)',
+  // Premium light-section shadows (softer, more subtle)
+  light: {
+    sm: '0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06)',
+    md: '0 4px 12px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.04)',
+    lg: '0 12px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04)',
+    cardHover: '0 20px 60px rgba(0, 0, 0, 0.1), 0 8px 20px rgba(0, 0, 0, 0.06)',
+  },
   // Glow effects for brand elements
   glow: {
     sm: '0 0 10px rgba(80, 175, 149, 0.3)',
     md: '0 0 20px rgba(80, 175, 149, 0.4)',
     lg: '0 0 30px rgba(80, 175, 149, 0.5)',
+    subtle: '0 0 40px rgba(80, 175, 149, 0.15)',
   },
 } as const;
 
@@ -290,11 +321,11 @@ export const motion = {
   // Durations
   duration: {
     instant: '0ms',
-    fast: '100ms',
-    normal: '200ms',
-    slow: '300ms',
-    slower: '500ms',
-    slowest: '700ms',
+    fast: '150ms',
+    normal: '300ms',     // Default premium transition
+    slow: '500ms',       // Slow premium transition
+    slower: '700ms',
+    slowest: '1000ms',
   },
 
   // Easing functions

@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 export default function FAQPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#0A0A0B", color: "#FAFAFA" }}>
       <NavBar />
       <div className="flex-1">
         <FAQClient />

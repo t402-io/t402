@@ -124,7 +124,7 @@ const comparisonFeatures: ComparisonFeature[] = [
   },
 ];
 
-function CheckIcon({ className = "" }: { className?: string }) {
+function CheckIcon({ className = "", style }: { className?: string; style?: React.CSSProperties }) {
   return (
     <svg
       width="20"
@@ -136,6 +136,7 @@ function CheckIcon({ className = "" }: { className?: string }) {
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
+      style={style}
       aria-hidden="true"
     >
       <polyline points="20 6 9 17 4 12" />
@@ -143,7 +144,7 @@ function CheckIcon({ className = "" }: { className?: string }) {
   );
 }
 
-function XIcon({ className = "" }: { className?: string }) {
+function XIcon({ className = "", style }: { className?: string; style?: React.CSSProperties }) {
   return (
     <svg
       width="20"
@@ -155,6 +156,7 @@ function XIcon({ className = "" }: { className?: string }) {
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
+      style={style}
       aria-hidden="true"
     >
       <line x1="18" y1="6" x2="6" y2="18" />
@@ -163,45 +165,56 @@ function XIcon({ className = "" }: { className?: string }) {
   );
 }
 
-function renderValue(value: string | boolean) {
+function renderValueLight(value: string | boolean) {
   if (value === true) {
-    return <CheckIcon className="mx-auto text-brand" />;
+    return <CheckIcon className="mx-auto" style={{ color: "#50AF95" }} />;
   }
   if (value === false) {
-    return <XIcon className="mx-auto text-foreground-tertiary" />;
+    return <XIcon className="mx-auto" style={{ color: "#CBD5E0" }} />;
   }
   return <span className="text-sm font-medium">{value}</span>;
 }
 
-// Mobile comparison card for each feature
 function MobileComparisonCard({ feature, index }: { feature: ComparisonFeature; index: number }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.03 }}
-      className="rounded-lg border border-border bg-background-tertiary p-4"
+      className="card-elevated p-5"
     >
       <div className="mb-3">
-        <p className="font-medium text-foreground">{feature.name}</p>
-        <p className="text-xs text-foreground-tertiary">{feature.description}</p>
+        <p className="font-medium" style={{ color: "var(--text-on-light)" }}>{feature.name}</p>
+        <p className="text-xs" style={{ color: "var(--text-on-light-tertiary)" }}>{feature.description}</p>
       </div>
       <div className="grid grid-cols-2 gap-2 text-sm">
-        <div className="rounded-md bg-brand/10 px-3 py-2">
-          <p className="text-xs text-foreground-tertiary">t402</p>
-          <div className="font-medium text-brand">{renderValue(feature.t402)}</div>
+        <div
+          className="rounded-xl px-3 py-2"
+          style={{ backgroundColor: "rgba(80,175,149,0.05)" }}
+        >
+          <p className="text-xs" style={{ color: "var(--text-on-light-tertiary)" }}>t402</p>
+          <div className="font-medium" style={{ color: "#50AF95" }}>{renderValueLight(feature.t402)}</div>
         </div>
-        <div className="rounded-md bg-background-secondary px-3 py-2">
-          <p className="text-xs text-foreground-tertiary">Stripe</p>
-          <div className="text-foreground-secondary">{renderValue(feature.stripe)}</div>
+        <div
+          className="rounded-xl px-3 py-2"
+          style={{ backgroundColor: "var(--bg-section-light-alt)" }}
+        >
+          <p className="text-xs" style={{ color: "var(--text-on-light-tertiary)" }}>Stripe</p>
+          <div style={{ color: "var(--text-on-light-secondary)" }}>{renderValueLight(feature.stripe)}</div>
         </div>
-        <div className="rounded-md bg-background-secondary px-3 py-2">
-          <p className="text-xs text-foreground-tertiary">PayPal</p>
-          <div className="text-foreground-secondary">{renderValue(feature.paypal)}</div>
+        <div
+          className="rounded-xl px-3 py-2"
+          style={{ backgroundColor: "var(--bg-section-light-alt)" }}
+        >
+          <p className="text-xs" style={{ color: "var(--text-on-light-tertiary)" }}>PayPal</p>
+          <div style={{ color: "var(--text-on-light-secondary)" }}>{renderValueLight(feature.paypal)}</div>
         </div>
-        <div className="rounded-md bg-background-secondary px-3 py-2">
-          <p className="text-xs text-foreground-tertiary">Coinbase</p>
-          <div className="text-foreground-secondary">{renderValue(feature.coinbase)}</div>
+        <div
+          className="rounded-xl px-3 py-2"
+          style={{ backgroundColor: "var(--bg-section-light-alt)" }}
+        >
+          <p className="text-xs" style={{ color: "var(--text-on-light-tertiary)" }}>Coinbase</p>
+          <div style={{ color: "var(--text-on-light-secondary)" }}>{renderValueLight(feature.coinbase)}</div>
         </div>
       </div>
     </motion.div>
@@ -215,38 +228,41 @@ function ComparisonTable() {
       <div className="hidden overflow-x-auto lg:block">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="border-b border-border">
-              <th className="py-4 pr-4 text-left text-sm font-medium text-foreground-tertiary">
+            <tr style={{ borderBottom: "1px solid var(--border-light)" }}>
+              <th
+                className="py-4 pr-4 text-left text-xs font-semibold uppercase tracking-wider"
+                style={{ color: "var(--text-on-light-tertiary)" }}
+              >
                 Feature
               </th>
               <th className="px-4 py-4 text-center">
                 <div className="inline-flex flex-col items-center">
-                  <span className="text-lg font-bold text-brand">t402</span>
-                  <span className="text-xs text-foreground-tertiary">Protocol</span>
+                  <span className="text-lg font-bold" style={{ color: "#50AF95" }}>t402</span>
+                  <span className="text-xs" style={{ color: "var(--text-on-light-tertiary)" }}>Protocol</span>
                 </div>
               </th>
               <th className="px-4 py-4 text-center">
                 <div className="inline-flex flex-col items-center">
-                  <span className="text-lg font-semibold text-foreground">Stripe</span>
-                  <span className="text-xs text-foreground-tertiary">Traditional</span>
+                  <span className="text-lg font-semibold" style={{ color: "var(--text-on-light)" }}>Stripe</span>
+                  <span className="text-xs" style={{ color: "var(--text-on-light-tertiary)" }}>Traditional</span>
                 </div>
               </th>
               <th className="px-4 py-4 text-center">
                 <div className="inline-flex flex-col items-center">
-                  <span className="text-lg font-semibold text-foreground">PayPal</span>
-                  <span className="text-xs text-foreground-tertiary">Traditional</span>
+                  <span className="text-lg font-semibold" style={{ color: "var(--text-on-light)" }}>PayPal</span>
+                  <span className="text-xs" style={{ color: "var(--text-on-light-tertiary)" }}>Traditional</span>
                 </div>
               </th>
               <th className="px-4 py-4 text-center">
                 <div className="inline-flex flex-col items-center">
-                  <span className="text-lg font-semibold text-foreground">Coinbase</span>
-                  <span className="text-xs text-foreground-tertiary">Commerce</span>
+                  <span className="text-lg font-semibold" style={{ color: "var(--text-on-light)" }}>Coinbase</span>
+                  <span className="text-xs" style={{ color: "var(--text-on-light-tertiary)" }}>Commerce</span>
                 </div>
               </th>
               <th className="px-4 py-4 text-center">
                 <div className="inline-flex flex-col items-center">
-                  <span className="text-lg font-semibold text-foreground">BTCPay</span>
-                  <span className="text-xs text-foreground-tertiary">Server</span>
+                  <span className="text-lg font-semibold" style={{ color: "var(--text-on-light)" }}>BTCPay</span>
+                  <span className="text-xs" style={{ color: "var(--text-on-light-tertiary)" }}>Server</span>
                 </div>
               </th>
             </tr>
@@ -258,28 +274,33 @@ function ComparisonTable() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
-                className="border-b border-border"
+                style={{
+                  borderBottom: "1px solid var(--border-light)",
+                }}
               >
                 <td className="py-4 pr-4">
                   <div>
-                    <p className="font-medium text-foreground">{feature.name}</p>
-                    <p className="text-xs text-foreground-tertiary">{feature.description}</p>
+                    <p className="font-medium" style={{ color: "var(--text-on-light)" }}>{feature.name}</p>
+                    <p className="text-xs" style={{ color: "var(--text-on-light-tertiary)" }}>{feature.description}</p>
                   </div>
                 </td>
-                <td className="bg-brand/5 px-4 py-4 text-center">
-                  {renderValue(feature.t402)}
+                <td
+                  className="px-4 py-4 text-center"
+                  style={{ backgroundColor: "rgba(80,175,149,0.05)", color: "#50AF95" }}
+                >
+                  {renderValueLight(feature.t402)}
                 </td>
-                <td className="px-4 py-4 text-center text-foreground-secondary">
-                  {renderValue(feature.stripe)}
+                <td className="px-4 py-4 text-center" style={{ color: "var(--text-on-light-secondary)" }}>
+                  {renderValueLight(feature.stripe)}
                 </td>
-                <td className="px-4 py-4 text-center text-foreground-secondary">
-                  {renderValue(feature.paypal)}
+                <td className="px-4 py-4 text-center" style={{ color: "var(--text-on-light-secondary)" }}>
+                  {renderValueLight(feature.paypal)}
                 </td>
-                <td className="px-4 py-4 text-center text-foreground-secondary">
-                  {renderValue(feature.coinbase)}
+                <td className="px-4 py-4 text-center" style={{ color: "var(--text-on-light-secondary)" }}>
+                  {renderValueLight(feature.coinbase)}
                 </td>
-                <td className="px-4 py-4 text-center text-foreground-secondary">
-                  {renderValue(feature.btcpay)}
+                <td className="px-4 py-4 text-center" style={{ color: "var(--text-on-light-secondary)" }}>
+                  {renderValueLight(feature.btcpay)}
                 </td>
               </motion.tr>
             ))}
@@ -307,161 +328,193 @@ function HighlightCard({
   description: string;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-background-secondary p-6 text-center">
-      <p className="text-sm text-foreground-tertiary">{title}</p>
-      <p className="my-2 text-3xl font-bold text-brand">{value}</p>
-      <p className="text-sm text-foreground-secondary">{description}</p>
+    <div
+      className="rounded-2xl p-6 text-center"
+      style={{ backgroundColor: "#111113", border: "1px solid rgba(255,255,255,0.08)" }}
+    >
+      <p className="text-sm" style={{ color: "#A1A1AA" }}>{title}</p>
+      <p className="my-2 text-3xl font-bold" style={{ color: "#50AF95" }}>{value}</p>
+      <p className="text-sm" style={{ color: "#71717A" }}>{description}</p>
     </div>
   );
 }
 
 export default function CompareClient() {
   return (
-    <div className="mx-auto max-w-[1440px] px-4 py-16 sm:px-6 lg:px-8">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mb-16 text-center"
-      >
-        <h1 className="mb-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-          Why t402?
-        </h1>
-        <p className="mx-auto max-w-2xl text-lg text-foreground-secondary">
-          See how t402 compares to traditional payment solutions and other crypto
-          payment processors. Built for the future of internet payments.
-        </p>
-      </motion.div>
+    <div className="relative overflow-hidden">
+      {/* Dark Header */}
+      <section className="section-dark py-24 md:py-32">
+        <div className="mx-auto max-w-7xl px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <span
+              className="text-xs font-semibold uppercase tracking-widest"
+              style={{ color: "#50AF95" }}
+            >
+              Comparison
+            </span>
+            <h1 className="mt-4 text-4xl font-bold tracking-tight md:text-5xl" style={{ color: "#FAFAFA" }}>
+              T402 vs Alternatives
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-lg" style={{ color: "#A1A1AA" }}>
+              See how t402 compares to traditional payment solutions and other crypto
+              payment processors. Built for the future of internet payments.
+            </p>
+          </motion.div>
 
-      {/* Key Highlights */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="mb-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
-      >
-        <HighlightCard
-          title="Transaction Fees"
-          value="0%"
-          description="No fees on any transaction"
-        />
-        <HighlightCard
-          title="Settlement"
-          value="Instant"
-          description="Funds available immediately"
-        />
-        <HighlightCard
-          title="Chains Supported"
-          value="28"
-          description="10 blockchain families"
-        />
-        <HighlightCard
-          title="Chargebacks"
-          value="Zero"
-          description="No payment reversals"
-        />
-      </motion.div>
+          {/* Key Highlights in dark header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="mx-auto mt-12 grid max-w-4xl gap-6 sm:grid-cols-2 lg:grid-cols-4"
+          >
+            <HighlightCard
+              title="Transaction Fees"
+              value="0%"
+              description="No fees on any transaction"
+            />
+            <HighlightCard
+              title="Settlement"
+              value="Instant"
+              description="Funds available immediately"
+            />
+            <HighlightCard
+              title="Chains Supported"
+              value="28"
+              description="10 blockchain families"
+            />
+            <HighlightCard
+              title="Chargebacks"
+              value="Zero"
+              description="No payment reversals"
+            />
+          </motion.div>
+        </div>
+      </section>
 
-      {/* Comparison Table */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="mb-20 rounded-xl border border-border bg-background-secondary p-6 sm:p-8"
-      >
-        <h2 className="mb-8 text-center text-2xl font-semibold text-foreground">
-          Feature Comparison
-        </h2>
-        <ComparisonTable />
-      </motion.div>
+      {/* Light Section: Comparison Table */}
+      <section className="section-light py-24 md:py-32">
+        <div className="mx-auto max-w-6xl px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
+            <span
+              className="text-xs font-semibold uppercase tracking-widest"
+              style={{ color: "#50AF95" }}
+            >
+              Features
+            </span>
+            <h2
+              className="mt-4 mb-12 text-3xl font-bold tracking-tight md:text-4xl"
+              style={{ color: "var(--text-on-light)" }}
+            >
+              Feature Comparison
+            </h2>
+          </motion.div>
 
-      {/* Use Cases */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-        className="mb-20"
-      >
-        <h2 className="mb-8 text-center text-2xl font-semibold text-foreground">
-          Perfect For
-        </h2>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="rounded-xl border border-border bg-background-secondary p-6">
-            <h3 className="mb-2 text-lg font-semibold text-foreground">AI Agents</h3>
-            <p className="text-sm text-foreground-secondary">
-              Native HTTP integration makes t402 the ideal payment rail for autonomous
-              AI agents that need to pay for resources programmatically.
-            </p>
-          </div>
-          <div className="rounded-xl border border-border bg-background-secondary p-6">
-            <h3 className="mb-2 text-lg font-semibold text-foreground">API Monetization</h3>
-            <p className="text-sm text-foreground-secondary">
-              Charge per API call with zero setup. No payment processor accounts,
-              no KYC, no waiting for payouts.
-            </p>
-          </div>
-          <div className="rounded-xl border border-border bg-background-secondary p-6">
-            <h3 className="mb-2 text-lg font-semibold text-foreground">Global Services</h3>
-            <p className="text-sm text-foreground-secondary">
-              Accept payments from anywhere in the world. No banking restrictions,
-              no currency conversion fees.
-            </p>
-          </div>
-          <div className="rounded-xl border border-border bg-background-secondary p-6">
-            <h3 className="mb-2 text-lg font-semibold text-foreground">Content Creators</h3>
-            <p className="text-sm text-foreground-secondary">
-              Monetize content with pay-per-view or pay-per-download. Keep 100% of
-              your earnings with zero platform fees.
-            </p>
-          </div>
-          <div className="rounded-xl border border-border bg-background-secondary p-6">
-            <h3 className="mb-2 text-lg font-semibold text-foreground">Marketplaces</h3>
-            <p className="text-sm text-foreground-secondary">
-              Dynamic payment routing enables multi-vendor marketplaces with instant
-              settlement to all parties.
-            </p>
-          </div>
-          <div className="rounded-xl border border-border bg-background-secondary p-6">
-            <h3 className="mb-2 text-lg font-semibold text-foreground">High Frequency</h3>
-            <p className="text-sm text-foreground-secondary">
-              Microtransactions and high-frequency payments without per-transaction
-              overhead. Perfect for gaming and streaming.
-            </p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="overflow-hidden rounded-2xl p-6 sm:p-8"
+            style={{ border: "1px solid var(--border-light)", backgroundColor: "white" }}
+          >
+            <ComparisonTable />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Dark Alt Section: Use Cases */}
+      <section className="section-dark-alt py-24 md:py-32">
+        <div className="mx-auto max-w-7xl px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
+            <span
+              className="text-xs font-semibold uppercase tracking-widest"
+              style={{ color: "#50AF95" }}
+            >
+              Use Cases
+            </span>
+            <h2
+              className="mt-4 mb-12 text-3xl font-bold tracking-tight md:text-4xl"
+              style={{ color: "#FAFAFA" }}
+            >
+              Perfect For
+            </h2>
+          </motion.div>
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              { title: "AI Agents", desc: "Native HTTP integration makes t402 the ideal payment rail for autonomous AI agents that need to pay for resources programmatically." },
+              { title: "API Monetization", desc: "Charge per API call with zero setup. No payment processor accounts, no KYC, no waiting for payouts." },
+              { title: "Global Services", desc: "Accept payments from anywhere in the world. No banking restrictions, no currency conversion fees." },
+              { title: "Content Creators", desc: "Monetize content with pay-per-view or pay-per-download. Keep 100% of your earnings with zero platform fees." },
+              { title: "Marketplaces", desc: "Dynamic payment routing enables multi-vendor marketplaces with instant settlement to all parties." },
+              { title: "High Frequency", desc: "Microtransactions and high-frequency payments without per-transaction overhead. Perfect for gaming and streaming." },
+            ].map((item, i) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.05 }}
+                className="card-elevated-dark p-8"
+              >
+                <h3 className="mb-3 text-lg font-semibold" style={{ color: "#FAFAFA" }}>{item.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: "#A1A1AA" }}>
+                  {item.desc}
+                </p>
+              </motion.div>
+            ))}
           </div>
         </div>
-      </motion.div>
+      </section>
 
-      {/* CTA */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-        className="rounded-2xl border border-border bg-background-secondary p-8 text-center sm:p-12"
-      >
-        <h2 className="mb-4 text-2xl font-bold text-foreground sm:text-3xl">
-          Ready to switch?
-        </h2>
-        <p className="mx-auto mb-8 max-w-xl text-foreground-secondary">
-          Start accepting stablecoin payments in minutes with our production-ready SDKs.
-          No sign-up required.
-        </p>
-        <div className="flex flex-wrap justify-center gap-4">
-          <Link
-            href="/sdks"
-            className="inline-flex items-center gap-2 rounded-lg bg-brand px-6 py-3 text-base font-medium transition-colors hover:bg-brand-secondary"
-            style={{ color: "#0A0A0B" }}
+      {/* Dark CTA */}
+      <section className="section-dark py-24 md:py-32">
+        <div className="mx-auto max-w-4xl px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
           >
-            View SDKs
-          </Link>
-          <Link
-            href="/playground"
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-background-tertiary px-6 py-3 text-base font-medium text-foreground transition-colors hover:bg-border"
-          >
-            Try Playground
-          </Link>
+            <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl" style={{ color: "#FAFAFA" }}>
+              Ready to switch?
+            </h2>
+            <p className="mx-auto mb-8 max-w-xl text-lg" style={{ color: "#A1A1AA" }}>
+              Start accepting stablecoin payments in minutes with our production-ready SDKs.
+              No sign-up required.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link
+                href="/sdks"
+                className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-base font-medium transition-all duration-300 hover:opacity-90"
+                style={{ backgroundColor: "#50AF95", color: "#0A0A0B" }}
+              >
+                View SDKs
+              </Link>
+              <Link
+                href="/playground"
+                className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-base font-medium transition-all duration-300 hover:bg-white/5"
+                style={{ border: "1px solid rgba(255,255,255,0.2)", color: "#FAFAFA" }}
+              >
+                Try Playground
+              </Link>
+            </div>
+          </motion.div>
         </div>
-      </motion.div>
+      </section>
     </div>
   );
 }

@@ -15,41 +15,36 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-6">
+    <div className="min-h-screen bg-[#0A0A0B] text-white flex items-center justify-center p-6">
       <div className="max-w-md w-full text-center">
-        <div className="mb-8">
-          <span className="text-8xl font-bold text-error/30">500</span>
-          <h1 className="text-2xl font-bold mt-4">Something Went Wrong</h1>
-          <p className="text-foreground-secondary mt-2">
+        <div className="mb-10">
+          <span className="text-8xl font-bold text-[#EF4444]/20">500</span>
+          <h1 className="text-2xl font-bold mt-4 text-white">
+            Something went wrong
+          </h1>
+          <p className="text-[#A1A1AA] mt-3 text-base">
             An unexpected error occurred. This has been logged for investigation.
           </p>
         </div>
 
-        <div className="rounded-xl border border-border bg-background-secondary p-5 mb-8 text-left font-mono text-sm">
-          <div className="text-foreground-tertiary">
-            <span className="text-error">ERROR</span>{" "}
-            <span className="text-foreground-secondary">Internal Server Error</span>
+        {error.digest && (
+          <div className="rounded-xl border border-[#27272A] bg-[#111113] p-4 mb-8 text-left font-mono text-sm text-[#71717A]">
+            Digest: {error.digest}
           </div>
-          {error.digest && (
-            <div className="mt-2 text-foreground-tertiary/60">
-              Digest: {error.digest}
-            </div>
-          )}
-        </div>
+        )}
 
         <div className="flex gap-3 justify-center">
           <button
             onClick={reset}
-            className="inline-flex items-center rounded-lg bg-brand px-5 py-2.5 text-sm font-medium transition-colors hover:bg-brand-secondary cursor-pointer"
-            style={{ color: "#0A0A0B" }}
+            className="inline-flex items-center rounded-xl bg-[#50AF95] px-6 py-3 text-sm font-semibold text-[#0A0A0B] transition-colors hover:bg-[#26A17B] cursor-pointer"
           >
-            Try Again
+            Try again
           </button>
           <Link
             href="/"
-            className="inline-flex items-center rounded-lg border border-border bg-background-tertiary px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-border"
+            className="inline-flex items-center rounded-xl border border-[#27272A] bg-[#111113] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#18181B]"
           >
-            Go Home
+            Go home
           </Link>
         </div>
       </div>

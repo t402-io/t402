@@ -15,7 +15,7 @@ export const metadata = {
 
 export default function WritingPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen" style={{ backgroundColor: "#0A0A0B", color: "#FAFAFA" }}>
       <NavBar />
       <main>
         <WritingClient />

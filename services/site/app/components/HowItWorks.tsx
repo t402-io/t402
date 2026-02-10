@@ -4,137 +4,94 @@ import { motion } from "motion/react";
 
 const steps = [
   {
-    number: "01",
-    title: "Client Request",
-    description: "Client sends HTTP request to protected resource",
-    icon: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-      </svg>
-    ),
+    number: 1,
+    title: "Request Resource",
+    description: "Client sends a standard HTTP request to the protected endpoint.",
   },
   {
-    number: "02",
-    title: "402 Response",
-    description: "Server returns 402 Payment Required with payment details",
-    icon: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
+    number: 2,
+    title: "402 Payment Required",
+    description: "Server responds with payment requirements: amount, network, and recipient.",
   },
   {
-    number: "03",
-    title: "Sign Payment",
-    description: "Client signs USDT payment with wallet (no gas needed)",
-    icon: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-      </svg>
-    ),
+    number: 3,
+    title: "Sign & Pay",
+    description: "Client signs a USDT payment authorization off-chain. No gas needed.",
   },
   {
-    number: "04",
-    title: "Retry with Payment",
-    description: "Client retries request with X-PAYMENT header",
-    icon: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-      </svg>
-    ),
-  },
-  {
-    number: "05",
-    title: "Verify & Settle",
-    description: "Facilitator verifies signature and settles on-chain",
-    icon: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-      </svg>
-    ),
-  },
-  {
-    number: "06",
+    number: 4,
     title: "Access Granted",
-    description: "Server delivers content, payment confirmed",
-    icon: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
-      </svg>
-    ),
+    description: "Server verifies the signature, settles on-chain, and returns the resource.",
   },
 ];
 
 export function HowItWorks() {
   return (
-    <section className="py-24 px-4 bg-background-secondary">
-      <div className="max-w-6xl mx-auto">
+    <section className="section-light-alt py-24 md:py-32">
+      <div className="mx-auto max-w-7xl px-6">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-16"
+          className="text-center"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+          <span className="text-xs font-semibold uppercase tracking-widest text-brand-primary">
             How It Works
+          </span>
+          <h2 className="mt-4 text-4xl font-bold tracking-tight text-[var(--text-on-light)] md:text-5xl">
+            Four Simple Steps
           </h2>
-          <p className="text-foreground-secondary text-lg max-w-2xl mx-auto">
-            HTTP 402 payment flow in 6 simple steps. No blockchain expertise required.
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-[var(--text-on-light-secondary)]">
+            Standard HTTP 402 payment flow. No blockchain expertise required.
           </p>
         </motion.div>
 
-        {/* Flow Diagram */}
-        <div className="relative">
-          {/* Connection Line - Desktop */}
-          <div className="absolute left-0 right-0 top-1/2 z-0 hidden h-0.5 -translate-y-1/2 bg-gradient-to-r from-transparent via-brand to-transparent lg:block" />
+        {/* Steps */}
+        <div className="relative mt-16">
+          {/* Connecting line - desktop */}
+          <div className="absolute left-0 right-0 top-10 z-0 hidden h-0.5 lg:block">
+            <div className="mx-auto h-full max-w-3xl bg-gradient-to-r from-transparent via-brand/30 to-transparent" />
+          </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {steps.map((step, index) => (
               <motion.div
                 key={step.number}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="relative"
+                transition={{ duration: 0.5, delay: index * 0.12 }}
+                className="relative text-center"
               >
-                <div className="group h-full rounded-xl border border-border bg-background-tertiary p-5 transition-colors hover:border-brand/50 sm:p-6">
-                  {/* Step Number */}
-                  <div className="mb-3 flex items-center gap-3 sm:mb-4 sm:gap-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full border border-brand/30 bg-brand/10 text-brand transition-colors group-hover:bg-brand/20 sm:h-12 sm:w-12">
-                      {step.icon}
-                    </div>
-                    <span className="font-mono text-sm text-foreground-tertiary">
-                      {step.number}
-                    </span>
-                  </div>
-
-                  {/* Content */}
-                  <h3 className="mb-2 text-base font-semibold text-foreground sm:text-lg">
-                    {step.title}
-                  </h3>
-                  <p className="text-sm text-foreground-secondary">
-                    {step.description}
-                  </p>
-
-                  {/* Arrow indicator for desktop */}
-                  {index < steps.length - 1 && index !== 2 && (
-                    <div className="absolute -right-4 top-1/2 z-10 hidden -translate-y-1/2 lg:block">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background-tertiary">
-                        <svg className="h-4 w-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
-                    </div>
-                  )}
+                {/* Number circle */}
+                <div className="relative z-10 mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-brand text-2xl font-bold text-[#0A0A0B]">
+                  {step.number}
                 </div>
 
-                {/* Mobile arrow indicator */}
+                {/* Content */}
+                <h3 className="mt-6 text-lg font-semibold text-[var(--text-on-light)]">
+                  {step.title}
+                </h3>
+                <p className="mt-3 text-sm text-[var(--text-on-light-secondary)] leading-relaxed">
+                  {step.description}
+                </p>
+
+                {/* Arrow between steps (desktop) */}
                 {index < steps.length - 1 && (
-                  <div className="flex justify-center py-2 sm:hidden">
-                    <svg className="h-5 w-5 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  <div className="absolute -right-4 top-10 z-10 hidden -translate-y-1/2 lg:block">
+                    <svg className="h-5 w-5 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                )}
+
+                {/* Arrow between steps (mobile) */}
+                {index < steps.length - 1 && (
+                  <div className="mt-4 flex justify-center sm:hidden">
+                    <svg className="h-5 w-5 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7" />
                     </svg>
                   </div>
                 )}
@@ -142,25 +99,6 @@ export function HowItWorks() {
             ))}
           </div>
         </div>
-
-        {/* Bottom CTA */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-          className="text-center mt-12"
-        >
-          <a
-            href="/playground"
-            className="inline-flex items-center gap-2 text-brand hover:text-brand-secondary transition-colors font-medium"
-          >
-            Try it in the Playground
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
-          </a>
-        </motion.div>
       </div>
     </section>
   );

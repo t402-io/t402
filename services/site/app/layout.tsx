@@ -17,7 +17,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "T402 - The Official Payment Protocol for USDT",
   description:
-    "T402 is the official payment protocol for USDT. HTTP-native stablecoin payments across 28 blockchains including EVM, Solana, TON, TRON, NEAR, Aptos, and more. Zero fees. Instant settlement. Built for AI agents.",
+    "T402 is the official payment protocol for USDT. HTTP-native stablecoin payments across 33 blockchains including EVM, Solana, TON, TRON, NEAR, Aptos, and more. Zero fees. Instant settlement. Built for AI agents.",
   keywords: [
     "USDT",
     "USDT0",
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "T402 - The Official Payment Protocol for USDT",
     description:
-      "HTTP-native stablecoin payments across 28 blockchains. Zero fees. Instant settlement. Built for AI agents.",
+      "HTTP-native stablecoin payments across 33 blockchains. Zero fees. Instant settlement. Built for AI agents.",
     type: "website",
     siteName: "T402",
     url: "https://t402.io",
@@ -63,7 +63,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "T402 - The Official Payment Protocol for USDT",
     description:
-      "HTTP-native stablecoin payments across 28 blockchains. Zero fees. Instant settlement. Built for AI agents.",
+      "HTTP-native stablecoin payments across 33 blockchains. Zero fees. Instant settlement. Built for AI agents.",
     images: ["/t402-logo.png"],
   },
   robots: {
@@ -133,7 +133,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
+    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} scroll-smooth`}>
       <head>
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/png" href="/favicon.png" />

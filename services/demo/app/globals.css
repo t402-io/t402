@@ -4,13 +4,18 @@
   --color-background: #0A0A0B;
   --color-foreground: #FAFAFA;
   --color-brand: #50AF95;
+  --color-brand-secondary: #26A17B;
   --color-brand-dim: #50AF9540;
-  --color-surface: #141415;
-  --color-surface-hover: #1a1a1c;
+  --color-surface: #111113;
+  --color-surface-hover: #191919;
   --color-surface-active: #222224;
-  --color-border: #2A2A2D;
-  --color-muted: #8E8E96;
-  --color-code-bg: #0d1117;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-hover: rgba(255, 255, 255, 0.15);
+  --color-text-primary: #FAFAFA;
+  --color-text-secondary: #A1A1AA;
+  --color-text-tertiary: #71717A;
+  --color-muted: #A1A1AA;
+  --color-code-bg: #111113;
   --color-success: #10B981;
   --color-success-dim: #10B98120;
   --color-warning: #F59E0B;
@@ -67,11 +72,6 @@
   --syn-comment: #6A9955;
   --syn-property: #9CDCFE;
   --syn-punctuation: #D4D4D4;
-
-  /* Glass card */
-  --glass-bg: rgba(20, 20, 21, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.06);
-  --glass-blur: 12px;
 }
 
 @layer base {
@@ -102,7 +102,7 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: var(--color-border);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 2px;
   }
 
@@ -112,30 +112,43 @@
 }
 
 @layer components {
-  .glass-card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur));
-    border: 1px solid var(--glass-border);
-    border-radius: 16px;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  .card-elevated {
+    background: #111113;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1.25rem;
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .glass-card:hover {
-    border-color: rgba(255, 255, 255, 0.12);
+  .card-elevated:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+  }
+
+  .card-static {
+    background: #111113;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1.25rem;
+  }
+
+  /* Legacy aliases — used in scenario components */
+  .glass-card {
+    background: #111113;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1.25rem;
   }
 
   .glass-card-interactive {
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur));
-    border: 1px solid var(--glass-border);
-    border-radius: 16px;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    background: #111113;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1.25rem;
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .glass-card-interactive:hover {
-    border-color: rgba(80, 175, 149, 0.3);
-    box-shadow: 0 0 20px rgba(80, 175, 149, 0.05);
-    transform: translateY(-1px);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
   }
 
   .hero-glow {
@@ -145,7 +158,7 @@
     transform: translate(-50%, -60%);
     width: 600px;
     height: 400px;
-    background: radial-gradient(ellipse, rgba(80, 175, 149, 0.08) 0%, transparent 70%);
+    background: radial-gradient(ellipse, rgba(80, 175, 149, 0.06) 0%, transparent 70%);
     pointer-events: none;
     z-index: 0;
   }
@@ -165,27 +178,32 @@
   }
 
   .btn-primary {
-    background: var(--color-brand);
-    color: white;
-    font-weight: 500;
-    border-radius: 12px;
-    transition: opacity 0.2s, transform 0.15s;
+    background: #50AF95;
+    color: #0A0A0B;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1),
+                transform 300ms cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
   }
 
   .btn-primary:hover {
-    opacity: 0.9;
-    transform: translateY(-0.5px);
+    opacity: 0.92;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(80, 175, 149, 0.25);
   }
 
   .btn-primary:active {
     transform: translateY(0);
+    box-shadow: none;
   }
 
   .btn-primary:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
   }
 }
 

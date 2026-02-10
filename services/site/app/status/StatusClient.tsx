@@ -12,10 +12,11 @@ interface HealthStatus {
   supportedNetworks?: number;
 }
 
-function ExternalLinkIcon({ className = "" }: { className?: string }) {
+function ExternalLinkIcon({ className = "", style }: { className?: string; style?: React.CSSProperties }) {
   return (
     <svg
       className={className}
+      style={style}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -26,10 +27,11 @@ function ExternalLinkIcon({ className = "" }: { className?: string }) {
   );
 }
 
-function CheckCircleIcon({ className = "" }: { className?: string }) {
+function CheckCircleIcon({ className = "", style }: { className?: string; style?: React.CSSProperties }) {
   return (
     <svg
       className={className}
+      style={style}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -45,7 +47,8 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={() => navigator.clipboard.writeText(text)}
-      className="ml-2 rounded p-1 text-gray-500 transition-colors hover:text-gray-300"
+      className="ml-2 rounded p-1 transition-colors hover:opacity-70"
+      style={{ color: "#A1A1AA" }}
       title="Copy address"
     >
       <svg
@@ -101,7 +104,7 @@ function useHealthCheck() {
     }
 
     checkHealth();
-    const interval = setInterval(checkHealth, 30000); // Check every 30 seconds
+    const interval = setInterval(checkHealth, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -110,34 +113,10 @@ function useHealthCheck() {
 
 function HealthBanner({ health }: { health: HealthStatus }) {
   const statusConfig = {
-    loading: {
-      bg: "bg-gray-500/10",
-      border: "border-gray-500/20",
-      dot: "bg-gray-500",
-      text: "text-gray-400",
-      label: "Checking...",
-    },
-    operational: {
-      bg: "bg-emerald-500/10",
-      border: "border-emerald-500/20",
-      dot: "bg-emerald-500",
-      text: "text-emerald-400",
-      label: "All Systems Operational",
-    },
-    degraded: {
-      bg: "bg-yellow-500/10",
-      border: "border-yellow-500/20",
-      dot: "bg-yellow-500",
-      text: "text-yellow-400",
-      label: "Partial Outage",
-    },
-    down: {
-      bg: "bg-red-500/10",
-      border: "border-red-500/20",
-      dot: "bg-red-500",
-      text: "text-red-400",
-      label: "Service Unavailable",
-    },
+    loading: { dot: "#A1A1AA", text: "#A1A1AA", label: "Checking..." },
+    operational: { dot: "#50AF95", text: "#50AF95", label: "All Systems Operational" },
+    degraded: { dot: "#EAB308", text: "#EAB308", label: "Partial Outage" },
+    down: { dot: "#EF4444", text: "#EF4444", label: "Service Unavailable" },
   };
 
   const config = statusConfig[health.status];
@@ -146,25 +125,30 @@ function HealthBanner({ health }: { health: HealthStatus }) {
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`mx-auto max-w-5xl rounded-xl border ${config.border} ${config.bg} p-3 sm:p-4`}
+      className="rounded-2xl p-4 sm:p-5"
+      style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(0,0,0,0.08)" }}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4">
         <div className="flex items-center gap-3">
-          <span className={`relative flex h-3 w-3`}>
+          <span className="relative flex h-3 w-3">
             {health.status === "operational" && (
-              <span className={`absolute inline-flex h-full w-full animate-ping rounded-full ${config.dot} opacity-75`} />
+              <span
+                className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
+                style={{ backgroundColor: config.dot }}
+              />
             )}
-            <span className={`relative inline-flex h-3 w-3 rounded-full ${config.dot}`} />
+            <span
+              className="relative inline-flex h-3 w-3 rounded-full"
+              style={{ backgroundColor: config.dot }}
+            />
           </span>
-          <span className={`text-sm font-medium sm:text-base ${config.text}`}>{config.label}</span>
+          <span className="text-sm font-medium sm:text-base" style={{ color: config.text }}>
+            {config.label}
+          </span>
         </div>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 sm:text-sm">
-          {health.latency !== undefined && (
-            <span>Latency: {health.latency}ms</span>
-          )}
-          {health.supportedNetworks !== undefined && (
-            <span>{health.supportedNetworks} networks</span>
-          )}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm" style={{ color: "#4A5568" }}>
+          {health.latency !== undefined && <span>Latency: {health.latency}ms</span>}
+          {health.supportedNetworks !== undefined && <span>{health.supportedNetworks} networks</span>}
           {health.lastChecked && (
             <span className="hidden sm:inline">Updated: {health.lastChecked.toLocaleTimeString()}</span>
           )}
@@ -177,7 +161,6 @@ function HealthBanner({ health }: { health: HealthStatus }) {
 export default function StatusClient() {
   const health = useHealthCheck();
 
-  // Group networks by family
   const families = networks.reduce(
     (acc, n) => {
       if (!acc[n.family]) acc[n.family] = [];
@@ -188,225 +171,225 @@ export default function StatusClient() {
   );
 
   return (
-    <div className="relative overflow-hidden">
-      {/* Header */}
-      <section className="relative px-4 pb-12 pt-24 sm:px-6 sm:pt-32 sm:pb-16 md:px-12">
-        <div className="mx-auto max-w-6xl text-center">
+    <>
+      {/* Dark Header */}
+      <section style={{ backgroundColor: "#0A0A0B" }} className="py-24 md:py-32">
+        <div className="max-w-7xl mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl lg:text-6xl">
+            <p className="uppercase text-xs tracking-widest font-semibold mb-4" style={{ color: "#50AF95" }}>
+              Infrastructure
+            </p>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4" style={{ color: "#FAFAFA" }}>
               Network Status
             </h1>
-            <p className="mx-auto mt-3 max-w-2xl text-base text-gray-400 sm:mt-4 sm:text-lg">
+            <p className="mx-auto max-w-2xl text-lg" style={{ color: "#A1A1AA" }}>
               Facilitator service health and supported networks
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Health Status Banner */}
-      <section className="px-4 pb-6 sm:px-6 sm:pb-8 md:px-12">
-        <HealthBanner health={health} />
-      </section>
+      {/* Light Dashboard */}
+      <section style={{ backgroundColor: "#F7FAF9" }} className="py-24 md:py-32">
+        <div className="max-w-5xl mx-auto px-6 space-y-12">
+          {/* Health Banner */}
+          <HealthBanner health={health} />
 
-      {/* Service Endpoints */}
-      <section className="px-4 pb-10 sm:px-6 sm:pb-12 md:px-12">
-        <div className="mx-auto max-w-5xl">
-          <h2 className="mb-3 text-lg font-semibold text-white sm:mb-4">
-            Service Endpoints
-          </h2>
-          <div className="grid gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
-            {serviceEndpoints.map((ep, i) => (
-              <motion.a
-                key={ep.name}
-                href={ep.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: i * 0.05 }}
-                className="group flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2.5 transition-colors hover:border-white/20 hover:bg-white/[0.04] sm:px-4 sm:py-3"
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-medium text-white">
-                    {ep.name}
-                  </div>
-                  <div className="truncate text-xs text-gray-500">{ep.description}</div>
-                </div>
-                <ExternalLinkIcon className="ml-2 h-4 w-4 shrink-0 text-gray-500 transition-colors group-hover:text-gray-300" />
-              </motion.a>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Facilitator Wallets */}
-      <section className="px-4 pb-12 sm:px-6 md:px-12">
-        <div className="mx-auto max-w-5xl">
-          <h2 className="mb-4 text-lg font-semibold text-white">
-            Facilitator Wallets
-          </h2>
-
-          {/* Desktop Table */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-            className="hidden overflow-hidden rounded-xl border border-white/10 md:block"
-          >
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-white/10 bg-white/[0.02]">
-                    <th className="px-4 py-3 text-left font-medium text-gray-400">
-                      Family
-                    </th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-400">
-                      Chains
-                    </th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-400">
-                      Address
-                    </th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-400">
-                      &nbsp;
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {facilitatorWallets.map((w, i) => (
-                    <tr
-                      key={w.family}
-                      className={
-                        i < facilitatorWallets.length - 1
-                          ? "border-b border-white/5"
-                          : ""
-                      }
-                    >
-                      <td className="px-4 py-3 font-medium text-white">
-                        {w.family}
-                      </td>
-                      <td className="px-4 py-3 text-gray-400">{w.chains}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center">
-                          <code className="max-w-[200px] truncate text-xs text-gray-400">
-                            {w.address}
-                          </code>
-                          <CopyButton text={w.address} />
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <a
-                          href={w.explorerUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-emerald-400 hover:text-emerald-300"
-                        >
-                          Explorer
-                        </a>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </motion.div>
-
-          {/* Mobile Cards */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-            className="grid gap-3 md:hidden"
-          >
-            {facilitatorWallets.map((w) => (
-              <div
-                key={w.family}
-                className="rounded-xl border border-white/10 bg-white/[0.02] p-4"
-              >
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="font-medium text-white">{w.family}</span>
-                  <span className="text-xs text-gray-500">{w.chains}</span>
-                </div>
-                <div className="mb-3 flex items-center gap-1">
-                  <code className="flex-1 truncate text-xs text-gray-400">
-                    {w.address}
-                  </code>
-                  <CopyButton text={w.address} />
-                </div>
-                <a
-                  href={w.explorerUrl}
+          {/* Service Endpoints */}
+          <div>
+            <h2 className="mb-4 text-lg font-semibold" style={{ color: "#1A1A2E" }}>
+              Service Endpoints
+            </h2>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {serviceEndpoints.map((ep, i) => (
+                <motion.a
+                  key={ep.name}
+                  href={ep.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: i * 0.05 }}
+                  className="group flex items-center justify-between rounded-2xl px-4 py-3 transition-all"
+                  style={{
+                    backgroundColor: "#FFFFFF",
+                    border: "1px solid rgba(0,0,0,0.08)",
+                  }}
                 >
-                  View in Explorer
-                  <ExternalLinkIcon className="h-3 w-3" />
-                </a>
-              </div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Supported Networks */}
-      <section className="px-4 pb-16 sm:px-6 md:px-12">
-        <div className="mx-auto max-w-5xl">
-          <h2 className="mb-4 text-lg font-semibold text-white">
-            Supported Networks
-          </h2>
-          <div className="space-y-5 sm:space-y-6">
-            {Object.entries(families).map(([family, nets], fi) => (
-              <motion.div
-                key={family}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.3 + fi * 0.05 }}
-              >
-                <h3 className="mb-2 text-sm font-medium text-gray-300">
-                  {family}{" "}
-                  <span className="text-gray-500">({nets.length})</span>
-                </h3>
-                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                  {nets.map((n) => (
-                    <div
-                      key={n.network}
-                      className="flex flex-col gap-1 rounded-lg border border-white/5 bg-white/[0.01] px-3 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-2"
-                    >
-                      <div className="flex items-center gap-2">
-                        <CheckCircleIcon className="h-4 w-4 shrink-0 text-emerald-400" />
-                        <span className="text-sm text-white">{n.name}</span>
-                      </div>
-                      <code className="truncate pl-6 text-[10px] text-gray-500 sm:pl-0 sm:text-xs">{n.network}</code>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium" style={{ color: "#1A1A2E" }}>
+                      {ep.name}
                     </div>
-                  ))}
+                    <div className="truncate text-xs" style={{ color: "#4A5568" }}>
+                      {ep.description}
+                    </div>
+                  </div>
+                  <ExternalLinkIcon className="ml-2 h-4 w-4 shrink-0 transition-colors group-hover:opacity-70" style={{ color: "#A1A1AA" } as React.CSSProperties} />
+                </motion.a>
+              ))}
+            </div>
+          </div>
+
+          {/* Facilitator Wallets */}
+          <div>
+            <h2 className="mb-4 text-lg font-semibold" style={{ color: "#1A1A2E" }}>
+              Facilitator Wallets
+            </h2>
+
+            {/* Desktop Table */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+              className="hidden overflow-hidden rounded-2xl md:block"
+              style={{ border: "1px solid rgba(0,0,0,0.08)" }}
+            >
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.08)", backgroundColor: "#F7FAF9" }}>
+                      <th className="px-4 py-3 text-left font-medium" style={{ color: "#4A5568" }}>Family</th>
+                      <th className="px-4 py-3 text-left font-medium" style={{ color: "#4A5568" }}>Chains</th>
+                      <th className="px-4 py-3 text-left font-medium" style={{ color: "#4A5568" }}>Address</th>
+                      <th className="px-4 py-3 text-left font-medium" style={{ color: "#4A5568" }}>&nbsp;</th>
+                    </tr>
+                  </thead>
+                  <tbody style={{ backgroundColor: "#FFFFFF" }}>
+                    {facilitatorWallets.map((w, i) => (
+                      <tr
+                        key={w.family}
+                        style={i < facilitatorWallets.length - 1 ? { borderBottom: "1px solid rgba(0,0,0,0.05)" } : undefined}
+                      >
+                        <td className="px-4 py-3 font-medium" style={{ color: "#1A1A2E" }}>{w.family}</td>
+                        <td className="px-4 py-3" style={{ color: "#4A5568" }}>{w.chains}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center">
+                            <code className="max-w-[200px] truncate text-xs" style={{ color: "#4A5568" }}>
+                              {w.address}
+                            </code>
+                            <CopyButton text={w.address} />
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <a
+                            href={w.explorerUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs hover:underline"
+                            style={{ color: "#50AF95" }}
+                          >
+                            Explorer
+                          </a>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </motion.div>
+
+            {/* Mobile Cards */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+              className="grid gap-3 md:hidden"
+            >
+              {facilitatorWallets.map((w) => (
+                <div
+                  key={w.family}
+                  className="rounded-2xl p-4"
+                  style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(0,0,0,0.08)" }}
+                >
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="font-medium" style={{ color: "#1A1A2E" }}>{w.family}</span>
+                    <span className="text-xs" style={{ color: "#4A5568" }}>{w.chains}</span>
+                  </div>
+                  <div className="mb-3 flex items-center gap-1">
+                    <code className="flex-1 truncate text-xs" style={{ color: "#4A5568" }}>
+                      {w.address}
+                    </code>
+                    <CopyButton text={w.address} />
+                  </div>
+                  <a
+                    href={w.explorerUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs hover:underline"
+                    style={{ color: "#50AF95" }}
+                  >
+                    View in Explorer
+                    <ExternalLinkIcon className="h-3 w-3" />
+                  </a>
                 </div>
-              </motion.div>
-            ))}
+              ))}
+            </motion.div>
+          </div>
+
+          {/* Supported Networks */}
+          <div>
+            <h2 className="mb-4 text-lg font-semibold" style={{ color: "#1A1A2E" }}>
+              Supported Networks
+            </h2>
+            <div className="space-y-6">
+              {Object.entries(families).map(([family, nets], fi) => (
+                <motion.div
+                  key={family}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.3 + fi * 0.05 }}
+                >
+                  <h3 className="mb-2 text-sm font-medium" style={{ color: "#1A1A2E" }}>
+                    {family}{" "}
+                    <span style={{ color: "#A1A1AA" }}>({nets.length})</span>
+                  </h3>
+                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    {nets.map((n) => (
+                      <div
+                        key={n.network}
+                        className="flex flex-col gap-1 rounded-xl px-3 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-2"
+                        style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(0,0,0,0.05)" }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <CheckCircleIcon className="h-4 w-4 shrink-0" style={{ color: "#50AF95" } as React.CSSProperties} />
+                          <span className="text-sm" style={{ color: "#1A1A2E" }}>{n.name}</span>
+                        </div>
+                        <code className="truncate pl-6 text-[10px] sm:pl-0 sm:text-xs" style={{ color: "#A1A1AA" }}>
+                          {n.network}
+                        </code>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Footer Note */}
-      <section className="px-4 pb-16 sm:px-6 sm:pb-24 md:px-12">
-        <div className="mx-auto max-w-4xl text-center">
+      {/* Grafana CTA */}
+      <section style={{ backgroundColor: "#FFFFFF" }} className="py-24 md:py-32">
+        <div className="max-w-4xl mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-8"
+            className="rounded-2xl p-8 sm:p-12"
+            style={{ backgroundColor: "#F7FAF9", border: "1px solid rgba(0,0,0,0.08)" }}
           >
-            <p className="mb-4 text-sm text-gray-400 sm:text-base">
-              For real-time monitoring and historical metrics, visit the Grafana
-              dashboard.
+            <p className="mb-6 text-base" style={{ color: "#4A5568" }}>
+              For real-time monitoring and historical metrics, visit the Grafana dashboard.
             </p>
             <Link
               href="https://grafana.facilitator.t402.io"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-500 sm:px-5"
+              className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-medium transition-all hover:opacity-90"
+              style={{ backgroundColor: "#50AF95", color: "#0A0A0B" }}
             >
               Open Grafana Dashboard
               <ExternalLinkIcon className="h-4 w-4" />
@@ -414,6 +397,6 @@ export default function StatusClient() {
           </motion.div>
         </div>
       </section>
-    </div>
+    </>
   );
 }

@@ -167,17 +167,24 @@ export default function PlaygroundPage() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[rgba(10,10,11,0.9)] backdrop-blur-xl">
+      <header
+        className="sticky top-0 z-50 backdrop-blur-xl"
+        style={{
+          background: "rgba(10, 10, 11, 0.8)",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+        }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="flex items-center gap-2 text-[var(--color-muted)] hover:text-white transition-colors"
+              className="flex items-center gap-2 hover:text-white transition-colors"
+              style={{ color: "#A1A1AA" }}
             >
               <ArrowLeft size={14} />
-              <span className="text-sm font-semibold text-[var(--color-brand)]">T402</span>
+              <span className="text-sm font-semibold" style={{ color: "#50AF95" }}>T402</span>
             </Link>
-            <span className="text-xs text-[var(--color-muted)]">/</span>
+            <span className="text-xs" style={{ color: "#71717A" }}>/</span>
             <span className="text-sm font-medium text-white">Playground</span>
           </div>
           <div className="flex items-center gap-3">
@@ -191,8 +198,14 @@ export default function PlaygroundPage() {
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-8">
         {/* Title */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-white mb-2">Protocol Playground</h1>
-          <p className="text-sm text-[var(--color-muted)]">
+          <span
+            className="inline-block text-xs font-semibold tracking-[0.2em] uppercase mb-3"
+            style={{ color: "#50AF95" }}
+          >
+            PLAYGROUND
+          </span>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Protocol Playground</h1>
+          <p className="text-sm" style={{ color: "#A1A1AA" }}>
             Execute T402 payment flows step-by-step. Watch the HTTP 402 handshake in real time.
           </p>
         </div>
@@ -202,14 +215,18 @@ export default function PlaygroundPage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             {/* Endpoint selector */}
             <div className="flex-1">
-              <label className="text-[10px] uppercase tracking-wider text-[var(--color-muted)] mb-1.5 block">
+              <label className="text-[10px] uppercase tracking-wider mb-1.5 block" style={{ color: "#71717A" }}>
                 Endpoint
               </label>
               <div className="relative">
                 <select
                   value={selectedEndpoint}
                   onChange={(e) => { setSelectedEndpoint(Number(e.target.value)); reset(); }}
-                  className="w-full appearance-none bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm text-white pr-8 focus:outline-none focus:border-[var(--color-brand)]"
+                  className="w-full appearance-none rounded-xl px-3 py-2 text-sm text-white pr-8 focus:outline-none"
+                  style={{
+                    background: "#111113",
+                    border: "1px solid rgba(255, 255, 255, 0.08)",
+                  }}
                 >
                   {ENDPOINTS.map((ep, i) => (
                     <option key={ep.path} value={i}>
@@ -217,7 +234,7 @@ export default function PlaygroundPage() {
                     </option>
                   ))}
                 </select>
-                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)] pointer-events-none" />
+                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "#71717A" }} />
               </div>
             </div>
 
@@ -234,7 +251,8 @@ export default function PlaygroundPage() {
               {step !== "idle" && (
                 <button
                   onClick={reset}
-                  className="flex items-center gap-2 px-3 py-3 text-sm text-[var(--color-muted)] hover:text-white border border-[var(--color-border)] rounded-lg transition-colors min-h-[44px]"
+                  className="flex items-center gap-2 px-3 py-3 text-sm hover:text-white rounded-xl transition-colors min-h-[44px]"
+                  style={{ color: "#A1A1AA", border: "1px solid rgba(255, 255, 255, 0.15)" }}
                 >
                   <RotateCcw size={14} />
                   Reset
@@ -287,7 +305,10 @@ export default function PlaygroundPage() {
                       copied={copied}
                     />
                   </div>
-                  <pre className="bg-[var(--color-code-bg)] rounded-lg p-3 overflow-x-auto text-xs font-mono text-[var(--color-code-text)] max-h-48 overflow-y-auto">
+                  <pre
+                    className="rounded-xl p-3 overflow-x-auto text-xs font-mono max-h-48 overflow-y-auto"
+                    style={{ background: "#111113", color: "#D4D4D4", border: "1px solid rgba(255, 255, 255, 0.08)" }}
+                  >
                     {paymentPayload}
                   </pre>
                 </div>
@@ -319,8 +340,8 @@ export default function PlaygroundPage() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
               >
-                <div className="glass-card p-4 border-[var(--color-error)]">
-                  <p className="text-sm text-[var(--color-error)]">{error}</p>
+                <div className="glass-card p-4" style={{ borderColor: "var(--color-error)" }}>
+                  <p className="text-sm" style={{ color: "#EF4444" }}>{error}</p>
                 </div>
               </motion.div>
             )}
@@ -350,21 +371,25 @@ function FlowTimeline({ step }: { step: FlowStep }) {
         return (
           <div key={s.id} className="flex items-center gap-1 shrink-0">
             <div
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                isActive
-                  ? "bg-[var(--color-brand)] text-white"
-                  : isPast
-                  ? "bg-[var(--color-surface-active)] text-white"
-                  : "bg-[var(--color-surface)] text-[var(--color-muted)]"
-              }`}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+              style={{
+                background: isActive ? "#50AF95" : isPast ? "#222224" : "#111113",
+                color: isActive ? "#0A0A0B" : isPast ? "#FAFAFA" : "#71717A",
+              }}
             >
-              <span className={`h-1.5 w-1.5 rounded-full ${
-                isActive ? "bg-white animate-pulse" : isPast ? "bg-[var(--color-success)]" : "bg-[var(--color-muted)]"
-              }`} />
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${isActive ? "animate-pulse" : ""}`}
+                style={{
+                  background: isActive ? "#0A0A0B" : isPast ? "#10B981" : "#71717A",
+                }}
+              />
               {s.label}
             </div>
             {i < steps.length - 1 && (
-              <div className={`w-4 h-px ${isPast ? "bg-[var(--color-brand)]" : "bg-[var(--color-border)]"}`} />
+              <div
+                className="w-4 h-px"
+                style={{ background: isPast ? "#50AF95" : "rgba(255, 255, 255, 0.08)" }}
+              />
             )}
           </div>
         );
@@ -389,32 +414,39 @@ function ExchangePanel({
   const [showRequestHeaders, setShowRequestHeaders] = useState(false);
 
   return (
-    <div className={`glass-card p-4 ${highlight ? "border-[var(--color-success)]" : ""}`}>
+    <div
+      className="glass-card p-4"
+      style={highlight ? { borderColor: "var(--color-success)" } : undefined}
+    >
       <h3 className="text-sm font-medium text-white mb-4">{title}</h3>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Request */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] uppercase tracking-wider text-[var(--color-muted)]">Request</span>
+            <span className="text-[10px] uppercase tracking-wider" style={{ color: "#71717A" }}>Request</span>
             <button
               onClick={() => setShowRequestHeaders(!showRequestHeaders)}
-              className="text-[10px] text-[var(--color-brand)] hover:underline"
+              className="text-[10px] hover:underline"
+              style={{ color: "#50AF95" }}
             >
               {showRequestHeaders ? "Hide" : "Show"} Headers
             </button>
           </div>
-          <div className="bg-[var(--color-code-bg)] rounded-lg p-3 space-y-2">
+          <div
+            className="rounded-xl p-3 space-y-2"
+            style={{ background: "#111113", border: "1px solid rgba(255, 255, 255, 0.08)" }}
+          >
             <div className="text-xs font-mono">
-              <span className="text-[var(--syn-keyword)]">{exchange.request.method}</span>{" "}
-              <span className="text-[var(--syn-string)]">{exchange.request.url}</span>
+              <span style={{ color: "var(--syn-keyword)" }}>{exchange.request.method}</span>{" "}
+              <span style={{ color: "var(--syn-string)" }}>{exchange.request.url}</span>
             </div>
             {showRequestHeaders && (
-              <div className="text-xs font-mono text-[var(--color-code-text-dim)] border-t border-[var(--color-border)] pt-2 space-y-0.5">
+              <div className="text-xs font-mono space-y-0.5 pt-2" style={{ color: "#9CA3AF", borderTop: "1px solid rgba(255, 255, 255, 0.08)" }}>
                 {Object.entries(exchange.request.headers).map(([k, v]) => (
                   <div key={k}>
-                    <span className="text-[var(--syn-property)]">{k}</span>:{" "}
-                    <span className="text-[var(--syn-string)]">
+                    <span style={{ color: "var(--syn-property)" }}>{k}</span>:{" "}
+                    <span style={{ color: "var(--syn-string)" }}>
                       {k === "Payment-Signature" ? v.slice(0, 24) + "..." : v}
                     </span>
                   </div>
@@ -422,8 +454,8 @@ function ExchangePanel({
               </div>
             )}
             {exchange.request.body && (
-              <div className="border-t border-[var(--color-border)] pt-2">
-                <pre className="text-xs font-mono text-[var(--color-code-text)] whitespace-pre-wrap">
+              <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)" }} className="pt-2">
+                <pre className="text-xs font-mono whitespace-pre-wrap" style={{ color: "#D4D4D4" }}>
                   {formatJson(exchange.request.body)}
                 </pre>
               </div>
@@ -435,7 +467,7 @@ function ExchangePanel({
         {exchange.response && (
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] uppercase tracking-wider text-[var(--color-muted)]">Response</span>
+              <span className="text-[10px] uppercase tracking-wider" style={{ color: "#71717A" }}>Response</span>
               <CopyButton
                 text={exchange.response.body}
                 id={`resp-${exchange.response.status}`}
@@ -443,19 +475,25 @@ function ExchangePanel({
                 copied={copied}
               />
             </div>
-            <div className="bg-[var(--color-code-bg)] rounded-lg p-3 space-y-2">
+            <div
+              className="rounded-xl p-3 space-y-2"
+              style={{ background: "#111113", border: "1px solid rgba(255, 255, 255, 0.08)" }}
+            >
               <div className="text-xs font-mono">
-                <span className={`font-bold ${
-                  exchange.response.status === 402 ? "text-[var(--color-warning)]" :
-                  exchange.response.status >= 200 && exchange.response.status < 300 ? "text-[var(--color-success)]" :
-                  "text-[var(--color-error)]"
-                }`}>
+                <span
+                  className="font-bold"
+                  style={{
+                    color: exchange.response.status === 402 ? "#F59E0B" :
+                      exchange.response.status >= 200 && exchange.response.status < 300 ? "#10B981" :
+                      "#EF4444"
+                  }}
+                >
                   {exchange.response.status}
                 </span>{" "}
-                <span className="text-[var(--color-code-text-dim)]">{exchange.response.statusText}</span>
+                <span style={{ color: "#9CA3AF" }}>{exchange.response.statusText}</span>
               </div>
-              <div className="border-t border-[var(--color-border)] pt-2">
-                <pre className="text-xs font-mono text-[var(--color-code-text)] whitespace-pre-wrap max-h-48 overflow-y-auto">
+              <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)" }} className="pt-2">
+                <pre className="text-xs font-mono whitespace-pre-wrap max-h-48 overflow-y-auto" style={{ color: "#D4D4D4" }}>
                   {formatJson(exchange.response.body)}
                 </pre>
               </div>
@@ -481,9 +519,10 @@ function CopyButton({
   return (
     <button
       onClick={() => onCopy(text, id)}
-      className="flex items-center gap-1 text-[10px] text-[var(--color-muted)] hover:text-white transition-colors"
+      className="flex items-center gap-1 text-[10px] hover:text-white transition-colors"
+      style={{ color: "#A1A1AA" }}
     >
-      {copied === id ? <Check size={10} className="text-[var(--color-success)]" /> : <Copy size={10} />}
+      {copied === id ? <Check size={10} style={{ color: "#10B981" }} /> : <Copy size={10} />}
       {copied === id ? "Copied" : "Copy"}
     </button>
   );
