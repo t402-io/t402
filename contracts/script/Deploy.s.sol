@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.24;
 
-import {Script, console2} from "forge-std/Script.sol";
-import {T402UptoRouter} from "../src/T402UptoRouter.sol";
+import { Script, console2 } from "forge-std/Script.sol";
+import { T402UptoRouter } from "../src/T402UptoRouter.sol";
 
 /// @title DeployT402UptoRouter
 /// @notice Deployment script for T402UptoRouter contract

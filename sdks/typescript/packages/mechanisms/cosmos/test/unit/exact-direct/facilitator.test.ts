@@ -4,7 +4,9 @@ import type { FacilitatorCosmosSigner, TransactionResult } from "../../../src/ty
 import type { PaymentPayload, PaymentRequirements } from "@t402/core/types";
 
 describe("ExactDirectCosmosFacilitator", () => {
-  const createMockTransaction = (overrides: Partial<TransactionResult> = {}): TransactionResult => ({
+  const createMockTransaction = (
+    overrides: Partial<TransactionResult> = {},
+  ): TransactionResult => ({
     txHash: "TX_HASH_ABC123DEF456",
     height: "12345",
     code: 0,

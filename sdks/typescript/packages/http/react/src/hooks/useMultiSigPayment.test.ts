@@ -49,12 +49,10 @@ describe('useMultiSigPayment', () => {
   })
 
   it('initiate succeeds and moves to collecting', async () => {
-    const initiateFn = vi.fn().mockResolvedValue(
-      mockInitiateResult({ threshold: 3, collectedCount: 1, isReady: false }),
-    )
-    const { result } = renderHook(() =>
-      useMultiSigPayment(defaultOptions({ initiateFn })),
-    )
+    const initiateFn = vi
+      .fn()
+      .mockResolvedValue(mockInitiateResult({ threshold: 3, collectedCount: 1, isReady: false }))
+    const { result } = renderHook(() => useMultiSigPayment(defaultOptions({ initiateFn })))
 
     await act(async () => {
       await result.current.initiate(initiateParams)
@@ -99,9 +97,9 @@ describe('useMultiSigPayment', () => {
 
   it('submit succeeds with autoWait=false', async () => {
     const waitFn = vi.fn()
-    const submitFn = vi.fn().mockResolvedValue(
-      mockSubmitResult({ userOpHash: '0xopSub', wait: waitFn }),
-    )
+    const submitFn = vi
+      .fn()
+      .mockResolvedValue(mockSubmitResult({ userOpHash: '0xopSub', wait: waitFn }))
     const onSuccess = vi.fn()
     const opts = defaultOptions({ submitFn, onSuccess, autoWait: false })
 
@@ -151,9 +149,7 @@ describe('useMultiSigPayment', () => {
     expect(result.current.status).toBe('error')
     expect(result.current.error).toBe('Safe not deployed')
     expect(result.current.isError).toBe(true)
-    expect(onError).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'Safe not deployed' }),
-    )
+    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ message: 'Safe not deployed' }))
   })
 
   it('handles submit error', async () => {
@@ -173,9 +169,7 @@ describe('useMultiSigPayment', () => {
 
     expect(result.current.status).toBe('error')
     expect(result.current.error).toBe('Execution reverted')
-    expect(onError).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'Execution reverted' }),
-    )
+    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ message: 'Execution reverted' }))
   })
 
   it('isLoading is true for initiating and submitting', async () => {
@@ -204,9 +198,9 @@ describe('useMultiSigPayment', () => {
   })
 
   it('tracks isReady from initiate result', async () => {
-    const initiateFn = vi.fn().mockResolvedValue(
-      mockInitiateResult({ threshold: 2, collectedCount: 2, isReady: true }),
-    )
+    const initiateFn = vi
+      .fn()
+      .mockResolvedValue(mockInitiateResult({ threshold: 2, collectedCount: 2, isReady: true }))
     const opts = defaultOptions({ initiateFn })
 
     const { result } = renderHook(() => useMultiSigPayment(opts))

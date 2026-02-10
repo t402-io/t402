@@ -15,7 +15,12 @@ import type {
   VerifyResponse,
 } from "@t402/core/types";
 import type { FacilitatorCosmosSigner, ExactDirectCosmosPayload, MsgSend } from "../../types.js";
-import { SCHEME_EXACT_DIRECT, COSMOS_CAIP2_NAMESPACE, MAX_TRANSACTION_AGE, MSG_TYPE_SEND } from "../../constants.js";
+import {
+  SCHEME_EXACT_DIRECT,
+  COSMOS_CAIP2_NAMESPACE,
+  MAX_TRANSACTION_AGE,
+  MSG_TYPE_SEND,
+} from "../../constants.js";
 import { normalizeNetwork, isValidAddress } from "../../utils.js";
 import { getDefaultToken } from "../../tokens.js";
 

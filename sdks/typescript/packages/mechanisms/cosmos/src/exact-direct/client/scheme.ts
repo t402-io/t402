@@ -77,8 +77,7 @@ export class ExactDirectCosmosClient implements SchemeNetworkClient {
     const amount = paymentRequirements.amount;
 
     // Determine denomination from extra field, config, or default
-    const denom =
-      (paymentRequirements.extra?.denom as string) || this.config.denom || USDC_DENOM;
+    const denom = (paymentRequirements.extra?.denom as string) || this.config.denom || USDC_DENOM;
 
     // Execute the transfer
     const txHash = await this.signer.sendTokens(network, recipient, amount, denom);

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.24;
 
-import {IT402UptoRouter} from "./interfaces/IT402UptoRouter.sol";
-import {IERC20Permit} from "./interfaces/IERC20Permit.sol";
+import { IT402UptoRouter } from "./interfaces/IT402UptoRouter.sol";
+import { IERC20Permit } from "./interfaces/IERC20Permit.sol";
 
 /// @title T402UptoRouter
 /// @notice Router contract for T402 Up-To scheme payments
@@ -176,11 +176,11 @@ contract T402UptoRouter is IT402UptoRouter {
     /// @param maxAmount The max amount to permit
     /// @return valid True if the payer has sufficient balance
     /// @return balance The payer's current balance
-    function checkPermitValidity(
-        address token,
-        address from,
-        uint256 maxAmount
-    ) external view returns (bool valid, uint256 balance) {
+    function checkPermitValidity(address token, address from, uint256 maxAmount)
+        external
+        view
+        returns (bool valid, uint256 balance)
+    {
         balance = IERC20Permit(token).balanceOf(from);
         valid = balance >= maxAmount;
     }

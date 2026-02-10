@@ -22,10 +22,10 @@ Three main components:
 
 ## Supported Networks
 
-| Network        | CAIP-2 Identifier  | USDC Denomination | Bech32 Prefix | Status     |
-| -------------- | ------------------ | ----------------- | ------------- | ---------- |
-| Noble Mainnet  | `cosmos:noble-1`   | `uusdc`           | `noble`       | Production |
-| Noble Testnet  | `cosmos:grand-1`   | `uusdc`           | `noble`       | Testnet    |
+| Network       | CAIP-2 Identifier | USDC Denomination | Bech32 Prefix | Status     |
+| ------------- | ----------------- | ----------------- | ------------- | ---------- |
+| Noble Mainnet | `cosmos:noble-1`  | `uusdc`           | `noble`       | Production |
+| Noble Testnet | `cosmos:grand-1`  | `uusdc`           | `noble`       | Testnet    |
 
 ## Package Exports
 

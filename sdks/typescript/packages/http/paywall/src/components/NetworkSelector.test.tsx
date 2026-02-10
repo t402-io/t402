@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import React from "react";
 import ReactDOMServer from "react-dom/server";
 import type { PaymentRequirements } from "@t402/core/types";
@@ -43,18 +43,13 @@ describe("NetworkSelector", () => {
 
   it("formats amount correctly (divide by 10^6, show 2 decimals)", () => {
     const html = renderToHtml(
-      <NetworkSelector
-        accepts={[{ ...baseRequirement, amount: "1500000" }]}
-        onSelect={() => {}}
-      />,
+      <NetworkSelector accepts={[{ ...baseRequirement, amount: "1500000" }]} onSelect={() => {}} />,
     );
     expect(html).toContain("1.50");
   });
 
   it("shows network display name", () => {
-    const html = renderToHtml(
-      <NetworkSelector accepts={[baseRequirement]} onSelect={() => {}} />,
-    );
+    const html = renderToHtml(<NetworkSelector accepts={[baseRequirement]} onSelect={() => {}} />);
     expect(html).toContain("Base");
   });
 
@@ -66,9 +61,7 @@ describe("NetworkSelector", () => {
   });
 
   it("empty accepts array renders no buttons", () => {
-    const html = renderToHtml(
-      <NetworkSelector accepts={[]} onSelect={() => {}} />,
-    );
+    const html = renderToHtml(<NetworkSelector accepts={[]} onSelect={() => {}} />);
     expect(html).not.toContain("<button");
   });
 
@@ -78,18 +71,13 @@ describe("NetworkSelector", () => {
       amount: undefined,
       maxAmountRequired: "2000000",
     };
-    const html = renderToHtml(
-      <NetworkSelector accepts={[req]} onSelect={() => {}} />,
-    );
+    const html = renderToHtml(<NetworkSelector accepts={[req]} onSelect={() => {}} />);
     expect(html).toContain("2.00");
   });
 
   it("buttons have correct aria-labels", () => {
     const html = renderToHtml(
-      <NetworkSelector
-        accepts={[{ ...baseRequirement, amount: "1000000" }]}
-        onSelect={() => {}}
-      />,
+      <NetworkSelector accepts={[{ ...baseRequirement, amount: "1000000" }]} onSelect={() => {}} />,
     );
     expect(html).toContain('aria-label="Pay 1.00 on Base"');
   });

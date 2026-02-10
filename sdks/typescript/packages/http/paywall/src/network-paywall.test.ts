@@ -24,11 +24,17 @@ vi.mock("./ton/template-loader", () => ({
   getTonTemplate: vi.fn(() => MOCK_TEMPLATE),
 }));
 
+// eslint-disable-next-line import/first
 import { getEvmPaywallHtml } from "./evm/paywall";
+// eslint-disable-next-line import/first
 import { getSvmPaywallHtml } from "./svm/paywall";
+// eslint-disable-next-line import/first
 import { getTonPaywallHtml } from "./ton/paywall";
+// eslint-disable-next-line import/first
 import { getEvmTemplate } from "./evm/template-loader";
+// eslint-disable-next-line import/first
 import { getSvmTemplate } from "./svm/template-loader";
+// eslint-disable-next-line import/first
 import { getTonTemplate } from "./ton/template-loader";
 
 const mockPaymentRequired: PaymentRequired = {

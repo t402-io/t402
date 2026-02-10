@@ -104,8 +104,7 @@ describe("ExactDirectCosmosServer", () => {
 
       it("should throw for price objects without asset", async () => {
         await expect(
-          async () =>
-            await server.parsePrice({ amount: "123456" } as never, NOBLE_MAINNET_CAIP2),
+          async () => await server.parsePrice({ amount: "123456" } as never, NOBLE_MAINNET_CAIP2),
         ).rejects.toThrow("Asset address must be specified");
       });
     });
@@ -124,9 +123,9 @@ describe("ExactDirectCosmosServer", () => {
       });
 
       it("should throw for unsupported network with no tokens", async () => {
-        await expect(
-          async () => await server.parsePrice("1.00", "cosmos:unknown"),
-        ).rejects.toThrow("No tokens configured");
+        await expect(async () => await server.parsePrice("1.00", "cosmos:unknown")).rejects.toThrow(
+          "No tokens configured",
+        );
       });
     });
   });

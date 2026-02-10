@@ -170,8 +170,7 @@ function generateQRMatrix(data: string): boolean[][] {
   }
   for (let i = 255; i < 512; i++) gfExp[i] = gfExp[i - 255];
 
-  const gfMul = (a: number, b: number) =>
-    a === 0 || b === 0 ? 0 : gfExp[gfLog[a] + gfLog[b]];
+  const gfMul = (a: number, b: number) => (a === 0 || b === 0 ? 0 : gfExp[gfLog[a] + gfLog[b]]);
 
   // Build generator polynomial
   const ecCount = cfg.ecBytes;
@@ -224,7 +223,7 @@ function generateQRMatrix(data: string): boolean[][] {
           const bitPos = 7 - (bitIndex % 8);
           const bit = (allCodewords[codewordIdx] >> bitPos) & 1;
           // Apply mask pattern 0: (row + col) % 2 === 0
-          const masked = bit ^ (((row + c) % 2 === 0) ? 1 : 0);
+          const masked = bit ^ ((row + c) % 2 === 0 ? 1 : 0);
           matrix[row][c] = masked === 1;
         }
         bitIndex++;
@@ -243,7 +242,7 @@ function generateQRMatrix(data: string): boolean[][] {
   matrix[8][7] = ((formatBits >> 8) & 1) === 1;
   matrix[8][8] = ((formatBits >> 7) & 1) === 1;
   matrix[7][8] = ((formatBits >> 6) & 1) === 1;
-  for (let i = 0; i <= 5; i++) matrix[5 - i][8] = ((formatBits >> (i)) & 1) === 1;
+  for (let i = 0; i <= 5; i++) matrix[5 - i][8] = ((formatBits >> i) & 1) === 1;
 
   // Second copy
   for (let i = 0; i <= 7; i++) matrix[size - 1 - i][8] = ((formatBits >> (14 - i)) & 1) === 1;

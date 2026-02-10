@@ -76,9 +76,7 @@ describe('useBridgePayment', () => {
     const autoBridgeFn = vi.fn().mockResolvedValue(mockBridgeResult())
     const onSuccess = vi.fn()
 
-    const { result } = renderHook(() =>
-      useBridgePayment({ bridgeFn, autoBridgeFn, onSuccess }),
-    )
+    const { result } = renderHook(() => useBridgePayment({ bridgeFn, autoBridgeFn, onSuccess }))
 
     await act(async () => {
       await result.current.autoBridge(autoBridgeParams)
@@ -94,9 +92,7 @@ describe('useBridgePayment', () => {
     const bridgeFn = vi.fn()
     const onError = vi.fn()
 
-    const { result } = renderHook(() =>
-      useBridgePayment({ bridgeFn, onError }),
-    )
+    const { result } = renderHook(() => useBridgePayment({ bridgeFn, onError }))
 
     await act(async () => {
       await result.current.autoBridge(autoBridgeParams)
@@ -141,9 +137,7 @@ describe('useBridgePayment', () => {
     const waitForDelivery = vi.fn()
     const bridgeFn = vi.fn().mockResolvedValue(mockBridgeResult({ waitForDelivery }))
 
-    const { result } = renderHook(() =>
-      useBridgePayment({ bridgeFn, autoWaitForDelivery: false }),
-    )
+    const { result } = renderHook(() => useBridgePayment({ bridgeFn, autoWaitForDelivery: false }))
 
     await act(async () => {
       await result.current.bridge(bridgeParams)
@@ -157,9 +151,7 @@ describe('useBridgePayment', () => {
     const bridgeFn = vi.fn().mockRejectedValue(new Error('Insufficient balance'))
     const onError = vi.fn()
 
-    const { result } = renderHook(() =>
-      useBridgePayment({ bridgeFn, onError }),
-    )
+    const { result } = renderHook(() => useBridgePayment({ bridgeFn, onError }))
 
     await act(async () => {
       await result.current.bridge(bridgeParams)
@@ -217,9 +209,7 @@ describe('useBridgePayment', () => {
   it('resets all state', async () => {
     const bridgeFn = vi.fn().mockResolvedValue(mockBridgeResult())
 
-    const { result } = renderHook(() =>
-      useBridgePayment({ bridgeFn, autoWaitForDelivery: true }),
-    )
+    const { result } = renderHook(() => useBridgePayment({ bridgeFn, autoWaitForDelivery: true }))
 
     await act(async () => {
       await result.current.bridge(bridgeParams)

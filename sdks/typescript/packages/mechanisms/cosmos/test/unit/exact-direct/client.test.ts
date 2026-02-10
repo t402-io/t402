@@ -4,12 +4,16 @@ import type { ClientCosmosSigner } from "../../../src/types";
 import type { PaymentRequirements } from "@t402/core/types";
 
 describe("ExactDirectCosmosClient", () => {
-  const createMockSigner = (address: string = "noble1abc123def456ghi789jkl"): ClientCosmosSigner => ({
+  const createMockSigner = (
+    address: string = "noble1abc123def456ghi789jkl",
+  ): ClientCosmosSigner => ({
     address,
     sendTokens: vi.fn().mockResolvedValue("TX_HASH_ABC123DEF456"),
   });
 
-  const createRequirements = (overrides: Partial<PaymentRequirements> = {}): PaymentRequirements => ({
+  const createRequirements = (
+    overrides: Partial<PaymentRequirements> = {},
+  ): PaymentRequirements => ({
     scheme: "exact-direct",
     network: "cosmos:noble-1",
     asset: "uusdc",
