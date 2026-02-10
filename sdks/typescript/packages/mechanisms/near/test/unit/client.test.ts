@@ -10,9 +10,9 @@ describe("ExactDirectNearClient", () => {
   beforeEach(() => {
     mockSigner = {
       accountId: "alice.near",
-      signAndSendTransaction: vi.fn().mockResolvedValue(
-        "9FtHUFBQsZ2MG77K3x3MJ9wjX3UT8zE4Bnv4RbdHJs3",
-      ),
+      signAndSendTransaction: vi
+        .fn()
+        .mockResolvedValue("9FtHUFBQsZ2MG77K3x3MJ9wjX3UT8zE4Bnv4RbdHJs3"),
     };
   });
 

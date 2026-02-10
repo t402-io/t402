@@ -2,7 +2,7 @@
  * WDK Multi-sig Tests
  */
 
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import type { Address, Hex } from 'viem'
 import {
   combineSignatures,

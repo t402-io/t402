@@ -5,18 +5,24 @@ import type { PaymentPayload, PaymentRequirements } from "@t402/core/types";
 import { NEAR_MAINNET_CAIP2, SCHEME_EXACT_DIRECT } from "../../src/constants";
 
 /** Helper to base64-encode ft_transfer args */
-function encodeFtTransferArgs(args: { receiver_id: string; amount: string; memo?: string }): string {
+function encodeFtTransferArgs(args: {
+  receiver_id: string;
+  amount: string;
+  memo?: string;
+}): string {
   return btoa(JSON.stringify(args));
 }
 
 /** Build a valid mock transaction result */
-function buildMockTransaction(overrides: Partial<{
-  receiverId: string;
-  signerId: string;
-  ftRecipient: string;
-  ftAmount: string;
-  succeeded: boolean;
-}>): TransactionResult {
+function buildMockTransaction(
+  overrides: Partial<{
+    receiverId: string;
+    signerId: string;
+    ftRecipient: string;
+    ftAmount: string;
+    succeeded: boolean;
+  }>,
+): TransactionResult {
   const opts = {
     receiverId: "usdt.tether-token.near",
     signerId: "alice.near",
@@ -27,9 +33,7 @@ function buildMockTransaction(overrides: Partial<{
   };
 
   return {
-    status: opts.succeeded
-      ? { SuccessValue: "" }
-      : { Failure: { error: "execution failed" } },
+    status: opts.succeeded ? { SuccessValue: "" } : { Failure: { error: "execution failed" } },
     transaction: {
       hash: "9FtHUFBQsZ2MG77K3x3MJ9wjX3UT8zE4Bnv4RbdHJs3",
       signer_id: opts.signerId,
@@ -67,12 +71,14 @@ describe("ExactDirectNearFacilitator", () => {
     };
   });
 
-  const makePayload = (overrides?: Partial<{
-    scheme: string;
-    network: string;
-    txHash: string;
-    from: string;
-  }>): PaymentPayload => ({
+  const makePayload = (
+    overrides?: Partial<{
+      scheme: string;
+      network: string;
+      txHash: string;
+      from: string;
+    }>,
+  ): PaymentPayload => ({
     t402Version: 2,
     accepted: {
       scheme: overrides?.scheme ?? SCHEME_EXACT_DIRECT,
@@ -129,10 +135,7 @@ describe("ExactDirectNearFacilitator", () => {
     it("should reject invalid scheme", async () => {
       const facilitator = new ExactDirectNearFacilitator(mockSigner);
 
-      const result = await facilitator.verify(
-        makePayload({ scheme: "wrong" }),
-        makeRequirements(),
-      );
+      const result = await facilitator.verify(makePayload({ scheme: "wrong" }), makeRequirements());
 
       expect(result.isValid).toBe(false);
       expect(result.invalidReason).toBe("invalid_scheme");
@@ -176,10 +179,7 @@ describe("ExactDirectNearFacilitator", () => {
     it("should reject invalid from address", async () => {
       const facilitator = new ExactDirectNearFacilitator(mockSigner);
 
-      const result = await facilitator.verify(
-        makePayload({ from: "X" }),
-        makeRequirements(),
-      );
+      const result = await facilitator.verify(makePayload({ from: "X" }), makeRequirements());
 
       expect(result.isValid).toBe(false);
       expect(result.invalidReason).toBe("invalid_from_address");
@@ -285,10 +285,7 @@ describe("ExactDirectNearFacilitator", () => {
     it("should fail settlement if verification fails", async () => {
       const facilitator = new ExactDirectNearFacilitator(mockSigner);
 
-      const result = await facilitator.settle(
-        makePayload({ scheme: "wrong" }),
-        makeRequirements(),
-      );
+      const result = await facilitator.settle(makePayload({ scheme: "wrong" }), makeRequirements());
 
       expect(result.success).toBe(false);
       expect(result.errorReason).toBe("invalid_scheme");

@@ -26,7 +26,7 @@ if not settings.configured:
     )
     django.setup()
 
-from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.test import RequestFactory
 
 from t402.django import (
@@ -35,7 +35,6 @@ from t402.django import (
     PaymentDetails,
 )
 from t402.types import (
-    T402_VERSION_V1,
     T402_VERSION_V2,
     VerifyResponse,
     SettleResponse,

@@ -6,7 +6,7 @@ with mocked web3 calls.
 
 import io
 import json
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -19,12 +19,8 @@ from t402.mcp.web3_utils import (
     extract_message_guid_from_receipt,
     format_wei_to_ether,
     get_erc20_balance,
-    get_erc20_contract,
     get_native_balance,
-    get_oft_contract,
     get_web3_provider,
-    quote_bridge_fee,
-    transfer_erc20,
 )
 from t402.mcp.constants import (
     CHAIN_IDS,

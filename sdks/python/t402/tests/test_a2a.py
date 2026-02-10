@@ -16,7 +16,6 @@ from t402.a2a import (
     A2AMessage,
     A2ATaskStatus,
     A2ATask,
-    A2AExtension,
     A2AAgentCard,
     A2ASkill,
     is_payment_required,

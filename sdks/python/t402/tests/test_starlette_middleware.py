@@ -17,7 +17,6 @@ from t402.starlette import (
     PaymentDetails,
 )
 from t402.types import (
-    T402_VERSION_V1,
     T402_VERSION_V2,
     VerifyResponse,
     SettleResponse,

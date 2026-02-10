@@ -20,23 +20,16 @@ from t402.schemes.cosmos import (
     ExactDirectCosmosServerScheme,
     ExactDirectCosmosFacilitatorScheme,
     # Configurations
-    ExactDirectCosmosClientConfig,
-    ExactDirectCosmosServerConfig,
     ExactDirectCosmosFacilitatorConfig,
     # Signer protocols
     ClientCosmosSigner,
     FacilitatorCosmosSigner,
     # Payload types
-    ExactDirectPayload,
     TransactionResult,
-    MsgSend,
-    Coin,
-    # Constants
     SCHEME_EXACT_DIRECT,
     COSMOS_NOBLE_MAINNET,
     COSMOS_NOBLE_TESTNET,
     CAIP_FAMILY,
-    USDC_DENOM,
     MSG_TYPE_SEND,
 )
 
