@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.1] - 2026-02-09
+
+### Fixed
+- **Python Flask V2 Headers** - Flask middleware now supports V2 protocol (`PAYMENT-SIGNATURE`, `PAYMENT-REQUIRED`, `PAYMENT-RESPONSE`) with V1 fallback
+- **Java EVM Network Coverage** - All 22 USDT0 + 5 legacy USDT networks (BNB, Avalanche, Fantom, Celo, Kaia)
+- **Facilitator RPC Prefixes** - Added 7 missing `EVMNetworkPrefixes` entries for dynamic RPC configuration
+
+### SDK Versions
+- TypeScript: v2.4.0 (unchanged)
+- Go: v1.9.0 (unchanged)
+- Python: v1.10.1
+- Java: v1.10.0
+
 ## [2.4.0] - 2026-02-06
 
 ### Added
@@ -214,7 +227,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - EVM support with EIP-3009 authorization
 - Basic client and server implementations
 
-[Unreleased]: https://github.com/t402-io/t402/compare/v2.4.0...HEAD
+[Unreleased]: https://github.com/t402-io/t402/compare/v2.4.1...HEAD
+[2.4.1]: https://github.com/t402-io/t402/compare/v2.4.0...v2.4.1
 [2.4.0]: https://github.com/t402-io/t402/compare/v2.3.1...v2.4.0
 [2.3.1]: https://github.com/t402-io/t402/compare/v2.1.0...v2.3.1
 [2.1.0]: https://github.com/t402-io/t402/compare/v2.0.0...v2.1.0

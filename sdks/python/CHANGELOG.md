@@ -4,6 +4,11 @@ All notable changes to the T402 Python SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [1.10.1] - 2026-02-09
+
+### Fixed
+- **Flask V2 Protocol Headers** - Flask middleware now supports V2 protocol (`PAYMENT-SIGNATURE`, `PAYMENT-REQUIRED`, `PAYMENT-RESPONSE`) with V1 fallback, matching FastAPI/Django/Starlette behavior
+
 ## [1.10.0] - 2026-02-06
 
 ### Added
@@ -199,7 +204,8 @@ All notable changes to the T402 Python SDK will be documented in this file.
 - EVM support with EIP-3009
 - Core types and utilities
 
-[Unreleased]: https://github.com/t402-io/t402/compare/python/v1.10.0...HEAD
+[Unreleased]: https://github.com/t402-io/t402/compare/python/v1.10.1...HEAD
+[1.10.1]: https://github.com/t402-io/t402/compare/python/v1.10.0...python/v1.10.1
 [1.10.0]: https://github.com/t402-io/t402/compare/python/v1.9.1...python/v1.10.0
 [1.9.1]: https://github.com/t402-io/t402/compare/python/v1.9.0...python/v1.9.1
 [1.9.0]: https://github.com/t402-io/t402/compare/python/v1.8.0...python/v1.9.0

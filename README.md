@@ -89,7 +89,7 @@ pnpm add -g @t402/cli
 t402 --help
 ```
 
-### Python (v1.10.0)
+### Python (v1.10.1)
 
 ```shell
 pip install t402
@@ -111,20 +111,20 @@ go install github.com/t402-io/t402/sdks/go/cmd/t402@v1.9.0
 t402 --help
 ```
 
-### Java (v1.9.0)
+### Java (v1.10.0)
 
 ```xml
 <dependency>
   <groupId>io.t402</groupId>
   <artifactId>t402</artifactId>
-  <version>1.9.0</version>
+  <version>1.10.0</version>
 </dependency>
 ```
 
 Or with Gradle:
 
 ```groovy
-implementation 'io.t402:t402:1.9.0'
+implementation 'io.t402:t402:1.10.0'
 ```
 
 </details>
