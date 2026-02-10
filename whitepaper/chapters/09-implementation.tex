@@ -18,10 +18,10 @@ This chapter provides practical guidance for integrating \tprotocol{} into appli
 \toprule
 \textbf{SDK} & \textbf{Version} & \textbf{Registry} & \textbf{Frameworks} & \textbf{License} \\
 \midrule
-TypeScript & 2.4.0 & npm @t402/* & Express, Fastify, Next.js & Apache 2.0 \\
-Python & 1.10.0 & PyPI & FastAPI, Flask, Django & Apache 2.0 \\
-Go & 1.9.0 & Go Modules & Gin, Echo, Chi & Apache 2.0 \\
-Java & 1.9.0 & Maven Central & Spring Boot, WebFlux & Apache 2.0 \\
+TypeScript & 2.4.0 & npm @t402/* & Express, Hono, Fastify, Next.js & Apache 2.0 \\
+Python & 1.10.1 & PyPI & FastAPI, Flask, Django, Starlette & Apache 2.0 \\
+Go & 1.9.0 & Go Modules & Gin, Echo, Chi, Fiber & Apache 2.0 \\
+Java & 1.10.0 & Maven Central & Servlet, Spring, WebFlux, Micronaut, Quarkus & Apache 2.0 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -61,24 +61,23 @@ The TypeScript SDK is organized as a monorepo with 29 modular packages:
 ]
 
 % Core layer
-\node[core] (types) at (0,0) {@t402/types};
-\node[core] (core) at (2.5,0) {@t402/core};
-\node[core] (schemes) at (5,0) {@t402/schemes};
+\node[core] (core) at (1.25,0) {@t402/core};
+\node[core] (evmcore) at (4,0) {@t402/evm-core};
 
 % Client layer
 \node[pkg] (fetch) at (0,-1.5) {@t402/fetch};
 \node[pkg] (axios) at (2.5,-1.5) {@t402/axios};
-\node[pkg] (mcp-client) at (5,-1.5) {@t402/mcp-client};
+\node[pkg] (mcp) at (5,-1.5) {@t402/mcp};
 
 % Server layer
 \node[pkg] (express) at (-1,-3) {@t402/express};
 \node[pkg] (fastify) at (1.5,-3) {@t402/fastify};
 \node[pkg] (hono) at (4,-3) {@t402/hono};
-\node[pkg] (mcp-server) at (6.5,-3) {@t402/mcp-server};
+\node[pkg] (next) at (6.5,-3) {@t402/next};
 
 % Chain handlers
 \node[pkg] (evm) at (0,-4.5) {@t402/evm};
-\node[pkg] (solana) at (2.5,-4.5) {@t402/solana};
+\node[pkg] (svm) at (2.5,-4.5) {@t402/svm};
 \node[pkg] (ton) at (5,-4.5) {@t402/ton};
 
 % Labels
@@ -90,7 +89,7 @@ The TypeScript SDK is organized as a monorepo with 29 modular packages:
 % Arrows
 \draw[->, gray, thick] (fetch) -- (core);
 \draw[->, gray, thick] (express) -- (core);
-\draw[->, gray, thick] (evm) -- (schemes);
+\draw[->, gray, thick] (evm) -- (evmcore);
 
 \end{tikzpicture}
 \caption{TypeScript SDK package architecture}
@@ -106,11 +105,13 @@ The TypeScript SDK is organized as a monorepo with 29 modular packages:
 \toprule
 \textbf{Category} & \textbf{Packages} & \textbf{Purpose} \\
 \midrule
-Core & types, core, schemes & Type definitions, core logic \\
-Client & fetch, axios, mcp-client & HTTP clients with auto-payment \\
+Core & core, evm-core, extensions & Type definitions, core logic \\
+Client & fetch, axios & HTTP clients with auto-payment \\
 Server & express, fastify, hono, next & Server middleware \\
-MCP & mcp-server, mcp-client & Model Context Protocol \\
-Chains & evm, solana, ton, tron & Chain-specific handlers \\
+AI & mcp, a2a & MCP server, A2A transport \\
+Chains & evm, svm, ton, tron, near, aptos, tezos, polkadot, stacks, cosmos & Chain-specific handlers \\
+UI & paywall, react, vue & Frontend components \\
+WDK & wdk, wdk-gasless, wdk-bridge, wdk-multisig & Tether WDK integration \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -228,8 +229,9 @@ package main
 
 import (
     "github.com/gin-gonic/gin"
-    "github.com/t402-io/t402/sdks/go/middleware"
-    "github.com/t402-io/t402/sdks/go/types"
+    t402 "github.com/t402-io/t402/sdks/go"
+    t402http "github.com/t402-io/t402/sdks/go/http"
+    t402gin "github.com/t402-io/t402/sdks/go/http/gin"
 )
 
 func main() {
@@ -444,8 +446,8 @@ import (
     "fmt"
     "log"
 
-    "github.com/t402-io/t402/sdks/go/client"
-    "github.com/t402-io/t402/sdks/go/schemes/evm"
+    t402http "github.com/t402-io/t402/sdks/go/http"
+    "github.com/t402-io/t402/sdks/go/mechanisms/evm"
 )
 
 func main() {
@@ -489,9 +491,9 @@ func main() {
 
 \subsection{Creating a Paid MCP Tool}
 
-\begin{lstlisting}[language=typescript,caption={MCP server with paid tools}]
+\begin{lstlisting}[language=typescript,caption={MCP server with paid tools (conceptual)}]
 import { McpServer } from "@modelcontextprotocol/sdk/server";
-import { T402McpPlugin } from "@t402/mcp-server";
+import { T402McpPlugin } from "@t402/mcp";
 
 const server = new McpServer({
   name: "financial-tools",
@@ -571,9 +573,9 @@ server.listen();
 
 \subsection{Unit Testing}
 
-\begin{lstlisting}[language=typescript,caption={Unit testing with mocks}]
+\begin{lstlisting}[language=typescript,caption={Unit testing with mocks (conceptual)}]
 import { describe, it, expect, vi } from "vitest";
-import { createMockPayment, MockFacilitator } from "@t402/testing";
+import { createMockPayment, MockFacilitator } from "@t402/core/testing";
 
 describe("Payment Middleware", () => {
   it("should require payment for protected routes", async () => {
@@ -600,7 +602,7 @@ describe("Payment Middleware", () => {
 
     const response = await request(app)
       .get("/api/premium")
-      .set("X-PAYMENT", encodePayment(payment))
+      .set("PAYMENT-SIGNATURE", encodePayment(payment))
       .expect(200);
 
     expect(response.body.data).toBeDefined();
@@ -613,7 +615,7 @@ describe("Payment Middleware", () => {
 
     await request(app)
       .get("/api/premium")
-      .set("X-PAYMENT", encodePayment(payment))
+      .set("PAYMENT-SIGNATURE", encodePayment(payment))
       .expect(402);
   });
 });
@@ -621,8 +623,8 @@ describe("Payment Middleware", () => {
 
 \subsection{Integration Testing}
 
-\begin{lstlisting}[language=typescript,caption={Integration testing with testnet}]
-import { T402TestClient } from "@t402/testing";
+\begin{lstlisting}[language=typescript,caption={Integration testing with testnet (conceptual)}]
+import { T402TestClient } from "@t402/core/testing";
 
 describe("Payment Flow Integration", () => {
   let client: T402TestClient;

@@ -255,6 +255,13 @@ Base/Optimism & $\sim$2 seconds & Low \\
 Arbitrum & $\sim$1 second & Low \\
 Solana & $\sim$0.4 seconds & Very Low \\
 TON & $\sim$5 seconds & Low \\
+TRON & $\sim$3 seconds & Low \\
+NEAR & $\sim$1.2 seconds & Low \\
+Aptos & $\sim$1 second & Very Low \\
+Tezos & $\sim$30 seconds & Low \\
+Polkadot & $\sim$12 seconds & Low \\
+Stacks & $\sim$10 minutes & Moderate \\
+Cosmos/Noble & $\sim$6 seconds & Low \\
 Ethereum L1 & $\sim$13 minutes & Moderate \\
 \bottomrule
 \end{tabular}
@@ -335,6 +342,12 @@ EVM & ECDSA secp256k1 & 256 bits & 128 bits \\
 Solana & Ed25519 & 256 bits & 128 bits \\
 TON & Ed25519 & 256 bits & 128 bits \\
 TRON & ECDSA secp256k1 & 256 bits & 128 bits \\
+NEAR & Ed25519 & 256 bits & 128 bits \\
+Aptos & Ed25519 & 256 bits & 128 bits \\
+Tezos & Ed25519 / secp256k1 & 256 bits & 128 bits \\
+Polkadot & Sr25519 (Schnorrkel) & 256 bits & 128 bits \\
+Stacks & ECDSA secp256k1 & 256 bits & 128 bits \\
+Cosmos & ECDSA secp256k1 & 256 bits & 128 bits \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -577,7 +590,7 @@ func validateSolanaTransaction(tx *solana.Transaction, req *Requirements) error 
 version: '3.8'
 services:
   facilitator:
-    image: t402/facilitator:2.0.0
+    image: ghcr.io/t402-io/facilitator:latest
     security_opt:
       - no-new-privileges:true
     read_only: true
@@ -666,7 +679,8 @@ Low & 7 days & Best effort & Minor info leak \\
 \midrule
 Protocol Design & Internal & 2024 Q4 & Complete \\
 SDK Code Review & Internal & 2025 Q1 & Complete \\
-External Audit & --- & 2025 Q2 & Planned \\
+Security Hardening & Internal & 2026 Q1 & Complete \\
+Smart Contract Audit & External & TBD & Pending \\
 \bottomrule
 \end{tabular}
 \end{table}

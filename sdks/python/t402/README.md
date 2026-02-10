@@ -16,8 +16,8 @@ uv add t402
 
 ## Features
 
-- **Multi-Chain Support**: EVM (Ethereum, Base, Polygon, etc.), TON, TRON, Solana
-- **Server Middleware**: FastAPI and Flask integrations
+- **Multi-Chain Support**: EVM (19 USDT0 networks), TON, TRON, Solana, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos
+- **Server Middleware**: FastAPI, Flask, Django, and Starlette integrations
 - **Client Libraries**: httpx and requests adapters
 - **ERC-4337 Account Abstraction**: Gasless payments with smart accounts
 - **USDT0 Cross-Chain Bridge**: LayerZero-powered bridging
@@ -184,14 +184,14 @@ facilitator = FacilitatorClient(facilitator_url)
 @app.get("/foo")
 async def foo(req: request: Request):
     payment_required = PaymentRequiredResponse(
-        t402_version: 1,
+        t402_version: 2,
         accepts=[payment_requirements],
         error="",
     )
-    payment_header = req.headers.get("X-PAYMENT", "")
+    payment_header = req.headers.get("PAYMENT-SIGNATURE", "") or req.headers.get("X-PAYMENT", "")
 
     if payment_header == "":
-        payment_required.error = "X-PAYMENT header not set"
+        payment_required.error = "PAYMENT-SIGNATURE header not set"
         return JSONResponse(
             content=payment_required.model_dump(by_alias=True),
             status_code=402,
@@ -209,7 +209,7 @@ async def foo(req: request: Request):
 
     settle_response = await facilitator.settle(payment, payment_requirements)
     if settle_response.success:
-        response.headers["X-PAYMENT-RESPONSE"] = base64.b64encode(
+        response.headers["PAYMENT-RESPONSE"] = base64.b64encode(
             settle_response.model_dump_json().encode("utf-8")
         ).decode("utf-8")
     else:

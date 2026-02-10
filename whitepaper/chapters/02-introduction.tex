@@ -314,6 +314,7 @@ Aptos & Fungible Asset & Ed25519 \\
 Tezos & FA2 & Ed25519 \\
 Polkadot & Asset Hub & Sr25519 \\
 Stacks & SIP-010 & ECDSA secp256k1 \\
+Cosmos/Noble & Native Token & secp256k1 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -344,10 +345,10 @@ app.use(paymentMiddleware({
 Client-side integration is equally straightforward:
 
 \begin{lstlisting}[language=typescript,caption={Client-side integration example}]
-import { T402Client } from "@t402/client";
+import { createT402Fetch } from "@t402/fetch";
 
-const client = new T402Client({ signer });
-const response = await client.fetch(
+const t402Fetch = createT402Fetch({ signer });
+const response = await t402Fetch(
   "https://api.example.com/premium"
 );
 \end{lstlisting}
@@ -385,7 +386,7 @@ This whitepaper is organized as follows:
 
     \item[Chapter 4: Core Specifications] details data schemas, network identifiers, error codes, and protocol extensions.
 
-    \item[Chapter 5: Payment Schemes] describes payment schemes, focusing on the ``exact'' scheme across EVM, Solana, TON, and TRON.
+    \item[Chapter 5: Payment Schemes] describes payment schemes, focusing on the ``exact'' scheme across all supported chains and the ``up-to'' scheme for metered payments.
 
     \item[Chapter 6: Transport Layers] covers transport implementations for HTTP, MCP, and A2A protocols.
 

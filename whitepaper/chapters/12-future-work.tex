@@ -52,7 +52,7 @@ This chapter outlines planned enhancements, research directions, and long-term v
 \draw[timeline] (0,0) -- (14,0);
 
 % Phase markers
-\foreach \x/\label in {0/Q1'25, 3.5/Q2'25, 7/Q3'25, 10.5/Q4'25, 14/Q1'26} {
+\foreach \x/\label in {0/Q1'25, 3.5/Q3'25, 7/Q1'26, 10.5/Q3'26, 14/Q1'27} {
     \draw[gray] (\x,-0.1) -- (\x,0.1);
     \node[below, font=\tiny\bfseries, gray] at (\x,-0.3) {\label};
 }
@@ -104,13 +104,13 @@ This chapter outlines planned enhancements, research directions, and long-term v
 \Cref{fig:roadmap} illustrates the four-phase development plan for \tprotocol{}:
 
 \begin{description}
-    \item[Phase 1 -- Foundation (Completed)] Core protocol specification, SDK implementations in TypeScript, Python, Go, and Java, plus the Facilitator service MVP.
+    \item[Phase 1 -- Foundation (Completed)] Core protocol specification, SDK implementations in TypeScript, Python, Go, and Java, plus the Facilitator service MVP with 10 blockchain families and 44+ networks.
 
-    \item[Phase 2 -- Enhancement (Current)] Protocol extensions including Up-To metered billing, Permit2 integration for improved gas efficiency, and Sign-In-With-X for identity.
+    \item[Phase 2 -- Enhancement (Completed)] Protocol extensions including Up-To scheme (implemented for SVM, TON, TRON, NEAR), hardware wallet support (TypeScript, Go), Cosmos chain support, MCP tool parity across all SDKs, and additional HTTP framework integrations.
 
-    \item[Phase 3 -- Scale] Infrastructure scaling with multi-region deployment, new SDK platforms (Rust, Swift), and subscription billing support.
+    \item[Phase 3 -- Scale (Planned)] Infrastructure scaling with multi-region deployment, new SDK platforms (Rust, Swift), and subscription billing support.
 
-    \item[Phase 4 -- Standardize] Industry standardization through IETF, W3C integration, and advanced privacy features using zero-knowledge proofs.
+    \item[Phase 4 -- Standardize (Planned)] Industry standardization through IETF, W3C integration, and advanced privacy features using zero-knowledge proofs.
 \end{description}
 
 %==============================================================================
@@ -121,7 +121,7 @@ This chapter outlines planned enhancements, research directions, and long-term v
 \subsection{Up-To Scheme}
 \label{subsec:up-to-scheme}
 
-The ``up-to'' scheme enables metered, usage-based billing where clients authorize a maximum amount upfront, and providers settle only the actual usage. This pattern is essential for:
+The ``up-to'' scheme enables metered, usage-based billing where clients authorize a maximum amount upfront, and providers settle only the actual usage. The up-to scheme is currently implemented for Solana (SVM), TON, TRON, and NEAR chains. EVM support via Permit2 is planned. This pattern is essential for:
 
 \begin{itemize}
     \item \textbf{Variable-cost APIs}: AI inference, cloud compute, data processing
@@ -375,7 +375,7 @@ SIWx complements \tprotocol{} by enabling:
 async function authMiddleware(req: Request) {
   // Priority: 1) Session credit, 2) T402 payment, 3) SIWx identity
   if (req.headers.get('Authorization')) return checkCredit(req);
-  if (req.headers.get('X-Payment')) return processPayment(req);
+  if (req.headers.get('PAYMENT-SIGNATURE')) return processPayment(req);
   if (req.headers.get('X-SIWx')) return verifySIWx(req);
   throw new PaymentRequiredError();
 }
@@ -788,7 +788,7 @@ The \tprotocol{} specification will be proposed as an Internet-Draft:
     \item \textbf{RFC 9XXX: HTTP Payment Required (402) Protocol}
     \begin{itemize}
         \item Updates RFC 7231 with 402 semantics
-        \item Defines \header{X-Payment} and \header{X-Payment-Response} headers
+        \item Defines \header{PAYMENT-SIGNATURE}, \header{PAYMENT-REQUIRED}, and \header{PAYMENT-RESPONSE} headers
         \item Specifies scheme registry mechanism
     \end{itemize}
 
@@ -803,10 +803,9 @@ The \tprotocol{} specification will be proposed as an Internet-Draft:
 \subsubsection{Timeline}
 
 \begin{enumerate}
-    \item \textbf{Q3 2025}: Draft submission to IETF HTTP Working Group
-    \item \textbf{Q4 2025}: Working group adoption
-    \item \textbf{Q2 2026}: Last Call
-    \item \textbf{Q4 2026}: RFC publication
+    \item \textbf{2026}: Draft submission to IETF HTTP Working Group
+    \item \textbf{2026--2027}: Working group adoption and review
+    \item \textbf{2027}: Last Call and RFC publication
 \end{enumerate}
 
 %------------------------------------------------------------------------------
@@ -836,7 +835,7 @@ const paymentRequest = new PaymentRequest(
 
 const response = await paymentRequest.show();
 const paymentHeader = response.details.paymentHeader;
-// Use paymentHeader in X-Payment header
+// Use paymentHeader in PAYMENT-SIGNATURE header
 \end{lstlisting}
 
 %------------------------------------------------------------------------------

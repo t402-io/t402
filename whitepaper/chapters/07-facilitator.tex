@@ -53,9 +53,10 @@ The Facilitator is a critical infrastructure component that handles blockchain i
 \node[service] (verify) at (0,0.5) {Verification\\Service};
 \node[service] (settle) at (3,0.5) {Settlement\\Service};
 
-\node[service] (evm) at (-2,-0.8) {EVM\\Handler};
-\node[service] (sol) at (0,-0.8) {Solana\\Handler};
-\node[service] (ton) at (2,-0.8) {TON\\Handler};
+\node[service] (evm) at (-3,-0.8) {EVM\\Handler};
+\node[service] (sol) at (-1,-0.8) {Solana\\Handler};
+\node[service] (ton) at (1,-0.8) {TON\\Handler};
+\node[service] (more) at (3,-0.8) {+7 more};
 
 % External stores
 \node[store] (redis) at (-5,0) {Redis};
@@ -67,9 +68,11 @@ The Facilitator is a critical infrastructure component that handles blockchain i
 \draw[->, thick] (verify) -- (evm);
 \draw[->, thick] (verify) -- (sol);
 \draw[->, thick] (verify) -- (ton);
+\draw[->, thick] (verify) -- (more);
 \draw[->, thick] (settle) -- (evm);
 \draw[->, thick] (settle) -- (sol);
 \draw[->, thick] (settle) -- (ton);
+\draw[->, thick] (settle) -- (more);
 
 \draw[<->, thick, gray] (redis) -- (api);
 \draw[<->, thick, gray] (rpc) -- (settle);
@@ -268,7 +271,10 @@ Returns supported networks, schemes, and signer addresses.
   "signers": {
     "eip155:*": ["0xC88f67e776f16DcFBf42e6bDda1B82604448899B"],
     "solana:*": ["8GGtWHRQ1wz5gDKE2KXZLktqzcfV1CBqSbeUZjA7hoWL"],
-    "tron:*": ["TT1MqNNj2k5qdGA6nrrCodW6oyHbbAreQ5"]
+    "tron:*": ["TT1MqNNj2k5qdGA6nrrCodW6oyHbbAreQ5"],
+    "ton:*": ["EQDjv9CUEJ__D_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkEUe"],
+    "stacks:*": ["SP36B1B191JTQAZTRKKWRN7J0YHHM41W9P9P7EPR5"],
+    "cosmos:*": ["noble1ejc2c2gvk46h7kyulx9fus85vdpq0zdjwkfav0"]
   },
   "version": "2.0.0"
 }
@@ -666,7 +672,7 @@ A pre-built Grafana dashboard is available at:
 \node[panel] at (0,0) {Settlement\\Success Rate\\[0.3cm]\Large 99.8\%};
 \node[panel] at (4,0) {Avg Latency\\[0.3cm]\Large 145ms};
 \node[panel] at (8,0) {24h Volume\\[0.3cm]\Large \$12,450};
-\node[panel] at (0,-2.5) {Active\\Networks\\[0.3cm]\Large 7};
+\node[panel] at (0,-2.5) {Active\\Networks\\[0.3cm]\Large 44};
 \node[panel] at (4,-2.5) {Hot Wallet\\Balance\\[0.3cm]\Large \$523};
 \node[panel] at (8,-2.5) {Error Rate\\[0.3cm]\Large 0.2\%};
 

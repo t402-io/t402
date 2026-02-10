@@ -87,9 +87,9 @@ The HTTP transport is the canonical implementation, using standard HTTP mechanis
 \toprule
 \textbf{Header} & \textbf{Direction} & \textbf{Content} \\
 \midrule
-\header{X-PAYMENT-REQUIRED} & S $\to$ C & Base64url(PaymentRequirements) \\
-\header{X-PAYMENT} & C $\to$ S & Base64url(PaymentPayload) \\
-\header{X-PAYMENT-RESPONSE} & S $\to$ C & Base64url(SettlementResponse) \\
+\header{PAYMENT-REQUIRED} & S $\to$ C & Base64url(PaymentRequirements) \\
+\header{PAYMENT-SIGNATURE} & C $\to$ S & Base64url(PaymentPayload) \\
+\header{PAYMENT-RESPONSE} & S $\to$ C & Base64url(SettlementResponse) \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -108,11 +108,11 @@ All header values use Base64url encoding (RFC 4648~\cite{base64} \S5) without pa
 \toprule
 \textbf{T402 State} & \textbf{HTTP} & \textbf{Header} & \textbf{Body} \\
 \midrule
-Payment Required & 402 & X-PAYMENT-REQUIRED & Error JSON \\
+Payment Required & 402 & PAYMENT-REQUIRED & Error JSON \\
 Invalid Payload & 400 & -- & Error details \\
-Verification Failed & 402 & X-PAYMENT-RESPONSE & Error details \\
-Settlement Failed & 402 & X-PAYMENT-RESPONSE & Error details \\
-Success & 200 & X-PAYMENT-RESPONSE & Resource \\
+Verification Failed & 402 & PAYMENT-RESPONSE & Error details \\
+Settlement Failed & 402 & PAYMENT-RESPONSE & Error details \\
+Success & 200 & PAYMENT-RESPONSE & Resource \\
 Server Error & 500 & -- & Error details \\
 \bottomrule
 \end{tabular}
@@ -154,11 +154,11 @@ Server Error & 500 & -- & Error details \\
 
 % Messages
 \draw[msg] (0,-1) -- node[above, font=\tiny] {GET /resource} (6,-1);
-\draw[msg, red!70] (6,-1.8) -- node[above, font=\tiny] {402 + X-PAYMENT-REQUIRED} (0,-1.8);
+\draw[msg, red!70] (6,-1.8) -- node[above, font=\tiny] {402 + PAYMENT-REQUIRED} (0,-1.8);
 
 \draw[msg, blue!70] (0,-2.8) -- node[above, font=\tiny] {Sign authorization} (0,-3.2);
 
-\draw[msg] (0,-3.8) -- node[above, font=\tiny] {GET /resource + X-PAYMENT} (6,-3.8);
+\draw[msg] (0,-3.8) -- node[above, font=\tiny] {GET /resource + PAYMENT-SIGNATURE} (6,-3.8);
 
 \draw[msg, orange!70] (6,-4.6) -- node[above, font=\tiny] {POST /verify} (12,-4.6);
 \draw[msg, orange!70] (12,-5.2) -- node[above, font=\tiny] {\{isValid: true\}} (6,-5.2);
@@ -166,7 +166,7 @@ Server Error & 500 & -- & Error details \\
 \draw[msg, orange!70] (6,-6) -- node[above, font=\tiny] {POST /settle} (12,-6);
 \draw[msg, orange!70] (12,-6.6) -- node[above, font=\tiny] {\{success: true, tx\}} (6,-6.6);
 
-\draw[msg, green!60!black] (6,-7.4) -- node[above, font=\tiny] {200 + X-PAYMENT-RESPONSE + Body} (0,-7.4);
+\draw[msg, green!60!black] (6,-7.4) -- node[above, font=\tiny] {200 + PAYMENT-RESPONSE + Body} (0,-7.4);
 
 % Phase labels
 \node[note, violet] at (-1.5,-1.4) {Phase 1:\\Discovery};
@@ -190,7 +190,7 @@ User-Agent: T402-Client/2.0
 # Server responds with payment requirements
 HTTP/1.1 402 Payment Required
 Content-Type: application/json
-X-PAYMENT-REQUIRED: eyJ0NDAyVmVyc2lvbiI6Miwic...
+PAYMENT-REQUIRED: eyJ0NDAyVmVyc2lvbiI6Miwic...
 X-T402-Version: 2
 
 {
@@ -205,12 +205,12 @@ X-T402-Version: 2
 GET /api/premium/data HTTP/1.1
 Host: api.example.com
 Accept: application/json
-X-PAYMENT: eyJ0NDAyVmVyc2lvbiI6Miwi...
+PAYMENT-SIGNATURE: eyJ0NDAyVmVyc2lvbiI6Miwi...
 
 # Server returns resource with settlement confirmation
 HTTP/1.1 200 OK
 Content-Type: application/json
-X-PAYMENT-RESPONSE: eyJzdWNjZXNzIjp0cnVlLC...
+PAYMENT-RESPONSE: eyJzdWNjZXNzIjp0cnVlLC...
 X-T402-Transaction: 0x7a8b9c...
 
 {
@@ -223,7 +223,7 @@ X-T402-Transaction: 0x7a8b9c...
 \begin{lstlisting}[language=json,caption={Payment verification failed}]
 HTTP/1.1 402 Payment Required
 Content-Type: application/json
-X-PAYMENT-RESPONSE: eyJzdWNjZXNzIjpmYWxzZS...
+PAYMENT-RESPONSE: eyJzdWNjZXNzIjpmYWxzZS...
 
 {
   "error": "Payment verification failed",
@@ -235,7 +235,7 @@ X-PAYMENT-RESPONSE: eyJzdWNjZXNzIjpmYWxzZS...
 \begin{lstlisting}[language=json,caption={Insufficient funds}]
 HTTP/1.1 402 Payment Required
 Content-Type: application/json
-X-PAYMENT-RESPONSE: eyJzdWNjZXNzIjpmYWxzZS...
+PAYMENT-RESPONSE: eyJzdWNjZXNzIjpmYWxzZS...
 
 {
   "error": "Payment failed",
@@ -255,7 +255,7 @@ Accept-Payment: network=eip155:8453, network=eip155:42161
 
 # Server responds with filtered options
 HTTP/1.1 402 Payment Required
-X-PAYMENT-REQUIRED: eyJ0NDAyVmVyc2lvbiI6Mi...
+PAYMENT-REQUIRED: eyJ0NDAyVmVyc2lvbiI6Mi...
 Vary: Accept-Payment
 \end{lstlisting}
 

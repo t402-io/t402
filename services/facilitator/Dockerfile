@@ -11,7 +11,7 @@ WORKDIR /app
 
 # Copy go mod files from root (for replace directive to work)
 COPY sdks/go/go.mod sdks/go/go.sum ./sdks/go/
-COPY services/facilitator/go.mod ./services/facilitator/
+COPY services/facilitator/go.mod services/facilitator/go.sum ./services/facilitator/
 
 # Download dependencies
 WORKDIR /app/services/facilitator

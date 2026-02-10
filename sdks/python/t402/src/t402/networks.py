@@ -1,7 +1,7 @@
 from typing import Literal, Union, get_args
 
 
-# EVM Networks
+# EVM Networks (V1 short names, use EVM_NETWORK_TO_CHAIN_ID for chain IDs)
 EVMNetworks = Literal[
     # Standard networks
     "base", "base-sepolia", "avalanche-fuji", "avalanche",
@@ -26,11 +26,36 @@ SVMNetworks = Literal[
     "solana:4uhcVJyU9pJkvQyS88uRDiswHXSCkY3z",  # Testnet
 ]
 
+# NEAR Networks (CAIP-2 format)
+NEARNetworks = Literal["near:mainnet", "near:testnet"]
+
+# Aptos Networks (CAIP-2 format)
+AptosNetworks = Literal["aptos:1", "aptos:2", "aptos:149"]
+
+# Tezos Networks (CAIP-2 format)
+TezosNetworks = Literal["tezos:NetXdQprcVkpaWU", "tezos:NetXnHfVqm9iesp"]
+
+# Polkadot Networks (CAIP-2 format)
+PolkadotNetworks = Literal[
+    "polkadot:68d56f15f85d3136970ec16946040bc1",  # Asset Hub
+    "polkadot:e143f23803ac50e8f6f8e62695d1ce9e",  # Westend Asset Hub
+]
+
+# Stacks Networks (CAIP-2 format)
+StacksNetworks = Literal["stacks:1", "stacks:2147483648"]
+
+# Cosmos Networks (CAIP-2 format)
+CosmosNetworks = Literal["cosmos:noble-1", "cosmos:grand-1"]
+
 # Legacy SVM network identifiers (V1 format)
 SVMNetworksV1 = Literal["solana", "solana-devnet", "solana-testnet"]
 
 # All supported networks
-SupportedNetworks = Union[EVMNetworks, TONNetworks, TRONNetworks, SVMNetworks]
+SupportedNetworks = Union[
+    EVMNetworks, TONNetworks, TRONNetworks, SVMNetworks,
+    NEARNetworks, AptosNetworks, TezosNetworks, PolkadotNetworks,
+    StacksNetworks, CosmosNetworks,
+]
 
 
 def get_all_supported_networks() -> tuple[str, ...]:
@@ -39,7 +64,13 @@ def get_all_supported_networks() -> tuple[str, ...]:
     ton = get_args(TONNetworks)
     tron = get_args(TRONNetworks)
     svm = get_args(SVMNetworks)
-    return evm + ton + tron + svm
+    near = get_args(NEARNetworks)
+    aptos = get_args(AptosNetworks)
+    tezos = get_args(TezosNetworks)
+    polkadot = get_args(PolkadotNetworks)
+    stacks = get_args(StacksNetworks)
+    cosmos = get_args(CosmosNetworks)
+    return evm + ton + tron + svm + near + aptos + tezos + polkadot + stacks + cosmos
 
 
 EVM_NETWORK_TO_CHAIN_ID = {
@@ -70,6 +101,11 @@ EVM_NETWORK_TO_CHAIN_ID = {
     "hyperevm": 999,
     "megaeth": 4326,
     "corn": 21000000,
+}
+
+# V1 to V2 EVM network mapping
+EVM_V1_TO_V2_MAP = {
+    name: f"eip155:{chain_id}" for name, chain_id in EVM_NETWORK_TO_CHAIN_ID.items()
 }
 
 # TON Network configurations
@@ -144,7 +180,7 @@ def is_tron_network(network: str) -> bool:
 
 def is_evm_network(network: str) -> bool:
     """Check if a network is an EVM network."""
-    return network in EVM_NETWORK_TO_CHAIN_ID
+    return network in EVM_NETWORK_TO_CHAIN_ID or network.startswith("eip155:")
 
 
 def is_svm_network(network: str) -> bool:
@@ -152,14 +188,56 @@ def is_svm_network(network: str) -> bool:
     return network.startswith("solana:") or network in SVM_V1_TO_V2_MAP
 
 
+def is_near_network(network: str) -> bool:
+    """Check if a network is a NEAR network."""
+    return network.startswith("near:")
+
+
+def is_aptos_network(network: str) -> bool:
+    """Check if a network is an Aptos network."""
+    return network.startswith("aptos:")
+
+
+def is_tezos_network(network: str) -> bool:
+    """Check if a network is a Tezos network."""
+    return network.startswith("tezos:")
+
+
+def is_polkadot_network(network: str) -> bool:
+    """Check if a network is a Polkadot network."""
+    return network.startswith("polkadot:")
+
+
+def is_stacks_network(network: str) -> bool:
+    """Check if a network is a Stacks network."""
+    return network.startswith("stacks:")
+
+
+def is_cosmos_network(network: str) -> bool:
+    """Check if a network is a Cosmos network."""
+    return network.startswith("cosmos:")
+
+
 def get_network_type(network: str) -> str:
-    """Get the network type (ton, tron, evm, svm, or unknown)."""
+    """Get the network type (ton, tron, evm, svm, near, aptos, tezos, polkadot, stacks, cosmos, or unknown)."""
     if is_ton_network(network):
         return "ton"
     if is_tron_network(network):
         return "tron"
     if is_svm_network(network):
         return "svm"
+    if is_near_network(network):
+        return "near"
+    if is_aptos_network(network):
+        return "aptos"
+    if is_tezos_network(network):
+        return "tezos"
+    if is_polkadot_network(network):
+        return "polkadot"
+    if is_stacks_network(network):
+        return "stacks"
+    if is_cosmos_network(network):
+        return "cosmos"
     if is_evm_network(network):
         return "evm"
     return "unknown"

@@ -62,7 +62,7 @@ Protocol errors indicate issues with the \tprotocol{} request format, unsupporte
 \endlastfoot
 invalid\_network & Specified network is not supported by facilitator & Query \code{/supported} for available networks \\
 network\_mismatch & Payment network does not match requirements & Use network specified in PaymentRequired \\
-invalid\_scheme & Payment scheme is not supported & Use \code{exact} scheme (currently only supported) \\
+invalid\_scheme & Payment scheme is not supported & Use \code{exact} or \code{upto} scheme \\
 scheme\_mismatch & Payment scheme does not match requirements & Use scheme specified in PaymentRequired \\
 invalid\_t402\_version & Protocol version is not supported & Upgrade client to support v2 \\
 version\_mismatch & Payload version incompatible with server & Match version in requirements \\
@@ -356,8 +356,8 @@ HTTP-specific errors related to the transport layer when using the HTTP/402 prot
 \endfoot
 \bottomrule
 \endlastfoot
-missing\_payment\_header & X-PAYMENT header not present & Include signed payload in header \\
-invalid\_payment\_header & X-PAYMENT header malformed & Base64url encode JSON payload \\
+missing\_payment\_header & PAYMENT-SIGNATURE header not present & Include signed payload in header \\
+invalid\_payment\_header & PAYMENT-SIGNATURE header malformed & Base64url encode JSON payload \\
 missing\_accept\_header & Client does not accept payment types & Include Accept header with payment types \\
 header\_too\_large & Payment header exceeds size limit & Reduce payload size \\
 invalid\_content\_type & Request Content-Type invalid & Use application/json \\

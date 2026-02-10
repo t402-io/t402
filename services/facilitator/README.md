@@ -4,7 +4,7 @@ Production-ready facilitator service for the T402 payment protocol.
 
 ## Features
 
-- **Multi-chain support**: 34 networks across EVM (Ethereum, Arbitrum, Base, Optimism, Polygon, etc.), TON, TRON, Solana, NEAR, Aptos, Tezos, Polkadot, Stacks, and Cosmos/Noble
+- **Multi-chain support**: 44 networks across EVM (Ethereum, Arbitrum, Base, Optimism, Polygon, etc.), TON, TRON, Solana, NEAR, Aptos, Tezos, Polkadot, Stacks, and Cosmos/Noble
 - **Smart wallet support**: EIP-6492 and EIP-1271 for smart contract wallets (Safe, ERC-4337, etc.)
 - **Rate limiting**: Redis-based rate limiting with configurable limits
 - **Metrics**: Prometheus metrics for monitoring

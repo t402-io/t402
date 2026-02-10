@@ -1,5 +1,7 @@
 package aptos
 
+import "strings"
+
 const (
 	// Scheme identifiers
 	SchemeExactDirect = "exact-direct"
@@ -117,9 +119,8 @@ func GetTokenByAddress(network, metadataAddress string) (TokenInfo, bool) {
 
 // normalizeAddress normalizes an Aptos address for comparison
 func normalizeAddress(addr string) string {
-	// Simple lowercase normalization - full implementation would pad addresses
 	if len(addr) > 2 && addr[:2] == "0x" {
-		return "0x" + addr[2:]
+		return "0x" + strings.ToLower(addr[2:])
 	}
-	return addr
+	return strings.ToLower(addr)
 }
