@@ -3,6 +3,7 @@ package ton
 import (
 	"context"
 	"math/big"
+	"os"
 	"testing"
 	"time"
 
@@ -121,9 +122,9 @@ func TestGenerateQueryId(t *testing.T) {
 }
 
 func TestGetSeqno(t *testing.T) {
-	// Skip if CI environment (requires network)
-	if testing.Short() {
-		t.Skip("Skipping network test in short mode")
+	// Skip if CI environment (requires network access to TON testnet)
+	if testing.Short() || os.Getenv("CI") != "" {
+		t.Skip("Skipping network test in short mode / CI")
 	}
 
 	// Use private key instead of mnemonic for reliability
