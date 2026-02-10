@@ -65,7 +65,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 | @t402/wdk-gasless | 2.4.0 | ERC-4337 gasless payments |
 | @t402/wdk-bridge | 2.4.0 | LayerZero bridging |
 | @t402/wdk-multisig | 2.4.0 | Safe multi-sig wallets |
-| @t402/mcp | 2.0.0-beta.1 | AI agent MCP server |
+| @t402/mcp | 2.4.0 | AI agent MCP server |
 | @t402/express | 2.4.0 | Express.js middleware |
 | @t402/next | 2.4.0 | Next.js integration |
 | @t402/hono | 2.4.0 | Hono middleware |
