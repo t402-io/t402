@@ -124,22 +124,35 @@ func main() {
 	}
 
 	// Create facilitator
-	facilitator, err := setupFacilitator(cfg)
+	facilitator, cleanupFn, err := setupFacilitator(cfg)
 	if err != nil {
 		log.Fatalf("Failed to setup facilitator: %v", err)
 	}
 
 	// Create and start server
 	srv := server.NewWithTracing(facilitator, redisClient, cfg, db, tracer)
+
+	// SECURITY: Register shutdown hook to zeroize private keys
+	if cleanupFn != nil {
+		srv.OnShutdown(cleanupFn)
+	}
+
 	srv.Start()
 }
 
-// setupFacilitator creates and configures the t402 facilitator
-func setupFacilitator(cfg *config.Config) (server.Facilitator, error) {
+// Zeroizable is implemented by signers that hold private key material
+type Zeroizable interface {
+	Zeroize()
+}
+
+// setupFacilitator creates and configures the t402 facilitator.
+// Returns the facilitator, a cleanup function for zeroizing keys, and any error.
+func setupFacilitator(cfg *config.Config) (server.Facilitator, func(), error) {
 	facilitator := t402.Newt402Facilitator()
 
-	// Track configured networks
+	// Track configured networks and signers that need cleanup
 	var configuredNetworks []string
+	var zeroizables []Zeroizable
 
 	// Setup EVM chains if private key is provided
 	if cfg.EvmPrivateKey != "" {
@@ -213,6 +226,7 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, error) {
 			}
 			facilitator.Register([]t402.Network{n.network}, evm.NewExactEvmScheme(netSigner, evmConfig))
 			facilitator.Register([]t402.Network{n.network}, evmupto.NewUptoEvmFacilitator(netSigner, uptoConfig))
+			zeroizables = append(zeroizables, netSigner)
 			configuredNetworks = append(configuredNetworks, n.name)
 			evmCount++
 			if !addressLogged {
@@ -232,6 +246,7 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, error) {
 				continue
 			}
 			facilitator.Register([]t402.Network{n.network}, evmlegacy.NewExactLegacyEvmScheme(netSigner, legacyConfig))
+			zeroizables = append(zeroizables, netSigner)
 			configuredNetworks = append(configuredNetworks, n.name+" (legacy)")
 			legacyCount++
 			if !addressLogged {
@@ -283,6 +298,7 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, error) {
 
 			if len(tonNetworks) > 0 {
 				facilitator.Register(tonNetworks, tonfac.NewExactTonScheme(tonSigner))
+				zeroizables = append(zeroizables, tonSigner)
 			}
 		}
 	} else {
@@ -335,6 +351,7 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, error) {
 			configuredNetworks = append(configuredNetworks, "Solana Devnet")
 
 			facilitator.Register(solanaNetworks, svmfac.NewExactSvmScheme(solanaSigner))
+			zeroizables = append(zeroizables, solanaSigner)
 			addrs := solanaSigner.GetAddresses(context.Background(), svm.SolanaMainnetCAIP2)
 			if len(addrs) > 0 {
 				log.Printf("Solana facilitator address: %s", addrs[0].String())
@@ -487,7 +504,7 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, error) {
 
 	// Log configured networks
 	if len(configuredNetworks) == 0 {
-		return nil, fmt.Errorf("no networks configured - at least one private key is required")
+		return nil, nil, fmt.Errorf("no networks configured - at least one private key is required")
 	}
 
 	log.Printf("Configured networks: %v", configuredNetworks)
@@ -515,7 +532,16 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, error) {
 		return nil, nil
 	})
 
-	return facilitator, nil
+	// Build cleanup function that zeroizes all signers holding private keys
+	cleanupFn := func() {
+		log.Printf("Zeroizing %d signer(s)...", len(zeroizables))
+		for _, z := range zeroizables {
+			z.Zeroize()
+		}
+		log.Printf("All signers zeroized")
+	}
+
+	return facilitator, cleanupFn, nil
 }
 
 // Print usage information

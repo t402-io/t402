@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"math/big"
 	"net/http"
 	"strings"
@@ -261,32 +260,130 @@ func (s *facilitatorTronSigner) VerifyTransaction(ctx context.Context, params tr
 		}, nil
 	}
 
-	// Use TRON node API to validate the transaction before accepting it.
-	// Send to /wallet/broadcasthex in dry-run fashion: if the node can parse it, it's structurally valid.
-	// The actual broadcast happens separately during settlement.
-	network := params.Network
-	if network == "" {
-		network = "tron:mainnet"
-	}
-
-	result, err := s.tronAPIRequest(ctx, network, "/wallet/gettransactioninfobyid", map[string]interface{}{
-		"value": params.SignedTransaction,
-	})
-	// If we can't reach the TRON node, fail closed
+	// SECURITY: Extract raw_data and signature from protobuf-encoded transaction
+	// and perform ECDSA signature recovery to verify the signer address.
+	rawData, signature, err := extractTronTxFields(txBytes)
 	if err != nil {
-		log.Printf("WARN: TRON transaction verification unavailable (node error): %v", err)
 		return &tron.VerifyMessageResult{
 			Valid:  false,
-			Reason: "verification_unavailable",
+			Reason: fmt.Sprintf("invalid_tx_structure: %v", err),
 		}, nil
 	}
 
-	// The API response is enough to confirm the node can parse the transaction format
-	_ = result
+	// Hash the raw_data with SHA256 (TRON's signing scheme)
+	txHash := sha256.Sum256(rawData)
+
+	// Recover the public key from the signature
+	// TRON uses secp256k1 (same as Ethereum), signature is 65 bytes [R || S || V]
+	if len(signature) != 65 {
+		return &tron.VerifyMessageResult{
+			Valid:  false,
+			Reason: "invalid_signature_length",
+		}, nil
+	}
+
+	pubKeyBytes, err := crypto.Ecrecover(txHash[:], signature)
+	if err != nil {
+		return &tron.VerifyMessageResult{
+			Valid:  false,
+			Reason: "signature_recovery_failed",
+		}, nil
+	}
+
+	// Convert recovered public key to TRON address
+	pubKey, err := crypto.UnmarshalPubkey(pubKeyBytes)
+	if err != nil {
+		return &tron.VerifyMessageResult{
+			Valid:  false,
+			Reason: "invalid_recovered_pubkey",
+		}, nil
+	}
+	recoveredAddress := publicKeyToTronAddress(pubKey)
+
+	// Verify the recovered address matches the expected sender
+	if params.ExpectedFrom != "" && recoveredAddress != params.ExpectedFrom {
+		return &tron.VerifyMessageResult{
+			Valid:  false,
+			Reason: fmt.Sprintf("signer_mismatch: expected %s, got %s", params.ExpectedFrom, recoveredAddress),
+		}, nil
+	}
 
 	return &tron.VerifyMessageResult{
 		Valid: true,
 	}, nil
+}
+
+// extractTronTxFields parses a protobuf-encoded TRON transaction to extract
+// the raw_data bytes (field 1) and first signature (field 2).
+// TRON Transaction protobuf: field 1 = raw_data (wire type 2), field 2 = signature (wire type 2)
+func extractTronTxFields(data []byte) (rawData []byte, signature []byte, err error) {
+	offset := 0
+	for offset < len(data) {
+		if offset >= len(data) {
+			break
+		}
+
+		// Read tag (varint)
+		tag, n := decodeVarint(data[offset:])
+		if n == 0 {
+			return nil, nil, fmt.Errorf("invalid varint at offset %d", offset)
+		}
+		offset += n
+
+		fieldNumber := tag >> 3
+		wireType := tag & 0x7
+
+		switch wireType {
+		case 0: // varint
+			_, n = decodeVarint(data[offset:])
+			if n == 0 {
+				return nil, nil, fmt.Errorf("invalid varint value at offset %d", offset)
+			}
+			offset += n
+		case 2: // length-delimited
+			length, n := decodeVarint(data[offset:])
+			if n == 0 {
+				return nil, nil, fmt.Errorf("invalid length at offset %d", offset)
+			}
+			offset += n
+			if offset+int(length) > len(data) {
+				return nil, nil, fmt.Errorf("field extends beyond data at offset %d", offset)
+			}
+			fieldData := data[offset : offset+int(length)]
+			offset += int(length)
+
+			if fieldNumber == 1 && rawData == nil {
+				rawData = fieldData
+			} else if fieldNumber == 2 && signature == nil {
+				signature = fieldData
+			}
+		default:
+			return nil, nil, fmt.Errorf("unsupported wire type %d at offset %d", wireType, offset)
+		}
+	}
+
+	if rawData == nil {
+		return nil, nil, fmt.Errorf("raw_data field not found")
+	}
+	if signature == nil {
+		return nil, nil, fmt.Errorf("signature field not found")
+	}
+
+	return rawData, signature, nil
+}
+
+// decodeVarint decodes a protobuf varint from the given bytes.
+// Returns the value and number of bytes consumed, or 0 bytes on error.
+func decodeVarint(data []byte) (uint64, int) {
+	var value uint64
+	for i := 0; i < len(data) && i < 10; i++ {
+		b := data[i]
+		value |= uint64(b&0x7F) << (7 * uint(i))
+		if b&0x80 == 0 {
+			return value, i + 1
+		}
+	}
+	return 0, 0
 }
 
 func (s *facilitatorTronSigner) BroadcastTransaction(ctx context.Context, signedTransaction string, network string) (string, error) {

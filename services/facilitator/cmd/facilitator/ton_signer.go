@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/big"
 	"net/http"
 	"strconv"
 	"strings"
@@ -366,6 +367,45 @@ func (s *facilitatorTonSigner) GetJettonWalletAddress(ctx context.Context, param
 }
 
 func (s *facilitatorTonSigner) VerifyMessage(ctx context.Context, params ton.VerifyMessageParams) (*ton.VerifyMessageResult, error) {
+	// Validate required parameters
+	if params.SignedBoc == "" {
+		return &ton.VerifyMessageResult{
+			Valid:  false,
+			Reason: "missing_signed_boc",
+		}, nil
+	}
+
+	if params.ExpectedFrom == "" {
+		return &ton.VerifyMessageResult{
+			Valid:  false,
+			Reason: "missing_expected_from",
+		}, nil
+	}
+
+	// Validate expected transfer parameters
+	if params.ExpectedTransfer.Destination == "" {
+		return &ton.VerifyMessageResult{
+			Valid:  false,
+			Reason: "missing_expected_destination",
+		}, nil
+	}
+
+	if params.ExpectedTransfer.JettonAmount == "" {
+		return &ton.VerifyMessageResult{
+			Valid:  false,
+			Reason: "missing_expected_amount",
+		}, nil
+	}
+
+	// Validate Jetton amount is a positive number
+	amount := new(big.Int)
+	if _, ok := amount.SetString(params.ExpectedTransfer.JettonAmount, 10); !ok || amount.Sign() <= 0 {
+		return &ton.VerifyMessageResult{
+			Valid:  false,
+			Reason: "invalid_expected_amount",
+		}, nil
+	}
+
 	// Decode the BOC
 	bocBytes, err := base64.StdEncoding.DecodeString(params.SignedBoc)
 	if err != nil {
@@ -398,19 +438,40 @@ func (s *facilitatorTonSigner) VerifyMessage(ctx context.Context, params ton.Ver
 		}, nil
 	}
 
-	// Try to send the BOC to the TON node for validation via estimateFee
-	// This validates the message structure without actually broadcasting
+	// Validate BOC size limits (reasonable external message should be <64KB)
+	if len(bocBytes) > 65536 {
+		return &ton.VerifyMessageResult{
+			Valid:  false,
+			Reason: "boc_too_large",
+		}, nil
+	}
+
+	// Use estimateFee to validate the BOC via the TON node
+	// This confirms the node can parse and simulate the message
 	network := params.Network
 	if network == "" {
 		network = "ton:mainnet"
 	}
-	_, err = s.tonRPCRequest(ctx, network, "tryLocateSourceTx", map[string]interface{}{
-		"boc": params.SignedBoc,
+
+	// estimateFee validates the BOC structure by having the node parse it
+	_, err = s.tonRPCRequest(ctx, network, "estimateFee", map[string]interface{}{
+		"address": params.ExpectedFrom,
+		"body":    params.SignedBoc,
 	})
-	// tryLocateSourceTx errors are expected (tx doesn't exist yet) - we just want to confirm
-	// the node can parse the BOC. If the RPC itself is unreachable, fail closed.
-	// Note: We accept the BOC if it has valid magic bytes and is parseable.
-	// Full BOC cell-tree parsing would require a dedicated TON library.
+	if err != nil {
+		// If the node explicitly rejects the BOC, fail
+		// Network errors: fail closed for security
+		log.Printf("WARN: TON estimateFee failed: %v", err)
+		return &ton.VerifyMessageResult{
+			Valid:  false,
+			Reason: "node_validation_failed",
+		}, nil
+	}
+
+	// Note: Full Ed25519 signature verification would require BOC cell-tree parsing
+	// to extract the signature and message data from the external message structure.
+	// This would need a dedicated TON library (e.g., tonutils-go).
+	// Current verification: structural (magic bytes) + node-parsed (estimateFee) + parameter validation.
 
 	return &ton.VerifyMessageResult{
 		Valid: true,

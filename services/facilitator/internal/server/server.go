@@ -59,6 +59,9 @@ type Server struct {
 	streamingHandlers  *streaming.Handlers
 	intentHandlers     *intent.Handlers
 	discoveryHandlers  *discovery.Handlers
+
+	// Shutdown hooks
+	shutdownHooks []func()
 }
 
 // New creates a new facilitator server
@@ -424,6 +427,12 @@ func (s *Server) Start() {
 	s.waitForShutdown()
 }
 
+// OnShutdown registers a function to be called during graceful shutdown.
+// Used to zeroize private keys and clean up sensitive resources.
+func (s *Server) OnShutdown(fn func()) {
+	s.shutdownHooks = append(s.shutdownHooks, fn)
+}
+
 // waitForShutdown waits for interrupt signal and gracefully shuts down
 func (s *Server) waitForShutdown() {
 	quit := make(chan os.Signal, 1)
@@ -437,6 +446,11 @@ func (s *Server) waitForShutdown() {
 
 	if err := s.httpServer.Shutdown(ctx); err != nil {
 		log.Fatalf("Server forced to shutdown: %v", err)
+	}
+
+	// SECURITY: Run shutdown hooks to zeroize private keys and clean up
+	for _, fn := range s.shutdownHooks {
+		fn()
 	}
 
 	log.Println("Server stopped")

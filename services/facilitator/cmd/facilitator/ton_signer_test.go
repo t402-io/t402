@@ -1008,65 +1008,196 @@ func TestGetJettonWalletAddress_EmptyStack(t *testing.T) {
 
 // --- VerifyMessage ---
 
-func TestVerifyMessage(t *testing.T) {
+func TestVerifyMessage_ParameterValidation(t *testing.T) {
 	signer, err := newFacilitatorTonSigner(testHexKey, "", "")
 	if err != nil {
 		t.Fatalf("Failed to create signer: %v", err)
 	}
 
-	// Valid BOC: base64 of at least 4 bytes
-	validBoc := base64.StdEncoding.EncodeToString([]byte{0xb5, 0xee, 0x9c, 0x72, 0x01, 0x02})
+	ctx := context.Background()
 
 	tests := []struct {
-		name      string
-		signedBoc string
-		wantValid bool
+		name       string
+		params     ton.VerifyMessageParams
 		wantReason string
 	}{
 		{
-			name:      "valid BOC (>= 4 bytes)",
-			signedBoc: validBoc,
-			wantValid: true,
+			name:       "missing signed BOC",
+			params:     ton.VerifyMessageParams{Network: ton.TonMainnetCAIP2},
+			wantReason: "missing_signed_boc",
 		},
 		{
-			name:      "invalid base64",
-			signedBoc: "not-valid-base64!!!",
-			wantValid: false,
-			wantReason: "invalid_boc_encoding",
+			name: "missing expected from",
+			params: ton.VerifyMessageParams{
+				SignedBoc: "dGVzdA==",
+				Network:   ton.TonMainnetCAIP2,
+			},
+			wantReason: "missing_expected_from",
 		},
 		{
-			name:      "BOC too short (< 4 bytes)",
-			signedBoc: base64.StdEncoding.EncodeToString([]byte{0x01, 0x02}),
-			wantValid: false,
-			wantReason: "boc_too_short",
+			name: "missing expected destination",
+			params: ton.VerifyMessageParams{
+				SignedBoc:    "dGVzdA==",
+				ExpectedFrom: "EQDtest",
+				Network:      ton.TonMainnetCAIP2,
+			},
+			wantReason: "missing_expected_destination",
 		},
 		{
-			name:      "BOC exactly 4 bytes",
-			signedBoc: base64.StdEncoding.EncodeToString([]byte{0xb5, 0xee, 0x9c, 0x72}),
-			wantValid: true,
+			name: "missing expected amount",
+			params: ton.VerifyMessageParams{
+				SignedBoc:    "dGVzdA==",
+				ExpectedFrom: "EQDtest",
+				ExpectedTransfer: ton.ExpectedTransfer{
+					Destination: "EQDdest",
+				},
+				Network: ton.TonMainnetCAIP2,
+			},
+			wantReason: "missing_expected_amount",
 		},
 		{
-			name:      "BOC 3 bytes (too short)",
-			signedBoc: base64.StdEncoding.EncodeToString([]byte{0xb5, 0xee, 0x9c}),
-			wantValid: false,
-			wantReason: "boc_too_short",
+			name: "invalid amount (not a number)",
+			params: ton.VerifyMessageParams{
+				SignedBoc:    "dGVzdA==",
+				ExpectedFrom: "EQDtest",
+				ExpectedTransfer: ton.ExpectedTransfer{
+					Destination:  "EQDdest",
+					JettonAmount: "abc",
+				},
+				Network: ton.TonMainnetCAIP2,
+			},
+			wantReason: "invalid_expected_amount",
 		},
 		{
-			name:      "empty string decodes to zero bytes",
-			signedBoc: "",
-			wantValid: false,
-			wantReason: "boc_too_short",
+			name: "invalid amount (zero)",
+			params: ton.VerifyMessageParams{
+				SignedBoc:    "dGVzdA==",
+				ExpectedFrom: "EQDtest",
+				ExpectedTransfer: ton.ExpectedTransfer{
+					Destination:  "EQDdest",
+					JettonAmount: "0",
+				},
+				Network: ton.TonMainnetCAIP2,
+			},
+			wantReason: "invalid_expected_amount",
 		},
+		{
+			name: "invalid amount (negative)",
+			params: ton.VerifyMessageParams{
+				SignedBoc:    "dGVzdA==",
+				ExpectedFrom: "EQDtest",
+				ExpectedTransfer: ton.ExpectedTransfer{
+					Destination:  "EQDdest",
+					JettonAmount: "-100",
+				},
+				Network: ton.TonMainnetCAIP2,
+			},
+			wantReason: "invalid_expected_amount",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := signer.VerifyMessage(ctx, tt.params)
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			if result.Valid {
+				t.Error("Expected Valid = false")
+			}
+			if result.Reason != tt.wantReason {
+				t.Errorf("Reason = %q, want %q", result.Reason, tt.wantReason)
+			}
+		})
+	}
+}
+
+func TestVerifyMessage_BOCValidation(t *testing.T) {
+	// Mock TON RPC server for estimateFee
+	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var reqBody map[string]interface{}
+		json.NewDecoder(r.Body).Decode(&reqBody)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"jsonrpc": "2.0",
+			"id":      1,
+			"result": map[string]interface{}{
+				"source_fees": map[string]interface{}{
+					"in_fwd_fee": 1,
+					"storage_fee": 1,
+					"gas_fee": 1,
+					"fwd_fee": 1,
+				},
+			},
+		})
+	}))
+	defer mockServer.Close()
+
+	signer, err := newFacilitatorTonSigner(testHexKey, mockServer.URL, "")
+	if err != nil {
+		t.Fatalf("Failed to create signer: %v", err)
+	}
+
+	// Valid params shared by all BOC tests
+	validParams := func(boc string) ton.VerifyMessageParams {
+		return ton.VerifyMessageParams{
+			SignedBoc:    boc,
+			ExpectedFrom: "EQDtest_sender_address",
+			ExpectedTransfer: ton.ExpectedTransfer{
+				Destination:  "EQDtest_dest_address",
+				JettonAmount: "1000000",
+			},
+			Network: ton.TonMainnetCAIP2,
+		}
 	}
 
 	ctx := context.Background()
 
+	tests := []struct {
+		name       string
+		signedBoc  string
+		wantValid  bool
+		wantReason string
+	}{
+		{
+			name:      "valid BOC with magic bytes",
+			signedBoc: base64.StdEncoding.EncodeToString([]byte{0xb5, 0xee, 0x9c, 0x72, 0x01, 0x02}),
+			wantValid: true,
+		},
+		{
+			name:      "valid BOC exactly 4 bytes",
+			signedBoc: base64.StdEncoding.EncodeToString([]byte{0xb5, 0xee, 0x9c, 0x72}),
+			wantValid: true,
+		},
+		{
+			name:       "invalid base64",
+			signedBoc:  "not-valid-base64!!!",
+			wantValid:  false,
+			wantReason: "invalid_boc_encoding",
+		},
+		{
+			name:       "BOC too short (2 bytes)",
+			signedBoc:  base64.StdEncoding.EncodeToString([]byte{0x01, 0x02}),
+			wantValid:  false,
+			wantReason: "boc_too_short",
+		},
+		{
+			name:       "BOC 3 bytes (too short)",
+			signedBoc:  base64.StdEncoding.EncodeToString([]byte{0xb5, 0xee, 0x9c}),
+			wantValid:  false,
+			wantReason: "boc_too_short",
+		},
+		{
+			name:       "invalid magic bytes",
+			signedBoc:  base64.StdEncoding.EncodeToString([]byte{0x00, 0x00, 0x00, 0x00, 0x01}),
+			wantValid:  false,
+			wantReason: "invalid_boc_magic",
+		},
+	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := signer.VerifyMessage(ctx, ton.VerifyMessageParams{
-				SignedBoc: tt.signedBoc,
-				Network:   ton.TonMainnetCAIP2,
-			})
+			result, err := signer.VerifyMessage(ctx, validParams(tt.signedBoc))
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
 			}
@@ -1074,12 +1205,53 @@ func TestVerifyMessage(t *testing.T) {
 				t.Fatal("Expected non-nil result")
 			}
 			if result.Valid != tt.wantValid {
-				t.Errorf("Valid = %v, want %v", result.Valid, tt.wantValid)
+				t.Errorf("Valid = %v, want %v (reason: %s)", result.Valid, tt.wantValid, result.Reason)
 			}
 			if !tt.wantValid && result.Reason != tt.wantReason {
 				t.Errorf("Reason = %q, want %q", result.Reason, tt.wantReason)
 			}
 		})
+	}
+}
+
+func TestVerifyMessage_NodeValidationFailure(t *testing.T) {
+	// Mock server that returns an RPC error
+	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"jsonrpc": "2.0",
+			"id":      1,
+			"error": map[string]interface{}{
+				"code":    -32600,
+				"message": "invalid BOC",
+			},
+		})
+	}))
+	defer mockServer.Close()
+
+	signer, err := newFacilitatorTonSigner(testHexKey, mockServer.URL, "")
+	if err != nil {
+		t.Fatalf("Failed to create signer: %v", err)
+	}
+
+	validBoc := base64.StdEncoding.EncodeToString([]byte{0xb5, 0xee, 0x9c, 0x72, 0x01, 0x02})
+	result, err := signer.VerifyMessage(context.Background(), ton.VerifyMessageParams{
+		SignedBoc:    validBoc,
+		ExpectedFrom: "EQDtest",
+		ExpectedTransfer: ton.ExpectedTransfer{
+			Destination:  "EQDdest",
+			JettonAmount: "1000000",
+		},
+		Network: ton.TonMainnetCAIP2,
+	})
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	if result.Valid {
+		t.Error("Expected Valid = false when node rejects BOC")
+	}
+	if result.Reason != "node_validation_failed" {
+		t.Errorf("Reason = %q, want %q", result.Reason, "node_validation_failed")
 	}
 }
 
