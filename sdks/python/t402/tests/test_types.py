@@ -124,6 +124,7 @@ def test_settle_response_serde():
         "transaction": "0x123",
         "network": "base",
         "payer": "0x123",
+        "confirmations": None,
     }
     assert original.model_dump(by_alias=True) == expected
     assert SettleResponse(**expected) == original

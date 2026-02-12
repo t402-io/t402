@@ -176,7 +176,7 @@ func TestCheckAndMark_NilCache(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestCheckAndMark_CacheError_FailOpen(t *testing.T) {
+func TestCheckAndMark_CacheError_FailClosed(t *testing.T) {
 	mr, err := miniredis.Run()
 	require.NoError(t, err)
 
@@ -191,9 +191,10 @@ func TestCheckAndMark_CacheError_FailOpen(t *testing.T) {
 	// Close miniredis to simulate cache error
 	mr.Close()
 
-	// Should fail open (return nil) when cache is unavailable
+	// Should fail closed (return error) when cache is unavailable to prevent duplicate settlements
 	err = store.CheckAndMark(ctx, "eip155:1", "exact", "payload-hash-abc")
-	assert.NoError(t, err)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "nonce check failed")
 }
 
 // ============== Test IsUsed ==============
@@ -520,10 +521,11 @@ func TestCheckAndMark_ContextCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // Cancel immediately
 
-	// With cancelled context, SetNX will error but CheckAndMark fails open
+	// With cancelled context, SetNX will error and CheckAndMark fails closed
 	err := store.CheckAndMark(ctx, "eip155:1", "exact", "ctx-cancel-hash")
-	// Should fail open (return nil) since it's a cache error
-	assert.NoError(t, err)
+	// Should fail closed (return error) to prevent duplicate settlements
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "nonce check failed")
 }
 
 func TestIsUsed_ContextCancellation(t *testing.T) {

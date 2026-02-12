@@ -52,9 +52,9 @@ func (s *NonceStore) CheckAndMark(ctx context.Context, network, scheme string, p
 	// Try to set the key only if it doesn't exist (atomic operation)
 	set, err := s.cache.SetNX(ctx, key, "1", s.ttl)
 	if err != nil {
-		// On cache error, fail open to maintain availability
-		// Log the error for monitoring
-		return nil
+		// Fail closed on cache error to prevent duplicate settlements
+		// A transient Redis failure should block payments rather than risk double-settlement
+		return fmt.Errorf("nonce check failed (Redis error): %w", err)
 	}
 
 	if !set {
