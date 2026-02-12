@@ -47,22 +47,24 @@ func NewUserRateLimiter(cache *cache.Client, globalRequests, userRequests int, w
 // AllowUser checks if a request is allowed for the given user/API key
 // P1-7: Implements hierarchical rate limiting: global -> per-user -> per-endpoint
 func (l *UserRateLimiter) AllowUser(ctx context.Context, apiKeyID, endpoint string) (bool, Info, error) {
-	// Check per-user limit first (most restrictive)
+	windowSeconds := int(l.window.Seconds())
+
+	// Check per-user limit first (most restrictive) — atomic INCR+EXPIRE
 	userKey := fmt.Sprintf("ratelimit:user:%s", apiKeyID)
-	userCount, err := l.cache.Incr(ctx, userKey)
+	result, err := l.cache.Eval(ctx, rateLimitScript, []string{userKey}, windowSeconds)
 	if err != nil {
-		return false, Info{}, fmt.Errorf("failed to increment user rate limit counter: %w", err)
+		return false, Info{}, fmt.Errorf("failed to execute user rate limit script: %w", err)
 	}
 
-	if userCount == 1 {
-		if err := l.cache.Expire(ctx, userKey, l.window); err != nil {
-			return false, Info{}, fmt.Errorf("failed to set user rate limit expiry: %w", err)
-		}
+	results, ok := result.([]interface{})
+	if !ok || len(results) != 2 {
+		return false, Info{}, fmt.Errorf("unexpected user rate limit script result: %v", result)
 	}
 
-	// Get TTL to calculate reset time
-	ttl, err := l.cache.TTL(ctx, userKey)
-	if err != nil {
+	userCount, _ := results[0].(int64)
+	ttlSeconds, _ := results[1].(int64)
+	ttl := time.Duration(ttlSeconds) * time.Second
+	if ttl <= 0 {
 		ttl = l.window
 	}
 
@@ -77,18 +79,19 @@ func (l *UserRateLimiter) AllowUser(ctx context.Context, apiKeyID, endpoint stri
 		return false, userInfo, nil
 	}
 
-	// Check per-endpoint limit for this user
+	// Check per-endpoint limit for this user — atomic INCR+EXPIRE
 	endpointKey := fmt.Sprintf("ratelimit:user:%s:%s", apiKeyID, endpoint)
-	endpointCount, err := l.cache.Incr(ctx, endpointKey)
+	result, err = l.cache.Eval(ctx, rateLimitScript, []string{endpointKey}, windowSeconds)
 	if err != nil {
-		return false, Info{}, fmt.Errorf("failed to increment endpoint rate limit counter: %w", err)
+		return false, Info{}, fmt.Errorf("failed to execute endpoint rate limit script: %w", err)
 	}
 
-	if endpointCount == 1 {
-		if err := l.cache.Expire(ctx, endpointKey, l.window); err != nil {
-			return false, Info{}, fmt.Errorf("failed to set endpoint rate limit expiry: %w", err)
-		}
+	results, ok = result.([]interface{})
+	if !ok || len(results) != 2 {
+		return false, Info{}, fmt.Errorf("unexpected endpoint rate limit script result: %v", result)
 	}
+
+	endpointCount, _ := results[0].(int64)
 
 	// Per-endpoint limit is half of user limit
 	endpointLimit := l.userRequests / 2
@@ -107,27 +110,40 @@ func (l *UserRateLimiter) AllowUser(ctx context.Context, apiKeyID, endpoint stri
 	return true, userInfo, nil
 }
 
+// rateLimitScript atomically increments a counter and sets expiry on first increment.
+// This prevents a race condition where INCR succeeds but EXPIRE fails (e.g., process crash),
+// which would leave the key without a TTL, permanently blocking the rate-limited key.
+// Returns: [count, ttl_seconds]
+const rateLimitScript = `
+local count = redis.call("INCR", KEYS[1])
+if count == 1 then
+    redis.call("EXPIRE", KEYS[1], ARGV[1])
+end
+local ttl = redis.call("TTL", KEYS[1])
+return {count, ttl}
+`
+
 // Allow checks if a request is allowed for the given key
 func (l *RedisLimiter) Allow(ctx context.Context, key string) (bool, Info, error) {
 	redisKey := l.prefix + key
+	windowSeconds := int(l.window.Seconds())
 
-	// Increment the counter
-	count, err := l.cache.Incr(ctx, redisKey)
+	result, err := l.cache.Eval(ctx, rateLimitScript, []string{redisKey}, windowSeconds)
 	if err != nil {
-		return false, Info{}, fmt.Errorf("failed to increment rate limit counter: %w", err)
+		return false, Info{}, fmt.Errorf("failed to execute rate limit script: %w", err)
 	}
 
-	// If this is the first request, set the expiry
-	if count == 1 {
-		if err := l.cache.Expire(ctx, redisKey, l.window); err != nil {
-			return false, Info{}, fmt.Errorf("failed to set rate limit expiry: %w", err)
-		}
+	// Parse Lua script result [count, ttl]
+	results, ok := result.([]interface{})
+	if !ok || len(results) != 2 {
+		return false, Info{}, fmt.Errorf("unexpected rate limit script result: %v", result)
 	}
 
-	// Get TTL to calculate reset time
-	ttl, err := l.cache.TTL(ctx, redisKey)
-	if err != nil {
-		ttl = l.window // Default to full window on error
+	count, _ := results[0].(int64)
+	ttlSeconds, _ := results[1].(int64)
+	ttl := time.Duration(ttlSeconds) * time.Second
+	if ttl <= 0 {
+		ttl = l.window
 	}
 
 	info := Info{
@@ -136,7 +152,6 @@ func (l *RedisLimiter) Allow(ctx context.Context, key string) (bool, Info, error
 		Reset:     time.Now().Add(ttl),
 	}
 
-	// Check if over limit
 	if int(count) > l.requests {
 		return false, info, nil
 	}

@@ -167,13 +167,10 @@ func TestCheckAndMark_NilCache(t *testing.T) {
 	store := NewNonceStore(nil, time.Hour)
 	ctx := context.Background()
 
-	// Should return nil (fail open) when cache is nil
+	// Should fail closed when cache is nil to prevent duplicate settlements
 	err := store.CheckAndMark(ctx, "eip155:1", "exact", "payload-hash-abc")
-	assert.NoError(t, err)
-
-	// Calling again should also return nil (no tracking without cache)
-	err = store.CheckAndMark(ctx, "eip155:1", "exact", "payload-hash-abc")
-	assert.NoError(t, err)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "cache unavailable")
 }
 
 func TestCheckAndMark_CacheError_FailClosed(t *testing.T) {
@@ -232,10 +229,10 @@ func TestIsUsed_NilCache(t *testing.T) {
 	store := NewNonceStore(nil, time.Hour)
 	ctx := context.Background()
 
-	// Should return false when cache is nil
-	used, err := store.IsUsed(ctx, "eip155:1", "exact", "payload-hash-abc")
-	assert.NoError(t, err)
-	assert.False(t, used)
+	// Should fail closed when cache is nil
+	_, err := store.IsUsed(ctx, "eip155:1", "exact", "payload-hash-abc")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "cache unavailable")
 }
 
 func TestIsUsed_CacheError(t *testing.T) {

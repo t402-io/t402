@@ -5,7 +5,8 @@ from t402.types import (
     EIP3009Authorization,
     VerifyResponse,
     SettleResponse,
-    PaymentPayload,
+    PaymentPayloadV1,
+    parse_payment_payload,
     T402Headers,
 )
 
@@ -140,7 +141,7 @@ def test_payment_payload_serde():
         nonce="0x789",
     )
     payload = ExactPaymentPayload(signature="0x123", authorization=auth)
-    original = PaymentPayload(
+    original = PaymentPayloadV1(
         t402_version=1,
         scheme="exact",
         network="base",
@@ -153,7 +154,23 @@ def test_payment_payload_serde():
         "payload": payload.model_dump(by_alias=True),
     }
     assert original.model_dump(by_alias=True) == expected
-    assert PaymentPayload(**expected) == original
+    assert PaymentPayloadV1(**expected) == original
+
+
+def test_parse_payment_payload_v1():
+    """Test that parse_payment_payload returns V1 for t402Version=1."""
+    data = {
+        "t402Version": 1,
+        "scheme": "exact",
+        "network": "eip155:8453",
+        "payload": {"signature": "0x123", "authorization": {
+            "from": "0x123", "to": "0x456", "value": "1000",
+            "validAfter": "0", "validBefore": "1000", "nonce": "0x789",
+        }},
+    }
+    result = parse_payment_payload(data)
+    assert isinstance(result, PaymentPayloadV1)
+    assert result.scheme == "exact"
 
 
 def test_t402_headers_serde():

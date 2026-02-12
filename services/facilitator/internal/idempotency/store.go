@@ -151,8 +151,12 @@ func (s *Store) Check(ctx context.Context, idempotencyKey string, payloadHash st
 	key := s.prefix + idempotencyKey
 	data, err := s.cache.Get(ctx, key)
 	if err != nil {
-		// Key doesn't exist - this is a new request
-		return nil, nil
+		// Distinguish key-not-found from actual Redis errors
+		if errors.Is(err, redis.Nil) {
+			return nil, nil // Key doesn't exist - this is a new request
+		}
+		// Fail closed on Redis errors to prevent duplicate processing
+		return nil, fmt.Errorf("idempotency check failed: %w", err)
 	}
 
 	var entry Entry

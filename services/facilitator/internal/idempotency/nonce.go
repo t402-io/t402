@@ -40,9 +40,8 @@ var ErrNonceAlreadyUsed = fmt.Errorf("nonce already used")
 // The nonce is derived from the payment payload to ensure uniqueness across all fields
 func (s *NonceStore) CheckAndMark(ctx context.Context, network, scheme string, payloadHash string) error {
 	if s.cache == nil {
-		// If cache is unavailable, we can't track nonces - log warning but allow
-		// This is a security tradeoff: availability vs. replay protection
-		return nil
+		// Fail closed: cannot verify nonce uniqueness without cache
+		return fmt.Errorf("nonce check failed: cache unavailable")
 	}
 
 	// Create a unique key combining network, scheme, and payload hash
@@ -68,7 +67,7 @@ func (s *NonceStore) CheckAndMark(ctx context.Context, network, scheme string, p
 // IsUsed checks if a nonce has been used without marking it
 func (s *NonceStore) IsUsed(ctx context.Context, network, scheme string, payloadHash string) (bool, error) {
 	if s.cache == nil {
-		return false, nil
+		return false, fmt.Errorf("nonce check failed: cache unavailable")
 	}
 
 	key := s.prefix + s.createNonceKey(network, scheme, payloadHash)

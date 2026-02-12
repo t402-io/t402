@@ -300,10 +300,9 @@ class TestCmdVerify:
         encoded = encode_payment(payload)
 
         with patch("t402.cli.FacilitatorClient") as MockClient, \
-             patch("t402.cli.PaymentPayload") as MockPayload:
-            # Mock the PaymentPayload validation to return a mock object
+             patch("t402.cli.parse_payment_payload") as mock_parse:
             mock_payload_instance = MagicMock()
-            MockPayload.model_validate.return_value = mock_payload_instance
+            mock_parse.return_value = mock_payload_instance
 
             mock_client = MockClient.return_value
             mock_result = MagicMock()
@@ -344,9 +343,9 @@ class TestCmdVerify:
         encoded = encode_payment(payload)
 
         with patch("t402.cli.FacilitatorClient") as MockClient, \
-             patch("t402.cli.PaymentPayload") as MockPayload:
+             patch("t402.cli.parse_payment_payload") as mock_parse:
             mock_payload_instance = MagicMock()
-            MockPayload.model_validate.return_value = mock_payload_instance
+            mock_parse.return_value = mock_payload_instance
 
             mock_client = MockClient.return_value
             mock_result = MagicMock()
@@ -387,9 +386,9 @@ class TestCmdVerify:
         encoded = encode_payment(payload)
 
         with patch("t402.cli.FacilitatorClient") as MockClient, \
-             patch("t402.cli.PaymentPayload") as MockPayload:
+             patch("t402.cli.parse_payment_payload") as mock_parse:
             mock_payload_instance = MagicMock()
-            MockPayload.model_validate.return_value = mock_payload_instance
+            mock_parse.return_value = mock_payload_instance
 
             mock_client = MockClient.return_value
             mock_result = MagicMock()
@@ -435,9 +434,9 @@ class TestCmdSettle:
         encoded = encode_payment(payload)
 
         with patch("t402.cli.FacilitatorClient") as MockClient, \
-             patch("t402.cli.PaymentPayload") as MockPayload:
+             patch("t402.cli.parse_payment_payload") as mock_parse:
             mock_payload_instance = MagicMock()
-            MockPayload.model_validate.return_value = mock_payload_instance
+            mock_parse.return_value = mock_payload_instance
 
             mock_client = MockClient.return_value
             mock_result = MagicMock()
@@ -480,9 +479,9 @@ class TestCmdSettle:
         encoded = encode_payment(payload)
 
         with patch("t402.cli.FacilitatorClient") as MockClient, \
-             patch("t402.cli.PaymentPayload") as MockPayload:
+             patch("t402.cli.parse_payment_payload") as mock_parse:
             mock_payload_instance = MagicMock()
-            MockPayload.model_validate.return_value = mock_payload_instance
+            mock_parse.return_value = mock_payload_instance
 
             mock_client = MockClient.return_value
             mock_result = MagicMock()

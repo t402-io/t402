@@ -631,9 +631,15 @@ func (s *facilitatorEvmSigner) VerifyTypedData(
 	message map[string]interface{},
 	signature []byte,
 ) (bool, error) {
-	// This is handled by the EVM scheme's universal verification
-	// For now, return true as actual verification happens in the scheme
-	return true, nil
+	// Compute EIP-712 hash from the typed data
+	hash, err := evmmech.HashTypedData(domain, typesMap, primaryType, message)
+	if err != nil {
+		return false, fmt.Errorf("failed to hash typed data: %w", err)
+	}
+
+	// Verify the signature using ECDSA recovery
+	expectedAddress := common.HexToAddress(address)
+	return evmmech.VerifyEOASignature(hash, signature, expectedAddress)
 }
 
 func (s *facilitatorEvmSigner) ReadContract(

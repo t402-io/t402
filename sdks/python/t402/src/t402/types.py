@@ -437,10 +437,6 @@ class PaymentPayloadV1(BaseModel):
     )
 
 
-# Alias for backward compatibility
-PaymentPayload = PaymentPayloadV1
-
-
 class PaymentPayloadV2(BaseModel):
     """V2 Payment Payload - Current format.
 
@@ -458,6 +454,21 @@ class PaymentPayloadV2(BaseModel):
         populate_by_name=True,
         from_attributes=True,
     )
+
+
+# Union type for V1/V2 payment payloads
+PaymentPayload = Union[PaymentPayloadV1, PaymentPayloadV2]
+
+
+def parse_payment_payload(data: dict) -> Union[PaymentPayloadV1, PaymentPayloadV2]:
+    """Parse a payment payload dict into the appropriate V1 or V2 model.
+
+    Inspects t402Version to determine which model to use.
+    """
+    version = data.get("t402Version", data.get("t402_version", 1))
+    if version >= 2:
+        return PaymentPayloadV2(**data)
+    return PaymentPayloadV1(**data)
 
 
 class T402Headers(BaseModel):

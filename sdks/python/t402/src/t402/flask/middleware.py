@@ -5,7 +5,7 @@ from t402.path import path_is_match
 from t402.networks import get_all_supported_networks, SupportedNetworks
 from t402.types import (
     Price,
-    PaymentPayload,
+    parse_payment_payload,
     PaymentRequirements,
     PaymentRequirementsV2,
     PaymentRequiredV2,
@@ -307,7 +307,7 @@ class PaymentMiddleware:
                 # Decode payment header
                 try:
                     payment_dict = decode_payment_signature_header(payment_header)
-                    payment = PaymentPayload(**payment_dict)
+                    payment = parse_payment_payload(payment_dict)
                 except Exception as e:
                     return t402_response(f"Invalid payment header format: {str(e)}", version)
 
