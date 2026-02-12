@@ -266,7 +266,8 @@ func (s *Server) handleSettle(c *gin.Context) {
 			}
 		}
 
-		apiErr := errors.NewSettlementFailedError(err.Error())
+		// SECURITY: Don't leak internal error details to the client
+		apiErr := errors.NewSettlementFailedError("settlement processing failed")
 		c.JSON(apiErr.HTTPStatus(), apiErr)
 		return
 	}

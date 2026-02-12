@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"log"
@@ -154,8 +155,10 @@ func AuditMiddleware(repo *AuditRepository, config *AuditMiddlewareConfig) gin.H
 		}
 
 		// Log asynchronously to not block the request
+		// SECURITY: Use context.Background() since the request context may be
+		// cancelled after the handler returns, but audit logging must complete.
 		go func() {
-			ctx := c.Request.Context()
+			ctx := context.Background()
 			if err := repo.Log(ctx, entry); err != nil {
 				// Log error but don't fail the request
 				// Track failure for monitoring

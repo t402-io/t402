@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/ethereum/go-ethereum"
@@ -546,6 +547,7 @@ type facilitatorEvmSigner struct {
 	address    common.Address
 	client     *ethclient.Client
 	chainID    *big.Int
+	nonceMu    sync.Mutex // Serializes nonce acquisition to prevent race conditions
 }
 
 // newFacilitatorEvmSigner creates a new EVM facilitator signer
@@ -586,28 +588,16 @@ func newFacilitatorEvmSigner(privateKeyHex string, rpcURL string) (*facilitatorE
 func (s *facilitatorEvmSigner) Zeroize() {
 	if s.privateKey != nil {
 		// SECURITY: Clear the private key's D value (the actual 256-bit secret)
+		// Note: big.Int.Bytes() returns a copy, so we must use SetInt64(0) to
+		// clear the internal abs slice directly.
 		if s.privateKey.D != nil {
-			// Get the underlying bytes and zero them
-			dBytes := s.privateKey.D.Bytes()
-			for i := range dBytes {
-				dBytes[i] = 0
-			}
-			// Set to zero-filled bytes to ensure the big.Int is properly cleared
-			s.privateKey.D.SetBytes(make([]byte, 32))
+			s.privateKey.D.SetInt64(0)
 		}
 		// SECURITY: Clear public key coordinates (derived from private key)
 		if s.privateKey.X != nil {
-			xBytes := s.privateKey.X.Bytes()
-			for i := range xBytes {
-				xBytes[i] = 0
-			}
 			s.privateKey.X.SetInt64(0)
 		}
 		if s.privateKey.Y != nil {
-			yBytes := s.privateKey.Y.Bytes()
-			for i := range yBytes {
-				yBytes[i] = 0
-			}
 			s.privateKey.Y.SetInt64(0)
 		}
 		s.privateKey = nil
@@ -731,6 +721,11 @@ func (s *facilitatorEvmSigner) WriteContract(
 		return "", fmt.Errorf("failed to pack method call: %w", err)
 	}
 
+	// SECURITY: Serialize nonce acquisition to prevent race conditions
+	// under concurrent settlements for the same chain
+	s.nonceMu.Lock()
+	defer s.nonceMu.Unlock()
+
 	// Get nonce
 	nonce, err := s.client.PendingNonceAt(ctx, s.address)
 	if err != nil {
@@ -811,6 +806,10 @@ func (s *facilitatorEvmSigner) SendTransaction(
 	to string,
 	data []byte,
 ) (string, error) {
+	// SECURITY: Serialize nonce acquisition to prevent race conditions
+	s.nonceMu.Lock()
+	defer s.nonceMu.Unlock()
+
 	// Get nonce
 	nonce, err := s.client.PendingNonceAt(ctx, s.address)
 	if err != nil {
@@ -954,8 +953,14 @@ func (s *facilitatorNearSigner) QueryTransaction(ctx context.Context, txHash str
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	// Make HTTP request
-	resp, err := http.Post(rpcURL, "application/json", bytes.NewReader(body))
+	// Make HTTP request with context propagation
+	req, err := http.NewRequestWithContext(ctx, "POST", rpcURL, bytes.NewReader(body))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query transaction: %w", err)
 	}
@@ -1010,7 +1015,13 @@ func (s *facilitatorNearSigner) GetBalance(ctx context.Context, accountID string
 		return "0", fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	resp, err := http.Post(rpcURL, "application/json", bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, "POST", rpcURL, bytes.NewReader(body))
+	if err != nil {
+		return "0", fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return "0", fmt.Errorf("failed to query balance: %w", err)
 	}
@@ -1067,10 +1078,15 @@ func (s *facilitatorAptosSigner) QueryTransaction(ctx context.Context, txHash st
 	rpcURL := s.mainnetRPC
 
 	// Build REST API URL for transaction query
-	url := fmt.Sprintf("%s/transactions/by_hash/%s", strings.TrimSuffix(rpcURL, "/"), txHash)
+	reqURL := fmt.Sprintf("%s/transactions/by_hash/%s", strings.TrimSuffix(rpcURL, "/"), txHash)
 
-	// Make HTTP request
-	resp, err := http.Get(url)
+	// Make HTTP request with context propagation
+	req, err := http.NewRequestWithContext(ctx, "GET", reqURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query transaction: %w", err)
 	}
@@ -1099,10 +1115,15 @@ func (s *facilitatorAptosSigner) GetBalance(ctx context.Context, address string,
 
 	// Build REST API URL for account resource
 	// For FA (Fungible Asset) balance, we need to query the primary fungible store
-	url := fmt.Sprintf("%s/accounts/%s/resource/0x1::fungible_asset::FungibleStore",
+	reqURL := fmt.Sprintf("%s/accounts/%s/resource/0x1::fungible_asset::FungibleStore",
 		strings.TrimSuffix(rpcURL, "/"), address)
 
-	resp, err := http.Get(url)
+	req, err := http.NewRequestWithContext(ctx, "GET", reqURL, nil)
+	if err != nil {
+		return "0", fmt.Errorf("failed to create request: %w", err)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return "0", fmt.Errorf("failed to query balance: %w", err)
 	}
@@ -1163,10 +1184,15 @@ func (s *facilitatorTezosSigner) QueryOperation(ctx context.Context, opHash stri
 	indexerURL := s.mainnetIndexer
 
 	// Build TzKT API URL for operation query
-	url := fmt.Sprintf("%s/v1/operations/transactions/%s", indexerURL, opHash)
+	reqURL := fmt.Sprintf("%s/v1/operations/transactions/%s", indexerURL, opHash)
 
-	// Make HTTP request
-	resp, err := http.Get(url)
+	// Make HTTP request with context propagation
+	req, err := http.NewRequestWithContext(ctx, "GET", reqURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query operation: %w", err)
 	}
@@ -1198,10 +1224,15 @@ func (s *facilitatorTezosSigner) GetBalance(ctx context.Context, contractAddress
 	indexerURL := s.mainnetIndexer
 
 	// Build TzKT API URL for token balance
-	url := fmt.Sprintf("%s/v1/tokens/balances?token.contract=%s&token.tokenId=%d&account=%s",
+	reqURL := fmt.Sprintf("%s/v1/tokens/balances?token.contract=%s&token.tokenId=%d&account=%s",
 		indexerURL, contractAddress, tokenID, address)
 
-	resp, err := http.Get(url)
+	req, err := http.NewRequestWithContext(ctx, "GET", reqURL, nil)
+	if err != nil {
+		return "0", fmt.Errorf("failed to create request: %w", err)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return "0", fmt.Errorf("failed to query balance: %w", err)
 	}

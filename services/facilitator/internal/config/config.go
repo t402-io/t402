@@ -302,9 +302,11 @@ func Load() *Config {
 		OTELSampleRate: getEnvFloat("OTEL_TRACES_SAMPLER_ARG", 1.0),
 
 		// HTTP Server Timeouts (configurable for different deployment scenarios)
+		// WriteTimeout must exceed max settle operation time (~60s) to avoid
+		// premature connection closure during on-chain settlement.
 		ReadTimeout:     time.Duration(getEnvInt("HTTP_READ_TIMEOUT", 30)) * time.Second,
-		WriteTimeout:    time.Duration(getEnvInt("HTTP_WRITE_TIMEOUT", 30)) * time.Second,
-		IdleTimeout:     time.Duration(getEnvInt("HTTP_IDLE_TIMEOUT", 60)) * time.Second,
+		WriteTimeout:    time.Duration(getEnvInt("HTTP_WRITE_TIMEOUT", 90)) * time.Second,
+		IdleTimeout:     time.Duration(getEnvInt("HTTP_IDLE_TIMEOUT", 120)) * time.Second,
 		ShutdownTimeout: time.Duration(getEnvInt("HTTP_SHUTDOWN_TIMEOUT", 30)) * time.Second,
 	}
 }

@@ -328,11 +328,11 @@ func TestTimeoutDefaults(t *testing.T) {
 	if cfg.ReadTimeout != 30*time.Second {
 		t.Errorf("expected ReadTimeout=30s, got %v", cfg.ReadTimeout)
 	}
-	if cfg.WriteTimeout != 30*time.Second {
-		t.Errorf("expected WriteTimeout=30s, got %v", cfg.WriteTimeout)
+	if cfg.WriteTimeout != 90*time.Second {
+		t.Errorf("expected WriteTimeout=90s, got %v", cfg.WriteTimeout)
 	}
-	if cfg.IdleTimeout != 60*time.Second {
-		t.Errorf("expected IdleTimeout=60s, got %v", cfg.IdleTimeout)
+	if cfg.IdleTimeout != 120*time.Second {
+		t.Errorf("expected IdleTimeout=120s, got %v", cfg.IdleTimeout)
 	}
 	if cfg.ShutdownTimeout != 30*time.Second {
 		t.Errorf("expected ShutdownTimeout=30s, got %v", cfg.ShutdownTimeout)

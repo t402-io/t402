@@ -161,20 +161,15 @@ func deriveTonSeed(words []string) []byte {
 	return seed
 }
 
-// clearString securely overwrites a string's underlying bytes
-// Note: This works because Go strings are immutable but the underlying
-// byte array can be modified via unsafe pointer manipulation.
-// This is a best-effort security measure - the GC may have already
-// copied the string data elsewhere.
+// clearString is a no-op placeholder.
+// Go strings are immutable: []byte(*s) creates a copy, so zeroing the copy
+// does not clear the original string data. Callers should store sensitive
+// data as []byte instead. Kept for API compatibility.
 func clearString(s *string) {
-	if s == nil || *s == "" {
+	if s == nil {
 		return
 	}
-	// Convert string header to byte slice header and zero it
-	b := []byte(*s)
-	for i := range b {
-		b[i] = 0
-	}
+	*s = ""
 }
 
 // hmacSha512 computes HMAC-SHA512 (used internally by PBKDF2)

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/t402-io/t402/sdks/go/mechanisms/cosmos"
@@ -169,13 +170,13 @@ func (s *facilitatorCosmosSigner) QueryTxByEvent(ctx context.Context, network st
 		return nil, err
 	}
 
-	// Build query string
+	// Build query string with proper URL encoding
 	eventQuery := ""
 	for i, event := range events {
 		if i > 0 {
 			eventQuery += "&"
 		}
-		eventQuery += "events=" + event
+		eventQuery += "events=" + url.QueryEscape(event)
 	}
 
 	url := fmt.Sprintf("%s/cosmos/tx/v1beta1/txs?%s", restURL, eventQuery)
