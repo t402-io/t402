@@ -162,9 +162,11 @@ func TestNetworkConfigHasDefaultToken(t *testing.T) {
 	if !ok {
 		t.Fatal("GetNetworkConfig(ghostnet) returned false")
 	}
-	// Ghostnet should have empty default token
-	if ghostnetConfig.DefaultToken.Symbol != "" {
-		t.Errorf("Ghostnet DefaultToken.Symbol = %v, want empty", ghostnetConfig.DefaultToken.Symbol)
+	if ghostnetConfig.DefaultToken.Symbol != "USDt" {
+		t.Errorf("Ghostnet DefaultToken.Symbol = %v, want USDt", ghostnetConfig.DefaultToken.Symbol)
+	}
+	if ghostnetConfig.DefaultToken.Decimals != 6 {
+		t.Errorf("Ghostnet DefaultToken.Decimals = %v, want 6", ghostnetConfig.DefaultToken.Decimals)
 	}
 }
 

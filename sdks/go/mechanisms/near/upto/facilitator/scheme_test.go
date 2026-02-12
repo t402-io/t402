@@ -179,8 +179,8 @@ func TestGetExtra(t *testing.T) {
 	if extra == nil {
 		t.Fatal("GetExtra(mainnet) returned nil")
 	}
-	if extra["assetSymbol"] != "USDC" {
-		t.Errorf("extra.assetSymbol = %v, want USDC", extra["assetSymbol"])
+	if extra["assetSymbol"] != "USDT" {
+		t.Errorf("extra.assetSymbol = %v, want USDT", extra["assetSymbol"])
 	}
 	if extra["assetDecimals"] != 6 {
 		t.Errorf("extra.assetDecimals = %v, want 6", extra["assetDecimals"])
