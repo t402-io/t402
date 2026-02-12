@@ -298,6 +298,9 @@ func TestNonEVMNetworkPrefixes(t *testing.T) {
 		"polkadot:e143f23803ac50e8f6f8e62695d1ce9e": "WESTEND_ASSET_HUB",
 		"stacks:1":                                 "STACKS",
 		"stacks:2147483648":                        "STACKS_TESTNET",
+		"tron:shasta":                              "TRON_SHASTA",
+		"cosmos:noble-1":                           "COSMOS",
+		"cosmos:grand-1":                           "COSMOS_TESTNET",
 	}
 
 	for network, expectedPrefix := range expectedNetworks {

@@ -134,6 +134,7 @@ var NonEVMNetworkPrefixes = map[string]string{
 	"ton:testnet":                            "TON_TESTNET",
 	"tron:mainnet":                           "TRON",
 	"tron:nile":                              "TRON_NILE",
+	"tron:shasta":                            "TRON_SHASTA",
 	"solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp": "SOLANA",
 	"solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1": "SOLANA_DEVNET",
 	"near:mainnet":                           "NEAR",
@@ -146,4 +147,6 @@ var NonEVMNetworkPrefixes = map[string]string{
 	"polkadot:e143f23803ac50e8f6f8e62695d1ce9e": "WESTEND_ASSET_HUB",
 	"stacks:1":                               "STACKS",
 	"stacks:2147483648":                      "STACKS_TESTNET",
+	"cosmos:noble-1":                         "COSMOS",
+	"cosmos:grand-1":                         "COSMOS_TESTNET",
 }

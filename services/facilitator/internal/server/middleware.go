@@ -568,7 +568,8 @@ var endpointTimeouts = map[string]time.Duration{
 	"/settle": 60 * time.Second, // P1-6: Settlement needs more time for on-chain confirmation
 }
 
-// OperationTimeoutMiddleware adds per-operation context timeouts
+// OperationTimeoutMiddleware adds per-operation context timeouts.
+// Handlers should check c.Request.Context() for cancellation.
 // SECURITY: P2-6 fix - Prevents resource exhaustion from hanging operations
 // P1-6: Uses per-endpoint timeouts for settlement
 func OperationTimeoutMiddleware(defaultTimeout time.Duration) gin.HandlerFunc {
@@ -591,21 +592,14 @@ func OperationTimeoutMiddleware(defaultTimeout time.Duration) gin.HandlerFunc {
 		ctx, cancel := context.WithTimeout(c.Request.Context(), timeout)
 		defer cancel()
 
-		// Replace the request context
+		// Replace the request context — handlers use c.Request.Context()
+		// to detect cancellation and return early.
 		c.Request = c.Request.WithContext(ctx)
 
-		// Handle timeout
-		done := make(chan struct{})
-		go func() {
-			c.Next()
-			close(done)
-		}()
+		c.Next()
 
-		select {
-		case <-done:
-			// Request completed normally
-		case <-ctx.Done():
-			// Timeout exceeded
+		// If the context expired during handler execution, log it.
+		if ctx.Err() == context.DeadlineExceeded && !c.Writer.Written() {
 			log.Printf("Request timeout for %s %s", c.Request.Method, c.Request.URL.Path)
 			c.AbortWithStatusJSON(http.StatusGatewayTimeout, gin.H{
 				"code":    "REQUEST_TIMEOUT",
