@@ -369,6 +369,10 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, func(), error) {
 			solanaNetworks = append(solanaNetworks, t402.Network(svm.SolanaDevnetCAIP2))
 			configuredNetworks = append(configuredNetworks, "Solana Devnet")
 
+			// Add testnet
+			solanaNetworks = append(solanaNetworks, t402.Network(svm.SolanaTestnetCAIP2))
+			configuredNetworks = append(configuredNetworks, "Solana Testnet")
+
 			facilitator.Register(solanaNetworks, svmfac.NewExactSvmScheme(solanaSigner))
 			facilitator.Register(solanaNetworks, svmuptofac.NewUptoSvmScheme(solanaSigner))
 			zeroizables = append(zeroizables, solanaSigner)
@@ -404,26 +408,34 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, func(), error) {
 		log.Printf("Warning: NEAR_RPC not set, NEAR chains disabled")
 	}
 
-	// Setup Aptos chains if RPC is configured
-	if cfg.AptosRPC != "" {
-		aptosSigner := newFacilitatorAptosSigner(cfg.AptosRPC, cfg.AptosTestnetRPC)
-
-		var aptosNetworks []t402.Network
-
-		// Add mainnet
-		aptosNetworks = append(aptosNetworks, t402.Network(aptos.AptosMainnetCAIP2))
-		configuredNetworks = append(configuredNetworks, "Aptos Mainnet")
-
-		// Add testnet if configured
-		if cfg.AptosTestnetRPC != "" {
-			aptosNetworks = append(aptosNetworks, t402.Network(aptos.AptosTestnetCAIP2))
-			configuredNetworks = append(configuredNetworks, "Aptos Testnet")
+	// Setup Aptos chains - each network gets its own signer instance
+	// (the FacilitatorAptosSigner interface doesn't pass network to QueryTransaction/GetBalance,
+	// so we register separate signer instances per network for correct RPC routing)
+	{
+		var aptosCount int
+		if cfg.AptosRPC != "" {
+			mainnetSigner := newFacilitatorAptosSigner(cfg.AptosRPC, "")
+			facilitator.Register([]t402.Network{t402.Network(aptos.AptosMainnetCAIP2)}, aptosfac.NewExactDirectAptosScheme(mainnetSigner, nil))
+			configuredNetworks = append(configuredNetworks, "Aptos Mainnet")
+			aptosCount++
 		}
-
-		facilitator.Register(aptosNetworks, aptosfac.NewExactDirectAptosScheme(aptosSigner, nil))
-		log.Printf("Aptos facilitator configured for %d networks", len(aptosNetworks))
-	} else {
-		log.Printf("Warning: APTOS_RPC not set, Aptos chains disabled")
+		if cfg.AptosTestnetRPC != "" {
+			testnetSigner := newFacilitatorAptosSigner(cfg.AptosTestnetRPC, "")
+			facilitator.Register([]t402.Network{t402.Network(aptos.AptosTestnetCAIP2)}, aptosfac.NewExactDirectAptosScheme(testnetSigner, nil))
+			configuredNetworks = append(configuredNetworks, "Aptos Testnet")
+			aptosCount++
+		}
+		if cfg.AptosDevnetRPC != "" {
+			devnetSigner := newFacilitatorAptosSigner(cfg.AptosDevnetRPC, "")
+			facilitator.Register([]t402.Network{t402.Network(aptos.AptosDevnetCAIP2)}, aptosfac.NewExactDirectAptosScheme(devnetSigner, nil))
+			configuredNetworks = append(configuredNetworks, "Aptos Devnet")
+			aptosCount++
+		}
+		if aptosCount > 0 {
+			log.Printf("Aptos facilitator configured for %d networks", aptosCount)
+		} else {
+			log.Printf("Warning: APTOS_RPC not set, Aptos chains disabled")
+		}
 	}
 
 	// Setup Tezos chains if RPC is configured
@@ -448,26 +460,34 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, func(), error) {
 		log.Printf("Warning: TEZOS_RPC not set, Tezos chains disabled")
 	}
 
-	// Setup Polkadot Asset Hub if indexer is configured
-	if cfg.PolkadotAssetHubIndexer != "" {
-		polkadotSigner := newFacilitatorPolkadotSigner(cfg.PolkadotAssetHubIndexer, cfg.WestendAssetHubIndexer)
-
-		var polkadotNetworks []t402.Network
-
-		// Add Polkadot Asset Hub (mainnet)
-		polkadotNetworks = append(polkadotNetworks, t402.Network(polkadot.PolkadotAssetHubCAIP2))
-		configuredNetworks = append(configuredNetworks, "Polkadot Asset Hub")
-
-		// Add Westend Asset Hub (testnet) if configured
-		if cfg.WestendAssetHubIndexer != "" {
-			polkadotNetworks = append(polkadotNetworks, t402.Network(polkadot.WestendAssetHubCAIP2))
-			configuredNetworks = append(configuredNetworks, "Westend Asset Hub")
+	// Setup Polkadot Asset Hub chains - each network gets its own signer instance
+	// (the FacilitatorPolkadotSigner interface doesn't pass network to QueryExtrinsic/GetBalance,
+	// so we register separate signer instances per network for correct indexer routing)
+	{
+		var polkadotCount int
+		if cfg.PolkadotAssetHubIndexer != "" {
+			mainnetSigner := newFacilitatorPolkadotSigner(cfg.PolkadotAssetHubIndexer, "")
+			facilitator.Register([]t402.Network{t402.Network(polkadot.PolkadotAssetHubCAIP2)}, polkadotfac.NewExactDirectPolkadotScheme(mainnetSigner, nil))
+			configuredNetworks = append(configuredNetworks, "Polkadot Asset Hub")
+			polkadotCount++
 		}
-
-		facilitator.Register(polkadotNetworks, polkadotfac.NewExactDirectPolkadotScheme(polkadotSigner, nil))
-		log.Printf("Polkadot facilitator configured for %d networks", len(polkadotNetworks))
-	} else {
-		log.Printf("Warning: POLKADOT_ASSET_HUB_INDEXER not set, Polkadot chains disabled")
+		if cfg.KusamaAssetHubIndexer != "" {
+			kusamaSigner := newFacilitatorPolkadotSigner(cfg.KusamaAssetHubIndexer, "")
+			facilitator.Register([]t402.Network{t402.Network(polkadot.KusamaAssetHubCAIP2)}, polkadotfac.NewExactDirectPolkadotScheme(kusamaSigner, nil))
+			configuredNetworks = append(configuredNetworks, "Kusama Asset Hub")
+			polkadotCount++
+		}
+		if cfg.WestendAssetHubIndexer != "" {
+			westendSigner := newFacilitatorPolkadotSigner(cfg.WestendAssetHubIndexer, "")
+			facilitator.Register([]t402.Network{t402.Network(polkadot.WestendAssetHubCAIP2)}, polkadotfac.NewExactDirectPolkadotScheme(westendSigner, nil))
+			configuredNetworks = append(configuredNetworks, "Westend Asset Hub")
+			polkadotCount++
+		}
+		if polkadotCount > 0 {
+			log.Printf("Polkadot facilitator configured for %d networks", polkadotCount)
+		} else {
+			log.Printf("Warning: No Polkadot indexers configured, Polkadot chains disabled")
+		}
 	}
 
 	// Setup Stacks chains if address is configured

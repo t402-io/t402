@@ -22,13 +22,18 @@ import (
 
 	"github.com/t402-io/t402/sdks/go/mechanisms/ton"
 	tonupto "github.com/t402-io/t402/sdks/go/mechanisms/ton/upto"
+
+	"github.com/xssnick/tonutils-go/address"
+	"github.com/xssnick/tonutils-go/tlb"
+	"github.com/xssnick/tonutils-go/tvm/cell"
 )
 
 // facilitatorTonSigner implements the FacilitatorTonSigner interface
 type facilitatorTonSigner struct {
-	addresses map[string]string // network -> address
-	endpoints map[string]string // network -> RPC endpoint
-	publicKey ed25519.PublicKey
+	addresses  map[string]string // network -> address
+	endpoints  map[string]string // network -> RPC endpoint
+	publicKey  ed25519.PublicKey
+	privateKey ed25519.PrivateKey // SECURITY: Required for TransferJetton signing; cleared on Zeroize()
 }
 
 // TonSignerConfig configures the TON signer
@@ -102,9 +107,10 @@ func newFacilitatorTonSigner(mnemonic string, mainnetRPC string, testnetRPC stri
 	publicKey := privateKey.Public().(ed25519.PublicKey)
 
 	signer := &facilitatorTonSigner{
-		addresses: make(map[string]string),
-		endpoints: make(map[string]string),
-		publicKey: publicKey,
+		addresses:  make(map[string]string),
+		endpoints:  make(map[string]string),
+		publicKey:  publicKey,
+		privateKey: privateKey,
 	}
 
 	// Set up endpoints and addresses
@@ -602,15 +608,177 @@ func (s *facilitatorTonSigner) IsDeployed(ctx context.Context, address string, n
 	return addrInfo.State == "active", nil
 }
 
-// TransferJetton transfers Jettons from the facilitator to a destination address.
+// TransferJetton transfers Jettons from the facilitator wallet to a destination address.
 // This is required by the upto scheme to distribute settlement amounts and refunds.
 //
-// NOTE: Not yet implemented. TON Jetton transfers require building wallet v4r2
-// external messages with cell serialization (TL-B encoding), which needs a dedicated
-// TON library (e.g., tonutils-go). The upto facilitator can still be registered for
-// verify-only mode; settle operations will return an error until this is implemented.
+// The implementation builds a wallet v4r2 external message containing a TEP-74
+// Jetton transfer internal message, signs it with ed25519, and broadcasts via RPC.
 func (s *facilitatorTonSigner) TransferJetton(ctx context.Context, params tonupto.TransferJettonParams) (*tonupto.TransferJettonResult, error) {
-	return nil, fmt.Errorf("TON TransferJetton not yet implemented: requires tonutils-go library for cell serialization (wallet v4r2 external message + Jetton transfer body)")
+	if s.privateKey == nil {
+		return nil, fmt.Errorf("private key not available for signing")
+	}
+
+	// Get facilitator address for this network
+	facilAddr, ok := s.addresses[params.Network]
+	if !ok {
+		return nil, fmt.Errorf("no address configured for network: %s", params.Network)
+	}
+
+	// Step 1: Resolve the facilitator's Jetton wallet address
+	jettonWalletAddr, err := s.GetJettonWalletAddress(ctx, ton.GetJettonWalletParams{
+		OwnerAddress:        facilAddr,
+		JettonMasterAddress: params.JettonMaster,
+		Network:             params.Network,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get jetton wallet address: %w", err)
+	}
+
+	// Step 2: Get current seqno for the facilitator wallet
+	seqno, err := s.GetSeqno(ctx, facilAddr, params.Network)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get seqno: %w", err)
+	}
+
+	// Step 3: Build the TEP-74 Jetton transfer body cell
+	amount, ok := new(big.Int).SetString(params.Amount, 10)
+	if !ok {
+		return nil, fmt.Errorf("invalid amount: %s", params.Amount)
+	}
+
+	destAddr, err := address.ParseAddr(params.Destination)
+	if err != nil {
+		return nil, fmt.Errorf("invalid destination address: %w", err)
+	}
+
+	respAddr, err := address.ParseAddr(params.ResponseDestination)
+	if err != nil {
+		return nil, fmt.Errorf("invalid response destination address: %w", err)
+	}
+
+	forwardAmount := uint64(1) // Default: 1 nanoTON
+	if params.ForwardTonAmount != "" {
+		if fa, err := strconv.ParseUint(params.ForwardTonAmount, 10, 64); err == nil {
+			forwardAmount = fa
+		}
+	}
+
+	// Generate unique query_id (timestamp-based)
+	queryId := big.NewInt(time.Now().UnixNano())
+
+	// TEP-74 Jetton transfer message body
+	jettonBody := cell.BeginCell().
+		MustStoreUInt(0x0f8a7ea5, 32).        // op: jetton_transfer
+		MustStoreBigUInt(queryId, 64).         // query_id
+		MustStoreBigCoins(amount).             // jetton amount
+		MustStoreAddr(destAddr).               // destination
+		MustStoreAddr(respAddr).               // response_destination
+		MustStoreBoolBit(false).               // no custom_payload
+		MustStoreCoins(forwardAmount).         // forward_ton_amount
+		MustStoreBoolBit(false).               // no forward_payload
+		EndCell()
+
+	// Step 4: Build internal message to the Jetton wallet
+	jettonDstAddr, err := address.ParseAddr(jettonWalletAddr)
+	if err != nil {
+		return nil, fmt.Errorf("invalid jetton wallet address: %w", err)
+	}
+
+	// TON amount to attach for gas (0.1 TON = 100_000_000 nanoTON)
+	gasAmount := tlb.FromNanoTONU(ton.DefaultJettonTransferTon)
+
+	internalMsg := &tlb.InternalMessage{
+		IHRDisabled: true,
+		Bounce:      true,
+		DstAddr:     jettonDstAddr,
+		Amount:      gasAmount,
+		Body:        jettonBody,
+	}
+
+	internalMsgCell, err := tlb.ToCell(internalMsg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to serialize internal message: %w", err)
+	}
+
+	// Step 5: Build wallet v4r2 payload
+	// subwallet_id(32) + valid_until(32) + seqno(32) + op(8) + mode(8) + ref(internal_msg)
+	validUntil := time.Now().Add(60 * time.Second).Unix()
+	const walletV4R2SubwalletID = 698983191
+	const sendModePayGasSeparately = 3
+
+	payload := cell.BeginCell().
+		MustStoreUInt(walletV4R2SubwalletID, 32).
+		MustStoreUInt(uint64(validUntil), 32).
+		MustStoreUInt(uint64(seqno), 32).
+		MustStoreUInt(0, 8). // simple send op
+		MustStoreUInt(sendModePayGasSeparately, 8).
+		MustStoreRef(internalMsgCell).
+		EndCell()
+
+	// Step 6: Sign the payload hash with ed25519
+	sig := ed25519.Sign(s.privateKey, payload.Hash())
+
+	// Step 7: Build the signed body: signature(512 bits) + payload
+	signedBody := cell.BeginCell().
+		MustStoreSlice(sig, 512).
+		MustStoreBuilder(payload.ToBuilder()).
+		EndCell()
+
+	// Step 8: Build external message
+	facilParsedAddr, err := address.ParseAddr(facilAddr)
+	if err != nil {
+		return nil, fmt.Errorf("invalid facilitator address: %w", err)
+	}
+
+	extMsg := cell.BeginCell().
+		MustStoreUInt(0b10, 2).        // ext_in_msg_info$10
+		MustStoreUInt(0b00, 2).        // src: addr_none$00
+		MustStoreAddr(facilParsedAddr). // dest
+		MustStoreCoins(0).             // import_fee
+		MustStoreBoolBit(false).       // no state init
+		MustStoreBoolBit(true).        // body as ref
+		MustStoreRef(signedBody).      // body
+		EndCell()
+
+	// Step 9: Serialize to BOC and send
+	bocBytes := extMsg.ToBOC()
+	bocBase64 := base64.StdEncoding.EncodeToString(bocBytes)
+
+	txHash, err := s.SendExternalMessage(ctx, bocBase64, params.Network)
+	if err != nil {
+		return &tonupto.TransferJettonResult{
+			Success: false,
+			Error:   fmt.Sprintf("failed to send transfer: %v", err),
+		}, nil
+	}
+
+	// Step 10: Wait for transaction confirmation
+	confirmation, err := s.WaitForTransaction(ctx, ton.WaitForTransactionParams{
+		Address: facilAddr,
+		Seqno:   seqno + 1,
+		Timeout: 60,
+		Network: params.Network,
+	})
+	if err != nil {
+		return &tonupto.TransferJettonResult{
+			Success: false,
+			TxHash:  txHash,
+			Error:   fmt.Sprintf("transfer sent but confirmation failed: %v", err),
+		}, nil
+	}
+
+	if !confirmation.Success {
+		return &tonupto.TransferJettonResult{
+			Success: false,
+			TxHash:  txHash,
+			Error:   confirmation.Error,
+		}, nil
+	}
+
+	return &tonupto.TransferJettonResult{
+		Success: true,
+		TxHash:  txHash,
+	}, nil
 }
 
 // facilitatorTonUptoAdapter adapts the facilitatorTonSigner to the
@@ -702,12 +870,17 @@ func (a *facilitatorTonUptoAdapter) TransferJetton(ctx context.Context, params t
 }
 
 // Zeroize clears sensitive data from memory
-// SECURITY: While the TON signer doesn't store private keys (only the public key),
-// this method is provided for consistency with other signers and to clear any
-// cached data structures
+// SECURITY: Clears the private key and public key from memory
 func (s *facilitatorTonSigner) Zeroize() {
 	if s == nil {
 		return
+	}
+	// SECURITY: Clear the private key bytes
+	if len(s.privateKey) > 0 {
+		for i := range s.privateKey {
+			s.privateKey[i] = 0
+		}
+		s.privateKey = nil
 	}
 	// Clear the public key bytes
 	if len(s.publicKey) > 0 {

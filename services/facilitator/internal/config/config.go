@@ -93,6 +93,7 @@ type Config struct {
 	// Aptos Configuration
 	AptosRPC        string
 	AptosTestnetRPC string
+	AptosDevnetRPC  string
 
 	// Tezos Configuration
 	TezosRPC        string
@@ -100,6 +101,7 @@ type Config struct {
 
 	// Polkadot Configuration
 	PolkadotAssetHubIndexer string
+	KusamaAssetHubIndexer   string
 	WestendAssetHubIndexer  string
 
 	// Stacks Configuration
@@ -282,6 +284,7 @@ func Load() *Config {
 		// Aptos Configuration
 		AptosRPC:        getEnv("APTOS_RPC", "https://fullnode.mainnet.aptoslabs.com/v1"),
 		AptosTestnetRPC: getEnv("APTOS_TESTNET_RPC", "https://fullnode.testnet.aptoslabs.com/v1"),
+		AptosDevnetRPC:  getEnv("APTOS_DEVNET_RPC", "https://fullnode.devnet.aptoslabs.com/v1"),
 
 		// Tezos Configuration
 		TezosRPC:        getEnv("TEZOS_RPC", "https://mainnet.api.tez.ie"),
@@ -289,6 +292,7 @@ func Load() *Config {
 
 		// Polkadot Configuration
 		PolkadotAssetHubIndexer: getEnv("POLKADOT_ASSET_HUB_INDEXER", "https://assethub-polkadot.api.subscan.io"),
+		KusamaAssetHubIndexer:   getEnv("KUSAMA_ASSET_HUB_INDEXER", "https://assethub-kusama.api.subscan.io"),
 		WestendAssetHubIndexer:  getEnv("WESTEND_ASSET_HUB_INDEXER", "https://assethub-westend.api.subscan.io"),
 
 		// Stacks Configuration
