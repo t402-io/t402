@@ -21,6 +21,7 @@ import (
 	"golang.org/x/crypto/pbkdf2"
 
 	"github.com/t402-io/t402/sdks/go/mechanisms/ton"
+	tonupto "github.com/t402-io/t402/sdks/go/mechanisms/ton/upto"
 )
 
 // facilitatorTonSigner implements the FacilitatorTonSigner interface
@@ -599,6 +600,105 @@ func (s *facilitatorTonSigner) IsDeployed(ctx context.Context, address string, n
 	}
 
 	return addrInfo.State == "active", nil
+}
+
+// TransferJetton transfers Jettons from the facilitator to a destination address.
+// This is required by the upto scheme to distribute settlement amounts and refunds.
+//
+// NOTE: Not yet implemented. TON Jetton transfers require building wallet v4r2
+// external messages with cell serialization (TL-B encoding), which needs a dedicated
+// TON library (e.g., tonutils-go). The upto facilitator can still be registered for
+// verify-only mode; settle operations will return an error until this is implemented.
+func (s *facilitatorTonSigner) TransferJetton(ctx context.Context, params tonupto.TransferJettonParams) (*tonupto.TransferJettonResult, error) {
+	return nil, fmt.Errorf("TON TransferJetton not yet implemented: requires tonutils-go library for cell serialization (wallet v4r2 external message + Jetton transfer body)")
+}
+
+// facilitatorTonUptoAdapter adapts the facilitatorTonSigner to the
+// UptoFacilitatorTonSigner interface (which uses ton/upto param types
+// instead of ton param types).
+type facilitatorTonUptoAdapter struct {
+	inner *facilitatorTonSigner
+}
+
+func (a *facilitatorTonUptoAdapter) GetAddresses(ctx context.Context, network string) []string {
+	return a.inner.GetAddresses(ctx, network)
+}
+
+func (a *facilitatorTonUptoAdapter) GetJettonBalance(ctx context.Context, params tonupto.GetJettonBalanceParams) (string, error) {
+	return a.inner.GetJettonBalance(ctx, ton.GetJettonBalanceParams{
+		OwnerAddress:        params.OwnerAddress,
+		JettonMasterAddress: params.JettonMasterAddress,
+		Network:             params.Network,
+	})
+}
+
+func (a *facilitatorTonUptoAdapter) GetJettonWalletAddress(ctx context.Context, params tonupto.GetJettonWalletParams) (string, error) {
+	return a.inner.GetJettonWalletAddress(ctx, ton.GetJettonWalletParams{
+		OwnerAddress:        params.OwnerAddress,
+		JettonMasterAddress: params.JettonMasterAddress,
+		Network:             params.Network,
+	})
+}
+
+func (a *facilitatorTonUptoAdapter) VerifyMessage(ctx context.Context, params tonupto.VerifyMessageParams) (*tonupto.VerifyMessageResult, error) {
+	result, err := a.inner.VerifyMessage(ctx, ton.VerifyMessageParams{
+		SignedBoc:    params.SignedBoc,
+		ExpectedFrom: params.ExpectedFrom,
+		ExpectedTransfer: ton.ExpectedTransfer{
+			JettonAmount: params.ExpectedTransfer.JettonAmount,
+			Destination:  params.ExpectedTransfer.Destination,
+			JettonMaster: params.ExpectedTransfer.JettonMaster,
+		},
+		Network: params.Network,
+	})
+	if err != nil {
+		return nil, err
+	}
+	uptoResult := &tonupto.VerifyMessageResult{
+		Valid:  result.Valid,
+		Reason: result.Reason,
+	}
+	if result.Transfer != nil {
+		uptoResult.Transfer = &tonupto.TransferInfo{
+			From:         result.Transfer.From,
+			To:           result.Transfer.To,
+			JettonAmount: result.Transfer.JettonAmount,
+			QueryId:      result.Transfer.QueryId,
+		}
+	}
+	return uptoResult, nil
+}
+
+func (a *facilitatorTonUptoAdapter) SendExternalMessage(ctx context.Context, signedBoc string, network string) (string, error) {
+	return a.inner.SendExternalMessage(ctx, signedBoc, network)
+}
+
+func (a *facilitatorTonUptoAdapter) WaitForTransaction(ctx context.Context, params tonupto.WaitForTransactionParams) (*tonupto.TransactionConfirmation, error) {
+	result, err := a.inner.WaitForTransaction(ctx, ton.WaitForTransactionParams{
+		Address: params.Address,
+		Seqno:   params.Seqno,
+		Timeout: params.Timeout,
+		Network: params.Network,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &tonupto.TransactionConfirmation{
+		Success: result.Success,
+		Error:   result.Error,
+	}, nil
+}
+
+func (a *facilitatorTonUptoAdapter) GetSeqno(ctx context.Context, address string, network string) (int64, error) {
+	return a.inner.GetSeqno(ctx, address, network)
+}
+
+func (a *facilitatorTonUptoAdapter) IsDeployed(ctx context.Context, address string, network string) (bool, error) {
+	return a.inner.IsDeployed(ctx, address, network)
+}
+
+func (a *facilitatorTonUptoAdapter) TransferJetton(ctx context.Context, params tonupto.TransferJettonParams) (*tonupto.TransferJettonResult, error) {
+	return a.inner.TransferJetton(ctx, params)
 }
 
 // Zeroize clears sensitive data from memory

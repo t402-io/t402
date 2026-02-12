@@ -5,12 +5,17 @@ import (
 	"crypto/ed25519"
 	"encoding/hex"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
+	bin "github.com/gagliardetto/binary"
 	solana "github.com/gagliardetto/solana-go"
+	computebudget "github.com/gagliardetto/solana-go/programs/compute-budget"
+	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/gagliardetto/solana-go/rpc"
 	"github.com/t402-io/t402/sdks/go/mechanisms/svm"
+	svmupto "github.com/t402-io/t402/sdks/go/mechanisms/svm/upto"
 )
 
 // facilitatorSolanaSigner implements the FacilitatorSvmSigner interface
@@ -237,4 +242,119 @@ func (s *facilitatorSolanaSigner) ConfirmTransaction(ctx context.Context, signat
 	}
 
 	return fmt.Errorf("transaction confirmation timeout after %d attempts", maxAttempts)
+}
+
+func (s *facilitatorSolanaSigner) GetTokenBalance(ctx context.Context, tokenAccount solana.PublicKey, network string) (uint64, error) {
+	client, err := s.getClient(network)
+	if err != nil {
+		return 0, err
+	}
+
+	result, err := client.GetTokenAccountBalance(ctx, tokenAccount, rpc.CommitmentFinalized)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get token balance: %w", err)
+	}
+
+	if result == nil || result.Value == nil {
+		return 0, nil
+	}
+
+	amount, err := strconv.ParseUint(result.Value.Amount, 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("failed to parse token balance amount %q: %w", result.Value.Amount, err)
+	}
+
+	return amount, nil
+}
+
+func (s *facilitatorSolanaSigner) GetDelegatedAmount(ctx context.Context, tokenAccount solana.PublicKey, network string) (*svmupto.DelegateInfo, error) {
+	client, err := s.getClient(network)
+	if err != nil {
+		return nil, err
+	}
+
+	info, err := client.GetAccountInfoWithOpts(ctx, tokenAccount, &rpc.GetAccountInfoOpts{
+		Commitment: rpc.CommitmentFinalized,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get account info: %w", err)
+	}
+
+	if info == nil || info.Value == nil || info.Value.Data == nil {
+		return &svmupto.DelegateInfo{Amount: 0}, nil
+	}
+
+	var account token.Account
+	if err := bin.NewBinDecoder(info.Value.Data.GetBinary()).Decode(&account); err != nil {
+		return nil, fmt.Errorf("failed to decode token account: %w", err)
+	}
+
+	return &svmupto.DelegateInfo{
+		Delegate: account.Delegate,
+		Amount:   account.DelegatedAmount,
+	}, nil
+}
+
+func (s *facilitatorSolanaSigner) CreateTransferTransaction(ctx context.Context, params svmupto.TransferParams) (*solana.Transaction, error) {
+	// Get a recent blockhash
+	blockhash, err := s.GetRecentBlockhash(ctx, params.Network)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get recent blockhash: %w", err)
+	}
+
+	// Build compute budget instructions
+	cuLimit, err := computebudget.NewSetComputeUnitLimitInstructionBuilder().
+		SetUnits(svm.DefaultComputeUnitLimit).
+		ValidateAndBuild()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build compute limit instruction: %w", err)
+	}
+
+	cuPrice, err := computebudget.NewSetComputeUnitPriceInstructionBuilder().
+		SetMicroLamports(svm.DefaultComputeUnitPriceMicrolamports).
+		ValidateAndBuild()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build compute price instruction: %w", err)
+	}
+
+	// Build TransferChecked instruction using delegated authority
+	transferIx, err := token.NewTransferCheckedInstructionBuilder().
+		SetAmount(params.Amount).
+		SetDecimals(params.Decimals).
+		SetSourceAccount(params.Source).
+		SetMintAccount(params.Mint).
+		SetDestinationAccount(params.Destination).
+		SetOwnerAccount(params.Authority).
+		ValidateAndBuild()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build transfer instruction: %w", err)
+	}
+
+	// Build the transaction
+	tx, err := solana.NewTransactionBuilder().
+		AddInstruction(cuLimit).
+		AddInstruction(cuPrice).
+		AddInstruction(transferIx).
+		SetRecentBlockHash(blockhash).
+		SetFeePayer(params.FeePayer).
+		Build()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build transaction: %w", err)
+	}
+
+	return tx, nil
+}
+
+func (s *facilitatorSolanaSigner) GetRecentBlockhash(ctx context.Context, network string) (solana.Hash, error) {
+	client, err := s.getClient(network)
+	if err != nil {
+		return solana.Hash{}, err
+	}
+
+	result, err := client.GetLatestBlockhash(ctx, rpc.CommitmentFinalized)
+	if err != nil {
+		return solana.Hash{}, fmt.Errorf("failed to get recent blockhash: %w", err)
+	}
+
+	return result.Value.Blockhash, nil
 }

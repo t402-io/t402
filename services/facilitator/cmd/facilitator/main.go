@@ -28,10 +28,13 @@ import (
 	evmupto "github.com/t402-io/t402/sdks/go/mechanisms/evm/upto"
 	"github.com/t402-io/t402/sdks/go/mechanisms/ton"
 	tonfac "github.com/t402-io/t402/sdks/go/mechanisms/ton/exact/facilitator"
+	tonuptofac "github.com/t402-io/t402/sdks/go/mechanisms/ton/upto/facilitator"
 	"github.com/t402-io/t402/sdks/go/mechanisms/tron"
 	tronfac "github.com/t402-io/t402/sdks/go/mechanisms/tron/exact/facilitator"
+	tronuptofac "github.com/t402-io/t402/sdks/go/mechanisms/tron/upto/facilitator"
 	"github.com/t402-io/t402/sdks/go/mechanisms/svm"
 	svmfac "github.com/t402-io/t402/sdks/go/mechanisms/svm/exact/facilitator"
+	svmuptofac "github.com/t402-io/t402/sdks/go/mechanisms/svm/upto/facilitator"
 	"github.com/t402-io/t402/sdks/go/mechanisms/near"
 	nearfac "github.com/t402-io/t402/sdks/go/mechanisms/near/exact-direct/facilitator"
 	"github.com/t402-io/t402/sdks/go/mechanisms/aptos"
@@ -187,6 +190,10 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, func(), error) {
 			{t402.Network("eip155:999"), cfg.HyperEvmRPC, "HyperEVM"},
 			{t402.Network("eip155:4326"), cfg.MegaEthRPC, "MegaETH"},
 			{t402.Network("eip155:21000000"), cfg.CornRPC, "Corn"},
+			// Testnet Networks
+			{t402.Network("eip155:11155111"), cfg.SepoliaRPC, "Ethereum Sepolia"},
+			{t402.Network("eip155:84532"), cfg.BaseSepoliaRPC, "Base Sepolia"},
+			{t402.Network("eip155:421614"), cfg.ArbitrumSepoliaRPC, "Arbitrum Sepolia"},
 		}
 
 		// Legacy USDT networks (no EIP-3009 support)
@@ -298,7 +305,9 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, func(), error) {
 
 			if len(tonNetworks) > 0 {
 				facilitator.Register(tonNetworks, tonfac.NewExactTonScheme(tonSigner))
+				facilitator.Register(tonNetworks, tonuptofac.NewUptoTonScheme(&facilitatorTonUptoAdapter{inner: tonSigner}))
 				zeroizables = append(zeroizables, tonSigner)
+				log.Printf("TON upto scheme registered for %d networks", len(tonNetworks))
 			}
 		}
 	} else {
@@ -325,6 +334,16 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, func(), error) {
 			configuredNetworks = append(configuredNetworks, "TRON Shasta")
 
 			facilitator.Register(tronNetworks, tronfac.NewExactTronScheme(tronSigner))
+
+			// Register TRON upto scheme (needs adapter for context-free interface)
+			tronUptoAdapter, err := newFacilitatorTronUptoAdapter(cfg.TronPrivateKey, cfg.TronRPC)
+			if err != nil {
+				log.Printf("Warning: Failed to create TRON upto adapter: %v", err)
+			} else {
+				facilitator.Register(tronNetworks, tronuptofac.NewUptoTronScheme(tronUptoAdapter))
+				log.Printf("TRON upto scheme registered for %d networks", len(tronNetworks))
+			}
+
 			addrs := tronSigner.GetAddresses(context.Background(), tron.TronMainnetCAIP2)
 			if len(addrs) > 0 {
 				log.Printf("TRON facilitator address: %s", addrs[0])
@@ -351,11 +370,13 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, func(), error) {
 			configuredNetworks = append(configuredNetworks, "Solana Devnet")
 
 			facilitator.Register(solanaNetworks, svmfac.NewExactSvmScheme(solanaSigner))
+			facilitator.Register(solanaNetworks, svmuptofac.NewUptoSvmScheme(solanaSigner))
 			zeroizables = append(zeroizables, solanaSigner)
 			addrs := solanaSigner.GetAddresses(context.Background(), svm.SolanaMainnetCAIP2)
 			if len(addrs) > 0 {
 				log.Printf("Solana facilitator address: %s", addrs[0].String())
 			}
+			log.Printf("Solana upto scheme registered for %d networks", len(solanaNetworks))
 		}
 	} else {
 		log.Printf("Warning: SVM_PRIVATE_KEY not set, Solana chains disabled")
@@ -501,6 +522,11 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, func(), error) {
 	} else {
 		log.Printf("Warning: COSMOS_MAINNET_ADDRESS and COSMOS_TESTNET_ADDRESS not set, Cosmos/Noble chains disabled")
 	}
+
+	// Register protocol extensions
+	facilitator.RegisterExtension("bazaar")
+	facilitator.RegisterExtension("siwx")
+	log.Printf("Registered extensions: bazaar, siwx")
 
 	// Log configured networks
 	if len(configuredNetworks) == 0 {

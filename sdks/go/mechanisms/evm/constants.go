@@ -60,8 +60,11 @@ var (
 	ChainIDHyperEVM    = big.NewInt(999)
 	ChainIDMegaETH     = big.NewInt(4326)
 	ChainIDCorn        = big.NewInt(21000000)
+	// Testnet networks
+	ChainIDSepolia         = big.NewInt(11155111)
+	ChainIDArbitrumSepolia = big.NewInt(421614)
 	// Legacy USDT networks (no EIP-3009 support)
-	ChainIDBNB       = big.NewInt(56)
+	ChainIDBNB = big.NewInt(56)
 	ChainIDAvalanche = big.NewInt(43114)
 	ChainIDFantom    = big.NewInt(250)
 	ChainIDCelo      = big.NewInt(42220)
@@ -171,6 +174,42 @@ var (
 			SupportedAssets: map[string]AssetInfo{
 				"USDC": {
 					Address:  "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+					Name:     "USDC",
+					Version:  "2",
+					Decimals: DefaultDecimals,
+				},
+			},
+		},
+		// Ethereum Sepolia
+		"eip155:11155111": {
+			ChainID: ChainIDSepolia,
+			DefaultAsset: AssetInfo{
+				Address:  "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", // USDC on Ethereum Sepolia
+				Name:     "USDC",
+				Version:  "2",
+				Decimals: DefaultDecimals,
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDC": {
+					Address:  "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+					Name:     "USDC",
+					Version:  "2",
+					Decimals: DefaultDecimals,
+				},
+			},
+		},
+		// Arbitrum Sepolia
+		"eip155:421614": {
+			ChainID: ChainIDArbitrumSepolia,
+			DefaultAsset: AssetInfo{
+				Address:  "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d", // USDC on Arbitrum Sepolia
+				Name:     "USDC",
+				Version:  "2",
+				Decimals: DefaultDecimals,
+			},
+			SupportedAssets: map[string]AssetInfo{
+				"USDC": {
+					Address:  "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d",
 					Name:     "USDC",
 					Version:  "2",
 					Decimals: DefaultDecimals,

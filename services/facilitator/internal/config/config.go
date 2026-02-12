@@ -60,8 +60,12 @@ type Config struct {
 	HyperEvmRPC  string
 	MegaEthRPC   string
 	CornRPC      string
+	// EVM Testnet Networks
+	SepoliaRPC         string
+	BaseSepoliaRPC     string
+	ArbitrumSepoliaRPC string
 	// Legacy USDT Networks (no EIP-3009 support)
-	BnbRPC       string
+	BnbRPC string
 	AvalancheRPC string
 	FantomRPC    string
 	CeloRPC      string
@@ -245,8 +249,12 @@ func Load() *Config {
 		HyperEvmRPC:  getEnv("HYPEREVM_RPC", "https://rpc.hyperliquid.xyz/evm"),
 		MegaEthRPC:   getEnv("MEGAETH_RPC", "https://mainnet.megaeth.com/rpc"),
 		CornRPC:      getEnv("CORN_RPC", "https://mainnet.corn-rpc.com"),
+		// EVM Testnet Networks
+		SepoliaRPC:         getEnv("SEPOLIA_RPC", "https://ethereum-sepolia-rpc.publicnode.com"),
+		BaseSepoliaRPC:     getEnv("BASE_SEPOLIA_RPC", "https://sepolia.base.org"),
+		ArbitrumSepoliaRPC: getEnv("ARBITRUM_SEPOLIA_RPC", "https://sepolia-rollup.arbitrum.io/rpc"),
 		// Legacy USDT Networks (no EIP-3009 support)
-		BnbRPC:       getEnv("BNB_RPC", "https://bsc-dataseed.binance.org"),
+		BnbRPC: getEnv("BNB_RPC", "https://bsc-dataseed.binance.org"),
 		AvalancheRPC: getEnv("AVALANCHE_RPC", "https://api.avax.network/ext/bc/C/rpc"),
 		FantomRPC:    getEnv("FANTOM_RPC", "https://rpcapi.fantom.network"),
 		CeloRPC:      getEnv("CELO_RPC", "https://forno.celo.org"),

@@ -16,6 +16,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/t402-io/t402/sdks/go/mechanisms/tron"
+	tronupto "github.com/t402-io/t402/sdks/go/mechanisms/tron/upto"
 )
 
 // facilitatorTronSigner implements the FacilitatorTronSigner interface
@@ -79,6 +80,341 @@ func newFacilitatorTronSigner(privateKeyHex string, mainnetRPC string) (*facilit
 	signer.addresses[tron.TronShastaCAIP2] = address
 
 	return signer, nil
+}
+
+// facilitatorTronUptoAdapter adapts the facilitatorTronSigner to the
+// UptoFacilitatorTronSigner interface (no context.Context, plus GetAllowance
+// and ExecuteTransferFrom).
+type facilitatorTronUptoAdapter struct {
+	inner      *facilitatorTronSigner
+	privateKey *ecdsa.PrivateKey
+}
+
+// newFacilitatorTronUptoAdapter creates a TRON upto adapter that wraps
+// the existing facilitatorTronSigner and retains the private key for signing
+// transferFrom transactions during settlement.
+func newFacilitatorTronUptoAdapter(privateKeyHex string, mainnetRPC string) (*facilitatorTronUptoAdapter, error) {
+	if privateKeyHex == "" {
+		return nil, fmt.Errorf("private key is required")
+	}
+
+	privateKeyHex = strings.TrimPrefix(privateKeyHex, "0x")
+
+	privateKeyBytes, err := hex.DecodeString(privateKeyHex)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode private key: %w", err)
+	}
+
+	privateKey, err := crypto.ToECDSA(privateKeyBytes)
+	if err != nil {
+		// Clear key bytes on error
+		for i := range privateKeyBytes {
+			privateKeyBytes[i] = 0
+		}
+		return nil, fmt.Errorf("failed to parse private key: %w", err)
+	}
+
+	// Clear raw bytes; the parsed *ecdsa.PrivateKey is retained for signing
+	for i := range privateKeyBytes {
+		privateKeyBytes[i] = 0
+	}
+
+	address := publicKeyToTronAddress(&privateKey.PublicKey)
+
+	inner := &facilitatorTronSigner{
+		addresses: make(map[string]string),
+		endpoints: make(map[string]string),
+	}
+
+	if mainnetRPC != "" {
+		inner.endpoints[tron.TronMainnetCAIP2] = mainnetRPC
+	} else {
+		inner.endpoints[tron.TronMainnetCAIP2] = "https://api.trongrid.io"
+	}
+	inner.addresses[tron.TronMainnetCAIP2] = address
+
+	inner.endpoints[tron.TronNileCAIP2] = "https://api.nileex.io"
+	inner.addresses[tron.TronNileCAIP2] = address
+
+	inner.endpoints[tron.TronShastaCAIP2] = "https://api.shasta.trongrid.io"
+	inner.addresses[tron.TronShastaCAIP2] = address
+
+	return &facilitatorTronUptoAdapter{
+		inner:      inner,
+		privateKey: privateKey,
+	}, nil
+}
+
+// GetAddresses implements UptoFacilitatorTronSigner.
+func (a *facilitatorTronUptoAdapter) GetAddresses(network string) []string {
+	return a.inner.GetAddresses(context.Background(), network)
+}
+
+// GetBalance implements UptoFacilitatorTronSigner.
+func (a *facilitatorTronUptoAdapter) GetBalance(params tronupto.GetBalanceParams) (string, error) {
+	return a.inner.GetBalance(context.Background(), tron.GetBalanceParams{
+		OwnerAddress:    params.OwnerAddress,
+		ContractAddress: params.ContractAddress,
+		Network:         params.Network,
+	})
+}
+
+// GetAllowance implements UptoFacilitatorTronSigner.
+// Calls TRC-20 allowance(owner, spender) via triggersmartcontract.
+func (a *facilitatorTronUptoAdapter) GetAllowance(params tronupto.GetAllowanceParams) (string, error) {
+	ownerHex, err := tronAddressToHex(params.OwnerAddress)
+	if err != nil {
+		return "0", fmt.Errorf("invalid owner address: %w", err)
+	}
+	spenderHex, err := tronAddressToHex(params.SpenderAddress)
+	if err != nil {
+		return "0", fmt.Errorf("invalid spender address: %w", err)
+	}
+
+	// ABI-encode: pad each 20-byte address to 32 bytes
+	ownerParam := fmt.Sprintf("%064s", strings.TrimPrefix(ownerHex, "41"))
+	spenderParam := fmt.Sprintf("%064s", strings.TrimPrefix(spenderHex, "41"))
+
+	result, err := a.inner.tronAPIRequest(context.Background(), params.Network, "/wallet/triggersmartcontract", map[string]interface{}{
+		"owner_address":     params.OwnerAddress,
+		"contract_address":  params.ContractAddress,
+		"function_selector": "allowance(address,address)",
+		"parameter":         ownerParam + spenderParam,
+		"visible":           true,
+	})
+	if err != nil {
+		return "0", nil
+	}
+
+	var triggerResult struct {
+		Result struct {
+			Result bool `json:"result"`
+		} `json:"result"`
+		ConstantResult []string `json:"constant_result"`
+	}
+	if err := json.Unmarshal(result, &triggerResult); err != nil {
+		return "0", nil
+	}
+
+	if !triggerResult.Result.Result || len(triggerResult.ConstantResult) == 0 {
+		return "0", nil
+	}
+
+	allowanceHex := triggerResult.ConstantResult[0]
+	allowance := new(big.Int)
+	allowance.SetString(allowanceHex, 16)
+
+	return allowance.String(), nil
+}
+
+// VerifyApproveTransaction implements UptoFacilitatorTronSigner.
+// Verifies the signer of a signed approve transaction using ECDSA recovery.
+func (a *facilitatorTronUptoAdapter) VerifyApproveTransaction(params tronupto.VerifyApproveParams) (*tronupto.VerifyApproveResult, error) {
+	txBytes, err := hex.DecodeString(params.SignedTransaction)
+	if err != nil {
+		return &tronupto.VerifyApproveResult{
+			Valid:  false,
+			Reason: "invalid_hex_encoding",
+		}, nil
+	}
+
+	if len(txBytes) < 100 {
+		return &tronupto.VerifyApproveResult{
+			Valid:  false,
+			Reason: "transaction_too_short",
+		}, nil
+	}
+
+	rawData, signature, err := extractTronTxFields(txBytes)
+	if err != nil {
+		return &tronupto.VerifyApproveResult{
+			Valid:  false,
+			Reason: fmt.Sprintf("invalid_tx_structure: %v", err),
+		}, nil
+	}
+
+	txHash := sha256.Sum256(rawData)
+
+	if len(signature) != 65 {
+		return &tronupto.VerifyApproveResult{
+			Valid:  false,
+			Reason: "invalid_signature_length",
+		}, nil
+	}
+
+	pubKeyBytes, err := crypto.Ecrecover(txHash[:], signature)
+	if err != nil {
+		return &tronupto.VerifyApproveResult{
+			Valid:  false,
+			Reason: "signature_recovery_failed",
+		}, nil
+	}
+
+	pubKey, err := crypto.UnmarshalPubkey(pubKeyBytes)
+	if err != nil {
+		return &tronupto.VerifyApproveResult{
+			Valid:  false,
+			Reason: "invalid_recovered_pubkey",
+		}, nil
+	}
+	recoveredAddress := publicKeyToTronAddress(pubKey)
+
+	if params.ExpectedOwner != "" && !tron.AddressesEqual(recoveredAddress, params.ExpectedOwner) {
+		return &tronupto.VerifyApproveResult{
+			Valid:  false,
+			Reason: fmt.Sprintf("signer_mismatch: expected %s, got %s", params.ExpectedOwner, recoveredAddress),
+		}, nil
+	}
+
+	return &tronupto.VerifyApproveResult{
+		Valid: true,
+		Owner: recoveredAddress,
+	}, nil
+}
+
+// BroadcastTransaction implements UptoFacilitatorTronSigner.
+func (a *facilitatorTronUptoAdapter) BroadcastTransaction(signedTransaction string, network string) (string, error) {
+	return a.inner.BroadcastTransaction(context.Background(), signedTransaction, network)
+}
+
+// ExecuteTransferFrom implements UptoFacilitatorTronSigner.
+// Builds a TRC-20 transferFrom(from, to, amount) transaction, signs it with
+// the facilitator private key, and broadcasts it.
+func (a *facilitatorTronUptoAdapter) ExecuteTransferFrom(params tronupto.TransferFromParams) (*tronupto.TransferFromResult, error) {
+	ctx := context.Background()
+
+	// ABI-encode transferFrom(address from, address to, uint256 amount)
+	fromHex, err := tronAddressToHex(params.From)
+	if err != nil {
+		return &tronupto.TransferFromResult{Success: false, Error: fmt.Sprintf("invalid from address: %v", err)}, nil
+	}
+	toHex, err := tronAddressToHex(params.To)
+	if err != nil {
+		return &tronupto.TransferFromResult{Success: false, Error: fmt.Sprintf("invalid to address: %v", err)}, nil
+	}
+
+	amount := new(big.Int)
+	if _, ok := amount.SetString(params.Amount, 10); !ok {
+		return &tronupto.TransferFromResult{Success: false, Error: "invalid amount"}, nil
+	}
+
+	fromParam := fmt.Sprintf("%064s", strings.TrimPrefix(fromHex, "41"))
+	toParam := fmt.Sprintf("%064s", strings.TrimPrefix(toHex, "41"))
+	amountParam := fmt.Sprintf("%064x", amount)
+
+	// Get the facilitator address for this network
+	facilitatorAddrs := a.inner.GetAddresses(ctx, params.Network)
+	if len(facilitatorAddrs) == 0 {
+		return &tronupto.TransferFromResult{Success: false, Error: "no facilitator address for network"}, nil
+	}
+
+	// Trigger smart contract to build the unsigned transaction
+	result, err := a.inner.tronAPIRequest(ctx, params.Network, "/wallet/triggersmartcontract", map[string]interface{}{
+		"owner_address":     facilitatorAddrs[0],
+		"contract_address":  params.ContractAddress,
+		"function_selector": "transferFrom(address,address,uint256)",
+		"parameter":         fromParam + toParam + amountParam,
+		"fee_limit":         100000000, // 100 TRX
+		"visible":           true,
+	})
+	if err != nil {
+		return &tronupto.TransferFromResult{Success: false, Error: fmt.Sprintf("triggersmartcontract failed: %v", err)}, nil
+	}
+
+	var triggerResult struct {
+		Result struct {
+			Result  bool   `json:"result"`
+			Message string `json:"message,omitempty"`
+		} `json:"result"`
+		Transaction struct {
+			RawDataHex string `json:"raw_data_hex"`
+			TxID       string `json:"txID"`
+		} `json:"transaction"`
+	}
+	if err := json.Unmarshal(result, &triggerResult); err != nil {
+		return &tronupto.TransferFromResult{Success: false, Error: fmt.Sprintf("failed to parse trigger result: %v", err)}, nil
+	}
+
+	if !triggerResult.Result.Result {
+		return &tronupto.TransferFromResult{Success: false, Error: fmt.Sprintf("trigger failed: %s", triggerResult.Result.Message)}, nil
+	}
+
+	// Sign the transaction: SHA256(raw_data_hex) -> secp256k1 sign
+	rawDataBytes, err := hex.DecodeString(triggerResult.Transaction.RawDataHex)
+	if err != nil {
+		return &tronupto.TransferFromResult{Success: false, Error: "invalid raw_data_hex"}, nil
+	}
+
+	txHash := sha256.Sum256(rawDataBytes)
+	sig, err := crypto.Sign(txHash[:], a.privateKey)
+	if err != nil {
+		return &tronupto.TransferFromResult{Success: false, Error: fmt.Sprintf("signing failed: %v", err)}, nil
+	}
+
+	// Broadcast via /wallet/broadcasttransaction with the signed tx
+	broadcastResult, err := a.inner.tronAPIRequest(ctx, params.Network, "/wallet/broadcasttransaction", map[string]interface{}{
+		"raw_data_hex": triggerResult.Transaction.RawDataHex,
+		"txID":         triggerResult.Transaction.TxID,
+		"signature":    []string{hex.EncodeToString(sig)},
+		"visible":      true,
+	})
+	if err != nil {
+		return &tronupto.TransferFromResult{Success: false, Error: fmt.Sprintf("broadcast failed: %v", err)}, nil
+	}
+
+	var bResult struct {
+		Result  bool   `json:"result"`
+		TxId    string `json:"txid"`
+		Code    string `json:"code"`
+		Message string `json:"message"`
+	}
+	if err := json.Unmarshal(broadcastResult, &bResult); err != nil {
+		return &tronupto.TransferFromResult{Success: false, Error: fmt.Sprintf("failed to parse broadcast result: %v", err)}, nil
+	}
+
+	if !bResult.Result {
+		msg := bResult.Message
+		if msg == "" {
+			msg = bResult.Code
+		}
+		return &tronupto.TransferFromResult{Success: false, Error: fmt.Sprintf("broadcast failed: %s", msg)}, nil
+	}
+
+	txId := bResult.TxId
+	if txId == "" {
+		txId = triggerResult.Transaction.TxID
+	}
+
+	return &tronupto.TransferFromResult{
+		Success: true,
+		TxId:    txId,
+	}, nil
+}
+
+// WaitForTransaction implements UptoFacilitatorTronSigner.
+func (a *facilitatorTronUptoAdapter) WaitForTransaction(params tronupto.WaitForTransactionParams) (*tronupto.TransactionConfirmation, error) {
+	result, err := a.inner.WaitForTransaction(context.Background(), tron.WaitForTransactionParams{
+		TxId:    params.TxId,
+		Network: params.Network,
+		Timeout: params.Timeout,
+	})
+	if err != nil {
+		return &tronupto.TransactionConfirmation{
+			Success: false,
+			Error:   err.Error(),
+		}, nil
+	}
+	return &tronupto.TransactionConfirmation{
+		Success:     result.Success,
+		TxId:        result.TxId,
+		BlockNumber: result.BlockNumber,
+		Error:       result.Error,
+	}, nil
+}
+
+// IsActivated implements UptoFacilitatorTronSigner.
+func (a *facilitatorTronUptoAdapter) IsActivated(address string, network string) (bool, error) {
+	return a.inner.IsActivated(context.Background(), address, network)
 }
 
 // publicKeyToTronAddress converts an ECDSA public key to a TRON address
