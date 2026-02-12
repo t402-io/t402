@@ -27,8 +27,8 @@ func TestParsePrice_StringDollar(t *testing.T) {
 	if result.Amount != "10000" {
 		t.Errorf("Amount = %v, want 10000", result.Amount)
 	}
-	if result.Asset != near.USDCMainnet.ContractID {
-		t.Errorf("Asset = %v, want %v", result.Asset, near.USDCMainnet.ContractID)
+	if result.Asset != near.USDTMainnet.ContractID {
+		t.Errorf("Asset = %v, want %v", result.Asset, near.USDTMainnet.ContractID)
 	}
 }
 
@@ -41,8 +41,8 @@ func TestParsePrice_Float64(t *testing.T) {
 	if result.Amount != "10000" {
 		t.Errorf("Amount = %v, want 10000", result.Amount)
 	}
-	if result.Asset != near.USDCMainnet.ContractID {
-		t.Errorf("Asset = %v, want %v", result.Asset, near.USDCMainnet.ContractID)
+	if result.Asset != near.USDTMainnet.ContractID {
+		t.Errorf("Asset = %v, want %v", result.Asset, near.USDTMainnet.ContractID)
 	}
 }
 
@@ -99,8 +99,8 @@ func TestParsePrice_MapWithoutAsset(t *testing.T) {
 		t.Errorf("Amount = %v, want 5000", result.Amount)
 	}
 	// Should default to the network's default token
-	if result.Asset != near.USDCMainnet.ContractID {
-		t.Errorf("Asset = %v, want %v (default)", result.Asset, near.USDCMainnet.ContractID)
+	if result.Asset != near.USDTMainnet.ContractID {
+		t.Errorf("Asset = %v, want %v (default)", result.Asset, near.USDTMainnet.ContractID)
 	}
 }
 
@@ -186,14 +186,14 @@ func TestEnhancePaymentRequirements_Success(t *testing.T) {
 	if result.Scheme != upto.SchemeUpto {
 		t.Errorf("Scheme = %v, want %v", result.Scheme, upto.SchemeUpto)
 	}
-	if result.Asset != near.USDCMainnet.ContractID {
-		t.Errorf("Asset = %v, want %v", result.Asset, near.USDCMainnet.ContractID)
+	if result.Asset != near.USDTMainnet.ContractID {
+		t.Errorf("Asset = %v, want %v", result.Asset, near.USDTMainnet.ContractID)
 	}
 	if result.Extra == nil {
 		t.Fatal("Extra should not be nil")
 	}
-	if result.Extra["symbol"] != "USDC" {
-		t.Errorf("Extra.symbol = %v, want USDC", result.Extra["symbol"])
+	if result.Extra["symbol"] != "USDT" {
+		t.Errorf("Extra.symbol = %v, want USDT", result.Extra["symbol"])
 	}
 	if result.Extra["decimals"] != 6 {
 		t.Errorf("Extra.decimals = %v, want 6", result.Extra["decimals"])
@@ -323,8 +323,8 @@ func TestEnhancePaymentRequirements_Testnet(t *testing.T) {
 		t.Fatalf("EnhancePaymentRequirements() error: %v", err)
 	}
 
-	if result.Asset != near.USDCTestnet.ContractID {
-		t.Errorf("Asset = %v, want %v", result.Asset, near.USDCTestnet.ContractID)
+	if result.Asset != near.USDTTestnet.ContractID {
+		t.Errorf("Asset = %v, want %v", result.Asset, near.USDTTestnet.ContractID)
 	}
 	if result.Extra["facilitator"] != "facilitator.testnet" {
 		t.Errorf("Extra.facilitator = %v, want facilitator.testnet", result.Extra["facilitator"])
@@ -743,7 +743,7 @@ func TestGetTokenDecimals(t *testing.T) {
 	}
 
 	// USDC on mainnet
-	decimals = server.GetTokenDecimals(t402.Network(near.NearMainnetCAIP2), near.USDCMainnet.ContractID)
+	decimals = server.GetTokenDecimals(t402.Network(near.NearMainnetCAIP2), near.USDTMainnet.ContractID)
 	if decimals != 6 {
 		t.Errorf("GetTokenDecimals(USDC mainnet) = %v, want 6", decimals)
 	}

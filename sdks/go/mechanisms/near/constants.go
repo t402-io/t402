@@ -65,12 +65,12 @@ var (
 		NearMainnetCAIP2: {
 			NetworkID:    "mainnet",
 			RPCURL:       NearMainnetRPC,
-			DefaultToken: USDCMainnet,
+			DefaultToken: USDTMainnet,
 		},
 		NearTestnetCAIP2: {
 			NetworkID:    "testnet",
 			RPCURL:       NearTestnetRPC,
-			DefaultToken: USDCTestnet,
+			DefaultToken: USDTTestnet,
 		},
 	}
 

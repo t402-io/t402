@@ -184,71 +184,65 @@ func setupFacilitator(cfg *config.Config) (server.Facilitator, error) {
 			{t402.Network("eip155:8217"), cfg.KaiaRPC, "Kaia"},
 		}
 
-		// Use Base RPC as default if available, otherwise use first available RPC
-		defaultRPC := cfg.BaseRPC
-		if defaultRPC == "" {
-			defaultRPC = cfg.EthRPC
+		// Create per-network EVM signers with dedicated RPC connections
+		// Each network needs its own ethclient connected to the correct chain RPC
+		// so that ReadContract, WriteContract, and GetChainID operate on the right chain
+		evmConfig := &evm.ExactEvmSchemeConfig{
+			DeployERC4337WithEIP6492: true,
 		}
-		if defaultRPC == "" {
-			defaultRPC = cfg.ArbitrumRPC
+		uptoConfig := &evmupto.UptoEvmFacilitatorConfig{
+			SettleFullAmount: false,
 		}
-		if defaultRPC == "" {
-			log.Printf("Warning: No RPC endpoint configured for EVM chains")
-		} else {
-			// Create EVM signer with default RPC
-			signer, err := newFacilitatorEvmSigner(cfg.EvmPrivateKey, defaultRPC)
+		legacyConfig := &evmlegacy.ExactLegacyEvmSchemeConfig{
+			MinAllowanceRatio: 1.0,
+		}
+
+		var addressLogged bool
+		var evmCount, legacyCount int
+
+		// Register standard EVM networks (exact + upto schemes per network)
+		for _, n := range networks {
+			if n.rpc == "" {
+				continue
+			}
+			netSigner, err := newFacilitatorEvmSigner(cfg.EvmPrivateKey, n.rpc)
 			if err != nil {
-				return nil, fmt.Errorf("failed to create EVM signer: %w", err)
+				log.Printf("Warning: Failed to create EVM signer for %s: %v", n.name, err)
+				continue
 			}
+			facilitator.Register([]t402.Network{n.network}, evm.NewExactEvmScheme(netSigner, evmConfig))
+			facilitator.Register([]t402.Network{n.network}, evmupto.NewUptoEvmFacilitator(netSigner, uptoConfig))
+			configuredNetworks = append(configuredNetworks, n.name)
+			evmCount++
+			if !addressLogged {
+				log.Printf("EVM facilitator address: %s", netSigner.GetAddresses()[0])
+				addressLogged = true
+			}
+		}
 
-			var networkList []t402.Network
-			for _, n := range networks {
-				if n.rpc != "" {
-					networkList = append(networkList, n.network)
-					configuredNetworks = append(configuredNetworks, n.name)
-				}
+		// Register legacy USDT networks (exact-legacy scheme, no EIP-3009)
+		for _, n := range legacyNetworks {
+			if n.rpc == "" {
+				continue
 			}
+			netSigner, err := newFacilitatorEvmSigner(cfg.EvmPrivateKey, n.rpc)
+			if err != nil {
+				log.Printf("Warning: Failed to create EVM signer for %s: %v", n.name, err)
+				continue
+			}
+			facilitator.Register([]t402.Network{n.network}, evmlegacy.NewExactLegacyEvmScheme(netSigner, legacyConfig))
+			configuredNetworks = append(configuredNetworks, n.name+" (legacy)")
+			legacyCount++
+			if !addressLogged {
+				log.Printf("EVM facilitator address: %s", netSigner.GetAddresses()[0])
+				addressLogged = true
+			}
+		}
 
-			if len(networkList) > 0 {
-				evmConfig := &evm.ExactEvmSchemeConfig{
-					DeployERC4337WithEIP6492: true,
-				}
-				facilitator.Register(networkList, evm.NewExactEvmScheme(signer, evmConfig))
-				log.Printf("EVM facilitator address: %s", signer.GetAddresses()[0])
-			}
-
-			// Register legacy networks with exact-legacy scheme
-			var legacyNetworkList []t402.Network
-			for _, n := range legacyNetworks {
-				if n.rpc != "" {
-					legacyNetworkList = append(legacyNetworkList, n.network)
-					configuredNetworks = append(configuredNetworks, n.name+" (legacy)")
-				}
-			}
-
-			if len(legacyNetworkList) > 0 {
-				legacyConfig := &evmlegacy.ExactLegacyEvmSchemeConfig{
-					MinAllowanceRatio: 1.0,
-				}
-				facilitator.Register(legacyNetworkList, evmlegacy.NewExactLegacyEvmScheme(signer, legacyConfig))
-				log.Printf("EVM legacy facilitator registered for %d networks", len(legacyNetworkList))
-			}
-
-			// Register upto scheme (EIP-2612 Permit) for all EVM networks
-			// The upto scheme supports gasless token approvals via permit
-			var uptoNetworkList []t402.Network
-			for _, n := range networks {
-				if n.rpc != "" {
-					uptoNetworkList = append(uptoNetworkList, n.network)
-				}
-			}
-			if len(uptoNetworkList) > 0 {
-				uptoConfig := &evmupto.UptoEvmFacilitatorConfig{
-					SettleFullAmount: false,
-				}
-				facilitator.Register(uptoNetworkList, evmupto.NewUptoEvmFacilitator(signer, uptoConfig))
-				log.Printf("EVM upto (EIP-2612 Permit) facilitator registered for %d networks", len(uptoNetworkList))
-			}
+		if addressLogged {
+			log.Printf("EVM registered %d standard + %d legacy networks (per-network RPC)", evmCount, legacyCount)
+		} else {
+			log.Printf("Warning: No RPC endpoint configured for EVM chains")
 		}
 	} else {
 		log.Printf("Warning: EVM_PRIVATE_KEY not set, EVM chains disabled")

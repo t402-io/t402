@@ -47,6 +47,13 @@ var (
 		Decimals:        6,
 	}
 
+	// USDt metadata for Ghostnet (no deployed contract, metadata only)
+	USDTGhostnet = TokenInfo{
+		Symbol:   "USDt",
+		Name:     "Tether USD (Testnet)",
+		Decimals: 6,
+	}
+
 	// Network configurations
 	NetworkConfigs = map[string]NetworkConfig{
 		TezosMainnetCAIP2: {
@@ -59,7 +66,7 @@ var (
 			Name:         "Tezos Ghostnet",
 			RpcURL:       TezosGhostnetRPC,
 			IndexerURL:   TezosGhostnetIndexer,
-			DefaultToken: TokenInfo{}, // No USDT on testnet
+			DefaultToken: USDTGhostnet,
 		},
 	}
 

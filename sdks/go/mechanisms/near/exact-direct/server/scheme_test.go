@@ -43,7 +43,7 @@ func TestParsePrice_AssetAmountMap(t *testing.T) {
 			},
 			network:    "near:mainnet",
 			wantAmount: "5000000",
-			wantAsset:  near.USDCMainnet.ContractID, // default for mainnet
+			wantAsset:  near.USDTMainnet.ContractID, // default for mainnet
 		},
 		{
 			name: "with extra fields",
@@ -65,7 +65,7 @@ func TestParsePrice_AssetAmountMap(t *testing.T) {
 			},
 			network:    "near:testnet",
 			wantAmount: "3000000",
-			wantAsset:  near.USDCTestnet.ContractID,
+			wantAsset:  near.USDTTestnet.ContractID,
 		},
 	}
 
@@ -99,42 +99,42 @@ func TestParsePrice_MoneyString(t *testing.T) {
 			price:      "$1.50",
 			network:    "near:mainnet",
 			wantAmount: "1500000",
-			wantAsset:  near.USDCMainnet.ContractID,
+			wantAsset:  near.USDTMainnet.ContractID,
 		},
 		{
 			name:       "plain decimal",
 			price:      "2.50",
 			network:    "near:mainnet",
 			wantAmount: "2500000",
-			wantAsset:  near.USDCMainnet.ContractID,
+			wantAsset:  near.USDTMainnet.ContractID,
 		},
 		{
 			name:       "integer amount",
 			price:      "10",
 			network:    "near:mainnet",
 			wantAmount: "10000000",
-			wantAsset:  near.USDCMainnet.ContractID,
+			wantAsset:  near.USDTMainnet.ContractID,
 		},
 		{
 			name:       "dollar with space",
 			price:      "$ 5.00",
 			network:    "near:mainnet",
 			wantAmount: "5000000",
-			wantAsset:  near.USDCMainnet.ContractID,
+			wantAsset:  near.USDTMainnet.ContractID,
 		},
 		{
 			name:       "small amount",
 			price:      "0.01",
 			network:    "near:mainnet",
 			wantAmount: "10000",
-			wantAsset:  near.USDCMainnet.ContractID,
+			wantAsset:  near.USDTMainnet.ContractID,
 		},
 		{
 			name:       "testnet uses default token",
 			price:      "1.00",
 			network:    "near:testnet",
 			wantAmount: "1000000",
-			wantAsset:  near.USDCTestnet.ContractID,
+			wantAsset:  near.USDTTestnet.ContractID,
 		},
 	}
 
@@ -288,12 +288,12 @@ func TestRegisterMoneyParser_SingleCustomParser(t *testing.T) {
 		t.Errorf("Expected tier='large', got %v", result1.Extra["tier"])
 	}
 
-	// Test small amount - should fall back to default (USDC)
+	// Test small amount - should fall back to default (USDT)
 	result2, err := scheme.ParsePrice(50.0, "near:mainnet")
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}
-	if result2.Asset != near.USDCMainnet.ContractID {
+	if result2.Asset != near.USDTMainnet.ContractID {
 		t.Errorf("Expected USDC for small amount, got %s", result2.Asset)
 	}
 }
@@ -348,9 +348,9 @@ func TestRegisterMoneyParser_MultipleInChain(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}
-	// Should use default USDC
-	if result3.Asset != near.USDCMainnet.ContractID {
-		t.Errorf("Expected USDC, got %s", result3.Asset)
+	// Should use default USDT
+	if result3.Asset != near.USDTMainnet.ContractID {
+		t.Errorf("Expected USDT, got %s", result3.Asset)
 	}
 }
 
@@ -383,8 +383,8 @@ func TestRegisterMoneyParser_ErrorSkipsParser(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}
-	if result.Asset != near.USDCMainnet.ContractID {
-		t.Errorf("Expected default USDC, got %s", result.Asset)
+	if result.Asset != near.USDTMainnet.ContractID {
+		t.Errorf("Expected default USDT, got %s", result.Asset)
 	}
 }
 
@@ -450,8 +450,8 @@ func TestEnhancePaymentRequirements_DefaultAsset(t *testing.T) {
 	}
 
 	// Default asset should be set
-	if result.Asset != near.USDCMainnet.ContractID {
-		t.Errorf("Asset = %v, want %v", result.Asset, near.USDCMainnet.ContractID)
+	if result.Asset != near.USDTMainnet.ContractID {
+		t.Errorf("Asset = %v, want %v", result.Asset, near.USDTMainnet.ContractID)
 	}
 }
 
@@ -782,8 +782,8 @@ func TestDefaultMoneyConversion_IncludesTokenMetadata(t *testing.T) {
 	}
 
 	// Default conversion should include token metadata in Extra
-	if result.Extra["symbol"] != "USDC" {
-		t.Errorf("Extra.symbol = %v, want USDC", result.Extra["symbol"])
+	if result.Extra["symbol"] != "USDT" {
+		t.Errorf("Extra.symbol = %v, want USDT", result.Extra["symbol"])
 	}
 	if result.Extra["decimals"] != 6 {
 		t.Errorf("Extra.decimals = %v, want 6", result.Extra["decimals"])
