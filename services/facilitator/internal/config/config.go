@@ -233,7 +233,7 @@ func Load() *Config {
 		// Phase 1: High Priority USDT0 Networks
 		PolygonRPC:  getEnv("POLYGON_RPC", "https://polygon-rpc.com"),
 		MantleRPC:   getEnv("MANTLE_RPC", "https://rpc.mantle.xyz"),
-		PlasmaRPC:   getEnv("PLASMA_RPC", "https://rpc.plasma.io"),
+		PlasmaRPC:   getEnv("PLASMA_RPC", "https://rpc.plasma.to"),
 		SeiRPC:      getEnv("SEI_RPC", "https://evm-rpc.sei-apis.com"),
 		ConfluxRPC:  getEnv("CONFLUX_RPC", "https://evm.confluxrpc.com"),
 		MonadRPC:    getEnv("MONAD_RPC", "https://rpc.monad.xyz"),
@@ -241,14 +241,14 @@ func Load() *Config {
 		FlareRPC:     getEnv("FLARE_RPC", "https://flare-api.flare.network/ext/C/rpc"),
 		RootstockRPC: getEnv("ROOTSTOCK_RPC", "https://public-node.rsk.co"),
 		XLayerRPC:    getEnv("XLAYER_RPC", "https://rpc.xlayer.tech"),
-		StableRPC:    getEnv("STABLE_RPC", "https://rpc.stable.io"),
-		HyperEvmRPC:  getEnv("HYPEREVM_RPC", "https://rpc.hyperevm.xyz"),
-		MegaEthRPC:   getEnv("MEGAETH_RPC", "https://rpc.megaeth.com"),
-		CornRPC:      getEnv("CORN_RPC", "https://rpc.corn.xyz"),
+		StableRPC:    getEnv("STABLE_RPC", "https://rpc.stable.xyz"),
+		HyperEvmRPC:  getEnv("HYPEREVM_RPC", "https://rpc.hyperliquid.xyz/evm"),
+		MegaEthRPC:   getEnv("MEGAETH_RPC", "https://mainnet.megaeth.com/rpc"),
+		CornRPC:      getEnv("CORN_RPC", "https://mainnet.corn-rpc.com"),
 		// Legacy USDT Networks (no EIP-3009 support)
 		BnbRPC:       getEnv("BNB_RPC", "https://bsc-dataseed.binance.org"),
 		AvalancheRPC: getEnv("AVALANCHE_RPC", "https://api.avax.network/ext/bc/C/rpc"),
-		FantomRPC:    getEnv("FANTOM_RPC", "https://rpc.ftm.tools"),
+		FantomRPC:    getEnv("FANTOM_RPC", "https://rpcapi.fantom.network"),
 		CeloRPC:      getEnv("CELO_RPC", "https://forno.celo.org"),
 		KaiaRPC:      getEnv("KAIA_RPC", "https://public-en.node.kaia.io"),
 
