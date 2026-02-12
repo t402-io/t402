@@ -9,7 +9,7 @@ from t402.types import (
     TokenAsset,
     EIP712Domain,
     PaymentRequirements,
-    PaymentPayload,
+    PaymentPayloadV1,
     ExactPaymentPayload,
     EIP3009Authorization,
 )
@@ -153,7 +153,7 @@ def test_find_matching_payment_requirements():
         authorization=authorization,
     )
 
-    payment = PaymentPayload(
+    payment = PaymentPayloadV1(
         t402_version=1, scheme="exact", network="base-sepolia", payload=exact_payload
     )
 

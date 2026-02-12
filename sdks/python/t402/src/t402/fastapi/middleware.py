@@ -60,7 +60,7 @@ from t402.networks import get_all_supported_networks, SupportedNetworks
 from t402.path import path_is_match
 from t402.paywall import is_browser_request, get_paywall_html
 from t402.types import (
-    PaymentPayload,
+    parse_payment_payload,
     PaymentRequirements,
     PaymentRequirementsV2,
     PaymentRequiredV2,
@@ -315,7 +315,7 @@ class PaymentMiddleware:
         # Decode payment
         try:
             payment_dict = decode_payment_signature_header(payment_header)
-            payment = PaymentPayload(**payment_dict)
+            payment = parse_payment_payload(payment_dict)
         except Exception as e:
             logger.warning(
                 f"Invalid payment header from {request.client.host if request.client else 'unknown'}: {e}"
@@ -690,7 +690,7 @@ def require_payment(
         # Decode payment
         try:
             payment_dict = decode_payment_signature_header(payment_header)
-            payment = PaymentPayload(**payment_dict)
+            payment = parse_payment_payload(payment_dict)
         except Exception as e:
             logger.warning(f"Invalid payment header: {e}")
             return create_402_response("Invalid payment header format")

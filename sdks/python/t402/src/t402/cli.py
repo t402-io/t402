@@ -23,7 +23,7 @@ from typing import Any
 from . import __version__
 from .exact import decode_payment, encode_payment
 from .facilitator import FacilitatorClient, FacilitatorConfig
-from .types import PaymentPayload
+from .types import parse_payment_payload
 
 
 def create_parser() -> argparse.ArgumentParser:
@@ -126,7 +126,7 @@ async def cmd_verify(args: argparse.Namespace) -> int:
 
         # Decode the payload first
         payload_dict = decode_payment(args.payload)
-        payload = PaymentPayload.model_validate(payload_dict)
+        payload = parse_payment_payload(payload_dict)
 
         result = await client.verify(payload)
 
@@ -152,7 +152,7 @@ async def cmd_settle(args: argparse.Namespace) -> int:
 
         # Decode the payload first
         payload_dict = decode_payment(args.payload)
-        payload = PaymentPayload.model_validate(payload_dict)
+        payload = parse_payment_payload(payload_dict)
 
         result = await client.settle(payload)
 

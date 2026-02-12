@@ -32,6 +32,7 @@ from t402.types import (
     PaymentRequirementsV1,
     PaymentPayload,
     PaymentPayloadV1,
+    parse_payment_payload,
     t402PaymentRequiredResponse,
     t402PaymentRequiredResponseV1,
     # V2 Types (Current)
@@ -327,6 +328,7 @@ __all__ = [
     "PaymentRequirementsV1",
     "PaymentPayload",
     "PaymentPayloadV1",
+    "parse_payment_payload",
     "t402PaymentRequiredResponse",
     "t402PaymentRequiredResponseV1",
     # V2 Types (Current)

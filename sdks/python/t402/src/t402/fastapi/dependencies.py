@@ -57,7 +57,7 @@ from t402.encoding import (
 from t402.facilitator import FacilitatorClient, FacilitatorConfig
 from t402.networks import get_all_supported_networks
 from t402.types import (
-    PaymentPayload,
+    parse_payment_payload,
     PaymentRequirements,
     PaymentRequirementsV2,
     PaymentRequiredV2,
@@ -232,7 +232,7 @@ class PaymentRequired:
         # Decode payment
         try:
             payment_dict = decode_payment_signature_header(payment_header)
-            payment = PaymentPayload(**payment_dict)
+            payment = parse_payment_payload(payment_dict)
         except Exception as e:
             logger.warning(f"Invalid payment header: {e}")
             self._raise_402("Invalid payment header format", [requirements], request)
