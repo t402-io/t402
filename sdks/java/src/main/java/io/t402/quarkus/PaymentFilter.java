@@ -330,8 +330,12 @@ public class PaymentFilter implements ContainerRequestFilter, ContainerResponseF
             prr.addAccepts(requirements);
 
             String json = Json.MAPPER.writeValueAsString(prr);
+
+            // V2 protocol requires base64-encoded payment requirements in header
+            String base64Header = java.util.Base64.getEncoder().encodeToString(json.getBytes(java.nio.charset.StandardCharsets.UTF_8));
             return Response.status(402)
                     .type(MediaType.APPLICATION_JSON)
+                    .header(io.t402.util.HttpConstants.PAYMENT_REQUIRED, base64Header)
                     .entity(json)
                     .build();
         } catch (Exception ex) {

@@ -212,6 +212,11 @@ public class PaymentWebFilter implements WebFilter {
             prr.addAccepts(requirements);
 
             String json = Json.MAPPER.writeValueAsString(prr);
+
+            // V2 protocol requires base64-encoded payment requirements in header
+            String base64Header = java.util.Base64.getEncoder().encodeToString(json.getBytes(StandardCharsets.UTF_8));
+            response.getHeaders().set(io.t402.util.HttpConstants.PAYMENT_REQUIRED, base64Header);
+
             byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
             DataBuffer buffer = response.bufferFactory().wrap(bytes);
             return response.writeWith(Mono.just(buffer));

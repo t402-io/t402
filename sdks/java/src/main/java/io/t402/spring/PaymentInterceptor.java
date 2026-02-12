@@ -267,7 +267,13 @@ public class PaymentInterceptor implements HandlerInterceptor {
         prr.error = error;
         prr.addAccepts(requirements);
 
-        response.getWriter().write(Json.MAPPER.writeValueAsString(prr));
+        String json = Json.MAPPER.writeValueAsString(prr);
+
+        // V2 protocol requires base64-encoded payment requirements in header
+        String base64Header = java.util.Base64.getEncoder().encodeToString(json.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        response.setHeader(io.t402.util.HttpConstants.PAYMENT_REQUIRED, base64Header);
+
+        response.getWriter().write(json);
     }
 
     /**

@@ -16,4 +16,7 @@ public class SettlementResponse {
 
     /** Network where the settlement occurred (CAIP-2). */
     public String  network;
+
+    /** Confirmation status (e.g., "pending"). */
+    public String  confirmations;
 }

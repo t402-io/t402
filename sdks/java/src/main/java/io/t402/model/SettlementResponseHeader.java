@@ -19,10 +19,16 @@ public class SettlementResponseHeader {
     
     /** Wallet address of the person who made the payment (can be null). */
     public String payer;
-    
+
+    /** Error reason if settlement failed. */
+    public String errorReason;
+
+    /** Confirmation status (e.g., "pending"). */
+    public String confirmations;
+
     /** Default constructor for Jackson. */
     public SettlementResponseHeader() {}
-    
+
     /** Constructor with all fields. */
     public SettlementResponseHeader(boolean success, String transaction, String network, String payer) {
         this.success = success;

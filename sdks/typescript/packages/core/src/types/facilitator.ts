@@ -23,6 +23,7 @@ export type SettleResponse = {
   payer?: string;
   transaction: string;
   network: Network;
+  confirmations?: string;
 };
 
 export type SupportedKind = {

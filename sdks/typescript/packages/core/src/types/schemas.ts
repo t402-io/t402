@@ -69,6 +69,7 @@ export const SettleResponseSchema = z.object({
   network: NetworkSchema,
   errorReason: z.string().optional(),
   payer: z.string().optional(),
+  confirmations: z.string().optional(),
 });
 
 // V1 schemas for backward compatibility

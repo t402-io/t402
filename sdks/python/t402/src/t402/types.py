@@ -356,6 +356,7 @@ class SettleResponse(BaseModel):
     transaction: Optional[str] = ""
     network: Optional[str] = ""
     payer: Optional[str] = None
+    confirmations: Optional[str] = None
 
     model_config = ConfigDict(
         alias_generator=to_camel,
