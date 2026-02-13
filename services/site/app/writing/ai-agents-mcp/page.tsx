@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { NavBar } from "../../components/NavBar";
 import { Footer } from "../../components/Footer";
+import { Mermaid } from "../../components/Mermaid";
 
 const pageTitle = "AI Agent Payments with MCP Integration";
 const pageDescription =
@@ -117,27 +118,23 @@ export default function AiAgentsMcpPage() {
               {/* How It Works */}
               <section className="space-y-4">
                 <h2 className="text-2xl font-semibold mt-4" style={{ color: "#1A1A2E" }}>How T402 + MCP Works</h2>
-                <div
-                  className="rounded-xl p-6 font-mono text-sm overflow-x-auto"
-                  style={{ backgroundColor: "#111113", color: "#FAFAFA" }}
-                >
-                  <pre style={{ color: "#A1A1AA" }}>{`AI Agent                    MCP Server              Paid API
-   │                           │                      │
-   │── tools/call ────────────▶│                      │
-   │   { tool: "weather" }     │── GET /weather ─────▶│
-   │                           │◀── 402 + accepts ────│
-   │◀── PaymentRequired ───────│                      │
-   │   { accepts: [...] }      │                      │
-   │                           │                      │
-   │── tools/call ────────────▶│                      │
-   │   { tool: "t402_pay",     │                      │
-   │     amount: "10000",      │                      │
-   │     network: "eip155:8453"│                      │
-   │   }                       │                      │
-   │                           │── GET + X-Payment ──▶│
-   │                           │◀── 200 + data ───────│
-   │◀── { temperature: 22 } ───│                      │`}</pre>
-                </div>
+                <Mermaid chart={`
+sequenceDiagram
+  participant Agent as AI Agent
+  participant MCP as MCP Server
+  participant API as Paid API
+
+  Agent->>MCP: tools/call { tool: "weather" }
+  MCP->>API: GET /weather
+  API-->>MCP: 402 + accepts
+  MCP-->>Agent: PaymentRequired { accepts: [...] }
+
+  Agent->>MCP: tools/call { tool: "t402_pay" }
+  Note right of Agent: amount: "10000"<br/>network: "eip155:8453"
+  MCP->>API: GET + X-Payment
+  API-->>MCP: 200 + data
+  MCP-->>Agent: { temperature: 22 }
+`} />
                 <p className="text-base" style={{ color: "#4A5568" }}>
                   The MCP server exposes T402 payment as a tool. When the agent encounters a 402 response, it can autonomously decide to pay based on its budget constraints and task requirements.
                 </p>

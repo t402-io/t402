@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { NavBar } from "../../components/NavBar";
 import { Footer } from "../../components/Footer";
+import { Mermaid } from "../../components/Mermaid";
 
 const pageTitle = "How T402 Achieves Multi-Chain Payment Settlement";
 const pageDescription =
@@ -101,20 +102,66 @@ export default function MultichainArchitecturePage() {
               {/* Three Layer Architecture */}
               <section className="space-y-4">
                 <h2 className="text-2xl font-semibold mt-4" style={{ color: "#1A1A2E" }}>Three-Layer Architecture</h2>
-                <div
-                  className="rounded-xl p-6 font-mono text-sm overflow-x-auto"
-                  style={{ backgroundColor: "#111113", color: "#FAFAFA" }}
-                >
-                  <pre style={{ color: "#A1A1AA" }}>{`┌─────────────────────────────────────────────┐
-│  Transport Layer (HTTP, MCP, A2A)           │
-│  How data is exchanged                      │
-├─────────────────────────────────────────────┤
-│  Scheme Layer (exact, upto)                 │
-│  Payment logic and authorization rules      │
-├─────────────────────────────────────────────┤
-│  Network Layer (EVM, Solana, TON, TRON...)  │
-│  Chain-specific signing and settlement      │
-└─────────────────────────────────────────────┘`}</pre>
+                <div className="rounded-xl overflow-hidden" style={{ backgroundColor: "#111113" }}>
+                  {[
+                    {
+                      title: "Transport Layer",
+                      desc: "How data is exchanged",
+                      items: ["HTTP", "MCP", "A2A"],
+                      opacity: 0.18,
+                    },
+                    {
+                      title: "Scheme Layer",
+                      desc: "Payment logic and authorization rules",
+                      items: ["exact", "upto"],
+                      opacity: 0.12,
+                    },
+                    {
+                      title: "Network Layer",
+                      desc: "Chain-specific signing and settlement",
+                      items: ["EVM", "Solana", "TON", "TRON", "..."],
+                      opacity: 0.06,
+                    },
+                  ].map((layer, i) => (
+                    <div
+                      key={layer.title}
+                      className="px-6 py-5"
+                      style={{
+                        backgroundColor: `rgba(80,175,149,${layer.opacity})`,
+                        borderTop: i > 0 ? "1px solid rgba(80,175,149,0.2)" : undefined,
+                      }}
+                    >
+                      <div className="flex items-baseline justify-between gap-4 mb-2">
+                        <span className="text-sm font-semibold" style={{ color: "#FAFAFA" }}>
+                          {layer.title}
+                        </span>
+                        <span className="text-xs" style={{ color: "#A1A1AA" }}>
+                          {layer.desc}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {layer.items.map((item) => (
+                          <span
+                            key={item}
+                            className="rounded-md px-2.5 py-1 text-xs font-mono"
+                            style={{
+                              backgroundColor: "rgba(80,175,149,0.12)",
+                              color: "#50AF95",
+                              border: "1px solid rgba(80,175,149,0.25)",
+                            }}
+                          >
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  <div
+                    className="px-6 py-2.5 text-center text-xs font-mono"
+                    style={{ color: "#A1A1AA", borderTop: "1px solid rgba(80,175,149,0.15)" }}
+                  >
+                    ↕ Any transport × any scheme × any network
+                  </div>
                 </div>
 
                 <h3 className="text-lg font-medium mt-6" style={{ color: "#1A1A2E" }}>Transport Layer</h3>
@@ -156,11 +203,11 @@ export default function MultichainArchitecturePage() {
                   ].map(({ chain, id }) => (
                     <div
                       key={id}
-                      className="flex items-center gap-3 rounded-2xl px-4 py-3"
+                      className="flex items-center gap-3 rounded-2xl px-4 py-3 min-w-0"
                       style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(0,0,0,0.08)" }}
                     >
-                      <span className="text-sm font-medium" style={{ color: "#1A1A2E" }}>{chain}</span>
-                      <code className="ml-auto text-xs font-mono" style={{ color: "#A1A1AA" }}>{id}</code>
+                      <span className="shrink-0 text-sm font-medium" style={{ color: "#1A1A2E" }}>{chain}</span>
+                      <code className="ml-auto truncate text-xs font-mono" style={{ color: "#A1A1AA" }}>{id}</code>
                     </div>
                   ))}
                 </div>
@@ -180,24 +227,24 @@ export default function MultichainArchitecturePage() {
                   <li><strong style={{ color: "#1A1A2E" }}>Settlement</strong>: Submits the on-chain transaction using the authorized transfer</li>
                   <li><strong style={{ color: "#1A1A2E" }}>Multi-chain routing</strong>: Maintains wallets and RPC connections for all supported networks</li>
                 </ul>
-                <div
-                  className="rounded-xl p-6 font-mono text-sm overflow-x-auto"
-                  style={{ backgroundColor: "#111113", color: "#FAFAFA" }}
-                >
-                  <pre style={{ color: "#A1A1AA" }}>{`Client                Server               Facilitator
-  │                     │                      │
-  │─── GET /resource ──▶│                      │
-  │◀── 402 + accepts ───│                      │
-  │                     │                      │
-  │ (sign off-chain)    │                      │
-  │                     │                      │
-  │── GET + X-Payment ─▶│                      │
-  │                     │─── POST /verify ────▶│
-  │                     │◀── { valid: true } ──│
-  │                     │─── POST /settle ────▶│
-  │                     │◀── { txHash: "..." }─│
-  │◀── 200 + resource ──│                      │`}</pre>
-                </div>
+                <Mermaid chart={`
+sequenceDiagram
+  participant Client
+  participant Server
+  participant Facilitator
+
+  Client->>Server: GET /resource
+  Server-->>Client: 402 + accepts
+
+  Note over Client: Sign off-chain
+
+  Client->>Server: GET + X-Payment
+  Server->>Facilitator: POST /verify
+  Facilitator-->>Server: { valid: true }
+  Server->>Facilitator: POST /settle
+  Facilitator-->>Server: { txHash: "..." }
+  Server-->>Client: 200 + resource
+`} />
                 <p className="text-base" style={{ color: "#4A5568" }}>
                   Servers never need to know chain-specific details. They send the payment payload to the facilitator and get back a verification result. This keeps server implementations simple regardless of how many chains are supported.
                 </p>

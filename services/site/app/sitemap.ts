@@ -87,7 +87,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${baseUrl}/compare`,
       lastModified: now,
       changeFrequency: "monthly",
-      priority: 0.8,
+      priority: 0.7,
     },
     {
       url: `${baseUrl}/faq`,

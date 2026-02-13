@@ -3,13 +3,13 @@ import { Footer } from "../components/Footer";
 import CompareClient from "./CompareClient";
 
 export const metadata = {
-  title: "Compare | t402",
+  title: "Why T402 | t402",
   description:
-    "See how t402 compares to traditional payment solutions like Stripe, PayPal, and other crypto payment processors. Zero fees, instant settlement, multi-chain support.",
+    "Discover why T402 is the leading HTTP-native stablecoin payment protocol. 50 networks, 4 SDKs, 18 HTTP framework integrations, AI agent support, and more.",
   openGraph: {
-    title: "t402 vs Traditional Payments - Comparison",
+    title: "Why T402 - The Payment Protocol for USDT",
     description:
-      "Compare t402's HTTP-native stablecoin payments to Stripe, PayPal, and crypto payment processors. Zero fees, instant settlement.",
+      "50 networks, 4 SDKs, zero fees, instant settlement. See why T402 is the best way to accept stablecoin payments.",
   },
 };
 

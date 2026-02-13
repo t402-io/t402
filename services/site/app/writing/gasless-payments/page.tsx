@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { NavBar } from "../../components/NavBar";
 import { Footer } from "../../components/Footer";
+import { Mermaid } from "../../components/Mermaid";
 
 const pageTitle = "Gasless Payments with ERC-4337 Account Abstraction";
 const pageDescription =
@@ -145,20 +146,26 @@ export default function GaslessPaymentsPage() {
                 <p className="text-base" style={{ color: "#4A5568" }}>
                   T402 integrates ERC-4337 through the <code className="font-mono text-sm px-1.5 py-0.5 rounded" style={{ backgroundColor: "rgba(80,175,149,0.1)", color: "#50AF95" }}>@t402/wdk-gasless</code> package. The flow wraps a standard EIP-3009 TransferWithAuthorization inside a UserOperation:
                 </p>
-                <div
-                  className="rounded-xl p-6 font-mono text-sm overflow-x-auto"
-                  style={{ backgroundColor: "#111113", color: "#FAFAFA" }}
-                >
-                  <pre style={{ color: "#A1A1AA" }}>{`1. Client signs EIP-3009 authorization (off-chain, free)
-2. Authorization is wrapped in a UserOperation
-3. Paymaster agrees to sponsor gas
-4. Bundler submits UserOp to EntryPoint contract
-5. EntryPoint validates and executes:
-   a. Paymaster pays gas
-   b. Token transfer executes via transferWithAuthorization
-6. USDT moves from payer → payee
-7. Gas cost is deducted from paymaster (or charged to user in USDT)`}</pre>
-                </div>
+                <Mermaid chart={`
+flowchart TD
+  A["1. Client signs EIP-3009 authorization
+  (off-chain, free)"]
+  B["2. Wrapped in UserOperation"]
+  C["3. Paymaster agrees to sponsor gas"]
+  D["4. Bundler submits UserOp to EntryPoint"]
+  E["5. EntryPoint validates & executes"]
+  F["5a. Paymaster pays gas"]
+  G["5b. Token transfer via transferWithAuthorization"]
+  H["6. USDT moves payer → payee"]
+  I["7. Gas deducted from paymaster
+  (or charged to user in USDT)"]
+
+  A --> B --> C --> D --> E
+  E --> F & G
+  F --> H
+  G --> H
+  H --> I
+`} />
                 <p className="text-base" style={{ color: "#4A5568" }}>
                   The user experience is simple: sign one message, payment complete. No ETH, no gas estimation, no stuck transactions.
                 </p>
