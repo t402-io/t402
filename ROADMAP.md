@@ -99,7 +99,7 @@ T402 aims to become the standard payment protocol for USDT/USDT0 across all supp
 
 ---
 
-## Supported Blockchains (33 Networks)
+## Supported Blockchains (50 Networks)
 
 ### USDT0 (LayerZero OFT) - 19 Networks
 
@@ -441,7 +441,7 @@ These features are implemented as advanced packages ready for public release:
 
 ### Q1-Q2 2026 Development Plan ✅
 - [x] All 18 P1 security issues fixed
-- [x] Facilitator: 44 networks, 64 kinds live (77.4% test coverage)
+- [x] Facilitator: 50 networks, 81 kinds live (77.4% test coverage)
 - [x] Full SDK parity: 10 mechanisms × 4 SDKs, 18 HTTP frameworks
 - [x] MCP 6/6 tools across all 4 SDKs
 - [x] 7,100+ tests across all SDKs, zero failures

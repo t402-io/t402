@@ -30,6 +30,12 @@ implementation 'io.t402:t402:1.10.0'
 - **Solana (SVM)**: Ed25519 signing with Base58 encoding
 - **TON**: Ed25519 signing with Base64 encoding
 - **TRON**: ECDSA secp256k1 with Base58Check encoding
+- **NEAR**: NEP-141 fungible token support
+- **Aptos**: Fungible Asset support
+- **Tezos**: FA2 token support
+- **Polkadot**: Asset Hub USDT support
+- **Stacks**: SIP-010 support (Bitcoin L2)
+- **Cosmos**: Noble USDC support
 
 ### ERC-4337 Account Abstraction
 - UserOperation builder and submission

@@ -46,6 +46,12 @@ Mechanisms (Chain-specific payment implementations):
 @t402/svm               Solana SPL token support
 @t402/ton               TON Jetton (TEP-74) support
 @t402/tron              TRON TRC-20 support
+@t402/near              NEAR NEP-141 support
+@t402/aptos             Aptos Fungible Asset support
+@t402/tezos             Tezos FA2 support
+@t402/polkadot          Polkadot Asset Hub support
+@t402/stacks            Stacks SIP-010 support (Bitcoin L2)
+@t402/cosmos            Cosmos/Noble support
 
 HTTP Integrations:
 @t402/express           Express.js middleware
