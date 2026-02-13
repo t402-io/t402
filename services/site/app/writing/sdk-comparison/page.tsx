@@ -78,7 +78,7 @@ const sdks: SdkInfo[] = [
   },
   {
     name: "Python",
-    version: "v1.10.0",
+    version: "v1.10.1",
     packageManager: "pip / uv",
     installCommand: "pip install t402",
     runtime: "Python 3.10+",
@@ -98,9 +98,9 @@ const sdks: SdkInfo[] = [
   },
   {
     name: "Java",
-    version: "v1.9.0",
+    version: "v1.10.0",
     packageManager: "Maven / Gradle",
-    installCommand: "<dependency>io.t402:t402:1.9.0</dependency>",
+    installCommand: "<dependency>io.t402:t402:1.10.0</dependency>",
     runtime: "Java 21+",
     bestFor: ["Enterprise systems", "Spring Boot", "Android apps", "Large-scale backends"],
     packages: 1,

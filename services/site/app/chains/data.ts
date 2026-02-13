@@ -621,13 +621,13 @@ export const features = [
   {
     id: "gasless",
     name: "Gasless Transactions",
-    description: "EIP-3009 enables gasless USDT0 transfers on all 19 EVM chains",
+    description: "EIP-3009 enables gasless USDT0 transfers on all EVM chains",
     icon: "gasless",
   },
   {
     id: "bridge",
     name: "Cross-Chain Bridge",
-    description: "LayerZero OFT standard enables seamless USDT0 bridging across 19 EVM chains",
+    description: "LayerZero OFT standard enables seamless USDT0 bridging across EVM chains",
     icon: "bridge",
   },
   {
