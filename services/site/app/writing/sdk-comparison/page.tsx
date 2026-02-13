@@ -201,7 +201,7 @@ export default function SdkComparisonPage() {
                 style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(0,0,0,0.08)" }}
               >
                 <p className="text-base" style={{ color: "#4A5568" }}>
-                  <strong style={{ color: "#1A1A2E" }}>TL;DR</strong>: T402 offers official SDKs in TypeScript, Python, Go, and Java. All SDKs support the same 28 blockchains and payment schemes. Choose TypeScript for web apps, Python for AI/ML, Go for high-performance services, and Java for enterprise systems.
+                  <strong style={{ color: "#1A1A2E" }}>TL;DR</strong>: T402 offers official SDKs in TypeScript, Python, Go, and Java. All SDKs support the same 50 networks and payment schemes. Choose TypeScript for web apps, Python for AI/ML, Go for high-performance services, and Java for enterprise systems.
                 </p>
               </div>
 
@@ -209,7 +209,7 @@ export default function SdkComparisonPage() {
               <section className="space-y-4">
                 <h2 className="text-2xl font-semibold mt-4" style={{ color: "#1A1A2E" }}>Overview</h2>
                 <p className="text-base" style={{ color: "#4A5568" }}>
-                  T402 provides four official SDKs to match your technology stack. Each SDK implements the full T402 protocol specification, supporting all 28 blockchains across 10 families with identical payment flows.
+                  T402 provides four official SDKs to match your technology stack. Each SDK implements the full T402 protocol specification, supporting all 50 networks across 10 families with identical payment flows.
                 </p>
                 <p className="text-base" style={{ color: "#4A5568" }}>
                   The core functionality is consistent across all SDKs: create payment requirements, sign payment payloads, verify signatures, and settle on-chain. The difference lies in language idioms, ecosystem integration, and performance characteristics.
@@ -292,7 +292,7 @@ export default function SdkComparisonPage() {
                     title: "Choose TypeScript if...",
                     items: [
                       "You\u2019re building a web application (React, Vue, Next.js)",
-                      "You want the most complete ecosystem with 21 packages",
+                      "You want the most complete ecosystem with 29 packages",
                       "You need React/Vue components for payment UIs",
                       "You\u2019re deploying to serverless platforms (Vercel, Cloudflare Workers)",
                     ],

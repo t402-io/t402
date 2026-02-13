@@ -92,7 +92,7 @@ export default async function Image() {
           <div style={{ display: "flex", gap: "16px", alignItems: "center", flexDirection: "row" }}>
             {[
               { name: "Facilitator", status: "Operational" },
-              { name: "Networks", status: "28 Active" },
+              { name: "Networks", status: "50 Active" },
               { name: "Uptime", status: "99.9%" },
             ].map((item) => (
               <div

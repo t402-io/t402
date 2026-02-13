@@ -63,9 +63,9 @@ export const facilitatorWallets = [
   {
     family: "TON",
     chains: "TON Mainnet",
-    address: "EQ5d11d21276ac6b5efdf179e654ff0c6eee34e0abfa263a",
+    address: "EQDjv9CUEJ__D_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkEUe",
     explorerUrl:
-      "https://tonviewer.com/EQ5d11d21276ac6b5efdf179e654ff0c6eee34e0abfa263a",
+      "https://tonviewer.com/EQDjv9CUEJ__D_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkEUe",
   },
   {
     family: "TRON",
@@ -73,6 +73,20 @@ export const facilitatorWallets = [
     address: "TT1MqNNj2k5qdGA6nrrCodW6oyHbbAreQ5",
     explorerUrl:
       "https://tronscan.org/#/address/TT1MqNNj2k5qdGA6nrrCodW6oyHbbAreQ5",
+  },
+  {
+    family: "Stacks",
+    chains: "Stacks Mainnet",
+    address: "SP36B1B191JTQAZTRKKWRN7J0YHHM41W9P9P7EPR5",
+    explorerUrl:
+      "https://explorer.hiro.so/address/SP36B1B191JTQAZTRKKWRN7J0YHHM41W9P9P7EPR5",
+  },
+  {
+    family: "Cosmos",
+    chains: "Noble Mainnet",
+    address: "noble1ejc2c2gvk46h7kyulx9fus85vdpq0zdjwkfav0",
+    explorerUrl:
+      "https://www.mintscan.io/noble/account/noble1ejc2c2gvk46h7kyulx9fus85vdpq0zdjwkfav0",
   },
 ];
 
@@ -172,7 +186,7 @@ export const networks: FacilitatorNetwork[] = [
     name: "TON",
     family: "TON",
     status: "operational",
-    walletAddress: "EQ5d11d21276ac6b5efdf179e654ff0c6eee34e0abfa263a",
+    walletAddress: "EQDjv9CUEJ__D_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkEUe",
     explorerUrl: "https://tonviewer.com",
   },
   {
@@ -220,7 +234,15 @@ export const networks: FacilitatorNetwork[] = [
     name: "Stacks",
     family: "Stacks",
     status: "operational",
-    walletAddress: "SP...",
+    walletAddress: "SP36B1B191JTQAZTRKKWRN7J0YHHM41W9P9P7EPR5",
     explorerUrl: "https://explorer.stacks.co",
+  },
+  {
+    network: "cosmos:noble-1",
+    name: "Cosmos / Noble",
+    family: "Cosmos",
+    status: "operational",
+    walletAddress: "noble1ejc2c2gvk46h7kyulx9fus85vdpq0zdjwkfav0",
+    explorerUrl: "https://www.mintscan.io/noble",
   },
 ];

@@ -31,7 +31,7 @@ const articles: Article[] = [
     slug: "t402-launch",
     title: "Introducing T402: The Official Payment Protocol for USDT",
     description:
-      "T402 brings HTTP-native stablecoin payments to the internet. Zero fees, instant settlement, and support for 28 blockchains across EVM, Solana, TON, TRON, NEAR, Aptos, and more.",
+      "T402 brings HTTP-native stablecoin payments to the internet. Zero fees, instant settlement, and support for 50 networks across EVM, Solana, TON, TRON, NEAR, Aptos, and more.",
     date: "January 15, 2026",
     authors: ["T402 Team"],
     image: "",
@@ -42,7 +42,7 @@ const articles: Article[] = [
     slug: "multichain-architecture",
     title: "How T402 Achieves Multi-Chain Payment Settlement",
     description:
-      "A deep dive into the architecture behind T402's support for 28 blockchains across 10 families. Learn how CAIP-2 identifiers, scheme-network separation, and the facilitator pattern enable true multi-chain payments.",
+      "A deep dive into the architecture behind T402's support for 50 networks across 10 families. Learn how CAIP-2 identifiers, scheme-network separation, and the facilitator pattern enable true multi-chain payments.",
     date: "January 18, 2026",
     authors: ["T402 Team"],
     image: "",
