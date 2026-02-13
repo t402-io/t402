@@ -274,7 +274,7 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     protocol: "A2A",
-    version: "2024-01-01",
+    version: "2025-01-01",
     agents: Object.values(AGENTS),
     tasks: Object.entries(TASK_DEFINITIONS).map(([id, def]) => ({
       id,

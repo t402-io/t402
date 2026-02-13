@@ -16,15 +16,15 @@ import clsx from "clsx";
 import type { ReactNode } from "react";
 
 const SCENARIOS = [
-  { id: "ai-api", title: "AI API", icon: Brain, color: "var(--color-scenario-ai)" },
-  { id: "content-paywall", title: "Paywall", icon: FileText, color: "var(--color-scenario-content)" },
-  { id: "data-marketplace", title: "Data Market", icon: Database, color: "var(--color-scenario-data)" },
-  { id: "agent-to-agent", title: "Agent-to-Agent", icon: Bot, color: "var(--color-scenario-agent)" },
-  { id: "iot-micropayments", title: "IoT", icon: Cpu, color: "var(--color-scenario-iot)" },
-  { id: "streaming-media", title: "Streaming", icon: Radio, color: "var(--color-scenario-stream)" },
-  { id: "mcp-ai-agent", title: "MCP Agent", icon: Wand2, color: "var(--color-scenario-mcp)" },
-  { id: "cross-chain-bridge", title: "Bridge", icon: ArrowLeftRight, color: "var(--color-scenario-bridge)" },
-  { id: "gasless-payment", title: "Gasless", icon: Zap, color: "var(--color-scenario-gasless)" },
+  { id: "ai-api", title: "AI API", icon: Brain },
+  { id: "content-paywall", title: "Paywall", icon: FileText },
+  { id: "data-marketplace", title: "Data Market", icon: Database },
+  { id: "agent-to-agent", title: "Agent-to-Agent", icon: Bot },
+  { id: "iot-micropayments", title: "IoT", icon: Cpu },
+  { id: "streaming-media", title: "Streaming", icon: Radio },
+  { id: "mcp-ai-agent", title: "MCP Agent", icon: Wand2 },
+  { id: "cross-chain-bridge", title: "Bridge", icon: ArrowLeftRight },
+  { id: "gasless-payment", title: "Gasless", icon: Zap },
 ];
 
 export default function ScenariosLayout({ children }: { children: ReactNode }) {
@@ -95,10 +95,10 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
           <AnimatePresence mode="wait">
             <motion.div
               key={pathname}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
               className="p-6 sm:p-8 lg:p-10 pb-24 lg:pb-10"
             >
               {children}
@@ -112,10 +112,7 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
         className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--color-border)] bg-[rgba(10,10,11,0.97)] backdrop-blur-xl safe-area-bottom"
         aria-label="Scenario navigation"
       >
-        {/* Scroll fade indicators */}
-        <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-[rgba(10,10,11,0.97)] to-transparent pointer-events-none z-10" />
-        <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-[rgba(10,10,11,0.97)] to-transparent pointer-events-none z-10" />
-        <div className="flex items-center overflow-x-auto px-3 py-3 gap-1.5 scrollbar-hide scroll-smooth snap-x snap-mandatory">
+        <div className="flex items-center overflow-x-auto px-2 py-2 gap-1 scrollbar-hide scroll-smooth">
           {SCENARIOS.map((s) => {
             const Icon = s.icon;
             const isActive = pathname === `/${s.id}`;
@@ -125,14 +122,14 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
                 href={`/${s.id}`}
                 aria-current={isActive ? "page" : undefined}
                 className={clsx(
-                  "shrink-0 flex flex-col items-center gap-1 px-3.5 py-2.5 rounded-xl text-[10px] font-medium transition-all min-w-[60px] snap-center active:scale-95",
+                  "shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-[10px] font-medium transition-colors",
                   isActive
                     ? "text-white bg-[var(--color-surface-active)]"
-                    : "text-[var(--color-muted)] active:bg-[var(--color-surface)]"
+                    : "text-[var(--color-muted)]"
                 )}
               >
-                <Icon size={18} style={{ color: isActive ? "#50AF95" : undefined }} aria-hidden="true" />
-                <span className="truncate max-w-[52px]">{s.title}</span>
+                <Icon size={14} style={{ color: isActive ? "#50AF95" : undefined }} aria-hidden="true" />
+                <span>{s.title}</span>
               </Link>
             );
           })}

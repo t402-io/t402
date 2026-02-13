@@ -24,7 +24,7 @@ function createContentPaymentRequired(request: NextRequest) {
 const PREMIUM_ARTICLE = {
   title: "The Future of Machine-to-Machine Payments",
   author: "T402 Research",
-  publishedAt: "2025-01-15T00:00:00Z",
+  publishedAt: "2026-02-01T00:00:00Z",
   readTime: "5 min",
   content: [
     {

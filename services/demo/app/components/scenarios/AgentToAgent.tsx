@@ -9,22 +9,26 @@ import type { FlowState } from "@/hooks/usePaymentFlow";
 import { CodeBlock } from "@/components/shared/CodeBlock";
 import { Spinner } from "@/components/shared/Spinner";
 import { encodePaymentHeader } from "@/lib/t402-client";
+import { Search, FileText, Radio, Handshake, Settings } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 type State = "idle" | "delegating" | "paying" | "executing" | "done" | "error";
 
 interface A2AResult {
   id: string;
-  status: { state: string };
-  artifacts: Array<{
-    kind: string;
-    parts: Array<{ kind: string; text: string }>;
-  }>;
+  type: string;
+  status: string;
+  result: {
+    summary: string;
+    details: string[];
+  };
+  [key: string]: unknown;
 }
 
-const AGENT_TASKS = [
-  { id: "research", label: "Research Agent", description: "Analyze market trends for BTC", icon: "🔍" },
-  { id: "summary", label: "Summary Agent", description: "Summarize recent DeFi developments", icon: "📝" },
-  { id: "monitor", label: "Monitor Agent", description: "Check protocol health metrics", icon: "📡" },
+const AGENT_TASKS: { id: string; label: string; description: string; icon: LucideIcon }[] = [
+  { id: "research", label: "Research Agent", description: "Analyze market trends for BTC", icon: Search },
+  { id: "summary", label: "Summary Agent", description: "Summarize recent DeFi developments", icon: FileText },
+  { id: "monitor", label: "Monitor Agent", description: "Check protocol health metrics", icon: Radio },
 ];
 
 export function AgentToAgent() {
@@ -138,7 +142,7 @@ export function AgentToAgent() {
                     : "border-[var(--color-border)] hover:border-[var(--color-muted)]"
                 }`}
               >
-                <span className="text-xl">{task.icon}</span>
+                <task.icon size={18} style={{ color: "#50AF95" }} />
                 <div className="text-left">
                   <p className="text-sm font-medium">{task.label}</p>
                   <p className="text-xs text-[var(--color-muted)]">{task.description}</p>
@@ -187,7 +191,7 @@ export function AgentToAgent() {
       <div>
         {state === "idle" && (
           <div className="glass-card p-4 sm:p-6 flex flex-col items-center justify-center min-h-[280px] sm:min-h-[340px] text-center">
-            <div className="text-4xl mb-3">🤝</div>
+            <Handshake size={32} className="mb-3" style={{ color: "#50AF95" }} />
             <h4 className="text-sm font-medium mb-2">Agent-to-Agent Protocol</h4>
             <p className="text-xs text-[var(--color-muted)] max-w-xs">
               Agents autonomously pay each other for tasks using T402. No human intervention — the requesting agent signs USDT authorization automatically.
@@ -197,15 +201,12 @@ export function AgentToAgent() {
 
         {(state === "delegating" || state === "paying" || state === "executing") && (
           <div className="glass-card p-4 sm:p-6 flex flex-col items-center justify-center min-h-[280px] sm:min-h-[340px]">
-            <div className="relative">
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                className="text-4xl"
-              >
-                ⚙️
-              </motion.div>
-            </div>
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            >
+              <Settings size={32} style={{ color: "#50AF95" }} />
+            </motion.div>
             <p className="text-sm mt-4 font-medium">
               {state === "delegating" && "Agent A delegating task..."}
               {state === "paying" && "Agent A paying Agent B..."}
@@ -231,8 +232,8 @@ export function AgentToAgent() {
                 </span>
                 <span className="text-xs text-[var(--color-muted)]">0.001 USDT paid</span>
               </div>
-              {result.artifacts?.[0]?.parts?.[0]?.text && (
-                <p className="text-sm leading-relaxed">{result.artifacts[0].parts[0].text}</p>
+              {result.result?.summary && (
+                <p className="text-sm leading-relaxed">{result.result.summary}</p>
               )}
             </div>
             <CodeBlock

@@ -33,11 +33,13 @@ export function IoTMicropayments() {
   const [totalCost, setTotalCost] = useState(0);
   const [flowState, setFlowState] = useState<FlowState>("idle");
   const [settle, setSettle] = useState<SettleInfo | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const getReading = useCallback(async (type: SensorType) => {
     setLoading(type);
     setFlowState("requesting");
     setSettle(null);
+    setError(null);
     try {
       const headers: Record<string, string> = {
         Accept: "application/json",
@@ -72,8 +74,8 @@ export function IoTMicropayments() {
         setTotalCost((prev) => prev + 0.0001);
         setFlowState("done");
       }
-    } catch {
-      // Handle error silently in demo
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch sensor reading. Please try again.");
       setFlowState("error");
     } finally {
       setLoading(null);
@@ -94,8 +96,8 @@ export function IoTMicropayments() {
               disabled={isLoading}
               className="glass-card-interactive p-4 flex items-center gap-3 text-left disabled:opacity-50"
             >
-              <div className="w-8 h-8 rounded-lg bg-[var(--color-scenario-iot)]20 flex items-center justify-center">
-                <Icon size={16} className="text-[var(--color-scenario-iot)]" />
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(80, 175, 149, 0.12)" }}>
+                <Icon size={16} style={{ color: "#50AF95" }} />
               </div>
               <div>
                 <p className="text-sm font-medium">{sensor.label}</p>
@@ -109,6 +111,18 @@ export function IoTMicropayments() {
 
       {flowState !== "idle" && (
         <PaymentStatus flowState={flowState} settle={settle} family={activeFamily} />
+      )}
+
+      {error && (
+        <div className="glass-card p-4 flex items-center justify-between">
+          <p className="text-xs text-[var(--color-error)]">{error}</p>
+          <button
+            onClick={() => { setError(null); setFlowState("idle"); }}
+            className="text-xs text-[var(--color-brand)] hover:underline ml-4 shrink-0"
+          >
+            Dismiss
+          </button>
+        </div>
       )}
 
       {/* Cost ticker */}

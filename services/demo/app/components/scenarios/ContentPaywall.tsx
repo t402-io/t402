@@ -9,6 +9,7 @@ import type { FlowState } from "@/hooks/usePaymentFlow";
 import { CodeBlock } from "@/components/shared/CodeBlock";
 import { Spinner } from "@/components/shared/Spinner";
 import { encodePaymentHeader } from "@/lib/t402-client";
+import { Lock } from "lucide-react";
 
 type State = "locked" | "paying" | "unlocked" | "error";
 
@@ -111,7 +112,7 @@ export function ContentPaywall() {
           <div className="relative">
             <div className="h-20 sm:h-24 bg-gradient-to-b from-transparent to-[var(--color-surface)]" />
             <div className="bg-[var(--color-surface)] p-4 sm:p-6 text-center border-t border-[var(--color-border)]">
-              <div className="text-3xl mb-3">🔒</div>
+              <Lock size={28} className="mb-3" style={{ color: "#50AF95" }} />
               <p className="text-sm text-[var(--color-muted)] mb-4">
                 Unlock this article for <span className="text-white font-medium">0.01 USDT</span>
               </p>

@@ -6,8 +6,8 @@ import { createBridgeTransaction, getEstimatedTimeRemaining } from "@/lib/bridge
 
 const BRIDGE_FEE = "10000"; // 0.01 USDT bridge fee
 
-// Supported LayerZero bridge chains
-const BRIDGE_CHAINS = ["ethereum", "arbitrum", "base", "optimism", "ink", "berachain", "unichain"];
+// Supported bridge chain families (matching frontend ChainFamily values)
+const BRIDGE_CHAINS = ["evm", "ton", "tron", "solana", "stacks", "near", "aptos"];
 
 // Estimated bridge times in seconds
 const ESTIMATED_TIMES: Record<string, Record<string, number>> = {

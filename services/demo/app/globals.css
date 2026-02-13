@@ -49,16 +49,16 @@
   --color-chain-polkadot: #E6007A;
   --color-chain-polkadot-dim: #E6007A20;
 
-  /* Scenario accent colors */
-  --color-scenario-ai: #8B5CF6;
-  --color-scenario-content: #EC4899;
-  --color-scenario-data: #14B8A6;
-  --color-scenario-agent: #F97316;
-  --color-scenario-iot: #06B6D4;
-  --color-scenario-stream: #EF4444;
-  --color-scenario-mcp: #6366F1;
-  --color-scenario-bridge: #84CC16;
-  --color-scenario-gasless: #FBBF24;
+  /* Scenario accent colors — monochrome/green tints */
+  --color-scenario-ai: #50AF95;
+  --color-scenario-content: #50AF95;
+  --color-scenario-data: #50AF95;
+  --color-scenario-agent: #50AF95;
+  --color-scenario-iot: #50AF95;
+  --color-scenario-stream: #50AF95;
+  --color-scenario-mcp: #50AF95;
+  --color-scenario-bridge: #50AF95;
+  --color-scenario-gasless: #50AF95;
 }
 
 :root {
@@ -116,13 +116,11 @@
     background: #111113;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 1.25rem;
-    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition: border-color 300ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .card-elevated:hover {
     border-color: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    transform: translateY(-2px);
   }
 
   .card-static {
@@ -131,7 +129,7 @@
     border-radius: 1.25rem;
   }
 
-  /* Legacy aliases — used in scenario components */
+  /* Aliases for card-static — used in scenario components */
   .glass-card {
     background: #111113;
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -142,39 +140,11 @@
     background: #111113;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 1.25rem;
-    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition: border-color 300ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .glass-card-interactive:hover {
     border-color: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    transform: translateY(-2px);
-  }
-
-  .hero-glow {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -60%);
-    width: 600px;
-    height: 400px;
-    background: radial-gradient(ellipse, rgba(80, 175, 149, 0.06) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .text-gradient-brand {
-    background: linear-gradient(135deg, #50AF95 0%, #7DD3C0 50%, #50AF95 100%);
-    background-size: 200% 200%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: gradient-shift 6s ease-in-out infinite;
-  }
-
-  @keyframes gradient-shift {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
   }
 
   .btn-primary {
@@ -182,28 +152,21 @@
     color: #0A0A0B;
     font-weight: 600;
     border-radius: 0.75rem;
-    transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1),
-                transform 300ms cubic-bezier(0.4, 0, 0.2, 1),
-                box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
   }
 
   .btn-primary:hover {
-    opacity: 0.92;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(80, 175, 149, 0.25);
+    opacity: 0.88;
   }
 
   .btn-primary:active {
-    transform: translateY(0);
-    box-shadow: none;
+    opacity: 0.8;
   }
 
   .btn-primary:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
   }
 }
 

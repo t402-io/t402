@@ -124,8 +124,7 @@ export default function HomePage() {
 
       {/* Hero */}
       <section className="relative min-h-[80vh] flex flex-col items-center justify-center px-4 sm:px-6 py-24 overflow-hidden">
-        <div className="hero-glow" />
-        <div className="relative z-10 text-center mb-14">
+        <div className="text-center mb-14">
           <span
             className="inline-block text-[10px] font-semibold tracking-[0.25em] uppercase mb-5 px-3 py-1 rounded-full"
             style={{ color: "#50AF95", background: "rgba(80, 175, 149, 0.08)", border: "1px solid rgba(80, 175, 149, 0.15)" }}
@@ -133,7 +132,7 @@ export default function HomePage() {
             INTERACTIVE DEMO
           </span>
           <h1 className="text-5xl md:text-6xl lg:text-8xl font-bold tracking-tight mb-5">
-            <span className="text-gradient-brand">32 Chains.</span>{" "}
+            <span style={{ color: "#50AF95" }}>32 Chains.</span>{" "}
             <span className="text-white">1 Header.</span>
           </h1>
           <p className="text-xl sm:text-2xl max-w-2xl mx-auto mb-4" style={{ color: "#A1A1AA" }}>
@@ -145,7 +144,7 @@ export default function HomePage() {
         </div>
 
         {/* Chain logos */}
-        <div className="relative z-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-10 px-4 max-w-sm sm:max-w-none">
+        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-10 px-4 max-w-sm sm:max-w-none">
           {CHAIN_FAMILIES.map((family) => (
             <div key={family} className="flex flex-col items-center gap-1">
               <div className="[&_svg]:w-5 [&_svg]:h-5 sm:[&_svg]:w-6 sm:[&_svg]:h-6">
@@ -157,7 +156,7 @@ export default function HomePage() {
         </div>
 
         {/* CTA */}
-        <div className="relative z-10 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
           <Link href="/ai-api" className="btn-primary px-5 py-3 text-sm flex items-center gap-2 min-h-[44px]">
             Try a Scenario <ArrowRight size={14} />
           </Link>
@@ -251,7 +250,7 @@ export default function HomePage() {
       {/* Developer Quick Start */}
       <section
         className="py-20 px-4 sm:px-6"
-        style={{ background: "#FFFFFF" }}
+        style={{ background: "#111113", borderTop: "1px solid rgba(255, 255, 255, 0.06)" }}
       >
         <div className="max-w-3xl mx-auto text-center">
           <span
@@ -260,13 +259,13 @@ export default function HomePage() {
           >
             DEVELOPERS
           </span>
-          <h2 className="text-xl sm:text-2xl font-bold mb-4" style={{ color: "#1A1A2E" }}>Integrate in Minutes</h2>
-          <p className="text-sm mb-8" style={{ color: "#4A5568" }}>
+          <h2 className="text-xl sm:text-2xl font-bold mb-4">Integrate in Minutes</h2>
+          <p className="text-sm mb-8" style={{ color: "#A1A1AA" }}>
             Add T402 payments to any HTTP API with a single middleware.
           </p>
           <div
             className="rounded-2xl p-4 sm:p-5 text-left overflow-hidden"
-            style={{ background: "#111113", border: "1px solid rgba(255, 255, 255, 0.08)" }}
+            style={{ background: "#0A0A0B", border: "1px solid rgba(255, 255, 255, 0.08)" }}
           >
             <pre className="text-[11px] sm:text-xs overflow-x-auto font-mono leading-relaxed" style={{ color: "#D4D4D4" }}>
 {`import { t402 } from '@t402/express';
@@ -281,10 +280,10 @@ app.get('/api/premium', t402({
             </pre>
           </div>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-1">
-            <a href="https://www.npmjs.com/org/t402" className="text-xs hover:opacity-70 transition-opacity px-3 py-2 min-h-[44px] flex items-center" style={{ color: "#4A5568" }}>npm</a>
-            <a href="https://pypi.org/project/t402" className="text-xs hover:opacity-70 transition-opacity px-3 py-2 min-h-[44px] flex items-center" style={{ color: "#4A5568" }}>PyPI</a>
-            <a href="https://pkg.go.dev/github.com/t402-io/t402/sdks/go" className="text-xs hover:opacity-70 transition-opacity px-3 py-2 min-h-[44px] flex items-center" style={{ color: "#4A5568" }}>Go</a>
-            <a href="https://central.sonatype.com/artifact/io.t402/t402" className="text-xs hover:opacity-70 transition-opacity px-3 py-2 min-h-[44px] flex items-center" style={{ color: "#4A5568" }}>Maven</a>
+            <a href="https://www.npmjs.com/org/t402" className="text-xs hover:opacity-70 transition-opacity px-3 py-2 min-h-[44px] flex items-center" style={{ color: "#A1A1AA" }}>npm</a>
+            <a href="https://pypi.org/project/t402" className="text-xs hover:opacity-70 transition-opacity px-3 py-2 min-h-[44px] flex items-center" style={{ color: "#A1A1AA" }}>PyPI</a>
+            <a href="https://pkg.go.dev/github.com/t402-io/t402/sdks/go" className="text-xs hover:opacity-70 transition-opacity px-3 py-2 min-h-[44px] flex items-center" style={{ color: "#A1A1AA" }}>Go</a>
+            <a href="https://central.sonatype.com/artifact/io.t402/t402" className="text-xs hover:opacity-70 transition-opacity px-3 py-2 min-h-[44px] flex items-center" style={{ color: "#A1A1AA" }}>Maven</a>
           </div>
         </div>
       </section>

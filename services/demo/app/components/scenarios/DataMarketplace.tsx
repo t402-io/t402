@@ -9,6 +9,7 @@ import type { FlowState } from "@/hooks/usePaymentFlow";
 import { CodeBlock } from "@/components/shared/CodeBlock";
 import { Spinner } from "@/components/shared/Spinner";
 import { encodePaymentHeader } from "@/lib/t402-client";
+import { BarChart3 } from "lucide-react";
 
 type State = "idle" | "paying" | "done" | "error";
 
@@ -157,7 +158,7 @@ export function DataMarketplace() {
       <div>
         {state === "idle" && (
           <div className="glass-card p-4 sm:p-6 flex flex-col items-center justify-center min-h-[220px] sm:min-h-[260px] text-center">
-            <div className="text-4xl mb-3">📊</div>
+            <BarChart3 size={32} className="mb-3" style={{ color: "#50AF95" }} />
             <p className="text-sm text-[var(--color-muted)]">
               Select a data feed and purchase access
             </p>
