@@ -14,7 +14,7 @@ This document outlines the complete development plan for T402 in 2026. **Q1-Q2 e
 
 ### Q1-Q2 Achievements
 - All 18 P1 security issues fixed, 77.4% facilitator test coverage
-- 44 networks, 64 kinds live on facilitator
+- 50 networks, 81 kinds live on facilitator
 - Full SDK feature parity: 10 mechanisms x 4 SDKs, 18 HTTP frameworks, MCP 6/6 tools
 - 7,100+ tests across all SDKs, zero failures
 - Three-site redesign (t402.io, docs.t402.io, demo.t402.io)
@@ -52,7 +52,7 @@ This document outlines the complete development plan for T402 in 2026. **Q1-Q2 e
 | Non-EVM | 4 (NEAR, Aptos, Tezos, Polkadot) | Production |
 | Bitcoin L2 | 1 (Stacks) | Production |
 | Cosmos | 1 (Noble USDC) | Production |
-| **Total** | **33 unique / 44 networks / 64 kinds** | **100% Coverage** |
+| **Total** | **33 unique / 50 networks / 81 kinds** | **100% Coverage** |
 
 ### CI/CD Pipeline
 
@@ -338,10 +338,10 @@ All legacy planning documents archived to services/docs/archived-plans/.
 ## Related Documents
 
 - [ROADMAP.md](./ROADMAP.md) — High-level project roadmap
-- [USDT_FULL_COVERAGE_PLAN.md](./USDT_FULL_COVERAGE_PLAN.md) — Network coverage details
+- [USDT_FULL_COVERAGE_PLAN.md](./archive/plans/USDT_FULL_COVERAGE_PLAN.md) — Network coverage details
 - [CONTRIBUTING.md](./CONTRIBUTING.md) — Contribution guidelines
 - [SECURITY.md](./SECURITY.md) — Security policy
-- [DEVELOPMENT_PLAN_2026_Q1_Q2.md](./DEVELOPMENT_PLAN_2026_Q1_Q2.md) — Archived Q1-Q2 detailed plan
+- [DEVELOPMENT_PLAN_2026_Q1_Q2.md](./archive/plans/DEVELOPMENT_PLAN_2026_Q1_Q2.md) — Archived Q1-Q2 detailed plan
 
 ---
 
