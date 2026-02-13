@@ -101,6 +101,31 @@ function DottedConnector() {
   );
 }
 
+function StatusCodeBlock() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.4, delay: 0.2 }}
+      className="rounded-2xl border-2 border-[var(--text-on-light)]/10 bg-white p-6 sm:p-8 font-mono text-sm"
+    >
+      <div className="space-y-2 text-[var(--text-on-light-secondary)]">
+        <p><span className="text-[var(--text-on-light)] font-semibold">HTTP/1.1</span> <span style={{ color: "#50AF95" }} className="font-bold">402</span> Payment Required</p>
+        <p className="text-xs opacity-60">Content-Type: application/json</p>
+        <p className="text-xs opacity-60">Payment-Required: ...</p>
+      </div>
+      <div className="mt-4 rounded-xl bg-[var(--text-on-light)]/[0.03] p-4 text-xs leading-relaxed">
+        <p>{"{"}</p>
+        <p className="pl-4">&quot;scheme&quot;: <span style={{ color: "#50AF95" }}>&quot;exact&quot;</span>,</p>
+        <p className="pl-4">&quot;network&quot;: <span style={{ color: "#50AF95" }}>&quot;eip155:8453&quot;</span>,</p>
+        <p className="pl-4">&quot;maxAmountRequired&quot;: <span style={{ color: "#50AF95" }}>&quot;1000000&quot;</span></p>
+        <p>{"}"}</p>
+      </div>
+    </motion.div>
+  );
+}
+
 export function HTTPNativeSection() {
   return (
     <section className="section-light py-20 md:py-28">
@@ -152,14 +177,9 @@ export function HTTPNativeSection() {
           </div>
 
           <div className="flex-shrink-0 w-full md:w-auto flex justify-center md:justify-end mt-10 md:mt-0">
-            <Image
-              src="/images/http_native_halftone.svg"
-              alt="Halftone illustration representing HTTP native flow"
-              width={400}
-              height={320}
-              className="w-full max-w-[320px] sm:max-w-[380px] md:max-w-[400px] h-auto"
-              priority
-            />
+            <div className="w-full max-w-[320px] sm:max-w-[380px] md:max-w-[400px]">
+              <StatusCodeBlock />
+            </div>
           </div>
         </div>
       </div>

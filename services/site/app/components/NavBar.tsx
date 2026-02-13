@@ -84,7 +84,7 @@ const navLinks = [
   { href: "/transports", label: "Transports" },
   { href: "/ecosystem", label: "Ecosystem" },
   { href: "/use-cases", label: "Use Cases" },
-  { href: "/compare", label: "Compare" },
+  { href: "/compare", label: "Why T402" },
   { href: "/playground", label: "Playground" },
   { href: "https://docs.t402.io", label: "Docs", external: true },
 ];
