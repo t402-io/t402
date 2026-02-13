@@ -48,7 +48,7 @@ const faqs: FAQItem[] = [
     id: "which-chains",
     question: "Which blockchains are supported?",
     answer:
-      "T402 supports 50 networks across 10 families: 19 EVM chains (Ethereum, Base, Arbitrum, Optimism, Polygon, etc.), Solana, TON (Telegram), TRON, NEAR, Aptos, Tezos, Polkadot Asset Hub, Stacks (Bitcoin L2), and Cosmos/Noble. Each chain uses its native token standard for USDT/USDC.",
+      "T402 supports 50 networks across 10 families: EVM chains (Ethereum, Base, Arbitrum, Optimism, Polygon, etc.), Solana, TON (Telegram), TRON, NEAR, Aptos, Tezos, Polkadot Asset Hub, Stacks (Bitcoin L2), and Cosmos/Noble. Each chain uses its native token standard for USDT/USDC.",
     category: "general",
   },
   {

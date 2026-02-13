@@ -218,9 +218,9 @@ export default function T402LaunchPage() {
                   <div className="grid grid-cols-2 sm:grid-cols-4 divide-x" style={{ borderColor: "rgba(0,0,0,0.08)" }}>
                     {[
                       { lang: "TypeScript", ver: "v2.4.0" },
-                      { lang: "Python", ver: "v1.10.0" },
+                      { lang: "Python", ver: "v1.10.1" },
                       { lang: "Go", ver: "v1.9.0" },
-                      { lang: "Java", ver: "v1.9.0" },
+                      { lang: "Java", ver: "v1.10.0" },
                     ].map((sdk) => (
                       <div key={sdk.lang} className="p-4 text-center">
                         <p className="font-mono text-sm" style={{ color: "#A1A1AA" }}>{sdk.lang}</p>
@@ -234,7 +234,7 @@ export default function T402LaunchPage() {
                   style={{ backgroundColor: "#111113", color: "#FAFAFA" }}
                 >
                   <p style={{ color: "#A1A1AA" }}># Install the TypeScript SDK</p>
-                  <p>npm install @t402/core @t402/schemes</p>
+                  <p>npm install @t402/core @t402/evm</p>
                 </div>
               </section>
 

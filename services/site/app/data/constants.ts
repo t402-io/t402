@@ -6,7 +6,6 @@ export const PROTOCOL_STATS = {
   sdkCount: 4,
   tsPackages: 29,
   httpFrameworks: 18,
-  evmChains: 19,
 } as const;
 
 export const SDK_VERSIONS = {

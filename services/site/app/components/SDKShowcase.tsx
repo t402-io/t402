@@ -66,8 +66,9 @@ export function SDKShowcase() {
               </div>
 
               {/* Install command */}
-              <div className="mt-4 overflow-hidden rounded-lg bg-[var(--bg-section-light-alt)] px-3 py-2">
-                <code className="block truncate text-xs text-[var(--text-on-light-secondary)]">
+              <div className="mt-4 overflow-hidden rounded-lg bg-[#1a1a2e] px-4 py-3">
+                <code className="block truncate font-mono text-xs text-[#e2e8f0]">
+                  <span className="text-[#50AF95] select-none">$ </span>
                   {installCommands[sdk.id] || sdk.installCommand}
                 </code>
               </div>

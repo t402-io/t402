@@ -237,7 +237,7 @@ export default function NonEvmChainsPage() {
                 style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(0,0,0,0.08)" }}
               >
                 <p className="text-base" style={{ color: "#4A5568" }}>
-                  <strong style={{ color: "#1A1A2E" }}>TL;DR</strong>: T402 supports 9 non-EVM blockchains alongside 19 EVM chains. Each chain has unique characteristics: TON for Telegram users, Solana for speed, TRON for global USDT volume, and more. The T402 SDK provides a unified API across all chains.
+                  <strong style={{ color: "#1A1A2E" }}>TL;DR</strong>: T402 supports 9 non-EVM blockchains alongside EVM chains. Each chain has unique characteristics: TON for Telegram users, Solana for speed, TRON for global USDT volume, and more. The T402 SDK provides a unified API across all chains.
                 </p>
               </div>
 

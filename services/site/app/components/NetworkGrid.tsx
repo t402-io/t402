@@ -2,13 +2,16 @@
 
 import { motion } from "motion/react";
 import Link from "next/link";
-import { chains, categories, type ChainCategory } from "../chains/data";
+import { chains, categories } from "../chains/data";
 
 export function NetworkGrid() {
-  const grouped = categories.map((cat) => ({
-    ...cat,
-    chains: chains.filter((c) => c.category === cat.id),
-  }));
+  const evmChains = chains.filter((c) => c.category === "evm");
+  const nonEvmGroups = categories
+    .filter((cat) => cat.id !== "evm")
+    .map((cat) => ({
+      ...cat,
+      chains: chains.filter((c) => c.category === cat.id),
+    }));
 
   return (
     <section className="section-dark py-24 md:py-32">
@@ -30,44 +33,67 @@ export function NetworkGrid() {
           </p>
         </motion.div>
 
-        {/* Chain groups */}
-        <div className="mt-16 space-y-8">
-          {grouped.map((group, groupIndex) => (
-            <motion.div
+        {/* EVM chains — compact pill row */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="mt-16"
+        >
+          <h3 className="mb-3 text-sm font-semibold uppercase tracking-widest text-foreground-tertiary">
+            EVM Chains
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {evmChains.map((chain) => (
+              <span
+                key={chain.id}
+                className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-sm text-foreground-secondary transition-colors hover:border-white/[0.15] hover:text-white"
+              >
+                <span
+                  className="h-2 w-2 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: chain.color }}
+                />
+                {chain.shortName}
+              </span>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Non-EVM chains — compact grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5"
+        >
+          {nonEvmGroups.map((group) => (
+            <div
               key={group.id}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: groupIndex * 0.06 }}
+              className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3"
             >
-              <h3 className="mb-3 text-sm font-semibold uppercase tracking-widest text-foreground-tertiary">
-                {group.name}
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {group.chains.map((chain) => (
-                  <span
-                    key={chain.id}
-                    className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-sm text-foreground-secondary transition-colors hover:border-white/[0.15] hover:text-white"
-                  >
-                    <span
-                      className="h-2 w-2 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: chain.color }}
-                    />
-                    {chain.shortName}
-                  </span>
-                ))}
+              <div className="flex items-center gap-2">
+                <span
+                  className="h-2 w-2 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: group.chains[0]?.color }}
+                />
+                <span className="text-sm font-medium text-white">
+                  {group.chains[0]?.shortName ?? group.name}
+                </span>
               </div>
-            </motion.div>
+              <p className="mt-1 text-xs text-foreground-tertiary">{group.name}</p>
+            </div>
           ))}
-        </div>
+        </motion.div>
 
         {/* CTA */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="mt-12 text-center"
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mt-10 text-center"
         >
           <Link
             href="/chains"

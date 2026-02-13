@@ -168,6 +168,15 @@ const iconMap: Record<string, React.FC<{ className?: string }>> = {
   go: GoIcon,
 };
 
+const packageGroups = [
+  { label: "Core", packages: typescriptPackages.filter((p) => ["@t402/core", "@t402/extensions"].includes(p.name)) },
+  { label: "Mechanisms", packages: typescriptPackages.filter((p) => ["@t402/evm-core", "@t402/evm", "@t402/svm", "@t402/ton", "@t402/tron", "@t402/near", "@t402/aptos", "@t402/tezos", "@t402/polkadot", "@t402/stacks"].includes(p.name)) },
+  { label: "HTTP & Client", packages: typescriptPackages.filter((p) => ["@t402/express", "@t402/hono", "@t402/fastify", "@t402/next", "@t402/fetch", "@t402/axios"].includes(p.name)) },
+  { label: "UI", packages: typescriptPackages.filter((p) => ["@t402/paywall", "@t402/react", "@t402/vue"].includes(p.name)) },
+  { label: "WDK & Tools", packages: typescriptPackages.filter((p) => ["@t402/wdk", "@t402/wdk-gasless", "@t402/wdk-bridge", "@t402/wdk-multisig", "@t402/mcp", "@t402/cli"].includes(p.name)) },
+  { label: "Advanced (Beta)", packages: advancedPackages },
+];
+
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
 
@@ -483,32 +492,41 @@ export default function SDKsClient() {
                 </ul>
               </div>
 
-              {/* TypeScript Packages */}
+              {/* TypeScript Packages — compact grouped list */}
               {selectedSDK.id === "typescript" && (
-                <div className="space-y-8">
-                  <div>
-                    <h3 className="mb-4 text-lg font-semibold" style={{ color: "#FAFAFA" }}>
-                      Packages <span className="text-sm font-normal" style={{ color: "#71717A" }}>({typescriptPackages.length})</span>
-                    </h3>
-                    <div className="grid gap-3">
-                      {typescriptPackages.map((pkg) => (
-                        <PackageCard key={pkg.name} pkg={pkg} />
-                      ))}
+                <div className="space-y-6">
+                  <h3 className="text-lg font-semibold" style={{ color: "#FAFAFA" }}>
+                    Packages <span className="text-sm font-normal" style={{ color: "#71717A" }}>({typescriptPackages.length + advancedPackages.length})</span>
+                  </h3>
+                  {packageGroups.map((group) => (
+                    <div key={group.label}>
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-widest" style={{ color: "#50AF95" }}>
+                        {group.label}
+                      </p>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        {group.packages.map((pkg) => (
+                          <div
+                            key={pkg.name}
+                            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5"
+                            style={{ background: "rgba(255,255,255,0.04)" }}
+                          >
+                            <code className="truncate text-xs" style={{ color: "#FAFAFA" }}>{pkg.name}</code>
+                            {pkg.badge && (
+                              <span
+                                className="shrink-0 rounded px-1 py-0.5 text-[8px] font-semibold uppercase"
+                                style={{
+                                  background: badgeStyles[pkg.badge].bg,
+                                  color: badgeStyles[pkg.badge].color,
+                                }}
+                              >
+                                {pkg.badge}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <h3 className="mb-2 text-lg font-semibold" style={{ color: "#FAFAFA" }}>
-                      Advanced Packages <span className="text-sm font-normal" style={{ color: "#71717A" }}>({advancedPackages.length})</span>
-                    </h3>
-                    <p className="mb-4 text-xs sm:text-sm" style={{ color: "#71717A" }}>
-                      Experimental packages for cutting-edge payment features.
-                    </p>
-                    <div className="grid gap-3">
-                      {advancedPackages.map((pkg) => (
-                        <PackageCard key={pkg.name} pkg={pkg} />
-                      ))}
-                    </div>
-                  </div>
+                  ))}
                 </div>
               )}
             </div>
