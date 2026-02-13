@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { serviceEndpoints, facilitatorWallets, networks } from "./data";
+
+/* ── Types ─────────────────────────────────────────────── */
 
 interface HealthStatus {
   status: "operational" | "degraded" | "down" | "loading";
@@ -12,196 +14,239 @@ interface HealthStatus {
   supportedNetworks?: number;
 }
 
-function ExternalLinkIcon({ className = "", style }: { className?: string; style?: React.CSSProperties }) {
+/* ── Icons ─────────────────────────────────────────────── */
+
+function ExternalLinkIcon({ className = "" }: { className?: string }) {
   return (
-    <svg
-      className={className}
-      style={style}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-    >
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3" />
     </svg>
   );
 }
 
-function CheckCircleIcon({ className = "", style }: { className?: string; style?: React.CSSProperties }) {
-  return (
-    <svg
-      className={className}
-      style={style}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-    >
-      <circle cx="12" cy="12" r="10" />
-      <path d="m9 12 2 2 4-4" />
-    </svg>
-  );
-}
-
 function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
   return (
     <button
-      onClick={() => navigator.clipboard.writeText(text)}
-      className="ml-2 rounded p-1 transition-colors hover:opacity-70"
-      style={{ color: "#A1A1AA" }}
+      onClick={() => {
+        navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }}
+      className="rounded p-1 transition-colors hover:bg-white/10"
       title="Copy address"
     >
-      <svg
-        className="h-3.5 w-3.5"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={2}
-      >
-        <rect x="9" y="9" width="13" height="13" rx="2" />
-        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-      </svg>
+      {copied ? (
+        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="#50AF95" strokeWidth={2}>
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      ) : (
+        <svg className="h-3.5 w-3.5 text-foreground-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+          <rect x="9" y="9" width="13" height="13" rx="2" />
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+        </svg>
+      )}
     </button>
   );
 }
 
+/* ── Health Hook ───────────────────────────────────────── */
+
+const FACILITATOR_BASE =
+  typeof window !== "undefined" && window.location.hostname === "localhost"
+    ? "/_facilitator"
+    : "https://facilitator.t402.io";
+
 function useHealthCheck() {
   const [health, setHealth] = useState<HealthStatus>({ status: "loading" });
 
-  useEffect(() => {
-    async function checkHealth() {
-      const start = Date.now();
-      try {
-        const [healthRes, supportedRes] = await Promise.all([
-          fetch("https://facilitator.t402.io/health", { cache: "no-store" }),
-          fetch("https://facilitator.t402.io/supported", { cache: "no-store" }),
-        ]);
-
-        const latency = Date.now() - start;
-
-        if (healthRes.ok && supportedRes.ok) {
-          const supportedData = await supportedRes.json();
-          const networkCount = supportedData?.kinds?.length ?? 0;
-          setHealth({
-            status: "operational",
-            latency,
-            lastChecked: new Date(),
-            supportedNetworks: networkCount,
-          });
-        } else {
-          setHealth({
-            status: "degraded",
-            latency,
-            lastChecked: new Date(),
-          });
-        }
-      } catch {
+  const checkHealth = useCallback(async () => {
+    const start = Date.now();
+    try {
+      const [healthRes, supportedRes] = await Promise.all([
+        fetch(`${FACILITATOR_BASE}/health`, { cache: "no-store" }),
+        fetch(`${FACILITATOR_BASE}/supported`, { cache: "no-store" }),
+      ]);
+      const latency = Date.now() - start;
+      if (healthRes.ok && supportedRes.ok) {
+        const supportedData = await supportedRes.json();
         setHealth({
-          status: "down",
+          status: "operational",
+          latency,
           lastChecked: new Date(),
+          supportedNetworks: supportedData?.kinds?.length ?? 0,
         });
+      } else {
+        setHealth({ status: "degraded", latency, lastChecked: new Date() });
       }
+    } catch {
+      setHealth({ status: "down", lastChecked: new Date() });
     }
+  }, []);
 
+  useEffect(() => {
     checkHealth();
     const interval = setInterval(checkHealth, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [checkHealth]);
 
   return health;
 }
 
-function HealthBanner({ health }: { health: HealthStatus }) {
-  const statusConfig = {
-    loading: { dot: "#A1A1AA", text: "#A1A1AA", label: "Checking..." },
-    operational: { dot: "#50AF95", text: "#50AF95", label: "All Systems Operational" },
-    degraded: { dot: "#EAB308", text: "#EAB308", label: "Partial Outage" },
-    down: { dot: "#EF4444", text: "#EF4444", label: "Service Unavailable" },
-  };
+/* ── Status Dot ────────────────────────────────────────── */
 
-  const config = statusConfig[health.status];
+const statusStyles = {
+  loading: { color: "#71717A", label: "Checking..." },
+  operational: { color: "#50AF95", label: "Operational" },
+  degraded: { color: "#EAB308", label: "Degraded" },
+  down: { color: "#EF4444", label: "Unavailable" },
+};
 
+function StatusDot({ status }: { status: HealthStatus["status"] }) {
+  const { color } = statusStyles[status];
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl p-4 sm:p-5"
-      style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(0,0,0,0.08)" }}
-    >
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4">
-        <div className="flex items-center gap-3">
-          <span className="relative flex h-3 w-3">
-            {health.status === "operational" && (
-              <span
-                className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
-                style={{ backgroundColor: config.dot }}
-              />
-            )}
-            <span
-              className="relative inline-flex h-3 w-3 rounded-full"
-              style={{ backgroundColor: config.dot }}
-            />
-          </span>
-          <span className="text-sm font-medium sm:text-base" style={{ color: config.text }}>
-            {config.label}
-          </span>
-        </div>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm" style={{ color: "#4A5568" }}>
-          {health.latency !== undefined && <span>Latency: {health.latency}ms</span>}
-          {health.supportedNetworks !== undefined && <span>{health.supportedNetworks} networks</span>}
-          {health.lastChecked && (
-            <span className="hidden sm:inline">Updated: {health.lastChecked.toLocaleTimeString()}</span>
-          )}
-        </div>
-      </div>
-    </motion.div>
+    <span className="relative flex h-2.5 w-2.5">
+      {status === "operational" && (
+        <span
+          className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
+          style={{ backgroundColor: color }}
+        />
+      )}
+      <span className="relative inline-flex h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} />
+    </span>
   );
 }
 
+/* ── Stat Card ─────────────────────────────────────────── */
+
+function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
+  return (
+    <div
+      className="rounded-xl px-5 py-4"
+      style={{ backgroundColor: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+    >
+      <p className="text-xs font-medium uppercase tracking-wider" style={{ color: "#71717A" }}>
+        {label}
+      </p>
+      <p className="mt-1 text-2xl font-bold" style={{ color: "#FAFAFA" }}>
+        {value}
+      </p>
+      {sub && (
+        <p className="mt-0.5 text-xs" style={{ color: "#71717A" }}>
+          {sub}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/* ── Main Component ────────────────────────────────────── */
+
 export default function StatusClient() {
   const health = useHealthCheck();
+  const { color: statusColor, label: statusLabel } = statusStyles[health.status];
 
-  const families = networks.reduce(
+  const familyGroups = networks.reduce(
     (acc, n) => {
       if (!acc[n.family]) acc[n.family] = [];
       acc[n.family].push(n);
       return acc;
     },
-    {} as Record<string, typeof networks>
+    {} as Record<string, typeof networks>,
   );
+
+  const evmNets = familyGroups["EVM"] ?? [];
+  const nonEvmFamilies = Object.entries(familyGroups).filter(([f]) => f !== "EVM");
 
   return (
     <>
-      {/* Dark Header */}
-      <section style={{ backgroundColor: "#0A0A0B" }} className="py-24 md:py-32">
-        <div className="max-w-7xl mx-auto px-6 text-center">
+      {/* ── Dark Hero + Health Banner ── */}
+      <section className="section-dark py-24 md:py-32">
+        <div className="mx-auto max-w-5xl px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
+            className="text-center"
           >
-            <p className="uppercase text-xs tracking-widest font-semibold mb-4" style={{ color: "#50AF95" }}>
+            <p
+              className="text-xs font-semibold uppercase tracking-widest"
+              style={{ color: "#50AF95" }}
+            >
               Infrastructure
             </p>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4" style={{ color: "#FAFAFA" }}>
+            <h1
+              className="mt-4 text-4xl font-bold tracking-tight md:text-5xl"
+              style={{ color: "#FAFAFA" }}
+            >
               Network Status
             </h1>
-            <p className="mx-auto max-w-2xl text-lg" style={{ color: "#A1A1AA" }}>
-              Facilitator service health and supported networks
+            <p className="mx-auto mt-4 max-w-xl text-lg" style={{ color: "#A1A1AA" }}>
+              Real-time health of the T402 facilitator and all supported networks.
             </p>
+          </motion.div>
+
+          {/* Health Banner */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+            className="mx-auto mt-12 max-w-2xl rounded-2xl px-6 py-5"
+            style={{
+              backgroundColor: "rgba(255,255,255,0.04)",
+              border: `1px solid ${health.status === "operational" ? "rgba(80,175,149,0.3)" : health.status === "down" ? "rgba(239,68,68,0.3)" : "rgba(255,255,255,0.08)"}`,
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <StatusDot status={health.status} />
+                <span className="text-base font-semibold" style={{ color: statusColor }}>
+                  {health.status === "loading" ? "Checking..." : statusLabel}
+                </span>
+              </div>
+              <div className="flex items-center gap-4 text-xs" style={{ color: "#71717A" }}>
+                {health.latency !== undefined && <span>{health.latency}ms</span>}
+                {health.lastChecked && (
+                  <span className="hidden sm:inline">
+                    {health.lastChecked.toLocaleTimeString()}
+                  </span>
+                )}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Stat Cards */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.25 }}
+            className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4"
+          >
+            <StatCard
+              label="Networks"
+              value={health.supportedNetworks !== undefined ? String(health.supportedNetworks) : "—"}
+              sub="payment kinds"
+            />
+            <StatCard label="Families" value={String(Object.keys(familyGroups).length)} sub="blockchain families" />
+            <StatCard label="Mainnets" value={String(networks.length)} sub="mainnet chains" />
+            <StatCard
+              label="Latency"
+              value={health.latency !== undefined ? `${health.latency}ms` : "—"}
+              sub="round-trip"
+            />
           </motion.div>
         </div>
       </section>
 
-      {/* Light Dashboard */}
-      <section style={{ backgroundColor: "#F7FAF9" }} className="py-24 md:py-32">
-        <div className="max-w-5xl mx-auto px-6 space-y-12">
-          {/* Health Banner */}
-          <HealthBanner health={health} />
-
+      {/* ── Light Section: Endpoints + Wallets ── */}
+      <section className="section-light py-24 md:py-32">
+        <div className="mx-auto max-w-5xl px-6 space-y-16">
           {/* Service Endpoints */}
           <div>
-            <h2 className="mb-4 text-lg font-semibold" style={{ color: "#1A1A2E" }}>
+            <h2
+              className="mb-6 text-xl font-bold tracking-tight"
+              style={{ color: "var(--text-on-light)" }}
+            >
               Service Endpoints
             </h2>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -212,23 +257,28 @@ export default function StatusClient() {
                   target="_blank"
                   rel="noopener noreferrer"
                   initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: i * 0.05 }}
-                  className="group flex items-center justify-between rounded-2xl px-4 py-3 transition-all"
-                  style={{
-                    backgroundColor: "#FFFFFF",
-                    border: "1px solid rgba(0,0,0,0.08)",
-                  }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: i * 0.04 }}
+                  className="card-elevated group flex items-center gap-4 p-4 transition-all hover:border-brand/30"
                 >
-                  <div className="min-w-0 flex-1">
-                    <div className="text-sm font-medium" style={{ color: "#1A1A2E" }}>
-                      {ep.name}
-                    </div>
-                    <div className="truncate text-xs" style={{ color: "#4A5568" }}>
-                      {ep.description}
-                    </div>
+                  <div
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
+                    style={{ backgroundColor: "rgba(80,175,149,0.08)" }}
+                  >
+                    <span className="text-sm font-bold" style={{ color: "#50AF95" }}>
+                      {ep.name.charAt(0)}
+                    </span>
                   </div>
-                  <ExternalLinkIcon className="ml-2 h-4 w-4 shrink-0 transition-colors group-hover:opacity-70" style={{ color: "#A1A1AA" } as React.CSSProperties} />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold" style={{ color: "var(--text-on-light)" }}>
+                      {ep.name}
+                    </p>
+                    <p className="truncate text-xs" style={{ color: "var(--text-on-light-tertiary)" }}>
+                      {ep.description}
+                    </p>
+                  </div>
+                  <ExternalLinkIcon className="h-4 w-4 shrink-0 text-[var(--text-on-light-tertiary)] transition-transform group-hover:translate-x-0.5" />
                 </motion.a>
               ))}
             </div>
@@ -236,133 +286,58 @@ export default function StatusClient() {
 
           {/* Facilitator Wallets */}
           <div>
-            <h2 className="mb-4 text-lg font-semibold" style={{ color: "#1A1A2E" }}>
+            <h2
+              className="mb-6 text-xl font-bold tracking-tight"
+              style={{ color: "var(--text-on-light)" }}
+            >
               Facilitator Wallets
             </h2>
-
-            {/* Desktop Table */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
-              className="hidden overflow-hidden rounded-2xl md:block"
-              style={{ border: "1px solid rgba(0,0,0,0.08)" }}
-            >
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.08)", backgroundColor: "#F7FAF9" }}>
-                      <th className="px-4 py-3 text-left font-medium" style={{ color: "#4A5568" }}>Family</th>
-                      <th className="px-4 py-3 text-left font-medium" style={{ color: "#4A5568" }}>Chains</th>
-                      <th className="px-4 py-3 text-left font-medium" style={{ color: "#4A5568" }}>Address</th>
-                      <th className="px-4 py-3 text-left font-medium" style={{ color: "#4A5568" }}>&nbsp;</th>
-                    </tr>
-                  </thead>
-                  <tbody style={{ backgroundColor: "#FFFFFF" }}>
-                    {facilitatorWallets.map((w, i) => (
-                      <tr
-                        key={w.family}
-                        style={i < facilitatorWallets.length - 1 ? { borderBottom: "1px solid rgba(0,0,0,0.05)" } : undefined}
-                      >
-                        <td className="px-4 py-3 font-medium" style={{ color: "#1A1A2E" }}>{w.family}</td>
-                        <td className="px-4 py-3" style={{ color: "#4A5568" }}>{w.chains}</td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center">
-                            <code className="max-w-[200px] truncate text-xs" style={{ color: "#4A5568" }}>
-                              {w.address}
-                            </code>
-                            <CopyButton text={w.address} />
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <a
-                            href={w.explorerUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs hover:underline"
-                            style={{ color: "#50AF95" }}
-                          >
-                            Explorer
-                          </a>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </motion.div>
-
-            {/* Mobile Cards */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
-              className="grid gap-3 md:hidden"
-            >
-              {facilitatorWallets.map((w) => (
-                <div
+            <div className="grid gap-3">
+              {facilitatorWallets.map((w, i) => (
+                <motion.div
                   key={w.family}
-                  className="rounded-2xl p-4"
-                  style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(0,0,0,0.08)" }}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: i * 0.04 }}
+                  className="card-elevated flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"
                 >
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="font-medium" style={{ color: "#1A1A2E" }}>{w.family}</span>
-                    <span className="text-xs" style={{ color: "#4A5568" }}>{w.chains}</span>
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
+                      style={{ backgroundColor: "rgba(80,175,149,0.08)", color: "#50AF95" }}
+                    >
+                      {w.family.slice(0, 3)}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold" style={{ color: "var(--text-on-light)" }}>
+                        {w.family}
+                      </p>
+                      <p className="text-xs" style={{ color: "var(--text-on-light-tertiary)" }}>
+                        {w.chains}
+                      </p>
+                    </div>
                   </div>
-                  <div className="mb-3 flex items-center gap-1">
-                    <code className="flex-1 truncate text-xs" style={{ color: "#4A5568" }}>
+                  <div className="flex items-center gap-2 pl-12 sm:pl-0">
+                    <code
+                      className="max-w-[240px] truncate rounded-md px-2 py-1 text-xs"
+                      style={{
+                        backgroundColor: "var(--bg-section-light-alt)",
+                        color: "var(--text-on-light-secondary)",
+                      }}
+                    >
                       {w.address}
                     </code>
                     <CopyButton text={w.address} />
-                  </div>
-                  <a
-                    href={w.explorerUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs hover:underline"
-                    style={{ color: "#50AF95" }}
-                  >
-                    View in Explorer
-                    <ExternalLinkIcon className="h-3 w-3" />
-                  </a>
-                </div>
-              ))}
-            </motion.div>
-          </div>
-
-          {/* Supported Networks */}
-          <div>
-            <h2 className="mb-4 text-lg font-semibold" style={{ color: "#1A1A2E" }}>
-              Supported Networks
-            </h2>
-            <div className="space-y-6">
-              {Object.entries(families).map(([family, nets], fi) => (
-                <motion.div
-                  key={family}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.3 + fi * 0.05 }}
-                >
-                  <h3 className="mb-2 text-sm font-medium" style={{ color: "#1A1A2E" }}>
-                    {family}{" "}
-                    <span style={{ color: "#A1A1AA" }}>({nets.length})</span>
-                  </h3>
-                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                    {nets.map((n) => (
-                      <div
-                        key={n.network}
-                        className="flex flex-col gap-1 rounded-xl px-3 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-2"
-                        style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(0,0,0,0.05)" }}
-                      >
-                        <div className="flex items-center gap-2">
-                          <CheckCircleIcon className="h-4 w-4 shrink-0" style={{ color: "#50AF95" } as React.CSSProperties} />
-                          <span className="text-sm" style={{ color: "#1A1A2E" }}>{n.name}</span>
-                        </div>
-                        <code className="truncate pl-6 text-[10px] sm:pl-0 sm:text-xs" style={{ color: "#A1A1AA" }}>
-                          {n.network}
-                        </code>
-                      </div>
-                    ))}
+                    <a
+                      href={w.explorerUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-medium hover:underline"
+                      style={{ color: "#50AF95" }}
+                    >
+                      Explorer
+                    </a>
                   </div>
                 </motion.div>
               ))}
@@ -371,24 +346,127 @@ export default function StatusClient() {
         </div>
       </section>
 
-      {/* Grafana CTA */}
-      <section style={{ backgroundColor: "#FFFFFF" }} className="py-24 md:py-32">
-        <div className="max-w-4xl mx-auto px-6 text-center">
+      {/* ── Dark Section: Supported Networks ── */}
+      <section className="section-dark py-24 md:py-32">
+        <div className="mx-auto max-w-5xl px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="rounded-2xl p-8 sm:p-12"
-            style={{ backgroundColor: "#F7FAF9", border: "1px solid rgba(0,0,0,0.08)" }}
+            className="text-center"
           >
-            <p className="mb-6 text-base" style={{ color: "#4A5568" }}>
-              For real-time monitoring and historical metrics, visit the Grafana dashboard.
+            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#50AF95" }}>
+              Coverage
+            </p>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl" style={{ color: "#FAFAFA" }}>
+              Supported Networks
+            </h2>
+            <p className="mx-auto mt-4 max-w-lg text-base" style={{ color: "#A1A1AA" }}>
+              All mainnet chains supported by the facilitator.
+            </p>
+          </motion.div>
+
+          {/* EVM — compact pills */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mt-12"
+          >
+            <div className="mb-3 flex items-center gap-2">
+              <h3
+                className="text-sm font-semibold uppercase tracking-widest"
+                style={{ color: "#71717A" }}
+              >
+                EVM
+              </h3>
+              <span
+                className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                style={{ backgroundColor: "rgba(80,175,149,0.12)", color: "#50AF95" }}
+              >
+                {evmNets.length}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {evmNets.map((n) => (
+                <span
+                  key={n.network}
+                  className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm transition-colors hover:border-white/20"
+                  style={{
+                    backgroundColor: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    color: "#A1A1AA",
+                  }}
+                >
+                  <StatusDot status="operational" />
+                  {n.name}
+                </span>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Non-EVM — cards */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"
+          >
+            {nonEvmFamilies.map(([family, nets]) => (
+              <div
+                key={family}
+                className="rounded-xl px-4 py-3"
+                style={{
+                  backgroundColor: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <StatusDot status="operational" />
+                  <span className="text-sm font-medium" style={{ color: "#FAFAFA" }}>
+                    {nets[0].name}
+                  </span>
+                </div>
+                <p className="mt-1 truncate text-xs font-mono" style={{ color: "#71717A" }}>
+                  {nets[0].network}
+                </p>
+                {nets.length > 1 && (
+                  <p className="mt-1 text-xs" style={{ color: "#50AF95" }}>
+                    +{nets.length - 1} more
+                  </p>
+                )}
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── Light CTA: Grafana ── */}
+      <section className="section-light py-24 md:py-32">
+        <div className="mx-auto max-w-3xl px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2
+              className="mb-3 text-2xl font-bold tracking-tight sm:text-3xl"
+              style={{ color: "var(--text-on-light)" }}
+            >
+              Real-Time Monitoring
+            </h2>
+            <p
+              className="mx-auto mb-8 max-w-md text-base"
+              style={{ color: "var(--text-on-light-secondary)" }}
+            >
+              Historical metrics, alerting, and detailed dashboards on Grafana.
             </p>
             <Link
               href="https://grafana.facilitator.t402.io"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-medium transition-all hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-base font-medium transition-all hover:opacity-90"
               style={{ backgroundColor: "#50AF95", color: "#0A0A0B" }}
             >
               Open Grafana Dashboard

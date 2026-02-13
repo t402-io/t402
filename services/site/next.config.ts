@@ -1,11 +1,22 @@
 import type { NextConfig } from "next";
 
+const isDev = process.env.NODE_ENV === "development";
+
 const nextConfig: NextConfig = {
   output: "export", // Static export for Cloudflare Pages
   images: {
     formats: ["image/avif", "image/webp"],
     unoptimized: true, // Required for static export
   },
+  // Proxy facilitator API in dev to avoid CORS (localhost not in allowed origins)
+  ...(isDev && {
+    rewrites: async () => [
+      {
+        source: "/_facilitator/:path*",
+        destination: "https://facilitator.t402.io/:path*",
+      },
+    ],
+  }),
   turbopack: {
     rules: {
       "*.svg": {
