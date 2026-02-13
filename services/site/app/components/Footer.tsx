@@ -58,7 +58,7 @@ const footerLinks = {
     { label: "TON", href: "/chains/ton" },
     { label: "TRON", href: "/chains/tron" },
     { label: "NEAR", href: "/chains/near" },
-    { label: "View All 33", href: "/chains" },
+    { label: "View All Chains", href: "/chains" },
   ],
 };
 

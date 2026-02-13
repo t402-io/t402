@@ -9,7 +9,7 @@ export const metadata = {
   openGraph: {
     title: "t402 Ecosystem - Packages & Integrations",
     description:
-      "Complete ecosystem of payment packages: 9 chain mechanisms, 4 HTTP middleware, UI components, wallet integrations, and AI agent tools.",
+      "Complete ecosystem of payment packages: 10 chain mechanisms, 4 HTTP middleware, UI components, wallet integrations, and AI agent tools.",
   },
 };
 

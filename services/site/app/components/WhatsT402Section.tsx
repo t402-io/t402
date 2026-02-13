@@ -17,7 +17,7 @@ const features = [
   {
     title: "Multi-Chain",
     description:
-      "One protocol, 33 blockchains. Unified payment flow across 10 chain families.",
+      "One protocol, 50 networks across 10 blockchain families. Unified payment flow everywhere.",
     icon: (
       <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <circle cx="12" cy="5" r="3" />

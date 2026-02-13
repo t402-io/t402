@@ -4,9 +4,9 @@ import { motion, useMotionValue, useTransform, animate, useInView } from "motion
 import { useEffect, useRef } from "react";
 
 const stats = [
-  { value: 33, suffix: "", label: "Blockchains" },
+  { value: 50, suffix: "", label: "Networks" },
   { value: 29, suffix: "", label: "Packages" },
-  { value: 22, suffix: "", label: "Frameworks" },
+  { value: 18, suffix: "", label: "Frameworks" },
   { value: 4, suffix: "", label: "SDKs" },
 ];
 

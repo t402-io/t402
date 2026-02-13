@@ -5,10 +5,10 @@ import { motion } from "motion/react";
 import { BackgroundVideo } from "./BackgroundVideo";
 
 const stats = [
-  { value: "33", label: "Chains" },
+  { value: "50", label: "Networks" },
+  { value: "81", label: "Kinds" },
   { value: "4", label: "SDKs" },
   { value: "$0", label: "Fees" },
-  { value: "<1s", label: "Settlement" },
 ];
 
 export function Hero() {
@@ -47,7 +47,7 @@ export function Hero() {
           transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
           className="mx-auto mt-6 max-w-2xl text-lg text-foreground-secondary md:text-xl"
         >
-          HTTP-native stablecoin payments across 33 blockchains. Zero fees.
+          HTTP-native stablecoin payments across 50 networks and 10 blockchain families. Zero fees.
           Instant settlement. Built for AI agents.
         </motion.p>
 

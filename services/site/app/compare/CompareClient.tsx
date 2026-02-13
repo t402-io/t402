@@ -3,6 +3,25 @@
 import Link from "next/link";
 import { motion } from "motion/react";
 
+interface ProtocolFeature {
+  name: string;
+  t402: string;
+  x402: string;
+}
+
+const protocolFeatures: ProtocolFeature[] = [
+  { name: "Multi-Chain Support", t402: "50 networks, 10 families", x402: "EVM only (Base)" },
+  { name: "Token Support", t402: "USDT, USDT0, USDC", x402: "USDC only" },
+  { name: "AI Agent Support", t402: "MCP + A2A native", x402: "None" },
+  { name: "Gasless Payments", t402: "ERC-4337", x402: "No" },
+  { name: "Non-EVM Chains", t402: "Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos", x402: "None" },
+  { name: "Official SDKs", t402: "4 (TS, Go, Python, Java)", x402: "1 (JavaScript)" },
+  { name: "HTTP Frameworks", t402: "18 integrations", x402: "1" },
+  { name: "Self-Hosted Facilitator", t402: "Yes", x402: "No" },
+  { name: "Open Source", t402: "Yes (Apache 2.0)", x402: "Partial" },
+  { name: "Settlement Speed", t402: "Instant on-chain", x402: "Delayed" },
+];
+
 interface ComparisonFeature {
   name: string;
   description: string;
@@ -71,7 +90,7 @@ const comparisonFeatures: ComparisonFeature[] = [
   {
     name: "Multi-Chain",
     description: "Blockchain support",
-    t402: "28 chains",
+    t402: "50 networks",
     stripe: false,
     paypal: false,
     coinbase: "8 chains",
@@ -173,6 +192,92 @@ function renderValueLight(value: string | boolean) {
     return <XIcon className="mx-auto" style={{ color: "#CBD5E0" }} />;
   }
   return <span className="text-sm font-medium">{value}</span>;
+}
+
+function isT402Advantage(t402Val: string, x402Val: string): boolean {
+  const negatives = ["none", "no", "partial", "delayed", "1", "1 (javascript)"];
+  return negatives.includes(x402Val.toLowerCase()) || x402Val.startsWith("EVM only");
+}
+
+function ProtocolComparisonTable() {
+  return (
+    <>
+      {/* Desktop Table */}
+      <div className="hidden overflow-x-auto lg:block">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+              <th
+                className="py-4 pr-4 text-left text-xs font-semibold uppercase tracking-wider"
+                style={{ color: "#71717A" }}
+              >
+                Feature
+              </th>
+              <th className="px-6 py-4 text-center">
+                <span className="text-lg font-bold" style={{ color: "#50AF95" }}>t402</span>
+              </th>
+              <th className="px-6 py-4 text-center">
+                <span className="text-lg font-semibold" style={{ color: "#A1A1AA" }}>x402</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {protocolFeatures.map((feature, index) => {
+              const advantage = isT402Advantage(feature.t402, feature.x402);
+              return (
+                <motion.tr
+                  key={feature.name}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+                >
+                  <td className="py-4 pr-4">
+                    <p className="font-medium" style={{ color: "#FAFAFA" }}>{feature.name}</p>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <div className="inline-flex items-center gap-2">
+                      {advantage && <CheckIcon style={{ color: "#50AF95" }} />}
+                      <span className="text-sm font-medium" style={{ color: "#50AF95" }}>{feature.t402}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <span className="text-sm" style={{ color: "#71717A" }}>{feature.x402}</span>
+                  </td>
+                </motion.tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="grid gap-3 lg:hidden">
+        {protocolFeatures.map((feature, index) => (
+          <motion.div
+            key={feature.name}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: index * 0.03 }}
+            className="rounded-2xl p-5"
+            style={{ backgroundColor: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+          >
+            <p className="mb-3 font-medium" style={{ color: "#FAFAFA" }}>{feature.name}</p>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="rounded-xl px-3 py-2" style={{ backgroundColor: "rgba(80,175,149,0.1)" }}>
+                <p className="text-xs" style={{ color: "#71717A" }}>t402</p>
+                <div className="font-medium" style={{ color: "#50AF95" }}>{feature.t402}</div>
+              </div>
+              <div className="rounded-xl px-3 py-2" style={{ backgroundColor: "rgba(255,255,255,0.03)" }}>
+                <p className="text-xs" style={{ color: "#71717A" }}>x402</p>
+                <div style={{ color: "#A1A1AA" }}>{feature.x402}</div>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </>
+  );
 }
 
 function MobileComparisonCard({ feature, index }: { feature: ComparisonFeature; index: number }) {
@@ -384,7 +489,7 @@ export default function CompareClient() {
             />
             <HighlightCard
               title="Chains Supported"
-              value="28"
+              value="50"
               description="10 blockchain families"
             />
             <HighlightCard
@@ -392,6 +497,41 @@ export default function CompareClient() {
               value="Zero"
               description="No payment reversals"
             />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Dark Section: Protocol Comparison (T402 vs x402) */}
+      <section className="section-dark py-24 md:py-32">
+        <div className="mx-auto max-w-4xl px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
+            <span
+              className="text-xs font-semibold uppercase tracking-widest"
+              style={{ color: "#50AF95" }}
+            >
+              Protocol Comparison
+            </span>
+            <h2
+              className="mt-4 mb-12 text-3xl font-bold tracking-tight md:text-4xl"
+              style={{ color: "#FAFAFA" }}
+            >
+              How T402 compares to x402
+            </h2>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="overflow-hidden rounded-2xl p-6 sm:p-8"
+            style={{ border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "#111113" }}
+          >
+            <ProtocolComparisonTable />
           </motion.div>
         </div>
       </section>
