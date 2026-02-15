@@ -4,3 +4,6 @@
 [submodule "services/docs/internal"]
 	path = services/docs/internal
 	url = git@github.com:t402-io/t402-internal.git
+[submodule "services/facilitator"]
+	path = services/facilitator
+	url = https://github.com/t402-io/facilitator.git
