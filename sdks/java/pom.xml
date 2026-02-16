@@ -98,7 +98,7 @@
     <dependency>
       <groupId>io.micronaut</groupId>
       <artifactId>micronaut-http</artifactId>
-      <version>4.10.14</version>
+      <version>4.10.15</version>
       <scope>provided</scope>
     </dependency>
 
@@ -130,7 +130,7 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
-      <version>6.0.2</version>
+      <version>6.0.3</version>
       <scope>test</scope>
     </dependency>
 
