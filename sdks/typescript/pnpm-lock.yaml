@@ -12,6 +12,7 @@ overrides:
   h3: '>=1.15.5'
   axios: '>=1.12.0'
   viem: ^2.44.2
+  '@tonconnect/bridge-sdk': 0.2.4
 
 importers:
 
@@ -5411,9 +5412,8 @@ packages:
       '@ton/core': ^0.62.0
       '@ton/crypto': ^3.3.0
 
-  '@tonconnect/bridge-sdk@https://release-assets.githubusercontent.com/github-production-release-asset/1004994143/a070df00-2e31-4792-9f58-b453ac399861?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-02-18T14%3A43%3A41Z&rscd=attachment%3B+filename%3Dtonconnect-bridge-sdk-0.2.6.tgz&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-02-18T13%3A42%3A51Z&ske=2026-02-18T14%3A43%3A41Z&sks=b&skv=2018-11-09&sig=jhhonmLo5bGNZSMHtzXiFINUD9v2Z%2BwndBsmVBht%2F0M%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc3MTQyMjYwMCwibmJmIjoxNzcxNDIyMzAwLCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.F0J1RIGYz51ekwrX-7qQTEoymrg08uwpxKks8Q_xz98&response-content-disposition=attachment%3B%20filename%3Dtonconnect-bridge-sdk-0.2.6.tgz&response-content-type=application%2Foctet-stream':
-    resolution: {tarball: https://release-assets.githubusercontent.com/github-production-release-asset/1004994143/a070df00-2e31-4792-9f58-b453ac399861?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-02-18T14%3A43%3A41Z&rscd=attachment%3B+filename%3Dtonconnect-bridge-sdk-0.2.6.tgz&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-02-18T13%3A42%3A51Z&ske=2026-02-18T14%3A43%3A41Z&sks=b&skv=2018-11-09&sig=jhhonmLo5bGNZSMHtzXiFINUD9v2Z%2BwndBsmVBht%2F0M%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc3MTQyMjYwMCwibmJmIjoxNzcxNDIyMzAwLCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.F0J1RIGYz51ekwrX-7qQTEoymrg08uwpxKks8Q_xz98&response-content-disposition=attachment%3B%20filename%3Dtonconnect-bridge-sdk-0.2.6.tgz&response-content-type=application%2Foctet-stream}
-    version: 0.2.6
+  '@tonconnect/bridge-sdk@0.2.4':
+    resolution: {integrity: sha512-W7fDoo8aT9FYnGPPLqh4Giiu1M5FP3GW4A+AeDB/xfTzM9XsO9aoWoSfrR1+QuNl2OmvtvneCFv4MnowM9+feg==}
 
   '@tonconnect/isomorphic-eventsource@0.0.2':
     resolution: {integrity: sha512-B4UoIjPi0QkvIzZH5fV3BQLWrqSYABdrzZQSI9sJA9aA+iC0ohOzFwVVGXanlxeDAy1bcvPbb29f6sVUk0UnnQ==}
@@ -15373,7 +15373,7 @@ snapshots:
       '@scure/bip39': 2.0.1
       '@ton/core': 0.63.0(@ton/crypto@3.3.0)
       '@ton/crypto': 3.3.0
-      '@tonconnect/bridge-sdk': https://release-assets.githubusercontent.com/github-production-release-asset/1004994143/a070df00-2e31-4792-9f58-b453ac399861?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-02-18T14%3A43%3A41Z&rscd=attachment%3B+filename%3Dtonconnect-bridge-sdk-0.2.6.tgz&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-02-18T13%3A42%3A51Z&ske=2026-02-18T14%3A43%3A41Z&sks=b&skv=2018-11-09&sig=jhhonmLo5bGNZSMHtzXiFINUD9v2Z%2BwndBsmVBht%2F0M%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc3MTQyMjYwMCwibmJmIjoxNzcxNDIyMzAwLCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.F0J1RIGYz51ekwrX-7qQTEoymrg08uwpxKks8Q_xz98&response-content-disposition=attachment%3B%20filename%3Dtonconnect-bridge-sdk-0.2.6.tgz&response-content-type=application%2Foctet-stream
+      '@tonconnect/bridge-sdk': 0.2.4
       '@tonconnect/protocol': 2.4.0
       '@tonconnect/sdk': 3.4.1
       lru-cache: 11.2.5
@@ -15385,13 +15385,11 @@ snapshots:
       - encoding
       - utf-8-validate
 
-  '@tonconnect/bridge-sdk@https://release-assets.githubusercontent.com/github-production-release-asset/1004994143/a070df00-2e31-4792-9f58-b453ac399861?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-02-18T14%3A43%3A41Z&rscd=attachment%3B+filename%3Dtonconnect-bridge-sdk-0.2.6.tgz&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-02-18T13%3A42%3A51Z&ske=2026-02-18T14%3A43%3A41Z&sks=b&skv=2018-11-09&sig=jhhonmLo5bGNZSMHtzXiFINUD9v2Z%2BwndBsmVBht%2F0M%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc3MTQyMjYwMCwibmJmIjoxNzcxNDIyMzAwLCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.F0J1RIGYz51ekwrX-7qQTEoymrg08uwpxKks8Q_xz98&response-content-disposition=attachment%3B%20filename%3Dtonconnect-bridge-sdk-0.2.6.tgz&response-content-type=application%2Foctet-stream':
+  '@tonconnect/bridge-sdk@0.2.4':
     dependencies:
       '@tonconnect/isomorphic-eventsource': 0.0.2
       '@tonconnect/isomorphic-fetch': 0.0.3
       '@tonconnect/protocol': 2.4.0
-      blakejs: 1.2.1
-      tweetnacl: 1.0.3
     transitivePeerDependencies:
       - encoding
 
