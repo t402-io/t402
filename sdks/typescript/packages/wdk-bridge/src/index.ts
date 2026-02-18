@@ -77,5 +77,16 @@ export type {
   BalanceSummary,
 } from './types.js'
 
+// TON Bridge
+export { T402TonBridge } from './ton-bridge.js'
+export type {
+  TonBridgeConfig,
+  TonBridgeQuoteParams,
+  TonBridgeQuote,
+  TonBridgeResult,
+  BridgeToEvmParams,
+  BridgeFromEvmParams,
+} from './ton-bridge.js'
+
 // Re-export LayerZero Scan client from @t402/evm for convenience
 export { LayerZeroScanClient, createLayerZeroScanClient } from '@t402/evm'

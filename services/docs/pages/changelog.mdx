@@ -16,7 +16,15 @@ T402 follows [Semantic Versioning](https://semver.org/):
   <Tabs.Tab>
 ## TypeScript SDK
 
-### v2.4.x (Current)
+### v2.5.x (Current)
+
+**v2.5.0** - February 2026
+- New `@t402/wdk-protocol` package — T402 payment protocol for WDK wallet apps
+- 5 new MCP tools for AI agents with WDK wallets (`wdk/getWallet`, `wdk/getBalances`, `wdk/transfer`, `wdk/swap`, `t402/autoPay`)
+- MCP server now exposes 11 tools when WDK seed phrase is configured (6 base + 5 WDK)
+- 30 packages total
+
+### v2.4.x
 
 **v2.4.0** - February 2026
 - Cosmos (Noble) support via `@t402/cosmos`
@@ -224,7 +232,8 @@ T402 follows [Semantic Versioning](https://semver.org/):
 - Added TON mainnet and testnet settlement
 - Added Stacks mainnet and testnet settlement (exact-direct)
 - Added Cosmos/Noble mainnet and testnet settlement (exact-direct)
-- Expanded to 44 networks, 64 kinds
+- Added Solana testnet, Aptos devnet, Kusama Asset Hub
+- Expanded to 50 networks, 81 kinds
 
 ### January 2026
 - Added Stacks settlement support

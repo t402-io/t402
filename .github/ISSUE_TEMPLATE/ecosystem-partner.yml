@@ -1,0 +1,113 @@
+name: Ecosystem Partner Registration
+description: Register as a t402 ecosystem partner
+title: "[Ecosystem]: "
+labels: ["ecosystem"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your interest in joining the t402 ecosystem! Please provide details about your organization and integration.
+
+  - type: input
+    id: name
+    attributes:
+      label: Organization/Project Name
+      description: The name of your organization or project
+      placeholder: "e.g., Acme APIs"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Partner Category
+      description: How does your organization participate in the t402 ecosystem?
+      options:
+        - Merchant (accepting payments)
+        - Facilitator (payment processing)
+        - SDK Integration
+        - Infrastructure Provider
+        - AI Agent Platform
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Brief description of your organization and what you do
+      placeholder: "e.g., We provide a premium weather API that charges per request using t402 payments on Base."
+    validations:
+      required: true
+
+  - type: input
+    id: website
+    attributes:
+      label: Website URL
+      description: Your organization's website
+      placeholder: "https://example.com"
+    validations:
+      required: true
+
+  - type: textarea
+    id: integration
+    attributes:
+      label: Integration Details
+      description: How are you integrating with t402? Which SDKs, networks, and schemes do you use?
+      placeholder: |
+        - SDK: TypeScript (@t402/express)
+        - Networks: eip155:8453 (Base), eip155:42161 (Arbitrum)
+        - Scheme: exact
+        - Framework: Express.js
+    validations:
+      required: true
+
+  - type: dropdown
+    id: networks
+    attributes:
+      label: Primary Network
+      description: Which blockchain network is your primary deployment target?
+      options:
+        - EVM (Ethereum, Base, Arbitrum, etc.)
+        - Solana
+        - TON
+        - TRON
+        - NEAR
+        - Aptos
+        - Tezos
+        - Polkadot
+        - Stacks
+        - Cosmos
+        - Multiple networks
+    validations:
+      required: true
+
+  - type: dropdown
+    id: status
+    attributes:
+      label: Integration Status
+      description: What is the current status of your t402 integration?
+      options:
+        - Planning / Evaluating
+        - In Development
+        - Testnet / Staging
+        - Production / Live
+    validations:
+      required: true
+
+  - type: input
+    id: contact
+    attributes:
+      label: Contact
+      description: How can we reach you? (Email, Twitter/X, Telegram, etc.)
+      placeholder: "e.g., dev@example.com or @handle"
+
+  - type: checkboxes
+    id: listing
+    attributes:
+      label: Listing Consent
+      options:
+        - label: I consent to being listed in the t402 ecosystem directory
+          required: true
+        - label: I would like to be featured in t402 ecosystem updates and announcements

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "t402": {
+      "command": "npx",
+      "args": ["@t402/mcp"],
+      "env": {
+        "T402_DEMO_MODE": "true"
+      }
+    }
+  }
+}

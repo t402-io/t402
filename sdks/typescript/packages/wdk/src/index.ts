@@ -250,6 +250,34 @@ export {
 } from './compatibility.js'
 export type { CompatibilityResult } from './compatibility.js'
 
+// Pricing provider
+export { createWdkMoneyParser, toAtomicUnits, resolveAssetForNetwork } from './pricing.js'
+export type { PricingProviderConfig } from './pricing.js'
+
+// Failover provider
+export {
+  FailoverProvider,
+  createFailoverProvider,
+  resolveRpcUrl,
+} from './failover.js'
+export type { FailoverConfig, ProviderStatus } from './failover.js'
+
+// Secret manager
+export { encryptSeed, decryptSeed } from './secret.js'
+export type { EncryptedSeed } from './secret.js'
+
+// Indexer verifier
+export {
+  WdkIndexerVerifier,
+  createIndexerVerifier,
+} from './indexer.js'
+export type {
+  WdkIndexerConfig,
+  TransactionQuery,
+  TransactionResult,
+  PaymentVerification,
+} from './indexer.js'
+
 // Hardware wallet support
 export {
   // Types

@@ -1,9 +1,34 @@
 import { useMemo } from "react";
-import { useTonConnectUI } from "@tonconnect/ui-react";
-import type { Wallet, SendTransactionRequest } from "@tonconnect/ui-react";
 import { Address, beginCell, Cell, internal } from "@ton/core";
 import { getTonClient } from "./rpc";
 import type { TonNetwork } from "./types";
+
+// TODO: Verify @ton/appkit transaction sending API once published.
+// This adapter maintains compatibility with both @ton/appkit and @tonconnect/ui-react.
+
+/**
+ * Wallet type (compatible with both @ton/appkit and @tonconnect/ui-react)
+ */
+type WalletLike = {
+  account?: {
+    address: string;
+    chain?: string;
+  };
+};
+
+/**
+ * UI instance type (compatible with both providers)
+ */
+type UILike = {
+  sendTransaction: (request: {
+    validUntil: number;
+    messages: Array<{
+      address: string;
+      amount: string;
+      payload?: string;
+    }>;
+  }) => Promise<{ boc: string }>;
+};
 
 /**
  * ClientTonSigner interface from @t402/ton
@@ -35,23 +60,54 @@ export interface SignMessageParams {
 }
 
 /**
- * Creates a ClientTonSigner adapter for TonConnect
+ * Load the UI provider dynamically.
+ * Tries @ton/appkit first, falls back to @tonconnect/ui-react.
+ */
+async function loadUI(): Promise<{
+  useUI: () => [UILike];
+}> {
+  // TODO: Update import path once @ton/appkit is published
+  try {
+    const appkit = await import("@ton/appkit" as string);
+    return {
+      useUI: appkit.useTonConnectUI ?? appkit.useAppKit,
+    };
+  } catch {
+    const tonconnect = await import("@tonconnect/ui-react");
+    return {
+      useUI: tonconnect.useTonConnectUI as unknown as () => [UILike],
+    };
+  }
+}
+
+// Cached provider
+let uiProviderPromise: ReturnType<typeof loadUI> | null = null;
+
+function getUIProvider() {
+  if (!uiProviderPromise) {
+    uiProviderPromise = loadUI();
+  }
+  return uiProviderPromise;
+}
+
+/**
+ * Creates a ClientTonSigner adapter for the wallet provider
  *
- * This adapter bridges TonConnect's sendTransaction API to the ClientTonSigner
- * interface required by @t402/ton. TonConnect's sendTransaction will sign and
- * broadcast the transaction, returning the signed BOC.
+ * This adapter bridges the wallet provider's sendTransaction API to the
+ * ClientTonSigner interface required by @t402/ton. The provider will
+ * sign and broadcast the transaction, returning the signed BOC.
  *
- * @param tonConnectUI - TonConnect UI instance
+ * @param uiInstance - Wallet UI instance (from @ton/appkit or @tonconnect/ui-react)
  * @param wallet - Connected wallet
  * @param network - Target TON network
  * @returns ClientTonSigner implementation
  */
 export function createTonConnectSigner(
-  tonConnectUI: ReturnType<typeof useTonConnectUI>[0],
-  wallet: Wallet,
+  uiInstance: UILike,
+  wallet: WalletLike,
   network: TonNetwork,
 ): ClientTonSigner {
-  const walletAddress = Address.parse(wallet.account.address);
+  const walletAddress = Address.parse(wallet.account!.address);
   const client = getTonClient(network);
 
   return {
@@ -61,7 +117,6 @@ export function createTonConnectSigner(
 
     async getSeqno(): Promise<number> {
       try {
-        // Query seqno directly from blockchain
         const result = await client.runMethod(walletAddress, "seqno", []);
         return result.stack.readNumber();
       } catch {
@@ -81,10 +136,10 @@ export function createTonConnectSigner(
         bounce,
       });
 
-      // Create transaction request for TonConnect
+      // Create transaction request (compatible with both providers)
       const validUntil = Math.floor(Date.now() / 1000) + timeout;
 
-      const transaction: SendTransactionRequest = {
+      const transaction = {
         validUntil,
         messages: [
           {
@@ -95,8 +150,8 @@ export function createTonConnectSigner(
         ],
       };
 
-      // TonConnect will sign and return the BOC
-      const result = await tonConnectUI.sendTransaction(transaction);
+      // Both @ton/appkit and @tonconnect/ui-react use sendTransaction
+      const result = await uiInstance.sendTransaction(transaction);
 
       // Parse the signed BOC from result
       const signedBoc = Buffer.from(result.boc, "base64");
@@ -108,22 +163,40 @@ export function createTonConnectSigner(
 }
 
 /**
- * Hook for creating a TonConnect-based ClientTonSigner
+ * Hook for creating a wallet-provider-based ClientTonSigner
  *
- * @param wallet - Connected TonConnect wallet
+ * Supports both @ton/appkit and @tonconnect/ui-react.
+ *
+ * @param wallet - Connected wallet (from either provider)
  * @param network - Target TON network
  * @returns ClientTonSigner or null if not connected
  */
-export function useTonSigner(wallet: Wallet | null, network: TonNetwork): ClientTonSigner | null {
-  const [tonConnectUI] = useTonConnectUI();
+export function useTonSigner(wallet: WalletLike | null, network: TonNetwork): ClientTonSigner | null {
+  // TODO: Once @ton/appkit is published, this hook should use
+  // the appkit's native hooks if available, with tonconnect fallback.
 
   return useMemo(() => {
-    if (!wallet) {
+    if (!wallet || !wallet.account) {
       return null;
     }
 
-    return createTonConnectSigner(tonConnectUI, wallet, network);
-  }, [tonConnectUI, wallet, network]);
+    // We need to get the UI instance synchronously for the memo.
+    // Use a lazy-loaded reference that resolves on first use.
+    let cachedUI: UILike | null = null;
+
+    const lazyUI: UILike = {
+      sendTransaction: async (request) => {
+        if (!cachedUI) {
+          const provider = await getUIProvider();
+          const [ui] = provider.useUI();
+          cachedUI = ui;
+        }
+        return cachedUI.sendTransaction(request);
+      },
+    };
+
+    return createTonConnectSigner(lazyUI, wallet, network);
+  }, [wallet, network]);
 }
 
 /**

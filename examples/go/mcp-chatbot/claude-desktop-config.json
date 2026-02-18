@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "t402-go": {
+      "command": "t402-mcp",
+      "env": {
+        "T402_DEMO_MODE": "true"
+      }
+    }
+  }
+}

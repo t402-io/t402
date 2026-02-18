@@ -1,4 +1,5 @@
 import type { PaymentRequired } from "@t402/core/types";
+import type { TonWalletInfo } from "./ton/wallets";
 
 declare global {
   interface Window {
@@ -13,6 +14,8 @@ declare global {
       tonConnectManifestUrl?: string;
       /** WalletConnect project ID for mobile deep linking */
       walletConnectProjectId?: string;
+      /** Dynamic TON Connect wallet list embedded at generation time */
+      tonWallets?: TonWalletInfo[];
       config: {
         chainConfig: Record<
           string,

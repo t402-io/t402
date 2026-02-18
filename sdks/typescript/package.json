@@ -15,7 +15,8 @@
       "vite": ">=6.3.6",
       "h3": ">=1.15.5",
       "axios": ">=1.12.0",
-      "viem": "^2.44.2"
+      "viem": "^2.44.2",
+      "@tonconnect/bridge-sdk": "0.2.4"
     }
   },
   "description": "t402 Payment Protocol Monorepo",

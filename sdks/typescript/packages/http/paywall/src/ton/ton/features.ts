@@ -1,9 +1,22 @@
-import type { Wallet, WalletInfo } from "@tonconnect/ui-react";
+import type { Wallet } from "./types";
+
+// TODO: Once @ton/appkit is published, update any appkit-specific
+// feature detection here. The current API is compatible with both providers.
+
+/**
+ * Wallet info type (compatible with both providers)
+ */
+interface WalletInfo {
+  name: string;
+  appName: string;
+  imageUrl?: string;
+  aboutUrl: string;
+}
 
 /**
  * Check if wallet supports sending transactions
  *
- * @param wallet - TonConnect wallet
+ * @param wallet - Connected wallet
  * @returns True if wallet can send transactions
  */
 export function canSendTransaction(wallet: Wallet | null): boolean {
@@ -13,7 +26,7 @@ export function canSendTransaction(wallet: Wallet | null): boolean {
 /**
  * Get wallet display info
  *
- * @param wallet - TonConnect wallet
+ * @param wallet - Connected wallet
  * @returns Wallet display information
  */
 export function getWalletDisplayInfo(wallet: Wallet): WalletInfo | null {
@@ -29,15 +42,13 @@ export function getWalletDisplayInfo(wallet: Wallet): WalletInfo | null {
         ? "https://tonkeeper.com/assets/tonconnect-icon.png"
         : undefined,
     aboutUrl: "",
-    tondns: undefined,
-    platforms: [],
-  } as unknown as WalletInfo;
+  };
 }
 
 /**
  * Determine chain from wallet
  *
- * @param wallet - TonConnect wallet
+ * @param wallet - Connected wallet
  * @returns Chain identifier (-239 for mainnet, -3 for testnet)
  */
 export function getWalletChain(wallet: Wallet): number {
@@ -49,7 +60,7 @@ export function getWalletChain(wallet: Wallet): number {
 /**
  * Check if wallet is on mainnet
  *
- * @param wallet - TonConnect wallet
+ * @param wallet - Connected wallet
  * @returns True if on mainnet
  */
 export function isMainnetWallet(wallet: Wallet): boolean {

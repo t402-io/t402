@@ -37,6 +37,7 @@ export { T402McpServer, createT402McpServer, loadConfigFromEnv } from './server/
 export {
   // Tool definitions
   TOOL_DEFINITIONS,
+  UNIFIED_TOOL_DEFINITIONS,
   // Balance tools
   getBalanceInputSchema,
   executeGetBalance,
@@ -59,6 +60,15 @@ export {
   bridgeInputSchema,
   executeBridge,
   formatBridgeResult,
+  // Unified tools
+  smartPayInputSchema,
+  executeSmartPay,
+  executeSmartPayDemo,
+  formatSmartPayResult,
+  paymentPlanInputSchema,
+  executePaymentPlan,
+  executePaymentPlanDemo,
+  formatPaymentPlanResult,
   // Types
   type GetBalanceInput,
   type GetAllBalancesInput,
@@ -70,6 +80,12 @@ export {
   type GetBridgeFeeInput,
   type BridgeInput,
   type BridgeOptions,
+  type SmartPayInput,
+  type SmartPayResult,
+  type SmartPayStep,
+  type PaymentPlanInput,
+  type PaymentPlanResult,
+  type UnifiedMcpConfig,
 } from './tools/index.js'
 
 // Types

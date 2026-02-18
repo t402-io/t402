@@ -7,6 +7,7 @@
 
 import { randomBytes } from "crypto";
 import { keccak_256 } from "@noble/hashes/sha3";
+import { sha256 as nobleSha256 } from "@noble/hashes/sha2";
 import { secp256k1 } from "@noble/curves/secp256k1";
 import { ed25519 } from "@noble/curves/ed25519";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
@@ -245,13 +246,16 @@ export function validateSIWxMessage(
  * @param chainId - CAIP-2 chain ID (e.g., "eip155:1", "solana:mainnet", "stellar:pubnet")
  * @returns The signature scheme to use for verification
  */
-function detectSignatureScheme(chainId: string): "evm" | "ed25519" {
+function detectSignatureScheme(chainId: string): "evm" | "ed25519" | "tron" {
   const namespace = chainId.split(":")[0];
 
   switch (namespace) {
     case "solana":
     case "stellar":
+    case "ton":
       return "ed25519";
+    case "tron":
+      return "tron";
     case "eip155":
     default:
       return "evm";
@@ -351,9 +355,79 @@ function decodeBase58(str: string): Uint8Array {
 }
 
 /**
+ * Encodes bytes to base58 string.
+ *
+ * @param bytes - Bytes to encode
+ * @returns Base58 encoded string
+ */
+function encodeBase58(bytes: Uint8Array): string {
+  const ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+
+  if (bytes.length === 0) return "";
+
+  // Count leading zeros
+  let leadingZeros = 0;
+  for (const b of bytes) {
+    if (b !== 0) break;
+    leadingZeros++;
+  }
+
+  // Convert to base58
+  const digits: number[] = [0];
+  for (const b of bytes) {
+    let carry = b;
+    for (let j = 0; j < digits.length; j++) {
+      carry += digits[j] * 256;
+      digits[j] = carry % 58;
+      carry = Math.floor(carry / 58);
+    }
+    while (carry > 0) {
+      digits.push(carry % 58);
+      carry = Math.floor(carry / 58);
+    }
+  }
+
+  let result = ALPHABET[0].repeat(leadingZeros);
+  for (let i = digits.length - 1; i >= 0; i--) {
+    result += ALPHABET[digits[i]];
+  }
+
+  return result;
+}
+
+/**
+ * Converts an EVM hex address to a TRON base58check address.
+ *
+ * TRON addresses are the same as EVM addresses but with a 0x41 prefix
+ * instead of 0x, encoded in base58check format.
+ *
+ * @param evmAddress - EVM address with 0x prefix
+ * @returns TRON base58check address starting with 'T'
+ */
+function evmAddressToTron(evmAddress: string): string {
+  const addr = evmAddress.toLowerCase().replace("0x", "");
+  // TRON address = 0x41 + 20-byte address
+  const addressBytes = hexToBytes("41" + addr);
+
+  // Double SHA-256 for base58check checksum
+  const hash1 = nobleSha256(addressBytes);
+  const hash2 = nobleSha256(hash1);
+  const checksum = hash2.slice(0, 4);
+
+  // Concatenate address + checksum
+  const fullAddress = new Uint8Array(addressBytes.length + 4);
+  fullAddress.set(addressBytes, 0);
+  fullAddress.set(checksum, addressBytes.length);
+
+  return encodeBase58(fullAddress);
+}
+
+
+/**
  * Verifies a SIWx signature.
  *
- * Supports EIP-191 personal signatures for EVM chains, Ed25519 for Solana/Stellar,
+ * Supports EIP-191 personal signatures for EVM chains, Ed25519 for Solana/Stellar/TON,
+ * TRON secp256k1 with base58check addresses,
  * and can optionally verify smart wallet signatures via EIP-1271/6492.
  *
  * @param message - The SIWx payload to verify
@@ -384,7 +458,7 @@ export async function verifySIWxSignature(
     const scheme = detectSignatureScheme(message.chainId);
 
     if (scheme === "ed25519") {
-      // Ed25519 verification for Solana and Stellar
+      // Ed25519 verification for Solana, Stellar, and TON
       // For Ed25519, the address IS the public key, so we verify directly
       const isValid = verifyEd25519Signature(messageText, signature, message.address);
 
@@ -395,6 +469,25 @@ export async function verifySIWxSignature(
       return {
         valid: false,
         error: "Ed25519 signature verification failed",
+      };
+    }
+
+    if (scheme === "tron") {
+      // TRON uses secp256k1 (same as EVM) but with base58check address format
+      const messageHash = hashMessage(messageText);
+      const recoveredEvmAddress = recoverAddress(messageHash, signature);
+
+      // Convert recovered EVM address to TRON base58check address
+      const recoveredTronAddress = evmAddressToTron(recoveredEvmAddress);
+
+      if (recoveredTronAddress === message.address) {
+        return { valid: true, address: message.address };
+      }
+
+      return {
+        valid: false,
+        address: recoveredTronAddress,
+        error: `Signature mismatch: expected ${message.address}, recovered ${recoveredTronAddress}`,
       };
     }
 

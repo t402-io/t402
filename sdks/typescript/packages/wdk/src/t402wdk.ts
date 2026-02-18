@@ -35,6 +35,7 @@ import type {
   SwapResult,
   SwapParams,
 } from './types.js'
+import { encryptSeed, decryptSeed, type EncryptedSeed } from './secret.js'
 import {
   WDKTonSignerAdapter,
   createWDKTonSigner,
@@ -327,6 +328,37 @@ export class T402WDK {
     instance._initializationError = null
 
     return instance
+  }
+
+  /**
+   * Create a T402WDK instance from an encrypted seed.
+   *
+   * @example
+   * ```typescript
+   * const encrypted = JSON.parse(fs.readFileSync('seed.enc.json', 'utf8'))
+   * const wdk = await T402WDK.fromEncryptedSeed(encrypted, 'my-password', {
+   *   arbitrum: 'https://arb1.arbitrum.io/rpc',
+   * })
+   * ```
+   */
+  static async fromEncryptedSeed(
+    encrypted: EncryptedSeed,
+    password: string,
+    config?: T402WDKConfig,
+    options?: T402WDKOptions,
+  ): Promise<T402WDK> {
+    const seedPhrase = await decryptSeed(encrypted, password)
+    return new T402WDK(seedPhrase, config, options)
+  }
+
+  /**
+   * Encrypt the current seed phrase for secure storage.
+   *
+   * @param password - Password to encrypt with
+   * @returns Encrypted seed data suitable for JSON serialization
+   */
+  async encryptSeed(password: string): Promise<EncryptedSeed> {
+    return encryptSeed(this._seedPhrase, password)
   }
 
   /**

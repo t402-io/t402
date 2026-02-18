@@ -1,0 +1,497 @@
+# T402 Protocol
+
+> Open-source HTTP-native payment protocol for USDT/USDT0 stablecoins.
+
+## Overview
+
+T402 is a payment protocol that uses HTTP 402 status codes. Flow: client requests resource -> server responds 402 + PaymentRequirements -> client signs off-chain -> resubmits with signed PAYMENT-SIGNATURE header -> server verifies via facilitator and serves resource.
+
+Architecture: Transport (HTTP, MCP, A2A) x Scheme (exact, upto) x Network (EVM, Solana, TON, TRON, etc.)
+
+Protocol version: 2 (current). Version 1 is legacy.
+
+## Scheme Types
+
+- exact: Fixed-amount transfers (EIP-3009 on EVM, SPL on Solana, TRC20 on TRON, Jettons on TON)
+- upto: Up-to-amount authorization (EIP-2612 on EVM) [draft]
+- exact-direct: On-chain transfer proof (NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos)
+
+## Supported Networks (CAIP-2)
+
+### EVM Networks
+| Name | CAIP-2 | Chain ID |
+|------|--------|----------|
+| Ethereum | eip155:1 | 1 |
+| Base | eip155:8453 | 8453 |
+| Arbitrum | eip155:42161 | 42161 |
+| Optimism | eip155:10 | 10 |
+| Polygon | eip155:137 | 137 |
+| Avalanche | eip155:43114 | 43114 |
+| Ink | eip155:57073 | 57073 |
+| Berachain | eip155:80094 | 80094 |
+| Unichain | eip155:130 | 130 |
+
+### Non-EVM Networks
+| Name | CAIP-2 |
+|------|--------|
+| Solana (mainnet) | solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp |
+| Solana (devnet) | solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1 |
+| TON (mainnet) | ton:mainnet |
+| TON (testnet) | ton:testnet |
+| TRON (mainnet) | tron:mainnet |
+| TRON (shasta) | tron:shasta |
+| NEAR | near:mainnet |
+| Aptos | aptos:mainnet |
+| Cosmos (Noble) | cosmos:cosmoshub-4 |
+| Stacks | stacks:mainnet |
+| Polkadot | polkadot:91b171bb158e2d3848fa23a9f1c25182 |
+| Tezos | tezos:NetXdQprcVkpaWU |
+
+### Token Addresses (EVM)
+
+**USDT0** (Tether omnichain, EIP-3009):
+| Network | Address |
+|---------|---------|
+| Ethereum | 0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee |
+| Arbitrum | 0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9 |
+| Ink | 0x0200C29006150606B650577BBE7B6248F58470c1 |
+| Berachain | 0x779Ded0c9e1022225f8E0630b35a9b54bE713736 |
+| Unichain | 0x9151434b16b9763660705744891fA906F660EcC5 |
+
+**USDC** (Circle):
+| Network | Address |
+|---------|---------|
+| Ethereum | 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 |
+| Arbitrum | 0xaf88d065e77c8cC2239327C5EDb3A432268e5831 |
+| Base | 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913 |
+| Polygon | 0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359 |
+
+## SDKs
+
+- TypeScript (v2.5.0): @t402/core, @t402/evm, @t402/svm, @t402/ton, @t402/tron, @t402/near, @t402/aptos, @t402/tezos, @t402/polkadot, @t402/stacks, @t402/cosmos + HTTP frameworks (@t402/express, @t402/hono, @t402/fastify, @t402/next) + AI (@t402/mcp)
+- Go (v1.9.0): github.com/t402-io/t402/sdks/go
+- Python (v1.10.1): t402 on PyPI
+- Java (v1.10.0): io.t402:t402-sdk on Maven Central
+
+## Transport Types
+
+- HTTP: 402 status code with PAYMENT-SIGNATURE / PAYMENT-REQUIRED / PAYMENT-RESPONSE headers
+- MCP: Model Context Protocol for AI agents (11 tools)
+- A2A: Agent-to-Agent protocol
+
+## PaymentRequired (402 Response)
+
+When a server requires payment, it responds with HTTP 402 and a JSON body:
+
+```json
+{
+  "t402Version": 2,
+  "error": "PAYMENT-SIGNATURE header is required",
+  "resource": {
+    "url": "https://api.example.com/premium-data",
+    "description": "Access to premium market data",
+    "mimeType": "application/json"
+  },
+  "accepts": [
+    {
+      "scheme": "exact",
+      "network": "eip155:8453",
+      "amount": "10000",
+      "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "payTo": "0x209693Bc6afc0C5328bA36FaF03C514EF312287C",
+      "maxTimeoutSeconds": 60,
+      "extra": {
+        "name": "USDC",
+        "version": "2"
+      }
+    }
+  ],
+  "extensions": {}
+}
+```
+
+### PaymentRequired Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| t402Version | number | Yes | Protocol version (must be 2) |
+| error | string | No | Human-readable error message |
+| resource | object | Yes | ResourceInfo describing the protected resource |
+| accepts | array | Yes | Array of PaymentRequirements defining acceptable payment methods |
+| extensions | object | No | Protocol extensions data |
+
+### PaymentRequirements Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| scheme | string | Yes | Payment scheme identifier (e.g., "exact") |
+| network | string | Yes | Blockchain network in CAIP-2 format (e.g., "eip155:8453") |
+| amount | string | Yes | Required payment amount in atomic token units |
+| asset | string | Yes | Token contract address |
+| payTo | string | Yes | Recipient wallet address |
+| maxTimeoutSeconds | number | Yes | Maximum time allowed for payment completion |
+| extra | object | No | Scheme-specific additional information |
+
+### ResourceInfo Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| url | string | Yes | URL of the protected resource |
+| description | string | No | Human-readable description |
+| mimeType | string | No | MIME type of the expected response |
+
+## PaymentPayload (Client Submission)
+
+The client sends a signed payment authorization:
+
+```json
+{
+  "t402Version": 2,
+  "resource": {
+    "url": "https://api.example.com/premium-data",
+    "description": "Access to premium market data",
+    "mimeType": "application/json"
+  },
+  "accepted": {
+    "scheme": "exact",
+    "network": "eip155:8453",
+    "amount": "10000",
+    "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "payTo": "0x209693Bc6afc0C5328bA36FaF03C514EF312287C",
+    "maxTimeoutSeconds": 60,
+    "extra": { "name": "USDC", "version": "2" }
+  },
+  "payload": {
+    "signature": "0x2d6a...",
+    "authorization": {
+      "from": "0x857b06519E91e3A54538791bDbb0E22373e36b66",
+      "to": "0x209693Bc6afc0C5328bA36FaF03C514EF312287C",
+      "value": "10000",
+      "validAfter": "1740672089",
+      "validBefore": "1740672154",
+      "nonce": "0xf374..."
+    }
+  },
+  "extensions": {}
+}
+```
+
+### PaymentPayload Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| t402Version | number | Yes | Protocol version identifier |
+| resource | object | No | ResourceInfo for the resource being accessed |
+| accepted | object | Yes | PaymentRequirements chosen by the client |
+| payload | object | Yes | Scheme-specific payment data (e.g., EIP-3009 signature + authorization) |
+| extensions | object | No | Protocol extensions data |
+
+## Facilitator API
+
+The facilitator handles payment verification and blockchain settlement.
+
+### POST /verify
+
+Verifies a payment authorization without executing the transaction.
+
+**Request:**
+```json
+{
+  "paymentPayload": { /* PaymentPayload */ },
+  "paymentRequirements": { /* PaymentRequirements */ }
+}
+```
+
+**Response:**
+```json
+{
+  "isValid": true,
+  "payer": "0x857b06519E91e3A54538791bDbb0E22373e36b66"
+}
+```
+
+### POST /settle
+
+Executes a verified payment on the blockchain.
+
+**Request:** Same as /verify
+
+**Response:**
+```json
+{
+  "success": true,
+  "payer": "0x857b06519E91e3A54538791bDbb0E22373e36b66",
+  "transaction": "0x1234...",
+  "network": "eip155:8453"
+}
+```
+
+### GET /supported
+
+Returns supported payment schemes, networks, and signer addresses.
+
+**Response:**
+```json
+{
+  "kinds": [
+    { "t402Version": 2, "scheme": "exact", "network": "eip155:8453" },
+    { "t402Version": 2, "scheme": "exact", "network": "eip155:42161" }
+  ],
+  "extensions": [],
+  "signers": {
+    "eip155:*": ["0x1234..."],
+    "solana:*": ["CKPKJWNdJEqa81x7CkZ14BVPiY6y16Sxs7owznqtWYp5"]
+  }
+}
+```
+
+## SDK Code Examples
+
+### TypeScript - Client
+
+```typescript
+import { ExactEVMClient } from '@t402/evm/exact/client';
+import { createT402HTTPClient } from '@t402/fetch';
+
+const client = createT402HTTPClient({
+  signers: [{
+    scheme: 'exact',
+    network: 'eip155:8453',
+    signer: new ExactEVMClient({ privateKey: '0x...' })
+  }],
+  facilitatorUrl: 'https://facilitator.t402.io'
+});
+
+const response = await client.fetch('https://api.example.com/premium');
+```
+
+### TypeScript - Server (Express)
+
+```typescript
+import express from 'express';
+import { createT402Middleware } from '@t402/express';
+import { ExactEVMServer } from '@t402/evm/exact/server';
+
+const app = express();
+
+const t402 = createT402Middleware({
+  mechanisms: [new ExactEVMServer()],
+  facilitatorUrl: 'https://facilitator.t402.io',
+  price: { amount: '10000', currency: 'USDC' },
+  payTo: '0xYourAddress',
+  networks: ['eip155:8453'],
+});
+
+app.get('/premium', t402, (req, res) => {
+  res.json({ data: 'premium content' });
+});
+```
+
+### Go - Client
+
+```go
+package main
+
+import (
+    "github.com/t402-io/t402/sdks/go/client"
+    "github.com/t402-io/t402/sdks/go/mechanisms/evm"
+)
+
+func main() {
+    signer, _ := evm.NewExactEVMClient("0xPrivateKey")
+    c := client.New(
+        client.WithSigner("exact", "eip155:8453", signer),
+        client.WithFacilitator("https://facilitator.t402.io"),
+    )
+    resp, _ := c.Get("https://api.example.com/premium")
+}
+```
+
+### Go - Server
+
+```go
+package main
+
+import (
+    "github.com/t402-io/t402/sdks/go/server"
+    "github.com/t402-io/t402/sdks/go/mechanisms/evm"
+)
+
+func main() {
+    srv := server.New(
+        server.WithMechanism(evm.NewExactEVMServer()),
+        server.WithFacilitator("https://facilitator.t402.io"),
+        server.WithPrice("10000", "USDC"),
+        server.WithPayTo("0xYourAddress"),
+        server.WithNetworks("eip155:8453"),
+    )
+    http.Handle("/premium", srv.Protect(handler))
+}
+```
+
+### Python - Client
+
+```python
+from t402 import T402Client
+
+client = T402Client(
+    private_key="0x...",
+    facilitator_url="https://facilitator.t402.io",
+    network="eip155:8453"
+)
+response = client.get("https://api.example.com/premium")
+```
+
+### Python - Server (FastAPI)
+
+```python
+from fastapi import FastAPI
+from t402.fastapi import require_payment
+
+app = FastAPI()
+
+@app.get("/premium")
+@require_payment(
+    amount="10000",
+    currency="USDC",
+    pay_to="0xYourAddress",
+    network="eip155:8453",
+    facilitator_url="https://facilitator.t402.io"
+)
+async def premium():
+    return {"data": "premium content"}
+```
+
+### Java - Client
+
+```java
+import io.t402.sdk.client.T402Client;
+
+T402Client client = T402Client.builder()
+    .privateKey("0x...")
+    .facilitatorUrl("https://facilitator.t402.io")
+    .network("eip155:8453")
+    .build();
+
+HttpResponse response = client.get("https://api.example.com/premium");
+```
+
+### Java - Server (Spring)
+
+```java
+import io.t402.sdk.spring.T402Filter;
+
+@Configuration
+public class T402Config {
+    @Bean
+    public T402Filter t402Filter() {
+        return T402Filter.builder()
+            .facilitatorUrl("https://facilitator.t402.io")
+            .amount("10000")
+            .currency("USDC")
+            .payTo("0xYourAddress")
+            .network("eip155:8453")
+            .build();
+    }
+}
+```
+
+## Extensions
+
+Extensions enable modular optional functionality beyond core payment mechanics. Servers advertise extensions in the `extensions` field of PaymentRequired, and clients echo them back in PaymentPayload.
+
+### Bazaar (Resource Discovery)
+
+Extension key: `bazaar`
+
+Enables facilitators to catalog and index t402-enabled resources. Servers declare input/output schemas for their endpoints, allowing automatic API discovery.
+
+Two variants:
+- QueryDiscoveryExtension: For GET/HEAD/DELETE requests (query parameters)
+- BodyDiscoveryExtension: For POST/PUT/PATCH requests (request body)
+
+### Sign-In-With-X (SIWx)
+
+Extension key: `siwx`
+
+CAIP-122 compliant wallet-based identity assertions. Allows clients to prove wallet ownership for authenticated pricing.
+
+Supported signature schemes: eip191, eip712, eip1271, eip6492, siws (Solana), sep10 (Stellar).
+
+### Payment Identifier
+
+Extension key: `paymentId`
+
+Attach unique identifiers for correlation, idempotency, and audit trails. Servers declare an ID in requirements, clients can append a client-side ID.
+
+## WDK (Wallet Development Kit)
+
+@t402/wdk integrates with the Tether WDK for multi-chain wallet management:
+- Multi-chain support: EVM, TON, Solana, TRON
+- Cross-chain bridging via LayerZero OFT (USDT0)
+- Token swaps via Velora protocol
+- Balance aggregation across chains
+- T402-compatible signer generation
+
+```typescript
+import { T402WDK } from '@t402/wdk';
+
+const wdk = new T402WDK(seedPhrase, {
+  arbitrum: 'https://arb1.arbitrum.io/rpc',
+  base: 'https://mainnet.base.org',
+});
+
+const signer = await wdk.getSigner('arbitrum');
+const signers = await wdk.getAllSigners();
+```
+
+## MCP Tools
+
+The @t402/mcp package provides 11 tools for AI agents:
+
+### Base Tools (6)
+| Tool | Description |
+|------|-------------|
+| t402/getBalance | Get token balances for a wallet on a specific network |
+| t402/getAllBalances | Get balances across all supported networks |
+| t402/pay | Execute a stablecoin payment (USDC, USDT, USDT0) |
+| t402/payGasless | Execute a gasless payment using ERC-4337 |
+| t402/getBridgeFee | Get fee quote for bridging USDT0 via LayerZero |
+| t402/bridge | Bridge USDT0 between chains |
+
+### WDK Tools (5, requires seed phrase)
+| Tool | Description |
+|------|-------------|
+| wdk/getWallet | Get WDK wallet info and supported chains |
+| wdk/getBalances | Get multi-chain token balances from WDK wallet |
+| wdk/transfer | Send stablecoins from WDK wallet |
+| wdk/swap | Swap tokens using Velora protocol |
+| t402/autoPay | Smart payment orchestrator - fetch URL, handle 402, pay, return content |
+
+## Security Considerations
+
+- Private keys never leave the client. The protocol uses off-chain signatures (EIP-3009, EIP-2612) that authorize specific transfers without exposing keys.
+- Always verify payment before serving resources. Validate amount, payTo, and deadline fields.
+- EIP-3009 nonces prevent replay attacks at the smart contract level.
+- Time constraints (validAfter/validBefore) limit authorization lifetime.
+- Use facilitator verification (POST /verify) before settlement for defense-in-depth.
+- Report vulnerabilities via GitHub Security Advisories or security@t402.io.
+
+## Error Codes
+
+Error codes follow the format T402-CXXX:
+- T402-1xxx: Client errors (invalid input, malformed requests)
+- T402-2xxx: Server errors (internal failures)
+- T402-3xxx: Facilitator errors (verification/settlement failures)
+- T402-4xxx: Chain errors (blockchain-specific)
+- T402-5xxx: Bridge errors (cross-chain operations)
+
+## Links
+
+- [Specification](https://github.com/t402-io/t402/blob/main/specs/t402-specification-v2.md)
+- [Documentation](https://docs.t402.io)
+- [Website](https://t402.io)
+- [GitHub](https://github.com/t402-io/t402)
+- [npm](https://www.npmjs.com/org/t402)
+- [PyPI](https://pypi.org/project/t402/)
+- [Maven Central](https://central.sonatype.com/artifact/io.t402/t402-sdk)

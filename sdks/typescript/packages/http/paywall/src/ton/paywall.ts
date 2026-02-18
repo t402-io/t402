@@ -1,6 +1,7 @@
 import type { PaymentRequired, PaywallTheme } from "../types";
 import { getTonTemplate } from "./template-loader";
 import { generateThemeScript } from "../themeUtils";
+import { getBundledWallets, type TonWalletInfo } from "./wallets";
 
 /**
  * Escapes a string for safe injection into JavaScript string literals
@@ -29,6 +30,12 @@ interface TonPaywallOptions {
   theme?: PaywallTheme;
   deliveryMode?: "cdn" | "inline";
   cdnBaseUrl?: string;
+  /**
+   * TON Connect wallet list to embed in the paywall HTML.
+   * If not provided, the bundled snapshot is used.
+   * Use `fetchTonWallets()` to get a fresh list at server start.
+   */
+  tonWallets?: TonWalletInfo[];
 }
 
 /**
@@ -42,6 +49,7 @@ interface TonPaywallOptions {
  * @param options.appName - The name of the application to display in the wallet connection modal
  * @param options.appLogo - The logo of the application to display in the wallet connection modal
  * @param options.tonConnectManifestUrl - Optional TonConnect manifest URL
+ * @param options.tonWallets - Optional dynamic wallet list (falls back to bundled)
  * @returns HTML string for the paywall page
  */
 export function getTonPaywallHtml(options: TonPaywallOptions): string {
@@ -61,6 +69,7 @@ export function getTonPaywallHtml(options: TonPaywallOptions): string {
     appLogo,
     tonConnectManifestUrl,
     theme,
+    tonWallets,
   } = options;
 
   const logOnTestnet = testnet
@@ -69,6 +78,9 @@ export function getTonPaywallHtml(options: TonPaywallOptions): string {
 
   const manifestUrl = tonConnectManifestUrl || "https://t402.io/tonconnect-manifest.json";
   const themeScript = generateThemeScript(theme);
+
+  // Embed wallet list for client-side wallet selection UI
+  const walletList = tonWallets ?? getBundledWallets();
 
   const configScript = `
   <script>
@@ -83,6 +95,7 @@ export function getTonPaywallHtml(options: TonPaywallOptions): string {
       appName: "${escapeString(appName || "")}",
       appLogo: "${escapeString(appLogo || "")}",
       tonConnectManifestUrl: "${escapeString(manifestUrl)}",
+      tonWallets: ${JSON.stringify(walletList)},
     };
     ${logOnTestnet}
   </script>`;

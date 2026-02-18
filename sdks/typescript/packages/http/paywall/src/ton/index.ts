@@ -6,6 +6,16 @@ import type {
 } from "../types";
 import { getTonPaywallHtml } from "./paywall";
 
+// Re-export wallet utilities for server-side use
+export {
+  fetchTonWallets,
+  getBundledWallets,
+  filterWalletsByPlatform,
+  generateWalletDeepLink,
+  resetWalletsCache,
+} from "./wallets";
+export type { TonWalletInfo, TonWalletPlatform, TonWalletBridge } from "./wallets";
+
 /**
  * TON paywall handler that supports TON-based networks (CAIP-2 format)
  */
