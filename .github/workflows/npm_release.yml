@@ -39,6 +39,7 @@ on:
           - wdk-gasless
           - wdk-bridge
           - wdk-multisig
+          - wdk-protocol
           - a2a
           - mcp
           - cli
@@ -146,6 +147,8 @@ jobs:
             path: packages/wdk-bridge
           - name: wdk-multisig
             path: packages/wdk-multisig
+          - name: wdk-protocol
+            path: packages/wdk-protocol
           # Transport packages
           - name: a2a
             path: packages/a2a

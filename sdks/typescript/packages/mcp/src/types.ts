@@ -148,6 +148,10 @@ export interface McpServerConfig {
   paymasterUrl?: string
   /** Bundler URL for ERC-4337 */
   bundlerUrl?: string
+  /** WDK seed phrase (enables WDK wallet tools when set) */
+  seedPhrase?: string
+  /** WDK chains to support (e.g., ['ethereum', 'arbitrum']) */
+  wdkChains?: string[]
 }
 
 /**

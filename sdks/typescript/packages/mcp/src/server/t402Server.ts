@@ -8,6 +8,7 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprot
 import type { McpServerConfig, SupportedNetwork } from '../types.js'
 import {
   TOOL_DEFINITIONS,
+  WDK_TOOL_DEFINITIONS,
   executeGetBalance,
   formatBalanceResult,
   getBalanceInputSchema,
@@ -26,16 +27,40 @@ import {
   executeBridge,
   formatBridgeResult,
   bridgeInputSchema,
+  // WDK tools
+  wdkGetWalletInputSchema,
+  executeWdkGetWallet,
+  executeWdkGetWalletDemo,
+  formatWdkWalletResult,
+  wdkGetBalancesInputSchema,
+  executeWdkGetBalances,
+  executeWdkGetBalancesDemo,
+  formatWdkBalancesResult,
+  wdkTransferInputSchema,
+  executeWdkTransfer,
+  executeWdkTransferDemo,
+  formatWdkTransferResult,
+  wdkSwapInputSchema,
+  executeWdkSwap,
+  executeWdkSwapDemo,
+  formatWdkSwapResult,
+  autoPayInputSchema,
+  executeAutoPay,
+  executeAutoPayDemo,
+  formatAutoPayResult,
 } from '../tools/index.js'
+import type { T402WDK } from '@t402/wdk'
 
 /**
  * t402 MCP Server
  *
  * Provides payment tools for AI agents via the Model Context Protocol.
+ * When a WDK seed phrase is configured, additional wallet management tools are available.
  */
 export class T402McpServer {
   private server: Server
   private config: McpServerConfig
+  private wdk: T402WDK | null = null
 
   constructor(config: McpServerConfig = {}) {
     this.config = config
@@ -55,13 +80,46 @@ export class T402McpServer {
   }
 
   /**
+   * Initialize the WDK instance from seed phrase
+   */
+  async initWdk(): Promise<void> {
+    if (!this.config.seedPhrase) return
+
+    try {
+      const { T402WDK } = await import('@t402/wdk')
+      const rpcUrls: Record<string, string> = {}
+
+      if (this.config.rpcUrls) {
+        for (const [network, url] of Object.entries(this.config.rpcUrls)) {
+          if (url) rpcUrls[network] = url
+        }
+      }
+
+      this.wdk = new T402WDK(this.config.seedPhrase, rpcUrls)
+    } catch {
+      console.error('Warning: Failed to initialize WDK. WDK tools will not be available.')
+    }
+  }
+
+  /**
+   * Get all tool definitions (base + WDK if configured)
+   */
+  private getToolDefinitions() {
+    const tools = { ...TOOL_DEFINITIONS }
+    if (this.wdk || this.config.demoMode) {
+      Object.assign(tools, WDK_TOOL_DEFINITIONS)
+    }
+    return tools
+  }
+
+  /**
    * Set up MCP request handlers
    */
   private setupHandlers(): void {
     // List available tools
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
       return {
-        tools: Object.values(TOOL_DEFINITIONS),
+        tools: Object.values(this.getToolDefinitions()),
       }
     })
 
@@ -88,6 +146,22 @@ export class T402McpServer {
 
           case 't402/bridge':
             return await this.handleBridge(args)
+
+          // WDK tools
+          case 'wdk/getWallet':
+            return await this.handleWdkGetWallet(args)
+
+          case 'wdk/getBalances':
+            return await this.handleWdkGetBalances(args)
+
+          case 'wdk/transfer':
+            return await this.handleWdkTransfer(args)
+
+          case 'wdk/swap':
+            return await this.handleWdkSwap(args)
+
+          case 't402/autoPay':
+            return await this.handleAutoPay(args)
 
           default:
             throw new Error(`Unknown tool: ${name}`)
@@ -250,10 +324,90 @@ export class T402McpServer {
     }
   }
 
+  // ---- WDK Tool Handlers ----
+
+  /**
+   * Handle wdk/getWallet
+   */
+  private async handleWdkGetWallet(args: unknown) {
+    wdkGetWalletInputSchema.parse(args)
+
+    const result = this.config.demoMode || !this.wdk
+      ? executeWdkGetWalletDemo()
+      : await executeWdkGetWallet({}, this.wdk)
+
+    return {
+      content: [{ type: 'text' as const, text: formatWdkWalletResult(result) }],
+    }
+  }
+
+  /**
+   * Handle wdk/getBalances
+   */
+  private async handleWdkGetBalances(args: unknown) {
+    const input = wdkGetBalancesInputSchema.parse(args)
+
+    const result = this.config.demoMode || !this.wdk
+      ? executeWdkGetBalancesDemo()
+      : await executeWdkGetBalances(input, this.wdk)
+
+    return {
+      content: [{ type: 'text' as const, text: formatWdkBalancesResult(result) }],
+    }
+  }
+
+  /**
+   * Handle wdk/transfer
+   */
+  private async handleWdkTransfer(args: unknown) {
+    const input = wdkTransferInputSchema.parse(args)
+
+    const result = this.config.demoMode || !this.wdk
+      ? executeWdkTransferDemo(input)
+      : await executeWdkTransfer(input, this.wdk)
+
+    return {
+      content: [{ type: 'text' as const, text: formatWdkTransferResult(result) }],
+    }
+  }
+
+  /**
+   * Handle wdk/swap
+   */
+  private async handleWdkSwap(args: unknown) {
+    const input = wdkSwapInputSchema.parse(args)
+
+    const result = this.config.demoMode || !this.wdk
+      ? executeWdkSwapDemo(input)
+      : await executeWdkSwap(input, this.wdk)
+
+    return {
+      content: [{ type: 'text' as const, text: formatWdkSwapResult(result) }],
+    }
+  }
+
+  /**
+   * Handle t402/autoPay
+   */
+  private async handleAutoPay(args: unknown) {
+    const input = autoPayInputSchema.parse(args)
+
+    const result = this.config.demoMode || !this.wdk
+      ? executeAutoPayDemo(input)
+      : await executeAutoPay(input, this.wdk)
+
+    return {
+      content: [{ type: 'text' as const, text: formatAutoPayResult(result) }],
+    }
+  }
+
   /**
    * Start the server using stdio transport
    */
   async run(): Promise<void> {
+    // Initialize WDK if seed phrase is configured
+    await this.initWdk()
+
     const transport = new StdioServerTransport()
     await this.server.connect(transport)
     console.error('t402 MCP Server running on stdio')
@@ -289,6 +443,14 @@ export function loadConfigFromEnv(): McpServerConfig {
   }
   if (process.env.T402_PAYMASTER_URL) {
     config.paymasterUrl = process.env.T402_PAYMASTER_URL
+  }
+
+  // WDK configuration
+  if (process.env.T402_WDK_SEED_PHRASE) {
+    config.seedPhrase = process.env.T402_WDK_SEED_PHRASE
+  }
+  if (process.env.T402_WDK_CHAINS) {
+    config.wdkChains = process.env.T402_WDK_CHAINS.split(',').map((c) => c.trim())
   }
 
   // Custom RPC URLs

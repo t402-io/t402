@@ -52,6 +52,8 @@
     "@modelcontextprotocol/sdk": "^1.26.0",
     "@t402/core": "workspace:*",
     "@t402/evm": "workspace:*",
+    "@t402/wdk": "workspace:*",
+    "@t402/wdk-protocol": "workspace:*",
     "zod": "^3.24.2"
   },
   "peerDependencies": {

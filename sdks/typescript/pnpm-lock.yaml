@@ -948,6 +948,12 @@ importers:
       '@t402/evm':
         specifier: workspace:*
         version: link:../mechanisms/evm
+      '@t402/wdk':
+        specifier: workspace:*
+        version: link:../wdk
+      '@t402/wdk-protocol':
+        specifier: workspace:*
+        version: link:../wdk-protocol
       viem:
         specifier: ^2.44.2
         version: 2.44.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)
@@ -1828,6 +1834,43 @@ importers:
       vite:
         specifier: '>=6.3.6'
         version: 7.3.1(@types/node@25.2.2)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.16.9)(tsx@4.21.0)(yaml@2.8.1)
+      vite-tsconfig-paths:
+        specifier: ^6.1.0
+        version: 6.1.0(typescript@5.9.3)(vite@7.3.1(@types/node@25.2.2)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.16.9)(tsx@4.21.0)(yaml@2.8.1))
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.2.2)(happy-dom@20.6.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jiti@2.6.1)(jsdom@28.0.0(@noble/hashes@2.0.1))(lightningcss@1.30.2)(terser@5.16.9)(tsx@4.21.0)(yaml@2.8.1)
+
+  packages/wdk-protocol:
+    dependencies:
+      '@t402/core':
+        specifier: workspace:*
+        version: link:../core
+      '@t402/evm':
+        specifier: workspace:*
+        version: link:../mechanisms/evm
+      '@t402/wdk':
+        specifier: workspace:*
+        version: link:../wdk
+      '@tetherto/wdk':
+        specifier: '>=1.0.0-beta.0'
+        version: 1.0.0-beta.5(bare-tcp@2.2.2(bare-abort-controller@1.0.0)(bare-buffer@3.4.2))
+      viem:
+        specifier: ^2.44.2
+        version: 2.45.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
+    devDependencies:
+      '@types/node':
+        specifier: ^25.2.2
+        version: 25.2.2
+      prettier:
+        specifier: 3.8.1
+        version: 3.8.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.1)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
       vite-tsconfig-paths:
         specifier: ^6.1.0
         version: 6.1.0(typescript@5.9.3)(vite@7.3.1(@types/node@25.2.2)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.16.9)(tsx@4.21.0)(yaml@2.8.1))
@@ -15755,7 +15798,7 @@ snapshots:
       abitype: 1.2.3(typescript@5.9.3)(zod@4.3.6)
       ethers: 6.14.4(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       semver: 7.7.4
-      viem: 2.44.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
+      viem: 2.45.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
     optionalDependencies:
       '@noble/curves': 1.9.7
       '@peculiar/asn1-schema': 2.6.0
@@ -15772,7 +15815,7 @@ snapshots:
       '@safe-global/types-kit': 2.0.1(typescript@5.9.3)(zod@4.3.6)
       '@wdk-safe-global/protocol-kit': 6.1.3(bufferutil@4.0.9)(ethers@6.14.4(bufferutil@4.0.9)(utf-8-validate@5.0.10))(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
       semver: 7.7.4
-      viem: 2.44.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
+      viem: 2.45.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
     transitivePeerDependencies:
       - bufferutil
       - debug

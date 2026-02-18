@@ -9,6 +9,7 @@ packages:
   - packages/wdk-gasless
   - packages/wdk-multisig
   - packages/wdk-bridge
+  - packages/wdk-protocol
   - packages/cli
   - packages/legacy/*
   - examples/facilitator
