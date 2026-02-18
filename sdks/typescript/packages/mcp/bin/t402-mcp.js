@@ -34,14 +34,18 @@ async function main() {
   console.error(`  Bundler URL: ${config.bundlerUrl ? 'configured' : 'not set'}`)
   console.error(`  Paymaster URL: ${config.paymasterUrl ? 'configured' : 'not set'}`)
   console.error(`  WDK Seed Phrase: ${config.seedPhrase ? 'configured' : 'not set'}`)
-  console.error(`  WDK Chains: ${config.wdkChains ? config.wdkChains.join(', ') : 'default (ethereum, arbitrum, base)'}`)
+  console.error(
+    `  WDK Chains: ${config.wdkChains ? config.wdkChains.join(', ') : 'default (ethereum, arbitrum, base)'}`,
+  )
 
   if (config.rpcUrls) {
     console.error(`  Custom RPC URLs: ${Object.keys(config.rpcUrls).join(', ')}`)
   }
 
   if (config.seedPhrase || config.demoMode) {
-    console.error('  WDK Tools: enabled (wdk/getWallet, wdk/getBalances, wdk/transfer, wdk/swap, t402/autoPay)')
+    console.error(
+      '  WDK Tools: enabled (wdk/getWallet, wdk/getBalances, wdk/transfer, wdk/swap, t402/autoPay)',
+    )
   } else {
     console.error('  WDK Tools: disabled (set T402_WDK_SEED_PHRASE to enable)')
   }
@@ -49,7 +53,9 @@ async function main() {
   if (!config.privateKey && !config.demoMode && !config.seedPhrase) {
     console.error('')
     console.error('Warning: No private key or seed phrase configured.')
-    console.error('Set T402_PRIVATE_KEY or T402_WDK_SEED_PHRASE env var, or enable T402_DEMO_MODE=true')
+    console.error(
+      'Set T402_PRIVATE_KEY or T402_WDK_SEED_PHRASE env var, or enable T402_DEMO_MODE=true',
+    )
     console.error('')
   }
 

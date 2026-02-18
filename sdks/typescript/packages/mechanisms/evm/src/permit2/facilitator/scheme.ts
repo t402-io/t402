@@ -14,7 +14,7 @@ import { PERMIT2_ADDRESS, permit2ABI, erc20BalanceABI } from "../constants";
  * Configuration for Permit2 EVM facilitator
  */
 export interface Permit2EvmSchemeConfig {
-  /** Nothing extra needed for Permit2 */
+  [key: string]: unknown;
 }
 
 /**
@@ -27,16 +27,40 @@ export class Permit2EvmScheme implements SchemeNetworkFacilitator {
   readonly scheme = "permit2";
   readonly caipFamily = "eip155:*";
 
+  /**
+   * Creates a new Permit2 facilitator instance.
+   *
+   * @param signer - The facilitator EVM signer
+   */
   constructor(private readonly signer: FacilitatorEvmSigner) {}
 
+  /**
+   * Get mechanism-specific extra data for supported kinds.
+   *
+   * @param _ - The network identifier
+   * @returns Extra data including permit2 contract address
+   */
   getExtra(_: string): Record<string, unknown> | undefined {
     return { permit2Address: PERMIT2_ADDRESS };
   }
 
+  /**
+   * Get signer addresses for this facilitator.
+   *
+   * @param _ - The network identifier
+   * @returns Array of signer addresses
+   */
   getSigners(_: string): string[] {
     return [...this.signer.getAddresses()];
   }
 
+  /**
+   * Verify a Permit2 payment payload.
+   *
+   * @param payload - The payment payload to verify
+   * @param requirements - The payment requirements
+   * @returns Verification result
+   */
   async verify(
     payload: PaymentPayload,
     requirements: PaymentRequirements,
@@ -71,9 +95,7 @@ export class Permit2EvmScheme implements SchemeNetworkFacilitator {
     }
 
     // Verify token matches
-    if (
-      getAddress(permit2Payload.permit.permitted.token) !== getAddress(requirements.asset)
-    ) {
+    if (getAddress(permit2Payload.permit.permitted.token) !== getAddress(requirements.asset)) {
       return {
         isValid: false,
         invalidReason: "token_mismatch",
@@ -82,9 +104,7 @@ export class Permit2EvmScheme implements SchemeNetworkFacilitator {
     }
 
     // Verify recipient matches
-    if (
-      getAddress(permit2Payload.transferDetails.to) !== getAddress(requirements.payTo)
-    ) {
+    if (getAddress(permit2Payload.transferDetails.to) !== getAddress(requirements.payTo)) {
       return {
         isValid: false,
         invalidReason: "recipient_mismatch",
@@ -151,6 +171,13 @@ export class Permit2EvmScheme implements SchemeNetworkFacilitator {
     };
   }
 
+  /**
+   * Settle a Permit2 payment by executing permitTransferFrom.
+   *
+   * @param payload - The payment payload
+   * @param requirements - The payment requirements
+   * @returns Settlement result
+   */
   async settle(
     payload: PaymentPayload,
     requirements: PaymentRequirements,

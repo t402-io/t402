@@ -70,9 +70,7 @@ describe('ExactBtcScheme (Facilitator)', () => {
     const signer = createMockSigner()
     const scheme = new ExactBtcScheme(signer)
 
-    expect(scheme.getSigners(BTC_MAINNET)).toEqual([
-      'bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4',
-    ])
+    expect(scheme.getSigners(BTC_MAINNET)).toEqual(['bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4'])
   })
 
   it('should return undefined for getExtra', () => {

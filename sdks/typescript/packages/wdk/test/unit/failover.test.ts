@@ -1,9 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import {
-  FailoverProvider,
-  createFailoverProvider,
-  resolveRpcUrl,
-} from '../../src/failover'
+import { FailoverProvider, createFailoverProvider, resolveRpcUrl } from '../../src/failover'
 
 const URL_1 = 'https://arb1.arbitrum.io/rpc'
 const URL_2 = 'https://arb-fallback-1.example.com'

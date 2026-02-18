@@ -350,7 +350,8 @@ describe('Server WDK Configuration', () => {
   it('should create server with seed phrase config', () => {
     const server = createT402McpServer({
       demoMode: true,
-      seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+      seedPhrase:
+        'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
     })
     expect(server).toBeInstanceOf(T402McpServer)
   })

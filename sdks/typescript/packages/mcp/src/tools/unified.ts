@@ -31,10 +31,7 @@ export const smartPayInputSchema = z.object({
     .regex(/^\d+(\.\d+)?$/)
     .optional()
     .describe('Maximum acceptable bridge fee in native token (optional)'),
-  preferredNetwork: z
-    .string()
-    .optional()
-    .describe('Preferred network for payment (optional)'),
+  preferredNetwork: z.string().optional().describe('Preferred network for payment (optional)'),
 })
 
 export type SmartPayInput = z.infer<typeof smartPayInputSchema>
@@ -166,10 +163,7 @@ export const UNIFIED_TOOL_DEFINITIONS = {
 /**
  * Execute t402/smartPay tool
  */
-export async function executeSmartPay(
-  input: SmartPayInput,
-  wdk: T402WDK,
-): Promise<SmartPayResult> {
+export async function executeSmartPay(input: SmartPayInput, wdk: T402WDK): Promise<SmartPayResult> {
   const steps: SmartPayStep[] = []
   const chains = input.preferredNetwork
     ? [input.preferredNetwork]
@@ -284,9 +278,7 @@ export async function executePaymentPlan(
   const bestChain = await wdk.findBestChainForPayment(requiredBigint)
 
   if (bestChain) {
-    const needsBridge = targetNetwork
-      ? !bestChain.chain.includes(targetNetwork)
-      : false
+    const needsBridge = targetNetwork ? !bestChain.chain.includes(targetNetwork) : false
 
     return {
       viable: true,
@@ -347,7 +339,8 @@ export function formatSmartPayResult(result: SmartPayResult): string {
     lines.push('')
     lines.push('### Steps')
     for (const step of result.steps) {
-      const icon = step.status === 'success' ? '[OK]' : step.status === 'skipped' ? '[SKIP]' : '[FAIL]'
+      const icon =
+        step.status === 'success' ? '[OK]' : step.status === 'skipped' ? '[SKIP]' : '[FAIL]'
       lines.push(`- ${icon} **${step.action}**: ${step.detail}`)
     }
   }

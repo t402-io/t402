@@ -50,9 +50,7 @@ export function detectChainFamily(network: string): ChainFamily {
   if (network.startsWith(CAIP2_STACKS)) return 'stacks'
   if (network.startsWith(CAIP2_COSMOS)) return 'cosmos'
 
-  throw new Error(
-    `Unsupported network: ${network}. Cannot detect chain family from CAIP-2 prefix.`,
-  )
+  throw new Error(`Unsupported network: ${network}. Cannot detect chain family from CAIP-2 prefix.`)
 }
 
 /**

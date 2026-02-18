@@ -52,9 +52,9 @@ describe('ExactBtcScheme (Server)', () => {
         payTo: 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq',
       })
 
-      await expect(
-        scheme.parsePrice({ amount: '5000' } as any, BTC_MAINNET),
-      ).rejects.toThrow('Asset must be specified')
+      await expect(scheme.parsePrice({ amount: '5000' } as any, BTC_MAINNET)).rejects.toThrow(
+        'Asset must be specified',
+      )
     })
 
     it('should throw for invalid money format', async () => {

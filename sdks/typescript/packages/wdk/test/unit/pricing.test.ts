@@ -1,6 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { createWdkMoneyParser, toAtomicUnits, resolveAssetForNetwork } from '../../src/pricing'
-import type { PricingProviderConfig } from '../../src/pricing'
 
 describe('createWdkMoneyParser', () => {
   it('should return AssetAmount for a valid amount on a known network', async () => {

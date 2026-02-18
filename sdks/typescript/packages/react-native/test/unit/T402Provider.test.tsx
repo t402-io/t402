@@ -10,7 +10,9 @@ const testConfig: T402ProviderConfig = {
 }
 
 // Helper to run a hook inside T402Provider using SSR
-function captureContext(config: T402ProviderConfig): { current: ReturnType<typeof useT402Context> } {
+function captureContext(config: T402ProviderConfig): {
+  current: ReturnType<typeof useT402Context>
+} {
   const ref = { current: null as unknown as ReturnType<typeof useT402Context> }
 
   function Capture() {

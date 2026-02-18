@@ -24,9 +24,7 @@ import { InMemoryStorage } from './storage.js'
  */
 export class T402TonWallet {
   private readonly walletKit: unknown
-  private readonly config: Required<
-    Pick<T402TonWalletConfig, 'walletVersion' | 'network'>
-  > &
+  private readonly config: Required<Pick<T402TonWalletConfig, 'walletVersion' | 'network'>> &
     T402TonWalletConfig
   private address: string | null = null
 
@@ -60,8 +58,7 @@ export class T402TonWallet {
     }
 
     const storage = config?.storage ?? new InMemoryStorage()
-    const endpoint =
-      config?.endpoint ?? getDefaultEndpoint(config?.network ?? 'mainnet')
+    const endpoint = config?.endpoint ?? getDefaultEndpoint(config?.network ?? 'mainnet')
 
     // Attempt to initialize @ton/walletkit
     let walletKit: unknown
@@ -142,9 +139,9 @@ export class T402TonWallet {
     const kit = this.walletKit as Record<string, unknown>
 
     if (typeof kit.getJettonBalance === 'function') {
-      return (
-        kit as { getJettonBalance: (master: string) => Promise<bigint> }
-      ).getJettonBalance(jettonMaster)
+      return (kit as { getJettonBalance: (master: string) => Promise<bigint> }).getJettonBalance(
+        jettonMaster,
+      )
     }
 
     throw new Error('Wallet kit does not support getJettonBalance')
@@ -160,9 +157,7 @@ export class T402TonWallet {
     const kit = this.walletKit as Record<string, unknown>
 
     if (typeof kit.signMessage === 'function') {
-      return (
-        kit as { signMessage: (msg: Uint8Array) => Promise<Uint8Array> }
-      ).signMessage(message)
+      return (kit as { signMessage: (msg: Uint8Array) => Promise<Uint8Array> }).signMessage(message)
     }
 
     if (typeof kit.sign === 'function') {

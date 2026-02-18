@@ -5,11 +5,7 @@
  * using Tether WDK's gas-free wallet.
  */
 
-import type {
-  WdkTronGasfreeConfig,
-  GasfreePaymentParams,
-  GasfreePaymentResult,
-} from './types.js'
+import type { WdkTronGasfreeConfig, GasfreePaymentParams, GasfreePaymentResult } from './types.js'
 import { getTokenAddress, TRON_USDT_DECIMALS } from './constants.js'
 
 /**
@@ -149,9 +145,7 @@ export class WdkTronGasfreeClient {
    */
   private getWdkInstance(): unknown {
     if (!this.config.wdkInstance) {
-      throw new Error(
-        'WDK instance not configured. Please provide a wdkInstance in the config.',
-      )
+      throw new Error('WDK instance not configured. Please provide a wdkInstance in the config.')
     }
     return this.config.wdkInstance
   }
@@ -217,10 +211,7 @@ export class WdkTronGasfreeClient {
       const instance = wdk as Record<string, unknown>
 
       if (typeof instance.getBalance === 'function') {
-        const fn = instance.getBalance as (
-          address: string,
-          tokenAddress: string,
-        ) => Promise<string>
+        const fn = instance.getBalance as (address: string, tokenAddress: string) => Promise<string>
         return fn(address, tokenAddress)
       }
     }

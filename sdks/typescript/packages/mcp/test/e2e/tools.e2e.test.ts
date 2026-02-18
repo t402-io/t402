@@ -11,14 +11,12 @@ import { startMockFacilitator, type MockFacilitator } from './setup.js'
  */
 describe('MCP Tools E2E', () => {
   let facilitator: MockFacilitator
-  let server: T402McpServer
-
-  const TEST_ADDRESS = '0x1234567890abcdef1234567890abcdef12345678'
+  let _server: T402McpServer
 
   beforeAll(async () => {
     facilitator = await startMockFacilitator()
 
-    server = createT402McpServer({
+    _server = createT402McpServer({
       demoMode: true,
     })
   })
@@ -201,10 +199,7 @@ describe('MCP Tools E2E', () => {
     })
 
     it('should have unique tool names', () => {
-      const allNames = [
-        ...Object.keys(TOOL_DEFINITIONS),
-        ...Object.keys(WDK_TOOL_DEFINITIONS),
-      ]
+      const allNames = [...Object.keys(TOOL_DEFINITIONS), ...Object.keys(WDK_TOOL_DEFINITIONS)]
       const uniqueNames = new Set(allNames)
       expect(uniqueNames.size).toBe(allNames.length)
     })

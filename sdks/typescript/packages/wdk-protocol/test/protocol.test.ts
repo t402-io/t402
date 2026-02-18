@@ -1,6 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { T402Protocol } from '../src/protocol.js'
-import { detectChainFamily, getEvmChainName, isEvmNetwork, EVM_CHAIN_MAP } from '../src/signer-factory.js'
+import {
+  detectChainFamily,
+  getEvmChainName,
+  isEvmNetwork,
+  EVM_CHAIN_MAP,
+} from '../src/signer-factory.js'
 import { extractPaymentRequired } from '../src/http-client.js'
 
 // ---- Mock WDK ----
@@ -159,9 +164,9 @@ describe('T402Protocol', () => {
 
       globalThis.fetch = vi.fn().mockResolvedValue(createOkResponse())
 
-      await expect(
-        protocol.getRequirements('https://api.example.com/free'),
-      ).rejects.toThrow('Expected 402 response, got 200')
+      await expect(protocol.getRequirements('https://api.example.com/free')).rejects.toThrow(
+        'Expected 402 response, got 200',
+      )
     })
   })
 })

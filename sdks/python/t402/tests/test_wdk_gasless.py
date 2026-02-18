@@ -6,7 +6,6 @@ from t402.wdk.gasless import (
     GaslessConfig,
     GaslessPaymentParams,
     GaslessPaymentResult,
-    SponsorshipInfo,
     ENTRYPOINT_V07_ADDRESS,
 )
 

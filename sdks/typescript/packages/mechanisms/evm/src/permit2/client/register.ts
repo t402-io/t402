@@ -48,7 +48,10 @@ export interface Permit2EvmClientConfig {
  * registerPermit2EvmScheme(client, { signer: account });
  * ```
  */
-export function registerPermit2EvmScheme(client: t402Client, config: Permit2EvmClientConfig): t402Client {
+export function registerPermit2EvmScheme(
+  client: t402Client,
+  config: Permit2EvmClientConfig,
+): t402Client {
   if (config.networks && config.networks.length > 0) {
     config.networks.forEach(network => {
       client.register(network, new Permit2EvmScheme(config.signer));

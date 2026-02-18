@@ -27,7 +27,9 @@ describe('TON Bridge Tools', () => {
     it('should include ton/getJettonBalance', () => {
       expect(TON_BRIDGE_TOOLS['ton/getJettonBalance']).toBeDefined()
       expect(TON_BRIDGE_TOOLS['ton/getJettonBalance'].inputSchema.required).toContain('address')
-      expect(TON_BRIDGE_TOOLS['ton/getJettonBalance'].inputSchema.required).toContain('jettonMaster')
+      expect(TON_BRIDGE_TOOLS['ton/getJettonBalance'].inputSchema.required).toContain(
+        'jettonMaster',
+      )
     })
 
     it('should include ton/swapJettons', () => {
@@ -109,11 +111,7 @@ describe('TON Bridge Tools', () => {
     })
 
     it('should handle unknown tool name', async () => {
-      const result = await executeTonBridgeTool(
-        'ton/unknown',
-        {},
-        demoConfig,
-      )
+      const result = await executeTonBridgeTool('ton/unknown', {}, demoConfig)
 
       expect(result.content[0].text).toContain('[DEMO]')
       expect(result.content[0].text).toContain('Unknown')
@@ -122,11 +120,7 @@ describe('TON Bridge Tools', () => {
 
   describe('executeTonBridgeTool (no config)', () => {
     it('should return error when no endpoint or API key is configured', async () => {
-      const result = await executeTonBridgeTool(
-        'ton/getBalance',
-        { address: 'UQTest' },
-        {},
-      )
+      const result = await executeTonBridgeTool('ton/getBalance', { address: 'UQTest' }, {})
 
       expect(result.isError).toBe(true)
       expect(result.content[0].text).toContain('not configured')

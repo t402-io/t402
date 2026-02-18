@@ -40,11 +40,7 @@
 export { WdkTronGasfreeClient, createWdkTronGasfreeClient } from './client.js'
 
 // Types
-export type {
-  WdkTronGasfreeConfig,
-  GasfreePaymentParams,
-  GasfreePaymentResult,
-} from './types.js'
+export type { WdkTronGasfreeConfig, GasfreePaymentParams, GasfreePaymentResult } from './types.js'
 
 // Constants
 export {

@@ -255,11 +255,7 @@ export { createWdkMoneyParser, toAtomicUnits, resolveAssetForNetwork } from './p
 export type { PricingProviderConfig } from './pricing.js'
 
 // Failover provider
-export {
-  FailoverProvider,
-  createFailoverProvider,
-  resolveRpcUrl,
-} from './failover.js'
+export { FailoverProvider, createFailoverProvider, resolveRpcUrl } from './failover.js'
 export type { FailoverConfig, ProviderStatus } from './failover.js'
 
 // Secret manager
@@ -267,10 +263,7 @@ export { encryptSeed, decryptSeed } from './secret.js'
 export type { EncryptedSeed } from './secret.js'
 
 // Indexer verifier
-export {
-  WdkIndexerVerifier,
-  createIndexerVerifier,
-} from './indexer.js'
+export { WdkIndexerVerifier, createIndexerVerifier } from './indexer.js'
 export type {
   WdkIndexerConfig,
   TransactionQuery,

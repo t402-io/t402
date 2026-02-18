@@ -22,7 +22,7 @@ yarn add @t402/react-native @t402/core
 ### 1. Wrap your app with T402Provider
 
 ```tsx
-import { T402Provider } from '@t402/react-native';
+import { T402Provider } from '@t402/react-native'
 
 function App() {
   return (
@@ -35,30 +35,30 @@ function App() {
     >
       <MyApp />
     </T402Provider>
-  );
+  )
 }
 ```
 
 ### 2. Use the payment hook
 
 ```tsx
-import { useT402Payment } from '@t402/react-native';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { useT402Payment } from '@t402/react-native'
+import { View, Text, TouchableOpacity } from 'react-native'
 
 function PremiumContent() {
-  const { state, pay, reset } = useT402Payment();
+  const { state, pay, reset } = useT402Payment()
 
   const handlePurchase = async () => {
     const result = await pay({
       url: 'https://api.example.com/content/123',
       preferredNetwork: 'eip155:42161',
-    });
+    })
 
     if (result.success) {
-      const data = await result.response?.json();
-      console.log('Content:', data);
+      const data = await result.response?.json()
+      console.log('Content:', data)
     }
-  };
+  }
 
   return (
     <View>
@@ -68,34 +68,37 @@ function PremiumContent() {
         <Text>Purchase ($0.01)</Text>
       </TouchableOpacity>
     </View>
-  );
+  )
 }
 ```
 
 ### 3. Use the PaymentSheet component
 
 ```tsx
-import { useState } from 'react';
-import { PaymentSheet, useT402Payment } from '@t402/react-native';
-import { Button } from 'react-native';
+import { useState } from 'react'
+import { PaymentSheet, useT402Payment } from '@t402/react-native'
+import { Button } from 'react-native'
 
 function ContentScreen() {
-  const { state, pay, reset } = useT402Payment();
-  const [showSheet, setShowSheet] = useState(false);
+  const { state, pay, reset } = useT402Payment()
+  const [showSheet, setShowSheet] = useState(false)
 
   return (
     <>
       <Button title="Buy Content" onPress={() => setShowSheet(true)} />
       <PaymentSheet
         visible={showSheet}
-        onClose={() => { setShowSheet(false); reset(); }}
+        onClose={() => {
+          setShowSheet(false)
+          reset()
+        }}
         paymentRequired={state.paymentRequired}
         selectedRequirement={state.paymentRequired?.accepts[0]}
         onPay={() => pay({ url: 'https://api.example.com/content' })}
         state={state}
       />
     </>
-  );
+  )
 }
 ```
 
@@ -105,53 +108,53 @@ function ContentScreen() {
 
 Context provider that initializes the t402 client for all child components.
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `config` | `T402ProviderConfig` | Configuration object |
-| `children` | `ReactNode` | Child components |
+| Prop       | Type                 | Description          |
+| ---------- | -------------------- | -------------------- |
+| `config`   | `T402ProviderConfig` | Configuration object |
+| `children` | `ReactNode`          | Child components     |
 
 ### `T402ProviderConfig`
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `facilitatorUrl` | `string` | Yes | URL of the t402 facilitator |
-| `networks` | `string[]` | No | Supported CAIP-2 network IDs |
-| `signer` | `unknown` | No | External signer instance |
-| `wdkSeedPhrase` | `string` | No | WDK seed phrase for built-in wallet |
-| `chains` | `Record<string, string>` | No | Chain RPC endpoints |
+| Field            | Type                     | Required | Description                         |
+| ---------------- | ------------------------ | -------- | ----------------------------------- |
+| `facilitatorUrl` | `string`                 | Yes      | URL of the t402 facilitator         |
+| `networks`       | `string[]`               | No       | Supported CAIP-2 network IDs        |
+| `signer`         | `unknown`                | No       | External signer instance            |
+| `wdkSeedPhrase`  | `string`                 | No       | WDK seed phrase for built-in wallet |
+| `chains`         | `Record<string, string>` | No       | Chain RPC endpoints                 |
 
 ### `useT402Payment()`
 
 Hook for the full payment flow. Returns:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `state` | `PaymentState` | Current payment state |
-| `pay` | `(options: PaymentOptions) => Promise<PaymentResult>` | Initiate payment |
-| `reset` | `() => void` | Reset to idle state |
+| Field   | Type                                                  | Description           |
+| ------- | ----------------------------------------------------- | --------------------- |
+| `state` | `PaymentState`                                        | Current payment state |
+| `pay`   | `(options: PaymentOptions) => Promise<PaymentResult>` | Initiate payment      |
+| `reset` | `() => void`                                          | Reset to idle state   |
 
 ### `PaymentSheet`
 
 Bottom-sheet modal component for displaying payment details.
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `visible` | `boolean` | Sheet visibility |
-| `onClose` | `() => void` | Close callback |
-| `paymentRequired` | `PaymentRequired` | 402 response data |
+| Prop                  | Type                  | Description             |
+| --------------------- | --------------------- | ----------------------- |
+| `visible`             | `boolean`             | Sheet visibility        |
+| `onClose`             | `() => void`          | Close callback          |
+| `paymentRequired`     | `PaymentRequired`     | 402 response data       |
 | `selectedRequirement` | `PaymentRequirements` | Selected payment option |
-| `onPay` | `() => Promise<void>` | Pay callback |
-| `state` | `PaymentState` | Current payment state |
-| `style` | `object` | Custom styles |
+| `onPay`               | `() => Promise<void>` | Pay callback            |
+| `state`               | `PaymentState`        | Current payment state   |
+| `style`               | `object`              | Custom styles           |
 
 ### `PaymentState`
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `status` | `PaymentStatus` | `'idle' \| 'loading' \| 'awaiting_payment' \| 'signing' \| 'verifying' \| 'success' \| 'error'` |
-| `error` | `Error` | Error details (when status is `'error'`) |
-| `txHash` | `string` | Transaction hash (when status is `'success'`) |
-| `paymentRequired` | `PaymentRequired` | The 402 response from the server |
+| Field             | Type              | Description                                                                                     |
+| ----------------- | ----------------- | ----------------------------------------------------------------------------------------------- |
+| `status`          | `PaymentStatus`   | `'idle' \| 'loading' \| 'awaiting_payment' \| 'signing' \| 'verifying' \| 'success' \| 'error'` |
+| `error`           | `Error`           | Error details (when status is `'error'`)                                                        |
+| `txHash`          | `string`          | Transaction hash (when status is `'success'`)                                                   |
+| `paymentRequired` | `PaymentRequired` | The 402 response from the server                                                                |
 
 ## Supported Networks
 

@@ -76,9 +76,7 @@ export class DefiPrePaymentProcessor {
       balances: Record<string, bigint>,
     ): Promise<DefiStrategyResult | null> => {
       const targetToken = requirements.asset
-      const targetAmount = requirements.amount
-        ? BigInt(requirements.amount)
-        : 0n
+      const targetAmount = requirements.amount ? BigInt(requirements.amount) : 0n
 
       if (!targetToken || targetAmount <= 0n) {
         return null
@@ -155,8 +153,6 @@ export class DefiPrePaymentProcessor {
 /**
  * Create a DeFi pre-payment processor
  */
-export function createDefiProcessor(
-  config?: DefiProcessorConfig,
-): DefiPrePaymentProcessor {
+export function createDefiProcessor(config?: DefiProcessorConfig): DefiPrePaymentProcessor {
   return new DefiPrePaymentProcessor(config)
 }

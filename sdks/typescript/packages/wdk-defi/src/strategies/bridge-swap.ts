@@ -168,8 +168,6 @@ export class BridgeSwapStrategy implements DefiStrategy {
 /**
  * Create a bridge-swap strategy
  */
-export function createBridgeSwapStrategy(
-  config?: BridgeSwapStrategyConfig,
-): BridgeSwapStrategy {
+export function createBridgeSwapStrategy(config?: BridgeSwapStrategyConfig): BridgeSwapStrategy {
   return new BridgeSwapStrategy(config)
 }

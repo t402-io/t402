@@ -1,9 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  declarePaymentIdExtension,
-  parsePaymentIdPayload,
-  validatePaymentId,
-} from "./server.js";
+import { declarePaymentIdExtension, parsePaymentIdPayload, validatePaymentId } from "./server.js";
 import { PAYMENT_ID_EXTENSION_KEY } from "./types.js";
 
 describe("Payment ID Server", () => {
@@ -136,10 +132,7 @@ describe("Payment ID Server", () => {
     });
 
     it("should validate with clientId present", () => {
-      const result = validatePaymentId(
-        { id: "test-id", clientId: "client-1" },
-        { id: "test-id" },
-      );
+      const result = validatePaymentId({ id: "test-id", clientId: "client-1" }, { id: "test-id" });
       expect(result).toBe(true);
     });
   });

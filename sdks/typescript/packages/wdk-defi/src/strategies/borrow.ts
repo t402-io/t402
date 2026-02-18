@@ -59,9 +59,7 @@ export class BorrowStrategy implements DefiStrategy {
     }
 
     // Check if user has any collateral tokens
-    return params.availableTokens.some(
-      (token) => (params.currentBalances[token] ?? 0n) > 0n,
-    )
+    return params.availableTokens.some((token) => (params.currentBalances[token] ?? 0n) > 0n)
   }
 
   async estimate(params: DefiStrategyParams): Promise<DefiEstimate> {
@@ -82,10 +80,7 @@ export class BorrowStrategy implements DefiStrategy {
         balance,
       )
 
-      if (
-        result.borrowable >= params.targetAmount &&
-        result.healthFactor >= minHealthFactor
-      ) {
+      if (result.borrowable >= params.targetAmount && result.healthFactor >= minHealthFactor) {
         const steps: Omit<DefiStep, 'txHash'>[] = [
           {
             type: 'approve',

@@ -74,12 +74,7 @@ export function PaymentSheet({
   }
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={[styles.sheet, style as Record<string, unknown>]}>
           {/* Header */}

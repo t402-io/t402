@@ -23,7 +23,7 @@ describe("TON Wallet Registry", () => {
 
     it("includes Tonkeeper in the bundled list", () => {
       const wallets = getBundledWallets();
-      const tonkeeper = wallets.find((w) => w.appName === "tonkeeper");
+      const tonkeeper = wallets.find(w => w.appName === "tonkeeper");
       expect(tonkeeper).toBeDefined();
       expect(tonkeeper!.name).toBe("Tonkeeper");
       expect(tonkeeper!.platforms.length).toBeGreaterThan(0);
@@ -68,9 +68,7 @@ describe("TON Wallet Registry", () => {
     });
 
     it("falls back to bundled wallets on fetch error", async () => {
-      vi.spyOn(globalThis, "fetch").mockRejectedValueOnce(
-        new Error("Network error"),
-      );
+      vi.spyOn(globalThis, "fetch").mockRejectedValueOnce(new Error("Network error"));
 
       const wallets = await fetchTonWallets();
       const bundled = getBundledWallets();
@@ -173,26 +171,22 @@ describe("TON Wallet Registry", () => {
 
     it("filters for iOS", () => {
       const result = filterWalletsByPlatform(testWallets, "ios");
-      expect(result.map((w) => w.appName)).toEqual(["ios-only", "multi"]);
+      expect(result.map(w => w.appName)).toEqual(["ios-only", "multi"]);
     });
 
     it("filters for Android", () => {
       const result = filterWalletsByPlatform(testWallets, "android");
-      expect(result.map((w) => w.appName)).toEqual(["android-only", "multi"]);
+      expect(result.map(w => w.appName)).toEqual(["android-only", "multi"]);
     });
 
     it("filters for browser (chrome/firefox/safari)", () => {
       const result = filterWalletsByPlatform(testWallets, "browser");
-      expect(result.map((w) => w.appName)).toEqual(["chrome-ext", "multi"]);
+      expect(result.map(w => w.appName)).toEqual(["chrome-ext", "multi"]);
     });
 
     it("filters for desktop (windows/macos/linux + browser extensions)", () => {
       const result = filterWalletsByPlatform(testWallets, "desktop");
-      expect(result.map((w) => w.appName)).toEqual([
-        "chrome-ext",
-        "desktop-app",
-        "multi",
-      ]);
+      expect(result.map(w => w.appName)).toEqual(["chrome-ext", "desktop-app", "multi"]);
     });
   });
 
@@ -290,7 +284,14 @@ describe("TON Wallet Registry", () => {
 
     it("skips entries without name or app_name", () => {
       const data = [
-        { name: "Valid", app_name: "valid", image: "", about_url: "", platforms: ["ios"], bridge: [{ type: "sse", url: "https://b.com" }] },
+        {
+          name: "Valid",
+          app_name: "valid",
+          image: "",
+          about_url: "",
+          platforms: ["ios"],
+          bridge: [{ type: "sse", url: "https://b.com" }],
+        },
         { name: "", app_name: "invalid", image: "", about_url: "", platforms: [], bridge: [] },
         { name: "NoApp", image: "", about_url: "", platforms: [], bridge: [] },
       ];

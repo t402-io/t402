@@ -6,7 +6,12 @@
  */
 
 import type { MoneyParser, AssetAmount, Network } from '@t402/core/types'
-import { USDT0_ADDRESSES, USDC_ADDRESSES, getChainFromNetwork, getPreferredToken } from './chains.js'
+import {
+  USDT0_ADDRESSES,
+  USDC_ADDRESSES,
+  getChainFromNetwork,
+  getPreferredToken,
+} from './chains.js'
 
 export interface PricingProviderConfig {
   /** Cache TTL in milliseconds (default: 60000 = 60s) */

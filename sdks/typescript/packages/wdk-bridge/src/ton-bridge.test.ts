@@ -38,9 +38,9 @@ describe('T402TonBridge', () => {
     })
 
     it('should throw without TON wallet', () => {
-      expect(
-        () => new T402TonBridge({ tonWallet: null as unknown }),
-      ).toThrow('TON wallet is required')
+      expect(() => new T402TonBridge({ tonWallet: null as unknown })).toThrow(
+        'TON wallet is required',
+      )
     })
   })
 

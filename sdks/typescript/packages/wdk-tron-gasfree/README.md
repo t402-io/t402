@@ -17,39 +17,39 @@ npm install @tetherto/wdk @tetherto/wdk-wallet-tron-gasfree
 ## Usage
 
 ```typescript
-import { createWdkTronGasfreeClient } from '@t402/wdk-tron-gasfree';
+import { createWdkTronGasfreeClient } from '@t402/wdk-tron-gasfree'
 
 // Create the client with your WDK tron-gasfree wallet instance
 const client = await createWdkTronGasfreeClient({
   wdkInstance: myTronGasfreeWallet,
-});
+})
 
 // Check USDT balance
-const balance = await client.getBalance();
-const formatted = client.getFormattedBalance(balance);
-console.log(`USDT Balance: ${formatted}`);
+const balance = await client.getBalance()
+const formatted = client.getFormattedBalance(balance)
+console.log(`USDT Balance: ${formatted}`)
 
 // Execute gas-free payment
 const result = await client.pay({
   to: 'TRecipientAddress...',
   amount: 1000000n, // 1 USDT (6 decimals)
-});
+})
 
-console.log('Transaction ID:', result.txId);
-console.log('Gas-free:', result.sponsored); // always true
+console.log('Transaction ID:', result.txId)
+console.log('Gas-free:', result.sponsored) // always true
 
 // Check if gas-free is available
 const canSponsor = await client.canSponsor({
   to: 'TRecipientAddress...',
   amount: 1000000n,
-});
-console.log('Can sponsor:', canSponsor);
+})
+console.log('Can sponsor:', canSponsor)
 ```
 
 ## Supported Tokens
 
-| Token | Network | Address |
-|-------|---------|---------|
+| Token | Network | Address                              |
+| ----- | ------- | ------------------------------------ |
 | USDT  | Mainnet | `TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t` |
 | USDT0 | Mainnet | `TKiUqMmnCBPqRfREwNExNYKG2KQqj5Gd2m` |
 | USDT  | Shasta  | `TG3XXyExBkPp9nzdajDZsozEu4BkaSJozs` |

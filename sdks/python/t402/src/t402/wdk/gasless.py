@@ -23,8 +23,8 @@ Example:
     ```
 """
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, Any
+from dataclasses import dataclass
+from typing import Optional
 
 
 # ERC-4337 v0.7 EntryPoint

@@ -23,7 +23,8 @@ function createRequirements(overrides?: Partial<PaymentRequirements>): PaymentRe
     payTo: '02' + 'd'.repeat(64),
     maxTimeoutSeconds: 3600,
     extra: {
-      bolt11Invoice: 'lnbc1pvjluezpp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypqdpl2pkx2ctn',
+      bolt11Invoice:
+        'lnbc1pvjluezpp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypqdpl2pkx2ctn',
     },
     ...overrides,
   }
@@ -44,7 +45,11 @@ describe('LightningScheme (Client)', () => {
     const result = await scheme.createPaymentPayload(2, requirements)
 
     expect(result.t402Version).toBe(2)
-    const payload = result.payload as { paymentHash: string; preimage: string; bolt11Invoice: string }
+    const payload = result.payload as {
+      paymentHash: string
+      preimage: string
+      bolt11Invoice: string
+    }
     expect(payload.preimage).toBe('a'.repeat(64))
     expect(payload.paymentHash).toBe('b'.repeat(64))
     expect(payload.bolt11Invoice).toBe(requirements.extra.bolt11Invoice)

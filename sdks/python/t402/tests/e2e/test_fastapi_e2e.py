@@ -1,8 +1,5 @@
 """E2E tests for FastAPI middleware integration with T402 payment protocol."""
 
-import json
-import base64
-import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 

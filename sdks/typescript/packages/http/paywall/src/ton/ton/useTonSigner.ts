@@ -171,7 +171,10 @@ export function createTonConnectSigner(
  * @param network - Target TON network
  * @returns ClientTonSigner or null if not connected
  */
-export function useTonSigner(wallet: WalletLike | null, network: TonNetwork): ClientTonSigner | null {
+export function useTonSigner(
+  wallet: WalletLike | null,
+  network: TonNetwork,
+): ClientTonSigner | null {
   // TODO: Once @ton/appkit is published, this hook should use
   // the appkit's native hooks if available, with tonconnect fallback.
 
@@ -185,7 +188,7 @@ export function useTonSigner(wallet: WalletLike | null, network: TonNetwork): Cl
     let cachedUI: UILike | null = null;
 
     const lazyUI: UILike = {
-      sendTransaction: async (request) => {
+      sendTransaction: async request => {
         if (!cachedUI) {
           const provider = await getUIProvider();
           const [ui] = provider.useUI();

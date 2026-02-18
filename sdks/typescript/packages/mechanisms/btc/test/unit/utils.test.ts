@@ -98,15 +98,23 @@ describe('isTestnetAddress', () => {
 
 describe('validateBolt11Invoice', () => {
   it('should accept valid mainnet invoices', () => {
-    expect(validateBolt11Invoice('lnbc1pvjluezpp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypqdpl2pkx2ctn')).toBe(true)
+    expect(
+      validateBolt11Invoice(
+        'lnbc1pvjluezpp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypqdpl2pkx2ctn',
+      ),
+    ).toBe(true)
   })
 
   it('should accept valid testnet invoices', () => {
-    expect(validateBolt11Invoice('lntb1pvjluezpp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypqd')).toBe(true)
+    expect(
+      validateBolt11Invoice('lntb1pvjluezpp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypqd'),
+    ).toBe(true)
   })
 
   it('should accept regtest invoices', () => {
-    expect(validateBolt11Invoice('lnbcrt1pvjluezpp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqyp')).toBe(true)
+    expect(
+      validateBolt11Invoice('lnbcrt1pvjluezpp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqyp'),
+    ).toBe(true)
   })
 
   it('should reject invalid invoices', () => {
@@ -123,7 +131,9 @@ describe('isValidHex', () => {
   })
 
   it('should validate hex with expected length', () => {
-    expect(isValidHex('abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789', 32)).toBe(true)
+    expect(isValidHex('abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789', 32)).toBe(
+      true,
+    )
     expect(isValidHex('abcdef', 3)).toBe(true)
     expect(isValidHex('abcdef', 4)).toBe(false)
   })
