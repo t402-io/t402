@@ -65,6 +65,24 @@ The `upto` scheme authorizes transfer of **up to** a maximum amount, enabling us
 | [Overview](./schemes/upto/scheme_upto.md) | Scheme specification **(DRAFT)** |
 | [EVM](./schemes/upto/scheme_upto_evm.md) | Ethereum/EVM chains (EIP-2612) **(DRAFT)** |
 
+## Extensions
+
+Extensions enable modular optional functionality beyond core payment mechanics.
+
+| Extension | Key | Description |
+|-----------|-----|-------------|
+| [Bazaar](./extensions/bazaar.md) | `bazaar` | Resource discovery and cataloging |
+| [Payment Identifier](./extensions/payment-identifier.md) | `paymentId` | Unique identifiers for correlation and idempotency |
+| [Sign-In-With-X](./extensions/sign-in-with-x.md) | `siwx` | CAIP-122 wallet-based identity assertions |
+
+See [extensions/README.md](./extensions/README.md) for the full extension guide and proposal template.
+
+## Research
+
+| Topic | Description |
+|-------|-------------|
+| [TON Connect Bridge](./research/ton-connect-bridge.md) | Analysis of TON Connect bridge protocol for t402 integration |
+
 ## Templates
 
 For contributors adding new schemes or transports:

@@ -1,0 +1,17 @@
+{
+  "name": "t402-mcp-chatbot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Interactive MCP chatbot example for t402 payment tools",
+  "type": "module",
+  "scripts": {
+    "start": "tsx chatbot.ts"
+  },
+  "dependencies": {
+    "@t402/mcp": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}

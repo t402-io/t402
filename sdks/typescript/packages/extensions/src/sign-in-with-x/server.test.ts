@@ -361,5 +361,60 @@ describe("Sign-In-With-X Server", () => {
       expect(result.valid).toBe(false);
       expect(result.error).toContain("Ed25519");
     });
+
+    it("should detect TON chain and use Ed25519 verification", async () => {
+      const payload: SIWxPayload = {
+        domain: "api.example.com",
+        address: "0x" + "ab".repeat(32), // Hex-encoded Ed25519 public key
+        uri: "https://api.example.com/resource",
+        version: "1",
+        chainId: "ton:mainnet",
+        nonce: "abc123",
+        issuedAt: "2025-01-01T00:00:00.000Z",
+        signature: "0x" + "00".repeat(64), // Invalid Ed25519 signature (64 bytes)
+      };
+
+      const result = await verifySIWxSignature(payload, payload.signature);
+
+      // Should fail because signature is invalid, but uses Ed25519 path
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain("Ed25519");
+    });
+
+    it("should detect TRON chain and use secp256k1 with base58 address", async () => {
+      const payload: SIWxPayload = {
+        domain: "api.example.com",
+        address: "TJCnKsPa7y5okkXvQAidZBzqx3QyQ6sxMW", // TRON base58check address
+        uri: "https://api.example.com/resource",
+        version: "1",
+        chainId: "tron:mainnet",
+        nonce: "abc123",
+        issuedAt: "2025-01-01T00:00:00.000Z",
+        signature: "0x" + "00".repeat(65), // Invalid signature
+      };
+
+      const result = await verifySIWxSignature(payload, payload.signature);
+
+      // Should fail because signature is invalid, but uses TRON path
+      expect(result.valid).toBe(false);
+    });
+
+    it("should handle TRON signature with recovery mismatch", async () => {
+      const payload: SIWxPayload = {
+        domain: "api.example.com",
+        address: "TJCnKsPa7y5okkXvQAidZBzqx3QyQ6sxMW",
+        uri: "https://api.example.com/resource",
+        version: "1",
+        chainId: "tron:mainnet",
+        nonce: "abc123",
+        issuedAt: "2025-01-01T00:00:00.000Z",
+        signature: "0x" + "ab".repeat(64) + "1b", // Looks valid but wrong signer
+      };
+
+      const result = await verifySIWxSignature(payload, payload.signature);
+
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain("Signature mismatch");
+    });
   });
 });

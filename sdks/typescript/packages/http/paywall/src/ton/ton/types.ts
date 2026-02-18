@@ -1,4 +1,34 @@
-import type { TonConnectUI, Wallet } from "@tonconnect/ui-react";
+// TODO: Once @ton/appkit is published, these types should be imported from it.
+// For now, we define compatible types that work with both @ton/appkit and @tonconnect/ui-react.
+
+/**
+ * Wallet type (compatible with both @ton/appkit and @tonconnect/ui-react)
+ */
+export type Wallet = {
+  account?: {
+    address: string;
+    chain?: string;
+  };
+  device?: {
+    appName: string;
+  };
+};
+
+/**
+ * UI instance type (compatible with both providers)
+ */
+export type TonConnectUI = {
+  openModal: () => Promise<void>;
+  disconnect: () => Promise<void>;
+  sendTransaction: (request: {
+    validUntil: number;
+    messages: Array<{
+      address: string;
+      amount: string;
+      payload?: string;
+    }>;
+  }) => Promise<{ boc: string }>;
+};
 
 /**
  * TON network identifiers (CAIP-2 format)
@@ -34,7 +64,7 @@ export interface TonWalletOption {
  * Connected TON wallet state
  */
 export interface ConnectedTonWallet {
-  /** TonConnect UI instance */
+  /** UI instance */
   tonConnectUI: TonConnectUI;
   /** Connected wallet info */
   wallet: Wallet;

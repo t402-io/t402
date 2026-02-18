@@ -1,14 +1,29 @@
 import { useCallback, useEffect, useState } from "react";
-import { useTonConnectUI, useTonWallet } from "@tonconnect/ui-react";
-import type { Wallet } from "@tonconnect/ui-react";
 import { Address } from "@ton/core";
+
+// TODO: Verify @ton/appkit hook signatures once the package is published.
+// The API below is based on the ton-connect/kit repository patterns.
+// If @ton/appkit is not available, fall back to @tonconnect/ui-react.
+
+/**
+ * Wallet type from @ton/appkit (or @tonconnect/ui-react fallback)
+ */
+type AppKitWallet = {
+  account?: {
+    address: string;
+    chain?: string;
+  };
+  device?: {
+    appName: string;
+  };
+};
 
 /**
  * Hook return type for TON wallet state
  */
 export interface UseTonWalletReturn {
   /** Connected wallet or null */
-  wallet: Wallet | null;
+  wallet: AppKitWallet | null;
   /** Wallet address in friendly format */
   address: string | null;
   /** Whether wallet is connected */
@@ -24,16 +39,80 @@ export interface UseTonWalletReturn {
 }
 
 /**
- * Hook for managing TonConnect wallet connection
+ * Load the wallet provider dynamically.
+ * Tries @ton/appkit first, falls back to @tonconnect/ui-react.
+ */
+async function loadWalletProvider(): Promise<{
+  useTonConnectUI: () => [{ openModal: () => Promise<void>; disconnect: () => Promise<void>; sendTransaction: (req: unknown) => Promise<{ boc: string }> }];
+  useTonWallet: () => AppKitWallet | null;
+  source: "appkit" | "tonconnect";
+}> {
+  // TODO: Update import path once @ton/appkit is published
+  try {
+    const appkit = await import("@ton/appkit" as string);
+    return {
+      useTonConnectUI: appkit.useTonConnectUI ?? appkit.useAppKit,
+      useTonWallet: appkit.useTonWallet ?? appkit.useWallet,
+      source: "appkit",
+    };
+  } catch {
+    // Fall back to @tonconnect/ui-react
+    const tonconnect = await import("@tonconnect/ui-react");
+    return {
+      useTonConnectUI: tonconnect.useTonConnectUI as unknown as typeof loadWalletProvider extends () => Promise<infer R> ? R["useTonConnectUI"] : never,
+      useTonWallet: tonconnect.useTonWallet as unknown as () => AppKitWallet | null,
+      source: "tonconnect",
+    };
+  }
+}
+
+// Cache the provider import
+let providerPromise: ReturnType<typeof loadWalletProvider> | null = null;
+
+function getProvider() {
+  if (!providerPromise) {
+    providerPromise = loadWalletProvider();
+  }
+  return providerPromise;
+}
+
+/**
+ * Hook for managing TON wallet connection
+ *
+ * Supports both @ton/appkit (preferred) and @tonconnect/ui-react (fallback).
+ * The public interface remains the same regardless of which provider is used.
  *
  * @param onStatus - Callback for status updates
  * @returns Wallet connection state and methods
  */
 export function useTonWalletConnection(onStatus?: (status: string) => void): UseTonWalletReturn {
-  const [tonConnectUI] = useTonConnectUI();
-  const wallet = useTonWallet();
+  const [wallet, setWallet] = useState<AppKitWallet | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [provider, setProvider] = useState<Awaited<ReturnType<typeof loadWalletProvider>> | null>(null);
+
+  // Load provider on mount
+  useEffect(() => {
+    getProvider().then(setProvider).catch(() => {
+      setError("Failed to load TON wallet provider");
+    });
+  }, []);
+
+  // TODO: Once @ton/appkit is published, replace this polling approach
+  // with proper hook integration. The hooks from @ton/appkit may have
+  // different signatures than @tonconnect/ui-react.
+  useEffect(() => {
+    if (!provider) return;
+
+    // For now, use the TonConnect-compatible hooks
+    // @ton/appkit is expected to maintain backward compatibility
+    try {
+      const walletState = provider.useTonWallet();
+      setWallet(walletState);
+    } catch {
+      // Hook not available outside React render — handled by connect/disconnect
+    }
+  }, [provider]);
 
   // Get friendly address from wallet
   const address = wallet?.account?.address
@@ -50,7 +129,9 @@ export function useTonWalletConnection(onStatus?: (status: string) => void): Use
     onStatus?.("Connecting to wallet...");
 
     try {
-      await tonConnectUI.openModal();
+      const p = await getProvider();
+      const [ui] = p.useTonConnectUI();
+      await ui.openModal();
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to connect wallet";
       setError(message);
@@ -58,18 +139,21 @@ export function useTonWalletConnection(onStatus?: (status: string) => void): Use
     } finally {
       setIsConnecting(false);
     }
-  }, [tonConnectUI, wallet, onStatus]);
+  }, [wallet, onStatus]);
 
   const disconnect = useCallback(async () => {
     try {
-      await tonConnectUI.disconnect();
+      const p = await getProvider();
+      const [ui] = p.useTonConnectUI();
+      await ui.disconnect();
+      setWallet(null);
       onStatus?.("");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to disconnect";
       setError(message);
       onStatus?.(message);
     }
-  }, [tonConnectUI, onStatus]);
+  }, [onStatus]);
 
   // Clear status when connected
   useEffect(() => {

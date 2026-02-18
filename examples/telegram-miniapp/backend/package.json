@@ -1,0 +1,26 @@
+{
+  "name": "t402-telegram-miniapp-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@t402/core": "workspace:*",
+    "@t402/express": "workspace:*",
+    "@t402/ton": "workspace:*",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5",
+    "@types/node": "^22",
+    "tsx": "^4.0.0",
+    "typescript": "^5.9.0"
+  }
+}

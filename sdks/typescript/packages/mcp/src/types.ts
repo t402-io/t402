@@ -152,6 +152,12 @@ export interface McpServerConfig {
   seedPhrase?: string
   /** WDK chains to support (e.g., ['ethereum', 'arbitrum']) */
   wdkChains?: string[]
+  /** Enable unified mode (base + WDK + unified tools) */
+  unifiedMode?: boolean
+  /** @ton/mcp server URL for TON bridge tools */
+  tonMcpEndpoint?: string
+  /** TON API key for direct TON bridge tool execution */
+  tonApiKey?: string
 }
 
 /**

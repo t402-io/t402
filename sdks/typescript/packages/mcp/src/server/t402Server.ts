@@ -9,6 +9,7 @@ import type { McpServerConfig, SupportedNetwork } from '../types.js'
 import {
   TOOL_DEFINITIONS,
   WDK_TOOL_DEFINITIONS,
+  UNIFIED_TOOL_DEFINITIONS,
   executeGetBalance,
   formatBalanceResult,
   getBalanceInputSchema,
@@ -48,6 +49,19 @@ import {
   executeAutoPay,
   executeAutoPayDemo,
   formatAutoPayResult,
+  // Unified tools
+  smartPayInputSchema,
+  executeSmartPay,
+  executeSmartPayDemo,
+  formatSmartPayResult,
+  paymentPlanInputSchema,
+  executePaymentPlan,
+  executePaymentPlanDemo,
+  formatPaymentPlanResult,
+  // TON bridge tools
+  TON_BRIDGE_TOOLS,
+  executeTonBridgeTool,
+  type TonMcpBridgeConfig,
 } from '../tools/index.js'
 import type { T402WDK } from '@t402/wdk'
 
@@ -101,13 +115,31 @@ export class T402McpServer {
     }
   }
 
+  /** TON MCP bridge configuration */
+  private tonBridgeConfig: TonMcpBridgeConfig | null = null
+
   /**
-   * Get all tool definitions (base + WDK if configured)
+   * Register TON bridge tools
+   *
+   * Enables AI agents to use @ton/mcp tools through the t402 MCP server.
+   */
+  registerTonBridge(config: TonMcpBridgeConfig): void {
+    this.tonBridgeConfig = config
+  }
+
+  /**
+   * Get all tool definitions (base + WDK if configured + unified if enabled + TON bridge if registered)
    */
   private getToolDefinitions() {
     const tools = { ...TOOL_DEFINITIONS }
     if (this.wdk || this.config.demoMode) {
       Object.assign(tools, WDK_TOOL_DEFINITIONS)
+    }
+    if (this.config.unifiedMode && (this.wdk || this.config.demoMode)) {
+      Object.assign(tools, UNIFIED_TOOL_DEFINITIONS)
+    }
+    if (this.tonBridgeConfig) {
+      Object.assign(tools, TON_BRIDGE_TOOLS)
     }
     return tools
   }
@@ -162,6 +194,21 @@ export class T402McpServer {
 
           case 't402/autoPay':
             return await this.handleAutoPay(args)
+
+          // Unified tools
+          case 't402/smartPay':
+            return await this.handleSmartPay(args)
+
+          case 't402/paymentPlan':
+            return await this.handlePaymentPlan(args)
+
+          // TON bridge tools
+          case 'ton/getBalance':
+          case 'ton/transfer':
+          case 'ton/getJettonBalance':
+          case 'ton/swapJettons':
+          case 'ton/getTransactionStatus':
+            return await this.handleTonBridgeTool(name, args)
 
           default:
             throw new Error(`Unknown tool: ${name}`)
@@ -401,6 +448,57 @@ export class T402McpServer {
     }
   }
 
+  // ---- Unified Tool Handlers ----
+
+  /**
+   * Handle t402/smartPay
+   */
+  private async handleSmartPay(args: unknown) {
+    const input = smartPayInputSchema.parse(args)
+
+    const result = this.config.demoMode || !this.wdk
+      ? executeSmartPayDemo(input)
+      : await executeSmartPay(input, this.wdk)
+
+    return {
+      content: [{ type: 'text' as const, text: formatSmartPayResult(result) }],
+    }
+  }
+
+  /**
+   * Handle t402/paymentPlan
+   */
+  private async handlePaymentPlan(args: unknown) {
+    const input = paymentPlanInputSchema.parse(args)
+
+    const result = this.config.demoMode || !this.wdk
+      ? executePaymentPlanDemo(input)
+      : await executePaymentPlan(input, this.wdk)
+
+    return {
+      content: [{ type: 'text' as const, text: formatPaymentPlanResult(result) }],
+    }
+  }
+
+  // ---- TON Bridge Tool Handler ----
+
+  /**
+   * Handle TON bridge tool calls
+   */
+  private async handleTonBridgeTool(name: string, args: unknown) {
+    if (!this.tonBridgeConfig) {
+      throw new Error(
+        'TON bridge not configured. Call registerTonBridge() to enable TON tools.',
+      )
+    }
+
+    return executeTonBridgeTool(
+      name,
+      (args ?? {}) as Record<string, unknown>,
+      this.tonBridgeConfig,
+    )
+  }
+
   /**
    * Start the server using stdio transport
    */
@@ -453,6 +551,11 @@ export function loadConfigFromEnv(): McpServerConfig {
     config.wdkChains = process.env.T402_WDK_CHAINS.split(',').map((c) => c.trim())
   }
 
+  // Unified mode
+  if (process.env.T402_UNIFIED_MODE === 'true') {
+    config.unifiedMode = true
+  }
+
   // Custom RPC URLs
   const rpcUrls: Partial<Record<SupportedNetwork, string>> = {}
   const networks: SupportedNetwork[] = [
@@ -476,6 +579,14 @@ export function loadConfigFromEnv(): McpServerConfig {
 
   if (Object.keys(rpcUrls).length > 0) {
     config.rpcUrls = rpcUrls
+  }
+
+  // TON MCP bridge configuration
+  if (process.env.T402_TON_MCP_ENDPOINT) {
+    config.tonMcpEndpoint = process.env.T402_TON_MCP_ENDPOINT
+  }
+  if (process.env.T402_TON_API_KEY) {
+    config.tonApiKey = process.env.T402_TON_API_KEY
   }
 
   return config

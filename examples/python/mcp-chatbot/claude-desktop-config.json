@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "t402-python": {
+      "command": "python",
+      "args": ["-m", "t402.mcp"],
+      "env": {
+        "T402_DEMO_MODE": "true"
+      }
+    }
+  }
+}

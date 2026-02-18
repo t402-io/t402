@@ -55,13 +55,17 @@
   "peerDependencies": {
     "viem": "^2.0.0",
     "@tetherto/wdk": ">=1.0.0-beta.0",
-    "@tetherto/wdk-wallet-evm": ">=1.0.0-beta.0"
+    "@tetherto/wdk-wallet-evm": ">=1.0.0-beta.0",
+    "@ton/core": ">=0.56.0"
   },
   "peerDependenciesMeta": {
     "@tetherto/wdk": {
       "optional": true
     },
     "@tetherto/wdk-wallet-evm": {
+      "optional": true
+    },
+    "@ton/core": {
       "optional": true
     }
   },

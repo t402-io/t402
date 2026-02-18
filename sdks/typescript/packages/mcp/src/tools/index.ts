@@ -98,6 +98,33 @@ export {
   type AutoPayResult,
 } from './autoPay.js'
 
+// TON bridge tools
+export {
+  TON_BRIDGE_TOOLS,
+  executeTonBridgeTool,
+  createTonBridgeToolSet,
+  type TonMcpBridgeConfig,
+} from './ton-bridge.js'
+
+// Unified tools
+export {
+  smartPayInputSchema,
+  executeSmartPay,
+  executeSmartPayDemo,
+  formatSmartPayResult,
+  paymentPlanInputSchema,
+  executePaymentPlan,
+  executePaymentPlanDemo,
+  formatPaymentPlanResult,
+  UNIFIED_TOOL_DEFINITIONS,
+  type SmartPayInput,
+  type SmartPayResult,
+  type SmartPayStep,
+  type PaymentPlanInput,
+  type PaymentPlanResult,
+  type UnifiedMcpConfig,
+} from './unified.js'
+
 /**
  * Base tool definitions (always available)
  */

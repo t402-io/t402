@@ -85,6 +85,30 @@ from .errors import (
     # Utilities
     is_wdk_error,
 )
+from .gasless import (
+    GaslessClient,
+    GaslessConfig,
+    GaslessPaymentParams,
+    GaslessPaymentResult,
+    SponsorshipInfo,
+)
+from .bridge import (
+    WDKBridgeClient,
+    BridgeConfig as WDKBridgeConfig,
+    BridgeParams as WDKBridgeParams,
+    BridgeResult as WDKBridgeResult,
+    BridgeRoute,
+)
+from .multisig import (
+    MultisigClient,
+    MultisigConfig,
+    MultisigProposal,
+)
+from .hardware import (
+    HardwareWalletSigner,
+    HardwareWalletConfig,
+    HardwareWalletType,
+)
 
 
 __all__ = [
@@ -137,4 +161,24 @@ __all__ = [
     "BridgeError",
     "WDKErrorCode",
     "is_wdk_error",
+    # Gasless
+    "GaslessClient",
+    "GaslessConfig",
+    "GaslessPaymentParams",
+    "GaslessPaymentResult",
+    "SponsorshipInfo",
+    # WDK Bridge
+    "WDKBridgeClient",
+    "WDKBridgeConfig",
+    "WDKBridgeParams",
+    "WDKBridgeResult",
+    "BridgeRoute",
+    # Multisig
+    "MultisigClient",
+    "MultisigConfig",
+    "MultisigProposal",
+    # Hardware wallet
+    "HardwareWalletSigner",
+    "HardwareWalletConfig",
+    "HardwareWalletType",
 ]
