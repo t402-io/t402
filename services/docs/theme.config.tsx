@@ -103,13 +103,13 @@ const config: DocsThemeConfig = {
 
   // --- Banner ---
   banner: {
-    key: 'v2.4.0-44-networks',
+    key: 'v2.5.0-50-networks',
     dismissible: true,
     content: (
       <a href="/changelog" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.375rem' }}>
-        <span style={{ fontWeight: 600 }}>T402 v2.4.0</span>
+        <span style={{ fontWeight: 600 }}>T402 v2.5.0</span>
         <span style={{ opacity: 0.5 }}>&mdash;</span>
-        <span>Now supporting 44 networks across 10 blockchain families</span>
+        <span>WDK Protocol + AI agent wallet tools across 50 networks</span>
         <span style={{ marginLeft: '0.25rem', opacity: 0.7 }}>&rarr;</span>
       </a>
     ),
