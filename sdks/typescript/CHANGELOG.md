@@ -18,6 +18,28 @@ All notable changes to the T402 TypeScript SDK will be documented in this file.
   - EIP-712 type definitions: `PERMIT_TYPES`, `PERMIT_DOMAIN_TYPES`
   - Helper functions: `createPermitDomain()`, `createPermitMessage()`
 
+## [2.5.0] - 2026-02-18
+
+### Added
+- **`@t402/wdk-protocol`** - New package: T402 payment protocol for WDK wallet apps
+  - `T402Protocol.create(wdk, config)` - Async factory from WDK instance
+  - `T402Protocol.fetch(url)` - Auto-detect and pay HTTP 402 responses
+  - `T402Protocol.signPayment(requirements)` - Sign payment using WDK signer
+  - `T402Protocol.submitPayment(url, payload)` - Submit signed payment
+  - `extractPaymentRequired(response)` - Parse 402 headers (V2 + V1 fallback)
+  - Chain detection utilities: `detectChainFamily()`, `isEvmNetwork()`, `EVM_CHAIN_MAP`
+  - 27 tests
+- **`@t402/mcp` WDK tools** - 5 new MCP tools for AI agents with WDK wallets
+  - `wdk/getWallet` - Get wallet address and configured chains
+  - `wdk/getBalances` - Multi-chain token balances (USDT0, USDC, native)
+  - `wdk/transfer` - Send stablecoins via WDK signer
+  - `wdk/swap` - Swap tokens via WDK Velora protocol
+  - `t402/autoPay` - Smart payment orchestrator: fetch URL, auto-pay 402, return content
+  - Tools conditionally registered when `T402_WDK_SEED_PHRASE` set or `T402_DEMO_MODE=true`
+  - All tools support demo mode for testing without real transactions
+  - 32 new tests (MCP total: 100)
+- Added `@t402/wdk-protocol` to npm release CI matrix (30 packages total)
+
 ## [2.3.1] - 2026-01-25
 
 ### Added
@@ -115,6 +137,11 @@ All notable changes to the T402 TypeScript SDK will be documented in this file.
 - Basic EVM support
 - Express middleware
 
-[Unreleased]: https://github.com/t402-io/t402/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/t402-io/t402/compare/v2.5.0...HEAD
+[2.5.0]: https://github.com/t402-io/t402/compare/v2.3.1...v2.5.0
+[2.3.1]: https://github.com/t402-io/t402/compare/v2.3.0...v2.3.1
+[2.3.0]: https://github.com/t402-io/t402/compare/v2.2.0...v2.3.0
+[2.2.0]: https://github.com/t402-io/t402/compare/v2.1.0...v2.2.0
+[2.1.0]: https://github.com/t402-io/t402/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/t402-io/t402/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/t402-io/t402/releases/tag/v1.0.0
