@@ -5,11 +5,7 @@
  * using Tether WDK's gasless wallet module.
  */
 
-import type {
-  TonGaslessConfig,
-  TonGaslessPaymentParams,
-  TonGaslessPaymentResult,
-} from './types.js'
+import type { TonGaslessConfig, TonGaslessPaymentParams, TonGaslessPaymentResult } from './types.js'
 import { getJettonAddress, TON_JETTON_DECIMALS } from './constants.js'
 
 /**
@@ -142,9 +138,7 @@ export class TonGaslessClient {
    */
   private getWdkInstance(): unknown {
     if (!this.config.wdkInstance) {
-      throw new Error(
-        'WDK instance not configured. Please provide a wdkInstance in the config.',
-      )
+      throw new Error('WDK instance not configured. Please provide a wdkInstance in the config.')
     }
     return this.config.wdkInstance
   }
@@ -260,8 +254,6 @@ export class TonGaslessClient {
  * console.log('Gasless:', result.sponsored);
  * ```
  */
-export async function createTonGaslessClient(
-  config: TonGaslessConfig,
-): Promise<TonGaslessClient> {
+export async function createTonGaslessClient(config: TonGaslessConfig): Promise<TonGaslessClient> {
   return new TonGaslessClient(config)
 }

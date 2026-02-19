@@ -60,7 +60,10 @@ const BUNDLED_WALLETS: TonWalletInfo[] = [
     imageUrl: "https://tonkeeper.com/assets/tonconnect-icon.png",
     aboutUrl: "https://tonkeeper.com",
     platforms: ["ios", "android", "chrome", "firefox", "macos", "windows", "linux"],
-    bridges: [{ type: "sse", url: "https://bridge.tonapi.io/bridge" }, { type: "js", key: "tonkeeper" }],
+    bridges: [
+      { type: "sse", url: "https://bridge.tonapi.io/bridge" },
+      { type: "js", key: "tonkeeper" },
+    ],
     universalUrl: "https://app.tonkeeper.com/ton-connect",
     deepLink: "tonkeeper-tc://",
   },
@@ -70,7 +73,10 @@ const BUNDLED_WALLETS: TonWalletInfo[] = [
     imageUrl: "https://static.mytonwallet.io/icon-256.png",
     aboutUrl: "https://mytonwallet.io",
     platforms: ["chrome", "windows", "macos", "linux", "ios", "android", "firefox"],
-    bridges: [{ type: "js", key: "mytonwallet" }, { type: "sse", url: "https://tonconnectbridge.mytonwallet.org/bridge/" }],
+    bridges: [
+      { type: "js", key: "mytonwallet" },
+      { type: "sse", url: "https://tonconnectbridge.mytonwallet.org/bridge/" },
+    ],
     universalUrl: "https://connect.mytonwallet.org",
     deepLink: "mytonwallet-tc://",
   },
@@ -89,27 +95,39 @@ const BUNDLED_WALLETS: TonWalletInfo[] = [
     imageUrl: "https://tonhub.com/tonconnect_logo.png",
     aboutUrl: "https://tonhub.com",
     platforms: ["ios", "android"],
-    bridges: [{ type: "js", key: "tonhub" }, { type: "sse", url: "https://connect.tonhubapi.com/tonconnect" }],
+    bridges: [
+      { type: "js", key: "tonhub" },
+      { type: "sse", url: "https://connect.tonhubapi.com/tonconnect" },
+    ],
     universalUrl: "https://tonhub.com/ton-connect",
   },
   {
     name: "Bitget Wallet",
     appName: "bitgetTonWallet",
-    imageUrl: "https://raw.githubusercontent.com/bitgetwallet/download/refs/heads/main/logo/png/bitget_wallet_logo_288_mini.png",
+    imageUrl:
+      "https://raw.githubusercontent.com/bitgetwallet/download/refs/heads/main/logo/png/bitget_wallet_logo_288_mini.png",
     aboutUrl: "https://web3.bitget.com",
     platforms: ["ios", "android", "chrome"],
-    bridges: [{ type: "js", key: "bitgetTonWallet" }, { type: "sse", url: "https://ton-connect-bridge.bgwapi.io/bridge" }],
+    bridges: [
+      { type: "js", key: "bitgetTonWallet" },
+      { type: "sse", url: "https://ton-connect-bridge.bgwapi.io/bridge" },
+    ],
     universalUrl: "https://bkcode.vip/ton-connect",
     deepLink: "bitkeep://",
   },
   {
     name: "OKX Wallet",
     appName: "okxWallet",
-    imageUrl: "https://static.okx.com/cdn/web3/assets/imgs/70d223c0-8527-40c1-8292-b3cc10b53d88.png",
+    imageUrl:
+      "https://static.okx.com/cdn/web3/assets/imgs/70d223c0-8527-40c1-8292-b3cc10b53d88.png",
     aboutUrl: "https://web3.okx.com",
     platforms: ["chrome", "safari", "firefox", "ios", "android"],
-    bridges: [{ type: "js", key: "okxTonWallet" }, { type: "sse", url: "https://web3.okx.com/tonbridge/discover/rpc/bridge" }],
-    universalUrl: "https://web3.okx.com/download?appendQuery=true&deeplink=okxwallet://web3/wallet/tonconnect",
+    bridges: [
+      { type: "js", key: "okxTonWallet" },
+      { type: "sse", url: "https://web3.okx.com/tonbridge/discover/rpc/bridge" },
+    ],
+    universalUrl:
+      "https://web3.okx.com/download?appendQuery=true&deeplink=okxwallet://web3/wallet/tonconnect",
   },
   {
     name: "Binance Wallet",
@@ -117,7 +135,10 @@ const BUNDLED_WALLETS: TonWalletInfo[] = [
     imageUrl: "https://public.bnbstatic.com/static/binance-w3w/ton-provider/binancew3w.png",
     aboutUrl: "https://www.binance.com/en/web3wallet",
     platforms: ["ios", "android", "macos", "windows", "linux", "chrome"],
-    bridges: [{ type: "js", key: "binancew3w" }, { type: "sse", url: "https://wallet.binance.com/tonbridge/bridge" }],
+    bridges: [
+      { type: "js", key: "binancew3w" },
+      { type: "sse", url: "https://wallet.binance.com/tonbridge/bridge" },
+    ],
     universalUrl: "https://app.binance.com/cedefi/ton-connect",
     deepLink: "bnc://app.binance.com/cedefi/ton-connect",
   },
@@ -127,16 +148,23 @@ const BUNDLED_WALLETS: TonWalletInfo[] = [
     imageUrl: "https://raw.githubusercontent.com/hot-dao/media/main/logo.png",
     aboutUrl: "https://hot-labs.org/",
     platforms: ["ios", "android", "macos", "windows", "linux"],
-    bridges: [{ type: "sse", url: "https://sse-bridge.hot-labs.org" }, { type: "js", key: "hotWallet" }],
+    bridges: [
+      { type: "sse", url: "https://sse-bridge.hot-labs.org" },
+      { type: "js", key: "hotWallet" },
+    ],
     universalUrl: "https://t.me/herewalletbot?attach=wallet",
   },
   {
     name: "Bybit Wallet",
     appName: "bybitTonWallet",
-    imageUrl: "https://raw.githubusercontent.com/bybit-web3/bybit-web3.github.io/main/docs/images/bybit-logo.png",
+    imageUrl:
+      "https://raw.githubusercontent.com/bybit-web3/bybit-web3.github.io/main/docs/images/bybit-logo.png",
     aboutUrl: "https://www.bybit.com/web3",
     platforms: ["ios", "android", "chrome"],
-    bridges: [{ type: "js", key: "bybitTonWallet" }, { type: "sse", url: "https://api-node.bybit.com/spot/api/web3/bridge/ton/bridge" }],
+    bridges: [
+      { type: "js", key: "bybitTonWallet" },
+      { type: "sse", url: "https://api-node.bybit.com/spot/api/web3/bridge/ton/bridge" },
+    ],
     universalUrl: "https://app.bybit.com/ton-connect",
     deepLink: "bybitapp://",
   },
@@ -155,14 +183,18 @@ const BUNDLED_WALLETS: TonWalletInfo[] = [
     imageUrl: "https://s.pvcliping.com/web/public_image/SafePal_x288.png",
     aboutUrl: "https://www.safepal.com",
     platforms: ["ios", "android", "chrome", "firefox"],
-    bridges: [{ type: "sse", url: "https://ton-bridge.safepal.com/tonbridge/v1/bridge" }, { type: "js", key: "safepalwallet" }],
+    bridges: [
+      { type: "sse", url: "https://ton-bridge.safepal.com/tonbridge/v1/bridge" },
+      { type: "js", key: "safepalwallet" },
+    ],
     universalUrl: "https://link.safepal.io/ton-connect",
     deepLink: "safepal-tc://",
   },
   {
     name: "OpenMask",
     appName: "openmask",
-    imageUrl: "https://raw.githubusercontent.com/OpenProduct/openmask-extension/main/public/openmask-logo-288.png",
+    imageUrl:
+      "https://raw.githubusercontent.com/OpenProduct/openmask-extension/main/public/openmask-logo-288.png",
     aboutUrl: "https://www.openmask.app/",
     platforms: ["chrome"],
     bridges: [{ type: "js", key: "openmask" }],
@@ -186,9 +218,7 @@ let walletsCache: WalletsCacheEntry | null = null;
  * @param cacheTTL - Cache duration in milliseconds (default: 1 hour)
  * @returns Array of wallet information
  */
-export async function fetchTonWallets(
-  cacheTTL: number = 3_600_000,
-): Promise<TonWalletInfo[]> {
+export async function fetchTonWallets(cacheTTL: number = 3_600_000): Promise<TonWalletInfo[]> {
   const now = Date.now();
   if (walletsCache && now - walletsCache.fetchedAt < cacheTTL) {
     return walletsCache.wallets;
@@ -258,14 +288,12 @@ export function filterWalletsByPlatform(
   wallets: TonWalletInfo[],
   platform: "ios" | "android" | "desktop" | "browser",
 ): TonWalletInfo[] {
-  return wallets.filter((wallet) => {
+  return wallets.filter(wallet => {
     if (platform === "browser") {
-      return wallet.platforms.some((p) => BROWSER_PLATFORMS.has(p));
+      return wallet.platforms.some(p => BROWSER_PLATFORMS.has(p));
     }
     if (platform === "desktop") {
-      return wallet.platforms.some(
-        (p) => DESKTOP_PLATFORMS.has(p) || BROWSER_PLATFORMS.has(p),
-      );
+      return wallet.platforms.some(p => DESKTOP_PLATFORMS.has(p) || BROWSER_PLATFORMS.has(p));
     }
     return wallet.platforms.includes(platform);
   });
@@ -278,10 +306,7 @@ export function filterWalletsByPlatform(
  * @param connectUrl - TON Connect session URL
  * @returns Link string, or null if the wallet has no link support
  */
-export function generateWalletDeepLink(
-  wallet: TonWalletInfo,
-  connectUrl: string,
-): string | null {
+export function generateWalletDeepLink(wallet: TonWalletInfo, connectUrl: string): string | null {
   const encodedUrl = encodeURIComponent(connectUrl);
 
   if (wallet.deepLink) {
@@ -335,10 +360,8 @@ export function parseWalletsList(data: unknown): TonWalletInfo[] {
       }
     }
 
-    const universalUrl =
-      typeof e.universal_url === "string" ? e.universal_url : undefined;
-    const deepLink =
-      typeof e.deepLink === "string" ? e.deepLink : undefined;
+    const universalUrl = typeof e.universal_url === "string" ? e.universal_url : undefined;
+    const deepLink = typeof e.deepLink === "string" ? e.deepLink : undefined;
 
     wallets.push({
       name,

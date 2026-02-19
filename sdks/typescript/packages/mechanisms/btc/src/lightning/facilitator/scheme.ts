@@ -46,7 +46,7 @@ export interface FacilitatorLightningSigner {
  */
 async function sha256Hex(preimageHex: string): Promise<string> {
   const bytes = new Uint8Array(preimageHex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)))
-  const hashBuffer = await crypto.subtle.digest('SHA-256', bytes)
+  const hashBuffer = await globalThis.crypto.subtle.digest('SHA-256', bytes)
   const hashArray = new Uint8Array(hashBuffer)
   return Array.from(hashArray)
     .map((b) => b.toString(16).padStart(2, '0'))

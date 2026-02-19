@@ -140,7 +140,6 @@ export interface RouteConfig {
    *
    * If not provided, defaults to { contentType: 'application/json', body: {} }.
    *
-   * @param context - The HTTP request context
    * @returns An object containing both contentType and body for the 402 response
    */
   unpaidResponseBody?: UnpaidResponseBody;

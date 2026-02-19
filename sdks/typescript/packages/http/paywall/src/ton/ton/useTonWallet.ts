@@ -43,7 +43,13 @@ export interface UseTonWalletReturn {
  * Tries @ton/appkit first, falls back to @tonconnect/ui-react.
  */
 async function loadWalletProvider(): Promise<{
-  useTonConnectUI: () => [{ openModal: () => Promise<void>; disconnect: () => Promise<void>; sendTransaction: (req: unknown) => Promise<{ boc: string }> }];
+  useTonConnectUI: () => [
+    {
+      openModal: () => Promise<void>;
+      disconnect: () => Promise<void>;
+      sendTransaction: (req: unknown) => Promise<{ boc: string }>;
+    },
+  ];
   useTonWallet: () => AppKitWallet | null;
   source: "appkit" | "tonconnect";
 }> {
@@ -59,7 +65,12 @@ async function loadWalletProvider(): Promise<{
     // Fall back to @tonconnect/ui-react
     const tonconnect = await import("@tonconnect/ui-react");
     return {
-      useTonConnectUI: tonconnect.useTonConnectUI as unknown as typeof loadWalletProvider extends () => Promise<infer R> ? R["useTonConnectUI"] : never,
+      useTonConnectUI:
+        tonconnect.useTonConnectUI as unknown as typeof loadWalletProvider extends () => Promise<
+          infer R
+        >
+          ? R["useTonConnectUI"]
+          : never,
       useTonWallet: tonconnect.useTonWallet as unknown as () => AppKitWallet | null,
       source: "tonconnect",
     };
@@ -89,13 +100,17 @@ export function useTonWalletConnection(onStatus?: (status: string) => void): Use
   const [wallet, setWallet] = useState<AppKitWallet | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [provider, setProvider] = useState<Awaited<ReturnType<typeof loadWalletProvider>> | null>(null);
+  const [provider, setProvider] = useState<Awaited<ReturnType<typeof loadWalletProvider>> | null>(
+    null,
+  );
 
   // Load provider on mount
   useEffect(() => {
-    getProvider().then(setProvider).catch(() => {
-      setError("Failed to load TON wallet provider");
-    });
+    getProvider()
+      .then(setProvider)
+      .catch(() => {
+        setError("Failed to load TON wallet provider");
+      });
   }, []);
 
   // TODO: Once @ton/appkit is published, replace this polling approach

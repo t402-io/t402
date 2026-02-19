@@ -85,9 +85,7 @@ describe("Permit2EvmScheme (Client)", () => {
       const callArgs = (mockSigner.signTypedData as any).mock.calls[0][0];
       expect(callArgs.domain.name).toBe("Permit2");
       expect(callArgs.domain.chainId).toBe(8453);
-      expect(callArgs.domain.verifyingContract).toBe(
-        "0x000000000022D473030F116dDEE9F6B43aC78BA3",
-      );
+      expect(callArgs.domain.verifyingContract).toBe("0x000000000022D473030F116dDEE9F6B43aC78BA3");
       expect(callArgs.primaryType).toBe("PermitTransferFrom");
     });
 

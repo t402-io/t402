@@ -4,19 +4,16 @@ import json
 import base64
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from httpx import Request, Response, AsyncClient
+from httpx import Request, Response
 from eth_account import Account
 
-from t402.clients.httpx import HttpxHooks, t402_payment_hooks, t402HttpxClient
+from t402.clients.httpx import HttpxHooks, t402_payment_hooks
 from t402.clients.base import PaymentError, t402Client
 from t402.types import (
     PaymentRequirements,
     PaymentRequirementsV2,
     t402PaymentRequiredResponse,
-    PaymentRequiredV2,
-    ResourceInfo,
     T402_VERSION_V1,
-    T402_VERSION_V2,
 )
 
 

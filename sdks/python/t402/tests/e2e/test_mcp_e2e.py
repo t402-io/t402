@@ -2,7 +2,6 @@
 
 import io
 import json
-import pytest
 
 from t402.mcp import (
     T402McpServer,
@@ -12,7 +11,6 @@ from t402.mcp import (
     BRIDGEABLE_CHAINS,
     GASLESS_NETWORKS,
 )
-from t402.mcp.types import ServerConfig as ServerConfigType
 
 TEST_ADDRESS = "0x1234567890abcdef1234567890abcdef12345678"
 

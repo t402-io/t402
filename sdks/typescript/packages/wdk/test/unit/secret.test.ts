@@ -35,8 +35,7 @@ describe('encryptSeed', () => {
   })
 
   it('should produce different ciphertexts for different seed phrases', async () => {
-    const seed2 =
-      'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong'
+    const seed2 = 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong'
     const encrypted1 = await encryptSeed(SEED_PHRASE, PASSWORD)
     const encrypted2 = await encryptSeed(seed2, PASSWORD)
 
@@ -73,9 +72,9 @@ describe('decryptSeed', () => {
   })
 
   it('should throw for null encrypted data', async () => {
-    await expect(
-      decryptSeed(null as unknown as EncryptedSeed, PASSWORD),
-    ).rejects.toThrow('Encrypted seed data is required')
+    await expect(decryptSeed(null as unknown as EncryptedSeed, PASSWORD)).rejects.toThrow(
+      'Encrypted seed data is required',
+    )
   })
 
   it('should throw for empty password', async () => {
@@ -179,9 +178,7 @@ describe('T402WDK secret methods', () => {
     T402WDK.registerWDK(MockWDKConstructor, MockWalletManagerEvm)
 
     const encrypted = await encryptSeed(SEED_PHRASE, PASSWORD)
-    await expect(
-      T402WDK.fromEncryptedSeed(encrypted, 'wrong-password'),
-    ).rejects.toThrow()
+    await expect(T402WDK.fromEncryptedSeed(encrypted, 'wrong-password')).rejects.toThrow()
 
     // Clean up
     // @ts-expect-error - accessing private static for testing

@@ -8,7 +8,7 @@ from requests import Response, PreparedRequest
 from eth_account import Account
 
 from t402.clients.requests import t402HTTPAdapter, t402_http_adapter, t402_requests
-from t402.clients.base import PaymentError, t402Client
+from t402.clients.base import PaymentError
 from t402.types import (
     PaymentRequirements,
     t402PaymentRequiredResponse,
@@ -109,7 +109,7 @@ class TestRequestsPaymentFlow:
 
         with patch(
             "requests.adapters.HTTPAdapter.send", side_effect=mock_send_impl
-        ) as mock_send:
+        ):
             response = adapter.send(request)
 
         assert response.status_code == 200

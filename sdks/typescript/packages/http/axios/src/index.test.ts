@@ -103,9 +103,8 @@ describe("wrapAxiosWithPayment()", () => {
     } as unknown as AxiosInstance;
 
     // Create mock client
-    const { t402Client: MockT402Client, t402HTTPClient: MockT402HTTPClient } = await import(
-      "@t402/core/client"
-    );
+    const { t402Client: MockT402Client, t402HTTPClient: MockT402HTTPClient } =
+      await import("@t402/core/client");
 
     mockClient = new MockT402Client() as unknown as t402Client;
 

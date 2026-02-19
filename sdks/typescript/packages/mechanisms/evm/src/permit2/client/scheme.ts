@@ -37,7 +37,7 @@ export class Permit2EvmScheme implements SchemeNetworkClient {
     const nonce = BigInt(
       "0x" +
         Array.from(globalThis.crypto.getRandomValues(new Uint8Array(32)))
-          .map((b) => b.toString(16).padStart(2, "0"))
+          .map(b => b.toString(16).padStart(2, "0"))
           .join(""),
     ).toString();
 
@@ -56,11 +56,7 @@ export class Permit2EvmScheme implements SchemeNetworkClient {
     };
 
     // Sign the Permit2 typed data
-    const signature = await this.signPermit2(
-      permit,
-      transferDetails.to,
-      paymentRequirements,
-    );
+    const signature = await this.signPermit2(permit, transferDetails.to, paymentRequirements);
 
     const payload: Permit2PayloadV2 = {
       permit,
@@ -77,6 +73,11 @@ export class Permit2EvmScheme implements SchemeNetworkClient {
 
   /**
    * Sign the Permit2 SignatureTransfer using EIP-712
+   *
+   * @param permit - The permit transfer data
+   * @param spender - The spender address
+   * @param requirements - The payment requirements
+   * @returns Signed typed data hex string
    */
   private async signPermit2(
     permit: Permit2PayloadV2["permit"],

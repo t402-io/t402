@@ -18,7 +18,11 @@ export interface SwapStrategyConfig {
   /** WDK instance for executing swaps */
   wdk?: {
     canSwap(): boolean
-    getSwapQuote(chain: string, fromToken: string, amount: bigint): Promise<{
+    getSwapQuote(
+      chain: string,
+      fromToken: string,
+      amount: bigint,
+    ): Promise<{
       outputAmount: bigint
       fee: bigint
       route: string[]
@@ -86,11 +90,7 @@ export class SwapStrategy implements DefiStrategy {
       const balance = params.currentBalances[tokenAddress] ?? 0n
       if (balance <= 0n) continue
 
-      const quote = await this.config.wdk.getSwapQuote(
-        params.targetNetwork,
-        tokenAddress,
-        balance,
-      )
+      const quote = await this.config.wdk.getSwapQuote(params.targetNetwork, tokenAddress, balance)
 
       if (quote.outputAmount >= params.targetAmount) {
         const steps: Omit<DefiStep, 'txHash'>[] = [

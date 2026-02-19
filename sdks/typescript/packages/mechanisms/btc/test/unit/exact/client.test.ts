@@ -8,7 +8,9 @@ function createMockSigner(): ClientBtcSigner {
   return {
     signPsbt: vi.fn().mockResolvedValue('signed-psbt-base64'),
     getAddress: vi.fn().mockReturnValue('bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4'),
-    getPublicKey: vi.fn().mockReturnValue('02b4632d08485ff1df2db55b9dafd23347d1c47a457072a1e87be26896549a8737'),
+    getPublicKey: vi
+      .fn()
+      .mockReturnValue('02b4632d08485ff1df2db55b9dafd23347d1c47a457072a1e87be26896549a8737'),
   }
 }
 
@@ -60,9 +62,7 @@ describe('ExactBtcScheme (Client)', () => {
     const scheme = new ExactBtcScheme(signer)
     const requirements = createRequirements({ amount: '' })
 
-    await expect(scheme.createPaymentPayload(2, requirements)).rejects.toThrow(
-      'Amount is required',
-    )
+    await expect(scheme.createPaymentPayload(2, requirements)).rejects.toThrow('Amount is required')
   })
 
   it('should throw if address is invalid', async () => {
@@ -80,9 +80,7 @@ describe('ExactBtcScheme (Client)', () => {
     const scheme = new ExactBtcScheme(signer)
     const requirements = createRequirements({ amount: '100' }) // below 546 dust limit
 
-    await expect(scheme.createPaymentPayload(2, requirements)).rejects.toThrow(
-      'below dust limit',
-    )
+    await expect(scheme.createPaymentPayload(2, requirements)).rejects.toThrow('below dust limit')
   })
 
   it('should pass unsigned PSBT to signer', async () => {

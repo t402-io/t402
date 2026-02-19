@@ -5,7 +5,6 @@
  * proxying @ton/mcp's 15 blockchain tools through the t402 MCP server.
  */
 
-
 /**
  * Configuration for the TON MCP bridge
  */
@@ -45,8 +44,7 @@ interface TonBridgeTool {
 export const TON_BRIDGE_TOOLS: Record<string, TonBridgeTool> = {
   'ton/getBalance': {
     name: 'ton/getBalance',
-    description:
-      'Get TON and Jetton balances for a wallet address on the TON blockchain.',
+    description: 'Get TON and Jetton balances for a wallet address on the TON blockchain.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -61,8 +59,7 @@ export const TON_BRIDGE_TOOLS: Record<string, TonBridgeTool> = {
 
   'ton/transfer': {
     name: 'ton/transfer',
-    description:
-      'Send TON to a recipient address on the TON blockchain.',
+    description: 'Send TON to a recipient address on the TON blockchain.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -85,8 +82,7 @@ export const TON_BRIDGE_TOOLS: Record<string, TonBridgeTool> = {
 
   'ton/getJettonBalance': {
     name: 'ton/getJettonBalance',
-    description:
-      'Get the balance of a specific Jetton (TON token) for a wallet address.',
+    description: 'Get the balance of a specific Jetton (TON token) for a wallet address.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -105,8 +101,7 @@ export const TON_BRIDGE_TOOLS: Record<string, TonBridgeTool> = {
 
   'ton/swapJettons': {
     name: 'ton/swapJettons',
-    description:
-      'Swap Jettons (TON tokens) using DEX aggregation on the TON network.',
+    description: 'Swap Jettons (TON tokens) using DEX aggregation on the TON network.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -133,8 +128,7 @@ export const TON_BRIDGE_TOOLS: Record<string, TonBridgeTool> = {
 
   'ton/getTransactionStatus': {
     name: 'ton/getTransactionStatus',
-    description:
-      'Check the status and details of a TON transaction by its hash.',
+    description: 'Check the status and details of a TON transaction by its hash.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -278,9 +272,7 @@ async function executeTonBridgeToolDirect(
         const balanceNano = BigInt(data.result)
         const balanceTon = Number(balanceNano) / 1e9
         return {
-          content: [
-            { type: 'text', text: `TON Balance: ${balanceTon.toFixed(4)} TON` },
-          ],
+          content: [{ type: 'text', text: `TON Balance: ${balanceTon.toFixed(4)} TON` }],
         }
       }
 
@@ -296,7 +288,10 @@ async function executeTonBridgeToolDirect(
         }
         return {
           content: [
-            { type: 'text', text: `Transaction found:\n${JSON.stringify(data.result[0], null, 2)}` },
+            {
+              type: 'text',
+              text: `Transaction found:\n${JSON.stringify(data.result[0], null, 2)}`,
+            },
           ],
         }
       }

@@ -42,11 +42,7 @@ export class T402Protocol {
   private facilitator: string
   private chains: string[]
 
-  private constructor(
-    wdk: T402WDK,
-    httpClient: t402HTTPClient,
-    config: T402ProtocolConfig,
-  ) {
+  private constructor(wdk: T402WDK, httpClient: t402HTTPClient, config: T402ProtocolConfig) {
     this.wdk = wdk
     this.httpClient = httpClient
     this.facilitator = config.facilitator ?? DEFAULT_FACILITATOR
@@ -98,8 +94,8 @@ export class T402Protocol {
     }
 
     // Extract payment requirements from 402 response
-    const paymentRequired = this.httpClient.getPaymentRequiredResponse(
-      (name: string) => response.headers.get(name),
+    const paymentRequired = this.httpClient.getPaymentRequiredResponse((name: string) =>
+      response.headers.get(name),
     )
 
     // Create signed payment payload using mechanism-specific logic

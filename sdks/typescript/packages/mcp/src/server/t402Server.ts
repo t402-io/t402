@@ -379,9 +379,10 @@ export class T402McpServer {
   private async handleWdkGetWallet(args: unknown) {
     wdkGetWalletInputSchema.parse(args)
 
-    const result = this.config.demoMode || !this.wdk
-      ? executeWdkGetWalletDemo()
-      : await executeWdkGetWallet({}, this.wdk)
+    const result =
+      this.config.demoMode || !this.wdk
+        ? executeWdkGetWalletDemo()
+        : await executeWdkGetWallet({}, this.wdk)
 
     return {
       content: [{ type: 'text' as const, text: formatWdkWalletResult(result) }],
@@ -394,9 +395,10 @@ export class T402McpServer {
   private async handleWdkGetBalances(args: unknown) {
     const input = wdkGetBalancesInputSchema.parse(args)
 
-    const result = this.config.demoMode || !this.wdk
-      ? executeWdkGetBalancesDemo()
-      : await executeWdkGetBalances(input, this.wdk)
+    const result =
+      this.config.demoMode || !this.wdk
+        ? executeWdkGetBalancesDemo()
+        : await executeWdkGetBalances(input, this.wdk)
 
     return {
       content: [{ type: 'text' as const, text: formatWdkBalancesResult(result) }],
@@ -409,9 +411,10 @@ export class T402McpServer {
   private async handleWdkTransfer(args: unknown) {
     const input = wdkTransferInputSchema.parse(args)
 
-    const result = this.config.demoMode || !this.wdk
-      ? executeWdkTransferDemo(input)
-      : await executeWdkTransfer(input, this.wdk)
+    const result =
+      this.config.demoMode || !this.wdk
+        ? executeWdkTransferDemo(input)
+        : await executeWdkTransfer(input, this.wdk)
 
     return {
       content: [{ type: 'text' as const, text: formatWdkTransferResult(result) }],
@@ -424,9 +427,10 @@ export class T402McpServer {
   private async handleWdkSwap(args: unknown) {
     const input = wdkSwapInputSchema.parse(args)
 
-    const result = this.config.demoMode || !this.wdk
-      ? executeWdkSwapDemo(input)
-      : await executeWdkSwap(input, this.wdk)
+    const result =
+      this.config.demoMode || !this.wdk
+        ? executeWdkSwapDemo(input)
+        : await executeWdkSwap(input, this.wdk)
 
     return {
       content: [{ type: 'text' as const, text: formatWdkSwapResult(result) }],
@@ -439,9 +443,10 @@ export class T402McpServer {
   private async handleAutoPay(args: unknown) {
     const input = autoPayInputSchema.parse(args)
 
-    const result = this.config.demoMode || !this.wdk
-      ? executeAutoPayDemo(input)
-      : await executeAutoPay(input, this.wdk)
+    const result =
+      this.config.demoMode || !this.wdk
+        ? executeAutoPayDemo(input)
+        : await executeAutoPay(input, this.wdk)
 
     return {
       content: [{ type: 'text' as const, text: formatAutoPayResult(result) }],
@@ -456,9 +461,10 @@ export class T402McpServer {
   private async handleSmartPay(args: unknown) {
     const input = smartPayInputSchema.parse(args)
 
-    const result = this.config.demoMode || !this.wdk
-      ? executeSmartPayDemo(input)
-      : await executeSmartPay(input, this.wdk)
+    const result =
+      this.config.demoMode || !this.wdk
+        ? executeSmartPayDemo(input)
+        : await executeSmartPay(input, this.wdk)
 
     return {
       content: [{ type: 'text' as const, text: formatSmartPayResult(result) }],
@@ -471,9 +477,10 @@ export class T402McpServer {
   private async handlePaymentPlan(args: unknown) {
     const input = paymentPlanInputSchema.parse(args)
 
-    const result = this.config.demoMode || !this.wdk
-      ? executePaymentPlanDemo(input)
-      : await executePaymentPlan(input, this.wdk)
+    const result =
+      this.config.demoMode || !this.wdk
+        ? executePaymentPlanDemo(input)
+        : await executePaymentPlan(input, this.wdk)
 
     return {
       content: [{ type: 'text' as const, text: formatPaymentPlanResult(result) }],
@@ -487,16 +494,10 @@ export class T402McpServer {
    */
   private async handleTonBridgeTool(name: string, args: unknown) {
     if (!this.tonBridgeConfig) {
-      throw new Error(
-        'TON bridge not configured. Call registerTonBridge() to enable TON tools.',
-      )
+      throw new Error('TON bridge not configured. Call registerTonBridge() to enable TON tools.')
     }
 
-    return executeTonBridgeTool(
-      name,
-      (args ?? {}) as Record<string, unknown>,
-      this.tonBridgeConfig,
-    )
+    return executeTonBridgeTool(name, (args ?? {}) as Record<string, unknown>, this.tonBridgeConfig)
   }
 
   /**

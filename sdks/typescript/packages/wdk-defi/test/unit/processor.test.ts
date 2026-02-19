@@ -111,12 +111,8 @@ describe('DefiPrePaymentProcessor', () => {
   describe('estimate', () => {
     it('should return best estimate by fee', async () => {
       const processor = new DefiPrePaymentProcessor()
-      processor.registerStrategy(
-        createMockStrategy('swap', { fee: 100n, outputAmount: 1000000n }),
-      )
-      processor.registerStrategy(
-        createMockStrategy('borrow', { fee: 50n, outputAmount: 1000000n }),
-      )
+      processor.registerStrategy(createMockStrategy('swap', { fee: 100n, outputAmount: 1000000n }))
+      processor.registerStrategy(createMockStrategy('borrow', { fee: 50n, outputAmount: 1000000n }))
 
       const params: DefiStrategyParams = {
         targetToken: '0xtarget',
@@ -150,13 +146,9 @@ describe('DefiPrePaymentProcessor', () => {
     it('should skip strategies that throw', async () => {
       const processor = new DefiPrePaymentProcessor()
       const failingStrategy = createMockStrategy('failing')
-      ;(failingStrategy.estimate as ReturnType<typeof vi.fn>).mockRejectedValue(
-        new Error('fail'),
-      )
+      ;(failingStrategy.estimate as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('fail'))
       processor.registerStrategy(failingStrategy)
-      processor.registerStrategy(
-        createMockStrategy('working', { fee: 10n }),
-      )
+      processor.registerStrategy(createMockStrategy('working', { fee: 10n }))
 
       const params: DefiStrategyParams = {
         targetToken: '0xtarget',

@@ -11,8 +11,6 @@ import {
   formatPaymentPlanResult,
   // Tool definitions
   UNIFIED_TOOL_DEFINITIONS,
-  TOOL_DEFINITIONS,
-  WDK_TOOL_DEFINITIONS,
 } from '../../src/tools/index.js'
 import { T402McpServer, createT402McpServer, loadConfigFromEnv } from '../../src/server/index.js'
 
@@ -143,9 +141,7 @@ describe('Unified Tool Formatters', () => {
       success: false,
       statusCode: 402,
       body: '',
-      steps: [
-        { action: 'check_balance', status: 'failed', detail: 'No balance' },
-      ],
+      steps: [{ action: 'check_balance', status: 'failed', detail: 'No balance' }],
       error: 'Insufficient funds',
     })
     expect(result).toContain('Failed')
@@ -239,7 +235,8 @@ describe('Server Unified Mode Configuration', () => {
   it('should create server with unified mode enabled', () => {
     const server = createT402McpServer({
       demoMode: true,
-      seedPhrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+      seedPhrase:
+        'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
       unifiedMode: true,
     })
     expect(server).toBeInstanceOf(T402McpServer)

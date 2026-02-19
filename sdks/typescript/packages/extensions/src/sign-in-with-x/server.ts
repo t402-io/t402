@@ -422,7 +422,6 @@ function evmAddressToTron(evmAddress: string): string {
   return encodeBase58(fullAddress);
 }
 
-
 /**
  * Verifies a SIWx signature.
  *

@@ -322,6 +322,12 @@ __all__ = [
     "is_tron_network",
     "is_evm_network",
     "is_svm_network",
+    "is_near_network",
+    "is_aptos_network",
+    "is_tezos_network",
+    "is_polkadot_network",
+    "is_stacks_network",
+    "is_cosmos_network",
     "get_network_type",
     # V1 Types (Legacy)
     "PaymentRequirements",

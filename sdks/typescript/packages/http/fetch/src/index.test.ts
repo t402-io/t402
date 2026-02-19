@@ -73,9 +73,8 @@ describe("wrapFetchWithPayment()", () => {
     mockFetch = vi.fn();
 
     // Create mock client
-    const { t402Client: MockT402Client, t402HTTPClient: MockT402HTTPClient } = await import(
-      "@t402/core/client"
-    );
+    const { t402Client: MockT402Client, t402HTTPClient: MockT402HTTPClient } =
+      await import("@t402/core/client");
 
     mockClient = new MockT402Client() as unknown as t402Client;
 
@@ -344,9 +343,8 @@ describe("wrapFetchWithPaymentFromConfig()", () => {
 
     mockFetch = vi.fn();
 
-    const { t402Client: MockT402Client, t402HTTPClient: MockT402HTTPClient } = await import(
-      "@t402/core/client"
-    );
+    const { t402Client: MockT402Client, t402HTTPClient: MockT402HTTPClient } =
+      await import("@t402/core/client");
     (MockT402Client.fromConfig as ReturnType<typeof vi.fn>).mockReturnValue(new MockT402Client());
 
     (

@@ -1,8 +1,5 @@
 """E2E tests for Flask middleware integration with T402 payment protocol."""
 
-import json
-import base64
-import pytest
 from flask import Flask
 
 from t402.flask.middleware import PaymentMiddleware

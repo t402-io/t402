@@ -222,7 +222,8 @@ describe('useT402Payment', () => {
     })
     const mockPaidResponse = new Response('ok', { status: 200 })
 
-    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(mock402)
       .mockResolvedValueOnce(mockPaidResponse)
 

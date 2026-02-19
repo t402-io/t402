@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { T402TonWallet, createT402TonWallet } from './wallet'
 import type { T402TonWalletConfig } from './types'
 
@@ -44,9 +44,7 @@ describe('T402TonWallet', () => {
     })
 
     it('should throw for an invalid mnemonic', async () => {
-      await expect(T402TonWallet.fromMnemonic('too short')).rejects.toThrow(
-        'Invalid mnemonic',
-      )
+      await expect(T402TonWallet.fromMnemonic('too short')).rejects.toThrow('Invalid mnemonic')
     })
 
     it('should accept custom configuration', async () => {
@@ -100,9 +98,7 @@ describe('T402TonWallet', () => {
 
     it('should accept a custom Jetton master address', async () => {
       const wallet = await T402TonWallet.fromMnemonic(testMnemonic)
-      const balance = await wallet.getJettonBalance(
-        'EQCustomJettonMaster1234567890',
-      )
+      const balance = await wallet.getJettonBalance('EQCustomJettonMaster1234567890')
       expect(typeof balance).toBe('bigint')
     })
   })

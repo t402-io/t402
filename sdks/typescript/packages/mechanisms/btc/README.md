@@ -3,6 +3,7 @@
 Bitcoin & Lightning Network payment mechanism for the t402 protocol.
 
 Supports:
+
 - **BTC On-chain**: PSBT-based payments using the `exact` scheme
 - **Lightning Network**: BOLT11 invoice payments with preimage verification
 
@@ -15,18 +16,19 @@ pnpm add @t402/btc @t402/core
 ```
 
 For PSBT construction with bitcoinjs-lib (optional):
+
 ```bash
 npm install bitcoinjs-lib
 ```
 
 ## Networks
 
-| Network | CAIP-2 ID |
-|---------|-----------|
-| BTC Mainnet | `bip122:000000000019d6689c085ae165831e93` |
-| BTC Testnet | `bip122:000000000933ea01ad0ee984209779ba` |
-| Lightning Mainnet | `lightning:mainnet` |
-| Lightning Testnet | `lightning:testnet` |
+| Network           | CAIP-2 ID                                 |
+| ----------------- | ----------------------------------------- |
+| BTC Mainnet       | `bip122:000000000019d6689c085ae165831e93` |
+| BTC Testnet       | `bip122:000000000933ea01ad0ee984209779ba` |
+| Lightning Mainnet | `lightning:mainnet`                       |
+| Lightning Testnet | `lightning:testnet`                       |
 
 ## Usage
 
@@ -39,7 +41,9 @@ import { t402Client } from '@t402/core/client'
 const client = new t402Client()
 registerExactBtcScheme(client, {
   signer: {
-    signPsbt: async (psbt) => { /* sign PSBT */ },
+    signPsbt: async (psbt) => {
+      /* sign PSBT */
+    },
     getAddress: () => 'bc1q...',
     getPublicKey: () => '02...',
   },

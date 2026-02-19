@@ -59,10 +59,7 @@ export interface AutoPayResult {
  * @param wdk - T402WDK instance
  * @returns AutoPay result
  */
-export async function executeAutoPay(
-  input: AutoPayInput,
-  wdk: T402WDK,
-): Promise<AutoPayResult> {
+export async function executeAutoPay(input: AutoPayInput, wdk: T402WDK): Promise<AutoPayResult> {
   const chains = input.preferredChain ? [input.preferredChain] : ['ethereum', 'arbitrum', 'base']
 
   const protocol = await T402Protocol.create(wdk, { chains })

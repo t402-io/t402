@@ -30,9 +30,7 @@ describe('WdkIndexerVerifier', () => {
     })
 
     it('should throw when endpoint is missing', () => {
-      expect(() => new WdkIndexerVerifier({ endpoint: '' })).toThrow(
-        'Indexer endpoint is required',
-      )
+      expect(() => new WdkIndexerVerifier({ endpoint: '' })).toThrow('Indexer endpoint is required')
     })
 
     it('should normalize endpoint by removing trailing slash', () => {
@@ -144,9 +142,9 @@ describe('WdkIndexerVerifier', () => {
         endpoint: 'https://indexer.example.com',
       })
 
-      await expect(
-        verifier.queryTransaction({ txHash: '0xabc', network: '' }),
-      ).rejects.toThrow('Network is required')
+      await expect(verifier.queryTransaction({ txHash: '0xabc', network: '' })).rejects.toThrow(
+        'Network is required',
+      )
     })
 
     it('should include API key in authorization header', async () => {

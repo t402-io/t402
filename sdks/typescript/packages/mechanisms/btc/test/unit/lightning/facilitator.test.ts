@@ -40,7 +40,8 @@ function createPayload(overrides?: Partial<PaymentPayload>): PaymentPayload {
     payload: {
       paymentHash: KNOWN_HASH,
       preimage: KNOWN_PREIMAGE,
-      bolt11Invoice: 'lnbc1pvjluezpp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypqdpl2pkx2ctn',
+      bolt11Invoice:
+        'lnbc1pvjluezpp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypqdpl2pkx2ctn',
     },
     ...overrides,
   }
@@ -123,7 +124,8 @@ describe('LightningScheme (Facilitator)', () => {
         payload: {
           paymentHash: KNOWN_HASH,
           preimage: 'invalid-hex',
-          bolt11Invoice: 'lnbc1pvjluezpp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypqdpl2pkx2ctn',
+          bolt11Invoice:
+            'lnbc1pvjluezpp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypqdpl2pkx2ctn',
         },
       })
       const result = await scheme.verify(payload, createRequirements())
@@ -140,7 +142,8 @@ describe('LightningScheme (Facilitator)', () => {
         payload: {
           paymentHash: 'f'.repeat(64), // wrong hash
           preimage: KNOWN_PREIMAGE,
-          bolt11Invoice: 'lnbc1pvjluezpp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypqdpl2pkx2ctn',
+          bolt11Invoice:
+            'lnbc1pvjluezpp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypqdpl2pkx2ctn',
         },
       })
       const result = await scheme.verify(payload, createRequirements())

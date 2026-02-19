@@ -69,8 +69,8 @@ export function useT402Payment(): UseT402PaymentReturn {
 
         // Select a payment requirement (prefer the requested network if available)
         const requirement = preferredNetwork
-          ? paymentRequired.accepts.find((r) => r.network === preferredNetwork) ??
-            paymentRequired.accepts[0]
+          ? (paymentRequired.accepts.find((r) => r.network === preferredNetwork) ??
+            paymentRequired.accepts[0])
           : paymentRequired.accepts[0]
 
         if (!requirement) {

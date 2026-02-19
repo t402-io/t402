@@ -30,10 +30,7 @@ export function registerPermit2EvmScheme(
   facilitator: t402Facilitator,
   config: Permit2EvmFacilitatorConfig,
 ): t402Facilitator {
-  facilitator.register(
-    config.networks,
-    new Permit2EvmScheme(config.signer),
-  );
+  facilitator.register(config.networks, new Permit2EvmScheme(config.signer));
 
   return facilitator;
 }

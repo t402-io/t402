@@ -40,11 +40,7 @@
 export { TonGaslessClient, createTonGaslessClient } from './client.js'
 
 // Types
-export type {
-  TonGaslessConfig,
-  TonGaslessPaymentParams,
-  TonGaslessPaymentResult,
-} from './types.js'
+export type { TonGaslessConfig, TonGaslessPaymentParams, TonGaslessPaymentResult } from './types.js'
 
 // Constants
 export {

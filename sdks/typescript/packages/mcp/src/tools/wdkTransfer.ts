@@ -17,12 +17,8 @@ export const wdkTransferInputSchema = z.object({
     .string()
     .regex(/^\d+(\.\d+)?$/)
     .describe("Amount to send (e.g., '10.50')"),
-  token: z
-    .enum(['USDC', 'USDT', 'USDT0'])
-    .describe('Token to transfer'),
-  chain: z
-    .string()
-    .describe('Chain to execute transfer on (e.g., "ethereum", "arbitrum")'),
+  token: z.enum(['USDC', 'USDT', 'USDT0']).describe('Token to transfer'),
+  chain: z.string().describe('Chain to execute transfer on (e.g., "ethereum", "arbitrum")'),
 })
 
 export type WdkTransferInput = z.infer<typeof wdkTransferInputSchema>

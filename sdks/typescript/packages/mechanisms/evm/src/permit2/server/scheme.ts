@@ -6,12 +6,7 @@ import {
   SchemeNetworkServer,
   MoneyParser,
 } from "@t402/core/types";
-import {
-  getDefaultToken,
-  getTokenConfig,
-  TokenConfig,
-  TOKEN_REGISTRY,
-} from "../../tokens.js";
+import { getDefaultToken, getTokenConfig, TokenConfig, TOKEN_REGISTRY } from "../../tokens.js";
 import { PERMIT2_ADDRESS } from "../constants";
 
 /**
@@ -31,23 +26,52 @@ export class Permit2EvmScheme implements SchemeNetworkServer {
   private moneyParsers: MoneyParser[] = [];
   private config: Permit2EvmSchemeConfig;
 
+  /**
+   * Creates a new Permit2EvmScheme server instance.
+   *
+   * @param config - Server configuration options
+   */
   constructor(config: Permit2EvmSchemeConfig = {}) {
     this.config = config;
   }
 
+  /**
+   * Get the list of supported EVM networks.
+   *
+   * @returns Array of supported network identifiers
+   */
   static getSupportedNetworks(): string[] {
     return Object.keys(TOKEN_REGISTRY);
   }
 
+  /**
+   * Check if a network is supported.
+   *
+   * @param network - Network identifier to check
+   * @returns Whether the network is supported
+   */
   static isNetworkSupported(network: string): boolean {
     return network in TOKEN_REGISTRY;
   }
 
+  /**
+   * Register a custom money parser for price conversion.
+   *
+   * @param parser - The money parser to register
+   * @returns This instance for chaining
+   */
   registerMoneyParser(parser: MoneyParser): Permit2EvmScheme {
     this.moneyParsers.push(parser);
     return this;
   }
 
+  /**
+   * Parse a price into an AssetAmount for the given network.
+   *
+   * @param price - The price to parse
+   * @param network - The target network
+   * @returns The parsed asset amount
+   */
   async parsePrice(price: Price, network: Network): Promise<AssetAmount> {
     if (typeof price === "object" && price !== null && "amount" in price) {
       if (!price.asset) {
@@ -72,6 +96,18 @@ export class Permit2EvmScheme implements SchemeNetworkServer {
     return this.defaultMoneyConversion(amount, network);
   }
 
+  /**
+   * Enhance payment requirements with Permit2-specific data.
+   *
+   * @param paymentRequirements - The base payment requirements
+   * @param supportedKind - The supported kind metadata
+   * @param supportedKind.t402Version - Protocol version
+   * @param supportedKind.scheme - Payment scheme
+   * @param supportedKind.network - Target network
+   * @param supportedKind.extra - Extra metadata
+   * @param extensionKeys - Active extension keys
+   * @returns Enhanced payment requirements
+   */
   enhancePaymentRequirements(
     paymentRequirements: PaymentRequirements,
     supportedKind: {
@@ -94,6 +130,12 @@ export class Permit2EvmScheme implements SchemeNetworkServer {
     return Promise.resolve(paymentRequirements);
   }
 
+  /**
+   * Parse a money value into a decimal number.
+   *
+   * @param money - The money value to parse
+   * @returns The decimal amount
+   */
   private parseMoneyToDecimal(money: string | number): number {
     if (typeof money === "number") {
       if (!Number.isFinite(money)) {
@@ -112,6 +154,13 @@ export class Permit2EvmScheme implements SchemeNetworkServer {
     return amount;
   }
 
+  /**
+   * Convert a decimal amount to a token amount using default network token.
+   *
+   * @param amount - The decimal amount
+   * @param network - The target network
+   * @returns The asset amount with token details
+   */
   private defaultMoneyConversion(amount: number, network: Network): AssetAmount {
     const token = this.getDefaultAsset(network);
 
@@ -127,6 +176,13 @@ export class Permit2EvmScheme implements SchemeNetworkServer {
     };
   }
 
+  /**
+   * Convert a decimal amount string to token smallest units.
+   *
+   * @param decimalAmount - The decimal amount as a string
+   * @param decimals - The token's decimal places
+   * @returns The amount in smallest units
+   */
   private convertToTokenAmount(decimalAmount: string, decimals: number): string {
     if (!/^-?\d+(\.\d+)?$/.test(decimalAmount)) {
       throw new Error(`Invalid amount format: ${decimalAmount}`);
@@ -140,6 +196,12 @@ export class Permit2EvmScheme implements SchemeNetworkServer {
     return result;
   }
 
+  /**
+   * Get the default token asset for a network.
+   *
+   * @param network - The target network
+   * @returns The token configuration
+   */
   private getDefaultAsset(network: Network): TokenConfig {
     if (this.config.preferredToken) {
       const preferred = getTokenConfig(network, this.config.preferredToken);
@@ -151,5 +213,4 @@ export class Permit2EvmScheme implements SchemeNetworkServer {
 
     throw new Error(`No tokens configured for network ${network}`);
   }
-
 }

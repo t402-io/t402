@@ -26,12 +26,10 @@ Example:
 """
 
 from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Callable, Any
+from typing import Optional, Dict, List
 
 from ..bridge.constants import (
-    LAYERZERO_SCAN_BASE_URL,
     get_bridgeable_chains,
-    supports_bridging,
 )
 
 

@@ -5,11 +5,7 @@
  * and invoice validation.
  */
 
-import {
-  SATS_PER_BTC,
-  MAINNET_ADDRESS_PREFIXES,
-  TESTNET_ADDRESS_PREFIXES,
-} from './constants.js'
+import { SATS_PER_BTC, MAINNET_ADDRESS_PREFIXES, TESTNET_ADDRESS_PREFIXES } from './constants.js'
 
 /**
  * Convert satoshis to BTC

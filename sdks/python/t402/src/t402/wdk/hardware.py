@@ -25,7 +25,7 @@ Example:
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional, Any, Dict, List
+from typing import Optional, Any, Dict
 
 
 class HardwareWalletType(Enum):

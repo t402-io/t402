@@ -39,7 +39,9 @@ const PAYMENT_ID_SCHEMA = {
  * // extensions: { [PAYMENT_ID_EXTENSION_KEY]: extension }
  * ```
  */
-export function declarePaymentIdExtension(options: DeclarePaymentIdOptions = {}): PaymentIdExtension {
+export function declarePaymentIdExtension(
+  options: DeclarePaymentIdOptions = {},
+): PaymentIdExtension {
   const info: PaymentIdExtensionInfo = {
     id: options.id || randomUUID(),
     idempotencyKey: options.idempotencyKey,
