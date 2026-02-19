@@ -7,6 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.0] - 2026-02-18
+
+### Added
+- **@t402/btc** - Bitcoin mechanism with on-chain (PSBT) and Lightning (BOLT11) payment schemes
+- **@t402/wdk-ton** - TON wallet management wrapping @ton/walletkit
+- **@t402/wdk-ton-gasless** - Gasless TON transactions via relay
+- **@t402/wdk-tron-gasfree** - Gas-free TRON USDT transfers
+- **@t402/wdk-defi** - DeFi pre-payment processor with Swap, Borrow, and BridgeSwap strategies
+- **@t402/wdk-protocol** - High-level T402Protocol for automatic balance check + bridge + pay
+- **@t402/react-native** - React Native SDK with T402Provider, useT402Payment hook, and PaymentSheet
+- **Permit2 EVM Scheme** - Uniswap Permit2 SignatureTransfer for gasless token approvals (`@t402/evm`)
+- **Unified MCP Server** - Combined WDK wallet tools + t402 payment tools with smartPay and paymentPlan
+- **TON Bridge** - TON↔EVM cross-chain bridging in `@t402/wdk-bridge`
+- **Payment Identifier Extension** - Unique payment ID tracking in `@t402/extensions`
+- **Sign-In With X (SIWX)** - Cross-chain authentication extension with TON/TRON support
+- **WDK Pricing** - `createWdkMoneyParser()` with configurable pricing providers
+- **WDK Failover** - Multi-provider RPC failover with health checks
+- **WDK Secret Manager** - Encrypted seed phrase storage with `fromEncryptedSeed()`/`encryptSeed()`
+- **WDK Indexer** - Facilitator transaction verification integration
+- **TON Paywall Wallets** - Dynamic wallet list sync for TON Connect paywall
+- **Python WDK Parity** - Gasless, bridge, multisig, and hardware modules for Python SDK
+- **Java WDK Parity** - Gasless, bridge, multisig, hardware modules + Spring auto-config for Java SDK
+- **Cross-SDK SIWX** - TON/TRON SIWX verification in Go, Python, and Java
+- **Cross-SDK Payment ID** - Payment identifier extension in Go, Python, and Java
+- **Extension Specs** - `specs/extensions/` with template, bazaar.md, payment-id.md, siwx.md
+- **MCP E2E Tests** - End-to-end tests for TS, Go, and Python MCP servers
+- **Python E2E Tests** - httpx, requests clients + FastAPI, Flask server integration tests
+- **MCP Chatbot Examples** - TypeScript, Python, and Go MCP chatbot examples
+- **TON Connect Bridge Research** - Research doc at `specs/research/ton-connect-bridge.md`
+- **llms.txt** - LLM-friendly project description files at repo root and docs site
+- **Ecosystem Expansion Plan** - Directory, templates, and outreach strategy
+- **Telegram Mini App Demo** - Payment demo in `examples/telegram-miniapp/`
+- **Mobile TON Reference** - ton-connect/kit-ios and kit-android documentation
+
+### Fixed
+- **npm audit** - Resolved 10 of 12 vulnerabilities via pnpm overrides (minimatch, validator, secp256k1, markdown-it, qs, ajv)
+- **CI tonconnect-bridge-sdk** - Override to npm 0.2.4 to avoid GitHub Releases JWT expiry
+- **Paywall ESLint** - Expanded gen/** ignore pattern for all chain template directories
+- **Python lint** - Added 6 missing network helpers to `__all__`, fixed unused imports
+
+### SDK Versions
+- TypeScript: v2.5.0 (36 packages)
+- Go: v1.9.0 (unchanged)
+- Python: v1.10.1 (unchanged)
+- Java: v1.10.0
+
 ## [2.4.1] - 2026-02-09
 
 ### Fixed
@@ -227,7 +273,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - EVM support with EIP-3009 authorization
 - Basic client and server implementations
 
-[Unreleased]: https://github.com/t402-io/t402/compare/v2.4.1...HEAD
+[Unreleased]: https://github.com/t402-io/t402/compare/v2.5.0...HEAD
+[2.5.0]: https://github.com/t402-io/t402/compare/v2.4.1...v2.5.0
 [2.4.1]: https://github.com/t402-io/t402/compare/v2.4.0...v2.4.1
 [2.4.0]: https://github.com/t402-io/t402/compare/v2.3.1...v2.4.0
 [2.3.1]: https://github.com/t402-io/t402/compare/v2.1.0...v2.3.1
