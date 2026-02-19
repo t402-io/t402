@@ -4,6 +4,22 @@ All notable changes to the T402 Go SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [1.10.0] - 2026-02-19
+
+### Added
+- **SIWX Extension** (`extensions/siwx/`) - Sign-In With X cross-chain authentication with TON/TRON support
+- **Payment Identifier Extension** (`types/payment_id.go`) - Unique payment ID tracking
+- **Permit2 EVM Scheme** (`mechanisms/evm/permit2/`) - Uniswap Permit2 SignatureTransfer for gasless token approvals
+- **MCP E2E Tests** (`mcp/e2e_test.go`) - End-to-end test suite for MCP server
+- **USAT Token Support** - Tether America USD token across all mechanisms
+
+### Fixed
+- **Tezos Ghostnet Metadata** - Added `USDTGhostnet` token info (was empty `TokenInfo{}`, now `Symbol: "USDt", Decimals: 6`)
+- **NEAR Default Token** - Corrected NEAR mainnet default token configuration
+- **Per-Network EVM RPC** - Network-specific RPC endpoints instead of shared fallback
+- **16 govulncheck Vulnerabilities** - Resolved all reported Go security vulnerabilities
+- **TON TestGetSeqno** - Skip flaky test in CI environment
+
 ## [1.9.0] - 2026-02-06
 
 ### Added
@@ -198,7 +214,8 @@ All notable changes to the T402 Go SDK will be documented in this file.
 - EVM signers
 - Bazaar extension for API discovery
 
-[Unreleased]: https://github.com/t402-io/t402/compare/go/v1.9.0...HEAD
+[Unreleased]: https://github.com/t402-io/t402/compare/go/v1.10.0...HEAD
+[1.10.0]: https://github.com/t402-io/t402/compare/go/v1.9.0...go/v1.10.0
 [1.9.0]: https://github.com/t402-io/t402/compare/go/v1.8.1...go/v1.9.0
 [1.8.1]: https://github.com/t402-io/t402/compare/go/v1.8.0...go/v1.8.1
 [1.8.0]: https://github.com/t402-io/t402/compare/go/v1.7.0...go/v1.8.0

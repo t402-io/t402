@@ -49,7 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### SDK Versions
 - TypeScript: v2.5.0 (36 packages)
-- Go: v1.9.0 (unchanged)
+- Go: v1.10.0
 - Python: v1.10.1 (unchanged)
 - Java: v1.10.0
 
