@@ -27,6 +27,8 @@ import type {
   WDKTonAccount,
   WDKSolanaAccount,
   WDKTronAccount,
+  WDKSparkAccount,
+  WDKBtcAccount,
   T402WDKCreateConfig,
   SignerEntry,
   GetAllSignersOptions,
@@ -37,6 +39,10 @@ import type {
   BorrowParams,
   BorrowResult,
   WDKAutoDiscoveryResult,
+  FiatOnRampProvider,
+  FiatOnRampQuote,
+  FiatOnRampParams,
+  FiatOnRampResult,
 } from './types.js'
 import { encryptSeed, decryptSeed, type EncryptedSeed } from './secret.js'
 import {
@@ -54,6 +60,8 @@ import {
   createWDKTronSigner,
   type ClientTronSigner,
 } from './adapters/tron-adapter.js'
+import { WDKSparkSignerAdapter, createWDKSparkSigner } from './adapters/spark-adapter.js'
+import { WDKBtcSignerAdapter, createWDKBtcSigner } from './adapters/btc-adapter.js'
 import { BalanceCache, type BalanceCacheConfig, type BalanceCacheStats } from './cache.js'
 import {
   normalizeChainConfig,
@@ -115,10 +123,15 @@ export class T402WDK {
   private static _WalletModules: WDKWalletModules = {}
   private static _ProtocolModules: WDKProtocolModules = {}
 
+  // Fiat on-ramp provider (set via registerFiatOnRamp)
+  private static _fiatOnRampProvider: FiatOnRampProvider | null = null
+
   // Multi-chain signer caches
   private _tonSignerCache: Map<number, WDKTonSignerAdapter> = new Map()
   private _svmSignerCache: Map<number, WDKSvmSignerAdapter> = new Map()
   private _tronSignerCache: Map<number, WDKTronSignerAdapter> = new Map()
+  private _sparkSignerCache: Map<number, WDKSparkSignerAdapter> = new Map()
+  private _btcSignerCache: Map<number, WDKBtcSignerAdapter> = new Map()
 
   /**
    * Register the Tether WDK modules
@@ -230,6 +243,20 @@ export class T402WDK {
   }
 
   /**
+   * Check if Spark wallet manager is registered
+   */
+  static isSparkRegistered(): boolean {
+    return T402WDK._WalletModules.spark !== undefined
+  }
+
+  /**
+   * Check if Bitcoin wallet manager is registered
+   */
+  static isBtcRegistered(): boolean {
+    return T402WDK._WalletModules.btc !== undefined
+  }
+
+  /**
    * Get all registered wallet modules
    */
   static getRegisteredWalletModules(): (keyof WDKWalletModules)[] {
@@ -245,6 +272,32 @@ export class T402WDK {
     return Object.keys(T402WDK._ProtocolModules).filter(
       (key) => T402WDK._ProtocolModules[key as keyof WDKProtocolModules] !== undefined,
     ) as (keyof WDKProtocolModules)[]
+  }
+
+  /**
+   * Register a fiat on-ramp provider
+   *
+   * @param provider - A FiatOnRampProvider implementation (e.g., MoonpayOnRampProvider)
+   *
+   * @example
+   * ```typescript
+   * import { T402WDK, MoonpayOnRampProvider } from '@t402/wdk';
+   *
+   * T402WDK.registerFiatOnRamp(new MoonpayOnRampProvider({ apiKey: 'pk_test_...' }));
+   * ```
+   */
+  static registerFiatOnRamp(provider: FiatOnRampProvider): void {
+    if (!provider || typeof provider.getQuote !== 'function') {
+      throw new WDKInitializationError('A valid FiatOnRampProvider is required')
+    }
+    T402WDK._fiatOnRampProvider = provider
+  }
+
+  /**
+   * Check if a fiat on-ramp provider is registered
+   */
+  static isFiatOnRampRegistered(): boolean {
+    return T402WDK._fiatOnRampProvider !== null
   }
 
   /**
@@ -325,6 +378,7 @@ export class T402WDK {
       ton: '@tetherto/wdk-wallet-ton',
       tron: '@tetherto/wdk-wallet-tron',
       btc: '@tetherto/wdk-wallet-btc',
+      spark: '@buildonspark/spark-sdk',
       evmErc4337: '@tetherto/wdk-wallet-evm-erc-4337',
       tonGasless: '@tetherto/wdk-wallet-ton-gasless',
       tronGasfree: '@tetherto/wdk-wallet-tron-gasfree',
@@ -578,6 +632,35 @@ export class T402WDK {
         }
       } catch {
         // Skip if TRON signer fails
+      }
+    }
+
+    // Spark signer
+    if (T402WDK.isSparkRegistered()) {
+      try {
+        const signer = await this.getSparkSigner(accountIndex)
+        for (const scheme of schemes) {
+          entries.push({ scheme, network: 'spark:mainnet', signer, family: 'spark' })
+        }
+      } catch {
+        // Skip if Spark signer fails
+      }
+    }
+
+    // Bitcoin signer
+    if (T402WDK.isBtcRegistered()) {
+      try {
+        const signer = await this.getBtcSigner(accountIndex)
+        for (const scheme of schemes) {
+          entries.push({
+            scheme,
+            network: 'bip122:000000000019d6689c085ae165831e93',
+            signer,
+            family: 'btc',
+          })
+        }
+      } catch {
+        // Skip if Bitcoin signer fails
       }
     }
 
@@ -854,6 +937,8 @@ export class T402WDK {
     this._tonSignerCache.clear()
     this._svmSignerCache.clear()
     this._tronSignerCache.clear()
+    this._sparkSignerCache.clear()
+    this._btcSignerCache.clear()
   }
 
   // ========== Multi-Chain Signers ==========
@@ -1028,6 +1113,115 @@ export class T402WDK {
   }
 
   /**
+   * Get a Spark (Bitcoin L2) signer for T402 payments
+   *
+   * @param accountIndex - HD wallet account index (default: 0)
+   * @throws {ChainError} If Spark wallet manager is not registered
+   * @returns An initialized WDKSparkSignerAdapter
+   *
+   * @example
+   * ```typescript
+   * const sparkSigner = await wallet.getSparkSigner();
+   *
+   * const client = createT402HTTPClient({
+   *   signers: [{ scheme: 'exact', network: 'spark:mainnet', signer: sparkSigner }]
+   * });
+   * ```
+   */
+  async getSparkSigner(accountIndex = 0): Promise<WDKSparkSignerAdapter> {
+    // Check cache first
+    const cached = this._sparkSignerCache.get(accountIndex)
+    if (cached) {
+      return cached
+    }
+
+    // Validate Spark wallet manager is registered
+    if (!T402WDK._WalletModules.spark) {
+      throw new ChainError(
+        WDKErrorCode.CHAIN_NOT_SUPPORTED,
+        'Spark wallet manager not registered. Call T402WDK.registerWDK(WDK, { wallets: { spark: SparkWalletManager } }).',
+        { chain: 'spark' },
+      )
+    }
+
+    try {
+      // Get Spark account from WDK
+      const account = (await this.wdk.getAccount(
+        'spark',
+        accountIndex,
+      )) as unknown as WDKSparkAccount
+
+      // Create and cache the signer adapter
+      const signer = await createWDKSparkSigner(account)
+      this._sparkSignerCache.set(accountIndex, signer)
+      return signer
+    } catch (error) {
+      if (isWDKError(error)) {
+        throw error
+      }
+
+      throw wrapError(error, WDKErrorCode.SIGNER_NOT_INITIALIZED, 'Failed to create Spark signer', {
+        chain: 'spark',
+        accountIndex,
+      })
+    }
+  }
+
+  /**
+   * Get a Bitcoin (BTC) on-chain signer for T402 payments
+   *
+   * @param accountIndex - HD wallet account index (default: 0)
+   * @throws {ChainError} If Bitcoin wallet manager is not registered
+   * @returns An initialized WDKBtcSignerAdapter
+   *
+   * @example
+   * ```typescript
+   * const btcSigner = await wallet.getBtcSigner();
+   *
+   * const client = createT402HTTPClient({
+   *   signers: [{ scheme: 'exact', network: 'bip122:000000000019d6689c085ae165831e93', signer: btcSigner }]
+   * });
+   * ```
+   */
+  async getBtcSigner(accountIndex = 0): Promise<WDKBtcSignerAdapter> {
+    // Check cache first
+    const cached = this._btcSignerCache.get(accountIndex)
+    if (cached) {
+      return cached
+    }
+
+    // Validate BTC wallet manager is registered
+    if (!T402WDK._WalletModules.btc) {
+      throw new ChainError(
+        WDKErrorCode.CHAIN_NOT_SUPPORTED,
+        'Bitcoin wallet manager not registered. Call T402WDK.registerWDK(WDK, { wallets: { btc: WalletManagerBtc } }).',
+        { chain: 'btc' },
+      )
+    }
+
+    try {
+      // Get Bitcoin account from WDK
+      const account = (await this.wdk.getAccount('btc', accountIndex)) as unknown as WDKBtcAccount
+
+      // Create and cache the signer adapter
+      const signer = await createWDKBtcSigner(account)
+      this._btcSignerCache.set(accountIndex, signer)
+      return signer
+    } catch (error) {
+      if (isWDKError(error)) {
+        throw error
+      }
+
+      throw wrapError(
+        error,
+        WDKErrorCode.SIGNER_NOT_INITIALIZED,
+        'Failed to create Bitcoin signer',
+        { chain: 'btc', accountIndex },
+      )
+    }
+  }
+
+  /**
    * Get a signer for a specific chain family
    *
    * @param family - Chain family (evm, svm, ton, tron)
@@ -1052,7 +1246,14 @@ export class T402WDK {
     family: ChainFamily,
     chainOrIndex?: string | number,
     accountIndex = 0,
-  ): Promise<WDKSigner | ClientTonSigner | ClientSvmSigner | ClientTronSigner> {
+  ): Promise<
+    | WDKSigner
+    | ClientTonSigner
+    | ClientSvmSigner
+    | ClientTronSigner
+    | WDKSparkSignerAdapter
+    | WDKBtcSignerAdapter
+  > {
     switch (family) {
       case 'evm':
         if (typeof chainOrIndex !== 'string') {
@@ -1073,10 +1274,16 @@ export class T402WDK {
       case 'tron':
         return this.getTronSigner(typeof chainOrIndex === 'number' ? chainOrIndex : accountIndex)
 
+      case 'spark':
+        return this.getSparkSigner(typeof chainOrIndex === 'number' ? chainOrIndex : accountIndex)
+
+      case 'btc':
+        return this.getBtcSigner(typeof chainOrIndex === 'number' ? chainOrIndex : accountIndex)
+
       default:
         throw new ChainError(
           WDKErrorCode.CHAIN_NOT_SUPPORTED,
-          `Chain family "${family}" is not supported. Available: evm, ton, svm, tron`,
+          `Chain family "${family}" is not supported. Available: evm, ton, svm, tron, spark, btc`,
           { chain: family },
         )
     }
@@ -1703,6 +1910,56 @@ export class T402WDK {
     }
   }
 
+  // ========== Fiat On-Ramp ==========
+
+  /**
+   * Get a fiat on-ramp quote
+   *
+   * @param params - Quote parameters (fiatAmount, fiatCurrency, network)
+   * @throws {WDKError} If no fiat on-ramp provider is registered
+   */
+  async getFiatOnRampQuote(
+    params: Pick<FiatOnRampParams, 'fiatAmount' | 'fiatCurrency' | 'network'>,
+  ): Promise<FiatOnRampQuote> {
+    if (!T402WDK._fiatOnRampProvider) {
+      throw new WDKError(
+        WDKErrorCode.PROTOCOL_NOT_REGISTERED,
+        'No fiat on-ramp provider registered. Call T402WDK.registerFiatOnRamp() first.',
+      )
+    }
+    return T402WDK._fiatOnRampProvider.getQuote(params)
+  }
+
+  /**
+   * Generate a fiat on-ramp widget URL for the user
+   *
+   * Returns a widget URL that the application should open in a browser
+   * or webview so the user can complete the fiat purchase.
+   *
+   * @param params - On-ramp parameters
+   * @throws {WDKError} If no fiat on-ramp provider is registered
+   *
+   * @example
+   * ```typescript
+   * const result = await wallet.onRampAndPay({
+   *   fiatAmount: 100,
+   *   fiatCurrency: 'USD',
+   *   walletAddress: '0x...',
+   *   network: 'eip155:42161',
+   * });
+   * // Open result.widgetUrl in browser/webview
+   * ```
+   */
+  onRampAndPay(params: FiatOnRampParams): FiatOnRampResult {
+    if (!T402WDK._fiatOnRampProvider) {
+      throw new WDKError(
+        WDKErrorCode.PROTOCOL_NOT_REGISTERED,
+        'No fiat on-ramp provider registered. Call T402WDK.registerFiatOnRamp() first.',
+      )
+    }
+    return T402WDK._fiatOnRampProvider.createWidget(params)
+  }
+
   // ========== Cache Management ==========
 
   /**
@@ -1766,6 +2023,8 @@ export class T402WDK {
     this._tonSignerCache.clear()
     this._svmSignerCache.clear()
     this._tronSignerCache.clear()
+    this._sparkSignerCache.clear()
+    this._btcSignerCache.clear()
   }
 }
 

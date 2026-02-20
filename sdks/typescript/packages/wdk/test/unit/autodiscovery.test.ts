@@ -50,6 +50,7 @@ const KNOWN_WALLET_PACKAGES = [
   '@tetherto/wdk-wallet-ton',
   '@tetherto/wdk-wallet-tron',
   '@tetherto/wdk-wallet-btc',
+  '@buildonspark/spark-sdk',
   '@tetherto/wdk-wallet-evm-erc-4337',
   '@tetherto/wdk-wallet-ton-gasless',
   '@tetherto/wdk-wallet-tron-gasfree',

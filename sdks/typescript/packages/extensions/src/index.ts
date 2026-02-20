@@ -10,3 +10,6 @@ export * from "./sign-in-with-x";
 
 // Payment ID extension
 export * from "./payment-id";
+
+// EIP-2612 gas sponsoring extension
+export * from "./eip2612-gas-sponsoring";

@@ -159,6 +159,11 @@ export type {
   // Lending types
   BorrowParams,
   BorrowResult,
+  // Fiat on-ramp types
+  FiatOnRampQuote,
+  FiatOnRampParams,
+  FiatOnRampResult,
+  FiatOnRampProvider,
 } from './types.js'
 
 // Multi-chain adapters
@@ -297,3 +302,7 @@ export {
   detectHardwareWalletSupport,
   isHardwareWalletSupported,
 } from './hardware/index.js'
+
+// Fiat on-ramp providers
+export { MoonpayOnRampProvider, getMoonpayCurrencyCode } from './providers/moonpay.js'
+export type { MoonpayConfig } from './providers/moonpay.js'

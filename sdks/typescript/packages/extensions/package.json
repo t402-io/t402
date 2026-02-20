@@ -98,6 +98,16 @@
         "types": "./dist/cjs/payment-id/index.d.ts",
         "default": "./dist/cjs/payment-id/index.js"
       }
+    },
+    "./eip2612-gas-sponsoring": {
+      "import": {
+        "types": "./dist/esm/eip2612-gas-sponsoring/index.d.mts",
+        "default": "./dist/esm/eip2612-gas-sponsoring/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/eip2612-gas-sponsoring/index.d.ts",
+        "default": "./dist/cjs/eip2612-gas-sponsoring/index.js"
+      }
     }
   },
   "files": [

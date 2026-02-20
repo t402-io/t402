@@ -234,7 +234,7 @@ export interface T402WDKOptions {
 /**
  * Supported blockchain families
  */
-export type ChainFamily = 'evm' | 'svm' | 'ton' | 'tron'
+export type ChainFamily = 'evm' | 'svm' | 'ton' | 'tron' | 'spark' | 'btc'
 
 /**
  * Solana chain configuration
@@ -307,6 +307,8 @@ export interface WDKWalletModules {
   tronGasfree?: unknown
   /** Bitcoin wallet manager (@tetherto/wdk-wallet-btc) */
   btc?: unknown
+  /** Spark (Bitcoin L2) wallet manager (@buildonspark/spark-sdk) */
+  spark?: unknown
 }
 
 /**
@@ -400,6 +402,36 @@ export interface WDKTronAccount {
   sendTransaction(signedTx: unknown): Promise<string>
   /** Transfer TRC20 token */
   transferTrc20?(params: { contractAddress: string; to: string; amount: bigint }): Promise<string>
+}
+
+/**
+ * Spark wallet account interface (compatible with @buildonspark/spark-sdk)
+ */
+export interface WDKSparkAccount {
+  /** Get wallet address */
+  getAddress(): Promise<string>
+  /** Get balance in satoshis */
+  getBalance(): Promise<bigint>
+  /** Send a transaction */
+  sendTransaction(params: { to: string; amount: bigint }): Promise<{ hash: string }>
+  /** Sign a message */
+  signMessage(message: string | Uint8Array): Promise<string>
+}
+
+/**
+ * WDK Bitcoin account interface (compatible with @tetherto/wdk-wallet-btc)
+ */
+export interface WDKBtcAccount {
+  /** Get wallet address */
+  getAddress(): Promise<string>
+  /** Get balance in satoshis */
+  getBalance(): Promise<bigint>
+  /** Send a Bitcoin transaction */
+  sendTransaction(params: { to: string; amount: bigint; fee?: bigint }): Promise<string>
+  /** Sign a message */
+  signMessage(message: string): Promise<string>
+  /** Sign a PSBT */
+  signPsbt(psbt: Uint8Array): Promise<Uint8Array>
 }
 
 /**
@@ -548,4 +580,76 @@ export interface BorrowResult {
   borrowTxHash: string
   /** Actual borrowed amount in smallest units */
   borrowedAmount: bigint
+}
+
+// ============================================================
+// Fiat On-Ramp Types
+// ============================================================
+
+/**
+ * Fiat on-ramp quote
+ */
+export interface FiatOnRampQuote {
+  /** Fiat amount to spend */
+  fiatAmount: number
+  /** Fiat currency code (e.g., "USD", "EUR") */
+  fiatCurrency: string
+  /** Crypto amount to receive */
+  cryptoAmount: string
+  /** Crypto currency code (e.g., "USDT") */
+  cryptoCurrency: string
+  /** Exchange rate (fiat per crypto) */
+  exchangeRate: number
+  /** Fee breakdown */
+  fees: { network: string; service: string; total: string }
+  /** Estimated time to complete in seconds */
+  estimatedTime: number
+}
+
+/**
+ * Fiat on-ramp parameters
+ */
+export interface FiatOnRampParams {
+  /** Fiat amount to spend */
+  fiatAmount: number
+  /** Fiat currency code (e.g., "USD") */
+  fiatCurrency: string
+  /** Crypto currency to buy (default: "USDT") */
+  cryptoCurrency?: string
+  /** Wallet address to receive funds */
+  walletAddress: string
+  /** CAIP-2 network identifier */
+  network: string
+  /** URL to redirect after purchase */
+  redirectUrl?: string
+}
+
+/**
+ * Fiat on-ramp result
+ */
+export interface FiatOnRampResult {
+  /** Widget URL to open for the user */
+  widgetUrl: string
+  /** Order ID for tracking */
+  orderId: string
+  /** When the widget URL expires */
+  expiresAt: string
+}
+
+/**
+ * Fiat on-ramp provider interface
+ */
+export interface FiatOnRampProvider {
+  /** Provider name */
+  name: string
+  /** Get a quote for fiat-to-crypto conversion */
+  getQuote(
+    params: Pick<FiatOnRampParams, 'fiatAmount' | 'fiatCurrency' | 'network'>,
+  ): Promise<FiatOnRampQuote>
+  /** Create a widget URL for the user to complete the purchase */
+  createWidget(params: FiatOnRampParams): FiatOnRampResult
+  /** Get supported fiat currencies */
+  getSupportedCurrencies(): string[]
+  /** Get supported CAIP-2 network identifiers */
+  getSupportedNetworks(): string[]
 }

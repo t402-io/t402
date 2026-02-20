@@ -8,3 +8,5 @@
 export { WDKTonSignerAdapter, createWDKTonSigner } from './ton-adapter.js'
 export { WDKSvmSignerAdapter, createWDKSvmSigner } from './svm-adapter.js'
 export { WDKTronSignerAdapter, createWDKTronSigner } from './tron-adapter.js'
+export { WDKSparkSignerAdapter, createWDKSparkSigner } from './spark-adapter.js'
+export { WDKBtcSignerAdapter, createWDKBtcSigner } from './btc-adapter.js'
