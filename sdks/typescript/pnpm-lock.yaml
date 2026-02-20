@@ -1636,7 +1636,7 @@ importers:
         specifier: workspace:*
         version: link:../mechanisms/evm
       '@tetherto/wdk':
-        specifier: '>=1.0.0-beta.0'
+        specifier: '>=1.0.0-beta.5 <2.0.0'
         version: 1.0.0-beta.5(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))
       '@tetherto/wdk-pricing-bitfinex-http':
         specifier: '>=1.0.0-beta.0'
@@ -1758,7 +1758,7 @@ importers:
         version: 1.0.0-beta.5(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))
       '@tetherto/wdk-wallet-evm':
         specifier: '>=1.0.0-beta.0'
-        version: 1.0.0-beta.7(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))(bufferutil@4.0.9)(sodium-javascript@0.8.0)(utf-8-validate@5.0.10)
+        version: 1.0.0-beta.7(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))(bare-url@2.3.2)(bufferutil@4.0.9)(sodium-javascript@0.8.0)(utf-8-validate@5.0.10)
       '@ton/core':
         specifier: '>=0.56.0'
         version: 0.63.0(@ton/crypto@3.3.0)
@@ -1895,10 +1895,10 @@ importers:
         version: 1.0.0-beta.5(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))
       '@tetherto/wdk-wallet-evm':
         specifier: '>=1.0.0-beta.0'
-        version: 1.0.0-beta.7(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))(bufferutil@4.0.9)(sodium-javascript@0.8.0)(utf-8-validate@5.0.10)
+        version: 1.0.0-beta.7(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))(bare-url@2.3.2)(bufferutil@4.0.9)(sodium-javascript@0.8.0)(utf-8-validate@5.0.10)
       '@tetherto/wdk-wallet-evm-erc-4337':
         specifier: '>=1.0.0-beta.0'
-        version: 1.0.0-beta.4(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))(bufferutil@4.0.9)(sodium-javascript@0.8.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
+        version: 1.0.0-beta.4(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))(bare-url@2.3.2)(bufferutil@4.0.9)(sodium-javascript@0.8.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
       viem:
         specifier: ^2.44.2
         version: 2.45.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
@@ -1971,7 +1971,7 @@ importers:
         version: 1.0.0-beta.5(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))
       '@tetherto/wdk-wallet-evm':
         specifier: '>=1.0.0-beta.0'
-        version: 1.0.0-beta.7(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))(bufferutil@4.0.9)(sodium-javascript@0.8.0)(utf-8-validate@5.0.10)
+        version: 1.0.0-beta.7(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))(bare-url@2.3.2)(bufferutil@4.0.9)(sodium-javascript@0.8.0)(utf-8-validate@5.0.10)
       viem:
         specifier: ^2.44.2
         version: 2.45.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
@@ -2145,7 +2145,7 @@ importers:
         version: link:../wdk-ton
       '@tetherto/wdk-wallet-ton-gasless':
         specifier: '>=1.0.0-beta.0'
-        version: 1.0.0-beta.4(@ton/core@0.63.0(@ton/crypto@3.3.0))(@ton/crypto@3.3.0)(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))
+        version: 1.0.0-beta.4(@ton/core@0.63.0(@ton/crypto@3.3.0))(@ton/crypto@3.3.0)(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))(bare-url@2.3.2)
       '@ton/core':
         specifier: '>=0.56.0'
         version: 0.63.0(@ton/crypto@3.3.0)
@@ -2215,7 +2215,7 @@ importers:
         version: 1.0.0-beta.5(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))
       '@tetherto/wdk-wallet-tron-gasfree':
         specifier: '>=1.0.0-beta.0'
-        version: 1.0.0-beta.4(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 1.0.0-beta.4(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))(bare-url@2.3.2)(bufferutil@4.0.9)(utf-8-validate@5.0.10)
     devDependencies:
       '@eslint/js':
         specifier: ^9.39.2
@@ -16170,24 +16170,6 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@tetherto/wdk-wallet-evm-erc-4337@1.0.0-beta.4(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))(bufferutil@4.0.9)(sodium-javascript@0.8.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)':
-    dependencies:
-      '@tetherto/wdk-safe-relay-kit': 4.1.5(bufferutil@4.0.9)(ethers@6.14.4(bufferutil@4.0.9)(utf-8-validate@5.0.10))(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
-      '@tetherto/wdk-wallet': 1.0.0-beta.7(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))
-      '@tetherto/wdk-wallet-evm': 1.0.0-beta.6(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))(bufferutil@4.0.9)(sodium-javascript@0.8.0)(utf-8-validate@5.0.10)
-      bare-node-runtime: 1.1.4(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))
-      ethers: 6.14.4(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-    transitivePeerDependencies:
-      - bare-tcp
-      - bare-url
-      - bufferutil
-      - debug
-      - react-native-b4a
-      - sodium-javascript
-      - typescript
-      - utf-8-validate
-      - zod
-
   '@tetherto/wdk-wallet-evm@1.0.0-beta.6(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))(bare-url@2.3.2)(bufferutil@4.0.9)(sodium-javascript@0.8.0)(utf-8-validate@5.0.10)':
     dependencies:
       '@noble/curves': 1.9.2
@@ -16206,24 +16188,6 @@ snapshots:
       - sodium-javascript
       - utf-8-validate
 
-  '@tetherto/wdk-wallet-evm@1.0.0-beta.6(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))(bufferutil@4.0.9)(sodium-javascript@0.8.0)(utf-8-validate@5.0.10)':
-    dependencies:
-      '@noble/curves': 1.9.2
-      '@noble/hashes': 1.8.0
-      '@noble/secp256k1': 2.2.3
-      '@tetherto/wdk-wallet': 1.0.0-beta.7(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))
-      bare-node-runtime: 1.1.4(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))
-      bip39: 3.1.0
-      ethers: 6.14.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      sodium-universal: 5.0.1(sodium-javascript@0.8.0)
-    transitivePeerDependencies:
-      - bare-tcp
-      - bare-url
-      - bufferutil
-      - react-native-b4a
-      - sodium-javascript
-      - utf-8-validate
-
   '@tetherto/wdk-wallet-evm@1.0.0-beta.7(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))(bare-url@2.3.2)(bufferutil@4.0.9)(sodium-javascript@0.8.0)(utf-8-validate@5.0.10)':
     dependencies:
       '@noble/curves': 1.9.2
@@ -16234,24 +16198,6 @@ snapshots:
       bip39: 3.1.0
       ethers: 6.14.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       sodium-universal: 5.0.1(bare-url@2.3.2)(sodium-javascript@0.8.0)
-    transitivePeerDependencies:
-      - bare-tcp
-      - bare-url
-      - bufferutil
-      - react-native-b4a
-      - sodium-javascript
-      - utf-8-validate
-
-  '@tetherto/wdk-wallet-evm@1.0.0-beta.7(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))(bufferutil@4.0.9)(sodium-javascript@0.8.0)(utf-8-validate@5.0.10)':
-    dependencies:
-      '@noble/curves': 1.9.2
-      '@noble/hashes': 1.8.0
-      '@noble/secp256k1': 2.2.3
-      '@tetherto/wdk-wallet': 1.0.0-beta.7(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))
-      bare-node-runtime: 1.1.4(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))
-      bip39: 3.1.0
-      ethers: 6.14.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      sodium-universal: 5.0.1(sodium-javascript@0.8.0)
     transitivePeerDependencies:
       - bare-tcp
       - bare-url
@@ -16286,34 +16232,16 @@ snapshots:
       - sodium-javascript
       - typescript
 
-  '@tetherto/wdk-wallet-ton-gasless@1.0.0-beta.4(@ton/core@0.63.0(@ton/crypto@3.3.0))(@ton/crypto@3.3.0)(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))':
+  '@tetherto/wdk-wallet-ton-gasless@1.0.0-beta.4(@ton/core@0.63.0(@ton/crypto@3.3.0))(@ton/crypto@3.3.0)(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))(bare-url@2.3.2)':
     dependencies:
       '@tetherto/wdk-wallet': 1.0.0-beta.7(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))
-      '@tetherto/wdk-wallet-ton': 1.0.0-beta.7(@ton/core@0.63.0(@ton/crypto@3.3.0))(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))
+      '@tetherto/wdk-wallet-ton': 1.0.0-beta.7(@ton/core@0.63.0(@ton/crypto@3.3.0))(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))(bare-url@2.3.2)(sodium-javascript@0.8.0)
       '@ton-api/client': 0.4.0(@ton/core@0.63.0(@ton/crypto@3.3.0))
       '@ton/ton': 15.1.0(@ton/core@0.63.0(@ton/crypto@3.3.0))(@ton/crypto@3.3.0)
       bare-node-runtime: 1.1.4(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))
     transitivePeerDependencies:
       - '@ton/core'
       - '@ton/crypto'
-      - bare-tcp
-      - bare-url
-      - debug
-      - react-native-b4a
-      - sodium-javascript
-
-  '@tetherto/wdk-wallet-ton@1.0.0-beta.7(@ton/core@0.63.0(@ton/crypto@3.3.0))(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))':
-    dependencies:
-      '@tetherto/wdk-wallet': 1.0.0-beta.7(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))
-      '@ton/crypto': 3.3.0
-      '@ton/ton': 15.1.0(@ton/core@0.63.0(@ton/crypto@3.3.0))(@ton/crypto@3.3.0)
-      bare-node-runtime: 1.1.4(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))
-      bip39: 3.1.0
-      micro-key-producer: 0.7.6
-      sodium-universal: 5.0.1(sodium-javascript@0.8.0)
-      tweetnacl: 1.0.3
-    transitivePeerDependencies:
-      - '@ton/core'
       - bare-tcp
       - bare-url
       - debug
@@ -16338,13 +16266,13 @@ snapshots:
       - react-native-b4a
       - sodium-javascript
 
-  '@tetherto/wdk-wallet-tron-gasfree@1.0.0-beta.4(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
+  '@tetherto/wdk-wallet-tron-gasfree@1.0.0-beta.4(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))(bare-url@2.3.2)(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
     dependencies:
       '@noble/curves': 1.9.2
       '@noble/hashes': 1.8.0
       '@noble/secp256k1': 2.3.0
       '@tetherto/wdk-wallet': 1.0.0-beta.7(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))
-      '@tetherto/wdk-wallet-tron': 1.0.0-beta.4(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      '@tetherto/wdk-wallet-tron': 1.0.0-beta.4(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))(bare-url@2.3.2)(bufferutil@4.0.9)(sodium-javascript@0.8.0)(utf-8-validate@5.0.10)
       bare-node-runtime: 1.1.4(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))
       tronweb: 5.3.4(bufferutil@4.0.9)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
@@ -16366,26 +16294,6 @@ snapshots:
       bare-node-runtime: 1.1.4(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))
       bip39: 3.1.0
       sodium-universal: 5.0.1(bare-url@2.3.2)(sodium-javascript@0.8.0)
-      tronweb: 5.3.4(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-    transitivePeerDependencies:
-      - bare-tcp
-      - bare-url
-      - bufferutil
-      - debug
-      - react-native-b4a
-      - sodium-javascript
-      - utf-8-validate
-
-  '@tetherto/wdk-wallet-tron@1.0.0-beta.4(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
-    dependencies:
-      '@noble/curves': 1.9.2
-      '@noble/hashes': 1.3.3
-      '@noble/secp256k1': 2.2.3
-      '@scure/bip32': 1.7.0
-      '@tetherto/wdk-wallet': 1.0.0-beta.7(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))
-      bare-node-runtime: 1.1.4(bare-tcp@2.2.5(bare-abort-controller@1.0.0)(bare-buffer@3.4.4))
-      bip39: 3.1.0
-      sodium-universal: 5.0.1(sodium-javascript@0.8.0)
       tronweb: 5.3.4(bufferutil@4.0.9)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
       - bare-tcp
@@ -22962,14 +22870,6 @@ snapshots:
       - bare-url
 
   sodium-universal@5.0.1(bare-url@2.3.2)(sodium-javascript@0.8.0):
-    dependencies:
-      sodium-native: 5.0.10(bare-url@2.3.2)
-    optionalDependencies:
-      sodium-javascript: 0.8.0
-    transitivePeerDependencies:
-      - bare-url
-
-  sodium-universal@5.0.1(sodium-javascript@0.8.0):
     dependencies:
       sodium-native: 5.0.10(bare-url@2.3.2)
     optionalDependencies:
