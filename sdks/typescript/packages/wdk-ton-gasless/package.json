@@ -1,6 +1,6 @@
 {
   "name": "@t402/wdk-ton-gasless",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "description": "Gasless USDT0 payments on TON with Tether WDK",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",

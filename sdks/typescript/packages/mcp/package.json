@@ -1,6 +1,6 @@
 {
   "name": "@t402/mcp",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "description": "t402 Payment Protocol MCP Server for AI Agents",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",

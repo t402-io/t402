@@ -4,6 +4,11 @@ All notable changes to the T402 Java SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [1.11.0] - 2026-02-20
+
+### Improved
+- Remove unused Maven dependency (duplicate `maven-javadoc-plugin`)
+
 ## [1.10.0] - 2026-02-09
 
 ### Added

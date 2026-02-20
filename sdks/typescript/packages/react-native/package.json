@@ -1,6 +1,6 @@
 {
   "name": "@t402/react-native",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "description": "React Native SDK for t402 payments",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",

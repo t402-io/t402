@@ -1,6 +1,6 @@
 {
   "name": "@t402/polkadot",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "description": "T402 Polkadot Asset Hub mechanism - USDT payments on Polkadot",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.mjs",

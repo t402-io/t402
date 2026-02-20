@@ -7,12 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.6.0] - 2026-02-20
+
 ### Added
 - **T402PaymentError** - Structured error class with cause, phase, and retryable fields in `@t402/core`
 - **WDK Test Harness** - Mock factories at `@t402/wdk/testing` for unit testing WDK integrations
 - **Unified Chain Registry** - All chain families (EVM, TON, TRON, SVM) in single registry
 - **Pluggable Logger** - Configurable logger interface for WDK
-- **Bundle Size Analysis** - Configuration for analyzing package bundle sizes
 - **Multi-Chain Address Validation** - EVM, TON, TRON, Solana, Bitcoin, Cosmos address validation
 - **Solana Versioned Transactions** - Priority fees and Token-2022 support in `@t402/svm`
 - **TRON Energy Estimation** - Dynamic fee limits for TRON transactions
@@ -33,6 +34,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **WDK Permit2 Example** - Example project at `examples/typescript/wdk-permit2/`
 - **WDK Upto Example** - Example project at `examples/typescript/wdk-upto/`
 - **E2E Integration Tests** - End-to-end integration tests for WDK
+
+### Improved
+- All 36 package.json files enriched with repository, homepage, keywords, publishConfig metadata
+- `.prettierignore` added to 25 packages missing it
+
+### SDK Versions
+- TypeScript: v2.6.0 (36 packages)
+- Go: v1.11.0
+- Python: v1.11.0
+- Java: v1.11.0
 
 ## [2.5.0] - 2026-02-18
 

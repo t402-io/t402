@@ -4,6 +4,14 @@ All notable changes to the T402 Go SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [1.11.0] - 2026-02-20
+
+### Improved
+- Remove unused legacy methods (`extractPayment`, `createHTTPResponse`) in HTTP server
+- Pre-compile regex in `normalizePath` for better performance
+- Add godoc comments on `facilitator.go` and `server.go` exported functions
+- Add godoc on `extensions/bazaar/server.go` exported function
+
 ## [1.10.0] - 2026-02-19
 
 ### Added

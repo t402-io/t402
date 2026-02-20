@@ -4,6 +4,17 @@ All notable changes to the T402 Python SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [1.11.0] - 2026-02-20
+
+### Added
+- **Chain Registry** - Non-EVM chain entries (TON, TRON, Solana) in `chains.py`
+- **Flask `__init__.py`** - Proper `__all__` exports and module docstring
+
+### Improved
+- Add comprehensive docstrings with Args/Returns to `FacilitatorClient` methods
+- Add type annotations (return types) across all middleware modules (FastAPI, Flask, Django, Starlette)
+- Improve client base class and httpx/requests client docstrings
+
 ## [1.10.1] - 2026-02-09
 
 ### Fixed
