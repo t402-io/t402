@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { TonGaslessClient, createTonGaslessClient } from './client'
+import { adaptTonGaslessWallet, isUpstreamTonGaslessWallet } from './adapter'
 import type { TonGaslessConfig } from './types'
 
 describe('TonGaslessClient', () => {
@@ -148,7 +149,11 @@ describe('TonGaslessClient', () => {
 
     it('should support address property', async () => {
       const client = new TonGaslessClient({
-        wdkInstance: { address: 'UQAddressProp12345678901234567890123456789' },
+        wdkInstance: {
+          address: 'UQAddressProp12345678901234567890123456789',
+          sendGaslessTransfer: vi.fn(),
+          getJettonBalance: vi.fn(),
+        },
       })
 
       const address = await client.getAddress()
@@ -206,6 +211,129 @@ describe('TonGaslessClient', () => {
       })
 
       expect(result).toBe(false)
+    })
+  })
+})
+
+describe('Adapter', () => {
+  describe('isUpstreamTonGaslessWallet', () => {
+    it('should return true for full upstream interface', () => {
+      const upstream = {
+        getAddress: vi.fn(),
+        sendGaslessTransfer: vi.fn(),
+        getJettonBalance: vi.fn(),
+      }
+      expect(isUpstreamTonGaslessWallet(upstream)).toBe(true)
+    })
+
+    it('should return false for partial interface', () => {
+      expect(isUpstreamTonGaslessWallet({ getAddress: vi.fn() })).toBe(false)
+    })
+
+    it('should return false for null', () => {
+      expect(isUpstreamTonGaslessWallet(null)).toBe(false)
+    })
+
+    it('should return false for non-objects', () => {
+      expect(isUpstreamTonGaslessWallet('string')).toBe(false)
+      expect(isUpstreamTonGaslessWallet(42)).toBe(false)
+    })
+  })
+
+  describe('adaptTonGaslessWallet', () => {
+    it('should return upstream instance directly if it has full interface', () => {
+      const upstream = {
+        getAddress: vi.fn().mockResolvedValue('UQAddr'),
+        sendGaslessTransfer: vi.fn().mockResolvedValue({ txHash: 'hash' }),
+        getJettonBalance: vi.fn().mockResolvedValue('100'),
+      }
+      const adapter = adaptTonGaslessWallet(upstream)
+      expect(adapter).toBe(upstream)
+    })
+
+    it('should adapt instance with transferJettonGasless', async () => {
+      const custom = {
+        getAddress: vi.fn().mockResolvedValue('UQAddr'),
+        transferJettonGasless: vi.fn().mockResolvedValue({ txHash: 'hash' }),
+        getJettonBalance: vi.fn().mockResolvedValue('100'),
+      }
+      const adapter = adaptTonGaslessWallet(custom)
+      const result = await adapter.sendGaslessTransfer({
+        to: 'UQRecipient',
+        amount: '1000000',
+        jettonAddress: 'EQ...',
+      })
+      expect(result.txHash).toBe('hash')
+      expect(custom.transferJettonGasless).toHaveBeenCalled()
+    })
+
+    it('should adapt instance with transfer method', async () => {
+      const custom = {
+        getAddress: vi.fn().mockResolvedValue('UQAddr'),
+        transfer: vi.fn().mockResolvedValue({ txHash: 'hash' }),
+        getBalance: vi.fn().mockResolvedValue('100'),
+      }
+      const adapter = adaptTonGaslessWallet(custom)
+      const result = await adapter.sendGaslessTransfer({
+        to: 'UQRecipient',
+        amount: '1000000',
+        jettonAddress: 'EQ...',
+      })
+      expect(result.txHash).toBe('hash')
+    })
+
+    it('should adapt instance with address property', async () => {
+      const custom = {
+        address: 'UQAddrProp',
+        sendGaslessTransfer: vi.fn().mockResolvedValue({ txHash: 'hash' }),
+        getJettonBalance: vi.fn().mockResolvedValue('100'),
+      }
+      const adapter = adaptTonGaslessWallet(custom)
+      const addr = await adapter.getAddress()
+      expect(addr).toBe('UQAddrProp')
+    })
+
+    it('should adapt getBalance as getJettonBalance fallback', async () => {
+      const custom = {
+        getAddress: vi.fn().mockResolvedValue('UQAddr'),
+        sendGaslessTransfer: vi.fn().mockResolvedValue({ txHash: 'hash' }),
+        getBalance: vi.fn().mockResolvedValue('500'),
+      }
+      const adapter = adaptTonGaslessWallet(custom)
+      const balance = await adapter.getJettonBalance('UQAddr', 'EQ...')
+      expect(balance).toBe('500')
+      expect(custom.getBalance).toHaveBeenCalledWith('UQAddr', 'EQ...')
+    })
+
+    it('should throw for null instance', () => {
+      expect(() => adaptTonGaslessWallet(null)).toThrow('WDK instance must be a non-null object')
+    })
+
+    it('should throw for instance without address method', () => {
+      expect(() =>
+        adaptTonGaslessWallet({
+          sendGaslessTransfer: vi.fn(),
+          getJettonBalance: vi.fn(),
+        }),
+      ).toThrow('WDK instance must provide getAddress() or address property')
+    })
+
+    it('should throw for instance without transfer method', () => {
+      expect(() =>
+        adaptTonGaslessWallet({
+          getAddress: vi.fn(),
+          getJettonBalance: vi.fn(),
+        }),
+      ).toThrow('does not support gasless transfers')
+    })
+
+    it('should throw for instance without balance method', () => {
+      expect(() =>
+        adaptTonGaslessWallet({
+          getAddress: vi.fn(),
+          sendGaslessTransfer: vi.fn(),
+        }),
+      ).toThrow('does not support balance queries')
     })
   })
 })

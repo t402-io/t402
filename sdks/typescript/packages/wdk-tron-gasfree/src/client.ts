@@ -3,10 +3,14 @@
  *
  * High-level client for executing gas-free TRC20 USDT payments on TRON
  * using Tether WDK's gas-free wallet.
+ *
+ * Supports both the upstream @tetherto/wdk-wallet-tron-gasfree module
+ * and custom WDK instances with compatible method signatures.
  */
 
 import type { WdkTronGasfreeConfig, GasfreePaymentParams, GasfreePaymentResult } from './types.js'
 import { getTokenAddress, TRON_USDT_DECIMALS } from './constants.js'
+import { adaptTronGasfreeWallet, type TronGasfreeWalletAdapter } from './adapter.js'
 
 /**
  * WDK TRON Gas-Free Client
@@ -16,6 +20,7 @@ import { getTokenAddress, TRON_USDT_DECIMALS } from './constants.js'
  */
 export class WdkTronGasfreeClient {
   private readonly config: WdkTronGasfreeConfig
+  private adapter?: TronGasfreeWalletAdapter
 
   constructor(config: WdkTronGasfreeConfig) {
     this.config = config
@@ -40,16 +45,11 @@ export class WdkTronGasfreeClient {
     const token = params.token ?? 'USDT'
     const tokenAddress = getTokenAddress(token)
 
-    // Get the WDK instance
-    const wdk = this.getWdkInstance()
+    const wallet = this.getAdapter()
+    const senderAddress = await wallet.getAddress()
 
-    // Build the gas-free transfer
-    const senderAddress = await this.getAddress()
-
-    // Execute the gas-free transfer via the WDK module
-    // The WDK tron-gasfree module handles relay submission internally
-    const result = await this.executeGasfreeTransfer(wdk, {
-      from: senderAddress,
+    // Execute the gas-free transfer via the adapter
+    const result = await wallet.sendGasfreeTransfer({
       to: params.to,
       amount: params.amount.toString(),
       tokenAddress,
@@ -70,12 +70,10 @@ export class WdkTronGasfreeClient {
   async getBalance(token?: 'USDT' | 'USDT0'): Promise<bigint> {
     const tokenType = token ?? 'USDT'
     const tokenAddress = getTokenAddress(tokenType)
-    const address = await this.getAddress()
+    const wallet = this.getAdapter()
+    const address = await wallet.getAddress()
 
-    const wdk = this.getWdkInstance()
-
-    // Query TRC20 balance via WDK
-    const balance = await this.queryTrc20Balance(wdk, address, tokenAddress)
+    const balance = await wallet.getBalance(address, tokenAddress)
     return BigInt(balance)
   }
 
@@ -96,23 +94,8 @@ export class WdkTronGasfreeClient {
    * Get wallet address
    */
   async getAddress(): Promise<string> {
-    const wdk = this.getWdkInstance()
-    if (!wdk) {
-      throw new Error('WDK instance not configured')
-    }
-
-    // The WDK tron-gasfree module provides the address
-    if (typeof wdk === 'object' && wdk !== null) {
-      const instance = wdk as Record<string, unknown>
-      if (typeof instance.getAddress === 'function') {
-        return (instance as { getAddress: () => Promise<string> }).getAddress()
-      }
-      if (typeof instance.address === 'string') {
-        return instance.address as string
-      }
-    }
-
-    throw new Error('Unable to get address from WDK instance')
+    const wallet = this.getAdapter()
+    return wallet.getAddress()
   }
 
   /**
@@ -141,82 +124,20 @@ export class WdkTronGasfreeClient {
   }
 
   /**
-   * Get the WDK instance
+   * Get or create the wallet adapter.
+   * Lazily wraps the WDK instance using the adapter layer.
    */
-  private getWdkInstance(): unknown {
+  private getAdapter(): TronGasfreeWalletAdapter {
+    if (this.adapter) {
+      return this.adapter
+    }
+
     if (!this.config.wdkInstance) {
       throw new Error('WDK instance not configured. Please provide a wdkInstance in the config.')
     }
-    return this.config.wdkInstance
-  }
 
-  /**
-   * Execute a gas-free TRC20 transfer via the WDK module
-   */
-  private async executeGasfreeTransfer(
-    wdk: unknown,
-    params: {
-      from: string
-      to: string
-      amount: string
-      tokenAddress: string
-      memo?: string
-    },
-  ): Promise<{ txId: string }> {
-    // Delegate to the WDK tron-gasfree module
-    if (typeof wdk === 'object' && wdk !== null) {
-      const instance = wdk as Record<string, unknown>
-
-      // Try the standard WDK gas-free transfer method
-      if (typeof instance.sendGasfreeTransfer === 'function') {
-        const fn = instance.sendGasfreeTransfer as (
-          params: Record<string, unknown>,
-        ) => Promise<{ txId: string }>
-        return fn({
-          to: params.to,
-          amount: params.amount,
-          tokenAddress: params.tokenAddress,
-          memo: params.memo,
-        })
-      }
-
-      // Try alternative method name
-      if (typeof instance.transfer === 'function') {
-        const fn = instance.transfer as (
-          params: Record<string, unknown>,
-        ) => Promise<{ txId: string }>
-        return fn({
-          to: params.to,
-          amount: params.amount,
-          tokenAddress: params.tokenAddress,
-        })
-      }
-    }
-
-    throw new Error(
-      'WDK instance does not support gas-free transfers. ' +
-        'Ensure @tetherto/wdk-wallet-tron-gasfree is properly configured.',
-    )
-  }
-
-  /**
-   * Query TRC20 token balance via the WDK module
-   */
-  private async queryTrc20Balance(
-    wdk: unknown,
-    address: string,
-    tokenAddress: string,
-  ): Promise<string> {
-    if (typeof wdk === 'object' && wdk !== null) {
-      const instance = wdk as Record<string, unknown>
-
-      if (typeof instance.getBalance === 'function') {
-        const fn = instance.getBalance as (address: string, tokenAddress: string) => Promise<string>
-        return fn(address, tokenAddress)
-      }
-    }
-
-    throw new Error('WDK instance does not support balance queries')
+    this.adapter = adaptTronGasfreeWallet(this.config.wdkInstance)
+    return this.adapter
   }
 }
 

@@ -39,6 +39,14 @@
 // Main client
 export { WdkTronGasfreeClient, createWdkTronGasfreeClient } from './client.js'
 
+// Adapter (upstream integration)
+export {
+  adaptTronGasfreeWallet,
+  isUpstreamTronGasfreeWallet,
+  tryLoadUpstreamModule,
+} from './adapter.js'
+export type { TronGasfreeWalletAdapter, UpstreamTronGasfreeWallet } from './adapter.js'
+
 // Types
 export type { WdkTronGasfreeConfig, GasfreePaymentParams, GasfreePaymentResult } from './types.js'
 

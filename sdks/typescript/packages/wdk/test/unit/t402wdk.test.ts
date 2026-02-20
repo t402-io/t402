@@ -869,5 +869,297 @@ describe('T402WDK', () => {
 
       await expect(wdk.getSwapQuote('base', '0xtoken', 1000000n)).rejects.toThrow(ChainError)
     })
+
+    it('should register swap protocol with WDK during initialization', () => {
+      const MockSwapModule = { name: 'swap-velora' }
+      T402WDK.registerWDK(MockWDKConstructor, {
+        wallets: { evm: MockWalletManagerEvm },
+        protocols: { swapVeloraEvm: MockSwapModule },
+      })
+      wdk = new T402WDK(VALID_SEED_PHRASE, { arbitrum: 'https://arb1.arbitrum.io/rpc' })
+
+      // The WDK instance should have had registerProtocol called for swap-velora
+      expect(wdk.isInitialized).toBe(true)
+      expect(wdk.canSwap()).toBe(true)
+      // Verify registerProtocol was called with 'swap-velora'
+      expect((wdk.wdk.registerProtocol as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+        'swap-velora',
+        MockSwapModule,
+      )
+    })
+
+    it('should execute swapAndPay successfully', async () => {
+      T402WDK.registerWDK(MockWDKConstructor, {
+        wallets: { evm: MockWalletManagerEvm },
+        protocols: { swapVeloraEvm: {} },
+      })
+      wdk = new T402WDK(VALID_SEED_PHRASE, { arbitrum: 'https://arb1.arbitrum.io/rpc' })
+
+      // Mock executeProtocol to return swap result
+      const mockResult = {
+        txHash: '0xswaphash',
+        inputAmount: 1000000n,
+        outputAmount: 999000n,
+      }
+      ;(wdk.wdk.executeProtocol as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResult)
+
+      const result = await wdk.swapAndPay({
+        chain: 'arbitrum',
+        fromToken: '0xWETH',
+        amount: 1000000n,
+      })
+
+      expect(result.txHash).toBe('0xswaphash')
+    })
+
+    it('should execute getSwapQuote successfully', async () => {
+      T402WDK.registerWDK(MockWDKConstructor, {
+        wallets: { evm: MockWalletManagerEvm },
+        protocols: { swapVeloraEvm: {} },
+      })
+      wdk = new T402WDK(VALID_SEED_PHRASE, { arbitrum: 'https://arb1.arbitrum.io/rpc' })
+
+      const mockQuote = {
+        inputToken: '0xWETH',
+        outputToken: '0xUSDT0',
+        inputAmount: 1000000n,
+        outputAmount: 999000n,
+        priceImpact: 0.1,
+        route: ['0xWETH', '0xUSDT0'],
+      }
+      ;(wdk.wdk.executeProtocol as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockQuote)
+
+      const quote = await wdk.getSwapQuote('arbitrum', '0xWETH', 1000000n)
+      expect(quote.inputToken).toBe('0xWETH')
+      expect(quote.priceImpact).toBe(0.1)
+    })
+  })
+
+  describe('Lending operations', () => {
+    let wdk: T402WDK
+
+    beforeEach(() => {
+      // @ts-expect-error - accessing private static for testing
+      T402WDK._WDK = null
+      // @ts-expect-error - accessing private static for testing
+      T402WDK._WalletManagerEvm = null
+      // @ts-expect-error - accessing private static for testing
+      T402WDK._WalletModules = {}
+      // @ts-expect-error - accessing private static for testing
+      T402WDK._ProtocolModules = {}
+    })
+
+    it('should report canBorrow() false when protocol not registered', () => {
+      T402WDK.registerWDK(MockWDKConstructor, {
+        wallets: { evm: MockWalletManagerEvm },
+      })
+      wdk = new T402WDK(VALID_SEED_PHRASE, { arbitrum: 'https://arb1.arbitrum.io/rpc' })
+
+      expect(wdk.canBorrow()).toBe(false)
+    })
+
+    it('should report canBorrow() true when protocol registered', () => {
+      T402WDK.registerWDK(MockWDKConstructor, {
+        wallets: { evm: MockWalletManagerEvm },
+        protocols: { lendingAaveEvm: {} },
+      })
+      wdk = new T402WDK(VALID_SEED_PHRASE, { arbitrum: 'https://arb1.arbitrum.io/rpc' })
+
+      expect(wdk.canBorrow()).toBe(true)
+    })
+
+    it('should register lending protocol with WDK during initialization', () => {
+      const MockLendingModule = { name: 'lending-aave' }
+      T402WDK.registerWDK(MockWDKConstructor, {
+        wallets: { evm: MockWalletManagerEvm },
+        protocols: { lendingAaveEvm: MockLendingModule },
+      })
+      wdk = new T402WDK(VALID_SEED_PHRASE, { arbitrum: 'https://arb1.arbitrum.io/rpc' })
+
+      expect(wdk.isInitialized).toBe(true)
+      expect(wdk.canBorrow()).toBe(true)
+      expect((wdk.wdk.registerProtocol as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+        'lending-aave',
+        MockLendingModule,
+      )
+    })
+
+    it('should throw on borrowAndPay when protocol not registered', async () => {
+      T402WDK.registerWDK(MockWDKConstructor, {
+        wallets: { evm: MockWalletManagerEvm },
+      })
+      wdk = new T402WDK(VALID_SEED_PHRASE, { arbitrum: 'https://arb1.arbitrum.io/rpc' })
+
+      await expect(
+        wdk.borrowAndPay({
+          chain: 'arbitrum',
+          collateralToken: '0xWETH',
+          collateralAmount: 50000000000000000n,
+          borrowAmount: 100000000n,
+        }),
+      ).rejects.toThrow(WDKError)
+      await expect(
+        wdk.borrowAndPay({
+          chain: 'arbitrum',
+          collateralToken: '0xWETH',
+          collateralAmount: 50000000000000000n,
+          borrowAmount: 100000000n,
+        }),
+      ).rejects.toThrow('Aave lending protocol not registered')
+    })
+
+    it('should throw on borrowAndPay for chain without USDT0', async () => {
+      T402WDK.registerWDK(MockWDKConstructor, {
+        wallets: { evm: MockWalletManagerEvm },
+        protocols: { lendingAaveEvm: {} },
+      })
+      wdk = new T402WDK(VALID_SEED_PHRASE, { base: 'https://mainnet.base.org' })
+
+      await expect(
+        wdk.borrowAndPay({
+          chain: 'base',
+          collateralToken: '0xWETH',
+          collateralAmount: 50000000000000000n,
+          borrowAmount: 100000000n,
+        }),
+      ).rejects.toThrow(ChainError)
+    })
+
+    it('should reject zero collateral amount', async () => {
+      T402WDK.registerWDK(MockWDKConstructor, {
+        wallets: { evm: MockWalletManagerEvm },
+        protocols: { lendingAaveEvm: {} },
+      })
+      wdk = new T402WDK(VALID_SEED_PHRASE, { arbitrum: 'https://arb1.arbitrum.io/rpc' })
+
+      await expect(
+        wdk.borrowAndPay({
+          chain: 'arbitrum',
+          collateralToken: '0xWETH',
+          collateralAmount: 0n,
+          borrowAmount: 100000000n,
+        }),
+      ).rejects.toThrow('collateralAmount must be greater than 0')
+    })
+
+    it('should reject zero borrow amount', async () => {
+      T402WDK.registerWDK(MockWDKConstructor, {
+        wallets: { evm: MockWalletManagerEvm },
+        protocols: { lendingAaveEvm: {} },
+      })
+      wdk = new T402WDK(VALID_SEED_PHRASE, { arbitrum: 'https://arb1.arbitrum.io/rpc' })
+
+      await expect(
+        wdk.borrowAndPay({
+          chain: 'arbitrum',
+          collateralToken: '0xWETH',
+          collateralAmount: 50000000000000000n,
+          borrowAmount: 0n,
+        }),
+      ).rejects.toThrow('borrowAmount must be greater than 0')
+    })
+
+    it('should execute borrowAndPay successfully', async () => {
+      T402WDK.registerWDK(MockWDKConstructor, {
+        wallets: { evm: MockWalletManagerEvm },
+        protocols: { lendingAaveEvm: {} },
+      })
+      wdk = new T402WDK(VALID_SEED_PHRASE, { arbitrum: 'https://arb1.arbitrum.io/rpc' })
+
+      const mockResult = {
+        supplyTxHash: '0xsupplyhash',
+        borrowTxHash: '0xborrowhash',
+        borrowedAmount: '100000000',
+        txHash: '0xborrowhash', // executeProtocol requires txHash
+      }
+      ;(wdk.wdk.executeProtocol as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResult)
+
+      const result = await wdk.borrowAndPay({
+        chain: 'arbitrum',
+        collateralToken: '0xWETH',
+        collateralAmount: 50000000000000000n,
+        borrowAmount: 100000000n,
+      })
+
+      expect(result.supplyTxHash).toBe('0xsupplyhash')
+      expect(result.borrowTxHash).toBe('0xborrowhash')
+      expect(result.borrowedAmount).toBe(100000000n)
+    })
+
+    it('should use variable interest rate mode by default', async () => {
+      T402WDK.registerWDK(MockWDKConstructor, {
+        wallets: { evm: MockWalletManagerEvm },
+        protocols: { lendingAaveEvm: {} },
+      })
+      wdk = new T402WDK(VALID_SEED_PHRASE, { arbitrum: 'https://arb1.arbitrum.io/rpc' })
+
+      const mockResult = {
+        supplyTxHash: '0xsupplyhash',
+        borrowTxHash: '0xborrowhash',
+        borrowedAmount: '100000000',
+        txHash: '0xborrowhash',
+      }
+      ;(wdk.wdk.executeProtocol as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResult)
+
+      await wdk.borrowAndPay({
+        chain: 'arbitrum',
+        collateralToken: '0xWETH',
+        collateralAmount: 50000000000000000n,
+        borrowAmount: 100000000n,
+      })
+
+      expect((wdk.wdk.executeProtocol as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+        'lending-aave',
+        expect.objectContaining({ interestRateMode: 2 }),
+      )
+    })
+
+    it('should allow custom interest rate mode', async () => {
+      T402WDK.registerWDK(MockWDKConstructor, {
+        wallets: { evm: MockWalletManagerEvm },
+        protocols: { lendingAaveEvm: {} },
+      })
+      wdk = new T402WDK(VALID_SEED_PHRASE, { arbitrum: 'https://arb1.arbitrum.io/rpc' })
+
+      const mockResult = {
+        supplyTxHash: '0xsupplyhash',
+        borrowTxHash: '0xborrowhash',
+        borrowedAmount: '100000000',
+        txHash: '0xborrowhash',
+      }
+      ;(wdk.wdk.executeProtocol as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResult)
+
+      await wdk.borrowAndPay({
+        chain: 'arbitrum',
+        collateralToken: '0xWETH',
+        collateralAmount: 50000000000000000n,
+        borrowAmount: 100000000n,
+        interestRateMode: 1,
+      })
+
+      expect((wdk.wdk.executeProtocol as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+        'lending-aave',
+        expect.objectContaining({ interestRateMode: 1 }),
+      )
+    })
+
+    it('should register both swap and lending protocols simultaneously', () => {
+      T402WDK.registerWDK(MockWDKConstructor, {
+        wallets: { evm: MockWalletManagerEvm },
+        protocols: {
+          swapVeloraEvm: {},
+          lendingAaveEvm: {},
+          bridgeUsdt0Evm: MockBridgeUsdt0Evm,
+        },
+      })
+      wdk = new T402WDK(VALID_SEED_PHRASE, { arbitrum: 'https://arb1.arbitrum.io/rpc' })
+
+      expect(wdk.canSwap()).toBe(true)
+      expect(wdk.canBorrow()).toBe(true)
+      expect(T402WDK.isBridgeRegistered()).toBe(true)
+      expect(T402WDK.getRegisteredProtocolModules()).toEqual(
+        expect.arrayContaining(['swapVeloraEvm', 'lendingAaveEvm', 'bridgeUsdt0Evm']),
+      )
+    })
   })
 })

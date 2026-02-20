@@ -25,7 +25,7 @@ import type {
   SponsorshipInfo,
   WdkAccount,
 } from './types.js'
-import { createWdkSmartAccount } from './account.js'
+import { createSmartAccountSigner } from './adapter.js'
 import { getTokenAddress, getChainName } from './constants.js'
 
 /**
@@ -428,6 +428,12 @@ export interface CreateWdkGaslessClientConfig {
   paymaster?: PaymasterConfig
   /** Salt nonce for address generation (defaults to 0) */
   saltNonce?: bigint
+  /**
+   * Optional pre-created upstream ERC-4337 wallet instance
+   * (from @tetherto/wdk-wallet-evm-erc-4337).
+   * When provided, this is used instead of the custom Safe-based smart account.
+   */
+  upstreamWallet?: unknown
 }
 
 /**
@@ -467,13 +473,18 @@ export interface CreateWdkGaslessClientConfig {
 export async function createWdkGaslessClient(
   config: CreateWdkGaslessClientConfig,
 ): Promise<WdkGaslessClient> {
-  // Create the WDK smart account
-  const smartAccount = await createWdkSmartAccount({
-    wdkAccount: config.wdkAccount,
-    publicClient: config.publicClient,
-    chainId: config.chainId,
-    saltNonce: config.saltNonce,
-  })
+  // Create the smart account signer.
+  // Uses upstream @tetherto/wdk-wallet-evm-erc-4337 when available,
+  // falls back to custom Safe-based WdkSmartAccount.
+  const smartAccount = await createSmartAccountSigner(
+    {
+      wdkAccount: config.wdkAccount,
+      publicClient: config.publicClient,
+      chainId: config.chainId,
+      saltNonce: config.saltNonce,
+    },
+    config.upstreamWallet,
+  )
 
   // Create the gasless client
   return new WdkGaslessClient({

@@ -148,6 +148,7 @@ export type {
   WDKInstanceMultiChain,
   // Factory method types
   T402WDKCreateConfig,
+  WDKAutoDiscoveryResult,
   SignerEntry,
   GetAllSignersOptions,
   FromWDKOptions,
@@ -155,6 +156,9 @@ export type {
   SwapQuote,
   SwapResult,
   SwapParams,
+  // Lending types
+  BorrowParams,
+  BorrowResult,
 } from './types.js'
 
 // Multi-chain adapters

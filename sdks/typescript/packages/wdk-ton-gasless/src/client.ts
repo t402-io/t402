@@ -3,10 +3,14 @@
  *
  * High-level client for executing gasless Jetton USDT0 payments on TON
  * using Tether WDK's gasless wallet module.
+ *
+ * Supports both the upstream @tetherto/wdk-wallet-ton-gasless module
+ * and custom WDK instances with compatible method signatures.
  */
 
 import type { TonGaslessConfig, TonGaslessPaymentParams, TonGaslessPaymentResult } from './types.js'
 import { getJettonAddress, TON_JETTON_DECIMALS } from './constants.js'
+import { adaptTonGaslessWallet, type TonGaslessWalletAdapter } from './adapter.js'
 
 /**
  * TON Gasless Client
@@ -16,6 +20,7 @@ import { getJettonAddress, TON_JETTON_DECIMALS } from './constants.js'
  */
 export class TonGaslessClient {
   private readonly config: TonGaslessConfig
+  private adapter?: TonGaslessWalletAdapter
 
   constructor(config: TonGaslessConfig) {
     this.config = config
@@ -39,12 +44,11 @@ export class TonGaslessClient {
     const token = params.token ?? 'USDT0'
     const jettonAddress = getJettonAddress(token)
 
-    const wdk = this.getWdkInstance()
-    const senderAddress = await this.getAddress()
+    const wallet = this.getAdapter()
+    const senderAddress = await wallet.getAddress()
 
-    // Execute the gasless transfer via the WDK module
-    const result = await this.executeGaslessTransfer(wdk, {
-      from: senderAddress,
+    // Execute the gasless transfer via the adapter
+    const result = await wallet.sendGaslessTransfer({
       to: params.to,
       amount: params.amount.toString(),
       jettonAddress,
@@ -91,11 +95,10 @@ export class TonGaslessClient {
   async getBalance(token?: 'USDT0' | 'USDT'): Promise<bigint> {
     const tokenType = token ?? 'USDT0'
     const jettonAddress = getJettonAddress(tokenType)
-    const address = await this.getAddress()
+    const wallet = this.getAdapter()
+    const address = await wallet.getAddress()
 
-    const wdk = this.getWdkInstance()
-
-    const balance = await this.queryJettonBalance(wdk, address, jettonAddress)
+    const balance = await wallet.getJettonBalance(address, jettonAddress)
     return BigInt(balance)
   }
 
@@ -115,122 +118,25 @@ export class TonGaslessClient {
    * Get wallet address
    */
   async getAddress(): Promise<string> {
-    const wdk = this.getWdkInstance()
-    if (!wdk) {
-      throw new Error('WDK instance not configured')
-    }
-
-    if (typeof wdk === 'object' && wdk !== null) {
-      const instance = wdk as Record<string, unknown>
-      if (typeof instance.getAddress === 'function') {
-        return (instance as { getAddress: () => Promise<string> }).getAddress()
-      }
-      if (typeof instance.address === 'string') {
-        return instance.address as string
-      }
-    }
-
-    throw new Error('Unable to get address from WDK instance')
+    const wallet = this.getAdapter()
+    return wallet.getAddress()
   }
 
   /**
-   * Get the WDK instance
+   * Get or create the wallet adapter.
+   * Lazily wraps the WDK instance using the adapter layer.
    */
-  private getWdkInstance(): unknown {
+  private getAdapter(): TonGaslessWalletAdapter {
+    if (this.adapter) {
+      return this.adapter
+    }
+
     if (!this.config.wdkInstance) {
       throw new Error('WDK instance not configured. Please provide a wdkInstance in the config.')
     }
-    return this.config.wdkInstance
-  }
 
-  /**
-   * Execute a gasless Jetton transfer via the WDK module
-   */
-  private async executeGaslessTransfer(
-    wdk: unknown,
-    params: {
-      from: string
-      to: string
-      amount: string
-      jettonAddress: string
-      memo?: string
-    },
-  ): Promise<{ txHash: string }> {
-    if (typeof wdk === 'object' && wdk !== null) {
-      const instance = wdk as Record<string, unknown>
-
-      // Try the standard WDK gasless transfer method
-      if (typeof instance.sendGaslessTransfer === 'function') {
-        const fn = instance.sendGaslessTransfer as (
-          params: Record<string, unknown>,
-        ) => Promise<{ txHash: string }>
-        return fn({
-          to: params.to,
-          amount: params.amount,
-          jettonAddress: params.jettonAddress,
-          memo: params.memo,
-        })
-      }
-
-      // Try alternative method names
-      if (typeof instance.transferJettonGasless === 'function') {
-        const fn = instance.transferJettonGasless as (
-          params: Record<string, unknown>,
-        ) => Promise<{ txHash: string }>
-        return fn({
-          to: params.to,
-          amount: params.amount,
-          jettonAddress: params.jettonAddress,
-        })
-      }
-
-      if (typeof instance.transfer === 'function') {
-        const fn = instance.transfer as (
-          params: Record<string, unknown>,
-        ) => Promise<{ txHash: string }>
-        return fn({
-          to: params.to,
-          amount: params.amount,
-          jettonAddress: params.jettonAddress,
-        })
-      }
-    }
-
-    throw new Error(
-      'WDK instance does not support gasless transfers. ' +
-        'Ensure @tetherto/wdk-wallet-ton-gasless is properly configured.',
-    )
-  }
-
-  /**
-   * Query Jetton balance via the WDK module
-   */
-  private async queryJettonBalance(
-    wdk: unknown,
-    address: string,
-    jettonAddress: string,
-  ): Promise<string> {
-    if (typeof wdk === 'object' && wdk !== null) {
-      const instance = wdk as Record<string, unknown>
-
-      if (typeof instance.getJettonBalance === 'function') {
-        const fn = instance.getJettonBalance as (
-          address: string,
-          jettonAddress: string,
-        ) => Promise<string>
-        return fn(address, jettonAddress)
-      }
-
-      if (typeof instance.getBalance === 'function') {
-        const fn = instance.getBalance as (
-          address: string,
-          jettonAddress: string,
-        ) => Promise<string>
-        return fn(address, jettonAddress)
-      }
-    }
-
-    throw new Error('WDK instance does not support balance queries')
+    this.adapter = adaptTonGaslessWallet(this.config.wdkInstance)
+    return this.adapter
   }
 }
 

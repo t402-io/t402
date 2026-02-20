@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { WdkTronGasfreeClient, createWdkTronGasfreeClient } from './client'
+import { adaptTronGasfreeWallet, isUpstreamTronGasfreeWallet } from './adapter'
 import type { WdkTronGasfreeConfig } from './types'
 
 describe('WdkTronGasfreeClient', () => {
@@ -147,7 +148,11 @@ describe('WdkTronGasfreeClient', () => {
 
     it('should support address property', async () => {
       const client = new WdkTronGasfreeClient({
-        wdkInstance: { address: 'TAddressProp123456789012345678901' },
+        wdkInstance: {
+          address: 'TAddressProp123456789012345678901',
+          sendGasfreeTransfer: vi.fn(),
+          getBalance: vi.fn(),
+        },
       })
 
       const address = await client.getAddress()
@@ -205,6 +210,102 @@ describe('WdkTronGasfreeClient', () => {
       })
 
       expect(result).toBe(false)
+    })
+  })
+})
+
+describe('Adapter', () => {
+  describe('isUpstreamTronGasfreeWallet', () => {
+    it('should return true for full upstream interface', () => {
+      const upstream = {
+        getAddress: vi.fn(),
+        sendGasfreeTransfer: vi.fn(),
+        getBalance: vi.fn(),
+      }
+      expect(isUpstreamTronGasfreeWallet(upstream)).toBe(true)
+    })
+
+    it('should return false for partial interface', () => {
+      expect(isUpstreamTronGasfreeWallet({ getAddress: vi.fn() })).toBe(false)
+    })
+
+    it('should return false for null', () => {
+      expect(isUpstreamTronGasfreeWallet(null)).toBe(false)
+    })
+
+    it('should return false for non-objects', () => {
+      expect(isUpstreamTronGasfreeWallet('string')).toBe(false)
+      expect(isUpstreamTronGasfreeWallet(42)).toBe(false)
+    })
+  })
+
+  describe('adaptTronGasfreeWallet', () => {
+    it('should return upstream instance directly if it has full interface', () => {
+      const upstream = {
+        getAddress: vi.fn().mockResolvedValue('TAddr'),
+        sendGasfreeTransfer: vi.fn().mockResolvedValue({ txId: 'id' }),
+        getBalance: vi.fn().mockResolvedValue('100'),
+      }
+      const adapter = adaptTronGasfreeWallet(upstream)
+      expect(adapter).toBe(upstream)
+    })
+
+    it('should adapt instance with transfer method', async () => {
+      const custom = {
+        getAddress: vi.fn().mockResolvedValue('TAddr'),
+        transfer: vi.fn().mockResolvedValue({ txId: 'id' }),
+        getBalance: vi.fn().mockResolvedValue('100'),
+      }
+      const adapter = adaptTronGasfreeWallet(custom)
+      const result = await adapter.sendGasfreeTransfer({
+        to: 'TRecipient',
+        amount: '1000000',
+        tokenAddress: 'TR7...',
+      })
+      expect(result.txId).toBe('id')
+      expect(custom.transfer).toHaveBeenCalled()
+    })
+
+    it('should adapt instance with address property', async () => {
+      const custom = {
+        address: 'TAddrProp',
+        sendGasfreeTransfer: vi.fn().mockResolvedValue({ txId: 'id' }),
+        getBalance: vi.fn().mockResolvedValue('100'),
+      }
+      const adapter = adaptTronGasfreeWallet(custom)
+      const addr = await adapter.getAddress()
+      expect(addr).toBe('TAddrProp')
+    })
+
+    it('should throw for null instance', () => {
+      expect(() => adaptTronGasfreeWallet(null)).toThrow('WDK instance must be a non-null object')
+    })
+
+    it('should throw for instance without address method', () => {
+      expect(() =>
+        adaptTronGasfreeWallet({
+          sendGasfreeTransfer: vi.fn(),
+          getBalance: vi.fn(),
+        }),
+      ).toThrow('WDK instance must provide getAddress() or address property')
+    })
+
+    it('should throw for instance without transfer method', () => {
+      expect(() =>
+        adaptTronGasfreeWallet({
+          getAddress: vi.fn(),
+          getBalance: vi.fn(),
+        }),
+      ).toThrow('does not support gas-free transfers')
+    })
+
+    it('should throw for instance without balance method', () => {
+      expect(() =>
+        adaptTronGasfreeWallet({
+          getAddress: vi.fn(),
+          sendGasfreeTransfer: vi.fn(),
+        }),
+      ).toThrow('does not support balance queries')
     })
   })
 })

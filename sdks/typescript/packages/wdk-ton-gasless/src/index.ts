@@ -39,6 +39,14 @@
 // Main client
 export { TonGaslessClient, createTonGaslessClient } from './client.js'
 
+// Adapter (upstream integration)
+export {
+  adaptTonGaslessWallet,
+  isUpstreamTonGaslessWallet,
+  tryLoadUpstreamModule,
+} from './adapter.js'
+export type { TonGaslessWalletAdapter, UpstreamTonGaslessWallet } from './adapter.js'
+
 // Types
 export type { TonGaslessConfig, TonGaslessPaymentParams, TonGaslessPaymentResult } from './types.js'
 

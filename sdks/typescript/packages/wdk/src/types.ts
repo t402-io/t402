@@ -303,6 +303,8 @@ export interface WDKWalletModules {
   tonGasless?: unknown
   /** TRON wallet manager (@tetherto/wdk-wallet-tron) */
   tron?: unknown
+  /** TRON gas-free wallet manager (@tetherto/wdk-wallet-tron-gasfree) */
+  tronGasfree?: unknown
   /** Bitcoin wallet manager (@tetherto/wdk-wallet-btc) */
   btc?: unknown
 }
@@ -417,6 +419,18 @@ export interface WDKInstanceMultiChain extends WDKInstance {
 // ============================================================
 
 /**
+ * Result of WDK module auto-discovery
+ */
+export interface WDKAutoDiscoveryResult {
+  /** Discovered modules ready for registration */
+  discovered: WDKModulesConfig
+  /** Package names that were found and loaded */
+  available: string[]
+  /** Package names that were not installed */
+  unavailable: string[]
+}
+
+/**
  * Configuration for T402WDK.create() factory method
  */
 export interface T402WDKCreateConfig {
@@ -506,4 +520,32 @@ export interface SwapParams {
   amount: bigint
   /** Maximum slippage tolerance (0-1, default: 0.005 = 0.5%) */
   maxSlippage?: number
+}
+
+/**
+ * Parameters for borrow-and-pay operations
+ */
+export interface BorrowParams {
+  /** Chain name (e.g., "ethereum", "arbitrum") */
+  chain: string
+  /** Collateral token address */
+  collateralToken: string
+  /** Collateral amount in smallest units */
+  collateralAmount: bigint
+  /** USDT0 amount to borrow in smallest units */
+  borrowAmount: bigint
+  /** Interest rate mode: 1 = stable, 2 = variable (default: 2) */
+  interestRateMode?: number
+}
+
+/**
+ * Result of a borrow-and-pay operation
+ */
+export interface BorrowResult {
+  /** Supply (deposit collateral) transaction hash */
+  supplyTxHash: string
+  /** Borrow transaction hash */
+  borrowTxHash: string
+  /** Actual borrowed amount in smallest units */
+  borrowedAmount: bigint
 }

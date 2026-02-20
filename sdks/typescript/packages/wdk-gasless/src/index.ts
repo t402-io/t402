@@ -93,6 +93,14 @@ export type { CreateWdkGaslessClientConfig } from './client.js'
 // Smart account
 export { WdkSmartAccount, createWdkSmartAccount, SAFE_4337_ADDRESSES } from './account.js'
 
+// Adapter (upstream integration)
+export {
+  createSmartAccountSigner,
+  isUpstreamErc4337Wallet,
+  tryLoadUpstreamModule,
+} from './adapter.js'
+export type { UpstreamErc4337Wallet } from './adapter.js'
+
 // Types
 export type {
   WdkAccount,

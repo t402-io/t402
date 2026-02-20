@@ -34,6 +34,9 @@ import type {
   SwapQuote,
   SwapResult,
   SwapParams,
+  BorrowParams,
+  BorrowResult,
+  WDKAutoDiscoveryResult,
 } from './types.js'
 import { encryptSeed, decryptSeed, type EncryptedSeed } from './secret.js'
 import {
@@ -301,6 +304,140 @@ export class T402WDK {
   }
 
   /**
+   * Auto-discover installed WDK packages using dynamic imports.
+   *
+   * Probes known `@tetherto/wdk-*` packages and returns the ones that
+   * are installed and importable.
+   *
+   * @returns Discovery result with available/unavailable packages and ready-to-use modules config
+   *
+   * @example
+   * ```typescript
+   * const result = await T402WDK.autoDiscover();
+   * console.log('Found:', result.available);
+   * console.log('Missing:', result.unavailable);
+   * ```
+   */
+  static async autoDiscover(): Promise<WDKAutoDiscoveryResult> {
+    const walletPackages: Record<keyof WDKWalletModules, string> = {
+      evm: '@tetherto/wdk-wallet-evm',
+      solana: '@tetherto/wdk-wallet-solana',
+      ton: '@tetherto/wdk-wallet-ton',
+      tron: '@tetherto/wdk-wallet-tron',
+      btc: '@tetherto/wdk-wallet-btc',
+      evmErc4337: '@tetherto/wdk-wallet-evm-erc-4337',
+      tonGasless: '@tetherto/wdk-wallet-ton-gasless',
+      tronGasfree: '@tetherto/wdk-wallet-tron-gasfree',
+    }
+
+    const protocolPackages: Record<keyof WDKProtocolModules, string> = {
+      bridgeUsdt0Evm: '@tetherto/wdk-protocol-bridge-usdt0-evm',
+      bridgeUsdt0Ton: '@tetherto/wdk-protocol-bridge-usdt0-ton',
+      swapVeloraEvm: '@tetherto/wdk-protocol-swap-velora-evm',
+      lendingAaveEvm: '@tetherto/wdk-protocol-lending-aave-evm',
+    }
+
+    const available: string[] = []
+    const unavailable: string[] = []
+    const wallets: WDKWalletModules = {}
+    const protocols: WDKProtocolModules = {}
+
+    // Probe wallet packages
+    const walletEntries = Object.entries(walletPackages) as [keyof WDKWalletModules, string][]
+    const walletResults = await Promise.allSettled(
+      walletEntries.map(async ([key, pkg]) => {
+        const mod = await import(/* @vite-ignore */ pkg)
+        return { key, pkg, mod: mod.default ?? mod }
+      }),
+    )
+
+    for (let i = 0; i < walletResults.length; i++) {
+      const result = walletResults[i]
+      if (result.status === 'fulfilled') {
+        const { key, pkg, mod } = result.value
+        wallets[key] = mod
+        available.push(pkg)
+      } else {
+        unavailable.push(walletEntries[i][1])
+      }
+    }
+
+    // Probe protocol packages
+    const protocolEntries = Object.entries(protocolPackages) as [keyof WDKProtocolModules, string][]
+    const protocolResults = await Promise.allSettled(
+      protocolEntries.map(async ([key, pkg]) => {
+        const mod = await import(/* @vite-ignore */ pkg)
+        return { key, pkg, mod: mod.default ?? mod }
+      }),
+    )
+
+    for (let i = 0; i < protocolResults.length; i++) {
+      const result = protocolResults[i]
+      if (result.status === 'fulfilled') {
+        const { key, pkg, mod } = result.value
+        protocols[key] = mod
+        available.push(pkg)
+      } else {
+        unavailable.push(protocolEntries[i][1])
+      }
+    }
+
+    return {
+      discovered: { wallets, protocols },
+      available,
+      unavailable,
+    }
+  }
+
+  /**
+   * Auto-discover installed WDK modules, then create a fully configured T402WDK.
+   *
+   * Combines `autoDiscover()` + `create()` in one call. Any explicit
+   * modules you pass in `config.modules` take precedence over discovered ones.
+   *
+   * @param config - Same as `T402WDKCreateConfig` but `modules` is optional/partial
+   * @returns A ready-to-use T402WDK instance
+   *
+   * @example
+   * ```typescript
+   * const wdk = await T402WDK.autoCreate({
+   *   seedPhrase: 'your twelve word seed phrase ...',
+   *   chains: { arbitrum: 'https://arb1.arbitrum.io/rpc' },
+   * });
+   * ```
+   */
+  static async autoCreate(
+    config: Omit<T402WDKCreateConfig, 'modules'> & { modules?: Partial<WDKModulesConfig> },
+  ): Promise<T402WDK> {
+    // Discover installed modules
+    const { discovered } = await T402WDK.autoDiscover()
+
+    // Merge: explicit modules override discovered ones
+    const mergedModules: WDKModulesConfig = {
+      wallets: { ...discovered.wallets, ...config.modules?.wallets },
+      protocols: { ...discovered.protocols, ...config.modules?.protocols },
+    }
+
+    // Auto-discover the WDK constructor itself
+    let WDKRef: WDKConstructor
+    try {
+      const wdkMod = await import(/* @vite-ignore */ '@tetherto/wdk')
+      WDKRef = (wdkMod.default ?? wdkMod) as unknown as WDKConstructor
+    } catch {
+      throw new WDKInitializationError(
+        '@tetherto/wdk package not found. Install it with: npm install @tetherto/wdk',
+      )
+    }
+
+    return T402WDK.create(WDKRef, {
+      seedPhrase: config.seedPhrase,
+      chains: config.chains,
+      modules: mergedModules,
+      options: config.options,
+    })
+  }
+
+  /**
    * Create a T402WDK from a pre-configured @tetherto/wdk instance.
    *
    * Wraps an existing WDK instance (already has wallets/protocols registered)
@@ -560,6 +697,28 @@ export class T402WDK {
           // Bridge registration failure is non-fatal, just log it
           console.warn(
             `Failed to register USDT0 bridge protocol: ${error instanceof Error ? error.message : String(error)}`,
+          )
+        }
+      }
+
+      // Register Velora swap protocol if available
+      if (T402WDK._ProtocolModules.swapVeloraEvm) {
+        try {
+          wdk = wdk.registerProtocol('swap-velora', T402WDK._ProtocolModules.swapVeloraEvm)
+        } catch (error) {
+          console.warn(
+            `Failed to register Velora swap protocol: ${error instanceof Error ? error.message : String(error)}`,
+          )
+        }
+      }
+
+      // Register Aave lending protocol if available
+      if (T402WDK._ProtocolModules.lendingAaveEvm) {
+        try {
+          wdk = wdk.registerProtocol('lending-aave', T402WDK._ProtocolModules.lendingAaveEvm)
+        } catch (error) {
+          console.warn(
+            `Failed to register Aave lending protocol: ${error instanceof Error ? error.message : String(error)}`,
           )
         }
       }
@@ -1451,6 +1610,100 @@ export class T402WDK {
           chain: params.chain,
           fromToken: params.fromToken,
           amount: params.amount.toString(),
+        },
+      )
+    }
+  }
+
+  // ========== Lending Protocol ==========
+
+  /**
+   * Check if the Aave lending protocol is registered and available
+   */
+  canBorrow(): boolean {
+    return T402WDK._ProtocolModules.lendingAaveEvm !== undefined
+  }
+
+  /**
+   * Borrow USDT0 against collateral and pay
+   *
+   * Uses the Aave protocol to deposit collateral, borrow USDT0, then the
+   * borrowed USDT0 is available for T402 payments.
+   *
+   * @param params - Borrow parameters
+   * @throws {WDKError} If lending protocol is not registered or borrow fails
+   *
+   * @example
+   * ```typescript
+   * // Borrow 100 USDT0 against 0.05 WETH on Arbitrum
+   * const result = await wallet.borrowAndPay({
+   *   chain: 'arbitrum',
+   *   collateralToken: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1', // WETH
+   *   collateralAmount: 50000000000000000n, // 0.05 WETH
+   *   borrowAmount: 100000000n, // 100 USDT0
+   * });
+   * ```
+   */
+  async borrowAndPay(params: BorrowParams): Promise<BorrowResult> {
+    if (!this.canBorrow()) {
+      throw new WDKError(
+        WDKErrorCode.PROTOCOL_NOT_REGISTERED,
+        'Aave lending protocol not registered. Call T402WDK.registerWDK(WDK, { protocols: { lendingAaveEvm: LendingAaveEvm } }).',
+      )
+    }
+
+    const usdt0Address = USDT0_ADDRESSES[params.chain]
+    if (!usdt0Address) {
+      throw new ChainError(
+        WDKErrorCode.CHAIN_NOT_SUPPORTED,
+        `Chain "${params.chain}" does not have a known USDT0 address`,
+        { chain: params.chain },
+      )
+    }
+
+    if (params.collateralAmount <= 0n) {
+      throw new WDKError(
+        WDKErrorCode.INVALID_PARAMETER,
+        'collateralAmount must be greater than 0',
+      )
+    }
+
+    if (params.borrowAmount <= 0n) {
+      throw new WDKError(
+        WDKErrorCode.INVALID_PARAMETER,
+        'borrowAmount must be greater than 0',
+      )
+    }
+
+    try {
+      const result = await this.wdk.executeProtocol('lending-aave', {
+        action: 'borrow',
+        chain: params.chain,
+        collateralToken: params.collateralToken,
+        collateralAmount: params.collateralAmount.toString(),
+        borrowToken: usdt0Address,
+        borrowAmount: params.borrowAmount.toString(),
+        interestRateMode: params.interestRateMode ?? 2,
+      })
+
+      // Invalidate balance cache for this chain after borrow
+      this._balanceCache.invalidateChain(params.chain)
+
+      const r = result as unknown as Record<string, unknown>
+      return {
+        supplyTxHash: r.supplyTxHash as string,
+        borrowTxHash: r.borrowTxHash as string,
+        borrowedAmount: BigInt(r.borrowedAmount as string),
+      }
+    } catch (error) {
+      throw wrapError(
+        error,
+        WDKErrorCode.PROTOCOL_EXECUTION_FAILED,
+        `Failed to execute borrow on ${params.chain}`,
+        {
+          chain: params.chain,
+          collateralToken: params.collateralToken,
+          borrowAmount: params.borrowAmount.toString(),
         },
       )
     }
