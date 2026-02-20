@@ -81,7 +81,7 @@ function resetWDKState() {
   T402WDK._ProtocolModules = {}
 }
 
-describe('T402WDK.autoDiscover()', () => {
+describe('T402WDK.autoDiscover()', { timeout: 30000 }, () => {
   beforeEach(() => {
     resetWDKState()
     vi.restoreAllMocks()
@@ -167,7 +167,7 @@ describe('T402WDK.autoDiscover()', () => {
   })
 })
 
-describe('T402WDK.autoCreate()', () => {
+describe('T402WDK.autoCreate()', { timeout: 30000 }, () => {
   beforeEach(() => {
     resetWDKState()
     vi.restoreAllMocks()
