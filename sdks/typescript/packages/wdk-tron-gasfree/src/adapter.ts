@@ -86,18 +86,14 @@ export function adaptTronGasfreeWallet(instance: unknown): TronGasfreeWalletAdap
   let sendGasfreeTransfer: TronGasfreeWalletAdapter['sendGasfreeTransfer']
   if (typeof obj.sendGasfreeTransfer === 'function') {
     sendGasfreeTransfer = (params) =>
-      (
-        obj.sendGasfreeTransfer as (
-          p: Record<string, unknown>,
-        ) => Promise<{ txId: string }>
-      )(params)
+      (obj.sendGasfreeTransfer as (p: Record<string, unknown>) => Promise<{ txId: string }>)(params)
   } else if (typeof obj.transfer === 'function') {
     sendGasfreeTransfer = (params) =>
-      (
-        obj.transfer as (
-          p: Record<string, unknown>,
-        ) => Promise<{ txId: string }>
-      )({ to: params.to, amount: params.amount, tokenAddress: params.tokenAddress })
+      (obj.transfer as (p: Record<string, unknown>) => Promise<{ txId: string }>)({
+        to: params.to,
+        amount: params.amount,
+        tokenAddress: params.tokenAddress,
+      })
   } else {
     throw new Error(
       'WDK instance does not support gas-free transfers. ' +

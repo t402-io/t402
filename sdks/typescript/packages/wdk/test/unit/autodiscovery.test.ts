@@ -1,11 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { T402WDK } from '../../src/t402wdk'
 import { WDKInitializationError } from '../../src/errors'
-import type {
-  WDKConstructor,
-  WDKInstance,
-  WDKAccount,
-} from '../../src/types'
+import type { WDKConstructor, WDKInstance, WDKAccount } from '../../src/types'
 
 // Mock WDK Account
 function createMockAccount(address: string): WDKAccount {

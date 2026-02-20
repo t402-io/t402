@@ -882,7 +882,7 @@ describe('T402WDK', () => {
       expect(wdk.isInitialized).toBe(true)
       expect(wdk.canSwap()).toBe(true)
       // Verify registerProtocol was called with 'swap-velora'
-      expect((wdk.wdk.registerProtocol as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+      expect(wdk.wdk.registerProtocol as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
         'swap-velora',
         MockSwapModule,
       )
@@ -978,7 +978,7 @@ describe('T402WDK', () => {
 
       expect(wdk.isInitialized).toBe(true)
       expect(wdk.canBorrow()).toBe(true)
-      expect((wdk.wdk.registerProtocol as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+      expect(wdk.wdk.registerProtocol as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
         'lending-aave',
         MockLendingModule,
       )
@@ -1108,7 +1108,7 @@ describe('T402WDK', () => {
         borrowAmount: 100000000n,
       })
 
-      expect((wdk.wdk.executeProtocol as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+      expect(wdk.wdk.executeProtocol as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
         'lending-aave',
         expect.objectContaining({ interestRateMode: 2 }),
       )
@@ -1137,7 +1137,7 @@ describe('T402WDK', () => {
         interestRateMode: 1,
       })
 
-      expect((wdk.wdk.executeProtocol as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith(
+      expect(wdk.wdk.executeProtocol as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
         'lending-aave',
         expect.objectContaining({ interestRateMode: 1 }),
       )

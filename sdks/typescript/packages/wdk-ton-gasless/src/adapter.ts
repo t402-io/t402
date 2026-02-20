@@ -40,7 +40,9 @@ export interface TonGaslessWalletAdapter {
 /**
  * Check if a WDK instance looks like an upstream @tetherto/wdk-wallet-ton-gasless wallet
  */
-export function isUpstreamTonGaslessWallet(instance: unknown): instance is UpstreamTonGaslessWallet {
+export function isUpstreamTonGaslessWallet(
+  instance: unknown,
+): instance is UpstreamTonGaslessWallet {
   if (typeof instance !== 'object' || instance === null) return false
   const obj = instance as Record<string, unknown>
   return (
@@ -84,25 +86,23 @@ export function adaptTonGaslessWallet(instance: unknown): TonGaslessWalletAdapte
   let sendGaslessTransfer: TonGaslessWalletAdapter['sendGaslessTransfer']
   if (typeof obj.sendGaslessTransfer === 'function') {
     sendGaslessTransfer = (params) =>
-      (
-        obj.sendGaslessTransfer as (
-          p: Record<string, unknown>,
-        ) => Promise<{ txHash: string }>
-      )(params)
+      (obj.sendGaslessTransfer as (p: Record<string, unknown>) => Promise<{ txHash: string }>)(
+        params,
+      )
   } else if (typeof obj.transferJettonGasless === 'function') {
     sendGaslessTransfer = (params) =>
-      (
-        obj.transferJettonGasless as (
-          p: Record<string, unknown>,
-        ) => Promise<{ txHash: string }>
-      )({ to: params.to, amount: params.amount, jettonAddress: params.jettonAddress })
+      (obj.transferJettonGasless as (p: Record<string, unknown>) => Promise<{ txHash: string }>)({
+        to: params.to,
+        amount: params.amount,
+        jettonAddress: params.jettonAddress,
+      })
   } else if (typeof obj.transfer === 'function') {
     sendGaslessTransfer = (params) =>
-      (
-        obj.transfer as (
-          p: Record<string, unknown>,
-        ) => Promise<{ txHash: string }>
-      )({ to: params.to, amount: params.amount, jettonAddress: params.jettonAddress })
+      (obj.transfer as (p: Record<string, unknown>) => Promise<{ txHash: string }>)({
+        to: params.to,
+        amount: params.amount,
+        jettonAddress: params.jettonAddress,
+      })
   } else {
     throw new Error(
       'WDK instance does not support gasless transfers. ' +

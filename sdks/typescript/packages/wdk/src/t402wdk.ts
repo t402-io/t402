@@ -1662,17 +1662,11 @@ export class T402WDK {
     }
 
     if (params.collateralAmount <= 0n) {
-      throw new WDKError(
-        WDKErrorCode.INVALID_PARAMETER,
-        'collateralAmount must be greater than 0',
-      )
+      throw new WDKError(WDKErrorCode.INVALID_PARAMETER, 'collateralAmount must be greater than 0')
     }
 
     if (params.borrowAmount <= 0n) {
-      throw new WDKError(
-        WDKErrorCode.INVALID_PARAMETER,
-        'borrowAmount must be greater than 0',
-      )
+      throw new WDKError(WDKErrorCode.INVALID_PARAMETER, 'borrowAmount must be greater than 0')
     }
 
     try {
