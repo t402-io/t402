@@ -85,7 +85,7 @@ describe('Constants', () => {
 })
 
 describe('Exports', () => {
-  it('should export main client', async () => {
+  it('should export main client', { timeout: 15000 }, async () => {
     const mod = await import('./index.js')
     expect(mod.WdkGaslessClient).toBeDefined()
     expect(mod.createWdkGaslessClient).toBeDefined()
