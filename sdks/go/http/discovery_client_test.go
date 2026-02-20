@@ -14,7 +14,7 @@ func TestListResources(t *testing.T) {
 		if r.Method != "GET" {
 			t.Errorf("expected GET, got %s", r.Method)
 		}
-		if r.URL.Path != "/discovery/resources" {
+		if r.URL.Path != "/v1/discovery/resources" {
 			t.Errorf("expected /discovery/resources, got %s", r.URL.Path)
 		}
 		if r.URL.Query().Get("type") != "http" {
@@ -77,7 +77,7 @@ func TestGetResource(t *testing.T) {
 		if r.Method != "GET" {
 			t.Errorf("expected GET, got %s", r.Method)
 		}
-		if r.URL.Path != "/discovery/resources/res-123" {
+		if r.URL.Path != "/v1/discovery/resources/res-123" {
 			t.Errorf("expected /discovery/resources/res-123, got %s", r.URL.Path)
 		}
 		_ = json.NewEncoder(w).Encode(DiscoveryItem{
@@ -125,7 +125,7 @@ func TestRegisterResource(t *testing.T) {
 		if r.Method != "POST" {
 			t.Errorf("expected POST, got %s", r.Method)
 		}
-		if r.URL.Path != "/discovery/register" {
+		if r.URL.Path != "/v1/discovery/register" {
 			t.Errorf("expected /discovery/register, got %s", r.URL.Path)
 		}
 
@@ -175,7 +175,7 @@ func TestUpdateResource(t *testing.T) {
 		if r.Method != "PUT" {
 			t.Errorf("expected PUT, got %s", r.Method)
 		}
-		if r.URL.Path != "/discovery/resources/res-123" {
+		if r.URL.Path != "/v1/discovery/resources/res-123" {
 			t.Errorf("expected /discovery/resources/res-123, got %s", r.URL.Path)
 		}
 
@@ -212,7 +212,7 @@ func TestDeleteResource(t *testing.T) {
 		if r.Method != "DELETE" {
 			t.Errorf("expected DELETE, got %s", r.Method)
 		}
-		if r.URL.Path != "/discovery/resources/res-123" {
+		if r.URL.Path != "/v1/discovery/resources/res-123" {
 			t.Errorf("expected /discovery/resources/res-123, got %s", r.URL.Path)
 		}
 		w.WriteHeader(http.StatusNoContent)

@@ -4,6 +4,11 @@ import { T402PaymentError } from "../errors";
 
 const DEFAULT_FACILITATOR_URL = "https://facilitator.t402.io";
 
+export interface SettleOptions {
+  /** Optional idempotency key for replay protection */
+  idempotencyKey?: string;
+}
+
 export interface FacilitatorConfig {
   url?: string;
   createAuthHeaders?: () => Promise<{
@@ -35,11 +40,13 @@ export interface FacilitatorClient {
    *
    * @param paymentPayload - The payment to settle
    * @param paymentRequirements - The requirements for settlement
+   * @param options - Optional settings including idempotency key
    * @returns Settlement response
    */
   settle(
     paymentPayload: PaymentPayload,
     paymentRequirements: PaymentRequirements,
+    options?: SettleOptions,
   ): Promise<SettleResponse>;
 
   /**
@@ -115,15 +122,21 @@ export class HTTPFacilitatorClient implements FacilitatorClient {
    *
    * @param paymentPayload - The payment to settle
    * @param paymentRequirements - The requirements for settlement
+   * @param options - Optional settings including idempotency key
    * @returns Settlement response
    */
   async settle(
     paymentPayload: PaymentPayload,
     paymentRequirements: PaymentRequirements,
+    options?: SettleOptions,
   ): Promise<SettleResponse> {
     let headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
+
+    if (options?.idempotencyKey) {
+      headers["Idempotency-Key"] = options.idempotencyKey;
+    }
 
     if (this._createAuthHeaders) {
       const authHeaders = await this.createAuthHeaders("settle");

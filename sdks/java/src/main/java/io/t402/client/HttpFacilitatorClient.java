@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * Synchronous facilitator client using Java 17 HttpClient.
@@ -35,6 +36,16 @@ import java.util.Set;
  *
  * // Get supported networks
  * Set<Kind> supported = client.supported();
+ *
+ * // With authentication
+ * HttpFacilitatorClient authClient = new HttpFacilitatorClient(
+ *     "https://facilitator.t402.io",
+ *     () -> Map.of(
+ *         "verify", Map.of("Authorization", "Bearer token"),
+ *         "settle", Map.of("Authorization", "Bearer token"),
+ *         "supported", Map.of("Authorization", "Bearer token")
+ *     )
+ * );
  * }</pre>
  *
  * @see FacilitatorClient
@@ -47,16 +58,30 @@ public class HttpFacilitatorClient implements FacilitatorClient {
                       .build();
 
     private final String baseUrl;   // without trailing "/"
+    private final Supplier<Map<String, Map<String, String>>> authHeadersProvider;
 
     /**
-     * Creates a new HTTP facilitator client.
+     * Creates a new HTTP facilitator client without authentication.
      *
      * @param baseUrl the base URL of the facilitator service (trailing slash will be removed)
      */
     public HttpFacilitatorClient(String baseUrl) {
+        this(baseUrl, null);
+    }
+
+    /**
+     * Creates a new HTTP facilitator client with optional authentication.
+     *
+     * @param baseUrl the base URL of the facilitator service (trailing slash will be removed)
+     * @param authHeadersProvider optional supplier that returns a map of endpoint name
+     *        ("verify", "settle", "supported") to header name/value pairs
+     */
+    public HttpFacilitatorClient(String baseUrl,
+                                 Supplier<Map<String, Map<String, String>>> authHeadersProvider) {
         this.baseUrl = baseUrl.endsWith("/")
                 ? baseUrl.substring(0, baseUrl.length() - 1)
                 : baseUrl;
+        this.authHeadersProvider = authHeadersProvider;
     }
 
     /* ------------------------------------------------ verify ------------- */
@@ -88,14 +113,15 @@ public class HttpFacilitatorClient implements FacilitatorClient {
                 "paymentRequirements", req
         );
 
-        HttpRequest request = HttpRequest.newBuilder()
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/verify"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(
-                        Json.MAPPER.writeValueAsString(body)))
-                .build();
+                        Json.MAPPER.writeValueAsString(body)));
 
-        HttpResponse<String> response = http.send(request, HttpResponse.BodyHandlers.ofString());
+        applyAuthHeaders(builder, "verify");
+
+        HttpResponse<String> response = http.send(builder.build(), HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) {
             throw new IOException("HTTP " + response.statusCode() + ": " + response.body());
         }
@@ -121,6 +147,23 @@ public class HttpFacilitatorClient implements FacilitatorClient {
     public SettlementResponse settle(String paymentHeader,
                                      PaymentRequirements req)
             throws IOException, InterruptedException {
+        return settle(paymentHeader, req, null);
+    }
+
+    /**
+     * Settles a verified payment with an optional idempotency key.
+     *
+     * @param paymentHeader base64-encoded payment payload from X-PAYMENT header
+     * @param req payment requirements for settlement
+     * @param idempotencyKey optional idempotency key for replay protection
+     * @return settlement response with transaction hash
+     * @throws IOException if network communication fails
+     * @throws InterruptedException if the request is interrupted
+     */
+    public SettlementResponse settle(String paymentHeader,
+                                     PaymentRequirements req,
+                                     String idempotencyKey)
+            throws IOException, InterruptedException {
 
         // Decode the payment header to get the full PaymentPayload
         PaymentPayload paymentPayload = PaymentPayload.fromHeader(paymentHeader);
@@ -131,14 +174,19 @@ public class HttpFacilitatorClient implements FacilitatorClient {
                 "paymentRequirements", req
         );
 
-        HttpRequest request = HttpRequest.newBuilder()
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/settle"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(
-                        Json.MAPPER.writeValueAsString(body)))
-                .build();
+                        Json.MAPPER.writeValueAsString(body)));
 
-        HttpResponse<String> response = http.send(request, HttpResponse.BodyHandlers.ofString());
+        if (idempotencyKey != null) {
+            builder.header("Idempotency-Key", idempotencyKey);
+        }
+
+        applyAuthHeaders(builder, "settle");
+
+        HttpResponse<String> response = http.send(builder.build(), HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) {
             throw new IOException("HTTP " + response.statusCode() + ": " + response.body());
         }
@@ -159,13 +207,13 @@ public class HttpFacilitatorClient implements FacilitatorClient {
      */
     @Override
     public Set<Kind> supported() throws IOException, InterruptedException {
-        HttpRequest request = HttpRequest.newBuilder()
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/supported"))
-                .GET()
-                .build();
+                .GET();
 
+        applyAuthHeaders(builder, "supported");
 
-        HttpResponse<String> response = http.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = http.send(builder.build(), HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) {
             throw new IOException("HTTP " + response.statusCode() + ": " + response.body());
         }
@@ -190,16 +238,29 @@ public class HttpFacilitatorClient implements FacilitatorClient {
      * @throws InterruptedException if the request is interrupted
      */
     public SupportedResponse supportedFull() throws IOException, InterruptedException {
-        HttpRequest request = HttpRequest.newBuilder()
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/supported"))
-                .GET()
-                .build();
+                .GET();
 
-        HttpResponse<String> response = http.send(request, HttpResponse.BodyHandlers.ofString());
+        applyAuthHeaders(builder, "supported");
+
+        HttpResponse<String> response = http.send(builder.build(), HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) {
             throw new IOException("HTTP " + response.statusCode() + ": " + response.body());
         }
 
         return Json.MAPPER.readValue(response.body(), SupportedResponse.class);
+    }
+
+    private void applyAuthHeaders(HttpRequest.Builder builder, String endpoint) {
+        if (authHeadersProvider != null) {
+            Map<String, Map<String, String>> allHeaders = authHeadersProvider.get();
+            if (allHeaders != null) {
+                Map<String, String> endpointHeaders = allHeaders.get(endpoint);
+                if (endpointHeaders != null) {
+                    endpointHeaders.forEach(builder::header);
+                }
+            }
+        }
     }
 }

@@ -8,6 +8,7 @@ from t402.types import (
     PaymentRequirements,
     VerifyResponse,
     SettleResponse,
+    SupportedResponse,
     ListDiscoveryResourcesRequest,
     ListDiscoveryResourcesResponse,
     DiscoveryItem,
@@ -90,18 +91,25 @@ class FacilitatorClient:
             return VerifyResponse(**data)
 
     async def settle(
-        self, payment: PaymentPayload, payment_requirements: PaymentRequirements
+        self,
+        payment: PaymentPayload,
+        payment_requirements: PaymentRequirements,
+        idempotency_key: Optional[str] = None,
     ) -> SettleResponse:
         """Settle a verified payment, executing the on-chain transfer.
 
         Args:
             payment: The payment payload to settle
             payment_requirements: The payment requirements that were matched
+            idempotency_key: Optional idempotency key for replay protection
 
         Returns:
             SettleResponse with settlement status and transaction details
         """
         headers = {"Content-Type": "application/json"}
+
+        if idempotency_key is not None:
+            headers["Idempotency-Key"] = idempotency_key
 
         if self.config.get("create_headers"):
             custom_headers = await self.config["create_headers"]()
@@ -122,6 +130,33 @@ class FacilitatorClient:
             )
             data = response.json()
             return SettleResponse(**data)
+
+    async def list_supported(self) -> SupportedResponse:
+        """Get supported payment kinds from the facilitator.
+
+        Returns:
+            SupportedResponse with supported kinds, extensions, and signers
+        """
+        headers = {"Content-Type": "application/json"}
+
+        if self.config.get("create_headers"):
+            custom_headers = await self.config["create_headers"]()
+            headers.update(custom_headers.get("supported", {}))
+
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{self.config['url']}/supported",
+                headers=headers,
+                follow_redirects=True,
+            )
+
+            if response.status_code != 200:
+                raise ValueError(
+                    f"Failed to get supported: {response.status_code} {response.text}"
+                )
+
+            data = response.json()
+            return SupportedResponse(**data)
 
     async def list(
         self, request: Optional[ListDiscoveryResourcesRequest] = None
@@ -152,7 +187,7 @@ class FacilitatorClient:
 
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                f"{self.config['url']}/discovery/resources",
+                f"{self.config['url']}/v1/discovery/resources",
                 params=params,
                 headers=headers,
                 follow_redirects=True,
@@ -183,7 +218,7 @@ class FacilitatorClient:
 
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                f"{self.config['url']}/discovery/resources/{resource_id}",
+                f"{self.config['url']}/v1/discovery/resources/{resource_id}",
                 headers=headers,
                 follow_redirects=True,
             )
@@ -215,7 +250,7 @@ class FacilitatorClient:
 
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                f"{self.config['url']}/discovery/register",
+                f"{self.config['url']}/v1/discovery/register",
                 json=request.model_dump(by_alias=True, exclude_none=True),
                 headers=headers,
                 follow_redirects=True,
@@ -249,7 +284,7 @@ class FacilitatorClient:
 
         async with httpx.AsyncClient() as client:
             response = await client.put(
-                f"{self.config['url']}/discovery/resources/{resource_id}",
+                f"{self.config['url']}/v1/discovery/resources/{resource_id}",
                 json=request.model_dump(by_alias=True, exclude_none=True),
                 headers=headers,
                 follow_redirects=True,
@@ -277,7 +312,7 @@ class FacilitatorClient:
 
         async with httpx.AsyncClient() as client:
             response = await client.delete(
-                f"{self.config['url']}/discovery/resources/{resource_id}",
+                f"{self.config['url']}/v1/discovery/resources/{resource_id}",
                 headers=headers,
                 follow_redirects=True,
             )

@@ -13,7 +13,7 @@ import (
 
 // ListResources lists discoverable resources from the Bazaar.
 func (c *HTTPFacilitatorClient) ListResources(ctx context.Context, params *ListResourcesParams) (*DiscoveryResponse, error) {
-	u, err := url.Parse(c.url + "/discovery/resources")
+	u, err := url.Parse(c.url + "/v1/discovery/resources")
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse URL: %w", err)
 	}
@@ -80,7 +80,7 @@ func (c *HTTPFacilitatorClient) ListResources(ctx context.Context, params *ListR
 
 // GetResource gets details of a specific discoverable resource.
 func (c *HTTPFacilitatorClient) GetResource(ctx context.Context, id string) (*DiscoveryItem, error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", c.url+"/discovery/resources/"+url.PathEscape(id), nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", c.url+"/v1/discovery/resources/"+url.PathEscape(id), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get request: %w", err)
 	}
@@ -112,7 +112,7 @@ func (c *HTTPFacilitatorClient) RegisterResource(ctx context.Context, registrati
 		return nil, fmt.Errorf("failed to marshal register request: %w", err)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "POST", c.url+"/discovery/register", bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, "POST", c.url+"/v1/discovery/register", bytes.NewReader(body))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create register request: %w", err)
 	}
@@ -144,7 +144,7 @@ func (c *HTTPFacilitatorClient) UpdateResource(ctx context.Context, id string, u
 		return nil, fmt.Errorf("failed to marshal update request: %w", err)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "PUT", c.url+"/discovery/resources/"+url.PathEscape(id), bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, "PUT", c.url+"/v1/discovery/resources/"+url.PathEscape(id), bytes.NewReader(body))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create update request: %w", err)
 	}
@@ -171,7 +171,7 @@ func (c *HTTPFacilitatorClient) UpdateResource(ctx context.Context, id string, u
 
 // DeleteResource deletes a resource from the Bazaar.
 func (c *HTTPFacilitatorClient) DeleteResource(ctx context.Context, id string) error {
-	req, err := http.NewRequestWithContext(ctx, "DELETE", c.url+"/discovery/resources/"+url.PathEscape(id), nil)
+	req, err := http.NewRequestWithContext(ctx, "DELETE", c.url+"/v1/discovery/resources/"+url.PathEscape(id), nil)
 	if err != nil {
 		return fmt.Errorf("failed to create delete request: %w", err)
 	}

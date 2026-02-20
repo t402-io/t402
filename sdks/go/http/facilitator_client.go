@@ -164,6 +164,23 @@ func (c *HTTPFacilitatorClient) GetSupported(ctx context.Context) (t402.Supporte
 	return supportedResponse, nil
 }
 
+// SettleOptions provides optional parameters for the settle request
+type SettleOptions struct {
+	// IdempotencyKey is an optional key for replay protection
+	IdempotencyKey string
+}
+
+// SettleWithOptions executes a payment with additional options (supports both V1 and V2)
+func (c *HTTPFacilitatorClient) SettleWithOptions(ctx context.Context, payloadBytes []byte, requirementsBytes []byte, opts *SettleOptions) (*t402.SettleResponse, error) {
+	// Detect version from bytes
+	version, err := types.DetectVersion(payloadBytes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to detect version: %w", err)
+	}
+
+	return c.settleHTTPWithOptions(ctx, version, payloadBytes, requirementsBytes, opts)
+}
+
 // ============================================================================
 // Internal HTTP Methods (shared by V1 and V2)
 // ============================================================================
@@ -231,6 +248,10 @@ func (c *HTTPFacilitatorClient) verifyHTTP(ctx context.Context, version int, pay
 }
 
 func (c *HTTPFacilitatorClient) settleHTTP(ctx context.Context, version int, payloadBytes, requirementsBytes []byte) (*t402.SettleResponse, error) {
+	return c.settleHTTPWithOptions(ctx, version, payloadBytes, requirementsBytes, nil)
+}
+
+func (c *HTTPFacilitatorClient) settleHTTPWithOptions(ctx context.Context, version int, payloadBytes, requirementsBytes []byte, opts *SettleOptions) (*t402.SettleResponse, error) {
 	// Build request body
 	var payloadMap, requirementsMap map[string]interface{}
 	if err := json.Unmarshal(payloadBytes, &payloadMap); err != nil {
@@ -258,6 +279,11 @@ func (c *HTTPFacilitatorClient) settleHTTP(ctx context.Context, version int, pay
 	}
 
 	req.Header.Set("Content-Type", "application/json")
+
+	// Add idempotency key if provided
+	if opts != nil && opts.IdempotencyKey != "" {
+		req.Header.Set("Idempotency-Key", opts.IdempotencyKey)
+	}
 
 	// Add auth headers if available
 	if c.authProvider != nil {

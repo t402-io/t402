@@ -121,7 +121,7 @@ export function withBazaar<T extends HTTPFacilitatorClient>(
         }
 
         const queryString = queryParams.toString();
-        const endpoint = `${client.url}/discovery/resources${queryString ? `?${queryString}` : ""}`;
+        const endpoint = `${client.url}/v1/discovery/resources${queryString ? `?${queryString}` : ""}`;
 
         const response = await fetch(endpoint, {
           method: "GET",

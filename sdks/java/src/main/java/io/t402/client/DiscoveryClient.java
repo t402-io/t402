@@ -74,7 +74,7 @@ public class DiscoveryClient {
             throws IOException, InterruptedException {
 
         String queryString = buildQueryString(params);
-        String url = baseUrl + "/discovery/resources" + queryString;
+        String url = baseUrl + "/v1/discovery/resources" + queryString;
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
@@ -102,7 +102,7 @@ public class DiscoveryClient {
             throws IOException, InterruptedException {
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "/discovery/resources/"
+                .uri(URI.create(baseUrl + "/v1/discovery/resources/"
                         + URLEncoder.encode(id, StandardCharsets.UTF_8)))
                 .header("Content-Type", "application/json")
                 .GET()
@@ -128,7 +128,7 @@ public class DiscoveryClient {
             throws IOException, InterruptedException {
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "/discovery/register"))
+                .uri(URI.create(baseUrl + "/v1/discovery/register"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(
                         Json.MAPPER.writeValueAsString(req)))
@@ -155,7 +155,7 @@ public class DiscoveryClient {
             throws IOException, InterruptedException {
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "/discovery/resources/"
+                .uri(URI.create(baseUrl + "/v1/discovery/resources/"
                         + URLEncoder.encode(id, StandardCharsets.UTF_8)))
                 .header("Content-Type", "application/json")
                 .PUT(HttpRequest.BodyPublishers.ofString(
@@ -181,7 +181,7 @@ public class DiscoveryClient {
             throws IOException, InterruptedException {
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "/discovery/resources/"
+                .uri(URI.create(baseUrl + "/v1/discovery/resources/"
                         + URLEncoder.encode(id, StandardCharsets.UTF_8)))
                 .header("Content-Type", "application/json")
                 .DELETE()

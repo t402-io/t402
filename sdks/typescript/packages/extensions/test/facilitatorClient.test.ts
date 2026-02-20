@@ -83,7 +83,7 @@ describe("withBazaar", () => {
       const result = await extended.extensions.discovery.listResources();
 
       expect(global.fetch).toHaveBeenCalledWith(
-        "https://facilitator.test.com/discovery/resources",
+        "https://facilitator.test.com/v1/discovery/resources",
         expect.objectContaining({
           method: "GET",
           headers: expect.objectContaining({
@@ -181,7 +181,7 @@ describe("withBazaar", () => {
       await extended.extensions.discovery.listResources();
 
       expect(global.fetch).toHaveBeenCalledWith(
-        "https://test.com/discovery/resources",
+        "https://test.com/v1/discovery/resources",
         expect.any(Object),
       );
     });

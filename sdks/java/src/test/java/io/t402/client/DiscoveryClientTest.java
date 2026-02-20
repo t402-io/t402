@@ -53,7 +53,7 @@ class DiscoveryClientTest {
         page.total = 1;
         mockResp.pagination = page;
 
-        server.createContext("/discovery/resources", exchange -> {
+        server.createContext("/v1/discovery/resources", exchange -> {
             assertEquals("GET", exchange.getRequestMethod());
             String query = exchange.getRequestURI().getQuery();
             assertNotNull(query);
@@ -90,7 +90,7 @@ class DiscoveryClientTest {
         page.total = 0;
         mockResp.pagination = page;
 
-        server.createContext("/discovery/resources", exchange -> {
+        server.createContext("/v1/discovery/resources", exchange -> {
             assertNull(exchange.getRequestURI().getQuery());
             byte[] body = Json.MAPPER.writeValueAsBytes(mockResp);
             exchange.sendResponseHeaders(200, body.length);
@@ -115,7 +115,7 @@ class DiscoveryClientTest {
         PaymentOption opt = new PaymentOption("exact", "eip155:8453", "100", "USDT", "0xabc", 3600);
         mockItem.accepts = List.of(opt);
 
-        server.createContext("/discovery/resources/res-123", exchange -> {
+        server.createContext("/v1/discovery/resources/res-123", exchange -> {
             assertEquals("GET", exchange.getRequestMethod());
             byte[] body = Json.MAPPER.writeValueAsBytes(mockItem);
             exchange.sendResponseHeaders(200, body.length);
@@ -133,7 +133,7 @@ class DiscoveryClientTest {
 
     @Test
     void getResourceNotFound() throws Exception {
-        server.createContext("/discovery/resources/nonexistent", exchange -> {
+        server.createContext("/v1/discovery/resources/nonexistent", exchange -> {
             byte[] body = "{\"error\":\"not found\"}".getBytes();
             exchange.sendResponseHeaders(404, body.length);
             try (OutputStream os = exchange.getResponseBody()) {
@@ -156,7 +156,7 @@ class DiscoveryClientTest {
         mockResp.t402Version = 2;
         mockResp.createdAt = "2026-01-15T10:00:00Z";
 
-        server.createContext("/discovery/register", exchange -> {
+        server.createContext("/v1/discovery/register", exchange -> {
             assertEquals("POST", exchange.getRequestMethod());
 
             String reqBody = new String(exchange.getRequestBody().readAllBytes());
@@ -184,7 +184,7 @@ class DiscoveryClientTest {
 
     @Test
     void registerResourceConflict() throws Exception {
-        server.createContext("/discovery/register", exchange -> {
+        server.createContext("/v1/discovery/register", exchange -> {
             byte[] body = "{\"error\":\"already exists\"}".getBytes();
             exchange.sendResponseHeaders(409, body.length);
             try (OutputStream os = exchange.getResponseBody()) {
@@ -212,7 +212,7 @@ class DiscoveryClientTest {
         mockItem.lastUpdated = 1700000000L;
         mockItem.accepts = List.of();
 
-        server.createContext("/discovery/resources/res-123", exchange -> {
+        server.createContext("/v1/discovery/resources/res-123", exchange -> {
             assertEquals("PUT", exchange.getRequestMethod());
 
             String reqBody = new String(exchange.getRequestBody().readAllBytes());
@@ -236,7 +236,7 @@ class DiscoveryClientTest {
 
     @Test
     void deleteResource() throws Exception {
-        server.createContext("/discovery/resources/res-123", exchange -> {
+        server.createContext("/v1/discovery/resources/res-123", exchange -> {
             assertEquals("DELETE", exchange.getRequestMethod());
             exchange.sendResponseHeaders(204, -1);
         });
@@ -247,7 +247,7 @@ class DiscoveryClientTest {
 
     @Test
     void deleteResourceForbidden() throws Exception {
-        server.createContext("/discovery/resources/res-123", exchange -> {
+        server.createContext("/v1/discovery/resources/res-123", exchange -> {
             byte[] body = "{\"error\":\"not authorized\"}".getBytes();
             exchange.sendResponseHeaders(403, body.length);
             try (OutputStream os = exchange.getResponseBody()) {

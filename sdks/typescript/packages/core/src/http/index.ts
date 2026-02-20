@@ -126,4 +126,4 @@ export type {
   ProcessSettleFailureResponse,
   RouteValidationError,
 } from "./t402HTTPResourceServer";
-export type { FacilitatorClient, FacilitatorConfig } from "./httpFacilitatorClient";
+export type { FacilitatorClient, FacilitatorConfig, SettleOptions } from "./httpFacilitatorClient";
