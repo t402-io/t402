@@ -509,25 +509,6 @@ func (s *t402HTTPResourceServer) extractPaymentV2(adapter HTTPAdapter) (*types.P
 	return payload, nil
 }
 
-// extractPayment extracts payment from headers (legacy method, now calls extractPaymentV2)
-//
-//nolint:unused // Legacy method kept for API compatibility
-func (s *t402HTTPResourceServer) extractPayment(adapter HTTPAdapter) *t402.PaymentPayload {
-	payload, err := s.extractPaymentV2(adapter)
-	if err != nil || payload == nil {
-		return nil
-	}
-
-	// Convert V2 to generic PaymentPayload for compatibility
-	return &t402.PaymentPayload{
-		T402Version: payload.T402Version,
-		Payload:     payload.Payload,
-		Accepted:    t402.PaymentRequirements{}, // Not used in V2 flow
-		Resource:    nil,
-		Extensions:  payload.Extensions,
-	}
-}
-
 // decodeBase64Header decodes a base64 header to JSON bytes
 func decodeBase64Header(header string) ([]byte, error) {
 	return base64.StdEncoding.DecodeString(header)
@@ -579,20 +560,6 @@ func (s *t402HTTPResourceServer) createHTTPResponseV2(paymentRequired types.Paym
 		},
 		Body: body,
 	}
-}
-
-// createHTTPResponse creates response instructions (legacy method)
-//
-//nolint:unused // Legacy method kept for API compatibility
-func (s *t402HTTPResourceServer) createHTTPResponse(paymentRequired t402.PaymentRequired, isWebBrowser bool, paywallConfig *PaywallConfig, customHTML string) *HTTPResponseInstructions {
-	// Convert to V2 and call V2 method
-	v2Required := types.PaymentRequired{
-		T402Version: 2,
-		Error:       paymentRequired.Error,
-		Resource:    nil, // Legacy field not used in V2
-		Extensions:  paymentRequired.Extensions,
-	}
-	return s.createHTTPResponseV2(v2Required, isWebBrowser, paywallConfig, customHTML, nil)
 }
 
 // createSettlementHeaders creates settlement response headers
@@ -962,6 +929,9 @@ func parseRoutePattern(pattern string) (string, *regexp.Regexp) {
 	return verb, regex
 }
 
+// multiSlashRegexp is pre-compiled for use in normalizePath.
+var multiSlashRegexp = regexp.MustCompile(`/+`)
+
 // normalizePath normalizes a URL path for matching
 func normalizePath(path string) string {
 	// Remove query string and fragment
@@ -977,8 +947,7 @@ func normalizePath(path string) string {
 	// Normalize slashes
 	path = strings.ReplaceAll(path, `\`, `/`)
 	// Replace multiple slashes with single slash
-	multiSlash := regexp.MustCompile(`/+`)
-	path = multiSlash.ReplaceAllString(path, `/`)
+	path = multiSlashRegexp.ReplaceAllString(path, `/`)
 	// Remove trailing slash
 	path = strings.TrimSuffix(path, `/`)
 

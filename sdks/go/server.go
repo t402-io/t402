@@ -112,6 +112,7 @@ func WithCacheTTL(ttl time.Duration) ResourceServerOption {
 	}
 }
 
+// Newt402ResourceServer creates a new resource server that manages payment requirements and verification.
 func Newt402ResourceServer(opts ...ResourceServerOption) *t402ResourceServer {
 	s := &t402ResourceServer{
 		schemes:              make(map[Network]map[string]SchemeNetworkServer),
@@ -178,6 +179,7 @@ func (s *t402ResourceServer) Register(network Network, schemeServer SchemeNetwor
 	return s
 }
 
+// RegisterExtension registers a protocol extension with the resource server.
 func (s *t402ResourceServer) RegisterExtension(extension types.ResourceServerExtension) *t402ResourceServer {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -190,6 +192,7 @@ func (s *t402ResourceServer) RegisterExtension(extension types.ResourceServerExt
 // Hook Registration Methods (Chainable)
 // ============================================================================
 
+// OnBeforeVerify registers a hook to execute before payment verification.
 func (s *t402ResourceServer) OnBeforeVerify(hook BeforeVerifyHook) *t402ResourceServer {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -197,6 +200,7 @@ func (s *t402ResourceServer) OnBeforeVerify(hook BeforeVerifyHook) *t402Resource
 	return s
 }
 
+// OnAfterVerify registers a hook to execute after successful payment verification.
 func (s *t402ResourceServer) OnAfterVerify(hook AfterVerifyHook) *t402ResourceServer {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -204,6 +208,7 @@ func (s *t402ResourceServer) OnAfterVerify(hook AfterVerifyHook) *t402ResourceSe
 	return s
 }
 
+// OnVerifyFailure registers a hook to execute when payment verification fails.
 func (s *t402ResourceServer) OnVerifyFailure(hook OnVerifyFailureHook) *t402ResourceServer {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -211,6 +216,7 @@ func (s *t402ResourceServer) OnVerifyFailure(hook OnVerifyFailureHook) *t402Reso
 	return s
 }
 
+// OnBeforeSettle registers a hook to execute before payment settlement.
 func (s *t402ResourceServer) OnBeforeSettle(hook BeforeSettleHook) *t402ResourceServer {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -218,6 +224,7 @@ func (s *t402ResourceServer) OnBeforeSettle(hook BeforeSettleHook) *t402Resource
 	return s
 }
 
+// OnAfterSettle registers a hook to execute after successful payment settlement.
 func (s *t402ResourceServer) OnAfterSettle(hook AfterSettleHook) *t402ResourceServer {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -225,6 +232,7 @@ func (s *t402ResourceServer) OnAfterSettle(hook AfterSettleHook) *t402ResourceSe
 	return s
 }
 
+// OnSettleFailure registers a hook to execute when payment settlement fails.
 func (s *t402ResourceServer) OnSettleFailure(hook OnSettleFailureHook) *t402ResourceServer {
 	s.mu.Lock()
 	defer s.mu.Unlock()

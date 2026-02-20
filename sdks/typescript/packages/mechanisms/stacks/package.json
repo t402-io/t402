@@ -97,5 +97,8 @@
   "bugs": {
     "url": "https://github.com/t402-io/t402/issues"
   },
-  "homepage": "https://t402.io"
+  "homepage": "https://t402.io",
+  "publishConfig": {
+    "access": "public"
+  }
 }

@@ -9,7 +9,7 @@ t402 is a protocol that enables HTTP resources to require cryptocurrency payment
 ## Installation
 
 ```bash
-go get github.com/t402-io/t402/sdks/go@v1.9.0
+go get github.com/t402-io/t402/sdks/go@v1.10.0
 ```
 
 ## What This Package Exports
@@ -78,6 +78,7 @@ Each mechanism provides `client/`, `server/`, and `facilitator/` sub-packages wi
 Protocol extension implementations:
 
 - **`extensions/bazaar`** - API discovery extension for making resources discoverable
+- **`extensions/siwx`** - Sign-In With X cross-chain authentication (CAIP-122)
 
 ## Architecture
 

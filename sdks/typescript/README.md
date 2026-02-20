@@ -3,7 +3,7 @@
 [![npm](https://img.shields.io/npm/v/@t402/core?label=npm%20%40t402%2Fcore)](https://www.npmjs.com/package/@t402/core)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/t402-io/t402/blob/main/LICENSE)
 
-> **Version 2.4.0** - TypeScript implementation of the [t402 Payment Protocol](https://t402.io).
+> **Version 2.5.0** - TypeScript implementation of the [t402 Payment Protocol](https://t402.io).
 
 ## Installation
 
@@ -71,6 +71,20 @@ WDK (Wallet Development Kit):
 @t402/wdk-gasless       ERC-4337 gasless payments
 @t402/wdk-bridge        LayerZero cross-chain bridging
 @t402/wdk-multisig      Safe multi-sig support
+@t402/wdk-ton           TON wallet management
+@t402/wdk-ton-gasless   Gasless TON transactions via relay
+@t402/wdk-tron-gasfree  Gas-free TRON USDT transfers
+@t402/wdk-defi          DeFi pre-payment processor
+@t402/wdk-protocol      High-level T402Protocol
+
+Mobile:
+@t402/react-native      React Native SDK with PaymentSheet
+
+Mechanisms (Additional):
+@t402/btc               Bitcoin (PSBT + Lightning)
+
+Transports:
+@t402/a2a               Agent-to-Agent transport
 
 Tools:
 @t402/mcp               AI Agent MCP server
@@ -214,17 +228,23 @@ pnpm typecheck
 ```
 typescript/
 ├── packages/
-│   ├── core/           # @t402/core
-│   ├── extensions/     # @t402/extensions
-│   ├── mechanisms/     # @t402/evm, @t402/svm, @t402/ton, @t402/tron
-│   ├── http/           # @t402/express, @t402/next, @t402/hono, etc.
-│   ├── wdk/            # @t402/wdk
-│   ├── wdk-gasless/    # @t402/wdk-gasless
-│   ├── wdk-bridge/     # @t402/wdk-bridge
-│   ├── wdk-multisig/   # @t402/wdk-multisig
-│   ├── mcp/            # @t402/mcp
-│   └── cli/            # @t402/cli
-├── site/               # Documentation website
+│   ├── core/              # @t402/core
+│   ├── extensions/        # @t402/extensions
+│   ├── a2a/               # @t402/a2a
+│   ├── mechanisms/        # @t402/evm, @t402/svm, @t402/ton, @t402/tron, @t402/btc, etc.
+│   ├── http/              # @t402/express, @t402/next, @t402/hono, etc.
+│   ├── wdk/               # @t402/wdk
+│   ├── wdk-gasless/       # @t402/wdk-gasless
+│   ├── wdk-bridge/        # @t402/wdk-bridge
+│   ├── wdk-multisig/      # @t402/wdk-multisig
+│   ├── wdk-ton/           # @t402/wdk-ton
+│   ├── wdk-ton-gasless/   # @t402/wdk-ton-gasless
+│   ├── wdk-tron-gasfree/  # @t402/wdk-tron-gasfree
+│   ├── wdk-defi/          # @t402/wdk-defi
+│   ├── wdk-protocol/      # @t402/wdk-protocol
+│   ├── react-native/      # @t402/react-native
+│   ├── mcp/               # @t402/mcp
+│   └── cli/               # @t402/cli
 └── pnpm-workspace.yaml
 ```
 

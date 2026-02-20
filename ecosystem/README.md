@@ -1,6 +1,6 @@
 # t402 Ecosystem
 
-The t402 ecosystem brings together merchants, facilitators, SDK developers, infrastructure providers, and AI agent platforms to enable internet-native payments across 10 blockchain families and 44+ networks.
+The t402 ecosystem brings together merchants, facilitators, SDK developers, infrastructure providers, and AI agent platforms to enable internet-native payments across 10 blockchain families and 50+ networks.
 
 ## What is the t402 Ecosystem?
 
@@ -31,8 +31,8 @@ SDKs enable developers to add t402 support to applications in their language of 
 
 | SDK | Version | Packages | Install |
 |-----|---------|----------|---------|
-| [TypeScript](https://www.npmjs.com/package/@t402/core) | v2.5.0 | 30 @t402/* packages | `pnpm add @t402/core` |
-| [Go](https://pkg.go.dev/github.com/t402-io/t402/sdks/go) | v1.9.0 | Single module | `go get github.com/t402-io/t402/sdks/go` |
+| [TypeScript](https://www.npmjs.com/package/@t402/core) | v2.5.0 | 36 @t402/* packages | `pnpm add @t402/core` |
+| [Go](https://pkg.go.dev/github.com/t402-io/t402/sdks/go) | v1.10.0 | Single module | `go get github.com/t402-io/t402/sdks/go` |
 | [Python](https://pypi.org/project/t402/) | v1.10.1 | Single package | `pip install t402` |
 | [Java](https://central.sonatype.com/artifact/io.t402/t402) | v1.10.0 | Single artifact | Maven/Gradle |
 
@@ -58,11 +58,11 @@ t402 is purpose-built for AI agent commerce. The MCP server enables any AI agent
 
 | Metric | Count |
 |--------|-------|
-| Supported Networks | 44+ |
+| Supported Networks | 50+ |
 | Chain Families | 10 (EVM, SVM, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos) |
 | SDK Languages | 4 (TypeScript, Go, Python, Java) |
-| TypeScript Packages | 30 |
-| HTTP Framework Integrations | 5 (Express, Hono, Fastify, Next.js, Fetch/Axios) |
+| TypeScript Packages | 36 |
+| HTTP Framework Integrations | 18 (5 TS + 4 Go + 4 Py + 5 Java) |
 | MCP Tools | 11 |
 | Payment Schemes | 2 (exact, upto) |
 | USDT0 Bridge Networks | 19 |
@@ -99,12 +99,12 @@ Use the SDKs, examples, and documentation to build your integration:
 
 | Feature | t402 | Alternatives |
 |---------|------|-------------|
-| Multi-chain | 10 chain families, 44+ networks | Typically EVM-only |
+| Multi-chain | 10 chain families, 50+ networks | Typically EVM-only |
 | AI Agent Payments | Native MCP + A2A support | Manual integration required |
 | TON/Telegram | Full TON Jetton support | Not supported |
 | Gasless Payments | ERC-4337 with paymaster sponsorship | Varies |
 | Cross-chain Bridge | USDT0 via LayerZero (19 networks) | Separate bridge services |
-| SDKs | 4 languages, 30 TS packages | 1-2 languages |
+| SDKs | 4 languages, 36 TS packages | 1-2 languages |
 | Open Standard | Apache 2.0, no vendor lock-in | Proprietary protocols |
 
 ## Links

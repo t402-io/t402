@@ -11,11 +11,13 @@ from t402.types import t402PaymentRequiredResponse
 
 
 class HttpxHooks:
-    def __init__(self, client: t402Client):
+    """Event hooks for httpx to handle 402 Payment Required responses."""
+
+    def __init__(self, client: t402Client) -> None:
         self.client = client
         self._is_retry = False
 
-    async def on_request(self, request: Request):
+    async def on_request(self, request: Request) -> None:
         """Handle request before it is sent."""
         pass
 

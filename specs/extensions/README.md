@@ -51,5 +51,5 @@ Each extension follows a standardized structure:
 | Extension | TypeScript | Go | Python | Java |
 |-----------|------------|-----|--------|------|
 | Bazaar | @t402/extensions | extensions pkg | t402.extensions | extensions module |
-| Payment Identifier | @t402/extensions | extensions pkg | t402.extensions | extensions module |
-| Sign-In-With-X | @t402/extensions | - | - | - |
+| Payment Identifier | @t402/extensions | types pkg | t402.extensions | extensions module |
+| Sign-In-With-X | @t402/extensions | extensions/siwx | t402.extensions.siwx | extensions module |

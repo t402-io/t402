@@ -15,7 +15,7 @@ import copy
 class t402HTTPAdapter(HTTPAdapter):
     """HTTP adapter for handling t402 payment required responses."""
 
-    def __init__(self, client: t402Client, **kwargs):
+    def __init__(self, client: t402Client, **kwargs) -> None:
         """Initialize the adapter with an t402Client.
 
         Args:

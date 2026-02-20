@@ -143,7 +143,7 @@ class PaymentConfig:
         # Validate and process price
         self._validate()
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Validate configuration."""
         supported_networks = get_all_supported_networks()
         if self.network not in supported_networks:
@@ -187,7 +187,7 @@ class PaymentMiddleware:
         ```
     """
 
-    def __init__(self, app: Starlette):
+    def __init__(self, app: Starlette) -> None:
         """Initialize the payment middleware.
 
         Args:

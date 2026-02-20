@@ -58,9 +58,20 @@ WDK (Wallet Development Kit):
 @t402/wdk-gasless       ERC-4337 gasless payments
 @t402/wdk-bridge        LayerZero cross-chain bridging
 @t402/wdk-multisig      Safe multi-sig support
+@t402/wdk-ton           TON wallet management
+@t402/wdk-ton-gasless   Gasless TON transactions via relay
+@t402/wdk-tron-gasfree  Gas-free TRON USDT transfers
+@t402/wdk-defi          DeFi pre-payment processor (swap, borrow, bridge-swap)
+@t402/wdk-protocol      High-level T402Protocol (auto balance + bridge + pay)
 
 Transports:
 @t402/a2a               Agent-to-Agent transport
+
+Mobile:
+@t402/react-native      React Native SDK with PaymentSheet
+
+Mechanisms (Additional):
+@t402/btc               Bitcoin (PSBT on-chain + Lightning BOLT11)
 
 Tools:
 @t402/mcp               AI Agent MCP server (Claude, etc.)
@@ -70,7 +81,7 @@ Tools:
 <details>
 <summary><b>Installation</b></summary>
 
-### TypeScript (v2.4.0)
+### TypeScript (v2.5.0)
 
 ```shell
 # Core packages
@@ -105,13 +116,13 @@ uv add t402
 t402 --help
 ```
 
-### Go (v1.9.0)
+### Go (v1.10.0)
 
 ```shell
-go get github.com/t402-io/t402/sdks/go@v1.9.0
+go get github.com/t402-io/t402/sdks/go@v1.10.0
 
 # CLI tool
-go install github.com/t402-io/t402/sdks/go/cmd/t402@v1.9.0
+go install github.com/t402-io/t402/sdks/go/cmd/t402@v1.10.0
 t402 --help
 ```
 
@@ -262,16 +273,16 @@ t402 info eip155:8453
 
 Legend: ✅ Complete | ❌ Not Available
 
-**Total Supported Networks: 44+** across 10 blockchain families
+**Total Supported Networks: 44** across 10 blockchain families (64 network+scheme kinds)
 
 ## Latest Releases
 
 | SDK | Version | Release Date | Changelog |
 |-----|---------|--------------|-----------|
-| TypeScript | v2.4.0 | 2026-02-06 | [CHANGELOG](sdks/typescript/CHANGELOG.md) |
-| Python | v1.10.1 | 2026-02-06 | [CHANGELOG](sdks/python/CHANGELOG.md) |
-| Go | v1.9.0 | 2026-02-06 | [CHANGELOG](sdks/go/CHANGELOG.md) |
-| Java | v1.10.0 | 2026-02-06 | [CHANGELOG](sdks/java/CHANGELOG.md) |
+| TypeScript | v2.5.0 | 2026-02-18 | [CHANGELOG](CHANGELOG.md) |
+| Go | v1.10.0 | 2026-02-19 | [CHANGELOG](sdks/go/CHANGELOG.md) |
+| Python | v1.10.1 | 2026-02-09 | [CHANGELOG](sdks/python/CHANGELOG.md) |
+| Java | v1.10.0 | 2026-02-09 | [CHANGELOG](sdks/java/CHANGELOG.md) |
 
 ## Ecosystem
 

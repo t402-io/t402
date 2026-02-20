@@ -151,7 +151,7 @@ class PaymentConfig:
         # Validate and process price
         self._validate()
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Validate configuration."""
         supported_networks = get_all_supported_networks()
         if self.network not in supported_networks:
@@ -204,7 +204,7 @@ class PaymentMiddleware:
     # Class-level storage for payment configs
     _configs: List[PaymentConfig] = []
 
-    def __init__(self, get_response: Callable):
+    def __init__(self, get_response: Callable) -> None:
         """Initialize the Django middleware.
 
         Args:
@@ -216,7 +216,7 @@ class PaymentMiddleware:
         if not PaymentMiddleware._configs:
             self._load_from_settings()
 
-    def _load_from_settings(self):
+    def _load_from_settings(self) -> None:
         """Load payment configs from Django settings."""
         try:
             from django.conf import settings

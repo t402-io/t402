@@ -33,7 +33,11 @@
   ],
   "license": "Apache-2.0",
   "author": "T402 Team",
-  "repository": "https://github.com/t402-io/t402",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/t402-io/t402.git",
+    "directory": "sdks/typescript/packages/wdk-multisig"
+  },
   "description": "Multi-sig Safe smart accounts with Tether WDK for M-of-N threshold payments",
   "devDependencies": {
     "@eslint/js": "^9.39.2",
@@ -87,5 +91,9 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "homepage": "https://t402.io",
+  "publishConfig": {
+    "access": "public"
+  }
 }

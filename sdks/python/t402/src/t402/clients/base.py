@@ -193,7 +193,7 @@ class t402Client:
         )
         return signed_header
 
-    def generate_nonce(self):
-        # Generate a random nonce (32 bytes = 64 hex chars)
+    def generate_nonce(self) -> str:
+        """Generate a random nonce (32 bytes = 64 hex chars)."""
         nonce = secrets.token_hex(32)
         return nonce

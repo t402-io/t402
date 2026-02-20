@@ -11,6 +11,7 @@ func (e *bazaarResourceServerExtension) Key() string {
 	return types.BAZAAR
 }
 
+// EnrichDeclaration enriches a bazaar discovery declaration with HTTP method information.
 func (e *bazaarResourceServerExtension) EnrichDeclaration(
 	declaration interface{},
 	transportContext interface{},

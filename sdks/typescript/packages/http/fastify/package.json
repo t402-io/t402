@@ -25,7 +25,11 @@
   ],
   "license": "Apache-2.0",
   "author": "T402 Team",
-  "repository": "https://github.com/t402-io/t402",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/t402-io/t402.git",
+    "directory": "sdks/typescript/packages/http/fastify"
+  },
   "description": "t402 Payment Protocol middleware for Fastify",
   "devDependencies": {
     "@eslint/js": "^9.39.2",
@@ -48,8 +52,7 @@
   },
   "dependencies": {
     "@t402/core": "workspace:*",
-    "@t402/extensions": "workspace:*",
-    "zod": "^3.24.2"
+    "@t402/extensions": "workspace:*"
   },
   "peerDependencies": {
     "@t402/paywall": "workspace:*",
@@ -74,5 +77,9 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "homepage": "https://t402.io",
+  "publishConfig": {
+    "access": "public"
+  }
 }

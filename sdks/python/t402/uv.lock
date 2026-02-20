@@ -1872,9 +1872,11 @@ dependencies = [
     { name = "eth-utils" },
     { name = "fastapi", extra = ["standard"] },
     { name = "flask" },
+    { name = "httpx" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
     { name = "python-dotenv" },
+    { name = "requests" },
     { name = "web3" },
 ]
 
@@ -1907,9 +1909,11 @@ requires-dist = [
     { name = "eth-utils", specifier = ">=3.0.0" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.115.12" },
     { name = "flask", specifier = ">=3.0.0" },
+    { name = "httpx", specifier = ">=0.27.0" },
     { name = "pydantic", specifier = ">=2.10.3" },
     { name = "pydantic-settings", specifier = ">=2.2.1" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
+    { name = "requests", specifier = ">=2.31.0" },
     { name = "solana", marker = "extra == 'all'", specifier = ">=0.35.0" },
     { name = "solana", marker = "extra == 'svm'", specifier = ">=0.35.0" },
     { name = "solders", marker = "extra == 'all'", specifier = ">=0.21.0" },

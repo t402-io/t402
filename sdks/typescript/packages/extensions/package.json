@@ -23,7 +23,11 @@
   ],
   "license": "Apache-2.0",
   "author": "T402 Team",
-  "repository": "https://github.com/t402-io/t402",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/t402-io/t402.git",
+    "directory": "sdks/typescript/packages/extensions"
+  },
   "description": "t402 Payment Protocol Extensions",
   "devDependencies": {
     "@eslint/js": "^9.39.2",
@@ -47,8 +51,7 @@
     "@t402/core": "workspace:*",
     "@noble/curves": "^1.8.1",
     "@noble/hashes": "^1.7.1",
-    "ajv": "^8.18.0",
-    "zod": "^3.24.2"
+    "ajv": "^8.18.0"
   },
   "peerDependencies": {
     "viem": "^2.0.0"
@@ -122,5 +125,9 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "homepage": "https://t402.io",
+  "publishConfig": {
+    "access": "public"
+  }
 }

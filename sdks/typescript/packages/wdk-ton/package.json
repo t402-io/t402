@@ -28,7 +28,8 @@
   "author": "T402 Team",
   "repository": {
     "type": "git",
-    "url": "https://github.com/t402-io/t402"
+    "url": "https://github.com/t402-io/t402",
+    "directory": "sdks/typescript/packages/wdk-ton"
   },
   "dependencies": {
     "@t402/core": "workspace:*",
@@ -82,5 +83,9 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "homepage": "https://t402.io",
+  "publishConfig": {
+    "access": "public"
+  }
 }

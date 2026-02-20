@@ -1,3 +1,9 @@
+"""EVM chain configuration and token registry.
+
+Maps network names to chain IDs and provides token metadata (address, decimals,
+EIP-712 domain info) for known tokens on each chain.
+"""
+
 NETWORK_TO_ID = {
     # Standard networks
     "base-sepolia": "84532",

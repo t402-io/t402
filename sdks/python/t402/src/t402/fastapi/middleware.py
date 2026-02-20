@@ -141,7 +141,7 @@ class PaymentConfig:
         # Validate and process price
         self._validate()
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Validate configuration."""
         # Validate network is supported
         supported_networks = get_all_supported_networks()
@@ -187,7 +187,7 @@ class PaymentMiddleware:
         ```
     """
 
-    def __init__(self, app: FastAPI):
+    def __init__(self, app: FastAPI) -> None:
         """Initialize the payment middleware.
 
         Args:

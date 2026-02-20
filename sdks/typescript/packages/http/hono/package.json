@@ -15,11 +15,23 @@
     "lint": "eslint . --ext .ts --fix",
     "lint:check": "eslint . --ext .ts"
   },
-  "keywords": [],
+  "keywords": [
+    "t402",
+    "payment",
+    "protocol",
+    "hono",
+    "middleware",
+    "http-402",
+    "stablecoin"
+  ],
   "license": "Apache-2.0",
   "author": "T402 Team",
-  "repository": "https://github.com/t402-io/t402",
-  "description": "t402 Payment Protocol",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/t402-io/t402.git",
+    "directory": "sdks/typescript/packages/http/hono"
+  },
+  "description": "Hono middleware for T402 HTTP 402 payment protocol",
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "@types/node": "^25.2.3",
@@ -41,8 +53,7 @@
   },
   "dependencies": {
     "@t402/core": "workspace:*",
-    "@t402/extensions": "workspace:*",
-    "zod": "^3.24.2"
+    "@t402/extensions": "workspace:*"
   },
   "peerDependencies": {
     "@t402/paywall": "workspace:*",
@@ -67,5 +78,9 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "homepage": "https://t402.io",
+  "publishConfig": {
+    "access": "public"
+  }
 }

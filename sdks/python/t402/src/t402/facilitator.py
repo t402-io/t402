@@ -30,7 +30,18 @@ class FacilitatorConfig(TypedDict, total=False):
 
 
 class FacilitatorClient:
-    def __init__(self, config: Optional[FacilitatorConfig] = None):
+    """Client for interacting with the T402 facilitator service.
+
+    Provides methods for verifying and settling payments, as well as
+    managing discoverable resources in the Bazaar.
+    """
+
+    def __init__(self, config: Optional[FacilitatorConfig] = None) -> None:
+        """Initialize the facilitator client.
+
+        Args:
+            config: Optional configuration. Defaults to production facilitator URL.
+        """
         if config is None:
             config = {"url": "https://facilitator.t402.io"}
 
@@ -46,7 +57,15 @@ class FacilitatorClient:
     async def verify(
         self, payment: PaymentPayload, payment_requirements: PaymentRequirements
     ) -> VerifyResponse:
-        """Verify a payment header is valid and a request should be processed"""
+        """Verify a payment header is valid and a request should be processed.
+
+        Args:
+            payment: The payment payload to verify
+            payment_requirements: The payment requirements to verify against
+
+        Returns:
+            VerifyResponse indicating validity, with payer address if valid
+        """
         headers = {"Content-Type": "application/json"}
 
         if self.config.get("create_headers"):
@@ -73,6 +92,15 @@ class FacilitatorClient:
     async def settle(
         self, payment: PaymentPayload, payment_requirements: PaymentRequirements
     ) -> SettleResponse:
+        """Settle a verified payment, executing the on-chain transfer.
+
+        Args:
+            payment: The payment payload to settle
+            payment_requirements: The payment requirements that were matched
+
+        Returns:
+            SettleResponse with settlement status and transaction details
+        """
         headers = {"Content-Type": "application/json"}
 
         if self.config.get("create_headers"):

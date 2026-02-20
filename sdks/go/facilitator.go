@@ -36,6 +36,7 @@ type t402Facilitator struct {
 	onSettleFailureHooks []FacilitatorOnSettleFailureHook
 }
 
+// Newt402Facilitator creates a new facilitator that manages payment verification and settlement.
 func Newt402Facilitator() *t402Facilitator {
 	return &t402Facilitator{
 		schemesV1:  []*schemeData{},
@@ -115,6 +116,7 @@ func (f *t402Facilitator) OnBeforeVerify(hook FacilitatorBeforeVerifyHook) *t402
 	return f
 }
 
+// OnAfterVerify registers a hook to execute after successful facilitator payment verification.
 func (f *t402Facilitator) OnAfterVerify(hook FacilitatorAfterVerifyHook) *t402Facilitator {
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -122,6 +124,7 @@ func (f *t402Facilitator) OnAfterVerify(hook FacilitatorAfterVerifyHook) *t402Fa
 	return f
 }
 
+// OnVerifyFailure registers a hook to execute when facilitator payment verification fails.
 func (f *t402Facilitator) OnVerifyFailure(hook FacilitatorOnVerifyFailureHook) *t402Facilitator {
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -129,6 +132,7 @@ func (f *t402Facilitator) OnVerifyFailure(hook FacilitatorOnVerifyFailureHook) *
 	return f
 }
 
+// OnBeforeSettle registers a hook to execute before facilitator payment settlement.
 func (f *t402Facilitator) OnBeforeSettle(hook FacilitatorBeforeSettleHook) *t402Facilitator {
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -136,6 +140,7 @@ func (f *t402Facilitator) OnBeforeSettle(hook FacilitatorBeforeSettleHook) *t402
 	return f
 }
 
+// OnAfterSettle registers a hook to execute after successful facilitator payment settlement.
 func (f *t402Facilitator) OnAfterSettle(hook FacilitatorAfterSettleHook) *t402Facilitator {
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -143,6 +148,7 @@ func (f *t402Facilitator) OnAfterSettle(hook FacilitatorAfterSettleHook) *t402Fa
 	return f
 }
 
+// OnSettleFailure registers a hook to execute when facilitator payment settlement fails.
 func (f *t402Facilitator) OnSettleFailure(hook FacilitatorOnSettleFailureHook) *t402Facilitator {
 	f.mu.Lock()
 	defer f.mu.Unlock()

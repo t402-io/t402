@@ -22,16 +22,13 @@ Examples of different client implementations for interacting with T402 services:
 
 - `clients/axios/` - Axios client with t402 payment interceptor from `@t402/axios`.
 - `clients/fetch/` - Client using the `@t402/fetch` wrapper around the native fetch API.
-- `clients/chainlink-vrf-nft/` - Example using [Chainlink](docs.chain.link) to mint a randomized NFT. Demonstrates verify/settle flow with `@t402/axios`.
-
-### Agents
-
-- `agent/` - Anthropic agent that pays via a Go proxy using `@t402/fetch`.
-- `dynamic_agent/` - Agent that discovers tools dynamically and pays per-request using t402.
-
-### Discovery
-
-- `discovery/` - Uses the facilitator to list available t402-protected resources (Bazaar).
+- `clients/advanced/` - Advanced client patterns (retry, multi-chain selection).
+- `clients/custom/` - Custom client implementation without framework wrappers.
+- `clients/bridge/` - Cross-chain bridge payment client using `@t402/evm`.
+- `clients/erc4337/` - Gasless ERC-4337 payment client.
+- `clients/ton/` - TON Jetton payment client.
+- `clients/tron/` - TRON TRC-20 payment client.
+- `clients/mcp/` - MCP chatbot client for AI agent payments.
 
 ### MCP
 
@@ -44,10 +41,6 @@ Examples of different client implementations for interacting with T402 services:
 ### Fullstack
 
 - `fullstack/next/` - Next.js app demonstrating route protection with `@t402/next` middleware.
-- `fullstack/mainnet/` - Next.js app configured for Base mainnet using the t402 hosted facilitator.
-- `fullstack/next-advanced/` - (Planned) Deep Next.js integration using a paywall + session cookie after verify/settle.
-- `fullstack/browser-wallet-example/` - Browser wallet template: Hono server + React client with session and one-time payments.
-- `fullstack/auth_based_pricing/` - SIWE + JWT with conditional pricing ($0.01 with JWT vs $0.10 without) using t402.
 
 ### Servers
 
@@ -56,7 +49,17 @@ Examples of different server implementations:
 - `servers/express/` - Express.js server using `@t402/express` middleware.
 - `servers/hono/` - Hono server using `@t402/hono` middleware.
 - `servers/advanced/` - Express server without middleware: delayed settlement, dynamic pricing, multiple requirements.
-- `servers/mainnet/` - Server example for accepting real USDC on Base mainnet using the t402 hosted facilitator.
+- `servers/custom/` - Custom server implementation with manual header handling.
+- `servers/ton/` - TON payment server using `@t402/express` with TON mechanism.
+- `servers/tron/` - TRON payment server using `@t402/express` with TRON mechanism.
+
+### WDK Examples
+
+- `wdk-gasless/` - Gasless ERC-4337 payment using `@t402/wdk-gasless`.
+- `wdk-bridge/` - Cross-chain bridging with `@t402/wdk-bridge`.
+- `wdk-multisig/` - Multi-sig wallet payment with `@t402/wdk-multisig`.
+- `wdk-permit2/` - Uniswap Permit2 gasless token approvals with `@t402/evm`.
+- `wdk-upto/` - Usage-based (upto) payments with permit scheme.
 
 ## Running Examples
 

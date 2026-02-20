@@ -16,11 +16,23 @@
     "lint": "eslint . --ext .ts --fix",
     "lint:check": "eslint . --ext .ts"
   },
-  "keywords": [],
+  "keywords": [
+    "t402",
+    "payment",
+    "protocol",
+    "types",
+    "http-402",
+    "stablecoin",
+    "usdt"
+  ],
   "license": "Apache-2.0",
   "author": "T402 Team",
-  "repository": "https://github.com/t402-io/t402",
-  "description": "t402 Payment Protocol",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/t402-io/t402.git",
+    "directory": "sdks/typescript/packages/core"
+  },
+  "description": "Core types, schemas, and constants for the T402 payment protocol",
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "@types/node": "^25.2.3",
@@ -126,5 +138,9 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "homepage": "https://t402.io",
+  "publishConfig": {
+    "access": "public"
+  }
 }

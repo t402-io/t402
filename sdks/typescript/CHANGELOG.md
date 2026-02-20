@@ -5,18 +5,24 @@ All notable changes to the T402 TypeScript SDK will be documented in this file.
 ## [Unreleased]
 
 ### Added
-- **Up-To Scheme Types** (`@t402/core`, `@t402/evm`) - Usage-based billing scheme
-  - `UptoPaymentRequirements` - Payment requirements with `maxAmount` for usage-based billing
-  - `UptoExtra` - Extra fields for billing units and EIP-712 domain parameters
-  - `UptoSettlement` - Settlement data with usage details
-  - `UptoUsageDetails` - Usage tracking metrics (unitsConsumed, unitPrice, unitType)
-  - `UptoSettlementResponse` - Settlement transaction response
-  - `UptoValidationResult` - Payment validation result
-  - `isUptoPaymentRequirements()` - Type guard for upto requirements
-  - `isValidUnit()` - Validate billing unit types
-  - EVM types: `PermitSignature`, `PermitAuthorization`, `UptoEIP2612Payload`
-  - EIP-712 type definitions: `PERMIT_TYPES`, `PERMIT_DOMAIN_TYPES`
-  - Helper functions: `createPermitDomain()`, `createPermitMessage()`
+- **T402PaymentError** - Structured error class with cause, phase, and retryable fields in `@t402/core`
+- **WDK Test Harness** - Mock factories at `@t402/wdk/testing` for unit testing
+- **Unified Chain Registry** - All chain families in single registry
+- **Pluggable Logger** - Configurable logger interface for WDK
+- **Multi-Chain Address Validation** - EVM, TON, TRON, Solana, Bitcoin, Cosmos
+- **Solana Versioned Transactions** - Priority fees and Token-2022 in `@t402/svm`
+- **TRON Energy Estimation** - Dynamic fee limits for TRON transactions
+- **TON Jetton Transfer Verification** - Enhanced verification in `@t402/ton`
+- **dispose() Pattern** - `Symbol.dispose` for WDK resource cleanup
+- **Multi-Provider RPC Failover** - Health checks across providers
+- **Network Resilience** - Retry logic for transient failures
+- **Multi-Instance WDK** - Concurrent WDK instance support
+- **Seed Phrase Key Rotation** - Secure key rotation
+- **Payment Idempotency Manager** - Payment deduplication
+- **Encrypted Backup/Recovery** - Encrypted seed phrase backup
+- **Compliance Manager** - Provider pattern for compliance checks
+- **Webhook Manager** - HMAC-SHA256 signed webhook delivery
+- **WDK Permit2 / Upto Examples** - New example projects
 
 ## [2.5.0] - 2026-02-18
 

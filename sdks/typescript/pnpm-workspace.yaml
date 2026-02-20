@@ -16,8 +16,5 @@ packages:
   - packages/wdk-ton-gasless
   - packages/react-native
   - packages/cli
-  - packages/legacy/*
-  - examples/facilitator
-  - examples/**/*
 ignoredBuiltDependencies:
   - esbuild

@@ -148,13 +148,6 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-bom</artifactId>
-      <version>12.1.6</version>
-      <type>pom</type>
-      <scope>import</scope>
-    </dependency>
   </dependencies>
 
   <build>

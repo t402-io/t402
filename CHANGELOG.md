@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **T402PaymentError** - Structured error class with cause, phase, and retryable fields in `@t402/core`
+- **WDK Test Harness** - Mock factories at `@t402/wdk/testing` for unit testing WDK integrations
+- **Unified Chain Registry** - All chain families (EVM, TON, TRON, SVM) in single registry
+- **Pluggable Logger** - Configurable logger interface for WDK
+- **Bundle Size Analysis** - Configuration for analyzing package bundle sizes
+- **Multi-Chain Address Validation** - EVM, TON, TRON, Solana, Bitcoin, Cosmos address validation
+- **Solana Versioned Transactions** - Priority fees and Token-2022 support in `@t402/svm`
+- **TRON Energy Estimation** - Dynamic fee limits for TRON transactions
+- **TON Jetton Transfer Verification** - Enhanced Jetton transfer verification in `@t402/ton`
+- **dispose() Pattern** - `Symbol.dispose` for WDK cleanup
+- **Multi-Provider RPC Failover** - RPC failover with health checks across providers
+- **Network Resilience** - Retry logic for transient network failures
+- **Multi-Instance WDK** - Static-to-instance field migration for concurrent WDK instances
+- **@tetherto/wdk Version Pinning** - Pinned WDK dependency for reproducible builds
+- **Seed Phrase Key Rotation** - Secure key rotation from seed phrases
+- **Payment Idempotency Manager** - Deduplication for payment operations
+- **Encrypted Backup/Recovery** - Encrypted seed phrase backup and recovery
+- **Compliance Manager** - Provider pattern for compliance checks
+- **Webhook Manager** - HMAC-SHA256 signed webhook delivery
+- **A2A Adapter Integration** - Agent-to-Agent transport adapter
+- **Facilitator Adapter** - Direct facilitator integration adapter
+- **SIWx Adapter** - Sign-In With X authentication adapter
+- **WDK Permit2 Example** - Example project at `examples/typescript/wdk-permit2/`
+- **WDK Upto Example** - Example project at `examples/typescript/wdk-upto/`
+- **E2E Integration Tests** - End-to-end integration tests for WDK
+
 ## [2.5.0] - 2026-02-18
 
 ### Added

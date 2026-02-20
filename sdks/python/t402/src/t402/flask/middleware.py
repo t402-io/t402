@@ -36,7 +36,7 @@ from t402.paywall import is_browser_request, get_paywall_html
 class ResponseWrapper:
     """Wrapper to capture and buffer response for settlement logic."""
 
-    def __init__(self, start_response):
+    def __init__(self, start_response) -> None:
         self.original_start_response = start_response
         self.status_code = None
         self.status = None
@@ -55,11 +55,11 @@ class ResponseWrapper:
 
         return buffered_write
 
-    def add_header(self, name, value):
+    def add_header(self, name: str, value: str) -> None:
         """Add a header to the response."""
         self.headers.append((name, value))
 
-    def send_response(self, body_chunks):
+    def send_response(self, body_chunks: list) -> None:
         """Send the buffered response after settlement."""
         write = self.original_start_response(self.status, self.headers)
         # Send data written via write callable first
@@ -83,7 +83,7 @@ class PaymentMiddleware:
         middleware.add(path="/premium/*", price=TokenAmount(...), pay_to_address="0x...")
     """
 
-    def __init__(self, app: Flask):
+    def __init__(self, app: Flask) -> None:
         self.app = app
         self.middleware_configs = []
         self.original_wsgi_app = app.wsgi_app
@@ -104,7 +104,7 @@ class PaymentMiddleware:
         resource: Optional[str] = None,
         paywall_config: Optional[PaywallConfig] = None,
         custom_paywall_html: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Add a payment middleware configuration.
 
@@ -145,7 +145,7 @@ class PaymentMiddleware:
         # Apply the middleware to the app
         self._apply_middleware()
 
-    def _apply_middleware(self):
+    def _apply_middleware(self) -> None:
         """Apply all middleware configurations to the Flask app."""
         current_wsgi_app = self.original_wsgi_app
 
