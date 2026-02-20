@@ -16,7 +16,7 @@ type BridgeState = "idle" | "selecting" | "paying" | "bridging" | "confirming" |
 
 // Chains that support cross-chain bridging via LayerZero USDT0 or similar protocols
 // Note: Full bridging support varies by chain - EVM chains have the best coverage
-const BRIDGEABLE: ChainFamily[] = ["evm", "ton", "tron", "solana", "stacks", "near", "aptos"];
+const BRIDGEABLE: ChainFamily[] = ["evm", "ton", "tron", "solana", "stacks", "near", "aptos", "tezos", "polkadot", "cosmos"];
 
 export function CrossChainBridge() {
   const { isDemo } = useDemoContext();

@@ -132,7 +132,7 @@ export default function HomePage() {
             INTERACTIVE DEMO
           </span>
           <h1 className="text-5xl md:text-6xl lg:text-8xl font-bold tracking-tight mb-5">
-            <span style={{ color: "#50AF95" }}>32 Chains.</span>{" "}
+            <span style={{ color: "#50AF95" }}>44 Networks.</span>{" "}
             <span className="text-white">1 Header.</span>
           </h1>
           <p className="text-xl sm:text-2xl max-w-2xl mx-auto mb-4" style={{ color: "#A1A1AA" }}>

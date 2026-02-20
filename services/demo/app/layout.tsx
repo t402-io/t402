@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://demo.t402.io"),
   title: "T402 Demo — HTTP 402 Payments with USDT",
   description:
-    "Interactive demo of the T402 payment protocol. Experience HTTP 402 flows with USDT/USDT0 — from AI API monetization to content paywalls.",
+    "Interactive demo of the T402 payment protocol. Experience HTTP 402 flows with USDT/USDT0 across 44 networks and 10 chain families — from AI API monetization to content paywalls.",
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
@@ -33,14 +33,14 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "T402 Demo — HTTP 402 Payments",
-    description: "Pay for web resources with USDT — no API keys, no subscriptions. Request → 402 → Sign → Settle → Access.",
+    description: "Pay for web resources with USDT across 44 networks and 10 chain families. No API keys, no subscriptions. Request → 402 → Sign → Settle → Access.",
     siteName: "T402",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "T402 Demo — HTTP 402 Payments",
-    description: "Pay for web resources with USDT — no API keys, no subscriptions.",
+    description: "Pay for web resources with USDT across 44 networks — no API keys, no subscriptions.",
   },
 };
 

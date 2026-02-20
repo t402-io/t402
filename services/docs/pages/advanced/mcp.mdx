@@ -1,3 +1,5 @@
+import { Callout } from 'nextra/components'
+
 # MCP Integration
 
 Enable AI agents like Claude to make stablecoin payments using the Model Context Protocol (MCP).
@@ -42,12 +44,17 @@ Edit `claude_desktop_config.json`:
       "args": ["@t402/mcp"],
       "env": {
         "T402_PRIVATE_KEY": "0x...",
-        "T402_DEMO_MODE": "true"
+        "T402_DEMO_MODE": "true",
+        "T402_WDK_SEED_PHRASE": "your twelve word seed phrase here"
       }
     }
   }
 }
 ```
+
+<Callout type="info">
+  Setting `T402_WDK_SEED_PHRASE` enables 5 additional WDK tools (11 total). Without it, only the 6 base tools are available.
+</Callout>
 
 ### 3. Restart Claude Desktop
 
@@ -55,53 +62,52 @@ The T402 tools will now be available to Claude.
 
 ## Available Tools
 
-### t402/getBalance
+The MCP server provides 6 base tools, plus 5 additional WDK tools when a seed phrase is configured (11 total).
 
-Check wallet balance on a specific network.
+### Base Tools (6)
 
-```
-"Check my USDT0 balance on Base"
-```
+#### t402/verify
+Verify a payment authorization against the facilitator.
 
-### t402/getAllBalances
+#### t402/settle
+Settle a verified payment on-chain via the facilitator.
 
-Get balances across all supported networks.
+#### t402/supported
+List all supported networks, schemes, and signers.
+
+#### t402/getRequirements
+Get payment requirements for a 402-protected resource.
+
+#### t402/getAllBalances
+Check balances across all supported networks.
 
 ```
 "What are all my stablecoin balances?"
 ```
 
-### t402/pay
-
+#### t402/pay
 Execute a stablecoin payment.
 
 ```
 "Send 5 USDT0 to 0x1234... on Arbitrum"
 ```
 
-### t402/payGasless
+### WDK Tools (5, requires `T402_WDK_SEED_PHRASE`)
 
-Execute a gasless payment using ERC-4337.
+#### wdk/getWallet
+Get WDK wallet address and chain info.
 
-```
-"Send 10 USDT0 to 0x1234... without paying gas"
-```
+#### wdk/getBalances
+Check balances across all configured WDK chains.
 
-### t402/getBridgeFee
+#### wdk/transfer
+Transfer tokens from the WDK wallet.
 
-Get fee quote for cross-chain bridging.
+#### wdk/swap
+Swap tokens via WDK on a given chain.
 
-```
-"How much does it cost to bridge 100 USDT0 from Arbitrum to Ethereum?"
-```
-
-### t402/bridge
-
-Bridge USDT0 between chains.
-
-```
-"Bridge 50 USDT0 from Arbitrum to Ethereum"
-```
+#### t402/autoPay
+Autonomously fetch a 402-protected resource, sign the payment, and return the content.
 
 ## Demo Mode
 

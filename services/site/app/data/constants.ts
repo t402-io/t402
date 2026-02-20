@@ -1,31 +1,31 @@
 export const PROTOCOL_STATS = {
-  chains: 33,
-  networks: 50,
-  kinds: 81,
+  chains: 44,
+  networks: 44,
+  kinds: 64,
   families: 10,
   sdkCount: 4,
-  tsPackages: 29,
+  tsPackages: 36,
   httpFrameworks: 18,
 } as const;
 
 export const SDK_VERSIONS = {
-  typescript: "2.4.0",
-  python: "1.10.1",
-  go: "1.9.0",
-  java: "1.10.0",
+  typescript: "2.6.0",
+  python: "1.11.0",
+  go: "1.11.0",
+  java: "1.11.0",
 } as const;
 
 export const CHAIN_FAMILIES = [
-  { name: "EVM", color: "#627EEA", count: 24 },
-  { name: "Solana", color: "#9945FF", count: 3 },
-  { name: "TON", color: "#0098EA", count: 2 },
-  { name: "TRON", color: "#FF0013", count: 3 },
-  { name: "NEAR", color: "#00C08B", count: 2 },
-  { name: "Aptos", color: "#2DD8A3", count: 3 },
-  { name: "Tezos", color: "#2C7DF7", count: 2 },
-  { name: "Polkadot", color: "#E6007A", count: 3 },
-  { name: "Stacks", color: "#5546FF", count: 2 },
-  { name: "Cosmos", color: "#2E3148", count: 2 },
+  { name: "EVM", color: "#627EEA", count: 19 },
+  { name: "Solana", color: "#9945FF", count: 1 },
+  { name: "TON", color: "#0098EA", count: 1 },
+  { name: "TRON", color: "#FF0013", count: 1 },
+  { name: "NEAR", color: "#00C08B", count: 1 },
+  { name: "Aptos", color: "#2DD8A3", count: 1 },
+  { name: "Tezos", color: "#2C7DF7", count: 1 },
+  { name: "Polkadot", color: "#E6007A", count: 1 },
+  { name: "Stacks", color: "#5546FF", count: 1 },
+  { name: "Cosmos", color: "#2E3148", count: 1 },
 ] as const;
 
 export const FACILITATOR_WALLETS = {

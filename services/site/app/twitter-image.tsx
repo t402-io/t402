@@ -133,7 +133,7 @@ export default async function Image() {
             }}
           >
             {[
-              { value: "28", label: "Chains" },
+              { value: "44", label: "Chains" },
               { value: "0%", label: "Fees" },
               { value: "4", label: "SDKs" },
               { value: "<1s", label: "Settlement" },

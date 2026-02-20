@@ -119,7 +119,7 @@ async function generateAiResponse(query: string): Promise<string> {
   try {
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const message = await client.messages.create({
-      model: "claude-haiku-4-20250414",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 256,
       messages: [
         {

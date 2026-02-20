@@ -7,7 +7,7 @@ import { createBridgeTransaction, getEstimatedTimeRemaining } from "@/lib/bridge
 const BRIDGE_FEE = "10000"; // 0.01 USDT bridge fee
 
 // Supported bridge chain families (matching frontend ChainFamily values)
-const BRIDGE_CHAINS = ["evm", "ton", "tron", "solana", "stacks", "near", "aptos"];
+const BRIDGE_CHAINS = ["evm", "ton", "tron", "solana", "stacks", "near", "aptos", "tezos", "polkadot", "cosmos"];
 
 // Estimated bridge times in seconds
 const ESTIMATED_TIMES: Record<string, Record<string, number>> = {
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
     },
     tracking: {
       statusUrl: `/api/demo/bridge/status?guid=${bridgeState.guid}`,
-      layerZeroScan: `https://layerzeroscan.com/tx/${bridgeState.guid}`,
+      layerZeroScan: `https://scan.layerzero-api.com/v1/messages/${bridgeState.guid}`,
     },
   };
 

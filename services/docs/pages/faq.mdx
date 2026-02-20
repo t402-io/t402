@@ -19,14 +19,20 @@ Currently, T402 supports:
 ### Which blockchains are supported?
 
 **EVM Chains:**
-- Ethereum, Arbitrum, Base, Optimism, Polygon, Ink, Berachain, Unichain
+- Ethereum, Arbitrum, Base, Optimism, Polygon, Ink, Berachain, Unichain, Mantle, Sei
 
 **Non-EVM:**
 - TON (The Open Network)
 - TRON
 - Solana
+- NEAR Protocol
+- Aptos
+- Tezos
+- Polkadot Asset Hub
+- Stacks (Bitcoin L2)
+- Cosmos (Noble)
 
-See [Chains](/chains) for the complete list.
+See [Chains](/chains) for the complete list with 44 networks across all 10 chain families.
 
 ## Technical
 
@@ -35,7 +41,7 @@ See [Chains](/chains) for the complete list.
 1. Client requests a protected resource
 2. Server returns `402 Payment Required` with payment details
 3. Client signs a payment authorization
-4. Client retries request with `X-Payment` header
+4. Client retries request with `PAYMENT-SIGNATURE` header
 5. Server verifies payment and returns the resource
 
 ```
@@ -44,7 +50,7 @@ Client                    Server                    Facilitator
   │─── GET /resource ──────▶│                           │
   │◀── 402 + payment opts ──│                           │
   │                         │                           │
-  │─── GET + X-Payment ────▶│── verify payment ────────▶│
+  │── GET + PAYMENT-SIG ───▶│── verify payment ────────▶│
   │                         │◀── settlement tx ─────────│
   │◀── 200 + resource ──────│                           │
 ```

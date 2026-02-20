@@ -237,7 +237,7 @@ export default function NonEvmChainsPage() {
                 style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(0,0,0,0.08)" }}
               >
                 <p className="text-base" style={{ color: "#4A5568" }}>
-                  <strong style={{ color: "#1A1A2E" }}>TL;DR</strong>: T402 supports 9 non-EVM blockchains alongside EVM chains. Each chain has unique characteristics: TON for Telegram users, Solana for speed, TRON for global USDT volume, and more. The T402 SDK provides a unified API across all chains.
+                  <strong style={{ color: "#1A1A2E" }}>TL;DR</strong>: T402 supports 10 non-EVM blockchains alongside EVM chains. Each chain has unique characteristics: TON for Telegram users, Solana for speed, TRON for global USDT volume, and more. The T402 SDK provides a unified API across all chains.
                 </p>
               </div>
 
@@ -248,7 +248,7 @@ export default function NonEvmChainsPage() {
                   While EVM chains dominate DeFi, some of the largest stablecoin user bases exist on non-EVM chains. TRON processes more USDT volume than any other chain. TON has direct access to 950M+ Telegram users. Solana offers sub-second finality for high-frequency applications.
                 </p>
                 <p className="text-base" style={{ color: "#4A5568" }}>
-                  By supporting 9 non-EVM chains, T402 enables you to reach users wherever they are, without building separate integrations for each blockchain&apos;s unique architecture.
+                  By supporting 10 non-EVM chains, T402 enables you to reach users wherever they are, without building separate integrations for each blockchain&apos;s unique architecture.
                 </p>
               </section>
 
@@ -334,7 +334,7 @@ app.use(paymentMiddleware({
               <section className="space-y-4">
                 <h2 className="text-2xl font-semibold mt-4" style={{ color: "#1A1A2E" }}>Get Started</h2>
                 <p className="text-base" style={{ color: "#4A5568" }}>
-                  T402 SDKs provide consistent interfaces across all 28 supported chains. Start accepting payments on any chain today:
+                  T402 SDKs provide consistent interfaces across all 44 supported chains. Start accepting payments on any chain today:
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <Link

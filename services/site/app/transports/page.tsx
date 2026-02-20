@@ -5,7 +5,7 @@ import TransportsClient from "./TransportsClient";
 export const metadata = {
   title: "Payment Transports | t402",
   description:
-    "HTTP, MCP, and A2A payment transports. One protocol for web APIs, AI agents, and agent-to-agent commerce across 50 networks.",
+    "HTTP, MCP, and A2A payment transports. One protocol for web APIs, AI agents, and agent-to-agent commerce across 44 networks.",
   openGraph: {
     title: "t402 Payment Transports - HTTP, MCP, A2A",
     description:

@@ -6,7 +6,7 @@ Guide for integrating T402 with non-EVM blockchain networks.
 
 ## Supported Chains
 
-T402 supports 8 non-EVM blockchain networks:
+T402 supports 9 non-EVM blockchain networks:
 
 | Chain | Package | Token Standard | Status |
 |-------|---------|----------------|--------|
@@ -18,6 +18,7 @@ T402 supports 8 non-EVM blockchain networks:
 | Tezos | `@t402/tezos` | FA2 | Production |
 | Polkadot | `@t402/polkadot` | Asset Hub | Production |
 | Stacks | `@t402/stacks` | SIP-010 | Production |
+| Cosmos (Noble) | `@t402/cosmos` | Bank MsgSend | Production |
 
 ## TON (The Open Network)
 
@@ -295,6 +296,31 @@ const stacksClient = new ExactStacksScheme(wallet);
 client.register('stacks:1', stacksClient);
 ```
 
+## Cosmos (Noble)
+
+### Network Details
+
+| Property | Value |
+|----------|-------|
+| Network ID | `cosmos:noble-1` (mainnet), `cosmos:grand-1` (testnet) |
+| Token | USDC native |
+| Signature | secp256k1 |
+| Finality | ~6 seconds |
+
+### Integration
+
+```typescript
+import { registerExactCosmosScheme } from '@t402/cosmos/exact/server';
+import { ExactCosmosScheme } from '@t402/cosmos/exact/client';
+
+// Server
+registerExactCosmosScheme(server, {});
+
+// Client
+const cosmosClient = new ExactCosmosScheme(wallet);
+client.register('cosmos:noble-1', cosmosClient);
+```
+
 ## Multi-Chain Server
 
 Support all non-EVM chains:
@@ -309,6 +335,7 @@ import { registerExactAptosScheme } from '@t402/aptos/exact/server';
 import { registerExactTezosScheme } from '@t402/tezos/exact/server';
 import { registerExactPolkadotScheme } from '@t402/polkadot/exact/server';
 import { registerExactStacksScheme } from '@t402/stacks/exact/server';
+import { registerExactCosmosScheme } from '@t402/cosmos/exact/server';
 
 const server = new t402ResourceServer(facilitator);
 
@@ -321,6 +348,7 @@ registerExactAptosScheme(server, {});
 registerExactTezosScheme(server, {});
 registerExactPolkadotScheme(server, {});
 registerExactStacksScheme(server, {});
+registerExactCosmosScheme(server, {});
 
 // Configure routes
 const routes = {
@@ -334,6 +362,7 @@ const routes = {
       { scheme: 'exact', network: 'tezos:NetXdQprcVkpaWU', payTo: 'tz1...', price: '$0.01' },
       { scheme: 'exact', network: 'polkadot:68d56f...', payTo: '15...', price: '$0.01' },
       { scheme: 'exact', network: 'stacks:1', payTo: 'SP...', price: '$0.01' },
+      { scheme: 'exact', network: 'cosmos:noble-1', payTo: 'noble1...', price: '$0.01' },
     ],
   },
 };
@@ -341,11 +370,11 @@ const routes = {
 
 ## Comparison
 
-| Feature | TON | TRON | Solana | NEAR | Aptos | Tezos | Polkadot | Stacks |
-|---------|-----|------|--------|------|-------|-------|----------|--------|
-| Finality | 5s | 3s | 400ms | 2s | 1s | 30s | 12s | 10min |
-| Avg Fee | $0.01 | $0.10 | $0.0001 | $0.001 | $0.001 | $0.01 | $0.01 | $0.05 |
-| Signature | Ed25519 | ECDSA | Ed25519 | Ed25519 | Ed25519 | Multi | Sr25519 | ECDSA |
+| Feature | TON | TRON | Solana | NEAR | Aptos | Tezos | Polkadot | Stacks | Cosmos |
+|---------|-----|------|--------|------|-------|-------|----------|--------|--------|
+| Finality | 5s | 3s | 400ms | 2s | 1s | 30s | 12s | 10min | 6s |
+| Avg Fee | $0.01 | $0.10 | $0.0001 | $0.001 | $0.001 | $0.01 | $0.01 | $0.05 | $0.001 |
+| Signature | Ed25519 | ECDSA | Ed25519 | Ed25519 | Ed25519 | Multi | Sr25519 | ECDSA | secp256k1 |
 
 ## Related
 

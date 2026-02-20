@@ -133,7 +133,7 @@ async function wrappedFetch(input, init) {
     ...init,
     headers: {
       ...init.headers,
-      'X-Payment': encodePayment(paymentPayload),
+      'Payment-Signature': encodePayment(paymentPayload),
     },
   });
 }
@@ -251,7 +251,7 @@ const response = await fetchWithPay('https://api.example.com/paid');
 
 // Check payment response header
 const paymentResponse = decodePaymentResponseHeader(
-  response.headers.get('X-Payment-Response')
+  response.headers.get('Payment-Response')
 );
 
 if (paymentResponse) {

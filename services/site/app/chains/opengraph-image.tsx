@@ -87,7 +87,7 @@ export default async function Image() {
             Supported Chains
           </h1>
           <p style={{ fontSize: "24px", color: "#71717A", marginBottom: "40px" }}>
-            28 networks across 10 blockchain families
+            44 networks across 10 blockchain families
           </p>
           <div style={{ display: "flex", gap: "8px", alignItems: "center", flexDirection: "row", flexWrap: "wrap", justifyContent: "center", maxWidth: "800px" }}>
             {[
@@ -100,6 +100,7 @@ export default async function Image() {
               { name: "Tezos", color: "#2C7DF7" },
               { name: "Polkadot", color: "#E6007A" },
               { name: "Stacks", color: "#5546FF" },
+              { name: "Cosmos", color: "#6F7390" },
             ].map((chain) => (
               <div
                 key={chain.name}

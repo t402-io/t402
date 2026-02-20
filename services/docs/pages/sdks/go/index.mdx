@@ -52,8 +52,8 @@ t402 version
 
 ## Features
 
-- **Multi-Chain**: All 10 blockchain families (EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks)
-- **Server**: HTTP middleware for payment protection (Gin, Echo, Chi, Fiber)
+- **Multi-Chain**: All 10 blockchain families (EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos)
+- **Server**: HTTP middleware for payment protection (net/http, Gin, Echo, Chi)
 - **Client**: HTTP client with automatic 402 handling
 - **Facilitator**: Full facilitator implementation
 - **CLI**: Command-line tools for testing and debugging
@@ -131,11 +131,12 @@ func main() {
 | `sdks/go/mechanisms/tezos` | Tezos blockchain |
 | `sdks/go/mechanisms/polkadot` | Polkadot Asset Hub |
 | `sdks/go/mechanisms/stacks` | Stacks (Bitcoin L2) |
+| `sdks/go/mechanisms/cosmos` | Cosmos/Noble |
 | `sdks/go/http` | HTTP client and server |
 | `sdks/go/http/gin` | Gin middleware |
 | `sdks/go/http/echo` | Echo middleware |
 | `sdks/go/http/chi` | Chi middleware |
-| `sdks/go/http/fiber` | Fiber middleware |
+| `sdks/go/http/stdlib` | net/http middleware |
 | `sdks/go/signers/evm` | EVM wallet signers |
 | `sdks/go/signers/svm` | Solana wallet signers |
 | `sdks/go/signers/ton` | TON wallet signers |
@@ -145,6 +146,7 @@ func main() {
 | `sdks/go/signers/tezos` | Tezos wallet signers |
 | `sdks/go/signers/polkadot` | Polkadot wallet signers |
 | `sdks/go/signers/stacks` | Stacks wallet signers |
+| `sdks/go/signers/cosmos` | Cosmos wallet signers |
 | `sdks/go/extensions/bazaar` | API discovery extension |
 | `sdks/go/cmd/t402` | CLI tool |
 
@@ -168,7 +170,7 @@ func main() {
       <FileTree.Folder name="gin" />
       <FileTree.Folder name="echo" />
       <FileTree.Folder name="chi" />
-      <FileTree.Folder name="fiber" />
+      <FileTree.Folder name="stdlib" />
     </FileTree.Folder>
     <FileTree.Folder name="cmd" defaultOpen>
       <FileTree.Folder name="t402" />

@@ -27,7 +27,7 @@ const faqs: FAQItem[] = [
     id: "what-is-t402",
     question: "What is T402?",
     answer:
-      "T402 is an open-source payment protocol that enables HTTP-native stablecoin (USDT/USDC) payments across 50 networks. It uses the HTTP 402 'Payment Required' status code to embed payments directly into web requests, allowing services to monetize APIs, content, and AI agent interactions without traditional payment processors.",
+      "T402 is an open-source payment protocol that enables HTTP-native stablecoin (USDT/USDC) payments across 44 networks. It uses the HTTP 402 'Payment Required' status code to embed payments directly into web requests, allowing services to monetize APIs, content, and AI agent interactions without traditional payment processors.",
     category: "general",
   },
   {
@@ -48,7 +48,7 @@ const faqs: FAQItem[] = [
     id: "which-chains",
     question: "Which blockchains are supported?",
     answer:
-      "T402 supports 50 networks across 10 families: EVM chains (Ethereum, Base, Arbitrum, Optimism, Polygon, etc.), Solana, TON (Telegram), TRON, NEAR, Aptos, Tezos, Polkadot Asset Hub, Stacks (Bitcoin L2), and Cosmos/Noble. Each chain uses its native token standard for USDT/USDC.",
+      "T402 supports 44 networks across 10 families: EVM chains (Ethereum, Base, Arbitrum, Optimism, Polygon, etc.), Solana, TON (Telegram), TRON, NEAR, Aptos, Tezos, Polkadot Asset Hub, Stacks (Bitcoin L2), and Cosmos/Noble. Each chain uses its native token standard for USDT/USDC.",
     category: "general",
   },
   {
@@ -168,7 +168,7 @@ const faqs: FAQItem[] = [
     id: "sdk-languages",
     question: "Which programming languages are supported?",
     answer:
-      "T402 offers official SDKs for TypeScript/JavaScript, Python, Go, and Java. TypeScript has the most complete ecosystem with 29 packages including React/Vue components. All SDKs support the same 50 networks with identical payment flows.",
+      "T402 offers official SDKs for TypeScript/JavaScript, Python, Go, and Java. TypeScript has the most complete ecosystem with 36 packages including React/Vue components. All SDKs support the same 44 networks with identical payment flows.",
     category: "integration",
   },
   {

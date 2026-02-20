@@ -237,7 +237,7 @@ t402 request https://api.example.com/data --gasless
 1. GET https://api.example.com/data
 2. ← 402 Payment Required (accepts: exact, eip155:8453, $0.01)
 3. Sign payment authorization (EIP-3009)
-4. GET https://api.example.com/data + X-Payment header
+4. GET https://api.example.com/data + Payment-Signature header
 5. ← 200 OK + response body
 ```
 

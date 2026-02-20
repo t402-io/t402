@@ -121,7 +121,7 @@ axiosInstance.interceptors.response.use(
     const paymentPayload = await client.createPaymentPayload(paymentRequired);
 
     // Add payment header and retry
-    error.config.headers['X-Payment'] = encodePayment(paymentPayload);
+    error.config.headers['Payment-Signature'] = encodePayment(paymentPayload);
     return axiosInstance.request(error.config);
   }
 );
@@ -226,7 +226,7 @@ const response = await api.get('/premium/data');
 
 // Check payment response
 const paymentResponse = decodePaymentResponseHeader(
-  response.headers['x-payment-response']
+  response.headers['payment-response']
 );
 
 if (paymentResponse) {

@@ -6,7 +6,7 @@ import { Mermaid } from "../../components/Mermaid";
 
 const pageTitle = "How T402 Achieves Multi-Chain Payment Settlement";
 const pageDescription =
-  "A deep dive into the architecture behind T402's support for 50 networks across 10 families. Learn how CAIP-2 identifiers, scheme-network separation, and the facilitator pattern enable true multi-chain payments.";
+  "A deep dive into the architecture behind T402's support for 44 networks across 10 families. Learn how CAIP-2 identifiers, scheme-network separation, and the facilitator pattern enable true multi-chain payments.";
 
 export const metadata: Metadata = {
   title: pageTitle,
@@ -92,7 +92,7 @@ export default function MultichainArchitecturePage() {
               <section className="space-y-4">
                 <h2 className="text-2xl font-semibold mt-4" style={{ color: "#1A1A2E" }}>The Multi-Chain Challenge</h2>
                 <p className="text-base" style={{ color: "#4A5568" }}>
-                  Supporting 50 networks isn&apos;t just about writing 28 integrations. Each chain has its own transaction format, signing algorithm, token standard, and finality model. A naive approach would create an exponential matrix of complexity — every transport times every scheme times every chain.
+                  Supporting 44 networks isn&apos;t just about writing separate integrations for each chain. Each chain has its own transaction format, signing algorithm, token standard, and finality model. A naive approach would create an exponential matrix of complexity — every transport times every scheme times every chain.
                 </p>
                 <p className="text-base" style={{ color: "#4A5568" }}>
                   T402 solves this through strict separation of concerns. The protocol defines clear interfaces at each layer, so adding a new chain doesn&apos;t require changes to the transport or scheme layers.
@@ -284,7 +284,7 @@ sequenceDiagram
                   <li>Register the mechanism in the facilitator&apos;s supported list</li>
                 </ol>
                 <p className="text-base" style={{ color: "#4A5568" }}>
-                  No changes to the HTTP transport, the scheme logic, or existing mechanisms are required. This is how T402 scaled from 1 chain to 50 networks without protocol changes.
+                  No changes to the HTTP transport, the scheme logic, or existing mechanisms are required. This is how T402 scaled from 1 chain to 44 networks without protocol changes.
                 </p>
               </section>
             </div>

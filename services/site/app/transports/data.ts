@@ -62,7 +62,7 @@ app.use(paymentMiddleware({
     color: "#8B5CF6",
     mechanism: "JSON-RPC error with code 402",
     dataFormat: "PaymentRequired in error.data field",
-    sdkSupport: ["TypeScript", "Go"],
+    sdkSupport: ["TypeScript", "Go", "Python", "Java"],
     useCases: [
       "AI agent tool monetization",
       "LLM resource access",
@@ -99,7 +99,7 @@ const server = new T402McpServer({
     color: "#EC4899",
     mechanism: "Task state input-required + payment metadata",
     dataFormat: "PaymentRequired in t402.payment.required metadata",
-    sdkSupport: ["TypeScript", "Go"],
+    sdkSupport: ["TypeScript", "Go", "Python", "Java"],
     useCases: [
       "Multi-agent service meshes",
       "Agent-to-agent commerce",
@@ -155,7 +155,7 @@ export const comparisonRows = [
   {
     label: "SDK Support",
     http: "TS, Go, Python, Java",
-    mcp: "TypeScript, Go",
-    a2a: "TypeScript, Go",
+    mcp: "TS, Go, Python, Java",
+    a2a: "TS, Go, Python, Java",
   },
 ];

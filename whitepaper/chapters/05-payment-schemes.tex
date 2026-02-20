@@ -657,6 +657,50 @@ Stacks transactions are secured by Bitcoin:
     \item Consider Bitcoin confirmation requirements for high-value payments
 \end{itemize}
 
+\section{Cosmos Implementation}
+\label{sec:cosmos-implementation}
+
+On Cosmos, the exact scheme uses native USDT on the Noble blockchain, a Cosmos appchain dedicated to native stablecoin issuance.
+
+\subsection{Native Token Standard}
+
+Noble hosts native USDT with the \code{uusdt} denomination (micro-USDT, 6 decimals). Transfers use the standard Cosmos \code{bank/MsgSend} message:
+
+\begin{lstlisting}[language=json,caption={Cosmos bank send message}]
+{
+  "typeUrl": "/cosmos.bank.v1beta1.MsgSend",
+  "value": {
+    "fromAddress": "noble1...",
+    "toAddress": "noble1...",
+    "amount": [{
+      "denom": "uusdt",
+      "amount": "1000000"
+    }]
+  }
+}
+\end{lstlisting}
+
+\subsection{Payload Structure}
+
+\begin{lstlisting}[language=json,caption={Cosmos exact scheme payload}]
+{
+  "signedTx": "base64-encoded-signed-transaction",
+  "publicKey": "base64-encoded-public-key",
+  "accountAddress": "noble1..."
+}
+\end{lstlisting}
+
+\subsection{Verification Requirements}
+
+\begin{itemize}
+    \item Validate secp256k1 signature
+    \item Verify sender matches \code{fromAddress}
+    \item Check denomination is \code{uusdt}
+    \item Validate recipient matches \field{payTo}
+    \item Confirm sufficient balance
+    \item Verify chain ID matches Noble mainnet (\code{noble-1}) or testnet (\code{grand-1})
+\end{itemize}
+
 \section{Scheme Comparison}
 \label{sec:scheme-comparison}
 
@@ -683,15 +727,15 @@ Finality & $\sim$2s (L2) & $\sim$0.4s & $\sim$5s & $\sim$3s & $\sim$1s \\
 \caption{Additional Network Implementations}
 \label{tab:scheme-comparison-additional}
 \footnotesize
-\begin{tabular}{lllll}
+\begin{tabular}{llllll}
 \toprule
-\textbf{Aspect} & \textbf{Aptos} & \textbf{Tezos} & \textbf{Polkadot} & \textbf{Stacks} \\
+\textbf{Aspect} & \textbf{Aptos} & \textbf{Tezos} & \textbf{Polkadot} & \textbf{Stacks} & \textbf{Cosmos} \\
 \midrule
-Signature & Ed25519 & Ed25519 & Sr25519 & ECDSA \\
-Standard & Fungible Asset & FA2 & Asset Hub & SIP-010 \\
-Nonce & Seq number & Counter & Nonce & Nonce \\
-Gasless & Fee sponsor & Fee sponsor & Fee sponsor & Fee sponsor \\
-Finality & $\sim$1s & $\sim$30s & $\sim$12s & $\sim$10min \\
+Signature & Ed25519 & Ed25519 & Sr25519 & ECDSA & secp256k1 \\
+Standard & Fungible Asset & FA2 & Asset Hub & SIP-010 & Native \\
+Nonce & Seq number & Counter & Nonce & Nonce & Sequence \\
+Gasless & Fee sponsor & Fee sponsor & Fee sponsor & Fee sponsor & Fee sponsor \\
+Finality & $\sim$1s & $\sim$30s & $\sim$12s & $\sim$10min & $\sim$6s \\
 \bottomrule
 \end{tabular}
 \end{table}

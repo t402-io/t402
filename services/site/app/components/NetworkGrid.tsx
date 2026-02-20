@@ -29,7 +29,7 @@ export function NetworkGrid() {
             <span className="text-gradient">One Protocol.</span>
           </h2>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-foreground-secondary">
-            50 networks across 10 blockchain families, all accessible through a single unified API.
+            44 networks across 10 blockchain families, all accessible through a single unified API.
           </p>
         </motion.div>
 

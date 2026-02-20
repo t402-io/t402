@@ -36,7 +36,7 @@ export const sdks: SDK[] = [
     icon: "typescript",
     installCommand: "npm install @t402/core",
     packageManager: "npm",
-    version: "2.4.0",
+    version: "2.6.0",
     docsUrl: "https://docs.t402.io/sdks/typescript",
     githubUrl: "https://github.com/t402-io/t402/tree/main/sdks/typescript",
     features: [
@@ -74,7 +74,7 @@ app.use(paymentMiddleware({
     icon: "python",
     installCommand: "pip install t402",
     packageManager: "pip",
-    version: "1.10.1",
+    version: "1.11.0",
     docsUrl: "https://docs.t402.io/sdks/python",
     githubUrl: "https://github.com/t402-io/t402/tree/main/sdks/python",
     features: [
@@ -113,7 +113,7 @@ app = middleware(app)`,
     icon: "go",
     installCommand: "go get github.com/t402-io/t402/sdks/go",
     packageManager: "go",
-    version: "1.9.0",
+    version: "1.11.0",
     docsUrl: "https://docs.t402.io/sdks/go",
     githubUrl: "https://github.com/t402-io/t402/tree/main/sdks/go",
     features: [
@@ -151,9 +151,9 @@ http.Handle("/", middleware(handler))`,
     description:
       "Enterprise-ready Java SDK with Spring Boot integration. Supports 10 blockchain families with annotation-based payment configuration.",
     icon: "java",
-    installCommand: "io.t402:t402:1.10.0",
+    installCommand: "io.t402:t402:1.11.0",
     packageManager: "maven",
-    version: "1.10.0",
+    version: "1.11.0",
     docsUrl: "https://docs.t402.io/sdks/java",
     githubUrl: "https://github.com/t402-io/t402/tree/main/sdks/java",
     features: [
@@ -268,6 +268,20 @@ export const typescriptPackages: Package[] = [
     features: ["SIP-010 tokens", "Bitcoin settlement", "Stacks.js", "Mainnet & Testnet"],
     badge: "new",
   },
+  {
+    name: "@t402/cosmos",
+    npmPackage: "@t402/cosmos",
+    description: "Cosmos (Noble) support for native USDC transfers",
+    features: ["Noble USDC", "IBC transfers", "Cosmos SDK", "Mainnet & Testnet"],
+    badge: "new",
+  },
+  {
+    name: "@t402/btc",
+    npmPackage: "@t402/btc",
+    description: "Bitcoin and Lightning Network support for BTC payments",
+    features: ["Bitcoin L1", "Lightning Network", "bitcoinjs-lib", "On-chain & Off-chain"],
+    badge: "new",
+  },
   // HTTP middleware
   {
     name: "@t402/express",
@@ -335,6 +349,21 @@ export const typescriptPackages: Package[] = [
     description: "Model Context Protocol server for AI agent payments",
     features: ["MCP tools", "Budget policies", "Autonomous payments", "Claude integration"],
   },
+  {
+    name: "@t402/a2a",
+    npmPackage: "@t402/a2a",
+    description: "Agent-to-Agent (A2A) transport for inter-agent commerce",
+    features: ["A2A protocol", "Task-based payments", "Agent discovery", "Service negotiation"],
+    badge: "new",
+  },
+  // UI components (continued)
+  {
+    name: "@t402/react-native",
+    npmPackage: "@t402/react-native",
+    description: "React Native SDK for mobile payment integration",
+    features: ["React Native", "Mobile payments", "iOS & Android", "Hooks & components"],
+    badge: "new",
+  },
   // WDK integrations
   {
     name: "@t402/wdk",
@@ -359,6 +388,41 @@ export const typescriptPackages: Package[] = [
     npmPackage: "@t402/wdk-multisig",
     description: "Safe multi-signature wallet integration",
     features: ["Safe protocol", "M-of-N signing", "Transaction queue", "Module support"],
+    badge: "new",
+  },
+  {
+    name: "@t402/wdk-protocol",
+    npmPackage: "@t402/wdk-protocol",
+    description: "T402 payment protocol for Tether WDK wallet apps",
+    features: ["WDK integration", "Payment protocol", "Wallet apps", "Auto-signing"],
+    badge: "new",
+  },
+  {
+    name: "@t402/wdk-defi",
+    npmPackage: "@t402/wdk-defi",
+    description: "DeFi integrations for WDK including swaps and liquidity",
+    features: ["Token swaps", "Liquidity pools", "DeFi protocols", "WDK wallets"],
+    badge: "new",
+  },
+  {
+    name: "@t402/wdk-ton",
+    npmPackage: "@t402/wdk-ton",
+    description: "Server-side TON wallet management with @ton/walletkit",
+    features: ["TON wallets", "Server-side", "walletkit", "Key management"],
+    badge: "new",
+  },
+  {
+    name: "@t402/wdk-ton-gasless",
+    npmPackage: "@t402/wdk-ton-gasless",
+    description: "Gasless USDT0 payments on TON with Tether WDK",
+    features: ["TON gasless", "USDT0 payments", "WDK integration", "No gas needed"],
+    badge: "new",
+  },
+  {
+    name: "@t402/wdk-tron-gasfree",
+    npmPackage: "@t402/wdk-tron-gasfree",
+    description: "Gas-free USDT payments on TRON with Tether WDK",
+    features: ["TRON gas-free", "USDT payments", "WDK integration", "No energy needed"],
     badge: "new",
   },
   // CLI

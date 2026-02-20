@@ -199,7 +199,7 @@ t402 verify <payload> --requirements <requirements>
 // Express.js
 app.use(cors({
   origin: ['https://your-frontend.com'],
-  exposedHeaders: ['X-Payment-Required', 'X-Payment-Response'],
+  exposedHeaders: ['Payment-Required', 'Payment-Response', 'Payment-Signature'],
 }));
 ```
 
@@ -207,11 +207,11 @@ app.use(cors({
 
 **Symptoms**: 402 response but no payment requirements
 
-**Check**: Ensure `X-Payment-Required` header is exposed:
+**Check**: Ensure `Payment-Required` header is exposed:
 
 ```typescript
 // Client-side: Check response headers
-console.log(response.headers.get('X-Payment-Required'));
+console.log(response.headers.get('Payment-Required'));
 ```
 
 ### Framework Middleware Order

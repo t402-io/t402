@@ -389,7 +389,7 @@ export const options = {
 export default function () {
   const res = http.get('https://api.example.com/api/premium/data', {
     headers: {
-      'X-Payment': VALID_PAYMENT_HEADER,
+      'Payment-Signature': VALID_PAYMENT_HEADER,
     },
   });
 

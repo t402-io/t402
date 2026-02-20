@@ -190,7 +190,7 @@ server {
         # CORS headers
         add_header Access-Control-Allow-Origin $http_origin;
         add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
-        add_header Access-Control-Allow-Headers "Content-Type, X-Payment, Idempotency-Key";
+        add_header Access-Control-Allow-Headers "Content-Type, Payment-Signature, Idempotency-Key";
     }
 }
 ```

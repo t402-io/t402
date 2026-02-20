@@ -33,6 +33,7 @@ export const chains: DemoChain[] = [
   { id: "tezos", name: "Tezos", network: "tezos:NetXdQprcVkpaWU", color: "#2C7DF7", family: "Tezos", gasless: false },
   { id: "polkadot", name: "Polkadot", network: "polkadot:68d56f15f85d3136970ec16946040bc1", color: "#E6007A", family: "Polkadot", gasless: false },
   { id: "stacks", name: "Stacks", network: "stacks:1", color: "#5546FF", family: "Stacks", gasless: false },
+  { id: "noble", name: "Noble", network: "cosmos:noble-1", color: "#B7B9C8", family: "Cosmos", gasless: false },
 ];
 
 export const chainFamilies = [...new Set(chains.map((c) => c.family))];

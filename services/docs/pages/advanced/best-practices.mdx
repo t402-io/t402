@@ -180,7 +180,7 @@ import { z } from 'zod';
 const PaymentPayloadSchema = z.object({
   t402Version: z.literal(2),
   scheme: z.string().min(1),
-  network: z.string().regex(/^(eip155|solana|ton|tron):/),
+  network: z.string().regex(/^(eip155|solana|ton|tron|near|aptos|tezos|polkadot|stacks|cosmos):/),
   payload: z.object({
     authorization: z.object({
       from: z.string(),
@@ -392,7 +392,7 @@ describe('PaymentMiddleware', () => {
 
   it('should proceed when valid payment provided', async () => {
     const req = createMockRequest('/api/premium', {
-      headers: { 'x-payment': validPaymentHeader },
+      headers: { 'payment-signature': validPaymentHeader },
     });
     const res = createMockResponse();
 
@@ -423,11 +423,11 @@ test('complete payment flow', async ({ request }) => {
 
   // Step 3: Request with payment
   const paid = await request.get('/api/premium', {
-    headers: { 'x-payment': encodePayment(payment) },
+    headers: { 'payment-signature': encodePayment(payment) },
   });
 
   expect(paid.status()).toBe(200);
-  expect(paid.headers()['x-payment-response']).toBeDefined();
+  expect(paid.headers()['payment-response']).toBeDefined();
 });
 ```
 

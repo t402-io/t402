@@ -2,7 +2,7 @@
 
 import { Callout, Tabs } from 'nextra/components'
 
-The Java SDK provides payment filters for 5 HTTP frameworks: Jakarta Servlet, Spring MVC, Spring WebFlux, Micronaut, and Quarkus. Each filter implements the full T402 v2 payment lifecycle with V2-first header detection and V1 fallback.
+The Java SDK provides payment filters for 5 HTTP frameworks: Jakarta Servlet, Spring MVC, Spring WebFlux, Micronaut, and JAX-RS. Each filter implements the full T402 v2 payment lifecycle with V2-first header detection and V1 fallback.
 
 ## Framework Overview
 
@@ -12,7 +12,7 @@ The Java SDK provides payment filters for 5 HTTP frameworks: Jakarta Servlet, Sp
 | Spring MVC | `io.t402.spring` | `PaymentInterceptor` | Synchronous |
 | Spring WebFlux | `io.t402.spring.reactive` | `PaymentWebFilter` | Reactive |
 | Micronaut | `io.t402.micronaut` | `PaymentFilter` | Reactive |
-| Quarkus | `io.t402.quarkus` | `PaymentFilter` | Synchronous (JAX-RS) |
+| JAX-RS | `io.t402.jaxrs` | `PaymentFilter` | Synchronous (JAX-RS) |
 
 ## Jakarta Servlet
 
@@ -153,12 +153,12 @@ public class ApiController {
 }
 ```
 
-## Quarkus
+## JAX-RS
 
-The Quarkus filter implements JAX-RS `ContainerRequestFilter` and `ContainerResponseFilter` for the full payment lifecycle.
+The JAX-RS filter implements `ContainerRequestFilter` and `ContainerResponseFilter` for the full payment lifecycle. Works with any JAX-RS runtime (Jersey, RESTEasy, etc.).
 
 ```java
-import io.t402.quarkus.PaymentFilter;
+import io.t402.jaxrs.PaymentFilter;
 import io.t402.client.HttpFacilitatorClient;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
@@ -185,7 +185,7 @@ public class T402Producer {
 }
 ```
 
-### Quarkus Resource
+### JAX-RS Resource
 
 ```java
 import jakarta.ws.rs.GET;

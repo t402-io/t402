@@ -18,17 +18,17 @@ This chapter provides practical guidance for integrating \tprotocol{} into appli
 \toprule
 \textbf{SDK} & \textbf{Version} & \textbf{Registry} & \textbf{Frameworks} & \textbf{License} \\
 \midrule
-TypeScript & 2.4.0 & npm @t402/* & Express, Hono, Fastify, Next.js & Apache 2.0 \\
-Python & 1.10.1 & PyPI & FastAPI, Flask, Django, Starlette & Apache 2.0 \\
-Go & 1.9.0 & Go Modules & Gin, Echo, Chi, Fiber & Apache 2.0 \\
-Java & 1.10.0 & Maven Central & Servlet, Spring, WebFlux, Micronaut, Quarkus & Apache 2.0 \\
+TypeScript & 2.6.0 & npm @t402/* & Express, Hono, Fastify, Next.js & Apache 2.0 \\
+Python & 1.11.0 & PyPI & FastAPI, Flask, Django, Starlette & Apache 2.0 \\
+Go & 1.11.0 & Go Modules & Gin, Echo, Chi, Fiber & Apache 2.0 \\
+Java & 1.11.0 & Maven Central & Servlet, Spring, WebFlux, Micronaut, Quarkus & Apache 2.0 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \subsection{TypeScript SDK Architecture}
 
-The TypeScript SDK is organized as a monorepo with 29 modular packages:
+The TypeScript SDK is organized as a monorepo with 36 modular packages:
 
 \begin{figure}[htbp]
 \centering
@@ -109,9 +109,10 @@ Core & core, evm-core, extensions & Type definitions, core logic \\
 Client & fetch, axios & HTTP clients with auto-payment \\
 Server & express, fastify, hono, next & Server middleware \\
 AI & mcp, a2a & MCP server, A2A transport \\
-Chains & evm, svm, ton, tron, near, aptos, tezos, polkadot, stacks, cosmos & Chain-specific handlers \\
-UI & paywall, react, vue & Frontend components \\
-WDK & wdk, wdk-gasless, wdk-bridge, wdk-multisig & Tether WDK integration \\
+Chains & evm, svm, ton, tron, near, aptos, tezos, polkadot, stacks, cosmos, btc & Chain-specific handlers \\
+UI & paywall, react, vue, react-native & Frontend components \\
+CLI & cli & Command-line interface \\
+WDK & wdk, wdk-gasless, wdk-bridge, wdk-multisig, wdk-protocol, wdk-defi, wdk-ton, wdk-ton-gasless, wdk-tron-gasfree & Tether WDK integration \\
 \bottomrule
 \end{tabular}
 \end{table}

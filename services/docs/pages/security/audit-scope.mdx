@@ -18,14 +18,20 @@ T402 is an HTTP-native payment protocol for USDT/USDT0 stablecoins across multip
 
 ```
 github.com/t402-io/t402/
-├── typescript/              # TypeScript SDK (21 npm packages)
+├── typescript/              # TypeScript SDK (36 npm packages)
 │   └── packages/
 │       ├── core/           # Protocol types
 │       ├── mechanisms/
 │       │   ├── evm/        # EVM signing (IN SCOPE)
 │       │   ├── svm/        # Solana signing (IN SCOPE)
 │       │   ├── ton/        # TON signing (IN SCOPE)
-│       │   └── tron/       # TRON signing (IN SCOPE)
+│       │   ├── tron/       # TRON signing (IN SCOPE)
+│       │   ├── near/       # NEAR signing (IN SCOPE)
+│       │   ├── aptos/      # Aptos signing (IN SCOPE)
+│       │   ├── tezos/      # Tezos signing (IN SCOPE)
+│       │   ├── polkadot/   # Polkadot signing (IN SCOPE)
+│       │   ├── stacks/     # Stacks signing (IN SCOPE)
+│       │   └── cosmos/     # Cosmos signing (IN SCOPE)
 │       └── ...
 ├── go/                      # Go SDK
 │   ├── signers/            # Signer implementations (IN SCOPE)
@@ -35,7 +41,13 @@ github.com/t402-io/t402/
 │   │   ├── evm/
 │   │   ├── svm/
 │   │   ├── ton/
-│   │   └── tron/
+│   │   ├── tron/
+│   │   ├── near/
+│   │   ├── aptos/
+│   │   ├── tezos/
+│   │   ├── polkadot/
+│   │   ├── stacks/
+│   │   └── cosmos/
 │   └── ...
 ├── python/                  # Python SDK
 │   └── t402/src/t402/

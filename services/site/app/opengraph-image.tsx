@@ -156,7 +156,7 @@ export default async function Image() {
               { name: "Tezos", color: "#2C7DF7" },
               { name: "Polkadot", color: "#E6007A" },
               { name: "Stacks", color: "#5546FF" },
-              { name: "+19", color: "#71717A" },
+              { name: "+35", color: "#71717A" },
             ].map((chain) => (
               <div
                 key={chain.name}

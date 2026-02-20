@@ -14,13 +14,13 @@ The T402 Java SDK provides a complete implementation of the t402 payment protoco
 <dependency>
     <groupId>io.t402</groupId>
     <artifactId>t402</artifactId>
-    <version>1.9.0</version>
+    <version>1.11.0</version>
 </dependency>
 ```
   </Tabs.Tab>
   <Tabs.Tab>
 ```groovy
-implementation 'io.t402:t402:1.9.0'
+implementation 'io.t402:t402:1.11.0'
 ```
   </Tabs.Tab>
 </Tabs>
@@ -54,7 +54,7 @@ implementation 'io.t402:t402:1.9.0'
 | Spring WebFlux (Reactive) | ✅ |
 | Jakarta Servlet Filter | ✅ |
 | Micronaut Filter | ✅ |
-| Quarkus Filter | ✅ |
+| JAX-RS Filter | ✅ |
 
 ## Quick Start
 
@@ -126,7 +126,7 @@ HttpResponse<String> response = client.get(
       <FileTree.Folder name="reactive" />
     </FileTree.Folder>
     <FileTree.Folder name="micronaut" />
-    <FileTree.Folder name="quarkus" />
+    <FileTree.Folder name="jaxrs" />
     <FileTree.Folder name="schemes" defaultOpen>
       <FileTree.Folder name="svm" />
       <FileTree.Folder name="ton" />
@@ -202,7 +202,7 @@ HttpResponse<String> response = client.get(
 | `io.t402.a2a` | A2A transport helpers |
 | `io.t402.spring` | Spring Boot auto-configuration |
 | `io.t402.micronaut` | Micronaut payment filter |
-| `io.t402.quarkus` | Quarkus payment filter |
+| `io.t402.jaxrs` | JAX-RS payment filter |
 | `io.t402.cli` | Command-line tools |
 
 ## Requirements

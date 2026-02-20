@@ -1,4 +1,4 @@
-export type ChainFamily = "evm" | "ton" | "tron" | "solana" | "stacks" | "near" | "aptos" | "tezos" | "polkadot";
+export type ChainFamily = "evm" | "ton" | "tron" | "solana" | "stacks" | "near" | "aptos" | "tezos" | "polkadot" | "cosmos";
 
 export interface ChainConfig {
   family: ChainFamily;
@@ -136,9 +136,22 @@ export const CHAIN_CONFIGS: Record<ChainFamily, ChainConfig> = {
     decimals: 6,
     tokenSymbol: "USDT",
   },
+  cosmos: {
+    family: "cosmos",
+    network: "cosmos:grand-1",
+    asset: "uusdc",
+    payTo: "noble1t402demo000000000000000000000000example",
+    explorer: "https://www.mintscan.io/noble-testnet/tx/",
+    faucet: "https://faucet.testnet.noble.strange.love",
+    name: "Noble Testnet",
+    label: "Cosmos",
+    color: "var(--color-chain-cosmos)",
+    decimals: 6,
+    tokenSymbol: "USDC",
+  },
 };
 
-export const CHAIN_FAMILIES: ChainFamily[] = ["evm", "ton", "tron", "solana", "stacks", "near", "aptos", "tezos", "polkadot"];
+export const CHAIN_FAMILIES: ChainFamily[] = ["evm", "ton", "tron", "solana", "stacks", "near", "aptos", "tezos", "polkadot", "cosmos"];
 
 export function getExplorerUrl(family: ChainFamily, txHash: string): string {
   const config = CHAIN_CONFIGS[family];

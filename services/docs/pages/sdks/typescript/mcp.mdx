@@ -14,21 +14,34 @@ npx @t402/mcp
 
 ## Features
 
-- **6 payment tools** for AI agents
-- **Multi-chain support** (EVM, TON, TRON)
+- **11 tools** for AI agents (6 base + 5 WDK wallet tools)
+- **Multi-chain support** (EVM, TON, TRON, Solana, and more)
 - **Demo mode** for testing without real transactions
 - **Claude Desktop** integration
+- **WDK wallet** management for autonomous agents
 
 ## MCP Tools
 
+### Base Tools (6)
+
 | Tool | Description |
 |------|-------------|
-| `t402/getBalance` | Check wallet balance on a specific network |
+| `t402/verify` | Verify a payment authorization |
+| `t402/settle` | Settle a verified payment on-chain |
+| `t402/supported` | List supported networks and schemes |
+| `t402/getRequirements` | Get payment requirements for a resource |
 | `t402/getAllBalances` | Check balances across all supported networks |
 | `t402/pay` | Execute stablecoin payment |
-| `t402/payGasless` | Execute gasless payment (ERC-4337) |
-| `t402/getBridgeFee` | Get fee quote for cross-chain bridge |
-| `t402/bridge` | Bridge USDT0 between chains |
+
+### WDK Tools (5, requires seed phrase)
+
+| Tool | Description |
+|------|-------------|
+| `wdk/getWallet` | Get WDK wallet address and info |
+| `wdk/getBalances` | Check WDK wallet balances |
+| `wdk/transfer` | Transfer tokens from WDK wallet |
+| `wdk/swap` | Swap tokens via WDK |
+| `t402/autoPay` | Autonomously pay for a 402-protected resource |
 
 ## Claude Desktop Setup
 
@@ -53,7 +66,8 @@ Add to your Claude Desktop configuration (`claude_desktop_config.json`):
 
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
-| `T402_PRIVATE_KEY` | EVM private key for signing | Required |
+| `T402_PRIVATE_KEY` | EVM private key for signing | Required (or WDK seed) |
+| `T402_WDK_SEED_PHRASE` | WDK seed phrase (enables 5 WDK tools) | Optional |
 | `T402_DEMO_MODE` | Enable demo mode (no real transactions) | `false` |
 | `T402_RPC_ETHEREUM` | Custom Ethereum RPC URL | Public RPC |
 | `T402_RPC_BASE` | Custom Base RPC URL | Public RPC |

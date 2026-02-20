@@ -43,7 +43,7 @@ export function getPreferredChain(request: Request): ChainFamily {
 export function createMultiChainAccepts(amount: string, scheme = "exact") {
   const families: ChainFamily[] = [
     "evm", "ton", "tron", "solana", "stacks",
-    "near", "aptos", "tezos", "polkadot"
+    "near", "aptos", "tezos", "polkadot", "cosmos"
   ];
   return families.map((family) => {
     const config = CHAIN_CONFIGS[family];

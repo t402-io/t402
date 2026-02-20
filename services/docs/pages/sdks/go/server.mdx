@@ -672,7 +672,7 @@ func TestProtectedEndpoint(t *testing.T) {
 
     // Test with valid payment
     req := httptest.NewRequest("GET", "/protected", nil)
-    req.Header.Set("X-PAYMENT", validPayment)
+    req.Header.Set("Payment-Signature", validPayment)
 
     w := httptest.NewRecorder()
     r.ServeHTTP(w, req)

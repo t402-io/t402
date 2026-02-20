@@ -6,7 +6,7 @@ import { Callout, Tabs } from 'nextra/components'
 
 ## Overview
 
-T402 implements cryptographic signing for four blockchain families, each with specific algorithms and standards:
+T402 implements cryptographic signing for ten blockchain families, each with specific algorithms and standards:
 
 | Chain | Algorithm | Signature Size | Key Standard |
 |-------|-----------|----------------|--------------|
@@ -14,6 +14,12 @@ T402 implements cryptographic signing for four blockchain families, each with sp
 | Solana | Ed25519 | 64 bytes (R, S) | Solana standard |
 | TON | Ed25519 | 64 bytes (R, S) | TON TL-B |
 | TRON | ECDSA (secp256k1) | 65 bytes (r, s, v) | Protobuf |
+| NEAR | Ed25519 | 64 bytes (R, S) | NEAR standard |
+| Aptos | Ed25519 | 64 bytes (R, S) | BCS encoding |
+| Tezos | Ed25519 / secp256k1 | 64 bytes | Micheline |
+| Polkadot | Sr25519 | 64 bytes | SCALE encoding |
+| Stacks | ECDSA (secp256k1) | 65 bytes (r, s, v) | Clarity |
+| Cosmos | ECDSA (secp256k1) | 64 bytes (r, s) | Protobuf (Amino/Direct) |
 
 ## EVM Networks
 

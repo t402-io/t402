@@ -35,6 +35,7 @@ pnpm add @t402/core @t402/evm @t402/wdk @t402/wdk-gasless @t402/wdk-bridge @t402
 | `@t402/tezos` | Tezos | `pnpm add @t402/tezos` |
 | `@t402/polkadot` | Polkadot Asset Hub | `pnpm add @t402/polkadot` |
 | `@t402/stacks` | Stacks (Bitcoin L2) | `pnpm add @t402/stacks` |
+| `@t402/cosmos` | Cosmos (Noble) | `pnpm add @t402/cosmos` |
 
 **WDK Integration**
 
@@ -92,13 +93,13 @@ The Python package includes:
 
 ```bash
 # Install
-go get github.com/t402-io/t402/sdks/go@v1.9.0
+go get github.com/t402-io/t402/sdks/go@v1.11.0
 ```
 
 The Go module includes:
 - Core protocol types
-- All 10 blockchain mechanisms (EVM, SVM, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks)
-- HTTP middleware (Gin, Echo, Chi, Fiber)
+- All 10 blockchain mechanisms (EVM, SVM, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos)
+- HTTP middleware (net/http, Gin, Echo, Chi)
 - MCP server for AI agents
 
 ## Java
@@ -109,20 +110,21 @@ The Go module includes:
 <dependency>
     <groupId>io.t402</groupId>
     <artifactId>t402</artifactId>
-    <version>1.9.0</version>
+    <version>1.11.0</version>
 </dependency>
 ```
 </Tabs.Tab>
 <Tabs.Tab>
 ```groovy
-implementation 'io.t402:t402:1.9.0'
+implementation 'io.t402:t402:1.11.0'
 ```
 </Tabs.Tab>
 </Tabs>
 
 The Java SDK includes:
-- Multi-chain support (EVM, SVM, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks)
+- Multi-chain support (EVM, SVM, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos)
 - Spring Boot 3.x auto-configuration
+- HTTP frameworks (Servlet, Spring, WebFlux, Micronaut, JAX-RS)
 - ERC-4337 Account Abstraction
 - USDT0 cross-chain bridge (LayerZero)
 - CLI tool

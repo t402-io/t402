@@ -139,6 +139,28 @@ export const packages: EcosystemPackage[] = [
     features: ["SIP-010 tokens", "secp256k1", "Bitcoin settlement"],
     badge: "new",
   },
+  {
+    id: "cosmos",
+    name: "@t402/cosmos",
+    category: "mechanisms",
+    description:
+      "Cosmos (Noble) support for native USDC transfers with IBC interoperability.",
+    language: "typescript",
+    npmPackage: "@t402/cosmos",
+    features: ["Noble USDC", "IBC transfers", "Cosmos SDK"],
+    badge: "new",
+  },
+  {
+    id: "btc",
+    name: "@t402/btc",
+    category: "mechanisms",
+    description:
+      "Bitcoin and Lightning Network support for on-chain and off-chain BTC payments.",
+    language: "typescript",
+    npmPackage: "@t402/btc",
+    features: ["Bitcoin L1", "Lightning Network", "bitcoinjs-lib"],
+    badge: "new",
+  },
 
   // HTTP Middleware
   {
@@ -237,6 +259,17 @@ export const packages: EcosystemPackage[] = [
     features: ["Composables", "Vue 3", "TypeScript"],
     badge: "new",
   },
+  {
+    id: "react-native",
+    name: "@t402/react-native",
+    category: "ui",
+    description:
+      "React Native SDK for building mobile payment flows on iOS and Android.",
+    language: "typescript",
+    npmPackage: "@t402/react-native",
+    features: ["React Native", "iOS & Android", "Hooks"],
+    badge: "new",
+  },
 
   // Wallet Integration
   {
@@ -282,6 +315,61 @@ export const packages: EcosystemPackage[] = [
     features: ["Safe multisig", "Enterprise", "Treasury"],
     badge: "beta",
   },
+  {
+    id: "wdk-protocol",
+    name: "@t402/wdk-protocol",
+    category: "wallet",
+    description:
+      "T402 payment protocol integration for Tether WDK wallet applications.",
+    language: "typescript",
+    npmPackage: "@t402/wdk-protocol",
+    features: ["WDK integration", "Payment protocol", "Auto-signing"],
+    badge: "new",
+  },
+  {
+    id: "wdk-defi",
+    name: "@t402/wdk-defi",
+    category: "wallet",
+    description:
+      "DeFi integrations for WDK including token swaps and liquidity management.",
+    language: "typescript",
+    npmPackage: "@t402/wdk-defi",
+    features: ["Token swaps", "Liquidity", "DeFi protocols"],
+    badge: "new",
+  },
+  {
+    id: "wdk-ton",
+    name: "@t402/wdk-ton",
+    category: "wallet",
+    description:
+      "Server-side TON wallet management with @ton/walletkit for T402.",
+    language: "typescript",
+    npmPackage: "@t402/wdk-ton",
+    features: ["TON wallets", "Server-side", "walletkit"],
+    badge: "new",
+  },
+  {
+    id: "wdk-ton-gasless",
+    name: "@t402/wdk-ton-gasless",
+    category: "wallet",
+    description:
+      "Gasless USDT0 payments on TON blockchain with Tether WDK integration.",
+    language: "typescript",
+    npmPackage: "@t402/wdk-ton-gasless",
+    features: ["TON gasless", "USDT0", "WDK"],
+    badge: "new",
+  },
+  {
+    id: "wdk-tron-gasfree",
+    name: "@t402/wdk-tron-gasfree",
+    category: "wallet",
+    description:
+      "Gas-free USDT payments on TRON blockchain with Tether WDK integration.",
+    language: "typescript",
+    npmPackage: "@t402/wdk-tron-gasfree",
+    features: ["TRON gas-free", "USDT", "WDK"],
+    badge: "new",
+  },
 
   // AI Agents
   {
@@ -289,10 +377,21 @@ export const packages: EcosystemPackage[] = [
     name: "@t402/mcp",
     category: "agents",
     description:
-      "MCP server and A2A agent implementation for monetizing AI tools and agent-to-agent commerce.",
+      "MCP server for monetizing AI tools with autonomous payment handling.",
     language: "typescript",
     npmPackage: "@t402/mcp",
-    features: ["MCP server", "A2A agent", "Tool monetization"],
+    features: ["MCP server", "11 tools", "Tool monetization"],
+    badge: "new",
+  },
+  {
+    id: "a2a",
+    name: "@t402/a2a",
+    category: "agents",
+    description:
+      "Agent-to-Agent (A2A) transport for inter-agent service commerce and task-based payments.",
+    language: "typescript",
+    npmPackage: "@t402/a2a",
+    features: ["A2A protocol", "Agent discovery", "Task payments"],
     badge: "new",
   },
 

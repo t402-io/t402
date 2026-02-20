@@ -6,10 +6,10 @@ This appendix provides comprehensive network configuration details for all suppo
 
 \section{EVM Networks}
 
-T402 supports 19+ EVM-compatible networks through the unified EIP-3009 interface. The table below lists networks with USDT0 (LayerZero OFT) support; additional networks support legacy USDT.
+T402 supports 25+ EVM-compatible networks through the unified EIP-3009 interface. The tables below list networks by token standard.
 
 \begin{longtable}{l l l}
-\caption{Supported EVM Networks with USDT0 (LayerZero OFT)} \label{tab:evm-networks} \\
+\caption{EVM Networks with USDT0 (LayerZero OFT)} \label{tab:evm-networks} \\
 \toprule
 \textbf{Network} & \textbf{CAIP-2 ID} & \textbf{USDT0 Contract} \\
 \midrule
@@ -25,22 +25,54 @@ T402 supports 19+ EVM-compatible networks through the unified EIP-3009 interface
 \endlastfoot
 Ethereum & eip155:1 & \texttt{0x6C96...1dee} \\
 Arbitrum One & eip155:42161 & \texttt{0xFd08...Cbb9} \\
-Base & eip155:8453 & \texttt{0x0200...70c1} \\
 Optimism & eip155:10 & \texttt{0x01bF...1071} \\
 Ink & eip155:57073 & \texttt{0x0200...70c1} \\
 Berachain & eip155:80094 & \texttt{0x779D...3736} \\
-Unichain & eip155:130 & \texttt{0x588c...5518} \\
+Unichain & eip155:130 & \texttt{0x9151...EcC5} \\
 Polygon & eip155:137 & \texttt{0xc213...8e8F} \\
-Avalanche & eip155:43114 & \texttt{0x9702...A8c7} \\
-BNB Chain & eip155:56 & \texttt{0x55d3...7955} \\
-Fantom & eip155:250 & \texttt{0x049d...3C7A} \\
-Linea & eip155:59144 & \texttt{0xA219...B93} \\
-Scroll & eip155:534352 & \texttt{0xf55B...9Df} \\
-zkSync Era & eip155:324 & \texttt{0x4932...bA4C} \\
-Mantle & eip155:5000 & \texttt{0x201E...56aE} \\
-Celo & eip155:42220 & \texttt{0x4806...D5e} \\
-Gnosis & eip155:100 & \texttt{0x4ECa...05C6} \\
+Mantle & eip155:5000 & \texttt{0x779D...3736} \\
+Plasma & eip155:9745 & \texttt{0xB8CE...5ebb} \\
+Sei & eip155:1329 & \texttt{0x9151...EcC5} \\
+Conflux eSpace & eip155:1030 & \texttt{0xaf37...47ff} \\
+Monad & eip155:143 & \texttt{0xe7cd...C82D} \\
+Rootstock & eip155:30 & \texttt{0x779d...3736} \\
+XLayer & eip155:196 & \texttt{0x779D...3736} \\
+Flare & eip155:14 & \texttt{0xe7cd...C82D} \\
+Corn & eip155:21000000 & \texttt{0xB8CE...5ebb} \\
+HyperEVM & eip155:999 & \texttt{0xB8CE...5ebb} \\
+MegaETH & eip155:4326 & \texttt{0xb8ce...5ebb} \\
+Stable & eip155:988 & \texttt{0x779D...3736} \\
 \end{longtable}
+
+\begin{table}[htbp]
+\centering
+\caption{EVM Networks with Legacy USDT}
+\label{tab:evm-legacy-networks}
+\begin{tabular}{l l l}
+\toprule
+\textbf{Network} & \textbf{CAIP-2 ID} & \textbf{USDT Contract} \\
+\midrule
+BNB Chain & eip155:56 & \texttt{0x55d3...7955} \\
+Avalanche & eip155:43114 & \texttt{0x9702...A8c7} \\
+Fantom & eip155:250 & \texttt{0x049d...3C7A} \\
+Celo & eip155:42220 & \texttt{0x4806...D5e} \\
+Kaia & eip155:8217 & \texttt{0xcee8...d167} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{EVM Networks with USDC}
+\label{tab:evm-usdc-networks}
+\begin{tabular}{l l l}
+\toprule
+\textbf{Network} & \textbf{CAIP-2 ID} & \textbf{USDC Contract} \\
+\midrule
+Base & eip155:8453 & \texttt{0x8335...2913} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \begin{infobox}[Full Contract Addresses]
 For complete contract addresses, query the Facilitator API at \url{https://facilitator.t402.io/supported}.

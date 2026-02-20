@@ -4,8 +4,8 @@ import { motion, useMotionValue, useTransform, animate, useInView } from "motion
 import { useEffect, useRef } from "react";
 
 const stats = [
-  { value: 50, suffix: "", label: "Networks" },
-  { value: 29, suffix: "", label: "Packages" },
+  { value: 44, suffix: "", label: "Networks" },
+  { value: 36, suffix: "", label: "Packages" },
   { value: 18, suffix: "", label: "Frameworks" },
   { value: 4, suffix: "", label: "SDKs" },
 ];

@@ -19,7 +19,7 @@ A service that verifies payment authorizations and executes on-chain settlements
 A unique identifier ensuring that retried requests don't result in duplicate payments. Passed in the `Idempotency-Key` header.
 
 ### Network
-A blockchain network identified by CAIP-2 format. T402 supports EVM chains (`eip155:*`), TON, TRON, Solana, NEAR, Aptos, Tezos, Polkadot, and Stacks.
+A blockchain network identified by CAIP-2 format. T402 supports EVM chains (`eip155:*`), TON, TRON, Solana, NEAR, Aptos, Tezos, Polkadot, Stacks, and Cosmos.
 
 ### Payment Payload
 The signed payment authorization from a client, containing amount, recipient, nonce, and cryptographic signature.
@@ -145,8 +145,8 @@ Security mechanism controlling cross-origin requests. T402 servers must configur
 
 ### Header
 HTTP metadata sent with requests/responses. Key T402 headers:
-- `X-Payment`: Payment authorization from client
-- `X-Payment-Response`: Settlement confirmation from server
+- `PAYMENT-SIGNATURE`: Payment authorization from client (V2). Also `X-Payment` for V1 backward compatibility.
+- `PAYMENT-RESPONSE`: Settlement confirmation from server (V2). Also `X-Payment-Response` for V1 backward compatibility.
 - `Idempotency-Key`: Unique request identifier
 
 ### Interceptor

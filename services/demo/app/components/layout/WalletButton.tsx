@@ -55,6 +55,8 @@ export function WalletButton() {
       return <TezosWalletButton />;
     case "polkadot":
       return <PolkadotWalletButton />;
+    case "cosmos":
+      return <CosmosWalletButton />;
     default:
       return null;
   }
@@ -455,4 +457,12 @@ function PolkadotWalletButton() {
   }
 
   return <ConnectButton label="Polkadot" onClick={handleConnect} />;
+}
+
+function CosmosWalletButton() {
+  const { isDemo } = useDemoContext();
+
+  if (isDemo) return <DemoWalletBadge label="Cosmos" />;
+
+  return <InstallButton label="Keplr" url="https://www.keplr.app/" />;
 }

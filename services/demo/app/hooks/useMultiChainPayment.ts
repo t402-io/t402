@@ -52,6 +52,8 @@ function createMockPayload(requirements: PaymentRequirements, family: ChainFamil
         return "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb";
       case "polkadot":
         return "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY";
+      case "cosmos":
+        return "noble1t402demo000000000000000000000000example";
       default:
         return "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD68";
     }

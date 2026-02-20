@@ -25,7 +25,7 @@ export function useChainContext() {
   return useContext(ChainContext);
 }
 
-const VALID_FAMILIES: ChainFamily[] = ["evm", "ton", "tron", "solana", "stacks", "near", "aptos", "tezos", "polkadot"];
+const VALID_FAMILIES: ChainFamily[] = ["evm", "ton", "tron", "solana", "stacks", "near", "aptos", "tezos", "polkadot", "cosmos"];
 
 export function ChainProvider({ children }: { children: ReactNode }) {
   const [activeFamily, setActiveFamilyState] = useState<ChainFamily>("evm");

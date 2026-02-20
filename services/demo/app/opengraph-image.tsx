@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const dynamic = "force-static";
-export const alt = "T402 Demo - Interactive HTTP 402 Payments with USDT";
+export const alt = "T402 Demo - Interactive HTTP 402 Payments with USDT across 44 Networks";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -140,7 +140,7 @@ export default async function Image() {
               lineHeight: 1.4,
             }}
           >
-            Pay for APIs, content, and AI with USDT
+            Pay for APIs, content, and AI with USDT across 44 networks
           </p>
 
           {/* Flow diagram */}
@@ -204,6 +204,7 @@ export default async function Image() {
               { name: "Tezos", color: "#2C7DF7" },
               { name: "Polkadot", color: "#E6007A" },
               { name: "Stacks", color: "#5546FF" },
+              { name: "Cosmos", color: "#B7B9C8" },
             ].map((chain) => (
               <div
                 key={chain.name}

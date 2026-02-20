@@ -74,6 +74,8 @@ export function createMockSettleResponse(chainOrNetwork: ChainFamily | string) {
         return "o" + Array.from({ length: 50 }, () => "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"[Math.floor(Math.random() * 58)]).join("");
       case "polkadot":
         return "0x" + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
+      case "cosmos":
+        return Array.from({ length: 64 }, () => "0123456789ABCDEF"[Math.floor(Math.random() * 16)]).join("");
       default:
         return "0x" + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
     }
@@ -100,6 +102,8 @@ export function createMockSettleResponse(chainOrNetwork: ChainFamily | string) {
         return "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb";
       case "polkadot":
         return "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY";
+      case "cosmos":
+        return "noble1t402demo000000000000000000000000example";
       default:
         return "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD68";
     }

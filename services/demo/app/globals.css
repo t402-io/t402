@@ -48,6 +48,8 @@
   --color-chain-tezos-dim: #2C7DF720;
   --color-chain-polkadot: #E6007A;
   --color-chain-polkadot-dim: #E6007A20;
+  --color-chain-cosmos: #B7B9C8;
+  --color-chain-cosmos-dim: #B7B9C820;
 
   /* Scenario accent colors — monochrome/green tints */
   --color-scenario-ai: #50AF95;

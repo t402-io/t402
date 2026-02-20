@@ -16,13 +16,19 @@ T402 follows [Semantic Versioning](https://semver.org/):
   <Tabs.Tab>
 ## TypeScript SDK
 
-### v2.5.x (Current)
+### v2.6.x (Current)
+
+**v2.6.0** - February 2026
+- Expanded to 36 packages under `@t402` on npm
+- Cross-SDK feature alignment with Go, Python, and Java SDKs
+- Improved multi-chain support and documentation
+
+### v2.5.x
 
 **v2.5.0** - February 2026
 - New `@t402/wdk-protocol` package — T402 payment protocol for WDK wallet apps
 - 5 new MCP tools for AI agents with WDK wallets (`wdk/getWallet`, `wdk/getBalances`, `wdk/transfer`, `wdk/swap`, `t402/autoPay`)
 - MCP server now exposes 11 tools when WDK seed phrase is configured (6 base + 5 WDK)
-- 30 packages total
 
 ### v2.4.x
 
@@ -87,13 +93,26 @@ T402 follows [Semantic Versioning](https://semver.org/):
   <Tabs.Tab>
 ## Go SDK
 
-### v1.9.x (Current)
+### v1.11.x (Current)
+
+**v1.11.0** - February 2026
+- Cross-SDK feature alignment
+- Improved multi-chain documentation and examples
+- Performance improvements for concurrent settlements
+
+### v1.10.x
+
+**v1.10.0** - February 2026
+- Expanded network coverage and testing
+- Improved error handling across all mechanisms
+
+### v1.9.x
 
 **v1.9.0** - February 2026
 - Added Cosmos (Noble) mechanism
 - Hardware wallet types and mock support
 - MCP server parity (6 tools)
-- HTTP framework expansion (Echo, Chi, Fiber)
+- HTTP framework expansion (net/http, Echo, Chi)
 
 ### v1.8.x
 
@@ -139,7 +158,14 @@ T402 follows [Semantic Versioning](https://semver.org/):
 <Tabs.Tab>
 ## Python SDK
 
-### v1.10.x (Current)
+### v1.11.x (Current)
+
+**v1.11.0** - February 2026
+- Cross-SDK feature alignment
+- Improved multi-chain documentation and examples
+- Enhanced async patterns for all mechanisms
+
+### v1.10.x
 
 **v1.10.0** - February 2026
 - Added Cosmos (Noble) support
@@ -183,12 +209,25 @@ T402 follows [Semantic Versioning](https://semver.org/):
 <Tabs.Tab>
 ## Java SDK
 
-### v1.9.x (Current)
+### v1.11.x (Current)
+
+**v1.11.0** - February 2026
+- Cross-SDK feature alignment
+- Improved multi-chain documentation and examples
+- Enhanced Spring Boot integration
+
+### v1.10.x
+
+**v1.10.0** - February 2026
+- Expanded network coverage and testing
+- Improved error handling across all mechanisms
+
+### v1.9.x
 
 **v1.9.0** - February 2026
 - Added Cosmos (Noble) support
 - MCP server parity (6 tools)
-- Micronaut and Quarkus filters
+- Micronaut and JAX-RS filters
 - Cross-SDK feature alignment
 
 ### v1.8.x
@@ -233,7 +272,7 @@ T402 follows [Semantic Versioning](https://semver.org/):
 - Added Stacks mainnet and testnet settlement (exact-direct)
 - Added Cosmos/Noble mainnet and testnet settlement (exact-direct)
 - Added Solana testnet, Aptos devnet, Kusama Asset Hub
-- Expanded to 50 networks, 81 kinds
+- 44 networks, 64 kinds across 10 chain families
 
 ### January 2026
 - Added Stacks settlement support

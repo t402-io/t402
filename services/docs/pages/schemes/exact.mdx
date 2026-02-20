@@ -233,7 +233,7 @@ The client signs an external message containing a Jetton transfer operation. The
 
 The client signs a TRC-20 transfer transaction with reference block bytes for replay protection.
 
-### NEAR, Aptos, Tezos, Polkadot, Stacks (Direct Transfer)
+### NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos (Direct Transfer)
 
 These chains use `exact-direct` — the client executes the transfer and returns the transaction hash:
 
@@ -254,6 +254,7 @@ See individual chain reference pages for details:
 - [Tezos](/reference/tezos) — FA2 `transfer` entrypoint
 - [Polkadot](/reference/polkadot) — `assets.transfer` extrinsic
 - [Stacks](/reference/stacks) — SIP-010 `transfer` contract call
+- [Cosmos](/reference/cosmos) — Bank `MsgSend`
 
 ## Verification
 
@@ -421,7 +422,7 @@ public ResponseEntity<?> getData() {
 | Solana | Recent blockhash (expires after ~2 minutes) |
 | TON | Wallet seqno + query ID |
 | TRON | Reference block bytes/hash + expiration |
-| NEAR/Aptos/Tezos/Polkadot/Stacks | Transaction hash uniqueness |
+| NEAR/Aptos/Tezos/Polkadot/Stacks/Cosmos | Transaction hash uniqueness |
 
 ### Time Window
 
@@ -469,6 +470,7 @@ validBefore = now + maxTimeoutSeconds
 | Tezos | `exact-direct` | Ed25519/secp256k1 | FA2 transfer |
 | Polkadot | `exact-direct` | Sr25519 | assets.transfer |
 | Stacks | `exact-direct` | secp256k1 | SIP-010 transfer |
+| Cosmos (Noble) | `exact-direct` | secp256k1 | Bank MsgSend |
 
 ## Troubleshooting
 

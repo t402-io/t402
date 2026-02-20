@@ -172,10 +172,10 @@ McpServer server = T402Mcp.createMultiChainServer(
 
 ```bash
 # Run MCP server
-java -jar t402-1.9.0.jar mcp-server
+java -jar t402-1.11.0.jar mcp-server
 
 # With configuration
-java -jar t402-1.9.0.jar mcp-server \
+java -jar t402-1.11.0.jar mcp-server \
   --facilitator https://facilitator.t402.io \
   --network eip155:8453
 ```
@@ -189,7 +189,7 @@ Add to `claude_desktop_config.json`:
   "mcpServers": {
     "t402": {
       "command": "java",
-      "args": ["-jar", "/path/to/t402-1.9.0.jar", "mcp-server"],
+      "args": ["-jar", "/path/to/t402-1.11.0.jar", "mcp-server"],
       "env": {
         "T402_FACILITATOR_URL": "https://facilitator.t402.io",
         "T402_PRIVATE_KEY": "0x..."
@@ -204,7 +204,7 @@ Add to `claude_desktop_config.json`:
 ```dockerfile
 FROM eclipse-temurin:21-jre
 
-COPY t402-1.9.0.jar /app/t402.jar
+COPY t402-1.11.0.jar /app/t402.jar
 
 ENTRYPOINT ["java", "-jar", "/app/t402.jar", "mcp-server"]
 ```

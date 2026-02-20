@@ -66,6 +66,15 @@ const CHAIN_SVGS: Record<ChainFamily, (size: number) => React.ReactNode> = {
       <circle cx="17" cy="15" r="1.5" fill="white" opacity="0.7" />
     </svg>
   ),
+  cosmos: (size) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="10" fill="#2E3148" />
+      <circle cx="12" cy="12" r="3" fill="#B7B9C8" />
+      <ellipse cx="12" cy="12" rx="8" ry="4" stroke="#B7B9C8" strokeWidth="1" fill="none" transform="rotate(60 12 12)" />
+      <ellipse cx="12" cy="12" rx="8" ry="4" stroke="#B7B9C8" strokeWidth="1" fill="none" transform="rotate(-60 12 12)" />
+      <ellipse cx="12" cy="12" rx="8" ry="4" stroke="#B7B9C8" strokeWidth="1" fill="none" />
+    </svg>
+  ),
 };
 
 interface ChainLogoProps {

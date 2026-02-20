@@ -66,14 +66,14 @@ This chapter outlines planned enhancements, research directions, and long-term v
 \node[feature] at (1.75,2.9) {4 SDK Languages};
 \node[feature] at (1.75,3.6) {Facilitator MVP};
 
-% Phase 2: Enhancement (current)
-\node[phase=t402blue] at (5.25,1.2) {Phase 2};
-\node[milestone=t402blue] at (3.5,0) {};
-\node[milestone=t402blue] at (7,0) {};
+% Phase 2: Enhancement (completed)
+\node[phase=t402green] at (5.25,1.2) {Phase 2};
+\node[milestone=t402green] at (3.5,0) {};
+\node[milestone=t402green] at (7,0) {};
 
 \node[feature] at (5.25,2.2) {Up-To Scheme};
-\node[feature] at (5.25,2.9) {Permit2 Support};
-\node[feature] at (5.25,3.6) {SIWx Identity};
+\node[feature] at (5.25,2.9) {Cosmos + HW Wallet};
+\node[feature] at (5.25,3.6) {MCP Parity};
 
 % Phase 3: Scale
 \node[phase=t402purple] at (8.75,1.2) {Phase 3};
@@ -94,7 +94,7 @@ This chapter outlines planned enhancements, research directions, and long-term v
 \node[feature] at (12.25,3.6) {ZK Privacy};
 
 % Legend
-\node[font=\tiny, gray] at (7,-1) {Completed \textbullet{} In Progress \textbullet{} Planned};
+\node[font=\tiny, gray] at (7,-1) {Completed \textbullet{} Planned};
 
 \end{tikzpicture}
 \caption{T402 Protocol Development Roadmap}
@@ -121,7 +121,7 @@ This chapter outlines planned enhancements, research directions, and long-term v
 \subsection{Up-To Scheme}
 \label{subsec:up-to-scheme}
 
-The ``up-to'' scheme enables metered, usage-based billing where clients authorize a maximum amount upfront, and providers settle only the actual usage. The up-to scheme is currently implemented for Solana (SVM), TON, TRON, and NEAR chains. EVM support via Permit2 is planned. This pattern is essential for:
+The ``up-to'' scheme enables metered, usage-based billing where clients authorize a maximum amount upfront, and providers settle only the actual usage. The up-to scheme is implemented for Solana (SVM), TON, TRON, and NEAR chains. EVM support via Permit2 is planned for a future release. This pattern is essential for:
 
 \begin{itemize}
     \item \textbf{Variable-cost APIs}: AI inference, cloud compute, data processing

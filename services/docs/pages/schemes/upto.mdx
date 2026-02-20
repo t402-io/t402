@@ -19,7 +19,7 @@ sequenceDiagram
     Server->>Client: 402 Payment Required (maxAmount: $1.00)
 
     Note over Client: Authorize up to $1.00
-    Client->>Server: GET /api/generate + X-PAYMENT
+    Client->>Server: GET /api/generate + Payment-Signature
 
     Server->>Facilitator: POST /verify (maxAmount)
     Facilitator->>Server: Verified

@@ -568,7 +568,7 @@ export const categories: { id: ChainCategory; name: string; description: string 
   {
     id: "evm",
     name: "EVM Chains",
-    description: "19 Ethereum Virtual Machine compatible chains with USDT0 via LayerZero OFT",
+    description: "EVM-compatible chains with USDT0 via LayerZero OFT",
   },
   {
     id: "svm",
@@ -651,7 +651,7 @@ export const features = [
   {
     id: "multichain",
     name: "Universal Coverage",
-    description: "50 networks across 10 blockchain ecosystems with unified API",
+    description: "44 networks across 10 blockchain ecosystems with unified API",
     icon: "multichain",
   },
 ];

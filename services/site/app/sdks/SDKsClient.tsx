@@ -170,10 +170,11 @@ const iconMap: Record<string, React.FC<{ className?: string }>> = {
 
 const packageGroups = [
   { label: "Core", packages: typescriptPackages.filter((p) => ["@t402/core", "@t402/extensions"].includes(p.name)) },
-  { label: "Mechanisms", packages: typescriptPackages.filter((p) => ["@t402/evm-core", "@t402/evm", "@t402/svm", "@t402/ton", "@t402/tron", "@t402/near", "@t402/aptos", "@t402/tezos", "@t402/polkadot", "@t402/stacks"].includes(p.name)) },
+  { label: "Mechanisms", packages: typescriptPackages.filter((p) => ["@t402/evm-core", "@t402/evm", "@t402/svm", "@t402/ton", "@t402/tron", "@t402/near", "@t402/aptos", "@t402/tezos", "@t402/polkadot", "@t402/stacks", "@t402/cosmos", "@t402/btc"].includes(p.name)) },
   { label: "HTTP & Client", packages: typescriptPackages.filter((p) => ["@t402/express", "@t402/hono", "@t402/fastify", "@t402/next", "@t402/fetch", "@t402/axios"].includes(p.name)) },
-  { label: "UI", packages: typescriptPackages.filter((p) => ["@t402/paywall", "@t402/react", "@t402/vue"].includes(p.name)) },
-  { label: "WDK & Tools", packages: typescriptPackages.filter((p) => ["@t402/wdk", "@t402/wdk-gasless", "@t402/wdk-bridge", "@t402/wdk-multisig", "@t402/mcp", "@t402/cli"].includes(p.name)) },
+  { label: "UI", packages: typescriptPackages.filter((p) => ["@t402/paywall", "@t402/react", "@t402/vue", "@t402/react-native"].includes(p.name)) },
+  { label: "Agents", packages: typescriptPackages.filter((p) => ["@t402/mcp", "@t402/a2a"].includes(p.name)) },
+  { label: "WDK & Tools", packages: typescriptPackages.filter((p) => ["@t402/wdk", "@t402/wdk-gasless", "@t402/wdk-bridge", "@t402/wdk-multisig", "@t402/wdk-protocol", "@t402/wdk-defi", "@t402/wdk-ton", "@t402/wdk-ton-gasless", "@t402/wdk-tron-gasfree", "@t402/cli"].includes(p.name)) },
   { label: "Advanced (Beta)", packages: advancedPackages },
 ];
 

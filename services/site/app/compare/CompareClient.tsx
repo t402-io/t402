@@ -71,7 +71,7 @@ const comparisonFeatures: ComparisonFeature[] = [
   {
     name: "Multi-Chain",
     description: "Blockchain support",
-    t402: "50 networks",
+    t402: "44 networks",
     stripe: false,
     paypal: false,
     coinbase: "8 chains",
@@ -341,7 +341,7 @@ function HighlightCard({
 
 const t402Strengths = [
   {
-    title: "50 Networks",
+    title: "44 Networks",
     desc: "Support 10 blockchain families including EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, and Cosmos.",
   },
   {
@@ -411,7 +411,7 @@ export default function CompareClient() {
             />
             <HighlightCard
               title="Chains Supported"
-              value="50"
+              value="44"
               description="10 blockchain families"
             />
             <HighlightCard
