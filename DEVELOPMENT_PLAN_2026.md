@@ -3,8 +3,8 @@
 > **Comprehensive Development Roadmap for T402 Payment Protocol**
 >
 > Created: 2026-01-22
-> Last Updated: 2026-02-10
-> Version: 2.0
+> Last Updated: 2026-02-20
+> Version: 2.1
 
 ---
 
@@ -14,9 +14,9 @@ This document outlines the complete development plan for T402 in 2026. **Q1-Q2 e
 
 ### Q1-Q2 Achievements
 - All 18 P1 security issues fixed, 77.4% facilitator test coverage
-- 50 networks, 81 kinds live on facilitator
+- 44 networks, 64 kinds live on facilitator (all chains including Aptos, Tezos, Polkadot, Stacks)
 - Full SDK feature parity: 10 mechanisms x 4 SDKs, 18 HTTP frameworks, MCP 6/6 tools
-- 7,100+ tests across all SDKs, zero failures
+- 7,200+ tests across all SDKs, zero failures
 - Three-site redesign (t402.io, docs.t402.io, demo.t402.io)
 
 ### Q3-Q4 Priorities
@@ -29,18 +29,18 @@ This document outlines the complete development plan for T402 in 2026. **Q1-Q2 e
 
 ---
 
-## Current State Analysis (Updated 2026-02-10)
+## Current State Analysis (Updated 2026-02-20)
 
 ### Codebase Statistics
 
 | Component | Packages | Tests | Coverage |
 |-----------|----------|-------|----------|
-| TypeScript SDK | 29 packages (v2.4.0) | 3,697 | 70-95% |
-| Go SDK | 92 packages (v1.9.0) | All passing | 45-80%+ |
+| TypeScript SDK | 36 packages (v2.5.0) | 3,700+ | 70-95% |
+| Go SDK | 92 packages (v1.10.0) | All passing | 45-80%+ |
 | Python SDK | v1.10.1 | 2,092 | 85-100% |
 | Java SDK | v1.10.0 | 1,369 | Production |
 | Facilitator | 15 internal modules | All passing | 77.4% |
-| **Total** | **—** | **~7,100+** | **All green** |
+| **Total** | **—** | **~7,200+** | **All green** |
 
 ### Supported Networks
 
@@ -52,7 +52,7 @@ This document outlines the complete development plan for T402 in 2026. **Q1-Q2 e
 | Non-EVM | 4 (NEAR, Aptos, Tezos, Polkadot) | Production |
 | Bitcoin L2 | 1 (Stacks) | Production |
 | Cosmos | 1 (Noble USDC) | Production |
-| **Total** | **33 unique / 50 networks / 81 kinds** | **100% Coverage** |
+| **Total** | **33 unique / 44 networks / 64 kinds** | **100% Coverage** |
 
 ### CI/CD Pipeline
 
@@ -72,7 +72,7 @@ This document outlines the complete development plan for T402 in 2026. **Q1-Q2 e
 All mechanism tests added across TypeScript (NEAR 120, Aptos 133, Tezos 250, Polkadot 226, Stacks 195) and Go (all 80%+).
 
 ### 1.2 TypeScript Version Alignment ✅
-All 29 packages aligned to v2.4.0. Advanced packages at v1.0.0-beta.2.
+All 36 packages aligned to v2.5.0.
 
 ### 1.3 Missing Documentation ✅
 All mechanism READMEs created. 100 docs pages at docs.t402.io.
@@ -180,7 +180,7 @@ All mechanisms at 80%+. 92 packages passing. SVM upto: 102 tests. TON/TRON/NEAR 
 ### 4.4 CI/CD Improvements
 
 - [ ] Standardize upload-artifact to v4 across all workflows
-- [ ] Add facilitator Go build cache to CI
+- [x] Add facilitator Go build cache to CI (Docker --mount=type=cache)
 - [ ] Make integration_tests.yml blocking (currently informational)
 - [ ] Raise facilitator coverage threshold: 75% → 80% (3 packages below 75%)
 
@@ -227,7 +227,7 @@ All legacy planning documents archived to services/docs/archived-plans/.
 | 1-2 | Test Coverage | Polkadot tests (TS 226 + Go) | ✅ |
 | 3-4 | Test Coverage | Tezos tests (TS 250 + Go) | ✅ |
 | 5-6 | Test Coverage | NEAR 120 + Aptos 133 tests | ✅ |
-| 7-8 | Version Alignment | All 29 packages to v2.4.0 | ✅ |
+| 7-8 | Version Alignment | All 36 packages to v2.5.0 | ✅ |
 | 9-10 | Documentation | All mechanism READMEs + 100 docs pages | ✅ |
 | 11-12 | Security | Internal review (18 P1 fixed), CI hardening | ✅ |
 
@@ -352,3 +352,4 @@ All legacy planning documents archived to services/docs/archived-plans/.
 | 1.0 | 2026-01-22 | T402 Team | Initial comprehensive plan |
 | 1.1 | 2026-01-22 | T402 Team | Marked Q1 priorities 1.1-1.3 complete, updated coverage metrics |
 | 2.0 | 2026-02-10 | T402 Team | Full rewrite: Q1-Q2 marked complete, actual metrics from project audit, Q3-Q4 refocused on Rust/Swift SDKs + external audit |
+| 2.1 | 2026-02-20 | T402 Team | Updated SDK versions (TS v2.5.0, Go v1.10.0, 36 packages), corrected facilitator stats (44 networks/64 kinds), marked Go build cache CI complete |
