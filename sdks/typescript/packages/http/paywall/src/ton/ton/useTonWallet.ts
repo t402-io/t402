@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { Address } from "@ton/core";
 
-// TODO: Verify @ton/appkit hook signatures once the package is published.
-// The API below is based on the ton-connect/kit repository patterns.
-// If @ton/appkit is not available, fall back to @tonconnect/ui-react.
-
 /**
- * Wallet type from @ton/appkit (or @tonconnect/ui-react fallback)
+ * Wallet type from @ton/appkit-react or @tonconnect/ui-react fallback.
+ *
+ * @ton/appkit-react exposes WalletInterface with getAddress()/getNetwork(),
+ * but we normalize to this shape for a unified public API.
  */
 type AppKitWallet = {
   account?: {
@@ -40,7 +39,7 @@ export interface UseTonWalletReturn {
 
 /**
  * Load the wallet provider dynamically.
- * Tries @ton/appkit first, falls back to @tonconnect/ui-react.
+ * Tries @ton/appkit-react first, falls back to @tonconnect/ui-react.
  */
 async function loadWalletProvider(): Promise<{
   useTonConnectUI: () => [
@@ -53,12 +52,64 @@ async function loadWalletProvider(): Promise<{
   useTonWallet: () => AppKitWallet | null;
   source: "appkit" | "tonconnect";
 }> {
-  // TODO: Update import path once @ton/appkit is published
   try {
-    const appkit = await import("@ton/appkit" as string);
+    const appkit = await import("@ton/appkit-react" as string);
+    // @ton/appkit-react exports useAppKit (returns AppKit instance),
+    // useConnectedWallets, useSelectedWallet, useAddress, useConnect, useDisconnect.
+    // We adapt useAppKit to the useTonConnectUI shape for compatibility.
     return {
-      useTonConnectUI: appkit.useTonConnectUI ?? appkit.useAppKit,
-      useTonWallet: appkit.useTonWallet ?? appkit.useWallet,
+      useTonConnectUI: () => {
+        const kit = appkit.useAppKit();
+        return [
+          {
+            openModal: async () => {
+              // Trigger connection via the first available connector
+              const connector = kit.connectors[0];
+              if (connector) {
+                await connector.connectWallet();
+              }
+            },
+            disconnect: async () => {
+              const connector = kit.connectors[0];
+              if (connector) {
+                await connector.disconnectWallet();
+              }
+            },
+            sendTransaction: async (req: unknown) => {
+              const wallets = kit.walletsManager.getWallets();
+              const wallet = wallets[0];
+              if (!wallet) throw new Error("No wallet connected");
+              return wallet.sendTransaction(req as Parameters<typeof wallet.sendTransaction>[0]);
+            },
+          },
+        ] as [
+          {
+            openModal: () => Promise<void>;
+            disconnect: () => Promise<void>;
+            sendTransaction: (req: unknown) => Promise<{ boc: string }>;
+          },
+        ];
+      },
+      useTonWallet: () => {
+        // Normalize @ton/appkit-react wallet to our shape
+        try {
+          const kit = appkit.useAppKit();
+          const wallets = kit.walletsManager.getWallets();
+          const wallet = wallets[0];
+          if (!wallet) return null;
+          return {
+            account: {
+              address: wallet.getAddress(),
+              chain: wallet.getNetwork(),
+            },
+            device: {
+              appName: wallet.connectorId,
+            },
+          };
+        } catch {
+          return null;
+        }
+      },
       source: "appkit",
     };
   } catch {
@@ -90,7 +141,7 @@ function getProvider() {
 /**
  * Hook for managing TON wallet connection
  *
- * Supports both @ton/appkit (preferred) and @tonconnect/ui-react (fallback).
+ * Supports both @ton/appkit-react (preferred) and @tonconnect/ui-react (fallback).
  * The public interface remains the same regardless of which provider is used.
  *
  * @param onStatus - Callback for status updates
@@ -113,14 +164,11 @@ export function useTonWalletConnection(onStatus?: (status: string) => void): Use
       });
   }, []);
 
-  // TODO: Once @ton/appkit is published, replace this polling approach
-  // with proper hook integration. The hooks from @ton/appkit may have
-  // different signatures than @tonconnect/ui-react.
   useEffect(() => {
     if (!provider) return;
 
-    // For now, use the TonConnect-compatible hooks
-    // @ton/appkit is expected to maintain backward compatibility
+    // Use the provider's hooks to get wallet state.
+    // Both @ton/appkit-react and @tonconnect/ui-react expose compatible hooks.
     try {
       const walletState = provider.useTonWallet();
       setWallet(walletState);

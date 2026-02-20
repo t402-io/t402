@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { TonConnectUIProvider, useTonConnectUI, useTonWallet } from "@tonconnect/ui-react";
 import { Address } from "@ton/core";
 
 import { registerExactTonScheme } from "@t402/ton/exact/client";
@@ -19,11 +18,76 @@ type TonPaywallProps = {
 };
 
 /**
+ * Load the TonConnect provider component dynamically.
+ * Tries @ton/appkit-react (AppKitProvider) first, falls back to @tonconnect/ui-react.
+ */
+let providerModulePromise: Promise<{
+  Provider: React.ComponentType<{ children: React.ReactNode; manifestUrl?: string }>;
+  useTonConnectUI: () => [
+    {
+      openModal: () => Promise<void>;
+      disconnect: () => Promise<void>;
+    },
+  ];
+  useTonWallet: () => { account?: { address: string; chain?: string } } | null;
+}> | null = null;
+
+function loadProviderModule() {
+  if (!providerModulePromise) {
+    providerModulePromise = (async () => {
+      // @tonconnect/ui-react is the stable fallback
+      const tonconnect = await import("@tonconnect/ui-react");
+      return {
+        Provider: tonconnect.TonConnectUIProvider as unknown as React.ComponentType<{
+          children: React.ReactNode;
+          manifestUrl?: string;
+        }>,
+        useTonConnectUI: tonconnect.useTonConnectUI as unknown as () => [
+          { openModal: () => Promise<void>; disconnect: () => Promise<void> },
+        ],
+        useTonWallet: tonconnect.useTonWallet as unknown as () => {
+          account?: { address: string; chain?: string };
+        } | null,
+      };
+    })();
+  }
+  return providerModulePromise;
+}
+
+/**
  * Inner paywall component that uses TonConnect hooks
  */
 function TonPaywallInner({ paymentRequired, onSuccessfulResponse }: TonPaywallProps) {
-  const [tonConnectUI] = useTonConnectUI();
-  const wallet = useTonWallet();
+  const [providerModule, setProviderModule] = useState<Awaited<
+    ReturnType<typeof loadProviderModule>
+  > | null>(null);
+
+  useEffect(() => {
+    loadProviderModule().then(setProviderModule);
+  }, []);
+
+  if (!providerModule) {
+    return null;
+  }
+
+  return (
+    <TonPaywallContent
+      paymentRequired={paymentRequired}
+      onSuccessfulResponse={onSuccessfulResponse}
+      providerModule={providerModule}
+    />
+  );
+}
+
+function TonPaywallContent({
+  paymentRequired,
+  onSuccessfulResponse,
+  providerModule,
+}: TonPaywallProps & {
+  providerModule: Awaited<ReturnType<typeof loadProviderModule>>;
+}) {
+  const [tonConnectUI] = providerModule.useTonConnectUI();
+  const wallet = providerModule.useTonWallet();
   const [status, setStatus] = useState<string>("");
   const [isPaying, setIsPaying] = useState(false);
   const [hideBalance, setHideBalance] = useState(true);
@@ -272,13 +336,25 @@ function TonPaywallInner({ paymentRequired, onSuccessfulResponse }: TonPaywallPr
 export function TonPaywall({ paymentRequired, onSuccessfulResponse }: TonPaywallProps) {
   const t402 = window.t402;
   const manifestUrl = t402.tonConnectManifestUrl || "https://t402.io/tonconnect-manifest.json";
+  const [ProviderComponent, setProviderComponent] = useState<React.ComponentType<{
+    children: React.ReactNode;
+    manifestUrl?: string;
+  }> | null>(null);
+
+  useEffect(() => {
+    loadProviderModule().then(mod => setProviderComponent(() => mod.Provider));
+  }, []);
+
+  if (!ProviderComponent) {
+    return null;
+  }
 
   return (
-    <TonConnectUIProvider manifestUrl={manifestUrl}>
+    <ProviderComponent manifestUrl={manifestUrl}>
       <TonPaywallInner
         paymentRequired={paymentRequired}
         onSuccessfulResponse={onSuccessfulResponse}
       />
-    </TonConnectUIProvider>
+    </ProviderComponent>
   );
 }

@@ -1,5 +1,6 @@
-// TODO: Once @ton/appkit is published, these types should be imported from it.
-// For now, we define compatible types that work with both @ton/appkit and @tonconnect/ui-react.
+// Types compatible with both @ton/appkit@0.0.8+ and @tonconnect/ui-react.
+// When @ton/appkit-react is installed, its native hooks provide WalletInterface
+// objects. These local types preserve backward compatibility with @tonconnect/ui-react.
 
 /**
  * Wallet type (compatible with both @ton/appkit and @tonconnect/ui-react)
@@ -16,16 +17,24 @@ export type Wallet = {
 
 /**
  * UI instance type (compatible with both providers)
+ *
+ * TransactionRequest in @ton/appkit@0.0.8 uses `TokenAmount` (string) for
+ * `amount` and adds optional `network`, `fromAddress`, and `extraCurrency`
+ * fields.  The shape below is the intersection that works with both
+ * @tonconnect/ui-react's sendTransaction and @ton/appkit's sendTransaction.
  */
 export type TonConnectUI = {
   openModal: () => Promise<void>;
   disconnect: () => Promise<void>;
   sendTransaction: (request: {
-    validUntil: number;
+    validUntil?: number;
+    network?: string;
+    fromAddress?: string;
     messages: Array<{
       address: string;
       amount: string;
       payload?: string;
+      stateInit?: string;
     }>;
   }) => Promise<{ boc: string }>;
 };

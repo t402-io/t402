@@ -1,8 +1,5 @@
 import type { Wallet } from "./types";
 
-// TODO: Once @ton/appkit is published, update any appkit-specific
-// feature detection here. The current API is compatible with both providers.
-
 /**
  * Wallet info type (compatible with both providers)
  */

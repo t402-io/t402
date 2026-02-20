@@ -34,7 +34,8 @@ describe('TON Bridge Tools', () => {
 
     it('should include ton/swapJettons', () => {
       expect(TON_BRIDGE_TOOLS['ton/swapJettons']).toBeDefined()
-      expect(TON_BRIDGE_TOOLS['ton/swapJettons'].inputSchema.required).toContain('fromJetton')
+      expect(TON_BRIDGE_TOOLS['ton/swapJettons'].inputSchema.required).toContain('from')
+      expect(TON_BRIDGE_TOOLS['ton/swapJettons'].inputSchema.required).toContain('to')
     })
 
     it('should include ton/getTransactionStatus', () => {
@@ -91,12 +92,13 @@ describe('TON Bridge Tools', () => {
     it('should return demo result for ton/swapJettons', async () => {
       const result = await executeTonBridgeTool(
         'ton/swapJettons',
-        { fromJetton: 'TON', toJetton: 'USDT0', amount: '10' },
+        { from: 'TON', to: 'USDT0', amount: '10' },
         demoConfig,
       )
 
       expect(result.content[0].text).toContain('[DEMO]')
       expect(result.content[0].text).toContain('Swap')
+      expect(result.content[0].text).toContain('Transaction')
     })
 
     it('should return demo result for ton/getTransactionStatus', async () => {

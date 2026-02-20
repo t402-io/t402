@@ -101,28 +101,29 @@ export const TON_BRIDGE_TOOLS: Record<string, TonBridgeTool> = {
 
   'ton/swapJettons': {
     name: 'ton/swapJettons',
-    description: 'Swap Jettons (TON tokens) using DEX aggregation on the TON network.',
+    description:
+      'Swap Jettons (TON tokens) using DEX aggregation on the TON network. Returns a raw transaction JSON to be sent via sendTransaction.',
     inputSchema: {
       type: 'object',
       properties: {
-        fromJetton: {
+        from: {
           type: 'string',
           description: 'Source Jetton master address (or "TON" for native TON)',
         },
-        toJetton: {
+        to: {
           type: 'string',
           description: 'Destination Jetton master address (or "TON" for native TON)',
         },
         amount: {
           type: 'string',
-          description: 'Amount to swap (in human-readable format)',
+          description: 'Amount to swap in human-readable format (e.g., "1.5")',
         },
         slippage: {
           type: 'string',
           description: 'Slippage tolerance (e.g., "0.5" for 0.5%)',
         },
       },
-      required: ['fromJetton', 'toJetton', 'amount'],
+      required: ['from', 'to', 'amount'],
     },
   },
 
@@ -195,7 +196,7 @@ function executeTonBridgeToolDemo(
     'ton/getBalance': `[DEMO] TON Balance for ${args.address ?? 'unknown'}:\n- TON: 5.25\n- USDT0: 100.00`,
     'ton/transfer': `[DEMO] Transfer sent:\n- To: ${args.to ?? 'unknown'}\n- Amount: ${args.amount ?? '0'} TON\n- TX: demo-ton-tx-hash-${Date.now().toString(36)}`,
     'ton/getJettonBalance': `[DEMO] Jetton Balance:\n- Address: ${args.address ?? 'unknown'}\n- Jetton: ${args.jettonMaster ?? 'unknown'}\n- Balance: 50.00`,
-    'ton/swapJettons': `[DEMO] Swap executed:\n- From: ${args.fromJetton ?? 'unknown'}\n- To: ${args.toJetton ?? 'unknown'}\n- Amount: ${args.amount ?? '0'}\n- TX: demo-swap-tx-${Date.now().toString(36)}`,
+    'ton/swapJettons': `[DEMO] Swap quote received:\n- From: ${args.from ?? 'unknown'}\n- To: ${args.to ?? 'unknown'}\n- Amount: ${args.amount ?? '0'}\n- Transaction: {"validUntil":${Math.floor(Date.now() / 1000) + 300},"messages":[{"address":"EQDemo...","amount":"${args.amount ?? '0'}","payload":"base64..."}]}`,
     'ton/getTransactionStatus': `[DEMO] Transaction Status:\n- Hash: ${args.txHash ?? 'unknown'}\n- Status: Confirmed\n- Block: 12345678`,
   }
 
