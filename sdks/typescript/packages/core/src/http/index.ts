@@ -104,6 +104,8 @@ export function decodePaymentResponseHeader(paymentResponseHeader: string): Sett
 export { t402HTTPResourceServer, RouteConfigurationError } from "./t402HTTPResourceServer";
 export { HTTPFacilitatorClient } from "./httpFacilitatorClient";
 export { t402HTTPClient } from "./t402HTTPClient";
+export { StreamingClient } from "./streamingClient";
+export { IntentClient } from "./intentClient";
 
 // Export HTTP types (type-only exports for isolatedModules compatibility)
 export type {
@@ -127,3 +129,47 @@ export type {
   RouteValidationError,
 } from "./t402HTTPResourceServer";
 export type { FacilitatorClient, FacilitatorConfig, SettleOptions } from "./httpFacilitatorClient";
+
+// Streaming types
+export type {
+  StreamStatus,
+  StreamMetadata,
+  Stream,
+  StreamUpdate,
+  StreamStats,
+  OpenStreamRequest,
+  UpdateStreamRequest,
+  CloseStreamRequest,
+  ListStreamsParams,
+  OpenStreamResponse,
+  UpdateStreamResponse,
+  CloseStreamResponse,
+  GetStreamResponse,
+  ListStreamsResponse,
+  PauseResumeResponse,
+  StreamingClientConfig,
+} from "./streamingClient";
+
+// Intent types
+export type {
+  IntentStatus,
+  IntentPriority,
+  RouteStepType,
+  RouteStep,
+  Route,
+  Intent,
+  CreateIntentRequest,
+  SelectRouteRequest,
+  ExecuteIntentRequest,
+  CancelIntentRequest,
+  ListIntentsParams,
+  CreateIntentResponse,
+  SelectRouteResponse,
+  ExecuteIntentResponse,
+  GetIntentResponse,
+  ListIntentsResponse,
+  CancelIntentResponse,
+  RefreshRoutesResponse,
+  IntentStats,
+  IntentClientConfig,
+} from "./intentClient";
