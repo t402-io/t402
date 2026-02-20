@@ -45,6 +45,8 @@ import type {
   FiatOnRampResult,
 } from './types.js'
 import { encryptSeed, decryptSeed, type EncryptedSeed } from './secret.js'
+import { T402EventEmitter, type T402Events } from './events.js'
+import { InMemoryReceiptStore, type PaymentReceiptStore } from './receipts.js'
 import {
   WDKTonSignerAdapter,
   createWDKTonSigner,
@@ -82,6 +84,26 @@ import {
   wrapError,
   isWDKError,
 } from './errors.js'
+import {
+  registerPricingProvider,
+  isPricingProviderRegistered,
+  type PricingProvider,
+} from './pricing.js'
+
+/**
+ * Payment cost estimate for a chain
+ */
+export interface PaymentCostEstimate {
+  paymentAmount: string
+  estimatedGasCost: bigint
+  nativeBalance: bigint
+  canAffordGas: boolean
+  chain: string
+  network: string
+}
+
+/** Middleware function type for chain account hooks */
+export type MiddlewareFunction = (account: unknown) => Promise<void>
 
 /**
  * T402WDK - Tether WDK integration for T402 payments
@@ -113,6 +135,8 @@ export class T402WDK {
   private _signerCache: Map<string, WDKSigner> = new Map()
   private _balanceCache: BalanceCache
   private _initializationError: Error | null = null
+  private _events = new T402EventEmitter()
+  private _receiptStore: PaymentReceiptStore = new InMemoryReceiptStore()
 
   // WDK module references (set via registerWDK)
   private static _WDK: WDKConstructor | null = null
@@ -125,6 +149,12 @@ export class T402WDK {
 
   // Fiat on-ramp provider (set via registerFiatOnRamp)
   private static _fiatOnRampProvider: FiatOnRampProvider | null = null
+
+  // Middleware hooks (chain → functions)
+  private static _middlewares = new Map<string, Array<(account: unknown) => Promise<void>>>()
+
+  // HD path-derived signer cache
+  private _pathSignerCache = new Map<string, WDKSigner>()
 
   // Multi-chain signer caches
   private _tonSignerCache: Map<number, WDKTonSignerAdapter> = new Map()
@@ -298,6 +328,43 @@ export class T402WDK {
    */
   static isFiatOnRampRegistered(): boolean {
     return T402WDK._fiatOnRampProvider !== null
+  }
+
+  /**
+   * Register a pricing provider for fiat-to-crypto rate conversion
+   */
+  static registerPricingProvider(provider: PricingProvider): void {
+    registerPricingProvider(provider)
+  }
+
+  /**
+   * Check if a pricing provider is registered
+   */
+  static isPricingProviderRegistered(): boolean {
+    return isPricingProviderRegistered()
+  }
+
+  /**
+   * Register a middleware for a chain
+   */
+  static registerMiddleware(chain: string, fn: (account: unknown) => Promise<void>): void {
+    const existing = T402WDK._middlewares.get(chain) ?? []
+    existing.push(fn)
+    T402WDK._middlewares.set(chain, existing)
+  }
+
+  /**
+   * Get registered middlewares for a chain
+   */
+  static getMiddlewares(chain: string): Array<(account: unknown) => Promise<void>> {
+    return T402WDK._middlewares.get(chain) ?? []
+  }
+
+  /**
+   * Clear all middlewares
+   */
+  static clearMiddlewares(): void {
+    T402WDK._middlewares.clear()
   }
 
   /**
@@ -806,6 +873,19 @@ export class T402WDK {
         }
       }
 
+      // Wire middlewares into WDK
+      if (typeof (wdk as any).registerMiddleware === 'function') {
+        for (const [chain, fns] of T402WDK._middlewares) {
+          for (const fn of fns) {
+            try {
+              ;(wdk as any).registerMiddleware(chain, fn)
+            } catch {
+              /* non-fatal */
+            }
+          }
+        }
+      }
+
       this._wdk = wdk
       this._initializationError = null
     } catch (error) {
@@ -849,6 +929,55 @@ export class T402WDK {
    */
   get initializationError(): Error | null {
     return this._initializationError
+  }
+
+  // ========== Event Emitter ==========
+
+  /**
+   * Subscribe to a T402 event
+   */
+  on<K extends keyof T402Events>(event: K, handler: (data: T402Events[K]) => void): this {
+    this._events.on(event, handler)
+    return this
+  }
+
+  /**
+   * Unsubscribe from a T402 event
+   */
+  off<K extends keyof T402Events>(event: K, handler: (data: T402Events[K]) => void): this {
+    this._events.off(event, handler)
+    return this
+  }
+
+  /**
+   * Subscribe to a T402 event (fires once then auto-unsubscribes)
+   */
+  once<K extends keyof T402Events>(event: K, handler: (data: T402Events[K]) => void): this {
+    this._events.once(event, handler)
+    return this
+  }
+
+  /**
+   * Emit a T402 event
+   */
+  emit<K extends keyof T402Events>(event: K, data: T402Events[K]): boolean {
+    return this._events.emit(event, data)
+  }
+
+  // ========== Receipt Store ==========
+
+  /**
+   * Get the payment receipt store
+   */
+  getReceiptStore(): PaymentReceiptStore {
+    return this._receiptStore
+  }
+
+  /**
+   * Set a custom payment receipt store backend
+   */
+  setReceiptStore(store: PaymentReceiptStore): void {
+    this._receiptStore = store
   }
 
   /**
@@ -912,6 +1041,11 @@ export class T402WDK {
     try {
       const signer = await createWDKSigner(this.wdk, chain, accountIndex)
       this._signerCache.set(cacheKey, signer)
+      this._events.emit('signer:initialized', {
+        chain,
+        address: signer.address,
+        family: 'evm',
+      })
       return signer
     } catch (error) {
       // Re-throw WDK errors as-is
@@ -934,11 +1068,83 @@ export class T402WDK {
    */
   clearSignerCache(): void {
     this._signerCache.clear()
+    this._pathSignerCache.clear()
     this._tonSignerCache.clear()
     this._svmSignerCache.clear()
     this._tronSignerCache.clear()
     this._sparkSignerCache.clear()
     this._btcSignerCache.clear()
+  }
+
+  // ========== Fee Rates & Cost Estimation ==========
+
+  /**
+   * Get current fee rates for a chain
+   */
+  async getFeeRates(chain: string): Promise<Record<string, bigint>> {
+    if (this._wdk && typeof (this._wdk as any).getFeeRates === 'function') {
+      return (this._wdk as any).getFeeRates(chain)
+    }
+    // Return default estimates
+    return { low: 1000000000n, medium: 2000000000n, high: 5000000000n }
+  }
+
+  /**
+   * Estimate total cost of a payment on a chain
+   */
+  async estimatePaymentCost(chain: string, amount: string): Promise<PaymentCostEstimate> {
+    const signer = await this.getSigner(chain)
+    const nativeBalance = await signer.getBalance()
+
+    let estimatedGasCost = 100000n * 2000000000n // default: 100k gas * 2 gwei
+    try {
+      const feeRates = await this.getFeeRates(chain)
+      const mediumRate = feeRates.medium ?? 2000000000n
+      estimatedGasCost = 100000n * mediumRate
+    } catch {
+      /* use default */
+    }
+
+    const config = this.getChainConfig(chain)
+    return {
+      paymentAmount: amount,
+      estimatedGasCost,
+      nativeBalance,
+      canAffordGas: nativeBalance >= estimatedGasCost,
+      chain,
+      network: config?.network ?? '',
+    }
+  }
+
+  // ========== HD Derivation Paths ==========
+
+  /**
+   * Get a signer using a custom BIP-44 derivation path
+   */
+  async getSignerByPath(chain: string, path: string): Promise<WDKSigner> {
+    const cacheKey = `${chain}:path:${path}`
+    const cached = this._pathSignerCache.get(cacheKey)
+    if (cached) return cached
+
+    if (!this._wdk) {
+      throw new WDKInitializationError('WDK not initialized')
+    }
+
+    if (typeof (this._wdk as any).getAccountByPath !== 'function') {
+      throw new Error(
+        'getAccountByPath not available. Upgrade @tetherto/wdk to support custom derivation paths.',
+      )
+    }
+
+    const account = await (this._wdk as any).getAccountByPath(chain, path)
+    const address = await account.getAddress()
+
+    const signer = new WDKSigner(this._wdk, chain, 0)
+    ;(signer as any)._account = account
+    ;(signer as any)._address = address
+
+    this._pathSignerCache.set(cacheKey, signer)
+    return signer
   }
 
   // ========== Multi-Chain Signers ==========
@@ -982,6 +1188,11 @@ export class T402WDK {
       // Create and cache the signer adapter
       const signer = await createWDKTonSigner(account)
       this._tonSignerCache.set(accountIndex, signer)
+      this._events.emit('signer:initialized', {
+        chain: 'ton',
+        address: signer.address.toString(),
+        family: 'ton',
+      })
       return signer
     } catch (error) {
       if (isWDKError(error)) {
@@ -1037,6 +1248,11 @@ export class T402WDK {
       // Create and cache the signer adapter
       const signer = await createWDKSvmSigner(account)
       this._svmSignerCache.set(accountIndex, signer)
+      this._events.emit('signer:initialized', {
+        chain: 'solana',
+        address: signer.address.toString(),
+        family: 'svm',
+      })
       return signer
     } catch (error) {
       if (isWDKError(error)) {
@@ -1099,6 +1315,11 @@ export class T402WDK {
         this._tronSignerCache.set(accountIndex, signer)
       }
 
+      this._events.emit('signer:initialized', {
+        chain: 'tron',
+        address: signer.address,
+        family: 'tron',
+      })
       return signer
     } catch (error) {
       if (isWDKError(error)) {
@@ -1154,6 +1375,11 @@ export class T402WDK {
       // Create and cache the signer adapter
       const signer = await createWDKSparkSigner(account)
       this._sparkSignerCache.set(accountIndex, signer)
+      this._events.emit('signer:initialized', {
+        chain: 'spark',
+        address: signer.address,
+        family: 'spark',
+      })
       return signer
     } catch (error) {
       if (isWDKError(error)) {
@@ -1206,6 +1432,11 @@ export class T402WDK {
       // Create and cache the signer adapter
       const signer = await createWDKBtcSigner(account)
       this._btcSignerCache.set(accountIndex, signer)
+      this._events.emit('signer:initialized', {
+        chain: 'btc',
+        address: signer.address,
+        family: 'btc',
+      })
       return signer
     } catch (error) {
       if (isWDKError(error)) {
@@ -1543,6 +1774,18 @@ export class T402WDK {
         for (const chainBalance of balances.chains) {
           const tokenBalance = chainBalance.tokens.find((t) => t.symbol === tokenSymbol)
           if (tokenBalance && tokenBalance.balance >= amount) {
+            // Verify gas affordability
+            try {
+              const costEstimate = await this.estimatePaymentCost(
+                chainBalance.chain,
+                amount.toString(),
+              )
+              if (!costEstimate.canAffordGas) {
+                continue // Skip chains where user can't afford gas
+              }
+            } catch {
+              /* continue anyway if estimation fails */
+            }
             return {
               chain: chainBalance.chain,
               token: tokenSymbol,
@@ -1623,6 +1866,12 @@ export class T402WDK {
     try {
       const recipient = params.recipient ?? (await this.getAddress(params.toChain))
 
+      this._events.emit('bridge:start', {
+        fromChain: params.fromChain,
+        toChain: params.toChain,
+        amount: params.amount,
+      })
+
       const result = await this.wdk.executeProtocol('bridge-usdt0', {
         fromChain: params.fromChain,
         toChain: params.toChain,
@@ -1637,6 +1886,12 @@ export class T402WDK {
           { fromChain: params.fromChain, toChain: params.toChain },
         )
       }
+
+      this._events.emit('bridge:confirmed', {
+        txHash: result.txHash,
+        fromChain: params.fromChain,
+        toChain: params.toChain,
+      })
 
       return {
         txHash: result.txHash,
@@ -1990,6 +2245,14 @@ export class T402WDK {
    */
   invalidateBalanceCache(): void {
     this._balanceCache.clear()
+    for (const chain of this.getConfiguredChains()) {
+      this._events.emit('balance:changed', {
+        chain,
+        token: '*',
+        previousBalance: 0n,
+        newBalance: 0n,
+      })
+    }
   }
 
   /**
@@ -1999,7 +2262,16 @@ export class T402WDK {
    * @returns Number of cache entries invalidated
    */
   invalidateChainCache(chain: string): number {
-    return this._balanceCache.invalidateChain(chain)
+    const count = this._balanceCache.invalidateChain(chain)
+    if (count > 0) {
+      this._events.emit('balance:changed', {
+        chain,
+        token: '*',
+        previousBalance: 0n,
+        newBalance: 0n,
+      })
+    }
+    return count
   }
 
   /**
@@ -2020,6 +2292,7 @@ export class T402WDK {
   dispose(): void {
     this._balanceCache.dispose()
     this._signerCache.clear()
+    this._pathSignerCache.clear()
     this._tonSignerCache.clear()
     this._svmSignerCache.clear()
     this._tronSignerCache.clear()

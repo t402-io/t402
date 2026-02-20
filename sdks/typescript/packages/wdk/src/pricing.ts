@@ -13,6 +13,28 @@ import {
   getPreferredToken,
 } from './chains.js'
 
+/** External pricing provider interface */
+export interface PricingProvider {
+  /** Get exchange rate from currency to token */
+  getRate(fromCurrency: string, toToken: string): Promise<number>
+  /** Get list of supported currency pairs */
+  getSupportedPairs(): Array<{ from: string; to: string }>
+}
+
+let _registeredPricingProvider: PricingProvider | null = null
+
+export function registerPricingProvider(provider: PricingProvider): void {
+  _registeredPricingProvider = provider
+}
+
+export function getPricingProvider(): PricingProvider | null {
+  return _registeredPricingProvider
+}
+
+export function isPricingProviderRegistered(): boolean {
+  return _registeredPricingProvider !== null
+}
+
 export interface PricingProviderConfig {
   /** Cache TTL in milliseconds (default: 60000 = 60s) */
   cacheTTL?: number
@@ -137,7 +159,16 @@ export function resolveAssetForNetwork(token: string, network: Network): string 
  *
  * Currently returns 1:1 for USD (stablecoin assumption).
  */
-async function fetchRate(fromCurrency: string, _toToken: string): Promise<number> {
+async function fetchRate(fromCurrency: string, toToken: string): Promise<number> {
+  // Try registered provider first
+  if (_registeredPricingProvider) {
+    try {
+      return await _registeredPricingProvider.getRate(fromCurrency, toToken)
+    } catch {
+      // Fall through to placeholder
+    }
+  }
+
   // USD → stablecoin is 1:1 by default
   if (fromCurrency.toUpperCase() === 'USD') {
     return 1.0

@@ -473,6 +473,82 @@ export class WDKSigner implements ClientEvmSigner {
   }
 
   /**
+   * Sign an EIP-2612 permit for gasless token approvals
+   *
+   * @param params - Permit parameters
+   * @returns The permit signature components (v, r, s)
+   * @throws {SigningError} If signing fails
+   */
+  async signPermit(params: {
+    token: Address
+    spender: Address
+    value: bigint
+    deadline: number
+    nonce?: bigint
+    tokenName?: string
+    tokenVersion?: string
+  }): Promise<{ v: number; r: `0x${string}`; s: `0x${string}` }> {
+    if (!params.token || !params.token.startsWith('0x')) {
+      throw new SigningError(
+        WDKErrorCode.INVALID_TYPED_DATA,
+        `Invalid token address: ${params.token}`,
+        { operation: 'signTypedData', context: { chain: this._chain } },
+      )
+    }
+    if (!params.spender || !params.spender.startsWith('0x')) {
+      throw new SigningError(
+        WDKErrorCode.INVALID_TYPED_DATA,
+        `Invalid spender address: ${params.spender}`,
+        { operation: 'signTypedData', context: { chain: this._chain } },
+      )
+    }
+
+    const chainId = this.getChainId()
+    const nonce = params.nonce ?? 0n
+
+    const typedData = {
+      domain: {
+        name: params.tokenName ?? 'Tether USD',
+        version: params.tokenVersion ?? '1',
+        chainId: BigInt(chainId),
+        verifyingContract: params.token,
+      },
+      types: {
+        Permit: [
+          { name: 'owner', type: 'address' },
+          { name: 'spender', type: 'address' },
+          { name: 'value', type: 'uint256' },
+          { name: 'nonce', type: 'uint256' },
+          { name: 'deadline', type: 'uint256' },
+        ],
+      },
+      primaryType: 'Permit',
+      message: {
+        owner: this.address,
+        spender: params.spender,
+        value: params.value.toString(),
+        nonce: nonce.toString(),
+        deadline: params.deadline.toString(),
+      },
+    }
+
+    const signature = await this.signTypedData(typedData)
+
+    // Parse v, r, s from the 65-byte signature
+    const sigHex = signature.slice(2) // remove 0x prefix
+    const r = `0x${sigHex.slice(0, 64)}` as `0x${string}`
+    const s = `0x${sigHex.slice(64, 128)}` as `0x${string}`
+    let v = parseInt(sigHex.slice(128, 130), 16)
+
+    // Normalize v to 27 or 28
+    if (v < 27) {
+      v += 27
+    }
+
+    return { v, r, s }
+  }
+
+  /**
    * Send a transaction (for advanced use cases)
    *
    * @throws {TransactionError} If transaction fails

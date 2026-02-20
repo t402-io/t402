@@ -26,6 +26,7 @@ export { T402Protocol } from './protocol.js'
 // Chain detection utilities
 export {
   detectChainFamily,
+  detectChainFamilyFromName,
   isEvmNetwork,
   getEvmChainName,
   EVM_CHAIN_MAP,

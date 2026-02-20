@@ -24,8 +24,10 @@ import { t402HTTPClient } from '@t402/core/http'
 import type { PaymentRequired, PaymentPayload } from '@t402/core/types'
 import { registerExactEvmScheme } from '@t402/evm/exact/client'
 import type { T402WDK } from '@t402/wdk'
+import type { EnrichedReceipt } from '@t402/wdk'
 
 import { extractPaymentRequired } from './http-client.js'
+import { detectChainFamily, detectChainFamilyFromName, type ChainFamily } from './signer-factory.js'
 import type { T402ProtocolConfig, T402FetchResult, PaymentReceipt } from './types.js'
 
 const DEFAULT_FACILITATOR = 'https://facilitator.t402.io'
@@ -35,12 +37,14 @@ const DEFAULT_FACILITATOR = 'https://facilitator.t402.io'
  *
  * Uses the real t402 protocol client infrastructure with EVM mechanism support.
  * Payment payloads are properly signed using EIP-3009 authorization.
+ * Supports multi-chain registration for EVM and non-EVM chain families.
  */
 export class T402Protocol {
   private httpClient: t402HTTPClient
   private wdk: T402WDK
   private facilitator: string
   private chains: string[]
+  private _registeredFamilies: Set<string> = new Set()
 
   private constructor(wdk: T402WDK, httpClient: t402HTTPClient, config: T402ProtocolConfig) {
     this.wdk = wdk
@@ -53,23 +57,42 @@ export class T402Protocol {
    * Create a new T402Protocol instance.
    *
    * This is async because it needs to initialize the WDK signer.
+   * Registers the primary EVM signer plus detects additional chain families
+   * from the configured chains list.
    *
    * @param wdk - An initialized T402WDK instance
    * @param config - Protocol configuration
    * @returns A configured T402Protocol instance
    */
   static async create(wdk: T402WDK, config: T402ProtocolConfig = {}): Promise<T402Protocol> {
-    // Get an EVM signer from WDK for the first available chain
-    const chainName = config.chains?.[0] ?? 'ethereum'
-    const signer = await wdk.getSigner(chainName)
-
-    // Create t402 client with EVM exact scheme
     const client = new t402Client()
-    registerExactEvmScheme(client, { signer })
+    const registeredFamilies = new Set<string>()
+
+    // Register EVM (primary chain)
+    const chainName = config.chains?.[0] ?? 'ethereum'
+    try {
+      const signer = await wdk.getSigner(chainName)
+      registerExactEvmScheme(client, { signer })
+      registeredFamilies.add('evm')
+    } catch {
+      // EVM not available — non-EVM-only config
+    }
+
+    // Detect additional chain families from configured chains
+    if (config.chains) {
+      for (const chain of config.chains) {
+        const family = detectChainFamilyFromName(chain)
+        if (family) {
+          registeredFamilies.add(family)
+        }
+      }
+    }
 
     const httpClient = new t402HTTPClient(client)
+    const protocol = new T402Protocol(wdk, httpClient, config)
+    protocol._registeredFamilies = registeredFamilies
 
-    return new T402Protocol(wdk, httpClient, config)
+    return protocol
   }
 
   /**
@@ -85,6 +108,8 @@ export class T402Protocol {
    * @returns The final response and optional payment receipt
    */
   async fetch(url: string | URL, init?: RequestInit): Promise<T402FetchResult> {
+    const urlStr = url.toString()
+
     // Make initial request
     const response = await fetch(url, init)
 
@@ -98,8 +123,27 @@ export class T402Protocol {
       response.headers.get(name),
     )
 
+    const network = paymentRequired.requirements?.[0]?.network ?? ''
+    const amount = paymentRequired.requirements?.[0]?.maxAmountRequired ?? ''
+
+    // Emit payment:start
+    this._emitOnWdk('payment:start', { url: urlStr, network, amount })
+
     // Create signed payment payload using mechanism-specific logic
-    const paymentPayload = await this.httpClient.createPaymentPayload(paymentRequired)
+    let paymentPayload: PaymentPayload
+    try {
+      paymentPayload = await this.httpClient.createPaymentPayload(paymentRequired)
+    } catch (error) {
+      const errMsg = error instanceof Error ? error.message : String(error)
+      this._emitOnWdk('payment:failed', { url: urlStr, error: errMsg })
+      throw error
+    }
+
+    this._emitOnWdk('payment:signed', {
+      url: urlStr,
+      scheme: paymentPayload.accepted.scheme,
+      network: paymentPayload.accepted.network,
+    })
 
     // Build retry headers
     const paymentHeaders = this.httpClient.encodePaymentSignatureHeader(paymentPayload)
@@ -111,15 +155,66 @@ export class T402Protocol {
     // Retry with payment
     const retryResponse = await fetch(url, { ...init, headers })
 
+    this._emitOnWdk('payment:submitted', { url: urlStr, statusCode: retryResponse.status })
+
+    const success = retryResponse.status !== 402
     const receipt: PaymentReceipt = {
-      success: retryResponse.status !== 402,
+      success,
       network: paymentPayload.accepted.network,
       scheme: paymentPayload.accepted.scheme,
       amount: paymentPayload.accepted.amount,
       payTo: paymentPayload.accepted.payTo,
     }
 
+    // Determine chain family for the enriched receipt
+    let chainFamily = 'evm'
+    try {
+      chainFamily = detectChainFamily(paymentPayload.accepted.network)
+    } catch {
+      // default to 'evm' if detection fails
+    }
+
+    // Save enriched receipt to the WDK receipt store
+    const enrichedReceipt: EnrichedReceipt = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      timestamp: new Date().toISOString(),
+      url: urlStr,
+      network: paymentPayload.accepted.network,
+      scheme: paymentPayload.accepted.scheme,
+      amount: paymentPayload.accepted.amount,
+      payTo: paymentPayload.accepted.payTo,
+      success,
+      chainFamily,
+    }
+
+    try {
+      await this.wdk.getReceiptStore().save(enrichedReceipt)
+    } catch {
+      // Receipt save failure is non-fatal
+    }
+
+    if (success) {
+      this._emitOnWdk('payment:complete', { url: urlStr, success: true, receipt })
+    } else {
+      this._emitOnWdk('payment:failed', { url: urlStr, error: 'Payment rejected (still 402)' })
+    }
+
     return { response: retryResponse, receipt }
+  }
+
+  /**
+   * Emit an event on the underlying WDK event system.
+   * Silently no-ops if the WDK doesn't support events.
+   */
+  private _emitOnWdk(event: string, data: unknown): void {
+    try {
+      const wdk = this.wdk as unknown as {
+        emit?(event: string, data: unknown): boolean
+      }
+      wdk.emit?.(event, data)
+    } catch {
+      // Non-fatal: WDK may not have events support
+    }
   }
 
   /**
@@ -196,5 +291,27 @@ export class T402Protocol {
    */
   getChains(): string[] {
     return [...this.chains]
+  }
+
+  /**
+   * Get the set of registered chain families (e.g., 'evm', 'ton', 'solana')
+   */
+  getRegisteredFamilies(): Set<string> {
+    return new Set(this._registeredFamilies)
+  }
+
+  /**
+   * Check if this protocol instance can handle a given CAIP-2 network.
+   *
+   * @param network - CAIP-2 network identifier (e.g., "eip155:42161", "ton:mainnet")
+   * @returns True if the required chain family is registered
+   */
+  canHandleNetwork(network: string): boolean {
+    try {
+      const family = detectChainFamily(network)
+      return this._registeredFamilies.has(family)
+    } catch {
+      return false
+    }
   }
 }

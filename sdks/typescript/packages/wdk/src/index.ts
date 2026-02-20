@@ -241,6 +241,23 @@ export type { RetryConfig } from './errors.js'
 export { WdkBridge, createDirectBridge } from './bridge.js'
 export type { BridgeQuoteResult, BridgeQuote, BridgeSigner } from './bridge.js'
 
+// Bridge delivery tracking
+export { BridgeTracker, mapLayerZeroStatus } from './bridge-tracker.js'
+export type {
+  BridgeTrackerConfig,
+  BridgeDeliveryStatus,
+  DeliveryResult,
+  WaitOptions,
+} from './bridge-tracker.js'
+
+// Event emitter
+export { T402EventEmitter } from './events.js'
+export type { T402Events } from './events.js'
+
+// Payment receipts
+export { InMemoryReceiptStore } from './receipts.js'
+export type { EnrichedReceipt, ReceiptFilter, PaymentReceiptStore } from './receipts.js'
+
 // Re-export bridge utilities from @t402/evm for convenience
 export {
   supportsBridging,
@@ -260,8 +277,18 @@ export {
 export type { CompatibilityResult } from './compatibility.js'
 
 // Pricing provider
-export { createWdkMoneyParser, toAtomicUnits, resolveAssetForNetwork } from './pricing.js'
-export type { PricingProviderConfig } from './pricing.js'
+export {
+  createWdkMoneyParser,
+  toAtomicUnits,
+  resolveAssetForNetwork,
+  registerPricingProvider,
+  getPricingProvider,
+  isPricingProviderRegistered,
+} from './pricing.js'
+export type { PricingProviderConfig, PricingProvider } from './pricing.js'
+
+// T402WDK utility types
+export type { PaymentCostEstimate, MiddlewareFunction } from './t402wdk.js'
 
 // Failover provider
 export { FailoverProvider, createFailoverProvider, resolveRpcUrl } from './failover.js'

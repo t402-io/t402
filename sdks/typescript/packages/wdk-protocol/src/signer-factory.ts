@@ -90,3 +90,39 @@ export function getEvmChainName(network: string): string | undefined {
 export function isEvmNetwork(network: string): boolean {
   return network.startsWith(CAIP2_EVM)
 }
+
+/**
+ * Map of human-readable chain names to their chain family
+ */
+const CHAIN_NAME_TO_FAMILY: Record<string, ChainFamily> = {
+  // EVM chains
+  ethereum: 'evm',
+  arbitrum: 'evm',
+  base: 'evm',
+  polygon: 'evm',
+  optimism: 'evm',
+  avalanche: 'evm',
+  ink: 'evm',
+  berachain: 'evm',
+  unichain: 'evm',
+  // Non-EVM chains
+  ton: 'ton',
+  solana: 'solana',
+  tron: 'tron',
+  near: 'near',
+  aptos: 'aptos',
+  tezos: 'tezos',
+  polkadot: 'polkadot',
+  stacks: 'stacks',
+  cosmos: 'cosmos',
+}
+
+/**
+ * Detect chain family from a human-readable chain name.
+ *
+ * @param chainName - Chain name (e.g., "ethereum", "ton", "solana")
+ * @returns The chain family, or undefined if not recognized
+ */
+export function detectChainFamilyFromName(chainName: string): ChainFamily | undefined {
+  return CHAIN_NAME_TO_FAMILY[chainName.toLowerCase()]
+}
