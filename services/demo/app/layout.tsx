@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import Script from "next/script";
 import { ClientProviders } from "./providers/ClientProviders";
 import "./globals.css";
 
@@ -52,6 +53,16 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body className="bg-[var(--color-background)] text-[var(--color-foreground)] antialiased">
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-7FRFFD0PH0"
+          strategy="afterInteractive"
+        />
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-7FRFFD0PH0');`}
+        </Script>
         <ClientProviders>
           {children}
         </ClientProviders>
