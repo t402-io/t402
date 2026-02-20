@@ -35,10 +35,10 @@ This document outlines the complete development plan for T402 in 2026. **Q1-Q2 e
 
 | Component | Packages | Tests | Coverage |
 |-----------|----------|-------|----------|
-| TypeScript SDK | 36 packages (v2.5.0) | 3,700+ | 70-95% |
-| Go SDK | 92 packages (v1.10.0) | All passing | 45-80%+ |
-| Python SDK | v1.10.1 | 2,092 | 85-100% |
-| Java SDK | v1.10.0 | 1,369 | Production |
+| TypeScript SDK | 36 packages (v2.6.0) | 3,700+ | 70-95% |
+| Go SDK | 92 packages (v1.11.0) | All passing | 45-80%+ |
+| Python SDK | v1.11.0 | 2,092 | 85-100% |
+| Java SDK | v1.11.0 | 1,369 | Production |
 | Facilitator | 15 internal modules | All passing | 77.4% |
 | **Total** | **—** | **~7,200+** | **All green** |
 
@@ -352,4 +352,5 @@ All legacy planning documents archived to services/docs/archived-plans/.
 | 1.0 | 2026-01-22 | T402 Team | Initial comprehensive plan |
 | 1.1 | 2026-01-22 | T402 Team | Marked Q1 priorities 1.1-1.3 complete, updated coverage metrics |
 | 2.0 | 2026-02-10 | T402 Team | Full rewrite: Q1-Q2 marked complete, actual metrics from project audit, Q3-Q4 refocused on Rust/Swift SDKs + external audit |
-| 2.1 | 2026-02-20 | T402 Team | Updated SDK versions (TS v2.5.0, Go v1.10.0, 36 packages), corrected facilitator stats (44 networks/64 kinds), marked Go build cache CI complete |
+| 2.1 | 2026-02-20 | T402 Team | Updated SDK versions, corrected facilitator stats (44 networks/64 kinds), marked Go build cache CI complete |
+| 2.2 | 2026-02-20 | T402 Team | Updated SDK versions to latest release (TS v2.6.0, Go v1.11.0, Py v1.11.0, Java v1.11.0) |
