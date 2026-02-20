@@ -27,7 +27,7 @@ import type { T402WDK } from '@t402/wdk'
 import type { EnrichedReceipt } from '@t402/wdk'
 
 import { extractPaymentRequired } from './http-client.js'
-import { detectChainFamily, detectChainFamilyFromName, type ChainFamily } from './signer-factory.js'
+import { detectChainFamily, detectChainFamilyFromName } from './signer-factory.js'
 import type { T402ProtocolConfig, T402FetchResult, PaymentReceipt } from './types.js'
 
 const DEFAULT_FACILITATOR = 'https://facilitator.t402.io'
@@ -123,8 +123,8 @@ export class T402Protocol {
       response.headers.get(name),
     )
 
-    const network = paymentRequired.requirements?.[0]?.network ?? ''
-    const amount = paymentRequired.requirements?.[0]?.maxAmountRequired ?? ''
+    const network = paymentRequired.accepts?.[0]?.network ?? ''
+    const amount = paymentRequired.accepts?.[0]?.amount ?? ''
 
     // Emit payment:start
     this._emitOnWdk('payment:start', { url: urlStr, network, amount })

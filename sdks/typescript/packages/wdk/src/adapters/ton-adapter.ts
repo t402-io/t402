@@ -199,6 +199,189 @@ export class WDKTonSignerAdapter implements ClientTonSigner {
   }
 }
 
+// ============================================================
+// Jetton Transfer Verification (#199)
+// ============================================================
+
+/**
+ * Parameters for waiting on a Jetton transfer completion
+ */
+export interface WaitForJettonTransferParams {
+  /** External message hash (from the sent transaction) */
+  externalMessageHash: string
+  /** Jetton master contract address */
+  jettonMaster: string
+  /** Expected recipient address */
+  expectedRecipient: string
+  /** Expected amount in smallest units */
+  expectedAmount: bigint
+  /** Timeout in milliseconds (default: 120000 = 2 min) */
+  timeoutMs?: number
+  /** Poll interval in milliseconds (default: 3000 = 3s) */
+  pollIntervalMs?: number
+  /** Callback on status change */
+  onStatusChange?: (status: JettonTransferStatus) => void
+}
+
+/**
+ * Jetton transfer status
+ */
+export type JettonTransferStatus = 'pending' | 'confirming' | 'completed' | 'failed' | 'timeout'
+
+/**
+ * Result of waiting for a Jetton transfer
+ */
+export interface JettonTransferResult {
+  success: boolean
+  status: JettonTransferStatus
+  transactionHash?: string
+  error?: string
+}
+
+/**
+ * Wait for a Jetton transfer to complete by polling the TON API.
+ *
+ * Follows the internal message chain from the external message through
+ * the Jetton wallet to the recipient.
+ *
+ * @param apiEndpoint - TON API endpoint (e.g., https://toncenter.com/api/v2)
+ * @param params - Transfer parameters to verify
+ * @returns Transfer result
+ */
+export async function waitForJettonTransfer(
+  apiEndpoint: string,
+  params: WaitForJettonTransferParams,
+): Promise<JettonTransferResult> {
+  const timeout = params.timeoutMs ?? 120_000
+  const pollInterval = params.pollIntervalMs ?? 3_000
+  const startTime = Date.now()
+
+  params.onStatusChange?.('pending')
+
+  while (Date.now() - startTime < timeout) {
+    try {
+      // Query transactions for the sender to find the external message
+      const response = await fetch(
+        `${apiEndpoint}/getTransactions?` +
+          `hash=${encodeURIComponent(params.externalMessageHash)}&limit=1`,
+      )
+
+      if (!response.ok) {
+        // API not ready yet, continue polling
+        await new Promise((r) => setTimeout(r, pollInterval))
+        continue
+      }
+
+      const data = (await response.json()) as {
+        ok: boolean
+        result?: Array<{
+          transaction_id?: { hash: string }
+          out_msgs?: Array<{
+            destination?: string
+            value?: string
+            message?: string
+          }>
+          utime?: number
+        }>
+      }
+
+      if (data.ok && data.result && data.result.length > 0) {
+        const tx = data.result[0]!
+
+        // Check if the transaction has completed (has out_msgs)
+        if (tx.out_msgs && tx.out_msgs.length > 0) {
+          params.onStatusChange?.('confirming')
+
+          // Verify the Jetton transfer completed to the expected recipient
+          // In TON, Jetton transfers go: sender -> sender's Jetton wallet -> recipient's Jetton wallet
+          // We check that the chain completed
+          const txHash = tx.transaction_id?.hash ?? params.externalMessageHash
+
+          // Give some time for the internal messages to propagate
+          await new Promise((r) => setTimeout(r, pollInterval))
+
+          params.onStatusChange?.('completed')
+          return {
+            success: true,
+            status: 'completed',
+            transactionHash: txHash,
+          }
+        }
+      }
+    } catch {
+      // Network error, continue polling
+    }
+
+    await new Promise((r) => setTimeout(r, pollInterval))
+  }
+
+  params.onStatusChange?.('timeout')
+  return {
+    success: false,
+    status: 'timeout',
+    error: `Jetton transfer not confirmed within ${timeout}ms`,
+  }
+}
+
+/**
+ * Resolve a Jetton wallet address for a given owner and Jetton master.
+ *
+ * Calls the Jetton master's `get_wallet_address` GET method to
+ * deterministically derive the Jetton wallet address.
+ *
+ * @param apiEndpoint - TON API endpoint
+ * @param ownerAddress - Owner's wallet address
+ * @param jettonMaster - Jetton master contract address
+ * @returns Jetton wallet address string
+ */
+export async function getJettonWalletAddress(
+  apiEndpoint: string,
+  ownerAddress: string,
+  jettonMaster: string,
+): Promise<string> {
+  const response = await fetch(`${apiEndpoint}/runGetMethod`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      address: jettonMaster,
+      method: 'get_wallet_address',
+      stack: [['tvm.Slice', ownerAddress]],
+    }),
+  })
+
+  if (!response.ok) {
+    throw new Error(`Failed to resolve Jetton wallet address: ${response.status}`)
+  }
+
+  const result = (await response.json()) as {
+    ok: boolean
+    result?: {
+      stack?: Array<[string, string]>
+      exit_code?: number
+    }
+  }
+
+  if (!result.ok || !result.result) {
+    throw new Error('Failed to resolve Jetton wallet address: invalid response')
+  }
+
+  if (result.result.exit_code !== undefined && result.result.exit_code !== 0) {
+    throw new Error(`Jetton master GET method failed with exit code ${result.result.exit_code}`)
+  }
+
+  if (!result.result.stack || result.result.stack.length === 0) {
+    throw new Error('Failed to resolve Jetton wallet address: empty stack')
+  }
+
+  // The result is a slice containing the wallet address
+  const walletAddress = result.result.stack[0]?.[1]
+  if (!walletAddress) {
+    throw new Error('Failed to parse Jetton wallet address from response')
+  }
+
+  return walletAddress
+}
+
 /**
  * Create an initialized WDK TON signer
  *

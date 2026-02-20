@@ -3,6 +3,7 @@ import {
   decodePaymentResponseHeader,
   encodePaymentSignatureHeader,
 } from ".";
+import { T402PaymentError } from "../errors";
 import { SettleResponse } from "../types";
 import { PaymentPayload, PaymentRequired } from "../types/payments";
 import { t402Client } from "../client/t402Client";
@@ -38,8 +39,9 @@ export class t402HTTPClient {
           "X-PAYMENT": encodePaymentSignatureHeader(paymentPayload),
         };
       default:
-        throw new Error(
+        throw new T402PaymentError(
           `Unsupported t402 version: ${(paymentPayload as PaymentPayload).t402Version}`,
+          { phase: "submission" },
         );
     }
   }
@@ -71,7 +73,9 @@ export class t402HTTPClient {
       return body as PaymentRequired;
     }
 
-    throw new Error("Invalid payment required response");
+    throw new T402PaymentError("Invalid payment required response", {
+      phase: "submission",
+    });
   }
 
   /**
@@ -93,7 +97,9 @@ export class t402HTTPClient {
       return decodePaymentResponseHeader(xPaymentResponse);
     }
 
-    throw new Error("Payment response header not found");
+    throw new T402PaymentError("Payment response header not found", {
+      phase: "settlement",
+    });
   }
 
   /**

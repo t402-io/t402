@@ -63,7 +63,7 @@
     "@ledgerhq/hw-transport-web-ble": ">=6.0.0",
     "@ledgerhq/hw-transport-webhid": ">=6.0.0",
     "@ledgerhq/hw-transport-webusb": ">=6.0.0",
-    "@tetherto/wdk": ">=1.0.0-beta.0",
+    "@tetherto/wdk": ">=1.0.0-beta.5 <2.0.0",
     "@tetherto/wdk-wallet-evm": ">=1.0.0-beta.0",
     "@tetherto/wdk-wallet-solana": ">=1.0.0-beta.0",
     "@tetherto/wdk-wallet-ton": ">=1.0.0-beta.0",
@@ -184,8 +184,29 @@
         "types": "./dist/cjs/adapters/tron-adapter.d.ts",
         "default": "./dist/cjs/adapters/tron-adapter.js"
       }
+    },
+    "./integrations": {
+      "import": {
+        "types": "./dist/esm/integrations/index.d.mts",
+        "default": "./dist/esm/integrations/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/integrations/index.d.ts",
+        "default": "./dist/cjs/integrations/index.js"
+      }
+    },
+    "./testing": {
+      "import": {
+        "types": "./dist/esm/testing/index.d.mts",
+        "default": "./dist/esm/testing/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/testing/index.d.ts",
+        "default": "./dist/cjs/testing/index.js"
+      }
     }
   },
+  "sideEffects": false,
   "files": [
     "dist"
   ]

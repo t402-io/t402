@@ -1,5 +1,6 @@
 import { PaymentPayload, PaymentRequirements } from "../types/payments";
 import { VerifyResponse, SettleResponse, SupportedResponse } from "../types/facilitator";
+import { T402PaymentError } from "../errors";
 
 const DEFAULT_FACILITATOR_URL = "https://facilitator.t402.io";
 
@@ -99,7 +100,11 @@ export class HTTPFacilitatorClient implements FacilitatorClient {
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => response.statusText);
-      throw new Error(`Facilitator verify failed (${response.status}): ${errorText}`);
+      throw new T402PaymentError(`Facilitator verify failed (${response.status}): ${errorText}`, {
+        phase: "verification",
+        code: response.status,
+        retryable: response.status >= 500 || response.status === 429,
+      });
     }
 
     return (await response.json()) as VerifyResponse;
@@ -137,7 +142,11 @@ export class HTTPFacilitatorClient implements FacilitatorClient {
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => response.statusText);
-      throw new Error(`Facilitator settle failed (${response.status}): ${errorText}`);
+      throw new T402PaymentError(`Facilitator settle failed (${response.status}): ${errorText}`, {
+        phase: "settlement",
+        code: response.status,
+        retryable: response.status >= 500 || response.status === 429,
+      });
     }
 
     return (await response.json()) as SettleResponse;
@@ -165,7 +174,14 @@ export class HTTPFacilitatorClient implements FacilitatorClient {
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => response.statusText);
-      throw new Error(`Facilitator getSupported failed (${response.status}): ${errorText}`);
+      throw new T402PaymentError(
+        `Facilitator getSupported failed (${response.status}): ${errorText}`,
+        {
+          phase: "unknown",
+          code: response.status,
+          retryable: response.status >= 500 || response.status === 429,
+        },
+      );
     }
 
     return (await response.json()) as SupportedResponse;

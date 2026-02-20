@@ -3,7 +3,7 @@
  */
 
 import type { Address } from 'viem'
-import type { NormalizedChainConfig, EvmChainConfig } from './types.js'
+import type { NormalizedChainConfig, EvmChainConfig, ChainFamily } from './types.js'
 
 /**
  * Default chain configurations
@@ -199,6 +199,188 @@ export const CHAIN_TOKENS: Record<string, TokenInfo[]> = {
   ],
 }
 
+// ============================================================
+// Unified Chain Registry
+// ============================================================
+
+/**
+ * Token entry in the chain registry (address is string to support non-EVM)
+ */
+export interface RegistryToken {
+  address: string
+  symbol: string
+  decimals: number
+}
+
+/**
+ * Unified chain registry entry
+ */
+export interface ChainRegistryEntry {
+  family: ChainFamily
+  chainId?: number
+  caip2: string
+  rpcEndpoints: string[]
+  tokens: RegistryToken[]
+}
+
+/**
+ * Unified chain registry mapping chain names to metadata.
+ *
+ * Includes EVM chains (derived from existing data), plus TON, TRON, Solana.
+ * Existing exports (DEFAULT_CHAINS, USDT0_ADDRESSES, etc.) remain the
+ * canonical source for EVM data; the registry provides a single lookup
+ * for cross-chain code paths.
+ */
+export const CHAIN_REGISTRY: Record<string, ChainRegistryEntry> = {
+  // --- EVM chains (derived from existing constants) ---
+  ethereum: {
+    family: 'evm',
+    chainId: 1,
+    caip2: 'eip155:1',
+    rpcEndpoints: ['https://eth.drpc.org'],
+    tokens: (CHAIN_TOKENS.ethereum ?? []).map((t) => ({
+      address: t.address,
+      symbol: t.symbol,
+      decimals: t.decimals,
+    })),
+  },
+  arbitrum: {
+    family: 'evm',
+    chainId: 42161,
+    caip2: 'eip155:42161',
+    rpcEndpoints: ['https://arb1.arbitrum.io/rpc'],
+    tokens: (CHAIN_TOKENS.arbitrum ?? []).map((t) => ({
+      address: t.address,
+      symbol: t.symbol,
+      decimals: t.decimals,
+    })),
+  },
+  base: {
+    family: 'evm',
+    chainId: 8453,
+    caip2: 'eip155:8453',
+    rpcEndpoints: ['https://mainnet.base.org'],
+    tokens: (CHAIN_TOKENS.base ?? []).map((t) => ({
+      address: t.address,
+      symbol: t.symbol,
+      decimals: t.decimals,
+    })),
+  },
+  ink: {
+    family: 'evm',
+    chainId: 57073,
+    caip2: 'eip155:57073',
+    rpcEndpoints: ['https://rpc-gel.inkonchain.com'],
+    tokens: (CHAIN_TOKENS.ink ?? []).map((t) => ({
+      address: t.address,
+      symbol: t.symbol,
+      decimals: t.decimals,
+    })),
+  },
+  berachain: {
+    family: 'evm',
+    chainId: 80094,
+    caip2: 'eip155:80094',
+    rpcEndpoints: [],
+    tokens: (CHAIN_TOKENS.berachain ?? []).map((t) => ({
+      address: t.address,
+      symbol: t.symbol,
+      decimals: t.decimals,
+    })),
+  },
+  unichain: {
+    family: 'evm',
+    chainId: 130,
+    caip2: 'eip155:130',
+    rpcEndpoints: [],
+    tokens: (CHAIN_TOKENS.unichain ?? []).map((t) => ({
+      address: t.address,
+      symbol: t.symbol,
+      decimals: t.decimals,
+    })),
+  },
+  optimism: {
+    family: 'evm',
+    chainId: 10,
+    caip2: 'eip155:10',
+    rpcEndpoints: ['https://mainnet.optimism.io'],
+    tokens: (CHAIN_TOKENS.optimism ?? []).map((t) => ({
+      address: t.address,
+      symbol: t.symbol,
+      decimals: t.decimals,
+    })),
+  },
+  polygon: {
+    family: 'evm',
+    chainId: 137,
+    caip2: 'eip155:137',
+    rpcEndpoints: ['https://polygon-rpc.com'],
+    tokens: (CHAIN_TOKENS.polygon ?? []).map((t) => ({
+      address: t.address,
+      symbol: t.symbol,
+      decimals: t.decimals,
+    })),
+  },
+  // --- Non-EVM chains ---
+  ton: {
+    family: 'ton',
+    caip2: 'ton:mainnet',
+    rpcEndpoints: ['https://toncenter.com/api/v2/jsonRPC'],
+    tokens: [
+      {
+        address: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
+        symbol: 'USDT',
+        decimals: 6,
+      },
+    ],
+  },
+  tron: {
+    family: 'tron',
+    caip2: 'tron:mainnet',
+    rpcEndpoints: ['https://api.trongrid.io'],
+    tokens: [
+      {
+        address: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t',
+        symbol: 'USDT',
+        decimals: 6,
+      },
+    ],
+  },
+  solana: {
+    family: 'svm',
+    caip2: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
+    rpcEndpoints: ['https://api.mainnet-beta.solana.com'],
+    tokens: [
+      {
+        address: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
+        symbol: 'USDT',
+        decimals: 6,
+      },
+    ],
+  },
+}
+
+/**
+ * Look up a chain registry entry by CAIP-2 identifier.
+ */
+export function getRegistryByCaip2(caip2: string): ChainRegistryEntry | undefined {
+  for (const entry of Object.values(CHAIN_REGISTRY)) {
+    if (entry.caip2 === caip2) {
+      return entry
+    }
+  }
+  return undefined
+}
+
+/**
+ * Get all chain names for a given chain family.
+ */
+export function getChainsByFamily(family: ChainFamily): string[] {
+  return Object.entries(CHAIN_REGISTRY)
+    .filter(([, entry]) => entry.family === family)
+    .map(([name]) => name)
+}
+
 /**
  * Normalize chain configuration from string or object
  */
@@ -218,9 +400,10 @@ export function normalizeChainConfig(
     }
   }
 
-  // Full config object
+  // Full config object — resolve primary URL from string or array
+  const resolvedProvider = Array.isArray(config.provider) ? config.provider[0] : config.provider
   return {
-    provider: config.provider,
+    provider: resolvedProvider,
     chainId: config.chainId ?? defaultConfig?.chainId ?? 1,
     network: config.network ?? defaultConfig?.network ?? `eip155:${config.chainId}`,
     name: chainName,
@@ -238,8 +421,15 @@ export function getNetworkFromChain(chain: string): string {
  * Get chain name from CAIP-2 network ID
  */
 export function getChainFromNetwork(network: string): string | undefined {
+  // Check EVM chains first (most common)
   for (const [chain, config] of Object.entries(DEFAULT_CHAINS)) {
     if (config.network === network) {
+      return chain
+    }
+  }
+  // Fall back to full registry (non-EVM chains)
+  for (const [chain, entry] of Object.entries(CHAIN_REGISTRY)) {
+    if (entry.caip2 === network) {
       return chain
     }
   }

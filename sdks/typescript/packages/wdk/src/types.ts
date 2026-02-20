@@ -8,12 +8,14 @@ import type { Address } from 'viem'
  * EVM chain configuration
  */
 export interface EvmChainConfig {
-  /** RPC endpoint URL */
-  provider: string
+  /** RPC endpoint URL or array of URLs for failover */
+  provider: string | string[]
   /** Chain ID */
-  chainId: number
+  chainId?: number
   /** CAIP-2 network identifier */
-  network: string
+  network?: string
+  /** Failover configuration (only used when provider is an array) */
+  failover?: Partial<import('./failover.js').FailoverConfig>
 }
 
 /**
@@ -225,6 +227,22 @@ export interface T402BalanceCacheConfig {
 export interface T402WDKOptions {
   /** Balance cache configuration */
   cache?: T402BalanceCacheConfig
+  /** Retry configuration for RPC-calling methods */
+  retry?: Partial<import('./errors.js').RetryConfig>
+  /** WDK constructor (instance-level override) */
+  wdk?: WDKConstructor
+  /** Wallet modules (instance-level override) */
+  wallets?: WDKWalletModules
+  /** Protocol modules (instance-level override) */
+  protocols?: WDKProtocolModules
+  /** Middleware hooks (instance-level override) */
+  middlewares?: Map<string, Array<(account: unknown) => Promise<void>>>
+  /** Fiat on-ramp provider (instance-level override) */
+  fiatOnRampProvider?: FiatOnRampProvider
+  /** Structured logger (default: noopLogger) */
+  logger?: import('./logger.js').T402Logger
+  /** Metric callback for observability */
+  onMetric?: (name: string, value: number, tags?: Record<string, string>) => void
 }
 
 // ============================================================
@@ -384,6 +402,10 @@ export interface WDKSolanaAccount {
   sendTransaction(params: { recipient: string; value: bigint }): Promise<string>
   /** Transfer SPL token */
   transfer(params: { token: string; recipient: string; amount: bigint }): Promise<string>
+  /** Get token program for a mint (Token or Token-2022) — optional Token-2022 support */
+  getTokenProgram?(mint: string): Promise<'Token' | 'Token-2022'>
+  /** Get transfer fee for a Token-2022 mint — optional Token-2022 support */
+  getTransferFee?(mint: string, amount: bigint): Promise<{ fee: bigint; netAmount: bigint }>
 }
 
 /**

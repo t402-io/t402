@@ -38,11 +38,9 @@ function createMockSigner(address = '0x1234567890123456789012345678901234567890'
     address: address as `0x${string}`,
     signTypedData: vi.fn().mockResolvedValue('0xmocksig'),
     signMessage: vi.fn().mockResolvedValue('0xmocksig'),
-    sendTransaction: vi
-      .fn()
-      .mockResolvedValue({
-        hash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890' as `0x${string}`,
-      }),
+    sendTransaction: vi.fn().mockResolvedValue({
+      hash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890' as `0x${string}`,
+    }),
     getChain: vi.fn().mockReturnValue('arbitrum'),
     getChainId: vi.fn().mockReturnValue(42161),
     isInitialized: true,

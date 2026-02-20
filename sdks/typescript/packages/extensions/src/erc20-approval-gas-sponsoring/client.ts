@@ -73,7 +73,7 @@ export function encodeApproveCalldata(spender: string, amount: string): string {
  * ```
  */
 export function createERC20ApprovalGasSponsorPayload(
-  info: ERC20ApprovalGasSponsorExtensionInfo,
+  _info: ERC20ApprovalGasSponsorExtensionInfo,
   params: CreateERC20ApprovalParams,
 ): ERC20ApprovalGasSponsorPayload {
   const payload: ERC20ApprovalGasSponsorPayload = {

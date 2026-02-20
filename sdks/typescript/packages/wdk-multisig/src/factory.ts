@@ -291,7 +291,8 @@ function getPublicClient(
   }
 
   // Extract RPC URL from config (can be string or EvmChainConfig object)
-  const rpcUrl = typeof config === 'string' ? config : config.provider
+  const provider = typeof config === 'string' ? config : config.provider
+  const rpcUrl = Array.isArray(provider) ? provider[0] : provider
   if (!rpcUrl) {
     throw new Error(`No RPC URL found in chain config for: ${chain}`)
   }

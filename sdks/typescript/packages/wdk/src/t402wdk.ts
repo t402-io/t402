@@ -83,12 +83,119 @@ import {
   WDKErrorCode,
   wrapError,
   isWDKError,
+  withRetry,
+  type RetryConfig,
 } from './errors.js'
 import {
   registerPricingProvider,
   isPricingProviderRegistered,
   type PricingProvider,
 } from './pricing.js'
+import { FailoverProvider, type FailoverConfig, type ProviderStatus } from './failover.js'
+
+/**
+ * Supported WDK semver range
+ */
+export const SUPPORTED_WDK_RANGE = '>=1.0.0-beta.5 <2.0.0'
+
+/**
+ * Parse a semver version string into components.
+ * Handles pre-release tags like "1.0.0-beta.5".
+ */
+export function parseSemver(
+  version: string,
+): { major: number; minor: number; patch: number; prerelease: string } | null {
+  const match = version.match(/^v?(\d+)\.(\d+)\.(\d+)(?:-(.+))?$/)
+  if (!match) return null
+  return {
+    major: parseInt(match[1], 10),
+    minor: parseInt(match[2], 10),
+    patch: parseInt(match[3], 10),
+    prerelease: match[4] ?? '',
+  }
+}
+
+/**
+ * Compare two pre-release strings.
+ * Empty prerelease (stable) is greater than any prerelease.
+ */
+function comparePrereleases(a: string, b: string): number {
+  if (a === b) return 0
+  if (a === '' && b !== '') return 1 // stable > prerelease
+  if (a !== '' && b === '') return -1
+
+  const aParts = a.split('.')
+  const bParts = b.split('.')
+  const len = Math.max(aParts.length, bParts.length)
+
+  for (let i = 0; i < len; i++) {
+    const ap = aParts[i] ?? ''
+    const bp = bParts[i] ?? ''
+    const aNum = /^\d+$/.test(ap)
+    const bNum = /^\d+$/.test(bp)
+
+    if (aNum && bNum) {
+      const diff = parseInt(ap, 10) - parseInt(bp, 10)
+      if (diff !== 0) return diff
+    } else if (aNum !== bNum) {
+      return aNum ? -1 : 1 // numeric < string
+    } else {
+      if (ap < bp) return -1
+      if (ap > bp) return 1
+    }
+  }
+  return 0
+}
+
+/**
+ * Compare two semver versions. Returns -1, 0, or 1.
+ */
+export function compareSemver(a: string, b: string): number {
+  const pa = parseSemver(a)
+  const pb = parseSemver(b)
+  if (!pa || !pb) return 0
+
+  if (pa.major !== pb.major) return pa.major - pb.major > 0 ? 1 : -1
+  if (pa.minor !== pb.minor) return pa.minor - pb.minor > 0 ? 1 : -1
+  if (pa.patch !== pb.patch) return pa.patch - pb.patch > 0 ? 1 : -1
+  return comparePrereleases(pa.prerelease, pb.prerelease)
+}
+
+/**
+ * Check if a version satisfies a simple range like ">=1.0.0-beta.5 <2.0.0".
+ * Supports: >=, >, <=, <, = comparators (space-separated AND).
+ */
+export function satisfiesSemverRange(version: string, range: string): boolean {
+  const parsed = parseSemver(version)
+  if (!parsed) return false
+
+  const constraints = range.trim().split(/\s+/)
+  for (const constraint of constraints) {
+    const match = constraint.match(/^(>=|<=|>|<|=)(.+)$/)
+    if (!match) continue
+    const [, op, target] = match
+    const cmp = compareSemver(version, target)
+
+    switch (op) {
+      case '>=':
+        if (cmp < 0) return false
+        break
+      case '>':
+        if (cmp <= 0) return false
+        break
+      case '<=':
+        if (cmp > 0) return false
+        break
+      case '<':
+        if (cmp >= 0) return false
+        break
+      case '=':
+        if (cmp !== 0) return false
+        break
+    }
+  }
+  return true
+}
 
 /**
  * Payment cost estimate for a chain
@@ -137,21 +244,111 @@ export class T402WDK {
   private _initializationError: Error | null = null
   private _events = new T402EventEmitter()
   private _receiptStore: PaymentReceiptStore = new InMemoryReceiptStore()
+  private _disposed = false
 
-  // WDK module references (set via registerWDK)
-  private static _WDK: WDKConstructor | null = null
-  private static _WalletManagerEvm: unknown = null
-  private static _BridgeUsdt0Evm: unknown = null
+  // Instance-level module references (#204 multi-instance)
+  private _wdkConstructor: WDKConstructor | null = null
+  private _walletManagerEvm: unknown = null
+  private _bridgeUsdt0Evm: unknown = null
+  private _walletModules: WDKWalletModules = {}
+  private _protocolModules: WDKProtocolModules = {}
+  private _fiatOnRampProvider: FiatOnRampProvider | null = null
+  private _middlewares = new Map<string, Array<(account: unknown) => Promise<void>>>()
 
-  // Multi-chain wallet module storage
-  private static _WalletModules: WDKWalletModules = {}
-  private static _ProtocolModules: WDKProtocolModules = {}
+  // Retry config (#202 network resilience)
+  private _retryConfig: Partial<RetryConfig> | undefined
 
-  // Fiat on-ramp provider (set via registerFiatOnRamp)
-  private static _fiatOnRampProvider: FiatOnRampProvider | null = null
+  // Failover providers (#195)
+  private _failoverProviders: Map<string, FailoverProvider> = new Map()
 
-  // Middleware hooks (chain → functions)
-  private static _middlewares = new Map<string, Array<(account: unknown) => Promise<void>>>()
+  // Static defaults for backward compatibility (#204)
+  private static _defaultModules: {
+    wdk?: WDKConstructor
+    walletManagerEvm?: unknown
+    bridgeUsdt0Evm?: unknown
+    wallets?: WDKWalletModules
+    protocols?: WDKProtocolModules
+    fiatOnRampProvider?: FiatOnRampProvider
+    middlewares?: Map<string, Array<(account: unknown) => Promise<void>>>
+  } = {}
+
+  // Legacy static accessors for tests that access _WDK, _WalletManagerEvm, etc.
+  static get _WDK(): WDKConstructor | null {
+    return T402WDK._defaultModules.wdk ?? null
+  }
+  static set _WDK(val: WDKConstructor | null) {
+    if (val === null) {
+      delete T402WDK._defaultModules.wdk
+    } else {
+      T402WDK._defaultModules.wdk = val
+    }
+  }
+  static get _WalletManagerEvm(): unknown {
+    return T402WDK._defaultModules.walletManagerEvm ?? null
+  }
+  static set _WalletManagerEvm(val: unknown) {
+    if (val === null) {
+      delete T402WDK._defaultModules.walletManagerEvm
+      if (T402WDK._defaultModules.wallets) {
+        delete T402WDK._defaultModules.wallets.evm
+      }
+    } else {
+      T402WDK._defaultModules.walletManagerEvm = val
+      if (!T402WDK._defaultModules.wallets) {
+        T402WDK._defaultModules.wallets = {}
+      }
+      T402WDK._defaultModules.wallets.evm = val
+    }
+  }
+  static get _BridgeUsdt0Evm(): unknown {
+    return T402WDK._defaultModules.bridgeUsdt0Evm ?? null
+  }
+  static set _BridgeUsdt0Evm(val: unknown) {
+    if (val === null) {
+      delete T402WDK._defaultModules.bridgeUsdt0Evm
+      // Also sync protocols
+      if (T402WDK._defaultModules.protocols) {
+        delete T402WDK._defaultModules.protocols.bridgeUsdt0Evm
+      }
+    } else {
+      T402WDK._defaultModules.bridgeUsdt0Evm = val
+      if (!T402WDK._defaultModules.protocols) {
+        T402WDK._defaultModules.protocols = {}
+      }
+      T402WDK._defaultModules.protocols.bridgeUsdt0Evm = val
+    }
+  }
+  static get _WalletModules(): WDKWalletModules {
+    return T402WDK._defaultModules.wallets ?? {}
+  }
+  static set _WalletModules(val: WDKWalletModules) {
+    T402WDK._defaultModules.wallets = val
+  }
+  static get _ProtocolModules(): WDKProtocolModules {
+    return T402WDK._defaultModules.protocols ?? {}
+  }
+  static set _ProtocolModules(val: WDKProtocolModules) {
+    T402WDK._defaultModules.protocols = val
+  }
+  static get _fiatOnRampProvider(): FiatOnRampProvider | null {
+    return T402WDK._defaultModules.fiatOnRampProvider ?? null
+  }
+  static set _fiatOnRampProvider(val: FiatOnRampProvider | null) {
+    if (val === null) {
+      delete T402WDK._defaultModules.fiatOnRampProvider
+    } else {
+      T402WDK._defaultModules.fiatOnRampProvider = val
+    }
+  }
+  static get _middlewares(): Map<string, Array<(account: unknown) => Promise<void>>> {
+    if (!T402WDK._defaultModules.middlewares) {
+      T402WDK._defaultModules.middlewares = new Map()
+    }
+    return T402WDK._defaultModules.middlewares
+  }
+  static set _middlewares(val: Map<string, Array<(account: unknown) => Promise<void>>>) {
+    T402WDK._defaultModules.middlewares = val
+  }
 
   // HD path-derived signer cache
   private _pathSignerCache = new Map<string, WDKSigner>()
@@ -205,6 +402,16 @@ export class T402WDK {
 
     if (typeof WDK !== 'function') {
       throw new WDKInitializationError('WDK must be a constructor function')
+    }
+
+    // #205: Runtime version check
+    const wdkVersion = (WDK as unknown as Record<string, unknown>).version as string | undefined
+    if (wdkVersion && typeof wdkVersion === 'string') {
+      if (!satisfiesSemverRange(wdkVersion, SUPPORTED_WDK_RANGE)) {
+        throw new WDKInitializationError(
+          `WDK version ${wdkVersion} is not supported. Required: ${SUPPORTED_WDK_RANGE}`,
+        )
+      }
     }
 
     T402WDK._WDK = WDK
@@ -616,6 +823,7 @@ export class T402WDK {
    * @returns Encrypted seed data suitable for JSON serialization
    */
   async encryptSeed(password: string): Promise<EncryptedSeed> {
+    this.assertNotDisposed()
     return encryptSeed(this._seedPhrase, password)
   }
 
@@ -632,6 +840,7 @@ export class T402WDK {
    * ```
    */
   async getAllSigners(options?: GetAllSignersOptions): Promise<SignerEntry[]> {
+    this.assertNotDisposed()
     const accountIndex = options?.accountIndex ?? 0
     const schemes = options?.schemes ?? ['exact']
     const includeNonEvm = options?.includeNonEvm ?? true
@@ -662,7 +871,7 @@ export class T402WDK {
     }
 
     // TON signer
-    if (T402WDK.isTonRegistered()) {
+    if (this._walletModules.ton !== undefined) {
       try {
         const signer = await this.getTonSigner(accountIndex)
         for (const scheme of schemes) {
@@ -674,7 +883,7 @@ export class T402WDK {
     }
 
     // Solana signer
-    if (T402WDK.isSolanaRegistered()) {
+    if (this._walletModules.solana !== undefined) {
       try {
         const signer = await this.getSvmSigner(accountIndex)
         for (const scheme of schemes) {
@@ -691,7 +900,7 @@ export class T402WDK {
     }
 
     // TRON signer
-    if (T402WDK.isTronRegistered()) {
+    if (this._walletModules.tron !== undefined) {
       try {
         const signer = await this.getTronSigner(accountIndex)
         for (const scheme of schemes) {
@@ -703,7 +912,7 @@ export class T402WDK {
     }
 
     // Spark signer
-    if (T402WDK.isSparkRegistered()) {
+    if (this._walletModules.spark !== undefined) {
       try {
         const signer = await this.getSparkSigner(accountIndex)
         for (const scheme of schemes) {
@@ -715,7 +924,7 @@ export class T402WDK {
     }
 
     // Bitcoin signer
-    if (T402WDK.isBtcRegistered()) {
+    if (this._walletModules.btc !== undefined) {
       try {
         const signer = await this.getBtcSigner(accountIndex)
         for (const scheme of schemes) {
@@ -767,11 +976,61 @@ export class T402WDK {
     // Initialize balance cache
     this._balanceCache = new BalanceCache(options.cache)
 
-    // Normalize chain configurations
+    // #204: Instance-level modules, falling back to static defaults
+    this._wdkConstructor = options.wdk ?? T402WDK._defaultModules.wdk ?? null
+    this._walletModules = options.wallets ?? T402WDK._defaultModules.wallets ?? {}
+    this._protocolModules = options.protocols ?? T402WDK._defaultModules.protocols ?? {}
+    this._walletManagerEvm =
+      this._walletModules.evm ?? T402WDK._defaultModules.walletManagerEvm ?? null
+    this._bridgeUsdt0Evm =
+      this._protocolModules.bridgeUsdt0Evm ?? T402WDK._defaultModules.bridgeUsdt0Evm ?? null
+    this._fiatOnRampProvider =
+      options.fiatOnRampProvider ?? T402WDK._defaultModules.fiatOnRampProvider ?? null
+    if (options.middlewares) {
+      this._middlewares = new Map(options.middlewares)
+    } else if (T402WDK._defaultModules.middlewares) {
+      // Copy static middlewares so instance doesn't mutate shared state
+      this._middlewares = new Map(T402WDK._defaultModules.middlewares)
+    }
+
+    // #202: Store retry config
+    this._retryConfig = options.retry
+
+    // Normalize chain configurations (#195: handle array providers)
     for (const [chain, chainConfig] of Object.entries(config)) {
       if (chainConfig) {
         try {
-          this._normalizedChains.set(chain, normalizeChainConfig(chain, chainConfig))
+          // Handle EvmChainConfig with provider arrays
+          if (
+            typeof chainConfig === 'object' &&
+            'provider' in chainConfig &&
+            Array.isArray(chainConfig.provider)
+          ) {
+            const urls = chainConfig.provider as string[]
+            if (urls.length === 0) {
+              throw new Error('Provider array must contain at least one URL')
+            }
+            // Create FailoverProvider
+            const failoverConfig: FailoverConfig = {
+              urls,
+              ...(chainConfig.failover ?? {}),
+            }
+            const failoverProvider = new FailoverProvider(failoverConfig)
+            this._failoverProviders.set(chain, failoverProvider)
+            // Normalize using the current URL from failover
+            const normalized = normalizeChainConfig(chain, failoverProvider.getCurrentUrl())
+            if (chainConfig.chainId !== undefined) normalized.chainId = chainConfig.chainId
+            if (chainConfig.network !== undefined) normalized.network = chainConfig.network
+            this._normalizedChains.set(chain, normalized)
+          } else {
+            this._normalizedChains.set(
+              chain,
+              normalizeChainConfig(
+                chain,
+                chainConfig as string | { provider: string; chainId: number; network: string },
+              ),
+            )
+          }
         } catch (error) {
           throw new ChainError(
             WDKErrorCode.INVALID_CHAIN_CONFIG,
@@ -786,9 +1045,25 @@ export class T402WDK {
     this._addDefaultChainsIfNeeded()
 
     // Initialize WDK if registered (skip for fromWDK — it sets _wdk directly)
-    if (!isFromWDK && T402WDK._WDK) {
+    if (!isFromWDK && this._wdkConstructor) {
       this._initializeWDK()
     }
+  }
+
+  /**
+   * Guard: throw if this instance has been disposed (#194)
+   */
+  private assertNotDisposed(): void {
+    if (this._disposed) {
+      throw new WDKError(WDKErrorCode.WDK_NOT_INITIALIZED, 'T402WDK has been disposed')
+    }
+  }
+
+  /**
+   * Whether this instance has been disposed
+   */
+  get isDisposed(): boolean {
+    return this._disposed
   }
 
   /**
@@ -808,12 +1083,12 @@ export class T402WDK {
    * Initialize the underlying WDK instance
    */
   private _initializeWDK(): void {
-    if (!T402WDK._WDK) {
+    if (!this._wdkConstructor) {
       this._initializationError = new WDKInitializationError('WDK not registered')
       return
     }
 
-    if (!T402WDK._WalletManagerEvm) {
+    if (!this._walletManagerEvm) {
       this._initializationError = new WDKInitializationError(
         'WalletManagerEvm not registered. Call T402WDK.registerWDK(WDK, WalletManagerEvm) to enable wallet functionality.',
       )
@@ -821,13 +1096,16 @@ export class T402WDK {
     }
 
     try {
-      let wdk = new T402WDK._WDK(this._seedPhrase)
+      let wdk = new this._wdkConstructor(this._seedPhrase)
 
       // Register EVM wallets for each configured chain
       for (const [chain, config] of this._normalizedChains) {
         try {
-          wdk = wdk.registerWallet(chain, T402WDK._WalletManagerEvm, {
-            provider: config.provider,
+          // #195: Use failover provider's current URL if available
+          const failover = this._failoverProviders.get(chain)
+          const providerUrl = failover ? failover.getCurrentUrl() : config.provider
+          wdk = wdk.registerWallet(chain, this._walletManagerEvm, {
+            provider: providerUrl,
             chainId: config.chainId,
           })
         } catch (error) {
@@ -840,9 +1118,9 @@ export class T402WDK {
       }
 
       // Register USDT0 bridge protocol if available
-      if (T402WDK._BridgeUsdt0Evm) {
+      if (this._bridgeUsdt0Evm) {
         try {
-          wdk = wdk.registerProtocol('bridge-usdt0', T402WDK._BridgeUsdt0Evm)
+          wdk = wdk.registerProtocol('bridge-usdt0', this._bridgeUsdt0Evm)
         } catch (error) {
           // Bridge registration failure is non-fatal, just log it
           console.warn(
@@ -852,9 +1130,9 @@ export class T402WDK {
       }
 
       // Register Velora swap protocol if available
-      if (T402WDK._ProtocolModules.swapVeloraEvm) {
+      if (this._protocolModules.swapVeloraEvm) {
         try {
-          wdk = wdk.registerProtocol('swap-velora', T402WDK._ProtocolModules.swapVeloraEvm)
+          wdk = wdk.registerProtocol('swap-velora', this._protocolModules.swapVeloraEvm)
         } catch (error) {
           console.warn(
             `Failed to register Velora swap protocol: ${error instanceof Error ? error.message : String(error)}`,
@@ -863,9 +1141,9 @@ export class T402WDK {
       }
 
       // Register Aave lending protocol if available
-      if (T402WDK._ProtocolModules.lendingAaveEvm) {
+      if (this._protocolModules.lendingAaveEvm) {
         try {
-          wdk = wdk.registerProtocol('lending-aave', T402WDK._ProtocolModules.lendingAaveEvm)
+          wdk = wdk.registerProtocol('lending-aave', this._protocolModules.lendingAaveEvm)
         } catch (error) {
           console.warn(
             `Failed to register Aave lending protocol: ${error instanceof Error ? error.message : String(error)}`,
@@ -875,7 +1153,7 @@ export class T402WDK {
 
       // Wire middlewares into WDK
       if (typeof (wdk as any).registerMiddleware === 'function') {
-        for (const [chain, fns] of T402WDK._middlewares) {
+        for (const [chain, fns] of this._middlewares) {
           for (const fn of fns) {
             try {
               ;(wdk as any).registerMiddleware(chain, fn)
@@ -1011,6 +1289,7 @@ export class T402WDK {
    * @returns An initialized WDKSigner
    */
   async getSigner(chain: string, accountIndex = 0): Promise<WDKSigner> {
+    this.assertNotDisposed()
     // Validate chain parameter
     if (!chain || typeof chain !== 'string') {
       throw new ChainError(
@@ -1166,6 +1445,7 @@ export class T402WDK {
    * ```
    */
   async getTonSigner(accountIndex = 0): Promise<ClientTonSigner> {
+    this.assertNotDisposed()
     // Check cache first
     const cached = this._tonSignerCache.get(accountIndex)
     if (cached) {
@@ -1173,7 +1453,7 @@ export class T402WDK {
     }
 
     // Validate TON wallet manager is registered
-    if (!T402WDK._WalletModules.ton) {
+    if (!this._walletModules.ton) {
       throw new ChainError(
         WDKErrorCode.CHAIN_NOT_SUPPORTED,
         'TON wallet manager not registered. Call T402WDK.registerWDK(WDK, { wallets: { ton: WalletManagerTon } }).',
@@ -1223,6 +1503,7 @@ export class T402WDK {
    * ```
    */
   async getSvmSigner(accountIndex = 0): Promise<ClientSvmSigner> {
+    this.assertNotDisposed()
     // Check cache first
     const cached = this._svmSignerCache.get(accountIndex)
     if (cached) {
@@ -1230,7 +1511,7 @@ export class T402WDK {
     }
 
     // Validate Solana wallet manager is registered
-    if (!T402WDK._WalletModules.solana) {
+    if (!this._walletModules.solana) {
       throw new ChainError(
         WDKErrorCode.CHAIN_NOT_SUPPORTED,
         'Solana wallet manager not registered. Call T402WDK.registerWDK(WDK, { wallets: { solana: WalletManagerSolana } }).',
@@ -1286,6 +1567,7 @@ export class T402WDK {
    * ```
    */
   async getTronSigner(accountIndex = 0, rpcUrl?: string): Promise<ClientTronSigner> {
+    this.assertNotDisposed()
     // Check cache first (only if no custom RPC)
     if (!rpcUrl) {
       const cached = this._tronSignerCache.get(accountIndex)
@@ -1295,7 +1577,7 @@ export class T402WDK {
     }
 
     // Validate TRON wallet manager is registered
-    if (!T402WDK._WalletModules.tron) {
+    if (!this._walletModules.tron) {
       throw new ChainError(
         WDKErrorCode.CHAIN_NOT_SUPPORTED,
         'TRON wallet manager not registered. Call T402WDK.registerWDK(WDK, { wallets: { tron: WalletManagerTron } }).',
@@ -1350,6 +1632,7 @@ export class T402WDK {
    * ```
    */
   async getSparkSigner(accountIndex = 0): Promise<WDKSparkSignerAdapter> {
+    this.assertNotDisposed()
     // Check cache first
     const cached = this._sparkSignerCache.get(accountIndex)
     if (cached) {
@@ -1357,7 +1640,7 @@ export class T402WDK {
     }
 
     // Validate Spark wallet manager is registered
-    if (!T402WDK._WalletModules.spark) {
+    if (!this._walletModules.spark) {
       throw new ChainError(
         WDKErrorCode.CHAIN_NOT_SUPPORTED,
         'Spark wallet manager not registered. Call T402WDK.registerWDK(WDK, { wallets: { spark: SparkWalletManager } }).',
@@ -1410,6 +1693,7 @@ export class T402WDK {
    * ```
    */
   async getBtcSigner(accountIndex = 0): Promise<WDKBtcSignerAdapter> {
+    this.assertNotDisposed()
     // Check cache first
     const cached = this._btcSignerCache.get(accountIndex)
     if (cached) {
@@ -1417,7 +1701,7 @@ export class T402WDK {
     }
 
     // Validate BTC wallet manager is registered
-    if (!T402WDK._WalletModules.btc) {
+    if (!this._walletModules.btc) {
       throw new ChainError(
         WDKErrorCode.CHAIN_NOT_SUPPORTED,
         'Bitcoin wallet manager not registered. Call T402WDK.registerWDK(WDK, { wallets: { btc: WalletManagerBtc } }).',
@@ -1529,6 +1813,7 @@ export class T402WDK {
    * @throws {SignerError} If address fetch fails
    */
   async getAddress(chain: string, accountIndex = 0): Promise<Address> {
+    this.assertNotDisposed()
     const signer = await this.getSigner(chain, accountIndex)
     return signer.address
   }
@@ -1541,6 +1826,7 @@ export class T402WDK {
    * @throws {BalanceError} If balance fetch fails
    */
   async getUsdt0Balance(chain: string, accountIndex = 0): Promise<bigint> {
+    this.assertNotDisposed()
     const usdt0Address = USDT0_ADDRESSES[chain]
     if (!usdt0Address) {
       return 0n
@@ -1550,11 +1836,8 @@ export class T402WDK {
       const signer = await this.getSigner(chain, accountIndex)
       const address = signer.address
 
-      return await this._balanceCache.getOrFetchTokenBalance(
-        chain,
-        usdt0Address,
-        address,
-        async () => signer.getTokenBalance(usdt0Address),
+      return await this._balanceCache.getOrFetchTokenBalance(chain, usdt0Address, address, () =>
+        this._withRetry(() => signer.getTokenBalance(usdt0Address)),
       )
     } catch (error) {
       // Return 0 for balance errors (chain might not support USDT0)
@@ -1573,6 +1856,7 @@ export class T402WDK {
    * @throws {BalanceError} If balance fetch fails
    */
   async getUsdcBalance(chain: string, accountIndex = 0): Promise<bigint> {
+    this.assertNotDisposed()
     const usdcAddress = USDC_ADDRESSES[chain]
     if (!usdcAddress) {
       return 0n
@@ -1582,11 +1866,8 @@ export class T402WDK {
       const signer = await this.getSigner(chain, accountIndex)
       const address = signer.address
 
-      return await this._balanceCache.getOrFetchTokenBalance(
-        chain,
-        usdcAddress,
-        address,
-        async () => signer.getTokenBalance(usdcAddress),
+      return await this._balanceCache.getOrFetchTokenBalance(chain, usdcAddress, address, () =>
+        this._withRetry(() => signer.getTokenBalance(usdcAddress)),
       )
     } catch (error) {
       // Return 0 for balance errors (chain might not support USDC)
@@ -1606,6 +1887,7 @@ export class T402WDK {
    * @throws {BalanceError} If balance fetch fails
    */
   async getChainBalances(chain: string, accountIndex = 0): Promise<ChainBalance> {
+    this.assertNotDisposed()
     const config = this._normalizedChains.get(chain)
     if (!config) {
       throw new ChainError(WDKErrorCode.CHAIN_NOT_CONFIGURED, `Chain "${chain}" not configured`, {
@@ -1625,7 +1907,7 @@ export class T402WDK {
             chain,
             token.address,
             address,
-            async () => signer.getTokenBalance(token.address),
+            () => this._withRetry(() => signer.getTokenBalance(token.address)),
           )
           return {
             token: token.address,
@@ -1656,8 +1938,8 @@ export class T402WDK {
       // Get native balance with caching
       let nativeBalance: bigint
       try {
-        nativeBalance = await this._balanceCache.getOrFetchNativeBalance(chain, address, async () =>
-          signer.getBalance(),
+        nativeBalance = await this._balanceCache.getOrFetchNativeBalance(chain, address, () =>
+          this._withRetry(() => signer.getBalance()),
         )
       } catch {
         nativeBalance = 0n
@@ -1822,8 +2104,9 @@ export class T402WDK {
    * @returns Bridge result with transaction hash
    */
   async bridgeUsdt0(params: BridgeParams): Promise<BridgeResult> {
+    this.assertNotDisposed()
     // Validate bridge availability
-    if (!T402WDK._BridgeUsdt0Evm) {
+    if (!this._bridgeUsdt0Evm) {
       throw new BridgeError(
         WDKErrorCode.BRIDGE_NOT_AVAILABLE,
         'USDT0 bridge not available. Register BridgeUsdt0Evm with T402WDK.registerWDK().',
@@ -1959,7 +2242,7 @@ export class T402WDK {
    * Check if the Velora swap protocol is registered and available
    */
   canSwap(): boolean {
-    return T402WDK._ProtocolModules.swapVeloraEvm !== undefined
+    return this._protocolModules.swapVeloraEvm !== undefined
   }
 
   /**
@@ -2083,7 +2366,7 @@ export class T402WDK {
    * Check if the Aave lending protocol is registered and available
    */
   canBorrow(): boolean {
-    return T402WDK._ProtocolModules.lendingAaveEvm !== undefined
+    return this._protocolModules.lendingAaveEvm !== undefined
   }
 
   /**
@@ -2176,13 +2459,14 @@ export class T402WDK {
   async getFiatOnRampQuote(
     params: Pick<FiatOnRampParams, 'fiatAmount' | 'fiatCurrency' | 'network'>,
   ): Promise<FiatOnRampQuote> {
-    if (!T402WDK._fiatOnRampProvider) {
+    this.assertNotDisposed()
+    if (!this._fiatOnRampProvider) {
       throw new WDKError(
         WDKErrorCode.PROTOCOL_NOT_REGISTERED,
         'No fiat on-ramp provider registered. Call T402WDK.registerFiatOnRamp() first.',
       )
     }
-    return T402WDK._fiatOnRampProvider.getQuote(params)
+    return this._fiatOnRampProvider.getQuote(params)
   }
 
   /**
@@ -2206,13 +2490,14 @@ export class T402WDK {
    * ```
    */
   onRampAndPay(params: FiatOnRampParams): FiatOnRampResult {
-    if (!T402WDK._fiatOnRampProvider) {
+    this.assertNotDisposed()
+    if (!this._fiatOnRampProvider) {
       throw new WDKError(
         WDKErrorCode.PROTOCOL_NOT_REGISTERED,
         'No fiat on-ramp provider registered. Call T402WDK.registerFiatOnRamp() first.',
       )
     }
-    return T402WDK._fiatOnRampProvider.createWidget(params)
+    return this._fiatOnRampProvider.createWidget(params)
   }
 
   // ========== Cache Management ==========
@@ -2285,12 +2570,26 @@ export class T402WDK {
   }
 
   /**
-   * Dispose of cache resources
+   * Dispose of all resources held by this instance (#194).
    *
-   * Call this when the T402WDK instance is no longer needed.
+   * After disposal, any public method call will throw.
+   * Safe to call multiple times.
    */
   dispose(): void {
-    this._balanceCache.dispose()
+    if (this._disposed) return
+    this._disposed = true
+
+    // Dispose underlying WDK if it supports it
+    if (this._wdk && typeof (this._wdk as any).dispose === 'function') {
+      try {
+        ;(this._wdk as any).dispose()
+      } catch {
+        /* best-effort */
+      }
+    }
+    this._wdk = null
+
+    // Clear ALL signer caches
     this._signerCache.clear()
     this._pathSignerCache.clear()
     this._tonSignerCache.clear()
@@ -2298,6 +2597,84 @@ export class T402WDK {
     this._tronSignerCache.clear()
     this._sparkSignerCache.clear()
     this._btcSignerCache.clear()
+
+    // Wipe seed phrase
+    this._seedPhrase = ''
+
+    // Stop balance cache timers
+    this._balanceCache.dispose()
+
+    // Dispose all FailoverProvider instances (#195)
+    for (const provider of this._failoverProviders.values()) {
+      provider.dispose()
+    }
+    this._failoverProviders.clear()
+  }
+
+  /**
+   * Symbol.dispose support for `using` declarations (TC39 Explicit Resource Management)
+   */
+  [Symbol.dispose](): void {
+    this.dispose()
+  }
+
+  // ========== Failover Provider Status (#195) ==========
+
+  /**
+   * Get the FailoverProvider status for a chain, if one exists.
+   *
+   * @param chain - Chain name
+   * @returns Array of provider statuses, or null if no failover is configured for the chain
+   */
+  getProviderStatus(chain: string): ProviderStatus[] | null {
+    const provider = this._failoverProviders.get(chain)
+    if (!provider) return null
+    return provider.getStatus()
+  }
+
+  // ========== Network Resilience (#202) ==========
+
+  /**
+   * Simple online connectivity check.
+   * Returns true if at least one configured chain's RPC responds.
+   */
+  get isOnline(): Promise<boolean> {
+    return this._checkOnline()
+  }
+
+  private async _checkOnline(): Promise<boolean> {
+    const chains = this.getConfiguredChains()
+    if (chains.length === 0) return false
+
+    for (const chain of chains) {
+      const config = this._normalizedChains.get(chain)
+      if (!config) continue
+      try {
+        const controller = new AbortController()
+        const timeout = setTimeout(() => controller.abort(), 3000)
+        const response = await fetch(config.provider, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ jsonrpc: '2.0', method: 'eth_chainId', params: [], id: 1 }),
+          signal: controller.signal,
+        })
+        clearTimeout(timeout)
+        if (response.ok) return true
+      } catch {
+        // try next
+      }
+    }
+    return false
+  }
+
+  /**
+   * Wrap an async operation with the instance retry config (#202)
+   */
+  private async _withRetry<T>(fn: () => Promise<T>): Promise<T> {
+    if (this._retryConfig) {
+      return withRetry(fn, this._retryConfig)
+    }
+    return fn()
   }
 }
 

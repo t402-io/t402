@@ -172,12 +172,34 @@ export {
   createWDKTonSigner,
   type ClientTonSigner,
   type SignMessageParams as TonSignMessageParams,
+  // Jetton transfer verification (#199)
+  waitForJettonTransfer,
+  getJettonWalletAddress,
+  type WaitForJettonTransferParams,
+  type JettonTransferStatus,
+  type JettonTransferResult,
 } from './adapters/ton-adapter.js'
 export {
   WDKSvmSignerAdapter,
   createWDKSvmSigner,
   type TransactionSigner as ClientSvmSigner,
   type SolanaAddress,
+  // Versioned transactions & priority fees (#197)
+  buildVersionedTransaction,
+  transferWithPriorityFee,
+  getRecentPriorityFees,
+  resolveATA,
+  deriveATAAddress,
+  type SerializedInstruction,
+  type BuildVersionedTransactionParams,
+  type TransferWithPriorityFeeParams,
+  type PriorityFeeEstimate,
+  type ATAResolution,
+  // Token-2022 (#203)
+  getTokenProgram,
+  getTransferFee,
+  type TokenProgramType,
+  type TransferFeeInfo,
 } from './adapters/svm-adapter.js'
 export {
   WDKTronSignerAdapter,
@@ -185,7 +207,14 @@ export {
   type ClientTronSigner,
   type SignTransactionParams as TronSignTransactionParams,
   type BlockInfo as TronBlockInfo,
+  // Energy delegation (#198)
+  type EnergyEstimate,
+  type EnergyProvider,
 } from './adapters/tron-adapter.js'
+
+// Address validation (#192)
+export { validatePaymentAddress } from './validation.js'
+export type { AddressValidationResult } from './validation.js'
 
 // Cache
 export {
@@ -204,14 +233,17 @@ export {
   USDC_ADDRESSES,
   USDT_LEGACY_ADDRESSES,
   CHAIN_TOKENS,
+  CHAIN_REGISTRY,
   normalizeChainConfig,
   getNetworkFromChain,
   getChainFromNetwork,
   getChainId,
   getUsdt0Chains,
   getPreferredToken,
+  getRegistryByCaip2,
+  getChainsByFamily,
 } from './chains.js'
-export type { TokenInfo } from './chains.js'
+export type { TokenInfo, ChainRegistryEntry, RegistryToken } from './chains.js'
 
 // Error types and utilities
 export {
@@ -250,6 +282,10 @@ export type {
   WaitOptions,
 } from './bridge-tracker.js'
 
+// Structured logging
+export { defaultLogger, noopLogger, createCorrelationId } from './logger.js'
+export type { T402Logger, MetricCallback } from './logger.js'
+
 // Event emitter
 export { T402EventEmitter } from './events.js'
 export type { T402Events } from './events.js'
@@ -287,16 +323,42 @@ export {
 } from './pricing.js'
 export type { PricingProviderConfig, PricingProvider } from './pricing.js'
 
-// T402WDK utility types
+// T402WDK utility types and semver utilities
 export type { PaymentCostEstimate, MiddlewareFunction } from './t402wdk.js'
+export { SUPPORTED_WDK_RANGE, parseSemver, compareSemver, satisfiesSemverRange } from './t402wdk.js'
 
 // Failover provider
 export { FailoverProvider, createFailoverProvider, resolveRpcUrl } from './failover.js'
 export type { FailoverConfig, ProviderStatus } from './failover.js'
 
 // Secret manager
-export { encryptSeed, decryptSeed } from './secret.js'
-export type { EncryptedSeed } from './secret.js'
+export {
+  encryptSeed,
+  decryptSeed,
+  rotateSeedPassword,
+  registerSecretManager,
+  getSecretManager,
+  createBackup,
+  verifyBackup,
+} from './secret.js'
+export type { EncryptedSeed, SecretManager, BackupMetadata } from './secret.js'
+
+// Idempotency
+export { InMemoryIdempotencyManager, NonceManager, generateIdempotencyKey } from './idempotency.js'
+export type { IdempotencyManager } from './idempotency.js'
+
+// Compliance
+export { ComplianceManager, BlacklistProvider, AmountLimitProvider } from './compliance.js'
+export type {
+  ComplianceCheckParams,
+  ComplianceResult,
+  ComplianceProvider,
+  ComplianceEvent,
+} from './compliance.js'
+
+// Webhooks
+export { WebhookManager } from './webhooks.js'
+export type { WebhookConfig, PaymentWebhookPayload, WebhookDeliveryResult } from './webhooks.js'
 
 // Indexer verifier
 export { WdkIndexerVerifier, createIndexerVerifier } from './indexer.js'
@@ -333,3 +395,19 @@ export {
 // Fiat on-ramp providers
 export { MoonpayOnRampProvider, getMoonpayCurrencyCode } from './providers/moonpay.js'
 export type { MoonpayConfig } from './providers/moonpay.js'
+
+// Integration adapters
+export {
+  createWdkA2APaymentClient,
+  type WdkA2AOptions,
+  type WdkA2APaymentClient,
+  type A2APaymentRequired,
+  type A2APaymentPayload,
+} from './integrations/a2a-adapter.js'
+export {
+  toFacilitatorWdkSigner,
+  createFacilitatorSigners,
+  type FacilitatorWdkSignerOptions,
+  type FacilitatorWdkSigner,
+} from './integrations/facilitator-adapter.js'
+export { toSIWxSigner, createSIWxSigners, type SIWxSigner } from './integrations/siwx-adapter.js'
