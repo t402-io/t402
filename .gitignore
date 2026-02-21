@@ -108,8 +108,19 @@ sdks/typescript/packages/wdk-ton-gasless/
 sdks/typescript/packages/wdk-tron-gasfree/
 sdks/typescript/packages/react-native/
 
+# Internal R&D research
+specs/research/
+
 # Advanced specs (proprietary features)
 specs/extensions/bazaar.md
 specs/extensions/eip2612-gas-sponsoring.md
 specs/extensions/erc20-approval-gas-sponsoring.md
 specs/schemes/permit2/
+
+# Unreleased advanced release workflow
+.github/workflows/npm_advanced_release.yml
+
+# Premium SDK docs (packages are proprietary)
+services/docs/pages/sdks/typescript/wdk-bridge.mdx
+services/docs/pages/sdks/typescript/wdk-gasless.mdx
+services/docs/pages/sdks/typescript/wdk-multisig.mdx

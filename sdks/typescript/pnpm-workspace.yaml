@@ -5,16 +5,6 @@ packages:
   - packages/mechanisms/*
   - packages/mcp
   - packages/a2a
-  - packages/wdk
-  - packages/wdk-gasless
-  - packages/wdk-multisig
-  - packages/wdk-bridge
-  - packages/wdk-defi
-  - packages/wdk-protocol
-  - packages/wdk-tron-gasfree
-  - packages/wdk-ton
-  - packages/wdk-ton-gasless
-  - packages/react-native
   - packages/cli
 ignoredBuiltDependencies:
   - esbuild
