@@ -88,6 +88,15 @@ services/docs/pages/advanced/smart-router.mdx
 services/docs/pages/advanced/intent-payments.mdx
 services/docs/pages/advanced/streaming-payments.mdx
 services/docs/pages/advanced/zk-payments.mdx
+services/docs/pages/advanced/a2a-negotiation.mdx
+services/docs/pages/advanced/agent-policy.mdx
+services/docs/pages/sdks/go/smart-router.mdx
+
+# Unreleased feature pages (marketing site)
+services/site/app/features/agent-policy/
+services/site/app/features/intent-payments/
+services/site/app/features/smart-router/
+services/site/app/features/zk-payments/
 
 # Audit internal docs
 contracts/AUDIT_PREPARATION.md

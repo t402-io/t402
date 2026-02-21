@@ -434,44 +434,7 @@ export const typescriptPackages: Package[] = [
   },
 ];
 
-export const advancedPackages: Package[] = [
-  {
-    name: "agent-policy",
-    description: "Declarative spending policies for AI agent wallets",
-    features: ["Budget limits", "Approved recipients", "Time windows", "Hierarchical permissions"],
-    badge: "beta",
-  },
-  {
-    name: "a2a-negotiation",
-    description: "Google A2A protocol transport for agent-to-agent payments",
-    features: ["A2A transport", "Price negotiation", "Multi-step flows", "Agent discovery"],
-    badge: "beta",
-  },
-  {
-    name: "streaming-payments",
-    description: "Continuous payment streams for ongoing resource access",
-    features: ["Per-second billing", "Stream creation", "Auto-topup", "Usage metering"],
-    badge: "beta",
-  },
-  {
-    name: "zk-payments",
-    description: "Zero-knowledge proof payments for privacy-preserving transactions",
-    features: ["ZK proofs", "Private amounts", "Selective disclosure", "Compliance friendly"],
-    badge: "beta",
-  },
-  {
-    name: "smart-router",
-    description: "Intelligent payment routing across chains and tokens",
-    features: ["Best-price routing", "Multi-hop paths", "Fee optimization", "Fallback chains"],
-    badge: "beta",
-  },
-  {
-    name: "intent-payments",
-    description: "Intent-based payments that resolve to optimal execution paths",
-    features: ["Intent expression", "Solver network", "MEV protection", "Cross-chain intents"],
-    badge: "beta",
-  },
-];
+export const advancedPackages: Package[] = [];
 
 export const supportedChains = [
   // EVM - USDT0 chains (live)

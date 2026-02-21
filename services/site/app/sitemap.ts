@@ -24,10 +24,6 @@ const featurePages = [
   "mcp",
   "a2a",
   "streaming",
-  "smart-router",
-  "intent-payments",
-  "zk-payments",
-  "agent-policy",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
