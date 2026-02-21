@@ -40,8 +40,6 @@
   },
   "dependencies": {
     "@t402/core": "workspace:*",
-    "@t402/wdk": "workspace:*",
-    "@t402/wdk-gasless": "workspace:*",
     "chalk": "^5.3.0",
     "commander": "^14.0.3",
     "conf": "^15.1.0",
