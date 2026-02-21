@@ -9,10 +9,10 @@ export const PROTOCOL_STATS = {
 } as const;
 
 export const SDK_VERSIONS = {
-  typescript: "2.6.0",
-  python: "1.11.0",
-  go: "1.11.0",
-  java: "1.11.0",
+  typescript: "2.6.1",
+  python: "1.11.1",
+  go: "1.11.1",
+  java: "1.11.1",
 } as const;
 
 export const CHAIN_FAMILIES = [

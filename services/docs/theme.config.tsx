@@ -103,11 +103,11 @@ const config: DocsThemeConfig = {
 
   // --- Banner ---
   banner: {
-    key: 'v2.6.0-44-networks',
+    key: 'v2.6.1-44-networks',
     dismissible: true,
     content: (
       <a href="/changelog" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.375rem' }}>
-        <span style={{ fontWeight: 600 }}>T402 v2.6.0</span>
+        <span style={{ fontWeight: 600 }}>T402 v2.6.1</span>
         <span style={{ opacity: 0.5 }}>&mdash;</span>
         <span>36 packages across 44 networks and 10 chain families</span>
         <span style={{ marginLeft: '0.25rem', opacity: 0.7 }}>&rarr;</span>
