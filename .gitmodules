@@ -4,3 +4,6 @@
 [submodule "services/facilitator"]
 	path = services/facilitator
 	url = https://github.com/t402-io/facilitator.git
+[submodule "premium"]
+	path = premium
+	url = https://github.com/t402-io/t402-premium.git
