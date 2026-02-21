@@ -88,3 +88,21 @@ contracts/SECURITY_AUDIT.md
 
 # Private submodule (managed locally, not tracked)
 services/docs/internal/
+
+# Premium packages (proprietary, not public)
+sdks/typescript/packages/wdk/
+sdks/typescript/packages/wdk-gasless/
+sdks/typescript/packages/wdk-bridge/
+sdks/typescript/packages/wdk-multisig/
+sdks/typescript/packages/wdk-defi/
+sdks/typescript/packages/wdk-protocol/
+sdks/typescript/packages/wdk-ton/
+sdks/typescript/packages/wdk-ton-gasless/
+sdks/typescript/packages/wdk-tron-gasfree/
+sdks/typescript/packages/react-native/
+
+# Advanced specs (proprietary features)
+specs/extensions/bazaar.md
+specs/extensions/eip2612-gas-sponsoring.md
+specs/extensions/erc20-approval-gas-sponsoring.md
+specs/schemes/permit2/
