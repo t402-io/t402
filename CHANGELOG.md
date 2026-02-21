@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **StreamingClient** - SDK client for facilitator streaming endpoints (7 methods: open, update, close, get, pause, resume, list) in `@t402/core`
+- **IntentClient** - SDK client for facilitator intent endpoints (8 methods: create, get, selectRoute, execute, cancel, refreshRoutes, list, stats) in `@t402/core`
+
+### Fixed
+- **Discovery API path** - Fixed discovery endpoint paths from `/discovery/` to `/v1/discovery/` in `@t402/extensions`
+- **Idempotency-Key support** - Added optional `idempotencyKey` parameter to `settle()` for deduplication
+
 ## [2.6.0] - 2026-02-20
 
 ### Added

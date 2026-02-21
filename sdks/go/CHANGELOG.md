@@ -4,6 +4,14 @@ All notable changes to the T402 Go SDK will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- **StreamingClient** - HTTP client for facilitator streaming endpoints (7 methods)
+- **IntentClient** - HTTP client for facilitator intent endpoints (8 methods)
+- **SettleWithOptions** - `SettleOptions` struct with `IdempotencyKey` for settle deduplication
+
+### Fixed
+- **Discovery API path** - Fixed discovery endpoint paths from `/discovery/` to `/v1/discovery/`
+
 ## [1.11.0] - 2026-02-20
 
 ### Improved

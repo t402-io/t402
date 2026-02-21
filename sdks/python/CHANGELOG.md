@@ -4,6 +4,13 @@ All notable changes to the T402 Python SDK will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- **`list_supported()`** - New method on `FacilitatorClient` to query supported networks
+- **Idempotency-Key support** - Added optional `idempotency_key` parameter to `settle()`
+
+### Fixed
+- **Discovery API path** - Fixed discovery endpoint paths from `/discovery/` to `/v1/discovery/`
+
 ## [1.11.0] - 2026-02-20
 
 ### Added
