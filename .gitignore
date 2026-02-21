@@ -77,3 +77,14 @@ DEVELOPMENT_PLAN*.md
 ROADMAP.md
 ecosystem/GROWTH_STRATEGY.md
 ecosystem/PARTNERS.md
+
+# Business-sensitive whitepaper chapters
+whitepaper/chapters/11-economics.tex
+whitepaper/chapters/12-future-work.tex
+
+# Audit internal docs
+contracts/AUDIT_PREPARATION.md
+contracts/SECURITY_AUDIT.md
+
+# Private submodule (managed locally, not tracked)
+services/docs/internal/
