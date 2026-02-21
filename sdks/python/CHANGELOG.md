@@ -4,6 +4,8 @@ All notable changes to the T402 Python SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [1.11.1] - 2026-02-21
+
 ### Added
 - **`list_supported()`** - New method on `FacilitatorClient` to query supported networks
 - **Idempotency-Key support** - Added optional `idempotency_key` parameter to `settle()`

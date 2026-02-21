@@ -1,6 +1,6 @@
 {
   "name": "@t402/wdk-tron-gasfree",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "description": "Gas-free USDT payments on TRON with Tether WDK",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",

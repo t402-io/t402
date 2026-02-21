@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.6.1] - 2026-02-21
+
 ### Added
 - **StreamingClient** - SDK client for facilitator streaming endpoints (7 methods: open, update, close, get, pause, resume, list) in `@t402/core`
 - **IntentClient** - SDK client for facilitator intent endpoints (8 methods: create, get, selectRoute, execute, cancel, refreshRoutes, list, stats) in `@t402/core`

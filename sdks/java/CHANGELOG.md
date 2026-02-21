@@ -4,6 +4,8 @@ All notable changes to the T402 Java SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [1.11.1] - 2026-02-21
+
 ### Added
 - **Auth headers support** - `Supplier<Map<String, Map<String, String>>>` constructor on `HttpFacilitatorClient` for custom auth headers
 - **Idempotency-Key support** - Added `settle()` overload with `idempotencyKey` parameter

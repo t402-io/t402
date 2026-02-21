@@ -4,6 +4,8 @@ All notable changes to the T402 Go SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [1.11.1] - 2026-02-21
+
 ### Added
 - **StreamingClient** - HTTP client for facilitator streaming endpoints (7 methods)
 - **IntentClient** - HTTP client for facilitator intent endpoints (8 methods)
