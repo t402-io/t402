@@ -7,7 +7,6 @@
 
 import { z } from 'zod'
 import type { T402WDK } from '@t402/wdk'
-import { T402Protocol } from '@t402/wdk-protocol'
 
 /**
  * Configuration for unified MCP mode
@@ -177,6 +176,7 @@ export async function executeSmartPay(input: SmartPayInput, wdk: T402WDK): Promi
   })
 
   // Step 2: Create protocol and fetch
+  const { T402Protocol } = await import('@t402/wdk-protocol')
   const protocol = await T402Protocol.create(wdk, { chains })
 
   steps.push({

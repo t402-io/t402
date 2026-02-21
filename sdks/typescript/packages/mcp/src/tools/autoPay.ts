@@ -7,7 +7,6 @@
 
 import { z } from 'zod'
 import type { T402WDK } from '@t402/wdk'
-import { T402Protocol } from '@t402/wdk-protocol'
 
 /**
  * Input schema for t402/autoPay tool
@@ -62,6 +61,7 @@ export interface AutoPayResult {
 export async function executeAutoPay(input: AutoPayInput, wdk: T402WDK): Promise<AutoPayResult> {
   const chains = input.preferredChain ? [input.preferredChain] : ['ethereum', 'arbitrum', 'base']
 
+  const { T402Protocol } = await import('@t402/wdk-protocol')
   const protocol = await T402Protocol.create(wdk, { chains })
 
   const { response, receipt } = await protocol.fetch(input.url)
