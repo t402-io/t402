@@ -37,11 +37,7 @@ on:
           - paywall
           - react
           - vue
-          - wdk
-          - wdk-gasless
-          - wdk-bridge
-          - wdk-multisig
-          - wdk-protocol
+          # WDK packages omitted — proprietary, published from private repo
           - a2a
           - mcp
           - cli
@@ -145,17 +141,7 @@ jobs:
             path: packages/http/react
           - name: vue
             path: packages/http/vue
-          # WDK packages
-          - name: wdk
-            path: packages/wdk
-          - name: wdk-gasless
-            path: packages/wdk-gasless
-          - name: wdk-bridge
-            path: packages/wdk-bridge
-          - name: wdk-multisig
-            path: packages/wdk-multisig
-          - name: wdk-protocol
-            path: packages/wdk-protocol
+          # WDK packages omitted — proprietary, published from private repo
           # Transport packages
           - name: a2a
             path: packages/a2a

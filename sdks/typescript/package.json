@@ -22,7 +22,8 @@
       "secp256k1": ">=5.0.1",
       "markdown-it": ">=14.1.1",
       "qs": ">=6.14.2",
-      "@eslint/eslintrc": ">=3.3.3"
+      "@eslint/eslintrc": ">=3.3.3",
+      "bn.js": ">=5.2.3"
     }
   },
   "description": "t402 Payment Protocol Monorepo",
