@@ -1,4 +1,4 @@
-import type { PaymentRequired } from "@t402/core/types";
+import type { PaymentRequired, ResourceServerExtension } from "@t402/core/types";
 import type {
   Address,
   ERC8004Extension,
@@ -8,6 +8,7 @@ import type {
 } from "./types";
 import { ERC8004_EXTENSION_KEY } from "./constants";
 import { verifyPayToMatchesAgent } from "./identity";
+import { getReputationSummary } from "./reputation";
 
 /**
  * Declare an ERC-8004 extension for a PaymentRequired response.
@@ -104,4 +105,56 @@ export async function verifyAgentIdentity(
   }
 
   return true;
+}
+
+/**
+ * Create a ResourceServerExtension that enriches ERC-8004 declarations
+ * with live reputation data from the on-chain Reputation Registry.
+ *
+ * When registered on a t402ResourceServer, this extension fetches the
+ * agent's current reputation score and feedback count at response time,
+ * including them in the PaymentRequired response for client inspection.
+ *
+ * @param config - Configuration with client and optional reputation parameters
+ * @returns ResourceServerExtension for registration on t402ResourceServer
+ *
+ * @example
+ * ```typescript
+ * const server = new t402ResourceServer(facilitatorClient);
+ * server.registerExtension(erc8004ResourceServerExtension({
+ *   client: viemPublicClient,
+ *   reputationRegistry: "0x...",
+ *   trustedReviewers: ["0x..."],
+ * }));
+ * ```
+ */
+export function erc8004ResourceServerExtension(config: {
+  client: ERC8004ReadClient;
+  reputationRegistry?: Address;
+  trustedReviewers?: Address[];
+}): ResourceServerExtension {
+  return {
+    key: ERC8004_EXTENSION_KEY,
+
+    enrichDeclaration: async (declaration) => {
+      const ext = declaration as ERC8004Extension;
+
+      // If reputation registry is configured, enrich with live score
+      if (config.reputationRegistry && config.trustedReviewers?.length) {
+        const summary = await getReputationSummary(
+          config.client,
+          config.reputationRegistry,
+          BigInt(ext.agentId),
+          config.trustedReviewers,
+        );
+        return {
+          ...ext,
+          reputationScore: summary.normalizedScore,
+          feedbackCount: Number(summary.count),
+        };
+      }
+
+      return ext;
+    },
+  };
 }

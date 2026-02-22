@@ -4,6 +4,7 @@ import {
   getERC8004Extension,
   createERC8004PayloadExtension,
   verifyAgentIdentity,
+  erc8004ResourceServerExtension,
 } from "../src/extension";
 import { ERC8004_EXTENSION_KEY } from "../src/constants";
 import type { PaymentRequired } from "@t402/core/types";
@@ -215,5 +216,65 @@ describe("verifyAgentIdentity", () => {
     const result = await verifyAgentIdentity(mockClient, pr);
     expect(result).toBe(true);
     expect(mockClient.readContract).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("erc8004ResourceServerExtension", () => {
+  it("enriches declaration with live reputation", async () => {
+    const mockClient: ERC8004ReadClient = {
+      readContract: vi.fn().mockResolvedValue([10n, 85n, 0]),
+    };
+
+    const ext = erc8004ResourceServerExtension({
+      client: mockClient,
+      reputationRegistry: "0xReputationRegistry",
+      trustedReviewers: ["0xReviewer1"],
+    });
+
+    expect(ext.key).toBe(ERC8004_EXTENSION_KEY);
+
+    const declaration = { agentId: 42, agentRegistry: "eip155:8453:0xRegistry" };
+    const enriched = await ext.enrichDeclaration!(declaration, {});
+
+    expect(enriched).toEqual({
+      agentId: 42,
+      agentRegistry: "eip155:8453:0xRegistry",
+      reputationScore: 85,
+      feedbackCount: 10,
+    });
+  });
+
+  it("passes through when no reputation config", async () => {
+    const mockClient: ERC8004ReadClient = {
+      readContract: vi.fn(),
+    };
+
+    const ext = erc8004ResourceServerExtension({
+      client: mockClient,
+    });
+
+    const declaration = { agentId: 42, agentRegistry: "eip155:8453:0xRegistry" };
+    const enriched = await ext.enrichDeclaration!(declaration, {});
+
+    expect(enriched).toEqual(declaration);
+    expect(mockClient.readContract).not.toHaveBeenCalled();
+  });
+
+  it("passes through when no trusted reviewers", async () => {
+    const mockClient: ERC8004ReadClient = {
+      readContract: vi.fn(),
+    };
+
+    const ext = erc8004ResourceServerExtension({
+      client: mockClient,
+      reputationRegistry: "0xReputationRegistry",
+      trustedReviewers: [],
+    });
+
+    const declaration = { agentId: 42, agentRegistry: "eip155:8453:0xRegistry" };
+    const enriched = await ext.enrichDeclaration!(declaration, {});
+
+    expect(enriched).toEqual(declaration);
+    expect(mockClient.readContract).not.toHaveBeenCalled();
   });
 });

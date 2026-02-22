@@ -1,5 +1,20 @@
 export { t402ResourceServer } from "./t402ResourceServer";
-export type { ResourceConfig, ResourceInfo } from "./t402ResourceServer";
+export type {
+  ResourceConfig,
+  ResourceInfo,
+  BeforeVerifyHook,
+  AfterVerifyHook,
+  OnVerifyFailureHook,
+  BeforeSettleHook,
+  AfterSettleHook,
+  OnSettleFailureHook,
+  VerifyContext,
+  VerifyResultContext,
+  VerifyFailureContext,
+  SettleContext,
+  SettleResultContext,
+  SettleFailureContext,
+} from "./t402ResourceServer";
 
 export { HTTPFacilitatorClient } from "../http/httpFacilitatorClient";
 export type { FacilitatorClient, FacilitatorConfig, SettleOptions } from "../http/httpFacilitatorClient";

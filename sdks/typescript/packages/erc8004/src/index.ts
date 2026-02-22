@@ -55,17 +55,26 @@ export {
   verifyPayToMatchesAgent,
 } from "./identity";
 
+// Reputation
+export {
+  getReputationSummary,
+  buildFeedbackFile,
+} from "./reputation";
+
 // Extension
 export {
   declareERC8004Extension,
   getERC8004Extension,
   createERC8004PayloadExtension,
   verifyAgentIdentity,
+  erc8004ResourceServerExtension,
 } from "./extension";
 
 // Hooks
 export {
   erc8004IdentityCheck,
   verifyAgentIdentityFromTask,
+  erc8004ReputationCheck,
+  erc8004ServerIdentityCheck,
 } from "./hooks";
 export type { IdentityCheckOptions } from "./hooks";
