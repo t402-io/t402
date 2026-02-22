@@ -9,6 +9,7 @@ import type {
 import { ERC8004_EXTENSION_KEY } from "./constants";
 import { verifyPayToMatchesAgent } from "./identity";
 import { getReputationSummary } from "./reputation";
+import { getValidationSummary } from "./validation";
 
 /**
  * Declare an ERC-8004 extension for a PaymentRequired response.
@@ -132,29 +133,45 @@ export function erc8004ResourceServerExtension(config: {
   client: ERC8004ReadClient;
   reputationRegistry?: Address;
   trustedReviewers?: Address[];
+  validationRegistry?: Address;
+  trustedValidators?: Address[];
 }): ResourceServerExtension {
   return {
     key: ERC8004_EXTENSION_KEY,
 
     enrichDeclaration: async (declaration) => {
-      const ext = declaration as ERC8004Extension;
+      let enriched = declaration as ERC8004Extension;
 
-      // If reputation registry is configured, enrich with live score
+      // Enrich with live reputation score
       if (config.reputationRegistry && config.trustedReviewers?.length) {
         const summary = await getReputationSummary(
           config.client,
           config.reputationRegistry,
-          BigInt(ext.agentId),
+          BigInt(enriched.agentId),
           config.trustedReviewers,
         );
-        return {
-          ...ext,
+        enriched = {
+          ...enriched,
           reputationScore: summary.normalizedScore,
           feedbackCount: Number(summary.count),
         };
       }
 
-      return ext;
+      // Enrich with live validation score
+      if (config.validationRegistry && config.trustedValidators?.length) {
+        const summary = await getValidationSummary(
+          config.client,
+          config.validationRegistry,
+          BigInt(enriched.agentId),
+          config.trustedValidators,
+        );
+        enriched = {
+          ...enriched,
+          validationScore: summary.averageResponse,
+        };
+      }
+
+      return enriched;
     },
   };
 }

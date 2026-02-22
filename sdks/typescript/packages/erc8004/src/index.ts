@@ -62,6 +62,13 @@ export {
   submitFeedback,
 } from "./reputation";
 
+// Validation
+export {
+  submitValidationRequest,
+  getValidationStatus,
+  getValidationSummary,
+} from "./validation";
+
 // Extension
 export {
   declareERC8004Extension,

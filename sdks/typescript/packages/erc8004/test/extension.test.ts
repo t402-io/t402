@@ -277,4 +277,56 @@ describe("erc8004ResourceServerExtension", () => {
     expect(enriched).toEqual(declaration);
     expect(mockClient.readContract).not.toHaveBeenCalled();
   });
+
+  it("enriches declaration with validation score", async () => {
+    const mockClient: ERC8004ReadClient = {
+      readContract: vi.fn().mockResolvedValue([8n, 90]),
+    };
+
+    const ext = erc8004ResourceServerExtension({
+      client: mockClient,
+      validationRegistry: "0xValidationRegistry",
+      trustedValidators: ["0xValidator1"],
+    });
+
+    const declaration = { agentId: 42, agentRegistry: "eip155:8453:0xRegistry" };
+    const enriched = await ext.enrichDeclaration!(declaration, {});
+
+    expect(enriched).toEqual({
+      agentId: 42,
+      agentRegistry: "eip155:8453:0xRegistry",
+      validationScore: 90,
+    });
+  });
+
+  it("enriches with both reputation and validation", async () => {
+    const mockClient: ERC8004ReadClient = {
+      readContract: vi
+        .fn()
+        // First call: reputation getSummary
+        .mockResolvedValueOnce([10n, 85n, 0])
+        // Second call: validation getSummary
+        .mockResolvedValueOnce([5n, 92]),
+    };
+
+    const ext = erc8004ResourceServerExtension({
+      client: mockClient,
+      reputationRegistry: "0xReputationRegistry",
+      trustedReviewers: ["0xReviewer1"],
+      validationRegistry: "0xValidationRegistry",
+      trustedValidators: ["0xValidator1"],
+    });
+
+    const declaration = { agentId: 42, agentRegistry: "eip155:8453:0xRegistry" };
+    const enriched = await ext.enrichDeclaration!(declaration, {});
+
+    expect(enriched).toEqual({
+      agentId: 42,
+      agentRegistry: "eip155:8453:0xRegistry",
+      reputationScore: 85,
+      feedbackCount: 10,
+      validationScore: 92,
+    });
+    expect(mockClient.readContract).toHaveBeenCalledTimes(2);
+  });
 });
