@@ -26,6 +26,8 @@ on:
           - polkadot
           - stacks
           - cosmos
+          - btc
+          - erc8004
           - express
           - next
           - hono
@@ -117,6 +119,11 @@ jobs:
             path: packages/mechanisms/stacks
           - name: cosmos
             path: packages/mechanisms/cosmos
+          - name: btc
+            path: packages/mechanisms/btc
+          # ERC-8004 package
+          - name: erc8004
+            path: packages/erc8004
           # HTTP server packages
           - name: express
             path: packages/http/express
