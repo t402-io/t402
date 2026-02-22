@@ -6,5 +6,6 @@ packages:
   - packages/mcp
   - packages/a2a
   - packages/cli
+  - packages/erc8004
 ignoredBuiltDependencies:
   - esbuild
