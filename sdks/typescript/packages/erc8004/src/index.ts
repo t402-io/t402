@@ -62,3 +62,10 @@ export {
   createERC8004PayloadExtension,
   verifyAgentIdentity,
 } from "./extension";
+
+// Hooks
+export {
+  erc8004IdentityCheck,
+  verifyAgentIdentityFromTask,
+} from "./hooks";
+export type { IdentityCheckOptions } from "./hooks";
