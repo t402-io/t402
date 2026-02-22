@@ -120,7 +120,6 @@ class ExactBtcClientScheme:
 
         pay_to = req.get("payTo") or req.get("pay_to", "")
         amount = req.get("amount", "")
-        network = req.get("network", "")
 
         # Validate required fields
         if not pay_to:

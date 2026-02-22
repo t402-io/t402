@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import logging
 from decimal import Decimal, ROUND_DOWN
-from typing import Any, Awaitable, Callable, Dict, List, Optional, Union
+from typing import Any, Awaitable, Callable, Dict, List, Union
 
 from t402.types import PaymentRequirementsV2, Network
 from t402.schemes.interfaces import AssetAmount, SupportedKindDict

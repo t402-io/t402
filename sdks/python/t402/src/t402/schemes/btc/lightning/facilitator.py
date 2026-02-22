@@ -28,7 +28,7 @@ from t402.schemes.btc.constants import (
     LIGHTNING_NETWORKS,
     is_valid_hex,
 )
-from t402.schemes.btc.types import FacilitatorLightningSigner, LightningPayload
+from t402.schemes.btc.types import FacilitatorLightningSigner
 
 
 logger = logging.getLogger(__name__)

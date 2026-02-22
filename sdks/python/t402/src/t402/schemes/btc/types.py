@@ -6,8 +6,6 @@ including PSBT payload types, Lightning payload types, and signer protocols.
 
 from __future__ import annotations
 
-import base64
-import json
 from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator

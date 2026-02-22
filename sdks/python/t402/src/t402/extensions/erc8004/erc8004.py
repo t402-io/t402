@@ -11,7 +11,6 @@ import httpx
 
 from t402.extensions.erc8004.constants import (
     ERC8004_EXTENSION_KEY,
-    FEEDBACK_TAGS,
     IDENTITY_REGISTRY_ABI,
     REPUTATION_REGISTRY_ABI,
     VALIDATION_REGISTRY_ABI,

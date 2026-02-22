@@ -20,7 +20,6 @@ from t402.schemes.btc.constants import (
     SCHEME_EXACT,
     BTC_CAIP_FAMILY,
     SATS_PER_BTC,
-    is_valid_btc_network,
 )
 
 

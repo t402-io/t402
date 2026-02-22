@@ -28,7 +28,7 @@ from t402.schemes.btc.constants import (
     DUST_LIMIT,
     validate_bitcoin_address,
 )
-from t402.schemes.btc.types import FacilitatorBtcSigner, BtcOnchainPayload
+from t402.schemes.btc.types import FacilitatorBtcSigner
 
 
 logger = logging.getLogger(__name__)
@@ -155,7 +155,6 @@ class ExactBtcFacilitatorScheme:
                 )
 
             # Verify scheme matches
-            accepted = payload_data if "scheme" not in payload_data else payload_data
             payload_scheme = ""
             if hasattr(payload, "model_dump"):
                 full_payload = payload.model_dump(by_alias=True)
