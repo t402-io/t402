@@ -13,6 +13,12 @@ import {
   formatBridgeFeeResult,
   formatBridgeResult,
   TOOL_DEFINITIONS,
+  ERC8004_TOOL_DEFINITIONS,
+  erc8004ResolveAgentInputSchema,
+  erc8004CheckReputationInputSchema,
+  erc8004VerifyWalletInputSchema,
+  formatErc8004CheckReputationResult,
+  formatErc8004VerifyWalletResult,
 } from '../../src/tools/index.js'
 
 describe('Tool Input Schemas', () => {
@@ -348,5 +354,151 @@ describe('Tool Definitions', () => {
       expect(definition.inputSchema.properties).toBeDefined()
       expect(definition.inputSchema.required).toBeDefined()
     }
+  })
+
+  it('should have all ERC-8004 tools', () => {
+    const expectedTools = [
+      'erc8004/resolveAgent',
+      'erc8004/checkReputation',
+      'erc8004/verifyWallet',
+    ]
+
+    for (const tool of expectedTools) {
+      expect(ERC8004_TOOL_DEFINITIONS).toHaveProperty(tool)
+    }
+  })
+
+  it('should have valid ERC-8004 tool definitions', () => {
+    for (const [name, definition] of Object.entries(ERC8004_TOOL_DEFINITIONS)) {
+      expect(definition.name).toBe(name)
+      expect(definition.description).toBeDefined()
+      expect(definition.inputSchema).toBeDefined()
+      expect(definition.inputSchema.type).toBe('object')
+      expect(definition.inputSchema.properties).toBeDefined()
+      expect(definition.inputSchema.required).toBeDefined()
+    }
+  })
+})
+
+describe('ERC-8004 Tool Input Schemas', () => {
+  describe('erc8004ResolveAgentInputSchema', () => {
+    it('should validate valid input', () => {
+      const input = {
+        agentId: 42,
+        agentRegistry: 'eip155:8453:0x1234567890123456789012345678901234567890',
+      }
+      expect(() => erc8004ResolveAgentInputSchema.parse(input)).not.toThrow()
+    })
+
+    it('should reject invalid agentRegistry format', () => {
+      const input = {
+        agentId: 42,
+        agentRegistry: 'invalid-registry',
+      }
+      expect(() => erc8004ResolveAgentInputSchema.parse(input)).toThrow()
+    })
+
+    it('should reject negative agentId', () => {
+      const input = {
+        agentId: -1,
+        agentRegistry: 'eip155:8453:0x1234567890123456789012345678901234567890',
+      }
+      expect(() => erc8004ResolveAgentInputSchema.parse(input)).toThrow()
+    })
+  })
+
+  describe('erc8004CheckReputationInputSchema', () => {
+    it('should validate valid input', () => {
+      const input = {
+        agentId: 42,
+        agentRegistry: 'eip155:8453:0x1234567890123456789012345678901234567890',
+        reputationRegistry: '0x1234567890123456789012345678901234567890',
+        trustedReviewers: ['0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'],
+      }
+      expect(() => erc8004CheckReputationInputSchema.parse(input)).not.toThrow()
+    })
+
+    it('should reject empty trustedReviewers', () => {
+      const input = {
+        agentId: 42,
+        agentRegistry: 'eip155:8453:0x1234567890123456789012345678901234567890',
+        reputationRegistry: '0x1234567890123456789012345678901234567890',
+        trustedReviewers: [],
+      }
+      expect(() => erc8004CheckReputationInputSchema.parse(input)).toThrow()
+    })
+  })
+
+  describe('erc8004VerifyWalletInputSchema', () => {
+    it('should validate valid input', () => {
+      const input = {
+        agentId: 42,
+        agentRegistry: 'eip155:8453:0x1234567890123456789012345678901234567890',
+        walletAddress: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd',
+      }
+      expect(() => erc8004VerifyWalletInputSchema.parse(input)).not.toThrow()
+    })
+
+    it('should reject invalid wallet address', () => {
+      const input = {
+        agentId: 42,
+        agentRegistry: 'eip155:8453:0x1234567890123456789012345678901234567890',
+        walletAddress: 'not-an-address',
+      }
+      expect(() => erc8004VerifyWalletInputSchema.parse(input)).toThrow()
+    })
+  })
+})
+
+describe('ERC-8004 Result Formatters', () => {
+  describe('formatErc8004CheckReputationResult', () => {
+    it('should format high reputation', () => {
+      const result = formatErc8004CheckReputationResult({
+        agentId: 42n,
+        count: 10n,
+        summaryValue: 85n,
+        summaryValueDecimals: 0,
+        normalizedScore: 85,
+      })
+      expect(result).toContain('Agent Reputation')
+      expect(result).toContain('85/100')
+      expect(result).toContain('High reputation')
+    })
+
+    it('should format zero feedback', () => {
+      const result = formatErc8004CheckReputationResult({
+        agentId: 1n,
+        count: 0n,
+        summaryValue: 0n,
+        summaryValueDecimals: 0,
+        normalizedScore: 0,
+      })
+      expect(result).toContain('0/100')
+      expect(result).toContain('No feedback recorded')
+    })
+  })
+
+  describe('formatErc8004VerifyWalletResult', () => {
+    it('should format matching wallet', () => {
+      const result = formatErc8004VerifyWalletResult({
+        matches: true,
+        agentId: 42,
+        walletAddress: '0x1234567890123456789012345678901234567890',
+        registryAddress: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd',
+      })
+      expect(result).toContain('VERIFIED')
+      expect(result).toContain('matches on-chain')
+    })
+
+    it('should format mismatching wallet', () => {
+      const result = formatErc8004VerifyWalletResult({
+        matches: false,
+        agentId: 42,
+        walletAddress: '0x1234567890123456789012345678901234567890',
+        registryAddress: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd',
+      })
+      expect(result).toContain('MISMATCH')
+      expect(result).toContain('does NOT match')
+    })
   })
 })

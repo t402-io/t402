@@ -106,6 +106,29 @@ export {
   type TonMcpBridgeConfig,
 } from './ton-bridge.js'
 
+// ERC-8004 tools
+export {
+  erc8004ResolveAgentInputSchema,
+  executeErc8004ResolveAgent,
+  formatErc8004ResolveAgentResult,
+  type Erc8004ResolveAgentInput,
+} from './erc8004ResolveAgent.js'
+
+export {
+  erc8004CheckReputationInputSchema,
+  executeErc8004CheckReputation,
+  formatErc8004CheckReputationResult,
+  type Erc8004CheckReputationInput,
+} from './erc8004CheckReputation.js'
+
+export {
+  erc8004VerifyWalletInputSchema,
+  executeErc8004VerifyWallet,
+  formatErc8004VerifyWalletResult,
+  type Erc8004VerifyWalletInput,
+  type Erc8004VerifyWalletResult,
+} from './erc8004VerifyWallet.js'
+
 // Unified tools
 export {
   smartPayInputSchema,
@@ -456,6 +479,90 @@ export const WDK_TOOL_DEFINITIONS = {
         },
       },
       required: ['url'],
+    },
+  },
+}
+
+/**
+ * ERC-8004 tool definitions (always available — read-only on-chain queries)
+ */
+export const ERC8004_TOOL_DEFINITIONS = {
+  'erc8004/resolveAgent': {
+    name: 'erc8004/resolveAgent',
+    description:
+      "Look up an agent's on-chain ERC-8004 identity. Returns the agent's registered wallet address, owner, registration file (name, description, services), and verification URI. Use this to verify an agent before making a payment.",
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        agentId: {
+          type: 'number',
+          description: 'Agent NFT token ID on the Identity Registry',
+        },
+        agentRegistry: {
+          type: 'string',
+          pattern: '^eip155:\\d+:0x[a-fA-F0-9]+$',
+          description: 'Agent registry identifier (e.g., "eip155:8453:0xRegistryAddress")',
+        },
+      },
+      required: ['agentId', 'agentRegistry'],
+    },
+  },
+
+  'erc8004/checkReputation': {
+    name: 'erc8004/checkReputation',
+    description:
+      "Query an agent's reputation score from the on-chain Reputation Registry. Returns a normalized 0-100 score based on feedback from trusted reviewers. Requires explicit trusted reviewer addresses for Sybil resistance.",
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        agentId: {
+          type: 'number',
+          description: 'Agent NFT token ID',
+        },
+        agentRegistry: {
+          type: 'string',
+          pattern: '^eip155:\\d+:0x[a-fA-F0-9]+$',
+          description: 'Agent registry identifier (e.g., "eip155:8453:0xRegistryAddress")',
+        },
+        reputationRegistry: {
+          type: 'string',
+          pattern: '^0x[a-fA-F0-9]{40}$',
+          description: 'Reputation Registry contract address on the same chain',
+        },
+        trustedReviewers: {
+          type: 'array',
+          items: { type: 'string', pattern: '^0x[a-fA-F0-9]{40}$' },
+          minItems: 1,
+          description: 'Addresses whose feedback is trusted (required for Sybil resistance)',
+        },
+      },
+      required: ['agentId', 'agentRegistry', 'reputationRegistry', 'trustedReviewers'],
+    },
+  },
+
+  'erc8004/verifyWallet': {
+    name: 'erc8004/verifyWallet',
+    description:
+      "Verify that a payment address (payTo) matches an agent's on-chain registered wallet. Use this before paying to confirm the recipient address is legitimate and owned by the declared agent.",
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        agentId: {
+          type: 'number',
+          description: 'Agent NFT token ID',
+        },
+        agentRegistry: {
+          type: 'string',
+          pattern: '^eip155:\\d+:0x[a-fA-F0-9]+$',
+          description: 'Agent registry identifier (e.g., "eip155:8453:0xRegistryAddress")',
+        },
+        walletAddress: {
+          type: 'string',
+          pattern: '^0x[a-fA-F0-9]{40}$',
+          description: 'Wallet address to verify (typically the payTo from payment requirements)',
+        },
+      },
+      required: ['agentId', 'agentRegistry', 'walletAddress'],
     },
   },
 }

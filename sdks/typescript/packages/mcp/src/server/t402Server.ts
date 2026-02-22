@@ -62,6 +62,17 @@ import {
   TON_BRIDGE_TOOLS,
   executeTonBridgeTool,
   type TonMcpBridgeConfig,
+  // ERC-8004 tools
+  ERC8004_TOOL_DEFINITIONS,
+  erc8004ResolveAgentInputSchema,
+  executeErc8004ResolveAgent,
+  formatErc8004ResolveAgentResult,
+  erc8004CheckReputationInputSchema,
+  executeErc8004CheckReputation,
+  formatErc8004CheckReputationResult,
+  erc8004VerifyWalletInputSchema,
+  executeErc8004VerifyWallet,
+  formatErc8004VerifyWalletResult,
 } from '../tools/index.js'
 import type { T402WDK } from '@t402/wdk'
 
@@ -131,7 +142,7 @@ export class T402McpServer {
    * Get all tool definitions (base + WDK if configured + unified if enabled + TON bridge if registered)
    */
   private getToolDefinitions() {
-    const tools = { ...TOOL_DEFINITIONS }
+    const tools = { ...TOOL_DEFINITIONS, ...ERC8004_TOOL_DEFINITIONS }
     if (this.wdk || this.config.demoMode) {
       Object.assign(tools, WDK_TOOL_DEFINITIONS)
     }
@@ -201,6 +212,16 @@ export class T402McpServer {
 
           case 't402/paymentPlan':
             return await this.handlePaymentPlan(args)
+
+          // ERC-8004 tools
+          case 'erc8004/resolveAgent':
+            return await this.handleErc8004ResolveAgent(args)
+
+          case 'erc8004/checkReputation':
+            return await this.handleErc8004CheckReputation(args)
+
+          case 'erc8004/verifyWallet':
+            return await this.handleErc8004VerifyWallet(args)
 
           // TON bridge tools
           case 'ton/getBalance':
@@ -484,6 +505,41 @@ export class T402McpServer {
 
     return {
       content: [{ type: 'text' as const, text: formatPaymentPlanResult(result) }],
+    }
+  }
+
+  // ---- ERC-8004 Tool Handlers ----
+
+  /**
+   * Handle erc8004/resolveAgent
+   */
+  private async handleErc8004ResolveAgent(args: unknown) {
+    const input = erc8004ResolveAgentInputSchema.parse(args)
+    const result = await executeErc8004ResolveAgent(input, this.config.rpcUrls)
+    return {
+      content: [{ type: 'text' as const, text: formatErc8004ResolveAgentResult(result) }],
+    }
+  }
+
+  /**
+   * Handle erc8004/checkReputation
+   */
+  private async handleErc8004CheckReputation(args: unknown) {
+    const input = erc8004CheckReputationInputSchema.parse(args)
+    const result = await executeErc8004CheckReputation(input, this.config.rpcUrls)
+    return {
+      content: [{ type: 'text' as const, text: formatErc8004CheckReputationResult(result) }],
+    }
+  }
+
+  /**
+   * Handle erc8004/verifyWallet
+   */
+  private async handleErc8004VerifyWallet(args: unknown) {
+    const input = erc8004VerifyWalletInputSchema.parse(args)
+    const result = await executeErc8004VerifyWallet(input, this.config.rpcUrls)
+    return {
+      content: [{ type: 'text' as const, text: formatErc8004VerifyWalletResult(result) }],
     }
   }
 

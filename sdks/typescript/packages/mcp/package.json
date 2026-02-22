@@ -55,6 +55,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",
     "@t402/core": "workspace:*",
+    "@t402/erc8004": "workspace:*",
     "@t402/evm": "workspace:*",
     "zod": "^3.24.2"
   },
