@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **@t402/erc8004** - New package for ERC-8004 Trustless Agents on-chain identity protocol
+  - Identity resolution: `resolveAgent()`, `parseAgentRegistry()`, `verifyPayToMatchesAgent()`
+  - Reputation queries: `getReputationSummary()`, `submitFeedback()`
+  - Validation registry: `submitValidationRequest()`, `getValidationStatus()`, `getValidationSummary()`
+  - Client hooks: `erc8004ClientExtension()` for pre-payment agent identity verification
+  - Server hooks: `erc8004ResourceServerExtension()` with reputation and validation score enrichment
+  - After-settle hook: `erc8004AfterSettleExtension()` for automatic feedback submission
+- **MCP ERC-8004 tools** - 3 new read-only tools in `@t402/mcp` for AI agent identity resolution
+  - `erc8004/resolveAgent` - Look up agent's on-chain identity, registration file, and services
+  - `erc8004/checkReputation` - Query reputation score from trusted reviewers
+  - `erc8004/verifyWallet` - Verify payTo matches agent's registered wallet
+
 ## [2.6.1] - 2026-02-21
 
 ### Added
