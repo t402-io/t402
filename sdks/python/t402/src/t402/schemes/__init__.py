@@ -190,6 +190,37 @@ from t402.schemes.cosmos import (
     SCHEME_EXACT_DIRECT as COSMOS_SCHEME_EXACT_DIRECT,
 )
 
+# BTC / Lightning Schemes
+from t402.schemes.btc import (
+    # On-chain
+    ExactBtcClientScheme,
+    ExactBtcServerScheme,
+    ExactBtcFacilitatorScheme,
+    ExactBtcClientConfig,
+    ExactBtcServerConfig,
+    ExactBtcFacilitatorConfig,
+    # Lightning
+    LightningClientScheme,
+    LightningServerScheme,
+    LightningFacilitatorScheme,
+    LightningServerConfig,
+    # Signer protocols
+    ClientBtcSigner,
+    ClientLightningSigner,
+    FacilitatorBtcSigner,
+    FacilitatorLightningSigner,
+    # Payload types
+    BtcOnchainPayload,
+    LightningPayload,
+    # Constants
+    SCHEME_EXACT as BTC_SCHEME_EXACT,
+    BTC_MAINNET,
+    BTC_TESTNET,
+    BTC_SIGNET,
+    LIGHTNING_MAINNET,
+    LIGHTNING_TESTNET,
+)
+
 __all__ = [
     # Type aliases
     "Price",
@@ -304,4 +335,28 @@ __all__ = [
     "ClientCosmosSigner",
     "FacilitatorCosmosSigner",
     "COSMOS_SCHEME_EXACT_DIRECT",
+    # BTC On-chain Schemes
+    "ExactBtcClientScheme",
+    "ExactBtcServerScheme",
+    "ExactBtcFacilitatorScheme",
+    "ExactBtcClientConfig",
+    "ExactBtcServerConfig",
+    "ExactBtcFacilitatorConfig",
+    "ClientBtcSigner",
+    "FacilitatorBtcSigner",
+    "BtcOnchainPayload",
+    "BTC_SCHEME_EXACT",
+    "BTC_MAINNET",
+    "BTC_TESTNET",
+    "BTC_SIGNET",
+    # Lightning Schemes
+    "LightningClientScheme",
+    "LightningServerScheme",
+    "LightningFacilitatorScheme",
+    "LightningServerConfig",
+    "ClientLightningSigner",
+    "FacilitatorLightningSigner",
+    "LightningPayload",
+    "LIGHTNING_MAINNET",
+    "LIGHTNING_TESTNET",
 ]

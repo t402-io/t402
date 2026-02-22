@@ -16,6 +16,16 @@ from t402.extensions.siwx import (
     parse_siwx_payload,
     validate_siwx_message,
 )
+from t402.extensions.erc8004 import (
+    ERC8004Extension,
+    ERC8004PayloadExtension,
+    ERC8004_EXTENSION_KEY,
+    declare_erc8004_extension,
+    get_erc8004_extension,
+    create_erc8004_payload_extension,
+    verify_agent_identity,
+    parse_agent_registry,
+)
 
 __all__ = [
     "PaymentIdExtensionInfo",
@@ -30,4 +40,12 @@ __all__ = [
     "declare_siwx_extension",
     "parse_siwx_payload",
     "validate_siwx_message",
+    "ERC8004Extension",
+    "ERC8004PayloadExtension",
+    "ERC8004_EXTENSION_KEY",
+    "declare_erc8004_extension",
+    "get_erc8004_extension",
+    "create_erc8004_payload_extension",
+    "verify_agent_identity",
+    "parse_agent_registry",
 ]

@@ -2,7 +2,6 @@
   "name": "@t402/a2a",
   "version": "2.7.0",
   "description": "A2A (Agent-to-Agent) transport for t402 payment protocol",
-  "type": "module",
   "main": "./dist/cjs/index.cjs",
   "module": "./dist/esm/index.mjs",
   "types": "./dist/esm/index.d.mts",
