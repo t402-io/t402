@@ -1,0 +1,330 @@
+# @t402/erc8004
+
+import { Callout, Tabs, Cards } from 'nextra/components'
+
+ERC-8004 Trustless Agents integration for the T402 payment protocol. Enables on-chain agent identity verification, reputation scoring, and validation workflows for AI agent payments.
+
+<Callout type="info">
+  New in v2.7.0 — This package provides the building blocks for verifying AI agent identities before making payments.
+</Callout>
+
+## Installation
+
+```bash
+pnpm add @t402/erc8004
+```
+
+**Peer dependencies** (optional):
+- `viem ^2.0.0` — for direct on-chain contract interaction
+
+## Overview
+
+ERC-8004 defines three on-chain registries for AI agent trust:
+
+| Registry | Purpose | Functions |
+|----------|---------|-----------|
+| **Identity Registry** | Agent registration and wallet mapping | `resolveAgent()`, `verifyPayToMatchesAgent()` |
+| **Reputation Registry** | Feedback and scoring | `getReputationSummary()`, `submitFeedback()` |
+| **Validation Registry** | Third-party validation | `submitValidationRequest()`, `getValidationSummary()` |
+
+## Identity Resolution
+
+### parseAgentRegistry
+
+Parse an agent registry ID string into components.
+
+```typescript
+import { parseAgentRegistry } from '@t402/erc8004'
+
+const registry = parseAgentRegistry('eip155:8453:0xRegistryAddress')
+// { namespace: 'eip155', chainId: '8453', address: '0x...', id: 'eip155:8453:0x...' }
+```
+
+### resolveAgent
+
+Resolve an agent's on-chain identity and off-chain registration file.
+
+```typescript
+import { resolveAgent } from '@t402/erc8004'
+
+const agent = await resolveAgent(
+  client,                    // ERC8004ReadClient (viem PublicClient)
+  '0xIdentityRegistry',     // Identity Registry address
+  1n,                        // Agent token ID
+  'eip155:8453:0xRegistry'  // Agent registry identifier
+)
+
+// agent.agentWallet — on-chain registered wallet
+// agent.registration.name — agent name from registration file
+// agent.registration.services — list of services offered
+// agent.registration.x402Support — whether agent supports T402
+```
+
+### verifyPayToMatchesAgent
+
+Verify that a `payTo` address in `PaymentRequirements` matches the agent's on-chain wallet.
+
+```typescript
+import { verifyPayToMatchesAgent } from '@t402/erc8004'
+
+const matches = await verifyPayToMatchesAgent(
+  client,
+  '0xIdentityRegistry',
+  1n,                    // Agent ID
+  '0xPayToAddress'       // Address from PaymentRequirements
+)
+// true if payTo matches agentWallet
+```
+
+## Reputation
+
+### getReputationSummary
+
+Query an agent's aggregated reputation from trusted reviewers.
+
+```typescript
+import { getReputationSummary } from '@t402/erc8004'
+
+const reputation = await getReputationSummary(
+  client,
+  '0xReputationRegistry',
+  1n,                              // Agent ID
+  ['0xReviewer1', '0xReviewer2'],  // Trusted reviewers (Sybil resistance)
+  'paymentSuccess',                // Optional tag1 filter
+)
+
+// reputation.count — number of feedback records
+// reputation.summaryValue — raw aggregated score
+// reputation.normalizedScore — 0-100 normalized score
+```
+
+### submitFeedback
+
+Submit on-chain feedback for an agent.
+
+```typescript
+import { submitFeedback, FEEDBACK_TAGS } from '@t402/erc8004'
+
+const txHash = await submitFeedback(
+  writeClient,               // ERC8004WriteClient
+  '0xReputationRegistry',
+  {
+    agentId: 1n,
+    value: 100n,
+    valueDecimals: 0,
+    tag1: FEEDBACK_TAGS.PAYMENT_SUCCESS,
+    tag2: '',
+  }
+)
+```
+
+### buildFeedbackFile
+
+Create an off-chain feedback file with optional proof of payment.
+
+```typescript
+import { buildFeedbackFile } from '@t402/erc8004'
+
+const file = buildFeedbackFile(
+  1,                              // agentId
+  'eip155:8453:0xRegistry',      // agentRegistry
+  '0xClientAddress',             // submitter
+  100, 0,                        // value, decimals
+  'paymentSuccess', '',          // tags
+  {                              // optional proof of payment
+    fromAddress: '0x...',
+    toAddress: '0x...',
+    chainId: '8453',
+    txHash: '0x...'
+  }
+)
+```
+
+## Validation
+
+### submitValidationRequest
+
+Submit a validation request for agent work.
+
+```typescript
+import { submitValidationRequest } from '@t402/erc8004'
+
+const txHash = await submitValidationRequest(
+  writeClient,
+  '0xValidationRegistry',
+  {
+    validatorAddress: '0xValidator',
+    agentId: 1n,
+    requestURI: 'https://example.com/validation.json',
+    requestHash: '0x...'  // keccak256 of request
+  }
+)
+```
+
+### getValidationStatus
+
+Query status of a specific validation request.
+
+```typescript
+import { getValidationStatus } from '@t402/erc8004'
+
+const status = await getValidationStatus(
+  client,
+  '0xValidationRegistry',
+  '0xRequestHash'
+)
+// status.response — 0-100 score
+// status.tag — validator's classification
+```
+
+### getValidationSummary
+
+Get aggregated validation summary across trusted validators.
+
+```typescript
+import { getValidationSummary } from '@t402/erc8004'
+
+const summary = await getValidationSummary(
+  client,
+  '0xValidationRegistry',
+  1n,
+  ['0xValidator1', '0xValidator2'],
+  'quality'  // optional tag filter
+)
+// summary.count — number of validations
+// summary.averageResponse — 0-100 average score
+```
+
+## Extensions
+
+### Server-Side: Enrich Payment Requirements
+
+Add ERC-8004 identity and reputation data to `PaymentRequired` responses.
+
+```typescript
+import { declareERC8004Extension, erc8004ResourceServerExtension } from '@t402/erc8004'
+
+// Declare extension in route config
+const routes = {
+  'GET /api/data': {
+    accepts: [{ scheme: 'exact', network: 'eip155:8453', price: '$0.01', payTo: '0x...' }],
+    extensions: {
+      erc8004: declareERC8004Extension(1, 'eip155:8453:0xRegistry', '0xAgentWallet')
+    }
+  }
+}
+
+// Register server extension for live reputation enrichment
+const server = new t402ResourceServer(facilitator)
+server.registerExtension(erc8004ResourceServerExtension({
+  client: publicClient,
+  reputationRegistry: '0xReputationRegistry',
+  trustedReviewers: ['0xReviewer1'],
+}))
+```
+
+### Client-Side: Verify Before Paying
+
+Verify agent identity from `PaymentRequired` before signing a payment.
+
+```typescript
+import { erc8004IdentityCheck } from '@t402/erc8004'
+
+const client = new t402Client()
+client.onBeforePaymentCreation(
+  erc8004IdentityCheck(publicClient, {
+    abortOnFailure: true,   // reject if verification fails
+    abortOnMissing: false,  // allow if no ERC-8004 extension present
+  })
+)
+```
+
+### After Settlement: Submit Feedback
+
+Automatically submit positive feedback after successful payment.
+
+```typescript
+import { erc8004SubmitFeedback } from '@t402/erc8004'
+
+server.onAfterSettle(
+  erc8004SubmitFeedback(writeClient, '0xReputationRegistry', {
+    tag1: 'paymentSuccess',
+    includeProofOfPayment: true,
+  })
+)
+```
+
+## MCP Tools
+
+Three read-only MCP tools are available in `@t402/mcp` for AI agent identity resolution:
+
+| Tool | Description |
+|------|-------------|
+| `erc8004/resolveAgent` | Look up agent's on-chain identity, registration file, and services |
+| `erc8004/checkReputation` | Query reputation score from trusted reviewers |
+| `erc8004/verifyWallet` | Verify payTo matches agent's registered wallet |
+
+These tools are always available (no private key required) and use the configured RPC URLs.
+
+## Types
+
+### Core Types
+
+```typescript
+interface AgentRegistry {
+  namespace: string
+  chainId: string
+  address: Address
+  id: AgentRegistryId
+}
+
+interface ResolvedAgent extends AgentIdentity {
+  registration: RegistrationFile
+}
+
+interface RegistrationFile {
+  type: string
+  name: string
+  description?: string
+  services: ServiceEntry[]
+  x402Support: boolean
+  active: boolean
+}
+
+interface ReputationSummary {
+  agentId: bigint
+  count: bigint
+  summaryValue: bigint
+  normalizedScore: number  // 0-100
+}
+```
+
+### Constants
+
+```typescript
+import { FEEDBACK_TAGS, ERC8004_EXTENSION_KEY } from '@t402/erc8004'
+
+FEEDBACK_TAGS.PAYMENT_SUCCESS   // "paymentSuccess"
+FEEDBACK_TAGS.PAYMENT_FAILED    // "paymentFailed"
+FEEDBACK_TAGS.SERVICE_QUALITY   // "starred"
+ERC8004_EXTENSION_KEY           // "erc8004"
+```
+
+### Contract ABIs
+
+```typescript
+import {
+  identityRegistryAbi,
+  reputationRegistryAbi,
+  validationRegistryAbi
+} from '@t402/erc8004'
+```
+
+## Related
+
+<Cards>
+  <Cards.Card title="MCP Integration" href="/sdks/typescript/mcp" />
+  <Cards.Card title="EVM Reference" href="/reference/evm" />
+  <Cards.Card title="Lifecycle Hooks" href="/sdks/typescript/http-frameworks#lifecycle-hooks" />
+  <Cards.Card title="Changelog" href="/changelog" />
+</Cards>
