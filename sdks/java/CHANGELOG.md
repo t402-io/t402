@@ -4,6 +4,8 @@ All notable changes to the T402 Java SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [1.12.0] - 2026-02-22
+
 ### Added
 - **ERC-8004 Extension** (`io.t402.extensions`) — Trustless AI agent identity and reputation
   - `Erc8004Extension` — identity resolution, reputation scoring, validation, feedback
@@ -611,7 +613,8 @@ Initial release of the T402 Java SDK, published to Maven Central.
 implementation 'io.t402:t402:1.0.0'
 ```
 
-[Unreleased]: https://github.com/t402-io/t402/compare/java/v1.11.1...HEAD
+[Unreleased]: https://github.com/t402-io/t402/compare/java/v1.12.0...HEAD
+[1.12.0]: https://github.com/t402-io/t402/compare/java/v1.11.1...java/v1.12.0
 [1.11.1]: https://github.com/t402-io/t402/compare/java/v1.11.0...java/v1.11.1
 [1.11.0]: https://github.com/t402-io/t402/compare/java/v1.10.0...java/v1.11.0
 [1.10.0]: https://github.com/t402-io/t402/compare/java/v1.9.0...java/v1.10.0

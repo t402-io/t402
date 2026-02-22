@@ -4,6 +4,8 @@ All notable changes to the T402 Python SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [1.12.0] - 2026-02-22
+
 ### Added
 - **BTC Mechanism** (`t402.schemes.btc`) — Bitcoin on-chain (PSBT) and Lightning Network (BOLT11) support
   - Exact scheme: client, server, facilitator for PSBT transactions
@@ -233,7 +235,8 @@ All notable changes to the T402 Python SDK will be documented in this file.
 - EVM support with EIP-3009
 - Core types and utilities
 
-[Unreleased]: https://github.com/t402-io/t402/compare/python/v1.11.1...HEAD
+[Unreleased]: https://github.com/t402-io/t402/compare/python/v1.12.0...HEAD
+[1.12.0]: https://github.com/t402-io/t402/compare/python/v1.11.1...python/v1.12.0
 [1.11.1]: https://github.com/t402-io/t402/compare/python/v1.11.0...python/v1.11.1
 [1.11.0]: https://github.com/t402-io/t402/compare/python/v1.10.1...python/v1.11.0
 [1.10.1]: https://github.com/t402-io/t402/compare/python/v1.10.0...python/v1.10.1
