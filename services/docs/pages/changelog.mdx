@@ -16,7 +16,22 @@ T402 follows [Semantic Versioning](https://semver.org/):
   <Tabs.Tab>
 ## TypeScript SDK
 
-### v2.6.x (Current)
+### v2.7.x (Current)
+
+**v2.7.0** - February 2026
+- New `@t402/erc8004` package — ERC-8004 Trustless Agents on-chain identity protocol
+  - Identity resolution: `resolveAgent()`, `parseAgentRegistry()`, `verifyPayToMatchesAgent()`
+  - Reputation queries: `getReputationSummary()`, `submitFeedback()`
+  - Validation registry: `submitValidationRequest()`, `getValidationStatus()`, `getValidationSummary()`
+  - Client hooks: `erc8004ClientExtension()` for pre-payment agent identity verification
+  - Server hooks: `erc8004ResourceServerExtension()` with reputation and validation enrichment
+  - After-settle hook: `erc8004AfterSettleExtension()` for automatic feedback submission
+- 3 new MCP tools for AI agent identity resolution in `@t402/mcp`
+  - `erc8004/resolveAgent` — look up agent's on-chain identity, registration file, and services
+  - `erc8004/checkReputation` — query reputation score from trusted reviewers
+  - `erc8004/verifyWallet` — verify payTo matches agent's registered wallet
+
+### v2.6.x
 
 **v2.6.1** - February 2026
 - StreamingClient — SDK client for facilitator streaming endpoints (7 methods)
