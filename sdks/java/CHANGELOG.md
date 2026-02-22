@@ -606,7 +606,9 @@ Initial release of the T402 Java SDK, published to Maven Central.
 implementation 'io.t402:t402:1.0.0'
 ```
 
-[Unreleased]: https://github.com/t402-io/t402/compare/java/v1.10.0...HEAD
+[Unreleased]: https://github.com/t402-io/t402/compare/java/v1.11.1...HEAD
+[1.11.1]: https://github.com/t402-io/t402/compare/java/v1.11.0...java/v1.11.1
+[1.11.0]: https://github.com/t402-io/t402/compare/java/v1.10.0...java/v1.11.0
 [1.10.0]: https://github.com/t402-io/t402/compare/java/v1.9.0...java/v1.10.0
 [1.9.0]: https://github.com/t402-io/t402/compare/java/v1.8.1...java/v1.9.0
 [1.8.1]: https://github.com/t402-io/t402/compare/java/v1.8.0...java/v1.8.1

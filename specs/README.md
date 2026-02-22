@@ -51,6 +51,8 @@ The `exact` scheme transfers a specific amount for each request.
 | [SVM](./schemes/exact/scheme_exact_svm.md) | Solana (SPL tokens) |
 | [TON](./schemes/exact/scheme_exact_ton.md) | TON blockchain (Jettons) |
 | [TRON](./schemes/exact/scheme_exact_tron.md) | TRON blockchain (TRC20) |
+| [BTC](./schemes/exact/scheme_exact_btc.md) | Bitcoin (PSBT) |
+| [Lightning](./schemes/exact/scheme_exact_lightning.md) | Lightning Network (BOLT11) |
 | [SUI](./schemes/exact/scheme_exact_sui.md) | Sui blockchain **(DRAFT)** |
 
 Additional chains implemented in SDKs (exact-direct variant — on-chain transfer as proof):
@@ -74,6 +76,9 @@ Extensions enable modular optional functionality beyond core payment mechanics.
 | [Bazaar](./extensions/bazaar.md) | `bazaar` | Resource discovery and cataloging |
 | [Payment Identifier](./extensions/payment-identifier.md) | `paymentId` | Unique identifiers for correlation and idempotency |
 | [Sign-In-With-X](./extensions/sign-in-with-x.md) | `siwx` | CAIP-122 wallet-based identity assertions |
+| [ERC-8004](./extensions/erc8004-integration.md) | `erc8004` | Trustless AI agent identity and reputation |
+| [EIP-2612 Gas Sponsor](./extensions/eip2612-gas-sponsoring.md) | `eip2612GasSponsor` | Gas sponsoring via EIP-2612 permits |
+| [ERC-20 Approval Gas](./extensions/erc20-approval-gas-sponsoring.md) | `erc20ApprovalGas` | Gas sponsoring via ERC-20 approvals |
 
 See [extensions/README.md](./extensions/README.md) for the full extension guide and proposal template.
 
@@ -82,6 +87,7 @@ See [extensions/README.md](./extensions/README.md) for the full extension guide 
 | Topic | Description |
 |-------|-------------|
 | [TON Connect Bridge](./research/ton-connect-bridge.md) | Analysis of TON Connect bridge protocol for t402 integration |
+| [Mobile TON Reference](./research/mobile-ton-reference.md) | Reference implementation for mobile TON integration |
 
 ## Templates
 

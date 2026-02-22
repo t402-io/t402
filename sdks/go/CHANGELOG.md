@@ -232,7 +232,9 @@ All notable changes to the T402 Go SDK will be documented in this file.
 - EVM signers
 - Bazaar extension for API discovery
 
-[Unreleased]: https://github.com/t402-io/t402/compare/go/v1.10.0...HEAD
+[Unreleased]: https://github.com/t402-io/t402/compare/go/v1.11.1...HEAD
+[1.11.1]: https://github.com/t402-io/t402/compare/go/v1.11.0...go/v1.11.1
+[1.11.0]: https://github.com/t402-io/t402/compare/go/v1.10.0...go/v1.11.0
 [1.10.0]: https://github.com/t402-io/t402/compare/go/v1.9.0...go/v1.10.0
 [1.9.0]: https://github.com/t402-io/t402/compare/go/v1.8.1...go/v1.9.0
 [1.8.1]: https://github.com/t402-io/t402/compare/go/v1.8.0...go/v1.8.1

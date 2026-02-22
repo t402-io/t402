@@ -41,6 +41,7 @@ Mechanisms (Chain-specific payment implementations):
 @t402/polkadot          Polkadot Asset Hub support
 @t402/stacks            Stacks (Bitcoin L2) SIP-010 support
 @t402/cosmos            Cosmos (Noble) native USDT support
+@t402/erc8004           ERC-8004 Trustless Agents (identity, reputation)
 
 HTTP Integrations:
 @t402/express           Express.js middleware
@@ -81,7 +82,7 @@ Tools:
 <details>
 <summary><b>Installation</b></summary>
 
-### TypeScript (v2.5.0)
+### TypeScript (v2.7.0)
 
 ```shell
 # Core packages
@@ -104,7 +105,7 @@ pnpm add -g @t402/cli
 t402 --help
 ```
 
-### Python (v1.10.1)
+### Python (v1.11.1)
 
 ```shell
 pip install t402
@@ -116,30 +117,30 @@ uv add t402
 t402 --help
 ```
 
-### Go (v1.10.0)
+### Go (v1.11.1)
 
 ```shell
-go get github.com/t402-io/t402/sdks/go@v1.10.0
+go get github.com/t402-io/t402/sdks/go@v1.11.1
 
 # CLI tool
-go install github.com/t402-io/t402/sdks/go/cmd/t402@v1.10.0
+go install github.com/t402-io/t402/sdks/go/cmd/t402@v1.11.1
 t402 --help
 ```
 
-### Java (v1.10.0)
+### Java (v1.11.1)
 
 ```xml
 <dependency>
   <groupId>io.t402</groupId>
   <artifactId>t402</artifactId>
-  <version>1.10.0</version>
+  <version>1.11.1</version>
 </dependency>
 ```
 
 Or with Gradle:
 
 ```groovy
-implementation 'io.t402:t402:1.10.0'
+implementation 'io.t402:t402:1.11.1'
 ```
 
 </details>
@@ -273,16 +274,16 @@ t402 info eip155:8453
 
 Legend: ✅ Complete | ❌ Not Available
 
-**Total Supported Networks: 44** across 10 blockchain families (64 network+scheme kinds)
+**Total Supported Networks: 50** across 10 blockchain families (81 network+scheme kinds)
 
 ## Latest Releases
 
 | SDK | Version | Release Date | Changelog |
 |-----|---------|--------------|-----------|
-| TypeScript | v2.5.0 | 2026-02-18 | [CHANGELOG](CHANGELOG.md) |
-| Go | v1.10.0 | 2026-02-19 | [CHANGELOG](sdks/go/CHANGELOG.md) |
-| Python | v1.10.1 | 2026-02-09 | [CHANGELOG](sdks/python/CHANGELOG.md) |
-| Java | v1.10.0 | 2026-02-09 | [CHANGELOG](sdks/java/CHANGELOG.md) |
+| TypeScript | v2.7.0 | 2026-02-22 | [CHANGELOG](CHANGELOG.md) |
+| Go | v1.11.1 | 2026-02-21 | [CHANGELOG](sdks/go/CHANGELOG.md) |
+| Python | v1.11.1 | 2026-02-21 | [CHANGELOG](sdks/python/CHANGELOG.md) |
+| Java | v1.11.1 | 2026-02-21 | [CHANGELOG](sdks/java/CHANGELOG.md) |
 
 ## Ecosystem
 

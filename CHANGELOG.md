@@ -336,7 +336,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - EVM support with EIP-3009 authorization
 - Basic client and server implementations
 
-[Unreleased]: https://github.com/t402-io/t402/compare/v2.5.0...HEAD
+[Unreleased]: https://github.com/t402-io/t402/compare/v2.7.0...HEAD
+[2.7.0]: https://github.com/t402-io/t402/compare/v2.6.1...v2.7.0
+[2.6.1]: https://github.com/t402-io/t402/compare/v2.6.0...v2.6.1
+[2.6.0]: https://github.com/t402-io/t402/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/t402-io/t402/compare/v2.4.1...v2.5.0
 [2.4.1]: https://github.com/t402-io/t402/compare/v2.4.0...v2.4.1
 [2.4.0]: https://github.com/t402-io/t402/compare/v2.3.1...v2.4.0
