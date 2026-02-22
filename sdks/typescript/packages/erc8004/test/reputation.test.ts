@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
-import { getReputationSummary, buildFeedbackFile } from "../src/reputation";
-import type { ERC8004ReadClient } from "../src/types";
+import { getReputationSummary, buildFeedbackFile, submitFeedback } from "../src/reputation";
+import type { ERC8004ReadClient, ERC8004WriteClient } from "../src/types";
 
 describe("getReputationSummary", () => {
   it("returns normalized score from contract", async () => {
@@ -158,5 +158,64 @@ describe("buildFeedbackFile", () => {
 
     expect(() => new Date(file.createdAt)).not.toThrow();
     expect(new Date(file.createdAt).toISOString()).toBe(file.createdAt);
+  });
+});
+
+describe("submitFeedback", () => {
+  it("calls writeContract with correct args", async () => {
+    const mockClient: ERC8004WriteClient = {
+      readContract: vi.fn(),
+      writeContract: vi.fn().mockResolvedValue("0xTxHash"),
+      waitForTransactionReceipt: vi.fn(),
+    };
+
+    const result = await submitFeedback(mockClient, "0xReputationRegistry", {
+      agentId: 42n,
+      value: 100n,
+      valueDecimals: 0,
+      tag1: "paymentSuccess",
+      tag2: "responseTime",
+      endpoint: "https://api.example.com/data",
+      feedbackURI: "https://feedback.example.com/42.json",
+      feedbackHash: "0xabcdef",
+    });
+
+    expect(result).toBe("0xTxHash");
+    expect(mockClient.writeContract).toHaveBeenCalledWith({
+      address: "0xReputationRegistry",
+      abi: expect.any(Array),
+      functionName: "giveFeedback",
+      args: [
+        42n,
+        100n,
+        0,
+        "paymentSuccess",
+        "responseTime",
+        "https://api.example.com/data",
+        "https://feedback.example.com/42.json",
+        "0xabcdef",
+      ],
+    });
+  });
+
+  it("uses defaults for optional params", async () => {
+    const mockClient: ERC8004WriteClient = {
+      readContract: vi.fn(),
+      writeContract: vi.fn().mockResolvedValue("0xTxHash"),
+      waitForTransactionReceipt: vi.fn(),
+    };
+
+    await submitFeedback(mockClient, "0xReputationRegistry", {
+      agentId: 1n,
+      value: 50n,
+      valueDecimals: 1,
+      tag1: "starred",
+      tag2: "",
+    });
+
+    const call = (mockClient.writeContract as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    expect(call.args[5]).toBe(""); // endpoint default
+    expect(call.args[6]).toBe(""); // feedbackURI default
+    expect(call.args[7]).toBe("0x" + "0".repeat(64)); // feedbackHash default
   });
 });

@@ -4,10 +4,11 @@ import {
   verifyAgentIdentityFromTask,
   erc8004ReputationCheck,
   erc8004ServerIdentityCheck,
+  erc8004SubmitFeedback,
 } from "../src/hooks";
 import { ERC8004_EXTENSION_KEY } from "../src/constants";
-import type { ERC8004ReadClient } from "../src/types";
-import type { PaymentRequired, PaymentPayload, PaymentRequirements, A2ATask } from "@t402/core/types";
+import type { ERC8004ReadClient, ERC8004WriteClient } from "../src/types";
+import type { PaymentRequired, PaymentPayload, PaymentRequirements, SettleResponse, A2ATask } from "@t402/core/types";
 
 const makePaymentRequired = (
   withExtension: boolean,
@@ -339,5 +340,146 @@ describe("erc8004ServerIdentityCheck", () => {
 
     expect(result).toBeUndefined();
     expect(mockClient.readContract).not.toHaveBeenCalled();
+  });
+});
+
+// ============================================================================
+// AfterSettle Hook
+// ============================================================================
+
+const makeSettleContext = (
+  withExtension: boolean,
+  success: boolean,
+  payTo = "0xabcdef1234567890abcdef1234567890abcdef12",
+) => ({
+  paymentPayload: {
+    t402Version: 2,
+    payload: { signature: "0x" },
+    resource: { url: "https://api.example.com/data" },
+    accepted: {
+      scheme: "exact",
+      network: "eip155:8453",
+      asset: "USDT",
+      amount: "1000000",
+      payTo,
+      maxTimeoutSeconds: 300,
+    },
+    ...(withExtension && {
+      extensions: {
+        [ERC8004_EXTENSION_KEY]: {
+          agentId: 42,
+          agentRegistry: "eip155:8453:0xRegistry",
+        },
+      },
+    }),
+  } as PaymentPayload,
+  requirements: {
+    scheme: "exact",
+    network: "eip155:8453",
+    asset: "USDT",
+    amount: "1000000",
+    payTo,
+    maxTimeoutSeconds: 300,
+  } as PaymentRequirements,
+  result: {
+    success,
+    transaction: "0xSettleTxHash",
+    network: "eip155:8453",
+    payer: "0xPayer",
+  } as SettleResponse,
+});
+
+describe("erc8004SubmitFeedback", () => {
+  it("submits feedback after successful settlement", async () => {
+    const mockClient: ERC8004WriteClient = {
+      readContract: vi.fn(),
+      writeContract: vi.fn().mockResolvedValue("0xFeedbackTxHash"),
+      waitForTransactionReceipt: vi.fn(),
+    };
+
+    const hook = erc8004SubmitFeedback(mockClient, "0xReputationRegistry");
+    await hook(makeSettleContext(true, true));
+
+    // Give fire-and-forget promise time to resolve
+    await new Promise((r) => setTimeout(r, 10));
+
+    expect(mockClient.writeContract).toHaveBeenCalledWith(
+      expect.objectContaining({
+        address: "0xReputationRegistry",
+        functionName: "giveFeedback",
+      }),
+    );
+  });
+
+  it("skips when no ERC-8004 extension", async () => {
+    const mockClient: ERC8004WriteClient = {
+      readContract: vi.fn(),
+      writeContract: vi.fn(),
+      waitForTransactionReceipt: vi.fn(),
+    };
+
+    const hook = erc8004SubmitFeedback(mockClient, "0xReputationRegistry");
+    await hook(makeSettleContext(false, true));
+
+    await new Promise((r) => setTimeout(r, 10));
+
+    expect(mockClient.writeContract).not.toHaveBeenCalled();
+  });
+
+  it("skips when settlement was not successful", async () => {
+    const mockClient: ERC8004WriteClient = {
+      readContract: vi.fn(),
+      writeContract: vi.fn(),
+      waitForTransactionReceipt: vi.fn(),
+    };
+
+    const hook = erc8004SubmitFeedback(mockClient, "0xReputationRegistry");
+    await hook(makeSettleContext(true, false));
+
+    await new Promise((r) => setTimeout(r, 10));
+
+    expect(mockClient.writeContract).not.toHaveBeenCalled();
+  });
+
+  it("logs warning on feedback submission failure", async () => {
+    const mockClient: ERC8004WriteClient = {
+      readContract: vi.fn(),
+      writeContract: vi.fn().mockRejectedValue(new Error("tx reverted")),
+      waitForTransactionReceipt: vi.fn(),
+    };
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const hook = erc8004SubmitFeedback(mockClient, "0xReputationRegistry");
+    await hook(makeSettleContext(true, true));
+
+    // Give fire-and-forget promise time to reject and log
+    await new Promise((r) => setTimeout(r, 50));
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Failed to submit feedback"),
+      expect.any(Error),
+    );
+
+    warnSpy.mockRestore();
+  });
+
+  it("builds feedback URI when config includes proof of payment", async () => {
+    const mockClient: ERC8004WriteClient = {
+      readContract: vi.fn(),
+      writeContract: vi.fn().mockResolvedValue("0xTxHash"),
+      waitForTransactionReceipt: vi.fn(),
+    };
+
+    const hook = erc8004SubmitFeedback(mockClient, "0xReputationRegistry", {
+      includeProofOfPayment: true,
+      feedbackBaseURI: "https://feedback.example.com",
+      tag1: "paymentSuccess",
+    });
+    await hook(makeSettleContext(true, true));
+
+    await new Promise((r) => setTimeout(r, 10));
+
+    const call = (mockClient.writeContract as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    expect(call.args[6]).toBe("https://feedback.example.com/0xSettleTxHash.json");
   });
 });

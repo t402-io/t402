@@ -59,6 +59,7 @@ export {
 export {
   getReputationSummary,
   buildFeedbackFile,
+  submitFeedback,
 } from "./reputation";
 
 // Extension
@@ -76,5 +77,6 @@ export {
   verifyAgentIdentityFromTask,
   erc8004ReputationCheck,
   erc8004ServerIdentityCheck,
+  erc8004SubmitFeedback,
 } from "./hooks";
 export type { IdentityCheckOptions } from "./hooks";

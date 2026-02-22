@@ -1,6 +1,9 @@
 import type {
   Address,
+  Hex,
   ERC8004ReadClient,
+  ERC8004WriteClient,
+  FeedbackParams,
   ReputationSummary,
   FeedbackFile,
   AgentRegistryId,
@@ -93,4 +96,38 @@ export function buildFeedbackFile(
     tag2,
     ...(proofOfPayment && { proofOfPayment }),
   };
+}
+
+/**
+ * Submit feedback for an agent to the on-chain Reputation Registry.
+ *
+ * Calls `giveFeedback` on the Reputation Registry contract.
+ * Typically used after a successful payment settlement to record
+ * positive feedback linking the agent to the transaction.
+ *
+ * @param client - Write-capable client for submitting transactions
+ * @param reputationRegistry - Reputation Registry contract address
+ * @param params - Feedback parameters (agentId, value, tags, etc.)
+ * @returns Transaction hash
+ */
+export async function submitFeedback(
+  client: ERC8004WriteClient,
+  reputationRegistry: Address,
+  params: FeedbackParams,
+): Promise<Hex> {
+  return client.writeContract({
+    address: reputationRegistry,
+    abi: reputationRegistryAbi,
+    functionName: "giveFeedback",
+    args: [
+      params.agentId,
+      params.value,
+      params.valueDecimals,
+      params.tag1,
+      params.tag2,
+      params.endpoint ?? "",
+      params.feedbackURI ?? "",
+      params.feedbackHash ?? ("0x" + "0".repeat(64)),
+    ],
+  });
 }

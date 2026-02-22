@@ -2,19 +2,26 @@ import type {
   BeforePaymentCreationHook,
   PaymentCreationContext,
 } from "@t402/core/client";
-import type { BeforeVerifyHook, VerifyContext } from "@t402/core/server";
+import type {
+  BeforeVerifyHook,
+  VerifyContext,
+  AfterSettleHook,
+  SettleResultContext,
+} from "@t402/core/server";
 import type { A2ATask } from "@t402/core/types";
 import { getPaymentRequired } from "@t402/core/types";
 import type {
   Address,
   AgentRegistryId,
   ERC8004ReadClient,
+  ERC8004WriteClient,
   ReputationCheckConfig,
+  FeedbackSubmissionConfig,
 } from "./types";
-import { ERC8004_EXTENSION_KEY } from "./constants";
+import { ERC8004_EXTENSION_KEY, FEEDBACK_TAGS } from "./constants";
 import { getERC8004Extension, verifyAgentIdentity } from "./extension";
 import { verifyPayToMatchesAgent } from "./identity";
-import { getReputationSummary } from "./reputation";
+import { getReputationSummary, submitFeedback, buildFeedbackFile } from "./reputation";
 
 /**
  * Options for the ERC-8004 identity check hook.
@@ -132,7 +139,7 @@ export async function verifyAgentIdentityFromTask(
  * Helper to extract ERC-8004 extension from a payment payload's extensions.
  */
 function getPayloadExtension(
-  context: VerifyContext,
+  context: { paymentPayload: { extensions?: Record<string, unknown> } },
 ): { agentId: number; agentRegistry: AgentRegistryId } | undefined {
   return context.paymentPayload.extensions?.[ERC8004_EXTENSION_KEY] as
     | { agentId: number; agentRegistry: AgentRegistryId }
@@ -237,5 +244,83 @@ export function erc8004ServerIdentityCheck(
         reason: `payTo address ${context.requirements.payTo} does not match on-chain agentWallet for agent ${ext.agentId}`,
       };
     }
+  };
+}
+
+/**
+ * Create an AfterSettleHook that submits positive feedback to the
+ * Reputation Registry after a successful payment settlement.
+ *
+ * Uses fire-and-forget: the feedback submission runs asynchronously
+ * and never blocks the settlement flow. Errors are logged as warnings.
+ *
+ * @param writeClient - Write-capable client for submitting feedback tx
+ * @param reputationRegistry - Reputation Registry contract address
+ * @param config - Feedback submission configuration
+ * @returns AfterSettleHook for registration on t402ResourceServer
+ *
+ * @example
+ * ```typescript
+ * server.onAfterSettle(erc8004SubmitFeedback(viemWalletClient, registryAddr, {
+ *   tag1: "paymentSuccess",
+ *   includeProofOfPayment: true,
+ * }));
+ * ```
+ */
+export function erc8004SubmitFeedback(
+  writeClient: ERC8004WriteClient,
+  reputationRegistry: Address,
+  config: FeedbackSubmissionConfig = {},
+): AfterSettleHook {
+  return async (context: SettleResultContext): Promise<void> => {
+    const ext = getPayloadExtension(context);
+    if (!ext) return;
+    if (!context.result.success) return;
+
+    const tag1 = config.tag1 ?? FEEDBACK_TAGS.PAYMENT_SUCCESS;
+    const tag2 = config.tag2 ?? "";
+
+    // Build feedback URI if proof of payment is configured
+    let feedbackURI = "";
+    const feedbackHash = ("0x" + "0".repeat(64)) as `0x${string}`;
+
+    if (config.includeProofOfPayment && context.result.transaction) {
+      buildFeedbackFile(
+        ext.agentId,
+        ext.agentRegistry,
+        context.result.payer ?? "",
+        100,
+        0,
+        tag1,
+        tag2,
+        {
+          fromAddress: context.result.payer ?? "",
+          toAddress: context.requirements.payTo,
+          chainId: context.requirements.network,
+          txHash: context.result.transaction,
+        },
+      );
+
+      if (config.feedbackBaseURI) {
+        feedbackURI = `${config.feedbackBaseURI}/${context.result.transaction}.json`;
+      }
+    }
+
+    // Fire-and-forget: submit on-chain feedback without blocking
+    submitFeedback(writeClient, reputationRegistry, {
+      agentId: BigInt(ext.agentId),
+      value: 100n,
+      valueDecimals: 0,
+      tag1,
+      tag2,
+      endpoint: context.paymentPayload.resource?.url,
+      feedbackURI,
+      feedbackHash,
+    }).catch((err) => {
+      console.warn(
+        `[erc8004] Failed to submit feedback for agent ${ext.agentId}:`,
+        err,
+      );
+    });
   };
 }
