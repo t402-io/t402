@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.7.0] - 2026-02-22
+
 ### Added
 - **@t402/erc8004** - New package for ERC-8004 Trustless Agents on-chain identity protocol
   - Identity resolution: `resolveAgent()`, `parseAgentRegistry()`, `verifyPayToMatchesAgent()`
