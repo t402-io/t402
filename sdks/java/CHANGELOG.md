@@ -4,6 +4,11 @@ All notable changes to the T402 Java SDK will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- **ERC-8004 Extension** (`io.t402.extensions`) — Trustless AI agent identity and reputation
+  - `Erc8004Extension` — identity resolution, reputation scoring, validation, feedback
+  - `Erc8004Constants` — contract addresses, ABIs, function selectors
+
 ## [1.11.1] - 2026-02-21
 
 ### Added

@@ -4,6 +4,14 @@ All notable changes to the T402 Go SDK will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- **BTC Mechanism** (`mechanisms/btc`) — Bitcoin on-chain (PSBT) and Lightning Network (BOLT11) support
+  - Client, Server, Facilitator implementations for exact scheme
+  - 5 networks: mainnet, testnet3, signet, lightning:mainnet, lightning:testnet
+- **ERC-8004 Extension** (`extensions/erc8004`) — Trustless AI agent identity and reputation
+  - Agent identity resolution, reputation scoring, validation helpers
+  - Contract constants and ABI definitions
+
 ## [1.11.1] - 2026-02-21
 
 ### Added

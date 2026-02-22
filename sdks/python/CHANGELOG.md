@@ -4,6 +4,15 @@ All notable changes to the T402 Python SDK will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- **BTC Mechanism** (`t402.schemes.btc`) — Bitcoin on-chain (PSBT) and Lightning Network (BOLT11) support
+  - Exact scheme: client, server, facilitator for PSBT transactions
+  - Lightning scheme: client, server, facilitator for BOLT11 invoices
+  - 5 networks: mainnet, testnet3, signet, lightning:mainnet, lightning:testnet
+- **ERC-8004 Extension** (`t402.extensions.erc8004`) — Trustless AI agent identity and reputation
+  - Agent identity resolution, reputation scoring, validation helpers
+  - Contract constants, feedback file builder, serialization utilities
+
 ## [1.11.1] - 2026-02-21
 
 ### Added
