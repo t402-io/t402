@@ -17,6 +17,7 @@ export default {
   polkadot: '@t402/polkadot',
   stacks: '@t402/stacks',
   cosmos: '@t402/cosmos',
+  btc: '@t402/btc',
   erc8004: '@t402/erc8004',
   extensions: '@t402/extensions',
   cli: '@t402/cli',

@@ -13,6 +13,8 @@
     "packages/mechanisms/tezos/src/index.ts",
     "packages/mechanisms/polkadot/src/index.ts",
     "packages/mechanisms/stacks/src/index.ts",
+    "packages/mechanisms/cosmos/src/index.ts",
+    "packages/mechanisms/btc/src/index.ts",
     "packages/http/express/src/index.ts",
     "packages/http/next/src/index.ts",
     "packages/http/hono/src/index.ts",
@@ -26,6 +28,8 @@
     "packages/wdk-gasless/src/index.ts",
     "packages/wdk-bridge/src/index.ts",
     "packages/wdk-multisig/src/index.ts",
+    "packages/erc8004/src/index.ts",
+    "packages/a2a/src/index.ts",
     "packages/mcp/src/index.ts",
     "packages/cli/src/index.ts"
   ],
