@@ -18,7 +18,7 @@ contract T402UptoPermit2Proxy is T402BasePermit2Proxy {
     error AmountExceedsPermitted();
 
     /// @param permit2 Address of the Permit2 contract
-    constructor(address permit2) T402BasePermit2Proxy(permit2) {}
+    constructor(address permit2) T402BasePermit2Proxy(permit2) { }
 
     /// @notice Settle an up-to payment via Permit2
     /// @param permit Permit2 transfer parameters (permitted.amount = max)

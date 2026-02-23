@@ -80,9 +80,8 @@ contract MockPermit2 is IPermit2 {
             transferDetails.requestedAmount <= permit.permitted.amount,
             "TRANSFER_AMOUNT_EXCEEDS_PERMITTED"
         );
-        IERC20Permit(permit.permitted.token).transferFrom(
-            owner, transferDetails.to, transferDetails.requestedAmount
-        );
+        IERC20Permit(permit.permitted.token)
+            .transferFrom(owner, transferDetails.to, transferDetails.requestedAmount);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -108,8 +107,9 @@ contract MockPermit2 is IPermit2 {
             abi.encode(_DOMAIN_TYPEHASH, _NAME_HASH, block.chainid, address(this))
         );
 
-        bytes32 tokenPermissionsHash =
-            keccak256(abi.encode(_TOKEN_PERMISSIONS_TYPEHASH, permit.permitted.token, permit.permitted.amount));
+        bytes32 tokenPermissionsHash = keccak256(
+            abi.encode(_TOKEN_PERMISSIONS_TYPEHASH, permit.permitted.token, permit.permitted.amount)
+        );
 
         bytes32 structHash = keccak256(
             abi.encode(
@@ -125,7 +125,11 @@ contract MockPermit2 is IPermit2 {
         return keccak256(abi.encodePacked("\x19\x01", domainSeparator, structHash));
     }
 
-    function _recoverSigner(bytes32 digest, bytes calldata signature) internal pure returns (address) {
+    function _recoverSigner(bytes32 digest, bytes calldata signature)
+        internal
+        pure
+        returns (address)
+    {
         require(signature.length == 65, "INVALID_SIG_LENGTH");
         bytes32 r;
         bytes32 s;

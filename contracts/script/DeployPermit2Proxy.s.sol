@@ -87,7 +87,11 @@ contract DeployPermit2Proxies is Script {
     {
         return address(
             uint160(
-                uint256(keccak256(abi.encodePacked(bytes1(0xff), CREATE2_DEPLOYER, salt, keccak256(initCode))))
+                uint256(
+                    keccak256(
+                        abi.encodePacked(bytes1(0xff), CREATE2_DEPLOYER, salt, keccak256(initCode))
+                    )
+                )
             )
         );
     }
@@ -98,7 +102,8 @@ contract DeployPermit2Proxies is Script {
 contract DeployPermit2ProxiesTestnet is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address permit2 = vm.envOr("PERMIT2_ADDRESS", address(0x000000000022D473030F116dDEE9F6B43aC78BA3));
+        address permit2 =
+            vm.envOr("PERMIT2_ADDRESS", address(0x000000000022D473030F116dDEE9F6B43aC78BA3));
 
         console2.log("Deploying to testnet...");
         console2.log("Permit2:", permit2);

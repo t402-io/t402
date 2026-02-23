@@ -151,18 +151,16 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Initialize forge-std
+      - name: Initialize dependencies
         run: |
-          rm -rf lib/forge-std
+          rm -rf lib/forge-std lib/openzeppelin-contracts
           git clone --depth 1 https://github.com/foundry-rs/forge-std lib/forge-std
+          git clone --depth 1 --branch v5.1.0 https://github.com/OpenZeppelin/openzeppelin-contracts lib/openzeppelin-contracts
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
-
-      - name: Install dependencies
-        run: forge install
 
       - name: Run tests
         run: forge test -vvv

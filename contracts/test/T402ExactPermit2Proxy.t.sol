@@ -71,9 +71,7 @@ contract T402ExactPermit2ProxyTest is Test {
         });
 
         T402BasePermit2Proxy.Witness memory witness = T402BasePermit2Proxy.Witness({
-            to: recipient,
-            facilitator: facilitator,
-            validAfter: validAfter
+            to: recipient, facilitator: facilitator, validAfter: validAfter
         });
 
         bytes memory sig = _signPermitWitnessTransfer(payerKey, permit, address(proxy), witness);
@@ -99,9 +97,7 @@ contract T402ExactPermit2ProxyTest is Test {
         });
 
         T402BasePermit2Proxy.Witness memory witness = T402BasePermit2Proxy.Witness({
-            to: recipient,
-            facilitator: facilitator,
-            validAfter: block.timestamp
+            to: recipient, facilitator: facilitator, validAfter: block.timestamp
         });
 
         bytes memory sig = _signPermitWitnessTransfer(payerKey, permit, address(proxy), witness);
@@ -124,9 +120,7 @@ contract T402ExactPermit2ProxyTest is Test {
         });
 
         T402BasePermit2Proxy.Witness memory witness = T402BasePermit2Proxy.Witness({
-            to: recipient,
-            facilitator: facilitator,
-            validAfter: block.timestamp
+            to: recipient, facilitator: facilitator, validAfter: block.timestamp
         });
 
         bytes memory sig = _signPermitWitnessTransfer(payerKey, permit, address(proxy), witness);
@@ -145,9 +139,7 @@ contract T402ExactPermit2ProxyTest is Test {
         });
 
         T402BasePermit2Proxy.Witness memory witness = T402BasePermit2Proxy.Witness({
-            to: recipient,
-            facilitator: facilitator,
-            validAfter: block.timestamp
+            to: recipient, facilitator: facilitator, validAfter: block.timestamp
         });
 
         bytes memory sig = _signPermitWitnessTransfer(payerKey, permit, address(proxy), witness);
@@ -165,9 +157,7 @@ contract T402ExactPermit2ProxyTest is Test {
         });
 
         T402BasePermit2Proxy.Witness memory witness = T402BasePermit2Proxy.Witness({
-            to: recipient,
-            facilitator: facilitator,
-            validAfter: block.timestamp
+            to: recipient, facilitator: facilitator, validAfter: block.timestamp
         });
 
         bytes memory sig = _signPermitWitnessTransfer(payerKey, permit, address(proxy), witness);
@@ -185,9 +175,7 @@ contract T402ExactPermit2ProxyTest is Test {
         });
 
         T402BasePermit2Proxy.Witness memory witness = T402BasePermit2Proxy.Witness({
-            to: address(0),
-            facilitator: facilitator,
-            validAfter: block.timestamp
+            to: address(0), facilitator: facilitator, validAfter: block.timestamp
         });
 
         bytes memory sig = _signPermitWitnessTransfer(payerKey, permit, address(proxy), witness);
@@ -228,9 +216,7 @@ contract T402ExactPermit2ProxyTest is Test {
         });
 
         T402BasePermit2Proxy.Witness memory witness = T402BasePermit2Proxy.Witness({
-            to: recipient,
-            facilitator: facilitator,
-            validAfter: block.timestamp
+            to: recipient, facilitator: facilitator, validAfter: block.timestamp
         });
 
         bytes memory sig = _signPermitWitnessTransfer(payerKey, permit, address(proxy), witness);
@@ -259,9 +245,8 @@ contract T402ExactPermit2ProxyTest is Test {
         // No approval to Permit2!
 
         // Sign EIP-2612 permit to approve Permit2
-        T402BasePermit2Proxy.EIP2612Permit memory permit2612 = _signEIP2612Permit(
-            freshPayerKey, freshPayer, address(permit2), AMOUNT, deadline
-        );
+        T402BasePermit2Proxy.EIP2612Permit memory permit2612 =
+            _signEIP2612Permit(freshPayerKey, freshPayer, address(permit2), AMOUNT, deadline);
 
         IPermit2.PermitTransferFrom memory permit = IPermit2.PermitTransferFrom({
             permitted: IPermit2.TokenPermissions({ token: address(token), amount: AMOUNT }),
@@ -270,12 +255,11 @@ contract T402ExactPermit2ProxyTest is Test {
         });
 
         T402BasePermit2Proxy.Witness memory witness = T402BasePermit2Proxy.Witness({
-            to: recipient,
-            facilitator: facilitator,
-            validAfter: block.timestamp
+            to: recipient, facilitator: facilitator, validAfter: block.timestamp
         });
 
-        bytes memory sig = _signPermitWitnessTransfer(freshPayerKey, permit, address(proxy), witness);
+        bytes memory sig =
+            _signPermitWitnessTransfer(freshPayerKey, permit, address(proxy), witness);
 
         vm.prank(facilitator);
         proxy.settleWithPermit(permit2612, permit, freshPayer, witness, sig);
@@ -288,7 +272,11 @@ contract T402ExactPermit2ProxyTest is Test {
         uint256 deadline = block.timestamp + 3600;
 
         T402BasePermit2Proxy.EIP2612Permit memory permit2612 = _signEIP2612Permit(
-            payerKey, payer, address(permit2), AMOUNT + 1, deadline // mismatched amount
+            payerKey,
+            payer,
+            address(permit2),
+            AMOUNT + 1,
+            deadline // mismatched amount
         );
 
         IPermit2.PermitTransferFrom memory permit = IPermit2.PermitTransferFrom({
@@ -298,9 +286,7 @@ contract T402ExactPermit2ProxyTest is Test {
         });
 
         T402BasePermit2Proxy.Witness memory witness = T402BasePermit2Proxy.Witness({
-            to: recipient,
-            facilitator: facilitator,
-            validAfter: block.timestamp
+            to: recipient, facilitator: facilitator, validAfter: block.timestamp
         });
 
         bytes memory sig = _signPermitWitnessTransfer(payerKey, permit, address(proxy), witness);
@@ -324,9 +310,7 @@ contract T402ExactPermit2ProxyTest is Test {
         });
 
         T402BasePermit2Proxy.Witness memory witness = T402BasePermit2Proxy.Witness({
-            to: recipient,
-            facilitator: facilitator,
-            validAfter: block.timestamp
+            to: recipient, facilitator: facilitator, validAfter: block.timestamp
         });
 
         bytes memory sig = _signPermitWitnessTransfer(payerKey, permit, address(proxy), witness);
@@ -357,7 +341,9 @@ contract T402ExactPermit2ProxyTest is Test {
         );
 
         bytes32 witnessHash = keccak256(
-            abi.encode(proxy.WITNESS_TYPEHASH(), witness.to, witness.facilitator, witness.validAfter)
+            abi.encode(
+                proxy.WITNESS_TYPEHASH(), witness.to, witness.facilitator, witness.validAfter
+            )
         );
 
         bytes32 tokenPermissionsHash = keccak256(
@@ -398,7 +384,9 @@ contract T402ExactPermit2ProxyTest is Test {
 
         bytes32 structHash = keccak256(
             abi.encode(
-                keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"),
+                keccak256(
+                    "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
+                ),
                 owner,
                 spender,
                 value,
@@ -410,12 +398,9 @@ contract T402ExactPermit2ProxyTest is Test {
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, structHash));
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerKey, digest);
 
-        return T402BasePermit2Proxy.EIP2612Permit({
-            value: value,
-            deadline: deadline,
-            v: v,
-            r: r,
-            s: s
-        });
+        return
+            T402BasePermit2Proxy.EIP2612Permit({
+                value: value, deadline: deadline, v: v, r: r, s: s
+            });
     }
 }

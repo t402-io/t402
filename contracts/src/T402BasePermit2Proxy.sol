@@ -127,8 +127,7 @@ abstract contract T402BasePermit2Proxy is ReentrancyGuard {
 
         // Construct transfer details with destination from witness
         IPermit2.SignatureTransferDetails memory transferDetails = IPermit2.SignatureTransferDetails({
-            to: witness.to,
-            requestedAmount: settlementAmount
+            to: witness.to, requestedAmount: settlementAmount
         });
 
         // Reconstruct witness hash for Permit2 verification
@@ -161,17 +160,19 @@ abstract contract T402BasePermit2Proxy is ReentrancyGuard {
         if (permit2612.value != permittedAmount) revert Permit2612AmountMismatch();
 
         // Approve the Permit2 contract as spender via EIP-2612
-        try IERC20Permit(token).permit(
-            owner,
-            address(PERMIT2),
-            permit2612.value,
-            permit2612.deadline,
-            permit2612.v,
-            permit2612.r,
-            permit2612.s
-        ) {
-            // Success — Permit2 now has approval
-        } catch (bytes memory reason) {
+        try IERC20Permit(token)
+            .permit(
+                owner,
+                address(PERMIT2),
+                permit2612.value,
+                permit2612.deadline,
+                permit2612.v,
+                permit2612.r,
+                permit2612.s
+            ) {
+        // Success — Permit2 now has approval
+        }
+        catch (bytes memory reason) {
             emit EIP2612PermitFailed(token, owner, reason);
         }
     }

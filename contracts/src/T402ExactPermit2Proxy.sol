@@ -10,7 +10,7 @@ import { T402BasePermit2Proxy, IPermit2 } from "./T402BasePermit2Proxy.sol";
 /// @custom:security-contact security@t402.io
 contract T402ExactPermit2Proxy is T402BasePermit2Proxy {
     /// @param permit2 Address of the Permit2 contract
-    constructor(address permit2) T402BasePermit2Proxy(permit2) {}
+    constructor(address permit2) T402BasePermit2Proxy(permit2) { }
 
     /// @notice Settle an exact payment via Permit2
     /// @param permit Permit2 transfer parameters
