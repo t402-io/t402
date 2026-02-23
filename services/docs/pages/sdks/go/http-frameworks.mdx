@@ -1,0 +1,400 @@
+# Go HTTP Frameworks
+
+import { Callout, Tabs } from 'nextra/components'
+
+The Go SDK provides payment middleware for 4 HTTP frameworks: Gin, Echo, Chi, and Fiber. Each middleware shares the same `Config` struct pattern and `RoutesConfig` for payment requirements.
+
+## Framework Overview
+
+| Framework | Package | Middleware Function | Type |
+|-----------|---------|-------------------|------|
+| Gin | `http/gin` | `T402Payment(Config)` | `gin.HandlerFunc` |
+| Echo | `http/echo` | `T402Payment(Config)` | `echo.MiddlewareFunc` |
+| Chi | `http/chi` | `T402Payment(Config)` | `func(http.Handler) http.Handler` |
+| Fiber | `http/fiber` | `T402Payment(Config)` | `fiber.Handler` |
+
+## Gin
+
+```go
+package main
+
+import (
+    "github.com/gin-gonic/gin"
+    t402 "github.com/t402-io/t402/sdks/go"
+    t402http "github.com/t402-io/t402/sdks/go/http"
+    ginmw "github.com/t402-io/t402/sdks/go/http/gin"
+    evm "github.com/t402-io/t402/sdks/go/mechanisms/evm/exact/server"
+)
+
+func main() {
+    r := gin.Default()
+
+    routes := t402http.RoutesConfig{
+        "GET /api/premium": {
+            Accepts: t402http.PaymentOptions{
+                {Scheme: "exact", PayTo: "0x...", Price: "$0.01", Network: "eip155:8453"},
+            },
+            Description: "Premium content",
+            MimeType:    "application/json",
+        },
+    }
+
+    facilitator := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
+        URL: "https://facilitator.t402.io",
+    })
+
+    r.Use(ginmw.T402Payment(ginmw.Config{
+        Routes:      routes,
+        Facilitator: facilitator,
+        Schemes: []ginmw.SchemeConfig{
+            {Network: "eip155:8453", Server: evm.NewExactEvmScheme()},
+        },
+    }))
+
+    r.GET("/api/premium", func(c *gin.Context) {
+        c.JSON(200, gin.H{"data": "Premium content!"})
+    })
+
+    r.Run(":8080")
+}
+```
+
+### Gin Config
+
+```go
+type Config struct {
+    Routes                 t402http.RoutesConfig
+    Facilitator            t402.FacilitatorClient
+    Facilitators           []t402.FacilitatorClient
+    Schemes                []SchemeConfig
+    PaywallConfig          *t402http.PaywallConfig
+    SyncFacilitatorOnStart bool
+    Timeout                time.Duration
+    ErrorHandler           func(*gin.Context, error)
+    SettlementHandler      func(*gin.Context, *t402.SettleResponse)
+}
+```
+
+## Echo
+
+```go
+package main
+
+import (
+    "github.com/labstack/echo/v4"
+    t402 "github.com/t402-io/t402/sdks/go"
+    t402http "github.com/t402-io/t402/sdks/go/http"
+    echomw "github.com/t402-io/t402/sdks/go/http/echo"
+    evm "github.com/t402-io/t402/sdks/go/mechanisms/evm/exact/server"
+)
+
+func main() {
+    e := echo.New()
+
+    routes := t402http.RoutesConfig{
+        "GET /api/premium": {
+            Accepts: t402http.PaymentOptions{
+                {Scheme: "exact", PayTo: "0x...", Price: "$0.01", Network: "eip155:8453"},
+            },
+            Description: "Premium content",
+            MimeType:    "application/json",
+        },
+    }
+
+    facilitator := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
+        URL: "https://facilitator.t402.io",
+    })
+
+    e.Use(echomw.T402Payment(echomw.Config{
+        Routes:      routes,
+        Facilitator: facilitator,
+        Schemes: []echomw.SchemeConfig{
+            {Network: "eip155:8453", Server: evm.NewExactEvmScheme()},
+        },
+    }))
+
+    e.GET("/api/premium", func(c echo.Context) error {
+        return c.JSON(200, map[string]string{"data": "Premium content!"})
+    })
+
+    e.Start(":8080")
+}
+```
+
+### Echo Config
+
+```go
+type Config struct {
+    Routes                 t402http.RoutesConfig
+    Facilitator            t402.FacilitatorClient
+    Facilitators           []t402.FacilitatorClient
+    Schemes                []SchemeConfig
+    PaywallConfig          *t402http.PaywallConfig
+    SyncFacilitatorOnStart bool
+    Timeout                time.Duration
+    ErrorHandler           func(echo.Context, error) error
+    SettlementHandler      func(echo.Context, *t402.SettleResponse)
+}
+```
+
+## Chi
+
+Chi uses standard `net/http` types, making it compatible with any `http.Handler`-based router.
+
+```go
+package main
+
+import (
+    "encoding/json"
+    "net/http"
+
+    "github.com/go-chi/chi/v5"
+    t402 "github.com/t402-io/t402/sdks/go"
+    t402http "github.com/t402-io/t402/sdks/go/http"
+    chimw "github.com/t402-io/t402/sdks/go/http/chi"
+    evm "github.com/t402-io/t402/sdks/go/mechanisms/evm/exact/server"
+)
+
+func main() {
+    r := chi.NewRouter()
+
+    routes := t402http.RoutesConfig{
+        "GET /api/premium": {
+            Accepts: t402http.PaymentOptions{
+                {Scheme: "exact", PayTo: "0x...", Price: "$0.01", Network: "eip155:8453"},
+            },
+            Description: "Premium content",
+            MimeType:    "application/json",
+        },
+    }
+
+    facilitator := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
+        URL: "https://facilitator.t402.io",
+    })
+
+    r.Use(chimw.T402Payment(chimw.Config{
+        Routes:      routes,
+        Facilitator: facilitator,
+        Schemes: []chimw.SchemeConfig{
+            {Network: "eip155:8453", Server: evm.NewExactEvmScheme()},
+        },
+    }))
+
+    r.Get("/api/premium", func(w http.ResponseWriter, r *http.Request) {
+        json.NewEncoder(w).Encode(map[string]string{"data": "Premium content!"})
+    })
+
+    http.ListenAndServe(":8080", r)
+}
+```
+
+### Chi Config
+
+```go
+type Config struct {
+    Routes                 t402http.RoutesConfig
+    Facilitator            t402.FacilitatorClient
+    Facilitators           []t402.FacilitatorClient
+    Schemes                []SchemeConfig
+    PaywallConfig          *t402http.PaywallConfig
+    SyncFacilitatorOnStart bool
+    Timeout                time.Duration
+    ErrorHandler           func(http.ResponseWriter, *http.Request, error)
+    SettlementHandler      func(http.ResponseWriter, *http.Request, *t402.SettleResponse)
+}
+```
+
+<Callout type="info">
+The Chi middleware also works with any `net/http` compatible router, including Go's built-in `http.ServeMux` (Go 1.22+).
+</Callout>
+
+## Fiber
+
+```go
+package main
+
+import (
+    "github.com/gofiber/fiber/v2"
+    t402 "github.com/t402-io/t402/sdks/go"
+    t402http "github.com/t402-io/t402/sdks/go/http"
+    fibermw "github.com/t402-io/t402/sdks/go/http/fiber"
+    evm "github.com/t402-io/t402/sdks/go/mechanisms/evm/exact/server"
+)
+
+func main() {
+    app := fiber.New()
+
+    routes := t402http.RoutesConfig{
+        "GET /api/premium": {
+            Accepts: t402http.PaymentOptions{
+                {Scheme: "exact", PayTo: "0x...", Price: "$0.01", Network: "eip155:8453"},
+            },
+            Description: "Premium content",
+            MimeType:    "application/json",
+        },
+    }
+
+    facilitator := t402http.NewHTTPFacilitatorClient(&t402http.FacilitatorConfig{
+        URL: "https://facilitator.t402.io",
+    })
+
+    app.Use(fibermw.T402Payment(fibermw.Config{
+        Routes:      routes,
+        Facilitator: facilitator,
+        Schemes: []fibermw.SchemeConfig{
+            {Network: "eip155:8453", Server: evm.NewExactEvmScheme()},
+        },
+    }))
+
+    app.Get("/api/premium", func(c *fiber.Ctx) error {
+        return c.JSON(fiber.Map{"data": "Premium content!"})
+    })
+
+    app.Listen(":8080")
+}
+```
+
+### Fiber Config
+
+```go
+type Config struct {
+    Routes                 t402http.RoutesConfig
+    Facilitator            t402.FacilitatorClient
+    Facilitators           []t402.FacilitatorClient
+    Schemes                []SchemeConfig
+    PaywallConfig          *t402http.PaywallConfig
+    SyncFacilitatorOnStart bool
+    Timeout                time.Duration
+    ErrorHandler           func(*fiber.Ctx, error) error
+    SettlementHandler      func(*fiber.Ctx, *t402.SettleResponse)
+}
+```
+
+## Shared Configuration
+
+All four middleware implementations share the same `RoutesConfig` and `PaymentOptions` types from the `t402http` package.
+
+### Route Configuration
+
+```go
+routes := t402http.RoutesConfig{
+    "GET /resource":     {...},  // Exact path match
+    "GET /users/*":      {...},  // Wildcard suffix
+    "POST /api/compute": {...},  // Specific method
+    "*":                 {...},  // Catch-all
+}
+```
+
+### Multi-Network Support
+
+Accept payments on multiple blockchains for a single route:
+
+```go
+routes := t402http.RoutesConfig{
+    "GET /api/data": {
+        Accepts: t402http.PaymentOptions{
+            {Scheme: "exact", PayTo: "0x...", Price: "$0.01", Network: "eip155:8453"},
+            {Scheme: "exact", PayTo: "0x...", Price: "$0.01", Network: "eip155:42161"},
+            {Scheme: "exact", PayTo: "So1...", Price: "$0.01", Network: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"},
+        },
+        Description: "Multi-chain data endpoint",
+        MimeType:    "application/json",
+    },
+}
+```
+
+### Dynamic Pricing
+
+```go
+{
+    Scheme:  "exact",
+    PayTo:   "0x...",
+    Network: "eip155:8453",
+    Price: t402http.DynamicPriceFunc(func(ctx context.Context, reqCtx t402http.HTTPRequestContext) (t402.Price, error) {
+        tier := getUserTier(reqCtx)
+        if tier == "premium" {
+            return "$0.001", nil
+        }
+        return "$0.01", nil
+    }),
+}
+```
+
+### Dynamic PayTo
+
+```go
+{
+    Scheme:  "exact",
+    Price:   "$10.00",
+    Network: "eip155:8453",
+    PayTo: t402http.DynamicPayToFunc(func(ctx context.Context, reqCtx t402http.HTTPRequestContext) (string, error) {
+        sellerID := extractSellerFromPath(reqCtx.Path)
+        return getSellerAddress(sellerID)
+    }),
+}
+```
+
+### Paywall (Browser UI)
+
+All frameworks support serving a browser-based payment UI for non-API requests:
+
+```go
+config := ginmw.Config{
+    Routes:      routes,
+    Facilitator: facilitator,
+    Schemes:     schemes,
+    PaywallConfig: &t402http.PaywallConfig{
+        Enabled:      true,
+        DeliveryMode: "inline", // or "cdn" (default)
+    },
+}
+```
+
+When a browser requests a payment-protected page, the middleware returns an HTML page with a payment UI instead of raw JSON. The CDN mode (~500B) loads the UI from a CDN, while inline mode (~2.7MB) embeds the UI directly.
+
+## Settlement and Error Handlers
+
+### Error Handler
+
+Customize how payment errors are returned to clients:
+
+```go
+// Gin
+ErrorHandler: func(c *gin.Context, err error) {
+    log.Printf("Payment error: %v", err)
+    c.JSON(http.StatusPaymentRequired, gin.H{"error": err.Error()})
+}
+
+// Echo
+ErrorHandler: func(c echo.Context, err error) error {
+    return c.JSON(http.StatusPaymentRequired, map[string]string{"error": err.Error()})
+}
+
+// Chi
+ErrorHandler: func(w http.ResponseWriter, r *http.Request, err error) {
+    http.Error(w, err.Error(), http.StatusPaymentRequired)
+}
+
+// Fiber
+ErrorHandler: func(c *fiber.Ctx, err error) error {
+    return c.Status(fiber.StatusPaymentRequired).JSON(fiber.Map{"error": err.Error()})
+}
+```
+
+### Settlement Handler
+
+Run custom logic after successful on-chain settlement:
+
+```go
+// Gin
+SettlementHandler: func(c *gin.Context, resp *t402.SettleResponse) {
+    log.Printf("Payment settled: tx=%s payer=%s", resp.Transaction, resp.Payer)
+    db.RecordPayment(resp.Transaction, resp.Payer)
+}
+```
+
+## Related
+
+- [Client SDK](/sdks/go/client) - Building payment clients
+- [Server SDK](/sdks/go/server) - Core server concepts
+- [Facilitator](/sdks/go/facilitator) - Building facilitators

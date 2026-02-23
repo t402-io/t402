@@ -1,0 +1,220 @@
+# Go MCP Server
+
+import { Callout } from 'nextra/components'
+
+The Go SDK includes an MCP (Model Context Protocol) server for AI agent integration, enabling language models to make stablecoin payments and check balances across EVM networks.
+
+## Installation
+
+```bash
+go install github.com/t402-io/t402/sdks/go/cmd/t402-mcp@latest
+```
+
+## Features
+
+- **6 tools** for AI agents (balance, payments, bridging)
+- **Multi-network** EVM support (Ethereum, Base, Arbitrum, Optimism, Polygon, Avalanche, Ink, Berachain, Unichain)
+- **Demo mode** for testing without real transactions
+- **Gasless payments** via ERC-4337 bundler/paymaster
+- **USDT0 bridging** via LayerZero OFT
+
+## MCP Tools
+
+| Tool | Description |
+|------|-------------|
+| `t402/getBalance` | Get native and token balances for an address on a specific network |
+| `t402/getAllBalances` | Get balances across all supported EVM networks |
+| `t402/pay` | Send stablecoin payment (USDC, USDT, USDT0) |
+| `t402/payGasless` | Send gasless payment via ERC-4337 |
+| `t402/getBridgeFee` | Get bridge fee estimate for cross-chain USDT0 transfer |
+| `t402/bridge` | Execute cross-chain USDT0 bridge via LayerZero |
+
+## Claude Desktop Setup
+
+Add to your Claude Desktop configuration (`claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "t402": {
+      "command": "t402-mcp",
+      "env": {
+        "T402_PRIVATE_KEY": "0x...",
+        "T402_DEMO_MODE": "true"
+      }
+    }
+  }
+}
+```
+
+## Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `T402_PRIVATE_KEY` | Hex wallet private key (0x...) | Yes |
+| `T402_DEMO_MODE` | Set to `"true"` to simulate transactions | No |
+| `T402_BUNDLER_URL` | ERC-4337 bundler endpoint for gasless payments | No |
+| `T402_PAYMASTER_URL` | ERC-4337 paymaster endpoint | No |
+| `T402_RPC_ETHEREUM` | Custom RPC URL for Ethereum | No |
+| `T402_RPC_BASE` | Custom RPC URL for Base | No |
+| `T402_RPC_ARBITRUM` | Custom RPC URL for Arbitrum | No |
+
+Custom RPC URLs follow the pattern `T402_RPC_<NETWORK>` where `<NETWORK>` is the uppercase chain name.
+
+## Supported Networks
+
+| Network | Tokens |
+|---------|--------|
+| Ethereum | USDC, USDT, USDT0 |
+| Base | USDC, USDT0 |
+| Arbitrum | USDC, USDT, USDT0 |
+| Optimism | USDC, USDT |
+| Polygon | USDC, USDT |
+| Avalanche | USDC, USDT |
+| Ink | USDT0 |
+| Berachain | USDT0 |
+| Unichain | USDT0 |
+
+## Programmatic Usage
+
+Use the MCP server as a library in your Go application:
+
+```go
+package main
+
+import (
+    "context"
+    "github.com/t402-io/t402/sdks/go/mcp"
+)
+
+func main() {
+    config := &mcp.ServerConfig{
+        PrivateKey: "0x...",
+        DemoMode:   true,
+        RPCURLs: map[string]string{
+            "ethereum": "https://eth.llamarpc.com",
+            "base":     "https://mainnet.base.org",
+        },
+    }
+
+    server := mcp.NewServer(config)
+
+    ctx := context.Background()
+    server.Run(ctx)
+}
+```
+
+### Configuration from Environment
+
+```go
+// LoadConfigFromEnv reads T402_PRIVATE_KEY, T402_DEMO_MODE,
+// T402_BUNDLER_URL, T402_PAYMASTER_URL, and T402_RPC_* variables.
+config := mcp.LoadConfigFromEnv()
+server := mcp.NewServer(config)
+```
+
+## Tool Details
+
+### t402/getBalance
+
+Get token balances for a specific address and network.
+
+**Input:**
+```json
+{
+  "address": "0x1234...",
+  "network": "base"
+}
+```
+
+**Output:**
+```json
+{
+  "network": "base",
+  "native": { "token": "ETH", "balance": "0.15", "raw": "150000000000000000" },
+  "tokens": [
+    { "token": "USDC", "balance": "100.50", "raw": "100500000" },
+    { "token": "USDT0", "balance": "50.00", "raw": "50000000" }
+  ]
+}
+```
+
+### t402/pay
+
+Send a stablecoin payment.
+
+**Input:**
+```json
+{
+  "to": "0xRecipient...",
+  "amount": "10.00",
+  "token": "USDC",
+  "network": "base"
+}
+```
+
+**Output:**
+```json
+{
+  "txHash": "0xabc...",
+  "from": "0xSender...",
+  "to": "0xRecipient...",
+  "amount": "10.00",
+  "token": "USDC",
+  "network": "base",
+  "explorerUrl": "https://basescan.org/tx/0xabc..."
+}
+```
+
+### t402/bridge
+
+Execute a cross-chain USDT0 bridge via LayerZero.
+
+**Input:**
+```json
+{
+  "fromChain": "arbitrum",
+  "toChain": "base",
+  "amount": "100.00",
+  "recipient": "0x..."
+}
+```
+
+**Output:**
+```json
+{
+  "txHash": "0xdef...",
+  "messageGuid": "0x...",
+  "fromChain": "arbitrum",
+  "toChain": "base",
+  "amount": "100.00",
+  "explorerUrl": "https://arbiscan.io/tx/0xdef...",
+  "trackingUrl": "https://scan.layerzero-api.com/v1/...",
+  "estimatedTime": 300
+}
+```
+
+## Demo Mode
+
+When `T402_DEMO_MODE=true`, the server simulates all transactions without submitting them to the blockchain. This is useful for testing AI agent workflows without spending real funds. Demo mode responses include `"demoMode": true` in the output.
+
+## Docker
+
+```dockerfile
+FROM golang:1.24-alpine
+
+RUN go install github.com/t402-io/t402/sdks/go/cmd/t402-mcp@latest
+
+ENTRYPOINT ["t402-mcp"]
+```
+
+```bash
+docker build -t t402-mcp .
+docker run -it -e T402_DEMO_MODE=true t402-mcp
+```
+
+## Related
+
+- [TypeScript MCP](/sdks/typescript/mcp) - TypeScript MCP server (11 tools)
+- [Java MCP](/sdks/java/mcp) - Java MCP server
+- [A2A Negotiation](/advanced/a2a-negotiation) - Agent-to-agent payments

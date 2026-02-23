@@ -54,7 +54,8 @@ implementation 'io.t402:t402:1.11.1'
 | Spring WebFlux (Reactive) | ✅ |
 | Jakarta Servlet Filter | ✅ |
 | Micronaut Filter | ✅ |
-| JAX-RS Filter | ✅ |
+| Quarkus / JAX-RS Filter | ✅ |
+| Bitcoin (PSBT + Lightning) | ✅ |
 
 ## Quick Start
 
@@ -126,13 +127,19 @@ HttpResponse<String> response = client.get(
       <FileTree.Folder name="reactive" />
     </FileTree.Folder>
     <FileTree.Folder name="micronaut" />
-    <FileTree.Folder name="jaxrs" />
+    <FileTree.Folder name="quarkus" />
     <FileTree.Folder name="schemes" defaultOpen>
+      <FileTree.Folder name="evm" />
       <FileTree.Folder name="svm" />
       <FileTree.Folder name="ton" />
       <FileTree.Folder name="tron" />
       <FileTree.Folder name="near" />
+      <FileTree.Folder name="aptos" />
+      <FileTree.Folder name="tezos" />
+      <FileTree.Folder name="polkadot" />
+      <FileTree.Folder name="stacks" />
       <FileTree.Folder name="cosmos" />
+      <FileTree.Folder name="btc" />
     </FileTree.Folder>
     <FileTree.Folder name="erc4337" />
     <FileTree.Folder name="bridge" />
@@ -177,6 +184,8 @@ HttpResponse<String> response = client.get(
 | Polkadot Asset Hub | `polkadot:68d56f15f85d3136970ec16946040bc1` |
 | Stacks Mainnet | `stacks:1` |
 | Cosmos/Noble Mainnet | `cosmos:noble-1` |
+| Bitcoin Mainnet | `bip122:000000000019d6689c085ae165831e93` |
+| Lightning Mainnet | `lightning:mainnet` |
 
 ## Packages
 
@@ -194,6 +203,7 @@ HttpResponse<String> response = client.get(
 | `io.t402.schemes.polkadot` | Polkadot exact-direct scheme |
 | `io.t402.schemes.stacks` | Stacks exact-direct scheme |
 | `io.t402.schemes.cosmos` | Cosmos/Noble exact-direct scheme |
+| `io.t402.schemes.btc` | Bitcoin PSBT and Lightning BOLT11 schemes |
 | `io.t402.erc4337` | ERC-4337 account abstraction |
 | `io.t402.bridge` | USDT0 cross-chain bridge |
 | `io.t402.multisig` | Safe multi-sig support |
@@ -202,7 +212,7 @@ HttpResponse<String> response = client.get(
 | `io.t402.a2a` | A2A transport helpers |
 | `io.t402.spring` | Spring Boot auto-configuration |
 | `io.t402.micronaut` | Micronaut payment filter |
-| `io.t402.jaxrs` | JAX-RS payment filter |
+| `io.t402.quarkus` | Quarkus / JAX-RS payment filter |
 | `io.t402.cli` | Command-line tools |
 
 ## Requirements

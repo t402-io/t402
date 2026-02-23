@@ -2,7 +2,7 @@
 
 import { Callout, Tabs } from 'nextra/components'
 
-The Java SDK provides payment filters for 5 HTTP frameworks: Jakarta Servlet, Spring MVC, Spring WebFlux, Micronaut, and JAX-RS. Each filter implements the full T402 v2 payment lifecycle with V2-first header detection and V1 fallback.
+The Java SDK provides payment filters for 6 HTTP frameworks: Jakarta Servlet, Spring MVC, Spring WebFlux, Micronaut, Quarkus (JAX-RS), and generic JAX-RS. Each filter implements the full T402 v2 payment lifecycle with V2-first header detection and V1 fallback.
 
 ## Framework Overview
 
@@ -12,7 +12,7 @@ The Java SDK provides payment filters for 5 HTTP frameworks: Jakarta Servlet, Sp
 | Spring MVC | `io.t402.spring` | `PaymentInterceptor` | Synchronous |
 | Spring WebFlux | `io.t402.spring.reactive` | `PaymentWebFilter` | Reactive |
 | Micronaut | `io.t402.micronaut` | `PaymentFilter` | Reactive |
-| JAX-RS | `io.t402.jaxrs` | `PaymentFilter` | Synchronous (JAX-RS) |
+| Quarkus (JAX-RS) | `io.t402.quarkus` | `PaymentFilter` | Synchronous (JAX-RS) |
 
 ## Jakarta Servlet
 
@@ -153,12 +153,24 @@ public class ApiController {
 }
 ```
 
-## JAX-RS
+### Micronaut Configuration
 
-The JAX-RS filter implements `ContainerRequestFilter` and `ContainerResponseFilter` for the full payment lifecycle. Works with any JAX-RS runtime (Jersey, RESTEasy, etc.).
+Micronaut uses `application.yml` for configuration:
+
+```yaml
+t402:
+  pay-to: "0xYourWalletAddress"
+  facilitator-url: "https://facilitator.t402.io"
+  network: "eip155:8453"
+  asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+```
+
+## Quarkus (JAX-RS)
+
+The Quarkus filter implements `ContainerRequestFilter` and `ContainerResponseFilter` for the full payment lifecycle. It works with any JAX-RS runtime (RESTEasy, Jersey, etc.) and is annotated with `@Provider` for auto-discovery.
 
 ```java
-import io.t402.jaxrs.PaymentFilter;
+import io.t402.quarkus.PaymentFilter;
 import io.t402.client.HttpFacilitatorClient;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
@@ -170,8 +182,8 @@ public class T402Producer {
     @ApplicationScoped
     public PaymentFilter paymentFilter() {
         Map<String, BigInteger> priceTable = Map.of(
-            "/api/premium", BigInteger.valueOf(10000),
-            "/api/report",  BigInteger.valueOf(1000000)
+            "/api/premium", BigInteger.valueOf(10000),   // 0.01 USDC
+            "/api/report",  BigInteger.valueOf(1000000)  // 1.00 USDC
         );
 
         return new PaymentFilter(
@@ -185,7 +197,7 @@ public class T402Producer {
 }
 ```
 
-### JAX-RS Resource
+### Quarkus Resource
 
 ```java
 import jakarta.ws.rs.GET;
@@ -202,12 +214,34 @@ public class ApiResource {
     public Map<String, String> premium() {
         return Map.of("data", "Premium content!");
     }
+
+    @GET
+    @Path("/report")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Map<String, String> report() {
+        return Map.of("report", "Full report data");
+    }
 }
 ```
 
+### Quarkus Configuration
+
+Configure via `application.properties`:
+
+```properties
+t402.pay-to=0xYourWalletAddress
+t402.facilitator-url=https://facilitator.t402.io
+t402.network=eip155:8453
+t402.asset=0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+```
+
+<Callout type="info">
+The Quarkus filter uses the `@Provider` annotation, so it is auto-discovered when the JAR is on the classpath. No manual registration is needed.
+</Callout>
+
 ## Common Configuration
 
-All filters share the same constructor pattern:
+All filters (Micronaut, Quarkus) share the same constructor pattern:
 
 ```java
 // Basic constructor (uses default network and asset)

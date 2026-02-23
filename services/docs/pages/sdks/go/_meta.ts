@@ -2,5 +2,8 @@ export default {
   index: 'Overview',
   client: 'Client SDK',
   server: 'Server SDK',
-  facilitator: 'Facilitator'
+  'http-frameworks': 'HTTP Frameworks',
+  facilitator: 'Facilitator',
+  mcp: 'MCP Server',
+  'smart-router': 'Smart Router'
 }
