@@ -16,7 +16,7 @@ export const SDK_VERSIONS = {
 } as const;
 
 export const CHAIN_FAMILIES = [
-  { name: "EVM", color: "#627EEA", count: 19 },
+  { name: "EVM", color: "#627EEA", count: 25 },
   { name: "Solana", color: "#9945FF", count: 1 },
   { name: "TON", color: "#0098EA", count: 1 },
   { name: "TRON", color: "#FF0013", count: 1 },

@@ -12,7 +12,7 @@ t402 is an open standard for HTTP-native payments. The ecosystem consists of all
 
 Facilitators verify and settle payments on-chain. They are the bridge between HTTP commerce and blockchain finality.
 
-- **Hosted Facilitator**: The official [t402 facilitator](https://facilitator.t402.io) supports 50 networks across 10 chain families with 81 payment kinds.
+- **Hosted Facilitator**: The official [t402 facilitator](https://facilitator.t402.io) supports 44 networks across 10 chain families with 64 payment kinds.
 - **Self-Hosted**: Run your own facilitator using the Docker image for full control over settlement.
 - **Custom**: Build a facilitator with custom logic (fee structures, settlement strategies, compliance rules).
 
