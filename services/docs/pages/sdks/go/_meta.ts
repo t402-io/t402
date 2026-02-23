@@ -4,6 +4,5 @@ export default {
   server: 'Server SDK',
   'http-frameworks': 'HTTP Frameworks',
   facilitator: 'Facilitator',
-  mcp: 'MCP Server',
-  'smart-router': 'Smart Router'
+  mcp: 'MCP Server'
 }
