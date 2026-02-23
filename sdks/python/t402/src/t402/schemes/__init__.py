@@ -83,6 +83,23 @@ from t402.schemes.evm import (
     PermitAuthorization,
     UptoEIP2612Payload,
     UptoEvmExtra,
+    # Permit2 EVM
+    Permit2EvmClientScheme,
+    Permit2EvmServerScheme,
+    Permit2EvmFacilitatorScheme,
+    FacilitatorPermit2Signer,
+    SCHEME_PERMIT2,
+    PERMIT2_ADDRESS,
+    # Permit2-Proxy EVM
+    Permit2ProxyEvmClientScheme,
+    Permit2ProxyEvmServerScheme,
+    Permit2ProxyEvmFacilitatorScheme,
+    FacilitatorPermit2ProxySigner,
+    Permit2ProxyTransactionConfirmation,
+    SCHEME_PERMIT2_PROXY,
+    EXACT_PROXY_ADDRESS,
+    UPTO_PROXY_ADDRESS,
+    WITNESS_TYPE_HASH,
 )
 
 # Upto Core Types
@@ -260,6 +277,23 @@ __all__ = [
     "PermitAuthorization",
     "UptoEIP2612Payload",
     "UptoEvmExtra",
+    # EVM Permit2 Schemes
+    "Permit2EvmClientScheme",
+    "Permit2EvmServerScheme",
+    "Permit2EvmFacilitatorScheme",
+    "FacilitatorPermit2Signer",
+    "SCHEME_PERMIT2",
+    "PERMIT2_ADDRESS",
+    # EVM Permit2-Proxy Schemes
+    "Permit2ProxyEvmClientScheme",
+    "Permit2ProxyEvmServerScheme",
+    "Permit2ProxyEvmFacilitatorScheme",
+    "FacilitatorPermit2ProxySigner",
+    "Permit2ProxyTransactionConfirmation",
+    "SCHEME_PERMIT2_PROXY",
+    "EXACT_PROXY_ADDRESS",
+    "UPTO_PROXY_ADDRESS",
+    "WITNESS_TYPE_HASH",
     # Upto Core Types
     "SCHEME_UPTO",
     "UptoPaymentRequirements",

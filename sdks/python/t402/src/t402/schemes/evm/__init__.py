@@ -7,6 +7,8 @@ Supported schemes:
 - exact: EIP-3009 TransferWithAuthorization (recommended)
 - exact-legacy: approve + transferFrom (DEPRECATED - see deprecation notice below)
 - upto: EIP-2612 Permit (usage-based billing)
+- permit2: Uniswap Permit2 PermitTransferFrom
+- permit2-proxy: Permit2 with witness via proxy contracts
 
 .. deprecated:: 2.3.0
     The **exact-legacy** scheme is deprecated and will be removed in v3.0.0.
@@ -62,6 +64,27 @@ from t402.schemes.evm.upto import (
     is_eip2612_payload,
 )
 
+from t402.schemes.evm.permit2 import (
+    Permit2EvmClientScheme,
+    Permit2EvmServerScheme,
+    Permit2EvmFacilitatorScheme,
+    FacilitatorPermit2Signer,
+    SCHEME_PERMIT2,
+    PERMIT2_ADDRESS,
+)
+
+from t402.schemes.evm.permit2_proxy import (
+    Permit2ProxyEvmClientScheme,
+    Permit2ProxyEvmServerScheme,
+    Permit2ProxyEvmFacilitatorScheme,
+    FacilitatorPermit2ProxySigner,
+    Permit2ProxyTransactionConfirmation,
+    SCHEME_PERMIT2_PROXY,
+    EXACT_PROXY_ADDRESS,
+    UPTO_PROXY_ADDRESS,
+    WITNESS_TYPE_HASH,
+)
+
 __all__ = [
     # Exact scheme
     "ExactEvmClientScheme",
@@ -88,4 +111,21 @@ __all__ = [
     "UptoEIP2612Payload",
     "UptoEvmExtra",
     "is_eip2612_payload",
+    # Permit2 scheme
+    "Permit2EvmClientScheme",
+    "Permit2EvmServerScheme",
+    "Permit2EvmFacilitatorScheme",
+    "FacilitatorPermit2Signer",
+    "SCHEME_PERMIT2",
+    "PERMIT2_ADDRESS",
+    # Permit2-Proxy scheme
+    "Permit2ProxyEvmClientScheme",
+    "Permit2ProxyEvmServerScheme",
+    "Permit2ProxyEvmFacilitatorScheme",
+    "FacilitatorPermit2ProxySigner",
+    "Permit2ProxyTransactionConfirmation",
+    "SCHEME_PERMIT2_PROXY",
+    "EXACT_PROXY_ADDRESS",
+    "UPTO_PROXY_ADDRESS",
+    "WITNESS_TYPE_HASH",
 ]
