@@ -123,7 +123,7 @@ describe("Multi-Network Integration Tests", () => {
           expect(token.symbol).toBeDefined();
           expect(token.name).toBeDefined();
           expect(token.version).toBeDefined();
-          expect(token.decimals).toBe(6); // USDC/USDT always 6 decimals
+          expect([6, 18]).toContain(token.decimals); // USDT uses 6 decimals; legacy USDT on BNB/Celo uses 18
           expect(["eip3009", "legacy"]).toContain(token.tokenType);
           expect(typeof token.priority).toBe("number");
         }
