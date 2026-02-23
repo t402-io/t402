@@ -14,6 +14,11 @@ const baseConfig = {
     "permit2/client/index": "src/permit2/client/index.ts",
     "permit2/server/index": "src/permit2/server/index.ts",
     "permit2/facilitator/index": "src/permit2/facilitator/index.ts",
+    // Permit2 Proxy scheme
+    "permit2-proxy/index": "src/permit2-proxy/index.ts",
+    "permit2-proxy/client/index": "src/permit2-proxy/client/index.ts",
+    "permit2-proxy/server/index": "src/permit2-proxy/server/index.ts",
+    "permit2-proxy/facilitator/index": "src/permit2-proxy/facilitator/index.ts",
     // Up-To scheme (DRAFT)
     "upto/client/index": "src/upto/client/index.ts",
     "upto/index": "src/upto/index.ts",

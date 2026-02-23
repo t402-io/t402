@@ -167,6 +167,46 @@
         "default": "./dist/cjs/permit2/facilitator/index.js"
       }
     },
+    "./permit2-proxy": {
+      "import": {
+        "types": "./dist/esm/permit2-proxy/index.d.mts",
+        "default": "./dist/esm/permit2-proxy/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/permit2-proxy/index.d.ts",
+        "default": "./dist/cjs/permit2-proxy/index.js"
+      }
+    },
+    "./permit2-proxy/client": {
+      "import": {
+        "types": "./dist/esm/permit2-proxy/client/index.d.mts",
+        "default": "./dist/esm/permit2-proxy/client/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/permit2-proxy/client/index.d.ts",
+        "default": "./dist/cjs/permit2-proxy/client/index.js"
+      }
+    },
+    "./permit2-proxy/server": {
+      "import": {
+        "types": "./dist/esm/permit2-proxy/server/index.d.mts",
+        "default": "./dist/esm/permit2-proxy/server/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/permit2-proxy/server/index.d.ts",
+        "default": "./dist/cjs/permit2-proxy/server/index.js"
+      }
+    },
+    "./permit2-proxy/facilitator": {
+      "import": {
+        "types": "./dist/esm/permit2-proxy/facilitator/index.d.mts",
+        "default": "./dist/esm/permit2-proxy/facilitator/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/permit2-proxy/facilitator/index.d.ts",
+        "default": "./dist/cjs/permit2-proxy/facilitator/index.js"
+      }
+    },
     "./upto": {
       "import": {
         "types": "./dist/esm/upto/index.d.mts",

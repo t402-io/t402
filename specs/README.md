@@ -7,7 +7,7 @@ This folder contains the complete documentation of the t402 payment protocol, or
 The t402 standard separates three key concepts:
 
 - **Transport**: How data is exchanged between parties (HTTP, MCP, A2A)
-- **Scheme**: The logical way money moves (exact, upto, etc.)
+- **Scheme**: The logical way money moves (exact, upto, permit2, permit2-proxy, etc.)
 - **Network**: The blockchain where value is exchanged (EVM, Solana, TON, TRON)
 
 ## Protocol Versions
@@ -66,6 +66,24 @@ The `upto` scheme authorizes transfer of **up to** a maximum amount, enabling us
 |----------------|-------------|
 | [Overview](./schemes/upto/scheme_upto.md) | Scheme specification **(DRAFT)** |
 | [EVM](./schemes/upto/scheme_upto_evm.md) | Ethereum/EVM chains (EIP-2612) **(DRAFT)** |
+
+### Permit2 Scheme
+
+The `permit2` scheme enables token transfers using Uniswap's Permit2 contract, supporting any ERC-20 token.
+
+| Implementation | Description |
+|----------------|-------------|
+| [Overview](./schemes/permit2/scheme_permit2.md) | Scheme specification |
+| [EVM](./schemes/permit2/scheme_permit2_evm.md) | Ethereum/EVM chains (Permit2 SignatureTransfer) |
+
+### Permit2 Proxy Scheme
+
+The `permit2-proxy` scheme extends `permit2` with witness-based facilitator binding via a proxy contract. Provides frontrun protection, destination locking, and optional gasless EIP-2612 flows. Interoperable with the x402 protocol.
+
+| Implementation | Description |
+|----------------|-------------|
+| [Overview](./schemes/permit2-proxy/scheme_permit2_proxy.md) | Scheme specification |
+| [EVM](./schemes/permit2-proxy/scheme_permit2_proxy_evm.md) | Ethereum/EVM chains (Permit2 + Witness proxy) |
 
 ## Extensions
 
