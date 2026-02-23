@@ -8,7 +8,7 @@ const installCommands: Record<string, string> = {
   typescript: "pnpm add @t402/core @t402/evm",
   python: "pip install t402",
   go: "go get github.com/t402-io/t402/sdks/go",
-  java: "io.t402:t402:1.12.0",
+  java: "io.t402:t402:1.12.1",
 };
 
 const packageCounts: Record<string, number> = {

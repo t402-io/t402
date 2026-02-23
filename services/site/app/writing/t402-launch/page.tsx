@@ -217,10 +217,10 @@ export default function T402LaunchPage() {
                 >
                   <div className="grid grid-cols-2 sm:grid-cols-4 divide-x" style={{ borderColor: "rgba(0,0,0,0.08)" }}>
                     {[
-                      { lang: "TypeScript", ver: "v2.7.0" },
-                      { lang: "Python", ver: "v1.12.0" },
-                      { lang: "Go", ver: "v1.12.0" },
-                      { lang: "Java", ver: "v1.12.0" },
+                      { lang: "TypeScript", ver: "v2.7.1" },
+                      { lang: "Python", ver: "v1.12.1" },
+                      { lang: "Go", ver: "v1.12.1" },
+                      { lang: "Java", ver: "v1.12.1" },
                     ].map((sdk) => (
                       <div key={sdk.lang} className="p-4 text-center">
                         <p className="font-mono text-sm" style={{ color: "#A1A1AA" }}>{sdk.lang}</p>

@@ -68,7 +68,7 @@ interface SdkInfo {
 const sdks: SdkInfo[] = [
   {
     name: "TypeScript",
-    version: "v2.7.0",
+    version: "v2.7.1",
     packageManager: "npm / pnpm",
     installCommand: "npm install @t402/core @t402/evm",
     runtime: "Node.js 18+, Bun, Deno",
@@ -78,7 +78,7 @@ const sdks: SdkInfo[] = [
   },
   {
     name: "Python",
-    version: "v1.12.0",
+    version: "v1.12.1",
     packageManager: "pip / uv",
     installCommand: "pip install t402",
     runtime: "Python 3.10+",
@@ -88,7 +88,7 @@ const sdks: SdkInfo[] = [
   },
   {
     name: "Go",
-    version: "v1.12.0",
+    version: "v1.12.1",
     packageManager: "go modules",
     installCommand: "go get github.com/t402-io/t402/sdks/go",
     runtime: "Go 1.24+",
@@ -98,9 +98,9 @@ const sdks: SdkInfo[] = [
   },
   {
     name: "Java",
-    version: "v1.12.0",
+    version: "v1.12.1",
     packageManager: "Maven / Gradle",
-    installCommand: "<dependency>io.t402:t402:1.12.0</dependency>",
+    installCommand: "<dependency>io.t402:t402:1.12.1</dependency>",
     runtime: "Java 21+",
     bestFor: ["Enterprise systems", "Spring Boot", "Android apps", "Large-scale backends"],
     packages: 1,

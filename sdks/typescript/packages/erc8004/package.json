@@ -1,6 +1,6 @@
 {
   "name": "@t402/erc8004",
-  "version": "2.7.0",
+  "version": "2.7.1",
   "description": "ERC-8004 Trustless Agents integration for t402 payment protocol",
   "main": "./dist/cjs/index.cjs",
   "module": "./dist/esm/index.mjs",

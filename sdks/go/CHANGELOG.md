@@ -4,6 +4,11 @@ All notable changes to the T402 Go SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [1.12.1] - 2026-02-23
+
+### Added
+- **Permit2 Proxy Types** (`mechanisms/evm/permit2proxy`) - Witness struct and type definitions for Permit2 proxy facilitator binding
+
 ## [1.12.0] - 2026-02-22
 
 ### Added

@@ -4,6 +4,13 @@ All notable changes to the T402 Java SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [1.12.1] - 2026-02-23
+
+### Added
+- **BTC Mechanism** (`io.t402.schemes.btc`) - Bitcoin on-chain (PSBT) and Lightning Network (BOLT11) support with client, server, and facilitator implementations
+- **Permit2 EVM Scheme** (`io.t402.schemes.evm.permit2`) - Uniswap Permit2 SignatureTransfer for gasless token approvals
+- **Permit2 Proxy EVM Scheme** (`io.t402.schemes.evm.permit2proxy`) - Witness-based facilitator binding for Permit2
+
 ## [1.12.0] - 2026-02-22
 
 ### Added

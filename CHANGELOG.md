@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.7.1] - 2026-02-23
+
+### Added
+- **Permit2 Proxy Contracts** - Witness-based facilitator binding for Permit2 with Solidity contracts, fork tests, and invariant tests
+- **Go Permit2 Proxy Types** - `mechanisms/evm/permit2proxy` types for Go SDK
+
+### Fixed
+- **npm audit vulnerabilities** - Override ajv to >=6.14.0 (CVE-2024-5765 ReDoS fix), ignore unfixable transitive CVEs (bigint-buffer, elliptic)
+- **CI** - Skip Foundry fork tests when `BASE_RPC_URL` secret is missing, remove `continue-on-error` from integration tests
+
 ## [2.7.0] - 2026-02-22
 
 ### Added

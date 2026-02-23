@@ -82,7 +82,7 @@ Tools:
 <details>
 <summary><b>Installation</b></summary>
 
-### TypeScript (v2.7.0)
+### TypeScript (v2.7.1)
 
 ```shell
 # Core packages
@@ -105,7 +105,7 @@ pnpm add -g @t402/cli
 t402 --help
 ```
 
-### Python (v1.12.0)
+### Python (v1.12.1)
 
 ```shell
 pip install t402
@@ -117,30 +117,30 @@ uv add t402
 t402 --help
 ```
 
-### Go (v1.12.0)
+### Go (v1.12.1)
 
 ```shell
-go get github.com/t402-io/t402/sdks/go@v1.12.0
+go get github.com/t402-io/t402/sdks/go@v1.12.1
 
 # CLI tool
-go install github.com/t402-io/t402/sdks/go/cmd/t402@v1.12.0
+go install github.com/t402-io/t402/sdks/go/cmd/t402@v1.12.1
 t402 --help
 ```
 
-### Java (v1.12.0)
+### Java (v1.12.1)
 
 ```xml
 <dependency>
   <groupId>io.t402</groupId>
   <artifactId>t402</artifactId>
-  <version>1.12.0</version>
+  <version>1.12.1</version>
 </dependency>
 ```
 
 Or with Gradle:
 
 ```groovy
-implementation 'io.t402:t402:1.12.0'
+implementation 'io.t402:t402:1.12.1'
 ```
 
 </details>
@@ -280,10 +280,10 @@ Legend: ✅ Complete | ❌ Not Available
 
 | SDK | Version | Release Date | Changelog |
 |-----|---------|--------------|-----------|
-| TypeScript | v2.7.0 | 2026-02-22 | [CHANGELOG](CHANGELOG.md) |
-| Go | v1.12.0 | 2026-02-22 | [CHANGELOG](sdks/go/CHANGELOG.md) |
-| Python | v1.12.0 | 2026-02-22 | [CHANGELOG](sdks/python/CHANGELOG.md) |
-| Java | v1.12.0 | 2026-02-22 | [CHANGELOG](sdks/java/CHANGELOG.md) |
+| TypeScript | v2.7.1 | 2026-02-23 | [CHANGELOG](CHANGELOG.md) |
+| Go | v1.12.1 | 2026-02-23 | [CHANGELOG](sdks/go/CHANGELOG.md) |
+| Python | v1.12.1 | 2026-02-23 | [CHANGELOG](sdks/python/CHANGELOG.md) |
+| Java | v1.12.1 | 2026-02-23 | [CHANGELOG](sdks/java/CHANGELOG.md) |
 
 ## Ecosystem
 

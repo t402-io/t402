@@ -4,6 +4,15 @@ All notable changes to the T402 Python SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [1.12.1] - 2026-02-23
+
+### Added
+- **Permit2 EVM Scheme** (`t402.schemes.evm.permit2`) - Uniswap Permit2 SignatureTransfer for gasless token approvals
+- **Permit2 Proxy EVM Scheme** (`t402.schemes.evm.permit2_proxy`) - Witness-based facilitator binding for Permit2
+
+### Fixed
+- **Ruff lint errors** - Resolve F401 (unused imports) and F841 (unused variables) in BTC and ERC-8004 modules
+
 ## [1.12.0] - 2026-02-22
 
 ### Added
