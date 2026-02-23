@@ -115,7 +115,7 @@ const jsonLd = {
       description:
         "Open-source SDKs for HTTP-native stablecoin payments across multiple blockchains",
       downloadUrl: "https://www.npmjs.com/package/@t402/core",
-      softwareVersion: "2.6.1",
+      softwareVersion: "2.7.0",
       programmingLanguage: ["TypeScript", "Python", "Go", "Java"],
     },
   ],

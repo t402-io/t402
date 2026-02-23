@@ -4,15 +4,15 @@ export const PROTOCOL_STATS = {
   kinds: 64,
   families: 10,
   sdkCount: 4,
-  tsPackages: 36,
+  tsPackages: 37,
   httpFrameworks: 18,
 } as const;
 
 export const SDK_VERSIONS = {
-  typescript: "2.6.1",
-  python: "1.11.1",
-  go: "1.11.1",
-  java: "1.11.1",
+  typescript: "2.7.0",
+  python: "1.12.0",
+  go: "1.12.0",
+  java: "1.12.0",
 } as const;
 
 export const CHAIN_FAMILIES = [

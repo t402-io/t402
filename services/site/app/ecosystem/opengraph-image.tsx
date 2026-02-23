@@ -87,7 +87,7 @@ export default async function Image() {
             Ecosystem
           </h1>
           <p style={{ fontSize: "24px", color: "#71717A", marginBottom: "40px" }}>
-            20+ packages for payments, wallets, and AI agents
+            37 packages for payments, wallets, and AI agents
           </p>
           <div style={{ display: "flex", gap: "12px", alignItems: "center", flexDirection: "row" }}>
             {["Mechanisms", "Middleware", "Clients", "Wallet", "Agents", "Tools"].map((cat) => (

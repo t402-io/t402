@@ -5,7 +5,7 @@ import EcosystemClient from "./EcosystemClient";
 export const metadata = {
   title: "Ecosystem | t402",
   description:
-    "25+ packages across TypeScript, Go, Python, and Java. Chain mechanisms, HTTP middleware, UI components, wallet integrations, and AI agent tools.",
+    "37 packages across TypeScript, Go, Python, and Java. Chain mechanisms, HTTP middleware, UI components, wallet integrations, and AI agent tools.",
   openGraph: {
     title: "t402 Ecosystem - Packages & Integrations",
     description:
