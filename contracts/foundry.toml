@@ -12,6 +12,11 @@ line_length = 100
 tab_width = 4
 bracket_spacing = true
 
+[profile.default.invariant]
+runs = 256
+depth = 32
+fail_on_revert = false
+
 [rpc_endpoints]
 base = "${BASE_RPC_URL}"
 base_sepolia = "${BASE_SEPOLIA_RPC_URL}"
