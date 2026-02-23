@@ -163,7 +163,13 @@ jobs:
           version: stable
 
       - name: Run tests
-        run: forge test -vvv
+        run: forge test -vvv --no-match-path 'test/fork/*'
+
+      - name: Run fork tests
+        if: env.BASE_RPC_URL != ''
+        run: forge test -vvv --match-path 'test/fork/*'
+        env:
+          BASE_RPC_URL: ${{ secrets.BASE_RPC_URL }}
 
   # Summary job
   tests-passed:
