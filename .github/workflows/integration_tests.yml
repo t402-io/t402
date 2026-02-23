@@ -59,7 +59,6 @@ jobs:
         env:
           TEST_NETWORK: testnet
           CI: true
-        continue-on-error: true
 
   # Go Integration Tests
   integration-go:
@@ -88,9 +87,8 @@ jobs:
         env:
           TEST_NETWORK: testnet
           CI: true
-        continue-on-error: true
 
-  # Summary
+  # Summary — fail the build on PR/push; warn-only on schedule/manual
   integration-summary:
     name: Integration Summary
     needs: [integration-typescript, integration-go]
@@ -102,11 +100,19 @@ jobs:
           echo "TypeScript Integration: ${{ needs.integration-typescript.result }}"
           echo "Go Integration: ${{ needs.integration-go.result }}"
 
-          # Integration tests are allowed to fail on schedule/manual runs
-          # But should be tracked for reliability
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            if [ "${{ needs.integration-typescript.result }}" == "failure" ] || \
-               [ "${{ needs.integration-go.result }}" == "failure" ]; then
-              echo "::warning::Some integration tests failed. Please review."
+          ts_result="${{ needs.integration-typescript.result }}"
+          go_result="${{ needs.integration-go.result }}"
+          has_failure=false
+
+          if [ "$ts_result" == "failure" ] || [ "$go_result" == "failure" ]; then
+            has_failure=true
+          fi
+
+          if [ "$has_failure" == "true" ]; then
+            if [ "${{ github.event_name }}" == "schedule" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+              echo "::warning::Integration tests failed (non-blocking on scheduled/manual runs)."
+            else
+              echo "::error::Integration tests failed."
+              exit 1
             fi
           fi
