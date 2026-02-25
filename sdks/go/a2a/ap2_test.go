@@ -2,6 +2,8 @@ package a2a
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // ============================================================================
@@ -621,4 +623,53 @@ func TestArtifactDescriptionAndPartsFields(t *testing.T) {
 	if artifact.Parts[1].Kind != "data" {
 		t.Errorf("expected second part kind data, got %s", artifact.Parts[1].Kind)
 	}
+}
+
+// ============================================================================
+// AgentCard Extension Composition & Header Helpers
+// ============================================================================
+
+func TestCreatePaymentExtensions(t *testing.T) {
+	t.Run("returns t402 + x402 by default", func(t *testing.T) {
+		exts := CreatePaymentExtensions(PaymentExtensionOptions{})
+		assert.Len(t, exts, 2)
+		assert.Equal(t, T402ExtensionURI, exts[0].URI)
+		assert.Equal(t, X402ExtensionURI, exts[1].URI)
+		assert.False(t, exts[0].Required)
+		assert.False(t, exts[1].Required)
+	})
+
+	t.Run("includes AP2 when roles specified", func(t *testing.T) {
+		exts := CreatePaymentExtensions(PaymentExtensionOptions{
+			AP2Roles: []string{"merchant"},
+		})
+		assert.Len(t, exts, 3)
+		assert.Equal(t, AP2ExtensionURI, exts[2].URI)
+		assert.Contains(t, exts[2].Description, "merchant")
+	})
+
+	t.Run("respects required flags", func(t *testing.T) {
+		exts := CreatePaymentExtensions(PaymentExtensionOptions{
+			T402Required: true,
+			X402Required: true,
+			AP2Roles:     []string{"shopper"},
+			AP2Required:  true,
+		})
+		assert.True(t, exts[0].Required)
+		assert.True(t, exts[1].Required)
+		assert.True(t, exts[2].Required)
+	})
+}
+
+func TestGetPaymentExtensionHeaders(t *testing.T) {
+	t.Run("returns x402 header by default", func(t *testing.T) {
+		headers := GetPaymentExtensionHeaders(false)
+		assert.Equal(t, X402ExtensionURI, headers[ExtensionsHeader])
+	})
+
+	t.Run("includes AP2 URI when requested", func(t *testing.T) {
+		headers := GetPaymentExtensionHeaders(true)
+		expected := X402ExtensionURI + ", " + AP2ExtensionURI
+		assert.Equal(t, expected, headers[ExtensionsHeader])
+	})
 }

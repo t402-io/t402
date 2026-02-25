@@ -84,6 +84,9 @@ from t402.a2a.ap2 import (
     create_payment_receipt_data_part,
     extract_cart_mandate_from_artifact,
     extract_payment_mandate_from_message,
+    # Phase 3 AgentCard extension composition & header helpers
+    create_payment_extensions,
+    get_payment_extension_headers,
 )
 
 __all__ = [
@@ -168,4 +171,7 @@ __all__ = [
     "create_payment_receipt_data_part",
     "extract_cart_mandate_from_artifact",
     "extract_payment_mandate_from_message",
+    # Phase 3 AgentCard extension composition & header helpers
+    "create_payment_extensions",
+    "get_payment_extension_headers",
 ]

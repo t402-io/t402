@@ -244,6 +244,37 @@ func ExtractPaymentMandateFromMessage(msg Message) (map[string]interface{}, bool
 	return nil, false
 }
 
+// PaymentExtensionOptions configures which payment extensions to include in an agent card.
+type PaymentExtensionOptions struct {
+	AP2Roles     []string
+	T402Required bool
+	X402Required bool
+	AP2Required  bool
+}
+
+// CreatePaymentExtensions composes an array of payment extensions for agent cards.
+// Always includes t402 and x402 extensions; optionally includes AP2 if roles are specified.
+func CreatePaymentExtensions(options PaymentExtensionOptions) []Extension {
+	extensions := []Extension{
+		CreateT402Extension(options.T402Required),
+		CreateX402Extension(options.X402Required),
+	}
+	if len(options.AP2Roles) > 0 {
+		extensions = append(extensions, CreateAP2Extension(options.AP2Roles, options.AP2Required))
+	}
+	return extensions
+}
+
+// GetPaymentExtensionHeaders returns the X-A2A-Extensions header map for payment extensions.
+// Always includes the x402 extension URI; optionally includes the AP2 extension URI.
+func GetPaymentExtensionHeaders(includeAP2 bool) map[string]string {
+	uris := X402ExtensionURI
+	if includeAP2 {
+		uris = uris + ", " + AP2ExtensionURI
+	}
+	return map[string]string{ExtensionsHeader: uris}
+}
+
 // mandateToMap converts a struct to a map[string]interface{} via JSON round-trip.
 func mandateToMap(v interface{}) map[string]interface{} {
 	b, err := json.Marshal(v)

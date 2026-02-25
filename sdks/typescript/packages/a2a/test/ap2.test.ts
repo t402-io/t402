@@ -4,12 +4,18 @@ import {
   AP2_EXTENSION_URI,
   X402_PAYMENT_METHOD,
   AP2_DATA_KEYS,
+  T402_A2A_EXTENSION_URI,
+  X402_A2A_EXTENSION_URI,
+  A2A_EXTENSIONS_HEADER,
   // Bridge functions
   createCartMandateWithX402,
   extractX402Requirements,
   createPaymentMandateWithX402,
   extractX402Payload,
   createAP2Extension,
+  // AgentCard & header helpers
+  createPaymentExtensions,
+  getPaymentExtensionHeaders,
   // DataPart helpers
   createCartMandateDataPart,
   createPaymentMandateDataPart,
@@ -487,5 +493,68 @@ describe("A2APaymentServer Embedded Flow", () => {
       parts: [{ kind: "text", text: "Hello" }],
     };
     expect(server.extractEmbeddedPayload(message)).toBeUndefined();
+  });
+});
+
+// ============================================================================
+// Phase 3: AgentCard Extension Composition & Header Helpers
+// ============================================================================
+
+describe("createPaymentExtensions", () => {
+  it("returns t402 + x402 extensions by default", () => {
+    const extensions = createPaymentExtensions();
+    expect(extensions).toHaveLength(2);
+    expect(extensions[0].uri).toBe(T402_A2A_EXTENSION_URI);
+    expect(extensions[1].uri).toBe(X402_A2A_EXTENSION_URI);
+    expect(extensions[0].required).toBe(false);
+    expect(extensions[1].required).toBe(false);
+  });
+
+  it("includes AP2 extension when roles specified", () => {
+    const extensions = createPaymentExtensions({ ap2Roles: ["merchant"] });
+    expect(extensions).toHaveLength(3);
+    expect(extensions[2].uri).toBe(AP2_EXTENSION_URI);
+    expect(extensions[2].description).toContain("merchant");
+  });
+
+  it("respects required flags", () => {
+    const extensions = createPaymentExtensions({
+      t402Required: true,
+      x402Required: true,
+      ap2Roles: ["shopper"],
+      ap2Required: true,
+    });
+    expect(extensions[0].required).toBe(true);
+    expect(extensions[1].required).toBe(true);
+    expect(extensions[2].required).toBe(true);
+  });
+
+  it("supports multiple AP2 roles", () => {
+    const extensions = createPaymentExtensions({
+      ap2Roles: ["merchant", "payment-processor"],
+    });
+    expect(extensions[2].description).toContain("merchant");
+    expect(extensions[2].description).toContain("payment-processor");
+  });
+});
+
+describe("getPaymentExtensionHeaders", () => {
+  it("returns x402 extension header by default", () => {
+    const headers = getPaymentExtensionHeaders();
+    expect(headers[A2A_EXTENSIONS_HEADER]).toBe(X402_A2A_EXTENSION_URI);
+  });
+
+  it("includes AP2 URI when requested", () => {
+    const headers = getPaymentExtensionHeaders(true);
+    const value = headers[A2A_EXTENSIONS_HEADER];
+    expect(value).toContain(X402_A2A_EXTENSION_URI);
+    expect(value).toContain(AP2_EXTENSION_URI);
+    expect(value).toBe(`${X402_A2A_EXTENSION_URI}, ${AP2_EXTENSION_URI}`);
+  });
+
+  it("header key matches A2A_EXTENSIONS_HEADER constant", () => {
+    const headers = getPaymentExtensionHeaders();
+    expect(Object.keys(headers)).toEqual([A2A_EXTENSIONS_HEADER]);
+    expect(A2A_EXTENSIONS_HEADER).toBe("X-A2A-Extensions");
   });
 });

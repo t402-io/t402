@@ -1,5 +1,10 @@
 package io.t402.a2a;
 
+import static io.t402.a2a.A2AHelpers.createT402Extension;
+import static io.t402.a2a.A2AHelpers.createX402Extension;
+import static io.t402.a2a.A2AConstants.EXTENSIONS_HEADER;
+import static io.t402.a2a.A2AConstants.X402_EXTENSION_URI;
+
 import java.util.*;
 
 /**
@@ -220,5 +225,73 @@ public final class AP2Helpers {
             }
         }
         return null;
+    }
+
+    // ==================== AgentCard extension composition ====================
+
+    /**
+     * Options for createPaymentExtensions.
+     */
+    public static class PaymentExtensionOptions {
+        public List<String> ap2Roles;
+        public boolean t402Required;
+        public boolean x402Required;
+        public boolean ap2Required;
+
+        public PaymentExtensionOptions() {}
+    }
+
+    /**
+     * Create a complete payment extensions list for an AgentCard.
+     * Returns [t402, x402, ap2?] extensions.
+     *
+     * @param options configuration for extension required flags and AP2 roles
+     * @return list of A2A extensions
+     */
+    public static List<A2ATypes.Extension> createPaymentExtensions(PaymentExtensionOptions options) {
+        List<A2ATypes.Extension> extensions = new ArrayList<>();
+        extensions.add(createT402Extension(options.t402Required));
+        extensions.add(createX402Extension(options.x402Required));
+        if (options.ap2Roles != null && !options.ap2Roles.isEmpty()) {
+            extensions.add(createAP2Extension(options.ap2Roles, options.ap2Required));
+        }
+        return extensions;
+    }
+
+    /**
+     * Create a complete payment extensions list for an AgentCard with default options.
+     * Returns [t402, x402] extensions with required=false.
+     *
+     * @return list of A2A extensions
+     */
+    public static List<A2ATypes.Extension> createPaymentExtensions() {
+        return createPaymentExtensions(new PaymentExtensionOptions());
+    }
+
+    // ==================== Header helpers ====================
+
+    /**
+     * Get HTTP headers for A2A payment extension activation.
+     *
+     * @param includeAP2 whether to include the AP2 extension URI
+     * @return map of HTTP headers
+     */
+    public static Map<String, String> getPaymentExtensionHeaders(boolean includeAP2) {
+        StringBuilder uris = new StringBuilder(X402_EXTENSION_URI);
+        if (includeAP2) {
+            uris.append(", ").append(AP2_EXTENSION_URI);
+        }
+        Map<String, String> headers = new HashMap<>();
+        headers.put(EXTENSIONS_HEADER, uris.toString());
+        return headers;
+    }
+
+    /**
+     * Get HTTP headers for A2A payment extension activation (x402 only).
+     *
+     * @return map of HTTP headers with x402 extension URI
+     */
+    public static Map<String, String> getPaymentExtensionHeaders() {
+        return getPaymentExtensionHeaders(false);
     }
 }

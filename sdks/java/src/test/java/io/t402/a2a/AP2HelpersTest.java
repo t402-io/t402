@@ -3,6 +3,7 @@ package io.t402.a2a;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import static io.t402.a2a.AP2Helpers.*;
+import static io.t402.a2a.A2AConstants.*;
 
 import java.util.*;
 
@@ -408,5 +409,55 @@ class AP2HelpersTest {
         A2ATypes.MessagePart textPart = A2ATypes.MessagePart.text("No mandate here");
         A2ATypes.Message message = new A2ATypes.Message("user", List.of(textPart), null);
         assertNull(extractPaymentMandateFromMessage(message));
+    }
+
+    // ==================== createPaymentExtensions ====================
+
+    @Test
+    void createPaymentExtensions_defaultReturnsT402X402() {
+        List<A2ATypes.Extension> exts = AP2Helpers.createPaymentExtensions();
+        assertEquals(2, exts.size());
+        assertEquals(T402_EXTENSION_URI, exts.get(0).uri);
+        assertEquals(X402_EXTENSION_URI, exts.get(1).uri);
+        assertFalse(exts.get(0).required);
+        assertFalse(exts.get(1).required);
+    }
+
+    @Test
+    void createPaymentExtensions_includesAP2WhenRolesSpecified() {
+        AP2Helpers.PaymentExtensionOptions opts = new AP2Helpers.PaymentExtensionOptions();
+        opts.ap2Roles = List.of("merchant");
+        List<A2ATypes.Extension> exts = AP2Helpers.createPaymentExtensions(opts);
+        assertEquals(3, exts.size());
+        assertEquals(AP2Helpers.AP2_EXTENSION_URI, exts.get(2).uri);
+        assertTrue(exts.get(2).description.contains("merchant"));
+    }
+
+    @Test
+    void createPaymentExtensions_respectsRequiredFlags() {
+        AP2Helpers.PaymentExtensionOptions opts = new AP2Helpers.PaymentExtensionOptions();
+        opts.t402Required = true;
+        opts.x402Required = true;
+        opts.ap2Roles = List.of("shopper");
+        opts.ap2Required = true;
+        List<A2ATypes.Extension> exts = AP2Helpers.createPaymentExtensions(opts);
+        assertTrue(exts.get(0).required);
+        assertTrue(exts.get(1).required);
+        assertTrue(exts.get(2).required);
+    }
+
+    // ==================== getPaymentExtensionHeaders ====================
+
+    @Test
+    void getPaymentExtensionHeaders_returnsX402ByDefault() {
+        Map<String, String> headers = AP2Helpers.getPaymentExtensionHeaders();
+        assertEquals(X402_EXTENSION_URI, headers.get(EXTENSIONS_HEADER));
+    }
+
+    @Test
+    void getPaymentExtensionHeaders_includesAP2WhenRequested() {
+        Map<String, String> headers = AP2Helpers.getPaymentExtensionHeaders(true);
+        String expected = X402_EXTENSION_URI + ", " + AP2Helpers.AP2_EXTENSION_URI;
+        assertEquals(expected, headers.get(EXTENSIONS_HEADER));
     }
 }

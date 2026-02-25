@@ -83,6 +83,8 @@ export {
   createPaymentMandateWithX402,
   extractX402Payload,
   createAP2Extension,
+  createPaymentExtensions,
+  getPaymentExtensionHeaders,
   createCartMandateDataPart,
   createPaymentMandateDataPart,
   createIntentMandateDataPart,

@@ -16,6 +16,12 @@ import type {
   A2AArtifact,
   A2AMessage,
 } from "./a2a";
+import {
+  A2A_EXTENSIONS_HEADER,
+  X402_A2A_EXTENSION_URI,
+  createT402Extension,
+  createX402Extension,
+} from "./a2a";
 
 // ============================================================================
 // AP2 Constants
@@ -235,6 +241,50 @@ export function createAP2Extension(
     description: `AP2 payment agent (roles: ${roles.join(", ")}).`,
     required,
   };
+}
+
+// ============================================================================
+// AgentCard & Header Helpers
+// ============================================================================
+
+/**
+ * Create a complete payment extensions array for an AgentCard.
+ * Returns [t402, x402, ap2?] extensions ready for capabilities.extensions.
+ *
+ * @param options - Configuration for extension declarations
+ * @returns Array of A2A extension declarations
+ */
+export function createPaymentExtensions(options: {
+  ap2Roles?: AP2Role[];
+  t402Required?: boolean;
+  x402Required?: boolean;
+  ap2Required?: boolean;
+} = {}): A2AExtension[] {
+  const extensions: A2AExtension[] = [
+    createT402Extension(options.t402Required ?? false),
+    createX402Extension(options.x402Required ?? false),
+  ];
+  if (options.ap2Roles) {
+    extensions.push(createAP2Extension(options.ap2Roles, options.ap2Required ?? false));
+  }
+  return extensions;
+}
+
+/**
+ * Get HTTP headers for A2A payment extension activation.
+ * Returns the X-A2A-Extensions header with the x402 v0.2 URI.
+ *
+ * @param includeAP2 - Whether to include the AP2 extension URI
+ * @returns Header name/value map
+ */
+export function getPaymentExtensionHeaders(
+  includeAP2: boolean = false,
+): Record<string, string> {
+  const uris = [X402_A2A_EXTENSION_URI];
+  if (includeAP2) {
+    uris.push(AP2_EXTENSION_URI);
+  }
+  return { [A2A_EXTENSIONS_HEADER]: uris.join(", ") };
 }
 
 // ============================================================================

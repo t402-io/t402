@@ -7,6 +7,15 @@ from typing import Any, Dict, List, Optional
 
 from t402.a2a.types import A2AArtifact, A2AMessage, A2AMessagePart
 
+from .helpers import (
+    create_t402_extension,
+    create_x402_extension,
+)
+from .types import (
+    A2A_EXTENSIONS_HEADER,
+    X402_A2A_EXTENSION_URI,
+)
+
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
@@ -331,3 +340,37 @@ def extract_payment_mandate_from_message(
         ):
             return part.data[AP2_DATA_KEY_PAYMENT_MANDATE]
     return None
+
+
+# ---------------------------------------------------------------------------
+# AgentCard extension composition & header helpers
+# ---------------------------------------------------------------------------
+
+
+def create_payment_extensions(
+    *,
+    ap2_roles: Optional[List[str]] = None,
+    t402_required: bool = False,
+    x402_required: bool = False,
+    ap2_required: bool = False,
+) -> List[Dict[str, Any]]:
+    """Create payment extensions array for an AgentCard."""
+    extensions: List[Dict[str, Any]] = [
+        asdict(create_t402_extension(t402_required)),
+        asdict(create_x402_extension(x402_required)),
+    ]
+    if ap2_roles:
+        extensions.append(
+            create_ap2_extension(ap2_roles, ap2_required)
+        )
+    return extensions
+
+
+def get_payment_extension_headers(
+    include_ap2: bool = False,
+) -> Dict[str, str]:
+    """Get HTTP headers for A2A payment extension activation."""
+    uris = [X402_A2A_EXTENSION_URI]
+    if include_ap2:
+        uris.append(AP2_EXTENSION_URI)
+    return {A2A_EXTENSIONS_HEADER: ", ".join(uris)}

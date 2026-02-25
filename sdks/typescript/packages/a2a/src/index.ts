@@ -88,6 +88,9 @@ export {
   createPaymentMandateWithX402,
   extractX402Payload,
   createAP2Extension,
+  // AP2 AgentCard & header helpers
+  createPaymentExtensions,
+  getPaymentExtensionHeaders,
   // AP2 DataPart helpers
   createCartMandateDataPart,
   createPaymentMandateDataPart,

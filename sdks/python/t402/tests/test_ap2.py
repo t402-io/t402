@@ -8,6 +8,9 @@ from t402.a2a import (
     AP2_DATA_KEY_CART_MANDATE,
     AP2_DATA_KEY_PAYMENT_MANDATE,
     AP2_DATA_KEY_PAYMENT_RECEIPT,
+    T402_A2A_EXTENSION_URI,
+    X402_A2A_EXTENSION_URI,
+    A2A_EXTENSIONS_HEADER,
     # Types
     PaymentCurrencyAmount,
     PaymentItem,
@@ -33,6 +36,9 @@ from t402.a2a import (
     create_payment_receipt_data_part,
     extract_cart_mandate_from_artifact,
     extract_payment_mandate_from_message,
+    # Phase 3 AgentCard extension composition & header helpers
+    create_payment_extensions,
+    get_payment_extension_headers,
     # Core types
     A2AMessagePart,
     A2AMessage,
@@ -451,3 +457,58 @@ def test_cart_contents_fields():
     assert len(
         contents.payment_request.details.display_items
     ) == 1
+
+
+# ===================================================================
+# Phase 3: AgentCard Extension Composition
+# ===================================================================
+
+
+class TestCreatePaymentExtensions:
+    def test_returns_t402_x402_by_default(self):
+        exts = create_payment_extensions()
+        assert len(exts) == 2
+        assert exts[0]["uri"] == T402_A2A_EXTENSION_URI
+        assert exts[1]["uri"] == X402_A2A_EXTENSION_URI
+        assert exts[0]["required"] is False
+        assert exts[1]["required"] is False
+
+    def test_includes_ap2_when_roles_specified(self):
+        exts = create_payment_extensions(ap2_roles=["merchant"])
+        assert len(exts) == 3
+        assert exts[2]["uri"] == AP2_EXTENSION_URI
+        assert "merchant" in exts[2]["description"]
+
+    def test_respects_required_flags(self):
+        exts = create_payment_extensions(
+            t402_required=True,
+            x402_required=True,
+            ap2_roles=["shopper"],
+            ap2_required=True,
+        )
+        assert exts[0]["required"] is True
+        assert exts[1]["required"] is True
+        assert exts[2]["required"] is True
+
+
+# ===================================================================
+# Phase 3: Payment Extension Headers
+# ===================================================================
+
+
+class TestGetPaymentExtensionHeaders:
+    def test_returns_x402_header_by_default(self):
+        headers = get_payment_extension_headers()
+        assert (
+            headers[A2A_EXTENSIONS_HEADER]
+            == X402_A2A_EXTENSION_URI
+        )
+
+    def test_includes_ap2_when_requested(self):
+        headers = get_payment_extension_headers(include_ap2=True)
+        value = headers[A2A_EXTENSIONS_HEADER]
+        assert X402_A2A_EXTENSION_URI in value
+        assert AP2_EXTENSION_URI in value
+        assert value == (
+            f"{X402_A2A_EXTENSION_URI}, {AP2_EXTENSION_URI}"
+        )
