@@ -88,6 +88,8 @@ from t402.a2a.ap2 import (
     create_payment_extensions,
     get_payment_extension_headers,
 )
+from t402.a2a.client import A2APaymentClient
+from t402.a2a.server import A2APaymentResult, A2APaymentServer
 
 __all__ = [
     # Phase 1 types constants
@@ -174,4 +176,8 @@ __all__ = [
     # Phase 3 AgentCard extension composition & header helpers
     "create_payment_extensions",
     "get_payment_extension_headers",
+    # Phase 4 Client/Server classes
+    "A2APaymentClient",
+    "A2APaymentServer",
+    "A2APaymentResult",
 ]
