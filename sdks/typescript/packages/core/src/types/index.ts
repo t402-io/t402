@@ -38,7 +38,9 @@ export type {
 } from "./a2a";
 export {
   T402_A2A_EXTENSION_URI,
+  X402_A2A_EXTENSION_URI,
   A2A_EXTENSIONS_HEADER,
+  CAIP2_TO_FLAT_NAME,
   isPaymentRequired,
   isPaymentCompleted,
   isPaymentFailed,
@@ -49,6 +51,11 @@ export {
   createPaymentCompletedMessage,
   createPaymentFailedMessage,
   createT402Extension,
+  createX402Extension,
+  mapT402ErrorToX402,
+  downgradeRequirementsToX402,
+  isStandaloneFlow,
+  isEmbeddedFlow,
 } from "./a2a";
 
 // Scheme-specific types

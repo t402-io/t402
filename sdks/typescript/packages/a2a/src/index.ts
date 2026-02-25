@@ -44,7 +44,9 @@ export {
   type A2ASkill,
   // Constants
   T402_A2A_EXTENSION_URI,
+  X402_A2A_EXTENSION_URI,
   A2A_EXTENSIONS_HEADER,
+  CAIP2_TO_FLAT_NAME,
   // Helper functions
   isPaymentRequired,
   isPaymentCompleted,
@@ -56,6 +58,12 @@ export {
   createPaymentCompletedMessage,
   createPaymentFailedMessage,
   createT402Extension,
+  createX402Extension,
+  // x402 compatibility
+  mapT402ErrorToX402,
+  downgradeRequirementsToX402,
+  isStandaloneFlow,
+  isEmbeddedFlow,
 } from "@t402/core/types";
 
 // Export client and server

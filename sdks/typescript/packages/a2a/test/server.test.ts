@@ -404,4 +404,81 @@ describe("A2APaymentServer", () => {
       expect(updatedTask.status.state).toBe("failed");
     });
   });
+
+  describe("dual-namespace (x402 compat)", () => {
+    it("extractPaymentPayload reads x402-only metadata", () => {
+      const server = new A2APaymentServer();
+      const message: A2AMessage = {
+        kind: "message",
+        role: "user",
+        parts: [{ kind: "text", text: "Payment" }],
+        metadata: {
+          "x402.payment.status": "payment-submitted",
+          "x402.payment.payload": mockPayload,
+        },
+      };
+      expect(server.extractPaymentPayload(message)).toEqual(mockPayload);
+    });
+
+    it("hasPaymentPayload detects x402-only metadata", () => {
+      const server = new A2APaymentServer();
+      const message: A2AMessage = {
+        kind: "message",
+        role: "user",
+        parts: [{ kind: "text", text: "Payment" }],
+        metadata: {
+          "x402.payment.status": "payment-submitted",
+          "x402.payment.payload": mockPayload,
+        },
+      };
+      expect(server.hasPaymentPayload(message)).toBe(true);
+    });
+
+    it("hasPaymentPayload prefers t402 when both present", () => {
+      const server = new A2APaymentServer();
+      const message: A2AMessage = {
+        kind: "message",
+        role: "user",
+        parts: [{ kind: "text", text: "Payment" }],
+        metadata: {
+          "t402.payment.status": "payment-submitted",
+          "t402.payment.payload": mockPayload,
+          "x402.payment.status": "payment-submitted",
+          "x402.payment.payload": mockPayload,
+        },
+      };
+      expect(server.hasPaymentPayload(message)).toBe(true);
+    });
+
+    it("processPayment works with x402-only payload", async () => {
+      const facilitator = createMockFacilitator();
+      const server = new A2APaymentServer({ facilitator });
+      const message: A2AMessage = {
+        kind: "message",
+        role: "user",
+        parts: [{ kind: "text", text: "Payment" }],
+        metadata: {
+          "x402.payment.status": "payment-submitted",
+          "x402.payment.payload": mockPayload,
+        },
+      };
+
+      const result = await server.processPayment(message, mockPaymentRequired);
+      expect(result.success).toBe(true);
+      // Result message should have both namespaces
+      expect(result.message.metadata?.["t402.payment.status"]).toBe("payment-completed");
+      expect(result.message.metadata?.["x402.payment.status"]).toBe("payment-completed");
+    });
+
+    it("createPaymentRequiredTask emits both t402 and x402 metadata", () => {
+      const server = new A2APaymentServer();
+      const task = server.createPaymentRequiredTask("task-dual", mockPaymentRequired);
+
+      expect(task.status.message?.metadata?.["t402.payment.status"]).toBe("payment-required");
+      expect(task.status.message?.metadata?.["x402.payment.status"]).toBe("payment-required");
+      expect(task.status.message?.metadata?.["t402.payment.required"]).toEqual(mockPaymentRequired);
+      // x402 downgraded should be present for EVM+exact
+      expect(task.status.message?.metadata?.["x402.payment.required"]).toBeDefined();
+    });
+  });
 });

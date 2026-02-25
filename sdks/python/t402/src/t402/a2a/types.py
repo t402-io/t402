@@ -16,6 +16,59 @@ META_PAYMENT_PAYLOAD = "t402.payment.payload"
 META_PAYMENT_RECEIPTS = "t402.payment.receipts"
 META_PAYMENT_ERROR = "t402.payment.error"
 
+# x402 v0.2 A2A extension URI (compatibility layer)
+X402_A2A_EXTENSION_URI = (
+    "https://github.com/google-agentic-commerce/"
+    "a2a-x402/blob/main/spec/v0.2"
+)
+
+# x402 payment metadata keys (compatibility layer)
+X402_META_PAYMENT_STATUS = "x402.payment.status"
+X402_META_PAYMENT_REQUIRED = "x402.payment.required"
+X402_META_PAYMENT_PAYLOAD = "x402.payment.payload"
+X402_META_PAYMENT_RECEIPTS = "x402.payment.receipts"
+X402_META_PAYMENT_ERROR = "x402.payment.error"
+
+# CAIP-2 to flat name mapping for x402 V1 compat
+CAIP2_TO_FLAT_NAME: Dict[str, str] = {
+    "eip155:1": "ethereum",
+    "eip155:8453": "base",
+    "eip155:84532": "base-sepolia",
+    "eip155:42161": "arbitrum",
+    "eip155:10": "optimism",
+    "eip155:137": "polygon",
+    "eip155:56": "bsc",
+    "eip155:43114": "avalanche",
+    "eip155:43113": "avalanche-fuji",
+    "eip155:250": "fantom",
+    "eip155:8217": "klaytn",
+    "eip155:42220": "celo",
+    "eip155:57073": "ink",
+    "eip155:80094": "berachain",
+    "eip155:130": "unichain",
+    "eip155:5000": "mantle",
+    "eip155:9745": "plasma",
+    "eip155:1329": "sei",
+    "eip155:1030": "conflux",
+    "eip155:143": "monad",
+    "eip155:14": "flare",
+    "eip155:30": "rootstock",
+    "eip155:196": "xlayer",
+    "eip155:988": "stable",
+    "eip155:999": "hyperevm",
+    "eip155:4326": "megaeth",
+    "eip155:21000000": "corn",
+}
+
+# T402 to x402 v0.2 error code mapping
+T402_TO_X402_ERROR_MAP: Dict[str, str] = {
+    "T402-1001": "INVALID_AMOUNT",
+    "T402-2001": "INVALID_SIGNATURE",
+    "T402-3001": "SETTLEMENT_FAILED",
+    "T402-5001": "SETTLEMENT_FAILED",
+    "T402-5002": "SETTLEMENT_FAILED",
+}
+
 # Payment status values
 STATUS_PAYMENT_REQUIRED = "payment-required"
 STATUS_PAYMENT_REJECTED = "payment-rejected"

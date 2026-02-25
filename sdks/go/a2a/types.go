@@ -19,6 +19,58 @@ const (
 	MetaPaymentError    = "t402.payment.error"
 )
 
+// x402 v0.2 A2A extension URI (compatibility layer).
+const X402ExtensionURI = "https://github.com/google-agentic-commerce/a2a-x402/blob/main/spec/v0.2"
+
+// x402 payment metadata keys (compatibility layer).
+const (
+	X402MetaPaymentStatus   = "x402.payment.status"
+	X402MetaPaymentRequired = "x402.payment.required"
+	X402MetaPaymentPayload  = "x402.payment.payload"
+	X402MetaPaymentReceipts = "x402.payment.receipts"
+	X402MetaPaymentError    = "x402.payment.error"
+)
+
+// CAIP2ToFlatName maps CAIP-2 EVM network identifiers to V1 flat names for x402 compat.
+var CAIP2ToFlatName = map[string]string{
+	"eip155:1":        "ethereum",
+	"eip155:8453":     "base",
+	"eip155:84532":    "base-sepolia",
+	"eip155:42161":    "arbitrum",
+	"eip155:10":       "optimism",
+	"eip155:137":      "polygon",
+	"eip155:56":       "bsc",
+	"eip155:43114":    "avalanche",
+	"eip155:43113":    "avalanche-fuji",
+	"eip155:250":      "fantom",
+	"eip155:8217":     "klaytn",
+	"eip155:42220":    "celo",
+	"eip155:57073":    "ink",
+	"eip155:80094":    "berachain",
+	"eip155:130":      "unichain",
+	"eip155:5000":     "mantle",
+	"eip155:9745":     "plasma",
+	"eip155:1329":     "sei",
+	"eip155:1030":     "conflux",
+	"eip155:143":      "monad",
+	"eip155:14":       "flare",
+	"eip155:30":       "rootstock",
+	"eip155:196":      "xlayer",
+	"eip155:988":      "stable",
+	"eip155:999":      "hyperevm",
+	"eip155:4326":     "megaeth",
+	"eip155:21000000": "corn",
+}
+
+// t402 to x402 v0.2 error code mapping.
+var t402ToX402ErrorMap = map[string]string{
+	"T402-1001": "INVALID_AMOUNT",
+	"T402-2001": "INVALID_SIGNATURE",
+	"T402-3001": "SETTLEMENT_FAILED",
+	"T402-5001": "SETTLEMENT_FAILED",
+	"T402-5002": "SETTLEMENT_FAILED",
+}
+
 // PaymentStatus values used in A2A metadata.
 const (
 	StatusPaymentRequired  = "payment-required"

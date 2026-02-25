@@ -179,7 +179,8 @@ export class A2APaymentServer {
    * @returns Payment payload or undefined
    */
   extractPaymentPayload(message: A2AMessage): PaymentPayload | undefined {
-    return message.metadata?.["t402.payment.payload"];
+    return (message.metadata?.["t402.payment.payload"] ??
+      message.metadata?.["x402.payment.payload"]) as PaymentPayload | undefined;
   }
 
   /**
@@ -189,10 +190,13 @@ export class A2APaymentServer {
    * @returns Whether the message contains a payment
    */
   hasPaymentPayload(message: A2AMessage): boolean {
-    return (
-      message.metadata?.["t402.payment.status"] === "payment-submitted" &&
-      message.metadata?.["t402.payment.payload"] !== undefined
-    );
+    const status =
+      message.metadata?.["t402.payment.status"] ??
+      message.metadata?.["x402.payment.status"];
+    const payload =
+      message.metadata?.["t402.payment.payload"] ??
+      message.metadata?.["x402.payment.payload"];
+    return status === "payment-submitted" && payload !== undefined;
   }
 
   /**
