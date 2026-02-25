@@ -19,7 +19,7 @@ require (
 require (
 	github.com/btcsuite/btcd/btcec/v2 v2.3.6
 	github.com/go-chi/chi/v5 v5.2.5
-	github.com/gofiber/fiber/v2 v2.52.11
+	github.com/gofiber/fiber/v2 v2.52.12
 	github.com/labstack/echo/v4 v4.15.1
 	github.com/mr-tron/base58 v1.2.0
 	github.com/xssnick/tonutils-go v1.15.5
