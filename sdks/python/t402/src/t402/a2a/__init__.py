@@ -25,6 +25,7 @@ from t402.a2a.types import (
     A2AMessagePart,
     A2AMessage,
     A2ATaskStatus,
+    A2AArtifact,
     A2ATask,
     A2AExtension,
     A2AAgentCard,
@@ -49,8 +50,44 @@ from t402.a2a.helpers import (
     create_t402_extension,
     create_x402_extension,
 )
+from t402.a2a.ap2 import (
+    # Constants
+    AP2_EXTENSION_URI,
+    X402_PAYMENT_METHOD,
+    AP2_DATA_KEY_INTENT_MANDATE,
+    AP2_DATA_KEY_CART_MANDATE,
+    AP2_DATA_KEY_PAYMENT_MANDATE,
+    AP2_DATA_KEY_PAYMENT_RECEIPT,
+    # Types
+    PaymentCurrencyAmount,
+    PaymentItem,
+    AP2PaymentMethodData,
+    AP2PaymentDetailsInit,
+    AP2PaymentRequest,
+    AP2PaymentResponse,
+    IntentMandate,
+    CartContents,
+    CartMandate,
+    PaymentMandateContents,
+    PaymentMandate,
+    AP2PaymentReceipt,
+    # Bridge functions
+    create_cart_mandate_with_x402,
+    extract_x402_requirements,
+    create_payment_mandate_with_x402,
+    extract_x402_payload,
+    create_ap2_extension,
+    # DataPart helpers
+    create_cart_mandate_data_part,
+    create_payment_mandate_data_part,
+    create_intent_mandate_data_part,
+    create_payment_receipt_data_part,
+    extract_cart_mandate_from_artifact,
+    extract_payment_mandate_from_message,
+)
 
 __all__ = [
+    # Phase 1 types constants
     "T402_A2A_EXTENSION_URI",
     "X402_A2A_EXTENSION_URI",
     "A2A_EXTENSIONS_HEADER",
@@ -75,10 +112,12 @@ __all__ = [
     "A2AMessagePart",
     "A2AMessage",
     "A2ATaskStatus",
+    "A2AArtifact",
     "A2ATask",
     "A2AExtension",
     "A2AAgentCard",
     "A2ASkill",
+    # Phase 1 helpers
     "is_payment_required",
     "is_payment_completed",
     "is_payment_failed",
@@ -96,4 +135,37 @@ __all__ = [
     "create_payment_failed_message",
     "create_t402_extension",
     "create_x402_extension",
+    # Phase 2 AP2 constants
+    "AP2_EXTENSION_URI",
+    "X402_PAYMENT_METHOD",
+    "AP2_DATA_KEY_INTENT_MANDATE",
+    "AP2_DATA_KEY_CART_MANDATE",
+    "AP2_DATA_KEY_PAYMENT_MANDATE",
+    "AP2_DATA_KEY_PAYMENT_RECEIPT",
+    # Phase 2 AP2 types
+    "PaymentCurrencyAmount",
+    "PaymentItem",
+    "AP2PaymentMethodData",
+    "AP2PaymentDetailsInit",
+    "AP2PaymentRequest",
+    "AP2PaymentResponse",
+    "IntentMandate",
+    "CartContents",
+    "CartMandate",
+    "PaymentMandateContents",
+    "PaymentMandate",
+    "AP2PaymentReceipt",
+    # Phase 2 AP2 bridge functions
+    "create_cart_mandate_with_x402",
+    "extract_x402_requirements",
+    "create_payment_mandate_with_x402",
+    "extract_x402_payload",
+    "create_ap2_extension",
+    # Phase 2 AP2 DataPart helpers
+    "create_cart_mandate_data_part",
+    "create_payment_mandate_data_part",
+    "create_intent_mandate_data_part",
+    "create_payment_receipt_data_part",
+    "extract_cart_mandate_from_artifact",
+    "extract_payment_mandate_from_message",
 ]

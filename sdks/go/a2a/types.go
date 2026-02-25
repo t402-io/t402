@@ -137,12 +137,14 @@ type Message struct {
 
 // Artifact is an output from a completed task.
 type Artifact struct {
-	Kind     string                 `json:"kind"`
-	Name     string                 `json:"name,omitempty"`
-	MimeType string                 `json:"mimeType,omitempty"`
-	Data     string                 `json:"data,omitempty"` // base64 encoded
-	URI      string                 `json:"uri,omitempty"`
-	Metadata map[string]interface{} `json:"metadata,omitempty"`
+	Kind        string                 `json:"kind"`
+	Name        string                 `json:"name,omitempty"`
+	Description string                 `json:"description,omitempty"`
+	Parts       []MessagePart          `json:"parts,omitempty"`
+	MimeType    string                 `json:"mimeType,omitempty"`
+	Data        string                 `json:"data,omitempty"` // base64 encoded
+	URI         string                 `json:"uri,omitempty"`
+	Metadata    map[string]interface{} `json:"metadata,omitempty"`
 }
 
 // TaskStatus represents the current status of an A2A task.

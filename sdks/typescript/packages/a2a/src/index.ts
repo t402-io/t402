@@ -64,6 +64,37 @@ export {
   downgradeRequirementsToX402,
   isStandaloneFlow,
   isEmbeddedFlow,
+  // AP2 types
+  type AP2Role,
+  type PaymentCurrencyAmount,
+  type PaymentItem,
+  type PaymentMethodData,
+  type PaymentDetailsInit,
+  type AP2PaymentRequest,
+  type AP2PaymentResponse,
+  type IntentMandate,
+  type CartContents,
+  type CartMandate,
+  type PaymentMandateContents,
+  type PaymentMandate,
+  type PaymentReceipt,
+  // AP2 constants
+  AP2_EXTENSION_URI,
+  X402_PAYMENT_METHOD,
+  AP2_DATA_KEYS,
+  // AP2 bridge functions
+  createCartMandateWithX402,
+  extractX402Requirements,
+  createPaymentMandateWithX402,
+  extractX402Payload,
+  createAP2Extension,
+  // AP2 DataPart helpers
+  createCartMandateDataPart,
+  createPaymentMandateDataPart,
+  createIntentMandateDataPart,
+  createPaymentReceiptDataPart,
+  extractCartMandateFromArtifact,
+  extractPaymentMandateFromMessage,
 } from "@t402/core/types";
 
 // Export client and server

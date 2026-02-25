@@ -117,6 +117,8 @@ export interface A2AMessage {
 export interface A2AArtifact {
   kind: string;
   name?: string;
+  description?: string;
+  parts?: A2AMessagePart[];
   mimeType?: string;
   data?: string; // base64 encoded
   uri?: string;

@@ -10,12 +10,18 @@ import type {
   A2AMessage,
   PaymentPayload,
   PaymentRequired,
+  PaymentRequirements,
   SchemeNetworkClient,
+  PaymentMandateContents,
 } from "@t402/core/types";
 import {
   isPaymentRequired,
   getPaymentRequired,
   createPaymentSubmissionMessage,
+  extractCartMandateFromArtifact,
+  extractX402Requirements,
+  createPaymentMandateWithX402,
+  createPaymentMandateDataPart,
 } from "@t402/core/types";
 
 /**
@@ -219,5 +225,58 @@ export class A2APaymentClient {
 
     const payload = await this.createPayload(mechanism, requirements);
     return this.createPaymentMessage(payload);
+  }
+
+  /**
+   * Extract payment requirements from an embedded-flow task.
+   * Scans task artifacts for CartMandate DataPart with x402 method data.
+   *
+   * @param task - The A2A task with CartMandate artifacts
+   * @returns x402 payment requirements or undefined
+   */
+  extractEmbeddedRequirements(task: A2ATask): PaymentRequirements[] | undefined {
+    if (!task.artifacts) return undefined;
+    for (const artifact of task.artifacts) {
+      const cartMandate = extractCartMandateFromArtifact(artifact);
+      if (cartMandate) {
+        return extractX402Requirements(cartMandate);
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * Create a payment message for the AP2 embedded flow.
+   * Wraps the PaymentPayload inside a PaymentMandate DataPart.
+   *
+   * @param mandateContents - Payment mandate contents (without payment_response)
+   * @param payload - The x402 payment payload
+   * @param userAuthorization - Optional user authorization (Verifiable Presentation)
+   * @param text - Optional text message
+   * @returns A2A message with PaymentMandate DataPart
+   */
+  createEmbeddedPaymentMessage(
+    mandateContents: PaymentMandateContents,
+    payload: PaymentPayload,
+    userAuthorization?: string,
+    text: string = "Here is the payment mandate.",
+  ): A2AMessage {
+    const mandate = createPaymentMandateWithX402(
+      mandateContents,
+      payload,
+      userAuthorization,
+    );
+    return {
+      kind: "message",
+      role: "user",
+      parts: [
+        { kind: "text", text },
+        createPaymentMandateDataPart(mandate),
+      ],
+      metadata: {
+        "t402.payment.status": "payment-submitted",
+        "x402.payment.status": "payment-submitted",
+      },
+    };
   }
 }

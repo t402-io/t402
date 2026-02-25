@@ -80,6 +80,8 @@ public final class A2ATypes {
     public static class Artifact {
         public String kind;
         public String name;
+        public String description;
+        public List<MessagePart> parts;
         @JsonProperty("mimeType")
         public String mimeType;
         public String data;

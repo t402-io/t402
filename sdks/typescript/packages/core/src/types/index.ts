@@ -58,6 +58,39 @@ export {
   isEmbeddedFlow,
 } from "./a2a";
 
+// AP2 (Agent Payments Protocol) types
+export type {
+  AP2Role,
+  PaymentCurrencyAmount,
+  PaymentItem,
+  PaymentMethodData,
+  PaymentDetailsInit,
+  AP2PaymentRequest,
+  AP2PaymentResponse,
+  IntentMandate,
+  CartContents,
+  CartMandate,
+  PaymentMandateContents,
+  PaymentMandate,
+  PaymentReceipt,
+} from "./ap2";
+export {
+  AP2_EXTENSION_URI,
+  X402_PAYMENT_METHOD,
+  AP2_DATA_KEYS,
+  createCartMandateWithX402,
+  extractX402Requirements,
+  createPaymentMandateWithX402,
+  extractX402Payload,
+  createAP2Extension,
+  createCartMandateDataPart,
+  createPaymentMandateDataPart,
+  createIntentMandateDataPart,
+  createPaymentReceiptDataPart,
+  extractCartMandateFromArtifact,
+  extractPaymentMandateFromMessage,
+} from "./ap2";
+
 // Scheme-specific types
 export type {
   UptoPaymentRequirements,

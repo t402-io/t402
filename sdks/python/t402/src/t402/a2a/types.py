@@ -123,6 +123,8 @@ class A2AArtifact:
 
     kind: str
     name: Optional[str] = None
+    description: Optional[str] = None
+    parts: Optional[List[A2AMessagePart]] = None
     mime_type: Optional[str] = None
     data: Optional[str] = None
     uri: Optional[str] = None

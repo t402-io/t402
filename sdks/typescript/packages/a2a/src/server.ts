@@ -11,12 +11,18 @@ import type {
   A2ATaskStatus,
   PaymentPayload,
   PaymentRequired,
+  PaymentRequirements,
   SettleResponse,
+  CartContents,
 } from "@t402/core/types";
 import {
   createPaymentRequiredMessage,
   createPaymentCompletedMessage,
   createPaymentFailedMessage,
+  createCartMandateWithX402,
+  createCartMandateDataPart,
+  extractPaymentMandateFromMessage,
+  extractX402Payload,
 } from "@t402/core/types";
 import type { FacilitatorClient } from "@t402/core/server";
 
@@ -378,5 +384,69 @@ export class A2APaymentServer {
   ): Promise<A2ATask> {
     const result = await this.processPayment(message, requirements);
     return this.updateTaskWithPaymentResult(task, result);
+  }
+
+  /**
+   * Create a payment-required task using the AP2 embedded flow.
+   * Returns a CartMandate as artifact instead of metadata.
+   *
+   * @param taskId - Task identifier
+   * @param cartContents - Cart contents (payment_request will be augmented with x402)
+   * @param requirements - x402 payment requirements to embed
+   * @param merchantAuthorization - Optional merchant JWT
+   * @param text - Optional text message
+   * @returns A2A task with CartMandate artifact and embedded flow metadata
+   */
+  createEmbeddedPaymentRequiredTask(
+    taskId: string,
+    cartContents: CartContents,
+    requirements: PaymentRequirements[],
+    merchantAuthorization?: string,
+    text?: string,
+  ): A2ATask {
+    const cartMandate = createCartMandateWithX402(
+      cartContents,
+      requirements,
+      merchantAuthorization,
+    );
+    return {
+      kind: "task",
+      id: taskId,
+      status: {
+        state: "input-required",
+        message: {
+          kind: "message",
+          role: "agent",
+          parts: [
+            { kind: "text", text: text || "Payment is required." },
+          ],
+          metadata: {
+            "x402.payment.status": "payment-required",
+            // No x402.payment.required — signals embedded flow
+          },
+        },
+        timestamp: new Date().toISOString(),
+      },
+      artifacts: [
+        {
+          kind: "ap2.cart",
+          name: "Cart Mandate",
+          parts: [createCartMandateDataPart(cartMandate)],
+        },
+      ],
+    };
+  }
+
+  /**
+   * Extract x402 PaymentPayload from an embedded-flow message.
+   * Scans message parts for PaymentMandate DataPart.
+   *
+   * @param message - A2A message with PaymentMandate DataPart
+   * @returns x402 PaymentPayload or undefined
+   */
+  extractEmbeddedPayload(message: A2AMessage): PaymentPayload | undefined {
+    const mandate = extractPaymentMandateFromMessage(message);
+    if (!mandate) return undefined;
+    return extractX402Payload(mandate);
   }
 }
