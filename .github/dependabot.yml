@@ -100,13 +100,16 @@ updates:
       - "dependencies"
       - "github-actions"
 
-  # Git submodules
+  # Git submodules (only public ones — private repos are updated manually)
   - package-ecosystem: "gitsubmodule"
     directory: "/"
     schedule:
       interval: "daily"
     commit-message:
       prefix: "chore(deps)"
+    ignore:
+      - dependency-name: "services/facilitator"
+      - dependency-name: "premium"
     labels:
       - "dependencies"
       - "submodule"
