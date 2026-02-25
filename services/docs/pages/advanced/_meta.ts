@@ -3,6 +3,7 @@ export default {
   bridge: 'Cross-Chain Bridge',
   mcp: 'MCP Integration',
   a2a: 'A2A Transport',
+  ap2: 'AP2 Integration',
   '---2': {
     type: 'separator',
     title: 'Operations'

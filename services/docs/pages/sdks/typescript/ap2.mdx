@@ -1,0 +1,211 @@
+# AP2 Integration (TypeScript)
+
+Using t402's AP2 embedded payment flow with `@t402/a2a`.
+
+import { Callout } from 'nextra/components'
+
+<Callout type="info">
+AP2 (Agentic Payment Protocol) is Google's open standard for agent-to-agent commerce. The `@t402/a2a` package bridges AP2 mandates with x402/t402 payment requirements, enabling embedded payment flows inside A2A tasks.
+</Callout>
+
+## Installation
+
+```bash
+npm install @t402/a2a
+```
+
+## Imports
+
+```typescript
+import {
+  // AP2 Types
+  type AP2Role,
+  type CartContents,
+  type CartMandate,
+  type PaymentMandateContents,
+  type PaymentMandate,
+  type PaymentReceipt,
+  type IntentMandate,
+  type PaymentCurrencyAmount,
+  type PaymentItem,
+  type PaymentMethodData,
+  type PaymentDetailsInit,
+  type AP2PaymentRequest,
+  type AP2PaymentResponse,
+
+  // Constants
+  AP2_EXTENSION_URI,
+  X402_PAYMENT_METHOD,
+  AP2_DATA_KEYS,
+
+  // Bridge Functions
+  createCartMandateWithX402,
+  extractX402Requirements,
+  createPaymentMandateWithX402,
+  extractX402Payload,
+  createAP2Extension,
+  createPaymentExtensions,
+  getPaymentExtensionHeaders,
+
+  // DataPart Helpers
+  createCartMandateDataPart,
+  createPaymentMandateDataPart,
+  createIntentMandateDataPart,
+  createPaymentReceiptDataPart,
+  extractCartMandateFromArtifact,
+  extractPaymentMandateFromMessage,
+
+  // Client & Server
+  A2APaymentClient,
+  A2APaymentServer,
+} from '@t402/a2a'
+```
+
+## Bridge Functions
+
+These functions convert between AP2 mandates and x402 payment data.
+
+| Function | Description |
+|----------|-------------|
+| `createCartMandateWithX402(cartContents, requirements[], merchantAuth?)` | Create a CartMandate with x402 requirements in PaymentMethodData |
+| `extractX402Requirements(cartMandate)` | Extract x402 requirements array from a CartMandate |
+| `createPaymentMandateWithX402(mandateContents, payload, userAuth?)` | Create a PaymentMandate with x402 payload in payment response |
+| `extractX402Payload(mandate)` | Extract x402 PaymentPayload from a PaymentMandate |
+
+### Example: Creating a CartMandate
+
+```typescript
+const cartMandate = createCartMandateWithX402(
+  {
+    id: 'cart-001',
+    merchant_name: 'Weather Agent',
+    cart_expiry: '2026-03-01T00:00:00Z',
+    user_cart_confirmation_required: false,
+    payment_request: {
+      method_data: [],
+      details: {
+        id: 'details-001',
+        display_items: [{ label: 'Weather forecast', amount: { currency: 'USD', value: 0.01 } }],
+        total: { label: 'Total', amount: { currency: 'USD', value: 0.01 } },
+      },
+    },
+  },
+  paymentRequirements,  // PaymentRequirements[]
+  merchantJWT,          // optional
+)
+```
+
+## DataPart Helpers
+
+Wrap and extract AP2 mandates from A2A DataParts.
+
+| Function | Description |
+|----------|-------------|
+| `createCartMandateDataPart(cartMandate)` | Wrap CartMandate in an A2A DataPart |
+| `createPaymentMandateDataPart(paymentMandate)` | Wrap PaymentMandate in an A2A DataPart |
+| `createIntentMandateDataPart(intentMandate)` | Wrap IntentMandate in an A2A DataPart |
+| `createPaymentReceiptDataPart(receipt)` | Wrap PaymentReceipt in an A2A DataPart |
+| `extractCartMandateFromArtifact(artifact)` | Extract CartMandate from an artifact's parts |
+| `extractPaymentMandateFromMessage(message)` | Extract PaymentMandate from a message's parts |
+
+## AgentCard Helpers
+
+Compose payment extension declarations for A2A AgentCards.
+
+| Function | Description |
+|----------|-------------|
+| `createPaymentExtensions(options?)` | Create `[t402, x402, ap2?]` extension array for AgentCard |
+| `getPaymentExtensionHeaders(includeAP2?)` | Get `X-A2A-Extensions` header map |
+| `createAP2Extension(roles?, required?)` | Create an AP2 extension declaration |
+
+```typescript
+// AgentCard with AP2 support
+const extensions = createPaymentExtensions({
+  ap2Roles: ['merchant'],
+  t402Required: false,
+  x402Required: false,
+  ap2Required: false,
+})
+
+// Request headers to activate AP2
+const headers = getPaymentExtensionHeaders(true)
+// → { 'X-A2A-Extensions': 'https://www.x402.org/, https://github.com/google-agentic-commerce/ap2/tree/v0.1' }
+```
+
+## Client: Embedded Flow
+
+The `A2APaymentClient` provides methods for extracting x402 requirements from CartMandate artifacts and submitting payments via PaymentMandate DataParts.
+
+```typescript
+const client = new A2APaymentClient({
+  onPaymentRequired: (req) => console.log('Payment required:', req),
+})
+
+// 1. Detect embedded payment requirements from task artifacts
+const requirements = client.extractEmbeddedRequirements(task)
+// → PaymentRequirements[] from CartMandate.payment_request.method_data
+
+if (requirements) {
+  // 2. Sign payment with your mechanism
+  const payload = await mechanism.createPaymentPayload(
+    requirements[0].t402Version,
+    requirements[0],
+  )
+
+  // 3. Wrap signed payload in a PaymentMandate message
+  const message = client.createEmbeddedPaymentMessage(
+    {
+      payment_mandate_id: 'mandate-001',
+      payment_details_id: 'details-001',
+      payment_details_total: {
+        label: 'Total',
+        amount: { currency: 'USD', value: 0.01 },
+      },
+      payment_response: { request_id: '', method_name: '', details: {} },
+      merchant_agent: 'agent://weather-agent',
+      timestamp: new Date().toISOString(),
+    },
+    payload,
+    userAuthorization,  // optional VP/JWT
+    'Here is the payment mandate.',
+  )
+  // Send message via A2A transport
+}
+```
+
+## Server: Embedded Flow
+
+The `A2APaymentServer` creates tasks with CartMandate artifacts and extracts PaymentPayloads from incoming PaymentMandate DataParts.
+
+```typescript
+const server = new A2APaymentServer({
+  facilitator: facilitatorClient,
+})
+
+// 1. Create a task with CartMandate artifact
+const task = server.createEmbeddedPaymentRequiredTask(
+  'task-456',
+  cartContents,           // CartContents
+  paymentRequirements,    // PaymentRequirements[]
+  merchantJWT,            // optional merchant authorization
+  'Payment required for weather data.',
+)
+// → Task with status "input-required" + CartMandate artifact
+
+// 2. When client responds, extract x402 payload from PaymentMandate DataPart
+const payload = server.extractEmbeddedPayload(incomingMessage)
+// → PaymentPayload from PaymentMandate.payment_response.details
+
+// 3. Verify and settle using the standalone flow
+if (payload) {
+  const result = await server.processPayment(incomingMessage, requirements)
+  if (result.success) {
+    // Serve the resource
+  }
+}
+```
+
+## Related
+
+- [A2A Transport](/advanced/a2a) -- Standalone A2A payment flow
+- [@t402/mcp](/sdks/typescript/mcp) -- MCP server for AI agent payments

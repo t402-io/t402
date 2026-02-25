@@ -148,6 +148,55 @@ After successful verification and settlement, the task completes with the receip
 }
 ```
 
+## AP2 Embedded Flow
+
+The [Agent Payments Protocol (AP2)](/advanced/ap2) extends A2A with a structured, mandate-based payment flow. Instead of carrying x402 requirements in message metadata, AP2 wraps them inside **CartMandate** artifacts using the W3C Payment Request format.
+
+### Embedded vs Standalone
+
+| Aspect | Standalone (A2A) | Embedded (AP2) |
+|--------|-----------------|----------------|
+| Requirements location | `t402.payment.required` metadata | CartMandate artifact DataPart |
+| Payment submission | `t402.payment.payload` metadata | PaymentMandate message DataPart |
+| Payment method format | t402 `PaymentRequirements` | W3C `PaymentMethodData` wrapping t402 |
+| Cart support | No | Yes (`PaymentDetailsInit`) |
+| Mandate tracking | No | Yes (mandate IDs, receipts) |
+| Detection | `isStandaloneFlow(task)` | `isEmbeddedFlow(task)` |
+
+### How It Works
+
+In the embedded flow, the server creates a CartMandate with x402 requirements embedded in the `PaymentMethodData`:
+
+```json
+{
+  "artifacts": [{
+    "kind": "ap2.cart",
+    "name": "Cart Mandate",
+    "parts": [{
+      "kind": "data",
+      "data": {
+        "ap2.mandates.CartMandate": {
+          "contents": {
+            "payment_request": {
+              "method_data": [{
+                "supported_methods": "https://www.x402.org/",
+                "data": { "requirements": [{ "scheme": "exact", "network": "eip155:8453", "..." }] }
+              }]
+            }
+          }
+        }
+      }
+    }]
+  }]
+}
+```
+
+The client extracts the requirements, signs the payment, and wraps it in a PaymentMandate DataPart in a message.
+
+<Callout type="info">
+  See the [AP2 Integration guide](/advanced/ap2) for the full embedded flow with code examples.
+</Callout>
+
 ## Payment Status Lifecycle
 
 | Status | Task State | Description |
@@ -169,11 +218,18 @@ Server agents advertise T402 support in their Agent Card:
 {
   "name": "Weather Agent",
   "capabilities": {
-    "extensions": [{
-      "uri": "https://github.com/google-a2a/a2a-t402/v0.1",
-      "description": "Accepts T402 USDT payments",
-      "required": true
-    }]
+    "extensions": [
+      {
+        "uri": "https://github.com/google-a2a/a2a-t402/v0.1",
+        "description": "Accepts T402 USDT payments",
+        "required": true
+      },
+      {
+        "uri": "https://github.com/google-agentic-commerce/a2a-x402/blob/main/spec/v0.2",
+        "description": "x402 v0.2 compatibility",
+        "required": false
+      }
+    ]
   }
 }
 ```
@@ -183,7 +239,7 @@ Server agents advertise T402 support in their Agent Card:
 Clients signal T402 support via an HTTP header on the A2A connection:
 
 ```http
-X-A2A-Extensions: https://github.com/google-a2a/a2a-t402/v0.1
+X-A2A-Extensions: https://github.com/google-agentic-commerce/a2a-x402/blob/main/spec/v0.2
 ```
 
 ## Error Handling
@@ -232,6 +288,11 @@ When payment fails, the task transitions to `failed` state with error details:
 | `t402.payment.payload` | Message metadata | Signed PaymentPayload |
 | `t402.payment.receipts` | Message metadata | Array of settlement receipts |
 | `t402.payment.error` | Message metadata | Error code string |
+| `x402.payment.status` | Message metadata | x402 compat alias for `t402.payment.status` |
+| `x402.payment.required` | Message metadata | x402 compat alias for `t402.payment.required` |
+| `x402.payment.payload` | Message metadata | x402 compat alias for `t402.payment.payload` |
+| `x402.payment.receipts` | Message metadata | x402 compat alias for `t402.payment.receipts` |
+| `x402.payment.error` | Message metadata | x402 compat alias for `t402.payment.error` |
 
 ## Implementation Example
 
@@ -340,6 +401,7 @@ if (task.status.state === 'input-required') {
 
 ## Related
 
+- [AP2 Integration](/advanced/ap2) — Embedded payment flow with AP2 mandates
 - [MCP Transport](/advanced/mcp) — T402 over Model Context Protocol
 - [Agent-to-Agent Use Case](/use-cases/ai-payments) — AI agent payment patterns
 - [T402 Specification](https://github.com/t402-io/t402/blob/main/specs/transports-v2/a2a.md) — Full A2A transport spec

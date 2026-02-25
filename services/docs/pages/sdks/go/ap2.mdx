@@ -1,0 +1,239 @@
+# AP2 Integration (Go)
+
+Using t402's AP2 embedded payment flow with the Go `a2a` package.
+
+import { Callout } from 'nextra/components'
+
+<Callout type="info">
+AP2 (Agentic Payment Protocol) is Google's open standard for agent-to-agent commerce. The Go `a2a` package bridges AP2 mandates with x402/t402 payment requirements, enabling embedded payment flows inside A2A tasks.
+</Callout>
+
+## Installation
+
+```bash
+go get github.com/t402-io/t402/sdks/go@latest
+```
+
+## Import
+
+```go
+import "github.com/t402-io/t402/sdks/go/a2a"
+```
+
+## Constants
+
+```go
+a2a.AP2ExtensionURI       // "https://github.com/google-agentic-commerce/ap2/tree/v0.1"
+a2a.X402PaymentMethod      // "https://www.x402.org/"
+a2a.AP2DataKeyIntentMandate  // "ap2.mandates.IntentMandate"
+a2a.AP2DataKeyCartMandate    // "ap2.mandates.CartMandate"
+a2a.AP2DataKeyPaymentMandate // "ap2.mandates.PaymentMandate"
+a2a.AP2DataKeyPaymentReceipt // "ap2.PaymentReceipt"
+```
+
+## Types
+
+```go
+type AP2PaymentCurrencyAmount struct {
+    Currency string  `json:"currency"`
+    Value    float64 `json:"value"`
+}
+
+type AP2PaymentItem struct {
+    Label   string                   `json:"label"`
+    Amount  AP2PaymentCurrencyAmount `json:"amount"`
+    Pending bool                     `json:"pending,omitempty"`
+}
+
+type CartContents struct {
+    ID                           string            `json:"id"`
+    UserCartConfirmationRequired bool              `json:"user_cart_confirmation_required"`
+    PaymentRequest               AP2PaymentRequest `json:"payment_request"`
+    CartExpiry                   string            `json:"cart_expiry"`
+    MerchantName                 string            `json:"merchant_name"`
+}
+
+type CartMandate struct {
+    Contents              CartContents `json:"contents"`
+    MerchantAuthorization string       `json:"merchant_authorization,omitempty"`
+}
+
+type PaymentMandateContents struct {
+    PaymentMandateID    string             `json:"payment_mandate_id"`
+    PaymentDetailsID    string             `json:"payment_details_id"`
+    PaymentDetailsTotal AP2PaymentItem     `json:"payment_details_total"`
+    PaymentResponse     AP2PaymentResponse `json:"payment_response"`
+    MerchantAgent       string             `json:"merchant_agent"`
+    Timestamp           string             `json:"timestamp"`
+}
+
+type PaymentMandate struct {
+    PaymentMandateContents PaymentMandateContents `json:"payment_mandate_contents"`
+    UserAuthorization      string                 `json:"user_authorization,omitempty"`
+}
+
+type IntentMandate struct {
+    NaturalLanguageDescription   string   `json:"natural_language_description"`
+    UserCartConfirmationRequired bool     `json:"user_cart_confirmation_required"`
+    Merchants                    []string `json:"merchants,omitempty"`
+    SKUs                         []string `json:"skus,omitempty"`
+    RequiresRefundability        bool     `json:"requires_refundability,omitempty"`
+    IntentExpiry                 string   `json:"intent_expiry"`
+}
+
+type AP2PaymentReceipt struct {
+    PaymentMandateID string                   `json:"payment_mandate_id"`
+    Timestamp        string                   `json:"timestamp"`
+    PaymentID        string                   `json:"payment_id"`
+    Amount           AP2PaymentCurrencyAmount `json:"amount"`
+    PaymentStatus    map[string]interface{}   `json:"payment_status"`
+}
+```
+
+## Bridge Functions
+
+| Function | Description |
+|----------|-------------|
+| `CreateCartMandateWithX402(contents, requirements, merchantAuth)` | Create a CartMandate with x402 requirements in method data |
+| `ExtractX402Requirements(mandate)` | Extract x402 requirements from a CartMandate |
+| `CreatePaymentMandateWithX402(contents, payload, userAuth)` | Create a PaymentMandate with x402 payload |
+| `ExtractX402Payload(mandate)` | Extract x402 PaymentPayload from a PaymentMandate |
+
+### Example: Creating a CartMandate
+
+```go
+cartMandate := a2a.CreateCartMandateWithX402(
+    a2a.CartContents{
+        ID:           "cart-001",
+        MerchantName: "Weather Agent",
+        CartExpiry:   "2026-03-01T00:00:00Z",
+        PaymentRequest: a2a.AP2PaymentRequest{
+            Details: a2a.AP2PaymentDetailsInit{
+                ID:    "details-001",
+                Total: a2a.AP2PaymentItem{Label: "Total", Amount: a2a.AP2PaymentCurrencyAmount{Currency: "USD", Value: 0.01}},
+            },
+        },
+    },
+    requirements,   // []map[string]interface{}
+    merchantAuth,   // string (optional, pass "" to omit)
+)
+```
+
+## DataPart Helpers
+
+| Function | Description |
+|----------|-------------|
+| `CreateCartMandateDataPart(mandate)` | Wrap CartMandate in an A2A MessagePart (kind=data) |
+| `CreatePaymentMandateDataPart(mandate)` | Wrap PaymentMandate in an A2A MessagePart |
+| `CreateIntentMandateDataPart(mandate)` | Wrap IntentMandate in an A2A MessagePart |
+| `CreatePaymentReceiptDataPart(receipt)` | Wrap AP2PaymentReceipt in an A2A MessagePart |
+| `ExtractCartMandateFromArtifact(artifact)` | Extract CartMandate map from artifact parts |
+| `ExtractPaymentMandateFromMessage(msg)` | Extract PaymentMandate map from message parts |
+
+## AgentCard Helpers
+
+| Function | Description |
+|----------|-------------|
+| `CreatePaymentExtensions(options)` | Create `[t402, x402, ap2?]` extension slice for AgentCards |
+| `GetPaymentExtensionHeaders(includeAP2)` | Get `X-A2A-Extensions` header map |
+| `CreateAP2Extension(roles, required)` | Create an AP2 extension declaration |
+
+```go
+extensions := a2a.CreatePaymentExtensions(a2a.PaymentExtensionOptions{
+    AP2Roles:     []string{"merchant"},
+    T402Required: false,
+    X402Required: false,
+    AP2Required:  false,
+})
+
+headers := a2a.GetPaymentExtensionHeaders(true)
+// → map["X-A2A-Extensions": "https://www.x402.org/, https://github.com/google-agentic-commerce/ap2/tree/v0.1"]
+```
+
+## Client: Embedded Flow
+
+The `A2APaymentClient` extracts x402 requirements from CartMandate artifacts and submits payments via PaymentMandate DataParts.
+
+```go
+client := a2a.NewA2APaymentClient(a2a.A2APaymentClientOptions{
+    OnPaymentRequired: func(req map[string]interface{}) {
+        fmt.Println("Payment required:", req)
+    },
+})
+
+// 1. Extract embedded requirements from task artifacts
+requirements := client.ExtractEmbeddedRequirements(task)
+// → []map[string]interface{} from CartMandate.payment_request.method_data
+
+if requirements != nil {
+    // 2. Sign payment with your mechanism
+    payload := signPayload(requirements[0])
+
+    // 3. Wrap signed payload in a PaymentMandate message
+    msg := client.CreateEmbeddedPaymentMessage(
+        a2a.PaymentMandateContents{
+            PaymentMandateID: "mandate-001",
+            PaymentDetailsID: "details-001",
+            PaymentDetailsTotal: a2a.AP2PaymentItem{
+                Label:  "Total",
+                Amount: a2a.AP2PaymentCurrencyAmount{Currency: "USD", Value: 0.01},
+            },
+            MerchantAgent: "agent://weather-agent",
+            Timestamp:     time.Now().UTC().Format(time.RFC3339),
+        },
+        payload,          // map[string]interface{}
+        userAuth,         // string (optional, pass "" to omit)
+        "Here is the payment mandate.",
+    )
+    // Send msg via A2A transport
+}
+```
+
+## Server: Embedded Flow
+
+The `A2APaymentServer` creates tasks with CartMandate artifacts and extracts PaymentPayloads from incoming PaymentMandate DataParts.
+
+```go
+server := a2a.NewA2APaymentServer(a2a.A2APaymentServerOptions{
+    Facilitator: myFacilitator,  // implements a2a.A2AFacilitator
+})
+
+// 1. Create a task with CartMandate artifact
+task := server.CreateEmbeddedPaymentRequiredTask(
+    "task-456",
+    cartContents,        // a2a.CartContents
+    requirements,        // []map[string]interface{}
+    merchantAuth,        // string (optional)
+    "Payment required for weather data.",
+)
+// → *Task with status "input-required" + CartMandate artifact
+
+// 2. Extract x402 payload from incoming PaymentMandate DataPart
+payload := server.ExtractEmbeddedPayload(incomingMessage)
+// → map[string]interface{} from PaymentMandate.payment_response.details
+
+// 3. Verify and settle
+if payload != nil {
+    result, err := server.ProcessPayment(ctx, incomingMessage, requirements)
+    if err == nil && result.Success {
+        // Serve the resource
+    }
+}
+```
+
+### A2AFacilitator Interface
+
+The server requires an `A2AFacilitator` implementation for verify and settle:
+
+```go
+type A2AFacilitator interface {
+    Verify(ctx context.Context, payload, requirements map[string]interface{}) (*VerifyResult, error)
+    Settle(ctx context.Context, payload, requirements map[string]interface{}) (*SettleResult, error)
+}
+```
+
+## Related
+
+- [A2A Transport](/advanced/a2a) -- Standalone A2A payment flow
+- [MCP Server](/sdks/go/mcp) -- MCP server for AI agent payments
+- [Client SDK](/sdks/go/client) -- Go client SDK overview

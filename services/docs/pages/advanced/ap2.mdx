@@ -1,0 +1,293 @@
+# AP2 Integration (Agent Payments Protocol)
+
+Embedding t402 payments inside Google's Agent Payments Protocol for structured agent commerce.
+
+import { Callout, Steps, Tabs } from 'nextra/components'
+
+## Overview
+
+[AP2 (Agent Payments Protocol)](https://github.com/google-agentic-commerce/ap2) is Google's open protocol for AI agent commerce. It defines a mandate-based payment flow built on the W3C Payment Request API, enabling shopping carts, multi-item purchases, and structured payment authorization.
+
+T402 integrates with AP2 as a **payment method** — x402 payment requirements and payloads are wrapped inside AP2's W3C-compatible structures using the payment method identifier `https://www.x402.org/`.
+
+## Mandate Lifecycle
+
+<Steps>
+### IntentMandate
+
+The shopper agent declares what it wants to buy in natural language.
+
+### CartMandate
+
+The merchant agent presents a shopping cart with x402 payment requirements embedded in `PaymentMethodData`.
+
+### PaymentMandate
+
+The shopper signs the x402 payment and wraps it in a PaymentMandate with optional user authorization.
+
+### PaymentReceipt
+
+The merchant verifies, settles on-chain, and returns a receipt confirming the transaction.
+</Steps>
+
+## Embedded Flow
+
+In the embedded flow, x402 requirements live inside the CartMandate artifact (not in message metadata). This is the key difference from the [standalone A2A flow](/advanced/a2a).
+
+### Server: CartMandate with x402
+
+The server creates a CartMandate with x402 requirements in `PaymentMethodData`:
+
+```json
+{
+  "kind": "task",
+  "id": "task-456",
+  "status": {
+    "state": "input-required",
+    "message": {
+      "kind": "message",
+      "role": "agent",
+      "parts": [{ "kind": "text", "text": "Payment is required." }],
+      "metadata": {
+        "t402.payment.status": "payment-required",
+        "x402.payment.status": "payment-required"
+      }
+    }
+  },
+  "artifacts": [{
+    "kind": "ap2.cart",
+    "name": "Cart Mandate",
+    "parts": [{
+      "kind": "data",
+      "data": {
+        "ap2.mandates.CartMandate": {
+          "contents": {
+            "id": "cart-001",
+            "user_cart_confirmation_required": true,
+            "payment_request": {
+              "method_data": [{
+                "supported_methods": "https://www.x402.org/",
+                "data": {
+                  "requirements": [{
+                    "scheme": "exact",
+                    "network": "eip155:8453",
+                    "amount": "1000000",
+                    "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bda02913",
+                    "payTo": "0xServerWallet...",
+                    "maxTimeoutSeconds": 600
+                  }]
+                }
+              }],
+              "details": {
+                "id": "details-001",
+                "display_items": [{ "label": "Weather API Call", "amount": { "currency": "USD", "value": 1 } }],
+                "total": { "label": "Total", "amount": { "currency": "USD", "value": 1 } }
+              }
+            },
+            "cart_expiry": "2026-03-01T00:00:00Z",
+            "merchant_name": "Weather Agent"
+          }
+        }
+      }
+    }]
+  }]
+}
+```
+
+<Callout type="info">
+  Notice that `metadata` has `t402.payment.status` but **no** `t402.payment.required` — this signals the embedded flow. Requirements are in the CartMandate artifact instead.
+</Callout>
+
+### Client: PaymentMandate with x402
+
+The client extracts requirements, signs the payment, and wraps it in a PaymentMandate:
+
+```json
+{
+  "kind": "message",
+  "role": "user",
+  "parts": [
+    { "kind": "text", "text": "Here is the payment mandate." },
+    {
+      "kind": "data",
+      "data": {
+        "ap2.mandates.PaymentMandate": {
+          "payment_mandate_contents": {
+            "payment_mandate_id": "mandate-001",
+            "payment_details_id": "details-001",
+            "payment_details_total": { "label": "Total", "amount": { "currency": "USD", "value": 1 } },
+            "payment_response": {
+              "request_id": "details-001",
+              "method_name": "https://www.x402.org/",
+              "details": {
+                "t402Version": 2,
+                "resource": { "url": "a2a://agent/weather" },
+                "accepted": { "scheme": "exact", "network": "eip155:8453", "amount": "1000000" },
+                "payload": { "signature": "0xabc...", "authorization": { "..." } }
+              }
+            },
+            "merchant_agent": "weather-agent",
+            "timestamp": "2026-02-25T12:00:00Z"
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "t402.payment.status": "payment-submitted",
+    "x402.payment.status": "payment-submitted"
+  }
+}
+```
+
+## AgentCard Extensions
+
+Agents supporting AP2 declare it in their AgentCard alongside the t402/x402 extensions:
+
+```json
+{
+  "capabilities": {
+    "extensions": [
+      { "uri": "https://github.com/google-a2a/a2a-t402/v0.1", "required": false },
+      { "uri": "https://github.com/google-agentic-commerce/a2a-x402/blob/main/spec/v0.2", "required": false },
+      { "uri": "https://github.com/google-agentic-commerce/ap2/tree/v0.1", "description": "AP2 payment agent (roles: merchant).", "required": false }
+    ]
+  }
+}
+```
+
+Use `createPaymentExtensions()` to generate this array programmatically.
+
+## DataPart Keys
+
+| Key | Carried In | Description |
+|-----|-----------|-------------|
+| `ap2.mandates.IntentMandate` | Message DataPart | User purchase intent |
+| `ap2.mandates.CartMandate` | Artifact DataPart | Shopping cart with x402 requirements |
+| `ap2.mandates.PaymentMandate` | Message DataPart | Signed payment authorization |
+| `ap2.PaymentReceipt` | Message/Artifact DataPart | Settlement confirmation |
+
+## Implementation
+
+<Tabs items={['TypeScript', 'Go', 'Python', 'Java']}>
+  <Tabs.Tab>
+```typescript
+import {
+  A2APaymentServer,
+  A2APaymentClient,
+  createPaymentExtensions,
+} from '@t402/a2a'
+
+// Server: Create embedded payment-required task
+const server = new A2APaymentServer({ facilitator })
+const task = server.createEmbeddedPaymentRequiredTask(
+  'task-456',
+  cartContents,
+  [{ scheme: 'exact', network: 'eip155:8453', amount: '1000000', ... }],
+)
+
+// Client: Extract requirements and create payment
+const client = new A2APaymentClient()
+const requirements = client.extractEmbeddedRequirements(task)
+// ... sign payment with mechanism ...
+const message = client.createEmbeddedPaymentMessage(
+  mandateContents, payload, userAuth,
+)
+
+// Server: Extract and verify
+const extractedPayload = server.extractEmbeddedPayload(message)
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```go
+import "github.com/t402-io/t402/sdks/go/a2a"
+
+// Server: Create embedded payment-required task
+server := a2a.NewA2APaymentServer(a2a.A2APaymentServerOptions{
+    Facilitator: facilitator,
+})
+task := server.CreateEmbeddedPaymentRequiredTask(
+    "task-456", cartContents, requirements, "", "",
+)
+
+// Client: Extract requirements
+client := a2a.NewA2APaymentClient(a2a.A2APaymentClientOptions{})
+reqs := client.ExtractEmbeddedRequirements(task)
+// ... sign payment ...
+msg := client.CreateEmbeddedPaymentMessage(
+    mandateContents, payload, userAuth, "",
+)
+
+// Server: Extract and verify
+extracted := server.ExtractEmbeddedPayload(msg)
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+from t402.a2a import A2APaymentServer, A2APaymentClient
+
+# Server: Create embedded payment-required task
+server = A2APaymentServer(facilitator=facilitator)
+task = server.create_embedded_payment_required_task(
+    "task-456", cart_contents, requirements,
+)
+
+# Client: Extract requirements
+client = A2APaymentClient()
+reqs = client.extract_embedded_requirements(task)
+# ... sign payment ...
+message = client.create_embedded_payment_message(
+    mandate_contents, payload, user_authorization=user_auth,
+)
+
+# Server: Extract and verify
+extracted = server.extract_embedded_payload(message)
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```java
+import io.t402.a2a.A2APaymentServer;
+import io.t402.a2a.A2APaymentClient;
+
+// Server: Create embedded payment-required task
+A2APaymentServer server = new A2APaymentServer(facilitator, null);
+Task task = server.createEmbeddedPaymentRequiredTask(
+    "task-456", cartContents, requirements, null, null
+);
+
+// Client: Extract requirements
+A2APaymentClient client = new A2APaymentClient();
+List<Map<String,Object>> reqs = client.extractEmbeddedRequirements(task);
+// ... sign payment ...
+Message message = client.createEmbeddedPaymentMessage(
+    mandateContents, payload, userAuth, null
+);
+
+// Server: Extract and verify
+Map<String,Object> extracted = server.extractEmbeddedPayload(message);
+```
+  </Tabs.Tab>
+</Tabs>
+
+## Standalone vs Embedded
+
+| Feature | Standalone (A2A) | Embedded (AP2) |
+|---------|-----------------|----------------|
+| Requirements in | Message metadata | CartMandate artifact |
+| Payment in | Message metadata | PaymentMandate DataPart |
+| Cart support | No | Yes |
+| Mandate tracking | No | Yes |
+| Receipt format | t402 `SettleResponse` | AP2 `PaymentReceipt` |
+| Best for | Simple one-shot payments | Shopping cart, multi-item |
+| Detection | `isStandaloneFlow(task)` | `isEmbeddedFlow(task)` |
+
+<Callout type="info">
+  Both flows use the same underlying x402 payment types. The embedded flow adds W3C Payment Request wrapping for richer commerce experiences.
+</Callout>
+
+## Related
+
+- [A2A Transport](/advanced/a2a) — Standalone t402 payment flow over A2A
+- [MCP Integration](/advanced/mcp) — T402 over Model Context Protocol
+- [AP2 Extension Spec](https://github.com/t402-io/t402/blob/main/specs/extensions/ap2-integration.md) — Full AP2 integration specification
+- [AP2 Protocol](https://github.com/google-agentic-commerce/ap2/tree/v0.1) — Google's Agent Payments Protocol

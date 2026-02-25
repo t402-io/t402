@@ -3,5 +3,6 @@ export default {
   'http-frameworks': 'HTTP Frameworks',
   'spring-boot': 'Spring Boot',
   mcp: 'MCP Server',
-  examples: 'Examples'
+  examples: 'Examples',
+  ap2: 'AP2 Integration'
 }

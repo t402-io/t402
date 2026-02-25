@@ -1,0 +1,240 @@
+# AP2 Integration (Java)
+
+Using t402's AP2 embedded payment flow with the Java `io.t402.a2a` package.
+
+import { Callout } from 'nextra/components'
+
+<Callout type="info">
+AP2 (Agentic Payment Protocol) is Google's open standard for agent-to-agent commerce. The `io.t402.a2a` package bridges AP2 mandates with x402/t402 payment requirements, enabling embedded payment flows inside A2A tasks.
+</Callout>
+
+## Installation
+
+```xml
+<dependency>
+  <groupId>io.t402</groupId>
+  <artifactId>t402</artifactId>
+  <version>1.12.1</version>
+</dependency>
+```
+
+## Imports
+
+```java
+import io.t402.a2a.AP2Helpers;
+import io.t402.a2a.A2APaymentClient;
+import io.t402.a2a.A2APaymentServer;
+import io.t402.a2a.A2APaymentServer.A2AFacilitator;
+import io.t402.a2a.A2APaymentServer.PaymentResult;
+import io.t402.a2a.A2APaymentServer.VerifyResult;
+import io.t402.a2a.A2APaymentServer.SettleResult;
+import io.t402.a2a.A2ATypes.*;
+```
+
+## Constants
+
+```java
+AP2Helpers.AP2_EXTENSION_URI          // "https://github.com/google-agentic-commerce/ap2/tree/v0.1"
+AP2Helpers.X402_PAYMENT_METHOD        // "https://www.x402.org/"
+AP2Helpers.AP2_DATA_KEY_INTENT_MANDATE  // "ap2.mandates.IntentMandate"
+AP2Helpers.AP2_DATA_KEY_CART_MANDATE    // "ap2.mandates.CartMandate"
+AP2Helpers.AP2_DATA_KEY_PAYMENT_MANDATE // "ap2.mandates.PaymentMandate"
+AP2Helpers.AP2_DATA_KEY_PAYMENT_RECEIPT // "ap2.PaymentReceipt"
+```
+
+## Bridge Functions
+
+All bridge functions are static methods on `AP2Helpers`. They use `Map<String, Object>` for untyped mandate and payload data.
+
+| Method | Description |
+|--------|-------------|
+| `AP2Helpers.createCartMandateWithX402(cartContents, requirements, merchantAuth)` | Create a CartMandate with x402 requirements in method data |
+| `AP2Helpers.extractX402Requirements(cartMandate)` | Extract x402 requirements from a CartMandate |
+| `AP2Helpers.createPaymentMandateWithX402(mandateContents, payload, userAuth)` | Create a PaymentMandate with x402 payload |
+| `AP2Helpers.extractX402Payload(paymentMandate)` | Extract x402 PaymentPayload from a PaymentMandate |
+
+### Example: Creating a CartMandate
+
+```java
+Map<String, Object> cartContents = Map.of(
+    "id", "cart-001",
+    "merchant_name", "Weather Agent",
+    "cart_expiry", "2026-03-01T00:00:00Z",
+    "user_cart_confirmation_required", false,
+    "payment_request", Map.of(
+        "method_data", List.of(),
+        "details", Map.of(
+            "id", "details-001",
+            "display_items", List.of(Map.of(
+                "label", "Weather forecast",
+                "amount", Map.of("currency", "USD", "value", 0.01)
+            )),
+            "total", Map.of(
+                "label", "Total",
+                "amount", Map.of("currency", "USD", "value", 0.01)
+            )
+        )
+    )
+);
+
+Map<String, Object> cartMandate = AP2Helpers.createCartMandateWithX402(
+    cartContents,
+    requirements,         // List<Map<String, Object>>
+    merchantJWT           // String (null to omit)
+);
+```
+
+## DataPart Helpers
+
+Wrap and extract AP2 mandates from A2A DataParts.
+
+| Method | Description |
+|--------|-------------|
+| `AP2Helpers.createCartMandateDataPart(cartMandate)` | Wrap CartMandate in a MessagePart (kind=data) |
+| `AP2Helpers.createPaymentMandateDataPart(paymentMandate)` | Wrap PaymentMandate in a MessagePart |
+| `AP2Helpers.extractCartMandateFromArtifact(artifact)` | Extract CartMandate map from artifact parts |
+| `AP2Helpers.extractPaymentMandateFromMessage(message)` | Extract PaymentMandate map from message parts |
+
+## AgentCard Helpers
+
+Compose payment extension declarations for A2A AgentCards.
+
+| Method | Description |
+|--------|-------------|
+| `AP2Helpers.createPaymentExtensions(options)` | Create `[t402, x402, ap2?]` extension list |
+| `AP2Helpers.createPaymentExtensions()` | Create `[t402, x402]` extensions with defaults |
+| `AP2Helpers.getPaymentExtensionHeaders(includeAP2)` | Get `X-A2A-Extensions` header map |
+| `AP2Helpers.getPaymentExtensionHeaders()` | Get headers with x402 only |
+| `AP2Helpers.createAP2Extension(roles, required)` | Create an AP2 extension declaration |
+
+```java
+// AgentCard with AP2 support
+AP2Helpers.PaymentExtensionOptions opts = new AP2Helpers.PaymentExtensionOptions();
+opts.ap2Roles = List.of("merchant");
+opts.t402Required = false;
+opts.x402Required = false;
+opts.ap2Required = false;
+List<Extension> extensions = AP2Helpers.createPaymentExtensions(opts);
+
+// Request headers to activate AP2
+Map<String, String> headers = AP2Helpers.getPaymentExtensionHeaders(true);
+// → {"X-A2A-Extensions": "https://www.x402.org/, https://github.com/google-agentic-commerce/ap2/tree/v0.1"}
+```
+
+## Client: Embedded Flow
+
+The `A2APaymentClient` extracts x402 requirements from CartMandate artifacts and submits payments via PaymentMandate DataParts.
+
+```java
+A2APaymentClient client = new A2APaymentClient(
+    req -> System.out.println("Payment required: " + req),
+    null, null, null
+);
+
+// 1. Extract embedded requirements from task artifacts
+List<Map<String, Object>> requirements = client.extractEmbeddedRequirements(task);
+// → List<Map> from CartMandate.payment_request.method_data
+
+if (requirements != null) {
+    // 2. Sign payment with your mechanism
+    Map<String, Object> payload = signPayload(requirements.get(0));
+
+    // 3. Wrap signed payload in a PaymentMandate message
+    Map<String, Object> mandateContents = new HashMap<>();
+    mandateContents.put("payment_mandate_id", "mandate-001");
+    mandateContents.put("payment_details_id", "details-001");
+    mandateContents.put("payment_details_total", Map.of(
+        "label", "Total",
+        "amount", Map.of("currency", "USD", "value", 0.01)
+    ));
+    mandateContents.put("merchant_agent", "agent://weather-agent");
+    mandateContents.put("timestamp", Instant.now().toString());
+
+    Message message = client.createEmbeddedPaymentMessage(
+        mandateContents,
+        payload,
+        userAuthorization,  // String, null to omit
+        "Here is the payment mandate."
+    );
+    // Send message via A2A transport
+}
+```
+
+## Server: Embedded Flow
+
+The `A2APaymentServer` creates tasks with CartMandate artifacts and extracts PaymentPayloads from incoming PaymentMandate DataParts.
+
+```java
+A2APaymentServer server = new A2APaymentServer(
+    facilitator,                  // A2AFacilitator implementation
+    Map.of(                       // default requirements
+        "t402Version", 2,
+        "resource", "agent://weather-agent/forecast"
+    ),
+    null, null, null, null, null  // optional callbacks
+);
+
+// 1. Create a task with CartMandate artifact
+Task task = server.createEmbeddedPaymentRequiredTask(
+    "task-456",
+    cartContents,           // Map<String, Object>
+    requirements,           // List<Map<String, Object>>
+    merchantJWT,            // String (null to omit)
+    "Payment required for weather data."
+);
+// → Task with status "input-required" + CartMandate artifact
+
+// 2. Extract x402 payload from incoming PaymentMandate DataPart
+Map<String, Object> payload = server.extractEmbeddedPayload(incomingMessage);
+// → Map from PaymentMandate.payment_response.details
+
+// 3. Verify and settle
+if (payload != null) {
+    PaymentResult result = server.processPayment(incomingMessage, requirements);
+    if (result.success) {
+        // Serve the resource
+    }
+}
+```
+
+### A2AFacilitator Interface
+
+The server requires an `A2AFacilitator` implementation for verify and settle. It is defined as an inner interface of `A2APaymentServer`:
+
+```java
+public interface A2AFacilitator {
+    VerifyResult verify(Map<String, Object> payload, Map<String, Object> requirements)
+        throws Exception;
+    SettleResult settle(Map<String, Object> payload, Map<String, Object> requirements)
+        throws Exception;
+}
+```
+
+### Result Types
+
+```java
+// Verification result
+A2APaymentServer.VerifyResult verifyResult;
+verifyResult.isValid;       // boolean
+verifyResult.invalidReason; // String
+
+// Settlement result
+A2APaymentServer.SettleResult settleResult;
+settleResult.success;       // boolean
+settleResult.errorReason;   // String
+settleResult.txHash;        // String
+settleResult.network;       // String
+
+// Payment processing result
+A2APaymentServer.PaymentResult paymentResult;
+paymentResult.success;      // boolean
+paymentResult.receipts;     // List<SettleResult>
+paymentResult.error;        // String
+paymentResult.message;      // Message
+```
+
+## Related
+
+- [A2A Transport](/advanced/a2a) -- Standalone A2A payment flow
+- [MCP Server](/sdks/java/mcp) -- MCP server for AI agent payments
+- [Spring Boot](/sdks/java/spring-boot) -- Spring Boot integration

@@ -3,5 +3,6 @@ export default {
   client: 'Client',
   server: 'Server',
   facilitator: 'Facilitator',
-  cli: 'CLI'
+  cli: 'CLI',
+  ap2: 'AP2 Integration'
 }

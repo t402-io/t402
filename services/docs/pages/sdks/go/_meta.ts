@@ -4,5 +4,6 @@ export default {
   server: 'Server SDK',
   'http-frameworks': 'HTTP Frameworks',
   facilitator: 'Facilitator',
-  mcp: 'MCP Server'
+  mcp: 'MCP Server',
+  ap2: 'AP2 Integration'
 }
