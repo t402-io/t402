@@ -143,7 +143,7 @@ export const USDT_LEGACY_ADDRESSES: Record<string, Address> = {
   // Celo
   "eip155:42220": "0x48065fbBE25f71C9282ddf5e1cD6D6A887483D5e",
   // Kaia (formerly Klaytn)
-  "eip155:8217": "0xcee8faf64bb97a73bb51e115aa89c17ffa8dd167",
+  "eip155:8217": "0xd077a400968890eacc75cdc901f0356c943e4fdb",
 };
 
 /**
