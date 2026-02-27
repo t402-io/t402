@@ -17,7 +17,11 @@ export type {
 } from "./t402ResourceServer";
 
 export { HTTPFacilitatorClient } from "../http/httpFacilitatorClient";
-export type { FacilitatorClient, FacilitatorConfig, SettleOptions } from "../http/httpFacilitatorClient";
+export type {
+  FacilitatorClient,
+  FacilitatorConfig,
+  SettleOptions,
+} from "../http/httpFacilitatorClient";
 
 export { t402HTTPResourceServer, RouteConfigurationError } from "../http/t402HTTPResourceServer";
 export type {

@@ -1,6 +1,10 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { Permit2ProxyEvmScheme } from "../../../src/permit2-proxy/server/scheme";
-import { PERMIT2_ADDRESS, T402_EXACT_PERMIT2_PROXY, T402_UPTO_PERMIT2_PROXY } from "../../../src/permit2-proxy/constants";
+import {
+  PERMIT2_ADDRESS,
+  T402_EXACT_PERMIT2_PROXY,
+  T402_UPTO_PERMIT2_PROXY,
+} from "../../../src/permit2-proxy/constants";
 
 describe("Permit2ProxyEvmScheme (Server)", () => {
   let server: Permit2ProxyEvmScheme;

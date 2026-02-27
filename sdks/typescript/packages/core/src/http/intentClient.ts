@@ -175,47 +175,64 @@ export class IntentClient {
   readonly url: string;
   private readonly apiKey?: string;
 
+  /**
+   * Create a new IntentClient instance.
+   *
+   * @param config - Optional client configuration for URL and API key
+   */
   constructor(config?: IntentClientConfig) {
     this.url = config?.url || DEFAULT_FACILITATOR_URL;
     this.apiKey = config?.apiKey;
   }
 
   /**
-   * Create a new payment intent and get available routes
+   * Create a new payment intent and get available routes.
+   *
+   * @param params - The intent creation parameters
+   * @returns The created intent with available and recommended routes
    */
   async createIntent(params: CreateIntentRequest): Promise<CreateIntentResponse> {
     return this.post<CreateIntentResponse>("/v1/intent", params);
   }
 
   /**
-   * Get intent details by ID
+   * Get intent details by ID.
+   *
+   * @param id - The unique intent identifier
+   * @returns The intent details
    */
   async getIntent(id: string): Promise<GetIntentResponse> {
     return this.get<GetIntentResponse>(`/v1/intent/${encodeURIComponent(id)}`);
   }
 
   /**
-   * Select a route for an intent
+   * Select a route for an intent.
+   *
+   * @param id - The unique intent identifier
+   * @param params - The route selection parameters
+   * @returns The intent with the selected route
    */
   async selectRoute(id: string, params: SelectRouteRequest): Promise<SelectRouteResponse> {
-    return this.post<SelectRouteResponse>(
-      `/v1/intent/${encodeURIComponent(id)}/route`,
-      params,
-    );
+    return this.post<SelectRouteResponse>(`/v1/intent/${encodeURIComponent(id)}/route`, params);
   }
 
   /**
-   * Execute an intent with a signed authorization
+   * Execute an intent with a signed authorization.
+   *
+   * @param id - The unique intent identifier
+   * @param params - The execution parameters including signature
+   * @returns The execution result with transaction hashes
    */
   async executeIntent(id: string, params: ExecuteIntentRequest): Promise<ExecuteIntentResponse> {
-    return this.post<ExecuteIntentResponse>(
-      `/v1/intent/${encodeURIComponent(id)}/execute`,
-      params,
-    );
+    return this.post<ExecuteIntentResponse>(`/v1/intent/${encodeURIComponent(id)}/execute`, params);
   }
 
   /**
-   * Cancel a pending intent
+   * Cancel a pending intent.
+   *
+   * @param id - The unique intent identifier
+   * @param params - Optional cancellation parameters with reason
+   * @returns The cancellation status and message
    */
   async cancelIntent(id: string, params?: CancelIntentRequest): Promise<CancelIntentResponse> {
     return this.post<CancelIntentResponse>(
@@ -225,17 +242,20 @@ export class IntentClient {
   }
 
   /**
-   * Refresh available routes for an intent
+   * Refresh available routes for an intent.
+   *
+   * @param id - The unique intent identifier
+   * @returns The intent with refreshed available and recommended routes
    */
   async refreshRoutes(id: string): Promise<RefreshRoutesResponse> {
-    return this.post<RefreshRoutesResponse>(
-      `/v1/intent/${encodeURIComponent(id)}/refresh`,
-      {},
-    );
+    return this.post<RefreshRoutesResponse>(`/v1/intent/${encodeURIComponent(id)}/refresh`, {});
   }
 
   /**
-   * List intents with optional filters
+   * List intents with optional filters.
+   *
+   * @param filters - Optional filter parameters for payer, payee, status, and pagination
+   * @returns Paginated list of intents matching the filters
    */
   async listIntents(filters?: ListIntentsParams): Promise<ListIntentsResponse> {
     const params = new URLSearchParams();
@@ -251,7 +271,9 @@ export class IntentClient {
   }
 
   /**
-   * Get intent statistics (counts by status)
+   * Get intent statistics (counts by status).
+   *
+   * @returns A record of status names to their counts
    */
   async getIntentStats(): Promise<IntentStats> {
     return this.get<IntentStats>("/v1/intent/stats");
@@ -261,6 +283,11 @@ export class IntentClient {
   // Internal HTTP helpers
   // ============================================================================
 
+  /**
+   * Build HTTP headers for API requests, including authorization if configured.
+   *
+   * @returns A headers record with content type and optional auth bearer token
+   */
   private buildHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -271,6 +298,13 @@ export class IntentClient {
     return headers;
   }
 
+  /**
+   * Send a POST request to the facilitator API.
+   *
+   * @param path - The API endpoint path
+   * @param body - The JSON request body
+   * @returns The parsed JSON response
+   */
   private async post<T>(path: string, body: unknown): Promise<T> {
     const response = await fetch(`${this.url}${path}`, {
       method: "POST",
@@ -290,6 +324,12 @@ export class IntentClient {
     return (await response.json()) as T;
   }
 
+  /**
+   * Send a GET request to the facilitator API.
+   *
+   * @param path - The API endpoint path
+   * @returns The parsed JSON response
+   */
   private async get<T>(path: string): Promise<T> {
     const response = await fetch(`${this.url}${path}`, {
       method: "GET",

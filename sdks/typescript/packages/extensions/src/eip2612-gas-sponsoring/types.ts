@@ -142,6 +142,10 @@ export interface PermitSigner {
    * Sign EIP-712 typed data and return hex-encoded signature.
    *
    * @param data - EIP-712 typed data to sign
+   * @param data.domain - EIP-712 domain separator fields
+   * @param data.types - EIP-712 type definitions
+   * @param data.primaryType - Primary type name for signing
+   * @param data.message - Message values to sign
    * @returns Hex-encoded signature
    */
   signTypedData(data: {

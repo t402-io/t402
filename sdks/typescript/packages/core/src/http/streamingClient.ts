@@ -167,6 +167,11 @@ export class StreamingClient {
   private readonly apiKey?: string;
   private readonly requesterAddress?: string;
 
+  /**
+   * Create a new StreamingClient instance.
+   *
+   * @param config - Client configuration options
+   */
   constructor(config?: StreamingClientConfig) {
     this.url = config?.url || DEFAULT_FACILITATOR_URL;
     this.apiKey = config?.apiKey;
@@ -174,28 +179,43 @@ export class StreamingClient {
   }
 
   /**
-   * Open a new payment stream
+   * Open a new payment stream.
+   *
+   * @param params - Stream opening parameters
+   * @returns The opened stream and deposit details
    */
   async openStream(params: OpenStreamRequest): Promise<OpenStreamResponse> {
     return this.post<OpenStreamResponse>("/v1/stream/open", params);
   }
 
   /**
-   * Update a stream with a new cumulative amount
+   * Update a stream with a new cumulative amount.
+   *
+   * @param params - Stream update parameters
+   * @returns The updated stream state and remaining balance
    */
   async updateStream(params: UpdateStreamRequest): Promise<UpdateStreamResponse> {
     return this.post<UpdateStreamResponse>("/v1/stream/update", params);
   }
 
   /**
-   * Close a stream and settle the final amount
+   * Close a stream and settle the final amount.
+   *
+   * @param params - Stream closing parameters
+   * @returns The closed stream with settlement details
    */
   async closeStream(params: CloseStreamRequest): Promise<CloseStreamResponse> {
     return this.post<CloseStreamResponse>("/v1/stream/close", params);
   }
 
   /**
-   * Get stream details by ID
+   * Get stream details by ID.
+   *
+   * @param id - The stream identifier
+   * @param options - Optional query parameters
+   * @param options.includeUpdates - Whether to include stream updates
+   * @param options.includeStats - Whether to include stream statistics
+   * @returns The stream details with optional updates and stats
    */
   async getStream(
     id: string,
@@ -210,21 +230,30 @@ export class StreamingClient {
   }
 
   /**
-   * Pause an active stream
+   * Pause an active stream.
+   *
+   * @param id - The stream identifier
+   * @returns The pause status and message
    */
   async pauseStream(id: string): Promise<PauseResumeResponse> {
     return this.post<PauseResumeResponse>(`/v1/stream/${encodeURIComponent(id)}/pause`, {});
   }
 
   /**
-   * Resume a paused stream
+   * Resume a paused stream.
+   *
+   * @param id - The stream identifier
+   * @returns The resume status and message
    */
   async resumeStream(id: string): Promise<PauseResumeResponse> {
     return this.post<PauseResumeResponse>(`/v1/stream/${encodeURIComponent(id)}/resume`, {});
   }
 
   /**
-   * List streams with optional filters
+   * List streams with optional filters.
+   *
+   * @param filters - Optional filtering and pagination parameters
+   * @returns A paginated list of streams
    */
   async listStreams(filters?: ListStreamsParams): Promise<ListStreamsResponse> {
     const params = new URLSearchParams();
@@ -246,6 +275,11 @@ export class StreamingClient {
   // Internal HTTP helpers
   // ============================================================================
 
+  /**
+   * Build HTTP headers for API requests.
+   *
+   * @returns A headers object with auth and content-type
+   */
   private buildHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -259,6 +293,13 @@ export class StreamingClient {
     return headers;
   }
 
+  /**
+   * Send a POST request to the streaming API.
+   *
+   * @param path - The API endpoint path
+   * @param body - The request body to send as JSON
+   * @returns The parsed JSON response
+   */
   private async post<T>(path: string, body: unknown): Promise<T> {
     const response = await fetch(`${this.url}${path}`, {
       method: "POST",
@@ -268,16 +309,25 @@ export class StreamingClient {
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => response.statusText);
-      throw new T402PaymentError(`Streaming API ${path} failed (${response.status}): ${errorText}`, {
-        phase: "unknown",
-        code: response.status,
-        retryable: response.status >= 500 || response.status === 429,
-      });
+      throw new T402PaymentError(
+        `Streaming API ${path} failed (${response.status}): ${errorText}`,
+        {
+          phase: "unknown",
+          code: response.status,
+          retryable: response.status >= 500 || response.status === 429,
+        },
+      );
     }
 
     return (await response.json()) as T;
   }
 
+  /**
+   * Send a GET request to the streaming API.
+   *
+   * @param path - The API endpoint path
+   * @returns The parsed JSON response
+   */
   private async get<T>(path: string): Promise<T> {
     const response = await fetch(`${this.url}${path}`, {
       method: "GET",
@@ -286,11 +336,14 @@ export class StreamingClient {
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => response.statusText);
-      throw new T402PaymentError(`Streaming API ${path} failed (${response.status}): ${errorText}`, {
-        phase: "unknown",
-        code: response.status,
-        retryable: response.status >= 500 || response.status === 429,
-      });
+      throw new T402PaymentError(
+        `Streaming API ${path} failed (${response.status}): ${errorText}`,
+        {
+          phase: "unknown",
+          code: response.status,
+          retryable: response.status >= 500 || response.status === 429,
+        },
+      );
     }
 
     return (await response.json()) as T;
