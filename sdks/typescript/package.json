@@ -17,7 +17,7 @@
       "axios": ">=1.12.0",
       "viem": "^2.44.2",
       "@tonconnect/bridge-sdk": "0.2.4",
-      "minimatch": ">=10.2.1",
+      "minimatch": ">=10.2.3",
       "validator": ">=13.15.22",
       "secp256k1": ">=5.0.1",
       "markdown-it": ">=14.1.1",
