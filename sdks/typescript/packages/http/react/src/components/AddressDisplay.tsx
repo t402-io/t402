@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useRef, useEffect } from 'react'
 import type { AddressDisplayProps } from '../types/index.js'
 import { truncateAddress } from '../utils/index.js'
 
@@ -62,14 +62,22 @@ export function AddressDisplay({
   className = '',
 }: AddressDisplayProps) {
   const [copied, setCopied] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(null)
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [])
 
   const displayAddress = truncateAddress(address, startChars, endChars)
 
   const handleCopy = useCallback(async () => {
+    if (timerRef.current) clearTimeout(timerRef.current)
     try {
       await navigator.clipboard.writeText(address)
       setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      timerRef.current = setTimeout(() => setCopied(false), 2000)
     } catch {
       // Fallback for older browsers
       const textArea = document.createElement('textarea')
@@ -79,7 +87,7 @@ export function AddressDisplay({
       document.execCommand('copy')
       document.body.removeChild(textArea)
       setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      timerRef.current = setTimeout(() => setCopied(false), 2000)
     }
   }, [address])
 
