@@ -331,7 +331,7 @@ KNOWN_TOKENS = {
     "8217": [
         {
             "human_name": "usdt",
-            "address": "0xcee8faf64bb97a73bb51e115aa89c17ffa8dd167",
+            "address": "0xd077a400968890eacc75cdc901f0356c943e4fdb",
             "name": "Tether USD",
             "decimals": 6,
             "version": "1",

@@ -621,14 +621,14 @@ var (
 		"eip155:8217": {
 			ChainID: ChainIDKaia,
 			DefaultAsset: AssetInfo{
-				Address:  "0xcee8faf64bb97a73bb51e115aa89c17ffa8dd167",
+				Address:  "0xd077a400968890eacc75cdc901f0356c943e4fdb", // Official Tether USD on Kaia
 				Name:     "Tether USD",
 				Version:  "1",
 				Decimals: DefaultDecimals,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT": {
-					Address:  "0xcee8faf64bb97a73bb51e115aa89c17ffa8dd167",
+					Address:  "0xd077a400968890eacc75cdc901f0356c943e4fdb",
 					Name:     "Tether USD",
 					Version:  "1",
 					Decimals: DefaultDecimals,

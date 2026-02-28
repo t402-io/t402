@@ -51,7 +51,7 @@ LEGACY_USDT_TOKENS = {
     "43114": "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7",  # Avalanche
     "250": "0x049d68029688eabf473097a2fc38ef61633a3c7a",  # Fantom
     "42220": "0x48065fbBE25f71C9282ddf5e1cD6D6A887483D5e",  # Celo
-    "8217": "0xcee8faf64bb97a73bb51e115aa89c17ffa8dd167",  # Kaia
+    "8217": "0xd077a400968890eacc75cdc901f0356c943e4fdb",  # Kaia
 }
 
 

@@ -3,6 +3,7 @@ on: [pull_request]
 
 jobs:
   typescript:
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -54,6 +55,7 @@ jobs:
           fi
 
   python:
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

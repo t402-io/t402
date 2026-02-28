@@ -229,10 +229,15 @@ func PayloadFromMap(data map[string]interface{}) (*ExactEIP3009Payload, error) {
 	return payload, nil
 }
 
-// IsValidNetwork checks if the network is supported for EVM
+// IsValidNetwork checks if the network is supported for EVM.
+// A network is valid if it exists in NetworkConfigs or matches a legacy alias.
 func IsValidNetwork(network string) bool {
+	if _, ok := NetworkConfigs[network]; ok {
+		return true
+	}
+	// Legacy aliases
 	switch network {
-	case "eip155:1", "eip155:8453", "eip155:84532", "base", "base-sepolia", "base-mainnet":
+	case "base", "base-sepolia", "base-mainnet":
 		return true
 	default:
 		return false

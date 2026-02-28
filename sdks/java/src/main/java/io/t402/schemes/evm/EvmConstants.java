@@ -155,7 +155,7 @@ public final class EvmConstants {
         AVALANCHE_MAINNET, "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7",
         FANTOM_MAINNET, "0x049d68029688eabf473097a2fc38ef61633a3c7a",
         CELO_MAINNET, "0x48065fbBE25f71C9282ddf5e1cD6D6A887483D5e",
-        KAIA_MAINNET, "0xcee8faf64bb97a73bb51e115aa89c17ffa8dd167"
+        KAIA_MAINNET, "0xd077a400968890eacc75cdc901f0356c943e4fdb"
     );
 
     /** Legacy USDT EIP-712 domain names (varies per network). */
