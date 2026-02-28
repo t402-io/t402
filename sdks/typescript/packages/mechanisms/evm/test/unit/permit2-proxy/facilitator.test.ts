@@ -1,7 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Permit2ProxyEvmScheme } from "../../../src/permit2-proxy/facilitator/scheme";
 import type { FacilitatorEvmSigner } from "../../../src/signer";
-import { PERMIT2_ADDRESS, T402_EXACT_PERMIT2_PROXY, T402_UPTO_PERMIT2_PROXY } from "../../../src/permit2-proxy/constants";
+import {
+  PERMIT2_ADDRESS,
+  T402_EXACT_PERMIT2_PROXY,
+  T402_UPTO_PERMIT2_PROXY,
+} from "../../../src/permit2-proxy/constants";
 
 describe("Permit2ProxyEvmScheme (Facilitator)", () => {
   let facilitator: Permit2ProxyEvmScheme;

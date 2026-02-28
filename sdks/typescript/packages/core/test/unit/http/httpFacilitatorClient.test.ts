@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { HTTPFacilitatorClient } from "../../../src/http/httpFacilitatorClient";
 import { T402PaymentError } from "../../../src/errors";
 import { buildPaymentPayload, buildPaymentRequirements } from "../../mocks";

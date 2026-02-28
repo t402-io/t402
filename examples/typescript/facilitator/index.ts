@@ -108,6 +108,13 @@ const svmSigner = toFacilitatorSvmSigner(svmAccount);
 // Track operation start times for duration metrics
 const operationTimers = new Map<string, number>();
 
+/**
+ * Generate a unique key for tracking operation timing metrics
+ *
+ * @param operation - the operation type (verify or settle)
+ * @param payload - the payment payload containing network and resource info
+ * @returns a unique string key for the operation
+ */
 function getOperationKey(
   operation: "verify" | "settle",
   payload: PaymentPayload,

@@ -10,12 +10,7 @@
  */
 
 import type { PaymentRequirements, PaymentPayload } from "./payments";
-import type {
-  A2AExtension,
-  A2ADataPart,
-  A2AArtifact,
-  A2AMessage,
-} from "./a2a";
+import type { A2AExtension, A2ADataPart, A2AArtifact, A2AMessage } from "./a2a";
 import {
   A2A_EXTENSIONS_HEADER,
   X402_A2A_EXTENSION_URI,
@@ -28,8 +23,7 @@ import {
 // ============================================================================
 
 /** AP2 extension URI for agent card declarations */
-export const AP2_EXTENSION_URI =
-  "https://github.com/google-agentic-commerce/ap2/tree/v0.1";
+export const AP2_EXTENSION_URI = "https://github.com/google-agentic-commerce/ap2/tree/v0.1";
 
 /** x402 payment method identifier for AP2 PaymentMethodData */
 export const X402_PAYMENT_METHOD = "https://www.x402.org/";
@@ -46,11 +40,7 @@ export const AP2_DATA_KEYS = {
 // AP2 Role
 // ============================================================================
 
-export type AP2Role =
-  | "merchant"
-  | "shopper"
-  | "credentials-provider"
-  | "payment-processor";
+export type AP2Role = "merchant" | "shopper" | "credentials-provider" | "payment-processor";
 
 // ============================================================================
 // W3C Payment Request API (subset)
@@ -147,6 +137,11 @@ export interface PaymentReceipt {
 /**
  * Create a CartMandate with x402 PaymentRequirements embedded in
  * the PaymentMethodData for method "https://www.x402.org/".
+ *
+ * @param cartContents - The base cart contents to embed requirements into
+ * @param requirements - The x402 payment requirements to embed
+ * @param merchantAuthorization - Optional merchant authorization token
+ * @returns A CartMandate with x402 requirements in PaymentMethodData
  */
 export function createCartMandateWithX402(
   cartContents: CartContents,
@@ -164,7 +159,7 @@ export function createCartMandateWithX402(
       ...cartContents.payment_request,
       method_data: [
         ...cartContents.payment_request.method_data.filter(
-          (m) => m.supported_methods !== X402_PAYMENT_METHOD,
+          m => m.supported_methods !== X402_PAYMENT_METHOD,
         ),
         x402MethodData,
       ],
@@ -179,12 +174,15 @@ export function createCartMandateWithX402(
 
 /**
  * Extract x402 PaymentRequirements from a CartMandate.
+ *
+ * @param cartMandate - The CartMandate to extract requirements from
+ * @returns The extracted x402 PaymentRequirements, or undefined if not found
  */
 export function extractX402Requirements(
   cartMandate: CartMandate,
 ): PaymentRequirements[] | undefined {
   const methodData = cartMandate.contents.payment_request.method_data.find(
-    (m) => m.supported_methods === X402_PAYMENT_METHOD,
+    m => m.supported_methods === X402_PAYMENT_METHOD,
   );
   if (!methodData?.data?.requirements) return undefined;
   return methodData.data.requirements as PaymentRequirements[];
@@ -193,6 +191,11 @@ export function extractX402Requirements(
 /**
  * Create a PaymentMandate with x402 PaymentPayload embedded in
  * the PaymentResponse.details for method "https://www.x402.org/".
+ *
+ * @param mandateContents - The base payment mandate contents
+ * @param payload - The x402 payment payload to embed
+ * @param userAuthorization - Optional user authorization token
+ * @returns A PaymentMandate with x402 payload in PaymentResponse details
  */
 export function createPaymentMandateWithX402(
   mandateContents: PaymentMandateContents,
@@ -216,10 +219,11 @@ export function createPaymentMandateWithX402(
 
 /**
  * Extract x402 PaymentPayload from a PaymentMandate.
+ *
+ * @param mandate - The PaymentMandate to extract the payload from
+ * @returns The extracted x402 PaymentPayload, or undefined if not found
  */
-export function extractX402Payload(
-  mandate: PaymentMandate,
-): PaymentPayload | undefined {
+export function extractX402Payload(mandate: PaymentMandate): PaymentPayload | undefined {
   const response = mandate.payment_mandate_contents.payment_response;
   if (response.method_name !== X402_PAYMENT_METHOD) return undefined;
   return response.details as unknown as PaymentPayload | undefined;
@@ -231,6 +235,10 @@ export function extractX402Payload(
 
 /**
  * Create an AP2 extension declaration for agent cards.
+ *
+ * @param roles - The AP2 roles this agent supports
+ * @param required - Whether the extension is required
+ * @returns An A2A extension declaration for AP2
  */
 export function createAP2Extension(
   roles: AP2Role[] = ["merchant"],
@@ -252,14 +260,20 @@ export function createAP2Extension(
  * Returns [t402, x402, ap2?] extensions ready for capabilities.extensions.
  *
  * @param options - Configuration for extension declarations
+ * @param options.ap2Roles - AP2 roles to advertise (omit to exclude AP2 extension)
+ * @param options.t402Required - Whether the t402 extension is required
+ * @param options.x402Required - Whether the x402 extension is required
+ * @param options.ap2Required - Whether the AP2 extension is required
  * @returns Array of A2A extension declarations
  */
-export function createPaymentExtensions(options: {
-  ap2Roles?: AP2Role[];
-  t402Required?: boolean;
-  x402Required?: boolean;
-  ap2Required?: boolean;
-} = {}): A2AExtension[] {
+export function createPaymentExtensions(
+  options: {
+    ap2Roles?: AP2Role[];
+    t402Required?: boolean;
+    x402Required?: boolean;
+    ap2Required?: boolean;
+  } = {},
+): A2AExtension[] {
   const extensions: A2AExtension[] = [
     createT402Extension(options.t402Required ?? false),
     createX402Extension(options.x402Required ?? false),
@@ -277,9 +291,7 @@ export function createPaymentExtensions(options: {
  * @param includeAP2 - Whether to include the AP2 extension URI
  * @returns Header name/value map
  */
-export function getPaymentExtensionHeaders(
-  includeAP2: boolean = false,
-): Record<string, string> {
+export function getPaymentExtensionHeaders(includeAP2: boolean = false): Record<string, string> {
   const uris = [X402_A2A_EXTENSION_URI];
   if (includeAP2) {
     uris.push(AP2_EXTENSION_URI);
@@ -293,10 +305,11 @@ export function getPaymentExtensionHeaders(
 
 /**
  * Create a DataPart containing a CartMandate.
+ *
+ * @param cartMandate - The CartMandate to wrap
+ * @returns An A2ADataPart containing the CartMandate
  */
-export function createCartMandateDataPart(
-  cartMandate: CartMandate,
-): A2ADataPart {
+export function createCartMandateDataPart(cartMandate: CartMandate): A2ADataPart {
   return {
     kind: "data",
     data: { [AP2_DATA_KEYS.CART_MANDATE]: cartMandate as unknown as Record<string, unknown> },
@@ -305,10 +318,11 @@ export function createCartMandateDataPart(
 
 /**
  * Create a DataPart containing a PaymentMandate.
+ *
+ * @param paymentMandate - The PaymentMandate to wrap
+ * @returns An A2ADataPart containing the PaymentMandate
  */
-export function createPaymentMandateDataPart(
-  paymentMandate: PaymentMandate,
-): A2ADataPart {
+export function createPaymentMandateDataPart(paymentMandate: PaymentMandate): A2ADataPart {
   return {
     kind: "data",
     data: { [AP2_DATA_KEYS.PAYMENT_MANDATE]: paymentMandate as unknown as Record<string, unknown> },
@@ -317,10 +331,11 @@ export function createPaymentMandateDataPart(
 
 /**
  * Create a DataPart containing an IntentMandate.
+ *
+ * @param intentMandate - The IntentMandate to wrap
+ * @returns An A2ADataPart containing the IntentMandate
  */
-export function createIntentMandateDataPart(
-  intentMandate: IntentMandate,
-): A2ADataPart {
+export function createIntentMandateDataPart(intentMandate: IntentMandate): A2ADataPart {
   return {
     kind: "data",
     data: { [AP2_DATA_KEYS.INTENT_MANDATE]: intentMandate as unknown as Record<string, unknown> },
@@ -329,10 +344,11 @@ export function createIntentMandateDataPart(
 
 /**
  * Create a DataPart containing a PaymentReceipt.
+ *
+ * @param receipt - The PaymentReceipt to wrap
+ * @returns An A2ADataPart containing the PaymentReceipt
  */
-export function createPaymentReceiptDataPart(
-  receipt: PaymentReceipt,
-): A2ADataPart {
+export function createPaymentReceiptDataPart(receipt: PaymentReceipt): A2ADataPart {
   return {
     kind: "data",
     data: { [AP2_DATA_KEYS.PAYMENT_RECEIPT]: receipt as unknown as Record<string, unknown> },
@@ -341,19 +357,15 @@ export function createPaymentReceiptDataPart(
 
 /**
  * Extract a CartMandate from an Artifact's parts.
+ *
+ * @param artifact - The A2A artifact to search for a CartMandate
+ * @returns The extracted CartMandate, or undefined if not found
  */
-export function extractCartMandateFromArtifact(
-  artifact: A2AArtifact,
-): CartMandate | undefined {
+export function extractCartMandateFromArtifact(artifact: A2AArtifact): CartMandate | undefined {
   if (!artifact.parts) return undefined;
   for (const part of artifact.parts) {
-    if (
-      part.kind === "data" &&
-      (part as A2ADataPart).data?.[AP2_DATA_KEYS.CART_MANDATE]
-    ) {
-      return (part as A2ADataPart).data[
-        AP2_DATA_KEYS.CART_MANDATE
-      ] as unknown as CartMandate;
+    if (part.kind === "data" && (part as A2ADataPart).data?.[AP2_DATA_KEYS.CART_MANDATE]) {
+      return (part as A2ADataPart).data[AP2_DATA_KEYS.CART_MANDATE] as unknown as CartMandate;
     }
   }
   return undefined;
@@ -361,18 +373,14 @@ export function extractCartMandateFromArtifact(
 
 /**
  * Extract a PaymentMandate from a Message's parts.
+ *
+ * @param message - The A2A message to search for a PaymentMandate
+ * @returns The extracted PaymentMandate, or undefined if not found
  */
-export function extractPaymentMandateFromMessage(
-  message: A2AMessage,
-): PaymentMandate | undefined {
+export function extractPaymentMandateFromMessage(message: A2AMessage): PaymentMandate | undefined {
   for (const part of message.parts) {
-    if (
-      part.kind === "data" &&
-      (part as A2ADataPart).data?.[AP2_DATA_KEYS.PAYMENT_MANDATE]
-    ) {
-      return (part as A2ADataPart).data[
-        AP2_DATA_KEYS.PAYMENT_MANDATE
-      ] as unknown as PaymentMandate;
+    if (part.kind === "data" && (part as A2ADataPart).data?.[AP2_DATA_KEYS.PAYMENT_MANDATE]) {
+      return (part as A2ADataPart).data[AP2_DATA_KEYS.PAYMENT_MANDATE] as unknown as PaymentMandate;
     }
   }
   return undefined;

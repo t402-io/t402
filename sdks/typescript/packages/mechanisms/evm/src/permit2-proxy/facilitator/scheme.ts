@@ -21,11 +21,11 @@ import {
  * Configuration for Permit2 Proxy EVM facilitator
  */
 export interface Permit2ProxyEvmSchemeConfig {
+  [key: string]: unknown;
   /** Override exact proxy contract address */
   exactProxyAddress?: `0x${string}`;
   /** Override upto proxy contract address */
   uptoProxyAddress?: `0x${string}`;
-  [key: string]: unknown;
 }
 
 /**
@@ -92,11 +92,7 @@ export class Permit2ProxyEvmScheme implements SchemeNetworkFacilitator {
     const proxyPayload = payload.payload as Permit2ProxyPayloadV2 | undefined;
 
     // Validate payload structure
-    if (
-      !proxyPayload?.permit?.permitted?.token ||
-      !proxyPayload?.owner ||
-      !proxyPayload?.witness
-    ) {
+    if (!proxyPayload?.permit?.permitted?.token || !proxyPayload?.owner || !proxyPayload?.witness) {
       return {
         isValid: false,
         invalidReason: "invalid_payload_structure",
@@ -226,11 +222,7 @@ export class Permit2ProxyEvmScheme implements SchemeNetworkFacilitator {
   ): Promise<SettleResponse> {
     const proxyPayload = payload.payload as Permit2ProxyPayloadV2 | undefined;
 
-    if (
-      !proxyPayload?.permit?.permitted?.token ||
-      !proxyPayload?.owner ||
-      !proxyPayload?.witness
-    ) {
+    if (!proxyPayload?.permit?.permitted?.token || !proxyPayload?.owner || !proxyPayload?.witness) {
       return {
         success: false,
         network: payload.accepted.network,

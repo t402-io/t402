@@ -53,9 +53,7 @@ export class Permit2ProxyEvmScheme implements SchemeNetworkClient {
     }
 
     // Get facilitator address from requirements extra
-    const facilitatorAddress = paymentRequirements.extra?.facilitator as
-      | `0x${string}`
-      | undefined;
+    const facilitatorAddress = paymentRequirements.extra?.facilitator as `0x${string}` | undefined;
 
     if (!facilitatorAddress) {
       throw new Error("Missing facilitator address in payment requirements extra");

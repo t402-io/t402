@@ -16,7 +16,12 @@ export { registerPermit2ProxyEvmScheme as registerPermit2ProxyEvmFacilitatorSche
 export type { Permit2ProxyEvmFacilitatorConfig } from "./facilitator/register";
 
 // Types
-export type { Permit2ProxyPayloadV2, T402Witness, PermitTransferFrom, TokenPermissions } from "./types";
+export type {
+  Permit2ProxyPayloadV2,
+  T402Witness,
+  PermitTransferFrom,
+  TokenPermissions,
+} from "./types";
 
 // Constants
 export {

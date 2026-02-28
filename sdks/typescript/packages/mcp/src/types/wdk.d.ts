@@ -13,7 +13,7 @@ declare module '@t402/wdk' {
     getSwapQuote(
       chain: string,
       fromToken: string,
-      amount: bigint
+      amount: bigint,
     ): Promise<{ expectedOutput: bigint; outputAmount: bigint; route: unknown }>
     swapAndPay(params: {
       chain: string
@@ -21,9 +21,7 @@ declare module '@t402/wdk' {
       amount: bigint
       recipient?: string
     }): Promise<{ hash: string; txHash: string; outputAmount: bigint }>
-    findBestChainForPayment(
-      amount: bigint
-    ): Promise<{ chain: string; balance: bigint } | null>
+    findBestChainForPayment(amount: bigint): Promise<{ chain: string; balance: bigint } | null>
   }
 
   export interface WDKSigner {
@@ -62,10 +60,7 @@ declare module '@t402/wdk-protocol' {
   }
 
   export class T402Protocol {
-    static create(
-      wdk: T402WDK,
-      options?: { chains?: string[] }
-    ): Promise<T402Protocol>
+    static create(wdk: T402WDK, options?: { chains?: string[] }): Promise<T402Protocol>
     fetch(url: string, init?: RequestInit): Promise<ProtocolFetchResult>
     signPayment(requirements: unknown): Promise<unknown>
     submitPayment(url: string, payload: unknown): Promise<Response>

@@ -3,7 +3,7 @@
 import time
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 from t402.schemes.evm.permit2.client import (
     Permit2EvmClientScheme,

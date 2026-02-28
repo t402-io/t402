@@ -56,7 +56,7 @@ export function encodeApproveCalldata(spender: string, amount: string): string {
 /**
  * Creates an ERC-20 approval gas sponsor payload from params and extension info.
  *
- * @param info - The server's extension info
+ * @param _info - The server's extension info (reserved for future use)
  * @param params - The approval parameters
  * @returns Gas sponsor payload ready for header encoding
  *

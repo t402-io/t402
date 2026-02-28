@@ -310,6 +310,11 @@ const T402_TO_X402_ERROR_MAP: Record<string, string> = {
 /**
  * Read a metadata value with t402/x402 dual-namespace fallback.
  * Checks t402.payment.* first, then x402.payment.* as fallback.
+ *
+ * @param metadata - The metadata record to read from
+ * @param t402Key - The t402 namespace key to check first
+ * @param x402Key - The x402 namespace key used as fallback
+ * @returns The metadata value from the first matching namespace, or undefined
  */
 function getMetaValue(
   metadata: Record<string, unknown> | undefined,
@@ -324,15 +329,12 @@ function getMetaValue(
 
 /**
  * Read the payment status from metadata (dual-namespace).
+ *
+ * @param metadata - The metadata record to read the payment status from
+ * @returns The payment status string, or undefined if not present
  */
-function getPaymentStatus(
-  metadata: Record<string, unknown> | undefined,
-): string | undefined {
-  return getMetaValue(
-    metadata,
-    "t402.payment.status",
-    "x402.payment.status",
-  ) as string | undefined;
+function getPaymentStatus(metadata: Record<string, unknown> | undefined): string | undefined {
+  return getMetaValue(metadata, "t402.payment.status", "x402.payment.status") as string | undefined;
 }
 
 // ============================================================================
@@ -579,7 +581,7 @@ export function downgradeRequirementsToX402(
 
   // Filter to EVM + exact scheme only
   const evmExactAccepts = requirements.accepts.filter(
-    (a) => a.network.startsWith("eip155:") && a.scheme === "exact",
+    a => a.network.startsWith("eip155:") && a.scheme === "exact",
   );
 
   if (evmExactAccepts.length === 0) {
@@ -593,7 +595,7 @@ export function downgradeRequirementsToX402(
 
   return {
     x402Version: 1,
-    accepts: evmExactAccepts.map((a) => ({
+    accepts: evmExactAccepts.map(a => ({
       ...a,
       network: CAIP2_TO_FLAT_NAME[a.network] ?? a.network,
       maxAmountRequired: a.amount,

@@ -112,6 +112,14 @@ export async function createPermitSignature(params: CreatePermitParams): Promise
  * Creates a gas sponsor payload from permit data and network.
  *
  * @param permit - Permit signature data from createPermitSignature
+ * @param permit.owner - Token owner address
+ * @param permit.spender - Approved spender address
+ * @param permit.value - Token amount in base units
+ * @param permit.deadline - Unix timestamp for permit expiry
+ * @param permit.v - Recovery parameter from signature
+ * @param permit.r - Signature r component (32 bytes hex)
+ * @param permit.s - Signature s component (32 bytes hex)
+ * @param permit.permitSignature - Full hex-encoded permit signature
  * @param network - CAIP-2 network identifier (e.g., "eip155:8453")
  * @returns Gas sponsor payload ready for header encoding
  *

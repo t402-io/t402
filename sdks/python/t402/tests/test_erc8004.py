@@ -1,6 +1,5 @@
 """Tests for the ERC-8004 Agent Registry extension."""
 
-from datetime import datetime, timezone
 
 import pytest
 
@@ -8,13 +7,9 @@ from t402.extensions.erc8004 import (
     ERC8004_EXTENSION_KEY,
     ERC8004Extension,
     ERC8004PayloadExtension,
-    AgentRegistry,
-    ReputationSummary,
-    ValidationSummary,
     FeedbackFile,
     FeedbackParams,
     ValidationRequestParams,
-    ValidationStatus,
     FEEDBACK_TAGS,
     IDENTITY_REGISTRY_ABI,
     REPUTATION_REGISTRY_ABI,

@@ -146,6 +146,10 @@ export const errorsTotal = new Counter({
 
 /**
  * Express middleware to track HTTP request metrics
+ *
+ * @param req - the incoming HTTP request
+ * @param res - the HTTP response object
+ * @param next - the next middleware function in the chain
  */
 export function metricsMiddleware(
   req: Request,
@@ -191,13 +195,22 @@ export function metricsMiddleware(
 
 /**
  * Normalize endpoint path for consistent metric labels
+ *
+ * @param path - the raw request path to normalize
+ * @returns the normalized endpoint string
  */
 function normalizeEndpoint(path: string): string {
   // Remove trailing slashes
   const normalized = path.replace(/\/+$/, "") || "/";
 
   // Known endpoints
-  const knownEndpoints = ["/verify", "/settle", "/supported", "/metrics", "/health"];
+  const knownEndpoints = [
+    "/verify",
+    "/settle",
+    "/supported",
+    "/metrics",
+    "/health",
+  ];
   if (knownEndpoints.includes(normalized)) {
     return normalized;
   }
@@ -212,6 +225,11 @@ function normalizeEndpoint(path: string): string {
 
 /**
  * Record a verification operation
+ *
+ * @param isValid - whether the verification passed
+ * @param network - the CAIP-2 network identifier
+ * @param scheme - the payment scheme used
+ * @param durationMs - operation duration in milliseconds
  */
 export function recordVerification(
   isValid: boolean,
@@ -226,6 +244,14 @@ export function recordVerification(
 
 /**
  * Record a settlement operation
+ *
+ * @param success - whether the settlement succeeded
+ * @param network - the CAIP-2 network identifier
+ * @param scheme - the payment scheme used
+ * @param durationMs - operation duration in milliseconds
+ * @param amountRaw - raw payment amount in smallest token units
+ * @param token - the token asset identifier
+ * @param amountUsd - payment amount in USD equivalent
  */
 export function recordSettlement(
   success: boolean,
@@ -251,6 +277,9 @@ export function recordSettlement(
 
 /**
  * Record an error
+ *
+ * @param type - the error category (verification, settlement, or internal)
+ * @param network - the CAIP-2 network identifier, defaults to "unknown"
  */
 export function recordError(
   type: "verification" | "settlement" | "internal",

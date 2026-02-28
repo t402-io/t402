@@ -29,7 +29,6 @@ from t402.schemes.btc import (
     LightningServerScheme,
     LightningFacilitatorScheme,
     # Configurations
-    ExactBtcClientConfig,
     ExactBtcServerConfig,
     ExactBtcFacilitatorConfig,
     LightningServerConfig,

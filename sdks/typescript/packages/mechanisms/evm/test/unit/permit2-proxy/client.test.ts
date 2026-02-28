@@ -59,9 +59,7 @@ describe("Permit2ProxyEvmScheme (Client)", () => {
     it("should set correct witness data", async () => {
       const result = await client.createPaymentPayload(2, baseRequirements);
 
-      expect(result.payload.witness.to.toLowerCase()).toBe(
-        baseRequirements.payTo.toLowerCase(),
-      );
+      expect(result.payload.witness.to.toLowerCase()).toBe(baseRequirements.payTo.toLowerCase());
       expect(result.payload.witness.facilitator.toLowerCase()).toBe(
         (baseRequirements.extra!.facilitator as string).toLowerCase(),
       );
@@ -92,9 +90,7 @@ describe("Permit2ProxyEvmScheme (Client)", () => {
       const callArgs = (mockSigner.signTypedData as any).mock.calls[0][0];
       expect(callArgs.domain.name).toBe("Permit2");
       expect(callArgs.domain.chainId).toBe(8453);
-      expect(callArgs.domain.verifyingContract).toBe(
-        "0x000000000022D473030F116dDEE9F6B43aC78BA3",
-      );
+      expect(callArgs.domain.verifyingContract).toBe("0x000000000022D473030F116dDEE9F6B43aC78BA3");
       expect(callArgs.primaryType).toBe("PermitWitnessTransferFrom");
     });
 
@@ -137,9 +133,7 @@ describe("Permit2ProxyEvmScheme (Client)", () => {
         extra: { exactProxyAddress: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8" },
       };
 
-      await expect(client.createPaymentPayload(2, badRequirements)).rejects.toThrow(
-        /facilitator/i,
-      );
+      await expect(client.createPaymentPayload(2, badRequirements)).rejects.toThrow(/facilitator/i);
     });
   });
 });
