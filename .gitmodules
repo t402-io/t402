@@ -7,3 +7,6 @@
 [submodule "premium"]
 	path = premium
 	url = https://github.com/t402-io/t402-premium.git
+[submodule "services/scan2pay"]
+	path = services/scan2pay
+	url = https://github.com/t402-io/scan2pay-t402.git
