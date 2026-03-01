@@ -319,6 +319,25 @@ func (f *ExactTonScheme) Settle(
 		finalTxHash = confirmation.Hash
 	}
 
+	// Post-confirmation failure detection (TEP-46 transaction status tracking)
+	// Seqno increment confirms the external message was processed, but the
+	// Jetton transfer within may have failed (e.g., insufficient gas for
+	// internal message). If the signer supports status checking, verify
+	// the transfer actually completed.
+	if checker, ok := f.signer.(ton.TransactionStatusChecker); ok && finalTxHash != "" {
+		status, err := checker.GetTransactionStatus(ctx, finalTxHash, string(network))
+		if err == nil && status == ton.TransactionStatusFailed {
+			return &t402.SettleResponse{
+				Success:     false,
+				ErrorReason: "jetton_transfer_failed",
+				Transaction: finalTxHash,
+				Network:     network,
+				Payer:       verifyResp.Payer,
+			}, nil
+		}
+		// Status check is best-effort; seqno confirmation is authoritative
+	}
+
 	return &t402.SettleResponse{
 		Success:     true,
 		Transaction: finalTxHash,

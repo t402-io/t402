@@ -26,6 +26,7 @@ from t402.types import (
 from t402.ton import (
     SCHEME_EXACT,
     MIN_VALIDITY_BUFFER,
+    TransactionStatus,
     validate_boc,
     addresses_equal,
     is_valid_network,
@@ -200,6 +201,34 @@ class FacilitatorTonSigner(Protocol):
 
         Returns:
             True if the wallet is deployed
+        """
+        ...
+
+
+@runtime_checkable
+class TransactionStatusChecker(Protocol):
+    """Optional protocol for post-confirmation failure detection.
+
+    Signers implementing this protocol enable the facilitator to verify that
+    the Jetton transfer within a confirmed transaction actually completed,
+    not just that the external message was processed (seqno incremented).
+
+    This adopts the transaction status tracking pattern from TON Connect v0.0.9 (TEP-46).
+    """
+
+    async def get_transaction_status(
+        self,
+        tx_hash: str,
+        network: str,
+    ) -> TransactionStatus:
+        """Get the status of a transaction by hash.
+
+        Args:
+            tx_hash: Transaction hash
+            network: Network identifier
+
+        Returns:
+            TransactionStatus indicating pending/confirmed/failed
         """
         ...
 
@@ -610,6 +639,32 @@ class ExactTonFacilitatorScheme:
 
         # Use the confirmed transaction hash if available
         final_tx_hash = confirmation.hash if confirmation.hash else tx_hash
+
+        # Post-confirmation failure detection (TEP-46 transaction status tracking)
+        # Seqno increment confirms the external message was processed, but the
+        # Jetton transfer within may have failed (e.g., insufficient gas for
+        # internal message). If the signer supports status checking, verify
+        # the transfer actually completed.
+        if (
+            isinstance(self._signer, TransactionStatusChecker)
+            and final_tx_hash
+        ):
+            try:
+                status = await self._signer.get_transaction_status(
+                    tx_hash=final_tx_hash,
+                    network=network,
+                )
+                if status == TransactionStatus.FAILED:
+                    return SettleResponse(
+                        success=False,
+                        error_reason="jetton_transfer_failed",
+                        transaction=final_tx_hash,
+                        network=network,
+                        payer=payer,
+                    )
+            except Exception:
+                # Status check is best-effort; seqno confirmation is authoritative
+                pass
 
         return SettleResponse(
             success=True,

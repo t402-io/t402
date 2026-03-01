@@ -20,10 +20,11 @@ export { registerExactTonScheme as registerExactTonFacilitatorScheme } from './e
 export type { TonFacilitatorConfig } from './exact/facilitator/index.js'
 
 // Export signer utilities
-export { toClientTonSigner, toFacilitatorTonSigner } from './signer.js'
+export { toClientTonSigner, toFacilitatorTonSigner, hasTransactionStatusChecker } from './signer.js'
 export type {
   ClientTonSigner,
   FacilitatorTonSigner,
+  TransactionStatusChecker,
   SignMessageParams,
   VerifyMessageParams,
   WaitForTransactionParams,
@@ -55,6 +56,7 @@ export type {
   ExactTonPayload,
   VerifyMessageResult,
   TransactionConfirmation,
+  TransactionStatus,
 } from './types.js'
 
 // Export upto scheme types

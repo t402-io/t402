@@ -465,3 +465,98 @@ func TestSettle_BroadcastFailed(t *testing.T) {
 		t.Errorf("Reason = %v, want transaction_failed", se.Reason)
 	}
 }
+
+// mockFacilitatorSignerWithStatus implements both FacilitatorTonSigner and TransactionStatusChecker
+type mockFacilitatorSignerWithStatus struct {
+	mockFacilitatorSigner
+	txStatus    ton.TransactionStatus
+	txStatusErr error
+}
+
+func (m *mockFacilitatorSignerWithStatus) GetTransactionStatus(_ context.Context, _ string, _ string) (ton.TransactionStatus, error) {
+	return m.txStatus, m.txStatusErr
+}
+
+func TestSettle_WithStatusChecker_Confirmed(t *testing.T) {
+	signer := &mockFacilitatorSignerWithStatus{
+		mockFacilitatorSigner: *newValidMockSigner(),
+		txStatus:              ton.TransactionStatusConfirmed,
+	}
+	signer.sendResult = "tx_hash_123"
+	signer.waitResult = &ton.TransactionConfirmation{
+		Success: true,
+		Hash:    "final_tx_hash",
+	}
+	scheme := NewExactTonScheme(signer)
+
+	resp, err := scheme.Settle(context.Background(), validPayload(), validRequirements())
+	if err != nil {
+		t.Fatalf("Settle() error: %v", err)
+	}
+	if !resp.Success {
+		t.Errorf("Success = false, ErrorReason: %s", resp.ErrorReason)
+	}
+	if resp.Transaction != "final_tx_hash" {
+		t.Errorf("Transaction = %v, want final_tx_hash", resp.Transaction)
+	}
+}
+
+func TestSettle_WithStatusChecker_Failed(t *testing.T) {
+	signer := &mockFacilitatorSignerWithStatus{
+		mockFacilitatorSigner: *newValidMockSigner(),
+		txStatus:              ton.TransactionStatusFailed,
+	}
+	signer.sendResult = "tx_hash_123"
+	signer.waitResult = &ton.TransactionConfirmation{
+		Success: true,
+		Hash:    "final_tx_hash",
+	}
+	scheme := NewExactTonScheme(signer)
+
+	resp, err := scheme.Settle(context.Background(), validPayload(), validRequirements())
+	if err != nil {
+		t.Fatalf("Settle() unexpected error: %v", err)
+	}
+	if resp.Success {
+		t.Error("expected Success = false for failed Jetton transfer")
+	}
+	if resp.ErrorReason != "jetton_transfer_failed" {
+		t.Errorf("ErrorReason = %v, want jetton_transfer_failed", resp.ErrorReason)
+	}
+	if resp.Transaction != "final_tx_hash" {
+		t.Errorf("Transaction = %v, want final_tx_hash", resp.Transaction)
+	}
+}
+
+func TestSettle_WithStatusChecker_Error_FallsBack(t *testing.T) {
+	signer := &mockFacilitatorSignerWithStatus{
+		mockFacilitatorSigner: *newValidMockSigner(),
+		txStatusErr:           fmt.Errorf("status check failed"),
+	}
+	signer.sendResult = "tx_hash_123"
+	signer.waitResult = &ton.TransactionConfirmation{
+		Success: true,
+		Hash:    "final_tx_hash",
+	}
+	scheme := NewExactTonScheme(signer)
+
+	resp, err := scheme.Settle(context.Background(), validPayload(), validRequirements())
+	if err != nil {
+		t.Fatalf("Settle() error: %v", err)
+	}
+	if !resp.Success {
+		t.Errorf("Success should be true when status check errors (best-effort), got ErrorReason: %s", resp.ErrorReason)
+	}
+}
+
+func TestTransactionStatus_Constants(t *testing.T) {
+	if ton.TransactionStatusPending != "pending" {
+		t.Errorf("TransactionStatusPending = %v, want pending", ton.TransactionStatusPending)
+	}
+	if ton.TransactionStatusConfirmed != "confirmed" {
+		t.Errorf("TransactionStatusConfirmed = %v, want confirmed", ton.TransactionStatusConfirmed)
+	}
+	if ton.TransactionStatusFailed != "failed" {
+		t.Errorf("TransactionStatusFailed = %v, want failed", ton.TransactionStatusFailed)
+	}
+}

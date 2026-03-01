@@ -14,6 +14,7 @@ import type {
   VerifyResponse,
 } from '@t402/core/types'
 import type { FacilitatorTonSigner } from '../../signer.js'
+import { hasTransactionStatusChecker } from '../../signer.js'
 import type { ExactTonPayloadV2 } from '../../types.js'
 import { SCHEME_EXACT } from '../../constants.js'
 import { addressesEqual, normalizeNetwork } from '../../utils.js'
@@ -313,7 +314,7 @@ export class ExactTonScheme implements SchemeNetworkFacilitator {
       // Send the pre-signed external message
       const txHash = await this.signer.sendExternalMessage(tonPayload.signedBoc)
 
-      // Wait for confirmation
+      // Wait for seqno-based confirmation
       const confirmation = await this.signer.waitForTransaction({
         address: tonPayload.authorization.from,
         seqno: tonPayload.authorization.seqno + 1, // Wait for next seqno
@@ -330,9 +331,36 @@ export class ExactTonScheme implements SchemeNetworkFacilitator {
         }
       }
 
+      const finalTxHash = confirmation.hash || txHash
+
+      // Post-confirmation failure detection (TEP-46 transaction status tracking)
+      // Seqno increment confirms the external message was processed, but the
+      // Jetton transfer within may have failed (e.g., insufficient gas for
+      // internal message). If the signer supports status checking, verify
+      // the transfer actually completed.
+      if (hasTransactionStatusChecker(this.signer) && finalTxHash) {
+        try {
+          const status = await this.signer.getTransactionStatus({
+            hash: finalTxHash,
+            network: payload.accepted.network,
+          })
+          if (status === 'failed') {
+            return {
+              success: false,
+              errorReason: 'jetton_transfer_failed',
+              transaction: finalTxHash,
+              network: payload.accepted.network,
+              payer: tonPayload.authorization.from,
+            }
+          }
+        } catch {
+          // Status check is best-effort; seqno confirmation is authoritative
+        }
+      }
+
       return {
         success: true,
-        transaction: confirmation.hash || txHash,
+        transaction: finalTxHash,
         network: payload.accepted.network,
         payer: tonPayload.authorization.from,
       }

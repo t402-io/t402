@@ -10,6 +10,7 @@ from __future__ import annotations
 import re
 import time
 import base64
+from enum import Enum
 from typing import Any, Dict, Optional, List
 from typing_extensions import TypedDict
 
@@ -160,10 +161,19 @@ class TonVerifyMessageResult(BaseModel):
     transfer: Optional[Dict[str, Any]] = None
 
 
+class TransactionStatus(str, Enum):
+    """Transaction lifecycle status (TEP-46 transaction status tracking)."""
+
+    PENDING = "pending"
+    CONFIRMED = "confirmed"
+    FAILED = "failed"
+
+
 class TonTransactionConfirmation(BaseModel):
     """TON transaction confirmation result."""
 
     success: bool
+    status: Optional[TransactionStatus] = None
     lt: Optional[str] = None
     hash: Optional[str] = None
     error: Optional[str] = None

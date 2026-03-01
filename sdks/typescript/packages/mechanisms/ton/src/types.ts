@@ -94,11 +94,20 @@ export type VerifyMessageResult = {
 }
 
 /**
+ * Transaction status for tracking payment lifecycle
+ *
+ * @see https://github.com/ton-connect/kit (TEP-46 transaction status)
+ */
+export type TransactionStatus = 'pending' | 'confirmed' | 'failed'
+
+/**
  * Transaction confirmation result
  */
 export type TransactionConfirmation = {
   /** Whether the transaction was confirmed */
   success: boolean
+  /** Transaction lifecycle status */
+  status?: TransactionStatus
   /** Logical time of the transaction */
   lt?: bigint
   /** Transaction hash */

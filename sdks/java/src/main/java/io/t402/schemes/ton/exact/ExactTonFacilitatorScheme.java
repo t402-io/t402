@@ -4,6 +4,8 @@ import io.t402.schemes.ton.ExactTonPayload;
 import io.t402.schemes.ton.FacilitatorTonSigner;
 import io.t402.schemes.ton.TonAuthorization;
 import io.t402.schemes.ton.TonConstants;
+import io.t402.schemes.ton.TransactionStatus;
+import io.t402.schemes.ton.TransactionStatusChecker;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -221,9 +223,29 @@ public class ExactTonFacilitatorScheme {
 
                 // Send and confirm transaction
                 return signer.sendAndConfirmTransaction(authorization, signature, normalizedNetwork)
-                    .thenApply(txHash ->
-                        SettlementResult.success(network, txHash, verifyResult.payer)
-                    )
+                    .thenCompose(txHash -> {
+                        // Post-confirmation failure detection (TEP-46)
+                        // Seqno increment confirms the external message was processed,
+                        // but the Jetton transfer within may have failed. If the signer
+                        // supports status checking, verify the transfer completed.
+                        if (signer instanceof TransactionStatusChecker && txHash != null && !txHash.isEmpty()) {
+                            TransactionStatusChecker checker = (TransactionStatusChecker) signer;
+                            return checker.getTransactionStatus(txHash, normalizedNetwork)
+                                .thenApply(status -> {
+                                    if (status == TransactionStatus.FAILED) {
+                                        return SettlementResult.failure(network, txHash,
+                                            "jetton_transfer_failed", verifyResult.payer);
+                                    }
+                                    return SettlementResult.success(network, txHash, verifyResult.payer);
+                                })
+                                .exceptionally(statusEx -> {
+                                    // Status check is best-effort; seqno confirmation is authoritative
+                                    return SettlementResult.success(network, txHash, verifyResult.payer);
+                                });
+                        }
+                        return CompletableFuture.completedFuture(
+                            SettlementResult.success(network, txHash, verifyResult.payer));
+                    })
                     .exceptionally(ex ->
                         SettlementResult.failure(network, "",
                             "transaction_failed: " + ex.getMessage(), verifyResult.payer)

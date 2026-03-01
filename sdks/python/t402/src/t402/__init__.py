@@ -89,6 +89,7 @@ from t402.ton import (
     TON_TESTNET,
     USDT_MAINNET_ADDRESS,
     USDT_TESTNET_ADDRESS,
+    TransactionStatus as TonTransactionStatus,
     validate_ton_address,
     get_usdt_address,
     get_network_config as get_ton_network_config,

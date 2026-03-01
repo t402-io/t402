@@ -151,12 +151,36 @@ type WaitForTransactionParams struct {
 	Network string
 }
 
+// TransactionStatus represents the lifecycle state of a transaction.
+// Adopts the transaction status tracking pattern from TON Connect v0.0.9 (TEP-46).
+type TransactionStatus string
+
+const (
+	// TransactionStatusPending indicates the transaction has been broadcast but not yet confirmed
+	TransactionStatusPending TransactionStatus = "pending"
+	// TransactionStatusConfirmed indicates the transaction was confirmed on-chain
+	TransactionStatusConfirmed TransactionStatus = "confirmed"
+	// TransactionStatusFailed indicates the transaction failed (e.g., Jetton transfer failed in trace)
+	TransactionStatusFailed TransactionStatus = "failed"
+)
+
 // TransactionConfirmation contains transaction confirmation result
 type TransactionConfirmation struct {
-	Success bool   `json:"success"`
-	Lt      string `json:"lt,omitempty"`
-	Hash    string `json:"hash,omitempty"`
-	Error   string `json:"error,omitempty"`
+	Success bool              `json:"success"`
+	Status  TransactionStatus `json:"status,omitempty"`
+	Lt      string            `json:"lt,omitempty"`
+	Hash    string            `json:"hash,omitempty"`
+	Error   string            `json:"error,omitempty"`
+}
+
+// TransactionStatusChecker is an optional interface that signers can implement
+// to enable post-confirmation failure detection. After seqno-based confirmation
+// succeeds, the facilitator can verify that the Jetton transfer within the
+// transaction actually completed (not just that the external message was processed).
+type TransactionStatusChecker interface {
+	// GetTransactionStatus returns the status of a transaction by its hash.
+	// Used for post-confirmation failure detection.
+	GetTransactionStatus(ctx context.Context, hash string, network string) (TransactionStatus, error)
 }
 
 // AssetInfo contains information about a Jetton token
