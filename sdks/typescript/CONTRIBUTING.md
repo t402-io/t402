@@ -132,8 +132,8 @@ cd packages/http/your-framework
     "build": "tsup",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint . --ext .ts --fix",
-    "lint:check": "eslint . --ext .ts",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
     "format": "prettier -c .prettierrc --write \"**/*.{ts,js,cjs,json,md}\"",
     "format:check": "prettier -c .prettierrc --check \"**/*.{ts,js,cjs,json,md}\""
   },
