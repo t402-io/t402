@@ -199,7 +199,10 @@ export type TransactionStatusChecker = {
 export function hasTransactionStatusChecker(
   signer: FacilitatorTonSigner,
 ): signer is FacilitatorTonSigner & TransactionStatusChecker {
-  return 'getTransactionStatus' in signer && typeof (signer as any).getTransactionStatus === 'function'
+  return (
+    'getTransactionStatus' in signer &&
+    typeof (signer as unknown as TransactionStatusChecker).getTransactionStatus === 'function'
+  )
 }
 
 /**
