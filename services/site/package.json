@@ -9,8 +9,8 @@
     "start": "next start",
     "format": "prettier -c .prettierrc --write \"**/*.{ts,tsx,js,json,md}\"",
     "format:check": "prettier -c .prettierrc --check \"**/*.{ts,tsx,js,json,md}\"",
-    "lint": "eslint . --ext .ts,.tsx --fix",
-    "lint:check": "eslint . --ext .ts,.tsx"
+    "lint": "eslint . --fix",
+    "lint:check": "eslint ."
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
