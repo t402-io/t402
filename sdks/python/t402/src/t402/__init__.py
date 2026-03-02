@@ -390,6 +390,7 @@ __all__ = [
     "TON_TESTNET",
     "USDT_MAINNET_ADDRESS",
     "USDT_TESTNET_ADDRESS",
+    "TonTransactionStatus",
     "validate_ton_address",
     "get_usdt_address",
     "get_ton_network_config",
