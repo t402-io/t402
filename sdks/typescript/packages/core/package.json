@@ -35,7 +35,7 @@
   "description": "Core types, schemas, and constants for the T402 payment protocol",
   "devDependencies": {
     "@eslint/js": "^9.39.3",
-    "@types/node": "^25.3.0",
+    "@types/node": "^25.3.3",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
     "eslint": "^9.24.0",
