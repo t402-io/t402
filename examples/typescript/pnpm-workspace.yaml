@@ -18,6 +18,7 @@ packages:
   - "../../sdks/typescript/packages/wdk-multisig"
   - "../../sdks/typescript/packages/wdk-bridge"
   - "../../sdks/typescript/packages/wdk-protocol"
+  - "../../sdks/typescript/packages/erc8004"
   - "../../sdks/typescript/packages/mcp"
   - "../../sdks/typescript/packages/a2a"
   - "../../sdks/typescript/packages/cli"
