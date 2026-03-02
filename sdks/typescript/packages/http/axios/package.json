@@ -34,7 +34,7 @@
   "description": "Axios interceptor for T402 HTTP 402 payment protocol",
   "devDependencies": {
     "@eslint/js": "^9.39.3",
-    "@types/node": "^25.3.0",
+    "@types/node": "^25.3.3",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
     "eslint": "^10.0.2",
@@ -52,7 +52,7 @@
   },
   "dependencies": {
     "@t402/core": "workspace:*",
-    "axios": "^1.13.5"
+    "axios": "^1.13.6"
   },
   "exports": {
     ".": {

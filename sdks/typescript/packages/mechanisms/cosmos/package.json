@@ -33,7 +33,7 @@
   "description": "t402 Payment Protocol Cosmos (Noble USDC) Implementation",
   "devDependencies": {
     "@eslint/js": "^9.39.3",
-    "@types/node": "^25.3.0",
+    "@types/node": "^25.3.3",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
     "eslint": "^10.0.2",

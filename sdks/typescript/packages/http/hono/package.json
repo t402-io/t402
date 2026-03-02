@@ -34,7 +34,7 @@
   "description": "Hono middleware for T402 HTTP 402 payment protocol",
   "devDependencies": {
     "@eslint/js": "^9.39.3",
-    "@types/node": "^25.3.0",
+    "@types/node": "^25.3.3",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
     "eslint": "^10.0.2",
@@ -42,7 +42,7 @@
     "eslint-plugin-jsdoc": "^62.7.1",
     "eslint-plugin-prettier": "^5.5.5",
     "glob": "^13.0.6",
-    "hono": "^4.12.2",
+    "hono": "^4.12.3",
     "prettier": "3.8.1",
     "tsup": "^8.5.1",
     "tsx": "^4.21.0",
