@@ -72,7 +72,7 @@ jobs:
           uv build
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: python-dist
           path: sdks/python/t402/dist/
