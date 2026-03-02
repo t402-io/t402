@@ -63,7 +63,7 @@ jobs:
         run: mvn package -DskipTests
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: java-dist
           path: sdks/java/target/*.jar
