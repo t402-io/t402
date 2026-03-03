@@ -6,11 +6,11 @@ EVMNetworks = Literal[
     # Standard networks
     "base", "base-sepolia", "avalanche-fuji", "avalanche",
     # Core USDT0 Networks
-    "ethereum", "arbitrum", "optimism", "polygon", "ink", "berachain", "unichain",
+    "ethereum", "arbitrum", "optimism", "polygon", "bsc", "ink", "berachain", "unichain",
     # Phase 1: High Priority USDT0 Networks
-    "mantle", "plasma", "sei", "conflux", "monad",
+    "mantle", "celo", "kaia", "plasma", "sei", "conflux", "monad",
     # Phase 2: Medium Priority USDT0 Networks
-    "flare", "rootstock", "xlayer", "stable", "hyperevm", "megaeth", "corn",
+    "flare", "rootstock", "xlayer", "fantom", "stable", "hyperevm", "megaeth", "corn",
 ]
 
 # TON Networks (CAIP-2 format)
@@ -84,11 +84,14 @@ EVM_NETWORK_TO_CHAIN_ID = {
     "arbitrum": 42161,
     "optimism": 10,
     "polygon": 137,
+    "bsc": 56,
     "ink": 57073,
     "berachain": 80094,
     "unichain": 130,
     # Phase 1: High Priority USDT0 Networks
     "mantle": 5000,
+    "celo": 42220,
+    "kaia": 8217,
     "plasma": 9745,
     "sei": 1329,
     "conflux": 1030,
@@ -97,6 +100,7 @@ EVM_NETWORK_TO_CHAIN_ID = {
     "flare": 14,
     "rootstock": 30,
     "xlayer": 196,
+    "fantom": 250,
     "stable": 988,
     "hyperevm": 999,
     "megaeth": 4326,
