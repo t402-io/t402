@@ -43,7 +43,7 @@ importers:
         version: 8.56.1(eslint@10.0.2)(typescript@5.9.3)
       '@vitest/coverage-v8':
         specifier: ^3.2.4
-        version: 3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
+        version: 3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       eslint:
         specifier: ^10.0.2
         version: 10.0.2
@@ -64,7 +64,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/a2a:
     dependencies:
@@ -77,7 +77,7 @@ importers:
         version: 25.3.3
       '@vitest/coverage-v8':
         specifier: ^3.2.4
-        version: 3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
+        version: 3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.1)
@@ -89,7 +89,7 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/cli:
     dependencies:
@@ -129,7 +129,7 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/core:
     dependencies:
@@ -184,7 +184,7 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/erc8004:
     dependencies:
@@ -200,7 +200,7 @@ importers:
         version: 25.3.3
       '@vitest/coverage-v8':
         specifier: ^3.2.4
-        version: 3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
+        version: 3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.1)
@@ -212,7 +212,7 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/extensions:
     dependencies:
@@ -279,7 +279,7 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@1.8.0))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@1.8.0))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/http/axios:
     dependencies:
@@ -337,7 +337,7 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/http/express:
     dependencies:
@@ -404,7 +404,7 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/http/fastify:
     dependencies:
@@ -468,7 +468,7 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/http/fetch:
     dependencies:
@@ -523,7 +523,7 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/http/hono:
     dependencies:
@@ -587,7 +587,7 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/http/next:
     dependencies:
@@ -651,7 +651,7 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/http/paywall:
     dependencies:
@@ -796,7 +796,7 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/http/react:
     dependencies:
@@ -872,7 +872,7 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/http/vue:
     dependencies:
@@ -918,7 +918,7 @@ importers:
         version: 13.0.6
       happy-dom:
         specifier: '>=20.0.0'
-        version: 20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       prettier:
         specifier: 3.8.1
         version: 3.8.1
@@ -939,7 +939,7 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
       vue:
         specifier: ^3.5.29
         version: 3.5.29(typescript@5.9.3)
@@ -1012,7 +1012,7 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/mechanisms/aptos:
     dependencies:
@@ -1034,7 +1034,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/mechanisms/btc:
     dependencies:
@@ -1092,7 +1092,7 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/mechanisms/cosmos:
     dependencies:
@@ -1147,7 +1147,7 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/mechanisms/evm:
     dependencies:
@@ -1208,7 +1208,7 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/mechanisms/evm-core:
     dependencies:
@@ -1257,7 +1257,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/mechanisms/near:
     dependencies:
@@ -1312,7 +1312,7 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/mechanisms/polkadot:
     dependencies:
@@ -1328,7 +1328,7 @@ importers:
         version: 25.3.3
       '@vitest/coverage-v8':
         specifier: ^3.2.4
-        version: 3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
+        version: 3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.1)
@@ -1337,7 +1337,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/mechanisms/stacks:
     dependencies:
@@ -1353,7 +1353,7 @@ importers:
         version: 25.3.3
       '@vitest/coverage-v8':
         specifier: ^3.2.4
-        version: 3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
+        version: 3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.1)
@@ -1362,7 +1362,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/mechanisms/svm:
     dependencies:
@@ -1432,7 +1432,7 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/mechanisms/tezos:
     dependencies:
@@ -1454,7 +1454,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/mechanisms/ton:
     dependencies:
@@ -1515,7 +1515,7 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
   packages/mechanisms/tron:
     dependencies:
@@ -1570,7 +1570,7 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@25.3.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
 
 packages:
 
@@ -4875,8 +4875,8 @@ packages:
   caniuse-lite@1.0.30001770:
     resolution: {integrity: sha512-x/2CLQ1jHENRbHg5PSId2sXq1CIO1CISvwWAj027ltMVG2UNgW+w9oH2+HzgEIRFembL8bUlXtfbBHR1fCg2xw==}
 
-  caniuse-lite@1.0.30001775:
-    resolution: {integrity: sha512-s3Qv7Lht9zbVKE9XoTyRG6wVDCKdtOFIjBGg3+Yhn6JaytuNKPIjBMTMIY1AnOH3seL5mvF+x33oGAyK3hVt3A==}
+  caniuse-lite@1.0.30001776:
+    resolution: {integrity: sha512-sg01JDPzZ9jGshqKSckOQthXnYwOEP50jeVFhaSFbZcOy05TiuuaffDOfcwtCisJ9kNQuLBFibYywv2Bgm9osw==}
 
   chai@5.3.3:
     resolution: {integrity: sha512-4zNhdJD/iOjSH0A05ea+Ke6MU5mmpQcbQsSOkgdaUMJ9zTlDTD/GYlwohmIE2u0gaxHYiVHEn1Fw9mZ/ktJWgw==}
@@ -5833,8 +5833,8 @@ packages:
   h3@1.15.5:
     resolution: {integrity: sha512-xEyq3rSl+dhGX2Lm0+eFQIAzlDN6Fs0EcC4f7BNUmzaRX/PTzeuM+Tr2lHB8FoXggsQIeXLj8EDVgs5ywxyxmg==}
 
-  happy-dom@20.7.0:
-    resolution: {integrity: sha512-hR/uLYQdngTyEfxnOoa+e6KTcfBFyc1hgFj/Cc144A5JJUuHFYqIEBDcD4FeGqUeKLRZqJ9eN9u7/GDjYEgS1g==}
+  happy-dom@20.8.3:
+    resolution: {integrity: sha512-lMHQRRwIPyJ70HV0kkFT7jH/gXzSI7yDkQFe07E2flwmNDFoWUTRMKpW2sglsnpeA7b6S2TJPp98EbQxai8eaQ==}
     engines: {node: '>=20.0.0'}
 
   has-bigints@1.1.0:
@@ -12003,7 +12003,7 @@ snapshots:
       vite: 7.3.1(@types/node@25.3.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
       vue: 3.5.29(typescript@5.9.3)
 
-  '@vitest/coverage-v8@3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))':
+  '@vitest/coverage-v8@3.2.4(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 1.0.2
@@ -12018,7 +12018,7 @@ snapshots:
       std-env: 3.10.0
       test-exclude: 7.0.1
       tinyrainbow: 2.0.0
-      vitest: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
+      vitest: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -13127,7 +13127,7 @@ snapshots:
   browserslist@4.28.1:
     dependencies:
       baseline-browser-mapping: 2.10.0
-      caniuse-lite: 1.0.30001775
+      caniuse-lite: 1.0.30001776
       electron-to-chromium: 1.5.302
       node-releases: 2.0.27
       update-browserslist-db: 1.2.3(browserslist@4.28.1)
@@ -13217,7 +13217,7 @@ snapshots:
 
   caniuse-lite@1.0.30001770: {}
 
-  caniuse-lite@1.0.30001775:
+  caniuse-lite@1.0.30001776:
     optional: true
 
   chai@5.3.3:
@@ -14410,7 +14410,7 @@ snapshots:
       ufo: 1.6.3
       uncrypto: 0.1.3
 
-  happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10):
+  happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10):
     dependencies:
       '@types/node': 25.3.3
       '@types/whatwg-mimetype': 3.0.2
@@ -17274,7 +17274,7 @@ snapshots:
       tsx: 4.21.0
       yaml: 2.8.1
 
-  vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@1.8.0))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1):
+  vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@1.8.0))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1):
     dependencies:
       '@types/chai': 5.2.2
       '@vitest/expect': 3.2.4
@@ -17302,7 +17302,7 @@ snapshots:
     optionalDependencies:
       '@types/debug': 4.1.12
       '@types/node': 25.3.3
-      happy-dom: 20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      happy-dom: 20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       jsdom: 28.1.0(@noble/hashes@1.8.0)
     transitivePeerDependencies:
       - jiti
@@ -17318,7 +17318,7 @@ snapshots:
       - tsx
       - yaml
 
-  vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1):
+  vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.3.3)(happy-dom@20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@28.1.0(@noble/hashes@2.0.1))(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.1):
     dependencies:
       '@types/chai': 5.2.2
       '@vitest/expect': 3.2.4
@@ -17346,7 +17346,7 @@ snapshots:
     optionalDependencies:
       '@types/debug': 4.1.12
       '@types/node': 25.3.3
-      happy-dom: 20.7.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      happy-dom: 20.8.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       jsdom: 28.1.0(@noble/hashes@2.0.1)
     transitivePeerDependencies:
       - jiti
