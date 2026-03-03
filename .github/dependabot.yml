@@ -109,6 +109,7 @@ updates:
       prefix: "chore(deps)"
     ignore:
       - dependency-name: "services/facilitator"
+      - dependency-name: "services/scan2pay"
       - dependency-name: "premium"
     labels:
       - "dependencies"
