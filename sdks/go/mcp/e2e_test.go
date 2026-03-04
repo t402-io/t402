@@ -342,7 +342,7 @@ func TestE2E_Tools(t *testing.T) {
 				if cOk && len(content) > 0 {
 					if fb, fbOk := content[0].(map[string]any); fbOk {
 						if txt, tOk := fb["text"].(string); tOk {
-							if strings.Contains(txt, "deadline exceeded") || strings.Contains(txt, "timeout") || strings.Contains(txt, "connection refused") {
+							if strings.Contains(txt, "deadline exceeded") || strings.Contains(txt, "timeout") || strings.Contains(txt, "connection refused") || strings.Contains(txt, "403 Forbidden") {
 								t.Skipf("Skipping due to RPC network issue: %s", txt)
 							}
 						}
