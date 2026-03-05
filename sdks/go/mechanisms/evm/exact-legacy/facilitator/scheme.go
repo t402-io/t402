@@ -142,22 +142,16 @@ func (f *ExactLegacyEvmScheme) Verify(
 		return nil, t402.NewVerifyError("failed_to_get_asset_info", "", network, err)
 	}
 
-	// Extract token info from requirements
-	tokenName := "T402LegacyTransfer"
-	tokenVersion := "1"
-	if requirements.Extra != nil {
-		if name, ok := requirements.Extra["name"].(string); ok {
-			tokenName = name
-		}
-		if version, ok := requirements.Extra["version"].(string); ok {
-			tokenVersion = version
-		}
-	}
+	// EIP-712 domain for LegacyTransferAuthorization
+	// Uses a fixed domain name to avoid mismatches between frontend signing
+	// and facilitator verification. The verifyingContract is the actual token address.
+	const legacyDomainName = "T402LegacyTransfer"
+	const legacyDomainVersion = "1"
 
 	// Build domain for signature verification
 	domain := evm.TypedDataDomain{
-		Name:              tokenName,
-		Version:           tokenVersion,
+		Name:              legacyDomainName,
+		Version:           legacyDomainVersion,
 		ChainID:           config.ChainID,
 		VerifyingContract: assetInfo.Address,
 	}
