@@ -19,7 +19,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -34,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 public class McpTools {
 
     private final ServerConfig config;
+    private final PriceService priceService;
 
     /**
      * Creates a new McpTools with the given configuration.
@@ -42,6 +45,32 @@ public class McpTools {
      */
     public McpTools(ServerConfig config) {
         this.config = config;
+        this.priceService = new PriceService();
+    }
+
+    private boolean isConfirmed(JsonNode arguments) {
+        JsonNode confirmed = arguments.get("confirmed");
+        return confirmed != null && confirmed.asBoolean(false);
+    }
+
+    private ToolResult confirmationPrompt(String action, String amount, String token,
+                                           String network, String to) {
+        String summary = String.format("Confirm: %s %s %s on %s to %s",
+            action, amount, token, network, to);
+        Map<String, Object> details = new LinkedHashMap<>();
+        details.put("amount", amount);
+        details.put("token", token);
+        details.put("network", network);
+        details.put("to", to);
+        Map<String, Object> json = new LinkedHashMap<>();
+        json.put("needsConfirmation", true);
+        json.put("summary", summary);
+        json.put("details", details);
+        try {
+            return new ToolResult(Json.MAPPER.writeValueAsString(json), false);
+        } catch (Exception e) {
+            return new ToolResult(summary, false);
+        }
     }
 
     /**
@@ -100,6 +129,15 @@ public class McpTools {
                     return handleGetTezosBalance(arguments);
                 case "t402/payTezos":
                     return handlePayTezos(arguments);
+                // Price & fee tools
+                case "t402/getTokenPrice":
+                    return handleGetTokenPrice(arguments);
+                case "t402/getGasPrice":
+                    return handleGetGasPrice(arguments);
+                case "t402/estimatePaymentFee":
+                    return handleEstimatePaymentFee(arguments);
+                case "t402/compareNetworkFees":
+                    return handleCompareNetworkFees(arguments);
                 default:
                     return errorResult("Unknown tool: " + name);
             }
@@ -356,6 +394,11 @@ public class McpTools {
             return errorResult("Invalid amount: " + e.getMessage());
         }
 
+        if (!isConfirmed(args)) {
+            return confirmationPrompt("Send", input.getAmount(),
+                input.getToken(), input.getNetwork(), input.getTo());
+        }
+
         // Validate private key is configured (unless demo mode)
         boolean hasPrivateKey = config.getPrivateKey() != null
             && !config.getPrivateKey().isEmpty();
@@ -441,6 +484,11 @@ public class McpTools {
         if (!McpConstants.isGaslessNetwork(input.getNetwork())) {
             return errorResult("Network " + input.getNetwork()
                 + " does not support gasless payments");
+        }
+
+        if (!isConfirmed(args)) {
+            return confirmationPrompt("Send (gasless)", input.getAmount(),
+                input.getToken(), input.getNetwork(), input.getTo());
         }
 
         boolean hasBundler = config.getBundlerUrl() != null
@@ -669,6 +717,12 @@ public class McpTools {
             return errorResult("Source and destination chains must be different");
         }
 
+        if (!isConfirmed(args)) {
+            return confirmationPrompt("Bridge", input.getAmount(),
+                "USDT0", input.getFromChain() + " -> " + input.getToChain(),
+                input.getRecipient());
+        }
+
         boolean hasPrivateKey = config.getPrivateKey() != null
             && !config.getPrivateKey().isEmpty();
 
@@ -869,6 +923,11 @@ public class McpTools {
             return errorResult("Invalid amount: " + e.getMessage());
         }
 
+        if (!isConfirmed(args)) {
+            return confirmationPrompt("Send", input.getAmount(),
+                input.getToken(), input.getNetwork(), input.getTo());
+        }
+
         boolean hasPrivateKey = config.getPrivateKey() != null
             && !config.getPrivateKey().isEmpty();
 
@@ -1027,6 +1086,11 @@ public class McpTools {
                 McpConstants.TON_USDT_DECIMALS);
         } catch (IllegalArgumentException e) {
             return errorResult("Invalid amount: " + e.getMessage());
+        }
+
+        if (!isConfirmed(args)) {
+            return confirmationPrompt("Send", input.getAmount(),
+                input.getToken(), input.getNetwork(), input.getTo());
         }
 
         boolean hasPrivateKey = config.getPrivateKey() != null
@@ -1191,6 +1255,11 @@ public class McpTools {
             return errorResult("Invalid amount: " + e.getMessage());
         }
 
+        if (!isConfirmed(args)) {
+            return confirmationPrompt("Send", input.getAmount(),
+                input.getToken(), input.getNetwork(), input.getTo());
+        }
+
         boolean hasPrivateKey = config.getPrivateKey() != null
             && !config.getPrivateKey().isEmpty();
 
@@ -1351,6 +1420,11 @@ public class McpTools {
                 McpConstants.NEAR_USDT_DECIMALS);
         } catch (IllegalArgumentException e) {
             return errorResult("Invalid amount: " + e.getMessage());
+        }
+
+        if (!isConfirmed(args)) {
+            return confirmationPrompt("Send", input.getAmount(),
+                input.getToken(), input.getNetwork(), input.getTo());
         }
 
         boolean hasPrivateKey = config.getPrivateKey() != null
@@ -1514,6 +1588,11 @@ public class McpTools {
                 McpConstants.APTOS_USDT_DECIMALS);
         } catch (IllegalArgumentException e) {
             return errorResult("Invalid amount: " + e.getMessage());
+        }
+
+        if (!isConfirmed(args)) {
+            return confirmationPrompt("Send", input.getAmount(),
+                input.getToken(), input.getNetwork(), input.getTo());
         }
 
         boolean hasPrivateKey = config.getPrivateKey() != null
@@ -1680,6 +1759,11 @@ public class McpTools {
             return errorResult("Invalid amount: " + e.getMessage());
         }
 
+        if (!isConfirmed(args)) {
+            return confirmationPrompt("Send", input.getAmount(),
+                input.getToken(), input.getNetwork(), input.getTo());
+        }
+
         boolean hasPrivateKey = config.getPrivateKey() != null
             && !config.getPrivateKey().isEmpty();
 
@@ -1766,6 +1850,393 @@ public class McpTools {
             .append("](").append(result.getExplorerUrl()).append(")\n");
 
         return sb.toString();
+    }
+
+    // ===== Price & Fee Tool Handlers =====
+
+    /**
+     * Handles t402/getTokenPrice tool - fetches token prices via CoinGecko.
+     */
+    private ToolResult handleGetTokenPrice(JsonNode args) throws Exception {
+        String tokensStr = args.has("tokens") ? args.get("tokens").asText() : null;
+        String currency = args.has("currency") ? args.get("currency").asText() : "usd";
+
+        if (tokensStr == null || tokensStr.isEmpty()) {
+            return errorResult("tokens parameter is required (comma-separated, e.g., 'ETH,USDC')");
+        }
+
+        List<String> tokens = List.of(tokensStr.split(","));
+
+        if (config.isDemoMode()) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("## Token Prices (Demo Mode)\n\n");
+            for (String token : tokens) {
+                String t = token.trim().toUpperCase();
+                double price = switch (t) {
+                    case "ETH" -> 3500.0;
+                    case "BTC" -> 95000.0;
+                    case "SOL" -> 180.0;
+                    case "AVAX" -> 35.0;
+                    case "MATIC" -> 0.55;
+                    case "TON" -> 5.5;
+                    case "TRX" -> 0.12;
+                    case "NEAR" -> 5.0;
+                    case "APT" -> 9.0;
+                    case "XTZ" -> 1.2;
+                    case "BERA" -> 3.0;
+                    default -> 1.0; // stablecoins
+                };
+                sb.append("- **").append(t).append(":** $")
+                    .append(String.format("%.2f", price))
+                    .append(" ").append(currency.toUpperCase()).append("\n");
+            }
+            return textResult(sb.toString());
+        }
+
+        Map<String, Double> prices = priceService.getTokenPrices(tokens, currency);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("## Token Prices\n\n");
+        for (String token : tokens) {
+            String t = token.trim().toUpperCase();
+            Double price = prices.get(t);
+            if (price != null) {
+                sb.append("- **").append(t).append(":** $")
+                    .append(String.format("%.2f", price))
+                    .append(" ").append(currency.toUpperCase()).append("\n");
+            } else {
+                sb.append("- **").append(t).append(":** price unavailable\n");
+            }
+        }
+        return textResult(sb.toString());
+    }
+
+    /**
+     * Handles t402/getGasPrice tool - queries current gas price for a network.
+     */
+    private ToolResult handleGetGasPrice(JsonNode args) throws Exception {
+        String networkStr = args.has("network") ? args.get("network").asText() : null;
+
+        if (networkStr == null || !McpConstants.isValidNetwork(networkStr)) {
+            return errorResult("Invalid or missing EVM network: " + networkStr);
+        }
+
+        SupportedNetwork network = SupportedNetwork.fromString(networkStr);
+
+        if (config.isDemoMode()) {
+            double gasGwei = switch (network) {
+                case ETHEREUM -> 25.0;
+                case BASE -> 0.01;
+                case ARBITRUM -> 0.1;
+                case OPTIMISM -> 0.01;
+                case POLYGON -> 30.0;
+                case AVALANCHE -> 25.0;
+                default -> 1.0;
+            };
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("## Gas Price on ").append(networkStr).append(" (Demo Mode)\n\n");
+            sb.append("- **Gas Price:** ").append(String.format("%.4f", gasGwei))
+                .append(" gwei\n");
+            return textResult(sb.toString());
+        }
+
+        try {
+            String rpcUrl = Web3Utils.resolveRpcUrl(config, network);
+            Web3j web3j = Web3Utils.getWeb3j(rpcUrl);
+
+            var gasPriceResponse = web3j.ethGasPrice().send();
+            if (gasPriceResponse.hasError()) {
+                return errorResult("Failed to get gas price: "
+                    + gasPriceResponse.getError().getMessage());
+            }
+
+            BigInteger gasPriceWei = gasPriceResponse.getGasPrice();
+            BigDecimal gasPriceGwei = new BigDecimal(gasPriceWei)
+                .divide(BigDecimal.TEN.pow(9), 4, RoundingMode.HALF_UP);
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("## Gas Price on ").append(networkStr).append("\n\n");
+            sb.append("- **Gas Price:** ").append(gasPriceGwei.toPlainString())
+                .append(" gwei\n");
+            sb.append("- **Raw (wei):** ").append(gasPriceWei).append("\n");
+            return textResult(sb.toString());
+        } catch (Exception e) {
+            return errorResult("Failed to get gas price: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Handles t402/estimatePaymentFee tool - estimates fee for an ERC-20 transfer.
+     */
+    private ToolResult handleEstimatePaymentFee(JsonNode args) throws Exception {
+        String networkStr = args.has("network") ? args.get("network").asText() : null;
+        String tokenStr = args.has("token") ? args.get("token").asText() : null;
+        String amount = args.has("amount") ? args.get("amount").asText() : "1";
+        String to = args.has("to") ? args.get("to").asText() :
+            "0x0000000000000000000000000000000000000001";
+
+        if (networkStr == null || !McpConstants.isValidNetwork(networkStr)) {
+            return errorResult("Invalid or missing EVM network: " + networkStr);
+        }
+
+        SupportedNetwork network = SupportedNetwork.fromString(networkStr);
+        SupportedToken token = tokenStr != null ? SupportedToken.fromString(tokenStr) : null;
+        if (token == null) {
+            return errorResult("Invalid or missing token: " + tokenStr);
+        }
+
+        String tokenAddr = McpConstants.getTokenAddress(network, token);
+        if (tokenAddr == null) {
+            return errorResult("Token " + tokenStr + " not supported on " + networkStr);
+        }
+
+        if (config.isDemoMode()) {
+            double gasGwei = switch (network) {
+                case ETHEREUM -> 25.0;
+                case BASE -> 0.01;
+                case ARBITRUM -> 0.1;
+                case OPTIMISM -> 0.01;
+                case POLYGON -> 30.0;
+                case AVALANCHE -> 25.0;
+                default -> 1.0;
+            };
+            long estimatedGas = 65000;
+            double feeNative = (gasGwei * estimatedGas) / 1e9;
+            String nativeSymbol = McpConstants.NATIVE_SYMBOLS.get(network);
+            double nativePrice = switch (nativeSymbol) {
+                case "ETH" -> 3500.0;
+                case "MATIC" -> 0.55;
+                case "AVAX" -> 35.0;
+                case "BERA" -> 3.0;
+                default -> 1.0;
+            };
+            double feeUsd = feeNative * nativePrice;
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("## Payment Fee Estimate on ").append(networkStr)
+                .append(" (Demo Mode)\n\n");
+            sb.append("- **Estimated Gas:** ").append(estimatedGas).append("\n");
+            sb.append("- **Gas Price:** ").append(String.format("%.4f", gasGwei))
+                .append(" gwei\n");
+            sb.append("- **Fee:** ").append(String.format("%.6f", feeNative))
+                .append(" ").append(nativeSymbol).append("\n");
+            sb.append("- **Fee (USD):** $").append(String.format("%.4f", feeUsd)).append("\n");
+            return textResult(sb.toString());
+        }
+
+        try {
+            String rpcUrl = Web3Utils.resolveRpcUrl(config, network);
+            Web3j web3j = Web3Utils.getWeb3j(rpcUrl);
+
+            // Get gas price
+            var gasPriceResponse = web3j.ethGasPrice().send();
+            if (gasPriceResponse.hasError()) {
+                return errorResult("Failed to get gas price: "
+                    + gasPriceResponse.getError().getMessage());
+            }
+            BigInteger gasPriceWei = gasPriceResponse.getGasPrice();
+
+            // Estimate gas for ERC-20 transfer
+            BigInteger tokenAmount = McpConstants.parseTokenAmount(amount,
+                McpConstants.TOKEN_DECIMALS);
+            org.web3j.abi.datatypes.Function transferFn = new org.web3j.abi.datatypes.Function(
+                "transfer",
+                java.util.Arrays.asList(
+                    new org.web3j.abi.datatypes.Address(to),
+                    new org.web3j.abi.datatypes.generated.Uint256(tokenAmount)
+                ),
+                java.util.Collections.singletonList(
+                    new org.web3j.abi.TypeReference<org.web3j.abi.datatypes.Bool>() {}
+                )
+            );
+            String encodedFn = org.web3j.abi.FunctionEncoder.encode(transferFn);
+
+            var gasEstimate = web3j.ethEstimateGas(
+                org.web3j.protocol.core.methods.request.Transaction
+                    .createFunctionCallTransaction(
+                        "0x0000000000000000000000000000000000000001",
+                        null, BigInteger.ZERO, null, tokenAddr, encodedFn
+                    )
+            ).send();
+
+            BigInteger gasLimit;
+            if (gasEstimate.hasError()) {
+                gasLimit = BigInteger.valueOf(65000); // Default
+            } else {
+                gasLimit = gasEstimate.getAmountUsed();
+            }
+
+            BigInteger feeWei = gasPriceWei.multiply(gasLimit);
+            String nativeSymbol = McpConstants.NATIVE_SYMBOLS.get(network);
+            BigDecimal feeNative = new BigDecimal(feeWei)
+                .divide(BigDecimal.TEN.pow(18), 8, RoundingMode.HALF_UP);
+            BigDecimal gasPriceGwei = new BigDecimal(gasPriceWei)
+                .divide(BigDecimal.TEN.pow(9), 4, RoundingMode.HALF_UP);
+
+            // Get USD price for native token
+            Map<String, Double> prices = priceService.getTokenPrices(
+                List.of(nativeSymbol), "usd");
+            Double nativePrice = prices.get(nativeSymbol.toUpperCase());
+            double feeUsd = nativePrice != null
+                ? feeNative.doubleValue() * nativePrice : 0;
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("## Payment Fee Estimate on ").append(networkStr).append("\n\n");
+            sb.append("- **Estimated Gas:** ").append(gasLimit).append("\n");
+            sb.append("- **Gas Price:** ").append(gasPriceGwei.toPlainString())
+                .append(" gwei\n");
+            sb.append("- **Fee:** ").append(feeNative.toPlainString())
+                .append(" ").append(nativeSymbol).append("\n");
+            if (nativePrice != null) {
+                sb.append("- **Fee (USD):** $")
+                    .append(String.format("%.4f", feeUsd)).append("\n");
+            }
+            return textResult(sb.toString());
+        } catch (Exception e) {
+            return errorResult("Failed to estimate fee: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Handles t402/compareNetworkFees tool - compares fees across networks.
+     */
+    private ToolResult handleCompareNetworkFees(JsonNode args) throws Exception {
+        String tokenStr = args.has("token") ? args.get("token").asText() : "USDC";
+        String amount = args.has("amount") ? args.get("amount").asText() : "10";
+
+        SupportedToken token = SupportedToken.fromString(tokenStr);
+        if (token == null) {
+            return errorResult("Invalid token: " + tokenStr);
+        }
+
+        if (config.isDemoMode()) {
+            // Return simulated comparison sorted by cost ascending
+            record FeeEntry(String network, double feeUsd, String feeNative,
+                            String symbol) {}
+
+            List<FeeEntry> entries = new ArrayList<>();
+            for (SupportedNetwork net : McpConstants.getAllNetworks()) {
+                String tokenAddr = McpConstants.getTokenAddress(net, token);
+                if (tokenAddr == null) continue;
+
+                String nativeSymbol = McpConstants.NATIVE_SYMBOLS.get(net);
+                double gasGwei = switch (net) {
+                    case ETHEREUM -> 25.0;
+                    case BASE -> 0.01;
+                    case ARBITRUM -> 0.1;
+                    case OPTIMISM -> 0.01;
+                    case POLYGON -> 30.0;
+                    case AVALANCHE -> 25.0;
+                    default -> 1.0;
+                };
+                double nativePrice = switch (nativeSymbol) {
+                    case "ETH" -> 3500.0;
+                    case "MATIC" -> 0.55;
+                    case "AVAX" -> 35.0;
+                    case "BERA" -> 3.0;
+                    default -> 1.0;
+                };
+                long estimatedGas = 65000;
+                double feeNative2 = (gasGwei * estimatedGas) / 1e9;
+                double feeUsd = feeNative2 * nativePrice;
+
+                entries.add(new FeeEntry(net.getValue(), feeUsd,
+                    String.format("%.6f", feeNative2), nativeSymbol));
+            }
+
+            entries.sort((a, b) -> Double.compare(a.feeUsd, b.feeUsd));
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("## Network Fee Comparison for ")
+                .append(tokenStr).append(" (Demo Mode)\n\n");
+            sb.append("| Network | Fee | Fee (USD) |\n");
+            sb.append("|---------|-----|----------|\n");
+            for (FeeEntry e : entries) {
+                sb.append("| ").append(e.network)
+                    .append(" | ").append(e.feeNative).append(" ").append(e.symbol)
+                    .append(" | $").append(String.format("%.4f", e.feeUsd))
+                    .append(" |\n");
+            }
+            return textResult(sb.toString());
+        }
+
+        // Real comparison using parallel CompletableFutures
+        record FeeEntry(String network, double feeUsd, String feeNative,
+                        String symbol) {}
+
+        List<SupportedNetwork> eligibleNetworks = new ArrayList<>();
+        for (SupportedNetwork net : McpConstants.getAllNetworks()) {
+            if (McpConstants.getTokenAddress(net, token) != null) {
+                eligibleNetworks.add(net);
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        CompletableFuture<FeeEntry>[] futures = new CompletableFuture[eligibleNetworks.size()];
+
+        for (int i = 0; i < eligibleNetworks.size(); i++) {
+            final SupportedNetwork net = eligibleNetworks.get(i);
+            futures[i] = CompletableFuture.supplyAsync(() -> {
+                try {
+                    String rpcUrl = Web3Utils.resolveRpcUrl(config, net);
+                    Web3j web3j = Web3Utils.getWeb3j(rpcUrl);
+                    var gasPriceResponse = web3j.ethGasPrice().send();
+                    if (gasPriceResponse.hasError()) return null;
+                    BigInteger gasPriceWei = gasPriceResponse.getGasPrice();
+
+                    long gasLimit = 65000;
+                    BigInteger feeWei = gasPriceWei.multiply(BigInteger.valueOf(gasLimit));
+                    String nativeSymbol = McpConstants.NATIVE_SYMBOLS.get(net);
+                    BigDecimal feeNat = new BigDecimal(feeWei)
+                        .divide(BigDecimal.TEN.pow(18), 8, RoundingMode.HALF_UP);
+
+                    Map<String, Double> prices = priceService.getTokenPrices(
+                        List.of(nativeSymbol), "usd");
+                    Double nativePrice = prices.get(nativeSymbol.toUpperCase());
+                    double feeUsd = nativePrice != null
+                        ? feeNat.doubleValue() * nativePrice : 0;
+
+                    return new FeeEntry(net.getValue(), feeUsd,
+                        feeNat.toPlainString(), nativeSymbol);
+                } catch (Exception e) {
+                    return null;
+                }
+            });
+        }
+
+        try {
+            CompletableFuture.allOf(futures).get(30, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            // Partial results acceptable
+        }
+
+        List<FeeEntry> entries = new ArrayList<>();
+        for (CompletableFuture<FeeEntry> f : futures) {
+            try {
+                FeeEntry entry = f.getNow(null);
+                if (entry != null) entries.add(entry);
+            } catch (Exception e) {
+                // skip
+            }
+        }
+
+        entries.sort((a, b) -> Double.compare(a.feeUsd, b.feeUsd));
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("## Network Fee Comparison for ").append(tokenStr).append("\n\n");
+        sb.append("| Network | Fee | Fee (USD) |\n");
+        sb.append("|---------|-----|----------|\n");
+        for (FeeEntry e : entries) {
+            sb.append("| ").append(e.network)
+                .append(" | ").append(e.feeNative).append(" ").append(e.symbol)
+                .append(" | $").append(String.format("%.4f", e.feeUsd))
+                .append(" |\n");
+        }
+        if (entries.isEmpty()) {
+            sb.append("No fee data available.\n");
+        }
+        return textResult(sb.toString());
     }
 
     // ===== Result Formatting =====

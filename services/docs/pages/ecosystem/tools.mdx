@@ -1,0 +1,142 @@
+import { Callout } from 'nextra/components'
+
+# Ecosystem Tools
+
+Complementary tools and MCP servers for the T402 ecosystem.
+
+## WDK MCP Toolkit
+
+[Tether WDK MCP Toolkit](https://github.com/tetherto/wdk-mcp-toolkit) is a general-purpose wallet MCP server with 30+ tools. It complements T402's payment-focused MCP tools.
+
+### Capability Comparison
+
+| Capability | T402 MCP | WDK MCP Toolkit |
+|---|---|---|
+| Payment protocol (402) | ✅ Core | ❌ |
+| Wallet management | ✅ WDK tools | ✅ Core |
+| Token transfers | ✅ | ✅ |
+| Swaps | ✅ | ✅ + quotes |
+| Bridges | ✅ | ✅ |
+| Price feeds | ✅ | ✅ |
+| Lending/borrowing | ❌ | ✅ |
+| Fiat on/off-ramp | ❌ | ✅ |
+| ERC-8004 identity | ✅ | ❌ |
+| Gasless payments | ✅ | ❌ |
+
+### Using Together
+
+You can run both T402 and WDK MCP servers together in Claude Desktop. Each provides distinct capabilities:
+
+- **T402 MCP** — Payment negotiation, 402 protocol, ERC-8004 identity, gasless transactions
+- **WDK MCP Toolkit** — Wallet management, DeFi operations, fiat ramps
+
+Example `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "t402": {
+      "command": "npx",
+      "args": ["@t402/mcp"],
+      "env": {
+        "T402_PRIVATE_KEY": "0x...",
+        "T402_WDK_SEED_PHRASE": "your twelve word seed phrase here"
+      }
+    },
+    "wdk": {
+      "command": "node",
+      "args": ["/path/to/wdk-mcp-toolkit/dist/index.js"],
+      "env": {
+        "WDK_SEED_PHRASE": "your twelve word seed phrase here"
+      }
+    }
+  }
+}
+```
+
+<Callout type="info">
+  When using both servers, the AI agent can combine capabilities — for example, using WDK for wallet balance checks and T402 for making 402 payments.
+</Callout>
+
+### Complementary Workflows
+
+| Workflow | T402 MCP | WDK MCP Toolkit |
+|---|---|---|
+| Check wallet balance | ✅ `get_balances` | ✅ `getBalances` |
+| Pay for API access | ✅ `make_payment` | ❌ |
+| Swap tokens | ✅ `execute_swap` | ✅ `swap` |
+| Bridge cross-chain | ✅ `execute_bridge` | ✅ `bridge` |
+| Verify agent identity | ✅ `verify_erc8004` | ❌ |
+| Check lending rates | ❌ | ✅ `getLendingRates` |
+| On-ramp fiat | ❌ | ✅ `onRamp` |
+
+## OpenClaw WDK Skills
+
+[OpenClaw](https://github.com/tetherto/wdk-docs/blob/main/.claude/skills/wdk/SKILL.md) provides Claude Code skills for WDK wallet operations. These are interactive `/slash` commands that guide developers through wallet management tasks.
+
+### Available Skills
+
+| Skill | Description |
+|---|---|
+| `/wdk-wallet` | Create and manage WDK wallets |
+| `/wdk-transfer` | Send token transfers |
+| `/wdk-swap` | Execute token swaps |
+| `/wdk-bridge` | Bridge tokens cross-chain |
+
+### T402 Skills
+
+T402 also provides Claude Code skills:
+
+| Skill | Description |
+|---|---|
+| `/pm` | Project manager for T402 development |
+| `/cross-sdk-check` | Verify cross-SDK consistency |
+| `/release` | Guided release workflow |
+
+## Related Projects
+
+### Third-Party Implementations
+
+| Project | Description | Link |
+|---|---|---|
+| x402-usdt0 | Cross-chain USDT0 payment demo | [GitHub](https://github.com/baghdadgherras/x402-usdt0) |
+| SemanticPay | Third-party x402 facilitator | [Website](https://www.semanticpay.io/) |
+
+### Tether Ecosystem
+
+| Project | Description | Link |
+|---|---|---|
+| USDT0 | Omnichain USDT with EIP-3009 | [tether.to/usdt0](https://tether.to/usdt0) |
+| Tether WDK | Wallet Development Kit | [wdk.tether.to](https://wdk.tether.to) |
+| WDK MCP Toolkit | MCP server for wallet operations | [GitHub](https://github.com/tetherto/wdk-mcp-toolkit) |
+
+### Standards
+
+| Standard | Purpose | Relevance |
+|---|---|---|
+| [EIP-3009](https://eips.ethereum.org/EIPS/eip-3009) | Transfer with authorization | Core EVM payment mechanism |
+| [ERC-8004](https://eips.ethereum.org/EIPS/eip-8004) | Native asset transfer | Agent identity verification |
+| [MCP](https://modelcontextprotocol.io) | Model Context Protocol | AI agent tool interface |
+| [A2A](https://google.github.io/A2A/) | Agent-to-Agent Protocol | Multi-agent payment coordination |
+
+## Building Custom Tools
+
+T402's modular architecture supports custom integrations:
+
+```typescript
+import { createClient } from '@t402/core';
+import { evmMechanism } from '@t402/evm-exact';
+
+// Create a custom payment client
+const client = createClient({
+  mechanisms: [evmMechanism],
+  facilitatorUrl: 'https://facilitator.t402.io',
+});
+
+// Use in your own MCP server, API, or automation
+const result = await client.pay(paymentRequirements, wallet);
+```
+
+<Callout type="info">
+  See the [MCP Integration](/advanced/mcp) guide for building custom MCP tools with T402.
+</Callout>

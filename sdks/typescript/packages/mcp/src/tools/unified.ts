@@ -31,6 +31,10 @@ export const smartPayInputSchema = z.object({
     .optional()
     .describe('Maximum acceptable bridge fee in native token (optional)'),
   preferredNetwork: z.string().optional().describe('Preferred network for payment (optional)'),
+  confirmed: z
+    .boolean()
+    .optional()
+    .describe('Set to true to confirm and execute this payment'),
 })
 
 export type SmartPayInput = z.infer<typeof smartPayInputSchema>
@@ -138,6 +142,11 @@ export const UNIFIED_TOOL_DEFINITIONS = {
           type: 'string',
           description: 'Preferred network for payment (optional)',
         },
+        confirmed: {
+          type: 'boolean',
+          description:
+            'Set to true to confirm and execute. Omit for a preview/confirmation prompt.',
+        },
       },
       required: ['url'],
     },
@@ -162,7 +171,23 @@ export const UNIFIED_TOOL_DEFINITIONS = {
 /**
  * Execute t402/smartPay tool
  */
-export async function executeSmartPay(input: SmartPayInput, wdk: T402WDK): Promise<SmartPayResult> {
+export async function executeSmartPay(
+  input: SmartPayInput,
+  wdk: T402WDK,
+): Promise<SmartPayResult | { needsConfirmation: true; summary: string; details: Record<string, string> }> {
+  // Elicitation: return confirmation prompt if not confirmed
+  if (!input.confirmed) {
+    return {
+      needsConfirmation: true,
+      summary: `Smart-pay for ${input.url}${input.preferredNetwork ? ` on ${input.preferredNetwork}` : ''}`,
+      details: {
+        url: input.url,
+        ...(input.maxBridgeFee ? { maxBridgeFee: input.maxBridgeFee } : {}),
+        ...(input.preferredNetwork ? { preferredNetwork: input.preferredNetwork } : {}),
+      },
+    }
+  }
+
   const steps: SmartPayStep[] = []
   const chains = input.preferredNetwork
     ? [input.preferredNetwork]
@@ -227,7 +252,22 @@ export async function executeSmartPay(input: SmartPayInput, wdk: T402WDK): Promi
 /**
  * Execute t402/smartPay in demo mode
  */
-export function executeSmartPayDemo(input: SmartPayInput): SmartPayResult {
+export function executeSmartPayDemo(
+  input: SmartPayInput,
+): SmartPayResult | { needsConfirmation: true; summary: string; details: Record<string, string> } {
+  // Elicitation: return confirmation prompt if not confirmed
+  if (!input.confirmed) {
+    return {
+      needsConfirmation: true,
+      summary: `Smart-pay for ${input.url}${input.preferredNetwork ? ` on ${input.preferredNetwork}` : ''}`,
+      details: {
+        url: input.url,
+        ...(input.maxBridgeFee ? { maxBridgeFee: input.maxBridgeFee } : {}),
+        ...(input.preferredNetwork ? { preferredNetwork: input.preferredNetwork } : {}),
+      },
+    }
+  }
+
   const network = input.preferredNetwork ?? 'arbitrum'
 
   return {

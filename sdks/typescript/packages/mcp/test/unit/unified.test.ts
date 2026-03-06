@@ -72,23 +72,39 @@ describe('Unified Tool Input Schemas', () => {
 
 describe('Unified Demo Mode Executors', () => {
   describe('executeSmartPayDemo', () => {
-    it('should return demo smartpay result', () => {
+    it('should return confirmation prompt when not confirmed', () => {
       const input = { url: 'https://api.example.com/premium' }
       const result = executeSmartPayDemo(input)
-      expect(result.success).toBe(true)
-      expect(result.statusCode).toBe(200)
-      expect(result.body).toContain('Demo')
-      expect(result.body).toContain(input.url)
-      expect(result.steps).toBeInstanceOf(Array)
-      expect(result.steps.length).toBeGreaterThan(0)
-      expect(result.payment).toBeDefined()
-      expect(result.payment!.network).toContain('eip155:')
+      expect('needsConfirmation' in result).toBe(true)
+      if ('needsConfirmation' in result) {
+        expect(result.needsConfirmation).toBe(true)
+        expect(result.summary).toContain(input.url)
+      }
     })
 
-    it('should use preferred network in demo', () => {
-      const input = { url: 'https://api.example.com/premium', preferredNetwork: 'base' }
+    it('should return demo smartpay result when confirmed', () => {
+      const input = { url: 'https://api.example.com/premium', confirmed: true }
       const result = executeSmartPayDemo(input)
-      expect(result.steps[0].detail).toContain('base')
+      expect('success' in result).toBe(true)
+      if ('success' in result) {
+        expect(result.success).toBe(true)
+        expect(result.statusCode).toBe(200)
+        expect(result.body).toContain('Demo')
+        expect(result.body).toContain(input.url)
+        expect(result.steps).toBeInstanceOf(Array)
+        expect(result.steps.length).toBeGreaterThan(0)
+        expect(result.payment).toBeDefined()
+        expect(result.payment!.network).toContain('eip155:')
+      }
+    })
+
+    it('should use preferred network in demo when confirmed', () => {
+      const input = { url: 'https://api.example.com/premium', preferredNetwork: 'base', confirmed: true }
+      const result = executeSmartPayDemo(input)
+      expect('steps' in result).toBe(true)
+      if ('steps' in result) {
+        expect(result.steps[0].detail).toContain('base')
+      }
     })
   })
 

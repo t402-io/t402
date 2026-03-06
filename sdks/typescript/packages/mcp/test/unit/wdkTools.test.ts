@@ -162,7 +162,7 @@ describe('WDK Demo Mode Executors', () => {
   })
 
   describe('executeWdkTransferDemo', () => {
-    it('should return demo transfer result', () => {
+    it('should return confirmation prompt when not confirmed', () => {
       const input = {
         to: '0x1234567890123456789012345678901234567890',
         amount: '10.50',
@@ -170,17 +170,37 @@ describe('WDK Demo Mode Executors', () => {
         chain: 'ethereum',
       }
       const result = executeWdkTransferDemo(input)
-      expect(result.txHash).toMatch(/^0xdemo/)
-      expect(result.amount).toBe('10.50')
-      expect(result.token).toBe('USDC')
-      expect(result.chain).toBe('ethereum')
-      expect(result.to).toBe(input.to)
-      expect(result.explorerUrl).toContain(result.txHash)
+      expect('needsConfirmation' in result).toBe(true)
+      if ('needsConfirmation' in result) {
+        expect(result.needsConfirmation).toBe(true)
+        expect(result.summary).toContain('10.50')
+        expect(result.summary).toContain('USDC')
+      }
+    })
+
+    it('should return demo transfer result when confirmed', () => {
+      const input = {
+        to: '0x1234567890123456789012345678901234567890',
+        amount: '10.50',
+        token: 'USDC' as const,
+        chain: 'ethereum',
+        confirmed: true,
+      }
+      const result = executeWdkTransferDemo(input)
+      expect('txHash' in result).toBe(true)
+      if ('txHash' in result) {
+        expect(result.txHash).toMatch(/^0xdemo/)
+        expect(result.amount).toBe('10.50')
+        expect(result.token).toBe('USDC')
+        expect(result.chain).toBe('ethereum')
+        expect(result.to).toBe(input.to)
+        expect(result.explorerUrl).toContain(result.txHash)
+      }
     })
   })
 
   describe('executeWdkSwapDemo', () => {
-    it('should return demo swap result with slippage', () => {
+    it('should return confirmation prompt when not confirmed', () => {
       const input = {
         fromToken: 'ETH',
         toToken: 'USDT0',
@@ -188,32 +208,65 @@ describe('WDK Demo Mode Executors', () => {
         chain: 'arbitrum',
       }
       const result = executeWdkSwapDemo(input)
-      expect(result.fromAmount).toBe('1.0')
-      expect(result.fromToken).toBe('ETH')
-      expect(result.toToken).toBe('USDT0')
-      expect(result.chain).toBe('arbitrum')
-      expect(result.txHash).toMatch(/^0xdemo/)
-      // ~0.3% slippage
-      const toAmount = parseFloat(result.toAmount)
-      expect(toAmount).toBeGreaterThan(0.99)
-      expect(toAmount).toBeLessThan(1.0)
+      expect('needsConfirmation' in result).toBe(true)
+      if ('needsConfirmation' in result) {
+        expect(result.needsConfirmation).toBe(true)
+        expect(result.summary).toContain('ETH')
+        expect(result.summary).toContain('USDT0')
+      }
+    })
+
+    it('should return demo swap result with slippage when confirmed', () => {
+      const input = {
+        fromToken: 'ETH',
+        toToken: 'USDT0',
+        amount: '1.0',
+        chain: 'arbitrum',
+        confirmed: true,
+      }
+      const result = executeWdkSwapDemo(input)
+      expect('fromAmount' in result).toBe(true)
+      if ('fromAmount' in result) {
+        expect(result.fromAmount).toBe('1.0')
+        expect(result.fromToken).toBe('ETH')
+        expect(result.toToken).toBe('USDT0')
+        expect(result.chain).toBe('arbitrum')
+        expect(result.txHash).toMatch(/^0xdemo/)
+        // ~0.3% slippage
+        const toAmount = parseFloat(result.toAmount)
+        expect(toAmount).toBeGreaterThan(0.99)
+        expect(toAmount).toBeLessThan(1.0)
+      }
     })
   })
 
   describe('executeAutoPayDemo', () => {
-    it('should return demo autopay result', () => {
+    it('should return confirmation prompt when not confirmed', () => {
       const input = { url: 'https://api.example.com/premium' }
       const result = executeAutoPayDemo(input)
-      expect(result.success).toBe(true)
-      expect(result.statusCode).toBe(200)
-      expect(result.body).toContain('Demo')
-      expect(result.body).toContain(input.url)
-      expect(result.contentType).toBe('text/plain')
-      expect(result.payment).toBeDefined()
-      expect(result.payment!.network).toContain('eip155:')
-      expect(result.payment!.scheme).toBe('exact')
-      expect(result.payment!.amount).toBeDefined()
-      expect(result.payment!.payTo).toMatch(/^0x/)
+      expect('needsConfirmation' in result).toBe(true)
+      if ('needsConfirmation' in result) {
+        expect(result.needsConfirmation).toBe(true)
+        expect(result.summary).toContain(input.url)
+      }
+    })
+
+    it('should return demo autopay result when confirmed', () => {
+      const input = { url: 'https://api.example.com/premium', confirmed: true }
+      const result = executeAutoPayDemo(input)
+      expect('success' in result).toBe(true)
+      if ('success' in result) {
+        expect(result.success).toBe(true)
+        expect(result.statusCode).toBe(200)
+        expect(result.body).toContain('Demo')
+        expect(result.body).toContain(input.url)
+        expect(result.contentType).toBe('text/plain')
+        expect(result.payment).toBeDefined()
+        expect(result.payment!.network).toContain('eip155:')
+        expect(result.payment!.scheme).toBe('exact')
+        expect(result.payment!.amount).toBeDefined()
+        expect(result.payment!.payTo).toMatch(/^0x/)
+      }
     })
   })
 })
@@ -316,22 +369,26 @@ describe('WDK Tool Formatters', () => {
 // ---- Tool Definitions ----
 
 describe('WDK Tool Definitions', () => {
-  it('should define 5 WDK tools', () => {
+  it('should define 7 WDK tools', () => {
     const toolNames = Object.keys(WDK_TOOL_DEFINITIONS)
-    expect(toolNames).toHaveLength(5)
+    expect(toolNames).toHaveLength(7)
     expect(toolNames).toContain('wdk/getWallet')
     expect(toolNames).toContain('wdk/getBalances')
     expect(toolNames).toContain('wdk/transfer')
     expect(toolNames).toContain('wdk/swap')
     expect(toolNames).toContain('t402/autoPay')
+    expect(toolNames).toContain('wdk/quoteSwap')
+    expect(toolNames).toContain('wdk/executeSwap')
   })
 
-  it('should define 6 base tools', () => {
+  it('should define 12 base tools', () => {
     const toolNames = Object.keys(TOOL_DEFINITIONS)
-    expect(toolNames).toHaveLength(6)
+    expect(toolNames).toHaveLength(12)
     expect(toolNames).toContain('t402/getBalance')
     expect(toolNames).toContain('t402/pay')
     expect(toolNames).toContain('t402/bridge')
+    expect(toolNames).toContain('t402/quoteBridge')
+    expect(toolNames).toContain('t402/executeBridgeQuote')
   })
 
   it('each WDK tool should have name, description, inputSchema', () => {

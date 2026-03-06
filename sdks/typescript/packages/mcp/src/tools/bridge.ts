@@ -42,6 +42,10 @@ export const bridgeInputSchema = z.object({
     .string()
     .regex(/^0x[a-fA-F0-9]{40}$/)
     .describe('Recipient address on destination chain'),
+  confirmed: z
+    .boolean()
+    .optional()
+    .describe('Set to true to confirm and execute this bridge'),
 })
 
 export type BridgeInput = z.infer<typeof bridgeInputSchema>
@@ -212,9 +216,18 @@ export interface BridgeOptions {
 export async function executeBridge(
   input: BridgeInput,
   options: BridgeOptions,
-): Promise<BridgeResult> {
+): Promise<BridgeResult | { needsConfirmation: true; summary: string; details: Record<string, string> }> {
   const { fromChain, toChain, amount, recipient } = input
   const { privateKey, rpcUrl, demoMode, slippageTolerance = 0.5 } = options
+
+  // Elicitation: return confirmation prompt if not confirmed
+  if (!input.confirmed) {
+    return {
+      needsConfirmation: true,
+      summary: `Bridge ${amount} USDT0 from ${fromChain} to ${toChain}`,
+      details: { fromChain, toChain, amount, recipient },
+    }
+  }
 
   // Validate chains are different
   if (fromChain === toChain) {

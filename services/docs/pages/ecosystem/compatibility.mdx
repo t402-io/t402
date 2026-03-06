@@ -1,0 +1,179 @@
+import { Callout, Tabs } from 'nextra/components'
+
+# Protocol Compatibility
+
+Comparison of T402 with other x402 protocol implementations.
+
+## Overview
+
+The x402 payment protocol ecosystem has multiple implementations. All share the same core concept — using HTTP 402 status codes for payment negotiation — but differ in chain support, features, and wire format.
+
+## Implementations
+
+| | T402 | Coinbase x402 | SemanticPay |
+|---|---|---|---|
+| **Base** | Original protocol | `@x402/facilitator` | Built on `@x402/*` |
+| **Chains** | 25 EVM + 12 non-EVM | 4 EVM | 2 EVM (Plasma, Stable) |
+| **Schemes** | exact, exact-legacy, exact-direct, upto | exact | exact |
+| **Tokens** | USDT, USDT0 | USDC | USDT0 |
+| **SDKs** | TypeScript, Go, Python, Java | TypeScript | TypeScript |
+
+## Feature Comparison
+
+| Feature | T402 | Coinbase x402 | Notes |
+|---|---|---|---|
+| HTTP 402 Status Code | ✅ | ✅ | Same semantics |
+| Payment-Required Header | ✅ (V2) | ✅ (V1) | Wire format differs |
+| X-PAYMENT Header | ✅ | ✅ | Compatible |
+| EIP-3009 Signatures | ✅ | ✅ | Same on-chain mechanism |
+| CAIP-2 Network IDs | ✅ | ❌ | T402 uses CAIP-2 standard |
+| Non-EVM Support | ✅ (Solana, TON, TRON, ...) | ❌ | |
+| ERC-8004 Identity | ✅ | ❌ | Agent identity verification |
+| MCP Tools | ✅ (16 TS + 18 Java) | ❌ | AI agent integration |
+| Gasless Payments | ✅ | ❌ | ERC-4337 paymaster |
+
+## Known Facilitators
+
+| Facilitator | Endpoint | Chains | Tokens |
+|---|---|---|---|
+| T402 | `facilitator.t402.io` | 37 networks | USDT, USDT0 |
+| SemanticPay | `api.semanticpay.io` | Plasma, Stable | USDT0 |
+| Self-hosted | Your infrastructure | Configurable | Configurable |
+
+<Callout type="info">
+  Any implementation can use any facilitator. The facilitator is selected via the `facilitatorUrl` field in PaymentRequirements.
+</Callout>
+
+## Wire Format
+
+### T402 (V2) PaymentRequirements
+
+T402 V2 uses [CAIP-2](https://github.com/ChainAgnostic/CAIPs/blob/main/CAIPs/caip-2.md) network identifiers and extended fields:
+
+```json
+{
+  "x402Version": 2,
+  "accepts": [
+    {
+      "scheme": "exact",
+      "network": "eip155:8453",
+      "maxAmountRequired": "1000000",
+      "resource": "https://api.example.com/premium",
+      "payTo": "0x...",
+      "extra": {
+        "name": "Base USDT0",
+        "token": {
+          "address": "0x...",
+          "decimals": 6,
+          "symbol": "USDT0"
+        }
+      }
+    }
+  ]
+}
+```
+
+### Coinbase x402 (V1) PaymentRequirements
+
+Coinbase x402 uses chain name strings and a simpler format:
+
+```json
+{
+  "x402Version": 1,
+  "accepts": [
+    {
+      "scheme": "exact",
+      "network": "base-sepolia",
+      "maxAmountRequired": "1000000",
+      "resource": "https://api.example.com/premium",
+      "payTo": "0x...",
+      "extra": {
+        "name": "USDC on Base Sepolia",
+        "token": "0x..."
+      }
+    }
+  ]
+}
+```
+
+### Key Differences
+
+| Field | T402 V2 | Coinbase V1 |
+|---|---|---|
+| `network` | CAIP-2 (`eip155:8453`) | Chain name (`base-sepolia`) |
+| `extra.token` | Object with address, decimals, symbol | String (address only) |
+| `scheme` | `exact`, `exact-legacy`, `exact-direct`, `upto` | `exact` |
+
+## Migration Guide
+
+For projects currently using Coinbase x402 (`@x402/*` packages) that want T402 features:
+
+### 1. Install T402 packages
+
+<Tabs items={['npm', 'pnpm', 'yarn']}>
+  <Tabs.Tab>
+```bash
+npm install @t402/core @t402/express
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+pnpm add @t402/core @t402/express
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+yarn add @t402/core @t402/express
+```
+  </Tabs.Tab>
+</Tabs>
+
+### 2. Update server middleware
+
+```typescript
+// Before (Coinbase x402)
+import { paymentMiddleware } from '@x402/express';
+
+app.use(paymentMiddleware(facilitatorUrl, {
+  '/api/resource': { price: '$0.01', network: 'base-sepolia' }
+}));
+
+// After (T402)
+import { paymentMiddleware } from '@t402/express';
+
+app.use(paymentMiddleware({
+  '/api/resource': {
+    accepts: {
+      scheme: 'exact',
+      network: 'eip155:8453',
+      payTo: address,
+      price: '$0.01'
+    }
+  }
+}));
+```
+
+### 3. Update client code
+
+```typescript
+// Before (Coinbase x402)
+import { paymentFetch } from '@x402/fetch';
+const response = await paymentFetch(url, { wallet });
+
+// After (T402)
+import { t402Fetch } from '@t402/fetch';
+const response = await t402Fetch(url, { wallet });
+```
+
+### 4. Benefits after migration
+
+- **More chains** — 37 networks instead of 4
+- **Multiple schemes** — exact, upto, direct, gasless
+- **CAIP-2 standard** — Future-proof network identifiers
+- **Non-EVM** — Solana, TON, TRON, and more
+- **ERC-8004** — AI agent identity verification
+- **Multi-SDK** — Go, Python, Java in addition to TypeScript
+
+<Callout type="warning">
+  T402 V2 and Coinbase V1 wire formats are not directly compatible. Clients must match the facilitator's expected version.
+</Callout>

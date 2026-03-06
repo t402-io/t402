@@ -58,6 +58,36 @@ import {
   executePaymentPlan,
   executePaymentPlanDemo,
   formatPaymentPlanResult,
+  // Price and fee tools
+  getTokenPriceInputSchema,
+  executeGetTokenPrice,
+  formatTokenPriceResult,
+  getGasPriceInputSchema,
+  executeGetGasPrice,
+  formatGasPriceResult,
+  estimatePaymentFeeInputSchema,
+  executeEstimatePaymentFee,
+  formatPaymentFeeEstimate,
+  compareNetworkFeesInputSchema,
+  executeCompareNetworkFees,
+  formatNetworkFeeComparison,
+  // Quote-based tools
+  quoteBridgeInputSchema,
+  executeQuoteBridge,
+  executeQuoteBridgeDemo,
+  formatBridgeQuoteResult,
+  executeBridgeFromQuoteInputSchema,
+  executeExecuteBridgeFromQuote,
+  executeExecuteBridgeFromQuoteDemo,
+  formatExecuteBridgeFromQuoteResult,
+  wdkQuoteSwapInputSchema,
+  executeWdkQuoteSwap,
+  executeWdkQuoteSwapDemo,
+  formatSwapQuoteResult,
+  wdkExecuteSwapInputSchema,
+  executeWdkExecuteSwap,
+  executeWdkExecuteSwapDemo,
+  formatExecuteSwapResult,
   // TON bridge tools
   TON_BRIDGE_TOOLS,
   executeTonBridgeTool,
@@ -213,6 +243,32 @@ export class T402McpServer {
           case 't402/paymentPlan':
             return await this.handlePaymentPlan(args)
 
+          // Price and fee tools
+          case 't402/getTokenPrice':
+            return await this.handleGetTokenPrice(args)
+
+          case 't402/getGasPrice':
+            return await this.handleGetGasPrice(args)
+
+          case 't402/estimatePaymentFee':
+            return await this.handleEstimatePaymentFee(args)
+
+          case 't402/compareNetworkFees':
+            return await this.handleCompareNetworkFees(args)
+
+          // Quote-based tools
+          case 't402/quoteBridge':
+            return await this.handleQuoteBridge(args)
+
+          case 't402/executeBridgeQuote':
+            return await this.handleExecuteBridgeQuote(args)
+
+          case 'wdk/quoteSwap':
+            return await this.handleWdkQuoteSwap(args)
+
+          case 'wdk/executeSwap':
+            return await this.handleWdkExecuteSwap(args)
+
           // ERC-8004 tools
           case 'erc8004/resolveAgent':
             return await this.handleErc8004ResolveAgent(args)
@@ -282,6 +338,35 @@ export class T402McpServer {
   }
 
   /**
+   * Format a confirmation prompt for elicitation
+   */
+  private formatConfirmation(result: {
+    needsConfirmation: true
+    summary: string
+    details: Record<string, string>
+  }) {
+    const detailLines = Object.entries(result.details)
+      .map(([key, value]) => `- **${key}:** ${value}`)
+      .join('\n')
+    return {
+      content: [
+        {
+          type: 'text' as const,
+          text: [
+            '## Confirmation Required',
+            '',
+            result.summary,
+            '',
+            detailLines,
+            '',
+            '_Call this tool again with `confirmed: true` to execute._',
+          ].join('\n'),
+        },
+      ],
+    }
+  }
+
+  /**
    * Handle t402/pay
    */
   private async handlePay(args: unknown) {
@@ -297,6 +382,10 @@ export class T402McpServer {
       rpcUrl: this.config.rpcUrls?.[input.network as SupportedNetwork],
       demoMode: this.config.demoMode,
     })
+
+    if ('needsConfirmation' in result) {
+      return this.formatConfirmation(result)
+    }
 
     return {
       content: [
@@ -338,6 +427,10 @@ export class T402McpServer {
       rpcUrl: this.config.rpcUrls?.[input.network as SupportedNetwork],
       demoMode: this.config.demoMode,
     })
+
+    if ('needsConfirmation' in result) {
+      return this.formatConfirmation(result)
+    }
 
     return {
       content: [
@@ -381,6 +474,10 @@ export class T402McpServer {
       rpcUrl: this.config.rpcUrls?.[input.fromChain as SupportedNetwork],
       demoMode: this.config.demoMode,
     })
+
+    if ('needsConfirmation' in result) {
+      return this.formatConfirmation(result)
+    }
 
     return {
       content: [
@@ -437,6 +534,10 @@ export class T402McpServer {
         ? executeWdkTransferDemo(input)
         : await executeWdkTransfer(input, this.wdk)
 
+    if ('needsConfirmation' in result) {
+      return this.formatConfirmation(result)
+    }
+
     return {
       content: [{ type: 'text' as const, text: formatWdkTransferResult(result) }],
     }
@@ -453,6 +554,10 @@ export class T402McpServer {
         ? executeWdkSwapDemo(input)
         : await executeWdkSwap(input, this.wdk)
 
+    if ('needsConfirmation' in result) {
+      return this.formatConfirmation(result)
+    }
+
     return {
       content: [{ type: 'text' as const, text: formatWdkSwapResult(result) }],
     }
@@ -468,6 +573,10 @@ export class T402McpServer {
       this.config.demoMode || !this.wdk
         ? executeAutoPayDemo(input)
         : await executeAutoPay(input, this.wdk)
+
+    if ('needsConfirmation' in result) {
+      return this.formatConfirmation(result)
+    }
 
     return {
       content: [{ type: 'text' as const, text: formatAutoPayResult(result) }],
@@ -487,6 +596,10 @@ export class T402McpServer {
         ? executeSmartPayDemo(input)
         : await executeSmartPay(input, this.wdk)
 
+    if ('needsConfirmation' in result) {
+      return this.formatConfirmation(result)
+    }
+
     return {
       content: [{ type: 'text' as const, text: formatSmartPayResult(result) }],
     }
@@ -505,6 +618,142 @@ export class T402McpServer {
 
     return {
       content: [{ type: 'text' as const, text: formatPaymentPlanResult(result) }],
+    }
+  }
+
+  // ---- Price and Fee Tool Handlers ----
+
+  /**
+   * Handle t402/getTokenPrice
+   */
+  private async handleGetTokenPrice(args: unknown) {
+    const input = getTokenPriceInputSchema.parse(args)
+    const result = await executeGetTokenPrice(input, { demoMode: this.config.demoMode })
+    return {
+      content: [{ type: 'text' as const, text: formatTokenPriceResult(result) }],
+    }
+  }
+
+  /**
+   * Handle t402/getGasPrice
+   */
+  private async handleGetGasPrice(args: unknown) {
+    const input = getGasPriceInputSchema.parse(args)
+    const result = await executeGetGasPrice(input, {
+      rpcUrl: this.config.rpcUrls?.[input.network as SupportedNetwork],
+      demoMode: this.config.demoMode,
+    })
+    return {
+      content: [{ type: 'text' as const, text: formatGasPriceResult(result) }],
+    }
+  }
+
+  /**
+   * Handle t402/estimatePaymentFee
+   */
+  private async handleEstimatePaymentFee(args: unknown) {
+    const input = estimatePaymentFeeInputSchema.parse(args)
+    const result = await executeEstimatePaymentFee(input, {
+      rpcUrl: this.config.rpcUrls?.[input.network as SupportedNetwork],
+      demoMode: this.config.demoMode,
+    })
+    return {
+      content: [{ type: 'text' as const, text: formatPaymentFeeEstimate(result) }],
+    }
+  }
+
+  /**
+   * Handle t402/compareNetworkFees
+   */
+  private async handleCompareNetworkFees(args: unknown) {
+    const input = compareNetworkFeesInputSchema.parse(args)
+    const result = await executeCompareNetworkFees(input, {
+      rpcUrls: this.config.rpcUrls,
+      demoMode: this.config.demoMode,
+    })
+    return {
+      content: [{ type: 'text' as const, text: formatNetworkFeeComparison(result) }],
+    }
+  }
+
+  // ---- Quote-based Tool Handlers ----
+
+  /**
+   * Handle t402/quoteBridge
+   */
+  private async handleQuoteBridge(args: unknown) {
+    const input = quoteBridgeInputSchema.parse(args)
+
+    const result = this.config.demoMode
+      ? executeQuoteBridgeDemo(input)
+      : await executeQuoteBridge(input, this.config.rpcUrls)
+
+    return {
+      content: [{ type: 'text' as const, text: formatBridgeQuoteResult(result) }],
+    }
+  }
+
+  /**
+   * Handle t402/executeBridgeQuote
+   */
+  private async handleExecuteBridgeQuote(args: unknown) {
+    if (!this.config.privateKey && !this.config.demoMode) {
+      throw new Error(
+        'Private key not configured. Set T402_PRIVATE_KEY environment variable or enable demo mode.',
+      )
+    }
+
+    const input = executeBridgeFromQuoteInputSchema.parse(args)
+
+    const result = this.config.demoMode
+      ? executeExecuteBridgeFromQuoteDemo(input)
+      : await executeExecuteBridgeFromQuote(input, {
+          privateKey: this.config.privateKey || '0x',
+          demoMode: this.config.demoMode,
+        })
+
+    if ('needsConfirmation' in result) {
+      return this.formatConfirmation(result)
+    }
+
+    return {
+      content: [{ type: 'text' as const, text: formatExecuteBridgeFromQuoteResult(result) }],
+    }
+  }
+
+  /**
+   * Handle wdk/quoteSwap
+   */
+  private async handleWdkQuoteSwap(args: unknown) {
+    const input = wdkQuoteSwapInputSchema.parse(args)
+
+    const result =
+      this.config.demoMode || !this.wdk
+        ? executeWdkQuoteSwapDemo(input)
+        : await executeWdkQuoteSwap(input, this.wdk)
+
+    return {
+      content: [{ type: 'text' as const, text: formatSwapQuoteResult(result) }],
+    }
+  }
+
+  /**
+   * Handle wdk/executeSwap
+   */
+  private async handleWdkExecuteSwap(args: unknown) {
+    const input = wdkExecuteSwapInputSchema.parse(args)
+
+    const result =
+      this.config.demoMode || !this.wdk
+        ? executeWdkExecuteSwapDemo(input)
+        : await executeWdkExecuteSwap(input, this.wdk)
+
+    if ('needsConfirmation' in result) {
+      return this.formatConfirmation(result)
+    }
+
+    return {
+      content: [{ type: 'text' as const, text: formatExecuteSwapResult(result) }],
     }
   }
 

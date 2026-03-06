@@ -238,10 +238,11 @@ public class McpServer {
         payProps.put("amount", payAmountProp);
         payProps.put("token", new Property("string", "Token to send", tokens));
         payProps.put("network", new Property("string", "Network to use", networks));
+        payProps.put("confirmed", new Property("boolean", "Set to true to confirm and execute"));
 
         toolDefs.add(new Tool(
             "t402/pay",
-            "Execute a stablecoin payment (USDC, USDT, or USDT0)",
+            "Execute a stablecoin payment (USDC, USDT, or USDT0). Requires confirmed=true to execute.",
             new InputSchema(payProps, List.of("to", "amount", "token", "network"))
         ));
 
@@ -255,10 +256,11 @@ public class McpServer {
         payGaslessProps.put("amount", payGaslessAmountProp);
         payGaslessProps.put("token", new Property("string", "Token to send", tokens));
         payGaslessProps.put("network", new Property("string", "Network to use (must support ERC-4337)", gaslessNetworks));
+        payGaslessProps.put("confirmed", new Property("boolean", "Set to true to confirm and execute"));
 
         toolDefs.add(new Tool(
             "t402/payGasless",
-            "Execute a gasless payment using ERC-4337 account abstraction (user pays no gas)",
+            "Execute a gasless payment using ERC-4337 account abstraction (user pays no gas). Requires confirmed=true to execute.",
             new InputSchema(payGaslessProps, List.of("to", "amount", "token", "network"))
         ));
 
@@ -289,10 +291,11 @@ public class McpServer {
         Property bridgeRecipientProp2 = new Property("string", "Recipient address on destination chain (0x...)");
         bridgeRecipientProp2.setPattern("^0x[a-fA-F0-9]{40}$");
         bridgeProps.put("recipient", bridgeRecipientProp2);
+        bridgeProps.put("confirmed", new Property("boolean", "Set to true to confirm and execute"));
 
         toolDefs.add(new Tool(
             "t402/bridge",
-            "Bridge USDT0 between chains using LayerZero OFT",
+            "Bridge USDT0 between chains using LayerZero OFT. Requires confirmed=true to execute.",
             new InputSchema(bridgeProps, List.of("fromChain", "toChain", "amount", "recipient"))
         ));
 
@@ -328,10 +331,11 @@ public class McpServer {
         paySvmProps.put("amount", svmAmountProp);
         paySvmProps.put("token", new Property("string", "SPL token to send", svmTokens));
         paySvmProps.put("network", new Property("string", "Solana network to use", svmNetworks));
+        paySvmProps.put("confirmed", new Property("boolean", "Set to true to confirm and execute"));
 
         toolDefs.add(new Tool(
             "t402/paySvm",
-            "Execute a USDC payment on Solana (SPL token transfer)",
+            "Execute a USDC payment on Solana (SPL token transfer). Requires confirmed=true to execute.",
             new InputSchema(paySvmProps, List.of("to", "amount", "token", "network"))
         ));
 
@@ -367,10 +371,11 @@ public class McpServer {
         payTonProps.put("amount", tonAmountProp);
         payTonProps.put("token", new Property("string", "Jetton to send", tonTokens));
         payTonProps.put("network", new Property("string", "TON network to use", tonNetworks));
+        payTonProps.put("confirmed", new Property("boolean", "Set to true to confirm and execute"));
 
         toolDefs.add(new Tool(
             "t402/payTon",
-            "Execute a USDT payment on TON (jetton transfer)",
+            "Execute a USDT payment on TON (jetton transfer). Requires confirmed=true to execute.",
             new InputSchema(payTonProps, List.of("to", "amount", "token", "network"))
         ));
 
@@ -406,10 +411,11 @@ public class McpServer {
         payTronProps.put("amount", tronAmountProp);
         payTronProps.put("token", new Property("string", "TRC-20 token to send", tronTokens));
         payTronProps.put("network", new Property("string", "TRON network to use", tronNetworks));
+        payTronProps.put("confirmed", new Property("boolean", "Set to true to confirm and execute"));
 
         toolDefs.add(new Tool(
             "t402/payTron",
-            "Execute a USDT payment on TRON (TRC-20 token transfer)",
+            "Execute a USDT payment on TRON (TRC-20 token transfer). Requires confirmed=true to execute.",
             new InputSchema(payTronProps, List.of("to", "amount", "token", "network"))
         ));
 
@@ -445,10 +451,11 @@ public class McpServer {
         payNearProps.put("amount", nearAmountProp);
         payNearProps.put("token", new Property("string", "NEP-141 token to send", nearTokens));
         payNearProps.put("network", new Property("string", "NEAR network to use", nearNetworks));
+        payNearProps.put("confirmed", new Property("boolean", "Set to true to confirm and execute"));
 
         toolDefs.add(new Tool(
             "t402/payNear",
-            "Execute a USDT payment on NEAR (NEP-141 token transfer)",
+            "Execute a USDT payment on NEAR (NEP-141 token transfer). Requires confirmed=true to execute.",
             new InputSchema(payNearProps, List.of("to", "amount", "token", "network"))
         ));
 
@@ -484,10 +491,11 @@ public class McpServer {
         payAptosProps.put("amount", aptosAmountProp);
         payAptosProps.put("token", new Property("string", "Fungible Asset to send", aptosTokens));
         payAptosProps.put("network", new Property("string", "Aptos network to use", aptosNetworks));
+        payAptosProps.put("confirmed", new Property("boolean", "Set to true to confirm and execute"));
 
         toolDefs.add(new Tool(
             "t402/payAptos",
-            "Execute a USDT payment on Aptos (Fungible Asset transfer)",
+            "Execute a USDT payment on Aptos (Fungible Asset transfer). Requires confirmed=true to execute.",
             new InputSchema(payAptosProps, List.of("to", "amount", "token", "network"))
         ));
 
@@ -523,11 +531,65 @@ public class McpServer {
         payTezosProps.put("amount", tezosAmountProp);
         payTezosProps.put("token", new Property("string", "FA2 token to send", tezosTokens));
         payTezosProps.put("network", new Property("string", "Tezos network to use", tezosNetworks));
+        payTezosProps.put("confirmed", new Property("boolean", "Set to true to confirm and execute"));
 
         toolDefs.add(new Tool(
             "t402/payTezos",
-            "Execute a USDt payment on Tezos (FA2 token transfer)",
+            "Execute a USDt payment on Tezos (FA2 token transfer). Requires confirmed=true to execute.",
             new InputSchema(payTezosProps, List.of("to", "amount", "token", "network"))
+        ));
+
+        // ===== Price & Fee Tools =====
+
+        // t402/getTokenPrice
+        Map<String, Property> getTokenPriceProps = new LinkedHashMap<>();
+        getTokenPriceProps.put("tokens", new Property("string", "Comma-separated token symbols (e.g., 'ETH,USDC,SOL')"));
+        getTokenPriceProps.put("currency", new Property("string", "Target currency (default: usd)"));
+
+        toolDefs.add(new Tool(
+            "t402/getTokenPrice",
+            "Get current prices for tokens via CoinGecko",
+            new InputSchema(getTokenPriceProps, List.of("tokens"))
+        ));
+
+        // t402/getGasPrice
+        Map<String, Property> getGasPriceProps = new LinkedHashMap<>();
+        getGasPriceProps.put("network", new Property("string", "EVM network to query", networks));
+
+        toolDefs.add(new Tool(
+            "t402/getGasPrice",
+            "Get current gas price for an EVM network in gwei",
+            new InputSchema(getGasPriceProps, List.of("network"))
+        ));
+
+        // t402/estimatePaymentFee
+        Map<String, Property> estimateFeeProps = new LinkedHashMap<>();
+        estimateFeeProps.put("network", new Property("string", "EVM network", networks));
+        estimateFeeProps.put("token", new Property("string", "Token to transfer", tokens));
+        Property estAmountProp = new Property("string", "Amount to transfer (e.g., '10')");
+        estAmountProp.setPattern("^\\d+(\\.\\d+)?$");
+        estimateFeeProps.put("amount", estAmountProp);
+        Property estToProp = new Property("string", "Recipient address (0x...)");
+        estToProp.setPattern("^0x[a-fA-F0-9]{40}$");
+        estimateFeeProps.put("to", estToProp);
+
+        toolDefs.add(new Tool(
+            "t402/estimatePaymentFee",
+            "Estimate the gas fee for a stablecoin transfer on an EVM network",
+            new InputSchema(estimateFeeProps, List.of("network", "token"))
+        ));
+
+        // t402/compareNetworkFees
+        Map<String, Property> compareFeeProps = new LinkedHashMap<>();
+        compareFeeProps.put("token", new Property("string", "Token to compare fees for", tokens));
+        Property cmpAmountProp = new Property("string", "Amount to transfer (e.g., '10')");
+        cmpAmountProp.setPattern("^\\d+(\\.\\d+)?$");
+        compareFeeProps.put("amount", cmpAmountProp);
+
+        toolDefs.add(new Tool(
+            "t402/compareNetworkFees",
+            "Compare gas fees for a stablecoin transfer across all supported EVM networks",
+            new InputSchema(compareFeeProps, List.of("token"))
         ));
 
         return toolDefs;

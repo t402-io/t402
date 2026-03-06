@@ -13,6 +13,7 @@ import {
   formatBridgeFeeResult,
   formatBridgeResult,
   TOOL_DEFINITIONS,
+  WDK_TOOL_DEFINITIONS,
   ERC8004_TOOL_DEFINITIONS,
   erc8004ResolveAgentInputSchema,
   erc8004CheckReputationInputSchema,
@@ -326,6 +327,93 @@ describe('Result Formatters', () => {
       expect(result).toContain('Message GUID')
       expect(result).toContain('LayerZero Scan')
     })
+  })
+})
+
+describe('Elicitation (confirmed param)', () => {
+  describe('payInputSchema', () => {
+    it('should accept confirmed: true', () => {
+      const input = {
+        to: '0x1234567890123456789012345678901234567890',
+        amount: '100',
+        token: 'USDC',
+        network: 'base',
+        confirmed: true,
+      }
+      const parsed = payInputSchema.parse(input)
+      expect(parsed.confirmed).toBe(true)
+    })
+
+    it('should accept without confirmed (optional)', () => {
+      const input = {
+        to: '0x1234567890123456789012345678901234567890',
+        amount: '100',
+        token: 'USDC',
+        network: 'base',
+      }
+      const parsed = payInputSchema.parse(input)
+      expect(parsed.confirmed).toBeUndefined()
+    })
+  })
+
+  describe('payGaslessInputSchema', () => {
+    it('should accept confirmed: true', () => {
+      const input = {
+        to: '0x1234567890123456789012345678901234567890',
+        amount: '25',
+        token: 'USDC',
+        network: 'base',
+        confirmed: true,
+      }
+      const parsed = payGaslessInputSchema.parse(input)
+      expect(parsed.confirmed).toBe(true)
+    })
+  })
+
+  describe('bridgeInputSchema', () => {
+    it('should accept confirmed: true', () => {
+      const input = {
+        fromChain: 'ethereum',
+        toChain: 'arbitrum',
+        amount: '100',
+        recipient: '0x1234567890123456789012345678901234567890',
+        confirmed: true,
+      }
+      const parsed = bridgeInputSchema.parse(input)
+      expect(parsed.confirmed).toBe(true)
+    })
+  })
+
+  it('write tool definitions should include confirmed in properties', () => {
+    const writeTools = ['t402/pay', 't402/payGasless', 't402/bridge']
+    for (const toolName of writeTools) {
+      const tool = TOOL_DEFINITIONS[toolName as keyof typeof TOOL_DEFINITIONS]
+      expect(tool.inputSchema.properties).toHaveProperty('confirmed')
+    }
+  })
+
+  it('read tool definitions should NOT include confirmed in properties', () => {
+    const readTools = ['t402/getBalance', 't402/getAllBalances', 't402/getBridgeFee']
+    for (const toolName of readTools) {
+      const tool = TOOL_DEFINITIONS[toolName as keyof typeof TOOL_DEFINITIONS]
+      expect(tool.inputSchema.properties).not.toHaveProperty('confirmed')
+    }
+  })
+
+  it('WDK write tool definitions should include confirmed in properties', () => {
+    const writeTools = ['wdk/transfer', 'wdk/swap', 't402/autoPay']
+    for (const toolName of writeTools) {
+      const tool = WDK_TOOL_DEFINITIONS[toolName as keyof typeof WDK_TOOL_DEFINITIONS]
+      expect(tool.inputSchema.properties).toHaveProperty('confirmed')
+    }
+  })
+
+  it('WDK read tool definitions should NOT include confirmed in properties', () => {
+    const readTools = ['wdk/getWallet', 'wdk/getBalances']
+    for (const toolName of readTools) {
+      const tool = WDK_TOOL_DEFINITIONS[toolName as keyof typeof WDK_TOOL_DEFINITIONS]
+      expect(tool.inputSchema.properties).not.toHaveProperty('confirmed')
+    }
   })
 })
 

@@ -489,6 +489,11 @@ public final class McpTypes {
             this.isError = isError;
         }
 
+        public ToolResult(String text, boolean isError) {
+            this.content = List.of(ContentBlock.text(text));
+            this.isError = isError;
+        }
+
         public List<ContentBlock> getContent() { return content; }
         public void setContent(List<ContentBlock> content) { this.content = content; }
 

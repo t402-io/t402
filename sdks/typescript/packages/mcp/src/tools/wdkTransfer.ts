@@ -19,6 +19,10 @@ export const wdkTransferInputSchema = z.object({
     .describe("Amount to send (e.g., '10.50')"),
   token: z.enum(['USDC', 'USDT', 'USDT0']).describe('Token to transfer'),
   chain: z.string().describe('Chain to execute transfer on (e.g., "ethereum", "arbitrum")'),
+  confirmed: z
+    .boolean()
+    .optional()
+    .describe('Set to true to confirm and execute this transfer'),
 })
 
 export type WdkTransferInput = z.infer<typeof wdkTransferInputSchema>
@@ -51,7 +55,16 @@ export interface WdkTransferResult {
 export async function executeWdkTransfer(
   input: WdkTransferInput,
   wdk: T402WDK,
-): Promise<WdkTransferResult> {
+): Promise<WdkTransferResult | { needsConfirmation: true; summary: string; details: Record<string, string> }> {
+  // Elicitation: return confirmation prompt if not confirmed
+  if (!input.confirmed) {
+    return {
+      needsConfirmation: true,
+      summary: `Transfer ${input.amount} ${input.token} on ${input.chain} to ${input.to}`,
+      details: { to: input.to, amount: input.amount, token: input.token, chain: input.chain },
+    }
+  }
+
   const signer = await wdk.getSigner(input.chain)
 
   // Use the WDK signer to send a raw transaction
@@ -79,7 +92,18 @@ export async function executeWdkTransfer(
  * @param input - Transfer parameters
  * @returns Demo transfer result
  */
-export function executeWdkTransferDemo(input: WdkTransferInput): WdkTransferResult {
+export function executeWdkTransferDemo(
+  input: WdkTransferInput,
+): WdkTransferResult | { needsConfirmation: true; summary: string; details: Record<string, string> } {
+  // Elicitation: return confirmation prompt if not confirmed
+  if (!input.confirmed) {
+    return {
+      needsConfirmation: true,
+      summary: `Transfer ${input.amount} ${input.token} on ${input.chain} to ${input.to}`,
+      details: { to: input.to, amount: input.amount, token: input.token, chain: input.chain },
+    }
+  }
+
   const demoTxHash = '0xdemo' + Math.random().toString(16).slice(2, 10)
   return {
     txHash: demoTxHash,

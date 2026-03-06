@@ -129,6 +129,91 @@ export {
   type Erc8004VerifyWalletResult,
 } from './erc8004VerifyWallet.js'
 
+// Price and fee tools
+export {
+  getTokenPrices,
+  getTokenPricesDemo,
+  clearPriceCache,
+} from './priceService.js'
+
+export {
+  getTokenPriceInputSchema,
+  executeGetTokenPrice,
+  formatTokenPriceResult,
+  type GetTokenPriceInput,
+  type TokenPriceResult,
+} from './getTokenPrice.js'
+
+export {
+  getGasPriceInputSchema,
+  executeGetGasPrice,
+  formatGasPriceResult,
+  type GetGasPriceInput,
+  type GasPriceResult,
+} from './getGasPrice.js'
+
+export {
+  estimatePaymentFeeInputSchema,
+  executeEstimatePaymentFee,
+  formatPaymentFeeEstimate,
+  type EstimatePaymentFeeInput,
+  type PaymentFeeEstimate,
+} from './estimatePaymentFee.js'
+
+export {
+  compareNetworkFeesInputSchema,
+  executeCompareNetworkFees,
+  formatNetworkFeeComparison,
+  type CompareNetworkFeesInput,
+  type NetworkFeeComparison,
+} from './compareNetworkFees.js'
+
+// Quote store
+export {
+  createQuote,
+  getQuote,
+  deleteQuote,
+  clearQuoteStore,
+  type QuoteData,
+} from './quoteStore.js'
+
+// Quote-based swap tools
+export {
+  wdkQuoteSwapInputSchema,
+  executeWdkQuoteSwap,
+  executeWdkQuoteSwapDemo,
+  formatSwapQuoteResult,
+  type WdkQuoteSwapInput,
+  type SwapQuoteResult,
+} from './wdkQuoteSwap.js'
+
+export {
+  wdkExecuteSwapInputSchema,
+  executeWdkExecuteSwap,
+  executeWdkExecuteSwapDemo,
+  formatExecuteSwapResult,
+  type WdkExecuteSwapInput,
+  type ExecuteSwapResult,
+} from './wdkExecuteSwap.js'
+
+// Quote-based bridge tools
+export {
+  quoteBridgeInputSchema,
+  executeQuoteBridge,
+  executeQuoteBridgeDemo,
+  formatBridgeQuoteResult,
+  type QuoteBridgeInput,
+  type BridgeQuoteResult,
+} from './quoteBridge.js'
+
+export {
+  executeBridgeFromQuoteInputSchema,
+  executeExecuteBridgeFromQuote,
+  executeExecuteBridgeFromQuoteDemo,
+  formatExecuteBridgeFromQuoteResult,
+  type ExecuteBridgeFromQuoteInput,
+} from './executeBridgeFromQuote.js'
+
 // Unified tools
 export {
   smartPayInputSchema,
@@ -261,6 +346,11 @@ export const TOOL_DEFINITIONS = {
           type: 'string',
           description: 'Optional memo/reference for the payment',
         },
+        confirmed: {
+          type: 'boolean',
+          description:
+            'Set to true to confirm and execute. Omit for a preview/confirmation prompt.',
+        },
       },
       required: ['to', 'amount', 'token', 'network'],
     },
@@ -292,6 +382,11 @@ export const TOOL_DEFINITIONS = {
           type: 'string',
           enum: ['ethereum', 'base', 'arbitrum', 'optimism', 'polygon', 'avalanche'],
           description: 'Network to execute gasless payment on (must support ERC-4337)',
+        },
+        confirmed: {
+          type: 'boolean',
+          description:
+            'Set to true to confirm and execute. Omit for a preview/confirmation prompt.',
         },
       },
       required: ['to', 'amount', 'token', 'network'],
@@ -357,8 +452,179 @@ export const TOOL_DEFINITIONS = {
           pattern: '^0x[a-fA-F0-9]{40}$',
           description: 'Recipient address on destination chain',
         },
+        confirmed: {
+          type: 'boolean',
+          description:
+            'Set to true to confirm and execute. Omit for a preview/confirmation prompt.',
+        },
       },
       required: ['fromChain', 'toChain', 'amount', 'recipient'],
+    },
+  },
+
+  't402/getTokenPrice': {
+    name: 't402/getTokenPrice',
+    description:
+      'Get current market prices for tokens (ETH, MATIC, AVAX, USDC, etc.) via CoinGecko. Cached for 5 minutes.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        tokens: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Token symbols to get prices for (e.g., ["ETH", "MATIC", "USDC"])',
+        },
+        currency: {
+          type: 'string',
+          description: 'Target currency (default: "usd")',
+        },
+      },
+      required: ['tokens'],
+    },
+  },
+
+  't402/getGasPrice': {
+    name: 't402/getGasPrice',
+    description:
+      'Get the current gas price on a specific blockchain network. Returns the price in gwei.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        network: {
+          type: 'string',
+          enum: [
+            'ethereum',
+            'base',
+            'arbitrum',
+            'optimism',
+            'polygon',
+            'avalanche',
+            'ink',
+            'berachain',
+            'unichain',
+          ],
+          description: 'Blockchain network to check gas price on',
+        },
+      },
+      required: ['network'],
+    },
+  },
+
+  't402/estimatePaymentFee': {
+    name: 't402/estimatePaymentFee',
+    description:
+      'Estimate the gas cost (in native token and USD) for a stablecoin payment on a specific network.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        network: {
+          type: 'string',
+          enum: [
+            'ethereum',
+            'base',
+            'arbitrum',
+            'optimism',
+            'polygon',
+            'avalanche',
+            'ink',
+            'berachain',
+            'unichain',
+          ],
+          description: 'Network to estimate fee on',
+        },
+        amount: {
+          type: 'string',
+          pattern: '^\\d+(\\.\\d+)?$',
+          description: "Payment amount (e.g., '100')",
+        },
+        token: {
+          type: 'string',
+          enum: ['USDC', 'USDT', 'USDT0'],
+          description: 'Token to use for payment',
+        },
+      },
+      required: ['network', 'amount', 'token'],
+    },
+  },
+
+  't402/compareNetworkFees': {
+    name: 't402/compareNetworkFees',
+    description:
+      'Compare payment fees across multiple networks for the same token. Returns a sorted table from cheapest to most expensive.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        amount: {
+          type: 'string',
+          pattern: '^\\d+(\\.\\d+)?$',
+          description: "Payment amount (e.g., '100')",
+        },
+        token: {
+          type: 'string',
+          enum: ['USDC', 'USDT', 'USDT0'],
+          description: 'Token to use for payment',
+        },
+        networks: {
+          type: 'array',
+          items: { type: 'string' },
+          description:
+            'Networks to compare. If not provided, compares all networks that support the token.',
+        },
+      },
+      required: ['amount', 'token'],
+    },
+  },
+
+  't402/quoteBridge': {
+    name: 't402/quoteBridge',
+    description:
+      'Get a bridge fee quote with a quoteId for later execution. Like getBridgeFee but returns a reusable quoteId. Call t402/executeBridge with the quoteId to execute.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        fromChain: {
+          type: 'string',
+          enum: ['ethereum', 'arbitrum', 'ink', 'berachain', 'unichain'],
+          description: 'Source chain to bridge from',
+        },
+        toChain: {
+          type: 'string',
+          enum: ['ethereum', 'arbitrum', 'ink', 'berachain', 'unichain'],
+          description: 'Destination chain to bridge to',
+        },
+        amount: {
+          type: 'string',
+          pattern: '^\\d+(\\.\\d+)?$',
+          description: "Amount of USDT0 to bridge (e.g., '100' for 100 USDT0)",
+        },
+        recipient: {
+          type: 'string',
+          pattern: '^0x[a-fA-F0-9]{40}$',
+          description: 'Recipient address on destination chain',
+        },
+      },
+      required: ['fromChain', 'toChain', 'amount', 'recipient'],
+    },
+  },
+
+  't402/executeBridgeQuote': {
+    name: 't402/executeBridgeQuote',
+    description:
+      'Execute a bridge using a quoteId from t402/quoteBridge. Requires confirmation.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        quoteId: {
+          type: 'string',
+          description: 'Quote ID from t402/quoteBridge',
+        },
+        confirmed: {
+          type: 'boolean',
+          description:
+            'Set to true to confirm and execute. Omit for a preview/confirmation prompt.',
+        },
+      },
+      required: ['quoteId'],
     },
   },
 }
@@ -421,6 +687,11 @@ export const WDK_TOOL_DEFINITIONS = {
           type: 'string',
           description: 'Chain to execute transfer on (e.g., "ethereum", "arbitrum")',
         },
+        confirmed: {
+          type: 'boolean',
+          description:
+            'Set to true to confirm and execute. Omit for a preview/confirmation prompt.',
+        },
       },
       required: ['to', 'amount', 'token', 'chain'],
     },
@@ -450,6 +721,11 @@ export const WDK_TOOL_DEFINITIONS = {
           type: 'string',
           description: 'Chain to execute swap on (e.g., "ethereum", "arbitrum")',
         },
+        confirmed: {
+          type: 'boolean',
+          description:
+            'Set to true to confirm and execute. Omit for a preview/confirmation prompt.',
+        },
       },
       required: ['fromToken', 'toToken', 'amount', 'chain'],
     },
@@ -477,8 +753,63 @@ export const WDK_TOOL_DEFINITIONS = {
           description:
             'Preferred chain for payment (e.g., "arbitrum"). If not specified, uses first available.',
         },
+        confirmed: {
+          type: 'boolean',
+          description:
+            'Set to true to confirm and execute. Omit for a preview/confirmation prompt.',
+        },
       },
       required: ['url'],
+    },
+  },
+
+  'wdk/quoteSwap': {
+    name: 'wdk/quoteSwap',
+    description:
+      'Get a swap quote with a quoteId for later execution. Returns exchange rate, fee, and price impact. Call wdk/executeSwap with the quoteId to execute.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        fromToken: {
+          type: 'string',
+          description: 'Token to swap from (e.g., "ETH", "USDC")',
+        },
+        toToken: {
+          type: 'string',
+          description: 'Token to swap to (e.g., "USDT0", "USDC")',
+        },
+        amount: {
+          type: 'string',
+          pattern: '^\\d+(\\.\\d+)?$',
+          description: "Amount to swap (e.g., '1.0')",
+        },
+        chain: {
+          type: 'string',
+          description: 'Chain to execute swap on (e.g., "ethereum", "arbitrum")',
+        },
+      },
+      required: ['fromToken', 'toToken', 'amount', 'chain'],
+    },
+  },
+
+  'wdk/executeSwap': {
+    name: 'wdk/executeSwap',
+    description:
+      'Execute a swap using a quoteId from wdk/quoteSwap. Requires confirmation.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        quoteId: {
+          type: 'string',
+          description: 'Quote ID from wdk/quoteSwap',
+        },
+        confirmed: {
+          type: 'boolean',
+          description:
+            'Set to true to confirm and execute. Omit for a preview/confirmation prompt.',
+        },
+      },
+      required: ['quoteId'],
     },
   },
 }

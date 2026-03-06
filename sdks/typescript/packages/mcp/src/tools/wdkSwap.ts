@@ -17,6 +17,10 @@ export const wdkSwapInputSchema = z.object({
     .regex(/^\d+(\.\d+)?$/)
     .describe("Amount to swap (e.g., '1.0')"),
   chain: z.string().describe('Chain to execute swap on (e.g., "ethereum", "arbitrum")'),
+  confirmed: z
+    .boolean()
+    .optional()
+    .describe('Set to true to confirm and execute this swap'),
 })
 
 export type WdkSwapInput = z.infer<typeof wdkSwapInputSchema>
@@ -46,7 +50,24 @@ export interface WdkSwapResult {
  * @param wdk - T402WDK instance
  * @returns Swap result
  */
-export async function executeWdkSwap(input: WdkSwapInput, wdk: T402WDK): Promise<WdkSwapResult> {
+export async function executeWdkSwap(
+  input: WdkSwapInput,
+  wdk: T402WDK,
+): Promise<WdkSwapResult | { needsConfirmation: true; summary: string; details: Record<string, string> }> {
+  // Elicitation: return confirmation prompt if not confirmed
+  if (!input.confirmed) {
+    return {
+      needsConfirmation: true,
+      summary: `Swap ${input.amount} ${input.fromToken} to ${input.toToken} on ${input.chain}`,
+      details: {
+        fromToken: input.fromToken,
+        toToken: input.toToken,
+        amount: input.amount,
+        chain: input.chain,
+      },
+    }
+  }
+
   // Parse amount to smallest units (assume 18 decimals for native, 6 for stablecoins)
   const decimals = ['USDC', 'USDT', 'USDT0'].includes(input.fromToken.toUpperCase()) ? 6 : 18
   const amountBigInt = parseUnits(input.amount, decimals)
@@ -81,7 +102,23 @@ export async function executeWdkSwap(input: WdkSwapInput, wdk: T402WDK): Promise
  * @param input - Swap parameters
  * @returns Demo swap result
  */
-export function executeWdkSwapDemo(input: WdkSwapInput): WdkSwapResult {
+export function executeWdkSwapDemo(
+  input: WdkSwapInput,
+): WdkSwapResult | { needsConfirmation: true; summary: string; details: Record<string, string> } {
+  // Elicitation: return confirmation prompt if not confirmed
+  if (!input.confirmed) {
+    return {
+      needsConfirmation: true,
+      summary: `Swap ${input.amount} ${input.fromToken} to ${input.toToken} on ${input.chain}`,
+      details: {
+        fromToken: input.fromToken,
+        toToken: input.toToken,
+        amount: input.amount,
+        chain: input.chain,
+      },
+    }
+  }
+
   // Simulate a swap with ~0.3% slippage
   const inputAmount = parseFloat(input.amount)
   const outputAmount = (inputAmount * 0.997).toFixed(6)

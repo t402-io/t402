@@ -31,6 +31,10 @@ export const payGaslessInputSchema = z.object({
   network: z
     .enum(['ethereum', 'base', 'arbitrum', 'optimism', 'polygon', 'avalanche'])
     .describe('Network to execute gasless payment on (must support ERC-4337)'),
+  confirmed: z
+    .boolean()
+    .optional()
+    .describe('Set to true to confirm and execute this payment'),
 })
 
 export type PayGaslessInput = z.infer<typeof payGaslessInputSchema>
@@ -114,9 +118,18 @@ interface UserOperation {
 export async function executePayGasless(
   input: PayGaslessInput,
   options: PayGaslessOptions,
-): Promise<GaslessPaymentResult> {
+): Promise<GaslessPaymentResult | { needsConfirmation: true; summary: string; details: Record<string, string> }> {
   const { to, amount, token, network } = input
   const { privateKey, bundlerUrl, paymasterUrl: _paymasterUrl, rpcUrl, demoMode } = options
+
+  // Elicitation: return confirmation prompt if not confirmed
+  if (!input.confirmed) {
+    return {
+      needsConfirmation: true,
+      summary: `Send ${amount} ${token} gasless on ${network} to ${to}`,
+      details: { to, amount, token, network },
+    }
+  }
 
   // Validate network supports gasless
   if (!GASLESS_SUPPORTED_NETWORKS.includes(network)) {

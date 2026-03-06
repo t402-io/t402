@@ -169,7 +169,7 @@ class McpServerTest {
     @Test
     void testGetToolDefinitions() {
         List<Tool> tools = McpServer.getToolDefinitions();
-        assertEquals(18, tools.size()); // 6 EVM + 2 SVM + 2 TON + 2 TRON + 2 NEAR + 2 Aptos + 2 Tezos tools
+        assertEquals(22, tools.size()); // 6 EVM + 2 SVM + 2 TON + 2 TRON + 2 NEAR + 2 Aptos + 2 Tezos + 4 Price/Fee tools
 
         List<String> toolNames = tools.stream().map(Tool::getName).toList();
         // EVM tools
@@ -197,6 +197,11 @@ class McpServerTest {
         // Tezos tools
         assertTrue(toolNames.contains("t402/getTezosBalance"));
         assertTrue(toolNames.contains("t402/payTezos"));
+        // Price & Fee tools
+        assertTrue(toolNames.contains("t402/getTokenPrice"));
+        assertTrue(toolNames.contains("t402/getGasPrice"));
+        assertTrue(toolNames.contains("t402/estimatePaymentFee"));
+        assertTrue(toolNames.contains("t402/compareNetworkFees"));
     }
 
     @Test
@@ -290,7 +295,7 @@ class McpServerTest {
         Map<String, Object> result = (Map<String, Object>) response.getResult();
         @SuppressWarnings("unchecked")
         List<Object> tools = (List<Object>) result.get("tools");
-        assertEquals(18, tools.size()); // 6 EVM + 2 SVM + 2 TON + 2 TRON + 2 NEAR + 2 Aptos + 2 Tezos tools
+        assertEquals(22, tools.size()); // 6 EVM + 2 SVM + 2 TON + 2 TRON + 2 NEAR + 2 Aptos + 2 Tezos + 4 Price/Fee tools
     }
 
     @Test
@@ -470,7 +475,7 @@ class McpServerTest {
 
         McpTools tools = new McpTools(config);
 
-        String args = "{\"to\":\"0x1234567890abcdef1234567890abcdef12345678\",\"amount\":\"10\",\"token\":\"USDC\",\"network\":\"base\"}";
+        String args = "{\"to\":\"0x1234567890abcdef1234567890abcdef12345678\",\"amount\":\"10\",\"token\":\"USDC\",\"network\":\"base\",\"confirmed\":true}";
         JsonNode argsNode = Json.MAPPER.readTree(args);
 
         ToolResult result = tools.handleTool("t402/pay", argsNode);
@@ -504,7 +509,7 @@ class McpServerTest {
 
         McpTools tools = new McpTools(config);
 
-        String args = "{\"fromChain\":\"arbitrum\",\"toChain\":\"ethereum\",\"amount\":\"100\",\"recipient\":\"0x1234567890abcdef1234567890abcdef12345678\"}";
+        String args = "{\"fromChain\":\"arbitrum\",\"toChain\":\"ethereum\",\"amount\":\"100\",\"recipient\":\"0x1234567890abcdef1234567890abcdef12345678\",\"confirmed\":true}";
         JsonNode argsNode = Json.MAPPER.readTree(args);
 
         ToolResult result = tools.handleTool("t402/bridge", argsNode);

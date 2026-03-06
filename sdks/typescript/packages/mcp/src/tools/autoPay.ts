@@ -24,6 +24,10 @@ export const autoPayInputSchema = z.object({
     .describe(
       'Preferred chain for payment (e.g., "arbitrum"). If not specified, uses first available.',
     ),
+  confirmed: z
+    .boolean()
+    .optional()
+    .describe('Set to true to confirm and execute this payment'),
 })
 
 export type AutoPayInput = z.infer<typeof autoPayInputSchema>
@@ -58,7 +62,23 @@ export interface AutoPayResult {
  * @param wdk - T402WDK instance
  * @returns AutoPay result
  */
-export async function executeAutoPay(input: AutoPayInput, wdk: T402WDK): Promise<AutoPayResult> {
+export async function executeAutoPay(
+  input: AutoPayInput,
+  wdk: T402WDK,
+): Promise<AutoPayResult | { needsConfirmation: true; summary: string; details: Record<string, string> }> {
+  // Elicitation: return confirmation prompt if not confirmed
+  if (!input.confirmed) {
+    return {
+      needsConfirmation: true,
+      summary: `Auto-pay for ${input.url}${input.maxAmount ? ` (max ${input.maxAmount})` : ''}`,
+      details: {
+        url: input.url,
+        ...(input.maxAmount ? { maxAmount: input.maxAmount } : {}),
+        ...(input.preferredChain ? { preferredChain: input.preferredChain } : {}),
+      },
+    }
+  }
+
   const chains = input.preferredChain ? [input.preferredChain] : ['ethereum', 'arbitrum', 'base']
 
   const { T402Protocol } = await import('@t402/wdk-protocol')
@@ -115,7 +135,22 @@ export async function executeAutoPay(input: AutoPayInput, wdk: T402WDK): Promise
  * @param input - AutoPay parameters
  * @returns Demo autopay result
  */
-export function executeAutoPayDemo(input: AutoPayInput): AutoPayResult {
+export function executeAutoPayDemo(
+  input: AutoPayInput,
+): AutoPayResult | { needsConfirmation: true; summary: string; details: Record<string, string> } {
+  // Elicitation: return confirmation prompt if not confirmed
+  if (!input.confirmed) {
+    return {
+      needsConfirmation: true,
+      summary: `Auto-pay for ${input.url}${input.maxAmount ? ` (max ${input.maxAmount})` : ''}`,
+      details: {
+        url: input.url,
+        ...(input.maxAmount ? { maxAmount: input.maxAmount } : {}),
+        ...(input.preferredChain ? { preferredChain: input.preferredChain } : {}),
+      },
+    }
+  }
+
   return {
     success: true,
     statusCode: 200,

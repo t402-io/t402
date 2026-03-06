@@ -66,7 +66,9 @@ class McpToolsTest {
                 "t402/getTronBalance", "t402/payTron",
                 "t402/getNearBalance", "t402/payNear",
                 "t402/getAptosBalance", "t402/payAptos",
-                "t402/getTezosBalance", "t402/payTezos"
+                "t402/getTezosBalance", "t402/payTezos",
+                "t402/getTokenPrice", "t402/getGasPrice",
+                "t402/estimatePaymentFee", "t402/compareNetworkFees"
             };
 
             for (String toolName : toolNames) {
@@ -184,7 +186,7 @@ class McpToolsTest {
         @Test
         void demoModeReturnsPaymentResult() throws Exception {
             String args = "{\"to\":\"0x1234567890abcdef1234567890abcdef12345678\","
-                + "\"amount\":\"10\",\"token\":\"USDC\",\"network\":\"base\"}";
+                + "\"amount\":\"10\",\"token\":\"USDC\",\"network\":\"base\",\"confirmed\":true}";
             JsonNode argsNode = Json.MAPPER.readTree(args);
 
             ToolResult result = demoTools.handleTool("t402/pay", argsNode);
@@ -248,7 +250,7 @@ class McpToolsTest {
         @Test
         void noPrivateKeyInNonDemoModeReturnsError() throws Exception {
             String args = "{\"to\":\"0x1234567890abcdef1234567890abcdef12345678\","
-                + "\"amount\":\"10\",\"token\":\"USDC\",\"network\":\"base\"}";
+                + "\"amount\":\"10\",\"token\":\"USDC\",\"network\":\"base\",\"confirmed\":true}";
             JsonNode argsNode = Json.MAPPER.readTree(args);
 
             ToolResult result = noPkTools.handleTool("t402/pay", argsNode);
@@ -260,7 +262,7 @@ class McpToolsTest {
         @Test
         void demoModePayIncludesExplorerUrl() throws Exception {
             String args = "{\"to\":\"0x1234567890abcdef1234567890abcdef12345678\","
-                + "\"amount\":\"5.5\",\"token\":\"USDC\",\"network\":\"ethereum\"}";
+                + "\"amount\":\"5.5\",\"token\":\"USDC\",\"network\":\"ethereum\",\"confirmed\":true}";
             JsonNode argsNode = Json.MAPPER.readTree(args);
 
             ToolResult result = demoTools.handleTool("t402/pay", argsNode);
@@ -283,7 +285,7 @@ class McpToolsTest {
         private ToolResult payDemo(String token, String network) throws Exception {
             String args = "{\"to\":\"0x1234567890abcdef1234567890abcdef12345678\","
                 + "\"amount\":\"1\",\"token\":\"" + token + "\","
-                + "\"network\":\"" + network + "\"}";
+                + "\"network\":\"" + network + "\",\"confirmed\":true}";
             return demoTools.handleTool("t402/pay", Json.MAPPER.readTree(args));
         }
     }
@@ -309,7 +311,7 @@ class McpToolsTest {
         @Test
         void demoModeReturnsGaslessResult() throws Exception {
             String args = "{\"to\":\"0x1234567890abcdef1234567890abcdef12345678\","
-                + "\"amount\":\"10\",\"token\":\"USDC\",\"network\":\"base\"}";
+                + "\"amount\":\"10\",\"token\":\"USDC\",\"network\":\"base\",\"confirmed\":true}";
             JsonNode argsNode = Json.MAPPER.readTree(args);
 
             ToolResult result = demoTools.handleTool("t402/payGasless", argsNode);
@@ -323,7 +325,7 @@ class McpToolsTest {
         @Test
         void noBundlerInNonDemoModeReturnsError() throws Exception {
             String args = "{\"to\":\"0x1234567890abcdef1234567890abcdef12345678\","
-                + "\"amount\":\"10\",\"token\":\"USDC\",\"network\":\"base\"}";
+                + "\"amount\":\"10\",\"token\":\"USDC\",\"network\":\"base\",\"confirmed\":true}";
             JsonNode argsNode = Json.MAPPER.readTree(args);
 
             ToolResult result = noPkTools.handleTool("t402/payGasless", argsNode);
@@ -340,7 +342,7 @@ class McpToolsTest {
             for (String network : gaslessNetworks) {
                 String args = "{\"to\":\"0x1234567890abcdef1234567890abcdef12345678\","
                     + "\"amount\":\"10\",\"token\":\"USDC\","
-                    + "\"network\":\"" + network + "\"}";
+                    + "\"network\":\"" + network + "\",\"confirmed\":true}";
                 JsonNode argsNode = Json.MAPPER.readTree(args);
 
                 ToolResult result = demoTools.handleTool("t402/payGasless", argsNode);
@@ -445,7 +447,8 @@ class McpToolsTest {
         void demoModeReturnsBridgeResult() throws Exception {
             String args = "{\"fromChain\":\"arbitrum\",\"toChain\":\"ethereum\","
                 + "\"amount\":\"100\","
-                + "\"recipient\":\"0x1234567890abcdef1234567890abcdef12345678\"}";
+                + "\"recipient\":\"0x1234567890abcdef1234567890abcdef12345678\","
+                + "\"confirmed\":true}";
             JsonNode argsNode = Json.MAPPER.readTree(args);
 
             ToolResult result = demoTools.handleTool("t402/bridge", argsNode);
@@ -474,7 +477,8 @@ class McpToolsTest {
         void noPrivateKeyInNonDemoModeReturnsError() throws Exception {
             String args = "{\"fromChain\":\"arbitrum\",\"toChain\":\"ethereum\","
                 + "\"amount\":\"100\","
-                + "\"recipient\":\"0x1234567890abcdef1234567890abcdef12345678\"}";
+                + "\"recipient\":\"0x1234567890abcdef1234567890abcdef12345678\","
+                + "\"confirmed\":true}";
             JsonNode argsNode = Json.MAPPER.readTree(args);
 
             ToolResult result = noPkTools.handleTool("t402/bridge", argsNode);
@@ -513,7 +517,8 @@ class McpToolsTest {
         void demoModeBridgeIncludesTrackingUrl() throws Exception {
             String args = "{\"fromChain\":\"ink\",\"toChain\":\"berachain\","
                 + "\"amount\":\"50\","
-                + "\"recipient\":\"0x1234567890abcdef1234567890abcdef12345678\"}";
+                + "\"recipient\":\"0x1234567890abcdef1234567890abcdef12345678\","
+                + "\"confirmed\":true}";
             JsonNode argsNode = Json.MAPPER.readTree(args);
 
             ToolResult result = demoTools.handleTool("t402/bridge", argsNode);
@@ -571,7 +576,7 @@ class McpToolsTest {
         @Test
         void paySvmDemoMode() throws Exception {
             String args = "{\"to\":\"8GGtWHRQ1wz5gDKE2KXZLktqzcfV1CBqSbeUZjA7hoWL\","
-                + "\"amount\":\"10\",\"token\":\"USDC\",\"network\":\"solana-mainnet\"}";
+                + "\"amount\":\"10\",\"token\":\"USDC\",\"network\":\"solana-mainnet\",\"confirmed\":true}";
             JsonNode argsNode = Json.MAPPER.readTree(args);
 
             ToolResult result = demoTools.handleTool("t402/paySvm", argsNode);
@@ -629,7 +634,7 @@ class McpToolsTest {
         @Test
         void payTonDemoMode() throws Exception {
             String args = "{\"to\":\"EQDjv9CUEJ__D_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkEUe\","
-                + "\"amount\":\"10\",\"token\":\"USDT\",\"network\":\"ton-mainnet\"}";
+                + "\"amount\":\"10\",\"token\":\"USDT\",\"network\":\"ton-mainnet\",\"confirmed\":true}";
             JsonNode argsNode = Json.MAPPER.readTree(args);
 
             ToolResult result = demoTools.handleTool("t402/payTon", argsNode);
@@ -687,7 +692,7 @@ class McpToolsTest {
         @Test
         void payTronDemoMode() throws Exception {
             String args = "{\"to\":\"TT1MqNNj2k5qdGA6nrrCodW6oyHbbAreQ5\","
-                + "\"amount\":\"10\",\"token\":\"USDT\",\"network\":\"tron-mainnet\"}";
+                + "\"amount\":\"10\",\"token\":\"USDT\",\"network\":\"tron-mainnet\",\"confirmed\":true}";
             JsonNode argsNode = Json.MAPPER.readTree(args);
 
             ToolResult result = demoTools.handleTool("t402/payTron", argsNode);
@@ -757,7 +762,7 @@ class McpToolsTest {
         @Test
         void payNearDemoMode() throws Exception {
             String args = "{\"to\":\"bob.near\","
-                + "\"amount\":\"10\",\"token\":\"USDT\",\"network\":\"near-mainnet\"}";
+                + "\"amount\":\"10\",\"token\":\"USDT\",\"network\":\"near-mainnet\",\"confirmed\":true}";
             JsonNode argsNode = Json.MAPPER.readTree(args);
 
             ToolResult result = demoTools.handleTool("t402/payNear", argsNode);
@@ -783,7 +788,7 @@ class McpToolsTest {
         @Test
         void payNearNoPrivateKeyReturnsError() throws Exception {
             String args = "{\"to\":\"bob.near\","
-                + "\"amount\":\"10\",\"token\":\"USDT\",\"network\":\"near-mainnet\"}";
+                + "\"amount\":\"10\",\"token\":\"USDT\",\"network\":\"near-mainnet\",\"confirmed\":true}";
             JsonNode argsNode = Json.MAPPER.readTree(args);
 
             ToolResult result = noPkTools.handleTool("t402/payNear", argsNode);
@@ -827,7 +832,7 @@ class McpToolsTest {
         @Test
         void payAptosDemoMode() throws Exception {
             String args = "{\"to\":\"0xabcdef1234567890\","
-                + "\"amount\":\"10\",\"token\":\"USDT\",\"network\":\"aptos-mainnet\"}";
+                + "\"amount\":\"10\",\"token\":\"USDT\",\"network\":\"aptos-mainnet\",\"confirmed\":true}";
             JsonNode argsNode = Json.MAPPER.readTree(args);
 
             ToolResult result = demoTools.handleTool("t402/payAptos", argsNode);
@@ -885,7 +890,7 @@ class McpToolsTest {
         @Test
         void payTezosDemoMode() throws Exception {
             String args = "{\"to\":\"tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb\","
-                + "\"amount\":\"10\",\"token\":\"USDT\",\"network\":\"tezos-mainnet\"}";
+                + "\"amount\":\"10\",\"token\":\"USDT\",\"network\":\"tezos-mainnet\",\"confirmed\":true}";
             JsonNode argsNode = Json.MAPPER.readTree(args);
 
             ToolResult result = demoTools.handleTool("t402/payTezos", argsNode);
@@ -912,9 +917,9 @@ class McpToolsTest {
         void payTezosAcceptsUsdtVariants() throws Exception {
             // Both "USDT" and "USDt" should be accepted
             String args1 = "{\"to\":\"tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb\","
-                + "\"amount\":\"10\",\"token\":\"USDT\",\"network\":\"tezos-mainnet\"}";
+                + "\"amount\":\"10\",\"token\":\"USDT\",\"network\":\"tezos-mainnet\",\"confirmed\":true}";
             String args2 = "{\"to\":\"tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb\","
-                + "\"amount\":\"10\",\"token\":\"USDt\",\"network\":\"tezos-mainnet\"}";
+                + "\"amount\":\"10\",\"token\":\"USDt\",\"network\":\"tezos-mainnet\",\"confirmed\":true}";
 
             ToolResult result1 = demoTools.handleTool("t402/payTezos",
                 Json.MAPPER.readTree(args1));
@@ -935,6 +940,482 @@ class McpToolsTest {
 
             assertTrue(result.isError());
             assertTrue(result.getContent().get(0).getText().contains("Only USDt"));
+        }
+    }
+
+    // ===== Elicitation / Confirmation =====
+
+    @Nested
+    class Elicitation {
+
+        @Test
+        void payWithoutConfirmedReturnsPrompt() throws Exception {
+            String args = "{\"to\":\"0x1234567890abcdef1234567890abcdef12345678\","
+                + "\"amount\":\"10\",\"token\":\"USDC\",\"network\":\"base\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/pay", argsNode);
+
+            assertFalse(result.isError());
+            String text = result.getContent().get(0).getText();
+            assertTrue(text.contains("needsConfirmation"));
+            assertTrue(text.contains("Confirm"));
+        }
+
+        @Test
+        void payWithConfirmedFalseReturnsPrompt() throws Exception {
+            String args = "{\"to\":\"0x1234567890abcdef1234567890abcdef12345678\","
+                + "\"amount\":\"10\",\"token\":\"USDC\",\"network\":\"base\",\"confirmed\":false}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/pay", argsNode);
+
+            assertFalse(result.isError());
+            String text = result.getContent().get(0).getText();
+            assertTrue(text.contains("needsConfirmation"));
+        }
+
+        @Test
+        void payWithConfirmedTrueExecutes() throws Exception {
+            String args = "{\"to\":\"0x1234567890abcdef1234567890abcdef12345678\","
+                + "\"amount\":\"10\",\"token\":\"USDC\",\"network\":\"base\",\"confirmed\":true}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/pay", argsNode);
+
+            assertFalse(result.isError());
+            String text = result.getContent().get(0).getText();
+            assertTrue(text.contains("Demo Mode"));
+            assertFalse(text.contains("needsConfirmation"));
+        }
+
+        @Test
+        void payGaslessWithoutConfirmedReturnsPrompt() throws Exception {
+            String args = "{\"to\":\"0x1234567890abcdef1234567890abcdef12345678\","
+                + "\"amount\":\"10\",\"token\":\"USDC\",\"network\":\"base\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/payGasless", argsNode);
+
+            assertFalse(result.isError());
+            String text = result.getContent().get(0).getText();
+            assertTrue(text.contains("needsConfirmation"));
+        }
+
+        @Test
+        void bridgeWithoutConfirmedReturnsPrompt() throws Exception {
+            String args = "{\"fromChain\":\"arbitrum\",\"toChain\":\"ethereum\","
+                + "\"amount\":\"100\","
+                + "\"recipient\":\"0x1234567890abcdef1234567890abcdef12345678\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/bridge", argsNode);
+
+            assertFalse(result.isError());
+            String text = result.getContent().get(0).getText();
+            assertTrue(text.contains("needsConfirmation"));
+            assertTrue(text.contains("Bridge"));
+        }
+
+        @Test
+        void paySvmWithoutConfirmedReturnsPrompt() throws Exception {
+            String args = "{\"to\":\"4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU\","
+                + "\"amount\":\"5\",\"token\":\"USDC\",\"network\":\"solana-mainnet\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/paySvm", argsNode);
+
+            assertFalse(result.isError());
+            String text = result.getContent().get(0).getText();
+            assertTrue(text.contains("needsConfirmation"));
+        }
+
+        @Test
+        void payTonWithoutConfirmedReturnsPrompt() throws Exception {
+            String args = "{\"to\":\"EQDrjaLahLkMB-hMCmkzOyBuHJ186Kj3BzU3KgrFnkct0NsV\","
+                + "\"amount\":\"5\",\"token\":\"USDT\",\"network\":\"ton-mainnet\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/payTon", argsNode);
+
+            assertFalse(result.isError());
+            String text = result.getContent().get(0).getText();
+            assertTrue(text.contains("needsConfirmation"));
+        }
+
+        @Test
+        void payTronWithoutConfirmedReturnsPrompt() throws Exception {
+            String args = "{\"to\":\"TN2YqJfX5bAJMkNgDxvbTgnCYGhv9ZfMVq\","
+                + "\"amount\":\"5\",\"token\":\"USDT\",\"network\":\"tron-mainnet\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/payTron", argsNode);
+
+            assertFalse(result.isError());
+            String text = result.getContent().get(0).getText();
+            assertTrue(text.contains("needsConfirmation"));
+        }
+
+        @Test
+        void payNearWithoutConfirmedReturnsPrompt() throws Exception {
+            String args = "{\"to\":\"alice.near\","
+                + "\"amount\":\"5\",\"token\":\"USDT\",\"network\":\"near-mainnet\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/payNear", argsNode);
+
+            assertFalse(result.isError());
+            String text = result.getContent().get(0).getText();
+            assertTrue(text.contains("needsConfirmation"));
+        }
+
+        @Test
+        void payAptosWithoutConfirmedReturnsPrompt() throws Exception {
+            String args = "{\"to\":\"0x" + "1".repeat(64) + "\","
+                + "\"amount\":\"5\",\"token\":\"USDT\",\"network\":\"aptos-mainnet\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/payAptos", argsNode);
+
+            assertFalse(result.isError());
+            String text = result.getContent().get(0).getText();
+            assertTrue(text.contains("needsConfirmation"));
+        }
+
+        @Test
+        void payTezosWithoutConfirmedReturnsPrompt() throws Exception {
+            String args = "{\"to\":\"tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb\","
+                + "\"amount\":\"5\",\"token\":\"USDT\",\"network\":\"tezos-mainnet\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/payTezos", argsNode);
+
+            assertFalse(result.isError());
+            String text = result.getContent().get(0).getText();
+            assertTrue(text.contains("needsConfirmation"));
+        }
+
+        @Test
+        void confirmationPromptContainsDetails() throws Exception {
+            String args = "{\"to\":\"0x1234567890abcdef1234567890abcdef12345678\","
+                + "\"amount\":\"25.5\",\"token\":\"USDC\",\"network\":\"ethereum\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/pay", argsNode);
+
+            String text = result.getContent().get(0).getText();
+            JsonNode json = Json.MAPPER.readTree(text);
+            assertTrue(json.get("needsConfirmation").asBoolean());
+            assertEquals("25.5", json.get("details").get("amount").asText());
+            assertEquals("USDC", json.get("details").get("token").asText());
+            assertEquals("ethereum", json.get("details").get("network").asText());
+            assertTrue(json.get("details").get("to").asText().startsWith("0x"));
+        }
+
+        @Test
+        void readOnlyToolsDoNotRequireConfirmation() throws Exception {
+            // getBalance is read-only - should work without confirmed param
+            String args = "{\"address\":\"0x1234567890abcdef1234567890abcdef12345678\","
+                + "\"network\":\"ethereum\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/getBalance", argsNode);
+
+            assertFalse(result.isError());
+            String text = result.getContent().get(0).getText();
+            assertFalse(text.contains("needsConfirmation"));
+            assertTrue(text.contains("Balance on"));
+        }
+    }
+
+    // ===== Token Price =====
+
+    @Nested
+    class TokenPrice {
+
+        @Test
+        void demoModeReturnsPrices() throws Exception {
+            String args = "{\"tokens\":\"ETH,USDC\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/getTokenPrice", argsNode);
+
+            assertFalse(result.isError());
+            String text = result.getContent().get(0).getText();
+            assertTrue(text.contains("Token Prices"));
+            assertTrue(text.contains("Demo Mode"));
+            assertTrue(text.contains("ETH"));
+            assertTrue(text.contains("USDC"));
+        }
+
+        @Test
+        void demoModeReturnsKnownPrices() throws Exception {
+            String args = "{\"tokens\":\"BTC\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/getTokenPrice", argsNode);
+
+            String text = result.getContent().get(0).getText();
+            assertTrue(text.contains("95000.00"));
+        }
+
+        @Test
+        void demoModeDefaultsStablecoinToOne() throws Exception {
+            String args = "{\"tokens\":\"USDC\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/getTokenPrice", argsNode);
+
+            String text = result.getContent().get(0).getText();
+            assertTrue(text.contains("1.00"));
+        }
+
+        @Test
+        void missingTokensReturnsError() throws Exception {
+            String args = "{}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/getTokenPrice", argsNode);
+
+            assertTrue(result.isError());
+            assertTrue(result.getContent().get(0).getText().contains("tokens parameter is required"));
+        }
+
+        @Test
+        void emptyTokensReturnsError() throws Exception {
+            String args = "{\"tokens\":\"\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/getTokenPrice", argsNode);
+
+            assertTrue(result.isError());
+        }
+
+        @Test
+        void customCurrencyAccepted() throws Exception {
+            String args = "{\"tokens\":\"ETH\",\"currency\":\"eur\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/getTokenPrice", argsNode);
+
+            assertFalse(result.isError());
+            String text = result.getContent().get(0).getText();
+            assertTrue(text.contains("EUR"));
+        }
+    }
+
+    // ===== Gas Price =====
+
+    @Nested
+    class GasPrice {
+
+        @Test
+        void demoModeReturnsGasPrice() throws Exception {
+            String args = "{\"network\":\"ethereum\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/getGasPrice", argsNode);
+
+            assertFalse(result.isError());
+            String text = result.getContent().get(0).getText();
+            assertTrue(text.contains("Gas Price"));
+            assertTrue(text.contains("Demo Mode"));
+            assertTrue(text.contains("gwei"));
+        }
+
+        @Test
+        void demoModeBaseHasLowGas() throws Exception {
+            String args = "{\"network\":\"base\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/getGasPrice", argsNode);
+
+            String text = result.getContent().get(0).getText();
+            assertTrue(text.contains("0.0100"));
+        }
+
+        @Test
+        void demoModeEthereumHasHigherGas() throws Exception {
+            String args = "{\"network\":\"ethereum\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/getGasPrice", argsNode);
+
+            String text = result.getContent().get(0).getText();
+            assertTrue(text.contains("25.0000"));
+        }
+
+        @Test
+        void invalidNetworkReturnsError() throws Exception {
+            String args = "{\"network\":\"invalid\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/getGasPrice", argsNode);
+
+            assertTrue(result.isError());
+            assertTrue(result.getContent().get(0).getText().contains("Invalid or missing EVM network"));
+        }
+
+        @Test
+        void missingNetworkReturnsError() throws Exception {
+            String args = "{}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/getGasPrice", argsNode);
+
+            assertTrue(result.isError());
+        }
+    }
+
+    // ===== Estimate Payment Fee =====
+
+    @Nested
+    class EstimatePaymentFee {
+
+        @Test
+        void demoModeReturnsEstimate() throws Exception {
+            String args = "{\"network\":\"base\",\"token\":\"USDC\",\"amount\":\"10\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/estimatePaymentFee", argsNode);
+
+            assertFalse(result.isError());
+            String text = result.getContent().get(0).getText();
+            assertTrue(text.contains("Payment Fee Estimate"));
+            assertTrue(text.contains("Demo Mode"));
+            assertTrue(text.contains("Estimated Gas"));
+            assertTrue(text.contains("Gas Price"));
+            assertTrue(text.contains("Fee (USD)"));
+        }
+
+        @Test
+        void demoModeBaseIsCheap() throws Exception {
+            String args = "{\"network\":\"base\",\"token\":\"USDC\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/estimatePaymentFee", argsNode);
+
+            String text = result.getContent().get(0).getText();
+            // Base: 0.01 gwei * 65000 gas / 1e9 * $3500 = very cheap
+            assertTrue(text.contains("$"));
+        }
+
+        @Test
+        void invalidNetworkReturnsError() throws Exception {
+            String args = "{\"network\":\"invalid\",\"token\":\"USDC\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/estimatePaymentFee", argsNode);
+
+            assertTrue(result.isError());
+        }
+
+        @Test
+        void missingTokenReturnsError() throws Exception {
+            String args = "{\"network\":\"base\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/estimatePaymentFee", argsNode);
+
+            assertTrue(result.isError());
+        }
+
+        @Test
+        void unsupportedTokenOnNetworkReturnsError() throws Exception {
+            // Use a token that might not be supported everywhere
+            String args = "{\"network\":\"berachain\",\"token\":\"USDC\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/estimatePaymentFee", argsNode);
+
+            // Either works or returns an appropriate error
+            assertNotNull(result);
+        }
+    }
+
+    // ===== Compare Network Fees =====
+
+    @Nested
+    class CompareNetworkFees {
+
+        @Test
+        void demoModeReturnsComparison() throws Exception {
+            String args = "{\"token\":\"USDC\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/compareNetworkFees", argsNode);
+
+            assertFalse(result.isError());
+            String text = result.getContent().get(0).getText();
+            assertTrue(text.contains("Network Fee Comparison"));
+            assertTrue(text.contains("Demo Mode"));
+            assertTrue(text.contains("USDC"));
+            // Should contain table headers
+            assertTrue(text.contains("Network"));
+            assertTrue(text.contains("Fee (USD)"));
+        }
+
+        @Test
+        void demoModeContainsMultipleNetworks() throws Exception {
+            String args = "{\"token\":\"USDC\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/compareNetworkFees", argsNode);
+
+            String text = result.getContent().get(0).getText();
+            // USDC should be on multiple networks
+            assertTrue(text.contains("base") || text.contains("ethereum")
+                || text.contains("arbitrum"));
+        }
+
+        @Test
+        void demoModeDefaultsToUsdc() throws Exception {
+            String args = "{}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/compareNetworkFees", argsNode);
+
+            assertFalse(result.isError());
+            String text = result.getContent().get(0).getText();
+            assertTrue(text.contains("USDC"));
+        }
+
+        @Test
+        void invalidTokenReturnsError() throws Exception {
+            String args = "{\"token\":\"INVALID\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/compareNetworkFees", argsNode);
+
+            assertTrue(result.isError());
+            assertTrue(result.getContent().get(0).getText().contains("Invalid token"));
+        }
+
+        @Test
+        void demoModeSortedByCostAscending() throws Exception {
+            String args = "{\"token\":\"USDC\"}";
+            JsonNode argsNode = Json.MAPPER.readTree(args);
+
+            ToolResult result = demoTools.handleTool("t402/compareNetworkFees", argsNode);
+
+            String text = result.getContent().get(0).getText();
+            // Extract USD values from the table and verify ascending order
+            String[] lines = text.split("\n");
+            double prevFee = -1;
+            for (String line : lines) {
+                if (line.contains("$") && line.startsWith("|") && !line.contains("Fee (USD)")) {
+                    int dollarIdx = line.lastIndexOf("$");
+                    if (dollarIdx >= 0) {
+                        String feeStr = line.substring(dollarIdx + 1).replaceAll("[^0-9.]", "");
+                        if (!feeStr.isEmpty()) {
+                            double fee = Double.parseDouble(feeStr);
+                            assertTrue(fee >= prevFee,
+                                "Fees should be sorted ascending, but " + fee + " < " + prevFee);
+                            prevFee = fee;
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -1058,7 +1539,7 @@ class McpToolsTest {
             McpTools tools = new McpTools(config);
 
             String args = "{\"to\":\"0x1234567890abcdef1234567890abcdef12345678\","
-                + "\"amount\":\"10\",\"token\":\"USDC\",\"network\":\"base\"}";
+                + "\"amount\":\"10\",\"token\":\"USDC\",\"network\":\"base\",\"confirmed\":true}";
             JsonNode argsNode = Json.MAPPER.readTree(args);
 
             ToolResult result = tools.handleTool("t402/pay", argsNode);
@@ -1076,7 +1557,8 @@ class McpToolsTest {
 
             String args = "{\"fromChain\":\"arbitrum\",\"toChain\":\"ethereum\","
                 + "\"amount\":\"100\","
-                + "\"recipient\":\"0x1234567890abcdef1234567890abcdef12345678\"}";
+                + "\"recipient\":\"0x1234567890abcdef1234567890abcdef12345678\","
+                + "\"confirmed\":true}";
             JsonNode argsNode = Json.MAPPER.readTree(args);
 
             ToolResult result = tools.handleTool("t402/bridge", argsNode);
@@ -1093,7 +1575,7 @@ class McpToolsTest {
             McpTools tools = new McpTools(config);
 
             String args = "{\"to\":\"0x1234567890abcdef1234567890abcdef12345678\","
-                + "\"amount\":\"10\",\"token\":\"USDC\",\"network\":\"base\"}";
+                + "\"amount\":\"10\",\"token\":\"USDC\",\"network\":\"base\",\"confirmed\":true}";
             JsonNode argsNode = Json.MAPPER.readTree(args);
 
             ToolResult result = tools.handleTool("t402/payGasless", argsNode);

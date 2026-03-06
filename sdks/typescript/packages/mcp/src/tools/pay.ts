@@ -42,6 +42,10 @@ export const payInputSchema = z.object({
     ])
     .describe('Network to execute payment on'),
   memo: z.string().optional().describe('Optional memo/reference for the payment'),
+  confirmed: z
+    .boolean()
+    .optional()
+    .describe('Set to true to confirm and execute this payment'),
 })
 
 export type PayInput = z.infer<typeof payInputSchema>
@@ -89,9 +93,21 @@ export interface PayOptions {
 /**
  * Execute pay tool
  */
-export async function executePay(input: PayInput, options: PayOptions): Promise<PaymentResult> {
+export async function executePay(
+  input: PayInput,
+  options: PayOptions,
+): Promise<PaymentResult | { needsConfirmation: true; summary: string; details: Record<string, string> }> {
   const { to, amount, token, network, memo: _memo } = input
   const { privateKey, rpcUrl, demoMode } = options
+
+  // Elicitation: return confirmation prompt if not confirmed
+  if (!input.confirmed) {
+    return {
+      needsConfirmation: true,
+      summary: `Send ${amount} ${token} on ${network} to ${to}`,
+      details: { to, amount, token, network },
+    }
+  }
 
   // Validate token support on network
   if (!supportsToken(network, token)) {
