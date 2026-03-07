@@ -13,7 +13,7 @@ Install T402 packages for your preferred language.
 pnpm add @t402/core @t402/evm
 
 # All mechanism packages
-pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/tron @t402/near @t402/aptos @t402/tezos @t402/polkadot @t402/stacks @t402/cosmos
+pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/tron @t402/near @t402/aptos @t402/tezos @t402/polkadot @t402/stacks @t402/cosmos @t402/stellar
 
 # Full stack with WDK
 pnpm add @t402/core @t402/evm @t402/wdk @t402/wdk-gasless @t402/wdk-bridge @t402/mcp
@@ -36,6 +36,7 @@ pnpm add @t402/core @t402/evm @t402/wdk @t402/wdk-gasless @t402/wdk-bridge @t402
 | `@t402/polkadot` | Polkadot Asset Hub | `pnpm add @t402/polkadot` |
 | `@t402/stacks` | Stacks (Bitcoin L2) | `pnpm add @t402/stacks` |
 | `@t402/cosmos` | Cosmos (Noble) | `pnpm add @t402/cosmos` |
+| `@t402/stellar` | Stellar | `pnpm add @t402/stellar` |
 
 **WDK Integration**
 
@@ -85,7 +86,7 @@ poetry add t402
 
 The Python package includes:
 - Core protocol types
-- Multi-chain mechanisms (EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos)
+- Multi-chain mechanisms (EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos, Stellar)
 - FastAPI, Flask, Django, and Starlette integrations
 - HTTPX client wrapper
 
@@ -93,12 +94,12 @@ The Python package includes:
 
 ```bash
 # Install
-go get github.com/t402-io/t402/sdks/go@v1.11.1
+go get github.com/t402-io/t402/sdks/go@v1.12.1
 ```
 
 The Go module includes:
 - Core protocol types
-- All 10 blockchain mechanisms (EVM, SVM, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos)
+- All 13 blockchain mechanisms (EVM, SVM, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos, Stellar, BTC, Upto)
 - HTTP middleware (net/http, Gin, Echo, Chi)
 - MCP server for AI agents
 
@@ -110,19 +111,19 @@ The Go module includes:
 <dependency>
     <groupId>io.t402</groupId>
     <artifactId>t402</artifactId>
-    <version>1.11.1</version>
+    <version>1.12.1</version>
 </dependency>
 ```
 </Tabs.Tab>
 <Tabs.Tab>
 ```groovy
-implementation 'io.t402:t402:1.11.1'
+implementation 'io.t402:t402:1.12.1'
 ```
 </Tabs.Tab>
 </Tabs>
 
 The Java SDK includes:
-- Multi-chain support (EVM, SVM, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos)
+- Multi-chain support (EVM, SVM, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos, Stellar)
 - Spring Boot 3.x auto-configuration
 - HTTP frameworks (Servlet, Spring, WebFlux, Micronaut, JAX-RS)
 - ERC-4337 Account Abstraction

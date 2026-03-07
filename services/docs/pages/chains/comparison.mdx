@@ -22,6 +22,7 @@ This page provides a comprehensive comparison of all supported blockchain mechan
 | Polkadot | exact-direct | Asset Hub | ✅ | ✅ | ✅ | ✅ |
 | Stacks | exact-direct | SIP-010 | ✅ | ✅ | ✅ | ✅ |
 | Cosmos | exact-direct | Bank MsgSend | ✅ | ✅ | ✅ | ✅ |
+| Stellar | exact | Soroban SEP-41 | ✅ | ✅ | ✅ | ✅ |
 
 ## Network Identifiers (CAIP-2)
 
@@ -53,6 +54,7 @@ This page provides a comprehensive comparison of all supported blockchain mechan
 | Polkadot | `polkadot:68d56f15f85d3136970ec16946040bc1` | `polkadot:e143f23803ac50e8f6f8e62695d1ce9e` | USDT Asset Hub |
 | Stacks | `stacks:1` | `stacks:2147483648` | sUSDC SIP-010 |
 | Cosmos (Noble) | `cosmos:noble-1` | `cosmos:grand-1` | USDC native |
+| Stellar | `stellar:pubnet` | `stellar:testnet` | USDC Soroban |
 
 ## Choosing a Scheme
 
@@ -62,7 +64,7 @@ T402 supports three payment schemes. Choose based on your use case:
 
 **Best for:** Fixed-price resources, one-time payments
 
-The client signs an off-chain authorization. The facilitator executes the transfer on-chain. Supported on EVM (via EIP-3009), Solana, TON, and TRON.
+The client signs an off-chain authorization. The facilitator executes the transfer on-chain. Supported on EVM (via EIP-3009), Solana, TON, TRON, and Stellar.
 
 ```
 Client signs → Facilitator settles on-chain
@@ -103,6 +105,7 @@ Use this decision tree to pick the right mechanism:
    - Polkadot → Use `@t402/polkadot`
    - Stacks → Use `@t402/stacks`
    - Cosmos/Noble → Use `@t402/cosmos`
+   - Stellar → Use `@t402/stellar`
 
 2. **Do you need usage-based billing?**
    - Yes → Use the `upto` scheme (available on EVM, Solana, TON, TRON, NEAR)
@@ -139,6 +142,6 @@ Use this decision tree to pick the right mechanism:
 | SDK | Version | Registry |
 |-----|---------|----------|
 | TypeScript | 2.7.1 | [npm](https://www.npmjs.com/org/t402) |
-| Go | 1.11.1 | [pkg.go.dev](https://pkg.go.dev/github.com/t402-io/t402/sdks/go) |
-| Python | 1.11.1 | [PyPI](https://pypi.org/project/t402) |
-| Java | 1.11.1 | [Maven Central](https://central.sonatype.com/artifact/io.t402/t402) |
+| Go | 1.12.1 | [pkg.go.dev](https://pkg.go.dev/github.com/t402-io/t402/sdks/go) |
+| Python | 1.12.1 | [PyPI](https://pypi.org/project/t402) |
+| Java | 1.12.1 | [Maven Central](https://central.sonatype.com/artifact/io.t402/t402) |
