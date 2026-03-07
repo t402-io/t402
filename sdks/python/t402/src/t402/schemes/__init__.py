@@ -207,6 +207,16 @@ from t402.schemes.cosmos import (
     SCHEME_EXACT_DIRECT as COSMOS_SCHEME_EXACT_DIRECT,
 )
 
+# Stellar Schemes
+from t402.schemes.stellar import (
+    ExactStellarClientScheme,
+    ExactStellarServerScheme,
+    ExactStellarFacilitatorScheme,
+    StellarSigner,
+    FacilitatorStellarSigner,
+    SCHEME_EXACT as STELLAR_SCHEME_EXACT,
+)
+
 # BTC / Lightning Schemes
 from t402.schemes.btc import (
     # On-chain
@@ -369,6 +379,13 @@ __all__ = [
     "ClientCosmosSigner",
     "FacilitatorCosmosSigner",
     "COSMOS_SCHEME_EXACT_DIRECT",
+    # Stellar Schemes
+    "ExactStellarClientScheme",
+    "ExactStellarServerScheme",
+    "ExactStellarFacilitatorScheme",
+    "StellarSigner",
+    "FacilitatorStellarSigner",
+    "STELLAR_SCHEME_EXACT",
     # BTC On-chain Schemes
     "ExactBtcClientScheme",
     "ExactBtcServerScheme",

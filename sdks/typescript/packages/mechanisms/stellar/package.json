@@ -1,0 +1,105 @@
+{
+  "name": "@t402/stellar",
+  "version": "2.7.1",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/cjs/index.d.ts",
+  "scripts": {
+    "start": "tsx --env-file=.env index.ts",
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "watch": "tsc --watch",
+    "format": "prettier -c .prettierrc --write \"**/*.{ts,js,cjs,json,md}\"",
+    "format:check": "prettier -c .prettierrc --check \"**/*.{ts,js,cjs,json,md}\"",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint ."
+  },
+  "keywords": [
+    "t402",
+    "payment",
+    "protocol",
+    "stellar",
+    "blockchain",
+    "soroban"
+  ],
+  "license": "Apache-2.0",
+  "author": "T402 Team",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/t402-io/t402.git",
+    "directory": "sdks/typescript/packages/mechanisms/stellar"
+  },
+  "description": "t402 Payment Protocol Stellar Implementation",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^25.3.3",
+    "@typescript-eslint/eslint-plugin": "^8.56.1",
+    "@typescript-eslint/parser": "^8.56.1",
+    "eslint": "^10.0.2",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsdoc": "^62.7.1",
+    "eslint-plugin-prettier": "^5.5.5",
+    "glob": "^13.0.6",
+    "prettier": "3.8.1",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "@t402/core": "workspace:*",
+    "@stellar/stellar-sdk": "^13.1.0"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.mts",
+        "default": "./dist/esm/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    },
+    "./exact/client": {
+      "import": {
+        "types": "./dist/esm/exact/client/index.d.mts",
+        "default": "./dist/esm/exact/client/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/exact/client/index.d.ts",
+        "default": "./dist/cjs/exact/client/index.js"
+      }
+    },
+    "./exact/server": {
+      "import": {
+        "types": "./dist/esm/exact/server/index.d.mts",
+        "default": "./dist/esm/exact/server/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/exact/server/index.d.ts",
+        "default": "./dist/cjs/exact/server/index.js"
+      }
+    },
+    "./exact/facilitator": {
+      "import": {
+        "types": "./dist/esm/exact/facilitator/index.d.mts",
+        "default": "./dist/esm/exact/facilitator/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/exact/facilitator/index.d.ts",
+        "default": "./dist/cjs/exact/facilitator/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "homepage": "https://t402.io",
+  "publishConfig": {
+    "access": "public"
+  }
+}

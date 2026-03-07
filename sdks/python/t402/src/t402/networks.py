@@ -47,6 +47,9 @@ StacksNetworks = Literal["stacks:1", "stacks:2147483648"]
 # Cosmos Networks (CAIP-2 format)
 CosmosNetworks = Literal["cosmos:noble-1", "cosmos:grand-1"]
 
+# Stellar Networks (CAIP-2 format)
+StellarNetworks = Literal["stellar:pubnet", "stellar:testnet"]
+
 # Legacy SVM network identifiers (V1 format)
 SVMNetworksV1 = Literal["solana", "solana-devnet", "solana-testnet"]
 
@@ -54,7 +57,7 @@ SVMNetworksV1 = Literal["solana", "solana-devnet", "solana-testnet"]
 SupportedNetworks = Union[
     EVMNetworks, TONNetworks, TRONNetworks, SVMNetworks,
     NEARNetworks, AptosNetworks, TezosNetworks, PolkadotNetworks,
-    StacksNetworks, CosmosNetworks,
+    StacksNetworks, CosmosNetworks, StellarNetworks,
 ]
 
 
@@ -70,7 +73,8 @@ def get_all_supported_networks() -> tuple[str, ...]:
     polkadot = get_args(PolkadotNetworks)
     stacks = get_args(StacksNetworks)
     cosmos = get_args(CosmosNetworks)
-    return evm + ton + tron + svm + near + aptos + tezos + polkadot + stacks + cosmos
+    stellar = get_args(StellarNetworks)
+    return evm + ton + tron + svm + near + aptos + tezos + polkadot + stacks + cosmos + stellar
 
 
 EVM_NETWORK_TO_CHAIN_ID = {
@@ -172,6 +176,21 @@ SVM_V1_TO_V2_MAP = {
 }
 
 
+# Stellar Network configurations
+STELLAR_NETWORKS = {
+    "stellar:pubnet": {
+        "name": "Stellar Pubnet",
+        "horizon_url": "https://horizon.stellar.org",
+        "is_testnet": False,
+    },
+    "stellar:testnet": {
+        "name": "Stellar Testnet",
+        "horizon_url": "https://horizon-testnet.stellar.org",
+        "is_testnet": True,
+    },
+}
+
+
 def is_ton_network(network: str) -> bool:
     """Check if a network is a TON network."""
     return network.startswith("ton:")
@@ -222,8 +241,13 @@ def is_cosmos_network(network: str) -> bool:
     return network.startswith("cosmos:")
 
 
+def is_stellar_network(network: str) -> bool:
+    """Check if a network is a Stellar network."""
+    return network.startswith("stellar:")
+
+
 def get_network_type(network: str) -> str:
-    """Get the network type (ton, tron, evm, svm, near, aptos, tezos, polkadot, stacks, cosmos, or unknown)."""
+    """Get the network type (ton, tron, evm, svm, near, aptos, tezos, polkadot, stacks, cosmos, stellar, or unknown)."""
     if is_ton_network(network):
         return "ton"
     if is_tron_network(network):
@@ -242,6 +266,8 @@ def get_network_type(network: str) -> str:
         return "stacks"
     if is_cosmos_network(network):
         return "cosmos"
+    if is_stellar_network(network):
+        return "stellar"
     if is_evm_network(network):
         return "evm"
     return "unknown"
