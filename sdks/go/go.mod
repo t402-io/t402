@@ -3,7 +3,7 @@ module github.com/t402-io/t402/sdks/go
 go 1.25.0
 
 require (
-	github.com/ethereum/go-ethereum v1.17.0
+	github.com/ethereum/go-ethereum v1.17.1
 	github.com/gagliardetto/binary v0.8.0
 	github.com/gagliardetto/solana-go v1.14.0
 	github.com/gin-gonic/gin v1.12.0
@@ -20,7 +20,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.52.12
 	github.com/labstack/echo/v4 v4.15.1
 	github.com/mr-tron/base58 v1.2.0
-	github.com/xssnick/tonutils-go v1.15.5
+	github.com/xssnick/tonutils-go v1.16.0
 	golang.org/x/crypto v0.48.0
 )
 
@@ -46,7 +46,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set/v2 v2.6.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
-	github.com/ethereum/c-kzg-4844/v2 v2.1.5 // indirect
+	github.com/ethereum/c-kzg-4844/v2 v2.1.6 // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.12 // indirect
 	github.com/gagliardetto/treeout v0.1.4 // indirect
@@ -81,7 +81,7 @@ require (
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible // indirect
 	github.com/streamingfast/logging v0.0.0-20230608130331-f22c91403091 // indirect
-	github.com/supranational/blst v0.3.16-0.20250831170142-f48500c1fdbe // indirect
+	github.com/supranational/blst v0.3.16 // indirect
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
