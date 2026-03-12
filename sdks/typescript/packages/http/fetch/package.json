@@ -33,10 +33,10 @@
   "description": "t402 Payment Protocol Fetch Extension",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/node": "^25.3.3",
+    "@types/node": "^25.3.5",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
-    "eslint": "^10.0.2",
+    "eslint": "^10.0.3",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jsdoc": "^62.7.1",
     "eslint-plugin-prettier": "^5.5.5",
