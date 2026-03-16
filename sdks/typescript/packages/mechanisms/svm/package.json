@@ -34,12 +34,12 @@
   "devDependencies": {
     "@scure/base": "^1.2.6",
     "@eslint/js": "^10.0.1",
-    "@types/node": "^25.3.5",
-    "@typescript-eslint/eslint-plugin": "^8.56.1",
-    "@typescript-eslint/parser": "^8.56.1",
+    "@types/node": "^25.5.0",
+    "@typescript-eslint/eslint-plugin": "^8.57.0",
+    "@typescript-eslint/parser": "^8.57.0",
     "eslint": "^10.0.3",
     "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-jsdoc": "^62.7.1",
+    "eslint-plugin-jsdoc": "^62.8.0",
     "eslint-plugin-prettier": "^5.5.5",
     "glob": "^13.0.6",
     "prettier": "3.8.1",
@@ -51,10 +51,10 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
-    "@solana-program/compute-budget": "^0.14.0",
+    "@solana-program/compute-budget": "^0.15.0",
     "@solana-program/token": "^0.12.0",
     "@solana-program/token-2022": "^0.9.0",
-    "@solana/kit": "^6.1.0",
+    "@solana/kit": "^6.3.1",
     "@t402/core": "workspace:*"
   },
   "exports": {
