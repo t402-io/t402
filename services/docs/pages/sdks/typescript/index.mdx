@@ -1,37 +1,38 @@
 # TypeScript SDK
 
-The T402 TypeScript SDK provides comprehensive support for HTTP-native stablecoin payments across 10 blockchain families.
+The T402 TypeScript SDK provides comprehensive support for HTTP-native stablecoin payments across 11 blockchain families.
 
 import { Cards, FileTree, Callout } from 'nextra/components'
 
 <Callout type="info">
-  **v2.7.1 Released** - 37 packages under `@t402` on npm, with ERC-8004 Trustless Agents and expanded multi-chain support.
+  **v2.8.0 Released** - 39 packages under `@t402` on npm, with Stellar support, ERC-8004 Trustless Agents and expanded multi-chain support.
 </Callout>
 
 ## Core Packages
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| `@t402/core` | 2.7.1 | Protocol types and HTTP utilities |
-| `@t402/extensions` | 2.7.1 | Protocol extensions and helpers |
+| `@t402/core` | 2.8.0 | Protocol types and HTTP utilities |
+| `@t402/extensions` | 2.8.0 | Protocol extensions and helpers |
 
 ## Blockchain Mechanisms
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| `@t402/evm` | 2.7.1 | EVM chains (Ethereum, Arbitrum, Base, etc.) with EIP-3009 |
-| `@t402/evm-core` | 2.7.1 | EVM types and utilities without viem dependency |
-| `@t402/svm` | 2.7.1 | Solana blockchain with SPL token transfers |
-| `@t402/ton` | 2.7.1 | TON blockchain with USDT Jetton support |
-| `@t402/tron` | 2.7.1 | TRON blockchain with TRC-20 USDT |
-| `@t402/near` | 2.7.1 | NEAR Protocol with NEP-141 USDT |
-| `@t402/aptos` | 2.7.1 | Aptos blockchain with Fungible Asset USDT |
-| `@t402/tezos` | 2.7.1 | Tezos blockchain with FA2 USDt |
-| `@t402/polkadot` | 2.7.1 | Polkadot Asset Hub with USDT |
-| `@t402/stacks` | 2.7.1 | Stacks (Bitcoin L2) with SIP-010 USDT |
-| `@t402/cosmos` | 2.7.1 | Cosmos (Noble) with bank MsgSend |
-| `@t402/btc` | 2.7.1 | Bitcoin with Lightning Network |
-| `@t402/erc8004` | 2.7.1 | ERC-8004 Trustless Agents identity and reputation |
+| `@t402/evm` | 2.8.0 | EVM chains (Ethereum, Arbitrum, Base, etc.) with EIP-3009 |
+| `@t402/evm-core` | 2.8.0 | EVM types and utilities without viem dependency |
+| `@t402/svm` | 2.8.0 | Solana blockchain with SPL token transfers |
+| `@t402/ton` | 2.8.0 | TON blockchain with USDT Jetton support |
+| `@t402/tron` | 2.8.0 | TRON blockchain with TRC-20 USDT |
+| `@t402/near` | 2.8.0 | NEAR Protocol with NEP-141 USDT |
+| `@t402/aptos` | 2.8.0 | Aptos blockchain with Fungible Asset USDT |
+| `@t402/tezos` | 2.8.0 | Tezos blockchain with FA2 USDt |
+| `@t402/polkadot` | 2.8.0 | Polkadot Asset Hub with USDT |
+| `@t402/stacks` | 2.8.0 | Stacks (Bitcoin L2) with SIP-010 USDT |
+| `@t402/cosmos` | 2.8.0 | Cosmos (Noble) with bank MsgSend |
+| `@t402/btc` | 2.8.0 | Bitcoin with Lightning Network |
+| `@t402/stellar` | 2.8.0 | Stellar blockchain with Soroban SEP-41 USDC |
+| `@t402/erc8004` | 2.8.0 | ERC-8004 Trustless Agents identity and reputation |
 
 <Callout type="info">
   **Bundle Size Optimization**: Use `@t402/evm-core` instead of `@t402/evm` if you only need types and don't require viem. This significantly reduces bundle size for type-only consumers.
@@ -41,42 +42,42 @@ import { Cards, FileTree, Callout } from 'nextra/components'
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| `@t402/wdk` | 2.7.1 | Tether WDK integration for EVM, TON, Solana, TRON |
-| `@t402/wdk-protocol` | 2.7.1 | T402 payment protocol for WDK wallet apps |
-| `@t402/wdk-gasless` | 2.7.1 | Gasless payments via ERC-4337 account abstraction |
-| `@t402/wdk-bridge` | 2.7.1 | Cross-chain bridging via LayerZero OFT |
-| `@t402/wdk-multisig` | 2.7.1 | Safe multi-signature wallet support |
+| `@t402/wdk` | 2.8.0 | Tether WDK integration for EVM, TON, Solana, TRON |
+| `@t402/wdk-protocol` | 2.8.0 | T402 payment protocol for WDK wallet apps |
+| `@t402/wdk-gasless` | 2.8.0 | Gasless payments via ERC-4337 account abstraction |
+| `@t402/wdk-bridge` | 2.8.0 | Cross-chain bridging via LayerZero OFT |
+| `@t402/wdk-multisig` | 2.8.0 | Safe multi-signature wallet support |
 
 ## HTTP Server Frameworks
 
 | Framework | Package | Version |
 |-----------|---------|---------|
-| Express.js | `@t402/express` | 2.7.1 |
-| Next.js | `@t402/next` | 2.7.1 |
-| Hono | `@t402/hono` | 2.7.1 |
-| Fastify | `@t402/fastify` | 2.7.1 |
+| Express.js | `@t402/express` | 2.8.0 |
+| Next.js | `@t402/next` | 2.8.0 |
+| Hono | `@t402/hono` | 2.8.0 |
+| Fastify | `@t402/fastify` | 2.8.0 |
 
 ## HTTP Client Libraries
 
 | Client | Package | Version |
 |--------|---------|---------|
-| Fetch API | `@t402/fetch` | 2.7.1 |
-| Axios | `@t402/axios` | 2.7.1 |
+| Fetch API | `@t402/fetch` | 2.8.0 |
+| Axios | `@t402/axios` | 2.8.0 |
 
 ## UI Components
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| `@t402/paywall` | 2.7.1 | Universal paywall component (framework-agnostic) |
-| `@t402/react` | 2.7.1 | React hooks and components |
-| `@t402/vue` | 2.7.1 | Vue 3 composables and components |
+| `@t402/paywall` | 2.8.0 | Universal paywall component (framework-agnostic) |
+| `@t402/react` | 2.8.0 | React hooks and components |
+| `@t402/vue` | 2.8.0 | Vue 3 composables and components |
 
 ## Tools
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| `@t402/cli` | 2.7.1 | Command-line tools for testing and development |
-| `@t402/mcp` | 2.7.1 | MCP server for AI agent payments (14 tools: 6 base + 5 WDK + 3 ERC-8004) |
+| `@t402/cli` | 2.8.0 | Command-line tools for testing and development |
+| `@t402/mcp` | 2.8.0 | MCP server for AI agent payments (14 tools: 6 base + 5 WDK + 3 ERC-8004) |
 
 ## Package Structure
 

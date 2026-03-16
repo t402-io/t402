@@ -27,6 +27,7 @@ on:
           - stacks
           - cosmos
           - btc
+          - stellar
           - erc8004
           - express
           - next
@@ -117,6 +118,8 @@ jobs:
             path: packages/mechanisms/cosmos
           - name: btc
             path: packages/mechanisms/btc
+          - name: stellar
+            path: packages/mechanisms/stellar
           # ERC-8004 package
           - name: erc8004
             path: packages/erc8004

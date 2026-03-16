@@ -1,6 +1,6 @@
 {
   "name": "@t402/cli",
-  "version": "2.7.1",
+  "version": "2.8.0",
   "description": "Command-line interface for the T402 payment protocol",
   "keywords": [
     "t402",
