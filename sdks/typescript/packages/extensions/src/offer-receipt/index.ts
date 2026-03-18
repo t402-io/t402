@@ -1,0 +1,38 @@
+// Types
+export type {
+  SignatureFormat,
+  OfferPayload,
+  ReceiptPayload,
+  EIP712Offer,
+  JWSOffer,
+  SignedOffer,
+  EIP712Receipt,
+  JWSReceipt,
+  SignedReceipt,
+  OfferReceiptRequirementsExtension,
+  OfferReceiptSettlementExtension,
+  EIP712OfferReceiptSigner,
+  EIP712OfferReceiptVerifier,
+} from "./types";
+
+// EIP-712 constants
+export {
+  OFFER_DOMAIN,
+  RECEIPT_DOMAIN,
+  OFFER_TYPES,
+  RECEIPT_TYPES,
+  OFFER_PRIMARY_TYPE,
+  RECEIPT_PRIMARY_TYPE,
+  normalizeOfferForSigning,
+  normalizeReceiptForSigning,
+} from "./eip712";
+
+// Signing and verification
+export {
+  createSignedOffer,
+  createSignedReceipt,
+  verifyOffer,
+  verifyReceipt,
+  matchOfferToRequirements,
+  isOfferExpired,
+} from "./signing";

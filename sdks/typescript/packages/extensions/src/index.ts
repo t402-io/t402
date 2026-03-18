@@ -16,3 +16,6 @@ export * from "./eip2612-gas-sponsoring";
 
 // ERC-20 approval gas sponsoring extension
 export * from "./erc20-approval-gas-sponsoring";
+
+// Offer and Receipt extension
+export * from "./offer-receipt";
