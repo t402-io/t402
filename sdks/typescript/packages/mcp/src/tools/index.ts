@@ -168,6 +168,43 @@ export {
   type NetworkFeeComparison,
 } from './compareNetworkFees.js'
 
+// Sign and verify tools
+export {
+  signMessageInputSchema,
+  executeSignMessage,
+  formatSignMessageResult,
+  type SignMessageInput,
+  type SignMessageResult,
+} from './signMessage.js'
+
+export {
+  verifySignatureInputSchema,
+  executeVerifySignature,
+  formatVerifySignatureResult,
+  type VerifySignatureInput,
+  type VerifySignatureResult,
+} from './verifySignature.js'
+
+// Transfer history tools
+export {
+  getTransferHistoryInputSchema,
+  executeGetTransferHistory,
+  formatTransferHistoryResult,
+  type GetTransferHistoryInput,
+  type TransferEvent,
+  type TransferHistoryResult,
+} from './getTransferHistory.js'
+
+// Historical price tools
+export {
+  getHistoricalPriceInputSchema,
+  executeGetHistoricalPrice,
+  formatHistoricalPriceResult,
+  type GetHistoricalPriceInput,
+  type PriceDataPoint,
+  type HistoricalPriceResult,
+} from './getHistoricalPrice.js'
+
 // Quote store
 export {
   createQuote,
@@ -625,6 +662,140 @@ export const TOOL_DEFINITIONS = {
         },
       },
       required: ['quoteId'],
+    },
+  },
+
+  't402/signMessage': {
+    name: 't402/signMessage',
+    description:
+      'Sign a message using the configured wallet. Returns an EIP-191 personal signature. Requires a configured private key.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        chain: {
+          type: 'string',
+          enum: [
+            'ethereum',
+            'base',
+            'arbitrum',
+            'optimism',
+            'polygon',
+            'avalanche',
+            'ink',
+            'berachain',
+            'unichain',
+          ],
+          description: 'Blockchain network context for signing',
+        },
+        message: {
+          type: 'string',
+          description: 'Message to sign',
+        },
+      },
+      required: ['chain', 'message'],
+    },
+  },
+
+  't402/verifySignature': {
+    name: 't402/verifySignature',
+    description:
+      'Verify an EIP-191 signed message. Checks whether a signature was produced by the claimed address. No wallet configuration needed — this is a read-only verification.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        chain: {
+          type: 'string',
+          enum: [
+            'ethereum',
+            'base',
+            'arbitrum',
+            'optimism',
+            'polygon',
+            'avalanche',
+            'ink',
+            'berachain',
+            'unichain',
+          ],
+          description: 'Blockchain network context for verification',
+        },
+        message: {
+          type: 'string',
+          description: 'The original message that was signed',
+        },
+        signature: {
+          type: 'string',
+          pattern: '^0x[a-fA-F0-9]+$',
+          description: 'The signature to verify (hex string)',
+        },
+        address: {
+          type: 'string',
+          pattern: '^0x[a-fA-F0-9]{40}$',
+          description: 'The expected signer address',
+        },
+      },
+      required: ['chain', 'message', 'signature', 'address'],
+    },
+  },
+
+  't402/getTransferHistory': {
+    name: 't402/getTransferHistory',
+    description:
+      'Get recent ERC-20 stablecoin transfer history for a wallet address. Queries on-chain Transfer events for USDC, USDT, and USDT0. Returns sent and received transfers sorted by most recent.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        network: {
+          type: 'string',
+          enum: [
+            'ethereum',
+            'base',
+            'arbitrum',
+            'optimism',
+            'polygon',
+            'avalanche',
+            'ink',
+            'berachain',
+            'unichain',
+          ],
+          description: 'Blockchain network to query',
+        },
+        address: {
+          type: 'string',
+          pattern: '^0x[a-fA-F0-9]{40}$',
+          description: 'Wallet address to get transfer history for',
+        },
+        token: {
+          type: 'string',
+          enum: ['USDC', 'USDT', 'USDT0'],
+          description:
+            'Filter by specific token. If not provided, queries all supported stablecoins.',
+        },
+        limit: {
+          type: 'number',
+          description: 'Maximum number of transfers to return (default: 10, max: 100)',
+        },
+      },
+      required: ['network', 'address'],
+    },
+  },
+
+  't402/getHistoricalPrice': {
+    name: 't402/getHistoricalPrice',
+    description:
+      'Get historical price data for a token over a specified period via CoinGecko. Returns price data points, high/low, and percentage change. Useful for trend analysis.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        token: {
+          type: 'string',
+          description: 'Token symbol (e.g., "ETH", "USDC", "USDT", "MATIC", "AVAX", "BTC", "SOL")',
+        },
+        days: {
+          type: 'number',
+          description: 'Number of days of history to retrieve (default: 7, max: 365)',
+        },
+      },
+      required: ['token'],
     },
   },
 }
