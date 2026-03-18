@@ -1,0 +1,20 @@
+{
+  "name": "@t402/wdk-lending",
+  "version": "2.8.0",
+  "description": "DeFi lending protocol abstractions for t402 (Aave V3, Compound)",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/cjs/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run --pool=forks"
+  },
+  "dependencies": {
+    "@t402/core": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0"
+  }
+}
