@@ -3,7 +3,6 @@ import {
   getTransactionDecoder,
   getCompiledTransactionMessageDecoder,
   type Transaction,
-  type CompiledTransactionMessage,
   createSolanaRpc,
   devnet,
   testnet,
@@ -95,9 +94,10 @@ export function decodeTransactionFromPayload(svmPayload: ExactSvmPayloadV1): Tra
 export function getTokenPayerFromTransaction(transaction: Transaction): string {
   const compiled = getCompiledTransactionMessageDecoder().decode(
     transaction.messageBytes,
-  ) as CompiledTransactionMessage;
-  const staticAccounts = compiled.staticAccounts ?? [];
-  const instructions = compiled.instructions ?? [];
+  );
+  // All current Solana transactions use legacy or v0 format, both of which have instructions
+  const staticAccounts = "staticAccounts" in compiled ? (compiled.staticAccounts as readonly { toString(): string }[]) : [];
+  const instructions = "instructions" in compiled ? (compiled.instructions as readonly { programAddressIndex: number; accountIndices?: number[] }[]) : [];
 
   for (const ix of instructions) {
     const programIndex = ix.programAddressIndex;

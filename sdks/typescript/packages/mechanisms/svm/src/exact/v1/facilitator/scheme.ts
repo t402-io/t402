@@ -15,7 +15,6 @@ import {
 import {
   getCompiledTransactionMessageDecoder,
   type Address,
-  type CompiledTransactionMessage,
 } from "@solana/kit";
 import type {
   PaymentPayload,
@@ -157,10 +156,11 @@ export class ExactSvmSchemeV1 implements SchemeNetworkFacilitator {
 
     const compiled = getCompiledTransactionMessageDecoder().decode(
       transaction.messageBytes,
-    ) as CompiledTransactionMessage;
+    );
 
-    const staticAccounts = compiled.staticAccounts ?? [];
-    const compiledInstructions = compiled.instructions ?? [];
+    // All current Solana transactions use legacy or v0 format with instructions/staticAccounts
+    const staticAccounts = ("staticAccounts" in compiled ? compiled.staticAccounts : []) as Address[];
+    const compiledInstructions = ("instructions" in compiled ? compiled.instructions : []) as { programAddressIndex: number; accountIndices?: number[]; data?: Uint8Array }[];
 
     // Map compiled instructions to decompiled format with resolved addresses
     const instructions = compiledInstructions.map(ix => ({
