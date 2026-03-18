@@ -17,6 +17,14 @@ import type { Address } from "./primitives";
 export type TokenType = "eip3009" | "legacy";
 
 /**
+ * Asset transfer method for scheme selection (x402-compatible).
+ * - "permit": EIP-3009 transferWithAuthorization (default)
+ * - "permit2": Uniswap Permit2 universal approval
+ * - "approve": Legacy approve + transferFrom
+ */
+export type AssetTransferMethod = "permit" | "permit2" | "approve";
+
+/**
  * Token configuration with EIP-712 domain parameters
  */
 export interface TokenConfig {
@@ -32,6 +40,10 @@ export interface TokenConfig {
   decimals: number;
   /** Token type for scheme selection */
   tokenType: TokenType;
+  /** Asset transfer method (default: inferred from tokenType) */
+  transferMethod?: AssetTransferMethod;
+  /** Whether the token supports EIP-2612 permit() */
+  supportsEip2612?: boolean;
   /** Payment priority (lower = higher priority) */
   priority: number;
 }
@@ -107,6 +119,8 @@ export const TOKEN_REGISTRY: NetworkTokenRegistry = {
       version: "1",
       decimals: 6,
       tokenType: "eip3009",
+      transferMethod: "permit",
+      supportsEip2612: true,
       priority: 1,
     },
     USDC: {
@@ -116,6 +130,8 @@ export const TOKEN_REGISTRY: NetworkTokenRegistry = {
       version: "2",
       decimals: 6,
       tokenType: "eip3009",
+      transferMethod: "permit",
+      supportsEip2612: true,
       priority: 2,
     },
     USDT: {
@@ -125,6 +141,8 @@ export const TOKEN_REGISTRY: NetworkTokenRegistry = {
       version: "1",
       decimals: 6,
       tokenType: "legacy",
+      transferMethod: "approve",
+      supportsEip2612: false,
       priority: 10, // Lower priority due to legacy flow
     },
   },
@@ -138,6 +156,8 @@ export const TOKEN_REGISTRY: NetworkTokenRegistry = {
       version: "1",
       decimals: 6,
       tokenType: "eip3009",
+      transferMethod: "permit",
+      supportsEip2612: true,
       priority: 1,
     },
     USDC: {
@@ -147,6 +167,8 @@ export const TOKEN_REGISTRY: NetworkTokenRegistry = {
       version: "2",
       decimals: 6,
       tokenType: "eip3009",
+      transferMethod: "permit",
+      supportsEip2612: true,
       priority: 2,
     },
   },
@@ -160,6 +182,8 @@ export const TOKEN_REGISTRY: NetworkTokenRegistry = {
       version: "1",
       decimals: 6,
       tokenType: "eip3009",
+      transferMethod: "permit",
+      supportsEip2612: true,
       priority: 1,
     },
   },
@@ -173,6 +197,8 @@ export const TOKEN_REGISTRY: NetworkTokenRegistry = {
       version: "1",
       decimals: 6,
       tokenType: "eip3009",
+      transferMethod: "permit",
+      supportsEip2612: true,
       priority: 1,
     },
   },
@@ -186,6 +212,8 @@ export const TOKEN_REGISTRY: NetworkTokenRegistry = {
       version: "1",
       decimals: 6,
       tokenType: "eip3009",
+      transferMethod: "permit",
+      supportsEip2612: true,
       priority: 1,
     },
   },
@@ -199,6 +227,8 @@ export const TOKEN_REGISTRY: NetworkTokenRegistry = {
       version: "2",
       decimals: 6,
       tokenType: "eip3009",
+      transferMethod: "permit",
+      supportsEip2612: true,
       priority: 2,
     },
   },
@@ -212,6 +242,8 @@ export const TOKEN_REGISTRY: NetworkTokenRegistry = {
       version: "2",
       decimals: 6,
       tokenType: "eip3009",
+      transferMethod: "permit",
+      supportsEip2612: true,
       priority: 2,
     },
   },
@@ -225,6 +257,8 @@ export const TOKEN_REGISTRY: NetworkTokenRegistry = {
       version: "2",
       decimals: 6,
       tokenType: "eip3009",
+      transferMethod: "permit",
+      supportsEip2612: true,
       priority: 2,
     },
   },
@@ -238,6 +272,8 @@ export const TOKEN_REGISTRY: NetworkTokenRegistry = {
       version: "2",
       decimals: 6,
       tokenType: "eip3009",
+      transferMethod: "permit",
+      supportsEip2612: true,
       priority: 2,
     },
     USDT: {
@@ -247,6 +283,8 @@ export const TOKEN_REGISTRY: NetworkTokenRegistry = {
       version: "1",
       decimals: 6,
       tokenType: "legacy",
+      transferMethod: "approve",
+      supportsEip2612: false,
       priority: 10,
     },
   },
@@ -305,6 +343,24 @@ export function getTokenByAddress(network: string, address: Address): TokenConfi
 export function supportsEIP3009(network: string, symbol: string): boolean {
   const config = getTokenConfig(network, symbol);
   return config?.tokenType === "eip3009";
+}
+
+/**
+ * Get the effective asset transfer method for a token.
+ * Falls back to inferring from tokenType if transferMethod is not explicitly set.
+ */
+export function getTransferMethod(config: TokenConfig): AssetTransferMethod {
+  if (config.transferMethod) return config.transferMethod;
+  return config.tokenType === "eip3009" ? "permit" : "approve";
+}
+
+/**
+ * Check if a token supports EIP-2612 permit().
+ * Falls back to inferring from tokenType if supportsEip2612 is not explicitly set.
+ */
+export function tokenSupportsEip2612(config: TokenConfig): boolean {
+  if (config.supportsEip2612 !== undefined) return config.supportsEip2612;
+  return config.tokenType === "eip3009";
 }
 
 /**

@@ -79,6 +79,8 @@ var (
 				Name:     "USD Coin",
 				Version:  "2",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDC": {
@@ -86,12 +88,16 @@ var (
 					Name:     "USD Coin",
 					Version:  "2",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 				"USAT": {
 					Address:  "0x07041776f5007aca2a54844f50503a18a72a8b68",
 					Name:     "Tether America USD",
 					Version:  "1",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodApprove,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -102,6 +108,8 @@ var (
 				Name:     "USD Coin",
 				Version:  "2",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDC": {
@@ -109,6 +117,8 @@ var (
 					Name:     "USD Coin",
 					Version:  "2",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -119,6 +129,8 @@ var (
 				Name:     "USD Coin",
 				Version:  "2",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDC": {
@@ -126,6 +138,8 @@ var (
 					Name:     "USD Coin",
 					Version:  "2",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -136,6 +150,8 @@ var (
 				Name:     "USD Coin",
 				Version:  "2",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDC": {
@@ -143,6 +159,8 @@ var (
 					Name:     "USD Coin",
 					Version:  "2",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -153,6 +171,8 @@ var (
 				Name:     "USDC",
 				Version:  "2",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDC": {
@@ -160,6 +180,8 @@ var (
 					Name:     "USDC",
 					Version:  "2",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -170,6 +192,8 @@ var (
 				Name:     "USDC",
 				Version:  "2",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDC": {
@@ -177,6 +201,8 @@ var (
 					Name:     "USDC",
 					Version:  "2",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -188,6 +214,8 @@ var (
 				Name:     "USDC",
 				Version:  "2",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDC": {
@@ -195,6 +223,8 @@ var (
 					Name:     "USDC",
 					Version:  "2",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -206,6 +236,8 @@ var (
 				Name:     "USDC",
 				Version:  "2",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDC": {
@@ -213,6 +245,8 @@ var (
 					Name:     "USDC",
 					Version:  "2",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -225,6 +259,8 @@ var (
 				Name:     "TetherToken",
 				Version:  "1",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
@@ -232,6 +268,8 @@ var (
 					Name:     "TetherToken",
 					Version:  "1",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -243,6 +281,8 @@ var (
 				Name:     "TetherToken",
 				Version:  "1",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
@@ -250,6 +290,8 @@ var (
 					Name:     "TetherToken",
 					Version:  "1",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -261,6 +303,8 @@ var (
 				Name:     "TetherToken",
 				Version:  "1",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
@@ -268,6 +312,8 @@ var (
 					Name:     "TetherToken",
 					Version:  "1",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -279,6 +325,8 @@ var (
 				Name:     "TetherToken",
 				Version:  "1",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
@@ -286,6 +334,8 @@ var (
 					Name:     "TetherToken",
 					Version:  "1",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -297,6 +347,8 @@ var (
 				Name:     "TetherToken",
 				Version:  "1",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
@@ -304,6 +356,8 @@ var (
 					Name:     "TetherToken",
 					Version:  "1",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -315,6 +369,8 @@ var (
 				Name:     "TetherToken",
 				Version:  "1",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
@@ -322,6 +378,8 @@ var (
 					Name:     "TetherToken",
 					Version:  "1",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -333,6 +391,8 @@ var (
 				Name:     "TetherToken",
 				Version:  "1",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
@@ -340,6 +400,8 @@ var (
 					Name:     "TetherToken",
 					Version:  "1",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -351,6 +413,8 @@ var (
 				Name:     "TetherToken",
 				Version:  "1",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
@@ -358,6 +422,8 @@ var (
 					Name:     "TetherToken",
 					Version:  "1",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -369,6 +435,8 @@ var (
 				Name:     "TetherToken",
 				Version:  "1",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
@@ -376,6 +444,8 @@ var (
 					Name:     "TetherToken",
 					Version:  "1",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -387,6 +457,8 @@ var (
 				Name:     "TetherToken",
 				Version:  "1",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
@@ -394,6 +466,8 @@ var (
 					Name:     "TetherToken",
 					Version:  "1",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -405,6 +479,8 @@ var (
 				Name:     "TetherToken",
 				Version:  "1",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
@@ -412,6 +488,8 @@ var (
 					Name:     "TetherToken",
 					Version:  "1",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -423,6 +501,8 @@ var (
 				Name:     "TetherToken",
 				Version:  "1",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
@@ -430,6 +510,8 @@ var (
 					Name:     "TetherToken",
 					Version:  "1",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -441,6 +523,8 @@ var (
 				Name:     "TetherToken",
 				Version:  "1",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
@@ -448,6 +532,8 @@ var (
 					Name:     "TetherToken",
 					Version:  "1",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -459,6 +545,8 @@ var (
 				Name:     "TetherToken",
 				Version:  "1",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
@@ -466,6 +554,8 @@ var (
 					Name:     "TetherToken",
 					Version:  "1",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -477,6 +567,8 @@ var (
 				Name:     "TetherToken",
 				Version:  "1",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
@@ -484,6 +576,8 @@ var (
 					Name:     "TetherToken",
 					Version:  "1",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -495,6 +589,8 @@ var (
 				Name:     "TetherToken",
 				Version:  "1",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
@@ -502,6 +598,8 @@ var (
 					Name:     "TetherToken",
 					Version:  "1",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -513,6 +611,8 @@ var (
 				Name:     "TetherToken",
 				Version:  "1",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
@@ -520,6 +620,8 @@ var (
 					Name:     "TetherToken",
 					Version:  "1",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -531,6 +633,8 @@ var (
 				Name:     "TetherToken",
 				Version:  "1",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodPermit,
+				SupportsEIP2612: true,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
@@ -538,6 +642,8 @@ var (
 					Name:     "TetherToken",
 					Version:  "1",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodPermit,
+					SupportsEIP2612: true,
 				},
 			},
 		},
@@ -553,6 +659,8 @@ var (
 				Name:     "Tether USD",
 				Version:  "1",
 				Decimals: 18, // BSC USDT uses 18 decimals
+				TransferMethod:  TransferMethodApprove,
+				SupportsEIP2612: false,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT": {
@@ -560,6 +668,8 @@ var (
 					Name:     "Tether USD",
 					Version:  "1",
 					Decimals: 18,
+					TransferMethod:  TransferMethodApprove,
+					SupportsEIP2612: false,
 				},
 			},
 		},
@@ -571,6 +681,8 @@ var (
 				Name:     "TetherToken",
 				Version:  "1",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodApprove,
+				SupportsEIP2612: false,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT": {
@@ -578,6 +690,8 @@ var (
 					Name:     "TetherToken",
 					Version:  "1",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodApprove,
+					SupportsEIP2612: false,
 				},
 			},
 		},
@@ -589,6 +703,8 @@ var (
 				Name:     "Frapped USDT",
 				Version:  "1",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodApprove,
+				SupportsEIP2612: false,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT": {
@@ -596,6 +712,8 @@ var (
 					Name:     "Frapped USDT",
 					Version:  "1",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodApprove,
+					SupportsEIP2612: false,
 				},
 			},
 		},
@@ -607,6 +725,8 @@ var (
 				Name:     "Tether USD",
 				Version:  "1",
 				Decimals: 18,
+				TransferMethod:  TransferMethodApprove,
+				SupportsEIP2612: false,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT": {
@@ -614,6 +734,8 @@ var (
 					Name:     "Tether USD",
 					Version:  "1",
 					Decimals: 18,
+					TransferMethod:  TransferMethodApprove,
+					SupportsEIP2612: false,
 				},
 			},
 		},
@@ -625,6 +747,8 @@ var (
 				Name:     "Tether USD",
 				Version:  "1",
 				Decimals: DefaultDecimals,
+				TransferMethod:  TransferMethodApprove,
+				SupportsEIP2612: false,
 			},
 			SupportedAssets: map[string]AssetInfo{
 				"USDT": {
@@ -632,6 +756,8 @@ var (
 					Name:     "Tether USD",
 					Version:  "1",
 					Decimals: DefaultDecimals,
+					TransferMethod:  TransferMethodApprove,
+					SupportsEIP2612: false,
 				},
 			},
 		},

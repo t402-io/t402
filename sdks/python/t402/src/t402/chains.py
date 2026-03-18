@@ -65,6 +65,8 @@ KNOWN_TOKENS = {
             "name": "USDC",
             "decimals": 6,
             "version": "2",
+            "transfer_method": "permit",
+            "supports_eip2612": True,
         }
     ],
     # Base Mainnet
@@ -75,6 +77,8 @@ KNOWN_TOKENS = {
             "name": "USD Coin",
             "decimals": 6,
             "version": "2",
+            "transfer_method": "permit",
+            "supports_eip2612": True,
         }
     ],
     # Avalanche Fuji (testnet)
@@ -85,6 +89,8 @@ KNOWN_TOKENS = {
             "name": "USD Coin",
             "decimals": 6,
             "version": "2",
+            "transfer_method": "permit",
+            "supports_eip2612": True,
         }
     ],
     # Avalanche Mainnet
@@ -95,6 +101,8 @@ KNOWN_TOKENS = {
             "name": "USDC",
             "decimals": 6,
             "version": "2",
+            "transfer_method": "permit",
+            "supports_eip2612": True,
         }
     ],
     # === USDT0 Networks ===
@@ -106,6 +114,8 @@ KNOWN_TOKENS = {
             "name": "TetherToken",
             "decimals": 6,
             "version": "1",
+            "transfer_method": "permit",
+            "supports_eip2612": True,
         },
         {
             "human_name": "usat",
@@ -113,6 +123,8 @@ KNOWN_TOKENS = {
             "name": "Tether America USD",
             "decimals": 6,
             "version": "1",
+            "transfer_method": "approve",
+            "supports_eip2612": True,
         },
     ],
     # Arbitrum One
@@ -123,6 +135,8 @@ KNOWN_TOKENS = {
             "name": "TetherToken",
             "decimals": 6,
             "version": "1",
+            "transfer_method": "permit",
+            "supports_eip2612": True,
         }
     ],
     # Optimism
@@ -133,6 +147,8 @@ KNOWN_TOKENS = {
             "name": "TetherToken",
             "decimals": 6,
             "version": "1",
+            "transfer_method": "permit",
+            "supports_eip2612": True,
         }
     ],
     # Polygon
@@ -143,6 +159,8 @@ KNOWN_TOKENS = {
             "name": "TetherToken",
             "decimals": 6,
             "version": "1",
+            "transfer_method": "permit",
+            "supports_eip2612": True,
         }
     ],
     # Ink
@@ -153,6 +171,8 @@ KNOWN_TOKENS = {
             "name": "TetherToken",
             "decimals": 6,
             "version": "1",
+            "transfer_method": "permit",
+            "supports_eip2612": True,
         }
     ],
     # Berachain
@@ -163,6 +183,8 @@ KNOWN_TOKENS = {
             "name": "TetherToken",
             "decimals": 6,
             "version": "1",
+            "transfer_method": "permit",
+            "supports_eip2612": True,
         }
     ],
     # Unichain
@@ -173,6 +195,8 @@ KNOWN_TOKENS = {
             "name": "TetherToken",
             "decimals": 6,
             "version": "1",
+            "transfer_method": "permit",
+            "supports_eip2612": True,
         }
     ],
     # Mantle
@@ -183,6 +207,8 @@ KNOWN_TOKENS = {
             "name": "TetherToken",
             "decimals": 6,
             "version": "1",
+            "transfer_method": "permit",
+            "supports_eip2612": True,
         }
     ],
     # Plasma
@@ -193,6 +219,8 @@ KNOWN_TOKENS = {
             "name": "TetherToken",
             "decimals": 6,
             "version": "1",
+            "transfer_method": "permit",
+            "supports_eip2612": True,
         }
     ],
     # Sei
@@ -203,6 +231,8 @@ KNOWN_TOKENS = {
             "name": "TetherToken",
             "decimals": 6,
             "version": "1",
+            "transfer_method": "permit",
+            "supports_eip2612": True,
         }
     ],
     # Conflux eSpace
@@ -213,6 +243,8 @@ KNOWN_TOKENS = {
             "name": "TetherToken",
             "decimals": 6,
             "version": "1",
+            "transfer_method": "permit",
+            "supports_eip2612": True,
         }
     ],
     # Monad
@@ -223,6 +255,8 @@ KNOWN_TOKENS = {
             "name": "TetherToken",
             "decimals": 6,
             "version": "1",
+            "transfer_method": "permit",
+            "supports_eip2612": True,
         }
     ],
     # Flare
@@ -233,6 +267,8 @@ KNOWN_TOKENS = {
             "name": "TetherToken",
             "decimals": 6,
             "version": "1",
+            "transfer_method": "permit",
+            "supports_eip2612": True,
         }
     ],
     # Rootstock
@@ -243,6 +279,8 @@ KNOWN_TOKENS = {
             "name": "TetherToken",
             "decimals": 6,
             "version": "1",
+            "transfer_method": "permit",
+            "supports_eip2612": True,
         }
     ],
     # XLayer
@@ -253,6 +291,8 @@ KNOWN_TOKENS = {
             "name": "TetherToken",
             "decimals": 6,
             "version": "1",
+            "transfer_method": "permit",
+            "supports_eip2612": True,
         }
     ],
     # Stable
@@ -263,6 +303,8 @@ KNOWN_TOKENS = {
             "name": "TetherToken",
             "decimals": 6,
             "version": "1",
+            "transfer_method": "permit",
+            "supports_eip2612": True,
         }
     ],
     # HyperEVM
@@ -273,6 +315,8 @@ KNOWN_TOKENS = {
             "name": "TetherToken",
             "decimals": 6,
             "version": "1",
+            "transfer_method": "permit",
+            "supports_eip2612": True,
         }
     ],
     # MegaETH
@@ -283,6 +327,8 @@ KNOWN_TOKENS = {
             "name": "TetherToken",
             "decimals": 6,
             "version": "1",
+            "transfer_method": "permit",
+            "supports_eip2612": True,
         }
     ],
     # Corn
@@ -293,6 +339,8 @@ KNOWN_TOKENS = {
             "name": "TetherToken",
             "decimals": 6,
             "version": "1",
+            "transfer_method": "permit",
+            "supports_eip2612": True,
         }
     ],
     # === Legacy USDT Networks (no EIP-3009 support) ===
@@ -304,6 +352,8 @@ KNOWN_TOKENS = {
             "name": "Tether USD",
             "decimals": 18,
             "version": "1",
+            "transfer_method": "approve",
+            "supports_eip2612": False,
         }
     ],
     # Avalanche C-Chain (already in KNOWN_TOKENS via "43114", add USDT)
@@ -315,6 +365,8 @@ KNOWN_TOKENS = {
             "name": "Frapped USDT",
             "decimals": 6,
             "version": "1",
+            "transfer_method": "approve",
+            "supports_eip2612": False,
         }
     ],
     # Celo
@@ -325,6 +377,8 @@ KNOWN_TOKENS = {
             "name": "Tether USD",
             "decimals": 18,
             "version": "1",
+            "transfer_method": "approve",
+            "supports_eip2612": False,
         }
     ],
     # Kaia (formerly Klaytn)
@@ -335,6 +389,8 @@ KNOWN_TOKENS = {
             "name": "Tether USD",
             "decimals": 6,
             "version": "1",
+            "transfer_method": "approve",
+            "supports_eip2612": False,
         }
     ],
 }
@@ -370,3 +426,21 @@ def get_default_token_address(chain_id: str, token_type: str = "usdc") -> str:
         if token["human_name"] == token_type:
             return token["address"]
     raise ValueError(f"Token type '{token_type}' not found for chain {chain_id}")
+
+
+def get_transfer_method(chain_id: str, address: str) -> str:
+    """Get the transfer method for a given chain and address.
+    Returns 'permit' (EIP-3009), 'permit2', or 'approve' (legacy).
+    """
+    for token in KNOWN_TOKENS.get(chain_id, []):
+        if token["address"].lower() == address.lower():
+            return token.get("transfer_method", "permit")
+    return "permit"
+
+
+def get_supports_eip2612(chain_id: str, address: str) -> bool:
+    """Check if a token supports EIP-2612 permit()."""
+    for token in KNOWN_TOKENS.get(chain_id, []):
+        if token["address"].lower() == address.lower():
+            return token.get("supports_eip2612", True)
+    return True

@@ -28,6 +28,19 @@ public final class EvmConstants {
     /** Up-To payment scheme identifier. */
     public static final String SCHEME_UPTO = "upto";
 
+    // ============================================================
+    // Asset Transfer Methods (x402-compatible)
+    // ============================================================
+
+    /** EIP-3009 transferWithAuthorization (default). */
+    public static final String TRANSFER_METHOD_PERMIT = "permit";
+
+    /** Uniswap Permit2 universal approval. */
+    public static final String TRANSFER_METHOD_PERMIT2 = "permit2";
+
+    /** Legacy approve + transferFrom. */
+    public static final String TRANSFER_METHOD_APPROVE = "approve";
+
     /** CAIP family pattern for EVM networks. */
     public static final String CAIP_FAMILY = "eip155:*";
 
@@ -495,5 +508,48 @@ public final class EvmConstants {
      */
     public static boolean isSupportedNetwork(String network) {
         return SUPPORTED_NETWORKS.contains(network);
+    }
+
+    // ============================================================
+    // Asset Transfer Method Utilities
+    // ============================================================
+
+    /**
+     * Get the transfer method for a token on a given network.
+     * Returns "permit" for EIP-3009 tokens (USDT0, USDC),
+     * "approve" for legacy tokens (USDT, USAT).
+     */
+    public static String getTransferMethod(String network, String tokenAddress) {
+        String lower = tokenAddress.toLowerCase();
+        // Legacy USDT
+        for (Map.Entry<String, String> entry : USDT_LEGACY_ADDRESSES.entrySet()) {
+            if (entry.getKey().equals(network) && entry.getValue().toLowerCase().equals(lower)) {
+                return TRANSFER_METHOD_APPROVE;
+            }
+        }
+        // USAT (has EIP-2612 but not EIP-3009)
+        for (Map.Entry<String, String> entry : USAT_ADDRESSES.entrySet()) {
+            if (entry.getKey().equals(network) && entry.getValue().toLowerCase().equals(lower)) {
+                return TRANSFER_METHOD_APPROVE;
+            }
+        }
+        // Default: EIP-3009 (USDT0, USDC)
+        return TRANSFER_METHOD_PERMIT;
+    }
+
+    /**
+     * Check if a token supports EIP-2612 permit().
+     * USDT0, USDC, and USAT support it; legacy USDT does not.
+     */
+    public static boolean supportsEip2612(String network, String tokenAddress) {
+        String lower = tokenAddress.toLowerCase();
+        // Legacy USDT does NOT support EIP-2612
+        for (Map.Entry<String, String> entry : USDT_LEGACY_ADDRESSES.entrySet()) {
+            if (entry.getKey().equals(network) && entry.getValue().toLowerCase().equals(lower)) {
+                return false;
+            }
+        }
+        // Everything else (USDT0, USDC, USAT) supports it
+        return true;
     }
 }

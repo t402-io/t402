@@ -164,12 +164,26 @@ type TransactionReceipt struct {
 	TxHash      string `json:"transactionHash"`
 }
 
+// AssetTransferMethod indicates how the token should be transferred.
+// "permit" = EIP-3009 transferWithAuthorization (default)
+// "permit2" = Uniswap Permit2 universal approval
+// "approve" = Legacy approve + transferFrom
+type AssetTransferMethod string
+
+const (
+	TransferMethodPermit  AssetTransferMethod = "permit"
+	TransferMethodPermit2 AssetTransferMethod = "permit2"
+	TransferMethodApprove AssetTransferMethod = "approve"
+)
+
 // AssetInfo contains information about an ERC20 token
 type AssetInfo struct {
-	Address  string
-	Name     string
-	Version  string
-	Decimals int
+	Address         string
+	Name            string
+	Version         string
+	Decimals        int
+	TransferMethod  AssetTransferMethod // Default: "permit" (EIP-3009)
+	SupportsEIP2612 bool                // Whether the token supports EIP-2612 permit()
 }
 
 // NetworkConfig contains network-specific configuration
