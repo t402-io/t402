@@ -1,0 +1,15 @@
+{
+  "name": "t402-agentic-commerce-demo",
+  "version": "1.0.0",
+  "description": "AI agent shopping demo — browse, select, and pay with t402",
+  "type": "module",
+  "scripts": {
+    "server": "tsx src/server.ts",
+    "agent": "tsx src/agent.ts"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.0"
+  }
+}
