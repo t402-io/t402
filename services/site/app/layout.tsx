@@ -18,7 +18,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "T402 - The Official Payment Protocol for USDT",
   description:
-    "T402 is the official payment protocol for USDT. HTTP-native stablecoin payments across 44 networks including EVM, Solana, TON, TRON, NEAR, Aptos, and more. Zero fees. Instant settlement. Built for AI agents.",
+    "T402 is the official payment protocol for USDT. HTTP-native stablecoin payments across 47 networks including EVM, Solana, TON, TRON, NEAR, Aptos, and more. Zero fees. Instant settlement. Built for AI agents.",
   keywords: [
     "USDT",
     "USDT0",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "T402 - The Official Payment Protocol for USDT",
     description:
-      "HTTP-native stablecoin payments across 44 networks. Zero fees. Instant settlement. Built for AI agents.",
+      "HTTP-native stablecoin payments across 47 networks. Zero fees. Instant settlement. Built for AI agents.",
     type: "website",
     siteName: "T402",
     url: "https://t402.io",
@@ -64,7 +64,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "T402 - The Official Payment Protocol for USDT",
     description:
-      "HTTP-native stablecoin payments across 44 networks. Zero fees. Instant settlement. Built for AI agents.",
+      "HTTP-native stablecoin payments across 47 networks. Zero fees. Instant settlement. Built for AI agents.",
     images: ["/t402-logo.png"],
   },
   robots: {

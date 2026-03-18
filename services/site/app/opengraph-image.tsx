@@ -132,7 +132,7 @@ export default async function Image() {
               marginBottom: "40px",
             }}
           >
-            HTTP-native stablecoin payments across 10 blockchain families
+            HTTP-native stablecoin payments across 13 blockchain families
           </p>
 
           {/* Chain badges */}
