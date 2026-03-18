@@ -1,0 +1,23 @@
+# @t402/stellar
+
+Stellar blockchain support with Soroban SEP-41 USDC transfers.
+
+## Installation
+
+```bash
+npm install @t402/stellar
+```
+
+## Networks
+
+| Network | CAIP-2 | Token |
+|---------|--------|-------|
+| Pubnet | `stellar:pubnet` | USDC (7 decimals) |
+| Testnet | `stellar:testnet` | USDC (7 decimals) |
+
+## Features
+
+- Soroban smart contract transfers (SEP-41)
+- Ed25519 signature verification
+- Ledger-based expiration (5s per ledger)
+- Client, Server, and Facilitator implementations

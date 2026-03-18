@@ -18,11 +18,15 @@ export default {
   stacks: '@t402/stacks',
   cosmos: '@t402/cosmos',
   btc: '@t402/btc',
+  stellar: '@t402/stellar',
+  spark: '@t402/spark',
+  '---2': {
+    type: 'separator',
+    title: 'Extensions'
+  },
   erc8004: '@t402/erc8004',
   extensions: '@t402/extensions',
-  cli: '@t402/cli',
-  wdk: '@t402/wdk',
-  '---2': {
+  '---3': {
     type: 'separator',
     title: 'Server Middleware'
   },
@@ -30,20 +34,39 @@ export default {
   hono: '@t402/hono',
   fastify: '@t402/fastify',
   next: '@t402/next',
-  '---3': {
+  'facilitator-embedded': '@t402/facilitator-embedded',
+  '---4': {
     type: 'separator',
     title: 'Client Libraries'
   },
   fetch: '@t402/fetch',
   axios: '@t402/axios',
-  '---4': {
+  '---5': {
     type: 'separator',
     title: 'UI Components'
   },
   paywall: '@t402/paywall',
   react: '@t402/react',
   vue: '@t402/vue',
-  '---5': {
+  'react-native': '@t402/react-native',
+  '---6': {
+    type: 'separator',
+    title: 'AI Agents'
+  },
+  mcp: '@t402/mcp',
+  a2a: '@t402/a2a',
+  policy: '@t402/policy',
+  observability: '@t402/observability',
+  '---7': {
+    type: 'separator',
+    title: 'Wallet (WDK)'
+  },
+  wdk: '@t402/wdk',
+  'wdk-gasless': '@t402/wdk-gasless',
+  'wdk-bridge': '@t402/wdk-bridge',
+  'wdk-multisig': '@t402/wdk-multisig',
+  cli: '@t402/cli',
+  '---8': {
     type: 'separator'
   },
   typedoc: {

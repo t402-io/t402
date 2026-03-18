@@ -1,0 +1,23 @@
+# @t402/spark
+
+Spark (Bitcoin L2) payment mechanism with Lightning Network integration.
+
+## Installation
+
+```bash
+npm install @t402/spark
+```
+
+## Networks
+
+| Network | CAIP-2 | Payment Types |
+|---------|--------|---------------|
+| Mainnet | `spark:mainnet` | Spark transfer, Lightning |
+| Testnet | `spark:testnet` | Spark transfer, Lightning |
+
+## Features
+
+- Direct Spark transfers (verified by transfer_id)
+- Lightning Network routing (SHA256 preimage verification)
+- Instant finality (no-op settlement)
+- Replay protection

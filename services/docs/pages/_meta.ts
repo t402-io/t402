@@ -15,8 +15,16 @@ export default {
     title: 'Chains',
     type: 'page'
   },
+  schemes: {
+    title: 'Schemes',
+    type: 'page'
+  },
   reference: {
     title: 'Reference',
+    type: 'page'
+  },
+  tutorials: {
+    title: 'Tutorials',
     type: 'page'
   },
   advanced: {
@@ -27,19 +35,15 @@ export default {
     title: 'Security',
     type: 'page'
   },
-  // Accessible via links but hidden from navbar
-  tutorials: {
-    title: 'Tutorials',
-    display: 'hidden'
-  },
   'use-cases': {
     title: 'Use Cases',
-    display: 'hidden'
+    type: 'page'
   },
-  schemes: {
-    title: 'Payment Schemes',
-    display: 'hidden'
+  ecosystem: {
+    title: 'Ecosystem',
+    type: 'page'
   },
+  // Hidden but accessible
   faq: {
     title: 'FAQ',
     display: 'hidden'
@@ -50,10 +54,6 @@ export default {
   },
   changelog: {
     title: 'Changelog',
-    display: 'hidden'
-  },
-  ecosystem: {
-    title: 'Ecosystem',
     display: 'hidden'
   },
   comparison: {
