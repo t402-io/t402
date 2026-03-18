@@ -1,0 +1,14 @@
+{
+  "name": "@t402/payments-mcp",
+  "version": "2.8.0",
+  "description": "One-command t402 payment client for AI agents — works with Claude, Claude Code, Codex, Gemini",
+  "bin": {
+    "t402-payments": "./src/cli.js"
+  },
+  "type": "module",
+  "scripts": {
+    "start": "node src/cli.js"
+  },
+  "files": ["src"],
+  "keywords": ["t402", "mcp", "payment", "ai-agent", "claude", "codex", "gemini"]
+}
