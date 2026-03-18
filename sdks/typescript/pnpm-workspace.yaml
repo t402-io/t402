@@ -8,5 +8,6 @@ packages:
   - packages/cli
   - packages/erc8004
   - packages/policy
+  - packages/observability
 ignoredBuiltDependencies:
   - esbuild
