@@ -1,7 +1,26 @@
 # @t402/wdk-bridge
 
-See the [SDK Showcase](/sdks/typescript) for details on this package.
+Cross-chain USDT0 bridging via LayerZero OFT standard.
 
 ```bash
 npm install @t402/wdk-bridge
 ```
+
+## Overview
+
+Bridge USDT0 between 19+ EVM chains using LayerZero's Omnichain Fungible Token (OFT) protocol. Also supports bridging to non-EVM destinations (Solana, TON, TRON).
+
+## Supported Routes
+
+- **EVM ↔ EVM**: All 19 USDT0 chains (Ethereum, Arbitrum, Optimism, Base, Polygon, Ink, Berachain, Unichain, etc.)
+- **EVM → Solana**: LayerZero endpoint 30168
+- **EVM → TON**: LayerZero endpoint 30343
+- **EVM → TRON**: LayerZero endpoint 30420
+
+## Features
+
+- Quote before bridge (estimate fees)
+- Smart routing (cheapest/fastest/preferred chain)
+- Delivery tracking via LayerZero message GUID
+- Balance aggregation across chains
+- Auto-routing based on available balances
