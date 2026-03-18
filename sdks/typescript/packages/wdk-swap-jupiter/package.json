@@ -1,0 +1,21 @@
+{
+  "name": "@t402/wdk-swap-jupiter",
+  "version": "2.8.0",
+  "description": "Jupiter DEX aggregator swap module for Solana wallets in the t402 WDK ecosystem",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/cjs/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run --pool=forks"
+  },
+  "dependencies": {
+    "@t402/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0"
+  }
+}

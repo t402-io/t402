@@ -9,6 +9,6 @@ packages:
   - packages/erc8004
   - packages/policy
   - packages/observability
-  - packages/wdk-facilitator
+  - packages/wdk*
 ignoredBuiltDependencies:
   - esbuild
