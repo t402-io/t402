@@ -9,6 +9,7 @@ Supported schemes:
 - upto: EIP-2612 Permit (usage-based billing)
 - permit2: Uniswap Permit2 PermitTransferFrom
 - permit2-proxy: Permit2 with witness via proxy contracts
+- erc7710: ERC-7710 delegation via smart account (ERC-4337/ERC-7579)
 
 .. deprecated:: 2.3.0
     The **exact-legacy** scheme is deprecated and will be removed in v3.0.0.
@@ -73,6 +74,14 @@ from t402.schemes.evm.permit2 import (
     PERMIT2_ADDRESS,
 )
 
+from t402.schemes.evm.erc7710 import (
+    ERC7710EvmFacilitatorScheme,
+    ERC7710EvmFacilitatorSigner,
+    ERC7710TransactionConfirmation,
+    encode_erc7579_execution,
+    parse_erc7710_payload,
+)
+
 from t402.schemes.evm.permit2_proxy import (
     Permit2ProxyEvmClientScheme,
     Permit2ProxyEvmServerScheme,
@@ -118,6 +127,12 @@ __all__ = [
     "FacilitatorPermit2Signer",
     "SCHEME_PERMIT2",
     "PERMIT2_ADDRESS",
+    # ERC-7710 scheme
+    "ERC7710EvmFacilitatorScheme",
+    "ERC7710EvmFacilitatorSigner",
+    "ERC7710TransactionConfirmation",
+    "encode_erc7579_execution",
+    "parse_erc7710_payload",
     # Permit2-Proxy scheme
     "Permit2ProxyEvmClientScheme",
     "Permit2ProxyEvmServerScheme",
