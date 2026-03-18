@@ -651,7 +651,7 @@ export const features = [
   {
     id: "multichain",
     name: "Universal Coverage",
-    description: "44 networks across 10 blockchain ecosystems with unified API",
+    description: "47 networks across 13 blockchain ecosystems with unified API",
     icon: "multichain",
   },
 ];

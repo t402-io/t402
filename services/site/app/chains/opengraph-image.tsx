@@ -87,7 +87,7 @@ export default async function Image() {
             Supported Chains
           </h1>
           <p style={{ fontSize: "24px", color: "#71717A", marginBottom: "40px" }}>
-            44 networks across 10 blockchain families
+            47 networks across 13 blockchain families
           </p>
           <div style={{ display: "flex", gap: "8px", alignItems: "center", flexDirection: "row", flexWrap: "wrap", justifyContent: "center", maxWidth: "800px" }}>
             {[

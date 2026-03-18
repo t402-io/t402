@@ -5,7 +5,7 @@ import { Footer } from "../../components/Footer";
 
 const pageTitle = "Introducing T402: The Official Payment Protocol for USDT";
 const pageDescription =
-  "T402 brings HTTP-native stablecoin payments to the internet. Zero fees, instant settlement, and support for 44 networks across 10 families.";
+  "T402 brings HTTP-native stablecoin payments to the internet. Zero fees, instant settlement, and support for 47 networks across 13 families.";
 
 export const metadata: Metadata = {
   title: pageTitle,
@@ -141,7 +141,7 @@ export default function T402LaunchPage() {
                 style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(0,0,0,0.08)" }}
               >
                 <p className="text-base" style={{ color: "#4A5568" }}>
-                  <strong style={{ color: "#1A1A2E" }}>TL;DR</strong>: T402 is an open-source payment protocol that embeds USDT payments directly into HTTP. It supports 44 networks across 10 families, offers zero transaction fees, instant settlement, and is designed for both human users and AI agents. Start accepting payments in minutes with our production-ready SDKs.
+                  <strong style={{ color: "#1A1A2E" }}>TL;DR</strong>: T402 is an open-source payment protocol that embeds USDT payments directly into HTTP. It supports 47 networks across 13 families, offers zero transaction fees, instant settlement, and is designed for both human users and AI agents. Start accepting payments in minutes with our production-ready SDKs.
                 </p>
               </div>
 
@@ -163,7 +163,7 @@ export default function T402LaunchPage() {
                   {[
                     { title: "Zero Transaction Fees", desc: "No percentage cuts, no flat fees. Keep 100% of your earnings." },
                     { title: "Instant Settlement", desc: "Funds are available immediately. No waiting days for payouts." },
-                    { title: "44 Networks", desc: "EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, and Cosmos across 10 blockchain families." },
+                    { title: "44 Networks", desc: "EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, and Cosmos across 13 blockchain families." },
                     { title: "Gasless Transactions", desc: "Users don\u2019t need native tokens. Pay transaction fees with USDT." },
                     { title: "AI Agent Ready", desc: "Native MCP integration for autonomous AI agent payments." },
                     { title: "Open Source", desc: "Fully auditable code. MIT licensed. Build with confidence." },
@@ -187,7 +187,7 @@ export default function T402LaunchPage() {
               <section className="space-y-4">
                 <h2 className="text-2xl font-semibold mt-4" style={{ color: "#1A1A2E" }}>Supported Networks</h2>
                 <p className="text-base" style={{ color: "#4A5568" }}>
-                  T402 supports payments across 44 networks, spanning 10 blockchain families:
+                  T402 supports payments across 47 networks, spanning 13 blockchain families:
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                   {["Ethereum", "Base", "Arbitrum", "Optimism", "Solana", "TON", "TRON", "NEAR", "Aptos", "Tezos", "Polkadot", "Stacks", "Mantle", "Ink", "Berachain"].map((chain) => (
@@ -217,7 +217,7 @@ export default function T402LaunchPage() {
                 >
                   <div className="grid grid-cols-2 sm:grid-cols-4 divide-x" style={{ borderColor: "rgba(0,0,0,0.08)" }}>
                     {[
-                      { lang: "TypeScript", ver: "v2.7.1" },
+                      { lang: "TypeScript", ver: "v2.8.0" },
                       { lang: "Python", ver: "v1.12.1" },
                       { lang: "Go", ver: "v1.12.1" },
                       { lang: "Java", ver: "v1.12.1" },

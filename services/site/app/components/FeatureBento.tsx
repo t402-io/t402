@@ -28,7 +28,7 @@ const features = [
   {
     title: "Multi-Chain",
     description:
-      "44 networks across 10 blockchain families. EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, and Cosmos.",
+      "47 networks across 13 blockchain families. EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, and Cosmos.",
     colSpan: 2,
     icon: (
       <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
