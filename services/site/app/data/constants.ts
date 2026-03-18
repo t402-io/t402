@@ -1,15 +1,15 @@
 export const PROTOCOL_STATS = {
-  chains: 44,
-  networks: 44,
-  kinds: 64,
-  families: 10,
+  chains: 47,
+  networks: 47,
+  kinds: 69,
+  families: 13,
   sdkCount: 4,
-  tsPackages: 37,
+  tsPackages: 42,
   httpFrameworks: 18,
 } as const;
 
 export const SDK_VERSIONS = {
-  typescript: "2.7.1",
+  typescript: "2.8.0",
   python: "1.12.1",
   go: "1.12.1",
   java: "1.12.1",
@@ -26,6 +26,9 @@ export const CHAIN_FAMILIES = [
   { name: "Polkadot", color: "#E6007A", count: 1 },
   { name: "Stacks", color: "#5546FF", count: 1 },
   { name: "Cosmos", color: "#2E3148", count: 1 },
+  { name: "Stellar", color: "#7C8CF8", count: 1 },
+  { name: "Bitcoin", color: "#F7931A", count: 2 },
+  { name: "Spark", color: "#FF6B35", count: 1 },
 ] as const;
 
 export const FACILITATOR_WALLETS = {

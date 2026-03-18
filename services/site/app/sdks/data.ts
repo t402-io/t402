@@ -36,14 +36,14 @@ export const sdks: SDK[] = [
     icon: "typescript",
     installCommand: "npm install @t402/core",
     packageManager: "npm",
-    version: "2.7.1",
+    version: "2.8.0",
     docsUrl: "https://docs.t402.io/sdks/typescript",
     githubUrl: "https://github.com/t402-io/t402/tree/main/sdks/typescript",
     features: [
       "Server & Client support",
       "Express, Hono, Fastify, Next.js middleware",
       "React & Vue components",
-      "10 chain mechanisms (EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos)",
+      "14 chain mechanisms (EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos, Stellar, BTC, Lightning, Spark)",
       "MCP + A2A agent transports",
       "WDK gasless, bridge & multisig",
       "TypeScript-first design",
@@ -434,6 +434,50 @@ export const typescriptPackages: Package[] = [
   },
 ];
 
+  {
+    name: "@t402/stellar",
+    npmPackage: "@t402/stellar",
+    description: "Stellar blockchain support with Soroban SEP-41 transfers",
+    features: ["Soroban contracts", "USDC payments", "Ed25519 signatures", "Pubnet & Testnet"],
+    badge: "new",
+  },
+  {
+    name: "@t402/spark",
+    npmPackage: "@t402/spark",
+    description: "Spark (Bitcoin L2) support with Lightning Network integration",
+    features: ["Instant BTC payments", "Lightning routing", "Zero fees", "Mainnet & Testnet"],
+    badge: "new",
+  },
+  // New packages from v2.8.0
+  {
+    name: "@t402/policy",
+    npmPackage: "@t402/policy",
+    description: "Payment policy engine for AI agent spending guardrails",
+    features: ["Spending limits", "Recipient allowlists", "Rate limiting", "Custom rules"],
+    badge: "new",
+  },
+  {
+    name: "@t402/observability",
+    npmPackage: "@t402/observability",
+    description: "Payment event tracking, metrics, and Prometheus export",
+    features: ["Event collection", "Flow tracing", "Prometheus metrics", "Ring buffer"],
+    badge: "new",
+  },
+  {
+    name: "@t402/facilitator-embedded",
+    npmPackage: "@t402/facilitator-embedded",
+    description: "In-process facilitator for simplified deployments",
+    features: ["No external service", "Scheme routing", "Lifecycle events", "Development mode"],
+    badge: "new",
+  },
+  {
+    name: "@t402/erc8004",
+    npmPackage: "@t402/erc8004",
+    description: "ERC-8004 agent identity and reputation registry",
+    features: ["Agent identity", "Reputation scoring", "Wallet verification", "On-chain registry"],
+  },
+];
+
 export const advancedPackages: Package[] = [];
 
 export const supportedChains = [
@@ -469,4 +513,11 @@ export const supportedChains = [
   { name: "Polkadot", id: "polkadot", color: "#E6007A" },
   { name: "Stacks", id: "stacks", color: "#5546FF" },
   { name: "Cosmos (Noble)", id: "cosmos", color: "#6F7390" },
+  { name: "Stellar", id: "stellar", color: "#7C8CF8" },
+  { name: "Bitcoin", id: "bitcoin", color: "#F7931A" },
+  { name: "Lightning", id: "lightning", color: "#FFC107" },
+  { name: "Spark", id: "spark", color: "#FF6B35" },
+  { name: "Sui", id: "sui", color: "#4DA2FF" },
+  { name: "Hedera", id: "hedera", color: "#222222" },
+  { name: "Algorand", id: "algorand", color: "#000000" },
 ];

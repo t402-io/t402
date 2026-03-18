@@ -12,7 +12,7 @@ const installCommands: Record<string, string> = {
 };
 
 const packageCounts: Record<string, number> = {
-  typescript: 37,
+  typescript: 42,
   python: 1,
   go: 1,
   java: 1,
