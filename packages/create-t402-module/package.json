@@ -1,0 +1,9 @@
+{
+  "name": "create-t402-module",
+  "version": "2.8.0",
+  "description": "Scaffold new t402 mechanism, extension, or MCP tool modules",
+  "bin": { "create-t402-module": "./src/cli.js" },
+  "type": "module",
+  "files": ["src", "templates"],
+  "keywords": ["t402", "scaffold", "generator", "mechanism", "extension"]
+}
