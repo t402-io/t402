@@ -36,3 +36,20 @@ export {
   matchOfferToRequirements,
   isOfferExpired,
 } from "./signing";
+
+// Server extension
+export {
+  OFFER_RECEIPT_KEY,
+  createOffersFromRequirements,
+  createReceiptForPayment,
+  offerReceiptServerExtension,
+} from "./server";
+export type { OfferReceiptServerConfig } from "./server";
+
+// Client utilities
+export {
+  extractOffers,
+  extractReceipt,
+  findAndVerifyOffer,
+  verifyReceiptFromResponse,
+} from "./client";
