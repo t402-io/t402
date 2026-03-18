@@ -20,11 +20,33 @@ T402 follows [Semantic Versioning](https://semver.org/):
 
 **v2.8.0** - March 2026
 - New `@t402/stellar` package — Stellar blockchain support with Soroban SEP-41 USDC transfers
-  - CAIP-2: `stellar:pubnet` / `stellar:testnet`
-  - Ed25519 signatures, ledger-based expiration (5s/ledger)
-  - Client, Server, and Facilitator implementations
-- Added `stellar` to npm release workflow matrix
-- 39 packages total (was 38)
+- New `@t402/spark` package — Spark (Bitcoin L2) with Lightning Network integration
+- New `@t402/policy` package — Payment policy engine for AI agent spending guardrails
+- New `@t402/observability` package — Payment event tracking and Prometheus metrics
+- New `@t402/facilitator-embedded` package — In-process facilitator (no external service)
+- New `@t402/wdk-facilitator` package — WDK wallet → Facilitator adapter
+- New `@t402/wdk-swap-jupiter` package — Jupiter DEX aggregator for Solana
+- New `@t402/wdk-lending` package — DeFi lending protocol abstractions (Aave V3)
+- New `@t402/wdk-fiat` package — Fiat on/off-ramp abstractions (MoonPay)
+- New `@t402/payments-mcp` — One-command MCP payment client for Claude/Codex/Gemini
+- New `create-t402-module` — Module scaffolding CLI
+- New `create-t402-agent` — Agent provisioning CLI
+- ERC-7710 smart account delegation (client + facilitator, all 4 SDKs)
+- ERC-7715 spend permissions for recurring/high-frequency payments
+- Offer-Receipt extension (EIP-712 signing + server/client middleware, all 4 SDKs)
+- SVM settlement cache for duplicate prevention (all 4 SDKs)
+- `assetTransferMethod` + `supportsEip2612` flags on EVM asset config
+- Bazaar marketplace MCP tools (search/pay/monetize)
+- Sign/verify, indexer, historical price MCP tools
+- XAU₮0 (Tether Gold) token support
+- Sui, Hedera, Algorand chain mechanism types
+- Bridge non-EVM destinations (Solana/TON/TRON via LayerZero)
+- RPC provider failover with circuit breaker
+- EAS identity attestation extension
+- T402SwapPay.sol atomic token conversion contract
+- AgentSkills SKILL.md specification
+- Agentic commerce demo
+- 42 packages total (was 39), 13 chain families (was 10), 47 networks
 
 ### v2.7.x
 
