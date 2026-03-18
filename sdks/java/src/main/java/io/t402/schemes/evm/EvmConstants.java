@@ -41,6 +41,9 @@ public final class EvmConstants {
     /** Legacy approve + transferFrom. */
     public static final String TRANSFER_METHOD_APPROVE = "approve";
 
+    /** ERC-7710 smart account delegation. */
+    public static final String TRANSFER_METHOD_ERC7710 = "erc7710";
+
     /** CAIP family pattern for EVM networks. */
     public static final String CAIP_FAMILY = "eip155:*";
 

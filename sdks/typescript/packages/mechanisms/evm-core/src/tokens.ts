@@ -21,8 +21,9 @@ export type TokenType = "eip3009" | "legacy";
  * - "permit": EIP-3009 transferWithAuthorization (default)
  * - "permit2": Uniswap Permit2 universal approval
  * - "approve": Legacy approve + transferFrom
+ * - "erc7710": ERC-7710 smart account delegation
  */
-export type AssetTransferMethod = "permit" | "permit2" | "approve";
+export type AssetTransferMethod = "permit" | "permit2" | "approve" | "erc7710";
 
 /**
  * Token configuration with EIP-712 domain parameters

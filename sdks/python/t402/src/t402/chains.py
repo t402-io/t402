@@ -430,7 +430,7 @@ def get_default_token_address(chain_id: str, token_type: str = "usdc") -> str:
 
 def get_transfer_method(chain_id: str, address: str) -> str:
     """Get the transfer method for a given chain and address.
-    Returns 'permit' (EIP-3009), 'permit2', or 'approve' (legacy).
+    Returns 'permit' (EIP-3009), 'permit2', 'approve' (legacy), or 'erc7710'.
     """
     for token in KNOWN_TOKENS.get(chain_id, []):
         if token["address"].lower() == address.lower():

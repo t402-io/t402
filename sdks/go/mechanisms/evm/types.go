@@ -2,6 +2,7 @@ package evm
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 )
 
@@ -100,6 +101,48 @@ func LegacyPayloadFromMap(data map[string]interface{}) (*ExactLegacyPayload, err
 	return payload, nil
 }
 
+// ExactERC7710Payload represents the ERC-7710 delegation payment payload.
+// Used with smart contract accounts (ERC-4337, ERC-7579 modular accounts)
+// that support delegation via ERC-7710.
+type ExactERC7710Payload struct {
+	// Address of the ERC-7710 Delegation Manager contract
+	DelegationManager string `json:"delegationManager"`
+	// Delegation proof/context required by the Delegation Manager
+	PermissionContext string `json:"permissionContext"`
+	// Address of the account that created the delegation
+	Delegator string `json:"delegator"`
+}
+
+// ToMap converts an ExactERC7710Payload to a map for JSON marshaling
+func (p *ExactERC7710Payload) ToMap() map[string]interface{} {
+	return map[string]interface{}{
+		"delegationManager": p.DelegationManager,
+		"permissionContext": p.PermissionContext,
+		"delegator":         p.Delegator,
+	}
+}
+
+// ERC7710PayloadFromMap creates an ExactERC7710Payload from a map
+func ERC7710PayloadFromMap(data map[string]interface{}) (*ExactERC7710Payload, error) {
+	payload := &ExactERC7710Payload{}
+
+	if dm, ok := data["delegationManager"].(string); ok {
+		payload.DelegationManager = dm
+	}
+	if pc, ok := data["permissionContext"].(string); ok {
+		payload.PermissionContext = pc
+	}
+	if d, ok := data["delegator"].(string); ok {
+		payload.Delegator = d
+	}
+
+	if payload.DelegationManager == "" || payload.PermissionContext == "" || payload.Delegator == "" {
+		return nil, fmt.Errorf("missing required ERC-7710 payload fields")
+	}
+
+	return payload, nil
+}
+
 // ClientEvmSigner defines the interface for client-side EVM signing operations
 type ClientEvmSigner interface {
 	// Address returns the signer's Ethereum address
@@ -174,6 +217,7 @@ const (
 	TransferMethodPermit  AssetTransferMethod = "permit"
 	TransferMethodPermit2 AssetTransferMethod = "permit2"
 	TransferMethodApprove AssetTransferMethod = "approve"
+	TransferMethodERC7710 AssetTransferMethod = "erc7710"
 )
 
 // AssetInfo contains information about an ERC20 token

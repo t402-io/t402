@@ -54,6 +54,24 @@ export type ExactLegacyPayload = {
 };
 
 // ============================================================================
+// ERC-7710 Delegation Types (Smart Account Delegation)
+// ============================================================================
+
+/**
+ * ERC-7710 delegation payload for smart account payments.
+ * Used with smart contract accounts (ERC-4337, ERC-7579 modular accounts)
+ * that support delegation via ERC-7710.
+ */
+export type ExactERC7710Payload = {
+  /** Address of the ERC-7710 Delegation Manager contract */
+  delegationManager: Address;
+  /** Delegation proof/context required by the Delegation Manager */
+  permissionContext: Hex;
+  /** Address of the account that created the delegation */
+  delegator: Address;
+};
+
+// ============================================================================
 // Up-To Scheme Types (EIP-2612 Permit)
 // ============================================================================
 
