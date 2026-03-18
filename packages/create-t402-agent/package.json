@@ -1,0 +1,9 @@
+{
+  "name": "create-t402-agent",
+  "version": "2.8.0",
+  "description": "Scaffold an AI agent with t402 payment capabilities",
+  "bin": { "create-t402-agent": "./src/cli.js" },
+  "type": "module",
+  "files": ["src"],
+  "keywords": ["t402", "agent", "scaffold", "ai", "payment", "mcp"]
+}
