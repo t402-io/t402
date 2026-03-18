@@ -20,13 +20,29 @@ import (
 
 // ExactSvmSchemeV1 implements the SchemeNetworkFacilitator interface for SVM (Solana) exact payments (V1)
 type ExactSvmSchemeV1 struct {
-	signer svm.FacilitatorSvmSigner
+	signer          svm.FacilitatorSvmSigner
+	settlementCache *svm.SettlementCache
 }
 
-// NewExactSvmSchemeV1 creates a new ExactSvmSchemeV1
-func NewExactSvmSchemeV1(signer svm.FacilitatorSvmSigner) *ExactSvmSchemeV1 {
-	return &ExactSvmSchemeV1{
+// NewExactSvmSchemeV1 creates a new ExactSvmSchemeV1.
+// An optional SettlementCache can be provided to share deduplication state across V1/V2 instances.
+func NewExactSvmSchemeV1(signer svm.FacilitatorSvmSigner, opts ...ExactSvmV1Option) *ExactSvmSchemeV1 {
+	s := &ExactSvmSchemeV1{
 		signer: signer,
+	}
+	for _, opt := range opts {
+		opt(s)
+	}
+	return s
+}
+
+// ExactSvmV1Option configures an ExactSvmSchemeV1.
+type ExactSvmV1Option func(*ExactSvmSchemeV1)
+
+// WithSettlementCacheV1 sets a shared settlement cache for duplicate detection.
+func WithSettlementCacheV1(cache *svm.SettlementCache) ExactSvmV1Option {
+	return func(s *ExactSvmSchemeV1) {
+		s.settlementCache = cache
 	}
 }
 
@@ -227,6 +243,21 @@ func (f *ExactSvmSchemeV1) Settle(
 		return nil, t402.NewSettleError("invalid_exact_solana_payload_transaction", verifyResp.Payer, network, "", err)
 	}
 
+	// Check for duplicate settlement
+	var cacheKey string
+	if f.settlementCache != nil {
+		cacheKey = svm.TransactionKey([]byte(svmPayload.Transaction))
+		if f.settlementCache.IsDuplicate(cacheKey) {
+			return nil, t402.NewSettleError("duplicate_settlement", verifyResp.Payer, network, "",
+				fmt.Errorf("transaction is already being settled"))
+		}
+		defer func() {
+			if err != nil {
+				f.settlementCache.Remove(cacheKey)
+			}
+		}()
+	}
+
 	// Parse extra field for feePayer (V1 uses *json.RawMessage)
 	var reqExtraMap map[string]interface{}
 	if requirements.Extra != nil {
@@ -267,6 +298,11 @@ func (f *ExactSvmSchemeV1) Settle(
 	// Wait for confirmation
 	if err := f.signer.ConfirmTransaction(ctx, signature, string(requirements.Network)); err != nil {
 		return nil, t402.NewSettleError("transaction_confirmation_failed", verifyResp.Payer, network, signature.String(), err)
+	}
+
+	// Remove from cache after successful settlement
+	if f.settlementCache != nil && cacheKey != "" {
+		f.settlementCache.Remove(cacheKey)
 	}
 
 	return &t402.SettleResponse{

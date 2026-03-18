@@ -1296,14 +1296,22 @@ class ExactSvmFacilitatorScheme:
     scheme = SCHEME_EXACT
     caip_family = "solana:*"
 
-    def __init__(self, signer: FacilitatorSvmSigner):
+    def __init__(
+        self,
+        signer: FacilitatorSvmSigner,
+        settlement_cache: Optional["SettlementCache"] = None,
+    ):
         """
         Initialize with a facilitator signer.
 
         Args:
             signer: FacilitatorSvmSigner implementation
+            settlement_cache: Optional SettlementCache to prevent duplicate
+                concurrent settlement requests. When provided, the settle
+                method will reject transactions that are already in-flight.
         """
         self._signer = signer
+        self._settlement_cache = settlement_cache
 
     def get_extra(self, network: str) -> Optional[Dict[str, Any]]:
         """
@@ -1497,9 +1505,26 @@ class ExactSvmFacilitatorScheme:
                 "payer": "",
             }
 
+        # Dedup via settlement cache
+        cache_key: Optional[str] = None
+        if self._settlement_cache is not None:
+            from t402.settlement_cache import SettlementCache
+
+            cache_key = SettlementCache.transaction_key(tx_base64)
+            if self._settlement_cache.is_duplicate(cache_key):
+                return {
+                    "success": False,
+                    "network": network,
+                    "transaction": "",
+                    "errorReason": "duplicate_settlement",
+                    "payer": "",
+                }
+
         # Verify first
         verify_result = await self.verify(payload, requirements)
         if not verify_result.get("isValid"):
+            if cache_key and self._settlement_cache:
+                self._settlement_cache.remove(cache_key)
             return {
                 "success": False,
                 "network": network,
@@ -1541,6 +1566,9 @@ class ExactSvmFacilitatorScheme:
                 "network": network,
                 "payer": verify_result.get("payer", ""),
             }
+        finally:
+            if cache_key and self._settlement_cache:
+                self._settlement_cache.remove(cache_key)
 
 
 # =============================================================================

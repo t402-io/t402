@@ -77,6 +77,7 @@ from t402.encoding import (
     extract_payment_from_headers,
     extract_payment_required_from_response,
 )
+from t402.settlement_cache import SettlementCache
 from t402.facilitator import FacilitatorClient, FacilitatorConfig
 from t402.exact import (
     prepare_payment_header,
@@ -377,6 +378,8 @@ __all__ = [
     "detect_protocol_version_from_headers",
     "extract_payment_from_headers",
     "extract_payment_required_from_response",
+    # Settlement Cache
+    "SettlementCache",
     # Facilitator
     "FacilitatorClient",
     "FacilitatorConfig",

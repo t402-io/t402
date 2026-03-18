@@ -2,12 +2,14 @@ package io.t402.schemes.svm.exact;
 
 import io.t402.schemes.svm.ExactSvmPayload;
 import io.t402.schemes.svm.FacilitatorSvmSigner;
+import io.t402.schemes.svm.SettlementCache;
 import io.t402.schemes.svm.SvmAuthorization;
 import io.t402.schemes.svm.SvmConstants;
 import io.t402.schemes.svm.SvmTransactionException;
 import io.t402.schemes.svm.SvmUtils;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +45,7 @@ public class ExactSvmFacilitatorScheme {
 
     private final FacilitatorSvmSigner signer;
     private final Random random = new Random();
+    private final SettlementCache settlementCache;
 
     /**
      * Creates a new ExactSvmFacilitatorScheme with the given signer.
@@ -50,10 +53,21 @@ public class ExactSvmFacilitatorScheme {
      * @param signer Facilitator signer for transaction operations
      */
     public ExactSvmFacilitatorScheme(FacilitatorSvmSigner signer) {
+        this(signer, null);
+    }
+
+    /**
+     * Creates a new ExactSvmFacilitatorScheme with the given signer and settlement cache.
+     *
+     * @param signer Facilitator signer for transaction operations
+     * @param settlementCache Optional cache to prevent duplicate concurrent settlements
+     */
+    public ExactSvmFacilitatorScheme(FacilitatorSvmSigner signer, SettlementCache settlementCache) {
         if (signer == null) {
             throw new IllegalArgumentException("Signer cannot be null");
         }
         this.signer = signer;
+        this.settlementCache = settlementCache;
     }
 
     /**
@@ -221,10 +235,25 @@ public class ExactSvmFacilitatorScheme {
                 SettlementResult.failure(network, "", "invalid_payload_structure", ""));
         }
 
+        // Check settlement cache for duplicate
+        final String cacheKey;
+        if (settlementCache != null) {
+            cacheKey = SettlementCache.transactionKey(txBase64.getBytes(StandardCharsets.UTF_8));
+            if (settlementCache.isDuplicate(cacheKey)) {
+                return CompletableFuture.completedFuture(
+                    SettlementResult.failure(network, "", "duplicate_settlement", ""));
+            }
+        } else {
+            cacheKey = null;
+        }
+
         // Verify first
         return verify(payload, requirements)
             .thenCompose(verifyResult -> {
                 if (!verifyResult.isValid) {
+                    if (cacheKey != null) {
+                        settlementCache.remove(cacheKey);
+                    }
                     return CompletableFuture.completedFuture(
                         SettlementResult.failure(network, "", verifyResult.invalidReason, verifyResult.payer));
                 }
@@ -238,14 +267,20 @@ public class ExactSvmFacilitatorScheme {
                     .thenCompose(signedTx ->
                         // Send and confirm
                         signer.sendAndConfirmTransaction(signedTx, requiredNetwork)
-                            .thenApply(signature ->
-                                SettlementResult.success(network, signature, verifyResult.payer)
-                            )
+                            .thenApply(signature -> {
+                                if (cacheKey != null) {
+                                    settlementCache.remove(cacheKey);
+                                }
+                                return SettlementResult.success(network, signature, verifyResult.payer);
+                            })
                     )
-                    .exceptionally(ex ->
-                        SettlementResult.failure(network, "",
-                            "transaction_failed: " + ex.getMessage(), verifyResult.payer)
-                    );
+                    .exceptionally(ex -> {
+                        if (cacheKey != null) {
+                            settlementCache.remove(cacheKey);
+                        }
+                        return SettlementResult.failure(network, "",
+                            "transaction_failed: " + ex.getMessage(), verifyResult.payer);
+                    });
             });
     }
 

@@ -27,5 +27,9 @@ export { isUptoSvmPayload } from "./upto/index";
 // Export constants
 export * from "./constants";
 
+// Export settlement cache
+export { SettlementCache } from "./settlement-cache";
+export type { SettlementCacheOptions } from "./settlement-cache";
+
 // Export utilities
 export * from "./utils";

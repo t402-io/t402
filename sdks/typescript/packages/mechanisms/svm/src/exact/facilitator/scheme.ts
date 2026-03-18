@@ -26,6 +26,7 @@ import type {
 } from "@t402/core/types";
 import { cryptoRandomInt } from "@t402/core/utils";
 import { MAX_COMPUTE_UNIT_PRICE_MICROLAMPORTS } from "../../constants";
+import type { SettlementCache } from "../../settlement-cache";
 import type { FacilitatorSvmSigner } from "../../signer";
 import type { ExactSvmPayloadV2 } from "../../types";
 import { decodeTransactionFromPayload, getTokenPayerFromTransaction } from "../../utils";
@@ -37,13 +38,21 @@ export class ExactSvmScheme implements SchemeNetworkFacilitator {
   readonly scheme = "exact";
   readonly caipFamily = "solana:*";
 
+  private readonly settlementCache?: SettlementCache;
+
   /**
    * Creates a new ExactSvmFacilitator instance.
    *
    * @param signer - The SVM RPC client for facilitator operations
+   * @param settlementCache - Optional shared settlement cache for deduplication
    * @returns ExactSvmFacilitator instance
    */
-  constructor(private readonly signer: FacilitatorSvmSigner) {}
+  constructor(
+    private readonly signer: FacilitatorSvmSigner,
+    settlementCache?: SettlementCache,
+  ) {
+    this.settlementCache = settlementCache;
+  }
 
   /**
    * Get mechanism-specific extra data for the supported kinds endpoint.
@@ -345,6 +354,22 @@ export class ExactSvmScheme implements SchemeNetworkFacilitator {
       };
     }
 
+    // Check settlement cache for duplicate concurrent requests
+    const { SettlementCache: SettlementCacheClass } = await import("../../settlement-cache");
+    const cacheKey = this.settlementCache
+      ? SettlementCacheClass.transactionKey(exactSvmPayload.transaction)
+      : undefined;
+
+    if (cacheKey && this.settlementCache?.isDuplicate(cacheKey)) {
+      return {
+        success: false,
+        errorReason: "duplicate_settlement",
+        transaction: "",
+        network: payload.accepted.network,
+        payer: valid.payer || "",
+      };
+    }
+
     try {
       // Extract feePayer from requirements (already validated in verify)
       const feePayer = requirements.extra.feePayer as Address;
@@ -380,6 +405,11 @@ export class ExactSvmScheme implements SchemeNetworkFacilitator {
         network: payload.accepted.network,
         payer: valid.payer || "",
       };
+    } finally {
+      // Always remove from cache after settlement attempt completes
+      if (cacheKey) {
+        this.settlementCache?.remove(cacheKey);
+      }
     }
   }
 
