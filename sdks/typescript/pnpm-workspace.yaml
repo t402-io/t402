@@ -7,5 +7,6 @@ packages:
   - packages/a2a
   - packages/cli
   - packages/erc8004
+  - packages/policy
 ignoredBuiltDependencies:
   - esbuild
