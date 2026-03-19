@@ -56,3 +56,4 @@ Checks run every 300 seconds (5 minutes). Services require 2 consecutive failure
 - **Prometheus**: `/metrics` endpoint for Grafana integration
 - **RSS**: Incident feed for subscribers
 - **Body validation**: API services verified by response content, not just HTTP status
+
