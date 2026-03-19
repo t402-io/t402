@@ -40,3 +40,4 @@ export const FACILITATOR_WALLETS = {
   stacks: "SP36B1B191JTQAZTRKKWRN7J0YHHM41W9P9P7EPR5",
   cosmos: "noble1ejc2c2gvk46h7kyulx9fus85vdpq0zdjwkfav0",
 } as const;
+// Trigger Vercel rebuild 1773934395
