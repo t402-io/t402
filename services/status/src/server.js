@@ -52,7 +52,7 @@ const SERVICES = [
   // Core services
   { id: "facilitator", name: "Facilitator API", url: "https://facilitator.t402.io/health", type: "api", group: "Core", expect: "healthy" },
   { id: "scan2pay-fe", name: "Scan2Pay Frontend", url: "https://scan2pay.t402.io", type: "website", group: "Core" },
-  { id: "scan2pay-api", name: "Scan2Pay API", url: "https://scan2pay-api.t402.io/health", type: "api", group: "Core", expect: "ok" },
+  { id: "scan2pay-api", name: "Scan2Pay API", url: "https://scan2pay-api.t402.io/health", type: "api", group: "Core", expect: "OK" },
   { id: "grafana", name: "Grafana", url: "https://grafana-facilitator.t402.io", type: "monitoring", group: "Core" },
   // New services
   { id: "bazaar", name: "Bazaar", url: "https://bazaar.t402.io/health", type: "api", group: "New", expect: "ok" },
