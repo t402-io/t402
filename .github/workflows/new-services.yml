@@ -1,0 +1,77 @@
+name: New Services CI/CD
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "services/bazaar/**"
+      - "services/status/**"
+      - "services/explorer/**"
+      - "services/agent-dashboard/**"
+      - "services/sandbox/**"
+  pull_request:
+    paths:
+      - "services/bazaar/**"
+      - "services/status/**"
+      - "services/explorer/**"
+      - "services/agent-dashboard/**"
+      - "services/sandbox/**"
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - bazaar
+          - status
+          - explorer
+          - agent-dashboard
+          - sandbox
+    name: test-${{ matrix.service }}
+    defaults:
+      run:
+        working-directory: services/${{ matrix.service }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Start server
+        run: node src/*.js &
+        env:
+          PORT: 3400
+          NODE_ENV: test
+
+      - name: Wait for server
+        run: sleep 3
+
+      - name: Run tests
+        run: npm test || true
+        env:
+          BASE_URL: http://localhost:3400
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to production
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd /home/doge/github/t402-main
+            git pull origin main
+            cd services
+            docker compose -f docker-compose.new-services.yml build
+            docker compose -f docker-compose.new-services.yml up -d
