@@ -10,5 +10,6 @@ packages:
   - packages/policy
   - packages/observability
   - packages/wdk*
+  - packages/react-native
 ignoredBuiltDependencies:
   - esbuild
