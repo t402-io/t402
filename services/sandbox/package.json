@@ -1,0 +1,13 @@
+{
+  "name": "t402-sandbox",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/proxy.js",
+    "start": "node src/proxy.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
