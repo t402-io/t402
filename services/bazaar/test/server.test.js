@@ -126,18 +126,18 @@ describe("Search", () => {
     assert.strictEqual(data.total, 0);
   });
 
-  it("multi-word query (weather+forecast matches, weather+zzzznonexistent fails)", async () => {
-    // Both terms match
-    const res1 = await fetch(`${BASE}/api/v1/search?q=weather+forecast`);
-    assert.strictEqual(res1.status, 200);
-    const data1 = await res1.json();
-    assert.ok(data1.services.length > 0, "weather+forecast should match");
+  it("multi-word query matches (weather+forecast)", async () => {
+    const res = await fetch(`${BASE}/api/v1/search?q=weather+forecast`);
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.ok(data.services.length > 0, "weather+forecast should match");
+  });
 
-    // Second term does not match
-    const res2 = await fetch(`${BASE}/api/v1/search?q=weather+zzzznonexistent`);
-    assert.strictEqual(res2.status, 200);
-    const data2 = await res2.json();
-    assert.strictEqual(data2.services.length, 0, "weather+zzzznonexistent should not match");
+  it("multi-word query fails when one term missing (weather+zzzznonexistent)", async () => {
+    const res = await fetch(`${BASE}/api/v1/search?q=weather+zzzznonexistent`);
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.strictEqual(data.services.length, 0, "weather+zzzznonexistent should not match");
   });
 
   it("token filter (USDT0)", async () => {

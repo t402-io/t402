@@ -11,10 +11,12 @@ import { z } from "zod";
 // ============================================================================
 
 export const searchBazaarInputSchema = z.object({
-  query: z.string().describe("Search query (e.g., 'weather API', 'image generation')"),
+  query: z.string().describe("Search query (supports multi-word, e.g., 'weather API', 'image generation')"),
   category: z.string().optional().describe("Filter by category (e.g., 'ai', 'data', 'compute')"),
   maxPrice: z.string().optional().describe("Maximum price in USD (e.g., '10.00')"),
-  network: z.string().optional().describe("Filter by network (e.g., 'eip155:8453')"),
+  network: z.string().optional().describe("Filter by CAIP-2 network (e.g., 'eip155:8453')"),
+  token: z.string().optional().describe("Filter by token (e.g., 'USDC', 'USDT0')"),
+  tags: z.string().optional().describe("Filter by tags (comma-separated, e.g., 'llm,inference')"),
 });
 
 export type SearchBazaarInput = z.infer<typeof searchBazaarInputSchema>;
@@ -26,7 +28,8 @@ export interface BazaarService {
   category: string;
   price: { amount: string; token: string; network: string };
   methods: string[];
-  rating?: number;
+  tags?: string[];
+  verified?: boolean;
 }
 
 export async function executeSearchBazaar(
@@ -40,6 +43,8 @@ export async function executeSearchBazaar(
   if (input.category) params.set("category", input.category);
   if (input.maxPrice) params.set("maxPrice", input.maxPrice);
   if (input.network) params.set("network", input.network);
+  if (input.token) params.set("token", input.token);
+  if (input.tags) params.set("tags", input.tags);
 
   try {
     const res = await fetch(`${bazaarUrl}/search?${params}`);
@@ -60,41 +65,41 @@ function getDemoResults(query: string): BazaarService[] {
     {
       url: "https://api.weather402.com/forecast",
       name: "Weather Forecast API",
-      description: "Global weather data with hourly resolution",
+      description: "Global weather data with hourly resolution, 7-day forecast",
       category: "data",
       price: { amount: "1000", token: "USDC", network: "eip155:8453" },
       methods: ["GET"],
     },
     {
-      url: "https://api.gpt402.com/v1/chat",
-      name: "GPT-4 Inference API",
-      description: "Pay-per-request GPT-4 API access",
+      url: "https://api.llm402.com/v1/chat/completions",
+      name: "LLM Inference API",
+      description: "Pay-per-request access to GPT-4, Claude, and open models",
       category: "ai",
       price: { amount: "5000", token: "USDC", network: "eip155:8453" },
       methods: ["POST"],
     },
     {
       url: "https://api.market402.com/report",
-      name: "DeFi Market Report",
-      description: "Weekly DeFi market analysis with trading signals",
-      category: "data",
+      name: "DeFi Market Intelligence",
+      description: "Weekly DeFi market analysis with trading signals and risk metrics",
+      category: "reports",
       price: { amount: "50000", token: "USDT0", network: "eip155:42161" },
       methods: ["GET"],
     },
     {
       url: "https://api.image402.com/generate",
       name: "Image Generation API",
-      description: "High-res image generation via Stable Diffusion",
+      description: "High-res image generation via Stable Diffusion XL and Flux",
       category: "ai",
       price: { amount: "2000", token: "USDC", network: "eip155:8453" },
       methods: ["POST"],
     },
     {
-      url: "https://api.compute402.com/run",
+      url: "https://api.compute402.com/gpu/run",
       name: "GPU Compute Service",
-      description: "On-demand GPU compute for ML inference",
+      description: "On-demand GPU compute for ML inference (A100, H100)",
       category: "compute",
-      price: { amount: "10000", token: "USDC", network: "eip155:8453" },
+      price: { amount: "100000", token: "USDT0", network: "eip155:42161" },
       methods: ["POST"],
     },
   ];
@@ -110,10 +115,12 @@ function getDemoResults(query: string): BazaarService[] {
 export function formatSearchBazaarResult(services: BazaarService[]): string {
   if (services.length === 0) return "No services found.";
   return services
-    .map(
-      (s) =>
-        `• **${s.name}** — ${s.description}\n  URL: ${s.url}\n  Price: ${Number(s.price.amount) / 1e6} ${s.price.token} on ${s.price.network}`,
-    )
+    .map((s) => {
+      let line = `• **${s.name}** — ${s.description}\n  URL: ${s.url}\n  Price: ${Number(s.price.amount) / 1e6} ${s.price.token} on ${s.price.network}`;
+      if (s.tags && s.tags.length > 0) line += `\n  Tags: ${s.tags.join(", ")}`;
+      if (s.verified !== undefined) line += `\n  Verified: ${s.verified ? "✓" : "✗"}`;
+      return line;
+    })
     .join("\n\n");
 }
 
@@ -179,10 +186,12 @@ export const BAZAAR_TOOL_DEFINITIONS = {
     inputSchema: {
       type: "object" as const,
       properties: {
-        query: { type: "string", description: "Search query" },
+        query: { type: "string", description: "Search query (supports multi-word)" },
         category: { type: "string", description: 'Category filter (e.g., "ai", "data", "compute")' },
         maxPrice: { type: "string", description: "Max price in USD" },
-        network: { type: "string", description: "Network filter" },
+        network: { type: "string", description: "CAIP-2 network filter" },
+        token: { type: "string", description: 'Token filter (e.g., "USDC", "USDT0")' },
+        tags: { type: "string", description: 'Tag filter (comma-separated, e.g., "llm,inference")' },
       },
       required: ["query"],
     },
