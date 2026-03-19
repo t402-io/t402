@@ -29,7 +29,7 @@ const SERVICES = [
   { id: "demo", name: "demo.t402.io", url: "https://demo.t402.io", type: "website" },
   { id: "facilitator", name: "Facilitator API", url: "https://facilitator.t402.io/health", type: "api" },
   { id: "scan2pay-fe", name: "Scan2Pay Frontend", url: "https://scan2pay.t402.io", type: "website" },
-  { id: "scan2pay-api", name: "Scan2Pay API", url: "https://scan2pay-api.t402.io/actuator/health", type: "api" },
+  { id: "scan2pay-api", name: "Scan2Pay API", url: "https://scan2pay-api.t402.io/health", type: "api" },
   { id: "grafana", name: "Grafana", url: "https://grafana-facilitator.t402.io", type: "monitoring" },
 ];
 
