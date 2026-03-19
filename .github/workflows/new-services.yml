@@ -47,23 +47,23 @@ jobs:
         run: npm ci
 
       - name: Start server
-        run: node src/*.js &
+        run: npm start &
         env:
-          PORT: 3400
           NODE_ENV: test
           BAZAAR_ADMIN_KEY: test-ci-key
 
       - name: Wait for server
         run: |
-          for i in $(seq 1 10); do
-            curl -sf http://localhost:3400/health && break
+          for i in $(seq 1 15); do
+            curl -sf http://localhost:${DEFAULT_PORT}/health && break
             sleep 1
           done
+        env:
+          DEFAULT_PORT: ${{ matrix.service == 'bazaar' && '3402' || matrix.service == 'status' && '3403' || matrix.service == 'explorer' && '3404' || matrix.service == 'agent-dashboard' && '3405' || '3406' }}
 
       - name: Run tests
         run: npm test
         env:
-          BASE_URL: http://localhost:3400
           BAZAAR_ADMIN_KEY: test-ci-key
 
   deploy:
