@@ -16,12 +16,8 @@ services:
       - PORT=3402
       - RATE_LIMIT_PER_MINUTE=60
       - BAZAAR_ADMIN_KEY=${BAZAAR_ADMIN_KEY:-}
-      - BAZAAR_DB_PATH=/app/data/bazaar.db
-      - REVERIFY_STALE_HOURS=24
-    volumes:
-      - bazaar-data:/app/data
     restart: unless-stopped
-    user: "app"
+    read_only: true
     security_opt:
       - no-new-privileges:true
     logging:
@@ -34,7 +30,6 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-    stop_grace_period: 10s
 
   status:
     build: ./status
@@ -78,16 +73,11 @@ services:
       - "3404:3404"
     environment:
       - PORT=3404
-      - DATABASE_URL=${EXPLORER_DATABASE_URL:-}
+      - DATABASE_URL=${DATABASE_URL:-}
+      - EXPLORER_MODE=${EXPLORER_MODE:-auto}
       - SQLITE_PATH=/data/explorer.db
-      - SYNC_INTERVAL_MS=60000
-      - EXPLORER_MODE=auto
     volumes:
       - explorer-data:/data
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    tmpfs:
-      - /tmp
     restart: unless-stopped
     read_only: true
     security_opt:
@@ -129,7 +119,7 @@ services:
     build: ./sandbox
     container_name: t402-sandbox
     ports:
-      - "127.0.0.1:3406:3406"
+      - "3406:3406"
     environment:
       - PORT=3406
       - FACILITATOR_URL=http://host.docker.internal:8080
@@ -152,6 +142,5 @@ services:
       retries: 3
 
 volumes:
-  bazaar-data:
   status-data:
   explorer-data:
