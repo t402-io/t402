@@ -53,13 +53,19 @@ async function checkService(service) {
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10_000);
-    const res = await fetch(service.url, { signal: controller.signal, redirect: "follow" });
+    const res = await fetch(service.url, {
+      signal: controller.signal,
+      redirect: "follow",
+      headers: { "User-Agent": "T402-StatusChecker/1.0" },
+    });
     clearTimeout(timeout);
     const latency = Date.now() - start;
+    // Treat 2xx and 3xx as operational; 429 (rate limited) is also operational (service is running, just throttled)
+    const isUp = res.ok || res.status === 307 || res.status === 302 || res.status === 429;
     return {
       id: service.id,
       name: service.name,
-      status: res.ok ? "operational" : "degraded",
+      status: isUp ? "operational" : "degraded",
       statusCode: res.status,
       latencyMs: latency,
       checkedAt: new Date().toISOString(),

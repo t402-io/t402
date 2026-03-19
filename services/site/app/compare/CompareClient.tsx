@@ -341,7 +341,7 @@ function HighlightCard({
 
 const t402Strengths = [
   {
-    title: "44 Networks",
+    title: "47 Networks",
     desc: "Support 13 blockchain families including EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, and Cosmos.",
   },
   {

@@ -68,8 +68,8 @@ const SUPPORTED_NETWORKS = ["eip155:84532", "eip155:11155111", "eip155:421614"];
 app.post("/verify", async (req, res) => {
   totalRequests++;
   const network = req.body?.paymentRequirements?.network;
-  if (network && !SUPPORTED_NETWORKS.some(n => network.startsWith(n.split(":")[0]))) {
-    return res.json({ isValid: false, error: "Sandbox only supports testnet networks", supportedKinds: SUPPORTED_NETWORKS, sandbox: true });
+  if (network && !SUPPORTED_NETWORKS.includes(network)) {
+    return res.status(400).json({ isValid: false, error: `Sandbox only supports testnets: ${SUPPORTED_NETWORKS.join(", ")}`, sandbox: true });
   }
   try {
     const r = await fetch(FACILITATOR_URL + "/verify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(req.body) });
@@ -82,8 +82,8 @@ app.post("/verify", async (req, res) => {
 app.post("/settle", async (req, res) => {
   totalRequests++;
   const network = req.body?.paymentRequirements?.network;
-  if (network && !SUPPORTED_NETWORKS.some(n => network.startsWith(n.split(":")[0]))) {
-    return res.json({ isValid: false, error: "Sandbox only supports testnet networks", supportedKinds: SUPPORTED_NETWORKS, sandbox: true });
+  if (network && !SUPPORTED_NETWORKS.includes(network)) {
+    return res.status(400).json({ success: false, error: `Sandbox only supports testnets: ${SUPPORTED_NETWORKS.join(", ")}`, sandbox: true });
   }
   try {
     const r = await fetch(FACILITATOR_URL + "/settle", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(req.body) });

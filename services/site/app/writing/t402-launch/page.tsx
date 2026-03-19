@@ -163,7 +163,7 @@ export default function T402LaunchPage() {
                   {[
                     { title: "Zero Transaction Fees", desc: "No percentage cuts, no flat fees. Keep 100% of your earnings." },
                     { title: "Instant Settlement", desc: "Funds are available immediately. No waiting days for payouts." },
-                    { title: "44 Networks", desc: "EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, and Cosmos across 13 blockchain families." },
+                    { title: "47 Networks", desc: "EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, and Cosmos across 13 blockchain families." },
                     { title: "Gasless Transactions", desc: "Users don\u2019t need native tokens. Pay transaction fees with USDT." },
                     { title: "AI Agent Ready", desc: "Native MCP integration for autonomous AI agent payments." },
                     { title: "Open Source", desc: "Fully auditable code. MIT licensed. Build with confidence." },
