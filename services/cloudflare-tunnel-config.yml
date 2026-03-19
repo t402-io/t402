@@ -1,0 +1,31 @@
+# Cloudflare Tunnel Configuration — New Services
+#
+# Add these entries to your existing ~/.cloudflared/config.yml
+# on the production server (220.134.32.65)
+#
+# After adding, restart cloudflared:
+#   sudo systemctl restart cloudflared
+#
+# Existing tunnel ID: d4000e5f-9db4-430f-961b-6fa2d7fb9aac
+
+# --- ADD THESE TO YOUR EXISTING ingress SECTION ---
+
+  # T402 Bazaar — Service Marketplace
+  - hostname: bazaar.t402.io
+    service: http://localhost:3402
+
+  # T402 Status — Public Health Monitoring
+  - hostname: status.t402.io
+    service: http://localhost:3403
+
+  # T402 Explorer — Payment Transaction Browser
+  - hostname: explorer.t402.io
+    service: http://localhost:3404
+
+  # T402 Agent Dashboard — AI Agent Monitoring
+  - hostname: agents.t402.io
+    service: http://localhost:3405
+
+  # T402 Sandbox — Testnet Facilitator
+  - hostname: sandbox.t402.io
+    service: http://localhost:3406

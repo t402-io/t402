@@ -1,0 +1,125 @@
+# T402 New Services — Docker Compose
+# Deploy: docker compose -f docker-compose.new-services.yml up -d
+#
+# Prerequisites:
+# - Docker + Docker Compose installed
+# - Cloudflare Tunnel configured for new domains
+# - Port 3402-3406 available
+
+services:
+  bazaar:
+    build: ./bazaar
+    container_name: t402-bazaar
+    ports:
+      - "3402:3402"
+    environment:
+      - PORT=3402
+      - RATE_LIMIT_PER_MINUTE=60
+      - BAZAAR_ADMIN_KEY=${BAZAAR_ADMIN_KEY:-}
+    restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3402/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  status:
+    build: ./status
+    container_name: t402-status
+    ports:
+      - "3403:3403"
+    environment:
+      - PORT=3403
+      - NODE_ENV=production
+    restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3403/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  explorer:
+    build: ./explorer
+    container_name: t402-explorer
+    ports:
+      - "3404:3404"
+    environment:
+      - PORT=3404
+    restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3404/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  agent-dashboard:
+    build: ./agent-dashboard
+    container_name: t402-agent-dashboard
+    ports:
+      - "3405:3405"
+    environment:
+      - PORT=3405
+    restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3405/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  sandbox:
+    build: ./sandbox
+    container_name: t402-sandbox
+    ports:
+      - "3406:3406"
+    environment:
+      - PORT=3406
+      - FACILITATOR_URL=http://host.docker.internal:8080
+      - RATE_LIMIT_PER_MINUTE=100
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3406/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
