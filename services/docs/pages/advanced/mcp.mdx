@@ -225,3 +225,110 @@ Check that Claude Desktop is properly configured and restarted.
 - Verify sufficient balance for amount + gas
 - Check network status
 - Ensure private key has correct permissions
+
+## New in v2.8.0
+
+### Bazaar Marketplace Tools
+
+Discover and pay for t402-protected services:
+
+```
+Agent: "Find AI inference APIs I can pay for"
+> [Uses t402/searchBazaar]
+> Found 3 services:
+> • GPT-4 Inference API — 0.005 USDC/request on Base
+> • Image Generation — 0.002 USDC/request on Base
+> • Speech-to-Text — 0.001 USDC/request on Arbitrum
+
+Agent: "Pay for the GPT-4 API"
+> [Uses t402/payForService]
+> Payment complete! Response received.
+```
+
+| Tool | Description |
+|------|-------------|
+| `t402/searchBazaar` | Search marketplace for paid services |
+| `t402/payForService` | Pay for and access a discovered service |
+| `t402/monetizeService` | Generate middleware config to monetize your API |
+
+### Sign & Verify Tools
+
+```
+Agent: "Sign a message proving I own this wallet"
+> [Uses t402/signMessage]
+> Signature: 0x3a4b...
+
+Agent: "Verify this signature is from 0xAlice"
+> [Uses t402/verifySignature]
+> Valid: true — signature matches 0xAlice
+```
+
+### Blockchain Indexer
+
+```
+Agent: "Show me recent USDC transfers for 0xMerchant"
+> [Uses t402/getTransferHistory]
+> Last 5 transfers:
+> • 1000 USDC from 0xBuyer1 (2 hours ago)
+> • 500 USDC from 0xBuyer2 (5 hours ago)
+```
+
+### Historical Prices
+
+```
+Agent: "What's the ETH price trend this week?"
+> [Uses t402/getHistoricalPrice]
+> ETH/USD 7-day: $3,200 → $3,450 (+7.8%)
+```
+
+## Integration with Policy Engine
+
+Use `@t402/policy` to set spending guardrails for MCP agents:
+
+```typescript
+import { PaymentPolicyEngine } from "@t402/policy";
+
+const policy = new PaymentPolicyEngine({
+  maxAmountPerPayment: "1000000",    // 1 USDC max per payment
+  maxAmountPerSession: "10000000",   // 10 USDC session budget
+  maxPaymentsPerHour: 100,
+  allowedNetworks: ["eip155:8453", "eip155:42161"],
+});
+```
+
+## Integration with Observability
+
+Track all MCP payment activity with `@t402/observability`:
+
+```typescript
+import { PaymentEventCollector, toPrometheusMetrics } from "@t402/observability";
+
+const collector = new PaymentEventCollector();
+// Expose metrics at /metrics
+app.get("/metrics", (req, res) => {
+  res.type("text/plain").send(toPrometheusMetrics(collector.getMetrics()));
+});
+```
+
+## Complete Tool Reference (36+ tools)
+
+### Core Payment (12)
+`t402/getBalance` · `t402/getAllBalances` · `t402/pay` · `t402/payGasless` · `t402/autoPay` · `t402/getTokenPrice` · `t402/getGasPrice` · `t402/estimatePaymentFee` · `t402/compareNetworkFees` · `t402/getBridgeFee` · `t402/bridge` · `t402/quoteBridge`
+
+### WDK Wallet (7)
+`wdk/getWallet` · `wdk/getBalances` · `wdk/transfer` · `wdk/swap` · `wdk/quoteSwap` · `wdk/executeSwap` · `t402/executeBridgeQuote`
+
+### Unified (2)
+`t402/smartPay` · `t402/paymentPlan`
+
+### ERC-8004 Identity (3)
+`erc8004/resolveAgent` · `erc8004/checkReputation` · `erc8004/verifyWallet`
+
+### Bazaar Marketplace (3)
+`t402/searchBazaar` · `t402/payForService` · `t402/monetizeService`
+
+### Indexer & Signing (4)
+`t402/signMessage` · `t402/verifySignature` · `t402/getTransferHistory` · `t402/getHistoricalPrice`
+
+### TON Bridge (5)
+`t402/tonBridgeQuote` · `t402/tonBridgeExecute` · `t402/tonBridgeStatus` · `t402/tonBridgeBalance` · `t402/tonBridgeHistory`
