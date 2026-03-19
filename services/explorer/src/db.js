@@ -61,8 +61,8 @@ export async function getTransactions({ network, token, scheme, limit = 20, curs
   if (scheme) { conds.push("scheme = $scheme"); params.scheme = scheme; }
   if (cursor) { conds.push("confirmed_at < (SELECT confirmed_at FROM settlements WHERE tx_hash = $cursor)"); params.cursor = cursor; }
   const where = conds.length > 0 ? `WHERE ${conds.join(" AND ")}` : "";
-  const countConds = conds.filter(c => !c.includes(cursor));
-  const countParams = { ...params }; delete countParams.$cursor;
+  const countConds = conds.filter(c => !c.includes("$cursor"));
+  const countParams = { ...params }; delete countParams.cursor;
   const countWhere = countConds.length > 0 ? `WHERE ${countConds.join(" AND ")}` : "";
   const countRow = db.sqlite.prepare(`SELECT COUNT(*) as total FROM settlements ${countWhere}`).get(countParams);
   const rows = db.sqlite.prepare(`SELECT * FROM settlements ${where} ORDER BY confirmed_at DESC LIMIT $limit`).all({ ...params, limit: limit + 1 });
