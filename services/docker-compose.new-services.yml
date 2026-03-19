@@ -16,8 +16,12 @@ services:
       - PORT=3402
       - RATE_LIMIT_PER_MINUTE=60
       - BAZAAR_ADMIN_KEY=${BAZAAR_ADMIN_KEY:-}
+      - BAZAAR_DB_PATH=/app/data/bazaar.db
+      - REVERIFY_STALE_HOURS=24
+    volumes:
+      - bazaar-data:/app/data
     restart: unless-stopped
-    read_only: true
+    user: "app"
     security_opt:
       - no-new-privileges:true
     logging:
@@ -30,6 +34,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+    stop_grace_period: 10s
 
   status:
     build: ./status
@@ -39,17 +44,29 @@ services:
     environment:
       - PORT=3403
       - NODE_ENV=production
+      - WEBHOOK_URLS=${WEBHOOK_URLS:-}
+      - MAINTENANCE_JSON=${MAINTENANCE_JSON:-[]}
+    volumes:
+      - status-data:/data
     restart: unless-stopped
     read_only: true
+    tmpfs:
+      - /tmp
     security_opt:
       - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3403/health"]
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3403/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -61,6 +78,16 @@ services:
       - "3404:3404"
     environment:
       - PORT=3404
+      - DATABASE_URL=${EXPLORER_DATABASE_URL:-}
+      - SQLITE_PATH=/data/explorer.db
+      - SYNC_INTERVAL_MS=60000
+      - EXPLORER_MODE=auto
+    volumes:
+      - explorer-data:/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    tmpfs:
+      - /tmp
     restart: unless-stopped
     read_only: true
     security_opt:
@@ -102,7 +129,7 @@ services:
     build: ./sandbox
     container_name: t402-sandbox
     ports:
-      - "3406:3406"
+      - "127.0.0.1:3406:3406"
     environment:
       - PORT=3406
       - FACILITATOR_URL=http://host.docker.internal:8080
@@ -123,3 +150,8 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+
+volumes:
+  bazaar-data:
+  status-data:
+  explorer-data:

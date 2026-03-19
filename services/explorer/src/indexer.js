@@ -1,98 +1,138 @@
 /**
- * Transaction indexer — in production, connects to facilitator logs or chain RPCs.
- * Currently uses in-memory store with generated data.
+ * Transaction indexer — seed data generation + PG-to-SQLite sync worker.
+ *
+ * Seed data uses correct address formats and decimal ranges per chain.
+ * Sync worker periodically pulls new settlements from PG into SQLite cache.
  */
 
-const transactions = [];
-let txId = 1;
+import { syncToCache, setLastSync, getPgPool } from "./db.js";
+
+function randomHex(len) {
+  return Array.from({ length: len }, () => Math.floor(Math.random() * 16).toString(16)).join("");
+}
+
+function randomEvmAddress() {
+  return "0x" + randomHex(40);
+}
+
+function randomSolanaAddress() {
+  const chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+  return Array.from({ length: 44 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+}
+
+function randomTonAddress() {
+  return "UQ" + Array.from({ length: 46 }, () => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"[Math.floor(Math.random() * 62)]).join("");
+}
+
+function randomTronAddress() {
+  return "T" + Array.from({ length: 33 }, () => "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"[Math.floor(Math.random() * 58)]).join("");
+}
+
+function randomStellarAddress() {
+  return "G" + Array.from({ length: 55 }, () => "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"[Math.floor(Math.random() * 32)]).join("");
+}
+
+function randomTxHash(network) {
+  if (network.startsWith("solana:")) return randomSolanaAddress();
+  if (network.startsWith("ton:")) return randomHex(64);
+  if (network.startsWith("tron:")) return randomHex(64);
+  if (network.startsWith("stellar:")) return randomHex(64);
+  return "0x" + randomHex(64);
+}
+
+function randomAddress(network) {
+  if (network.startsWith("solana:")) return randomSolanaAddress();
+  if (network.startsWith("ton:")) return randomTonAddress();
+  if (network.startsWith("tron:")) return randomTronAddress();
+  if (network.startsWith("stellar:")) return randomStellarAddress();
+  return randomEvmAddress();
+}
 
 const NETWORKS = [
   "eip155:8453", "eip155:42161", "eip155:1", "eip155:137", "eip155:10",
   "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", "ton:mainnet", "tron:mainnet",
-  "stellar:pubnet", "spark:mainnet",
+  "stellar:pubnet",
 ];
-const TOKENS = ["USDC", "USDT0", "USDT", "USAT"];
-const SCHEMES = ["exact", "exact-legacy", "exact-direct"];
 
-function randomHex(len) {
-  return "0x" + Array.from({ length: len }, () => Math.floor(Math.random() * 16).toString(16)).join("");
+const TOKENS = ["USDC", "USDT0", "USDT", "USAT"];
+
+function getScheme(network) {
+  if (network.startsWith("eip155:")) {
+    return Math.random() < 0.5 ? "exact" : "exact-legacy";
+  }
+  return "exact";
 }
 
-// Seed data
+function getDecimals(token, network) {
+  if (network.startsWith("stellar:") && token === "USDC") return 7;
+  return 6;
+}
+
 export function seedTransactions(count = 100) {
+  const transactions = [];
   for (let i = 0; i < count; i++) {
     const net = NETWORKS[i % NETWORKS.length];
+    const token = TOKENS[i % TOKENS.length];
+    const decimals = getDecimals(token, net);
     const ago = Math.floor(Math.random() * 86400 * 30);
+    const humanAmount = Math.random() * 9999.99 + 0.01;
+    const rawAmount = Math.floor(humanAmount * (10 ** decimals));
+
     transactions.push({
-      id: txId++,
-      txHash: randomHex(64),
+      id: crypto.randomUUID(),
+      txHash: randomTxHash(net),
       network: net,
-      scheme: net.startsWith("eip155") ? SCHEMES[i % 2] : "exact",
-      token: TOKENS[i % TOKENS.length],
-      amount: String(Math.floor(Math.random() * 1000000) + 1000),
-      from: randomHex(40),
-      to: randomHex(40),
+      scheme: getScheme(net),
+      token,
+      amount: String(rawAmount),
+      from: randomAddress(net),
+      to: randomAddress(net),
       status: "confirmed",
-      blockNumber: Math.floor(Math.random() * 10000000) + 1000000,
-      gasUsed: net.startsWith("eip155") ? String(Math.floor(Math.random() * 200000) + 50000) : "0",
+      gasUsed: net.startsWith("eip155:") ? String(Math.floor(Math.random() * 200000) + 50000) : "0",
       settledAt: new Date(Date.now() - ago * 1000).toISOString(),
     });
   }
   transactions.sort((a, b) => new Date(b.settledAt) - new Date(a.settledAt));
+  return transactions;
 }
 
-export function getTransactions({ network, token, scheme, limit = 20, offset = 0, cursor } = {}) {
-  let results = [...transactions];
-  if (network) results = results.filter((t) => t.network === network);
-  if (token) results = results.filter((t) => t.token === token);
-  if (scheme) results = results.filter((t) => t.scheme === scheme);
-  if (cursor) {
-    const idx = results.findIndex((t) => t.txHash === cursor);
-    if (idx >= 0) results = results.slice(idx + 1);
+let syncInterval = null;
+let lastSyncTimestamp = null;
+
+export function startSync(intervalMs = 60000) {
+  if (syncInterval) return;
+
+  async function doSync() {
+    const pool = getPgPool();
+    if (!pool) return;
+
+    try {
+      const since = lastSyncTimestamp || new Date(Date.now() - 86400_000 * 30).toISOString();
+      const result = await pool.query(
+        "SELECT * FROM settlements WHERE confirmed_at > $1 ORDER BY confirmed_at ASC LIMIT 1000",
+        [since],
+      );
+
+      if (result.rows.length > 0) {
+        syncToCache(result.rows);
+        lastSyncTimestamp = result.rows[result.rows.length - 1].confirmed_at;
+        setLastSync(new Date().toISOString());
+        console.log(`Synced ${result.rows.length} settlements from PG`);
+      }
+    } catch (err) {
+      console.warn("PG sync failed:", err.message);
+    }
   }
 
-  const page = results.slice(offset, offset + limit);
-  return {
-    transactions: page,
-    total: results.length,
-    hasMore: offset + limit < results.length,
-    nextCursor: page.length > 0 ? page[page.length - 1].txHash : null,
-  };
+  doSync();
+  syncInterval = setInterval(doSync, intervalMs);
+  console.log(`Sync worker started (${intervalMs}ms interval)`);
 }
 
-export function getTransaction(hash) {
-  return transactions.find((t) => t.txHash === hash);
-}
-
-export function search(query) {
-  const q = query.toLowerCase();
-  return transactions.filter(
-    (t) => t.txHash.includes(q) || t.from.includes(q) || t.to.includes(q),
-  ).slice(0, 50);
-}
-
-export function getStats(days = 7) {
-  const cutoff = Date.now() - days * 86400_000;
-  const recent = transactions.filter((t) => new Date(t.settledAt).getTime() > cutoff);
-  const byNetwork = {}, byToken = {}, byScheme = {};
-  let totalVolume = 0n;
-
-  for (const tx of recent) {
-    byNetwork[tx.network] = (byNetwork[tx.network] || 0) + 1;
-    byToken[tx.token] = (byToken[tx.token] || 0) + 1;
-    byScheme[tx.scheme] = (byScheme[tx.scheme] || 0) + 1;
-    totalVolume += BigInt(tx.amount);
+export function stopSync() {
+  if (syncInterval) {
+    clearInterval(syncInterval);
+    syncInterval = null;
+    console.log("Sync worker stopped");
   }
-
-  return {
-    period: `${days}d`,
-    totalTransactions: recent.length,
-    totalVolume: totalVolume.toString(),
-    uniquePayers: new Set(recent.map((t) => t.from)).size,
-    uniqueRecipients: new Set(recent.map((t) => t.to)).size,
-    byNetwork,
-    byToken,
-    byScheme,
-    avgTransactionSize: recent.length > 0 ? String(totalVolume / BigInt(recent.length)) : "0",
-  };
 }

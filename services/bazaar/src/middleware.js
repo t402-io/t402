@@ -1,11 +1,92 @@
 /**
- * Middleware: rate limiting, API key auth, service verification
+ * Middleware: rate limiting, API key auth, input validation, service verification, metrics
  */
 
-// Simple in-memory rate limiter
+// ── Metrics ───────────────────────────────────────────────────────────
+const metrics = {
+  startedAt: new Date().toISOString(),
+  requests: { total: 0, byMethod: {}, byStatus: {}, byPath: {} },
+  errors: 0,
+  verifications: { total: 0, successful: 0, returned402: 0 },
+  registrations: { total: 0, rejected: 0, duplicates: 0 },
+};
+
+export function getMetrics() {
+  return { ...metrics, uptime: process.uptime() };
+}
+
+function recordRequest(method, path, status) {
+  metrics.requests.total++;
+  metrics.requests.byMethod[method] = (metrics.requests.byMethod[method] || 0) + 1;
+  metrics.requests.byStatus[status] = (metrics.requests.byStatus[status] || 0) + 1;
+
+  // Normalize path — collapse IDs to :id
+  const normalized = path.replace(/\/svc-\d+/g, "/:id").split("?")[0];
+  metrics.requests.byPath[normalized] = (metrics.requests.byPath[normalized] || 0) + 1;
+}
+
+export function recordError() {
+  metrics.errors++;
+}
+
+export function recordVerification(reachable, returns402) {
+  metrics.verifications.total++;
+  if (reachable) metrics.verifications.successful++;
+  if (returns402) metrics.verifications.returned402++;
+}
+
+export function recordRegistration(rejected, duplicate) {
+  metrics.registrations.total++;
+  if (rejected) metrics.registrations.rejected++;
+  if (duplicate) metrics.registrations.duplicates++;
+}
+
+// ── Structured logging ────────────────────────────────────────────────
+function log(level, msg, data) {
+  const entry = {
+    time: new Date().toISOString(),
+    level,
+    service: "t402-bazaar",
+    msg,
+    ...data,
+  };
+  console.log(JSON.stringify(entry));
+}
+
+export const logger = {
+  info: (msg, data) => log("info", msg, data),
+  warn: (msg, data) => log("warn", msg, data),
+  error: (msg, data) => log("error", msg, data),
+};
+
+// ── Request logging middleware ────────────────────────────────────────
+export function requestLogger(req, res, next) {
+  const start = performance.now();
+  const originalEnd = res.end;
+
+  res.end = function (...args) {
+    const duration = Math.round(performance.now() - start);
+    recordRequest(req.method, req.url, res.statusCode);
+
+    logger.info("request", {
+      method: req.method,
+      url: req.url,
+      status: res.statusCode,
+      duration_ms: duration,
+      ip: req.headers["cf-connecting-ip"] || req.headers["x-forwarded-for"] || req.ip,
+    });
+
+    originalEnd.apply(res, args);
+  };
+
+  next();
+}
+
+// ── Rate limiting ─────────────────────────────────────────────────────
 const rateLimits = new Map();
 const RATE_LIMIT = parseInt(process.env.RATE_LIMIT_PER_MINUTE || "60");
 const RATE_WINDOW = 60_000;
+const MAX_RATE_LIMIT_ENTRIES = 10_000;
 
 export function rateLimit(req, res, next) {
   const ip = req.headers["cf-connecting-ip"] || req.headers["x-forwarded-for"] || req.ip;
@@ -14,6 +95,9 @@ export function rateLimit(req, res, next) {
 
   let entry = rateLimits.get(key);
   if (!entry || now - entry.windowStart > RATE_WINDOW) {
+    if (!entry && rateLimits.size >= MAX_RATE_LIMIT_ENTRIES) {
+      pruneExpiredEntries();
+    }
     entry = { count: 0, windowStart: now };
     rateLimits.set(key, entry);
   }
@@ -28,15 +112,17 @@ export function rateLimit(req, res, next) {
   next();
 }
 
-// Prune expired entries every 5 minutes
-setInterval(() => {
+function pruneExpiredEntries() {
   const cutoff = Date.now() - RATE_WINDOW * 2;
   for (const [key, entry] of rateLimits) {
     if (entry.windowStart < cutoff) rateLimits.delete(key);
   }
-}, 300_000);
+}
 
-// API key auth for write operations
+const _pruneInterval = setInterval(pruneExpiredEntries, 300_000);
+_pruneInterval.unref();
+
+// ── Auth ──────────────────────────────────────────────────────────────
 const ADMIN_API_KEY = process.env.BAZAAR_ADMIN_KEY;
 
 export function requireAuth(req, res, next) {
@@ -51,21 +137,196 @@ export function requireAuth(req, res, next) {
   next();
 }
 
-// Service URL verification — probe the URL to check if it returns 402
+// ── Input validation ──────────────────────────────────────────────────
+const MAX_NAME_LENGTH = 200;
+const MAX_DESCRIPTION_LENGTH = 2000;
+const MAX_CATEGORY_LENGTH = 50;
+const MAX_METHODS = 10;
+const VALID_METHODS = new Set(["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"]);
+const VALID_TOKENS = new Set(["USDC", "USDT", "USDT0", "USAT"]);
+
+export function validateServiceInput(body) {
+  const errors = [];
+
+  if (!body.url || typeof body.url !== "string") {
+    errors.push("url is required and must be a string");
+  } else {
+    try {
+      const parsed = new URL(body.url);
+      if (!["https:", "http:"].includes(parsed.protocol)) {
+        errors.push("URL must use http or https protocol");
+      }
+    } catch {
+      errors.push("Invalid URL format");
+    }
+  }
+
+  if (!body.name || typeof body.name !== "string") {
+    errors.push("name is required and must be a string");
+  } else if (body.name.length > MAX_NAME_LENGTH) {
+    errors.push(`name must be at most ${MAX_NAME_LENGTH} characters`);
+  }
+
+  if (!body.price || typeof body.price !== "object") {
+    errors.push("price is required and must be an object");
+  } else {
+    if (!body.price.amount || typeof body.price.amount !== "string" || !/^\d+$/.test(body.price.amount)) {
+      errors.push("price.amount must be a numeric string (smallest unit)");
+    }
+    if (!body.price.token || !VALID_TOKENS.has(body.price.token)) {
+      errors.push(`price.token must be one of: ${[...VALID_TOKENS].join(", ")}`);
+    }
+    if (!body.price.network || typeof body.price.network !== "string") {
+      errors.push("price.network is required (CAIP-2 format, e.g. eip155:8453)");
+    }
+  }
+
+  if (body.description !== undefined) {
+    if (typeof body.description !== "string") {
+      errors.push("description must be a string");
+    } else if (body.description.length > MAX_DESCRIPTION_LENGTH) {
+      errors.push(`description must be at most ${MAX_DESCRIPTION_LENGTH} characters`);
+    }
+  }
+
+  if (body.category !== undefined) {
+    if (typeof body.category !== "string") {
+      errors.push("category must be a string");
+    } else if (body.category.length > MAX_CATEGORY_LENGTH) {
+      errors.push(`category must be at most ${MAX_CATEGORY_LENGTH} characters`);
+    }
+  }
+
+  if (body.methods !== undefined) {
+    if (!Array.isArray(body.methods)) {
+      errors.push("methods must be an array");
+    } else if (body.methods.length > MAX_METHODS) {
+      errors.push(`methods must have at most ${MAX_METHODS} entries`);
+    } else {
+      for (const m of body.methods) {
+        if (!VALID_METHODS.has(m)) {
+          errors.push(`Invalid method: ${m}`);
+        }
+      }
+    }
+  }
+
+  if (body.owner !== undefined && typeof body.owner !== "string") {
+    errors.push("owner must be a string");
+  }
+
+  return errors;
+}
+
+// ── Sanitization ──────────────────────────────────────────────────────
+export function sanitizeString(str) {
+  return str.replace(/<[^>]*>/g, "").trim();
+}
+
+// ── SSRF protection ───────────────────────────────────────────────────
+const BLOCKED_HOSTNAMES = new Set([
+  "localhost",
+  "127.0.0.1",
+  "0.0.0.0",
+  "[::1]",
+  "metadata.google.internal",
+]);
+
+function isPrivateIP(hostname) {
+  if (BLOCKED_HOSTNAMES.has(hostname)) return true;
+
+  const ipv4Match = hostname.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+  if (ipv4Match) {
+    const [, a, b] = ipv4Match.map(Number);
+    if (a === 10) return true;
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    if (a === 192 && b === 168) return true;
+    if (a === 169 && b === 254) return true;
+    if (a === 0) return true;
+  }
+
+  return false;
+}
+
+// ── Service verification ──────────────────────────────────────────────
 export async function verifyServiceUrl(url) {
   try {
+    const parsed = new URL(url);
+    if (isPrivateIP(parsed.hostname)) {
+      recordVerification(false, false);
+      return { reachable: false, returns402: false, error: "URL points to a private/internal address" };
+    }
+
+    const start = performance.now();
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5_000);
-    const res = await fetch(url, { signal: controller.signal, method: "GET" });
+    const res = await fetch(url, {
+      signal: controller.signal,
+      method: "GET",
+      redirect: "manual",
+    });
     clearTimeout(timeout);
+    const latencyMs = Math.round(performance.now() - start);
 
-    return {
+    const result = {
       reachable: true,
       returns402: res.status === 402,
       statusCode: res.status,
-      latencyMs: 0, // Would need timing
+      latencyMs,
     };
+
+    // Extract discovery info from 402 response
+    if (res.status === 402) {
+      try {
+        const body = await res.json();
+        result.discovery = extractDiscoveryInfo(body);
+      } catch {
+        // Response wasn't JSON — that's fine
+      }
+    }
+
+    recordVerification(true, res.status === 402);
+    return result;
   } catch (e) {
+    recordVerification(false, false);
     return { reachable: false, returns402: false, error: e.message };
   }
+}
+
+/**
+ * Extract bazaar discovery info from a 402 PaymentRequired response.
+ * Supports both v2 (extensions.bazaar) and v1 (outputSchema) formats.
+ */
+function extractDiscoveryInfo(body) {
+  // V2: extensions.bazaar.info
+  if (body?.extensions?.bazaar?.info) {
+    return {
+      version: 2,
+      input: body.extensions.bazaar.info.input || null,
+      output: body.extensions.bazaar.info.output || null,
+    };
+  }
+
+  // V1: outputSchema (legacy)
+  if (body?.paymentRequirements?.[0]?.outputSchema || body?.requirements?.outputSchema) {
+    const schema = body.paymentRequirements?.[0]?.outputSchema || body.requirements?.outputSchema;
+    return {
+      version: 1,
+      output: { type: "json", schema },
+    };
+  }
+
+  return null;
+}
+
+// ── Error handler ─────────────────────────────────────────────────────
+export function errorHandler(err, _req, res, _next) {
+  recordError();
+  logger.error("unhandled error", { error: err.message, stack: err.stack });
+
+  if (err.type === "entity.parse.failed") {
+    return res.status(400).json({ error: "Invalid JSON in request body" });
+  }
+
+  res.status(500).json({ error: "Internal server error" });
 }

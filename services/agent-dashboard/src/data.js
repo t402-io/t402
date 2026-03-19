@@ -49,6 +49,8 @@ const NETWORKS = [
     decimals: 6,
   },
   { caip2: "ton:mainnet", label: "TON", token: "USDT", decimals: 6 },
+  { caip2: "stellar:pubnet", label: "Stellar", token: "USDC", decimals: 7 },
+  { caip2: "tron:mainnet", label: "TRON", token: "USDT", decimals: 6 },
 ];
 
 const SERVICES = [
@@ -82,7 +84,7 @@ export function generatePaymentHistory(address, days = 7) {
   for (let i = 0; i < count; i++) {
     const net = NETWORKS[Math.floor(rand() * NETWORKS.length)];
     const ago = Math.floor(rand() * 86400 * days);
-    const amountRaw = Math.floor(rand() * 200000) + 100; // 100–200099 smallest units
+    const amountRaw = Math.floor(rand() * 4990001) + 10000; // 10000–5000000 smallest units ($0.01–$5.00)
     const status = STATUSES[Math.floor(rand() * STATUSES.length)];
 
     payments.push({
@@ -173,8 +175,8 @@ export function generateBudget(address) {
  * @param {number} [days=7]
  * @returns {object}
  */
-export function generateStats(address, days = 7) {
-  const payments = generatePaymentHistory(address, days);
+export function generateStats(address, days = 7, payments = null) {
+  payments = payments ?? generatePaymentHistory(address, days);
   const settled = payments.filter((p) => p.status === "settled");
 
   // aggregate by service
@@ -223,6 +225,7 @@ export function generateStats(address, days = 7) {
 export function generateAlerts(address) {
   const budget = generateBudget(address);
   const alerts = [];
+  const alertTimestamp = new Date(Math.floor(Date.now() / 3600000) * 3600000).toISOString();
 
   const sessionPct = budget.usage.sessionPercentage;
   const todayPct = budget.usage.todayPercentage;
@@ -234,7 +237,7 @@ export function generateAlerts(address) {
       message: `Session budget exceeded: ${sessionPct.toFixed(1)}% used ($${(Number(budget.usage.sessionSpent) / 1e6).toFixed(2)} / $${(Number(budget.usage.sessionLimit) / 1e6).toFixed(2)})`,
       field: "session",
       percentage: sessionPct,
-      timestamp: new Date().toISOString(),
+      timestamp: alertTimestamp,
     });
   } else if (sessionPct >= 80) {
     alerts.push({
@@ -243,7 +246,7 @@ export function generateAlerts(address) {
       message: `Session budget nearing limit: ${sessionPct.toFixed(1)}% used ($${(Number(budget.usage.sessionSpent) / 1e6).toFixed(2)} / $${(Number(budget.usage.sessionLimit) / 1e6).toFixed(2)})`,
       field: "session",
       percentage: sessionPct,
-      timestamp: new Date().toISOString(),
+      timestamp: alertTimestamp,
     });
   }
 
@@ -254,7 +257,7 @@ export function generateAlerts(address) {
       message: `Daily budget exceeded: ${todayPct.toFixed(1)}% used ($${(Number(budget.usage.todaySpent) / 1e6).toFixed(2)} / $${(Number(budget.usage.todayLimit) / 1e6).toFixed(2)})`,
       field: "daily",
       percentage: todayPct,
-      timestamp: new Date().toISOString(),
+      timestamp: alertTimestamp,
     });
   } else if (todayPct >= 80) {
     alerts.push({
@@ -263,7 +266,7 @@ export function generateAlerts(address) {
       message: `Daily budget nearing limit: ${todayPct.toFixed(1)}% used ($${(Number(budget.usage.todaySpent) / 1e6).toFixed(2)} / $${(Number(budget.usage.todayLimit) / 1e6).toFixed(2)})`,
       field: "daily",
       percentage: todayPct,
-      timestamp: new Date().toISOString(),
+      timestamp: alertTimestamp,
     });
   }
 
@@ -279,17 +282,27 @@ export function generateAlerts(address) {
 export function exportPaymentsCsv(address, days = 7) {
   const payments = generatePaymentHistory(address, days);
   const header = "id,timestamp,service,network,token,amount,amount_usd,to,txHash,status";
+
+  /** RFC 4180: wrap in double-quotes if value contains comma, quote, or newline. */
+  function csvField(value) {
+    const str = String(value);
+    if (str.includes(",") || str.includes('"') || str.includes("\n") || str.includes("\r")) {
+      return '"' + str.replace(/"/g, '""') + '"';
+    }
+    return str;
+  }
+
   const rows = payments.map((p) =>
     [
       p.id,
       p.timestamp,
-      `"${p.service}"`,
-      p.network,
+      csvField(p.service),
+      csvField(p.network),
       p.token,
       p.amount,
       p.amountFormatted,
-      p.to,
-      p.txHash,
+      csvField(p.to),
+      csvField(p.txHash),
       p.status,
     ].join(","),
   );

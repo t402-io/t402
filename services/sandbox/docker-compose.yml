@@ -1,4 +1,4 @@
-# Sandbox Facilitator - Testnet Only
+# Sandbox Facilitator - Testnet Only (standalone dev mode)
 # Deploy: docker compose up -d
 
 services:
@@ -8,7 +8,7 @@ services:
       - "8080:8080"
     environment:
       - ENV=testnet
-      - NETWORKS=eip155:84532,eip155:11155111,solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1
+      - NETWORKS=eip155:84532,eip155:11155111,eip155:421614,solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1
       - EVM_PRIVATE_KEY=${EVM_PRIVATE_KEY}
       - RATE_LIMIT_PER_MINUTE=100
       - LOG_LEVEL=info

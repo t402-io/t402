@@ -40,23 +40,31 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: "22"
+          cache: "npm"
+          cache-dependency-path: services/${{ matrix.service }}/package-lock.json
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Start server
         run: node src/*.js &
         env:
           PORT: 3400
           NODE_ENV: test
+          BAZAAR_ADMIN_KEY: test-ci-key
 
       - name: Wait for server
-        run: sleep 3
+        run: |
+          for i in $(seq 1 10); do
+            curl -sf http://localhost:3400/health && break
+            sleep 1
+          done
 
       - name: Run tests
-        run: npm test || true
+        run: npm test
         env:
           BASE_URL: http://localhost:3400
+          BAZAAR_ADMIN_KEY: test-ci-key
 
   deploy:
     needs: test
@@ -70,8 +78,9 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
-            cd /home/doge/github/t402-main
-            git pull origin main
+            cd /home/doge/github/t402
+            git fetch origin main
+            git checkout origin/main -- services/
             cd services
             docker compose -f docker-compose.new-services.yml build
             docker compose -f docker-compose.new-services.yml up -d

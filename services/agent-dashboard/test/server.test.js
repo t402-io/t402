@@ -127,10 +127,17 @@ describe("Agent Dashboard API", () => {
     assert.ok(csv2.length > 0);
   });
 
-  it("GET / returns HTML dashboard", async () => {
+  it("GET / returns HTML dashboard with onboarding", async () => {
     const res = await fetch(BASE);
     const html = await res.text();
     assert.ok(html.includes("Agent Payment Dashboard"));
+    assert.ok(html.includes("Try Demo"));
+    assert.ok(html.includes("Load Dashboard"));
+  });
+
+  it("GET / with address shows toolbar links", async () => {
+    const res = await fetch(`${BASE}?address=0xToolbar`);
+    const html = await res.text();
     assert.ok(html.includes("Export CSV"));
     assert.ok(html.includes("Alerts API"));
   });

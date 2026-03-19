@@ -4,19 +4,42 @@
  * Enables AI agents to discover, register, and search for
  * t402-protected paid API services.
  *
- * GET  /api/v1/search?q=weather&category=data&maxPrice=10
- * GET  /api/v1/services/:id
- * POST /api/v1/services (register new service)
- * GET  /api/v1/categories
- * GET  /api/v1/stats
- * GET  /health
+ * GET    /api/v1/search?q=weather&category=data&maxPrice=10
+ * GET    /api/v1/services/:id
+ * POST   /api/v1/services          (register new service)
+ * PUT    /api/v1/services/:id      (update service)
+ * DELETE /api/v1/services/:id      (remove service)
+ * GET    /api/v1/services/:id/verify
+ * GET    /api/v1/featured
+ * GET    /api/v1/categories
+ * GET    /api/v1/stats
+ * GET    /health
+ * GET    /ready
+ * GET    /metrics
  */
 
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 import express from "express";
-import { rateLimit, requireAuth, verifyServiceUrl } from "./middleware.js";
+import compression from "compression";
+import {
+  rateLimit,
+  requireAuth,
+  validateServiceInput,
+  sanitizeString,
+  verifyServiceUrl,
+  requestLogger,
+  logger,
+  getMetrics,
+  recordRegistration,
+  errorHandler,
+} from "./middleware.js";
+import { store, seedStore, getNextId } from "./store.js";
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: "100kb" }));
+app.use(compression());
 
 // Security headers
 app.disable("x-powered-by");
@@ -24,132 +47,76 @@ app.use((_req, res, next) => {
   res.set("X-Content-Type-Options", "nosniff");
   res.set("X-Frame-Options", "DENY");
   res.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.set("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
   next();
 });
 
 const PORT = process.env.PORT || 3402;
+const MAX_SEARCH_LIMIT = 100;
+const REVERIFY_INTERVAL = parseInt(process.env.REVERIFY_INTERVAL_MS || String(30 * 60_000)); // 30 min
+const REVERIFY_STALE_HOURS = parseInt(process.env.REVERIFY_STALE_HOURS || "24");
 
 // CORS headers
 app.use((_req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-API-Key, Authorization");
   if (_req.method === "OPTIONS") return res.status(204).end();
   next();
 });
 
-// Request logging
-app.use((req, _res, next) => {
-  console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
-  next();
-});
+// Structured request logging
+app.use(requestLogger);
 
 // Rate limiting on all routes
 app.use(rateLimit);
 
-// In-memory store (replace with PostgreSQL in production)
-const services = new Map();
-let nextId = 1;
+// Initialize store with seed data
+seedStore();
 
-// Seed with example services
-const seeds = [
-  {
-    url: "https://api.weather402.com/forecast",
-    name: "Weather Forecast API",
-    description: "Global weather data with hourly resolution, 7-day forecast",
-    category: "data",
-    price: { amount: "1000", token: "USDC", network: "eip155:8453" },
-    methods: ["GET"],
-    owner: "0x209693Bc6afc0C5328bA36FaF03C514EF312287C",
-  },
-  {
-    url: "https://api.llm402.com/v1/chat/completions",
-    name: "LLM Inference API",
-    description: "Pay-per-request access to GPT-4, Claude, and open models",
-    category: "ai",
-    price: { amount: "5000", token: "USDC", network: "eip155:8453" },
-    methods: ["POST"],
-    owner: "0x1234567890abcdef1234567890abcdef12345678",
-  },
-  {
-    url: "https://api.market402.com/report",
-    name: "DeFi Market Intelligence",
-    description: "Weekly DeFi market analysis with trading signals and risk metrics",
-    category: "reports",
-    price: { amount: "50000", token: "USDT0", network: "eip155:42161" },
-    methods: ["GET"],
-    owner: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
-  },
-  {
-    url: "https://api.image402.com/generate",
-    name: "Image Generation API",
-    description: "High-res image generation via Stable Diffusion XL and Flux",
-    category: "ai",
-    price: { amount: "2000", token: "USDC", network: "eip155:8453" },
-    methods: ["POST"],
-    owner: "0x5678567856785678567856785678567856785678",
-  },
-  {
-    url: "https://api.translate402.com/v1/translate",
-    name: "Translation API",
-    description: "Neural machine translation for 100+ languages",
-    category: "ai",
-    price: { amount: "500", token: "USDC", network: "eip155:8453" },
-    methods: ["POST"],
-    owner: "0x9876987698769876987698769876987698769876",
-  },
-  {
-    url: "https://api.code402.com/review",
-    name: "AI Code Review",
-    description: "Automated code review with security analysis and suggestions",
-    category: "developer-tools",
-    price: { amount: "10000", token: "USDC", network: "eip155:8453" },
-    methods: ["POST"],
-    owner: "0xfedcfedcfedcfedcfedcfedcfedcfedcfedcfedc",
-  },
-  {
-    url: "https://api.data402.com/blockchain/analytics",
-    name: "Blockchain Analytics API",
-    description: "On-chain data: wallet profiling, transaction clustering, risk scoring",
-    category: "data",
-    price: { amount: "15000", token: "USDC", network: "eip155:8453" },
-    methods: ["GET", "POST"],
-    owner: "0xaaaa1111bbbb2222cccc3333dddd4444eeee5555",
-  },
-  {
-    url: "https://api.compute402.com/gpu/run",
-    name: "GPU Compute Service",
-    description: "On-demand GPU compute for ML inference (A100, H100)",
-    category: "compute",
-    price: { amount: "100000", token: "USDT0", network: "eip155:42161" },
-    methods: ["POST"],
-    owner: "0xbbbb2222cccc3333dddd4444eeee5555ffff6666",
-  },
-];
-
-for (const seed of seeds) {
-  const id = `svc-${String(nextId++).padStart(3, "0")}`;
-  services.set(id, {
-    id,
-    ...seed,
-    verified: true,
-    registeredAt: new Date().toISOString(),
-  });
-}
-
-// Search services
+// ── Search ────────────────────────────────────────────────────────────
 app.get("/api/v1/search", (req, res) => {
-  const { q, category, maxPrice, network, limit = "20" } = req.query;
-  let results = Array.from(services.values());
+  const { q, category, maxPrice, network, token, tags, verified, limit = "20", offset = "0" } = req.query;
+  let results = store.getAll();
 
   if (q) {
-    const query = String(q).toLowerCase();
-    results = results.filter(
-      (s) =>
-        s.name.toLowerCase().includes(query) ||
-        s.description.toLowerCase().includes(query) ||
-        s.category.toLowerCase().includes(query),
-    );
+    // Multi-word search: all terms must match somewhere
+    const terms = String(q).toLowerCase().split(/\s+/).filter(Boolean);
+    results = results
+      .map((s) => {
+        let score = 0;
+        const nameLower = s.name.toLowerCase();
+        const descLower = s.description.toLowerCase();
+        const catLower = s.category.toLowerCase();
+        const tagsLower = (s.tags || []).join(" ").toLowerCase();
+
+        for (const term of terms) {
+          let termScore = 0;
+          if (nameLower.includes(term)) termScore += 10;
+          if (descLower.includes(term)) termScore += 3;
+          if (catLower.includes(term)) termScore += 2;
+          if (tagsLower.includes(term)) termScore += 4;
+          if (termScore === 0) return { ...s, _score: 0 }; // all terms must match
+          score += termScore;
+        }
+
+        if (nameLower === String(q).toLowerCase()) score += 5;
+        return { ...s, _score: score };
+      })
+      .filter((s) => s._score > 0);
+
+    results.sort((a, b) => {
+      if (a.verified !== b.verified) return a.verified ? -1 : 1;
+      if (a._score !== b._score) return b._score - a._score;
+      return b.registeredAt.localeCompare(a.registeredAt);
+    });
+
+    results = results.map(({ _score, ...rest }) => rest);
+  } else {
+    results.sort((a, b) => {
+      if (a.verified !== b.verified) return a.verified ? -1 : 1;
+      return b.registeredAt.localeCompare(a.registeredAt);
+    });
   }
 
   if (category) {
@@ -160,75 +127,173 @@ app.get("/api/v1/search", (req, res) => {
     results = results.filter((s) => s.price.network === network);
   }
 
+  if (token) {
+    results = results.filter((s) => s.price.token === token);
+  }
+
+  if (tags) {
+    const filterTags = String(tags).split(",").map((t) => t.trim().toLowerCase());
+    results = results.filter((s) => {
+      const svcTags = (s.tags || []).map((t) => t.toLowerCase());
+      return filterTags.some((t) => svcTags.includes(t));
+    });
+  }
+
+  if (verified === "true") {
+    results = results.filter((s) => s.verified);
+  } else if (verified === "false") {
+    results = results.filter((s) => !s.verified);
+  }
+
   if (maxPrice) {
     const max = parseFloat(maxPrice) * 1e6;
     results = results.filter((s) => parseInt(s.price.amount) <= max);
   }
 
-  results = results.slice(0, parseInt(limit));
+  const parsedOffset = Math.max(0, parseInt(offset) || 0);
+  const parsedLimit = Math.min(Math.max(1, parseInt(limit) || 20), MAX_SEARCH_LIMIT);
+  const total = results.length;
+  results = results.slice(parsedOffset, parsedOffset + parsedLimit);
 
   res.json({
     services: results,
     count: results.length,
+    total,
     query: { q, category, maxPrice, network },
+    pagination: { offset: parsedOffset, limit: parsedLimit },
   });
 });
 
-// Get service by ID
+// ── Get service by ID ─────────────────────────────────────────────────
 app.get("/api/v1/services/:id", (req, res) => {
-  const service = services.get(req.params.id);
+  const service = store.get(req.params.id);
   if (!service) {
     return res.status(404).json({ error: "Service not found" });
   }
   res.json(service);
 });
 
-// Register new service (auth required)
+// ── Register new service ──────────────────────────────────────────────
 app.post("/api/v1/services", requireAuth, (req, res) => {
-  const { url, name, description, category, price, methods, owner } = req.body;
-
-  if (!url || !name || !price) {
-    return res.status(400).json({ error: "url, name, and price are required" });
+  const errors = validateServiceInput(req.body);
+  if (errors.length > 0) {
+    recordRegistration(true, false);
+    return res.status(400).json({ error: "Validation failed", details: errors });
   }
 
-  // URL validation
-  try { new URL(url); } catch { return res.status(400).json({ error: "Invalid URL" }); }
-  if (!url.startsWith("http")) return res.status(400).json({ error: "URL must start with http(s)" });
+  const { url, name, description, category, price, methods, owner, tags } = req.body;
 
-  // Duplicate check
-  const existing = Array.from(services.values()).find(s => s.url === url);
-  if (existing) return res.status(409).json({ error: "Service already registered", existingId: existing.id });
+  const existing = store.getByUrl(url);
+  if (existing) {
+    recordRegistration(false, true);
+    return res.status(409).json({ error: "Service already registered", existingId: existing.id });
+  }
 
-  const id = `svc-${String(nextId++).padStart(3, "0")}`;
+  const id = getNextId();
+  const now = new Date().toISOString();
   const service = {
     id,
     url,
-    name,
-    description: description || "",
-    category: category || "other",
+    name: sanitizeString(name),
+    description: sanitizeString(description || ""),
+    category: sanitizeString(category || "other"),
     price,
     methods: methods || ["GET"],
+    tags: Array.isArray(tags) ? tags.map((t) => sanitizeString(String(t)).toLowerCase()).slice(0, 20) : [],
     owner: owner || "unknown",
     verified: false,
-    registeredAt: new Date().toISOString(),
+    registeredAt: now,
+    updatedAt: now,
   };
 
-  services.set(id, service);
+  store.set(id, service);
+  recordRegistration(false, false);
+  logger.info("service registered", { id, url, name: service.name });
   res.status(201).json(service);
 
-  // Async verification — probe the URL in the background
+  // Async verification
   verifyServiceUrl(url).then((result) => {
-    const svc = services.get(id);
+    const svc = store.get(id);
     if (svc) {
       svc.verified = result.returns402;
       svc.verification = result;
+      if (result.discovery) svc.discovery = result.discovery;
+      svc.updatedAt = new Date().toISOString();
+      store.set(id, svc);
+      logger.info("service verified", { id, verified: svc.verified, latencyMs: result.latencyMs });
     }
   });
 });
 
-// Re-verify a service URL
+// ── Update service ────────────────────────────────────────────────────
+app.put("/api/v1/services/:id", requireAuth, (req, res) => {
+  const service = store.get(req.params.id);
+  if (!service) {
+    return res.status(404).json({ error: "Service not found" });
+  }
+
+  const { name, description, category, price, methods, owner, tags } = req.body;
+
+  if (name !== undefined) {
+    if (typeof name !== "string" || name.length > 200) {
+      return res.status(400).json({ error: "name must be a string of at most 200 characters" });
+    }
+    service.name = sanitizeString(name);
+  }
+  if (description !== undefined) {
+    if (typeof description !== "string" || description.length > 2000) {
+      return res.status(400).json({ error: "description must be a string of at most 2000 characters" });
+    }
+    service.description = sanitizeString(description);
+  }
+  if (category !== undefined) {
+    if (typeof category !== "string" || category.length > 50) {
+      return res.status(400).json({ error: "category must be a string of at most 50 characters" });
+    }
+    service.category = sanitizeString(category);
+  }
+  if (price !== undefined) {
+    if (typeof price !== "object" || !price.amount || !price.token || !price.network) {
+      return res.status(400).json({ error: "price must include amount, token, and network" });
+    }
+    service.price = price;
+  }
+  if (methods !== undefined) {
+    if (!Array.isArray(methods)) {
+      return res.status(400).json({ error: "methods must be an array" });
+    }
+    service.methods = methods;
+  }
+  if (owner !== undefined) {
+    service.owner = owner;
+  }
+  if (tags !== undefined) {
+    if (!Array.isArray(tags)) {
+      return res.status(400).json({ error: "tags must be an array" });
+    }
+    service.tags = tags.map((t) => sanitizeString(String(t)).toLowerCase()).slice(0, 20);
+  }
+
+  service.updatedAt = new Date().toISOString();
+  store.set(req.params.id, service);
+  logger.info("service updated", { id: req.params.id });
+  res.json(service);
+});
+
+// ── Delete service ────────────────────────────────────────────────────
+app.delete("/api/v1/services/:id", requireAuth, (req, res) => {
+  const service = store.get(req.params.id);
+  if (!service) {
+    return res.status(404).json({ error: "Service not found" });
+  }
+  store.delete(req.params.id);
+  logger.info("service deleted", { id: req.params.id, name: service.name });
+  res.json({ deleted: true, id: req.params.id });
+});
+
+// ── Re-verify service ─────────────────────────────────────────────────
 app.get("/api/v1/services/:id/verify", async (req, res) => {
-  const service = services.get(req.params.id);
+  const service = store.get(req.params.id);
   if (!service) {
     return res.status(404).json({ error: "Service not found" });
   }
@@ -236,29 +301,45 @@ app.get("/api/v1/services/:id/verify", async (req, res) => {
   const result = await verifyServiceUrl(service.url);
   service.verified = result.returns402;
   service.verification = result;
+  if (result.discovery) service.discovery = result.discovery;
+  service.updatedAt = new Date().toISOString();
+  store.set(req.params.id, service);
   res.json({ id: service.id, url: service.url, ...result });
 });
 
-// Featured services — top 5 verified services
+// ── Featured ──────────────────────────────────────────────────────────
 app.get("/api/v1/featured", (_req, res) => {
-  const featured = Array.from(services.values())
+  const featured = store
+    .getAll()
     .filter((s) => s.verified)
+    .sort((a, b) => b.registeredAt.localeCompare(a.registeredAt))
     .slice(0, 5);
   res.json({ services: featured, count: featured.length });
 });
 
-// List categories
+// ── Categories ────────────────────────────────────────────────────────
 app.get("/api/v1/categories", (_req, res) => {
   const categories = {};
-  for (const s of services.values()) {
+  for (const s of store.getAll()) {
     categories[s.category] = (categories[s.category] || 0) + 1;
   }
   res.json({ categories });
 });
 
-// Stats
+// ── Tags ──────────────────────────────────────────────────────────────
+app.get("/api/v1/tags", (_req, res) => {
+  const tagCounts = {};
+  for (const s of store.getAll()) {
+    for (const t of s.tags || []) {
+      tagCounts[t] = (tagCounts[t] || 0) + 1;
+    }
+  }
+  res.json({ tags: tagCounts });
+});
+
+// ── Stats ─────────────────────────────────────────────────────────────
 app.get("/api/v1/stats", (_req, res) => {
-  const all = Array.from(services.values());
+  const all = store.getAll();
   const networks = {};
   const tokens = {};
   for (const s of all) {
@@ -267,19 +348,102 @@ app.get("/api/v1/stats", (_req, res) => {
   }
   res.json({
     totalServices: all.length,
-    verified: all.filter((s) => s.verified).length,
+    verified: store.countVerified(),
     networks,
     tokens,
   });
 });
 
-// Health check
+// ── Health / Ready / Metrics ──────────────────────────────────────────
 app.get("/health", (_req, res) => {
-  res.json({ status: "ok", service: "t402-bazaar", services: services.size });
+  res.json({ status: "ok", service: "t402-bazaar", services: store.size() });
 });
 
-app.listen(PORT, () => {
-  console.log(`🏪 T402 Bazaar running on http://localhost:${PORT}`);
-  console.log(`   ${services.size} services indexed`);
-  console.log(`   Endpoints: /api/v1/search, /api/v1/services, /api/v1/categories, /api/v1/stats`);
+app.get("/ready", (_req, res) => {
+  if (store.size() === 0) {
+    return res.status(503).json({ status: "not ready", reason: "No services loaded" });
+  }
+  res.json({ status: "ready", services: store.size() });
 });
+
+app.get("/metrics", (_req, res) => {
+  res.json({
+    ...getMetrics(),
+    store: {
+      services: store.size(),
+      verified: store.countVerified(),
+      engine: store.isMemory() ? "memory" : "sqlite",
+    },
+  });
+});
+
+// ── OpenAPI spec ──────────────────────────────────────────────────────
+const __dirname = dirname(fileURLToPath(import.meta.url));
+let openapiSpec;
+try {
+  openapiSpec = readFileSync(join(__dirname, "..", "openapi.yaml"), "utf8");
+} catch {
+  // openapi.yaml not available (e.g., in minimal Docker build)
+}
+
+app.get("/openapi.yaml", (_req, res) => {
+  if (!openapiSpec) {
+    return res.status(404).json({ error: "OpenAPI spec not available" });
+  }
+  res.type("text/yaml").send(openapiSpec);
+});
+
+// ── Error handler ─────────────────────────────────────────────────────
+app.use(errorHandler);
+
+// ── Periodic re-verification ──────────────────────────────────────────
+async function reverifyStaleServices() {
+  const cutoff = new Date(Date.now() - REVERIFY_STALE_HOURS * 3600_000).toISOString();
+  const stale = store.getStale(cutoff, 5);
+
+  if (stale.length === 0) return;
+
+  logger.info("re-verification started", { count: stale.length });
+
+  for (const svc of stale) {
+    try {
+      const result = await verifyServiceUrl(svc.url);
+      svc.verified = result.returns402;
+      svc.verification = result;
+      if (result.discovery) svc.discovery = result.discovery;
+      svc.updatedAt = new Date().toISOString();
+      store.set(svc.id, svc);
+    } catch (e) {
+      logger.error("re-verification failed", { id: svc.id, error: e.message });
+    }
+  }
+
+  logger.info("re-verification complete", { count: stale.length });
+}
+
+const _reverifyInterval = setInterval(reverifyStaleServices, REVERIFY_INTERVAL);
+_reverifyInterval.unref();
+
+// ── Start server ──────────────────────────────────────────────────────
+const server = app.listen(PORT, () => {
+  logger.info("server started", {
+    port: PORT,
+    services: store.size(),
+    store: store.isMemory() ? "memory" : "sqlite",
+    endpoints: ["/api/v1/search", "/api/v1/services", "/api/v1/categories", "/api/v1/stats", "/api/v1/featured"],
+  });
+});
+
+// Graceful shutdown
+function shutdown(signal) {
+  logger.info("shutdown initiated", { signal });
+  server.close(() => {
+    store.close();
+    logger.info("server closed");
+    process.exit(0);
+  });
+  setTimeout(() => process.exit(1), 10_000).unref();
+}
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
