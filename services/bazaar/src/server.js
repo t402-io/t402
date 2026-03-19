@@ -18,6 +18,15 @@ import { rateLimit, requireAuth, verifyServiceUrl } from "./middleware.js";
 const app = express();
 app.use(express.json());
 
+// Security headers
+app.disable("x-powered-by");
+app.use((_req, res, next) => {
+  res.set("X-Content-Type-Options", "nosniff");
+  res.set("X-Frame-Options", "DENY");
+  res.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  next();
+});
+
 const PORT = process.env.PORT || 3402;
 
 // CORS headers
@@ -152,7 +161,7 @@ app.get("/api/v1/search", (req, res) => {
   }
 
   if (maxPrice) {
-    const max = parseInt(maxPrice) * 1e6; // Convert USD to smallest unit
+    const max = parseFloat(maxPrice) * 1e6;
     results = results.filter((s) => parseInt(s.price.amount) <= max);
   }
 
@@ -181,6 +190,14 @@ app.post("/api/v1/services", requireAuth, (req, res) => {
   if (!url || !name || !price) {
     return res.status(400).json({ error: "url, name, and price are required" });
   }
+
+  // URL validation
+  try { new URL(url); } catch { return res.status(400).json({ error: "Invalid URL" }); }
+  if (!url.startsWith("http")) return res.status(400).json({ error: "URL must start with http(s)" });
+
+  // Duplicate check
+  const existing = Array.from(services.values()).find(s => s.url === url);
+  if (existing) return res.status(409).json({ error: "Service already registered", existingId: existing.id });
 
   const id = `svc-${String(nextId++).padStart(3, "0")}`;
   const service = {

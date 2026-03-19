@@ -75,6 +75,7 @@ const STATUSES = ["settled", "settled", "settled", "settled", "pending", "failed
 export function generatePaymentHistory(address, days = 7) {
   const seed = hash(address + ":payments");
   const rand = prng(seed);
+  const baseTime = Math.floor(Date.now() / 86400000) * 86400000; // Start of today (UTC)
   const count = 15 + Math.floor(rand() * 40); // 15–54 payments
   const payments = [];
 
@@ -95,7 +96,7 @@ export function generatePaymentHistory(address, days = 7) {
       to: "0x" + hexString(rand, 40),
       service: SERVICES[Math.floor(rand() * SERVICES.length)],
       status,
-      timestamp: new Date(Date.now() - ago * 1000).toISOString(),
+      timestamp: new Date(baseTime - ago * 1000).toISOString(),
     });
   }
 

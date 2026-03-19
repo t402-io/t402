@@ -22,6 +22,17 @@ import {
 } from "./data.js";
 
 const app = express();
+app.use(express.json());
+
+// Security headers
+app.disable("x-powered-by");
+app.use((_req, res, next) => {
+  res.set("X-Content-Type-Options", "nosniff");
+  res.set("X-Frame-Options", "DENY");
+  res.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  next();
+});
+
 const PORT = process.env.PORT || 3405;
 
 // ── CORS ─────────────────────────────────────────────────────────────
@@ -38,6 +49,9 @@ app.use((_req, res, next) => {
 
 // Payment history
 app.get("/api/v1/payments", (req, res) => {
+  if (!req.query.address) {
+    return res.status(400).json({ error: "address parameter required" });
+  }
   const { address = "0xAgent", network, limit = "20", days = "7" } = req.query;
   let payments = generatePaymentHistory(address, +days);
   if (network) payments = payments.filter((p) => p.network === network);

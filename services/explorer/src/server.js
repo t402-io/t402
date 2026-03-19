@@ -21,6 +21,17 @@ import {
 } from "./indexer.js";
 
 const app = express();
+app.use(express.json());
+
+// Security headers
+app.disable("x-powered-by");
+app.use((_req, res, next) => {
+  res.set("X-Content-Type-Options", "nosniff");
+  res.set("X-Frame-Options", "DENY");
+  res.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  next();
+});
+
 const PORT = process.env.PORT || 3404;
 
 // CORS headers

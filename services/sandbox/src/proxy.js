@@ -11,6 +11,15 @@ import express from "express";
 const app = express();
 app.use(express.json());
 
+// Security headers
+app.disable("x-powered-by");
+app.use((_req, res, next) => {
+  res.set("X-Content-Type-Options", "nosniff");
+  res.set("X-Frame-Options", "DENY");
+  res.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  next();
+});
+
 const PORT = process.env.PORT || 3406;
 const FACILITATOR_URL = process.env.FACILITATOR_URL || "http://localhost:8080";
 const RATE_LIMIT = parseInt(process.env.RATE_LIMIT_PER_MINUTE || "100");
@@ -54,8 +63,14 @@ app.get("/supported", (_req, res) => {
   });
 });
 
+const SUPPORTED_NETWORKS = ["eip155:84532", "eip155:11155111", "eip155:421614"];
+
 app.post("/verify", async (req, res) => {
   totalRequests++;
+  const network = req.body?.paymentRequirements?.network;
+  if (network && !SUPPORTED_NETWORKS.some(n => network.startsWith(n.split(":")[0]))) {
+    return res.json({ isValid: false, error: "Sandbox only supports testnet networks", supportedKinds: SUPPORTED_NETWORKS, sandbox: true });
+  }
   try {
     const r = await fetch(FACILITATOR_URL + "/verify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(req.body) });
     res.status(r.status).json(await r.json());
@@ -66,6 +81,10 @@ app.post("/verify", async (req, res) => {
 
 app.post("/settle", async (req, res) => {
   totalRequests++;
+  const network = req.body?.paymentRequirements?.network;
+  if (network && !SUPPORTED_NETWORKS.some(n => network.startsWith(n.split(":")[0]))) {
+    return res.json({ isValid: false, error: "Sandbox only supports testnet networks", supportedKinds: SUPPORTED_NETWORKS, sandbox: true });
+  }
   try {
     const r = await fetch(FACILITATOR_URL + "/settle", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(req.body) });
     res.status(r.status).json(await r.json());
@@ -76,5 +95,13 @@ app.post("/settle", async (req, res) => {
 
 app.get("/health", (_req, res) => res.json({ status: "ok", service: "t402-sandbox", mode: "testnet" }));
 app.get("/usage", (_req, res) => res.json({ totalRequests, rateLimit: RATE_LIMIT }));
+
+// JSON parse error handler
+app.use((err, _req, res, _next) => {
+  if (err.type === "entity.parse.failed") {
+    return res.status(400).json({ error: "Invalid JSON", sandbox: true });
+  }
+  res.status(500).json({ error: "Internal error", sandbox: true });
+});
 
 app.listen(PORT, () => console.log("Sandbox on http://localhost:" + PORT));
