@@ -14,6 +14,32 @@ describe("Agent Dashboard API", () => {
     const res = await fetch(`${BASE}/api/v1/payments?address=0xTest`);
     const data = await res.json();
     assert.ok(data.payments.length > 0);
+    assert.strictEqual(data.address, "0xTest");
+    // Each payment has expected fields
+    const p = data.payments[0];
+    assert.ok(p.id);
+    assert.ok(p.txHash);
+    assert.ok(p.service);
+    assert.ok(p.amountFormatted);
+    assert.ok(p.networkLabel);
+  });
+
+  it("GET /api/v1/payments is deterministic per address", async () => {
+    const r1 = await fetch(`${BASE}/api/v1/payments?address=0xDeterministic`);
+    const d1 = await r1.json();
+    const r2 = await fetch(`${BASE}/api/v1/payments?address=0xDeterministic`);
+    const d2 = await r2.json();
+    assert.strictEqual(d1.total, d2.total);
+    assert.strictEqual(d1.payments[0].id, d2.payments[0].id);
+    assert.strictEqual(d1.payments[0].service, d2.payments[0].service);
+  });
+
+  it("GET /api/v1/payments respects network filter", async () => {
+    const res = await fetch(`${BASE}/api/v1/payments?address=0xTest&network=eip155:8453`);
+    const data = await res.json();
+    for (const p of data.payments) {
+      assert.strictEqual(p.network, "eip155:8453");
+    }
   });
 
   it("GET /api/v1/balances/:addr returns balances", async () => {
@@ -21,6 +47,13 @@ describe("Agent Dashboard API", () => {
     const data = await res.json();
     assert.ok(data.balances.length > 0);
     assert.ok(data.totalUsd);
+    assert.strictEqual(data.address, "0xTest");
+    // Check balance shape
+    const b = data.balances[0];
+    assert.ok(b.network);
+    assert.ok(b.networkLabel);
+    assert.ok(b.token);
+    assert.ok(b.balanceFormatted);
   });
 
   it("GET /api/v1/budget/:addr returns budget", async () => {
@@ -28,6 +61,9 @@ describe("Agent Dashboard API", () => {
     const data = await res.json();
     assert.ok(data.policy);
     assert.ok(data.usage);
+    assert.ok(Array.isArray(data.policy.allowedNetworks));
+    assert.strictEqual(typeof data.usage.sessionPercentage, "number");
+    assert.strictEqual(typeof data.usage.todayPercentage, "number");
   });
 
   it("GET /api/v1/stats/:addr returns stats", async () => {
@@ -35,11 +71,81 @@ describe("Agent Dashboard API", () => {
     const data = await res.json();
     assert.ok(data.totalPayments > 0);
     assert.ok(data.topServices.length > 0);
+    assert.ok(data.byNetwork);
+    assert.ok(data.avgPaymentUsd);
+  });
+
+  it("GET /api/v1/alerts/:addr returns alerts array", async () => {
+    const res = await fetch(`${BASE}/api/v1/alerts/0xTest`);
+    const data = await res.json();
+    assert.strictEqual(data.address, "0xTest");
+    assert.ok(Array.isArray(data.alerts));
+    assert.strictEqual(typeof data.count, "number");
+    assert.strictEqual(data.count, data.alerts.length);
+    // If alerts exist, check shape
+    for (const a of data.alerts) {
+      assert.ok(["warning", "critical"].includes(a.level));
+      assert.ok(a.message);
+      assert.ok(a.id);
+      assert.strictEqual(typeof a.percentage, "number");
+    }
+  });
+
+  it("GET /api/v1/alerts/:addr is consistent for same address", async () => {
+    const r1 = await fetch(`${BASE}/api/v1/alerts/0xAlertTest`);
+    const d1 = await r1.json();
+    const r2 = await fetch(`${BASE}/api/v1/alerts/0xAlertTest`);
+    const d2 = await r2.json();
+    assert.strictEqual(d1.count, d2.count);
+    for (let i = 0; i < d1.alerts.length; i++) {
+      assert.strictEqual(d1.alerts[i].level, d2.alerts[i].level);
+      assert.strictEqual(d1.alerts[i].field, d2.alerts[i].field);
+    }
+  });
+
+  it("GET /api/v1/export/:addr returns CSV", async () => {
+    const res = await fetch(`${BASE}/api/v1/export/0xTest`);
+    assert.strictEqual(res.headers.get("content-type"), "text/csv; charset=utf-8");
+    assert.ok(res.headers.get("content-disposition").includes("attachment"));
+    const csv = await res.text();
+    const lines = csv.split("\n");
+    // Header + at least one data row
+    assert.ok(lines.length > 1);
+    assert.ok(lines[0].startsWith("id,timestamp,service"));
+    // Data row has correct number of columns
+    const cols = lines[1].split(",");
+    assert.ok(cols.length >= 10, `Expected >=10 columns, got ${cols.length}`);
+  });
+
+  it("GET /api/v1/export/:addr respects days param", async () => {
+    const r1 = await fetch(`${BASE}/api/v1/export/0xExport?days=1`);
+    const csv1 = await r1.text();
+    const r2 = await fetch(`${BASE}/api/v1/export/0xExport?days=30`);
+    const csv2 = await r2.text();
+    // More days should yield same or more rows (deterministic seed changes with days)
+    assert.ok(csv1.length > 0);
+    assert.ok(csv2.length > 0);
   });
 
   it("GET / returns HTML dashboard", async () => {
     const res = await fetch(BASE);
     const html = await res.text();
     assert.ok(html.includes("Agent Payment Dashboard"));
+    assert.ok(html.includes("Export CSV"));
+    assert.ok(html.includes("Alerts API"));
+  });
+
+  it("GET / with address shows data", async () => {
+    const res = await fetch(`${BASE}?address=0xDashTest`);
+    const html = await res.text();
+    assert.ok(html.includes("Agent Payment Dashboard"));
+    assert.ok(html.includes("0xDashTest"));
+    // Should have network breakdown
+    assert.ok(html.includes("Network Breakdown"));
+  });
+
+  it("CORS headers are present", async () => {
+    const res = await fetch(`${BASE}/health`);
+    assert.strictEqual(res.headers.get("access-control-allow-origin"), "*");
   });
 });

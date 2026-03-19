@@ -4,6 +4,6 @@
   "private": true,
   "type": "module",
   "scripts": { "dev": "node --watch src/server.js", "start": "node src/server.js",
-    "test": "node --test test/*.test.js" },
+    "test": "NODE_ENV=test node --test test/*.test.js" },
   "dependencies": { "express": "^5.1.0" }
 }

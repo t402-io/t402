@@ -13,11 +13,30 @@
  */
 
 import express from "express";
+import { rateLimit, requireAuth, verifyServiceUrl } from "./middleware.js";
 
 const app = express();
 app.use(express.json());
 
 const PORT = process.env.PORT || 3402;
+
+// CORS headers
+app.use((_req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-API-Key, Authorization");
+  if (_req.method === "OPTIONS") return res.status(204).end();
+  next();
+});
+
+// Request logging
+app.use((req, _res, next) => {
+  console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
+  next();
+});
+
+// Rate limiting on all routes
+app.use(rateLimit);
 
 // In-memory store (replace with PostgreSQL in production)
 const services = new Map();
@@ -155,8 +174,8 @@ app.get("/api/v1/services/:id", (req, res) => {
   res.json(service);
 });
 
-// Register new service
-app.post("/api/v1/services", (req, res) => {
+// Register new service (auth required)
+app.post("/api/v1/services", requireAuth, (req, res) => {
   const { url, name, description, category, price, methods, owner } = req.body;
 
   if (!url || !name || !price) {
@@ -179,6 +198,36 @@ app.post("/api/v1/services", (req, res) => {
 
   services.set(id, service);
   res.status(201).json(service);
+
+  // Async verification — probe the URL in the background
+  verifyServiceUrl(url).then((result) => {
+    const svc = services.get(id);
+    if (svc) {
+      svc.verified = result.returns402;
+      svc.verification = result;
+    }
+  });
+});
+
+// Re-verify a service URL
+app.get("/api/v1/services/:id/verify", async (req, res) => {
+  const service = services.get(req.params.id);
+  if (!service) {
+    return res.status(404).json({ error: "Service not found" });
+  }
+
+  const result = await verifyServiceUrl(service.url);
+  service.verified = result.returns402;
+  service.verification = result;
+  res.json({ id: service.id, url: service.url, ...result });
+});
+
+// Featured services — top 5 verified services
+app.get("/api/v1/featured", (_req, res) => {
+  const featured = Array.from(services.values())
+    .filter((s) => s.verified)
+    .slice(0, 5);
+  res.json({ services: featured, count: featured.length });
 });
 
 // List categories

@@ -57,4 +57,25 @@ describe("Bazaar API", () => {
     const data = await res.json();
     assert.ok(data.id.startsWith("svc-"));
   });
+
+  it("Rate limiting headers are present", async () => {
+    const res = await fetch(`${BASE}/health`);
+    assert.strictEqual(res.status, 200);
+    assert.ok(res.headers.has("x-ratelimit-remaining"), "X-RateLimit-Remaining header should be present");
+    assert.ok(res.headers.has("x-ratelimit-limit"), "X-RateLimit-Limit header should be present");
+  });
+
+  it("GET /api/v1/featured returns verified services", async () => {
+    const res = await fetch(`${BASE}/api/v1/featured`);
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.ok(Array.isArray(data.services));
+    assert.ok(data.count <= 5, "Featured should return at most 5 services");
+    assert.ok(data.services.every(s => s.verified), "All featured services should be verified");
+  });
+
+  it("CORS header is present", async () => {
+    const res = await fetch(`${BASE}/api/v1/search`);
+    assert.strictEqual(res.headers.get("access-control-allow-origin"), "*");
+  });
 });
