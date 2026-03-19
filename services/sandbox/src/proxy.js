@@ -106,8 +106,11 @@ async function checkUpstream() {
   }
 }
 
+// Detect if running as main entry point (not imported by tests)
+const _isMain = process.argv[1] && new URL(import.meta.url).pathname === process.argv[1];
+
 // Periodic upstream check (every 30s)
-if (process.env.NODE_ENV !== "test") {
+if (_isMain) {
   checkUpstream();
   const healthTimer = setInterval(checkUpstream, 30_000);
   healthTimer.unref();
@@ -329,7 +332,7 @@ function shutdown(signal) {
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 process.on("SIGINT", () => shutdown("SIGINT"));
 
-if (process.env.NODE_ENV !== "test") {
+if (_isMain) {
   startServer();
 }
 

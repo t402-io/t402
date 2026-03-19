@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert";
 
-const BASE = "http://localhost:3404";
+const BASE = process.env.BASE_URL || "http://localhost:3404";
 
 describe("Explorer API", () => {
   it("GET /health returns ok", async () => {
