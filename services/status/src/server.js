@@ -35,13 +35,20 @@ app.use((_req, res, next) => {
 });
 
 const SERVICES = [
+  // Vercel-hosted
   { id: "site", name: "t402.io", url: "https://t402.io", type: "website" },
   { id: "docs", name: "docs.t402.io", url: "https://docs.t402.io", type: "website" },
   { id: "demo", name: "demo.t402.io", url: "https://demo.t402.io", type: "website" },
+  // Core services
   { id: "facilitator", name: "Facilitator API", url: "https://facilitator.t402.io/health", type: "api" },
   { id: "scan2pay-fe", name: "Scan2Pay Frontend", url: "https://scan2pay.t402.io", type: "website" },
   { id: "scan2pay-api", name: "Scan2Pay API", url: "https://scan2pay-api.t402.io/health", type: "api" },
   { id: "grafana", name: "Grafana", url: "https://grafana-facilitator.t402.io", type: "monitoring" },
+  // New services
+  { id: "bazaar", name: "Bazaar", url: "https://bazaar.t402.io/health", type: "api" },
+  { id: "explorer", name: "Explorer", url: "https://explorer.t402.io/health", type: "api" },
+  { id: "dashboard", name: "Agent Dashboard", url: "https://agents.t402.io/health", type: "api" },
+  { id: "sandbox", name: "Sandbox", url: "https://sandbox.t402.io/health", type: "api" },
 ];
 
 // Health check results cache
