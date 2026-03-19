@@ -432,8 +432,6 @@ export const typescriptPackages: Package[] = [
     description: "Command-line interface for T402 operations",
     features: ["Wallet management", "Send payments", "Multi-chain", "Configuration"],
   },
-];
-
   {
     name: "@t402/stellar",
     npmPackage: "@t402/stellar",
