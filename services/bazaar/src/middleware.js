@@ -40,7 +40,9 @@ setInterval(() => {
 const ADMIN_API_KEY = process.env.BAZAAR_ADMIN_KEY;
 
 export function requireAuth(req, res, next) {
-  if (!ADMIN_API_KEY) return next(); // No auth if not configured
+  if (!ADMIN_API_KEY) {
+    return res.status(503).json({ error: "Service registration disabled — BAZAAR_ADMIN_KEY not configured" });
+  }
 
   const key = req.headers["x-api-key"] || req.headers["authorization"]?.replace("Bearer ", "");
   if (key !== ADMIN_API_KEY) {
