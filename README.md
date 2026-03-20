@@ -41,6 +41,7 @@ Mechanisms (Chain-specific payment implementations):
 @t402/polkadot          Polkadot Asset Hub support
 @t402/stacks            Stacks (Bitcoin L2) SIP-010 support
 @t402/cosmos            Cosmos (Noble) native USDT support
+@t402/stellar           Stellar (Soroban) USDC support
 @t402/erc8004           ERC-8004 Trustless Agents (identity, reputation)
 
 HTTP Integrations:
@@ -82,7 +83,7 @@ Tools:
 <details>
 <summary><b>Installation</b></summary>
 
-### TypeScript (v2.7.1)
+### TypeScript (v2.8.0)
 
 ```shell
 # Core packages
@@ -211,6 +212,11 @@ implementation 'io.t402:t402:1.12.1'
 - Noble Testnet (`cosmos:grand-1`)
 - Supports native USDC via MsgSend
 
+### Stellar
+- Stellar Pubnet (`stellar:pubnet`)
+- Stellar Testnet (`stellar:testnet`)
+- Supports USDC via Soroban SEP-41 transfers
+
 ### USDT0 Cross-Chain Bridge (LayerZero)
 - **All 19 USDT0 networks** fully supported
 - **Message tracking** via LayerZero Scan API
@@ -266,6 +272,7 @@ t402 info eip155:8453
 | Polkadot | ✅ | ✅ | ✅ | ✅ |
 | Stacks | ✅ | ✅ | ✅ | ✅ |
 | Cosmos | ✅ | ✅ | ✅ | ✅ |
+| Stellar | ✅ | ✅ | ✅ | ✅ |
 | ERC-4337 Gasless | ✅ | ✅ | ✅ | ✅ |
 | USDT0 Bridge | ✅ | ✅ | ✅ | ✅ |
 | WDK Integration | ✅ | ✅ | ✅ | ✅ |
@@ -274,13 +281,13 @@ t402 info eip155:8453
 
 Legend: ✅ Complete | ❌ Not Available
 
-**Total Supported Networks: 50** across 10 blockchain families (81 network+scheme kinds)
+**Total Supported Networks: 52** across 11 blockchain families (81 network+scheme kinds)
 
 ## Latest Releases
 
 | SDK | Version | Release Date | Changelog |
 |-----|---------|--------------|-----------|
-| TypeScript | v2.7.1 | 2026-02-23 | [CHANGELOG](CHANGELOG.md) |
+| TypeScript | v2.8.0 | 2026-03-07 | Stellar support · [CHANGELOG](CHANGELOG.md) |
 | Go | v1.12.1 | 2026-02-23 | [CHANGELOG](sdks/go/CHANGELOG.md) |
 | Python | v1.12.1 | 2026-02-23 | [CHANGELOG](sdks/python/CHANGELOG.md) |
 | Java | v1.12.1 | 2026-02-23 | [CHANGELOG](sdks/java/CHANGELOG.md) |

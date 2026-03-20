@@ -44,31 +44,25 @@ docker compose -f docker-compose.sites.yml up -d
 ### t402.io (Main Site)
 
 - **Location**: `services/site/`
-- **Build**: `cd services/site && pnpm install && pnpm build`
-- **Deploy**: Automatic via CI — pushes to Cloudflare Pages (`t402-site` project)
-- **Workflow**: `.github/workflows/site.yml`
-- **Health check**: `curl -s -o /dev/null -w "%{http_code}" https://t402.io`
-- **Env vars**: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`
+- **Port**: 3010
+- **Build + Deploy**: `docker compose -f docker-compose.sites.yml build site && docker compose -f docker-compose.sites.yml up -d site`
+- **Health check**: `curl -s localhost:3010`
 - **Gotchas**: Also compiles the whitepaper (requires texlive) as part of the build
 
 ### docs.t402.io
 
 - **Location**: `services/docs/`
-- **Build**: `cd services/docs && pnpm install && pnpm build`
-- **Deploy**: Automatic via CI — pushes to Cloudflare Pages (`t402-docs` project)
-- **Workflow**: `.github/workflows/docs.yml`
-- **Health check**: `curl -s -o /dev/null -w "%{http_code}" https://docs.t402.io`
-- **Env vars**: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`
+- **Port**: 3011
+- **Build + Deploy**: `docker compose -f docker-compose.sites.yml build docs && docker compose -f docker-compose.sites.yml up -d docs`
+- **Health check**: `curl -s localhost:3011`
 - **Gotchas**: Pinned to Next.js `~14.2.35` (Nextra 3.x incompatible with 15)
 
 ### demo.t402.io
 
 - **Location**: `services/demo/`
-- **Build**: `cd services/demo && pnpm install && pnpm build && pnpm cf:build`
-- **Deploy**: Automatic via CI — pushes to Cloudflare Workers
-- **Workflow**: `.github/workflows/demo.yml`
-- **Health check**: `curl -s -o /dev/null -w "%{http_code}" https://demo.t402.io`
-- **Env vars**: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`
+- **Port**: 3012
+- **Build + Deploy**: `docker compose -f docker-compose.sites.yml build demo && docker compose -f docker-compose.sites.yml up -d demo`
+- **Health check**: `curl -s localhost:3012`
 
 ## Docker Services (Production Server: 220.134.32.65)
 

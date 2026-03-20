@@ -56,11 +56,11 @@ services/docs/
 
 ## Deployment
 
-The site is built as a static export and can be deployed to any static hosting provider (Vercel, Netlify, Cloudflare Pages).
+The docs site runs as a Docker container behind Cloudflare Tunnel on port 3011.
 
 ```bash
-# Build produces static files in out/
-pnpm build
+docker compose -f docker-compose.sites.yml build docs
+docker compose -f docker-compose.sites.yml up -d docs
 ```
 
 ## Content Guidelines

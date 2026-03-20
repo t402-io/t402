@@ -8,7 +8,7 @@ Marketing website for T402 - The Official Payment Protocol for USDT.
 
 - **Framework:** Next.js 16 with App Router
 - **Styling:** Tailwind CSS 4
-- **Deployment:** Cloudflare Pages (static export)
+- **Deployment:** Docker + Cloudflare Tunnel (port 3010)
 - **Package Manager:** pnpm
 
 ## Development
@@ -29,13 +29,11 @@ pnpm start
 
 ## Deployment
 
-The site automatically deploys to Cloudflare Pages on push to `main` branch.
-
-### Manual Deployment
+The site runs as a Docker container behind Cloudflare Tunnel on port 3010.
 
 ```bash
-pnpm build
-wrangler pages deploy out --project-name t402-site
+docker compose -f docker-compose.sites.yml build site
+docker compose -f docker-compose.sites.yml up -d site
 ```
 
 ## Related Repositories
