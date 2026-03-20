@@ -4,9 +4,9 @@
 
 | Service | URL | Platform | Port |
 |---------|-----|----------|------|
-| Main Site | https://t402.io | Cloudflare Pages / Docker | 3010 |
-| Docs | https://docs.t402.io | Cloudflare Pages / Docker | 3011 |
-| Demo | https://demo.t402.io | Cloudflare Workers / Docker | 3012 |
+| Main Site | https://t402.io | Docker (220.134.32.65) | 3010 |
+| Docs | https://docs.t402.io | Docker (220.134.32.65) | 3011 |
+| Demo | https://demo.t402.io | Docker (220.134.32.65) | 3012 |
 | Facilitator | https://facilitator.t402.io | Docker (220.134.32.65) | 8080 |
 | Grafana | https://grafana-facilitator.t402.io | Docker (220.134.32.65) | 3000 |
 | Scan2Pay API | https://scan2pay-api.t402.io | Docker (220.134.32.65) | 8081 |
@@ -26,13 +26,12 @@
 
 ## Static Sites
 
-Two deployment options: Cloudflare (CI auto-deploy) or Docker (self-hosted).
-
-### Docker Deploy (all 3 sites)
+All three run as Docker containers via Cloudflare Tunnel (migrated from Vercel/Cloudflare Pages on 2026-03-20).
 
 ```bash
-cd services
-docker compose -f docker-compose.sites.yml build
+ssh doge@220.134.32.65
+cd /home/doge/github/t402-main/services
+docker compose -f docker-compose.sites.yml build site docs demo
 docker compose -f docker-compose.sites.yml up -d
 ```
 
@@ -41,10 +40,6 @@ docker compose -f docker-compose.sites.yml up -d
 | site | 3010 | `curl -s localhost:3010` |
 | docs | 3011 | `curl -s localhost:3011` |
 | demo | 3012 | `curl -s localhost:3012` |
-
-### Cloudflare Deploy (auto via CI)
-
-All three deploy automatically via GitHub Actions on push to `main` when their directory changes. Manual deploy: trigger the workflow via `workflow_dispatch`.
 
 ### t402.io (Main Site)
 
@@ -178,6 +173,9 @@ Config: `~/.cloudflared/config.yml` on prod server
 
 | Hostname | Target |
 |----------|--------|
+| `t402.io` | `localhost:3010` |
+| `docs.t402.io` | `localhost:3011` |
+| `demo.t402.io` | `localhost:3012` |
 | `facilitator.t402.io` | `localhost:8080` |
 | `grafana-facilitator.t402.io` | `localhost:3000` |
 | `scan2pay.t402.io` | `localhost:3001` |
