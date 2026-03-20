@@ -9,6 +9,11 @@
 import express from "express";
 import compression from "compression";
 
+// --- Structured JSON logging ---
+function log(level, message, data = {}) {
+  console.log(JSON.stringify({ timestamp: new Date().toISOString(), level, message, ...data }));
+}
+
 const app = express();
 
 const PORT = parseInt(process.env.PORT || "3406");
@@ -204,7 +209,7 @@ app.post("/verify", async (req, res) => {
     res.status(result.status).json(result.data);
   } catch (err) {
     upstreamErrors++;
-    console.error("[sandbox] /verify upstream error:", err.message);
+    log("error", "/verify upstream error", { error: err.message });
     res.json({
       isValid: true,
       payer: "0x0000000000000000000000000000000000C0FFEE",
@@ -227,7 +232,7 @@ app.post("/settle", async (req, res) => {
     res.status(result.status).json(result.data);
   } catch (err) {
     upstreamErrors++;
-    console.error("[sandbox] /settle upstream error:", err.message);
+    log("error", "/settle upstream error", { error: err.message });
     res.json({
       success: true,
       transaction: "0x" + "0".repeat(64),
@@ -304,7 +309,7 @@ app.use((err, _req, res, _next) => {
   if (err.type === "entity.parse.failed") {
     return res.status(400).json({ error: "Invalid JSON", sandbox: true });
   }
-  console.error("[sandbox] Unhandled error:", err.message || err);
+  log("error", "Unhandled error", { error: err.message || String(err) });
   res.status(500).json({ error: "Internal error", sandbox: true });
 });
 
@@ -313,13 +318,13 @@ let server;
 
 function startServer() {
   server = app.listen(PORT, () => {
-    console.log(JSON.stringify({ level: "info", service: "t402-sandbox", msg: `Listening on port ${PORT}`, mode: "testnet" }));
+    log("info", `Listening on port ${PORT}`, { service: "t402-sandbox", mode: "testnet" });
   });
   return server;
 }
 
 function shutdown(signal) {
-  console.log(JSON.stringify({ level: "info", service: "t402-sandbox", msg: `${signal} received, shutting down` }));
+  log("info", `${signal} received, shutting down`, { service: "t402-sandbox" });
   if (server) {
     server.close(() => process.exit(0));
     // Force exit after 5s if connections don't drain

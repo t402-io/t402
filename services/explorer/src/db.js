@@ -39,14 +39,14 @@ const db = { pgPool: null, sqlite: null, lastSync: null };
 export async function initDb(pgUrl, sqlitePath) {
   if (pgUrl && pg) {
     const Pool = pg.default?.Pool || pg.Pool;
-    db.pgPool = new Pool({ connectionString: pgUrl, max: 3, idleTimeoutMillis: 30000, connectionTimeoutMillis: 5000, options: "-c default_transaction_read_only=on" });
+    db.pgPool = new Pool({ connectionString: pgUrl, max: 20, idleTimeoutMillis: 30000, connectionTimeoutMillis: 5000, options: "-c default_transaction_read_only=on" });
     try { const c = await db.pgPool.connect(); c.release(); console.log("PG connected"); }
     catch (err) { console.warn("PG connection failed:", err.message); db.pgPool = null; }
   }
   if (sqlitePath && Database) {
     db.sqlite = new Database(sqlitePath);
     db.sqlite.pragma("journal_mode = WAL");
-    db.sqlite.pragma("busy_timeout = 5000");
+    db.sqlite.pragma("busy_timeout = 30000");
     db.sqlite.exec(SQLITE_SCHEMA);
     console.log("SQLite initialized at", sqlitePath);
   }

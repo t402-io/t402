@@ -21,6 +21,22 @@ import { loadMaintenance, getUpcoming, isInMaintenance } from "./maintenance.js"
 
 const app = express();
 
+// Rate limiting — 60 requests per minute per IP
+const rateLimitMap = new Map();
+const RATE_LIMIT = parseInt(process.env.RATE_LIMIT_PER_MINUTE || '60', 10);
+
+setInterval(() => rateLimitMap.clear(), 60_000);
+
+function rateLimit(req, res, next) {
+  const ip = req.headers['cf-connecting-ip'] || req.ip;
+  const count = (rateLimitMap.get(ip) || 0) + 1;
+  rateLimitMap.set(ip, count);
+  if (count > RATE_LIMIT) {
+    return res.status(429).json({ error: 'Too many requests' });
+  }
+  next();
+}
+
 // Compression
 app.use(compression());
 
@@ -154,6 +170,8 @@ if (process.env.NODE_ENV !== "test") {
 }
 
 // --- JSON APIs ---
+
+app.use('/api', rateLimit);
 
 app.get("/api/status", (_req, res) => {
   res.set("Cache-Control", "public, max-age=30");

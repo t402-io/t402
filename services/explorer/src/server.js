@@ -42,6 +42,7 @@ const DATABASE_URL = process.env.DATABASE_URL || undefined;
 const SQLITE_PATH = process.env.SQLITE_PATH || undefined;
 const SYNC_INTERVAL = parseInt(process.env.SYNC_INTERVAL_MS, 10) || 60000;
 const EXPLORER_MODE = process.env.EXPLORER_MODE || "auto";
+let resolvedMode = EXPLORER_MODE; // updated in start() to "seed" or "live"
 
 app.disable("x-powered-by");
 app.use((_req, res, next) => {
@@ -83,40 +84,40 @@ app.get("/api/v1/transactions", async (req, res) => {
     limit: Math.min(Math.max(parseInt(limit, 10) || 20, 1), 100),
     cursor: cursor || undefined,
   });
-  res.json(result);
+  res.json({ mode: resolvedMode, ...result });
 });
 
 app.get("/api/v1/transactions/:hash", async (req, res) => {
   res.set("Cache-Control", "public, max-age=30");
   const tx = await getTransaction(req.params.hash);
-  if (!tx) return res.status(404).json({ error: "Transaction not found" });
-  res.json(tx);
+  if (!tx) return res.status(404).json({ mode: resolvedMode, error: "Transaction not found" });
+  res.json({ mode: resolvedMode, ...tx });
 });
 
 app.get("/api/v1/search", async (req, res) => {
   res.set("Cache-Control", "public, max-age=30");
   const q = String(req.query.q || "").trim();
-  if (!q) return res.json({ results: [], query: q, total: 0 });
+  if (!q) return res.json({ mode: resolvedMode, results: [], query: q, total: 0 });
   const results = await search(q);
-  res.json({ results, query: q, total: results.length });
+  res.json({ mode: resolvedMode, results, query: q, total: results.length });
 });
 
 app.get("/api/v1/stats", async (req, res) => {
   res.set("Cache-Control", "public, max-age=30");
   const days = Math.min(Math.max(parseInt(req.query.days, 10) || 7, 1), 90);
-  res.json(await getStats(days));
+  res.json({ mode: resolvedMode, ...(await getStats(days)) });
 });
 
 app.get("/api/v1/networks", async (_req, res) => {
   res.set("Cache-Control", "public, max-age=30");
   const networks = await getNetworks();
-  res.json({ networks, total: networks.length });
+  res.json({ mode: resolvedMode, networks, total: networks.length });
 });
 
 app.get("/api/v1/tokens", async (_req, res) => {
   res.set("Cache-Control", "public, max-age=30");
   const tokens = await getTokens();
-  res.json({ tokens, total: tokens.length });
+  res.json({ mode: resolvedMode, tokens, total: tokens.length });
 });
 
 app.get("/", async (_req, res) => {
@@ -150,6 +151,8 @@ async function start() {
   const sqlitePath = SQLITE_PATH || (EXPLORER_MODE === "seed" ? ":memory:" : undefined);
 
   await initDb(pgUrl, sqlitePath || ":memory:");
+
+  resolvedMode = (!usePg || EXPLORER_MODE === "seed") ? "seed" : "live";
 
   if (!usePg || EXPLORER_MODE === "seed") {
     const txs = seedTransactions(100);

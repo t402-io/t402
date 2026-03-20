@@ -127,7 +127,7 @@ const ADMIN_API_KEY = process.env.BAZAAR_ADMIN_KEY;
 
 export function requireAuth(req, res, next) {
   if (!ADMIN_API_KEY) {
-    return res.status(503).json({ error: "Service registration disabled — BAZAAR_ADMIN_KEY not configured" });
+    return res.status(401).json({ error: "Authentication required", code: "UNAUTHORIZED" });
   }
 
   const key = req.headers["x-api-key"] || req.headers["authorization"]?.replace("Bearer ", "");
