@@ -78,9 +78,9 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
-            cd /home/doge/github/t402
+            cd /home/doge/github/t402-main
             git fetch origin main
             git checkout origin/main -- services/
             cd services
-            docker compose -f docker-compose.new-services.yml build
+            docker compose -f docker-compose.new-services.yml build --parallel
             docker compose -f docker-compose.new-services.yml up -d
