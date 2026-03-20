@@ -39,8 +39,13 @@ services:
     environment:
       - PORT=3403
       - NODE_ENV=production
+      - ADMIN_API_KEY=${ADMIN_API_KEY:-}
       - WEBHOOK_URLS=${WEBHOOK_URLS:-}
       - MAINTENANCE_JSON=${MAINTENANCE_JSON:-[]}
+      - SERVICES_JSON=${SERVICES_JSON:-}
+      - CHECK_INTERVAL_MS=${CHECK_INTERVAL_MS:-300000}
+      - FAIL_THRESHOLD=${FAIL_THRESHOLD:-2}
+      - RATE_LIMIT_PER_MINUTE=${RATE_LIMIT_PER_MINUTE:-60}
     volumes:
       - status-data:/data
     restart: unless-stopped
@@ -73,7 +78,7 @@ services:
       - "3404:3404"
     environment:
       - PORT=3404
-      - DATABASE_URL=${DATABASE_URL:-postgresql://facilitator:${POSTGRES_PASSWORD}@host.docker.internal:5432/facilitator}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://scan2pay:${SCAN2PAY_PG_PASSWORD}@host.docker.internal:5432/scan2pay}
       - EXPLORER_MODE=${EXPLORER_MODE:-auto}
       - SQLITE_PATH=/data/explorer.db
     extra_hosts:
@@ -102,10 +107,25 @@ services:
       - "3405:3405"
     environment:
       - PORT=3405
+      - DATABASE_URL=${AGENT_DASHBOARD_DATABASE_URL:-}
+      - DASHBOARD_API_KEY=${AGENT_DASHBOARD_API_KEY:-}
+      - ALLOWED_ORIGINS=${AGENT_DASHBOARD_ALLOWED_ORIGINS:-}
+      - RATE_LIMIT_PER_MINUTE=${AGENT_DASHBOARD_RATE_LIMIT:-100}
+      - BUDGET_MAX_PER_PAYMENT=${BUDGET_MAX_PER_PAYMENT:-1000000}
+      - BUDGET_MAX_PER_SESSION=${BUDGET_MAX_PER_SESSION:-10000000}
+      - BUDGET_MAX_PER_DAY=${BUDGET_MAX_PER_DAY:-50000000}
     restart: unless-stopped
     read_only: true
+    tmpfs:
+      - /tmp
     security_opt:
       - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
     logging:
       driver: json-file
       options:

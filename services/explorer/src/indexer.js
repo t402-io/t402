@@ -108,9 +108,28 @@ export function startSync(intervalMs = 60000) {
     if (!pool) return;
 
     try {
-      const since = lastSyncTimestamp || new Date(Date.now() - 86400_000 * 30).toISOString();
+      const since = lastSyncTimestamp || new Date(Date.now() - 86400000 * 30).toISOString();
+      // Query Scan2Pay crypto_orders (real payments) instead of facilitator settlements
       const result = await pool.query(
-        "SELECT * FROM settlements WHERE confirmed_at > $1 ORDER BY confirmed_at ASC LIMIT 1000",
+        `SELECT
+          id,
+          selected_network AS network,
+          COALESCE(scheme, 'exact') AS scheme,
+          tx_hash,
+          COALESCE(payer, '') AS from_address,
+          COALESCE(pay_to_evm, pay_to_solana, pay_to_ton, pay_to_tron, '') AS to_address,
+          COALESCE(crypto_amount, amount) AS amount,
+          COALESCE(selected_asset, 'USDT') AS asset,
+          CASE WHEN status = 'paid' THEN 'confirmed' ELSE status END AS status,
+          created_at,
+          paid_at AS confirmed_at,
+          NULL AS gas_used,
+          NULL AS gas_price,
+          NULL AS metadata
+        FROM crypto_orders
+        WHERE status = 'paid' AND paid_at > $1
+        ORDER BY paid_at ASC
+        LIMIT 1000`,
         [since],
       );
 
@@ -118,7 +137,7 @@ export function startSync(intervalMs = 60000) {
         syncToCache(result.rows);
         lastSyncTimestamp = result.rows[result.rows.length - 1].confirmed_at;
         setLastSync(new Date().toISOString());
-        log("info", "Synced settlements from PG", { count: result.rows.length });
+        log("info", "Synced orders from PG", { count: result.rows.length });
       }
     } catch (err) {
       log("warn", "PG sync failed", { error: err.message });
