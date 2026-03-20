@@ -13,10 +13,10 @@ function themeToggleScript() {
 function headerHtml(title, subtitle) {
   return `<div class="header-bar">
     <div>
-      <h1><a href="/">${title}</a></h1>
+      <h1>${title}</h1>
       ${subtitle ? `<p class="subtitle">${subtitle}</p>` : ""}
     </div>
-    <button id="themeToggle" class="secondary theme-toggle" title="Toggle light/dark mode">Toggle Theme</button>
+    <button id="themeToggle" class="secondary theme-toggle" title="Toggle theme">&#9680;</button>
   </div>`;
 }
 
@@ -37,42 +37,38 @@ export function renderIndex({ stats, transactions, networks, tokens }) {
 ${themeToggleScript()}
 </head>
 <body>
-  ${headerHtml("T402 Payment Explorer", "Real-time transaction browser for the T402 payment protocol")}
+  ${headerHtml('<a href="/">T402 Explorer</a>', 'Real-time settlement browser for the <a href="https://t402.io">T402 protocol</a>')}
   <div class="stats">
-    <div class="stat"><div class="stat-value">${escapeHtml(String(stats?.totalTransactions ?? 0))}</div><div class="stat-label">Transactions (7d)</div></div>
+    <div class="stat"><div class="stat-value">${escapeHtml(String(stats?.totalTransactions ?? 0))}</div><div class="stat-label">Settlements (7d)</div></div>
     <div class="stat"><div class="stat-value">$${escapeHtml(totalVol)}</div><div class="stat-label">Volume (7d)</div></div>
-    <div class="stat"><div class="stat-value">${escapeHtml(String(Object.keys(stats?.byNetwork ?? {}).length))}</div><div class="stat-label">Networks</div></div>
-    <div class="stat"><div class="stat-value">${escapeHtml(String(stats?.uniquePayers ?? 0))}</div><div class="stat-label">Unique Payers</div></div>
-    <div class="stat"><div class="stat-value">${escapeHtml(String(stats?.uniqueRecipients ?? 0))}</div><div class="stat-label">Unique Recipients</div></div>
-    <div class="stat"><div class="stat-value">$${escapeHtml(avgSize)}</div><div class="stat-label">Avg Tx Size</div></div>
+    <div class="stat"><div class="stat-value">${escapeHtml(String(Object.keys(stats?.byNetwork ?? {}).length))}</div><div class="stat-label">Chains</div></div>
+    <div class="stat"><div class="stat-value">${escapeHtml(String(Object.keys(stats?.byToken ?? {}).length))}</div><div class="stat-label">Tokens</div></div>
+    <div class="stat"><div class="stat-value">${escapeHtml(String(stats?.uniquePayers ?? 0))}</div><div class="stat-label">Payers</div></div>
+    <div class="stat"><div class="stat-value">$${escapeHtml(avgSize)}</div><div class="stat-label">Avg Size</div></div>
   </div>
-  <div class="browse-links">
-    <span class="muted">Networks:</span> ${networkLinks}
-    <span class="muted" style="margin-left:1rem;">Tokens:</span> ${tokenLinks}
-  </div>
+  <div class="browse-links"><span class="muted">Chains:</span> ${networkLinks}</div>
+  <div class="browse-links"><span class="muted">Tokens:</span> ${tokenLinks}</div>
   <div class="filters">
-    <select id="networkFilter"><option value="">All Networks</option>${networkOptions}</select>
+    <select id="networkFilter"><option value="">All Chains</option>${networkOptions}</select>
     <select id="tokenFilter"><option value="">All Tokens</option>${tokenOptions}</select>
-    <input id="searchInput" placeholder="Search by tx hash or address...">
-    <button id="searchBtn">Search</button>
+    <label class="filter-label">From <input type="date" id="dateFrom"></label>
+    <label class="filter-label">To <input type="date" id="dateTo"></label>
+    <select id="sortBy">
+      <option value="">Newest first</option>
+      <option value="confirmed_at|ASC">Oldest first</option>
+      <option value="amount|DESC">Amount ↓</option>
+      <option value="amount|ASC">Amount ↑</option>
+    </select>
     <button class="secondary" id="resetBtn">Reset</button>
   </div>
   <div class="filters">
-    <label class="filter-label">From: <input type="date" id="dateFrom"></label>
-    <label class="filter-label">To: <input type="date" id="dateTo"></label>
-    <select id="sortBy">
-      <option value="">Sort: Time (newest)</option>
-      <option value="confirmed_at|ASC">Time (oldest)</option>
-      <option value="amount|DESC">Amount (high-low)</option>
-      <option value="amount|ASC">Amount (low-high)</option>
-      <option value="network|ASC">Network (A-Z)</option>
-      <option value="network|DESC">Network (Z-A)</option>
-    </select>
+    <input id="searchInput" placeholder="Search tx hash or address (min 4 chars)...">
+    <button id="searchBtn">Search</button>
   </div>
   <h2>Recent Transactions</h2>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Tx Hash</th><th>Network</th><th>Token</th><th class="text-right">Amount</th><th>From</th><th>To</th><th>Scheme</th><th>Time</th></tr></thead>
+      <thead><tr><th>Hash</th><th>Chain</th><th>Token</th><th class="text-right">Amount</th><th>From</th><th>To</th><th>Scheme</th><th>Settled</th></tr></thead>
       <tbody id="txBody">${rows}</tbody>
     </table>
   </div>
@@ -83,12 +79,11 @@ ${themeToggleScript()}
     <button id="nextBtn" class="secondary">Next</button>
   </div>
   <footer>
-    <a href="/api/v1/transactions">Transactions API</a> ·
-    <a href="/api/v1/stats">Stats API</a> ·
-    <a href="/api/v1/networks">Networks API</a> ·
-    <a href="/api/v1/tokens">Tokens API</a> ·
     <a href="/api/v1/export?format=csv">Export CSV</a> ·
-    Powered by <a href="https://t402.io">T402</a>
+    <a href="/api/v1/transactions">API</a> ·
+    <a href="/api/v1/stats">Stats</a> ·
+    <a href="/metrics">Metrics</a>
+    <br><span style="font-size:0.75rem;">Powered by <a href="https://t402.io">T402 Protocol</a></span>
   </footer>
   <script src="/static/app.js"></script>
 </body></html>`;
