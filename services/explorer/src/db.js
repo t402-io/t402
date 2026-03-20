@@ -191,7 +191,8 @@ export async function getAllTransactionsForExport({ network, token } = {}) {
 export function syncToCache(rows) {
   if (!db.sqlite || rows.length === 0) return;
   const insert = db.sqlite.prepare("INSERT OR REPLACE INTO settlements (id, network, scheme, tx_hash, from_address, to_address, amount, asset, status, created_at, confirmed_at, gas_used, gas_price, metadata) VALUES ($id, $network, $scheme, $tx_hash, $from_address, $to_address, $amount, $asset, $status, $created_at, $confirmed_at, $gas_used, $gas_price, $metadata)");
-  const tx = db.sqlite.transaction((items) => { for (const r of items) insert.run({ id: r.id, network: r.network, scheme: r.scheme, tx_hash: r.tx_hash, from_address: r.from_address, to_address: r.to_address, amount: r.amount, asset: r.asset, status: r.status || "confirmed", created_at: r.created_at, confirmed_at: r.confirmed_at, gas_used: r.gas_used, gas_price: r.gas_price, metadata: typeof r.metadata === "object" ? JSON.stringify(r.metadata) : r.metadata }); });
+  const toStr = (v) => v instanceof Date ? v.toISOString() : (v ?? null);
+  const tx = db.sqlite.transaction((items) => { for (const r of items) insert.run({ id: String(r.id), network: String(r.network || ''), scheme: String(r.scheme || 'exact'), tx_hash: String(r.tx_hash || ''), from_address: String(r.from_address || ''), to_address: String(r.to_address || ''), amount: String(r.amount || '0'), asset: String(r.asset || ''), status: String(r.status || 'confirmed'), created_at: toStr(r.created_at), confirmed_at: toStr(r.confirmed_at), gas_used: r.gas_used ? String(r.gas_used) : null, gas_price: r.gas_price ? String(r.gas_price) : null, metadata: typeof r.metadata === "object" && r.metadata !== null ? JSON.stringify(r.metadata) : (r.metadata ?? null) }); });
   tx(rows);
 }
 
