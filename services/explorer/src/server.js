@@ -243,8 +243,8 @@ app.get("/address/:address", async (req, res) => {
   res.type("html").send(renderAddressPage(req.params.address, result.transactions, { total: result.total, totalVolume: result.totalVolume }));
 });
 
-app.get("/network/*", async (req, res) => {
-  const networkId = req.params[0];
+app.get("/network/{*networkPath}", async (req, res) => {
+  const networkId = req.params.networkPath;
   const stats = await getNetworkStats(networkId);
   if (!stats) return res.status(404).type("html").send(renderNetworkPage(networkId, null, []));
   const txResult = await getTransactions({ network: networkId, limit: 20 });
