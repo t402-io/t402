@@ -22,13 +22,13 @@ function headerHtml(title, subtitle) {
 
 export function renderIndex({ stats, transactions, networks, tokens }) {
   const networkOptions = (networks || []).map(n => `<option value="${escapeHtml(n.network)}">${escapeHtml(getNetworkName(n.network))} (${n.count})</option>`).join("");
-  const tokenOptions = (tokens || []).map(t => `<option value="${escapeHtml(t.token)}">${escapeHtml(t.token)} (${t.count})</option>`).join("");
+  const tokenOptions = (tokens || []).filter(t => t.token !== "UNKNOWN").map(t => `<option value="${escapeHtml(t.token)}">${escapeHtml(t.token)} (${t.count})</option>`).join("");
   const rows = (transactions || []).map(tx => renderRow(tx)).join("");
   const totalVol = stats ? formatAmount(stats.totalVolume, "USDT", null) : "0.00";
   const avgSize = stats ? formatAmount(stats.avgTransactionSize, "USDT", null) : "0.00";
 
   const networkLinks = (networks || []).map(n => `<a href="/network/${escapeHtml(encodeURIComponent(n.network))}" class="badge">${escapeHtml(getNetworkName(n.network))} (${n.count})</a>`).join(" ");
-  const tokenLinks = (tokens || []).map(t => `<a href="/token/${escapeHtml(encodeURIComponent(t.token))}" class="badge badge-token">${escapeHtml(t.token)} (${t.count})</a>`).join(" ");
+  const tokenLinks = (tokens || []).filter(t => t.token !== "UNKNOWN").map(t => `<a href="/token/${escapeHtml(encodeURIComponent(t.token))}" class="badge badge-token">${escapeHtml(t.token)} (${t.count})</a>`).join(" ");
 
   return `<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">

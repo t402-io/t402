@@ -3,6 +3,7 @@
  */
 
 import { log } from "./server.js";
+import { getDecimals } from "./utils.js";
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 
@@ -114,9 +115,13 @@ export async function getStats(days = 7) {
   const byToken = {};
   const byScheme = {};
   for (const r of grouped) {
-    totalVolume += BigInt(r.volume || 0);
+    // Normalize volume to 6-decimal base (USD stablecoin standard)
+    let vol = BigInt(r.volume || 0);
+    const decimals = getDecimals(r.token, r.network);
+    if (decimals > 6) vol = vol / BigInt(10 ** (decimals - 6));
+    totalVolume += vol;
     byNetwork[r.network] = (byNetwork[r.network] || 0) + r.count;
-    byToken[r.token] = (byToken[r.token] || 0) + r.count;
+    if (r.token !== "UNKNOWN") byToken[r.token] = (byToken[r.token] || 0) + r.count;
     byScheme[r.scheme] = (byScheme[r.scheme] || 0) + r.count;
   }
   return { period: `${days}d`, totalTransactions: base.total, totalVolume: totalVolume.toString(), uniquePayers: base.payers, uniqueRecipients: base.recipients, byNetwork, byToken, byScheme, avgTransactionSize: base.total > 0 ? String(totalVolume / BigInt(base.total)) : "0" };
