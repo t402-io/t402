@@ -37,6 +37,7 @@ import {
   close,
   getDbStatus,
   insertSeedData,
+  clearCache,
 } from "./db.js";
 import { seedTransactions, startSync, stopSync } from "./indexer.js";
 import { renderIndex, renderDetail, renderAddressPage, renderNetworkPage, renderTokenPage } from "./templates.js";
@@ -330,6 +331,9 @@ async function start() {
     const txs = seedTransactions(100);
     insertSeedData(txs);
     log("info", "Seeded 100 transactions");
+  } else {
+    // PG connected — clear any leftover seed data before syncing real data
+    clearCache();
   }
 
   if (usePg) { startSync(SYNC_INTERVAL); }

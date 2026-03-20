@@ -57,6 +57,45 @@ const NETWORKS = [
 
 const TOKENS = ["USDC", "USDT0", "USDT", "USAT"];
 
+// Map contract addresses to token symbols for display
+const TOKEN_ADDRESS_MAP = {
+  // USDT
+  "0xdac17f958d2ee523a2206206994597c13d831ec7": "USDT", // Ethereum
+  "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9": "USDT", // Arbitrum
+  "0xc2132d05d31c914a87c6611c10748aeb04b58e8f": "USDT", // Polygon
+  "0x94b008aa00579c1307b0ef2c499ad98a8ce58e58": "USDT", // Optimism
+  "0xfde4c96c8593536e31f229ea8f37b2ada2699bb2": "USDT", // Base
+  "0x55d398326f99059ff775485246999027b3197955": "USDT", // BSC
+  "0x9702230a8ea53601f5cd2dc00fdbc13d4df4a8c7": "USDT", // Avalanche
+  // USDC
+  "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": "USDC", // Ethereum
+  "0xaf88d065e77c8cc2239327c5edb3a432268e5831": "USDC", // Arbitrum
+  "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359": "USDC", // Polygon
+  "0x0b2c639c533813f4aa9d7837caf62653d097ff85": "USDC", // Optimism
+  "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913": "USDC", // Base
+  "0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e": "USDC", // Avalanche
+  // USAT
+  "0x07041776f5007aca2a54844f50503a18a72a8b68": "USAT", // Ethereum
+  // USDT0
+  "0x01bff41798a0bcf287b996046ca68b395dbc1071": "USDT0", // Optimism
+  "0x0200c29006150606b650577bbe7b6248f58470c1": "USDT0", // Ink
+  "0x779ded0c9e1022225f8e0630b35a9b54be713736": "USDT0", // Berachain/Mantle/Rootstock/XLayer
+  "0x588ce4f028d8e7b53b687865d6a67b3a54c75518": "USDT0", // Unichain
+  // Non-EVM
+  "eqcxe6mutqjkfngfarotkot1lzbdiix1kcixrv7nw2id_sds": "USDT", // TON
+  "tr7nhqjekqxgtci8q8zy4pl8otszgjlj6t": "USDT", // TRON
+  "epjfwdd5aufqssqem2qn1xzybapc8g4weggkzwytdt1v": "USDC", // Solana
+  "es9vmfrzacermjfrf4h2fyd4kconky11mcce8benwnyb": "USDT", // Solana
+};
+
+export function resolveTokenSymbol(asset) {
+  if (!asset) return "UNKNOWN";
+  // Already a symbol
+  if (asset.length <= 5 && /^[A-Z0-9]+$/.test(asset)) return asset;
+  // Try address lookup (case-insensitive)
+  return TOKEN_ADDRESS_MAP[asset.toLowerCase()] || asset;
+}
+
 function getScheme(network) {
   if (network.startsWith("eip155:")) {
     return Math.random() < 0.5 ? "exact" : "exact-legacy";
@@ -137,7 +176,9 @@ export function startSync(intervalMs = 60000) {
       );
 
       if (result.rows.length > 0) {
-        syncToCache(result.rows);
+        // Resolve contract addresses to token symbols
+        const mapped = result.rows.map(r => ({ ...r, asset: resolveTokenSymbol(r.asset) }));
+        syncToCache(mapped);
         lastSyncTimestamp = result.rows[result.rows.length - 1].confirmed_at;
         setLastSync(new Date().toISOString());
         log("info", "Synced orders from PG", { count: result.rows.length });

@@ -188,6 +188,11 @@ export async function getAllTransactionsForExport({ network, token } = {}) {
   return db.sqlite.prepare(`SELECT * FROM settlements ${where} ORDER BY confirmed_at DESC LIMIT 10000`).all(params);
 }
 
+export function clearCache() {
+  if (!db.sqlite) return;
+  db.sqlite.prepare("DELETE FROM settlements").run();
+}
+
 export function syncToCache(rows) {
   if (!db.sqlite || rows.length === 0) return;
   const insert = db.sqlite.prepare("INSERT OR REPLACE INTO settlements (id, network, scheme, tx_hash, from_address, to_address, amount, asset, status, created_at, confirmed_at, gas_used, gas_price, metadata) VALUES ($id, $network, $scheme, $tx_hash, $from_address, $to_address, $amount, $asset, $status, $created_at, $confirmed_at, $gas_used, $gas_price, $metadata)");
