@@ -190,8 +190,8 @@ describe('MCP Tools E2E', () => {
   })
 
   describe('Tool completeness', () => {
-    it('should have 12 base tool definitions', () => {
-      expect(Object.keys(TOOL_DEFINITIONS)).toHaveLength(12)
+    it('should have 16 base tool definitions', () => {
+      expect(Object.keys(TOOL_DEFINITIONS)).toHaveLength(16)
     })
 
     it('should have 7 WDK tool definitions', () => {

@@ -381,9 +381,9 @@ describe('WDK Tool Definitions', () => {
     expect(toolNames).toContain('wdk/executeSwap')
   })
 
-  it('should define 12 base tools', () => {
+  it('should define 16 base tools', () => {
     const toolNames = Object.keys(TOOL_DEFINITIONS)
-    expect(toolNames).toHaveLength(12)
+    expect(toolNames).toHaveLength(16)
     expect(toolNames).toContain('t402/getBalance')
     expect(toolNames).toContain('t402/pay')
     expect(toolNames).toContain('t402/bridge')

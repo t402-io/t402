@@ -340,8 +340,8 @@ describe('Price/Fee Tool Definitions', () => {
     expect(TOOL_DEFINITIONS).toHaveProperty('t402/compareNetworkFees')
   })
 
-  it('should have 12 total base tool definitions', () => {
-    expect(Object.keys(TOOL_DEFINITIONS)).toHaveLength(12)
+  it('should have 16 total base tool definitions', () => {
+    expect(Object.keys(TOOL_DEFINITIONS)).toHaveLength(16)
   })
 
   it('each new tool should have name, description, inputSchema', () => {
