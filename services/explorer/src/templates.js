@@ -40,7 +40,7 @@ ${themeToggleScript()}
 </head>
 <body>
   ${headerHtml('<a href="/">T402 Explorer</a>', 'Real-time settlement browser for the <a href="https://t402.io">T402 protocol</a>')}
-  <p class="muted" style="margin-bottom:1rem;">Browse confirmed payments across ${chainCount} blockchains using the <a href="https://t402.io">T402 HTTP 402 protocol</a>.</p>
+  <p class="intro">Browse ${formatNumber(totalSettlements)} confirmed payments across ${chainCount} blockchains via the <a href="https://t402.io">T402 protocol</a>.</p>
   <div class="stats">
     <div class="stat" title="Total confirmed settlements in the last 7 days"><div class="stat-value">${escapeHtml(formatNumber(totalSettlements))}</div><div class="stat-label">Settlements (7d)</div></div>
     <div class="stat" title="Total USD volume settled in the last 7 days"><div class="stat-value">$${escapeHtml(totalVol)}</div><div class="stat-label">Volume (7d)</div></div>
@@ -49,8 +49,8 @@ ${themeToggleScript()}
     <div class="stat" title="Unique payer addresses in the last 7 days"><div class="stat-value">${escapeHtml(formatNumber(stats?.uniquePayers ?? 0))}</div><div class="stat-label">Payers</div></div>
     <div class="stat" title="Average settlement amount in USD"><div class="stat-value">$${escapeHtml(avgSize)}</div><div class="stat-label">Avg Size</div></div>
   </div>
-  <div class="browse-links"><span class="muted">Chains:</span> ${networkLinks}</div>
-  <div class="browse-links"><span class="muted">Tokens:</span> ${tokenLinks}</div>
+  <div class="browse-section"><span class="browse-label">Chains</span> ${networkLinks}</div>
+  <div class="browse-section"><span class="browse-label">Tokens</span> ${tokenLinks}</div>
   <div class="filters">
     <select id="networkFilter"><option value="">All Chains</option>${networkOptions}</select>
     <select id="tokenFilter"><option value="">All Tokens</option>${tokenOptions}</select>
