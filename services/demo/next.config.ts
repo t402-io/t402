@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   // Force dynamic rendering for all pages (no static generation)
   // Required because wallet SDKs use browser-only APIs
   experimental: {},

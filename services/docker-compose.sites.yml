@@ -1,0 +1,66 @@
+# Static sites — t402.io, docs, demo
+# Deploy: docker compose -f docker-compose.sites.yml up -d
+# Ports: site=3010, docs=3011, demo=3012
+
+services:
+  site:
+    build:
+      context: ./site
+    ports:
+      - "127.0.0.1:3010:3000"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:size=32m
+      - /var/run:size=1m
+      - /tmp:size=8m
+    mem_limit: 64m
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+  docs:
+    build:
+      context: ./docs
+    ports:
+      - "127.0.0.1:3011:3000"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:size=32m
+      - /var/run:size=1m
+      - /tmp:size=8m
+    mem_limit: 64m
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+  demo:
+    build:
+      context: ./demo
+      args:
+        NEXT_PUBLIC_FACILITATOR_URL: ${FACILITATOR_URL:-https://facilitator.t402.io}
+        NEXT_PUBLIC_DEMO_MODE: demo
+        NEXT_PUBLIC_TESTNET: "true"
+    ports:
+      - "127.0.0.1:3012:3000"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+    mem_limit: 256m
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"

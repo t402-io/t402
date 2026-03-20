@@ -4,9 +4,9 @@
 
 | Service | URL | Platform | Port |
 |---------|-----|----------|------|
-| Main Site | https://t402.io | Cloudflare Pages | - |
-| Docs | https://docs.t402.io | Cloudflare Pages | - |
-| Demo | https://demo.t402.io | Cloudflare Workers | - |
+| Main Site | https://t402.io | Cloudflare Pages / Docker | 3010 |
+| Docs | https://docs.t402.io | Cloudflare Pages / Docker | 3011 |
+| Demo | https://demo.t402.io | Cloudflare Workers / Docker | 3012 |
 | Facilitator | https://facilitator.t402.io | Docker (220.134.32.65) | 8080 |
 | Grafana | https://grafana-facilitator.t402.io | Docker (220.134.32.65) | 3000 |
 | Scan2Pay API | https://scan2pay-api.t402.io | Docker (220.134.32.65) | 8081 |
@@ -24,7 +24,25 @@
 - GitHub Actions secrets configured: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY`
 - Cloudflare Tunnel running on prod (`d4000e5f-9db4-430f-961b-6fa2d7fb9aac`)
 
-## Static Sites (Cloudflare)
+## Static Sites
+
+Two deployment options: Cloudflare (CI auto-deploy) or Docker (self-hosted).
+
+### Docker Deploy (all 3 sites)
+
+```bash
+cd services
+docker compose -f docker-compose.sites.yml build
+docker compose -f docker-compose.sites.yml up -d
+```
+
+| Service | Port | Health Check |
+|---------|------|-------------|
+| site | 3010 | `curl -s localhost:3010` |
+| docs | 3011 | `curl -s localhost:3011` |
+| demo | 3012 | `curl -s localhost:3012` |
+
+### Cloudflare Deploy (auto via CI)
 
 All three deploy automatically via GitHub Actions on push to `main` when their directory changes. Manual deploy: trigger the workflow via `workflow_dispatch`.
 
@@ -220,7 +238,7 @@ docker compose -f <compose-file> logs -f <service-name> --tail 100
 
 **Full health check (all services):**
 ```bash
-for svc in 8080 3000 3001 8081 3402 3403 3404 3405 3406; do
+for svc in 3010 3011 3012 8080 3000 3001 8081 3402 3403 3404 3405 3406; do
   code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "http://localhost:${svc}/health" 2>/dev/null || echo "000")
   echo "Port ${svc}: HTTP ${code}"
 done
