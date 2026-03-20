@@ -73,9 +73,11 @@ services:
       - "3404:3404"
     environment:
       - PORT=3404
-      - DATABASE_URL=${DATABASE_URL:-}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://facilitator:${POSTGRES_PASSWORD}@host.docker.internal:5432/facilitator}
       - EXPLORER_MODE=${EXPLORER_MODE:-auto}
       - SQLITE_PATH=/data/explorer.db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - explorer-data:/data
     restart: unless-stopped

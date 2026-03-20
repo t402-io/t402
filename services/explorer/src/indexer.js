@@ -6,6 +6,7 @@
  */
 
 import { syncToCache, setLastSync, getPgPool } from "./db.js";
+import { log } from "./server.js";
 
 function randomHex(len) {
   return Array.from({ length: len }, () => Math.floor(Math.random() * 16).toString(16)).join("");
@@ -117,22 +118,22 @@ export function startSync(intervalMs = 60000) {
         syncToCache(result.rows);
         lastSyncTimestamp = result.rows[result.rows.length - 1].confirmed_at;
         setLastSync(new Date().toISOString());
-        console.log(`Synced ${result.rows.length} settlements from PG`);
+        log("info", "Synced settlements from PG", { count: result.rows.length });
       }
     } catch (err) {
-      console.warn("PG sync failed:", err.message);
+      log("warn", "PG sync failed", { error: err.message });
     }
   }
 
   doSync();
   syncInterval = setInterval(doSync, intervalMs);
-  console.log(`Sync worker started (${intervalMs}ms interval)`);
+  log("info", "Sync worker started", { interval_ms: intervalMs });
 }
 
 export function stopSync() {
   if (syncInterval) {
     clearInterval(syncInterval);
     syncInterval = null;
-    console.log("Sync worker stopped");
+    log("info", "Sync worker stopped");
   }
 }

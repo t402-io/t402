@@ -67,6 +67,10 @@
     if (opts.token) params.set("token", opts.token);
     if (opts.limit) params.set("limit", String(opts.limit));
     if (opts.cursor) params.set("cursor", opts.cursor);
+    if (opts.dateFrom) params.set("dateFrom", opts.dateFrom);
+    if (opts.dateTo) params.set("dateTo", opts.dateTo);
+    if (opts.sortBy) params.set("sortBy", opts.sortBy);
+    if (opts.sortDir) params.set("sortDir", opts.sortDir);
 
     const loading = document.getElementById("loading");
     if (loading) loading.style.display = "block";
@@ -92,7 +96,38 @@
     }
   }
 
+  function updateUrlParams(filters) {
+    var params = new URLSearchParams();
+    if (filters.network) params.set("network", filters.network);
+    if (filters.token) params.set("token", filters.token);
+    if (filters.search) params.set("q", filters.search);
+    var qs = params.toString();
+    var newUrl = window.location.pathname + (qs ? "?" + qs : "");
+    window.history.replaceState(null, "", newUrl);
+  }
+
+  function readUrlParams() {
+    var params = new URLSearchParams(window.location.search);
+    return {
+      network: params.get("network") || "",
+      token: params.get("token") || "",
+      search: params.get("q") || "",
+    };
+  }
+
+  function initThemeToggle() {
+    var toggle = document.getElementById("themeToggle");
+    if (!toggle) return;
+    toggle.addEventListener("click", function () {
+      var root = document.documentElement;
+      var isLight = root.classList.toggle("light");
+      localStorage.setItem("t402-theme", isLight ? "light" : "dark");
+    });
+  }
+
   function init() {
+    initThemeToggle();
+
     const networkFilter = document.getElementById("networkFilter");
     const tokenFilter = document.getElementById("tokenFilter");
     const searchInput = document.getElementById("searchInput");
@@ -100,28 +135,65 @@
     const resetBtn = document.getElementById("resetBtn");
     const nextBtn = document.getElementById("nextBtn");
     const prevBtn = document.getElementById("prevBtn");
+    const dateFrom = document.getElementById("dateFrom");
+    const dateTo = document.getElementById("dateTo");
+    const sortByEl = document.getElementById("sortBy");
+
+    // Restore filters from URL on page load
+    var urlFilters = readUrlParams();
+    if (networkFilter && urlFilters.network) networkFilter.value = urlFilters.network;
+    if (tokenFilter && urlFilters.token) tokenFilter.value = urlFilters.token;
+    if (searchInput && urlFilters.search) searchInput.value = urlFilters.search;
 
     function getFilters() {
-      return {
+      var filters = {
         network: networkFilter ? networkFilter.value : "",
         token: tokenFilter ? tokenFilter.value : "",
         limit: 20,
       };
+      if (dateFrom && dateFrom.value) {
+        filters.dateFrom = new Date(dateFrom.value).toISOString();
+      }
+      if (dateTo && dateTo.value) {
+        var d = new Date(dateTo.value);
+        d.setHours(23, 59, 59, 999);
+        filters.dateTo = d.toISOString();
+      }
+      if (sortByEl && sortByEl.value) {
+        var parts = sortByEl.value.split("|");
+        filters.sortBy = parts[0];
+        filters.sortDir = parts[1] || "DESC";
+      }
+      return filters;
     }
 
     function reload() {
       currentPage = 1;
       currentCursor = null;
       cursorStack.length = 0;
-      loadTransactions(getFilters());
+      var filters = getFilters();
+      updateUrlParams({ network: filters.network, token: filters.token, search: searchInput ? searchInput.value.trim() : "" });
+      loadTransactions(filters);
+    }
+
+    // Apply URL filters on load if any are set
+    if (urlFilters.network || urlFilters.token) {
+      reload();
+    }
+    if (urlFilters.search && searchBtn) {
+      searchBtn.click();
     }
 
     if (networkFilter) networkFilter.addEventListener("change", reload);
     if (tokenFilter) tokenFilter.addEventListener("change", reload);
+    if (dateFrom) dateFrom.addEventListener("change", reload);
+    if (dateTo) dateTo.addEventListener("change", reload);
+    if (sortByEl) sortByEl.addEventListener("change", reload);
 
     if (searchBtn) {
       searchBtn.addEventListener("click", async function () {
         const q = searchInput ? searchInput.value.trim() : "";
+        updateUrlParams({ network: networkFilter ? networkFilter.value : "", token: tokenFilter ? tokenFilter.value : "", search: q });
         if (!q) return reload();
         const data = await fetchJSON(API_BASE + "/search?q=" + encodeURIComponent(q));
         const tbody = document.getElementById("txBody");
@@ -139,6 +211,10 @@
         if (networkFilter) networkFilter.value = "";
         if (tokenFilter) tokenFilter.value = "";
         if (searchInput) searchInput.value = "";
+        if (dateFrom) dateFrom.value = "";
+        if (dateTo) dateTo.value = "";
+        if (sortByEl) sortByEl.value = "";
+        updateUrlParams({});
         reload();
       });
     }
