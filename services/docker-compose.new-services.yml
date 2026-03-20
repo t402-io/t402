@@ -78,11 +78,12 @@ services:
       - "3404:3404"
     environment:
       - PORT=3404
-      - DATABASE_URL=${DATABASE_URL:-postgresql://scan2pay:${SCAN2PAY_PG_PASSWORD}@host.docker.internal:5432/scan2pay}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://scan2pay:${SCAN2PAY_PG_PASSWORD}@scan2pay-postgres:5432/scan2pay}
       - EXPLORER_MODE=${EXPLORER_MODE:-auto}
       - SQLITE_PATH=/data/explorer.db
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    networks:
+      - default
+      - scan2pay
     volumes:
       - explorer-data:/data
     restart: unless-stopped
@@ -166,3 +167,8 @@ services:
 volumes:
   status-data:
   explorer-data:
+
+networks:
+  scan2pay:
+    name: scan2pay-java_scan2pay-network
+    external: true
