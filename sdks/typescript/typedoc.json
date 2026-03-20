@@ -15,6 +15,7 @@
     "packages/mechanisms/stacks/src/index.ts",
     "packages/mechanisms/cosmos/src/index.ts",
     "packages/mechanisms/btc/src/index.ts",
+    "packages/mechanisms/stellar/src/index.ts",
     "packages/http/express/src/index.ts",
     "packages/http/next/src/index.ts",
     "packages/http/hono/src/index.ts",

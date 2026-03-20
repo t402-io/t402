@@ -1,4 +1,11 @@
 # syntax=docker/dockerfile:1
+#
+# NOTE: This Dockerfile runs `pnpm build` (Nextra only), not `pnpm build:full`.
+# TypeDoc API docs (public/api/) require the full TypeScript SDK monorepo and
+# are generated in CI via `build:full` (see .github/workflows/docs.yml).
+# For Docker builds, pre-generate API docs with `pnpm build:api` from the repo
+# root, then build the image — the COPY step will include public/api/ if present.
+#
 FROM node:22-alpine AS builder
 RUN corepack enable && corepack prepare pnpm@10.7.0 --activate
 WORKDIR /app

@@ -27,13 +27,15 @@ jobs:
         with:
           node-version: "22"
           cache: "pnpm"
-          cache-dependency-path: services/docs/pnpm-lock.yaml
+          cache-dependency-path: |
+            services/docs/pnpm-lock.yaml
+            sdks/typescript/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: npm run build
+      - name: Build (with TypeDoc API docs)
+        run: npm run build:full
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3

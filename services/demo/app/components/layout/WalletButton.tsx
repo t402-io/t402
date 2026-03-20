@@ -13,6 +13,7 @@ import { useNearPayment } from "@/hooks/useNearPayment";
 import { useAptosPayment } from "@/hooks/useAptosPayment";
 import { useTezosPayment } from "@/hooks/useTezosPayment";
 import { usePolkadotPayment } from "@/hooks/usePolkadotPayment";
+import { useCosmosPayment } from "@/hooks/useCosmosPayment";
 
 // Loading placeholder shown during SSR and initial hydration
 function WalletButtonSkeleton() {
@@ -461,8 +462,34 @@ function PolkadotWalletButton() {
 
 function CosmosWalletButton() {
   const { isDemo } = useDemoContext();
+  const { show } = useToast();
+  const { address, isConnected, hasWallet, connect, disconnect } = useCosmosPayment();
 
   if (isDemo) return <DemoWalletBadge label="Cosmos" />;
+  if (isConnected && address) {
+    return (
+      <ConnectedBadge
+        address={address}
+        label="Cosmos"
+        onDisconnect={() => {
+          disconnect();
+          show("info", "Cosmos wallet disconnected");
+        }}
+      />
+    );
+  }
 
-  return <InstallButton label="Keplr" url="https://www.keplr.app/" />;
+  const handleConnect = async () => {
+    try {
+      await connect();
+    } catch (err) {
+      show("error", `Keplr connection failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+    }
+  };
+
+  if (!hasWallet) {
+    return <InstallButton label="Keplr" url="https://www.keplr.app/" />;
+  }
+
+  return <ConnectButton label="Keplr" onClick={handleConnect} />;
 }

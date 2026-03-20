@@ -14,13 +14,15 @@
 import express from "express";
 import compression from "compression";
 import {
-  generatePaymentHistory,
-  generateBalances,
-  generateBudget,
-  generateStats,
-  generateAlerts,
-  exportPaymentsCsv,
-} from "./data.js";
+  getPayments,
+  getBalances,
+  getBudget,
+  getStats,
+  getAlerts,
+  getExportCsv,
+  getMode,
+  shutdown,
+} from "./datasource.js";
 
 const app = express();
 
@@ -110,76 +112,87 @@ function statusIndicator(status) {
 // ── API endpoints ───────────────────────────────────────────────────
 
 // Payment history
-app.get("/api/v1/payments", (req, res) => {
-  if (!req.query.address) {
-    return res.status(400).json({ error: "address parameter required" });
-  }
-  const address = req.query.address;
-  if (!isValidAddress(address)) {
-    return res.status(400).json({ error: "invalid address format" });
-  }
-  const network = req.query.network;
-  const limit = clampInt(req.query.limit, 1, 100, 20);
-  const days = clampInt(req.query.days, 1, 365, 7);
+app.get("/api/v1/payments", async (req, res, next) => {
+  try {
+    if (!req.query.address) {
+      return res.status(400).json({ error: "address parameter required" });
+    }
+    const address = req.query.address;
+    if (!isValidAddress(address)) {
+      return res.status(400).json({ error: "invalid address format" });
+    }
+    const network = req.query.network || null;
+    const limit = clampInt(req.query.limit, 1, 100, 20);
+    const days = clampInt(req.query.days, 1, 365, 7);
 
-  let payments = generatePaymentHistory(address, days);
-  if (network) payments = payments.filter((p) => p.network === network);
-  res.set("Cache-Control", "public, max-age=60");
-  res.json({ payments: payments.slice(0, limit), total: payments.length, address });
+    const { payments, total } = await getPayments(address, { days, limit, network });
+    res.set("Cache-Control", "public, max-age=60");
+    res.json({ payments, total, address });
+  } catch (err) { next(err); }
 });
 
 // Balances
-app.get("/api/v1/balances/:address", (req, res) => {
-  if (!isValidAddress(req.params.address)) {
-    return res.status(400).json({ error: "invalid address format" });
-  }
-  const { balances, totalUsd } = generateBalances(req.params.address);
-  res.set("Cache-Control", "public, max-age=60");
-  res.json({ address: req.params.address, balances, totalUsd });
+app.get("/api/v1/balances/:address", async (req, res, next) => {
+  try {
+    if (!isValidAddress(req.params.address)) {
+      return res.status(400).json({ error: "invalid address format" });
+    }
+    const { balances, totalUsd } = await getBalances(req.params.address);
+    res.set("Cache-Control", "public, max-age=60");
+    res.json({ address: req.params.address, balances, totalUsd });
+  } catch (err) { next(err); }
 });
 
 // Budget usage
-app.get("/api/v1/budget/:address", (req, res) => {
-  if (!isValidAddress(req.params.address)) {
-    return res.status(400).json({ error: "invalid address format" });
-  }
-  const budget = generateBudget(req.params.address);
-  res.set("Cache-Control", "public, max-age=60");
-  res.json({ address: req.params.address, ...budget });
+app.get("/api/v1/budget/:address", async (req, res, next) => {
+  try {
+    if (!isValidAddress(req.params.address)) {
+      return res.status(400).json({ error: "invalid address format" });
+    }
+    const budget = await getBudget(req.params.address);
+    res.set("Cache-Control", "public, max-age=60");
+    res.json({ address: req.params.address, ...budget });
+  } catch (err) { next(err); }
 });
 
 // Stats
-app.get("/api/v1/stats/:address", (req, res) => {
-  if (!isValidAddress(req.params.address)) {
-    return res.status(400).json({ error: "invalid address format" });
-  }
-  const days = clampInt(req.query.days, 1, 365, 7);
-  const stats = generateStats(req.params.address, days);
-  res.set("Cache-Control", "public, max-age=60");
-  res.json({ address: req.params.address, ...stats });
+app.get("/api/v1/stats/:address", async (req, res, next) => {
+  try {
+    if (!isValidAddress(req.params.address)) {
+      return res.status(400).json({ error: "invalid address format" });
+    }
+    const days = clampInt(req.query.days, 1, 365, 7);
+    const stats = await getStats(req.params.address, days);
+    res.set("Cache-Control", "public, max-age=60");
+    res.json({ address: req.params.address, ...stats });
+  } catch (err) { next(err); }
 });
 
 // Alerts
-app.get("/api/v1/alerts/:address", (req, res) => {
-  if (!isValidAddress(req.params.address)) {
-    return res.status(400).json({ error: "invalid address format" });
-  }
-  const alerts = generateAlerts(req.params.address);
-  res.set("Cache-Control", "public, max-age=60");
-  res.json({ address: req.params.address, alerts, count: alerts.length });
+app.get("/api/v1/alerts/:address", async (req, res, next) => {
+  try {
+    if (!isValidAddress(req.params.address)) {
+      return res.status(400).json({ error: "invalid address format" });
+    }
+    const alerts = await getAlerts(req.params.address);
+    res.set("Cache-Control", "public, max-age=60");
+    res.json({ address: req.params.address, alerts, count: alerts.length });
+  } catch (err) { next(err); }
 });
 
 // CSV Export
-app.get("/api/v1/export/:address", (req, res) => {
-  if (!isValidAddress(req.params.address)) {
-    return res.status(400).json({ error: "invalid address format" });
-  }
-  const days = clampInt(req.query.days, 1, 365, 7);
-  const csv = exportPaymentsCsv(req.params.address, days);
-  const safeFilename = req.params.address.slice(0, 10).replace(/[^a-zA-Z0-9]/g, "");
-  res.set("Content-Type", "text/csv");
-  res.set("Content-Disposition", `attachment; filename="t402-payments-${safeFilename}.csv"`);
-  res.send(csv);
+app.get("/api/v1/export/:address", async (req, res, next) => {
+  try {
+    if (!isValidAddress(req.params.address)) {
+      return res.status(400).json({ error: "invalid address format" });
+    }
+    const days = clampInt(req.query.days, 1, 365, 7);
+    const csv = await getExportCsv(req.params.address, days);
+    const safeFilename = req.params.address.slice(0, 10).replace(/[^a-zA-Z0-9]/g, "");
+    res.set("Content-Type", "text/csv");
+    res.set("Content-Disposition", `attachment; filename="t402-payments-${safeFilename}.csv"`);
+    res.send(csv);
+  } catch (err) { next(err); }
 });
 
 // ── HTML Dashboard ──────────────────────────────────────────────────
@@ -606,23 +619,31 @@ function renderDashboard(data) {
 </body></html>`;
 }
 
-app.get("/", (req, res) => {
-  const rawAddress = req.query.address || "";
-  const hasAddress = rawAddress.length > 0 && isValidAddress(rawAddress);
-  const address = hasAddress ? rawAddress : null;
+app.get("/", async (req, res, next) => {
+  try {
+    const rawAddress = req.query.address || "";
+    const hasAddress = rawAddress.length > 0 && isValidAddress(rawAddress);
+    const address = hasAddress ? rawAddress : null;
 
-  const balData = hasAddress ? generateBalances(address) : null;
-  const budget = hasAddress ? generateBudget(address) : null;
-  const stats = hasAddress ? generateStats(address, 7) : null;
-  const payments = hasAddress ? generatePaymentHistory(address, 7).slice(0, 15) : [];
-  const alerts = hasAddress ? generateAlerts(address) : [];
+    const balData = hasAddress ? await getBalances(address) : null;
+    const budget = hasAddress ? await getBudget(address) : null;
+    const stats = hasAddress ? await getStats(address, 7) : null;
+    const { payments } = hasAddress
+      ? await getPayments(address, { days: 7, limit: 15 })
+      : { payments: [] };
+    const alerts = hasAddress ? await getAlerts(address) : [];
 
-  res.type("html").send(renderDashboard({ address, hasAddress, balData, budget, stats, payments, alerts }));
+    res.type("html").send(renderDashboard({ address, hasAddress, balData, budget, stats, payments, alerts }));
+  } catch (err) { next(err); }
 });
 
-// ── Health ─────────────────────────────────────────────────────────
+// ── Info / Health ───────────────────────────────────────────────────
 
-app.get("/health", (_req, res) => res.json({ status: "ok", service: "t402-agent-dashboard" }));
+app.get("/api/v1/info", (_req, res) => {
+  res.json({ mode: getMode(), version: "1.1.0" });
+});
+
+app.get("/health", (_req, res) => res.json({ status: "ok", service: "t402-agent-dashboard", mode: getMode() }));
 
 // ── Error handling middleware ──────────────────────────────────────
 
@@ -635,9 +656,18 @@ app.use((err, _req, res, _next) => {
 
 const isDirectRun = process.argv[1] && new URL(import.meta.url).pathname === new URL(`file://${process.argv[1]}`).pathname;
 if (isDirectRun) {
-  app.listen(PORT, () => {
-    console.log(`T402 Agent Dashboard on http://localhost:${PORT}`);
+  const server = app.listen(PORT, () => {
+    console.log(`T402 Agent Dashboard on http://localhost:${PORT} [${getMode()} mode]`);
   });
+
+  // Graceful shutdown — close DB pool when stopping.
+  const graceful = () => {
+    server.close(() => {
+      shutdown().then(() => process.exit(0));
+    });
+  };
+  process.on("SIGINT", graceful);
+  process.on("SIGTERM", graceful);
 }
 
 export default app;

@@ -12,6 +12,7 @@ import { useNearPayment } from "./useNearPayment";
 import { useAptosPayment } from "./useAptosPayment";
 import { useTezosPayment } from "./useTezosPayment";
 import { usePolkadotPayment } from "./usePolkadotPayment";
+import { useCosmosPayment } from "./useCosmosPayment";
 import type { ChainFamily } from "@/lib/testnet-config";
 
 interface PaymentRequirements {
@@ -89,6 +90,7 @@ export function useMultiChainPayment() {
   const aptos = useAptosPayment();
   const tezos = useTezosPayment();
   const polkadot = usePolkadotPayment();
+  const cosmos = useCosmosPayment();
 
   const isConnected = (() => {
     switch (activeFamily) {
@@ -101,6 +103,7 @@ export function useMultiChainPayment() {
       case "aptos": return aptos.isConnected;
       case "tezos": return tezos.isConnected;
       case "polkadot": return polkadot.isConnected;
+      case "cosmos": return cosmos.isConnected;
       default: return false;
     }
   })();
@@ -116,6 +119,7 @@ export function useMultiChainPayment() {
       case "aptos": return aptos.address;
       case "tezos": return tezos.address;
       case "polkadot": return polkadot.address;
+      case "cosmos": return cosmos.address;
       default: return null;
     }
   })();
@@ -146,11 +150,13 @@ export function useMultiChainPayment() {
           return tezos.signPayment(requirements) as Promise<PaymentPayload>;
         case "polkadot":
           return polkadot.signPayment(requirements) as Promise<PaymentPayload>;
+        case "cosmos":
+          return cosmos.signPayment(requirements) as Promise<PaymentPayload>;
         default:
           throw new Error(`Unsupported chain: ${activeFamily}`);
       }
     },
-    [activeFamily, isDemo, evm, ton, solana, tron, stacks, near, aptos, tezos, polkadot]
+    [activeFamily, isDemo, evm, ton, solana, tron, stacks, near, aptos, tezos, polkadot, cosmos]
   );
 
   return {

@@ -54,6 +54,11 @@ const PolkadotProvider = dynamic(
   { ssr: false, loading: () => null }
 );
 
+const CosmosProvider = dynamic(
+  () => import("./CosmosProvider").then((mod) => mod.CosmosProvider),
+  { ssr: false, loading: () => null }
+);
+
 // Wrapper that handles the wallet providers with error resilience
 function WalletProviders({ children }: { children: ReactNode }) {
   return (
@@ -64,7 +69,9 @@ function WalletProviders({ children }: { children: ReactNode }) {
             <AptosProvider>
               <TezosProvider>
                 <PolkadotProvider>
-                  {children}
+                  <CosmosProvider>
+                    {children}
+                  </CosmosProvider>
                 </PolkadotProvider>
               </TezosProvider>
             </AptosProvider>

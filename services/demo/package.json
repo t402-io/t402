@@ -20,6 +20,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
     "@aptos-labs/ts-sdk": "^1.33.0",
+    "@cosmjs/stargate": "^0.38.1",
     "@near-wallet-selector/core": "^8.9.0",
     "@near-wallet-selector/modal-ui": "^8.9.0",
     "@near-wallet-selector/my-near-wallet": "^8.9.0",
