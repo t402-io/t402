@@ -42,6 +42,17 @@ describe("Agent Dashboard API", () => {
     }
   });
 
+  it("GET /api/v1/payments returns pagination fields", async () => {
+    const res = await fetch(`${BASE}/api/v1/payments?address=0xTest&limit=5&offset=2`);
+    const data = await res.json();
+    assert.strictEqual(typeof data.offset, "number");
+    assert.strictEqual(typeof data.limit, "number");
+    assert.strictEqual(typeof data.hasMore, "boolean");
+    assert.strictEqual(data.offset, 2);
+    assert.strictEqual(data.limit, 5);
+    assert.ok(data.payments.length <= 5);
+  });
+
   it("GET /api/v1/balances/:addr returns balances", async () => {
     const res = await fetch(`${BASE}/api/v1/balances/0xTest`);
     const data = await res.json();
@@ -154,5 +165,25 @@ describe("Agent Dashboard API", () => {
   it("CORS headers are present", async () => {
     const res = await fetch(`${BASE}/health`);
     assert.strictEqual(res.headers.get("access-control-allow-origin"), "*");
+  });
+
+  it("GET /api/v1/info returns mode and version", async () => {
+    const res = await fetch(`${BASE}/api/v1/info`);
+    const data = await res.json();
+    assert.strictEqual(data.mode, "demo");
+    assert.strictEqual(data.version, "1.1.0");
+  });
+
+  it("GET /metrics returns Prometheus format", async () => {
+    const res = await fetch(`${BASE}/metrics`);
+    assert.ok(res.headers.get("content-type").includes("text/plain"));
+    const text = await res.text();
+    assert.ok(text.includes("http_requests_total"));
+    assert.ok(text.includes("datasource_mode"));
+  });
+
+  it("X-Request-Id header is returned", async () => {
+    const res = await fetch(`${BASE}/health`);
+    assert.ok(res.headers.get("x-request-id"));
   });
 });

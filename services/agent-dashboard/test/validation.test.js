@@ -5,7 +5,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert";
 
-const BASE = "http://localhost:3405";
+const BASE = process.env.BASE_URL || "http://localhost:3405";
 
 describe("Input validation", () => {
   // ── Payments endpoint ──────────────────────────────────────────────
@@ -134,12 +134,14 @@ describe("XSS prevention", () => {
 });
 
 describe("Security headers", () => {
-  it("CSP header is set", async () => {
+  it("CSP header is set with nonce", async () => {
     const res = await fetch(`${BASE}/health`);
     const csp = res.headers.get("content-security-policy");
     assert.ok(csp, "CSP header should be present");
     assert.ok(csp.includes("default-src 'none'"));
     assert.ok(csp.includes("frame-ancestors 'none'"));
+    assert.ok(csp.includes("script-src 'nonce-"));
+    assert.ok(csp.includes("style-src 'nonce-"));
   });
 
   it("X-Frame-Options is DENY", async () => {
@@ -186,6 +188,7 @@ describe("Edge cases", () => {
 
   it("Cache-Control header is set on API responses", async () => {
     const res = await fetch(`${BASE}/api/v1/balances/0xTest`);
+    // In demo mode, should be public
     assert.strictEqual(res.headers.get("cache-control"), "public, max-age=60");
   });
 });
