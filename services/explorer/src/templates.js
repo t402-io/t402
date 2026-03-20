@@ -1,4 +1,4 @@
-import { escapeHtml, formatAmount, formatAddress, formatHash, formatTime, getNetworkName, getExplorerUrl, getAddressUrl } from "./utils.js";
+import { escapeHtml, formatAmount, formatNumber, formatAddress, formatHash, formatTime, getNetworkName, getExplorerUrl, getAddressUrl } from "./utils.js";
 
 function themeToggleScript() {
   return `<script>
@@ -26,9 +26,11 @@ export function renderIndex({ stats, transactions, networks, tokens }) {
   const rows = (transactions || []).map(tx => renderRow(tx)).join("");
   const totalVol = stats ? formatAmount(stats.totalVolume, "USDT", null) : "0.00";
   const avgSize = stats ? formatAmount(stats.avgTransactionSize, "USDT", null) : "0.00";
+  const chainCount = Object.keys(stats?.byNetwork ?? {}).length;
+  const totalSettlements = stats?.totalTransactions ?? 0;
 
   const networkLinks = (networks || []).map(n => `<a href="/network/${escapeHtml(encodeURIComponent(n.network))}" class="badge">${escapeHtml(getNetworkName(n.network))} (${n.count})</a>`).join(" ");
-  const tokenLinks = (tokens || []).filter(t => t.token !== "UNKNOWN").map(t => `<a href="/token/${escapeHtml(encodeURIComponent(t.token))}" class="badge badge-token">${escapeHtml(t.token)} (${t.count})</a>`).join(" ");
+  const tokenLinks = (tokens || []).filter(t => t.token !== "UNKNOWN").map(t => `<a href="/token/${escapeHtml(encodeURIComponent(t.token))}" class="badge badge-token" title="${escapeHtml(tokenFullName(t.token))}">${escapeHtml(t.token)} (${t.count})</a>`).join(" ");
 
   return `<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -38,13 +40,14 @@ ${themeToggleScript()}
 </head>
 <body>
   ${headerHtml('<a href="/">T402 Explorer</a>', 'Real-time settlement browser for the <a href="https://t402.io">T402 protocol</a>')}
+  <p class="muted" style="margin-bottom:1rem;">Browse confirmed payments across ${chainCount} blockchains using the <a href="https://t402.io">T402 HTTP 402 protocol</a>.</p>
   <div class="stats">
-    <div class="stat"><div class="stat-value">${escapeHtml(String(stats?.totalTransactions ?? 0))}</div><div class="stat-label">Settlements (7d)</div></div>
-    <div class="stat"><div class="stat-value">$${escapeHtml(totalVol)}</div><div class="stat-label">Volume (7d)</div></div>
-    <div class="stat"><div class="stat-value">${escapeHtml(String(Object.keys(stats?.byNetwork ?? {}).length))}</div><div class="stat-label">Chains</div></div>
-    <div class="stat"><div class="stat-value">${escapeHtml(String(Object.keys(stats?.byToken ?? {}).length))}</div><div class="stat-label">Tokens</div></div>
-    <div class="stat"><div class="stat-value">${escapeHtml(String(stats?.uniquePayers ?? 0))}</div><div class="stat-label">Payers</div></div>
-    <div class="stat"><div class="stat-value">$${escapeHtml(avgSize)}</div><div class="stat-label">Avg Size</div></div>
+    <div class="stat" title="Total confirmed settlements in the last 7 days"><div class="stat-value">${escapeHtml(formatNumber(totalSettlements))}</div><div class="stat-label">Settlements (7d)</div></div>
+    <div class="stat" title="Total USD volume settled in the last 7 days"><div class="stat-value">$${escapeHtml(totalVol)}</div><div class="stat-label">Volume (7d)</div></div>
+    <div class="stat" title="Number of distinct blockchains with activity"><div class="stat-value">${escapeHtml(String(chainCount))}</div><div class="stat-label">Chains</div></div>
+    <div class="stat" title="Number of distinct token types used"><div class="stat-value">${escapeHtml(String(Object.keys(stats?.byToken ?? {}).length))}</div><div class="stat-label">Tokens</div></div>
+    <div class="stat" title="Unique payer addresses in the last 7 days"><div class="stat-value">${escapeHtml(formatNumber(stats?.uniquePayers ?? 0))}</div><div class="stat-label">Payers</div></div>
+    <div class="stat" title="Average settlement amount in USD"><div class="stat-value">$${escapeHtml(avgSize)}</div><div class="stat-label">Avg Size</div></div>
   </div>
   <div class="browse-links"><span class="muted">Chains:</span> ${networkLinks}</div>
   <div class="browse-links"><span class="muted">Tokens:</span> ${tokenLinks}</div>
@@ -62,20 +65,20 @@ ${themeToggleScript()}
     <button class="secondary" id="resetBtn">Reset</button>
   </div>
   <div class="filters">
-    <input id="searchInput" placeholder="Search tx hash or address (min 4 chars)...">
+    <input id="searchInput" placeholder="Search by tx hash (0x...) or wallet address">
     <button id="searchBtn">Search</button>
   </div>
   <h2>Recent Transactions</h2>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Hash</th><th>Chain</th><th>Token</th><th class="text-right">Amount</th><th>From</th><th>To</th><th>Scheme</th><th>Settled</th></tr></thead>
+      <thead><tr><th>Hash</th><th>Chain</th><th>Token</th><th class="text-right">Amount</th><th>From</th><th>To</th><th title="exact = EIP-3009 gasless transfer; exact-legacy = approve + transferFrom">Scheme</th><th>Settled</th></tr></thead>
       <tbody id="txBody">${rows}</tbody>
     </table>
   </div>
   <div id="loading" class="loading" style="display:none">Loading...</div>
   <div class="pagination">
     <button id="prevBtn" class="secondary" disabled>Previous</button>
-    <span id="pageInfo" class="page-info">Page 1</span>
+    <span id="pageInfo" class="page-info" data-total="${totalSettlements}">Page 1 &middot; ${formatNumber(totalSettlements)} settlements</span>
     <button id="nextBtn" class="secondary">Next</button>
   </div>
   <footer>
@@ -89,18 +92,31 @@ ${themeToggleScript()}
 </body></html>`;
 }
 
+const FACILITATOR_ADDRESS = "0xC88f67e776f16DcFBf42e6bDda1B82604448899B";
+
 function renderRow(tx) {
   const amount = formatAmount(tx.amount, tx.token, tx.network);
+  const schemeClass = tx.scheme === "exact" ? "scheme-exact" : "scheme-legacy";
+  const schemeTitle = tx.scheme === "exact" ? "EIP-3009 gasless transfer" : "approve + transferFrom";
+  const toCell = tx.to && tx.to.toLowerCase() === FACILITATOR_ADDRESS.toLowerCase()
+    ? `<span class="badge badge-facilitator" title="${escapeHtml(tx.to)}">Facilitator</span>`
+    : `<code>${escapeHtml(formatAddress(tx.to))}</code>`;
+  const tokenTitle = tokenFullName(tx.token);
   return `<tr data-hash="${escapeHtml(tx.txHash)}">
     <td><code>${escapeHtml(formatHash(tx.txHash))}</code></td>
     <td><a href="/network/${escapeHtml(encodeURIComponent(tx.network))}"><span class="badge">${escapeHtml(getNetworkName(tx.network))}</span></a></td>
-    <td><a href="/token/${escapeHtml(encodeURIComponent(tx.token))}"><span class="badge badge-token">${escapeHtml(tx.token)}</span></a></td>
+    <td><a href="/token/${escapeHtml(encodeURIComponent(tx.token))}"><span class="badge badge-token" title="${escapeHtml(tokenTitle)}">${escapeHtml(tx.token)}</span></a></td>
     <td class="amount">$${escapeHtml(amount)}</td>
     <td><code>${escapeHtml(formatAddress(tx.from))}</code></td>
-    <td><code>${escapeHtml(formatAddress(tx.to))}</code></td>
-    <td>${escapeHtml(tx.scheme)}</td>
+    <td>${toCell}</td>
+    <td><span class="badge ${schemeClass}" title="${escapeHtml(schemeTitle)}">${escapeHtml(tx.scheme)}</span></td>
     <td class="time" title="${escapeHtml(tx.settledAt)}">${escapeHtml(formatTime(tx.settledAt))}</td>
   </tr>`;
+}
+
+function tokenFullName(symbol) {
+  const names = { "USDT": "Tether USD", "USDC": "USD Coin", "USDT0": "Tether USD (bridged)", "USAT": "Tether America USD" };
+  return names[symbol] || symbol;
 }
 
 export function renderDetail(tx) {
@@ -127,7 +143,7 @@ ${themeToggleScript()}
     <div class="detail-row"><span class="detail-label">Amount</span><span class="detail-value amount-large">$${escapeHtml(amount)} <a href="/token/${escapeHtml(encodeURIComponent(tx.token))}"><span class="badge badge-token">${escapeHtml(tx.token)}</span></a></span></div>
     <div class="detail-row"><span class="detail-label">From</span><span class="detail-value"><code>${escapeHtml(tx.from)}</code><button class="copy-btn" data-copy="${escapeHtml(tx.from)}" title="Copy">Copy</button>${fromUrl ? `<a href="${escapeHtml(fromUrl)}" target="_blank" rel="noopener noreferrer" class="explorer-link">View</a>` : ""}</span></div>
     <div class="detail-row"><span class="detail-label">To</span><span class="detail-value"><code>${escapeHtml(tx.to)}</code><button class="copy-btn" data-copy="${escapeHtml(tx.to)}" title="Copy">Copy</button>${toUrl ? `<a href="${escapeHtml(toUrl)}" target="_blank" rel="noopener noreferrer" class="explorer-link">View</a>` : ""}</span></div>
-    <div class="detail-row"><span class="detail-label">Scheme</span><span class="detail-value">${escapeHtml(tx.scheme)}</span></div>
+    <div class="detail-row"><span class="detail-label">Scheme</span><span class="detail-value"><span class="badge ${tx.scheme === "exact" ? "scheme-exact" : "scheme-legacy"}" title="${tx.scheme === "exact" ? "EIP-3009 gasless transfer" : "approve + transferFrom"}">${escapeHtml(tx.scheme)}</span></span></div>
     <div class="detail-row"><span class="detail-label">Raw Amount</span><span class="detail-value"><code>${escapeHtml(tx.amount)}</code> (smallest units)</span></div>
     ${tx.gasUsed && tx.gasUsed !== "0" ? `<div class="detail-row"><span class="detail-label">Gas Used</span><span class="detail-value">${escapeHtml(tx.gasUsed)}</span></div>` : ""}
     <div class="detail-row"><span class="detail-label">Settled At</span><span class="detail-value">${escapeHtml(tx.settledAt)}</span></div>
@@ -153,7 +169,7 @@ ${themeToggleScript()}
     <div class="detail-row"><span class="detail-label">Address</span><span class="detail-value"><code>${escapeHtml(address)}</code><button class="copy-btn" data-copy="${escapeHtml(address)}" title="Copy">Copy</button></span></div>
   </div>
   <div class="stats">
-    <div class="stat"><div class="stat-value">${escapeHtml(String(stats?.total ?? 0))}</div><div class="stat-label">Transactions</div></div>
+    <div class="stat"><div class="stat-value">${escapeHtml(formatNumber(stats?.total ?? 0))}</div><div class="stat-label">Transactions</div></div>
     <div class="stat"><div class="stat-value">$${escapeHtml(totalVol)}</div><div class="stat-label">Volume</div></div>
   </div>
   <h2>Transactions</h2>
@@ -209,16 +225,16 @@ ${themeToggleScript()}
     <div class="detail-row"><span class="detail-label">Schemes</span><span class="detail-value">${schemeBadges || "<span class=\"muted\">None</span>"}</span></div>
   </div>
   <div class="stats">
-    <div class="stat"><div class="stat-value">${escapeHtml(String(stats.totalTransactions))}</div><div class="stat-label">Transactions</div></div>
-    <div class="stat"><div class="stat-value">$${escapeHtml(totalVol)}</div><div class="stat-label">Total Volume</div></div>
-    <div class="stat"><div class="stat-value">$${escapeHtml(avgSize)}</div><div class="stat-label">Avg Tx Size</div></div>
-    <div class="stat"><div class="stat-value">${escapeHtml(String(stats.uniquePayers))}</div><div class="stat-label">Unique Payers</div></div>
-    <div class="stat"><div class="stat-value">${escapeHtml(String(stats.uniqueRecipients))}</div><div class="stat-label">Unique Recipients</div></div>
+    <div class="stat" title="Total confirmed transactions on this network"><div class="stat-value">${escapeHtml(formatNumber(stats.totalTransactions))}</div><div class="stat-label">Transactions</div></div>
+    <div class="stat" title="Total USD volume on this network"><div class="stat-value">$${escapeHtml(totalVol)}</div><div class="stat-label">Total Volume</div></div>
+    <div class="stat" title="Average transaction size in USD"><div class="stat-value">$${escapeHtml(avgSize)}</div><div class="stat-label">Avg Tx Size</div></div>
+    <div class="stat" title="Unique payer addresses on this network"><div class="stat-value">${escapeHtml(formatNumber(stats.uniquePayers))}</div><div class="stat-label">Unique Payers</div></div>
+    <div class="stat" title="Unique recipient addresses on this network"><div class="stat-value">${escapeHtml(formatNumber(stats.uniqueRecipients))}</div><div class="stat-label">Unique Recipients</div></div>
   </div>
   <h2>Recent Transactions</h2>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Tx Hash</th><th>Network</th><th>Token</th><th class="text-right">Amount</th><th>From</th><th>To</th><th>Scheme</th><th>Time</th></tr></thead>
+      <thead><tr><th>Tx Hash</th><th>Network</th><th>Token</th><th class="text-right">Amount</th><th>From</th><th>To</th><th title="exact = EIP-3009 gasless transfer; exact-legacy = approve + transferFrom">Scheme</th><th>Time</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
   </div>
@@ -270,16 +286,16 @@ ${themeToggleScript()}
     <div class="detail-row"><span class="detail-label">Schemes</span><span class="detail-value">${schemeBadges || "<span class=\"muted\">None</span>"}</span></div>
   </div>
   <div class="stats">
-    <div class="stat"><div class="stat-value">${escapeHtml(String(stats.totalTransactions))}</div><div class="stat-label">Transactions</div></div>
-    <div class="stat"><div class="stat-value">$${escapeHtml(totalVol)}</div><div class="stat-label">Total Volume</div></div>
-    <div class="stat"><div class="stat-value">$${escapeHtml(avgSize)}</div><div class="stat-label">Avg Tx Size</div></div>
-    <div class="stat"><div class="stat-value">${escapeHtml(String(stats.uniquePayers))}</div><div class="stat-label">Unique Payers</div></div>
-    <div class="stat"><div class="stat-value">${escapeHtml(String(stats.uniqueRecipients))}</div><div class="stat-label">Unique Recipients</div></div>
+    <div class="stat" title="Total confirmed transactions for this token"><div class="stat-value">${escapeHtml(formatNumber(stats.totalTransactions))}</div><div class="stat-label">Transactions</div></div>
+    <div class="stat" title="Total USD volume for this token"><div class="stat-value">$${escapeHtml(totalVol)}</div><div class="stat-label">Total Volume</div></div>
+    <div class="stat" title="Average transaction size in USD"><div class="stat-value">$${escapeHtml(avgSize)}</div><div class="stat-label">Avg Tx Size</div></div>
+    <div class="stat" title="Unique payer addresses for this token"><div class="stat-value">${escapeHtml(formatNumber(stats.uniquePayers))}</div><div class="stat-label">Unique Payers</div></div>
+    <div class="stat" title="Unique recipient addresses for this token"><div class="stat-value">${escapeHtml(formatNumber(stats.uniqueRecipients))}</div><div class="stat-label">Unique Recipients</div></div>
   </div>
   <h2>Recent Transactions</h2>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Tx Hash</th><th>Network</th><th>Token</th><th class="text-right">Amount</th><th>From</th><th>To</th><th>Scheme</th><th>Time</th></tr></thead>
+      <thead><tr><th>Tx Hash</th><th>Network</th><th>Token</th><th class="text-right">Amount</th><th>From</th><th>To</th><th title="exact = EIP-3009 gasless transfer; exact-legacy = approve + transferFrom">Scheme</th><th>Time</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
   </div>

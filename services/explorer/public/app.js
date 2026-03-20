@@ -41,6 +41,8 @@
     return res.json();
   }
 
+  var FACILITATOR_ADDRESS = "0xC88f67e776f16DcFBf42e6bDda1B82604448899B";
+
   function buildTxRow(tx) {
     const tr = createElement("tr", { "data-hash": tx.txHash });
     tr.addEventListener("click", function () {
@@ -51,8 +53,16 @@
     tr.appendChild(createElement("td", {}, createElement("span", { className: "badge badge-token", textContent: tx.token })));
     tr.appendChild(createElement("td", { className: "amount", textContent: "$" + tx.amount }));
     tr.appendChild(createElement("td", {}, createElement("code", { textContent: formatAddress(tx.from) })));
-    tr.appendChild(createElement("td", {}, createElement("code", { textContent: formatAddress(tx.to) })));
-    tr.appendChild(createElement("td", { textContent: tx.scheme }));
+    var toEl;
+    if (tx.to && tx.to.toLowerCase() === FACILITATOR_ADDRESS.toLowerCase()) {
+      toEl = createElement("span", { className: "badge badge-facilitator", title: tx.to, textContent: "Facilitator" });
+    } else {
+      toEl = createElement("code", { textContent: formatAddress(tx.to) });
+    }
+    tr.appendChild(createElement("td", {}, toEl));
+    var schemeClass = tx.scheme === "exact" ? "scheme-exact" : "scheme-legacy";
+    var schemeTitle = tx.scheme === "exact" ? "EIP-3009 gasless transfer" : "approve + transferFrom";
+    tr.appendChild(createElement("td", {}, createElement("span", { className: "badge " + schemeClass, title: schemeTitle, textContent: tx.scheme })));
     tr.appendChild(createElement("td", { className: "time", textContent: tx.settledAt }));
     return tr;
   }
@@ -89,7 +99,11 @@
       const pageInfo = document.getElementById("pageInfo");
       if (nextBtn) nextBtn.disabled = !data.hasMore;
       if (prevBtn) prevBtn.disabled = currentPage <= 1;
-      if (pageInfo) pageInfo.textContent = "Page " + currentPage;
+      if (pageInfo) {
+        var total = data.total || pageInfo.getAttribute("data-total") || 0;
+        var totalFormatted = Number(total).toLocaleString("en-US");
+        pageInfo.textContent = "Page " + currentPage + " \u00b7 " + totalFormatted + " settlements";
+      }
       currentCursor = data.nextCursor;
     } finally {
       if (loading) loading.style.display = "none";

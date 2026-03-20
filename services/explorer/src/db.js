@@ -109,7 +109,7 @@ export async function getStats(days = 7) {
   const cutoff = new Date(Date.now() - days * 86400_000).toISOString();
   if (!db.sqlite) return { period: `${days}d`, totalTransactions: 0, totalVolume: "0", uniquePayers: 0, uniqueRecipients: 0, byNetwork: {}, byToken: {}, byScheme: {}, avgTransactionSize: "0" };
   const base = db.sqlite.prepare("SELECT COUNT(*) as total, COUNT(DISTINCT from_address) as payers, COUNT(DISTINCT to_address) as recipients FROM settlements WHERE confirmed_at >= ?").get(cutoff);
-  const grouped = db.sqlite.prepare("SELECT network, asset as token, scheme, COUNT(*) as count, SUM(CAST(amount AS INTEGER)) as volume FROM settlements WHERE confirmed_at >= ? GROUP BY network, asset, scheme").all(cutoff);
+  const grouped = db.sqlite.prepare("SELECT network, asset as token, scheme, COUNT(*) as count, SUM(CAST(amount AS INTEGER)) as volume FROM settlements WHERE confirmed_at >= ? AND asset != 'UNKNOWN' GROUP BY network, asset, scheme").all(cutoff);
   let totalVolume = 0n;
   const byNetwork = {};
   const byToken = {};
@@ -153,7 +153,7 @@ export async function getNetworks() {
 
 export async function getTokens() {
   if (!db.sqlite) return [];
-  return db.sqlite.prepare("SELECT asset as token, COUNT(*) as count FROM settlements GROUP BY asset ORDER BY count DESC").all();
+  return db.sqlite.prepare("SELECT asset as token, COUNT(*) as count FROM settlements WHERE asset != 'UNKNOWN' GROUP BY asset ORDER BY count DESC").all();
 }
 
 export async function getNetworkStats(network) {
@@ -163,7 +163,7 @@ export async function getNetworkStats(network) {
   const amounts = db.sqlite.prepare("SELECT amount FROM settlements WHERE network = ?").all(network);
   let totalVolume = 0n;
   for (const r of amounts) totalVolume += BigInt(r.amount);
-  const tokens = db.sqlite.prepare("SELECT asset as token, COUNT(*) as count FROM settlements WHERE network = ? GROUP BY asset ORDER BY count DESC").all(network);
+  const tokens = db.sqlite.prepare("SELECT asset as token, COUNT(*) as count FROM settlements WHERE network = ? AND asset != 'UNKNOWN' GROUP BY asset ORDER BY count DESC").all(network);
   const schemes = db.sqlite.prepare("SELECT scheme, COUNT(*) as count FROM settlements WHERE network = ? GROUP BY scheme ORDER BY count DESC").all(network);
   const uniquePayers = db.sqlite.prepare("SELECT COUNT(DISTINCT from_address) as count FROM settlements WHERE network = ?").get(network);
   const uniqueRecipients = db.sqlite.prepare("SELECT COUNT(DISTINCT to_address) as count FROM settlements WHERE network = ?").get(network);

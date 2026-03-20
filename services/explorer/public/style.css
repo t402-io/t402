@@ -159,9 +159,10 @@ tbody tr {
   border-bottom: 1px solid var(--border-light);
   cursor: pointer; transition: background 0.1s;
 }
+tbody tr:nth-child(even) { background: var(--bg-card); }
 tbody tr:last-child { border-bottom: none; }
 tbody tr:hover { background: var(--row-hover); }
-td { padding: 0.65rem 1rem; vertical-align: middle; }
+td { padding: 0.75rem 1rem; vertical-align: middle; }
 td a { text-decoration: none; }
 code {
   font-family: 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
@@ -177,6 +178,10 @@ code {
   white-space: nowrap;
 }
 .badge-token { background: var(--badge-token-bg); color: var(--badge-token-text); }
+.scheme-exact { background: var(--status-confirmed-bg); color: var(--status-confirmed-text); }
+.scheme-legacy { background: var(--status-pending-bg); color: var(--status-pending-text); }
+.badge-facilitator { background: rgba(139,92,246,0.12); color: #a78bfa; font-size: 0.75rem; font-weight: 500; }
+:root.light .badge-facilitator { background: rgba(109,40,217,0.08); color: #7c3aed; }
 
 /* Amount */
 .amount { text-align: right; font-weight: 600; color: var(--amount-color); font-variant-numeric: tabular-nums; }
@@ -245,6 +250,6 @@ footer a:hover { text-decoration: underline; }
   .stat { padding: 0.75rem; }
   .detail-row { flex-direction: column; align-items: flex-start; gap: 0.4rem; }
   .detail-label { min-width: unset; }
-  td { padding: 0.5rem 0.6rem; font-size: 0.8rem; }
+  td { padding: 0.55rem 0.6rem; font-size: 0.8rem; }
   code { font-size: 0.75rem; }
 }

@@ -41,6 +41,10 @@ const ADDR_URLS = { "eip155:1": "https://etherscan.io/address/", "eip155:8453": 
 
 export function getExplorerUrl(network, txHash) { return (network && txHash && TX_URLS[network]) ? TX_URLS[network] + txHash : null; }
 export function getAddressUrl(network, address) { return (network && address && ADDR_URLS[network]) ? ADDR_URLS[network] + address : null; }
+export function formatNumber(n) {
+  if (n == null) return "0";
+  return Number(n).toLocaleString("en-US");
+}
 export function formatAddress(address) { if (!address || address.length <= 16) return address || ""; return address.slice(0, 8) + "\u2026" + address.slice(-6); }
 export function formatHash(hash) { if (!hash || hash.length <= 20) return hash || ""; return hash.slice(0, 10) + "\u2026" + hash.slice(-6); }
 export function formatTime(isoStr) {
