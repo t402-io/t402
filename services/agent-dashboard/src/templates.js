@@ -99,7 +99,7 @@ footer{color:#6b7280;font-size:.8rem;margin-top:2rem;padding-top:1rem;border-top
 
 // ── Client-side script template ─────────────────────────────────────
 
-function clientScript(address, nonce) {
+function clientScript(address) {
   return `
 (function() {
   var addr = ${JSON.stringify(address).replace(/</g, "\\u003c")};

@@ -7,19 +7,29 @@
 
 import express from "express";
 import compression from "compression";
-import { randomBytes, randomUUID } from "node:crypto";
+import { randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 import { getMode, shutdown } from "./datasource.js";
 import { registerRoutes } from "./routes.js";
 import { log } from "./utils.js";
+
+/** Constant-time string comparison to prevent timing attacks. */
+function safeCompare(a, b) {
+  if (typeof a !== "string" || typeof b !== "string") return false;
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) return false;
+  return timingSafeEqual(bufA, bufB);
+}
 
 const app = express();
 
 // ── Compression ─────────────────────────────────────────────────────
 app.use(compression());
 
-// ── X-Request-Id ────────────────────────────────────────────────────
+// ── X-Request-Id (validated: alphanumeric + hyphens, max 128 chars) ─
 app.use((req, res, next) => {
-  req.id = req.get("X-Request-Id") || randomUUID();
+  const incoming = req.get("X-Request-Id");
+  req.id = (incoming && /^[a-zA-Z0-9_-]{1,128}$/.test(incoming)) ? incoming : randomUUID();
   res.set("X-Request-Id", req.id);
   next();
 });
@@ -34,8 +44,9 @@ app.use((_req, res, next) => {
   res.set("Referrer-Policy", "strict-origin-when-cross-origin");
   res.set(
     "Content-Security-Policy",
-    `default-src 'none'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; img-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'`,
+    `default-src 'none'; connect-src 'self'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; img-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'`,
   );
+  res.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
   res.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   res.set("Cross-Origin-Opener-Policy", "same-origin");
   res.set("Cross-Origin-Resource-Policy", "same-origin");
@@ -50,9 +61,8 @@ app.use((req, res, next) => {
     if (allowed.length > 0 && origin && allowed.includes(origin)) {
       res.set("Access-Control-Allow-Origin", origin);
       res.set("Vary", "Origin");
-    } else if (allowed.length === 0) {
-      res.set("Access-Control-Allow-Origin", "*");
     }
+    // In live mode with no ALLOWED_ORIGINS, deny cross-origin by default
   } else {
     res.set("Access-Control-Allow-Origin", "*");
   }
@@ -66,11 +76,19 @@ app.use((req, res, next) => {
 const rateLimits = new Map();
 const RATE_LIMIT = parseInt(process.env.RATE_LIMIT_PER_MINUTE || "100", 10);
 
+const MAX_RATE_LIMIT_ENTRIES = 100_000;
+
 function rateLimit(limit) {
   const effectiveLimit = limit || RATE_LIMIT;
   return (req, res, next) => {
-    const ip = req.get("cf-connecting-ip") || req.get("x-forwarded-for")?.split(",")[0]?.trim() || req.ip;
+    // Use req.ip as primary; only trust cf-connecting-ip / x-forwarded-for if configured
+    const ip = req.ip || "unknown";
     const key = `${ip}:${effectiveLimit}`;
+    // Protect against memory exhaustion from unique IPs
+    if (rateLimits.size > MAX_RATE_LIMIT_ENTRIES && !rateLimits.has(key)) {
+      res.set("Retry-After", "60");
+      return res.status(503).json({ error: "Service temporarily unavailable" });
+    }
     const now = Date.now();
     const windowStart = now - 60000;
     let hits = rateLimits.get(key) || [];
@@ -102,8 +120,8 @@ app.use(rateLimit());
 const API_KEY = process.env.DASHBOARD_API_KEY || "";
 if (API_KEY) {
   app.use("/api/v1", (req, res, next) => {
-    const key = req.get("X-API-Key") || req.get("Authorization")?.replace("Bearer ", "");
-    if (key !== API_KEY) return res.status(401).json({ error: "Unauthorized" });
+    const key = req.get("X-API-Key") || req.get("Authorization")?.replace(/^bearer\s+/i, "");
+    if (!safeCompare(key, API_KEY)) return res.status(401).json({ error: "Unauthorized" });
     next();
   });
 }
@@ -128,6 +146,8 @@ if (isDirectRun) {
   });
 
   const graceful = () => {
+    // Force exit after 10s if connections don't close
+    setTimeout(() => process.exit(1), 10000).unref();
     server.close(() => {
       shutdown().then(() => process.exit(0));
     });

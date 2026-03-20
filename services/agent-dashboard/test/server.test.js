@@ -122,7 +122,7 @@ describe("Agent Dashboard API", () => {
     const lines = csv.split("\n");
     // Header + at least one data row
     assert.ok(lines.length > 1);
-    assert.ok(lines[0].startsWith("id,timestamp,service"));
+    assert.ok(lines[0].startsWith("id,timestamp,service,network,token,amount,amount_formatted"));
     // Data row has correct number of columns
     const cols = lines[1].split(",");
     assert.ok(cols.length >= 10, `Expected >=10 columns, got ${cols.length}`);

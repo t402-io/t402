@@ -140,6 +140,7 @@ describe("Security headers", () => {
     assert.ok(csp, "CSP header should be present");
     assert.ok(csp.includes("default-src 'none'"));
     assert.ok(csp.includes("frame-ancestors 'none'"));
+    assert.ok(csp.includes("connect-src 'self'"));
     assert.ok(csp.includes("script-src 'nonce-"));
     assert.ok(csp.includes("style-src 'nonce-"));
   });
@@ -162,6 +163,14 @@ describe("Security headers", () => {
   it("Cross-Origin-Opener-Policy is same-origin", async () => {
     const res = await fetch(`${BASE}/health`);
     assert.strictEqual(res.headers.get("cross-origin-opener-policy"), "same-origin");
+  });
+
+  it("Strict-Transport-Security is set", async () => {
+    const res = await fetch(`${BASE}/health`);
+    const hsts = res.headers.get("strict-transport-security");
+    assert.ok(hsts);
+    assert.ok(hsts.includes("max-age="));
+    assert.ok(hsts.includes("includeSubDomains"));
   });
 });
 

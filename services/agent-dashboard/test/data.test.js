@@ -258,7 +258,7 @@ describe("exportPaymentsCsv", () => {
     const csv = exportPaymentsCsv("0xCsv");
     const lines = csv.split("\n");
     assert.ok(lines.length > 1);
-    assert.strictEqual(lines[0], "id,timestamp,service,network,token,amount,amount_usd,to,txHash,status");
+    assert.strictEqual(lines[0], "id,timestamp,service,network,token,amount,amount_formatted,to,txHash,status");
   });
 
   it("each data row has 10 columns", () => {

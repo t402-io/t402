@@ -38,22 +38,30 @@ const MAX_PER_DAY = parseInt(process.env.BUDGET_MAX_PER_DAY || "50000000", 10);
 
 /** @type {import("pg").Pool|null} */
 let _pool = null;
+/** @type {Promise<import("pg").Pool>|null} */
+let _poolPromise = null;
 
-async function getPool() {
-  if (_pool) return _pool;
+async function initPool() {
   const { default: pg } = await import("pg");
-  _pool = new pg.Pool({
+  const pool = new pg.Pool({
     connectionString: DATABASE_URL,
     max: 10,
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 5_000,
   });
-  _pool.on("error", (err) => log("error", "PostgreSQL pool error", { error: err.message }));
+  pool.on("error", (err) => log("error", "PostgreSQL pool error", { error: err.message }));
   // Verify connectivity once at startup.
-  const client = await _pool.connect();
+  const client = await pool.connect();
   client.release();
   log("info", "PostgreSQL pool connected", { max: 10 });
-  return _pool;
+  _pool = pool;
+  return pool;
+}
+
+/** Singleton pool getter — prevents race condition on concurrent first calls. */
+async function getPool() {
+  if (!_poolPromise) _poolPromise = initPool();
+  return _poolPromise;
 }
 
 /**
@@ -186,8 +194,8 @@ export async function getBalances(address) {
   const result = await pool.query({
     name: "get-balances",
     text: `SELECT network,
-            COALESCE(SUM(CASE WHEN to_address = $1 THEN CAST(amount AS BIGINT) ELSE 0 END), 0)
-              - COALESCE(SUM(CASE WHEN from_address = $1 THEN CAST(amount AS BIGINT) ELSE 0 END), 0)
+            COALESCE(SUM(CASE WHEN to_address = $1 THEN CAST(amount AS NUMERIC) ELSE 0 END), 0)
+              - COALESCE(SUM(CASE WHEN from_address = $1 THEN CAST(amount AS NUMERIC) ELSE 0 END), 0)
               AS net_balance
      FROM settlements
      WHERE (from_address = $1 OR to_address = $1)
@@ -208,7 +216,7 @@ export async function getBalances(address) {
       networkLabel: meta.label,
       token: meta.token,
       balance: String(raw),
-      balanceFormatted: (raw / 1e6).toFixed(2),
+      balanceFormatted: (raw / 10 ** meta.decimals).toFixed(2),
     };
   });
 
@@ -234,7 +242,7 @@ export async function getBudget(address) {
 
   const todayResult = await pool.query({
     name: "budget-today",
-    text: `SELECT COALESCE(SUM(CAST(amount AS BIGINT)), 0) AS total
+    text: `SELECT COALESCE(SUM(CAST(amount AS NUMERIC)), 0) AS total
      FROM settlements
      WHERE from_address = $1
        AND status = 'settled'
@@ -247,7 +255,7 @@ export async function getBudget(address) {
   const hourAgo = new Date(Date.now() - 3600 * 1000);
   const sessionResult = await pool.query({
     name: "budget-session",
-    text: `SELECT COALESCE(SUM(CAST(amount AS BIGINT)), 0) AS total,
+    text: `SELECT COALESCE(SUM(CAST(amount AS NUMERIC)), 0) AS total,
             COUNT(*) AS cnt
      FROM settlements
      WHERE from_address = $1
@@ -299,12 +307,12 @@ export async function getStats(address, days = 7) {
   const svcResult = await pool.query({
     name: "stats-top-services",
     text: `SELECT COALESCE(service, resource, 'Unknown') AS svc,
-                  COUNT(*) AS cnt, SUM(CAST(amount AS BIGINT)) AS total
+                  COUNT(*) AS cnt, SUM(CAST(amount AS NUMERIC)) AS total
            FROM settlements
            WHERE (from_address = $1 OR to_address = $1)
              AND status = 'settled'
              AND created_at >= $2
-           GROUP BY svc ORDER BY total DESC LIMIT 5`,
+           GROUP BY COALESCE(service, resource, 'Unknown') ORDER BY total DESC LIMIT 5`,
     values: [address, cutoff],
   });
 
@@ -317,7 +325,7 @@ export async function getStats(address, days = 7) {
   // By network (SQL aggregation)
   const netResult = await pool.query({
     name: "stats-by-network",
-    text: `SELECT network, COUNT(*) AS cnt, SUM(CAST(amount AS BIGINT)) AS total
+    text: `SELECT network, COUNT(*) AS cnt, SUM(CAST(amount AS NUMERIC)) AS total
            FROM settlements
            WHERE (from_address = $1 OR to_address = $1)
              AND status = 'settled'

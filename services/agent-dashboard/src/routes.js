@@ -40,7 +40,9 @@ export function registerRoutes(app, opts = {}) {
     metrics.requests++;
     res.on("finish", () => {
       const duration = Date.now() - start;
-      const key = `${req.method} ${req.route?.path || req.path}`;
+      // Only use matched route patterns to prevent cardinality explosion from arbitrary paths
+      const routePath = req.route?.path || "unmatched";
+      const key = `${req.method} ${routePath}`;
       metrics.requestsByPath[key] = (metrics.requestsByPath[key] || 0) + 1;
       if (res.statusCode >= 400) metrics.errors++;
       metrics.latencies.push(duration);
@@ -219,7 +221,9 @@ export function registerRoutes(app, opts = {}) {
     ];
 
     for (const [path, count] of Object.entries(metrics.requestsByPath)) {
-      lines.push(`http_requests_by_path{path="${path.replace(/"/g, '\\"')}"} ${count}`);
+      // Sanitize for Prometheus label: strip control chars, limit length
+      const safePath = path.replace(/["\\\n\r}]/g, "_").slice(0, 80);
+      lines.push(`http_requests_by_path{path="${safePath}"} ${count}`);
     }
 
     res.set("Content-Type", "text/plain; version=0.0.4");

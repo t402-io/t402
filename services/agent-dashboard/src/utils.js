@@ -60,9 +60,12 @@ export function statusIndicator(status) {
 
 // ── CSV ─────────────────────────────────────────────────────────────
 
-/** RFC 4180: wrap in double-quotes if value contains comma, quote, or newline. */
+/** RFC 4180: wrap in double-quotes if value contains comma, quote, or newline.
+ *  Also guards against CSV formula injection (=, +, -, @, \t, \r prefixes). */
 export function csvField(value) {
-  const str = String(value);
+  let str = String(value);
+  // Prevent formula injection in Excel/Sheets
+  if (/^[=+\-@\t\r]/.test(str)) str = "'" + str;
   if (str.includes(",") || str.includes('"') || str.includes("\n") || str.includes("\r")) {
     return '"' + str.replace(/"/g, '""') + '"';
   }
@@ -75,7 +78,7 @@ export function csvField(value) {
  * @returns {string}
  */
 export function formatPaymentsCsv(payments) {
-  const header = "id,timestamp,service,network,token,amount,amount_usd,to,txHash,status";
+  const header = "id,timestamp,service,network,token,amount,amount_formatted,to,txHash,status";
   const rows = payments.map((p) =>
     [
       p.id,
@@ -161,24 +164,24 @@ export function buildAlertsFromBudget(budget) {
  * @returns {object}
  */
 export function aggregatePaymentStats(settled, days) {
-  // Aggregate by service
-  const serviceMap = {};
+  // Aggregate by service (Object.create(null) prevents prototype pollution)
+  const serviceMap = Object.create(null);
   for (const p of settled) {
-    const s = (serviceMap[p.service] ||= { name: p.service, count: 0, amount: 0 });
-    s.count++;
-    s.amount += Number(p.amount);
+    if (!serviceMap[p.service]) serviceMap[p.service] = { name: p.service, count: 0, amount: 0 };
+    serviceMap[p.service].count++;
+    serviceMap[p.service].amount += Number(p.amount);
   }
   const topServices = Object.values(serviceMap)
     .sort((a, b) => b.amount - a.amount)
     .slice(0, 5)
     .map((s) => ({ ...s, amount: String(s.amount) }));
 
-  // Aggregate by network
-  const byNetwork = {};
+  // Aggregate by network (Object.create(null) prevents prototype pollution)
+  const byNetwork = Object.create(null);
   for (const p of settled) {
-    const n = (byNetwork[p.network] ||= { count: 0, amount: 0 });
-    n.count++;
-    n.amount += Number(p.amount);
+    if (!byNetwork[p.network]) byNetwork[p.network] = { count: 0, amount: 0 };
+    byNetwork[p.network].count++;
+    byNetwork[p.network].amount += Number(p.amount);
   }
   for (const k of Object.keys(byNetwork)) {
     byNetwork[k].amount = String(byNetwork[k].amount);
