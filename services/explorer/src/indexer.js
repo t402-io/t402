@@ -114,20 +114,23 @@ export function startSync(intervalMs = 60000) {
         `SELECT
           id,
           selected_network AS network,
-          COALESCE(scheme, 'exact') AS scheme,
+          CASE
+            WHEN selected_network LIKE 'eip155:%' THEN 'exact'
+            ELSE 'exact'
+          END AS scheme,
           tx_hash,
           COALESCE(payer, '') AS from_address,
           COALESCE(pay_to_evm, pay_to_solana, pay_to_ton, pay_to_tron, '') AS to_address,
           COALESCE(crypto_amount, amount) AS amount,
-          COALESCE(selected_asset, 'USDT') AS asset,
-          CASE WHEN status = 'paid' THEN 'confirmed' ELSE status END AS status,
+          COALESCE(selected_asset, '') AS asset,
+          'confirmed' AS status,
           created_at,
           paid_at AS confirmed_at,
-          NULL AS gas_used,
-          NULL AS gas_price,
-          NULL AS metadata
+          NULL::text AS gas_used,
+          NULL::text AS gas_price,
+          NULL::text AS metadata
         FROM crypto_orders
-        WHERE status = 'paid' AND paid_at > $1
+        WHERE status = 'paid' AND tx_hash IS NOT NULL AND paid_at > $1
         ORDER BY paid_at ASC
         LIMIT 1000`,
         [since],
