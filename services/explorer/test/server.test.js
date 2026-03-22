@@ -97,7 +97,9 @@ describe("Explorer API", () => {
     const list = await fetch(`${BASE}/api/v1/transactions?limit=1`);
     const { transactions } = await list.json();
     if (transactions.length === 0) return; // skip if no seed data yet
-    const res = await fetch(`${BASE}/api/v1/search?q=${transactions[0].txHash.slice(0,12)}`);
+    // Use ≥32 chars to ensure looksLikeTxHash is true for all networks (EVM, Solana, TON, etc.)
+    const query = transactions[0].txHash.slice(0, 34);
+    const res = await fetch(`${BASE}/api/v1/search?q=${encodeURIComponent(query)}`);
     const data = await res.json();
     assert.ok(data.results.length > 0);
   });
