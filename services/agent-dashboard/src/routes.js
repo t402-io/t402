@@ -233,7 +233,7 @@ export function registerRoutes(app, opts = {}) {
   // ── Info / Health ──────────────────────────────────────────────
 
   app.get("/api/v1/info", (_req, res) => {
-    res.json({ mode: getMode(), version: "1.1.0" });
+    res.json({ mode: getMode(), version: "1.2.0" });
   });
 
   app.get("/health", (_req, res) => {

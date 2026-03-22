@@ -1,0 +1,302 @@
+openapi: 3.0.3
+info:
+  title: T402 Agent Dashboard API
+  description: AI agent payment monitoring — balances, budgets, spending analytics, and alerts.
+  version: 1.2.0
+  license:
+    name: MIT
+
+servers:
+  - url: https://agents.t402.io
+    description: Production
+  - url: http://localhost:3405
+    description: Local development
+
+paths:
+  /api/v1/payments:
+    get:
+      summary: Payment history
+      parameters:
+        - name: address
+          in: query
+          required: true
+          schema: { type: string }
+          description: Wallet address
+        - name: days
+          in: query
+          schema: { type: integer, default: 7, minimum: 1, maximum: 365 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20, minimum: 1, maximum: 100 }
+        - name: offset
+          in: query
+          schema: { type: integer, default: 0, minimum: 0, maximum: 10000 }
+        - name: network
+          in: query
+          schema: { type: string }
+          description: CAIP-2 network filter (e.g. eip155:8453)
+      responses:
+        "200":
+          description: Payment history with pagination
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payments: { type: array, items: { $ref: "#/components/schemas/Payment" } }
+                  total: { type: integer }
+                  offset: { type: integer }
+                  limit: { type: integer }
+                  hasMore: { type: boolean }
+                  address: { type: string }
+        "400": { $ref: "#/components/responses/BadRequest" }
+
+  /api/v1/balances/{address}:
+    get:
+      summary: Multi-chain balances
+      parameters:
+        - $ref: "#/components/parameters/Address"
+      responses:
+        "200":
+          description: Balance per network
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  address: { type: string }
+                  balances: { type: array, items: { $ref: "#/components/schemas/Balance" } }
+                  totalUsd: { type: string }
+
+  /api/v1/budget/{address}:
+    get:
+      summary: Budget usage vs policy limits
+      parameters:
+        - $ref: "#/components/parameters/Address"
+      responses:
+        "200":
+          description: Policy and usage
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  address: { type: string }
+                  policy:
+                    type: object
+                    properties:
+                      maxPerPayment: { type: string }
+                      maxPerSession: { type: string }
+                      maxPerDay: { type: string }
+                      allowedNetworks: { type: array, items: { type: string } }
+                  usage:
+                    type: object
+                    properties:
+                      sessionSpent: { type: string }
+                      sessionLimit: { type: string }
+                      sessionPercentage: { type: number }
+                      todaySpent: { type: string }
+                      todayLimit: { type: string }
+                      todayPercentage: { type: number }
+                      paymentsThisHour: { type: integer }
+
+  /api/v1/stats/{address}:
+    get:
+      summary: Spending analytics
+      parameters:
+        - $ref: "#/components/parameters/Address"
+        - name: days
+          in: query
+          schema: { type: integer, default: 7 }
+      responses:
+        "200":
+          description: Stats with top services and network breakdown
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  address: { type: string }
+                  period: { type: string }
+                  totalPayments: { type: integer }
+                  totalSpent: { type: string }
+                  totalSpentUsd: { type: string }
+                  avgPaymentSize: { type: string }
+                  avgPaymentUsd: { type: string }
+                  topServices: { type: array, items: { type: object } }
+                  byNetwork: { type: object }
+
+  /api/v1/stats/{address}/trend:
+    get:
+      summary: Daily spending trend
+      parameters:
+        - $ref: "#/components/parameters/Address"
+        - name: days
+          in: query
+          schema: { type: integer, default: 30, minimum: 1, maximum: 365 }
+      responses:
+        "200":
+          description: Daily aggregated spending
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  address: { type: string }
+                  days: { type: integer }
+                  trend:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date: { type: string, format: date }
+                        count: { type: integer }
+                        amount: { type: string }
+                        amountUsd: { type: string }
+
+  /api/v1/alerts/{address}:
+    get:
+      summary: Active budget alerts
+      parameters:
+        - $ref: "#/components/parameters/Address"
+      responses:
+        "200":
+          description: Alert list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  address: { type: string }
+                  alerts: { type: array, items: { $ref: "#/components/schemas/Alert" } }
+                  count: { type: integer }
+
+  /api/v1/export/{address}:
+    get:
+      summary: CSV export of payment history
+      parameters:
+        - $ref: "#/components/parameters/Address"
+        - name: days
+          in: query
+          schema: { type: integer, default: 7 }
+      responses:
+        "200":
+          description: CSV file download
+          content:
+            text/csv:
+              schema: { type: string }
+
+  /api/v1/dashboard/{address}:
+    get:
+      summary: Combined dashboard data (single call)
+      description: Returns balances, budget, stats, payments, and alerts in one response.
+      parameters:
+        - $ref: "#/components/parameters/Address"
+        - name: days
+          in: query
+          schema: { type: integer, default: 7 }
+      responses:
+        "200":
+          description: All dashboard data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  address: { type: string }
+                  mode: { type: string, enum: [demo, live] }
+                  balances: { type: object }
+                  budget: { type: object }
+                  stats: { type: object }
+                  payments: { type: object }
+                  alerts: { type: object }
+
+  /api/v1/info:
+    get:
+      summary: Service info
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mode: { type: string, enum: [demo, live] }
+                  version: { type: string }
+
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string }
+                  service: { type: string }
+                  mode: { type: string }
+
+  /metrics:
+    get:
+      summary: Prometheus metrics
+      responses:
+        "200":
+          content:
+            text/plain:
+              schema: { type: string }
+
+components:
+  parameters:
+    Address:
+      name: address
+      in: path
+      required: true
+      schema: { type: string, pattern: "^[a-zA-Z0-9:._-]{1,128}$" }
+      description: Wallet address (alphanumeric, colons, dots, hyphens)
+
+  responses:
+    BadRequest:
+      description: Invalid input
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error: { type: string }
+
+  schemas:
+    Payment:
+      type: object
+      properties:
+        id: { type: string }
+        txHash: { type: string }
+        network: { type: string }
+        networkLabel: { type: string }
+        token: { type: string }
+        amount: { type: string }
+        amountFormatted: { type: string }
+        to: { type: string }
+        service: { type: string }
+        status: { type: string, enum: [settled, pending, failed] }
+        timestamp: { type: string, format: date-time }
+
+    Balance:
+      type: object
+      properties:
+        network: { type: string }
+        networkLabel: { type: string }
+        token: { type: string }
+        balance: { type: string }
+        balanceFormatted: { type: string }
+
+    Alert:
+      type: object
+      properties:
+        id: { type: string }
+        level: { type: string, enum: [warning, critical] }
+        message: { type: string }
+        field: { type: string }
+        percentage: { type: number }
+        timestamp: { type: string, format: date-time }

@@ -346,6 +346,7 @@ function clientScript(address) {
   }
 
   startAutoRefresh();
+  refreshTrend();
 })();`;
 }
 

@@ -171,7 +171,7 @@ describe("Agent Dashboard API", () => {
     const res = await fetch(`${BASE}/api/v1/info`);
     const data = await res.json();
     assert.strictEqual(data.mode, "demo");
-    assert.strictEqual(data.version, "1.1.0");
+    assert.strictEqual(data.version, "1.2.0");
   });
 
   it("GET /metrics returns Prometheus format", async () => {
@@ -217,6 +217,34 @@ describe("Agent Dashboard API", () => {
     assert.ok(data.alerts);
     assert.strictEqual(typeof data.alerts.count, "number");
     assert.strictEqual(data.mode, "demo");
+  });
+
+  it("GET /api/v1/stats/:addr/trend returns daily trend", async () => {
+    const res = await fetch(`${BASE}/api/v1/stats/0xTest/trend?days=7`);
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.strictEqual(data.address, "0xTest");
+    assert.strictEqual(data.days, 7);
+    assert.ok(Array.isArray(data.trend));
+    assert.strictEqual(data.trend.length, 7);
+    for (const d of data.trend) {
+      assert.ok(d.date);
+      assert.strictEqual(typeof d.count, "number");
+      assert.ok(d.amount);
+      assert.ok(d.amountUsd);
+    }
+  });
+
+  it("GET /api/v1/stats/:addr/trend defaults to 30 days", async () => {
+    const res = await fetch(`${BASE}/api/v1/stats/0xTest/trend`);
+    const data = await res.json();
+    assert.strictEqual(data.days, 30);
+    assert.strictEqual(data.trend.length, 30);
+  });
+
+  it("GET /api/v1/stats/:addr/trend with invalid address returns 400", async () => {
+    const res = await fetch(`${BASE}/api/v1/stats/<script>/trend`);
+    assert.strictEqual(res.status, 400);
   });
 
   it("GET /api/v1/dashboard with invalid address returns 400", async () => {
