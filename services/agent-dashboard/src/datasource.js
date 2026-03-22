@@ -142,7 +142,7 @@ export async function getPayments(address, options = {}) {
   if (network) {
     query = {
       name: "get-payments-filtered",
-      text: `SELECT * FROM settlements
+      text: `SELECT * FROM settlements_view
              WHERE (from_address = $1 OR to_address = $1)
                AND created_at >= $2
                AND network = $3
@@ -153,7 +153,7 @@ export async function getPayments(address, options = {}) {
   } else {
     query = {
       name: "get-payments",
-      text: `SELECT * FROM settlements
+      text: `SELECT * FROM settlements_view
              WHERE (from_address = $1 OR to_address = $1)
                AND created_at >= $2
              ORDER BY created_at DESC
@@ -168,13 +168,13 @@ export async function getPayments(address, options = {}) {
   const countQuery = network
     ? {
         name: "count-payments-filtered",
-        text: `SELECT COUNT(*) as cnt FROM settlements
+        text: `SELECT COUNT(*) as cnt FROM settlements_view
                WHERE (from_address = $1 OR to_address = $1) AND created_at >= $2 AND network = $3`,
         values: [address, cutoff, network],
       }
     : {
         name: "count-payments",
-        text: `SELECT COUNT(*) as cnt FROM settlements
+        text: `SELECT COUNT(*) as cnt FROM settlements_view
                WHERE (from_address = $1 OR to_address = $1) AND created_at >= $2`,
         values: [address, cutoff],
       };
@@ -203,7 +203,7 @@ export async function getBalances(address) {
             COALESCE(SUM(CASE WHEN to_address = $1 THEN CAST(amount AS NUMERIC) ELSE 0 END), 0)
               - COALESCE(SUM(CASE WHEN from_address = $1 THEN CAST(amount AS NUMERIC) ELSE 0 END), 0)
               AS net_balance
-     FROM settlements
+     FROM settlements_view
      WHERE (from_address = $1 OR to_address = $1)
        AND status = 'confirmed'
      GROUP BY network
@@ -249,7 +249,7 @@ export async function getBudget(address) {
   const todayResult = await pool.query({
     name: "budget-today",
     text: `SELECT COALESCE(SUM(CAST(amount AS NUMERIC)), 0) AS total
-     FROM settlements
+     FROM settlements_view
      WHERE from_address = $1
        AND status = 'confirmed'
        AND created_at >= $2`,
@@ -263,7 +263,7 @@ export async function getBudget(address) {
     name: "budget-session",
     text: `SELECT COALESCE(SUM(CAST(amount AS NUMERIC)), 0) AS total,
             COUNT(*) AS cnt
-     FROM settlements
+     FROM settlements_view
      WHERE from_address = $1
        AND status = 'confirmed'
        AND created_at >= $2`,
@@ -314,7 +314,7 @@ export async function getStats(address, days = 7) {
     name: "stats-top-services",
     text: `SELECT COALESCE(service, resource, 'Unknown') AS svc,
                   COUNT(*) AS cnt, SUM(CAST(amount AS NUMERIC)) AS total
-           FROM settlements
+           FROM settlements_view
            WHERE (from_address = $1 OR to_address = $1)
              AND status = 'confirmed'
              AND created_at >= $2
@@ -332,7 +332,7 @@ export async function getStats(address, days = 7) {
   const netResult = await pool.query({
     name: "stats-by-network",
     text: `SELECT network, COUNT(*) AS cnt, SUM(CAST(amount AS NUMERIC)) AS total
-           FROM settlements
+           FROM settlements_view
            WHERE (from_address = $1 OR to_address = $1)
              AND status = 'confirmed'
              AND created_at >= $2
@@ -383,7 +383,7 @@ export async function getTrend(address, days = 30) {
     name: "trend-daily",
     text: `SELECT DATE(created_at) AS day, COUNT(*) AS cnt,
                   COALESCE(SUM(CAST(amount AS NUMERIC)), 0) AS total
-           FROM settlements
+           FROM settlements_view
            WHERE (from_address = $1 OR to_address = $1)
              AND status = 'confirmed'
              AND created_at >= $2
@@ -447,7 +447,7 @@ export async function getAgents() {
                   COUNT(*) AS payment_count,
                   COALESCE(SUM(CAST(amount AS NUMERIC)), 0) AS total_spent,
                   MAX(created_at) AS last_active
-           FROM settlements
+           FROM settlements_view
            WHERE status = 'confirmed'
            GROUP BY from_address
            ORDER BY total_spent DESC
@@ -484,7 +484,7 @@ export async function getGlobalStats(days = 7) {
     text: `SELECT COUNT(*) AS total_payments,
                   COUNT(DISTINCT from_address) AS unique_agents,
                   COALESCE(SUM(CAST(amount AS NUMERIC)), 0) AS total_volume
-           FROM settlements
+           FROM settlements_view
            WHERE status = 'confirmed'
              AND created_at >= $1`,
     values: [cutoff],
@@ -523,7 +523,7 @@ export async function getGlobalTransactions(options = {}) {
   if (network) {
     query = {
       name: "global-tx-filtered",
-      text: `SELECT * FROM settlements
+      text: `SELECT * FROM settlements_view
              WHERE network = $1
              ORDER BY created_at DESC
              LIMIT $2 OFFSET $3`,
@@ -531,20 +531,20 @@ export async function getGlobalTransactions(options = {}) {
     };
     countQuery = {
       name: "global-tx-count-filtered",
-      text: `SELECT COUNT(*) AS cnt FROM settlements WHERE network = $1`,
+      text: `SELECT COUNT(*) AS cnt FROM settlements_view WHERE network = $1`,
       values: [network],
     };
   } else {
     query = {
       name: "global-tx",
-      text: `SELECT * FROM settlements
+      text: `SELECT * FROM settlements_view
              ORDER BY created_at DESC
              LIMIT $1 OFFSET $2`,
       values: [limit, offset],
     };
     countQuery = {
       name: "global-tx-count",
-      text: `SELECT COUNT(*) AS cnt FROM settlements`,
+      text: `SELECT COUNT(*) AS cnt FROM settlements_view`,
     };
   }
 
@@ -568,7 +568,7 @@ export async function getGlobalNetworkStats(days = 7) {
   const result = await pool.query({
     name: "global-network-stats",
     text: `SELECT network, COUNT(*) as count, COALESCE(SUM(CAST(amount AS NUMERIC)), 0) as volume
-           FROM settlements WHERE status = 'confirmed' AND created_at >= $1
+           FROM settlements_view WHERE status = 'confirmed' AND created_at >= $1
            GROUP BY network ORDER BY volume DESC`,
     values: [cutoff],
   });
@@ -594,7 +594,7 @@ export async function getGlobalTrend(days = 30) {
   const result = await pool.query({
     name: "global-trend",
     text: `SELECT DATE(created_at) AS day, COUNT(*) AS cnt, COALESCE(SUM(CAST(amount AS NUMERIC)), 0) AS total
-           FROM settlements WHERE status = 'confirmed' AND created_at >= $1
+           FROM settlements_view WHERE status = 'confirmed' AND created_at >= $1
            GROUP BY DATE(created_at) ORDER BY day ASC`,
     values: [cutoff],
   });
