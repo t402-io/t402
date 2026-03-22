@@ -51,16 +51,16 @@
   --color-chain-cosmos: #B7B9C8;
   --color-chain-cosmos-dim: #B7B9C820;
 
-  /* Scenario accent colors — monochrome/green tints */
+  /* Scenario accent colors */
   --color-scenario-ai: #50AF95;
-  --color-scenario-content: #50AF95;
-  --color-scenario-data: #50AF95;
-  --color-scenario-agent: #50AF95;
-  --color-scenario-iot: #50AF95;
-  --color-scenario-stream: #50AF95;
-  --color-scenario-mcp: #50AF95;
-  --color-scenario-bridge: #50AF95;
-  --color-scenario-gasless: #50AF95;
+  --color-scenario-content: #6366F1;
+  --color-scenario-data: #F59E0B;
+  --color-scenario-agent: #EC4899;
+  --color-scenario-iot: #14B8A6;
+  --color-scenario-stream: #8B5CF6;
+  --color-scenario-mcp: #3B82F6;
+  --color-scenario-bridge: #F97316;
+  --color-scenario-gasless: #10B981;
 }
 
 :root {

@@ -27,7 +27,7 @@ export function ScenarioShell({ title, description, cost, accentColor, scenarioI
       {/* Brand accent line */}
       <div
         className="h-0.5 w-16 rounded-full mb-8"
-        style={{ background: "linear-gradient(90deg, #50AF95, transparent)" }}
+        style={{ background: `linear-gradient(90deg, ${accentColor}, transparent)` }}
       />
       <div className="mb-10">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
@@ -39,7 +39,7 @@ export function ScenarioShell({ title, description, cost, accentColor, scenarioI
             {cost}
           </span>
         </div>
-        <p className="text-sm max-w-xl mb-5 leading-relaxed" style={{ color: "#A1A1AA" }}>{description}</p>
+        <p className="text-sm max-w-xl mb-5 leading-relaxed text-[var(--color-muted)]">{description}</p>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <ChainSelector />
           <ChainBadge family={activeFamily} showNetwork />

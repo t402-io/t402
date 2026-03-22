@@ -151,12 +151,21 @@ services:
       - PORT=3406
       - FACILITATOR_URL=http://host.docker.internal:8080
       - RATE_LIMIT_PER_MINUTE=100
+      - TRUST_CF_HEADER=true
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
     read_only: true
+    tmpfs:
+      - /tmp
     security_opt:
       - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
     logging:
       driver: json-file
       options:

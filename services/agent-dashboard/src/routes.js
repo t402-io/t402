@@ -9,6 +9,7 @@ import {
   getBalances,
   getBudget,
   getStats,
+  getTrend,
   getAlerts,
   getExportCsv,
   getMode,
@@ -128,6 +129,21 @@ export function registerRoutes(app, opts = {}) {
       const alerts = await getAlerts(req.params.address);
       res.set("Cache-Control", cacheHeader());
       res.json({ address: req.params.address, alerts, count: alerts.length });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // ── Spending trend (daily aggregation) ──────────────────────────
+  app.get("/api/v1/stats/:address/trend", async (req, res, next) => {
+    try {
+      if (!isValidAddress(req.params.address)) {
+        return res.status(400).json({ error: "invalid address format" });
+      }
+      const days = clampInt(req.query.days, 1, 365, 30);
+      const trend = await getTrend(req.params.address, days);
+      res.set("Cache-Control", cacheHeader());
+      res.json({ address: req.params.address, days, trend });
     } catch (err) {
       next(err);
     }

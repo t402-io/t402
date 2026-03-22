@@ -97,7 +97,7 @@ const FLOW_STEPS = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen">
+    <div id="main-content" className="min-h-screen">
       {/* Header */}
       <header
         className="sticky top-0 z-50 backdrop-blur-xl"
@@ -135,7 +135,7 @@ export default function HomePage() {
             <span style={{ color: "#50AF95" }}>44 Networks.</span>{" "}
             <span className="text-white">1 Header.</span>
           </h1>
-          <p className="text-xl sm:text-2xl max-w-2xl mx-auto mb-4" style={{ color: "#A1A1AA" }}>
+          <p className="text-xl sm:text-2xl max-w-2xl mx-auto mb-4 text-[var(--color-muted)]">
             HTTP-native USDT payments for APIs, content, AI agents, and IoT.
           </p>
           <p className="text-sm" style={{ color: "#71717A" }}>
@@ -180,7 +180,7 @@ export default function HomePage() {
       {/* How It Works */}
       <section
         className="py-20 px-4 sm:px-6"
-        style={{ background: "#111113", borderTop: "1px solid rgba(255, 255, 255, 0.06)" }}
+        style={{ background: "var(--color-surface)", borderTop: "1px solid rgba(255, 255, 255, 0.06)" }}
       >
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-10">
@@ -192,12 +192,12 @@ export default function HomePage() {
             </span>
             <h2 className="text-2xl sm:text-3xl font-bold">How T402 Works</h2>
           </div>
-          <div className="card-static p-4 sm:p-6 mb-10" style={{ background: "#0A0A0B" }}>
+          <div className="card-static p-4 sm:p-6 mb-10" style={{ background: "var(--color-background)" }}>
             <FlowDiagram autoPlay />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
             {FLOW_STEPS.map((item) => (
-              <div key={item.step} className="card-static p-5 sm:p-6 text-center" style={{ background: "#0A0A0B" }}>
+              <div key={item.step} className="card-static p-5 sm:p-6 text-center" style={{ background: "var(--color-background)" }}>
                 <div
                   className="w-12 h-12 rounded-full flex items-center justify-center text-base font-bold mx-auto mb-4"
                   style={{ background: "rgba(80, 175, 149, 0.12)", color: "#50AF95", border: "1px solid rgba(80, 175, 149, 0.2)" }}
@@ -205,7 +205,7 @@ export default function HomePage() {
                   {item.step}
                 </div>
                 <h3 className="text-sm font-semibold mb-2">{item.title}</h3>
-                <p className="text-xs leading-relaxed" style={{ color: "#A1A1AA" }}>{item.description}</p>
+                <p className="text-xs leading-relaxed text-[var(--color-muted)]">{item.description}</p>
               </div>
             ))}
           </div>
@@ -226,7 +226,7 @@ export default function HomePage() {
               EXPLORE
             </span>
             <h2 className="text-2xl sm:text-3xl font-bold mb-3">Interactive Scenarios</h2>
-            <p className="text-sm" style={{ color: "#A1A1AA" }}>
+            <p className="text-sm text-[var(--color-muted)]">
               Explore real-world payment flows across {CHAIN_FAMILIES.length} blockchain families
             </p>
           </div>
@@ -250,7 +250,7 @@ export default function HomePage() {
       {/* Developer Quick Start */}
       <section
         className="py-20 px-4 sm:px-6"
-        style={{ background: "#111113", borderTop: "1px solid rgba(255, 255, 255, 0.06)" }}
+        style={{ background: "var(--color-surface)", borderTop: "1px solid rgba(255, 255, 255, 0.06)" }}
       >
         <div className="max-w-3xl mx-auto text-center">
           <span
@@ -260,12 +260,12 @@ export default function HomePage() {
             DEVELOPERS
           </span>
           <h2 className="text-xl sm:text-2xl font-bold mb-4">Integrate in Minutes</h2>
-          <p className="text-sm mb-8" style={{ color: "#A1A1AA" }}>
+          <p className="text-sm mb-8 text-[var(--color-muted)]">
             Add T402 payments to any HTTP API with a single middleware.
           </p>
           <div
             className="rounded-2xl p-4 sm:p-5 text-left overflow-hidden"
-            style={{ background: "#0A0A0B", border: "1px solid rgba(255, 255, 255, 0.08)" }}
+            style={{ background: "var(--color-background)", border: "1px solid rgba(255, 255, 255, 0.08)" }}
           >
             <pre className="text-[11px] sm:text-xs overflow-x-auto font-mono leading-relaxed" style={{ color: "#D4D4D4" }}>
 {`import { t402 } from '@t402/express';

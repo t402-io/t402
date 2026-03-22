@@ -91,7 +91,7 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto" role="main">
+        <main id="main-content" className="flex-1 overflow-y-auto" role="main">
           <AnimatePresence mode="wait">
             <motion.div
               key={pathname}

@@ -102,6 +102,14 @@ footer{color:#6b7280;font-size:.8rem;margin-top:2rem;padding-top:1rem;border-top
 .pagination .btn:disabled{opacity:.4;cursor:default}
 .page-info{color:#9ca3af;font-size:.85rem}
 
+/* Sparkline chart */
+.sparkline-container{background:#111827;border-radius:8px;border:1px solid #1f2937;padding:1rem;margin:1rem 0}
+.sparkline-container h3{color:#9ca3af;font-size:.85rem;margin-bottom:.5rem}
+.sparkline svg{width:100%;height:80px}
+.sparkline polyline{fill:none;stroke:#50AF95;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.sparkline .area{fill:url(#sparkGrad);stroke:none}
+.sparkline text{fill:#6b7280;font-size:10px}
+
 /* Filter bar */
 .filter-bar{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;margin-bottom:.5rem}
 .filter-bar select{background:#111827;border:1px solid #374151;color:#e5e7eb;padding:.4rem .75rem;border-radius:6px;font-size:.85rem;font-family:inherit}
@@ -144,6 +152,43 @@ function clientScript(address) {
     var base = explorers[network];
     if (base && txHash) return '<a href="' + esc(base + txHash) + '" target="_blank" rel="noopener">' + esc(txHash.slice(0, 10)) + '…</a>';
     return esc(txHash || "");
+  }
+
+  // ── SVG sparkline renderer ───────────────────────────────────────
+  function renderSparkline(trend) {
+    var container = document.getElementById("sparkline-chart");
+    if (!container || !trend || trend.length === 0) return;
+    var w = 600, h = 80, pad = 20;
+    var amounts = trend.map(function(d) { return parseFloat(d.amountUsd) || 0; });
+    var maxVal = Math.max.apply(null, amounts) || 1;
+    var step = (w - pad * 2) / Math.max(amounts.length - 1, 1);
+    var points = amounts.map(function(v, i) {
+      return (pad + i * step).toFixed(1) + "," + (h - pad - (v / maxVal) * (h - pad * 2)).toFixed(1);
+    }).join(" ");
+    var areaPoints = points + " " + (pad + (amounts.length - 1) * step).toFixed(1) + "," + (h - pad) + " " + pad + "," + (h - pad);
+    // Date labels (first, middle, last)
+    var labels = "";
+    if (trend.length > 2) {
+      labels = '<text x="' + pad + '" y="' + h + '">' + esc(trend[0].date.slice(5)) + '</text>';
+      var mid = Math.floor(trend.length / 2);
+      labels += '<text x="' + (pad + mid * step) + '" y="' + h + '" text-anchor="middle">' + esc(trend[mid].date.slice(5)) + '</text>';
+      labels += '<text x="' + (w - pad) + '" y="' + h + '" text-anchor="end">' + esc(trend[trend.length - 1].date.slice(5)) + '</text>';
+    }
+    // Max value label
+    labels += '<text x="' + (w - pad) + '" y="12" text-anchor="end">$' + maxVal.toFixed(2) + '</text>';
+    container.innerHTML = '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none">' +
+      '<defs><linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#50AF95" stop-opacity="0.3"/><stop offset="100%" stop-color="#50AF95" stop-opacity="0"/></linearGradient></defs>' +
+      '<polygon class="area" points="' + areaPoints + '"/>' +
+      '<polyline points="' + points + '"/>' +
+      labels + '</svg>';
+  }
+
+  // Fetch and render trend on load + refresh
+  function refreshTrend() {
+    fetch("/api/v1/stats/" + encodeURIComponent(addr) + "/trend?days=" + Math.max(currentDays, 7))
+      .then(function(r) { return r.json(); })
+      .then(function(data) { renderSparkline(data.trend); })
+      .catch(function() {});
   }
 
   // ── Error banner ────────────────────────────────────────────────
@@ -200,6 +245,7 @@ function clientScript(address) {
         }).join("");
       }
       if (spinner) spinner.style.display = "none";
+      refreshTrend();
     }).catch(function(err) {
       if (spinner) spinner.style.display = "none";
       showError();
@@ -481,6 +527,11 @@ export function renderDashboard(data) {
       <div class="card"><div class="card-value" data-card="payments">${totalPay}</div><div class="card-label" data-period-label="Payments (7d)">Payments (7d)</div></div>
       <div class="card"><div class="card-value" data-card="spent">$${totalSpent}</div><div class="card-label" data-period-label="Spent (7d)">Spent (7d)</div></div>
       <div class="card"><div class="card-value" data-card="avg">$${avgPay}</div><div class="card-label">Avg Payment</div></div>
+    </div>
+
+    <div class="sparkline-container">
+      <h3>Spending Trend</h3>
+      <div class="sparkline" id="sparkline-chart"></div>
     </div>
 
     <h2>Budget Usage</h2>

@@ -14,6 +14,7 @@ import {
   generateBudget,
   generateStats as generateStatsSynthetic,
   generateAlerts,
+  generateTrendData,
   exportPaymentsCsv,
 } from "./data.js";
 import { networkMeta } from "./networks.js";
@@ -357,6 +358,41 @@ export async function getStats(address, days = 7) {
     topServices,
     byNetwork,
   };
+}
+
+/**
+ * Get daily spending trend for an address.
+ * @param {string} address
+ * @param {number} [days=30]
+ * @returns {Promise<Array<{ date: string, count: number, amount: string, amountUsd: string }>>}
+ */
+export async function getTrend(address, days = 30) {
+  if (getMode() === "demo") {
+    return generateTrendData(address, days);
+  }
+
+  const pool = await getPool();
+  const cutoff = new Date(Date.now() - days * 86400 * 1000);
+
+  const result = await pool.query({
+    name: "trend-daily",
+    text: `SELECT DATE(created_at) AS day, COUNT(*) AS cnt,
+                  COALESCE(SUM(CAST(amount AS NUMERIC)), 0) AS total
+           FROM settlements
+           WHERE (from_address = $1 OR to_address = $1)
+             AND status = 'settled'
+             AND created_at >= $2
+           GROUP BY DATE(created_at)
+           ORDER BY day ASC`,
+    values: [address, cutoff],
+  });
+
+  return result.rows.map((row) => ({
+    date: row.day instanceof Date ? row.day.toISOString().slice(0, 10) : String(row.day),
+    count: Number(row.cnt),
+    amount: String(row.total || 0),
+    amountUsd: (Number(row.total || 0) / 1e6).toFixed(2),
+  }));
 }
 
 /**

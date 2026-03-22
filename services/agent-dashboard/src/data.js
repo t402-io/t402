@@ -179,6 +179,44 @@ export function generateAlerts(address) {
 }
 
 /**
+ * Generate deterministic daily spending trend.
+ * @param {string} address
+ * @param {number} [days=30]
+ * @returns {Array<{ date: string, count: number, amount: string, amountUsd: string }>}
+ */
+export function generateTrendData(address, days = 30) {
+  const payments = generatePaymentHistory(address, days);
+  const settled = payments.filter((p) => p.status === "settled");
+
+  // Aggregate by date
+  const byDate = Object.create(null);
+  for (const p of settled) {
+    const date = p.timestamp.slice(0, 10);
+    if (!byDate[date]) byDate[date] = { count: 0, amount: 0 };
+    byDate[date].count++;
+    byDate[date].amount += Number(p.amount);
+  }
+
+  // Fill in missing dates
+  const result = [];
+  const now = new Date();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now);
+    d.setUTCDate(d.getUTCDate() - i);
+    const date = d.toISOString().slice(0, 10);
+    const entry = byDate[date] || { count: 0, amount: 0 };
+    result.push({
+      date,
+      count: entry.count,
+      amount: String(entry.amount),
+      amountUsd: (entry.amount / 1e6).toFixed(2),
+    });
+  }
+
+  return result;
+}
+
+/**
  * Export payment history as CSV string.
  * @param {string} address
  * @param {number} [days=7]

@@ -27,13 +27,13 @@ export function ScenarioCard({ title, description, cost, icon, accentColor, href
           <h3 className="text-sm font-semibold group-hover:text-white transition-colors">{title}</h3>
           <span
             className="text-[10px] font-medium px-2 py-0.5 rounded-full mt-1 inline-block"
-            style={{ background: "#50AF9515", color: "#50AF95" }}
+            style={{ background: `${accentColor}15`, color: accentColor }}
           >
             {cost}
           </span>
         </div>
       </div>
-      <p className="text-xs leading-relaxed line-clamp-2" style={{ color: "#A1A1AA" }}>
+      <p className="text-xs leading-relaxed line-clamp-2 text-[var(--color-muted)]">
         {description}
       </p>
     </Link>
