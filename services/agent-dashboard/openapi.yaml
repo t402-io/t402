@@ -211,6 +211,86 @@ paths:
                   payments: { type: object }
                   alerts: { type: object }
 
+  /api/agents:
+    get:
+      summary: List known agents
+      description: Returns agents with payment counts and spending totals. In demo mode, returns 5 synthetic agents.
+      responses:
+        "200":
+          description: Agents list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mode: { type: string, enum: [demo, live] }
+                  agents:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string }
+                        address: { type: string }
+                        name: { type: string }
+                        status: { type: string, enum: [active, idle, budget_exceeded] }
+                        paymentCount: { type: integer }
+                        totalSpent: { type: string }
+                        totalSpentUsd: { type: string }
+                        lastActive: { type: string, format: date-time }
+                  total: { type: integer }
+
+  /api/stats:
+    get:
+      summary: Global stats across all agents
+      parameters:
+        - name: days
+          in: query
+          schema: { type: integer, default: 7 }
+      responses:
+        "200":
+          description: Aggregate metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mode: { type: string }
+                  period: { type: string }
+                  totalAgents: { type: integer }
+                  totalPayments: { type: integer }
+                  totalVolume: { type: string }
+                  totalVolumeUsd: { type: string }
+                  avgPaymentSize: { type: string }
+                  avgPaymentUsd: { type: string }
+
+  /api/transactions:
+    get:
+      summary: Global transactions across all agents
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20, minimum: 1, maximum: 100 }
+        - name: offset
+          in: query
+          schema: { type: integer, default: 0 }
+        - name: network
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Paginated transaction list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mode: { type: string }
+                  transactions: { type: array, items: { $ref: "#/components/schemas/Payment" } }
+                  total: { type: integer }
+                  offset: { type: integer }
+                  limit: { type: integer }
+                  hasMore: { type: boolean }
+
   /api/v1/info:
     get:
       summary: Service info
