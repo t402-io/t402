@@ -19,8 +19,8 @@
  */
 
 import { readFileSync } from "fs";
+import path from "path";
 import { fileURLToPath } from "url";
-import { dirname, join } from "path";
 import express from "express";
 import compression from "compression";
 import {
@@ -37,6 +37,8 @@ import {
 } from "./middleware.js";
 import { store, seedStore, getNextId } from "./store.js";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 const app = express();
 app.use(express.json({ limit: "100kb" }));
 app.use(compression());
@@ -47,7 +49,10 @@ app.use((_req, res, next) => {
   res.set("X-Content-Type-Options", "nosniff");
   res.set("X-Frame-Options", "DENY");
   res.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  res.set("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
+  res.set(
+    "Content-Security-Policy",
+    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-ancestors 'none'; base-uri 'self'",
+  );
   next();
 });
 
@@ -71,8 +76,20 @@ app.use(requestLogger);
 // Rate limiting on all routes
 app.use(rateLimit);
 
+// Serve static frontend from public/
+app.use(express.static(path.join(__dirname, "..", "public")));
+
 // Initialize store with seed data
 seedStore();
+
+// Ensure seed services have verification metadata so /featured works
+for (const svc of store.getAll()) {
+  if (svc.verified && !svc.verification) {
+    svc.verification = { reachable: true, returns402: true, statusCode: 402, latencyMs: 0 };
+    svc.updatedAt = new Date().toISOString();
+    store.set(svc.id, svc);
+  }
+}
 
 // ── Search ────────────────────────────────────────────────────────────
 app.get("/api/v1/search", (req, res) => {
@@ -377,11 +394,65 @@ app.get("/metrics", (_req, res) => {
   });
 });
 
+// ── Prometheus metrics ────────────────────────────────────────────────
+app.get("/metrics/prometheus", (_req, res) => {
+  const m = getMetrics();
+  const lines = [];
+
+  lines.push("# HELP bazaar_requests_total Total requests");
+  lines.push("# TYPE bazaar_requests_total counter");
+  for (const [method, count] of Object.entries(m.requests.byMethod || {})) {
+    lines.push(`bazaar_requests_total{method="${method}"} ${count}`);
+  }
+  for (const [status, count] of Object.entries(m.requests.byStatus || {})) {
+    lines.push(`bazaar_requests_total{status="${status}"} ${count}`);
+  }
+
+  lines.push("");
+  lines.push("# HELP bazaar_services_total Total registered services");
+  lines.push("# TYPE bazaar_services_total gauge");
+  lines.push(`bazaar_services_total ${store.size()}`);
+
+  lines.push("");
+  lines.push("# HELP bazaar_services_verified Verified services count");
+  lines.push("# TYPE bazaar_services_verified gauge");
+  lines.push(`bazaar_services_verified ${store.countVerified()}`);
+
+  lines.push("");
+  lines.push("# HELP bazaar_uptime_seconds Service uptime");
+  lines.push("# TYPE bazaar_uptime_seconds gauge");
+  lines.push(`bazaar_uptime_seconds ${Math.floor(m.uptime)}`);
+
+  lines.push("");
+  lines.push("# HELP bazaar_errors_total Total errors");
+  lines.push("# TYPE bazaar_errors_total counter");
+  lines.push(`bazaar_errors_total ${m.errors}`);
+
+  lines.push("");
+  lines.push("# HELP bazaar_verifications_total Total verifications");
+  lines.push("# TYPE bazaar_verifications_total counter");
+  lines.push(`bazaar_verifications_total ${m.verifications.total}`);
+
+  lines.push("");
+  lines.push("# HELP bazaar_verifications_successful Successful verifications");
+  lines.push("# TYPE bazaar_verifications_successful counter");
+  lines.push(`bazaar_verifications_successful ${m.verifications.successful}`);
+
+  lines.push("");
+  lines.push("# HELP bazaar_registrations_total Total registrations");
+  lines.push("# TYPE bazaar_registrations_total counter");
+  lines.push(`bazaar_registrations_total ${m.registrations.total}`);
+
+  lines.push("");
+
+  res.set("Content-Type", "text/plain; version=0.0.4; charset=utf-8");
+  res.send(lines.join("\n"));
+});
+
 // ── OpenAPI spec ──────────────────────────────────────────────────────
-const __dirname = dirname(fileURLToPath(import.meta.url));
 let openapiSpec;
 try {
-  openapiSpec = readFileSync(join(__dirname, "..", "openapi.yaml"), "utf8");
+  openapiSpec = readFileSync(path.join(__dirname, "..", "openapi.yaml"), "utf8");
 } catch {
   // openapi.yaml not available (e.g., in minimal Docker build)
 }
@@ -391,6 +462,11 @@ app.get("/openapi.yaml", (_req, res) => {
     return res.status(404).json({ error: "OpenAPI spec not available" });
   }
   res.type("text/yaml").send(openapiSpec);
+});
+
+// ── Frontend fallback ─────────────────────────────────────────────────
+app.get("/", (_req, res) => {
+  res.sendFile(path.join(__dirname, "..", "public", "index.html"));
 });
 
 // ── Error handler ─────────────────────────────────────────────────────

@@ -16,8 +16,12 @@ services:
       - PORT=3402
       - RATE_LIMIT_PER_MINUTE=60
       - BAZAAR_ADMIN_KEY=${BAZAAR_ADMIN_KEY:-}
+    volumes:
+      - bazaar-data:/app/data
     restart: unless-stopped
     read_only: true
+    tmpfs:
+      - /tmp
     security_opt:
       - no-new-privileges:true
     logging:
@@ -165,6 +169,7 @@ services:
       retries: 3
 
 volumes:
+  bazaar-data:
   status-data:
   explorer-data:
 

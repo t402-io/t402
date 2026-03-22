@@ -154,7 +154,7 @@ Grafana runs as part of the Facilitator compose stack (not separately).
 - **Env vars**: `BAZAAR_ADMIN_KEY`, `WEBHOOK_URLS`, `DATABASE_URL`, `EXPLORER_MODE`
 - **Gotchas**:
   - Sandbox connects to the facilitator via `host.docker.internal:8080`
-  - Status and Explorer use named volumes (`status-data`, `explorer-data`) for persistence
+  - Bazaar, Status, and Explorer use named volumes (`bazaar-data`, `status-data`, `explorer-data`) for persistence
 
 ## Infrastructure
 

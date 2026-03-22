@@ -10,6 +10,7 @@ WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules
 COPY package.json .
 COPY src/ src/
+COPY public/ public/
 COPY openapi.yaml .
 RUN mkdir -p /app/data && chown -R app:app /app
 USER app

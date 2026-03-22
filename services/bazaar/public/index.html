@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>T402 Bazaar — Decentralized Service Marketplace</title>
+  <meta name="description" content="Discover and connect to t402-protected paid API services. A decentralized marketplace for AI agents powered by the T402 payment protocol.">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="T402 Bazaar — Service Marketplace">
+  <meta property="og:description" content="Discover t402-protected paid API services for AI agents. Search by category, network, and token.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://bazaar.t402.io">
+  <meta property="og:site_name" content="T402 Bazaar">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="T402 Bazaar — Service Marketplace">
+  <meta name="twitter:description" content="Discover t402-protected paid API services for AI agents.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%236366f1'/><text x='50' y='68' font-size='50' font-family='system-ui' font-weight='700' text-anchor='middle' fill='white'>B</text></svg>">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg-primary:#0f172a;--bg-secondary:#1e293b;--bg-card:#1e293b;--bg-card-hover:#263348;
+      --border:#334155;--border-hover:#475569;
+      --text-primary:#f1f5f9;--text-secondary:#94a3b8;--text-muted:#64748b;
+      --accent:#6366f1;--accent-hover:#818cf8;--accent-dim:rgba(99,102,241,.12);
+      --green:#22c55e;--green-dim:rgba(34,197,94,.12);
+      --yellow:#eab308;--yellow-dim:rgba(234,179,8,.12);
+      --red:#ef4444;--blue:#3b82f6;--purple:#a855f7;--cyan:#06b6d4;
+      --radius:10px;--radius-sm:6px;--radius-xs:4px;
+      --shadow:0 1px 3px rgba(0,0,0,.3),0 1px 2px rgba(0,0,0,.2);
+      --shadow-lg:0 10px 25px rgba(0,0,0,.4);
+      --font-sans:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+      --font-mono:'SF Mono',SFMono-Regular,ui-monospace,'DejaVu Sans Mono',Menlo,monospace;
+      --transition:150ms ease;
+    }
+    html{font-size:16px;-webkit-text-size-adjust:100%}
+    body{font-family:var(--font-sans);background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-height:100vh}
+    a{color:var(--accent);text-decoration:none;transition:color var(--transition)}
+    a:hover{color:var(--accent-hover)}
+    a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:var(--radius-xs)}
+
+    /* Layout */
+    .container{max-width:1200px;margin:0 auto;padding:0 1.25rem}
+
+    /* Header */
+    .header{border-bottom:1px solid var(--border);padding:2rem 0}
+    .header-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+    .header-brand{display:flex;align-items:center;gap:.75rem}
+    .header-logo{width:40px;height:40px;border-radius:var(--radius-sm);background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.25rem;color:#fff;flex-shrink:0}
+    .header-text h1{font-size:1.5rem;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+    .header-text p{font-size:.875rem;color:var(--text-secondary);margin-top:.125rem}
+    .header-links{display:flex;gap:1rem;align-items:center}
+    .header-links a{font-size:.875rem;color:var(--text-secondary);display:flex;align-items:center;gap:.375rem;padding:.375rem .75rem;border:1px solid var(--border);border-radius:var(--radius-sm);transition:all var(--transition)}
+    .header-links a:hover{color:var(--text-primary);border-color:var(--border-hover);background:var(--bg-card)}
+
+    /* Stats */
+    .stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;padding:1.5rem 0;border-bottom:1px solid var(--border)}
+    .stat-item{text-align:center;padding:.75rem .5rem}
+    .stat-value{font-size:1.5rem;font-weight:700;color:var(--text-primary);font-variant-numeric:tabular-nums}
+    .stat-label{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-top:.125rem}
+    @media(max-width:480px){.stats-bar{grid-template-columns:repeat(2,1fr)}}
+
+    /* Filters */
+    .filters{padding:1.25rem 0;display:flex;gap:.75rem;flex-wrap:wrap;align-items:center}
+    .search-input{flex:1;min-width:200px;padding:.625rem 1rem .625rem 2.5rem;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-size:.875rem;transition:border-color var(--transition);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85zm-5.44.856a5 5 0 1 1 0-10 5 5 0 0 1 0 10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:.75rem center}
+    .search-input::placeholder{color:var(--text-muted)}
+    .search-input:focus{border-color:var(--accent);background-color:var(--bg-primary)}
+    .filter-select{padding:.625rem .75rem;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-size:.875rem;cursor:pointer;transition:border-color var(--transition);appearance:auto;min-width:140px}
+    .filter-select:focus{border-color:var(--accent)}
+    .result-count{font-size:.8125rem;color:var(--text-muted);white-space:nowrap;padding:.375rem 0}
+
+    /* Grid */
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;padding:1.25rem 0 3rem}
+    @media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:580px){.grid{grid-template-columns:1fr}}
+
+    /* Card */
+    .card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;transition:all var(--transition);display:flex;flex-direction:column;gap:.75rem;position:relative}
+    .card:hover{border-color:var(--border-hover);background:var(--bg-card-hover);box-shadow:var(--shadow);transform:translateY(-1px)}
+    .card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem}
+    .card-title{font-size:1rem;font-weight:600;line-height:1.3;word-break:break-word}
+    .card-verified{flex-shrink:0;width:20px;height:20px;display:flex;align-items:center;justify-content:center}
+    .card-verified svg{width:18px;height:18px}
+    .card-desc{font-size:.8125rem;color:var(--text-secondary);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .card-meta{display:flex;flex-wrap:wrap;gap:.375rem;margin-top:auto}
+    .badge{display:inline-flex;align-items:center;gap:.25rem;padding:.1875rem .5rem;border-radius:var(--radius-xs);font-size:.6875rem;font-weight:500;letter-spacing:.01em;white-space:nowrap}
+    .badge-category{background:var(--accent-dim);color:var(--accent-hover)}
+    .badge-network{background:rgba(6,182,212,.1);color:var(--cyan)}
+    .badge-price{background:var(--green-dim);color:var(--green);font-family:var(--font-mono);font-weight:600}
+    .badge-method{font-family:var(--font-mono);font-size:.625rem;font-weight:600;padding:.125rem .375rem}
+    .badge-method-get{background:rgba(34,197,94,.1);color:var(--green)}
+    .badge-method-post{background:rgba(59,130,246,.1);color:var(--blue)}
+    .badge-method-put{background:rgba(234,179,8,.1);color:var(--yellow)}
+    .badge-method-delete{background:rgba(239,68,68,.1);color:var(--red)}
+    .badge-method-patch{background:rgba(168,85,247,.1);color:var(--purple)}
+    .card-tags{display:flex;flex-wrap:wrap;gap:.25rem}
+    .tag{font-size:.625rem;padding:.125rem .375rem;border-radius:var(--radius-xs);background:rgba(148,163,184,.08);color:var(--text-muted);border:1px solid rgba(148,163,184,.12)}
+    .card-footer{display:flex;align-items:center;justify-content:space-between;padding-top:.5rem;border-top:1px solid var(--border);margin-top:auto}
+    .card-owner{font-size:.6875rem;color:var(--text-muted);font-family:var(--font-mono);cursor:default}
+    .card-actions{display:flex;gap:.5rem}
+    .btn-details{font-size:.75rem;padding:.25rem .625rem;border-radius:var(--radius-xs);border:1px solid var(--border);background:transparent;color:var(--text-secondary);cursor:pointer;transition:all var(--transition)}
+    .btn-details:hover{border-color:var(--accent);color:var(--accent)}
+
+    /* Detail panel */
+    .card-detail{display:none;padding-top:.75rem;border-top:1px solid var(--border);font-size:.8125rem}
+    .card-detail.open{display:block}
+    .detail-row{display:flex;gap:.5rem;margin-bottom:.375rem}
+    .detail-label{color:var(--text-muted);min-width:70px;flex-shrink:0}
+    .detail-value{color:var(--text-secondary);word-break:break-all;font-family:var(--font-mono);font-size:.75rem}
+    .detail-value a{font-family:var(--font-mono);font-size:.75rem}
+
+    /* States */
+    .empty-state,.error-state{text-align:center;padding:4rem 1rem;color:var(--text-muted)}
+    .empty-state h3,.error-state h3{font-size:1.125rem;color:var(--text-secondary);margin-bottom:.5rem}
+    .error-state{color:var(--red)}
+    .error-state button{margin-top:1rem;padding:.5rem 1.25rem;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);cursor:pointer;font-size:.875rem}
+    .error-state button:hover{background:var(--accent-hover)}
+
+    /* Skeleton */
+    .skeleton{background:linear-gradient(90deg,var(--bg-secondary) 25%,var(--bg-card-hover) 50%,var(--bg-secondary) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius-xs)}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .skeleton-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;display:flex;flex-direction:column;gap:.75rem}
+    .skeleton-line{height:14px}
+    .skeleton-title{height:20px;width:70%}
+    .skeleton-desc{height:14px;width:90%}
+    .skeleton-desc2{height:14px;width:60%}
+    .skeleton-badges{display:flex;gap:.375rem}
+    .skeleton-badge{height:22px;width:60px;border-radius:var(--radius-xs)}
+
+    /* Footer */
+    .footer{border-top:1px solid var(--border);padding:2rem 0;text-align:center}
+    .footer-inner{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:1.5rem;font-size:.8125rem;color:var(--text-muted)}
+    .footer-inner a{color:var(--text-secondary)}
+
+    /* Noscript */
+    .noscript-msg{text-align:center;padding:4rem 1rem;color:var(--text-secondary);font-size:1rem}
+
+    /* Tooltip */
+    [data-tooltip]{position:relative}
+    [data-tooltip]:hover::after{content:attr(data-tooltip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);padding:.25rem .5rem;background:#0f172a;border:1px solid var(--border);border-radius:var(--radius-xs);font-size:.6875rem;color:var(--text-primary);white-space:nowrap;z-index:10;pointer-events:none}
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="container header-inner">
+      <div class="header-brand">
+        <div class="header-logo" aria-hidden="true">B</div>
+        <div class="header-text">
+          <h1>T402 Bazaar</h1>
+          <p>Decentralized Service Marketplace for AI Agents</p>
+        </div>
+      </div>
+      <nav class="header-links" aria-label="External links">
+        <a href="/openapi.yaml" target="_blank" rel="noopener">OpenAPI Spec</a>
+        <a href="https://docs.t402.io" target="_blank" rel="noopener">Docs</a>
+        <a href="https://github.com/t402-io/t402" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Stats -->
+  <section class="container" aria-label="Marketplace statistics">
+    <div class="stats-bar" id="stats-bar">
+      <div class="stat-item"><div class="stat-value" id="stat-total">--</div><div class="stat-label">Services</div></div>
+      <div class="stat-item"><div class="stat-value" id="stat-verified">--</div><div class="stat-label">Verified</div></div>
+      <div class="stat-item"><div class="stat-value" id="stat-networks">--</div><div class="stat-label">Networks</div></div>
+      <div class="stat-item"><div class="stat-value" id="stat-tokens">--</div><div class="stat-label">Tokens</div></div>
+    </div>
+  </section>
+
+  <!-- Filters -->
+  <section class="container" aria-label="Search and filters">
+    <div class="filters">
+      <label for="search" class="sr-only">Search services</label>
+      <input type="search" id="search" class="search-input" placeholder="Search services..." aria-label="Search services">
+      <select id="filter-category" class="filter-select" aria-label="Filter by category">
+        <option value="">All Categories</option>
+      </select>
+      <select id="filter-network" class="filter-select" aria-label="Filter by network">
+        <option value="">All Networks</option>
+      </select>
+      <select id="filter-token" class="filter-select" aria-label="Filter by token">
+        <option value="">All Tokens</option>
+      </select>
+      <span class="result-count" id="result-count" aria-live="polite"></span>
+    </div>
+  </section>
+
+  <!-- Grid -->
+  <main class="container">
+    <div class="grid" id="service-grid" role="list" aria-label="Service listings">
+      <noscript>
+        <div class="noscript-msg">
+          <p>JavaScript is required to browse the marketplace. Please enable JavaScript and reload.</p>
+          <p>Alternatively, use the <a href="/openapi.yaml">API</a> directly at <code>/api/v1/search</code>.</p>
+        </div>
+      </noscript>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span>Powered by <a href="https://t402.io" target="_blank" rel="noopener">T402 Protocol</a></span>
+      <a href="https://docs.t402.io" target="_blank" rel="noopener">Documentation</a>
+      <a href="https://github.com/t402-io/t402" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      'use strict';
+
+      // ── CAIP-2 to human name mapping ──────────────────────────────
+      var NETWORK_NAMES = {
+        'eip155:1': 'Ethereum', 'eip155:10': 'Optimism', 'eip155:56': 'BNB Chain',
+        'eip155:137': 'Polygon', 'eip155:250': 'Fantom', 'eip155:8453': 'Base',
+        'eip155:42161': 'Arbitrum', 'eip155:42170': 'Arbitrum Nova',
+        'eip155:43114': 'Avalanche', 'eip155:59144': 'Linea',
+        'eip155:324': 'zkSync Era', 'eip155:534352': 'Scroll',
+        'eip155:1101': 'Polygon zkEVM', 'eip155:5000': 'Mantle',
+        'eip155:7777777': 'Zora', 'eip155:81457': 'Blast',
+        'eip155:34443': 'Mode', 'eip155:1135': 'Lisk',
+        'eip155:2522': 'Fraxtal', 'eip155:7560': 'Cyber',
+        'eip155:1329': 'Sei', 'eip155:252': 'Fraxtal',
+        'eip155:169': 'Manta Pacific', 'eip155:204': 'opBNB',
+        'eip155:100': 'Gnosis', 'eip155:42220': 'Celo',
+        'eip155:1088': 'Metis', 'eip155:167000': 'Taiko',
+        'solana:mainnet': 'Solana', 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp': 'Solana',
+        'ton:mainnet': 'TON', 'tron:mainnet': 'TRON',
+        'stellar:pubnet': 'Stellar', 'cosmos:cosmoshub-4': 'Cosmos',
+        'aptos:mainnet': 'Aptos', 'near:mainnet': 'NEAR',
+        'tezos:mainnet': 'Tezos', 'polkadot:91b171bb158e2d3848fa23a9f1c25182': 'Polkadot',
+        'stacks:mainnet': 'Stacks', 'conflux:mainnet': 'Conflux',
+        'eip155:8217': 'Kaia', 'eip155:2040': 'Berachain'
+      };
+
+      function networkName(caip2) {
+        return NETWORK_NAMES[caip2] || caip2;
+      }
+
+      // ── Price formatting ──────────────────────────────────────────
+      function formatPrice(amount, token) {
+        var decimals = 6;
+        var raw = parseInt(amount, 10) || 0;
+        var value = raw / Math.pow(10, decimals);
+        if (value < 0.001 && value > 0) return '<$0.001 ' + token;
+        if (value >= 1) return '$' + value.toFixed(2) + ' ' + token;
+        if (value >= 0.01) return '$' + value.toFixed(3) + ' ' + token;
+        return '$' + value.toFixed(4) + ' ' + token;
+      }
+
+      // ── Truncation ────────────────────────────────────────────────
+      function truncate(str, len) {
+        if (!str) return '';
+        return str.length > len ? str.slice(0, len) + '...' : str;
+      }
+
+      function truncateAddr(addr) {
+        if (!addr || addr.length < 12) return addr || 'unknown';
+        return addr.slice(0, 6) + '...' + addr.slice(-4);
+      }
+
+      // ── DOM helpers ───────────────────────────────────────────────
+      var $ = function(sel) { return document.getElementById(sel); };
+
+      function el(tag, attrs, children) {
+        var e = document.createElement(tag);
+        if (attrs) {
+          for (var k in attrs) {
+            if (k === 'className') e.className = attrs[k];
+            else if (k === 'textContent') e.textContent = attrs[k];
+            else if (k === 'innerHTML') e.innerHTML = attrs[k];
+            else if (k.startsWith('on')) e.addEventListener(k.slice(2).toLowerCase(), attrs[k]);
+            else e.setAttribute(k, attrs[k]);
+          }
+        }
+        if (children) {
+          children.forEach(function(c) {
+            if (typeof c === 'string') e.appendChild(document.createTextNode(c));
+            else if (c) e.appendChild(c);
+          });
+        }
+        return e;
+      }
+
+      // ── Skeleton loader ───────────────────────────────────────────
+      function renderSkeletons(count) {
+        var grid = $('service-grid');
+        grid.innerHTML = '';
+        for (var i = 0; i < count; i++) {
+          var card = el('div', { className: 'skeleton-card', 'aria-hidden': 'true' }, [
+            el('div', { className: 'skeleton skeleton-title' }),
+            el('div', { className: 'skeleton skeleton-desc' }),
+            el('div', { className: 'skeleton skeleton-desc2' }),
+            el('div', { className: 'skeleton-badges' }, [
+              el('div', { className: 'skeleton skeleton-badge' }),
+              el('div', { className: 'skeleton skeleton-badge' }),
+              el('div', { className: 'skeleton skeleton-badge' })
+            ])
+          ]);
+          grid.appendChild(card);
+        }
+      }
+
+      // ── Card rendering ────────────────────────────────────────────
+      function methodClass(m) {
+        return 'badge badge-method badge-method-' + m.toLowerCase();
+      }
+
+      function renderCard(svc) {
+        var verifiedSvg = svc.verified
+          ? '<svg viewBox="0 0 20 20" fill="#22c55e"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/></svg>'
+          : '<svg viewBox="0 0 20 20" fill="#475569"><circle cx="10" cy="10" r="7" fill="none" stroke="#475569" stroke-width="1.5"/></svg>';
+
+        var detailId = 'detail-' + svc.id;
+
+        var card = el('article', { className: 'card', role: 'listitem' }, [
+          // Header
+          el('div', { className: 'card-header' }, [
+            el('h2', { className: 'card-title', textContent: svc.name }),
+            el('div', {
+              className: 'card-verified',
+              innerHTML: verifiedSvg,
+              title: svc.verified ? 'Verified: returns 402' : 'Not verified',
+              'aria-label': svc.verified ? 'Verified service' : 'Unverified service'
+            })
+          ]),
+          // Description
+          el('p', { className: 'card-desc', textContent: truncate(svc.description, 120) }),
+          // Badges
+          el('div', { className: 'card-meta' }, [
+            el('span', { className: 'badge badge-category', textContent: svc.category }),
+            el('span', { className: 'badge badge-price', textContent: formatPrice(svc.price.amount, svc.price.token) }),
+            el('span', { className: 'badge badge-network', textContent: networkName(svc.price.network) })
+          ]),
+          // Methods
+          el('div', { className: 'card-meta' },
+            (svc.methods || []).map(function(m) {
+              return el('span', { className: methodClass(m), textContent: m });
+            })
+          ),
+          // Tags
+          (svc.tags && svc.tags.length > 0) ? el('div', { className: 'card-tags' },
+            svc.tags.slice(0, 8).map(function(t) {
+              return el('span', { className: 'tag', textContent: t });
+            })
+          ) : null,
+          // Footer
+          el('div', { className: 'card-footer' }, [
+            el('span', {
+              className: 'card-owner',
+              textContent: truncateAddr(svc.owner),
+              'data-tooltip': svc.owner,
+              title: svc.owner
+            }),
+            el('button', {
+              className: 'btn-details',
+              textContent: 'Details',
+              'aria-expanded': 'false',
+              'aria-controls': detailId,
+              onClick: function(e) {
+                var panel = document.getElementById(detailId);
+                var open = panel.classList.toggle('open');
+                e.currentTarget.setAttribute('aria-expanded', open ? 'true' : 'false');
+                e.currentTarget.textContent = open ? 'Hide' : 'Details';
+              }
+            })
+          ]),
+          // Detail panel
+          el('div', { className: 'card-detail', id: detailId }, [
+            el('div', { className: 'detail-row' }, [
+              el('span', { className: 'detail-label', textContent: 'URL' }),
+              el('span', { className: 'detail-value' }, [
+                el('a', { href: svc.url, target: '_blank', rel: 'noopener', textContent: svc.url })
+              ])
+            ]),
+            el('div', { className: 'detail-row' }, [
+              el('span', { className: 'detail-label', textContent: 'Network' }),
+              el('span', { className: 'detail-value', textContent: svc.price.network + ' (' + networkName(svc.price.network) + ')' })
+            ]),
+            el('div', { className: 'detail-row' }, [
+              el('span', { className: 'detail-label', textContent: 'Owner' }),
+              el('span', { className: 'detail-value', textContent: svc.owner })
+            ]),
+            el('div', { className: 'detail-row' }, [
+              el('span', { className: 'detail-label', textContent: 'ID' }),
+              el('span', { className: 'detail-value', textContent: svc.id })
+            ]),
+            el('div', { className: 'detail-row' }, [
+              el('span', { className: 'detail-label', textContent: 'Registered' }),
+              el('span', { className: 'detail-value', textContent: new Date(svc.registeredAt).toLocaleDateString() })
+            ])
+          ])
+        ]);
+
+        return card;
+      }
+
+      // ── State ─────────────────────────────────────────────────────
+      var allServices = [];
+      var statsData = null;
+
+      // ── Render grid ───────────────────────────────────────────────
+      function renderGrid(services) {
+        var grid = $('service-grid');
+        grid.innerHTML = '';
+
+        $('result-count').textContent = services.length + ' service' + (services.length !== 1 ? 's' : '');
+
+        if (services.length === 0) {
+          grid.innerHTML = '<div class="empty-state"><h3>No services found</h3><p>Try adjusting your search or filters.</p></div>';
+          return;
+        }
+
+        services.forEach(function(svc) {
+          grid.appendChild(renderCard(svc));
+        });
+      }
+
+      function renderError(msg) {
+        var grid = $('service-grid');
+        grid.innerHTML = '';
+        var div = el('div', { className: 'error-state' }, [
+          el('h3', { textContent: 'Failed to load services' }),
+          el('p', { textContent: msg || 'Could not connect to the Bazaar API.' }),
+          el('button', { textContent: 'Retry', onClick: init })
+        ]);
+        grid.appendChild(div);
+      }
+
+      // ── Filtering ─────────────────────────────────────────────────
+      function applyFilters() {
+        var q = ($('search').value || '').toLowerCase().trim();
+        var cat = $('filter-category').value;
+        var net = $('filter-network').value;
+        var tok = $('filter-token').value;
+
+        var filtered = allServices.filter(function(svc) {
+          if (cat && svc.category !== cat) return false;
+          if (net && svc.price.network !== net) return false;
+          if (tok && svc.price.token !== tok) return false;
+          if (q) {
+            var terms = q.split(/\s+/);
+            var haystack = (svc.name + ' ' + svc.description + ' ' + svc.category + ' ' + (svc.tags || []).join(' ')).toLowerCase();
+            for (var i = 0; i < terms.length; i++) {
+              if (haystack.indexOf(terms[i]) === -1) return false;
+            }
+          }
+          return true;
+        });
+
+        renderGrid(filtered);
+      }
+
+      // ── Debounce ──────────────────────────────────────────────────
+      function debounce(fn, ms) {
+        var timer;
+        return function() {
+          clearTimeout(timer);
+          timer = setTimeout(fn, ms);
+        };
+      }
+
+      // ── Populate filter dropdowns ─────────────────────────────────
+      function populateFilters(categories, networks, tokens) {
+        var catSelect = $('filter-category');
+        Object.keys(categories).sort().forEach(function(c) {
+          catSelect.appendChild(el('option', { value: c, textContent: c + ' (' + categories[c] + ')' }));
+        });
+
+        var netSelect = $('filter-network');
+        Object.keys(networks).sort().forEach(function(n) {
+          netSelect.appendChild(el('option', { value: n, textContent: networkName(n) + ' (' + networks[n] + ')' }));
+        });
+
+        var tokSelect = $('filter-token');
+        Object.keys(tokens).sort().forEach(function(t) {
+          tokSelect.appendChild(el('option', { value: t, textContent: t + ' (' + tokens[t] + ')' }));
+        });
+      }
+
+      // ── Fetch data ────────────────────────────────────────────────
+      function fetchJSON(url) {
+        return fetch(url).then(function(r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        });
+      }
+
+      function init() {
+        renderSkeletons(6);
+
+        Promise.all([
+          fetchJSON('/api/v1/search?limit=100'),
+          fetchJSON('/api/v1/stats'),
+          fetchJSON('/api/v1/categories')
+        ]).then(function(results) {
+          var searchData = results[0];
+          statsData = results[1];
+          var catData = results[2];
+
+          allServices = searchData.services || [];
+
+          // Stats
+          $('stat-total').textContent = statsData.totalServices || 0;
+          $('stat-verified').textContent = statsData.verified || 0;
+          $('stat-networks').textContent = Object.keys(statsData.networks || {}).length;
+          $('stat-tokens').textContent = Object.keys(statsData.tokens || {}).length;
+
+          // Filters
+          populateFilters(catData.categories || {}, statsData.networks || {}, statsData.tokens || {});
+
+          // Render
+          renderGrid(allServices);
+        }).catch(function(err) {
+          renderError(err.message);
+        });
+      }
+
+      // ── Event listeners ───────────────────────────────────────────
+      $('search').addEventListener('input', debounce(applyFilters, 300));
+      $('filter-category').addEventListener('change', applyFilters);
+      $('filter-network').addEventListener('change', applyFilters);
+      $('filter-token').addEventListener('change', applyFilters);
+
+      // ── Keyboard: Escape clears search ────────────────────────────
+      $('search').addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          e.target.value = '';
+          applyFilters();
+        }
+      });
+
+      // ── Boot ──────────────────────────────────────────────────────
+      init();
+    })();
+  </script>
+</body>
+</html>
