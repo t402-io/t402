@@ -128,8 +128,8 @@ describe("XSS prevention", () => {
     const xss = encodeURIComponent("<script>alert(1)</script>");
     const res = await fetch(`${BASE}/?address=${xss}`);
     const html = await res.text();
-    // Invalid address should trigger onboarding (empty state), not data view
-    assert.ok(html.includes("Try Demo"), "Should show onboarding for invalid address");
+    // Invalid address should trigger overview (empty state), not data view
+    assert.ok(html.includes("Global Overview"), "Should show overview for invalid address");
   });
 });
 

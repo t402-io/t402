@@ -138,12 +138,12 @@ describe("Agent Dashboard API", () => {
     assert.ok(csv2.length > 0);
   });
 
-  it("GET / returns HTML dashboard with onboarding", async () => {
+  it("GET / returns HTML dashboard with overview", async () => {
     const res = await fetch(BASE);
     const html = await res.text();
     assert.ok(html.includes("Agent Payment Dashboard"));
-    assert.ok(html.includes("Try Demo"));
-    assert.ok(html.includes("Load Dashboard"));
+    assert.ok(html.includes("Global Overview"));
+    assert.ok(html.includes("View Dashboard"));
   });
 
   it("GET / with address shows toolbar links", async () => {
@@ -268,6 +268,70 @@ describe("Agent Dashboard API", () => {
   it("GET /api/v1/events with invalid address returns 400", async () => {
     const res = await fetch(`${BASE}/api/v1/events/<script>`);
     assert.strictEqual(res.status, 400);
+  });
+
+  it("GET /api/agents returns agents list", async () => {
+    const res = await fetch(`${BASE}/api/agents`);
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.ok(Array.isArray(data.agents));
+    assert.ok(data.agents.length > 0);
+    assert.strictEqual(data.total, data.agents.length);
+    const agent = data.agents[0];
+    assert.ok(agent.id);
+    assert.ok(agent.address);
+    assert.ok(agent.name);
+    assert.ok(agent.status);
+    assert.strictEqual(typeof agent.paymentCount, "number");
+    assert.ok(agent.totalSpentUsd);
+    assert.ok(agent.lastActive);
+  });
+
+  it("GET /api/stats returns global stats", async () => {
+    const res = await fetch(`${BASE}/api/stats`);
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.strictEqual(typeof data.totalAgents, "number");
+    assert.ok(data.totalAgents > 0);
+    assert.strictEqual(typeof data.totalPayments, "number");
+    assert.ok(data.totalVolumeUsd);
+    assert.ok(data.avgPaymentUsd);
+    assert.strictEqual(data.period, "7d");
+  });
+
+  it("GET /api/stats respects days param", async () => {
+    const res = await fetch(`${BASE}/api/stats?days=30`);
+    const data = await res.json();
+    assert.strictEqual(data.period, "30d");
+  });
+
+  it("GET /api/transactions returns global transactions", async () => {
+    const res = await fetch(`${BASE}/api/transactions?limit=5`);
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.ok(Array.isArray(data.transactions));
+    assert.ok(data.transactions.length <= 5);
+    assert.strictEqual(typeof data.total, "number");
+    assert.strictEqual(typeof data.hasMore, "boolean");
+    assert.strictEqual(data.offset, 0);
+    assert.strictEqual(data.limit, 5);
+  });
+
+  it("GET /api/transactions supports network filter", async () => {
+    const res = await fetch(`${BASE}/api/transactions?network=eip155:8453&limit=5`);
+    const data = await res.json();
+    for (const tx of data.transactions) {
+      assert.strictEqual(tx.network, "eip155:8453");
+    }
+  });
+
+  it("GET / without address shows overview with agents", async () => {
+    const res = await fetch(BASE);
+    const html = await res.text();
+    assert.ok(html.includes("Global Overview"));
+    assert.ok(html.includes("Active Agents"));
+    assert.ok(html.includes("Research Agent"));
+    assert.ok(html.includes("Look Up Agent"));
   });
 
   it("GET /api/v1/dashboard with invalid address returns 400", async () => {
