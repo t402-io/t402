@@ -6,8 +6,12 @@
  */
 
 import express from "express";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 import compression from "compression";
-import { randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+import { randomUUID, timingSafeEqual } from "node:crypto";
 import { getMode, shutdown } from "./datasource.js";
 import { registerRoutes } from "./routes.js";
 import { log } from "./utils.js";
@@ -37,14 +41,12 @@ app.use((req, res, next) => {
 // ── Security headers + CSP nonce ────────────────────────────────────
 app.disable("x-powered-by");
 app.use((_req, res, next) => {
-  const nonce = randomBytes(16).toString("base64");
-  res.locals.cspNonce = nonce;
   res.set("X-Content-Type-Options", "nosniff");
   res.set("X-Frame-Options", "DENY");
   res.set("Referrer-Policy", "strict-origin-when-cross-origin");
   res.set(
     "Content-Security-Policy",
-    `default-src 'none'; connect-src 'self'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; img-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'`,
+    "default-src 'none'; connect-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
   );
   res.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
   res.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
@@ -125,6 +127,9 @@ if (API_KEY) {
     next();
   });
 }
+
+// ── Static files (CSS, JS — browser-cached) ────────────────────────
+app.use(express.static(join(__dirname, "..", "public"), { maxAge: "1h", etag: true }));
 
 // ── Routes ──────────────────────────────────────────────────────────
 registerRoutes(app, { rateLimit });

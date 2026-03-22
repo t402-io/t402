@@ -1,14 +1,16 @@
 /**
  * HTML template rendering for the T402 Agent Dashboard.
  *
- * Extracted from server.js to keep rendering separate from routing.
+ * CSS and client JS are served as static files from /public/
+ * for browser caching and CSP compliance.
  */
 
 import { escapeHtml, timeAgo, statusIndicator } from "./utils.js";
 
-// ── CSS (static, never changes) ─────────────────────────────────────
-
-const CSS = `
+// CSS and client JS are now served as static files from public/
+// CSS: public/style.css — with CSS custom properties for dark/light theming
+// JS:  public/app.js — reads address from data-address attribute on <main>
+const _CSS_REMOVED = `/* Moved to public/style.css */
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,-apple-system,sans-serif;background:#0a0a0b;color:#e5e7eb;max-width:1060px;margin:0 auto;padding:1.5rem}
 h1{color:#50AF95;margin-bottom:.25rem} h2{color:#9ca3af;font-size:1.1rem;margin-top:2rem}
@@ -367,7 +369,7 @@ export function renderDashboard(data) {
     return `<!DOCTYPE html>
 <html lang="en"><head><title>T402 Agent Dashboard</title>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<style nonce="${cspNonce}">${CSS}</style></head>
+<link rel="stylesheet" href="/style.css"></head>
 <body>
   <header>
     <h1>Agent Payment Dashboard</h1>
@@ -498,10 +500,11 @@ export function renderDashboard(data) {
   return `<!DOCTYPE html>
 <html lang="en"><head><title>T402 Agent Dashboard</title>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<style nonce="${cspNonce}">${CSS}</style></head>
+<link rel="stylesheet" href="/style.css"></head>
 <body>
   <header>
     <h1>Agent Payment Dashboard</h1>
+    <button class="theme-toggle" id="theme-toggle" type="button">\u2600 Light</button>
     <div class="subtitle">T402 Protocol — AI Agent Payment Monitoring</div>
     <form method="get">
       <label for="addr-input">Agent wallet address</label>
@@ -512,7 +515,7 @@ export function renderDashboard(data) {
     </form>
   </header>
 
-  <main>
+  <main data-address="${safeAddr}">
     <div id="error-banner" class="error-banner"></div>
     ${alertsHtml}
 
@@ -616,6 +619,6 @@ export function renderDashboard(data) {
     Powered by <a href="https://t402.io">T402</a>
   </footer>
 
-  <script nonce="${cspNonce}">${clientScript(address)}</script>
+  <script src="/app.js" defer></script>
 </body></html>`;
 }

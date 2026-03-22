@@ -134,15 +134,15 @@ describe("XSS prevention", () => {
 });
 
 describe("Security headers", () => {
-  it("CSP header is set with nonce", async () => {
+  it("CSP header is set with self directives", async () => {
     const res = await fetch(`${BASE}/health`);
     const csp = res.headers.get("content-security-policy");
     assert.ok(csp, "CSP header should be present");
     assert.ok(csp.includes("default-src 'none'"));
     assert.ok(csp.includes("frame-ancestors 'none'"));
     assert.ok(csp.includes("connect-src 'self'"));
-    assert.ok(csp.includes("script-src 'nonce-"));
-    assert.ok(csp.includes("style-src 'nonce-"));
+    assert.ok(csp.includes("script-src 'self'"));
+    assert.ok(csp.includes("style-src 'self'"));
   });
 
   it("X-Frame-Options is DENY", async () => {
