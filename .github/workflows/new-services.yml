@@ -94,4 +94,4 @@ jobs:
             git checkout origin/main -- services/
             cd services
             docker compose -f docker-compose.new-services.yml build --parallel
-            docker compose -f docker-compose.new-services.yml up -d
+            docker compose -f docker-compose.new-services.yml up -d --force-recreate --remove-orphans
