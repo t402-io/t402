@@ -101,15 +101,16 @@ export async function shutdown() {
 function rowToPayment(row, index) {
   const network = row.network || "eip155:1";
   const meta = networkMeta(network);
+  const decimals = (row.metadata && typeof row.metadata === "object" && row.metadata.decimals) ? Number(row.metadata.decimals) : meta.decimals;
   const amountRaw = Number(row.amount || 0);
   return {
     id: `pay-${String(index + 1).padStart(4, "0")}`,
     txHash: row.tx_hash || "",
     network,
     networkLabel: meta.label,
-    token: row.token || meta.token,
+    token: row.token || row.asset || meta.token,
     amount: String(amountRaw),
-    amountFormatted: (amountRaw / 10 ** meta.decimals).toFixed(meta.decimals === 7 ? 2 : 4),
+    amountFormatted: (amountRaw / 10 ** decimals).toFixed(decimals > 6 ? 4 : 4),
     to: row.to_address || "",
     service: row.service || row.resource || (row.metadata && typeof row.metadata === "object" ? (row.metadata.resource || row.metadata.service) : null) || "Payment",
     status: row.status === "confirmed" ? "settled" : (row.status || "settled"),
