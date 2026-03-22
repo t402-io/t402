@@ -6,8 +6,11 @@
 
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const require = createRequire(import.meta.url);
+const { version: VERSION } = require("../package.json");
 
 import {
   getPayments,
@@ -346,7 +349,7 @@ export function registerRoutes(app, opts = {}) {
   // ── Info / Health ──────────────────────────────────────────────
 
   app.get("/api/v1/info", (_req, res) => {
-    res.json({ mode: getMode(), version: "1.2.0" });
+    res.json({ mode: getMode(), version: VERSION });
   });
 
   app.get("/health", (_req, res) => {

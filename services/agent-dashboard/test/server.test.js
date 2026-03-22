@@ -171,7 +171,7 @@ describe("Agent Dashboard API", () => {
     const res = await fetch(`${BASE}/api/v1/info`);
     const data = await res.json();
     assert.strictEqual(data.mode, "demo");
-    assert.strictEqual(data.version, "1.2.0");
+    assert.ok(data.version.match(/^\d+\.\d+\.\d+$/));
   });
 
   it("GET /metrics returns Prometheus format", async () => {
