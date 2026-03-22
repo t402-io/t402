@@ -7,11 +7,11 @@ const MAX_REQUESTS = 100;
 
 const CSP_DIRECTIVES = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://static.cloudflareinsights.com",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com",
   "img-src 'self' data: blob: https:",
-  "connect-src 'self' https://facilitator.t402.io https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.walletconnect.com wss://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.org https://*.tonapi.io https://*.toncenter.com https://*.solana.com https://*.near.org https://*.aptoslabs.com https://*.tezos.com https://*.polkadot.io https://*.cosmos.network https://*.publicnode.com https://*.drpc.org",
+  "connect-src 'self' https://facilitator.t402.io https://cloudflareinsights.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.walletconnect.com wss://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.org https://*.tonapi.io https://*.toncenter.com https://*.solana.com https://*.near.org https://*.aptoslabs.com https://*.tezos.com https://*.polkadot.io https://*.cosmos.network https://*.publicnode.com https://*.drpc.org",
   "frame-src 'self' https://*.walletconnect.com",
   "form-action 'self'",
   "frame-ancestors 'none'",
