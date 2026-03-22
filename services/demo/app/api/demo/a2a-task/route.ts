@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPreferredChain, getAcceptsForChain, getNetwork, getAsset, PAY_TO, DEMO_AMOUNT } from "@/lib/config";
+import { getPreferredChain, getAcceptsForChain, buildRequirementsFromPayload, DEMO_AMOUNT } from "@/lib/config";
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 
@@ -229,15 +229,7 @@ export async function POST(request: NextRequest) {
 
   // Live mode: verify and settle
   const paymentPayload = decodeHeader(paymentHeader);
-  const requirements = {
-    scheme: "exact",
-    network: getNetwork(),
-    amount: taskDef.cost,
-    asset: getAsset(),
-    payTo: PAY_TO,
-    maxTimeoutSeconds: 60,
-    extra: { name: "USDT", version: "2" },
-  };
+  const requirements = buildRequirementsFromPayload(paymentPayload, taskDef.cost);
 
   try {
     const verifyResult = await verifyPayment(paymentPayload, requirements);

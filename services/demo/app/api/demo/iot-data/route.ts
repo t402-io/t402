@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPreferredChain, getAcceptsForChain, getNetwork, getAsset, PAY_TO } from "@/lib/config";
+import { getPreferredChain, getAcceptsForChain, buildRequirementsFromPayload } from "@/lib/config";
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 
@@ -61,15 +61,7 @@ export async function GET(request: NextRequest) {
 
   // Live mode: verify and settle with facilitator
   const paymentPayload = decodeHeader(paymentHeader);
-  const requirements = {
-    scheme: "exact",
-    network: getNetwork(),
-    amount: IOT_AMOUNT,
-    asset: getAsset(),
-    payTo: PAY_TO,
-    maxTimeoutSeconds: 60,
-    extra: { name: "USDT", version: "2" },
-  };
+  const requirements = buildRequirementsFromPayload(paymentPayload, IOT_AMOUNT);
 
   try {
     const verifyResult = await verifyPayment(paymentPayload, requirements);

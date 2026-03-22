@@ -40,13 +40,16 @@ export function getPreferredChain(request: Request): ChainFamily {
  * Create the `accepts` array for a 402 response based on the preferred chain.
  * Returns the preferred chain first, followed by all other chains.
  */
-export function createMultiChainAccepts(amount: string, scheme = "exact") {
+const EXACT_DIRECT_FAMILIES: ChainFamily[] = ["stacks", "near", "aptos", "tezos", "polkadot", "cosmos"];
+
+export function createMultiChainAccepts(amount: string, schemeOverride?: string) {
   const families: ChainFamily[] = [
     "evm", "ton", "tron", "solana", "stacks",
     "near", "aptos", "tezos", "polkadot", "cosmos"
   ];
   return families.map((family) => {
     const config = CHAIN_CONFIGS[family];
+    const scheme = schemeOverride ?? (EXACT_DIRECT_FAMILIES.includes(family) ? "exact-direct" : "exact");
     return {
       scheme,
       network: config.network,
@@ -59,10 +62,45 @@ export function createMultiChainAccepts(amount: string, scheme = "exact") {
 }
 
 /**
- * Create an `accepts` array with the preferred chain first.
+ * Build payment requirements from a decoded payment payload.
+ * Extracts the `network` field from the payload and finds the matching chain config
+ * so that live-mode verify/settle uses the correct network, asset, payTo, and scheme.
  */
-export function getAcceptsForChain(preferredChain: ChainFamily, amount: string, scheme = "exact") {
-  const all = createMultiChainAccepts(amount, scheme);
+export function buildRequirementsFromPayload(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  paymentPayload: any,
+  amount: string,
+  schemeOverride?: string,
+) {
+  const network: string | undefined = paymentPayload?.network;
+  const matchingFamily = network
+    ? (Object.keys(CHAIN_CONFIGS) as ChainFamily[]).find(
+        (f) => CHAIN_CONFIGS[f].network === network,
+      )
+    : undefined;
+
+  const config = matchingFamily ? CHAIN_CONFIGS[matchingFamily] : undefined;
+  const family = matchingFamily ?? "evm";
+  const scheme =
+    schemeOverride ??
+    (EXACT_DIRECT_FAMILIES.includes(family) ? "exact-direct" : "exact");
+
+  return {
+    scheme,
+    network: config?.network ?? getNetwork(),
+    amount,
+    asset: config?.asset ?? getAsset(),
+    payTo: config?.payTo ?? PAY_TO,
+    maxTimeoutSeconds: 60,
+  };
+}
+
+/**
+ * Create an `accepts` array with the preferred chain first.
+ * When no schemeOverride is given, each chain uses its correct scheme automatically.
+ */
+export function getAcceptsForChain(preferredChain: ChainFamily, amount: string, schemeOverride?: string) {
+  const all = createMultiChainAccepts(amount, schemeOverride);
   const preferredIndex = all.findIndex(
     (a) => a.network === CHAIN_CONFIGS[preferredChain].network
   );

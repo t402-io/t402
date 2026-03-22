@@ -151,7 +151,9 @@ export function usePaymentFlow(url: string) {
       let settleResponse: SettleResponse | null = null;
       if (paymentResponseHeader) {
         try {
-          settleResponse = JSON.parse(atob(paymentResponseHeader));
+          const padded = paymentResponseHeader.replace(/-/g, "+").replace(/_/g, "/");
+          const decoded = atob(padded + "=".repeat((4 - (padded.length % 4)) % 4));
+          settleResponse = JSON.parse(decoded);
         } catch {
           // Ignore parse errors
         }

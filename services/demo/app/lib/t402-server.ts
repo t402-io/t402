@@ -6,10 +6,19 @@ const FACILITATOR_TIMEOUT_MS = 30_000;
  * Fetch with a 30-second timeout via AbortController.
  */
 async function facilitatorFetch(url: string, init?: RequestInit): Promise<Response> {
+  const apiKey = process.env.FACILITATOR_API_KEY || "";
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), FACILITATOR_TIMEOUT_MS);
   try {
-    const response = await fetch(url, { ...init, signal: controller.signal });
+    const response = await fetch(url, {
+      ...init,
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+        ...(apiKey ? { "X-API-Key": apiKey } : {}),
+        ...init?.headers,
+      },
+    });
     return response;
   } catch (error: unknown) {
     if (error instanceof DOMException && error.name === "AbortError") {
@@ -34,6 +43,10 @@ export async function verifyPayment(paymentPayload: unknown, paymentRequirements
       paymentRequirements,
     }),
   });
+  if (!response.ok) {
+    const text = await response.text().catch(() => "");
+    throw new Error(`Facilitator returned ${response.status}: ${text}`);
+  }
   return response.json();
 }
 
@@ -50,6 +63,10 @@ export async function settlePayment(paymentPayload: unknown, paymentRequirements
       paymentRequirements,
     }),
   });
+  if (!response.ok) {
+    const text = await response.text().catch(() => "");
+    throw new Error(`Facilitator returned ${response.status}: ${text}`);
+  }
   return response.json();
 }
 

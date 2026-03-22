@@ -4,14 +4,14 @@ import { useState, useEffect } from "react";
 
 interface FacilitatorStatus {
   online: boolean;
-  supportedNetworks: number;
+  supportedKinds: number;
   url: string;
 }
 
 export function useFacilitatorStatus() {
   const [status, setStatus] = useState<FacilitatorStatus>({
     online: false,
-    supportedNetworks: 0,
+    supportedKinds: 0,
     url: "",
   });
   const [loading, setLoading] = useState(true);
@@ -26,7 +26,7 @@ export function useFacilitatorStatus() {
         if (mounted) {
           setStatus({
             online: data.facilitator?.online ?? false,
-            supportedNetworks: data.facilitator?.supportedNetworks ?? 0,
+            supportedKinds: data.facilitator?.supportedKinds ?? 0,
             url: data.facilitator?.url ?? "",
           });
         }

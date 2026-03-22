@@ -4,7 +4,7 @@ import { useFacilitatorStatus } from "@/hooks/useFacilitatorStatus";
 import { Spinner } from "@/components/shared/Spinner";
 
 export function FacilitatorBadge() {
-  const { online, supportedNetworks, loading } = useFacilitatorStatus();
+  const { online, supportedKinds, loading } = useFacilitatorStatus();
 
   if (loading) {
     return (
@@ -22,7 +22,7 @@ export function FacilitatorBadge() {
         style={{ backgroundColor: online ? "var(--color-success)" : "var(--color-error)" }}
       />
       <span style={{ color: online ? "var(--color-success)" : "var(--color-error)" }}>
-        {online ? `Facilitator (${supportedNetworks} networks)` : "Facilitator offline"}
+        {online ? `Facilitator (${supportedKinds} kinds)` : "Facilitator offline"}
       </span>
     </div>
   );

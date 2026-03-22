@@ -24,7 +24,7 @@ export async function GET() {
     facilitator: {
       url: FACILITATOR_URL,
       online: facilitatorOnline,
-      supportedNetworks: supportedCount,
+      supportedKinds: supportedCount,
     },
     demo: {
       network: getNetwork(),

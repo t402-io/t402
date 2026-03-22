@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPreferredChain, getAcceptsForChain, getNetwork, getAsset, PAY_TO } from "@/lib/config";
+import { getPreferredChain, getAcceptsForChain, getNetwork, buildRequirementsFromPayload } from "@/lib/config";
 import { encodeHeader, verifyPayment, settlePayment } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 import {
@@ -105,18 +105,10 @@ export async function POST(request: NextRequest) {
 
   // Live mode: verify and settle with facilitator
   try {
-    const requirements = {
-      scheme: "exact",
-      network: getNetwork(),
-      amount: tool.cost,
-      asset: getAsset(),
-      payTo: PAY_TO,
-      maxTimeoutSeconds: 60,
-      extra: { name: "USDT", version: "2" },
-    };
-
     // Extract payment payload from MCP meta
     const paymentPayload = payment as PaymentMeta;
+
+    const requirements = buildRequirementsFromPayload(paymentPayload.payload, tool.cost);
 
     const verifyResult = await verifyPayment(paymentPayload.payload, requirements);
     if (!verifyResult.isValid) {
@@ -163,7 +155,7 @@ export async function POST(request: NextRequest) {
       createToolResponse(id, result, {
         success: true,
         transaction: settleResult.transaction,
-        network: getNetwork(),
+        network: requirements.network,
         payer: paymentPayload.payload?.authorization?.from as string,
       })
     );
