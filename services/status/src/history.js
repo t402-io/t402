@@ -230,6 +230,10 @@ export function addManualIncident({ serviceId, title, description, severity }) {
   incidents.push(incident);
   if (incidents.length > MAX_INCIDENTS) incidents.splice(0, incidents.length - MAX_INCIDENTS);
   dirty = true;
+  // Notify on manual incident creation
+  if (onStatusChange && serviceId) {
+    onStatusChange({ serviceId, serviceName: title, from: "operational", to: severity || "degraded" });
+  }
   return incident;
 }
 
@@ -246,6 +250,10 @@ export function updateIncident(id, update = {}) {
   if (update.status === "resolved") {
     incident.status = "resolved";
     incident.resolvedAt = new Date().toISOString();
+    // Notify on manual incident resolution
+    if (onStatusChange && incident.serviceId) {
+      onStatusChange({ serviceId: incident.serviceId, serviceName: incident.title, from: incident.severity || "down", to: "operational" });
+    }
   }
   dirty = true;
   return incident;

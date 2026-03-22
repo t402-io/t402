@@ -31,11 +31,11 @@ npm run dev     # http://localhost:3403
 | GET | `/metrics` | Prometheus exposition format metrics |
 | GET | `/health` | Own health check |
 
-## Monitored Services (11)
+## Monitored Services (12)
 
 **Websites**: t402.io, docs.t402.io, demo.t402.io
 **Core**: Facilitator API, Scan2Pay Frontend, Scan2Pay API, Grafana
-**New**: Bazaar, Explorer, Agent Dashboard, Sandbox
+**Platform**: Bazaar, Explorer, Agent Dashboard, Sandbox, Sandbox Upstream
 
 Checks run every 300 seconds (5 minutes). Services require 2 consecutive failures before being marked as down.
 
@@ -67,24 +67,30 @@ src/
   maintenance.js   — Maintenance windows with hot-reload + CRUD
   server.js        — Express routes, HTML pages, badges, RSS, metrics
 test/
-  server.test.js   — 42 tests covering all endpoints and modules
+  server.test.js   — 81 tests covering all endpoints and modules
 ```
 
 ## Features
 
 - **AJAX auto-update**: Status page updates in-place every 30s without page reload
-- **Uptime bars**: 90-day color-coded uptime visualization per service (CSS tooltips)
+- **Uptime bars**: 90-day color-coded visualization with JS tooltips (touch-friendly)
+- **Uptime legend**: Color-coded legend (operational/degraded/down/no data)
+- **Interactive sparkline**: Hover data points to see latency + time, with 24h axis labels
 - **Latency percentiles**: p50/p95/p99 response times on detail pages
 - **Relative timestamps**: Human-friendly "3h ago" dates with full date on hover
-- **Persistence**: Check history and incidents survive restarts (flat-file JSON)
+- **Persistence**: Check history and incidents survive restarts (flat-file JSON, backward-compat)
 - **Performance**: Per-service Map indexing + binary search (~700x faster than v1)
 - **Webhooks**: Discord/Slack/Telegram/generic notifications with cooldown + dedup
-- **Manual incidents**: Create/update incidents via admin API for postmortems
-- **Maintenance windows**: Scheduled maintenance with hot-reload and admin CRUD
+- **Manual incidents**: Create/update incidents via admin API with postmortem timeline
+- **Maintenance windows**: Scheduled maintenance with hot-reload, admin CRUD, date validation
 - **Dependency mapping**: Shows affected services when upstream is down
-- **Badges**: SVG status badges for README embedding
-- **Prometheus**: `/metrics` endpoint for Grafana integration
+- **Staleness detection**: Banner warns when API unreachable for 90+ seconds
+- **Badges**: SVG status badges (green/yellow/red/gray for maintenance)
+- **Prometheus**: `/metrics` endpoint with sanitized labels
 - **RSS**: Incident feed for subscribers
 - **Body validation**: API services verified by response content, not just HTTP status
-- **Security**: HSTS, CSP, XFO, Permissions-Policy, global rate limiting
-- **Empty state**: Shows "Checking Services..." until first check cycle completes
+- **Security**: HSTS, CSP, XFO, Permissions-Policy, timing-safe admin auth, global rate limiting
+- **Accessibility**: WCAG AA contrast, aria-labels on status dots, keyboard-navigable
+- **Mobile responsive**: Hidden latency column, CSS grid stat cards, touch tooltips
+- **Empty state**: Pulsing "Checking all services..." skeleton on startup
+- **Detail page auto-refresh**: Polls status, latency, percentiles, and incidents every 30s

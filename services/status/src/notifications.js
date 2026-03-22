@@ -118,30 +118,35 @@ async function sendWithRetry(url, payload, attempt = 0) {
       await new Promise((r) => setTimeout(r, RETRY_DELAYS[attempt]));
       return sendWithRetry(url, payload, attempt + 1);
     }
-    console.error(`Webhook failed after ${MAX_RETRIES} attempts: ${new URL(url).hostname}`, e.message);
+    try { console.error(`Webhook failed after ${MAX_RETRIES} attempts: ${new URL(url).hostname}`, e.message); }
+    catch { console.error(`Webhook failed after ${MAX_RETRIES} attempts`, e.message); }
   }
 }
 
 export async function notifyStatusChange(event) {
-  if (WEBHOOK_URLS.length === 0) return;
+  try {
+    if (WEBHOOK_URLS.length === 0) return;
 
-  // Per-service cooldown
-  const now = Date.now();
-  const lastTime = lastNotified.get(event.serviceId) || 0;
-  if (now - lastTime < COOLDOWN_MS) return;
+    // Per-service cooldown
+    const now = Date.now();
+    const lastTime = lastNotified.get(event.serviceId) || 0;
+    if (now - lastTime < COOLDOWN_MS) return;
 
-  // Dedup — skip if same status as last notification for this service
-  const lastStatus = lastEvent.get(event.serviceId);
-  if (lastStatus === event.to) return;
+    // Dedup — skip if same status as last notification for this service
+    const lastStatus = lastEvent.get(event.serviceId);
+    if (lastStatus === event.to) return;
 
-  // Update tracking
-  lastNotified.set(event.serviceId, now);
-  lastEvent.set(event.serviceId, event.to);
+    // Update tracking
+    lastNotified.set(event.serviceId, now);
+    lastEvent.set(event.serviceId, event.to);
 
-  const tasks = WEBHOOK_URLS.map((rawUrl) => {
-    const { url, body } = formatPayload(event, rawUrl);
-    return sendWithRetry(url, body);
-  });
-  // Fire and forget — don't block the check cycle
-  Promise.allSettled(tasks).catch(() => {});
+    const tasks = WEBHOOK_URLS.map((rawUrl) => {
+      const { url, body } = formatPayload(event, rawUrl);
+      return sendWithRetry(url, body);
+    });
+    // Fire and forget — don't block the check cycle
+    Promise.allSettled(tasks).catch(() => {});
+  } catch (e) {
+    console.error("Notification error:", e.message);
+  }
 }
