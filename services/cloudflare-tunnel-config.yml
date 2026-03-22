@@ -26,6 +26,10 @@
   - hostname: agents.t402.io
     service: http://localhost:3405
 
+  # T402 Agent Dashboard (singular alias)
+  - hostname: agent.t402.io
+    service: http://localhost:3405
+
   # T402 Sandbox — Testnet Facilitator
   - hostname: sandbox.t402.io
     service: http://localhost:3406
