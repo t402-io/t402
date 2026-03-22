@@ -4,9 +4,6 @@ import Script from "next/script";
 import { ClientProviders } from "./providers/ClientProviders";
 import "./globals.css";
 
-// Force dynamic rendering for all pages - wallet SDKs require browser-only APIs
-export const dynamic = "force-dynamic";
-
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",

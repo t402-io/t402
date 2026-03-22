@@ -147,6 +147,13 @@ function getMockResponse(query: string): string {
   return `This is a demonstration of pay-per-query AI monetization via T402. Your query "${query.slice(0, 50)}" would be processed by Claude and charged 0.001 USDT per request — no API keys, no subscriptions, just pay and use.`;
 }
 
+export async function GET() {
+  return NextResponse.json(
+    { error: "Method not allowed", reason: "Use POST with a JSON body", example: { query: "What is T402?" } },
+    { status: 405 }
+  );
+}
+
 // Support OPTIONS for CORS preflight
 export async function OPTIONS() {
   return new NextResponse(null, {

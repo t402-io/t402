@@ -10,7 +10,7 @@ export type TokenType =
   | "punctuation"
   | "plain";
 
-export type Language = "json" | "typescript" | "python" | "go" | "java" | "http";
+export type Language = "json" | "typescript" | "python" | "go" | "java" | "http" | "bash";
 
 export interface Token {
   text: string;
@@ -99,6 +99,20 @@ const HTTP_RULES: Rule[] = [
   { pattern: /^[{}[\]:,]/, type: "punctuation" },
 ];
 
+const BASH_RULES: Rule[] = [
+  { pattern: /^#.*/, type: "comment" },
+  { pattern: /^(?:curl|echo|export|set)\b/, type: "function" },
+  { pattern: /^-[a-zA-Z]+\b/, type: "keyword" },
+  { pattern: /^--[a-zA-Z][-a-zA-Z]*\b/, type: "keyword" },
+  { pattern: /^"(?:[^"\\]|\\.)*"/, type: "string" },
+  { pattern: /^'(?:[^'\\]|\\.)*'/, type: "string" },
+  { pattern: /^https?:\/\/\S+/, type: "string" },
+  { pattern: /^<[^>]+>/, type: "variable" },
+  { pattern: /^\$\w+/, type: "variable" },
+  { pattern: /^[{}[\]();|&>]/, type: "punctuation" },
+  { pattern: /^\\$/, type: "punctuation" },
+];
+
 const RULES: Record<Language, Rule[]> = {
   json: JSON_RULES,
   typescript: TYPESCRIPT_RULES,
@@ -106,6 +120,7 @@ const RULES: Record<Language, Rule[]> = {
   go: GO_RULES,
   java: JAVA_RULES,
   http: HTTP_RULES,
+  bash: BASH_RULES,
 };
 
 export function tokenize(code: string, language: Language): Token[] {

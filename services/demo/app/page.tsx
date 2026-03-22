@@ -1,17 +1,14 @@
-"use client";
-
 import Link from "next/link";
-import { WalletButton } from "@/components/layout/WalletButton";
-import { ModeToggle } from "@/components/layout/ModeToggle";
-import { FacilitatorBadge } from "@/components/layout/FacilitatorBadge";
+import { HomeHeader } from "@/components/layout/HomeHeader";
 import { ScenarioCard } from "@/components/shared/ScenarioCard";
 import { ChainLogo } from "@/components/shared/ChainLogo";
 import { FlowDiagram } from "@/components/shared/FlowDiagram";
+import { HomeCodeExample } from "@/components/shared/HomeCodeExample";
 import { CHAIN_FAMILIES, CHAIN_CONFIGS } from "@/lib/testnet-config";
 import {
   Brain, FileText, Database, Bot,
   Cpu, Radio, Wand2, ArrowLeftRight, Zap,
-  ArrowRight,
+  ArrowRight, KeyRound, Coins, Globe,
 } from "lucide-react";
 
 const SCENARIOS = [
@@ -98,29 +95,13 @@ const FLOW_STEPS = [
 export default function HomePage() {
   return (
     <div id="main-content" className="min-h-screen">
-      {/* Header */}
-      <header
-        className="sticky top-0 z-50 backdrop-blur-xl"
-        style={{
-          background: "rgba(10, 10, 11, 0.85)",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
-          boxShadow: "0 1px 0 rgba(80, 175, 149, 0.08)",
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-4">
-            <span className="text-base font-bold tracking-tight" style={{ color: "var(--color-brand)" }}>T402</span>
-            <span className="hidden sm:inline text-xs font-medium" style={{ color: "var(--color-text-tertiary)" }}>demo</span>
-            <div className="hidden sm:block">
-              <FacilitatorBadge />
-            </div>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <ModeToggle />
-            <WalletButton />
-          </div>
-        </div>
-      </header>
+      {/* Testnet Banner */}
+      <div className="text-center text-[10px] font-medium py-1.5" style={{ background: "var(--color-warning-dim)", color: "var(--color-warning)" }}>
+        Testnet Demo — No real funds required. Connect any testnet wallet to try.
+      </div>
+
+      {/* Header (client island — wallet/mode/facilitator need browser APIs) */}
+      <HomeHeader />
 
       {/* Hero */}
       <section className="relative min-h-[80vh] flex flex-col items-center justify-center px-4 sm:px-6 py-24 overflow-hidden">
@@ -169,11 +150,51 @@ export default function HomePage() {
           </Link>
           <a
             href="https://docs.t402.io"
+            target="_blank"
+            rel="noopener noreferrer"
             className="px-5 py-3 text-sm hover:text-white transition-colors rounded-xl min-h-[44px] flex items-center"
             style={{ color: "var(--color-muted)", border: "1px solid rgba(255, 255, 255, 0.15)" }}
           >
             Read Docs
           </a>
+        </div>
+      </section>
+
+      {/* Why T402 */}
+      <section
+        className="py-20 px-4 sm:px-6"
+        style={{ background: "var(--color-surface)", borderTop: "1px solid rgba(255, 255, 255, 0.06)" }}
+      >
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-10">
+            <span
+              className="inline-block text-xs font-semibold tracking-[0.2em] uppercase mb-3"
+              style={{ color: "var(--color-brand)" }}
+            >
+              WHY T402
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold">Payment Without Friction</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[
+              { icon: <KeyRound size={18} />, title: "No API Keys", description: "No accounts, no dashboards, no API key management. Any HTTP client can pay." },
+              { icon: <Coins size={18} />, title: "Micropayments", description: "Sub-cent payments with no minimum. Pay 0.001 USDT per API call — impossible with credit cards." },
+              { icon: <Bot size={18} />, title: "Machine-Native", description: "AI agents and IoT devices pay autonomously. No human in the loop required." },
+              { icon: <Globe size={18} />, title: "Any Chain", description: "10 blockchain families, 44 networks. Users pay from whatever wallet they already have." },
+            ].map((card) => (
+              <div
+                key={card.title}
+                className="card-static p-5 sm:p-6"
+                style={{ background: "var(--color-background)" }}
+              >
+                <div className="mb-3" style={{ color: "var(--color-brand)" }}>
+                  {card.icon}
+                </div>
+                <h3 className="text-sm font-semibold mb-2">{card.title}</h3>
+                <p className="text-xs leading-relaxed text-[var(--color-muted)]">{card.description}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -263,27 +284,14 @@ export default function HomePage() {
           <p className="text-sm mb-8 text-[var(--color-muted)]">
             Add T402 payments to any HTTP API with a single middleware.
           </p>
-          <div
-            className="rounded-2xl p-4 sm:p-5 text-left overflow-hidden"
-            style={{ background: "var(--color-background)", border: "1px solid rgba(255, 255, 255, 0.08)" }}
-          >
-            <pre className="text-[11px] sm:text-xs overflow-x-auto font-mono leading-relaxed" style={{ color: "var(--color-code-text)" }}>
-{`import { t402 } from '@t402/express';
-
-app.get('/api/premium', t402({
-  scheme: 'exact',
-  network: 'eip155:8453',
-  amount: '1000',  // 0.001 USDT
-}), (req, res) => {
-  res.json({ data: 'Premium content' });
-});`}
-            </pre>
+          <div className="text-left">
+            <HomeCodeExample />
           </div>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-1">
-            <a href="https://www.npmjs.com/org/t402" className="text-xs hover:opacity-70 transition-opacity px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>npm</a>
-            <a href="https://pypi.org/project/t402" className="text-xs hover:opacity-70 transition-opacity px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>PyPI</a>
-            <a href="https://pkg.go.dev/github.com/t402-io/t402/sdks/go" className="text-xs hover:opacity-70 transition-opacity px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>Go</a>
-            <a href="https://central.sonatype.com/artifact/io.t402/t402" className="text-xs hover:opacity-70 transition-opacity px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>Maven</a>
+            <a href="https://www.npmjs.com/org/t402" target="_blank" rel="noopener noreferrer" className="text-xs hover:opacity-70 transition-opacity px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>npm</a>
+            <a href="https://pypi.org/project/t402" target="_blank" rel="noopener noreferrer" className="text-xs hover:opacity-70 transition-opacity px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>PyPI</a>
+            <a href="https://pkg.go.dev/github.com/t402-io/t402/sdks/go" target="_blank" rel="noopener noreferrer" className="text-xs hover:opacity-70 transition-opacity px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>Go</a>
+            <a href="https://central.sonatype.com/artifact/io.t402/t402" target="_blank" rel="noopener noreferrer" className="text-xs hover:opacity-70 transition-opacity px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>Maven</a>
           </div>
         </div>
       </section>
@@ -300,16 +308,17 @@ app.get('/api/premium', t402({
               <span className="text-xs" style={{ color: "var(--color-text-tertiary)" }}>The Official Payment Protocol for USDT</span>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
-              <a href="https://t402.io" className="text-xs hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>Website</a>
-              <a href="https://docs.t402.io" className="text-xs hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>Docs</a>
-              <a href="https://github.com/t402-io/t402" className="text-xs hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>GitHub</a>
-              <a href="https://facilitator.t402.io" className="text-xs hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>API</a>
+              <a href="https://t402.io" target="_blank" rel="noopener noreferrer" className="text-xs hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>Website</a>
+              <a href="https://docs.t402.io" target="_blank" rel="noopener noreferrer" className="text-xs hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>Docs</a>
+              <a href="https://github.com/t402-io/t402" target="_blank" rel="noopener noreferrer" className="text-xs hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>GitHub</a>
+              <a href="https://facilitator.t402.io" target="_blank" rel="noopener noreferrer" className="text-xs hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>API</a>
             </div>
           </div>
           <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.06)" }} className="pt-6 text-center">
             <p className="text-[10px] tracking-wide" style={{ color: "var(--color-text-tertiary)" }}>
               &copy; {new Date().getFullYear()} T402 Protocol. HTTP-native stablecoin payments.
             </p>
+            <span className="text-[10px] tracking-wide" style={{ color: "var(--color-text-tertiary)" }}>MIT License</span>
           </div>
         </div>
       </footer>

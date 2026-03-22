@@ -1,5 +1,3 @@
-"use client";
-
 import type { ChainFamily } from "@/lib/testnet-config";
 
 const CHAIN_SVGS: Record<ChainFamily, (size: number) => React.ReactNode> = {
