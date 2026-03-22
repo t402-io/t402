@@ -186,4 +186,50 @@ describe("Agent Dashboard API", () => {
     const res = await fetch(`${BASE}/health`);
     assert.ok(res.headers.get("x-request-id"));
   });
+
+  it("X-Request-Id reflects valid incoming header", async () => {
+    const res = await fetch(`${BASE}/health`, { headers: { "X-Request-Id": "test-req-123" } });
+    assert.strictEqual(res.headers.get("x-request-id"), "test-req-123");
+  });
+
+  it("X-Request-Id rejects invalid format and generates new", async () => {
+    const res = await fetch(`${BASE}/health`, { headers: { "X-Request-Id": "<script>alert(1)</script>" } });
+    const id = res.headers.get("x-request-id");
+    assert.ok(id);
+    assert.ok(!id.includes("<script>"), "Should not reflect invalid request ID");
+  });
+
+  it("GET /api/v1/dashboard/:addr returns combined data", async () => {
+    const res = await fetch(`${BASE}/api/v1/dashboard/0xTest`);
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.strictEqual(data.address, "0xTest");
+    assert.ok(data.balances);
+    assert.ok(data.balances.totalUsd);
+    assert.ok(data.budget);
+    assert.ok(data.budget.policy);
+    assert.ok(data.budget.usage);
+    assert.ok(data.stats);
+    assert.ok(data.stats.totalPayments > 0);
+    assert.ok(data.payments);
+    assert.ok(data.payments.items.length > 0);
+    assert.strictEqual(typeof data.payments.total, "number");
+    assert.ok(data.alerts);
+    assert.strictEqual(typeof data.alerts.count, "number");
+    assert.strictEqual(data.mode, "demo");
+  });
+
+  it("GET /api/v1/dashboard with invalid address returns 400", async () => {
+    const res = await fetch(`${BASE}/api/v1/dashboard/<script>`);
+    assert.strictEqual(res.status, 400);
+  });
+
+  it("GET /api/v1/dashboard respects days param", async () => {
+    const r1 = await fetch(`${BASE}/api/v1/dashboard/0xTest?days=1`);
+    const d1 = await r1.json();
+    assert.strictEqual(d1.stats.period, "1d");
+    const r2 = await fetch(`${BASE}/api/v1/dashboard/0xTest?days=30`);
+    const d2 = await r2.json();
+    assert.strictEqual(d2.stats.period, "30d");
+  });
 });

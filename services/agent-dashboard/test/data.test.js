@@ -1,7 +1,7 @@
 /**
  * Unit tests for data.js — deterministic data generators.
  */
-import { describe, it } from "node:test";
+import { describe, it, before } from "node:test";
 import assert from "node:assert";
 import {
   generatePaymentHistory,
@@ -275,5 +275,89 @@ describe("exportPaymentsCsv", () => {
     const a = exportPaymentsCsv("0xCsvDet");
     const b = exportPaymentsCsv("0xCsvDet");
     assert.strictEqual(a, b);
+  });
+});
+
+describe("csvField (from utils.js)", () => {
+  // Import directly to test edge cases
+  let csvField;
+  before(async () => {
+    const mod = await import("../src/utils.js");
+    csvField = mod.csvField;
+  });
+
+  it("returns plain string unchanged", () => {
+    assert.strictEqual(csvField("hello"), "hello");
+  });
+
+  it("quotes strings with commas", () => {
+    assert.strictEqual(csvField("a,b"), '"a,b"');
+  });
+
+  it("escapes double quotes inside", () => {
+    assert.strictEqual(csvField('say "hi"'), '"say ""hi"""');
+  });
+
+  it("quotes strings with newlines", () => {
+    assert.ok(csvField("line1\nline2").startsWith('"'));
+  });
+
+  it("guards formula injection with = prefix", () => {
+    const result = csvField("=SUM(A1:A10)");
+    assert.ok(!result.startsWith("="), "Should not start with =");
+    assert.ok(result.includes("'="), "Should prefix with single quote");
+  });
+
+  it("guards formula injection with + prefix", () => {
+    assert.ok(csvField("+cmd").includes("'+"));
+  });
+
+  it("guards formula injection with - prefix", () => {
+    assert.ok(csvField("-1+1").includes("'-"));
+  });
+
+  it("guards formula injection with @ prefix", () => {
+    assert.ok(csvField("@SUM").includes("'@"));
+  });
+
+  it("handles empty string", () => {
+    assert.strictEqual(csvField(""), "");
+  });
+
+  it("handles null/undefined via String coercion", () => {
+    assert.strictEqual(csvField(null), "null");
+    assert.strictEqual(csvField(undefined), "undefined");
+  });
+
+  it("handles numbers", () => {
+    assert.strictEqual(csvField(42), "42");
+  });
+});
+
+describe("escapeHtml (from utils.js)", () => {
+  let escapeHtml;
+  before(async () => {
+    const mod = await import("../src/utils.js");
+    escapeHtml = mod.escapeHtml;
+  });
+
+  it("escapes all five HTML special chars", () => {
+    assert.strictEqual(escapeHtml('&<>"\''), "&amp;&lt;&gt;&quot;&#39;");
+  });
+
+  it("handles null input", () => {
+    assert.strictEqual(escapeHtml(null), "");
+  });
+
+  it("handles undefined input", () => {
+    assert.strictEqual(escapeHtml(undefined), "");
+  });
+
+  it("handles numeric input", () => {
+    assert.strictEqual(escapeHtml(42), "42");
+  });
+
+  it("returns safe string unchanged", () => {
+    assert.strictEqual(escapeHtml("hello world"), "hello world");
   });
 });

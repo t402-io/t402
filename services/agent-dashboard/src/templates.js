@@ -93,6 +93,20 @@ footer{color:#6b7280;font-size:.8rem;margin-top:2rem;padding-top:1rem;border-top
   input{max-width:100%}
   .form-row{flex-direction:column;align-items:stretch}
 }
+/* Error banner */
+.error-banner{display:none;padding:.75rem 1rem;border-radius:8px;background:#450a0a;border:1px solid #EF4444;color:#FCA5A5;font-size:.9rem;margin:1rem 0}
+.error-banner.visible{display:block}
+
+/* Pagination */
+.pagination{display:flex;align-items:center;justify-content:center;gap:1rem;margin-top:1rem}
+.pagination .btn:disabled{opacity:.4;cursor:default}
+.page-info{color:#9ca3af;font-size:.85rem}
+
+/* Filter bar */
+.filter-bar{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;margin-bottom:.5rem}
+.filter-bar select{background:#111827;border:1px solid #374151;color:#e5e7eb;padding:.4rem .75rem;border-radius:6px;font-size:.85rem;font-family:inherit}
+.filter-bar select:focus{outline:none;border-color:#50AF95}
+
 @media(max-width:400px){
   .cards{grid-template-columns:1fr}
 }`;
@@ -104,9 +118,42 @@ function clientScript(address) {
 (function() {
   var addr = ${JSON.stringify(address).replace(/</g, "\\u003c")};
   var currentDays = 7;
+  var currentOffset = 0;
+  var currentNetwork = "";
+  var currentTotal = 0;
+  var PAGE_SIZE = 15;
   var sortCol = -1;
   var sortAsc = true;
   var refreshTimer = null;
+
+  // ── Explorer URLs by network prefix ─────────────────────────────
+  var explorers = {
+    "eip155:1": "https://etherscan.io/tx/",
+    "eip155:8453": "https://basescan.org/tx/",
+    "eip155:42161": "https://arbiscan.io/tx/",
+    "eip155:137": "https://polygonscan.com/tx/",
+    "eip155:10": "https://optimistic.etherscan.io/tx/",
+    "eip155:56": "https://bscscan.com/tx/",
+    "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp": "https://solscan.io/tx/",
+    "ton:mainnet": "https://tonviewer.com/transaction/",
+    "stellar:pubnet": "https://stellarchain.io/tx/",
+    "tron:mainnet": "https://tronscan.org/#/transaction/"
+  };
+
+  function explorerLink(network, txHash) {
+    var base = explorers[network];
+    if (base && txHash) return '<a href="' + esc(base + txHash) + '" target="_blank" rel="noopener">' + esc(txHash.slice(0, 10)) + '…</a>';
+    return esc(txHash || "");
+  }
+
+  // ── Error banner ────────────────────────────────────────────────
+  function showError(msg) {
+    var banner = document.getElementById("error-banner");
+    if (!banner) return;
+    banner.textContent = msg || "Data refresh failed — showing last known data";
+    banner.classList.add("visible");
+    setTimeout(function() { banner.classList.remove("visible"); }, 10000);
+  }
 
   // ── Auto-refresh every 60s ──────────────────────────────────────
   function startAutoRefresh() {
@@ -116,14 +163,16 @@ function clientScript(address) {
   function refreshData() {
     var spinner = document.getElementById("refresh-spinner");
     if (spinner) spinner.style.display = "inline-block";
+    var netParam = currentNetwork ? "&network=" + encodeURIComponent(currentNetwork) : "";
     Promise.all([
       fetch("/api/v1/stats/" + encodeURIComponent(addr) + "?days=" + currentDays).then(function(r){return r.json();}),
-      fetch("/api/v1/payments?address=" + encodeURIComponent(addr) + "&days=" + currentDays + "&limit=15").then(function(r){return r.json();}),
+      fetch("/api/v1/payments?address=" + encodeURIComponent(addr) + "&days=" + currentDays + "&limit=" + PAGE_SIZE + "&offset=" + currentOffset + netParam).then(function(r){return r.json();}),
       fetch("/api/v1/balances/" + encodeURIComponent(addr)).then(function(r){return r.json();}),
       fetch("/api/v1/budget/" + encodeURIComponent(addr)).then(function(r){return r.json();}),
       fetch("/api/v1/alerts/" + encodeURIComponent(addr)).then(function(r){return r.json();})
     ]).then(function(results) {
       var stats = results[0], payData = results[1], balData = results[2], budgetData = results[3], alertData = results[4];
+      document.getElementById("error-banner")?.classList.remove("visible");
       // Update summary cards
       var cards = document.querySelectorAll("[data-card]");
       cards.forEach(function(el) {
@@ -133,18 +182,27 @@ function clientScript(address) {
         if (key === "spent") el.textContent = "$" + (stats.totalSpentUsd || "--");
         if (key === "avg") el.textContent = "$" + (stats.avgPaymentUsd || "--");
       });
+      // Update dynamic period labels
+      document.querySelectorAll("[data-period-label]").forEach(function(el) {
+        el.textContent = el.getAttribute("data-period-label").replace("7d", currentDays + "d");
+      });
+      // Update pagination state
+      currentTotal = payData.total || 0;
+      updatePagination();
       // Update payments table body
       var tbody = document.getElementById("payments-tbody");
       if (tbody && payData.payments) {
         tbody.innerHTML = payData.payments.map(function(p) {
           var label = esc(p.networkLabel || p.network);
           var si = p.status === "settled" ? "\\u2713 " : p.status === "pending" ? "\\u231B " : p.status === "failed" ? "\\u2717 " : "";
-          return "<tr><td>" + esc(p.service) + "</td><td>$" + esc(p.amountFormatted) + " " + esc(p.token) + "</td><td>" + label + "</td><td class=\\"status-" + esc(p.status) + "\\">" + esc(si + p.status) + "</td><td>" + esc(timeAgoClient(p.timestamp)) + "</td></tr>";
+          var txLink = explorerLink(p.network, p.txHash);
+          return "<tr><td>" + esc(p.service) + "</td><td>$" + esc(p.amountFormatted) + " " + esc(p.token) + "</td><td>" + label + "</td><td class=\\"status-" + esc(p.status) + "\\">" + esc(si + p.status) + "</td><td>" + txLink + "</td><td>" + esc(timeAgoClient(p.timestamp)) + "</td></tr>";
         }).join("");
       }
       if (spinner) spinner.style.display = "none";
-    }).catch(function() {
+    }).catch(function(err) {
       if (spinner) spinner.style.display = "none";
+      showError();
     });
   }
 
@@ -188,6 +246,40 @@ function clientScript(address) {
       });
       rows.forEach(function(r){tbody.appendChild(r);});
     });
+  });
+
+  // ── Pagination ──────────────────────────────────────────────────
+  function updatePagination() {
+    var pageInfo = document.getElementById("page-info");
+    var prevBtn = document.getElementById("prev-btn");
+    var nextBtn = document.getElementById("next-btn");
+    if (!pageInfo) return;
+    var page = Math.floor(currentOffset / PAGE_SIZE) + 1;
+    var totalPages = Math.max(1, Math.ceil(currentTotal / PAGE_SIZE));
+    pageInfo.textContent = "Page " + page + " of " + totalPages;
+    if (prevBtn) prevBtn.disabled = currentOffset === 0;
+    if (nextBtn) nextBtn.disabled = currentOffset + PAGE_SIZE >= currentTotal;
+  }
+
+  var prevBtn = document.getElementById("prev-btn");
+  if (prevBtn) prevBtn.addEventListener("click", function() {
+    currentOffset = Math.max(0, currentOffset - PAGE_SIZE);
+    refreshData();
+  });
+  var nextBtn = document.getElementById("next-btn");
+  if (nextBtn) nextBtn.addEventListener("click", function() {
+    if (currentOffset + PAGE_SIZE < currentTotal) {
+      currentOffset += PAGE_SIZE;
+      refreshData();
+    }
+  });
+
+  // ── Network filter ─────────────────────────────────────────────
+  var netFilter = document.getElementById("network-filter");
+  if (netFilter) netFilter.addEventListener("change", function() {
+    currentNetwork = netFilter.value;
+    currentOffset = 0;
+    refreshData();
   });
 
   // ── Utilities ───────────────────────────────────────────────────
@@ -304,12 +396,30 @@ export function renderDashboard(data) {
   }
 
   // ── Payment table rows ───────────────────────────────────────────
+  // Explorer URL lookup for server-rendered tx links
+  const explorerUrls = {
+    "eip155:1": "https://etherscan.io/tx/",
+    "eip155:8453": "https://basescan.org/tx/",
+    "eip155:42161": "https://arbiscan.io/tx/",
+    "eip155:137": "https://polygonscan.com/tx/",
+    "eip155:10": "https://optimistic.etherscan.io/tx/",
+    "eip155:56": "https://bscscan.com/tx/",
+    "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp": "https://solscan.io/tx/",
+    "ton:mainnet": "https://tonviewer.com/transaction/",
+    "stellar:pubnet": "https://stellarchain.io/tx/",
+    "tron:mainnet": "https://tronscan.org/#/transaction/",
+  };
+
   const paymentRows = payments
     .map((p) => {
       const ago = timeAgo(new Date(p.timestamp));
       const netShort = escapeHtml(p.networkLabel || p.network);
       const indicator = statusIndicator(p.status);
-      return `<tr><td>${escapeHtml(p.service)}</td><td>$${escapeHtml(p.amountFormatted)} ${escapeHtml(p.token)}</td><td>${netShort}</td><td class="status-${escapeHtml(p.status)}">${escapeHtml(indicator)}</td><td>${escapeHtml(ago)}</td></tr>`;
+      const explorerBase = explorerUrls[p.network];
+      const txCell = explorerBase && p.txHash
+        ? `<a href="${escapeHtml(explorerBase + p.txHash)}" target="_blank" rel="noopener"><code>${escapeHtml(p.txHash.slice(0, 10))}…</code></a>`
+        : `<code>${escapeHtml((p.txHash || "").slice(0, 10))}…</code>`;
+      return `<tr><td>${escapeHtml(p.service)}</td><td>$${escapeHtml(p.amountFormatted)} ${escapeHtml(p.token)}</td><td>${netShort}</td><td class="status-${escapeHtml(p.status)}">${escapeHtml(indicator)}</td><td>${txCell}</td><td>${escapeHtml(ago)}</td></tr>`;
     })
     .join("\n");
 
@@ -356,6 +466,7 @@ export function renderDashboard(data) {
   </header>
 
   <main>
+    <div id="error-banner" class="error-banner"></div>
     ${alertsHtml}
 
     <div class="range-bar">
@@ -367,8 +478,8 @@ export function renderDashboard(data) {
 
     <div class="cards">
       <div class="card"><div class="card-value" data-card="balance">$${totalBal}</div><div class="card-label">Total Balance</div></div>
-      <div class="card"><div class="card-value" data-card="payments">${totalPay}</div><div class="card-label">Payments (7d)</div></div>
-      <div class="card"><div class="card-value" data-card="spent">$${totalSpent}</div><div class="card-label">Spent (7d)</div></div>
+      <div class="card"><div class="card-value" data-card="payments">${totalPay}</div><div class="card-label" data-period-label="Payments (7d)">Payments (7d)</div></div>
+      <div class="card"><div class="card-value" data-card="spent">$${totalSpent}</div><div class="card-label" data-period-label="Spent (7d)">Spent (7d)</div></div>
       <div class="card"><div class="card-value" data-card="avg">$${avgPay}</div><div class="card-label">Avg Payment</div></div>
     </div>
 
@@ -401,6 +512,21 @@ export function renderDashboard(data) {
     </div>
 
     <h2>Recent Payments</h2>
+    <div class="filter-bar">
+      <select id="network-filter" aria-label="Filter by network">
+        <option value="">All Networks</option>
+        <option value="eip155:1">Ethereum</option>
+        <option value="eip155:8453">Base</option>
+        <option value="eip155:42161">Arbitrum</option>
+        <option value="eip155:137">Polygon</option>
+        <option value="eip155:10">Optimism</option>
+        <option value="eip155:56">BNB Chain</option>
+        <option value="solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp">Solana</option>
+        <option value="ton:mainnet">TON</option>
+        <option value="stellar:pubnet">Stellar</option>
+        <option value="tron:mainnet">TRON</option>
+      </select>
+    </div>
     <div style="overflow-x:auto">
     <table>
       <thead>
@@ -409,13 +535,19 @@ export function renderDashboard(data) {
           <th><button class="sort-btn" data-col="1" type="button">Amount <span class="sort-arrow"></span></button></th>
           <th><button class="sort-btn" data-col="2" type="button">Network <span class="sort-arrow"></span></button></th>
           <th><button class="sort-btn" data-col="3" type="button">Status <span class="sort-arrow"></span></button></th>
-          <th><button class="sort-btn" data-col="4" type="button">Time <span class="sort-arrow"></span></button></th>
+          <th>Tx</th>
+          <th><button class="sort-btn" data-col="5" type="button">Time <span class="sort-arrow"></span></button></th>
         </tr>
       </thead>
       <tbody id="payments-tbody">
-        ${paymentRows || '<tr><td colspan="5" style="color:#6b7280">No data</td></tr>'}
+        ${paymentRows || '<tr><td colspan="6" style="color:#6b7280">No data</td></tr>'}
       </tbody>
     </table>
+    </div>
+    <div class="pagination">
+      <button class="btn" id="prev-btn" type="button" disabled>← Prev</button>
+      <span class="page-info" id="page-info">Page 1</span>
+      <button class="btn" id="next-btn" type="button">Next →</button>
     </div>
 
     <div class="toolbar">

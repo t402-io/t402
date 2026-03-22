@@ -182,6 +182,38 @@ export function registerRoutes(app, opts = {}) {
     }
   });
 
+  // ── Combined dashboard endpoint (single call for all data) ────
+  app.get("/api/v1/dashboard/:address", async (req, res, next) => {
+    try {
+      if (!isValidAddress(req.params.address)) {
+        return res.status(400).json({ error: "invalid address format" });
+      }
+      const address = req.params.address;
+      const days = clampInt(req.query.days, 1, 365, 7);
+
+      const [balData, budget, stats, { payments, total }, alerts] = await Promise.all([
+        getBalances(address),
+        getBudget(address),
+        getStats(address, days),
+        getPayments(address, { days, limit: 15 }),
+        getAlerts(address),
+      ]);
+
+      res.set("Cache-Control", cacheHeader());
+      res.json({
+        address,
+        mode: getMode(),
+        balances: balData,
+        budget,
+        stats,
+        payments: { items: payments, total },
+        alerts: { items: alerts, count: alerts.length },
+      });
+    } catch (err) {
+      next(err);
+    }
+  });
+
   // ── Info / Health ──────────────────────────────────────────────
 
   app.get("/api/v1/info", (_req, res) => {
