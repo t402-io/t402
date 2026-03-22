@@ -709,3 +709,114 @@ describe("GET /metrics", () => {
     assert.strictEqual(after.totalRequests, before.totalRequests, "/metrics should not increment totalRequests");
   });
 });
+
+describe("POST /webhook/test", () => {
+  it("rejects missing url", async () => {
+    const res = await fetch(`${BASE}/webhook/test`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    assert.strictEqual(res.status, 400);
+    const data = await res.json();
+    assert.ok(data.error.includes("url"));
+  });
+
+  it("rejects invalid url format", async () => {
+    const res = await fetch(`${BASE}/webhook/test`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: "not-a-url" }),
+    });
+    assert.strictEqual(res.status, 400);
+    const data = await res.json();
+    assert.ok(data.error.includes("Invalid"));
+  });
+
+  it("rejects non-HTTPS url for non-localhost", async () => {
+    const res = await fetch(`${BASE}/webhook/test`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: "http://example.com/webhook" }),
+    });
+    assert.strictEqual(res.status, 400);
+    const data = await res.json();
+    assert.ok(data.error.includes("HTTPS"));
+  });
+
+  it("rejects invalid event type", async () => {
+    const res = await fetch(`${BASE}/webhook/test`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: "http://localhost:9999/hook", event: "invalid.event" }),
+    });
+    assert.strictEqual(res.status, 400);
+    const data = await res.json();
+    assert.ok(data.error.includes("Invalid event"));
+  });
+
+  it("returns 502 when target is unreachable", async () => {
+    const res = await fetch(`${BASE}/webhook/test`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: "http://localhost:19999/hook", event: "verification.completed" }),
+    });
+    assert.strictEqual(res.status, 502);
+    const data = await res.json();
+    assert.strictEqual(data.delivered, false);
+    assert.ok(data.callbackId);
+    assert.strictEqual(data.event, "verification.completed");
+    assert.strictEqual(data.sandbox, true);
+  });
+
+  it("delivers to a local HTTP server", async () => {
+    // Start a tiny HTTP server to receive the webhook
+    const { createServer } = await import("node:http");
+    let receivedBody = null;
+    let receivedHeaders = {};
+    const hookServer = createServer((req, res) => {
+      let body = "";
+      req.on("data", c => body += c);
+      req.on("end", () => {
+        receivedBody = JSON.parse(body);
+        receivedHeaders = req.headers;
+        res.writeHead(200);
+        res.end("ok");
+      });
+    });
+    await new Promise(resolve => hookServer.listen(0, resolve));
+    const hookPort = hookServer.address().port;
+
+    try {
+      const res = await fetch(`${BASE}/webhook/test`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: `http://localhost:${hookPort}/hook`,
+          event: "settlement.completed",
+        }),
+      });
+      assert.strictEqual(res.status, 200);
+      const data = await res.json();
+      assert.strictEqual(data.delivered, true);
+      assert.strictEqual(data.event, "settlement.completed");
+      assert.ok(data.callbackId);
+      assert.ok(data.signatureSecret);
+      assert.strictEqual(data.targetStatus, 200);
+
+      // Verify the webhook was actually received
+      assert.ok(receivedBody);
+      assert.strictEqual(receivedBody.event, "settlement.completed");
+      assert.strictEqual(receivedBody.sandbox, true);
+      assert.ok(receivedBody.data.success);
+      assert.ok(receivedBody.data.transaction);
+
+      // Verify signature headers
+      assert.ok(receivedHeaders["x-t402-signature"]);
+      assert.ok(receivedHeaders["x-t402-event"]);
+      assert.ok(receivedHeaders["x-t402-delivery"]);
+    } finally {
+      hookServer.close();
+    }
+  });
+});

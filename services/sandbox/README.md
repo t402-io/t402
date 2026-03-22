@@ -61,6 +61,7 @@ t402:
 | `GET` | `/playground` | Interactive API playground |
 | `POST` | `/verify` | Verify payment signature |
 | `POST` | `/settle` | Settle payment on-chain |
+| `POST` | `/webhook/test` | Test webhook delivery to your endpoint |
 
 ## Rate Limits
 

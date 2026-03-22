@@ -156,6 +156,43 @@ Grafana runs as part of the Facilitator compose stack (not separately).
   - Sandbox connects to the facilitator via `host.docker.internal:8080`
   - Bazaar, Status, and Explorer use named volumes (`bazaar-data`, `status-data`, `explorer-data`) for persistence
 
+### Sandbox (sandbox.t402.io)
+
+- **Location**: `services/sandbox/`
+- **Port**: 3406
+- **Playground**: https://sandbox.t402.io/playground
+- **Health checks**:
+  ```bash
+  curl -s localhost:3406/health   # liveness
+  curl -s localhost:3406/ready    # readiness (checks upstream facilitator connectivity)
+  ```
+- **Metrics**: `curl -s localhost:3406/metrics` (Prometheus format — request counts, latency histograms, upstream errors)
+- **Environment variables**:
+  | Variable | Default | Description |
+  |----------|---------|-------------|
+  | `PORT` | `3406` | Server listen port |
+  | `FACILITATOR_URL` | `http://host.docker.internal:8080` | Upstream facilitator endpoint |
+  | `FACILITATOR_API_KEY` | (none) | API key for upstream facilitator — **must be set** or `/verify` and `/settle` return 401 from upstream (sandbox logs a warning on startup if missing) |
+  | `RATE_LIMIT_PER_MINUTE` | `100` | Per-IP rate limit |
+  | `TRUST_CF_HEADER` | `true` | Use `CF-Connecting-IP` header for rate limiting (set `true` behind Cloudflare Tunnel) |
+- **Production mode** (part of the new-services stack):
+  ```bash
+  cd /home/doge/github/t402-main/services
+  docker compose -f docker-compose.new-services.yml build sandbox
+  docker compose -f docker-compose.new-services.yml up -d --no-deps sandbox
+  ```
+  Uses the production facilitator at `host.docker.internal:8080`. Set `FACILITATOR_API_KEY` in `.env`.
+- **Standalone mode** (bundles a testnet facilitator for local development):
+  ```bash
+  cd services/sandbox && docker compose up -d
+  ```
+  Starts both the sandbox and a testnet-only facilitator container. Requires `EVM_PRIVATE_KEY` in `.env` for the testnet wallet.
+- **Gotchas**:
+  - `FACILITATOR_API_KEY` must be set in `.env` or the sandbox will log a startup warning and all `/verify`, `/settle` calls will return 401 from the upstream facilitator
+  - In production mode, sandbox reaches the facilitator via `host.docker.internal:8080` (Docker `extra_hosts` mapping)
+  - Logs are collected automatically by Promtail (Docker SD auto-discovers all compose containers)
+  - Metrics are scraped by Prometheus via `host.docker.internal:3406`
+
 ## Infrastructure
 
 ### Cloudflare Tunnel
