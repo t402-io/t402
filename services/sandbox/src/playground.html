@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>T402 Sandbox — API Playground</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0a0a0b;color:#e5e7eb;min-height:100vh}
+a{color:#50AF95;text-decoration:none}
+a:hover{text-decoration:underline}
+
+.header{padding:1.5rem 2rem;border-bottom:1px solid #1f2937;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.header h1{color:#50AF95;font-size:1.4rem;display:flex;align-items:center;gap:.5rem}
+.badge{display:inline-block;background:#065f46;color:#6ee7b7;padding:.15em .5em;border-radius:4px;font-size:.7rem;font-weight:600}
+.header-links{display:flex;gap:1rem;font-size:.85rem}
+
+.container{max-width:1280px;margin:0 auto;padding:1.5rem}
+
+/* Quick links bar */
+.quick-bar{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.quick-btn{padding:.4rem .8rem;background:#1f2937;color:#9ca3af;border:1px solid #374151;border-radius:6px;cursor:pointer;font-size:.8rem;font-family:inherit;transition:all .15s}
+.quick-btn:hover{background:#374151;color:#e5e7eb}
+
+/* Controls row */
+.controls{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem}
+.controls label{color:#9ca3af;font-size:.8rem}
+.controls select{background:#1f2937;color:#e5e7eb;border:1px solid #374151;border-radius:6px;padding:.4rem .6rem;font-size:.85rem;font-family:inherit;cursor:pointer}
+.controls select:focus{outline:none;border-color:#50AF95}
+
+/* Endpoint tabs */
+.endpoint-tabs{display:flex;gap:0;margin-bottom:0}
+.ep-tab{padding:.5rem 1.2rem;background:#1f2937;color:#9ca3af;cursor:pointer;font-size:.85rem;font-weight:500;border:1px solid #374151;border-bottom:none;transition:all .15s}
+.ep-tab:first-child{border-radius:8px 0 0 0}
+.ep-tab:last-child{border-radius:0 8px 0 0}
+.ep-tab.active{background:#111827;color:#50AF95;border-bottom-color:#111827}
+.ep-tab:hover:not(.active){background:#283040}
+
+/* Main panels */
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid #374151;border-radius:0 8px 8px 8px;overflow:hidden;min-height:400px}
+@media(max-width:768px){.panels{grid-template-columns:1fr;min-height:auto}}
+
+.panel{display:flex;flex-direction:column}
+.panel-header{display:flex;justify-content:space-between;align-items:center;padding:.6rem 1rem;background:#111827;border-bottom:1px solid #1f2937}
+.panel-title{color:#9ca3af;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.panel-actions{display:flex;gap:.4rem}
+.panel-btn{padding:.25rem .6rem;background:#1f2937;color:#9ca3af;border:1px solid #374151;border-radius:4px;cursor:pointer;font-size:.75rem;font-family:inherit;transition:all .15s}
+.panel-btn:hover{background:#374151;color:#e5e7eb}
+.panel-btn.send{background:#065f46;color:#6ee7b7;border-color:#065f46}
+.panel-btn.send:hover{background:#047857}
+.panel-btn.send:disabled{opacity:.5;cursor:not-allowed}
+
+.panel:first-child{border-right:1px solid #374151}
+@media(max-width:768px){.panel:first-child{border-right:none;border-bottom:1px solid #374151}}
+
+textarea{width:100%;flex:1;background:#0a0a0b;color:#e5e7eb;border:none;padding:1rem;font-family:'SF Mono',SFMono-Regular,Consolas,'Liberation Mono',Menlo,monospace;font-size:.82rem;line-height:1.6;resize:none;outline:none;min-height:300px}
+textarea::placeholder{color:#4b5563}
+
+.response-area{flex:1;overflow:auto;padding:1rem;font-family:'SF Mono',SFMono-Regular,Consolas,'Liberation Mono',Menlo,monospace;font-size:.82rem;line-height:1.6;white-space:pre-wrap;word-break:break-word;background:#0a0a0b;min-height:300px}
+
+/* Status badge */
+.status-badge{display:inline-block;padding:.15em .5em;border-radius:4px;font-size:.75rem;font-weight:600;font-family:'SF Mono',monospace}
+.status-2xx{background:#065f46;color:#6ee7b7}
+.status-4xx{background:#78350f;color:#fbbf24}
+.status-5xx{background:#7f1d1d;color:#fca5a5}
+
+/* Rate limit bar */
+.rate-bar{display:flex;align-items:center;gap:.75rem;margin-top:1rem;padding:.6rem 1rem;background:#111827;border:1px solid #1f2937;border-radius:6px;font-size:.8rem;color:#9ca3af}
+.rate-bar .label{font-weight:500}
+.rate-bar .value{color:#e5e7eb}
+.rate-meter{flex:1;max-width:200px;height:6px;background:#1f2937;border-radius:3px;overflow:hidden}
+.rate-meter-fill{height:100%;background:#50AF95;border-radius:3px;transition:width .3s}
+.rate-meter-fill.low{background:#f59e0b}
+.rate-meter-fill.critical{background:#ef4444}
+
+/* Headers display */
+.headers-toggle{cursor:pointer;color:#50AF95;font-size:.75rem;padding:.2rem 0;user-select:none}
+.headers-toggle:hover{text-decoration:underline}
+.headers-list{display:none;margin-top:.5rem;padding:.5rem;background:#111827;border-radius:4px;font-size:.75rem;line-height:1.6}
+.headers-list.show{display:block}
+.header-key{color:#50AF95}
+.header-val{color:#e5e7eb}
+
+/* Loading spinner */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid #374151;border-top-color:#50AF95;border-radius:50%;animation:spin .6s linear infinite;margin-right:.4rem;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Toast */
+.toast{position:fixed;bottom:2rem;right:2rem;background:#1f2937;color:#e5e7eb;padding:.6rem 1rem;border-radius:6px;font-size:.85rem;border:1px solid #374151;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;z-index:100}
+.toast.show{opacity:1;transform:translateY(0)}
+
+.muted{color:#9ca3af}
+.method-badge{display:inline-block;padding:.1em .4em;border-radius:3px;font-size:.7rem;font-weight:700;font-family:monospace;margin-right:.3rem}
+.method-get{background:#1e3a5f;color:#93c5fd}
+.method-post{background:#3b1f2b;color:#f9a8d4}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1><a href="/" style="color:inherit;text-decoration:none">T402 Sandbox</a> <span style="color:#e5e7eb;font-weight:300;font-size:1rem">/ Playground</span> <span class="badge">TESTNET</span></h1>
+  <div class="header-links">
+    <a href="/">Home</a>
+    <a href="https://docs.t402.io">Docs</a>
+    <a href="https://github.com/t402-io/t402">GitHub</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Quick Links -->
+  <div class="quick-bar">
+    <span style="color:#9ca3af;font-size:.8rem;padding:.4rem 0">Quick:</span>
+    <button class="quick-btn" onclick="quickFetch('/health')"><span class="method-badge method-get">GET</span>/health</button>
+    <button class="quick-btn" onclick="quickFetch('/ready')"><span class="method-badge method-get">GET</span>/ready</button>
+    <button class="quick-btn" onclick="quickFetch('/supported')"><span class="method-badge method-get">GET</span>/supported</button>
+    <button class="quick-btn" onclick="quickFetch('/faucets')"><span class="method-badge method-get">GET</span>/faucets</button>
+    <button class="quick-btn" onclick="quickFetch('/examples')"><span class="method-badge method-get">GET</span>/examples</button>
+    <button class="quick-btn" onclick="quickFetch('/usage')"><span class="method-badge method-get">GET</span>/usage</button>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <label>Network:</label>
+    <select id="networkSelect" onchange="onNetworkChange()">
+      <option value="eip155:84532">Base Sepolia (eip155:84532)</option>
+      <option value="eip155:11155111">Ethereum Sepolia (eip155:11155111)</option>
+      <option value="eip155:421614">Arbitrum Sepolia (eip155:421614)</option>
+      <option value="solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1">Solana Devnet</option>
+      <option value="ton:testnet">TON Testnet</option>
+      <option value="tron:0x94a9059e">TRON Nile</option>
+      <option value="stellar:testnet">Stellar Testnet</option>
+    </select>
+  </div>
+
+  <!-- Endpoint Tabs -->
+  <div class="endpoint-tabs">
+    <div class="ep-tab active" onclick="switchEndpoint('supported')">/supported</div>
+    <div class="ep-tab" onclick="switchEndpoint('verify')">/verify</div>
+    <div class="ep-tab" onclick="switchEndpoint('settle')">/settle</div>
+  </div>
+
+  <!-- Panels -->
+  <div class="panels">
+    <!-- Request Panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title" id="requestTitle">Request</span>
+        <div class="panel-actions">
+          <button class="panel-btn" onclick="copyRequest()" title="Copy as curl">Copy curl</button>
+          <button class="panel-btn send" id="sendBtn" onclick="sendRequest()">Try It</button>
+        </div>
+      </div>
+      <textarea id="requestBody" placeholder="Request body (JSON)..." spellcheck="false"></textarea>
+    </div>
+
+    <!-- Response Panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <span>
+          <span class="panel-title">Response</span>
+          <span id="statusBadge"></span>
+          <span id="timingBadge" style="font-size:.7rem;color:#9ca3af;margin-left:.5rem"></span>
+        </span>
+        <div class="panel-actions">
+          <button class="panel-btn" onclick="copyResponse()" title="Copy response">Copy</button>
+        </div>
+      </div>
+      <div class="response-area" id="responseArea"><span class="muted">Send a request to see the response...</span></div>
+      <div style="padding:0 1rem .5rem">
+        <span class="headers-toggle" id="headersToggle" onclick="toggleHeaders()" style="display:none">Show headers</span>
+        <div class="headers-list" id="headersList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rate Limit Bar -->
+  <div class="rate-bar">
+    <span class="label">Rate Limit:</span>
+    <span class="value" id="rateRemaining">--</span>
+    <span class="muted">/</span>
+    <span class="value" id="rateLimit">--</span>
+    <div class="rate-meter"><div class="rate-meter-fill" id="rateMeter" style="width:100%"></div></div>
+    <span class="muted" id="requestId" style="font-size:.7rem"></span>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// State
+let currentEndpoint = 'supported';
+let currentMethod = 'GET';
+let lastResponse = '';
+let lastHeaders = {};
+let loading = false;
+
+const networkSelect = document.getElementById('networkSelect');
+const requestBody = document.getElementById('requestBody');
+const responseArea = document.getElementById('responseArea');
+const statusBadge = document.getElementById('statusBadge');
+const timingBadge = document.getElementById('timingBadge');
+const sendBtn = document.getElementById('sendBtn');
+const requestTitle = document.getElementById('requestTitle');
+const headersToggle = document.getElementById('headersToggle');
+const headersList = document.getElementById('headersList');
+const rateRemaining = document.getElementById('rateRemaining');
+const rateLimit = document.getElementById('rateLimit');
+const rateMeter = document.getElementById('rateMeter');
+const requestIdEl = document.getElementById('requestId');
+
+// Example payloads per endpoint
+function getExamplePayload(endpoint, network) {
+  const isEvm = network.startsWith('eip155:');
+  const isSolana = network.startsWith('solana:');
+  const isTon = network.startsWith('ton:');
+  const isTron = network.startsWith('tron:');
+  const isStellar = network.startsWith('stellar:');
+
+  let payer = '0xYourWalletAddress';
+  let payee = '0xRecipientAddress';
+  let sig = '0xabc123...';
+
+  if (isSolana) {
+    payer = 'YourSolanaPublicKey';
+    payee = 'RecipientSolanaPublicKey';
+    sig = 'base58signature...';
+  } else if (isTon) {
+    payer = 'UQYourTonAddress';
+    payee = 'UQRecipientTonAddress';
+    sig = 'base64signature...';
+  } else if (isTron) {
+    payer = 'TYourTronAddress';
+    payee = 'TRecipientTronAddress';
+    sig = '0xabc123...';
+  } else if (isStellar) {
+    payer = 'GYourStellarAddress';
+    payee = 'GRecipientStellarAddress';
+    sig = 'base64signature...';
+  }
+
+  if (endpoint === 'verify' || endpoint === 'settle') {
+    return JSON.stringify({
+      paymentPayload: {
+        signature: sig,
+        authorization: { payer: payer }
+      },
+      paymentRequirements: {
+        scheme: 'exact',
+        network: network,
+        maxAmountRequired: '1000000',
+        resource: 'https://example.com/api/data',
+        payee: payee
+      }
+    }, null, 2);
+  }
+  return '';
+}
+
+function switchEndpoint(endpoint) {
+  currentEndpoint = endpoint;
+  document.querySelectorAll('.ep-tab').forEach(function(t) { t.classList.remove('active'); });
+  event.target.classList.add('active');
+
+  if (endpoint === 'supported') {
+    currentMethod = 'GET';
+    requestBody.value = '';
+    requestBody.disabled = true;
+    requestBody.placeholder = 'GET request — no body needed';
+    requestTitle.textContent = 'GET /supported';
+    sendBtn.textContent = 'Try It';
+  } else {
+    currentMethod = 'POST';
+    requestBody.disabled = false;
+    requestBody.placeholder = 'Request body (JSON)...';
+    requestTitle.textContent = 'POST /' + endpoint;
+    sendBtn.textContent = 'Send';
+    requestBody.value = getExamplePayload(endpoint, networkSelect.value);
+  }
+}
+
+function onNetworkChange() {
+  if (currentEndpoint !== 'supported') {
+    requestBody.value = getExamplePayload(currentEndpoint, networkSelect.value);
+  }
+}
+
+function updateRateLimit(headers) {
+  var limit = headers.get('x-ratelimit-limit');
+  var remaining = headers.get('x-ratelimit-remaining');
+  var rid = headers.get('x-request-id');
+
+  if (limit) rateLimit.textContent = limit;
+  if (remaining !== null) {
+    rateRemaining.textContent = remaining;
+    var pct = (parseInt(remaining) / parseInt(limit || 100)) * 100;
+    rateMeter.style.width = pct + '%';
+    rateMeter.className = 'rate-meter-fill';
+    if (pct < 20) rateMeter.classList.add('critical');
+    else if (pct < 50) rateMeter.classList.add('low');
+  }
+  if (rid) requestIdEl.textContent = 'X-Request-Id: ' + rid;
+}
+
+function displayResponse(status, body, headers, elapsed) {
+  // Status badge
+  var cls = 'status-badge ';
+  if (status >= 200 && status < 300) cls += 'status-2xx';
+  else if (status >= 400 && status < 500) cls += 'status-4xx';
+  else cls += 'status-5xx';
+  statusBadge.className = cls;
+  statusBadge.textContent = status;
+
+  timingBadge.textContent = elapsed + 'ms';
+
+  // Body
+  try {
+    var parsed = typeof body === 'string' ? JSON.parse(body) : body;
+    lastResponse = JSON.stringify(parsed, null, 2);
+  } catch (e) {
+    lastResponse = String(body);
+  }
+  responseArea.textContent = lastResponse;
+
+  // Headers
+  lastHeaders = {};
+  if (headers) {
+    var headerHtml = '';
+    var interesting = ['x-request-id', 'x-ratelimit-limit', 'x-ratelimit-remaining', 'content-type', 'x-content-type-options', 'x-frame-options', 'content-security-policy', 'access-control-allow-origin'];
+    headers.forEach(function(val, key) {
+      lastHeaders[key] = val;
+      if (interesting.indexOf(key) !== -1 || key.startsWith('x-')) {
+        headerHtml += '<span class="header-key">' + escapeHtml(key) + '</span>: <span class="header-val">' + escapeHtml(val) + '</span>\n';
+      }
+    });
+    if (headerHtml) {
+      headersToggle.style.display = '';
+      headersList.innerHTML = headerHtml;
+    }
+  }
+
+  updateRateLimit(headers);
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function sendRequest() {
+  if (loading) return;
+  loading = true;
+  sendBtn.disabled = true;
+  sendBtn.innerHTML = '<span class="spinner"></span>Sending...';
+  responseArea.innerHTML = '<span class="muted">Loading...</span>';
+  statusBadge.textContent = '';
+  statusBadge.className = '';
+  timingBadge.textContent = '';
+  headersToggle.style.display = 'none';
+  headersList.className = 'headers-list';
+
+  var url = '/' + currentEndpoint;
+  var opts = { method: currentMethod };
+
+  if (currentMethod === 'POST') {
+    opts.headers = { 'Content-Type': 'application/json' };
+    opts.body = requestBody.value;
+  }
+
+  var start = Date.now();
+  try {
+    var res = await fetch(url, opts);
+    var elapsed = Date.now() - start;
+    var text = await res.text();
+    displayResponse(res.status, text, res.headers, elapsed);
+  } catch (err) {
+    var elapsed2 = Date.now() - start;
+    responseArea.textContent = 'Error: ' + err.message;
+    timingBadge.textContent = elapsed2 + 'ms';
+    statusBadge.className = 'status-badge status-5xx';
+    statusBadge.textContent = 'ERR';
+  }
+
+  loading = false;
+  sendBtn.disabled = false;
+  sendBtn.textContent = currentEndpoint === 'supported' ? 'Try It' : 'Send';
+}
+
+async function quickFetch(path) {
+  responseArea.innerHTML = '<span class="muted">Loading...</span>';
+  statusBadge.textContent = '';
+  statusBadge.className = '';
+  timingBadge.textContent = '';
+  headersToggle.style.display = 'none';
+  headersList.className = 'headers-list';
+  requestTitle.textContent = 'GET ' + path;
+
+  var start = Date.now();
+  try {
+    var res = await fetch(path);
+    var elapsed = Date.now() - start;
+    var text = await res.text();
+    displayResponse(res.status, text, res.headers, elapsed);
+  } catch (err) {
+    var elapsed2 = Date.now() - start;
+    responseArea.textContent = 'Error: ' + err.message;
+    timingBadge.textContent = elapsed2 + 'ms';
+    statusBadge.className = 'status-badge status-5xx';
+    statusBadge.textContent = 'ERR';
+  }
+}
+
+function getCurlCommand() {
+  var url = location.origin + '/' + currentEndpoint;
+  if (currentMethod === 'GET') {
+    return 'curl -s ' + url + ' | jq';
+  }
+  return "curl -s -X POST " + url + " \\\n  -H \"Content-Type: application/json\" \\\n  -d '" + requestBody.value.replace(/\n/g, '') + "'";
+}
+
+function copyRequest() {
+  var cmd = getCurlCommand();
+  navigator.clipboard.writeText(cmd).then(function() {
+    showToast('Copied curl command');
+  });
+}
+
+function copyResponse() {
+  if (lastResponse) {
+    navigator.clipboard.writeText(lastResponse).then(function() {
+      showToast('Copied response');
+    });
+  }
+}
+
+function toggleHeaders() {
+  headersList.classList.toggle('show');
+  headersToggle.textContent = headersList.classList.contains('show') ? 'Hide headers' : 'Show headers';
+}
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2000);
+}
+
+// Initialize
+switchEndpoint('supported');
+// Reset tab highlight since switchEndpoint relies on event.target
+document.querySelector('.ep-tab').classList.add('active');
+</script>
+</body>
+</html>

@@ -247,6 +247,29 @@ describe("Agent Dashboard API", () => {
     assert.strictEqual(res.status, 400);
   });
 
+  it("GET /api/v1/events/:addr returns SSE stream", async () => {
+    // Use raw http to avoid compression buffering
+    const { get } = await import("node:http");
+    const url = new URL(`${BASE}/api/v1/events/0xTest`);
+    const data = await new Promise((resolve, reject) => {
+      const req = get({ hostname: url.hostname, port: url.port, path: url.pathname, headers: { "Accept-Encoding": "identity" } }, (res) => {
+        assert.ok(res.headers["content-type"].includes("text/event-stream"));
+        let buf = "";
+        res.on("data", (chunk) => { buf += chunk.toString(); if (buf.includes("event: snapshot")) { req.destroy(); resolve(buf); } });
+        res.on("error", () => resolve(buf));
+      });
+      req.on("error", reject);
+      setTimeout(() => { req.destroy(); reject(new Error("SSE timeout")); }, 5000);
+    });
+    assert.ok(data.includes("event: snapshot"), "Should contain snapshot event");
+    assert.ok(data.includes('"balances"'), "Snapshot should include balances");
+  });
+
+  it("GET /api/v1/events with invalid address returns 400", async () => {
+    const res = await fetch(`${BASE}/api/v1/events/<script>`);
+    assert.strictEqual(res.status, 400);
+  });
+
   it("GET /api/v1/dashboard with invalid address returns 400", async () => {
     const res = await fetch(`${BASE}/api/v1/dashboard/<script>`);
     assert.strictEqual(res.status, 400);

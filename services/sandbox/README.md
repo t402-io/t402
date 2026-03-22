@@ -11,7 +11,7 @@ Public testnet facilitator for developer testing across 7 testnet networks. No A
 | Arbitrum Sepolia | `eip155:421614` | USDC | exact |
 | Solana Devnet | `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` | USDC | exact |
 | TON Testnet | `ton:testnet` | USDT | exact |
-| TRON Nile | `tron:nile` | USDT | exact |
+| TRON Nile | `tron:0x94a9059e` | USDT | exact |
 | Stellar Testnet | `stellar:testnet` | USDC | exact |
 
 ## Quick Start
@@ -57,6 +57,8 @@ t402:
 | `GET` | `/faucets` | Testnet token faucet links |
 | `GET` | `/examples` | Example payment flows per network |
 | `GET` | `/usage` | Usage statistics |
+| `GET` | `/metrics` | Prometheus metrics |
+| `GET` | `/playground` | Interactive API playground |
 | `POST` | `/verify` | Verify payment signature |
 | `POST` | `/settle` | Settle payment on-chain |
 
@@ -81,9 +83,19 @@ t402:
 | TRON Nile | TRX + USDT | [Nile Faucet](https://nileex.io/join/getJoinPage) |
 | Stellar Testnet | XLM + USDC | [Stellar Friendbot](https://friendbot.stellar.org/) |
 
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `3406` | Server port |
+| `FACILITATOR_URL` | `http://localhost:8080` | Upstream facilitator URL (http/https) |
+| `FACILITATOR_API_KEY` | — | API key for upstream facilitator (required for /verify, /settle) |
+| `RATE_LIMIT_PER_MINUTE` | `100` | Max requests per IP per minute |
+| `TRUST_CF_HEADER` | `false` | Use `CF-Connecting-IP` header for rate limiting (enable behind Cloudflare) |
+
 ## Mock Fallback
 
-When the upstream facilitator is unreachable, the sandbox returns mock responses clearly marked with `"mock": true`. This allows frontend development without a running facilitator.
+When the upstream facilitator is unreachable, the sandbox returns **503 error responses** with `"mock": true`. This makes it clear no on-chain verification or settlement occurred.
 
 ## Development
 

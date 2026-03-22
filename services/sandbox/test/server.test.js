@@ -635,4 +635,77 @@ describe("Landing page", () => {
     assert.ok(text.includes("Java"), "Missing Java tab");
     assert.ok(text.includes("curl"), "Missing curl tab");
   });
+
+  it("landing page links to playground", async () => {
+    const res = await fetch(`${BASE}/`);
+    const text = await res.text();
+    assert.ok(text.includes("/playground"), "Missing playground link");
+  });
+});
+
+describe("GET /playground", () => {
+  it("returns HTML playground page", async () => {
+    const res = await fetch(`${BASE}/playground`);
+    assert.strictEqual(res.status, 200);
+    assert.ok(res.headers.get("content-type").includes("html"));
+    const text = await res.text();
+    assert.ok(text.includes("T402 Sandbox"), "Missing title");
+    assert.ok(text.includes("Playground") || text.includes("playground"), "Missing playground content");
+  });
+
+  it("has permissive CSP for self connections", async () => {
+    const res = await fetch(`${BASE}/playground`);
+    const csp = res.headers.get("content-security-policy");
+    assert.ok(csp.includes("connect-src"), "Missing connect-src in CSP");
+  });
+
+  it("includes network selector and endpoint controls", async () => {
+    const res = await fetch(`${BASE}/playground`);
+    const text = await res.text();
+    assert.ok(text.includes("eip155:84532"), "Missing Base Sepolia network");
+    assert.ok(text.includes("ton:testnet"), "Missing TON Testnet network");
+    assert.ok(text.includes("/verify"), "Missing verify endpoint");
+    assert.ok(text.includes("/settle"), "Missing settle endpoint");
+  });
+});
+
+describe("GET /metrics", () => {
+  it("returns Prometheus exposition format", async () => {
+    const res = await fetch(`${BASE}/metrics`);
+    assert.strictEqual(res.status, 200);
+    const ct = res.headers.get("content-type");
+    assert.ok(ct.includes("text/plain"), "Content-Type should be text/plain");
+    const text = await res.text();
+    assert.ok(text.includes("# HELP"), "Missing HELP comments");
+    assert.ok(text.includes("# TYPE"), "Missing TYPE comments");
+  });
+
+  it("includes core metrics", async () => {
+    const res = await fetch(`${BASE}/metrics`);
+    const text = await res.text();
+    assert.ok(text.includes("sandbox_upstream_errors_total"), "Missing upstream errors counter");
+    assert.ok(text.includes("sandbox_upstream_healthy"), "Missing upstream healthy gauge");
+    assert.ok(text.includes("sandbox_rate_limit_hits_total"), "Missing rate limit counter");
+    assert.ok(text.includes("sandbox_active_rate_limit_entries"), "Missing rate limit entries gauge");
+  });
+
+  it("tracks request counts after POST calls", async () => {
+    // Make a POST request first
+    await fetch(`${BASE}/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ paymentPayload: {}, paymentRequirements: { network: "eip155:84532" } }),
+    });
+    const res = await fetch(`${BASE}/metrics`);
+    const text = await res.text();
+    assert.ok(text.includes('sandbox_requests_total{endpoint="/verify"}'), "Missing /verify request count");
+  });
+
+  it("does not count /metrics as totalRequests", async () => {
+    const before = await fetch(`${BASE}/usage`).then(r => r.json());
+    await fetch(`${BASE}/metrics`);
+    await fetch(`${BASE}/metrics`);
+    const after = await fetch(`${BASE}/usage`).then(r => r.json());
+    assert.strictEqual(after.totalRequests, before.totalRequests, "/metrics should not increment totalRequests");
+  });
 });

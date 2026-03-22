@@ -198,6 +198,70 @@ export function registerRoutes(app, opts = {}) {
     }
   });
 
+  // ── SSE real-time event stream ──────────────────────────────────
+  app.get("/api/v1/events/:address", (req, res, next) => {
+    try {
+      if (!isValidAddress(req.params.address)) {
+        return res.status(400).json({ error: "invalid address format" });
+      }
+      const address = req.params.address;
+      const days = clampInt(req.query.days, 1, 365, 7);
+
+      res.set({
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+        "X-Accel-Buffering": "no",
+      });
+      res.flushHeaders();
+
+      // Send initial snapshot
+      const sendEvent = (event, data) => {
+        res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+      };
+
+      const sendSnapshot = async () => {
+        try {
+          const [balData, budget, stats, { payments, total }, alerts] = await Promise.all([
+            getBalances(address),
+            getBudget(address),
+            getStats(address, days),
+            getPayments(address, { days, limit: 15 }),
+            getAlerts(address),
+          ]);
+          sendEvent("snapshot", {
+            balances: balData,
+            budget,
+            stats,
+            payments: { items: payments, total },
+            alerts: { items: alerts, count: alerts.length },
+          });
+        } catch (err) {
+          sendEvent("error", { message: "Failed to fetch data" });
+        }
+      };
+
+      // Initial snapshot
+      sendSnapshot();
+
+      // Periodic updates (every 30s)
+      const interval = setInterval(sendSnapshot, 30000);
+
+      // Heartbeat to keep connection alive (every 15s)
+      const heartbeat = setInterval(() => {
+        res.write(": heartbeat\n\n");
+      }, 15000);
+
+      // Cleanup on disconnect
+      req.on("close", () => {
+        clearInterval(interval);
+        clearInterval(heartbeat);
+      });
+    } catch (err) {
+      next(err);
+    }
+  });
+
   // ── Combined dashboard endpoint (single call for all data) ────
   app.get("/api/v1/dashboard/:address", async (req, res, next) => {
     try {

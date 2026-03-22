@@ -152,6 +152,7 @@ services:
       - FACILITATOR_URL=http://host.docker.internal:8080
       - RATE_LIMIT_PER_MINUTE=100
       - TRUST_CF_HEADER=true
+      - FACILITATOR_API_KEY=${FACILITATOR_API_KEY:-}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped

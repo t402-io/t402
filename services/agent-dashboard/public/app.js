@@ -101,8 +101,56 @@
     setTimeout(function () { banner.classList.remove("visible"); }, 10000);
   }
 
-  // ── Auto-refresh ────────────────────────────────────────────────
-  setInterval(function () { refreshData(); }, 60000);
+  // ── SSE real-time updates (fallback to polling) ────────────────
+  var sseActive = false;
+  function connectSSE() {
+    if (!window.EventSource) return; // Fallback to polling
+    var es = new EventSource("/api/v1/events/" + encodeURIComponent(addr) + "?days=" + currentDays);
+    es.addEventListener("snapshot", function (e) {
+      try {
+        var d = JSON.parse(e.data);
+        sseActive = true;
+        applySnapshot(d);
+      } catch (err) { /* ignore parse errors */ }
+    });
+    es.addEventListener("error", function () {
+      sseActive = false;
+      // EventSource auto-reconnects
+    });
+    // Close SSE on page unload
+    window.addEventListener("beforeunload", function () { es.close(); });
+  }
+
+  function applySnapshot(d) {
+    var balData = d.balances, stats = d.stats;
+    var eb = document.getElementById("error-banner");
+    if (eb) eb.classList.remove("visible");
+    document.querySelectorAll("[data-card]").forEach(function (el) {
+      var key = el.getAttribute("data-card");
+      if (key === "balance") el.textContent = "$" + (balData.totalUsd || "--");
+      if (key === "payments") el.textContent = stats.totalPayments != null ? stats.totalPayments : "--";
+      if (key === "spent") el.textContent = "$" + (stats.totalSpentUsd || "--");
+      if (key === "avg") el.textContent = "$" + (stats.avgPaymentUsd || "--");
+    });
+    if (d.payments && d.payments.items) {
+      currentTotal = d.payments.total || 0;
+      updatePagination();
+      var tbody = document.getElementById("payments-tbody");
+      if (tbody) {
+        tbody.innerHTML = d.payments.items.map(function (p) {
+          var label = esc(p.networkLabel || p.network);
+          var si = p.status === "settled" ? "\u2713 " : p.status === "pending" ? "\u231B " : p.status === "failed" ? "\u2717 " : "";
+          var txLink = explorerLink(p.network, p.txHash);
+          return "<tr><td>" + esc(p.service) + "</td><td>$" + esc(p.amountFormatted) + " " + esc(p.token) + "</td><td>" + label + '</td><td class="status-' + esc(p.status) + '">' + esc(si + p.status) + "</td><td>" + txLink + "</td><td>" + esc(timeAgoClient(p.timestamp)) + "</td></tr>";
+        }).join("");
+      }
+    }
+    refreshTrend();
+  }
+
+  connectSSE();
+  // Polling fallback — only used when SSE is not active
+  setInterval(function () { if (!sseActive) refreshData(); }, 60000);
 
   function refreshData() {
     var spinner = document.getElementById("refresh-spinner");

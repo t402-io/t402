@@ -9,6 +9,12 @@
 import express from "express";
 import compression from "compression";
 import { randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const playgroundHtml = readFileSync(join(__dirname, "playground.html"), "utf8");
 
 // --- Structured JSON logging ---
 function log(level, message, data = {}) {
@@ -24,6 +30,7 @@ const RATE_LIMIT_MAX_ENTRIES = 10_000; // Max unique IPs tracked before forced e
 const VERIFY_TIMEOUT_MS = 30_000;
 const SETTLE_TIMEOUT_MS = 90_000;
 const TRUST_CF_HEADER = process.env.TRUST_CF_HEADER === "true";
+const FACILITATOR_API_KEY = process.env.FACILITATOR_API_KEY || "";
 
 // Validate FACILITATOR_URL at startup
 try {
@@ -86,6 +93,7 @@ app.use((req, res, next) => {
   res.set("X-RateLimit-Limit", String(RATE_LIMIT));
   res.set("X-RateLimit-Remaining", String(Math.max(0, RATE_LIMIT - entry.count)));
   if (entry.count > RATE_LIMIT) {
+    metrics.rateLimitHits++;
     return res.status(429).json({ error: "Rate limit exceeded", sandbox: true });
   }
   next();
@@ -113,12 +121,15 @@ app.use((req, res, next) => {
   if (req.method === "POST") {
     const start = Date.now();
     res.on("finish", () => {
+      const duration = Date.now() - start;
       log("info", `${req.method} ${req.path}`, {
         status: res.statusCode,
-        duration: Date.now() - start,
+        duration,
         ip: TRUST_CF_HEADER ? (req.headers["cf-connecting-ip"] || req.ip) : req.ip,
         requestId: req.requestId,
       });
+      metrics.requestsTotal.set(req.path, (metrics.requestsTotal.get(req.path) || 0) + 1);
+      metrics.requestDuration.push({ endpoint: req.path, duration, timestamp: Date.now() });
     });
   }
   next();
@@ -145,6 +156,17 @@ const SUPPORTED_KINDS = SUPPORTED_NETWORKS.map((network) => ({
 // --- Usage tracking ---
 let totalRequests = 0;
 let upstreamErrors = 0;
+
+// --- Metrics ---
+const metrics = {
+  requestsTotal: new Map(),    // label: endpoint -> count
+  requestDuration: [],         // { endpoint, duration, timestamp }
+  errorsTotal: 0,
+  upstreamLatency: [],         // { duration, timestamp }
+  rateLimitHits: 0,
+};
+
+const METRICS_RETENTION_MS = 300_000; // Keep 5 minutes of histogram data
 
 // --- Upstream health state ---
 let upstreamHealthy = null; // null = unknown, true/false after first check
@@ -173,6 +195,9 @@ const _isMain = process.argv[1] && new URL(import.meta.url).pathname === process
 // Periodic upstream check (every 30s)
 let healthTimer;
 if (_isMain) {
+  if (!FACILITATOR_API_KEY) {
+    log("warn", "No FACILITATOR_API_KEY set — upstream /verify and /settle will return 401");
+  }
   checkUpstream();
   healthTimer = setInterval(checkUpstream, 30_000);
   healthTimer.unref();
@@ -180,12 +205,19 @@ if (_isMain) {
 
 // --- Helper: proxy to facilitator ---
 async function proxyToFacilitator(path, body, timeoutMs) {
+  const start = Date.now();
+  const headers = { "Content-Type": "application/json" };
+  if (FACILITATOR_API_KEY) {
+    headers["X-API-Key"] = FACILITATOR_API_KEY;
+  }
   const res = await fetch(`${FACILITATOR_URL}${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(timeoutMs),
   });
+  const duration = Date.now() - start;
+  metrics.upstreamLatency.push({ duration, timestamp: Date.now() });
   const text = await res.text();
   try {
     return { status: res.status, data: JSON.parse(text) };
@@ -381,6 +413,84 @@ app.get("/usage", (_req, res) => {
   res.json({ totalRequests, upstreamErrors, rateLimit: RATE_LIMIT, upstreamHealthy });
 });
 
+app.get("/metrics", (_req, res) => {
+  const now = Date.now();
+  // Prune old histogram data
+  const cutoff = now - METRICS_RETENTION_MS;
+  metrics.requestDuration = metrics.requestDuration.filter(m => m.timestamp > cutoff);
+  metrics.upstreamLatency = metrics.upstreamLatency.filter(m => m.timestamp > cutoff);
+
+  const lines = [
+    "# HELP sandbox_requests_total Total requests by endpoint",
+    "# TYPE sandbox_requests_total counter",
+  ];
+
+  for (const [endpoint, count] of metrics.requestsTotal) {
+    lines.push(`sandbox_requests_total{endpoint="${endpoint}"} ${count}`);
+  }
+
+  lines.push(
+    "# HELP sandbox_upstream_errors_total Total upstream errors",
+    "# TYPE sandbox_upstream_errors_total counter",
+    `sandbox_upstream_errors_total ${upstreamErrors}`,
+    "# HELP sandbox_upstream_healthy Whether upstream facilitator is reachable",
+    "# TYPE sandbox_upstream_healthy gauge",
+    `sandbox_upstream_healthy ${upstreamHealthy === true ? 1 : 0}`,
+    "# HELP sandbox_rate_limit_hits_total Rate limit rejections",
+    "# TYPE sandbox_rate_limit_hits_total counter",
+    `sandbox_rate_limit_hits_total ${metrics.rateLimitHits}`,
+    "# HELP sandbox_active_rate_limit_entries Number of tracked IPs",
+    "# TYPE sandbox_active_rate_limit_entries gauge",
+    `sandbox_active_rate_limit_entries ${limits.size}`,
+  );
+
+  // Request duration histogram (5min window)
+  if (metrics.requestDuration.length > 0) {
+    const buckets = [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10];
+    lines.push(
+      "# HELP sandbox_request_duration_seconds Request duration histogram",
+      "# TYPE sandbox_request_duration_seconds histogram",
+    );
+    let sum = 0;
+    for (const b of buckets) {
+      const count = metrics.requestDuration.filter(m => m.duration / 1000 <= b).length;
+      lines.push(`sandbox_request_duration_seconds_bucket{le="${b}"} ${count}`);
+    }
+    lines.push(`sandbox_request_duration_seconds_bucket{le="+Inf"} ${metrics.requestDuration.length}`);
+    for (const m of metrics.requestDuration) sum += m.duration / 1000;
+    lines.push(`sandbox_request_duration_seconds_sum ${sum.toFixed(6)}`);
+    lines.push(`sandbox_request_duration_seconds_count ${metrics.requestDuration.length}`);
+  }
+
+  // Upstream latency histogram
+  if (metrics.upstreamLatency.length > 0) {
+    const buckets = [0.1, 0.25, 0.5, 1, 2.5, 5, 10, 30, 90];
+    lines.push(
+      "# HELP sandbox_upstream_latency_seconds Upstream facilitator latency histogram",
+      "# TYPE sandbox_upstream_latency_seconds histogram",
+    );
+    let sum = 0;
+    for (const b of buckets) {
+      const count = metrics.upstreamLatency.filter(m => m.duration / 1000 <= b).length;
+      lines.push(`sandbox_upstream_latency_seconds_bucket{le="${b}"} ${count}`);
+    }
+    lines.push(`sandbox_upstream_latency_seconds_bucket{le="+Inf"} ${metrics.upstreamLatency.length}`);
+    for (const m of metrics.upstreamLatency) sum += m.duration / 1000;
+    lines.push(`sandbox_upstream_latency_seconds_sum ${sum.toFixed(6)}`);
+    lines.push(`sandbox_upstream_latency_seconds_count ${metrics.upstreamLatency.length}`);
+  }
+
+  res.set("Content-Type", "text/plain; version=0.0.4; charset=utf-8");
+  res.send(lines.join("\n") + "\n");
+});
+
+// Playground page
+app.get("/playground", (_req, res) => {
+  totalRequests++;
+  res.set("Content-Security-Policy", "default-src 'self'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'");
+  res.type("html").send(playgroundHtml);
+});
+
 // Landing page
 app.get("/", (_req, res) => {
   res.set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'");
@@ -467,6 +577,7 @@ curl -s -X POST https://sandbox.t402.io/verify \\
 <tr><td>GET</td><td><a href="/usage">/usage</a></td><td>Usage statistics</td></tr>
 <tr><td>POST</td><td>/verify</td><td>Verify payment</td></tr>
 <tr><td>POST</td><td>/settle</td><td>Settle payment</td></tr>
+<tr><td>GET</td><td><a href="/playground">/playground</a></td><td>Interactive API playground</td></tr>
 </table>
 
 <h2>Rate Limits</h2>
@@ -475,7 +586,7 @@ curl -s -X POST https://sandbox.t402.io/verify \\
 <div class="note">When the upstream facilitator is unreachable, the sandbox returns error responses with <code>"mock": true</code>. Connect a testnet facilitator for real on-chain verification.</div>
 
 <p style="color:#6b7280;margin-top:2rem;font-size:.85rem">
-  <a href="https://docs.t402.io">Docs</a> · <a href="https://github.com/t402-io/t402">GitHub</a> · Powered by <a href="https://t402.io">T402</a>
+  <a href="/playground">Playground</a> · <a href="https://docs.t402.io">Docs</a> · <a href="https://github.com/t402-io/t402">GitHub</a> · Powered by <a href="https://t402.io">T402</a>
 </p>
 <script>
 function showTab(id){

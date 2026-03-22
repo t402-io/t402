@@ -28,6 +28,7 @@ const DEFAULT_SERVICES = [
 ];
 
 const REQUIRED_FIELDS = ["id", "name", "url", "type", "group"];
+const SAFE_ID_RE = /^[a-zA-Z0-9][a-zA-Z0-9._-]*$/;
 
 export let SERVICES = [...DEFAULT_SERVICES];
 export let SERVICE_MAP = new Map(SERVICES.map((s) => [s.id, s]));
@@ -36,6 +37,9 @@ function validate(services) {
   for (const s of services) {
     for (const field of REQUIRED_FIELDS) {
       if (!s[field]) throw new Error(`Service missing required field "${field}": ${JSON.stringify(s)}`);
+    }
+    if (!SAFE_ID_RE.test(s.id)) {
+      throw new Error(`Service ID must be alphanumeric (with .-_): "${s.id}"`);
     }
   }
 }
