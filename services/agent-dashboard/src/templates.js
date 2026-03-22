@@ -1,358 +1,34 @@
 /**
  * HTML template rendering for the T402 Agent Dashboard.
  *
- * CSS and client JS are served as static files from /public/
- * for browser caching and CSP compliance.
+ * CSS → public/style.css · JS → public/app.js
  */
 
 import { escapeHtml, timeAgo, statusIndicator } from "./utils.js";
 
-// CSS and client JS are now served as static files from public/
-// CSS: public/style.css — with CSS custom properties for dark/light theming
-// JS:  public/app.js — reads address from data-address attribute on <main>
-const _CSS_REMOVED = `/* Moved to public/style.css */
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,-apple-system,sans-serif;background:#0a0a0b;color:#e5e7eb;max-width:1060px;margin:0 auto;padding:1.5rem}
-h1{color:#50AF95;margin-bottom:.25rem} h2{color:#9ca3af;font-size:1.1rem;margin-top:2rem}
-.subtitle{color:#6b7280;font-size:.9rem;margin-bottom:1.5rem}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin:1rem 0}
-.card{background:#111827;padding:1.25rem;border-radius:8px;border:1px solid #1f2937}
-.card-value{font-size:1.7rem;font-weight:bold;color:#50AF95}
-.card-label{color:#6b7280;font-size:.82rem;margin-top:.2rem}
-.bar{height:8px;background:#1f2937;border-radius:4px;overflow:hidden;margin-top:.5rem}
-.bar-fill{height:100%;background:#50AF95;border-radius:4px;transition:width .3s}
-.warn .bar-fill{background:#F59E0B}
-.warn .card-value{color:#F59E0B}
+// Explorer URL lookup for server-rendered tx links
+const EXPLORER_URLS = {
+  "eip155:1": "https://etherscan.io/tx/",
+  "eip155:8453": "https://basescan.org/tx/",
+  "eip155:42161": "https://arbiscan.io/tx/",
+  "eip155:137": "https://polygonscan.com/tx/",
+  "eip155:10": "https://optimistic.etherscan.io/tx/",
+  "eip155:56": "https://bscscan.com/tx/",
+  "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp": "https://solscan.io/tx/",
+  "ton:mainnet": "https://tonviewer.com/transaction/",
+  "stellar:pubnet": "https://stellarchain.io/tx/",
+  "tron:mainnet": "https://tronscan.org/#/transaction/",
+};
 
-label{color:#9ca3af;font-size:.85rem;display:block;margin-bottom:.35rem}
-input{background:#111827;border:1px solid #374151;color:#e5e7eb;padding:.75rem 1rem;border-radius:8px;width:100%;max-width:420px;font-size:1rem}
-input:focus{outline:none;border-color:#50AF95}
-.form-row{display:flex;gap:.75rem;align-items:flex-end;flex-wrap:wrap;margin:1rem 0}
-.form-row input{margin:0}
+const HEAD = `<!DOCTYPE html>
+<html lang="en"><head><title>T402 Agent Dashboard</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="/style.css"></head>
+<body>`;
 
-table{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:1rem}
-thead th{text-align:left;color:#6b7280;padding:.5rem;border-bottom:2px solid #1f2937;white-space:nowrap;cursor:default}
-tbody td{padding:.5rem;border-bottom:1px solid #111827}
-code{color:#50AF95;font-size:.8em}
-a{color:#50AF95;text-decoration:none} a:hover{text-decoration:underline}
-.status-settled{color:#10B981} .status-pending{color:#F59E0B} .status-failed{color:#EF4444}
-.warn{color:#F59E0B}
-
-.alerts{display:flex;flex-direction:column;gap:.5rem;margin-top:.75rem}
-.alert{padding:.75rem 1rem;border-radius:8px;font-size:.9rem}
-.alert-warning{background:#422006;border:1px solid #F59E0B;color:#FCD34D}
-.alert-critical{background:#450a0a;border:1px solid #EF4444;color:#FCA5A5}
-.alert-icon{font-weight:bold;margin-right:.5rem}
-
-.net-row{display:flex;align-items:center;gap:.5rem;margin:.35rem 0;font-size:.85rem}
-.net-label{width:90px;text-align:right;color:#9ca3af;flex-shrink:0}
-.net-bar{flex:1;height:14px;background:#1f2937;border-radius:3px;overflow:hidden;min-width:60px}
-.net-fill{height:100%;background:#50AF95;border-radius:3px}
-.net-val{color:#e5e7eb;white-space:nowrap;flex-shrink:0;width:120px}
-
-.toolbar{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;margin-top:1rem}
-.btn{display:inline-block;padding:.5rem 1rem;border-radius:6px;background:#1f2937;color:#50AF95;border:1px solid #374151;font-size:.85rem;cursor:pointer;text-decoration:none;font-family:inherit}
-.btn:hover{background:#374151}
-
-/* Onboarding / empty state */
-.onboarding{text-align:center;padding:3rem 1.5rem;margin:2rem 0;background:#111827;border-radius:12px;border:1px solid #1f2937}
-.onboarding h2{color:#e5e7eb;font-size:1.5rem;margin-top:0;margin-bottom:.5rem}
-.onboarding p{color:#9ca3af;max-width:520px;margin:0 auto .75rem}
-.onboarding ul{list-style:none;padding:0;max-width:400px;margin:1.25rem auto;text-align:left}
-.onboarding li{padding:.35rem 0;color:#d1d5db;font-size:.9rem}
-.onboarding li::before{content:"\\2022";color:#50AF95;font-weight:bold;margin-right:.5rem}
-.demo-btn{display:inline-block;padding:.85rem 2.25rem;border-radius:8px;background:linear-gradient(135deg,#10B981,#0D9488);color:#fff;font-size:1.1rem;font-weight:600;border:none;cursor:pointer;text-decoration:none;margin:1.25rem 0;transition:opacity .15s}
-.demo-btn:hover{opacity:.88;text-decoration:none}
-
-/* Date range selector */
-.range-bar{display:flex;gap:.35rem;margin:1rem 0}
-.range-btn{padding:.35rem .85rem;border-radius:5px;background:#1f2937;color:#9ca3af;border:1px solid #374151;font-size:.8rem;cursor:pointer;font-family:inherit}
-.range-btn:hover{background:#374151;color:#e5e7eb}
-.range-btn.active{background:#50AF95;color:#0a0a0b;border-color:#50AF95;font-weight:600}
-
-/* Sort buttons in table headers */
-.sort-btn{background:none;border:none;color:#6b7280;cursor:pointer;font:inherit;font-size:.85rem;padding:.5rem;text-align:left;white-space:nowrap;width:100%}
-.sort-btn:hover{color:#e5e7eb}
-.sort-btn .sort-arrow{margin-left:.25rem;font-size:.7rem}
-
-/* Loading spinner */
-.loading{display:inline-block;width:18px;height:18px;border:2px solid #374151;border-top-color:#50AF95;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-left:.5rem}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-footer{color:#6b7280;font-size:.8rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #1f2937}
-
-@media(max-width:640px){
-  body{padding:1rem .75rem}
-  .cards{grid-template-columns:1fr 1fr}
-  .card{padding:1rem}
-  .card-value{font-size:1.3rem}
-  table{font-size:.75rem}
-  thead th,tbody td{padding:.35rem .25rem}
-  .sort-btn{padding:.35rem .25rem;font-size:.75rem}
-  .net-label{width:70px;font-size:.75rem}
-  .net-val{width:100px;font-size:.75rem}
-  .toolbar{flex-direction:column;align-items:stretch}
-  input{max-width:100%}
-  .form-row{flex-direction:column;align-items:stretch}
-}
-/* Error banner */
-.error-banner{display:none;padding:.75rem 1rem;border-radius:8px;background:#450a0a;border:1px solid #EF4444;color:#FCA5A5;font-size:.9rem;margin:1rem 0}
-.error-banner.visible{display:block}
-
-/* Pagination */
-.pagination{display:flex;align-items:center;justify-content:center;gap:1rem;margin-top:1rem}
-.pagination .btn:disabled{opacity:.4;cursor:default}
-.page-info{color:#9ca3af;font-size:.85rem}
-
-/* Sparkline chart */
-.sparkline-container{background:#111827;border-radius:8px;border:1px solid #1f2937;padding:1rem;margin:1rem 0}
-.sparkline-container h3{color:#9ca3af;font-size:.85rem;margin-bottom:.5rem}
-.sparkline svg{width:100%;height:80px}
-.sparkline polyline{fill:none;stroke:#50AF95;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
-.sparkline .area{fill:url(#sparkGrad);stroke:none}
-.sparkline text{fill:#6b7280;font-size:10px}
-
-/* Filter bar */
-.filter-bar{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;margin-bottom:.5rem}
-.filter-bar select{background:#111827;border:1px solid #374151;color:#e5e7eb;padding:.4rem .75rem;border-radius:6px;font-size:.85rem;font-family:inherit}
-.filter-bar select:focus{outline:none;border-color:#50AF95}
-
-@media(max-width:400px){
-  .cards{grid-template-columns:1fr}
-}`;
-
-// ── Client-side script template ─────────────────────────────────────
-
-function clientScript(address) {
-  return `
-(function() {
-  var addr = ${JSON.stringify(address).replace(/</g, "\\u003c")};
-  var currentDays = 7;
-  var currentOffset = 0;
-  var currentNetwork = "";
-  var currentTotal = 0;
-  var PAGE_SIZE = 15;
-  var sortCol = -1;
-  var sortAsc = true;
-  var refreshTimer = null;
-
-  // ── Explorer URLs by network prefix ─────────────────────────────
-  var explorers = {
-    "eip155:1": "https://etherscan.io/tx/",
-    "eip155:8453": "https://basescan.org/tx/",
-    "eip155:42161": "https://arbiscan.io/tx/",
-    "eip155:137": "https://polygonscan.com/tx/",
-    "eip155:10": "https://optimistic.etherscan.io/tx/",
-    "eip155:56": "https://bscscan.com/tx/",
-    "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp": "https://solscan.io/tx/",
-    "ton:mainnet": "https://tonviewer.com/transaction/",
-    "stellar:pubnet": "https://stellarchain.io/tx/",
-    "tron:mainnet": "https://tronscan.org/#/transaction/"
-  };
-
-  function explorerLink(network, txHash) {
-    var base = explorers[network];
-    if (base && txHash) return '<a href="' + esc(base + txHash) + '" target="_blank" rel="noopener">' + esc(txHash.slice(0, 10)) + '…</a>';
-    return esc(txHash || "");
-  }
-
-  // ── SVG sparkline renderer ───────────────────────────────────────
-  function renderSparkline(trend) {
-    var container = document.getElementById("sparkline-chart");
-    if (!container || !trend || trend.length === 0) return;
-    var w = 600, h = 80, pad = 20;
-    var amounts = trend.map(function(d) { return parseFloat(d.amountUsd) || 0; });
-    var maxVal = Math.max.apply(null, amounts) || 1;
-    var step = (w - pad * 2) / Math.max(amounts.length - 1, 1);
-    var points = amounts.map(function(v, i) {
-      return (pad + i * step).toFixed(1) + "," + (h - pad - (v / maxVal) * (h - pad * 2)).toFixed(1);
-    }).join(" ");
-    var areaPoints = points + " " + (pad + (amounts.length - 1) * step).toFixed(1) + "," + (h - pad) + " " + pad + "," + (h - pad);
-    // Date labels (first, middle, last)
-    var labels = "";
-    if (trend.length > 2) {
-      labels = '<text x="' + pad + '" y="' + h + '">' + esc(trend[0].date.slice(5)) + '</text>';
-      var mid = Math.floor(trend.length / 2);
-      labels += '<text x="' + (pad + mid * step) + '" y="' + h + '" text-anchor="middle">' + esc(trend[mid].date.slice(5)) + '</text>';
-      labels += '<text x="' + (w - pad) + '" y="' + h + '" text-anchor="end">' + esc(trend[trend.length - 1].date.slice(5)) + '</text>';
-    }
-    // Max value label
-    labels += '<text x="' + (w - pad) + '" y="12" text-anchor="end">$' + maxVal.toFixed(2) + '</text>';
-    container.innerHTML = '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none">' +
-      '<defs><linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#50AF95" stop-opacity="0.3"/><stop offset="100%" stop-color="#50AF95" stop-opacity="0"/></linearGradient></defs>' +
-      '<polygon class="area" points="' + areaPoints + '"/>' +
-      '<polyline points="' + points + '"/>' +
-      labels + '</svg>';
-  }
-
-  // Fetch and render trend on load + refresh
-  function refreshTrend() {
-    fetch("/api/v1/stats/" + encodeURIComponent(addr) + "/trend?days=" + Math.max(currentDays, 7))
-      .then(function(r) { return r.json(); })
-      .then(function(data) { renderSparkline(data.trend); })
-      .catch(function() {});
-  }
-
-  // ── Error banner ────────────────────────────────────────────────
-  function showError(msg) {
-    var banner = document.getElementById("error-banner");
-    if (!banner) return;
-    banner.textContent = msg || "Data refresh failed — showing last known data";
-    banner.classList.add("visible");
-    setTimeout(function() { banner.classList.remove("visible"); }, 10000);
-  }
-
-  // ── Auto-refresh every 60s ──────────────────────────────────────
-  function startAutoRefresh() {
-    refreshTimer = setInterval(function() { refreshData(); }, 60000);
-  }
-
-  function refreshData() {
-    var spinner = document.getElementById("refresh-spinner");
-    if (spinner) spinner.style.display = "inline-block";
-    var netParam = currentNetwork ? "&network=" + encodeURIComponent(currentNetwork) : "";
-    Promise.all([
-      fetch("/api/v1/stats/" + encodeURIComponent(addr) + "?days=" + currentDays).then(function(r){return r.json();}),
-      fetch("/api/v1/payments?address=" + encodeURIComponent(addr) + "&days=" + currentDays + "&limit=" + PAGE_SIZE + "&offset=" + currentOffset + netParam).then(function(r){return r.json();}),
-      fetch("/api/v1/balances/" + encodeURIComponent(addr)).then(function(r){return r.json();}),
-      fetch("/api/v1/budget/" + encodeURIComponent(addr)).then(function(r){return r.json();}),
-      fetch("/api/v1/alerts/" + encodeURIComponent(addr)).then(function(r){return r.json();})
-    ]).then(function(results) {
-      var stats = results[0], payData = results[1], balData = results[2], budgetData = results[3], alertData = results[4];
-      document.getElementById("error-banner")?.classList.remove("visible");
-      // Update summary cards
-      var cards = document.querySelectorAll("[data-card]");
-      cards.forEach(function(el) {
-        var key = el.getAttribute("data-card");
-        if (key === "balance") el.textContent = "$" + (balData.totalUsd || "--");
-        if (key === "payments") el.textContent = stats.totalPayments != null ? stats.totalPayments : "--";
-        if (key === "spent") el.textContent = "$" + (stats.totalSpentUsd || "--");
-        if (key === "avg") el.textContent = "$" + (stats.avgPaymentUsd || "--");
-      });
-      // Update dynamic period labels
-      document.querySelectorAll("[data-period-label]").forEach(function(el) {
-        el.textContent = el.getAttribute("data-period-label").replace("7d", currentDays + "d");
-      });
-      // Update pagination state
-      currentTotal = payData.total || 0;
-      updatePagination();
-      // Update payments table body
-      var tbody = document.getElementById("payments-tbody");
-      if (tbody && payData.payments) {
-        tbody.innerHTML = payData.payments.map(function(p) {
-          var label = esc(p.networkLabel || p.network);
-          var si = p.status === "settled" ? "\\u2713 " : p.status === "pending" ? "\\u231B " : p.status === "failed" ? "\\u2717 " : "";
-          var txLink = explorerLink(p.network, p.txHash);
-          return "<tr><td>" + esc(p.service) + "</td><td>$" + esc(p.amountFormatted) + " " + esc(p.token) + "</td><td>" + label + "</td><td class=\\"status-" + esc(p.status) + "\\">" + esc(si + p.status) + "</td><td>" + txLink + "</td><td>" + esc(timeAgoClient(p.timestamp)) + "</td></tr>";
-        }).join("");
-      }
-      if (spinner) spinner.style.display = "none";
-      refreshTrend();
-    }).catch(function(err) {
-      if (spinner) spinner.style.display = "none";
-      showError();
-    });
-  }
-
-  // ── Date range selector ─────────────────────────────────────────
-  document.querySelectorAll(".range-btn").forEach(function(btn) {
-    btn.addEventListener("click", function() {
-      document.querySelectorAll(".range-btn").forEach(function(b){b.classList.remove("active");});
-      btn.classList.add("active");
-      currentDays = parseInt(btn.getAttribute("data-days"), 10);
-      refreshData();
-    });
-  });
-
-  // ── Manual refresh button ───────────────────────────────────────
-  var refreshBtn = document.getElementById("refresh-btn");
-  if (refreshBtn) {
-    refreshBtn.addEventListener("click", function(e) {
-      e.preventDefault();
-      refreshData();
-    });
-  }
-
-  // ── Click-to-sort on table headers ──────────────────────────────
-  document.querySelectorAll(".sort-btn").forEach(function(btn) {
-    btn.addEventListener("click", function() {
-      var col = parseInt(btn.getAttribute("data-col"), 10);
-      if (sortCol === col) { sortAsc = !sortAsc; } else { sortCol = col; sortAsc = true; }
-      // Update arrows
-      document.querySelectorAll(".sort-btn .sort-arrow").forEach(function(a){a.textContent = "";});
-      var arrow = btn.querySelector(".sort-arrow");
-      if (arrow) arrow.textContent = sortAsc ? "\\u25B2" : "\\u25BC";
-      // Sort rows
-      var tbody = document.getElementById("payments-tbody");
-      if (!tbody) return;
-      var rows = Array.from(tbody.querySelectorAll("tr"));
-      rows.sort(function(a, b) {
-        var aText = a.children[col] ? a.children[col].textContent.trim() : "";
-        var bText = b.children[col] ? b.children[col].textContent.trim() : "";
-        var cmp = aText.localeCompare(bText, undefined, {numeric: true});
-        return sortAsc ? cmp : -cmp;
-      });
-      rows.forEach(function(r){tbody.appendChild(r);});
-    });
-  });
-
-  // ── Pagination ──────────────────────────────────────────────────
-  function updatePagination() {
-    var pageInfo = document.getElementById("page-info");
-    var prevBtn = document.getElementById("prev-btn");
-    var nextBtn = document.getElementById("next-btn");
-    if (!pageInfo) return;
-    var page = Math.floor(currentOffset / PAGE_SIZE) + 1;
-    var totalPages = Math.max(1, Math.ceil(currentTotal / PAGE_SIZE));
-    pageInfo.textContent = "Page " + page + " of " + totalPages;
-    if (prevBtn) prevBtn.disabled = currentOffset === 0;
-    if (nextBtn) nextBtn.disabled = currentOffset + PAGE_SIZE >= currentTotal;
-  }
-
-  var prevBtn = document.getElementById("prev-btn");
-  if (prevBtn) prevBtn.addEventListener("click", function() {
-    currentOffset = Math.max(0, currentOffset - PAGE_SIZE);
-    refreshData();
-  });
-  var nextBtn = document.getElementById("next-btn");
-  if (nextBtn) nextBtn.addEventListener("click", function() {
-    if (currentOffset + PAGE_SIZE < currentTotal) {
-      currentOffset += PAGE_SIZE;
-      refreshData();
-    }
-  });
-
-  // ── Network filter ─────────────────────────────────────────────
-  var netFilter = document.getElementById("network-filter");
-  if (netFilter) netFilter.addEventListener("change", function() {
-    currentNetwork = netFilter.value;
-    currentOffset = 0;
-    refreshData();
-  });
-
-  // ── Utilities ───────────────────────────────────────────────────
-  function esc(s) {
-    var d = document.createElement("div");
-    d.appendChild(document.createTextNode(s || ""));
-    return d.innerHTML;
-  }
-  function timeAgoClient(iso) {
-    var sec = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-    if (sec < 0) return "just now";
-    if (sec < 60) return sec + "s ago";
-    var min = Math.floor(sec / 60);
-    if (min < 60) return min + "m ago";
-    var hr = Math.floor(min / 60);
-    if (hr < 24) return hr + "h ago";
-    return Math.floor(hr / 24) + "d ago";
-  }
-
-  startAutoRefresh();
-  refreshTrend();
-})();`;
-}
-
-// ── Public API ──────────────────────────────────────────────────────
+const FOOTER = `  <footer>Powered by <a href="https://t402.io">T402</a></footer>
+  <script src="/app.js" defer></script>
+</body></html>`;
 
 /**
  * Render the full dashboard HTML.
@@ -362,15 +38,11 @@ function clientScript(address) {
  * @returns {string} Full HTML document
  */
 export function renderDashboard(data) {
-  const { address, hasAddress, balData, budget, stats, payments, alerts, cspNonce } = data;
+  const { address, hasAddress, balData, budget, stats, payments, alerts } = data;
 
   // ── Empty / onboarding state ─────────────────────────────────────
   if (!hasAddress) {
-    return `<!DOCTYPE html>
-<html lang="en"><head><title>T402 Agent Dashboard</title>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="/style.css"></head>
-<body>
+    return `${HEAD}
   <header>
     <h1>Agent Payment Dashboard</h1>
     <div class="subtitle">T402 Protocol — AI Agent Payment Monitoring</div>
@@ -395,16 +67,13 @@ export function renderDashboard(data) {
       </div>
     </form>
   </main>
-  <footer>
-    Powered by <a href="https://t402.io">T402</a>
-  </footer>
-</body></html>`;
+${FOOTER}`;
   }
 
   const safeAddr = escapeHtml(address || "");
   const encodedAddr = encodeURIComponent(address || "");
 
-  // ── Build network bar chart ──────────────────────────────────────
+  // ── Network bar chart ────────────────────────────────────────────
   let networkChart = "";
   if (stats && stats.byNetwork) {
     const entries = Object.entries(stats.byNetwork).sort(
@@ -445,40 +114,26 @@ export function renderDashboard(data) {
   }
 
   // ── Payment table rows ───────────────────────────────────────────
-  // Explorer URL lookup for server-rendered tx links
-  const explorerUrls = {
-    "eip155:1": "https://etherscan.io/tx/",
-    "eip155:8453": "https://basescan.org/tx/",
-    "eip155:42161": "https://arbiscan.io/tx/",
-    "eip155:137": "https://polygonscan.com/tx/",
-    "eip155:10": "https://optimistic.etherscan.io/tx/",
-    "eip155:56": "https://bscscan.com/tx/",
-    "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp": "https://solscan.io/tx/",
-    "ton:mainnet": "https://tonviewer.com/transaction/",
-    "stellar:pubnet": "https://stellarchain.io/tx/",
-    "tron:mainnet": "https://tronscan.org/#/transaction/",
-  };
-
   const paymentRows = payments
     .map((p) => {
       const ago = timeAgo(new Date(p.timestamp));
       const netShort = escapeHtml(p.networkLabel || p.network);
       const indicator = statusIndicator(p.status);
-      const explorerBase = explorerUrls[p.network];
-      const txCell = explorerBase && p.txHash
-        ? `<a href="${escapeHtml(explorerBase + p.txHash)}" target="_blank" rel="noopener"><code>${escapeHtml(p.txHash.slice(0, 10))}…</code></a>`
-        : `<code>${escapeHtml((p.txHash || "").slice(0, 10))}…</code>`;
+      const explorerBase = EXPLORER_URLS[p.network];
+      const txCell =
+        explorerBase && p.txHash
+          ? `<a href="${escapeHtml(explorerBase + p.txHash)}" target="_blank" rel="noopener"><code>${escapeHtml(p.txHash.slice(0, 10))}\u2026</code></a>`
+          : `<code>${escapeHtml((p.txHash || "").slice(0, 10))}\u2026</code>`;
       return `<tr><td>${escapeHtml(p.service)}</td><td>$${escapeHtml(p.amountFormatted)} ${escapeHtml(p.token)}</td><td>${netShort}</td><td class="status-${escapeHtml(p.status)}">${escapeHtml(indicator)}</td><td>${txCell}</td><td>${escapeHtml(ago)}</td></tr>`;
     })
     .join("\n");
 
-  // ── Summary cards ────────────────────────────────────────────────
+  // ── Summary values ───────────────────────────────────────────────
   const totalBal = balData ? escapeHtml(balData.totalUsd) : "--";
   const totalPay = stats ? escapeHtml(String(stats.totalPayments)) : "--";
   const totalSpent = stats ? escapeHtml(stats.totalSpentUsd) : "--";
   const avgPay = stats ? escapeHtml(stats.avgPaymentUsd) : "--";
 
-  // ── Budget section ───────────────────────────────────────────────
   const sessionPct = budget ? budget.usage.sessionPercentage : 0;
   const dailyPct = budget ? budget.usage.todayPercentage : 0;
   const sessionClass = sessionPct >= 80 ? "warn" : "";
@@ -488,7 +143,6 @@ export function renderDashboard(data) {
   const todaySpentFmt = budget ? (Number(budget.usage.todaySpent) / 1e6).toFixed(2) : "0";
   const todayLimitFmt = budget ? (Number(budget.usage.todayLimit) / 1e6).toFixed(2) : "0";
 
-  // ── Top services ─────────────────────────────────────────────────
   const serviceRows = (stats ? stats.topServices : [])
     .map(
       (s) =>
@@ -497,11 +151,7 @@ export function renderDashboard(data) {
     .join("\n");
 
   // ── Full page ────────────────────────────────────────────────────
-  return `<!DOCTYPE html>
-<html lang="en"><head><title>T402 Agent Dashboard</title>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="/style.css"></head>
-<body>
+  return `${HEAD}
   <header>
     <h1>Agent Payment Dashboard</h1>
     <button class="theme-toggle" id="theme-toggle" type="button">\u2600 Light</button>
@@ -543,13 +193,13 @@ export function renderDashboard(data) {
       <div class="card ${sessionClass}">
         <div class="card-label">Session Budget</div>
         <div class="card-value">${sessionPct}%</div>
-        <div class="bar" role="progressbar" aria-valuenow="${Math.min(sessionPct, 100)}" aria-valuemin="0" aria-valuemax="100"><div class="bar-fill" style="width:${Math.min(sessionPct, 100)}%"></div></div>
+        <div class="bar" role="progressbar" aria-valuenow="${Math.min(sessionPct, 100)}" aria-valuemin="0" aria-valuemax="100" aria-label="Session budget usage"><div class="bar-fill" style="width:${Math.min(sessionPct, 100)}%"></div></div>
         <div class="card-label">$${sessionSpentFmt} / $${sessionLimitFmt}</div>
       </div>
       <div class="card ${dailyClass}">
         <div class="card-label">Daily Budget</div>
         <div class="card-value">${dailyPct}%</div>
-        <div class="bar" role="progressbar" aria-valuenow="${Math.min(dailyPct, 100)}" aria-valuemin="0" aria-valuemax="100"><div class="bar-fill" style="width:${Math.min(dailyPct, 100)}%"></div></div>
+        <div class="bar" role="progressbar" aria-valuenow="${Math.min(dailyPct, 100)}" aria-valuemin="0" aria-valuemax="100" aria-label="Daily budget usage"><div class="bar-fill" style="width:${Math.min(dailyPct, 100)}%"></div></div>
         <div class="card-label">$${todaySpentFmt} / $${todayLimitFmt}</div>
       </div>
     </div>
@@ -561,7 +211,7 @@ export function renderDashboard(data) {
     <table>
       <thead><tr><th>Service</th><th>Payments</th><th>Amount</th></tr></thead>
       <tbody>
-        ${serviceRows || '<tr><td colspan="3" style="color:#6b7280">No data</td></tr>'}
+        ${serviceRows || '<tr><td colspan="3" style="color:var(--text-dim)">No data</td></tr>'}
       </tbody>
     </table>
     </div>
@@ -595,30 +245,23 @@ export function renderDashboard(data) {
         </tr>
       </thead>
       <tbody id="payments-tbody">
-        ${paymentRows || '<tr><td colspan="6" style="color:#6b7280">No data</td></tr>'}
+        ${paymentRows || '<tr><td colspan="6" style="color:var(--text-dim)">No data</td></tr>'}
       </tbody>
     </table>
     </div>
     <div class="pagination">
-      <button class="btn" id="prev-btn" type="button" disabled>← Prev</button>
+      <button class="btn" id="prev-btn" type="button" disabled>\u2190 Prev</button>
       <span class="page-info" id="page-info">Page 1</span>
-      <button class="btn" id="next-btn" type="button">Next →</button>
+      <button class="btn" id="next-btn" type="button">Next \u2192</button>
     </div>
 
     <div class="toolbar">
       <a class="btn" href="/api/v1/export/${encodedAddr}?days=7">Export CSV</a>
-      <a class="btn" href="/api/v1/payments?address=${encodedAddr}">Payments API</a>
-      <a class="btn" href="/api/v1/balances/${encodedAddr}">Balances API</a>
-      <a class="btn" href="/api/v1/budget/${encodedAddr}">Budget API</a>
-      <a class="btn" href="/api/v1/stats/${encodedAddr}">Stats API</a>
+      <a class="btn" href="/api/v1/dashboard/${encodedAddr}">Dashboard API</a>
+      <a class="btn" href="/api/v1/stats/${encodedAddr}/trend?days=30">Trend API</a>
       <a class="btn" href="/api/v1/alerts/${encodedAddr}">Alerts API</a>
     </div>
   </main>
 
-  <footer>
-    Powered by <a href="https://t402.io">T402</a>
-  </footer>
-
-  <script src="/app.js" defer></script>
-</body></html>`;
+${FOOTER}`;
 }
