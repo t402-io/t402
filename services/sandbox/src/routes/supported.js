@@ -3,7 +3,7 @@
  */
 import { MAGIC_ADDRESSES, SUPPORTED_NETWORKS, SUPPORTED_KINDS } from "../lib/magic.js";
 import { incrementRequests } from "../lib/metrics.js";
-import { upstreamHealthy, upstreamNetworks } from "../lib/upstream.js";
+import { upstreamHealthy, upstreamNetworks, upstreamSigners } from "../lib/upstream.js";
 
 export function registerSupportedRoutes(app) {
   app.get("/supported", (_req, res) => {
@@ -12,16 +12,17 @@ export function registerSupportedRoutes(app) {
       ...k,
       upstream: upstreamNetworks.includes(k.network),
     }));
+    const defaultSigners = {
+      "eip155:*": ["0xC88f67e776f16DcFBf42e6bDda1B82604448899B"],
+      "solana:*": [],
+      "ton:*": [],
+      "tron:*": [],
+      "stellar:*": [],
+    };
     res.json({
       kinds,
       extensions: ["erc8004"],
-      signers: {
-        "eip155:*": ["0x0000000000000000000000000000000000000000"],
-        "solana:*": [],
-        "ton:*": [],
-        "tron:*": [],
-        "stellar:*": [],
-      },
+      signers: upstreamSigners || defaultSigners,
       sandbox: true,
       upstreamHealthy: upstreamHealthy === true,
       hint: "Testnet only — networks with upstream:true have real on-chain verification. Others use mock fallback.",
@@ -42,6 +43,7 @@ export function registerSupportedRoutes(app) {
         ]},
         { network: "eip155:421614", name: "Arbitrum Sepolia", tokens: [
           { symbol: "ETH (gas)", url: "https://www.alchemy.com/faucets/arbitrum-sepolia" },
+          { symbol: "USDC", url: "https://faucet.circle.com/" },
         ]},
         { network: "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1", name: "Solana Devnet", tokens: [
           { symbol: "SOL (gas)", url: "https://faucet.solana.com/" },
@@ -49,6 +51,7 @@ export function registerSupportedRoutes(app) {
         ]},
         { network: "ton:testnet", name: "TON Testnet", tokens: [
           { symbol: "TON (gas)", url: "https://t.me/testgiver_ton_bot" },
+          { symbol: "USDT", url: "https://t.me/testgiver_ton_bot", note: "Use magic test addresses for USDT testing" },
         ]},
         { network: "tron:nile", name: "TRON Nile", tokens: [
           { symbol: "TRX (gas)", url: "https://nileex.io/join/getJoinPage" },
@@ -57,6 +60,7 @@ export function registerSupportedRoutes(app) {
           { symbol: "XLM (gas)", url: "https://friendbot.stellar.org" },
         ]},
       ],
+      note: "For networks without token faucets, use magic test addresses (GET /test-addresses) for deterministic testing without real tokens.",
       sandbox: true,
     });
   });

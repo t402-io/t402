@@ -1,7 +1,13 @@
 <!DOCTYPE html>
 <html><head><title>T402 Sandbox</title>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="T402 Sandbox — Public testnet facilitator for developer testing. No API key needed.">
+<meta property="og:title" content="T402 Sandbox">
+<meta property="og:description" content="Public testnet facilitator for developer testing. 7 testnet networks, magic test addresses, interactive playground.">
+<meta property="og:url" content="https://sandbox.t402.io">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧪</text></svg>">
 <style>
+html{scroll-behavior:smooth}
 body{font-family:system-ui;background:#0a0a0b;color:#e5e7eb;max-width:720px;margin:0 auto;padding:2rem}
 h1{color:#50AF95;font-size:1.6rem}
 h2{color:#d1d5db;font-size:1.1rem;margin-top:2rem}
@@ -39,6 +45,10 @@ td{padding:.5rem;border-bottom:1px solid #111827;font-size:.9em}
   The client signs a payment off-chain and resubmits. The server verifies via a <strong>facilitator</strong> and settles on-chain.
   This sandbox lets you test the entire flow without real funds.
 </p>
+
+<div style="text-align:center;margin:1.5rem 0">
+  <a href="/playground" style="display:inline-block;background:#065f46;color:#6ee7b7;padding:.6rem 1.5rem;border-radius:6px;text-decoration:none;font-weight:600;font-size:.95rem">Try the Playground &rarr;</a>
+</div>
 
 <h2>Payment Flow</h2>
 <div class="flow">
@@ -101,12 +111,12 @@ curl -s https://sandbox.t402.io/supported | jq
 # Get faucet links
 curl -s https://sandbox.t402.io/faucets | jq
 
-# Verify a payment
+# Verify with magic test address (always succeeds)
 curl -s -X POST https://sandbox.t402.io/verify \
   -H "Content-Type: application/json" \
-  -d '{"paymentPayload":{},"paymentRequirements":{"network":"eip155:84532"}}'</code></pre>
+  -d '{"paymentPayload":{"payload":{"payer":"0x0000000000000000000000000000000000CAFE01"}},"paymentRequirements":{"network":"eip155:84532"}}'</code></pre>
 
-<h2>Supported Networks</h2>
+<h2>Supported Networks <span id="live-count" style="font-size:.75rem;color:#10b981"></span></h2>
 <table>
 <tr><th>Network</th><th>CAIP-2</th><th>Token</th><th>Status</th></tr>
 <tr data-network="eip155:84532"><td>Base Sepolia</td><td><code>eip155:84532</code></td><td>USDC</td><td class="upstream-status" style="font-size:.8em">...</td></tr>
@@ -158,7 +168,7 @@ curl -s -X POST https://sandbox.t402.io/verify \
 <tr><th></th><th>Sandbox</th><th>Production</th></tr>
 <tr><td style="color:#9ca3af">URL</td><td><code>sandbox.t402.io</code></td><td><code>facilitator.t402.io</code></td></tr>
 <tr><td style="color:#9ca3af">API Key</td><td>Not needed</td><td>Required (<code>X-API-Key</code>)</td></tr>
-<tr><td style="color:#9ca3af">Networks</td><td>Testnets only</td><td>25+ mainnets</td></tr>
+<tr><td style="color:#9ca3af">Networks</td><td>7 testnets</td><td>39+ mainnets</td></tr>
 <tr><td style="color:#9ca3af">Tokens</td><td>Test USDC/USDT (free)</td><td>Real USDC/USDT</td></tr>
 <tr><td style="color:#9ca3af">Settlement</td><td>Mock or testnet</td><td>Real on-chain</td></tr>
 <tr><td style="color:#9ca3af">Magic Addresses</td><td>Supported</td><td>Not supported</td></tr>
@@ -176,13 +186,19 @@ function showTab(id){
   event.target.classList.add('active');
 }
 fetch('/supported').then(r=>r.json()).then(data=>{
+  var liveCount=data.kinds.filter(k=>k.upstream).length;
+  var el=document.getElementById('live-count');
+  if(el)el.textContent='('+liveCount+'/'+data.kinds.length+' live)';
   document.querySelectorAll('tr[data-network]').forEach(tr=>{
     var net=tr.getAttribute('data-network');
     var kind=data.kinds.find(k=>k.network===net);
     var cell=tr.querySelector('.upstream-status');
     if(cell&&kind){
-      cell.textContent=kind.upstream?'\uD83D\uDFE2 Live':'\u26AA Mock';
-      cell.style.color=kind.upstream?'#10b981':'#6b7280';
+      if(kind.upstream){
+        cell.innerHTML='<span style="background:#065f46;color:#6ee7b7;padding:.15em .5em;border-radius:3px;font-size:.75rem">Live</span>';
+      }else{
+        cell.innerHTML='<span style="background:#1f2937;color:#6b7280;padding:.15em .5em;border-radius:3px;font-size:.75rem">Mock</span>';
+      }
     }
   });
 }).catch(()=>{});

@@ -7,6 +7,7 @@ import { metrics } from "./metrics.js";
 
 export let upstreamHealthy = null; // null = unknown, true/false after first check
 export let upstreamNetworks = [];  // networks the upstream facilitator actually supports
+export let upstreamSigners = null; // signers from upstream /supported response
 
 export async function checkUpstream() {
   const prev = upstreamHealthy;
@@ -31,6 +32,7 @@ export async function checkUpstream() {
       if (sRes.ok) {
         const data = await sRes.json();
         upstreamNetworks = (data.kinds || []).map(k => k.network);
+        if (data.signers) upstreamSigners = data.signers;
       }
     } catch { /* non-critical */ }
   }
