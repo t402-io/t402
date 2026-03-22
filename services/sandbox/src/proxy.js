@@ -20,9 +20,21 @@ const app = express();
 const PORT = parseInt(process.env.PORT || "3406");
 const FACILITATOR_URL = process.env.FACILITATOR_URL || "http://localhost:8080";
 const RATE_LIMIT = parseInt(process.env.RATE_LIMIT_PER_MINUTE || "100");
+const RATE_LIMIT_MAX_ENTRIES = 10_000; // Max unique IPs tracked before forced eviction
 const VERIFY_TIMEOUT_MS = 30_000;
 const SETTLE_TIMEOUT_MS = 90_000;
 const TRUST_CF_HEADER = process.env.TRUST_CF_HEADER === "true";
+
+// Validate FACILITATOR_URL at startup
+try {
+  const parsed = new URL(FACILITATOR_URL);
+  if (!["http:", "https:"].includes(parsed.protocol)) {
+    throw new Error(`Invalid protocol: ${parsed.protocol}`);
+  }
+} catch (err) {
+  log("error", "Invalid FACILITATOR_URL", { url: FACILITATOR_URL, error: err.message });
+  process.exit(1);
+}
 
 // Compress responses
 app.use(compression());
@@ -62,6 +74,11 @@ app.use((req, res, next) => {
   const now = Date.now();
   let entry = limits.get(ip);
   if (!entry || now - entry.start > RATE_WINDOW_MS) {
+    // Prevent unbounded Map growth under IP-spray attacks
+    if (!entry && limits.size >= RATE_LIMIT_MAX_ENTRIES) {
+      const oldest = limits.keys().next().value;
+      limits.delete(oldest);
+    }
     entry = { count: 0, start: now };
     limits.set(ip, entry);
   }
@@ -154,9 +171,10 @@ async function checkUpstream() {
 const _isMain = process.argv[1] && new URL(import.meta.url).pathname === process.argv[1];
 
 // Periodic upstream check (every 30s)
+let healthTimer;
 if (_isMain) {
   checkUpstream();
-  const healthTimer = setInterval(checkUpstream, 30_000);
+  healthTimer = setInterval(checkUpstream, 30_000);
   healthTimer.unref();
 }
 
@@ -491,6 +509,8 @@ function startServer() {
 
 function shutdown(signal) {
   log("info", `${signal} received, shutting down`, { service: "t402-sandbox" });
+  clearInterval(evictionTimer);
+  if (healthTimer) clearInterval(healthTimer);
   if (server) {
     server.close(() => process.exit(0));
     // Force exit after 5s if connections don't drain
