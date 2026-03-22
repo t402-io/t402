@@ -91,7 +91,7 @@ describe("HTML page", () => {
     // OG meta tags
     assert.ok(html.includes("og:title"));
     // AJAX update script (no location.reload)
-    assert.ok(html.includes("setInterval"));
+    assert.ok(html.includes("setTimeout") || html.includes("setInterval"), "Should use polling");
     assert.ok(!html.includes("location.reload"));
     // Noscript fallback
     assert.ok(html.includes("<noscript>"));

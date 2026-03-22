@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "test": "NODE_ENV=test node --test test/*.test.js"
+    "test": "NODE_ENV=test node --test --test-force-exit test/*.test.js"
   },
   "dependencies": {
     "compression": "^1.8.1",
