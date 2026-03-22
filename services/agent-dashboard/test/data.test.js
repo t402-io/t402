@@ -10,6 +10,8 @@ import {
   generateStats,
   generateAlerts,
   exportPaymentsCsv,
+  generateGlobalNetworkStats,
+  generateGlobalTrendData,
 } from "../src/data.js";
 
 describe("generatePaymentHistory", () => {
@@ -359,5 +361,41 @@ describe("escapeHtml (from utils.js)", () => {
 
   it("returns safe string unchanged", () => {
     assert.strictEqual(escapeHtml("hello world"), "hello world");
+  });
+});
+
+describe("generateGlobalNetworkStats", () => {
+  it("returns array with network distribution", () => {
+    const stats = generateGlobalNetworkStats(7);
+    assert.ok(Array.isArray(stats));
+    assert.ok(stats.length > 0);
+    const net = stats[0];
+    assert.ok(net.network);
+    assert.ok(net.networkLabel);
+    assert.ok(net.volumeUsd);
+    assert.strictEqual(typeof net.count, "number");
+  });
+
+  it("is deterministic", () => {
+    const a = generateGlobalNetworkStats(7);
+    const b = generateGlobalNetworkStats(7);
+    assert.deepStrictEqual(a, b);
+  });
+});
+
+describe("generateGlobalTrendData", () => {
+  it("returns array with correct length", () => {
+    const trend = generateGlobalTrendData(7);
+    assert.strictEqual(trend.length, 7);
+    const day = trend[0];
+    assert.ok(day.date);
+    assert.strictEqual(typeof day.count, "number");
+    assert.ok(day.amountUsd);
+  });
+
+  it("is deterministic", () => {
+    const a = generateGlobalTrendData(7);
+    const b = generateGlobalTrendData(7);
+    assert.deepStrictEqual(a, b);
   });
 });

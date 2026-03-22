@@ -25,9 +25,11 @@ import {
   getAgents,
   getGlobalStats,
   getGlobalTransactions,
+  getGlobalNetworkStats,
+  getGlobalTrend,
 } from "./datasource.js";
 import { renderDashboard, renderApiDocs } from "./templates.js";
-import { isValidAddress, clampInt, log } from "./utils.js";
+import { isValidAddress, isValidCaip2, clampInt, log } from "./utils.js";
 
 // ── Metrics (hand-rolled Prometheus counters, no deps) ──────────────
 
@@ -35,7 +37,10 @@ const metrics = {
   requests: 0,
   errors: 0,
   requestsByPath: {},
-  latencies: [],
+  latencyBuckets: { 10: 0, 50: 0, 100: 0, 250: 0, 500: 0, 1000: 0, Infinity: 0 },
+  latencySum: 0,
+  latencyCount: 0,
+  sseConnections: 0,
 };
 
 /**
@@ -57,8 +62,11 @@ export function registerRoutes(app, opts = {}) {
       const key = `${req.method} ${routePath}`;
       metrics.requestsByPath[key] = (metrics.requestsByPath[key] || 0) + 1;
       if (res.statusCode >= 400) metrics.errors++;
-      metrics.latencies.push(duration);
-      if (metrics.latencies.length > 1000) metrics.latencies = metrics.latencies.slice(-500);
+      metrics.latencySum += duration;
+      metrics.latencyCount++;
+      for (const bucket of [10, 50, 100, 250, 500, 1000, Infinity]) {
+        if (duration <= bucket) metrics.latencyBuckets[bucket]++;
+      }
     });
     next();
   });
@@ -76,6 +84,9 @@ export function registerRoutes(app, opts = {}) {
         return res.status(400).json({ error: "invalid address format" });
       }
       const network = req.query.network || null;
+      if (network && !isValidCaip2(network)) {
+        return res.status(400).json({ error: "invalid network format" });
+      }
       const limit = clampInt(req.query.limit, 1, 100, 20);
       const days = clampInt(req.query.days, 1, 365, 7);
       const offset = clampInt(req.query.offset, 0, 10000, 0);
@@ -229,13 +240,18 @@ export function registerRoutes(app, opts = {}) {
         "X-Accel-Buffering": "no",
       });
       res.flushHeaders();
+      metrics.sseConnections++;
+
+      let closed = false;
 
       // Send initial snapshot
       const sendEvent = (event, data) => {
+        if (closed) return;
         res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
       };
 
       const sendSnapshot = async () => {
+        if (closed) return;
         try {
           const [balData, budget, stats, { payments, total }, alerts] = await Promise.all([
             getBalances(address),
@@ -264,11 +280,14 @@ export function registerRoutes(app, opts = {}) {
 
       // Heartbeat to keep connection alive (every 15s)
       const heartbeat = setInterval(() => {
+        if (closed) return;
         res.write(": heartbeat\n\n");
       }, 15000);
 
       // Cleanup on disconnect
       req.on("close", () => {
+        closed = true;
+        metrics.sseConnections--;
         clearInterval(interval);
         clearInterval(heartbeat);
       });
@@ -332,12 +351,39 @@ export function registerRoutes(app, opts = {}) {
     }
   });
 
+  // ── Global network distribution ─────────────────────────────
+  app.get("/api/stats/networks", async (req, res, next) => {
+    try {
+      const days = clampInt(req.query.days, 1, 365, 7);
+      const networks = await getGlobalNetworkStats(days);
+      res.set("Cache-Control", cacheHeader());
+      res.json({ mode: getMode(), period: `${days}d`, networks });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // ── Global daily trend ────────────────────────────────────
+  app.get("/api/stats/trend", async (req, res, next) => {
+    try {
+      const days = clampInt(req.query.days, 1, 365, 30);
+      const trend = await getGlobalTrend(days);
+      res.set("Cache-Control", cacheHeader());
+      res.json({ mode: getMode(), period: `${days}d`, trend });
+    } catch (err) {
+      next(err);
+    }
+  });
+
   // ── Global transactions (no address required) ───────────────
   app.get("/api/transactions", async (req, res, next) => {
     try {
       const limit = clampInt(req.query.limit, 1, 100, 20);
       const offset = clampInt(req.query.offset, 0, 10000, 0);
       const network = req.query.network || null;
+      if (network && !isValidCaip2(network)) {
+        return res.status(400).json({ error: "invalid network format" });
+      }
       const { transactions, total } = await getGlobalTransactions({ limit, offset, network });
       res.set("Cache-Control", cacheHeader());
       res.json({ mode: getMode(), transactions, total, offset, limit, hasMore: offset + transactions.length < total });
@@ -387,11 +433,6 @@ export function registerRoutes(app, opts = {}) {
   // ── Prometheus metrics ─────────────────────────────────────────
 
   app.get("/metrics", (_req, res) => {
-    const avgLatency =
-      metrics.latencies.length > 0
-        ? (metrics.latencies.reduce((a, b) => a + b, 0) / metrics.latencies.length).toFixed(1)
-        : 0;
-
     const lines = [
       `# HELP http_requests_total Total HTTP requests`,
       `# TYPE http_requests_total counter`,
@@ -399,13 +440,36 @@ export function registerRoutes(app, opts = {}) {
       `# HELP http_errors_total Total HTTP errors (4xx+5xx)`,
       `# TYPE http_errors_total counter`,
       `http_errors_total ${metrics.errors}`,
-      `# HELP http_request_duration_ms_avg Average request duration`,
-      `# TYPE http_request_duration_ms_avg gauge`,
-      `http_request_duration_ms_avg ${avgLatency}`,
+      `# HELP http_request_duration_ms Request duration histogram`,
+      `# TYPE http_request_duration_ms histogram`,
+      `http_request_duration_ms_bucket{le="10"} ${metrics.latencyBuckets[10]}`,
+      `http_request_duration_ms_bucket{le="50"} ${metrics.latencyBuckets[50]}`,
+      `http_request_duration_ms_bucket{le="100"} ${metrics.latencyBuckets[100]}`,
+      `http_request_duration_ms_bucket{le="250"} ${metrics.latencyBuckets[250]}`,
+      `http_request_duration_ms_bucket{le="500"} ${metrics.latencyBuckets[500]}`,
+      `http_request_duration_ms_bucket{le="1000"} ${metrics.latencyBuckets[1000]}`,
+      `http_request_duration_ms_bucket{le="+Inf"} ${metrics.latencyBuckets[Infinity]}`,
+      `http_request_duration_ms_sum ${metrics.latencySum}`,
+      `http_request_duration_ms_count ${metrics.latencyCount}`,
+      `# HELP sse_active_connections Active SSE connections`,
+      `# TYPE sse_active_connections gauge`,
+      `sse_active_connections ${metrics.sseConnections}`,
       `# HELP datasource_mode Current data source mode`,
       `# TYPE datasource_mode gauge`,
       `datasource_mode{mode="${getMode()}"} 1`,
     ];
+
+    // Pool stats (live mode only)
+    const poolStats = getPoolStats();
+    if (poolStats) {
+      lines.push(
+        `# HELP pg_pool_total Total pool connections`,
+        `# TYPE pg_pool_total gauge`,
+        `pg_pool_total ${poolStats.totalCount}`,
+        `pg_pool_idle ${poolStats.idleCount}`,
+        `pg_pool_waiting ${poolStats.waitingCount}`,
+      );
+    }
 
     for (const [path, count] of Object.entries(metrics.requestsByPath)) {
       // Sanitize for Prometheus label: strip control chars, limit length

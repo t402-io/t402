@@ -5,6 +5,7 @@
  */
 
 import { escapeHtml, timeAgo, statusIndicator } from "./utils.js";
+import { EXPLORER_URLS } from "./networks.js";
 
 /**
  * Render the API documentation page with the OpenAPI spec displayed.
@@ -32,19 +33,6 @@ export function renderApiDocs(specYaml) {
 </html>`;
 }
 
-// Explorer URL lookup for server-rendered tx links
-const EXPLORER_URLS = {
-  "eip155:1": "https://etherscan.io/tx/",
-  "eip155:8453": "https://basescan.org/tx/",
-  "eip155:42161": "https://arbiscan.io/tx/",
-  "eip155:137": "https://polygonscan.com/tx/",
-  "eip155:10": "https://optimistic.etherscan.io/tx/",
-  "eip155:56": "https://bscscan.com/tx/",
-  "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp": "https://solscan.io/tx/",
-  "ton:mainnet": "https://tonviewer.com/transaction/",
-  "stellar:pubnet": "https://stellarchain.io/tx/",
-  "tron:mainnet": "https://tronscan.org/#/transaction/",
-};
 
 const HEAD = `<!DOCTYPE html>
 <html lang="en"><head><title>T402 Agent Dashboard</title>
@@ -53,6 +41,7 @@ const HEAD = `<!DOCTYPE html>
 <body>`;
 
 const FOOTER = `  <footer>Powered by <a href="https://t402.io">T402</a></footer>
+  <script>window.__EXPLORERS__=${JSON.stringify(EXPLORER_URLS)};</script>
   <script src="/app.js" defer></script>
 </body></html>`;
 

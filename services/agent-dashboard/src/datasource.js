@@ -19,6 +19,8 @@ import {
   generateAgents,
   generateGlobalStats,
   generateGlobalTransactions,
+  generateGlobalNetworkStats,
+  generateGlobalTrendData,
 } from "./data.js";
 import { networkMeta } from "./networks.js";
 import { buildAlertsFromBudget, formatPaymentsCsv, log } from "./utils.js";
@@ -109,8 +111,8 @@ function rowToPayment(row, index) {
     amount: String(amountRaw),
     amountFormatted: (amountRaw / 10 ** meta.decimals).toFixed(meta.decimals === 7 ? 2 : 4),
     to: row.to_address || "",
-    service: row.service || row.resource || "Unknown",
-    status: row.status || "settled",
+    service: row.service || row.resource || (row.metadata && typeof row.metadata === "object" ? (row.metadata.resource || row.metadata.service) : null) || "Payment",
+    status: row.status === "confirmed" ? "settled" : (row.status || "settled"),
     timestamp: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
   };
 }
@@ -203,7 +205,7 @@ export async function getBalances(address) {
               AS net_balance
      FROM settlements
      WHERE (from_address = $1 OR to_address = $1)
-       AND status = 'settled'
+       AND status = 'confirmed'
      GROUP BY network
      ORDER BY net_balance DESC`,
     values: [address],
@@ -249,7 +251,7 @@ export async function getBudget(address) {
     text: `SELECT COALESCE(SUM(CAST(amount AS NUMERIC)), 0) AS total
      FROM settlements
      WHERE from_address = $1
-       AND status = 'settled'
+       AND status = 'confirmed'
        AND created_at >= $2`,
     values: [address, todayStart],
   });
@@ -263,7 +265,7 @@ export async function getBudget(address) {
             COUNT(*) AS cnt
      FROM settlements
      WHERE from_address = $1
-       AND status = 'settled'
+       AND status = 'confirmed'
        AND created_at >= $2`,
     values: [address, hourAgo],
   });
@@ -314,7 +316,7 @@ export async function getStats(address, days = 7) {
                   COUNT(*) AS cnt, SUM(CAST(amount AS NUMERIC)) AS total
            FROM settlements
            WHERE (from_address = $1 OR to_address = $1)
-             AND status = 'settled'
+             AND status = 'confirmed'
              AND created_at >= $2
            GROUP BY COALESCE(service, resource, 'Unknown') ORDER BY total DESC LIMIT 5`,
     values: [address, cutoff],
@@ -332,7 +334,7 @@ export async function getStats(address, days = 7) {
     text: `SELECT network, COUNT(*) AS cnt, SUM(CAST(amount AS NUMERIC)) AS total
            FROM settlements
            WHERE (from_address = $1 OR to_address = $1)
-             AND status = 'settled'
+             AND status = 'confirmed'
              AND created_at >= $2
            GROUP BY network`,
     values: [address, cutoff],
@@ -383,7 +385,7 @@ export async function getTrend(address, days = 30) {
                   COALESCE(SUM(CAST(amount AS NUMERIC)), 0) AS total
            FROM settlements
            WHERE (from_address = $1 OR to_address = $1)
-             AND status = 'settled'
+             AND status = 'confirmed'
              AND created_at >= $2
            GROUP BY DATE(created_at)
            ORDER BY day ASC`,
@@ -446,7 +448,7 @@ export async function getAgents() {
                   COALESCE(SUM(CAST(amount AS NUMERIC)), 0) AS total_spent,
                   MAX(created_at) AS last_active
            FROM settlements
-           WHERE status = 'settled'
+           WHERE status = 'confirmed'
            GROUP BY from_address
            ORDER BY total_spent DESC
            LIMIT 50`,
@@ -483,7 +485,7 @@ export async function getGlobalStats(days = 7) {
                   COUNT(DISTINCT from_address) AS unique_agents,
                   COALESCE(SUM(CAST(amount AS NUMERIC)), 0) AS total_volume
            FROM settlements
-           WHERE status = 'settled'
+           WHERE status = 'confirmed'
              AND created_at >= $1`,
     values: [cutoff],
   });
@@ -552,4 +554,63 @@ export async function getGlobalTransactions(options = {}) {
   const total = parseInt(countResult.rows[0]?.cnt || "0", 10);
 
   return { transactions, total };
+}
+
+/**
+ * Get payment volume by network across all agents.
+ * @param {number} [days=7]
+ * @returns {Promise<Array<object>>}
+ */
+export async function getGlobalNetworkStats(days = 7) {
+  if (getMode() === "demo") return generateGlobalNetworkStats(days);
+  const pool = await getPool();
+  const cutoff = new Date(Date.now() - days * 86400 * 1000);
+  const result = await pool.query({
+    name: "global-network-stats",
+    text: `SELECT network, COUNT(*) as count, COALESCE(SUM(CAST(amount AS NUMERIC)), 0) as volume
+           FROM settlements WHERE status = 'confirmed' AND created_at >= $1
+           GROUP BY network ORDER BY volume DESC`,
+    values: [cutoff],
+  });
+  return result.rows.map(row => {
+    const meta = networkMeta(row.network);
+    return {
+      network: row.network, networkLabel: meta.label, token: meta.token,
+      count: Number(row.count), volume: String(row.volume),
+      volumeUsd: (Number(row.volume) / 1e6).toFixed(2),
+    };
+  });
+}
+
+/**
+ * Get daily spending trend across all agents.
+ * @param {number} [days=30]
+ * @returns {Promise<Array<{ date: string, count: number, amount: string, amountUsd: string }>>}
+ */
+export async function getGlobalTrend(days = 30) {
+  if (getMode() === "demo") return generateGlobalTrendData(days);
+  const pool = await getPool();
+  const cutoff = new Date(Date.now() - days * 86400 * 1000);
+  const result = await pool.query({
+    name: "global-trend",
+    text: `SELECT DATE(created_at) AS day, COUNT(*) AS cnt, COALESCE(SUM(CAST(amount AS NUMERIC)), 0) AS total
+           FROM settlements WHERE status = 'confirmed' AND created_at >= $1
+           GROUP BY DATE(created_at) ORDER BY day ASC`,
+    values: [cutoff],
+  });
+  // Fill in missing dates
+  const byDate = Object.create(null);
+  for (const row of result.rows) {
+    const d = row.day instanceof Date ? row.day.toISOString().slice(0, 10) : String(row.day);
+    byDate[d] = { count: Number(row.cnt), amount: Number(row.total) };
+  }
+  const trend = [];
+  const now = new Date();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now); d.setUTCDate(d.getUTCDate() - i);
+    const date = d.toISOString().slice(0, 10);
+    const entry = byDate[date] || { count: 0, amount: 0 };
+    trend.push({ date, count: entry.count, amount: String(entry.amount), amountUsd: (entry.amount / 1e6).toFixed(2) });
+  }
+  return trend;
 }

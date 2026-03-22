@@ -21,6 +21,20 @@ export const NETWORK_META = {
 /** Array form for iteration (used by synthetic data generators). */
 export const NETWORKS = Object.entries(NETWORK_META).map(([caip2, meta]) => ({ caip2, ...meta }));
 
+/** Block explorer transaction URL prefixes keyed by CAIP-2 network ID. */
+export const EXPLORER_URLS = {
+  "eip155:1": "https://etherscan.io/tx/",
+  "eip155:8453": "https://basescan.org/tx/",
+  "eip155:42161": "https://arbiscan.io/tx/",
+  "eip155:137": "https://polygonscan.com/tx/",
+  "eip155:10": "https://optimistic.etherscan.io/tx/",
+  "eip155:56": "https://bscscan.com/tx/",
+  "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp": "https://solscan.io/tx/",
+  "ton:mainnet": "https://tonviewer.com/transaction/",
+  "stellar:pubnet": "https://stellarchain.io/tx/",
+  "tron:mainnet": "https://tronscan.org/#/transaction/",
+};
+
 /** Lookup with fallback for unknown networks. */
 export function networkMeta(caip2) {
   return NETWORK_META[caip2] || { label: caip2, token: "USDT", decimals: 6 };

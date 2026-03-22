@@ -374,4 +374,64 @@ describe("Agent Dashboard API", () => {
     const res = await fetch(BASE);
     assert.strictEqual(res.headers.get("cross-origin-resource-policy"), "same-origin");
   });
+
+  it("GET /api/stats/networks returns network distribution", async () => {
+    const res = await fetch(`${BASE}/api/stats/networks`);
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.ok(Array.isArray(data.networks));
+    assert.ok(data.networks.length > 0);
+    assert.strictEqual(data.period, "7d");
+    const net = data.networks[0];
+    assert.ok(net.network);
+    assert.ok(net.networkLabel);
+    assert.ok(net.volumeUsd);
+    assert.strictEqual(typeof net.count, "number");
+  });
+
+  it("GET /api/stats/trend returns global daily trend", async () => {
+    const res = await fetch(`${BASE}/api/stats/trend`);
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.ok(Array.isArray(data.trend));
+    assert.strictEqual(data.trend.length, 30);
+    assert.strictEqual(data.period, "30d");
+    const day = data.trend[0];
+    assert.ok(day.date);
+    assert.strictEqual(typeof day.count, "number");
+    assert.ok(day.amountUsd);
+  });
+
+  it("GET /api/stats/trend respects days param", async () => {
+    const res = await fetch(`${BASE}/api/stats/trend?days=7`);
+    const data = await res.json();
+    assert.strictEqual(data.trend.length, 7);
+    assert.strictEqual(data.period, "7d");
+  });
+
+  it("GET /api/v1/payments rejects invalid network format", async () => {
+    const res = await fetch(`${BASE}/api/v1/payments?address=0xTest&network=<script>alert(1)</script>`);
+    assert.strictEqual(res.status, 400);
+    const data = await res.json();
+    assert.ok(data.error.includes("network"));
+  });
+
+  it("GET /api/v1/payments accepts valid CAIP-2 network", async () => {
+    const res = await fetch(`${BASE}/api/v1/payments?address=0xTest&network=eip155:8453`);
+    assert.strictEqual(res.status, 200);
+  });
+
+  it("GET /api/transactions rejects invalid network format", async () => {
+    const res = await fetch(`${BASE}/api/transactions?network=DROP TABLE`);
+    assert.strictEqual(res.status, 400);
+  });
+
+  it("GET /metrics includes histogram buckets", async () => {
+    const res = await fetch(`${BASE}/metrics`);
+    const text = await res.text();
+    assert.ok(text.includes("http_request_duration_ms_bucket"));
+    assert.ok(text.includes("http_request_duration_ms_sum"));
+    assert.ok(text.includes("http_request_duration_ms_count"));
+    assert.ok(text.includes("sse_active_connections"));
+  });
 });

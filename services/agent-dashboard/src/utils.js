@@ -30,6 +30,12 @@ export function clampInt(val, min, max, fallback) {
   return Math.max(min, Math.min(max, n));
 }
 
+/** Validate a CAIP-2 network identifier (e.g. "eip155:1"). Returns true when value is falsy (no filter). */
+export function isValidCaip2(value) {
+  if (!value) return true;
+  return typeof value === "string" && /^[a-z0-9-]{2,20}:[a-zA-Z0-9._-]{1,64}$/.test(value);
+}
+
 // ── Formatting ──────────────────────────────────────────────────────
 
 export function timeAgo(date) {

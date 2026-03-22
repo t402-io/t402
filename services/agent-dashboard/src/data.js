@@ -297,6 +297,55 @@ export function generateGlobalStats(days = 7) {
  * @param {{ limit?: number, offset?: number, network?: string }} [options]
  * @returns {{ transactions: Array<object>, total: number }}
  */
+export function generateGlobalNetworkStats(days = 7) {
+  let allPayments = [];
+  for (const agent of DEMO_AGENTS) {
+    allPayments = allPayments.concat(generatePaymentHistory(agent.address, days).filter(p => p.status === "settled"));
+  }
+  const byNetwork = {};
+  for (const p of allPayments) {
+    if (!byNetwork[p.network]) byNetwork[p.network] = { network: p.network, networkLabel: p.networkLabel, token: p.token, count: 0, volume: 0 };
+    byNetwork[p.network].count++;
+    byNetwork[p.network].volume += Number(p.amount);
+  }
+  const networks = Object.values(byNetwork).sort((a, b) => b.volume - a.volume);
+  return networks.map(n => ({ ...n, volume: String(n.volume), volumeUsd: (n.volume / 1e6).toFixed(2) }));
+}
+
+/**
+ * Generate global daily spending trend across all demo agents.
+ * @param {number} [days=30]
+ * @returns {Array<{ date: string, count: number, amount: string, amountUsd: string }>}
+ */
+export function generateGlobalTrendData(days = 30) {
+  let allPayments = [];
+  for (const agent of DEMO_AGENTS) {
+    allPayments = allPayments.concat(generatePaymentHistory(agent.address, days).filter(p => p.status === "settled"));
+  }
+  const byDate = Object.create(null);
+  for (const p of allPayments) {
+    const date = p.timestamp.slice(0, 10);
+    if (!byDate[date]) byDate[date] = { count: 0, amount: 0 };
+    byDate[date].count++;
+    byDate[date].amount += Number(p.amount);
+  }
+  const result = [];
+  const now = new Date();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now); d.setUTCDate(d.getUTCDate() - i);
+    const date = d.toISOString().slice(0, 10);
+    const entry = byDate[date] || { count: 0, amount: 0 };
+    result.push({ date, count: entry.count, amount: String(entry.amount), amountUsd: (entry.amount / 1e6).toFixed(2) });
+  }
+  return result;
+}
+
+/**
+ * Generate global transactions across all demo agents.
+ * Merges and sorts payments from all demo agents.
+ * @param {{ limit?: number, offset?: number, network?: string }} [options]
+ * @returns {{ transactions: Array<object>, total: number }}
+ */
 export function generateGlobalTransactions(options = {}) {
   const { limit = 20, offset = 0, network = null } = options;
 

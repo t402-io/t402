@@ -291,6 +291,64 @@ paths:
                   limit: { type: integer }
                   hasMore: { type: boolean }
 
+  /api/stats/networks:
+    get:
+      summary: Payment volume by network
+      description: Returns payment volume aggregated by network across all agents.
+      parameters:
+        - name: days
+          in: query
+          schema: { type: integer, default: 7, minimum: 1, maximum: 365 }
+      responses:
+        "200":
+          description: Network distribution
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mode: { type: string, enum: [demo, live] }
+                  period: { type: string }
+                  networks:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        network: { type: string }
+                        networkLabel: { type: string }
+                        token: { type: string }
+                        count: { type: integer }
+                        volume: { type: string }
+                        volumeUsd: { type: string }
+
+  /api/stats/trend:
+    get:
+      summary: Daily spending trend across all agents
+      description: Returns daily aggregated spending for the given period, with zero-filled missing dates.
+      parameters:
+        - name: days
+          in: query
+          schema: { type: integer, default: 30, minimum: 1, maximum: 365 }
+      responses:
+        "200":
+          description: Daily trend data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mode: { type: string, enum: [demo, live] }
+                  period: { type: string }
+                  trend:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date: { type: string, format: date }
+                        count: { type: integer }
+                        amount: { type: string }
+                        amountUsd: { type: string }
+
   /api/v1/info:
     get:
       summary: Service info

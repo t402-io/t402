@@ -35,18 +35,7 @@
   var sortAsc = true;
 
   // ── Explorer URLs ───────────────────────────────────────────────
-  var explorers = {
-    "eip155:1": "https://etherscan.io/tx/",
-    "eip155:8453": "https://basescan.org/tx/",
-    "eip155:42161": "https://arbiscan.io/tx/",
-    "eip155:137": "https://polygonscan.com/tx/",
-    "eip155:10": "https://optimistic.etherscan.io/tx/",
-    "eip155:56": "https://bscscan.com/tx/",
-    "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp": "https://solscan.io/tx/",
-    "ton:mainnet": "https://tonviewer.com/transaction/",
-    "stellar:pubnet": "https://stellarchain.io/tx/",
-    "tron:mainnet": "https://tronscan.org/#/transaction/",
-  };
+  var explorers = window.__EXPLORERS__ || {};
 
   function explorerLink(network, txHash) {
     var base = explorers[network];
