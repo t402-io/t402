@@ -96,9 +96,10 @@ export async function POST(request: NextRequest) {
     response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
     return response;
   } catch (error) {
+    const reason = String(error);
     return NextResponse.json(
-      { error: "Facilitator error", reason: String(error) },
-      { status: 502 }
+      { error: "Facilitator error", reason },
+      { status: 500 }
     );
   }
 }

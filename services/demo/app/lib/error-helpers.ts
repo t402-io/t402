@@ -15,7 +15,7 @@ export function classifyError(error: unknown): ErrorType {
   if (lower.includes("timed out") || lower.includes("timeout") || lower.includes("aborted")) {
     return "timeout";
   }
-  if (lower.includes("facilitator") || lower.includes("502") || lower.includes("503")) {
+  if (lower.includes("facilitator") || lower.includes("503") || lower.includes("service unavailable")) {
     return "facilitator";
   }
   if (lower.includes("network") || lower.includes("fetch") || lower.includes("econnrefused")) {

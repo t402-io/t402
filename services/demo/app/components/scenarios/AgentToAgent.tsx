@@ -97,7 +97,9 @@ export function AgentToAgent() {
       setSettle(parsePaymentResponse(retryResponse));
 
       if (!retryResponse.ok) {
-        throw new Error(`Request failed: ${retryResponse.status}`);
+        const errBody = await retryResponse.json().catch(() => null);
+        const reason = errBody?.reason || errBody?.error || `status ${retryResponse.status}`;
+        throw new Error(reason);
       }
 
       const data = await retryResponse.json();

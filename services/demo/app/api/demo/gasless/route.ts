@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return NextResponse.json(
       { error: "Facilitator error", reason: String(error) },
-      { status: 502 }
+      { status: 500 }
     );
   }
 }
