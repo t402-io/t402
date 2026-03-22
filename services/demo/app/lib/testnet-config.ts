@@ -7,7 +7,6 @@ export interface ChainConfig {
   payTo: string;
   explorer: string;
   explorerSuffix?: string;
-  faucet: string;
   name: string;
   label: string;
   color: string;
@@ -17,6 +16,14 @@ export interface ChainConfig {
   tokenContractName?: string;
   /** EIP-712 domain version (EVM only) */
   tokenContractVersion?: string;
+  /** Faucet for native gas token */
+  gasFaucet: string;
+  /** Display label for gas faucet (e.g. "Base Sepolia ETH") */
+  gasFaucetLabel: string;
+  /** Faucet for test stablecoin (USDT/USDC) */
+  tokenFaucet: string;
+  /** Display label for token faucet */
+  tokenFaucetLabel: string;
 }
 
 export const CHAIN_CONFIGS: Record<ChainFamily, ChainConfig> = {
@@ -26,7 +33,6 @@ export const CHAIN_CONFIGS: Record<ChainFamily, ChainConfig> = {
     asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
     payTo: "0xC88f67e776f16DcFBf42e6bDda1B82604448899B",
     explorer: "https://sepolia.basescan.org/tx/",
-    faucet: "https://www.alchemy.com/faucets/base-sepolia",
     name: "Base Sepolia",
     label: "EVM",
     color: "var(--color-chain-evm)",
@@ -34,6 +40,10 @@ export const CHAIN_CONFIGS: Record<ChainFamily, ChainConfig> = {
     tokenSymbol: "USDC",
     tokenContractName: "USD Coin",
     tokenContractVersion: "2",
+    gasFaucet: "https://www.alchemy.com/faucets/base-sepolia",
+    gasFaucetLabel: "Base Sepolia ETH",
+    tokenFaucet: "https://faucet.circle.com/",
+    tokenFaucetLabel: "USDC (Circle Faucet)",
   },
   ton: {
     family: "ton",
@@ -41,12 +51,15 @@ export const CHAIN_CONFIGS: Record<ChainFamily, ChainConfig> = {
     asset: "kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy",
     payTo: "EQDjv9CUEJ__D_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkEUe",
     explorer: "https://testnet.tonscan.org/tx/",
-    faucet: "https://t.me/testgiver_ton_bot",
     name: "TON Testnet",
     label: "TON",
     color: "var(--color-chain-ton)",
     decimals: 6,
     tokenSymbol: "USDT",
+    gasFaucet: "https://t.me/testgiver_ton_bot",
+    gasFaucetLabel: "Testnet TON",
+    tokenFaucet: "https://testnet.tonscan.org/address/kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy",
+    tokenFaucetLabel: "USDT (Testnet Jetton — mint via wallet)",
   },
   tron: {
     family: "tron",
@@ -54,12 +67,15 @@ export const CHAIN_CONFIGS: Record<ChainFamily, ChainConfig> = {
     asset: "TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf",
     payTo: "TT1MqNNj2k5qdGA6nrrCodW6oyHbbAreQ5",
     explorer: "https://nile.tronscan.org/#/transaction/",
-    faucet: "https://nileex.io/join/getJoinPage",
     name: "TRON Nile",
     label: "TRON",
     color: "var(--color-chain-tron)",
     decimals: 6,
     tokenSymbol: "USDT",
+    gasFaucet: "https://nileex.io/join/getJoinPage",
+    gasFaucetLabel: "Nile TRX",
+    tokenFaucet: "https://nileex.io/join/getJoinPage",
+    tokenFaucetLabel: "USDT (same faucet — select TRC-20)",
   },
   solana: {
     family: "solana",
@@ -68,12 +84,15 @@ export const CHAIN_CONFIGS: Record<ChainFamily, ChainConfig> = {
     payTo: "8GGtWHRQ1wz5gDKE2KXZLktqzcfV1CBqSbeUZjA7hoWL",
     explorer: "https://explorer.solana.com/tx/",
     explorerSuffix: "?cluster=devnet",
-    faucet: "https://faucet.solana.com",
     name: "Solana Devnet",
     label: "Solana",
     color: "var(--color-chain-solana)",
     decimals: 6,
     tokenSymbol: "USDT",
+    gasFaucet: "https://faucet.solana.com",
+    gasFaucetLabel: "Devnet SOL",
+    tokenFaucet: "https://spl-token-faucet.com/?token-name=USDT",
+    tokenFaucetLabel: "USDT (SPL Token Faucet)",
   },
   stacks: {
     family: "stacks",
@@ -82,12 +101,15 @@ export const CHAIN_CONFIGS: Record<ChainFamily, ChainConfig> = {
     payTo: "SP36B1B191JTQAZTRKKWRN7J0YHHM41W9P9P7EPR5",
     explorer: "https://explorer.hiro.so/txid/",
     explorerSuffix: "?chain=testnet",
-    faucet: "https://explorer.hiro.so/sandbox/faucet?chain=testnet",
     name: "Stacks Testnet",
     label: "Stacks",
     color: "var(--color-chain-stacks)",
     decimals: 6,
     tokenSymbol: "USDT",
+    gasFaucet: "https://explorer.hiro.so/sandbox/faucet?chain=testnet",
+    gasFaucetLabel: "Testnet STX",
+    tokenFaucet: "https://explorer.hiro.so/sandbox/deploy?chain=testnet",
+    tokenFaucetLabel: "USDT (deploy mock contract via Sandbox)",
   },
   near: {
     family: "near",
@@ -95,12 +117,15 @@ export const CHAIN_CONFIGS: Record<ChainFamily, ChainConfig> = {
     asset: "usdc.fakes.testnet",
     payTo: "t402-facilitator.testnet",
     explorer: "https://testnet.nearblocks.io/txns/",
-    faucet: "https://near-faucet.io",
     name: "NEAR Testnet",
     label: "NEAR",
     color: "var(--color-chain-near)",
     decimals: 6,
     tokenSymbol: "USDC",
+    gasFaucet: "https://near-faucet.io",
+    gasFaucetLabel: "Testnet NEAR",
+    tokenFaucet: "https://near-faucet.io",
+    tokenFaucetLabel: "USDC (usdc.fakes.testnet — same faucet)",
   },
   aptos: {
     family: "aptos",
@@ -109,12 +134,15 @@ export const CHAIN_CONFIGS: Record<ChainFamily, ChainConfig> = {
     payTo: "0xde57951f571b0bd792d05e0e3f62fed292099b2721b8c9efc76b3eae57ad74ef",
     explorer: "https://explorer.aptoslabs.com/txn/",
     explorerSuffix: "?network=testnet",
-    faucet: "https://aptoslabs.com/testnet-faucet",
     name: "Aptos Testnet",
     label: "Aptos",
     color: "var(--color-chain-aptos)",
     decimals: 6,
     tokenSymbol: "USDT",
+    gasFaucet: "https://aptoslabs.com/testnet-faucet",
+    gasFaucetLabel: "Testnet APT",
+    tokenFaucet: "https://aptoslabs.com/testnet-faucet",
+    tokenFaucetLabel: "USDT (same faucet — includes test coins)",
   },
   tezos: {
     family: "tezos",
@@ -122,12 +150,15 @@ export const CHAIN_CONFIGS: Record<ChainFamily, ChainConfig> = {
     asset: "KT1P8RdJ5MfHMK5phKJ5JsfNfask5v2b2NQS",
     payTo: "tz1WGmWmJwJ4Z8DRhYxyNwQSfktFCLXB8dg6",
     explorer: "https://ghostnet.tzkt.io/",
-    faucet: "https://faucet.ghostnet.teztnets.com",
     name: "Tezos Ghostnet",
     label: "Tezos",
     color: "var(--color-chain-tezos)",
     decimals: 6,
     tokenSymbol: "USDt",
+    gasFaucet: "https://faucet.ghostnet.teztnets.com",
+    gasFaucetLabel: "Ghostnet XTZ",
+    tokenFaucet: "https://faucet.ghostnet.teztnets.com",
+    tokenFaucetLabel: "USDt (same faucet — includes FA2 tokens)",
   },
   polkadot: {
     family: "polkadot",
@@ -135,12 +166,15 @@ export const CHAIN_CONFIGS: Record<ChainFamily, ChainConfig> = {
     asset: "1984",
     payTo: "5GVGsVNg5pY8iF2Wj118mtJux1HwhVp2jrStx9fqmzVABCVL",
     explorer: "https://assethub-westend.subscan.io/extrinsic/",
-    faucet: "https://faucet.polkadot.io/?parachain=1000",
     name: "Westend Asset Hub",
     label: "Polkadot",
     color: "var(--color-chain-polkadot)",
     decimals: 6,
     tokenSymbol: "USDT",
+    gasFaucet: "https://faucet.polkadot.io/?parachain=1000",
+    gasFaucetLabel: "Westend WND",
+    tokenFaucet: "https://faucet.polkadot.io/?parachain=1000",
+    tokenFaucetLabel: "USDT (Asset 1984 — teleport or sudo mint)",
   },
   cosmos: {
     family: "cosmos",
@@ -148,12 +182,15 @@ export const CHAIN_CONFIGS: Record<ChainFamily, ChainConfig> = {
     asset: "uusdc",
     payTo: "noble1ejc2c2gvk46h7kyulx9fus85vdpq0zdjwkfav0",
     explorer: "https://www.mintscan.io/noble-testnet/tx/",
-    faucet: "https://faucet.testnet.noble.strange.love",
     name: "Noble Testnet",
     label: "Cosmos",
     color: "var(--color-chain-cosmos)",
     decimals: 6,
     tokenSymbol: "USDC",
+    gasFaucet: "https://faucet.testnet.noble.strange.love",
+    gasFaucetLabel: "Noble testnet gas",
+    tokenFaucet: "https://faucet.testnet.noble.strange.love",
+    tokenFaucetLabel: "USDC (same faucet — includes uusdc)",
   },
 };
 
@@ -165,5 +202,9 @@ export function getExplorerUrl(family: ChainFamily, txHash: string): string {
 }
 
 export function getFaucetUrl(family: ChainFamily): string {
-  return CHAIN_CONFIGS[family].faucet;
+  return CHAIN_CONFIGS[family].gasFaucet;
+}
+
+export function getTokenFaucetUrl(family: ChainFamily): string {
+  return CHAIN_CONFIGS[family].tokenFaucet;
 }
