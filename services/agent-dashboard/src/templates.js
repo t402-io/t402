@@ -38,32 +38,63 @@ const FOOTER = `  <footer>Powered by <a href="https://t402.io">T402</a></footer>
  * @returns {string} Full HTML document
  */
 export function renderDashboard(data) {
-  const { address, hasAddress, balData, budget, stats, payments, alerts } = data;
+  const { address, hasAddress, balData, budget, stats, payments, alerts, agents, globalStats } = data;
 
-  // ── Empty / onboarding state ─────────────────────────────────────
+  // ── Overview page (no address selected) ────────────────────────────
   if (!hasAddress) {
+    // Global stats cards
+    const gs = globalStats || {};
+    const gsCards = globalStats
+      ? `<div class="cards">
+          <div class="card"><div class="card-value">${escapeHtml(String(gs.totalAgents || 0))}</div><div class="card-label">Active Agents</div></div>
+          <div class="card"><div class="card-value">${escapeHtml(String(gs.totalPayments || 0))}</div><div class="card-label">Payments (${escapeHtml(gs.period || "7d")})</div></div>
+          <div class="card"><div class="card-value">$${escapeHtml(gs.totalVolumeUsd || "0")}</div><div class="card-label">Total Volume</div></div>
+          <div class="card"><div class="card-value">$${escapeHtml(gs.avgPaymentUsd || "0")}</div><div class="card-label">Avg Payment</div></div>
+        </div>`
+      : "";
+
+    // Agents table
+    const agentsList = agents || [];
+    const agentRows = agentsList
+      .map((a) => {
+        const statusClass = a.status === "active" ? "status-settled" : a.status === "budget_exceeded" ? "status-failed" : "status-pending";
+        const ago = timeAgo(new Date(a.lastActive));
+        return `<tr>
+          <td><a href="?address=${encodeURIComponent(a.address)}">${escapeHtml(a.name)}</a></td>
+          <td><code>${escapeHtml(a.address.slice(0, 10))}\u2026</code></td>
+          <td class="${statusClass}">${escapeHtml(a.status)}</td>
+          <td>${escapeHtml(String(a.paymentCount))}</td>
+          <td>$${escapeHtml(a.totalSpentUsd)}</td>
+          <td>${escapeHtml(ago)}</td>
+        </tr>`;
+      })
+      .join("\n");
+
     return `${HEAD}
   <header>
     <h1>Agent Payment Dashboard</h1>
+    <button class="theme-toggle" id="theme-toggle" type="button">\u2600 Light</button>
     <div class="subtitle">T402 Protocol — AI Agent Payment Monitoring</div>
   </header>
-  <main>
-    <div class="onboarding">
-      <h2>T402 Agent Dashboard</h2>
-      <p>Monitor your AI agent's on-chain payment activity across multiple networks in real time.</p>
-      <ul>
-        <li>Multi-chain balance tracking (Base, Arbitrum, Ethereum, Solana, TON)</li>
-        <li>Budget enforcement with session and daily limits</li>
-        <li>Payment history with per-service and per-network breakdowns</li>
-        <li>Alerts when spending approaches policy thresholds</li>
-      </ul>
-      <a class="demo-btn" href="?address=0xC88f67e776f16DcFBf42e6bDda1B82604448899B">Try Demo</a>
+  <main data-overview="true">
+    <h2>Global Overview</h2>
+    ${gsCards}
+
+    <h2>Agents</h2>
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Name</th><th>Address</th><th>Status</th><th>Payments</th><th>Spent</th><th>Last Active</th></tr></thead>
+      <tbody>
+        ${agentRows || '<tr><td colspan="6" style="color:var(--text-dim)">No agents</td></tr>'}
+      </tbody>
+    </table>
     </div>
+
+    <h2>Look Up Agent</h2>
     <form method="get">
-      <label for="addr-input">Agent wallet address</label>
       <div class="form-row">
         <input id="addr-input" name="address" placeholder="Enter agent wallet address (0x...)" value="">
-        <button class="btn" type="submit">Load Dashboard</button>
+        <button class="btn" type="submit">View Dashboard</button>
       </div>
     </form>
   </main>
