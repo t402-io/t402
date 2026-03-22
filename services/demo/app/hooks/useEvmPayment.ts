@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { useAccount, useSignTypedData } from "wagmi";
+import { useAccount, useSignTypedData, useSwitchChain } from "wagmi";
 
 interface PaymentRequirements {
   scheme: string;
@@ -61,11 +61,22 @@ function createNonce(): string {
 export function useEvmPayment() {
   const { address, isConnected, chain } = useAccount();
   const { signTypedDataAsync } = useSignTypedData();
+  const { switchChainAsync } = useSwitchChain();
 
   const signPayment = useCallback(
     async (requirements: PaymentRequirements): Promise<PaymentPayload> => {
       if (!address || !isConnected) {
         throw new Error("Wallet not connected");
+      }
+
+      // Auto-switch to the required chain if wallet is on a different one
+      const requiredChainId = parseInt(requirements.network.split(":")[1]);
+      if (chain?.id !== requiredChainId) {
+        try {
+          await switchChainAsync({ chainId: requiredChainId });
+        } catch {
+          throw new Error(`Please switch your wallet to chain ${requiredChainId} (Base Sepolia)`);
+        }
       }
 
       const now = Math.floor(Date.now() / 1000);
@@ -104,7 +115,7 @@ export function useEvmPayment() {
         },
       };
     },
-    [address, isConnected, signTypedDataAsync]
+    [address, isConnected, chain, signTypedDataAsync, switchChainAsync]
   );
 
   return {

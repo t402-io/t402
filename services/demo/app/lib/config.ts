@@ -57,6 +57,12 @@ export function createMultiChainAccepts(amount: string, schemeOverride?: string)
       asset: config.asset,
       payTo: config.payTo,
       maxTimeoutSeconds: 60,
+      ...(config.tokenContractName ? {
+        extra: {
+          name: config.tokenContractName,
+          version: config.tokenContractVersion || "1",
+        },
+      } : {}),
     };
   });
 }

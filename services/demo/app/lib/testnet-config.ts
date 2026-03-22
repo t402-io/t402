@@ -13,6 +13,10 @@ export interface ChainConfig {
   color: string;
   decimals: number;
   tokenSymbol: string;
+  /** EIP-712 domain name for the token contract (EVM only) */
+  tokenContractName?: string;
+  /** EIP-712 domain version (EVM only) */
+  tokenContractVersion?: string;
 }
 
 export const CHAIN_CONFIGS: Record<ChainFamily, ChainConfig> = {
@@ -27,7 +31,9 @@ export const CHAIN_CONFIGS: Record<ChainFamily, ChainConfig> = {
     label: "EVM",
     color: "var(--color-chain-evm)",
     decimals: 6,
-    tokenSymbol: "USDT",
+    tokenSymbol: "USDC",
+    tokenContractName: "USD Coin",
+    tokenContractVersion: "2",
   },
   ton: {
     family: "ton",
