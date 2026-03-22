@@ -265,7 +265,7 @@ app.get("/", async (_req, res) => {
     getStats(7), getTransactions({ limit: 20 }), getNetworks(), getTokens(),
   ]);
   res.type("html").send(renderIndex({
-    stats, transactions: txResult.transactions, networks, tokens,
+    stats, transactions: txResult.transactions, networks, tokens, totalAll: txResult.total,
   }));
 });
 

@@ -20,7 +20,7 @@ function headerHtml(title, subtitle) {
   </div>`;
 }
 
-export function renderIndex({ stats, transactions, networks, tokens }) {
+export function renderIndex({ stats, transactions, networks, tokens, totalAll }) {
   const networkOptions = (networks || []).map(n => `<option value="${escapeHtml(n.network)}">${escapeHtml(getNetworkName(n.network))} (${n.count})</option>`).join("");
   const tokenOptions = (tokens || []).filter(t => t.token !== "UNKNOWN").map(t => `<option value="${escapeHtml(t.token)}">${escapeHtml(t.token)} (${t.count})</option>`).join("");
   const rows = (transactions || []).map(tx => renderRow(tx)).join("");
@@ -34,13 +34,14 @@ export function renderIndex({ stats, transactions, networks, tokens }) {
 
   return `<!DOCTYPE html>
 <html lang="en" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="google" content="notranslate">
-<title>T402 Explorer</title>
+<title>T402 Explorer — Payment Settlement Browser</title>
+<meta name="description" content="Browse real-time USDT/USDC payment settlements across Ethereum, Arbitrum, Solana, TON, TRON and more via the T402 protocol.">
 <link rel="stylesheet" href="/static/style.css">
 ${themeToggleScript()}
 </head>
 <body>
   ${headerHtml('<a href="/">T402 Explorer</a>', 'Real-time settlement browser for the <a href="https://t402.io">T402 protocol</a>')}
-  <p class="intro">Browse ${formatNumber(totalSettlements)} confirmed payments across ${chainCount} blockchains via the <a href="https://t402.io">T402 protocol</a>.</p>
+  <p class="intro">Browse ${formatNumber(totalAll || totalSettlements)} confirmed payments across ${(networks || []).length} blockchains via the <a href="https://t402.io">T402 protocol</a>.</p>
   <div class="stats">
     <div class="stat" title="Total confirmed settlements in the last 7 days"><div class="stat-value">${escapeHtml(formatNumber(totalSettlements))}</div><div class="stat-label">Settlements (7d)</div></div>
     <div class="stat" title="Total USD volume settled in the last 7 days"><div class="stat-value">$${escapeHtml(totalVol)}</div><div class="stat-label">Volume (7d)</div></div>
@@ -78,7 +79,7 @@ ${themeToggleScript()}
   <div id="loading" class="loading" style="display:none">Loading...</div>
   <div class="pagination">
     <button id="prevBtn" class="secondary" disabled>Previous</button>
-    <span id="pageInfo" class="page-info" data-total="${totalSettlements}">Page 1 &middot; ${formatNumber(totalSettlements)} settlements</span>
+    <span id="pageInfo" class="page-info" data-total="${totalAll || totalSettlements}">Page 1 &middot; ${formatNumber(totalAll || totalSettlements)} settlements</span>
     <button id="nextBtn" class="secondary">Next</button>
   </div>
   <footer>
