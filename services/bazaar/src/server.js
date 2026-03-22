@@ -261,8 +261,24 @@ app.put("/api/v1/services/:id", requireAuth, (req, res) => {
     return res.status(404).json({ error: "Service not found" });
   }
 
-  const { name, description, category, price, methods, owner, tags } = req.body;
+  const { url, name, description, category, price, methods, owner, tags } = req.body;
 
+  if (url !== undefined) {
+    if (typeof url !== "string" || url.length > 2000) {
+      return res.status(400).json({ error: "url must be a string of at most 2000 characters" });
+    }
+    try {
+      new URL(url);
+    } catch {
+      return res.status(400).json({ error: "url must be a valid URL" });
+    }
+    // Check for duplicates (another service with same URL)
+    const existing = store.getByUrl(url);
+    if (existing && existing.id !== req.params.id) {
+      return res.status(409).json({ error: "URL already registered by another service", existingId: existing.id });
+    }
+    service.url = url;
+  }
   if (name !== undefined) {
     if (typeof name !== "string" || name.length > 200) {
       return res.status(400).json({ error: "name must be a string of at most 200 characters" });

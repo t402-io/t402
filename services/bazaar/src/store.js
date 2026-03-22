@@ -64,7 +64,7 @@ if (!useMemory) {
     getByUrl: db.prepare("SELECT * FROM services WHERE url = ?"),
     getAll: db.prepare("SELECT * FROM services ORDER BY verified DESC, registered_at DESC"),
     update: db.prepare(`
-      UPDATE services SET name=@name, description=@description, category=@category,
+      UPDATE services SET url=@url, name=@name, description=@description, category=@category,
         price_amount=@price_amount, price_token=@price_token, price_network=@price_network,
         methods=@methods, tags=@tags, owner=@owner, verified=@verified, verification=@verification,
         discovery=@discovery, updated_at=@updated_at
