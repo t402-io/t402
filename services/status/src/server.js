@@ -60,7 +60,8 @@ app.use((req, res, next) => {
 
 // Global rate limiting (covers ALL routes, not just /api)
 const rateLimitMap = new Map();
-setInterval(() => rateLimitMap.clear(), 60_000);
+const rateLimitInterval = setInterval(() => rateLimitMap.clear(), 60_000);
+rateLimitInterval.unref(); // don't keep process alive for this timer
 
 app.use((req, res, next) => {
   if (req.path === "/health") return next(); // exempt health checks
