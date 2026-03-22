@@ -50,19 +50,22 @@ test.describe("Playground Page", () => {
       await page.getByRole("button", { name: /Execute Flow/i }).click();
 
       // Wait for the initial exchange panel to appear (Step 1)
-      const step1Panel = page.getByText(
-        "Step 1: Initial Request"
-      );
+      // Panel title is "Step 1: Initial Request → 402 Payment Required"
+      const step1Panel = page.getByText(/Step 1: Initial Request/);
       await expect(step1Panel).toBeVisible({ timeout: 15000 });
 
-      // Should show 402 status
-      await expect(page.getByText("402")).toBeVisible({ timeout: 15000 });
+      // Should show 402 status code in the response section
+      const status402 = page.locator(".glass-card .font-bold", { hasText: "402" });
+      await expect(status402).toBeVisible({ timeout: 15000 });
 
-      // Wait for retry exchange panel (Step 3) with 200 status
-      const step3Panel = page.getByText("Step 3: Retry with Payment");
+      // Wait for retry exchange panel (Step 3)
+      // Panel title is "Step 3: Retry with Payment → Resource Access"
+      const step3Panel = page.getByText(/Step 3: Retry with Payment/);
       await expect(step3Panel).toBeVisible({ timeout: 15000 });
 
-      await expect(page.getByText("200")).toBeVisible({ timeout: 15000 });
+      // Should show 200 status code in the response section
+      const status200 = page.locator(".glass-card .font-bold", { hasText: "200" });
+      await expect(status200).toBeVisible({ timeout: 15000 });
     });
   });
 
@@ -82,7 +85,7 @@ test.describe("Playground Page", () => {
 
       // Wait for exchange panels to appear
       await expect(
-        page.getByText("Step 1: Initial Request")
+        page.getByText(/Step 1: Initial Request/)
       ).toBeVisible({ timeout: 15000 });
 
       // Reset button should now be visible
@@ -94,7 +97,7 @@ test.describe("Playground Page", () => {
 
       // Exchange panels should be gone
       await expect(
-        page.getByText("Step 1: Initial Request")
+        page.getByText(/Step 1: Initial Request/)
       ).not.toBeVisible();
     });
   });

@@ -143,7 +143,9 @@ test.describe("Accessibility", () => {
     test('chain selector has role="tablist"', async ({ page }) => {
       await page.goto("/ai-api");
 
-      const tablist = page.getByRole("tablist", {
+      // Scope to the main content area to avoid matching the header's chain selector
+      const mainContent = page.locator("#main-content");
+      const tablist = mainContent.getByRole("tablist", {
         name: "Blockchain selection",
       });
       await expect(tablist).toBeAttached();

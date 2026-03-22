@@ -40,11 +40,16 @@ test.describe("Scenario Shell Elements", () => {
   });
 
   test("displays cost badge", async ({ page }) => {
-    await expect(page.getByText("0.001 USDT/query")).toBeVisible();
+    // The cost badge is a <span> inside the scenario header (ScenarioShell)
+    const header = page.locator(".mb-10");
+    await expect(header.getByText("0.001 USDT/query")).toBeVisible();
   });
 
   test("has chain selector with tab roles", async ({ page }) => {
-    const chainSelector = page.getByRole("tablist", { name: "Blockchain selection" });
+    // Scope to the main content area to target the ScenarioShell's ChainSelector
+    // (the header also has a ChainSelector at desktop widths)
+    const mainContent = page.locator("#main-content");
+    const chainSelector = mainContent.getByRole("tablist", { name: "Blockchain selection" });
     await expect(chainSelector).toBeVisible();
 
     // EVM tab should be selected by default
@@ -89,7 +94,9 @@ test.describe("AI API Deep Test", () => {
   });
 
   test("shows cost per query badge", async ({ page }) => {
-    await expect(page.getByText("0.001 USDT/query")).toBeVisible();
+    // The cost badge inside the query input card (AiApiScenario)
+    const queryCard = page.locator(".glass-card").filter({ hasText: "Query" });
+    await expect(queryCard.getByText("0.001 USDT/query")).toBeVisible();
   });
 
   test("shows idle state placeholder before payment", async ({ page }) => {
@@ -101,10 +108,10 @@ test.describe("AI API Deep Test", () => {
     await page.getByRole("button", { name: "Pay & Query" }).click();
 
     // Should show loading/payment state
-    await expect(page.getByText(/Paying|Processing|Generating|Requesting/)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/Paying|Processing USDT|Generating/).first()).toBeVisible({ timeout: 5000 });
 
     // Wait for the flow to complete (demo mode is fast)
-    await expect(page.getByText(/Paid|queries|error/i)).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(/Paid|queries|error/i).first()).toBeVisible({ timeout: 15000 });
   });
 });
 
@@ -120,8 +127,9 @@ test.describe("Content Paywall Deep Test", () => {
   });
 
   test("shows paywall unlock prompt", async ({ page }) => {
-    await expect(page.getByText(/Unlock this article for/)).toBeVisible();
-    await expect(page.getByText("0.01 USDT")).toBeVisible();
+    // The paywall text is: <p>Unlock this article for <span>0.01 USDT</span></p>
+    // getByText matches the full text content of the <p> including nested spans
+    await expect(page.getByText("Unlock this article for 0.01 USDT")).toBeVisible();
   });
 
   test("has Pay & Read button", async ({ page }) => {
@@ -137,10 +145,10 @@ test.describe("Content Paywall Deep Test", () => {
     await page.getByRole("button", { name: "Pay & Read" }).click();
 
     // Should show payment processing
-    await expect(page.getByText(/Processing payment|Requesting/)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/Processing payment|Requesting|Signing/).first()).toBeVisible({ timeout: 5000 });
 
-    // Wait for unlock — article content or success badge appears
-    await expect(page.getByText(/Unlocked|Reset demo/i)).toBeVisible({ timeout: 15000 });
+    // Wait for unlock
+    await expect(page.getByText(/Unlocked|Reset demo/i).first()).toBeVisible({ timeout: 15000 });
 
     // Paywall should be gone
     await expect(page.getByRole("button", { name: "Pay & Read" })).not.toBeVisible();

@@ -11,7 +11,8 @@ test.describe("Hero Section", () => {
   });
 
   test("displays protocol badge", async ({ page }) => {
-    await expect(page.getByText("HTTP 402 PAYMENT PROTOCOL")).toBeVisible();
+    const hero = page.locator("section").first();
+    await expect(hero.getByText("HTTP 402 PAYMENT PROTOCOL")).toBeVisible();
   });
 
   test("displays subtitle description", async ({ page }) => {
@@ -21,8 +22,9 @@ test.describe("Hero Section", () => {
   });
 
   test("displays flow summary", async ({ page }) => {
-    // The flow summary uses &rarr; which renders as arrows
-    const flowText = page.getByText(/Request.*402.*Sign.*Settle.*Access/);
+    // The flow summary uses &rarr; which renders as arrows — scope to hero section
+    const hero = page.locator("section").first();
+    const flowText = hero.getByText(/Request.*402.*Sign.*Settle.*Access/);
     await expect(flowText).toBeVisible();
   });
 });
@@ -81,19 +83,22 @@ test.describe("Inline Demo", () => {
     });
     await triggerBtn.click();
 
+    // Scope all assertions to the InlineDemo container
+    const demo = page.locator(".rounded-2xl.text-left");
+
     // Wait for all 5 step labels to appear
     await expect(
-      page.getByText("GET /api/demo/content")
+      demo.getByText("GET /api/demo/content")
     ).toBeVisible({ timeout: 15000 });
-    await expect(page.getByText("HTTP 402")).toBeVisible({ timeout: 15000 });
-    await expect(page.getByText("Sign payment")).toBeVisible({ timeout: 15000 });
+    await expect(demo.getByText("HTTP 402")).toBeVisible({ timeout: 15000 });
+    await expect(demo.getByText("Sign payment")).toBeVisible({ timeout: 15000 });
     await expect(
-      page.getByText("Retry with Payment-Signature")
+      demo.getByText("Retry with Payment-Signature")
     ).toBeVisible({ timeout: 15000 });
-    await expect(page.getByText("HTTP 200")).toBeVisible({ timeout: 15000 });
+    await expect(demo.getByText("HTTP 200")).toBeVisible({ timeout: 15000 });
 
     // Wait for completion
-    await expect(page.getByText(/Paid in/)).toBeVisible({ timeout: 15000 });
+    await expect(demo.getByText(/Paid in/)).toBeVisible({ timeout: 15000 });
   });
 
   test("Run again button resets to idle state", async ({ page }) => {
@@ -127,24 +132,27 @@ test.describe("Why T402 Section", () => {
   });
 
   test("displays all 4 feature cards", async ({ page }) => {
-    await expect(page.getByText("No API Keys")).toBeVisible();
-    await expect(page.getByText("Micropayments")).toBeVisible();
-    await expect(page.getByText("Machine-Native")).toBeVisible();
-    await expect(page.getByText("Any Chain")).toBeVisible();
+    // Scope to "Why T402" section to avoid matching scenario card descriptions
+    const whySection = page.locator("section").filter({ hasText: "Payment Without Friction" });
+    await expect(whySection.getByRole("heading", { name: "No API Keys" })).toBeVisible();
+    await expect(whySection.getByRole("heading", { name: "Micropayments" })).toBeVisible();
+    await expect(whySection.getByRole("heading", { name: "Machine-Native" })).toBeVisible();
+    await expect(whySection.getByRole("heading", { name: "Any Chain" })).toBeVisible();
   });
 
   test("feature cards have descriptions", async ({ page }) => {
+    const whySection = page.locator("section").filter({ hasText: "Payment Without Friction" });
     await expect(
-      page.getByText("No accounts, no dashboards, no API key management")
+      whySection.getByText("No accounts, no dashboards, no API key management")
     ).toBeVisible();
     await expect(
-      page.getByText("Sub-cent payments with no minimum")
+      whySection.getByText("Sub-cent payments with no minimum")
     ).toBeVisible();
     await expect(
-      page.getByText("AI agents and IoT devices pay autonomously")
+      whySection.getByText("AI agents and IoT devices pay autonomously")
     ).toBeVisible();
     await expect(
-      page.getByText("10 blockchain families, 44 networks")
+      whySection.getByText("10 blockchain families, 44 networks")
     ).toBeVisible();
   });
 });
@@ -183,18 +191,20 @@ test.describe("Live Stats Section", () => {
   });
 
   test("displays all 4 stat cards", async ({ page }) => {
-    await expect(page.getByText("Networks")).toBeVisible();
-    await expect(page.getByText("Payment Kinds")).toBeVisible();
-    await expect(page.getByText("Mechanisms")).toBeVisible();
-    await expect(page.getByText("SDKs")).toBeVisible();
+    // Scope to the stats grid to avoid matching text elsewhere on the page
+    const statsSection = page.locator(".grid.grid-cols-2.sm\\:grid-cols-4");
+    await expect(statsSection.getByText("Networks")).toBeVisible();
+    await expect(statsSection.getByText("Payment Kinds")).toBeVisible();
+    await expect(statsSection.getByText("Mechanisms")).toBeVisible();
+    await expect(statsSection.getByText("SDKs")).toBeVisible();
   });
 
   test("displays static stat values", async ({ page }) => {
     // Networks = 44, Mechanisms = 13, SDKs = 4 are hardcoded
     const statsSection = page.locator(".grid.grid-cols-2.sm\\:grid-cols-4");
-    await expect(statsSection.getByText("44")).toBeVisible();
-    await expect(statsSection.getByText("13")).toBeVisible();
-    await expect(statsSection.getByText("4")).toBeVisible();
+    await expect(statsSection.getByText("44", { exact: true })).toBeVisible();
+    await expect(statsSection.getByText("13", { exact: true })).toBeVisible();
+    await expect(statsSection.getByText("4", { exact: true })).toBeVisible();
   });
 });
 
@@ -302,8 +312,7 @@ test.describe("Code Tabs (Developer Quick Start)", () => {
   test("clicking curl tab shows curl command", async ({ page }) => {
     const curlTab = page.getByRole("button", { name: "curl" });
     await curlTab.click();
-    await expect(page.getByText("curl")).toBeVisible();
-    await expect(page.getByText("api.example.com/premium")).toBeVisible();
+    await expect(page.getByText("api.example.com/premium").first()).toBeVisible();
   });
 });
 
@@ -319,7 +328,7 @@ test.describe("Footer", () => {
 
   test("displays T402 branding", async ({ page }) => {
     const footer = page.locator("footer");
-    await expect(footer.getByText("T402")).toBeVisible();
+    await expect(footer.getByText("T402", { exact: true })).toBeVisible();
     await expect(
       footer.getByText("The Official Payment Protocol for USDT")
     ).toBeVisible();

@@ -2,21 +2,18 @@
 
 import { useChainContext } from "@/providers/ChainProvider";
 import { useDemoContext } from "@/providers/DemoProvider";
+import { useWalletReady } from "@/providers/ClientProviders";
 import { useMultiChainPayment } from "@/hooks/useMultiChainPayment";
 import { Check, X, AlertCircle } from "lucide-react";
 
-export function PaymentChecklist() {
+function ChecklistInner() {
   const { activeConfig } = useChainContext();
-  const { isDemo } = useDemoContext();
   const { isConnected } = useMultiChainPayment();
-
-  // In demo mode, everything is "ready"
-  if (isDemo) return null;
 
   const checks = [
     {
       label: `Chain: ${activeConfig.label}`,
-      ok: true, // Always true - chain is always selected
+      ok: true,
     },
     {
       label: isConnected ? "Wallet connected" : "Wallet not connected",
@@ -26,7 +23,7 @@ export function PaymentChecklist() {
   ];
 
   const allReady = checks.every((c) => c.ok);
-  if (allReady) return null; // Don't show when everything is ready
+  if (allReady) return null;
 
   return (
     <div
@@ -61,4 +58,14 @@ export function PaymentChecklist() {
       </div>
     </div>
   );
+}
+
+export function PaymentChecklist() {
+  const { isDemo } = useDemoContext();
+  const walletReady = useWalletReady();
+
+  // In demo mode or before wallet providers mount, don't show
+  if (isDemo || !walletReady) return null;
+
+  return <ChecklistInner />;
 }

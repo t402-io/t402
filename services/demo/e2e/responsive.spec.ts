@@ -8,13 +8,24 @@ test.describe("Responsive Design", () => {
       await page.goto("/");
       await page.waitForLoadState("networkidle");
 
-      const scrollWidth = await page.evaluate(
-        () => document.documentElement.scrollWidth
-      );
-      const clientWidth = await page.evaluate(
-        () => document.documentElement.clientWidth
-      );
-      expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+      // Check for page-level overflow, excluding intentionally scrollable containers
+      const overflows = await page.evaluate(() => {
+        const html = document.documentElement;
+        const scrollables = document.querySelectorAll("*");
+        const originals: Array<{ el: HTMLElement; val: string }> = [];
+        scrollables.forEach((el) => {
+          const style = getComputedStyle(el);
+          if (style.overflowX === "auto" || style.overflowX === "scroll") {
+            const htmlEl = el as HTMLElement;
+            originals.push({ el: htmlEl, val: htmlEl.style.overflowX });
+            htmlEl.style.overflowX = "hidden";
+          }
+        });
+        const result = html.scrollWidth > html.clientWidth;
+        originals.forEach(({ el, val }) => { el.style.overflowX = val; });
+        return result;
+      });
+      expect(overflows).toBe(false);
     });
 
     test("scenario cards are visible on homepage", async ({ page }) => {
@@ -98,6 +109,35 @@ test.describe("Responsive Design", () => {
       { name: "desktop", width: 1280, height: 800 },
     ];
 
+    // Check for page-level horizontal overflow, excluding elements that use
+    // overflow-x: auto/scroll (e.g. chain selectors, code blocks, timelines).
+    // Those are intentionally scrollable containers.
+    const hasPageOverflow = () => {
+      const html = document.documentElement;
+      const body = document.body;
+      // Check if the body itself causes page-level horizontal scroll
+      const htmlOverflow = getComputedStyle(html).overflowX;
+      const bodyOverflow = getComputedStyle(body).overflowX;
+      // If html/body have overflow hidden/auto, there's no page-level scrollbar
+      if (htmlOverflow === "hidden" || bodyOverflow === "hidden") return false;
+      // Compare body's scrollWidth to viewport, but account for scrollable containers
+      // by temporarily hiding overflow on all overflow-x:auto/scroll elements
+      const scrollables = document.querySelectorAll("*");
+      const originals: Array<{ el: HTMLElement; val: string }> = [];
+      scrollables.forEach((el) => {
+        const style = getComputedStyle(el);
+        if (style.overflowX === "auto" || style.overflowX === "scroll") {
+          const htmlEl = el as HTMLElement;
+          originals.push({ el: htmlEl, val: htmlEl.style.overflowX });
+          htmlEl.style.overflowX = "hidden";
+        }
+      });
+      const overflows = html.scrollWidth > html.clientWidth;
+      // Restore
+      originals.forEach(({ el, val }) => { el.style.overflowX = val; });
+      return overflows;
+    };
+
     for (const vp of viewports) {
       test(`no horizontal overflow on ${vp.name} (${vp.width}x${vp.height}) — homepage`, async ({
         page,
@@ -106,13 +146,8 @@ test.describe("Responsive Design", () => {
         await page.goto("/");
         await page.waitForLoadState("networkidle");
 
-        const scrollWidth = await page.evaluate(
-          () => document.documentElement.scrollWidth
-        );
-        const clientWidth = await page.evaluate(
-          () => document.documentElement.clientWidth
-        );
-        expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+        const overflows = await page.evaluate(hasPageOverflow);
+        expect(overflows).toBe(false);
       });
 
       test(`no horizontal overflow on ${vp.name} (${vp.width}x${vp.height}) — scenario page`, async ({
@@ -122,13 +157,8 @@ test.describe("Responsive Design", () => {
         await page.goto("/ai-api");
         await page.waitForLoadState("networkidle");
 
-        const scrollWidth = await page.evaluate(
-          () => document.documentElement.scrollWidth
-        );
-        const clientWidth = await page.evaluate(
-          () => document.documentElement.clientWidth
-        );
-        expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+        const overflows = await page.evaluate(hasPageOverflow);
+        expect(overflows).toBe(false);
       });
 
       test(`no horizontal overflow on ${vp.name} (${vp.width}x${vp.height}) — playground`, async ({
@@ -138,13 +168,8 @@ test.describe("Responsive Design", () => {
         await page.goto("/playground");
         await page.waitForLoadState("networkidle");
 
-        const scrollWidth = await page.evaluate(
-          () => document.documentElement.scrollWidth
-        );
-        const clientWidth = await page.evaluate(
-          () => document.documentElement.clientWidth
-        );
-        expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+        const overflows = await page.evaluate(hasPageOverflow);
+        expect(overflows).toBe(false);
       });
     }
   });

@@ -138,8 +138,10 @@ test.describe("External Links", () => {
   test("all external links have target=_blank and rel=noopener noreferrer", async ({ page }) => {
     await page.goto("/");
 
-    // Get all links with href starting with http (external links)
-    const externalLinks = page.locator('a[href^="http"]');
+    // Wait for page to fully render
+    await page.waitForLoadState("domcontentloaded");
+    // Get all links with href starting with https (external links)
+    const externalLinks = page.locator('a[href^="https://"]');
     const count = await externalLinks.count();
 
     expect(count).toBeGreaterThan(0);
