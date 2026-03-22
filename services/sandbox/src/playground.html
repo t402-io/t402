@@ -106,6 +106,23 @@ textarea::placeholder{color:#4b5563}
 .badge-ok{color:#10b981}
 .badge-warn{color:#f59e0b}
 .badge-err{color:#ef4444}
+
+/* Walkthrough */
+.walkthrough{background:#111827;border:1px solid #374151;border-radius:8px;margin-bottom:1.5rem;overflow:hidden}
+.walkthrough-header{display:flex;justify-content:space-between;align-items:center;padding:.8rem 1rem;cursor:pointer}
+.walkthrough-header h3{margin:0;font-size:.95rem;color:#e5e7eb}
+.walkthrough-content{padding:0 1rem 1rem}
+.step{display:flex;gap:.8rem;padding:.6rem 0;border-bottom:1px solid #1f2937;opacity:.7}
+.step.active{opacity:1;background:#0d1117;margin:0 -.5rem;padding:.6rem .5rem;border-radius:4px}
+.step.completed{opacity:1}
+.step.completed .step-num{background:#065f46;color:#6ee7b7}
+.step-num{width:24px;height:24px;border-radius:50%;background:#374151;color:#9ca3af;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0;margin-top:2px}
+.step-body{flex:1}
+.step-body strong{color:#e5e7eb;font-size:.85rem}
+.step-body p{color:#9ca3af;font-size:.8rem;margin:.3rem 0 0}
+.step-body code{background:#1f2937;padding:.1em .3em;border-radius:3px;font-size:.8em}
+.inline-btn{background:#065f46;color:#6ee7b7;border:none;padding:.25rem .6rem;border-radius:4px;cursor:pointer;font-size:.75rem;font-family:inherit}
+.inline-btn:hover{background:#047857}
 </style>
 </head>
 <body>
@@ -132,6 +149,60 @@ textarea::placeholder{color:#4b5563}
     <button class="quick-btn" onclick="quickFetch('/usage')"><span class="method-badge method-get">GET</span>/usage</button>
   </div>
 
+  <!-- Getting Started Walkthrough -->
+  <div class="walkthrough" id="walkthrough">
+    <div class="walkthrough-header" onclick="toggleWalkthrough()">
+      <h3>&#127919; Getting Started Guide</h3>
+      <span id="walkthrough-toggle">&#9660;</span>
+    </div>
+    <div class="walkthrough-content" id="walkthrough-content">
+      <div class="step" id="step1">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Check Supported Networks</strong>
+          <p>Click <button class="inline-btn" onclick="quickFetch('/supported');markStep(1)">Try /supported</button> to see available testnet networks and their upstream status.</p>
+        </div>
+      </div>
+      <div class="step" id="step2">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Verify a Payment (Magic Address)</strong>
+          <p>Select a network, switch to the <code>/verify</code> tab, and click "Try It". The example uses magic address <code>0x...CAFE01</code> which always returns <code>isValid: true</code>.</p>
+          <p><button class="inline-btn" onclick="selectEndpoint('verify');sendRequest();markStep(2)">Run Verify &#8594;</button></p>
+        </div>
+      </div>
+      <div class="step" id="step3">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Settle the Payment</strong>
+          <p>Switch to <code>/settle</code> and send. You'll get a mock transaction hash back.</p>
+          <p><button class="inline-btn" onclick="selectEndpoint('settle');sendRequest();markStep(3)">Run Settle &#8594;</button></p>
+        </div>
+      </div>
+      <div class="step" id="step4">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <strong>Test Error Handling</strong>
+          <p>Change the payer address to <code>0x...CAFE02</code> (signature failure) or <code>0x...CAFE12</code> (insufficient funds) and re-send to test error paths.</p>
+        </div>
+      </div>
+      <div class="step" id="step5">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <strong>Test Webhooks</strong>
+          <p>Switch to <code>/webhook/test</code> to send a test callback to your server. Use <a href="https://httpbin.org/post" target="_blank">httpbin.org</a> for testing.</p>
+        </div>
+      </div>
+      <div class="step completed" id="step6">
+        <div class="step-num">&#10003;</div>
+        <div class="step-body">
+          <strong>Ready for Integration</strong>
+          <p>Copy SDK code from any request using the buttons below. Point your SDK at <code>https://sandbox.t402.io</code> and you're ready to build!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Controls -->
   <div class="controls">
     <label>Network:</label>
@@ -144,6 +215,9 @@ textarea::placeholder{color:#4b5563}
       <option value="tron:nile">TRON Nile</option>
       <option value="stellar:testnet">Stellar Testnet</option>
     </select>
+    <div style="font-size:.7rem;color:#6b7280;margin-top:4px">
+      &#128994; Real on-chain verification &nbsp; &#9898; Mock fallback
+    </div>
   </div>
 
   <!-- Endpoint Tabs -->
@@ -151,6 +225,7 @@ textarea::placeholder{color:#4b5563}
     <div class="ep-tab active" onclick="switchEndpoint('supported')">/supported</div>
     <div class="ep-tab" onclick="switchEndpoint('verify')">/verify</div>
     <div class="ep-tab" onclick="switchEndpoint('settle')">/settle</div>
+    <div class="ep-tab" onclick="switchEndpoint('webhook/test')"><span class="method-badge method-post">POST</span>/webhook/test</div>
   </div>
 
   <!-- Panels -->
@@ -165,6 +240,10 @@ textarea::placeholder{color:#4b5563}
         </div>
       </div>
       <textarea id="requestBody" placeholder="Request body (JSON)..." spellcheck="false"></textarea>
+      <div id="idempotencyRow" style="display:none;padding:0 1rem .5rem">
+        <label style="font-size:.75rem;color:#9ca3af">Idempotency-Key (optional):</label>
+        <input id="idempotencyKey" type="text" placeholder="unique-key-123" style="width:100%;background:#111827;color:#e5e7eb;border:1px solid #374151;border-radius:4px;padding:.3rem .5rem;font-size:.8rem;font-family:monospace;margin-top:2px">
+      </div>
       <div class="btn-group" style="padding:0 1rem .5rem">
         <button class="panel-btn" onclick="copyAsSDK('typescript')">Copy as TypeScript</button>
         <button class="panel-btn" onclick="copyAsSDK('go')">Copy as Go</button>
@@ -352,6 +431,13 @@ function getExamplePayload(endpoint, network) {
     sig = 'base64signature...';
   }
 
+  if (endpoint === 'webhook/test') {
+    return JSON.stringify({
+      url: "https://httpbin.org/post",
+      event: "settlement.completed"
+    }, null, 2);
+  }
+
   if (endpoint === 'verify' || endpoint === 'settle') {
     return JSON.stringify({
       t402Version: 2,
@@ -381,6 +467,36 @@ function switchEndpoint(endpoint) {
   currentEndpoint = endpoint;
   document.querySelectorAll('.ep-tab').forEach(function(t) { t.classList.remove('active'); });
   event.target.classList.add('active');
+
+  document.getElementById('idempotencyRow').style.display = (endpoint === 'settle') ? 'block' : 'none';
+
+  if (endpoint === 'supported') {
+    currentMethod = 'GET';
+    requestBody.value = '';
+    requestBody.disabled = true;
+    requestBody.placeholder = 'GET request — no body needed';
+    requestTitle.textContent = 'GET /supported';
+    sendBtn.textContent = 'Try It';
+  } else {
+    currentMethod = 'POST';
+    requestBody.disabled = false;
+    requestBody.placeholder = 'Request body (JSON)...';
+    requestTitle.textContent = 'POST /' + endpoint;
+    sendBtn.textContent = 'Send';
+    requestBody.value = getExamplePayload(endpoint, networkSelect.value);
+  }
+}
+
+// Programmatic endpoint selection (used by walkthrough buttons)
+function selectEndpoint(endpoint) {
+  currentEndpoint = endpoint;
+  document.querySelectorAll('.ep-tab').forEach(function(t) { t.classList.remove('active'); });
+  // Find matching tab
+  document.querySelectorAll('.ep-tab').forEach(function(t) {
+    if (t.textContent.indexOf('/' + endpoint) !== -1) t.classList.add('active');
+  });
+
+  document.getElementById('idempotencyRow').style.display = (endpoint === 'settle') ? 'block' : 'none';
 
   if (endpoint === 'supported') {
     currentMethod = 'GET';
@@ -488,6 +604,14 @@ async function sendRequest() {
     reqBodyStr = requestBody.value;
   }
 
+  if (currentEndpoint === 'settle') {
+    var idemKey = document.getElementById('idempotencyKey').value;
+    if (idemKey) {
+      if (!opts.headers) opts.headers = {};
+      opts.headers['Idempotency-Key'] = idemKey;
+    }
+  }
+
   var start = Date.now();
   try {
     var res = await fetch(url, opts);
@@ -567,6 +691,46 @@ function showToast(msg) {
   t.classList.add('show');
   setTimeout(function() { t.classList.remove('show'); }, 2000);
 }
+
+// --- Walkthrough ---
+var completedSteps = new Set();
+
+function markStep(n) {
+  completedSteps.add(n);
+  var el = document.getElementById('step' + n);
+  if (el) {
+    el.classList.add('completed');
+    el.querySelector('.step-num').textContent = '\u2713';
+  }
+  // Highlight next step
+  var next = document.getElementById('step' + (n + 1));
+  if (next) next.classList.add('active');
+}
+
+function toggleWalkthrough() {
+  var content = document.getElementById('walkthrough-content');
+  var toggle = document.getElementById('walkthrough-toggle');
+  if (content.style.display === 'none') {
+    content.style.display = 'block';
+    toggle.textContent = '\u25BC';
+  } else {
+    content.style.display = 'none';
+    toggle.textContent = '\u25B6';
+  }
+}
+
+// --- Upstream Status Indicators ---
+fetch('/supported').then(function(r) { return r.json(); }).then(function(data) {
+  var select = document.getElementById('networkSelect');
+  for (var i = 0; i < select.options.length; i++) {
+    var opt = select.options[i];
+    var kind = data.kinds.find(function(k) { return k.network === opt.value; });
+    if (kind) {
+      var status = kind.upstream ? '\uD83D\uDFE2' : '\u26AA';
+      opt.textContent = status + ' ' + opt.textContent.replace(/^[\uD83D\uDFE2\u26AA]\s*/, '');
+    }
+  }
+}).catch(function() {}); // Non-critical
 
 // Initialize
 switchEndpoint('supported');

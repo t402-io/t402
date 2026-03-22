@@ -20,10 +20,58 @@ td{padding:.5rem;border-bottom:1px solid #111827;font-size:.9em}
 .tab-content{display:none}
 .tab-content.active{display:block}
 .note{background:#1c1917;border-left:3px solid #f59e0b;padding:.75rem 1rem;margin:1rem 0;font-size:.85em;color:#fbbf24}
+.flow{display:flex;align-items:center;gap:.3rem;overflow-x:auto;padding:.5rem 0;margin:1rem 0}
+.flow-step{border:1px solid #374151;border-radius:8px;padding:.6rem .8rem;text-align:center;min-width:100px;flex-shrink:0}
+.flow-icon{width:28px;height:28px;border-radius:50%;background:#1f2937;color:#50AF95;display:flex;align-items:center;justify-content:center;margin:0 auto .3rem;font-size:.8rem;font-weight:700}
+.flow-label{color:#e5e7eb;font-size:.8rem;font-weight:600}
+.flow-desc{color:#6b7280;font-size:.7rem;margin-top:.2rem}
+.flow-arrow{color:#374151;font-size:1.2rem;flex-shrink:0}
+@media(max-width:600px){.flow{flex-wrap:wrap;justify-content:center}.flow-arrow{display:none}}
 </style></head>
 <body>
 <h1>T402 Sandbox<span class="badge">TESTNET</span></h1>
 <p>Public testnet facilitator for developer testing. No API key needed. No real funds.</p>
+
+<h2>What is T402?</h2>
+<p style="color:#9ca3af;font-size:.9em;line-height:1.6">
+  T402 is an open-source HTTP-native payment protocol for stablecoins.
+  When a server requires payment, it returns <code>HTTP 402 Payment Required</code> with payment instructions.
+  The client signs a payment off-chain and resubmits. The server verifies via a <strong>facilitator</strong> and settles on-chain.
+  This sandbox lets you test the entire flow without real funds.
+</p>
+
+<h2>Payment Flow</h2>
+<div class="flow">
+  <div class="flow-step">
+    <div class="flow-icon">1</div>
+    <div class="flow-label">Client Request</div>
+    <div class="flow-desc">GET /api/data</div>
+  </div>
+  <div class="flow-arrow">&rarr;</div>
+  <div class="flow-step">
+    <div class="flow-icon">2</div>
+    <div class="flow-label">402 Response</div>
+    <div class="flow-desc">Payment-Required header</div>
+  </div>
+  <div class="flow-arrow">&rarr;</div>
+  <div class="flow-step">
+    <div class="flow-icon">3</div>
+    <div class="flow-label">Client Signs</div>
+    <div class="flow-desc">Off-chain signature</div>
+  </div>
+  <div class="flow-arrow">&rarr;</div>
+  <div class="flow-step">
+    <div class="flow-icon">4</div>
+    <div class="flow-label">Verify + Settle</div>
+    <div class="flow-desc">Facilitator confirms</div>
+  </div>
+  <div class="flow-arrow">&rarr;</div>
+  <div class="flow-step" style="border-color:#10b981">
+    <div class="flow-icon" style="background:#065f46;color:#6ee7b7">&#10003;</div>
+    <div class="flow-label">Access Granted</div>
+    <div class="flow-desc">200 OK + data</div>
+  </div>
+</div>
 
 <h2>Quick Start</h2>
 <div class="tab-bar">
@@ -60,14 +108,24 @@ curl -s -X POST https://sandbox.t402.io/verify \
 
 <h2>Supported Networks</h2>
 <table>
-<tr><th>Network</th><th>CAIP-2</th><th>Token</th></tr>
-<tr><td>Base Sepolia</td><td><code>eip155:84532</code></td><td>USDC</td></tr>
-<tr><td>Ethereum Sepolia</td><td><code>eip155:11155111</code></td><td>USDC</td></tr>
-<tr><td>Arbitrum Sepolia</td><td><code>eip155:421614</code></td><td>USDC</td></tr>
-<tr><td>Solana Devnet</td><td><code>solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1</code></td><td>USDC</td></tr>
-<tr><td>TON Testnet</td><td><code>ton:testnet</code></td><td>USDT</td></tr>
-<tr><td>TRON Nile</td><td><code>tron:nile</code></td><td>USDT</td></tr>
-<tr><td>Stellar Testnet</td><td><code>stellar:testnet</code></td><td>USDC</td></tr>
+<tr><th>Network</th><th>CAIP-2</th><th>Token</th><th>Status</th></tr>
+<tr data-network="eip155:84532"><td>Base Sepolia</td><td><code>eip155:84532</code></td><td>USDC</td><td class="upstream-status" style="font-size:.8em">...</td></tr>
+<tr data-network="eip155:11155111"><td>Ethereum Sepolia</td><td><code>eip155:11155111</code></td><td>USDC</td><td class="upstream-status" style="font-size:.8em">...</td></tr>
+<tr data-network="eip155:421614"><td>Arbitrum Sepolia</td><td><code>eip155:421614</code></td><td>USDC</td><td class="upstream-status" style="font-size:.8em">...</td></tr>
+<tr data-network="solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"><td>Solana Devnet</td><td><code>solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1</code></td><td>USDC</td><td class="upstream-status" style="font-size:.8em">...</td></tr>
+<tr data-network="ton:testnet"><td>TON Testnet</td><td><code>ton:testnet</code></td><td>USDT</td><td class="upstream-status" style="font-size:.8em">...</td></tr>
+<tr data-network="tron:nile"><td>TRON Nile</td><td><code>tron:nile</code></td><td>USDT</td><td class="upstream-status" style="font-size:.8em">...</td></tr>
+<tr data-network="stellar:testnet"><td>Stellar Testnet</td><td><code>stellar:testnet</code></td><td>USDC</td><td class="upstream-status" style="font-size:.8em">...</td></tr>
+</table>
+
+<h2>Magic Test Addresses</h2>
+<p style="color:#9ca3af;font-size:.85em">Use these as the <code>payer</code> field to get deterministic responses — no real tokens needed. <a href="/test-addresses">Full list &rarr;</a></p>
+<table>
+<tr><th>Address</th><th>Verify</th><th>Settle</th></tr>
+<tr><td><code>0x...CAFE01</code></td><td style="color:#10b981">&#10003; Valid</td><td style="color:#10b981">&#10003; Success</td></tr>
+<tr><td><code>0x...CAFE02</code></td><td style="color:#ef4444">&#10007; Bad signature</td><td style="color:#10b981">&#10003; Success</td></tr>
+<tr><td><code>0x...CAFE12</code></td><td style="color:#10b981">&#10003; Valid</td><td style="color:#ef4444">&#10007; Insufficient funds</td></tr>
+<tr><td><code>0x...CAFE99</code></td><td style="color:#f59e0b">&#9201; 2s delay</td><td style="color:#f59e0b">&#9201; 2s delay</td></tr>
 </table>
 
 <h2>Endpoints</h2>
@@ -95,6 +153,18 @@ curl -s -X POST https://sandbox.t402.io/verify \
 
 <div class="note">When the upstream facilitator is unreachable, the sandbox returns error responses with <code>"mock": true</code>. Connect a testnet facilitator for real on-chain verification.</div>
 
+<h2>Sandbox &rarr; Production</h2>
+<table>
+<tr><th></th><th>Sandbox</th><th>Production</th></tr>
+<tr><td style="color:#9ca3af">URL</td><td><code>sandbox.t402.io</code></td><td><code>facilitator.t402.io</code></td></tr>
+<tr><td style="color:#9ca3af">API Key</td><td>Not needed</td><td>Required (<code>X-API-Key</code>)</td></tr>
+<tr><td style="color:#9ca3af">Networks</td><td>Testnets only</td><td>25+ mainnets</td></tr>
+<tr><td style="color:#9ca3af">Tokens</td><td>Test USDC/USDT (free)</td><td>Real USDC/USDT</td></tr>
+<tr><td style="color:#9ca3af">Settlement</td><td>Mock or testnet</td><td>Real on-chain</td></tr>
+<tr><td style="color:#9ca3af">Magic Addresses</td><td>Supported</td><td>Not supported</td></tr>
+</table>
+<div class="note">To migrate: change the facilitator URL in your SDK config and add your API key. All request/response formats are identical.</div>
+
 <p style="color:#6b7280;margin-top:2rem;font-size:.85rem">
   <a href="/playground">Playground</a> · <a href="/errors">Errors</a> · <a href="https://docs.t402.io">Docs</a> · <a href="https://github.com/t402-io/t402">GitHub</a> · Powered by <a href="https://t402.io">T402</a>
 </p>
@@ -105,5 +175,16 @@ function showTab(id){
   document.getElementById('tab-'+id).classList.add('active');
   event.target.classList.add('active');
 }
+fetch('/supported').then(r=>r.json()).then(data=>{
+  document.querySelectorAll('tr[data-network]').forEach(tr=>{
+    var net=tr.getAttribute('data-network');
+    var kind=data.kinds.find(k=>k.network===net);
+    var cell=tr.querySelector('.upstream-status');
+    if(cell&&kind){
+      cell.textContent=kind.upstream?'\uD83D\uDFE2 Live':'\u26AA Mock';
+      cell.style.color=kind.upstream?'#10b981':'#6b7280';
+    }
+  });
+}).catch(()=>{});
 </script>
 </body></html>
