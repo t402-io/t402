@@ -33,7 +33,7 @@ export function renderIndex({ stats, transactions, networks, tokens }) {
   const tokenLinks = (tokens || []).filter(t => t.token !== "UNKNOWN").map(t => `<a href="/token/${escapeHtml(encodeURIComponent(t.token))}" class="badge badge-token" title="${escapeHtml(tokenFullName(t.token))}">${escapeHtml(t.token)} (${t.count})</a>`).join(" ");
 
   return `<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="google" content="notranslate">
 <title>T402 Explorer</title>
 <link rel="stylesheet" href="/static/style.css">
 ${themeToggleScript()}
@@ -128,7 +128,7 @@ export function renderDetail(tx) {
   const statusClass = tx.status === "confirmed" ? "status-confirmed" : tx.status === "pending" ? "status-pending" : "status-failed";
 
   return `<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="google" content="notranslate">
 <title>Tx ${escapeHtml(formatHash(tx.txHash))} - T402 Explorer</title>
 <link rel="stylesheet" href="/static/style.css">
 ${themeToggleScript()}
@@ -157,7 +157,7 @@ export function renderAddressPage(address, transactions, stats) {
   const totalVol = stats ? formatAmount(stats.totalVolume, "USDT", null) : "0.00";
 
   return `<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="google" content="notranslate">
 <title>Address ${escapeHtml(formatAddress(address))} - T402 Explorer</title>
 <link rel="stylesheet" href="/static/style.css">
 ${themeToggleScript()}
@@ -189,7 +189,7 @@ export function renderNetworkPage(networkId, stats, transactions) {
 
   if (!stats) {
     return `<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="google" content="notranslate">
 <title>${escapeHtml(name)} - T402 Explorer</title>
 <link rel="stylesheet" href="/static/style.css">
 ${themeToggleScript()}
@@ -211,7 +211,7 @@ ${themeToggleScript()}
   const schemeBadges = (stats.schemes || []).map(s => `<span class="badge">${escapeHtml(s.scheme)} (${s.count})</span>`).join(" ");
 
   return `<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="google" content="notranslate">
 <title>${escapeHtml(name)} - T402 Explorer</title>
 <link rel="stylesheet" href="/static/style.css">
 ${themeToggleScript()}
@@ -251,7 +251,7 @@ export function renderTokenPage(tokenSymbol, stats, transactions) {
 
   if (!stats) {
     return `<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="google" content="notranslate">
 <title>${escapeHtml(tokenSymbol)} - T402 Explorer</title>
 <link rel="stylesheet" href="/static/style.css">
 ${themeToggleScript()}
@@ -273,7 +273,7 @@ ${themeToggleScript()}
   const schemeBadges = (stats.schemes || []).map(s => `<span class="badge">${escapeHtml(s.scheme)} (${s.count})</span>`).join(" ");
 
   return `<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="google" content="notranslate">
 <title>${escapeHtml(tokenSymbol)} - T402 Explorer</title>
 <link rel="stylesheet" href="/static/style.css">
 ${themeToggleScript()}
@@ -309,7 +309,7 @@ ${themeToggleScript()}
 
 function render404() {
   return `<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="google" content="notranslate">
 <title>Not Found - T402 Explorer</title>
 <link rel="stylesheet" href="/static/style.css">
 ${themeToggleScript()}
