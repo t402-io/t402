@@ -1,5 +1,6 @@
 # Sandbox Facilitator - Testnet Only (standalone dev mode)
 # Deploy: docker compose up -d
+# Requires: EVM_PRIVATE_KEY in .env for testnet wallet
 
 services:
   facilitator:
@@ -8,11 +9,48 @@ services:
       - "8080:8080"
     environment:
       - ENV=testnet
-      - NETWORKS=eip155:84532,eip155:11155111,eip155:421614,solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1
+      - NETWORKS=eip155:84532,eip155:11155111,eip155:421614,solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1,ton:testnet,tron:0x94a9059e,stellar:testnet
       - EVM_PRIVATE_KEY=${EVM_PRIVATE_KEY}
+      - API_KEYS=${SANDBOX_FACILITATOR_KEY:-sandbox-dev-key}
+      - API_KEY_REQUIRED=true
       - RATE_LIMIT_PER_MINUTE=100
       - LOG_LEVEL=info
     restart: unless-stopped
     read_only: true
     security_opt:
       - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  sandbox:
+    build: .
+    ports:
+      - "3406:3406"
+    environment:
+      - PORT=3406
+      - FACILITATOR_URL=http://facilitator:8080
+      - FACILITATOR_API_KEY=${SANDBOX_FACILITATOR_KEY:-sandbox-dev-key}
+      - RATE_LIMIT_PER_MINUTE=100
+    depends_on:
+      facilitator:
+        condition: service_healthy
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3406/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
