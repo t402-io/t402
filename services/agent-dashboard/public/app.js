@@ -7,8 +7,22 @@
 (function () {
   "use strict";
 
+  // ── Theme toggle (runs on all pages) ─────────────────────────────
+  var theme = localStorage.getItem("t402-theme") || "dark";
+  if (theme === "light") document.documentElement.classList.add("light");
+  var themeBtn = document.getElementById("theme-toggle");
+  if (themeBtn) {
+    themeBtn.textContent = theme === "light" ? "\u263E Dark" : "\u2600 Light";
+    themeBtn.addEventListener("click", function () {
+      var isLight = document.documentElement.classList.toggle("light");
+      localStorage.setItem("t402-theme", isLight ? "light" : "dark");
+      themeBtn.textContent = isLight ? "\u263E Dark" : "\u2600 Light";
+    });
+  }
+
+  // ── Agent-specific dashboard (requires data-address) ────────────
   var main = document.querySelector("[data-address]");
-  if (!main) return; // onboarding page, no address
+  if (!main) return; // overview page — theme toggle is enough
   var addr = main.getAttribute("data-address");
   if (!addr) return;
 
@@ -19,20 +33,6 @@
   var PAGE_SIZE = 15;
   var sortCol = -1;
   var sortAsc = true;
-
-  // ── Theme toggle ────────────────────────────────────────────────
-  var theme = localStorage.getItem("t402-theme") || "dark";
-  if (theme === "light") document.documentElement.classList.add("light");
-
-  var themeBtn = document.getElementById("theme-toggle");
-  if (themeBtn) {
-    themeBtn.textContent = theme === "light" ? "\u263E Dark" : "\u2600 Light";
-    themeBtn.addEventListener("click", function () {
-      var isLight = document.documentElement.classList.toggle("light");
-      localStorage.setItem("t402-theme", isLight ? "light" : "dark");
-      themeBtn.textContent = isLight ? "\u263E Dark" : "\u2600 Light";
-    });
-  }
 
   // ── Explorer URLs ───────────────────────────────────────────────
   var explorers = {

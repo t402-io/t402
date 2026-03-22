@@ -180,7 +180,9 @@ export function registerRoutes(app, opts = {}) {
         budget = null,
         stats = null,
         payments = [],
-        alerts = [];
+        alerts = [],
+        agents = null,
+        globalStats = null;
 
       if (hasAddress) {
         [balData, budget, stats, { payments }, alerts] = await Promise.all([
@@ -190,12 +192,14 @@ export function registerRoutes(app, opts = {}) {
           getPayments(address, { days: 7, limit: 15 }),
           getAlerts(address),
         ]);
+      } else {
+        // Overview page — fetch agents list and global stats
+        [agents, globalStats] = await Promise.all([getAgents(), getGlobalStats(7)]);
       }
 
-      const cspNonce = res.locals.cspNonce || "";
       res
         .type("html")
-        .send(renderDashboard({ address, hasAddress, balData, budget, stats, payments, alerts, cspNonce }));
+        .send(renderDashboard({ address, hasAddress, balData, budget, stats, payments, alerts, agents, globalStats }));
     } catch (err) {
       next(err);
     }

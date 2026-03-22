@@ -170,6 +170,7 @@ const METRICS_RETENTION_MS = 300_000; // Keep 5 minutes of histogram data
 
 // --- Upstream health state ---
 let upstreamHealthy = null; // null = unknown, true/false after first check
+let upstreamNetworks = [];  // networks the upstream facilitator actually supports
 
 async function checkUpstream() {
   const prev = upstreamHealthy;
@@ -186,6 +187,16 @@ async function checkUpstream() {
   }
   if (prev === false && upstreamHealthy === true) {
     log("info", "Upstream recovered", { facilitatorUrl: FACILITATOR_URL });
+  }
+  // Refresh upstream supported networks periodically
+  if (upstreamHealthy) {
+    try {
+      const sRes = await fetch(`${FACILITATOR_URL}/supported`, { signal: AbortSignal.timeout(5000) });
+      if (sRes.ok) {
+        const data = await sRes.json();
+        upstreamNetworks = (data.kinds || []).map(k => k.network);
+      }
+    } catch { /* non-critical */ }
   }
 }
 
@@ -234,7 +245,8 @@ app.get("/health", (_req, res) => {
 
 app.get("/ready", (_req, res) => {
   if (upstreamHealthy) {
-    res.json({ ready: true, upstream: "connected", service: "t402-sandbox" });
+    const liveCount = SUPPORTED_NETWORKS.filter(n => upstreamNetworks.includes(n)).length;
+    res.json({ ready: true, upstream: "connected", service: "t402-sandbox", liveNetworks: liveCount, totalNetworks: SUPPORTED_NETWORKS.length });
   } else {
     res.status(503).json({ ready: false, upstream: "unreachable", service: "t402-sandbox", note: "Mock fallback active" });
   }
@@ -242,8 +254,12 @@ app.get("/ready", (_req, res) => {
 
 app.get("/supported", (_req, res) => {
   totalRequests++;
+  const kinds = SUPPORTED_KINDS.map(k => ({
+    ...k,
+    upstream: upstreamNetworks.includes(k.network),
+  }));
   res.json({
-    kinds: SUPPORTED_KINDS,
+    kinds,
     extensions: ["erc8004"],
     signers: {
       "eip155:*": ["0x0000000000000000000000000000000000000000"],
@@ -253,7 +269,8 @@ app.get("/supported", (_req, res) => {
       "stellar:*": [],
     },
     sandbox: true,
-    hint: "Testnet only — get test tokens at /faucets",
+    upstreamHealthy: upstreamHealthy === true,
+    hint: "Testnet only — networks with upstream:true have real on-chain verification. Others use mock fallback.",
   });
 });
 
