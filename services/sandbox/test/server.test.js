@@ -94,7 +94,7 @@ describe("GET /supported", () => {
     assert.ok(networks.includes("eip155:421614"), "Missing Arbitrum Sepolia");
     assert.ok(networks.includes("solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"), "Missing Solana Devnet");
     assert.ok(networks.includes("ton:testnet"), "Missing TON Testnet");
-    assert.ok(networks.includes("tron:0x94a9059e"), "Missing TRON Nile");
+    assert.ok(networks.includes("tron:nile"), "Missing TRON Nile");
     assert.ok(networks.includes("stellar:testnet"), "Missing Stellar Testnet");
   });
 
@@ -134,7 +134,7 @@ describe("GET /faucets", () => {
     assert.ok(data.faucets.length >= 7, `Expected at least 7 faucets, got ${data.faucets.length}`);
     const networks = data.faucets.map((f) => f.network);
     assert.ok(networks.includes("ton:testnet"), "Missing TON Testnet faucet");
-    assert.ok(networks.includes("tron:0x94a9059e"), "Missing TRON Nile faucet");
+    assert.ok(networks.includes("tron:nile"), "Missing TRON Nile faucet");
     assert.ok(networks.includes("stellar:testnet"), "Missing Stellar Testnet faucet");
   });
 });
@@ -331,7 +331,7 @@ describe("Network validation", () => {
   });
 
   it("POST /verify accepts new testnet networks", async () => {
-    for (const network of ["ton:testnet", "tron:0x94a9059e", "stellar:testnet"]) {
+    for (const network of ["ton:testnet", "tron:nile", "stellar:testnet"]) {
       const res = await fetch(`${BASE}/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -343,7 +343,7 @@ describe("Network validation", () => {
   });
 
   it("POST /settle accepts new testnet networks", async () => {
-    for (const network of ["ton:testnet", "tron:0x94a9059e", "stellar:testnet"]) {
+    for (const network of ["ton:testnet", "tron:nile", "stellar:testnet"]) {
       const res = await fetch(`${BASE}/settle`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -622,7 +622,7 @@ describe("Landing page", () => {
     const text = await res.text();
     assert.ok(text.includes("eip155:84532"), "Missing Base Sepolia in landing page");
     assert.ok(text.includes("ton:testnet"), "Missing TON Testnet in landing page");
-    assert.ok(text.includes("tron:0x94a9059e"), "Missing TRON Nile in landing page");
+    assert.ok(text.includes("tron:nile"), "Missing TRON Nile in landing page");
     assert.ok(text.includes("stellar:testnet"), "Missing Stellar Testnet in landing page");
   });
 

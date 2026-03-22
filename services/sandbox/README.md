@@ -11,7 +11,7 @@ Public testnet facilitator for developer testing across 7 testnet networks. No A
 | Arbitrum Sepolia | `eip155:421614` | USDC | exact |
 | Solana Devnet | `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` | USDC | exact |
 | TON Testnet | `ton:testnet` | USDT | exact |
-| TRON Nile | `tron:0x94a9059e` | USDT | exact |
+| TRON Nile | `tron:nile` | USDT | exact |
 | Stellar Testnet | `stellar:testnet` | USDC | exact |
 
 ## Quick Start

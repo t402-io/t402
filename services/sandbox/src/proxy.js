@@ -142,7 +142,7 @@ const SUPPORTED_NETWORKS = [
   "eip155:421614",       // Arbitrum Sepolia
   "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1", // Solana Devnet
   "ton:testnet",         // TON Testnet
-  "tron:0x94a9059e",     // TRON Nile
+  "tron:nile",     // TRON Nile
   "stellar:testnet",     // Stellar Testnet
 ];
 
@@ -296,7 +296,7 @@ app.get("/faucets", (_req, res) => {
       { network: "ton:testnet", name: "TON Testnet", tokens: [
         { symbol: "TON (gas)", url: "https://t.me/testgiver_ton_bot" },
       ]},
-      { network: "tron:0x94a9059e", name: "TRON Nile", tokens: [
+      { network: "tron:nile", name: "TRON Nile", tokens: [
         { symbol: "TRX (gas)", url: "https://nileex.io/join/getJoinPage" },
       ]},
       { network: "stellar:testnet", name: "Stellar Testnet", tokens: [
@@ -698,7 +698,7 @@ curl -s -X POST https://sandbox.t402.io/verify \\
 <tr><td>Arbitrum Sepolia</td><td><code>eip155:421614</code></td><td>USDC</td></tr>
 <tr><td>Solana Devnet</td><td><code>solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1</code></td><td>USDC</td></tr>
 <tr><td>TON Testnet</td><td><code>ton:testnet</code></td><td>USDT</td></tr>
-<tr><td>TRON Nile</td><td><code>tron:0x94a9059e</code></td><td>USDT</td></tr>
+<tr><td>TRON Nile</td><td><code>tron:nile</code></td><td>USDT</td></tr>
 <tr><td>Stellar Testnet</td><td><code>stellar:testnet</code></td><td>USDC</td></tr>
 </table>
 
