@@ -225,3 +225,96 @@ export function generateTrendData(address, days = 30) {
 export function exportPaymentsCsv(address, days = 7) {
   return formatPaymentsCsv(generatePaymentHistory(address, days));
 }
+
+// ── Demo agent addresses ──────────────────────────────────────────
+
+const DEMO_AGENTS = [
+  { address: "0xC88f67e776f16DcFBf42e6bDda1B82604448899B", name: "Research Agent" },
+  { address: "0xA1b2C3d4E5f6789012345678901234567890AbCd", name: "Trading Bot" },
+  { address: "0xDeadBeef00000000000000000000000000000001", name: "Data Fetcher" },
+  { address: "0x1234567890abcdef1234567890abcdef12345678", name: "Content Writer" },
+  { address: "0xFEDCBA9876543210FEDCBA9876543210FEDCBA98", name: "Code Reviewer" },
+];
+
+/**
+ * Generate a list of demo AI agents with synthetic activity data.
+ * @returns {Array<object>}
+ */
+export function generateAgents() {
+  return DEMO_AGENTS.map((agent, i) => {
+    const seed = hash(agent.address + ":agent");
+    const rand = prng(seed);
+    const paymentCount = 5 + Math.floor(rand() * 50);
+    const totalSpent = Math.floor(rand() * 80000000) + 1000000; // $1–$81 range
+    const hoursAgo = Math.floor(rand() * 72);
+    const statusRoll = rand();
+    const status = statusRoll < 0.7 ? "active" : statusRoll < 0.9 ? "idle" : "budget_exceeded";
+
+    return {
+      id: `agent-${i + 1}`,
+      address: agent.address,
+      name: agent.name,
+      status,
+      paymentCount,
+      totalSpent: String(totalSpent),
+      totalSpentUsd: (totalSpent / 1e6).toFixed(2),
+      lastActive: new Date(Date.now() - hoursAgo * 3600 * 1000).toISOString(),
+    };
+  });
+}
+
+/**
+ * Generate global stats across all demo agents.
+ * @param {number} [days=7]
+ * @returns {object}
+ */
+export function generateGlobalStats(days = 7) {
+  const agents = generateAgents();
+  let totalPayments = 0;
+  let totalVolume = 0;
+
+  for (const agent of agents) {
+    totalPayments += agent.paymentCount;
+    totalVolume += Number(agent.totalSpent);
+  }
+
+  const avgPayment = totalPayments > 0 ? Math.floor(totalVolume / totalPayments) : 0;
+
+  return {
+    period: `${days}d`,
+    totalAgents: agents.length,
+    totalPayments,
+    totalVolume: String(totalVolume),
+    totalVolumeUsd: (totalVolume / 1e6).toFixed(2),
+    avgPaymentSize: String(avgPayment),
+    avgPaymentUsd: (avgPayment / 1e6).toFixed(4),
+  };
+}
+
+/**
+ * Generate global transactions across all demo agents.
+ * Merges and sorts payments from all demo agents.
+ * @param {{ limit?: number, offset?: number, network?: string }} [options]
+ * @returns {{ transactions: Array<object>, total: number }}
+ */
+export function generateGlobalTransactions(options = {}) {
+  const { limit = 20, offset = 0, network = null } = options;
+
+  let allPayments = [];
+  for (const agent of DEMO_AGENTS) {
+    const payments = generatePaymentHistory(agent.address, 7);
+    allPayments = allPayments.concat(payments);
+  }
+
+  // Sort by timestamp descending
+  allPayments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+  if (network) {
+    allPayments = allPayments.filter((p) => p.network === network);
+  }
+
+  const total = allPayments.length;
+  const transactions = allPayments.slice(offset, offset + limit);
+
+  return { transactions, total };
+}

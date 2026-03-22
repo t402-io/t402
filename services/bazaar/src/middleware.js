@@ -65,7 +65,7 @@ export const logger = {
 export function requestId(req, res, next) {
   const id = req.headers["x-request-id"] || crypto.randomUUID();
   req.id = id;
-  res.setHeader("X-Request-Id", id);
+  res.set("X-Request-Id", id);
   next();
 }
 
@@ -103,15 +103,15 @@ export function sendWithEtag(req, res, body, cacheControl) {
   const etag = `"${crypto.createHash("md5").update(json).digest("hex")}"`;
 
   if (cacheControl) {
-    res.setHeader("Cache-Control", cacheControl);
+    res.set("Cache-Control", cacheControl);
   }
-  res.setHeader("ETag", etag);
+  res.set("ETag", etag);
 
   if (req.headers["if-none-match"] === etag) {
     return res.status(304).end();
   }
 
-  res.setHeader("Content-Type", "application/json");
+  res.set("Content-Type", "application/json");
   res.send(json);
 }
 
@@ -136,8 +136,8 @@ export function rateLimit(req, res, next) {
   }
 
   entry.count++;
-  res.setHeader("X-RateLimit-Limit", RATE_LIMIT);
-  res.setHeader("X-RateLimit-Remaining", Math.max(0, RATE_LIMIT - entry.count));
+  res.set("X-RateLimit-Limit", String(RATE_LIMIT));
+  res.set("X-RateLimit-Remaining", String(Math.max(0, RATE_LIMIT - entry.count)));
 
   if (entry.count > RATE_LIMIT) {
     return res.status(429).json({ error: "Rate limit exceeded", retryAfter: Math.ceil((entry.windowStart + RATE_WINDOW - now) / 1000) });

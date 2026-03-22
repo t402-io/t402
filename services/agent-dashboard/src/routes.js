@@ -14,6 +14,9 @@ import {
   getExportCsv,
   getMode,
   getPoolStats,
+  getAgents,
+  getGlobalStats,
+  getGlobalTransactions,
 } from "./datasource.js";
 import { renderDashboard } from "./templates.js";
 import { isValidAddress, clampInt, log } from "./utils.js";
@@ -289,6 +292,43 @@ export function registerRoutes(app, opts = {}) {
         payments: { items: payments, total },
         alerts: { items: alerts, count: alerts.length },
       });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // ── Agents list ──────────────────────────────────────────────
+  app.get("/api/agents", async (_req, res, next) => {
+    try {
+      const agents = await getAgents();
+      res.set("Cache-Control", cacheHeader());
+      res.json({ mode: getMode(), agents, total: agents.length });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // ── Global stats (no address required) ──────────────────────
+  app.get("/api/stats", async (req, res, next) => {
+    try {
+      const days = clampInt(req.query.days, 1, 365, 7);
+      const stats = await getGlobalStats(days);
+      res.set("Cache-Control", cacheHeader());
+      res.json({ mode: getMode(), ...stats });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // ── Global transactions (no address required) ───────────────
+  app.get("/api/transactions", async (req, res, next) => {
+    try {
+      const limit = clampInt(req.query.limit, 1, 100, 20);
+      const offset = clampInt(req.query.offset, 0, 10000, 0);
+      const network = req.query.network || null;
+      const { transactions, total } = await getGlobalTransactions({ limit, offset, network });
+      res.set("Cache-Control", cacheHeader());
+      res.json({ mode: getMode(), transactions, total, offset, limit, hasMore: offset + transactions.length < total });
     } catch (err) {
       next(err);
     }

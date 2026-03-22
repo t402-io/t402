@@ -16,6 +16,9 @@ import {
   generateAlerts,
   generateTrendData,
   exportPaymentsCsv,
+  generateAgents,
+  generateGlobalStats,
+  generateGlobalTransactions,
 } from "./data.js";
 import { networkMeta } from "./networks.js";
 import { buildAlertsFromBudget, formatPaymentsCsv, log } from "./utils.js";
@@ -422,4 +425,131 @@ export async function getExportCsv(address, days = 7) {
 
   const { payments } = await getPayments(address, { days, limit: 10000 });
   return formatPaymentsCsv(payments);
+}
+
+/**
+ * Get list of known agents.
+ * In live mode, returns distinct payer addresses from settlements.
+ * In demo mode, returns synthetic agent data.
+ * @returns {Promise<Array<object>>}
+ */
+export async function getAgents() {
+  if (getMode() === "demo") {
+    return generateAgents();
+  }
+
+  const pool = await getPool();
+  const result = await pool.query({
+    name: "get-agents",
+    text: `SELECT from_address AS address,
+                  COUNT(*) AS payment_count,
+                  COALESCE(SUM(CAST(amount AS NUMERIC)), 0) AS total_spent,
+                  MAX(created_at) AS last_active
+           FROM settlements
+           WHERE status = 'settled'
+           GROUP BY from_address
+           ORDER BY total_spent DESC
+           LIMIT 50`,
+  });
+
+  return result.rows.map((row, i) => ({
+    id: `agent-${i + 1}`,
+    address: row.address,
+    name: `Agent ${i + 1}`,
+    status: "active",
+    paymentCount: Number(row.payment_count),
+    totalSpent: String(row.total_spent),
+    totalSpentUsd: (Number(row.total_spent) / 1e6).toFixed(2),
+    lastActive: row.last_active ? new Date(row.last_active).toISOString() : null,
+  }));
+}
+
+/**
+ * Get global stats across all agents.
+ * @param {number} [days=7]
+ * @returns {Promise<object>}
+ */
+export async function getGlobalStats(days = 7) {
+  if (getMode() === "demo") {
+    return generateGlobalStats(days);
+  }
+
+  const pool = await getPool();
+  const cutoff = new Date(Date.now() - days * 86400 * 1000);
+
+  const result = await pool.query({
+    name: "global-stats",
+    text: `SELECT COUNT(*) AS total_payments,
+                  COUNT(DISTINCT from_address) AS unique_agents,
+                  COALESCE(SUM(CAST(amount AS NUMERIC)), 0) AS total_volume
+           FROM settlements
+           WHERE status = 'settled'
+             AND created_at >= $1`,
+    values: [cutoff],
+  });
+
+  const row = result.rows[0] || {};
+  const totalPayments = Number(row.total_payments || 0);
+  const totalVolume = Number(row.total_volume || 0);
+
+  return {
+    period: `${days}d`,
+    totalAgents: Number(row.unique_agents || 0),
+    totalPayments,
+    totalVolume: String(totalVolume),
+    totalVolumeUsd: (totalVolume / 1e6).toFixed(2),
+    avgPaymentSize: totalPayments > 0 ? String(Math.floor(totalVolume / totalPayments)) : "0",
+    avgPaymentUsd: totalPayments > 0 ? (totalVolume / totalPayments / 1e6).toFixed(4) : "0.0000",
+  };
+}
+
+/**
+ * Get global transactions across all agents.
+ * @param {{ limit?: number, offset?: number, network?: string }} [options]
+ * @returns {Promise<{ transactions: Array<object>, total: number }>}
+ */
+export async function getGlobalTransactions(options = {}) {
+  const { limit = 20, offset = 0, network = null } = options;
+
+  if (getMode() === "demo") {
+    return generateGlobalTransactions({ limit, offset, network });
+  }
+
+  const pool = await getPool();
+
+  let query, countQuery;
+  if (network) {
+    query = {
+      name: "global-tx-filtered",
+      text: `SELECT * FROM settlements
+             WHERE network = $1
+             ORDER BY created_at DESC
+             LIMIT $2 OFFSET $3`,
+      values: [network, limit, offset],
+    };
+    countQuery = {
+      name: "global-tx-count-filtered",
+      text: `SELECT COUNT(*) AS cnt FROM settlements WHERE network = $1`,
+      values: [network],
+    };
+  } else {
+    query = {
+      name: "global-tx",
+      text: `SELECT * FROM settlements
+             ORDER BY created_at DESC
+             LIMIT $1 OFFSET $2`,
+      values: [limit, offset],
+    };
+    countQuery = {
+      name: "global-tx-count",
+      text: `SELECT COUNT(*) AS cnt FROM settlements`,
+    };
+  }
+
+  const [result, countResult] = await Promise.all([pool.query(query), pool.query(countQuery)]);
+
+  const transactions = result.rows.map((row, i) => rowToPayment(row, offset + i));
+  const total = parseInt(countResult.rows[0]?.cnt || "0", 10);
+
+  return { transactions, total };
 }

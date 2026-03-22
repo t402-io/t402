@@ -43,7 +43,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 app.use(express.json({ limit: "100kb" }));
-app.use(compression());
 
 // Security headers
 app.disable("x-powered-by");
@@ -65,18 +64,23 @@ const REVERIFY_STALE_HOURS = parseInt(process.env.REVERIFY_STALE_HOURS || "24");
 
 // CORS headers
 app.use((_req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-API-Key, Authorization");
+  res.set("Access-Control-Allow-Origin", "*");
+  res.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.set("Access-Control-Allow-Headers", "Content-Type, X-API-Key, Authorization");
   if (_req.method === "OPTIONS") return res.status(204).end();
   next();
 });
 
-// Request ID (correlation)
+// Request ID (correlation) — must be before compression so header is set early
 app.use(requestId);
 
 // Structured request logging
 app.use(requestLogger);
+
+// Compression — registered after requestId and requestLogger so their
+// headers (X-Request-Id) are already on the response before compression
+// intercepts res.end / res.write.
+app.use(compression());
 
 // Rate limiting on all routes
 app.use(rateLimit);
@@ -98,12 +102,13 @@ for (const svc of store.getAll()) {
 
 // ── Search ────────────────────────────────────────────────────────────
 app.get("/api/v1/search", (req, res) => {
-  const { q, category, maxPrice, network, token, tags, verified, limit = "20", offset = "0" } = req.query;
+  const { q, query, category, maxPrice, network, token, tags, verified, limit = "20", offset = "0" } = req.query;
+  const searchTerm = q || query;
   let results = store.getAll();
 
-  if (q) {
+  if (searchTerm) {
     // Multi-word search: all terms must match somewhere
-    const terms = String(q).toLowerCase().split(/\s+/).filter(Boolean);
+    const terms = String(searchTerm).toLowerCase().split(/\s+/).filter(Boolean);
     results = results
       .map((s) => {
         let score = 0;
@@ -122,7 +127,7 @@ app.get("/api/v1/search", (req, res) => {
           score += termScore;
         }
 
-        if (nameLower === String(q).toLowerCase()) score += 5;
+        if (nameLower === String(searchTerm).toLowerCase()) score += 5;
         return { ...s, _score: score };
       })
       .filter((s) => s._score > 0);
@@ -181,7 +186,7 @@ app.get("/api/v1/search", (req, res) => {
     services: results,
     count: results.length,
     total,
-    query: { q, category, maxPrice, network },
+    query: { q: searchTerm, category, maxPrice, network },
     pagination: { offset: parsedOffset, limit: parsedLimit },
   };
   sendWithEtag(req, res, body, "public, max-age=30");
