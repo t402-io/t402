@@ -262,7 +262,7 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (error) {
     return NextResponse.json(
-      { error: "Facilitator error", message: String(error) },
+      { error: "Facilitator error", reason: String(error) },
       { status: 502 }
     );
   }

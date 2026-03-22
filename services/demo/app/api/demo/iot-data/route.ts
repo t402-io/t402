@@ -94,8 +94,21 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     return NextResponse.json(
-      { error: "Facilitator error", message: String(error) },
+      { error: "Facilitator error", reason: String(error) },
       { status: 502 }
     );
   }
+}
+
+// Support OPTIONS for CORS preflight
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Payment-Signature, x-preferred-chain, x-demo-mode",
+      "Access-Control-Expose-Headers": "Payment-Required, Payment-Response",
+    },
+  });
 }

@@ -16,11 +16,11 @@ export function CodeTabs({ tabs, className }: CodeTabsProps) {
   return (
     <div
       className={clsx("rounded-2xl overflow-hidden", className)}
-      style={{ border: "1px solid rgba(255, 255, 255, 0.08)" }}
+      style={{ border: "1px solid var(--color-border)" }}
     >
       <div
         className="flex overflow-x-auto scrollbar-hide"
-        style={{ background: "#111113", borderBottom: "1px solid rgba(255, 255, 255, 0.08)" }}
+        style={{ background: "var(--color-surface)", borderBottom: "1px solid var(--color-border)" }}
       >
         {tabs.map((tab, i) => (
           <button
@@ -33,8 +33,8 @@ export function CodeTabs({ tabs, className }: CodeTabsProps) {
                 : "hover:text-white"
             )}
             style={{
-              background: i === active ? "#222224" : "transparent",
-              color: i === active ? "#FAFAFA" : "#71717A",
+              background: i === active ? "var(--color-surface-active)" : "transparent",
+              color: i === active ? "var(--color-text-primary)" : "var(--color-text-tertiary)",
             }}
           >
             {tab.label}

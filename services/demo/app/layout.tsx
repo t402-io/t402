@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import Script from "next/script";
 import { ClientProviders } from "./providers/ClientProviders";
@@ -50,9 +50,10 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
-  other: {
-    "theme-color": "#0A0A0B",
-  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0A0A0B",
 };
 
 const jsonLd = {

@@ -37,7 +37,12 @@ function createPaymentRequired(sourceChain: string, targetChain: string, request
 export async function POST(request: NextRequest) {
   const paymentHeader = request.headers.get("payment-signature");
   const isDemoMode = request.headers.get("x-demo-mode") === "true";
-  const body = await request.json().catch(() => ({}));
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
   const {
     sourceChain = "arbitrum",
     targetChain = "ethereum",
@@ -50,7 +55,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: "Unsupported chain",
-        message: `Supported chains: ${BRIDGE_CHAINS.join(", ")}`,
+        reason: `Supported chains: ${BRIDGE_CHAINS.join(", ")}`,
       },
       { status: 400 }
     );
@@ -151,7 +156,7 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (error) {
     return NextResponse.json(
-      { error: "Facilitator error", message: String(error) },
+      { error: "Facilitator error", reason: String(error) },
       { status: 502 }
     );
   }

@@ -13,8 +13,11 @@ const CSP_DIRECTIVES = [
   "img-src 'self' data: blob: https:",
   "connect-src 'self' https://facilitator.t402.io https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.walletconnect.com wss://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.org https://*.tonapi.io https://*.toncenter.com https://*.solana.com https://*.near.org https://*.aptoslabs.com https://*.tezos.com https://*.polkadot.io https://*.cosmos.network https://*.publicnode.com https://*.drpc.org",
   "frame-src 'self' https://*.walletconnect.com",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
   "object-src 'none'",
   "base-uri 'self'",
+  "upgrade-insecure-requests",
 ].join('; ');
 
 const SECURITY_HEADERS: Record<string, string> = {
@@ -44,6 +47,12 @@ export function middleware(request: NextRequest) {
     const entry = rateMap.get(ip);
 
     if (!entry || now > entry.reset) {
+      // Clean up expired entries to prevent unbounded memory growth
+      if (rateMap.size > 1000) {
+        for (const [key, val] of rateMap) {
+          if (now > val.reset) rateMap.delete(key);
+        }
+      }
       rateMap.set(ip, { count: 1, reset: now + WINDOW_MS });
       return applySecurityHeaders(NextResponse.next());
     }
@@ -63,6 +72,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon\\.ico|favicon\\.svg|favicon-96x96\\.png|apple-touch-icon\\.png|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
+    '/((?!_next/static|_next/image|_next/data|favicon\\.ico|favicon\\.svg|favicon-96x96\\.png|apple-touch-icon\\.png|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
   ],
 };

@@ -67,15 +67,15 @@ export function CodeBlock({
   return (
     <div
       className={`overflow-hidden rounded-2xl flex flex-col ${className}`}
-      style={{ background: "#111113", border: "1px solid rgba(255, 255, 255, 0.08)" }}
+      style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
     >
       {showHeader && (
         <div
           className="flex items-center justify-between px-3 sm:px-4 py-2 shrink-0"
-          style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.08)" }}
+          style={{ borderBottom: "1px solid var(--color-border)" }}
         >
           {label && (
-            <span className="text-[10px] sm:text-xs font-medium truncate mr-2" style={{ color: labelColor || "#71717A" }}>
+            <span className="text-[10px] sm:text-xs font-medium truncate mr-2" style={{ color: labelColor || "var(--color-text-tertiary)" }}>
               {label}
             </span>
           )}
@@ -84,10 +84,10 @@ export function CodeBlock({
             <button
               onClick={handleCopy}
               className="flex items-center gap-1 text-[10px] sm:text-xs hover:text-white transition-colors shrink-0"
-              style={{ color: "#A1A1AA" }}
+              style={{ color: "var(--color-muted)" }}
               aria-label={copied ? "Copied to clipboard" : "Copy code"}
             >
-              {copied ? <Check size={12} style={{ color: "#10B981" }} /> : <Copy size={12} />}
+              {copied ? <Check size={12} style={{ color: "var(--color-success)" }} /> : <Copy size={12} />}
               <span className="hidden sm:inline">{copied ? "Copied" : "Copy"}</span>
             </button>
           )}
@@ -95,13 +95,13 @@ export function CodeBlock({
       )}
       <pre
         className="flex-1 overflow-auto p-3 sm:p-4 text-[11px] sm:text-sm leading-relaxed"
-        style={{ maxHeight: maxHeight || undefined, color: "#D4D4D4" }}
+        style={{ maxHeight: maxHeight || undefined, color: "var(--color-code-text)" }}
       >
         <code>
           {lines.map((lineTokens, lineIdx) => (
             <span key={lineIdx} className="block">
               {showLineNumbers && (
-                <span className="inline-block w-8 text-right mr-4 select-none opacity-50 text-xs" style={{ color: "#71717A" }}>
+                <span className="inline-block w-8 text-right mr-4 select-none opacity-50 text-xs" style={{ color: "var(--color-text-tertiary)" }}>
                   {lineIdx + 1}
                 </span>
               )}

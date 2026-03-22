@@ -96,8 +96,8 @@ export function IoTMicropayments() {
               disabled={isLoading}
               className="glass-card-interactive p-4 flex items-center gap-3 text-left disabled:opacity-50"
             >
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(80, 175, 149, 0.12)" }}>
-                <Icon size={16} style={{ color: "#50AF95" }} />
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#14B8A61F" }}>
+                <Icon size={16} style={{ color: "var(--color-scenario-iot)" }} />
               </div>
               <div>
                 <p className="text-sm font-medium">{sensor.label}</p>

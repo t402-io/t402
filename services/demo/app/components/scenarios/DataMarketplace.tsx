@@ -158,7 +158,7 @@ export function DataMarketplace() {
       <div>
         {state === "idle" && (
           <div className="glass-card p-4 sm:p-6 flex flex-col items-center justify-center min-h-[220px] sm:min-h-[260px] text-center">
-            <BarChart3 size={32} className="mb-3" style={{ color: "#50AF95" }} />
+            <BarChart3 size={32} className="mb-3" style={{ color: "var(--color-scenario-data)" }} />
             <p className="text-sm text-[var(--color-muted)]">
               Select a data feed and purchase access
             </p>

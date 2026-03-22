@@ -87,9 +87,9 @@ export function GaslessPayment() {
             <li className="flex items-center gap-2"><span className="text-[var(--color-error)]">✗</span> Gas price volatility</li>
           </ul>
         </div>
-        <div className="glass-card p-5" style={{ boxShadow: "inset 0 0 0 1px rgba(80, 175, 149, 0.2)" }}>
+        <div className="glass-card p-5" style={{ boxShadow: "inset 0 0 0 1px #10B98133" }}>
           <div className="flex items-center gap-2 mb-3">
-            <Zap size={16} style={{ color: "#50AF95" }} />
+            <Zap size={16} style={{ color: "var(--color-scenario-gasless)" }} />
             <h3 className="text-sm font-semibold">Gasless (ERC-4337)</h3>
           </div>
           <ul className="text-xs text-[var(--color-muted)] space-y-1.5">

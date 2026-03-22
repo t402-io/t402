@@ -25,11 +25,11 @@ export default function Error({
           </svg>
         </div>
         <h2 className="text-lg font-semibold mb-2">Something went wrong</h2>
-        <p className="text-sm mb-1" style={{ color: "#A1A1AA" }}>
+        <p className="text-sm mb-1" style={{ color: "var(--color-muted)" }}>
           An unexpected error occurred while loading this page.
         </p>
         {error.digest && (
-          <p className="text-xs font-mono mb-4" style={{ color: "#71717A" }}>
+          <p className="text-xs font-mono mb-4" style={{ color: "var(--color-text-tertiary)" }}>
             Error ID: {error.digest}
           </p>
         )}
@@ -43,7 +43,7 @@ export default function Error({
           <a
             href="/"
             className="px-5 py-3 text-sm rounded-xl hover:text-white transition-colors min-h-[44px] flex items-center"
-            style={{ border: "1px solid rgba(255, 255, 255, 0.15)", color: "#A1A1AA" }}
+            style={{ border: "1px solid rgba(255, 255, 255, 0.15)", color: "var(--color-muted)" }}
           >
             Go home
           </a>

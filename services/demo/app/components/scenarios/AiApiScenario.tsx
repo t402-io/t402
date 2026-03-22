@@ -173,7 +173,7 @@ export function AiApiScenario() {
       <div className="flex flex-col gap-3">
         {state === "idle" && (
           <div className="glass-card p-4 sm:p-6 flex flex-col items-center justify-center min-h-[200px] sm:min-h-[240px] text-center">
-            <Bot size={32} className="mb-3" style={{ color: "#50AF95" }} />
+            <Bot size={32} className="mb-3" style={{ color: "var(--color-scenario-ai)" }} />
             <p className="text-sm text-[var(--color-muted)]">
               AI response will appear here after payment
             </p>

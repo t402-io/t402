@@ -36,13 +36,13 @@ export async function POST(request: NextRequest) {
   }
 
   // Parse the request body for the query
-  let query = "What is HTTP 402?";
+  let body;
   try {
-    const body = await request.json();
-    if (body.query) query = body.query;
+    body = await request.json();
   } catch {
-    // Use default query
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
+  const query = body.query || "What is HTTP 402?";
 
   const paymentPayload = decodeHeader(paymentHeader);
   const requirements = {
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (error) {
     return NextResponse.json(
-      { error: "Facilitator error", message: String(error) },
+      { error: "Facilitator error", reason: String(error) },
       { status: 502 }
     );
   }
@@ -145,4 +145,17 @@ function getMockResponse(query: string): string {
     return "T402 is an open-source HTTP-native payment protocol for USDT/USDT0 stablecoins. It enables web services to require cryptocurrency payments without intermediaries using a simple request-response pattern.";
   }
   return `This is a demonstration of pay-per-query AI monetization via T402. Your query "${query.slice(0, 50)}" would be processed by Claude and charged 0.001 USDT per request — no API keys, no subscriptions, just pay and use.`;
+}
+
+// Support OPTIONS for CORS preflight
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Payment-Signature, x-preferred-chain, x-demo-mode",
+      "Access-Control-Expose-Headers": "Payment-Required, Payment-Response",
+    },
+  });
 }

@@ -55,7 +55,12 @@ export async function POST(request: NextRequest) {
   }
 
   const chain = getPreferredChain(request);
-  const body = await request.json().catch(() => ({}));
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
 
   // Extract sender from payment or use demo address
   const senderAddress = (body.sender || "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD68") as Address;
@@ -167,7 +172,7 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (error) {
     return NextResponse.json(
-      { error: "Facilitator error", message: String(error) },
+      { error: "Facilitator error", reason: String(error) },
       { status: 502 }
     );
   }

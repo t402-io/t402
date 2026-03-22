@@ -114,7 +114,7 @@ export function StreamingMedia() {
             <h3 className="text-sm font-semibold">Premium Audio Stream</h3>
             <p className="text-xs text-[var(--color-muted)]">Pay-per-second • upto scheme</p>
           </div>
-          <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "rgba(80, 175, 149, 0.12)", color: "#50AF95" }}>
+          <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "#8B5CF61F", color: "var(--color-scenario-stream)" }}>
             {COST_PER_10S} USDT/10s
           </span>
         </div>

@@ -112,7 +112,7 @@ export function ContentPaywall() {
           <div className="relative">
             <div className="h-20 sm:h-24 bg-gradient-to-b from-transparent to-[var(--color-surface)]" />
             <div className="bg-[var(--color-surface)] p-4 sm:p-6 text-center border-t border-[var(--color-border)]">
-              <Lock size={28} className="mb-3" style={{ color: "#50AF95" }} />
+              <Lock size={28} className="mb-3" style={{ color: "var(--color-scenario-content)" }} />
               <p className="text-sm text-[var(--color-muted)] mb-4">
                 Unlock this article for <span className="text-white font-medium">0.01 USDT</span>
               </p>

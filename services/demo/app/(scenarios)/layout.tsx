@@ -80,9 +80,9 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
                       ? "bg-[var(--color-surface-active)] text-white"
                       : "text-[var(--color-muted)] hover:text-white hover:bg-[var(--color-surface-hover)]"
                   )}
-                  style={isActive ? { borderLeft: "2px solid #50AF95", paddingLeft: "10px" } : undefined}
+                  style={isActive ? { borderLeft: "2px solid var(--color-brand)", paddingLeft: "10px" } : undefined}
                 >
-                  <Icon size={14} style={{ color: isActive ? "#50AF95" : undefined }} aria-hidden="true" />
+                  <Icon size={14} style={{ color: isActive ? "var(--color-brand)" : undefined }} aria-hidden="true" />
                   <span>{s.title}</span>
                 </Link>
               );
@@ -128,7 +128,7 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
                     : "text-[var(--color-muted)]"
                 )}
               >
-                <Icon size={14} style={{ color: isActive ? "#50AF95" : undefined }} aria-hidden="true" />
+                <Icon size={14} style={{ color: isActive ? "var(--color-brand)" : undefined }} aria-hidden="true" />
                 <span>{s.title}</span>
               </Link>
             );

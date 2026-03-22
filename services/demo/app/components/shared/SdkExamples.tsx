@@ -25,20 +25,20 @@ export function SdkExamples({ scenarioId, className }: SdkExamplesProps) {
     <div className={clsx("mt-8", className)}>
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-medium text-white flex items-center gap-2">
-          <Code2 size={14} style={{ color: "#50AF95" }} />
+          <Code2 size={14} style={{ color: "var(--color-brand)" }} />
           SDK Integration
         </h3>
         {hasServer && (
           <div
             className="flex items-center gap-0.5 rounded-xl p-0.5"
-            style={{ background: "#111113" }}
+            style={{ background: "var(--color-surface)" }}
           >
             <button
               onClick={() => setView("client")}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors min-h-[36px]"
               style={{
-                background: view === "client" ? "#222224" : "transparent",
-                color: view === "client" ? "#FAFAFA" : "#71717A",
+                background: view === "client" ? "var(--color-surface-active)" : "transparent",
+                color: view === "client" ? "var(--color-text-primary)" : "var(--color-text-tertiary)",
               }}
             >
               <Code2 size={12} aria-hidden="true" />
@@ -48,8 +48,8 @@ export function SdkExamples({ scenarioId, className }: SdkExamplesProps) {
               onClick={() => setView("server")}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors min-h-[36px]"
               style={{
-                background: view === "server" ? "#222224" : "transparent",
-                color: view === "server" ? "#FAFAFA" : "#71717A",
+                background: view === "server" ? "var(--color-surface-active)" : "transparent",
+                color: view === "server" ? "var(--color-text-primary)" : "var(--color-text-tertiary)",
               }}
             >
               <Server size={12} aria-hidden="true" />

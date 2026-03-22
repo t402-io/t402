@@ -20,10 +20,10 @@ function WalletButtonSkeleton() {
   return (
     <div
       className="flex items-center gap-2 rounded-xl px-3 py-1.5"
-      style={{ background: "#111113", border: "1px solid rgba(255, 255, 255, 0.08)" }}
+      style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
     >
-      <span className="h-2 w-2 rounded-full animate-pulse" style={{ background: "#71717A" }} />
-      <span className="font-mono text-xs" style={{ color: "#71717A" }}>...</span>
+      <span className="h-2 w-2 rounded-full animate-pulse" style={{ background: "var(--color-text-tertiary)" }} />
+      <span className="font-mono text-xs" style={{ color: "var(--color-text-tertiary)" }}>...</span>
     </div>
   );
 }
@@ -67,11 +67,11 @@ function DemoWalletBadge({ label }: { label: string }) {
   return (
     <div
       className="flex items-center gap-2 rounded-xl px-3 py-1.5"
-      style={{ background: "#111113", border: "1px solid rgba(255, 255, 255, 0.08)" }}
+      style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
     >
-      <span className="h-2 w-2 rounded-full" style={{ background: "#F59E0B" }} />
+      <span className="h-2 w-2 rounded-full" style={{ background: "var(--color-warning)" }} />
       <span className="font-mono text-xs text-white">Demo Wallet</span>
-      <span className="text-xs" style={{ color: "#71717A" }}>{label}</span>
+      <span className="text-xs" style={{ color: "var(--color-text-tertiary)" }}>{label}</span>
     </div>
   );
 }
@@ -89,18 +89,18 @@ function ConnectedBadge({
     <div className="flex items-center gap-1.5 sm:gap-2">
       <div
         className="flex items-center gap-1.5 sm:gap-2 rounded-xl px-2 sm:px-3 py-1.5"
-        style={{ background: "#111113", border: "1px solid rgba(255, 255, 255, 0.08)" }}
+        style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
       >
-        <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: "#10B981" }} />
+        <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: "var(--color-success)" }} />
         <span className="font-mono text-[10px] sm:text-xs text-white">
           {address.slice(0, 4)}...{address.slice(-3)}
         </span>
-        <span className="hidden sm:inline text-xs" style={{ color: "#71717A" }}>{label}</span>
+        <span className="hidden sm:inline text-xs" style={{ color: "var(--color-text-tertiary)" }}>{label}</span>
       </div>
       <button
         onClick={onDisconnect}
         className="rounded-xl px-2 py-1.5 text-[10px] sm:text-xs hover:text-white transition-colors"
-        style={{ border: "1px solid rgba(255, 255, 255, 0.08)", color: "#A1A1AA" }}
+        style={{ border: "1px solid var(--color-border)", color: "var(--color-muted)" }}
         aria-label={`Disconnect ${label} wallet`}
       >
         <span className="hidden sm:inline">Disconnect</span>
@@ -129,7 +129,7 @@ function InstallButton({ label, url }: { label: string; url: string }) {
       target="_blank"
       rel="noopener noreferrer"
       className="rounded-xl px-4 py-2.5 text-xs hover:text-white transition-colors min-h-[40px] flex items-center"
-      style={{ border: "1px solid rgba(255, 255, 255, 0.15)", color: "#A1A1AA" }}
+      style={{ border: "1px solid var(--color-border-hover)", color: "var(--color-muted)" }}
     >
       Install {label}
     </a>

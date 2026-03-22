@@ -1,10 +1,31 @@
 import { FACILITATOR_URL } from "./config";
 
+const FACILITATOR_TIMEOUT_MS = 30_000;
+
+/**
+ * Fetch with a 30-second timeout via AbortController.
+ */
+async function facilitatorFetch(url: string, init?: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FACILITATOR_TIMEOUT_MS);
+  try {
+    const response = await fetch(url, { ...init, signal: controller.signal });
+    return response;
+  } catch (error: unknown) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new Error("Facilitator request timed out after 30s");
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 /**
  * Verify a payment payload against the facilitator.
  */
 export async function verifyPayment(paymentPayload: unknown, paymentRequirements: unknown) {
-  const response = await fetch(`${FACILITATOR_URL}/verify`, {
+  const response = await facilitatorFetch(`${FACILITATOR_URL}/verify`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -20,7 +41,7 @@ export async function verifyPayment(paymentPayload: unknown, paymentRequirements
  * Settle a verified payment on-chain via the facilitator.
  */
 export async function settlePayment(paymentPayload: unknown, paymentRequirements: unknown) {
-  const response = await fetch(`${FACILITATOR_URL}/settle`, {
+  const response = await facilitatorFetch(`${FACILITATOR_URL}/settle`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -36,7 +57,7 @@ export async function settlePayment(paymentPayload: unknown, paymentRequirements
  * Check facilitator health and supported networks.
  */
 export async function getFacilitatorSupported() {
-  const response = await fetch(`${FACILITATOR_URL}/supported`);
+  const response = await facilitatorFetch(`${FACILITATOR_URL}/supported`);
   return response.json();
 }
 

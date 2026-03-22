@@ -142,7 +142,7 @@ export function AgentToAgent() {
                     : "border-[var(--color-border)] hover:border-[var(--color-muted)]"
                 }`}
               >
-                <task.icon size={18} style={{ color: "#50AF95" }} />
+                <task.icon size={18} style={{ color: "var(--color-scenario-agent)" }} />
                 <div className="text-left">
                   <p className="text-sm font-medium">{task.label}</p>
                   <p className="text-xs text-[var(--color-muted)]">{task.description}</p>
@@ -191,7 +191,7 @@ export function AgentToAgent() {
       <div>
         {state === "idle" && (
           <div className="glass-card p-4 sm:p-6 flex flex-col items-center justify-center min-h-[280px] sm:min-h-[340px] text-center">
-            <Handshake size={32} className="mb-3" style={{ color: "#50AF95" }} />
+            <Handshake size={32} className="mb-3" style={{ color: "var(--color-scenario-agent)" }} />
             <h4 className="text-sm font-medium mb-2">Agent-to-Agent Protocol</h4>
             <p className="text-xs text-[var(--color-muted)] max-w-xs">
               Agents autonomously pay each other for tasks using T402. No human intervention — the requesting agent signs USDT authorization automatically.
@@ -205,7 +205,7 @@ export function AgentToAgent() {
               animate={{ rotate: 360 }}
               transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
             >
-              <Settings size={32} style={{ color: "#50AF95" }} />
+              <Settings size={32} style={{ color: "var(--color-scenario-agent)" }} />
             </motion.div>
             <p className="text-sm mt-4 font-medium">
               {state === "delegating" && "Agent A delegating task..."}

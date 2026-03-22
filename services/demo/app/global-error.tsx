@@ -9,7 +9,7 @@ export default function GlobalError({
 }) {
   return (
     <html lang="en">
-      <body style={{ background: "#0A0A0B", color: "#FAFAFA", fontFamily: "system-ui, sans-serif" }}>
+      <body style={{ backgroundColor: "var(--color-background)", color: "var(--color-foreground)", fontFamily: "system-ui, sans-serif" }}>
         <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
           <div style={{ maxWidth: "400px", width: "100%", textAlign: "center" }}>
             <div style={{ fontSize: "48px", marginBottom: "16px" }}>
@@ -21,11 +21,11 @@ export default function GlobalError({
             <h1 style={{ fontSize: "20px", fontWeight: 600, marginBottom: "8px" }}>
               Application Error
             </h1>
-            <p style={{ fontSize: "14px", color: "#71717A", marginBottom: "8px" }}>
+            <p style={{ fontSize: "14px", color: "var(--color-text-tertiary)", marginBottom: "8px" }}>
               A critical error occurred. This has been logged automatically.
             </p>
             {error.digest && (
-              <p style={{ fontSize: "12px", color: "#71717A", fontFamily: "monospace", marginBottom: "16px" }}>
+              <p style={{ fontSize: "12px", color: "var(--color-text-tertiary)", fontFamily: "monospace", marginBottom: "16px" }}>
                 Error ID: {error.digest}
               </p>
             )}

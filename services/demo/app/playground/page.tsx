@@ -171,7 +171,7 @@ export default function PlaygroundPage() {
         className="sticky top-0 z-50 backdrop-blur-xl"
         style={{
           background: "rgba(10, 10, 11, 0.8)",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+          borderBottom: "1px solid var(--color-border)",
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
@@ -179,12 +179,12 @@ export default function PlaygroundPage() {
             <Link
               href="/"
               className="flex items-center gap-2 hover:text-white transition-colors"
-              style={{ color: "#A1A1AA" }}
+              style={{ color: "var(--color-muted)" }}
             >
               <ArrowLeft size={14} />
-              <span className="text-sm font-semibold" style={{ color: "#50AF95" }}>T402</span>
+              <span className="text-sm font-semibold" style={{ color: "var(--color-brand)" }}>T402</span>
             </Link>
-            <span className="text-xs" style={{ color: "#71717A" }}>/</span>
+            <span className="text-xs" style={{ color: "var(--color-text-tertiary)" }}>/</span>
             <span className="text-sm font-medium text-white">Playground</span>
           </div>
           <div className="flex items-center gap-3">
@@ -200,12 +200,12 @@ export default function PlaygroundPage() {
         <div className="mb-8">
           <span
             className="inline-block text-xs font-semibold tracking-[0.2em] uppercase mb-3"
-            style={{ color: "#50AF95" }}
+            style={{ color: "var(--color-brand)" }}
           >
             PLAYGROUND
           </span>
           <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Protocol Playground</h1>
-          <p className="text-sm" style={{ color: "#A1A1AA" }}>
+          <p className="text-sm" style={{ color: "var(--color-muted)" }}>
             Execute T402 payment flows step-by-step. Watch the HTTP 402 handshake in real time.
           </p>
         </div>
@@ -215,7 +215,7 @@ export default function PlaygroundPage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             {/* Endpoint selector */}
             <div className="flex-1">
-              <label className="text-[10px] uppercase tracking-wider mb-1.5 block" style={{ color: "#71717A" }}>
+              <label className="text-[10px] uppercase tracking-wider mb-1.5 block" style={{ color: "var(--color-text-tertiary)" }}>
                 Endpoint
               </label>
               <div className="relative">
@@ -223,9 +223,10 @@ export default function PlaygroundPage() {
                   value={selectedEndpoint}
                   onChange={(e) => { setSelectedEndpoint(Number(e.target.value)); reset(); }}
                   className="w-full appearance-none rounded-xl px-3 py-2 text-sm text-white pr-8 focus:outline-none"
+                  aria-label="Select API endpoint"
                   style={{
-                    background: "#111113",
-                    border: "1px solid rgba(255, 255, 255, 0.08)",
+                    background: "var(--color-surface)",
+                    border: "1px solid var(--color-border)",
                   }}
                 >
                   {ENDPOINTS.map((ep, i) => (
@@ -234,7 +235,7 @@ export default function PlaygroundPage() {
                     </option>
                   ))}
                 </select>
-                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "#71717A" }} />
+                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "var(--color-text-tertiary)" }} />
               </div>
             </div>
 
@@ -252,7 +253,7 @@ export default function PlaygroundPage() {
                 <button
                   onClick={reset}
                   className="flex items-center gap-2 px-3 py-3 text-sm hover:text-white rounded-xl transition-colors min-h-[44px]"
-                  style={{ color: "#A1A1AA", border: "1px solid rgba(255, 255, 255, 0.15)" }}
+                  style={{ color: "var(--color-muted)", border: "1px solid var(--color-border-hover)" }}
                 >
                   <RotateCcw size={14} />
                   Reset
@@ -307,7 +308,7 @@ export default function PlaygroundPage() {
                   </div>
                   <pre
                     className="rounded-xl p-3 overflow-x-auto text-xs font-mono max-h-48 overflow-y-auto"
-                    style={{ background: "#111113", color: "#D4D4D4", border: "1px solid rgba(255, 255, 255, 0.08)" }}
+                    style={{ background: "var(--color-surface)", color: "var(--color-code-text)", border: "1px solid var(--color-border)" }}
                   >
                     {paymentPayload}
                   </pre>
@@ -373,14 +374,14 @@ function FlowTimeline({ step }: { step: FlowStep }) {
             <div
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
               style={{
-                background: isActive ? "#50AF95" : isPast ? "#222224" : "#111113",
-                color: isActive ? "#0A0A0B" : isPast ? "#FAFAFA" : "#71717A",
+                background: isActive ? "var(--color-brand)" : isPast ? "var(--color-surface-active)" : "var(--color-surface)",
+                color: isActive ? "var(--color-background)" : isPast ? "var(--color-text-primary)" : "var(--color-text-tertiary)",
               }}
             >
               <span
                 className={`h-1.5 w-1.5 rounded-full ${isActive ? "animate-pulse" : ""}`}
                 style={{
-                  background: isActive ? "#0A0A0B" : isPast ? "#10B981" : "#71717A",
+                  background: isActive ? "var(--color-background)" : isPast ? "var(--color-success)" : "var(--color-text-tertiary)",
                 }}
               />
               {s.label}
@@ -388,7 +389,7 @@ function FlowTimeline({ step }: { step: FlowStep }) {
             {i < steps.length - 1 && (
               <div
                 className="w-4 h-px"
-                style={{ background: isPast ? "#50AF95" : "rgba(255, 255, 255, 0.08)" }}
+                style={{ background: isPast ? "var(--color-brand)" : "var(--color-border)" }}
               />
             )}
           </div>
@@ -424,25 +425,25 @@ function ExchangePanel({
         {/* Request */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] uppercase tracking-wider" style={{ color: "#71717A" }}>Request</span>
+            <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--color-text-tertiary)" }}>Request</span>
             <button
               onClick={() => setShowRequestHeaders(!showRequestHeaders)}
               className="text-[10px] hover:underline"
-              style={{ color: "#50AF95" }}
+              style={{ color: "var(--color-brand)" }}
             >
               {showRequestHeaders ? "Hide" : "Show"} Headers
             </button>
           </div>
           <div
             className="rounded-xl p-3 space-y-2"
-            style={{ background: "#111113", border: "1px solid rgba(255, 255, 255, 0.08)" }}
+            style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
           >
             <div className="text-xs font-mono">
               <span style={{ color: "var(--syn-keyword)" }}>{exchange.request.method}</span>{" "}
               <span style={{ color: "var(--syn-string)" }}>{exchange.request.url}</span>
             </div>
             {showRequestHeaders && (
-              <div className="text-xs font-mono space-y-0.5 pt-2" style={{ color: "#9CA3AF", borderTop: "1px solid rgba(255, 255, 255, 0.08)" }}>
+              <div className="text-xs font-mono space-y-0.5 pt-2" style={{ color: "var(--color-code-text-dim)", borderTop: "1px solid var(--color-border)" }}>
                 {Object.entries(exchange.request.headers).map(([k, v]) => (
                   <div key={k}>
                     <span style={{ color: "var(--syn-property)" }}>{k}</span>:{" "}
@@ -454,8 +455,8 @@ function ExchangePanel({
               </div>
             )}
             {exchange.request.body && (
-              <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)" }} className="pt-2">
-                <pre className="text-xs font-mono whitespace-pre-wrap" style={{ color: "#D4D4D4" }}>
+              <div style={{ borderTop: "1px solid var(--color-border)" }} className="pt-2">
+                <pre className="text-xs font-mono whitespace-pre-wrap" style={{ color: "var(--color-code-text)" }}>
                   {formatJson(exchange.request.body)}
                 </pre>
               </div>
@@ -467,7 +468,7 @@ function ExchangePanel({
         {exchange.response && (
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] uppercase tracking-wider" style={{ color: "#71717A" }}>Response</span>
+              <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--color-text-tertiary)" }}>Response</span>
               <CopyButton
                 text={exchange.response.body}
                 id={`resp-${exchange.response.status}`}
@@ -477,23 +478,23 @@ function ExchangePanel({
             </div>
             <div
               className="rounded-xl p-3 space-y-2"
-              style={{ background: "#111113", border: "1px solid rgba(255, 255, 255, 0.08)" }}
+              style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
             >
               <div className="text-xs font-mono">
                 <span
                   className="font-bold"
                   style={{
                     color: exchange.response.status === 402 ? "#F59E0B" :
-                      exchange.response.status >= 200 && exchange.response.status < 300 ? "#10B981" :
+                      exchange.response.status >= 200 && exchange.response.status < 300 ? "var(--color-success)" :
                       "#EF4444"
                   }}
                 >
                   {exchange.response.status}
                 </span>{" "}
-                <span style={{ color: "#9CA3AF" }}>{exchange.response.statusText}</span>
+                <span style={{ color: "var(--color-code-text-dim)" }}>{exchange.response.statusText}</span>
               </div>
-              <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)" }} className="pt-2">
-                <pre className="text-xs font-mono whitespace-pre-wrap max-h-48 overflow-y-auto" style={{ color: "#D4D4D4" }}>
+              <div style={{ borderTop: "1px solid var(--color-border)" }} className="pt-2">
+                <pre className="text-xs font-mono whitespace-pre-wrap max-h-48 overflow-y-auto" style={{ color: "var(--color-code-text)" }}>
                   {formatJson(exchange.response.body)}
                 </pre>
               </div>
@@ -520,9 +521,9 @@ function CopyButton({
     <button
       onClick={() => onCopy(text, id)}
       className="flex items-center gap-1 text-[10px] hover:text-white transition-colors"
-      style={{ color: "#A1A1AA" }}
+      style={{ color: "var(--color-muted)" }}
     >
-      {copied === id ? <Check size={10} style={{ color: "#10B981" }} /> : <Copy size={10} />}
+      {copied === id ? <Check size={10} style={{ color: "var(--color-success)" }} /> : <Copy size={10} />}
       {copied === id ? "Copied" : "Copy"}
     </button>
   );

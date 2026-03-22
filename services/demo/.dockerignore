@@ -1,0 +1,10 @@
+node_modules
+.next
+.git
+*.md
+test
+e2e
+playwright-report
+coverage
+.env*
+.turbo

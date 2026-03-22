@@ -109,8 +109,8 @@ export default function HomePage() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-4">
-            <span className="text-base font-bold tracking-tight" style={{ color: "#50AF95" }}>T402</span>
-            <span className="hidden sm:inline text-xs font-medium" style={{ color: "#71717A" }}>demo</span>
+            <span className="text-base font-bold tracking-tight" style={{ color: "var(--color-brand)" }}>T402</span>
+            <span className="hidden sm:inline text-xs font-medium" style={{ color: "var(--color-text-tertiary)" }}>demo</span>
             <div className="hidden sm:block">
               <FacilitatorBadge />
             </div>
@@ -127,18 +127,18 @@ export default function HomePage() {
         <div className="text-center mb-14">
           <span
             className="inline-block text-[10px] font-semibold tracking-[0.25em] uppercase mb-5 px-3 py-1 rounded-full"
-            style={{ color: "#50AF95", background: "rgba(80, 175, 149, 0.08)", border: "1px solid rgba(80, 175, 149, 0.15)" }}
+            style={{ color: "var(--color-brand)", background: "var(--color-brand-dim)", border: "1px solid rgba(80, 175, 149, 0.15)" }}
           >
             INTERACTIVE DEMO
           </span>
           <h1 className="text-5xl md:text-6xl lg:text-8xl font-bold tracking-tight mb-5">
-            <span style={{ color: "#50AF95" }}>44 Networks.</span>{" "}
+            <span style={{ color: "var(--color-brand)" }}>44 Networks.</span>{" "}
             <span className="text-white">1 Header.</span>
           </h1>
           <p className="text-xl sm:text-2xl max-w-2xl mx-auto mb-4 text-[var(--color-muted)]">
             HTTP-native USDT payments for APIs, content, AI agents, and IoT.
           </p>
-          <p className="text-sm" style={{ color: "#71717A" }}>
+          <p className="text-sm" style={{ color: "var(--color-text-tertiary)" }}>
             Request &rarr; 402 &rarr; Sign &rarr; Settle &rarr; Access. Under 3 seconds.
           </p>
         </div>
@@ -150,7 +150,7 @@ export default function HomePage() {
               <div className="[&_svg]:w-5 [&_svg]:h-5 sm:[&_svg]:w-6 sm:[&_svg]:h-6">
                 <ChainLogo family={family} size={24} />
               </div>
-              <span className="text-[8px] sm:text-[9px]" style={{ color: "#71717A" }}>{CHAIN_CONFIGS[family].label}</span>
+              <span className="text-[8px] sm:text-[9px]" style={{ color: "var(--color-text-tertiary)" }}>{CHAIN_CONFIGS[family].label}</span>
             </div>
           ))}
         </div>
@@ -162,7 +162,7 @@ export default function HomePage() {
           </Link>
           <Link
             href="/playground"
-            className="px-5 py-3 text-sm text-white hover:text-[#50AF95] transition-colors rounded-xl min-h-[44px] flex items-center"
+            className="px-5 py-3 text-sm text-white hover:text-[var(--color-brand)] transition-colors rounded-xl min-h-[44px] flex items-center"
             style={{ border: "1px solid rgba(255, 255, 255, 0.15)" }}
           >
             Playground
@@ -170,7 +170,7 @@ export default function HomePage() {
           <a
             href="https://docs.t402.io"
             className="px-5 py-3 text-sm hover:text-white transition-colors rounded-xl min-h-[44px] flex items-center"
-            style={{ color: "#A1A1AA", border: "1px solid rgba(255, 255, 255, 0.15)" }}
+            style={{ color: "var(--color-muted)", border: "1px solid rgba(255, 255, 255, 0.15)" }}
           >
             Read Docs
           </a>
@@ -186,7 +186,7 @@ export default function HomePage() {
           <div className="text-center mb-10">
             <span
               className="inline-block text-xs font-semibold tracking-[0.2em] uppercase mb-3"
-              style={{ color: "#50AF95" }}
+              style={{ color: "var(--color-brand)" }}
             >
               PROTOCOL
             </span>
@@ -200,7 +200,7 @@ export default function HomePage() {
               <div key={item.step} className="card-static p-5 sm:p-6 text-center" style={{ background: "var(--color-background)" }}>
                 <div
                   className="w-12 h-12 rounded-full flex items-center justify-center text-base font-bold mx-auto mb-4"
-                  style={{ background: "rgba(80, 175, 149, 0.12)", color: "#50AF95", border: "1px solid rgba(80, 175, 149, 0.2)" }}
+                  style={{ background: "var(--color-brand-dim)", color: "var(--color-brand)", border: "1px solid rgba(80, 175, 149, 0.2)" }}
                 >
                   {item.step}
                 </div>
@@ -221,7 +221,7 @@ export default function HomePage() {
           <div className="text-center mb-12">
             <span
               className="inline-block text-xs font-semibold tracking-[0.2em] uppercase mb-3"
-              style={{ color: "#50AF95" }}
+              style={{ color: "var(--color-brand)" }}
             >
               EXPLORE
             </span>
@@ -255,7 +255,7 @@ export default function HomePage() {
         <div className="max-w-3xl mx-auto text-center">
           <span
             className="inline-block text-xs font-semibold tracking-[0.2em] uppercase mb-3"
-            style={{ color: "#50AF95" }}
+            style={{ color: "var(--color-brand)" }}
           >
             DEVELOPERS
           </span>
@@ -267,7 +267,7 @@ export default function HomePage() {
             className="rounded-2xl p-4 sm:p-5 text-left overflow-hidden"
             style={{ background: "var(--color-background)", border: "1px solid rgba(255, 255, 255, 0.08)" }}
           >
-            <pre className="text-[11px] sm:text-xs overflow-x-auto font-mono leading-relaxed" style={{ color: "#D4D4D4" }}>
+            <pre className="text-[11px] sm:text-xs overflow-x-auto font-mono leading-relaxed" style={{ color: "var(--color-code-text)" }}>
 {`import { t402 } from '@t402/express';
 
 app.get('/api/premium', t402({
@@ -280,10 +280,10 @@ app.get('/api/premium', t402({
             </pre>
           </div>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-1">
-            <a href="https://www.npmjs.com/org/t402" className="text-xs hover:opacity-70 transition-opacity px-3 py-2 min-h-[44px] flex items-center" style={{ color: "#A1A1AA" }}>npm</a>
-            <a href="https://pypi.org/project/t402" className="text-xs hover:opacity-70 transition-opacity px-3 py-2 min-h-[44px] flex items-center" style={{ color: "#A1A1AA" }}>PyPI</a>
-            <a href="https://pkg.go.dev/github.com/t402-io/t402/sdks/go" className="text-xs hover:opacity-70 transition-opacity px-3 py-2 min-h-[44px] flex items-center" style={{ color: "#A1A1AA" }}>Go</a>
-            <a href="https://central.sonatype.com/artifact/io.t402/t402" className="text-xs hover:opacity-70 transition-opacity px-3 py-2 min-h-[44px] flex items-center" style={{ color: "#A1A1AA" }}>Maven</a>
+            <a href="https://www.npmjs.com/org/t402" className="text-xs hover:opacity-70 transition-opacity px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>npm</a>
+            <a href="https://pypi.org/project/t402" className="text-xs hover:opacity-70 transition-opacity px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>PyPI</a>
+            <a href="https://pkg.go.dev/github.com/t402-io/t402/sdks/go" className="text-xs hover:opacity-70 transition-opacity px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>Go</a>
+            <a href="https://central.sonatype.com/artifact/io.t402/t402" className="text-xs hover:opacity-70 transition-opacity px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>Maven</a>
           </div>
         </div>
       </section>
@@ -296,18 +296,18 @@ app.get('/api/premium', t402({
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-8 mb-8">
             <div className="flex flex-col items-center sm:items-start gap-1">
-              <span className="text-base font-bold tracking-tight" style={{ color: "#50AF95" }}>T402</span>
-              <span className="text-xs" style={{ color: "#71717A" }}>The Official Payment Protocol for USDT</span>
+              <span className="text-base font-bold tracking-tight" style={{ color: "var(--color-brand)" }}>T402</span>
+              <span className="text-xs" style={{ color: "var(--color-text-tertiary)" }}>The Official Payment Protocol for USDT</span>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
-              <a href="https://t402.io" className="text-xs hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center" style={{ color: "#A1A1AA" }}>Website</a>
-              <a href="https://docs.t402.io" className="text-xs hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center" style={{ color: "#A1A1AA" }}>Docs</a>
-              <a href="https://github.com/t402-io/t402" className="text-xs hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center" style={{ color: "#A1A1AA" }}>GitHub</a>
-              <a href="https://facilitator.t402.io" className="text-xs hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center" style={{ color: "#A1A1AA" }}>API</a>
+              <a href="https://t402.io" className="text-xs hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>Website</a>
+              <a href="https://docs.t402.io" className="text-xs hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>Docs</a>
+              <a href="https://github.com/t402-io/t402" className="text-xs hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>GitHub</a>
+              <a href="https://facilitator.t402.io" className="text-xs hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>API</a>
             </div>
           </div>
           <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.06)" }} className="pt-6 text-center">
-            <p className="text-[10px] tracking-wide" style={{ color: "#71717A" }}>
+            <p className="text-[10px] tracking-wide" style={{ color: "var(--color-text-tertiary)" }}>
               &copy; {new Date().getFullYear()} T402 Protocol. HTTP-native stablecoin payments.
             </p>
           </div>
