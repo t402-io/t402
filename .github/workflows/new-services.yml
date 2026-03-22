@@ -59,6 +59,14 @@ jobs:
             curl -sf http://localhost:${PORT}/health && break
             sleep 1
           done
+          # Explorer needs extra time for seed data insertion
+          if [ "${{ matrix.service }}" = "explorer" ]; then
+            for i in $(seq 1 10); do
+              COUNT=$(curl -sf http://localhost:${PORT}/api/v1/transactions?limit=1 | node -e "process.stdin.on('data',d=>{try{console.log(JSON.parse(d).total||0)}catch{console.log(0)}})" 2>/dev/null)
+              [ "$COUNT" -gt 0 ] 2>/dev/null && break
+              sleep 1
+            done
+          fi
 
       - name: Run tests
         run: npm test
