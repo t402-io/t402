@@ -1,7 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
-import { useTonConnectUI, useTonAddress } from "@tonconnect/ui-react";
+import { useCallback, useContext, createContext } from "react";
 
 interface PaymentRequirements {
   scheme: string;
@@ -19,6 +18,20 @@ interface PaymentPayload {
   network: string;
   payload: Record<string, unknown>;
 }
+
+// TON Wallet Context — populated by TonConnectProvider, safe to use without provider
+interface TonWalletContextType {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  tonConnectUI: any;
+  rawAddress: string | null;
+  friendlyAddress: string | null;
+}
+
+export const TonWalletContext = createContext<TonWalletContextType>({
+  tonConnectUI: null,
+  rawAddress: null,
+  friendlyAddress: null,
+});
 
 // Build a Jetton transfer message body cell (simplified for demo)
 // In production, use @t402/ton which handles full BOC construction
@@ -38,9 +51,7 @@ function buildJettonTransferBody(params: {
 }
 
 export function useTonPayment() {
-  const [tonConnectUI] = useTonConnectUI();
-  const rawAddress = useTonAddress(false); // raw format
-  const friendlyAddress = useTonAddress(true); // friendly format
+  const { tonConnectUI, rawAddress, friendlyAddress } = useContext(TonWalletContext);
 
   const isConnected = !!rawAddress;
 
@@ -91,11 +102,11 @@ export function useTonPayment() {
   );
 
   const connect = useCallback(async () => {
-    await tonConnectUI.openModal();
+    if (tonConnectUI) await tonConnectUI.openModal();
   }, [tonConnectUI]);
 
   const disconnect = useCallback(async () => {
-    await tonConnectUI.disconnect();
+    if (tonConnectUI) await tonConnectUI.disconnect();
   }, [tonConnectUI]);
 
   return {

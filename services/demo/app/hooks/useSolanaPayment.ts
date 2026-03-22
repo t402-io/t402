@@ -1,12 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
-import { useWallet, useConnection } from "@solana/wallet-adapter-react";
-import {
-  Transaction,
-  PublicKey,
-  SystemProgram,
-} from "@solana/web3.js";
+import { useCallback, useContext, createContext } from "react";
 
 interface PaymentRequirements {
   scheme: string;
@@ -25,74 +19,92 @@ interface PaymentPayload {
   payload: Record<string, unknown>;
 }
 
-// SPL Token Program ID
-const TOKEN_PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
-
-// Build SPL token transfer instruction manually (avoids @solana/spl-token heavy dep)
-function createTransferInstruction(
-  source: PublicKey,
-  destination: PublicKey,
-  owner: PublicKey,
-  amount: bigint
-): { programId: PublicKey; keys: { pubkey: PublicKey; isSigner: boolean; isWritable: boolean }[]; data: Buffer } {
-  // SPL Token Transfer instruction layout: [3 (u8 instruction), amount (u64 LE)]
-  const data = Buffer.alloc(9);
-  data.writeUInt8(3, 0); // Transfer instruction index
-  data.writeBigUInt64LE(amount, 1);
-
-  return {
-    programId: TOKEN_PROGRAM_ID,
-    keys: [
-      { pubkey: source, isSigner: false, isWritable: true },
-      { pubkey: destination, isSigner: false, isWritable: true },
-      { pubkey: owner, isSigner: true, isWritable: false },
-    ],
-    data,
-  };
+// Solana Wallet Context — populated by SolanaProvider, safe to use without provider
+export interface SolanaWalletContextType {
+  publicKey: string | null;
+  connected: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  signTransaction: ((tx: any) => Promise<any>) | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  connection: any;
+  hasWallet: boolean;
+  connect: () => Promise<void>;
+  disconnect: () => Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  wallets: any[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  select: (name: any) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  wallet: any;
 }
 
-// Derive Associated Token Account address
-function getAssociatedTokenAddress(mint: PublicKey, owner: PublicKey): PublicKey {
-  const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
-  const [address] = PublicKey.findProgramAddressSync(
-    [owner.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), mint.toBuffer()],
-    ASSOCIATED_TOKEN_PROGRAM_ID
-  );
-  return address;
-}
+export const SolanaWalletCtx = createContext<SolanaWalletContextType>({
+  publicKey: null,
+  connected: false,
+  signTransaction: null,
+  connection: null,
+  hasWallet: false,
+  connect: async () => {},
+  disconnect: async () => {},
+  wallets: [],
+  select: () => {},
+  wallet: null,
+});
 
 export function useSolanaPayment() {
-  const { publicKey, signTransaction, connected, connect, disconnect, wallets, select, wallet } = useWallet();
-  const { connection } = useConnection();
+  const ctx = useContext(SolanaWalletCtx);
 
   const signPayment = useCallback(
     async (requirements: PaymentRequirements): Promise<PaymentPayload> => {
-      if (!publicKey || !signTransaction) {
+      if (!ctx.publicKey || !ctx.signTransaction || !ctx.connection) {
         throw new Error("Solana wallet not connected");
       }
 
+      // Dynamic import to avoid loading @solana/web3.js in initial bundle
+      const { Transaction, PublicKey } = await import("@solana/web3.js");
+
+      const TOKEN_PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
+      const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
+
+      const ownerPubkey = new PublicKey(ctx.publicKey);
       const mint = new PublicKey(requirements.asset);
       const recipient = new PublicKey(requirements.payTo);
       const amount = BigInt(requirements.amount);
 
-      // Derive token accounts
-      const senderAta = getAssociatedTokenAddress(mint, publicKey);
-      const recipientAta = getAssociatedTokenAddress(mint, recipient);
+      // Derive Associated Token Account addresses
+      const [senderAta] = PublicKey.findProgramAddressSync(
+        [ownerPubkey.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), mint.toBuffer()],
+        ASSOCIATED_TOKEN_PROGRAM_ID
+      );
+      const [recipientAta] = PublicKey.findProgramAddressSync(
+        [recipient.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), mint.toBuffer()],
+        ASSOCIATED_TOKEN_PROGRAM_ID
+      );
 
-      // Create transfer instruction
-      const transferIx = createTransferInstruction(senderAta, recipientAta, publicKey, amount);
+      // SPL Token Transfer instruction: [3 (u8), amount (u64 LE)]
+      const data = Buffer.alloc(9);
+      data.writeUInt8(3, 0);
+      data.writeBigUInt64LE(amount, 1);
 
-      // Build transaction
-      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+      const transferIx = {
+        programId: TOKEN_PROGRAM_ID,
+        keys: [
+          { pubkey: senderAta, isSigner: false, isWritable: true },
+          { pubkey: recipientAta, isSigner: false, isWritable: true },
+          { pubkey: ownerPubkey, isSigner: true, isWritable: false },
+        ],
+        data,
+      };
+
+      const { blockhash, lastValidBlockHeight } = await ctx.connection.getLatestBlockhash();
       const tx = new Transaction({
         blockhash,
         lastValidBlockHeight,
-        feePayer: publicKey,
+        feePayer: ownerPubkey,
       });
       tx.add(transferIx);
 
-      // Sign (but don't send — facilitator settles)
-      const signedTx = await signTransaction(tx);
+      const signedTx = await ctx.signTransaction(tx);
       const serialized = signedTx.serialize({ requireAllSignatures: true });
       const base64Tx = Buffer.from(serialized).toString("base64");
 
@@ -102,39 +114,35 @@ export function useSolanaPayment() {
         network: requirements.network,
         payload: {
           transaction: base64Tx,
-          from: publicKey.toBase58(),
+          from: ctx.publicKey,
           to: requirements.payTo,
           value: requirements.amount,
           blockhash,
         },
       };
     },
-    [publicKey, signTransaction, connection]
+    [ctx.publicKey, ctx.signTransaction, ctx.connection]
   );
 
-  const hasWallet = wallets.some((w) => w.readyState === "Installed");
-
   const doConnect = useCallback(async () => {
-    const installed = wallets.find((w) => w.readyState === "Installed");
+    const installed = ctx.wallets.find((w: { readyState: string }) => w.readyState === "Installed");
     if (installed) {
-      // If already selected, just connect
-      if (wallet?.adapter.name === installed.adapter.name) {
-        if (connect) await connect();
+      if (ctx.wallet?.adapter.name === installed.adapter.name) {
+        await ctx.connect();
       } else {
-        // Select the wallet — autoConnect in SolanaProvider will handle connection
-        select(installed.adapter.name);
+        ctx.select(installed.adapter.name);
       }
     } else {
       window.open("https://phantom.app/", "_blank");
     }
-  }, [wallets, wallet, select, connect]);
+  }, [ctx]);
 
   return {
-    address: publicKey?.toBase58() || null,
-    isConnected: connected,
-    hasWallet,
+    address: ctx.publicKey,
+    isConnected: ctx.connected,
+    hasWallet: ctx.hasWallet,
     signPayment,
     connect: doConnect,
-    disconnect: useCallback(async () => { if (disconnect) await disconnect(); }, [disconnect]),
+    disconnect: useCallback(async () => { await ctx.disconnect(); }, [ctx]),
   };
 }

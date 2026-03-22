@@ -2,6 +2,8 @@
  * Middleware: rate limiting, API key auth, input validation, service verification, metrics
  */
 
+import crypto from "crypto";
+
 // ── Metrics ───────────────────────────────────────────────────────────
 const metrics = {
   startedAt: new Date().toISOString(),
@@ -59,6 +61,14 @@ export const logger = {
   error: (msg, data) => log("error", msg, data),
 };
 
+// ── Request ID middleware ─────────────────────────────────────────────
+export function requestId(req, res, next) {
+  const id = req.headers["x-request-id"] || crypto.randomUUID();
+  req.id = id;
+  res.setHeader("X-Request-Id", id);
+  next();
+}
+
 // ── Request logging middleware ────────────────────────────────────────
 export function requestLogger(req, res, next) {
   const start = performance.now();
@@ -68,11 +78,16 @@ export function requestLogger(req, res, next) {
     const duration = Math.round(performance.now() - start);
     recordRequest(req.method, req.url, res.statusCode);
 
+    const ua = req.headers["user-agent"] || "";
+
     logger.info("request", {
+      requestId: req.id,
       method: req.method,
       url: req.url,
       status: res.statusCode,
       duration_ms: duration,
+      content_length: res.getHeader("content-length") || 0,
+      user_agent: ua.length > 100 ? ua.slice(0, 100) : ua,
       ip: req.headers["cf-connecting-ip"] || req.headers["x-forwarded-for"] || req.ip,
     });
 
@@ -80,6 +95,24 @@ export function requestLogger(req, res, next) {
   };
 
   next();
+}
+
+// ── ETag / Conditional request support ───────────────────────────────
+export function sendWithEtag(req, res, body, cacheControl) {
+  const json = JSON.stringify(body);
+  const etag = `"${crypto.createHash("md5").update(json).digest("hex")}"`;
+
+  if (cacheControl) {
+    res.setHeader("Cache-Control", cacheControl);
+  }
+  res.setHeader("ETag", etag);
+
+  if (req.headers["if-none-match"] === etag) {
+    return res.status(304).end();
+  }
+
+  res.setHeader("Content-Type", "application/json");
+  res.send(json);
 }
 
 // ── Rate limiting ─────────────────────────────────────────────────────
@@ -322,7 +355,7 @@ function extractDiscoveryInfo(body) {
 // ── Error handler ─────────────────────────────────────────────────────
 export function errorHandler(err, _req, res, _next) {
   recordError();
-  logger.error("unhandled error", { error: err.message, stack: err.stack });
+  logger.error("unhandled error", { requestId: _req.id, error: err.message, stack: err.stack });
 
   if (err.type === "entity.parse.failed") {
     return res.status(400).json({ error: "Invalid JSON in request body" });

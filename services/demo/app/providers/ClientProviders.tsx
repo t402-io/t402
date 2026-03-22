@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { useState, useEffect, Suspense, createContext, useContext } from "react";
 import dynamic from "next/dynamic";
-import { ChainProvider } from "./ChainProvider";
+import { ChainProvider, useChainContext } from "./ChainProvider";
 import { DemoProvider } from "./DemoProvider";
 import { ToastProvider } from "./ToastProvider";
 
@@ -13,17 +13,14 @@ export function useWalletReady() {
   return useContext(WalletReadyContext);
 }
 
-// Fallback component for loading states
-function ProviderFallback({ children }: { children: ReactNode }) {
-  return <>{children}</>;
-}
-
-// Dynamic import wallet providers with ssr: false and loading fallbacks
+// Dynamic import wallet providers with ssr: false
+// EVM is always loaded (most common chain family)
 const WagmiProviderWrapper = dynamic(
   () => import("./WagmiProvider").then((mod) => mod.WagmiProviderWrapper),
   { ssr: false, loading: () => null }
 );
 
+// Other chain providers loaded on demand
 const TonConnectProvider = dynamic(
   () => import("./TonConnectProvider").then((mod) => mod.TonConnectProvider),
   { ssr: false, loading: () => null }
@@ -59,25 +56,41 @@ const CosmosProvider = dynamic(
   { ssr: false, loading: () => null }
 );
 
-// Wrapper that handles the wallet providers with error resilience
-function WalletProviders({ children }: { children: ReactNode }) {
+// Conditionally renders only the active chain's wallet provider + EVM (always loaded)
+function ActiveWalletProvider({ children }: { children: ReactNode }) {
+  const { activeFamily } = useChainContext();
+
+  // EVM always wraps children (most common, relatively lightweight with Wagmi)
+  let wrapped = <>{children}</>;
+
+  // Wrap with the active chain's provider (if not EVM)
+  switch (activeFamily) {
+    case "ton":
+      wrapped = <TonConnectProvider>{wrapped}</TonConnectProvider>;
+      break;
+    case "solana":
+      wrapped = <SolanaProvider>{wrapped}</SolanaProvider>;
+      break;
+    case "near":
+      wrapped = <NearProvider>{wrapped}</NearProvider>;
+      break;
+    case "aptos":
+      wrapped = <AptosProvider>{wrapped}</AptosProvider>;
+      break;
+    case "tezos":
+      wrapped = <TezosProvider>{wrapped}</TezosProvider>;
+      break;
+    case "polkadot":
+      wrapped = <PolkadotProvider>{wrapped}</PolkadotProvider>;
+      break;
+    case "cosmos":
+      wrapped = <CosmosProvider>{wrapped}</CosmosProvider>;
+      break;
+  }
+
   return (
     <WagmiProviderWrapper>
-      <TonConnectProvider>
-        <SolanaProvider>
-          <NearProvider>
-            <AptosProvider>
-              <TezosProvider>
-                <PolkadotProvider>
-                  <CosmosProvider>
-                    {children}
-                  </CosmosProvider>
-                </PolkadotProvider>
-              </TezosProvider>
-            </AptosProvider>
-          </NearProvider>
-        </SolanaProvider>
-      </TonConnectProvider>
+      {wrapped}
     </WagmiProviderWrapper>
   );
 }
@@ -107,16 +120,16 @@ export function ClientProviders({ children }: { children: ReactNode }) {
     return coreProviders;
   }
 
-  // After mount, wrap with wallet providers
+  // After mount, wrap with active chain's wallet provider
   return (
     <WalletReadyContext.Provider value={true}>
       <ChainProvider>
         <DemoProvider>
           <ToastProvider>
             <Suspense fallback={children}>
-              <WalletProviders>
+              <ActiveWalletProvider>
                 {children}
-              </WalletProviders>
+              </ActiveWalletProvider>
             </Suspense>
           </ToastProvider>
         </DemoProvider>

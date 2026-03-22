@@ -1,6 +1,6 @@
 # T402 Sandbox Facilitator
 
-Public testnet facilitator for developer testing. No API key needed. No real funds.
+Public testnet facilitator for developer testing across 7 testnet networks. No API key needed. No real funds.
 
 ## Supported Networks
 
@@ -10,6 +10,9 @@ Public testnet facilitator for developer testing. No API key needed. No real fun
 | Ethereum Sepolia | `eip155:11155111` | USDC | exact |
 | Arbitrum Sepolia | `eip155:421614` | USDC | exact |
 | Solana Devnet | `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` | USDC | exact |
+| TON Testnet | `ton:testnet` | USDT | exact |
+| TRON Nile | `tron:nile` | USDT | exact |
+| Stellar Testnet | `stellar:testnet` | USDC | exact |
 
 ## Quick Start
 
@@ -52,6 +55,7 @@ t402:
 | `GET` | `/ready` | Readiness (checks upstream facilitator) |
 | `GET` | `/supported` | Supported testnet kinds (SupportedResponse) |
 | `GET` | `/faucets` | Testnet token faucet links |
+| `GET` | `/examples` | Example payment flows per network |
 | `GET` | `/usage` | Usage statistics |
 | `POST` | `/verify` | Verify payment signature |
 | `POST` | `/settle` | Settle payment on-chain |
@@ -60,6 +64,7 @@ t402:
 
 - 100 requests/minute per IP
 - Headers: `X-RateLimit-Limit`, `X-RateLimit-Remaining`
+- Set `TRUST_CF_HEADER=true` behind Cloudflare to use `CF-Connecting-IP` for per-client rate limiting
 - Testnet tokens only — not for production use
 
 ## Getting Test Tokens
@@ -72,6 +77,9 @@ t402:
 | Arbitrum Sepolia | ETH | [Alchemy Faucet](https://www.alchemy.com/faucets/arbitrum-sepolia) |
 | Solana Devnet | SOL | [Solana Faucet](https://faucet.solana.com/) |
 | Solana Devnet | USDC | [Circle Faucet](https://faucet.circle.com/) |
+| TON Testnet | TON | [TON Faucet](https://faucet.tonxapi.com/) |
+| TRON Nile | TRX + USDT | [Nile Faucet](https://nileex.io/join/getJoinPage) |
+| Stellar Testnet | XLM + USDC | [Stellar Friendbot](https://friendbot.stellar.org/) |
 
 ## Mock Fallback
 

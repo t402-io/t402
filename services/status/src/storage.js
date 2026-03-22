@@ -1,6 +1,7 @@
 /**
  * Flat-file JSON persistence for status history.
  * Writes atomically (tmp + rename) to prevent corruption.
+ * Stores checks as Map<serviceId, Check[]> for efficient per-service queries.
  */
 
 import { readFile, writeFile, rename, mkdir } from "node:fs/promises";
@@ -27,23 +28,32 @@ async function readJSON(filepath, fallback) {
     const raw = await readFile(filepath, "utf-8");
     return JSON.parse(raw);
   } catch {
+    console.warn(`Storage: ${filepath} not found or corrupted, using defaults`);
     return fallback;
   }
 }
 
 async function writeJSON(filepath, data) {
-  try {
-    await ensureDir();
-    const tmp = filepath + ".tmp";
-    await writeFile(tmp, JSON.stringify(data), "utf-8");
-    await rename(tmp, filepath);
-  } catch (e) {
-    console.error(`Storage write failed for ${filepath}:`, e.message);
-  }
+  await ensureDir();
+  const tmp = filepath + ".tmp";
+  await writeFile(tmp, JSON.stringify(data), "utf-8");
+  await rename(tmp, filepath);
 }
 
 export async function loadChecks() {
-  return readJSON(CHECKS_FILE, []);
+  const data = await readJSON(CHECKS_FILE, {});
+  // Backward compat: if old flat-array format, convert to Map
+  if (Array.isArray(data)) {
+    const map = new Map();
+    for (const check of data) {
+      const arr = map.get(check.serviceId) || [];
+      arr.push(check);
+      map.set(check.serviceId, arr);
+    }
+    return map;
+  }
+  // New format: { [serviceId]: Check[] }
+  return new Map(Object.entries(data));
 }
 
 export async function loadIncidents() {
@@ -51,8 +61,8 @@ export async function loadIncidents() {
   return data;
 }
 
-export async function saveChecks(checks) {
-  await writeJSON(CHECKS_FILE, checks);
+export async function saveChecks(checksByService) {
+  await writeJSON(CHECKS_FILE, Object.fromEntries(checksByService));
 }
 
 export async function saveIncidents(incidents, nextId) {

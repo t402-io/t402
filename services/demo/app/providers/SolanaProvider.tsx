@@ -2,31 +2,30 @@
 
 import { useState, useEffect, type ReactNode } from "react";
 import dynamic from "next/dynamic";
-import { WalletContext } from "@solana/wallet-adapter-react";
-import type { WalletContextState } from "@solana/wallet-adapter-react";
+import { SolanaWalletCtx } from "@/hooks/useSolanaPayment";
 
 // Lazy-load @solana/web3.js + wallet adapters (~400KB) into a separate chunk.
 const SolanaWalletContext = dynamic(() => import("./SolanaWalletContext"), {
   ssr: false,
 });
 
-// Clean fallback values for useWallet() — no console.error spam from getters.
-const FALLBACK_WALLET_STATE: WalletContextState = {
-  autoConnect: false,
-  wallets: [],
-  wallet: null,
+// Lazy-load the inner context bridge that reads SDK hooks into our custom context.
+const SolanaWalletSafeContext = dynamic(() => import("./SolanaWalletSafeContext"), {
+  ssr: false,
+});
+
+// Fallback context values before the real provider loads
+const FALLBACK_SOLANA_STATE = {
   publicKey: null,
-  connecting: false,
   connected: false,
-  disconnecting: false,
+  signTransaction: null,
+  connection: null,
+  hasWallet: false,
+  connect: async () => {},
+  disconnect: async () => {},
+  wallets: [] as never[],
   select: () => {},
-  connect: () => Promise.reject(new Error("Wallet provider not loaded")),
-  disconnect: () => Promise.reject(new Error("Wallet provider not loaded")),
-  sendTransaction: () => Promise.reject(new Error("Wallet provider not loaded")),
-  signTransaction: undefined,
-  signAllTransactions: undefined,
-  signMessage: undefined,
-  signIn: undefined,
+  wallet: null,
 };
 
 export function SolanaProvider({ children }: { children: ReactNode }) {
@@ -37,14 +36,19 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Before the real Solana providers load, provide clean fallback context
-  // so useWallet() calls don't spam console.error from default getters.
   if (!mounted) {
     return (
-      <WalletContext.Provider value={FALLBACK_WALLET_STATE}>
+      <SolanaWalletCtx.Provider value={FALLBACK_SOLANA_STATE}>
         {children}
-      </WalletContext.Provider>
+      </SolanaWalletCtx.Provider>
     );
   }
 
-  return <SolanaWalletContext>{children}</SolanaWalletContext>;
+  return (
+    <SolanaWalletContext>
+      <SolanaWalletSafeContext>
+        {children}
+      </SolanaWalletSafeContext>
+    </SolanaWalletContext>
+  );
 }

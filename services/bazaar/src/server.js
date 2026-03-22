@@ -29,7 +29,9 @@ import {
   validateServiceInput,
   sanitizeString,
   verifyServiceUrl,
+  requestId,
   requestLogger,
+  sendWithEtag,
   logger,
   getMetrics,
   recordRegistration,
@@ -69,6 +71,9 @@ app.use((_req, res, next) => {
   if (_req.method === "OPTIONS") return res.status(204).end();
   next();
 });
+
+// Request ID (correlation)
+app.use(requestId);
 
 // Structured request logging
 app.use(requestLogger);
@@ -172,13 +177,14 @@ app.get("/api/v1/search", (req, res) => {
   const total = results.length;
   results = results.slice(parsedOffset, parsedOffset + parsedLimit);
 
-  res.json({
+  const body = {
     services: results,
     count: results.length,
     total,
     query: { q, category, maxPrice, network },
     pagination: { offset: parsedOffset, limit: parsedLimit },
-  });
+  };
+  sendWithEtag(req, res, body, "public, max-age=30");
 });
 
 // ── Get service by ID ─────────────────────────────────────────────────
@@ -187,7 +193,7 @@ app.get("/api/v1/services/:id", (req, res) => {
   if (!service) {
     return res.status(404).json({ error: "Service not found" });
   }
-  res.json(service);
+  sendWithEtag(req, res, service, "public, max-age=60");
 });
 
 // ── Register new service ──────────────────────────────────────────────
@@ -226,6 +232,7 @@ app.post("/api/v1/services", requireAuth, (req, res) => {
   store.set(id, service);
   recordRegistration(false, false);
   logger.info("service registered", { id, url, name: service.name });
+  res.set("Cache-Control", "no-store");
   res.status(201).json(service);
 
   // Async verification
@@ -294,6 +301,7 @@ app.put("/api/v1/services/:id", requireAuth, (req, res) => {
   service.updatedAt = new Date().toISOString();
   store.set(req.params.id, service);
   logger.info("service updated", { id: req.params.id });
+  res.set("Cache-Control", "no-store");
   res.json(service);
 });
 
@@ -305,6 +313,7 @@ app.delete("/api/v1/services/:id", requireAuth, (req, res) => {
   }
   store.delete(req.params.id);
   logger.info("service deleted", { id: req.params.id, name: service.name });
+  res.set("Cache-Control", "no-store");
   res.json({ deleted: true, id: req.params.id });
 });
 
@@ -325,37 +334,37 @@ app.get("/api/v1/services/:id/verify", async (req, res) => {
 });
 
 // ── Featured ──────────────────────────────────────────────────────────
-app.get("/api/v1/featured", (_req, res) => {
+app.get("/api/v1/featured", (req, res) => {
   const featured = store
     .getAll()
     .filter((s) => s.verified)
     .sort((a, b) => b.registeredAt.localeCompare(a.registeredAt))
     .slice(0, 5);
-  res.json({ services: featured, count: featured.length });
+  sendWithEtag(req, res, { services: featured, count: featured.length }, "public, max-age=300");
 });
 
 // ── Categories ────────────────────────────────────────────────────────
-app.get("/api/v1/categories", (_req, res) => {
+app.get("/api/v1/categories", (req, res) => {
   const categories = {};
   for (const s of store.getAll()) {
     categories[s.category] = (categories[s.category] || 0) + 1;
   }
-  res.json({ categories });
+  sendWithEtag(req, res, { categories }, "public, max-age=60");
 });
 
 // ── Tags ──────────────────────────────────────────────────────────────
-app.get("/api/v1/tags", (_req, res) => {
+app.get("/api/v1/tags", (req, res) => {
   const tagCounts = {};
   for (const s of store.getAll()) {
     for (const t of s.tags || []) {
       tagCounts[t] = (tagCounts[t] || 0) + 1;
     }
   }
-  res.json({ tags: tagCounts });
+  sendWithEtag(req, res, { tags: tagCounts }, "public, max-age=60");
 });
 
 // ── Stats ─────────────────────────────────────────────────────────────
-app.get("/api/v1/stats", (_req, res) => {
+app.get("/api/v1/stats", (req, res) => {
   const all = store.getAll();
   const networks = {};
   const tokens = {};
@@ -363,20 +372,22 @@ app.get("/api/v1/stats", (_req, res) => {
     networks[s.price.network] = (networks[s.price.network] || 0) + 1;
     tokens[s.price.token] = (tokens[s.price.token] || 0) + 1;
   }
-  res.json({
+  sendWithEtag(req, res, {
     totalServices: all.length,
     verified: store.countVerified(),
     networks,
     tokens,
-  });
+  }, "public, max-age=60");
 });
 
 // ── Health / Ready / Metrics ──────────────────────────────────────────
 app.get("/health", (_req, res) => {
+  res.set("Cache-Control", "no-cache");
   res.json({ status: "ok", service: "t402-bazaar", services: store.size() });
 });
 
 app.get("/ready", (_req, res) => {
+  res.set("Cache-Control", "no-cache");
   if (store.size() === 0) {
     return res.status(503).json({ status: "not ready", reason: "No services loaded" });
   }

@@ -2,7 +2,8 @@
  * Webhook notifications for status changes.
  *
  * Configure via WEBHOOK_URLS env var (comma-separated).
- * Supports Discord, Slack, and generic JSON webhooks.
+ * Supports Discord, Slack, Telegram, and generic JSON webhooks.
+ * Per-service cooldown prevents notification storms from flapping services.
  */
 
 const WEBHOOK_URLS = (process.env.WEBHOOK_URLS || "")
@@ -12,6 +13,11 @@ const WEBHOOK_URLS = (process.env.WEBHOOK_URLS || "")
 
 const MAX_RETRIES = 3;
 const RETRY_DELAYS = [1000, 5000, 15000];
+const COOLDOWN_MS = 300_000; // 5 minutes per-service cooldown
+
+// Per-service notification tracking
+const lastNotified = new Map(); // serviceId → timestamp
+const lastEvent = new Map();    // serviceId → status ("down"/"degraded"/"operational")
 
 function formatPayload(event, url) {
   const isDown = event.to === "down" || event.to === "degraded";
@@ -28,42 +34,63 @@ function formatPayload(event, url) {
   // Discord webhook format
   if (url.includes("discord.com/api/webhooks")) {
     return {
-      embeds: [
-        {
+      url,
+      body: {
+        embeds: [{
           title: `${emoji} ${title}`,
           description,
           color,
           timestamp,
           footer: { text: "T402 Status" },
-        },
-      ],
+        }],
+      },
     };
   }
 
   // Slack webhook format
   if (url.includes("hooks.slack.com")) {
     return {
-      text: `${emoji} *${title}*`,
-      blocks: [
-        {
+      url,
+      body: {
+        text: `${emoji} *${title}*`,
+        blocks: [{
           type: "section",
           text: {
             type: "mrkdwn",
             text: `${emoji} *${title}*\n${description}\n_${timestamp}_`,
           },
-        },
-      ],
+        }],
+      },
+    };
+  }
+
+  // Telegram webhook format
+  if (url.includes("api.telegram.org")) {
+    const parsed = new URL(url);
+    const chatId = parsed.searchParams.get("chat_id");
+    // Remove query params for the POST URL
+    const postUrl = `${parsed.origin}${parsed.pathname}`;
+    return {
+      url: postUrl,
+      body: {
+        chat_id: chatId,
+        text: `${emoji} <b>${title}</b>\n${description}\n<i>${timestamp}</i>`,
+        parse_mode: "HTML",
+      },
     };
   }
 
   // Generic JSON payload
   return {
-    event: isDown ? "service.down" : "service.recovered",
-    service: { id: event.serviceId, name: event.serviceName },
-    from: event.from,
-    to: event.to,
-    timestamp,
-    statusPageUrl: "https://status.t402.io",
+    url,
+    body: {
+      event: isDown ? "service.down" : "service.recovered",
+      service: { id: event.serviceId, name: event.serviceName },
+      from: event.from,
+      to: event.to,
+      timestamp,
+      statusPageUrl: "https://status.t402.io",
+    },
   };
 }
 
@@ -75,24 +102,45 @@ async function sendWithRetry(url, payload, attempt = 0) {
       body: JSON.stringify(payload),
       signal: AbortSignal.timeout(10_000),
     });
-    if (!res.ok && attempt < MAX_RETRIES - 1) {
-      await new Promise((r) => setTimeout(r, RETRY_DELAYS[attempt]));
-      return sendWithRetry(url, payload, attempt + 1);
+    if (!res.ok) {
+      // Drain response body before retry
+      await res.text().catch(() => {});
+      if (attempt < MAX_RETRIES - 1) {
+        await new Promise((r) => setTimeout(r, RETRY_DELAYS[attempt]));
+        return sendWithRetry(url, payload, attempt + 1);
+      }
+    } else {
+      const host = new URL(url).hostname;
+      console.log(`Webhook delivered: ${host}`);
     }
   } catch (e) {
     if (attempt < MAX_RETRIES - 1) {
       await new Promise((r) => setTimeout(r, RETRY_DELAYS[attempt]));
       return sendWithRetry(url, payload, attempt + 1);
     }
-    console.error(`Webhook failed after ${MAX_RETRIES} attempts: ${url}`, e.message);
+    console.error(`Webhook failed after ${MAX_RETRIES} attempts: ${new URL(url).hostname}`, e.message);
   }
 }
 
 export async function notifyStatusChange(event) {
   if (WEBHOOK_URLS.length === 0) return;
-  const tasks = WEBHOOK_URLS.map((url) => {
-    const payload = formatPayload(event, url);
-    return sendWithRetry(url, payload);
+
+  // Per-service cooldown
+  const now = Date.now();
+  const lastTime = lastNotified.get(event.serviceId) || 0;
+  if (now - lastTime < COOLDOWN_MS) return;
+
+  // Dedup — skip if same status as last notification for this service
+  const lastStatus = lastEvent.get(event.serviceId);
+  if (lastStatus === event.to) return;
+
+  // Update tracking
+  lastNotified.set(event.serviceId, now);
+  lastEvent.set(event.serviceId, event.to);
+
+  const tasks = WEBHOOK_URLS.map((rawUrl) => {
+    const { url, body } = formatPayload(event, rawUrl);
+    return sendWithRetry(url, body);
   });
   // Fire and forget — don't block the check cycle
   Promise.allSettled(tasks).catch(() => {});
