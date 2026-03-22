@@ -15,6 +15,8 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const playgroundHtml = readFileSync(join(__dirname, "playground.html"), "utf8");
+const landingHtml = readFileSync(join(__dirname, "landing.html"), "utf8");
+const openapiSpec = readFileSync(join(__dirname, "openapi.yaml"), "utf8");
 
 // --- Structured JSON logging ---
 function log(level, message, data = {}) {
@@ -103,7 +105,7 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   res.set("Access-Control-Allow-Origin", "*");
   res.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-API-Key, X-Request-Id");
+  res.set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-API-Key, X-Request-Id, X-Sandbox-Session");
   if (req.method === "OPTIONS") return res.sendStatus(204);
   next();
 });
@@ -135,6 +137,59 @@ app.use((req, res, next) => {
   next();
 });
 
+// Record request/response in history for tracked sessions
+app.use((req, res, next) => {
+  const sessionId = req.headers["x-sandbox-session"];
+  if (sessionId && typeof sessionId === "string" && sessionId.length <= 64) {
+    const start = Date.now();
+
+    // Capture response body
+    const originalJson = res.json.bind(res);
+    let responseBody;
+    res.json = (body) => {
+      responseBody = body;
+      return originalJson(body);
+    };
+
+    res.on("finish", () => {
+      let session = requestHistory.get(sessionId);
+      if (!session) {
+        // Enforce max sessions
+        if (requestHistory.size >= MAX_SESSIONS) {
+          // Evict oldest session
+          const oldest = requestHistory.keys().next().value;
+          requestHistory.delete(oldest);
+        }
+        session = { entries: [], lastAccess: Date.now() };
+        requestHistory.set(sessionId, session);
+      }
+      session.lastAccess = Date.now();
+
+      const entry = {
+        id: req.requestId,
+        timestamp: new Date().toISOString(),
+        method: req.method,
+        path: req.path,
+        status: res.statusCode,
+        duration: Date.now() - start,
+        requestBody: req.method === "POST" ? req.body : undefined,
+        responseBody: responseBody,
+        headers: {
+          "x-request-id": req.requestId,
+          "x-ratelimit-remaining": res.getHeader("x-ratelimit-remaining"),
+        },
+      };
+
+      session.entries.push(entry);
+      // Trim to max
+      if (session.entries.length > MAX_HISTORY_PER_SESSION) {
+        session.entries.shift();
+      }
+    });
+  }
+  next();
+});
+
 // --- Supported testnet networks ---
 const SUPPORTED_NETWORKS = [
   "eip155:84532",        // Base Sepolia
@@ -145,6 +200,26 @@ const SUPPORTED_NETWORKS = [
   "tron:nile",     // TRON Nile
   "stellar:testnet",     // Stellar Testnet
 ];
+
+// --- Magic test addresses for payment simulation ---
+// These addresses trigger deterministic responses without hitting upstream.
+// Like Stripe's test card numbers (4242...).
+const MAGIC_ADDRESSES = {
+  // Always verify as valid
+  VERIFY_SUCCESS: "0x0000000000000000000000000000000000CAFE01",
+  // Always verify as invalid (bad signature)
+  VERIFY_FAIL_SIGNATURE: "0x0000000000000000000000000000000000CAFE02",
+  // Always verify as invalid (expired)
+  VERIFY_FAIL_EXPIRED: "0x0000000000000000000000000000000000CAFE03",
+  // Always settle successfully
+  SETTLE_SUCCESS: "0x0000000000000000000000000000000000CAFE11",
+  // Always settle with failure (insufficient funds)
+  SETTLE_FAIL_FUNDS: "0x0000000000000000000000000000000000CAFE12",
+  // Always settle with failure (timeout)
+  SETTLE_FAIL_TIMEOUT: "0x0000000000000000000000000000000000CAFE13",
+  // Simulate slow response (2 second delay)
+  SLOW_RESPONSE: "0x0000000000000000000000000000000000CAFE99",
+};
 
 // SupportedKind objects matching SDK SupportedResponse type
 const SUPPORTED_KINDS = SUPPORTED_NETWORKS.map((network) => ({
@@ -167,6 +242,23 @@ const metrics = {
 };
 
 const METRICS_RETENTION_MS = 300_000; // Keep 5 minutes of histogram data
+
+// --- Request history (per-session, in-memory) ---
+const MAX_HISTORY_PER_SESSION = 50;
+const MAX_SESSIONS = 1000;
+const SESSION_TTL_MS = 3_600_000; // 1 hour
+const requestHistory = new Map(); // sessionId -> { entries: [], lastAccess: Date.now() }
+
+// Evict expired sessions every 5 minutes
+const historyEvictionTimer = setInterval(() => {
+  const now = Date.now();
+  for (const [id, session] of requestHistory) {
+    if (now - session.lastAccess > SESSION_TTL_MS) {
+      requestHistory.delete(id);
+    }
+  }
+}, 300_000);
+historyEvictionTimer.unref();
 
 // --- Upstream health state ---
 let upstreamHealthy = null; // null = unknown, true/false after first check
@@ -307,54 +399,114 @@ app.get("/faucets", (_req, res) => {
   });
 });
 
-app.get("/examples", (_req, res) => {
+app.get("/test-addresses", (_req, res) => {
   totalRequests++;
   res.json({
+    testAddresses: {
+      verifySuccess: {
+        address: MAGIC_ADDRESSES.VERIFY_SUCCESS,
+        description: "Always passes verification",
+        verify: "isValid: true",
+        settle: "success: true",
+      },
+      verifyFailSignature: {
+        address: MAGIC_ADDRESSES.VERIFY_FAIL_SIGNATURE,
+        description: "Fails verification with invalid_signature",
+        verify: "isValid: false, invalidReason: 'invalid_signature'",
+        settle: "success: true (verify-only failure)",
+      },
+      verifyFailExpired: {
+        address: MAGIC_ADDRESSES.VERIFY_FAIL_EXPIRED,
+        description: "Fails verification with authorization_expired",
+        verify: "isValid: false, invalidReason: 'authorization_expired'",
+        settle: "success: true (verify-only failure)",
+      },
+      settleSuccess: {
+        address: MAGIC_ADDRESSES.SETTLE_SUCCESS,
+        description: "Always settles successfully",
+        verify: "isValid: true",
+        settle: "success: true",
+      },
+      settleFailFunds: {
+        address: MAGIC_ADDRESSES.SETTLE_FAIL_FUNDS,
+        description: "Fails settlement with insufficient_funds",
+        verify: "isValid: true",
+        settle: "success: false, errorReason: 'insufficient_funds'",
+      },
+      settleFailTimeout: {
+        address: MAGIC_ADDRESSES.SETTLE_FAIL_TIMEOUT,
+        description: "Fails settlement with settlement_timeout",
+        verify: "isValid: true",
+        settle: "success: false, errorReason: 'settlement_timeout'",
+      },
+      slowResponse: {
+        address: MAGIC_ADDRESSES.SLOW_RESPONSE,
+        description: "Adds 2-second delay to response (for timeout testing)",
+        verify: "isValid: true (after 2s delay)",
+        settle: "success: true (after 2s delay)",
+      },
+    },
+    usage: "Include any test address as the 'payer' field in paymentPayload.payload.payer, paymentPayload.authorization.payer, or paymentPayload.payer",
+    sandbox: true,
+  });
+});
+
+app.get("/examples", (_req, res) => {
+  totalRequests++;
+
+  // Example PaymentRequirements matching SDK PaymentRequirements type
+  const exampleRequirements = {
+    scheme: "exact",
+    network: "eip155:84532",
+    asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    amount: "1000000",
+    payTo: "0xRecipientAddress",
+    maxTimeoutSeconds: 300,
+    extra: {},
+  };
+
+  // Example PaymentPayload matching SDK PaymentPayload type
+  const examplePayload = {
+    t402Version: 2,
+    accepted: exampleRequirements,
+    payload: {
+      payer: MAGIC_ADDRESSES.VERIFY_SUCCESS,
+      signature: "0xabc123...",
+    },
+  };
+
+  // Example verify/settle request body (matches SDK VerifyRequest/SettleRequest)
+  const exampleVerifyBody = {
+    paymentPayload: examplePayload,
+    paymentRequirements: exampleRequirements,
+  };
+
+  res.json({
+    note: "All examples use magic test addresses (0x...CAFE01) for deterministic responses. See GET /test-addresses for the full list.",
     verify: {
       request: {
         method: "POST",
         url: "https://sandbox.t402.io/verify",
         headers: { "Content-Type": "application/json" },
-        body: {
-          paymentPayload: {
-            signature: "0xabc123...",
-            authorization: { payer: "0xYourWalletAddress" },
-          },
-          paymentRequirements: {
-            scheme: "exact",
-            network: "eip155:84532",
-            maxAmountRequired: "1000000",
-            resource: "https://example.com/api/data",
-            payee: "0xRecipientAddress",
-          },
-        },
+        body: exampleVerifyBody,
       },
-      response: { isValid: true, payer: "0xYourWalletAddress" },
+      response: { isValid: true, payer: MAGIC_ADDRESSES.VERIFY_SUCCESS, sandbox: true, mock: true },
     },
     settle: {
       request: {
         method: "POST",
         url: "https://sandbox.t402.io/settle",
         headers: { "Content-Type": "application/json" },
-        body: {
-          paymentPayload: {
-            signature: "0xabc123...",
-            authorization: { payer: "0xYourWalletAddress" },
-          },
-          paymentRequirements: {
-            scheme: "exact",
-            network: "eip155:84532",
-            maxAmountRequired: "1000000",
-            resource: "https://example.com/api/data",
-            payee: "0xRecipientAddress",
-          },
-        },
+        body: exampleVerifyBody,
       },
       response: {
         success: true,
-        transaction: "0x...",
+        transaction: "0x" + "a".repeat(64),
         network: "eip155:84532",
-        payer: "0xYourWalletAddress",
+        payer: MAGIC_ADDRESSES.VERIFY_SUCCESS,
+        confirmations: "confirmed",
+        sandbox: true,
+        mock: true,
       },
     },
     webhook: {
@@ -377,11 +529,24 @@ app.get("/examples", (_req, res) => {
       },
       events: ["verification.completed", "verification.failed", "settlement.completed", "settlement.failed"],
     },
+    testAddresses: {
+      description: "Magic test addresses simulate deterministic verify/settle outcomes without real tokens (like Stripe's test card numbers)",
+      example: {
+        method: "POST",
+        url: "https://sandbox.t402.io/verify",
+        headers: { "Content-Type": "application/json" },
+        body: exampleVerifyBody,
+      },
+      addresses: MAGIC_ADDRESSES,
+      listEndpoint: "GET /test-addresses",
+    },
     curl: {
       supported: "curl -s https://sandbox.t402.io/supported | jq",
       faucets: "curl -s https://sandbox.t402.io/faucets | jq",
-      verify: 'curl -s -X POST https://sandbox.t402.io/verify -H "Content-Type: application/json" -d \'{"paymentPayload":{},"paymentRequirements":{"network":"eip155:84532"}}\'',
+      testAddresses: "curl -s https://sandbox.t402.io/test-addresses | jq",
+      verify: `curl -s -X POST https://sandbox.t402.io/verify -H "Content-Type: application/json" -d '${JSON.stringify(exampleVerifyBody)}'`,
     },
+    openapi: "GET /openapi.yaml",
     sandbox: true,
   });
 });
@@ -403,6 +568,71 @@ app.post("/verify", async (req, res) => {
   if (networkError) {
     return res.status(400).json({ isValid: false, invalidReason: networkError, sandbox: true });
   }
+
+  // Check for magic test addresses
+  const payer = req.body?.paymentPayload?.payload?.payer
+    || req.body?.paymentPayload?.authorization?.payer
+    || req.body?.paymentPayload?.payer;
+  const upperPayer = payer?.toUpperCase?.();
+
+  const magicMatch = (addr) => Object.entries(MAGIC_ADDRESSES).find(([, v]) => v.toUpperCase() === addr)?.[0];
+  const magicKey = upperPayer ? magicMatch(upperPayer) : null;
+  if (magicKey) {
+    // Simulate latency for SLOW_RESPONSE
+    if (magicKey === "SLOW_RESPONSE") {
+      await new Promise(r => setTimeout(r, 2000));
+    }
+
+    if (magicKey === "VERIFY_SUCCESS" || magicKey === "SETTLE_SUCCESS") {
+      return res.json({
+        isValid: true,
+        payer: payer,
+        sandbox: true,
+        mock: true,
+        note: "Magic test address — simulated successful verification",
+      });
+    }
+    if (magicKey === "VERIFY_FAIL_SIGNATURE") {
+      return res.json({
+        isValid: false,
+        invalidReason: "invalid_signature",
+        payer: payer,
+        sandbox: true,
+        mock: true,
+        note: "Magic test address — simulated signature verification failure",
+      });
+    }
+    if (magicKey === "VERIFY_FAIL_EXPIRED") {
+      return res.json({
+        isValid: false,
+        invalidReason: "authorization_expired",
+        payer: payer,
+        sandbox: true,
+        mock: true,
+        note: "Magic test address — simulated expired authorization",
+      });
+    }
+    // For settle-specific addresses, verify still succeeds (you'd verify before settling)
+    if (magicKey === "SETTLE_FAIL_FUNDS" || magicKey === "SETTLE_FAIL_TIMEOUT") {
+      return res.json({
+        isValid: true,
+        payer: payer,
+        sandbox: true,
+        mock: true,
+        note: "Magic test address — verification passed (settle will fail with this address)",
+      });
+    }
+    if (magicKey === "SLOW_RESPONSE") {
+      return res.json({
+        isValid: true,
+        payer: payer,
+        sandbox: true,
+        mock: true,
+        note: "Magic test address — simulated slow response (2s delay)",
+      });
+    }
+  }
+
   try {
     const result = await proxyToFacilitator("/verify", req.body, VERIFY_TIMEOUT_MS);
     if (result.status >= 500) {
@@ -428,6 +658,75 @@ app.post("/settle", async (req, res) => {
   if (networkError) {
     return res.status(400).json({ success: false, errorReason: networkError, sandbox: true });
   }
+
+  // Check for magic test addresses
+  const settlerPayer = req.body?.paymentPayload?.payload?.payer
+    || req.body?.paymentPayload?.authorization?.payer
+    || req.body?.paymentPayload?.payer;
+  const upperSettlePayer = settlerPayer?.toUpperCase?.();
+
+  const settleMagicMatch = (addr) => Object.entries(MAGIC_ADDRESSES).find(([, v]) => v.toUpperCase() === addr)?.[0];
+  const settleMagicKey = upperSettlePayer ? settleMagicMatch(upperSettlePayer) : null;
+  if (settleMagicKey) {
+    if (settleMagicKey === "SLOW_RESPONSE") {
+      await new Promise(r => setTimeout(r, 2000));
+    }
+
+    const mockNetwork = network || "eip155:84532";
+    const mockTxHash = "0x" + randomUUID().replace(/-/g, "") + randomUUID().replace(/-/g, "");
+
+    if (settleMagicKey === "VERIFY_SUCCESS"
+      || settleMagicKey === "SETTLE_SUCCESS"
+      || settleMagicKey === "SLOW_RESPONSE") {
+      return res.json({
+        success: true,
+        payer: settlerPayer,
+        transaction: mockTxHash,
+        network: mockNetwork,
+        confirmations: "confirmed",
+        sandbox: true,
+        mock: true,
+        note: "Magic test address — simulated successful settlement",
+      });
+    }
+    if (settleMagicKey === "SETTLE_FAIL_FUNDS") {
+      return res.json({
+        success: false,
+        errorReason: "insufficient_funds",
+        payer: settlerPayer,
+        network: mockNetwork,
+        sandbox: true,
+        mock: true,
+        note: "Magic test address — simulated insufficient funds",
+      });
+    }
+    if (settleMagicKey === "SETTLE_FAIL_TIMEOUT") {
+      return res.json({
+        success: false,
+        errorReason: "settlement_timeout",
+        payer: settlerPayer,
+        network: mockNetwork,
+        sandbox: true,
+        mock: true,
+        note: "Magic test address — simulated settlement timeout",
+      });
+    }
+    // verify-specific fail addresses still settle (weird case, but handle gracefully)
+    if (settleMagicKey === "VERIFY_FAIL_SIGNATURE"
+      || settleMagicKey === "VERIFY_FAIL_EXPIRED") {
+      return res.json({
+        success: true,
+        payer: settlerPayer,
+        transaction: mockTxHash,
+        network: mockNetwork,
+        confirmations: "confirmed",
+        sandbox: true,
+        mock: true,
+        note: "Magic test address — settlement succeeds (this address only fails verify)",
+      });
+    }
+  }
+
   try {
     const result = await proxyToFacilitator("/settle", req.body, SETTLE_TIMEOUT_MS);
     if (result.status >= 500) {
@@ -627,113 +926,139 @@ app.post("/webhook/test", async (req, res) => {
   }
 });
 
+// Request history viewer
+app.get("/history", (req, res) => {
+  const sessionId = req.headers["x-sandbox-session"] || req.query.session;
+  if (!sessionId) {
+    return res.status(400).json({
+      error: "Provide X-Sandbox-Session header or ?session= query parameter",
+      usage: "Include 'X-Sandbox-Session: <your-uuid>' header in all requests, then GET /history to see them",
+      sandbox: true,
+    });
+  }
+  const session = requestHistory.get(sessionId);
+  if (!session) {
+    return res.json({
+      session: sessionId,
+      entries: [],
+      note: "No history found. Include 'X-Sandbox-Session: " + sessionId + "' header in your requests to start tracking.",
+      sandbox: true,
+    });
+  }
+  session.lastAccess = Date.now();
+  res.json({
+    session: sessionId,
+    count: session.entries.length,
+    maxEntries: MAX_HISTORY_PER_SESSION,
+    ttlMinutes: Math.round(SESSION_TTL_MS / 60000),
+    entries: session.entries,
+    sandbox: true,
+  });
+});
+
+// OpenAPI spec
+app.get("/openapi.yaml", (_req, res) => {
+  res.type("text/yaml").send(openapiSpec);
+});
+
+app.get("/openapi.json", (_req, res) => {
+  res.redirect("/openapi.yaml");
+});
+
+// Error catalog
+app.get("/errors", (_req, res) => {
+  totalRequests++;
+  res.json({
+    errors: [
+      {
+        status: 400,
+        code: "missing_network",
+        message: "Missing or invalid paymentRequirements.network",
+        cause: "The request body is missing the paymentRequirements.network field, or it's not a string",
+        fix: "Include a valid testnet network from /supported in your request body",
+        example: { paymentRequirements: { network: "eip155:84532" } },
+      },
+      {
+        status: 400,
+        code: "unsupported_network",
+        message: `Sandbox only supports testnets: ${SUPPORTED_NETWORKS.join(", ")}`,
+        cause: "The network you specified is not a supported testnet",
+        fix: "Use one of the networks listed at GET /supported. Mainnet networks are not allowed.",
+      },
+      {
+        status: 400,
+        code: "invalid_json",
+        message: "Invalid JSON",
+        cause: "The request body is not valid JSON",
+        fix: "Ensure Content-Type is application/json and the body is valid JSON",
+      },
+      {
+        status: 400,
+        code: "missing_webhook_url",
+        message: "Missing 'url' — provide the webhook URL to test",
+        cause: "POST /webhook/test requires a 'url' field",
+        fix: "Include { \"url\": \"https://your-server.com/webhook\" } in the body",
+      },
+      {
+        status: 400,
+        code: "invalid_webhook_url",
+        message: "Webhook URL must use HTTPS",
+        cause: "Non-localhost webhook URLs must use HTTPS for security",
+        fix: "Use an HTTPS URL, or localhost/127.0.0.1 for development",
+      },
+      {
+        status: 400,
+        code: "invalid_event_type",
+        message: "Invalid event type",
+        cause: "The event field is not a recognized T402 webhook event",
+        fix: "Use one of: verification.completed, verification.failed, settlement.completed, settlement.failed",
+      },
+      {
+        status: 415,
+        code: "wrong_content_type",
+        message: "Content-Type must be application/json",
+        cause: "POST requests must have Content-Type: application/json header",
+        fix: "Add -H 'Content-Type: application/json' to your curl command",
+      },
+      {
+        status: 429,
+        code: "rate_limit_exceeded",
+        message: "Rate limit exceeded",
+        cause: "You've exceeded 100 requests/minute from your IP",
+        fix: "Wait for the rate limit window to reset (1 minute). Check X-RateLimit-Remaining header.",
+      },
+      {
+        status: 502,
+        code: "webhook_delivery_failed",
+        message: "Webhook delivery failed",
+        cause: "The target webhook URL was unreachable or returned an error",
+        fix: "Ensure your webhook server is running and accessible",
+      },
+      {
+        status: 503,
+        code: "upstream_unreachable",
+        message: "Upstream facilitator unreachable — mock mode active",
+        cause: "The sandbox cannot reach the upstream facilitator for real verification/settlement",
+        fix: "Use magic test addresses (GET /test-addresses) for deterministic responses, or wait for upstream to recover (check GET /ready)",
+      },
+    ],
+    sandbox: true,
+  });
+});
+
 // Landing page
 app.get("/", (_req, res) => {
   res.set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'");
-  res.type("html").send(`<!DOCTYPE html>
-<html><head><title>T402 Sandbox</title>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<style>
-body{font-family:system-ui;background:#0a0a0b;color:#e5e7eb;max-width:720px;margin:0 auto;padding:2rem}
-h1{color:#50AF95;font-size:1.6rem}
-h2{color:#d1d5db;font-size:1.1rem;margin-top:2rem}
-a{color:#50AF95}
-code{background:#1f2937;padding:.15em .4em;border-radius:4px;font-size:.85em}
-pre{background:#1f2937;padding:1rem;border-radius:8px;overflow-x:auto;font-size:.85em;line-height:1.5}
-.badge{display:inline-block;background:#065f46;color:#6ee7b7;padding:.2em .6em;border-radius:4px;font-size:.75rem;margin-left:.5rem}
-table{width:100%;border-collapse:collapse;margin:1rem 0}
-th{text-align:left;padding:.5rem;color:#9ca3af;font-size:.8rem;border-bottom:1px solid #1f2937}
-td{padding:.5rem;border-bottom:1px solid #111827;font-size:.9em}
-.tab-bar{display:flex;gap:0;margin-bottom:0}
-.tab{padding:.4rem .8rem;background:#1f2937;color:#9ca3af;cursor:pointer;font-size:.8rem;border:1px solid #374151;border-bottom:none}
-.tab:first-child{border-radius:6px 0 0 0}
-.tab:last-child{border-radius:0 6px 0 0}
-.tab.active{background:#111827;color:#50AF95}
-.tab-content{display:none}
-.tab-content.active{display:block}
-.note{background:#1c1917;border-left:3px solid #f59e0b;padding:.75rem 1rem;margin:1rem 0;font-size:.85em;color:#fbbf24}
-</style></head>
-<body>
-<h1>T402 Sandbox<span class="badge">TESTNET</span></h1>
-<p>Public testnet facilitator for developer testing. No API key needed. No real funds.</p>
+  res.type("html").send(landingHtml);
+});
 
-<h2>Quick Start</h2>
-<div class="tab-bar">
-  <div class="tab active" onclick="showTab('ts')">TypeScript</div>
-  <div class="tab" onclick="showTab('go')">Go</div>
-  <div class="tab" onclick="showTab('py')">Python</div>
-  <div class="tab" onclick="showTab('java')">Java</div>
-  <div class="tab" onclick="showTab('curl')">curl</div>
-</div>
-<pre id="tab-ts" class="tab-content active"><code>import { HTTPFacilitatorClient } from "@t402/http";
-
-const client = new HTTPFacilitatorClient({
-  url: "https://sandbox.t402.io"
-});</code></pre>
-<pre id="tab-go" class="tab-content"><code>import "github.com/t402-io/t402/sdks/go/http"
-
-client := http.NewFacilitatorClient("https://sandbox.t402.io")</code></pre>
-<pre id="tab-py" class="tab-content"><code>from t402 import FacilitatorClient
-
-client = FacilitatorClient("https://sandbox.t402.io")</code></pre>
-<pre id="tab-java" class="tab-content"><code># application.yml
-t402:
-  facilitator-url: https://sandbox.t402.io</code></pre>
-<pre id="tab-curl" class="tab-content"><code># Check supported networks
-curl -s https://sandbox.t402.io/supported | jq
-
-# Get faucet links
-curl -s https://sandbox.t402.io/faucets | jq
-
-# Verify a payment
-curl -s -X POST https://sandbox.t402.io/verify \\
-  -H "Content-Type: application/json" \\
-  -d '{"paymentPayload":{},"paymentRequirements":{"network":"eip155:84532"}}'</code></pre>
-
-<h2>Supported Networks</h2>
-<table>
-<tr><th>Network</th><th>CAIP-2</th><th>Token</th></tr>
-<tr><td>Base Sepolia</td><td><code>eip155:84532</code></td><td>USDC</td></tr>
-<tr><td>Ethereum Sepolia</td><td><code>eip155:11155111</code></td><td>USDC</td></tr>
-<tr><td>Arbitrum Sepolia</td><td><code>eip155:421614</code></td><td>USDC</td></tr>
-<tr><td>Solana Devnet</td><td><code>solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1</code></td><td>USDC</td></tr>
-<tr><td>TON Testnet</td><td><code>ton:testnet</code></td><td>USDT</td></tr>
-<tr><td>TRON Nile</td><td><code>tron:nile</code></td><td>USDT</td></tr>
-<tr><td>Stellar Testnet</td><td><code>stellar:testnet</code></td><td>USDC</td></tr>
-</table>
-
-<h2>Endpoints</h2>
-<table>
-<tr><th>Method</th><th>Path</th><th>Description</th></tr>
-<tr><td>GET</td><td><a href="/health">/health</a></td><td>Health check</td></tr>
-<tr><td>GET</td><td><a href="/ready">/ready</a></td><td>Readiness (upstream status)</td></tr>
-<tr><td>GET</td><td><a href="/supported">/supported</a></td><td>Supported testnet kinds</td></tr>
-<tr><td>GET</td><td><a href="/faucets">/faucets</a></td><td>Testnet token faucets</td></tr>
-<tr><td>GET</td><td><a href="/examples">/examples</a></td><td>Sample request/response payloads</td></tr>
-<tr><td>GET</td><td><a href="/usage">/usage</a></td><td>Usage statistics</td></tr>
-<tr><td>POST</td><td>/verify</td><td>Verify payment</td></tr>
-<tr><td>POST</td><td>/settle</td><td>Settle payment</td></tr>
-<tr><td>POST</td><td>/webhook/test</td><td>Test webhook delivery</td></tr>
-<tr><td>GET</td><td><a href="/playground">/playground</a></td><td>Interactive API playground</td></tr>
-</table>
-
-<h2>Rate Limits</h2>
-<p>100 requests/minute per IP. Headers: <code>X-RateLimit-Limit</code>, <code>X-RateLimit-Remaining</code>.</p>
-
-<div class="note">When the upstream facilitator is unreachable, the sandbox returns error responses with <code>"mock": true</code>. Connect a testnet facilitator for real on-chain verification.</div>
-
-<p style="color:#6b7280;margin-top:2rem;font-size:.85rem">
-  <a href="/playground">Playground</a> · <a href="https://docs.t402.io">Docs</a> · <a href="https://github.com/t402-io/t402">GitHub</a> · Powered by <a href="https://t402.io">T402</a>
-</p>
-<script>
-function showTab(id){
-  document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));
-  document.getElementById('tab-'+id).classList.add('active');
-  event.target.classList.add('active');
-}
-</script>
-</body></html>`);
+// 404 handler — JSON response for unknown routes
+app.use((_req, res) => {
+  res.status(404).json({
+    error: "Not found",
+    hint: "See GET / for available endpoints, or GET /openapi.yaml for the API spec",
+    sandbox: true,
+  });
 });
 
 // JSON parse error handler
@@ -758,6 +1083,7 @@ function startServer() {
 function shutdown(signal) {
   log("info", `${signal} received, shutting down`, { service: "t402-sandbox" });
   clearInterval(evictionTimer);
+  clearInterval(historyEvictionTimer);
   if (healthTimer) clearInterval(healthTimer);
   if (server) {
     server.close(() => process.exit(0));
@@ -775,4 +1101,4 @@ if (_isMain) {
   startServer();
 }
 
-export { app, startServer, SUPPORTED_NETWORKS, SUPPORTED_KINDS };
+export { app, startServer, SUPPORTED_NETWORKS, SUPPORTED_KINDS, MAGIC_ADDRESSES, requestHistory, MAX_HISTORY_PER_SESSION, MAX_SESSIONS, SESSION_TTL_MS };

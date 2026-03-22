@@ -43,7 +43,7 @@ a:hover{text-decoration:underline}
 .panel{display:flex;flex-direction:column}
 .panel-header{display:flex;justify-content:space-between;align-items:center;padding:.6rem 1rem;background:#111827;border-bottom:1px solid #1f2937}
 .panel-title{color:#9ca3af;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
-.panel-actions{display:flex;gap:.4rem}
+.panel-actions{display:flex;gap:.4rem;flex-wrap:wrap}
 .panel-btn{padding:.25rem .6rem;background:#1f2937;color:#9ca3af;border:1px solid #374151;border-radius:4px;cursor:pointer;font-size:.75rem;font-family:inherit;transition:all .15s}
 .panel-btn:hover{background:#374151;color:#e5e7eb}
 .panel-btn.send{background:#065f46;color:#6ee7b7;border-color:#065f46}
@@ -93,6 +93,19 @@ textarea::placeholder{color:#4b5563}
 .method-badge{display:inline-block;padding:.1em .4em;border-radius:3px;font-size:.7rem;font-weight:700;font-family:monospace;margin-right:.3rem}
 .method-get{background:#1e3a5f;color:#93c5fd}
 .method-post{background:#3b1f2b;color:#f9a8d4}
+
+/* SDK copy button group */
+.btn-group{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0}
+.btn-group button{font-size:.75rem;padding:4px 8px}
+
+/* History panel */
+.history-panel{margin-top:2rem;border-top:1px solid #374151;padding-top:1rem}
+.history-panel h3{cursor:pointer;color:#9ca3af;font-size:.9rem}
+.history-entry{padding:6px 8px;border-bottom:1px solid #111827;cursor:pointer;font-size:.85em;display:flex;gap:8px;align-items:center}
+.history-entry:hover{background:#1f2937}
+.badge-ok{color:#10b981}
+.badge-warn{color:#f59e0b}
+.badge-err{color:#ef4444}
 </style>
 </head>
 <body>
@@ -152,6 +165,12 @@ textarea::placeholder{color:#4b5563}
         </div>
       </div>
       <textarea id="requestBody" placeholder="Request body (JSON)..." spellcheck="false"></textarea>
+      <div class="btn-group" style="padding:0 1rem .5rem">
+        <button class="panel-btn" onclick="copyAsSDK('typescript')">Copy as TypeScript</button>
+        <button class="panel-btn" onclick="copyAsSDK('go')">Copy as Go</button>
+        <button class="panel-btn" onclick="copyAsSDK('python')">Copy as Python</button>
+        <button class="panel-btn" onclick="copyAsSDK('java')">Copy as Java</button>
+      </div>
     </div>
 
     <!-- Response Panel -->
@@ -166,7 +185,7 @@ textarea::placeholder{color:#4b5563}
           <button class="panel-btn" onclick="copyResponse()" title="Copy response">Copy</button>
         </div>
       </div>
-      <div class="response-area" id="responseArea"><span class="muted">Send a request to see the response...</span></div>
+      <pre class="response-area" id="responseArea"><span class="muted">Send a request to see the response...</span></pre>
       <div style="padding:0 1rem .5rem">
         <span class="headers-toggle" id="headersToggle" onclick="toggleHeaders()" style="display:none">Show headers</span>
         <div class="headers-list" id="headersList"></div>
@@ -183,6 +202,12 @@ textarea::placeholder{color:#4b5563}
     <div class="rate-meter"><div class="rate-meter-fill" id="rateMeter" style="width:100%"></div></div>
     <span class="muted" id="requestId" style="font-size:.7rem"></span>
   </div>
+
+  <!-- Request History -->
+  <div class="history-panel">
+    <h3 onclick="toggleHistory()">Request History <span id="history-count">(0)</span> &#9660;</h3>
+    <div id="history-list" style="display:none"></div>
+  </div>
 </div>
 
 <!-- Toast -->
@@ -190,61 +215,155 @@ textarea::placeholder{color:#4b5563}
 
 <script>
 // State
-let currentEndpoint = 'supported';
-let currentMethod = 'GET';
-let lastResponse = '';
-let lastHeaders = {};
-let loading = false;
+var currentEndpoint = 'supported';
+var currentMethod = 'GET';
+var lastResponse = '';
+var lastHeaders = {};
+var loading = false;
 
-const networkSelect = document.getElementById('networkSelect');
-const requestBody = document.getElementById('requestBody');
-const responseArea = document.getElementById('responseArea');
-const statusBadge = document.getElementById('statusBadge');
-const timingBadge = document.getElementById('timingBadge');
-const sendBtn = document.getElementById('sendBtn');
-const requestTitle = document.getElementById('requestTitle');
-const headersToggle = document.getElementById('headersToggle');
-const headersList = document.getElementById('headersList');
-const rateRemaining = document.getElementById('rateRemaining');
-const rateLimit = document.getElementById('rateLimit');
-const rateMeter = document.getElementById('rateMeter');
-const requestIdEl = document.getElementById('requestId');
+var networkSelect = document.getElementById('networkSelect');
+var requestBody = document.getElementById('requestBody');
+var responseArea = document.getElementById('responseArea');
+var statusBadge = document.getElementById('statusBadge');
+var timingBadge = document.getElementById('timingBadge');
+var sendBtn = document.getElementById('sendBtn');
+var requestTitle = document.getElementById('requestTitle');
+var headersToggle = document.getElementById('headersToggle');
+var headersList = document.getElementById('headersList');
+var rateRemaining = document.getElementById('rateRemaining');
+var rateLimit = document.getElementById('rateLimit');
+var rateMeter = document.getElementById('rateMeter');
+var requestIdEl = document.getElementById('requestId');
+
+// --- Request History ---
+var requestHistoryLocal = [];
+
+function addToHistory(method, path, status, duration, reqBody, resBody) {
+  requestHistoryLocal.unshift({
+    time: new Date().toLocaleTimeString(),
+    method: method, path: path, status: status, duration: duration,
+    request: reqBody,
+    response: resBody
+  });
+  if (requestHistoryLocal.length > 20) requestHistoryLocal.pop();
+  renderHistory();
+}
+
+function renderHistory() {
+  var el = document.getElementById('history-list');
+  var count = document.getElementById('history-count');
+  count.textContent = '(' + requestHistoryLocal.length + ')';
+  el.innerHTML = requestHistoryLocal.map(function(h, i) {
+    var badgeClass = h.status < 300 ? 'badge-ok' : (h.status < 500 ? 'badge-warn' : 'badge-err');
+    return '<div class="history-entry" onclick="loadHistoryEntry(' + i + ')">' +
+      '<span class="' + badgeClass + '">' + h.status + '</span>' +
+      '<code>' + h.method + ' ' + h.path + '</code>' +
+      '<span class="muted">' + h.duration + 'ms</span>' +
+      '<span class="muted">' + h.time + '</span>' +
+      '</div>';
+  }).join('');
+}
+
+function loadHistoryEntry(i) {
+  var entry = requestHistoryLocal[i];
+  if (entry.request) {
+    requestBody.value = typeof entry.request === 'string' ? entry.request : JSON.stringify(entry.request, null, 2);
+  }
+  try {
+    var parsed = typeof entry.response === 'string' ? JSON.parse(entry.response) : entry.response;
+    lastResponse = JSON.stringify(parsed, null, 2);
+    responseArea.innerHTML = syntaxHighlight(lastResponse);
+  } catch (e) {
+    lastResponse = String(entry.response);
+    responseArea.textContent = lastResponse;
+  }
+}
+
+function toggleHistory() {
+  var el = document.getElementById('history-list');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+// --- JSON Syntax Highlighting ---
+function syntaxHighlight(json) {
+  if (typeof json !== 'string') json = JSON.stringify(json, null, 2);
+  return json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"([^"]+)"(?=\s*:)/g, '<span style="color:#50AF95">"$1"</span>')
+    .replace(/: "([^"]*)"/g, ': <span style="color:#fbbf24">"$1"</span>')
+    .replace(/: (\d+\.?\d*)/g, ': <span style="color:#60a5fa">$1</span>')
+    .replace(/: (true|false)/g, ': <span style="color:#c084fc">$1</span>')
+    .replace(/: (null)/g, ': <span style="color:#6b7280">$1</span>');
+}
+
+// --- SDK Code Generation ---
+function copyAsSDK(lang) {
+  var body = requestBody.value;
+  var endpoint = currentEndpoint;
+
+  if (endpoint === 'supported') {
+    endpoint = '/supported';
+  } else {
+    endpoint = '/' + endpoint;
+  }
+
+  var templates = {
+    typescript: 'import { HTTPFacilitatorClient } from "@t402/http";\n\nconst client = new HTTPFacilitatorClient({\n  url: "https://sandbox.t402.io"\n});\n\nconst result = await client.' + (endpoint === '/verify' ? 'verify' : endpoint === '/settle' ? 'settle' : 'getSupported') + '(\n  paymentPayload,\n  paymentRequirements\n);\nconsole.log(result);',
+
+    go: 'import t402http "github.com/t402-io/t402/sdks/go/http"\n\nclient := t402http.NewFacilitatorClient("https://sandbox.t402.io")\n\nresult, err := client.' + (endpoint === '/verify' ? 'Verify' : endpoint === '/settle' ? 'Settle' : 'GetSupported') + '(ctx, payloadBytes, requirementsBytes)\nif err != nil {\n    log.Fatal(err)\n}\nfmt.Printf("%+v\\n", result)',
+
+    python: 'from t402 import FacilitatorClient\n\nclient = FacilitatorClient("https://sandbox.t402.io")\n\nresult = await client.' + (endpoint === '/verify' ? 'verify' : endpoint === '/settle' ? 'settle' : 'get_supported') + '(\n    payment_payload,\n    payment_requirements\n)\nprint(result)',
+
+    java: 'HttpFacilitatorClient client = new HttpFacilitatorClient(\n    "https://sandbox.t402.io"\n);\n\n' + (endpoint === '/verify' ? 'VerificationResponse' : endpoint === '/settle' ? 'SettlementResponse' : 'SupportedResponse') + ' result = client.' + (endpoint === '/verify' ? 'verify' : endpoint === '/settle' ? 'settle' : 'getSupported') + '(\n    paymentHeader,\n    paymentRequirements\n);\nSystem.out.println(result);'
+  };
+
+  var code = templates[lang] || '';
+  navigator.clipboard.writeText(code).then(function() {
+    showToast('Copied ' + lang + ' code');
+  });
+}
 
 // Example payloads per endpoint
 function getExamplePayload(endpoint, network) {
-  const isEvm = network.startsWith('eip155:');
-  const isSolana = network.startsWith('solana:');
-  const isTon = network.startsWith('ton:');
-  const isTron = network.startsWith('tron:');
-  const isStellar = network.startsWith('stellar:');
+  var isEvm = network.startsWith('eip155:');
+  var isSolana = network.startsWith('solana:');
+  var isTon = network.startsWith('ton:');
+  var isTron = network.startsWith('tron:');
+  var isStellar = network.startsWith('stellar:');
 
-  let payer = '0xYourWalletAddress';
-  let payee = '0xRecipientAddress';
-  let sig = '0xabc123...';
+  var payer = '0x0000000000000000000000000000000000CAFE01';
+  var payee = '0x0000000000000000000000000000000000CAFE02';
+  var sig = '0xabc123def456...';
 
   if (isSolana) {
-    payer = 'YourSolanaPublicKey';
-    payee = 'RecipientSolanaPublicKey';
+    payer = '11111111111111111111111111111112';
+    payee = '11111111111111111111111111111113';
     sig = 'base58signature...';
   } else if (isTon) {
-    payer = 'UQYourTonAddress';
-    payee = 'UQRecipientTonAddress';
+    payer = 'UQ0000000000000000000000000000000000000000CAFE01';
+    payee = 'UQ0000000000000000000000000000000000000000CAFE02';
     sig = 'base64signature...';
   } else if (isTron) {
-    payer = 'TYourTronAddress';
-    payee = 'TRecipientTronAddress';
-    sig = '0xabc123...';
+    payer = 'T0000000000000000000000000000CAFE01';
+    payee = 'T0000000000000000000000000000CAFE02';
+    sig = '0xabc123def456...';
   } else if (isStellar) {
-    payer = 'GYourStellarAddress';
-    payee = 'GRecipientStellarAddress';
+    payer = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAFE01';
+    payee = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAFE02';
     sig = 'base64signature...';
   }
 
   if (endpoint === 'verify' || endpoint === 'settle') {
     return JSON.stringify({
+      t402Version: 2,
       paymentPayload: {
-        signature: sig,
-        authorization: { payer: payer }
+        accepted: {
+          scheme: 'exact',
+          network: network
+        },
+        payload: {
+          signature: sig,
+          authorization: { payer: payer }
+        }
       },
       paymentRequirements: {
         scheme: 'exact',
@@ -321,7 +440,7 @@ function displayResponse(status, body, headers, elapsed) {
   } catch (e) {
     lastResponse = String(body);
   }
-  responseArea.textContent = lastResponse;
+  responseArea.innerHTML = syntaxHighlight(lastResponse);
 
   // Headers
   lastHeaders = {};
@@ -361,10 +480,12 @@ async function sendRequest() {
 
   var url = '/' + currentEndpoint;
   var opts = { method: currentMethod };
+  var reqBodyStr = null;
 
   if (currentMethod === 'POST') {
     opts.headers = { 'Content-Type': 'application/json' };
     opts.body = requestBody.value;
+    reqBodyStr = requestBody.value;
   }
 
   var start = Date.now();
@@ -373,6 +494,7 @@ async function sendRequest() {
     var elapsed = Date.now() - start;
     var text = await res.text();
     displayResponse(res.status, text, res.headers, elapsed);
+    addToHistory(currentMethod, url, res.status, elapsed, reqBodyStr, text);
   } catch (err) {
     var elapsed2 = Date.now() - start;
     responseArea.textContent = 'Error: ' + err.message;
@@ -401,6 +523,7 @@ async function quickFetch(path) {
     var elapsed = Date.now() - start;
     var text = await res.text();
     displayResponse(res.status, text, res.headers, elapsed);
+    addToHistory('GET', path, res.status, elapsed, null, text);
   } catch (err) {
     var elapsed2 = Date.now() - start;
     responseArea.textContent = 'Error: ' + err.message;

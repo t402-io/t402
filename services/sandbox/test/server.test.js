@@ -820,3 +820,194 @@ describe("POST /webhook/test", () => {
     }
   });
 });
+
+// --- New features tests ---
+
+describe("Magic test addresses", () => {
+  it("GET /test-addresses returns all magic addresses", async () => {
+    const res = await fetch(`${BASE}/test-addresses`);
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.ok(data.testAddresses);
+    assert.ok(data.testAddresses.verifySuccess);
+    assert.ok(data.testAddresses.settleSuccess);
+    assert.ok(data.testAddresses.settleFailFunds);
+    assert.ok(data.usage);
+  });
+
+  it("CAFE01 verify returns isValid:true", async () => {
+    const res = await fetch(`${BASE}/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        paymentPayload: { payload: { payer: "0x0000000000000000000000000000000000CAFE01" } },
+        paymentRequirements: { network: "eip155:84532" },
+      }),
+    });
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.strictEqual(data.isValid, true);
+    assert.strictEqual(data.mock, true);
+  });
+
+  it("CAFE02 verify returns isValid:false with invalid_signature", async () => {
+    const res = await fetch(`${BASE}/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        paymentPayload: { payload: { payer: "0x0000000000000000000000000000000000cafe02" } },
+        paymentRequirements: { network: "eip155:84532" },
+      }),
+    });
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.strictEqual(data.isValid, false);
+    assert.strictEqual(data.invalidReason, "invalid_signature");
+  });
+
+  it("CAFE11 settle returns success:true with transaction", async () => {
+    const res = await fetch(`${BASE}/settle`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        paymentPayload: { payload: { payer: "0x0000000000000000000000000000000000CAFE11" } },
+        paymentRequirements: { network: "eip155:84532" },
+      }),
+    });
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.strictEqual(data.success, true);
+    assert.ok(data.transaction);
+    assert.ok(data.network);
+    assert.strictEqual(data.confirmations, "confirmed");
+  });
+
+  it("CAFE12 settle returns success:false with insufficient_funds", async () => {
+    const res = await fetch(`${BASE}/settle`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        paymentPayload: { payload: { payer: "0x0000000000000000000000000000000000CAFE12" } },
+        paymentRequirements: { network: "eip155:84532" },
+      }),
+    });
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.strictEqual(data.success, false);
+    assert.strictEqual(data.errorReason, "insufficient_funds");
+  });
+
+  it("magic addresses are case-insensitive", async () => {
+    const res = await fetch(`${BASE}/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        paymentPayload: { authorization: { payer: "0x0000000000000000000000000000000000cafe01" } },
+        paymentRequirements: { network: "ton:testnet" },
+      }),
+    });
+    const data = await res.json();
+    assert.strictEqual(data.isValid, true);
+  });
+});
+
+describe("GET /errors", () => {
+  it("returns error catalog", async () => {
+    const res = await fetch(`${BASE}/errors`);
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.ok(Array.isArray(data.errors));
+    assert.ok(data.errors.length >= 8);
+    for (const err of data.errors) {
+      assert.ok(err.status);
+      assert.ok(err.code);
+      assert.ok(err.message);
+      assert.ok(err.cause);
+      assert.ok(err.fix);
+    }
+  });
+});
+
+describe("GET /openapi.yaml", () => {
+  it("returns YAML OpenAPI spec", async () => {
+    const res = await fetch(`${BASE}/openapi.yaml`);
+    assert.strictEqual(res.status, 200);
+    const ct = res.headers.get("content-type");
+    assert.ok(ct.includes("yaml") || ct.includes("text"), "Should be YAML content type");
+    const text = await res.text();
+    assert.ok(text.includes("openapi:"));
+    assert.ok(text.includes("T402 Sandbox"));
+    assert.ok(text.includes("/verify"));
+  });
+});
+
+describe("Request history", () => {
+  it("GET /history without session returns 400", async () => {
+    const res = await fetch(`${BASE}/history`);
+    assert.strictEqual(res.status, 400);
+    const data = await res.json();
+    assert.ok(data.error);
+    assert.ok(data.usage);
+  });
+
+  it("tracks requests with X-Sandbox-Session header", async () => {
+    const session = "test-session-" + Date.now();
+
+    // Make some requests with session header
+    await fetch(`${BASE}/supported`, { headers: { "X-Sandbox-Session": session } });
+    await fetch(`${BASE}/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Sandbox-Session": session },
+      body: JSON.stringify({
+        paymentPayload: { payload: { payer: "0x0000000000000000000000000000000000CAFE01" } },
+        paymentRequirements: { network: "eip155:84532" },
+      }),
+    });
+
+    // Fetch history
+    const res = await fetch(`${BASE}/history`, { headers: { "X-Sandbox-Session": session } });
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.strictEqual(data.session, session);
+    assert.ok(data.count >= 2, `Expected at least 2 entries, got ${data.count}`);
+
+    // Verify entries have correct structure
+    const entry = data.entries[data.entries.length - 1]; // oldest
+    assert.ok(entry.id);
+    assert.ok(entry.timestamp);
+    assert.ok(entry.method);
+    assert.ok(entry.path);
+    assert.ok(typeof entry.status === "number");
+  });
+
+  it("supports ?session= query parameter", async () => {
+    const session = "query-test-" + Date.now();
+    await fetch(`${BASE}/health`, { headers: { "X-Sandbox-Session": session } });
+    const res = await fetch(`${BASE}/history?session=${session}`);
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.strictEqual(data.session, session);
+  });
+});
+
+describe("JSON 404 handler", () => {
+  it("returns JSON for unknown GET routes", async () => {
+    const res = await fetch(`${BASE}/nonexistent-page`);
+    assert.strictEqual(res.status, 404);
+    const data = await res.json();
+    assert.strictEqual(data.error, "Not found");
+    assert.ok(data.hint);
+    assert.strictEqual(data.sandbox, true);
+  });
+
+  it("returns JSON for unknown POST routes", async () => {
+    const res = await fetch(`${BASE}/nonexistent`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}",
+    });
+    assert.strictEqual(res.status, 404);
+    const data = await res.json();
+    assert.strictEqual(data.error, "Not found");
+  });
+});

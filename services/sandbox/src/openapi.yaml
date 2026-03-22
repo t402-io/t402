@@ -1,0 +1,717 @@
+openapi: "3.1.0"
+info:
+  title: T402 Sandbox API
+  version: "1.2.0"
+  description: |
+    Public testnet facilitator proxy for the T402 HTTP-native payment protocol.
+    No API key required. No real funds. Rate limited to 100 requests/minute per IP.
+
+    The sandbox proxies to a real testnet facilitator when available, and falls back
+    to mock responses (marked with `"mock": true`) when the upstream is unreachable.
+
+    **Magic test addresses** — like Stripe's test card numbers — trigger deterministic
+    responses without hitting the upstream facilitator. See `GET /test-addresses`.
+  contact:
+    name: T402
+    url: https://t402.io
+  license:
+    name: MIT
+    url: https://github.com/t402-io/t402/blob/main/LICENSE
+
+servers:
+  - url: https://sandbox.t402.io
+    description: Production sandbox (testnet only)
+
+tags:
+  - name: health
+    description: Health and readiness checks
+  - name: payments
+    description: Payment verification and settlement
+  - name: developer-tools
+    description: Faucets, examples, test addresses, and debugging utilities
+
+paths:
+  /:
+    get:
+      tags: [health]
+      summary: Landing page
+      description: HTML landing page with quick-start guides and endpoint reference.
+      operationId: getLandingPage
+      responses:
+        "200":
+          description: HTML page
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /health:
+    get:
+      tags: [health]
+      summary: Health check
+      operationId: getHealth
+      responses:
+        "200":
+          description: Service is running
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, service, mode]
+                properties:
+                  status:
+                    type: string
+                    enum: [ok]
+                  service:
+                    type: string
+                    enum: [t402-sandbox]
+                  mode:
+                    type: string
+                    enum: [testnet]
+
+  /ready:
+    get:
+      tags: [health]
+      summary: Readiness check (upstream status)
+      operationId: getReady
+      responses:
+        "200":
+          description: Upstream facilitator is connected
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ready, upstream, service, liveNetworks, totalNetworks]
+                properties:
+                  ready:
+                    type: boolean
+                    enum: [true]
+                  upstream:
+                    type: string
+                    enum: [connected]
+                  service:
+                    type: string
+                  liveNetworks:
+                    type: integer
+                  totalNetworks:
+                    type: integer
+        "503":
+          description: Upstream facilitator is unreachable (mock fallback active)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ready, upstream, service, note]
+                properties:
+                  ready:
+                    type: boolean
+                    enum: [false]
+                  upstream:
+                    type: string
+                    enum: [unreachable]
+                  service:
+                    type: string
+                  note:
+                    type: string
+
+  /supported:
+    get:
+      tags: [payments]
+      summary: Supported testnet kinds
+      description: Returns supported payment kinds, extensions, and signer families. Matches the SDK `SupportedResponse` type.
+      operationId: getSupported
+      responses:
+        "200":
+          description: Supported kinds and capabilities
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SupportedResponse"
+
+  /faucets:
+    get:
+      tags: [developer-tools]
+      summary: Testnet token faucets
+      description: Returns faucet URLs for obtaining testnet tokens on each supported network.
+      operationId: getFaucets
+      responses:
+        "200":
+          description: Faucet information
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [faucets, sandbox]
+                properties:
+                  faucets:
+                    type: array
+                    items:
+                      type: object
+                      required: [network, name, tokens]
+                      properties:
+                        network:
+                          type: string
+                          description: CAIP-2 network identifier
+                          examples: ["eip155:84532"]
+                        name:
+                          type: string
+                          examples: ["Base Sepolia"]
+                        tokens:
+                          type: array
+                          items:
+                            type: object
+                            required: [symbol, url]
+                            properties:
+                              symbol:
+                                type: string
+                                examples: ["USDC"]
+                              url:
+                                type: string
+                                format: uri
+                  sandbox:
+                    type: boolean
+
+  /examples:
+    get:
+      tags: [developer-tools]
+      summary: Sample request/response payloads
+      description: |
+        Returns example payloads matching the SDK types (`PaymentPayload`, `PaymentRequirements`,
+        `VerifyResponse`, `SettleResponse`). Use magic test addresses (e.g. `0x...CAFE01`) for
+        deterministic responses without on-chain verification.
+      operationId: getExamples
+      responses:
+        "200":
+          description: Example payloads with curl commands
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [verify, settle, webhook, curl, sandbox]
+                properties:
+                  verify:
+                    type: object
+                    properties:
+                      request:
+                        type: object
+                      response:
+                        $ref: "#/components/schemas/VerifyResponse"
+                  settle:
+                    type: object
+                    properties:
+                      request:
+                        type: object
+                      response:
+                        $ref: "#/components/schemas/SettleResponse"
+                  webhook:
+                    type: object
+                  curl:
+                    type: object
+                  sandbox:
+                    type: boolean
+
+  /test-addresses:
+    get:
+      tags: [developer-tools]
+      summary: Magic test addresses
+      description: |
+        Returns all magic test addresses and their expected behavior. These addresses
+        trigger deterministic mock responses without hitting the upstream facilitator,
+        similar to Stripe's test card numbers (4242...).
+      operationId: getTestAddresses
+      responses:
+        "200":
+          description: Test address catalog
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [testAddresses, usage, sandbox]
+                properties:
+                  testAddresses:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        address:
+                          type: string
+                        description:
+                          type: string
+                        verify:
+                          type: string
+                        settle:
+                          type: string
+                  usage:
+                    type: string
+                  sandbox:
+                    type: boolean
+
+  /usage:
+    get:
+      tags: [developer-tools]
+      summary: Usage statistics
+      operationId: getUsage
+      responses:
+        "200":
+          description: Current usage counters
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [totalRequests, upstreamErrors, rateLimit, upstreamHealthy]
+                properties:
+                  totalRequests:
+                    type: integer
+                  upstreamErrors:
+                    type: integer
+                  rateLimit:
+                    type: integer
+                  upstreamHealthy:
+                    type: boolean
+                    nullable: true
+
+  /metrics:
+    get:
+      tags: [developer-tools]
+      summary: Prometheus metrics
+      operationId: getMetrics
+      responses:
+        "200":
+          description: Prometheus exposition format
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /playground:
+    get:
+      tags: [developer-tools]
+      summary: Interactive API playground
+      description: Browser-based UI for testing sandbox endpoints interactively.
+      operationId: getPlayground
+      responses:
+        "200":
+          description: HTML playground page
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /verify:
+    post:
+      tags: [payments]
+      summary: Verify a payment
+      description: |
+        Verifies a signed payment payload against the payment requirements.
+        Proxies to the upstream testnet facilitator when available, otherwise
+        returns a mock response. Use magic test addresses for deterministic results.
+      operationId: verifyPayment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyRequest"
+            example:
+              paymentPayload:
+                t402Version: 2
+                accepted:
+                  scheme: exact
+                  network: "eip155:84532"
+                  asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
+                  amount: "1000000"
+                  payTo: "0xRecipientAddress"
+                  maxTimeoutSeconds: 300
+                  extra: {}
+                payload:
+                  payer: "0x0000000000000000000000000000000000CAFE01"
+                  signature: "0xabc123..."
+              paymentRequirements:
+                scheme: exact
+                network: "eip155:84532"
+                asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
+                amount: "1000000"
+                payTo: "0xRecipientAddress"
+                maxTimeoutSeconds: 300
+                extra: {}
+      responses:
+        "200":
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerifyResponse"
+        "400":
+          description: Invalid request (unsupported network, missing fields)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "415":
+          description: Content-Type must be application/json
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Upstream unreachable (mock fallback)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerifyResponse"
+
+  /settle:
+    post:
+      tags: [payments]
+      summary: Settle a payment
+      description: |
+        Settles a verified payment on-chain. Proxies to the upstream testnet
+        facilitator when available, otherwise returns a mock response.
+        Use magic test addresses for deterministic results.
+      operationId: settlePayment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SettleRequest"
+            example:
+              paymentPayload:
+                t402Version: 2
+                accepted:
+                  scheme: exact
+                  network: "eip155:84532"
+                  asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
+                  amount: "1000000"
+                  payTo: "0xRecipientAddress"
+                  maxTimeoutSeconds: 300
+                  extra: {}
+                payload:
+                  payer: "0x0000000000000000000000000000000000CAFE01"
+                  signature: "0xabc123..."
+              paymentRequirements:
+                scheme: exact
+                network: "eip155:84532"
+                asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
+                amount: "1000000"
+                payTo: "0xRecipientAddress"
+                maxTimeoutSeconds: 300
+                extra: {}
+      responses:
+        "200":
+          description: Settlement result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SettleResponse"
+        "400":
+          description: Invalid request (unsupported network, missing fields)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "415":
+          description: Content-Type must be application/json
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Upstream unreachable (mock fallback)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SettleResponse"
+
+  /webhook/test:
+    post:
+      tags: [developer-tools]
+      summary: Test webhook delivery
+      description: |
+        Sends a sample webhook callback to the provided URL with HMAC-SHA256 signature.
+        Use this to verify your webhook endpoint receives and validates T402 callbacks correctly.
+      operationId: testWebhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url]
+              properties:
+                url:
+                  type: string
+                  format: uri
+                  description: Webhook URL to deliver the test event to (HTTPS required, localhost exempt)
+                event:
+                  type: string
+                  enum: [verification.completed, verification.failed, settlement.completed, settlement.failed]
+                  default: verification.completed
+                  description: Event type to simulate
+            example:
+              url: "https://your-server.com/webhook"
+              event: "settlement.completed"
+      responses:
+        "200":
+          description: Webhook delivered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [delivered, callbackId, event, targetUrl, targetStatus, signatureSecret, sandbox]
+                properties:
+                  delivered:
+                    type: boolean
+                    enum: [true]
+                  callbackId:
+                    type: string
+                    format: uuid
+                  event:
+                    type: string
+                  targetUrl:
+                    type: string
+                  targetStatus:
+                    type: integer
+                  signatureSecret:
+                    type: string
+                  signatureHeader:
+                    type: string
+                  sandbox:
+                    type: boolean
+                  note:
+                    type: string
+        "400":
+          description: Invalid request (missing URL, invalid event type)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: Webhook delivery failed (target unreachable)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [delivered, callbackId, event, targetUrl, error, sandbox]
+                properties:
+                  delivered:
+                    type: boolean
+                    enum: [false]
+                  callbackId:
+                    type: string
+                  event:
+                    type: string
+                  targetUrl:
+                    type: string
+                  error:
+                    type: string
+                  sandbox:
+                    type: boolean
+
+components:
+  schemas:
+    PaymentRequirements:
+      type: object
+      description: Payment requirements specifying what payment is needed. Matches SDK `PaymentRequirements` type.
+      required: [scheme, network, asset, amount, payTo, maxTimeoutSeconds, extra]
+      properties:
+        scheme:
+          type: string
+          description: Payment scheme (e.g. "exact", "exact-legacy")
+          examples: ["exact"]
+        network:
+          type: string
+          description: CAIP-2 network identifier
+          examples: ["eip155:84532"]
+        asset:
+          type: string
+          description: Token contract address
+          examples: ["0x036CbD53842c5426634e7929541eC2318f3dCF7e"]
+        amount:
+          type: string
+          description: Amount in smallest token units
+          examples: ["1000000"]
+        payTo:
+          type: string
+          description: Recipient address
+          examples: ["0xRecipientAddress"]
+        maxTimeoutSeconds:
+          type: integer
+          description: Maximum time in seconds before authorization expires
+          examples: [300]
+        extra:
+          type: object
+          description: Scheme-specific extra fields
+          additionalProperties: true
+
+    PaymentPayload:
+      type: object
+      description: Signed payment payload sent by the client. Matches SDK `PaymentPayload` type.
+      required: [t402Version, accepted, payload]
+      properties:
+        t402Version:
+          type: integer
+          description: Protocol version
+          examples: [2]
+        resource:
+          type: object
+          description: Resource being paid for
+          properties:
+            url:
+              type: string
+            description:
+              type: string
+            mimeType:
+              type: string
+        accepted:
+          $ref: "#/components/schemas/PaymentRequirements"
+        payload:
+          type: object
+          description: Mechanism-specific signed payload (contains payer, signature, etc.)
+          additionalProperties: true
+        extensions:
+          type: object
+          description: Protocol extensions
+          additionalProperties: true
+
+    VerifyRequest:
+      type: object
+      description: Request body for POST /verify. Matches SDK `VerifyRequest` type.
+      required: [paymentPayload, paymentRequirements]
+      properties:
+        paymentPayload:
+          $ref: "#/components/schemas/PaymentPayload"
+        paymentRequirements:
+          $ref: "#/components/schemas/PaymentRequirements"
+
+    SettleRequest:
+      type: object
+      description: Request body for POST /settle. Matches SDK `SettleRequest` type.
+      required: [paymentPayload, paymentRequirements]
+      properties:
+        paymentPayload:
+          $ref: "#/components/schemas/PaymentPayload"
+        paymentRequirements:
+          $ref: "#/components/schemas/PaymentRequirements"
+
+    VerifyResponse:
+      type: object
+      description: Verification result. Matches SDK `VerifyResponse` type.
+      required: [isValid]
+      properties:
+        isValid:
+          type: boolean
+          description: Whether the payment authorization is valid
+        invalidReason:
+          type: string
+          description: Reason for verification failure (only when isValid is false)
+        payer:
+          type: string
+          description: Payer address extracted from the authorization
+        sandbox:
+          type: boolean
+          description: Always true for sandbox responses
+        mock:
+          type: boolean
+          description: True when response is from mock fallback (not on-chain verified)
+
+    SettleResponse:
+      type: object
+      description: Settlement result. Matches SDK `SettleResponse` type.
+      required: [success]
+      properties:
+        success:
+          type: boolean
+          description: Whether settlement succeeded
+        errorReason:
+          type: string
+          description: Reason for settlement failure (only when success is false)
+        payer:
+          type: string
+          description: Payer address
+        transaction:
+          type: string
+          description: On-chain transaction hash
+        network:
+          type: string
+          description: CAIP-2 network where settlement occurred
+        confirmations:
+          type: string
+          description: Confirmation status
+        sandbox:
+          type: boolean
+        mock:
+          type: boolean
+
+    SupportedKind:
+      type: object
+      description: A supported payment kind. Matches SDK `SupportedKind` type.
+      required: [t402Version, scheme, network]
+      properties:
+        t402Version:
+          type: integer
+          examples: [2]
+        scheme:
+          type: string
+          examples: ["exact"]
+        network:
+          type: string
+          description: CAIP-2 network identifier
+          examples: ["eip155:84532"]
+        extra:
+          type: object
+          additionalProperties: true
+        upstream:
+          type: boolean
+          description: Whether this network has a live upstream facilitator connection
+
+    SupportedResponse:
+      type: object
+      description: Supported payment capabilities. Matches SDK `SupportedResponse` type.
+      required: [kinds, extensions, signers]
+      properties:
+        kinds:
+          type: array
+          items:
+            $ref: "#/components/schemas/SupportedKind"
+        extensions:
+          type: array
+          items:
+            type: string
+          examples: [["erc8004"]]
+        signers:
+          type: object
+          description: "CAIP family pattern to signer addresses mapping"
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        sandbox:
+          type: boolean
+        upstreamHealthy:
+          type: boolean
+        hint:
+          type: string
+
+    ErrorResponse:
+      type: object
+      required: [error, sandbox]
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+        sandbox:
+          type: boolean
+          enum: [true]
