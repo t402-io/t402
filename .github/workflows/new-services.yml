@@ -47,14 +47,16 @@ jobs:
         run: npm ci
 
       - name: Start server
+        if: matrix.service != 'status'
         run: npm start &
         env:
           BAZAAR_ADMIN_KEY: test-ci-key
           EXPLORER_MODE: seed
 
       - name: Wait for server
+        if: matrix.service != 'status'
         run: |
-          PORT=${{ matrix.service == 'bazaar' && '3402' || matrix.service == 'status' && '3403' || matrix.service == 'explorer' && '3404' || matrix.service == 'agent-dashboard' && '3405' || '3406' }}
+          PORT=${{ matrix.service == 'bazaar' && '3402' || matrix.service == 'explorer' && '3404' || matrix.service == 'agent-dashboard' && '3405' || '3406' }}
           for i in $(seq 1 15); do
             curl -sf http://localhost:${PORT}/health && break
             sleep 1
