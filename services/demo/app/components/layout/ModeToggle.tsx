@@ -16,6 +16,7 @@ export function ModeToggle() {
         active={mode === "demo"}
         color="#F59E0B"
         onClick={() => setMode("demo")}
+        title="Simulated wallet — no real funds needed"
       />
       <ModeButton
         label="Live"
@@ -23,6 +24,7 @@ export function ModeToggle() {
         active={mode === "live"}
         color="#10B981"
         onClick={() => setMode("live")}
+        title="Connect real testnet wallet"
       />
     </div>
   );
@@ -33,16 +35,19 @@ function ModeButton({
   active,
   color,
   onClick,
+  title,
 }: {
   label: string;
   value: DemoMode;
   active: boolean;
   color: string;
   onClick: () => void;
+  title?: string;
 }) {
   return (
     <button
       onClick={onClick}
+      title={title}
       className={`flex items-center gap-1 sm:gap-1.5 rounded-lg px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-medium transition-all`}
       style={{
         background: active ? "var(--color-border)" : "transparent",

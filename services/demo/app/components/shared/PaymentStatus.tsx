@@ -23,12 +23,12 @@ interface PaymentStatusProps {
 
 const FLOW_ANNOUNCEMENTS: Record<FlowState, string> = {
   idle: "",
-  requesting: "Sending request to server",
+  requesting: "Requesting payment requirements from server",
   "got-402": "Server requires payment. Preparing authorization.",
-  signing: "Signing payment authorization",
-  retrying: "Sending payment to server",
-  verifying: "Verifying payment on-chain",
-  done: "Payment settled successfully",
+  signing: "Waiting for wallet signature approval",
+  retrying: "Submitting payment for verification",
+  verifying: "Verifying settlement on blockchain",
+  done: "Payment complete, access granted",
   error: "Payment failed",
 };
 
@@ -46,6 +46,36 @@ export function PaymentStatus({ flowState, settle, family }: PaymentStatusProps)
         {FLOW_ANNOUNCEMENTS[flowState]}
       </div>
       <FlowDiagram state={flowState} compact />
+      {flowState === "requesting" && (
+        <p className="text-xs text-center mt-3" style={{ color: "var(--color-muted)" }}>
+          Requesting payment requirements...
+        </p>
+      )}
+      {flowState === "got-402" && (
+        <p className="text-xs text-center mt-3" style={{ color: "var(--color-muted)" }}>
+          Payment required. Preparing authorization...
+        </p>
+      )}
+      {flowState === "signing" && (
+        <div className="text-center mt-3">
+          <p className="text-xs font-medium" style={{ color: "var(--color-warning)" }}>
+            Check your wallet for a signature request
+          </p>
+          <p className="text-[10px] mt-1" style={{ color: "var(--color-muted)" }}>
+            Approve the transaction in your wallet extension to continue
+          </p>
+        </div>
+      )}
+      {flowState === "retrying" && (
+        <p className="text-xs text-center mt-3" style={{ color: "var(--color-muted)" }}>
+          Submitting payment to server...
+        </p>
+      )}
+      {flowState === "verifying" && (
+        <p className="text-xs text-center mt-3" style={{ color: "var(--color-muted)" }}>
+          Verifying on-chain settlement...
+        </p>
+      )}
       {showResult && (
         <div className="flex items-center justify-between mt-3 pt-3 border-t border-[var(--color-border)]">
           <div className="flex items-center gap-3">

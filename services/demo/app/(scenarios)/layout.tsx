@@ -13,6 +13,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import clsx from "clsx";
+import { useDemoContext } from "@/providers/DemoProvider";
 import type { ReactNode } from "react";
 
 const SCENARIOS = [
@@ -29,6 +30,7 @@ const SCENARIOS = [
 
 export default function ScenariosLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const { isDemo } = useDemoContext();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -92,6 +94,14 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
 
         {/* Main content */}
         <main id="main-content" className="flex-1 overflow-y-auto" role="main">
+          {isDemo && (
+            <div
+              className="text-center text-[10px] font-medium py-1.5 px-4"
+              style={{ background: "var(--color-warning-dim)", color: "var(--color-warning)" }}
+            >
+              Demo Mode — Payments are simulated. Switch to Live for real wallet transactions.
+            </div>
+          )}
           <AnimatePresence mode="wait">
             <motion.div
               key={pathname}

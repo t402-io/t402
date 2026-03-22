@@ -4,6 +4,7 @@ import { ChainSelector } from "./ChainSelector";
 import { ChainBadge } from "./ChainBadge";
 import { FaucetLink } from "./FaucetLink";
 import { SdkExamples } from "./SdkExamples";
+import { PaymentChecklist } from "./PaymentChecklist";
 import { useChainContext } from "@/providers/ChainProvider";
 import { useDemoContext } from "@/providers/DemoProvider";
 import type { ScenarioId } from "@/lib/sdk-examples";
@@ -44,12 +45,17 @@ export function ScenarioShell({ title, description, cost, accentColor, scenarioI
           <ChainSelector />
           <ChainBadge family={activeFamily} showNetwork />
         </div>
-        {isLive && (
+        {isLive ? (
           <div className="mt-4">
             <FaucetLink family={activeFamily} />
           </div>
+        ) : (
+          <p className="text-[10px] mt-4" style={{ color: "var(--color-muted)" }}>
+            Demo mode uses a simulated wallet. Switch to Live to test with real testnet tokens.
+          </p>
         )}
       </div>
+      <PaymentChecklist />
       {children}
       {scenarioId && <SdkExamples scenarioId={scenarioId} />}
     </div>

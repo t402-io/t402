@@ -5,6 +5,7 @@ import { useDemoContext } from "@/providers/DemoProvider";
 import { useToast } from "@/providers/ToastProvider";
 import { useMultiChainPayment } from "./useMultiChainPayment";
 import { encodePaymentHeader } from "@/lib/t402-client";
+import { classifyError, getUserFriendlyMessage } from "@/lib/error-helpers";
 
 export type FlowState =
   | "idle"
@@ -168,12 +169,14 @@ export function usePaymentFlow(url: string) {
         responseStatus: retryResponse.status,
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      show("error", message);
+      const originalMessage = error instanceof Error ? error.message : String(error);
+      const type = classifyError(error);
+      const friendlyMessage = getUserFriendlyMessage(type, originalMessage);
+      show("error", friendlyMessage);
       setResult((prev) => ({
         ...prev,
         state: "error",
-        error: message,
+        error: originalMessage,
       }));
     }
   }, [url, isDemo, isConnected, activeFamily, signPayment, show]);

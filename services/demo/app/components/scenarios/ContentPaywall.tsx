@@ -9,6 +9,7 @@ import type { FlowState } from "@/hooks/usePaymentFlow";
 import { CodeBlock } from "@/components/shared/CodeBlock";
 import { Spinner } from "@/components/shared/Spinner";
 import { encodePaymentHeader } from "@/lib/t402-client";
+import { classifyError, getUserFriendlyMessage, getErrorAction } from "@/lib/error-helpers";
 import { Lock } from "lucide-react";
 
 type State = "locked" | "paying" | "unlocked" | "error";
@@ -80,7 +81,8 @@ export function ContentPaywall() {
       setState("unlocked");
       setFlowState("done");
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      const originalMessage = err instanceof Error ? err.message : String(err);
+      setError(originalMessage);
       setState("error");
       setFlowState("error");
     }
@@ -205,7 +207,14 @@ export function ContentPaywall() {
 
       {state === "error" && (
         <div className="glass-card p-8 text-center">
-          <p className="text-sm text-[var(--color-error)]">{error}</p>
+          <p className="text-sm text-[var(--color-error)]">
+            {error ? getUserFriendlyMessage(classifyError(error), error) : "An unknown error occurred."}
+          </p>
+          {error && (
+            <p className="text-[10px] mt-1" style={{ color: "var(--color-muted)" }}>
+              {getErrorAction(classifyError(error), activeFamily) || "Try again or switch to Demo mode."}
+            </p>
+          )}
           <button
             onClick={() => { setState("locked"); setFlowState("idle"); setSettle(null); }}
             className="mt-3 text-xs text-[var(--color-muted)] hover:text-white cursor-pointer"
