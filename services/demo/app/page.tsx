@@ -4,6 +4,8 @@ import { ScenarioCard } from "@/components/shared/ScenarioCard";
 import { ChainLogo } from "@/components/shared/ChainLogo";
 import { FlowDiagram } from "@/components/shared/FlowDiagram";
 import { HomeCodeExample } from "@/components/shared/HomeCodeExample";
+import { LiveStats } from "@/components/shared/LiveStats";
+import { InlineDemo } from "@/components/shared/InlineDemo";
 import { CHAIN_FAMILIES, CHAIN_CONFIGS } from "@/lib/testnet-config";
 import {
   Brain, FileText, Database, Bot,
@@ -110,17 +112,18 @@ export default function HomePage() {
             className="inline-block text-[10px] font-semibold tracking-[0.25em] uppercase mb-5 px-3 py-1 rounded-full"
             style={{ color: "var(--color-brand)", background: "var(--color-brand-dim)", border: "1px solid rgba(80, 175, 149, 0.15)" }}
           >
-            INTERACTIVE DEMO
+            HTTP 402 PAYMENT PROTOCOL
           </span>
-          <h1 className="text-5xl md:text-6xl lg:text-8xl font-bold tracking-tight mb-5">
-            <span style={{ color: "var(--color-brand)" }}>44 Networks.</span>{" "}
-            <span className="text-white">1 Header.</span>
+          <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight mb-5">
+            <span className="text-white">Your API should accept payments.</span>
+            <br />
+            <span style={{ color: "var(--color-brand)" }}>Without Stripe. Without API keys.</span>
           </h1>
-          <p className="text-xl sm:text-2xl max-w-2xl mx-auto mb-4 text-[var(--color-muted)]">
-            HTTP-native USDT payments for APIs, content, AI agents, and IoT.
+          <p className="text-lg sm:text-xl max-w-2xl mx-auto mb-4 text-[var(--color-muted)]">
+            T402 turns any HTTP endpoint into a paid resource. USDT micropayments across 44 networks — settled on-chain in under 3 seconds.
           </p>
           <p className="text-sm" style={{ color: "var(--color-text-tertiary)" }}>
-            Request &rarr; 402 &rarr; Sign &rarr; Settle &rarr; Access. Under 3 seconds.
+            Request &rarr; 402 &rarr; Sign &rarr; Settle &rarr; Access
           </p>
         </div>
 
@@ -157,6 +160,11 @@ export default function HomePage() {
           >
             Read Docs
           </a>
+        </div>
+
+        {/* Inline Demo */}
+        <div className="mt-8 flex justify-center">
+          <InlineDemo />
         </div>
       </section>
 
@@ -195,7 +203,52 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+
+          {/* Comparison */}
+          <div
+            className="mt-10 rounded-2xl overflow-hidden max-w-2xl mx-auto"
+            style={{ border: "1px solid var(--color-border)" }}
+          >
+            <table className="w-full text-xs">
+              <thead>
+                <tr style={{ background: "var(--color-surface)" }}>
+                  <th className="text-left px-4 py-3 font-medium" style={{ color: "var(--color-muted)" }}></th>
+                  <th className="text-center px-4 py-3 font-semibold" style={{ color: "var(--color-brand)" }}>T402</th>
+                  <th className="text-center px-4 py-3 font-medium" style={{ color: "var(--color-muted)" }}>Stripe</th>
+                  <th className="text-center px-4 py-3 font-medium" style={{ color: "var(--color-muted)" }}>x402</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ["Minimum payment", "$0.0001", "$0.50+", "$0.01"],
+                  ["Transaction fee", "Gas only", "2.9% + $0.30", "Gas only"],
+                  ["Setup required", "None", "KYC + Dashboard", "Coinbase account"],
+                  ["Chains supported", "44 (10 families)", "\u2014", "EVM only"],
+                  ["Machine-to-machine", "Native", "API key required", "Limited"],
+                  ["Protocol", "HTTP 402 (open)", "Proprietary", "HTTP 402"],
+                ].map(([label, t402, stripe, x402], i) => (
+                  <tr
+                    key={i}
+                    style={{
+                      background: i % 2 === 0 ? "var(--color-background)" : "var(--color-surface)",
+                      borderTop: "1px solid var(--color-border)",
+                    }}
+                  >
+                    <td className="px-4 py-2.5 font-medium text-white">{label}</td>
+                    <td className="px-4 py-2.5 text-center" style={{ color: "var(--color-brand)" }}>{t402}</td>
+                    <td className="px-4 py-2.5 text-center" style={{ color: "var(--color-muted)" }}>{stripe}</td>
+                    <td className="px-4 py-2.5 text-center" style={{ color: "var(--color-muted)" }}>{x402}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
+      </section>
+
+      {/* Live Stats */}
+      <section className="py-12 px-4 sm:px-6" style={{ borderTop: "1px solid rgba(255, 255, 255, 0.06)" }}>
+        <LiveStats />
       </section>
 
       {/* How It Works */}

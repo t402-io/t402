@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { FlowDiagram } from "./FlowDiagram";
 import { TransactionLink } from "./TransactionLink";
 import type { FlowState } from "@/hooks/usePaymentFlow";
@@ -39,6 +40,33 @@ const FLOW_ANNOUNCEMENTS: Record<FlowState, string> = {
 export function PaymentStatus({ flowState, settle, family }: PaymentStatusProps) {
   const showResult = flowState === "done" && settle?.transaction;
 
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    if (flowState === "requesting" && !startTime) {
+      setStartTime(Date.now());
+    }
+    if (flowState === "done" || flowState === "error") {
+      if (startTime) {
+        setElapsed(Date.now() - startTime);
+      }
+    }
+    if (flowState === "idle") {
+      setStartTime(null);
+      setElapsed(0);
+    }
+  }, [flowState, startTime]);
+
+  // Running timer during active flow
+  useEffect(() => {
+    if (!startTime || flowState === "done" || flowState === "error" || flowState === "idle") return;
+    const interval = setInterval(() => {
+      setElapsed(Date.now() - startTime);
+    }, 100);
+    return () => clearInterval(interval);
+  }, [startTime, flowState]);
+
   return (
     <div className="glass-card p-3 sm:p-4" aria-busy={flowState !== "idle" && flowState !== "done" && flowState !== "error"}>
       {/* Screen reader announcement for payment progress */}
@@ -75,6 +103,16 @@ export function PaymentStatus({ flowState, settle, family }: PaymentStatusProps)
         <p className="text-xs text-center mt-3" style={{ color: "var(--color-muted)" }}>
           Verifying on-chain settlement...
         </p>
+      )}
+      {flowState !== "idle" && elapsed > 0 && (
+        <div className="text-center mt-2">
+          <span
+            className="text-xs font-mono"
+            style={{ color: flowState === "done" ? "var(--color-success)" : "var(--color-muted)" }}
+          >
+            {flowState === "done" ? `Paid in ${(elapsed / 1000).toFixed(1)}s` : `${(elapsed / 1000).toFixed(1)}s`}
+          </span>
+        </div>
       )}
       {showResult && (
         <div className="flex items-center justify-between mt-3 pt-3 border-t border-[var(--color-border)]">
