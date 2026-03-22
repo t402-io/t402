@@ -4,6 +4,11 @@
  * Extracted from server.js to separate routing from middleware.
  */
 
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
 import {
   getPayments,
   getBalances,
@@ -18,7 +23,7 @@ import {
   getGlobalStats,
   getGlobalTransactions,
 } from "./datasource.js";
-import { renderDashboard } from "./templates.js";
+import { renderDashboard, renderApiDocs } from "./templates.js";
 import { isValidAddress, clampInt, log } from "./utils.js";
 
 // ── Metrics (hand-rolled Prometheus counters, no deps) ──────────────
@@ -351,6 +356,29 @@ export function registerRoutes(app, opts = {}) {
       if (poolStats) health.pool = poolStats;
     }
     res.json(health);
+  });
+
+  // ── API Documentation ─────────────────────────────────────────────
+  app.get("/docs", async (_req, res, next) => {
+    try {
+      const { readFile } = await import("node:fs/promises");
+      const specPath = join(__dirname, "..", "openapi.yaml");
+      const spec = await readFile(specPath, "utf-8");
+      res.type("html").send(renderApiDocs(spec));
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  app.get("/openapi.yaml", async (_req, res, next) => {
+    try {
+      const { readFile } = await import("node:fs/promises");
+      const specPath = join(__dirname, "..", "openapi.yaml");
+      const spec = await readFile(specPath, "utf-8");
+      res.type("text/yaml").send(spec);
+    } catch (err) {
+      next(err);
+    }
   });
 
   // ── Prometheus metrics ─────────────────────────────────────────

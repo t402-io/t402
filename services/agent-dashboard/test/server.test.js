@@ -347,4 +347,31 @@ describe("Agent Dashboard API", () => {
     const d2 = await r2.json();
     assert.strictEqual(d2.stats.period, "30d");
   });
+
+  it("GET /docs returns HTML with API reference", async () => {
+    const res = await fetch(`${BASE}/docs`);
+    assert.strictEqual(res.status, 200);
+    assert.ok(res.headers.get("content-type").includes("text/html"));
+    const html = await res.text();
+    assert.ok(html.includes("API Reference"));
+    assert.ok(html.includes("openapi.yaml"));
+  });
+
+  it("GET /openapi.yaml returns YAML spec", async () => {
+    const res = await fetch(`${BASE}/openapi.yaml`);
+    assert.strictEqual(res.status, 200);
+    const text = await res.text();
+    assert.ok(text.includes("openapi: 3.0.3"));
+    assert.ok(text.includes("T402 Agent Dashboard API"));
+  });
+
+  it("API endpoints have cross-origin CORP header", async () => {
+    const res = await fetch(`${BASE}/api/v1/info`);
+    assert.strictEqual(res.headers.get("cross-origin-resource-policy"), "cross-origin");
+  });
+
+  it("HTML pages have same-origin CORP header", async () => {
+    const res = await fetch(BASE);
+    assert.strictEqual(res.headers.get("cross-origin-resource-policy"), "same-origin");
+  });
 });

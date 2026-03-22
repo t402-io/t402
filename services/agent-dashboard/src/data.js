@@ -230,10 +230,10 @@ export function exportPaymentsCsv(address, days = 7) {
 
 const DEMO_AGENTS = [
   { address: "0xC88f67e776f16DcFBf42e6bDda1B82604448899B", name: "Research Agent" },
-  { address: "0xA1b2C3d4E5f6789012345678901234567890AbCd", name: "Trading Bot" },
-  { address: "0xDeadBeef00000000000000000000000000000001", name: "Data Fetcher" },
-  { address: "0x1234567890abcdef1234567890abcdef12345678", name: "Content Writer" },
-  { address: "0xFEDCBA9876543210FEDCBA9876543210FEDCBA98", name: "Code Reviewer" },
+  { address: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D", name: "Trading Bot" },
+  { address: "0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD", name: "Data Fetcher" },
+  { address: "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45", name: "Content Writer" },
+  { address: "0x1111111254EEB25477B68fb85Ed929f73A960582", name: "Code Reviewer" },
 ];
 
 /**

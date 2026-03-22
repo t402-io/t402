@@ -6,6 +6,32 @@
 
 import { escapeHtml, timeAgo, statusIndicator } from "./utils.js";
 
+/**
+ * Render the API documentation page with the OpenAPI spec displayed.
+ * @param {string} specYaml Raw YAML content of the OpenAPI spec
+ * @returns {string} Full HTML document
+ */
+export function renderApiDocs(specYaml) {
+  // Escape for safe HTML embedding
+  const escaped = specYaml.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>T402 Agent Dashboard — API Reference</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div style="max-width:900px;margin:0 auto;padding:2rem">
+    <h1>T402 Agent Dashboard — API Reference</h1>
+    <p><a href="/">← Dashboard</a> · <a href="/openapi.yaml">Download OpenAPI Spec</a></p>
+    <pre style="background:#1e1e2e;color:#cdd6f4;padding:1.5rem;border-radius:8px;overflow-x:auto;font-size:0.85rem;line-height:1.5"><code>${escaped}</code></pre>
+  </div>
+</body>
+</html>`;
+}
+
 // Explorer URL lookup for server-rendered tx links
 const EXPLORER_URLS = {
   "eip155:1": "https://etherscan.io/tx/",

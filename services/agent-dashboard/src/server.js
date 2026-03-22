@@ -40,7 +40,7 @@ app.use((req, res, next) => {
 
 // ── Security headers + CSP nonce ────────────────────────────────────
 app.disable("x-powered-by");
-app.use((_req, res, next) => {
+app.use((req, res, next) => {
   res.set("X-Content-Type-Options", "nosniff");
   res.set("X-Frame-Options", "DENY");
   res.set("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -51,7 +51,9 @@ app.use((_req, res, next) => {
   res.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
   res.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   res.set("Cross-Origin-Opener-Policy", "same-origin");
-  res.set("Cross-Origin-Resource-Policy", "same-origin");
+  // CORP: cross-origin for API endpoints, same-origin for HTML/static
+  const isApi = req.path.startsWith("/api/") || req.path === "/health" || req.path === "/metrics" || req.path === "/openapi.yaml";
+  res.set("Cross-Origin-Resource-Policy", isApi ? "cross-origin" : "same-origin");
   next();
 });
 

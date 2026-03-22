@@ -112,6 +112,13 @@ services:
       - "3405:3405"
     environment:
       - PORT=3405
+      # Live mode: connect to Facilitator's PostgreSQL for real transaction data.
+      # The facilitator postgres runs on the facilitator_internal network (see
+      # facilitator/docker-compose.prod.yaml). To enable live mode:
+      #   1. Uncomment DATABASE_URL below
+      #   2. Uncomment the "networks" and "facilitator" network block below
+      #   3. Ensure POSTGRES_PASSWORD matches the facilitator's .env.prod
+      # - DATABASE_URL=postgresql://facilitator:${POSTGRES_PASSWORD}@postgres:5432/facilitator?sslmode=disable
       - DATABASE_URL=${AGENT_DASHBOARD_DATABASE_URL:-}
       - DASHBOARD_API_KEY=${AGENT_DASHBOARD_API_KEY:-}
       - ALLOWED_ORIGINS=${AGENT_DASHBOARD_ALLOWED_ORIGINS:-}
@@ -119,6 +126,10 @@ services:
       - BUDGET_MAX_PER_PAYMENT=${BUDGET_MAX_PER_PAYMENT:-1000000}
       - BUDGET_MAX_PER_SESSION=${BUDGET_MAX_PER_SESSION:-10000000}
       - BUDGET_MAX_PER_DAY=${BUDGET_MAX_PER_DAY:-50000000}
+    # Uncomment to connect to facilitator postgres for live mode:
+    # networks:
+    #   - default
+    #   - facilitator
     restart: unless-stopped
     read_only: true
     tmpfs:
@@ -185,3 +196,7 @@ networks:
   scan2pay:
     name: scan2pay-java_scan2pay-network
     external: true
+  # Uncomment for agent-dashboard live mode (read-only access to facilitator DB):
+  # facilitator:
+  #   name: facilitator_internal
+  #   external: true
