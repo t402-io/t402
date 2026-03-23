@@ -24,8 +24,8 @@ interface PaymentPayload {
       from: string;
       to: string;
       value: string;
-      validAfter: number;
-      validBefore: number;
+      validAfter: string;
+      validBefore: string;
       nonce: string;
     };
     signature: string;
@@ -118,8 +118,8 @@ export function useEvmPayment() {
             from: address,
             to: requirements.payTo,
             value: requirements.amount,
-            validAfter: Number(authorization.validAfter),
-            validBefore: Number(authorization.validBefore),
+            validAfter: String(authorization.validAfter),
+            validBefore: String(authorization.validBefore),
             nonce: authorization.nonce,
           },
           signature,
