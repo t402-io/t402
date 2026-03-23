@@ -93,11 +93,17 @@ export function useTonPayment() {
         network: requirements.network,
         accepted: { scheme: requirements.scheme, network: requirements.network },
         payload: {
-          boc: result.boc,
-          from: rawAddress,
-          to: requirements.payTo,
-          value: requirements.amount,
-          queryId: queryId.toString(),
+          signedBoc: result.boc,
+          authorization: {
+            from: rawAddress,
+            to: requirements.payTo,
+            jettonMaster: requirements.asset,
+            jettonAmount: requirements.amount,
+            tonAmount: "50000000",
+            validUntil: Math.floor(Date.now() / 1000) + requirements.maxTimeoutSeconds,
+            seqno: 0,
+            queryId: "0",
+          },
         },
       };
     },

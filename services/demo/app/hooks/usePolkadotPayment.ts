@@ -86,10 +86,13 @@ export function usePolkadotPayment() {
         network: requirements.network,
         accepted: { scheme: requirements.scheme, network: requirements.network },
         payload: {
-          extrinsic: extrinsicHash,
+          extrinsicHash,
+          blockHash: "",
+          extrinsicIndex: 0,
           from: address,
           to: requirements.payTo,
-          value: requirements.amount,
+          amount: requirements.amount,
+          assetId: Number(requirements.asset) || 1984,
         },
       };
     },

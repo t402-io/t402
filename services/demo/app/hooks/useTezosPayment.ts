@@ -88,10 +88,12 @@ export function useTezosPayment() {
         network: requirements.network,
         accepted: { scheme: requirements.scheme, network: requirements.network },
         payload: {
-          operation: opHash,
+          opHash,
           from: address,
           to: requirements.payTo,
-          value: requirements.amount,
+          amount: requirements.amount,
+          contractAddress: requirements.asset,
+          tokenId: 0,
         },
       };
     },

@@ -96,10 +96,10 @@ export function useNearPayment() {
         network: requirements.network,
         accepted: { scheme: requirements.scheme, network: requirements.network },
         payload: {
-          transaction: txHash,
+          txHash,
           from: accountId,
           to: requirements.payTo,
-          value: amount,
+          amount,
         },
       };
     },

@@ -85,10 +85,11 @@ export function useAptosPayment() {
         network: requirements.network,
         accepted: { scheme: requirements.scheme, network: requirements.network },
         payload: {
-          transaction: txHash,
+          txHash,
           from: address,
           to: requirements.payTo,
-          value: requirements.amount,
+          amount: requirements.amount,
+          metadataAddress: requirements.asset,
         },
       };
     },
