@@ -49,13 +49,17 @@ export function ChainSelector({ compact = false }: { compact?: boolean }) {
               <button
                 key={chain.network}
                 onClick={() => setActiveNetwork(chain.network)}
-                className="shrink-0 px-2 py-1 rounded-lg text-[10px] font-medium transition-all"
+                className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium transition-all"
                 style={{
                   background: isActive ? chain.color + "20" : "transparent",
                   color: isActive ? "var(--color-text-primary)" : "var(--color-text-tertiary)",
                   border: isActive ? `1px solid ${chain.color}40` : "1px solid transparent",
                 }}
               >
+                <span
+                  className="h-2 w-2 rounded-full shrink-0"
+                  style={{ backgroundColor: chain.color }}
+                />
                 {chain.name}
               </button>
             );
