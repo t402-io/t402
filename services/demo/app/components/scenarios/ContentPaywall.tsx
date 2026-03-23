@@ -123,10 +123,9 @@ export function ContentPaywall() {
               </p>
               <button
                 onClick={unlock}
-                disabled={state === "paying"}
                 className="btn-primary px-6 py-3 min-h-[44px]"
               >
-                {state === "paying" ? "Paying..." : "Pay & Read"}
+                Pay & Read
               </button>
               <p className="text-xs text-[var(--color-muted)] mt-3">
                 No subscription. No account. Just pay once.
