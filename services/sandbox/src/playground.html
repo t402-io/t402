@@ -785,7 +785,7 @@ function toggleWalkthrough() {
 }
 
 // --- Upstream Status Indicators ---
-fetch('/supported').then(function(r) { return r.json(); }).then(function(data) {
+fetch('/supported').then(function(r) { if(!r.ok)throw new Error(r.status);return r.json(); }).then(function(data) {
   var select = document.getElementById('networkSelect');
   for (var i = 0; i < select.options.length; i++) {
     var opt = select.options[i];

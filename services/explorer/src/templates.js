@@ -76,7 +76,7 @@ ${themeToggleScript()}
       <tbody id="txBody">${rows}</tbody>
     </table>
   </div>
-  <div id="loading" class="loading" style="display:none">Loading...</div>
+  <div id="loading" class="loading hidden">Loading...</div>
   <div class="pagination">
     <button id="prevBtn" class="secondary" disabled>Previous</button>
     <span id="pageInfo" class="page-info" data-total="${totalAll || totalSettlements}">Page 1 &middot; ${formatNumber(totalAll || totalSettlements)} settlements</span>
@@ -87,7 +87,7 @@ ${themeToggleScript()}
     <a href="/api/v1/transactions">API</a> ·
     <a href="/api/v1/stats">Stats</a> ·
     <a href="/metrics">Metrics</a>
-    <br><span style="font-size:0.75rem;">Powered by <a href="https://t402.io">T402 Protocol</a></span>
+    <br><span class="text-sm">Powered by <a href="https://t402.io">T402 Protocol</a></span>
   </footer>
   <script src="/static/app.js"></script>
 </body></html>`;

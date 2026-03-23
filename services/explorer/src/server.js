@@ -48,6 +48,7 @@ export function log(level, message, data = {}) {
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
+app.set("trust proxy", "loopback");
 
 app.use(compression());
 app.use(express.json());
@@ -107,7 +108,8 @@ function normalizePath(path) {
 
 function csvEscape(value) {
   if (value == null) return "";
-  const str = String(value);
+  let str = String(value);
+  if (/^[=+\-@\t\r]/.test(str)) str = "'" + str;
   if (str.includes(",") || str.includes('"') || str.includes("\n")) {
     return '"' + str.replace(/"/g, '""') + '"';
   }
@@ -121,7 +123,7 @@ app.use((_req, res, next) => {
   res.set("Referrer-Policy", "strict-origin-when-cross-origin");
   res.set(
     "Content-Security-Policy",
-    "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
+    "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; img-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
   );
   next();
 });
@@ -311,6 +313,10 @@ app.get("/metrics", (_req, res) => {
 app.get("/health", (_req, res) => {
   const dbStatus = getDbStatus();
   res.json({ status: "ok", service: "t402-explorer", mode: EXPLORER_MODE, db: dbStatus });
+});
+
+app.use((_req, res) => {
+  res.status(404).json({ error: "Not found" });
 });
 
 app.use((err, _req, res, _next) => {

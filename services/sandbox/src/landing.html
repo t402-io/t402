@@ -236,7 +236,7 @@ function showTab(id, e){
 function handleTabKey(id, e){
   if(e.key==='Enter'||e.key===' '){e.preventDefault();showTab(id, e);}
 }
-fetch('/supported').then(r=>r.json()).then(data=>{
+fetch('/supported').then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(data=>{
   var kinds=data.kinds||[];
   var liveCount=kinds.filter(k=>k.upstream).length;
   var el=document.getElementById('live-count');

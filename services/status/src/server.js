@@ -29,6 +29,7 @@ import { notifyStatusChange } from "./notifications.js";
 import { loadMaintenance, getUpcoming, addWindow, removeWindow } from "./maintenance.js";
 
 const app = express();
+app.set("trust proxy", "loopback");
 const PORT = process.env.PORT || 3403;
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY || "";
 
@@ -45,7 +46,7 @@ app.use((_req, res, next) => {
   res.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
   res.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   res.set("X-Permitted-Cross-Domain-Policies", "none");
-  res.set("Content-Security-Policy", "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; font-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'");
+  res.set("Content-Security-Policy", "default-src 'none'; script-src 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; form-action 'self'; frame-ancestors 'none'; base-uri 'none'");
   next();
 });
 
@@ -321,6 +322,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#0a0a0b;color:#e5
 h1{font-size:1.5rem;margin-bottom:.25rem}
 h2{color:#b0b8c4;font-size:1.25rem;font-weight:700;margin-top:2.5rem}
 a{color:#50AF95}
+a:focus-visible{outline:2px solid #50AF95;outline-offset:2px;border-radius:2px}
 .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;position:relative}
 table{width:100%;border-collapse:collapse;margin:1rem 0}
 th{text-align:left;padding:.5rem .75rem;color:#b0b8c4;font-size:.85rem;white-space:nowrap}
@@ -539,7 +541,7 @@ app.get("/", (_req, res) => {
 
       var lastChecked='',failCount=0;
       function poll(){
-        fetch('/api/status').then(function(r){return r.json()}).then(function(d){
+        fetch('/api/status').then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(d){
           failCount=0;
           var sb=document.getElementById('stale');if(sb)sb.classList.remove('show');
           if(d.checkedAt&&d.checkedAt!==lastChecked){
@@ -560,7 +562,7 @@ app.get("/", (_req, res) => {
               var cl=row.querySelector('.col-lat');if(cl)cl.textContent=s.latencyMs+'ms';
             });
             // Refresh incidents
-            fetch('/api/incidents?limit=10').then(function(r){return r.json()}).then(function(id2){
+            fetch('/api/incidents?limit=10').then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(id2){
               var ih=document.getElementById('incidents');
               if(!ih||!id2.incidents)return;
               if(id2.incidents.length===0){ih.innerHTML='<p style="color:#9ca3af">No recent incidents.</p>';return}
@@ -721,7 +723,7 @@ app.get("/service/:id", (req, res) => {
     (function(){
       var dots={operational:'🟢',maintenance:'🔵',degraded:'🟡',down:'🔴'};
       function poll(){
-        fetch('/api/service/${escapeXml(service.id)}').then(function(r){return r.json()}).then(function(d){
+        fetch('/api/service/${escapeXml(service.id)}').then(function(r){if(!r.ok)throw new Error(r.status);return r.json()}).then(function(d){
           if(d.service&&d.service.current){
             var s=d.service.current;
             var st=document.getElementById('svc-status');if(st){st.textContent=s.status;st.classList.add('flash')}
@@ -788,6 +790,11 @@ function escapeXml(str) {
 app.get("/health", (_req, res) => {
   res.set("Cache-Control", "no-cache");
   res.json({ status: "ok", service: "t402-status" });
+});
+
+// 404 catch-all
+app.use((_req, res) => {
+  res.status(404).json({ error: "Not found" });
 });
 
 // Error handling middleware

@@ -35,6 +35,7 @@ import { registerPageRoutes } from "./routes/pages.js";
 
 // --- App setup ---
 const app = express();
+app.set("trust proxy", "loopback");
 
 // Compress responses
 app.use(compression());

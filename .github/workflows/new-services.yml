@@ -52,6 +52,7 @@ jobs:
         env:
           BAZAAR_ADMIN_KEY: test-ci-key
           EXPLORER_MODE: seed
+          RATE_LIMIT_PER_MINUTE: "1000"
 
       - name: Wait for server
         if: matrix.service != 'status'

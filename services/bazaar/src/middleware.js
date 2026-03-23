@@ -164,7 +164,7 @@ export function requireAuth(req, res, next) {
   }
 
   const key = req.headers["x-api-key"] || req.headers["authorization"]?.replace("Bearer ", "");
-  if (key !== ADMIN_API_KEY) {
+  if (!key || key.length !== ADMIN_API_KEY.length || !crypto.timingSafeEqual(Buffer.from(key), Buffer.from(ADMIN_API_KEY))) {
     return res.status(401).json({ error: "Unauthorized — provide X-API-Key header" });
   }
   next();

@@ -42,6 +42,7 @@ import { store, seedStore, getNextId } from "./store.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
+app.set("trust proxy", "loopback");
 app.use(express.json({ limit: "100kb" }));
 
 // Security headers
@@ -52,7 +53,7 @@ app.use((_req, res, next) => {
   res.set("Referrer-Policy", "strict-origin-when-cross-origin");
   res.set(
     "Content-Security-Policy",
-    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-ancestors 'none'; base-uri 'self'",
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; frame-ancestors 'none'; base-uri 'self'",
   );
   next();
 });
@@ -499,6 +500,11 @@ app.get("/openapi.yaml", (_req, res) => {
 // ── Frontend fallback ─────────────────────────────────────────────────
 app.get("/", (_req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "index.html"));
+});
+
+// ── 404 catch-all ────────────────────────────────────────────────────
+app.use((_req, res) => {
+  res.status(404).json({ error: "Not found" });
 });
 
 // ── Error handler ─────────────────────────────────────────────────────
