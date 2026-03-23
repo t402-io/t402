@@ -117,6 +117,6 @@ jobs:
             git fetch origin main
             git checkout origin/main -- services/
             cd services
-            SERVICES="${{ needs.detect-changes.outputs.services }}"
-            docker compose -f docker-compose.new-services.yml build $SERVICES
-            docker compose -f docker-compose.new-services.yml up -d --no-deps $SERVICES
+            set -- ${{ needs.detect-changes.outputs.services }}
+            docker compose -f docker-compose.new-services.yml build "$@"
+            docker compose -f docker-compose.new-services.yml up -d --no-deps "$@"
