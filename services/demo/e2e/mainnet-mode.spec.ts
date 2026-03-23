@@ -49,7 +49,7 @@ test.describe("Mainnet Mode Toggle", () => {
     const body = await res.json();
     // Arbitrum should be first
     expect(body.accepts[0].network).toBe("eip155:42161");
-    expect(body.accepts[0].extra.name).toBe("TetherToken");
+    expect(body.accepts[0].extra.name).toBe("USD\u20ae0"); // USD₮0
   });
 
   test("mainnet/testnet toggle is visible on scenario page", async ({ page }) => {
