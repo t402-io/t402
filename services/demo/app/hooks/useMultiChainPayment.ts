@@ -29,6 +29,7 @@ interface PaymentPayload {
   t402Version: number;
   scheme: string;
   network: string;
+  accepted?: { scheme: string; network: string };
   payload: Record<string, unknown>;
 }
 
@@ -64,6 +65,7 @@ function createMockPayload(requirements: PaymentRequirements, family: ChainFamil
     t402Version: 2,
     scheme: requirements.scheme,
     network: requirements.network,
+    accepted: { scheme: requirements.scheme, network: requirements.network },
     payload: {
       authorization: {
         from: mockAddress,

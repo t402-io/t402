@@ -2,6 +2,7 @@
 
 import { ChainSelector } from "./ChainSelector";
 import { ChainBadge } from "./ChainBadge";
+import { TokenBalance } from "./TokenBalance";
 import { FaucetLink } from "./FaucetLink";
 import { SdkExamples } from "./SdkExamples";
 import { PaymentChecklist } from "./PaymentChecklist";
@@ -45,6 +46,7 @@ export function ScenarioShell({ title, description, cost, accentColor, scenarioI
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <ChainSelector />
           <ChainBadge family={activeFamily} showNetwork />
+          {isLive && <TokenBalance />}
         </div>
         {isLive && testnet ? (
           <div className="mt-4">

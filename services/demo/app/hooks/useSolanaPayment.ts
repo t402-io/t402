@@ -5,6 +5,7 @@ import { useCallback, useContext, createContext } from "react";
 interface PaymentRequirements {
   scheme: string;
   network: string;
+  accepted?: { scheme: string; network: string };
   amount: string;
   asset: string;
   payTo: string;
@@ -16,6 +17,7 @@ interface PaymentPayload {
   t402Version: number;
   scheme: string;
   network: string;
+  accepted?: { scheme: string; network: string };
   payload: Record<string, unknown>;
 }
 
@@ -112,6 +114,7 @@ export function useSolanaPayment() {
         t402Version: 2,
         scheme: requirements.scheme,
         network: requirements.network,
+        accepted: { scheme: requirements.scheme, network: requirements.network },
         payload: {
           transaction: base64Tx,
           from: ctx.publicKey,

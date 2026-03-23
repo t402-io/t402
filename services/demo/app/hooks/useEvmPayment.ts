@@ -17,6 +17,7 @@ interface PaymentPayload {
   t402Version: number;
   scheme: string;
   network: string;
+  accepted?: { scheme: string; network: string };
   payload: {
     authorization: {
       from: string;
@@ -102,6 +103,7 @@ export function useEvmPayment() {
         t402Version: 2,
         scheme: requirements.scheme,
         network: requirements.network,
+        accepted: { scheme: requirements.scheme, network: requirements.network },
         payload: {
           authorization: {
             from: address,

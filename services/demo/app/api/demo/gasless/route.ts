@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPreferredChain, getAcceptsForChain, buildRequirementsFromPayload, getAsset, PAY_TO } from "@/lib/config";
+import { getPreferredChain, getAcceptsForChain, buildRequirementsFromPayload, isTestnetRequest, PAY_TO } from "@/lib/config";
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 import {
@@ -14,7 +14,14 @@ import type { Address } from "viem";
 
 const GASLESS_AMOUNT = "1000"; // 0.001 USDT
 
-// ERC-4337 infrastructure configuration
+// ERC-4337 infrastructure configuration — mode-aware
+const PIMLICO_API_KEY = process.env.PIMLICO_API_KEY || "";
+function getPimlicoUrl(isTestnet: boolean) {
+  const chain = isTestnet ? "base-sepolia" : "base";
+  const base = `https://api.pimlico.io/v2/${chain}/rpc`;
+  return PIMLICO_API_KEY ? `${base}?apikey=${PIMLICO_API_KEY}` : base;
+}
+// Legacy defaults for when request is not available
 const BUNDLER_URL = process.env.NEXT_PUBLIC_BUNDLER_URL || "https://api.pimlico.io/v2/base-sepolia/rpc";
 const PAYMASTER_URL = process.env.NEXT_PUBLIC_PAYMASTER_URL || "https://api.pimlico.io/v2/base-sepolia/rpc";
 
@@ -35,8 +42,8 @@ function createPaymentRequired(request: NextRequest) {
         accountAbstraction: "ERC-4337",
         entryPoint: ENTRYPOINT_V07,
         paymaster: PIMLICO_PAYMASTER,
-        paymasterUrl: PAYMASTER_URL,
-        bundlerUrl: BUNDLER_URL,
+        paymasterUrl: getPimlicoUrl(isTestnetRequest(request)),
+        bundlerUrl: getPimlicoUrl(isTestnetRequest(request)),
       },
     })),
   };
@@ -64,7 +71,7 @@ export async function POST(request: NextRequest) {
 
   // Extract sender from payment or use demo address
   const senderAddress = (body.sender || "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD68") as Address;
-  const tokenAddress = getAsset() as Address;
+  const tokenAddress = "0x036CbD53842c5426634e7929541eC2318f3dCF7e" as Address; // Base Sepolia USDC
   const recipientAddress = PAY_TO as Address;
   const amount = BigInt(GASLESS_AMOUNT);
 
@@ -177,8 +184,8 @@ export async function GET() {
     standard: "ERC-4337",
     entryPoint: ENTRYPOINT_V07,
     paymaster: PIMLICO_PAYMASTER,
-    bundlerUrl: BUNDLER_URL,
-    supportedChains: ["base-sepolia", "arbitrum-sepolia"],
+    bundlerUrl: getPimlicoUrl(true),
+    supportedChains: ["base-sepolia", "base", "arbitrum-sepolia", "arbitrum"],
     estimatedGasSavings: {
       wei: gasSavings.savings.toString(),
       usd: gasSavings.savingsUsd,
