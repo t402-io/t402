@@ -778,6 +778,9 @@ components:
         mock:
           type: boolean
           description: True when response is from mock fallback (not on-chain verified)
+        note:
+          type: string
+          description: Additional context about the response (e.g. magic test address usage)
 
     SettleResponse:
       type: object
@@ -806,6 +809,9 @@ components:
           type: boolean
         mock:
           type: boolean
+        note:
+          type: string
+          description: Additional context about the response (e.g. magic test address usage)
 
     SupportedKind:
       type: object
@@ -825,6 +831,20 @@ components:
         extra:
           type: object
           additionalProperties: true
+        token:
+          type: object
+          nullable: true
+          description: Token metadata for this network
+          properties:
+            symbol:
+              type: string
+              example: "USDC"
+            address:
+              type: string
+              example: "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
+            decimals:
+              type: integer
+              example: 6
         upstream:
           type: boolean
           description: Whether this network has a live upstream facilitator connection

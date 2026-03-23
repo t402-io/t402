@@ -422,13 +422,13 @@ function copyAsSDK(lang) {
   }
 
   var templates = {
-    typescript: 'import { HTTPFacilitatorClient } from "@t402/http";\n\nconst client = new HTTPFacilitatorClient({\n  url: "https://sandbox.t402.io"\n});\n\nconst result = await client.' + (endpoint === '/verify' ? 'verify' : endpoint === '/settle' ? 'settle' : 'getSupported') + '(\n  paymentPayload,\n  paymentRequirements\n);\nconsole.log(result);',
+    typescript: 'import { HTTPFacilitatorClient } from "@t402/core";\n\nconst client = new HTTPFacilitatorClient({\n  url: "https://sandbox.t402.io"\n});\n\nconst result = await client.' + (endpoint === '/verify' ? 'verify' : endpoint === '/settle' ? 'settle' : 'getSupported') + '(\n  paymentPayload,\n  paymentRequirements\n);\nconsole.log(result);',
 
-    go: 'import t402http "github.com/t402-io/t402/sdks/go/http"\n\nclient := t402http.NewFacilitatorClient("https://sandbox.t402.io")\n\nresult, err := client.' + (endpoint === '/verify' ? 'Verify' : endpoint === '/settle' ? 'Settle' : 'GetSupported') + '(ctx, payloadBytes, requirementsBytes)\nif err != nil {\n    log.Fatal(err)\n}\nfmt.Printf("%+v\\n", result)',
+    go: 'import t402http "github.com/t402-io/t402/sdks/go/http"\n\nclient := t402http.NewFacilitatorClient(&t402http.FacilitatorConfig{URL: "https://sandbox.t402.io"})\n\nresult, err := client.' + (endpoint === '/verify' ? 'Verify' : endpoint === '/settle' ? 'Settle' : 'GetSupported') + '(ctx, payloadBytes, requirementsBytes)\nif err != nil {\n    log.Fatal(err)\n}\nfmt.Printf("%+v\\n", result)',
 
-    python: 'from t402 import FacilitatorClient\n\nclient = FacilitatorClient("https://sandbox.t402.io")\n\nresult = await client.' + (endpoint === '/verify' ? 'verify' : endpoint === '/settle' ? 'settle' : 'get_supported') + '(\n    payment_payload,\n    payment_requirements\n)\nprint(result)',
+    python: 'from t402 import FacilitatorClient\n\nclient = FacilitatorClient({"url": "https://sandbox.t402.io"})\n\nresult = await client.' + (endpoint === '/verify' ? 'verify' : endpoint === '/settle' ? 'settle' : 'get_supported') + '(\n    payment_payload,\n    payment_requirements\n)\nprint(result)',
 
-    java: 'HttpFacilitatorClient client = new HttpFacilitatorClient(\n    "https://sandbox.t402.io"\n);\n\n' + (endpoint === '/verify' ? 'VerificationResponse' : endpoint === '/settle' ? 'SettlementResponse' : 'SupportedResponse') + ' result = client.' + (endpoint === '/verify' ? 'verify' : endpoint === '/settle' ? 'settle' : 'getSupported') + '(\n    paymentHeader,\n    paymentRequirements\n);\nSystem.out.println(result);'
+    java: 'import io.t402.client.HttpFacilitatorClient;\n\nHttpFacilitatorClient client = new HttpFacilitatorClient(\n    "https://sandbox.t402.io"\n);\n\n' + (endpoint === '/verify' ? 'VerificationResponse' : endpoint === '/settle' ? 'SettlementResponse' : 'SupportedResponse') + ' result = client.' + (endpoint === '/verify' ? 'verify' : endpoint === '/settle' ? 'settle' : 'getSupported') + '(\n    paymentHeader,\n    paymentRequirements\n);\nSystem.out.println(result);'
   };
 
   var code = templates[lang] || '';

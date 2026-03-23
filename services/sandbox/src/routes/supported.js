@@ -290,6 +290,20 @@ export function registerSupportedRoutes(app) {
           fix: "Ensure your webhook server is running and accessible",
         },
         {
+          status: 413,
+          code: "payload_too_large",
+          message: "Payload too large (max 50kb)",
+          cause: "The request body exceeds the 50kb size limit",
+          fix: "Reduce the size of your request body. Payment payloads should be well under 50kb.",
+        },
+        {
+          status: 404,
+          code: "not_found",
+          message: "Not found",
+          cause: "The requested endpoint does not exist",
+          fix: "Check the endpoint path. Available endpoints are listed at GET /supported and GET /",
+        },
+        {
           status: 503,
           code: "upstream_unreachable",
           message: "Upstream facilitator unreachable — mock mode active",

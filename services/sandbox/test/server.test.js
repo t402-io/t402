@@ -5,6 +5,7 @@ import { isPrivateOrReservedHost } from "../src/routes/webhook.js";
 // If BASE_URL is set, server is already running externally (CI mode)
 // Otherwise, start our own server (local mode)
 const EXTERNAL = !!process.env.BASE_URL;
+if (!EXTERNAL) process.env.RATE_LIMIT_PER_MINUTE = "1000"; // avoid 429s in tests
 const PORT = parseInt(process.env.PORT || "3406");
 const BASE = process.env.BASE_URL || `http://localhost:${PORT}`;
 
@@ -107,6 +108,17 @@ describe("GET /supported", () => {
     assert.ok("ton:*" in data.signers);
     assert.ok("tron:*" in data.signers);
     assert.ok("stellar:*" in data.signers);
+  });
+
+  it("includes token metadata for each kind", async () => {
+    const res = await fetch(BASE + "/supported");
+    const data = await res.json();
+    for (const kind of data.kinds) {
+      assert.ok(kind.token, `missing token for ${kind.network}`);
+      assert.ok(kind.token.symbol, `missing token.symbol for ${kind.network}`);
+      assert.ok(kind.token.address, `missing token.address for ${kind.network}`);
+      assert.ok(typeof kind.token.decimals === "number", `token.decimals should be number for ${kind.network}`);
+    }
   });
 });
 
@@ -335,6 +347,21 @@ describe("Network validation", () => {
     assert.strictEqual(data.success, false);
   });
 
+  it("suggests testnet when mainnet network is used", async () => {
+    const res = await fetch(BASE + "/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        paymentPayload: { payload: { payer: "0xabc" } },
+        paymentRequirements: { network: "eip155:1" }
+      })
+    });
+    assert.strictEqual(res.status, 400);
+    const data = await res.json();
+    assert.ok(data.suggestion, "should include suggestion for mainnet network");
+    assert.ok(data.suggestion.includes("eip155:11155111"), "should suggest Ethereum Sepolia");
+  });
+
   it("POST /verify accepts new testnet networks", async () => {
     for (const network of ["ton:testnet", "tron:nile", "stellar:testnet"]) {
       const res = await fetch(`${BASE}/verify`, {
@@ -446,7 +473,7 @@ describe("GET /usage", () => {
     const data = await res.json();
     assert.ok(typeof data.totalRequests === "number");
     assert.ok(typeof data.upstreamErrors === "number");
-    assert.strictEqual(data.rateLimit, 100);
+    assert.strictEqual(data.rateLimit, parseInt(process.env.RATE_LIMIT_PER_MINUTE || "100"));
   });
 
   it("includes upstreamHealthy field", async () => {
@@ -568,7 +595,7 @@ describe("Rate limiting", () => {
 
   it("limit header matches configured rate limit", async () => {
     const res = await fetch(`${BASE}/health`);
-    assert.strictEqual(res.headers.get("x-ratelimit-limit"), "100");
+    assert.strictEqual(res.headers.get("x-ratelimit-limit"), process.env.RATE_LIMIT_PER_MINUTE || "100");
   });
 });
 
@@ -1012,6 +1039,51 @@ describe("Magic test addresses", () => {
     assert.ok(elapsed >= 1500, `Expected delay of at least 1500ms, got ${elapsed}ms`);
   });
 
+  it("CAFE01 settle returns success:true", async () => {
+    const res = await fetch(BASE + "/settle", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        paymentPayload: { payload: { payer: "0x0000000000000000000000000000000000CAFE01" } },
+        paymentRequirements: { network: "eip155:84532" }
+      })
+    });
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.strictEqual(data.success, true);
+  });
+
+  it("CAFE02 settle returns success:true (verify-only failure)", async () => {
+    const res = await fetch(BASE + "/settle", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        paymentPayload: { payload: { payer: "0x0000000000000000000000000000000000CAFE02" } },
+        paymentRequirements: { network: "eip155:84532" }
+      })
+    });
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.strictEqual(data.success, true);
+  });
+
+  it("CAFE99 settle has delayed response", async () => {
+    const start = Date.now();
+    const res = await fetch(BASE + "/settle", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        paymentPayload: { payload: { payer: "0x0000000000000000000000000000000000CAFE99" } },
+        paymentRequirements: { network: "eip155:84532" }
+      })
+    });
+    const elapsed = Date.now() - start;
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.strictEqual(data.success, true);
+    assert.ok(elapsed >= 1500, `Expected delay of at least 1500ms, got ${elapsed}ms`);
+  });
+
   it("magic addresses are case-insensitive", async () => {
     const res = await fetch(`${BASE}/verify`, {
       method: "POST",
@@ -1040,6 +1112,14 @@ describe("GET /errors", () => {
       assert.ok(err.cause);
       assert.ok(err.fix);
     }
+  });
+
+  it("includes 413 and 404 error codes", async () => {
+    const res = await fetch(BASE + "/errors");
+    const data = await res.json();
+    const codes = data.errors.map(e => e.code);
+    assert.ok(codes.includes("payload_too_large"), "should include 413");
+    assert.ok(codes.includes("not_found"), "should include 404");
   });
 });
 

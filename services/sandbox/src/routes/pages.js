@@ -10,7 +10,7 @@ const landingHtml = readFileSync(join(__dirname, "..", "landing.html"), "utf8");
 
 export function registerPageRoutes(app) {
   app.get("/", (_req, res) => {
-    res.set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'");
+    res.set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'");
     res.type("html").send(landingHtml);
   });
 }
