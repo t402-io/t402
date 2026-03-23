@@ -102,7 +102,7 @@ function createPaymentRequired(taskType: string, request: NextRequest) {
       description: `Agent-to-Agent Task: ${task.description}`,
       mimeType: "application/json",
     },
-    accepts: getAcceptsForChain(chain, task.cost),
+    accepts: getAcceptsForChain(chain, task.cost, request),
   };
 }
 
@@ -287,7 +287,7 @@ export async function OPTIONS() {
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Payment-Signature, x-demo-mode, x-preferred-chain",
+      "Access-Control-Allow-Headers": "Content-Type, Payment-Signature, x-preferred-chain, x-demo-mode, x-network-mode",
       "Access-Control-Expose-Headers": "Payment-Required, Payment-Response",
     },
   });

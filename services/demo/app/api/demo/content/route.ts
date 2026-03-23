@@ -17,7 +17,7 @@ function createContentPaymentRequired(request: NextRequest) {
     t402Version: 2,
     error: "Payment required",
     resource: { ...RESOURCE, mimeType: "application/json" },
-    accepts: getAcceptsForChain(chain, CONTENT_AMOUNT),
+    accepts: getAcceptsForChain(chain, CONTENT_AMOUNT, request),
   };
 }
 
@@ -136,7 +136,7 @@ export async function OPTIONS() {
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Payment-Signature, x-preferred-chain, x-demo-mode",
+      "Access-Control-Allow-Headers": "Content-Type, Payment-Signature, x-preferred-chain, x-demo-mode, x-network-mode",
       "Access-Control-Expose-Headers": "Payment-Required, Payment-Response",
     },
   });

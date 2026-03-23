@@ -32,7 +32,7 @@ const AGENT_TASKS: { id: string; label: string; description: string; icon: Lucid
 ];
 
 export function AgentToAgent() {
-  const { isDemo } = useDemoContext();
+  const { isDemo, testnet } = useDemoContext();
   const { signPayment, activeFamily } = useMultiChainPayment();
   const [selectedTask, setSelectedTask] = useState(AGENT_TASKS[0]);
   const [state, setState] = useState<State>("idle");
@@ -52,6 +52,7 @@ export function AgentToAgent() {
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
         "x-preferred-chain": activeFamily,
+        "x-network-mode": testnet ? "testnet" : "mainnet",
       };
       if (isDemo) headers["x-demo-mode"] = "true";
 
@@ -83,6 +84,7 @@ export function AgentToAgent() {
       const retryHeaders: Record<string, string> = {
         "Content-Type": "application/json",
         "x-preferred-chain": activeFamily,
+        "x-network-mode": testnet ? "testnet" : "mainnet",
         "Payment-Signature": encodePaymentHeader(paymentPayload),
       };
       if (isDemo) retryHeaders["x-demo-mode"] = "true";

@@ -16,7 +16,7 @@ function createPaymentRequired(type: string, request: NextRequest) {
       description: `IoT ${type} sensor reading`,
       mimeType: "application/json",
     },
-    accepts: getAcceptsForChain(chain, IOT_AMOUNT),
+    accepts: getAcceptsForChain(chain, IOT_AMOUNT, request),
   };
 }
 
@@ -99,7 +99,7 @@ export async function OPTIONS() {
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Payment-Signature, x-preferred-chain, x-demo-mode",
+      "Access-Control-Allow-Headers": "Content-Type, Payment-Signature, x-preferred-chain, x-demo-mode, x-network-mode",
       "Access-Control-Expose-Headers": "Payment-Required, Payment-Response",
     },
   });

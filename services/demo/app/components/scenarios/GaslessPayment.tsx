@@ -12,7 +12,7 @@ import { encodePaymentHeader } from "@/lib/t402-client";
 type GaslessState = "idle" | "creating-userop" | "bundling" | "settling" | "done";
 
 export function GaslessPayment() {
-  const { isDemo } = useDemoContext();
+  const { isDemo, testnet } = useDemoContext();
   const { signPayment, activeFamily } = useMultiChainPayment();
   const [state, setState] = useState<GaslessState>("idle");
   const [txHash, setTxHash] = useState<string | null>(null);
@@ -28,6 +28,7 @@ export function GaslessPayment() {
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
         "x-preferred-chain": activeFamily,
+        "x-network-mode": testnet ? "testnet" : "mainnet",
       };
       if (isDemo) headers["x-demo-mode"] = "true";
 

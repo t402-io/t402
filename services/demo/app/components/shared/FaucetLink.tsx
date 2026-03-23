@@ -11,8 +11,10 @@ interface FaucetLinkProps {
 export function FaucetLink({ family, className }: FaucetLinkProps) {
   const config = CHAIN_CONFIGS[family];
 
+  if (!config.gasFaucet) return null;
+
   const sameUrl = config.gasFaucet === config.tokenFaucet;
-  const noTokenFaucet = config.tokenFaucetLabel.startsWith("No ");
+  const noTokenFaucet = config.tokenFaucetLabel?.startsWith("No ") ?? false;
 
   return (
     <div className={`flex flex-col gap-1.5 ${className || ""}`}>

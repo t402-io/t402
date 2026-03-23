@@ -50,7 +50,7 @@ interface FlowResult {
 }
 
 export function usePaymentFlow(url: string) {
-  const { isDemo } = useDemoContext();
+  const { isDemo, testnet } = useDemoContext();
   const { show } = useToast();
   const { signPayment, isConnected, activeFamily } = useMultiChainPayment();
 
@@ -80,6 +80,7 @@ export function usePaymentFlow(url: string) {
       const headers: Record<string, string> = {
         Accept: "application/json",
         "x-preferred-chain": activeFamily,
+        "x-network-mode": testnet ? "testnet" : "mainnet",
       };
       if (isDemo) {
         headers["x-demo-mode"] = "true";
@@ -134,6 +135,7 @@ export function usePaymentFlow(url: string) {
       const retryHeaders: Record<string, string> = {
         Accept: "application/json",
         "x-preferred-chain": activeFamily,
+        "x-network-mode": testnet ? "testnet" : "mainnet",
         "Payment-Signature": encodedPayment,
       };
       if (isDemo) {

@@ -9,6 +9,7 @@ import { useChainContext } from "@/providers/ChainProvider";
 import { useDemoContext } from "@/providers/DemoProvider";
 import type { ScenarioId } from "@/lib/sdk-examples";
 import type { ReactNode } from "react";
+import { AlertTriangle } from "lucide-react";
 
 interface ScenarioShellProps {
   title: string;
@@ -21,7 +22,7 @@ interface ScenarioShellProps {
 
 export function ScenarioShell({ title, description, cost, accentColor, scenarioId, children }: ScenarioShellProps) {
   const { activeFamily } = useChainContext();
-  const { isLive } = useDemoContext();
+  const { isLive, testnet } = useDemoContext();
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -45,13 +46,18 @@ export function ScenarioShell({ title, description, cost, accentColor, scenarioI
           <ChainSelector />
           <ChainBadge family={activeFamily} showNetwork />
         </div>
-        {isLive ? (
+        {isLive && testnet ? (
           <div className="mt-4">
             <FaucetLink family={activeFamily} />
           </div>
+        ) : isLive && !testnet ? (
+          <div className="mt-4 flex items-center gap-1.5 text-[10px]" style={{ color: "#EF4444" }}>
+            <AlertTriangle size={12} />
+            <span>Mainnet — real funds will be used for payments</span>
+          </div>
         ) : (
           <p className="text-[10px] mt-4" style={{ color: "var(--color-muted)" }}>
-            Demo mode uses a simulated wallet. Switch to Live to test with real testnet tokens.
+            Demo mode uses a simulated wallet. Switch to Live to test with real tokens.
           </p>
         )}
       </div>

@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
       t402Version: 2,
       error: "Payment required",
       resource: { ...RESOURCE, mimeType: "application/json" },
-      accepts: getAcceptsForChain(chain, DEMO_AMOUNT),
+      accepts: getAcceptsForChain(chain, DEMO_AMOUNT, request),
     };
 
     const response = NextResponse.json(paymentRequired, { status: 402 });
@@ -92,7 +92,7 @@ export async function OPTIONS() {
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Payment-Signature, x-preferred-chain, x-demo-mode",
+      "Access-Control-Allow-Headers": "Content-Type, Payment-Signature, x-preferred-chain, x-demo-mode, x-network-mode",
       "Access-Control-Expose-Headers": "Payment-Required, Payment-Response",
     },
   });

@@ -12,18 +12,20 @@ export interface ChainConfig {
   color: string;
   decimals: number;
   tokenSymbol: string;
+  /** Payment scheme */
+  scheme?: string;
   /** EIP-712 domain name for the token contract (EVM only) */
   tokenContractName?: string;
   /** EIP-712 domain version (EVM only) */
   tokenContractVersion?: string;
-  /** Faucet for native gas token */
-  gasFaucet: string;
+  /** Faucet for native gas token (testnet only) */
+  gasFaucet?: string;
   /** Display label for gas faucet (e.g. "Base Sepolia ETH") */
-  gasFaucetLabel: string;
-  /** Faucet for test stablecoin (USDT/USDC) */
-  tokenFaucet: string;
+  gasFaucetLabel?: string;
+  /** Faucet for test stablecoin (USDT/USDC, testnet only) */
+  tokenFaucet?: string;
   /** Display label for token faucet */
-  tokenFaucetLabel: string;
+  tokenFaucetLabel?: string;
 }
 
 export const CHAIN_CONFIGS: Record<ChainFamily, ChainConfig> = {
@@ -202,9 +204,9 @@ export function getExplorerUrl(family: ChainFamily, txHash: string): string {
 }
 
 export function getFaucetUrl(family: ChainFamily): string {
-  return CHAIN_CONFIGS[family].gasFaucet;
+  return CHAIN_CONFIGS[family].gasFaucet ?? "";
 }
 
 export function getTokenFaucetUrl(family: ChainFamily): string {
-  return CHAIN_CONFIGS[family].tokenFaucet;
+  return CHAIN_CONFIGS[family].tokenFaucet ?? "";
 }

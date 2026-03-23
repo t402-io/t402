@@ -3,29 +3,50 @@
 import { useDemoContext, type DemoMode } from "@/providers/DemoProvider";
 
 export function ModeToggle() {
-  const { mode, setMode } = useDemoContext();
+  const { mode, setMode, testnet, setTestnet } = useDemoContext();
 
   return (
-    <div
-      className="flex items-center gap-1 rounded-xl p-0.5"
-      style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
-    >
-      <ModeButton
-        label="Demo"
-        value="demo"
-        active={mode === "demo"}
-        color="#F59E0B"
-        onClick={() => setMode("demo")}
-        title="Simulated wallet — no real funds needed"
-      />
-      <ModeButton
-        label="Live"
-        value="live"
-        active={mode === "live"}
-        color="#10B981"
-        onClick={() => setMode("live")}
-        title="Connect real testnet wallet"
-      />
+    <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+      {/* Demo / Live toggle */}
+      <div
+        className="flex items-center gap-1 rounded-xl p-0.5"
+        style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
+      >
+        <ModeButton
+          label="Demo"
+          active={mode === "demo"}
+          color="#F59E0B"
+          onClick={() => setMode("demo")}
+          title="Simulated wallet — no real funds needed"
+        />
+        <ModeButton
+          label="Live"
+          active={mode === "live"}
+          color="#10B981"
+          onClick={() => setMode("live")}
+          title="Connect real wallet"
+        />
+      </div>
+      {/* Testnet / Mainnet toggle */}
+      <div
+        className="flex items-center gap-1 rounded-xl p-0.5"
+        style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
+      >
+        <ModeButton
+          label="Testnet"
+          active={testnet}
+          color="#6366F1"
+          onClick={() => setTestnet(true)}
+          title="Use testnet tokens (free)"
+        />
+        <ModeButton
+          label="Mainnet"
+          active={!testnet}
+          color="#EF4444"
+          onClick={() => setTestnet(false)}
+          title="Use real mainnet tokens"
+        />
+      </div>
     </div>
   );
 }
@@ -38,7 +59,6 @@ function ModeButton({
   title,
 }: {
   label: string;
-  value: DemoMode;
   active: boolean;
   color: string;
   onClick: () => void;

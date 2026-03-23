@@ -19,7 +19,7 @@ type BridgeState = "idle" | "selecting" | "paying" | "bridging" | "confirming" |
 const BRIDGEABLE: ChainFamily[] = ["evm", "ton", "tron", "solana", "stacks", "near", "aptos", "tezos", "polkadot", "cosmos"];
 
 export function CrossChainBridge() {
-  const { isDemo } = useDemoContext();
+  const { isDemo, testnet } = useDemoContext();
   const { signPayment, activeFamily } = useMultiChainPayment();
   const [sourceChain, setSourceChain] = useState<ChainFamily>("evm");
   const [targetChain, setTargetChain] = useState<ChainFamily>("ton");
@@ -37,6 +37,7 @@ export function CrossChainBridge() {
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
         "x-preferred-chain": activeFamily,
+        "x-network-mode": testnet ? "testnet" : "mainnet",
       };
       if (isDemo) headers["x-demo-mode"] = "true";
 

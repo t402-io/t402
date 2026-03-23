@@ -17,7 +17,9 @@ function createPaymentRequired(request: NextRequest, segment: number) {
       description: `Premium audio stream - Segment ${segment} (10 seconds)`,
       mimeType: "audio/wav",
     },
-    accepts: getAcceptsForChain(chain, STREAM_MAX_AMOUNT, "upto"),
+    accepts: getAcceptsForChain(chain, STREAM_MAX_AMOUNT, request).map((a) =>
+      a.network.startsWith("eip155:") ? { ...a, scheme: "upto" } : a
+    ),
   };
 }
 
@@ -79,7 +81,8 @@ export async function GET(request: NextRequest) {
 
   // Live mode: verify and settle with facilitator
   const paymentPayload = decodeHeader(paymentHeader);
-  const requirements = buildRequirementsFromPayload(paymentPayload, STREAM_MAX_AMOUNT, "upto");
+  const req = buildRequirementsFromPayload(paymentPayload, STREAM_MAX_AMOUNT);
+  const requirements = req.scheme === "exact" ? { ...req, scheme: "upto" } : req;
 
   try {
     const verifyResult = await verifyPayment(paymentPayload, requirements);
@@ -143,7 +146,7 @@ export async function OPTIONS() {
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Payment-Signature, x-demo-mode, x-preferred-chain",
+      "Access-Control-Allow-Headers": "Content-Type, Payment-Signature, x-preferred-chain, x-demo-mode, x-network-mode",
       "Access-Control-Expose-Headers": "Payment-Required, Payment-Response, X-Segment, X-Duration, X-Cost",
     },
   });

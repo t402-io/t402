@@ -24,7 +24,7 @@ const AVAILABLE_TOOLS = [
 ];
 
 export function McpAiAgent() {
-  const { isDemo } = useDemoContext();
+  const { isDemo, testnet } = useDemoContext();
   const { signPayment, activeFamily } = useMultiChainPayment();
   const [toolCalls, setToolCalls] = useState<ToolCall[]>([]);
   const [totalCost, setTotalCost] = useState(0);
@@ -48,6 +48,7 @@ export function McpAiAgent() {
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
         "x-preferred-chain": activeFamily,
+        "x-network-mode": testnet ? "testnet" : "mainnet",
       };
       if (isDemo) headers["x-demo-mode"] = "true";
 

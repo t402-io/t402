@@ -12,7 +12,7 @@ import { encodePaymentHeader } from "@/lib/t402-client";
 type StreamState = "idle" | "buffering" | "playing" | "paused" | "ended";
 
 export function StreamingMedia() {
-  const { isDemo } = useDemoContext();
+  const { isDemo, testnet } = useDemoContext();
   const { signPayment, activeFamily } = useMultiChainPayment();
   const [state, setState] = useState<StreamState>("idle");
   const [elapsed, setElapsed] = useState(0);
@@ -33,6 +33,7 @@ export function StreamingMedia() {
       const headers: Record<string, string> = {
         Accept: "application/json",
         "x-preferred-chain": activeFamily,
+        "x-network-mode": testnet ? "testnet" : "mainnet",
       };
       if (isDemo) headers["x-demo-mode"] = "true";
 

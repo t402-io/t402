@@ -28,7 +28,7 @@ function createPaymentRequired(request: NextRequest) {
       description: "Gasless USDT payment via ERC-4337 Account Abstraction",
       mimeType: "application/json",
     },
-    accepts: getAcceptsForChain(chain, GASLESS_AMOUNT).map((accept) => ({
+    accepts: getAcceptsForChain(chain, GASLESS_AMOUNT, request).map((accept) => ({
       ...accept,
       extra: {
         gasless: true,
@@ -201,7 +201,7 @@ export async function OPTIONS() {
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Payment-Signature, x-demo-mode, x-preferred-chain",
+      "Access-Control-Allow-Headers": "Content-Type, Payment-Signature, x-preferred-chain, x-demo-mode, x-network-mode",
       "Access-Control-Expose-Headers": "Payment-Required, Payment-Response",
     },
   });
