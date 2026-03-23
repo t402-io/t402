@@ -77,12 +77,34 @@ jobs:
           BAZAAR_ADMIN_KEY: test-ci-key
           BASE_URL: http://localhost:${{ matrix.service == 'bazaar' && '3402' || matrix.service == 'status' && '3403' || matrix.service == 'explorer' && '3404' || matrix.service == 'agent-dashboard' && '3405' || '3406' }}
 
-  deploy:
+  detect-changes:
     needs: test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.changes.outputs.services }}
     steps:
-      - name: Deploy to production
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - id: changes
+        run: |
+          BASE="${{ github.event.before }}"
+          HEAD="${{ github.sha }}"
+          CHANGED=""
+          for svc in bazaar status explorer agent-dashboard sandbox; do
+            if git diff --name-only "$BASE" "$HEAD" | grep -q "^services/${svc}/"; then
+              CHANGED="${CHANGED:+$CHANGED }${svc}"
+            fi
+          done
+          echo "services=${CHANGED:-none}" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.services != 'none'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy changed services
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.DEPLOY_HOST }}
@@ -93,5 +115,6 @@ jobs:
             git fetch origin main
             git checkout origin/main -- services/
             cd services
-            docker compose -f docker-compose.new-services.yml build --parallel
-            docker compose -f docker-compose.new-services.yml up -d --force-recreate --remove-orphans
+            SERVICES="${{ needs.detect-changes.outputs.services }}"
+            docker compose -f docker-compose.new-services.yml build $SERVICES
+            docker compose -f docker-compose.new-services.yml up -d --no-deps $SERVICES

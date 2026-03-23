@@ -29,7 +29,13 @@ import {
   getGlobalTrend,
 } from "./datasource.js";
 import { renderDashboard, renderApiDocs } from "./templates.js";
+import { EXPLORER_URLS } from "./networks.js";
 import { isValidAddress, isValidCaip2, clampInt, log } from "./utils.js";
+
+// ── SSE connection limits ────────────────────────────────────────────
+const MAX_SSE_CONNECTIONS = 100;
+const MAX_SSE_PER_IP = 3;
+const sseConnectionsByIp = new Map();
 
 // ── Metrics (hand-rolled Prometheus counters, no deps) ──────────────
 
@@ -230,6 +236,18 @@ export function registerRoutes(app, opts = {}) {
       if (!isValidAddress(req.params.address)) {
         return res.status(400).json({ error: "invalid address format" });
       }
+
+      // Enforce SSE connection limits
+      if (metrics.sseConnections >= MAX_SSE_CONNECTIONS) {
+        return res.status(429).json({ error: "Too many SSE connections" });
+      }
+      const ip = req.ip || "unknown";
+      const ipCount = sseConnectionsByIp.get(ip) || 0;
+      if (ipCount >= MAX_SSE_PER_IP) {
+        return res.status(429).json({ error: "Too many SSE connections from this IP" });
+      }
+      sseConnectionsByIp.set(ip, ipCount + 1);
+
       const address = req.params.address;
       const days = clampInt(req.query.days, 1, 365, 7);
 
@@ -240,6 +258,7 @@ export function registerRoutes(app, opts = {}) {
         "X-Accel-Buffering": "no",
       });
       res.flushHeaders();
+      res.write("retry: 30000\n\n");
       metrics.sseConnections++;
 
       let closed = false;
@@ -288,6 +307,9 @@ export function registerRoutes(app, opts = {}) {
       req.on("close", () => {
         closed = true;
         metrics.sseConnections--;
+        const remaining = (sseConnectionsByIp.get(ip) || 1) - 1;
+        if (remaining <= 0) sseConnectionsByIp.delete(ip);
+        else sseConnectionsByIp.set(ip, remaining);
         clearInterval(interval);
         clearInterval(heartbeat);
       });
@@ -430,9 +452,25 @@ export function registerRoutes(app, opts = {}) {
     }
   });
 
-  // ── Prometheus metrics ─────────────────────────────────────────
+  // ── Explorers JS (external script to avoid inline <script>) ────
+  app.get("/explorers.js", (_req, res) => {
+    res.set("Content-Type", "application/javascript");
+    res.set("Cache-Control", "public, max-age=3600");
+    res.send(`window.__EXPLORERS__=${JSON.stringify(EXPLORER_URLS)};`);
+  });
 
-  app.get("/metrics", (_req, res) => {
+  // ── Prometheus metrics (auth-protected in live mode) ────────────
+
+  app.get("/metrics", (req, res, next) => {
+    // Protect metrics in live mode when API key is configured
+    if (getMode() === "live" && process.env.DASHBOARD_API_KEY) {
+      const key = req.get("X-API-Key") || req.get("Authorization")?.replace(/^bearer\s+/i, "");
+      if (!key || key !== process.env.DASHBOARD_API_KEY) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+    }
+    next();
+  }, (_req, res) => {
     const lines = [
       `# HELP http_requests_total Total HTTP requests`,
       `# TYPE http_requests_total counter`,
@@ -473,7 +511,7 @@ export function registerRoutes(app, opts = {}) {
 
     for (const [path, count] of Object.entries(metrics.requestsByPath)) {
       // Sanitize for Prometheus label: strip control chars, limit length
-      const safePath = path.replace(/["\\\n\r}]/g, "_").slice(0, 80);
+      const safePath = path.replace(/["\\\n\r{}]/g, "_").slice(0, 80);
       lines.push(`http_requests_by_path{path="${safePath}"} ${count}`);
     }
 

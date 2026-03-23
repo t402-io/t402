@@ -2,10 +2,22 @@
  * Negative and edge-case tests for the Agent Dashboard API.
  * Covers input validation, XSS prevention, and error handling.
  */
-import { describe, it } from "node:test";
+import { describe, it, before, after } from "node:test";
 import assert from "node:assert";
 
-const BASE = process.env.BASE_URL || "http://localhost:3405";
+let server;
+let BASE = process.env.BASE_URL || "";
+
+// Auto-start server if no BASE_URL is set (standalone test run)
+if (!BASE) {
+  before(async () => {
+    const app = (await import("../src/server.js")).default;
+    server = app.listen(0); // random available port
+    await new Promise((resolve) => server.on("listening", resolve));
+    BASE = `http://localhost:${server.address().port}`;
+  });
+  after(() => { if (server) server.close(); });
+}
 
 describe("Input validation", () => {
   // ── Payments endpoint ──────────────────────────────────────────────

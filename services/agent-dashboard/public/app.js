@@ -76,7 +76,7 @@
 
   function refreshTrend() {
     fetch("/api/v1/stats/" + encodeURIComponent(addr) + "/trend?days=" + Math.max(currentDays, 7))
-      .then(function (r) { return r.json(); })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (data) { renderSparkline(data.trend); })
       .catch(function () {});
   }
@@ -143,14 +143,15 @@
 
   function refreshData() {
     var spinner = document.getElementById("refresh-spinner");
-    if (spinner) spinner.style.display = "inline-block";
+    if (spinner) spinner.classList.remove("hidden");
     var netParam = currentNetwork ? "&network=" + encodeURIComponent(currentNetwork) : "";
+    function jsonOk(r) { if (!r.ok) throw new Error(r.status); return r.json(); }
     Promise.all([
-      fetch("/api/v1/stats/" + encodeURIComponent(addr) + "?days=" + currentDays).then(function (r) { return r.json(); }),
-      fetch("/api/v1/payments?address=" + encodeURIComponent(addr) + "&days=" + currentDays + "&limit=" + PAGE_SIZE + "&offset=" + currentOffset + netParam).then(function (r) { return r.json(); }),
-      fetch("/api/v1/balances/" + encodeURIComponent(addr)).then(function (r) { return r.json(); }),
-      fetch("/api/v1/budget/" + encodeURIComponent(addr)).then(function (r) { return r.json(); }),
-      fetch("/api/v1/alerts/" + encodeURIComponent(addr)).then(function (r) { return r.json(); }),
+      fetch("/api/v1/stats/" + encodeURIComponent(addr) + "?days=" + currentDays).then(jsonOk),
+      fetch("/api/v1/payments?address=" + encodeURIComponent(addr) + "&days=" + currentDays + "&limit=" + PAGE_SIZE + "&offset=" + currentOffset + netParam).then(jsonOk),
+      fetch("/api/v1/balances/" + encodeURIComponent(addr)).then(jsonOk),
+      fetch("/api/v1/budget/" + encodeURIComponent(addr)).then(jsonOk),
+      fetch("/api/v1/alerts/" + encodeURIComponent(addr)).then(jsonOk),
     ])
       .then(function (results) {
         var stats = results[0], payData = results[1], balData = results[2];
@@ -183,11 +184,11 @@
             })
             .join("");
         }
-        if (spinner) spinner.style.display = "none";
+        if (spinner) spinner.classList.add("hidden");
         refreshTrend();
       })
       .catch(function () {
-        if (spinner) spinner.style.display = "none";
+        if (spinner) spinner.classList.add("hidden");
         showError();
       });
   }

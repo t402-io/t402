@@ -87,16 +87,16 @@ export function formatPaymentsCsv(payments) {
   const header = "id,timestamp,service,network,token,amount,amount_formatted,to,txHash,status";
   const rows = payments.map((p) =>
     [
-      p.id,
-      p.timestamp,
+      csvField(p.id),
+      csvField(p.timestamp),
       csvField(p.service),
       csvField(p.network),
-      p.token,
-      p.amount,
-      p.amountFormatted,
+      csvField(p.token),
+      csvField(p.amount),
+      csvField(p.amountFormatted),
       csvField(p.to),
       csvField(p.txHash),
-      p.status,
+      csvField(p.status),
     ].join(","),
   );
   return [header, ...rows].join("\n");

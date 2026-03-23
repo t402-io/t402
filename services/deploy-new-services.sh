@@ -24,7 +24,7 @@ echo ""
 
 # Step 2: Build and start containers
 echo "🐳 Step 2: Building and starting containers..."
-docker compose -f docker-compose.new-services.yml build --no-cache
+docker compose -f docker-compose.new-services.yml build
 docker compose -f docker-compose.new-services.yml up -d
 echo "   ✅ Containers started"
 echo ""

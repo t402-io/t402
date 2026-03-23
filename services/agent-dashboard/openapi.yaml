@@ -186,6 +186,27 @@ paths:
             text/csv:
               schema: { type: string }
 
+  /api/v1/events/{address}:
+    get:
+      summary: Real-time event stream (SSE)
+      description: |
+        Server-Sent Events stream delivering snapshots every 30s with balances, budget, stats, payments, and alerts.
+        Heartbeat sent every 15s. Max 100 global connections, 3 per IP.
+      parameters:
+        - $ref: "#/components/parameters/Address"
+        - name: days
+          in: query
+          schema: { type: integer, default: 7, minimum: 1, maximum: 365 }
+      responses:
+        "200":
+          description: SSE event stream
+          content:
+            text/event-stream:
+              schema: { type: string }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "429":
+          description: Too many SSE connections
+
   /api/v1/dashboard/{address}:
     get:
       summary: Combined dashboard data (single call)
@@ -208,8 +229,16 @@ paths:
                   balances: { type: object }
                   budget: { type: object }
                   stats: { type: object }
-                  payments: { type: object }
-                  alerts: { type: object }
+                  payments:
+                    type: object
+                    properties:
+                      items: { type: array, items: { $ref: "#/components/schemas/Payment" } }
+                      total: { type: integer }
+                  alerts:
+                    type: object
+                    properties:
+                      items: { type: array, items: { $ref: "#/components/schemas/Alert" } }
+                      count: { type: integer }
 
   /api/agents:
     get:

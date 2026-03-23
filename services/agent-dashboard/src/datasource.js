@@ -29,6 +29,10 @@ import { buildAlertsFromBudget, formatPaymentsCsv, log } from "./utils.js";
 
 const DATABASE_URL = process.env.DATABASE_URL || "";
 
+if (!DATABASE_URL) {
+  log("warn", "DATABASE_URL not set — running in demo mode with synthetic data");
+}
+
 /** @returns {"live"|"demo"} */
 export function getMode() {
   return DATABASE_URL ? "live" : "demo";

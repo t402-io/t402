@@ -24,10 +24,10 @@ export function renderApiDocs(specYaml) {
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <div style="max-width:900px;margin:0 auto;padding:2rem">
+  <div class="api-docs-container">
     <h1>T402 Agent Dashboard — API Reference</h1>
     <p><a href="/">← Dashboard</a> · <a href="/openapi.yaml">Download OpenAPI Spec</a></p>
-    <pre style="background:#1e1e2e;color:#cdd6f4;padding:1.5rem;border-radius:8px;overflow-x:auto;font-size:0.85rem;line-height:1.5"><code>${escaped}</code></pre>
+    <pre class="api-docs-pre"><code>${escaped}</code></pre>
   </div>
 </body>
 </html>`;
@@ -41,7 +41,7 @@ const HEAD = `<!DOCTYPE html>
 <body>`;
 
 const FOOTER = `  <footer>Powered by <a href="https://t402.io">T402</a></footer>
-  <script>window.__EXPLORERS__=${JSON.stringify(EXPLORER_URLS)};</script>
+  <script src="/explorers.js" defer></script>
   <script src="/app.js" defer></script>
 </body></html>`;
 
@@ -96,11 +96,11 @@ export function renderDashboard(data) {
     ${gsCards}
 
     <h2>Agents</h2>
-    <div style="overflow-x:auto">
+    <div class="table-wrapper">
     <table>
       <thead><tr><th>Name</th><th>Address</th><th>Status</th><th>Payments</th><th>Spent</th><th>Last Active</th></tr></thead>
       <tbody>
-        ${agentRows || '<tr><td colspan="6" style="color:var(--text-dim)">No agents</td></tr>'}
+        ${agentRows || '<tr><td colspan="6" class="text-dim">No agents</td></tr>'}
       </tbody>
     </table>
     </div>
@@ -219,7 +219,7 @@ ${FOOTER}`;
       <button class="range-btn" data-days="1" type="button">1d</button>
       <button class="range-btn active" data-days="7" type="button">7d</button>
       <button class="range-btn" data-days="30" type="button">30d</button>
-      <button class="btn" id="refresh-btn" type="button">Refresh <span id="refresh-spinner" class="loading" style="display:none"></span></button>
+      <button class="btn" id="refresh-btn" type="button">Refresh <span id="refresh-spinner" class="loading hidden"></span></button>
     </div>
 
     <div class="cards">
@@ -250,14 +250,14 @@ ${FOOTER}`;
       </div>
     </div>
 
-    ${networkChart ? `<h2>Network Breakdown</h2><div style="margin-top:.75rem">${networkChart}</div>` : ""}
+    ${networkChart ? `<h2>Network Breakdown</h2><div class="mt-sm">${networkChart}</div>` : ""}
 
     <h2>Top Services</h2>
-    <div style="overflow-x:auto">
+    <div class="table-wrapper">
     <table>
       <thead><tr><th>Service</th><th>Payments</th><th>Amount</th></tr></thead>
       <tbody>
-        ${serviceRows || '<tr><td colspan="3" style="color:var(--text-dim)">No data</td></tr>'}
+        ${serviceRows || '<tr><td colspan="3" class="text-dim">No data</td></tr>'}
       </tbody>
     </table>
     </div>
@@ -278,7 +278,7 @@ ${FOOTER}`;
         <option value="tron:mainnet">TRON</option>
       </select>
     </div>
-    <div style="overflow-x:auto">
+    <div class="table-wrapper">
     <table>
       <thead>
         <tr>
@@ -291,7 +291,7 @@ ${FOOTER}`;
         </tr>
       </thead>
       <tbody id="payments-tbody">
-        ${paymentRows || '<tr><td colspan="6" style="color:var(--text-dim)">No data</td></tr>'}
+        ${paymentRows || '<tr><td colspan="6" class="text-dim">No data</td></tr>'}
       </tbody>
     </table>
     </div>

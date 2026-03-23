@@ -27,6 +27,9 @@ function safeCompare(a, b) {
 
 const app = express();
 
+// ── Trust proxy (behind Cloudflare Tunnel) ──────────────────────────
+app.set("trust proxy", "loopback");
+
 // ── Compression ─────────────────────────────────────────────────────
 app.use(compression());
 
@@ -46,7 +49,7 @@ app.use((req, res, next) => {
   res.set("Referrer-Policy", "strict-origin-when-cross-origin");
   res.set(
     "Content-Security-Policy",
-    "default-src 'none'; connect-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
+    "default-src 'none'; connect-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
   );
   res.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
   res.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
@@ -120,10 +123,10 @@ setInterval(() => {
 // Apply global rate limit
 app.use(rateLimit());
 
-// ── Optional API key auth ───────────────────────────────────────────
+// ── Optional API key auth (covers /api/v1 AND /api/) ────────────────
 const API_KEY = process.env.DASHBOARD_API_KEY || "";
 if (API_KEY) {
-  app.use("/api/v1", (req, res, next) => {
+  app.use("/api", (req, res, next) => {
     const key = req.get("X-API-Key") || req.get("Authorization")?.replace(/^bearer\s+/i, "");
     if (!safeCompare(key, API_KEY)) return res.status(401).json({ error: "Unauthorized" });
     next();
@@ -135,6 +138,11 @@ app.use(express.static(join(__dirname, "..", "public"), { maxAge: "1h", etag: tr
 
 // ── Routes ──────────────────────────────────────────────────────────
 registerRoutes(app, { rateLimit });
+
+// ── 404 catch-all ─────────────────────────────────────────────────
+app.use((_req, res) => {
+  res.status(404).json({ error: "Not found" });
+});
 
 // ── Error handling middleware ───────────────────────────────────────
 app.use((err, req, res, _next) => {
