@@ -65,7 +65,8 @@ export type NetworkTokenRegistry = Record<string, Record<string, TokenConfig>>;
  * - Native cross-chain via LayerZero
  */
 export const USDT0_ADDRESSES: Record<string, Address> = {
-  // Ethereum Mainnet - OFT Adapter (bridge endpoint)
+  // Ethereum Mainnet - OFT Adapter (bridge endpoint, NOT a standard ERC-20).
+  // Reverts on name()/symbol()/decimals(). Use USDT_LEGACY_ADDRESSES for Ethereum payments.
   "eip155:1": "0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee",
   // Arbitrum One - Native USDT0
   "eip155:42161": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
@@ -112,6 +113,9 @@ export const USDT_LEGACY_ADDRESSES: Record<string, Address> = {
  */
 export const TOKEN_REGISTRY: NetworkTokenRegistry = {
   // Ethereum Mainnet
+  // NOTE: USDT0 on Ethereum is an OFT Adapter (0x6C96dE32...), not a standard ERC-20.
+  // It does NOT support name()/symbol()/decimals()/balanceOf().
+  // Prefer USDT (legacy) or USDC for Ethereum mainnet payments.
   "eip155:1": {
     USDT0: {
       address: USDT0_ADDRESSES["eip155:1"],
