@@ -35,9 +35,9 @@
     "@scure/base": "^1.2.6",
     "@eslint/js": "^10.0.1",
     "@types/node": "^25.5.0",
-    "@typescript-eslint/eslint-plugin": "^8.57.0",
-    "@typescript-eslint/parser": "^8.57.0",
-    "eslint": "^10.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.57.1",
+    "@typescript-eslint/parser": "^8.57.1",
+    "eslint": "^10.1.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jsdoc": "^62.8.0",
     "eslint-plugin-prettier": "^5.5.5",
@@ -54,7 +54,7 @@
     "@solana-program/compute-budget": "^0.15.0",
     "@solana-program/token": "^0.12.0",
     "@solana-program/token-2022": "^0.9.0",
-    "@solana/kit": "^6.3.1",
+    "@solana/kit": "^6.5.0",
     "@t402/core": "workspace:*"
   },
   "exports": {
