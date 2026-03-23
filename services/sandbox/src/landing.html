@@ -143,7 +143,19 @@ curl -s -X POST https://sandbox.t402.io/verify \
 </tbody>
 </table>
 
-<h2>Magic Test Addresses</h2>
+<h2>Get Test Tokens</h2>
+<p style="color:#9ca3af;font-size:.85em">Use <a href="/faucets">faucets</a> to get testnet tokens, or use <a href="#magic">magic test addresses</a> to skip tokens entirely.</p>
+<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin:.75rem 0">
+  <a href="https://portal.cdp.coinbase.com/products/faucet" target="_blank" style="padding:.3rem .7rem;background:#1f2937;border-radius:4px;font-size:.8rem;text-decoration:none;color:#9ca3af;border:1px solid #374151">Base Sepolia</a>
+  <a href="https://cloud.google.com/application/web3/faucet/ethereum/sepolia" target="_blank" style="padding:.3rem .7rem;background:#1f2937;border-radius:4px;font-size:.8rem;text-decoration:none;color:#9ca3af;border:1px solid #374151">Ethereum Sepolia</a>
+  <a href="https://www.alchemy.com/faucets/arbitrum-sepolia" target="_blank" style="padding:.3rem .7rem;background:#1f2937;border-radius:4px;font-size:.8rem;text-decoration:none;color:#9ca3af;border:1px solid #374151">Arbitrum Sepolia</a>
+  <a href="https://faucet.solana.com/" target="_blank" style="padding:.3rem .7rem;background:#1f2937;border-radius:4px;font-size:.8rem;text-decoration:none;color:#9ca3af;border:1px solid #374151">Solana Devnet</a>
+  <a href="https://t.me/testgiver_ton_bot" target="_blank" style="padding:.3rem .7rem;background:#1f2937;border-radius:4px;font-size:.8rem;text-decoration:none;color:#9ca3af;border:1px solid #374151">TON Testnet</a>
+  <a href="https://nileex.io/join/getJoinPage" target="_blank" style="padding:.3rem .7rem;background:#1f2937;border-radius:4px;font-size:.8rem;text-decoration:none;color:#9ca3af;border:1px solid #374151">TRON Nile</a>
+  <a href="https://friendbot.stellar.org" target="_blank" style="padding:.3rem .7rem;background:#1f2937;border-radius:4px;font-size:.8rem;text-decoration:none;color:#9ca3af;border:1px solid #374151">Stellar Testnet</a>
+</div>
+
+<h2 id="magic">Magic Test Addresses</h2>
 <p style="color:#9ca3af;font-size:.85em">Use these as the <code>payer</code> field to get deterministic responses — no real tokens needed. <a href="/test-addresses" target="_blank">Full list (JSON) &rarr;</a></p>
 <table>
 <thead>
@@ -152,7 +164,10 @@ curl -s -X POST https://sandbox.t402.io/verify \
 <tbody>
 <tr><td><code>0x...CAFE01</code></td><td style="color:#10b981">&#10003; Valid</td><td style="color:#10b981">&#10003; Success</td></tr>
 <tr><td><code>0x...CAFE02</code></td><td style="color:#ef4444">&#10007; Bad signature</td><td style="color:#10b981">&#10003; Success</td></tr>
+<tr><td><code>0x...CAFE03</code></td><td style="color:#ef4444">&#10007; Expired</td><td style="color:#10b981">&#10003; Success</td></tr>
+<tr><td><code>0x...CAFE11</code></td><td style="color:#10b981">&#10003; Valid</td><td style="color:#10b981">&#10003; Success</td></tr>
 <tr><td><code>0x...CAFE12</code></td><td style="color:#10b981">&#10003; Valid</td><td style="color:#ef4444">&#10007; Insufficient funds</td></tr>
+<tr><td><code>0x...CAFE13</code></td><td style="color:#10b981">&#10003; Valid</td><td style="color:#ef4444">&#10007; Timeout</td></tr>
 <tr><td><code>0x...CAFE99</code></td><td style="color:#f59e0b">&#9201; 2s delay</td><td style="color:#f59e0b">&#9201; 2s delay</td></tr>
 </tbody>
 </table>
@@ -203,7 +218,7 @@ curl -s -X POST https://sandbox.t402.io/verify \
 <div class="note">To migrate: change the facilitator URL in your SDK config and add your API key. All request/response formats are identical.</div>
 
 <p style="color:#6b7280;margin-top:2rem;font-size:.85rem;border-top:1px solid #1f2937;padding-top:1.5rem">
-  <a href="/playground">Playground</a> · <a href="/errors">Errors</a> · <a href="https://docs.t402.io">Docs</a> · <a href="https://github.com/t402-io/t402">GitHub</a> · Powered by <a href="https://t402.io">T402</a>
+  <a href="/playground">Playground</a> · <a href="/errors">Errors</a> · <a href="/openapi.yaml">OpenAPI</a> · <a href="https://docs.t402.io">Docs</a> · <a href="https://github.com/t402-io/t402">GitHub</a> · <a href="https://www.npmjs.com/org/t402">npm</a> · Powered by <a href="https://t402.io">T402</a>
 </p>
 <script>
 function showTab(id, e){
@@ -235,6 +250,10 @@ fetch('/supported').then(r=>r.json()).then(data=>{
         cell.innerHTML='<span style="background:#065f46;color:#6ee7b7;padding:.15em .5em;border-radius:3px;font-size:.75rem">Live</span>';
       }else{
         cell.innerHTML='<span style="background:#1f2937;color:#6b7280;padding:.15em .5em;border-radius:3px;font-size:.75rem">Mock</span>';
+      }
+      var tokenCell = tr.querySelectorAll('td')[2];
+      if (tokenCell && kind.token) {
+        tokenCell.innerHTML = kind.token.symbol + ' <code style="font-size:.7em;color:#6b7280">' + kind.token.address.substring(0, 8) + '...</code>';
       }
     }
   });

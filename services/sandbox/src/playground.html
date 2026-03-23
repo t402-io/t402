@@ -246,6 +246,7 @@ textarea:focus-visible,
       &#128994; Real on-chain verification &nbsp; &#9898; Mock fallback
     </div>
   </div>
+  <div id="magicHint" style="font-size:.75rem;color:#6b7280;padding:.3rem 0;min-height:1.2em"></div>
 
   <!-- Endpoint Tabs -->
   <div class="endpoint-tabs" role="tablist">
@@ -508,6 +509,15 @@ function switchEndpoint(endpoint, e) {
 
   document.getElementById('idempotencyRow').style.display = (endpoint === 'settle') ? 'block' : 'none';
 
+  var magicSelect = document.getElementById('magicSelect');
+  if (magicSelect) {
+    magicSelect.style.display = (endpoint === 'supported') ? 'none' : '';
+    var magicLabel = magicSelect.previousElementSibling;
+    if (magicLabel && magicLabel.tagName === 'LABEL') magicLabel.style.display = (endpoint === 'supported') ? 'none' : '';
+  }
+  var magicHint = document.getElementById('magicHint');
+  if (magicHint) magicHint.style.display = (endpoint === 'supported') ? 'none' : '';
+
   if (endpoint === 'supported') {
     currentMethod = 'GET';
     requestBody.value = '';
@@ -540,6 +550,18 @@ function onNetworkChange() {
 
 function onMagicChange() {
   var val = document.getElementById('magicSelect').value;
+  var hints = {
+    'CAFE01': 'Verify: isValid=true \u00b7 Settle: success=true',
+    'CAFE02': 'Verify: isValid=false (invalid_signature) \u00b7 Settle: success=true',
+    'CAFE03': 'Verify: isValid=false (authorization_expired) \u00b7 Settle: success=true',
+    'CAFE11': 'Verify: isValid=true \u00b7 Settle: success=true (with tx hash)',
+    'CAFE12': 'Verify: isValid=true \u00b7 Settle: success=false (insufficient_funds)',
+    'CAFE13': 'Verify: isValid=true \u00b7 Settle: success=false (settlement_timeout)',
+    'CAFE99': 'Adds 2-second delay to response (for timeout testing)',
+    'custom': 'Uses upstream facilitator for real on-chain verification'
+  };
+  var hintEl = document.getElementById('magicHint');
+  if (hintEl) hintEl.textContent = hints[val] || '';
   if (val === 'custom' || currentEndpoint === 'supported') return;
   var addr = '0x' + '0'.repeat(34) + val;
   // Update the payer field in the current request body
@@ -579,7 +601,7 @@ function displayResponse(status, body, headers, elapsed) {
   statusBadge.className = cls;
   statusBadge.textContent = status;
 
-  timingBadge.textContent = elapsed + 'ms';
+  timingBadge.innerHTML = '<span style="color:#374151;margin:0 .5rem">\u00b7</span>' + elapsed + 'ms';
 
   // Body
   try {
