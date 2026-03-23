@@ -153,7 +153,7 @@ Grafana runs as part of the Facilitator compose stack (not separately).
   ```
 - **Env vars**: `BAZAAR_ADMIN_KEY`, `WEBHOOK_URLS`, `DATABASE_URL`, `EXPLORER_MODE`
 - **Gotchas**:
-  - Sandbox connects to the facilitator via `host.docker.internal:8080`
+  - Sandbox connects to the facilitator via `https://facilitator.t402.io` (set in docker-compose)
   - Bazaar, Status, and Explorer use named volumes (`bazaar-data`, `status-data`, `explorer-data`) for persistence
 
 ### Sandbox (sandbox.t402.io)
@@ -171,7 +171,7 @@ Grafana runs as part of the Facilitator compose stack (not separately).
   | Variable | Default | Description |
   |----------|---------|-------------|
   | `PORT` | `3406` | Server listen port |
-  | `FACILITATOR_URL` | `http://host.docker.internal:8080` | Upstream facilitator endpoint |
+  | `FACILITATOR_URL` | `http://localhost:8080` | Upstream facilitator endpoint (`http://localhost:8080` standalone; production compose overrides to `https://facilitator.t402.io`) |
   | `FACILITATOR_API_KEY` | (none) | API key for upstream facilitator — **must be set** or `/verify` and `/settle` return 401 from upstream (sandbox logs a warning on startup if missing) |
   | `RATE_LIMIT_PER_MINUTE` | `100` | Per-IP rate limit |
   | `TRUST_CF_HEADER` | `true` | Use `CF-Connecting-IP` header for rate limiting (set `true` behind Cloudflare Tunnel) |
@@ -181,7 +181,7 @@ Grafana runs as part of the Facilitator compose stack (not separately).
   docker compose -f docker-compose.new-services.yml build sandbox
   docker compose -f docker-compose.new-services.yml up -d --no-deps sandbox
   ```
-  Uses the production facilitator at `host.docker.internal:8080`. Set `FACILITATOR_API_KEY` in `.env`.
+  Uses the production facilitator at `https://facilitator.t402.io` (configured in `docker-compose.new-services.yml`). Set `FACILITATOR_API_KEY` in `.env`.
 - **Standalone mode** (bundles a testnet facilitator for local development):
   ```bash
   cd services/sandbox && docker compose up -d
@@ -189,7 +189,7 @@ Grafana runs as part of the Facilitator compose stack (not separately).
   Starts both the sandbox and a testnet-only facilitator container. Requires `EVM_PRIVATE_KEY` in `.env` for the testnet wallet.
 - **Gotchas**:
   - `FACILITATOR_API_KEY` must be set in `.env` or the sandbox will log a startup warning and all `/verify`, `/settle` calls will return 401 from the upstream facilitator
-  - In production mode, sandbox reaches the facilitator via `host.docker.internal:8080` (Docker `extra_hosts` mapping)
+  - In production mode, sandbox reaches the facilitator via `https://facilitator.t402.io` (set in `docker-compose.new-services.yml`)
   - Logs are collected automatically by Promtail (Docker SD auto-discovers all compose containers)
   - Metrics are scraped by Prometheus via `host.docker.internal:3406`
 

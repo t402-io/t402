@@ -155,6 +155,7 @@ services:
       - FACILITATOR_URL=https://facilitator.t402.io
       - RATE_LIMIT_PER_MINUTE=100
       - TRUST_CF_HEADER=true
+      # FACILITATOR_API_KEY must be set in .env — required for /verify and /settle proxy calls to work
       - FACILITATOR_API_KEY=${FACILITATOR_API_KEY:-}
     restart: unless-stopped
     read_only: true

@@ -15,6 +15,7 @@ import { log } from "./lib/logger.js";
 import { MAGIC_ADDRESSES, SUPPORTED_NETWORKS, SUPPORTED_KINDS } from "./lib/magic.js";
 import { checkUpstream } from "./lib/upstream.js";
 import { requestHistory, MAX_HISTORY_PER_SESSION, MAX_SESSIONS, SESSION_TTL_MS, historyEvictionTimer } from "./lib/history.js";
+import { clearPruneTimer } from "./lib/metrics.js";
 
 // --- Middleware ---
 import { securityHeaders } from "./middleware/security.js";
@@ -72,6 +73,9 @@ app.use((err, _req, res, _next) => {
   if (err.type === "entity.parse.failed") {
     return res.status(400).json({ error: "Invalid JSON", sandbox: true });
   }
+  if (err.type === "entity.too.large") {
+    return res.status(413).json({ error: "Payload too large (max 50kb)", sandbox: true });
+  }
   log("error", "Unhandled error", { error: err.message || String(err) });
   res.status(500).json({ error: "Internal error", sandbox: true });
 });
@@ -104,6 +108,7 @@ function shutdown(signal) {
   log("info", `${signal} received, shutting down`, { service: "t402-sandbox" });
   clearInterval(evictionTimer);
   clearInterval(historyEvictionTimer);
+  clearPruneTimer();
   if (healthTimer) clearInterval(healthTimer);
   if (server) {
     server.close(() => process.exit(0));

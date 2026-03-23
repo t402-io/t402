@@ -9,7 +9,7 @@ COPY src/ src/
 USER node
 EXPOSE 3406
 
-HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 --start-period=5s \
   CMD wget -q --spider http://127.0.0.1:3406/health || exit 1
 
 CMD ["node", "src/proxy.js"]

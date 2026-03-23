@@ -168,6 +168,12 @@ paths:
                               url:
                                 type: string
                                 format: uri
+                              note:
+                                type: string
+                                description: Additional information about the faucet
+                  note:
+                    type: string
+                    description: General guidance about using faucets and test addresses
                   sandbox:
                     type: boolean
 
@@ -346,7 +352,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                type: object
+                properties:
+                  isValid:
+                    type: boolean
+                    example: false
+                  invalidReason:
+                    type: string
+                    example: "unsupported_network"
+                  sandbox:
+                    type: boolean
         "415":
           description: Content-Type must be application/json
           content:
@@ -415,7 +430,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  errorReason:
+                    type: string
+                    example: "unsupported_network"
+                  sandbox:
+                    type: boolean
         "415":
           description: Content-Type must be application/json
           content:
@@ -434,6 +458,134 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SettleResponse"
+
+  /errors:
+    get:
+      tags: [developer-tools]
+      summary: Error catalog
+      description: Returns all possible error codes, causes, and fixes.
+      operationId: getErrors
+      responses:
+        "200":
+          description: List of all sandbox error codes
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [errors, sandbox]
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      required: [status, code, message, cause, fix]
+                      properties:
+                        status:
+                          type: integer
+                          description: HTTP status code
+                        code:
+                          type: string
+                          description: Machine-readable error code
+                        message:
+                          type: string
+                          description: Human-readable error message
+                        cause:
+                          type: string
+                          description: Explanation of what triggers this error
+                        fix:
+                          type: string
+                          description: How to resolve this error
+                        example:
+                          type: object
+                          description: Example request body that triggers this error
+                  sandbox:
+                    type: boolean
+
+  /history:
+    get:
+      tags: [developer-tools]
+      summary: Request history
+      description: Returns recent request/response history for the current session (identified by X-Sandbox-Session header).
+      operationId: getHistory
+      parameters:
+        - name: X-Sandbox-Session
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Session identifier for tracking request history
+        - name: session
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Session identifier (alternative to X-Sandbox-Session header)
+      responses:
+        "200":
+          description: Session request history
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [session, sandbox]
+                properties:
+                  session:
+                    type: string
+                    description: The session identifier
+                  count:
+                    type: integer
+                    description: Number of history entries
+                  maxEntries:
+                    type: integer
+                    description: Maximum entries stored per session
+                  ttlMinutes:
+                    type: integer
+                    description: Session time-to-live in minutes
+                  entries:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Request identifier
+                        timestamp:
+                          type: string
+                          format: date-time
+                        method:
+                          type: string
+                        path:
+                          type: string
+                        status:
+                          type: integer
+                        duration:
+                          type: number
+                        requestBody:
+                          type: object
+                          description: Request body (POST requests only)
+                        responseBody:
+                          type: object
+                          description: Response body
+                        headers:
+                          type: object
+                          description: Selected response headers
+                          properties:
+                            x-request-id:
+                              type: string
+                            x-ratelimit-remaining:
+                              type: string
+                  note:
+                    type: string
+                  sandbox:
+                    type: boolean
+        "400":
+          description: Missing session identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /webhook/test:
     post:

@@ -1,5 +1,6 @@
 import { describe, it, before, after } from "node:test";
 import assert from "node:assert";
+import { isPrivateOrReservedHost } from "../src/routes/webhook.js";
 
 // If BASE_URL is set, server is already running externally (CI mode)
 // Otherwise, start our own server (local mode)
@@ -588,20 +589,15 @@ describe("Unknown routes", () => {
 // ─── Body size limits ────────────────────────────────────────────────────────
 
 describe("Body size limits", () => {
-  it("rejects payloads over 50kb", async () => {
-    const large = JSON.stringify({ data: "x".repeat(60000) });
+  it("rejects payloads over 50kb with 413", async () => {
     const res = await fetch(`${BASE}/verify`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: large,
+      body: JSON.stringify({ data: "x".repeat(60000), paymentRequirements: { network: "eip155:84532" } }),
     });
-    // Express returns 413 (entity too large) or 500 (caught by generic error handler)
-    // Either way, the request should NOT succeed
-    assert.ok(
-      [400, 413, 500].includes(res.status),
-      `Expected 400, 413, or 500, got ${res.status}`,
-    );
-    assert.notStrictEqual(res.status, 200, "Oversized payload should not succeed");
+    assert.strictEqual(res.status, 413);
+    const data = await res.json();
+    assert.ok(data.error.includes("too large"));
   });
 });
 
@@ -821,6 +817,74 @@ describe("POST /webhook/test", () => {
   });
 });
 
+// ─── SSRF protection ──────────────────────────────────────────────────────
+
+describe("SSRF protection", () => {
+  it("blocks 10.x.x.x private range", () => {
+    assert.strictEqual(isPrivateOrReservedHost("10.0.0.1"), true);
+    assert.strictEqual(isPrivateOrReservedHost("10.255.255.255"), true);
+  });
+
+  it("blocks 172.16-31.x.x private range", () => {
+    assert.strictEqual(isPrivateOrReservedHost("172.16.0.1"), true);
+    assert.strictEqual(isPrivateOrReservedHost("172.31.255.255"), true);
+  });
+
+  it("blocks 192.168.x.x private range", () => {
+    assert.strictEqual(isPrivateOrReservedHost("192.168.1.1"), true);
+    assert.strictEqual(isPrivateOrReservedHost("192.168.0.0"), true);
+  });
+
+  it("blocks link-local and cloud metadata IPs", () => {
+    assert.strictEqual(isPrivateOrReservedHost("169.254.169.254"), true);
+    assert.strictEqual(isPrivateOrReservedHost("169.254.0.1"), true);
+  });
+
+  it("blocks loopback range", () => {
+    assert.strictEqual(isPrivateOrReservedHost("127.0.0.2"), true);
+    assert.strictEqual(isPrivateOrReservedHost("127.255.255.255"), true);
+  });
+
+  it("blocks unspecified and IPv6 loopback", () => {
+    assert.strictEqual(isPrivateOrReservedHost("0.0.0.0"), true);
+    assert.strictEqual(isPrivateOrReservedHost("::1"), true);
+    assert.strictEqual(isPrivateOrReservedHost("[::1]"), true);
+  });
+
+  it("allows public IPs", () => {
+    assert.strictEqual(isPrivateOrReservedHost("8.8.8.8"), false);
+    assert.strictEqual(isPrivateOrReservedHost("1.1.1.1"), false);
+  });
+
+  it("allows IPs just outside private ranges", () => {
+    assert.strictEqual(isPrivateOrReservedHost("172.15.255.255"), false);
+    assert.strictEqual(isPrivateOrReservedHost("172.32.0.1"), false);
+    assert.strictEqual(isPrivateOrReservedHost("11.0.0.1"), false);
+  });
+
+  it("allows public hostnames", () => {
+    assert.strictEqual(isPrivateOrReservedHost("example.com"), false);
+  });
+
+  it("rejects webhook to private IP", async () => {
+    const res = await fetch(`${BASE}/webhook/test`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: "https://10.0.0.1/webhook" }),
+    });
+    assert.strictEqual(res.status, 400);
+  });
+
+  it("rejects webhook to cloud metadata endpoint", async () => {
+    const res = await fetch(`${BASE}/webhook/test`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: "https://169.254.169.254/latest/meta-data/" }),
+    });
+    assert.strictEqual(res.status, 400);
+  });
+});
+
 // --- New features tests ---
 
 describe("Magic test addresses", () => {
@@ -897,6 +961,53 @@ describe("Magic test addresses", () => {
     assert.strictEqual(data.errorReason, "insufficient_funds");
   });
 
+  it("CAFE03 verify returns authorization_expired", async () => {
+    const res = await fetch(`${BASE}/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        paymentPayload: { payload: { payer: "0x0000000000000000000000000000000000CAFE03" } },
+        paymentRequirements: { network: "eip155:84532" },
+      }),
+    });
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.strictEqual(data.isValid, false);
+    assert.strictEqual(data.invalidReason, "authorization_expired");
+  });
+
+  it("CAFE13 settle returns settlement_timeout", async () => {
+    const res = await fetch(`${BASE}/settle`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        paymentPayload: { payload: { payer: "0x0000000000000000000000000000000000CAFE13" } },
+        paymentRequirements: { network: "eip155:84532" },
+      }),
+    });
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.strictEqual(data.success, false);
+    assert.strictEqual(data.errorReason, "settlement_timeout");
+  });
+
+  it("CAFE99 verify has delayed response", async () => {
+    const start = Date.now();
+    const res = await fetch(`${BASE}/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        paymentPayload: { payload: { payer: "0x0000000000000000000000000000000000CAFE99" } },
+        paymentRequirements: { network: "eip155:84532" },
+      }),
+    });
+    const elapsed = Date.now() - start;
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.strictEqual(data.isValid, true);
+    assert.ok(elapsed >= 1500, `Expected delay of at least 1500ms, got ${elapsed}ms`);
+  });
+
   it("magic addresses are case-insensitive", async () => {
     const res = await fetch(`${BASE}/verify`, {
       method: "POST",
@@ -938,6 +1049,13 @@ describe("GET /openapi.yaml", () => {
     assert.ok(text.includes("openapi:"));
     assert.ok(text.includes("T402 Sandbox"));
     assert.ok(text.includes("/verify"));
+  });
+});
+
+describe("GET /openapi.json", () => {
+  it("GET /openapi.json redirects to /openapi.yaml", async () => {
+    const res = await fetch(`${BASE}/openapi.json`, { redirect: "manual" });
+    assert.ok([301, 302, 307, 308].includes(res.status));
   });
 });
 

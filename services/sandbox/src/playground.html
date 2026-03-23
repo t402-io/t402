@@ -123,6 +123,22 @@ textarea::placeholder{color:#4b5563}
 .step-body code{background:#1f2937;padding:.1em .3em;border-radius:3px;font-size:.8em}
 .inline-btn{background:#065f46;color:#6ee7b7;border:none;padding:.25rem .6rem;border-radius:4px;cursor:pointer;font-size:.75rem;font-family:inherit}
 .inline-btn:hover{background:#047857}
+
+/* Focus-visible styles (Fix #4) */
+.ep-tab:focus-visible,
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+.quick-btn:focus-visible,
+.history-toggle:focus-visible{outline:2px solid #10b981;outline-offset:2px}
+
+/* Reduced motion (Fix #13) */
+@media(prefers-reduced-motion:reduce){
+  .spinner{animation:none}
+  .toast{transition:none}
+  .ep-tab,.panel-btn,.quick-btn,.rate-meter-fill{transition:none}
+}
 </style>
 </head>
 <body>
@@ -151,7 +167,7 @@ textarea::placeholder{color:#4b5563}
 
   <!-- Getting Started Walkthrough -->
   <div class="walkthrough" id="walkthrough">
-    <div class="walkthrough-header" onclick="toggleWalkthrough()">
+    <div class="walkthrough-header" role="button" tabindex="0" onclick="toggleWalkthrough()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleWalkthrough()}">
       <h3>&#127919; Getting Started Guide</h3>
       <span id="walkthrough-toggle">&#9660;</span>
     </div>
@@ -221,17 +237,17 @@ textarea::placeholder{color:#4b5563}
   </div>
 
   <!-- Endpoint Tabs -->
-  <div class="endpoint-tabs">
-    <div class="ep-tab active" onclick="switchEndpoint('supported')">/supported</div>
-    <div class="ep-tab" onclick="switchEndpoint('verify')">/verify</div>
-    <div class="ep-tab" onclick="switchEndpoint('settle')">/settle</div>
-    <div class="ep-tab" onclick="switchEndpoint('webhook/test')"><span class="method-badge method-post">POST</span>/webhook/test</div>
+  <div class="endpoint-tabs" role="tablist">
+    <div class="ep-tab active" role="tab" tabindex="0" aria-selected="true" onclick="switchEndpoint('supported', event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchEndpoint('supported', event)}">/supported</div>
+    <div class="ep-tab" role="tab" tabindex="0" aria-selected="false" onclick="switchEndpoint('verify', event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchEndpoint('verify', event)}">/verify</div>
+    <div class="ep-tab" role="tab" tabindex="0" aria-selected="false" onclick="switchEndpoint('settle', event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchEndpoint('settle', event)}">/settle</div>
+    <div class="ep-tab" role="tab" tabindex="0" aria-selected="false" onclick="switchEndpoint('webhook/test', event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchEndpoint('webhook/test', event)}"><span class="method-badge method-post">POST</span>/webhook/test</div>
   </div>
 
   <!-- Panels -->
   <div class="panels">
     <!-- Request Panel -->
-    <div class="panel">
+    <div class="panel" role="tabpanel">
       <div class="panel-header">
         <span class="panel-title" id="requestTitle">Request</span>
         <div class="panel-actions">
@@ -239,10 +255,10 @@ textarea::placeholder{color:#4b5563}
           <button class="panel-btn send" id="sendBtn" onclick="sendRequest()">Try It</button>
         </div>
       </div>
-      <textarea id="requestBody" placeholder="Request body (JSON)..." spellcheck="false"></textarea>
+      <textarea id="requestBody" placeholder="Request body (JSON)..." spellcheck="false" aria-label="Request body"></textarea>
       <div id="idempotencyRow" style="display:none;padding:0 1rem .5rem">
-        <label style="font-size:.75rem;color:#9ca3af">Idempotency-Key (optional):</label>
-        <input id="idempotencyKey" type="text" placeholder="unique-key-123" style="width:100%;background:#111827;color:#e5e7eb;border:1px solid #374151;border-radius:4px;padding:.3rem .5rem;font-size:.8rem;font-family:monospace;margin-top:2px">
+        <label for="idempotencyKey" style="font-size:.75rem;color:#9ca3af">Idempotency-Key (optional):</label>
+        <input id="idempotencyKey" type="text" placeholder="unique-key-123" aria-label="Idempotency key" style="width:100%;background:#111827;color:#e5e7eb;border:1px solid #374151;border-radius:4px;padding:.3rem .5rem;font-size:.8rem;font-family:monospace;margin-top:2px">
       </div>
       <div class="btn-group" style="padding:0 1rem .5rem">
         <button class="panel-btn" onclick="copyAsSDK('typescript')">Copy as TypeScript</button>
@@ -253,7 +269,7 @@ textarea::placeholder{color:#4b5563}
     </div>
 
     <!-- Response Panel -->
-    <div class="panel">
+    <div class="panel" role="tabpanel">
       <div class="panel-header">
         <span>
           <span class="panel-title">Response</span>
@@ -264,9 +280,9 @@ textarea::placeholder{color:#4b5563}
           <button class="panel-btn" onclick="copyResponse()" title="Copy response">Copy</button>
         </div>
       </div>
-      <pre class="response-area" id="responseArea"><span class="muted">Send a request to see the response...</span></pre>
+      <pre class="response-area" id="responseArea" role="log" aria-live="polite" aria-label="API response"><span class="muted">Send a request to see the response...</span></pre>
       <div style="padding:0 1rem .5rem">
-        <span class="headers-toggle" id="headersToggle" onclick="toggleHeaders()" style="display:none">Show headers</span>
+        <span class="headers-toggle" id="headersToggle" role="button" tabindex="0" onclick="toggleHeaders()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleHeaders()}" style="display:none">Show headers</span>
         <div class="headers-list" id="headersList"></div>
       </div>
     </div>
@@ -278,19 +294,19 @@ textarea::placeholder{color:#4b5563}
     <span class="value" id="rateRemaining">--</span>
     <span class="muted">/</span>
     <span class="value" id="rateLimit">--</span>
-    <div class="rate-meter"><div class="rate-meter-fill" id="rateMeter" style="width:100%"></div></div>
+    <div class="rate-meter" role="meter" aria-label="Rate limit usage" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><div class="rate-meter-fill" id="rateMeter" style="width:100%"></div></div>
     <span class="muted" id="requestId" style="font-size:.7rem"></span>
   </div>
 
   <!-- Request History -->
   <div class="history-panel">
-    <h3 onclick="toggleHistory()">Request History <span id="history-count">(0)</span> &#9660;</h3>
+    <h3 class="history-toggle" role="button" tabindex="0" onclick="toggleHistory()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleHistory()}">Request History <span id="history-count">(0)</span> &#9660;</h3>
     <div id="history-list" style="display:none"></div>
   </div>
 </div>
 
 <!-- Toast -->
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="alert" aria-live="assertive"></div>
 
 <script>
 // State
@@ -398,38 +414,27 @@ function copyAsSDK(lang) {
   var code = templates[lang] || '';
   navigator.clipboard.writeText(code).then(function() {
     showToast('Copied ' + lang + ' code');
-  });
+  }).catch(function() { showToast('Copy failed — try selecting text manually'); });
 }
 
 // Example payloads per endpoint
 function getExamplePayload(endpoint, network) {
-  var isEvm = network.startsWith('eip155:');
-  var isSolana = network.startsWith('solana:');
-  var isTon = network.startsWith('ton:');
-  var isTron = network.startsWith('tron:');
-  var isStellar = network.startsWith('stellar:');
-
+  // Sandbox magic addresses — network-agnostic, matched by address string not format
   var payer = '0x0000000000000000000000000000000000CAFE01';
   var payee = '0x0000000000000000000000000000000000CAFE02';
   var sig = '0xabc123def456...';
 
-  if (isSolana) {
-    payer = '11111111111111111111111111111112';
-    payee = '11111111111111111111111111111113';
-    sig = 'base58signature...';
-  } else if (isTon) {
-    payer = 'UQ0000000000000000000000000000000000000000CAFE01';
-    payee = 'UQ0000000000000000000000000000000000000000CAFE02';
-    sig = 'base64signature...';
-  } else if (isTron) {
-    payer = 'T0000000000000000000000000000CAFE01';
-    payee = 'T0000000000000000000000000000CAFE02';
-    sig = '0xabc123def456...';
-  } else if (isStellar) {
-    payer = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAFE01';
-    payee = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAFE02';
-    sig = 'base64signature...';
-  }
+  // Testnet token contract addresses per network
+  var assetByNetwork = {
+    'eip155:84532': '0x036CbD53842c5426634e7929541eC2318f3dCF7e',
+    'eip155:11155111': '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
+    'eip155:421614': '0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d',
+    'solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1': '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
+    'ton:testnet': 'kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy',
+    'tron:nile': 'TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf',
+    'stellar:testnet': 'CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA'
+  };
+  var asset = assetByNetwork[network] || '';
 
   if (endpoint === 'webhook/test') {
     return JSON.stringify({
@@ -440,33 +445,47 @@ function getExamplePayload(endpoint, network) {
 
   if (endpoint === 'verify' || endpoint === 'settle') {
     return JSON.stringify({
-      t402Version: 2,
       paymentPayload: {
+        t402Version: 2,
         accepted: {
           scheme: 'exact',
-          network: network
+          network: network,
+          asset: asset
         },
         payload: {
           signature: sig,
-          authorization: { payer: payer }
+          payer: payer
         }
       },
       paymentRequirements: {
         scheme: 'exact',
         network: network,
-        maxAmountRequired: '1000000',
-        resource: 'https://example.com/api/data',
-        payee: payee
+        asset: asset,
+        amount: '1000000',
+        payTo: payee
       }
     }, null, 2);
   }
   return '';
 }
 
-function switchEndpoint(endpoint) {
+function switchEndpoint(endpoint, e) {
   currentEndpoint = endpoint;
-  document.querySelectorAll('.ep-tab').forEach(function(t) { t.classList.remove('active'); });
-  event.target.classList.add('active');
+  document.querySelectorAll('.ep-tab').forEach(function(t) {
+    t.classList.remove('active');
+    t.setAttribute('aria-selected', 'false');
+  });
+  if (e) {
+    e.currentTarget.classList.add('active');
+    e.currentTarget.setAttribute('aria-selected', 'true');
+  } else {
+    document.querySelectorAll('.ep-tab').forEach(function(t) {
+      if (t.textContent.includes('/' + endpoint)) {
+        t.classList.add('active');
+        t.setAttribute('aria-selected', 'true');
+      }
+    });
+  }
 
   document.getElementById('idempotencyRow').style.display = (endpoint === 'settle') ? 'block' : 'none';
 
@@ -489,30 +508,7 @@ function switchEndpoint(endpoint) {
 
 // Programmatic endpoint selection (used by walkthrough buttons)
 function selectEndpoint(endpoint) {
-  currentEndpoint = endpoint;
-  document.querySelectorAll('.ep-tab').forEach(function(t) { t.classList.remove('active'); });
-  // Find matching tab
-  document.querySelectorAll('.ep-tab').forEach(function(t) {
-    if (t.textContent.indexOf('/' + endpoint) !== -1) t.classList.add('active');
-  });
-
-  document.getElementById('idempotencyRow').style.display = (endpoint === 'settle') ? 'block' : 'none';
-
-  if (endpoint === 'supported') {
-    currentMethod = 'GET';
-    requestBody.value = '';
-    requestBody.disabled = true;
-    requestBody.placeholder = 'GET request — no body needed';
-    requestTitle.textContent = 'GET /supported';
-    sendBtn.textContent = 'Try It';
-  } else {
-    currentMethod = 'POST';
-    requestBody.disabled = false;
-    requestBody.placeholder = 'Request body (JSON)...';
-    requestTitle.textContent = 'POST /' + endpoint;
-    sendBtn.textContent = 'Send';
-    requestBody.value = getExamplePayload(endpoint, networkSelect.value);
-  }
+  switchEndpoint(endpoint);
 }
 
 function onNetworkChange() {
@@ -531,6 +527,7 @@ function updateRateLimit(headers) {
     rateRemaining.textContent = remaining;
     var pct = (parseInt(remaining) / parseInt(limit || 100)) * 100;
     rateMeter.style.width = pct + '%';
+    rateMeter.parentElement.setAttribute('aria-valuenow', Math.round(pct));
     rateMeter.className = 'rate-meter-fill';
     if (pct < 20) rateMeter.classList.add('critical');
     else if (pct < 50) rateMeter.classList.add('low');
@@ -662,21 +659,21 @@ function getCurlCommand() {
   if (currentMethod === 'GET') {
     return 'curl -s ' + url + ' | jq';
   }
-  return "curl -s -X POST " + url + " \\\n  -H \"Content-Type: application/json\" \\\n  -d '" + requestBody.value.replace(/\n/g, '') + "'";
+  return "curl -s -X POST " + url + " \\\n  -H \"Content-Type: application/json\" \\\n  -d '" + requestBody.value.replace(/\n/g, '').replace(/'/g, "'\\''") + "'";
 }
 
 function copyRequest() {
   var cmd = getCurlCommand();
   navigator.clipboard.writeText(cmd).then(function() {
     showToast('Copied curl command');
-  });
+  }).catch(function() { showToast('Copy failed — try selecting text manually'); });
 }
 
 function copyResponse() {
   if (lastResponse) {
     navigator.clipboard.writeText(lastResponse).then(function() {
       showToast('Copied response');
-    });
+    }).catch(function() { showToast('Copy failed — try selecting text manually'); });
   }
 }
 
@@ -734,8 +731,6 @@ fetch('/supported').then(function(r) { return r.json(); }).then(function(data) {
 
 // Initialize
 switchEndpoint('supported');
-// Reset tab highlight since switchEndpoint relies on event.target
-document.querySelector('.ep-tab').classList.add('active');
 </script>
 </body>
 </html>
