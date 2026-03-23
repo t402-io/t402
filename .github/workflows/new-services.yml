@@ -76,6 +76,7 @@ jobs:
         timeout-minutes: 5
         env:
           BAZAAR_ADMIN_KEY: test-ci-key
+          RATE_LIMIT_PER_MINUTE: "1000"
           BASE_URL: http://localhost:${{ matrix.service == 'bazaar' && '3402' || matrix.service == 'status' && '3403' || matrix.service == 'explorer' && '3404' || matrix.service == 'agent-dashboard' && '3405' || '3406' }}
 
   detect-changes:
