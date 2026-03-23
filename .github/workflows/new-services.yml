@@ -81,7 +81,7 @@ jobs:
 
   detect-changes:
     needs: test
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     outputs:
       services: ${{ steps.changes.outputs.services }}
@@ -91,15 +91,20 @@ jobs:
           fetch-depth: 0
       - id: changes
         run: |
-          BASE="${{ github.event.before }}"
-          HEAD="${{ github.sha }}"
-          CHANGED=""
-          for svc in bazaar status explorer agent-dashboard sandbox; do
-            if git diff --name-only "$BASE" "$HEAD" | grep -q "^services/${svc}/"; then
-              CHANGED="${CHANGED:+$CHANGED }${svc}"
-            fi
-          done
-          echo "services=${CHANGED:-none}" >> "$GITHUB_OUTPUT"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # Deploy all services on manual trigger
+            echo "services=bazaar status explorer agent-dashboard sandbox" >> "$GITHUB_OUTPUT"
+          else
+            BASE="${{ github.event.before }}"
+            HEAD="${{ github.sha }}"
+            CHANGED=""
+            for svc in bazaar status explorer agent-dashboard sandbox; do
+              if git diff --name-only "$BASE" "$HEAD" | grep -q "^services/${svc}/"; then
+                CHANGED="${CHANGED:+$CHANGED }${svc}"
+              fi
+            done
+            echo "services=${CHANGED:-none}" >> "$GITHUB_OUTPUT"
+          fi
 
   deploy:
     needs: detect-changes
