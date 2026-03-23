@@ -31,11 +31,23 @@ export const SUPPORTED_NETWORKS = [
   "stellar:testnet",     // Stellar Testnet
 ];
 
+export const TOKEN_INFO = {
+  "eip155:84532": { symbol: "USDC", address: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", decimals: 6 },
+  "eip155:11155111": { symbol: "USDC", address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", decimals: 6 },
+  "eip155:421614": { symbol: "USDC", address: "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d", decimals: 6 },
+  "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1": { symbol: "USDC", address: "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU", decimals: 6 },
+  "ton:testnet": { symbol: "USDT", address: "kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy", decimals: 6 },
+  "tron:nile": { symbol: "USDT", address: "TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf", decimals: 6 },
+  "stellar:testnet": { symbol: "USDC", address: "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA", decimals: 7 },
+};
+
 // SupportedKind objects matching SDK SupportedResponse type
 export const SUPPORTED_KINDS = SUPPORTED_NETWORKS.map((network) => ({
   t402Version: 2,
   scheme: "exact",
   network,
+  token: TOKEN_INFO[network] || null,
+  upstream: false, // will be enriched by checkUpstream
 }));
 
 /**
@@ -58,16 +70,30 @@ export function extractPayer(body) {
     || body?.paymentPayload?.payer;
 }
 
+const MAINNET_TO_TESTNET = {
+  "eip155:1": "eip155:11155111",
+  "eip155:8453": "eip155:84532",
+  "eip155:42161": "eip155:421614",
+  "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+  "ton:mainnet": "ton:testnet",
+  "tron:mainnet": "tron:nile",
+  "stellar:pubnet": "stellar:testnet",
+};
+
 /**
  * Validate that a network is a supported testnet.
- * Returns an error string or null if valid.
+ * Returns an error object { error, suggestion? } or null if valid.
  */
 export function validateNetwork(network) {
   if (!network || typeof network !== "string") {
-    return "Missing or invalid paymentRequirements.network";
+    return { error: "Missing or invalid paymentRequirements.network" };
   }
   if (!SUPPORTED_NETWORKS.includes(network)) {
-    return `Sandbox only supports testnets: ${SUPPORTED_NETWORKS.join(", ")}`;
+    const suggestion = MAINNET_TO_TESTNET[network];
+    return {
+      error: `Sandbox only supports testnets: ${SUPPORTED_NETWORKS.join(", ")}`,
+      ...(suggestion && { suggestion: `Did you mean "${suggestion}"?` }),
+    };
   }
   return null;
 }

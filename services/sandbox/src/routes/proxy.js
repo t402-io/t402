@@ -14,7 +14,12 @@ export function registerProxyRoutes(app) {
     const network = req.body?.paymentRequirements?.network;
     const networkError = validateNetwork(network);
     if (networkError) {
-      return res.status(400).json({ isValid: false, invalidReason: networkError, sandbox: true });
+      return res.status(400).json({
+        isValid: false,
+        invalidReason: networkError.error,
+        ...(networkError.suggestion && { suggestion: networkError.suggestion }),
+        sandbox: true,
+      });
     }
 
     // Check for magic test addresses
@@ -99,7 +104,12 @@ export function registerProxyRoutes(app) {
     const network = req.body?.paymentRequirements?.network;
     const networkError = validateNetwork(network);
     if (networkError) {
-      return res.status(400).json({ success: false, errorReason: networkError, sandbox: true });
+      return res.status(400).json({
+        success: false,
+        errorReason: networkError.error,
+        ...(networkError.suggestion && { suggestion: networkError.suggestion }),
+        sandbox: true,
+      });
     }
 
     // Check for magic test addresses

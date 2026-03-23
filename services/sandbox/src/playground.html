@@ -157,12 +157,12 @@ textarea:focus-visible,
   <!-- Quick Links -->
   <div class="quick-bar">
     <span style="color:#9ca3af;font-size:.8rem;padding:.4rem 0">Quick:</span>
-    <button class="quick-btn" onclick="quickFetch('/health')"><span class="method-badge method-get">GET</span>/health</button>
-    <button class="quick-btn" onclick="quickFetch('/ready')"><span class="method-badge method-get">GET</span>/ready</button>
-    <button class="quick-btn" onclick="quickFetch('/supported')"><span class="method-badge method-get">GET</span>/supported</button>
-    <button class="quick-btn" onclick="quickFetch('/faucets')"><span class="method-badge method-get">GET</span>/faucets</button>
-    <button class="quick-btn" onclick="quickFetch('/examples')"><span class="method-badge method-get">GET</span>/examples</button>
-    <button class="quick-btn" onclick="quickFetch('/usage')"><span class="method-badge method-get">GET</span>/usage</button>
+    <button class="quick-btn" onclick="quickFetch('/health')" title="Check if sandbox is running"><span class="method-badge method-get">GET</span>/health</button>
+    <button class="quick-btn" onclick="quickFetch('/ready')" title="Check upstream facilitator connectivity"><span class="method-badge method-get">GET</span>/ready</button>
+    <button class="quick-btn" onclick="quickFetch('/supported')" title="List supported testnet networks"><span class="method-badge method-get">GET</span>/supported</button>
+    <button class="quick-btn" onclick="quickFetch('/faucets')" title="Get testnet token faucet links"><span class="method-badge method-get">GET</span>/faucets</button>
+    <button class="quick-btn" onclick="quickFetch('/examples')" title="View example request/response payloads"><span class="method-badge method-get">GET</span>/examples</button>
+    <button class="quick-btn" onclick="quickFetch('/usage')" title="View rate limit usage statistics"><span class="method-badge method-get">GET</span>/usage</button>
   </div>
 
   <!-- Getting Started Walkthrough -->
@@ -230,6 +230,17 @@ textarea:focus-visible,
       <option value="ton:testnet">TON Testnet</option>
       <option value="tron:nile">TRON Nile</option>
       <option value="stellar:testnet">Stellar Testnet</option>
+    </select>
+    <label>Test Address:</label>
+    <select id="magicSelect" onchange="onMagicChange()">
+      <option value="CAFE01">&#10003; Verify Success (CAFE01)</option>
+      <option value="CAFE02">&#10007; Verify Fail: Signature (CAFE02)</option>
+      <option value="CAFE03">&#10007; Verify Fail: Expired (CAFE03)</option>
+      <option value="CAFE11">&#10003; Settle Success (CAFE11)</option>
+      <option value="CAFE12">&#10007; Settle Fail: Funds (CAFE12)</option>
+      <option value="CAFE13">&#10007; Settle Fail: Timeout (CAFE13)</option>
+      <option value="CAFE99">&#9201; Slow Response 2s (CAFE99)</option>
+      <option value="custom">Custom Address</option>
     </select>
     <div style="font-size:.7rem;color:#6b7280;margin-top:4px">
       &#128994; Real on-chain verification &nbsp; &#9898; Mock fallback
@@ -301,6 +312,7 @@ textarea:focus-visible,
   <!-- Request History -->
   <div class="history-panel">
     <h3 class="history-toggle" role="button" tabindex="0" onclick="toggleHistory()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleHistory()}">Request History <span id="history-count">(0)</span> &#9660;</h3>
+    <button onclick="clearHistory()" style="float:right;font-size:.75rem;padding:.2rem .5rem;background:#1f2937;color:#9ca3af;border:1px solid #374151;border-radius:4px;cursor:pointer">Clear</button>
     <div id="history-list" style="display:none"></div>
   </div>
 </div>
@@ -341,6 +353,13 @@ function addToHistory(method, path, status, duration, reqBody, resBody) {
     response: resBody
   });
   if (requestHistoryLocal.length > 20) requestHistoryLocal.pop();
+  renderHistory();
+  try { localStorage.setItem('sandbox-history', JSON.stringify(requestHistoryLocal)); } catch(e) {}
+}
+
+function clearHistory() {
+  requestHistoryLocal = [];
+  localStorage.removeItem('sandbox-history');
   renderHistory();
 }
 
@@ -503,6 +522,7 @@ function switchEndpoint(endpoint, e) {
     requestTitle.textContent = 'POST /' + endpoint;
     sendBtn.textContent = 'Send';
     requestBody.value = getExamplePayload(endpoint, networkSelect.value);
+    onMagicChange();
   }
 }
 
@@ -514,7 +534,22 @@ function selectEndpoint(endpoint) {
 function onNetworkChange() {
   if (currentEndpoint !== 'supported') {
     requestBody.value = getExamplePayload(currentEndpoint, networkSelect.value);
+    onMagicChange();
   }
+}
+
+function onMagicChange() {
+  var val = document.getElementById('magicSelect').value;
+  if (val === 'custom' || currentEndpoint === 'supported') return;
+  var addr = '0x' + '0'.repeat(34) + val;
+  // Update the payer field in the current request body
+  try {
+    var body = JSON.parse(requestBody.value);
+    if (body.paymentPayload && body.paymentPayload.payload) {
+      body.paymentPayload.payload.payer = addr;
+    }
+    requestBody.value = JSON.stringify(body, null, 2);
+  } catch(e) {}
 }
 
 function updateRateLimit(headers) {
@@ -702,6 +737,17 @@ function markStep(n) {
   // Highlight next step
   var next = document.getElementById('step' + (n + 1));
   if (next) next.classList.add('active');
+
+  if (completedSteps.size >= 5) {
+    // Auto-collapse walkthrough after a delay
+    setTimeout(function() {
+      var content = document.querySelector('.walkthrough-content');
+      if (content) content.style.display = 'none';
+      var toggle = document.getElementById('walkthrough-toggle');
+      if (toggle) toggle.textContent = '\u25B6';
+      showToast('Walkthrough complete! You\'re ready for integration.');
+    }, 1000);
+  }
 }
 
 function toggleWalkthrough() {
@@ -731,6 +777,16 @@ fetch('/supported').then(function(r) { return r.json(); }).then(function(data) {
 
 // Initialize
 switchEndpoint('supported');
+
+// Pre-populate rate limit display
+document.getElementById('rateRemaining').textContent = '100';
+document.getElementById('rateLimit').textContent = '100';
+
+// Load persisted history
+try {
+  var saved = localStorage.getItem('sandbox-history');
+  if (saved) { requestHistoryLocal = JSON.parse(saved); renderHistory(); }
+} catch(e) {}
 </script>
 </body>
 </html>

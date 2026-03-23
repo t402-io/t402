@@ -10,12 +10,15 @@
 <style>
 html{scroll-behavior:smooth}
 body{font-family:system-ui;background:#0a0a0b;color:#e5e7eb;max-width:960px;margin:0 auto;padding:2rem}
-h1{color:#50AF95;font-size:1.6rem}
-h2{color:#d1d5db;font-size:1.1rem;margin-top:2rem}
+h1{color:#50AF95;font-size:2rem;margin-bottom:.5rem}
+h2{color:#d1d5db;font-size:1.25rem;margin-top:2.5rem;margin-bottom:.75rem}
+p{line-height:1.7}
 a{color:#50AF95}
 code{background:#1f2937;padding:.15em .4em;border-radius:4px;font-size:.85em}
 pre{background:#1f2937;padding:1rem;border-radius:8px;overflow-x:auto;font-size:.85em;line-height:1.5}
-.badge{display:inline-block;background:#065f46;color:#6ee7b7;padding:.2em .6em;border-radius:4px;font-size:.75rem;margin-left:.5rem}
+.badge{display:inline-block;background:#065f46;color:#6ee7b7;padding:.2em .6em;border-radius:4px;font-size:.8rem;margin-left:.5rem}
+.cta-btn{display:inline-block;background:#065f46;color:#6ee7b7;padding:.75rem 2rem;border-radius:8px;text-decoration:none;font-weight:600;font-size:1rem;transition:background .15s}
+.cta-btn:hover{background:#047857}
 table{width:100%;border-collapse:collapse;margin:1rem 0}
 table code{word-break:break-all}
 @media(max-width:600px){table{display:block;overflow-x:auto}}
@@ -29,30 +32,29 @@ td{padding:.5rem;border-bottom:1px solid #111827;font-size:.9em}
 .tab-content{display:none}
 .tab-content.active{display:block}
 .note{background:#1c1917;border-left:3px solid #f59e0b;padding:.75rem 1rem;margin:1rem 0;font-size:.85em;color:#fbbf24}
-.flow{display:flex;align-items:center;gap:.3rem;overflow-x:auto;padding:.5rem 0;margin:1rem 0}
-.flow-step{border:1px solid #374151;border-radius:8px;padding:.75rem 1rem;text-align:center;min-width:120px;flex:1;max-width:180px}
-.flow-icon{width:28px;height:28px;border-radius:50%;background:#1f2937;color:#50AF95;display:flex;align-items:center;justify-content:center;margin:0 auto .3rem;font-size:.8rem;font-weight:700}
+.flow{display:flex;align-items:center;gap:.5rem;overflow-x:auto;padding:.5rem 0;margin:1rem 0}
+.flow-step{border:1px solid #374151;border-radius:8px;padding:.75rem 1rem;text-align:center;min-width:120px;flex:1;max-width:180px;background:#111827}
+.flow-icon{width:32px;height:32px;border-radius:50%;background:#1f2937;color:#50AF95;display:flex;align-items:center;justify-content:center;margin:0 auto .3rem;font-size:.9rem;font-weight:700}
 .flow-label{color:#e5e7eb;font-size:.8rem;font-weight:600}
 .flow-desc{color:#6b7280;font-size:.7rem;margin-top:.2rem}
 .flow-arrow{color:#374151;font-size:1.2rem;flex-shrink:0}
-.tab:focus-visible,a:focus-visible,.cta-link:focus-visible{outline:2px solid #10b981;outline-offset:2px}
+.tab:focus-visible,a:focus-visible,.cta-btn:focus-visible{outline:2px solid #10b981;outline-offset:2px}
 @media(max-width:600px){.flow{flex-wrap:wrap;justify-content:center}.flow-arrow{display:none}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto !important}}
 </style></head>
 <body>
 <h1>T402 Sandbox<span class="badge">TESTNET</span></h1>
-<p>Public testnet facilitator for developer testing. No API key needed. No real funds.</p>
+<p style="color:#9ca3af;font-size:1.05rem;margin-top:.5rem">Test payments on 7 testnets. No API key. No real funds. Just code.</p>
 
 <h2>What is T402?</h2>
-<p style="color:#9ca3af;font-size:.9em;line-height:1.6">
+<p style="color:#9ca3af;font-size:.9em;line-height:1.7">
   T402 is an open-source HTTP-native payment protocol for stablecoins.
-  When a server requires payment, it returns <code>HTTP 402 Payment Required</code> with payment instructions.
-  The client signs a payment off-chain and resubmits. The server verifies via a <strong>facilitator</strong> and settles on-chain.
-  This sandbox lets you test the entire flow without real funds.
+  Servers return <code>HTTP 402</code> with payment instructions &mdash; clients sign off-chain, resubmit, and the facilitator verifies and settles on-chain.
+  This sandbox lets you test the entire flow with zero real funds.
 </p>
 
 <div style="text-align:center;margin:1.5rem 0">
-  <a href="/playground" class="cta-link" style="display:inline-block;background:#065f46;color:#6ee7b7;padding:.6rem 1.5rem;border-radius:6px;text-decoration:none;font-weight:600;font-size:.95rem">Try the Playground &rarr;</a>
+  <a href="/playground" class="cta-btn">Try the Playground &rarr;</a>
 </div>
 
 <h2>Payment Flow</h2>
@@ -81,7 +83,7 @@ td{padding:.5rem;border-bottom:1px solid #111827;font-size:.9em}
     <div class="flow-desc">Facilitator confirms</div>
   </div>
   <div class="flow-arrow">&rarr;</div>
-  <div class="flow-step" style="border-color:#10b981">
+  <div class="flow-step" style="border-color:#10b981;background:#0d2818">
     <div class="flow-icon" style="background:#065f46;color:#6ee7b7">&#10003;</div>
     <div class="flow-label">Access Granted</div>
     <div class="flow-desc">200 OK + data</div>
@@ -122,6 +124,8 @@ curl -s https://sandbox.t402.io/faucets | jq
 curl -s -X POST https://sandbox.t402.io/verify \
   -H "Content-Type: application/json" \
   -d '{"paymentPayload":{"payload":{"payer":"0x0000000000000000000000000000000000CAFE01"}},"paymentRequirements":{"network":"eip155:84532"}}'</code></pre>
+
+<div style="text-align:center;margin:1.5rem 0"><a href="/playground" class="cta-btn">Open Playground &rarr;</a></div>
 
 <h2>Supported Networks <span id="live-count" style="font-size:.75rem;color:#10b981"></span></h2>
 <table>
@@ -198,7 +202,7 @@ curl -s -X POST https://sandbox.t402.io/verify \
 </table>
 <div class="note">To migrate: change the facilitator URL in your SDK config and add your API key. All request/response formats are identical.</div>
 
-<p style="color:#6b7280;margin-top:2rem;font-size:.85rem">
+<p style="color:#6b7280;margin-top:2rem;font-size:.85rem;border-top:1px solid #1f2937;padding-top:1.5rem">
   <a href="/playground">Playground</a> · <a href="/errors">Errors</a> · <a href="https://docs.t402.io">Docs</a> · <a href="https://github.com/t402-io/t402">GitHub</a> · Powered by <a href="https://t402.io">T402</a>
 </p>
 <script>

@@ -172,7 +172,11 @@ describe("GET /examples", () => {
     const data = await res.json();
     assert.ok(data.curl.supported, "Missing curl.supported");
     assert.ok(data.curl.faucets, "Missing curl.faucets");
-    assert.ok(data.curl.verify, "Missing curl.verify");
+    assert.ok(data.curl.verify_base_sepolia, "Missing curl.verify_base_sepolia");
+    assert.ok(data.curl.verify_solana_devnet, "Missing curl.verify_solana_devnet");
+    assert.ok(data.curl.verify_ton_testnet, "Missing curl.verify_ton_testnet");
+    assert.ok(data.curl.settle, "Missing curl.settle");
+    assert.ok(data.curl.webhook, "Missing curl.webhook");
   });
 });
 
