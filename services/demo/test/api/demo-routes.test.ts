@@ -26,7 +26,7 @@ function makeRequest(
   }
 ) {
   const headers = new Headers(options?.headers);
-  const init: RequestInit & { method?: string } = { method: options?.method ?? "GET", headers };
+  const init: { method: string; headers: Headers; body?: string } = { method: options?.method ?? "GET", headers };
   if (options?.body) {
     init.body = JSON.stringify(options.body);
   }

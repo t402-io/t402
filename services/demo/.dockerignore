@@ -5,6 +5,9 @@ node_modules
 test
 e2e
 playwright-report
+test-results
 coverage
+out
+.open-next
 .env*
 .turbo

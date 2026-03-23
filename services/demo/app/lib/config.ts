@@ -86,6 +86,9 @@ export function buildRequirementsFromPayload(
     : undefined;
 
   const config = matchingFamily ? CHAIN_CONFIGS[matchingFamily] : undefined;
+  if (network && !matchingFamily) {
+    console.warn(`[t402] Unknown network "${network}" in payment payload, falling back to EVM defaults`);
+  }
   const family = matchingFamily ?? "evm";
   const scheme =
     schemeOverride ??

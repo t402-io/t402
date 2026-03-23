@@ -68,7 +68,8 @@ export function AiApiScenario() {
       const paymentRequired = await initialResponse.json();
 
       // Step 2: Sign payment via multi-chain hook
-      const requirements = paymentRequired.accepts[0];
+      const requirements = paymentRequired.accepts?.[0];
+      if (!requirements) throw new Error("No payment options available");
       setFlowState("signing");
       const paymentPayload = await signPayment(requirements);
 

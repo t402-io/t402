@@ -38,7 +38,7 @@ export const CHAIN_CONFIGS: Record<ChainFamily, ChainConfig> = {
     color: "var(--color-chain-evm)",
     decimals: 6,
     tokenSymbol: "USDC",
-    tokenContractName: "USD Coin",
+    tokenContractName: "USDC",
     tokenContractVersion: "2",
     gasFaucet: "https://www.alchemy.com/faucets/base-sepolia",
     gasFaucetLabel: "Base Sepolia ETH",

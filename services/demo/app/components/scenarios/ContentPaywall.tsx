@@ -53,7 +53,8 @@ export function ContentPaywall() {
 
       setFlowState("got-402");
       const paymentRequired = await initialResponse.json();
-      const requirements = paymentRequired.accepts[0];
+      const requirements = paymentRequired.accepts?.[0];
+      if (!requirements) throw new Error("No payment options available");
 
       // Step 2: Sign via multi-chain hook & retry
       setFlowState("signing");

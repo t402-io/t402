@@ -36,7 +36,8 @@ export function GaslessPayment() {
       if (res.status === 402) {
         setFlowState("got-402");
         const paymentRequired = await res.json();
-        const requirements = paymentRequired.accepts[0];
+        const requirements = paymentRequired.accepts?.[0];
+      if (!requirements) throw new Error("No payment options available");
         setFlowState("signing");
         const paymentPayload = await signPayment(requirements);
 

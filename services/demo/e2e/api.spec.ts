@@ -155,7 +155,7 @@ test.describe('GET /api/demo/content', () => {
     }
   });
 
-  test('EVM accept has extra.name = "USD Coin"', async ({ request }) => {
+  test('EVM accept has extra.name = "USDC"', async ({ request }) => {
     const res = await request.get(`${BASE}/api/demo/content`);
     const body = await res.json();
 
@@ -164,7 +164,7 @@ test.describe('GET /api/demo/content', () => {
     );
     expect(evmAccept).toBeTruthy();
     expect(evmAccept.extra).toBeTruthy();
-    expect(evmAccept.extra.name).toBe('USD Coin');
+    expect(evmAccept.extra.name).toBe('USDC');
   });
 
   test('402 response includes preview with title and author', async ({ request }) => {

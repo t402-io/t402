@@ -64,7 +64,12 @@ function ActiveWalletProvider({ children }: { children: ReactNode }) {
   let wrapped = <>{children}</>;
 
   // Wrap with the active chain's provider (if not EVM)
+  // Note: EVM uses WagmiProvider (always loaded below), TRON + Stacks use window injection (no provider needed)
   switch (activeFamily) {
+    case "evm":
+    case "tron":
+    case "stacks":
+      break;
     case "ton":
       wrapped = <TonConnectProvider>{wrapped}</TonConnectProvider>;
       break;

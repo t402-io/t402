@@ -143,7 +143,7 @@ export async function OPTIONS() {
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Payment-Signature, X-Demo-Mode, X-Preferred-Chain",
+      "Access-Control-Allow-Headers": "Content-Type, Payment-Signature, x-demo-mode, x-preferred-chain",
       "Access-Control-Expose-Headers": "Payment-Required, Payment-Response, X-Segment, X-Duration, X-Cost",
     },
   });

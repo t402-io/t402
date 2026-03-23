@@ -72,7 +72,8 @@ export function McpAiAgent() {
 
       // Check for 402 error in MCP response
       if (initialData.error?.code === 402) {
-        const requirements = initialData.error.data.accepts[0];
+        const requirements = initialData.error.data.accepts?.[0];
+        if (!requirements) throw new Error("No payment options available");
         const paymentPayload = await signPayment(requirements);
 
         setToolCalls((prev) => prev.map((c) => c.id === callId ? { ...c, status: "executing" } : c));
