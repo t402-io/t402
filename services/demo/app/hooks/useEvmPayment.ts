@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { useAccount, useSignTypedData, useSwitchChain } from "wagmi";
+import { getConfigByNetwork } from "@/lib/chain-registry";
 
 interface PaymentRequirements {
   scheme: string;
@@ -70,13 +71,21 @@ export function useEvmPayment() {
         throw new Error("Wallet not connected");
       }
 
-      // Auto-switch to the required chain if wallet is on a different one
       const requiredChainId = parseInt(requirements.network.split(":")[1]);
+      const chainConfig = getConfigByNetwork(requirements.network);
+      const chainName = chainConfig?.name || `Chain ${requiredChainId}`;
+
+      // Auto-switch to the required chain if wallet is on a different one
       if (chain?.id !== requiredChainId) {
         try {
           await switchChainAsync({ chainId: requiredChainId });
-        } catch {
-          throw new Error(`Please switch your wallet to chain ${requiredChainId} (Base Sepolia)`);
+          // Wait for wagmi to update chain state after switch
+          await new Promise((r) => setTimeout(r, 500));
+        } catch (e) {
+          throw new Error(
+            `Please switch your wallet to ${chainName}. ` +
+            `Your wallet may not support this network — try adding it manually.`
+          );
         }
       }
 

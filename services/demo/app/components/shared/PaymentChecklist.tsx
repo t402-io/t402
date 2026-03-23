@@ -4,15 +4,23 @@ import { useChainContext } from "@/providers/ChainProvider";
 import { useDemoContext } from "@/providers/DemoProvider";
 import { useWalletReady } from "@/providers/ClientProviders";
 import { useMultiChainPayment } from "@/hooks/useMultiChainPayment";
+import { useAccount, useSwitchChain } from "wagmi";
 import { Check, X, AlertCircle } from "lucide-react";
 
 function ChecklistInner() {
-  const { activeConfig } = useChainContext();
+  const { activeConfig, activeFamily } = useChainContext();
   const { isConnected } = useMultiChainPayment();
+  const evmAccount = useAccount();
+  const { switchChain } = useSwitchChain();
+
+  // Check if wallet is on the correct chain (EVM only)
+  const requiredChainId = activeFamily === "evm" ? parseInt(activeConfig.network.split(":")[1]) : null;
+  const walletChainId = evmAccount.chain?.id ?? null;
+  const wrongChain = activeFamily === "evm" && isConnected && requiredChainId && walletChainId && walletChainId !== requiredChainId;
 
   const checks = [
     {
-      label: `Chain: ${activeConfig.label}`,
+      label: `Chain: ${activeConfig.name} (${activeConfig.tokenSymbol})`,
       ok: true,
     },
     {
@@ -20,6 +28,17 @@ function ChecklistInner() {
       ok: isConnected,
       help: !isConnected ? "Click Connect Wallet in the header" : undefined,
     },
+    ...(wrongChain
+      ? [
+          {
+            label: `Wrong network: wallet on ${evmAccount.chain?.name || `Chain ${walletChainId}`}`,
+            ok: false,
+            help: `Need ${activeConfig.name}`,
+            action: () => switchChain?.({ chainId: requiredChainId! }),
+            actionLabel: `Switch to ${activeConfig.name}`,
+          },
+        ]
+      : []),
   ];
 
   const allReady = checks.every((c) => c.ok);
@@ -52,6 +71,15 @@ function ChecklistInner() {
             </span>
             {check.help && (
               <span style={{ color: "var(--color-muted)" }}> — {check.help}</span>
+            )}
+            {"action" in check && check.action && (
+              <button
+                onClick={check.action}
+                className="px-2 py-0.5 rounded text-[10px] font-medium cursor-pointer hover:opacity-80"
+                style={{ background: "var(--color-brand)", color: "white" }}
+              >
+                {check.actionLabel}
+              </button>
             )}
           </div>
         ))}
