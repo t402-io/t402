@@ -22,10 +22,10 @@ test.describe("Mainnet Mode Toggle", () => {
     expect(res.status()).toBe(402);
     const body = await res.json();
     expect(body.accepts).toHaveLength(10);
-    // First EVM entry should be Ethereum mainnet (USDT0)
+    // First EVM entry should be Arbitrum mainnet (USDT0 — native ERC-20)
     const evm = body.accepts.find((a: { network: string }) => a.network.startsWith("eip155:"));
-    expect(evm.network).toBe("eip155:1");
-    expect(evm.asset).toBe("0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee");
+    expect(evm.network).toBe("eip155:42161");
+    expect(evm.asset).toBe("0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9");
   });
 
   test("mainnet mode uses correct TRON mainnet address", async ({ request }) => {

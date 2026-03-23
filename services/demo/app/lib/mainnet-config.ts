@@ -16,10 +16,10 @@ export const MAINNET_CONFIGS: Record<string, ChainConfig> = {
   // ═══════════════════════════════════════════════════════════════
   "eip155:1": {
     family: "evm", network: "eip155:1", name: "Ethereum", label: "Ethereum",
-    asset: "0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee",
+    asset: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
     payTo: "0xC88f67e776f16DcFBf42e6bDda1B82604448899B",
-    scheme: "exact", tokenSymbol: "USDT0", decimals: 6,
-    tokenContractName: "TetherToken", tokenContractVersion: "1",
+    scheme: "exact-legacy", tokenSymbol: "USDT", decimals: 6,
+    tokenContractName: "Tether USD", tokenContractVersion: "1",
     explorer: "https://etherscan.io/tx/",
     color: "#627EEA",
   },

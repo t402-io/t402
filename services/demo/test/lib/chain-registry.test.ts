@@ -140,7 +140,7 @@ describe("chain-registry", () => {
 
     it("returns mainnet config in mainnet mode", () => {
       const config = getDefaultConfigForFamily("evm", false);
-      expect(config.network).toBe("eip155:1"); // Ethereum USDT0
+      expect(config.network).toBe("eip155:42161"); // Arbitrum USDT0
     });
   });
 
@@ -168,7 +168,7 @@ describe("chain-registry", () => {
     it("returns 10 entries in mainnet mode", () => {
       const accepts = buildAccepts("1000", false);
       expect(accepts).toHaveLength(10);
-      expect(accepts[0].network).toBe("eip155:1"); // Ethereum USDT0
+      expect(accepts[0].network).toBe("eip155:42161"); // Arbitrum USDT0
     });
 
     it("uses preferred network for EVM in mainnet mode", () => {
