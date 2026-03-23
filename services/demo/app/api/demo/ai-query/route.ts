@@ -97,9 +97,11 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (error) {
     const reason = String(error);
+    // Parse facilitator error for user-friendly response
+    const isPaymentIssue = reason.includes("Insufficient balance") || reason.includes("insufficient") || reason.includes("verify_signature");
     return NextResponse.json(
-      { error: "Facilitator error", reason },
-      { status: 500 }
+      { error: isPaymentIssue ? "Payment failed" : "Facilitator error", reason },
+      { status: isPaymentIssue ? 402 : 500 }
     );
   }
 }

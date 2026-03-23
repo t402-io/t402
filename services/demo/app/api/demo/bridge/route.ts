@@ -147,9 +147,11 @@ export async function POST(request: NextRequest) {
     response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
     return response;
   } catch (error) {
+    const reason = String(error);
+    const isPaymentIssue = reason.includes('Insufficient balance') || reason.includes('insufficient') || reason.includes('verify_signature');
     return NextResponse.json(
-      { error: "Facilitator error", reason: String(error) },
-      { status: 500 }
+      { error: isPaymentIssue ? 'Payment failed' : 'Facilitator error', reason },
+      { status: isPaymentIssue ? 402 : 500 }
     );
   }
 }

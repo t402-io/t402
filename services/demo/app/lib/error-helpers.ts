@@ -9,7 +9,7 @@ export function classifyError(error: unknown): ErrorType {
   if (lower.includes("rejected") || lower.includes("denied") || lower.includes("cancelled") || lower.includes("user refused")) {
     return "wallet-rejected";
   }
-  if (lower.includes("insufficient") || lower.includes("balance")) {
+  if (lower.includes("insufficient") || lower.includes("balance") || lower.includes("verify_signature") || lower.includes("payment failed")) {
     return "insufficient-funds";
   }
   if (lower.includes("timed out") || lower.includes("timeout") || lower.includes("aborted")) {
@@ -29,7 +29,7 @@ export function getUserFriendlyMessage(type: ErrorType, originalMessage: string)
     case "wallet-rejected":
       return "You declined the signature request. Try again when ready.";
     case "insufficient-funds":
-      return "Insufficient token balance. You need test tokens to complete this payment.";
+      return "Insufficient token balance. You need tokens to complete this payment.";
     case "timeout":
       return "Request timed out. The facilitator may be busy — try again.";
     case "facilitator":
