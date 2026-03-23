@@ -51,7 +51,7 @@ export const CHAIN_CONFIGS: Record<ChainFamily, ChainConfig> = {
     family: "ton",
     network: "ton:testnet",
     asset: "kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy",
-    payTo: "EQDjv9CUEJ__D_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkEUe",
+    payTo: "kQDjv9CUEJ__D_3-3J4trQtqVklMBiNoGVSf3Fu6AaDGkP6U",
     explorer: "https://testnet.tonscan.org/tx/",
     name: "TON Testnet",
     label: "TON",
