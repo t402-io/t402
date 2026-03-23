@@ -1,7 +1,20 @@
-import { describe, it } from "node:test";
+import { describe, it, before, after } from "node:test";
 import assert from "node:assert";
 
-const BASE = process.env.BASE_URL || "http://localhost:3404";
+let server;
+let BASE = process.env.BASE_URL || "";
+
+if (!BASE) {
+  if (!process.env.EXPLORER_MODE) process.env.EXPLORER_MODE = "seed";
+  before(async () => {
+    const { default: app, start } = await import("../src/server.js");
+    await start({ listen: false });
+    server = app.listen(0);
+    await new Promise((resolve) => server.on("listening", resolve));
+    BASE = `http://localhost:${server.address().port}`;
+  });
+  after(() => { if (server) server.close(); });
+}
 
 describe("Explorer API", () => {
   it("GET /health returns ok", async () => {

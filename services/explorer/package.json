@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "EXPLORER_MODE=seed node --watch src/server.js",
     "start": "node src/server.js",
-    "test": "EXPLORER_MODE=seed node --test test/*.test.js"
+    "test": "EXPLORER_MODE=seed node --test --test-force-exit test/*.test.js"
   },
   "dependencies": {
     "better-sqlite3": "^11.7.0",

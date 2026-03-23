@@ -1,13 +1,7 @@
 import { escapeHtml, formatAmount, formatNumber, formatAddress, formatHash, formatTime, getNetworkName, getExplorerUrl, getAddressUrl } from "./utils.js";
 
 function themeToggleScript() {
-  return `<script>
-(function(){
-  var root = document.documentElement;
-  var stored = localStorage.getItem("t402-theme");
-  if (stored === "light") root.classList.add("light");
-})();
-</script>`;
+  return `<script src="/static/theme.js"></script>`;
 }
 
 function headerHtml(title, subtitle) {

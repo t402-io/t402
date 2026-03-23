@@ -53,7 +53,7 @@ app.use((_req, res, next) => {
   res.set("Referrer-Policy", "strict-origin-when-cross-origin");
   res.set(
     "Content-Security-Policy",
-    "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; frame-ancestors 'none'; base-uri 'self'",
+    "default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; frame-ancestors 'none'; base-uri 'self'",
   );
   next();
 });
@@ -539,14 +539,21 @@ const _reverifyInterval = setInterval(reverifyStaleServices, REVERIFY_INTERVAL);
 _reverifyInterval.unref();
 
 // ── Start server ──────────────────────────────────────────────────────
-const server = app.listen(PORT, () => {
-  logger.info("server started", {
-    port: PORT,
-    services: store.size(),
-    store: store.isMemory() ? "memory" : "sqlite",
-    endpoints: ["/api/v1/search", "/api/v1/services", "/api/v1/categories", "/api/v1/stats", "/api/v1/featured"],
+const isDirectRun =
+  process.argv[1] && new URL(import.meta.url).pathname === new URL(`file://${process.argv[1]}`).pathname;
+
+if (isDirectRun) {
+  app.listen(PORT, () => {
+    logger.info("server started", {
+      port: PORT,
+      services: store.size(),
+      store: store.isMemory() ? "memory" : "sqlite",
+      endpoints: ["/api/v1/search", "/api/v1/services", "/api/v1/categories", "/api/v1/stats", "/api/v1/featured"],
+    });
   });
-});
+}
+
+export default app;
 
 // Graceful shutdown
 function shutdown(signal) {

@@ -123,7 +123,7 @@ app.use((_req, res, next) => {
   res.set("Referrer-Policy", "strict-origin-when-cross-origin");
   res.set(
     "Content-Security-Policy",
-    "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; img-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
+    "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; img-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
   );
   next();
 });
@@ -324,7 +324,7 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: "Internal server error" });
 });
 
-async function start() {
+async function start({ listen = true } = {}) {
   const usePg = EXPLORER_MODE === "pg" || (EXPLORER_MODE === "auto" && DATABASE_URL);
   const pgUrl = usePg ? DATABASE_URL : undefined;
   const sqlitePath = SQLITE_PATH || (EXPLORER_MODE === "seed" ? ":memory:" : undefined);
@@ -344,9 +344,11 @@ async function start() {
 
   if (usePg) { startSync(SYNC_INTERVAL); }
 
-  app.listen(PORT, () => {
-    log("info", "T402 Explorer started", { port: PORT, mode: EXPLORER_MODE, pg: !!pgUrl, sqlite: sqlitePath || ":memory:" });
-  });
+  if (listen) {
+    app.listen(PORT, () => {
+      log("info", "T402 Explorer started", { port: PORT, mode: EXPLORER_MODE, pg: !!pgUrl, sqlite: sqlitePath || ":memory:" });
+    });
+  }
 }
 
 async function shutdown(signal) {
@@ -359,6 +361,11 @@ async function shutdown(signal) {
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 process.on("SIGINT", () => shutdown("SIGINT"));
 
-start().catch((err) => { log("error", "Failed to start", { error: err.message, stack: err.stack }); process.exit(1); });
+const isDirectRun =
+  process.argv[1] && new URL(import.meta.url).pathname === new URL(`file://${process.argv[1]}`).pathname;
 
-export default app;
+if (isDirectRun) {
+  start().catch((err) => { log("error", "Failed to start", { error: err.message, stack: err.stack }); process.exit(1); });
+}
+
+export { app as default, start };

@@ -1,8 +1,20 @@
-import { describe, it } from "node:test";
+import { describe, it, before, after } from "node:test";
 import assert from "node:assert";
 
-const BASE = process.env.BASE_URL || "http://localhost:3402";
-const ADMIN_KEY = process.env.BAZAAR_ADMIN_KEY;
+let server;
+let BASE = process.env.BASE_URL || "";
+const ADMIN_KEY = process.env.BAZAAR_ADMIN_KEY || "test-key";
+
+if (!BASE) {
+  if (!process.env.BAZAAR_ADMIN_KEY) process.env.BAZAAR_ADMIN_KEY = "test-key";
+  before(async () => {
+    const app = (await import("../src/server.js")).default;
+    server = app.listen(0);
+    await new Promise((resolve) => server.on("listening", resolve));
+    BASE = `http://localhost:${server.address().port}`;
+  });
+  after(() => { if (server) server.close(); });
+}
 
 // ── Health / Ready / Metrics ──────────────────────────────────────────
 
