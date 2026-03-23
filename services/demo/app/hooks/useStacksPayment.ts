@@ -25,11 +25,11 @@ interface PaymentPayload {
 const appConfig = new AppConfig(["store_write"]);
 const userSession = new UserSession({ appConfig });
 
-// Parse a Stacks contract address into [address, contractName]
+// Parse "ST1PQHQKV0...token-susdc" into [address, contractName]
 function parseContractId(asset: string): { address: string; contractName: string } {
-  // Format: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.token-usdt"
-  const parts = asset.split(".");
-  return { address: parts[0], contractName: parts[1] || "token-usdt" };
+  const dotIndex = asset.indexOf(".");
+  if (dotIndex === -1) return { address: asset, contractName: "token-susdc" };
+  return { address: asset.slice(0, dotIndex), contractName: asset.slice(dotIndex + 1) };
 }
 
 export function useStacksPayment() {
@@ -75,13 +75,14 @@ export function useStacksPayment() {
         throw new Error("Stacks wallet not connected");
       }
 
-      const { address: contractAddress, contractName } = parseContractId(requirements.asset);
+      const { address: deployer, contractName } = parseContractId(requirements.asset);
       const amount = BigInt(requirements.amount);
 
-      // Use openContractCall which opens Hiro Wallet popup for signing
+      // SIP-010 transfer(amount, sender, recipient)
+      // Stacks is pre-broadcast — Hiro Wallet broadcasts the tx
       return new Promise<PaymentPayload>((resolve, reject) => {
         openContractCall({
-          contractAddress,
+          contractAddress: deployer,
           contractName,
           functionName: "transfer",
           functionArgs: [
@@ -91,6 +92,7 @@ export function useStacksPayment() {
           ],
           network: STACKS_TESTNET,
           onFinish: (data) => {
+            // Build payload matching ExactDirectStacksPayload
             resolve({
               t402Version: 2,
               scheme: requirements.scheme,
@@ -99,9 +101,8 @@ export function useStacksPayment() {
                 txId: data.txId,
                 from: address,
                 to: requirements.payTo,
-                value: requirements.amount,
-                contractAddress,
-                contractName,
+                amount: requirements.amount,
+                contractAddress: requirements.asset, // Full "principal.contract-name"
               },
             });
           },

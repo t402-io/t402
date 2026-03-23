@@ -19,12 +19,38 @@ interface PaymentPayload {
   payload: Record<string, unknown>;
 }
 
+interface TronAuthorization {
+  from: string;
+  to: string;
+  contractAddress: string;
+  amount: string;
+  expiration: number;
+  refBlockBytes: string;
+  refBlockHash: string;
+  timestamp: number;
+}
+
 // TronWeb type declarations for the injected window.tronWeb
+interface TronTransaction {
+  txID: string;
+  raw_data: {
+    ref_block_bytes: string;
+    ref_block_hash: string;
+    expiration: number;
+    timestamp: number;
+    contract: unknown[];
+  };
+  raw_data_hex: string;
+  signature?: string[];
+  visible?: boolean;
+}
+
 interface TronWeb {
   ready: boolean;
   defaultAddress: { base58: string; hex: string };
   trx: {
-    sign: (transaction: unknown) => Promise<{ signature: string; txID: string; raw_data: unknown }>;
+    sign: (transaction: TronTransaction) => Promise<TronTransaction>;
+    sendRawTransaction: (signedTx: TronTransaction) => Promise<{ result: boolean; txid: string }>;
   };
   transactionBuilder: {
     triggerSmartContract: (
@@ -33,7 +59,7 @@ interface TronWeb {
       options: { feeLimit?: number; callValue?: number },
       parameter: { type: string; value: unknown }[],
       issuerAddress: string
-    ) => Promise<{ result: { result: boolean }; transaction: unknown }>;
+    ) => Promise<{ result: { result: boolean }; transaction: TronTransaction }>;
   };
 }
 
@@ -117,8 +143,7 @@ export function useTronPayment() {
         throw new Error("TronLink wallet not connected");
       }
 
-      // Build TRC-20 transfer transaction
-      // transfer(address _to, uint256 _value)
+      // 1. Build TRC-20 transfer(address _to, uint256 _value)
       const parameter = [
         { type: "address", value: requirements.payTo },
         { type: "uint256", value: requirements.amount },
@@ -132,19 +157,32 @@ export function useTronPayment() {
         address
       );
 
-      // Sign the transaction
+      // 2. Sign the transaction
       const signedTx = await tronWeb.trx.sign(transaction);
 
+      // 3. Broadcast (TRON is pre-broadcast — wallet sends tx before facilitator sees it)
+      await tronWeb.trx.sendRawTransaction(signedTx);
+
+      // 4. Extract block info from the signed transaction's raw_data
+      const authorization: TronAuthorization = {
+        from: address,
+        to: requirements.payTo,
+        contractAddress: requirements.asset,
+        amount: requirements.amount,
+        expiration: signedTx.raw_data.expiration,
+        refBlockBytes: signedTx.raw_data.ref_block_bytes,
+        refBlockHash: signedTx.raw_data.ref_block_hash,
+        timestamp: signedTx.raw_data.timestamp,
+      };
+
+      // 5. Build payload matching ExactTronPayloadV2
       return {
         t402Version: 2,
         scheme: requirements.scheme,
         network: requirements.network,
         payload: {
-          transaction: signedTx,
-          from: address,
-          to: requirements.payTo,
-          value: requirements.amount,
-          txID: (signedTx as { txID?: string }).txID || "",
+          signedTransaction: signedTx.raw_data_hex,
+          authorization,
         },
       };
     },
