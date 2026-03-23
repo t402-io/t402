@@ -31,7 +31,7 @@ import { loadMaintenance, getUpcoming, addWindow, removeWindow } from "./mainten
 const app = express();
 app.set("trust proxy", "loopback");
 const PORT = process.env.PORT || 3403;
-const ADMIN_API_KEY = process.env.ADMIN_API_KEY || "";
+const ADMIN_API_KEY = (process.env.STATUS_ADMIN_KEY || "").trim();
 
 // --- Middleware ---
 
@@ -417,7 +417,7 @@ app.get("/", (_req, res) => {
   let rows = "";
   for (const g of groups) {
     if (!grouped[g] || grouped[g].length === 0) continue;
-    rows += `<tr><td colspan="4" class="group-header">${g}</td></tr>`;
+    rows += `<tr><td colspan="4" class="group-header">${escapeXml(g)}</td></tr>`;
     for (const s of grouped[g]) {
       const dotEmoji = s.status === "operational" ? "🟢" : s.status === "maintenance" ? "🔵" : s.status === "degraded" ? "🟡" : "🔴";
       const uptime = getUptime(s.id, 30);
@@ -817,7 +817,7 @@ if (process.env.NODE_ENV !== "test") {
     if (checkInterval) clearInterval(checkInterval);
     await flush();
     server.close(() => process.exit(0));
-    setTimeout(() => process.exit(0), 10_000);
+    setTimeout(() => process.exit(1), 10_000);
   };
   process.on("SIGTERM", shutdown);
   process.on("SIGINT", shutdown);

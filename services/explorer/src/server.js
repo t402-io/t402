@@ -125,6 +125,7 @@ app.use((_req, res, next) => {
     "Content-Security-Policy",
     "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; img-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
   );
+  res.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
   next();
 });
 

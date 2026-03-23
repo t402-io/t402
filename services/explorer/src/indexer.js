@@ -105,6 +105,10 @@ function getScheme(network) {
 
 function getDecimals(token, network) {
   if (network.startsWith("stellar:") && token === "USDC") return 7;
+  // BSC USDT and USDC are 18 decimals
+  if (network === "eip155:56") return 18;
+  // Celo USDT is 18 decimals
+  if (network === "eip155:42220") return 18;
   return 6;
 }
 

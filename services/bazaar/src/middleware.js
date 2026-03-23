@@ -265,7 +265,7 @@ const BLOCKED_HOSTNAMES = new Set([
   "metadata.google.internal",
 ]);
 
-function isPrivateIP(hostname) {
+export function isPrivateIP(hostname) {
   if (BLOCKED_HOSTNAMES.has(hostname)) return true;
 
   const ipv4Match = hostname.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);

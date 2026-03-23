@@ -145,7 +145,7 @@ export async function notifyStatusChange(event) {
       return sendWithRetry(url, body);
     });
     // Fire and forget — don't block the check cycle
-    Promise.allSettled(tasks).catch(() => {});
+    Promise.allSettled(tasks);
   } catch (e) {
     console.error("Notification error:", e.message);
   }

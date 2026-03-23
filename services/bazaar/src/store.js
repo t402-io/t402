@@ -317,5 +317,7 @@ export function getNextId() {
     if (num > max) max = num;
   }
   nextId = max + 1;
-  return `svc-${String(nextId++).padStart(3, "0")}`;
+  const id = `svc-${String(nextId).padStart(3, "0")}`;
+  nextId++;
+  return id;
 }

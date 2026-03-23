@@ -11,7 +11,7 @@ export const NETWORK_META = {
   "eip155:42161": { label: "Arbitrum", token: "USDT0", decimals: 6 },
   "eip155:137": { label: "Polygon", token: "USDC", decimals: 6 },
   "eip155:10": { label: "Optimism", token: "USDC", decimals: 6 },
-  "eip155:56": { label: "BNB Chain", token: "USDT", decimals: 6 },
+  "eip155:56": { label: "BNB Chain", token: "USDT", decimals: 18 },
   "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp": { label: "Solana", token: "USDC", decimals: 6 },
   "ton:mainnet": { label: "TON", token: "USDT", decimals: 6 },
   "stellar:pubnet": { label: "Stellar", token: "USDC", decimals: 7 },

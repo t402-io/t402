@@ -29,6 +29,7 @@ import {
   validateServiceInput,
   sanitizeString,
   verifyServiceUrl,
+  isPrivateIP,
   requestId,
   requestLogger,
   sendWithEtag,
@@ -55,6 +56,9 @@ app.use((_req, res, next) => {
     "Content-Security-Policy",
     "default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; frame-ancestors 'none'; base-uri 'self'",
   );
+  res.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+  res.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  res.set("X-Permitted-Cross-Domain-Policies", "none");
   next();
 });
 
@@ -268,10 +272,14 @@ app.put("/api/v1/services/:id", requireAuth, (req, res) => {
     if (typeof url !== "string" || url.length > 2000) {
       return res.status(400).json({ error: "url must be a string of at most 2000 characters" });
     }
+    let parsed;
     try {
-      new URL(url);
+      parsed = new URL(url);
     } catch {
       return res.status(400).json({ error: "url must be a valid URL" });
+    }
+    if (isPrivateIP(parsed.hostname)) {
+      return res.status(400).json({ error: "URL must not point to a private/internal address" });
     }
     // Check for duplicates (another service with same URL)
     const existing = store.getByUrl(url);
@@ -539,11 +547,12 @@ const _reverifyInterval = setInterval(reverifyStaleServices, REVERIFY_INTERVAL);
 _reverifyInterval.unref();
 
 // ── Start server ──────────────────────────────────────────────────────
+let server;
 const isDirectRun =
   process.argv[1] && new URL(import.meta.url).pathname === new URL(`file://${process.argv[1]}`).pathname;
 
 if (isDirectRun) {
-  app.listen(PORT, () => {
+  server = app.listen(PORT, () => {
     logger.info("server started", {
       port: PORT,
       services: store.size(),

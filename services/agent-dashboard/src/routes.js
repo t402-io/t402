@@ -7,6 +7,7 @@
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
+import { timingSafeEqual } from "node:crypto";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
@@ -31,6 +32,15 @@ import {
 import { renderDashboard, renderApiDocs } from "./templates.js";
 import { EXPLORER_URLS } from "./networks.js";
 import { isValidAddress, isValidCaip2, clampInt, log } from "./utils.js";
+
+/** Constant-time string comparison to prevent timing attacks. */
+function safeCompare(a, b) {
+  if (typeof a !== "string" || typeof b !== "string") return false;
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) return false;
+  return timingSafeEqual(bufA, bufB);
+}
 
 // ── SSE connection limits ────────────────────────────────────────────
 const MAX_SSE_CONNECTIONS = 100;
@@ -465,7 +475,7 @@ export function registerRoutes(app, opts = {}) {
     // Protect metrics in live mode when API key is configured
     if (getMode() === "live" && process.env.DASHBOARD_API_KEY) {
       const key = req.get("X-API-Key") || req.get("Authorization")?.replace(/^bearer\s+/i, "");
-      if (!key || key !== process.env.DASHBOARD_API_KEY) {
+      if (!key || !safeCompare(key, process.env.DASHBOARD_API_KEY)) {
         return res.status(401).json({ error: "Unauthorized" });
       }
     }
@@ -504,7 +514,11 @@ export function registerRoutes(app, opts = {}) {
         `# HELP pg_pool_total Total pool connections`,
         `# TYPE pg_pool_total gauge`,
         `pg_pool_total ${poolStats.totalCount}`,
+        `# HELP pg_pool_idle Idle pool connections`,
+        `# TYPE pg_pool_idle gauge`,
         `pg_pool_idle ${poolStats.idleCount}`,
+        `# HELP pg_pool_waiting Waiting pool connections`,
+        `# TYPE pg_pool_waiting gauge`,
         `pg_pool_waiting ${poolStats.waitingCount}`,
       );
     }
