@@ -22,10 +22,10 @@ test.describe("Mainnet Mode Toggle", () => {
     expect(res.status()).toBe(402);
     const body = await res.json();
     expect(body.accepts).toHaveLength(10);
-    // First EVM entry should be Base mainnet
+    // First EVM entry should be Ethereum mainnet (USDT0)
     const evm = body.accepts.find((a: { network: string }) => a.network.startsWith("eip155:"));
-    expect(evm.network).toBe("eip155:8453");
-    expect(evm.asset).toBe("0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913");
+    expect(evm.network).toBe("eip155:1");
+    expect(evm.asset).toBe("0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee");
   });
 
   test("mainnet mode uses correct TRON mainnet address", async ({ request }) => {

@@ -17,7 +17,7 @@ const EXACT_DIRECT_FAMILIES: ChainFamily[] = ["stacks", "near", "aptos", "tezos"
 
 /** Default mainnet network per family (used when switching from testnet family to mainnet) */
 const DEFAULT_MAINNET_NETWORK: Record<ChainFamily, string> = {
-  evm: "eip155:8453",       // Base (USDC, most accessible)
+  evm: "eip155:1",          // Ethereum (USDT0)
   ton: "ton:mainnet",
   tron: "tron:mainnet",
   solana: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
