@@ -52,7 +52,7 @@ interface FlowResult {
 export function usePaymentFlow(url: string) {
   const { isDemo, testnet } = useDemoContext();
   const { show } = useToast();
-  const { signPayment, isConnected, activeFamily } = useMultiChainPayment();
+  const { signPayment, isConnected, activeFamily, activeNetwork } = useMultiChainPayment();
 
   const [result, setResult] = useState<FlowResult>({
     state: "idle",
@@ -82,9 +82,8 @@ export function usePaymentFlow(url: string) {
         "x-preferred-chain": activeFamily,
         "x-network-mode": testnet ? "testnet" : "mainnet",
       };
-      if (isDemo) {
-        headers["x-demo-mode"] = "true";
-      }
+      if (activeNetwork) headers["x-preferred-network"] = activeNetwork;
+      if (isDemo) headers["x-demo-mode"] = "true";
 
       const initialResponse = await fetch(url, { headers });
 
@@ -138,9 +137,8 @@ export function usePaymentFlow(url: string) {
         "x-network-mode": testnet ? "testnet" : "mainnet",
         "Payment-Signature": encodedPayment,
       };
-      if (isDemo) {
-        retryHeaders["x-demo-mode"] = "true";
-      }
+      if (activeNetwork) retryHeaders["x-preferred-network"] = activeNetwork;
+      if (isDemo) retryHeaders["x-demo-mode"] = "true";
 
       setResult((prev) => ({ ...prev, requestHeaders: retryHeaders }));
 

@@ -79,7 +79,7 @@ function createMockPayload(requirements: PaymentRequirements, family: ChainFamil
 }
 
 export function useMultiChainPayment() {
-  const { activeFamily, activeConfig } = useChainContext();
+  const { activeFamily, activeConfig, activeNetwork } = useChainContext();
   const { isDemo } = useDemoContext();
   const evm = useEvmPayment();
   const ton = useTonPayment();
@@ -161,6 +161,7 @@ export function useMultiChainPayment() {
 
   return {
     activeFamily,
+    activeNetwork,
     activeConfig,
     isConnected: isDemo || isConnected,
     address: isDemo ? "demo-wallet" : address,

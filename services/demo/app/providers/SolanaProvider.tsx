@@ -3,6 +3,7 @@
 import { useState, useEffect, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { SolanaWalletCtx } from "@/hooks/useSolanaPayment";
+import { useDemoContext } from "./DemoProvider";
 
 // Lazy-load @solana/web3.js + wallet adapters (~400KB) into a separate chunk.
 const SolanaWalletContext = dynamic(() => import("./SolanaWalletContext"), {
@@ -30,6 +31,7 @@ const FALLBACK_SOLANA_STATE = {
 
 export function SolanaProvider({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
+  const { testnet } = useDemoContext();
 
   useEffect(() => {
     setMounted(true);
@@ -45,7 +47,7 @@ export function SolanaProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <SolanaWalletContext>
+    <SolanaWalletContext cluster={testnet ? "devnet" : "mainnet-beta"}>
       <SolanaWalletSafeContext>
         {children}
       </SolanaWalletSafeContext>

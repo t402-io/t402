@@ -39,7 +39,7 @@ const ENDPOINTS = [
 
 export default function PlaygroundPage() {
   const { signPayment, activeFamily } = useMultiChainPayment();
-  const { isDemo } = useDemoContext();
+  const { isDemo, testnet } = useDemoContext();
 
   const [selectedEndpoint, setSelectedEndpoint] = useState(0);
   const [step, setStep] = useState<FlowStep>("idle");
@@ -73,6 +73,7 @@ export default function PlaygroundPage() {
       const headers: Record<string, string> = {
         "Accept": "application/json",
         "x-preferred-chain": activeFamily,
+        "x-network-mode": testnet ? "testnet" : "mainnet",
       };
       if (isDemo) headers["x-demo-mode"] = "true";
       if (endpoint.body) headers["Content-Type"] = "application/json";
