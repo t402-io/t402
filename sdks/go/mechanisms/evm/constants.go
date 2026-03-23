@@ -256,7 +256,7 @@ var (
 			ChainID: ChainIDArbitrum,
 			DefaultAsset: AssetInfo{
 				Address:  "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
-				Name:     "TetherToken",
+				Name:     "USD₮0",
 				Version:  "1",
 				Decimals: DefaultDecimals,
 				TransferMethod:  TransferMethodPermit,
@@ -265,7 +265,7 @@ var (
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
 					Address:  "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
-					Name:     "TetherToken",
+					Name:     "USD₮0",
 					Version:  "1",
 					Decimals: DefaultDecimals,
 					TransferMethod:  TransferMethodPermit,
@@ -278,7 +278,7 @@ var (
 			ChainID: ChainIDOptimism,
 			DefaultAsset: AssetInfo{
 				Address:  "0x01bFF41798a0BcF287b996046Ca68b395DbC1071",
-				Name:     "TetherToken",
+				Name:     "USD₮0",
 				Version:  "1",
 				Decimals: DefaultDecimals,
 				TransferMethod:  TransferMethodPermit,
@@ -287,7 +287,7 @@ var (
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
 					Address:  "0x01bFF41798a0BcF287b996046Ca68b395DbC1071",
-					Name:     "TetherToken",
+					Name:     "USD₮0",
 					Version:  "1",
 					Decimals: DefaultDecimals,
 					TransferMethod:  TransferMethodPermit,
@@ -300,7 +300,7 @@ var (
 			ChainID: ChainIDPolygon,
 			DefaultAsset: AssetInfo{
 				Address:  "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
-				Name:     "TetherToken",
+				Name:     "USD₮0",
 				Version:  "1",
 				Decimals: DefaultDecimals,
 				TransferMethod:  TransferMethodPermit,
@@ -309,7 +309,7 @@ var (
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
 					Address:  "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
-					Name:     "TetherToken",
+					Name:     "USD₮0",
 					Version:  "1",
 					Decimals: DefaultDecimals,
 					TransferMethod:  TransferMethodPermit,
@@ -322,7 +322,7 @@ var (
 			ChainID: ChainIDInk,
 			DefaultAsset: AssetInfo{
 				Address:  "0x0200C29006150606B650577BBE7B6248F58470c1",
-				Name:     "TetherToken",
+				Name:     "USD₮0",
 				Version:  "1",
 				Decimals: DefaultDecimals,
 				TransferMethod:  TransferMethodPermit,
@@ -331,7 +331,7 @@ var (
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
 					Address:  "0x0200C29006150606B650577BBE7B6248F58470c1",
-					Name:     "TetherToken",
+					Name:     "USD₮0",
 					Version:  "1",
 					Decimals: DefaultDecimals,
 					TransferMethod:  TransferMethodPermit,
@@ -344,7 +344,7 @@ var (
 			ChainID: ChainIDBerachain,
 			DefaultAsset: AssetInfo{
 				Address:  "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
-				Name:     "TetherToken",
+				Name:     "USD₮0",
 				Version:  "1",
 				Decimals: DefaultDecimals,
 				TransferMethod:  TransferMethodPermit,
@@ -353,7 +353,7 @@ var (
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
 					Address:  "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
-					Name:     "TetherToken",
+					Name:     "USD₮0",
 					Version:  "1",
 					Decimals: DefaultDecimals,
 					TransferMethod:  TransferMethodPermit,
@@ -366,7 +366,7 @@ var (
 			ChainID: ChainIDUnichain,
 			DefaultAsset: AssetInfo{
 				Address:  "0x9151434b16b9763660705744891fA906F660EcC5",
-				Name:     "TetherToken",
+				Name:     "USD₮0",
 				Version:  "1",
 				Decimals: DefaultDecimals,
 				TransferMethod:  TransferMethodPermit,
@@ -375,7 +375,7 @@ var (
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
 					Address:  "0x9151434b16b9763660705744891fA906F660EcC5",
-					Name:     "TetherToken",
+					Name:     "USD₮0",
 					Version:  "1",
 					Decimals: DefaultDecimals,
 					TransferMethod:  TransferMethodPermit,
@@ -388,7 +388,7 @@ var (
 			ChainID: ChainIDMantle,
 			DefaultAsset: AssetInfo{
 				Address:  "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
-				Name:     "TetherToken",
+				Name:     "USDT0",
 				Version:  "1",
 				Decimals: DefaultDecimals,
 				TransferMethod:  TransferMethodPermit,
@@ -397,7 +397,7 @@ var (
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
 					Address:  "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
-					Name:     "TetherToken",
+					Name:     "USDT0",
 					Version:  "1",
 					Decimals: DefaultDecimals,
 					TransferMethod:  TransferMethodPermit,
@@ -410,7 +410,7 @@ var (
 			ChainID: ChainIDPlasma,
 			DefaultAsset: AssetInfo{
 				Address:  "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
-				Name:     "TetherToken",
+				Name:     "USDT0",
 				Version:  "1",
 				Decimals: DefaultDecimals,
 				TransferMethod:  TransferMethodPermit,
@@ -419,7 +419,7 @@ var (
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
 					Address:  "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
-					Name:     "TetherToken",
+					Name:     "USDT0",
 					Version:  "1",
 					Decimals: DefaultDecimals,
 					TransferMethod:  TransferMethodPermit,
@@ -432,7 +432,7 @@ var (
 			ChainID: ChainIDSei,
 			DefaultAsset: AssetInfo{
 				Address:  "0x9151434b16b9763660705744891fA906F660EcC5",
-				Name:     "TetherToken",
+				Name:     "USD₮0",
 				Version:  "1",
 				Decimals: DefaultDecimals,
 				TransferMethod:  TransferMethodPermit,
@@ -441,7 +441,7 @@ var (
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
 					Address:  "0x9151434b16b9763660705744891fA906F660EcC5",
-					Name:     "TetherToken",
+					Name:     "USD₮0",
 					Version:  "1",
 					Decimals: DefaultDecimals,
 					TransferMethod:  TransferMethodPermit,
@@ -454,7 +454,7 @@ var (
 			ChainID: ChainIDConflux,
 			DefaultAsset: AssetInfo{
 				Address:  "0xaf37E8B6C9ED7f6318979f56Fc287d76c30847ff",
-				Name:     "TetherToken",
+				Name:     "USDT0",
 				Version:  "1",
 				Decimals: DefaultDecimals,
 				TransferMethod:  TransferMethodPermit,
@@ -463,7 +463,7 @@ var (
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
 					Address:  "0xaf37E8B6C9ED7f6318979f56Fc287d76c30847ff",
-					Name:     "TetherToken",
+					Name:     "USDT0",
 					Version:  "1",
 					Decimals: DefaultDecimals,
 					TransferMethod:  TransferMethodPermit,
@@ -476,7 +476,7 @@ var (
 			ChainID: ChainIDMonad,
 			DefaultAsset: AssetInfo{
 				Address:  "0xe7cd86e13AC4309349F30B3435a9d337750fC82D",
-				Name:     "TetherToken",
+				Name:     "USDT0",
 				Version:  "1",
 				Decimals: DefaultDecimals,
 				TransferMethod:  TransferMethodPermit,
@@ -485,7 +485,7 @@ var (
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
 					Address:  "0xe7cd86e13AC4309349F30B3435a9d337750fC82D",
-					Name:     "TetherToken",
+					Name:     "USDT0",
 					Version:  "1",
 					Decimals: DefaultDecimals,
 					TransferMethod:  TransferMethodPermit,
@@ -498,7 +498,7 @@ var (
 			ChainID: ChainIDFlare,
 			DefaultAsset: AssetInfo{
 				Address:  "0xe7cd86e13AC4309349F30B3435a9d337750fC82D",
-				Name:     "TetherToken",
+				Name:     "USD₮0",
 				Version:  "1",
 				Decimals: DefaultDecimals,
 				TransferMethod:  TransferMethodPermit,
@@ -507,7 +507,7 @@ var (
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
 					Address:  "0xe7cd86e13AC4309349F30B3435a9d337750fC82D",
-					Name:     "TetherToken",
+					Name:     "USD₮0",
 					Version:  "1",
 					Decimals: DefaultDecimals,
 					TransferMethod:  TransferMethodPermit,
@@ -520,7 +520,7 @@ var (
 			ChainID: ChainIDRootstock,
 			DefaultAsset: AssetInfo{
 				Address:  "0x779dED0C9e1022225F8e0630b35A9B54Be713736",
-				Name:     "TetherToken",
+				Name:     "USD₮0",
 				Version:  "1",
 				Decimals: DefaultDecimals,
 				TransferMethod:  TransferMethodPermit,
@@ -529,7 +529,7 @@ var (
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
 					Address:  "0x779dED0C9e1022225F8e0630b35A9B54Be713736",
-					Name:     "TetherToken",
+					Name:     "USD₮0",
 					Version:  "1",
 					Decimals: DefaultDecimals,
 					TransferMethod:  TransferMethodPermit,
@@ -542,7 +542,7 @@ var (
 			ChainID: ChainIDXLayer,
 			DefaultAsset: AssetInfo{
 				Address:  "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
-				Name:     "TetherToken",
+				Name:     "USD₮0",
 				Version:  "1",
 				Decimals: DefaultDecimals,
 				TransferMethod:  TransferMethodPermit,
@@ -551,7 +551,7 @@ var (
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
 					Address:  "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
-					Name:     "TetherToken",
+					Name:     "USD₮0",
 					Version:  "1",
 					Decimals: DefaultDecimals,
 					TransferMethod:  TransferMethodPermit,
@@ -564,7 +564,7 @@ var (
 			ChainID: ChainIDStable,
 			DefaultAsset: AssetInfo{
 				Address:  "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
-				Name:     "TetherToken",
+				Name:     "USDT0",
 				Version:  "1",
 				Decimals: DefaultDecimals,
 				TransferMethod:  TransferMethodPermit,
@@ -573,7 +573,7 @@ var (
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
 					Address:  "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
-					Name:     "TetherToken",
+					Name:     "USDT0",
 					Version:  "1",
 					Decimals: DefaultDecimals,
 					TransferMethod:  TransferMethodPermit,
@@ -586,7 +586,7 @@ var (
 			ChainID: ChainIDHyperEVM,
 			DefaultAsset: AssetInfo{
 				Address:  "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
-				Name:     "TetherToken",
+				Name:     "USDT0",
 				Version:  "1",
 				Decimals: DefaultDecimals,
 				TransferMethod:  TransferMethodPermit,
@@ -595,7 +595,7 @@ var (
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
 					Address:  "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
-					Name:     "TetherToken",
+					Name:     "USDT0",
 					Version:  "1",
 					Decimals: DefaultDecimals,
 					TransferMethod:  TransferMethodPermit,
@@ -608,7 +608,7 @@ var (
 			ChainID: ChainIDMegaETH,
 			DefaultAsset: AssetInfo{
 				Address:  "0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb",
-				Name:     "TetherToken",
+				Name:     "USDT0",
 				Version:  "1",
 				Decimals: DefaultDecimals,
 				TransferMethod:  TransferMethodPermit,
@@ -617,7 +617,7 @@ var (
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
 					Address:  "0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb",
-					Name:     "TetherToken",
+					Name:     "USDT0",
 					Version:  "1",
 					Decimals: DefaultDecimals,
 					TransferMethod:  TransferMethodPermit,
@@ -630,7 +630,7 @@ var (
 			ChainID: ChainIDCorn,
 			DefaultAsset: AssetInfo{
 				Address:  "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
-				Name:     "TetherToken",
+				Name:     "USDT0",
 				Version:  "1",
 				Decimals: DefaultDecimals,
 				TransferMethod:  TransferMethodPermit,
@@ -639,7 +639,7 @@ var (
 			SupportedAssets: map[string]AssetInfo{
 				"USDT0": {
 					Address:  "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
-					Name:     "TetherToken",
+					Name:     "USDT0",
 					Version:  "1",
 					Decimals: DefaultDecimals,
 					TransferMethod:  TransferMethodPermit,
