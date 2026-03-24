@@ -60,6 +60,57 @@ function createNonce(): string {
   return "0x" + Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+/**
+ * Try to switch the wallet to the required chain.
+ * If wallet_switchEthereumChain fails (chain not added), try wallet_addEthereumChain.
+ */
+async function ensureCorrectChain(
+  switchChainAsync: (args: { chainId: number }) => Promise<unknown>,
+  requiredChainId: number,
+  chainName: string,
+) {
+  try {
+    await switchChainAsync({ chainId: requiredChainId });
+  } catch (switchError: any) {
+    // Error code 4902 = chain not added to wallet
+    // Some wallets also throw generic errors when chain is unknown
+    const code = switchError?.code ?? switchError?.cause?.code;
+    if (code === 4902 || code === -32603) {
+      // Try adding the chain via provider
+      const provider = (window as any).ethereum;
+      if (provider?.request) {
+        const config = getConfigByNetwork(`eip155:${requiredChainId}`);
+        try {
+          await provider.request({
+            method: "wallet_addEthereumChain",
+            params: [{
+              chainId: `0x${requiredChainId.toString(16)}`,
+              chainName: config?.name || chainName,
+              rpcUrls: [config?.explorer?.replace("/tx/", "").replace("https://", "https://rpc.") || `https://rpc.publicnode.com`],
+              nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+              blockExplorerUrls: config?.explorer ? [config.explorer.replace("/tx/", "")] : undefined,
+            }],
+          });
+          // After adding, try switching again
+          await switchChainAsync({ chainId: requiredChainId });
+        } catch {
+          throw new Error(`Please add ${chainName} to your wallet manually and try again.`);
+        }
+      } else {
+        throw new Error(`Please add ${chainName} to your wallet manually and try again.`);
+      }
+    } else {
+      throw new Error(
+        `Please switch your wallet to ${chainName}. ` +
+        `Your wallet may not support automatic chain switching.`
+      );
+    }
+  }
+
+  // Wait for wagmi to update chain state after switch
+  await new Promise((r) => setTimeout(r, 1000));
+}
+
 export function useEvmPayment() {
   const { address, isConnected, chain } = useAccount();
   const { signTypedDataAsync } = useSignTypedData();
@@ -77,16 +128,7 @@ export function useEvmPayment() {
 
       // Auto-switch to the required chain if wallet is on a different one
       if (chain?.id !== requiredChainId) {
-        try {
-          await switchChainAsync({ chainId: requiredChainId });
-          // Wait for wagmi to update chain state after switch
-          await new Promise((r) => setTimeout(r, 500));
-        } catch (e) {
-          throw new Error(
-            `Please switch your wallet to ${chainName}. ` +
-            `Your wallet may not support this network — try adding it manually.`
-          );
-        }
+        await ensureCorrectChain(switchChainAsync, requiredChainId, chainName);
       }
 
       const now = Math.floor(Date.now() / 1000);
