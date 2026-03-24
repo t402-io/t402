@@ -57,7 +57,7 @@ export function x402ToT402<T extends Record<string, unknown>>(payload: T): T {
   if (!isX402Format(payload)) return payload;
 
   const { x402Version, ...rest } = payload;
-  return { ...rest, t402Version: x402Version } as T;
+  return { ...rest, t402Version: x402Version } as unknown as T;
 }
 
 /**
@@ -71,7 +71,7 @@ export function t402ToX402<T extends Record<string, unknown>>(payload: T): T {
   if (!isT402Format(payload)) return payload;
 
   const { t402Version, ...rest } = payload;
-  return { ...rest, x402Version: t402Version } as T;
+  return { ...rest, x402Version: t402Version } as unknown as T;
 }
 
 /**
