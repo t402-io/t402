@@ -83,10 +83,19 @@ export function useTronPayment() {
     const checkTronLink = () => {
       if (typeof window === "undefined") return;
 
-      // OKX Wallet injects tronWeb via window.okxwallet.tronLink
+      // Check window.tronWeb (injected by TronLink or OKX Wallet)
+      // OKX sets tronWeb but doesn't set .ready — check .defaultAddress instead
+      const tronWeb = window.tronWeb;
+      if (tronWeb && (tronWeb.ready || tronWeb.defaultAddress?.base58)) {
+        setIsInstalled(true);
+        setIsConnected(true);
+        setAddress(tronWeb.defaultAddress.base58);
+        return;
+      }
+
+      // Fallback: check OKX's dedicated tronLink namespace
       const okxTron = window.okxwallet?.tronLink;
-      if (okxTron?.tronWeb && okxTron.tronWeb.ready) {
-        // Promote OKX's tronWeb to window.tronWeb so signPayment works
+      if (okxTron?.tronWeb?.defaultAddress?.base58) {
         if (!window.tronWeb) (window as any).tronWeb = okxTron.tronWeb;
         setIsInstalled(true);
         setIsConnected(true);
@@ -94,12 +103,8 @@ export function useTronPayment() {
         return;
       }
 
-      const tronWeb = window.tronWeb;
-      if (tronWeb && tronWeb.ready) {
-        setIsInstalled(true);
-        setIsConnected(true);
-        setAddress(tronWeb.defaultAddress.base58);
-      } else if (window.tronLink || okxTron) {
+      // Wallet exists but not connected yet
+      if (window.tronLink || okxTron || tronWeb) {
         setIsInstalled(true);
         setIsConnected(false);
         setAddress(null);
@@ -130,47 +135,29 @@ export function useTronPayment() {
   }, []);
 
   const connect = useCallback(async () => {
-    // Try OKX Wallet TRON first
-    const okxTron = window.okxwallet?.tronLink;
-    if (okxTron?.request) {
+    // Try tronLink.request (works for both TronLink and OKX)
+    const tronLink = window.tronLink || window.okxwallet?.tronLink;
+    if (tronLink) {
       try {
-        await okxTron.request({ method: "tron_requestAccounts" });
+        await (tronLink as any).request({ method: "tron_requestAccounts" });
         await new Promise((r) => setTimeout(r, 1000));
-        const tw = okxTron.tronWeb || window.tronWeb;
-        if (tw?.ready) {
+        const tw = window.tronWeb || window.okxwallet?.tronLink?.tronWeb;
+        if (tw?.defaultAddress?.base58) {
           if (!window.tronWeb) (window as any).tronWeb = tw;
           setIsInstalled(true);
           setIsConnected(true);
           setAddress(tw.defaultAddress.base58);
           return;
         }
-      } catch { /* user rejected or not available */ }
-    }
-
-    // Try TronLink
-    if (window.tronLink) {
-      try {
-        await window.tronLink.request({ method: "tron_requestAccounts" });
-        await new Promise((r) => setTimeout(r, 500));
-        if (window.tronWeb?.ready) {
-          setIsConnected(true);
-          setAddress(window.tronWeb.defaultAddress.base58);
-          return;
-        }
       } catch { /* user rejected */ }
     }
 
-    // Debug: log what's available
-    console.log("[TRON] Detection failed. Available APIs:", {
-      tronWeb: typeof window.tronWeb,
-      tronWebReady: window.tronWeb?.ready,
-      tronLink: typeof window.tronLink,
-      okxwallet: typeof window.okxwallet,
-      okxTronLink: typeof (window as any).okxwallet?.tronLink,
-      okxKeys: (window as any).okxwallet ? Object.keys((window as any).okxwallet).join(",") : "N/A",
-    });
-    // Don't open TronLink page — show error instead
-    throw new Error("TRON wallet not detected. Please ensure OKX Wallet TRON is enabled, or install TronLink.");
+    // No TRON wallet available
+    if (!window.tronWeb && !window.tronLink && !window.okxwallet?.tronLink) {
+      window.open("https://www.tronlink.org/", "_blank");
+    } else {
+      throw new Error("TRON wallet detected but connection failed. Please try again.");
+    }
   }, []);
 
   const disconnect = useCallback(async () => {
