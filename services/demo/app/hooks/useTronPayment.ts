@@ -160,8 +160,17 @@ export function useTronPayment() {
       } catch { /* user rejected */ }
     }
 
-    // No TRON wallet found
-    window.open("https://www.tronlink.org/", "_blank");
+    // Debug: log what's available
+    console.log("[TRON] Detection failed. Available APIs:", {
+      tronWeb: typeof window.tronWeb,
+      tronWebReady: window.tronWeb?.ready,
+      tronLink: typeof window.tronLink,
+      okxwallet: typeof window.okxwallet,
+      okxTronLink: typeof (window as any).okxwallet?.tronLink,
+      okxKeys: (window as any).okxwallet ? Object.keys((window as any).okxwallet).join(",") : "N/A",
+    });
+    // Don't open TronLink page — show error instead
+    throw new Error("TRON wallet not detected. Please ensure OKX Wallet TRON is enabled, or install TronLink.");
   }, []);
 
   const disconnect = useCallback(async () => {
