@@ -7,7 +7,7 @@
 
   <groupId>io.t402</groupId>
   <artifactId>t402</artifactId>
-  <version>1.12.1</version>
+  <version>1.13.0</version>
   <packaging>jar</packaging>
 
   <name>t402</name>
