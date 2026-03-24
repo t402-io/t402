@@ -59,7 +59,18 @@ export function getAcceptsForChain(
     network = CHAIN_CONFIGS[preferredChain].network;
   }
 
-  return buildAccepts(amount, isTestnet, network);
+  const accepts = buildAccepts(amount, isTestnet, network);
+
+  // Reorder: move preferredChain's entry to front
+  if (!network) {
+    const idx = accepts.findIndex((a) => familyFromNetwork(a.network) === preferredChain);
+    if (idx > 0) {
+      const [preferred] = accepts.splice(idx, 1);
+      accepts.unshift(preferred);
+    }
+  }
+
+  return accepts;
 }
 
 /**
