@@ -187,7 +187,7 @@ function CodeBlock({ code, filename }: { code: string; filename: string }) {
         <span className="font-mono text-xs text-foreground-tertiary">{filename}</span>
         <button
           onClick={handleCopy}
-          className="flex h-7 w-7 items-center justify-center rounded-md text-foreground-tertiary transition-colors hover:bg-white/5 hover:text-foreground"
+          className="flex h-9 w-9 items-center justify-center rounded-md text-foreground-tertiary transition-colors hover:bg-white/5 hover:text-foreground"
           aria-label={copied ? "Copied" : "Copy code"}
         >
           {copied ? <CheckIcon className="h-4 w-4 text-success" /> : <CopyIcon className="h-4 w-4" />}
@@ -264,12 +264,12 @@ export function CodeExamples() {
         >
           <div className="mx-auto max-w-4xl">
             {/* Server/Client tabs */}
-            <div className="mb-4 flex gap-6">
+            <div className="mb-4 flex gap-4">
               <button
                 onClick={() => setActiveTab("server")}
-                className={`text-sm font-medium transition-colors ${
+                className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                   activeTab === "server"
-                    ? "text-brand"
+                    ? "bg-brand/10 text-brand"
                     : "text-foreground-tertiary hover:text-foreground-secondary"
                 }`}
               >
@@ -277,9 +277,9 @@ export function CodeExamples() {
               </button>
               <button
                 onClick={() => setActiveTab("client")}
-                className={`text-sm font-medium transition-colors ${
+                className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                   activeTab === "client"
-                    ? "text-brand"
+                    ? "bg-brand/10 text-brand"
                     : "text-foreground-tertiary hover:text-foreground-secondary"
                 }`}
               >
