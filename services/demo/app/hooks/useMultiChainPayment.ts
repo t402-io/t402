@@ -127,7 +127,7 @@ export function useMultiChainPayment() {
   })();
 
   const signPayment = useCallback(
-    async (requirements: PaymentRequirements): Promise<PaymentPayload> => {
+    async (requirements: PaymentRequirements, onProgress?: (step: string) => void): Promise<PaymentPayload> => {
       if (isDemo) {
         await new Promise((r) => setTimeout(r, 600));
         return createMockPayload(requirements, activeFamily);
@@ -135,7 +135,7 @@ export function useMultiChainPayment() {
 
       switch (activeFamily) {
         case "evm":
-          return evm.signPayment(requirements) as Promise<PaymentPayload>;
+          return evm.signPayment(requirements, onProgress) as Promise<PaymentPayload>;
         case "ton":
           return ton.signPayment(requirements) as Promise<PaymentPayload>;
         case "solana":

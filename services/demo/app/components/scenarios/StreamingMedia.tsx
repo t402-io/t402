@@ -45,7 +45,10 @@ export function StreamingMedia() {
         const requirements = paymentRequired.accepts?.[0];
       if (!requirements) throw new Error("No payment options available");
         setFlowState("signing");
-        const paymentPayload = await signPayment(requirements);
+        const paymentPayload = await signPayment(requirements, (step) => {
+        if (step === "approving") setFlowState("approving");
+        if (step === "signing") setFlowState("signing");
+      });
 
         const retryHeaders: Record<string, string> = {
           ...headers,

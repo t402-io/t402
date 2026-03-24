@@ -175,7 +175,7 @@ export function useEvmPayment() {
   const { signTypedDataAsync } = useSignTypedData();
   const { switchChainAsync } = useSwitchChain();
   const signPayment = useCallback(
-    async (requirements: PaymentRequirements): Promise<PaymentPayload> => {
+    async (requirements: PaymentRequirements, onProgress?: (step: string) => void): Promise<PaymentPayload> => {
       if (!address || !isConnected) throw new Error("Wallet not connected");
 
       const requiredChainId = parseInt(requirements.network.split(":")[1]);
@@ -200,7 +200,7 @@ export function useEvmPayment() {
 
         if (currentAllowance < requiredAmount) {
           // Step 1: Send on-chain approve transaction via wallet provider
-          // USDT quirk: if current allowance > 0, must reset to 0 first
+          onProgress?.("approving");
           const provider = (window as any).ethereum;
           if (!provider?.request) throw new Error("Wallet provider not available for approve transaction");
 
@@ -235,6 +235,7 @@ export function useEvmPayment() {
         }
 
         // Step 2: Sign EIP-712 LegacyTransferAuthorization
+        onProgress?.("signing");
         const authorization = {
           from: address,
           to: requirements.payTo as `0x${string}`,

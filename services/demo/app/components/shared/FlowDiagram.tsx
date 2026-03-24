@@ -27,6 +27,7 @@ function flowStateToStep(state: FlowState): StepId | null {
   switch (state) {
     case "requesting": return "request";
     case "got-402": return "402";
+    case "approving": return "sign";
     case "signing": return "sign";
     case "retrying": return "retry";
     case "verifying": return "settle";

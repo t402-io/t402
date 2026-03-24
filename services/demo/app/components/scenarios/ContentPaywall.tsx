@@ -60,7 +60,10 @@ export function ContentPaywall() {
 
       // Step 2: Sign via multi-chain hook & retry
       setFlowState("signing");
-      const paymentPayload = await signPayment(requirements);
+      const paymentPayload = await signPayment(requirements, (step) => {
+        if (step === "approving") setFlowState("approving");
+        if (step === "signing") setFlowState("signing");
+      });
 
       const retryHeaders: Record<string, string> = {
         Accept: "application/json",

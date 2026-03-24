@@ -78,7 +78,10 @@ export function AgentToAgent() {
 
       // Step 2: Auto-pay (agent signs autonomously via multi-chain hook)
       setFlowState("signing");
-      const paymentPayload = await signPayment(requirements);
+      const paymentPayload = await signPayment(requirements, (step) => {
+        if (step === "approving") setFlowState("approving");
+        if (step === "signing") setFlowState("signing");
+      });
 
       setState("executing");
 

@@ -26,6 +26,7 @@ const FLOW_ANNOUNCEMENTS: Record<FlowState, string> = {
   idle: "",
   requesting: "Requesting payment requirements from server",
   "got-402": "Server requires payment. Preparing authorization.",
+  approving: "Step 1/2: Approving token — confirm in your wallet",
   signing: "Waiting for wallet signature approval",
   retrying: "Submitting payment for verification",
   verifying: "Verifying settlement on blockchain",

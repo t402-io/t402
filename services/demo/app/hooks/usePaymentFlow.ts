@@ -11,6 +11,7 @@ export type FlowState =
   | "idle"
   | "requesting"
   | "got-402"
+  | "approving"
   | "signing"
   | "retrying"
   | "verifying"
