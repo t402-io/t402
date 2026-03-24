@@ -1,6 +1,6 @@
 import type { ChainFamily } from "@/lib/testnet-config";
 
-export type ErrorType = "network" | "wallet-rejected" | "insufficient-funds" | "facilitator" | "timeout" | "unknown";
+export type ErrorType = "network" | "wallet-rejected" | "insufficient-funds" | "insufficient-allowance" | "facilitator" | "timeout" | "unknown";
 
 export function classifyError(error: unknown): ErrorType {
   const msg = error instanceof Error ? error.message : String(error);
@@ -8,6 +8,9 @@ export function classifyError(error: unknown): ErrorType {
 
   if (lower.includes("rejected") || lower.includes("denied") || lower.includes("cancelled") || lower.includes("user refused")) {
     return "wallet-rejected";
+  }
+  if (lower.includes("insufficient_allowance") || lower.includes("allowance")) {
+    return "insufficient-allowance";
   }
   if (lower.includes("insufficient") || lower.includes("balance") || lower.includes("verify_signature") || lower.includes("payment failed")) {
     return "insufficient-funds";
@@ -28,8 +31,10 @@ export function getUserFriendlyMessage(type: ErrorType, originalMessage: string)
   switch (type) {
     case "wallet-rejected":
       return "You declined the signature request. Try again when ready.";
+    case "insufficient-allowance":
+      return "This token requires on-chain approval before payment. Legacy tokens (Ethereum USDT, BSC USDT) need an approve transaction first. Try a chain with USDT0 (Arbitrum, Optimism) for gasless one-step payments.";
     case "insufficient-funds":
-      return "Insufficient token balance. You need tokens to complete this payment.";
+      return "Insufficient token balance for this payment.";
     case "timeout":
       return "Request timed out. The facilitator may be busy — try again.";
     case "facilitator":
@@ -44,7 +49,9 @@ export function getUserFriendlyMessage(type: ErrorType, originalMessage: string)
 export function getErrorAction(type: ErrorType, family: ChainFamily): string | null {
   switch (type) {
     case "insufficient-funds":
-      return "Get test tokens from the faucet link above.";
+      return "Ensure you have enough tokens on the selected chain.";
+    case "insufficient-allowance":
+      return "Switch to Arbitrum or Optimism for one-step USDT0 payments.";
     case "wallet-rejected":
       return "Click the payment button to try again.";
     case "timeout":

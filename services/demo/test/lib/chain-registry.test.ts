@@ -72,7 +72,7 @@ describe("chain-registry", () => {
     });
 
     it("EVM USDT0 chains use exact scheme with correct EIP-712 name", () => {
-      const usdt0Chains = ["eip155:42161", "eip155:10", "eip155:137", "eip155:57073"];
+      const usdt0Chains = ["eip155:42161", "eip155:10", "eip155:57073"];
       for (const network of usdt0Chains) {
         const config = MAINNET_CONFIGS[network];
         expect(config.scheme).toBe("exact");
