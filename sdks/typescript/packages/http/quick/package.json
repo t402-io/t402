@@ -1,0 +1,114 @@
+{
+  "name": "@t402/quick",
+  "version": "2.8.0",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "build": "tsup",
+    "format": "prettier -c .prettierrc --write \"**/*.{ts,js,cjs,json,md}\"",
+    "format:check": "prettier -c .prettierrc --check \"**/*.{ts,js,cjs,json,md}\"",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint ."
+  },
+  "keywords": [
+    "t402",
+    "payment",
+    "protocol",
+    "quick",
+    "middleware",
+    "http-402",
+    "stablecoin",
+    "USDT",
+    "express",
+    "fastify",
+    "hono"
+  ],
+  "license": "Apache-2.0",
+  "author": "T402 Team",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/t402-io/t402.git",
+    "directory": "sdks/typescript/packages/http/quick"
+  },
+  "description": "Zero-config T402 payment middleware — accept USDT payments in 3 lines of code",
+  "dependencies": {
+    "@t402/core": "workspace:*",
+    "@t402/express": "workspace:*",
+    "@t402/fastify": "workspace:*",
+    "@t402/hono": "workspace:*"
+  },
+  "peerDependencies": {
+    "express": "^4.0.0 || ^5.0.0",
+    "fastify": "^5.0.0",
+    "hono": "^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "express": { "optional": true },
+    "fastify": { "optional": true },
+    "hono": { "optional": true }
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.5.0",
+    "express": "^5.2.1",
+    "fastify": "^5.0.0",
+    "hono": "^4.0.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.0",
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^3.2.4"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.mts",
+        "default": "./dist/esm/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    },
+    "./express": {
+      "import": {
+        "types": "./dist/esm/express.d.mts",
+        "default": "./dist/esm/express.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/express.d.ts",
+        "default": "./dist/cjs/express.js"
+      }
+    },
+    "./fastify": {
+      "import": {
+        "types": "./dist/esm/fastify.d.mts",
+        "default": "./dist/esm/fastify.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/fastify.d.ts",
+        "default": "./dist/cjs/fastify.js"
+      }
+    },
+    "./hono": {
+      "import": {
+        "types": "./dist/esm/hono.d.mts",
+        "default": "./dist/esm/hono.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/hono.d.ts",
+        "default": "./dist/cjs/hono.js"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "homepage": "https://t402.io",
+  "publishConfig": {
+    "access": "public"
+  }
+}
