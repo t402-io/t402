@@ -12,7 +12,8 @@ export function ChainSelector({ compact = false }: { compact?: boolean }) {
 
   // In mainnet mode, EVM has multiple chains
   const evmMainnetChains = !testnet ? getMainnetConfigsForFamily("evm") : [];
-  const showEvmSubChains = !testnet && activeFamily === "evm" && evmMainnetChains.length > 1;
+  // Only show sub-chains in non-compact mode (i.e., NOT in the header)
+  const showEvmSubChains = !compact && !testnet && activeFamily === "evm" && evmMainnetChains.length > 1;
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -40,16 +41,16 @@ export function ChainSelector({ compact = false }: { compact?: boolean }) {
           );
         })}
       </div>
-      {/* EVM sub-chain selector (mainnet only) */}
+      {/* EVM sub-chain selector (mainnet, non-compact only) */}
       {showEvmSubChains && (
-        <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide pl-1">
+        <div className="flex flex-wrap items-center gap-1 pl-1 max-w-full">
           {evmMainnetChains.map((chain) => {
             const isActive = activeNetwork === chain.network;
             return (
               <button
                 key={chain.network}
                 onClick={() => setActiveNetwork(chain.network)}
-                className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium transition-all"
+                className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium transition-all"
                 style={{
                   background: isActive ? chain.color + "20" : "transparent",
                   color: isActive ? "var(--color-text-primary)" : "var(--color-text-tertiary)",
@@ -57,7 +58,7 @@ export function ChainSelector({ compact = false }: { compact?: boolean }) {
                 }}
               >
                 <span
-                  className="h-2 w-2 rounded-full shrink-0"
+                  className="h-1.5 w-1.5 rounded-full shrink-0"
                   style={{ backgroundColor: chain.color }}
                 />
                 {chain.name}
