@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback } from "react";
-import { useAccount, useSignTypedData, useSwitchChain } from "wagmi";
+import { useAccount, useSignTypedData, useSwitchChain, useWriteContract, useReadContract } from "wagmi";
+import { erc20Abi, maxUint256 } from "viem";
 import { getConfigByNetwork } from "@/lib/chain-registry";
 
 interface PaymentRequirements {
@@ -22,7 +23,6 @@ interface PaymentPayload {
   payload: Record<string, unknown>;
 }
 
-// EIP-712 domain
 function getDomain(requirements: PaymentRequirements) {
   const chainId = parseInt(requirements.network.split(":")[1]);
   return {
@@ -33,7 +33,6 @@ function getDomain(requirements: PaymentRequirements) {
   };
 }
 
-// EIP-3009 TransferWithAuthorization types (for exact scheme)
 const TRANSFER_WITH_AUTHORIZATION_TYPES = {
   TransferWithAuthorization: [
     { name: "from", type: "address" },
@@ -45,7 +44,6 @@ const TRANSFER_WITH_AUTHORIZATION_TYPES = {
   ],
 } as const;
 
-// EIP-2612 LegacyTransferAuthorization types (for exact-legacy scheme)
 const LEGACY_TRANSFER_AUTHORIZATION_TYPES = {
   LegacyTransferAuthorization: [
     { name: "from", type: "address" },
@@ -64,7 +62,6 @@ function createNonce(): string {
   return "0x" + Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-/** Public RPC URLs for wallet_addEthereumChain */
 const CHAIN_RPC: Record<number, string> = {
   1: "https://ethereum-rpc.publicnode.com",
   10: "https://mainnet.optimism.io",
@@ -96,7 +93,7 @@ const CHAIN_RPC: Record<number, string> = {
 
 const NATIVE_CURRENCY: Record<number, { name: string; symbol: string; decimals: number }> = {
   56: { name: "BNB", symbol: "BNB", decimals: 18 },
-  137: { name: "MATIC", symbol: "MATIC", decimals: 18 },
+  137: { name: "MATIC", symbol: "POL", decimals: 18 },
   250: { name: "FTM", symbol: "FTM", decimals: 18 },
   42220: { name: "CELO", symbol: "CELO", decimals: 18 },
   43114: { name: "AVAX", symbol: "AVAX", decimals: 18 },
@@ -119,13 +116,9 @@ async function ensureCorrectChain(
     const code = switchError?.code ?? switchError?.cause?.code;
     if (code === 4902 || code === -32603 || code === 4001) {
       const provider = (window as any).ethereum;
-      if (!provider?.request) {
-        throw new Error(`Please add ${chainName} to your wallet manually.`);
-      }
+      if (!provider?.request) throw new Error(`Please add ${chainName} to your wallet manually.`);
       const rpcUrl = CHAIN_RPC[requiredChainId];
-      if (!rpcUrl) {
-        throw new Error(`Please add ${chainName} (Chain ID: ${requiredChainId}) to your wallet manually.`);
-      }
+      if (!rpcUrl) throw new Error(`Please add ${chainName} (Chain ID: ${requiredChainId}) manually.`);
       const config = getConfigByNetwork(`eip155:${requiredChainId}`);
       const nativeCurrency = NATIVE_CURRENCY[requiredChainId] || { name: "ETH", symbol: "ETH", decimals: 18 };
       try {
@@ -141,7 +134,7 @@ async function ensureCorrectChain(
         });
         await switchChainAsync({ chainId: requiredChainId });
       } catch {
-        throw new Error(`Failed to add ${chainName}. Please add it manually (Chain ID: ${requiredChainId}).`);
+        throw new Error(`Failed to add ${chainName}. Add manually (Chain ID: ${requiredChainId}).`);
       }
     } else {
       throw new Error(`Please switch your wallet to ${chainName} manually.`);
@@ -150,19 +143,42 @@ async function ensureCorrectChain(
   await new Promise((r) => setTimeout(r, 1000));
 }
 
-// Facilitator address (spender for exact-legacy approve+transferFrom)
-const FACILITATOR_ADDRESS = "0xC88f67e776f16DcFBf42e6bDda1B82604448899B";
+const FACILITATOR_ADDRESS = "0xC88f67e776f16DcFBf42e6bDda1B82604448899B" as `0x${string}`;
+
+/**
+ * Check on-chain allowance for the facilitator.
+ * Returns the raw allowance as a bigint via direct RPC call.
+ */
+async function checkAllowance(chainId: number, tokenAddress: string, ownerAddress: string): Promise<bigint> {
+  const rpcUrl = CHAIN_RPC[chainId];
+  if (!rpcUrl) return BigInt(0);
+
+  // allowance(address,address) = 0xdd62ed3e
+  const owner = ownerAddress.slice(2).toLowerCase().padStart(64, "0");
+  const spender = FACILITATOR_ADDRESS.slice(2).toLowerCase().padStart(64, "0");
+  const data = `0xdd62ed3e${owner}${spender}`;
+
+  try {
+    const response = await fetch(rpcUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", method: "eth_call", params: [{ to: tokenAddress, data }, "latest"], id: 1 }),
+    });
+    const result = await response.json();
+    if (result.result) return BigInt(result.result);
+  } catch { /* ignore */ }
+  return BigInt(0);
+}
 
 export function useEvmPayment() {
   const { address, isConnected, chain } = useAccount();
   const { signTypedDataAsync } = useSignTypedData();
   const { switchChainAsync } = useSwitchChain();
+  const { writeContractAsync } = useWriteContract();
 
   const signPayment = useCallback(
     async (requirements: PaymentRequirements): Promise<PaymentPayload> => {
-      if (!address || !isConnected) {
-        throw new Error("Wallet not connected");
-      }
+      if (!address || !isConnected) throw new Error("Wallet not connected");
 
       const requiredChainId = parseInt(requirements.network.split(":")[1]);
       const chainConfig = getConfigByNetwork(requirements.network);
@@ -172,13 +188,34 @@ export function useEvmPayment() {
         await ensureCorrectChain(switchChainAsync, requiredChainId, chainName);
       }
 
+      const isLegacy = requirements.scheme === "exact-legacy";
       const now = Math.floor(Date.now() / 1000);
       const nonce = createNonce() as `0x${string}`;
       const domain = getDomain(requirements);
-      const isLegacy = requirements.scheme === "exact-legacy";
 
       if (isLegacy) {
-        // exact-legacy: LegacyTransferAuthorization with spender field
+        // ──────────────────────────────────────────────────
+        // exact-legacy: Check allowance → Approve if needed → Sign
+        // ──────────────────────────────────────────────────
+        const requiredAmount = BigInt(requirements.amount);
+        const currentAllowance = await checkAllowance(requiredChainId, requirements.asset, address);
+
+        if (currentAllowance < requiredAmount) {
+          // Step 1: Send on-chain approve transaction
+          // Use max uint256 so user doesn't need to approve again for future payments
+          await writeContractAsync({
+            address: requirements.asset as `0x${string}`,
+            abi: erc20Abi,
+            functionName: "approve",
+            args: [FACILITATOR_ADDRESS, maxUint256],
+            chainId: requiredChainId,
+          });
+
+          // Wait for the approve tx to be mined
+          await new Promise((r) => setTimeout(r, 3000));
+        }
+
+        // Step 2: Sign EIP-712 LegacyTransferAuthorization
         const authorization = {
           from: address,
           to: requirements.payTo as `0x${string}`,
@@ -186,7 +223,7 @@ export function useEvmPayment() {
           validAfter: BigInt(now - 600),
           validBefore: BigInt(now + requirements.maxTimeoutSeconds),
           nonce,
-          spender: FACILITATOR_ADDRESS as `0x${string}`,
+          spender: FACILITATOR_ADDRESS,
         };
 
         const signature = await signTypedDataAsync({
@@ -216,7 +253,9 @@ export function useEvmPayment() {
         };
       }
 
-      // exact: TransferWithAuthorization (EIP-3009)
+      // ──────────────────────────────────────────────────
+      // exact: TransferWithAuthorization (EIP-3009) — one step
+      // ──────────────────────────────────────────────────
       const authorization = {
         from: address,
         to: requirements.payTo as `0x${string}`,
@@ -251,13 +290,8 @@ export function useEvmPayment() {
         },
       };
     },
-    [address, isConnected, chain, signTypedDataAsync, switchChainAsync]
+    [address, isConnected, chain, signTypedDataAsync, switchChainAsync, writeContractAsync]
   );
 
-  return {
-    address,
-    isConnected,
-    chain,
-    signPayment,
-  };
+  return { address, isConnected, chain, signPayment };
 }

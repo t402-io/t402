@@ -19,10 +19,13 @@ function ChecklistInner() {
   const walletChainId = evmAccount.chain?.id ?? null;
   const wrongChain = activeFamily === "evm" && isConnected && requiredChainId && walletChainId && walletChainId !== requiredChainId;
 
+  const isLegacy = activeFamily === "evm" && activeConfig.scheme === "exact-legacy";
+
   const checks = [
     {
       label: `Chain: ${activeConfig.name} (${activeConfig.tokenSymbol})`,
       ok: true,
+      help: isLegacy ? "Legacy token — requires approve + sign (2 steps)" : undefined,
     },
     {
       label: isConnected ? "Wallet connected" : "Wallet not connected",
