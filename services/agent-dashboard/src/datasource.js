@@ -22,7 +22,7 @@ import {
   generateGlobalNetworkStats,
   generateGlobalTrendData,
 } from "./data.js";
-import { networkMeta } from "./networks.js";
+import { networkMeta, resolveTokenSymbol } from "./networks.js";
 import { buildAlertsFromBudget, formatPaymentsCsv, log } from "./utils.js";
 
 // ── Mode detection ──────────────────────────────────────────────────
@@ -112,7 +112,7 @@ function rowToPayment(row, index) {
     txHash: row.tx_hash || "",
     network,
     networkLabel: meta.label,
-    token: row.token || row.asset || meta.token,
+    token: resolveTokenSymbol(row.token || row.asset) || meta.token,
     amount: String(amountRaw),
     amountFormatted: (amountRaw / 10 ** decimals).toFixed(decimals > 6 ? 4 : 4),
     to: row.to_address || "",
@@ -143,24 +143,27 @@ export async function getPayments(address, options = {}) {
   const pool = await getPool();
   const cutoff = new Date(Date.now() - days * 86400 * 1000);
 
+  const statusFilter = `AND status = 'confirmed' AND CAST(amount AS NUMERIC) > 0`;
   let query, params;
   if (network) {
     query = {
-      name: "get-payments-filtered",
+      name: "get-payments-filtered-v2",
       text: `SELECT * FROM settlements_view
              WHERE (from_address = $1 OR to_address = $1)
                AND created_at >= $2
                AND network = $3
+               ${statusFilter}
              ORDER BY created_at DESC
              LIMIT $4 OFFSET $5`,
       values: [address, cutoff, network, limit, offset],
     };
   } else {
     query = {
-      name: "get-payments",
+      name: "get-payments-v2",
       text: `SELECT * FROM settlements_view
              WHERE (from_address = $1 OR to_address = $1)
                AND created_at >= $2
+               ${statusFilter}
              ORDER BY created_at DESC
              LIMIT $3 OFFSET $4`,
       values: [address, cutoff, limit, offset],
@@ -172,15 +175,17 @@ export async function getPayments(address, options = {}) {
   // Get total count for pagination info.
   const countQuery = network
     ? {
-        name: "count-payments-filtered",
+        name: "count-payments-filtered-v2",
         text: `SELECT COUNT(*) as cnt FROM settlements_view
-               WHERE (from_address = $1 OR to_address = $1) AND created_at >= $2 AND network = $3`,
+               WHERE (from_address = $1 OR to_address = $1) AND created_at >= $2 AND network = $3
+               ${statusFilter}`,
         values: [address, cutoff, network],
       }
     : {
-        name: "count-payments",
+        name: "count-payments-v2",
         text: `SELECT COUNT(*) as cnt FROM settlements_view
-               WHERE (from_address = $1 OR to_address = $1) AND created_at >= $2`,
+               WHERE (from_address = $1 OR to_address = $1) AND created_at >= $2
+               ${statusFilter}`,
         values: [address, cutoff],
       };
   const countResult = await pool.query(countQuery);
@@ -277,6 +282,16 @@ export async function getBudget(address) {
   const sessionSpent = Number(sessionResult.rows[0]?.total || 0);
   const paymentsThisHour = Number(sessionResult.rows[0]?.cnt || 0);
 
+  // Fetch distinct networks this address has actually used
+  const netResult = await pool.query({
+    name: "budget-networks",
+    text: `SELECT DISTINCT network FROM settlements_view
+           WHERE (from_address = $1 OR to_address = $1) AND status = 'confirmed'
+           ORDER BY network`,
+    values: [address],
+  });
+  const allowedNetworks = netResult.rows.map((r) => r.network).filter(Boolean);
+
   const sessionPct = +((sessionSpent / MAX_PER_SESSION) * 100).toFixed(1);
   const todayPct = +((todaySpent / MAX_PER_DAY) * 100).toFixed(1);
 
@@ -285,7 +300,7 @@ export async function getBudget(address) {
       maxPerPayment: String(MAX_PER_PAYMENT),
       maxPerSession: String(MAX_PER_SESSION),
       maxPerDay: String(MAX_PER_DAY),
-      allowedNetworks: ["eip155:8453", "eip155:42161", "eip155:137"],
+      allowedNetworks,
     },
     usage: {
       sessionSpent: String(sessionSpent),
@@ -459,16 +474,24 @@ export async function getAgents() {
            LIMIT 50`,
   });
 
-  return result.rows.map((row, i) => ({
-    id: `agent-${i + 1}`,
-    address: row.address,
-    name: `Agent ${i + 1}`,
-    status: "active",
-    paymentCount: Number(row.payment_count),
-    totalSpent: String(row.total_spent),
-    totalSpentUsd: (Number(row.total_spent) / 1e6).toFixed(2),
-    lastActive: row.last_active ? new Date(row.last_active).toISOString() : null,
-  }));
+  return result.rows.map((row, i) => {
+    const lastActive = row.last_active ? new Date(row.last_active) : null;
+    const hoursSinceActive = lastActive ? (Date.now() - lastActive.getTime()) / 3600000 : Infinity;
+    let status = "inactive";
+    if (hoursSinceActive < 1) status = "active";
+    else if (hoursSinceActive < 168) status = "idle"; // 7 days
+
+    return {
+      id: `agent-${i + 1}`,
+      address: row.address,
+      name: `Agent ${i + 1}`,
+      status,
+      paymentCount: Number(row.payment_count),
+      totalSpent: String(row.total_spent),
+      totalSpentUsd: (Number(row.total_spent) / 1e6).toFixed(2),
+      lastActive: lastActive ? lastActive.toISOString() : null,
+    };
+  });
 }
 
 /**
@@ -527,29 +550,35 @@ export async function getGlobalTransactions(options = {}) {
   let query, countQuery;
   if (network) {
     query = {
-      name: "global-tx-filtered",
+      name: "global-tx-filtered-v2",
       text: `SELECT * FROM settlements_view
-             WHERE network = $1
+             WHERE status = 'confirmed'
+               AND CAST(amount AS NUMERIC) > 0
+               AND network = $1
              ORDER BY created_at DESC
              LIMIT $2 OFFSET $3`,
       values: [network, limit, offset],
     };
     countQuery = {
-      name: "global-tx-count-filtered",
-      text: `SELECT COUNT(*) AS cnt FROM settlements_view WHERE network = $1`,
+      name: "global-tx-count-filtered-v2",
+      text: `SELECT COUNT(*) AS cnt FROM settlements_view
+             WHERE status = 'confirmed' AND CAST(amount AS NUMERIC) > 0 AND network = $1`,
       values: [network],
     };
   } else {
     query = {
-      name: "global-tx",
+      name: "global-tx-v2",
       text: `SELECT * FROM settlements_view
+             WHERE status = 'confirmed'
+               AND CAST(amount AS NUMERIC) > 0
              ORDER BY created_at DESC
              LIMIT $1 OFFSET $2`,
       values: [limit, offset],
     };
     countQuery = {
-      name: "global-tx-count",
-      text: `SELECT COUNT(*) AS cnt FROM settlements_view`,
+      name: "global-tx-count-v2",
+      text: `SELECT COUNT(*) AS cnt FROM settlements_view
+             WHERE status = 'confirmed' AND CAST(amount AS NUMERIC) > 0`,
     };
   }
 
