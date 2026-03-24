@@ -1,6 +1,6 @@
 module github.com/t402-io/t402/sdks/go
 
-go 1.25.0
+go 1.26.1
 
 require (
 	github.com/ethereum/go-ethereum v1.17.1
