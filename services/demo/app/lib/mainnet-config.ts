@@ -45,7 +45,7 @@ export const MAINNET_CONFIGS: Record<string, ChainConfig> = {
     family: "evm", network: "eip155:137", name: "Polygon", label: "Polygon",
     asset: "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
     payTo: "0xC88f67e776f16DcFBf42e6bDda1B82604448899B",
-    scheme: "exact", tokenSymbol: "USDT0", decimals: 6,
+    scheme: "exact-legacy", tokenSymbol: "USDT0", decimals: 6,
     tokenContractName: "USD₮0", tokenContractVersion: "1",
     explorer: "https://polygonscan.com/tx/",
     color: "#8247E5",
