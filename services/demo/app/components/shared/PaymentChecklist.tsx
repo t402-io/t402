@@ -6,6 +6,7 @@ import { useWalletReady } from "@/providers/ClientProviders";
 import { useMultiChainPayment } from "@/hooks/useMultiChainPayment";
 import { useAccount, useSwitchChain } from "wagmi";
 import { Check, X, AlertCircle } from "lucide-react";
+import { getConfigByNetwork } from "@/lib/chain-registry";
 
 function ChecklistInner() {
   const { activeConfig, activeFamily } = useChainContext();
@@ -34,7 +35,28 @@ function ChecklistInner() {
             label: `Wrong network: wallet on ${evmAccount.chain?.name || `Chain ${walletChainId}`}`,
             ok: false,
             help: `Need ${activeConfig.name}`,
-            action: () => switchChain?.({ chainId: requiredChainId! }),
+            action: async () => {
+              try {
+                switchChain?.({ chainId: requiredChainId! });
+              } catch {
+                // If switch fails, try adding the chain
+                const provider = (window as any).ethereum;
+                if (provider?.request) {
+                  const cfg = getConfigByNetwork(activeConfig.network);
+                  try {
+                    await provider.request({
+                      method: "wallet_addEthereumChain",
+                      params: [{
+                        chainId: `0x${requiredChainId!.toString(16)}`,
+                        chainName: cfg?.name || activeConfig.name,
+                        rpcUrls: [`https://${activeConfig.name.toLowerCase().replace(/\s/g, "-")}-rpc.publicnode.com`],
+                        nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+                      }],
+                    });
+                  } catch { /* user rejected */ }
+                }
+              }
+            },
             actionLabel: `Switch to ${activeConfig.name}`,
           },
         ]
