@@ -43,10 +43,12 @@ export function ScenarioShell({ title, description, cost, accentColor, scenarioI
           </span>
         </div>
         <p className="text-sm max-w-xl mb-5 leading-relaxed text-[var(--color-muted)]">{description}</p>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+        <div className="flex flex-col gap-2">
           <ChainSelector />
-          <ChainBadge family={activeFamily} showNetwork />
-          {isLive && <TokenBalance />}
+          <div className="flex items-center gap-2 flex-wrap">
+            <ChainBadge family={activeFamily} showNetwork />
+            {isLive && <TokenBalance />}
+          </div>
         </div>
         {isLive && testnet ? (
           <div className="mt-4">

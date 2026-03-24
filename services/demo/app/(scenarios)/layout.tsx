@@ -50,12 +50,16 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
               <FacilitatorBadge />
             </div>
           </div>
-          <div className="flex items-center gap-1 sm:gap-2">
-            <div className="hidden md:block">
+          <div className="flex items-center gap-1 sm:gap-2 min-w-0">
+            <div className="hidden xl:block shrink-0">
               <ChainSelector compact />
             </div>
-            <ModeToggle />
-            <WalletButton />
+            <div className="shrink-0">
+              <ModeToggle />
+            </div>
+            <div className="shrink min-w-0">
+              <WalletButton />
+            </div>
           </div>
         </div>
         {/* Mobile/Tablet chain selector */}

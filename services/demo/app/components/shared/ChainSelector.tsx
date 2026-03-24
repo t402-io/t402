@@ -10,10 +10,12 @@ export function ChainSelector({ compact = false }: { compact?: boolean }) {
   const { activeFamily, setActiveFamily, activeNetwork, setActiveNetwork } = useChainContext();
   const { testnet } = useDemoContext();
 
-  // In mainnet mode, EVM has multiple chains
   const evmMainnetChains = !testnet ? getMainnetConfigsForFamily("evm") : [];
-  // Only show sub-chains in non-compact mode (i.e., NOT in the header)
   const showEvmSubChains = !compact && !testnet && activeFamily === "evm" && evmMainnetChains.length > 1;
+
+  // Split EVM chains into USDT0 (exact) and Legacy USDT (exact-legacy)
+  const usdt0Chains = evmMainnetChains.filter((c) => c.scheme === "exact");
+  const legacyChains = evmMainnetChains.filter((c) => c.scheme === "exact-legacy");
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -43,30 +45,42 @@ export function ChainSelector({ compact = false }: { compact?: boolean }) {
       </div>
       {/* EVM sub-chain selector (mainnet, non-compact only) */}
       {showEvmSubChains && (
-        <div className="flex flex-wrap items-center gap-0.5 sm:gap-1 pl-1 max-w-full">
-          {evmMainnetChains.map((chain) => {
-            const isActive = activeNetwork === chain.network;
-            return (
-              <button
-                key={chain.network}
-                onClick={() => setActiveNetwork(chain.network)}
-                className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium transition-all"
-                style={{
-                  background: isActive ? chain.color + "20" : "transparent",
-                  color: isActive ? "var(--color-text-primary)" : "var(--color-text-tertiary)",
-                  border: isActive ? `1px solid ${chain.color}40` : "1px solid transparent",
-                }}
-              >
-                <span
-                  className="h-1.5 w-1.5 rounded-full shrink-0"
-                  style={{ backgroundColor: chain.color }}
-                />
-                {chain.name}
-              </button>
-            );
-          })}
+        <div className="flex flex-col gap-1 pl-1">
+          {/* USDT0 chains — one-step payment */}
+          <div className="flex flex-wrap items-center gap-0.5">
+            <span className="text-[8px] text-[var(--color-muted)] mr-1 shrink-0">USDT0</span>
+            {usdt0Chains.map((chain) => (
+              <EvmChainPill key={chain.network} chain={chain} isActive={activeNetwork === chain.network} onClick={() => setActiveNetwork(chain.network)} />
+            ))}
+          </div>
+          {/* Legacy USDT chains — needs approve */}
+          {legacyChains.length > 0 && (
+            <div className="flex flex-wrap items-center gap-0.5">
+              <span className="text-[8px] text-[var(--color-muted)] mr-1 shrink-0">Legacy</span>
+              {legacyChains.map((chain) => (
+                <EvmChainPill key={chain.network} chain={chain} isActive={activeNetwork === chain.network} onClick={() => setActiveNetwork(chain.network)} />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
+  );
+}
+
+function EvmChainPill({ chain, isActive, onClick }: { chain: { network: string; name: string; color: string }; isActive: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-medium transition-all"
+      style={{
+        background: isActive ? chain.color + "20" : "transparent",
+        color: isActive ? "var(--color-text-primary)" : "var(--color-text-tertiary)",
+        border: isActive ? `1px solid ${chain.color}40` : "1px solid transparent",
+      }}
+    >
+      <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ backgroundColor: chain.color }} />
+      {chain.name}
+    </button>
   );
 }
