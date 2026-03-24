@@ -104,6 +104,16 @@ export function decodePaymentResponseHeader(paymentResponseHeader: string): Sett
 export { t402HTTPResourceServer, RouteConfigurationError } from "./t402HTTPResourceServer";
 export { HTTPFacilitatorClient } from "./httpFacilitatorClient";
 export { t402HTTPClient } from "./t402HTTPClient";
+export {
+  isX402Format,
+  isT402Format,
+  hasVersionField,
+  x402ToT402,
+  t402ToX402,
+  normalizeToT402,
+  normalizePaymentPayload,
+  normalizePaymentRequired,
+} from "./x402Compat";
 export { StreamingClient } from "./streamingClient";
 export { IntentClient } from "./intentClient";
 

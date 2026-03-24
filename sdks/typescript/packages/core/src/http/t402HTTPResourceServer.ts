@@ -4,6 +4,7 @@ import {
   encodePaymentRequiredHeader,
   encodePaymentResponseHeader,
 } from ".";
+import { normalizePaymentPayload } from "./x402Compat";
 import {
   PaymentPayload,
   PaymentRequired,
@@ -595,7 +596,9 @@ export class t402HTTPResourceServer {
 
     if (header) {
       try {
-        return decodePaymentSignatureHeader(header);
+        const decoded = decodePaymentSignatureHeader(header);
+        // Normalize x402-format payloads (x402Version → t402Version) for interop
+        return normalizePaymentPayload(decoded as unknown as Record<string, unknown>);
       } catch (error) {
         console.warn("Failed to decode payment header:", error);
       }
