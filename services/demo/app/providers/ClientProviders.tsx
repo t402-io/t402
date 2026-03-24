@@ -14,25 +14,21 @@ export function useWalletReady() {
   return useContext(WalletReadyContext);
 }
 
-// EVM provider — always loaded (most common chain family, required for all scenarios)
+// EVM provider — always loaded (wagmi hooks are used everywhere)
 const WagmiProviderWrapper = dynamic(
   () => import("./WagmiProvider").then((mod) => mod.WagmiProviderWrapper),
   { ssr: false, loading: () => null }
 );
 
 /**
- * Lazy-loaded non-EVM providers. These are only imported when the user
- * actually selects that chain family. Each provider + its wallet SDK
- * is a separate webpack chunk that doesn't load until needed.
+ * Lazy-loaded non-EVM providers. Only imported when user selects that chain.
  */
 const LAZY_PROVIDERS: Record<string, React.ComponentType<{ children: ReactNode }>> = {};
 
 function getLazyProvider(family: ChainFamily): React.ComponentType<{ children: ReactNode }> | null {
-  // EVM uses WagmiProvider (always loaded), TRON + Stacks use window injection
   if (family === "evm" || family === "tron" || family === "stacks") return null;
 
   if (!LAZY_PROVIDERS[family]) {
-    // Create lazy component only on first access — this triggers the chunk download
     const LazyComponent = lazy(() => {
       switch (family) {
         case "ton": return import("./TonConnectProvider").then((m) => ({ default: m.TonConnectProvider }));
@@ -50,26 +46,20 @@ function getLazyProvider(family: ChainFamily): React.ComponentType<{ children: R
   return LAZY_PROVIDERS[family];
 }
 
-// Renders only the active chain's wallet provider
-function ActiveWalletProvider({ children }: { children: ReactNode }) {
+// Wraps children with the active non-EVM chain provider (if needed)
+function NonEvmProvider({ children }: { children: ReactNode }) {
   const { activeFamily } = useChainContext();
   const { isDemo } = useDemoContext();
 
-  // In demo mode, skip non-EVM providers entirely (mock wallet, no SDK needed)
+  // Demo mode: no wallet SDK needed
   const Provider = isDemo ? null : getLazyProvider(activeFamily);
 
-  const content = Provider ? (
+  if (!Provider) return <>{children}</>;
+
+  return (
     <Suspense fallback={children}>
       <Provider>{children}</Provider>
     </Suspense>
-  ) : (
-    children
-  );
-
-  return (
-    <WagmiProviderWrapper>
-      {content}
-    </WagmiProviderWrapper>
   );
 }
 
@@ -80,30 +70,37 @@ export function ClientProviders({ children }: { children: ReactNode }) {
     setMounted(true);
   }, []);
 
-  // SSR + pre-mount: core providers only, no wallet SDKs
+  // Core providers (work on both SSR and client)
+  const core = (
+    <DemoProvider>
+      <ChainProvider>
+        <ToastProvider>
+          {children}
+        </ToastProvider>
+      </ChainProvider>
+    </DemoProvider>
+  );
+
+  // SSR: no wallet providers
   if (!mounted) {
     return (
       <WalletReadyContext.Provider value={false}>
-        <DemoProvider>
-          <ChainProvider>
-            <ToastProvider>
-              {children}
-            </ToastProvider>
-          </ChainProvider>
-        </DemoProvider>
+        {core}
       </WalletReadyContext.Provider>
     );
   }
 
-  // After mount: add wallet providers
+  // Client: wrap with WagmiProvider (always) + non-EVM provider (on demand)
   return (
     <WalletReadyContext.Provider value={true}>
       <DemoProvider>
         <ChainProvider>
           <ToastProvider>
-            <ActiveWalletProvider>
-              {children}
-            </ActiveWalletProvider>
+            <WagmiProviderWrapper>
+              <NonEvmProvider>
+                {children}
+              </NonEvmProvider>
+            </WagmiProviderWrapper>
           </ToastProvider>
         </ChainProvider>
       </DemoProvider>
