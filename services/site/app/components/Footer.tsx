@@ -71,16 +71,18 @@ function FooterColumn({
 }) {
   return (
     <div>
-      <h3
+      <p
         className="text-xs font-semibold uppercase"
         style={{
           color: "#50AF95",
           letterSpacing: "0.1em",
           fontSize: "0.75rem",
         }}
+        role="heading"
+        aria-level={4}
       >
         {title}
-      </h3>
+      </p>
       <ul className="mt-5 space-y-3">
         {links.map((link) => (
           <li key={link.label}>
