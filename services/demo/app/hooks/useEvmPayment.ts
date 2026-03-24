@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback } from "react";
-import { useAccount, useSignTypedData, useSwitchChain, useWriteContract, useReadContract } from "wagmi";
-import { erc20Abi, maxUint256 } from "viem";
+import { useAccount, useSignTypedData, useSwitchChain } from "wagmi";
+import { encodeFunctionData, erc20Abi } from "viem";
 import { getConfigByNetwork } from "@/lib/chain-registry";
 
 interface PaymentRequirements {
@@ -174,8 +174,6 @@ export function useEvmPayment() {
   const { address, isConnected, chain } = useAccount();
   const { signTypedDataAsync } = useSignTypedData();
   const { switchChainAsync } = useSwitchChain();
-  const { writeContractAsync } = useWriteContract();
-
   const signPayment = useCallback(
     async (requirements: PaymentRequirements): Promise<PaymentPayload> => {
       if (!address || !isConnected) throw new Error("Wallet not connected");
@@ -201,18 +199,39 @@ export function useEvmPayment() {
         const currentAllowance = await checkAllowance(requiredChainId, requirements.asset, address);
 
         if (currentAllowance < requiredAmount) {
-          // Step 1: Send on-chain approve transaction
-          // Use max uint256 so user doesn't need to approve again for future payments
-          await writeContractAsync({
-            address: requirements.asset as `0x${string}`,
+          // Step 1: Send on-chain approve transaction via wallet provider
+          // USDT quirk: if current allowance > 0, must reset to 0 first
+          const provider = (window as any).ethereum;
+          if (!provider?.request) throw new Error("Wallet provider not available for approve transaction");
+
+          if (currentAllowance > BigInt(0)) {
+            // Reset allowance to 0 first (USDT requires this)
+            const resetData = encodeFunctionData({
+              abi: erc20Abi,
+              functionName: "approve",
+              args: [FACILITATOR_ADDRESS, BigInt(0)],
+            });
+            await provider.request({
+              method: "eth_sendTransaction",
+              params: [{ from: address, to: requirements.asset, data: resetData }],
+            });
+            await new Promise((r) => setTimeout(r, 5000)); // Wait for reset tx
+          }
+
+          // Approve a large amount (not maxUint256 — some legacy tokens reject it)
+          const approveAmount = BigInt("1000000000000"); // 1M USDT (enough for a while)
+          const approveData = encodeFunctionData({
             abi: erc20Abi,
             functionName: "approve",
-            args: [FACILITATOR_ADDRESS, maxUint256],
-            chainId: requiredChainId,
+            args: [FACILITATOR_ADDRESS, approveAmount],
+          });
+          await provider.request({
+            method: "eth_sendTransaction",
+            params: [{ from: address, to: requirements.asset, data: approveData }],
           });
 
-          // Wait for the approve tx to be mined
-          await new Promise((r) => setTimeout(r, 3000));
+          // Wait for approve tx to be mined
+          await new Promise((r) => setTimeout(r, 15000)); // Ethereum ~12s/block
         }
 
         // Step 2: Sign EIP-712 LegacyTransferAuthorization
@@ -290,7 +309,7 @@ export function useEvmPayment() {
         },
       };
     },
-    [address, isConnected, chain, signTypedDataAsync, switchChainAsync, writeContractAsync]
+    [address, isConnected, chain, signTypedDataAsync, switchChainAsync]
   );
 
   return { address, isConnected, chain, signPayment };
