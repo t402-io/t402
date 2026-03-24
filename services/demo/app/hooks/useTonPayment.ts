@@ -21,7 +21,7 @@ interface PaymentPayload {
   payload: Record<string, unknown>;
 }
 
-// TON Wallet Context — populated by TonConnectProvider, safe to use without provider
+// TON Wallet Context — populated by TonConnectProvider
 interface TonWalletContextType {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tonConnectUI: any;
@@ -36,39 +36,52 @@ export const TonWalletContext = createContext<TonWalletContextType>({
 });
 
 /**
- * Convert TON user-friendly address (EQ.../kQ.../UQ...) to raw format (0:hex).
- * TonConnect sendTransaction requires raw format addresses.
+ * Build Jetton transfer body using @ton/core (same approach as scan2pay).
  */
-function toRawAddress(friendlyAddr: string): string {
-  // If already raw format, return as-is
-  if (friendlyAddr.includes(":")) return friendlyAddr;
+async function buildJettonTransferCell(params: {
+  amount: bigint;
+  destination: string; // payTo address
+  responseDestination: string; // sender's address for excess
+}): Promise<string> {
+  // Dynamic import to keep @ton/core out of initial bundle
+  const { beginCell, Address, toNano } = await import("@ton/core");
 
-  // Decode base64url
-  let base64 = friendlyAddr.replace(/-/g, "+").replace(/_/g, "/");
-  while (base64.length % 4) base64 += "=";
-  const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+  const JETTON_TRANSFER_OP = 0xf8a7ea5;
 
-  // bytes[0] = flags, bytes[1] = workchain (0 or -1), bytes[2..33] = hash
-  const workchain = bytes[1] === 0xff ? -1 : bytes[1];
-  const hash = Array.from(bytes.slice(2, 34)).map((b) => b.toString(16).padStart(2, "0")).join("");
-  return `${workchain}:${hash}`;
+  const body = beginCell()
+    .storeUint(JETTON_TRANSFER_OP, 32)  // op: jetton_transfer
+    .storeUint(0, 64)                    // query_id
+    .storeCoins(params.amount)           // amount in smallest units
+    .storeAddress(Address.parse(params.destination))     // destination
+    .storeAddress(Address.parse(params.responseDestination)) // response_destination
+    .storeBit(false)                     // no custom_payload
+    .storeCoins(toNano("0.05"))          // forward_ton_amount
+    .storeBit(false)                     // no forward_payload
+    .endCell();
+
+  return body.toBoc().toString("base64");
 }
 
-// Build a Jetton transfer message body cell (simplified for demo)
-// In production, use @t402/ton which handles full BOC construction
-function buildJettonTransferBody(params: {
-  queryId: bigint;
-  amount: bigint;
-  destination: string;
-  responseDestination: string;
-}): string {
-  // Jetton transfer opcode: 0x0f8a7ea5
-  // This is a simplified hex representation for the demo
-  // Real implementation uses @ton/core Cell builder
-  const opcode = "0f8a7ea5";
-  const queryId = params.queryId.toString(16).padStart(16, "0");
-  const amount = params.amount.toString(16).padStart(32, "0");
-  return `${opcode}${queryId}${amount}`;
+/**
+ * Get user's Jetton wallet address by calling get_wallet_address on the Jetton master.
+ */
+async function getJettonWalletAddress(jettonMaster: string, ownerAddress: string): Promise<string> {
+  const { TonClient } = await import("@ton/ton");
+  const { Address, beginCell } = await import("@ton/core");
+
+  const client = new TonClient({
+    endpoint: "https://toncenter.com/api/v2/jsonRPC",
+  });
+
+  const masterAddr = Address.parse(jettonMaster);
+  const ownerAddr = Address.parse(ownerAddress);
+
+  const result = await client.runMethod(masterAddr, "get_wallet_address", [
+    { type: "slice", cell: beginCell().storeAddress(ownerAddr).endCell() },
+  ]);
+
+  const walletAddress = result.stack.readAddress();
+  return walletAddress.toString(); // Returns user-friendly format
 }
 
 export function useTonPayment() {
@@ -82,29 +95,38 @@ export function useTonPayment() {
         throw new Error("TON wallet not connected");
       }
 
-      const queryId = BigInt(Date.now());
       const amount = BigInt(requirements.amount);
+      const senderFriendly = friendlyAddress || rawAddress;
 
-      // Build the jetton transfer payload
-      const body = buildJettonTransferBody({
-        queryId,
+      // Step 1: Get user's Jetton wallet address (not the master contract!)
+      const jettonWalletAddress = await getJettonWalletAddress(requirements.asset, rawAddress);
+
+      // Step 2: Build the Jetton transfer body cell
+      const payloadBase64 = await buildJettonTransferCell({
         amount,
         destination: requirements.payTo,
         responseDestination: rawAddress,
       });
 
-      // Send transaction via TonConnect
-      // This signs and broadcasts the jetton transfer
+      // Step 3: Send transaction via TonConnect
       const result = await tonConnectUI.sendTransaction({
         validUntil: Math.floor(Date.now() / 1000) + requirements.maxTimeoutSeconds,
         messages: [
           {
-            address: requirements.asset, // User-friendly format (EQ.../kQ...) required by TonConnect
-            amount: "50000000", // 0.05 TON for gas
-            payload: body,
+            address: jettonWalletAddress, // User's Jetton wallet, NOT the master
+            amount: "100000000", // 0.1 TON for gas
+            payload: payloadBase64,
           },
         ],
       });
+
+      // Step 4: Compute BOC hash for tx tracking
+      let bocHash = "";
+      try {
+        const { Cell } = await import("@ton/core");
+        const cell = Cell.fromBoc(Buffer.from(result.boc, "base64"))[0];
+        bocHash = cell.hash().toString("hex");
+      } catch { /* ignore */ }
 
       return {
         t402Version: 2,
@@ -113,12 +135,13 @@ export function useTonPayment() {
         accepted: { scheme: requirements.scheme, network: requirements.network },
         payload: {
           signedBoc: result.boc,
+          bocHash,
           authorization: {
-            from: rawAddress,
+            from: senderFriendly,
             to: requirements.payTo,
             jettonMaster: requirements.asset,
             jettonAmount: requirements.amount,
-            tonAmount: "50000000",
+            tonAmount: "100000000",
             validUntil: Math.floor(Date.now() / 1000) + requirements.maxTimeoutSeconds,
             seqno: 0,
             queryId: "0",
@@ -126,23 +149,22 @@ export function useTonPayment() {
         },
       };
     },
-    [rawAddress, tonConnectUI]
+    [rawAddress, friendlyAddress, tonConnectUI]
   );
 
-  const connect = useCallback(async () => {
-    if (tonConnectUI) await tonConnectUI.openModal();
-  }, [tonConnectUI]);
-
-  const disconnect = useCallback(async () => {
-    if (tonConnectUI) await tonConnectUI.disconnect();
-  }, [tonConnectUI]);
-
   return {
-    address: friendlyAddress || null,
-    rawAddress: rawAddress || null,
+    address: friendlyAddress || rawAddress,
     isConnected,
     signPayment,
-    connect,
-    disconnect,
+    connect: useCallback(async () => {
+      if (tonConnectUI) {
+        await tonConnectUI.openModal();
+      }
+    }, [tonConnectUI]),
+    disconnect: useCallback(async () => {
+      if (tonConnectUI) {
+        await tonConnectUI.disconnect();
+      }
+    }, [tonConnectUI]),
   };
 }
