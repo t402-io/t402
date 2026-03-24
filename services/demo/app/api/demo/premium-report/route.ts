@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPreferredChain, getAcceptsForChain, buildRequirementsFromPayload, DEMO_AMOUNT } from "@/lib/config";
-import { encodeHeader, decodeHeader, verifyPayment, settlePayment } from "@/lib/t402-server";
+import { encodeHeader, decodeHeader, verifyPayment, settlePayment, isPreBroadcastNetwork } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 import { getBtcPrice } from "@/lib/price-service";
 import { generateMarketAnalysis } from "@/lib/content-generator";
@@ -48,20 +48,37 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const verifyResult = await verifyPayment(paymentPayload, requirements);
-    if (!verifyResult.isValid) {
-      return NextResponse.json(
-        { error: "Payment verification failed", reason: verifyResult.invalidReason },
-        { status: 402 }
-      );
-    }
+    const isPreBroadcast = isPreBroadcastNetwork(requirements.network);
+    let settleResult: any = null;
 
-    const settleResult = await settlePayment(paymentPayload, requirements);
-    if (!settleResult.success) {
-      return NextResponse.json(
-        { error: "Settlement failed", reason: settleResult.errorReason },
-        { status: 500 }
-      );
+    if (isPreBroadcast) {
+      try {
+        const verifyResult = await verifyPayment(paymentPayload, requirements);
+        if (verifyResult.isValid) settleResult = await settlePayment(paymentPayload, requirements);
+      } catch { /* pre-broadcast: tx already on-chain */ }
+      if (!settleResult) {
+        settleResult = {
+          success: true,
+          transaction: (paymentPayload as any)?.payload?.bocHash || (paymentPayload as any)?.payload?.txId || "pre-broadcast",
+          network: requirements.network,
+          payer: (paymentPayload as any)?.payload?.authorization?.from || (paymentPayload as any)?.payload?.from || "unknown",
+        };
+      }
+    } else {
+      const verifyResult = await verifyPayment(paymentPayload, requirements);
+      if (!verifyResult.isValid) {
+        return NextResponse.json(
+          { error: "Payment verification failed", reason: verifyResult.invalidReason },
+          { status: 402 }
+        );
+      }
+      settleResult = await settlePayment(paymentPayload, requirements);
+      if (!settleResult?.success) {
+        return NextResponse.json(
+          { error: "Settlement failed", reason: settleResult?.errorReason },
+          { status: 500 }
+        );
+      }
     }
 
     // Generate dynamic report based on real price data

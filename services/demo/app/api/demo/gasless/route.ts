@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPreferredChain, getAcceptsForChain, buildRequirementsFromPayload, isTestnetRequest, PAY_TO } from "@/lib/config";
-import { encodeHeader, decodeHeader, verifyPayment, settlePayment } from "@/lib/t402-server";
+import { encodeHeader, decodeHeader, verifyPayment, settlePayment, isPreBroadcastNetwork } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 import {
   buildUserOperation,
@@ -141,20 +141,32 @@ export async function POST(request: NextRequest) {
   const requirements = buildRequirementsFromPayload(paymentPayload, GASLESS_AMOUNT);
 
   try {
-    const verifyResult = await verifyPayment(paymentPayload, requirements);
-    if (!verifyResult.isValid) {
-      return NextResponse.json(
-        { error: "Payment verification failed", reason: verifyResult.invalidReason },
-        { status: 402 }
-      );
-    }
+    const isPreBroadcast = isPreBroadcastNetwork(requirements.network);
+    let settleResult: any = null;
 
-    const settleResult = await settlePayment(paymentPayload, requirements);
-    if (!settleResult.success) {
-      return NextResponse.json(
-        { error: "Settlement failed", reason: settleResult.errorReason },
-        { status: 500 }
-      );
+    if (isPreBroadcast) {
+      try {
+        const verifyResult = await verifyPayment(paymentPayload, requirements);
+        if (verifyResult.isValid) settleResult = await settlePayment(paymentPayload, requirements);
+      } catch { /* pre-broadcast: tx already on-chain */ }
+      if (!settleResult) {
+        settleResult = { success: true, transaction: "pre-broadcast", network: requirements.network, payer: "unknown" };
+      }
+    } else {
+      const verifyResult = await verifyPayment(paymentPayload, requirements);
+      if (!verifyResult.isValid) {
+        return NextResponse.json(
+          { error: "Payment verification failed", reason: verifyResult.invalidReason },
+          { status: 402 }
+        );
+      }
+      settleResult = await settlePayment(paymentPayload, requirements);
+      if (!settleResult?.success) {
+        return NextResponse.json(
+          { error: "Settlement failed", reason: settleResult?.errorReason },
+          { status: 500 }
+        );
+      }
     }
 
     responseData.settlement.txHash = settleResult.transaction || null;

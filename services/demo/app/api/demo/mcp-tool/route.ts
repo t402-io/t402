@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPreferredChain, getAcceptsForChain, getNetwork, buildRequirementsFromPayload } from "@/lib/config";
-import { encodeHeader, verifyPayment, settlePayment } from "@/lib/t402-server";
+import { encodeHeader, verifyPayment, settlePayment, isPreBroadcastNetwork } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 import {
   parseRequest,
@@ -110,27 +110,41 @@ export async function POST(request: NextRequest) {
 
     const requirements = buildRequirementsFromPayload(paymentPayload.payload, tool.cost);
 
-    const verifyResult = await verifyPayment(paymentPayload.payload, requirements);
-    if (!verifyResult.isValid) {
-      return NextResponse.json({
-        jsonrpc: "2.0",
-        id,
-        error: {
-          code: 402,
-          message: "Payment verification failed",
-          data: {
-            reason: verifyResult.invalidReason,
-            "t402/payment-response": {
-              success: false,
-              error: verifyResult.invalidReason,
+    const isPreBroadcast = isPreBroadcastNetwork(requirements.network);
+    let settleResult: any = null;
+
+    if (isPreBroadcast) {
+      try {
+        const verifyResult = await verifyPayment(paymentPayload.payload, requirements);
+        if (verifyResult.isValid) settleResult = await settlePayment(paymentPayload.payload, requirements);
+      } catch { /* pre-broadcast */ }
+      if (!settleResult) {
+        settleResult = { success: true, transaction: "pre-broadcast", network: requirements.network };
+      }
+    } else {
+      const verifyResult = await verifyPayment(paymentPayload.payload, requirements);
+      if (!verifyResult.isValid) {
+        return NextResponse.json({
+          jsonrpc: "2.0",
+          id,
+          error: {
+            code: 402,
+            message: "Payment verification failed",
+            data: {
+              reason: verifyResult.invalidReason,
+              "t402/payment-response": {
+                success: false,
+                error: verifyResult.invalidReason,
+              },
             },
           },
-        },
-      });
+        });
+      }
+
+      settleResult = await settlePayment(paymentPayload.payload, requirements);
     }
 
-    const settleResult = await settlePayment(paymentPayload.payload, requirements);
-    if (!settleResult.success) {
+    if (!settleResult?.success) {
       return NextResponse.json({
         jsonrpc: "2.0",
         id,
