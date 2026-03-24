@@ -70,7 +70,7 @@ export function UseCasesPreview() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="card-elevated group p-8"
             >
-              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--bg-section-light-alt)] text-brand transition-transform group-hover:scale-110">
+              <div className="mb-5 text-brand transition-transform group-hover:scale-110">
                 {useCase.icon}
               </div>
 
