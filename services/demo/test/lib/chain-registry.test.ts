@@ -49,12 +49,12 @@ describe("chain-registry", () => {
   });
 
   describe("MAINNET_CONFIGS", () => {
-    it("has 34 mainnet chains (25 EVM + 9 non-EVM)", () => {
+    it("has 33 mainnet chains (24 EVM + 9 non-EVM)", () => {
       const networks = Object.keys(MAINNET_CONFIGS);
-      expect(networks.length).toBe(34);
+      expect(networks.length).toBe(33);
 
       const evmChains = networks.filter((n) => n.startsWith("eip155:"));
-      expect(evmChains.length).toBe(25);
+      expect(evmChains.length).toBe(24);
 
       const nonEvmChains = networks.filter((n) => !n.startsWith("eip155:"));
       expect(nonEvmChains.length).toBe(9);
@@ -89,11 +89,10 @@ describe("chain-registry", () => {
       }
     });
 
-    it("Base uses USDC with USD Coin EIP-712 name", () => {
-      const base = MAINNET_CONFIGS["eip155:8453"];
-      expect(base.tokenSymbol).toBe("USDC");
-      expect(base.tokenContractName).toBe("USD Coin");
-      expect(base.tokenContractVersion).toBe("2");
+    it("Arbitrum uses USDT0 with correct EIP-712 name", () => {
+      const arb = MAINNET_CONFIGS["eip155:42161"];
+      expect(arb.tokenSymbol).toBe("USDT0");
+      expect(arb.scheme).toBe("exact");
     });
 
     it("BSC USDT has 18 decimals", () => {
@@ -117,9 +116,9 @@ describe("chain-registry", () => {
 
   describe("getConfigByNetwork", () => {
     it("finds mainnet config by CAIP-2 ID", () => {
-      const config = getConfigByNetwork("eip155:8453");
+      const config = getConfigByNetwork("eip155:42161");
       expect(config).toBeDefined();
-      expect(config!.name).toBe("Base");
+      expect(config!.name).toBe("Arbitrum");
     });
 
     it("finds testnet config by CAIP-2 ID", () => {
@@ -148,7 +147,7 @@ describe("chain-registry", () => {
   describe("getMainnetConfigsForFamily", () => {
     it("returns 25 EVM mainnet chains", () => {
       const evmChains = getMainnetConfigsForFamily("evm");
-      expect(evmChains.length).toBe(25);
+      expect(evmChains.length).toBe(24);
     });
 
     it("returns 1 chain for non-EVM families", () => {
@@ -179,10 +178,10 @@ describe("chain-registry", () => {
     });
 
     it("sets correct EIP-712 extra fields", () => {
-      const accepts = buildAccepts("1000", false, "eip155:8453");
-      const base = accepts.find((a) => a.network === "eip155:8453");
-      expect(base?.extra?.name).toBe("USD Coin");
-      expect(base?.extra?.version).toBe("2");
+      const accepts = buildAccepts("1000", false, "eip155:42161");
+      const arb = accepts.find((a) => a.network === "eip155:42161");
+      expect(arb?.extra?.name).toMatch(/USD[₮T]0|USDT0/);
+      expect(arb?.extra?.version).toBe("1");
     });
 
     it("exact-direct for non-EVM families", () => {
@@ -194,9 +193,9 @@ describe("chain-registry", () => {
 
   describe("buildRequirements", () => {
     it("builds correct requirements from mainnet payload", () => {
-      const req = buildRequirements({ network: "eip155:8453" }, "1000");
-      expect(req.network).toBe("eip155:8453");
-      expect(req.asset).toBe("0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913");
+      const req = buildRequirements({ network: "eip155:42161" }, "1000");
+      expect(req.network).toBe("eip155:42161");
+      expect(req.asset).toBe("0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9");
       expect(req.scheme).toBe("exact");
     });
 
@@ -242,7 +241,7 @@ describe("chain-registry", () => {
 
   describe("getExplorerUrlByNetwork", () => {
     it("generates correct mainnet explorer URLs", () => {
-      expect(getExplorerUrlByNetwork("eip155:8453", "0xabc")).toBe("https://basescan.org/tx/0xabc");
+      expect(getExplorerUrlByNetwork("eip155:42161", "0xabc")).toBe("https://arbiscan.io/tx/0xabc");
       expect(getExplorerUrlByNetwork("tron:mainnet", "abc")).toBe("https://tronscan.org/#/transaction/abc");
     });
   });

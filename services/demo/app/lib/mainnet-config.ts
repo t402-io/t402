@@ -187,20 +187,8 @@ export const MAINNET_CONFIGS: Record<string, ChainConfig> = {
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // EVM — USDC (exact scheme, EIP-3009)
-  // ═══════════════════════════════════════════════════════════════
-  "eip155:8453": {
-    family: "evm", network: "eip155:8453", name: "Base", label: "Base",
-    asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-    payTo: "0xC88f67e776f16DcFBf42e6bDda1B82604448899B",
-    scheme: "exact", tokenSymbol: "USDC", decimals: 6,
-    tokenContractName: "USD Coin", tokenContractVersion: "2",
-    explorer: "https://basescan.org/tx/",
-    color: "#0052FF",
-  },
-
-  // ═══════════════════════════════════════════════════════════════
-  // EVM — Legacy USDT (exact-legacy scheme, approve+transferFrom)
+  // EVM — Legacy USDT/USDT0 (exact-legacy scheme, approve+transferFrom)
+  // These chains require on-chain approve before facilitator can transferFrom.
   // ═══════════════════════════════════════════════════════════════
   "eip155:56": {
     family: "evm", network: "eip155:56", name: "BNB Chain", label: "BNB",

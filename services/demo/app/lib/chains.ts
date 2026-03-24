@@ -9,9 +9,8 @@ export interface DemoChain {
 
 export const chains: DemoChain[] = [
   // EVM — exact/upto scheme (Facilitator-supported mainnets)
-  { id: "ethereum", name: "Ethereum", network: "eip155:1", color: "#627EEA", family: "EVM", gasless: true },
-  { id: "base", name: "Base", network: "eip155:8453", color: "#0052FF", family: "EVM", gasless: true },
   { id: "arbitrum", name: "Arbitrum", network: "eip155:42161", color: "#28A0F0", family: "EVM", gasless: true },
+  { id: "ethereum", name: "Ethereum", network: "eip155:1", color: "#627EEA", family: "EVM", gasless: true },
   { id: "optimism", name: "Optimism", network: "eip155:10", color: "#FF0420", family: "EVM", gasless: true },
   { id: "polygon", name: "Polygon", network: "eip155:137", color: "#8247E5", family: "EVM", gasless: true },
   { id: "avalanche", name: "Avalanche", network: "eip155:43114", color: "#E84142", family: "EVM", gasless: true },
