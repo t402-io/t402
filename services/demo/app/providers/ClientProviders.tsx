@@ -1,11 +1,12 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useState, useEffect, Suspense, createContext, useContext } from "react";
+import { useState, useEffect, Suspense, createContext, useContext, lazy } from "react";
 import dynamic from "next/dynamic";
 import { ChainProvider, useChainContext } from "./ChainProvider";
-import { DemoProvider } from "./DemoProvider";
+import { DemoProvider, useDemoContext } from "./DemoProvider";
 import { ToastProvider } from "./ToastProvider";
+import type { ChainFamily } from "@/lib/testnet-config";
 
 // Context to track if wallet providers are mounted
 const WalletReadyContext = createContext(false);
@@ -13,89 +14,61 @@ export function useWalletReady() {
   return useContext(WalletReadyContext);
 }
 
-// Dynamic import wallet providers with ssr: false
-// EVM is always loaded (most common chain family)
+// EVM provider — always loaded (most common chain family, required for all scenarios)
 const WagmiProviderWrapper = dynamic(
   () => import("./WagmiProvider").then((mod) => mod.WagmiProviderWrapper),
   { ssr: false, loading: () => null }
 );
 
-// Other chain providers loaded on demand
-const TonConnectProvider = dynamic(
-  () => import("./TonConnectProvider").then((mod) => mod.TonConnectProvider),
-  { ssr: false, loading: () => null }
-);
+/**
+ * Lazy-loaded non-EVM providers. These are only imported when the user
+ * actually selects that chain family. Each provider + its wallet SDK
+ * is a separate webpack chunk that doesn't load until needed.
+ */
+const LAZY_PROVIDERS: Record<string, React.ComponentType<{ children: ReactNode }>> = {};
 
-const SolanaProvider = dynamic(
-  () => import("./SolanaProvider").then((mod) => mod.SolanaProvider),
-  { ssr: false, loading: () => null }
-);
+function getLazyProvider(family: ChainFamily): React.ComponentType<{ children: ReactNode }> | null {
+  // EVM uses WagmiProvider (always loaded), TRON + Stacks use window injection
+  if (family === "evm" || family === "tron" || family === "stacks") return null;
 
-const NearProvider = dynamic(
-  () => import("./NearProvider").then((mod) => mod.NearProvider),
-  { ssr: false, loading: () => null }
-);
+  if (!LAZY_PROVIDERS[family]) {
+    // Create lazy component only on first access — this triggers the chunk download
+    const LazyComponent = lazy(() => {
+      switch (family) {
+        case "ton": return import("./TonConnectProvider").then((m) => ({ default: m.TonConnectProvider }));
+        case "solana": return import("./SolanaProvider").then((m) => ({ default: m.SolanaProvider }));
+        case "near": return import("./NearProvider").then((m) => ({ default: m.NearProvider }));
+        case "aptos": return import("./AptosProvider").then((m) => ({ default: m.AptosProvider }));
+        case "tezos": return import("./TezosProvider").then((m) => ({ default: m.TezosProvider }));
+        case "polkadot": return import("./PolkadotProvider").then((m) => ({ default: m.PolkadotProvider }));
+        case "cosmos": return import("./CosmosProvider").then((m) => ({ default: m.CosmosProvider }));
+        default: return Promise.resolve({ default: ({ children }: { children: ReactNode }) => <>{children}</> });
+      }
+    });
+    LAZY_PROVIDERS[family] = LazyComponent;
+  }
+  return LAZY_PROVIDERS[family];
+}
 
-const AptosProvider = dynamic(
-  () => import("./AptosProvider").then((mod) => mod.AptosProvider),
-  { ssr: false, loading: () => null }
-);
-
-const TezosProvider = dynamic(
-  () => import("./TezosProvider").then((mod) => mod.TezosProvider),
-  { ssr: false, loading: () => null }
-);
-
-const PolkadotProvider = dynamic(
-  () => import("./PolkadotProvider").then((mod) => mod.PolkadotProvider),
-  { ssr: false, loading: () => null }
-);
-
-const CosmosProvider = dynamic(
-  () => import("./CosmosProvider").then((mod) => mod.CosmosProvider),
-  { ssr: false, loading: () => null }
-);
-
-// Conditionally renders only the active chain's wallet provider + EVM (always loaded)
+// Renders only the active chain's wallet provider
 function ActiveWalletProvider({ children }: { children: ReactNode }) {
   const { activeFamily } = useChainContext();
+  const { isDemo } = useDemoContext();
 
-  // EVM always wraps children (most common, relatively lightweight with Wagmi)
-  let wrapped = <>{children}</>;
+  // In demo mode, skip non-EVM providers entirely (mock wallet, no SDK needed)
+  const Provider = isDemo ? null : getLazyProvider(activeFamily);
 
-  // Wrap with the active chain's provider (if not EVM)
-  // Note: EVM uses WagmiProvider (always loaded below), TRON + Stacks use window injection (no provider needed)
-  switch (activeFamily) {
-    case "evm":
-    case "tron":
-    case "stacks":
-      break;
-    case "ton":
-      wrapped = <TonConnectProvider>{wrapped}</TonConnectProvider>;
-      break;
-    case "solana":
-      wrapped = <SolanaProvider>{wrapped}</SolanaProvider>;
-      break;
-    case "near":
-      wrapped = <NearProvider>{wrapped}</NearProvider>;
-      break;
-    case "aptos":
-      wrapped = <AptosProvider>{wrapped}</AptosProvider>;
-      break;
-    case "tezos":
-      wrapped = <TezosProvider>{wrapped}</TezosProvider>;
-      break;
-    case "polkadot":
-      wrapped = <PolkadotProvider>{wrapped}</PolkadotProvider>;
-      break;
-    case "cosmos":
-      wrapped = <CosmosProvider>{wrapped}</CosmosProvider>;
-      break;
-  }
+  const content = Provider ? (
+    <Suspense fallback={children}>
+      <Provider>{children}</Provider>
+    </Suspense>
+  ) : (
+    children
+  );
 
   return (
     <WagmiProviderWrapper>
-      {wrapped}
+      {content}
     </WagmiProviderWrapper>
   );
 }
@@ -107,38 +80,33 @@ export function ClientProviders({ children }: { children: ReactNode }) {
     setMounted(true);
   }, []);
 
-  // Core providers that work on both server and client
-  const coreProviders = (
-    <WalletReadyContext.Provider value={false}>
-      <ChainProvider>
-        <DemoProvider>
-          <ToastProvider>
-            {children}
-          </ToastProvider>
-        </DemoProvider>
-      </ChainProvider>
-    </WalletReadyContext.Provider>
-  );
-
-  // During SSR, render with core providers only
+  // SSR + pre-mount: core providers only, no wallet SDKs
   if (!mounted) {
-    return coreProviders;
+    return (
+      <WalletReadyContext.Provider value={false}>
+        <DemoProvider>
+          <ChainProvider>
+            <ToastProvider>
+              {children}
+            </ToastProvider>
+          </ChainProvider>
+        </DemoProvider>
+      </WalletReadyContext.Provider>
+    );
   }
 
-  // After mount, wrap with active chain's wallet provider
+  // After mount: add wallet providers
   return (
     <WalletReadyContext.Provider value={true}>
-      <ChainProvider>
-        <DemoProvider>
+      <DemoProvider>
+        <ChainProvider>
           <ToastProvider>
-            <Suspense fallback={children}>
-              <ActiveWalletProvider>
-                {children}
-              </ActiveWalletProvider>
-            </Suspense>
+            <ActiveWalletProvider>
+              {children}
+            </ActiveWalletProvider>
           </ToastProvider>
-        </DemoProvider>
-      </ChainProvider>
+        </ChainProvider>
+      </DemoProvider>
     </WalletReadyContext.Provider>
   );
 }
