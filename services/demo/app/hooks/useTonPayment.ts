@@ -99,7 +99,7 @@ export function useTonPayment() {
         validUntil: Math.floor(Date.now() / 1000) + requirements.maxTimeoutSeconds,
         messages: [
           {
-            address: toRawAddress(requirements.asset), // Must be raw format for TonConnect
+            address: requirements.asset, // User-friendly format (EQ.../kQ...) required by TonConnect
             amount: "50000000", // 0.05 TON for gas
             payload: body,
           },
