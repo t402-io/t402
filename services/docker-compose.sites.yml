@@ -1,6 +1,7 @@
 # Static sites — t402.io, docs, demo
 # Deploy: docker compose -f docker-compose.sites.yml up -d
 # Ports: site=3010, docs=3011, demo=3012
+name: t402-sites
 
 services:
   site:

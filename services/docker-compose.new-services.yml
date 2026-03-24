@@ -3,6 +3,7 @@
 #
 # Prerequisites:
 # - Docker + Docker Compose installed
+name: t402-services
 # - Cloudflare Tunnel configured for new domains
 # - Port 3402-3406 available
 
