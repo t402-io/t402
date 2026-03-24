@@ -19,20 +19,10 @@ interface PaymentPayload {
   scheme: string;
   network: string;
   accepted?: { scheme: string; network: string };
-  payload: {
-    authorization: {
-      from: string;
-      to: string;
-      value: string;
-      validAfter: string;
-      validBefore: string;
-      nonce: string;
-    };
-    signature: string;
-  };
+  payload: Record<string, unknown>;
 }
 
-// EIP-712 domain for TransferWithAuthorization
+// EIP-712 domain
 function getDomain(requirements: PaymentRequirements) {
   const chainId = parseInt(requirements.network.split(":")[1]);
   return {
@@ -43,6 +33,7 @@ function getDomain(requirements: PaymentRequirements) {
   };
 }
 
+// EIP-3009 TransferWithAuthorization types (for exact scheme)
 const TRANSFER_WITH_AUTHORIZATION_TYPES = {
   TransferWithAuthorization: [
     { name: "from", type: "address" },
@@ -54,13 +45,26 @@ const TRANSFER_WITH_AUTHORIZATION_TYPES = {
   ],
 } as const;
 
+// EIP-2612 LegacyTransferAuthorization types (for exact-legacy scheme)
+const LEGACY_TRANSFER_AUTHORIZATION_TYPES = {
+  LegacyTransferAuthorization: [
+    { name: "from", type: "address" },
+    { name: "to", type: "address" },
+    { name: "value", type: "uint256" },
+    { name: "validAfter", type: "uint256" },
+    { name: "validBefore", type: "uint256" },
+    { name: "nonce", type: "bytes32" },
+    { name: "spender", type: "address" },
+  ],
+} as const;
+
 function createNonce(): string {
   const bytes = new Uint8Array(32);
   crypto.getRandomValues(bytes);
   return "0x" + Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-/** Public RPC URLs for wallet_addEthereumChain (must be HTTPS, publicly accessible) */
+/** Public RPC URLs for wallet_addEthereumChain */
 const CHAIN_RPC: Record<number, string> = {
   1: "https://ethereum-rpc.publicnode.com",
   10: "https://mainnet.optimism.io",
@@ -90,7 +94,6 @@ const CHAIN_RPC: Record<number, string> = {
   21000000: "https://rpc.corn.xyz",
 };
 
-/** Native currency config per chain */
 const NATIVE_CURRENCY: Record<number, { name: string; symbol: string; decimals: number }> = {
   56: { name: "BNB", symbol: "BNB", decimals: 18 },
   137: { name: "MATIC", symbol: "MATIC", decimals: 18 },
@@ -105,9 +108,6 @@ const NATIVE_CURRENCY: Record<number, { name: string; symbol: string; decimals: 
   5000: { name: "MNT", symbol: "MNT", decimals: 18 },
 };
 
-/**
- * Ensure wallet is on the correct chain. Try switch first, then add+switch.
- */
 async function ensureCorrectChain(
   switchChainAsync: (args: { chainId: number }) => Promise<unknown>,
   requiredChainId: number,
@@ -116,22 +116,18 @@ async function ensureCorrectChain(
   try {
     await switchChainAsync({ chainId: requiredChainId });
   } catch (switchError: any) {
-    // Error 4902 = chain not in wallet, -32603 = generic RPC error
     const code = switchError?.code ?? switchError?.cause?.code;
     if (code === 4902 || code === -32603 || code === 4001) {
       const provider = (window as any).ethereum;
       if (!provider?.request) {
         throw new Error(`Please add ${chainName} to your wallet manually.`);
       }
-
       const rpcUrl = CHAIN_RPC[requiredChainId];
       if (!rpcUrl) {
         throw new Error(`Please add ${chainName} (Chain ID: ${requiredChainId}) to your wallet manually.`);
       }
-
       const config = getConfigByNetwork(`eip155:${requiredChainId}`);
       const nativeCurrency = NATIVE_CURRENCY[requiredChainId] || { name: "ETH", symbol: "ETH", decimals: 18 };
-
       try {
         await provider.request({
           method: "wallet_addEthereumChain",
@@ -143,19 +139,19 @@ async function ensureCorrectChain(
             blockExplorerUrls: config?.explorer ? [config.explorer.replace("/tx/", "")] : undefined,
           }],
         });
-        // After adding, switch again
         await switchChainAsync({ chainId: requiredChainId });
       } catch {
-        throw new Error(`Failed to add ${chainName}. Please add it to your wallet manually (Chain ID: ${requiredChainId}, RPC: ${rpcUrl}).`);
+        throw new Error(`Failed to add ${chainName}. Please add it manually (Chain ID: ${requiredChainId}).`);
       }
     } else {
       throw new Error(`Please switch your wallet to ${chainName} manually.`);
     }
   }
-
-  // Wait for wagmi to sync chain state
   await new Promise((r) => setTimeout(r, 1000));
 }
+
+// Facilitator address (spender for exact-legacy approve+transferFrom)
+const FACILITATOR_ADDRESS = "0xC88f67e776f16DcFBf42e6bDda1B82604448899B";
 
 export function useEvmPayment() {
   const { address, isConnected, chain } = useAccount();
@@ -172,22 +168,63 @@ export function useEvmPayment() {
       const chainConfig = getConfigByNetwork(requirements.network);
       const chainName = chainConfig?.name || `Chain ${requiredChainId}`;
 
-      // Auto-switch to the required chain
       if (chain?.id !== requiredChainId) {
         await ensureCorrectChain(switchChainAsync, requiredChainId, chainName);
       }
 
       const now = Math.floor(Date.now() / 1000);
+      const nonce = createNonce() as `0x${string}`;
+      const domain = getDomain(requirements);
+      const isLegacy = requirements.scheme === "exact-legacy";
+
+      if (isLegacy) {
+        // exact-legacy: LegacyTransferAuthorization with spender field
+        const authorization = {
+          from: address,
+          to: requirements.payTo as `0x${string}`,
+          value: BigInt(requirements.amount),
+          validAfter: BigInt(now - 600),
+          validBefore: BigInt(now + requirements.maxTimeoutSeconds),
+          nonce,
+          spender: FACILITATOR_ADDRESS as `0x${string}`,
+        };
+
+        const signature = await signTypedDataAsync({
+          domain,
+          types: LEGACY_TRANSFER_AUTHORIZATION_TYPES,
+          primaryType: "LegacyTransferAuthorization",
+          message: authorization,
+        });
+
+        return {
+          t402Version: 2,
+          scheme: requirements.scheme,
+          network: requirements.network,
+          accepted: { scheme: requirements.scheme, network: requirements.network },
+          payload: {
+            authorization: {
+              from: address,
+              to: requirements.payTo,
+              value: requirements.amount,
+              validAfter: String(authorization.validAfter),
+              validBefore: String(authorization.validBefore),
+              nonce,
+              spender: FACILITATOR_ADDRESS,
+            },
+            signature,
+          },
+        };
+      }
+
+      // exact: TransferWithAuthorization (EIP-3009)
       const authorization = {
         from: address,
         to: requirements.payTo as `0x${string}`,
         value: BigInt(requirements.amount),
         validAfter: BigInt(now - 600),
         validBefore: BigInt(now + requirements.maxTimeoutSeconds),
-        nonce: createNonce() as `0x${string}`,
+        nonce,
       };
-
-      const domain = getDomain(requirements);
 
       const signature = await signTypedDataAsync({
         domain,
@@ -208,7 +245,7 @@ export function useEvmPayment() {
             value: requirements.amount,
             validAfter: String(authorization.validAfter),
             validBefore: String(authorization.validBefore),
-            nonce: authorization.nonce,
+            nonce,
           },
           signature,
         },
