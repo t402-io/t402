@@ -168,8 +168,12 @@ export function useTronPayment() {
   const signPayment = useCallback(
     async (requirements: PaymentRequirements): Promise<PaymentPayload> => {
       const tronWeb = window.tronWeb;
-      if (!tronWeb || !tronWeb.ready || !address) {
-        throw new Error("TronLink wallet not connected");
+      if (!tronWeb || !address) {
+        throw new Error("TRON wallet not connected");
+      }
+      // OKX doesn't set .ready, check .defaultAddress instead
+      if (!tronWeb.ready && !tronWeb.defaultAddress?.base58) {
+        throw new Error("TRON wallet not ready");
       }
 
       // 1. Build TRC-20 transfer(address _to, uint256 _value)
