@@ -69,6 +69,7 @@ declare global {
   interface Window {
     tronWeb?: TronWeb;
     tronLink?: { ready: boolean; request: (args: { method: string }) => Promise<unknown> };
+    okxwallet?: { tronLink?: { ready: boolean; tronWeb?: TronWeb; request?: (args: { method: string }) => Promise<unknown> } };
   }
 }
 
@@ -77,26 +78,38 @@ export function useTronPayment() {
   const [isConnected, setIsConnected] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
 
-  // Detect TronLink installation and connection state
+  // Detect TronLink or OKX Wallet TRON support
   useEffect(() => {
     const checkTronLink = () => {
       if (typeof window === "undefined") return;
+
+      // OKX Wallet injects tronWeb via window.okxwallet.tronLink
+      const okxTron = window.okxwallet?.tronLink;
+      if (okxTron?.tronWeb && okxTron.tronWeb.ready) {
+        // Promote OKX's tronWeb to window.tronWeb so signPayment works
+        if (!window.tronWeb) (window as any).tronWeb = okxTron.tronWeb;
+        setIsInstalled(true);
+        setIsConnected(true);
+        setAddress(okxTron.tronWeb.defaultAddress.base58);
+        return;
+      }
 
       const tronWeb = window.tronWeb;
       if (tronWeb && tronWeb.ready) {
         setIsInstalled(true);
         setIsConnected(true);
         setAddress(tronWeb.defaultAddress.base58);
-      } else if (window.tronLink) {
+      } else if (window.tronLink || okxTron) {
         setIsInstalled(true);
         setIsConnected(false);
         setAddress(null);
       }
     };
 
-    // TronLink may inject after page load
+    // Wallet extensions may inject after page load
     checkTronLink();
     const timer = setTimeout(checkTronLink, 1000);
+    const timer2 = setTimeout(checkTronLink, 3000); // OKX may be slower
 
     // Listen for TronLink events
     const handleMessage = (e: MessageEvent) => {
@@ -111,26 +124,44 @@ export function useTronPayment() {
 
     return () => {
       clearTimeout(timer);
+      clearTimeout(timer2);
       window.removeEventListener("message", handleMessage);
     };
   }, []);
 
   const connect = useCallback(async () => {
-    if (!window.tronLink) {
-      window.open("https://www.tronlink.org/", "_blank");
-      return;
+    // Try OKX Wallet TRON first
+    const okxTron = window.okxwallet?.tronLink;
+    if (okxTron?.request) {
+      try {
+        await okxTron.request({ method: "tron_requestAccounts" });
+        await new Promise((r) => setTimeout(r, 1000));
+        const tw = okxTron.tronWeb || window.tronWeb;
+        if (tw?.ready) {
+          if (!window.tronWeb) (window as any).tronWeb = tw;
+          setIsInstalled(true);
+          setIsConnected(true);
+          setAddress(tw.defaultAddress.base58);
+          return;
+        }
+      } catch { /* user rejected or not available */ }
     }
-    try {
-      await window.tronLink.request({ method: "tron_requestAccounts" });
-      // Wait for TronLink to update
-      await new Promise((r) => setTimeout(r, 500));
-      if (window.tronWeb?.ready) {
-        setIsConnected(true);
-        setAddress(window.tronWeb.defaultAddress.base58);
-      }
-    } catch {
-      // User rejected
+
+    // Try TronLink
+    if (window.tronLink) {
+      try {
+        await window.tronLink.request({ method: "tron_requestAccounts" });
+        await new Promise((r) => setTimeout(r, 500));
+        if (window.tronWeb?.ready) {
+          setIsConnected(true);
+          setAddress(window.tronWeb.defaultAddress.base58);
+          return;
+        }
+      } catch { /* user rejected */ }
     }
+
+    // No TRON wallet found
+    window.open("https://www.tronlink.org/", "_blank");
   }, []);
 
   const disconnect = useCallback(async () => {
