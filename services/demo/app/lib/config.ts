@@ -1,5 +1,5 @@
 import { type ChainFamily, CHAIN_CONFIGS } from "@/lib/testnet-config";
-import { buildAccepts, buildRequirements, getConfigByNetwork, getDefaultConfigForFamily } from "@/lib/chain-registry";
+import { buildAccepts, buildRequirements, getConfigByNetwork, getDefaultConfigForFamily, familyFromNetwork } from "@/lib/chain-registry";
 
 export const FACILITATOR_URL =
   process.env.NEXT_PUBLIC_FACILITATOR_URL || "https://facilitator.t402.io";
@@ -49,12 +49,15 @@ export function getAcceptsForChain(
   const isTestnet = request ? isTestnetRequest(request) : true;
   const preferredNetwork = request ? getPreferredNetwork(request) : undefined;
 
-  // Use preferred network, or derive from family
-  const network = preferredNetwork || (
-    isTestnet
-      ? CHAIN_CONFIGS[preferredChain].network
-      : undefined
-  );
+  // Only use preferredNetwork if it matches the preferredChain family
+  // (prevents stale EVM network from overriding when user switches to TON/Solana/etc)
+  let network = preferredNetwork;
+  if (network && familyFromNetwork(network) !== preferredChain) {
+    network = undefined;
+  }
+  if (!network && isTestnet) {
+    network = CHAIN_CONFIGS[preferredChain].network;
+  }
 
   return buildAccepts(amount, isTestnet, network);
 }
