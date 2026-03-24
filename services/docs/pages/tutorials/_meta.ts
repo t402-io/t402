@@ -1,4 +1,7 @@
 export default {
+  'quick-start': {
+    title: '⚡ Quick Start (10 min)',
+  },
   index: 'Overview',
   '---1': {
     type: 'separator',

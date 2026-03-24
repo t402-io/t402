@@ -1,0 +1,186 @@
+# Zero to Paid API in 10 Minutes
+
+Accept USDT payments on any Express, Fastify, or Hono API — in 3 lines of code.
+
+## What You'll Build
+
+A Node.js API with one protected endpoint. Clients must pay 1 USDT to access it.
+No blockchain knowledge required.
+
+## Prerequisites
+
+- Node.js 18+ installed
+- A USDT wallet address (any EVM wallet — MetaMask, Trust Wallet, etc.)
+
+## Step 1: Create a New Project
+
+```bash
+mkdir my-paid-api && cd my-paid-api
+npm init -y
+npm install express @t402/quick
+```
+
+## Step 2: Add the Payment Middleware
+
+Create `index.js`:
+
+```js filename="index.js"
+const express = require("express");
+const { t402 } = require("@t402/quick/express");
+
+const app = express();
+
+// This route is free
+app.get("/", (req, res) => {
+  res.json({ message: "Welcome! The /premium endpoint costs 1 USDT." });
+});
+
+// This route requires 1 USDT payment
+app.use(
+  "/premium",
+  t402({
+    price: "1.00",
+    payTo: "YOUR_WALLET_ADDRESS", // Replace with your EVM wallet address
+  })
+);
+
+app.get("/premium", (req, res) => {
+  res.json({
+    data: "This is premium content!",
+    tip: "You paid 1 USDT to access this.",
+  });
+});
+
+app.listen(3000, () => {
+  console.log("Server running at http://localhost:3000");
+});
+```
+
+Replace `YOUR_WALLET_ADDRESS` with your actual EVM wallet address (starts with `0x...`).
+
+## Step 3: Start the Server
+
+```bash
+node index.js
+```
+
+## Step 4: See the 402 Response
+
+Open `http://localhost:3000/premium` in your browser or use curl:
+
+```bash
+curl http://localhost:3000/premium
+```
+
+You'll see a **402 Payment Required** response with payment instructions:
+
+```json
+{
+  "error": "Payment required",
+  "accepts": [
+    {
+      "scheme": "exact",
+      "network": "eip155:42161",
+      "amount": "1000000",
+      "payTo": "0xYourAddress..."
+    }
+  ]
+}
+```
+
+This tells the client: "Pay 1 USDT on Arbitrum to access this resource."
+
+## Step 5: Make a Payment (Testnet)
+
+To test with real payments, you'll need:
+
+1. A wallet with USDT on Arbitrum (or any supported network)
+2. A T402-compatible client (or use the [demo](https://demo.t402.io))
+
+The T402 client will:
+1. See the 402 response
+2. Sign a payment authorization (off-chain, no gas)
+3. Resubmit the request with a `PAYMENT-SIGNATURE` header
+4. Receive the premium content + the facilitator settles the payment
+
+## What Just Happened?
+
+```
+Client                           Your Server                    Facilitator
+  │                                  │                              │
+  ├── GET /premium ──────────────────►│                              │
+  │                                  │                              │
+  │◄── 402 Payment Required ─────────┤                              │
+  │    (PAYMENT-REQUIRED header)     │                              │
+  │                                  │                              │
+  ├── GET /premium ──────────────────►│                              │
+  │    (PAYMENT-SIGNATURE header)    │                              │
+  │                                  ├── POST /verify ──────────────►│
+  │                                  │◄── { isValid: true } ────────┤
+  │                                  │                              │
+  │◄── 200 OK ───────────────────────┤── POST /settle ──────────────►│
+  │    (premium content)             │◄── { success: true } ────────┤
+  │    (PAYMENT-RESPONSE header)     │                              │
+```
+
+## Next Steps
+
+- **Change the price**: Set `price: "0.01"` for micropayments
+- **Change the network**: Set `network: "eip155:137"` for Polygon
+- **Add multiple routes**: Use `t402()` on any route
+- **Self-host the facilitator**: See [Self-Hosted Facilitator](/tutorials/self-hosted-facilitator)
+- **Use with Fastify or Hono**: Import from `@t402/quick/fastify` or `@t402/quick/hono`
+
+## Fastify Example
+
+```js
+const fastify = require("fastify")();
+const { t402 } = require("@t402/quick/fastify");
+
+fastify.register(t402({ price: "1.00", payTo: "0xYourAddress" }));
+
+fastify.get("/premium", async () => {
+  return { data: "Premium content!" };
+});
+
+fastify.listen({ port: 3000 });
+```
+
+## Hono Example
+
+```js
+import { Hono } from "hono";
+import { t402 } from "@t402/quick/hono";
+
+const app = new Hono();
+
+app.use("/premium", t402({ price: "1.00", payTo: "0xYourAddress" }));
+
+app.get("/premium", (c) => c.json({ data: "Premium content!" }));
+
+export default app;
+```
+
+## Configuration Reference
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `price` | `string` | *required* | Price in USDT (e.g., "1.00") |
+| `payTo` | `string` | *required* | Your wallet address |
+| `network` | `string` | `"eip155:42161"` | CAIP-2 network ID |
+| `facilitator` | `string` | T402 hosted | Facilitator URL |
+| `scheme` | `string` | `"exact"` | Payment scheme |
+| `maxTimeoutSeconds` | `number` | `120` | Payment signature timeout |
+
+## Supported Networks
+
+| Network | CAIP-2 ID | Token |
+|---------|-----------|-------|
+| Arbitrum One | `eip155:42161` | USDT |
+| Polygon | `eip155:137` | USDT |
+| BSC | `eip155:56` | USDT |
+| Ethereum | `eip155:1` | USDT |
+| Optimism | `eip155:10` | USDT |
+| Base | `eip155:8453` | USDT |
+
+For all 33+ supported networks, see [Chains](/chains).
