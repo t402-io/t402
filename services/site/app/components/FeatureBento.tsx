@@ -116,7 +116,7 @@ export function FeatureBento() {
                 feature.colSpan === 2 ? "md:col-span-2" : ""
               }`}
             >
-              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--bg-section-light-alt)] text-brand transition-transform group-hover:scale-110">
+              <div className="mb-5 text-brand transition-transform group-hover:scale-110">
                 {feature.icon}
               </div>
               <h3 className="text-lg font-semibold text-[var(--text-on-light)] sm:text-xl">
