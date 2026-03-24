@@ -13,7 +13,7 @@ type StreamState = "idle" | "buffering" | "playing" | "paused" | "ended";
 
 export function StreamingMedia() {
   const { isDemo, testnet } = useDemoContext();
-  const { signPayment, activeFamily } = useMultiChainPayment();
+  const { signPayment, activeFamily, activeNetwork } = useMultiChainPayment();
   const [state, setState] = useState<StreamState>("idle");
   const [elapsed, setElapsed] = useState(0);
   const [totalCost, setTotalCost] = useState(0);
@@ -34,6 +34,7 @@ export function StreamingMedia() {
         Accept: "application/json",
         "x-preferred-chain": activeFamily,
         "x-network-mode": testnet ? "testnet" : "mainnet",
+        ...(activeNetwork ? { "x-preferred-network": activeNetwork } : {}),
       };
       if (isDemo) headers["x-demo-mode"] = "true";
 

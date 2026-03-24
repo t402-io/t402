@@ -23,7 +23,7 @@ interface Article {
 
 export function ContentPaywall() {
   const { isDemo, testnet } = useDemoContext();
-  const { signPayment, activeFamily } = useMultiChainPayment();
+  const { signPayment, activeFamily, activeNetwork } = useMultiChainPayment();
   const [state, setState] = useState<State>("locked");
   const [article, setArticle] = useState<Article | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +42,7 @@ export function ContentPaywall() {
         Accept: "application/json",
         "x-preferred-chain": activeFamily,
         "x-network-mode": testnet ? "testnet" : "mainnet",
+        ...(activeNetwork ? { "x-preferred-network": activeNetwork } : {}),
       };
       if (isDemo) headers["x-demo-mode"] = "true";
 
@@ -65,6 +66,7 @@ export function ContentPaywall() {
         Accept: "application/json",
         "x-preferred-chain": activeFamily,
         "x-network-mode": testnet ? "testnet" : "mainnet",
+        ...(activeNetwork ? { "x-preferred-network": activeNetwork } : {}),
         "Payment-Signature": encodePaymentHeader(paymentPayload),
       };
       if (isDemo) retryHeaders["x-demo-mode"] = "true";

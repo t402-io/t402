@@ -27,7 +27,7 @@ const SENSORS: { type: SensorType; label: string; icon: typeof Thermometer; unit
 
 export function IoTMicropayments() {
   const { isDemo, testnet } = useDemoContext();
-  const { signPayment, activeFamily } = useMultiChainPayment();
+  const { signPayment, activeFamily, activeNetwork } = useMultiChainPayment();
   const [readings, setReadings] = useState<SensorReading[]>([]);
   const [loading, setLoading] = useState<SensorType | null>(null);
   const [totalCost, setTotalCost] = useState(0);
@@ -45,6 +45,7 @@ export function IoTMicropayments() {
         Accept: "application/json",
         "x-preferred-chain": activeFamily,
         "x-network-mode": testnet ? "testnet" : "mainnet",
+        ...(activeNetwork ? { "x-preferred-network": activeNetwork } : {}),
       };
       if (isDemo) headers["x-demo-mode"] = "true";
 

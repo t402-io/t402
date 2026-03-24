@@ -13,7 +13,7 @@ type GaslessState = "idle" | "creating-userop" | "bundling" | "settling" | "done
 
 export function GaslessPayment() {
   const { isDemo, testnet } = useDemoContext();
-  const { signPayment, activeFamily } = useMultiChainPayment();
+  const { signPayment, activeFamily, activeNetwork } = useMultiChainPayment();
   const [state, setState] = useState<GaslessState>("idle");
   const [txHash, setTxHash] = useState<string | null>(null);
   const [flowState, setFlowState] = useState<FlowState>("idle");
@@ -29,6 +29,7 @@ export function GaslessPayment() {
         "Content-Type": "application/json",
         "x-preferred-chain": activeFamily,
         "x-network-mode": testnet ? "testnet" : "mainnet",
+        ...(activeNetwork ? { "x-preferred-network": activeNetwork } : {}),
       };
       if (isDemo) headers["x-demo-mode"] = "true";
 

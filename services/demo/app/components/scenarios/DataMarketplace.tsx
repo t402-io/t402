@@ -32,7 +32,7 @@ const ENDPOINTS = [
 
 export function DataMarketplace() {
   const { isDemo, testnet } = useDemoContext();
-  const { signPayment, activeFamily } = useMultiChainPayment();
+  const { signPayment, activeFamily, activeNetwork } = useMultiChainPayment();
   const [selectedEndpoint, setSelectedEndpoint] = useState(ENDPOINTS[0]);
   const [state, setState] = useState<State>("idle");
   const [result, setResult] = useState<MarketData | null>(null);
@@ -53,6 +53,7 @@ export function DataMarketplace() {
         Accept: "application/json",
         "x-preferred-chain": activeFamily,
         "x-network-mode": testnet ? "testnet" : "mainnet",
+        ...(activeNetwork ? { "x-preferred-network": activeNetwork } : {}),
       };
       if (isDemo) headers["x-demo-mode"] = "true";
 
@@ -76,6 +77,7 @@ export function DataMarketplace() {
         Accept: "application/json",
         "x-preferred-chain": activeFamily,
         "x-network-mode": testnet ? "testnet" : "mainnet",
+        ...(activeNetwork ? { "x-preferred-network": activeNetwork } : {}),
         "Payment-Signature": encodePaymentHeader(paymentPayload),
       };
       if (isDemo) retryHeaders["x-demo-mode"] = "true";

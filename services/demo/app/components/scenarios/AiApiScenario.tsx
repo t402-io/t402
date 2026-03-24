@@ -30,7 +30,7 @@ const EXAMPLE_QUERIES = [
 
 export function AiApiScenario() {
   const { isDemo, testnet } = useDemoContext();
-  const { signPayment, activeFamily } = useMultiChainPayment();
+  const { signPayment, activeFamily, activeNetwork } = useMultiChainPayment();
   const [query, setQuery] = useState(EXAMPLE_QUERIES[0]);
   const [state, setState] = useState<State>("idle");
   const [result, setResult] = useState<AiResult | null>(null);
@@ -51,6 +51,7 @@ export function AiApiScenario() {
         "Content-Type": "application/json",
         "x-preferred-chain": activeFamily,
         "x-network-mode": testnet ? "testnet" : "mainnet",
+        ...(activeNetwork ? { "x-preferred-network": activeNetwork } : {}),
       };
       if (isDemo) headers["x-demo-mode"] = "true";
 
@@ -81,6 +82,7 @@ export function AiApiScenario() {
         "Content-Type": "application/json",
         "x-preferred-chain": activeFamily,
         "x-network-mode": testnet ? "testnet" : "mainnet",
+        ...(activeNetwork ? { "x-preferred-network": activeNetwork } : {}),
         "Payment-Signature": encodePaymentHeader(paymentPayload),
       };
       if (isDemo) retryHeaders["x-demo-mode"] = "true";
