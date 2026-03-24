@@ -35,6 +35,25 @@ export const TonWalletContext = createContext<TonWalletContextType>({
   friendlyAddress: null,
 });
 
+/**
+ * Convert TON user-friendly address (EQ.../kQ.../UQ...) to raw format (0:hex).
+ * TonConnect sendTransaction requires raw format addresses.
+ */
+function toRawAddress(friendlyAddr: string): string {
+  // If already raw format, return as-is
+  if (friendlyAddr.includes(":")) return friendlyAddr;
+
+  // Decode base64url
+  let base64 = friendlyAddr.replace(/-/g, "+").replace(/_/g, "/");
+  while (base64.length % 4) base64 += "=";
+  const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+
+  // bytes[0] = flags, bytes[1] = workchain (0 or -1), bytes[2..33] = hash
+  const workchain = bytes[1] === 0xff ? -1 : bytes[1];
+  const hash = Array.from(bytes.slice(2, 34)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  return `${workchain}:${hash}`;
+}
+
 // Build a Jetton transfer message body cell (simplified for demo)
 // In production, use @t402/ton which handles full BOC construction
 function buildJettonTransferBody(params: {
@@ -80,7 +99,7 @@ export function useTonPayment() {
         validUntil: Math.floor(Date.now() / 1000) + requirements.maxTimeoutSeconds,
         messages: [
           {
-            address: requirements.asset, // Jetton wallet address
+            address: toRawAddress(requirements.asset), // Must be raw format for TonConnect
             amount: "50000000", // 0.05 TON for gas
             payload: body,
           },
