@@ -99,7 +99,9 @@ export function useTonPayment() {
       const senderFriendly = friendlyAddress || rawAddress;
 
       // Step 1: Get user's Jetton wallet address (not the master contract!)
+      console.log("[TON] Getting jetton wallet for", requirements.asset, "owner", rawAddress);
       const jettonWalletAddress = await getJettonWalletAddress(requirements.asset, rawAddress);
+      console.log("[TON] Jetton wallet address:", jettonWalletAddress);
 
       // Step 2: Build the Jetton transfer body cell
       const payloadBase64 = await buildJettonTransferCell({
@@ -109,6 +111,7 @@ export function useTonPayment() {
       });
 
       // Step 3: Send transaction via TonConnect
+      console.log("[TON] Sending transaction:", { address: jettonWalletAddress, payloadLen: payloadBase64.length });
       const result = await tonConnectUI.sendTransaction({
         validUntil: Math.floor(Date.now() / 1000) + requirements.maxTimeoutSeconds,
         messages: [
