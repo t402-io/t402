@@ -96,7 +96,7 @@ const FLOW_STEPS = [
 
 export default function HomePage() {
   return (
-    <div id="main-content" className="min-h-screen">
+    <div id="main-content" className="min-h-screen overflow-x-hidden">
       {/* Testnet Banner */}
       <div className="text-center text-[10px] font-medium py-1.5" style={{ background: "var(--color-warning-dim)", color: "var(--color-warning)" }}>
         Testnet Demo — No real funds required. Connect any testnet wallet to try.
@@ -114,7 +114,7 @@ export default function HomePage() {
           >
             HTTP 402 PAYMENT PROTOCOL
           </span>
-          <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight mb-5">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight mb-5">
             <span className="text-white">Your API should accept payments.</span>
             <br />
             <span style={{ color: "var(--color-brand)" }}>Without Stripe. Without API keys.</span>
@@ -128,7 +128,7 @@ export default function HomePage() {
         </div>
 
         {/* Chain logos */}
-        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-10 px-4 max-w-sm sm:max-w-none">
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 mb-10 px-2 sm:px-4 max-w-xs sm:max-w-none">
           {CHAIN_FAMILIES.map((family) => (
             <div key={family} className="flex flex-col items-center gap-1">
               <div className="[&_svg]:w-5 [&_svg]:h-5 sm:[&_svg]:w-6 sm:[&_svg]:h-6">

@@ -28,7 +28,7 @@ export function ChainSelector({ compact = false }: { compact?: boolean }) {
               role="tab"
               aria-selected={isActive}
               onClick={() => setActiveFamily(family)}
-              className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all min-h-[36px]"
+              className="shrink-0 flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-[10px] sm:text-xs font-medium transition-all min-h-[36px]"
               style={{
                 background: isActive ? "var(--color-surface-active)" : "transparent",
                 color: isActive ? "var(--color-text-primary)" : "var(--color-text-tertiary)",
@@ -43,7 +43,7 @@ export function ChainSelector({ compact = false }: { compact?: boolean }) {
       </div>
       {/* EVM sub-chain selector (mainnet, non-compact only) */}
       {showEvmSubChains && (
-        <div className="flex flex-wrap items-center gap-1 pl-1 max-w-full">
+        <div className="flex flex-wrap items-center gap-0.5 sm:gap-1 pl-1 max-w-full">
           {evmMainnetChains.map((chain) => {
             const isActive = activeNetwork === chain.network;
             return (

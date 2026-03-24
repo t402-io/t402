@@ -85,7 +85,7 @@ function ChecklistInner() {
       </div>
       <div className="space-y-1.5">
         {checks.map((check, i) => (
-          <div key={i} className="flex items-center gap-2">
+          <div key={i} className="flex flex-wrap items-start gap-1.5 sm:gap-2">
             {check.ok ? (
               <Check size={12} style={{ color: "var(--color-success)" }} />
             ) : (

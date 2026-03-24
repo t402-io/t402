@@ -88,18 +88,19 @@ function ConnectedBadge({
   return (
     <div className="flex items-center gap-1.5 sm:gap-2">
       <div
-        className="flex items-center gap-1.5 sm:gap-2 rounded-xl px-2 sm:px-3 py-1.5"
+        className="flex items-center gap-1 sm:gap-1.5 rounded-xl px-1.5 sm:px-2.5 py-1 sm:py-1.5"
         style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
       >
-        <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: "var(--color-success)" }} />
-        <span className="font-mono text-[10px] sm:text-xs text-white">
-          {address.slice(0, 4)}...{address.slice(-3)}
+        <span className="h-1.5 w-1.5 sm:h-2 sm:w-2 shrink-0 rounded-full" style={{ background: "var(--color-success)" }} />
+        <span className="font-mono text-[9px] sm:text-xs text-white">
+          <span className="sm:hidden">{address.slice(0, 4)}..{address.slice(-2)}</span>
+          <span className="hidden sm:inline">{address.slice(0, 4)}...{address.slice(-3)}</span>
         </span>
         <span className="hidden sm:inline text-xs" style={{ color: "var(--color-text-tertiary)" }}>{label}</span>
       </div>
       <button
         onClick={onDisconnect}
-        className="rounded-xl px-2 py-1.5 text-[10px] sm:text-xs hover:text-white transition-colors"
+        className="rounded-xl px-1.5 sm:px-2 py-1 sm:py-1.5 text-[9px] sm:text-xs hover:text-white transition-colors"
         style={{ border: "1px solid var(--color-border)", color: "var(--color-muted)" }}
         aria-label={`Disconnect ${label} wallet`}
       >

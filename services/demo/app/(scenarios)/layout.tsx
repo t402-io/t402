@@ -33,11 +33,11 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
   const { isDemo } = useDemoContext();
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col overflow-x-hidden">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[rgba(10,10,11,0.9)] backdrop-blur-xl" style={{ boxShadow: "0 1px 0 rgba(80, 175, 149, 0.08)" }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-3">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 h-16 flex items-center justify-between overflow-hidden">
+          <div className="flex items-center gap-1 sm:gap-2">
             <Link
               href="/"
               className="flex items-center gap-1.5 sm:gap-2 text-[var(--color-muted)] hover:text-white transition-colors"
@@ -50,7 +50,7 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
               <FacilitatorBadge />
             </div>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1 sm:gap-2">
             <div className="hidden md:block">
               <ChainSelector compact />
             </div>

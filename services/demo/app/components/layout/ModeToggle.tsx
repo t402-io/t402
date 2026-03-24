@@ -6,7 +6,7 @@ export function ModeToggle() {
   const { mode, setMode, testnet, setTestnet } = useDemoContext();
 
   return (
-    <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+    <div className="flex items-center gap-0.5 sm:gap-1">
       {/* Demo / Live toggle */}
       <div
         className="flex items-center gap-1 rounded-xl p-0.5"
@@ -68,7 +68,7 @@ function ModeButton({
     <button
       onClick={onClick}
       title={title}
-      className={`flex items-center gap-1 sm:gap-1.5 rounded-lg px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-medium transition-all`}
+      className={`flex items-center gap-1 sm:gap-1.5 rounded-lg px-1.5 sm:px-2.5 py-1 text-[9px] sm:text-[11px] font-medium transition-all`}
       style={{
         background: active ? "var(--color-border)" : "transparent",
         color: active ? "var(--color-text-primary)" : "var(--color-text-tertiary)",
@@ -76,7 +76,7 @@ function ModeButton({
       aria-pressed={active}
     >
       <span
-        className={`h-1.5 w-1.5 rounded-full shrink-0 ${active ? "animate-pulse" : ""}`}
+        className={`h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full shrink-0 ${active ? "animate-pulse" : ""}`}
         style={{ backgroundColor: active ? color : "var(--color-text-tertiary)" }}
       />
       {label}

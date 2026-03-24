@@ -33,8 +33,8 @@ export function ScenarioShell({ title, description, cost, accentColor, scenarioI
         style={{ background: `linear-gradient(90deg, ${accentColor}, transparent)` }}
       />
       <div className="mb-10">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{title}</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-4">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">{title}</h1>
           <span
             className="text-xs font-medium px-2.5 py-1 rounded-full w-fit"
             style={{ background: `${accentColor}15`, color: accentColor }}
@@ -43,7 +43,7 @@ export function ScenarioShell({ title, description, cost, accentColor, scenarioI
           </span>
         </div>
         <p className="text-sm max-w-xl mb-5 leading-relaxed text-[var(--color-muted)]">{description}</p>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
           <ChainSelector />
           <ChainBadge family={activeFamily} showNetwork />
           {isLive && <TokenBalance />}
