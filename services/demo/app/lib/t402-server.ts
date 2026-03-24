@@ -1,5 +1,13 @@
 import { FACILITATOR_URL } from "./config";
 
+/**
+ * Check if a network uses pre-broadcast model (wallet broadcasts before facilitator).
+ * For these networks, verify/settle may fail because the tx is already on-chain.
+ */
+export function isPreBroadcastNetwork(network: string): boolean {
+  return ["ton:", "solana:", "tron:"].some((p) => network.startsWith(p));
+}
+
 const FACILITATOR_TIMEOUT_MS = 90_000;
 
 /**
