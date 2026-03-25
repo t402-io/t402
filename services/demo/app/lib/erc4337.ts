@@ -4,6 +4,7 @@
  */
 
 import { encodeFunctionData, type Address, type Hex } from "viem";
+import { estimateGas } from "./pimlico-service";
 
 // ERC-20 transfer function signature
 const TRANSFER_ABI = [
@@ -118,6 +119,23 @@ export function generateGasEstimates(): GasEstimates {
     maxFeePerGas: BigInt(1000000000) + BigInt(Math.floor(Math.random() * 500000000)), // ~1-1.5 gwei
     maxPriorityFeePerGas: BigInt(100000000) + BigInt(Math.floor(Math.random() * 50000000)), // ~0.1-0.15 gwei
   };
+}
+
+/**
+ * Get real gas estimates from Pimlico, falling back to mock estimates
+ */
+export async function getRealOrMockGasEstimates(chainId: number): Promise<GasEstimates> {
+  const real = await estimateGas(chainId);
+  if (real) {
+    return {
+      callGasLimit: BigInt(real.callGasLimit),
+      verificationGasLimit: BigInt(real.verificationGasLimit),
+      preVerificationGas: BigInt(real.preVerificationGas),
+      maxFeePerGas: BigInt(real.maxFeePerGas),
+      maxPriorityFeePerGas: BigInt(real.maxPriorityFeePerGas),
+    };
+  }
+  return generateGasEstimates();
 }
 
 /**

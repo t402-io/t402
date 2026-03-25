@@ -3,6 +3,7 @@
  * Generates contextual analysis based on real price data.
  */
 
+import Anthropic from "@anthropic-ai/sdk";
 import type { PriceData } from "./price-service";
 
 export interface MarketSection {
@@ -74,6 +75,55 @@ function getTrendDescription(change24h: number): {
     momentum: "significant selling pressure",
     outlook: "Wait for stabilization before entering new positions.",
   };
+}
+
+/**
+ * Generate AI-powered market analysis using Claude, with fallback to static analysis.
+ */
+export async function generateAiMarketAnalysis(priceData: PriceData): Promise<MarketReport> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return generateMarketAnalysis(priceData);
+  }
+
+  const { price, change24h, volume24h, high24h, low24h } = priceData;
+
+  try {
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const message = await client.messages.create({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 512,
+      messages: [
+        {
+          role: "user",
+          content: `You are a crypto market analyst. Given BTC current price: $${price.toLocaleString()}, 24h change: ${change24h.toFixed(2)}%, 24h volume: $${(volume24h / 1e9).toFixed(1)}B, 24h high: $${high24h.toLocaleString()}, 24h low: $${low24h.toLocaleString()}.
+
+Write a professional market analysis with exactly 4 sections. Respond in JSON only:
+{ "sections": [{ "heading": "string", "content": "string (2-3 sentences)" }] }
+
+Sections: 1) Market Overview, 2) Technical Analysis, 3) Volume & Momentum, 4) Short-term Outlook`,
+        },
+      ],
+      system: "You are a professional cryptocurrency market analyst. Respond with valid JSON only, no markdown fences or extra text.",
+    });
+
+    const textBlock = message.content.find((b) => b.type === "text");
+    if (!textBlock?.text) {
+      return generateMarketAnalysis(priceData);
+    }
+
+    const parsed = JSON.parse(textBlock.text) as { sections: MarketSection[] };
+    if (!Array.isArray(parsed.sections) || parsed.sections.length === 0) {
+      return generateMarketAnalysis(priceData);
+    }
+
+    return {
+      title: "Premium Market Report",
+      generated: new Date().toISOString(),
+      sections: parsed.sections,
+    };
+  } catch {
+    return generateMarketAnalysis(priceData);
+  }
 }
 
 /**

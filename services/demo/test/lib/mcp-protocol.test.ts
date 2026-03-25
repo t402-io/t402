@@ -15,7 +15,7 @@ describe("parseRequest", () => {
       jsonrpc: "2.0",
       id: 1,
       method: "tools/call",
-      params: { name: "analyze" },
+      params: { name: "get_weather" },
     };
 
     const { request, payment, error } = parseRequest(body);
@@ -30,7 +30,7 @@ describe("parseRequest", () => {
       id: 1,
       method: "tools/call",
       params: {
-        name: "analyze",
+        name: "get_weather",
         _meta: {
           "t402/payment": {
             t402Version: 2,
@@ -81,9 +81,9 @@ describe("parseRequest", () => {
 
 describe("getTool", () => {
   it("returns tool by name", () => {
-    const tool = getTool("analyze");
+    const tool = getTool("get_weather");
     expect(tool).not.toBeNull();
-    expect(tool?.name).toBe("analyze");
+    expect(tool?.name).toBe("get_weather");
   });
 
   it("returns null for unknown tool", () => {
@@ -108,7 +108,7 @@ describe("listTools", () => {
 
 describe("createPaymentRequiredError", () => {
   it("creates 402 error response", () => {
-    const tool = getTool("analyze")!;
+    const tool = getTool("get_weather")!;
     const accepts = [{ scheme: "exact", network: "eip155:84532", amount: "1000", asset: "0x...", payTo: "0x..." }];
 
     const response = createPaymentRequiredError(1, tool, accepts);
@@ -155,18 +155,18 @@ describe("createErrorResponse", () => {
 });
 
 describe("MCP_TOOLS", () => {
-  it("has analyze tool", () => {
-    const tool = MCP_TOOLS.find((t) => t.name === "analyze");
+  it("has get_weather tool", () => {
+    const tool = MCP_TOOLS.find((t) => t.name === "get_weather");
     expect(tool).toBeDefined();
   });
 
-  it("has summarize tool", () => {
-    const tool = MCP_TOOLS.find((t) => t.name === "summarize");
+  it("has web_search tool", () => {
+    const tool = MCP_TOOLS.find((t) => t.name === "web_search");
     expect(tool).toBeDefined();
   });
 
-  it("has translate tool", () => {
-    const tool = MCP_TOOLS.find((t) => t.name === "translate");
+  it("has calculate tool", () => {
+    const tool = MCP_TOOLS.find((t) => t.name === "calculate");
     expect(tool).toBeDefined();
   });
 
@@ -184,27 +184,40 @@ describe("MCP_TOOLS", () => {
 });
 
 describe("Tool execution", () => {
-  it("analyze tool returns JSON", async () => {
-    const tool = getTool("analyze")!;
-    const result = await tool.execute({ text: "Hello world" });
+  it("get_weather tool returns JSON with weather data", async () => {
+    const tool = getTool("get_weather")!;
+    const result = await tool.execute({ city: "Tokyo" });
     const parsed = JSON.parse(result);
-    expect(parsed).toHaveProperty("wordCount");
-    expect(parsed).toHaveProperty("sentiment");
+    expect(parsed).toHaveProperty("city");
+    expect(parsed).toHaveProperty("temperature");
+    expect(parsed).toHaveProperty("humidity");
+    expect(parsed).toHaveProperty("conditions");
   });
 
-  it("summarize tool returns JSON", async () => {
-    const tool = getTool("summarize")!;
-    const result = await tool.execute({ content: "This is a test content" });
+  it("web_search tool returns JSON with results", async () => {
+    const tool = getTool("web_search")!;
+    const result = await tool.execute({ query: "T402 protocol" });
     const parsed = JSON.parse(result);
-    expect(parsed).toHaveProperty("summary");
-    expect(parsed).toHaveProperty("originalLength");
+    expect(parsed).toHaveProperty("results");
+    expect(parsed.results).toHaveLength(3);
+    expect(parsed.results[0]).toHaveProperty("title");
+    expect(parsed.results[0]).toHaveProperty("snippet");
+    expect(parsed.results[0]).toHaveProperty("url");
   });
 
-  it("translate tool returns JSON", async () => {
-    const tool = getTool("translate")!;
-    const result = await tool.execute({ text: "Hello", targetLang: "es" });
+  it("calculate tool returns JSON with result", async () => {
+    const tool = getTool("calculate")!;
+    const result = await tool.execute({ expression: "42 * 1337" });
     const parsed = JSON.parse(result);
-    expect(parsed).toHaveProperty("translated");
-    expect(parsed).toHaveProperty("targetLang", "es");
+    expect(parsed).toHaveProperty("expression", "42 * 1337");
+    expect(parsed).toHaveProperty("result", 56154);
+    expect(parsed).toHaveProperty("formatted", "56154");
+  });
+
+  it("calculate tool rejects invalid expressions", async () => {
+    const tool = getTool("calculate")!;
+    const result = await tool.execute({ expression: "require('fs')" });
+    const parsed = JSON.parse(result);
+    expect(parsed).toHaveProperty("error", "Invalid expression");
   });
 });

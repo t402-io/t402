@@ -3,7 +3,7 @@ import { getPreferredChain, getAcceptsForChain, buildRequirementsFromPayload, DE
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment, isPreBroadcastNetwork } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 import { getBtcPrice } from "@/lib/price-service";
-import { generateMarketAnalysis } from "@/lib/content-generator";
+import { generateAiMarketAnalysis } from "@/lib/content-generator";
 import { classifyFacilitatorError } from "@/lib/error-helpers";
 
 
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
 
     // Generate dynamic report based on real price data
     const priceData = await getBtcPrice();
-    const premiumReport = generateMarketAnalysis(priceData);
+    const premiumReport = await generateAiMarketAnalysis(priceData);
 
     const response = NextResponse.json(premiumReport);
     response.headers.set("Payment-Response", encodeHeader(settleResponse));
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
 
     // Generate dynamic report based on real price data
     const priceData = await getBtcPrice();
-    const premiumReport = generateMarketAnalysis(priceData);
+    const premiumReport = await generateAiMarketAnalysis(priceData);
 
     const response = NextResponse.json(premiumReport);
     response.headers.set("Payment-Response", encodeHeader(settleResult));

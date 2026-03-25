@@ -5,6 +5,7 @@ import { createMockSettleResponse } from "@/lib/mock-responses";
 import {
   buildUserOperation,
   generateGasEstimates,
+  getRealOrMockGasEstimates,
   calculateGasSavings,
   generateUserOpHash,
   ENTRYPOINT_V07,
@@ -12,6 +13,7 @@ import {
 } from "@/lib/erc4337";
 import type { Address } from "viem";
 import { classifyFacilitatorError } from "@/lib/error-helpers";
+import { isPimlicoConfigured, getSponsorshipData } from "@/lib/pimlico-service";
 
 const GASLESS_AMOUNT = "1000"; // 0.001 USDT
 
@@ -123,6 +125,16 @@ export async function POST(request: NextRequest) {
     },
   };
 
+  // Enrich sponsorship data with real Pimlico estimates when configured
+  if (isPimlicoConfigured()) {
+    const chainId = chain.startsWith("eip155:") ? parseInt(chain.split(":")[1]) : 84532;
+    const sponsorship = await getSponsorshipData(chainId);
+    if (sponsorship) {
+      (responseData.sponsorship as any).gasSaved = sponsorship.gasSaved;
+      (responseData.sponsorship as any).source = "pimlico";
+    }
+  }
+
   if (isDemoMode) {
     await new Promise((r) => setTimeout(r, 800)); // Simulate bundler delay
     const settleResponse = createMockSettleResponse(chain);
@@ -190,7 +202,7 @@ export async function POST(request: NextRequest) {
  * GET /api/demo/gasless - Get gasless payment info
  */
 export async function GET() {
-  const gasEstimates = generateGasEstimates();
+  const gasEstimates = await getRealOrMockGasEstimates(84532); // Default to Base Sepolia
   const gasSavings = calculateGasSavings(gasEstimates);
 
   return NextResponse.json({

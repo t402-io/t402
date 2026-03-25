@@ -81,92 +81,217 @@ export interface McpTool {
   execute: (input: Record<string, unknown>) => Promise<string>;
 }
 
+// Weather code descriptions from Open-Meteo WMO codes
+const WEATHER_CODES: Record<number, string> = {
+  0: "Clear sky",
+  1: "Mainly clear",
+  2: "Partly cloudy",
+  3: "Overcast",
+  45: "Foggy",
+  48: "Depositing rime fog",
+  51: "Light drizzle",
+  53: "Moderate drizzle",
+  55: "Dense drizzle",
+  61: "Slight rain",
+  63: "Moderate rain",
+  65: "Heavy rain",
+  71: "Slight snow",
+  73: "Moderate snow",
+  75: "Heavy snow",
+  80: "Slight rain showers",
+  81: "Moderate rain showers",
+  82: "Violent rain showers",
+  95: "Thunderstorm",
+  96: "Thunderstorm with slight hail",
+  99: "Thunderstorm with heavy hail",
+};
+
 // Available demo tools
 export const MCP_TOOLS: McpTool[] = [
   {
-    name: "analyze",
-    description: "Analyze text for sentiment, topics, and key insights",
+    name: "get_weather",
+    description: "Get current weather data for any city",
     inputSchema: {
       type: "object",
       properties: {
-        text: { type: "string", description: "Text to analyze" },
-        aspects: { type: "string", description: "Comma-separated aspects to analyze" },
+        city: { type: "string", description: "City name" },
       },
-      required: ["text"],
+      required: ["city"],
     },
     cost: "1000", // 0.001 USDT
     execute: async (input) => {
-      const text = String(input.text || "").slice(0, 500);
-      const wordCount = text.split(/\s+/).length;
-      const sentiment = wordCount > 50 ? "neutral" : wordCount > 20 ? "positive" : "brief";
+      const city = String(input.city || "Tokyo");
 
-      return JSON.stringify({
-        wordCount,
-        sentiment,
-        topics: ["general"],
-        keyPhrases: text.split(/\s+/).slice(0, 5),
-        readingTime: `${Math.ceil(wordCount / 200)} min`,
-      });
-    },
-  },
-  {
-    name: "summarize",
-    description: "Generate a concise summary of provided content",
-    inputSchema: {
-      type: "object",
-      properties: {
-        content: { type: "string", description: "Content to summarize" },
-        maxLength: { type: "string", description: "Maximum summary length in words" },
-      },
-      required: ["content"],
-    },
-    cost: "1000",
-    execute: async (input) => {
-      const content = String(input.content || "");
-      const maxLength = parseInt(String(input.maxLength || "50"), 10);
-      const words = content.split(/\s+/).slice(0, maxLength);
-
-      return JSON.stringify({
-        summary: words.join(" ") + (content.split(/\s+/).length > maxLength ? "..." : ""),
-        originalLength: content.length,
-        summaryLength: words.join(" ").length,
-        compressionRatio: (words.join(" ").length / Math.max(1, content.length)).toFixed(2),
-      });
-    },
-  },
-  {
-    name: "translate",
-    description: "Translate text between languages",
-    inputSchema: {
-      type: "object",
-      properties: {
-        text: { type: "string", description: "Text to translate" },
-        targetLang: { type: "string", description: "Target language code (e.g., 'es', 'fr', 'zh')" },
-        sourceLang: { type: "string", description: "Source language code (optional)" },
-      },
-      required: ["text", "targetLang"],
-    },
-    cost: "2000", // 0.002 USDT (translation is more expensive)
-    execute: async (input) => {
-      const text = String(input.text || "");
-      const targetLang = String(input.targetLang || "es");
-
-      // Simulated translation (just demonstrates the flow)
-      const translations: Record<string, string> = {
-        es: `[ES] ${text}`,
-        fr: `[FR] ${text}`,
-        zh: `[ZH] ${text}`,
-        ja: `[JA] ${text}`,
-        de: `[DE] ${text}`,
+      const fallback = {
+        city: "Tokyo",
+        country: "Japan",
+        temperature: "22°C",
+        humidity: "65%",
+        windSpeed: "12 km/h",
+        conditions: "Partly cloudy",
+        timestamp: new Date().toISOString(),
       };
 
-      return JSON.stringify({
-        original: text,
-        translated: translations[targetLang] || `[${targetLang.toUpperCase()}] ${text}`,
-        sourceLang: "en",
-        targetLang,
-        confidence: 0.95,
-      });
+      try {
+        const geoRes = await fetch(
+          `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1`
+        );
+        if (!geoRes.ok) return JSON.stringify(fallback);
+
+        const geoData = await geoRes.json();
+        if (!geoData.results || geoData.results.length === 0) {
+          return JSON.stringify({ ...fallback, city, country: "Unknown" });
+        }
+
+        const { latitude: lat, longitude: lon, name: resolvedCity, country } = geoData.results[0];
+
+        const weatherRes = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code`
+        );
+        if (!weatherRes.ok) return JSON.stringify(fallback);
+
+        const weatherData = await weatherRes.json();
+        const current = weatherData.current;
+
+        return JSON.stringify({
+          city: resolvedCity,
+          country,
+          temperature: `${current.temperature_2m}°C`,
+          humidity: `${current.relative_humidity_2m}%`,
+          windSpeed: `${current.wind_speed_10m} km/h`,
+          conditions: WEATHER_CODES[current.weather_code] ?? "Unknown",
+          timestamp: new Date().toISOString(),
+        });
+      } catch {
+        return JSON.stringify(fallback);
+      }
+    },
+  },
+  {
+    name: "web_search",
+    description: "Search the web for information",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "Search query" },
+      },
+      required: ["query"],
+    },
+    cost: "1000", // 0.001 USDT
+    execute: async (input) => {
+      const query = String(input.query || "T402 protocol");
+
+      const fallbackResults = {
+        results: [
+          {
+            title: "T402 - HTTP-Native Payment Protocol",
+            snippet: "T402 is an open-source protocol enabling HTTP 402 payments with USDT stablecoins across EVM, Solana, TON, and TRON networks.",
+            url: "https://t402.io",
+          },
+          {
+            title: "T402 Documentation",
+            snippet: "Learn how to integrate T402 payments into your API, MCP server, or web application with SDKs for TypeScript, Go, Python, and Java.",
+            url: "https://docs.t402.io",
+          },
+          {
+            title: "T402 GitHub Repository",
+            snippet: "Open-source HTTP 402 payment protocol. 13 blockchain mechanisms, 4 SDK languages, facilitator settlement service.",
+            url: "https://github.com/t402-io/t402",
+          },
+        ],
+      };
+
+      const apiKey = process.env.ANTHROPIC_API_KEY;
+      if (!apiKey) {
+        return JSON.stringify(fallbackResults);
+      }
+
+      try {
+        const res = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": apiKey,
+            "anthropic-version": "2023-06-01",
+          },
+          body: JSON.stringify({
+            model: "claude-haiku-4-20250414",
+            max_tokens: 1024,
+            messages: [
+              {
+                role: "user",
+                content: `Given the search query '${query}', provide 3 search results. Respond in JSON only, no markdown: { "results": [{ "title": "...", "snippet": "...", "url": "..." }] }`,
+              },
+            ],
+          }),
+        });
+
+        if (!res.ok) return JSON.stringify(fallbackResults);
+
+        const data = await res.json();
+        const text = data.content?.[0]?.text ?? "";
+        const parsed = JSON.parse(text);
+        if (parsed.results && Array.isArray(parsed.results)) {
+          return JSON.stringify(parsed);
+        }
+        return JSON.stringify(fallbackResults);
+      } catch {
+        return JSON.stringify(fallbackResults);
+      }
+    },
+  },
+  {
+    name: "calculate",
+    description: "Perform mathematical calculations",
+    inputSchema: {
+      type: "object",
+      properties: {
+        expression: { type: "string", description: "Math expression" },
+      },
+      required: ["expression"],
+    },
+    cost: "1000", // 0.001 USDT
+    execute: async (input) => {
+      const expression = String(input.expression || "");
+
+      // Sanitize: only allow digits, decimal points, operators, parens, spaces, and Math builtins
+      const sanitized = expression.replace(
+        /[^0-9.+\-*/() Math.sqrtpowPIE]/g,
+        ""
+      );
+
+      if (sanitized !== expression) {
+        return JSON.stringify({
+          error: "Invalid expression",
+          expression,
+          message: "Expression contains disallowed characters. Only numbers, operators (+, -, *, /), parentheses, spaces, and Math functions (sqrt, pow, PI, E) are allowed.",
+        });
+      }
+
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-implied-eval
+        const result = new Function(`return ${sanitized}`)() as number;
+
+        if (typeof result !== "number" || !isFinite(result)) {
+          return JSON.stringify({
+            error: "Invalid result",
+            expression,
+            message: "Expression did not evaluate to a finite number.",
+          });
+        }
+
+        return JSON.stringify({
+          expression,
+          result,
+          formatted: String(result),
+        });
+      } catch {
+        return JSON.stringify({
+          error: "Evaluation error",
+          expression,
+          message: "Failed to evaluate the expression.",
+        });
+      }
     },
   },
 ];

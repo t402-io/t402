@@ -3,6 +3,7 @@ import { getPreferredChain, getAcceptsForChain, buildRequirementsFromPayload } f
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment, isPreBroadcastNetwork } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 import { classifyFacilitatorError } from "@/lib/error-helpers";
+import { getReading } from "@/lib/weather-service";
 
 
 const IOT_AMOUNT = "100"; // 0.0001 USDT per reading
@@ -21,19 +22,6 @@ function createPaymentRequired(type: string, request: NextRequest) {
   };
 }
 
-function generateReading(type: string) {
-  const now = new Date().toISOString();
-  switch (type) {
-    case "temperature":
-      return { type, value: (15 + Math.random() * 20).toFixed(1), unit: "°C", timestamp: now };
-    case "humidity":
-      return { type, value: (40 + Math.random() * 40).toFixed(0), unit: "%", timestamp: now };
-    case "gps":
-      return { type, value: `${(35.6 + Math.random() * 0.1).toFixed(4)}, ${(139.7 + Math.random() * 0.1).toFixed(4)}`, unit: "coords", timestamp: now };
-    default:
-      return { type, value: "0", unit: "unknown", timestamp: now };
-  }
-}
 
 export async function GET(request: NextRequest) {
   const type = request.nextUrl.searchParams.get("type") || "temperature";
@@ -49,7 +37,8 @@ export async function GET(request: NextRequest) {
   }
 
   // Payment received
-  const reading = generateReading(type);
+  const sensorType = (["temperature", "humidity", "gps"].includes(type) ? type : "temperature") as "temperature" | "humidity" | "gps";
+  const reading = await getReading(sensorType);
 
   if (isDemoMode) {
     const chain = getPreferredChain(request);

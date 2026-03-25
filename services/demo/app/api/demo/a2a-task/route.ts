@@ -3,6 +3,7 @@ import { getPreferredChain, getAcceptsForChain, buildRequirementsFromPayload, DE
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment, isPreBroadcastNetwork } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 import { classifyFacilitatorError } from "@/lib/error-helpers";
+import { executeAgentTask } from "@/lib/a2a-agent-service";
 
 // Agent definitions
 interface Agent {
@@ -188,20 +189,23 @@ export async function POST(request: NextRequest) {
     return response;
   }
 
-  // Get result data
-  const result = TASK_RESULTS[taskType] || TASK_RESULTS.research;
-  const conversation = generateConversation(taskType, taskDef.agents, result);
+  // Run real multi-agent pipeline (falls back to hardcoded if no API key or on error)
+  const startedAt = new Date();
+  const aiResult = await executeAgentTask(taskType as "research" | "analysis" | "report", query || null);
+  const completedAt = new Date();
+  const durationMs = completedAt.getTime() - startedAt.getTime();
+
+  // Get fallback data
+  const fallbackResult = TASK_RESULTS[taskType] || TASK_RESULTS.research;
+  const fallbackConversation = generateConversation(taskType, taskDef.agents, fallbackResult);
 
   const taskResult = {
     id: "task-" + Date.now().toString(36),
     type: taskType,
     status: "completed",
     agents: taskDef.agents.map((id) => AGENTS[id]).filter(Boolean),
-    conversation,
-    result: {
-      summary: result.summary,
-      details: result.details,
-    },
+    conversation: aiResult ? aiResult.conversation : fallbackConversation,
+    result: aiResult ? aiResult.result : { summary: fallbackResult.summary, details: fallbackResult.details },
     cost: {
       amount: taskDef.cost,
       formatted: `${(parseInt(taskDef.cost, 10) / 1000000).toFixed(4)} USDT`,
@@ -212,9 +216,10 @@ export async function POST(request: NextRequest) {
     },
     metadata: {
       query: query || null,
-      startedAt: new Date(Date.now() - 2000).toISOString(),
-      completedAt: new Date().toISOString(),
-      duration: "1.8s",
+      startedAt: startedAt.toISOString(),
+      completedAt: completedAt.toISOString(),
+      duration: aiResult ? `${(durationMs / 1000).toFixed(1)}s` : "1.8s",
+      model: aiResult ? "claude-haiku" : "mock",
     },
   };
 

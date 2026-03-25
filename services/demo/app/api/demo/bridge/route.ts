@@ -3,6 +3,7 @@ import { getPreferredChain, getAcceptsForChain, buildRequirementsFromPayload, PA
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment, isPreBroadcastNetwork } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 import { createBridgeTransaction, getEstimatedTimeRemaining } from "@/lib/bridge-state";
+import { getRecentBridgeMessages, getChainName } from "@/lib/layerzero-service";
 import { classifyFacilitatorError } from "@/lib/error-helpers";
 
 const BRIDGE_FEE = "10000"; // 0.01 USDT bridge fee
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
     recipient: recipient || PAY_TO,
   });
 
-  const responseData = {
+  const responseData: Record<string, any> = {
     success: true,
     bridge: {
       sourceChain,
@@ -112,6 +113,24 @@ export async function POST(request: NextRequest) {
       layerZeroScan: `https://scan.layerzero-api.com/v1/messages/${bridgeState.guid}`,
     },
   };
+
+  // Enrich with real LayerZero Scan data
+  try {
+    const recentMessages = await getRecentBridgeMessages();
+    if (recentMessages.length > 0) {
+      const ref = recentMessages[0];
+      responseData.referenceTx = {
+        guid: ref.guid,
+        srcTxHash: ref.srcTxHash,
+        dstTxHash: ref.dstTxHash,
+        route: `${getChainName(ref.srcChainId)} → ${getChainName(ref.dstChainId)}`,
+        status: ref.status,
+        layerZeroScanUrl: `https://layerzeroscan.com/tx/${ref.srcTxHash}`,
+      };
+    }
+  } catch {
+    // Non-critical - skip if LayerZero API unavailable
+  }
 
   if (isDemoMode) {
     await new Promise((r) => setTimeout(r, 500)); // Simulate processing
