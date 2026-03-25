@@ -53,6 +53,8 @@ services:
         NEXT_PUBLIC_TESTNET: "true"
     environment:
       - FACILITATOR_API_KEY=${FACILITATOR_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - PIMLICO_API_KEY=${PIMLICO_API_KEY:-}
     ports:
       - "127.0.0.1:3012:3000"
     restart: unless-stopped

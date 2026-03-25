@@ -133,33 +133,25 @@ export const MCP_TOOLS: McpTool[] = [
       };
 
       try {
-        const geoRes = await fetch(
-          `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1`
+        // Primary: wttr.in (works reliably from Docker containers)
+        const res = await fetch(
+          `https://wttr.in/${encodeURIComponent(city)}?format=j1`,
+          { signal: AbortSignal.timeout(5000) }
         );
-        if (!geoRes.ok) return JSON.stringify(fallback);
+        if (!res.ok) return JSON.stringify(fallback);
 
-        const geoData = await geoRes.json();
-        if (!geoData.results || geoData.results.length === 0) {
-          return JSON.stringify({ ...fallback, city, country: "Unknown" });
-        }
+        const json = await res.json();
+        const current = json.current_condition?.[0];
+        if (!current) return JSON.stringify({ ...fallback, city });
 
-        const { latitude: lat, longitude: lon, name: resolvedCity, country } = geoData.results[0];
-
-        const weatherRes = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code`
-        );
-        if (!weatherRes.ok) return JSON.stringify(fallback);
-
-        const weatherData = await weatherRes.json();
-        const current = weatherData.current;
-
+        const area = json.nearest_area?.[0];
         return JSON.stringify({
-          city: resolvedCity,
-          country,
-          temperature: `${current.temperature_2m}°C`,
-          humidity: `${current.relative_humidity_2m}%`,
-          windSpeed: `${current.wind_speed_10m} km/h`,
-          conditions: WEATHER_CODES[current.weather_code] ?? "Unknown",
+          city: area?.areaName?.[0]?.value || city,
+          country: area?.country?.[0]?.value || "Unknown",
+          temperature: `${current.temp_C}°C`,
+          humidity: `${current.humidity}%`,
+          windSpeed: `${current.windspeedKmph} km/h`,
+          conditions: current.weatherDesc?.[0]?.value || "Unknown",
           timestamp: new Date().toISOString(),
         });
       } catch {
