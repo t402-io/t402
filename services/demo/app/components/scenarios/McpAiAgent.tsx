@@ -125,8 +125,10 @@ export function McpAiAgent() {
               disabled={agentThinking}
               className="glass-card-interactive p-4 text-left disabled:opacity-50"
             >
-              <div className="flex items-center gap-2 mb-2">
-                <Icon size={14} className="text-[var(--color-scenario-mcp)]" />
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(168, 85, 247, 0.1)" }}>
+                  <Icon size={16} className="text-[var(--color-scenario-mcp)]" />
+                </div>
                 <span className="text-xs font-semibold">{tool.label}</span>
               </div>
               <p className="text-[10px] text-[var(--color-muted)]">{tool.description}</p>

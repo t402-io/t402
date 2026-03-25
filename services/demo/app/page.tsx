@@ -206,16 +206,16 @@ export default function HomePage() {
 
           {/* Comparison */}
           <div
-            className="mt-10 rounded-2xl overflow-hidden max-w-2xl mx-auto"
+            className="mt-10 rounded-2xl overflow-x-auto max-w-2xl mx-auto"
             style={{ border: "1px solid var(--color-border)" }}
           >
-            <table className="w-full text-xs">
+            <table className="w-full text-xs min-w-[360px]">
               <thead>
                 <tr style={{ background: "var(--color-surface)" }}>
-                  <th className="text-left px-4 py-3 font-medium" style={{ color: "var(--color-muted)" }}></th>
-                  <th className="text-center px-4 py-3 font-semibold" style={{ color: "var(--color-brand)" }}>T402</th>
-                  <th className="text-center px-4 py-3 font-medium" style={{ color: "var(--color-muted)" }}>Stripe</th>
-                  <th className="text-center px-4 py-3 font-medium" style={{ color: "var(--color-muted)" }}>x402</th>
+                  <th className="text-left px-2 sm:px-4 py-3 font-medium" style={{ color: "var(--color-muted)" }}></th>
+                  <th className="text-center px-2 sm:px-4 py-3 font-semibold" style={{ color: "var(--color-brand)" }}>T402</th>
+                  <th className="text-center px-2 sm:px-4 py-3 font-medium" style={{ color: "var(--color-muted)" }}>Stripe</th>
+                  <th className="text-center px-2 sm:px-4 py-3 font-medium" style={{ color: "var(--color-muted)" }}>x402</th>
                 </tr>
               </thead>
               <tbody>
@@ -234,10 +234,10 @@ export default function HomePage() {
                       borderTop: "1px solid var(--color-border)",
                     }}
                   >
-                    <td className="px-4 py-2.5 font-medium text-white">{label}</td>
-                    <td className="px-4 py-2.5 text-center" style={{ color: "var(--color-brand)" }}>{t402}</td>
-                    <td className="px-4 py-2.5 text-center" style={{ color: "var(--color-muted)" }}>{stripe}</td>
-                    <td className="px-4 py-2.5 text-center" style={{ color: "var(--color-muted)" }}>{x402}</td>
+                    <td className="px-2 sm:px-4 py-2.5 font-medium text-white whitespace-nowrap">{label}</td>
+                    <td className="px-2 sm:px-4 py-2.5 text-center" style={{ color: "var(--color-brand)" }}>{t402}</td>
+                    <td className="px-2 sm:px-4 py-2.5 text-center" style={{ color: "var(--color-muted)" }}>{stripe}</td>
+                    <td className="px-2 sm:px-4 py-2.5 text-center" style={{ color: "var(--color-muted)" }}>{x402}</td>
                   </tr>
                 ))}
               </tbody>

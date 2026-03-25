@@ -118,11 +118,15 @@
     background: #111113;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 1.25rem;
-    transition: border-color 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition: border-color 300ms cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1),
+                transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .card-elevated:hover {
-    border-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(80, 175, 149, 0.25);
+    box-shadow: 0 4px 24px rgba(80, 175, 149, 0.06);
+    transform: translateY(-2px);
   }
 
   .card-static {
@@ -142,11 +146,14 @@
     background: #111113;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 1.25rem;
-    transition: border-color 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition: border-color 300ms cubic-bezier(0.4, 0, 0.2, 1),
+                background 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
   }
 
   .glass-card-interactive:hover {
-    border-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
+    background: #151517;
   }
 
   .btn-primary {

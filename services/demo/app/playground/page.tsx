@@ -276,6 +276,27 @@ export default function PlaygroundPage() {
           <FlowTimeline step={step} />
         </div>
 
+        {/* Empty state hint */}
+        {step === "idle" && !initialExchange && (
+          <div
+            className="rounded-2xl p-6 sm:p-8 text-center"
+            style={{ background: "var(--color-surface)", border: "1px dashed var(--color-border)" }}
+          >
+            <div className="text-sm font-mono mb-3" style={{ color: "var(--color-text-tertiary)" }}>
+              <span style={{ color: "var(--syn-keyword)" }}>GET</span>{" "}
+              <span style={{ color: "var(--syn-string)" }}>/api/demo/content</span>{" → "}
+              <span style={{ color: "#F59E0B" }}>402</span>{" → "}
+              <span style={{ color: "var(--syn-function)" }}>Sign</span>{" → "}
+              <span style={{ color: "var(--color-success)" }}>200 OK</span>
+            </div>
+            <p className="text-xs" style={{ color: "var(--color-text-tertiary)" }}>
+              Click <strong>Execute Flow</strong> to watch the HTTP 402 payment handshake step-by-step.
+              <br />
+              Each step shows the raw request and response with headers.
+            </p>
+          </div>
+        )}
+
         {/* Exchanges */}
         <div className="space-y-6">
           <AnimatePresence mode="popLayout">
