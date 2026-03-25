@@ -182,19 +182,37 @@ export function useTronPayment() {
         { type: "uint256", value: requirements.amount },
       ];
 
-      const { transaction } = await tronWeb.transactionBuilder.triggerSmartContract(
-        requirements.asset,
-        "transfer(address,uint256)",
-        { feeLimit: 100_000_000 }, // 100 TRX fee limit
-        parameter,
-        address
-      );
+      let transaction: TronTransaction;
+      try {
+        const result = await tronWeb.transactionBuilder.triggerSmartContract(
+          requirements.asset,
+          "transfer(address,uint256)",
+          { feeLimit: 100_000_000 },
+          parameter,
+          address
+        );
+        transaction = result.transaction;
+      } catch (e) {
+        console.error("[TRON] triggerSmartContract failed:", e);
+        throw new Error(`Failed to build TRON transaction: ${e instanceof Error ? e.message : String(e)}`);
+      }
 
       // 2. Sign the transaction
-      const signedTx = await tronWeb.trx.sign(transaction);
+      let signedTx: TronTransaction;
+      try {
+        signedTx = await tronWeb.trx.sign(transaction);
+      } catch (e) {
+        console.error("[TRON] sign failed:", e);
+        throw new Error(`TRON signing failed: ${e instanceof Error ? e.message : String(e)}`);
+      }
 
-      // 3. Broadcast (TRON is pre-broadcast — wallet sends tx before facilitator sees it)
-      await tronWeb.trx.sendRawTransaction(signedTx);
+      // 3. Broadcast
+      try {
+        await tronWeb.trx.sendRawTransaction(signedTx);
+      } catch (e) {
+        console.error("[TRON] broadcast failed:", e);
+        // Don't throw — tx might still have been sent
+      }
 
       // 4. Extract block info from the signed transaction's raw_data
       const authorization: TronAuthorization = {
