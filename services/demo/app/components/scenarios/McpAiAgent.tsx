@@ -110,7 +110,7 @@ export function McpAiAgent() {
     } finally {
       setAgentThinking(false);
     }
-  }, [isDemo, activeFamily, signPayment]);
+  }, [isDemo, activeFamily, activeNetwork, testnet, signPayment]);
 
   return (
     <div className="space-y-6">

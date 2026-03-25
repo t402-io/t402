@@ -24,7 +24,7 @@ interface PaymentPayload {
 }
 
 function getDomain(requirements: PaymentRequirements) {
-  const chainId = parseInt(requirements.network.split(":")[1]);
+  const chainId = parseInt(requirements.network.split(":")[1], 10);
   return {
     name: (requirements.extra?.name as string) || "USD Coin",
     version: (requirements.extra?.version as string) || "2",
@@ -143,7 +143,8 @@ async function ensureCorrectChain(
   await new Promise((r) => setTimeout(r, 1000));
 }
 
-const FACILITATOR_ADDRESS = "0xC88f67e776f16DcFBf42e6bDda1B82604448899B" as `0x${string}`;
+// Facilitator address — sourced from config, falls back to well-known address
+const FACILITATOR_ADDRESS = (process.env.NEXT_PUBLIC_FACILITATOR_ADDRESS || "0xC88f67e776f16DcFBf42e6bDda1B82604448899B") as `0x${string}`;
 
 /**
  * Check on-chain allowance for the facilitator.
@@ -178,7 +179,7 @@ export function useEvmPayment() {
     async (requirements: PaymentRequirements, onProgress?: (step: string) => void): Promise<PaymentPayload> => {
       if (!address || !isConnected) throw new Error("Wallet not connected");
 
-      const requiredChainId = parseInt(requirements.network.split(":")[1]);
+      const requiredChainId = parseInt(requirements.network.split(":")[1], 10);
       const chainConfig = getConfigByNetwork(requirements.network);
       const chainName = chainConfig?.name || `Chain ${requiredChainId}`;
 

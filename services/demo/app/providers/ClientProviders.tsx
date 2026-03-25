@@ -67,40 +67,29 @@ export function ClientProviders({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    // Defer wallet provider mounting until after initial paint for faster FCP
+    if (typeof requestIdleCallback === "function") {
+      requestIdleCallback(() => setMounted(true));
+    } else {
+      setTimeout(() => setMounted(true), 1);
+    }
   }, []);
 
-  // Core providers (work on both SSR and client)
-  const core = (
-    <DemoProvider>
-      <ChainProvider>
-        <ToastProvider>
-          {children}
-        </ToastProvider>
-      </ChainProvider>
-    </DemoProvider>
-  );
-
-  // SSR: no wallet providers
-  if (!mounted) {
-    return (
-      <WalletReadyContext.Provider value={false}>
-        {core}
-      </WalletReadyContext.Provider>
-    );
-  }
-
-  // Client: wrap with WagmiProvider (always) + non-EVM provider (on demand)
+  // Single provider tree — wallet providers conditionally mount on client only
   return (
-    <WalletReadyContext.Provider value={true}>
+    <WalletReadyContext.Provider value={mounted}>
       <DemoProvider>
         <ChainProvider>
           <ToastProvider>
-            <WagmiProviderWrapper>
-              <NonEvmProvider>
-                {children}
-              </NonEvmProvider>
-            </WagmiProviderWrapper>
+            {mounted ? (
+              <WagmiProviderWrapper>
+                <NonEvmProvider>
+                  {children}
+                </NonEvmProvider>
+              </WagmiProviderWrapper>
+            ) : (
+              children
+            )}
           </ToastProvider>
         </ChainProvider>
       </DemoProvider>

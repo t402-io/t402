@@ -9,18 +9,20 @@ import { PaymentStatus, parsePaymentResponse, type SettleInfo } from "@/componen
 import type { FlowState } from "@/hooks/usePaymentFlow";
 import { encodePaymentHeader } from "@/lib/t402-client";
 
-type GaslessState = "idle" | "creating-userop" | "bundling" | "settling" | "done";
+type GaslessState = "idle" | "creating-userop" | "bundling" | "settling" | "done" | "error";
 
 export function GaslessPayment() {
   const { isDemo, testnet } = useDemoContext();
   const { signPayment, activeFamily, activeNetwork } = useMultiChainPayment();
   const [state, setState] = useState<GaslessState>("idle");
+  const [error, setError] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [flowState, setFlowState] = useState<FlowState>("idle");
   const [settle, setSettle] = useState<SettleInfo | null>(null);
 
   const execute = useCallback(async () => {
     setState("creating-userop");
+    setError(null);
     setFlowState("requesting");
     setSettle(null);
 
@@ -64,14 +66,16 @@ export function GaslessPayment() {
 
       setState("done");
       setFlowState("done");
-    } catch {
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Payment failed");
       setFlowState("error");
-      setState("idle");
+      setState("error");
     }
-  }, [isDemo, activeFamily, signPayment]);
+  }, [isDemo, activeFamily, activeNetwork, testnet, signPayment]);
 
   const reset = () => {
     setState("idle");
+    setError(null);
     setTxHash(null);
     setFlowState("idle");
     setSettle(null);
@@ -115,7 +119,11 @@ export function GaslessPayment() {
       <div className="glass-card p-6">
         <h3 className="text-sm font-semibold mb-4">ERC-4337 Payment Flow</h3>
 
-        {state === "idle" && (
+        {error && (
+          <p className="text-xs text-[var(--color-error)] mb-3">{error}</p>
+        )}
+
+        {(state === "idle" || state === "error") && (
           <button onClick={execute} className="btn-primary px-4 py-3 text-sm w-full min-h-[44px] flex items-center justify-center gap-2">
             <Zap size={14} />
             Pay 0.001 USDT (Gasless)

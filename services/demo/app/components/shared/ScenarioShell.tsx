@@ -55,7 +55,7 @@ export function ScenarioShell({ title, description, cost, accentColor, scenarioI
             <FaucetLink family={activeFamily} />
           </div>
         ) : isLive && !testnet ? (
-          <div className="mt-4 flex items-center gap-1.5 text-[10px]" style={{ color: "#EF4444" }}>
+          <div className="mt-4 flex items-center gap-1.5 text-[10px]" style={{ color: "var(--color-error)" }}>
             <AlertTriangle size={12} />
             <span>Mainnet — real funds will be used for payments</span>
           </div>

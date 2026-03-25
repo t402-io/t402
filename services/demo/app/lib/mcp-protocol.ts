@@ -123,7 +123,7 @@ export const MCP_TOOLS: McpTool[] = [
     cost: "1000",
     execute: async (input) => {
       const content = String(input.content || "");
-      const maxLength = parseInt(String(input.maxLength || "50"));
+      const maxLength = parseInt(String(input.maxLength || "50"), 10);
       const words = content.split(/\s+/).slice(0, maxLength);
 
       return JSON.stringify({
@@ -287,7 +287,7 @@ export function listTools(): Array<{
 }> {
   return MCP_TOOLS.map((t) => ({
     name: t.name,
-    description: `${t.description} (Cost: ${(parseInt(t.cost) / 1000000).toFixed(4)} USDT)`,
+    description: `${t.description} (Cost: ${(parseInt(t.cost, 10) / 1000000).toFixed(4)} USDT)`,
     inputSchema: t.inputSchema,
   }));
 }

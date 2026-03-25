@@ -86,7 +86,7 @@ export function IoTMicropayments() {
     } finally {
       setLoading(null);
     }
-  }, [isDemo, activeFamily, signPayment]);
+  }, [isDemo, activeFamily, activeNetwork, testnet, signPayment]);
 
   return (
     <div className="space-y-6">

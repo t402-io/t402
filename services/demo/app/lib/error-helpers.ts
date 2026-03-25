@@ -46,6 +46,27 @@ export function getUserFriendlyMessage(type: ErrorType, originalMessage: string)
   }
 }
 
+/**
+ * Classify an error from the facilitator for API route responses.
+ * Returns a safe user-facing message (never leaks stack traces).
+ */
+export function classifyFacilitatorError(error: unknown): { status: number; error: string; detail: string; requestId: string } {
+  const requestId = crypto.randomUUID();
+  const reason = error instanceof Error ? error.message : String(error);
+  const lower = reason.toLowerCase();
+  const isPaymentIssue = lower.includes("insufficient balance") || lower.includes("insufficient") || lower.includes("verify_signature");
+
+  if (isPaymentIssue) {
+    return { status: 402, error: "Payment failed", detail: "Insufficient balance or signature verification failed", requestId };
+  }
+  if (lower.includes("timed out") || lower.includes("timeout")) {
+    return { status: 504, error: "Facilitator timeout", detail: "The facilitator took too long to respond", requestId };
+  }
+  // Log full error server-side with request ID for debugging, return generic message to client
+  console.error(`[facilitator-error] [${requestId}]`, reason);
+  return { status: 500, error: "Facilitator error", detail: "An unexpected error occurred while processing your payment", requestId };
+}
+
 export function getErrorAction(type: ErrorType, family: ChainFamily): string | null {
   switch (type) {
     case "insufficient-funds":

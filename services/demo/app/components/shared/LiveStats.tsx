@@ -2,6 +2,12 @@
 
 import { useFacilitatorStatus } from "@/hooks/useFacilitatorStatus";
 import { Activity, Globe, Shield, Layers } from "lucide-react";
+import { CHAIN_FAMILIES } from "@/lib/testnet-config";
+import { MAINNET_CONFIGS } from "@/lib/chain-registry";
+
+const MAINNET_COUNT = Object.keys(MAINNET_CONFIGS).length;
+const TESTNET_COUNT = CHAIN_FAMILIES.length;
+const TOTAL_NETWORKS = MAINNET_COUNT + TESTNET_COUNT;
 
 export function LiveStats() {
   const { online, supportedKinds, loading } = useFacilitatorStatus();
@@ -9,9 +15,9 @@ export function LiveStats() {
   const items = [
     {
       icon: Globe,
-      value: "44",
+      value: String(TOTAL_NETWORKS),
       label: "Networks",
-      detail: "34 Mainnet + 10 Testnet",
+      detail: `${MAINNET_COUNT} Mainnet + ${TESTNET_COUNT} Testnet`,
     },
     {
       icon: Layers,

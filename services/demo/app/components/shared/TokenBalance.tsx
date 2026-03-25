@@ -44,7 +44,7 @@ function EvmTokenBalance() {
   const { activeConfig } = useChainContext();
   const { address, isConnected } = useAccount();
 
-  const chainId = parseInt(activeConfig.network.split(":")[1]);
+  const chainId = parseInt(activeConfig.network.split(":")[1], 10);
 
   const { data: balance, isLoading, isError } = useReadContract({
     address: activeConfig.asset as `0x${string}`,

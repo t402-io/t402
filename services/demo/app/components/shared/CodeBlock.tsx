@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { Copy, Check } from "lucide-react";
 import { tokenize, type Language, type Token } from "@/lib/syntax-highlighter";
 
@@ -25,7 +25,7 @@ const TOKEN_CSS_VAR: Record<string, string> = {
   comment: "var(--syn-comment)",
   property: "var(--syn-property)",
   punctuation: "var(--syn-punctuation)",
-  plain: "#D4D4D4",
+  plain: "var(--syn-punctuation)",
 };
 
 export function CodeBlock({
@@ -39,6 +39,13 @@ export function CodeBlock({
   className = "",
 }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
+  const copyTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    };
+  }, []);
 
   const tokens = useMemo(() => tokenize(code, language), [code, language]);
 
@@ -59,7 +66,8 @@ export function CodeBlock({
   const handleCopy = () => {
     navigator.clipboard.writeText(code);
     setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    copyTimerRef.current = setTimeout(() => setCopied(false), 1500);
   };
 
   const showHeader = label || showCopyButton;

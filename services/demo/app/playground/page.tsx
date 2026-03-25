@@ -189,7 +189,9 @@ export default function PlaygroundPage() {
             <span className="text-sm font-medium text-white">Playground</span>
           </div>
           <div className="flex items-center gap-3">
-            <ChainSelector compact />
+            <div className="hidden sm:block">
+              <ChainSelector compact />
+            </div>
             <ModeToggle />
             <WalletButton />
           </div>
@@ -209,6 +211,11 @@ export default function PlaygroundPage() {
           <p className="text-sm" style={{ color: "var(--color-muted)" }}>
             Execute T402 payment flows step-by-step. Watch the HTTP 402 handshake in real time.
           </p>
+        </div>
+
+        {/* Mobile chain selector (hidden on sm+) */}
+        <div className="sm:hidden mb-4">
+          <ChainSelector compact />
         </div>
 
         {/* Controls */}
@@ -356,11 +363,11 @@ export default function PlaygroundPage() {
 
 function FlowTimeline({ step }: { step: FlowStep }) {
   const steps = [
-    { id: "requesting", label: "Request" },
-    { id: "got-402", label: "402 Received" },
-    { id: "signing", label: "Sign Payment" },
-    { id: "retrying", label: "Retry" },
-    { id: "done", label: "Complete" },
+    { id: "requesting", label: "Request", shortLabel: "Request" },
+    { id: "got-402", label: "402 Received", shortLabel: "402" },
+    { id: "signing", label: "Sign Payment", shortLabel: "Sign" },
+    { id: "retrying", label: "Retry", shortLabel: "Retry" },
+    { id: "done", label: "Complete", shortLabel: "Done" },
   ];
 
   const currentIndex = steps.findIndex((s) => s.id === step);
@@ -385,7 +392,8 @@ function FlowTimeline({ step }: { step: FlowStep }) {
                   background: isActive ? "var(--color-background)" : isPast ? "var(--color-success)" : "var(--color-text-tertiary)",
                 }}
               />
-              {s.label}
+              <span className="hidden sm:inline">{s.label}</span>
+              <span className="sm:hidden">{s.shortLabel}</span>
             </div>
             {i < steps.length - 1 && (
               <div

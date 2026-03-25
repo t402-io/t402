@@ -364,7 +364,7 @@ export default function HomePage() {
               <a href="https://t402.io" target="_blank" rel="noopener noreferrer" className="text-xs hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>Website</a>
               <a href="https://docs.t402.io" target="_blank" rel="noopener noreferrer" className="text-xs hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>Docs</a>
               <a href="https://github.com/t402-io/t402" target="_blank" rel="noopener noreferrer" className="text-xs hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>GitHub</a>
-              <a href="https://facilitator.t402.io" target="_blank" rel="noopener noreferrer" className="text-xs hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>API</a>
+              <a href="https://docs.t402.io/api" target="_blank" rel="noopener noreferrer" className="text-xs hover:text-white transition-colors px-3 py-2 min-h-[44px] flex items-center" style={{ color: "var(--color-muted)" }}>API</a>
             </div>
           </div>
           <div style={{ borderTop: "1px solid rgba(255, 255, 255, 0.06)" }} className="pt-6 text-center">

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPreferredChain, getAcceptsForChain, buildRequirementsFromPayload } from "@/lib/config";
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment, isPreBroadcastNetwork } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
+import { classifyFacilitatorError } from "@/lib/error-helpers";
 
 
 const IOT_AMOUNT = "100"; // 0.0001 USDT per reading
@@ -102,11 +103,10 @@ export async function GET(request: NextRequest) {
     response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
     return response;
   } catch (error) {
-    const reason = String(error);
-    const isPaymentIssue = reason.includes('Insufficient balance') || reason.includes('insufficient') || reason.includes('verify_signature');
+    const { status, error: errMsg, detail, requestId } = classifyFacilitatorError(error);
     return NextResponse.json(
-      { error: isPaymentIssue ? 'Payment failed' : 'Facilitator error', reason },
-      { status: isPaymentIssue ? 402 : 500 }
+      { error: errMsg, reason: detail, requestId },
+      { status }
     );
   }
 }

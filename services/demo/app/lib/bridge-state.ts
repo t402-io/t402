@@ -66,6 +66,10 @@ export function createBridgeTransaction(params: {
   fee: string;
   recipient: string;
 }): BridgeState {
+  // Periodic cleanup to prevent unbounded memory growth
+  if (bridgeStates.size > 100) {
+    cleanupOldStates();
+  }
   const guid = generateMessageGuid();
   const srcTxHash = generateTxHash(params.sourceChain);
 

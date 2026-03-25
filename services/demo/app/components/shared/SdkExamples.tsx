@@ -31,10 +31,13 @@ export function SdkExamples({ scenarioId, className }: SdkExamplesProps) {
         {hasServer && (
           <div
             className="flex items-center gap-0.5 rounded-xl p-0.5"
+            role="group"
+            aria-label="Code view"
             style={{ background: "var(--color-surface)" }}
           >
             <button
               onClick={() => setView("client")}
+              aria-pressed={view === "client"}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors min-h-[36px]"
               style={{
                 background: view === "client" ? "var(--color-surface-active)" : "transparent",
@@ -46,6 +49,7 @@ export function SdkExamples({ scenarioId, className }: SdkExamplesProps) {
             </button>
             <button
               onClick={() => setView("server")}
+              aria-pressed={view === "server"}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors min-h-[36px]"
               style={{
                 background: view === "server" ? "var(--color-surface-active)" : "transparent",

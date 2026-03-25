@@ -67,7 +67,7 @@ export function StreamingMedia() {
       setState("idle");
       setFlowState("error");
     }
-  }, [isDemo, activeFamily, signPayment]);
+  }, [isDemo, activeFamily, activeNetwork, testnet, signPayment]);
 
   useEffect(() => {
     if (state === "playing") {

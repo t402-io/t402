@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPreferredChain, getAcceptsForChain, buildRequirementsFromPayload, DEMO_AMOUNT } from "@/lib/config";
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment, isPreBroadcastNetwork } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
+import { classifyFacilitatorError } from "@/lib/error-helpers";
 
 // Agent definitions
 interface Agent {
@@ -203,7 +204,7 @@ export async function POST(request: NextRequest) {
     },
     cost: {
       amount: taskDef.cost,
-      formatted: `${(parseInt(taskDef.cost) / 1000000).toFixed(4)} USDT`,
+      formatted: `${(parseInt(taskDef.cost, 10) / 1000000).toFixed(4)} USDT`,
       breakdown: taskDef.agents.map((id) => ({
         agent: AGENTS[id]?.name || id,
         share: `${(100 / taskDef.agents.length).toFixed(0)}%`,
@@ -270,11 +271,10 @@ export async function POST(request: NextRequest) {
     response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
     return response;
   } catch (error) {
-    const reason = String(error);
-    const isPaymentIssue = reason.includes('Insufficient balance') || reason.includes('insufficient') || reason.includes('verify_signature');
+    const { status, error: errMsg, detail, requestId } = classifyFacilitatorError(error);
     return NextResponse.json(
-      { error: isPaymentIssue ? 'Payment failed' : 'Facilitator error', reason },
-      { status: isPaymentIssue ? 402 : 500 }
+      { error: errMsg, reason: detail, requestId },
+      { status }
     );
   }
 }
@@ -291,7 +291,7 @@ export async function GET() {
       id,
       description: def.description,
       cost: def.cost,
-      costFormatted: `${(parseInt(def.cost) / 1000000).toFixed(4)} USDT`,
+      costFormatted: `${(parseInt(def.cost, 10) / 1000000).toFixed(4)} USDT`,
       involvedAgents: def.agents.map((agentId) => AGENTS[agentId]?.name || agentId),
     })),
   });

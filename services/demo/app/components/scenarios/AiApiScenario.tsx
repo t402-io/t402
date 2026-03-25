@@ -117,7 +117,7 @@ export function AiApiScenario() {
       setState("error");
       setFlowState("error");
     }
-  }, [query, isDemo, activeFamily, signPayment]);
+  }, [query, isDemo, activeFamily, activeNetwork, testnet, signPayment]);
 
   return (
     <>

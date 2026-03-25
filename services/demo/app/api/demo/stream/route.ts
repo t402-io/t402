@@ -3,6 +3,7 @@ import { getPreferredChain, getAcceptsForChain, buildRequirementsFromPayload } f
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment, isPreBroadcastNetwork } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 import { generateSegmentAudio, getSegmentInfo } from "@/lib/audio-generator";
+import { classifyFacilitatorError } from "@/lib/error-helpers";
 
 const STREAM_MAX_AMOUNT = "10000"; // 0.01 USDT max (upto scheme)
 const COST_PER_SEGMENT = "1000"; // 0.001 USDT per 10-second segment
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
   const isDemoMode = request.headers.get("x-demo-mode") === "true";
   const segment = request.nextUrl.searchParams.get("segment") || "0";
   const format = request.nextUrl.searchParams.get("format");
-  const segmentNum = Math.max(0, Math.min(4, parseInt(segment) || 0));
+  const segmentNum = Math.max(0, Math.min(4, parseInt(segment, 10) || 0));
 
   // No payment provided - return 402
   if (!paymentHeader) {
@@ -144,11 +145,10 @@ export async function GET(request: NextRequest) {
     });
     return response;
   } catch (error) {
-    const reason = String(error);
-    const isPaymentIssue = reason.includes('Insufficient balance') || reason.includes('insufficient') || reason.includes('verify_signature');
+    const { status, error: errMsg, detail, requestId } = classifyFacilitatorError(error);
     return NextResponse.json(
-      { error: isPaymentIssue ? 'Payment failed' : 'Facilitator error', reason },
-      { status: isPaymentIssue ? 402 : 500 }
+      { error: errMsg, reason: detail, requestId },
+      { status }
     );
   }
 }

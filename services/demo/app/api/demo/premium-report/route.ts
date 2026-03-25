@@ -4,6 +4,7 @@ import { encodeHeader, decodeHeader, verifyPayment, settlePayment, isPreBroadcas
 import { createMockSettleResponse } from "@/lib/mock-responses";
 import { getBtcPrice } from "@/lib/price-service";
 import { generateMarketAnalysis } from "@/lib/content-generator";
+import { classifyFacilitatorError } from "@/lib/error-helpers";
 
 
 const RESOURCE = {
@@ -90,11 +91,10 @@ export async function GET(request: NextRequest) {
     response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
     return response;
   } catch (error) {
-    const reason = String(error);
-    const isPaymentIssue = reason.includes('Insufficient balance') || reason.includes('insufficient') || reason.includes('verify_signature');
+    const { status, error: errMsg, detail, requestId } = classifyFacilitatorError(error);
     return NextResponse.json(
-      { error: isPaymentIssue ? 'Payment failed' : 'Facilitator error', reason },
-      { status: isPaymentIssue ? 402 : 500 }
+      { error: errMsg, reason: detail, requestId },
+      { status }
     );
   }
 }

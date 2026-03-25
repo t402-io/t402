@@ -64,7 +64,9 @@ export interface GasEstimates {
  * Generate a random nonce (simulated)
  */
 function generateNonce(): Hex {
-  const nonce = Math.floor(Math.random() * 1000000);
+  const bytes = new Uint8Array(4);
+  crypto.getRandomValues(bytes);
+  const nonce = new DataView(bytes.buffer).getUint32(0);
   return `0x${nonce.toString(16).padStart(64, "0")}` as Hex;
 }
 

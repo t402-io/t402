@@ -105,6 +105,11 @@ export function PaymentStatus({ flowState, settle, family }: PaymentStatusProps)
           Verifying on-chain settlement...
         </p>
       )}
+      {flowState === "error" && (
+        <p className="text-xs text-center mt-3" style={{ color: "var(--color-error)" }}>
+          Payment failed. Please try again.
+        </p>
+      )}
       {flowState !== "idle" && elapsed > 0 && (
         <div className="text-center mt-2">
           <span

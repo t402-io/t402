@@ -8,7 +8,7 @@ export function isPreBroadcastNetwork(network: string): boolean {
   return ["ton:", "solana:", "tron:"].some((p) => network.startsWith(p));
 }
 
-const FACILITATOR_TIMEOUT_MS = 90_000;
+const FACILITATOR_TIMEOUT_MS = 30_000;
 
 /**
  * Fetch with a 30-second timeout via AbortController.
@@ -30,7 +30,7 @@ async function facilitatorFetch(url: string, init?: RequestInit): Promise<Respon
     return response;
   } catch (error: unknown) {
     if (error instanceof DOMException && error.name === "AbortError") {
-      throw new Error("Facilitator request timed out after 90s");
+      throw new Error("Facilitator request timed out after 30s");
     }
     throw error;
   } finally {

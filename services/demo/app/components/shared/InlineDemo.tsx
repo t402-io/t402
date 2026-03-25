@@ -13,34 +13,42 @@ export function InlineDemo() {
     setStep("requesting");
     const start = Date.now();
 
-    const res1 = await fetch("/api/demo/content", {
-      headers: { Accept: "application/json", "x-demo-mode": "true", "x-preferred-chain": "evm" },
-    });
-    const paymentRequired = await res1.json();
-    setStep("got-402");
+    try {
+      const res1 = await fetch("/api/demo/content", {
+        headers: { Accept: "application/json", "x-demo-mode": "true", "x-preferred-chain": "evm" },
+      });
+      if (res1.status !== 402) {
+        setStep("idle");
+        return;
+      }
+      const paymentRequired = await res1.json();
+      setStep("got-402");
 
-    await new Promise((r) => setTimeout(r, 600));
-    setStep("signing");
+      await new Promise((r) => setTimeout(r, 600));
+      setStep("signing");
 
-    const mockPayload = btoa(JSON.stringify({
-      t402Version: 2,
-      scheme: "exact",
-      network: paymentRequired.accepts?.[0]?.network ?? "eip155:84532",
-      payload: {
-        authorization: { from: "0xdemo", to: paymentRequired.accepts?.[0]?.payTo ?? "0x", value: paymentRequired.accepts?.[0]?.amount ?? "10000" },
-        signature: "0xdemo",
-      },
-    })).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+      const mockPayload = btoa(JSON.stringify({
+        t402Version: 2,
+        scheme: "exact",
+        network: paymentRequired.accepts?.[0]?.network ?? "eip155:84532",
+        payload: {
+          authorization: { from: "0xdemo", to: paymentRequired.accepts?.[0]?.payTo ?? "0x", value: paymentRequired.accepts?.[0]?.amount ?? "10000" },
+          signature: "0xdemo",
+        },
+      })).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 
-    await new Promise((r) => setTimeout(r, 400));
-    setStep("retrying");
+      await new Promise((r) => setTimeout(r, 400));
+      setStep("retrying");
 
-    const res2 = await fetch("/api/demo/content", {
-      headers: { Accept: "application/json", "x-demo-mode": "true", "x-preferred-chain": "evm", "Payment-Signature": mockPayload },
-    });
-    await res2.json();
-    setElapsed(Date.now() - start);
-    setStep("done");
+      const res2 = await fetch("/api/demo/content", {
+        headers: { Accept: "application/json", "x-demo-mode": "true", "x-preferred-chain": "evm", "Payment-Signature": mockPayload },
+      });
+      await res2.json();
+      setElapsed(Date.now() - start);
+      setStep("done");
+    } catch {
+      setStep("idle");
+    }
   }, []);
 
   const steps = [

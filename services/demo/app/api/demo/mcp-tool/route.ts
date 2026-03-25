@@ -174,8 +174,9 @@ export async function POST(request: NextRequest) {
       })
     );
   } catch (error) {
+    console.error("[mcp-tool-error]", error);
     return NextResponse.json(
-      createErrorResponse(id, -32603, `Internal error: ${String(error)}`)
+      createErrorResponse(id, -32603, "Internal error: An unexpected error occurred")
     );
   }
 }

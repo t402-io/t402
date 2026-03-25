@@ -3,6 +3,7 @@ import { getPreferredChain, getAcceptsForChain, buildRequirementsFromPayload, PA
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment, isPreBroadcastNetwork } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 import { createBridgeTransaction, getEstimatedTimeRemaining } from "@/lib/bridge-state";
+import { classifyFacilitatorError } from "@/lib/error-helpers";
 
 const BRIDGE_FEE = "10000"; // 0.01 USDT bridge fee
 
@@ -159,11 +160,10 @@ export async function POST(request: NextRequest) {
     response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
     return response;
   } catch (error) {
-    const reason = String(error);
-    const isPaymentIssue = reason.includes('Insufficient balance') || reason.includes('insufficient') || reason.includes('verify_signature');
+    const { status, error: errMsg, detail, requestId } = classifyFacilitatorError(error);
     return NextResponse.json(
-      { error: isPaymentIssue ? 'Payment failed' : 'Facilitator error', reason },
-      { status: isPaymentIssue ? 402 : 500 }
+      { error: errMsg, reason: detail, requestId },
+      { status }
     );
   }
 }

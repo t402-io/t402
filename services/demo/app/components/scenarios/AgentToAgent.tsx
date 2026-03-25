@@ -119,7 +119,7 @@ export function AgentToAgent() {
       setState("error");
       setFlowState("error");
     }
-  }, [isDemo, activeFamily, signPayment, selectedTask]);
+  }, [isDemo, activeFamily, activeNetwork, testnet, signPayment, selectedTask]);
 
   const getStepStatus = (step: number) => {
     const stateOrder: State[] = ["idle", "delegating", "paying", "executing", "done"];
@@ -259,7 +259,13 @@ export function AgentToAgent() {
 
         {state === "error" && (
           <div className="glass-card p-4 sm:p-6 text-center">
-            <p className="text-sm text-[var(--color-error)]">{error}</p>
+            <p className="text-sm text-[var(--color-error)] mb-3">{error}</p>
+            <button
+              onClick={() => { setState("idle"); setError(null); setFlowState("idle"); setSettle(null); }}
+              className="text-xs text-[var(--color-brand)] hover:underline"
+            >
+              Try again
+            </button>
           </div>
         )}
       </div>

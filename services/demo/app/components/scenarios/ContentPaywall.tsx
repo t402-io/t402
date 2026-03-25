@@ -96,7 +96,7 @@ export function ContentPaywall() {
       setState("error");
       setFlowState("error");
     }
-  }, [isDemo, activeFamily, signPayment]);
+  }, [isDemo, activeFamily, activeNetwork, testnet, signPayment]);
 
   return (
     <div className="max-w-3xl mx-auto">

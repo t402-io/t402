@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { getPreferredChain, getAcceptsForChain, buildRequirementsFromPayload } from "@/lib/config";
+import { classifyFacilitatorError } from "@/lib/error-helpers";
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 
@@ -124,12 +125,10 @@ export async function POST(request: NextRequest) {
     response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
     return response;
   } catch (error) {
-    const reason = String(error);
-    // Parse facilitator error for user-friendly response
-    const isPaymentIssue = reason.includes("Insufficient balance") || reason.includes("insufficient") || reason.includes("verify_signature");
+    const { status, error: errMsg, detail, requestId } = classifyFacilitatorError(error);
     return NextResponse.json(
-      { error: isPaymentIssue ? "Payment failed" : "Facilitator error", reason },
-      { status: isPaymentIssue ? 402 : 500 }
+      { error: errMsg, reason: detail, requestId },
+      { status }
     );
   }
 }

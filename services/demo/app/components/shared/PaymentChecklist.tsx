@@ -15,7 +15,7 @@ function ChecklistInner() {
   const { switchChain } = useSwitchChain();
 
   // Check if wallet is on the correct chain (EVM only)
-  const requiredChainId = activeFamily === "evm" ? parseInt(activeConfig.network.split(":")[1]) : null;
+  const requiredChainId = activeFamily === "evm" ? parseInt(activeConfig.network.split(":")[1], 10) : null;
   const walletChainId = evmAccount.chain?.id ?? null;
   const wrongChain = activeFamily === "evm" && isConnected && requiredChainId && walletChainId && walletChainId !== requiredChainId;
 

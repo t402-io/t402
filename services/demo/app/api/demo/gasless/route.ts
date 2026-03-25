@@ -11,6 +11,7 @@ import {
   PIMLICO_PAYMASTER,
 } from "@/lib/erc4337";
 import type { Address } from "viem";
+import { classifyFacilitatorError } from "@/lib/error-helpers";
 
 const GASLESS_AMOUNT = "1000"; // 0.001 USDT
 
@@ -71,7 +72,7 @@ export async function POST(request: NextRequest) {
 
   // Extract sender from payment or use demo address
   const senderAddress = (body.sender || "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD68") as Address;
-  const tokenAddress = "0x036CbD53842c5426634e7929541eC2318f3dCF7e" as Address; // Base Sepolia USDC
+  const tokenAddress = (process.env.NEXT_PUBLIC_TOKEN_ADDRESS || "0x036CbD53842c5426634e7929541eC2318f3dCF7e") as Address; // Base Sepolia USDC
   const recipientAddress = PAY_TO as Address;
   const amount = BigInt(GASLESS_AMOUNT);
 
@@ -177,11 +178,10 @@ export async function POST(request: NextRequest) {
     response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
     return response;
   } catch (error) {
-    const reason = String(error);
-    const isPaymentIssue = reason.includes('Insufficient balance') || reason.includes('insufficient') || reason.includes('verify_signature');
+    const { status, error: errMsg, detail, requestId } = classifyFacilitatorError(error);
     return NextResponse.json(
-      { error: isPaymentIssue ? 'Payment failed' : 'Facilitator error', reason },
-      { status: isPaymentIssue ? 402 : 500 }
+      { error: errMsg, reason: detail, requestId },
+      { status }
     );
   }
 }

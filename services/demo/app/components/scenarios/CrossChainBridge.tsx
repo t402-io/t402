@@ -82,7 +82,7 @@ export function CrossChainBridge() {
 
     setState("done");
     setFlowState("done");
-  }, [isDemo, activeFamily, signPayment, sourceChain, targetChain]);
+  }, [isDemo, activeFamily, activeNetwork, testnet, signPayment, sourceChain, targetChain]);
 
   const reset = () => {
     setState("idle");

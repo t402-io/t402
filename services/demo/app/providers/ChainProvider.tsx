@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, useMemo, type ReactNode } from "react";
 import { type ChainFamily, CHAIN_CONFIGS, type ChainConfig } from "@/lib/testnet-config";
 import { getDefaultConfigForFamily, getMainnetConfigsForFamily, getConfigByNetwork, familyFromNetwork, MAINNET_CONFIGS } from "@/lib/chain-registry";
 import { useDemoContext } from "./DemoProvider";
@@ -32,7 +32,7 @@ export function useChainContext() {
   return useContext(ChainContext);
 }
 
-const VALID_FAMILIES: ChainFamily[] = ["evm", "ton", "tron", "solana", "stacks", "near", "aptos", "tezos", "polkadot", "cosmos"];
+const VALID_FAMILIES = Object.keys(CHAIN_CONFIGS) as ChainFamily[];
 
 export function ChainProvider({ children }: { children: ReactNode }) {
   const [activeFamily, setActiveFamilyState] = useState<ChainFamily>("evm");
@@ -80,16 +80,17 @@ export function ChainProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Resolve activeConfig based on mode
-  let activeConfig: ChainConfig;
-  if (testnet) {
-    activeConfig = CHAIN_CONFIGS[activeFamily];
-  } else if (activeNetwork && activeNetwork in MAINNET_CONFIGS) {
-    activeConfig = MAINNET_CONFIGS[activeNetwork];
-  } else {
-    activeConfig = getDefaultConfigForFamily(activeFamily, false);
-  }
+  const activeConfig = useMemo<ChainConfig>(() => {
+    if (testnet) {
+      return CHAIN_CONFIGS[activeFamily];
+    } else if (activeNetwork && activeNetwork in MAINNET_CONFIGS) {
+      return MAINNET_CONFIGS[activeNetwork];
+    } else {
+      return getDefaultConfigForFamily(activeFamily, false);
+    }
+  }, [testnet, activeFamily, activeNetwork]);
 
-  const value: ChainContextValue = {
+  const value = useMemo<ChainContextValue>(() => ({
     activeFamily,
     setActiveFamily,
     activeNetwork,
@@ -98,7 +99,7 @@ export function ChainProvider({ children }: { children: ReactNode }) {
     isConnected: walletState.connected,
     address: walletState.address,
     setWalletState,
-  };
+  }), [activeFamily, setActiveFamily, activeNetwork, setActiveNetwork, activeConfig, walletState, setWalletState]);
 
   return (
     <ChainContext.Provider value={value}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from "react";
 
 export type DemoMode = "live" | "demo";
 
@@ -46,21 +46,21 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const setMode = (newMode: DemoMode) => {
+  const setMode = useCallback((newMode: DemoMode) => {
     setModeState(newMode);
     if (typeof window !== "undefined") {
       localStorage.setItem("t402-demo-mode", newMode);
     }
-  };
+  }, []);
 
-  const setTestnet = (v: boolean) => {
+  const setTestnet = useCallback((v: boolean) => {
     setTestnetState(v);
     if (typeof window !== "undefined") {
       localStorage.setItem("t402-demo-testnet", String(v));
     }
-  };
+  }, []);
 
-  const value: DemoContextValue = {
+  const value = useMemo<DemoContextValue>(() => ({
     mode,
     setMode,
     isLive: mode === "live",
@@ -68,7 +68,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     facilitatorUrl: process.env.NEXT_PUBLIC_FACILITATOR_URL || "https://facilitator.t402.io",
     testnet,
     setTestnet,
-  };
+  }), [mode, setMode, testnet, setTestnet]);
 
   return (
     <DemoContext.Provider value={value}>

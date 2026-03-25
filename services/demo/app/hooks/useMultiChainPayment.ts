@@ -73,9 +73,9 @@ function createMockPayload(requirements: PaymentRequirements, family: ChainFamil
         value: requirements.amount,
         validAfter: 0,
         validBefore: Math.floor(Date.now() / 1000) + 60,
-        nonce: "0x" + Array(64).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join(""),
+        nonce: "0x" + Array.from(crypto.getRandomValues(new Uint8Array(32)), (b) => b.toString(16).padStart(2, "0")).join(""),
       },
-      signature: "0x" + Array(130).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join(""),
+      signature: "0x" + Array.from(crypto.getRandomValues(new Uint8Array(65)), (b) => b.toString(16).padStart(2, "0")).join(""),
     },
   };
 }

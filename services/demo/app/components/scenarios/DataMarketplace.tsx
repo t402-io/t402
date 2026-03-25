@@ -107,7 +107,7 @@ export function DataMarketplace() {
       setState("error");
       setFlowState("error");
     }
-  }, [isDemo, activeFamily, signPayment, selectedEndpoint]);
+  }, [isDemo, activeFamily, activeNetwork, testnet, signPayment, selectedEndpoint]);
 
   return (
     <>
