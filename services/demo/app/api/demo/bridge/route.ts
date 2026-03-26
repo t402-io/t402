@@ -9,12 +9,14 @@ import { executeBridge, supportsRealBridge } from "@/lib/bridge-executor";
 
 const BRIDGE_FEE = "10000"; // 0.01 USDT bridge fee
 
-// Supported bridge chains — both family names and specific chain names
+// Supported bridge chains — all 22 EVM chains + legacy family names
 const BRIDGE_CHAINS = [
-  // Family names (legacy)
+  "ethereum", "arbitrum", "optimism", "polygon",
+  "ink", "berachain", "unichain", "mantle", "sei", "monad",
+  "conflux", "flare", "rootstock", "xlayer", "stable", "corn",
+  "plasma", "megaeth", "hyperevm", "morph", "hedera", "tempo",
+  // Keep legacy family names for backward compatibility
   "evm", "ton", "tron", "solana", "stacks", "near", "aptos", "tezos", "polkadot", "cosmos",
-  // Specific chain names (from bridge redesign)
-  "arbitrum", "ethereum", "ink", "berachain", "unichain", "optimism", "polygon", "base", "mantle",
 ];
 
 // Estimated bridge times in seconds
@@ -142,8 +144,13 @@ export async function POST(request: NextRequest) {
   // Frontend sends "evm", "ton" etc. — bridge SDK needs "arbitrum", "ink" etc.
   const FAMILY_TO_BRIDGE: Record<string, string> = {
     evm: "arbitrum", // Default EVM bridge source
-    ethereum: "ethereum", arbitrum: "arbitrum", base: "base",
-    optimism: "optimism", ink: "ink", berachain: "berachain", unichain: "unichain",
+    // All specific chains map to themselves
+    ethereum: "ethereum", arbitrum: "arbitrum", optimism: "optimism", polygon: "polygon",
+    ink: "ink", berachain: "berachain", unichain: "unichain", mantle: "mantle",
+    sei: "sei", monad: "monad", conflux: "conflux", flare: "flare",
+    rootstock: "rootstock", xlayer: "xlayer", stable: "stable", corn: "corn",
+    plasma: "plasma", megaeth: "megaeth", hyperevm: "hyperevm", morph: "morph",
+    hedera: "hedera", tempo: "tempo",
   };
   const bridgeSource = FAMILY_TO_BRIDGE[sourceChain] || sourceChain;
   const bridgeTarget = FAMILY_TO_BRIDGE[targetChain] || targetChain;

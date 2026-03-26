@@ -21,7 +21,6 @@ import {
   type SettleInfo,
 } from "@/components/shared/PaymentStatus";
 import type { FlowState } from "@/hooks/usePaymentFlow";
-import type { ChainFamily } from "@/lib/testnet-config";
 import { encodePaymentHeader } from "@/lib/t402-client";
 
 // ---------------------------------------------------------------------------
@@ -40,10 +39,12 @@ type BridgeState =
 
 type TrackingStage = "submitted" | "inflight" | "confirming" | "delivered";
 
+type BridgeCategory = "major" | "l2" | "other";
+
 interface BridgeChain {
   id: string;
   name: string;
-  family: ChainFamily;
+  category: BridgeCategory;
 }
 
 interface Quote {
@@ -73,25 +74,56 @@ interface TrackingData {
 }
 
 const BRIDGE_CHAINS: BridgeChain[] = [
-  { id: "arbitrum", name: "Arbitrum", family: "evm" as const },
-  { id: "ethereum", name: "Ethereum", family: "evm" as const },
-  { id: "ink", name: "Ink", family: "evm" as const },
-  { id: "berachain", name: "Berachain", family: "evm" as const },
-  { id: "unichain", name: "Unichain", family: "evm" as const },
-];
-
-const COMING_SOON_CHAINS: BridgeChain[] = [
-  { id: "ton", name: "TON", family: "ton" as const },
-  { id: "tron", name: "TRON", family: "tron" as const },
-  { id: "solana", name: "Solana", family: "solana" as const },
+  // Major
+  { id: "arbitrum", name: "Arbitrum", category: "major" },
+  { id: "ethereum", name: "Ethereum", category: "major" },
+  { id: "optimism", name: "Optimism", category: "major" },
+  { id: "polygon", name: "Polygon", category: "major" },
+  // L2/L3
+  { id: "ink", name: "Ink", category: "l2" },
+  { id: "berachain", name: "Berachain", category: "l2" },
+  { id: "unichain", name: "Unichain", category: "l2" },
+  { id: "mantle", name: "Mantle", category: "l2" },
+  { id: "sei", name: "Sei", category: "l2" },
+  { id: "monad", name: "Monad", category: "l2" },
+  // Other
+  { id: "conflux", name: "Conflux eSpace", category: "other" },
+  { id: "flare", name: "Flare", category: "other" },
+  { id: "rootstock", name: "Rootstock", category: "other" },
+  { id: "xlayer", name: "XLayer", category: "other" },
+  { id: "stable", name: "Stable", category: "other" },
+  { id: "corn", name: "Corn", category: "other" },
+  { id: "plasma", name: "Plasma", category: "other" },
+  { id: "megaeth", name: "MegaETH", category: "other" },
+  { id: "hyperevm", name: "HyperEVM", category: "other" },
+  { id: "morph", name: "Morph", category: "other" },
+  { id: "hedera", name: "Hedera", category: "other" },
+  { id: "tempo", name: "Tempo", category: "other" },
 ];
 
 const CHAIN_EXPLORERS: Record<string, string> = {
-  arbitrum: "https://arbiscan.io/tx/",
   ethereum: "https://etherscan.io/tx/",
+  arbitrum: "https://arbiscan.io/tx/",
+  optimism: "https://optimistic.etherscan.io/tx/",
+  polygon: "https://polygonscan.com/tx/",
   ink: "https://explorer.inkonchain.com/tx/",
   berachain: "https://berascan.com/tx/",
   unichain: "https://uniscan.xyz/tx/",
+  mantle: "https://mantlescan.xyz/tx/",
+  sei: "https://seitrace.com/tx/",
+  monad: "https://explorer.monad.xyz/tx/",
+  conflux: "https://evm.confluxscan.io/tx/",
+  flare: "https://flarescan.com/tx/",
+  rootstock: "https://explorer.rootstock.io/tx/",
+  xlayer: "https://www.okx.com/web3/explorer/xlayer/tx/",
+  stable: "https://explorer.stable.io/tx/",
+  corn: "https://cornscan.io/tx/",
+  plasma: "https://plasmascan.io/tx/",
+  megaeth: "https://explorer.megaeth.com/tx/",
+  hyperevm: "https://explorer.hyperliquid.xyz/tx/",
+  morph: "https://explorer.morphl2.io/tx/",
+  hedera: "https://hashscan.io/mainnet/transaction/",
+  tempo: "https://explorer.tempo.xyz/tx/",
 };
 
 const TRACKING_STAGES: { key: TrackingStage; label: string }[] = [
@@ -156,16 +188,21 @@ function ChainDropdown({
           disabled={disabled}
           className="w-full appearance-none bg-[var(--color-surface)] text-white text-sm rounded-lg px-3 py-2.5 pr-8 border border-[var(--color-border)] focus:outline-none focus:border-[var(--color-brand)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {BRIDGE_CHAINS.filter((c) => c.id !== exclude).map((chain) => (
-            <option key={chain.id} value={chain.id}>
-              {chain.name}
-            </option>
-          ))}
-          {COMING_SOON_CHAINS.map((chain) => (
-            <option key={chain.id} value={chain.id} disabled>
-              {chain.name} — Coming soon
-            </option>
-          ))}
+          <optgroup label="Major">
+            {BRIDGE_CHAINS.filter((c) => c.category === "major" && c.id !== exclude).map((chain) => (
+              <option key={chain.id} value={chain.id}>{chain.name}</option>
+            ))}
+          </optgroup>
+          <optgroup label="L2 / L3">
+            {BRIDGE_CHAINS.filter((c) => c.category === "l2" && c.id !== exclude).map((chain) => (
+              <option key={chain.id} value={chain.id}>{chain.name}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Other Networks">
+            {BRIDGE_CHAINS.filter((c) => c.category === "other" && c.id !== exclude).map((chain) => (
+              <option key={chain.id} value={chain.id}>{chain.name}</option>
+            ))}
+          </optgroup>
         </select>
         <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--color-muted)]">
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -176,17 +213,11 @@ function ChainDropdown({
       {/* Selected chain logo indicator */}
       <div className="flex items-center gap-1.5 mt-1.5">
         <ChainLogo
-          family={
-            BRIDGE_CHAINS.find((c) => c.id === value)?.family ??
-            COMING_SOON_CHAINS.find((c) => c.id === value)?.family ??
-            "evm"
-          }
+          family={"evm"}
           size={12}
         />
         <span className="text-[10px] text-[var(--color-muted)]">
-          {BRIDGE_CHAINS.find((c) => c.id === value)?.name ??
-            COMING_SOON_CHAINS.find((c) => c.id === value)?.name ??
-            value}
+          {BRIDGE_CHAINS.find((c) => c.id === value)?.name ?? value}
         </span>
       </div>
     </div>
@@ -931,7 +962,7 @@ export function CrossChainBridge() {
               className="btn-primary px-4 py-3 text-sm w-full min-h-[44px] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChainLogo
-                family={BRIDGE_CHAINS.find((c) => c.id === toChain)?.family ?? "evm"}
+                family={"evm"}
                 size={14}
               />
               Bridge {displayAmount} USDT0
@@ -996,8 +1027,8 @@ export function CrossChainBridge() {
       {/* ------------------------------------------------------------------ */}
       <p className="text-xs text-[var(--color-muted)]">
         Cross-chain payments use LayerZero USDT0 OFT standard. Pay on any chain, receive on any other
-        — the facilitator handles bridging automatically. Supported routes: Arbitrum, Ethereum, Ink,
-        Berachain, and Unichain. TON, TRON, and Solana bridging coming soon.
+        — the facilitator handles bridging automatically. All 22 EVM chains supported including Arbitrum,
+        Ethereum, Optimism, Polygon, and more.
       </p>
     </div>
   );
