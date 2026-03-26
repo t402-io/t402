@@ -463,6 +463,10 @@ export function DexSwap() {
     if (!swapTx) return;
     setState("approving");
     try {
+      // Ensure wallet is on the correct chain before approve
+      if (switchChainAsync && chainId) {
+        try { await switchChainAsync({ chainId }); } catch { /* user may reject */ }
+      }
       const hash = await writeContractAsync({
         address: srcToken.address as `0x${string}`,
         abi: erc20Abi,
@@ -487,12 +491,16 @@ export function DexSwap() {
       setState("error");
       setFlowState("error");
     }
-  }, [swapTx, srcToken, writeContractAsync, refetchAllowance, amountInSmallestUnits, spender, chainId]);
+  }, [swapTx, srcToken, writeContractAsync, refetchAllowance, amountInSmallestUnits, spender, chainId, switchChainAsync]);
 
   const handleExecuteSwap = useCallback(async () => {
     if (!swapTx) return;
     setState("executing");
     try {
+      // Ensure wallet is on the correct chain before swap
+      if (switchChainAsync && chainId) {
+        try { await switchChainAsync({ chainId }); } catch { /* user may reject */ }
+      }
       const hash = await sendTransactionAsync({
         to: swapTx.to as `0x${string}`,
         data: swapTx.data as `0x${string}`,
@@ -506,7 +514,7 @@ export function DexSwap() {
       setState("error");
       setFlowState("error");
     }
-  }, [swapTx, sendTransactionAsync, chainId]);
+  }, [swapTx, sendTransactionAsync, chainId, switchChainAsync]);
 
   const handleSrcChange = (symbol: string) => {
     const token = tokens.find((t) => t.symbol === symbol);
