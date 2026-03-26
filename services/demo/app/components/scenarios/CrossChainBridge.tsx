@@ -501,7 +501,7 @@ function ErrorState({
 
 export function CrossChainBridge() {
   const { isDemo, testnet } = useDemoContext();
-  const { signPayment, activeFamily, activeNetwork } = useMultiChainPayment();
+  const { signPayment, activeFamily, activeNetwork, address: walletAddress } = useMultiChainPayment();
 
   // Form state
   const [fromChain, setFromChain] = useState("arbitrum");
@@ -676,6 +676,9 @@ export function CrossChainBridge() {
         sourceChain: fromChain,
         targetChain: toChain,
         amount: String(amountRaw),
+        // Send user's wallet address as bridge recipient
+        // so bridged tokens go to the USER, not the Facilitator
+        ...(walletAddress && walletAddress !== "demo-wallet" && { recipient: walletAddress }),
       });
 
       // Step 1: Get 402
