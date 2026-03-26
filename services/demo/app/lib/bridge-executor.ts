@@ -166,7 +166,9 @@ export async function quoteBridge(params: {
 
     // Format native fee: convert wei to ETH with 4 decimals
     const feeEth = Number(quote.nativeFee) / 1e18;
-    const nativeFeeFormatted = `${feeEth.toFixed(4)} ETH`;
+    // Use enough decimals to show small fees (LayerZero fees are often < 0.0001 ETH)
+    const feeStr = feeEth < 0.0001 ? feeEth.toExponential(2) : feeEth.toFixed(6);
+    const nativeFeeFormatted = `${feeStr} ETH`;
 
     // Format estimated time
     const minutes = Math.ceil(quote.estimatedTime / 60);
