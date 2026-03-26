@@ -60,6 +60,122 @@ export function getRealBridgeChains(): string[] {
   return getBridgeableChains();
 }
 
+export interface BridgeQuoteResult {
+  available: boolean;
+  nativeFee: string;           // wei
+  nativeFeeFormatted: string;  // "0.0003 ETH"
+  amountToSend: string;        // USDT0 units
+  minAmountToReceive: string;  // after slippage
+  estimatedTime: number;       // seconds
+  estimatedTimeFormatted: string; // "~5 min"
+  fromChain: string;
+  toChain: string;
+  protocol: string;
+}
+
+/**
+ * Get a quote for bridging USDT0 without executing the transaction
+ *
+ * @returns Quote result with fee and timing info, or null if not configured/supported
+ */
+export async function quoteBridge(params: {
+  fromChain: string;
+  toChain: string;
+  amount: bigint;
+  recipient: string;
+}): Promise<BridgeQuoteResult | null> {
+  const rawKey = process.env.BRIDGE_WALLET_PRIVATE_KEY;
+  if (!rawKey) {
+    console.log("[bridge-quote] BRIDGE_WALLET_PRIVATE_KEY not configured");
+    return null;
+  }
+
+  if (!supportsRealBridge(params.fromChain, params.toChain)) {
+    console.log(`[bridge-quote] Chain pair ${params.fromChain} → ${params.toChain} not supported`);
+    return null;
+  }
+
+  const chainConfig = CHAIN_MAP[params.fromChain];
+  if (!chainConfig) {
+    console.log(`[bridge-quote] No RPC config for chain: ${params.fromChain}`);
+    return null;
+  }
+
+  try {
+    const privateKey = rawKey.startsWith("0x") ? rawKey : `0x${rawKey}`;
+    const account = privateKeyToAccount(privateKey as `0x${string}`);
+
+    const publicClient = createPublicClient({
+      chain: chainConfig.chain,
+      transport: http(chainConfig.rpc),
+    });
+
+    // Quote only needs readContract, no wallet client needed
+    const signer = {
+      address: account.address,
+      readContract: async (args: { address: Address; abi: readonly unknown[]; functionName: string; args?: readonly unknown[] }) => {
+        return publicClient.readContract({
+          address: args.address,
+          abi: args.abi as any,
+          functionName: args.functionName,
+          args: args.args as any,
+        });
+      },
+      writeContract: async (_args: any): Promise<`0x${string}`> => {
+        throw new Error("writeContract not available in quote mode");
+      },
+      waitForTransactionReceipt: async (_args: any): Promise<any> => {
+        throw new Error("waitForTransactionReceipt not available in quote mode");
+      },
+    };
+
+    const bridge = new Usdt0Bridge(signer, params.fromChain);
+
+    console.log(`[bridge-quote] Quoting ${params.fromChain} → ${params.toChain}, amount: ${params.amount}`);
+
+    const quote = await bridge.quote({
+      fromChain: params.fromChain,
+      toChain: params.toChain,
+      amount: params.amount,
+      recipient: params.recipient as Address,
+    });
+
+    // Format native fee: convert wei to ETH with 4 decimals
+    const feeEth = Number(quote.nativeFee) / 1e18;
+    const nativeFeeFormatted = `${feeEth.toFixed(4)} ETH`;
+
+    // Format estimated time
+    const minutes = Math.ceil(quote.estimatedTime / 60);
+    const estimatedTimeFormatted = `~${minutes} min`;
+
+    // Apply 0.5% slippage to amount
+    const minAmountToReceive = params.amount - (params.amount * BigInt(50)) / BigInt(10000);
+
+    return {
+      available: true,
+      nativeFee: quote.nativeFee.toString(),
+      nativeFeeFormatted,
+      amountToSend: quote.amountToSend.toString(),
+      minAmountToReceive: minAmountToReceive.toString(),
+      estimatedTime: quote.estimatedTime,
+      estimatedTimeFormatted,
+      fromChain: quote.fromChain,
+      toChain: quote.toChain,
+      protocol: "LayerZero V2",
+    };
+  } catch (error) {
+    console.error(`[bridge-quote] Failed:`, error instanceof Error ? error.message : error);
+    return null;
+  }
+}
+
+/**
+ * Get the list of chains configured in the demo bridge chain map
+ */
+export function getSupportedBridgeChains(): string[] {
+  return Object.keys(CHAIN_MAP);
+}
+
 /**
  * Execute a real cross-chain USDT0 bridge via LayerZero OFT
  *
