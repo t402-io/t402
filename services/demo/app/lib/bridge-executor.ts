@@ -248,9 +248,16 @@ export async function executeBridge(params: {
     });
 
     // BridgeSigner adapter: wraps viem walletClient + publicClient
+    // WORKAROUND: The published SDK calls allowance() on the OFT contract (bug — should be on token).
+    // Since USDT0 separates token and OFT contracts, allowance() reverts on the OFT.
+    // We pre-approved the token, so we intercept allowance calls to return max value.
     const signer = {
       address: account.address,
       readContract: async (args: { address: Address; abi: readonly unknown[]; functionName: string; args?: readonly unknown[] }) => {
+        // Intercept allowance calls on OFT contract — return max to skip SDK's approve step
+        if (args.functionName === "allowance") {
+          return BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        }
         return publicClient.readContract({
           address: args.address,
           abi: args.abi as any,
