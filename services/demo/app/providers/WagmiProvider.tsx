@@ -65,9 +65,14 @@ for (const chain of allChains) {
   transports[chain.id] = http();
 }
 // Override specific chains with known-good public RPCs
-transports[baseSepolia.id] = http("https://base-sepolia.publicnode.com");
-transports[base.id] = http("https://mainnet.base.org");
 transports[mainnet.id] = http("https://ethereum-rpc.publicnode.com");
+transports[arbitrum.id] = http("https://arbitrum-one-rpc.publicnode.com");
+transports[optimism.id] = http("https://optimism-rpc.publicnode.com");
+transports[polygon.id] = http("https://polygon-bor-rpc.publicnode.com");
+transports[bsc.id] = http("https://bsc-rpc.publicnode.com");
+transports[avalanche.id] = http("https://avalanche-c-chain-rpc.publicnode.com");
+transports[base.id] = http("https://base-rpc.publicnode.com");
+transports[baseSepolia.id] = http("https://base-sepolia.publicnode.com");
 
 const config = createConfig({
   chains: allChains,
