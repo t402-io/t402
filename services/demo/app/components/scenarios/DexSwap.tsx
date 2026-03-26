@@ -54,6 +54,8 @@ const TOKENS: Token[] = [
 
 const ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const PARASWAP_ROUTER = "0xDEF171Fe48CF0115B1d80b88dc8eAB59176FEe57";
+// ParaSwap uses TokenTransferProxy for token approvals (NOT the router itself)
+const PARASWAP_SPENDER = "0x216b4b4ba9f3e719726886d34a177484278bfcae";
 const MAX_UINT256 = BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 const ARBITRUM_CHAIN_ID = 42161;
 
@@ -116,7 +118,7 @@ export function DexSwap() {
     address: srcToken.address as `0x${string}`,
     abi: erc20Abi,
     functionName: "allowance",
-    args: userAddress ? [userAddress, PARASWAP_ROUTER as `0x${string}`] : undefined,
+    args: userAddress ? [userAddress, PARASWAP_SPENDER as `0x${string}`] : undefined,
     chainId: ARBITRUM_CHAIN_ID,
     query: {
       enabled: isConnected && !!userAddress && needsApproval && state === "txReady",
@@ -326,7 +328,7 @@ export function DexSwap() {
         address: srcToken.address as `0x${string}`,
         abi: erc20Abi,
         functionName: "approve",
-        args: [PARASWAP_ROUTER as `0x${string}`, MAX_UINT256],
+        args: [PARASWAP_SPENDER as `0x${string}`, MAX_UINT256],
         chainId: ARBITRUM_CHAIN_ID,
       });
       // Wait a moment for the approval to be indexed, then refetch allowance
@@ -618,7 +620,7 @@ export function DexSwap() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-[var(--color-muted)]">Router</span>
                   <span className="text-white font-mono text-xs">
-                    {PARASWAP_ROUTER.slice(0, 8)}...{PARASWAP_ROUTER.slice(-4)} (ParaSwap)
+                    {PARASWAP_SPENDER.slice(0, 8)}...{PARASWAP_SPENDER.slice(-4)} (ParaSwap TokenTransferProxy)
                   </span>
                 </div>
               </div>
