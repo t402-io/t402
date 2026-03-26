@@ -16,7 +16,31 @@ import {
   Usdt0Bridge,
   getBridgeableChains,
   supportsBridging,
+  USDT0_OFT_ADDRESSES,
+  LAYERZERO_ENDPOINT_IDS,
 } from "@t402/evm";
+
+// Override OFT addresses with correct values from docs.usdt0.to/deployments
+// The published SDK has TOKEN addresses instead of OFT addresses
+// Token ≠ OFT: the OFT contract has quoteSend()/send(), the token is just ERC-20
+Object.assign(USDT0_OFT_ADDRESSES, {
+  ethereum: "0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee",
+  arbitrum: "0x14E4A1B13bf7F943c8ff7C51fb60FA964A298D92",
+  ink: "0x1cB6De532588fCA4a21B7209DE7C456AF8434A65",
+  berachain: "0x3Dc96399109df5ceb2C226664A086140bD0379cB",
+  unichain: "0xc07bE8994D035631c36fb4a89C918CeFB2f03EC3",
+  optimism: "0xF03b4d9AC1D5d1E7c4cEf54C2A313b9fe051A0aD",
+  polygon: "0x6BA10300f0DC58B7a1e4c0e41f5daBb7D7829e13",
+  mantle: "0xcb768e263FB1C62214E7cab4AA8d036D76dc59CC",
+} as Record<string, `0x${string}`>);
+
+// Add missing endpoint IDs
+Object.assign(LAYERZERO_ENDPOINT_IDS, {
+  ink: 30339,
+  mantle: 30181,
+  optimism: 30111,
+  polygon: 30109,
+} as Record<string, number>);
 
 // Chain name → viem chain + RPC config
 const CHAIN_MAP: Record<string, { chain: Chain; rpc: string }> = {
