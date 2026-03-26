@@ -71,8 +71,8 @@ export async function executeBridge(params: {
   amount: bigint;
   recipient: string;
 }): Promise<BridgeExecutionResult | null> {
-  const privateKey = process.env.BRIDGE_WALLET_PRIVATE_KEY;
-  if (!privateKey) {
+  const rawKey = process.env.BRIDGE_WALLET_PRIVATE_KEY;
+  if (!rawKey) {
     console.log("[bridge] BRIDGE_WALLET_PRIVATE_KEY not configured, using simulation");
     return null;
   }
@@ -89,6 +89,8 @@ export async function executeBridge(params: {
   }
 
   try {
+    // Ensure 0x prefix
+    const privateKey = rawKey.startsWith("0x") ? rawKey : `0x${rawKey}`;
     const account = privateKeyToAccount(privateKey as `0x${string}`);
 
     // Create a wallet client that also has public client capabilities

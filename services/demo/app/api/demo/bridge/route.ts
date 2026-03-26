@@ -133,12 +133,22 @@ export async function POST(request: NextRequest) {
     // Non-critical - skip if LayerZero API unavailable
   }
 
+  // Map family names to specific bridge chain names
+  // Frontend sends "evm", "ton" etc. — bridge SDK needs "arbitrum", "ink" etc.
+  const FAMILY_TO_BRIDGE: Record<string, string> = {
+    evm: "arbitrum", // Default EVM bridge source
+    ethereum: "ethereum", arbitrum: "arbitrum", base: "base",
+    optimism: "optimism", ink: "ink", berachain: "berachain", unichain: "unichain",
+  };
+  const bridgeSource = FAMILY_TO_BRIDGE[sourceChain] || sourceChain;
+  const bridgeTarget = FAMILY_TO_BRIDGE[targetChain] || targetChain;
+
   // Attempt real bridge for supported EVM chain pairs
-  if (supportsRealBridge(sourceChain, targetChain)) {
+  if (supportsRealBridge(bridgeSource, bridgeTarget)) {
     try {
       const bridgeResult = await executeBridge({
-        fromChain: sourceChain,
-        toChain: targetChain,
+        fromChain: bridgeSource,
+        toChain: bridgeTarget,
         amount: BigInt(amount),
         recipient: recipient || PAY_TO,
       });
@@ -156,7 +166,7 @@ export async function POST(request: NextRequest) {
   }
   if (!responseData.bridge.real) {
     responseData.bridge.real = false;
-    if (!supportsRealBridge(sourceChain, targetChain)) {
+    if (!supportsRealBridge(bridgeSource, bridgeTarget)) {
       responseData.bridge.note = "Simulated — LayerZero OFT not available on this chain pair";
     }
   }

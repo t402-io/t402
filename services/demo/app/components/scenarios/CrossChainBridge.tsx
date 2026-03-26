@@ -42,7 +42,7 @@ export function CrossChainBridge() {
       };
       if (isDemo) headers["x-demo-mode"] = "true";
 
-      const body = JSON.stringify({ sourceChain, targetChain, amount: "1000000" });
+      const body = JSON.stringify({ sourceChain, targetChain, amount: "100000" }); // 0.1 USDT
 
       // Get 402 from bridge API
       const res = await fetch("/api/demo/bridge", { method: "POST", headers, body });
@@ -173,7 +173,7 @@ export function CrossChainBridge() {
               </p>
             )}
             <button onClick={executeBridge} disabled={state !== "idle" && state !== "done"} className="btn-primary px-4 py-3 text-sm w-full min-h-[44px]">
-              {flowState === "error" ? "Try Again" : "Bridge 1.00 USDT"}
+              {flowState === "error" ? "Try Again" : "Bridge 0.10 USDT"}
             </button>
           </div>
         )}
