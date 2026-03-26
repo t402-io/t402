@@ -3,7 +3,7 @@ import { getPreferredChain, getAcceptsForChain, buildRequirementsFromPayload } f
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment, isPreBroadcastNetwork } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 import { classifyFacilitatorError } from "@/lib/error-helpers";
-import { getSwapQuote, buildSwapTransaction, getSupportedTokens } from "@/lib/swap-service";
+import { getSwapQuote, buildSwapTransaction, getSupportedTokens, getSupportedChains } from "@/lib/swap-service";
 
 const SWAP_FEE = "10000"; // 0.01 USDT (6 decimals)
 
@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
   const amount = searchParams.get("amount");
   const srcDecimals = searchParams.get("srcDecimals");
   const destDecimals = searchParams.get("destDecimals");
+  const chainKey = searchParams.get("chainKey") || undefined;
 
   // If query params provided, return a free quote
   if (srcToken && destToken && amount && srcDecimals != null && destDecimals != null) {
@@ -41,6 +42,7 @@ export async function GET(request: NextRequest) {
       amount,
       srcDecimals: Number(srcDecimals),
       destDecimals: Number(destDecimals),
+      chainKey,
     });
 
     if (!quote) {
@@ -57,9 +59,21 @@ export async function GET(request: NextRequest) {
     return response;
   }
 
-  // No query params: return supported tokens list
-  const tokens = getSupportedTokens();
-  const response = NextResponse.json({ tokens });
+  // If chainKey specified without quote params, return tokens for that chain
+  if (chainKey) {
+    const tokens = getSupportedTokens(chainKey);
+    const response = NextResponse.json({ tokens });
+    response.headers.set("Access-Control-Allow-Origin", "*");
+    return response;
+  }
+
+  // No query params: return all chains with their tokens
+  const chains = getSupportedChains();
+  const chainsWithTokens = chains.map(c => ({
+    ...c,
+    tokens: getSupportedTokens(c.key),
+  }));
+  const response = NextResponse.json({ chains: chainsWithTokens });
   response.headers.set("Access-Control-Allow-Origin", "*");
   return response;
 }
@@ -85,7 +99,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Parse swap parameters from request body
-  let body: { srcToken: string; destToken: string; amount: string; srcDecimals: number; destDecimals: number; userAddress?: string };
+  let body: { srcToken: string; destToken: string; amount: string; srcDecimals: number; destDecimals: number; userAddress?: string; chainKey?: string };
   try {
     body = await request.json();
     if (!body.srcToken || !body.destToken || !body.amount || body.srcDecimals == null || body.destDecimals == null) {
@@ -98,6 +112,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
+  const chainKey = body.chainKey || undefined;
+
   // Payment header present — verify and settle
   const paymentPayload = decodeHeader(paymentHeader);
   const requirements = buildRequirementsFromPayload(paymentPayload, SWAP_FEE);
@@ -109,7 +125,7 @@ export async function POST(request: NextRequest) {
     const settleResponse = createMockSettleResponse(chain);
 
     // Fetch real swap quote from ParaSwap
-    const quote = await getSwapQuote(body);
+    const quote = await getSwapQuote({ ...body, chainKey });
     if (!quote) {
       return NextResponse.json(
         { error: "Failed to fetch swap quote. Try different tokens or amount." },
@@ -126,6 +142,7 @@ export async function POST(request: NextRequest) {
         srcAmount: body.amount,
         priceRoute: quote.priceRoute,
         userAddress: body.userAddress,
+        chainKey,
       });
     }
 
@@ -173,7 +190,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch real swap quote from ParaSwap
-    const quote = await getSwapQuote(body);
+    const quote = await getSwapQuote({ ...body, chainKey });
     if (!quote) {
       return NextResponse.json(
         { error: "Failed to fetch swap quote. Try different tokens or amount." },
@@ -190,6 +207,7 @@ export async function POST(request: NextRequest) {
         srcAmount: body.amount,
         priceRoute: quote.priceRoute,
         userAddress: body.userAddress,
+        chainKey,
       });
     }
 

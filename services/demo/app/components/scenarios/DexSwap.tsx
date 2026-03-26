@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { motion } from "motion/react";
-import { useAccount, useSendTransaction, useWaitForTransactionReceipt, useReadContract, useWriteContract } from "wagmi";
+import { useAccount, useSendTransaction, useWaitForTransactionReceipt, useReadContract, useWriteContract, useSwitchChain } from "wagmi";
 import { useDemoContext } from "@/providers/DemoProvider";
 import { useMultiChainPayment } from "@/hooks/useMultiChainPayment";
 import { PaymentStatus, parsePaymentResponse, type SettleInfo } from "@/components/shared/PaymentStatus";
@@ -41,23 +41,116 @@ interface SwapTxData {
   chainId: number;
 }
 
-const TOKENS: Token[] = [
-  { symbol: "USDT", address: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9", decimals: 6 },
-  { symbol: "USDC", address: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831", decimals: 6 },
-  { symbol: "ETH", address: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", decimals: 18 },
-  { symbol: "WBTC", address: "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f", decimals: 8 },
-  { symbol: "ARB", address: "0x912CE59144191C1204E64559FE8253a0e49E6548", decimals: 18 },
-  { symbol: "LINK", address: "0xf97f4df75117a78c1A5a0DBb814Af92458539FB4", decimals: 18 },
-  { symbol: "UNI", address: "0xFa7F8980b0f1E64A2062791cc3b0871572f1F7f0", decimals: 18 },
-  { symbol: "DAI", address: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1", decimals: 18 },
-];
+// Multi-chain token registry
+const CHAIN_TOKENS: Record<string, Token[]> = {
+  ethereum: [
+    { symbol: "USDT", address: "0xdAC17F958D2ee523a2206206994597C13D831ec7", decimals: 6 },
+    { symbol: "USDC", address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", decimals: 6 },
+    { symbol: "ETH", address: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", decimals: 18 },
+    { symbol: "WBTC", address: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", decimals: 8 },
+    { symbol: "DAI", address: "0x6B175474E89094C44Da98b954EedeAC495271d0F", decimals: 18 },
+    { symbol: "LINK", address: "0x514910771AF9Ca656af840dff83E8264EcF986CA", decimals: 18 },
+  ],
+  arbitrum: [
+    { symbol: "USDT", address: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9", decimals: 6 },
+    { symbol: "USDC", address: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831", decimals: 6 },
+    { symbol: "ETH", address: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", decimals: 18 },
+    { symbol: "WBTC", address: "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f", decimals: 8 },
+    { symbol: "ARB", address: "0x912CE59144191C1204E64559FE8253a0e49E6548", decimals: 18 },
+    { symbol: "LINK", address: "0xf97f4df75117a78c1A5a0DBb814Af92458539FB4", decimals: 18 },
+    { symbol: "UNI", address: "0xFa7F8980b0f1E64A2062791cc3b0871572f1F7f0", decimals: 18 },
+    { symbol: "DAI", address: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1", decimals: 18 },
+  ],
+  optimism: [
+    { symbol: "USDT", address: "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58", decimals: 6 },
+    { symbol: "USDC", address: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85", decimals: 6 },
+    { symbol: "ETH", address: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", decimals: 18 },
+    { symbol: "WBTC", address: "0x68f180fcCe6836688e9084f035309E29Bf0A2095", decimals: 8 },
+    { symbol: "OP", address: "0x4200000000000000000000000000000000000042", decimals: 18 },
+    { symbol: "DAI", address: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1", decimals: 18 },
+  ],
+  polygon: [
+    { symbol: "USDT", address: "0xc2132D05D31c914a87C6611C10748AEb04B58e8F", decimals: 6 },
+    { symbol: "USDC", address: "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359", decimals: 6 },
+    { symbol: "MATIC", address: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", decimals: 18 },
+    { symbol: "WBTC", address: "0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6", decimals: 8 },
+    { symbol: "DAI", address: "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063", decimals: 18 },
+  ],
+  bsc: [
+    { symbol: "USDT", address: "0x55d398326f99059fF775485246999027B3197955", decimals: 18 },
+    { symbol: "USDC", address: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d", decimals: 18 },
+    { symbol: "BNB", address: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", decimals: 18 },
+    { symbol: "BTCB", address: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c", decimals: 18 },
+    { symbol: "DAI", address: "0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3", decimals: 18 },
+  ],
+  avalanche: [
+    { symbol: "USDT", address: "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7", decimals: 6 },
+    { symbol: "USDC", address: "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", decimals: 6 },
+    { symbol: "AVAX", address: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", decimals: 18 },
+    { symbol: "WBTC", address: "0x50b7545627a5162F82A992c33b87aDc75187B218", decimals: 8 },
+    { symbol: "DAI", address: "0xd586E7F844cEa2F87f50152665BCbc2C279D8d70", decimals: 18 },
+  ],
+  base: [
+    { symbol: "USDC", address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", decimals: 6 },
+    { symbol: "ETH", address: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", decimals: 18 },
+    { symbol: "DAI", address: "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb", decimals: 18 },
+  ],
+};
+
+const CHAIN_NAMES: Record<string, string> = {
+  ethereum: "Ethereum",
+  arbitrum: "Arbitrum",
+  optimism: "Optimism",
+  polygon: "Polygon",
+  bsc: "BNB Chain",
+  avalanche: "Avalanche",
+  base: "Base",
+};
+
+const CHAIN_IDS: Record<string, number> = {
+  ethereum: 1,
+  arbitrum: 42161,
+  optimism: 10,
+  polygon: 137,
+  bsc: 56,
+  avalanche: 43114,
+  base: 8453,
+};
+
+// Native token symbol per chain (the token at 0xEeee...EEeE)
+const CHAIN_NATIVE: Record<string, string> = {
+  ethereum: "ETH",
+  arbitrum: "ETH",
+  optimism: "ETH",
+  polygon: "MATIC",
+  bsc: "BNB",
+  avalanche: "AVAX",
+  base: "ETH",
+};
+
+const PARASWAP_SPENDERS: Record<string, string> = {
+  ethereum: "0x216b4b4ba9f3e719726886d34a177484278bfcae",
+  arbitrum: "0x216b4b4ba9f3e719726886d34a177484278bfcae",
+  optimism: "0x216b4b4ba9f3e719726886d34a177484278bfcae",
+  polygon: "0x216b4b4ba9f3e719726886d34a177484278bfcae",
+  bsc: "0x216b4b4ba9f3e719726886d34a177484278bfcae",
+  avalanche: "0x216b4b4ba9f3e719726886d34a177484278bfcae",
+  base: "0x93aAAe79a53759cD164340E4C8766E4Db5331cD7",
+};
+
+const CHAIN_EXPLORERS: Record<string, string> = {
+  ethereum: "https://etherscan.io",
+  arbitrum: "https://arbiscan.io",
+  optimism: "https://optimistic.etherscan.io",
+  polygon: "https://polygonscan.com",
+  bsc: "https://bscscan.com",
+  avalanche: "https://snowtrace.io",
+  base: "https://basescan.org",
+};
 
 const ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const PARASWAP_ROUTER = "0xDEF171Fe48CF0115B1d80b88dc8eAB59176FEe57";
-// ParaSwap uses TokenTransferProxy for token approvals (NOT the router itself)
-const PARASWAP_SPENDER = "0x216b4b4ba9f3e719726886d34a177484278bfcae";
 const MAX_UINT256 = BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-const ARBITRUM_CHAIN_ID = 42161;
 
 const erc20Abi = [
   {
@@ -82,13 +175,29 @@ const erc20Abi = [
   },
 ] as const;
 
+function getDefaultTokens(chainKey: string): { src: Token; dest: Token } {
+  const tokens = CHAIN_TOKENS[chainKey] || CHAIN_TOKENS.arbitrum;
+  const nativeSymbol = CHAIN_NATIVE[chainKey] || "ETH";
+  const src = tokens[0]; // First token (USDT or USDC)
+  const dest = tokens.find(t => t.symbol === nativeSymbol) || tokens[1];
+  return { src, dest };
+}
+
 export function DexSwap() {
   const { isDemo, testnet } = useDemoContext();
   const { signPayment, activeFamily, activeNetwork } = useMultiChainPayment();
   const { address: userAddress, isConnected } = useAccount();
+  const { switchChainAsync } = useSwitchChain();
 
-  const [srcToken, setSrcToken] = useState<Token>(TOKENS[0]); // USDT
-  const [destToken, setDestToken] = useState<Token>(TOKENS[2]); // ETH
+  const [chain, setChain] = useState("arbitrum");
+  const tokens = useMemo(() => CHAIN_TOKENS[chain] || CHAIN_TOKENS.arbitrum, [chain]);
+  const chainId = CHAIN_IDS[chain] || 42161;
+  const chainName = CHAIN_NAMES[chain] || "Arbitrum";
+  const spender = PARASWAP_SPENDERS[chain] || PARASWAP_SPENDERS.arbitrum;
+  const explorerUrl = CHAIN_EXPLORERS[chain] || CHAIN_EXPLORERS.arbitrum;
+
+  const [srcToken, setSrcToken] = useState<Token>(CHAIN_TOKENS.arbitrum[0]); // USDT
+  const [destToken, setDestToken] = useState<Token>(CHAIN_TOKENS.arbitrum[2]); // ETH
   const [amount, setAmount] = useState("10");
   const [state, setState] = useState<State>("idle");
   const [quote, setQuote] = useState<SwapQuote | null>(null);
@@ -109,7 +218,7 @@ export function DexSwap() {
   const { writeContractAsync } = useWriteContract();
   const { data: txReceipt, isLoading: isTxConfirming } = useWaitForTransactionReceipt({
     hash: swapTxHash,
-    chainId: ARBITRUM_CHAIN_ID,
+    chainId,
   });
 
   // Check ERC20 allowance for non-ETH source tokens
@@ -118,8 +227,8 @@ export function DexSwap() {
     address: srcToken.address as `0x${string}`,
     abi: erc20Abi,
     functionName: "allowance",
-    args: userAddress ? [userAddress, PARASWAP_SPENDER as `0x${string}`] : undefined,
-    chainId: ARBITRUM_CHAIN_ID,
+    args: userAddress ? [userAddress, spender as `0x${string}`] : undefined,
+    chainId,
     query: {
       enabled: isConnected && !!userAddress && needsApproval && state === "txReady",
     },
@@ -134,16 +243,44 @@ export function DexSwap() {
     }
   }, [txReceipt, state]);
 
+  // Handle chain change: reset tokens to defaults for new chain
+  const handleChainChange = useCallback(async (newChain: string) => {
+    setChain(newChain);
+    const defaults = getDefaultTokens(newChain);
+    setSrcToken(defaults.src);
+    setDestToken(defaults.dest);
+    setQuote(null);
+    setExecutedQuote(null);
+    setSwapTx(null);
+    setSwapTxHash(undefined);
+    setError(null);
+    setState("idle");
+    setFlowState("idle");
+    setSettle(null);
+
+    // Switch wagmi chain if connected
+    if (isConnected && switchChainAsync) {
+      const targetChainId = CHAIN_IDS[newChain];
+      if (targetChainId) {
+        try {
+          await switchChainAsync({ chainId: targetChainId });
+        } catch {
+          // User may reject chain switch — that's OK
+        }
+      }
+    }
+  }, [isConnected, switchChainAsync]);
+
   // Tokens available for dest (exclude srcToken)
   const destOptions = useMemo(
-    () => TOKENS.filter((t) => t.address !== srcToken.address),
-    [srcToken]
+    () => tokens.filter((t) => t.address !== srcToken.address),
+    [tokens, srcToken]
   );
 
   // Tokens available for src (exclude destToken)
   const srcOptions = useMemo(
-    () => TOKENS.filter((t) => t.address !== destToken.address),
-    [destToken]
+    () => tokens.filter((t) => t.address !== destToken.address),
+    [tokens, destToken]
   );
 
   // Convert user amount to smallest units
@@ -189,6 +326,7 @@ export function DexSwap() {
           amount: amountInSmallestUnits,
           srcDecimals: String(srcToken.decimals),
           destDecimals: String(destToken.decimals),
+          chainKey: chain,
         });
 
         const res = await fetch(`/api/demo/swap?${params}`, {
@@ -217,7 +355,7 @@ export function DexSwap() {
       if (debounceRef.current) clearTimeout(debounceRef.current);
       if (abortRef.current) abortRef.current.abort();
     };
-  }, [srcToken, destToken, amountInSmallestUnits]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [srcToken, destToken, amountInSmallestUnits, chain]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const execute = useCallback(async () => {
     if (!amountInSmallestUnits) return;
@@ -247,6 +385,7 @@ export function DexSwap() {
         srcDecimals: srcToken.decimals,
         destDecimals: destToken.decimals,
         userAddress: userAddress || undefined,
+        chainKey: chain,
       });
 
       // Step 1: Get 402
@@ -318,7 +457,7 @@ export function DexSwap() {
       setState("error");
       setFlowState("error");
     }
-  }, [isDemo, testnet, activeFamily, activeNetwork, signPayment, srcToken, destToken, amountInSmallestUnits, userAddress]);
+  }, [isDemo, testnet, activeFamily, activeNetwork, signPayment, srcToken, destToken, amountInSmallestUnits, userAddress, chain]);
 
   const handleApprove = useCallback(async () => {
     if (!swapTx) return;
@@ -328,8 +467,8 @@ export function DexSwap() {
         address: srcToken.address as `0x${string}`,
         abi: erc20Abi,
         functionName: "approve",
-        args: [PARASWAP_SPENDER as `0x${string}`, MAX_UINT256],
-        chainId: ARBITRUM_CHAIN_ID,
+        args: [spender as `0x${string}`, MAX_UINT256],
+        chainId,
       });
       // Wait a moment for the approval to be indexed, then refetch allowance
       // We use a simple polling approach
@@ -348,7 +487,7 @@ export function DexSwap() {
       setState("error");
       setFlowState("error");
     }
-  }, [swapTx, srcToken, writeContractAsync, refetchAllowance, amountInSmallestUnits]);
+  }, [swapTx, srcToken, writeContractAsync, refetchAllowance, amountInSmallestUnits, spender, chainId]);
 
   const handleExecuteSwap = useCallback(async () => {
     if (!swapTx) return;
@@ -358,7 +497,7 @@ export function DexSwap() {
         to: swapTx.to as `0x${string}`,
         data: swapTx.data as `0x${string}`,
         value: BigInt(swapTx.value),
-        chainId: ARBITRUM_CHAIN_ID,
+        chainId,
       });
       setSwapTxHash(hash);
       // Receipt monitoring is handled by useWaitForTransactionReceipt + useEffect
@@ -367,10 +506,10 @@ export function DexSwap() {
       setState("error");
       setFlowState("error");
     }
-  }, [swapTx, sendTransactionAsync]);
+  }, [swapTx, sendTransactionAsync, chainId]);
 
   const handleSrcChange = (symbol: string) => {
-    const token = TOKENS.find((t) => t.symbol === symbol);
+    const token = tokens.find((t) => t.symbol === symbol);
     if (token) {
       setSrcToken(token);
       // If new src equals current dest, swap them
@@ -381,7 +520,7 @@ export function DexSwap() {
   };
 
   const handleDestChange = (symbol: string) => {
-    const token = TOKENS.find((t) => t.symbol === symbol);
+    const token = tokens.find((t) => t.symbol === symbol);
     if (token) {
       setDestToken(token);
       if (token.address === srcToken.address) {
@@ -415,6 +554,7 @@ export function DexSwap() {
   }, [amount, srcToken.symbol, destToken.symbol, state]);
 
   const isButtonDisabled = state === "paying" || state === "txReady" || state === "approving" || state === "executing" || !amountInSmallestUnits;
+  const isSwapActive = state === "paying" || state === "txReady" || state === "approving" || state === "executing";
 
   return (
     <>
@@ -429,11 +569,41 @@ export function DexSwap() {
             <div className="flex items-center justify-between mb-4">
               <h4 className="text-sm font-medium flex items-center gap-2">
                 <Repeat size={14} style={{ color: "var(--color-scenario-swap)" }} />
-                Swap on Arbitrum
+                Swap on {chainName}
               </h4>
               <span className="text-[9px] font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(59,130,246,0.1)", color: "#60A5FA" }}>
-                Arbitrum One
+                {chainName}
               </span>
+            </div>
+
+            {/* Chain selector */}
+            <div
+              className="rounded-lg p-3 mb-3"
+              style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
+            >
+              <label className="text-[10px] uppercase tracking-wider text-[var(--color-muted)] mb-1.5 block">
+                Network
+              </label>
+              <div className="relative">
+                <select
+                  value={chain}
+                  onChange={(e) => handleChainChange(e.target.value)}
+                  disabled={isSwapActive}
+                  className="w-full appearance-none bg-[var(--color-surface-active)] text-white text-sm font-medium px-3 py-2 pr-7 rounded-lg border border-[var(--color-border)] cursor-pointer focus:outline-none focus:border-[var(--color-brand)]"
+                >
+                  <option value="arbitrum">Arbitrum</option>
+                  <option value="ethereum">Ethereum</option>
+                  <option value="optimism">Optimism</option>
+                  <option value="polygon">Polygon</option>
+                  <option value="bsc">BNB Chain</option>
+                  <option value="avalanche">Avalanche</option>
+                  <option value="base">Base</option>
+                </select>
+                <ChevronDown
+                  size={12}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-muted)]"
+                />
+              </div>
             </div>
 
             {/* From token */}
@@ -450,7 +620,7 @@ export function DexSwap() {
                     <select
                       value={srcToken.symbol}
                       onChange={(e) => handleSrcChange(e.target.value)}
-                      disabled={state === "paying" || state === "txReady" || state === "approving" || state === "executing"}
+                      disabled={isSwapActive}
                       className="appearance-none bg-[var(--color-surface-active)] text-white text-sm font-medium px-3 py-2 pr-7 rounded-lg border border-[var(--color-border)] cursor-pointer focus:outline-none focus:border-[var(--color-brand)]"
                     >
                       {srcOptions.map((t) => (
@@ -472,7 +642,7 @@ export function DexSwap() {
                       const v = e.target.value;
                       if (v === "" || /^\d*\.?\d*$/.test(v)) setAmount(v);
                     }}
-                    disabled={state === "paying" || state === "txReady" || state === "approving" || state === "executing"}
+                    disabled={isSwapActive}
                     placeholder="0.00"
                     className="flex-1 bg-transparent text-right text-lg font-medium text-white placeholder-[var(--color-text-tertiary)] focus:outline-none min-w-0"
                   />
@@ -483,7 +653,7 @@ export function DexSwap() {
               <div className="flex justify-center -my-1">
                 <button
                   onClick={swapTokens}
-                  disabled={state === "paying" || state === "txReady" || state === "approving" || state === "executing"}
+                  disabled={isSwapActive}
                   className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-[var(--color-surface-active)] cursor-pointer"
                   style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
                   aria-label="Swap tokens"
@@ -505,7 +675,7 @@ export function DexSwap() {
                     <select
                       value={destToken.symbol}
                       onChange={(e) => handleDestChange(e.target.value)}
-                      disabled={state === "paying" || state === "txReady" || state === "approving" || state === "executing"}
+                      disabled={isSwapActive}
                       className="appearance-none bg-[var(--color-surface-active)] text-white text-sm font-medium px-3 py-2 pr-7 rounded-lg border border-[var(--color-border)] cursor-pointer focus:outline-none focus:border-[var(--color-brand)]"
                     >
                       {destOptions.map((t) => (
@@ -590,7 +760,7 @@ export function DexSwap() {
                 </div>
               </div>
               <p className="text-[10px] text-[var(--color-text-tertiary)] text-right mt-1">
-                Powered by ParaSwap · aggregating 10+ DEXes on Arbitrum
+                Powered by ParaSwap · aggregating 10+ DEXes on {chainName}
               </p>
             </motion.div>
           )}
@@ -620,7 +790,7 @@ export function DexSwap() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-[var(--color-muted)]">Router</span>
                   <span className="text-white font-mono text-xs">
-                    {PARASWAP_SPENDER.slice(0, 8)}...{PARASWAP_SPENDER.slice(-4)} (ParaSwap TokenTransferProxy)
+                    {spender.slice(0, 8)}...{spender.slice(-4)} (ParaSwap TokenTransferProxy)
                   </span>
                 </div>
               </div>
@@ -675,13 +845,13 @@ export function DexSwap() {
               </p>
               {swapTxHash && (
                 <a
-                  href={`https://arbiscan.io/tx/${swapTxHash}`}
+                  href={`${explorerUrl}/tx/${swapTxHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[10px] mt-1 flex items-center gap-1 hover:underline"
                   style={{ color: "var(--color-info)" }}
                 >
-                  View on Arbiscan <ExternalLink size={9} />
+                  View on Explorer <ExternalLink size={9} />
                 </a>
               )}
             </motion.div>
@@ -724,7 +894,7 @@ export function DexSwap() {
               <h4 className="text-sm font-medium text-white mb-4">How it works</h4>
               <div className="space-y-3">
                 {[
-                  { step: "1", label: "Live Quote", desc: "ParaSwap aggregates 10+ DEXes on Arbitrum to find the best rate -- free, instant." },
+                  { step: "1", label: "Live Quote", desc: `ParaSwap aggregates 10+ DEXes on ${chainName} to find the best rate -- free, instant.` },
                   { step: "2", label: "Pay via T402", desc: "Click Swap to pay 0.01 USDT via HTTP 402. No API key needed." },
                   { step: "3", label: "Approve & Execute", desc: "Approve the token (if needed), then execute the swap directly from your wallet." },
                 ].map((item) => (
@@ -834,7 +1004,7 @@ export function DexSwap() {
 
                 {!swapTxHash && (
                   <p className="text-[10px] text-[var(--color-muted)] mb-3 -mt-2">
-                    This is a real-time DEX quote purchased via T402. Connect a wallet on Arbitrum to execute swaps.
+                    This is a real-time DEX quote purchased via T402. Connect a wallet on {chainName} to execute swaps.
                   </p>
                 )}
 
@@ -885,7 +1055,7 @@ export function DexSwap() {
                     >
                       <span className="text-[var(--color-muted)]">Tx hash</span>
                       <a
-                        href={`https://arbiscan.io/tx/${swapTxHash}`}
+                        href={`${explorerUrl}/tx/${swapTxHash}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-white font-mono text-xs flex items-center gap-1 hover:underline"
