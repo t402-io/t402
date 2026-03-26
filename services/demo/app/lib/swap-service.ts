@@ -32,6 +32,14 @@ export interface SwapQuote {
   gasCostUSD: string;     // "$0.05"
   route: string[];        // ["PancakeswapV3 (83%)", "SushiSwapV3 (17%)"]
   estimatedGas: string;
+  priceRoute: any;        // raw ParaSwap priceRoute, needed to build tx
+}
+
+export interface SwapTx {
+  to: string;
+  data: string;
+  value: string;
+  chainId: number;
 }
 
 export function getSupportedTokens() { return SWAP_TOKENS; }
@@ -97,9 +105,49 @@ export async function getSwapQuote(params: {
       gasCostUSD: pr.gasCostUSD ? `$${Number(pr.gasCostUSD).toFixed(2)}` : "~$0.05",
       route: routes,
       estimatedGas: pr.gasCost || "500000",
+      priceRoute: pr,
     };
   } catch (error) {
     console.error("[swap] Quote failed:", error instanceof Error ? error.message : error);
+    return null;
+  }
+}
+
+export async function buildSwapTransaction(params: {
+  srcToken: string;
+  destToken: string;
+  srcAmount: string;
+  priceRoute: any;
+  userAddress: string;
+  slippage?: number; // bps, default 100 (1%)
+}): Promise<SwapTx | null> {
+  try {
+    const res = await fetch(`${PARASWAP_API}/transactions/${NETWORK_ID}?ignoreChecks=true`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        srcToken: params.srcToken,
+        destToken: params.destToken,
+        srcAmount: params.srcAmount,
+        priceRoute: params.priceRoute,
+        userAddress: params.userAddress,
+        partner: "t402",
+        slippage: params.slippage ?? 100,
+        deadline: Math.floor(Date.now() / 1000) + 300, // 5 min
+      }),
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data.to || !data.data) return null;
+    return {
+      to: data.to,
+      data: data.data,
+      value: data.value || "0",
+      chainId: data.chainId || NETWORK_ID,
+    };
+  } catch (error) {
+    console.error("[swap] Build tx failed:", error instanceof Error ? error.message : error);
     return null;
   }
 }

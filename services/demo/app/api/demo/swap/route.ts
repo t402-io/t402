@@ -3,7 +3,7 @@ import { getPreferredChain, getAcceptsForChain, buildRequirementsFromPayload } f
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment, isPreBroadcastNetwork } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 import { classifyFacilitatorError } from "@/lib/error-helpers";
-import { getSwapQuote, getSupportedTokens } from "@/lib/swap-service";
+import { getSwapQuote, buildSwapTransaction, getSupportedTokens } from "@/lib/swap-service";
 
 const SWAP_FEE = "10000"; // 0.01 USDT (6 decimals)
 
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Parse swap parameters from request body
-  let body: { srcToken: string; destToken: string; amount: string; srcDecimals: number; destDecimals: number };
+  let body: { srcToken: string; destToken: string; amount: string; srcDecimals: number; destDecimals: number; userAddress?: string };
   try {
     body = await request.json();
     if (!body.srcToken || !body.destToken || !body.amount || body.srcDecimals == null || body.destDecimals == null) {
@@ -117,7 +117,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const response = NextResponse.json({ executed: true, quote });
+    // Build swap tx if a real user address is provided
+    let swapTx = null;
+    if (body.userAddress && body.userAddress !== "demo-wallet" && body.userAddress.startsWith("0x")) {
+      swapTx = await buildSwapTransaction({
+        srcToken: body.srcToken,
+        destToken: body.destToken,
+        srcAmount: body.amount,
+        priceRoute: quote.priceRoute,
+        userAddress: body.userAddress,
+      });
+    }
+
+    const responseBody: any = { executed: true, quote };
+    if (swapTx) responseBody.swapTx = swapTx;
+    const response = NextResponse.json(responseBody);
     response.headers.set("Payment-Response", encodeHeader(settleResponse));
     response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
     return response;
@@ -167,7 +181,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const response = NextResponse.json({ executed: true, quote });
+    // Build swap tx if a real user address is provided
+    let swapTx = null;
+    if (body.userAddress && body.userAddress !== "demo-wallet" && body.userAddress.startsWith("0x")) {
+      swapTx = await buildSwapTransaction({
+        srcToken: body.srcToken,
+        destToken: body.destToken,
+        srcAmount: body.amount,
+        priceRoute: quote.priceRoute,
+        userAddress: body.userAddress,
+      });
+    }
+
+    const responseBody: any = { executed: true, quote };
+    if (swapTx) responseBody.swapTx = swapTx;
+    const response = NextResponse.json(responseBody);
     response.headers.set("Payment-Response", encodeHeader(settleResult));
     response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
     return response;
