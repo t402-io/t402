@@ -15,7 +15,8 @@ export type ScenarioId =
   | "streaming-media"
   | "mcp-ai-agent"
   | "cross-chain-bridge"
-  | "gasless-payment";
+  | "gasless-payment"
+  | "dex-swap";
 
 // Client-side SDK examples showing how to integrate T402 for each scenario
 const EXAMPLES: Record<ScenarioId, SdkExample[]> = {
@@ -662,6 +663,79 @@ T402Response response = gasless.get(
 PremiumData data = response.as(PremiumData.class);`,
     },
   ],
+
+  "dex-swap": [
+    {
+      label: "TypeScript",
+      language: "typescript",
+      code: `import { T402Client } from '@t402/client';
+
+const client = new T402Client({
+  facilitatorUrl: 'https://facilitator.t402.io',
+  signer: wallet,
+});
+
+// Pay 0.01 USDT and get a real-time swap quote
+const res = await client.post('https://api.example.com/swap', {
+  body: {
+    srcToken: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',  // USDT
+    destToken: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', // ETH
+    amount: '1000000000',  // 1000 USDT
+    srcDecimals: 6,
+    destDecimals: 18,
+  },
+});
+
+const { quote } = await res.json();
+console.log(quote.rate);           // "1 USDT = 0.000481 ETH"
+console.log(quote.route);          // ["PancakeswapV3 (83%)", ...]`,
+    },
+    {
+      label: "Python",
+      language: "python",
+      code: `from t402 import T402Client
+
+client = T402Client(
+    facilitator_url="https://facilitator.t402.io",
+    signer=wallet,
+)
+
+# Pay 0.01 USDT and get a real-time swap quote
+res = client.post("https://api.example.com/swap", json={
+    "srcToken": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+    "destToken": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+    "amount": "1000000000",
+    "srcDecimals": 6,
+    "destDecimals": 18,
+})
+
+quote = res.json()["quote"]
+print(quote["rate"])      # 1 USDT = 0.000481 ETH
+print(quote["route"])     # ["PancakeswapV3 (83%)", ...]`,
+    },
+    {
+      label: "Go",
+      language: "go",
+      code: `import t402 "github.com/t402-io/t402/sdks/go/http"
+
+client := t402.NewClient(t402.Config{
+    FacilitatorURL: "https://facilitator.t402.io",
+    Signer:         signer,
+})
+
+body := map[string]any{
+    "srcToken":    "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+    "destToken":   "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+    "amount":      "1000000000",
+    "srcDecimals": 6,
+    "destDecimals": 18,
+}
+
+// Pay 0.01 USDT and get a real-time swap quote
+resp, _ := client.Post("https://api.example.com/swap", body)
+fmt.Println(resp.Quote.Rate)   // 1 USDT = 0.000481 ETH`,
+    },
+  ],
 };
 
 export function getExamplesForScenario(scenarioId: ScenarioId): SdkExample[] {
@@ -764,6 +838,7 @@ export const GET = withT402({
   "mcp-ai-agent": [],
   "cross-chain-bridge": [],
   "gasless-payment": [],
+  "dex-swap": [],
 };
 
 export function getServerExamplesForScenario(scenarioId: ScenarioId): SdkExample[] {

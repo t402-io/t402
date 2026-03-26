@@ -10,7 +10,7 @@ import { ChainSelector } from "@/components/shared/ChainSelector";
 import {
   Brain, FileText, Database, Bot,
   Cpu, Radio, Wand2, ArrowLeftRight, Zap,
-  ArrowLeft,
+  Repeat, ArrowLeft,
 } from "lucide-react";
 import clsx from "clsx";
 import { useDemoContext } from "@/providers/DemoProvider";
@@ -26,6 +26,7 @@ const SCENARIOS = [
   { id: "mcp-ai-agent", title: "MCP Agent", icon: Wand2 },
   { id: "cross-chain-bridge", title: "Bridge", icon: ArrowLeftRight },
   { id: "gasless-payment", title: "Gasless", icon: Zap },
+  { id: "dex-swap", title: "DEX Swap", icon: Repeat },
 ];
 
 export default function ScenariosLayout({ children }: { children: ReactNode }) {

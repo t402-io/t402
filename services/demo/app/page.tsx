@@ -10,7 +10,7 @@ import { CHAIN_FAMILIES, CHAIN_CONFIGS } from "@/lib/testnet-config";
 import {
   Brain, FileText, Database, Bot,
   Cpu, Radio, Wand2, ArrowLeftRight, Zap,
-  ArrowRight, KeyRound, Coins, Globe,
+  Repeat, ArrowRight, KeyRound, Coins, Globe,
 } from "lucide-react";
 
 const SCENARIOS = [
@@ -85,6 +85,14 @@ const SCENARIOS = [
     cost: "0.001 USDT",
     icon: <Zap size={18} />,
     accentColor: "var(--color-scenario-gasless)",
+  },
+  {
+    id: "dex-swap",
+    title: "DEX Swap",
+    description: "Swap tokens via ParaSwap aggregator. Pay 0.01 USDT per quote — real-time pricing from 10+ DEXes on Arbitrum.",
+    cost: "0.01 USDT/swap",
+    icon: <Repeat size={18} />,
+    accentColor: "var(--color-scenario-swap)",
   },
 ];
 
