@@ -578,12 +578,20 @@ export function CrossChainBridge() {
         if (!res.ok) return;
         const data = await res.json();
 
-        const newStatus = data.status || data.real?.status || "SUBMITTED";
+        // status can be a string ("DELIVERED") or an object ({ name: "DELIVERED", message: "..." })
+        const rawStatus = data.status;
+        const newStatus = typeof rawStatus === "object" && rawStatus?.name
+          ? rawStatus.name
+          : typeof rawStatus === "string"
+            ? rawStatus
+            : "SUBMITTED";
         const newStage = statusToStage(newStatus);
         setTrackingStage(newStage);
 
         if (data.estimatedTimeRemaining !== undefined) {
-          setEstimatedRemaining(data.estimatedTimeRemaining);
+          // Normalize ms → seconds
+          const raw = data.estimatedTimeRemaining;
+          setEstimatedRemaining(raw > 10000 ? Math.ceil(raw / 1000) : raw);
         }
 
         setTracking((prev) =>
@@ -712,7 +720,10 @@ export function CrossChainBridge() {
           real: isReal,
         });
 
-        const estTime = msg.estimatedTimeRemaining ?? msg.estimatedTime ?? 300;
+        // estimatedTimeRemaining from API is in ms, estimatedTime is in seconds
+        const rawEst = msg.estimatedTimeRemaining ?? msg.estimatedTime ?? 300;
+        // Normalize to seconds (if > 10000, assume milliseconds)
+        const estTime = rawEst > 10000 ? Math.ceil(rawEst / 1000) : rawEst;
         setEstimatedRemaining(estTime);
         setBridgeStartTime(Date.now());
         setState("tracking");
