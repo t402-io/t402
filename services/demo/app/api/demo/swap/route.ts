@@ -9,10 +9,42 @@ const SWAP_FEE = "10000"; // 0.01 USDT (6 decimals)
 
 const RESOURCE = {
   url: "/api/demo/swap",
-  description: "DEX swap quote via ParaSwap aggregator",
+  description: "DEX swap execution via ParaSwap aggregator",
 };
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const srcToken = searchParams.get("srcToken");
+  const destToken = searchParams.get("destToken");
+  const amount = searchParams.get("amount");
+  const srcDecimals = searchParams.get("srcDecimals");
+  const destDecimals = searchParams.get("destDecimals");
+
+  // If query params provided, return a free quote
+  if (srcToken && destToken && amount && srcDecimals != null && destDecimals != null) {
+    const quote = await getSwapQuote({
+      srcToken,
+      destToken,
+      amount,
+      srcDecimals: Number(srcDecimals),
+      destDecimals: Number(destDecimals),
+    });
+
+    if (!quote) {
+      const response = NextResponse.json(
+        { error: "Failed to fetch swap quote. Try different tokens or amount." },
+        { status: 502 }
+      );
+      response.headers.set("Access-Control-Allow-Origin", "*");
+      return response;
+    }
+
+    const response = NextResponse.json({ quote });
+    response.headers.set("Access-Control-Allow-Origin", "*");
+    return response;
+  }
+
+  // No query params: return supported tokens list
   const tokens = getSupportedTokens();
   const response = NextResponse.json({ tokens });
   response.headers.set("Access-Control-Allow-Origin", "*");
@@ -72,7 +104,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const response = NextResponse.json({ quote });
+    const response = NextResponse.json({ executed: true, quote });
     response.headers.set("Payment-Response", encodeHeader(settleResponse));
     response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
     return response;
@@ -122,7 +154,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const response = NextResponse.json({ quote });
+    const response = NextResponse.json({ executed: true, quote });
     response.headers.set("Payment-Response", encodeHeader(settleResult));
     response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
     return response;

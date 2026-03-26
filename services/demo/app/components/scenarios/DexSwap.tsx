@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { motion } from "motion/react";
 import { useDemoContext } from "@/providers/DemoProvider";
 import { useMultiChainPayment } from "@/hooks/useMultiChainPayment";
@@ -11,7 +11,7 @@ import { Spinner } from "@/components/shared/Spinner";
 import { encodePaymentHeader } from "@/lib/t402-client";
 import { Repeat, ArrowDown, ChevronDown } from "lucide-react";
 
-type State = "idle" | "paying" | "done" | "error";
+type State = "idle" | "quoting" | "quoted" | "paying" | "swapping" | "done" | "error";
 
 interface Token {
   symbol: string;
@@ -49,13 +49,18 @@ export function DexSwap() {
 
   const [srcToken, setSrcToken] = useState<Token>(TOKENS[0]); // USDT
   const [destToken, setDestToken] = useState<Token>(TOKENS[2]); // ETH
-  const [amount, setAmount] = useState("1000");
+  const [amount, setAmount] = useState("10");
   const [state, setState] = useState<State>("idle");
   const [quote, setQuote] = useState<SwapQuote | null>(null);
+  const [executedQuote, setExecutedQuote] = useState<SwapQuote | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [swaps, setSwaps] = useState(0);
   const [flowState, setFlowState] = useState<FlowState>("idle");
   const [settle, setSettle] = useState<SettleInfo | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
+
+  const abortRef = useRef<AbortController | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Tokens available for dest (exclude srcToken)
   const destOptions = useMemo(
@@ -76,11 +81,70 @@ export function DexSwap() {
     return (BigInt(Math.round(num * Math.pow(10, srcToken.decimals)))).toString();
   }, [amount, srcToken]);
 
+  // Auto-fetch free quote when inputs change (debounced 500ms)
+  useEffect(() => {
+    // Don't fetch while paying/swapping/done
+    if (state === "paying" || state === "swapping" || state === "done") return;
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (abortRef.current) abortRef.current.abort();
+
+    if (!amountInSmallestUnits) {
+      setQuote(null);
+      if (state === "quoted" || state === "quoting") setState("idle");
+      return;
+    }
+
+    setQuoteLoading(true);
+
+    debounceRef.current = setTimeout(async () => {
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      try {
+        setState((prev) => (prev === "idle" || prev === "quoted" || prev === "error") ? "quoting" : prev);
+
+        const params = new URLSearchParams({
+          srcToken: srcToken.address,
+          destToken: destToken.address,
+          amount: amountInSmallestUnits,
+          srcDecimals: String(srcToken.decimals),
+          destDecimals: String(destToken.decimals),
+        });
+
+        const res = await fetch(`/api/demo/swap?${params}`, {
+          signal: controller.signal,
+        });
+
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => null);
+          throw new Error(errBody?.error || `Quote failed (${res.status})`);
+        }
+
+        const data = await res.json();
+        setQuote(data.quote);
+        setQuoteLoading(false);
+        setState("quoted");
+      } catch (err) {
+        if ((err as Error).name === "AbortError") return;
+        setQuote(null);
+        setQuoteLoading(false);
+        // Don't go to full error state for quote failures - just show idle
+        setState("idle");
+      }
+    }, 500);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (abortRef.current) abortRef.current.abort();
+    };
+  }, [srcToken, destToken, amountInSmallestUnits]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const execute = useCallback(async () => {
     if (!amountInSmallestUnits) return;
 
     setState("paying");
-    setQuote(null);
+    setExecutedQuote(null);
     setError(null);
     setFlowState("requesting");
     setSettle(null);
@@ -126,7 +190,7 @@ export function DexSwap() {
         if (step === "signing") setFlowState("signing");
       });
 
-      // Step 3: Retry with payment
+      // Step 3: Retry with payment — execute the swap
       const retryHeaders: Record<string, string> = {
         Accept: "application/json",
         "Content-Type": "application/json",
@@ -137,6 +201,7 @@ export function DexSwap() {
       };
       if (isDemo) retryHeaders["x-demo-mode"] = "true";
 
+      setState("swapping");
       setFlowState("retrying");
       const retryResponse = await fetch("/api/demo/swap", {
         method: "POST",
@@ -154,7 +219,7 @@ export function DexSwap() {
       }
 
       const data = await retryResponse.json();
-      setQuote(data.quote);
+      setExecutedQuote(data.quote);
       setSwaps((n) => n + 1);
       setState("done");
       setFlowState("done");
@@ -163,7 +228,7 @@ export function DexSwap() {
       setState("error");
       setFlowState("error");
     }
-  }, [isDemo, activeFamily, activeNetwork, testnet, signPayment, srcToken, destToken, amountInSmallestUnits]);
+  }, [isDemo, testnet, activeFamily, activeNetwork, signPayment, srcToken, destToken, amountInSmallestUnits]);
 
   const handleSrcChange = (symbol: string) => {
     const token = TOKENS.find((t) => t.symbol === symbol);
@@ -190,6 +255,26 @@ export function DexSwap() {
     setSrcToken(destToken);
     setDestToken(srcToken);
   };
+
+  const reset = () => {
+    setState("idle");
+    setQuote(null);
+    setExecutedQuote(null);
+    setFlowState("idle");
+    setSettle(null);
+    setError(null);
+  };
+
+  // Button label
+  const buttonLabel = useMemo(() => {
+    const num = parseFloat(amount);
+    if (state === "paying") return null; // spinner shown instead
+    if (state === "swapping") return null;
+    if (!amount || isNaN(num) || num <= 0) return "Enter an amount";
+    return `Swap ${amount} ${srcToken.symbol} \u2192 ${destToken.symbol}`;
+  }, [amount, srcToken.symbol, destToken.symbol, state]);
+
+  const isButtonDisabled = state === "paying" || state === "swapping" || !amountInSmallestUnits;
 
   return (
     <>
@@ -220,6 +305,7 @@ export function DexSwap() {
                     <select
                       value={srcToken.symbol}
                       onChange={(e) => handleSrcChange(e.target.value)}
+                      disabled={state === "paying" || state === "swapping"}
                       className="appearance-none bg-[var(--color-surface-active)] text-white text-sm font-medium px-3 py-2 pr-7 rounded-lg border border-[var(--color-border)] cursor-pointer focus:outline-none focus:border-[var(--color-brand)]"
                     >
                       {srcOptions.map((t) => (
@@ -238,6 +324,7 @@ export function DexSwap() {
                     inputMode="decimal"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
+                    disabled={state === "paying" || state === "swapping"}
                     placeholder="0.00"
                     className="flex-1 bg-transparent text-right text-lg font-medium text-white placeholder-[var(--color-text-tertiary)] focus:outline-none min-w-0"
                   />
@@ -248,6 +335,7 @@ export function DexSwap() {
               <div className="flex justify-center -my-1">
                 <button
                   onClick={swapTokens}
+                  disabled={state === "paying" || state === "swapping"}
                   className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-[var(--color-surface-active)] cursor-pointer"
                   style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
                   aria-label="Swap tokens"
@@ -269,6 +357,7 @@ export function DexSwap() {
                     <select
                       value={destToken.symbol}
                       onChange={(e) => handleDestChange(e.target.value)}
+                      disabled={state === "paying" || state === "swapping"}
                       className="appearance-none bg-[var(--color-surface-active)] text-white text-sm font-medium px-3 py-2 pr-7 rounded-lg border border-[var(--color-border)] cursor-pointer focus:outline-none focus:border-[var(--color-brand)]"
                     >
                       {destOptions.map((t) => (
@@ -282,43 +371,111 @@ export function DexSwap() {
                       className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-muted)]"
                     />
                   </div>
-                  <div className="flex-1 text-right text-lg font-medium text-[var(--color-text-tertiary)]">
-                    {state === "done" && quote ? quote.destAmountFormatted : "—"}
+                  <div className="flex-1 text-right text-lg font-medium">
+                    {quoteLoading ? (
+                      <span className="inline-flex items-center gap-1.5 text-[var(--color-text-tertiary)]">
+                        <Spinner size="sm" color="var(--color-muted)" />
+                      </span>
+                    ) : quote && (state === "quoted" || state === "quoting") ? (
+                      <span className="text-white">{quote.destAmountFormatted}</span>
+                    ) : executedQuote && state === "done" ? (
+                      <span className="text-white">{executedQuote.destAmountFormatted}</span>
+                    ) : (
+                      <span className="text-[var(--color-text-tertiary)]">&mdash;</span>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
+          {/* Live Quote preview — shown when quote loaded, before payment */}
+          {quote && (state === "quoted" || state === "paying" || state === "swapping") && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="glass-card p-4"
+            >
+              <h5 className="text-xs font-medium text-[var(--color-muted)] mb-3 uppercase tracking-wider">
+                Live Quote
+              </h5>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-[var(--color-muted)]">Rate</span>
+                  <span className="text-white font-medium">{quote.rate}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-[var(--color-muted)]">You receive</span>
+                  <span className="text-white font-medium">~{quote.destAmountFormatted} {quote.destSymbol}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-[var(--color-muted)]">Price impact</span>
+                  <span className="text-white">{quote.priceImpact}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-[var(--color-muted)]">Est. gas</span>
+                  <span className="text-white">{quote.gasCostUSD}</span>
+                </div>
+                {quote.route.length > 0 && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-[var(--color-muted)]">Route</span>
+                    <div className="flex flex-wrap gap-1 justify-end">
+                      {quote.route.map((r, i) => (
+                        <span
+                          key={i}
+                          className="text-[10px] font-medium px-1.5 py-0.5 rounded-full"
+                          style={{ background: "var(--color-info-dim)", color: "var(--color-info)" }}
+                        >
+                          {r}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-[var(--color-muted)]">T402 fee</span>
+                  <span className="text-white">0.01 USDT</span>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           <button
             onClick={execute}
-            disabled={state === "paying" || !amountInSmallestUnits}
+            disabled={isButtonDisabled}
             className="btn-primary w-full py-3 min-h-[44px] flex items-center justify-center gap-2"
           >
-            {state === "paying" ? (
+            {state === "paying" || state === "swapping" ? (
               <>
                 <Spinner size="sm" color="white" />
-                Getting Quote...
+                {state === "paying" ? "Processing payment..." : "Executing swap..."}
               </>
             ) : (
-              <>Pay 0.01 USDT & Get Quote</>
+              <span className="flex flex-col items-center">
+                <span>{buttonLabel}</span>
+                {amountInSmallestUnits && (
+                  <span className="text-[10px] opacity-70">(0.01 USDT fee via T402)</span>
+                )}
+              </span>
             )}
           </button>
 
           {swaps > 0 && (
             <p className="text-xs text-[var(--color-muted)] text-center">
-              {swaps} swap {swaps === 1 ? "quote" : "quotes"} this session
+              {swaps} swap{swaps === 1 ? "" : "s"} executed this session
             </p>
           )}
         </div>
 
         {/* Right: Result */}
         <div>
-          {state === "idle" && (
+          {(state === "idle" || state === "quoting" || state === "quoted") && (
             <div className="glass-card p-4 sm:p-6 flex flex-col items-center justify-center min-h-[220px] sm:min-h-[320px] text-center">
               <Repeat size={32} className="mb-3" style={{ color: "var(--color-scenario-swap)" }} />
               <p className="text-sm text-[var(--color-muted)]">
-                Select tokens and pay to get a real-time swap quote
+                {state === "quoted"
+                  ? "Quote ready — click Swap to execute via T402"
+                  : "Select tokens and enter an amount to get a live quote"}
               </p>
               <p className="text-xs text-[var(--color-muted)] mt-2">
                 Powered by ParaSwap — aggregating 10+ DEXes on Arbitrum
@@ -326,57 +483,59 @@ export function DexSwap() {
             </div>
           )}
 
-          {state === "paying" && (
+          {(state === "paying" || state === "swapping") && (
             <div className="glass-card p-4 sm:p-6 flex flex-col items-center justify-center min-h-[220px] sm:min-h-[320px]">
               <Spinner size="lg" color="var(--color-brand)" />
-              <p className="text-sm text-[var(--color-muted)] mt-4">Processing payment & fetching quote...</p>
+              <p className="text-sm text-[var(--color-muted)] mt-4">
+                {state === "paying" ? "Processing T402 payment..." : "Executing swap..."}
+              </p>
             </div>
           )}
 
-          {state === "done" && quote && (
+          {state === "done" && executedQuote && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className="space-y-4"
             >
-              {/* Quote details card */}
+              {/* Swap confirmed card */}
               <div className="glass-card p-5">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-sm font-medium text-white">Quote Result</h4>
+                  <h4 className="text-sm font-medium text-white">Swap Confirmed</h4>
                   <span
                     className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                     style={{ background: "var(--color-success-dim)", color: "var(--color-success)" }}
                   >
-                    Paid 0.01 USDT
+                    Executed
                   </span>
                 </div>
 
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-[var(--color-muted)]">Rate</span>
-                    <span className="text-white font-medium">{quote.rate}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-[var(--color-muted)]">You receive</span>
+                    <span className="text-[var(--color-muted)]">Swapped</span>
                     <span className="text-white font-medium">
-                      ~{quote.destAmountFormatted} {quote.destSymbol}
+                      {amount} {executedQuote.srcSymbol} &rarr; {executedQuote.destAmountFormatted} {executedQuote.destSymbol}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
+                    <span className="text-[var(--color-muted)]">Rate</span>
+                    <span className="text-white font-medium">{executedQuote.rate}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
                     <span className="text-[var(--color-muted)]">Price impact</span>
-                    <span className="text-white">{quote.priceImpact}</span>
+                    <span className="text-white">{executedQuote.priceImpact}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-[var(--color-muted)]">Est. gas</span>
-                    <span className="text-white">{quote.gasCostUSD}</span>
+                    <span className="text-white">{executedQuote.gasCostUSD}</span>
                   </div>
-                  {quote.route.length > 0 && (
+                  {executedQuote.route.length > 0 && (
                     <div className="pt-2" style={{ borderTop: "1px solid var(--color-border)" }}>
                       <span className="text-[10px] uppercase tracking-wider text-[var(--color-muted)] mb-1.5 block">
                         Route
                       </span>
                       <div className="flex flex-wrap gap-1.5">
-                        {quote.route.map((r, i) => (
+                        {executedQuote.route.map((r, i) => (
                           <span
                             key={i}
                             className="text-[10px] font-medium px-2 py-0.5 rounded-full"
@@ -391,21 +550,28 @@ export function DexSwap() {
                       </div>
                     </div>
                   )}
+                  <div
+                    className="flex items-center justify-between text-sm pt-2"
+                    style={{ borderTop: "1px solid var(--color-border)" }}
+                  >
+                    <span className="text-[var(--color-muted)]">T402 fee</span>
+                    <span className="text-white">0.01 USDT (settled on-chain)</span>
+                  </div>
                 </div>
               </div>
 
               {/* Raw JSON */}
               <CodeBlock
-                code={JSON.stringify({ quote }, null, 2)}
+                code={JSON.stringify({ executed: true, quote: executedQuote }, null, 2)}
                 language="json"
-                label={`${quote.srcSymbol} → ${quote.destSymbol} — Paid 0.01 USDT`}
+                label={`${executedQuote.srcSymbol} \u2192 ${executedQuote.destSymbol} \u2014 Swap Executed`}
                 labelColor="var(--color-success)"
                 showCopyButton
                 maxHeight="200px"
               />
 
               <button
-                onClick={() => { setState("idle"); setQuote(null); setFlowState("idle"); setSettle(null); }}
+                onClick={reset}
                 className="text-xs text-[var(--color-muted)] hover:text-white cursor-pointer"
               >
                 Get another quote
@@ -417,7 +583,7 @@ export function DexSwap() {
             <div className="glass-card p-4 sm:p-6 text-center">
               <p className="text-sm text-[var(--color-error)]">{error}</p>
               <button
-                onClick={() => { setState("idle"); setFlowState("idle"); setSettle(null); }}
+                onClick={reset}
                 className="mt-3 text-xs text-[var(--color-muted)] hover:text-white cursor-pointer min-h-[36px]"
               >
                 Reset
