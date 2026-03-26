@@ -177,6 +177,31 @@ export async function quoteBridge(params: {
     // Apply 0.5% slippage to amount
     const minAmountToReceive = params.amount - (params.amount * BigInt(50)) / BigInt(10000);
 
+    // Check bridge wallet USDT0 balance
+    let bridgeBalance: string | undefined;
+    try {
+      const tokenAddress = USDT0_OFT_ADDRESSES[params.fromChain];
+      // The token is separate from OFT — get token address from mainnet config
+      // For Arbitrum, token is 0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9
+      const TOKEN_ADDRESSES: Record<string, Address> = {
+        arbitrum: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+        ethereum: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+        ink: "0x0200C29006150606B650577BBE7B6248F58470c1",
+        berachain: "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
+        unichain: "0x9151434b16b9763660705744891fA906F660EcC5",
+      };
+      const tokenAddr = TOKEN_ADDRESSES[params.fromChain];
+      if (tokenAddr) {
+        const bal = await publicClient.readContract({
+          address: tokenAddr,
+          abi: [{ inputs: [{ name: "account", type: "address" }], name: "balanceOf", outputs: [{ type: "uint256" }], stateMutability: "view", type: "function" }] as const,
+          functionName: "balanceOf",
+          args: [account.address],
+        });
+        bridgeBalance = (bal as bigint).toString();
+      }
+    } catch { /* non-critical */ }
+
     return {
       available: true,
       nativeFee: quote.nativeFee.toString(),
@@ -188,6 +213,11 @@ export async function quoteBridge(params: {
       fromChain: quote.fromChain,
       toChain: quote.toChain,
       protocol: "LayerZero V2",
+      ...(bridgeBalance !== undefined && {
+        bridgeLiquidity: bridgeBalance,
+        bridgeLiquidityFormatted: `${(Number(bridgeBalance) / 1e6).toFixed(4)} USDT0`,
+        sufficientLiquidity: BigInt(bridgeBalance) >= params.amount,
+      }),
     };
   } catch (error) {
     console.error(`[bridge-quote] Failed:`, error instanceof Error ? error.message : error);

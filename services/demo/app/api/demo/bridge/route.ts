@@ -166,7 +166,12 @@ export async function POST(request: NextRequest) {
         responseData.tracking.layerZeroScan = bridgeResult.layerZeroScanUrl;
       }
     } catch (err) {
-      console.error("[bridge] Real bridge failed, continuing with simulation:", err);
+      const errMsg = err instanceof Error ? err.message : String(err);
+      console.error("[bridge] Real bridge failed:", errMsg);
+      responseData.bridge.real = false;
+      responseData.bridge.error = errMsg.includes("burn amount exceeds balance")
+        ? "Insufficient bridge liquidity — please try a smaller amount"
+        : `Bridge execution failed: ${errMsg.slice(0, 100)}`;
     }
   }
   if (!responseData.bridge.real) {

@@ -56,6 +56,8 @@ interface Quote {
   estimatedTimeFormatted: string;
   fromChain: string;
   toChain: string;
+  sufficientLiquidity?: boolean;
+  bridgeLiquidityFormatted?: string;
   protocol: string;
   reason?: string;
 }
@@ -234,6 +236,13 @@ function QuotePreview({ quote, amount }: { quote: Quote; amount: string }) {
           {toName} via LayerZero V2
         </span>
       </div>
+      {quote.sufficientLiquidity === false && (
+        <div className="flex items-center gap-2 p-2 rounded-lg mt-1" style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}>
+          <span className="text-[10px]" style={{ color: "var(--color-error)" }}>
+            ⚠ Insufficient bridge liquidity ({quote.bridgeLiquidityFormatted || "0"} available). Try a smaller amount.
+          </span>
+        </div>
+      )}
       {quote.simulated && (
         <p className="text-[10px] text-[var(--color-muted)] italic">
           Simulated quote — real LayerZero OFT fees may vary
@@ -497,7 +506,7 @@ export function CrossChainBridge() {
   // Form state
   const [fromChain, setFromChain] = useState("arbitrum");
   const [toChain, setToChain] = useState("ethereum");
-  const [amountInput, setAmountInput] = useState("0.1");
+  const [amountInput, setAmountInput] = useState("0.01");
 
   // Bridge state machine
   const [state, setState] = useState<BridgeState>("idle");
@@ -704,6 +713,11 @@ export function CrossChainBridge() {
           throw new Error(data.error || "Bridge request failed");
         }
 
+        // Check if real bridge failed (payment succeeded but bridge execution failed)
+        if (data.bridge?.error) {
+          throw new Error(data.bridge.error);
+        }
+
         // Extract tracking info
         const msg = data.message || {};
         const isReal = data.bridge?.real === true;
@@ -864,7 +878,7 @@ export function CrossChainBridge() {
                 }}
                 disabled={formDisabled}
                 className="w-full bg-[var(--color-surface)] text-white text-sm rounded-lg px-3 py-2.5 pr-16 border border-[var(--color-border)] focus:outline-none focus:border-[var(--color-brand)] transition-colors disabled:opacity-50 font-mono"
-                placeholder="0.1"
+                placeholder="0.01"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--color-muted)] font-medium">
                 USDT0
@@ -910,7 +924,7 @@ export function CrossChainBridge() {
           {state !== "failed" && (
             <button
               onClick={executeBridge}
-              disabled={!amountValid || !quote || state === "quoting" || fromChain === toChain}
+              disabled={!amountValid || !quote || state === "quoting" || fromChain === toChain || quote?.sufficientLiquidity === false}
               className="btn-primary px-4 py-3 text-sm w-full min-h-[44px] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChainLogo
