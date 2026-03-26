@@ -16,7 +16,7 @@ import type { Address } from "viem";
  * @see https://docs.layerzero.network/v2/deployments/deployed-contracts
  */
 export const LAYERZERO_ENDPOINT_IDS: Record<string, number> = {
-  // Mainnets
+  // Mainnets — from https://docs.usdt0.to/technical-documentation/deployments
   ethereum: 30101,
   arbitrum: 30110,
   base: 30184,
@@ -24,10 +24,22 @@ export const LAYERZERO_ENDPOINT_IDS: Record<string, number> = {
   polygon: 30109,
   avalanche: 30106,
   bsc: 30102,
-  // USDT0 specific chains
-  ink: 30291, // Ink mainnet
-  berachain: 30362, // Berachain mainnet
-  unichain: 30320, // Unichain mainnet
+  // USDT0 native chains
+  ink: 30339,
+  berachain: 30362,
+  unichain: 30320,
+  mantle: 30181,
+  sei: 30280,
+  conflux: 30212,
+  monad: 30390,
+  flare: 30295,
+  rootstock: 30333,
+  xlayer: 30274,
+  stable: 30396,
+  corn: 30331,
+  plasma: 30383,
+  megaeth: 30398,
+  hyperevm: 30367,
   // Testnets
   sepolia: 40161,
   arbitrumSepolia: 40231,
@@ -48,6 +60,18 @@ export const NETWORK_TO_CHAIN: Record<string, string> = {
   "eip155:57073": "ink",
   "eip155:80094": "berachain",
   "eip155:130": "unichain",
+  "eip155:5000": "mantle",
+  "eip155:1329": "sei",
+  "eip155:1030": "conflux",
+  "eip155:143": "monad",
+  "eip155:14": "flare",
+  "eip155:30": "rootstock",
+  "eip155:196": "xlayer",
+  "eip155:988": "stable",
+  "eip155:21000000": "corn",
+  "eip155:9745": "plasma",
+  "eip155:4326": "megaeth",
+  "eip155:999": "hyperevm",
   // Testnets
   "eip155:11155111": "sepolia",
   "eip155:421614": "arbitrumSepolia",
@@ -66,13 +90,28 @@ export const CHAIN_TO_NETWORK: Record<string, string> = Object.fromEntries(
  * These are the contracts that handle cross-chain transfers
  */
 export const USDT0_OFT_ADDRESSES: Record<string, Address> = {
-  // Ethereum is the OFT Adapter (locks/unlocks tokens)
+  // Ethereum OFT Adapter (locks/unlocks native USDT ↔ USDT0)
   ethereum: "0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee",
-  // Other chains have native USDT0 OFT contracts
-  arbitrum: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
-  ink: "0x0200C29006150606B650577BBE7B6248F58470c1",
-  berachain: "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
-  unichain: "0x9151434b16b9763660705744891fA906F660EcC5",
+  // L2 OFT contracts (NOT the token address — the OFT with quoteSend/send)
+  // Source: https://docs.usdt0.to/technical-documentation/deployments
+  arbitrum: "0x14E4A1B13bf7F943c8ff7C51fb60FA964A298D92",
+  ink: "0x1cB6De532588fCA4a21B7209DE7C456AF8434A65",
+  berachain: "0x3Dc96399109df5ceb2C226664A086140bD0379cB",
+  unichain: "0xc07bE8994D035631c36fb4a89C918CeFB2f03EC3",
+  optimism: "0xF03b4d9AC1D5d1E7c4cEf54C2A313b9fe051A0aD",
+  polygon: "0x6BA10300f0DC58B7a1e4c0e41f5daBb7D7829e13",
+  mantle: "0xcb768e263FB1C62214E7cab4AA8d036D76dc59CC",
+  sei: "0x56Fe74A2e3b484b921c447357203431a3485CC60",
+  conflux: "0xC57efa1c7113D98BdA6F9f249471704Ece5dd84A",
+  monad: "0x9151434b16b9763660705744891fA906F660EcC5",
+  flare: "0x567287d2A9829215a37e3B88843d32f9221E7588",
+  rootstock: "0x1a594d5d5d1c426281C1064B07f23F57B2716B61",
+  xlayer: "0x94bcca6bdfd6a61817ab0e960bfede4984505554",
+  stable: "0xedaba024be4d87974d5aB11C6Dd586963CcCB027",
+  corn: "0x3f82943338a8a76c35BFA0c1828aA27fd43a34E4",
+  plasma: "0x02ca37966753bDdDf11216B73B16C1dE756A7CF9",
+  megaeth: "0x9151434b16b9763660705744891fa906f660ecc5",
+  hyperevm: "0x904861a24F30EC96ea7CFC3bE9EA4B476d237e98",
 };
 
 /**
