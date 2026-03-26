@@ -287,10 +287,15 @@ export function DexSwap() {
         {/* Left: Swap form */}
         <div className="flex flex-col gap-4">
           <div className="glass-card p-5">
-            <h4 className="text-sm font-medium mb-4 flex items-center gap-2">
-              <Repeat size={14} style={{ color: "var(--color-scenario-swap)" }} />
-              Swap on Arbitrum
-            </h4>
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="text-sm font-medium flex items-center gap-2">
+                <Repeat size={14} style={{ color: "var(--color-scenario-swap)" }} />
+                Swap on Arbitrum
+              </h4>
+              <span className="text-[9px] font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(59,130,246,0.1)", color: "#60A5FA" }}>
+                Arbitrum One
+              </span>
+            </div>
 
             {/* From token */}
             <div className="space-y-3">
@@ -481,16 +486,33 @@ export function DexSwap() {
         {/* Right: Result */}
         <div>
           {(state === "idle" || state === "quoting" || state === "quoted") && (
-            <div className="glass-card p-4 sm:p-6 flex flex-col items-center justify-center min-h-[220px] sm:min-h-[320px] text-center">
-              <Repeat size={32} className="mb-3" style={{ color: "var(--color-scenario-swap)" }} />
-              <p className="text-sm text-[var(--color-muted)]">
-                {state === "quoted"
-                  ? "Quote ready — click Swap to execute via T402"
-                  : "Select tokens and enter an amount to get a live quote"}
-              </p>
-              <p className="text-xs text-[var(--color-muted)] mt-2">
-                Powered by ParaSwap — aggregating 10+ DEXes on Arbitrum
-              </p>
+            <div className="glass-card p-4 sm:p-6">
+              <h4 className="text-sm font-medium text-white mb-4">How it works</h4>
+              <div className="space-y-3">
+                {[
+                  { step: "1", label: "Live Quote", desc: "ParaSwap aggregates 10+ DEXes on Arbitrum to find the best rate — free, instant." },
+                  { step: "2", label: "Pay via T402", desc: "Click Swap to pay 0.01 USDT via HTTP 402. No API key needed." },
+                  { step: "3", label: "Execute Swap", desc: "Server executes the swap atomically. You receive tokens at the quoted rate." },
+                ].map((item) => (
+                  <div key={item.step} className="flex items-start gap-3">
+                    <div
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5"
+                      style={{ background: "var(--color-scenario-swap)", color: "white", opacity: 0.8 }}
+                    >
+                      {item.step}
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-white">{item.label}</p>
+                      <p className="text-[10px] text-[var(--color-muted)] leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 pt-3" style={{ borderTop: "1px solid var(--color-border)" }}>
+                <p className="text-[10px] text-[var(--color-text-tertiary)]">
+                  Supported DEXes: Uniswap V2/V3 · PancakeSwap V3 · SushiSwap V3 · CamelotV3 · Balancer · Curve · and more
+                </p>
+              </div>
             </div>
           )}
 
@@ -512,18 +534,22 @@ export function DexSwap() {
               {/* Swap confirmed card */}
               <div className="glass-card p-5">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-sm font-medium text-white">Swap Confirmed</h4>
+                  <h4 className="text-sm font-medium text-white">Swap Quote Result</h4>
                   <span
                     className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                     style={{ background: "var(--color-success-dim)", color: "var(--color-success)" }}
                   >
-                    Executed
+                    Paid 0.01 USDT
                   </span>
                 </div>
 
+                <p className="text-[10px] text-[var(--color-muted)] mb-3 -mt-2">
+                  This is a real-time DEX quote purchased via T402. In production, the swap would execute atomically after payment.
+                </p>
+
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-[var(--color-muted)]">Swapped</span>
+                    <span className="text-[var(--color-muted)]">Swap</span>
                     <span className="text-white font-medium">
                       {amount} {executedQuote.srcSymbol} &rarr; {executedQuote.destAmountFormatted} {executedQuote.destSymbol}
                     </span>
