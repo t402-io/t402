@@ -195,9 +195,19 @@ export function CrossChainBridge() {
               <span className="text-sm font-medium">Bridge complete!</span>
             </div>
             {txHash && (
-              <p className="text-xs font-mono text-[var(--color-muted)]">
-                tx: {txHash.slice(0, 10)}...{txHash.slice(-6)}
-              </p>
+              <div className="space-y-1">
+                <p className="text-xs font-mono text-[var(--color-muted)]">
+                  tx: {txHash.slice(0, 10)}...{txHash.slice(-6)}
+                </p>
+                <a
+                  href={`https://layerzeroscan.com/tx/${txHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[10px] text-[var(--color-brand)] hover:underline"
+                >
+                  View on LayerZero Scan →
+                </a>
+              </div>
             )}
             <button onClick={reset} className="text-xs text-[var(--color-brand)] hover:underline">
               Bridge again

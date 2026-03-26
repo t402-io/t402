@@ -5,6 +5,7 @@ import { createMockSettleResponse } from "@/lib/mock-responses";
 import { createBridgeTransaction, getEstimatedTimeRemaining } from "@/lib/bridge-state";
 import { getRecentBridgeMessages, getChainName } from "@/lib/layerzero-service";
 import { classifyFacilitatorError } from "@/lib/error-helpers";
+import { executeBridge, supportsRealBridge } from "@/lib/bridge-executor";
 
 const BRIDGE_FEE = "10000"; // 0.01 USDT bridge fee
 
@@ -130,6 +131,34 @@ export async function POST(request: NextRequest) {
     }
   } catch {
     // Non-critical - skip if LayerZero API unavailable
+  }
+
+  // Attempt real bridge for supported EVM chain pairs
+  if (supportsRealBridge(sourceChain, targetChain)) {
+    try {
+      const bridgeResult = await executeBridge({
+        fromChain: sourceChain,
+        toChain: targetChain,
+        amount: BigInt(amount),
+        recipient: recipient || PAY_TO,
+      });
+      if (bridgeResult) {
+        responseData.bridge.real = true;
+        responseData.bridge.txHash = bridgeResult.txHash;
+        responseData.message.guid = bridgeResult.messageGuid;
+        responseData.message.srcTxHash = bridgeResult.txHash;
+        responseData.message.status = "INFLIGHT";
+        responseData.tracking.layerZeroScan = bridgeResult.layerZeroScanUrl;
+      }
+    } catch (err) {
+      console.error("[bridge] Real bridge failed, continuing with simulation:", err);
+    }
+  }
+  if (!responseData.bridge.real) {
+    responseData.bridge.real = false;
+    if (!supportsRealBridge(sourceChain, targetChain)) {
+      responseData.bridge.note = "Simulated — LayerZero OFT not available on this chain pair";
+    }
   }
 
   if (isDemoMode) {
