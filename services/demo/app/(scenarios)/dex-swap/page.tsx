@@ -18,10 +18,11 @@ export default function DexSwapPage() {
   return (
     <ScenarioShell
       title="DEX Swap"
-      description="Swap tokens on Arbitrum via ParaSwap. Pay 0.01 USDT per swap quote — real-time pricing from 10+ DEXes."
+      description="Swap tokens via ParaSwap on 7 chains. Pay 0.01 USDT per swap — real-time pricing from 10+ DEXes."
       cost="0.01 USDT/swap"
       accentColor="var(--color-scenario-swap)"
       scenarioId="dex-swap"
+      hideChecklist
     >
       <DexSwap />
     </ScenarioShell>

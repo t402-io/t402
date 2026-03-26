@@ -18,10 +18,11 @@ interface ScenarioShellProps {
   cost: string;
   accentColor: string;
   scenarioId?: ScenarioId;
+  hideChecklist?: boolean;
   children: ReactNode;
 }
 
-export function ScenarioShell({ title, description, cost, accentColor, scenarioId, children }: ScenarioShellProps) {
+export function ScenarioShell({ title, description, cost, accentColor, scenarioId, hideChecklist, children }: ScenarioShellProps) {
   const { activeFamily } = useChainContext();
   const { isLive, testnet } = useDemoContext();
 
@@ -65,7 +66,7 @@ export function ScenarioShell({ title, description, cost, accentColor, scenarioI
           </p>
         )}
       </div>
-      <PaymentChecklist />
+      {!hideChecklist && <PaymentChecklist />}
       {children}
       {scenarioId && <SdkExamples scenarioId={scenarioId} />}
     </div>

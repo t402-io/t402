@@ -13,7 +13,7 @@ const CSP_DIRECTIVES = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com",
   "img-src 'self' data: blob: https:",
-  "connect-src 'self' https://*.t402.io https://*.walletconnect.com https://*.infura.io https://*.alchemy.com https://*.pimlico.io https://*.publicnode.com https://*.arbitrum.io https://*.base.org https://*.optimism.io https://*.berachain.com https://*.inkonchain.com https://www.google-analytics.com https://static.cloudflareinsights.com wss://*.walletconnect.com wss://*.infura.io",
+  "connect-src 'self' https://*.t402.io https://*.walletconnect.com https://*.infura.io https://*.alchemy.com https://*.pimlico.io https://*.publicnode.com https://*.arbitrum.io https://*.base.org https://*.optimism.io https://*.berachain.com https://*.inkonchain.com https://polygon-rpc.com https://*.polygon-rpc.com https://*.bsc-rpc.com https://*.avalanche-rpc.com https://rpc.mantle.xyz https://evm-rpc.sei-apis.com https://evm.confluxrpc.com https://rpc.megaeth.com https://rpc.hyperliquid.xyz https://rpc.morphl2.io https://api.paraswap.io https://www.google-analytics.com https://static.cloudflareinsights.com wss://*.walletconnect.com wss://*.infura.io",
   "frame-src 'self' https://*.walletconnect.com",
   "form-action 'self'",
   "frame-ancestors 'none'",
