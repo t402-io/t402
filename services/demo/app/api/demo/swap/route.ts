@@ -22,6 +22,19 @@ export async function GET(request: NextRequest) {
 
   // If query params provided, return a free quote
   if (srcToken && destToken && amount && srcDecimals != null && destDecimals != null) {
+    // Validate inputs
+    const amountNum = Number(amount);
+    if (!amountNum || amountNum <= 0) {
+      const response = NextResponse.json({ error: "Amount must be greater than 0" }, { status: 400 });
+      response.headers.set("Access-Control-Allow-Origin", "*");
+      return response;
+    }
+    if (srcToken.toLowerCase() === destToken.toLowerCase()) {
+      const response = NextResponse.json({ error: "Source and destination tokens must be different" }, { status: 400 });
+      response.headers.set("Access-Control-Allow-Origin", "*");
+      return response;
+    }
+
     const quote = await getSwapQuote({
       srcToken,
       destToken,

@@ -26,6 +26,7 @@ export interface SwapQuote {
   destSymbol: string;
   destAmount: string;
   destAmountFormatted: string;
+  minReceived: string;    // after 0.5% slippage
   rate: string;           // "1 USDT = 0.000481 ETH"
   priceImpact: string;    // "0.02%"
   gasCostUSD: string;     // "$0.05"
@@ -52,27 +53,34 @@ export async function getSwapQuote(params: {
     const pr = data.priceRoute;
     if (!pr) return null;
 
-    // Extract route info
-    const routes: string[] = [];
+    // Extract route info (deduplicate by exchange name)
+    const routeMap = new Map<string, number>();
     for (const bestRoute of pr.bestRoute || []) {
       for (const swap of bestRoute.swaps || []) {
         for (const ex of swap.swapExchanges || []) {
-          routes.push(`${ex.exchange} (${ex.percent}%)`);
+          const name = ex.exchange;
+          routeMap.set(name, (routeMap.get(name) || 0) + Number(ex.percent || 0));
         }
       }
     }
+    const routes = Array.from(routeMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, pct]) => `${name} (${Math.round(pct)}%)`)
+      .slice(0, 5);
 
     // Find token info
     const srcInfo = SWAP_TOKENS.find(t => t.address.toLowerCase() === params.srcToken.toLowerCase());
     const destInfo = SWAP_TOKENS.find(t => t.address.toLowerCase() === params.destToken.toLowerCase());
 
     const destAmount = pr.destAmount;
-    const destFormatted = (Number(destAmount) / Math.pow(10, params.destDecimals)).toFixed(
-      params.destDecimals > 8 ? 8 : params.destDecimals
-    );
+    const destFloat = Number(destAmount) / Math.pow(10, params.destDecimals);
+    const destFormatted = destFloat.toFixed(params.destDecimals > 8 ? 8 : 6).replace(/\.?0+$/, "");
+
+    // Min received after 0.5% slippage
+    const minReceivedFloat = destFloat * 0.995;
+    const minReceived = minReceivedFloat.toFixed(params.destDecimals > 8 ? 8 : 6).replace(/\.?0+$/, "");
 
     const srcFormatted = (Number(params.amount) / Math.pow(10, params.srcDecimals));
-    const destFloat = Number(destAmount) / Math.pow(10, params.destDecimals);
     const rate = `1 ${srcInfo?.symbol || "?"} = ${(destFloat / srcFormatted).toFixed(8)} ${destInfo?.symbol || "?"}`;
 
     return {
@@ -83,10 +91,11 @@ export async function getSwapQuote(params: {
       destSymbol: destInfo?.symbol || "?",
       destAmount,
       destAmountFormatted: destFormatted,
+      minReceived,
       rate,
       priceImpact: pr.priceImpact ? `${(Number(pr.priceImpact) * 100).toFixed(2)}%` : "<0.01%",
       gasCostUSD: pr.gasCostUSD ? `$${Number(pr.gasCostUSD).toFixed(2)}` : "~$0.05",
-      route: routes.slice(0, 5),
+      route: routes,
       estimatedGas: pr.gasCost || "500000",
     };
   } catch (error) {

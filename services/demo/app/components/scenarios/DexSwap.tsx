@@ -25,6 +25,7 @@ interface SwapQuote {
   destSymbol: string;
   destAmount: string;
   destAmountFormatted: string;
+  minReceived: string;
   rate: string;
   priceImpact: string;
   gasCostUSD: string;
@@ -323,7 +324,10 @@ export function DexSwap() {
                     type="text"
                     inputMode="decimal"
                     value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === "" || /^\d*\.?\d*$/.test(v)) setAmount(v);
+                    }}
                     disabled={state === "paying" || state === "swapping"}
                     placeholder="0.00"
                     className="flex-1 bg-transparent text-right text-lg font-medium text-white placeholder-[var(--color-text-tertiary)] focus:outline-none min-w-0"
@@ -409,6 +413,10 @@ export function DexSwap() {
                   <span className="text-white font-medium">~{quote.destAmountFormatted} {quote.destSymbol}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
+                  <span className="text-[var(--color-muted)]">Min. received (0.5% slippage)</span>
+                  <span className="text-white">{quote.minReceived} {quote.destSymbol}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
                   <span className="text-[var(--color-muted)]">Price impact</span>
                   <span className="text-white">{quote.priceImpact}</span>
                 </div>
@@ -437,6 +445,9 @@ export function DexSwap() {
                   <span className="text-white">0.01 USDT</span>
                 </div>
               </div>
+              <p className="text-[10px] text-[var(--color-text-tertiary)] text-right mt-1">
+                Powered by ParaSwap · aggregating 10+ DEXes on Arbitrum
+              </p>
             </motion.div>
           )}
 
