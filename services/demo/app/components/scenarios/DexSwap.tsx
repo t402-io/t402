@@ -117,6 +117,17 @@ const CHAIN_IDS: Record<string, number> = {
   base: 8453,
 };
 
+// CAIP-2 network IDs for T402 payment — so fee is paid on the same chain as swap
+const CHAIN_CAIP2: Record<string, string> = {
+  ethereum: "eip155:1",
+  arbitrum: "eip155:42161",
+  optimism: "eip155:10",
+  polygon: "eip155:137",
+  bsc: "eip155:56",
+  avalanche: "eip155:43114",
+  base: "eip155:8453",
+};
+
 // Native token symbol per chain (the token at 0xEeee...EEeE)
 const CHAIN_NATIVE: Record<string, string> = {
   ethereum: "ETH",
@@ -372,9 +383,9 @@ export function DexSwap() {
       const headers: Record<string, string> = {
         Accept: "application/json",
         "Content-Type": "application/json",
-        "x-preferred-chain": activeFamily,
-        "x-network-mode": testnet ? "testnet" : "mainnet",
-        ...(activeNetwork ? { "x-preferred-network": activeNetwork } : {}),
+        "x-preferred-chain": "evm",
+        "x-network-mode": "mainnet",
+        "x-preferred-network": CHAIN_CAIP2[chain] || "eip155:42161",
       };
       if (isDemo) headers["x-demo-mode"] = "true";
 
@@ -415,9 +426,9 @@ export function DexSwap() {
       const retryHeaders: Record<string, string> = {
         Accept: "application/json",
         "Content-Type": "application/json",
-        "x-preferred-chain": activeFamily,
-        "x-network-mode": testnet ? "testnet" : "mainnet",
-        ...(activeNetwork ? { "x-preferred-network": activeNetwork } : {}),
+        "x-preferred-chain": "evm",
+        "x-network-mode": "mainnet",
+        "x-preferred-network": CHAIN_CAIP2[chain] || "eip155:42161",
         "Payment-Signature": encodePaymentHeader(paymentPayload),
       };
       if (isDemo) retryHeaders["x-demo-mode"] = "true";
