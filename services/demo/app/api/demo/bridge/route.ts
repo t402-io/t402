@@ -9,8 +9,13 @@ import { executeBridge, supportsRealBridge } from "@/lib/bridge-executor";
 
 const BRIDGE_FEE = "10000"; // 0.01 USDT bridge fee
 
-// Supported bridge chain families (matching frontend ChainFamily values)
-const BRIDGE_CHAINS = ["evm", "ton", "tron", "solana", "stacks", "near", "aptos", "tezos", "polkadot", "cosmos"];
+// Supported bridge chains — both family names and specific chain names
+const BRIDGE_CHAINS = [
+  // Family names (legacy)
+  "evm", "ton", "tron", "solana", "stacks", "near", "aptos", "tezos", "polkadot", "cosmos",
+  // Specific chain names (from bridge redesign)
+  "arbitrum", "ethereum", "ink", "berachain", "unichain", "optimism", "polygon", "base", "mantle",
+];
 
 // Estimated bridge times in seconds
 const ESTIMATED_TIMES: Record<string, Record<string, number>> = {

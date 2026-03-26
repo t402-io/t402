@@ -67,12 +67,7 @@ export function ClientProviders({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Defer wallet provider mounting until after initial paint for faster FCP
-    if (typeof requestIdleCallback === "function") {
-      requestIdleCallback(() => setMounted(true));
-    } else {
-      setTimeout(() => setMounted(true), 1);
-    }
+    setMounted(true);
   }, []);
 
   // Single provider tree — wallet providers conditionally mount on client only
