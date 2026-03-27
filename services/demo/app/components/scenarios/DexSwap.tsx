@@ -452,11 +452,57 @@ export function DexSwap() {
       const data = await retryResponse.json();
       setExecutedQuote(data.quote);
 
-      // If server returned a swap tx, transition to txReady for user to execute
+      // If server returned a swap tx, auto-execute (approve if needed → swap)
       if (data.swapTx) {
         setSwapTx(data.swapTx);
-        setState("txReady");
+        setExecutedQuote(data.quote);
         setFlowState("done");
+
+        // Auto-execute: approve if needed, then swap — all in one flow
+        try {
+          // Ensure correct chain
+          if (switchChainAsync && chainId) {
+            try { await switchChainAsync({ chainId }); } catch { /* user may reject */ }
+          }
+
+          // Check allowance and approve if needed (skip for native token)
+          const isNative = srcToken.address.toLowerCase() === "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
+          if (!isNative) {
+            setState("approving");
+            const allowanceResult = await refetchAllowance();
+            const currentAllowance = allowanceResult.data ?? BigInt(0);
+            if (currentAllowance < BigInt(amountInSmallestUnits || "0")) {
+              await writeContractAsync({
+                address: srcToken.address as `0x${string}`,
+                abi: erc20Abi,
+                functionName: "approve",
+                args: [spender as `0x${string}`, MAX_UINT256],
+                chainId,
+              });
+              // Poll for allowance confirmation
+              for (let i = 0; i < 15; i++) {
+                await new Promise((r) => setTimeout(r, 2000));
+                const result = await refetchAllowance();
+                if (result.data && result.data >= BigInt(amountInSmallestUnits || "0")) break;
+              }
+            }
+          }
+
+          // Execute swap
+          setState("executing");
+          const hash = await sendTransactionAsync({
+            to: data.swapTx.to as `0x${string}`,
+            data: data.swapTx.data as `0x${string}`,
+            value: BigInt(data.swapTx.value),
+            chainId,
+          });
+          setSwapTxHash(hash);
+          // Receipt handled by useWaitForTransactionReceipt + useEffect
+        } catch (err) {
+          setError(err instanceof Error ? err.message : String(err));
+          setState("error");
+          setFlowState("error");
+        }
       } else {
         // No swap tx (demo mode without real wallet) — show quote result
         setSwaps((n) => n + 1);
@@ -753,55 +799,7 @@ export function DexSwap() {
               )}
             </div>
 
-            {/* Swap Ready card — shown after T402 payment, before swap execution */}
-            {state === "txReady" && swapTx && executedQuote && (
-              <motion.div
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="glass-card p-5"
-              >
-                <h5 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
-                  <CheckCircle size={14} style={{ color: "var(--color-success)" }} />
-                  Swap Ready
-                </h5>
-                <div className="space-y-2.5">
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-[var(--color-success)]">&#10003;</span>
-                    <span className="text-[var(--color-muted)]">T402 fee paid (0.01 USDT)</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-[var(--color-muted)]">Swap</span>
-                    <span className="text-white font-medium">
-                      {amount} {executedQuote.srcSymbol} &rarr; ~{executedQuote.destAmountFormatted} {executedQuote.destSymbol}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-[var(--color-muted)]">Router</span>
-                    <span className="text-white font-mono text-xs">
-                      {spender.slice(0, 8)}...{spender.slice(-4)} (ParaSwap TokenTransferProxy)
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex gap-3 mt-4">
-                  {needsApproval && !hasSufficientAllowance && (
-                    <button
-                      onClick={handleApprove}
-                      className="btn-primary flex-1 py-2.5 flex items-center justify-center gap-2"
-                    >
-                      Approve {srcToken.symbol}
-                    </button>
-                  )}
-                  <button
-                    onClick={handleExecuteSwap}
-                    disabled={needsApproval && !hasSufficientAllowance}
-                    className="btn-primary flex-1 py-2.5 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    Execute Swap
-                  </button>
-                </div>
-              </motion.div>
-            )}
+            {/* txReady is now a transient state — auto-executes, no manual card needed */}
 
             {/* Approving state */}
             {state === "approving" && (
