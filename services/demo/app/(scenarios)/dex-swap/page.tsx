@@ -22,6 +22,7 @@ export default function DexSwapPage() {
       cost="0.01 USDT/swap"
       accentColor="var(--color-scenario-swap)"
       scenarioId="dex-swap"
+      hideChainSelector
       hideChecklist
     >
       <DexSwap />

@@ -19,10 +19,12 @@ interface ScenarioShellProps {
   accentColor: string;
   scenarioId?: ScenarioId;
   hideChecklist?: boolean;
+  /** Hide the chain selector, badge, and balance — for scenarios that manage their own chain (Bridge, DEX Swap) */
+  hideChainSelector?: boolean;
   children: ReactNode;
 }
 
-export function ScenarioShell({ title, description, cost, accentColor, scenarioId, hideChecklist, children }: ScenarioShellProps) {
+export function ScenarioShell({ title, description, cost, accentColor, scenarioId, hideChecklist, hideChainSelector, children }: ScenarioShellProps) {
   const { activeFamily } = useChainContext();
   const { isLive, testnet } = useDemoContext();
 
@@ -44,26 +46,30 @@ export function ScenarioShell({ title, description, cost, accentColor, scenarioI
           </span>
         </div>
         <p className="text-sm max-w-xl mb-5 leading-relaxed text-[var(--color-muted)]">{description}</p>
-        <div className="flex flex-col gap-2">
-          <ChainSelector />
-          <div className="flex items-center gap-2 flex-wrap">
-            <ChainBadge family={activeFamily} showNetwork />
-            {isLive && <TokenBalance />}
-          </div>
-        </div>
-        {isLive && testnet ? (
-          <div className="mt-4">
-            <FaucetLink family={activeFamily} />
-          </div>
-        ) : isLive && !testnet ? (
-          <div className="mt-4 flex items-center gap-1.5 text-[10px]" style={{ color: "var(--color-error)" }}>
-            <AlertTriangle size={12} />
-            <span>Mainnet — real funds will be used for payments</span>
-          </div>
-        ) : (
-          <p className="text-[10px] mt-4" style={{ color: "var(--color-muted)" }}>
-            Demo mode uses a simulated wallet. Switch to Live to test with real tokens.
-          </p>
+        {!hideChainSelector && (
+          <>
+            <div className="flex flex-col gap-2">
+              <ChainSelector />
+              <div className="flex items-center gap-2 flex-wrap">
+                <ChainBadge family={activeFamily} showNetwork />
+                {isLive && <TokenBalance />}
+              </div>
+            </div>
+            {isLive && testnet ? (
+              <div className="mt-4">
+                <FaucetLink family={activeFamily} />
+              </div>
+            ) : isLive && !testnet ? (
+              <div className="mt-4 flex items-center gap-1.5 text-[10px]" style={{ color: "var(--color-error)" }}>
+                <AlertTriangle size={12} />
+                <span>Mainnet — real funds will be used for payments</span>
+              </div>
+            ) : (
+              <p className="text-[10px] mt-4" style={{ color: "var(--color-muted)" }}>
+                Demo mode uses a simulated wallet. Switch to Live to test with real tokens.
+              </p>
+            )}
+          </>
         )}
       </div>
       {!hideChecklist && <PaymentChecklist />}
