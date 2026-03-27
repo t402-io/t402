@@ -148,6 +148,7 @@ const ERC20_ABI = [
 export interface ChainEntry {
   name: string;
   chainId: number;
+  nativeSymbol: string;
   tokenAddress: Address;
   oftAddress: Address;
   lzEndpointId: number;
@@ -159,6 +160,7 @@ export interface ChainEntry {
 export const CHAIN_REGISTRY: Record<string, ChainEntry> = {
   ethereum: {
     name: "Ethereum",
+    nativeSymbol: "ETH",
     chainId: 1,
     tokenAddress: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
     oftAddress: "0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee",
@@ -169,6 +171,7 @@ export const CHAIN_REGISTRY: Record<string, ChainEntry> = {
   },
   arbitrum: {
     name: "Arbitrum",
+    nativeSymbol: "ETH",
     chainId: 42161,
     tokenAddress: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
     oftAddress: "0x14E4A1B13bf7F943c8ff7C51fb60FA964A298D92",
@@ -179,6 +182,7 @@ export const CHAIN_REGISTRY: Record<string, ChainEntry> = {
   },
   optimism: {
     name: "Optimism",
+    nativeSymbol: "ETH",
     chainId: 10,
     tokenAddress: "0x01bFF41798a0BcF287b996046Ca68b395DbC1071",
     oftAddress: "0xF03b4d9AC1D5d1E7c4cEf54C2A313b9fe051A0aD",
@@ -189,6 +193,7 @@ export const CHAIN_REGISTRY: Record<string, ChainEntry> = {
   },
   polygon: {
     name: "Polygon",
+    nativeSymbol: "POL",
     chainId: 137,
     tokenAddress: "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
     oftAddress: "0x6BA10300f0DC58B7a1e4c0e41f5daBb7D7829e13",
@@ -199,6 +204,7 @@ export const CHAIN_REGISTRY: Record<string, ChainEntry> = {
   },
   ink: {
     name: "Ink",
+    nativeSymbol: "ETH",
     chainId: 57073,
     tokenAddress: "0x0200C29006150606B650577BBE7B6248F58470c1",
     oftAddress: "0x1cB6De532588fCA4a21B7209DE7C456AF8434A65",
@@ -209,6 +215,7 @@ export const CHAIN_REGISTRY: Record<string, ChainEntry> = {
   },
   berachain: {
     name: "Berachain",
+    nativeSymbol: "ETH",
     chainId: 80094,
     tokenAddress: "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
     oftAddress: "0x3Dc96399109df5ceb2C226664A086140bD0379cB",
@@ -219,6 +226,7 @@ export const CHAIN_REGISTRY: Record<string, ChainEntry> = {
   },
   unichain: {
     name: "Unichain",
+    nativeSymbol: "ETH",
     chainId: 130,
     tokenAddress: "0x9151434b16b9763660705744891fA906F660EcC5",
     oftAddress: "0xc07bE8994D035631c36fb4a89C918CeFB2f03EC3",
@@ -229,6 +237,7 @@ export const CHAIN_REGISTRY: Record<string, ChainEntry> = {
   },
   mantle: {
     name: "Mantle",
+    nativeSymbol: "MNT",
     chainId: 5000,
     tokenAddress: "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
     oftAddress: "0xcb768e263FB1C62214E7cab4AA8d036D76dc59CC",
@@ -239,6 +248,7 @@ export const CHAIN_REGISTRY: Record<string, ChainEntry> = {
   },
   sei: {
     name: "Sei",
+    nativeSymbol: "SEI",
     chainId: 1329,
     tokenAddress: "0x9151434b16b9763660705744891fA906F660EcC5",
     oftAddress: "0x56Fe74A2e3b484b921c447357203431a3485CC60",
@@ -249,6 +259,7 @@ export const CHAIN_REGISTRY: Record<string, ChainEntry> = {
   },
   monad: {
     name: "Monad",
+    nativeSymbol: "MON",
     chainId: 143,
     tokenAddress: "0xe7cd86e13AC4309349F30B3435a9d337750fC82D",
     oftAddress: "0x9151434b16b9763660705744891fA906F660EcC5",
@@ -259,6 +270,7 @@ export const CHAIN_REGISTRY: Record<string, ChainEntry> = {
   },
   conflux: {
     name: "Conflux eSpace",
+    nativeSymbol: "CFX",
     chainId: 1030,
     tokenAddress: "0xaf37E8B6C9ED7f6318979f56Fc287d76c30847ff",
     oftAddress: "0xC57efa1c7113D98BdA6F9f249471704Ece5dd84A",
@@ -269,6 +281,7 @@ export const CHAIN_REGISTRY: Record<string, ChainEntry> = {
   },
   flare: {
     name: "Flare",
+    nativeSymbol: "FLR",
     chainId: 14,
     tokenAddress: "0xe7cd86e13AC4309349F30B3435a9d337750fC82D",
     oftAddress: "0x567287d2A9829215a37e3B88843d32f9221E7588",
@@ -279,6 +292,7 @@ export const CHAIN_REGISTRY: Record<string, ChainEntry> = {
   },
   rootstock: {
     name: "Rootstock",
+    nativeSymbol: "RBTC",
     chainId: 30,
     tokenAddress: "0x779dED0C9e1022225F8e0630b35A9B54Be713736",
     oftAddress: "0x1a594d5d5d1c426281C1064B07f23F57B2716B61",
@@ -289,6 +303,7 @@ export const CHAIN_REGISTRY: Record<string, ChainEntry> = {
   },
   xlayer: {
     name: "X Layer",
+    nativeSymbol: "OKB",
     chainId: 196,
     tokenAddress: "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
     oftAddress: "0x94bcca6bdfd6a61817ab0e960bfede4984505554",
@@ -299,6 +314,7 @@ export const CHAIN_REGISTRY: Record<string, ChainEntry> = {
   },
   stable: {
     name: "Stable",
+    nativeSymbol: "ETH",
     chainId: 988,
     tokenAddress: "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
     oftAddress: "0xedaba024be4d87974d5aB11C6Dd586963CcCB027",
@@ -309,6 +325,7 @@ export const CHAIN_REGISTRY: Record<string, ChainEntry> = {
   },
   corn: {
     name: "Corn",
+    nativeSymbol: "ETH",
     chainId: 21000000,
     tokenAddress: "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
     oftAddress: "0x3f82943338a8a76c35BFA0c1828aA27fd43a34E4",
@@ -319,6 +336,7 @@ export const CHAIN_REGISTRY: Record<string, ChainEntry> = {
   },
   plasma: {
     name: "Plasma",
+    nativeSymbol: "ETH",
     chainId: 9745,
     tokenAddress: "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
     oftAddress: "0x02ca37966753bDdDf11216B73B16C1dE756A7CF9",
@@ -329,6 +347,7 @@ export const CHAIN_REGISTRY: Record<string, ChainEntry> = {
   },
   megaeth: {
     name: "MegaETH",
+    nativeSymbol: "ETH",
     chainId: 4326,
     tokenAddress: "0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb",
     oftAddress: "0x9151434b16b9763660705744891fa906f660ecc5",
@@ -339,6 +358,7 @@ export const CHAIN_REGISTRY: Record<string, ChainEntry> = {
   },
   hyperevm: {
     name: "HyperEVM",
+    nativeSymbol: "ETH",
     chainId: 999,
     tokenAddress: "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb",
     oftAddress: "0x904861a24F30EC96ea7CFC3bE9EA4B476d237e98",
@@ -349,6 +369,7 @@ export const CHAIN_REGISTRY: Record<string, ChainEntry> = {
   },
   morph: {
     name: "Morph",
+    nativeSymbol: "ETH",
     chainId: 2818,
     tokenAddress: "0xe7cd86e13AC4309349F30B3435a9d337750fC82D",
     oftAddress: "0xcb768e263FB1C62214E7cab4AA8d036D76dc59CC",
@@ -359,6 +380,7 @@ export const CHAIN_REGISTRY: Record<string, ChainEntry> = {
   },
   hedera: {
     name: "Hedera",
+    nativeSymbol: "HBAR",
     chainId: 295,
     tokenAddress: "0x00000000000000000000000000000000009Ce723",
     oftAddress: "0xe3119e23fC2371d1E6b01775ba312035425A53d6",
@@ -369,6 +391,7 @@ export const CHAIN_REGISTRY: Record<string, ChainEntry> = {
   },
   tempo: {
     name: "Tempo",
+    nativeSymbol: "ETH",
     chainId: 698,
     tokenAddress: "0x20C00000000000000000000014f22CA97301EB73",
     oftAddress: "0xaf37E8B6C9ED7f6318979f56Fc287d76c30847ff",
@@ -398,7 +421,7 @@ function makeViemChain(entry: ChainEntry) {
   return {
     id: entry.chainId,
     name: entry.name,
-    nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+    nativeCurrency: { name: entry.nativeSymbol, symbol: entry.nativeSymbol, decimals: 18 },
     rpcUrls: { default: { http: [entry.rpc] } },
   } as const;
 }
@@ -523,6 +546,8 @@ export async function quoteBridge(params: {
   amount: bigint;
   recipient: string;
 }): Promise<BridgeQuoteResult | null> {
+  if (params.amount <= BigInt(0)) return null;
+
   const rawKey = process.env.BRIDGE_WALLET_PRIVATE_KEY;
   if (!rawKey) {
     console.log("[bridge-quote] BRIDGE_WALLET_PRIVATE_KEY not configured");
@@ -579,7 +604,7 @@ export async function quoteBridge(params: {
     // Format native fee
     const feeEth = Number(nativeFee) / 1e18;
     const feeStr = feeEth < 0.0001 ? feeEth.toExponential(2) : feeEth.toFixed(6);
-    const nativeFeeFormatted = `${feeStr} ETH`;
+    const nativeFeeFormatted = `${feeStr} ${srcEntry.nativeSymbol}`;
 
     // Estimated time
     const estimatedTime = estimateBridgeTime(params.fromChain, params.toChain);
