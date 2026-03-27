@@ -1,6 +1,5 @@
 "use client";
 
-import { ChainSelector } from "./ChainSelector";
 import { ChainBadge } from "./ChainBadge";
 import { TokenBalance } from "./TokenBalance";
 import { FaucetLink } from "./FaucetLink";
@@ -28,7 +27,6 @@ interface ScenarioShellProps {
   description: string;
   cost: string;
   accentColor: string;
-  /** Icon name (lowercase): brain, filetext, database, bot, cpu, radio, wand2, arrowleftright, zap, repeat */
   iconName?: string;
   scenarioId?: ScenarioId;
   hideChecklist?: boolean;
@@ -48,29 +46,28 @@ export function ScenarioShell({ title, description, cost, accentColor, iconName,
     >
       {/* Scenario header with gradient band */}
       <div
-        className="rounded-2xl p-6 sm:p-8 mb-8"
+        className="rounded-2xl p-5 sm:p-7 mb-6"
         style={{
-          background: `linear-gradient(135deg, ${accentColor}08, transparent 60%)`,
-          border: `1px solid ${accentColor}10`,
+          background: `linear-gradient(135deg, ${accentColor}12, ${accentColor}04 50%, transparent 100%)`,
+          border: `1px solid ${accentColor}15`,
         }}
       >
-        <div className="flex items-start gap-4 mb-4">
-          {/* Scenario icon */}
+        <div className="flex items-start gap-3 sm:gap-4">
           {Icon && (
             <div
-              className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center shrink-0"
-              style={{ background: `${accentColor}15`, border: `1px solid ${accentColor}20`, color: accentColor }}
+              className="w-11 h-11 sm:w-13 sm:h-13 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: `${accentColor}18`, border: `1px solid ${accentColor}25`, color: accentColor }}
             >
-              <Icon size={24} />
+              <Icon size={22} />
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">{title}</h1>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 mb-1.5">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">{title}</h1>
               <span
-                className="text-xs sm:text-sm font-medium px-3 py-1 rounded-full w-fit"
+                className="text-[11px] sm:text-xs font-semibold px-2.5 py-0.5 rounded-full w-fit"
                 style={{
-                  background: `${accentColor}12`,
+                  background: `${accentColor}15`,
                   color: accentColor,
                   border: `1px solid ${accentColor}25`,
                 }}
@@ -78,35 +75,24 @@ export function ScenarioShell({ title, description, cost, accentColor, iconName,
                 {cost}
               </span>
             </div>
-            <p className="text-sm max-w-xl leading-relaxed text-[var(--color-muted)]">{description}</p>
-          </div>
-        </div>
+            <p className="text-xs sm:text-sm max-w-xl leading-relaxed text-[var(--color-muted)]">{description}</p>
 
-        {!hideChainSelector && (
-          <>
-            <div className="flex flex-col gap-2 mt-4">
-              <div className="flex items-center gap-2 flex-wrap">
+            {/* Chain info row — compact */}
+            {!hideChainSelector && (
+              <div className="flex items-center gap-2 flex-wrap mt-3">
                 <ChainBadge family={activeFamily} showNetwork />
                 {isLive && <TokenBalance />}
                 {isLive && <WalletChainIndicator />}
+                {isLive && testnet && <FaucetLink family={activeFamily} />}
+                {isLive && !testnet && (
+                  <span className="flex items-center gap-1 text-[10px]" style={{ color: "var(--color-error)" }}>
+                    <AlertTriangle size={10} /> Mainnet
+                  </span>
+                )}
               </div>
-            </div>
-            {isLive && testnet ? (
-              <div className="mt-3">
-                <FaucetLink family={activeFamily} />
-              </div>
-            ) : isLive && !testnet ? (
-              <div className="mt-3 flex items-center gap-1.5 text-[10px]" style={{ color: "var(--color-error)" }}>
-                <AlertTriangle size={12} />
-                <span>Mainnet — real funds will be used for payments</span>
-              </div>
-            ) : (
-              <p className="text-[10px] mt-3" style={{ color: "var(--color-muted)" }}>
-                Demo mode uses a simulated wallet. Switch to Live to test with real tokens.
-              </p>
             )}
-          </>
-        )}
+          </div>
+        </div>
       </div>
 
       {!hideChecklist && <PaymentChecklist />}

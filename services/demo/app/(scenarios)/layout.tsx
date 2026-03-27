@@ -113,10 +113,11 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
         <main id="main-content" className="flex-1 overflow-y-auto" role="main">
           {isDemo && (
             <div
-              className="text-center text-[10px] font-medium py-1.5 px-4"
-              style={{ background: "var(--color-warning-dim)", color: "var(--color-warning)" }}
+              className="flex items-center justify-center gap-2 text-[11px] font-medium py-2 px-4"
+              style={{ background: "rgba(245, 158, 11, 0.06)", color: "var(--color-warning)" }}
             >
-              Demo Mode — Payments are simulated. Switch to Live for real wallet transactions.
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--color-warning)" }} />
+              Demo Mode — Payments are simulated
             </div>
           )}
           <AnimatePresence mode="wait">
