@@ -412,7 +412,11 @@ export function DexSwap() {
 
       setFlowState("got-402");
       const paymentRequired = await initialResponse.json();
-      const requirements = paymentRequired.accepts?.[0];
+      // Pick the accept matching the swap chain's CAIP-2 (not just [0] which may be wrong chain)
+      const targetNetwork = CHAIN_CAIP2[chain] || "eip155:42161";
+      const requirements = paymentRequired.accepts?.find(
+        (a: { network: string }) => a.network === targetNetwork
+      ) || paymentRequired.accepts?.[0];
       if (!requirements) throw new Error("No payment options available");
 
       // Step 2: Sign via multi-chain hook

@@ -730,7 +730,11 @@ export function CrossChainBridge() {
       if (res.status === 402) {
         setFlowState("got-402");
         const paymentRequired = await res.json();
-        const requirements = paymentRequired.accepts?.[0];
+        // Pick the accept matching the FROM chain's CAIP-2 (not just [0])
+        const targetNetwork = CHAIN_CAIP2[fromChain] || "eip155:42161";
+        const requirements = paymentRequired.accepts?.find(
+          (a: { network: string }) => a.network === targetNetwork
+        ) || paymentRequired.accepts?.[0];
         if (!requirements) throw new Error("No payment options available");
 
         // Step 2: Sign
