@@ -44,15 +44,55 @@
 
   var FACILITATOR_ADDRESS = "0xC88f67e776f16DcFBf42e6bDda1B82604448899B";
 
+  var NETWORK_NAMES = { "eip155:1": "Ethereum", "eip155:8453": "Base", "eip155:42161": "Arbitrum", "eip155:137": "Polygon", "eip155:10": "Optimism", "eip155:56": "BNB Chain", "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp": "Solana", "ton:mainnet": "TON", "tron:mainnet": "TRON", "stellar:pubnet": "Stellar" };
+
+  function getNetworkName(caip2) {
+    if (!caip2) return "";
+    if (NETWORK_NAMES[caip2]) return NETWORK_NAMES[caip2];
+    var parts = caip2.split(":");
+    if (parts[0] === "eip155") return "EVM (" + parts[1] + ")";
+    return caip2;
+  }
+
+  function getDecimals(token, network) {
+    if (network && network.startsWith("stellar:") && token === "USDC") return 7;
+    if (network === "eip155:56" || network === "eip155:42220") return 18;
+    return 6;
+  }
+
+  function formatAmount(amountStr, token, network) {
+    if (!amountStr) return "0.00";
+    var decimals = getDecimals(token, network);
+    try {
+      var raw = BigInt(amountStr);
+      var divisor = BigInt(Math.pow(10, decimals));
+      var whole = raw / divisor;
+      var frac = raw % divisor;
+      return whole.toString() + "." + frac.toString().padStart(decimals, "0").slice(0, 2);
+    } catch (e) { return amountStr; }
+  }
+
+  function formatTime(isoStr) {
+    if (!isoStr) return "";
+    var ms = Date.now() - new Date(isoStr).getTime();
+    var s = Math.floor(ms / 1000);
+    if (s < 60) return s + "s ago";
+    var m = Math.floor(s / 60);
+    if (m < 60) return m + "m ago";
+    var h = Math.floor(m / 60);
+    if (h < 24) return h + "h ago";
+    return Math.floor(h / 24) + "d ago";
+  }
+
   function buildTxRow(tx) {
     const tr = createElement("tr", { "data-hash": tx.txHash });
     tr.addEventListener("click", function () {
       window.location.href = "/tx/" + encodeURIComponent(tx.txHash);
     });
     tr.appendChild(createElement("td", {}, createElement("code", { textContent: formatHash(tx.txHash) })));
-    tr.appendChild(createElement("td", {}, createElement("span", { className: "badge", textContent: tx.network })));
+    tr.appendChild(createElement("td", {}, createElement("span", { className: "badge", textContent: getNetworkName(tx.network) })));
     tr.appendChild(createElement("td", {}, createElement("span", { className: "badge badge-token", textContent: tx.token })));
-    tr.appendChild(createElement("td", { className: "amount", textContent: "$" + tx.amount }));
+    tr.appendChild(createElement("td", { className: "amount", textContent: "$" + formatAmount(tx.amount, tx.token, tx.network) })));
     tr.appendChild(createElement("td", {}, createElement("code", { textContent: formatAddress(tx.from) })));
     var toEl;
     if (tx.to && tx.to.toLowerCase() === FACILITATOR_ADDRESS.toLowerCase()) {
@@ -62,9 +102,10 @@
     }
     tr.appendChild(createElement("td", {}, toEl));
     var schemeClass = tx.scheme === "exact" ? "scheme-exact" : "scheme-legacy";
-    var schemeTitle = tx.scheme === "exact" ? "EIP-3009 gasless transfer" : "approve + transferFrom";
+    var isEvm = tx.network && tx.network.startsWith("eip155:");
+    var schemeTitle = tx.scheme === "exact" ? (isEvm ? "EIP-3009 gasless transfer" : "Direct transfer") : "approve + transferFrom";
     tr.appendChild(createElement("td", {}, createElement("span", { className: "badge " + schemeClass, title: schemeTitle, textContent: tx.scheme })));
-    tr.appendChild(createElement("td", { className: "time", textContent: tx.settledAt }));
+    tr.appendChild(createElement("td", { className: "time", title: tx.settledAt || "", textContent: formatTime(tx.settledAt) }));
     return tr;
   }
 
@@ -76,6 +117,7 @@
     const params = new URLSearchParams();
     if (opts.network) params.set("network", opts.network);
     if (opts.token) params.set("token", opts.token);
+    if (opts.status) params.set("status", opts.status);
     if (opts.limit) params.set("limit", String(opts.limit));
     if (opts.cursor) params.set("cursor", opts.cursor);
     if (opts.dateFrom) params.set("dateFrom", opts.dateFrom);
@@ -145,6 +187,7 @@
 
     const networkFilter = document.getElementById("networkFilter");
     const tokenFilter = document.getElementById("tokenFilter");
+    const statusFilter = document.getElementById("statusFilter");
     const searchInput = document.getElementById("searchInput");
     const searchBtn = document.getElementById("searchBtn");
     const resetBtn = document.getElementById("resetBtn");
@@ -164,6 +207,7 @@
       var filters = {
         network: networkFilter ? networkFilter.value : "",
         token: tokenFilter ? tokenFilter.value : "",
+        status: statusFilter ? statusFilter.value : "",
         limit: 20,
       };
       if (dateFrom && dateFrom.value) {
@@ -201,6 +245,7 @@
 
     if (networkFilter) networkFilter.addEventListener("change", reload);
     if (tokenFilter) tokenFilter.addEventListener("change", reload);
+    if (statusFilter) statusFilter.addEventListener("change", reload);
     if (dateFrom) dateFrom.addEventListener("change", reload);
     if (dateTo) dateTo.addEventListener("change", reload);
     if (sortByEl) sortByEl.addEventListener("change", reload);
@@ -225,6 +270,7 @@
       resetBtn.addEventListener("click", function () {
         if (networkFilter) networkFilter.value = "";
         if (tokenFilter) tokenFilter.value = "";
+        if (statusFilter) statusFilter.value = "";
         if (searchInput) searchInput.value = "";
         if (dateFrom) dateFrom.value = "";
         if (dateTo) dateTo.value = "";

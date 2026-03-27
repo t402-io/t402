@@ -53,26 +53,26 @@ export async function getTransactions({ network, token, scheme, limit = 20, curs
   if (!db.sqlite) return { transactions: [], total: 0, hasMore: false, nextCursor: null };
   let cursorTime = null;
   if (cursor) {
-    const cursorRow = db.sqlite.prepare('SELECT confirmed_at FROM settlements WHERE tx_hash = ?').get(cursor);
-    if (cursorRow) cursorTime = cursorRow.confirmed_at;
+    const cursorRow = db.sqlite.prepare('SELECT COALESCE(confirmed_at, created_at) as ts FROM settlements WHERE tx_hash = ?').get(cursor);
+    if (cursorRow) cursorTime = cursorRow.ts;
   }
   const conds = []; const params = {};
   if (network) { conds.push("network = $network"); params.network = network; }
   if (token) { conds.push("asset = $token"); params.token = token; }
   if (scheme) { conds.push("scheme = $scheme"); params.scheme = scheme; }
   if (status) { conds.push("status = $status"); params.status = status; }
-  if (dateFrom) { conds.push("confirmed_at >= $dateFrom"); params.dateFrom = dateFrom; }
-  if (dateTo) { conds.push("confirmed_at <= $dateTo"); params.dateTo = dateTo; }
+  if (dateFrom) { conds.push("COALESCE(confirmed_at, created_at) >= $dateFrom"); params.dateFrom = dateFrom; }
+  if (dateTo) { conds.push("COALESCE(confirmed_at, created_at) <= $dateTo"); params.dateTo = dateTo; }
   if (amountMin != null && amountMin !== "") { conds.push("CAST(amount AS INTEGER) >= $amountMin"); params.amountMin = parseInt(amountMin, 10); }
   if (amountMax != null && amountMax !== "") { conds.push("CAST(amount AS INTEGER) <= $amountMax"); params.amountMax = parseInt(amountMax, 10); }
-  if (cursorTime) { conds.push("confirmed_at < $cursorTime"); params.cursorTime = cursorTime; }
+  if (cursorTime) { conds.push("COALESCE(confirmed_at, created_at) < $cursorTime"); params.cursorTime = cursorTime; }
   const where = conds.length > 0 ? `WHERE ${conds.join(" AND ")}` : "";
   const countConds = conds.filter(c => !c.includes("$cursorTime"));
   const countParams = { ...params }; delete countParams.cursorTime;
   const countWhere = countConds.length > 0 ? `WHERE ${countConds.join(" AND ")}` : "";
   const countRow = db.sqlite.prepare(`SELECT COUNT(*) as total FROM settlements ${countWhere}`).get(countParams);
   const allowedSort = ["confirmed_at", "amount", "network"];
-  const sortField = allowedSort.includes(sortBy) ? sortBy : "confirmed_at";
+  const sortField = allowedSort.includes(sortBy) ? (sortBy === "confirmed_at" ? "COALESCE(confirmed_at, created_at)" : sortBy) : "COALESCE(confirmed_at, created_at)";
   const sortDirection = sortDir === "ASC" ? "ASC" : "DESC";
   const rows = db.sqlite.prepare(`SELECT * FROM settlements ${where} ORDER BY ${sortField} ${sortDirection} LIMIT $limit`).all({ ...params, limit: limit + 1 });
   const page = rows.slice(0, limit);
@@ -88,20 +88,20 @@ export async function getTransaction(hash) {
 export async function search(query) {
   if (!db.sqlite) return [];
   if (query.length < 4) return [];
-  const looksLikeTxHash = query.startsWith("0x") || query.length >= 32;
-  if (looksLikeTxHash) {
-    const prefix = `${query}%`;
-    return db.sqlite.prepare("SELECT * FROM settlements WHERE tx_hash LIKE ? ORDER BY confirmed_at DESC LIMIT 50").all(prefix).map(sqliteRowToTx);
-  }
+  // Try tx hash search first
+  const prefix = `${query}%`;
+  const txResults = db.sqlite.prepare("SELECT * FROM settlements WHERE tx_hash LIKE ? ORDER BY COALESCE(confirmed_at, created_at) DESC LIMIT 50").all(prefix).map(sqliteRowToTx);
+  if (txResults.length > 0) return txResults;
+  // Fall through to address search (handles 0x addresses that aren't tx hashes)
   const q = `%${query}%`;
-  return db.sqlite.prepare("SELECT * FROM settlements WHERE from_address LIKE ? OR to_address LIKE ? ORDER BY confirmed_at DESC LIMIT 50").all(q, q).map(sqliteRowToTx);
+  return db.sqlite.prepare("SELECT * FROM settlements WHERE from_address LIKE ? OR to_address LIKE ? ORDER BY COALESCE(confirmed_at, created_at) DESC LIMIT 50").all(q, q).map(sqliteRowToTx);
 }
 
 export async function getStats(days = 7) {
   const cutoff = new Date(Date.now() - days * 86400_000).toISOString();
   if (!db.sqlite) return { period: `${days}d`, totalTransactions: 0, totalVolume: "0", uniquePayers: 0, uniqueRecipients: 0, byNetwork: {}, byToken: {}, byScheme: {}, avgTransactionSize: "0" };
-  const base = db.sqlite.prepare("SELECT COUNT(*) as total, COUNT(DISTINCT from_address) as payers, COUNT(DISTINCT to_address) as recipients FROM settlements WHERE confirmed_at >= ?").get(cutoff);
-  const grouped = db.sqlite.prepare("SELECT network, asset as token, scheme, COUNT(*) as count, SUM(CAST(amount AS INTEGER)) as volume FROM settlements WHERE confirmed_at >= ? AND asset != 'UNKNOWN' GROUP BY network, asset, scheme").all(cutoff);
+  const base = db.sqlite.prepare("SELECT COUNT(*) as total, COUNT(DISTINCT from_address) as payers, COUNT(DISTINCT to_address) as recipients FROM settlements WHERE COALESCE(confirmed_at, created_at) >= ?").get(cutoff);
+  const grouped = db.sqlite.prepare("SELECT network, asset as token, scheme, COUNT(*) as count, SUM(CAST(amount AS INTEGER)) as volume FROM settlements WHERE COALESCE(confirmed_at, created_at) >= ? AND asset != 'UNKNOWN' GROUP BY network, asset, scheme").all(cutoff);
   let totalVolume = 0n;
   const byNetwork = {};
   const byToken = {};
@@ -124,17 +124,22 @@ export async function getTransactionsByAddress(address, limit = 20, cursor) {
   const params = { address };
   let cursorClause = "";
   if (cursor) {
-    const cursorRow = db.sqlite.prepare('SELECT confirmed_at FROM settlements WHERE tx_hash = ?').get(cursor);
+    const cursorRow = db.sqlite.prepare('SELECT COALESCE(confirmed_at, created_at) as ts FROM settlements WHERE tx_hash = ?').get(cursor);
     if (cursorRow) {
-      cursorClause = " AND confirmed_at < $cursorTime";
-      params.cursorTime = cursorRow.confirmed_at;
+      cursorClause = " AND COALESCE(confirmed_at, created_at) < $cursorTime";
+      params.cursorTime = cursorRow.ts;
     }
   }
   const countRow = db.sqlite.prepare("SELECT COUNT(*) as total FROM settlements WHERE from_address = $address OR to_address = $address").get({ address });
-  const rows = db.sqlite.prepare(`SELECT * FROM settlements WHERE (from_address = $address OR to_address = $address)${cursorClause} ORDER BY confirmed_at DESC LIMIT $limit`).all({ ...params, limit: limit + 1 });
+  const rows = db.sqlite.prepare(`SELECT * FROM settlements WHERE (from_address = $address OR to_address = $address)${cursorClause} ORDER BY COALESCE(confirmed_at, created_at) DESC LIMIT $limit`).all({ ...params, limit: limit + 1 });
   const page = rows.slice(0, limit);
   let totalVolume = 0n;
-  for (const r of page) totalVolume += BigInt(r.amount);
+  for (const r of page) {
+    let vol = BigInt(r.amount);
+    const decimals = getDecimals(r.asset, r.network);
+    if (decimals > 6) vol = vol / BigInt(10 ** (decimals - 6));
+    totalVolume += vol;
+  }
   return { transactions: page.map(sqliteRowToTx), total: countRow.total, totalVolume: totalVolume.toString(), hasMore: rows.length > limit, nextCursor: page.length > 0 ? page[page.length - 1].tx_hash : null };
 }
 
@@ -152,9 +157,14 @@ export async function getNetworkStats(network) {
   if (!db.sqlite) return null;
   const total = db.sqlite.prepare("SELECT COUNT(*) as count FROM settlements WHERE network = ?").get(network);
   if (!total || total.count === 0) return null;
-  const amounts = db.sqlite.prepare("SELECT amount FROM settlements WHERE network = ?").all(network);
+  const amounts = db.sqlite.prepare("SELECT amount, asset as token FROM settlements WHERE network = ?").all(network);
   let totalVolume = 0n;
-  for (const r of amounts) totalVolume += BigInt(r.amount);
+  for (const r of amounts) {
+    let vol = BigInt(r.amount);
+    const decimals = getDecimals(r.token, network);
+    if (decimals > 6) vol = vol / BigInt(10 ** (decimals - 6));
+    totalVolume += vol;
+  }
   const tokens = db.sqlite.prepare("SELECT asset as token, COUNT(*) as count FROM settlements WHERE network = ? AND asset != 'UNKNOWN' GROUP BY asset ORDER BY count DESC").all(network);
   const schemes = db.sqlite.prepare("SELECT scheme, COUNT(*) as count FROM settlements WHERE network = ? GROUP BY scheme ORDER BY count DESC").all(network);
   const uniquePayers = db.sqlite.prepare("SELECT COUNT(DISTINCT from_address) as count FROM settlements WHERE network = ?").get(network);
@@ -166,9 +176,14 @@ export async function getTokenStats(tokenSymbol) {
   if (!db.sqlite) return null;
   const total = db.sqlite.prepare("SELECT COUNT(*) as count FROM settlements WHERE asset = ?").get(tokenSymbol);
   if (!total || total.count === 0) return null;
-  const amounts = db.sqlite.prepare("SELECT amount FROM settlements WHERE asset = ?").all(tokenSymbol);
+  const amounts = db.sqlite.prepare("SELECT amount, network FROM settlements WHERE asset = ?").all(tokenSymbol);
   let totalVolume = 0n;
-  for (const r of amounts) totalVolume += BigInt(r.amount);
+  for (const r of amounts) {
+    let vol = BigInt(r.amount);
+    const decimals = getDecimals(tokenSymbol, r.network);
+    if (decimals > 6) vol = vol / BigInt(10 ** (decimals - 6));
+    totalVolume += vol;
+  }
   const networks = db.sqlite.prepare("SELECT network, COUNT(*) as count FROM settlements WHERE asset = ? GROUP BY network ORDER BY count DESC").all(tokenSymbol);
   const schemes = db.sqlite.prepare("SELECT scheme, COUNT(*) as count FROM settlements WHERE asset = ? GROUP BY scheme ORDER BY count DESC").all(tokenSymbol);
   const uniquePayers = db.sqlite.prepare("SELECT COUNT(DISTINCT from_address) as count FROM settlements WHERE asset = ?").get(tokenSymbol);

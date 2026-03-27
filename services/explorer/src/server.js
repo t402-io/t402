@@ -92,7 +92,7 @@ function recordMetrics(method, path, status, durationSec) {
   entry.sum += durationSec;
   entry.count += 1;
   for (let i = 0; i < DURATION_BUCKETS.length; i++) {
-    if (durationSec <= DURATION_BUCKETS[i]) entry.buckets[i] += 1;
+    if (durationSec <= DURATION_BUCKETS[i]) { entry.buckets[i] += 1; break; }
   }
 }
 
@@ -248,8 +248,8 @@ app.get("/address/:address", async (req, res) => {
   res.type("html").send(renderAddressPage(req.params.address, result.transactions, { total: result.total, totalVolume: result.totalVolume }));
 });
 
-app.get("/network/{*networkPath}", async (req, res) => {
-  const networkId = req.params.networkPath;
+app.get("/network/:networkId", async (req, res) => {
+  const networkId = req.params.networkId;
   const stats = await getNetworkStats(networkId);
   if (!stats) return res.status(404).type("html").send(renderNetworkPage(networkId, null, []));
   const txResult = await getTransactions({ network: networkId, limit: 20 });
@@ -265,6 +265,7 @@ app.get("/token/:tokenSymbol", async (req, res) => {
 });
 
 app.get("/", async (_req, res) => {
+  res.set("Cache-Control", "public, max-age=10");
   const [stats, txResult, networks, tokens] = await Promise.all([
     getStats(7), getTransactions({ limit: 20 }), getNetworks(), getTokens(),
   ]);
@@ -304,7 +305,7 @@ app.get("/metrics", (_req, res) => {
 
   const dbStatus = getDbStatus();
   const syncLag = dbStatus.lastSync ? (Date.now() - new Date(dbStatus.lastSync).getTime()) / 1000 : -1;
-  lines.push("# HELP explorer_sync_lag_seconds Seconds since last PG sync");
+  lines.push("# HELP explorer_sync_lag_seconds Seconds since last Facilitator sync");
   lines.push("# TYPE explorer_sync_lag_seconds gauge");
   lines.push(`explorer_sync_lag_seconds ${syncLag}`);
 

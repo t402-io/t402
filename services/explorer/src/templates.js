@@ -30,12 +30,12 @@ export function renderIndex({ stats, transactions, networks, tokens, totalAll })
 <html lang="en" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="google" content="notranslate">
 <title>T402 Explorer — Payment Settlement Browser</title>
 <meta name="description" content="Browse real-time USDT/USDC payment settlements across Ethereum, Arbitrum, Solana, TON, TRON and more via the T402 protocol.">
-<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"><link rel="stylesheet" href="/static/style.css">
 ${themeToggleScript()}
 </head>
 <body>
   ${headerHtml('<a href="/">T402 Explorer</a>', 'Real-time settlement browser for the <a href="https://t402.io">T402 protocol</a>')}
-  <p class="intro">Browse ${formatNumber(totalAll || totalSettlements)} confirmed payments across ${(networks || []).length} blockchains via the <a href="https://t402.io">T402 protocol</a>.</p>
+  <p class="intro">Browse ${formatNumber(totalAll || totalSettlements)} settlements across ${(networks || []).length} blockchains via the <a href="https://t402.io">T402 protocol</a>.</p>
   <div class="stats">
     <div class="stat" title="Total confirmed settlements in the last 7 days"><div class="stat-value">${escapeHtml(formatNumber(totalSettlements))}</div><div class="stat-label">Settlements (7d)</div></div>
     <div class="stat" title="Total USD volume settled in the last 7 days"><div class="stat-value">$${escapeHtml(totalVol)}</div><div class="stat-label">Volume (7d)</div></div>
@@ -49,6 +49,7 @@ ${themeToggleScript()}
   <div class="filters">
     <select id="networkFilter"><option value="">All Chains</option>${networkOptions}</select>
     <select id="tokenFilter"><option value="">All Tokens</option>${tokenOptions}</select>
+    <select id="statusFilter"><option value="">All Status</option><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="failed">Failed</option></select>
     <label class="filter-label">From <input type="date" id="dateFrom"></label>
     <label class="filter-label">To <input type="date" id="dateTo"></label>
     <select id="sortBy">
@@ -60,13 +61,13 @@ ${themeToggleScript()}
     <button class="secondary" id="resetBtn">Reset</button>
   </div>
   <div class="filters">
-    <input id="searchInput" placeholder="Search by tx hash (0x...) or wallet address">
+    <input type="search" id="searchInput" placeholder="Search by tx hash (0x...) or wallet address">
     <button id="searchBtn">Search</button>
   </div>
   <h2>Recent Transactions</h2>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Hash</th><th>Chain</th><th>Token</th><th class="text-right">Amount</th><th>From</th><th>To</th><th title="exact = EIP-3009 gasless transfer; exact-legacy = approve + transferFrom">Scheme</th><th>Settled</th></tr></thead>
+      <thead><tr><th>Hash</th><th>Chain</th><th>Token</th><th class="text-right">Amount</th><th>From</th><th>To</th><th title="exact = direct gasless transfer; exact-legacy = approve + transferFrom">Scheme</th><th>Time</th></tr></thead>
       <tbody id="txBody">${rows}</tbody>
     </table>
   </div>
@@ -92,7 +93,8 @@ const FACILITATOR_ADDRESS = "0xC88f67e776f16DcFBf42e6bDda1B82604448899B";
 function renderRow(tx) {
   const amount = formatAmount(tx.amount, tx.token, tx.network);
   const schemeClass = tx.scheme === "exact" ? "scheme-exact" : "scheme-legacy";
-  const schemeTitle = tx.scheme === "exact" ? "EIP-3009 gasless transfer" : "approve + transferFrom";
+  const isEvm = tx.network && tx.network.startsWith("eip155:");
+  const schemeTitle = tx.scheme === "exact" ? (isEvm ? "EIP-3009 gasless transfer" : "Direct transfer") : "approve + transferFrom";
   const toCell = tx.to && tx.to.toLowerCase() === FACILITATOR_ADDRESS.toLowerCase()
     ? `<span class="badge badge-facilitator" title="${escapeHtml(tx.to)}">Facilitator</span>`
     : `<code>${escapeHtml(formatAddress(tx.to))}</code>`;
@@ -102,8 +104,8 @@ function renderRow(tx) {
     <td><a href="/network/${escapeHtml(encodeURIComponent(tx.network))}"><span class="badge">${escapeHtml(getNetworkName(tx.network))}</span></a></td>
     <td><a href="/token/${escapeHtml(encodeURIComponent(tx.token))}"><span class="badge badge-token" title="${escapeHtml(tokenTitle)}">${escapeHtml(tx.token)}</span></a></td>
     <td class="amount">$${escapeHtml(amount)}</td>
-    <td><code>${escapeHtml(formatAddress(tx.from))}</code></td>
-    <td>${toCell}</td>
+    <td><a href="/address/${escapeHtml(encodeURIComponent(tx.from))}"><code>${escapeHtml(formatAddress(tx.from))}</code></a></td>
+    <td>${tx.to && tx.to.toLowerCase() === FACILITATOR_ADDRESS.toLowerCase() ? toCell : `<a href="/address/${escapeHtml(encodeURIComponent(tx.to))}">${toCell}</a>`}</td>
     <td><span class="badge ${schemeClass}" title="${escapeHtml(schemeTitle)}">${escapeHtml(tx.scheme)}</span></td>
     <td class="time" title="${escapeHtml(tx.settledAt)}">${escapeHtml(formatTime(tx.settledAt))}</td>
   </tr>`;
@@ -125,11 +127,11 @@ export function renderDetail(tx) {
   return `<!DOCTYPE html>
 <html lang="en" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="google" content="notranslate">
 <title>Tx ${escapeHtml(formatHash(tx.txHash))} - T402 Explorer</title>
-<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"><link rel="stylesheet" href="/static/style.css">
 ${themeToggleScript()}
 </head>
 <body>
-  ${headerHtml('<a href="/">T402 Payment Explorer</a>', '<a href="/">Back to transactions</a>')}
+  ${headerHtml('<a href="/">T402 Explorer</a>', '<a href="/">Back to transactions</a>')}
   <div class="tx-detail">
     <h2>Transaction Details</h2>
     <div class="detail-row"><span class="detail-label">Status</span><span class="status-badge ${statusClass}">${escapeHtml(tx.status)}</span></div>
@@ -154,11 +156,11 @@ export function renderAddressPage(address, transactions, stats) {
   return `<!DOCTYPE html>
 <html lang="en" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="google" content="notranslate">
 <title>Address ${escapeHtml(formatAddress(address))} - T402 Explorer</title>
-<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"><link rel="stylesheet" href="/static/style.css">
 ${themeToggleScript()}
 </head>
 <body>
-  ${headerHtml('<a href="/">T402 Payment Explorer</a>', '<a href="/">Back to transactions</a>')}
+  ${headerHtml('<a href="/">T402 Explorer</a>', '<a href="/">Back to transactions</a>')}
   <div class="tx-detail">
     <h2>Address Details</h2>
     <div class="detail-row"><span class="detail-label">Address</span><span class="detail-value"><code>${escapeHtml(address)}</code><button class="copy-btn" data-copy="${escapeHtml(address)}" title="Copy">Copy</button></span></div>
@@ -174,6 +176,10 @@ ${themeToggleScript()}
       <tbody>${rows}</tbody>
     </table>
   </div>
+  <footer>
+    <a href="/">Back to Explorer</a> ·
+    Powered by <a href="https://t402.io">T402</a>
+  </footer>
   <script src="/static/app.js"></script>
 </body></html>`;
 }
@@ -186,11 +192,11 @@ export function renderNetworkPage(networkId, stats, transactions) {
     return `<!DOCTYPE html>
 <html lang="en" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="google" content="notranslate">
 <title>${escapeHtml(name)} - T402 Explorer</title>
-<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"><link rel="stylesheet" href="/static/style.css">
 ${themeToggleScript()}
 </head>
 <body>
-  ${headerHtml('<a href="/">T402 Payment Explorer</a>', '<a href="/">Back to transactions</a>')}
+  ${headerHtml('<a href="/">T402 Explorer</a>', '<a href="/">Back to transactions</a>')}
   <div class="tx-detail">
     <h2>Network Not Found</h2>
     <p class="subtitle">No transactions found for network <code>${escapeHtml(networkId)}</code>.</p>
@@ -208,11 +214,11 @@ ${themeToggleScript()}
   return `<!DOCTYPE html>
 <html lang="en" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="google" content="notranslate">
 <title>${escapeHtml(name)} - T402 Explorer</title>
-<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"><link rel="stylesheet" href="/static/style.css">
 ${themeToggleScript()}
 </head>
 <body>
-  ${headerHtml('<a href="/">T402 Payment Explorer</a>', '<a href="/">Back to transactions</a>')}
+  ${headerHtml('<a href="/">T402 Explorer</a>', '<a href="/">Back to transactions</a>')}
   <div class="tx-detail">
     <h2>Network: ${escapeHtml(name)}</h2>
     <div class="detail-row"><span class="detail-label">CAIP-2 ID</span><span class="detail-value"><code>${escapeHtml(networkId)}</code><button class="copy-btn" data-copy="${escapeHtml(networkId)}" title="Copy">Copy</button></span></div>
@@ -248,11 +254,11 @@ export function renderTokenPage(tokenSymbol, stats, transactions) {
     return `<!DOCTYPE html>
 <html lang="en" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="google" content="notranslate">
 <title>${escapeHtml(tokenSymbol)} - T402 Explorer</title>
-<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"><link rel="stylesheet" href="/static/style.css">
 ${themeToggleScript()}
 </head>
 <body>
-  ${headerHtml('<a href="/">T402 Payment Explorer</a>', '<a href="/">Back to transactions</a>')}
+  ${headerHtml('<a href="/">T402 Explorer</a>', '<a href="/">Back to transactions</a>')}
   <div class="tx-detail">
     <h2>Token Not Found</h2>
     <p class="subtitle">No transactions found for token <code>${escapeHtml(tokenSymbol)}</code>.</p>
@@ -270,11 +276,11 @@ ${themeToggleScript()}
   return `<!DOCTYPE html>
 <html lang="en" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="google" content="notranslate">
 <title>${escapeHtml(tokenSymbol)} - T402 Explorer</title>
-<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"><link rel="stylesheet" href="/static/style.css">
 ${themeToggleScript()}
 </head>
 <body>
-  ${headerHtml('<a href="/">T402 Payment Explorer</a>', '<a href="/">Back to transactions</a>')}
+  ${headerHtml('<a href="/">T402 Explorer</a>', '<a href="/">Back to transactions</a>')}
   <div class="tx-detail">
     <h2>Token: ${escapeHtml(tokenSymbol)}</h2>
     <div class="detail-row"><span class="detail-label">Networks</span><span class="detail-value">${networkBadges || "<span class=\"muted\">None</span>"}</span></div>
@@ -306,11 +312,11 @@ function render404() {
   return `<!DOCTYPE html>
 <html lang="en" translate="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="google" content="notranslate">
 <title>Not Found - T402 Explorer</title>
-<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"><link rel="stylesheet" href="/static/style.css">
 ${themeToggleScript()}
 </head>
 <body>
-  ${headerHtml('<a href="/">T402 Payment Explorer</a>', '')}
+  ${headerHtml('<a href="/">T402 Explorer</a>', '')}
   <div class="tx-detail">
     <h2>Transaction Not Found</h2>
     <p class="subtitle">The transaction does not exist or has not been indexed yet.</p>
