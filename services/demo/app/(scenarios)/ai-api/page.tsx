@@ -22,6 +22,7 @@ export default function AiApiPage() {
       cost="0.001 USDT/query"
       accentColor="var(--color-scenario-ai)"
       scenarioId="ai-api"
+      hideChainSelector
     >
       <AiApiScenario />
     </ScenarioShell>

@@ -10,7 +10,6 @@ import { CodeBlock } from "@/components/shared/CodeBlock";
 import { Spinner } from "@/components/shared/Spinner";
 import { encodePaymentHeader } from "@/lib/t402-client";
 import { classifyError, getUserFriendlyMessage, getErrorAction } from "@/lib/error-helpers";
-import { Bot } from "lucide-react";
 
 type State = "idle" | "paying" | "streaming" | "done" | "error";
 
@@ -124,129 +123,129 @@ export function AiApiScenario() {
     {flowState !== "idle" && (
       <PaymentStatus flowState={flowState} settle={settle} family={activeFamily} />
     )}
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Left: Input */}
-      <div className="flex flex-col gap-4">
-        <div className="glass-card p-4 sm:p-5">
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            <span className="text-sm font-medium">Query</span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--color-brand-dim)] text-[var(--color-brand)]">
-              0.001 USDT/query
-            </span>
-          </div>
-          <textarea
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="w-full bg-[var(--color-code-bg)] border border-[var(--color-border)] rounded-lg p-3 text-sm font-mono text-[var(--color-code-text)] resize-none focus:outline-none focus:border-[var(--color-brand)]"
-            rows={3}
-            placeholder="Ask anything..."
-          />
-          <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-3">
-            {EXAMPLE_QUERIES.map((q) => (
-              <button
-                key={q}
-                onClick={() => setQuery(q)}
-                className={`text-[10px] sm:text-xs px-2 sm:px-2.5 py-1 rounded-md border transition-colors cursor-pointer active:scale-95 ${
-                  query === q
-                    ? "border-[var(--color-brand)] text-[var(--color-brand)]"
-                    : "border-[var(--color-border)] text-[var(--color-muted)] hover:text-white"
-                }`}
-              >
-                <span className="sm:hidden">{q.slice(0, 20)}...</span>
-                <span className="hidden sm:inline">{q.slice(0, 30)}...</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <button
-          onClick={execute}
-          disabled={state === "paying" || state === "streaming"}
-          className="btn-primary w-full py-3 min-h-[48px] flex items-center justify-center gap-2"
-        >
-          {state === "paying" || state === "streaming" ? (
-            <>
-              <Spinner size="sm" color="white" />
-              {state === "paying" ? "Paying..." : "Generating..."}
-            </>
-          ) : (
-            <>Pay & Query</>
-          )}
-        </button>
-
-        {totalQueries > 0 && (
-          <p className="text-xs text-[var(--color-muted)] text-center">
-            {totalQueries} queries · {(totalQueries * 0.001).toFixed(3)} USDT spent
-          </p>
-        )}
-      </div>
-
-      {/* Right: Response */}
-      <div className="flex flex-col gap-3">
-        {state === "idle" && (
-          <div className="glass-card p-4 sm:p-6 flex flex-col items-center justify-center min-h-[200px] sm:min-h-[240px] text-center">
-            <Bot size={32} className="mb-3" style={{ color: "var(--color-scenario-ai)" }} />
-            <p className="text-sm text-[var(--color-muted)]">
-              AI response will appear here after payment
-            </p>
-          </div>
-        )}
-
-        {(state === "paying" || state === "streaming") && (
-          <div className="glass-card p-4 sm:p-6 flex flex-col items-center justify-center min-h-[200px] sm:min-h-[240px]">
-            <Spinner size="lg" color="var(--color-brand)" />
-            <p className="text-sm text-[var(--color-muted)] mt-4">
-              {state === "paying" ? "Processing USDT payment..." : "Generating response..."}
-            </p>
-          </div>
-        )}
-
-        {state === "done" && result && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col gap-3"
-          >
-            <div className="glass-card p-5">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs text-[var(--color-muted)]">
-                  Model: {result.model}
-                </span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--color-success-dim)] text-[var(--color-success)]">
-                  Paid {result.cost}
-                </span>
-              </div>
-              <p className="text-sm leading-relaxed">{result.response}</p>
+    <div className="max-w-lg mx-auto space-y-4">
+      {/* Form card — hidden when result is showing */}
+      {state !== "done" && (
+        <>
+          <div className="glass-card p-4 sm:p-5">
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <span className="text-sm font-medium">Query</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--color-brand-dim)] text-[var(--color-brand)]">
+                0.001 USDT/query
+              </span>
             </div>
-            <CodeBlock
-              code={JSON.stringify({ query: result.query, cost: result.cost, model: result.model }, null, 2)}
-              language="json"
-              label="Response Metadata"
-              labelColor="var(--color-muted)"
-              maxHeight="120px"
+            <textarea
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="w-full bg-[var(--color-code-bg)] border border-[var(--color-border)] rounded-lg p-3 text-sm font-mono text-[var(--color-code-text)] resize-none focus:outline-none focus:border-[var(--color-brand)]"
+              rows={3}
+              placeholder="Ask anything..."
+              disabled={state === "paying" || state === "streaming"}
             />
-          </motion.div>
-        )}
+            <div className="flex flex-wrap gap-1.5 mt-3">
+              {EXAMPLE_QUERIES.slice(0, 3).map((q, i) => (
+                <button
+                  key={i}
+                  onClick={() => setQuery(q)}
+                  className="text-[10px] px-2 py-1 rounded-full transition-colors cursor-pointer active:scale-95"
+                  style={{
+                    background: query === q ? "var(--color-brand-dim)" : "var(--color-surface)",
+                    color: query === q ? "var(--color-brand)" : "var(--color-muted)",
+                    border: query === q ? "1px solid var(--color-brand)" : "1px solid var(--color-border)",
+                  }}
+                >
+                  {q.length > 30 ? q.slice(0, 30) + "..." : q}
+                </button>
+              ))}
+            </div>
 
-        {state === "error" && (
-          <div className="glass-card p-4 sm:p-6 text-center">
-            <p className="text-sm text-[var(--color-error)]">
-              {error ? getUserFriendlyMessage(classifyError(error), error) : "An unknown error occurred."}
-            </p>
-            {error && (
-              <p className="text-[10px] mt-1" style={{ color: "var(--color-muted)" }}>
-                {getErrorAction(classifyError(error), activeFamily) || "Try again or switch to Demo mode."}
-              </p>
-            )}
             <button
-              onClick={() => { setState("idle"); setFlowState("idle"); setSettle(null); }}
-              className="mt-3 text-xs text-[var(--color-muted)] hover:text-white cursor-pointer min-h-[36px]"
+              onClick={execute}
+              disabled={state === "paying" || state === "streaming"}
+              className="btn-primary w-full py-3 min-h-[48px] flex items-center justify-center gap-2 mt-4"
             >
-              Reset
+              {state === "paying" || state === "streaming" ? (
+                <>
+                  <Spinner size="sm" color="white" />
+                  {state === "paying" ? "Paying..." : "Generating..."}
+                </>
+              ) : (
+                <>Pay & Query</>
+              )}
             </button>
           </div>
-        )}
-      </div>
+
+          {/* Processing spinner */}
+          {(state === "paying" || state === "streaming") && (
+            <div className="glass-card p-6 flex flex-col items-center justify-center">
+              <Spinner size="lg" color="var(--color-brand)" />
+              <p className="text-sm text-[var(--color-muted)] mt-4">
+                {state === "paying" ? "Processing USDT payment..." : "Generating response..."}
+              </p>
+            </div>
+          )}
+
+          {/* Error state */}
+          {state === "error" && (
+            <div className="glass-card p-4 sm:p-6 text-center">
+              <p className="text-sm text-[var(--color-error)]">
+                {error ? getUserFriendlyMessage(classifyError(error), error) : "An unknown error occurred."}
+              </p>
+              {error && (
+                <p className="text-[10px] mt-1" style={{ color: "var(--color-muted)" }}>
+                  {getErrorAction(classifyError(error), activeFamily) || "Try again or switch to Demo mode."}
+                </p>
+              )}
+              <button
+                onClick={() => { setState("idle"); setFlowState("idle"); setSettle(null); }}
+                className="mt-3 text-xs text-[var(--color-muted)] hover:text-white cursor-pointer min-h-[36px]"
+              >
+                Reset
+              </button>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Result — replaces the form when done */}
+      {state === "done" && result && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col gap-3"
+        >
+          <div className="glass-card p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "var(--color-surface)", color: "var(--color-muted)", border: "1px solid var(--color-border)" }}>
+                {result.model}
+              </span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--color-success-dim)] text-[var(--color-success)]">
+                {result.cost}
+              </span>
+            </div>
+            <p className="text-sm leading-relaxed">{result.response}</p>
+          </div>
+          <CodeBlock
+            code={JSON.stringify({ query: result.query, cost: result.cost, model: result.model }, null, 2)}
+            language="json"
+            label="Response Metadata"
+            labelColor="var(--color-muted)"
+            maxHeight="120px"
+          />
+          <button
+            onClick={() => { setState("idle"); setFlowState("idle"); setSettle(null); }}
+            className="btn-primary w-full py-3 min-h-[48px] flex items-center justify-center gap-2"
+          >
+            Ask another question
+          </button>
+        </motion.div>
+      )}
+
+      {totalQueries > 0 && (
+        <p className="text-xs text-[var(--color-muted)] text-center">
+          {totalQueries} queries · {(totalQueries * 0.001).toFixed(3)} USDT spent
+        </p>
+      )}
     </div>
     </>
   );
