@@ -494,6 +494,12 @@ table tbody tr:hover {
   background: rgba(80, 175, 149, 0.04);
 }
 
+/* --- TOC: limit height and add scroll for long pages --- */
+.nextra-toc > ul {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
 /* ============================================
    Responsive
    ============================================ */
