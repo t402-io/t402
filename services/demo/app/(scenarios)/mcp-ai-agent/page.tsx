@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Wand2 } from "lucide-react";
 import { ScenarioShell } from "@/components/shared/ScenarioShell";
 import { McpAiAgent } from "@/components/scenarios/McpAiAgent";
 
@@ -18,7 +17,7 @@ export const metadata: Metadata = {
 export default function McpAiAgentPage() {
   return (
     <ScenarioShell
-      icon={Wand2}
+      iconName="wand2"
       title="MCP AI Agent"
       description="AI agent autonomously pays for tools and resources via Model Context Protocol."
       cost="0.001 USDT/tool"

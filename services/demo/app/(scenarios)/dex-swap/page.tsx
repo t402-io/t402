@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Repeat } from "lucide-react";
 import { ScenarioShell } from "@/components/shared/ScenarioShell";
 import { DexSwap } from "@/components/scenarios/DexSwap";
 
@@ -18,7 +17,7 @@ export const metadata: Metadata = {
 export default function DexSwapPage() {
   return (
     <ScenarioShell
-      icon={Repeat}
+      iconName="repeat"
       title="DEX Swap"
       description="Swap tokens via ParaSwap on 7 chains. Pay 0.01 USDT per swap — real-time pricing from 10+ DEXes."
       cost="0.01 USDT/swap"

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { ArrowLeftRight } from "lucide-react";
 import { ScenarioShell } from "@/components/shared/ScenarioShell";
 import { CrossChainBridge } from "@/components/scenarios/CrossChainBridge";
 
@@ -18,7 +17,7 @@ export const metadata: Metadata = {
 export default function CrossChainBridgePage() {
   return (
     <ScenarioShell
-      icon={ArrowLeftRight}
+      iconName="arrowleftright"
       title="Cross-Chain Bridge"
       description="Bridge USDT0 across 22 EVM chains via LayerZero. Pay 0.01 USDT per bridge — real on-chain settlement."
       cost="0.01 USDT/bridge"

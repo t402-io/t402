@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Radio } from "lucide-react";
 import { ScenarioShell } from "@/components/shared/ScenarioShell";
 import { StreamingMedia } from "@/components/scenarios/StreamingMedia";
 
@@ -18,7 +17,7 @@ export const metadata: Metadata = {
 export default function StreamingMediaPage() {
   return (
     <ScenarioShell
-      icon={Radio}
+      iconName="radio"
       title="Streaming Media"
       description="Pay-per-second audio streaming. No subscriptions, just listen and pay as you go."
       cost="0.001 USDT/10s"

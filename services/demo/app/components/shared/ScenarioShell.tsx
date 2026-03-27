@@ -10,22 +10,34 @@ import { useChainContext } from "@/providers/ChainProvider";
 import { useDemoContext } from "@/providers/DemoProvider";
 import type { ScenarioId } from "@/lib/sdk-examples";
 import type { ReactNode } from "react";
-import { AlertTriangle } from "lucide-react";
+import {
+  AlertTriangle, Brain, FileText, Database, Bot,
+  Cpu, Radio, Wand2, ArrowLeftRight, Zap, Repeat,
+  type LucideIcon,
+} from "lucide-react";
 import { WalletChainIndicator } from "./WalletChainIndicator";
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  brain: Brain, filetext: FileText, database: Database, bot: Bot,
+  cpu: Cpu, radio: Radio, wand2: Wand2, arrowleftright: ArrowLeftRight,
+  zap: Zap, repeat: Repeat,
+};
 
 interface ScenarioShellProps {
   title: string;
   description: string;
   cost: string;
   accentColor: string;
-  icon?: React.ComponentType<{ size?: number; className?: string }>;
+  /** Icon name (lowercase): brain, filetext, database, bot, cpu, radio, wand2, arrowleftright, zap, repeat */
+  iconName?: string;
   scenarioId?: ScenarioId;
   hideChecklist?: boolean;
   hideChainSelector?: boolean;
   children: ReactNode;
 }
 
-export function ScenarioShell({ title, description, cost, accentColor, icon: Icon, scenarioId, hideChecklist, hideChainSelector, children }: ScenarioShellProps) {
+export function ScenarioShell({ title, description, cost, accentColor, iconName, scenarioId, hideChecklist, hideChainSelector, children }: ScenarioShellProps) {
+  const Icon = iconName ? ICON_MAP[iconName] : undefined;
   const { activeFamily } = useChainContext();
   const { isLive, testnet } = useDemoContext();
 
