@@ -223,6 +223,7 @@ code {
 .scheme-exact { background: var(--green-bg); color: var(--green-text); }
 .scheme-legacy { background: var(--yellow-bg); color: var(--yellow-text); }
 .badge-facilitator { background: var(--purple-bg); color: var(--purple-text); }
+.badge-purpose { background: rgba(99,102,241,0.15); color: #818cf8; font-weight: 500; }
 
 /* Amounts & Text */
 .amount {

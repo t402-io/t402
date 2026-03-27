@@ -67,7 +67,7 @@ ${themeToggleScript()}
   <h2>Recent Transactions</h2>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Hash</th><th>Chain</th><th>Token</th><th class="text-right">Amount</th><th>From</th><th>To</th><th title="exact = direct gasless transfer; exact-legacy = approve + transferFrom">Scheme</th><th>Time</th></tr></thead>
+      <thead><tr><th>Hash</th><th>Chain</th><th>Token</th><th class="text-right">Amount</th><th>From</th><th>To</th><th>Purpose</th><th title="exact = direct gasless transfer; exact-legacy = approve + transferFrom">Scheme</th><th>Time</th></tr></thead>
       <tbody id="txBody">${rows}</tbody>
     </table>
   </div>
@@ -106,6 +106,7 @@ function renderRow(tx) {
     <td class="amount">$${escapeHtml(amount)}</td>
     <td><a href="/address/${escapeHtml(encodeURIComponent(tx.from))}"><code>${escapeHtml(formatAddress(tx.from))}</code></a></td>
     <td>${tx.to && tx.to.toLowerCase() === FACILITATOR_ADDRESS.toLowerCase() ? toCell : `<a href="/address/${escapeHtml(encodeURIComponent(tx.to))}">${toCell}</a>`}</td>
+    <td class="purpose">${tx.description ? `<span class="badge badge-purpose" title="${escapeHtml(tx.source || '')}">${escapeHtml(tx.description)}</span>` : '<span class="muted">—</span>'}</td>
     <td><span class="badge ${schemeClass}" title="${escapeHtml(schemeTitle)}">${escapeHtml(tx.scheme)}</span></td>
     <td class="time" title="${escapeHtml(tx.settledAt)}">${escapeHtml(formatTime(tx.settledAt))}</td>
   </tr>`;

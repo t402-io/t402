@@ -101,6 +101,10 @@
       toEl = createElement("code", { textContent: formatAddress(tx.to) });
     }
     tr.appendChild(createElement("td", {}, toEl));
+    var purposeEl = tx.description
+      ? createElement("span", { className: "badge badge-purpose", title: tx.source || "", textContent: tx.description })
+      : createElement("span", { className: "muted", textContent: "—" });
+    tr.appendChild(createElement("td", { className: "purpose" }, purposeEl));
     var schemeClass = tx.scheme === "exact" ? "scheme-exact" : "scheme-legacy";
     var isEvm = tx.network && tx.network.startsWith("eip155:");
     var schemeTitle = tx.scheme === "exact" ? (isEvm ? "EIP-3009 gasless transfer" : "Direct transfer") : "approve + transferFrom";
