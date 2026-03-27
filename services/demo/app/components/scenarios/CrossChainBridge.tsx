@@ -23,7 +23,9 @@ import {
 import type { FlowState } from "@/hooks/usePaymentFlow";
 import { encodePaymentHeader } from "@/lib/t402-client";
 import { useEvmChainSync } from "@/hooks/useEvmChainSync";
+import { useChainContext } from "@/providers/ChainProvider";
 import { WalletChainIndicator } from "@/components/shared/WalletChainIndicator";
+import { CHAIN_FAMILIES, CHAIN_CONFIGS } from "@/lib/testnet-config";
 
 // ---------------------------------------------------------------------------
 // Types & Constants
@@ -566,6 +568,47 @@ function ErrorState({
 }
 
 // ---------------------------------------------------------------------------
+// Pay Fee Chain Selector — lets user choose which chain to pay the bridge fee on
+// ---------------------------------------------------------------------------
+
+function PayFeeChainSelector() {
+  const { activeFamily, setActiveFamily } = useChainContext();
+  const { testnet } = useDemoContext();
+
+  return (
+    <div className="mt-4">
+      <label className="text-[10px] uppercase tracking-wider text-[var(--color-muted)] mb-2 block">
+        Pay Bridge Fee With
+      </label>
+      <div className="flex flex-wrap gap-1.5">
+        {CHAIN_FAMILIES.map((family) => {
+          const cfg = CHAIN_CONFIGS[family];
+          const isActive = activeFamily === family;
+          return (
+            <button
+              key={family}
+              onClick={() => setActiveFamily(family)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all"
+              style={{
+                background: isActive ? `${cfg.color}15` : "var(--color-surface)",
+                border: isActive ? `1px solid ${cfg.color}40` : "1px solid var(--color-border)",
+                color: isActive ? "var(--color-text-primary)" : "var(--color-text-tertiary)",
+              }}
+            >
+              <ChainLogo family={family} size={14} />
+              {cfg.label}
+            </button>
+          );
+        })}
+      </div>
+      <p className="text-[10px] text-[var(--color-muted)] mt-1.5">
+        0.01 USDT fee — paid on {CHAIN_CONFIGS[activeFamily].label}. Bridge executes on EVM via LayerZero.
+      </p>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main Component
 // ---------------------------------------------------------------------------
 
@@ -949,12 +992,17 @@ export function CrossChainBridge() {
               disabled={formDisabled}
             />
           </div>
-          <div className="mb-4">
-            <WalletChainIndicator expectedChainId={BRIDGE_CHAIN_IDS[fromChain]} />
-          </div>
+          {activeFamily === "evm" && (
+            <div className="mb-4">
+              <WalletChainIndicator expectedChainId={BRIDGE_CHAIN_IDS[fromChain]} />
+            </div>
+          )}
+
+          {/* Pay fee with — chain selector */}
+          <PayFeeChainSelector />
 
           {/* Amount input */}
-          <div>
+          <div className="mt-4">
             <label className="text-[10px] uppercase tracking-wider text-[var(--color-muted)] mb-2 block">
               Amount
             </label>
