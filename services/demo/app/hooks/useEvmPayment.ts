@@ -63,8 +63,6 @@ function createNonce(): string {
   return "0x" + Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-// CHAIN_RPC and NATIVE_CURRENCY are now in @/lib/evm-chains.ts
-// Aliases for backward compatibility within this file
 const CHAIN_RPC = EVM_CHAIN_RPC;
 const NATIVE_CURRENCY = EVM_NATIVE_CURRENCY;
 
@@ -95,6 +93,8 @@ async function ensureCorrectChain(
             blockExplorerUrls: config?.explorer ? [config.explorer.replace("/tx/", "")] : undefined,
           }],
         });
+        // OKX compatibility: delay after adding chain
+        await new Promise((r) => setTimeout(r, 500));
         await switchChainAsync({ chainId: requiredChainId });
       } catch {
         throw new Error(`Failed to add ${chainName}. Add manually (Chain ID: ${requiredChainId}).`);
@@ -105,18 +105,16 @@ async function ensureCorrectChain(
   }
 }
 
-// Facilitator address — sourced from config, falls back to well-known address
+// Facilitator address
 const FACILITATOR_ADDRESS = (process.env.NEXT_PUBLIC_FACILITATOR_ADDRESS || "0xC88f67e776f16DcFBf42e6bDda1B82604448899B") as `0x${string}`;
 
 /**
  * Check on-chain allowance for the facilitator.
- * Returns the raw allowance as a bigint via direct RPC call.
  */
 async function checkAllowance(chainId: number, tokenAddress: string, ownerAddress: string): Promise<bigint> {
   const rpcUrl = CHAIN_RPC[chainId];
   if (!rpcUrl) return BigInt(0);
 
-  // allowance(address,address) = 0xdd62ed3e
   const owner = ownerAddress.slice(2).toLowerCase().padStart(64, "0");
   const spender = FACILITATOR_ADDRESS.slice(2).toLowerCase().padStart(64, "0");
   const data = `0xdd62ed3e${owner}${spender}`;
@@ -133,6 +131,44 @@ async function checkAllowance(chainId: number, tokenAddress: string, ownerAddres
   return BigInt(0);
 }
 
+/**
+ * Poll for transaction receipt until confirmed or timeout.
+ * Returns the receipt or throws on timeout.
+ */
+async function waitForReceipt(chainId: number, txHash: string, maxWait = 60000): Promise<void> {
+  const rpcUrl = CHAIN_RPC[chainId];
+  if (!rpcUrl) {
+    // No RPC URL — fall back to a fixed wait
+    await new Promise((r) => setTimeout(r, 15000));
+    return;
+  }
+
+  const start = Date.now();
+  while (Date.now() - start < maxWait) {
+    try {
+      const response = await fetch(rpcUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "eth_getTransactionReceipt",
+          params: [txHash],
+          id: 1,
+        }),
+      });
+      const result = await response.json();
+      if (result.result && result.result.blockNumber) {
+        return; // Transaction mined
+      }
+    } catch {
+      // Ignore polling errors, retry
+    }
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+
+  throw new Error("Transaction confirmation timed out. The transaction may still be pending.");
+}
+
 export function useEvmPayment() {
   const { address, isConnected, chain } = useAccount();
   const { signTypedDataAsync } = useSignTypedData();
@@ -145,8 +181,12 @@ export function useEvmPayment() {
       const chainConfig = getConfigByNetwork(requirements.network);
       const chainName = chainConfig?.name || `Chain ${requiredChainId}`;
 
+      // Ensure wallet is on the correct chain
       if (chain?.id !== requiredChainId) {
+        onProgress?.("switching-chain");
         await ensureCorrectChain(switchChainAsync, requiredChainId, chainName);
+        // Wait briefly for Wagmi to update chain state
+        await new Promise((r) => setTimeout(r, 300));
       }
 
       const isLegacy = requirements.scheme === "exact-legacy";
@@ -162,7 +202,6 @@ export function useEvmPayment() {
         const currentAllowance = await checkAllowance(requiredChainId, requirements.asset, address);
 
         if (currentAllowance < requiredAmount) {
-          // Step 1: Send on-chain approve transaction via wallet provider
           onProgress?.("approving");
           const provider = (window as any).ethereum;
           if (!provider?.request) throw new Error("Wallet provider not available for approve transaction");
@@ -174,30 +213,34 @@ export function useEvmPayment() {
               functionName: "approve",
               args: [FACILITATOR_ADDRESS, BigInt(0)],
             });
-            await provider.request({
+            const resetTxHash = await provider.request({
               method: "eth_sendTransaction",
               params: [{ from: address, to: requirements.asset, data: resetData }],
             });
-            await new Promise((r) => setTimeout(r, 5000)); // Wait for reset tx
+            // Poll for receipt instead of fixed wait
+            if (resetTxHash) {
+              await waitForReceipt(requiredChainId, resetTxHash);
+            }
           }
 
-          // Approve a large amount (not maxUint256 — some legacy tokens reject it)
-          const approveAmount = BigInt("1000000000000"); // 1M USDT (enough for a while)
+          // Approve a large amount
+          const approveAmount = BigInt("1000000000000"); // 1M USDT
           const approveData = encodeFunctionData({
             abi: erc20Abi,
             functionName: "approve",
             args: [FACILITATOR_ADDRESS, approveAmount],
           });
-          await provider.request({
+          const approveTxHash = await provider.request({
             method: "eth_sendTransaction",
             params: [{ from: address, to: requirements.asset, data: approveData }],
           });
-
-          // Wait for approve tx to be mined
-          await new Promise((r) => setTimeout(r, 15000)); // Ethereum ~12s/block
+          // Poll for receipt instead of fixed wait
+          if (approveTxHash) {
+            await waitForReceipt(requiredChainId, approveTxHash);
+          }
         }
 
-        // Step 2: Sign EIP-712 LegacyTransferAuthorization
+        // Sign EIP-712 LegacyTransferAuthorization
         onProgress?.("signing");
         const authorization = {
           from: address,

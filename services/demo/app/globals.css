@@ -50,6 +50,8 @@
   --color-chain-polkadot-dim: #E6007A20;
   --color-chain-cosmos: #B7B9C8;
   --color-chain-cosmos-dim: #B7B9C820;
+  --color-chain-stellar: #7B61FF;
+  --color-chain-stellar-dim: #7B61FF20;
 
   /* Scenario accent colors */
   --color-scenario-ai: #50AF95;

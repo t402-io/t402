@@ -13,7 +13,7 @@ export type { ChainFamily, ChainConfig };
 export { CHAIN_FAMILIES, TESTNET_CONFIGS, MAINNET_CONFIGS };
 
 /** Families that use exact-direct scheme */
-const EXACT_DIRECT_FAMILIES: ChainFamily[] = ["stacks", "near", "aptos", "tezos", "polkadot", "cosmos"];
+const EXACT_DIRECT_FAMILIES: ChainFamily[] = ["stacks", "near", "aptos", "tezos", "polkadot", "cosmos", "stellar"];
 
 /** Default mainnet network per family (used when switching from testnet family to mainnet) */
 const DEFAULT_MAINNET_NETWORK: Record<ChainFamily, string> = {
@@ -27,6 +27,7 @@ const DEFAULT_MAINNET_NETWORK: Record<ChainFamily, string> = {
   tezos: "tezos:NetXdQprcVkpaWU",
   polkadot: "polkadot:68d56f15f85d3136970ec16946040bc1",
   cosmos: "cosmos:noble-1",
+  stellar: "stellar:pubnet",
 };
 
 /** Default testnet network per family */
@@ -41,6 +42,7 @@ const DEFAULT_TESTNET_NETWORK: Record<ChainFamily, string> = {
   tezos: "tezos:NetXnHfVqm9iesp",
   polkadot: "polkadot:e143f23803ac50e8f6f8e62695d1ce9e",
   cosmos: "cosmos:grand-1",
+  stellar: "stellar:testnet",
 };
 
 /**
@@ -226,5 +228,6 @@ export function familyFromNetwork(network: string): ChainFamily {
   if (network.startsWith("tezos:")) return "tezos";
   if (network.startsWith("polkadot:")) return "polkadot";
   if (network.startsWith("cosmos:")) return "cosmos";
+  if (network.startsWith("stellar:")) return "stellar";
   return "evm";
 }

@@ -26,6 +26,7 @@ const FLOW_ANNOUNCEMENTS: Record<FlowState, string> = {
   idle: "",
   requesting: "Requesting payment requirements from server",
   "got-402": "Server requires payment. Preparing authorization.",
+  "switching-chain": "Switching wallet to correct chain",
   approving: "Step 1/2: Approving token — confirm in your wallet",
   signing: "Waiting for wallet signature approval",
   retrying: "Submitting payment for verification",
@@ -84,6 +85,16 @@ export function PaymentStatus({ flowState, settle, family }: PaymentStatusProps)
         <p className="text-xs text-center mt-3" style={{ color: "var(--color-muted)" }}>
           Payment required. Preparing authorization...
         </p>
+      )}
+      {flowState === "switching-chain" && (
+        <div className="text-center mt-3">
+          <p className="text-xs font-medium" style={{ color: "var(--color-info)" }}>
+            Switching wallet to the correct chain...
+          </p>
+          <p className="text-[10px] mt-1" style={{ color: "var(--color-muted)" }}>
+            Please confirm the chain switch in your wallet
+          </p>
+        </div>
       )}
       {flowState === "signing" && (
         <div className="text-center mt-3">

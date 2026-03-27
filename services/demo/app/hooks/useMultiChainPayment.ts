@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useRef, useEffect } from "react";
 import { useChainContext } from "@/providers/ChainProvider";
 import { useDemoContext } from "@/providers/DemoProvider";
 import { useEvmPayment } from "./useEvmPayment";
@@ -13,7 +13,8 @@ import { useAptosPayment } from "./useAptosPayment";
 import { useTezosPayment } from "./useTezosPayment";
 import { usePolkadotPayment } from "./usePolkadotPayment";
 import { useCosmosPayment } from "./useCosmosPayment";
-import type { ChainFamily } from "@/lib/testnet-config";
+import { useStellarPayment } from "./useStellarPayment";
+import { familyFromNetwork, type ChainFamily } from "@/lib/chain-registry";
 
 interface PaymentRequirements {
   scheme: string;
@@ -56,6 +57,8 @@ function createMockPayload(requirements: PaymentRequirements, family: ChainFamil
         return "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY";
       case "cosmos":
         return "noble1t402demo000000000000000000000000example";
+      case "stellar":
+        return "GBDEVU63Y6NTHJQQZIKVTC2LSQLMEAIFYRP2XAJDDQVWRDQJLEVLWM36";
       default:
         return "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD68";
     }
@@ -93,6 +96,11 @@ export function useMultiChainPayment() {
   const tezos = useTezosPayment();
   const polkadot = usePolkadotPayment();
   const cosmos = useCosmosPayment();
+  const stellar = useStellarPayment();
+
+  // Ref-based snapshot to avoid stale closure capture
+  const activeFamilyRef = useRef(activeFamily);
+  useEffect(() => { activeFamilyRef.current = activeFamily; }, [activeFamily]);
 
   const isConnected = (() => {
     switch (activeFamily) {
@@ -106,6 +114,7 @@ export function useMultiChainPayment() {
       case "tezos": return tezos.isConnected;
       case "polkadot": return polkadot.isConnected;
       case "cosmos": return cosmos.isConnected;
+      case "stellar": return stellar.isConnected;
       default: return false;
     }
   })();
@@ -122,13 +131,25 @@ export function useMultiChainPayment() {
       case "tezos": return tezos.address;
       case "polkadot": return polkadot.address;
       case "cosmos": return cosmos.address;
+      case "stellar": return stellar.address;
       default: return null;
     }
   })();
 
   const signPayment = useCallback(
     async (requirements: PaymentRequirements, onProgress?: (step: string) => void, forceFamily?: ChainFamily): Promise<PaymentPayload> => {
-      const family = forceFamily || activeFamily;
+      // Read current family from ref (not stale closure)
+      const family = forceFamily || activeFamilyRef.current;
+
+      // Validate: family from requirements.network must match the selected family
+      const networkFamily = familyFromNetwork(requirements.network);
+      if (family !== networkFamily) {
+        throw new Error(
+          `Chain mismatch: wallet is set to ${family} but payment requires ${networkFamily} (${requirements.network}). ` +
+          `Please switch to the correct chain.`
+        );
+      }
+
       if (isDemo) {
         await new Promise((r) => setTimeout(r, 600));
         return createMockPayload(requirements, family);
@@ -155,11 +176,13 @@ export function useMultiChainPayment() {
           return polkadot.signPayment(requirements) as Promise<PaymentPayload>;
         case "cosmos":
           return cosmos.signPayment(requirements) as Promise<PaymentPayload>;
+        case "stellar":
+          return stellar.signPayment(requirements) as Promise<PaymentPayload>;
         default:
-          throw new Error(`Unsupported chain: ${activeFamily}`);
+          throw new Error(`Unsupported chain: ${family}`);
       }
     },
-    [activeFamily, isDemo, evm, ton, solana, tron, stacks, near, aptos, tezos, polkadot, cosmos]
+    [isDemo, evm, ton, solana, tron, stacks, near, aptos, tezos, polkadot, cosmos, stellar]
   );
 
   return {

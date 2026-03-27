@@ -315,6 +315,18 @@ export const MAINNET_CONFIGS: Record<string, ChainConfig> = {
     explorer: "https://www.mintscan.io/noble/tx/",
     color: "#B7B9C8",
   },
+
+  // ═══════════════════════════════════════════════════════════════
+  // Stellar — exact scheme (pre-signed Soroban transactions)
+  // ═══════════════════════════════════════════════════════════════
+  "stellar:pubnet": {
+    family: "stellar", network: "stellar:pubnet", name: "Stellar", label: "Stellar",
+    asset: "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI",
+    payTo: "GBDEVU63Y6NTHJQQZIKVTC2LSQLMEAIFYRP2XAJDDQVWRDQJLEVLWM36",
+    scheme: "exact", tokenSymbol: "USDC", decimals: 7,
+    explorer: "https://stellar.expert/explorer/public/tx/",
+    color: "#7B61FF",
+  },
 };
 
 /** All mainnet CAIP-2 network IDs */

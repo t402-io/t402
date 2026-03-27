@@ -58,6 +58,7 @@ export function IoTMicropayments() {
       if (!requirements) throw new Error("No payment options available");
         setFlowState("signing");
         const paymentPayload = await signPayment(requirements, (step) => {
+        if (step === "switching-chain") setFlowState("switching-chain" as FlowState);
         if (step === "approving") setFlowState("approving");
         if (step === "signing") setFlowState("signing");
       });

@@ -73,6 +73,13 @@ const CHAIN_SVGS: Record<ChainFamily, (size: number) => React.ReactNode> = {
       <ellipse cx="12" cy="12" rx="8" ry="4" stroke="#B7B9C8" strokeWidth="1" fill="none" />
     </svg>
   ),
+  stellar: (size) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="10" fill="#7B61FF" />
+      <path d="M6 10L18 5L16 11H6Z" fill="white" opacity="0.9" />
+      <path d="M18 14L6 19L8 13H18Z" fill="white" opacity="0.9" />
+    </svg>
+  ),
 };
 
 interface ChainLogoProps {

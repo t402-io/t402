@@ -1,16 +1,19 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useDemoContext } from "@/providers/DemoProvider";
+import { useChainContext } from "@/providers/ChainProvider";
 import { useToast } from "@/providers/ToastProvider";
 import { useMultiChainPayment } from "./useMultiChainPayment";
 import { encodePaymentHeader } from "@/lib/t402-client";
 import { classifyError, getUserFriendlyMessage } from "@/lib/error-helpers";
+import { chainIdFromCaip2 } from "@/lib/evm-chains";
 
 export type FlowState =
   | "idle"
   | "requesting"
   | "got-402"
+  | "switching-chain"
   | "approving"
   | "signing"
   | "retrying"
@@ -53,7 +56,17 @@ interface FlowResult {
 export function usePaymentFlow(url: string) {
   const { isDemo, testnet } = useDemoContext();
   const { show } = useToast();
-  const { signPayment, isConnected, activeFamily, activeNetwork } = useMultiChainPayment();
+  const { signPayment, isConnected } = useMultiChainPayment();
+  const {
+    activeFamily, activeNetwork, isChainMatched,
+    isSwitchingChain, ensureEvmChain, setPaymentInProgress,
+  } = useChainContext();
+
+  // Ref-based snapshots to always read current values inside async execute()
+  const activeFamilyRef = useRef(activeFamily);
+  const activeNetworkRef = useRef(activeNetwork);
+  useEffect(() => { activeFamilyRef.current = activeFamily; }, [activeFamily]);
+  useEffect(() => { activeNetworkRef.current = activeNetwork; }, [activeNetwork]);
 
   const [result, setResult] = useState<FlowResult>({
     state: "idle",
@@ -66,6 +79,10 @@ export function usePaymentFlow(url: string) {
   });
 
   const execute = useCallback(async () => {
+    // Read current values from refs (not stale closure values)
+    const currentFamily = activeFamilyRef.current;
+    const currentNetwork = activeNetworkRef.current;
+
     setResult({
       state: "requesting",
       paymentRequired: null,
@@ -80,10 +97,10 @@ export function usePaymentFlow(url: string) {
       // Step 1: Initial request
       const headers: Record<string, string> = {
         Accept: "application/json",
-        "x-preferred-chain": activeFamily,
+        "x-preferred-chain": currentFamily,
         "x-network-mode": testnet ? "testnet" : "mainnet",
       };
-      if (activeNetwork) headers["x-preferred-network"] = activeNetwork;
+      if (currentNetwork) headers["x-preferred-network"] = currentNetwork;
       if (isDemo) headers["x-demo-mode"] = "true";
 
       const initialResponse = await fetch(url, { headers });
@@ -112,7 +129,7 @@ export function usePaymentFlow(url: string) {
       // Small delay for UX
       await delay(500);
 
-      // Step 3: Sign payment
+      // Step 3: Validate wallet connection
       if (!isConnected) {
         show("error", "Wallet not connected. Please connect your wallet first.");
         setResult((prev) => ({
@@ -123,32 +140,59 @@ export function usePaymentFlow(url: string) {
         return;
       }
 
+      // Step 3.5: Pre-payment chain validation gate (NEW)
+      // Re-read current values in case they changed during the delay
+      const networkNow = activeNetworkRef.current;
+      const familyNow = activeFamilyRef.current;
+
+      if (familyNow === "evm" && !isDemo && networkNow) {
+        const targetChainId = chainIdFromCaip2(networkNow);
+        if (targetChainId) {
+          setResult((prev) => ({ ...prev, state: "switching-chain" }));
+          setPaymentInProgress(true);
+
+          const switched = await ensureEvmChain(targetChainId);
+          if (!switched) {
+            setPaymentInProgress(false);
+            show("error", "Please switch your wallet to the correct chain.");
+            setResult((prev) => ({
+              ...prev,
+              state: "error",
+              error: "Chain switch required. Please switch your wallet to the correct chain.",
+            }));
+            return;
+          }
+        }
+      }
+
+      // Step 4: Sign payment
+      setPaymentInProgress(true);
       setResult((prev) => ({ ...prev, state: "signing" }));
 
       // Pick the accept matching the user's selected network, fall back to first
-      const requirements = activeNetwork
-        ? paymentRequired.accepts.find((a) => a.network === activeNetwork) || paymentRequired.accepts[0]
+      const requirements = networkNow
+        ? paymentRequired.accepts.find((a) => a.network === networkNow) || paymentRequired.accepts[0]
         : paymentRequired.accepts[0];
       const paymentPayload = await signPayment(requirements);
 
-      // Step 4: Retry with payment
+      // Step 5: Retry with payment
       setResult((prev) => ({ ...prev, state: "retrying" }));
 
       const encodedPayment = encodePaymentHeader(paymentPayload);
       const retryHeaders: Record<string, string> = {
         Accept: "application/json",
-        "x-preferred-chain": activeFamily,
+        "x-preferred-chain": familyNow,
         "x-network-mode": testnet ? "testnet" : "mainnet",
         "Payment-Signature": encodedPayment,
       };
-      if (activeNetwork) retryHeaders["x-preferred-network"] = activeNetwork;
+      if (networkNow) retryHeaders["x-preferred-network"] = networkNow;
       if (isDemo) retryHeaders["x-demo-mode"] = "true";
 
       setResult((prev) => ({ ...prev, requestHeaders: retryHeaders }));
 
       const retryResponse = await fetch(url, { headers: retryHeaders });
 
-      // Step 5: Parse result
+      // Step 6: Parse result
       setResult((prev) => ({ ...prev, state: "verifying" }));
 
       const paymentResponseHeader = retryResponse.headers.get("Payment-Response");
@@ -165,6 +209,7 @@ export function usePaymentFlow(url: string) {
 
       const data = await retryResponse.json();
 
+      setPaymentInProgress(false);
       setResult({
         state: "done",
         paymentRequired,
@@ -175,6 +220,7 @@ export function usePaymentFlow(url: string) {
         responseStatus: retryResponse.status,
       });
     } catch (error) {
+      setPaymentInProgress(false);
       const originalMessage = error instanceof Error ? error.message : String(error);
       const type = classifyError(error);
       const friendlyMessage = getUserFriendlyMessage(type, originalMessage);
@@ -185,9 +231,10 @@ export function usePaymentFlow(url: string) {
         error: originalMessage,
       }));
     }
-  }, [url, isDemo, isConnected, activeFamily, activeNetwork, testnet, signPayment, show]);
+  }, [url, isDemo, isConnected, testnet, signPayment, show, ensureEvmChain, setPaymentInProgress]);
 
   const reset = useCallback(() => {
+    setPaymentInProgress(false);
     setResult({
       state: "idle",
       paymentRequired: null,
@@ -197,7 +244,7 @@ export function usePaymentFlow(url: string) {
       requestHeaders: {},
       responseStatus: null,
     });
-  }, []);
+  }, [setPaymentInProgress]);
 
   return { ...result, execute, reset };
 }

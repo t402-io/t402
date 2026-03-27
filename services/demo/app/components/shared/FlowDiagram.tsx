@@ -27,6 +27,7 @@ function flowStateToStep(state: FlowState): StepId | null {
   switch (state) {
     case "requesting": return "request";
     case "got-402": return "402";
+    case "switching-chain": return "sign"; // chain switch is part of the signing phase
     case "approving": return "sign";
     case "signing": return "sign";
     case "retrying": return "retry";

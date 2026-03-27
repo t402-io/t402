@@ -14,6 +14,7 @@ import { useAptosPayment } from "@/hooks/useAptosPayment";
 import { useTezosPayment } from "@/hooks/useTezosPayment";
 import { usePolkadotPayment } from "@/hooks/usePolkadotPayment";
 import { useCosmosPayment } from "@/hooks/useCosmosPayment";
+import { useStellarPayment } from "@/hooks/useStellarPayment";
 
 // Loading placeholder shown during SSR and initial hydration
 function WalletButtonSkeleton() {
@@ -58,6 +59,8 @@ export function WalletButton() {
       return <PolkadotWalletButton />;
     case "cosmos":
       return <CosmosWalletButton />;
+    case "stellar":
+      return <StellarWalletButton />;
     default:
       return null;
   }
@@ -493,4 +496,38 @@ function CosmosWalletButton() {
   }
 
   return <ConnectButton label="Keplr" onClick={handleConnect} />;
+}
+
+function StellarWalletButton() {
+  const { isDemo } = useDemoContext();
+  const { show } = useToast();
+  const { address, isConnected, hasWallet, connect, disconnect } = useStellarPayment();
+
+  if (isDemo) return <DemoWalletBadge label="Stellar" />;
+  if (isConnected && address) {
+    return (
+      <ConnectedBadge
+        address={address}
+        label="Stellar"
+        onDisconnect={() => {
+          disconnect();
+          show("info", "Stellar wallet disconnected");
+        }}
+      />
+    );
+  }
+
+  const handleConnect = async () => {
+    try {
+      await connect();
+    } catch (err) {
+      show("error", `Freighter connection failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+    }
+  };
+
+  if (!hasWallet) {
+    return <InstallButton label="Freighter" url="https://www.freighter.app/" />;
+  }
+
+  return <ConnectButton label="Stellar" onClick={handleConnect} />;
 }

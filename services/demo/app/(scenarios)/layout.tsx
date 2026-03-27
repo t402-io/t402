@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { WalletButton } from "@/components/layout/WalletButton";
 import { ModeToggle } from "@/components/layout/ModeToggle";
 import { FacilitatorBadge } from "@/components/layout/FacilitatorBadge";
-import { ChainSelector } from "@/components/shared/ChainSelector";
+import { ChainSelector, ChainMismatchBanner } from "@/components/shared/ChainSelector";
 import {
   Brain, FileText, Database, Bot,
   Cpu, Radio, Wand2, ArrowLeftRight, Zap,
@@ -68,6 +68,9 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
           <ChainSelector compact />
         </div>
       </header>
+
+      {/* Chain mismatch warning banner */}
+      <ChainMismatchBanner />
 
       <div className="flex flex-1">
         {/* Sidebar (desktop) */}

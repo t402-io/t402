@@ -757,6 +757,7 @@ export function CrossChainBridge() {
         setFlowState("signing");
         // Force EVM family for payment signing (Bridge is always EVM)
         const paymentPayload = await signPayment(requirements, (step) => {
+          if (step === "switching-chain") setFlowState("switching-chain" as FlowState);
           if (step === "approving") setFlowState("approving");
           if (step === "signing") setFlowState("signing");
         }, "evm");

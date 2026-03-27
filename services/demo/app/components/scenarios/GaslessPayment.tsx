@@ -4,16 +4,20 @@ import { useState, useCallback } from "react";
 import { Zap, Fuel, CheckCircle } from "lucide-react";
 import { Spinner } from "@/components/shared/Spinner";
 import { useDemoContext } from "@/providers/DemoProvider";
+import { useChainContext } from "@/providers/ChainProvider";
 import { useMultiChainPayment } from "@/hooks/useMultiChainPayment";
 import { PaymentStatus, parsePaymentResponse, type SettleInfo } from "@/components/shared/PaymentStatus";
+import { WalletChainIndicator } from "@/components/shared/WalletChainIndicator";
 import type { FlowState } from "@/hooks/usePaymentFlow";
 import { encodePaymentHeader } from "@/lib/t402-client";
+import { chainIdFromCaip2 } from "@/lib/evm-chains";
 
 type GaslessState = "idle" | "creating-userop" | "bundling" | "settling" | "done" | "error";
 
 export function GaslessPayment() {
   const { isDemo, testnet } = useDemoContext();
   const { signPayment, activeFamily, activeNetwork } = useMultiChainPayment();
+  const { ensureEvmChain, isChainMatched, isSwitchingChain } = useChainContext();
   const [state, setState] = useState<GaslessState>("idle");
   const [error, setError] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
@@ -35,6 +39,18 @@ export function GaslessPayment() {
       };
       if (isDemo) headers["x-demo-mode"] = "true";
 
+      // Chain validation gate for EVM
+      if (activeFamily === "evm" && !isDemo && activeNetwork) {
+        const targetChainId = chainIdFromCaip2(activeNetwork);
+        if (targetChainId) {
+          setFlowState("switching-chain" as FlowState);
+          const switched = await ensureEvmChain(targetChainId);
+          if (!switched) {
+            throw new Error("Please switch your wallet to the correct chain.");
+          }
+        }
+      }
+
       // Get 402 from gasless API
       const res = await fetch("/api/demo/gasless", { method: "POST", headers });
       if (res.status === 402) {
@@ -44,6 +60,7 @@ export function GaslessPayment() {
       if (!requirements) throw new Error("No payment options available");
         setFlowState("signing");
         const paymentPayload = await signPayment(requirements, (step) => {
+        if (step === "switching-chain") setFlowState("switching-chain" as FlowState);
         if (step === "approving") setFlowState("approving");
         if (step === "signing") setFlowState("signing");
       });
@@ -71,7 +88,7 @@ export function GaslessPayment() {
       setFlowState("error");
       setState("error");
     }
-  }, [isDemo, activeFamily, activeNetwork, testnet, signPayment]);
+  }, [isDemo, activeFamily, activeNetwork, testnet, signPayment, ensureEvmChain]);
 
   const reset = () => {
     setState("idle");
@@ -110,6 +127,8 @@ export function GaslessPayment() {
           </ul>
         </div>
       </div>
+
+      <WalletChainIndicator />
 
       {flowState !== "idle" && (
         <PaymentStatus flowState={flowState} settle={settle} family={activeFamily} />

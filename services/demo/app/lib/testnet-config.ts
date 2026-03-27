@@ -1,4 +1,4 @@
-export type ChainFamily = "evm" | "ton" | "tron" | "solana" | "stacks" | "near" | "aptos" | "tezos" | "polkadot" | "cosmos";
+export type ChainFamily = "evm" | "ton" | "tron" | "solana" | "stacks" | "near" | "aptos" | "tezos" | "polkadot" | "cosmos" | "stellar";
 
 export interface ChainConfig {
   family: ChainFamily;
@@ -194,9 +194,25 @@ export const CHAIN_CONFIGS: Record<ChainFamily, ChainConfig> = {
     tokenFaucet: "https://faucet.circle.com/",
     tokenFaucetLabel: "USDC (Circle Faucet — select Noble Testnet)",
   },
+  stellar: {
+    family: "stellar",
+    network: "stellar:testnet",
+    asset: "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA",
+    payTo: "GBDEVU63Y6NTHJQQZIKVTC2LSQLMEAIFYRP2XAJDDQVWRDQJLEVLWM36",
+    explorer: "https://stellar.expert/explorer/testnet/tx/",
+    name: "Stellar Testnet",
+    label: "Stellar",
+    color: "var(--color-chain-stellar)",
+    decimals: 7,
+    tokenSymbol: "USDC",
+    gasFaucet: "https://friendbot.stellar.org/",
+    gasFaucetLabel: "Testnet XLM (Friendbot)",
+    tokenFaucet: "https://faucet.circle.com/",
+    tokenFaucetLabel: "USDC (Circle Faucet — select Stellar Testnet)",
+  },
 };
 
-export const CHAIN_FAMILIES: ChainFamily[] = ["evm", "ton", "tron", "solana", "stacks", "near", "aptos", "tezos", "polkadot", "cosmos"];
+export const CHAIN_FAMILIES: ChainFamily[] = ["evm", "ton", "tron", "solana", "stacks", "near", "aptos", "tezos", "polkadot", "cosmos", "stellar"];
 
 export function getExplorerUrl(family: ChainFamily, txHash: string): string {
   const config = CHAIN_CONFIGS[family];
