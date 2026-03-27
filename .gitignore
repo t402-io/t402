@@ -84,12 +84,6 @@ whitepaper/chapters/11-economics.tex
 whitepaper/chapters/12-future-work.tex
 
 # Unreleased product docs (proprietary feature designs)
-services/docs/pages/advanced/smart-router.mdx
-services/docs/pages/advanced/intent-payments.mdx
-services/docs/pages/advanced/streaming-payments.mdx
-services/docs/pages/advanced/zk-payments.mdx
-services/docs/pages/advanced/a2a-negotiation.mdx
-services/docs/pages/advanced/agent-policy.mdx
 services/docs/pages/sdks/go/smart-router.mdx
 
 # Unreleased feature pages (marketing site)
@@ -133,3 +127,4 @@ specs/schemes/permit2/
 services/docs/pages/sdks/typescript/wdk-bridge.mdx
 services/docs/pages/sdks/typescript/wdk-gasless.mdx
 services/docs/pages/sdks/typescript/wdk-multisig.mdx
+.gstack/

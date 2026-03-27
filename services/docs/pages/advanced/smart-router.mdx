@@ -1,0 +1,684 @@
+# Smart Router
+
+import { Callout, Tabs } from 'nextra/components'
+
+<Callout type="info">
+  **Coming Soon**: `@t402/smart-router` is not yet released. This page describes planned functionality and APIs are subject to change. Follow the [GitHub repository](https://github.com/t402-io/t402) for release announcements.
+</Callout>
+
+Smart Payment Routing Engine for T402 Protocol. Find the most cost-effective or fastest route for cross-chain payments with optimal path finding, real-time pricing, liquidity aggregation, and MEV protection.
+
+## Features
+
+- **Path Finding** - Dijkstra, A*, k-shortest paths, and Pareto-optimal algorithms
+- **Real-time Pricing** - Gas oracle with predictive modeling
+- **Liquidity Aggregation** - Aggregate across DEXs and bridges
+- **MEV Protection** - Flashbots and private mempool support
+- **Route Validation** - Validate routes before execution
+
+## Installation
+
+```bash npm2yarn
+npm install @t402/smart-router
+```
+
+## Quick Start
+
+```typescript
+import {
+  RoutingEngine,
+  GasOracle,
+  LiquidityAggregator,
+  TransactionBuilder,
+} from '@t402/smart-router';
+
+// Set up routing engine
+const router = new RoutingEngine();
+
+// Add network graph edges (liquidity sources)
+router.updateGraph([
+  {
+    from: 'eip155:1',
+    to: 'eip155:8453',
+    fromAsset: '0xUSDT',
+    toAsset: '0xUSDT',
+    protocol: 'layerzero',
+    type: 'bridge',
+    cost: 50000,
+    liquidity: '50000000000',
+    estimatedTime: 120,
+  },
+]);
+
+// Find best route
+const routes = await router.findRoutes({
+  sourceChain: 'eip155:1',
+  sourceAsset: '0xUSDT',
+  sourceAmount: '1000000000', // 1000 USDT
+  destinationChain: 'eip155:8453',
+  destinationAsset: '0xUSDT',
+  recipient: '0xRecipient',
+  sender: '0xSender',
+  optimization: 'balanced',
+});
+
+console.log('Best route cost:', routes[0].totalCost);
+console.log('Estimated time:', routes[0].estimatedTime, 'seconds');
+```
+
+## Optimization Strategies
+
+| Strategy | Description |
+|----------|-------------|
+| `cost` | Minimize total fees and gas costs |
+| `speed` | Minimize execution time |
+| `balanced` | Balance cost, speed, and reliability |
+| `slippage` | Minimize price impact |
+| `privacy` | Prefer privacy-preserving routes |
+
+```typescript
+// Cost optimized
+const cheapest = await router.findRoutes({
+  ...request,
+  optimization: 'cost',
+});
+
+// Speed optimized
+const fastest = await router.findRoutes({
+  ...request,
+  optimization: 'speed',
+});
+```
+
+## Gas Oracle
+
+Real-time gas tracking with predictive modeling:
+
+```typescript
+import { GasOracle } from '@t402/smart-router/pricing';
+
+const gasOracle = new GasOracle({
+  cacheTtl: 15000,
+  enablePrediction: true,
+});
+
+// Get current gas prices
+const gasPrice = await gasOracle.getGasPrice('eip155:8453');
+console.log('Standard:', gasPrice.standard);
+console.log('Fast:', gasPrice.fast);
+
+// Calculate cost in USD
+const { costUsd } = await gasOracle.calculateGasCostUsd(
+  'eip155:8453',
+  '150000', // gas units
+  'fast',
+);
+
+// Predict future gas prices
+const prediction = gasOracle.predictGasPrice('eip155:8453', 5);
+```
+
+## Fee Estimator
+
+Estimate fees for operations:
+
+```typescript
+import { FeeEstimator } from '@t402/smart-router/pricing';
+
+const feeEstimator = new FeeEstimator(gasOracle);
+
+const estimate = await feeEstimator.estimateFees({
+  chain: 'eip155:8453',
+  operation: 'swap',
+  protocol: 'uniswap',
+  inputAsset: '0xUSDT',
+  outputAsset: '0xUSDC',
+  amount: '1000000000',
+  gasSpeed: 'standard',
+});
+
+console.log('Total fee (USD):', estimate.totalFeeUsd);
+```
+
+## Liquidity Aggregation
+
+Aggregate liquidity across DEXs and bridges:
+
+```typescript
+import { LiquidityAggregator } from '@t402/smart-router/liquidity';
+
+const aggregator = new LiquidityAggregator({
+  cacheTtl: 30000,
+  minLiquidity: '1000',
+});
+
+// Get aggregated liquidity
+const liquidity = await aggregator.getLiquidity(
+  'eip155:8453',
+  '0xUSDT',
+  '0xUSDC',
+);
+
+console.log('Total liquidity:', liquidity.totalLiquidity);
+console.log('Best price:', liquidity.bestPrice);
+
+// Calculate slippage
+const slippage = aggregator.calculateSlippage(
+  liquidity,
+  '100000000', // 100 USDT
+  '0.5',       // 0.5% tolerance
+);
+
+console.log('Price impact:', slippage.priceImpact);
+
+// Cross-chain liquidity
+const crossChain = await aggregator.getCrossChainLiquidity(
+  'eip155:1',
+  'eip155:8453',
+  '0xUSDT',
+);
+```
+
+## Transaction Building
+
+Build transactions from routes:
+
+```typescript
+import { TransactionBuilder } from '@t402/smart-router/execution';
+
+const builder = new TransactionBuilder(gasOracle);
+
+const transactions = await builder.buildRoute(route, '0xSender', {
+  gasSpeed: 'fast',
+  mevProtection: 'flashbots',
+  autoApprove: true,
+});
+
+// Get required approvals
+const approvals = builder.getRequiredApprovals(route, '0xSender');
+```
+
+## MEV Protection
+
+Protect transactions from MEV attacks:
+
+```typescript
+import { MevProtection } from '@t402/smart-router/execution';
+
+const mev = new MevProtection({
+  flashbotsRelay: 'https://relay.flashbots.net',
+});
+
+// Estimate MEV risk
+const risk = mev.estimateMevRisk(transaction, 'eip155:1');
+console.log('Risk level:', risk.riskLevel);
+console.log('Recommendations:', risk.recommendations);
+
+// Submit with protection
+const result = await mev.protect(
+  transaction,
+  signedTransaction,
+  'flashbots',
+  'eip155:1',
+);
+```
+
+### Protection Strategies
+
+| Strategy | Description |
+|----------|-------------|
+| `none` | No protection (public mempool) |
+| `flashbots` | Use Flashbots bundle (Ethereum) |
+| `private_mempool` | Use private RPC endpoints |
+| `timing` | Submit at optimal time |
+| `splitting` | Split into smaller transactions |
+
+## Path Finding Algorithms
+
+```typescript
+import {
+  dijkstra,
+  astar,
+  kShortestPaths,
+  paretoOptimalPaths,
+  COST_CONFIGS,
+} from '@t402/smart-router/routing';
+
+// Dijkstra's algorithm
+const path = dijkstra(
+  edges,
+  'eip155:1', '0xUSDT',
+  'eip155:8453', '0xUSDT',
+  COST_CONFIGS.balanced,
+  5, // max hops
+);
+
+// A* with heuristic
+const fastPath = astar(
+  edges,
+  'eip155:1', '0xUSDT',
+  'eip155:8453', '0xUSDT',
+  COST_CONFIGS.speed,
+  5,
+);
+
+// K-shortest paths (Yen's algorithm)
+const topPaths = kShortestPaths(edges, start, end, config, 5);
+
+// Pareto-optimal paths (multi-objective)
+const pareto = paretoOptimalPaths(edges, start, end);
+```
+
+## Route Types
+
+| Type | Description |
+|------|-------------|
+| `transfer` | Simple token transfer |
+| `swap` | DEX swap |
+| `bridge` | Cross-chain bridge |
+| `wrap` | Wrap native token (ETH -> WETH) |
+| `unwrap` | Unwrap to native (WETH -> ETH) |
+| `approve` | Token approval |
+
+## Supported Chains
+
+| Chain | ID |
+|-------|-----|
+| Ethereum | `eip155:1` |
+| Base | `eip155:8453` |
+| Arbitrum | `eip155:42161` |
+| Optimism | `eip155:10` |
+| Polygon | `eip155:137` |
+| BSC | `eip155:56` |
+| Solana | `solana:mainnet` |
+
+## API Reference
+
+### RoutingEngine
+
+| Method | Description |
+|--------|-------------|
+| `findRoutes()` | Find all routes matching request |
+| `getBestRoute()` | Get single best route |
+| `validateRoute()` | Validate route is executable |
+| `updateGraph()` | Update network graph |
+| `addEdge()` | Add single edge |
+
+### GasOracle
+
+| Method | Description |
+|--------|-------------|
+| `getGasPrice()` | Get current gas prices |
+| `getMultiChainGasPrices()` | Multi-chain prices |
+| `calculateGasCostUsd()` | Calculate cost in USD |
+| `predictGasPrice()` | Predict future prices |
+
+### LiquidityAggregator
+
+| Method | Description |
+|--------|-------------|
+| `getLiquidity()` | Get aggregated liquidity |
+| `getCrossChainLiquidity()` | Bridge liquidity |
+| `calculateSlippage()` | Calculate slippage |
+| `findBestRoute()` | Find best execution |
+
+## Intent-Based Payments
+
+<Callout type="info">
+  **Coming Soon**: `@t402/intent-payments` is not yet released. This page describes planned functionality and APIs are subject to change. Follow the [GitHub repository](https://github.com/t402-io/t402) for release announcements.
+</Callout>
+
+Intent-Based Payment System for T402 Protocol. Instead of manually specifying transaction parameters, users express what they want to achieve (the intent), and solvers compete to fulfill them optimally.
+
+### Features
+
+- **Intent Builder** - Fluent API for constructing payment intents
+- **Solver Network** - Competitive solver selection and execution
+- **Auction System** - Sealed bid auctions for solver competition
+- **Execution Modes** - Direct, auction, and best-effort execution
+- **Rollback Support** - Handle failed executions gracefully
+- **Reputation System** - Track and rank solver performance
+
+### Installation
+
+```bash npm2yarn
+npm install @t402/intent-payments
+```
+
+### Quick Start
+
+```typescript
+import {
+  createIntent,
+  SolverRegistry,
+  IntentExecutor,
+} from '@t402/intent-payments';
+
+// 1. Create an intent
+const intent = createIntent()
+  .from('0xMyWallet')
+  .action('pay')
+  .to('0xRecipient')
+  .amount('1000000') // 1 USDC (6 decimals)
+  .asset('0xUSDC')
+  .network('eip155:8453') // Base
+  .maxSlippage('0.5')
+  .deadlineIn(300) // 5 minutes
+  .build();
+
+// 2. Set up solver registry
+const registry = new SolverRegistry();
+registry.register({
+  id: 'solver-1',
+  name: 'My Solver',
+  endpoint: 'https://solver.example.com',
+  capabilities: {
+    supportedActions: ['pay', 'swap'],
+    supportedNetworks: ['eip155:8453'],
+    supportedAssets: ['0xUSDC'],
+  },
+});
+
+// 3. Execute intent
+const executor = new IntentExecutor(registry);
+const result = await executor.submit(intent, { mode: 'best_effort' });
+
+console.log(result.state); // 'completed'
+```
+
+### Intent Builder
+
+The fluent builder API makes it easy to construct complex intents.
+
+#### Simple Payment
+
+```typescript
+const intent = createIntent()
+  .from('0xPayer')
+  .action('pay')
+  .to('0xRecipient')
+  .amount('1000000')
+  .asset('0xUSDC')
+  .network('eip155:8453')
+  .build();
+```
+
+#### Swap
+
+```typescript
+const intent = createIntent()
+  .from('0xUser')
+  .swap('0xETH', 'eip155:1') // Source asset & network
+  .to('0xUser')
+  .amount('500000000') // Output amount
+  .asset('0xUSDC')
+  .network('eip155:8453')
+  .maxSlippage('1.0')
+  .build();
+```
+
+#### Bridge and Pay
+
+```typescript
+const intent = createIntent()
+  .from('0xUser')
+  .bridgeAndPay('eip155:1') // Bridge from Ethereum
+  .to('0xRecipient')
+  .amount('1000000')
+  .asset('0xUSDC')
+  .network('eip155:8453') // To Base
+  .build();
+```
+
+#### Conditional Payment
+
+```typescript
+const intent = createIntent()
+  .from('0xPayer')
+  .action('pay')
+  .to('0xRecipient')
+  .amount('1000000')
+  .asset('0xUSDC')
+  .whenPriceIs('0xETH', 'gt', '3000', '0xChainlinkOracle')
+  .build();
+```
+
+#### Recurring Payment
+
+```typescript
+const intent = createIntent()
+  .from('0xPayer')
+  .action('pay')
+  .to('0xRecipient')
+  .amount('1000000')
+  .asset('0xUSDC')
+  .monthly(Date.now())
+  .build();
+```
+
+#### Batch Payment
+
+```typescript
+import { batchPayment } from '@t402/intent-payments';
+
+const intent = batchPayment(
+  '0xPayer',
+  [
+    { recipient: '0xAlice', amount: '500000' },
+    { recipient: '0xBob', amount: '300000' },
+    { recipient: '0xCharlie', amount: '200000' },
+  ],
+  '0xUSDC',
+);
+```
+
+### Constraints
+
+Add constraints to control execution:
+
+```typescript
+createIntent()
+  // ... basic intent setup
+  .maxSlippage('0.5')         // Max 0.5% slippage
+  .maxFees('100000')          // Max total fees
+  .maxGasFees('50000')        // Max gas fees
+  .deadline(timestamp)         // Absolute deadline
+  .deadlineIn(300)            // Relative deadline (seconds)
+  .privacy('shielded')        // Privacy level
+  .preferSolvers(['solver-1'])
+  .excludeSolvers(['solver-2'])
+  .build();
+```
+
+### Execution Modes
+
+<Tabs items={['Direct', 'Auction', 'Best Effort']}>
+  <Tabs.Tab>
+    Selects a single solver and executes immediately:
+    ```typescript
+    const result = await executor.submit(intent, { mode: 'direct' });
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    Runs a competitive auction among solvers:
+    ```typescript
+    const result = await executor.submit(intent, {
+      mode: 'auction',
+      auctionDuration: 30000, // 30 seconds
+    });
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    Tries direct execution first, falls back to auction, with retries:
+    ```typescript
+    const result = await executor.submit(intent, {
+      mode: 'best_effort',
+      retryCount: 3,
+    });
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### Custom Solvers
+
+Implement the `ISolver` interface to create custom solvers:
+
+```typescript
+import { ISolver, BaseSolver, PaymentIntent, IntentSolution } from '@t402/intent-payments';
+
+class MySolver extends BaseSolver {
+  async solve(intent: PaymentIntent): Promise<IntentSolution> {
+    // Calculate optimal execution path
+    return {
+      id: uuid(),
+      intentId: intent.id,
+      solverId: this.id,
+      steps: [...],
+      expectedOutput: '1000000',
+      costs: {
+        gasFees: '50000',
+        solverFees: '10000',
+        total: '60000',
+      },
+      estimatedTime: 15,
+      signature: 'solver-signature',
+    };
+  }
+
+  async execute(solution: IntentSolution): Promise<IntentExecutionResult> {
+    // Execute the solution on-chain
+    return {
+      id: uuid(),
+      solutionId: solution.id,
+      state: 'success',
+      transactions: [...],
+      actualOutput: '1000000',
+    };
+  }
+}
+```
+
+### Auction System
+
+Run competitive auctions for solver selection:
+
+```typescript
+import { AuctionManager, createSealedAuction } from '@t402/intent-payments';
+
+const auctionManager = new AuctionManager();
+
+// Create a sealed bid auction
+const auction = createSealedAuction(intent, auctionManager, 30000);
+
+// Solvers submit bids
+auctionManager.submitBid(auction.id, 'solver-1', solution, '50000', 'signature');
+
+// Close auction and get winner
+auctionManager.closeAuction(auction.id);
+const winner = auctionManager.selectWinner(auction.id);
+```
+
+### Solver Ranking
+
+Rank solvers based on configurable criteria:
+
+```typescript
+import { SolverRanking, reliabilityOptimizedRanking } from '@t402/intent-payments';
+
+// Use preset ranking strategy
+const ranking = reliabilityOptimizedRanking();
+
+// Or customize weights
+const customRanking = new SolverRanking({
+  reputationWeight: 0.3,
+  successRateWeight: 0.3,
+  speedWeight: 0.2,
+  costWeight: 0.1,
+  volumeWeight: 0.1,
+});
+
+const ranked = ranking.rank(registrations);
+```
+
+### Intent Types
+
+| Type | Description |
+|------|-------------|
+| `simple` | Basic single-step payment |
+| `conditional` | Payment triggered by conditions |
+| `recurring` | Scheduled repeated payments |
+| `batch` | Multiple payments in one intent |
+| `swap` | Asset exchange |
+| `bridge` | Cross-chain transfer and payment |
+
+### Intent States
+
+| State | Description |
+|-------|-------------|
+| `created` | Intent has been built |
+| `pending` | Waiting for solver selection |
+| `solving` | Solver is computing solution |
+| `solved` | Solution found, awaiting execution |
+| `executing` | Solution being executed on-chain |
+| `completed` | Successfully completed |
+| `failed` | Execution failed |
+| `expired` | Deadline passed |
+| `cancelled` | Cancelled by user |
+
+### Rollback Management
+
+Handle failed executions with rollback support:
+
+```typescript
+import { RollbackManager } from '@t402/intent-payments';
+
+const rollbackManager = new RollbackManager();
+rollbackManager.registerHandler(handler);
+
+if (await rollbackManager.canRollback(solution, result)) {
+  const record = await rollbackManager.rollback(
+    intent,
+    solution,
+    result,
+    'Execution failed',
+  );
+  console.log('Amount recovered:', record.amountRecovered);
+}
+```
+
+### Intent API Reference
+
+#### Intent Builder
+
+| Function | Description |
+|----------|-------------|
+| `createIntent()` | Start building an intent |
+| `simplePayment()` | Quick payment intent |
+| `swapIntent()` | Quick swap intent |
+| `batchPayment()` | Quick batch payment intent |
+
+#### Solver Registry
+
+| Method | Description |
+|--------|-------------|
+| `register()` | Register a solver |
+| `getSolver()` | Get solver instance |
+| `findSolvers()` | Find solvers for intent |
+| `selectSolver()` | Select best solver |
+| `updateReputation()` | Update solver reputation |
+| `getLeaderboard()` | Get top solvers |
+
+#### Intent Executor
+
+| Method | Description |
+|--------|-------------|
+| `submit()` | Execute an intent |
+| `cancel()` | Cancel pending execution |
+| `retry()` | Retry failed execution |
+| `getState()` | Get execution state |
+
+## Related
+
+- [Bridge](/advanced/bridge) - Cross-chain bridging
+- [Gasless](/advanced/gasless) - Gasless transactions
+- [Streaming Payments](/advanced/experimental) - Payment channels
