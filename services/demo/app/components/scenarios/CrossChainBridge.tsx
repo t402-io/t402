@@ -687,21 +687,18 @@ export function CrossChainBridge() {
   }, [fromChain, toChain, amountInput]);
 
   // ---------------------------------------------------------------------------
-  // Status polling
+  // Status polling (only for real bridges, not demo simulations)
   // ---------------------------------------------------------------------------
   useEffect(() => {
-    if (state !== "tracking" || !tracking) return;
+    if (state !== "tracking" || !tracking?.real) return;
 
     const poll = async () => {
       try {
-        const params = tracking.real
-          ? `real=true&txHash=${tracking.srcTxHash}`
-          : `guid=${tracking.guid}`;
+        const params = `real=true&txHash=${tracking.srcTxHash}`;
         const res = await fetch(`/api/demo/bridge/status?${params}`);
         if (!res.ok) return;
         const data = await res.json();
 
-        // status can be a string ("DELIVERED") or an object ({ name: "DELIVERED", message: "..." })
         const rawStatus = data.status;
         const newStatus = typeof rawStatus === "object" && rawStatus?.name
           ? rawStatus.name
@@ -712,7 +709,6 @@ export function CrossChainBridge() {
         setTrackingStage(newStage);
 
         if (data.estimatedTimeRemaining !== undefined) {
-          // Normalize ms → seconds
           const raw = data.estimatedTimeRemaining;
           setEstimatedRemaining(raw > 10000 ? Math.ceil(raw / 1000) : raw);
         }
@@ -729,6 +725,8 @@ export function CrossChainBridge() {
 
         if (newStage === "delivered") {
           setState("delivered");
+          // Stop polling once delivered
+          if (pollRef.current) clearInterval(pollRef.current);
         }
       } catch {
         // Polling failure is non-critical
@@ -736,13 +734,12 @@ export function CrossChainBridge() {
     };
 
     pollRef.current = setInterval(poll, 5000);
-    // Run once immediately
     poll();
 
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
     };
-  }, [state, tracking]);
+  }, [state, tracking?.real, tracking?.srcTxHash, tracking?.guid]);
 
   // Simulate progression for demo mode (simulated bridges)
   useEffect(() => {
