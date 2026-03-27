@@ -87,6 +87,7 @@ services:
       - FACILITATOR_API_KEY=${FACILITATOR_API_KEY:-}
       - EXPLORER_MODE=${EXPLORER_MODE:-auto}
       - SQLITE_PATH=/data/explorer.db
+      - SYNC_INTERVAL_MS=${SYNC_INTERVAL_MS:-10000}
     networks:
       - default
       - facilitator_ext
