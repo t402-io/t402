@@ -23,6 +23,62 @@ server {
     root /usr/share/nginx/html;
     index index.html;
 
+    # Redirects from old structure (10 sections → 6 sections)
+    rewrite ^/tutorials/quick-start$ /getting-started/quickstart permanent;
+    rewrite ^/tutorials/(.*)$ /guides/$1 permanent;
+    rewrite ^/use-cases/api-monetization$ /guides/api-monetization permanent;
+    rewrite ^/use-cases/micro-payments$ /guides/api-monetization permanent;
+    rewrite ^/use-cases/ai-payments$ /guides/ai-agent-payments permanent;
+    rewrite ^/use-cases/content-access$ /guides/ai-agent-payments permanent;
+    rewrite ^/use-cases/?$ /guides permanent;
+    rewrite ^/getting-started/installation$ /getting-started/quickstart permanent;
+    rewrite ^/chains/?$ /resources/chains permanent;
+    rewrite ^/chains/(.*)$ /resources/chains permanent;
+    rewrite ^/schemes/?$ /resources/schemes permanent;
+    rewrite ^/schemes/(.*)$ /resources/schemes permanent;
+    rewrite ^/security/?$ /resources/security permanent;
+    rewrite ^/security/(.*)$ /resources/security permanent;
+    rewrite ^/ecosystem/?$ /resources/chains permanent;
+    rewrite ^/ecosystem/(.*)$ /resources/chains permanent;
+    rewrite ^/faq$ /resources/faq permanent;
+    rewrite ^/glossary$ /resources/faq permanent;
+    rewrite ^/comparison$ /resources/faq permanent;
+    rewrite ^/changelog$ /resources/changelog permanent;
+    rewrite ^/reference/near$ /reference/other-mechanisms permanent;
+    rewrite ^/reference/aptos$ /reference/other-mechanisms permanent;
+    rewrite ^/reference/tezos$ /reference/other-mechanisms permanent;
+    rewrite ^/reference/polkadot$ /reference/other-mechanisms permanent;
+    rewrite ^/reference/stacks$ /reference/other-mechanisms permanent;
+    rewrite ^/reference/cosmos$ /reference/other-mechanisms permanent;
+    rewrite ^/reference/btc$ /reference/other-mechanisms permanent;
+    rewrite ^/reference/stellar$ /reference/other-mechanisms permanent;
+    rewrite ^/reference/spark$ /reference/other-mechanisms permanent;
+    rewrite ^/reference/express$ /reference/server-middleware permanent;
+    rewrite ^/reference/hono$ /reference/server-middleware permanent;
+    rewrite ^/reference/fastify$ /reference/server-middleware permanent;
+    rewrite ^/reference/next$ /reference/server-middleware permanent;
+    rewrite ^/reference/facilitator-embedded$ /reference/server-middleware permanent;
+    rewrite ^/reference/fetch$ /reference/client-libraries permanent;
+    rewrite ^/reference/axios$ /reference/client-libraries permanent;
+    rewrite ^/reference/mcp$ /advanced/mcp permanent;
+    rewrite ^/reference/a2a$ /reference/ai-agents permanent;
+    rewrite ^/reference/policy$ /reference/ai-agents permanent;
+    rewrite ^/reference/observability$ /reference/ai-agents permanent;
+    rewrite ^/reference/wdk-gasless$ /reference/wdk permanent;
+    rewrite ^/reference/wdk-bridge$ /reference/wdk permanent;
+    rewrite ^/reference/wdk-multisig$ /reference/wdk permanent;
+    rewrite ^/reference/react-native$ /reference/react permanent;
+    rewrite ^/advanced/a2a-negotiation$ /advanced/a2a permanent;
+    rewrite ^/advanced/deployment$ /guides/production-deployment permanent;
+    rewrite ^/advanced/best-practices$ /advanced/operations permanent;
+    rewrite ^/advanced/performance$ /advanced/operations permanent;
+    rewrite ^/advanced/troubleshooting$ /advanced/operations permanent;
+    rewrite ^/advanced/intent-payments$ /advanced/smart-router permanent;
+    rewrite ^/advanced/streaming-payments$ /advanced/experimental permanent;
+    rewrite ^/advanced/zk-payments$ /advanced/experimental permanent;
+    rewrite ^/advanced/migration-v1-to-v2$ /advanced/migration permanent;
+    rewrite ^/advanced/migration-v2\.2-to-v2\.3$ /advanced/migration permanent;
+
     location / {
         try_files $uri $uri.html $uri/ /404.html =404;
     }
