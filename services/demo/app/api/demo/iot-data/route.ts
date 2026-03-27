@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPreferredChain, getAcceptsForChain, buildRequirementsFromPayload } from "@/lib/config";
-import { encodeHeader, decodeHeader, verifyPayment, settlePayment, isPreBroadcastNetwork } from "@/lib/t402-server";
+import { encodeHeader, decodeHeader, verifyPayment, settlePayment, recordSettlement, isPreBroadcastNetwork } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 import { classifyFacilitatorError } from "@/lib/error-helpers";
 import { getReading } from "@/lib/weather-service";
@@ -63,12 +63,25 @@ export async function GET(request: NextRequest) {
         if (verifyResult.isValid) settleResult = await settlePayment(paymentPayload, requirements, { source: "demo.t402.io/iot-data", description: "IoT Data Feed" });
       } catch { /* pre-broadcast: tx already on-chain */ }
       if (!settleResult) {
+        const txHash = (paymentPayload as any)?.payload?.bocHash || (paymentPayload as any)?.payload?.txId || "pre-broadcast";
+        const payer = (paymentPayload as any)?.payload?.authorization?.from || (paymentPayload as any)?.payload?.from || "unknown";
         settleResult = {
           success: true,
-          transaction: (paymentPayload as any)?.payload?.bocHash || (paymentPayload as any)?.payload?.txId || "pre-broadcast",
+          transaction: txHash,
           network: requirements.network,
-          payer: (paymentPayload as any)?.payload?.authorization?.from || (paymentPayload as any)?.payload?.from || "unknown",
+          payer,
         };
+        // Record pre-broadcast settlement for Explorer visibility
+        recordSettlement({
+          network: requirements.network,
+          scheme: requirements.scheme,
+          txHash,
+          fromAddress: payer,
+          toAddress: requirements.payTo || "",
+          amount: requirements.amount || "",
+          asset: requirements.asset || "",
+          metadata: { source: "demo.t402.io/iot-data", description: "IoT Data Feed", preBroadcast: true },
+        });
       }
     } else {
       const verifyResult = await verifyPayment(paymentPayload, requirements);

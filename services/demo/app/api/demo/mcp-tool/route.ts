@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPreferredChain, getAcceptsForChain, getNetwork, buildRequirementsFromPayload } from "@/lib/config";
-import { encodeHeader, verifyPayment, settlePayment, isPreBroadcastNetwork } from "@/lib/t402-server";
+import { encodeHeader, verifyPayment, settlePayment, recordSettlement, isPreBroadcastNetwork } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 import {
   parseRequest,
@@ -119,7 +119,20 @@ export async function POST(request: NextRequest) {
         if (verifyResult.isValid) settleResult = await settlePayment(paymentPayload.payload, requirements, { source: "demo.t402.io/mcp-tool", description: "MCP AI Tool" });
       } catch { /* pre-broadcast */ }
       if (!settleResult) {
-        settleResult = { success: true, transaction: "pre-broadcast", network: requirements.network };
+        const txHash = (paymentPayload.payload as any)?.bocHash || (paymentPayload.payload as any)?.txId || "pre-broadcast";
+        const payer = (paymentPayload.payload as any)?.authorization?.from || (paymentPayload.payload as any)?.from || "unknown";
+        settleResult = { success: true, transaction: txHash, network: requirements.network, payer };
+        // Record pre-broadcast settlement for Explorer visibility
+        recordSettlement({
+          network: requirements.network,
+          scheme: requirements.scheme,
+          txHash,
+          fromAddress: payer,
+          toAddress: requirements.payTo || "",
+          amount: requirements.amount || "",
+          asset: requirements.asset || "",
+          metadata: { source: "demo.t402.io/mcp-tool", description: "MCP AI Tool", preBroadcast: true },
+        });
       }
     } else {
       const verifyResult = await verifyPayment(paymentPayload.payload, requirements);

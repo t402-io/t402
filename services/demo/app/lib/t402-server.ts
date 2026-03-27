@@ -81,6 +81,25 @@ export async function settlePayment(paymentPayload: unknown, paymentRequirements
 }
 
 /**
+ * Record a pre-broadcast settlement (TON/Solana/TRON) in the Facilitator DB.
+ * Used when the wallet broadcasts directly and /settle isn't called.
+ */
+export async function recordSettlement(data: {
+  network: string; scheme: string; txHash: string;
+  fromAddress: string; toAddress: string; amount: string;
+  asset: string; metadata?: Record<string, unknown>;
+}) {
+  try {
+    await facilitatorFetch(`${FACILITATOR_URL}/v1/settlements`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  } catch {
+    // Non-blocking — don't fail the response if recording fails
+  }
+}
+
+/**
  * Check facilitator health and supported networks.
  */
 export async function getFacilitatorSupported() {

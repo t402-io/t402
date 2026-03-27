@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPreferredChain, getAcceptsForChain, buildRequirementsFromPayload, PAY_TO } from "@/lib/config";
-import { encodeHeader, decodeHeader, verifyPayment, settlePayment, isPreBroadcastNetwork } from "@/lib/t402-server";
+import { encodeHeader, decodeHeader, verifyPayment, settlePayment, recordSettlement, isPreBroadcastNetwork } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
 import { createBridgeTransaction, getEstimatedTimeRemaining } from "@/lib/bridge-state";
 import { getRecentBridgeMessages, getChainName } from "@/lib/layerzero-service";
@@ -211,7 +211,20 @@ export async function POST(request: NextRequest) {
         if (verifyResult.isValid) settleResult = await settlePayment(paymentPayload, requirements, { source: "demo.t402.io/bridge", description: "Cross-Chain Bridge" });
       } catch { /* pre-broadcast: tx already on-chain */ }
       if (!settleResult) {
-        settleResult = { success: true, transaction: "pre-broadcast", network: requirements.network, payer: "unknown" };
+        const txHash = (paymentPayload as any)?.payload?.bocHash || (paymentPayload as any)?.payload?.txId || "pre-broadcast";
+        const payer = (paymentPayload as any)?.payload?.authorization?.from || (paymentPayload as any)?.payload?.from || "unknown";
+        settleResult = { success: true, transaction: txHash, network: requirements.network, payer };
+        // Record pre-broadcast settlement for Explorer visibility
+        recordSettlement({
+          network: requirements.network,
+          scheme: requirements.scheme,
+          txHash,
+          fromAddress: payer,
+          toAddress: requirements.payTo || "",
+          amount: requirements.amount || "",
+          asset: requirements.asset || "",
+          metadata: { source: "demo.t402.io/bridge", description: "Cross-Chain Bridge", preBroadcast: true },
+        });
       }
     } else {
       const verifyResult = await verifyPayment(paymentPayload, requirements);
