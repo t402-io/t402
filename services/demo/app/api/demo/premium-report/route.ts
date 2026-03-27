@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     if (isPreBroadcast) {
       try {
         const verifyResult = await verifyPayment(paymentPayload, requirements);
-        if (verifyResult.isValid) settleResult = await settlePayment(paymentPayload, requirements);
+        if (verifyResult.isValid) settleResult = await settlePayment(paymentPayload, requirements, { source: "demo.t402.io/premium-report", description: "Premium Report" });
       } catch { /* pre-broadcast: tx already on-chain */ }
       if (!settleResult) {
         settleResult = {
@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
           { status: 402 }
         );
       }
-      settleResult = await settlePayment(paymentPayload, requirements);
+      settleResult = await settlePayment(paymentPayload, requirements, { source: "demo.t402.io/premium-report", description: "Premium Report" });
       if (!settleResult?.success) {
         return NextResponse.json(
           { error: "Settlement failed", reason: settleResult?.errorReason },

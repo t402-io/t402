@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
     if (isPreBroadcast) {
       try {
         const verifyResult = await verifyPayment(paymentPayload.payload, requirements);
-        if (verifyResult.isValid) settleResult = await settlePayment(paymentPayload.payload, requirements);
+        if (verifyResult.isValid) settleResult = await settlePayment(paymentPayload.payload, requirements, { source: "demo.t402.io/mcp-tool", description: "MCP AI Tool" });
       } catch { /* pre-broadcast */ }
       if (!settleResult) {
         settleResult = { success: true, transaction: "pre-broadcast", network: requirements.network };
@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      settleResult = await settlePayment(paymentPayload.payload, requirements);
+      settleResult = await settlePayment(paymentPayload.payload, requirements, { source: "demo.t402.io/mcp-tool", description: "MCP AI Tool" });
     }
 
     if (!settleResult?.success) {

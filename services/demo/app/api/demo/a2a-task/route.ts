@@ -244,7 +244,7 @@ export async function POST(request: NextRequest) {
     if (isPreBroadcast) {
       try {
         const verifyResult = await verifyPayment(paymentPayload, requirements);
-        if (verifyResult.isValid) settleResult = await settlePayment(paymentPayload, requirements);
+        if (verifyResult.isValid) settleResult = await settlePayment(paymentPayload, requirements, { source: "demo.t402.io/a2a-task", description: "Agent-to-Agent Task" });
       } catch { /* pre-broadcast: tx already on-chain */ }
       if (!settleResult) {
         settleResult = {
@@ -262,7 +262,7 @@ export async function POST(request: NextRequest) {
           { status: 402 }
         );
       }
-      settleResult = await settlePayment(paymentPayload, requirements);
+      settleResult = await settlePayment(paymentPayload, requirements, { source: "demo.t402.io/a2a-task", description: "Agent-to-Agent Task" });
       if (!settleResult?.success) {
         return NextResponse.json(
           { error: "Settlement failed", reason: settleResult?.errorReason },

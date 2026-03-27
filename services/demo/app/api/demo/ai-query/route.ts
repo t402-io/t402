@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       try {
         const verifyResult = await verifyPayment(paymentPayload, requirements);
         if (verifyResult.isValid) {
-          settleResult = await settlePayment(paymentPayload, requirements);
+          settleResult = await settlePayment(paymentPayload, requirements, { source: "demo.t402.io/ai-query", description: "AI Query" });
         }
       } catch {
         // Expected: facilitator may reject because balance already moved
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      settleResult = await settlePayment(paymentPayload, requirements);
+      settleResult = await settlePayment(paymentPayload, requirements, { source: "demo.t402.io/ai-query", description: "AI Query" });
       if (!settleResult || !(settleResult as any).success) {
         return NextResponse.json(
           { error: "Settlement failed", reason: (settleResult as any)?.errorReason },

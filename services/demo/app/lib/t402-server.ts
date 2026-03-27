@@ -60,8 +60,9 @@ export async function verifyPayment(paymentPayload: unknown, paymentRequirements
 
 /**
  * Settle a verified payment on-chain via the facilitator.
+ * @param metadata Optional context for Explorer (e.g. { source, description })
  */
-export async function settlePayment(paymentPayload: unknown, paymentRequirements: unknown) {
+export async function settlePayment(paymentPayload: unknown, paymentRequirements: unknown, metadata?: Record<string, unknown>) {
   const response = await facilitatorFetch(`${FACILITATOR_URL}/settle`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -69,6 +70,7 @@ export async function settlePayment(paymentPayload: unknown, paymentRequirements
       t402Version: 2,
       paymentPayload,
       paymentRequirements,
+      ...(metadata ? { metadata } : {}),
     }),
   });
   if (!response.ok) {

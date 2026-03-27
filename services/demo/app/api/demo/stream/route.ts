@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
     if (isPreBroadcast) {
       try {
         const verifyResult = await verifyPayment(paymentPayload, requirements);
-        if (verifyResult.isValid) settleResult = await settlePayment(paymentPayload, requirements);
+        if (verifyResult.isValid) settleResult = await settlePayment(paymentPayload, requirements, { source: "demo.t402.io/stream", description: "Streaming Media" });
       } catch { /* pre-broadcast: tx already on-chain */ }
       if (!settleResult) {
         settleResult = { success: true, transaction: "pre-broadcast", network: requirements.network, payer: "unknown" };
@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
           { status: 402 }
         );
       }
-      settleResult = await settlePayment(paymentPayload, requirements);
+      settleResult = await settlePayment(paymentPayload, requirements, { source: "demo.t402.io/stream", description: "Streaming Media" });
       if (!settleResult?.success) {
         return NextResponse.json(
           { error: "Settlement failed", reason: settleResult?.errorReason },
