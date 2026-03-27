@@ -22,6 +22,7 @@ import {
 } from "@/components/shared/PaymentStatus";
 import type { FlowState } from "@/hooks/usePaymentFlow";
 import { encodePaymentHeader } from "@/lib/t402-client";
+import { useAccount, useSwitchChain } from "wagmi";
 
 // ---------------------------------------------------------------------------
 // Types & Constants
@@ -83,6 +84,15 @@ const CHAIN_CAIP2: Record<string, string> = {
   corn: "eip155:21000000", plasma: "eip155:9745", megaeth: "eip155:4326",
   hyperevm: "eip155:999", morph: "eip155:2818", hedera: "eip155:295",
   tempo: "eip155:698",
+};
+
+// EVM chainIds for wallet switching
+const BRIDGE_CHAIN_IDS: Record<string, number> = {
+  ethereum: 1, arbitrum: 42161, optimism: 10, polygon: 137,
+  ink: 57073, berachain: 80094, unichain: 130, mantle: 5000,
+  sei: 1329, monad: 143, conflux: 1030, flare: 14, rootstock: 30,
+  xlayer: 196, stable: 988, corn: 21000000, plasma: 9745,
+  megaeth: 4326, hyperevm: 999, morph: 2818, hedera: 295, tempo: 698,
 };
 
 const BRIDGE_CHAINS: BridgeChain[] = [
@@ -545,6 +555,8 @@ function ErrorState({
 export function CrossChainBridge() {
   const { isDemo, testnet } = useDemoContext();
   const { signPayment, activeFamily, activeNetwork, address: walletAddress } = useMultiChainPayment();
+  const { isConnected } = useAccount();
+  const { switchChainAsync } = useSwitchChain();
 
   // Form state
   const [fromChain, setFromChain] = useState("arbitrum");
@@ -707,6 +719,12 @@ export function CrossChainBridge() {
     setTrackingStage("submitted");
 
     try {
+      // Switch wallet to the FROM chain BEFORE T402 payment
+      const targetChainId = BRIDGE_CHAIN_IDS[fromChain];
+      if (isConnected && switchChainAsync && targetChainId) {
+        try { await switchChainAsync({ chainId: targetChainId }); } catch { /* user may reject */ }
+      }
+
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
         "x-preferred-chain": "evm",
@@ -818,7 +836,7 @@ export function CrossChainBridge() {
       setFlowState("error");
       setState("failed");
     }
-  }, [isDemo, activeFamily, activeNetwork, testnet, signPayment, fromChain, toChain, amountRaw]);
+  }, [isDemo, activeFamily, activeNetwork, testnet, signPayment, fromChain, toChain, amountRaw, isConnected, switchChainAsync, walletAddress]);
 
   // ---------------------------------------------------------------------------
   // Reset
@@ -839,14 +857,19 @@ export function CrossChainBridge() {
   // Ensure fromChain !== toChain
   // ---------------------------------------------------------------------------
   const handleFromChange = useCallback(
-    (id: string) => {
+    async (id: string) => {
       setFromChain(id);
       if (id === toChain) {
         const alt = BRIDGE_CHAINS.find((c) => c.id !== id);
         if (alt) setToChain(alt.id);
       }
+      // Switch wallet to match the FROM chain
+      const cid = BRIDGE_CHAIN_IDS[id];
+      if (isConnected && switchChainAsync && cid) {
+        try { await switchChainAsync({ chainId: cid }); } catch { /* user may reject */ }
+      }
     },
-    [toChain]
+    [toChain, isConnected, switchChainAsync]
   );
 
   const handleToChange = useCallback(
@@ -889,10 +912,15 @@ export function CrossChainBridge() {
 
             {/* Swap button */}
             <button
-              onClick={() => {
+              onClick={async () => {
                 const prev = fromChain;
                 setFromChain(toChain);
                 setToChain(prev);
+                // Switch wallet to match new FROM chain
+                const cid = BRIDGE_CHAIN_IDS[toChain];
+                if (isConnected && switchChainAsync && cid) {
+                  try { await switchChainAsync({ chainId: cid }); } catch { /* user may reject */ }
+                }
               }}
               disabled={formDisabled}
               className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full bg-[var(--color-surface)] hover:bg-[var(--color-surface-active)] transition-colors disabled:opacity-50"

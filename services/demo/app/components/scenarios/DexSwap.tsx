@@ -380,6 +380,11 @@ export function DexSwap() {
     setSettle(null);
 
     try {
+      // Switch wallet to the correct chain BEFORE T402 payment
+      if (isConnected && switchChainAsync && chainId) {
+        try { await switchChainAsync({ chainId }); } catch { /* user may reject */ }
+      }
+
       const headers: Record<string, string> = {
         Accept: "application/json",
         "Content-Type": "application/json",
