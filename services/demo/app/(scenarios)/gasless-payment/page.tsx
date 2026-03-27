@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Zap } from "lucide-react";
 import { ScenarioShell } from "@/components/shared/ScenarioShell";
 import { GaslessPayment } from "@/components/scenarios/GaslessPayment";
 
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
 export default function GaslessPaymentPage() {
   return (
     <ScenarioShell
+      icon={Zap}
       title="Gasless Payment"
       description="No ETH needed. ERC-4337 account abstraction handles gas — users only pay USDT."
       cost="0.001 USDT"

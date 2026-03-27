@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { FileText } from "lucide-react";
 import { ScenarioShell } from "@/components/shared/ScenarioShell";
 import { ContentPaywall } from "@/components/scenarios/ContentPaywall";
 
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
 export default function ContentPaywallPage() {
   return (
     <ScenarioShell
+      icon={FileText}
       title="Content Paywall"
       description="Replace subscription fatigue with one-time payments. Readers pay only for what they read."
       cost="0.01 USDT/article"

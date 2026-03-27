@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { WalletButton } from "@/components/layout/WalletButton";
 import { ModeToggle } from "@/components/layout/ModeToggle";
@@ -32,16 +33,34 @@ const SCENARIOS = [
 export default function ScenariosLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { isDemo } = useDemoContext();
+  const bottomNavRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll active item into view in bottom nav
+  useEffect(() => {
+    if (!bottomNavRef.current) return;
+    const activeEl = bottomNavRef.current.querySelector("[aria-current='page']");
+    if (activeEl) {
+      activeEl.scrollIntoView({ inline: "center", behavior: "smooth", block: "nearest" });
+    }
+  }, [pathname]);
 
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[rgba(10,10,11,0.9)] backdrop-blur-xl" style={{ boxShadow: "0 1px 0 rgba(80, 175, 149, 0.08)" }}>
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 h-16 flex items-center justify-between overflow-hidden">
-          <div className="flex items-center gap-1 sm:gap-2">
+      <header
+        className="sticky top-0 z-50 border-b border-[var(--color-border)]"
+        style={{
+          background: "linear-gradient(180deg, rgba(10,10,11,0.95), rgba(10,10,11,0.9))",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          boxShadow: "0 1px 0 rgba(80, 175, 149, 0.06)",
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 h-14 sm:h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/"
-              className="flex items-center gap-1.5 sm:gap-2 text-[var(--color-muted)] hover:text-white transition-colors"
+              className="flex items-center gap-1.5 text-[var(--color-muted)] hover:text-white transition-colors"
               aria-label="Back to home"
             >
               <ArrowLeft size={14} />
@@ -51,21 +70,11 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
               <FacilitatorBadge />
             </div>
           </div>
-          <div className="flex items-center gap-1 sm:gap-2 min-w-0">
-            <div className="hidden xl:block shrink-0">
-              <ChainSelector compact />
-            </div>
-            <div className="shrink-0">
-              <ModeToggle />
-            </div>
-            <div className="shrink min-w-0">
-              <WalletButton />
-            </div>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <ChainSelector compact />
+            <ModeToggle />
+            <WalletButton />
           </div>
-        </div>
-        {/* Mobile/Tablet chain selector */}
-        <div className="md:hidden border-t border-[var(--color-border)] px-4 py-2 overflow-x-auto scrollbar-hide">
-          <ChainSelector compact />
         </div>
       </header>
 
@@ -85,14 +94,14 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
                   href={`/${s.id}`}
                   aria-current={isActive ? "page" : undefined}
                   className={clsx(
-                    "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all",
+                    "flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-medium transition-all",
                     isActive
                       ? "bg-[var(--color-surface-active)] text-white"
                       : "text-[var(--color-muted)] hover:text-white hover:bg-[var(--color-surface-hover)]"
                   )}
                   style={isActive ? { borderLeft: "2px solid var(--color-brand)", paddingLeft: "10px" } : undefined}
                 >
-                  <Icon size={14} style={{ color: isActive ? "var(--color-brand)" : undefined }} aria-hidden="true" />
+                  <Icon size={15} style={{ color: isActive ? "var(--color-brand)" : undefined }} aria-hidden="true" />
                   <span>{s.title}</span>
                 </Link>
               );
@@ -113,10 +122,10 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
           <AnimatePresence mode="wait">
             <motion.div
               key={pathname}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
               className="p-6 sm:p-8 lg:p-10 pb-24 lg:pb-10"
             >
               {children}
@@ -125,12 +134,17 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
         </main>
       </div>
 
-      {/* Bottom nav (mobile) */}
+      {/* Bottom nav (mobile) — improved touch targets & active indicator */}
       <nav
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--color-border)] bg-[rgba(10,10,11,0.97)] backdrop-blur-xl safe-area-bottom"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--color-border)] safe-area-bottom"
+        style={{
+          background: "rgba(10, 10, 11, 0.97)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+        }}
         aria-label="Scenario navigation"
       >
-        <div className="flex items-center overflow-x-auto px-2 py-2 gap-1 scrollbar-hide scroll-smooth">
+        <div ref={bottomNavRef} className="flex items-center overflow-x-auto px-2 py-1.5 gap-0.5 scrollbar-hide scroll-smooth">
           {SCENARIOS.map((s) => {
             const Icon = s.icon;
             const isActive = pathname === `/${s.id}`;
@@ -140,13 +154,20 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
                 href={`/${s.id}`}
                 aria-current={isActive ? "page" : undefined}
                 className={clsx(
-                  "shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-[10px] font-medium transition-colors",
+                  "relative shrink-0 flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-[11px] font-medium transition-all active:scale-95",
                   isActive
                     ? "text-white bg-[var(--color-surface-active)]"
                     : "text-[var(--color-muted)]"
                 )}
               >
-                <Icon size={14} style={{ color: isActive ? "var(--color-brand)" : undefined }} aria-hidden="true" />
+                {/* Active indicator bar */}
+                {isActive && (
+                  <span
+                    className="absolute top-0 left-3 right-3 h-[2px] rounded-full"
+                    style={{ background: "var(--color-brand)" }}
+                  />
+                )}
+                <Icon size={15} style={{ color: isActive ? "var(--color-brand)" : undefined }} aria-hidden="true" />
                 <span>{s.title}</span>
               </Link>
             );

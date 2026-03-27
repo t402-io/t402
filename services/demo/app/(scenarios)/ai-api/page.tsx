@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Brain } from "lucide-react";
 import { ScenarioShell } from "@/components/shared/ScenarioShell";
 import { AiApiScenario } from "@/components/scenarios/AiApiScenario";
 
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
 export default function AiApiPage() {
   return (
     <ScenarioShell
+      icon={Brain}
       title="AI API Monetization"
       description="No API keys. No subscriptions. Agents and users pay 0.001 USDT per query — instantly settled on-chain."
       cost="0.001 USDT/query"

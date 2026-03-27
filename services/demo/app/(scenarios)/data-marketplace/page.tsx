@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Database } from "lucide-react";
 import { ScenarioShell } from "@/components/shared/ScenarioShell";
 import { DataMarketplace } from "@/components/scenarios/DataMarketplace";
 
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
 export default function DataMarketplacePage() {
   return (
     <ScenarioShell
+      icon={Database}
       title="Data Marketplace"
       description="Pay-per-request market data. No monthly minimums — just USDT micropayments."
       cost="0.001 USDT/request"

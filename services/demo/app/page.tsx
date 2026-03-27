@@ -114,7 +114,10 @@ export default function HomePage() {
       <HomeHeader />
 
       {/* Hero */}
-      <section className="relative min-h-[80vh] flex flex-col items-center justify-center px-4 sm:px-6 py-24 overflow-hidden">
+      <section
+        className="relative min-h-[80vh] flex flex-col items-center justify-center px-4 sm:px-6 py-24 overflow-hidden"
+        style={{ background: "radial-gradient(ellipse at center, rgba(80, 175, 149, 0.04) 0%, transparent 70%)" }}
+      >
         <div className="text-center mb-14">
           <span
             className="inline-block text-[10px] font-semibold tracking-[0.25em] uppercase mb-5 px-3 py-1 rounded-full"
@@ -135,14 +138,21 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* Chain logos */}
-        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 mb-10 px-2 sm:px-4 max-w-xs sm:max-w-none">
-          {CHAIN_FAMILIES.map((family) => (
-            <div key={family} className="flex flex-col items-center gap-1">
-              <div className="[&_svg]:w-5 [&_svg]:h-5 sm:[&_svg]:w-6 sm:[&_svg]:h-6">
-                <ChainLogo family={family} size={24} />
+        {/* Chain logos with staggered float animation */}
+        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-5 mb-10 px-2 sm:px-4 max-w-xs sm:max-w-none">
+          {CHAIN_FAMILIES.map((family, i) => (
+            <div
+              key={family}
+              className="flex flex-col items-center gap-1.5 animate-float"
+              style={{ animationDelay: `${i * 200}ms`, animationDuration: `${3 + (i % 3) * 0.5}s` }}
+            >
+              <div
+                className="[&_svg]:w-6 [&_svg]:h-6 sm:[&_svg]:w-7 sm:[&_svg]:h-7 p-2 rounded-xl transition-transform hover:scale-110"
+                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+              >
+                <ChainLogo family={family} size={28} />
               </div>
-              <span className="text-[8px] sm:text-[9px]" style={{ color: "var(--color-text-tertiary)" }}>{CHAIN_CONFIGS[family].label}</span>
+              <span className="text-[8px] sm:text-[9px] font-medium" style={{ color: "var(--color-text-tertiary)" }}>{CHAIN_CONFIGS[family].label}</span>
             </div>
           ))}
         </div>
