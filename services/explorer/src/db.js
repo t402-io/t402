@@ -1,5 +1,5 @@
 /**
- * Database layer: PG (source of truth) -> SQLite (local cache) -> seed data (fallback).
+ * Database layer: Facilitator API (source of truth) -> SQLite (local cache) -> seed data (fallback).
  */
 
 import { log } from "./server.js";
@@ -7,10 +7,8 @@ import { getDecimals } from "./utils.js";
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 
-let pg = null;
 let Database = null;
 
-try { pg = await import("pg"); } catch { /* pg not available */ }
 try { Database = require("better-sqlite3"); } catch { /* better-sqlite3 not available */ }
 
 const SQLITE_SCHEMA = `
@@ -38,15 +36,9 @@ const SQLITE_SCHEMA = `
   CREATE INDEX IF NOT EXISTS idx_settlements_to_address ON settlements(to_address);
 `;
 
-const db = { pgPool: null, sqlite: null, lastSync: null };
+const db = { sqlite: null, lastSync: null };
 
-export async function initDb(pgUrl, sqlitePath) {
-  if (pgUrl && pg) {
-    const Pool = pg.default?.Pool || pg.Pool;
-    db.pgPool = new Pool({ connectionString: pgUrl, max: 20, idleTimeoutMillis: 30000, connectionTimeoutMillis: 5000, options: "-c default_transaction_read_only=on" });
-    try { const c = await db.pgPool.connect(); c.release(); log("info", "PG connected"); }
-    catch (err) { log("warn", "PG connection failed", { error: err.message }); db.pgPool = null; }
-  }
+export async function initDb(sqlitePath) {
   if (sqlitePath && Database) {
     db.sqlite = new Database(sqlitePath);
     db.sqlite.pragma("journal_mode = WAL");
@@ -212,13 +204,11 @@ export function insertSeedData(transactions) {
 }
 
 export async function close() {
-  if (db.pgPool) { await db.pgPool.end(); db.pgPool = null; }
   if (db.sqlite) { db.sqlite.close(); db.sqlite = null; }
 }
 
-export function getDbStatus() { return { pg: db.pgPool !== null, sqlite: db.sqlite !== null, lastSync: db.lastSync }; }
+export function getDbStatus() { return { facilitator: !!process.env.FACILITATOR_URL, sqlite: db.sqlite !== null, lastSync: db.lastSync }; }
 export function setLastSync(ts) { db.lastSync = ts; }
-export function getPgPool() { return db.pgPool; }
 
 function sqliteRowToTx(row) {
   return { id: row.id, txHash: row.tx_hash, network: row.network, scheme: row.scheme, token: row.asset, amount: row.amount, from: row.from_address, to: row.to_address, status: row.status, settledAt: row.confirmed_at || row.created_at, gasUsed: row.gas_used, gasPrice: row.gas_price };

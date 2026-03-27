@@ -83,12 +83,13 @@ services:
       - "3404:3404"
     environment:
       - PORT=3404
-      - DATABASE_URL=${DATABASE_URL:-postgresql://scan2pay:${SCAN2PAY_PG_PASSWORD}@scan2pay-postgres:5432/scan2pay}
+      - FACILITATOR_URL=${FACILITATOR_URL:-http://facilitator:8080}
+      - FACILITATOR_API_KEY=${FACILITATOR_API_KEY:-}
       - EXPLORER_MODE=${EXPLORER_MODE:-auto}
       - SQLITE_PATH=/data/explorer.db
     networks:
       - default
-      - scan2pay
+      - facilitator_ext
     volumes:
       - explorer-data:/data
     restart: unless-stopped
@@ -192,4 +193,7 @@ networks:
     external: true
   facilitator:
     name: facilitator_internal
+    external: true
+  facilitator_ext:
+    name: facilitator_external
     external: true

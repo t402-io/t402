@@ -282,7 +282,7 @@ describe("Health details", () => {
     const data = await res.json();
     assert.ok(data.db);
     assert.strictEqual(typeof data.db.sqlite, "boolean");
-    assert.strictEqual(typeof data.db.pg, "boolean");
+    assert.strictEqual(typeof data.db.facilitator, "boolean");
     assert.ok(data.mode);
   });
 });

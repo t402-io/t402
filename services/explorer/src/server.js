@@ -54,7 +54,8 @@ app.use(compression());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3404;
-const DATABASE_URL = process.env.DATABASE_URL || undefined;
+const FACILITATOR_URL = process.env.FACILITATOR_URL || undefined;
+const FACILITATOR_API_KEY = process.env.FACILITATOR_API_KEY || "";
 const SQLITE_PATH = process.env.SQLITE_PATH || undefined;
 const SYNC_INTERVAL = parseInt(process.env.SYNC_INTERVAL_MS, 10) || 60000;
 const EXPLORER_MODE = process.env.EXPLORER_MODE || "auto";
@@ -326,28 +327,28 @@ app.use((err, _req, res, _next) => {
 });
 
 async function start({ listen = true } = {}) {
-  const usePg = EXPLORER_MODE === "pg" || (EXPLORER_MODE === "auto" && DATABASE_URL);
-  const pgUrl = usePg ? DATABASE_URL : undefined;
+  const useFacilitator = EXPLORER_MODE === "live" || EXPLORER_MODE === "pg" ||
+    (EXPLORER_MODE === "auto" && FACILITATOR_URL);
   const sqlitePath = SQLITE_PATH || (EXPLORER_MODE === "seed" ? ":memory:" : undefined);
 
-  await initDb(pgUrl, sqlitePath || ":memory:");
+  await initDb(sqlitePath || ":memory:");
 
-  resolvedMode = (!usePg || EXPLORER_MODE === "seed") ? "seed" : "live";
+  resolvedMode = (!useFacilitator || EXPLORER_MODE === "seed") ? "seed" : "live";
 
-  if (!usePg || EXPLORER_MODE === "seed") {
+  if (!useFacilitator || EXPLORER_MODE === "seed") {
     const txs = seedTransactions(100);
     insertSeedData(txs);
     log("info", "Seeded 100 transactions");
   } else {
-    // PG connected — clear any leftover seed data before syncing real data
+    // Facilitator mode — clear any leftover seed data before syncing real data
     clearCache();
   }
 
-  if (usePg) { startSync(SYNC_INTERVAL); }
+  if (useFacilitator) { startSync(FACILITATOR_URL, FACILITATOR_API_KEY, SYNC_INTERVAL); }
 
   if (listen) {
     app.listen(PORT, () => {
-      log("info", "T402 Explorer started", { port: PORT, mode: EXPLORER_MODE, pg: !!pgUrl, sqlite: sqlitePath || ":memory:" });
+      log("info", "T402 Explorer started", { port: PORT, mode: EXPLORER_MODE, facilitator: !!FACILITATOR_URL, sqlite: sqlitePath || ":memory:" });
     });
   }
 }

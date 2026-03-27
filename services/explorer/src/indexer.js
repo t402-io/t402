@@ -1,11 +1,11 @@
 /**
- * Transaction indexer — seed data generation + PG-to-SQLite sync worker.
+ * Transaction indexer — seed data generation + Facilitator API sync worker.
  *
  * Seed data uses correct address formats and decimal ranges per chain.
- * Sync worker periodically pulls new settlements from PG into SQLite cache.
+ * Sync worker periodically pulls new settlements from Facilitator API into SQLite cache.
  */
 
-import { syncToCache, setLastSync, getPgPool } from "./db.js";
+import { syncToCache, setLastSync } from "./db.js";
 import { log } from "./server.js";
 
 function randomHex(len) {
@@ -143,58 +143,82 @@ export function seedTransactions(count = 100) {
 let syncInterval = null;
 let lastSyncTimestamp = null;
 
-export function startSync(intervalMs = 60000) {
+export function startSync(facilitatorUrl, facilitatorApiKey, intervalMs = 60000) {
   if (syncInterval) return;
+  if (!facilitatorUrl) { log("warn", "No FACILITATOR_URL, sync disabled"); return; }
 
   async function doSync() {
-    const pool = getPgPool();
-    if (!pool) return;
-
     try {
-      const since = lastSyncTimestamp || new Date(Date.now() - 86400000 * 30).toISOString();
-      // Query Scan2Pay crypto_orders (real payments) instead of facilitator settlements
-      const result = await pool.query(
-        `SELECT
-          id,
-          selected_network AS network,
-          CASE
-            WHEN selected_network LIKE 'eip155:%' THEN 'exact'
-            ELSE 'exact'
-          END AS scheme,
-          tx_hash,
-          COALESCE(payer, '') AS from_address,
-          COALESCE(pay_to_evm, pay_to_solana, pay_to_ton, pay_to_tron, '') AS to_address,
-          COALESCE(crypto_amount, amount) AS amount,
-          COALESCE(selected_asset, '') AS asset,
-          'confirmed' AS status,
-          created_at,
-          paid_at AS confirmed_at,
-          NULL::text AS gas_used,
-          NULL::text AS gas_price,
-          NULL::text AS metadata
-        FROM crypto_orders
-        WHERE status = 'paid' AND tx_hash IS NOT NULL AND paid_at > $1
-        ORDER BY paid_at ASC
-        LIMIT 1000`,
-        [since],
-      );
+      const since = lastSyncTimestamp || new Date(Date.now() - 86400000 * 90).toISOString();
+      let offset = 0;
+      let totalSynced = 0;
+      let newestCreatedAt = null;
 
-      if (result.rows.length > 0) {
-        // Resolve contract addresses to token symbols
-        const mapped = result.rows.map(r => ({ ...r, asset: resolveTokenSymbol(r.asset) }));
+      // Paginate through all records since last sync
+      while (true) {
+        const url = `${facilitatorUrl}/v1/settlements?since=${encodeURIComponent(since)}&limit=1000&offset=${offset}`;
+        const headers = { "Accept": "application/json" };
+        if (facilitatorApiKey) headers["X-API-Key"] = facilitatorApiKey;
+
+        const res = await fetch(url, { headers, signal: AbortSignal.timeout(30000) });
+        if (!res.ok) {
+          log("warn", "Facilitator API error", { status: res.status, url });
+          break;
+        }
+
+        const data = await res.json();
+        const settlements = data.settlements || [];
+        if (settlements.length === 0) break;
+
+        // Map Facilitator camelCase → SQLite snake_case
+        const mapped = settlements.map(s => ({
+          id: s.id,
+          network: s.network || "",
+          scheme: s.scheme || "exact",
+          tx_hash: s.txHash || "",
+          from_address: s.fromAddress || "",
+          to_address: s.toAddress || "",
+          amount: s.amount || "0",
+          asset: resolveTokenSymbol(s.asset),
+          status: s.status || "confirmed",
+          created_at: s.createdAt,
+          confirmed_at: s.confirmedAt,
+          gas_used: s.gasUsed != null ? String(s.gasUsed) : null,
+          gas_price: s.gasPrice != null ? String(s.gasPrice) : null,
+          metadata: s.metadata,
+        }));
+
         syncToCache(mapped);
-        lastSyncTimestamp = result.rows[result.rows.length - 1].confirmed_at;
+        totalSynced += mapped.length;
+
+        // Track the newest createdAt across all pages (results are DESC ordered)
+        // First item on first page is the newest overall
+        for (const s of settlements) {
+          if (s.createdAt && (!newestCreatedAt || s.createdAt > newestCreatedAt)) {
+            newestCreatedAt = s.createdAt;
+          }
+        }
+
+        // If fewer than limit returned, we're done
+        if (settlements.length < 1000) break;
+        offset += settlements.length;
+      }
+
+      // Update lastSyncTimestamp to the newest record so next sync only fetches newer
+      if (newestCreatedAt) lastSyncTimestamp = newestCreatedAt;
+
+      if (totalSynced > 0) {
         setLastSync(new Date().toISOString());
-        log("info", "Synced orders from PG", { count: result.rows.length });
+        log("info", "Synced settlements from Facilitator", { count: totalSynced });
       }
     } catch (err) {
-      log("warn", "PG sync failed", { error: err.message });
+      log("warn", "Facilitator sync failed", { error: err.message });
     }
   }
 
   doSync();
   syncInterval = setInterval(doSync, intervalMs);
-  log("info", "Sync worker started", { interval_ms: intervalMs });
+  log("info", "Sync worker started", { interval_ms: intervalMs, url: facilitatorUrl });
 }
 
 export function stopSync() {
