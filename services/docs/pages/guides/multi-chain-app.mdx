@@ -1,0 +1,378 @@
+# Multi-Chain Payment App
+
+import { Callout, Tabs, Steps } from 'nextra/components'
+
+This tutorial shows how to build an application that accepts payments from multiple blockchain networks simultaneously.
+
+## Overview
+
+A multi-chain payment app allows users to pay with their preferred network:
+
+- **EVM chains**: Ethereum, Base, Arbitrum, etc.
+- **Non-EVM chains**: TON, TRON, Solana, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos
+- **Automatic routing**: Best network selection
+
+## Architecture
+
+```
+┌─────────────┐     ┌──────────────┐     ┌─────────────┐
+│   Client    │────>│    Server    │────>│ Facilitator │
+│  (Browser)  │     │   (API)      │     │  (t402.io)  │
+└─────────────┘     └──────────────┘     └─────────────┘
+       │                   │                    │
+       │    ┌──────────────┼──────────────┐    │
+       v    v              v              v    v
+    ┌─────┐ ┌─────┐   ┌─────┐   ┌─────┐ ┌─────┐
+    │ EVM │ │ TON │   │TRON │   │ SVM │ │ ... │
+    └─────┘ └─────┘   └─────┘   └─────┘ └─────┘
+```
+
+<Steps>
+
+### Server Setup
+
+Configure your server to accept multiple payment networks.
+
+<Tabs items={['TypeScript', 'Go']}>
+  <Tabs.Tab>
+```typescript
+import express from 'express';
+import { paymentMiddleware } from '@t402/express';
+import { t402ResourceServer, createFacilitatorClient } from '@t402/core/server';
+import { registerExactEvmScheme } from '@t402/evm/exact/server';
+import { registerExactTonScheme } from '@t402/ton/exact/server';
+import { registerExactTronScheme } from '@t402/tron/exact/server';
+import { registerExactSvmScheme } from '@t402/svm/exact/server';
+
+const app = express();
+
+// Create facilitator client
+const facilitator = createFacilitatorClient({
+  url: 'https://facilitator.t402.io',
+});
+
+// Create t402 server with all mechanisms
+const server = new t402ResourceServer(facilitator);
+registerExactEvmScheme(server, {});
+registerExactTonScheme(server, {});
+registerExactTronScheme(server, {});
+registerExactSvmScheme(server, {});
+
+// Define routes with multiple payment options
+const routes = {
+  '/api/premium/*': {
+    accepts: [
+      // EVM chains
+      { scheme: 'exact', network: 'eip155:8453', payTo: '0xYourEvmAddress', price: '$0.01' },
+      { scheme: 'exact', network: 'eip155:42161', payTo: '0xYourEvmAddress', price: '$0.01' },
+      // TON
+      { scheme: 'exact', network: 'ton:mainnet', payTo: 'EQYourTonAddress', price: '$0.01' },
+      // TRON
+      { scheme: 'exact', network: 'tron:mainnet', payTo: 'TYourTronAddress', price: '$0.01' },
+      // Solana
+      { scheme: 'exact', network: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp', payTo: 'YourSolanaAddress', price: '$0.01' },
+    ],
+    description: 'Premium API - Pay with any supported chain',
+  },
+};
+
+app.use(paymentMiddleware(routes, server));
+
+app.get('/api/premium/data', (req, res) => {
+  res.json({ data: 'Premium multi-chain content' });
+});
+
+app.listen(3000);
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```go
+package main
+
+import (
+    "github.com/gin-gonic/gin"
+    t402 "github.com/t402-io/t402/sdks/go"
+    "github.com/t402-io/t402/sdks/go/http"
+    "github.com/t402-io/t402/sdks/go/mechanisms/evm"
+    "github.com/t402-io/t402/sdks/go/mechanisms/ton"
+    "github.com/t402-io/t402/sdks/go/mechanisms/tron"
+    "github.com/t402-io/t402/sdks/go/mechanisms/svm"
+)
+
+func main() {
+    r := gin.Default()
+
+    // Create t402 server with all mechanisms
+    server := t402.NewResourceServer(facilitator)
+    evm.RegisterExactScheme(server)
+    ton.RegisterExactScheme(server)
+    tron.RegisterExactScheme(server)
+    svm.RegisterExactScheme(server)
+
+    // Configure multi-chain routes
+    routes := http.Routes{
+        "/api/premium/*": {
+            Accepts: []http.PaymentConfig{
+                {Scheme: "exact", Network: "eip155:8453", PayTo: "0x...", Price: "$0.01"},
+                {Scheme: "exact", Network: "ton:mainnet", PayTo: "EQ...", Price: "$0.01"},
+                {Scheme: "exact", Network: "tron:mainnet", PayTo: "T...", Price: "$0.01"},
+                {Scheme: "exact", Network: "solana:5eykt...", PayTo: "...", Price: "$0.01"},
+            },
+        },
+    }
+
+    r.Use(http.PaymentMiddleware(routes, server))
+    r.GET("/api/premium/data", handler)
+    r.Run(":3000")
+}
+```
+  </Tabs.Tab>
+</Tabs>
+
+### Client Setup with Multiple Wallets
+
+Create a client that can pay with any available wallet.
+
+```typescript
+import { t402Client } from '@t402/core/client';
+import { ExactEvmScheme } from '@t402/evm/exact/client';
+import { ExactTonScheme } from '@t402/ton';
+import { ExactTronScheme } from '@t402/tron';
+import { ExactSvmScheme } from '@t402/svm';
+
+// Register all available wallets
+const client = new t402Client();
+
+// EVM (if wallet connected)
+if (evmWallet) {
+  client.register('eip155:*', new ExactEvmScheme(evmSigner));
+}
+
+// TON (if wallet connected)
+if (tonWallet) {
+  client.register('ton:mainnet', new ExactTonScheme(tonSigner));
+}
+
+// TRON (if wallet connected)
+if (tronWallet) {
+  client.register('tron:mainnet', new ExactTronScheme(tronSigner));
+}
+
+// Solana (if wallet connected)
+if (solanaWallet) {
+  client.register('solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp', new ExactSvmScheme(svmSigner));
+}
+```
+
+### Smart Network Selection
+
+Implement automatic network selection based on user preferences or availability:
+
+```typescript
+import { SelectPaymentRequirements } from '@t402/core/client';
+
+// Custom selector: prefer user's connected wallet network
+const selectPayment: SelectPaymentRequirements = (requirements, context) => {
+  // Get user's preferred network (e.g., from connected wallet)
+  const preferredNetwork = getUserPreferredNetwork();
+
+  // Try to find matching requirement
+  const preferred = requirements.find(r => r.network === preferredNetwork);
+  if (preferred) return preferred;
+
+  // Fallback to lowest fee network
+  const sorted = requirements.sort((a, b) => {
+    return estimateFee(a.network) - estimateFee(b.network);
+  });
+
+  return sorted[0];
+};
+
+const client = new t402Client({ selectPaymentRequirements: selectPayment });
+```
+
+### React Multi-Wallet Component
+
+Create a UI that shows all payment options:
+
+```tsx
+import { useState } from 'react';
+import { usePaymentRequired, PaymentButton } from '@t402/react';
+import { getNetworkDisplayName, isEvmNetwork, isTonNetwork } from '@t402/react';
+
+function MultiChainPayment({ paymentRequired }) {
+  const [selectedNetwork, setSelectedNetwork] = useState(null);
+
+  const requirements = paymentRequired.accepts;
+
+  return (
+    <div className="payment-modal">
+      <h2>Choose Payment Network</h2>
+
+      <div className="network-list">
+        {requirements.map((req, i) => (
+          <button
+            key={i}
+            className={`network-option ${selectedNetwork === i ? 'selected' : ''}`}
+            onClick={() => setSelectedNetwork(i)}
+          >
+            <NetworkIcon network={req.network} />
+            <span>{getNetworkDisplayName(req.network)}</span>
+            <span className="price">{req.maxAmountRequired} USDT</span>
+          </button>
+        ))}
+      </div>
+
+      {selectedNetwork !== null && (
+        <PaymentButton
+          onClick={() => handlePayment(requirements[selectedNetwork])}
+          size="lg"
+        >
+          Pay with {getNetworkDisplayName(requirements[selectedNetwork].network)}
+        </PaymentButton>
+      )}
+    </div>
+  );
+}
+
+function NetworkIcon({ network }) {
+  if (isEvmNetwork(network)) return <EvmIcon />;
+  if (isTonNetwork(network)) return <TonIcon />;
+  // ... other networks
+}
+```
+
+### Wallet Connection Manager
+
+Manage multiple wallet connections:
+
+```typescript
+import { useState, useEffect } from 'react';
+
+function useMultiWallet() {
+  const [wallets, setWallets] = useState({
+    evm: null,
+    ton: null,
+    tron: null,
+    solana: null,
+  });
+
+  // Connect EVM wallet (MetaMask, etc.)
+  const connectEvm = async () => {
+    if (window.ethereum) {
+      const accounts = await window.ethereum.request({
+        method: 'eth_requestAccounts',
+      });
+      setWallets(w => ({ ...w, evm: accounts[0] }));
+    }
+  };
+
+  // Connect TON wallet (Tonkeeper, etc.)
+  const connectTon = async () => {
+    // TON Connect implementation
+  };
+
+  // Connect TRON wallet (TronLink)
+  const connectTron = async () => {
+    if (window.tronWeb) {
+      const address = window.tronWeb.defaultAddress.base58;
+      setWallets(w => ({ ...w, tron: address }));
+    }
+  };
+
+  // Connect Solana wallet (Phantom)
+  const connectSolana = async () => {
+    if (window.solana?.isPhantom) {
+      const response = await window.solana.connect();
+      setWallets(w => ({ ...w, solana: response.publicKey.toString() }));
+    }
+  };
+
+  return {
+    wallets,
+    connectEvm,
+    connectTon,
+    connectTron,
+    connectSolana,
+    connectedNetworks: Object.entries(wallets)
+      .filter(([_, v]) => v)
+      .map(([k]) => k),
+  };
+}
+```
+
+</Steps>
+
+## Best Practices
+
+### Price Consistency
+
+Keep prices consistent across networks:
+
+```typescript
+const PRICE_USD = '0.01';
+
+const routes = {
+  '/api/premium/*': {
+    accepts: [
+      { scheme: 'exact', network: 'eip155:8453', payTo: evmAddress, price: PRICE_USD },
+      { scheme: 'exact', network: 'ton:mainnet', payTo: tonAddress, price: PRICE_USD },
+      // ... all use same price
+    ],
+  },
+};
+```
+
+### Address Management
+
+Use environment variables for addresses:
+
+```typescript
+const addresses = {
+  evm: process.env.EVM_PAY_TO_ADDRESS,
+  ton: process.env.TON_PAY_TO_ADDRESS,
+  tron: process.env.TRON_PAY_TO_ADDRESS,
+  solana: process.env.SOLANA_PAY_TO_ADDRESS,
+};
+```
+
+### Error Handling
+
+Handle network-specific errors:
+
+```typescript
+try {
+  await pay(selectedRequirement);
+} catch (error) {
+  if (isEvmNetwork(selectedRequirement.network)) {
+    handleEvmError(error);
+  } else if (isTonNetwork(selectedRequirement.network)) {
+    handleTonError(error);
+  }
+  // ... other networks
+}
+```
+
+## Testing
+
+Test with multiple testnets:
+
+```typescript
+const testnetRoutes = {
+  '/api/test/*': {
+    accepts: [
+      { scheme: 'exact', network: 'eip155:84532', payTo: '0x...', price: '$0.001' }, // Base Sepolia
+      { scheme: 'exact', network: 'ton:testnet', payTo: 'kQ...', price: '$0.001' },
+      { scheme: 'exact', network: 'tron:nile', payTo: 'T...', price: '$0.001' },
+      { scheme: 'exact', network: 'solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1', payTo: '...', price: '$0.001' },
+    ],
+  },
+};
+```
+
+## Related
+
+- [TON Integration](/guides/ton-integration) - TON-specific guide
+- [TRON Integration](/guides/tron-integration) - TRON-specific guide
+- [Solana Integration](/guides/solana-integration) - Solana-specific guide
+- [Smart Router](/advanced/smart-router) - Automatic route optimization

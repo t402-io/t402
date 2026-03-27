@@ -7,58 +7,25 @@ export default {
     title: 'Getting Started',
     type: 'page'
   },
+  guides: {
+    title: 'Guides',
+    type: 'page'
+  },
   sdks: {
     title: 'SDKs',
-    type: 'page'
-  },
-  chains: {
-    title: 'Chains',
-    type: 'page'
-  },
-  schemes: {
-    title: 'Schemes',
     type: 'page'
   },
   reference: {
     title: 'Reference',
     type: 'page'
   },
-  tutorials: {
-    title: 'Tutorials',
-    type: 'page'
-  },
   advanced: {
     title: 'Advanced',
     type: 'page'
   },
-  security: {
-    title: 'Security',
+  resources: {
+    title: 'Resources',
     type: 'page'
-  },
-  'use-cases': {
-    title: 'Use Cases',
-    type: 'page'
-  },
-  ecosystem: {
-    title: 'Ecosystem',
-    type: 'page'
-  },
-  // Hidden but accessible
-  faq: {
-    title: 'FAQ',
-    display: 'hidden'
-  },
-  glossary: {
-    title: 'Glossary',
-    display: 'hidden'
-  },
-  changelog: {
-    title: 'Changelog',
-    display: 'hidden'
-  },
-  comparison: {
-    title: 'Comparison',
-    display: 'hidden'
   },
   '---': {
     type: 'separator'

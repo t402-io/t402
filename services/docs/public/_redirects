@@ -1,0 +1,98 @@
+# Tutorials -> Guides
+/tutorials/quick-start /getting-started/quickstart 301
+/tutorials/ton-integration /guides/ton-integration 301
+/tutorials/tron-integration /guides/tron-integration 301
+/tutorials/solana-integration /guides/solana-integration 301
+/tutorials/multi-chain-app /guides/multi-chain-app 301
+/tutorials/self-hosted-facilitator /guides/self-hosted-facilitator 301
+/tutorials/multisig-setup /guides/multisig-setup 301
+/tutorials/production-deployment /guides/production-deployment 301
+/tutorials /guides 301
+
+# Use Cases -> Guides
+/use-cases/api-monetization /guides/api-monetization 301
+/use-cases/micro-payments /guides/api-monetization 301
+/use-cases/ai-payments /guides/ai-agent-payments 301
+/use-cases/content-access /guides/ai-agent-payments 301
+/use-cases /guides 301
+
+# Getting Started consolidation
+/getting-started/installation /getting-started/quickstart 301
+
+# Chains -> Resources
+/chains /resources/chains 301
+/chains/evm /resources/chains 301
+/chains/non-evm /resources/chains 301
+/chains/bitcoin /resources/chains 301
+/chains/testnets /resources/chains 301
+/chains/comparison /resources/chains 301
+
+# Schemes -> Resources
+/schemes /resources/schemes 301
+/schemes/exact /resources/schemes 301
+/schemes/upto /resources/schemes 301
+
+# Security -> Resources
+/security /resources/security 301
+/security/cryptographic-operations /resources/security 301
+/security/threat-model /resources/security 301
+/security/audit-scope /resources/security 301
+
+# Ecosystem -> Resources
+/ecosystem /resources/chains 301
+/ecosystem/compatibility /resources/chains 301
+/ecosystem/tools /resources/faq 301
+
+# Hidden pages -> Resources
+/faq /resources/faq 301
+/glossary /resources/faq 301
+/comparison /resources/faq 301
+/changelog /resources/changelog 301
+
+# Reference consolidations: minor mechanisms -> other-mechanisms
+/reference/near /reference/other-mechanisms 301
+/reference/aptos /reference/other-mechanisms 301
+/reference/tezos /reference/other-mechanisms 301
+/reference/polkadot /reference/other-mechanisms 301
+/reference/stacks /reference/other-mechanisms 301
+/reference/cosmos /reference/other-mechanisms 301
+/reference/btc /reference/other-mechanisms 301
+/reference/stellar /reference/other-mechanisms 301
+/reference/spark /reference/other-mechanisms 301
+
+# Reference consolidations: server middleware
+/reference/express /reference/server-middleware 301
+/reference/hono /reference/server-middleware 301
+/reference/fastify /reference/server-middleware 301
+/reference/next /reference/server-middleware 301
+/reference/facilitator-embedded /reference/server-middleware 301
+
+# Reference consolidations: client libraries
+/reference/fetch /reference/client-libraries 301
+/reference/axios /reference/client-libraries 301
+
+# Reference consolidations: AI agents
+/reference/mcp /advanced/mcp 301
+/reference/a2a /reference/ai-agents 301
+/reference/policy /reference/ai-agents 301
+/reference/observability /reference/ai-agents 301
+
+# Reference consolidations: WDK
+/reference/wdk-gasless /reference/wdk 301
+/reference/wdk-bridge /reference/wdk 301
+/reference/wdk-multisig /reference/wdk 301
+
+# Reference consolidations: UI
+/reference/react-native /reference/react 301
+
+# Advanced consolidations
+/advanced/a2a-negotiation /advanced/a2a 301
+/advanced/deployment /guides/production-deployment 301
+/advanced/best-practices /advanced/operations 301
+/advanced/performance /advanced/operations 301
+/advanced/troubleshooting /advanced/operations 301
+/advanced/intent-payments /advanced/smart-router 301
+/advanced/streaming-payments /advanced/experimental 301
+/advanced/zk-payments /advanced/experimental 301
+/advanced/migration-v1-to-v2 /advanced/migration 301
+/advanced/migration-v2.2-to-v2.3 /advanced/migration 301

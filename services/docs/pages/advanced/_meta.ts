@@ -4,14 +4,13 @@ export default {
   mcp: 'MCP Integration',
   a2a: 'A2A Transport',
   ap2: 'AP2 Integration',
+  'smart-router': 'Smart Router & Intents',
+  'agent-policy': 'Agent Policy',
+  experimental: 'Experimental Features',
   '---2': {
     type: 'separator',
     title: 'Operations'
   },
-  deployment: 'Deployment Guide',
-  'best-practices': 'Best Practices',
-  performance: 'Performance Tuning',
-  troubleshooting: 'Troubleshooting',
-  'migration-v1-to-v2': 'Migration Guide (v1→v2)',
-  'migration-v2.2-to-v2.3': 'Migration Guide (v2.2→v2.3)'
+  operations: 'Best Practices & Troubleshooting',
+  migration: 'Migration Guides'
 }

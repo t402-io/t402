@@ -1,0 +1,411 @@
+# API Monetization
+
+Charge per-request fees for your API endpoints with simple middleware. No payment gateway, no subscriptions - just HTTP headers.
+
+## Overview
+
+T402 makes API monetization simple:
+
+- **Per-request pricing**: Charge exactly what each endpoint is worth
+- **Instant settlement**: Receive USDT immediately, no invoicing
+- **Zero chargeback risk**: Blockchain payments are final
+- **Simple integration**: Add middleware to existing APIs
+
+## Quick Start
+
+### 1. Install Dependencies
+
+```bash
+pnpm add @t402/express @t402/evm
+```
+
+### 2. Add Payment Middleware
+
+```typescript
+import express from 'express'
+import { paymentMiddleware } from '@t402/express'
+import { ExactEvmScheme } from '@t402/evm'
+
+const app = express()
+
+// Configure pricing per endpoint
+app.use(paymentMiddleware({
+  'GET /api/basic': {
+    price: '$0.001',
+    network: 'eip155:8453',
+    payTo: process.env.WALLET_ADDRESS,
+    description: 'Basic API access'
+  },
+  'GET /api/premium': {
+    price: '$0.01',
+    network: 'eip155:8453',
+    payTo: process.env.WALLET_ADDRESS,
+    description: 'Premium API access'
+  },
+  'POST /api/compute': {
+    price: '$0.10',
+    network: 'eip155:8453',
+    payTo: process.env.WALLET_ADDRESS,
+    description: 'Heavy computation'
+  }
+}))
+
+// Your existing routes work as normal
+app.get('/api/basic', (req, res) => {
+  res.json({ data: 'Basic response' })
+})
+
+app.get('/api/premium', (req, res) => {
+  res.json({ data: 'Premium response with more details' })
+})
+
+app.listen(3000)
+```
+
+## Pricing Strategies
+
+### Fixed Per-Request
+
+Simple, predictable pricing:
+
+```typescript
+'GET /api/weather': {
+  price: '$0.001',
+  // ...
+}
+```
+
+### Dynamic Pricing
+
+Price based on request parameters:
+
+```typescript
+import { paymentMiddleware, PriceResolver } from '@t402/express'
+
+const dynamicPricing: PriceResolver = (req) => {
+  const complexity = req.query.complexity || 'low'
+  const prices = {
+    low: '$0.01',
+    medium: '$0.05',
+    high: '$0.25'
+  }
+  return prices[complexity] || prices.low
+}
+
+app.use(paymentMiddleware({
+  'POST /api/analyze': {
+    price: dynamicPricing,
+    network: 'eip155:8453',
+    payTo: process.env.WALLET_ADDRESS
+  }
+}))
+```
+
+### Tiered Pricing
+
+Different prices for different tiers:
+
+```typescript
+'GET /api/data': {
+  price: '$0.001', // Default tier
+  tiers: {
+    basic: '$0.001',
+    pro: '$0.0005',    // 50% discount
+    enterprise: '$0'    // Free for enterprise
+  }
+}
+```
+
+## Framework Integrations
+
+### Express.js
+
+```typescript
+import { paymentMiddleware } from '@t402/express'
+app.use(paymentMiddleware(config))
+```
+
+### Next.js API Routes
+
+```typescript
+import { withPayment } from '@t402/next'
+
+export default withPayment(handler, {
+  price: '$0.01',
+  network: 'eip155:8453',
+  payTo: process.env.WALLET_ADDRESS
+})
+```
+
+### Hono
+
+```typescript
+import { paymentMiddleware } from '@t402/hono'
+app.use('/api/*', paymentMiddleware(config))
+```
+
+## Multi-Network Support
+
+Accept payments on multiple networks:
+
+```typescript
+'GET /api/data': {
+  price: '$0.01',
+  networks: ['eip155:8453', 'eip155:42161', 'ton:-239'],
+  payTo: {
+    'eip155:8453': '0xBaseAddress...',
+    'eip155:42161': '0xArbitrumAddress...',
+    'ton:-239': 'UQTonAddress...'
+  }
+}
+```
+
+## Monitoring & Analytics
+
+### Track Payments
+
+```typescript
+import { paymentMiddleware, PaymentEvent } from '@t402/express'
+
+app.use(paymentMiddleware(config, {
+  onPayment: (event: PaymentEvent) => {
+    console.log(`Payment received: ${event.amount} ${event.asset}`)
+    // Log to your analytics service
+    analytics.track('payment', {
+      endpoint: event.path,
+      amount: event.amount,
+      network: event.network,
+      txHash: event.txHash
+    })
+  }
+}))
+```
+
+### Facilitator Dashboard
+
+Monitor payments via the facilitator dashboard:
+
+```
+https://grafana.facilitator.t402.io
+```
+
+## Best Practices
+
+import { Callout } from 'nextra/components'
+
+<Callout type="info">
+**Start Small**: Begin with low prices ($0.001) and adjust based on demand.
+</Callout>
+
+1. **Clear pricing**: Show prices in API documentation
+2. **Reasonable limits**: Set appropriate rate limits alongside payments
+3. **Error handling**: Return clear error messages for failed payments
+4. **Testing**: Use testnets during development
+
+## Example: Weather API
+
+Complete example of a monetized weather API:
+
+```typescript
+import express from 'express'
+import { paymentMiddleware } from '@t402/express'
+
+const app = express()
+
+app.use(paymentMiddleware({
+  'GET /weather/current': {
+    price: '$0.001',
+    network: 'eip155:8453',
+    payTo: process.env.WALLET_ADDRESS,
+    description: 'Current weather data'
+  },
+  'GET /weather/forecast': {
+    price: '$0.01',
+    network: 'eip155:8453',
+    payTo: process.env.WALLET_ADDRESS,
+    description: '7-day weather forecast'
+  },
+  'GET /weather/historical': {
+    price: '$0.05',
+    network: 'eip155:8453',
+    payTo: process.env.WALLET_ADDRESS,
+    description: 'Historical weather data'
+  }
+}))
+
+app.get('/weather/current', async (req, res) => {
+  const { city } = req.query
+  // Fetch weather data...
+  res.json({ city, temp: 22, condition: 'sunny' })
+})
+
+app.listen(3000, () => {
+  console.log('Weather API running on port 3000')
+})
+```
+
+## Micro-Payments
+
+T402 on Layer 2 networks makes true micro-payments economically viable, enabling sub-cent pricing that traditional payment systems cannot support.
+
+### Why Micro-Payments?
+
+Traditional payment systems can't handle small amounts:
+
+| Payment Method | Minimum Viable Payment |
+|----------------|----------------------|
+| Credit Cards | ~$0.50 (due to fees) |
+| PayPal | ~$0.30 (due to fees) |
+| Stripe | ~$0.50 (due to fees) |
+| **T402 on Base** | **~$0.0001** |
+
+### Network Selection for Micro-Payments
+
+Choose the right network based on payment size:
+
+| Payment Size | Recommended Network | Gas Cost |
+|--------------|--------------------:|----------|
+| $0.0001 - $0.001 | Base (gasless) | ~$0 |
+| $0.001 - $0.01 | Base, Arbitrum | ~$0.001 |
+| $0.01 - $0.10 | Any EVM | ~$0.01 |
+| $0.10+ | Any supported | Varies |
+
+### Gasless Micro-Payments
+
+For the smallest payments, use ERC-4337 gasless transactions:
+
+```typescript
+import { GaslessT402Client } from '@t402/wdk-gasless'
+
+const client = new GaslessT402Client({
+  bundlerUrl: 'https://bundler.example.com',
+  paymasterUrl: 'https://paymaster.example.com',
+  network: 'eip155:8453'
+})
+
+// Users pay $0.001 without needing gas
+await client.pay({
+  to: '0xMerchant...',
+  amount: '0.001',
+  asset: 'USDT'
+})
+```
+
+### Micro-Payment Use Cases
+
+#### Per-Token Pricing (AI/LLM)
+
+```typescript
+// Charge based on token usage
+'POST /api/generate': {
+  price: (req) => {
+    const tokens = estimateTokens(req.body.prompt)
+    const pricePerToken = 0.00001 // $0.00001 per token
+    return `$${tokens * pricePerToken}`
+  },
+  network: 'eip155:8453',
+  payTo: process.env.WALLET_ADDRESS
+}
+```
+
+#### Per-Byte Pricing (Storage/Bandwidth)
+
+```typescript
+// Charge based on data size
+'POST /api/upload': {
+  price: (req) => {
+    const bytes = parseInt(req.headers['content-length'])
+    const pricePerMB = 0.001 // $0.001 per MB
+    const priceInDollars = (bytes / 1024 / 1024) * pricePerMB
+    return `$${priceInDollars.toFixed(6)}`
+  },
+  network: 'eip155:8453',
+  payTo: process.env.WALLET_ADDRESS
+}
+```
+
+#### Per-Second Pricing (Compute)
+
+```typescript
+// Charge for compute time
+'POST /api/render': {
+  price: (req) => {
+    const estimatedSeconds = estimateRenderTime(req.body)
+    const pricePerSecond = 0.01 // $0.01 per second
+    return `$${estimatedSeconds * pricePerSecond}`
+  },
+  network: 'eip155:8453',
+  payTo: process.env.WALLET_ADDRESS
+}
+```
+
+### Batching for Efficiency
+
+For very high-volume micro-payments, batch multiple payments:
+
+```typescript
+import { BatchPaymentClient } from '@t402/core'
+
+const client = new BatchPaymentClient({
+  network: 'eip155:8453',
+  batchInterval: 60000, // Batch every minute
+  minBatchSize: 10
+})
+
+// Individual payments are batched automatically
+await client.queuePayment({ to: merchant1, amount: '0.001' })
+await client.queuePayment({ to: merchant2, amount: '0.002' })
+// ... payments are settled together
+```
+
+### Implementation Tips
+
+1. **Use L2 Networks** - Always use Layer 2 for micro-payments:
+
+```typescript
+const MICRO_PAYMENT_NETWORKS = [
+  'eip155:8453',   // Base
+  'eip155:42161',  // Arbitrum
+  'eip155:10',     // Optimism
+]
+```
+
+2. **Implement Caching** - Cache payment authorizations to reduce blockchain calls:
+
+```typescript
+const paymentCache = new Map()
+
+function getCachedPayment(userId, resource) {
+  const key = `${userId}:${resource}`
+  const cached = paymentCache.get(key)
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.payment
+  }
+  return null
+}
+```
+
+3. **Aggregate Small Payments** - For very small payments, consider aggregation:
+
+```typescript
+// Track usage, settle periodically
+let userBalance = {}
+
+function trackUsage(userId, amount) {
+  userBalance[userId] = (userBalance[userId] || 0) + amount
+}
+
+// Settle when balance exceeds threshold
+function settleIfNeeded(userId) {
+  if (userBalance[userId] >= 0.01) { // $0.01 minimum
+    settlePayment(userId, userBalance[userId])
+    userBalance[userId] = 0
+  }
+}
+```
+
+## Next Steps
+
+- [Quick Start](/getting-started/quickstart) - Basic setup guide
+- [Server Integration](/getting-started/server) - Detailed server setup
+- [Gasless Payments](/advanced/gasless) - Zero-gas user experience

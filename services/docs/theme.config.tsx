@@ -106,10 +106,10 @@ const config: DocsThemeConfig = {
     key: 'v2.8.0-stellar',
     dismissible: true,
     content: (
-      <a href="/changelog" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.375rem' }}>
+      <a href="/resources/changelog" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.375rem' }}>
         <span style={{ fontWeight: 600 }}>T402 v2.8.0</span>
         <span style={{ opacity: 0.5 }}>&mdash;</span>
-        <span>Stellar support + 39 packages across 45 networks</span>
+        <span>Stellar support + 42 packages across 47 networks</span>
         <span style={{ marginLeft: '0.25rem', opacity: 0.7 }}>&rarr;</span>
       </a>
     ),

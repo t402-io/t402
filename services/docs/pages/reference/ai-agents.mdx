@@ -1,0 +1,136 @@
+import { Callout } from 'nextra/components'
+
+# AI Agent Packages
+
+Packages for enabling AI agent payments, transport, policy, and observability.
+
+## @t402/mcp — MCP Server
+
+Model Context Protocol (MCP) server for AI agent payments. 32+ tools for Claude, Codex, Gemini.
+
+### Installation
+
+```bash
+npm install @t402/mcp
+```
+
+### Tools
+
+#### Core Payment
+- `t402/getBalance` — Token balances on a network
+- `t402/getAllBalances` — Balances across all networks
+- `t402/pay` — Execute stablecoin payment
+- `t402/payGasless` — Pay without gas (ERC-4337)
+- `t402/autoPay` — Smart auto-payment (handle 402 automatically)
+
+#### Bridge & Swap
+- `t402/bridge` — Cross-chain USDT0 transfer
+- `wdk/swap` — Token swap via DEX
+
+#### AI Agent
+- `erc8004/resolveAgent` — Agent identity lookup
+- `erc8004/checkReputation` — Reputation score query
+- `t402/searchBazaar` — Discover paid services
+
+#### Pricing
+- `t402/getTokenPrice` — Current token prices
+- `t402/getHistoricalPrice` — OHLCV price data
+
+For the full MCP integration guide, see [MCP Integration](/advanced/mcp).
+
+## @t402/a2a — Agent-to-Agent Transport
+
+Agent-to-Agent (A2A) transport for inter-agent commerce using the Google A2A protocol.
+
+### Installation
+
+```bash
+npm install @t402/a2a
+```
+
+### Features
+
+- A2A protocol integration for agent-to-agent payments
+- Task-based payment lifecycle
+- Agent discovery and capability declaration
+- Service negotiation and pricing
+
+## @t402/policy — Payment Policy Engine
+
+Payment policy engine for AI agent spending guardrails.
+
+### Installation
+
+```bash
+npm install @t402/policy
+```
+
+### Usage
+
+```ts
+import { PaymentPolicyEngine } from "@t402/policy";
+
+const engine = new PaymentPolicyEngine({
+  maxAmountPerPayment: "1000000",    // 1 USDC max
+  maxAmountPerSession: "10000000",   // 10 USDC session budget
+  maxPaymentsPerHour: 100,
+  allowedNetworks: ["eip155:8453"],
+  blockedRecipients: ["0xEvil..."],
+});
+
+const decision = engine.evaluate("exact", "eip155:8453", "0xUSDC", "500000", "0xRecipient");
+if (decision.allowed) {
+  engine.recordPayment("500000");
+}
+```
+
+### Rules
+
+| Rule | Description |
+|------|-------------|
+| `maxAmountPerPayment` | Per-transaction limit |
+| `maxAmountPerSession` | Cumulative session budget |
+| `maxAmountPerDay` | Daily spending limit |
+| `maxPaymentsPerHour` | Rate limiting |
+| `allowedRecipients` | Whitelist (case-insensitive) |
+| `blockedRecipients` | Blacklist |
+| `allowedNetworks` | Network restrictions |
+| `allowedSchemes` | Scheme restrictions |
+| `customRules` | Custom validation callbacks |
+
+Available in all 4 SDKs (TypeScript, Go, Python, Java).
+
+## @t402/observability — Payment Metrics
+
+Payment event tracking, flow tracing, and Prometheus metrics export.
+
+### Installation
+
+```bash
+npm install @t402/observability
+```
+
+### Usage
+
+```ts
+import { PaymentEventCollector, PaymentTracer, toPrometheusMetrics } from "@t402/observability";
+
+const collector = new PaymentEventCollector();
+const tracer = new PaymentTracer(collector);
+
+tracer.startFlow("pay-001", { network: "eip155:8453" });
+tracer.recordStep("pay-001", "payment.verified");
+tracer.endFlow("pay-001", true);
+
+const metrics = collector.getMetrics();
+const prometheus = toPrometheusMetrics(metrics);
+```
+
+### Metrics
+
+- `t402_payments_total{status}` — Total by status (attempted/successful/failed)
+- `t402_payment_duration_seconds{phase}` — Verify/settle latency
+- `t402_payment_amount_total{network}` — Amount by network
+- `t402_payment_failures_total{reason}` — Failure breakdown
+
+Available in all 4 SDKs (TypeScript, Go, Python, Java).

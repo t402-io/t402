@@ -1,0 +1,400 @@
+# TRON Integration Guide
+
+import { Callout, Tabs, Steps } from 'nextra/components'
+
+This tutorial shows how to integrate T402 payments with the TRON blockchain using TRC-20 tokens.
+
+## Overview
+
+TRON uses TRC-20 tokens for USDT transfers. The T402 TRON implementation supports:
+
+- **TRC-20 USDT** on mainnet and testnets
+- **ECDSA secp256k1 signatures**
+- **Reference-based replay protection**
+
+## Prerequisites
+
+- Node.js 18+ or Python 3.10+
+- TRON wallet with testnet USDT
+- Basic understanding of TRON concepts
+
+## Network Identifiers
+
+| Network | CAIP-2 Identifier |
+|---------|-------------------|
+| TRON Mainnet | `tron:mainnet` |
+| TRON Nile (Testnet) | `tron:nile` |
+| TRON Shasta (Testnet) | `tron:shasta` |
+
+## USDT Addresses
+
+| Network | TRC-20 Contract |
+|---------|-----------------|
+| Mainnet | `TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t` |
+| Nile | `TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf` |
+
+<Steps>
+
+### Install Dependencies
+
+<Tabs items={['TypeScript', 'Python', 'Go']}>
+  <Tabs.Tab>
+```bash
+npm install @t402/tron @t402/core tronweb
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+pip install t402[tron]
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+go get github.com/t402-io/t402/sdks/go/mechanisms/tron
+```
+  </Tabs.Tab>
+</Tabs>
+
+### Client Setup
+
+Create a client that can sign TRON payment authorizations.
+
+<Tabs items={['TypeScript', 'Python', 'Go']}>
+  <Tabs.Tab>
+```typescript
+import { t402Client } from '@t402/core/client';
+import { ExactTronScheme, toClientTronSigner } from '@t402/tron';
+import TronWeb from 'tronweb';
+
+// Create TronWeb instance
+const tronWeb = new TronWeb({
+  fullHost: 'https://api.trongrid.io',
+  privateKey: 'your_private_key_hex',
+});
+
+// Create TRON signer
+const tronSigner = toClientTronSigner({
+  tronWeb,
+  privateKey: 'your_private_key_hex',
+});
+
+// Create t402 client
+const client = new t402Client()
+  .register('tron:mainnet', new ExactTronScheme(tronSigner))
+  .register('tron:nile', new ExactTronScheme(tronSigner));
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+from t402 import t402Client
+from t402.tron import TronSigner, ExactTronScheme
+
+# Create TRON signer
+signer = TronSigner.from_private_key("your_private_key_hex")
+
+# Create t402 client
+client = t402Client()
+client.register("tron:mainnet", ExactTronScheme(signer))
+client.register("tron:nile", ExactTronScheme(signer))
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```go
+import (
+    "github.com/t402-io/t402/sdks/go/mechanisms/tron"
+    t402 "github.com/t402-io/t402/sdks/go"
+)
+
+// Create TRON signer
+signer, err := tron.NewSignerFromPrivateKey(privateKeyHex)
+if err != nil {
+    log.Fatal(err)
+}
+
+// Create t402 client
+client := t402.NewClient()
+client.Register("tron:mainnet", tron.NewExactScheme(signer))
+client.Register("tron:nile", tron.NewExactScheme(signer))
+```
+  </Tabs.Tab>
+</Tabs>
+
+### Server Setup
+
+Configure your server to accept TRON payments.
+
+<Tabs items={['TypeScript (Express)', 'Python (FastAPI)', 'Go']}>
+  <Tabs.Tab>
+```typescript
+import express from 'express';
+import { paymentMiddleware } from '@t402/express';
+import { t402ResourceServer, createFacilitatorClient } from '@t402/core/server';
+import { registerExactTronServerScheme } from '@t402/tron/exact/server';
+
+const app = express();
+
+// Create facilitator client
+const facilitator = createFacilitatorClient({
+  url: 'https://facilitator.t402.io',
+});
+
+// Create t402 server
+const server = new t402ResourceServer(facilitator);
+registerExactTronServerScheme(server, {});
+
+// Define routes with TRON payment
+const routes = {
+  '/api/premium/*': {
+    accepts: {
+      scheme: 'exact',
+      network: 'tron:mainnet',
+      payTo: 'TYourTronAddress',
+      price: '$0.01',
+    },
+    description: 'Premium API access',
+  },
+};
+
+// Apply middleware
+app.use(paymentMiddleware(routes, server));
+
+app.get('/api/premium/data', (req, res) => {
+  res.json({ data: 'Premium content' });
+});
+
+app.listen(3000);
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+from fastapi import FastAPI
+from t402.fastapi.middleware import require_payment
+
+app = FastAPI()
+
+app.middleware("http")(
+    require_payment(
+        price="0.01",
+        pay_to_address="TYourTronAddress",
+        network="tron:mainnet",
+    )
+)
+
+@app.get("/api/premium")
+async def premium():
+    return {"data": "Premium content"}
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```go
+package main
+
+import (
+    "github.com/gin-gonic/gin"
+    "github.com/t402-io/t402/sdks/go/http"
+    "github.com/t402-io/t402/sdks/go/mechanisms/tron"
+)
+
+func main() {
+    r := gin.Default()
+
+    // Create t402 server
+    server := t402.NewResourceServer(facilitator)
+    tron.RegisterExactScheme(server)
+
+    // Configure routes
+    routes := http.Routes{
+        "/api/premium/*": {
+            Accepts: http.PaymentConfig{
+                Scheme:  "exact",
+                Network: "tron:mainnet",
+                PayTo:   "TYourTronAddress",
+                Price:   "$0.01",
+            },
+        },
+    }
+
+    r.Use(http.PaymentMiddleware(routes, server))
+
+    r.GET("/api/premium/data", func(c *gin.Context) {
+        c.JSON(200, gin.H{"data": "Premium content"})
+    })
+
+    r.Run(":3000")
+}
+```
+  </Tabs.Tab>
+</Tabs>
+
+### Make Payment Requests
+
+<Tabs items={['TypeScript', 'Python', 'Go']}>
+  <Tabs.Tab>
+```typescript
+import { wrapFetchWithPayment } from '@t402/fetch';
+
+const fetchWithPay = wrapFetchWithPayment(fetch, client);
+
+// Automatic payment handling
+const response = await fetchWithPay('https://api.example.com/api/premium/data', {
+  method: 'GET',
+});
+
+const data = await response.json();
+console.log(data);
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+from t402.clients.httpx import t402HttpxClient
+
+async with t402HttpxClient(client=client) as http:
+    response = await http.get("https://api.example.com/api/premium/data")
+    data = await response.json()
+    print(data)
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```go
+httpClient := t402.NewHTTPClient(client)
+
+resp, err := httpClient.Get(ctx, "https://api.example.com/api/premium/data")
+if err != nil {
+    log.Fatal(err)
+}
+defer resp.Body.Close()
+
+var data map[string]interface{}
+json.NewDecoder(resp.Body).Decode(&data)
+fmt.Println(data)
+```
+  </Tabs.Tab>
+</Tabs>
+
+</Steps>
+
+## TRON-Specific Concepts
+
+### TRC-20 Transfers
+
+TRON uses TRC-20 tokens (similar to ERC-20). The payment flow:
+
+1. Client signs a TRC-20 transfer authorization
+2. Authorization includes payment reference for tracking
+3. Facilitator submits the transaction
+4. TRC-20 contract processes the transfer
+
+### Address Formats
+
+TRON uses Base58Check addresses starting with `T`:
+
+```typescript
+import { validateTronAddress, formatAddress } from '@t402/tron';
+
+// Validate address
+const isValid = validateTronAddress('TT1MqNNj2k5qdGA6nrrCodW6oyHbbAreQ5');
+
+// Convert hex to base58
+const base58 = formatAddress('41...');
+```
+
+### Energy and Bandwidth
+
+TRON transactions consume energy and bandwidth:
+
+```typescript
+import { estimateTransactionFee } from '@t402/tron';
+
+const fee = estimateTransactionFee({
+  amount: '1000000', // 1 USDT
+  network: 'tron:mainnet',
+});
+// Returns: { energy: 65000, bandwidth: 350, trxFee: '14' }
+```
+
+<Callout type="info">
+  USDT transfers on TRON are often free for accounts with sufficient frozen TRX for energy/bandwidth.
+</Callout>
+
+### Payment Reference
+
+Each payment includes a unique reference:
+
+```typescript
+import { generatePaymentReference } from '@t402/tron';
+
+const reference = generatePaymentReference();
+// Returns: unique hex string for tracking
+```
+
+## Testing on Nile Testnet
+
+<Callout type="info">
+  Get testnet TRX and USDT from the [Nile Testnet Faucet](https://nileex.io/join/getJoinPage).
+</Callout>
+
+1. Configure for testnet:
+
+```typescript
+const routes = {
+  '/api/test/*': {
+    accepts: {
+      scheme: 'exact',
+      network: 'tron:nile',
+      payTo: 'TYourNileAddress',
+      price: '$0.001',
+    },
+  },
+};
+```
+
+2. Use Nile testnet wallet
+
+3. Verify transactions on [nile.tronscan.org](https://nile.tronscan.org)
+
+## TronLink Integration
+
+For browser-based applications:
+
+```typescript
+// Check if TronLink is available
+if (typeof window.tronWeb !== 'undefined') {
+  const tronWeb = window.tronWeb;
+
+  // Request account access
+  const address = await tronWeb.request({ method: 'tron_requestAccounts' });
+
+  // Create signer from TronLink
+  const signer = toClientTronSigner({
+    tronWeb,
+  });
+
+  const client = new t402Client()
+    .register('tron:mainnet', new ExactTronScheme(signer));
+}
+```
+
+## Troubleshooting
+
+### Common Issues
+
+| Issue | Solution |
+|-------|----------|
+| Invalid signature | Ensure private key matches address |
+| Insufficient energy | Freeze TRX for energy or pay TRX fee |
+| Invalid address format | Use Base58Check format (starts with T) |
+| Network timeout | Use reliable TRON API endpoint |
+
+### Error Codes
+
+| Code | Description |
+|------|-------------|
+| `BANDWITH_ERROR` | Insufficient bandwidth |
+| `CONTRACT_VALIDATE_ERROR` | Invalid contract call |
+| `SIGERROR` | Signature verification failed |
+
+## Related
+
+- [@t402/tron Reference](/reference/tron) - API documentation
+- [TRON Network Details](/resources/chains) - Chain configuration
+- [Multi-Chain App](/guides/multi-chain-app) - Cross-chain integration

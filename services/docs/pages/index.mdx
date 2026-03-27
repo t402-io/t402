@@ -4,7 +4,7 @@ import { Callout, Steps, Tabs } from 'nextra/components'
 
 <div className="stats">
   <div className="stat"><span className="stat-number">v2.8.0</span> <span className="stat-label">Latest</span></div>
-  <div className="stat"><span className="stat-number">50</span> <span className="stat-label">Networks</span></div>
+  <div className="stat"><span className="stat-number">47</span> <span className="stat-label">Networks</span></div>
   <div className="stat"><span className="stat-number">13</span> <span className="stat-label">Chains</span></div>
   <div className="stat"><span className="stat-number">42</span> <span className="stat-label">Packages</span></div>
 </div>
@@ -28,7 +28,7 @@ The open payment protocol for USDT — enable seamless stablecoin payments acros
   </div>
   <div className="feature-card">
     <div className="feature-title">Multi-Chain</div>
-    <p className="feature-desc">11 blockchain families: EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos.</p>
+    <p className="feature-desc">13 blockchain families: EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos, Bitcoin, Stellar, Spark.</p>
   </div>
   <div className="feature-card">
     <div className="feature-title">Gasless Payments</div>
@@ -180,28 +180,28 @@ Content-Type: application/json
 ## Supported Networks
 
 <div className="chain-tags">
-  <a href="/chains/evm" className="chain-tag">Ethereum</a>
-  <a href="/chains/evm" className="chain-tag">Arbitrum</a>
-  <a href="/chains/evm" className="chain-tag">Base</a>
-  <a href="/chains/evm" className="chain-tag">Optimism</a>
-  <a href="/chains/evm" className="chain-tag">Polygon</a>
-  <a href="/chains/evm" className="chain-tag">Ink</a>
-  <a href="/chains/evm" className="chain-tag">Berachain</a>
-  <a href="/chains/evm" className="chain-tag">Unichain</a>
-  <a href="/chains/non-evm#solana" className="chain-tag">Solana</a>
-  <a href="/chains/non-evm#ton" className="chain-tag">TON</a>
-  <a href="/chains/non-evm#tron" className="chain-tag">TRON</a>
-  <a href="/chains/non-evm#near" className="chain-tag">NEAR</a>
-  <a href="/chains/non-evm#aptos" className="chain-tag">Aptos</a>
-  <a href="/chains/non-evm#tezos" className="chain-tag">Tezos</a>
-  <a href="/chains/non-evm#polkadot" className="chain-tag">Polkadot</a>
-  <a href="/chains/non-evm#stacks" className="chain-tag">Stacks</a>
-  <a href="/chains/non-evm#cosmos" className="chain-tag">Cosmos</a>
-  <a href="/chains/non-evm#stellar" className="chain-tag">Stellar</a>
+  <a href="/resources/chains" className="chain-tag">Ethereum</a>
+  <a href="/resources/chains" className="chain-tag">Arbitrum</a>
+  <a href="/resources/chains" className="chain-tag">Base</a>
+  <a href="/resources/chains" className="chain-tag">Optimism</a>
+  <a href="/resources/chains" className="chain-tag">Polygon</a>
+  <a href="/resources/chains" className="chain-tag">Ink</a>
+  <a href="/resources/chains" className="chain-tag">Berachain</a>
+  <a href="/resources/chains" className="chain-tag">Unichain</a>
+  <a href="/resources/chains" className="chain-tag">Solana</a>
+  <a href="/resources/chains" className="chain-tag">TON</a>
+  <a href="/resources/chains" className="chain-tag">TRON</a>
+  <a href="/resources/chains" className="chain-tag">NEAR</a>
+  <a href="/resources/chains" className="chain-tag">Aptos</a>
+  <a href="/resources/chains" className="chain-tag">Tezos</a>
+  <a href="/resources/chains" className="chain-tag">Polkadot</a>
+  <a href="/resources/chains" className="chain-tag">Stacks</a>
+  <a href="/resources/chains" className="chain-tag">Cosmos</a>
+  <a href="/resources/chains" className="chain-tag">Stellar</a>
 </div>
 
 <Callout type="info">
-See [Chains](/chains) for network IDs, token addresses, and configuration details.
+See [Chains & Networks](/resources/chains) for network IDs, token addresses, and configuration details.
 </Callout>
 
 <hr className="section-divider" />
@@ -210,10 +210,10 @@ See [Chains](/chains) for network IDs, token addresses, and configuration detail
 
 | Use Case | Description | Price Range |
 |----------|-------------|-------------|
-| [**AI Agent Payments**](/use-cases/ai-payments) | AI agents pay for APIs via MCP | $0.001 - $0.10/call |
-| [**API Monetization**](/use-cases/api-monetization) | Charge per-request for endpoints | $0.01 - $1.00/req |
-| [**Premium Content**](/use-cases/content-access) | Gate content behind micro-payments | $0.10 - $10.00/item |
-| [**Micro-Payments**](/use-cases/micro-payments) | Sub-cent payments on L2 networks | $0.0001 - $0.01/tx |
+| [**AI Agent Payments**](/guides/ai-agent-payments) | AI agents pay for APIs via MCP | $0.001 - $0.10/call |
+| [**API Monetization**](/guides/api-monetization) | Charge per-request for endpoints | $0.01 - $1.00/req |
+| [**Premium Content**](/guides/ai-agent-payments) | Gate content behind micro-payments | $0.10 - $10.00/item |
+| [**Micro-Payments**](/guides/api-monetization) | Sub-cent payments on L2 networks | $0.0001 - $0.01/tx |
 
 <hr className="section-divider" />
 
@@ -235,5 +235,5 @@ See [Chains](/chains) for network IDs, token addresses, and configuration detail
 
 - [**Quick Start Guide**](/getting-started/quickstart) — Get up and running in 5 minutes
 - [**Core Concepts**](/getting-started/concepts) — Understand how T402 works
-- [**Installation**](/getting-started/installation) — Detailed setup for all languages
+- [**Guides**](/guides) — Chain integrations, use cases, and deployment
 - [**API Reference**](/reference/facilitator-api) — Facilitator API documentation

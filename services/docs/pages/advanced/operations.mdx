@@ -1,0 +1,1169 @@
+import { Callout, Tabs } from 'nextra/components'
+
+# Operations Guide
+
+Best practices, performance tuning, and troubleshooting for T402 in production.
+
+## Best Practices
+
+Guidelines for building robust t402-enabled applications.
+
+### Payment Flow Design
+
+#### Verify Before Processing
+
+Always verify payments before executing expensive operations:
+
+```typescript
+// Good: Verify first, then process
+app.post('/api/compute', async (req, res) => {
+  const payment = extractPayment(req);
+
+  // Verify payment BEFORE doing expensive work
+  const verified = await facilitator.verify(payment, requirements);
+  if (!verified.isValid) {
+    return res.status(402).json({ error: 'Invalid payment' });
+  }
+
+  // Now do the expensive computation
+  const result = await expensiveComputation(req.body);
+
+  // Settle after success
+  await facilitator.settle(payment, requirements);
+
+  return res.json(result);
+});
+```
+
+#### Idempotent Settlements
+
+Handle duplicate settlement attempts gracefully:
+
+```typescript
+// Track processed payments
+const processedPayments = new Set();
+
+async function settlePayment(payment, requirements) {
+  const paymentId = `${payment.nonce}-${payment.from}`;
+
+  if (processedPayments.has(paymentId)) {
+    return { alreadyProcessed: true };
+  }
+
+  const result = await facilitator.settle(payment, requirements);
+  processedPayments.add(paymentId);
+
+  return result;
+}
+```
+
+#### Atomic Operations
+
+Ensure payment and service delivery are atomic:
+
+```typescript
+// Use database transactions
+async function processPayment(payment, requirements) {
+  const tx = await db.beginTransaction();
+
+  try {
+    // Record payment intent
+    await tx.insert('payments', {
+      nonce: payment.nonce,
+      status: 'pending',
+    });
+
+    // Settle payment
+    const result = await facilitator.settle(payment, requirements);
+
+    // Update status
+    await tx.update('payments', {
+      status: 'completed',
+      txHash: result.transaction,
+    });
+
+    await tx.commit();
+    return result;
+  } catch (error) {
+    await tx.rollback();
+    throw error;
+  }
+}
+```
+
+### Error Handling
+
+#### Graceful Degradation
+
+```typescript
+// Provide fallback for payment failures
+async function handleRequest(req, res) {
+  try {
+    const payment = extractPayment(req);
+    const result = await processWithPayment(payment);
+    return res.json(result);
+  } catch (error) {
+    if (error.code === 'FACILITATOR_UNAVAILABLE') {
+      // Fallback to queued processing
+      await queueForLaterProcessing(req);
+      return res.status(202).json({
+        message: 'Payment queued for processing',
+      });
+    }
+    throw error;
+  }
+}
+```
+
+#### Informative Error Messages
+
+```typescript
+// Return helpful error information
+function handlePaymentError(error, res) {
+  const errorResponses = {
+    INVALID_SIGNATURE: {
+      status: 402,
+      message: 'Payment signature is invalid. Please sign again.',
+    },
+    EXPIRED_PAYMENT: {
+      status: 402,
+      message: 'Payment has expired. Create a new payment.',
+    },
+    INSUFFICIENT_FUNDS: {
+      status: 402,
+      message: 'Insufficient balance in payer wallet.',
+    },
+    NETWORK_MISMATCH: {
+      status: 400,
+      message: 'Payment network does not match required network.',
+    },
+  };
+
+  const response = errorResponses[error.code] || {
+    status: 500,
+    message: 'Payment processing failed',
+  };
+
+  return res.status(response.status).json({
+    error: response.message,
+    code: error.code,
+    retryable: error.retryable ?? false,
+  });
+}
+```
+
+#### Retry Logic
+
+```typescript
+// Implement exponential backoff for transient failures
+async function settleWithRetry(payment, requirements, maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await facilitator.settle(payment, requirements);
+    } catch (error) {
+      if (!error.retryable || attempt === maxRetries) {
+        throw error;
+      }
+
+      // Exponential backoff
+      const delay = Math.min(1000 * Math.pow(2, attempt), 10000);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+}
+```
+
+### Security
+
+#### Validate All Inputs
+
+```typescript
+import { z } from 'zod';
+
+// Define strict schemas
+const PaymentPayloadSchema = z.object({
+  t402Version: z.literal(2),
+  scheme: z.string().min(1),
+  network: z.string().regex(/^(eip155|solana|ton|tron|near|aptos|tezos|polkadot|stacks|cosmos):/),
+  payload: z.object({
+    authorization: z.object({
+      from: z.string(),
+      to: z.string(),
+      value: z.string(),
+      validAfter: z.string(),
+      validBefore: z.string(),
+      nonce: z.string(),
+    }),
+    signature: z.string(),
+  }),
+});
+
+function validatePayment(data: unknown) {
+  return PaymentPayloadSchema.parse(data);
+}
+```
+
+#### Protect Against Replay Attacks
+
+<Callout type="warning">
+  Each payment nonce should only be usable once. Track used nonces to prevent replay attacks.
+</Callout>
+
+```typescript
+// Use Redis for nonce tracking
+import Redis from 'ioredis';
+
+const redis = new Redis();
+
+async function checkNonce(nonce: string, network: string) {
+  const key = `nonce:${network}:${nonce}`;
+
+  // Set with expiry (24 hours)
+  const set = await redis.set(key, '1', 'EX', 86400, 'NX');
+
+  if (!set) {
+    throw new Error('Payment nonce already used');
+  }
+}
+```
+
+#### Amount Validation
+
+```typescript
+// Validate payment amounts match requirements
+function validateAmount(payment, requirements) {
+  const paymentAmount = BigInt(payment.payload.authorization.value);
+  const requiredAmount = BigInt(requirements.maxAmountRequired);
+
+  if (paymentAmount < requiredAmount) {
+    throw new Error(
+      `Insufficient payment: got ${paymentAmount}, need ${requiredAmount}`
+    );
+  }
+
+  // Optional: Check for overpayment
+  const maxOverpayment = requiredAmount * 2n;
+  if (paymentAmount > maxOverpayment) {
+    throw new Error('Payment amount suspiciously high');
+  }
+}
+```
+
+### User Experience
+
+#### Clear Payment Requirements
+
+```typescript
+// Return detailed payment requirements
+function buildPaymentRequired(route, req) {
+  return {
+    t402Version: 2,
+    accepts: route.accepts.map((option) => ({
+      ...option,
+      // Include human-readable descriptions
+      description: route.description,
+      displayPrice: formatPrice(option.price),
+      networkName: getNetworkName(option.network),
+    })),
+    resource: {
+      path: req.path,
+      method: req.method,
+      description: route.description,
+    },
+    error: 'Payment required to access this resource',
+  };
+}
+```
+
+#### Progress Indicators
+
+```typescript
+// For long-running settlements, provide status updates
+app.get('/api/payment/:id/status', async (req, res) => {
+  const status = await getPaymentStatus(req.params.id);
+
+  res.json({
+    status: status.state, // 'pending', 'verifying', 'settling', 'completed'
+    progress: status.progress, // 0-100
+    message: status.message,
+    estimatedTime: status.estimatedTime,
+  });
+});
+```
+
+#### Helpful Error Pages
+
+```typescript
+// Custom 402 response handler
+function handle402(requirements, res) {
+  res.status(402).json({
+    ...requirements,
+    // Add helpful context
+    help: {
+      documentation: 'https://docs.t402.io/getting-started',
+      supportedWallets: ['MetaMask', 'Coinbase Wallet', 'WalletConnect'],
+      faucets: {
+        'eip155:84532': 'https://faucet.base.org',
+      },
+    },
+  });
+}
+```
+
+### Testing
+
+#### Unit Tests
+
+```typescript
+import { describe, it, expect, vi } from 'vitest';
+
+describe('PaymentMiddleware', () => {
+  it('should return 402 when no payment provided', async () => {
+    const req = createMockRequest('/api/premium');
+    const res = createMockResponse();
+
+    await paymentMiddleware(req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(402);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        t402Version: 2,
+        accepts: expect.any(Array),
+      })
+    );
+  });
+
+  it('should proceed when valid payment provided', async () => {
+    const req = createMockRequest('/api/premium', {
+      headers: { 'payment-signature': validPaymentHeader },
+    });
+    const res = createMockResponse();
+
+    vi.spyOn(facilitator, 'verify').mockResolvedValue({ isValid: true });
+
+    await paymentMiddleware(req, res, next);
+
+    expect(next).toHaveBeenCalled();
+  });
+});
+```
+
+#### Integration Tests
+
+```typescript
+import { test, expect } from '@playwright/test';
+
+test('complete payment flow', async ({ request }) => {
+  // Step 1: Request without payment
+  const initial = await request.get('/api/premium');
+  expect(initial.status()).toBe(402);
+
+  const requirements = await initial.json();
+  expect(requirements.accepts).toHaveLength(1);
+
+  // Step 2: Create payment
+  const payment = await createTestPayment(requirements.accepts[0]);
+
+  // Step 3: Request with payment
+  const paid = await request.get('/api/premium', {
+    headers: { 'payment-signature': encodePayment(payment) },
+  });
+
+  expect(paid.status()).toBe(200);
+  expect(paid.headers()['payment-response']).toBeDefined();
+});
+```
+
+#### Load Testing
+
+```typescript
+// k6 load test script
+import http from 'k6/http';
+import { check, sleep } from 'k6';
+
+export const options = {
+  vus: 50,
+  duration: '5m',
+};
+
+export default function () {
+  // Test 402 response time
+  const res = http.get('https://api.example.com/premium');
+
+  check(res, {
+    'status is 402': (r) => r.status === 402,
+    'response time < 500ms': (r) => r.timings.duration < 500,
+  });
+
+  sleep(1);
+}
+```
+
+### Monitoring and Alerting
+
+#### Key Metrics
+
+```typescript
+// Track these metrics
+const metrics = {
+  // Counters
+  paymentsTotal: new Counter('t402_payments_total'),
+  paymentsSuccess: new Counter('t402_payments_success'),
+  paymentsFailed: new Counter('t402_payments_failed'),
+
+  // Histograms
+  verificationLatency: new Histogram('t402_verification_latency'),
+  settlementLatency: new Histogram('t402_settlement_latency'),
+
+  // Gauges
+  pendingSettlements: new Gauge('t402_pending_settlements'),
+};
+```
+
+#### Alert Thresholds
+
+| Metric | Warning | Critical |
+|--------|---------|----------|
+| Payment failure rate | >5% | >10% |
+| Verification latency p99 | >3s | >10s |
+| Settlement latency p99 | >30s | >60s |
+| Facilitator error rate | >1% | >5% |
+| Pending settlements | >100 | >500 |
+
+### Documentation
+
+#### API Documentation
+
+```typescript
+/**
+ * Premium data endpoint
+ *
+ * @route GET /api/premium
+ * @group Premium - Premium data access
+ *
+ * @payment
+ * - scheme: exact
+ * - network: eip155:8453
+ * - price: $0.01
+ *
+ * @returns {object} 200 - Premium data
+ * @returns {PaymentRequired} 402 - Payment required
+ */
+app.get('/api/premium', handler);
+```
+
+#### Changelog
+
+Maintain a changelog for payment-related changes:
+
+```markdown
+## [1.2.0] - 2026-01-15
+
+### Added
+- Support for TON payments on /api/premium endpoint
+
+### Changed
+- Increased price for /api/compute from $0.05 to $0.10
+
+### Fixed
+- Fixed race condition in settlement processing
+```
+
+---
+
+## Performance Tuning
+
+Optimize T402 for high-throughput payment processing.
+
+### Connection Management
+
+#### HTTP Client Pooling
+
+Reuse HTTP connections to reduce latency and resource usage.
+
+<Tabs items={['TypeScript', 'Python', 'Go', 'Java']}>
+  <Tabs.Tab>
+```typescript
+import { Agent } from 'undici';
+
+// Create a connection pool
+const agent = new Agent({
+  keepAliveTimeout: 60_000,
+  keepAliveMaxTimeout: 120_000,
+  connections: 100,
+  pipelining: 1,
+});
+
+// Use with fetch
+const response = await fetch(url, { dispatcher: agent });
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+import httpx
+
+# Create a client with connection pooling
+client = httpx.Client(
+    timeout=30.0,
+    limits=httpx.Limits(
+        max_keepalive_connections=20,
+        max_connections=100,
+        keepalive_expiry=60.0,
+    ),
+)
+
+# Async version
+async_client = httpx.AsyncClient(
+    timeout=30.0,
+    limits=httpx.Limits(
+        max_keepalive_connections=20,
+        max_connections=100,
+    ),
+)
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```go
+import (
+    "net/http"
+    "time"
+)
+
+// Create optimized transport
+transport := &http.Transport{
+    MaxIdleConns:        100,
+    MaxIdleConnsPerHost: 20,
+    IdleConnTimeout:     90 * time.Second,
+    DisableCompression:  false,
+}
+
+client := &http.Client{
+    Transport: transport,
+    Timeout:   30 * time.Second,
+}
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```java
+import java.net.http.HttpClient;
+import java.time.Duration;
+
+HttpClient client = HttpClient.newBuilder()
+    .connectTimeout(Duration.ofSeconds(10))
+    .executor(Executors.newFixedThreadPool(10))
+    .version(HttpClient.Version.HTTP_2)
+    .build();
+```
+  </Tabs.Tab>
+</Tabs>
+
+#### RPC Connection Management
+
+Use multiple RPC providers with fallback for reliability.
+
+```typescript
+import { createPublicClient, http, fallback } from 'viem';
+import { base } from 'viem/chains';
+
+const client = createPublicClient({
+  chain: base,
+  transport: fallback([
+    http('https://mainnet.base.org'),
+    http('https://base.llamarpc.com'),
+    http('https://base.drpc.org'),
+  ], {
+    rank: true,           // Automatically rank by latency
+    retryCount: 3,
+    retryDelay: 150,
+  }),
+});
+```
+
+---
+
+### Caching Strategies
+
+#### Payment Requirements Cache
+
+Cache payment requirements to reduce 402 round-trips.
+
+```typescript
+import { LRUCache } from 'lru-cache';
+
+const requirementsCache = new LRUCache<string, PaymentRequirements[]>({
+  max: 1000,              // Maximum entries
+  ttl: 1000 * 60 * 5,     // 5 minute TTL
+});
+
+async function getRequirements(url: string): Promise<PaymentRequirements[]> {
+  const cached = requirementsCache.get(url);
+  if (cached) return cached;
+
+  // Fetch fresh requirements
+  const response = await fetch(url);
+  if (response.status === 402) {
+    const requirements = parseRequirements(response);
+    requirementsCache.set(url, requirements);
+    return requirements;
+  }
+  throw new Error('No payment required');
+}
+```
+
+#### Token Balance Cache
+
+Cache wallet balances to avoid redundant RPC calls.
+
+```typescript
+const balanceCache = new Map<string, { balance: bigint; timestamp: number }>();
+const BALANCE_TTL = 30_000; // 30 seconds
+
+async function getCachedBalance(
+  address: string,
+  token: string,
+  chainId: number
+): Promise<bigint> {
+  const key = `${chainId}:${token}:${address}`;
+  const cached = balanceCache.get(key);
+
+  if (cached && Date.now() - cached.timestamp < BALANCE_TTL) {
+    return cached.balance;
+  }
+
+  const balance = await fetchBalance(address, token, chainId);
+  balanceCache.set(key, { balance, timestamp: Date.now() });
+  return balance;
+}
+```
+
+#### Nonce Management
+
+Pre-fetch and cache nonces to avoid delays.
+
+```typescript
+class NonceManager {
+  private nonces = new Map<string, bigint>();
+  private locks = new Map<string, Promise<void>>();
+
+  async getNextNonce(address: string, chainId: number): Promise<bigint> {
+    const key = `${chainId}:${address}`;
+
+    // Wait for any pending nonce operation
+    const lock = this.locks.get(key);
+    if (lock) await lock;
+
+    let nonce = this.nonces.get(key);
+    if (nonce === undefined) {
+      nonce = await this.fetchOnChainNonce(address, chainId);
+    }
+
+    this.nonces.set(key, nonce + 1n);
+    return nonce;
+  }
+
+  resetNonce(address: string, chainId: number): void {
+    this.nonces.delete(`${chainId}:${address}`);
+  }
+}
+```
+
+---
+
+### Batch Operations
+
+#### Batch Settlements
+
+Group multiple settlements into a single facilitator call (when supported).
+
+```typescript
+// Instead of settling one by one
+for (const payment of payments) {
+  await facilitator.settle(payment); // Slow
+}
+
+// Batch settle
+const results = await facilitator.settleBatch(payments); // Fast
+```
+
+<Callout type="info">
+Batch settlement support depends on the facilitator implementation. Check `/supported` endpoint for capabilities.
+</Callout>
+
+#### Parallel Verification
+
+Verify multiple payments concurrently.
+
+```typescript
+// Sequential (slow)
+const results = [];
+for (const payment of payments) {
+  results.push(await facilitator.verify(payment));
+}
+
+// Parallel (fast)
+const results = await Promise.all(
+  payments.map(payment => facilitator.verify(payment))
+);
+```
+
+---
+
+### Rate Limiting
+
+#### Client-Side Rate Limiting
+
+Implement rate limiting to avoid hitting API limits.
+
+```typescript
+import Bottleneck from 'bottleneck';
+
+const limiter = new Bottleneck({
+  maxConcurrent: 10,     // Max concurrent requests
+  minTime: 100,          // Min time between requests (ms)
+  reservoir: 100,        // Requests per interval
+  reservoirRefreshAmount: 100,
+  reservoirRefreshInterval: 60_000, // Refresh every minute
+});
+
+// Wrap your API calls
+const verify = limiter.wrap(async (payload: PaymentPayload) => {
+  return await facilitator.verify(payload);
+});
+```
+
+#### Exponential Backoff
+
+Handle rate limit errors gracefully.
+
+```typescript
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxRetries = 3,
+  baseDelay = 1000
+): Promise<T> {
+  let lastError: Error;
+
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error as Error;
+
+      // Check if it's a rate limit error
+      if (error.code === 'T402-2005') {
+        const delay = baseDelay * Math.pow(2, i);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  throw lastError;
+}
+```
+
+---
+
+### Server-Side Optimization
+
+#### Middleware Configuration
+
+Optimize payment middleware for high traffic.
+
+```typescript
+import { paymentMiddleware } from '@t402/express';
+
+app.use(paymentMiddleware(routes, resourceServer, {
+  // Skip payment check for health endpoints
+  skip: (req) => req.path === '/health' || req.path === '/metrics',
+
+  // Cache verification results
+  verificationCache: {
+    ttl: 60_000,  // 1 minute
+    max: 10_000,  // Max entries
+  },
+
+  // Concurrent verification limit
+  maxConcurrentVerifications: 50,
+}));
+```
+
+#### Async Settlement
+
+Settle payments asynchronously after sending response.
+
+```typescript
+app.get('/api/data', paymentRequired(config), async (req, res) => {
+  // Send response immediately
+  res.json({ data: 'your content' });
+
+  // Settle payment in background
+  setImmediate(async () => {
+    try {
+      await resourceServer.settle(req.payment);
+    } catch (error) {
+      logger.error('Settlement failed', { error, paymentId: req.payment.id });
+      // Queue for retry
+      await settlementQueue.add(req.payment);
+    }
+  });
+});
+```
+
+<Callout type="warning">
+Async settlement improves response times but requires robust error handling and retry mechanisms.
+</Callout>
+
+---
+
+### Monitoring
+
+#### Key Metrics to Track
+
+| Metric | Description | Target |
+|--------|-------------|--------|
+| `t402_verification_duration_ms` | Time to verify payment | < 100ms |
+| `t402_settlement_duration_ms` | Time to settle payment | < 500ms |
+| `t402_cache_hit_rate` | Requirements cache hit rate | > 80% |
+| `t402_rpc_latency_ms` | Blockchain RPC latency | < 200ms |
+| `t402_error_rate` | Payment error rate | < 1% |
+
+#### Prometheus Integration
+
+```typescript
+import { Counter, Histogram } from 'prom-client';
+
+const verificationDuration = new Histogram({
+  name: 't402_verification_duration_seconds',
+  help: 'Payment verification duration',
+  labelNames: ['network', 'scheme', 'status'],
+  buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5],
+});
+
+const settlementCounter = new Counter({
+  name: 't402_settlements_total',
+  help: 'Total payment settlements',
+  labelNames: ['network', 'scheme', 'status'],
+});
+
+// Use in middleware
+const timer = verificationDuration.startTimer({ network, scheme });
+try {
+  const result = await verify(payment);
+  timer({ status: 'success' });
+  settlementCounter.inc({ network, scheme, status: 'success' });
+} catch (error) {
+  timer({ status: 'error' });
+  settlementCounter.inc({ network, scheme, status: 'error' });
+}
+```
+
+---
+
+### Hardware Recommendations
+
+#### Production Server
+
+| Component | Minimum | Recommended |
+|-----------|---------|-------------|
+| CPU | 2 cores | 4+ cores |
+| RAM | 4 GB | 8+ GB |
+| Storage | SSD 50 GB | NVMe 100 GB |
+| Network | 100 Mbps | 1 Gbps |
+
+#### Scaling Guidelines
+
+- **< 100 req/s**: Single instance
+- **100-1000 req/s**: 2-4 instances with load balancer
+- **> 1000 req/s**: Kubernetes with horizontal pod autoscaling
+
+---
+
+### Performance Checklist
+
+Before going to production, verify:
+
+- [ ] Connection pooling configured
+- [ ] Caching implemented for requirements and balances
+- [ ] Rate limiting in place
+- [ ] Monitoring and alerting configured
+- [ ] Async settlement with retry queue (if using)
+- [ ] Load testing completed
+- [ ] Fallback RPC providers configured
+
+---
+
+## Troubleshooting
+
+Common issues and solutions when working with T402.
+
+### Payment Verification Failures
+
+#### T402-1006: Invalid Signature
+
+**Symptoms**: Payment verification fails with "Signature verification failed"
+
+**Common Causes**:
+
+1. **Wrong signer**: The address signing doesn't match the `from` address
+2. **Chain ID mismatch**: Signing for wrong chain
+3. **Incorrect typed data**: Domain separator or message hash mismatch
+
+**Solutions**:
+
+<Tabs items={['TypeScript', 'Python', 'Go']}>
+  <Tabs.Tab>
+```typescript
+// Ensure signer address matches payload
+const signer = privateKeyToAccount(privateKey);
+console.log('Signer address:', signer.address);
+
+// Verify chain ID
+const chainId = await client.getChainId();
+console.log('Chain ID:', chainId);
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+# Check signer address
+from eth_account import Account
+account = Account.from_key(private_key)
+print(f"Signer: {account.address}")
+
+# Verify you're on the right network
+print(f"Network: {payment_requirements.network}")
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```go
+// Verify signer
+addr := crypto.PubkeyToAddress(privateKey.PublicKey)
+fmt.Printf("Signer: %s\n", addr.Hex())
+```
+  </Tabs.Tab>
+</Tabs>
+
+#### T402-1011: Expired Payment
+
+**Symptoms**: "Payment has expired" error
+
+**Cause**: The `validBefore` timestamp has passed
+
+**Solution**: Generate a new payment with a fresh deadline:
+
+```typescript
+const deadline = Math.floor(Date.now() / 1000) + 3600; // 1 hour from now
+```
+
+<Callout type="warning">
+Always use server time, not client time, to avoid clock skew issues.
+</Callout>
+
+---
+
+### Settlement Failures
+
+#### T402-3003: Insufficient Balance
+
+**Symptoms**: Settlement fails with "Insufficient balance"
+
+**Diagnostic Steps**:
+
+1. Check token balance on the source chain
+2. Verify the correct token contract is being used
+3. Ensure balance covers amount + gas (if paying gas)
+
+```bash
+# Using t402 CLI
+t402 balance 0xYourAddress --network eip155:8453
+```
+
+#### T402-3002: Settlement Failed
+
+**Symptoms**: Generic settlement failure
+
+**Common Causes**:
+
+1. **Nonce already used**: Payment was already settled
+2. **Gas price spike**: Transaction underpriced
+3. **RPC issues**: Node connection problems
+
+**Solutions**:
+
+- Check transaction status on block explorer
+- Retry with fresh nonce
+- Try alternative RPC endpoint
+
+---
+
+### Network Connectivity
+
+#### T402-4001: Chain Unavailable
+
+**Symptoms**: Cannot connect to blockchain RPC
+
+**Solutions**:
+
+1. **Check RPC URL**: Ensure endpoint is correct and accessible
+
+```typescript
+// Test RPC connection
+const blockNumber = await provider.getBlockNumber();
+console.log('Connected, block:', blockNumber);
+```
+
+2. **Use fallback RPCs**: Configure multiple providers
+
+```typescript
+const providers = [
+  'https://mainnet.base.org',
+  'https://base.llamarpc.com',
+  'https://base.drpc.org',
+];
+```
+
+3. **Check rate limits**: You may be hitting RPC rate limits
+
+#### T402-2004: RPC Unavailable (Facilitator)
+
+**Symptoms**: Facilitator cannot reach blockchain
+
+**Action**: This is a server-side issue. Check:
+- https://facilitator.t402.io/health
+- https://status.t402.io (if available)
+
+---
+
+### Debug Logging
+
+#### Enable Verbose Logging
+
+<Tabs items={['TypeScript', 'Python', 'Go']}>
+  <Tabs.Tab>
+```typescript
+// Enable debug mode
+process.env.T402_DEBUG = 'true';
+
+// Or use debug package
+import debug from 'debug';
+debug.enable('t402:*');
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+# Or specifically for t402
+import t402
+t402.set_log_level('DEBUG')
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```go
+import "github.com/t402-io/t402/sdks/go/log"
+
+log.SetLevel(log.DebugLevel)
+```
+  </Tabs.Tab>
+</Tabs>
+
+#### Inspect Payment Payloads
+
+```bash
+# Decode a base64 payment payload
+t402 decode eyJzY2hlbWUiOiJleGFjdCIs...
+
+# Verify payload matches requirements
+t402 verify <payload> --requirements <requirements>
+```
+
+---
+
+### Common Integration Issues
+
+#### CORS Errors (Browser)
+
+**Symptoms**: "CORS policy" errors in browser console
+
+**Solution**: The resource server must include CORS headers:
+
+```typescript
+// Express.js
+app.use(cors({
+  origin: ['https://your-frontend.com'],
+  exposedHeaders: ['Payment-Required', 'Payment-Response', 'Payment-Signature'],
+}));
+```
+
+#### Missing Headers
+
+**Symptoms**: 402 response but no payment requirements
+
+**Check**: Ensure `Payment-Required` header is exposed:
+
+```typescript
+// Client-side: Check response headers
+console.log(response.headers.get('Payment-Required'));
+```
+
+#### Framework Middleware Order
+
+**Symptoms**: Payments not being processed
+
+**Solution**: Ensure T402 middleware runs before route handlers:
+
+```typescript
+// CORRECT: Payment middleware before routes
+app.use(paymentMiddleware(config));
+app.get('/api/data', handler);
+
+// WRONG: Routes before middleware
+app.get('/api/data', handler);
+app.use(paymentMiddleware(config)); // Too late!
+```
+
+---
+
+### Gasless Payment Issues
+
+#### ERC-4337: UserOperation Failed
+
+**Symptoms**: "AA" prefixed errors (AA21, AA25, etc.)
+
+| Error | Meaning | Solution |
+|-------|---------|----------|
+| AA21 | Didn't pay prefund | Paymaster rejected sponsorship |
+| AA23 | Reverted during validation | Check calldata and account |
+| AA25 | Invalid signature | Wrong owner or signature format |
+| AA31 | Paymaster stake too low | Use different paymaster |
+
+#### Paymaster Rejection
+
+**Symptoms**: Paymaster refuses to sponsor
+
+**Common Causes**:
+- Daily limit exceeded
+- Token not on allowlist
+- Amount too high/low
+
+**Solution**: Check paymaster policies or use self-pay mode
+
+---
+
+### Getting Help
+
+If you can't resolve your issue:
+
+1. **Search existing issues**: [GitHub Issues](https://github.com/t402-io/t402/issues)
+2. **Check documentation**: [docs.t402.io](https://docs.t402.io)
+3. **Open a new issue** with:
+   - Error code and message
+   - SDK version
+   - Minimal reproduction code
+   - Network and chain details
+
+<Callout type="info">
+When reporting issues, never share private keys or production credentials.
+</Callout>

@@ -1,4 +1,4 @@
-import { Callout, Steps, Tabs } from 'nextra/components'
+import { Callout, FileTree, Steps, Tabs } from 'nextra/components'
 
 # Quick Start
 
@@ -200,9 +200,77 @@ var response = client.get("https://api.example.com/api/premium");
   </Tabs.Tab>
 </Tabs>
 
+## Installation
+
+<Tabs items={['TypeScript', 'Python', 'Go', 'Java']}>
+  <Tabs.Tab>
+```bash
+# Core + EVM (most common)
+pnpm add @t402/core @t402/evm
+
+# With Express middleware
+pnpm add @t402/core @t402/evm @t402/express
+
+# Full client setup with fetch wrapper
+pnpm add @t402/core @t402/evm @t402/fetch
+
+# All mechanism packages (multi-chain)
+pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/tron @t402/near @t402/aptos @t402/tezos @t402/polkadot @t402/stacks @t402/cosmos @t402/stellar
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+pip install t402
+# or: uv add t402 / poetry add t402
+```
+
+Includes all mechanisms, FastAPI/Flask/Django integrations, and HTTPX client wrapper.
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+go get github.com/t402-io/t402/sdks/go
+```
+
+Includes all 13 mechanisms, HTTP middleware (net/http, Gin, Echo, Chi), and MCP server.
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+```xml
+<dependency>
+    <groupId>io.t402</groupId>
+    <artifactId>t402</artifactId>
+    <version>1.12.1</version>
+</dependency>
+```
+
+Includes Spring Boot auto-configuration, all mechanisms, ERC-4337, and LayerZero bridge.
+
+  </Tabs.Tab>
+</Tabs>
+
+### Requirements
+
+| Language | Version |
+|----------|---------|
+| TypeScript | Node.js 18+ or Bun 1.0+, TypeScript 5.0+ |
+| Python | Python 3.10+ |
+| Go | Go 1.24+ |
+| Java | Java 17+, Maven or Gradle |
+
+### MCP Server (AI Agents)
+
+```bash
+npm install -g @t402/mcp   # Install globally
+npx @t402/mcp              # Or run directly
+```
+
+See [MCP Integration](/advanced/mcp) for configuration details.
+
 ## What's Next?
 
-- [Installation](/getting-started/installation) - Detailed installation guide
-- [Core Concepts](/getting-started/concepts) - Understand how T402 works
-- [Server Integration](/getting-started/server) - Complete server setup
-- [Client Integration](/getting-started/client) - Complete client setup
+- [Core Concepts](/getting-started/concepts) — Understand how T402 works
+- [Server Integration](/getting-started/server) — Complete server setup
+- [Client Integration](/getting-started/client) — Complete client setup
+- [Guides](/guides) — Chain integration tutorials and use cases

@@ -755,3 +755,68 @@ export type {
 - [@t402/wdk-bridge](/sdks/typescript/wdk-bridge) - Cross-chain bridging
 - [@t402/wdk-multisig](/sdks/typescript/wdk-multisig) - Multi-sig payments
 - [Client Guide](/getting-started/client) - Client implementation
+
+## React Native
+
+React Native SDK for mobile payment integration on iOS and Android.
+
+```bash
+npm install @t402/react-native
+```
+
+### Components
+
+#### T402Provider
+
+Wraps your app with t402 payment context.
+
+```tsx
+import { T402Provider } from "@t402/react-native";
+
+export default function App() {
+  return (
+    <T402Provider config={{ facilitatorUrl: "https://facilitator.t402.io" }}>
+      <YourApp />
+    </T402Provider>
+  );
+}
+```
+
+#### useT402Payment Hook
+
+```tsx
+import { useT402Payment } from "@t402/react-native";
+
+function PayButton() {
+  const { pay, isLoading } = useT402Payment();
+
+  return (
+    <Button
+      onPress={() => pay({ url: "https://api.example.com/data" })}
+      loading={isLoading}
+      title="Pay & Access"
+    />
+  );
+}
+```
+
+#### PaymentSheet
+
+Pre-built payment UI component.
+
+```tsx
+import { PaymentSheet } from "@t402/react-native";
+
+<PaymentSheet
+  requirements={paymentRequirements}
+  onPaymentComplete={(result) => console.log(result)}
+/>
+```
+
+### Features
+
+- React Native hooks and components
+- iOS and Android support
+- Wallet connection (WalletConnect, Coinbase Wallet)
+- Payment flow UI
+- SSR-safe

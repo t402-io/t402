@@ -1,0 +1,1778 @@
+import { Tabs, Callout, Cards } from 'nextra/components'
+
+# Other Chain Mechanisms
+
+Reference documentation for non-major chain mechanisms. For EVM, Solana, TON, and TRON, see their dedicated pages.
+
+<Tabs items={['NEAR', 'Aptos', 'Tezos', 'Polkadot', 'Stacks', 'Cosmos', 'Bitcoin', 'Stellar', 'Spark']}>
+  <Tabs.Tab>
+
+NEAR Protocol implementation for T402 payments using NEP-141 fungible tokens.
+
+## Installation
+
+```bash
+pnpm add @t402/near
+```
+
+## Overview
+
+The `@t402/near` package enables T402 payments on NEAR Protocol using NEP-141 token transfers. It uses the **exact-direct** scheme — the client executes the token transfer directly on-chain, then provides the transaction hash as proof of payment.
+
+Key features:
+- **Named accounts** — human-readable addresses like `alice.near`
+- **Direct settlement** — client submits the transfer, no facilitator relay needed
+- **NEP-141 standard** — compatible with all NEAR fungible tokens
+
+## Network IDs
+
+| Network | CAIP-2 ID | RPC Endpoint |
+|---------|-----------|--------------|
+| Mainnet | `near:mainnet` | `https://rpc.mainnet.near.org` |
+| Testnet | `near:testnet` | `https://rpc.testnet.near.org` |
+
+## Client Usage
+
+```typescript
+import { ExactDirectNearClient } from '@t402/near/exact-direct/client'
+
+const client = new ExactDirectNearClient({
+  accountId: 'alice.near',
+  signAndSendTransaction: async (receiverId, actions) => {
+    // Use your NEAR wallet to sign and send
+    const result = await wallet.signAndSendTransaction({ receiverId, actions })
+    return result.transaction.hash
+  }
+})
+
+// Create payment payload (executes transfer on-chain)
+const payload = await client.createPaymentPayload(2, requirements)
+```
+
+## Server Usage
+
+```typescript
+import { ExactDirectNearServer } from '@t402/near/exact-direct/server'
+
+const server = new ExactDirectNearServer({
+  rpcUrl: 'https://rpc.mainnet.near.org'
+})
+
+// Enhance requirements with NEAR-specific fields
+const enhanced = await server.enhancePaymentRequirements(baseRequirements)
+```
+
+## Facilitator Usage
+
+```typescript
+import { ExactDirectNearFacilitator } from '@t402/near/exact-direct/facilitator'
+
+const facilitator = new ExactDirectNearFacilitator({
+  rpcUrl: 'https://rpc.mainnet.near.org',
+  indexerUrl: 'https://api.nearblocks.io' // optional
+})
+
+// Verify the transaction hash from client
+const result = await facilitator.verify(payload, requirements)
+// For exact-direct, settle is a no-op (already settled by client)
+const settled = await facilitator.settle(payload, requirements)
+```
+
+## PaymentRequirements
+
+```typescript
+const requirements = {
+  scheme: 'exact-direct',
+  network: 'near:mainnet',
+  amount: '1000000', // 1 USDT (6 decimals)
+  asset: 'usdt.tether-token.near', // NEP-141 contract ID
+  payTo: 'merchant.near',
+  maxTimeoutSeconds: 300
+}
+```
+
+## Payment Flow
+
+1. **Client** calls `ft_transfer` on the NEP-141 token contract
+2. **Client** attaches 1 yoctoNEAR deposit (required by NEP-141)
+3. **Transaction** executes on NEAR
+4. **Client** returns the `txHash` as proof of payment
+5. **Facilitator** verifies the transaction via RPC or indexer
+
+<Callout type="info">
+  The `exact-direct` scheme means the client settles the payment directly on-chain.
+  The facilitator only verifies the transaction — it does not relay or execute it.
+</Callout>
+
+## Token Addresses
+
+| Token | Network | Contract ID | Decimals |
+|-------|---------|-------------|----------|
+| USDT | Mainnet | `usdt.tether-token.near` | 6 |
+| USDC | Mainnet | `17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1` | 6 |
+| USDC | Testnet | `usdc.fakes.testnet` | 6 |
+
+## Payload Structure
+
+```typescript
+interface ExactDirectNearPayload {
+  txHash: string;   // base58 transaction hash
+  from: string;     // sender account ID
+  to: string;       // recipient account ID
+  amount: string;   // amount in smallest units
+}
+```
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `invalid_payload_structure` | Missing txHash, from, to, or amount |
+| `network_mismatch` | Transaction network doesn't match requirements |
+| `amount_mismatch` | Transferred amount less than required |
+| `recipient_mismatch` | Transfer recipient doesn't match payTo |
+| `transaction_not_found` | Transaction hash not found on-chain |
+| `transaction_failed` | Transaction exists but failed |
+
+## Example: Full Integration
+
+<Tabs items={['Client', 'Server']}>
+  <Tabs.Tab>
+```typescript
+import { t402Client } from '@t402/fetch'
+import { registerExactDirectNearClient } from '@t402/near/exact-direct/client'
+
+const client = new t402Client()
+registerExactDirectNearClient(client, {
+  accountId: wallet.accountId,
+  signAndSendTransaction: wallet.signAndSendTransaction
+})
+
+const response = await client.fetch('https://api.example.com/premium')
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```typescript
+import { paymentMiddleware } from '@t402/express'
+
+app.use(paymentMiddleware({
+  'GET /api/premium': {
+    price: '$0.01',
+    network: 'near:mainnet',
+    asset: 'usdt.tether-token.near',
+    payTo: 'merchant.near',
+    description: 'Premium API access'
+  }
+}))
+```
+  </Tabs.Tab>
+</Tabs>
+
+## Go SDK
+
+```go
+import "github.com/t402-io/t402/sdks/go/mechanisms/near"
+
+// Client
+client := near.NewExactDirectNearScheme(signer, &near.ExactDirectNearClientConfig{
+    GasAmount: "30000000000000", // 30 TGas
+})
+payload, err := client.CreatePaymentPayload(ctx, requirements)
+
+// Facilitator
+facilitator := near.NewExactDirectNearFacilitator(rpcURL)
+result, err := facilitator.Verify(ctx, payload, requirements)
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+Aptos blockchain implementation for T402 payments using the Fungible Asset standard.
+
+## Installation
+
+```bash
+pnpm add @t402/aptos
+```
+
+## Overview
+
+The `@t402/aptos` package enables T402 payments on Aptos using the Move-based Fungible Asset (FA) standard. It uses the **exact-direct** scheme — the client executes the transfer directly on-chain via `primary_fungible_store::transfer`.
+
+Key features:
+- **Fungible Asset standard** — Move-native token transfers
+- **Direct settlement** — client submits the transfer directly
+- **Metadata-based addressing** — tokens identified by FA metadata address
+
+## Network IDs
+
+| Network | CAIP-2 ID | Chain ID | RPC Endpoint |
+|---------|-----------|----------|--------------|
+| Mainnet | `aptos:1` | 1 | `https://fullnode.mainnet.aptoslabs.com/v1` |
+| Testnet | `aptos:2` | 2 | `https://fullnode.testnet.aptoslabs.com/v1` |
+| Devnet | `aptos:149` | 149 | `https://fullnode.devnet.aptoslabs.com/v1` |
+
+## Client Usage
+
+```typescript
+import { ExactDirectAptosClient } from '@t402/aptos/exact-direct/client'
+
+const client = new ExactDirectAptosClient({
+  address: '0x1234...abcd',
+  signAndSubmitTransaction: async (payload) => {
+    // Use your Aptos wallet (Petra, Martian, etc.)
+    const result = await wallet.signAndSubmitTransaction(payload)
+    return result.hash
+  }
+})
+
+const payload = await client.createPaymentPayload(2, requirements)
+```
+
+## Server Usage
+
+```typescript
+import { ExactDirectAptosServer } from '@t402/aptos/exact-direct/server'
+
+const server = new ExactDirectAptosServer({
+  rpcUrl: 'https://fullnode.mainnet.aptoslabs.com/v1'
+})
+
+const enhanced = await server.enhancePaymentRequirements(baseRequirements)
+```
+
+## Facilitator Usage
+
+```typescript
+import { ExactDirectAptosFacilitator } from '@t402/aptos/exact-direct/facilitator'
+
+const facilitator = new ExactDirectAptosFacilitator({
+  rpcUrl: 'https://fullnode.mainnet.aptoslabs.com/v1'
+})
+
+const result = await facilitator.verify(payload, requirements)
+const settled = await facilitator.settle(payload, requirements)
+```
+
+## PaymentRequirements
+
+```typescript
+const requirements = {
+  scheme: 'exact-direct',
+  network: 'aptos:1',
+  amount: '1000000', // 1 USDT (6 decimals)
+  asset: '0xf73e887a8754f540ee6e1a93bdc6dde2af69fc7ca5de32013e89dd44244473cb', // FA metadata address
+  payTo: '0xRecipientAddress...',
+  maxTimeoutSeconds: 600
+}
+```
+
+## Payment Flow
+
+1. **Client** builds a `primary_fungible_store::transfer` transaction
+2. **Client** signs and submits to the Aptos network
+3. **Transaction** executes the Move entry function
+4. **Client** returns the `txHash` as proof
+5. **Facilitator** verifies the transaction via REST API
+
+<Callout type="info">
+  Aptos uses the Fungible Asset standard (not legacy Coin). The `asset` field in requirements
+  is the FA metadata address, not a module address.
+</Callout>
+
+## Token Addresses (FA Metadata)
+
+| Token | Network | Metadata Address | Decimals |
+|-------|---------|-----------------|----------|
+| USDT | Mainnet | `0xf73e887a8754f540ee6e1a93bdc6dde2af69fc7ca5de32013e89dd44244473cb` | 6 |
+| USDC | Mainnet | `0xbae207659db88bea0cbead6da0ed00aac12edcdda169e591cd41c94180b46f3b` | 6 |
+| USDT | Testnet | `0xf73e887a8754f540ee6e1a93bdc6dde2af69fc7ca5de32013e89dd44244473cb` | 6 |
+
+## Payload Structure
+
+```typescript
+interface ExactDirectAptosPayload {
+  txHash: string;           // Aptos transaction hash
+  from: string;             // sender address (0x format)
+  to: string;               // recipient address
+  amount: string;           // amount as string
+  metadataAddress: string;  // FA metadata address
+}
+```
+
+## Transaction Details
+
+The transfer uses Move's entry function:
+
+```
+0x1::primary_fungible_store::transfer
+```
+
+With arguments:
+1. `metadata_address` — FA metadata object address
+2. `recipient` — destination address
+3. `amount` — transfer amount (u64)
+
+Default gas configuration:
+- **Max gas**: 100,000 units
+- **Gas price**: 100 octas
+- **Expiration**: 600 seconds
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `invalid_payload_structure` | Missing txHash, from, to, amount, or metadataAddress |
+| `network_mismatch` | Chain ID doesn't match requirements |
+| `amount_mismatch` | Transferred amount less than required |
+| `recipient_mismatch` | Transfer recipient doesn't match payTo |
+| `asset_mismatch` | FA metadata address doesn't match |
+| `transaction_not_found` | Transaction hash not found |
+| `transaction_failed` | Transaction executed but failed (VM error) |
+
+## Example: Full Integration
+
+<Tabs items={['Client', 'Server']}>
+  <Tabs.Tab>
+```typescript
+import { t402Client } from '@t402/fetch'
+import { registerExactDirectAptosClient } from '@t402/aptos/exact-direct/client'
+
+const client = new t402Client()
+registerExactDirectAptosClient(client, {
+  address: wallet.address,
+  signAndSubmitTransaction: wallet.signAndSubmitTransaction
+})
+
+const response = await client.fetch('https://api.example.com/premium')
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```typescript
+import { paymentMiddleware } from '@t402/express'
+
+app.use(paymentMiddleware({
+  'GET /api/premium': {
+    price: '$0.01',
+    network: 'aptos:1',
+    asset: '0xf73e887a8754f540ee6e1a93bdc6dde2af69fc7ca5de32013e89dd44244473cb',
+    payTo: '0xMerchantAddress...',
+    description: 'Premium API access'
+  }
+}))
+```
+  </Tabs.Tab>
+</Tabs>
+
+## Go SDK
+
+```go
+import "github.com/t402-io/t402/sdks/go/mechanisms/aptos"
+
+// Client
+client := aptos.NewExactDirectAptosScheme(signer, &aptos.Config{
+    MaxGasAmount: 100000,
+    GasUnitPrice: 100,
+})
+payload, err := client.CreatePaymentPayload(ctx, requirements)
+
+// Facilitator
+facilitator := aptos.NewExactDirectAptosFacilitator(rpcURL)
+result, err := facilitator.Verify(ctx, payload, requirements)
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+Tezos blockchain implementation for T402 payments using FA2 (TZIP-12) tokens.
+
+## Installation
+
+```bash
+pnpm add @t402/tezos
+```
+
+## Overview
+
+The `@t402/tezos` package enables T402 payments on Tezos using the FA2 token standard (TZIP-12). It uses the **exact-direct** scheme — the client executes the `transfer` entrypoint directly on the FA2 contract.
+
+Key features:
+- **FA2 standard (TZIP-12)** — multi-asset token contracts
+- **Token IDs** — FA2 contracts can hold multiple token types
+- **TzKT indexer** — transaction verification via indexer API
+
+## Network IDs
+
+| Network | CAIP-2 ID | RPC Endpoint |
+|---------|-----------|--------------|
+| Mainnet | `tezos:NetXdQprcVkpaWU` | `https://mainnet.api.tez.ie` |
+| Ghostnet (Testnet) | `tezos:NetXnHfVqm9iesp` | `https://ghostnet.tezos.marigold.dev` |
+
+<Callout type="info">
+  Tezos CAIP-2 identifiers use the network's genesis block hash prefix.
+</Callout>
+
+## Client Usage
+
+```typescript
+import { ExactDirectTezosClient } from '@t402/tezos/exact-direct/client'
+
+const client = new ExactDirectTezosClient({
+  address: 'tz1YourAddress...',
+  signAndSendOperation: async (params) => {
+    // Use your Tezos wallet (Temple, Kukai, etc.)
+    const result = await wallet.sendOperation(params)
+    return result.opHash
+  }
+})
+
+const payload = await client.createPaymentPayload(2, requirements)
+```
+
+## Server Usage
+
+```typescript
+import { ExactDirectTezosServer } from '@t402/tezos/exact-direct/server'
+
+const server = new ExactDirectTezosServer({
+  rpcUrl: 'https://mainnet.api.tez.ie'
+})
+
+const enhanced = await server.enhancePaymentRequirements(baseRequirements)
+```
+
+## Facilitator Usage
+
+```typescript
+import { ExactDirectTezosFacilitator } from '@t402/tezos/exact-direct/facilitator'
+
+const facilitator = new ExactDirectTezosFacilitator({
+  rpcUrl: 'https://mainnet.api.tez.ie',
+  indexerUrl: 'https://api.tzkt.io' // TzKT indexer for verification
+})
+
+const result = await facilitator.verify(payload, requirements)
+const settled = await facilitator.settle(payload, requirements)
+```
+
+## PaymentRequirements
+
+```typescript
+const requirements = {
+  scheme: 'exact-direct',
+  network: 'tezos:NetXdQprcVkpaWU',
+  amount: '1000000', // 1 USDT (6 decimals)
+  asset: 'KT1XnTn74bUtxHfDtBmm2bGZAQfhPbvKWR8o', // FA2 contract
+  payTo: 'tz1MerchantAddress...',
+  maxTimeoutSeconds: 300,
+  extra: {
+    tokenId: 0 // Token ID within the FA2 contract
+  }
+}
+```
+
+## Payment Flow
+
+1. **Client** calls the FA2 `transfer` entrypoint on the token contract
+2. **Operation** is injected into the Tezos network
+3. **Client** returns the `opHash` (operation hash) as proof
+4. **Facilitator** verifies via TzKT indexer or RPC
+5. **Operation** is confirmed after 1+ block confirmations
+
+## Token Addresses
+
+| Token | Network | FA2 Contract | Token ID | Decimals |
+|-------|---------|-------------|----------|----------|
+| USDt | Mainnet | `KT1XnTn74bUtxHfDtBmm2bGZAQfhPbvKWR8o` | 0 | 6 |
+
+<Callout type="warning">
+  FA2 contracts can hold multiple tokens. Always specify the `tokenId` in the `extra` field
+  of PaymentRequirements. USDT on Tezos uses token ID `0`.
+</Callout>
+
+## Payload Structure
+
+```typescript
+interface ExactDirectTezosPayload {
+  opHash: string;           // operation hash (o prefix, base58)
+  from: string;             // sender address (tz1/tz2/tz3 prefix)
+  to: string;               // recipient address
+  amount: string;           // amount in smallest units
+  contractAddress: string;  // FA2 contract address (KT1 prefix)
+  tokenId: number;          // token ID within contract
+}
+```
+
+## FA2 Transfer Entrypoint
+
+The FA2 `transfer` entrypoint accepts:
+
+```
+transfer: list(
+  pair(
+    address,  // from
+    list(pair(address, pair(nat, nat)))  // [(to, (token_id, amount))]
+  )
+)
+```
+
+## Address Formats
+
+| Prefix | Type |
+|--------|------|
+| `tz1` | Ed25519 implicit account |
+| `tz2` | Secp256k1 implicit account |
+| `tz3` | P-256 implicit account |
+| `KT1` | Originated contract |
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `invalid_payload_structure` | Missing opHash, from, to, or amount |
+| `network_mismatch` | Operation network doesn't match |
+| `amount_mismatch` | Transferred amount less than required |
+| `recipient_mismatch` | Transfer recipient doesn't match payTo |
+| `contract_mismatch` | FA2 contract doesn't match asset |
+| `token_id_mismatch` | Token ID doesn't match requirements |
+| `operation_not_found` | Operation hash not found |
+| `operation_failed` | Operation exists but failed |
+
+## Example: Full Integration
+
+<Tabs items={['Client', 'Server']}>
+  <Tabs.Tab>
+```typescript
+import { t402Client } from '@t402/fetch'
+import { registerExactDirectTezosClient } from '@t402/tezos/exact-direct/client'
+
+const client = new t402Client()
+registerExactDirectTezosClient(client, {
+  address: wallet.address,
+  signAndSendOperation: wallet.sendOperation
+})
+
+const response = await client.fetch('https://api.example.com/premium')
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```typescript
+import { paymentMiddleware } from '@t402/express'
+
+app.use(paymentMiddleware({
+  'GET /api/premium': {
+    price: '$0.01',
+    network: 'tezos:NetXdQprcVkpaWU',
+    asset: 'KT1XnTn74bUtxHfDtBmm2bGZAQfhPbvKWR8o',
+    payTo: 'tz1MerchantAddress...',
+    description: 'Premium API access',
+    extra: { tokenId: 0 }
+  }
+}))
+```
+  </Tabs.Tab>
+</Tabs>
+
+## Go SDK
+
+```go
+import "github.com/t402-io/t402/sdks/go/mechanisms/tezos"
+
+// Client
+client := tezos.NewExactDirectTezosScheme(signer, &tezos.Config{})
+payload, err := client.CreatePaymentPayload(ctx, requirements)
+
+// Facilitator
+facilitator := tezos.NewExactDirectTezosFacilitator(rpcURL, indexerURL)
+result, err := facilitator.Verify(ctx, payload, requirements)
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+Polkadot Asset Hub implementation for T402 payments using system assets.
+
+## Installation
+
+```bash
+pnpm add @t402/polkadot
+```
+
+## Overview
+
+The `@t402/polkadot` package enables T402 payments on Polkadot Asset Hub (formerly Statemint) using native system assets. It uses the **exact-direct** scheme — the client submits an asset transfer extrinsic directly on-chain.
+
+Key features:
+- **System assets** — USDT (Asset ID 1984) on Asset Hub
+- **Parachain native** — runs on Polkadot's Asset Hub parachain
+- **Subscan verification** — transaction verification via Subscan indexer
+- **Multi-network** — supports Polkadot, Kusama, and Westend Asset Hubs
+
+## Network IDs
+
+| Network | CAIP-2 ID | SS58 Prefix | RPC Endpoint |
+|---------|-----------|------------|--------------|
+| Polkadot Asset Hub | `polkadot:68d56f15f85d3136970ec16946040bc1` | 0 | `wss://polkadot-asset-hub-rpc.polkadot.io` |
+| Kusama Asset Hub | `polkadot:48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a` | 2 | `wss://kusama-asset-hub-rpc.polkadot.io` |
+| Westend Asset Hub | `polkadot:e143f23803ac50e8f6f8e62695d1ce9e` | 42 | `wss://westend-asset-hub-rpc.polkadot.io` |
+
+<Callout type="info">
+  CAIP-2 identifiers for Polkadot networks use the first 32 characters of the genesis block hash.
+  RPC uses WebSocket (`wss://`), not HTTP.
+</Callout>
+
+## Client Usage
+
+```typescript
+import { createExactDirectPolkadotClient } from '@t402/polkadot/exact-direct/client'
+
+const client = createExactDirectPolkadotClient({
+  address: '15oF4uVJwmo4TdGW7VfQxNLavjCXviqWrb9sGQgMT9kNNQjL',
+  signAndSubmitExtrinsic: async (call, network) => {
+    // Use your Polkadot wallet (Polkadot.js, Talisman, SubWallet)
+    const result = await wallet.signAndSubmit(call)
+    return {
+      extrinsicHash: result.hash,
+      extrinsicId: `${result.blockHash}-${result.index}`
+    }
+  }
+})
+
+const payload = await client.createPaymentPayload(2, requirements)
+```
+
+## Server Usage
+
+```typescript
+import { registerExactDirectPolkadotServer } from '@t402/polkadot/exact-direct/server'
+
+const server = registerExactDirectPolkadotServer({
+  rpcUrl: 'wss://polkadot-asset-hub-rpc.polkadot.io'
+})
+```
+
+## Facilitator Usage
+
+```typescript
+import { createExactDirectPolkadotFacilitator } from '@t402/polkadot/exact-direct/facilitator'
+
+const facilitator = createExactDirectPolkadotFacilitator({
+  indexerUrl: 'https://assethub-polkadot.api.subscan.io'
+})
+
+const result = await facilitator.verify(payload, requirements)
+const settled = await facilitator.settle(payload, requirements)
+```
+
+## PaymentRequirements
+
+```typescript
+const requirements = {
+  scheme: 'exact-direct',
+  network: 'polkadot:68d56f15f85d3136970ec16946040bc1',
+  amount: '1000000', // 1 USDT (6 decimals)
+  asset: '1984', // Asset ID for USDT on Asset Hub
+  payTo: '15oF4uVJwmo4TdGW7VfQxNLavjCXviqWrb9sGQgMT9kNNQjL',
+  maxTimeoutSeconds: 300
+}
+```
+
+## Payment Flow
+
+1. **Client** builds an `assets.transfer` extrinsic for the specified asset ID
+2. **Client** signs and submits to the Asset Hub parachain
+3. **Extrinsic** is included in a block
+4. **Client** returns the extrinsic hash and ID as proof
+5. **Facilitator** verifies via Subscan API
+
+## Token Addresses
+
+| Token | Network | Asset ID | Decimals |
+|-------|---------|----------|----------|
+| USDT | Polkadot Asset Hub | 1984 | 6 |
+| USDT | Kusama Asset Hub | 1984 | 6 |
+| Test USDT | Westend Asset Hub | 1984 | 6 |
+
+<Callout type="warning">
+  On Polkadot Asset Hub, tokens are identified by numeric Asset IDs, not contract addresses.
+  USDT is Asset ID `1984` across all Asset Hub networks.
+</Callout>
+
+## Payload Structure
+
+```typescript
+interface ExactDirectPolkadotPayload {
+  extrinsicHash: string;  // extrinsic hash
+  extrinsicId: string;    // format: "{blockHash}-{extrinsicIndex}"
+  from: string;           // sender SS58 address
+  to: string;             // recipient SS58 address
+  amount: string;         // amount in smallest units
+  assetId: number;        // Asset ID (1984 for USDT)
+}
+```
+
+## Address Format
+
+Polkadot uses SS58 encoding with network-specific prefixes:
+
+| Network | SS58 Prefix | Example |
+|---------|------------|---------|
+| Polkadot | 0 | `15oF4uVJwmo4...` |
+| Kusama | 2 | `HNZata7iMY...` |
+| Westend | 42 | `5GrwvaEF5...` |
+
+The same public key produces different SS58 addresses on different networks.
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `invalid_payload_structure` | Missing extrinsicHash or extrinsicId |
+| `network_mismatch` | Extrinsic network doesn't match |
+| `amount_mismatch` | Transferred amount less than required |
+| `recipient_mismatch` | Transfer recipient doesn't match payTo |
+| `asset_id_mismatch` | Asset ID doesn't match requirements |
+| `extrinsic_not_found` | Extrinsic not found on-chain |
+| `extrinsic_failed` | Extrinsic exists but failed |
+
+## Example: Full Integration
+
+<Tabs items={['Client', 'Server']}>
+  <Tabs.Tab>
+```typescript
+import { t402Client } from '@t402/fetch'
+import { registerExactDirectPolkadotClient } from '@t402/polkadot/exact-direct/client'
+
+const client = new t402Client()
+registerExactDirectPolkadotClient(client, {
+  address: wallet.address,
+  signAndSubmitExtrinsic: wallet.signAndSubmit
+})
+
+const response = await client.fetch('https://api.example.com/premium')
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```typescript
+import { paymentMiddleware } from '@t402/express'
+
+app.use(paymentMiddleware({
+  'GET /api/premium': {
+    price: '$0.01',
+    network: 'polkadot:68d56f15f85d3136970ec16946040bc1',
+    asset: '1984',
+    payTo: '15oF4uVJwmo4TdGW7VfQxNLavjCXviqWrb9sGQgMT9kNNQjL',
+    description: 'Premium API access'
+  }
+}))
+```
+  </Tabs.Tab>
+</Tabs>
+
+## Go SDK
+
+```go
+import "github.com/t402-io/t402/sdks/go/mechanisms/polkadot"
+
+// Client
+client := polkadot.NewExactDirectPolkadotScheme(signer, &polkadot.Config{})
+payload, err := client.CreatePaymentPayload(ctx, requirements)
+
+// Facilitator
+facilitator := polkadot.NewExactDirectPolkadotFacilitator(indexerURL)
+result, err := facilitator.Verify(ctx, payload, requirements)
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+Stacks (Bitcoin L2) implementation for T402 payments using SIP-010 fungible tokens.
+
+## Installation
+
+```bash
+pnpm add @t402/stacks
+```
+
+## Overview
+
+The `@t402/stacks` package enables T402 payments on Stacks, a Bitcoin Layer 2 with Proof-of-Transfer consensus. It uses the **exact-direct** scheme with SIP-010 fungible token contracts written in Clarity.
+
+Key features:
+- **Bitcoin settlement** — Stacks transactions are anchored to Bitcoin
+- **SIP-010 standard** — Clarity-based fungible token interface
+- **Hiro API** — transaction verification via Hiro's Stacks API
+- **Principal addresses** — `SP` (mainnet) or `ST` (testnet) prefixed
+
+## Network IDs
+
+| Network | CAIP-2 ID | Chain ID | API Endpoint |
+|---------|-----------|----------|--------------|
+| Mainnet | `stacks:1` | 1 | `https://api.mainnet.hiro.so` |
+| Testnet | `stacks:2147483648` | 2147483648 | `https://api.testnet.hiro.so` |
+
+## Client Usage
+
+```typescript
+import { createExactDirectStacksClient } from '@t402/stacks/exact-direct/client'
+
+const client = createExactDirectStacksClient({
+  address: 'SP3Y2ZSH8P7D50B0VBTSX11S7XSG24M1VB9YFQA4K',
+  signAndBroadcast: async (txOptions) => {
+    // Use Hiro Wallet or Leather
+    const result = await wallet.signAndBroadcast(txOptions)
+    return result.txId
+  }
+})
+
+const payload = await client.createPaymentPayload(2, requirements)
+```
+
+## Server Usage
+
+```typescript
+import { registerExactDirectStacksServer } from '@t402/stacks/exact-direct/server'
+
+const server = registerExactDirectStacksServer({
+  apiUrl: 'https://api.mainnet.hiro.so'
+})
+```
+
+## Facilitator Usage
+
+```typescript
+import { createExactDirectStacksFacilitator } from '@t402/stacks/exact-direct/facilitator'
+
+const facilitator = createExactDirectStacksFacilitator({
+  apiUrl: 'https://api.mainnet.hiro.so'
+})
+
+const result = await facilitator.verify(payload, requirements)
+const settled = await facilitator.settle(payload, requirements)
+```
+
+## PaymentRequirements
+
+```typescript
+const requirements = {
+  scheme: 'exact-direct',
+  network: 'stacks:1',
+  amount: '1000000', // 1 sUSDC (6 decimals)
+  asset: 'SP3Y2ZSH8P7D50B0VBTSX11S7XSG24M1VB9YFQA4K.token-susdc', // SIP-010 contract
+  payTo: 'SP1MERCHANT...',
+  maxTimeoutSeconds: 600
+}
+```
+
+## Payment Flow
+
+1. **Client** builds a SIP-010 `transfer` contract call
+2. **Client** signs and broadcasts the Stacks transaction
+3. **Transaction** is included in a Stacks block (anchored to Bitcoin)
+4. **Client** returns the `txId` as proof
+5. **Facilitator** verifies via Hiro API
+
+<Callout type="info">
+  Stacks transactions take ~10 minutes for Bitcoin anchoring, but the facilitator
+  can verify mempool transactions for faster confirmation.
+</Callout>
+
+## Token Addresses (SIP-010 Contracts)
+
+| Token | Network | Contract Address | Decimals |
+|-------|---------|-----------------|----------|
+| sUSDC | Mainnet | `SP3Y2ZSH8P7D50B0VBTSX11S7XSG24M1VB9YFQA4K.token-susdc` | 6 |
+| sUSDC | Testnet | `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.token-susdc` | 6 |
+
+<Callout type="warning">
+  SIP-010 contract addresses use the format `{principal}.{contract-name}`.
+  The full contract address must be specified in the `asset` field.
+</Callout>
+
+## Payload Structure
+
+```typescript
+interface ExactDirectStacksPayload {
+  txId: string;              // Stacks transaction ID
+  from: string;              // sender principal
+  to: string;                // recipient principal
+  amount: string;            // amount in smallest units
+  contractAddress: string;   // full SIP-010 contract address
+}
+```
+
+## SIP-010 Interface
+
+The SIP-010 `transfer` function in Clarity:
+
+```clarity
+(define-public (transfer
+  (amount uint)
+  (sender principal)
+  (recipient principal)
+  (memo (optional (buff 34)))
+)
+```
+
+## Address Format
+
+| Prefix | Network | Example |
+|--------|---------|---------|
+| `SP` | Mainnet | `SP3Y2ZSH8P7D50B0VBTSX11S7XSG24M1VB9YFQA4K` |
+| `ST` | Testnet | `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM` |
+
+Principals can be:
+- **Standard** — `SP...` / `ST...` (user wallets)
+- **Contract** — `SP....<contract-name>` (deployed contracts)
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `invalid_payload_structure` | Missing txId, from, to, or amount |
+| `network_mismatch` | Transaction network doesn't match |
+| `amount_mismatch` | Transferred amount less than required |
+| `recipient_mismatch` | Transfer recipient doesn't match payTo |
+| `contract_mismatch` | SIP-010 contract doesn't match asset |
+| `transaction_not_found` | Transaction ID not found |
+| `transaction_failed` | Transaction exists but aborted |
+
+## Example: Full Integration
+
+<Tabs items={['Client', 'Server']}>
+  <Tabs.Tab>
+```typescript
+import { t402Client } from '@t402/fetch'
+import { registerExactDirectStacksClient } from '@t402/stacks/exact-direct/client'
+
+const client = new t402Client()
+registerExactDirectStacksClient(client, {
+  address: wallet.stxAddress,
+  signAndBroadcast: wallet.signAndBroadcast
+})
+
+const response = await client.fetch('https://api.example.com/premium')
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```typescript
+import { paymentMiddleware } from '@t402/express'
+
+app.use(paymentMiddleware({
+  'GET /api/premium': {
+    price: '$0.01',
+    network: 'stacks:1',
+    asset: 'SP3Y2ZSH8P7D50B0VBTSX11S7XSG24M1VB9YFQA4K.token-susdc',
+    payTo: 'SP1MERCHANT...',
+    description: 'Premium API access'
+  }
+}))
+```
+  </Tabs.Tab>
+</Tabs>
+
+## Go SDK
+
+```go
+import "github.com/t402-io/t402/sdks/go/mechanisms/stacks"
+
+// Client
+client := stacks.NewExactDirectStacksScheme(signer, &stacks.Config{})
+payload, err := client.CreatePaymentPayload(ctx, requirements)
+
+// Facilitator
+facilitator := stacks.NewExactDirectStacksFacilitator(apiURL)
+result, err := facilitator.Verify(ctx, payload, requirements)
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+Cosmos Hub ecosystem implementation for T402 payments using native bank transfers on Noble chain.
+
+## Installation
+
+<Tabs items={['npm', 'pnpm', 'yarn']}>
+  <Tabs.Tab>
+```bash
+npm install @t402/cosmos
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+pnpm add @t402/cosmos
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+yarn add @t402/cosmos
+```
+  </Tabs.Tab>
+</Tabs>
+
+## Overview
+
+The `@t402/cosmos` package enables T402 payments on the Cosmos ecosystem using native USDC transfers on Noble chain. It uses the **exact-direct** scheme — the client executes the token transfer directly on-chain, then provides the transaction hash as proof of payment.
+
+Key features:
+- **Noble chain** — native USDC issuance via Circle's Cross-Chain Transfer Protocol (CCTP)
+- **Direct settlement** — client submits the transfer, no facilitator relay needed
+- **Instant finality** — Tendermint consensus provides immediate transaction finality
+- **Low fees** — typical gas cost ~0.005 USDC per transaction
+- **Bech32 addresses** — human-readable `noble1...` format
+
+## Supported Networks
+
+| Network | CAIP-2 ID | RPC Endpoint | REST API |
+|---------|-----------|--------------|----------|
+| Noble Mainnet | `cosmos:noble-1` | `https://noble-rpc.polkachu.com` | `https://noble-api.polkachu.com` |
+| Noble Testnet | `cosmos:grand-1` | `https://rpc.testnet.noble.strange.love` | `https://api.testnet.noble.strange.love` |
+
+## Quick Start
+
+```typescript
+import { ExactDirectCosmosClient } from '@t402/cosmos/exact-direct/client'
+
+const client = new ExactDirectCosmosClient({
+  address: 'noble1abc...xyz',
+  signAndBroadcast: async (txRaw) => {
+    // Use your Cosmos wallet to sign and broadcast
+    const result = await wallet.signAndBroadcast(txRaw)
+    return result.transactionHash
+  }
+})
+
+// Create payment payload (executes transfer on-chain)
+const payload = await client.createPaymentPayload(2, requirements)
+```
+
+## Client Usage
+
+```typescript
+import { ExactDirectCosmosClient } from '@t402/cosmos/exact-direct/client'
+
+const client = new ExactDirectCosmosClient({
+  address: 'noble1ejc2c2gvk46h7kyulx9fus85vdpq0zdjwkfav0',
+  signAndBroadcast: async (txRaw) => {
+    // Sign and broadcast the MsgSend transaction
+    const result = await wallet.signAndBroadcast(txRaw)
+    return result.transactionHash
+  },
+  gasLimit: '200000',      // optional, default 200000
+  gasPrice: '0.025uusdc'   // optional, default 0.025uusdc
+})
+
+// Create payment payload (executes transfer on-chain)
+const payload = await client.createPaymentPayload(2, requirements)
+```
+
+## Server Usage
+
+```typescript
+import { ExactDirectCosmosServer } from '@t402/cosmos/exact-direct/server'
+
+const server = new ExactDirectCosmosServer({
+  rpcUrl: 'https://noble-rpc.polkachu.com',
+  restUrl: 'https://noble-api.polkachu.com'
+})
+
+// Enhance requirements with Cosmos-specific fields
+const enhanced = await server.enhancePaymentRequirements(baseRequirements)
+```
+
+## Facilitator Usage
+
+```typescript
+import { ExactDirectCosmosFacilitator } from '@t402/cosmos/exact-direct/facilitator'
+
+const facilitator = new ExactDirectCosmosFacilitator({
+  rpcUrl: 'https://noble-rpc.polkachu.com',
+  restUrl: 'https://noble-api.polkachu.com'
+})
+
+// Verify the transaction hash from client
+const result = await facilitator.verify(payload, requirements)
+// For exact-direct, settle is a no-op (already settled by client)
+const settled = await facilitator.settle(payload, requirements)
+```
+
+## PaymentRequirements
+
+```typescript
+const requirements = {
+  scheme: 'exact-direct',
+  network: 'cosmos:noble-1',
+  amount: '1000000', // 1 USDC (6 decimals)
+  asset: 'uusdc', // denomination (microUSDC)
+  payTo: 'noble1ejc2c2gvk46h7kyulx9fus85vdpq0zdjwkfav0',
+  maxTimeoutSeconds: 300
+}
+```
+
+## Payload Structure
+
+```typescript
+interface ExactDirectCosmosPayload {
+  txHash: string;    // Transaction hash (hex, no 0x prefix)
+  from: string;      // noble1... sender address
+  to: string;        // noble1... recipient address
+  amount: string;    // Amount in uusdc (smallest unit)
+  denom?: string;    // Token denomination (default: uusdc)
+}
+```
+
+## Payment Flow
+
+1. **Client** creates a `/cosmos.bank.v1beta1.MsgSend` transaction
+2. **Client** signs and broadcasts the transaction to Noble chain
+3. **Transaction** executes with Tendermint consensus (instant finality)
+4. **Client** returns the transaction hash as proof of payment
+5. **Facilitator** verifies the transaction via RPC or REST API
+
+<Callout type="info">
+  The `exact-direct` scheme means the client settles the payment directly on-chain.
+  The facilitator only verifies the transaction — it does not relay or execute it.
+</Callout>
+
+## Token Details
+
+| Property | Value |
+|----------|-------|
+| Token | Native USDC (Circle CCTP) |
+| Denomination | `uusdc` (micro-USDC) |
+| Decimals | 6 |
+| Facilitator Address (Mainnet) | `noble1ejc2c2gvk46h7kyulx9fus85vdpq0zdjwkfav0` |
+| Facilitator Address (Testnet) | `noble1ejc2c2gvk46h7kyulx9fus85vdpq0zdjwkfav0` |
+
+## Gas Configuration
+
+| Parameter | Value |
+|-----------|-------|
+| Gas Limit | 200,000 |
+| Gas Price | 0.025 uusdc |
+| Typical Fee | ~0.005 USDC (5,000 uusdc) |
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `invalid_payload_structure` | Missing txHash, from, to, or amount |
+| `network_mismatch` | Transaction network doesn't match requirements |
+| `amount_mismatch` | Transferred amount less than required |
+| `recipient_mismatch` | Transfer recipient doesn't match payTo |
+| `denom_mismatch` | Token denomination doesn't match requirements |
+| `transaction_not_found` | Transaction hash not found on-chain |
+| `transaction_failed` | Transaction exists but failed |
+
+## Multi-SDK Examples
+
+<Tabs items={['TypeScript', 'Go', 'Python', 'Java']}>
+  <Tabs.Tab>
+```typescript
+import { ExactDirectCosmosClient } from '@t402/cosmos/exact-direct/client'
+import { t402Client } from '@t402/fetch'
+import { registerExactDirectCosmosClient } from '@t402/cosmos/exact-direct/client'
+
+// Setup client
+const cosmosClient = new ExactDirectCosmosClient({
+  address: wallet.address,
+  signAndBroadcast: wallet.signAndBroadcast
+})
+
+// Register with t402 client
+const client = new t402Client()
+registerExactDirectCosmosClient(client, {
+  address: wallet.address,
+  signAndBroadcast: wallet.signAndBroadcast
+})
+
+// Make paid request
+const response = await client.fetch('https://api.example.com/premium')
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```go
+import "github.com/t402-io/t402/sdks/go/mechanisms/cosmos"
+
+// Client
+client := cosmos.NewExactDirectCosmosScheme(signer, &cosmos.ExactDirectCosmosClientConfig{
+    GasLimit: "200000",
+    GasPrice: "0.025uusdc",
+})
+payload, err := client.CreatePaymentPayload(ctx, requirements)
+
+// Server
+server := cosmos.NewExactDirectCosmosServer(&cosmos.ExactDirectCosmosServerConfig{
+    RPCURL: "https://noble-rpc.polkachu.com",
+    RestURL: "https://noble-api.polkachu.com",
+})
+enhanced, err := server.EnhancePaymentRequirements(ctx, requirements)
+
+// Facilitator
+facilitator := cosmos.NewExactDirectCosmosFacilitator(&cosmos.ExactDirectCosmosFacilitatorConfig{
+    RPCURL: "https://noble-rpc.polkachu.com",
+    RestURL: "https://noble-api.polkachu.com",
+})
+result, err := facilitator.Verify(ctx, payload, requirements)
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+from t402.schemes.cosmos.exact_direct.client import ExactDirectCosmosClient
+from t402.schemes.cosmos.exact_direct.server import ExactDirectCosmosServer
+from t402.schemes.cosmos.exact_direct.facilitator import ExactDirectCosmosFacilitator
+
+# Client
+client = ExactDirectCosmosClient(
+    address="noble1abc...xyz",
+    sign_and_broadcast=wallet.sign_and_broadcast,
+    gas_limit="200000",
+    gas_price="0.025uusdc"
+)
+payload = await client.create_payment_payload(requirements)
+
+# Server
+server = ExactDirectCosmosServer(
+    rpc_url="https://noble-rpc.polkachu.com",
+    rest_url="https://noble-api.polkachu.com"
+)
+enhanced = await server.enhance_payment_requirements(requirements)
+
+# Facilitator
+facilitator = ExactDirectCosmosFacilitator(
+    rpc_url="https://noble-rpc.polkachu.com",
+    rest_url="https://noble-api.polkachu.com"
+)
+result = await facilitator.verify(payload, requirements)
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```java
+import io.t402.mechanisms.cosmos.ExactDirectCosmosClient;
+import io.t402.mechanisms.cosmos.ExactDirectCosmosServer;
+import io.t402.mechanisms.cosmos.ExactDirectCosmosFacilitator;
+
+// Client
+var client = new ExactDirectCosmosClient(
+    "noble1abc...xyz",
+    wallet::signAndBroadcast,
+    "200000",
+    "0.025uusdc"
+);
+var payload = client.createPaymentPayload(requirements);
+
+// Server
+var server = new ExactDirectCosmosServer(
+    "https://noble-rpc.polkachu.com",
+    "https://noble-api.polkachu.com"
+);
+var enhanced = server.enhancePaymentRequirements(requirements);
+
+// Facilitator
+var facilitator = new ExactDirectCosmosFacilitator(
+    "https://noble-rpc.polkachu.com",
+    "https://noble-api.polkachu.com"
+);
+var result = facilitator.verify(payload, requirements);
+```
+  </Tabs.Tab>
+</Tabs>
+
+## Example: Express Integration
+
+```typescript
+import express from 'express'
+import { paymentMiddleware } from '@t402/express'
+
+const app = express()
+
+app.use(paymentMiddleware({
+  'GET /api/premium': {
+    price: '$0.01',
+    network: 'cosmos:noble-1',
+    asset: 'uusdc',
+    payTo: 'noble1ejc2c2gvk46h7kyulx9fus85vdpq0zdjwkfav0',
+    description: 'Premium API access'
+  }
+}))
+
+app.get('/api/premium', (req, res) => {
+  res.json({ data: 'premium content' })
+})
+
+app.listen(3000)
+```
+
+## Related Links
+
+<Cards>
+  <Cards.Card
+    title="Protocol Specification"
+    href="/specification"
+  />
+  <Cards.Card
+    title="Facilitator API"
+    href="/reference/facilitator-api"
+  />
+  <Cards.Card
+    title="Express Middleware"
+    href="/reference/express"
+  />
+  <Cards.Card
+    title="Fetch Client"
+    href="/reference/fetch"
+  />
+</Cards>
+
+## Additional Resources
+
+- [Noble Chain Documentation](https://docs.noble.xyz)
+- [Circle CCTP](https://www.circle.com/en/cross-chain-transfer-protocol)
+- [Cosmos SDK Documentation](https://docs.cosmos.network)
+- [Keplr Wallet](https://www.keplr.app)
+- [Leap Wallet](https://www.leapwallet.io)
+
+</Tabs.Tab>
+  <Tabs.Tab>
+
+Bitcoin & Lightning Network payment mechanism for T402 payments.
+
+## Installation
+
+<Tabs items={['npm', 'pnpm', 'yarn']}>
+  <Tabs.Tab>
+```bash
+npm install @t402/btc @t402/core
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+pnpm add @t402/btc @t402/core
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```bash
+yarn add @t402/btc @t402/core
+```
+  </Tabs.Tab>
+</Tabs>
+
+For PSBT construction (optional):
+
+```bash
+npm install bitcoinjs-lib
+```
+
+## Overview
+
+The `@t402/btc` package enables T402 payments on Bitcoin and Lightning Network. It supports two payment schemes:
+
+- **BTC On-chain (`exact`)** — PSBT-based payments with on-chain settlement
+- **Lightning Network (`lightning`)** — BOLT11 invoice payments with preimage verification
+
+Key features:
+- **Dual scheme** — on-chain for larger payments, Lightning for instant micropayments
+- **PSBT standard** — uses BIP-174 Partially Signed Bitcoin Transactions
+- **BOLT11 invoices** — standard Lightning payment requests with preimage proof
+- **Taproot support** — compatible with P2TR, P2WPKH, and legacy address types
+
+## Supported Networks
+
+| Network | CAIP-2 ID | Scheme | Settlement |
+|---------|-----------|--------|------------|
+| BTC Mainnet | `bip122:000000000019d6689c085ae165831e93` | `exact` | On-chain (~10 min) |
+| BTC Testnet | `bip122:000000000933ea01ad0ee984209779ba` | `exact` | On-chain (~10 min) |
+| Lightning Mainnet | `lightning:mainnet` | `lightning` | Instant |
+| Lightning Testnet | `lightning:testnet` | `lightning` | Instant |
+
+## Quick Start
+
+### BTC On-chain
+
+```typescript
+import { registerExactBtcScheme } from '@t402/btc/exact/client'
+import { t402Client } from '@t402/core/client'
+
+const client = new t402Client()
+registerExactBtcScheme(client, {
+  signer: {
+    signPsbt: async (psbt) => { /* sign with wallet */ },
+    getAddress: () => 'bc1q...',
+    getPublicKey: () => '02...',
+  },
+})
+
+const response = await client.fetch('https://api.example.com/premium')
+```
+
+### Lightning
+
+```typescript
+import { registerLightningScheme } from '@t402/btc/lightning/client'
+import { t402Client } from '@t402/core/client'
+
+const client = new t402Client()
+registerLightningScheme(client, {
+  signer: {
+    payInvoice: async (bolt11) => {
+      const result = await lightningNode.pay(bolt11)
+      return { preimage: result.preimage, paymentHash: result.paymentHash }
+    },
+    getNodePubKey: () => '02...',
+  },
+})
+```
+
+## Client Usage
+
+### BTC On-chain Client
+
+```typescript
+import { registerExactBtcScheme } from '@t402/btc/exact/client'
+import { t402Client } from '@t402/core/client'
+
+const client = new t402Client()
+registerExactBtcScheme(client, {
+  signer: {
+    signPsbt: async (psbt) => {
+      // Sign the PSBT using your Bitcoin wallet (e.g., bitcoinjs-lib)
+      return signedPsbt
+    },
+    getAddress: () => 'bc1q...',
+    getPublicKey: () => '02...',
+  },
+})
+
+// Create payment payload (constructs and signs PSBT)
+const payload = await client.createPaymentPayload(requirements)
+```
+
+### Lightning Client
+
+```typescript
+import { registerLightningScheme } from '@t402/btc/lightning/client'
+import { t402Client } from '@t402/core/client'
+
+const client = new t402Client()
+registerLightningScheme(client, {
+  signer: {
+    payInvoice: async (bolt11) => {
+      // Pay BOLT11 invoice via your Lightning node (LND, CLN, etc.)
+      const result = await lndClient.payInvoice({ paymentRequest: bolt11 })
+      return {
+        preimage: result.preimage,
+        paymentHash: result.paymentHash,
+      }
+    },
+    getNodePubKey: () => '02abc...def',
+  },
+})
+```
+
+## Server Usage
+
+```typescript
+import { registerExactBtcScheme } from '@t402/btc/exact/server'
+import { registerLightningScheme } from '@t402/btc/lightning/server'
+import { t402ResourceServer } from '@t402/core/server'
+
+const server = new t402ResourceServer(facilitatorClient)
+
+// BTC on-chain
+registerExactBtcScheme(server, {
+  schemeConfig: { payTo: 'bc1q...' },
+})
+
+// Lightning
+registerLightningScheme(server, {
+  schemeConfig: {
+    generateInvoice: async (amountSats, description, expiry) => {
+      // Generate BOLT11 invoice via your Lightning node
+      const invoice = await lndClient.addInvoice({
+        value: amountSats,
+        memo: description,
+        expiry: expiry,
+      })
+      return {
+        bolt11Invoice: invoice.paymentRequest,
+        paymentHash: invoice.rHash,
+      }
+    },
+  },
+})
+```
+
+## Facilitator Usage
+
+```typescript
+import { registerExactBtcScheme } from '@t402/btc/exact/facilitator'
+import { registerLightningScheme } from '@t402/btc/lightning/facilitator'
+import { t402Facilitator } from '@t402/core/facilitator'
+
+const facilitator = new t402Facilitator()
+
+// BTC on-chain
+registerExactBtcScheme(facilitator, {
+  signer: btcFacilitatorSigner,
+  networks: 'bip122:000000000019d6689c085ae165831e93',
+})
+
+// Lightning
+registerLightningScheme(facilitator, {
+  signer: lnFacilitatorSigner,
+  networks: 'lightning:mainnet',
+})
+```
+
+## PaymentRequirements
+
+### BTC On-chain
+
+```typescript
+const requirements = {
+  scheme: 'exact',
+  network: 'bip122:000000000019d6689c085ae165831e93',
+  payTo: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+  maxAmountRequired: '100000', // satoshis
+  maxTimeoutSeconds: 3600
+}
+```
+
+### Lightning
+
+```typescript
+const requirements = {
+  scheme: 'lightning',
+  network: 'lightning:mainnet',
+  payTo: '02abc...def', // node pubkey
+  maxAmountRequired: '1000', // satoshis
+  maxTimeoutSeconds: 300,
+  extra: {
+    bolt11Invoice: 'lnbc10u1p...',
+    paymentHash: 'abc123...',
+  }
+}
+```
+
+## Payment Flow
+
+### BTC On-chain Flow
+
+1. **Server** returns 402 with `scheme: "exact"` and `network: "bip122:..."`
+2. **Client** constructs a PSBT sending the required amount to `payTo`
+3. **Client** signs the PSBT with their Bitcoin wallet
+4. **Client** broadcasts the signed transaction
+5. **Client** returns the transaction hash as proof of payment
+6. **Facilitator** verifies the transaction via Bitcoin RPC
+
+### Lightning Flow
+
+1. **Server** returns 402 with `scheme: "lightning"` and a BOLT11 invoice
+2. **Client** pays the BOLT11 invoice via their Lightning node
+3. **Client** receives the payment preimage as proof of payment
+4. **Client** returns the preimage and payment hash
+5. **Facilitator** verifies the preimage matches the payment hash
+
+<Callout type="info">
+  Lightning payments settle instantly with cryptographic proof (preimage).
+  BTC on-chain payments require confirmation (~10 minutes for 1 block).
+</Callout>
+
+## Multi-SDK Examples
+
+<Tabs items={['TypeScript', 'Go', 'Python', 'Java']}>
+  <Tabs.Tab>
+```typescript
+import { registerExactBtcScheme } from '@t402/btc/exact/client'
+import { registerLightningScheme } from '@t402/btc/lightning/client'
+import { t402Client } from '@t402/core/client'
+
+const client = new t402Client()
+
+// Register BTC on-chain
+registerExactBtcScheme(client, {
+  signer: {
+    signPsbt: async (psbt) => signedPsbt,
+    getAddress: () => 'bc1q...',
+    getPublicKey: () => '02...',
+  },
+})
+
+// Register Lightning
+registerLightningScheme(client, {
+  signer: {
+    payInvoice: async (bolt11) => ({
+      preimage: '...', paymentHash: '...'
+    }),
+    getNodePubKey: () => '02...',
+  },
+})
+
+const response = await client.fetch('https://api.example.com/premium')
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```go
+import "github.com/t402-io/t402/sdks/go/mechanisms/btc"
+
+// BTC on-chain client
+btcClient := btc.NewExactBtcScheme(signer, &btc.ExactBtcClientConfig{
+    Network: "bip122:000000000019d6689c085ae165831e93",
+})
+payload, err := btcClient.CreatePaymentPayload(ctx, requirements)
+
+// Lightning client
+lnClient := btc.NewLightningScheme(lnSigner, &btc.LightningClientConfig{
+    Network: "lightning:mainnet",
+})
+payload, err := lnClient.CreatePaymentPayload(ctx, requirements)
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+from t402.schemes.btc.exact.client import ExactBtcClient
+from t402.schemes.btc.lightning.client import LightningClient
+
+# BTC on-chain
+btc_client = ExactBtcClient(
+    sign_psbt=wallet.sign_psbt,
+    get_address=lambda: "bc1q...",
+    get_public_key=lambda: "02...",
+)
+payload = await btc_client.create_payment_payload(requirements)
+
+# Lightning
+ln_client = LightningClient(
+    pay_invoice=node.pay_invoice,
+    get_node_pubkey=lambda: "02...",
+)
+payload = await ln_client.create_payment_payload(requirements)
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```java
+import io.t402.mechanisms.btc.ExactBtcClient;
+import io.t402.mechanisms.btc.LightningClient;
+
+// BTC on-chain
+var btcClient = new ExactBtcClient(
+    wallet::signPsbt,
+    () -> "bc1q...",
+    () -> "02..."
+);
+var payload = btcClient.createPaymentPayload(requirements);
+
+// Lightning
+var lnClient = new LightningClient(
+    node::payInvoice,
+    () -> "02..."
+);
+var payload = lnClient.createPaymentPayload(requirements);
+```
+  </Tabs.Tab>
+</Tabs>
+
+## Example: Express Integration
+
+```typescript
+import express from 'express'
+import { paymentMiddleware } from '@t402/express'
+
+const app = express()
+
+app.use(paymentMiddleware({
+  'GET /api/premium': {
+    price: '$1.00',
+    network: 'lightning:mainnet',
+    payTo: '02abc...def',
+    description: 'Premium API access'
+  }
+}))
+
+app.get('/api/premium', (req, res) => {
+  res.json({ data: 'premium content' })
+})
+
+app.listen(3000)
+```
+
+## Related Links
+
+<Cards>
+  <Cards.Card
+    title="Protocol Specification"
+    href="/specification"
+  />
+  <Cards.Card
+    title="Facilitator API"
+    href="/reference/facilitator-api"
+  />
+  <Cards.Card
+    title="Express Middleware"
+    href="/reference/express"
+  />
+  <Cards.Card
+    title="Fetch Client"
+    href="/reference/fetch"
+  />
+</Cards>
+
+## Additional Resources
+
+- [Bitcoin Developer Documentation](https://developer.bitcoin.org)
+- [BIP-174: Partially Signed Bitcoin Transactions](https://github.com/bitcoin/bips/blob/master/bip-0174.mediawiki)
+- [BOLT11: Invoice Protocol for Lightning Payments](https://github.com/lightning/bolts/blob/master/11-payment-encoding.md)
+- [Lightning Network Specification](https://github.com/lightning/bolts)
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+Stellar blockchain support with Soroban SEP-41 USDC transfers.
+
+## Installation
+
+```bash
+npm install @t402/stellar
+```
+
+## Networks
+
+| Network | CAIP-2 | Token |
+|---------|--------|-------|
+| Pubnet | `stellar:pubnet` | USDC (7 decimals) |
+| Testnet | `stellar:testnet` | USDC (7 decimals) |
+
+## Features
+
+- Soroban smart contract transfers (SEP-41)
+- Ed25519 signature verification
+- Ledger-based expiration (5s per ledger)
+- Client, Server, and Facilitator implementations
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+Spark (Bitcoin L2) payment mechanism with Lightning Network integration.
+
+## Installation
+
+```bash
+npm install @t402/spark
+```
+
+## Networks
+
+| Network | CAIP-2 | Payment Types |
+|---------|--------|---------------|
+| Mainnet | `spark:mainnet` | Spark transfer, Lightning |
+| Testnet | `spark:testnet` | Spark transfer, Lightning |
+
+## Features
+
+- Direct Spark transfers (verified by transfer_id)
+- Lightning Network routing (SHA256 preimage verification)
+- Instant finality (no-op settlement)
+- Replay protection
+
+</Tabs.Tab>
+</Tabs>

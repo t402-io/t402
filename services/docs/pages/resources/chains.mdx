@@ -1,0 +1,1417 @@
+# Chains & Networks
+
+import { Callout, Tabs } from 'nextra/components'
+
+<div className="stats">
+  <div className="stat"><span className="stat-number">44</span> <span className="stat-label">Networks</span></div>
+  <div className="stat"><span className="stat-number">10</span> <span className="stat-label">Chain Families</span></div>
+  <div className="stat"><span className="stat-number">64</span> <span className="stat-label">Payment Kinds</span></div>
+</div>
+
+## EVM Chains (Mainnet)
+
+| Chain | Network ID | USDT0 | USDC | Gasless |
+|-------|------------|-------|------|---------|
+| Ethereum | `eip155:1` | ✅ | ✅ | ✅ |
+| Arbitrum | `eip155:42161` | ✅ | ✅ | ✅ |
+| Base | `eip155:8453` | ✅ | ✅ | ✅ |
+| Optimism | `eip155:10` | ✅ | ✅ | ✅ |
+| Polygon | `eip155:137` | ✅ | ✅ | ✅ |
+| Ink | `eip155:57073` | ✅ | - | ✅ |
+| Berachain | `eip155:80094` | ✅ | - | ✅ |
+| Unichain | `eip155:130` | ✅ | - | ✅ |
+| Mantle | `eip155:5000` | ✅ | - | ✅ |
+| Sei | `eip155:1329` | ✅ | - | ✅ |
+
+## EVM Chains (Testnet)
+
+| Chain | Network ID | USDT0 | USDC | Gasless |
+|-------|------------|-------|------|---------|
+| Sepolia | `eip155:11155111` | ✅ | ✅ | ✅ |
+| Base Sepolia | `eip155:84532` | ✅ | ✅ | ✅ |
+| Arbitrum Sepolia | `eip155:421614` | ✅ | ✅ | ✅ |
+| Ink Sepolia | `eip155:763373` | ✅ | - | ✅ |
+| Berachain bArtio | `eip155:80084` | ✅ | - | ✅ |
+| Unichain Sepolia | `eip155:1301` | ✅ | - | ✅ |
+
+## Non-EVM Chains
+
+| Chain | Mainnet ID | Testnet ID | Token | Status |
+|-------|------------|------------|-------|--------|
+| TON | `ton:mainnet` | `ton:testnet` | USDT Jetton | Production |
+| TRON | `tron:mainnet` | `tron:nile`, `tron:shasta` | USDT TRC-20 | Production |
+| Solana | `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` | `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` | USDC SPL | Production |
+| NEAR | `near:mainnet` | `near:testnet` | USDT NEP-141 | Production |
+| Aptos | `aptos:1` | `aptos:2` | USDT FA | Production |
+| Tezos | `tezos:NetXdQprcVkpaWU` | `tezos:NetXnHfVqm9iesp` | USDt FA2 | Production |
+| Polkadot Asset Hub | `polkadot:68d56f15f85d3136970ec16946040bc1` | `polkadot:e143f23803ac50e8f6f8e62695d1ce9e` | USDT (Asset 1984) | Production |
+| Stacks | `stacks:1` | `stacks:2147483648` | sUSDC SIP-010 | Production |
+| Cosmos (Noble) | `cosmos:noble-1` | `cosmos:grand-1` | USDC native | Production |
+
+<Callout type="info">
+  Network identifiers follow [CAIP-2](https://github.com/ChainAgnostic/CAIPs/blob/main/CAIPs/caip-2.md) format.
+  Some chains use genesis block hashes (Solana, Tezos, Polkadot) while others use chain IDs (EVM, Aptos, Stacks).
+</Callout>
+
+## USDT0 Addresses
+
+USDT0 is the new Omnichain Fungible Token (OFT) version of USDT with EIP-3009 support.
+
+| Chain | Address |
+|-------|---------|
+| Ethereum | `0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee` |
+| Arbitrum | `0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9` |
+| Ink | `0x0200C29006150606B650577BBE7B6248F58470c1` |
+| Berachain | `0x779Ded0c9e1022225f8E0630b35a9b54bE713736` |
+| Unichain | `0x9151434b16b9763660705744891fA906F660EcC5` |
+
+## NEAR Token Addresses
+
+| Token | Network | Contract ID | Decimals |
+|-------|---------|-------------|----------|
+| USDT | Mainnet | `usdt.tether-token.near` | 6 |
+| USDC | Mainnet | `17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1` | 6 |
+| USDC | Testnet | `usdc.fakes.testnet` | 6 |
+
+## Aptos Token Addresses (Fungible Asset)
+
+| Token | Network | Metadata Address | Decimals |
+|-------|---------|-----------------|----------|
+| USDT | Mainnet | `0xf73e887a8754f540ee6e1a93bdc6dde2af69fc7ca5de32013e89dd44244473cb` | 6 |
+| USDC | Mainnet | `0xbae207659db88bea0cbead6da0ed00aac12edcdda169e591cd41c94180b46f3b` | 6 |
+
+## Tezos Token Addresses (FA2)
+
+| Token | Network | Contract | Token ID | Decimals |
+|-------|---------|----------|----------|----------|
+| USDt | Mainnet | `KT1XnTn74bUtxHfDtBmm2bGZAQfhPbvKWR8o` | 0 | 6 |
+
+## Polkadot Asset Hub
+
+| Token | Network | Asset ID | Decimals |
+|-------|---------|----------|----------|
+| USDT | Polkadot Asset Hub | 1984 | 6 |
+| USDT | Kusama Asset Hub | 1984 | 6 |
+| USDT | Westend Asset Hub (testnet) | 1984 | 6 |
+
+## Stacks Token Addresses (SIP-010)
+
+| Token | Network | Contract | Decimals |
+|-------|---------|----------|----------|
+| sUSDC | Mainnet | `SP3Y2ZSH8P7D50B0VBTSX11S7XSG24M1VB9YFQA4K.token-susdc` | 6 |
+| sUSDC | Testnet | `ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.token-susdc` | 6 |
+
+## Cross-Chain Bridging
+
+USDT0 supports cross-chain transfers via LayerZero OFT:
+
+| Route | Estimated Time |
+|-------|----------------|
+| Ethereum ↔ Arbitrum | ~3-15 minutes |
+| L2 ↔ L2 | ~5 minutes |
+| Any ↔ Ethereum | ~15 minutes |
+
+See [@t402/wdk-bridge](/sdks/typescript/wdk-bridge) for bridging integration.
+
+## Network Selection
+
+When configuring T402, use the CAIP-2 network ID format:
+
+```typescript
+// EVM chains
+'eip155:1'      // Ethereum
+'eip155:8453'   // Base
+'eip155:42161'  // Arbitrum
+
+// Non-EVM chains
+'ton:mainnet'                                    // TON
+'tron:mainnet'                                   // TRON
+'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp'       // Solana Mainnet
+'near:mainnet'                                   // NEAR
+'aptos:1'                                        // Aptos Mainnet
+'tezos:NetXdQprcVkpaWU'                         // Tezos Mainnet
+'polkadot:68d56f15f85d3136970ec16946040bc1'    // Polkadot Asset Hub
+'stacks:1'                                       // Stacks Mainnet
+'cosmos:noble-1'                                 // Noble (Cosmos)
+```
+
+## Adding New Chains
+
+T402 is extensible. To add support for a new chain:
+
+1. Implement the scheme interface for your chain
+2. Register the scheme with the client/server
+3. Submit a PR to the T402 repository
+
+See the [Contributing Guide](https://github.com/t402-io/t402/blob/main/CONTRIBUTING.md) for details.
+
+---
+
+## EVM Chains
+
+Detailed guide for EVM (Ethereum Virtual Machine) compatible chains. T402 supports all major EVM chains through the `@t402/evm` package.
+
+### Layer 2 Benefits
+
+| Benefit | Description |
+|---------|-------------|
+| Lower gas | ~100x cheaper than Ethereum mainnet |
+| Faster finality | Seconds vs minutes |
+| Same security | Secured by Ethereum |
+| Same addresses | Use same wallet across L2s |
+
+### Server Setup
+
+```typescript
+import { t402ResourceServer, createFacilitatorClient } from '@t402/core/server';
+import { registerExactEvmScheme } from '@t402/evm/exact/server';
+
+const facilitator = createFacilitatorClient({
+  url: 'https://facilitator.t402.io',
+});
+
+const server = new t402ResourceServer(facilitator);
+registerExactEvmScheme(server, {});
+
+// Configure routes
+const routes = {
+  '/api/premium/*': {
+    accepts: [
+      { scheme: 'exact', network: 'eip155:8453', payTo: '0x...', price: '$0.01' },
+      { scheme: 'exact', network: 'eip155:42161', payTo: '0x...', price: '$0.01' },
+    ],
+  },
+};
+```
+
+### Client Setup
+
+<Tabs items={['viem', 'ethers.js', 'web3.js']}>
+  <Tabs.Tab>
+```typescript
+import { t402Client } from '@t402/core/client';
+import { ExactEvmScheme } from '@t402/evm/exact/client';
+import { createWalletClient, custom } from 'viem';
+import { base } from 'viem/chains';
+
+// Create viem wallet client
+const walletClient = createWalletClient({
+  chain: base,
+  transport: custom(window.ethereum),
+});
+
+// Create T402 client
+const client = new t402Client();
+client.register('eip155:*', new ExactEvmScheme(walletClient));
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```typescript
+import { t402Client } from '@t402/core/client';
+import { ExactEvmScheme } from '@t402/evm/exact/client';
+import { ethers } from 'ethers';
+
+// Create ethers signer
+const provider = new ethers.BrowserProvider(window.ethereum);
+const signer = await provider.getSigner();
+
+// Create T402 client
+const client = new t402Client();
+client.register('eip155:*', new ExactEvmScheme(signer));
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```typescript
+import { t402Client } from '@t402/core/client';
+import { ExactEvmScheme } from '@t402/evm/exact/client';
+import Web3 from 'web3';
+
+// Create web3 instance
+const web3 = new Web3(window.ethereum);
+const accounts = await web3.eth.getAccounts();
+
+// Create T402 client with web3 adapter
+const client = new t402Client();
+client.register('eip155:*', new ExactEvmScheme({
+  address: accounts[0],
+  signTypedData: (data) => web3.eth.signTypedData(accounts[0], data),
+}));
+```
+  </Tabs.Tab>
+</Tabs>
+
+### EIP-3009 (TransferWithAuthorization)
+
+T402 uses EIP-3009 for gasless token transfers.
+
+#### How It Works
+
+1. **User signs** an off-chain authorization message
+2. **Facilitator executes** the `transferWithAuthorization` on-chain
+3. **User pays no gas** - facilitator covers gas costs
+
+#### Authorization Structure
+
+```typescript
+interface TransferWithAuthorization {
+  from: string;        // Payer address
+  to: string;          // Recipient address
+  value: bigint;       // Amount in smallest unit
+  validAfter: bigint;  // Unix timestamp (usually 0)
+  validBefore: bigint; // Deadline timestamp
+  nonce: bytes32;      // Random nonce
+}
+```
+
+#### Signature Verification
+
+The EIP-712 typed data structure:
+
+```typescript
+const domain = {
+  name: 'USD0',
+  version: '1',
+  chainId: 8453,
+  verifyingContract: '0x...',
+};
+
+const types = {
+  TransferWithAuthorization: [
+    { name: 'from', type: 'address' },
+    { name: 'to', type: 'address' },
+    { name: 'value', type: 'uint256' },
+    { name: 'validAfter', type: 'uint256' },
+    { name: 'validBefore', type: 'uint256' },
+    { name: 'nonce', type: 'bytes32' },
+  ],
+};
+```
+
+### Gas Estimation
+
+#### Average Costs by Chain
+
+| Chain | Transfer Cost | Settlement Cost |
+|-------|---------------|-----------------|
+| Ethereum | ~$5-50 | ~$10-100 |
+| Arbitrum | ~$0.01-0.10 | ~$0.02-0.20 |
+| Base | ~$0.001-0.01 | ~$0.002-0.02 |
+| Optimism | ~$0.01-0.10 | ~$0.02-0.20 |
+
+<Callout type="info">
+  Gas costs vary with network congestion. L2s are generally 100x cheaper than Ethereum mainnet.
+</Callout>
+
+#### Programmatic Estimation
+
+```typescript
+import { estimateGas } from '@t402/evm';
+
+const estimate = await estimateGas({
+  network: 'eip155:8453',
+  operation: 'transferWithAuthorization',
+  rpcUrl: 'https://mainnet.base.org',
+});
+
+console.log(`Estimated gas: ${estimate.gasLimit}`);
+console.log(`Estimated cost: $${estimate.costUsd}`);
+```
+
+### Multi-Chain Support
+
+#### Same Address Across Chains
+
+EVM addresses work across all EVM chains:
+
+```typescript
+const payToAddress = '0x742d35Cc6634C0532925a3b844Bc9e7595f5b1A1';
+
+const routes = {
+  '/api/premium/*': {
+    accepts: [
+      { scheme: 'exact', network: 'eip155:1', payTo: payToAddress, price: '$0.01' },
+      { scheme: 'exact', network: 'eip155:8453', payTo: payToAddress, price: '$0.01' },
+      { scheme: 'exact', network: 'eip155:42161', payTo: payToAddress, price: '$0.01' },
+    ],
+  },
+};
+```
+
+#### User Network Selection
+
+Let users choose their preferred chain:
+
+```typescript
+import { getNetworkDisplayName, getChainConfig } from '@t402/evm';
+
+const supportedNetworks = [
+  'eip155:8453',   // Base
+  'eip155:42161',  // Arbitrum
+  'eip155:10',     // Optimism
+];
+
+// Display network options to user
+supportedNetworks.forEach(network => {
+  const config = getChainConfig(network);
+  console.log(`${getNetworkDisplayName(network)}: ~$${config.avgGasCost}`);
+});
+```
+
+### Wallet Integration
+
+#### MetaMask
+
+```typescript
+// Request account access
+await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+// Get current chain
+const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+
+// Switch to Base
+await window.ethereum.request({
+  method: 'wallet_switchEthereumChain',
+  params: [{ chainId: '0x2105' }], // Base = 8453 = 0x2105
+});
+```
+
+#### WalletConnect
+
+```typescript
+import { createWalletClient } from 'viem';
+import { WalletConnectConnector } from '@wagmi/connectors/walletConnect';
+
+const connector = new WalletConnectConnector({
+  options: {
+    projectId: 'your-project-id',
+    chains: [base, arbitrum, optimism],
+  },
+});
+
+await connector.connect();
+const walletClient = await connector.getWalletClient();
+```
+
+#### Safe Multi-Sig
+
+```typescript
+import { createMultisigClient } from '@t402/wdk-multisig';
+
+const multisigClient = await createMultisigClient({
+  safeAddress: '0xYourSafeAddress',
+  chainId: 8453,
+  owners: ['0xOwner1', '0xOwner2', '0xOwner3'],
+  threshold: 2,
+});
+```
+
+### RPC Endpoints
+
+#### Recommended Providers
+
+| Chain | Public RPC | Paid Options |
+|-------|------------|--------------|
+| Ethereum | `https://eth.llamarpc.com` | Alchemy, Infura |
+| Arbitrum | `https://arb1.arbitrum.io/rpc` | Alchemy, QuickNode |
+| Base | `https://mainnet.base.org` | Alchemy, QuickNode |
+| Optimism | `https://mainnet.optimism.io` | Alchemy, QuickNode |
+
+#### Configuration
+
+```typescript
+const rpcConfig = {
+  'eip155:1': process.env.ETH_RPC_URL || 'https://eth.llamarpc.com',
+  'eip155:8453': process.env.BASE_RPC_URL || 'https://mainnet.base.org',
+  'eip155:42161': process.env.ARB_RPC_URL || 'https://arb1.arbitrum.io/rpc',
+};
+```
+
+### Troubleshooting
+
+#### Common Issues
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| "Invalid signature" | Wrong chain ID | Verify network matches |
+| "Insufficient funds" | No USDT balance | Fund wallet with USDT |
+| "Nonce already used" | Replay attempt | Generate new nonce |
+| "Deadline passed" | Authorization expired | Sign new authorization |
+
+#### Debugging
+
+```typescript
+import { verifySignature, decodePayment } from '@t402/evm';
+
+// Decode payment header
+const payment = decodePayment(xPaymentHeader);
+console.log('Payment details:', payment);
+
+// Verify signature locally
+const isValid = await verifySignature({
+  message: payment.message,
+  signature: payment.signature,
+  expectedSigner: payment.from,
+});
+console.log('Signature valid:', isValid);
+```
+
+---
+
+## Non-EVM Chains
+
+Guide for integrating T402 with non-EVM blockchain networks. T402 supports 9 non-EVM blockchain networks:
+
+| Chain | Package | Token Standard | Status |
+|-------|---------|----------------|--------|
+| TON | `@t402/ton` | Jetton | Production |
+| TRON | `@t402/tron` | TRC-20 | Production |
+| Solana | `@t402/svm` | SPL Token | Production |
+| NEAR | `@t402/near` | NEP-141 | Production |
+| Aptos | `@t402/aptos` | Fungible Asset | Production |
+| Tezos | `@t402/tezos` | FA2 | Production |
+| Polkadot | `@t402/polkadot` | Asset Hub | Production |
+| Stacks | `@t402/stacks` | SIP-010 | Production |
+| Cosmos (Noble) | `@t402/cosmos` | Bank MsgSend | Production |
+
+### TON (The Open Network)
+
+| Property | Value |
+|----------|-------|
+| Network ID | `ton:mainnet`, `ton:testnet` |
+| Token | USDT Jetton |
+| Signature | Ed25519 |
+| Finality | ~5 seconds |
+
+**Token Addresses:**
+
+| Network | Jetton Master |
+|---------|---------------|
+| Mainnet | `EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs` |
+| Testnet | `kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy` |
+
+```typescript
+import { registerExactTonScheme } from '@t402/ton/exact/server';
+import { ExactTonScheme } from '@t402/ton/exact/client';
+
+// Server
+registerExactTonScheme(server, {});
+
+// Client
+const tonClient = new ExactTonScheme(tonConnectUI);
+client.register('ton:mainnet', tonClient);
+```
+
+#### TON Connect
+
+```typescript
+import { TonConnectUI } from '@tonconnect/ui';
+
+const tonConnectUI = new TonConnectUI({
+  manifestUrl: 'https://yourapp.com/tonconnect-manifest.json',
+});
+
+await tonConnectUI.connectWallet();
+```
+
+### TRON
+
+| Property | Value |
+|----------|-------|
+| Network ID | `tron:mainnet`, `tron:nile`, `tron:shasta` |
+| Token | USDT TRC-20 |
+| Signature | ECDSA secp256k1 |
+| Finality | ~3 seconds |
+
+**Token Addresses:**
+
+| Network | Contract |
+|---------|----------|
+| Mainnet | `TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t` |
+| Nile | `TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf` |
+
+```typescript
+import { registerExactTronScheme } from '@t402/tron/exact/server';
+import { ExactTronScheme } from '@t402/tron/exact/client';
+
+// Server
+registerExactTronScheme(server, {});
+
+// Client (with TronLink)
+const tronWeb = window.tronWeb;
+const tronClient = new ExactTronScheme(tronWeb);
+client.register('tron:mainnet', tronClient);
+```
+
+<Callout type="warning">
+  TRON uses Energy for smart contract execution. Ensure accounts have sufficient Energy or TRX for gas.
+</Callout>
+
+### Solana
+
+| Property | Value |
+|----------|-------|
+| Network ID | `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` (mainnet) |
+| Token | USDC SPL Token |
+| Signature | Ed25519 |
+| Finality | ~400ms |
+
+**Token Addresses:**
+
+| Network | Mint Address |
+|---------|--------------|
+| Mainnet | `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v` |
+| Devnet | `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU` |
+
+```typescript
+import { registerExactSvmScheme } from '@t402/svm/exact/server';
+import { ExactSvmScheme } from '@t402/svm/exact/client';
+import { useWallet } from '@solana/wallet-adapter-react';
+
+// Server
+registerExactSvmScheme(server, {});
+
+// Client (with Phantom)
+const { signMessage, publicKey } = useWallet();
+const svmClient = new ExactSvmScheme({ signMessage, publicKey });
+client.register('solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp', svmClient);
+```
+
+### NEAR
+
+| Property | Value |
+|----------|-------|
+| Network ID | `near:mainnet`, `near:testnet` |
+| Token | USDT NEP-141 |
+| Signature | Ed25519 |
+| Finality | ~2 seconds |
+
+**Token Addresses:**
+
+| Network | Contract ID |
+|---------|-------------|
+| Mainnet | `usdt.tether-token.near` |
+| Testnet | `usdt.fakes.testnet` |
+
+```typescript
+import { registerExactNearScheme } from '@t402/near/exact/server';
+import { ExactNearScheme } from '@t402/near/exact/client';
+
+// Server
+registerExactNearScheme(server, {});
+
+// Client
+const nearClient = new ExactNearScheme(wallet);
+client.register('near:mainnet', nearClient);
+```
+
+### Aptos
+
+| Property | Value |
+|----------|-------|
+| Network ID | `aptos:1` (mainnet), `aptos:2` (testnet) |
+| Token | USDT Fungible Asset |
+| Signature | Ed25519 |
+| Finality | ~1 second |
+
+```typescript
+import { registerExactAptosScheme } from '@t402/aptos/exact/server';
+import { ExactAptosScheme } from '@t402/aptos/exact/client';
+
+// Server
+registerExactAptosScheme(server, {});
+
+// Client
+const aptosClient = new ExactAptosScheme(wallet);
+client.register('aptos:1', aptosClient);
+```
+
+### Tezos
+
+| Property | Value |
+|----------|-------|
+| Network ID | `tezos:NetXdQprcVkpaWU` (mainnet) |
+| Token | USDt FA2 (TZIP-12) |
+| Signature | Ed25519/secp256k1/P256 |
+| Finality | ~30 seconds |
+
+```typescript
+import { registerExactTezosScheme } from '@t402/tezos/exact/server';
+import { ExactTezosScheme } from '@t402/tezos/exact/client';
+
+// Server
+registerExactTezosScheme(server, {});
+
+// Client
+const tezosClient = new ExactTezosScheme(wallet);
+client.register('tezos:NetXdQprcVkpaWU', tezosClient);
+```
+
+### Polkadot Asset Hub
+
+| Property | Value |
+|----------|-------|
+| Network ID | `polkadot:68d56f15f85d3136970ec16946040bc1` |
+| Token | USDT (Asset ID 1984) |
+| Signature | Sr25519/Ed25519 |
+| Finality | ~12 seconds |
+
+```typescript
+import { registerExactPolkadotScheme } from '@t402/polkadot/exact/server';
+import { ExactPolkadotScheme } from '@t402/polkadot/exact/client';
+
+// Server
+registerExactPolkadotScheme(server, {});
+
+// Client
+const polkadotClient = new ExactPolkadotScheme(wallet);
+client.register('polkadot:68d56f15f85d3136970ec16946040bc1', polkadotClient);
+```
+
+### Stacks (Bitcoin L2)
+
+| Property | Value |
+|----------|-------|
+| Network ID | `stacks:1` (mainnet), `stacks:2147483648` (testnet) |
+| Token | sUSDC SIP-010 |
+| Signature | secp256k1 |
+| Finality | Bitcoin block (~10 min) |
+
+```typescript
+import { registerExactStacksScheme } from '@t402/stacks/exact/server';
+import { ExactStacksScheme } from '@t402/stacks/exact/client';
+
+// Server
+registerExactStacksScheme(server, {});
+
+// Client
+const stacksClient = new ExactStacksScheme(wallet);
+client.register('stacks:1', stacksClient);
+```
+
+### Cosmos (Noble)
+
+| Property | Value |
+|----------|-------|
+| Network ID | `cosmos:noble-1` (mainnet), `cosmos:grand-1` (testnet) |
+| Token | USDC native |
+| Signature | secp256k1 |
+| Finality | ~6 seconds |
+
+```typescript
+import { registerExactCosmosScheme } from '@t402/cosmos/exact/server';
+import { ExactCosmosScheme } from '@t402/cosmos/exact/client';
+
+// Server
+registerExactCosmosScheme(server, {});
+
+// Client
+const cosmosClient = new ExactCosmosScheme(wallet);
+client.register('cosmos:noble-1', cosmosClient);
+```
+
+### Multi-Chain Server
+
+Support all non-EVM chains:
+
+```typescript
+import { t402ResourceServer, createFacilitatorClient } from '@t402/core/server';
+import { registerExactTonScheme } from '@t402/ton/exact/server';
+import { registerExactTronScheme } from '@t402/tron/exact/server';
+import { registerExactSvmScheme } from '@t402/svm/exact/server';
+import { registerExactNearScheme } from '@t402/near/exact/server';
+import { registerExactAptosScheme } from '@t402/aptos/exact/server';
+import { registerExactTezosScheme } from '@t402/tezos/exact/server';
+import { registerExactPolkadotScheme } from '@t402/polkadot/exact/server';
+import { registerExactStacksScheme } from '@t402/stacks/exact/server';
+import { registerExactCosmosScheme } from '@t402/cosmos/exact/server';
+
+const server = new t402ResourceServer(facilitator);
+
+// Register all mechanisms
+registerExactTonScheme(server, {});
+registerExactTronScheme(server, {});
+registerExactSvmScheme(server, {});
+registerExactNearScheme(server, {});
+registerExactAptosScheme(server, {});
+registerExactTezosScheme(server, {});
+registerExactPolkadotScheme(server, {});
+registerExactStacksScheme(server, {});
+registerExactCosmosScheme(server, {});
+
+// Configure routes
+const routes = {
+  '/api/premium/*': {
+    accepts: [
+      { scheme: 'exact', network: 'ton:mainnet', payTo: 'EQ...', price: '$0.01' },
+      { scheme: 'exact', network: 'tron:mainnet', payTo: 'T...', price: '$0.01' },
+      { scheme: 'exact', network: 'solana:5eykt...', payTo: '...', price: '$0.01' },
+      { scheme: 'exact', network: 'near:mainnet', payTo: 'account.near', price: '$0.01' },
+      { scheme: 'exact', network: 'aptos:1', payTo: '0x...', price: '$0.01' },
+      { scheme: 'exact', network: 'tezos:NetXdQprcVkpaWU', payTo: 'tz1...', price: '$0.01' },
+      { scheme: 'exact', network: 'polkadot:68d56f...', payTo: '15...', price: '$0.01' },
+      { scheme: 'exact', network: 'stacks:1', payTo: 'SP...', price: '$0.01' },
+      { scheme: 'exact', network: 'cosmos:noble-1', payTo: 'noble1...', price: '$0.01' },
+    ],
+  },
+};
+```
+
+### Non-EVM Chain Comparison
+
+| Feature | TON | TRON | Solana | NEAR | Aptos | Tezos | Polkadot | Stacks | Cosmos |
+|---------|-----|------|--------|------|-------|-------|----------|--------|--------|
+| Finality | 5s | 3s | 400ms | 2s | 1s | 30s | 12s | 10min | 6s |
+| Avg Fee | $0.01 | $0.10 | $0.0001 | $0.001 | $0.001 | $0.01 | $0.01 | $0.05 | $0.001 |
+| Signature | Ed25519 | ECDSA | Ed25519 | Ed25519 | Ed25519 | Multi | Sr25519 | ECDSA | secp256k1 |
+
+---
+
+## Bitcoin & Lightning
+
+Guide for integrating T402 with Bitcoin on-chain (PSBT) and Lightning Network (BOLT11) payments.
+
+T402 supports Bitcoin through two payment methods:
+
+| Method | Network ID | Payload | Settlement | Best For |
+|--------|-----------|---------|------------|----------|
+| On-chain (PSBT) | `bip122:000000000019d6689c085ae165831e93` | Signed PSBT | ~10 min (1 confirmation) | Larger payments |
+| Lightning (BOLT11) | `lightning:mainnet` | Preimage | Instant (~seconds) | Micropayments |
+
+### Network Identifiers
+
+Bitcoin uses [BIP-122](https://github.com/bitcoin/bips/blob/master/bip-0122.mediawiki) chain genesis block hashes as CAIP-2 identifiers:
+
+| Network | CAIP-2 ID |
+|---------|-----------|
+| BTC Mainnet | `bip122:000000000019d6689c085ae165831e93` |
+| BTC Testnet | `bip122:000000000933ea01ad0ee984209779ba` |
+| Lightning Mainnet | `lightning:mainnet` |
+| Lightning Testnet | `lightning:testnet` |
+
+### On-Chain (PSBT)
+
+Bitcoin on-chain payments use [BIP-174 Partially Signed Bitcoin Transactions (PSBT)](https://github.com/bitcoin/bips/blob/master/bip-0174.mediawiki). The client creates and signs a PSBT, the facilitator verifies the outputs and broadcasts it.
+
+#### Payment Flow
+
+1. Server returns 402 with `network: "bip122:000000000019d6689c085ae165831e93"` and `payTo` (Bitcoin address)
+2. Client builds a PSBT with the required output (payTo address + amount in satoshis)
+3. Client signs the PSBT and submits it as the payment payload
+4. Facilitator verifies the PSBT outputs match requirements
+5. Facilitator finalizes and broadcasts the transaction
+6. Facilitator waits for confirmation and returns the txid
+
+#### Supported Address Types
+
+- **P2WPKH** (bc1q...) — Native SegWit
+- **P2TR** (bc1p...) — Taproot
+- **P2PKH** (1...) — Legacy
+- **P2SH** (3...) — Script Hash
+
+#### Dust Limit
+
+The minimum payment amount is 546 satoshis (Bitcoin dust limit). Payments below this threshold are rejected.
+
+#### Integration
+
+<Tabs items={['TypeScript', 'Go', 'Python', 'Java']}>
+  <Tabs.Tab>
+```typescript
+import { ExactBtcScheme } from '@t402/btc/exact/client';
+import { registerExactBtcScheme } from '@t402/btc/exact/server';
+
+// Client — sign PSBTs
+const btcClient = new ExactBtcScheme(btcSigner);
+client.register('bip122:000000000019d6689c085ae165831e93', btcClient);
+
+// Server — accept BTC payments
+registerExactBtcScheme(server, {});
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```go
+import (
+    btcclient "github.com/t402-io/t402/sdks/go/mechanisms/btc/exact/client"
+    btcserver "github.com/t402-io/t402/sdks/go/mechanisms/btc/exact/server"
+    "github.com/t402-io/t402/sdks/go/mechanisms/btc"
+)
+
+// Client — sign PSBTs
+scheme := btcclient.NewExactBtcScheme(btcSigner)
+client.Register(btc.BtcMainnetCAIP2, scheme)
+
+// Server — accept BTC payments
+serverScheme := btcserver.NewExactBtcScheme()
+server.Register(btc.BtcMainnetCAIP2, serverScheme)
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+from t402.schemes.btc.exact.client import ExactBtcClientScheme
+from t402.schemes.btc.exact.server import ExactBtcServerScheme
+
+# Client
+btc_client = ExactBtcClientScheme(btc_signer)
+client.register("bip122:000000000019d6689c085ae165831e93", btc_client)
+
+# Server
+btc_server = ExactBtcServerScheme()
+server.register("bip122:000000000019d6689c085ae165831e93", btc_server)
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```java
+import io.t402.schemes.btc.exact.ExactBtcClientScheme;
+import io.t402.schemes.btc.exact.ExactBtcServerScheme;
+
+// Client
+ExactBtcClientScheme btcClient = new ExactBtcClientScheme(btcSigner);
+client.register("bip122:000000000019d6689c085ae165831e93", btcClient);
+
+// Server
+ExactBtcServerScheme btcServer = new ExactBtcServerScheme();
+server.register("bip122:000000000019d6689c085ae165831e93", btcServer);
+```
+  </Tabs.Tab>
+</Tabs>
+
+#### Signer Interface
+
+Clients implement the `ClientBtcSigner` interface to sign PSBTs:
+
+<Tabs items={['Go', 'TypeScript']}>
+  <Tabs.Tab>
+```go
+type ClientBtcSigner interface {
+    // SignPsbt signs a PSBT and returns the base64-encoded signed PSBT
+    SignPsbt(psbt string) (string, error)
+
+    // GetAddress returns the signer's Bitcoin address
+    GetAddress() string
+
+    // GetPublicKey returns the signer's public key as hex
+    GetPublicKey() string
+}
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```typescript
+interface ClientBtcSigner {
+  signPsbt(psbt: string): Promise<string>;
+  getAddress(): string;
+  getPublicKey(): string;
+}
+```
+  </Tabs.Tab>
+</Tabs>
+
+Facilitators implement `FacilitatorBtcSigner` to verify and broadcast:
+
+```go
+type FacilitatorBtcSigner interface {
+    GetAddresses() []string
+    VerifyPsbt(ctx context.Context, signedPsbt, expectedPayTo, expectedAmount string) (valid bool, reason string, payer string, err error)
+    BroadcastPsbt(ctx context.Context, signedPsbt string) (txID string, err error)
+    WaitForConfirmation(ctx context.Context, txID string, confirmations int) (confirmed bool, blockHash string, confs int, err error)
+}
+```
+
+### Lightning Network (BOLT11)
+
+Lightning payments use [BOLT11 invoices](https://github.com/lightning/bolts/blob/master/11-payment-encoding.md). The server provides a BOLT11 invoice, the client pays it and returns the preimage as proof of payment.
+
+#### Payment Flow
+
+1. Server returns 402 with `network: "lightning:mainnet"` and a BOLT11 invoice in `extra.bolt11Invoice`
+2. Client pays the BOLT11 invoice via their Lightning node
+3. Client receives the preimage and payment hash
+4. Client submits preimage + payment hash as the payment payload
+5. Facilitator looks up the payment hash to verify settlement
+6. Payment confirmed instantly
+
+#### Integration
+
+<Tabs items={['TypeScript', 'Go', 'Python']}>
+  <Tabs.Tab>
+```typescript
+import { LightningScheme } from '@t402/btc/lightning/client';
+import { registerLightningScheme } from '@t402/btc/lightning/server';
+
+// Client — pay BOLT11 invoices
+const lnClient = new LightningScheme(lightningSigner);
+client.register('lightning:mainnet', lnClient);
+
+// Server — generate BOLT11 invoices
+registerLightningScheme(server, { invoiceGenerator });
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```go
+import (
+    btcclient "github.com/t402-io/t402/sdks/go/mechanisms/btc/exact/client"
+    "github.com/t402-io/t402/sdks/go/mechanisms/btc"
+)
+
+// Client — pay BOLT11 invoices
+lnScheme := btcclient.NewLightningScheme(lightningSigner)
+client.Register(btc.LightningMainnetCAIP2, lnScheme)
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```python
+from t402.schemes.btc.lightning.client import LightningClientScheme
+from t402.schemes.btc.lightning.server import LightningServerScheme
+
+# Client
+ln_client = LightningClientScheme(lightning_signer)
+client.register("lightning:mainnet", ln_client)
+
+# Server
+ln_server = LightningServerScheme(invoice_generator=generator)
+server.register("lightning:mainnet", ln_server)
+```
+  </Tabs.Tab>
+</Tabs>
+
+#### Lightning Signer Interface
+
+```go
+type ClientLightningSigner interface {
+    // PayInvoice pays a BOLT11 invoice and returns the preimage and payment hash
+    PayInvoice(bolt11 string) (preimage string, paymentHash string, err error)
+
+    // GetNodePubKey returns the Lightning node's public key as hex
+    GetNodePubKey() string
+}
+```
+
+#### BOLT11 Invoice Formats
+
+| Prefix | Network |
+|--------|---------|
+| `lnbc` | Bitcoin Mainnet |
+| `lntb` | Bitcoin Testnet |
+| `lnbcrt` | Bitcoin Regtest |
+
+### Payload Types
+
+#### PSBT Payload
+
+```json
+{
+  "t402Version": 2,
+  "payload": {
+    "signedPsbt": "cHNidP8BAH..."
+  },
+  "accepted": {
+    "scheme": "exact",
+    "network": "bip122:000000000019d6689c085ae165831e93",
+    "asset": "BTC",
+    "amount": "100000",
+    "payTo": "bc1q..."
+  }
+}
+```
+
+#### Lightning Payload
+
+```json
+{
+  "t402Version": 2,
+  "payload": {
+    "paymentHash": "abc123...",
+    "preimage": "def456...",
+    "bolt11Invoice": "lnbc10u1p..."
+  },
+  "accepted": {
+    "scheme": "exact",
+    "network": "lightning:mainnet",
+    "asset": "BTC",
+    "amount": "10000",
+    "payTo": "02abc..."
+  }
+}
+```
+
+### SDK Support
+
+| SDK | On-chain (PSBT) | Lightning (BOLT11) |
+|-----|-----------------|-------------------|
+| TypeScript (`@t402/btc`) | Client, Server, Facilitator | Client, Server, Facilitator |
+| Go (`mechanisms/btc`) | Client, Server, Facilitator | Client |
+| Python (`schemes.btc`) | Client, Server, Facilitator | Client, Server |
+| Java (`io.t402.schemes.btc`) | Client, Server, Facilitator | Client, Facilitator |
+
+### Server-Side Route Configuration
+
+#### Go Server with Bitcoin
+
+```go
+routes := t402http.RoutesConfig{
+    "GET /api/data": {
+        Accepts: t402http.PaymentOptions{
+            {Scheme: "exact", PayTo: "bc1q...", Price: "10000", Network: btc.BtcMainnetCAIP2},
+        },
+        Description: "Data endpoint accepting BTC",
+        MimeType:    "application/json",
+    },
+}
+```
+
+<Callout type="warning">
+Bitcoin amounts are specified in satoshis (1 BTC = 100,000,000 satoshis). The minimum payment amount is 546 satoshis (dust limit).
+</Callout>
+
+#### Accepting Both BTC and EVM
+
+```go
+routes := t402http.RoutesConfig{
+    "GET /api/data": {
+        Accepts: t402http.PaymentOptions{
+            {Scheme: "exact", PayTo: "bc1q...", Price: "10000", Network: btc.BtcMainnetCAIP2},
+            {Scheme: "exact", PayTo: "0x...", Price: "$0.01", Network: "eip155:8453"},
+        },
+    },
+}
+```
+
+---
+
+## Testnets
+
+Testing T402 integration on testnet networks before production deployment.
+
+<Callout type="info">
+**Sandbox Facilitator** — Use [sandbox.t402.io](https://sandbox.t402.io) as your testnet facilitator. No API key required. Supports 7 testnets with [magic test addresses](https://sandbox.t402.io/test-addresses) for deterministic testing. See the [interactive playground](https://sandbox.t402.io/playground).
+</Callout>
+
+### Why Use Testnets?
+
+- **Free tokens** - No real funds required
+- **Safe testing** - No financial risk
+- **Same behavior** - Identical to mainnet
+- **Debug easily** - Block explorers available
+
+### EVM Testnets
+
+| Chain | Network ID | Faucet |
+|-------|------------|--------|
+| Sepolia | `eip155:11155111` | [sepoliafaucet.com](https://sepoliafaucet.com) |
+| Base Sepolia | `eip155:84532` | [base.org/faucet](https://www.base.org/faucet) |
+| Arbitrum Sepolia | `eip155:421614` | [faucet.arbitrum.io](https://faucet.arbitrum.io) |
+| Optimism Sepolia | `eip155:11155420` | [faucet.optimism.io](https://faucet.optimism.io) |
+| Ink Sepolia | `eip155:763373` | [faucet.ink.xyz](https://faucet.ink.xyz) |
+| Berachain bArtio | `eip155:80084` | [faucet.berachain.com](https://faucet.berachain.com) |
+| Unichain Sepolia | `eip155:1301` | [faucet.unichain.org](https://faucet.unichain.org) |
+
+#### RPC Endpoints
+
+```typescript
+const testnetRpcs = {
+  'eip155:11155111': 'https://rpc.sepolia.org',
+  'eip155:84532': 'https://sepolia.base.org',
+  'eip155:421614': 'https://sepolia-rollup.arbitrum.io/rpc',
+  'eip155:11155420': 'https://sepolia.optimism.io',
+};
+```
+
+#### Configuration Example
+
+```typescript
+// testnet-config.ts
+const testnetRoutes = {
+  '/api/test/*': {
+    accepts: [
+      {
+        scheme: 'exact',
+        network: 'eip155:84532', // Base Sepolia
+        payTo: '0xYourTestAddress',
+        price: '$0.001',
+      },
+    ],
+  },
+};
+```
+
+### TON Testnet
+
+| Property | Value |
+|----------|-------|
+| Network ID | `ton:testnet` |
+| RPC | `https://testnet.toncenter.com/api/v2/jsonRPC` |
+| Faucet | [@testgiver_ton_bot](https://t.me/testgiver_ton_bot) |
+| Jetton Master | `kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy` |
+
+```typescript
+const tonTestnetConfig = {
+  network: 'ton:testnet',
+  jettonMaster: 'kQD0GKBM8ZbryVk2aESmzfU6b9b_8era_IkvBSELujFZPsyy',
+  rpcUrl: 'https://testnet.toncenter.com/api/v2/jsonRPC',
+};
+```
+
+### TRON Testnets
+
+| Testnet | Network ID | RPC | Faucet |
+|---------|-----------|-----|--------|
+| Nile | `tron:nile` | `https://nile.trongrid.io` | [nileex.io/faucet](https://nileex.io/faucet) |
+| Shasta | `tron:shasta` | `https://api.shasta.trongrid.io` | [shasta.tronscan.org](https://shasta.tronscan.org) |
+
+Test USDT (Nile): `TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf`
+
+### Solana Devnet
+
+| Property | Value |
+|----------|-------|
+| Network ID | `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` |
+| RPC | `https://api.devnet.solana.com` |
+| Faucet | `solana airdrop 1` (CLI) |
+| Test USDC Mint | `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU` |
+
+### NEAR Testnet
+
+| Property | Value |
+|----------|-------|
+| Network ID | `near:testnet` |
+| RPC | `https://rpc.testnet.near.org` |
+| Faucet | [near.org/wallet](https://wallet.testnet.near.org) |
+| Test USDT | `usdt.fakes.testnet` |
+
+```typescript
+const nearTestnetConfig = {
+  network: 'near:testnet',
+  rpcUrl: 'https://rpc.testnet.near.org',
+  tokenContract: 'usdt.fakes.testnet',
+};
+```
+
+### Aptos Testnet
+
+| Property | Value |
+|----------|-------|
+| Network ID | `aptos:2` |
+| RPC | `https://fullnode.testnet.aptoslabs.com/v1` |
+| Faucet | [aptoslabs.com/faucet](https://aptos.dev/en/network/faucet) |
+
+### Tezos Ghostnet
+
+| Property | Value |
+|----------|-------|
+| Network ID | `tezos:NetXnHfVqm9iesp` |
+| RPC | `https://ghostnet.tezos.marigold.dev` |
+| Faucet | [faucet.ghostnet.teznet.xyz](https://faucet.ghostnet.teznet.xyz) |
+
+### Polkadot Westend
+
+| Property | Value |
+|----------|-------|
+| Network ID | `polkadot:e143f23803ac50e8f6f8e62695d1ce9e` |
+| Asset ID | 1984 |
+| Faucet | [faucet.polkadot.io](https://faucet.polkadot.io) |
+
+### Stacks Testnet
+
+| Property | Value |
+|----------|-------|
+| Network ID | `stacks:2147483648` |
+| RPC | `https://api.testnet.hiro.so` |
+| Faucet | [explorer.hiro.so/faucet](https://explorer.hiro.so/faucet?chain=testnet) |
+
+### Cosmos Testnet (Noble Grand)
+
+| Property | Value |
+|----------|-------|
+| Network ID | `cosmos:grand-1` |
+| RPC | `https://rpc.testnet.noble.strange.love` |
+| REST | `https://api.testnet.noble.strange.love` |
+| Token | USDC (`uusdc`) |
+
+### Testing Best Practices
+
+#### 1. Environment Variables
+
+```bash
+# .env.test
+NODE_ENV=test
+T402_NETWORK=eip155:84532
+T402_RPC_URL=https://sepolia.base.org
+T402_PAY_TO=0xYourTestAddress
+T402_FACILITATOR_URL=https://facilitator.t402.io
+```
+
+#### 2. Conditional Configuration
+
+```typescript
+const isTestnet = process.env.NODE_ENV === 'test';
+
+const config = {
+  network: isTestnet ? 'eip155:84532' : 'eip155:8453',
+  facilitator: 'https://facilitator.t402.io', // Same for both
+};
+```
+
+#### 3. Integration Tests
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import { t402Client } from '@t402/core/client';
+
+describe('T402 Integration', () => {
+  it('should complete payment flow', async () => {
+    const client = new t402Client();
+    // ... setup with testnet
+
+    const response = await client.fetch('https://api.example.com/test');
+    expect(response.ok).toBe(true);
+  });
+});
+```
+
+#### 4. Faucet Automation
+
+```typescript
+// scripts/fund-test-wallet.ts
+async function fundWallet(address: string, network: string) {
+  switch (network) {
+    case 'eip155:84532':
+      // Base Sepolia faucet
+      await requestBaseSepolia(address);
+      break;
+    case 'ton:testnet':
+      console.log('Use @testgiver_ton_bot on Telegram');
+      break;
+    // ... other networks
+  }
+}
+```
+
+### Facilitator Testnet Support
+
+The public facilitator supports all testnets:
+
+```bash
+# Check supported networks
+curl -s https://facilitator.t402.io/supported | jq '.kinds[] | select(.network | contains("testnet") or contains("sepolia"))'
+```
+
+<Callout type="info">
+  The facilitator service handles both mainnet and testnet transactions. No separate testnet facilitator needed.
+</Callout>
+
+---
+
+## Comparison Matrix
+
+This section provides a comprehensive comparison of all supported blockchain mechanisms across T402 SDKs.
+
+### Mechanism Support
+
+| Mechanism | Scheme | Token Standard | TypeScript | Go | Python | Java |
+|-----------|--------|----------------|:---:|:---:|:---:|:---:|
+| EVM (25 chains) | exact | EIP-3009 | ✅ | ✅ | ✅ | ✅ |
+| EVM (legacy) | exact-legacy | ERC-20 approve | ✅ | ✅ | ✅ | ✅ |
+| EVM | upto | EIP-2612 permit | ✅ | ✅ | ✅ | ✅ |
+| Solana | exact | SPL Token | ✅ | ✅ | ✅ | ✅ |
+| Solana | upto | SPL Token approve | ✅ | ✅ | ✅ | ✅ |
+| TON | exact | Jetton (TEP-74) | ✅ | ✅ | ✅ | ✅ |
+| TON | upto | Jetton approve | ✅ | ✅ | ✅ | ✅ |
+| TRON | exact | TRC-20 | ✅ | ✅ | ✅ | ✅ |
+| TRON | upto | TRC-20 approve | ✅ | ✅ | ✅ | ✅ |
+| NEAR | exact-direct | NEP-141 | ✅ | ✅ | ✅ | ✅ |
+| NEAR | upto | NEP-141 approve | ✅ | ✅ | ✅ | ✅ |
+| Aptos | exact-direct | Fungible Asset | ✅ | ✅ | ✅ | ✅ |
+| Tezos | exact-direct | FA2 (TZIP-12) | ✅ | ✅ | ✅ | ✅ |
+| Polkadot | exact-direct | Asset Hub | ✅ | ✅ | ✅ | ✅ |
+| Stacks | exact-direct | SIP-010 | ✅ | ✅ | ✅ | ✅ |
+| Cosmos | exact-direct | Bank MsgSend | ✅ | ✅ | ✅ | ✅ |
+| Stellar | exact | Soroban SEP-41 | ✅ | ✅ | ✅ | ✅ |
+
+### Choosing a Scheme
+
+T402 supports three payment schemes. Choose based on your use case:
+
+#### exact
+
+**Best for:** Fixed-price resources, one-time payments
+
+The client signs an off-chain authorization. The facilitator executes the transfer on-chain. Supported on EVM (via EIP-3009), Solana, TON, TRON, and Stellar.
+
+```
+Client signs → Facilitator settles on-chain
+```
+
+#### exact-direct
+
+**Best for:** Chains without off-chain authorization standards
+
+The client executes the transfer directly on-chain, then submits the transaction hash as proof. Used on NEAR, Aptos, Tezos, Polkadot, Stacks, and Cosmos.
+
+```
+Client transfers on-chain → Submits tx hash → Facilitator verifies
+```
+
+#### upto
+
+**Best for:** Usage-based billing, metered APIs, streaming
+
+The client pre-authorizes a maximum amount. The server charges only what is consumed. Currently supported on EVM (EIP-2612 permit), Solana, TON, TRON, and NEAR.
+
+```
+Client authorizes max → Server tracks usage → Facilitator settles actual amount
+```
+
+### Choosing a Mechanism
+
+Use this decision tree to pick the right mechanism:
+
+1. **What blockchain does your user have funds on?**
+   - Ethereum, Arbitrum, Base, Optimism, or other EVM → Use `@t402/evm`
+   - Solana → Use `@t402/svm`
+   - TON → Use `@t402/ton`
+   - TRON → Use `@t402/tron`
+   - NEAR → Use `@t402/near`
+   - Aptos → Use `@t402/aptos`
+   - Tezos → Use `@t402/tezos`
+   - Polkadot → Use `@t402/polkadot`
+   - Stacks → Use `@t402/stacks`
+   - Cosmos/Noble → Use `@t402/cosmos`
+   - Stellar → Use `@t402/stellar`
+
+2. **Do you need usage-based billing?**
+   - Yes → Use the `upto` scheme (available on EVM, Solana, TON, TRON, NEAR)
+   - No → Use `exact` (EVM/Solana/TON/TRON) or `exact-direct` (all others)
+
+3. **Do you need to accept payments from multiple chains?**
+   - Yes → Register multiple mechanisms with your server and use `@t402/wdk-bridge` for cross-chain bridging
+   - No → Use a single mechanism package
+
+### HTTP Framework Support
+
+| Framework | TypeScript | Go | Python | Java |
+|-----------|:---:|:---:|:---:|:---:|
+| Express | ✅ | — | — | — |
+| Next.js | ✅ | — | — | — |
+| Hono | ✅ | — | — | — |
+| Fastify | ✅ | — | — | — |
+| Gin | — | ✅ | — | — |
+| Echo | — | ✅ | — | — |
+| Chi | — | ✅ | — | — |
+| net/http | — | ✅ | — | — |
+| FastAPI | — | — | ✅ | — |
+| Flask | — | — | ✅ | — |
+| Django | — | — | ✅ | — |
+| Starlette | — | — | ✅ | — |
+| Spring | — | — | — | ✅ |
+| Servlet | — | — | — | ✅ |
+| WebFlux | — | — | — | ✅ |
+| Micronaut | — | — | — | ✅ |
+| JAX-RS | — | — | — | ✅ |
+
+### SDK Versions
+
+| SDK | Version | Registry |
+|-----|---------|----------|
+| TypeScript | 2.8.0 | [npm](https://www.npmjs.com/org/t402) |
+| Go | 1.12.1 | [pkg.go.dev](https://pkg.go.dev/github.com/t402-io/t402/sdks/go) |
+| Python | 1.12.1 | [PyPI](https://pypi.org/project/t402) |
+| Java | 1.12.1 | [Maven Central](https://central.sonatype.com/artifact/io.t402/t402) |

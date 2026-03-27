@@ -1,0 +1,1263 @@
+# Security
+
+import { Callout, Tabs } from 'nextra/components'
+
+T402 is designed with security as a core principle. This page documents the cryptographic foundations, threat model, and security audit scope for the protocol.
+
+<Callout type="info">
+  T402 is preparing for a formal security audit. This documentation is designed to assist auditors and security researchers in understanding the protocol's security properties.
+</Callout>
+
+## Security Principles
+
+### 1. No Custom Cryptography
+
+T402 uses only industry-standard cryptographic primitives:
+
+| Chain Family | Signature Algorithm | Hash Function | Standard |
+|--------------|--------------------|--------------|---------|
+| EVM | ECDSA (secp256k1) | Keccak-256 | EIP-712, EIP-3009 |
+| Solana | Ed25519 | SHA-512 | Solana standard |
+| TON | Ed25519 | SHA-256 | TON TL-B |
+| TRON | ECDSA (secp256k1) | SHA-256 | TRON protocol |
+| NEAR | Ed25519 | SHA-256 | NEP-141 |
+| Aptos | Ed25519 | SHA3-256 | Fungible Asset |
+| Tezos | Ed25519/secp256k1/P256 | Blake2b | FA2 (TZIP-12) |
+| Polkadot | Sr25519/Ed25519 | Blake2b | Asset Hub |
+| Stacks | ECDSA (secp256k1) | SHA-256 | SIP-010 |
+| Cosmos | ECDSA (secp256k1) | SHA-256 | Bank MsgSend |
+
+### 2. Defense in Depth
+
+Multiple layers of protection prevent unauthorized payments:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    TRANSPORT LAYER                          │
+│  HTTPS/TLS encryption for all communication                │
+├─────────────────────────────────────────────────────────────┤
+│                    PROTOCOL LAYER                           │
+│  EIP-712 typed data prevents signature reuse               │
+├─────────────────────────────────────────────────────────────┤
+│                    APPLICATION LAYER                        │
+│  Nonces, time windows, amount validation                   │
+├─────────────────────────────────────────────────────────────┤
+│                    BLOCKCHAIN LAYER                         │
+│  Smart contract verification, finality guarantees          │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 3. Minimal Trust Requirements
+
+| Entity | Trust Level | Reason |
+|--------|-------------|--------|
+| Blockchain | High | Protocol security depends on blockchain consensus |
+| Token Contracts | High | USDT/USDC contracts must function correctly |
+| Facilitator | Medium | Can be self-hosted; cannot forge signatures |
+| Resource Server | Low | Cannot access funds without valid signature |
+| Client | None | Signatures are cryptographically verified |
+
+### 4. Fail-Safe Design
+
+- Invalid signatures are rejected before any funds move
+- Insufficient balance checks occur before settlement
+- Time windows prevent indefinite authorization validity
+- Nonce registry prevents double-spending
+
+## Security Features by Chain
+
+### EVM Networks
+
+| Feature | Implementation |
+|---------|----------------|
+| Replay Protection | EIP-712 domain separator (chainId, verifyingContract) |
+| Authorization | EIP-3009 TransferWithAuthorization |
+| Nonce Management | 32-byte random nonce, on-chain registry |
+| Time Bounds | validAfter / validBefore timestamps |
+| Smart Wallets | EIP-1271 signature verification |
+| Counterfactual | ERC-6492 wrapped signatures |
+
+### Solana (SVM)
+
+| Feature | Implementation |
+|---------|----------------|
+| Replay Protection | Recent blockhash (300 blocks validity) |
+| Authorization | TransferChecked instruction |
+| Fee Payer Safety | Instruction structure validation |
+| Amount Validation | Exact amount matching |
+
+### TON
+
+| Feature | Implementation |
+|---------|----------------|
+| Replay Protection | Wallet seqno (sequence number) |
+| Authorization | Jetton transfer message |
+| Address Derivation | Owner + Jetton master validation |
+
+### TRON
+
+| Feature | Implementation |
+|---------|----------------|
+| Replay Protection | Reference block + expiration |
+| Authorization | TRC-20 transfer |
+| Address Recovery | ECDSA public key recovery |
+
+## Reporting Security Issues
+
+If you discover a security vulnerability, please report it responsibly:
+
+1. **Email**: security@t402.io
+2. **Do not** disclose publicly until patched
+3. Include detailed reproduction steps
+4. We will acknowledge within 48 hours
+
+<Callout type="warning">
+  Never share real private keys or sensitive credentials when reporting issues. Use testnet funds and test accounts only.
+</Callout>
+
+## Security Audit Status
+
+| Component | Status | Auditor |
+|-----------|--------|---------|
+| Smart Contracts (T402UptoRouter) | Internal audit complete (0 Critical, 2 Medium) | External audit pending |
+| Protocol Specification | Internal review complete | External audit planned Q2 2026 |
+| Facilitator Service | Internal review complete | External audit planned Q2 2026 |
+| TypeScript SDK | Internal review complete | External audit planned Q2 2026 |
+| Go SDK | Internal review complete | External audit planned Q2 2026 |
+| Python SDK | Internal review complete | External audit planned Q2 2026 |
+| Java SDK | Internal review complete | External audit planned Q2 2026 |
+
+---
+
+## Cryptographic Operations
+
+This section provides a comprehensive overview of all cryptographic operations used in the T402 protocol across all supported blockchains.
+
+### Overview
+
+T402 implements cryptographic signing for ten blockchain families, each with specific algorithms and standards:
+
+| Chain | Algorithm | Signature Size | Key Standard |
+|-------|-----------|----------------|--------------|
+| EVM | ECDSA (secp256k1) | 65 bytes (r, s, v) | EIP-712 |
+| Solana | Ed25519 | 64 bytes (R, S) | Solana standard |
+| TON | Ed25519 | 64 bytes (R, S) | TON TL-B |
+| TRON | ECDSA (secp256k1) | 65 bytes (r, s, v) | Protobuf |
+| NEAR | Ed25519 | 64 bytes (R, S) | NEAR standard |
+| Aptos | Ed25519 | 64 bytes (R, S) | BCS encoding |
+| Tezos | Ed25519 / secp256k1 | 64 bytes | Micheline |
+| Polkadot | Sr25519 | 64 bytes | SCALE encoding |
+| Stacks | ECDSA (secp256k1) | 65 bytes (r, s, v) | Clarity |
+| Cosmos | ECDSA (secp256k1) | 64 bytes (r, s) | Protobuf (Amino/Direct) |
+
+### EVM Networks
+
+#### Signature Scheme: EIP-712 Typed Data
+
+EVM networks use ECDSA signatures over EIP-712 typed data structures for payment authorization.
+
+**Algorithm Details:**
+
+| Component | Value |
+|-----------|-------|
+| Curve | secp256k1 |
+| Hash Function | Keccak-256 |
+| Signature Format | (r: 32 bytes, s: 32 bytes, v: 1 byte) |
+| v Value | 27 or 28 (recovery ID + 27) |
+
+#### EIP-712 Domain Separator
+
+The domain separator prevents cross-chain and cross-contract replay attacks:
+
+```typescript
+const domain = {
+  name: "USD Coin",        // Token name
+  version: "2",            // Token version
+  chainId: 8453n,          // Chain ID (prevents cross-chain replay)
+  verifyingContract: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"  // Token address
+};
+```
+
+**Domain Separator Hash:**
+```
+domainSeparator = keccak256(
+  abi.encode(
+    keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+    keccak256(bytes(name)),
+    keccak256(bytes(version)),
+    chainId,
+    verifyingContract
+  )
+)
+```
+
+#### EIP-3009: TransferWithAuthorization
+
+T402 uses EIP-3009 for exact payment authorizations:
+
+```typescript
+const types = {
+  TransferWithAuthorization: [
+    { name: "from", type: "address" },
+    { name: "to", type: "address" },
+    { name: "value", type: "uint256" },
+    { name: "validAfter", type: "uint256" },
+    { name: "validBefore", type: "uint256" },
+    { name: "nonce", type: "bytes32" }
+  ]
+};
+
+const message = {
+  from: "0xPayer...",
+  to: "0xRecipient...",
+  value: 1000000n,        // Amount in atomic units
+  validAfter: 0n,         // Unix timestamp
+  validBefore: 1705000000n, // Unix timestamp
+  nonce: "0x..."          // Random 32 bytes
+};
+```
+
+**Message Hash Computation:**
+```
+structHash = keccak256(
+  abi.encode(
+    keccak256("TransferWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)"),
+    from,
+    to,
+    value,
+    validAfter,
+    validBefore,
+    nonce
+  )
+)
+
+messageHash = keccak256(0x19 || 0x01 || domainSeparator || structHash)
+```
+
+#### Signature Verification
+
+<Tabs items={['EOA Verification', 'EIP-1271 (Smart Wallet)', 'ERC-6492 (Counterfactual)']}>
+  <Tabs.Tab>
+**EOA (Externally Owned Account) Verification:**
+
+```go
+// Recover public key from signature
+func VerifyEOASignature(hash []byte, signature []byte, expectedAddress common.Address) bool {
+    // Adjust v value for recovery
+    if signature[64] >= 27 {
+        signature[64] -= 27
+    }
+
+    // Recover public key
+    publicKey, err := crypto.SigToPub(hash, signature)
+    if err != nil {
+        return false
+    }
+
+    // Derive address and compare
+    recoveredAddress := crypto.PubkeyToAddress(*publicKey)
+    return recoveredAddress == expectedAddress
+}
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+**EIP-1271 Smart Contract Wallet Verification:**
+
+```solidity
+// Smart contract must implement:
+interface IERC1271 {
+    function isValidSignature(bytes32 hash, bytes signature)
+        external view returns (bytes4 magicValue);
+}
+
+// Magic value for valid signature
+bytes4 constant MAGIC_VALUE = 0x1626ba7e;
+```
+
+```go
+// Verification call
+result, err := contract.Call("isValidSignature", hash, signature)
+return result == MAGIC_VALUE
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+**ERC-6492 Counterfactual Wallet Support:**
+
+For wallets not yet deployed on-chain:
+
+```
+Wrapped Signature Format:
+┌──────────────────────────────────────────────────────────────┐
+│ abi.encode(address factory, bytes factoryCalldata, bytes sig)│
+│ + 32-byte magic suffix: 0x6492649264926492...                │
+└──────────────────────────────────────────────────────────────┘
+```
+
+```go
+// Detection
+func IsERC6492(signature []byte) bool {
+    if len(signature) < 32 {
+        return false
+    }
+    magic := signature[len(signature)-32:]
+    return bytes.Equal(magic, ERC6492_MAGIC_BYTES)
+}
+
+// Unwrapping
+func UnwrapERC6492(signature []byte) (factory, calldata, innerSig []byte) {
+    // Remove magic suffix
+    wrapped := signature[:len(signature)-32]
+    // ABI decode
+    factory, calldata, innerSig = abi.Decode(wrapped)
+    return
+}
+```
+  </Tabs.Tab>
+</Tabs>
+
+#### Nonce Generation
+
+Nonces must be cryptographically random to prevent replay attacks:
+
+```python
+import secrets
+
+def create_nonce() -> bytes:
+    """Create a random 32-byte nonce for authorization signatures."""
+    return secrets.token_bytes(32)
+```
+
+<Callout type="warning">
+  Never use predictable nonces (timestamps, counters, etc.). Always use cryptographically secure random number generators.
+</Callout>
+
+### Solana (SVM)
+
+#### Signature Scheme: Ed25519
+
+Solana uses Ed25519 for transaction signing, providing deterministic signatures without the k-parameter vulnerabilities of ECDSA.
+
+**Algorithm Details:**
+
+| Component | Value |
+|-----------|-------|
+| Curve | Edwards25519 |
+| Hash Function | SHA-512 (internal) |
+| Signature Format | (R: 32 bytes, S: 32 bytes) |
+| Public Key | 32 bytes |
+| Private Key | 64 bytes (seed + public key) |
+
+#### Transaction Signing
+
+```go
+// Create and sign Solana transaction
+func SignTransaction(tx *solana.Transaction, privateKey solana.PrivateKey) error {
+    // Serialize message
+    messageBytes, err := tx.Message.MarshalBinary()
+    if err != nil {
+        return err
+    }
+
+    // Sign with Ed25519
+    signature, err := privateKey.Sign(messageBytes)
+    if err != nil {
+        return err
+    }
+
+    // Attach signature at correct index
+    tx.Signatures[accountIndex] = signature
+    return nil
+}
+```
+
+#### Fee Payer Sponsorship
+
+T402 supports gasless Solana payments where a facilitator pays transaction fees:
+
+```
+Transaction Structure:
+┌────────────────────────────────────────────┐
+│ Signatures:                                │
+│   [0] Fee Payer (Facilitator)              │
+│   [1] Transfer Authority (Client)          │
+├────────────────────────────────────────────┤
+│ Instructions:                              │
+│   1. ComputeBudget.SetLimit                │
+│   2. ComputeBudget.SetPrice (≤5 lamports)  │
+│   3. SPL Token TransferChecked             │
+└────────────────────────────────────────────┘
+```
+
+**Security Validation:**
+
+The facilitator MUST verify:
+1. Fee payer is NOT in any instruction accounts
+2. Fee payer is NOT the transfer authority
+3. Fee payer is NOT the token source
+4. Compute budget price `<= 5` lamports per compute unit
+5. Transfer amount equals requirement exactly
+
+#### Address Derivation
+
+```typescript
+// Associated Token Account (ATA) derivation
+const ata = await getAssociatedTokenAddress(
+  mint,        // Token mint address
+  owner,       // Owner public key
+  false,       // Allow owner off curve
+  TOKEN_PROGRAM_ID,
+  ASSOCIATED_TOKEN_PROGRAM_ID
+);
+```
+
+### TON Blockchain
+
+#### Signature Scheme: Ed25519
+
+TON uses Ed25519 for message signing with BOC (Bag of Cells) encoding.
+
+**Algorithm Details:**
+
+| Component | Value |
+|-----------|-------|
+| Curve | Edwards25519 |
+| Hash Function | SHA-256 (message hash) |
+| Message Format | Cell (BOC) |
+| Address Format | Base64 (workchain:hash) |
+
+#### Jetton Transfer Signing
+
+```typescript
+// Build Jetton transfer message
+const transferBody = beginCell()
+  .storeUint(0xf8a7ea5, 32)        // transfer op code
+  .storeUint(queryId, 64)          // query ID
+  .storeCoins(amount)              // Jetton amount
+  .storeAddress(destination)       // Recipient
+  .storeAddress(responseDestination)
+  .storeMaybeRef(null)             // custom payload
+  .storeCoins(forwardTonAmount)    // TON for forward
+  .storeMaybeRef(forwardPayload)
+  .endCell();
+
+// Create external message
+const externalMessage = beginCell()
+  .storeUint(seqno, 32)            // Sequence number
+  .storeUint(expireAt, 32)         // Expiration
+  .storeRef(internalMessage)
+  .endCell();
+
+// Sign
+const signature = sign(externalMessage.hash(), privateKey);
+```
+
+#### Replay Protection
+
+TON uses sequence numbers (seqno) for replay protection:
+
+```
+Wallet State:
+├─ seqno: Current sequence number
+├─ Each transaction increments seqno
+├─ Network rejects:
+│   ├─ seqno < expected (already processed)
+│   └─ seqno > expected (gap in sequence)
+└─ Valid only if seqno == expected
+```
+
+### TRON Blockchain
+
+#### Signature Scheme: ECDSA (secp256k1)
+
+TRON uses the same ECDSA curve as Ethereum but with different hashing and encoding.
+
+**Algorithm Details:**
+
+| Component | Value |
+|-----------|-------|
+| Curve | secp256k1 |
+| Hash Function | SHA-256 |
+| Address Encoding | Base58Check (T prefix) |
+| Transaction Format | Protobuf |
+
+#### Transaction Signing
+
+```java
+// Sign TRON transaction
+public byte[] signTransaction(Transaction tx) {
+    // Serialize raw data
+    byte[] rawData = tx.getRawData().toByteArray();
+
+    // Hash with SHA-256
+    byte[] txHash = Sha256.hash(rawData);
+
+    // Sign with ECDSA
+    ECDSASignature sig = ECKey.sign(txHash, privateKey);
+
+    // Encode as 65 bytes (r, s, v)
+    return encodeSignature(sig);
+}
+```
+
+#### Address Recovery
+
+```java
+// Recover address from signature
+public String recoverAddress(byte[] txHash, byte[] signature) {
+    // Extract r, s, v
+    BigInteger r = new BigInteger(1, Arrays.copyOfRange(signature, 0, 32));
+    BigInteger s = new BigInteger(1, Arrays.copyOfRange(signature, 32, 64));
+    int v = signature[64] & 0xFF;
+
+    // Recover public key
+    ECKey.ECDSASignature ecSig = new ECKey.ECDSASignature(r, s);
+    ECKey recoveredKey = ECKey.recoverFromSignature(v - 27, ecSig, txHash);
+
+    // Derive TRON address
+    byte[] pubKeyHash = Hash.sha3(recoveredKey.getPubKey());
+    byte[] addressBytes = new byte[21];
+    addressBytes[0] = 0x41;  // TRON prefix
+    System.arraycopy(pubKeyHash, 12, addressBytes, 1, 20);
+
+    return Base58Check.encode(addressBytes);
+}
+```
+
+### Key Management
+
+#### BIP-39 Seed Phrases
+
+All SDKs support BIP-39 mnemonic phrases for key derivation:
+
+```python
+from eth_account import Account
+
+# Enable HD wallet features
+Account.enable_unaudited_hdwallet_features()
+
+# Derive EVM account from mnemonic
+account = Account.from_mnemonic(
+    seed_phrase,
+    account_path="m/44'/60'/0'/0/0"  # BIP-44 path
+)
+```
+
+#### BIP-44 Derivation Paths
+
+| Chain | Path | Coin Type |
+|-------|------|-----------|
+| EVM | `m/44'/60'/0'/0/n` | 60 (Ethereum) |
+| Solana | `m/44'/501'/0'/0'` | 501 |
+| TON | `m/44'/607'/0'` | 607 |
+| TRON | `m/44'/195'/0'/0/n` | 195 |
+
+#### Security Best Practices
+
+<Callout type="error">
+  **Never expose private keys:**
+  - Do not log private keys or seed phrases
+  - Do not store in version control
+  - Use environment variables or secure vaults
+  - Consider hardware security modules (HSM) for production
+</Callout>
+
+```typescript
+// Good: Load from environment
+const privateKey = process.env.PRIVATE_KEY;
+
+// Bad: Hardcoded key
+const privateKey = "0x1234..."; // NEVER DO THIS
+```
+
+### External Dependencies
+
+#### Go Dependencies
+
+| Package | Purpose | Security Notes |
+|---------|---------|----------------|
+| `go-ethereum` | ECDSA, Keccak-256 | Well-audited, Ethereum Foundation |
+| `solana-go` | Ed25519, Borsh | Gagliardetto, widely used |
+| `golang.org/x/crypto` | Ed25519 | Go standard library |
+| `go-bip39` | Mnemonic generation | Tyler Smith, well-tested |
+
+#### Python Dependencies
+
+| Package | Purpose | Security Notes |
+|---------|---------|----------------|
+| `eth-account` | EVM signing | ConsenSys, audited |
+| `solana` | Solana signing | Solana Foundation |
+| `pynacl` | Ed25519 | libsodium bindings |
+
+#### TypeScript Dependencies
+
+| Package | Purpose | Security Notes |
+|---------|---------|----------------|
+| `viem` | EVM signing | Wevm team, audited |
+| `@solana/web3.js` | Solana signing | Solana Foundation |
+| `@ton/ton` | TON signing | TON Foundation |
+
+#### Java Dependencies
+
+| Package | Purpose | Security Notes |
+|---------|---------|----------------|
+| `web3j` | EVM signing | Web3 Labs, audited |
+| `bouncycastle` | Ed25519 | Legion of Bouncy Castle, industry standard |
+
+### Cryptographic Hygiene Checklist
+
+- [ ] Use cryptographically secure random number generators for nonces
+- [ ] Verify signature format before processing (length, v value)
+- [ ] Check domain separator matches expected values
+- [ ] Validate time windows are reasonable (not expired, not too far future)
+- [ ] Confirm amounts match requirements exactly
+- [ ] Verify recipient addresses match expected payTo
+- [ ] Check nonce has not been used before
+- [ ] Validate chain ID matches expected network
+- [ ] Use constant-time comparison for signature verification
+- [ ] Never log or expose private key material
+
+---
+
+## Threat Model
+
+This section describes the security threat model for the T402 protocol, including trust assumptions, attack vectors, and mitigations.
+
+### System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              T402 PAYMENT FLOW                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌──────────┐    ┌──────────────────┐    ┌─────────────┐    ┌───────────┐  │
+│  │  Client  │───▶│  Resource Server │───▶│ Facilitator │───▶│ Blockchain│  │
+│  │ (Payer)  │◀───│    (Payee)       │◀───│  (Settler)  │◀───│  Network  │  │
+│  └──────────┘    └──────────────────┘    └─────────────┘    └───────────┘  │
+│       │                   │                     │                 │        │
+│       │  1. Request       │                     │                 │        │
+│       │─────────────────▶│                     │                 │        │
+│       │  2. 402 + Requirements                 │                 │        │
+│       │◀─────────────────│                     │                 │        │
+│       │  3. Sign Payment  │                     │                 │        │
+│       │  (local)          │                     │                 │        │
+│       │  4. Request + Payment Header            │                 │        │
+│       │─────────────────▶│                     │                 │        │
+│       │                   │  5. Verify          │                 │        │
+│       │                   │─────────────────────▶                 │        │
+│       │                   │  6. Valid/Invalid   │                 │        │
+│       │                   │◀─────────────────────                 │        │
+│       │                   │  7. Process Request │                 │        │
+│       │                   │                     │                 │        │
+│       │                   │  8. Settle          │                 │        │
+│       │                   │─────────────────────▶                 │        │
+│       │                   │                     │  9. Submit Tx   │        │
+│       │                   │                     │────────────────▶│        │
+│       │                   │                     │  10. Confirmed  │        │
+│       │                   │                     │◀────────────────│        │
+│       │                   │  11. Settlement Response               │        │
+│       │                   │◀─────────────────────                 │        │
+│       │  12. Response + Settlement Header       │                 │        │
+│       │◀─────────────────│                     │                 │        │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Trust Assumptions
+
+#### High Trust Requirements
+
+| Entity | Trust Level | Assumption | Impact if Violated |
+|--------|-------------|------------|-------------------|
+| **Blockchain Network** | High | Consensus is secure, finality is achieved | Complete protocol failure |
+| **Token Contract** | High | USDT/USDC contracts execute correctly | Incorrect transfers |
+| **RPC Nodes** | Medium-High | Return valid blockchain state | False verification results |
+
+#### Medium Trust Requirements
+
+| Entity | Trust Level | Assumption | Impact if Violated |
+|--------|-------------|------------|-------------------|
+| **Facilitator** | Medium | Executes payments honestly | Payments may not settle |
+| **Client Device** | Medium | Not compromised, keys secure | Unauthorized payments |
+| **TLS/PKI** | Medium | Certificate validation works | MITM attacks possible |
+
+#### Low/No Trust Requirements
+
+| Entity | Trust Level | Reason |
+|--------|-------------|--------|
+| **Resource Server** | Low | Cannot forge signatures, cannot access funds |
+| **Network Observers** | None | Signatures are publicly verifiable |
+| **Client (for Server)** | None | All claims cryptographically verified |
+
+### Attack Vectors and Mitigations
+
+#### 1. Replay Attacks
+
+**Threat:** Attacker captures a valid payment and resubmits it.
+
+<Tabs items={['EVM', 'Solana', 'TON', 'TRON']}>
+  <Tabs.Tab>
+**EVM Mitigations:**
+- **Nonce:** 32-byte random nonce included in signature
+- **Nonce Registry:** Smart contract tracks used nonces
+- **Domain Separator:** Chain ID prevents cross-chain replay
+- **Time Windows:** validAfter/validBefore bound validity
+
+```
+Replay Attempt:
+├─ Same chain, same contract → Blocked by nonce registry
+├─ Different chain → Blocked by chainId in domain separator
+├─ Same chain, different contract → Blocked by verifyingContract
+└─ After expiration → Blocked by validBefore check
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+**Solana Mitigations:**
+- **Recent Blockhash:** Transactions valid for ~300 blocks (~2 minutes)
+- **Network Rejection:** Stale transactions automatically rejected
+- **Single Use:** Each transaction can only be processed once
+
+```
+Replay Attempt:
+├─ Immediate replay → Blocked by duplicate transaction detection
+├─ Delayed replay → Blocked by blockhash expiration
+└─ Cross-cluster → Invalid blockhash for different cluster
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+**TON Mitigations:**
+- **Seqno:** Wallet sequence number must match expected
+- **Increment:** Each transaction increments seqno
+- **Order Enforcement:** Out-of-order transactions rejected
+
+```
+Replay Attempt:
+├─ Same seqno → Blocked by seqno already used
+├─ Future seqno → Blocked by gap in sequence
+└─ Different wallet → Different seqno counter
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+**TRON Mitigations:**
+- **Reference Block:** Transaction references recent block
+- **Expiration:** Explicit expiration timestamp
+- **Block Height:** Network validates reference block validity
+
+```
+Replay Attempt:
+├─ After expiration → Blocked by timestamp check
+├─ Invalid reference block → Blocked by network validation
+└─ Cross-chain → Different network entirely
+```
+  </Tabs.Tab>
+</Tabs>
+
+#### 2. Signature Forgery
+
+**Threat:** Attacker creates fake signatures without private key.
+
+**Mitigations:**
+- ECDSA (secp256k1) and Ed25519 are computationally secure
+- 256-bit security level prevents brute force
+- No known practical attacks against these algorithms
+
+#### 3. Amount Manipulation
+
+**Threat:** Attacker modifies payment amount after signing.
+
+**Mitigations:**
+- Amount is included in signed data
+- Any modification invalidates signature
+- Facilitator verifies amount matches requirements
+
+#### 4. Recipient Manipulation
+
+**Threat:** Attacker redirects payment to different address.
+
+**Mitigations:**
+- `to` address included in signed data
+- Facilitator verifies `to` matches `payTo` from requirements
+- Smart contract enforces recipient
+
+#### 5. Man-in-the-Middle (MITM)
+
+**Threat:** Attacker intercepts and modifies communication.
+
+**Mitigations:**
+- HTTPS/TLS required for all communication
+- Signatures cover all payment parameters
+- Modified data results in invalid signature
+
+#### 6. Double Spending
+
+**Threat:** Payer attempts to use same authorization twice.
+
+**Mitigations:**
+- **EVM:** Nonce registry in smart contract
+- **Solana:** Transaction deduplication by network
+- **TON:** Seqno enforcement
+- **TRON:** Transaction hash uniqueness
+
+#### 7. Insufficient Balance
+
+**Threat:** Payer signs authorization but lacks funds.
+
+**Mitigations:**
+- Balance checked during verification
+- Balance re-checked during settlement
+- Transaction fails if insufficient
+
+#### 8. Fee Payer Exploitation (Solana)
+
+**Threat:** Malicious transaction drains facilitator funds.
+
+**Mitigations:**
+- Strict instruction structure validation
+- Fee payer must NOT appear in instruction accounts
+- Fee payer must NOT be transfer authority
+- Compute budget price capped at 5 lamports
+
+#### 9. Time-Based Attacks
+
+**Threat:** Exploit clock skew or time windows.
+
+**Mitigations:**
+- Server enforces maximum validity window
+- Facilitator checks `validBefore` is reasonable
+- Blockchain uses block timestamp (not client time)
+
+#### 10. Smart Contract Wallet Impersonation
+
+**Threat:** Claim to be smart contract wallet to bypass EOA verification.
+
+**Mitigations:**
+- EIP-1271 call made to actual contract address
+- Contract must return magic value `0x1626ba7e`
+- Cannot fake contract response without contract deployment
+
+### Threat Matrix
+
+| Threat | Likelihood | Impact | Risk | Mitigation Status |
+|--------|------------|--------|------|-------------------|
+| Replay Attack | Medium | High | High | Mitigated (nonces, time windows) |
+| Signature Forgery | Very Low | Critical | Medium | Mitigated (cryptographic security) |
+| Amount Manipulation | Low | High | Medium | Mitigated (signed data) |
+| Recipient Manipulation | Low | High | Medium | Mitigated (signed data) |
+| MITM Attack | Low | Medium | Low | Mitigated (TLS, signatures) |
+| Double Spending | Medium | High | High | Mitigated (nonce registry) |
+| Insufficient Balance | Medium | Low | Low | Mitigated (balance checks) |
+| Fee Payer Exploitation | Medium | High | High | Mitigated (instruction validation) |
+| Time-Based Attack | Low | Medium | Low | Mitigated (window limits) |
+| Smart Wallet Impersonation | Low | Medium | Low | Mitigated (EIP-1271) |
+
+### Out-of-Scope Threats
+
+| Threat | Responsible Party | Reason |
+|--------|-------------------|--------|
+| Private key compromise | User/Integrator | Key management is user responsibility |
+| Phishing attacks | User education | Social engineering outside protocol |
+| Token contract bugs | Token issuer | USDT/USDC security is issuer's domain |
+| Blockchain consensus attacks | Network | 51% attacks are network-level |
+| DNS hijacking | Infrastructure | DNS security is infrastructure concern |
+| Client device malware | User | Endpoint security is user responsibility |
+
+### Security Invariants
+
+The following properties must always hold:
+
+#### 1. Payment Integrity
+```
+∀ payment P:
+  P.settles ⟹ (P.amount = P.requirements.amount ∧
+               P.recipient = P.requirements.payTo ∧
+               P.signature.valid)
+```
+
+#### 2. No Unauthorized Transfers
+```
+∀ transfer T:
+  T.executes ⟹ ∃ signature S:
+    (S.valid ∧ S.signer = T.from ∧ S.covers(T))
+```
+
+#### 3. Single Use Authorization
+```
+∀ authorization A:
+  A.used_count ≤ 1
+```
+
+#### 4. Time-Bounded Validity
+```
+∀ authorization A:
+  A.valid ⟹ (now ≥ A.validAfter ∧ now < A.validBefore)
+```
+
+#### 5. Chain Isolation
+```
+∀ signature S on chain C1:
+  ¬S.valid(chain C2) where C1 ≠ C2
+```
+
+### Incident Response
+
+#### Detection
+
+Monitor for:
+- Unusual verification failure rates
+- Settlement failures after successful verification
+- Duplicate nonce attempts
+- Time window violations
+- Balance check failures
+
+#### Response Procedures
+
+1. **Signature Forgery Detected:**
+   - Immediately halt all settlements
+   - Investigate cryptographic implementation
+   - Check for key compromise
+
+2. **Double Spend Attempt:**
+   - Log and alert on duplicate nonce
+   - Block payer if repeated attempts
+   - Verify nonce registry integrity
+
+3. **Fee Payer Exploitation (Solana):**
+   - Pause Solana settlements
+   - Review instruction validation logic
+   - Check facilitator wallet balance
+
+4. **Mass Verification Failures:**
+   - Check RPC node connectivity
+   - Verify domain separator configuration
+   - Check for contract upgrades
+
+### Security Contact
+
+Report security vulnerabilities to: **security@t402.io**
+
+<Callout type="warning">
+  Please practice responsible disclosure. Do not publicly disclose vulnerabilities until they have been addressed.
+</Callout>
+
+---
+
+## Audit Scope
+
+This section defines the scope for security audits of the T402 protocol, including critical code paths, focus areas, and testing recommendations.
+
+### Executive Summary
+
+T402 is an HTTP-native payment protocol for USDT/USDT0 stablecoins across multiple blockchains. The audit should focus on:
+
+1. **Signature generation and verification** across all chains
+2. **Payment verification logic** in the facilitator
+3. **Replay protection mechanisms** (nonces, time windows)
+4. **Fee payer safety** for sponsored transactions (Solana)
+5. **SDK cryptographic implementations** in all four languages
+
+### Repository Structure
+
+```
+github.com/t402-io/t402/
+├── typescript/              # TypeScript SDK (36 npm packages)
+│   └── packages/
+│       ├── core/           # Protocol types
+│       ├── mechanisms/
+│       │   ├── evm/        # EVM signing (IN SCOPE)
+│       │   ├── svm/        # Solana signing (IN SCOPE)
+│       │   ├── ton/        # TON signing (IN SCOPE)
+│       │   ├── tron/       # TRON signing (IN SCOPE)
+│       │   ├── near/       # NEAR signing (IN SCOPE)
+│       │   ├── aptos/      # Aptos signing (IN SCOPE)
+│       │   ├── tezos/      # Tezos signing (IN SCOPE)
+│       │   ├── polkadot/   # Polkadot signing (IN SCOPE)
+│       │   ├── stacks/     # Stacks signing (IN SCOPE)
+│       │   └── cosmos/     # Cosmos signing (IN SCOPE)
+│       └── ...
+├── go/                      # Go SDK
+│   ├── signers/            # Signer implementations (IN SCOPE)
+│   │   ├── evm/
+│   │   └── svm/
+│   ├── mechanisms/         # Chain-specific logic (IN SCOPE)
+│   │   ├── evm/
+│   │   ├── svm/
+│   │   ├── ton/
+│   │   ├── tron/
+│   │   ├── near/
+│   │   ├── aptos/
+│   │   ├── tezos/
+│   │   ├── polkadot/
+│   │   ├── stacks/
+│   │   └── cosmos/
+│   └── ...
+├── python/                  # Python SDK
+│   └── t402/src/t402/
+│       ├── schemes/        # Scheme implementations (IN SCOPE)
+│       ├── wdk/            # Wallet signing (IN SCOPE)
+│       └── erc4337/        # Account abstraction (IN SCOPE)
+├── java/                    # Java SDK
+│   └── src/main/java/io/t402/
+│       └── crypto/         # Crypto signers (IN SCOPE)
+├── services/
+│   └── facilitator/        # Facilitator service (IN SCOPE)
+└── specs/                   # Protocol specifications (REFERENCE)
+```
+
+### In-Scope Components
+
+#### Priority 1: Critical Path (Must Audit)
+
+| Component | Location | Description | Risk Level |
+|-----------|----------|-------------|-----------|
+| EVM Verification | `go/mechanisms/evm/exact/facilitator/` | Payment verification and settlement | Critical |
+| EVM Signers | `go/signers/evm/`, `java/crypto/EvmSigner.java` | EIP-712 signing | Critical |
+| Nonce Management | `go/mechanisms/evm/`, Facilitator DB | Replay prevention | Critical |
+| SVM Verification | `go/mechanisms/svm/exact/facilitator/` | Solana payment verification | Critical |
+| Fee Payer Validation | `go/mechanisms/svm/` | Instruction safety checks | Critical |
+
+#### Priority 2: High Importance
+
+| Component | Location | Description | Risk Level |
+|-----------|----------|-------------|-----------|
+| EIP-712 Hashing | `go/mechanisms/evm/eip712.go` | Typed data hashing | High |
+| EIP-1271 Verification | `go/mechanisms/evm/verify_1271.go` | Smart wallet support | High |
+| ERC-6492 Parsing | `go/mechanisms/evm/erc6492.go` | Counterfactual wallets | High |
+| TON Signing | `typescript/packages/mechanisms/ton/` | TON message signing | High |
+| TRON Signing | `java/crypto/TronSigner.java` | TRON transaction signing | High |
+
+#### Priority 3: Important
+
+| Component | Location | Description | Risk Level |
+|-----------|----------|-------------|-----------|
+| Python WDK | `python/t402/wdk/signer.py` | BIP-39 wallet signing | Medium |
+| Python ERC-4337 | `python/t402/erc4337/` | Account abstraction | Medium |
+| TypeScript Signers | `typescript/packages/mechanisms/*/src/signer.ts` | Client signing | Medium |
+| Java SVM Signer | `java/crypto/SvmSigner.java` | Ed25519 signing | Medium |
+
+### Out-of-Scope
+
+| Component | Reason |
+|-----------|--------|
+| UI Components | `@t402/react`, `@t402/vue` - No crypto operations |
+| HTTP Framework Adapters | `@t402/express`, `@t402/hono` - Wrapper code |
+| CLI Tools | User interfaces, no crypto logic |
+| Documentation Site | Static content |
+| CI/CD Pipelines | Infrastructure |
+
+### Critical Code Paths
+
+#### 1. EVM Payment Verification
+
+```
+File: go/mechanisms/evm/exact/facilitator/scheme.go
+
+Function: Verify(ctx, payload, requirements)
+├─ 1. Validate scheme = "exact"
+├─ 2. Parse EVM payload from bytes
+├─ 3. Extract authorization from payload
+├─ 4. Get network configuration
+├─ 5. Validate recipient matches payTo
+├─ 6. Validate amount ≥ required
+├─ 7. Check nonce not already used          ← CRITICAL: Replay prevention
+├─ 8. Query payer balance                    ← CRITICAL: Sufficient funds
+├─ 9. Get token metadata (name, version)
+├─ 10. Compute EIP-712 hash                  ← CRITICAL: Correct hashing
+├─ 11. Recover signer from signature         ← CRITICAL: Signature validation
+├─ 12. Compare recovered address with from   ← CRITICAL: Authorization match
+└─ 13. Return VerifyResponse
+```
+
+#### 2. EVM Payment Settlement
+
+```
+File: go/mechanisms/evm/exact/facilitator/scheme.go
+
+Function: Settle(ctx, payload, requirements)
+├─ 1. All verification steps (above)
+├─ 2. Build transferWithAuthorization call
+├─ 3. Estimate gas
+├─ 4. Submit transaction                     ← CRITICAL: Correct parameters
+├─ 5. Wait for confirmation
+├─ 6. Mark nonce as used                     ← CRITICAL: Prevent double-spend
+└─ 7. Return SettlementResponse
+```
+
+#### 3. Solana Fee Payer Validation
+
+```
+File: go/mechanisms/svm/exact/facilitator/scheme.go
+
+Function: ValidateTransaction(tx, feePayer, requirements)
+├─ 1. Verify exactly 3 instructions
+│   ├─ [0] ComputeBudget.SetLimit
+│   ├─ [1] ComputeBudget.SetPrice
+│   └─ [2] SPL Token TransferChecked
+├─ 2. Verify compute price ≤ 5 lamports     ← CRITICAL: Fee limit
+├─ 3. For each instruction:
+│   └─ Verify feePayer NOT in accounts      ← CRITICAL: Fee payer safety
+├─ 4. Verify transfer authority ≠ feePayer  ← CRITICAL: Fee payer safety
+├─ 5. Verify token source ≠ feePayer        ← CRITICAL: Fee payer safety
+├─ 6. Verify transfer amount = required     ← CRITICAL: Exact amount
+└─ 7. Verify destination = payTo ATA        ← CRITICAL: Correct recipient
+```
+
+#### 4. EIP-712 Hash Computation
+
+```
+File: go/mechanisms/evm/eip712.go
+
+Function: HashEIP3009Authorization(domain, authorization)
+├─ 1. Encode domain separator
+│   ├─ Hash type string
+│   ├─ Hash name
+│   ├─ Hash version
+│   ├─ Encode chainId
+│   └─ Encode verifyingContract
+├─ 2. Encode struct hash
+│   ├─ Hash type string
+│   ├─ Encode from
+│   ├─ Encode to
+│   ├─ Encode value
+│   ├─ Encode validAfter
+│   ├─ Encode validBefore
+│   └─ Encode nonce
+├─ 3. Compute final hash
+│   └─ keccak256(0x19 || 0x01 || domainSeparator || structHash)
+└─ 4. Return hash                           ← CRITICAL: Must match contract
+```
+
+### Focus Areas for Auditors
+
+#### 1. Signature Verification
+
+**Review Checklist:**
+- [ ] ECDSA v value adjustment (27/28 conversion)
+- [ ] Ed25519 signature format validation
+- [ ] Public key recovery correctness
+- [ ] Constant-time comparison for signatures
+- [ ] Handling of malformed signatures (no panic)
+
+#### 2. Nonce Management
+
+**Review Checklist:**
+- [ ] Nonce uniqueness enforcement
+- [ ] Race condition handling in nonce checks
+- [ ] Nonce storage persistence
+- [ ] Nonce format validation (32 bytes)
+
+#### 3. Time Window Validation
+
+**Review Checklist:**
+- [ ] `validAfter` checked correctly
+- [ ] `validBefore` checked correctly
+- [ ] Block timestamp vs. system time handling
+- [ ] Overflow/underflow in timestamp comparison
+
+#### 4. Amount and Recipient Validation
+
+**Review Checklist:**
+- [ ] Amount comparison (>= required, not just ==)
+- [ ] Recipient address validation
+- [ ] Checksum address handling
+- [ ] Integer overflow in amount calculations
+
+#### 5. Solana-Specific Checks
+
+**Review Checklist:**
+- [ ] Instruction count validation
+- [ ] Instruction order validation
+- [ ] Account list completeness check
+- [ ] Associated Token Account derivation
+- [ ] Compute budget price enforcement
+
+#### 6. EIP-1271 and ERC-6492
+
+**Review Checklist:**
+- [ ] Magic value hardcoded correctly (0x1626ba7e)
+- [ ] Contract call error handling
+- [ ] Gas limit for verification call
+- [ ] ERC-6492 magic suffix detection
+- [ ] ABI decoding for wrapped signatures
+
+### Testing Recommendations
+
+#### Unit Tests
+
+```go
+// Signature edge cases
+func TestVerifySignature_InvalidLength(t *testing.T) {
+    // Signatures shorter than 65 bytes
+    // Signatures longer than 65 bytes
+}
+
+func TestVerifySignature_InvalidV(t *testing.T) {
+    // v = 0, 1, 26, 29, 30, 255
+}
+
+func TestVerifySignature_MalleableS(t *testing.T) {
+    // s > n/2 (signature malleability)
+}
+```
+
+```go
+// Nonce tests
+func TestNonceUniqueness(t *testing.T) {
+    // Same nonce, same payer
+    // Same nonce, different payer
+    // Concurrent nonce usage
+}
+```
+
+```go
+// Time window tests
+func TestTimeWindow_BoundaryConditions(t *testing.T) {
+    // validAfter = now (exact boundary)
+    // validBefore = now (exact boundary)
+    // validAfter = validBefore
+    // validAfter > validBefore
+}
+```
+
+#### Integration Tests
+
+```go
+// Full payment flow on testnet
+func TestFullPaymentFlow_EVM(t *testing.T) {
+    // 1. Generate valid payment
+    // 2. Verify payment
+    // 3. Settle payment
+    // 4. Verify nonce marked as used
+    // 5. Attempt replay (should fail)
+}
+```
+
+#### Fuzzing Targets
+
+| Target | Input | Goal |
+|--------|-------|------|
+| `ParseEVMPayload` | Random bytes | No panic, graceful error |
+| `HashEIP3009Authorization` | Random domain/auth | Consistent output |
+| `VerifyEOASignature` | Random signature | No panic, correct result |
+| `ValidateTransaction` (Solana) | Random tx bytes | No panic, reject invalid |
+
+### Environment Setup
+
+#### Testnet Configuration
+
+| Network | Chain ID | RPC | Faucet |
+|---------|----------|-----|--------|
+| Base Sepolia | 84532 | `https://sepolia.base.org` | [faucet.quicknode.com](https://faucet.quicknode.com/base/sepolia) |
+| Solana Devnet | - | `https://api.devnet.solana.com` | [solfaucet.com](https://solfaucet.com) |
+| TON Testnet | - | `https://testnet.toncenter.com` | [@testgiver_ton_bot](https://t.me/testgiver_ton_bot) |
+| TRON Nile | - | `https://nile.trongrid.io` | [nileex.io](https://nileex.io/join/getJoinPage) |
+
+### Contact Information
+
+| Role | Contact |
+|------|---------|
+| Technical Lead | engineering@t402.io |
+| Security Contact | security@t402.io |
+| Project Manager | pm@t402.io |
+
+<Callout type="info">
+  For audit engagement inquiries, please contact security@t402.io with your firm's credentials and proposed timeline.
+</Callout>

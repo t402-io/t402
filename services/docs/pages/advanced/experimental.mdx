@@ -1,0 +1,739 @@
+import { Callout, Tabs, Steps } from 'nextra/components'
+
+# Experimental Features
+
+<Callout type="warning">
+These features are experimental and may change in future releases.
+</Callout>
+
+## Streaming Payments
+
+<Callout type="info">
+  **Coming Soon**: `@t402/streaming-payments` is not yet released. This page describes planned functionality and APIs are subject to change. Follow the [GitHub repository](https://github.com/t402-io/t402) for release announcements.
+</Callout>
+
+Per-second settlement using payment channel technology. Enable continuous value transfer with off-chain state updates and on-chain settlement, similar to Lightning Network concepts adapted for stablecoin HTTP payments.
+
+### Features
+
+- **Payment Channels** - State machine-based channel lifecycle
+- **Per-Second Billing** - Continuous streaming with metering
+- **Checkpointing** - Periodic state commits with signatures
+- **Dispute Resolution** - Evidence-based dispute handling
+- **Tiered Rates** - Dynamic pricing based on usage
+
+### Installation
+
+```bash npm2yarn
+npm install @t402/streaming-payments
+```
+
+### Quick Start
+
+```typescript
+import {
+  ChannelOpener,
+  FlowController,
+  CheckpointManager,
+} from '@t402/streaming-payments';
+
+// Create a payment channel
+const opener = new ChannelOpener();
+const { channel, stateMachine } = opener.create({
+  chain: 'eip155:8453',
+  asset: '0xUSDT',
+  payerAddress: '0xPayer',
+  payeeAddress: '0xPayee',
+  depositAmount: '1000000000', // 1000 USDT
+  ratePerSecond: '1000',       // 0.001 USDT per second
+});
+
+// Fund the channel
+opener.processFunding(stateMachine, '0xTxHash', '1000000000');
+opener.confirmFunding(stateMachine, { /* confirmation */ });
+
+// Start streaming
+const flow = new FlowController(channel.id, channel.ratePerSecond);
+flow.start();
+
+// Get current streamed amount
+const currentAmount = flow.getCurrentAmount();
+
+// Pause/resume
+flow.pause();
+flow.resume();
+
+// Stop and get final amount
+const { finalAmount } = flow.stop();
+```
+
+### Payment Flow
+
+<Steps>
+#### Channel Open
+Payer deposits funds into the channel. Channel enters 'open' state.
+
+#### Streaming
+Continuous per-second billing with off-chain state updates. Periodic checkpoints are created.
+
+#### Close Initiation
+Either party can initiate close by submitting the final checkpoint.
+
+#### Challenge Period
+24-hour window where counter-party can dispute by submitting a newer checkpoint.
+
+#### Finalization
+After challenge period, on-chain settlement distributes funds.
+</Steps>
+
+### Channel Management
+
+#### Opening a Channel
+
+```typescript
+import { ChannelOpener, ChannelStateMachine } from '@t402/streaming-payments/channels';
+
+const opener = new ChannelOpener({
+  fundingTimeout: 3600000, // 1 hour
+  confirmations: 3,
+});
+
+const result = opener.create({
+  chain: 'eip155:8453',
+  asset: '0xUSDT',
+  payerAddress: '0xPayer',
+  payeeAddress: '0xPayee',
+  depositAmount: '1000000000',
+  ratePerSecond: '1000',
+});
+
+// Process state transitions
+const { stateMachine } = result;
+stateMachine.process({ type: 'FUND', txHash: '0x...', amount: '1000000000' });
+stateMachine.process({ type: 'CONFIRM_FUNDING' });
+```
+
+#### Closing a Channel
+
+```typescript
+import { ChannelCloser } from '@t402/streaming-payments/channels';
+
+const closer = new ChannelCloser({
+  challengePeriod: 86400, // 24 hours
+});
+
+// Initiate close
+closer.initiateClose(stateMachine, '0xPayer', '0xSignature');
+
+// After challenge period
+closer.finalize(stateMachine);
+```
+
+#### Channel States
+
+| State | Description |
+|-------|-------------|
+| `created` | Awaiting funding |
+| `funding` | Funding tx submitted |
+| `open` | Active and streaming |
+| `paused` | Temporarily paused |
+| `closing` | In challenge period |
+| `disputing` | Dispute in progress |
+| `closed` | Fully settled |
+| `expired` | Timed out |
+
+### Flow Control
+
+#### Fixed Rate Streaming
+
+```typescript
+import { FlowController, createFixedRateFlow } from '@t402/streaming-payments/streaming';
+
+const flow = createFixedRateFlow('ch_123', '1000');
+flow.start();
+
+// Get current streamed amount
+console.log(flow.getCurrentAmount());
+
+// Subscribe to events
+flow.onEvent(event => {
+  switch (event.type) {
+    case 'started':
+      console.log('Started at rate:', event.rate);
+      break;
+    case 'checkpoint':
+      console.log('Checkpoint:', event.checkpointId);
+      break;
+    case 'completed':
+      console.log('Total:', event.totalAmount);
+      break;
+  }
+});
+```
+
+#### Tiered Rate Streaming
+
+```typescript
+import { createTieredRateFlow } from '@t402/streaming-payments/streaming';
+
+const flow = createTieredRateFlow(
+  'ch_123',
+  '1000', // Base rate
+  [
+    { threshold: '1000000', rate: '800' },  // Discount after 1M
+    { threshold: '5000000', rate: '600' },  // Further discount after 5M
+  ],
+);
+```
+
+#### Rate Adjustment
+
+```typescript
+import { RateController } from '@t402/streaming-payments/streaming';
+
+const rateController = new RateController({
+  type: 'fixed',
+  baseRate: '1000',
+  minRate: '500',
+  maxRate: '2000',
+});
+
+rateController.adjustRate({
+  sessionId: 'ss_123',
+  newRate: '1200',
+  reason: 'Peak demand',
+});
+```
+
+### Metering & Billing
+
+```typescript
+import { MeteringManager, BillingManager } from '@t402/streaming-payments/streaming';
+
+// Metering
+const metering = new MeteringManager('ss_123');
+metering.record(60, '60000', '1000'); // 60 seconds at 1000/s
+
+const metrics = metering.getMetrics();
+console.log('Total:', metrics.totalAmount);
+console.log('Average rate:', metrics.averageRate);
+
+// Billing
+const billing = new BillingManager(
+  'ch_123',
+  '0xPayer',
+  '0xPayee',
+  { period: 'hour', minimumCharge: '100000' },
+);
+
+const invoice = billing.generateInvoice(
+  metering.getRecords(),
+  startTime,
+  endTime,
+);
+```
+
+### Checkpoints & Settlement
+
+#### Creating Checkpoints
+
+```typescript
+import { CheckpointManager } from '@t402/streaming-payments/settlement';
+
+const checkpointMgr = new CheckpointManager(config, {
+  autoCheckpoint: true,
+  intervalSeconds: 3600,
+});
+
+const checkpoint = checkpointMgr.create({
+  channelId: 'ch_123',
+  sequence: 0,
+  payerBalance: '900000000',
+  payeeBalance: '100000000',
+  totalStreamed: '100000000',
+  payerSignature: '0xsig',
+});
+
+// Verify checkpoint chain
+const validation = checkpointMgr.verifyCheckpointChain(checkpoints);
+```
+
+#### Final Settlement
+
+```typescript
+import { FinalSettlementManager } from '@t402/streaming-payments/settlement';
+
+const settlementMgr = new FinalSettlementManager(checkpointMgr, config);
+
+// Unilateral close
+settlementMgr.initiate({
+  channelId: 'ch_123',
+  initiator: '0xPayer',
+  finalCheckpoint: checkpoint,
+  reason: 'unilateral',
+  signature: '0xsig',
+});
+
+// Mutual close (instant, no challenge)
+settlementMgr.processMutual(
+  'ch_123',
+  payerSignature,
+  payeeSignature,
+  finalCheckpoint,
+);
+
+// Check if can finalize
+const { canFinalize, timeRemaining } = settlementMgr.canFinalize('ch_123');
+if (canFinalize) {
+  settlementMgr.finalize('ch_123');
+}
+```
+
+### Dispute Resolution
+
+```typescript
+import { DisputeManager, createCheckpointEvidence } from '@t402/streaming-payments/settlement';
+
+const disputeMgr = new DisputeManager(checkpointMgr, config);
+
+// Raise dispute
+disputeMgr.raise({
+  channelId: 'ch_123',
+  initiator: '0xPayee',
+  respondent: '0xPayer',
+  reason: 'stale_state',
+  description: 'Payer submitted old checkpoint',
+  claimedPayerBalance: '800000000',
+  claimedPayeeBalance: '200000000',
+  claimedCheckpoint: newerCheckpoint,
+  evidence: [
+    createCheckpointEvidence(newerCheckpoint, 'Newer signed checkpoint'),
+  ],
+});
+
+// Respond to dispute
+disputeMgr.respond({
+  disputeId: 'dsp_123',
+  responder: '0xPayer',
+  evidence: [...],
+  signature: '0xsig',
+});
+
+// Resolve dispute
+disputeMgr.resolve(
+  'dsp_123',
+  '0xPayee',          // Winner
+  '800000000',        // Final payer balance
+  '200000000',        // Final payee balance
+  'Challenger had newer checkpoint',
+);
+```
+
+#### Dispute Reasons
+
+| Reason | Description |
+|--------|-------------|
+| `invalid_checkpoint` | Signature/data invalid |
+| `stale_state` | Challenger has newer state |
+| `balance_mismatch` | Balance doesn't match |
+| `unauthorized_close` | Unauthorized party |
+| `fraud` | Fraudulent activity |
+
+### Configuration
+
+#### Settlement Config
+
+```typescript
+const settlementConfig = {
+  challengePeriod: 86400,           // 24 hours
+  disputeResponsePeriod: 43200,     // 12 hours
+  disputeResolutionPeriod: 172800,  // 48 hours
+  minCheckpointInterval: 60,        // 60 seconds
+  maxCheckpointsStored: 100,
+  settlementFee: '0',
+  disputeBond: '0',
+};
+```
+
+#### Billing Config
+
+```typescript
+const billingConfig = {
+  period: 'realtime',      // 'second' | 'minute' | 'hour' | 'day'
+  minimumCharge: '0',
+  roundingMode: 'floor',   // 'ceil' | 'round'
+  gracePeriod: 0,
+  invoiceInterval: 86400,  // Daily
+};
+```
+
+### Streaming API Reference
+
+#### ChannelOpener
+
+| Method | Description |
+|--------|-------------|
+| `create()` | Create new channel |
+| `processFunding()` | Process funding tx |
+| `confirmFunding()` | Confirm funding |
+
+#### FlowController
+
+| Method | Description |
+|--------|-------------|
+| `start()` | Start streaming |
+| `pause()` | Pause streaming |
+| `resume()` | Resume streaming |
+| `stop()` | Stop and get final |
+| `getCurrentAmount()` | Current streamed |
+| `createCheckpoint()` | Manual checkpoint |
+
+#### CheckpointManager
+
+| Method | Description |
+|--------|-------------|
+| `create()` | Create checkpoint |
+| `getLatest()` | Get latest |
+| `validate()` | Validate checkpoint |
+| `verifyCheckpointChain()` | Verify chain |
+
+## Zero-Knowledge Payments
+
+<Callout type="info">
+  **Coming Soon**: `@t402/zk-payments` is not yet released. This page describes planned functionality and APIs are subject to change. Follow the [GitHub repository](https://github.com/t402-io/t402) for release announcements.
+</Callout>
+
+Zero-knowledge proof system for privacy-preserving payment verification. Prove payment attributes (balance sufficiency, compliance, identity) without revealing sensitive information.
+
+### Features
+
+- **Range Proofs** - Prove value is within bounds without revealing it
+- **Balance Proofs** - Prove sufficient funds without revealing balance
+- **Identity Proofs** - Selective disclosure of identity attributes
+- **Compliance Proofs** - Prove regulatory compliance privately
+- **Proof Aggregation** - Combine multiple proofs into one
+- **Verification Caching** - Efficient verification with LRU cache
+
+### Installation
+
+```bash npm2yarn
+npm install @t402/zk-payments
+```
+
+### Quick Start
+
+```typescript
+import { RangeProofGenerator, BalanceProofGenerator, ProofVerifier } from '@t402/zk-payments';
+
+// Range proof: prove value is between 0 and 1000
+const rangeGen = new RangeProofGenerator();
+const rangeProof = rangeGen.generate('500', '0', '1000');
+
+// Verify
+const verifier = new ProofVerifier();
+const result = verifier.verify(rangeProof.proof);
+console.log('Valid:', result.valid);
+```
+
+### Range Proofs
+
+Prove a value is within a range without revealing the actual value:
+
+```typescript
+import { RangeProofGenerator } from '@t402/zk-payments/proofs';
+
+const generator = new RangeProofGenerator();
+
+// Prove value is between 0 and 1000
+const result = generator.generate('500', '0', '1000');
+
+if (result.success) {
+  console.log('Proof:', result.proof);
+
+  // Verify the proof
+  const verification = generator.verify(result.proof);
+  console.log('Valid:', verification.valid);
+}
+```
+
+### Balance Proofs
+
+Prove sufficient balance without revealing actual balance:
+
+```typescript
+import { BalanceProofGenerator, MockBalanceProvider } from '@t402/zk-payments/proofs';
+
+const provider = new MockBalanceProvider();
+provider.setBalance('0x123', 'USDT', 'ethereum', '10000');
+
+const generator = new BalanceProofGenerator({}, provider);
+
+// Prove balance >= 5000 without revealing actual balance
+const result = await generator.generate(
+  '0x123',      // account
+  '10000',      // actual balance (private)
+  '5000',       // required amount (public)
+  'USDT',       // asset
+  'ethereum'    // chain
+);
+
+if (result.success) {
+  console.log('Balance proof generated');
+  // Verifier only learns: balance >= 5000
+  // They do NOT learn: actual balance is 10000
+}
+```
+
+### Identity Proofs
+
+Prove identity attributes with selective disclosure:
+
+```typescript
+import { IdentityProofGenerator, createMockCredential } from '@t402/zk-payments/proofs';
+
+const generator = new IdentityProofGenerator();
+
+// Create credential
+const credential = createMockCredential('user1', {
+  age: 25,
+  country: 'US',
+  accredited_investor: true,
+});
+
+// Prove age >= 18 without revealing actual age
+const ageProof = generator.generateAgeProof(credential, 18);
+// Verifier learns: user is 18+
+// Verifier does NOT learn: user is exactly 25
+
+// Prove jurisdiction without revealing country
+const jurisdictionProof = generator.generateJurisdictionProof(
+  credential,
+  ['US', 'CA', 'UK'] // Allowed jurisdictions
+);
+// Verifier learns: user is in allowed jurisdiction
+// Verifier does NOT learn: which specific country
+```
+
+### Compliance Proofs
+
+Prove regulatory compliance without revealing personal information:
+
+```typescript
+import { ComplianceProofGenerator, createMockAttestation } from '@t402/zk-payments/proofs';
+
+const generator = new ComplianceProofGenerator();
+
+// Create attestation from KYC provider
+const attestation = createMockAttestation('user1', [
+  'kyc_verified',
+  'aml_cleared',
+  'sanctions_cleared',
+], {
+  jurisdictions: ['US', 'CA'],
+  transactionLimits: {
+    daily: '1000000',
+    monthly: '10000000',
+    perTransaction: '100000',
+  },
+});
+
+// Generate compliance proof for payment
+const result = generator.generatePaymentComplianceProof(
+  attestation,
+  '50000',        // transaction amount
+  ['US', 'CA']    // allowed jurisdictions
+);
+// Verifier learns: user passed KYC/AML, is in allowed jurisdiction, within limits
+// Verifier does NOT learn: actual identity, specific country, etc.
+```
+
+### Proof Verification
+
+Universal verification with caching:
+
+```typescript
+import { ProofVerifier, VerificationCache } from '@t402/zk-payments/verification';
+
+const cache = new VerificationCache({ maxSize: 10000 });
+const verifier = new ProofVerifier();
+
+// Verify with caching
+const result = cache.getOrVerify(proof, (p) => verifier.verify(p));
+
+// Batch verification
+const batchResult = await verifier.verifyBatch({
+  proofs: [proof1, proof2, proof3],
+  parallel: true,
+  failFast: false,
+});
+
+console.log('All valid:', batchResult.allValid);
+console.log('Valid count:', batchResult.validCount);
+console.log('Failed:', batchResult.failedIndices);
+```
+
+### Proof Aggregation
+
+Combine multiple proofs into one:
+
+```typescript
+import { ProofAggregator } from '@t402/zk-payments/verification';
+
+const aggregator = new ProofAggregator();
+
+// Aggregate multiple proofs
+const result = aggregator.aggregate([
+  rangeProof,
+  balanceProof,
+  complianceProof,
+]);
+
+if (result.success) {
+  // Single aggregated proof instead of three
+  console.log('Aggregated proof:', result.aggregated);
+  // Reduces on-chain verification cost
+}
+```
+
+### Client SDK
+
+Client-side proof generation:
+
+```typescript
+import { ZKPaymentClient, MockBalanceProvider } from '@t402/zk-payments';
+
+const provider = new MockBalanceProvider();
+const client = new ZKPaymentClient({
+  facilitatorUrl: 'https://api.example.com'
+}, provider);
+
+// Register credentials
+client.registerCredential(credential);
+client.registerAttestation(attestation);
+
+// Generate proofs for a payment request
+const result = await client.generateProofsForRequest(request, {
+  balance: {
+    account: '0x123',
+    actualBalance: '10000'
+  },
+  attestationId: 'att_123',
+});
+```
+
+### Server Integration
+
+```typescript
+import { ZKPaymentServer, createDefaultPolicy } from '@t402/zk-payments';
+
+const server = new ZKPaymentServer({ port: 3000 });
+
+// Register payment policies
+server.registerPolicy(createDefaultPolicy('standard', 'Standard Payment'));
+
+// Custom routes
+server.addRoute('GET', '/custom', (req, res) => {
+  res.json({ custom: true });
+});
+
+await server.start();
+```
+
+### Facilitator Service
+
+Coordinate proof verification for payments:
+
+```typescript
+import { ZKPaymentFacilitator } from '@t402/zk-payments';
+
+const facilitator = new ZKPaymentFacilitator();
+
+// Register policy
+facilitator.registerPolicy({
+  id: 'high-value',
+  name: 'High Value Payments',
+  requirements: [
+    { type: 'balance', required: true },
+    { type: 'compliance', required: true },
+    { type: 'identity', required: false },
+  ],
+  minAmount: '10000',
+  active: true,
+});
+
+// Create payment request
+const request = facilitator.createRequest(
+  'payer1', 'payee1', '50000', 'USDT', 'ethereum', 'high-value'
+);
+
+// Submit and verify proofs
+const response = await facilitator.submitProofs({
+  requestId: request.id,
+  proofs: [balanceProof, complianceProof],
+  submittedAt: Date.now(),
+});
+
+// Complete payment after verification
+if (response.status === 'verified') {
+  facilitator.completePayment(request.id, '0x...txHash');
+}
+```
+
+### Proof Types
+
+| Type | Purpose | Public Inputs |
+|------|---------|---------------|
+| `range` | Value within bounds | min, max, commitment |
+| `balance` | Sufficient funds | required amount, commitment |
+| `identity` | Attribute claims | predicates, identity commitment |
+| `compliance` | Regulatory compliance | requirements, verifier key |
+
+### Supported Proof Systems
+
+| System | Description | Use Case |
+|--------|-------------|----------|
+| Groth16 | Efficient, small proofs | Production |
+| PLONK | Universal setup | Flexibility |
+| STARK | Post-quantum secure | High security |
+| Bulletproofs | No trusted setup | Range proofs |
+
+<Callout type="info">
+  Current implementation uses mock proofs for development. Production implementation will use actual cryptographic proof systems.
+</Callout>
+
+### ZK API Reference
+
+#### Proofs Module
+
+| Export | Description |
+|--------|-------------|
+| `RangeProofGenerator` | Range proofs |
+| `BalanceProofGenerator` | Balance proofs |
+| `IdentityProofGenerator` | Identity proofs |
+| `ComplianceProofGenerator` | Compliance proofs |
+| `createMockCredential` | Test credentials |
+| `createMockAttestation` | Test attestations |
+
+#### Verification Module
+
+| Export | Description |
+|--------|-------------|
+| `ProofVerifier` | Universal verifier |
+| `ProofAggregator` | Combine proofs |
+| `VerificationCache` | Caching layer |
+| `LRUVerificationCache` | LRU cache |
+
+#### Integration Module
+
+| Export | Description |
+|--------|-------------|
+| `ZKPaymentFacilitator` | Server coordinator |
+| `ZKPaymentClient` | Client SDK |
+| `ZKPaymentServer` | HTTP server |
+| `createDefaultPolicy` | Standard policy |
+
+## Related
+
+- [Agent Policy](/advanced/agent-policy) - Spending policies
+- [Smart Router](/advanced/smart-router) - Privacy-preserving routes
+- [Security](/resources/security) - Security documentation

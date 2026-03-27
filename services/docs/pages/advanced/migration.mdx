@@ -1,0 +1,619 @@
+import { Callout, Tabs } from 'nextra/components'
+
+# Migration Guides
+
+## V1 to V2
+
+This guide covers migrating from T402 Protocol v1 (formerly X402) to v2. The v2 release includes breaking changes to improve consistency, add new features, and align with industry standards.
+
+### Quick Summary
+
+| Change | v1 | v2 |
+|--------|----|----|
+| Package namespace | `x402-*` | `@t402/*` |
+| Protocol version | `t402Version: 1` | `t402Version: 2` |
+| Network format | Custom (`base-sepolia`) | CAIP-2 (`eip155:84532`) |
+| Amount field | `maxAmountRequired` | `amount` |
+| HTTP header | `X-PAYMENT` | `PAYMENT-SIGNATURE` |
+| Resource info | Flat in requirements | Nested `ResourceInfo` object |
+| Extensions | Not supported | Supported via `extensions` field |
+
+### Step 1: Update Package Names
+
+All packages have been renamed from `x402-*` to `@t402/*`:
+
+```bash
+# Remove old packages
+npm uninstall x402-core x402-express x402-fetch x402-evm
+
+# Install new packages
+npm install @t402/core @t402/express @t402/fetch @t402/evm
+```
+
+#### Package Name Mapping
+
+| v1 Package | v2 Package |
+|------------|------------|
+| `x402-core` | `@t402/core` |
+| `x402-express` | `@t402/express` |
+| `x402-fetch` | `@t402/fetch` |
+| `x402-axios` | `@t402/axios` |
+| `x402-evm` | `@t402/evm` |
+| `x402-react` | `@t402/react` |
+| `x402-vue` | `@t402/vue` |
+
+#### New Packages in v2
+
+- `@t402/svm` - Solana support
+- `@t402/ton` - TON support
+- `@t402/tron` - TRON support
+- `@t402/next` - Next.js App Router
+- `@t402/hono` - Hono middleware
+- `@t402/fastify` - Fastify plugin
+- `@t402/wdk` - Tether WDK integration
+- `@t402/wdk-gasless` - ERC-4337 gasless payments
+- `@t402/wdk-bridge` - LayerZero bridging
+- `@t402/mcp` - AI agent MCP server
+- `@t402/cli` - Development CLI
+
+### Step 2: Update Import Statements
+
+```typescript
+// v1
+import { PaymentRequirements } from "x402-core";
+import { createExactEvmScheme } from "x402-evm";
+
+// v2
+import { PaymentRequirements } from "@t402/core";
+import { ExactEvmScheme } from "@t402/evm";
+```
+
+### Step 3: Update Network Identifiers
+
+v2 uses [CAIP-2](https://github.com/ChainAgnostic/CAIPs/blob/main/CAIPs/caip-2.md) format for network identifiers:
+
+```typescript
+// v1
+const network = "base-sepolia";
+const network = "ethereum";
+const network = "arbitrum";
+
+// v2
+const network = "eip155:84532";  // Base Sepolia
+const network = "eip155:1";       // Ethereum Mainnet
+const network = "eip155:42161";   // Arbitrum One
+```
+
+#### Common Network Mappings
+
+| v1 Name | v2 CAIP-2 | Chain |
+|---------|-----------|-------|
+| `ethereum` | `eip155:1` | Ethereum Mainnet |
+| `base` | `eip155:8453` | Base |
+| `base-sepolia` | `eip155:84532` | Base Sepolia |
+| `arbitrum` | `eip155:42161` | Arbitrum One |
+| `optimism` | `eip155:10` | Optimism |
+| `polygon` | `eip155:137` | Polygon |
+
+### Step 4: Update PaymentRequirements Structure
+
+#### v1 Structure (Flat)
+
+```typescript
+// v1
+const requirements: PaymentRequirementsV1 = {
+  scheme: "exact",
+  network: "base-sepolia",
+  maxAmountRequired: "1000000",  // 1 USDC
+  resource: "https://api.example.com/data",
+  description: "Premium API access",
+  mimeType: "application/json",
+  outputSchema: {},
+  payTo: "0x...",
+  maxTimeoutSeconds: 60,
+  asset: "0x...",
+  extra: {}
+};
+```
+
+#### v2 Structure (Nested ResourceInfo)
+
+```typescript
+// v2
+const requirements: PaymentRequirements = {
+  scheme: "exact",
+  network: "eip155:84532",
+  amount: "1000000",  // Renamed from maxAmountRequired
+  payTo: "0x...",
+  maxTimeoutSeconds: 60,
+  asset: "0x...",
+  extra: {}
+};
+
+const paymentRequired: PaymentRequired = {
+  t402Version: 2,
+  resource: {
+    url: "https://api.example.com/data",
+    description: "Premium API access",
+    mimeType: "application/json"
+  },
+  accepts: [requirements],
+  extensions: {}  // New in v2
+};
+```
+
+#### Key Changes
+
+1. **`maxAmountRequired` -> `amount`**: Simplified field name
+2. **Resource info moved**: `resource`, `description`, `mimeType`, `outputSchema` moved to `ResourceInfo` object
+3. **`outputSchema` removed**: No longer part of core spec
+4. **`extensions` added**: Support for protocol extensions
+
+### Step 5: Update PaymentPayload Structure
+
+#### v1 Structure
+
+```typescript
+// v1
+const payload: PaymentPayloadV1 = {
+  t402Version: 1,
+  scheme: "exact",
+  network: "base-sepolia",
+  payload: {
+    signature: "0x...",
+    // scheme-specific fields
+  }
+};
+```
+
+#### v2 Structure
+
+```typescript
+// v2
+const payload: PaymentPayload = {
+  t402Version: 2,
+  resource: {
+    url: "https://api.example.com/data",
+    description: "Premium API access",
+    mimeType: "application/json"
+  },
+  accepted: {
+    scheme: "exact",
+    network: "eip155:84532",
+    amount: "1000000",
+    asset: "0x...",
+    payTo: "0x...",
+    maxTimeoutSeconds: 60,
+    extra: {}
+  },
+  payload: {
+    signature: "0x...",
+    // scheme-specific fields
+  },
+  extensions: {}
+};
+```
+
+#### Key Changes
+
+1. **`scheme` and `network` moved**: Now inside `accepted` object
+2. **`resource` added**: Echoes the resource info from server
+3. **`accepted` added**: Contains the accepted payment requirements
+4. **`extensions` added**: Client can include extension data
+
+### Step 6: Update HTTP Headers
+
+#### Header Names
+
+```typescript
+// v1 - Request
+headers["X-PAYMENT"] = encodedPayload;
+
+// v2 - Request
+headers["PAYMENT-SIGNATURE"] = encodedPayload;
+
+// v1 - Response
+headers["X-PAYMENT-RESPONSE"] = encodedResponse;
+
+// v2 - Response
+headers["PAYMENT-RESPONSE"] = encodedResponse;
+```
+
+#### Backward Compatibility
+
+The v2 SDK automatically handles both header formats:
+
+```typescript
+// Server reads both formats
+const header = adapter.getHeader("payment-signature")
+  || adapter.getHeader("x-payment");
+
+// Client sends v2 header, server accepts both
+```
+
+### Step 7: Update Server Configuration
+
+#### Express Middleware
+
+```typescript
+// v1
+import { createPaymentMiddleware } from "x402-express";
+
+app.use("/api", createPaymentMiddleware({
+  requirements: {
+    scheme: "exact",
+    network: "base-sepolia",
+    maxAmountRequired: "1000000",
+    // ...flat structure
+  }
+}));
+
+// v2
+import { t402Middleware } from "@t402/express";
+
+app.use("/api", t402Middleware({
+  routes: {
+    "/premium": {
+      price: "1.00",  // Human-readable, auto-converted
+      payTo: "0x...",
+      network: "eip155:84532",
+      asset: "0x..."
+    }
+  },
+  facilitator: "https://facilitator.t402.io"
+}));
+```
+
+#### Key Server Changes
+
+1. **Route-based configuration**: Define requirements per route
+2. **Human-readable prices**: Use `"1.00"` instead of `"1000000"`
+3. **Auto-conversion**: SDK converts to atomic units
+4. **Facilitator client**: Built-in facilitator integration
+
+### Step 8: Update Client Configuration
+
+#### Fetch Client
+
+```typescript
+// v1
+import { createPaymentClient } from "x402-fetch";
+
+const client = createPaymentClient({
+  wallet: privateKey,
+  network: "base-sepolia"
+});
+
+// v2
+import { t402Fetch, createEvmWallet } from "@t402/fetch";
+
+const wallet = createEvmWallet(privateKey);
+const response = await t402Fetch("https://api.example.com/data", {
+  wallet,
+  network: "eip155:84532"
+});
+```
+
+### Step 9: Update Facilitator Integration
+
+#### Verify Request
+
+```typescript
+// v1
+const verifyRequest: VerifyRequestV1 = {
+  paymentPayload: payload,
+  paymentRequirements: requirements  // Flat structure
+};
+
+// v2
+const verifyRequest: VerifyRequest = {
+  paymentPayload: payload,
+  paymentRequirements: requirements,
+  resource: resourceInfo
+};
+```
+
+#### Supported Response
+
+```typescript
+// v1 - No extensions
+const supported: SupportedResponseV1 = {
+  kinds: [
+    { t402Version: 1, scheme: "exact", network: "base-sepolia" }
+  ]
+};
+
+// v2 - With extensions
+const supported: SupportedResponse = {
+  kinds: [
+    { t402Version: 2, scheme: "exact", network: "eip155:84532" }
+  ],
+  extensions: {
+    bazaar: { enabled: true },
+    siwx: { enabled: true }
+  }
+};
+```
+
+### Step 10: Handle Extensions (New in v2)
+
+v2 introduces protocol extensions for optional features:
+
+```typescript
+import { BazaarExtension, SIWXExtension } from "@t402/extensions";
+
+// Server advertises extensions
+const paymentRequired: PaymentRequired = {
+  t402Version: 2,
+  resource: { /* ... */ },
+  accepts: [/* ... */],
+  extensions: {
+    bazaar: {
+      info: { discoveryUrl: "https://api.example.com/.well-known/bazaar" },
+      schema: { /* JSON Schema */ }
+    }
+  }
+};
+
+// Client echoes extensions
+const payload: PaymentPayload = {
+  t402Version: 2,
+  // ...
+  extensions: {
+    bazaar: {
+      info: { /* ... */ }
+    }
+  }
+};
+```
+
+### Common Migration Issues
+
+#### Issue: Network Not Found
+
+```
+Error: Unknown network: base-sepolia
+```
+
+**Solution**: Update to CAIP-2 format:
+```typescript
+// Wrong
+network: "base-sepolia"
+
+// Correct
+network: "eip155:84532"
+```
+
+#### Issue: Missing Resource Info
+
+```
+Error: PaymentRequired.resource is required
+```
+
+**Solution**: Add ResourceInfo object:
+```typescript
+const paymentRequired = {
+  t402Version: 2,
+  resource: {
+    url: "https://api.example.com/data",
+    description: "API access",
+    mimeType: "application/json"
+  },
+  accepts: [/* ... */]
+};
+```
+
+#### Issue: Amount Field Name
+
+```
+Error: amount is required
+```
+
+**Solution**: Rename `maxAmountRequired` to `amount`:
+```typescript
+// Wrong
+{ maxAmountRequired: "1000000" }
+
+// Correct
+{ amount: "1000000" }
+```
+
+### Gradual Migration
+
+If you need to support both v1 and v2 clients during migration:
+
+```typescript
+import { PaymentRequiredV1 } from "@t402/core/v1";
+import { PaymentRequired } from "@t402/core";
+
+function createPaymentRequired(config) {
+  // v2 format (default)
+  const v2: PaymentRequired = {
+    t402Version: 2,
+    resource: {
+      url: config.resource,
+      description: config.description,
+      mimeType: config.mimeType
+    },
+    accepts: [{
+      scheme: config.scheme,
+      network: config.network,
+      amount: config.amount,
+      // ...
+    }]
+  };
+
+  // v1 format (legacy support)
+  const v1: PaymentRequiredV1 = {
+    t402Version: 1,
+    accepts: [{
+      scheme: config.scheme,
+      network: convertToLegacyNetwork(config.network),
+      maxAmountRequired: config.amount,
+      resource: config.resource,
+      description: config.description,
+      mimeType: config.mimeType,
+      // ...
+    }]
+  };
+
+  return { v1, v2 };
+}
+```
+
+---
+
+## V2.2 to V2.3
+
+This guide covers upgrading from T402 TypeScript SDK v2.2 to v2.3. The v2.3 release adds multi-chain support, a shared EVM utilities package, and enhanced WDK integration. There is one minor breaking change.
+
+### Quick Summary
+
+| Change | v2.2 | v2.3 |
+|--------|------|------|
+| Chains supported | EVM, Solana, TON, TRON | + NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos |
+| EVM shared utils | Inline in `@t402/evm` | Extracted to `@t402/evm-core` |
+| Legacy USDT | Not supported | `@t402/evm/exact-legacy` for non-EIP-3009 tokens |
+| WDK factory | `new T402WDK(wdk)` | `T402WDK.create()` / `T402WDK.fromWDK()` |
+| WDK swap | Not available | `canSwap()`, `getSwapQuote()`, `swapAndPay()` |
+| Base tsconfig | Per-package only | Shared `tsconfig.base.json` |
+
+### New Packages
+
+#### Mechanism Packages (v2.3.1)
+
+Six new blockchain mechanism packages are available:
+
+```bash
+npm install @t402/near      # NEAR Protocol (NEP-141)
+npm install @t402/aptos     # Aptos (Fungible Asset)
+npm install @t402/tezos     # Tezos (FA2 / TZIP-12)
+npm install @t402/polkadot  # Polkadot Asset Hub
+npm install @t402/stacks    # Stacks (Bitcoin L2)
+npm install @t402/cosmos    # Cosmos (Noble USDC)
+```
+
+All use the **exact-direct** scheme -- the client executes the transfer on-chain, then provides the transaction hash as proof.
+
+```typescript
+// Example: NEAR payment client
+import { createExactDirectNearClient } from "@t402/near/exact-direct/client";
+
+const client = createExactDirectNearClient({ signer: myNearSigner });
+const payload = await client.createPaymentPayload(2, requirements);
+```
+
+#### @t402/evm-core (v2.3.0)
+
+Shared EVM utilities extracted from `@t402/evm`. If you only need EVM helpers without the full mechanism, you can import from here:
+
+```bash
+npm install @t402/evm-core
+```
+
+This package is a dependency of `@t402/evm` -- no action required if you already use `@t402/evm`.
+
+### New Feature: EVM Exact-Legacy Scheme
+
+v2.3 adds support for legacy USDT tokens that don't implement EIP-3009 (e.g., on BNB Chain, Avalanche, Fantom, Celo, Kaia):
+
+```typescript
+import { ExactLegacyEvmClient } from "@t402/evm/exact-legacy/client";
+import { ExactLegacyEvmFacilitator } from "@t402/evm/exact-legacy/facilitator";
+```
+
+This uses standard ERC-20 `approve` + `transferFrom` instead of `transferWithAuthorization`.
+
+### WDK Changes
+
+#### Factory Methods (Recommended)
+
+v2.3.1 introduces static factory methods for `T402WDK`. The old constructor still works but the factory methods are recommended:
+
+```typescript
+// v2.2 (still works)
+import { T402WDK } from "@t402/wdk";
+const t402 = new T402WDK(wdkInstance);
+
+// v2.3 (recommended)
+import { T402WDK } from "@t402/wdk";
+
+// Create with full configuration
+const t402 = await T402WDK.create({
+  wdk: wdkInstance,
+  network: "eip155:8453",
+});
+
+// Quick setup from existing WDK
+const t402 = T402WDK.fromWDK(wdkInstance);
+```
+
+#### Multi-Chain Signer Discovery
+
+```typescript
+// New in v2.3.1
+const signers = await t402.getAllSigners();
+// Returns signers for all available chains
+```
+
+#### Swap Integration
+
+```typescript
+// New in v2.3.1
+const canDoSwap = await t402.canSwap("eip155:8453");
+const quote = await t402.getSwapQuote({
+  fromAsset: "0x...",
+  toAsset: "0x...",
+  amount: "1000000",
+});
+const result = await t402.swapAndPay(requirements, quote);
+```
+
+### Breaking Change
+
+#### `as const` Arrays in Type Definitions
+
+If you extend T402 types that use `as const` arrays, you may need to update your code:
+
+```typescript
+// v2.2 -- worked
+const NETWORKS = ["eip155:1", "eip155:8453"] as const;
+function isSupported(n: string) {
+  return NETWORKS.includes(n); // Error in v2.3
+}
+
+// v2.3 -- fix
+function isSupported(n: string) {
+  return (NETWORKS as readonly string[]).includes(n);
+}
+```
+
+This only affects code that calls `.includes()` on `as const` arrays. Most users won't be impacted.
+
+### Version Compatibility
+
+| Package | v2.2 | v2.3.0 | v2.3.1 |
+|---------|------|--------|--------|
+| `@t402/core` | 2.2.0 | 2.3.0 | 2.3.1 |
+| `@t402/evm` | 2.2.0 | 2.3.0 | 2.3.1 |
+| `@t402/wdk` | 2.2.0 | 2.3.0 | 2.3.1 |
+| WDK SDK | beta.4 | beta.5 | beta.5 |
+| wallet-evm | 1.x | 2.0.0-rc.1 | 2.0.0-rc.1 |
+
+### Upgrading
+
+```bash
+# Update all T402 packages
+npm update @t402/core @t402/evm @t402/wdk
+
+# Or update everything at once
+npx npm-check-updates -f '@t402/*' -u && npm install
+```
+
+No code changes are required unless you hit the `as const` breaking change above. All existing v2.2 code is compatible with v2.3.
+
+### Need Help?
+
+- [Documentation](https://docs.t402.io)
+- [GitHub Issues](https://github.com/t402-io/t402/issues)
+- [V1 to V2 section above](#v1-to-v2) (for upgrading from v1)

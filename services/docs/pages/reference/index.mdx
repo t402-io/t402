@@ -2,7 +2,7 @@
 
 import { Cards } from 'nextra/components'
 
-Comprehensive reference documentation for all T402 packages.
+Comprehensive reference documentation for all T402 packages. For protocol concepts, see [Core Concepts](/getting-started/concepts).
 
 ## Facilitator API
 
@@ -11,7 +11,7 @@ Comprehensive reference documentation for all T402 packages.
   <Cards.Card title="OpenAPI Specification" href="/reference/openapi" />
 </Cards>
 
-## Mechanism Packages
+## Mechanisms
 
 <Cards>
   <Cards.Card title="@t402/core" href="/reference/core" />
@@ -19,31 +19,21 @@ Comprehensive reference documentation for all T402 packages.
   <Cards.Card title="@t402/svm" href="/reference/svm" />
   <Cards.Card title="@t402/ton" href="/reference/ton" />
   <Cards.Card title="@t402/tron" href="/reference/tron" />
-  <Cards.Card title="@t402/near" href="/reference/near" />
-  <Cards.Card title="@t402/aptos" href="/reference/aptos" />
-  <Cards.Card title="@t402/tezos" href="/reference/tezos" />
-  <Cards.Card title="@t402/polkadot" href="/reference/polkadot" />
-  <Cards.Card title="@t402/stacks" href="/reference/stacks" />
-  <Cards.Card title="@t402/cosmos" href="/reference/cosmos" />
-  <Cards.Card title="@t402/btc" href="/reference/btc" />
+  <Cards.Card title="Other Chains (NEAR, Aptos, Tezos, ...)" href="/reference/other-mechanisms" />
+</Cards>
+
+## Extensions
+
+<Cards>
   <Cards.Card title="@t402/erc8004" href="/reference/erc8004" />
   <Cards.Card title="@t402/extensions" href="/reference/extensions" />
 </Cards>
 
-## Server Middleware
+## Middleware & Clients
 
 <Cards>
-  <Cards.Card title="@t402/express" href="/reference/express" />
-  <Cards.Card title="@t402/hono" href="/reference/hono" />
-  <Cards.Card title="@t402/fastify" href="/reference/fastify" />
-  <Cards.Card title="@t402/next" href="/reference/next" />
-</Cards>
-
-## Client Libraries
-
-<Cards>
-  <Cards.Card title="@t402/fetch" href="/reference/fetch" />
-  <Cards.Card title="@t402/axios" href="/reference/axios" />
+  <Cards.Card title="Server Middleware (Express, Hono, Fastify, Next.js)" href="/reference/server-middleware" />
+  <Cards.Card title="Client Libraries (Fetch, Axios)" href="/reference/client-libraries" />
 </Cards>
 
 ## UI Components
@@ -54,68 +44,22 @@ Comprehensive reference documentation for all T402 packages.
   <Cards.Card title="@t402/vue" href="/reference/vue" />
 </Cards>
 
-## Tools
+## AI & Agents
+
+<Cards>
+  <Cards.Card title="AI Agent Packages (MCP, A2A, Policy, Observability)" href="/reference/ai-agents" />
+</Cards>
+
+## Wallet & CLI
 
 <Cards>
   <Cards.Card title="@t402/wdk" href="/reference/wdk" />
   <Cards.Card title="@t402/cli" href="/reference/cli" />
 </Cards>
 
-## Architecture
-
-T402 follows a three-component architecture:
-
-```
-┌─────────┐     ┌─────────────┐     ┌─────────────┐
-│ Client  │────▶│ Facilitator │────▶│   Server    │
-└─────────┘     └─────────────┘     └─────────────┘
-     │                 │                   │
-     └─────── Payment Authorization ───────┘
-```
-
-### Client
-
-The client initiates payments by signing authorization messages:
-
-```typescript
-import { ExactEvmScheme } from '@t402/evm';
-
-const scheme = ExactEvmScheme.client({
-  signer: myWalletSigner,
-  network: 'eip155:8453' // Base
-});
-```
-
-### Facilitator
-
-The facilitator validates payments and executes on-chain transfers:
-
-```typescript
-import { ExactEvmScheme } from '@t402/evm';
-
-const scheme = ExactEvmScheme.facilitator({
-  signer: facilitatorSigner,
-  rpcUrl: 'https://mainnet.base.org'
-});
-```
-
-### Server
-
-The server defines payment requirements and verifies completion:
-
-```typescript
-import { ExactEvmScheme } from '@t402/evm';
-
-const scheme = ExactEvmScheme.server({
-  rpcUrl: 'https://mainnet.base.org'
-});
-```
-
 ## Common Types
 
 ### PaymentRequirements
-
-Defines what payment is required for a resource:
 
 ```typescript
 interface PaymentRequirements {
@@ -124,19 +68,17 @@ interface PaymentRequirements {
   amount: string;           // Amount in smallest units (e.g., "1000000" for 1 USDT)
   payTo: string;            // Recipient address
   asset?: string;           // Token address (optional, defaults to native USDT)
-  maxTimeoutSeconds?: number; // Maximum time for payment validity
-  extra?: Record<string, unknown>; // Mechanism-specific data
+  maxTimeoutSeconds?: number;
+  extra?: Record<string, unknown>;
 }
 ```
 
 ### PaymentPayload
 
-The payment authorization sent by the client:
-
 ```typescript
 interface PaymentPayload {
   t402Version: number;      // Protocol version (2)
-  accepted: {               // The requirements being paid
+  accepted: {
     scheme: string;
     network: string;
     amount: string;
@@ -145,53 +87,6 @@ interface PaymentPayload {
     extra?: Record<string, unknown>;
   };
   payload: Record<string, unknown>; // Scheme-specific payload
-  resource?: {              // Resource metadata
-    url: string;
-    description: string;
-    mimeType: string;
-  };
-}
-```
-
-## HTTP Protocol
-
-### 402 Response
-
-When payment is required, servers return HTTP 402:
-
-```http
-HTTP/1.1 402 Payment Required
-Payment-Required: scheme="exact";network="eip155:8453";amount="10000";...
-Content-Type: application/json
-
-{
-  "error": "Payment required",
-  "accepts": [...]
-}
-```
-
-### Payment Header
-
-Clients include payment in the `Payment-Signature` header:
-
-```http
-GET /api/resource HTTP/1.1
-Payment-Signature: signature="0x...";payload="..."
-```
-
-## Error Handling
-
-All packages use consistent error types:
-
-```typescript
-import { T402Error, PaymentError, ValidationError } from '@t402/core';
-
-try {
-  await client.fetch(url);
-} catch (error) {
-  if (error instanceof PaymentError) {
-    console.log('Payment failed:', error.code);
-  }
 }
 ```
 

@@ -664,3 +664,75 @@ result.warnings.forEach(w => console.warn(w));
 | Ink | Yes | No | Yes |
 | Berachain | Yes | No | Yes |
 | Unichain | Yes | No | Yes |
+
+## @t402/wdk-gasless
+
+Gasless USDT0 payments via EIP-3009 and ERC-4337 account abstraction.
+
+```bash
+npm install @t402/wdk-gasless
+```
+
+### Overview
+
+Users pay zero gas fees. The facilitator sponsors gas via:
+- **EIP-3009** `transferWithAuthorization` — token moved directly without approve step
+- **ERC-4337** UserOperations — bundler handles gas, paymaster sponsors fees
+
+### Supported Networks
+
+All 25 EVM networks with USDT0 (EIP-3009 support).
+
+### How It Works
+
+1. Client signs EIP-3009 `transferWithAuthorization` (off-chain, no gas)
+2. Facilitator submits the signed authorization on-chain (pays gas)
+3. Token transfers directly from payer to merchant
+4. Payer never needs native token (ETH/MATIC/etc.)
+
+## @t402/wdk-bridge
+
+Cross-chain USDT0 bridging via LayerZero OFT standard.
+
+```bash
+npm install @t402/wdk-bridge
+```
+
+### Overview
+
+Bridge USDT0 between 19+ EVM chains using LayerZero's Omnichain Fungible Token (OFT) protocol. Also supports bridging to non-EVM destinations (Solana, TON, TRON).
+
+### Supported Routes
+
+- **EVM ↔ EVM**: All 19 USDT0 chains (Ethereum, Arbitrum, Optimism, Base, Polygon, Ink, Berachain, Unichain, etc.)
+- **EVM → Solana**: LayerZero endpoint 30168
+- **EVM → TON**: LayerZero endpoint 30343
+- **EVM → TRON**: LayerZero endpoint 30420
+
+### Features
+
+- Quote before bridge (estimate fees)
+- Smart routing (cheapest/fastest/preferred chain)
+- Delivery tracking via LayerZero message GUID
+- Balance aggregation across chains
+- Auto-routing based on available balances
+
+## @t402/wdk-multisig
+
+Safe multi-signature wallet integration for enterprise treasury management.
+
+```bash
+npm install @t402/wdk-multisig
+```
+
+### Overview
+
+Integrate Safe (formerly Gnosis Safe) multi-sig wallets with t402 payments. Enables M-of-N signing for payment approval, transaction queuing, and module-based extensions.
+
+### Features
+
+- Safe protocol integration (multi-sig)
+- M-of-N signing threshold for payment approval
+- Transaction queue management
+- Module support for automated payments
+- Compatible with Safe Core SDK
