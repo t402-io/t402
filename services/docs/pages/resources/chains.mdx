@@ -151,7 +151,7 @@ See the [Contributing Guide](https://github.com/t402-io/t402/blob/main/CONTRIBUT
 
 Detailed guide for EVM (Ethereum Virtual Machine) compatible chains. T402 supports all major EVM chains through the `@t402/evm` package.
 
-#### Layer 2 Benefits
+##### Layer 2 Benefits
 
 | Benefit | Description |
 |---------|-------------|
@@ -160,7 +160,7 @@ Detailed guide for EVM (Ethereum Virtual Machine) compatible chains. T402 suppor
 | Same security | Secured by Ethereum |
 | Same addresses | Use same wallet across L2s |
 
-#### Server Setup
+##### Server Setup
 
 ```typescript
 import { t402ResourceServer, createFacilitatorClient } from '@t402/core/server';
@@ -184,7 +184,7 @@ const routes = {
 };
 ```
 
-#### Client Setup
+##### Client Setup
 
 <Tabs items={['viem', 'ethers.js', 'web3.js']}>
   <Tabs.Tab>
@@ -240,7 +240,7 @@ client.register('eip155:*', new ExactEvmScheme({
   </Tabs.Tab>
 </Tabs>
 
-#### EIP-3009 (TransferWithAuthorization)
+##### EIP-3009 (TransferWithAuthorization)
 
 T402 uses EIP-3009 for gasless token transfers.
 
@@ -287,7 +287,7 @@ const types = {
 };
 ```
 
-#### Gas Estimation
+##### Gas Estimation
 
 ##### Average Costs by Chain
 
@@ -317,7 +317,7 @@ console.log(`Estimated gas: ${estimate.gasLimit}`);
 console.log(`Estimated cost: $${estimate.costUsd}`);
 ```
 
-#### Multi-Chain Support
+##### Multi-Chain Support
 
 ##### Same Address Across Chains
 
@@ -357,7 +357,7 @@ supportedNetworks.forEach(network => {
 });
 ```
 
-#### Wallet Integration
+##### Wallet Integration
 
 ##### MetaMask
 
@@ -405,7 +405,7 @@ const multisigClient = await createMultisigClient({
 });
 ```
 
-#### RPC Endpoints
+##### RPC Endpoints
 
 ##### Recommended Providers
 
@@ -426,7 +426,7 @@ const rpcConfig = {
 };
 ```
 
-#### Troubleshooting
+##### Troubleshooting
 
 ##### Common Issues
 
@@ -709,7 +709,7 @@ const cosmosClient = new ExactCosmosScheme(wallet);
 client.register('cosmos:noble-1', cosmosClient);
 ```
 
-#### Multi-Chain Server
+##### Multi-Chain Server
 
 Support all non-EVM chains:
 
@@ -756,7 +756,7 @@ const routes = {
 };
 ```
 
-#### Non-EVM Chain Comparison
+##### Non-EVM Chain Comparison
 
 | Feature | TON | TRON | Solana | NEAR | Aptos | Tezos | Polkadot | Stacks | Cosmos |
 |---------|-----|------|--------|------|-------|-------|----------|--------|--------|
@@ -777,7 +777,7 @@ T402 supports Bitcoin through two payment methods:
 | On-chain (PSBT) | `bip122:000000000019d6689c085ae165831e93` | Signed PSBT | ~10 min (1 confirmation) | Larger payments |
 | Lightning (BOLT11) | `lightning:mainnet` | Preimage | Instant (~seconds) | Micropayments |
 
-#### Network Identifiers
+##### Network Identifiers
 
 Bitcoin uses [BIP-122](https://github.com/bitcoin/bips/blob/master/bip-0122.mediawiki) chain genesis block hashes as CAIP-2 identifiers:
 
@@ -788,7 +788,7 @@ Bitcoin uses [BIP-122](https://github.com/bitcoin/bips/blob/master/bip-0122.medi
 | Lightning Mainnet | `lightning:mainnet` |
 | Lightning Testnet | `lightning:testnet` |
 
-#### On-Chain (PSBT)
+##### On-Chain (PSBT)
 
 Bitcoin on-chain payments use [BIP-174 Partially Signed Bitcoin Transactions (PSBT)](https://github.com/bitcoin/bips/blob/master/bip-0174.mediawiki). The client creates and signs a PSBT, the facilitator verifies the outputs and broadcasts it.
 
@@ -916,7 +916,7 @@ type FacilitatorBtcSigner interface {
 }
 ```
 
-#### Lightning Network (BOLT11)
+##### Lightning Network (BOLT11)
 
 Lightning payments use [BOLT11 invoices](https://github.com/lightning/bolts/blob/master/11-payment-encoding.md). The server provides a BOLT11 invoice, the client pays it and returns the preimage as proof of payment.
 
@@ -993,7 +993,7 @@ type ClientLightningSigner interface {
 | `lntb` | Bitcoin Testnet |
 | `lnbcrt` | Bitcoin Regtest |
 
-#### Payload Types
+##### Payload Types
 
 ##### PSBT Payload
 
@@ -1033,7 +1033,7 @@ type ClientLightningSigner interface {
 }
 ```
 
-#### SDK Support
+##### SDK Support
 
 | SDK | On-chain (PSBT) | Lightning (BOLT11) |
 |-----|-----------------|-------------------|
@@ -1042,7 +1042,7 @@ type ClientLightningSigner interface {
 | Python (`schemes.btc`) | Client, Server, Facilitator | Client, Server |
 | Java (`io.t402.schemes.btc`) | Client, Server, Facilitator | Client, Facilitator |
 
-#### Server-Side Route Configuration
+##### Server-Side Route Configuration
 
 ##### Go Server with Bitcoin
 
@@ -1085,14 +1085,14 @@ Testing T402 integration on testnet networks before production deployment.
 **Sandbox Facilitator** — Use [sandbox.t402.io](https://sandbox.t402.io) as your testnet facilitator. No API key required. Supports 7 testnets with [magic test addresses](https://sandbox.t402.io/test-addresses) for deterministic testing. See the [interactive playground](https://sandbox.t402.io/playground).
 </Callout>
 
-#### Why Use Testnets?
+##### Why Use Testnets?
 
 - **Free tokens** - No real funds required
 - **Safe testing** - No financial risk
 - **Same behavior** - Identical to mainnet
 - **Debug easily** - Block explorers available
 
-#### EVM Testnets
+##### EVM Testnets
 
 | Chain | Network ID | Faucet |
 |-------|------------|--------|
@@ -1133,7 +1133,7 @@ const testnetRoutes = {
 };
 ```
 
-#### TON Testnet
+##### TON Testnet
 
 | Property | Value |
 |----------|-------|
@@ -1150,7 +1150,7 @@ const tonTestnetConfig = {
 };
 ```
 
-#### TRON Testnets
+##### TRON Testnets
 
 | Testnet | Network ID | RPC | Faucet |
 |---------|-----------|-----|--------|
@@ -1159,7 +1159,7 @@ const tonTestnetConfig = {
 
 Test USDT (Nile): `TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf`
 
-#### Solana Devnet
+##### Solana Devnet
 
 | Property | Value |
 |----------|-------|
@@ -1168,7 +1168,7 @@ Test USDT (Nile): `TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf`
 | Faucet | `solana airdrop 1` (CLI) |
 | Test USDC Mint | `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU` |
 
-#### NEAR Testnet
+##### NEAR Testnet
 
 | Property | Value |
 |----------|-------|
@@ -1185,7 +1185,7 @@ const nearTestnetConfig = {
 };
 ```
 
-#### Aptos Testnet
+##### Aptos Testnet
 
 | Property | Value |
 |----------|-------|
@@ -1193,7 +1193,7 @@ const nearTestnetConfig = {
 | RPC | `https://fullnode.testnet.aptoslabs.com/v1` |
 | Faucet | [aptoslabs.com/faucet](https://aptos.dev/en/network/faucet) |
 
-#### Tezos Ghostnet
+##### Tezos Ghostnet
 
 | Property | Value |
 |----------|-------|
@@ -1201,7 +1201,7 @@ const nearTestnetConfig = {
 | RPC | `https://ghostnet.tezos.marigold.dev` |
 | Faucet | [faucet.ghostnet.teznet.xyz](https://faucet.ghostnet.teznet.xyz) |
 
-#### Polkadot Westend
+##### Polkadot Westend
 
 | Property | Value |
 |----------|-------|
@@ -1209,7 +1209,7 @@ const nearTestnetConfig = {
 | Asset ID | 1984 |
 | Faucet | [faucet.polkadot.io](https://faucet.polkadot.io) |
 
-#### Stacks Testnet
+##### Stacks Testnet
 
 | Property | Value |
 |----------|-------|
@@ -1217,7 +1217,7 @@ const nearTestnetConfig = {
 | RPC | `https://api.testnet.hiro.so` |
 | Faucet | [explorer.hiro.so/faucet](https://explorer.hiro.so/faucet?chain=testnet) |
 
-#### Cosmos Testnet (Noble Grand)
+##### Cosmos Testnet (Noble Grand)
 
 | Property | Value |
 |----------|-------|
@@ -1226,7 +1226,7 @@ const nearTestnetConfig = {
 | REST | `https://api.testnet.noble.strange.love` |
 | Token | USDC (`uusdc`) |
 
-#### Testing Best Practices
+##### Testing Best Practices
 
 ##### 1. Environment Variables
 
@@ -1285,7 +1285,7 @@ async function fundWallet(address: string, network: string) {
 }
 ```
 
-#### Facilitator Testnet Support
+##### Facilitator Testnet Support
 
 The public facilitator supports all testnets:
 
@@ -1304,7 +1304,7 @@ curl -s https://facilitator.t402.io/supported | jq '.kinds[] | select(.network |
 
 This section provides a comprehensive comparison of all supported blockchain mechanisms across T402 SDKs.
 
-#### Mechanism Support
+##### Mechanism Support
 
 | Mechanism | Scheme | Token Standard | TypeScript | Go | Python | Java |
 |-----------|--------|----------------|:---:|:---:|:---:|:---:|
@@ -1326,7 +1326,7 @@ This section provides a comprehensive comparison of all supported blockchain mec
 | Cosmos | exact-direct | Bank MsgSend | ✅ | ✅ | ✅ | ✅ |
 | Stellar | exact | Soroban SEP-41 | ✅ | ✅ | ✅ | ✅ |
 
-#### Choosing a Scheme
+##### Choosing a Scheme
 
 T402 supports three payment schemes. Choose based on your use case:
 
@@ -1360,7 +1360,7 @@ The client pre-authorizes a maximum amount. The server charges only what is cons
 Client authorizes max → Server tracks usage → Facilitator settles actual amount
 ```
 
-#### Choosing a Mechanism
+##### Choosing a Mechanism
 
 Use this decision tree to pick the right mechanism:
 
@@ -1385,7 +1385,7 @@ Use this decision tree to pick the right mechanism:
    - Yes → Register multiple mechanisms with your server and use `@t402/wdk-bridge` for cross-chain bridging
    - No → Use a single mechanism package
 
-#### HTTP Framework Support
+##### HTTP Framework Support
 
 | Framework | TypeScript | Go | Python | Java |
 |-----------|:---:|:---:|:---:|:---:|
@@ -1407,7 +1407,7 @@ Use this decision tree to pick the right mechanism:
 | Micronaut | — | — | — | ✅ |
 | JAX-RS | — | — | — | ✅ |
 
-#### SDK Versions
+##### SDK Versions
 
 | SDK | Version | Registry |
 |-----|---------|----------|

@@ -10,7 +10,7 @@ T402 is designed with security as a core principle. This page documents the cryp
 
 ## Security Principles
 
-#### 1. No Custom Cryptography
+##### 1. No Custom Cryptography
 
 T402 uses only industry-standard cryptographic primitives:
 
@@ -27,7 +27,7 @@ T402 uses only industry-standard cryptographic primitives:
 | Stacks | ECDSA (secp256k1) | SHA-256 | SIP-010 |
 | Cosmos | ECDSA (secp256k1) | SHA-256 | Bank MsgSend |
 
-#### 2. Defense in Depth
+##### 2. Defense in Depth
 
 Multiple layers of protection prevent unauthorized payments:
 
@@ -47,7 +47,7 @@ Multiple layers of protection prevent unauthorized payments:
 └─────────────────────────────────────────────────────────────┘
 ```
 
-#### 3. Minimal Trust Requirements
+##### 3. Minimal Trust Requirements
 
 | Entity | Trust Level | Reason |
 |--------|-------------|--------|
@@ -57,7 +57,7 @@ Multiple layers of protection prevent unauthorized payments:
 | Resource Server | Low | Cannot access funds without valid signature |
 | Client | None | Signatures are cryptographically verified |
 
-#### 4. Fail-Safe Design
+##### 4. Fail-Safe Design
 
 - Invalid signatures are rejected before any funds move
 - Insufficient balance checks occur before settlement
@@ -66,7 +66,7 @@ Multiple layers of protection prevent unauthorized payments:
 
 ## Security Features by Chain
 
-#### EVM Networks
+##### EVM Networks
 
 | Feature | Implementation |
 |---------|----------------|
@@ -77,7 +77,7 @@ Multiple layers of protection prevent unauthorized payments:
 | Smart Wallets | EIP-1271 signature verification |
 | Counterfactual | ERC-6492 wrapped signatures |
 
-#### Solana (SVM)
+##### Solana (SVM)
 
 | Feature | Implementation |
 |---------|----------------|
@@ -86,7 +86,7 @@ Multiple layers of protection prevent unauthorized payments:
 | Fee Payer Safety | Instruction structure validation |
 | Amount Validation | Exact amount matching |
 
-#### TON
+##### TON
 
 | Feature | Implementation |
 |---------|----------------|
@@ -94,7 +94,7 @@ Multiple layers of protection prevent unauthorized payments:
 | Authorization | Jetton transfer message |
 | Address Derivation | Owner + Jetton master validation |
 
-#### TRON
+##### TRON
 
 | Feature | Implementation |
 |---------|----------------|
@@ -133,7 +133,7 @@ If you discover a security vulnerability, please report it responsibly:
 
 This section provides a comprehensive overview of all cryptographic operations used in the T402 protocol across all supported blockchains.
 
-#### Overview
+##### Overview
 
 T402 implements cryptographic signing for ten blockchain families, each with specific algorithms and standards:
 
@@ -150,7 +150,7 @@ T402 implements cryptographic signing for ten blockchain families, each with spe
 | Stacks | ECDSA (secp256k1) | 65 bytes (r, s, v) | Clarity |
 | Cosmos | ECDSA (secp256k1) | 64 bytes (r, s) | Protobuf (Amino/Direct) |
 
-#### EVM Networks
+##### EVM Networks
 
 ##### Signature Scheme: EIP-712 Typed Data
 
@@ -331,7 +331,7 @@ def create_nonce() -> bytes:
   Never use predictable nonces (timestamps, counters, etc.). Always use cryptographically secure random number generators.
 </Callout>
 
-#### Solana (SVM)
+##### Solana (SVM)
 
 ##### Signature Scheme: Ed25519
 
@@ -410,7 +410,7 @@ const ata = await getAssociatedTokenAddress(
 );
 ```
 
-#### TON Blockchain
+##### TON Blockchain
 
 ##### Signature Scheme: Ed25519
 
@@ -465,7 +465,7 @@ Wallet State:
 └─ Valid only if seqno == expected
 ```
 
-#### TRON Blockchain
+##### TRON Blockchain
 
 ##### Signature Scheme: ECDSA (secp256k1)
 
@@ -523,7 +523,7 @@ public String recoverAddress(byte[] txHash, byte[] signature) {
 }
 ```
 
-#### Key Management
+##### Key Management
 
 ##### BIP-39 Seed Phrases
 
@@ -569,7 +569,7 @@ const privateKey = process.env.PRIVATE_KEY;
 const privateKey = "0x1234..."; // NEVER DO THIS
 ```
 
-#### External Dependencies
+##### External Dependencies
 
 ##### Go Dependencies
 
@@ -603,7 +603,7 @@ const privateKey = "0x1234..."; // NEVER DO THIS
 | `web3j` | EVM signing | Web3 Labs, audited |
 | `bouncycastle` | Ed25519 | Legion of Bouncy Castle, industry standard |
 
-#### Cryptographic Hygiene Checklist
+##### Cryptographic Hygiene Checklist
 
 - [ ] Use cryptographically secure random number generators for nonces
 - [ ] Verify signature format before processing (length, v value)
@@ -622,7 +622,7 @@ const privateKey = "0x1234..."; // NEVER DO THIS
 
 This section describes the security threat model for the T402 protocol, including trust assumptions, attack vectors, and mitigations.
 
-#### System Architecture
+##### System Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -662,7 +662,7 @@ This section describes the security threat model for the T402 protocol, includin
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-#### Trust Assumptions
+##### Trust Assumptions
 
 ##### High Trust Requirements
 
@@ -834,7 +834,7 @@ Replay Attempt:
 - Contract must return magic value `0x1626ba7e`
 - Cannot fake contract response without contract deployment
 
-#### Threat Matrix
+##### Threat Matrix
 
 | Threat | Likelihood | Impact | Risk | Mitigation Status |
 |--------|------------|--------|------|-------------------|
@@ -849,7 +849,7 @@ Replay Attempt:
 | Time-Based Attack | Low | Medium | Low | Mitigated (window limits) |
 | Smart Wallet Impersonation | Low | Medium | Low | Mitigated (EIP-1271) |
 
-#### Out-of-Scope Threats
+##### Out-of-Scope Threats
 
 | Threat | Responsible Party | Reason |
 |--------|-------------------|--------|
@@ -860,7 +860,7 @@ Replay Attempt:
 | DNS hijacking | Infrastructure | DNS security is infrastructure concern |
 | Client device malware | User | Endpoint security is user responsibility |
 
-#### Security Invariants
+##### Security Invariants
 
 The following properties must always hold:
 
@@ -897,7 +897,7 @@ The following properties must always hold:
   ¬S.valid(chain C2) where C1 ≠ C2
 ```
 
-#### Incident Response
+##### Incident Response
 
 ##### Detection
 
@@ -930,7 +930,7 @@ Monitor for:
    - Verify domain separator configuration
    - Check for contract upgrades
 
-#### Security Contact
+##### Security Contact
 
 Report security vulnerabilities to: **security@t402.io**
 
@@ -944,7 +944,7 @@ Report security vulnerabilities to: **security@t402.io**
 
 This section defines the scope for security audits of the T402 protocol, including critical code paths, focus areas, and testing recommendations.
 
-#### Executive Summary
+##### Executive Summary
 
 T402 is an HTTP-native payment protocol for USDT/USDT0 stablecoins across multiple blockchains. The audit should focus on:
 
@@ -954,7 +954,7 @@ T402 is an HTTP-native payment protocol for USDT/USDT0 stablecoins across multip
 4. **Fee payer safety** for sponsored transactions (Solana)
 5. **SDK cryptographic implementations** in all four languages
 
-#### Repository Structure
+##### Repository Structure
 
 ```
 github.com/t402-io/t402/
@@ -1002,7 +1002,7 @@ github.com/t402-io/t402/
 └── specs/                   # Protocol specifications (REFERENCE)
 ```
 
-#### In-Scope Components
+##### In-Scope Components
 
 ##### Priority 1: Critical Path (Must Audit)
 
@@ -1033,7 +1033,7 @@ github.com/t402-io/t402/
 | TypeScript Signers | `typescript/packages/mechanisms/*/src/signer.ts` | Client signing | Medium |
 | Java SVM Signer | `java/crypto/SvmSigner.java` | Ed25519 signing | Medium |
 
-#### Out-of-Scope
+##### Out-of-Scope
 
 | Component | Reason |
 |-----------|--------|
@@ -1043,7 +1043,7 @@ github.com/t402-io/t402/
 | Documentation Site | Static content |
 | CI/CD Pipelines | Infrastructure |
 
-#### Critical Code Paths
+##### Critical Code Paths
 
 ##### 1. EVM Payment Verification
 
@@ -1125,7 +1125,7 @@ Function: HashEIP3009Authorization(domain, authorization)
 └─ 4. Return hash                           ← CRITICAL: Must match contract
 ```
 
-#### Focus Areas for Auditors
+##### Focus Areas for Auditors
 
 ##### 1. Signature Verification
 
@@ -1178,7 +1178,7 @@ Function: HashEIP3009Authorization(domain, authorization)
 - [ ] ERC-6492 magic suffix detection
 - [ ] ABI decoding for wrapped signatures
 
-#### Testing Recommendations
+##### Testing Recommendations
 
 ##### Unit Tests
 
@@ -1239,7 +1239,7 @@ func TestFullPaymentFlow_EVM(t *testing.T) {
 | `VerifyEOASignature` | Random signature | No panic, correct result |
 | `ValidateTransaction` (Solana) | Random tx bytes | No panic, reject invalid |
 
-#### Environment Setup
+##### Environment Setup
 
 ##### Testnet Configuration
 
@@ -1250,7 +1250,7 @@ func TestFullPaymentFlow_EVM(t *testing.T) {
 | TON Testnet | - | `https://testnet.toncenter.com` | [@testgiver_ton_bot](https://t.me/testgiver_ton_bot) |
 | TRON Nile | - | `https://nile.trongrid.io` | [nileex.io](https://nileex.io/join/getJoinPage) |
 
-#### Contact Information
+##### Contact Information
 
 | Role | Contact |
 |------|---------|
