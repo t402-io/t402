@@ -226,5 +226,7 @@ export function getDbStatus() { return { facilitator: !!process.env.FACILITATOR_
 export function setLastSync(ts) { db.lastSync = ts; }
 
 function sqliteRowToTx(row) {
-  return { id: row.id, txHash: row.tx_hash, network: row.network, scheme: row.scheme, token: row.asset, amount: row.amount, from: row.from_address, to: row.to_address, status: row.status, settledAt: row.confirmed_at || row.created_at, gasUsed: row.gas_used, gasPrice: row.gas_price };
+  let meta = null;
+  try { if (row.metadata) meta = JSON.parse(row.metadata); } catch { /* ignore */ }
+  return { id: row.id, txHash: row.tx_hash, network: row.network, scheme: row.scheme, token: row.asset, amount: row.amount, from: row.from_address, to: row.to_address, status: row.status, settledAt: row.confirmed_at || row.created_at, gasUsed: row.gas_used, gasPrice: row.gas_price, description: meta?.description || meta?.displayName || null, resourceUrl: meta?.resourceUrl || null };
 }
