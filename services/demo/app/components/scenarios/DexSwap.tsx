@@ -421,10 +421,11 @@ export function DexSwap() {
 
       // Step 2: Sign via multi-chain hook
       setFlowState("signing");
+      // Force EVM family for payment signing (DEX Swap is always EVM)
       const paymentPayload = await signPayment(requirements, (step) => {
         if (step === "approving") setFlowState("approving");
         if (step === "signing") setFlowState("signing");
-      });
+      }, "evm");
 
       // Step 3: Retry with payment — execute the swap
       const retryHeaders: Record<string, string> = {

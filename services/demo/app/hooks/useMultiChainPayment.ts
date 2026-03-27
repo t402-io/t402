@@ -127,13 +127,14 @@ export function useMultiChainPayment() {
   })();
 
   const signPayment = useCallback(
-    async (requirements: PaymentRequirements, onProgress?: (step: string) => void): Promise<PaymentPayload> => {
+    async (requirements: PaymentRequirements, onProgress?: (step: string) => void, forceFamily?: ChainFamily): Promise<PaymentPayload> => {
+      const family = forceFamily || activeFamily;
       if (isDemo) {
         await new Promise((r) => setTimeout(r, 600));
-        return createMockPayload(requirements, activeFamily);
+        return createMockPayload(requirements, family);
       }
 
-      switch (activeFamily) {
+      switch (family) {
         case "evm":
           return evm.signPayment(requirements, onProgress) as Promise<PaymentPayload>;
         case "ton":
