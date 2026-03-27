@@ -22,7 +22,8 @@ import {
 } from "@/components/shared/PaymentStatus";
 import type { FlowState } from "@/hooks/usePaymentFlow";
 import { encodePaymentHeader } from "@/lib/t402-client";
-import { useAccount, useSwitchChain } from "wagmi";
+import { useEvmChainSync } from "@/hooks/useEvmChainSync";
+import { WalletChainIndicator } from "@/components/shared/WalletChainIndicator";
 
 // ---------------------------------------------------------------------------
 // Types & Constants
@@ -555,8 +556,7 @@ function ErrorState({
 export function CrossChainBridge() {
   const { isDemo, testnet } = useDemoContext();
   const { signPayment, activeFamily, activeNetwork, address: walletAddress } = useMultiChainPayment();
-  const { isConnected } = useAccount();
-  const { switchChainAsync } = useSwitchChain();
+  const { ensureChain } = useEvmChainSync();
 
   // Form state
   const [fromChain, setFromChain] = useState("arbitrum");
@@ -719,11 +719,9 @@ export function CrossChainBridge() {
     setTrackingStage("submitted");
 
     try {
-      // Switch wallet to the FROM chain BEFORE T402 payment
+      // Ensure wallet is on the FROM chain before T402 payment
       const targetChainId = BRIDGE_CHAIN_IDS[fromChain];
-      if (isConnected && switchChainAsync && targetChainId) {
-        try { await switchChainAsync({ chainId: targetChainId }); } catch { /* user may reject */ }
-      }
+      if (targetChainId) await ensureChain(targetChainId);
 
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
@@ -836,7 +834,7 @@ export function CrossChainBridge() {
       setFlowState("error");
       setState("failed");
     }
-  }, [isDemo, activeFamily, activeNetwork, testnet, signPayment, fromChain, toChain, amountRaw, isConnected, switchChainAsync, walletAddress]);
+  }, [isDemo, activeFamily, activeNetwork, testnet, signPayment, fromChain, toChain, amountRaw, ensureChain, walletAddress]);
 
   // ---------------------------------------------------------------------------
   // Reset
@@ -857,7 +855,7 @@ export function CrossChainBridge() {
   // Ensure fromChain !== toChain
   // ---------------------------------------------------------------------------
   const handleFromChange = useCallback(
-    async (id: string) => {
+    (id: string) => {
       setFromChain(id);
       if (id === toChain) {
         const alt = BRIDGE_CHAINS.find((c) => c.id !== id);
@@ -865,11 +863,9 @@ export function CrossChainBridge() {
       }
       // Switch wallet to match the FROM chain
       const cid = BRIDGE_CHAIN_IDS[id];
-      if (isConnected && switchChainAsync && cid) {
-        try { await switchChainAsync({ chainId: cid }); } catch { /* user may reject */ }
-      }
+      if (cid) ensureChain(cid);
     },
-    [toChain, isConnected, switchChainAsync]
+    [toChain, ensureChain]
   );
 
   const handleToChange = useCallback(
@@ -912,15 +908,13 @@ export function CrossChainBridge() {
 
             {/* Swap button */}
             <button
-              onClick={async () => {
+              onClick={() => {
                 const prev = fromChain;
                 setFromChain(toChain);
                 setToChain(prev);
                 // Switch wallet to match new FROM chain
                 const cid = BRIDGE_CHAIN_IDS[toChain];
-                if (isConnected && switchChainAsync && cid) {
-                  try { await switchChainAsync({ chainId: cid }); } catch { /* user may reject */ }
-                }
+                if (cid) ensureChain(cid);
               }}
               disabled={formDisabled}
               className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full bg-[var(--color-surface)] hover:bg-[var(--color-surface-active)] transition-colors disabled:opacity-50"
@@ -936,6 +930,9 @@ export function CrossChainBridge() {
               exclude={fromChain}
               disabled={formDisabled}
             />
+          </div>
+          <div className="mb-4">
+            <WalletChainIndicator expectedChainId={BRIDGE_CHAIN_IDS[fromChain]} />
           </div>
 
           {/* Amount input */}

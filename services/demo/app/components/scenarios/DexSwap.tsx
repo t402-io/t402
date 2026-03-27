@@ -2,13 +2,15 @@
 
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { motion } from "motion/react";
-import { useAccount, useSendTransaction, useWaitForTransactionReceipt, useReadContract, useWriteContract, useSwitchChain } from "wagmi";
+import { useAccount, useSendTransaction, useWaitForTransactionReceipt, useReadContract, useWriteContract } from "wagmi";
 import { useDemoContext } from "@/providers/DemoProvider";
 import { useMultiChainPayment } from "@/hooks/useMultiChainPayment";
+import { useEvmChainSync } from "@/hooks/useEvmChainSync";
 import { PaymentStatus, parsePaymentResponse, type SettleInfo } from "@/components/shared/PaymentStatus";
 import type { FlowState } from "@/hooks/usePaymentFlow";
 import { CodeBlock } from "@/components/shared/CodeBlock";
 import { Spinner } from "@/components/shared/Spinner";
+import { WalletChainIndicator } from "@/components/shared/WalletChainIndicator";
 import { encodePaymentHeader } from "@/lib/t402-client";
 import { Repeat, ArrowDown, ChevronDown, CheckCircle, ExternalLink } from "lucide-react";
 
@@ -198,7 +200,7 @@ export function DexSwap() {
   const { isDemo, testnet } = useDemoContext();
   const { signPayment, activeFamily, activeNetwork } = useMultiChainPayment();
   const { address: userAddress, isConnected } = useAccount();
-  const { switchChainAsync } = useSwitchChain();
+  const { ensureChain } = useEvmChainSync();
 
   const [chain, setChain] = useState("arbitrum");
   const tokens = useMemo(() => CHAIN_TOKENS[chain] || CHAIN_TOKENS.arbitrum, [chain]);
@@ -269,18 +271,12 @@ export function DexSwap() {
     setFlowState("idle");
     setSettle(null);
 
-    // Switch wagmi chain if connected
-    if (isConnected && switchChainAsync) {
-      const targetChainId = CHAIN_IDS[newChain];
-      if (targetChainId) {
-        try {
-          await switchChainAsync({ chainId: targetChainId });
-        } catch {
-          // User may reject chain switch — that's OK
-        }
-      }
+    // Switch wallet to match selected chain
+    const targetChainId = CHAIN_IDS[newChain];
+    if (targetChainId) {
+      ensureChain(targetChainId);
     }
-  }, [isConnected, switchChainAsync]);
+  }, [ensureChain]);
 
   // Tokens available for dest (exclude srcToken)
   const destOptions = useMemo(
@@ -380,10 +376,8 @@ export function DexSwap() {
     setSettle(null);
 
     try {
-      // Switch wallet to the correct chain BEFORE T402 payment
-      if (isConnected && switchChainAsync && chainId) {
-        try { await switchChainAsync({ chainId }); } catch { /* user may reject */ }
-      }
+      // Ensure wallet is on the correct chain before T402 payment
+      await ensureChain(chainId);
 
       const headers: Record<string, string> = {
         Accept: "application/json",
@@ -470,10 +464,8 @@ export function DexSwap() {
 
         // Auto-execute: approve if needed, then swap — all in one flow
         try {
-          // Ensure correct chain
-          if (switchChainAsync && chainId) {
-            try { await switchChainAsync({ chainId }); } catch { /* user may reject */ }
-          }
+          // Ensure wallet is on correct chain
+          await ensureChain(chainId);
 
           // Check allowance and approve if needed (skip for native token)
           const isNative = srcToken.address.toLowerCase() === "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
@@ -531,9 +523,7 @@ export function DexSwap() {
     setState("approving");
     try {
       // Ensure wallet is on the correct chain before approve
-      if (switchChainAsync && chainId) {
-        try { await switchChainAsync({ chainId }); } catch { /* user may reject */ }
-      }
+      await ensureChain(chainId);
       const hash = await writeContractAsync({
         address: srcToken.address as `0x${string}`,
         abi: erc20Abi,
@@ -558,16 +548,14 @@ export function DexSwap() {
       setState("error");
       setFlowState("error");
     }
-  }, [swapTx, srcToken, writeContractAsync, refetchAllowance, amountInSmallestUnits, spender, chainId, switchChainAsync]);
+  }, [swapTx, srcToken, writeContractAsync, refetchAllowance, amountInSmallestUnits, spender, chainId, ensureChain]);
 
   const handleExecuteSwap = useCallback(async () => {
     if (!swapTx) return;
     setState("executing");
     try {
       // Ensure wallet is on the correct chain before swap
-      if (switchChainAsync && chainId) {
-        try { await switchChainAsync({ chainId }); } catch { /* user may reject */ }
-      }
+      await ensureChain(chainId);
       const hash = await sendTransactionAsync({
         to: swapTx.to as `0x${string}`,
         data: swapTx.data as `0x${string}`,
@@ -581,7 +569,7 @@ export function DexSwap() {
       setState("error");
       setFlowState("error");
     }
-  }, [swapTx, sendTransactionAsync, chainId, switchChainAsync]);
+  }, [swapTx, sendTransactionAsync, chainId, ensureChain]);
 
   const handleSrcChange = (symbol: string) => {
     const token = tokens.find((t) => t.symbol === symbol);
@@ -680,6 +668,7 @@ export function DexSwap() {
                     className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-muted)]"
                   />
                 </div>
+                <WalletChainIndicator expectedChainId={chainId} />
               </div>
 
               {/* From token */}

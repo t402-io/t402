@@ -3,7 +3,32 @@
 import { createContext, useContext, useState, useCallback, useEffect, useMemo, type ReactNode } from "react";
 import { type ChainFamily, CHAIN_CONFIGS, type ChainConfig } from "@/lib/testnet-config";
 import { getDefaultConfigForFamily, getMainnetConfigsForFamily, getConfigByNetwork, familyFromNetwork, MAINNET_CONFIGS } from "@/lib/chain-registry";
+import { chainIdFromCaip2 } from "@/lib/evm-chains";
 import { useDemoContext } from "./DemoProvider";
+
+// ---------------------------------------------------------------------------
+// EVM wallet state (pushed in by EvmChainSyncBridge)
+// ---------------------------------------------------------------------------
+
+export interface EvmWalletSyncState {
+  walletChainId: number | undefined;
+  walletChainName: string | undefined;
+  isSwitching: boolean;
+  switchError: string | null;
+  ensureChain: (chainId: number) => Promise<boolean>;
+}
+
+const DEFAULT_EVM_SYNC: EvmWalletSyncState = {
+  walletChainId: undefined,
+  walletChainName: undefined,
+  isSwitching: false,
+  switchError: null,
+  ensureChain: async () => false,
+};
+
+// ---------------------------------------------------------------------------
+// Context interface
+// ---------------------------------------------------------------------------
 
 interface ChainContextValue {
   activeFamily: ChainFamily;
@@ -15,6 +40,18 @@ interface ChainContextValue {
   isConnected: boolean;
   address: string | null;
   setWalletState: (connected: boolean, address: string | null) => void;
+
+  // EVM wallet chain sync (populated by EvmChainSyncBridge)
+  walletChainId: number | undefined;
+  walletChainName: string | undefined;
+  isSwitchingChain: boolean;
+  chainSwitchError: string | null;
+  /** True when wallet chain matches activeNetwork for EVM, or always true for non-EVM */
+  isChainMatched: boolean;
+  /** Switch wallet to a specific EVM chain. Returns true on success. */
+  ensureEvmChain: (chainId: number) => Promise<boolean>;
+  /** Internal: used by EvmChainSyncBridge to push wallet state */
+  setEvmWalletState: (state: EvmWalletSyncState) => void;
 }
 
 const ChainContext = createContext<ChainContextValue>({
@@ -26,6 +63,13 @@ const ChainContext = createContext<ChainContextValue>({
   isConnected: false,
   address: null,
   setWalletState: () => {},
+  walletChainId: undefined,
+  walletChainName: undefined,
+  isSwitchingChain: false,
+  chainSwitchError: null,
+  isChainMatched: true,
+  ensureEvmChain: async () => false,
+  setEvmWalletState: () => {},
 });
 
 export function useChainContext() {
@@ -56,9 +100,12 @@ export function ChainProvider({ children }: { children: ReactNode }) {
     address: string | null;
   }>({ connected: false, address: null });
 
+  // EVM wallet sync state (pushed by EvmChainSyncBridge)
+  const [evmSync, setEvmSync] = useState<EvmWalletSyncState>(DEFAULT_EVM_SYNC);
+
   const setActiveFamily = useCallback((family: ChainFamily) => {
     setActiveFamilyState(family);
-    setActiveNetworkState(null); // Reset network when switching family
+    setActiveNetworkState(null);
     if (typeof window !== "undefined") {
       localStorage.setItem("t402-chain-family", family);
       localStorage.removeItem("t402-chain-network");
@@ -79,6 +126,10 @@ export function ChainProvider({ children }: { children: ReactNode }) {
     setWalletStateInternal({ connected, address });
   }, []);
 
+  const setEvmWalletState = useCallback((state: EvmWalletSyncState) => {
+    setEvmSync(state);
+  }, []);
+
   // Resolve activeConfig based on mode
   const activeConfig = useMemo<ChainConfig>(() => {
     if (testnet) {
@@ -90,6 +141,16 @@ export function ChainProvider({ children }: { children: ReactNode }) {
     }
   }, [testnet, activeFamily, activeNetwork]);
 
+  // Determine if wallet chain matches the selected network
+  const isChainMatched = useMemo(() => {
+    if (activeFamily !== "evm") return true; // Non-EVM: no chain switching concept
+    if (!activeNetwork) return true; // No specific network selected
+    if (!evmSync.walletChainId) return true; // Wallet not connected
+    const expectedChainId = chainIdFromCaip2(activeNetwork);
+    if (!expectedChainId) return true;
+    return evmSync.walletChainId === expectedChainId;
+  }, [activeFamily, activeNetwork, evmSync.walletChainId]);
+
   const value = useMemo<ChainContextValue>(() => ({
     activeFamily,
     setActiveFamily,
@@ -99,7 +160,14 @@ export function ChainProvider({ children }: { children: ReactNode }) {
     isConnected: walletState.connected,
     address: walletState.address,
     setWalletState,
-  }), [activeFamily, setActiveFamily, activeNetwork, setActiveNetwork, activeConfig, walletState, setWalletState]);
+    walletChainId: evmSync.walletChainId,
+    walletChainName: evmSync.walletChainName,
+    isSwitchingChain: evmSync.isSwitching,
+    chainSwitchError: evmSync.switchError,
+    isChainMatched,
+    ensureEvmChain: evmSync.ensureChain,
+    setEvmWalletState,
+  }), [activeFamily, setActiveFamily, activeNetwork, setActiveNetwork, activeConfig, walletState, setWalletState, evmSync, isChainMatched, setEvmWalletState]);
 
   return (
     <ChainContext.Provider value={value}>

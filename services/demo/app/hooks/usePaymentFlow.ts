@@ -125,7 +125,10 @@ export function usePaymentFlow(url: string) {
 
       setResult((prev) => ({ ...prev, state: "signing" }));
 
-      const requirements = paymentRequired.accepts[0];
+      // Pick the accept matching the user's selected network, fall back to first
+      const requirements = activeNetwork
+        ? paymentRequired.accepts.find((a) => a.network === activeNetwork) || paymentRequired.accepts[0]
+        : paymentRequired.accepts[0];
       const paymentPayload = await signPayment(requirements);
 
       // Step 4: Retry with payment
@@ -182,7 +185,7 @@ export function usePaymentFlow(url: string) {
         error: originalMessage,
       }));
     }
-  }, [url, isDemo, isConnected, activeFamily, signPayment, show]);
+  }, [url, isDemo, isConnected, activeFamily, activeNetwork, testnet, signPayment, show]);
 
   const reset = useCallback(() => {
     setResult({

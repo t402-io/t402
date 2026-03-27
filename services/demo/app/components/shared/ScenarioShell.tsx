@@ -11,6 +11,7 @@ import { useDemoContext } from "@/providers/DemoProvider";
 import type { ScenarioId } from "@/lib/sdk-examples";
 import type { ReactNode } from "react";
 import { AlertTriangle } from "lucide-react";
+import { WalletChainIndicator } from "./WalletChainIndicator";
 
 interface ScenarioShellProps {
   title: string;
@@ -53,6 +54,7 @@ export function ScenarioShell({ title, description, cost, accentColor, scenarioI
               <div className="flex items-center gap-2 flex-wrap">
                 <ChainBadge family={activeFamily} showNetwork />
                 {isLive && <TokenBalance />}
+                {isLive && <WalletChainIndicator />}
               </div>
             </div>
             {isLive && testnet ? (

@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useState, useEffect, Suspense, createContext, useContext, lazy } from "react";
 import dynamic from "next/dynamic";
 import { ChainProvider, useChainContext } from "./ChainProvider";
+import { EvmChainSyncBridge } from "./EvmChainSyncBridge";
 import { DemoProvider, useDemoContext } from "./DemoProvider";
 import { ToastProvider } from "./ToastProvider";
 import type { ChainFamily } from "@/lib/testnet-config";
@@ -78,6 +79,7 @@ export function ClientProviders({ children }: { children: ReactNode }) {
           <ToastProvider>
             {mounted ? (
               <WagmiProviderWrapper>
+                <EvmChainSyncBridge />
                 <NonEvmProvider>
                   {children}
                 </NonEvmProvider>

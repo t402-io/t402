@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import { useAccount, useSignTypedData, useSwitchChain } from "wagmi";
 import { encodeFunctionData, erc20Abi } from "viem";
 import { getConfigByNetwork } from "@/lib/chain-registry";
+import { EVM_CHAIN_RPC, EVM_NATIVE_CURRENCY, getEvmChainName } from "@/lib/evm-chains";
 
 interface PaymentRequirements {
   scheme: string;
@@ -62,48 +63,10 @@ function createNonce(): string {
   return "0x" + Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-const CHAIN_RPC: Record<number, string> = {
-  1: "https://ethereum-rpc.publicnode.com",
-  10: "https://mainnet.optimism.io",
-  14: "https://flare-api.flare.network/ext/C/rpc",
-  30: "https://public-node.rsk.co",
-  56: "https://bsc-rpc.publicnode.com",
-  130: "https://mainnet.unichain.org",
-  137: "https://polygon-bor-rpc.publicnode.com",
-  143: "https://rpc.monad.xyz",
-  196: "https://rpc.xlayer.tech",
-  250: "https://rpc.ftm.tools",
-  988: "https://rpc.stable.io",
-  999: "https://rpc.hyperliquid.xyz/evm",
-  1030: "https://evm.confluxrpc.com",
-  1329: "https://evm-rpc.sei-apis.com",
-  4326: "https://rpc.megaeth.com",
-  5000: "https://rpc.mantle.xyz",
-  8217: "https://public-en.node.kaia.io",
-  8453: "https://mainnet.base.org",
-  9745: "https://rpc.plasma.to",
-  42161: "https://arb1.arbitrum.io/rpc",
-  42220: "https://forno.celo.org",
-  43114: "https://api.avax.network/ext/bc/C/rpc",
-  57073: "https://rpc-gel.inkonchain.com",
-  80094: "https://rpc.berachain.com",
-  84532: "https://base-sepolia.publicnode.com",
-  21000000: "https://rpc.corn.xyz",
-};
-
-const NATIVE_CURRENCY: Record<number, { name: string; symbol: string; decimals: number }> = {
-  56: { name: "BNB", symbol: "BNB", decimals: 18 },
-  137: { name: "MATIC", symbol: "POL", decimals: 18 },
-  250: { name: "FTM", symbol: "FTM", decimals: 18 },
-  42220: { name: "CELO", symbol: "CELO", decimals: 18 },
-  43114: { name: "AVAX", symbol: "AVAX", decimals: 18 },
-  8217: { name: "KAIA", symbol: "KAIA", decimals: 18 },
-  80094: { name: "BERA", symbol: "BERA", decimals: 18 },
-  143: { name: "MON", symbol: "MON", decimals: 18 },
-  14: { name: "FLR", symbol: "FLR", decimals: 18 },
-  30: { name: "RBTC", symbol: "RBTC", decimals: 18 },
-  5000: { name: "MNT", symbol: "MNT", decimals: 18 },
-};
+// CHAIN_RPC and NATIVE_CURRENCY are now in @/lib/evm-chains.ts
+// Aliases for backward compatibility within this file
+const CHAIN_RPC = EVM_CHAIN_RPC;
+const NATIVE_CURRENCY = EVM_NATIVE_CURRENCY;
 
 async function ensureCorrectChain(
   switchChainAsync: (args: { chainId: number }) => Promise<unknown>,
@@ -140,7 +103,6 @@ async function ensureCorrectChain(
       throw new Error(`Please switch your wallet to ${chainName} manually.`);
     }
   }
-  await new Promise((r) => setTimeout(r, 1000));
 }
 
 // Facilitator address — sourced from config, falls back to well-known address
