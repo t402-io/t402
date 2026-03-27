@@ -78,30 +78,37 @@ interface TrackingData {
 // CAIP-2 network IDs — T402 fee is paid on the FROM chain
 const CHAIN_CAIP2: Record<string, string> = {
   ethereum: "eip155:1", arbitrum: "eip155:42161", optimism: "eip155:10",
-  polygon: "eip155:137", ink: "eip155:57073", berachain: "eip155:80094",
+  base: "eip155:8453", polygon: "eip155:137", bnb: "eip155:56",
+  avalanche: "eip155:43114", ink: "eip155:57073", berachain: "eip155:80094",
   unichain: "eip155:130", mantle: "eip155:5000", sei: "eip155:1329",
   monad: "eip155:143", conflux: "eip155:1030", flare: "eip155:14",
   rootstock: "eip155:30", xlayer: "eip155:196", stable: "eip155:988",
   corn: "eip155:21000000", plasma: "eip155:9745", megaeth: "eip155:4326",
-  hyperevm: "eip155:999", morph: "eip155:2818", hedera: "eip155:295",
+  hyperevm: "eip155:999", fantom: "eip155:250", kaia: "eip155:8217",
+  celo: "eip155:42220", morph: "eip155:2818", hedera: "eip155:295",
   tempo: "eip155:698",
 };
 
 // EVM chainIds for wallet switching
 const BRIDGE_CHAIN_IDS: Record<string, number> = {
-  ethereum: 1, arbitrum: 42161, optimism: 10, polygon: 137,
+  ethereum: 1, arbitrum: 42161, optimism: 10, base: 8453,
+  polygon: 137, bnb: 56, avalanche: 43114,
   ink: 57073, berachain: 80094, unichain: 130, mantle: 5000,
   sei: 1329, monad: 143, conflux: 1030, flare: 14, rootstock: 30,
   xlayer: 196, stable: 988, corn: 21000000, plasma: 9745,
-  megaeth: 4326, hyperevm: 999, morph: 2818, hedera: 295, tempo: 698,
+  megaeth: 4326, hyperevm: 999, fantom: 250, kaia: 8217,
+  celo: 42220, morph: 2818, hedera: 295, tempo: 698,
 };
 
 const BRIDGE_CHAINS: BridgeChain[] = [
   // Major
   { id: "arbitrum", name: "Arbitrum", category: "major" },
   { id: "ethereum", name: "Ethereum", category: "major" },
+  { id: "base", name: "Base", category: "major" },
   { id: "optimism", name: "Optimism", category: "major" },
   { id: "polygon", name: "Polygon", category: "major" },
+  { id: "bnb", name: "BNB Chain", category: "major" },
+  { id: "avalanche", name: "Avalanche", category: "major" },
   // L2/L3
   { id: "ink", name: "Ink", category: "l2" },
   { id: "berachain", name: "Berachain", category: "l2" },
@@ -119,6 +126,9 @@ const BRIDGE_CHAINS: BridgeChain[] = [
   { id: "plasma", name: "Plasma", category: "other" },
   { id: "megaeth", name: "MegaETH", category: "other" },
   { id: "hyperevm", name: "HyperEVM", category: "other" },
+  { id: "fantom", name: "Fantom", category: "other" },
+  { id: "kaia", name: "Kaia", category: "other" },
+  { id: "celo", name: "Celo", category: "other" },
   { id: "morph", name: "Morph", category: "other" },
   { id: "hedera", name: "Hedera", category: "other" },
   { id: "tempo", name: "Tempo", category: "other" },
@@ -127,8 +137,11 @@ const BRIDGE_CHAINS: BridgeChain[] = [
 const CHAIN_EXPLORERS: Record<string, string> = {
   ethereum: "https://etherscan.io/tx/",
   arbitrum: "https://arbiscan.io/tx/",
+  base: "https://basescan.org/tx/",
   optimism: "https://optimistic.etherscan.io/tx/",
   polygon: "https://polygonscan.com/tx/",
+  bnb: "https://bscscan.com/tx/",
+  avalanche: "https://snowscan.xyz/tx/",
   ink: "https://explorer.inkonchain.com/tx/",
   berachain: "https://berascan.com/tx/",
   unichain: "https://uniscan.xyz/tx/",
@@ -144,6 +157,9 @@ const CHAIN_EXPLORERS: Record<string, string> = {
   plasma: "https://plasmascan.io/tx/",
   megaeth: "https://explorer.megaeth.com/tx/",
   hyperevm: "https://explorer.hyperliquid.xyz/tx/",
+  fantom: "https://ftmscan.com/tx/",
+  kaia: "https://kaiascan.io/tx/",
+  celo: "https://celoscan.io/tx/",
   morph: "https://explorer.morphl2.io/tx/",
   hedera: "https://hashscan.io/mainnet/transaction/",
   tempo: "https://explorer.tempo.xyz/tx/",
