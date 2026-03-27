@@ -73,6 +73,18 @@ interface TrackingData {
   real?: boolean;
 }
 
+// CAIP-2 network IDs — T402 fee is paid on the FROM chain
+const CHAIN_CAIP2: Record<string, string> = {
+  ethereum: "eip155:1", arbitrum: "eip155:42161", optimism: "eip155:10",
+  polygon: "eip155:137", ink: "eip155:57073", berachain: "eip155:80094",
+  unichain: "eip155:130", mantle: "eip155:5000", sei: "eip155:1329",
+  monad: "eip155:143", conflux: "eip155:1030", flare: "eip155:14",
+  rootstock: "eip155:30", xlayer: "eip155:196", stable: "eip155:988",
+  corn: "eip155:21000000", plasma: "eip155:9745", megaeth: "eip155:4326",
+  hyperevm: "eip155:999", morph: "eip155:2818", hedera: "eip155:295",
+  tempo: "eip155:698",
+};
+
 const BRIDGE_CHAINS: BridgeChain[] = [
   // Major
   { id: "arbitrum", name: "Arbitrum", category: "major" },
@@ -697,9 +709,9 @@ export function CrossChainBridge() {
     try {
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
-        "x-preferred-chain": activeFamily,
-        "x-network-mode": testnet ? "testnet" : "mainnet",
-        ...(activeNetwork ? { "x-preferred-network": activeNetwork } : {}),
+        "x-preferred-chain": "evm",
+        "x-network-mode": "mainnet",
+        "x-preferred-network": CHAIN_CAIP2[fromChain] || "eip155:42161",
       };
       if (isDemo) headers["x-demo-mode"] = "true";
 
