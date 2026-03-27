@@ -735,15 +735,18 @@ export function CrossChainBridge() {
     setTrackingStage("submitted");
 
     try {
-      // Ensure wallet is on the FROM chain before T402 payment
-      const targetChainId = BRIDGE_CHAIN_IDS[fromChain];
-      if (targetChainId) await ensureChain(targetChainId);
+      // T402 payment uses the user's active chain (any chain supported by Facilitator).
+      // Bridge execution is always EVM (LayerZero) — handled server-side independently.
+      if (activeFamily === "evm") {
+        const targetChainId = BRIDGE_CHAIN_IDS[fromChain];
+        if (targetChainId) await ensureChain(targetChainId);
+      }
 
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
-        "x-preferred-chain": "evm",
-        "x-network-mode": "mainnet",
-        "x-preferred-network": CHAIN_CAIP2[fromChain] || "eip155:42161",
+        "x-preferred-chain": activeFamily,
+        "x-network-mode": testnet ? "testnet" : "mainnet",
+        ...(activeNetwork ? { "x-preferred-network": activeNetwork } : {}),
       };
       if (isDemo) headers["x-demo-mode"] = "true";
 
@@ -756,27 +759,25 @@ export function CrossChainBridge() {
         ...(walletAddress && walletAddress !== "demo-wallet" && { recipient: walletAddress }),
       });
 
-      // Step 1: Get 402
+      // Step 1: Get 402 — server returns accepts for ALL chains
       const res = await fetch("/api/demo/bridge", { method: "POST", headers, body });
 
       if (res.status === 402) {
         setFlowState("got-402");
         const paymentRequired = await res.json();
-        // Pick the accept matching the FROM chain's CAIP-2 (not just [0])
-        const targetNetwork = CHAIN_CAIP2[fromChain] || "eip155:42161";
-        const requirements = paymentRequired.accepts?.find(
-          (a: { network: string }) => a.network === targetNetwork
-        ) || paymentRequired.accepts?.[0];
+        // Pick the accept matching user's active network/family (not forced EVM)
+        const requirements = activeNetwork
+          ? paymentRequired.accepts?.find((a: { network: string }) => a.network === activeNetwork) || paymentRequired.accepts?.[0]
+          : paymentRequired.accepts?.[0];
         if (!requirements) throw new Error("No payment options available");
 
-        // Step 2: Sign
+        // Step 2: Sign — use user's active chain (no forceFamily)
         setFlowState("signing");
-        // Force EVM family for payment signing (Bridge is always EVM)
         const paymentPayload = await signPayment(requirements, (step) => {
           if (step === "switching-chain") setFlowState("switching-chain" as FlowState);
           if (step === "approving") setFlowState("approving");
           if (step === "signing") setFlowState("signing");
-        }, "evm");
+        });
 
         setState("bridging");
 

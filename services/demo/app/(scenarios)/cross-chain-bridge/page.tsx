@@ -19,7 +19,7 @@ export default function CrossChainBridgePage() {
     <ScenarioShell
       iconName="arrowleftright"
       title="Cross-Chain Bridge"
-      description="Bridge USDT0 across 28 EVM chains via LayerZero. Pay 0.01 USDT per bridge — real on-chain settlement."
+      description="Bridge USDT0 across 28 EVM chains via LayerZero. Pay 0.01 USDT bridge fee from any chain — EVM, TON, Solana, TRON, and more."
       cost="0.01 USDT/bridge"
       accentColor="var(--color-scenario-bridge)"
       scenarioId="cross-chain-bridge"
