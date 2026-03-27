@@ -22,6 +22,7 @@ server {
     listen 3000;
     root /usr/share/nginx/html;
     index index.html;
+    absolute_redirect off;
 
     # Redirects from old structure (10 sections → 6 sections)
     rewrite ^/tutorials/quick-start$ /getting-started/quickstart permanent;

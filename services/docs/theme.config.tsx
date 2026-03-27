@@ -2,6 +2,7 @@ import type { DocsThemeConfig } from 'nextra-theme-docs'
 import { useRouter } from 'nextra/hooks'
 import { DocSearch } from '@docsearch/react'
 import '@docsearch/css'
+import PagefindSearch from './components/PagefindSearch'
 
 /**
  * Algolia DocSearch configuration
@@ -156,7 +157,7 @@ const config: DocsThemeConfig = {
   },
 
   // --- Search ---
-  // Algolia DocSearch - renders custom search if credentials are configured
+  // Algolia DocSearch if configured, otherwise Pagefind (static search)
   search: {
     component: ALGOLIA_APP_ID && ALGOLIA_API_KEY && ALGOLIA_INDEX_NAME
       ? () => (
@@ -166,7 +167,7 @@ const config: DocsThemeConfig = {
             indexName={ALGOLIA_INDEX_NAME}
           />
         )
-      : undefined // Falls back to Nextra's built-in search
+      : PagefindSearch
   },
 
   // --- Repository ---

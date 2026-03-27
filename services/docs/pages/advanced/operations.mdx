@@ -10,7 +10,7 @@ Guidelines for building robust t402-enabled applications.
 
 ### Payment Flow Design
 
-#### Verify Before Processing
+##### Verify Before Processing
 
 Always verify payments before executing expensive operations:
 
@@ -35,7 +35,7 @@ app.post('/api/compute', async (req, res) => {
 });
 ```
 
-#### Idempotent Settlements
+##### Idempotent Settlements
 
 Handle duplicate settlement attempts gracefully:
 
@@ -57,7 +57,7 @@ async function settlePayment(payment, requirements) {
 }
 ```
 
-#### Atomic Operations
+##### Atomic Operations
 
 Ensure payment and service delivery are atomic:
 
@@ -93,7 +93,7 @@ async function processPayment(payment, requirements) {
 
 ### Error Handling
 
-#### Graceful Degradation
+##### Graceful Degradation
 
 ```typescript
 // Provide fallback for payment failures
@@ -115,7 +115,7 @@ async function handleRequest(req, res) {
 }
 ```
 
-#### Informative Error Messages
+##### Informative Error Messages
 
 ```typescript
 // Return helpful error information
@@ -152,7 +152,7 @@ function handlePaymentError(error, res) {
 }
 ```
 
-#### Retry Logic
+##### Retry Logic
 
 ```typescript
 // Implement exponential backoff for transient failures
@@ -175,7 +175,7 @@ async function settleWithRetry(payment, requirements, maxRetries = 3) {
 
 ### Security
 
-#### Validate All Inputs
+##### Validate All Inputs
 
 ```typescript
 import { z } from 'zod';
@@ -203,7 +203,7 @@ function validatePayment(data: unknown) {
 }
 ```
 
-#### Protect Against Replay Attacks
+##### Protect Against Replay Attacks
 
 <Callout type="warning">
   Each payment nonce should only be usable once. Track used nonces to prevent replay attacks.
@@ -227,7 +227,7 @@ async function checkNonce(nonce: string, network: string) {
 }
 ```
 
-#### Amount Validation
+##### Amount Validation
 
 ```typescript
 // Validate payment amounts match requirements
@@ -251,7 +251,7 @@ function validateAmount(payment, requirements) {
 
 ### User Experience
 
-#### Clear Payment Requirements
+##### Clear Payment Requirements
 
 ```typescript
 // Return detailed payment requirements
@@ -275,7 +275,7 @@ function buildPaymentRequired(route, req) {
 }
 ```
 
-#### Progress Indicators
+##### Progress Indicators
 
 ```typescript
 // For long-running settlements, provide status updates
@@ -291,7 +291,7 @@ app.get('/api/payment/:id/status', async (req, res) => {
 });
 ```
 
-#### Helpful Error Pages
+##### Helpful Error Pages
 
 ```typescript
 // Custom 402 response handler
@@ -312,7 +312,7 @@ function handle402(requirements, res) {
 
 ### Testing
 
-#### Unit Tests
+##### Unit Tests
 
 ```typescript
 import { describe, it, expect, vi } from 'vitest';
@@ -348,7 +348,7 @@ describe('PaymentMiddleware', () => {
 });
 ```
 
-#### Integration Tests
+##### Integration Tests
 
 ```typescript
 import { test, expect } from '@playwright/test';
@@ -374,7 +374,7 @@ test('complete payment flow', async ({ request }) => {
 });
 ```
 
-#### Load Testing
+##### Load Testing
 
 ```typescript
 // k6 load test script
@@ -401,7 +401,7 @@ export default function () {
 
 ### Monitoring and Alerting
 
-#### Key Metrics
+##### Key Metrics
 
 ```typescript
 // Track these metrics
@@ -420,7 +420,7 @@ const metrics = {
 };
 ```
 
-#### Alert Thresholds
+##### Alert Thresholds
 
 | Metric | Warning | Critical |
 |--------|---------|----------|
@@ -432,7 +432,7 @@ const metrics = {
 
 ### Documentation
 
-#### API Documentation
+##### API Documentation
 
 ```typescript
 /**
@@ -452,7 +452,7 @@ const metrics = {
 app.get('/api/premium', handler);
 ```
 
-#### Changelog
+##### Changelog
 
 Maintain a changelog for payment-related changes:
 
@@ -477,7 +477,7 @@ Optimize T402 for high-throughput payment processing.
 
 ### Connection Management
 
-#### HTTP Client Pooling
+##### HTTP Client Pooling
 
 Reuse HTTP connections to reduce latency and resource usage.
 
@@ -557,7 +557,7 @@ HttpClient client = HttpClient.newBuilder()
   </Tabs.Tab>
 </Tabs>
 
-#### RPC Connection Management
+##### RPC Connection Management
 
 Use multiple RPC providers with fallback for reliability.
 
@@ -583,7 +583,7 @@ const client = createPublicClient({
 
 ### Caching Strategies
 
-#### Payment Requirements Cache
+##### Payment Requirements Cache
 
 Cache payment requirements to reduce 402 round-trips.
 
@@ -610,7 +610,7 @@ async function getRequirements(url: string): Promise<PaymentRequirements[]> {
 }
 ```
 
-#### Token Balance Cache
+##### Token Balance Cache
 
 Cache wallet balances to avoid redundant RPC calls.
 
@@ -636,7 +636,7 @@ async function getCachedBalance(
 }
 ```
 
-#### Nonce Management
+##### Nonce Management
 
 Pre-fetch and cache nonces to avoid delays.
 
@@ -671,7 +671,7 @@ class NonceManager {
 
 ### Batch Operations
 
-#### Batch Settlements
+##### Batch Settlements
 
 Group multiple settlements into a single facilitator call (when supported).
 
@@ -689,7 +689,7 @@ const results = await facilitator.settleBatch(payments); // Fast
 Batch settlement support depends on the facilitator implementation. Check `/supported` endpoint for capabilities.
 </Callout>
 
-#### Parallel Verification
+##### Parallel Verification
 
 Verify multiple payments concurrently.
 
@@ -710,7 +710,7 @@ const results = await Promise.all(
 
 ### Rate Limiting
 
-#### Client-Side Rate Limiting
+##### Client-Side Rate Limiting
 
 Implement rate limiting to avoid hitting API limits.
 
@@ -731,7 +731,7 @@ const verify = limiter.wrap(async (payload: PaymentPayload) => {
 });
 ```
 
-#### Exponential Backoff
+##### Exponential Backoff
 
 Handle rate limit errors gracefully.
 
@@ -767,7 +767,7 @@ async function withRetry<T>(
 
 ### Server-Side Optimization
 
-#### Middleware Configuration
+##### Middleware Configuration
 
 Optimize payment middleware for high traffic.
 
@@ -789,7 +789,7 @@ app.use(paymentMiddleware(routes, resourceServer, {
 }));
 ```
 
-#### Async Settlement
+##### Async Settlement
 
 Settle payments asynchronously after sending response.
 
@@ -819,7 +819,7 @@ Async settlement improves response times but requires robust error handling and 
 
 ### Monitoring
 
-#### Key Metrics to Track
+##### Key Metrics to Track
 
 | Metric | Description | Target |
 |--------|-------------|--------|
@@ -829,7 +829,7 @@ Async settlement improves response times but requires robust error handling and 
 | `t402_rpc_latency_ms` | Blockchain RPC latency | < 200ms |
 | `t402_error_rate` | Payment error rate | < 1% |
 
-#### Prometheus Integration
+##### Prometheus Integration
 
 ```typescript
 import { Counter, Histogram } from 'prom-client';
@@ -863,7 +863,7 @@ try {
 
 ### Hardware Recommendations
 
-#### Production Server
+##### Production Server
 
 | Component | Minimum | Recommended |
 |-----------|---------|-------------|
@@ -872,7 +872,7 @@ try {
 | Storage | SSD 50 GB | NVMe 100 GB |
 | Network | 100 Mbps | 1 Gbps |
 
-#### Scaling Guidelines
+##### Scaling Guidelines
 
 - **< 100 req/s**: Single instance
 - **100-1000 req/s**: 2-4 instances with load balancer
@@ -900,7 +900,7 @@ Common issues and solutions when working with T402.
 
 ### Payment Verification Failures
 
-#### T402-1006: Invalid Signature
+##### T402-1006: Invalid Signature
 
 **Symptoms**: Payment verification fails with "Signature verification failed"
 
@@ -944,7 +944,7 @@ fmt.Printf("Signer: %s\n", addr.Hex())
   </Tabs.Tab>
 </Tabs>
 
-#### T402-1011: Expired Payment
+##### T402-1011: Expired Payment
 
 **Symptoms**: "Payment has expired" error
 
@@ -964,7 +964,7 @@ Always use server time, not client time, to avoid clock skew issues.
 
 ### Settlement Failures
 
-#### T402-3003: Insufficient Balance
+##### T402-3003: Insufficient Balance
 
 **Symptoms**: Settlement fails with "Insufficient balance"
 
@@ -979,7 +979,7 @@ Always use server time, not client time, to avoid clock skew issues.
 t402 balance 0xYourAddress --network eip155:8453
 ```
 
-#### T402-3002: Settlement Failed
+##### T402-3002: Settlement Failed
 
 **Symptoms**: Generic settlement failure
 
@@ -999,7 +999,7 @@ t402 balance 0xYourAddress --network eip155:8453
 
 ### Network Connectivity
 
-#### T402-4001: Chain Unavailable
+##### T402-4001: Chain Unavailable
 
 **Symptoms**: Cannot connect to blockchain RPC
 
@@ -1025,7 +1025,7 @@ const providers = [
 
 3. **Check rate limits**: You may be hitting RPC rate limits
 
-#### T402-2004: RPC Unavailable (Facilitator)
+##### T402-2004: RPC Unavailable (Facilitator)
 
 **Symptoms**: Facilitator cannot reach blockchain
 
@@ -1037,7 +1037,7 @@ const providers = [
 
 ### Debug Logging
 
-#### Enable Verbose Logging
+##### Enable Verbose Logging
 
 <Tabs items={['TypeScript', 'Python', 'Go']}>
   <Tabs.Tab>
@@ -1069,7 +1069,7 @@ log.SetLevel(log.DebugLevel)
   </Tabs.Tab>
 </Tabs>
 
-#### Inspect Payment Payloads
+##### Inspect Payment Payloads
 
 ```bash
 # Decode a base64 payment payload
@@ -1083,7 +1083,7 @@ t402 verify <payload> --requirements <requirements>
 
 ### Common Integration Issues
 
-#### CORS Errors (Browser)
+##### CORS Errors (Browser)
 
 **Symptoms**: "CORS policy" errors in browser console
 
@@ -1097,7 +1097,7 @@ app.use(cors({
 }));
 ```
 
-#### Missing Headers
+##### Missing Headers
 
 **Symptoms**: 402 response but no payment requirements
 
@@ -1108,7 +1108,7 @@ app.use(cors({
 console.log(response.headers.get('Payment-Required'));
 ```
 
-#### Framework Middleware Order
+##### Framework Middleware Order
 
 **Symptoms**: Payments not being processed
 
@@ -1128,7 +1128,7 @@ app.use(paymentMiddleware(config)); // Too late!
 
 ### Gasless Payment Issues
 
-#### ERC-4337: UserOperation Failed
+##### ERC-4337: UserOperation Failed
 
 **Symptoms**: "AA" prefixed errors (AA21, AA25, etc.)
 
@@ -1139,7 +1139,7 @@ app.use(paymentMiddleware(config)); // Too late!
 | AA25 | Invalid signature | Wrong owner or signature format |
 | AA31 | Paymaster stake too low | Use different paymaster |
 
-#### Paymaster Rejection
+##### Paymaster Rejection
 
 **Symptoms**: Paymaster refuses to sponsor
 

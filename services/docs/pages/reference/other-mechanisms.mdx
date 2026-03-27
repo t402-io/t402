@@ -4,6 +4,20 @@ import { Tabs, Callout, Cards } from 'nextra/components'
 
 Reference documentation for non-major chain mechanisms. For EVM, Solana, TON, and TRON, see their dedicated pages.
 
+| Chain | Package | Scheme | Token Standard |
+|-------|---------|--------|----------------|
+| NEAR | `@t402/near` | exact-direct | NEP-141 |
+| Aptos | `@t402/aptos` | exact-direct | Fungible Asset |
+| Tezos | `@t402/tezos` | exact-direct | FA2 (TZIP-12) |
+| Polkadot | `@t402/polkadot` | exact-direct | Asset Hub (1984) |
+| Stacks | `@t402/stacks` | exact-direct | SIP-010 |
+| Cosmos | `@t402/cosmos` | exact-direct | Bank MsgSend |
+| Bitcoin | `@t402/btc` | exact-direct | PSBT + Lightning |
+| Stellar | `@t402/stellar` | exact-direct | Soroban SEP-41 |
+| Spark | `@t402/spark` | exact-direct | Lightning Network |
+
+Select a tab below for full documentation:
+
 <Tabs items={['NEAR', 'Aptos', 'Tezos', 'Polkadot', 'Stacks', 'Cosmos', 'Bitcoin', 'Stellar', 'Spark']}>
   <Tabs.Tab>
 
@@ -1316,11 +1330,11 @@ app.listen(3000)
   />
   <Cards.Card
     title="Express Middleware"
-    href="/reference/express"
+    href="/reference/server-middleware"
   />
   <Cards.Card
     title="Fetch Client"
-    href="/reference/fetch"
+    href="/reference/client-libraries"
   />
 </Cards>
 
@@ -1709,11 +1723,11 @@ app.listen(3000)
   />
   <Cards.Card
     title="Express Middleware"
-    href="/reference/express"
+    href="/reference/server-middleware"
   />
   <Cards.Card
     title="Fetch Client"
-    href="/reference/fetch"
+    href="/reference/client-libraries"
   />
 </Cards>
 

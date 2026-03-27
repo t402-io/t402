@@ -6,21 +6,21 @@ import { Callout, Tabs } from 'nextra/components'
 
 ### General
 
-#### What is T402?
+##### What is T402?
 
 T402 is an open standard for HTTP-native stablecoin payments. It enables any HTTP resource to accept USDT payments using a simple header-based protocol, similar to how HTTP Basic Auth works.
 
-#### Why the name "T402"?
+##### Why the name "T402"?
 
 The name combines "T" (for Tether/USDT) with "402" (the HTTP status code for "Payment Required"). The HTTP 402 status code was reserved for future use in digital payment systems - T402 fulfills that vision.
 
-#### What stablecoins are supported?
+##### What stablecoins are supported?
 
 Currently, T402 supports:
 - **USDT** - Tether USD on all supported networks
 - **USDT0** - Tether USD OFT (LayerZero) for cross-chain transfers
 
-#### Which blockchains are supported?
+##### Which blockchains are supported?
 
 **EVM Chains:**
 - Ethereum, Arbitrum, Base, Optimism, Polygon, Ink, Berachain, Unichain, Mantle, Sei
@@ -40,7 +40,7 @@ See [Chains & Networks](/resources/chains) for the complete list with 47 network
 
 ### Technical
 
-#### How does T402 work?
+##### How does T402 work?
 
 1. Client requests a protected resource
 2. Server returns `402 Payment Required` with payment details
@@ -59,7 +59,7 @@ Client                    Server                    Facilitator
   │◀── 200 + resource ──────│                           │
 ```
 
-#### What is a Facilitator?
+##### What is a Facilitator?
 
 The Facilitator is a trusted third party that:
 - Verifies payment authorizations
@@ -68,20 +68,20 @@ The Facilitator is a trusted third party that:
 
 T402 provides a default facilitator at `https://facilitator.t402.io`.
 
-#### Can I run my own Facilitator?
+##### Can I run my own Facilitator?
 
 Yes! The facilitator is open source. You can run your own for:
 - Custom settlement logic
 - Private deployments
 - Specific compliance requirements
 
-#### What are the fees?
+##### What are the fees?
 
 T402 itself has no protocol fees. Costs include:
 - **Network gas fees** (varies by chain, ~$0.001 on L2s)
 - **Facilitator fees** (default facilitator: free during beta)
 
-#### Is T402 secure?
+##### Is T402 secure?
 
 Yes. T402 uses:
 - **Cryptographic signatures** for authorization
@@ -89,13 +89,13 @@ Yes. T402 uses:
 - **Time-limited authorizations** to prevent replay attacks
 - **EIP-3009 / EIP-712** typed data signing on EVM
 
-#### What happens if payment fails?
+##### What happens if payment fails?
 
 If payment verification fails, the server returns `402 Payment Required` again with an error message. The client can retry with a new payment authorization.
 
 ### Integration
 
-#### How long does integration take?
+##### How long does integration take?
 
 Basic integration takes 15-30 minutes:
 1. Install SDK (~2 minutes)
@@ -103,15 +103,15 @@ Basic integration takes 15-30 minutes:
 3. Configure pricing (~5 minutes)
 4. Test (~10 minutes)
 
-#### Do I need smart contracts?
+##### Do I need smart contracts?
 
 No. T402 uses existing token contracts (USDT). No custom smart contract deployment required.
 
-#### Can I use T402 with my existing API?
+##### Can I use T402 with my existing API?
 
 Yes! T402 integrates as middleware. Add it to Express, Next.js, Hono, or any HTTP server without changing your existing routes.
 
-#### How do I handle failed payments?
+##### How do I handle failed payments?
 
 The middleware automatically returns 402 with error details:
 
@@ -126,14 +126,14 @@ app.use(paymentMiddleware(config, {
 
 ### Pricing
 
-#### What's the minimum payment amount?
+##### What's the minimum payment amount?
 
 Technically, any amount > 0. Practically:
 - **L2 chains** (Base, Arbitrum): ~$0.001 minimum (due to gas)
 - **L1 chains** (Ethereum): ~$1 minimum (due to gas)
 - **Gasless** (ERC-4337): ~$0.0001 minimum
 
-#### How do I set dynamic pricing?
+##### How do I set dynamic pricing?
 
 Use a price resolver function:
 
@@ -146,7 +146,7 @@ Use a price resolver function:
 }
 ```
 
-#### Can I offer free tier + paid tier?
+##### Can I offer free tier + paid tier?
 
 Yes! Use conditional pricing:
 
@@ -161,7 +161,7 @@ Yes! Use conditional pricing:
 
 ### Troubleshooting
 
-#### "Payment Required" but payment was sent
+##### "Payment Required" but payment was sent
 
 Check:
 1. **Network mismatch**: Payment network matches server expectation
@@ -169,21 +169,21 @@ Check:
 3. **Amount mismatch**: Exact amount required (not more, not less)
 4. **Wrong recipient**: Payment sent to correct address
 
-#### "Invalid signature" error
+##### "Invalid signature" error
 
 Ensure:
 1. Client and server use same network ID format (CAIP-2)
 2. Typed data matches exactly
 3. Signature hasn't expired
 
-#### Gasless payments not working
+##### Gasless payments not working
 
 Verify:
 1. Bundler URL is correct and accessible
 2. Paymaster has sufficient funds
 3. User has approved USDT for the smart account
 
-#### Transaction pending for too long
+##### Transaction pending for too long
 
 On-chain settlement typically takes:
 - **L2 chains**: 1-3 seconds
@@ -195,17 +195,17 @@ If longer, check network congestion or RPC issues.
 
 ### Support
 
-#### Where can I get help?
+##### Where can I get help?
 
 - **GitHub Issues**: [github.com/t402-io/t402/issues](https://github.com/t402-io/t402/issues)
 - **Twitter/X**: [@t402_io](https://x.com/t402_io)
 - **Documentation**: [docs.t402.io](https://docs.t402.io)
 
-#### How do I report a security issue?
+##### How do I report a security issue?
 
 For security issues, please email security@t402.io instead of creating a public GitHub issue.
 
-#### Is T402 open source?
+##### Is T402 open source?
 
 Yes! T402 is fully open source under the MIT license:
 - [GitHub Repository](https://github.com/t402-io/t402)
@@ -292,7 +292,7 @@ How T402 compares to other payment solutions.
 
 ### Use Case Fit
 
-#### API Monetization
+##### API Monetization
 
 | Requirement | T402 | Traditional |
 |-------------|------|-------------|
@@ -303,7 +303,7 @@ How T402 compares to other payment solutions.
 
 **Verdict**: T402 excels at API monetization
 
-#### E-commerce
+##### E-commerce
 
 | Requirement | T402 | Traditional |
 |-------------|------|-------------|
@@ -314,7 +314,7 @@ How T402 compares to other payment solutions.
 
 **Verdict**: Traditional payments better for mainstream e-commerce
 
-#### SaaS / Subscriptions
+##### SaaS / Subscriptions
 
 | Requirement | T402 | Traditional |
 |-------------|------|-------------|
@@ -325,7 +325,7 @@ How T402 compares to other payment solutions.
 
 **Verdict**: Depends on user base - T402 for crypto-native SaaS
 
-#### AI Agent Payments
+##### AI Agent Payments
 
 | Requirement | T402 | Traditional |
 |-------------|------|-------------|
@@ -338,7 +338,7 @@ How T402 compares to other payment solutions.
 
 ### Cost Analysis
 
-#### Transaction Costs
+##### Transaction Costs
 
 | Chain | T402 Gas Cost | Stripe Fee |
 |-------|---------------|------------|
@@ -349,7 +349,7 @@ How T402 compares to other payment solutions.
 
 **Break-even**: T402 cheaper for transactions under ~$10
 
-#### Example: $1 Payment
+##### Example: $1 Payment
 
 | Provider | Fee | Net to Merchant |
 |----------|-----|-----------------|
@@ -357,7 +357,7 @@ How T402 compares to other payment solutions.
 | Stripe | $0.329 | $0.671 |
 | PayPal | $0.329 | $0.671 |
 
-#### Example: $100 Payment
+##### Example: $100 Payment
 
 | Provider | Fee | Net to Merchant |
 |----------|-----|-----------------|
@@ -367,7 +367,7 @@ How T402 compares to other payment solutions.
 
 ### Integration Complexity
 
-#### Development Time
+##### Development Time
 
 | Task | T402 | Stripe |
 |------|------|--------|
@@ -376,7 +376,7 @@ How T402 compares to other payment solutions.
 | Multi-currency | Included | Extra work |
 | Webhook handling | Not needed | Required |
 
-#### Code Comparison
+##### Code Comparison
 
 <Tabs items={['T402', 'Stripe']}>
   <Tabs.Tab>
@@ -419,7 +419,7 @@ const { error } = await stripe.confirmCardPayment(clientSecret, {
 
 ### When to Use T402
 
-#### Ideal Use Cases
+##### Ideal Use Cases
 
 1. **API Monetization** - Pay-per-request pricing
 2. **Digital Content** - Instant access after payment
@@ -428,7 +428,7 @@ const { error } = await stripe.confirmCardPayment(clientSecret, {
 5. **Micropayments** - Sub-$1 transactions
 6. **Privacy-First** - No personal data required
 
-#### Not Ideal For
+##### Not Ideal For
 
 1. **Mainstream E-commerce** - Users expect card payments
 2. **Subscription Services** - Unless crypto-native audience
@@ -437,14 +437,14 @@ const { error } = await stripe.confirmCardPayment(clientSecret, {
 
 ### Migration Path
 
-#### From Stripe to T402
+##### From Stripe to T402
 
 1. **Parallel deployment** - Offer both options
 2. **Crypto discount** - Incentivize T402 adoption
 3. **Gradual migration** - Start with tech-savvy users
 4. **Full migration** - When critical mass reached
 
-#### Hybrid Approach
+##### Hybrid Approach
 
 ```typescript
 // Offer both payment methods
@@ -469,202 +469,202 @@ Key terms and concepts used in T402 documentation.
 
 ### Protocol Terms
 
-#### 402 Payment Required
+##### 402 Payment Required
 HTTP status code indicating that payment is required to access a resource. T402 builds on this standard HTTP semantics.
 
-#### CAIP-2
+##### CAIP-2
 Chain Agnostic Improvement Proposal 2. A standard format for blockchain network identifiers: `namespace:reference`. Examples: `eip155:1` (Ethereum), `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` (Solana mainnet).
 
-#### Facilitator
+##### Facilitator
 A service that verifies payment authorizations and executes on-chain settlements. Can be self-hosted or use the public facilitator at `facilitator.t402.io`.
 
-#### Idempotency Key
+##### Idempotency Key
 A unique identifier ensuring that retried requests don't result in duplicate payments. Passed in the `Idempotency-Key` header.
 
-#### Network
+##### Network
 A blockchain network identified by CAIP-2 format. T402 supports EVM chains (`eip155:*`), TON, TRON, Solana, NEAR, Aptos, Tezos, Polkadot, Stacks, and Cosmos.
 
-#### Payment Payload
+##### Payment Payload
 The signed payment authorization from a client, containing amount, recipient, nonce, and cryptographic signature.
 
-#### Payment Requirements
+##### Payment Requirements
 Server-specified conditions for payment acceptance, including scheme, network, asset, amount, and recipient address.
 
-#### Resource Server
+##### Resource Server
 The server providing protected resources that require payment. Integrates T402 middleware to handle payment verification.
 
-#### Scheme
+##### Scheme
 The payment logic implementation. Current schemes:
 - **exact**: Pay exact amount specified
 - **upto**: Pay up to a maximum amount
 
-#### Settlement
+##### Settlement
 The process of executing an on-chain transaction to transfer funds from payer to recipient.
 
-#### Transport
+##### Transport
 The communication protocol for T402 messages. Supported transports:
 - **HTTP**: Standard web requests
 - **MCP**: Model Context Protocol for AI agents
 - **A2A**: Agent-to-Agent protocol
 
-#### Verification
+##### Verification
 The process of validating a payment authorization without executing settlement. Checks signature validity, amount, and authorization status.
 
 ### Blockchain Terms
 
-#### Account Abstraction (ERC-4337)
+##### Account Abstraction (ERC-4337)
 Ethereum standard enabling smart contract wallets with features like gasless transactions, social recovery, and batched operations.
 
-#### Asset ID
+##### Asset ID
 Chain-specific identifier for a token. Examples: contract address (EVM), account ID (NEAR), metadata address (Aptos), asset ID (Polkadot).
 
-#### Bundler
+##### Bundler
 A service that bundles multiple UserOperations and submits them on-chain. Used in ERC-4337 for gasless payments.
 
-#### CAIP-10
+##### CAIP-10
 Chain Agnostic Improvement Proposal 10. Standard for account identifiers: `namespace:reference:address`.
 
-#### Decimals
+##### Decimals
 The number of decimal places for a token. USDT and USDC typically use 6 decimals.
 
-#### EIP-3009
+##### EIP-3009
 Ethereum standard for `transferWithAuthorization`, enabling gasless token transfers via signed messages.
 
-#### EIP-712
+##### EIP-712
 Ethereum standard for typed structured data signing, providing human-readable signature requests.
 
-#### FA2
+##### FA2
 Tezos token standard (TZIP-12) for fungible and non-fungible tokens.
 
-#### Fungible Asset
+##### Fungible Asset
 Aptos's native token standard, replacing the older Coin standard.
 
-#### Gas
+##### Gas
 The fee paid to blockchain validators for transaction execution. Varies by network and congestion.
 
-#### Jetton
+##### Jetton
 TON's token standard, similar to ERC-20 on Ethereum.
 
-#### NEP-141
+##### NEP-141
 NEAR's fungible token standard, analogous to ERC-20.
 
-#### Nonce
+##### Nonce
 A unique number used once to prevent replay attacks. Can be random (EIP-3009) or sequential.
 
-#### OFT (Omnichain Fungible Token)
+##### OFT (Omnichain Fungible Token)
 LayerZero standard enabling tokens to exist across multiple chains. USDT0 uses this standard.
 
-#### Paymaster
+##### Paymaster
 An ERC-4337 component that sponsors gas fees for users, enabling gasless transactions.
 
-#### RPC (Remote Procedure Call)
+##### RPC (Remote Procedure Call)
 API endpoint for interacting with blockchain nodes. Examples: `https://mainnet.base.org`, `https://api.trongrid.io`.
 
-#### SIP-010
+##### SIP-010
 Stacks (Bitcoin L2) fungible token standard.
 
-#### SPL Token
+##### SPL Token
 Solana Program Library token standard for fungible tokens.
 
-#### TRC-20
+##### TRC-20
 TRON's token standard, similar to ERC-20.
 
-#### USDT0
+##### USDT0
 Tether's new omnichain USDT with EIP-3009 support, enabling gasless transfers.
 
-#### UserOperation
+##### UserOperation
 ERC-4337 transaction structure containing calldata, gas limits, and paymaster information.
 
 ### SDK Terms
 
-#### Client
+##### Client
 SDK component that signs payment authorizations using the user's wallet.
 
-#### Mechanism
+##### Mechanism
 A chain-specific implementation of a payment scheme. Example: `@t402/evm` implements the `exact` scheme for EVM chains.
 
-#### Middleware
+##### Middleware
 Server component that intercepts requests to check for and verify payments before passing to route handlers.
 
-#### Provider
+##### Provider
 Blockchain connection interface. Examples: ethers.js provider, viem client, web3.js instance.
 
-#### Server (SDK)
+##### Server (SDK)
 SDK component that generates payment requirements and processes payment headers.
 
-#### Signer
+##### Signer
 Wallet interface for signing messages and transactions. Can be browser extension, hardware wallet, or programmatic key.
 
-#### WDK (Wallet Development Kit)
+##### WDK (Wallet Development Kit)
 Tether's SDK for wallet integration, used by T402 for advanced features.
 
 ### HTTP Terms
 
-#### Content-Type
+##### Content-Type
 HTTP header specifying the media type. T402 uses `application/json` for responses.
 
-#### CORS (Cross-Origin Resource Sharing)
+##### CORS (Cross-Origin Resource Sharing)
 Security mechanism controlling cross-origin requests. T402 servers must configure appropriate CORS headers.
 
-#### Header
+##### Header
 HTTP metadata sent with requests/responses. Key T402 headers:
 - `PAYMENT-SIGNATURE`: Payment authorization from client (V2). Also `X-Payment` for V1 backward compatibility.
 - `PAYMENT-RESPONSE`: Settlement confirmation from server (V2). Also `X-Payment-Response` for V1 backward compatibility.
 - `Idempotency-Key`: Unique request identifier
 
-#### Interceptor
+##### Interceptor
 Client-side component that automatically handles 402 responses. Available for fetch and axios.
 
-#### Proxy
+##### Proxy
 Server component that forwards requests while handling payment logic. Used in Next.js integration.
 
-#### Rate Limiting
+##### Rate Limiting
 Restriction on request frequency to prevent abuse. Facilitator implements per-IP and per-key limits.
 
-#### Webhook
+##### Webhook
 HTTP callback for asynchronous notifications. Not used in T402 (synchronous model).
 
 ### Security Terms
 
-#### Authorization
+##### Authorization
 Permission to perform an action. In T402, a signed message authorizing fund transfer.
 
-#### Deadline
+##### Deadline
 Timestamp after which a payment authorization expires. Prevents indefinite validity.
 
-#### HSM (Hardware Security Module)
+##### HSM (Hardware Security Module)
 Dedicated hardware for secure key storage and cryptographic operations.
 
-#### Private Key
+##### Private Key
 Secret cryptographic key for signing transactions. Must never be exposed.
 
-#### Public Key
+##### Public Key
 Cryptographic key derived from private key, used for verification and address generation.
 
-#### Replay Attack
+##### Replay Attack
 Attempt to reuse a valid transaction. Prevented by nonces and deadlines.
 
-#### Signature
+##### Signature
 Cryptographic proof that a message was signed by a specific private key.
 
 ### Integration Terms
 
-#### App Router
+##### App Router
 Next.js 13+ routing system using the `app/` directory structure.
 
-#### Dependency Injection
+##### Dependency Injection
 Design pattern for providing dependencies to components. Used in FastAPI and Spring Boot integrations.
 
-#### Edge Runtime
+##### Edge Runtime
 Lightweight JavaScript runtime for edge computing. Supported by `@t402/hono`.
 
-#### MCP (Model Context Protocol)
+##### MCP (Model Context Protocol)
 Anthropic's protocol for AI model interactions with external tools and data.
 
-#### Route Config
+##### Route Config
 T402 configuration mapping URL patterns to payment requirements.
 
-#### SSR (Server-Side Rendering)
+##### SSR (Server-Side Rendering)
 Rendering pages on the server before sending to client. Paywall component supports SSR.
 
 ### Common Abbreviations
