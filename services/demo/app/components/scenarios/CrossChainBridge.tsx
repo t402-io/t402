@@ -938,31 +938,26 @@ export function CrossChainBridge() {
       )}
 
       {/* ------------------------------------------------------------------ */}
-      {/* B. Quote Preview                                                   */}
-      {/* ------------------------------------------------------------------ */}
-      {state === "quoting" && (
-        <div className="glass-card p-4 flex items-center justify-center gap-2">
-          <Spinner size="sm" />
-          <span className="text-xs text-[var(--color-muted)]">Fetching quote...</span>
-        </div>
-      )}
-
-      {state === "quoted" && quote && (
-        <QuotePreview quote={quote} amount={String(amountRaw)} />
-      )}
-
-      {/* ------------------------------------------------------------------ */}
-      {/* Payment flow status                                                */}
-      {/* ------------------------------------------------------------------ */}
-      {flowState !== "idle" && flowState !== "done" && (
-        <PaymentStatus flowState={flowState} settle={settle} family={activeFamily} />
-      )}
-
-      {/* ------------------------------------------------------------------ */}
-      {/* C. Bridge Button                                                   */}
+      {/* B. Quote + Button (inside the form card)                           */}
       {/* ------------------------------------------------------------------ */}
       {showForm && (
-        <div className="glass-card p-5">
+        <div className="space-y-3">
+          {state === "quoting" && (
+            <div className="glass-card p-3 flex items-center justify-center gap-2">
+              <Spinner size="sm" />
+              <span className="text-xs text-[var(--color-muted)]">Fetching quote...</span>
+            </div>
+          )}
+
+          {state === "quoted" && quote && (
+            <QuotePreview quote={quote} amount={String(amountRaw)} />
+          )}
+
+          {/* Payment flow status */}
+          {flowState !== "idle" && flowState !== "done" && (
+            <PaymentStatus flowState={flowState} settle={settle} family={activeFamily} />
+          )}
+
           {state === "failed" && error && (
             <ErrorState error={error} onRetry={reset} />
           )}
@@ -1032,7 +1027,7 @@ export function CrossChainBridge() {
       {/* ------------------------------------------------------------------ */}
       {/* SDK Examples                                                       */}
       {/* ------------------------------------------------------------------ */}
-      <SdkExamples scenarioId="cross-chain-bridge" />
+      {/* SdkExamples rendered by ScenarioShell via scenarioId */}
 
       {/* ------------------------------------------------------------------ */}
       {/* Explainer                                                          */}
