@@ -14,6 +14,7 @@ import {
 import type { Address } from "viem";
 import { classifyFacilitatorError } from "@/lib/error-helpers";
 import { isPimlicoConfigured, getSponsorshipData } from "@/lib/pimlico-service";
+import { isGaslessConfigured, executeGaslessTransfer } from "@/lib/gasless-executor";
 
 const GASLESS_AMOUNT = "1000"; // 0.001 USDT
 
@@ -92,7 +93,7 @@ export async function POST(request: NextRequest) {
   const gasSavings = calculateGasSavings(gasEstimates);
   const userOpHash = generateUserOpHash();
 
-  const responseData = {
+  const responseData: Record<string, any> = {
     success: true,
     gasless: true,
     accountAbstraction: {
@@ -197,6 +198,40 @@ export async function POST(request: NextRequest) {
 
     responseData.settlement.txHash = settleResult.transaction || null;
     responseData.settlement.status = "confirmed";
+
+    // Attempt real ERC-4337 gasless execution if configured
+    if (isGaslessConfigured()) {
+      const chainId = requirements.network.startsWith("eip155:")
+        ? parseInt(requirements.network.split(":")[1])
+        : 84532;
+      try {
+        const gaslessResult = await executeGaslessTransfer({
+          tokenAddress: requirements.asset || tokenAddress,
+          to: recipientAddress,
+          amount,
+          chainId,
+        });
+        responseData.erc4337 = {
+          real: true,
+          userOpHash: gaslessResult.userOpHash,
+          txHash: gaslessResult.txHash,
+          smartAccountAddress: gaslessResult.smartAccountAddress,
+          gasSponsored: gaslessResult.gasSponsored,
+          gasSavedEstimate: gaslessResult.gasSavedEstimate,
+        };
+        responseData.settlement.status = "confirmed-erc4337";
+        if (gaslessResult.txHash) {
+          responseData.settlement.txHash = gaslessResult.txHash;
+        }
+      } catch (err) {
+        console.error("[gasless] Real ERC-4337 execution failed:", err);
+        responseData.erc4337 = {
+          real: false,
+          error: err instanceof Error ? err.message : "ERC-4337 execution failed",
+          fallback: "T402 payment settled successfully, but gasless execution failed",
+        };
+      }
+    }
 
     const response = NextResponse.json(responseData);
     response.headers.set("Payment-Response", encodeHeader(settleResult));

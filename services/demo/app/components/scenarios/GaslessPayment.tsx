@@ -23,6 +23,15 @@ export function GaslessPayment() {
   const [txHash, setTxHash] = useState<string | null>(null);
   const [flowState, setFlowState] = useState<FlowState>("idle");
   const [settle, setSettle] = useState<SettleInfo | null>(null);
+  const [erc4337Data, setErc4337Data] = useState<{
+    real: boolean;
+    userOpHash?: string;
+    txHash?: string | null;
+    smartAccountAddress?: string;
+    gasSponsored?: boolean;
+    gasSavedEstimate?: string;
+    error?: string;
+  } | null>(null);
 
   const execute = useCallback(async () => {
     setState("creating-userop");
@@ -79,6 +88,9 @@ export function GaslessPayment() {
         setSettle(parsePaymentResponse(retryRes));
         const data = await retryRes.json();
         setTxHash(data.settlement?.txHash || null);
+        if (data.erc4337) {
+          setErc4337Data(data.erc4337);
+        }
       }
 
       setState("done");
@@ -96,6 +108,7 @@ export function GaslessPayment() {
     setTxHash(null);
     setFlowState("idle");
     setSettle(null);
+    setErc4337Data(null);
   };
 
   return (
@@ -170,9 +183,35 @@ export function GaslessPayment() {
                   <CheckCircle size={14} />
                   <span className="text-sm font-medium">Payment complete — no gas spent!</span>
                 </div>
+                {erc4337Data?.real && (
+                  <div className="glass-card p-3 space-y-1.5 text-xs">
+                    <div className="flex items-center gap-1.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-success)]" />
+                      <span className="font-medium text-[var(--color-success)]">Real ERC-4337</span>
+                      {erc4337Data.gasSponsored && (
+                        <span className="px-1.5 py-0.5 rounded text-[9px] bg-[var(--color-success-dim)] text-[var(--color-success)]">
+                          Gas Sponsored
+                        </span>
+                      )}
+                    </div>
+                    {erc4337Data.smartAccountAddress && (
+                      <p className="font-mono text-[var(--color-muted)]">
+                        Smart Account: {erc4337Data.smartAccountAddress.slice(0, 10)}...{erc4337Data.smartAccountAddress.slice(-6)}
+                      </p>
+                    )}
+                    {erc4337Data.gasSavedEstimate && (
+                      <p className="text-[var(--color-muted)]">Gas saved: {erc4337Data.gasSavedEstimate}</p>
+                    )}
+                  </div>
+                )}
                 {txHash && (
                   <p className="text-xs font-mono text-[var(--color-muted)]">
                     tx: {txHash.slice(0, 10)}...{txHash.slice(-6)}
+                  </p>
+                )}
+                {!erc4337Data?.real && (
+                  <p className="text-[10px] text-[var(--color-muted)]">
+                    Simulated — configure PIMLICO_API_KEY for real ERC-4337 execution
                   </p>
                 )}
                 <button onClick={reset} className="text-xs text-[var(--color-brand)] hover:underline">
