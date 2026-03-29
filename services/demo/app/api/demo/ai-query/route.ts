@@ -145,7 +145,7 @@ async function generateAiResponse(query: string): Promise<string> {
       max_tokens: 1024,
       tools: [
         {
-          type: "web_search" as any,
+          type: "web_search_20250305",
           name: "web_search",
           max_uses: 3,
         } as any,
