@@ -20,8 +20,16 @@ export function ChainSelector({ compact = false }: { compact?: boolean }) {
   const { testnet } = useDemoContext();
 
   const [isOpen, setIsOpen] = useState(false);
+  const [isMobileView, setIsMobileView] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+
+  // Detect mobile vs desktop on open
+  useEffect(() => {
+    if (isOpen) {
+      setIsMobileView(window.innerWidth < 640);
+    }
+  }, [isOpen]);
 
   // Close on click outside (desktop only — mobile uses overlay)
   useEffect(() => {
@@ -98,19 +106,42 @@ export function ChainSelector({ compact = false }: { compact?: boolean }) {
         <ChevronDown size={11} className={`transition-transform ${isOpen ? "rotate-180" : ""}`} style={{ color: "var(--color-text-tertiary)" }} />
       </button>
 
-      {/* Panel — Bottom sheet on mobile (portal), dropdown on desktop (inline) */}
-      {isOpen && (
+      {/* Panel — single render based on viewport */}
+      {isOpen && !isMobileView && (
+        <div
+          ref={panelRef}
+          className="absolute top-full mt-2 left-0 w-[360px] max-h-[80vh] overflow-y-auto z-50 rounded-2xl"
+          style={{
+            background: "rgba(17, 17, 19, 0.98)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            boxShadow: "0 16px 48px rgba(0, 0, 0, 0.5)",
+          }}
+          role="listbox"
+          aria-label="Blockchain networks"
+        >
+          <ChainPanelContent
+            activeFamily={activeFamily}
+            activeNetwork={activeNetwork}
+            testnet={testnet}
+            onSelectFamily={handleSelectFamily}
+            onSelectNetwork={handleSelectNetwork}
+            onClose={() => setIsOpen(false)}
+            isMobile={false}
+          />
+        </div>
+      )}
+
+      {isOpen && isMobileView && typeof document !== "undefined" && createPortal(
         <>
-          {/* Desktop: inline dropdown */}
+          <div className="fixed inset-0 z-[9998] bg-black/50" onClick={() => setIsOpen(false)} />
           <div
-            ref={panelRef}
-            className="hidden sm:block absolute top-full mt-2 left-0 w-[360px] max-h-[80vh] overflow-y-auto z-50 rounded-2xl"
+            className="fixed bottom-0 left-0 right-0 z-[9999] rounded-t-2xl max-h-[70vh] overflow-y-auto"
             style={{
               background: "rgba(17, 17, 19, 0.98)",
-              backdropFilter: "blur(20px)",
-              WebkitBackdropFilter: "blur(20px)",
               border: "1px solid rgba(255, 255, 255, 0.1)",
-              boxShadow: "0 16px 48px rgba(0, 0, 0, 0.5)",
+              boxShadow: "0 -8px 32px rgba(0, 0, 0, 0.5)",
             }}
             role="listbox"
             aria-label="Blockchain networks"
@@ -122,38 +153,11 @@ export function ChainSelector({ compact = false }: { compact?: boolean }) {
               onSelectFamily={handleSelectFamily}
               onSelectNetwork={handleSelectNetwork}
               onClose={() => setIsOpen(false)}
-              isMobile={false}
+              isMobile={true}
             />
           </div>
-
-          {/* Mobile: portal to body */}
-          {typeof document !== "undefined" && createPortal(
-            <>
-              <div className="sm:hidden fixed inset-0 z-[9998] bg-black/50" onClick={() => setIsOpen(false)} />
-              <div
-                className="sm:hidden fixed bottom-0 left-0 right-0 z-[9999] rounded-t-2xl max-h-[70vh] overflow-y-auto"
-                style={{
-                  background: "rgba(17, 17, 19, 0.98)",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
-                  boxShadow: "0 -8px 32px rgba(0, 0, 0, 0.5)",
-                }}
-                role="listbox"
-                aria-label="Blockchain networks"
-              >
-                <ChainPanelContent
-                  activeFamily={activeFamily}
-                  activeNetwork={activeNetwork}
-                  testnet={testnet}
-                  onSelectFamily={handleSelectFamily}
-                  onSelectNetwork={handleSelectNetwork}
-                  onClose={() => setIsOpen(false)}
-                  isMobile={true}
-                />
-              </div>
-            </>,
-            document.body
-          )}
-        </>
+        </>,
+        document.body
       )}
     </div>
   );
