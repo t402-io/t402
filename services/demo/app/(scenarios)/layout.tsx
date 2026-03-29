@@ -56,21 +56,21 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
           boxShadow: "0 1px 0 rgba(80, 175, 149, 0.06)",
         }}
       >
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 h-14 sm:h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 h-12 sm:h-14 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/"
-              className="flex items-center gap-1.5 text-[var(--color-muted)] hover:text-white transition-colors"
+              className="flex items-center gap-1 text-[var(--color-muted)] hover:text-white transition-colors"
               aria-label="Back to home"
             >
-              <ArrowLeft size={14} />
-              <span className="text-sm font-semibold text-[var(--color-brand)]">T402</span>
+              <ArrowLeft size={13} />
+              <span className="text-xs sm:text-sm font-semibold text-[var(--color-brand)]">T402</span>
             </Link>
             <div className="hidden sm:block">
               <FacilitatorBadge />
             </div>
           </div>
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <ChainSelector compact />
             <ModeToggle />
             <WalletButton />
@@ -145,7 +145,7 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
         }}
         aria-label="Scenario navigation"
       >
-        <div ref={bottomNavRef} className="flex items-center overflow-x-auto px-2 py-1.5 gap-0.5 scrollbar-hide scroll-smooth">
+        <div ref={bottomNavRef} className="flex items-center overflow-x-auto px-1 py-1 gap-0 scrollbar-hide scroll-smooth">
           {SCENARIOS.map((s) => {
             const Icon = s.icon;
             const isActive = pathname === `/${s.id}`;
@@ -155,20 +155,19 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
                 href={`/${s.id}`}
                 aria-current={isActive ? "page" : undefined}
                 className={clsx(
-                  "relative shrink-0 flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-[11px] font-medium transition-all active:scale-95",
+                  "relative shrink-0 flex items-center gap-1 px-2.5 py-2 rounded-md text-[10px] font-medium transition-all active:scale-95",
                   isActive
                     ? "text-white bg-[var(--color-surface-active)]"
                     : "text-[var(--color-muted)]"
                 )}
               >
-                {/* Active indicator bar */}
                 {isActive && (
                   <span
-                    className="absolute top-0 left-3 right-3 h-[2px] rounded-full"
+                    className="absolute top-0 left-2 right-2 h-[2px] rounded-full"
                     style={{ background: "var(--color-brand)" }}
                   />
                 )}
-                <Icon size={15} style={{ color: isActive ? "var(--color-brand)" : undefined }} aria-hidden="true" />
+                <Icon size={13} style={{ color: isActive ? "var(--color-brand)" : undefined }} aria-hidden="true" />
                 <span>{s.title}</span>
               </Link>
             );
