@@ -392,7 +392,7 @@ export const CHAIN_REGISTRY: Record<string, ChainEntry> = {
   tempo: {
     name: "Tempo",
     nativeSymbol: "ETH",
-    chainId: 698,
+    chainId: 4217,
     tokenAddress: "0x20C00000000000000000000014f22CA97301EB73",
     oftAddress: "0xaf37E8B6C9ED7f6318979f56Fc287d76c30847ff",
     lzEndpointId: 30410,

@@ -9,14 +9,13 @@ import { executeBridge, supportsRealBridge } from "@/lib/bridge-executor";
 
 const BRIDGE_FEE = "10000"; // 0.01 USDT bridge fee
 
-// Supported bridge chains — all 28 EVM chains + legacy family names
+// Supported bridge chains — 22 USDT0 OFT chains (from docs.usdt0.to/api/deployments)
 const BRIDGE_CHAINS = [
-  "ethereum", "arbitrum", "base", "optimism", "polygon", "bnb", "avalanche",
+  "ethereum", "arbitrum", "optimism", "polygon",
   "ink", "berachain", "unichain", "mantle", "sei", "monad",
   "conflux", "flare", "rootstock", "xlayer", "stable", "corn",
-  "plasma", "megaeth", "hyperevm", "fantom", "kaia", "celo",
-  "morph", "hedera", "tempo",
-  // Keep legacy family names for backward compatibility
+  "plasma", "megaeth", "hyperevm", "morph", "hedera", "tempo",
+  // Legacy family names for T402 fee payment (not bridge destinations)
   "evm", "ton", "tron", "solana", "stacks", "near", "aptos", "tezos", "polkadot", "cosmos", "stellar",
 ];
 
@@ -145,14 +144,13 @@ export async function POST(request: NextRequest) {
   // Frontend sends "evm", "ton" etc. — bridge SDK needs "arbitrum", "ink" etc.
   const FAMILY_TO_BRIDGE: Record<string, string> = {
     evm: "arbitrum", // Default EVM bridge source
-    // All specific chains map to themselves
-    ethereum: "ethereum", arbitrum: "arbitrum", base: "base", optimism: "optimism",
-    polygon: "polygon", bnb: "bnb", avalanche: "avalanche",
-    ink: "ink", berachain: "berachain", unichain: "unichain", mantle: "mantle",
-    sei: "sei", monad: "monad", conflux: "conflux", flare: "flare",
-    rootstock: "rootstock", xlayer: "xlayer", stable: "stable", corn: "corn",
+    // All 22 USDT0 OFT chains map to themselves
+    ethereum: "ethereum", arbitrum: "arbitrum", optimism: "optimism",
+    polygon: "polygon", ink: "ink", berachain: "berachain",
+    unichain: "unichain", mantle: "mantle", sei: "sei", monad: "monad",
+    conflux: "conflux", flare: "flare", rootstock: "rootstock",
+    xlayer: "xlayer", stable: "stable", corn: "corn",
     plasma: "plasma", megaeth: "megaeth", hyperevm: "hyperevm",
-    fantom: "fantom", kaia: "kaia", celo: "celo",
     morph: "morph", hedera: "hedera", tempo: "tempo",
   };
   const bridgeSource = FAMILY_TO_BRIDGE[sourceChain] || sourceChain;
