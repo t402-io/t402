@@ -1,6 +1,7 @@
 "use client";
 
-import { useAccount, useConnect, useDisconnect } from "wagmi";
+import { useAccount, useDisconnect } from "wagmi";
+import { useAppKit } from "@reown/appkit/react";
 import { useChainContext } from "@/providers/ChainProvider";
 import { useDemoContext } from "@/providers/DemoProvider";
 import { useToast } from "@/providers/ToastProvider";
@@ -149,8 +150,8 @@ function EvmWalletButton() {
   const { isDemo } = useDemoContext();
   const { show } = useToast();
   const { address, isConnected, chain } = useAccount();
-  const { connect, connectors, isPending } = useConnect();
   const { disconnect } = useDisconnect();
+  const { open } = useAppKit();
 
   if (isDemo) return <DemoWalletBadge label="EVM" />;
 
@@ -167,42 +168,7 @@ function EvmWalletButton() {
     );
   }
 
-  const hasInjectedProvider = typeof window !== "undefined" && !!window.ethereum;
-
-  const handleConnect = () => {
-    if (hasInjectedProvider) {
-      const injected = connectors.find((c) => c.id === "injected");
-      if (injected) {
-        connect(
-          { connector: injected },
-          {
-            onSuccess: () => show("success", "EVM wallet connected"),
-            onError: (err) => show("error", `Connection failed: ${err.message}`),
-          }
-        );
-        return;
-      }
-    }
-    const wc = connectors.find((c) => c.id === "walletConnect");
-    if (wc) {
-      connect(
-        { connector: wc },
-        {
-          onSuccess: () => show("success", "EVM wallet connected via WalletConnect"),
-          onError: (err) => show("error", `WalletConnect failed: ${err.message}`),
-        }
-      );
-      return;
-    }
-    show("warning", "No EVM wallet detected. Opening MetaMask install page.");
-    window.open("https://metamask.io/download/", "_blank");
-  };
-
-  if (!hasInjectedProvider && !connectors.some((c) => c.id === "walletConnect")) {
-    return <InstallButton label="MetaMask" url="https://metamask.io/download/" />;
-  }
-
-  return <ConnectButton label="Wallet" onClick={handleConnect} loading={isPending} />;
+  return <ConnectButton label="Wallet" onClick={() => open()} />;
 }
 
 function TonWalletButton() {

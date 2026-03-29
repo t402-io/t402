@@ -24,6 +24,8 @@
     "@near-wallet-selector/my-near-wallet": "^8.9.0",
     "@polkadot/api": "^15.0.0",
     "@polkadot/extension-dapp": "^0.53.0",
+    "@reown/appkit": "^1.8.19",
+    "@reown/appkit-adapter-wagmi": "^1.8.19",
     "@solana/wallet-adapter-base": "^0.9.27",
     "@solana/wallet-adapter-react": "^0.15.39",
     "@solana/wallet-adapter-wallets": "^0.19.37",
