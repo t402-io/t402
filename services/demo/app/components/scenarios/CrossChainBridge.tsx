@@ -311,6 +311,7 @@ function QuotePreview({ quote, amount }: { quote: Quote; amount: string }) {
 function BridgeStepper({
   currentStage,
   startTime,
+  real,
   estimatedRemaining,
   srcTxHash,
   dstTxHash,
@@ -319,6 +320,7 @@ function BridgeStepper({
 }: {
   currentStage: TrackingStage;
   startTime: number;
+  real?: boolean;
   estimatedRemaining: number;
   srcTxHash: string | null;
   dstTxHash: string | null;
@@ -412,9 +414,12 @@ function BridgeStepper({
         )}
       </div>
 
-      {/* Links */}
+      {/* Links — only show for real bridges */}
       <div className="flex flex-wrap items-center justify-center gap-3 text-[10px]">
-        {srcTxHash && CHAIN_EXPLORERS[fromChain] && (
+        {!real && (
+          <span className="text-[var(--color-muted)]">Simulated bridge — no on-chain transaction</span>
+        )}
+        {real && srcTxHash && CHAIN_EXPLORERS[fromChain] && (
           <a
             href={`${CHAIN_EXPLORERS[fromChain]}${srcTxHash}`}
             target="_blank"
@@ -424,7 +429,7 @@ function BridgeStepper({
             Source tx <ExternalLink size={8} />
           </a>
         )}
-        {layerZeroScanUrl && (
+        {real && layerZeroScanUrl && (
           <a
             href={layerZeroScanUrl}
             target="_blank"
@@ -458,6 +463,7 @@ function SuccessState({
   fromChain,
   startTime,
   onReset,
+  real,
 }: {
   amount: string;
   toChain: string;
@@ -467,6 +473,7 @@ function SuccessState({
   fromChain: string;
   startTime: number;
   onReset: () => void;
+  real?: boolean;
 }) {
   const toName = BRIDGE_CHAINS.find((c) => c.id === toChain)?.name ?? toChain;
   const elapsedSec = Math.floor((Date.now() - startTime) / 1000);
@@ -487,7 +494,10 @@ function SuccessState({
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-3 text-[10px]">
-        {srcTxHash && CHAIN_EXPLORERS[fromChain] && (
+        {!real && (
+          <span className="text-[var(--color-muted)]">Simulated — switch to Live for real on-chain bridge</span>
+        )}
+        {real && srcTxHash && CHAIN_EXPLORERS[fromChain] && (
           <a
             href={`${CHAIN_EXPLORERS[fromChain]}${srcTxHash}`}
             target="_blank"
@@ -497,7 +507,7 @@ function SuccessState({
             Source tx <ExternalLink size={8} />
           </a>
         )}
-        {dstTxHash && (
+        {real && dstTxHash && (
           <a
             href={`https://layerzeroscan.com/tx/${dstTxHash}`}
             target="_blank"
@@ -507,7 +517,7 @@ function SuccessState({
             Dest tx <ExternalLink size={8} />
           </a>
         )}
-        {layerZeroScanUrl && (
+        {real && layerZeroScanUrl && (
           <a
             href={layerZeroScanUrl}
             target="_blank"
@@ -1034,6 +1044,7 @@ export function CrossChainBridge() {
         <BridgeStepper
           currentStage={trackingStage}
           startTime={bridgeStartTime}
+          real={tracking.real}
           estimatedRemaining={estimatedRemaining}
           srcTxHash={tracking.srcTxHash}
           dstTxHash={tracking.dstTxHash}
@@ -1055,6 +1066,7 @@ export function CrossChainBridge() {
           fromChain={fromChain}
           startTime={bridgeStartTime}
           onReset={reset}
+          real={tracking.real}
         />
       )}
 
