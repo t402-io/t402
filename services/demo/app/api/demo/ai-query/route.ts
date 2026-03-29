@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     const response = NextResponse.json({
       query,
       response: aiResponse,
-      model: process.env.ANTHROPIC_API_KEY ? "claude-haiku" : "mock",
+      model: process.env.ANTHROPIC_API_KEY ? "claude-sonnet-4 + web search" : "mock",
       cost: "0.001 USDT",
     });
     response.headers.set("Payment-Response", encodeHeader(settleResponse));
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
     const response = NextResponse.json({
       query,
       response: aiResponse,
-      model: process.env.ANTHROPIC_API_KEY ? "claude-haiku" : "mock",
+      model: process.env.ANTHROPIC_API_KEY ? "claude-sonnet-4 + web search" : "mock",
       cost: "0.001 USDT",
     });
     response.headers.set("Payment-Response", encodeHeader(settleResult));
@@ -141,20 +141,29 @@ async function generateAiResponse(query: string): Promise<string> {
   try {
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const message = await client.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 256,
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1024,
+      tools: [
+        {
+          type: "web_search" as any,
+          name: "web_search",
+          max_uses: 3,
+        } as any,
+      ],
       messages: [
         {
           role: "user",
           content: query,
         },
       ],
-      system: "You are a helpful AI assistant accessed via the T402 HTTP 402 payment protocol. Keep responses concise (2-3 sentences max). You are demonstrating pay-per-query AI API monetization.",
+      system: "You are a helpful AI assistant accessed via the T402 HTTP 402 payment protocol. Use web search to find the latest information when the question involves recent events, people, or topics that may have changed after your training data. Keep responses concise (3-5 sentences max). Always provide up-to-date, accurate information.",
     });
 
-    const textBlock = message.content.find((b) => b.type === "text");
-    return textBlock?.text ?? "No response generated.";
-  } catch {
+    // Extract text from response (may include tool use blocks)
+    const textBlocks = message.content.filter((b) => b.type === "text");
+    return textBlocks.map((b) => (b as any).text).join("\n\n") || "No response generated.";
+  } catch (err) {
+    console.error("[ai-query] Claude API error:", err);
     return getMockResponse(query);
   }
 }
