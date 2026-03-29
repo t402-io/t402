@@ -59,13 +59,14 @@ export function ChainSelector({ compact = false }: { compact?: boolean }) {
   const handleSelectFamily = useCallback((family: ChainFamily) => {
     setActiveFamily(family);
     if (family !== "evm" || testnet) {
-      setIsOpen(false);
+      // Delay close to ensure state update completes (portal unmount can interrupt)
+      requestAnimationFrame(() => setIsOpen(false));
     }
   }, [setActiveFamily, testnet]);
 
   const handleSelectNetwork = useCallback((network: string) => {
     setActiveNetwork(network);
-    setIsOpen(false);
+    requestAnimationFrame(() => setIsOpen(false));
   }, [setActiveNetwork]);
 
   const config = CHAIN_CONFIGS[activeFamily];
