@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useChainContext } from "@/providers/ChainProvider";
 import { useDemoContext } from "@/providers/DemoProvider";
 import { CHAIN_FAMILIES, CHAIN_CONFIGS, type ChainFamily } from "@/lib/testnet-config";
@@ -96,90 +97,134 @@ export function ChainSelector({ compact = false }: { compact?: boolean }) {
         <ChevronDown size={11} className={`transition-transform ${isOpen ? "rotate-180" : ""}`} style={{ color: "var(--color-text-tertiary)" }} />
       </button>
 
-      {/* Panel — Bottom sheet on mobile, dropdown on desktop */}
+      {/* Panel — Bottom sheet on mobile (portal), dropdown on desktop (inline) */}
       {isOpen && (
         <>
-          {/* Backdrop (mobile) */}
-          <div
-            className="fixed inset-0 z-[60] bg-black/50 sm:hidden"
-            onClick={() => setIsOpen(false)}
-          />
-
-          {/* Panel */}
+          {/* Desktop: inline dropdown */}
           <div
             ref={panelRef}
-            className="fixed bottom-0 left-0 right-0 z-[61] rounded-t-2xl sm:rounded-2xl sm:absolute sm:bottom-auto sm:top-full sm:mt-2 sm:left-0 sm:right-auto sm:w-[360px] max-h-[70vh] sm:max-h-[80vh] overflow-y-auto"
+            className="hidden sm:block absolute top-full mt-2 left-0 w-[360px] max-h-[80vh] overflow-y-auto z-50 rounded-2xl"
             style={{
               background: "rgba(17, 17, 19, 0.98)",
               backdropFilter: "blur(20px)",
               WebkitBackdropFilter: "blur(20px)",
               border: "1px solid rgba(255, 255, 255, 0.1)",
-              boxShadow: "0 -8px 32px rgba(0, 0, 0, 0.5)",
+              boxShadow: "0 16px 48px rgba(0, 0, 0, 0.5)",
             }}
             role="listbox"
             aria-label="Blockchain networks"
           >
-            {/* Mobile handle + close */}
-            <div className="sm:hidden flex items-center justify-between px-4 pt-3 pb-1">
-              <span className="text-xs font-semibold text-white">Select Network</span>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="p-1 rounded-lg hover:bg-[var(--color-surface-hover)]"
-                aria-label="Close"
-              >
-                <X size={16} style={{ color: "var(--color-text-tertiary)" }} />
-              </button>
-            </div>
-            {/* Drag handle */}
-            <div className="sm:hidden flex justify-center pb-2">
-              <div className="w-8 h-1 rounded-full bg-[var(--color-border)]" />
-            </div>
-
-            {/* Chain Families Grid */}
-            <div className="px-3 sm:p-3 pb-2">
-              <p className="hidden sm:block text-[10px] uppercase tracking-[0.15em] font-semibold mb-2" style={{ color: "var(--color-text-tertiary)" }}>
-                Network
-              </p>
-              <div className="grid grid-cols-4 sm:grid-cols-3 gap-1.5">
-                {CHAIN_FAMILIES.map((family) => {
-                  const cfg = CHAIN_CONFIGS[family];
-                  const isActive = activeFamily === family;
-                  return (
-                    <button
-                      key={family}
-                      role="option"
-                      aria-selected={isActive}
-                      onClick={() => handleSelectFamily(family)}
-                      className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 px-2 py-2 sm:py-2 rounded-lg text-[10px] sm:text-xs font-medium transition-all min-h-[44px]"
-                      style={{
-                        background: isActive ? `${cfg.color}15` : "transparent",
-                        border: isActive ? `1px solid ${cfg.color}40` : "1px solid transparent",
-                        color: isActive ? "var(--color-text-primary)" : "var(--color-text-tertiary)",
-                      }}
-                    >
-                      <ChainLogo family={family} size={18} />
-                      <span className="truncate">{cfg.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* EVM Sub-chains (mainnet only) */}
-            {activeFamily === "evm" && !testnet && (
-              <EvmSubChains
-                activeNetwork={activeNetwork}
-                onSelect={handleSelectNetwork}
-              />
-            )}
-
-            {/* Bottom safe area (mobile) */}
-            <div className="sm:hidden h-6 safe-area-bottom" />
+            <ChainPanelContent
+              activeFamily={activeFamily}
+              activeNetwork={activeNetwork}
+              testnet={testnet}
+              onSelectFamily={handleSelectFamily}
+              onSelectNetwork={handleSelectNetwork}
+              onClose={() => setIsOpen(false)}
+              isMobile={false}
+            />
           </div>
 
+          {/* Mobile: portal to body */}
+          {typeof document !== "undefined" && createPortal(
+            <>
+              <div className="sm:hidden fixed inset-0 z-[9998] bg-black/50" onClick={() => setIsOpen(false)} />
+              <div
+                className="sm:hidden fixed bottom-0 left-0 right-0 z-[9999] rounded-t-2xl max-h-[70vh] overflow-y-auto"
+                style={{
+                  background: "rgba(17, 17, 19, 0.98)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  boxShadow: "0 -8px 32px rgba(0, 0, 0, 0.5)",
+                }}
+                role="listbox"
+                aria-label="Blockchain networks"
+              >
+                <ChainPanelContent
+                  activeFamily={activeFamily}
+                  activeNetwork={activeNetwork}
+                  testnet={testnet}
+                  onSelectFamily={handleSelectFamily}
+                  onSelectNetwork={handleSelectNetwork}
+                  onClose={() => setIsOpen(false)}
+                  isMobile={true}
+                />
+              </div>
+            </>,
+            document.body
+          )}
         </>
       )}
     </div>
+  );
+}
+
+// ─── Shared Panel Content ───
+
+function ChainPanelContent({
+  activeFamily, activeNetwork, testnet,
+  onSelectFamily, onSelectNetwork, onClose, isMobile,
+}: {
+  activeFamily: ChainFamily;
+  activeNetwork: string | null;
+  testnet: boolean;
+  onSelectFamily: (family: ChainFamily) => void;
+  onSelectNetwork: (network: string) => void;
+  onClose: () => void;
+  isMobile: boolean;
+}) {
+  return (
+    <>
+      {isMobile && (
+        <>
+          <div className="flex items-center justify-between px-4 pt-3 pb-1">
+            <span className="text-xs font-semibold text-white">Select Network</span>
+            <button onClick={onClose} className="p-1 rounded-lg hover:bg-[var(--color-surface-hover)]" aria-label="Close">
+              <X size={16} style={{ color: "var(--color-text-tertiary)" }} />
+            </button>
+          </div>
+          <div className="flex justify-center pb-2">
+            <div className="w-8 h-1 rounded-full bg-[var(--color-border)]" />
+          </div>
+        </>
+      )}
+
+      <div className="px-3 sm:p-3 pb-2">
+        {!isMobile && (
+          <p className="text-[10px] uppercase tracking-[0.15em] font-semibold mb-2" style={{ color: "var(--color-text-tertiary)" }}>
+            Network
+          </p>
+        )}
+        <div className={`grid ${isMobile ? "grid-cols-4" : "grid-cols-3"} gap-1.5`}>
+          {CHAIN_FAMILIES.map((family) => {
+            const cfg = CHAIN_CONFIGS[family];
+            const isActive = activeFamily === family;
+            return (
+              <button
+                key={family}
+                role="option"
+                aria-selected={isActive}
+                onClick={() => onSelectFamily(family)}
+                className={`flex ${isMobile ? "flex-col" : "flex-row"} items-center gap-1 sm:gap-2 px-2 py-2 rounded-lg text-[10px] sm:text-xs font-medium transition-all min-h-[44px]`}
+                style={{
+                  background: isActive ? `${cfg.color}15` : "transparent",
+                  border: isActive ? `1px solid ${cfg.color}40` : "1px solid transparent",
+                  color: isActive ? "var(--color-text-primary)" : "var(--color-text-tertiary)",
+                }}
+              >
+                <ChainLogo family={family} size={isMobile ? 20 : 18} />
+                <span className="truncate">{cfg.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {activeFamily === "evm" && !testnet && (
+        <EvmSubChains activeNetwork={activeNetwork} onSelect={onSelectNetwork} />
+      )}
+
+      {isMobile && <div className="h-6 safe-area-bottom" />}
+    </>
   );
 }
 
