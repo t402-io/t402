@@ -211,7 +211,9 @@ export function GaslessPayment() {
                 )}
                 {!erc4337Data?.real && (
                   <p className="text-[10px] text-[var(--color-muted)]">
-                    Simulated — configure PIMLICO_API_KEY for real ERC-4337 execution
+                    {isDemo
+                      ? "Demo mode — switch to Live for real ERC-4337 gasless execution"
+                      : "Simulated — configure PIMLICO_API_KEY for real ERC-4337 execution"}
                   </p>
                 )}
                 <button onClick={reset} className="text-xs text-[var(--color-brand)] hover:underline">
