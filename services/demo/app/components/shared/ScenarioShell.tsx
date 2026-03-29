@@ -46,26 +46,26 @@ export function ScenarioShell({ title, description, cost, accentColor, iconName,
     >
       {/* Scenario header with gradient band */}
       <div
-        className="rounded-2xl p-5 sm:p-7 mb-6"
+        className="rounded-xl sm:rounded-2xl p-4 sm:p-7 mb-5 sm:mb-6"
         style={{
           background: `linear-gradient(135deg, ${accentColor}12, ${accentColor}04 50%, transparent 100%)`,
           border: `1px solid ${accentColor}15`,
         }}
       >
-        <div className="flex items-start gap-3 sm:gap-4">
+        <div className="flex items-start gap-2.5 sm:gap-4">
           {Icon && (
             <div
-              className="w-11 h-11 sm:w-13 sm:h-13 rounded-xl flex items-center justify-center shrink-0"
+              className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0"
               style={{ background: `${accentColor}18`, border: `1px solid ${accentColor}25`, color: accentColor }}
             >
-              <Icon size={22} />
+              <Icon size={20} />
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 mb-1.5">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">{title}</h1>
+            <div className="flex items-center gap-2 sm:gap-3 mb-1 flex-wrap">
+              <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold tracking-tight">{title}</h1>
               <span
-                className="text-[11px] sm:text-xs font-semibold px-2.5 py-0.5 rounded-full w-fit"
+                className="text-[10px] sm:text-xs font-semibold px-2 sm:px-2.5 py-0.5 rounded-full"
                 style={{
                   background: `${accentColor}15`,
                   color: accentColor,
@@ -75,7 +75,7 @@ export function ScenarioShell({ title, description, cost, accentColor, iconName,
                 {cost}
               </span>
             </div>
-            <p className="text-xs sm:text-sm max-w-xl leading-relaxed text-[var(--color-muted)]">{description}</p>
+            <p className="text-[11px] sm:text-sm max-w-xl leading-relaxed text-[var(--color-muted)]">{description}</p>
 
             {/* Chain info row — compact */}
             {!hideChainSelector && (

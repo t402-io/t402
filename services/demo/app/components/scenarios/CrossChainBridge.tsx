@@ -932,10 +932,11 @@ export function CrossChainBridge() {
                 if (cid) ensureChain(cid);
               }}
               disabled={formDisabled}
-              className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full bg-[var(--color-surface)] hover:bg-[var(--color-surface-active)] transition-colors disabled:opacity-50"
+              className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[var(--color-surface)] hover:bg-[var(--color-surface-active)] transition-colors disabled:opacity-50 shrink-0"
               title="Swap chains"
+              aria-label="Swap chains"
             >
-              <ArrowLeftRight size={14} className="text-[var(--color-scenario-bridge)]" />
+              <ArrowLeftRight size={14} className="text-[var(--color-scenario-bridge)] rotate-90 sm:rotate-0" />
             </button>
 
             <ChainDropdown

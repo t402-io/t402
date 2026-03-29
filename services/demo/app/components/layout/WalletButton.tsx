@@ -69,12 +69,15 @@ export function WalletButton() {
 function DemoWalletBadge({ label }: { label: string }) {
   return (
     <div
-      className="flex items-center gap-2 rounded-xl px-3 py-1.5"
+      className="flex items-center gap-1.5 rounded-lg px-2 py-1"
       style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
     >
-      <span className="h-2 w-2 rounded-full" style={{ background: "var(--color-warning)" }} />
-      <span className="font-mono text-xs text-white">Demo Wallet</span>
-      <span className="text-xs" style={{ color: "var(--color-text-tertiary)" }}>{label}</span>
+      <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--color-warning)" }} />
+      <span className="font-mono text-[10px] sm:text-xs text-white">
+        <span className="sm:hidden">Demo</span>
+        <span className="hidden sm:inline">Demo Wallet</span>
+      </span>
+      <span className="hidden sm:inline text-[10px]" style={{ color: "var(--color-text-tertiary)" }}>{label}</span>
     </div>
   );
 }

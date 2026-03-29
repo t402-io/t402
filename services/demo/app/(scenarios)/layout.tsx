@@ -127,7 +127,7 @@ export default function ScenariosLayout({ children }: { children: ReactNode }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="p-6 sm:p-8 lg:p-10 pb-24 lg:pb-10"
+              className="p-4 sm:p-8 lg:p-10 pb-24 lg:pb-10"
             >
               {children}
             </motion.div>

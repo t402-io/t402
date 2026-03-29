@@ -6,10 +6,10 @@ export function ModeToggle() {
   const { mode, setMode, testnet, setTestnet } = useDemoContext();
 
   return (
-    <div className="flex items-center gap-0.5 sm:gap-1">
+    <div className="flex items-center gap-0.5">
       {/* Demo / Live toggle */}
       <div
-        className="flex items-center gap-1 rounded-xl p-0.5"
+        className="flex items-center rounded-lg p-0.5"
         style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
       >
         <ModeButton
@@ -29,7 +29,7 @@ export function ModeToggle() {
       </div>
       {/* Testnet / Mainnet toggle */}
       <div
-        className="flex items-center gap-1 rounded-xl p-0.5"
+        className="hidden sm:flex items-center rounded-lg p-0.5"
         style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
       >
         <ModeButton
@@ -47,6 +47,21 @@ export function ModeToggle() {
           title="Use real mainnet tokens"
         />
       </div>
+      {/* Mobile: compact testnet/mainnet dot */}
+      <button
+        onClick={() => setTestnet(!testnet)}
+        className="sm:hidden flex items-center gap-1 rounded-lg px-1.5 py-1"
+        style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
+        title={testnet ? "Testnet — tap for Mainnet" : "Mainnet — tap for Testnet"}
+      >
+        <span
+          className="h-1.5 w-1.5 rounded-full animate-pulse"
+          style={{ backgroundColor: testnet ? "#6366F1" : "#EF4444" }}
+        />
+        <span className="text-[9px] font-medium" style={{ color: "var(--color-text-tertiary)" }}>
+          {testnet ? "T" : "M"}
+        </span>
+      </button>
     </div>
   );
 }
@@ -68,7 +83,7 @@ function ModeButton({
     <button
       onClick={onClick}
       title={title}
-      className={`flex items-center gap-1 sm:gap-1.5 rounded-lg px-1.5 sm:px-2.5 py-1 text-[9px] sm:text-[11px] font-medium transition-all`}
+      className="flex items-center gap-1 rounded-md px-2 py-1 text-[10px] sm:text-[11px] font-medium transition-all"
       style={{
         background: active ? "var(--color-border)" : "transparent",
         color: active ? "var(--color-text-primary)" : "var(--color-text-tertiary)",
@@ -76,7 +91,7 @@ function ModeButton({
       aria-pressed={active}
     >
       <span
-        className={`h-1 w-1 sm:h-1.5 sm:w-1.5 rounded-full shrink-0 ${active ? "animate-pulse" : ""}`}
+        className={`h-1.5 w-1.5 rounded-full shrink-0 ${active ? "animate-pulse" : ""}`}
         style={{ backgroundColor: active ? color : "var(--color-text-tertiary)" }}
       />
       {label}
