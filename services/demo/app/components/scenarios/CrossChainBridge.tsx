@@ -23,6 +23,8 @@ import {
 import type { FlowState } from "@/hooks/usePaymentFlow";
 import { encodePaymentHeader } from "@/lib/t402-client";
 import { useEvmChainSync } from "@/hooks/useEvmChainSync";
+import { useBridgeExecution } from "@/hooks/useBridgeExecution";
+import { BRIDGE_CHAIN_REGISTRY } from "@/lib/bridge-chains";
 import { WalletChainIndicator } from "@/components/shared/WalletChainIndicator";
 
 // ---------------------------------------------------------------------------
@@ -569,6 +571,7 @@ export function CrossChainBridge() {
   const { isDemo, testnet } = useDemoContext();
   const { signPayment, activeFamily, activeNetwork, address: walletAddress } = useMultiChainPayment();
   const { ensureChain } = useEvmChainSync();
+  const bridgeExec = useBridgeExecution();
 
   // Form state
   const [fromChain, setFromChain] = useState("arbitrum");
@@ -774,7 +777,7 @@ export function CrossChainBridge() {
 
         setState("bridging");
 
-        // Step 3: Retry with payment
+        // Step 3: Retry with payment to settle T402 fee
         const retryHeaders: Record<string, string> = {
           ...headers,
           "Payment-Signature": encodePaymentHeader(paymentPayload),
@@ -786,54 +789,58 @@ export function CrossChainBridge() {
         setSettle(parsePaymentResponse(retryRes));
 
         const data = await retryRes.json();
-
         if (!data.success) {
-          throw new Error(data.error || "Bridge request failed");
+          throw new Error(data.error || "T402 payment failed");
         }
 
-        // Check if real bridge failed (payment succeeded but bridge execution failed)
-        if (data.bridge?.error) {
-          throw new Error(data.bridge.error);
+        // Step 4: Execute bridge on user's wallet (client-side)
+        // Only in Live mode with a real wallet
+        if (!isDemo && walletAddress && walletAddress !== "demo-wallet") {
+          setFlowState("done"); // T402 payment done
+          setState("bridging");
+
+          // Switch wallet to FROM chain
+          const fromChainInfo = BRIDGE_CHAIN_REGISTRY[fromChain];
+          if (fromChainInfo) {
+            await ensureChain(fromChainInfo.chainId);
+          }
+
+          // Execute: approve → quoteSend → send
+          const bridgeResult = await bridgeExec.execute(
+            fromChain, toChain, BigInt(amountRaw), walletAddress
+          );
+
+          if (bridgeResult) {
+            setTracking({
+              guid: bridgeResult.guid || bridgeResult.txHash,
+              status: "INFLIGHT",
+              srcTxHash: bridgeResult.txHash,
+              dstTxHash: null,
+              layerZeroScanUrl: bridgeResult.layerZeroScanUrl,
+              real: true,
+            });
+            setEstimatedRemaining(300);
+            setBridgeStartTime(Date.now());
+            setState("tracking");
+          } else {
+            throw new Error(bridgeExec.error || "Bridge execution failed");
+          }
+        } else {
+          // Demo mode: use server response as before
+          const msg = data.message || {};
+          setTracking({
+            guid: msg.guid || "simulated",
+            status: msg.status || "SUBMITTED",
+            srcTxHash: data.bridge?.txHash || null,
+            dstTxHash: null,
+            layerZeroScanUrl: data.tracking?.layerZeroScan || "",
+            real: false,
+          });
+          setEstimatedRemaining(300);
+          setBridgeStartTime(Date.now());
+          setState("tracking");
+          setFlowState("done");
         }
-
-        // Extract tracking info
-        const msg = data.message || {};
-        const isReal = data.bridge?.real === true;
-        const srcTx = data.bridge?.txHash || msg.srcTxHash || null;
-        const guid = msg.guid || "simulated";
-        const lzUrl = data.tracking?.layerZeroScan || `https://layerzeroscan.com/tx/${srcTx || guid}`;
-
-        setTracking({
-          guid,
-          status: msg.status || "SUBMITTED",
-          srcTxHash: srcTx,
-          dstTxHash: null,
-          layerZeroScanUrl: lzUrl,
-          real: isReal,
-        });
-
-        // estimatedTimeRemaining from API is in ms, estimatedTime is in seconds
-        const rawEst = msg.estimatedTimeRemaining ?? msg.estimatedTime ?? 300;
-        // Normalize to seconds (if > 10000, assume milliseconds)
-        const estTime = rawEst > 10000 ? Math.ceil(rawEst / 1000) : rawEst;
-        setEstimatedRemaining(estTime);
-        setBridgeStartTime(Date.now());
-        setState("tracking");
-        setFlowState("done");
-      } else if (res.ok) {
-        // Unusual: 200 without 402 flow
-        const data = await res.json();
-        setTracking({
-          guid: data.message?.guid || "direct",
-          status: "SUBMITTED",
-          srcTxHash: data.bridge?.txHash || null,
-          dstTxHash: null,
-          layerZeroScanUrl: data.tracking?.layerZeroScan || "",
-          real: data.bridge?.real,
-        });
-        setBridgeStartTime(Date.now());
-        setState("tracking");
-        setFlowState("done");
       } else {
         const errData = await res.json().catch(() => ({}));
         throw new Error(errData.error || `Server error (${res.status})`);
@@ -845,7 +852,7 @@ export function CrossChainBridge() {
       setFlowState("error");
       setState("failed");
     }
-  }, [isDemo, activeFamily, activeNetwork, testnet, signPayment, fromChain, toChain, amountRaw, ensureChain, walletAddress]);
+  }, [isDemo, activeFamily, activeNetwork, testnet, signPayment, fromChain, toChain, amountRaw, ensureChain, walletAddress, bridgeExec]);
 
   // ---------------------------------------------------------------------------
   // Reset
