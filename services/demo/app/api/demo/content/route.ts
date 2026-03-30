@@ -195,22 +195,47 @@ async function generateArticle() {
     });
 
     const textBlocks = message.content.filter((b) => b.type === "text");
-    const rawText = textBlocks.map((b) => (b as any).text).join("");
+    const rawText = textBlocks.map((b) => (b as any).text).join("\n\n");
 
-    // Extract JSON from response
-    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      const parsed = JSON.parse(jsonMatch[0]);
+    // Try to extract JSON from response
+    try {
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        if (parsed.title && parsed.content) {
+          return {
+            title: parsed.title,
+            author: "T402 Research · AI Generated",
+            publishedAt: new Date().toISOString(),
+            readTime: "3 min",
+            content: Array.isArray(parsed.content) ? parsed.content : [{ type: "paragraph", text: String(parsed.content) }],
+          };
+        }
+      }
+    } catch { /* JSON parse failed, use text fallback */ }
+
+    // Fallback: split raw text into paragraphs
+    const paragraphs = rawText.split(/\n\n+/).filter((p) => p.trim().length > 20);
+    if (paragraphs.length > 0) {
+      // Use first line as title, rest as content
+      const title = paragraphs[0].replace(/^#+\s*/, "").replace(/^\*\*(.+)\*\*$/, "$1").slice(0, 100);
+      const content = paragraphs.slice(1).map((p) => {
+        const isHeading = p.startsWith("#") || (p.length < 60 && !p.includes("."));
+        return {
+          type: isHeading ? "heading" : "paragraph",
+          text: p.replace(/^#+\s*/, "").replace(/\*\*/g, ""),
+        };
+      });
       return {
-        title: parsed.title || "Premium Article",
+        title,
         author: "T402 Research · AI Generated",
         publishedAt: new Date().toISOString(),
         readTime: "3 min",
-        content: parsed.content || [{ type: "paragraph", text: rawText }],
+        content: content.length > 0 ? content : [{ type: "paragraph", text: rawText }],
       };
     }
 
-    // If JSON parse fails, return as single paragraph
+    // Last resort
     return {
       title: "Latest in Crypto & AI",
       author: "T402 Research · AI Generated",
