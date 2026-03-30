@@ -175,23 +175,30 @@ async function generateArticle() {
 
   try {
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+    // Pick a random topic for variety
+    const topics = [
+      "How AI agents are transforming crypto payments in 2026",
+      "The rise of USDT0 and cross-chain stablecoin transfers",
+      "Why HTTP 402 is the missing payment layer of the internet",
+      "ERC-4337 account abstraction and the future of gasless payments",
+      "Machine-to-machine micropayments: the trillion-dollar opportunity",
+      "LayerZero OFT and the unification of stablecoin liquidity",
+      "How MCP (Model Context Protocol) enables AI agent commerce",
+      "The death of API keys: pay-per-request as the new business model",
+    ];
+    const topic = topics[Math.floor(Math.random() * topics.length)];
+
     const message = await client.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 1024,
-      tools: [
-        {
-          type: "web_search_20250305",
-          name: "web_search",
-          max_uses: 3,
-        } as any,
-      ],
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 512,
       messages: [
         {
           role: "user",
-          content: "Write a short premium article (300-400 words) about a trending topic in crypto, AI, or fintech TODAY. Use web search to find the latest news. Include 2-3 section headings. Write in a professional but accessible style. DO NOT return JSON. Just write the article in plain text with the title on the first line.",
+          content: `Write a short premium article (200-300 words) about: ${topic}. Include 2-3 section headings. Professional but accessible style. Title on first line, headings with ## prefix.`,
         },
       ],
-      system: "You are a premium content writer for T402, an HTTP payment protocol. Write concise, insightful articles about the latest trends in crypto, blockchain, AI, and fintech. Always use web search to ensure content is current. Write the article title on the first line (no # prefix), then the article body with section headings marked by ## prefix. Keep it under 400 words.",
+      system: "You are a premium content writer for T402, an HTTP payment protocol for USDT stablecoins. Write concise, insightful articles. Title on first line (no # prefix), section headings with ## prefix. Keep under 300 words.",
     });
 
     const textBlocks = message.content.filter((b) => b.type === "text");
