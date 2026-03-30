@@ -188,60 +188,36 @@ async function generateArticle() {
       messages: [
         {
           role: "user",
-          content: "Write a short premium article (300-400 words) about a trending topic in crypto, AI, or fintech TODAY. Use web search to find the latest news. Format as JSON with fields: title (string), content (array of objects with type 'paragraph' or 'heading' and text string). Include 2-3 headings. Write in a professional but accessible style. Return ONLY the JSON, no markdown.",
+          content: "Write a short premium article (300-400 words) about a trending topic in crypto, AI, or fintech TODAY. Use web search to find the latest news. Include 2-3 section headings. Write in a professional but accessible style. DO NOT return JSON. Just write the article in plain text with the title on the first line.",
         },
       ],
-      system: "You are a premium content writer for T402, an HTTP payment protocol. Write concise, insightful articles about the latest trends in crypto, blockchain, AI, and fintech. Always use web search to ensure you're writing about today's most relevant topics. Return ONLY valid JSON.",
+      system: "You are a premium content writer for T402, an HTTP payment protocol. Write concise, insightful articles about the latest trends in crypto, blockchain, AI, and fintech. Always use web search to ensure content is current. Write the article title on the first line (no # prefix), then the article body with section headings marked by ## prefix. Keep it under 400 words.",
     });
 
     const textBlocks = message.content.filter((b) => b.type === "text");
-    const rawText = textBlocks.map((b) => (b as any).text).join("\n\n");
+    const rawText = textBlocks.map((b) => (b as any).text).join("\n\n").trim();
 
-    // Try to extract JSON from response
-    try {
-      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0]);
-        if (parsed.title && parsed.content) {
-          return {
-            title: parsed.title,
-            author: "T402 Research · AI Generated",
-            publishedAt: new Date().toISOString(),
-            readTime: "3 min",
-            content: Array.isArray(parsed.content) ? parsed.content : [{ type: "paragraph", text: String(parsed.content) }],
-          };
-        }
+    // Parse plain text: first line = title, ## = headings, rest = paragraphs
+    const lines = rawText.split("\n").filter((l) => l.trim());
+    const title = lines[0]?.replace(/^#+\s*/, "").replace(/^\*\*(.+)\*\*$/, "$1").trim() || "Latest in Crypto & AI";
+
+    const content: Array<{ type: string; text: string }> = [];
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      if (line.startsWith("##") || line.startsWith("**") && line.endsWith("**") && line.length < 80) {
+        content.push({ type: "heading", text: line.replace(/^#+\s*/, "").replace(/^\*\*(.+)\*\*$/, "$1") });
+      } else {
+        content.push({ type: "paragraph", text: line.replace(/^\*\*(.+)\*\*$/, "$1") });
       }
-    } catch { /* JSON parse failed, use text fallback */ }
-
-    // Fallback: split raw text into paragraphs
-    const paragraphs = rawText.split(/\n\n+/).filter((p) => p.trim().length > 20);
-    if (paragraphs.length > 0) {
-      // Use first line as title, rest as content
-      const title = paragraphs[0].replace(/^#+\s*/, "").replace(/^\*\*(.+)\*\*$/, "$1").slice(0, 100);
-      const content = paragraphs.slice(1).map((p) => {
-        const isHeading = p.startsWith("#") || (p.length < 60 && !p.includes("."));
-        return {
-          type: isHeading ? "heading" : "paragraph",
-          text: p.replace(/^#+\s*/, "").replace(/\*\*/g, ""),
-        };
-      });
-      return {
-        title,
-        author: "T402 Research · AI Generated",
-        publishedAt: new Date().toISOString(),
-        readTime: "3 min",
-        content: content.length > 0 ? content : [{ type: "paragraph", text: rawText }],
-      };
     }
 
-    // Last resort
     return {
-      title: "Latest in Crypto & AI",
+      title,
       author: "T402 Research · AI Generated",
       publishedAt: new Date().toISOString(),
       readTime: "3 min",
-      content: [{ type: "paragraph", text: rawText }],
+      content: content.length > 0 ? content : [{ type: "paragraph", text: rawText }],
     };
   } catch (err) {
     console.error("[content] AI generation failed:", err);
