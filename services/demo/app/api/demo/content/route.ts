@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import Anthropic from "@anthropic-ai/sdk";
 import { getPreferredChain, getAcceptsForChain, buildRequirementsFromPayload } from "@/lib/config";
 import { encodeHeader, decodeHeader, verifyPayment, settlePayment, recordSettlement, isPreBroadcastNetwork } from "@/lib/t402-server";
 import { createMockSettleResponse } from "@/lib/mock-responses";
@@ -95,7 +96,8 @@ export async function GET(request: NextRequest) {
     await new Promise((r) => setTimeout(r, 600));
     const chain = getPreferredChain(request);
     const settleResponse = createMockSettleResponse(chain);
-    const response = NextResponse.json({ article: PREMIUM_ARTICLE });
+    const article = await generateArticle();
+    const response = NextResponse.json({ article });
     response.headers.set("Payment-Response", encodeHeader(settleResponse));
     response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
     return response;
@@ -148,7 +150,8 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const response = NextResponse.json({ article: PREMIUM_ARTICLE });
+    const article = await generateArticle();
+    const response = NextResponse.json({ article });
     response.headers.set("Payment-Response", encodeHeader(settleResult));
     response.headers.set("Access-Control-Expose-Headers", "Payment-Required, Payment-Response");
     return response;
@@ -158,6 +161,66 @@ export async function GET(request: NextRequest) {
       { error: errMsg, reason: detail, requestId },
       { status }
     );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// AI Article Generation
+// ---------------------------------------------------------------------------
+
+async function generateArticle() {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return PREMIUM_ARTICLE; // Fallback to static
+  }
+
+  try {
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const message = await client.messages.create({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1024,
+      tools: [
+        {
+          type: "web_search_20250305",
+          name: "web_search",
+          max_uses: 3,
+        } as any,
+      ],
+      messages: [
+        {
+          role: "user",
+          content: "Write a short premium article (300-400 words) about a trending topic in crypto, AI, or fintech TODAY. Use web search to find the latest news. Format as JSON with fields: title (string), content (array of objects with type 'paragraph' or 'heading' and text string). Include 2-3 headings. Write in a professional but accessible style. Return ONLY the JSON, no markdown.",
+        },
+      ],
+      system: "You are a premium content writer for T402, an HTTP payment protocol. Write concise, insightful articles about the latest trends in crypto, blockchain, AI, and fintech. Always use web search to ensure you're writing about today's most relevant topics. Return ONLY valid JSON.",
+    });
+
+    const textBlocks = message.content.filter((b) => b.type === "text");
+    const rawText = textBlocks.map((b) => (b as any).text).join("");
+
+    // Extract JSON from response
+    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      return {
+        title: parsed.title || "Premium Article",
+        author: "T402 Research · AI Generated",
+        publishedAt: new Date().toISOString(),
+        readTime: "3 min",
+        content: parsed.content || [{ type: "paragraph", text: rawText }],
+      };
+    }
+
+    // If JSON parse fails, return as single paragraph
+    return {
+      title: "Latest in Crypto & AI",
+      author: "T402 Research · AI Generated",
+      publishedAt: new Date().toISOString(),
+      readTime: "3 min",
+      content: [{ type: "paragraph", text: rawText }],
+    };
+  } catch (err) {
+    console.error("[content] AI generation failed:", err);
+    return PREMIUM_ARTICLE; // Fallback to static
   }
 }
 
