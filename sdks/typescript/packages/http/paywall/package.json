@@ -74,7 +74,7 @@
     "@ton/core": "^0.63.1",
     "@ton/ton": "^16.2.2",
     "@tonconnect/ui-react": "^2.4.2",
-    "@wagmi/connectors": "^7.2.1",
+    "@wagmi/connectors": "^8.0.0",
     "@wagmi/core": "^3.4.0",
     "@wallet-standard/app": "^1.1.0",
     "@wallet-standard/base": "^1.1.0",
