@@ -47,6 +47,13 @@ try {
     CREATE INDEX IF NOT EXISTS idx_services_network ON services(price_network);
   `);
 
+  // Migration: add api_key_hash column if missing (existing DBs)
+  try {
+    db.exec(`ALTER TABLE services ADD COLUMN api_key_hash TEXT`);
+  } catch {
+    // Column already exists — ignore
+  }
+
   logger.info("database initialized", { path: DB_PATH, engine: "sqlite" });
 } catch (e) {
   logger.warn("SQLite unavailable, using in-memory store", { error: e.message, path: DB_PATH });
