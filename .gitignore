@@ -132,3 +132,6 @@ services/docs/pages/sdks/typescript/wdk-multisig.mdx
 # Architecture documents (generated/exported)
 *.pdf
 scan2pay-architecture.md
+
+# Security reports (private — do not commit)
+security/reports/
