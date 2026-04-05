@@ -171,6 +171,27 @@ export class UptoEvmFacilitatorScheme implements SchemeNetworkFacilitator {
       };
     }
 
+    // Verify spender matches the trusted router address
+    // SECURITY: The permit must authorize the router contract as spender.
+    // Without this check, an attacker can sign a permit for a different spender,
+    // pass verification, trigger protected handler execution, and settlement
+    // would then fail because the router is not the authorized spender.
+    const routerAddress = requirements.extra?.routerAddress as string | undefined;
+    if (!routerAddress) {
+      return {
+        isValid: false,
+        invalidReason: "missing_router_address",
+        payer: uptoPayload.authorization.owner,
+      };
+    }
+    if (getAddress(uptoPayload.authorization.spender) !== getAddress(routerAddress)) {
+      return {
+        isValid: false,
+        invalidReason: "spender_mismatch: permit must authorize the router contract",
+        payer: uptoPayload.authorization.owner,
+      };
+    }
+
     // Build typed data for signature verification
     const chainId = parseInt(requirements.network.split(":")[1]);
     const permitTypedData = {
@@ -184,7 +205,7 @@ export class UptoEvmFacilitatorScheme implements SchemeNetworkFacilitator {
       },
       message: {
         owner: getAddress(uptoPayload.authorization.owner),
-        spender: getAddress(uptoPayload.authorization.spender),
+        spender: getAddress(routerAddress),
         value: BigInt(uptoPayload.authorization.value),
         nonce: BigInt(uptoPayload.authorization.nonce),
         deadline: BigInt(uptoPayload.authorization.deadline),
