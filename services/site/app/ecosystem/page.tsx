@@ -5,11 +5,11 @@ import EcosystemClient from "./EcosystemClient";
 export const metadata = {
   title: "Ecosystem | t402",
   description:
-    "47+ packages across TypeScript, Go, Python, and Java. 14 chain mechanisms, HTTP middleware, UI components, wallet integrations, AI agent tools, and developer utilities.",
+    "47+ packages and 15+ partners across TypeScript, Go, Python, and Java. Chain mechanisms, HTTP middleware, AI agents, wallets, and infrastructure integrations.",
   openGraph: {
-    title: "t402 Ecosystem - Packages & Integrations",
+    title: "t402 Ecosystem - Packages, Partners & Integrations",
     description:
-      "Complete ecosystem of payment packages: 14 chain mechanisms, 5 HTTP middleware, UI components, wallet integrations, and AI agent tools.",
+      "Complete ecosystem: 47+ packages, 15+ partners including Tether, LayerZero, Circle, Anthropic, OpenAI, and more.",
   },
 };
 

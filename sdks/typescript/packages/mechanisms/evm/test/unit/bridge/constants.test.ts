@@ -32,8 +32,8 @@ describe("Bridge Constants", () => {
   describe("USDT0_OFT_ADDRESSES", () => {
     it("should have addresses for USDT0 chains", () => {
       expect(USDT0_OFT_ADDRESSES.ethereum).toBe("0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee");
-      expect(USDT0_OFT_ADDRESSES.arbitrum).toBe("0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9");
-      expect(USDT0_OFT_ADDRESSES.ink).toBe("0x0200C29006150606B650577BBE7B6248F58470c1");
+      expect(USDT0_OFT_ADDRESSES.arbitrum).toBe("0x14E4A1B13bf7F943c8ff7C51fb60FA964A298D92");
+      expect(USDT0_OFT_ADDRESSES.ink).toBe("0x1cB6De532588fCA4a21B7209DE7C456AF8434A65");
     });
   });
 
@@ -81,7 +81,7 @@ describe("Bridge Constants", () => {
     });
 
     it("should return undefined for unknown networks", () => {
-      expect(getEndpointIdFromNetwork("eip155:999")).toBeUndefined();
+      expect(getEndpointIdFromNetwork("eip155:99999999")).toBeUndefined();
     });
   });
 
@@ -125,7 +125,8 @@ describe("Bridge Constants", () => {
       const chains = getBridgeableChains();
 
       expect(chains).not.toContain("base");
-      expect(chains).not.toContain("polygon");
+      // polygon now has USDT0 support
+      expect(chains).toContain("polygon");
     });
   });
 

@@ -2,6 +2,194 @@
  * Ecosystem Data for t402
  */
 
+// ── Partner Directory ────────────────────────────────────────────────
+
+export type PartnerCategory =
+  | "infrastructure"
+  | "defi"
+  | "ai"
+  | "services"
+  | "wallets";
+
+export const partnerCategoryLabels: Record<PartnerCategory, string> = {
+  infrastructure: "Infrastructure",
+  defi: "DeFi & Payments",
+  ai: "AI & Agents",
+  services: "Services",
+  wallets: "Wallets & Identity",
+};
+
+export interface Partner {
+  id: string;
+  name: string;
+  category: PartnerCategory;
+  description: string;
+  url: string;
+  logo?: string;
+  integration: string;
+  badge?: "live" | "building" | "planned";
+}
+
+export const partners: Partner[] = [
+  // Infrastructure
+  {
+    id: "tether",
+    name: "Tether / USDT0",
+    category: "infrastructure",
+    description:
+      "USDT0 cross-chain stablecoin — default payment asset for t402 across 22+ chains via LayerZero OFT.",
+    url: "https://usdt0.to",
+    integration: "Default asset on all EVM mechanisms",
+    badge: "live",
+  },
+  {
+    id: "layerzero",
+    name: "LayerZero",
+    category: "infrastructure",
+    description:
+      "Cross-chain messaging protocol powering USDT0 OFT bridging between t402-supported chains.",
+    url: "https://layerzero.network",
+    integration: "Bridge module for cross-chain settlements",
+    badge: "live",
+  },
+  {
+    id: "cloudflare",
+    name: "Cloudflare",
+    category: "infrastructure",
+    description:
+      "CDN, DDoS protection, and Tunnel for all t402 production services.",
+    url: "https://cloudflare.com",
+    integration: "Tunnel + DNS for 12 services",
+    badge: "live",
+  },
+  // DeFi & Payments
+  {
+    id: "scan2pay",
+    name: "Scan2Pay",
+    category: "defi",
+    description:
+      "QR-code point-of-sale payment solution built on t402. Supports fiat on-ramp via OLPay.",
+    url: "https://scan2pay.t402.io",
+    integration: "Full t402 integration with facilitator",
+    badge: "live",
+  },
+  {
+    id: "uniswap",
+    name: "Uniswap V3",
+    category: "defi",
+    description:
+      "DEX integration for T402SwapPay — atomic swap-and-pay from any token to stablecoins.",
+    url: "https://uniswap.org",
+    integration: "SwapRouter in T402SwapPay.sol",
+    badge: "live",
+  },
+  {
+    id: "circle",
+    name: "Circle / USDC",
+    category: "defi",
+    description:
+      "USDC stablecoin supported as alternative payment asset across Ethereum, Base, Arbitrum, Polygon.",
+    url: "https://circle.com",
+    integration: "Supported asset on 6+ chains",
+    badge: "live",
+  },
+  // AI & Agents
+  {
+    id: "anthropic",
+    name: "Anthropic (Claude)",
+    category: "ai",
+    description:
+      "MCP server integration for Claude — AI agents can discover and pay for t402-protected APIs.",
+    url: "https://anthropic.com",
+    integration: "@t402/mcp + @t402/payments-mcp",
+    badge: "live",
+  },
+  {
+    id: "openai",
+    name: "OpenAI (Codex)",
+    category: "ai",
+    description:
+      "MCP-compatible payments for Codex CLI agents via @t402/payments-mcp.",
+    url: "https://openai.com",
+    integration: "@t402/payments-mcp auto-detection",
+    badge: "live",
+  },
+  {
+    id: "google",
+    name: "Google (Gemini)",
+    category: "ai",
+    description:
+      "MCP-compatible payments for Gemini agents via @t402/payments-mcp.",
+    url: "https://deepmind.google",
+    integration: "@t402/payments-mcp auto-detection",
+    badge: "live",
+  },
+  // Services
+  {
+    id: "bazaar",
+    name: "T402 Bazaar",
+    category: "services",
+    description:
+      "Service marketplace for AI agents to discover and register t402-protected APIs.",
+    url: "https://bazaar.t402.io",
+    integration: "Native t402 service",
+    badge: "live",
+  },
+  {
+    id: "explorer",
+    name: "T402 Explorer",
+    category: "services",
+    description:
+      "On-chain payment transaction browser for t402 settlements across all networks.",
+    url: "https://explorer.t402.io",
+    integration: "Native t402 service",
+    badge: "live",
+  },
+  {
+    id: "sandbox",
+    name: "T402 Sandbox",
+    category: "services",
+    description:
+      "Interactive playground for testing t402 payment flows with a testnet facilitator.",
+    url: "https://sandbox.t402.io",
+    integration: "Native t402 service",
+    badge: "live",
+  },
+  // Wallets & Identity
+  {
+    id: "moonpay",
+    name: "MoonPay",
+    category: "wallets",
+    description:
+      "Fiat on/off-ramp integration via @t402/wdk-fiat for buying USDT/USDC with credit card.",
+    url: "https://moonpay.com",
+    integration: "@t402/wdk-fiat module",
+    badge: "live",
+  },
+  {
+    id: "pimlico",
+    name: "Pimlico",
+    category: "wallets",
+    description:
+      "ERC-4337 bundler and paymaster for account abstraction and gasless t402 payments.",
+    url: "https://pimlico.io",
+    integration: "ERC-4337 module in EVM mechanism",
+    badge: "live",
+  },
+  {
+    id: "jupiter",
+    name: "Jupiter",
+    category: "defi",
+    description:
+      "Solana DEX aggregator for token swaps before t402 payments via @t402/wdk-swap-jupiter.",
+    url: "https://jup.ag",
+    integration: "@t402/wdk-swap-jupiter module",
+    badge: "live",
+  },
+];
+
+// ── Packages ─────────────────────────────────────────────────────────
+
 export type EcosystemCategory =
   | "mechanisms"
   | "middleware"

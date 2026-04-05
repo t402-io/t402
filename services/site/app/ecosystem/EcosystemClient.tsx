@@ -6,7 +6,10 @@ import { motion, AnimatePresence } from "motion/react";
 import {
   packages,
   categoryLabels,
+  partners,
+  partnerCategoryLabels,
   type EcosystemCategory,
+  type PartnerCategory,
 } from "./data";
 
 const categories: ("all" | EcosystemCategory)[] = [
@@ -144,8 +147,8 @@ export default function EcosystemClient() {
 
   const stats = [
     { label: "Packages", value: packages.length.toString() },
+    { label: "Partners", value: partners.length.toString() },
     { label: "Languages", value: "4" },
-    { label: "Categories", value: Object.keys(categoryLabels).length.toString() },
     { label: "Blockchain Families", value: "10" },
   ];
 
@@ -232,6 +235,112 @@ export default function EcosystemClient() {
               ))}
             </motion.div>
           </AnimatePresence>
+        </div>
+      </section>
+
+      {/* Partners Directory */}
+      <section className="section-dark py-24 md:py-32">
+        <div className="mx-auto max-w-7xl px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-12 text-center"
+          >
+            <span
+              className="text-xs font-semibold uppercase tracking-widest"
+              style={{ color: "#50AF95" }}
+            >
+              Partners & Integrations
+            </span>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight md:text-4xl" style={{ color: "#FAFAFA" }}>
+              Ecosystem Partners
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-lg" style={{ color: "#A1A1AA" }}>
+              {partners.length} integrations powering payments, wallets, AI agents, and infrastructure.
+            </p>
+          </motion.div>
+
+          {/* Partner category groups */}
+          {(Object.keys(partnerCategoryLabels) as PartnerCategory[]).map((cat) => {
+            const catPartners = partners.filter((p) => p.category === cat);
+            if (catPartners.length === 0) return null;
+            return (
+              <div key={cat} className="mb-12">
+                <h3
+                  className="mb-6 text-sm font-semibold uppercase tracking-widest"
+                  style={{ color: "#A1A1AA" }}
+                >
+                  {partnerCategoryLabels[cat]}
+                </h3>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {catPartners.map((partner) => (
+                    <motion.a
+                      key={partner.id}
+                      href={partner.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      initial={{ opacity: 0, y: 10 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      className="group rounded-2xl p-5 transition-all duration-300 hover:scale-[1.02]"
+                      style={{
+                        backgroundColor: "#111113",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                      }}
+                    >
+                      <div className="mb-2 flex items-center justify-between">
+                        <h4 className="text-sm font-semibold" style={{ color: "#FAFAFA" }}>
+                          {partner.name}
+                        </h4>
+                        {partner.badge && (
+                          <span
+                            className="rounded-full px-2 py-0.5 text-xs font-medium"
+                            style={{
+                              backgroundColor:
+                                partner.badge === "live"
+                                  ? "rgba(80,175,149,0.15)"
+                                  : partner.badge === "building"
+                                    ? "rgba(245,158,11,0.15)"
+                                    : "rgba(113,113,122,0.15)",
+                              color:
+                                partner.badge === "live"
+                                  ? "#50AF95"
+                                  : partner.badge === "building"
+                                    ? "#F59E0B"
+                                    : "#71717A",
+                            }}
+                          >
+                            {partner.badge}
+                          </span>
+                        )}
+                      </div>
+                      <p className="mb-2 text-xs leading-relaxed line-clamp-2" style={{ color: "#A1A1AA" }}>
+                        {partner.description}
+                      </p>
+                      <p className="text-xs" style={{ color: "#71717A" }}>
+                        {partner.integration}
+                      </p>
+                    </motion.a>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Become a partner CTA */}
+          <div className="mt-8 text-center">
+            <p className="text-sm" style={{ color: "#71717A" }}>
+              Building with t402?{" "}
+              <a
+                href="https://github.com/t402-io/t402/issues/new?template=partner.md&title=[Partner]+Your+Project+Name"
+                className="underline transition-colors hover:text-white"
+                style={{ color: "#50AF95" }}
+              >
+                Submit a PR to get listed
+              </a>
+            </p>
+          </div>
         </div>
       </section>
 
