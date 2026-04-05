@@ -20,6 +20,21 @@ This chapter provides a comprehensive security analysis of \tprotocol{}, includi
 \tprotocol{} is designed so that a malicious Facilitator cannot steal user funds. The Facilitator can only settle payments to the \field{payTo} address specified in the cryptographically signed authorization. This is verified on-chain by the token contract.
 \end{infobox}
 
+\section{Trust Model}
+\label{sec:trust-model}
+
+\tprotocol{} is \textbf{trust-minimized}, not trustless. The key trust assumptions are:
+
+\begin{itemize}
+    \item \textbf{Facilitator as settlement agent}: The Facilitator submits signed transactions on behalf of the payer. It cannot redirect funds (the \field{payTo} address is bound in the payer's signature), but it can \emph{refuse to settle} or \emph{delay settlement}. This is a liveness dependency, not a safety risk.
+
+    \item \textbf{Facilitator has no custody}: The payer's signature authorizes a specific transfer. The Facilitator submits it but never holds user funds. If compromised, a Facilitator cannot extract funds beyond the amounts already authorized by payers.
+
+    \item \textbf{On-chain verification}: All settlement transactions are verified by the blockchain's token contract. The Facilitator cannot forge or modify the authorized transfer parameters.
+
+    \item \textbf{Current limitations}: There is no on-chain mechanism to cap total Facilitator settlement volume or enforce multi-sig for high-value transactions. These are areas for future protocol hardening (see Chapter~\ref{ch:future-work}).
+\end{itemize}
+
 \section{Formal Threat Model}
 \label{sec:threat-model-formal}
 

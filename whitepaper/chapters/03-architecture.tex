@@ -12,7 +12,7 @@ The \tprotocol{} protocol is built on three fundamental architectural principles
 \begin{enumerate}
     \item \textbf{Separation of Concerns}: Payment logic, transport encoding, and blockchain operations are cleanly separated into independent layers.
 
-    \item \textbf{Trust Minimization}: No single party can unilaterally redirect funds or forge payments. The blockchain serves as the ultimate source of truth.
+    \item \textbf{Trust Minimization}: No single party can unilaterally redirect funds or forge payments. The Facilitator acts as a settlement agent but never has custody of user funds. The blockchain serves as the ultimate source of truth for all transfers.
 
     \item \textbf{Extensibility}: New payment schemes, transport layers, and blockchain networks can be added without modifying core protocol components.
 \end{enumerate}

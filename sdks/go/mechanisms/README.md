@@ -57,37 +57,51 @@ Verify signatures and settle payments on-chain.
 - **Used by**: Payment processing services
 - **Responsibilities**: Verify signatures, submit blockchain transactions
 
-## Supported Mechanisms
+## Mechanism Maturity Levels
 
-### EVM - Exact
+### Production — Full implementation + comprehensive tests
 
-Ethereum-based exact payments using EIP-3009.
+| Network | Schemes | Files | Notes |
+|---------|---------|-------|-------|
+| **EVM** | exact, upto, permit2-proxy, exact-direct, exact-legacy | 24+ | EIP-3009, EIP-2612, Permit2 |
+| **SVM** | exact | 11+ | Solana token program transfers |
 
-**See:** [evm/README.md](evm/README.md)
+### Beta — Implementation exists, limited production testing
 
-### SVM - Exact
+| Network | Schemes | Files | Notes |
+|---------|---------|-------|-------|
+| **TON** | exact, upto | 7+ | Jetton transfers, wallet seqno |
+| **Tron** | exact | 7+ | TRC20 signed transactions |
+| **BTC** | exact, lightning | 6+ | PSBT + Lightning BOLT11 |
+| **Stellar** | exact | 6+ | Soroban XDR transactions |
 
-Solana-based exact payments using token transfers.
+### Alpha — Implementation exists but minimal testing
 
-**See:** [svm/README.md](svm/README.md)
+| Network | Schemes | Notes |
+|---------|---------|-------|
+| **Cosmos** | exact | IBC token transfers |
+| **NEAR** | exact | NEP-141 fungible tokens |
+| **Polkadot** | exact | Substrate asset transfers |
+| **Stacks** | exact | SIP-010 tokens |
+| **Tezos** | exact | FA2 tokens |
+| **Aptos** | exact | Move coin transfers |
 
-## Future Mechanisms
+### Experimental — Types only, no logic (skeleton)
 
-As new payment schemes are developed, they will be added to this directory:
+| Network | Status |
+|---------|--------|
+| **Algorand** | Types + constants defined only |
+| **Hedera** | Types + constants defined only |
+| **Sui** | Types + constants defined only |
 
-### Planned Schemes
+### Cross-cutting
 
-- **`upto`** - Pay up to a maximum amount based on resource consumption
-- **`subscription`** - Recurring payment schemes
-- **`batch`** - Batch multiple payments together
+| Mechanism | Description |
+|-----------|-------------|
+| **Upto** | Generic upto scheme (network-agnostic parts) |
+| **Spark** | Spark mechanism (TS only, Py + Java missing) |
 
-### Network Expansion
-
-New network types can be added:
-
-- **Bitcoin Lightning** - `lightning/exact/`
-- **Cosmos** - `cosmos/exact/`
-- **Polkadot** - `polkadot/exact/`
+See [SECURITY.md](SECURITY.md) for replay protection details per mechanism.
 
 ## Contributing New Mechanisms
 
