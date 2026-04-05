@@ -50,7 +50,7 @@ services:
         reservations:
           memory: 64M
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3406/health"]
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3406/health').then(r=>{if(!r.ok)throw r.status;process.exit(0)}).catch(()=>process.exit(1))"]
       interval: 30s
       timeout: 5s
       retries: 3

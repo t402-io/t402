@@ -42,3 +42,7 @@ export function incrementRequests() {
 export function incrementUpstreamErrors() {
   upstreamErrors++;
 }
+
+export function incrementErrors() {
+  metrics.errorsTotal++;
+}

@@ -3,7 +3,7 @@
  */
 import { RATE_LIMIT } from "../lib/config.js";
 import { metrics, METRICS_RETENTION_MS, totalRequests, upstreamErrors } from "../lib/metrics.js";
-import { upstreamHealthy, upstreamNetworks } from "../lib/upstream.js";
+import { upstreamHealthy, upstreamNetworks, getCircuitState } from "../lib/upstream.js";
 import { SUPPORTED_NETWORKS } from "../lib/magic.js";
 import { limits } from "../middleware/rateLimit.js";
 
@@ -13,11 +13,12 @@ export function registerHealthRoutes(app) {
   });
 
   app.get("/ready", (_req, res) => {
+    const circuit = getCircuitState();
     if (upstreamHealthy) {
       const liveCount = SUPPORTED_NETWORKS.filter(n => upstreamNetworks.includes(n)).length;
-      res.json({ ready: true, upstream: "connected", service: "t402-sandbox", liveNetworks: liveCount, totalNetworks: SUPPORTED_NETWORKS.length });
+      res.json({ ready: true, upstream: "connected", service: "t402-sandbox", liveNetworks: liveCount, totalNetworks: SUPPORTED_NETWORKS.length, circuitBreaker: circuit });
     } else {
-      res.status(503).json({ ready: false, upstream: "unreachable", service: "t402-sandbox", note: "Mock fallback active" });
+      res.status(503).json({ ready: false, upstream: "unreachable", service: "t402-sandbox", note: "Mock fallback active", circuitBreaker: circuit });
     }
   });
 
@@ -51,6 +52,12 @@ export function registerHealthRoutes(app) {
       "# HELP sandbox_rate_limit_hits_total Rate limit rejections",
       "# TYPE sandbox_rate_limit_hits_total counter",
       `sandbox_rate_limit_hits_total ${metrics.rateLimitHits}`,
+      "# HELP sandbox_errors_total Total error responses (4xx + 5xx)",
+      "# TYPE sandbox_errors_total counter",
+      `sandbox_errors_total ${metrics.errorsTotal}`,
+      "# HELP sandbox_circuit_breaker Circuit breaker state (0=closed, 1=half-open, 2=open)",
+      "# TYPE sandbox_circuit_breaker gauge",
+      `sandbox_circuit_breaker ${{"closed": 0, "half-open": 1, "open": 2}[getCircuitState()]}`,
       "# HELP sandbox_active_rate_limit_entries Number of tracked IPs",
       "# TYPE sandbox_active_rate_limit_entries gauge",
       `sandbox_active_rate_limit_entries ${limits.size}`,

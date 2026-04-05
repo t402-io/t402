@@ -247,6 +247,12 @@ textarea:focus-visible,
     </div>
   </div>
   <div id="magicHint" style="font-size:.75rem;color:#6b7280;padding:.3rem 0;min-height:1.2em"></div>
+  <div style="margin-top:.25rem">
+    <label for="apiKeyInput" style="font-size:.75rem;color:#6b7280">X-API-Key <span style="color:#4b5563">(optional — for custom facilitator)</span>:</label>
+    <input id="apiKeyInput" type="password" placeholder="sk-..." autocomplete="off"
+      style="width:240px;background:#111827;color:#e5e7eb;border:1px solid #374151;border-radius:4px;padding:.3rem .5rem;font-size:.8rem;font-family:'SF Mono',monospace;margin-left:.5rem"
+      oninput="try{sessionStorage.setItem('sandbox-api-key',this.value)}catch(e){}">
+  </div>
 
   <!-- Endpoint Tabs -->
   <div class="endpoint-tabs" role="tablist">
@@ -264,7 +270,8 @@ textarea:focus-visible,
         <span class="panel-title" id="requestTitle">Request</span>
         <div class="panel-actions">
           <button class="panel-btn" onclick="copyRequest()" title="Copy as curl">Copy curl</button>
-          <button class="panel-btn send" id="sendBtn" onclick="sendRequest()">Try It</button>
+          <button class="panel-btn send" id="sendBtn" onclick="sendRequest()" title="Send request (Cmd/Ctrl+Enter)">Try It</button>
+          <button class="panel-btn" id="sequenceBtn" onclick="runSequence()" title="Run verify then settle" style="display:none">Verify &rarr; Settle</button>
         </div>
       </div>
       <textarea id="requestBody" placeholder="Request body (JSON)..." spellcheck="false" aria-label="Request body"></textarea>
@@ -508,6 +515,7 @@ function switchEndpoint(endpoint, e) {
   }
 
   document.getElementById('idempotencyRow').style.display = (endpoint === 'settle') ? 'block' : 'none';
+  document.getElementById('sequenceBtn').style.display = (endpoint === 'verify' || endpoint === 'settle') ? '' : 'none';
 
   var magicSelect = document.getElementById('magicSelect');
   if (magicSelect) {
@@ -656,6 +664,12 @@ async function sendRequest() {
     opts.headers = { 'Content-Type': 'application/json' };
     opts.body = requestBody.value;
     reqBodyStr = requestBody.value;
+  }
+
+  var apiKey = document.getElementById('apiKeyInput').value;
+  if (apiKey) {
+    if (!opts.headers) opts.headers = {};
+    opts.headers['X-API-Key'] = apiKey;
   }
 
   if (currentEndpoint === 'settle') {
@@ -809,6 +823,30 @@ try {
   var saved = localStorage.getItem('sandbox-history');
   if (saved) { requestHistoryLocal = JSON.parse(saved); renderHistory(); }
 } catch(e) {}
+
+// Restore API key from sessionStorage
+try {
+  var savedKey = sessionStorage.getItem('sandbox-api-key');
+  if (savedKey) document.getElementById('apiKeyInput').value = savedKey;
+} catch(e) {}
+
+// --- Verify → Settle Sequence ---
+async function runSequence() {
+  switchEndpoint('verify');
+  await sendRequest();
+  await new Promise(function(r) { setTimeout(r, 300); });
+  switchEndpoint('settle');
+  await sendRequest();
+  showToast('Sequence complete: verify \u2192 settle');
+}
+
+// --- Keyboard Shortcuts ---
+document.addEventListener('keydown', function(e) {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    e.preventDefault();
+    sendRequest();
+  }
+});
 </script>
 </body>
 </html>

@@ -1192,6 +1192,164 @@ describe("Request history", () => {
   });
 });
 
+// ─── Security Hardening ──────────────────────────────────────────────────────
+
+describe("Permissions-Policy header", () => {
+  it("sets Permissions-Policy on all responses", async () => {
+    const res = await fetch(`${BASE}/health`);
+    const pp = res.headers.get("permissions-policy");
+    assert.ok(pp, "Should have permissions-policy header");
+    assert.ok(pp.includes("camera=()"), "Should restrict camera");
+    assert.ok(pp.includes("microphone=()"), "Should restrict microphone");
+    assert.ok(pp.includes("geolocation=()"), "Should restrict geolocation");
+  });
+});
+
+describe("CSP enhancements", () => {
+  it("default CSP includes base-uri and frame-ancestors", async () => {
+    const res = await fetch(`${BASE}/health`);
+    const csp = res.headers.get("content-security-policy");
+    assert.ok(csp.includes("base-uri"), "Should include base-uri");
+    assert.ok(csp.includes("frame-ancestors"), "Should include frame-ancestors");
+  });
+
+  it("landing page CSP allows data: images", async () => {
+    const res = await fetch(`${BASE}/`);
+    const csp = res.headers.get("content-security-policy");
+    assert.ok(csp.includes("img-src"), "Should have img-src directive");
+    assert.ok(csp.includes("data:"), "Should allow data: URIs for favicon");
+  });
+
+  it("playground CSP allows data: images", async () => {
+    const res = await fetch(`${BASE}/playground`);
+    const csp = res.headers.get("content-security-policy");
+    assert.ok(csp.includes("img-src"), "Should have img-src directive");
+    assert.ok(csp.includes("data:"), "Should allow data: URIs for favicon");
+  });
+});
+
+// ─── Errors Metric ───────────────────────────────────────────────────────────
+
+describe("sandbox_errors_total metric", () => {
+  it("appears in /metrics output", async () => {
+    const res = await fetch(`${BASE}/metrics`);
+    const text = await res.text();
+    assert.ok(text.includes("sandbox_errors_total"), "Should expose sandbox_errors_total");
+  });
+
+  it("increments after a 400 response", async () => {
+    // Get baseline
+    const before = await fetch(`${BASE}/metrics`);
+    const beforeText = await before.text();
+    const beforeMatch = beforeText.match(/sandbox_errors_total (\d+)/);
+    const beforeCount = beforeMatch ? parseInt(beforeMatch[1]) : 0;
+
+    // Trigger a 400 error
+    await fetch(`${BASE}/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ paymentRequirements: { network: null } }),
+    });
+
+    // Check incremented
+    const after = await fetch(`${BASE}/metrics`);
+    const afterText = await after.text();
+    const afterMatch = afterText.match(/sandbox_errors_total (\d+)/);
+    const afterCount = afterMatch ? parseInt(afterMatch[1]) : 0;
+    assert.ok(afterCount > beforeCount, `Expected errors to increment: ${beforeCount} → ${afterCount}`);
+  });
+});
+
+// ─── Concurrent Requests ─────────────────────────────────────────────────────
+
+describe("Concurrent requests", () => {
+  it("handles 20 concurrent verify requests", async () => {
+    const requests = Array.from({ length: 20 }, () =>
+      fetch(`${BASE}/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          paymentPayload: { payload: { payer: "0x0000000000000000000000000000000000CAFE01" } },
+          paymentRequirements: { network: "eip155:84532" },
+        }),
+      })
+    );
+    const results = await Promise.all(requests);
+    for (const res of results) {
+      assert.strictEqual(res.status, 200);
+      const data = await res.json();
+      assert.strictEqual(data.isValid, true);
+      assert.strictEqual(data.sandbox, true);
+    }
+  });
+});
+
+// ─── Playground UX Features ──────────────────────────────────────────────────
+
+describe("Playground features", () => {
+  it("includes keyboard shortcut hint", async () => {
+    const res = await fetch(`${BASE}/playground`);
+    const html = await res.text();
+    assert.ok(html.includes("Cmd/Ctrl+Enter"), "Should show keyboard shortcut hint");
+  });
+
+  it("includes API key input field", async () => {
+    const res = await fetch(`${BASE}/playground`);
+    const html = await res.text();
+    assert.ok(html.includes("apiKeyInput"), "Should have API key input field");
+  });
+
+  it("includes sequence button", async () => {
+    const res = await fetch(`${BASE}/playground`);
+    const html = await res.text();
+    assert.ok(html.includes("sequenceBtn"), "Should have verify→settle sequence button");
+  });
+});
+
+// ─── Circuit Breaker ─────────────────────────────────────────────────────────
+
+describe("Circuit breaker state", () => {
+  it("GET /ready includes circuitBreaker field", async () => {
+    const res = await fetch(`${BASE}/ready`);
+    const data = await res.json();
+    assert.ok("circuitBreaker" in data, "Should have circuitBreaker field");
+    assert.ok(["closed", "open", "half-open"].includes(data.circuitBreaker), "Should be a valid circuit state");
+  });
+
+  it("GET /metrics includes sandbox_circuit_breaker gauge", async () => {
+    const res = await fetch(`${BASE}/metrics`);
+    const text = await res.text();
+    assert.ok(text.includes("sandbox_circuit_breaker"), "Should expose circuit breaker gauge");
+  });
+});
+
+// ─── Webhook Secret Configurability ──────────────────────────────────────────
+
+describe("Webhook secret", () => {
+  it("POST /webhook/test response includes event field", async () => {
+    const res = await fetch(`${BASE}/webhook/test`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: "http://localhost:1/webhook", event: "verification.completed" }),
+    });
+    const data = await res.json();
+    assert.strictEqual(data.event, "verification.completed");
+  });
+});
+
+// ─── Landing Page Security ───────────────────────────────────────────────────
+
+describe("Landing page link security", () => {
+  it("external links have rel=noopener noreferrer", async () => {
+    const res = await fetch(`${BASE}/`);
+    const html = await res.text();
+    const externalLinks = html.match(/target="_blank"/g) || [];
+    const safeLinks = html.match(/target="_blank"\s+rel="noopener noreferrer"/g) || [];
+    assert.ok(externalLinks.length > 0, "Should have external links");
+    assert.strictEqual(externalLinks.length, safeLinks.length, "All target=_blank links should have rel=noopener noreferrer");
+  });
+});
+
 describe("JSON 404 handler", () => {
   it("returns JSON for unknown GET routes", async () => {
     const res = await fetch(`${BASE}/nonexistent-page`);

@@ -97,8 +97,8 @@ export function registerWebhookRoutes(app) {
 
     // Compute HMAC signature (using a test secret)
     const { createHmac } = await import("node:crypto");
-    const secret = "sandbox-webhook-test-secret";
-    const signature = createHmac("sha256", secret).update(JSON.stringify(payload)).digest("hex");
+    const webhookSecret = process.env.WEBHOOK_SECRET || "sandbox-webhook-test-secret";
+    const signature = createHmac("sha256", webhookSecret).update(JSON.stringify(payload)).digest("hex");
 
     try {
       const callbackRes = await fetch(url, {
@@ -120,10 +120,10 @@ export function registerWebhookRoutes(app) {
         event: eventType,
         targetUrl: url,
         targetStatus: callbackRes.status,
-        signatureSecret: secret,
+        signatureSecret: webhookSecret,
         signatureHeader: "X-T402-Signature",
         sandbox: true,
-        note: `Verify signature with: HMAC-SHA256(body, "${secret}")`,
+        note: `Verify signature with: HMAC-SHA256(body, "${webhookSecret}")`,
       });
     } catch (err) {
       res.status(502).json({

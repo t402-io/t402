@@ -84,6 +84,31 @@ t402:
 | TRON Nile | TRX + USDT | [Nile Faucet](https://nileex.io/join/getJoinPage) |
 | Stellar Testnet | XLM + USDC | [Stellar Friendbot](https://friendbot.stellar.org/) |
 
+## Magic Test Addresses
+
+Like Stripe's test card numbers, use these as the `payer` field for deterministic responses — no real tokens needed:
+
+| Address | Verify | Settle | Use Case |
+|---------|--------|--------|----------|
+| `0x...CAFE01` | isValid: true | success: true | Happy path |
+| `0x...CAFE02` | isValid: false (invalid_signature) | success: true | Signature failure |
+| `0x...CAFE03` | isValid: false (authorization_expired) | success: true | Expired auth |
+| `0x...CAFE11` | isValid: true | success: true | Settle-specific success |
+| `0x...CAFE12` | isValid: true | success: false (insufficient_funds) | Insufficient funds |
+| `0x...CAFE13` | isValid: true | success: false (settlement_timeout) | Settlement timeout |
+| `0x...CAFE99` | 2s delay → isValid: true | 2s delay → success: true | Timeout testing |
+
+Magic addresses are case-insensitive and work on any testnet network. The payer can be in `paymentPayload.payload.payer`, `paymentPayload.authorization.payer`, or `paymentPayload.payer`.
+
+## Timeout Behavior
+
+| Operation | Timeout | On Timeout |
+|-----------|---------|------------|
+| Verify upstream | 30s | 503 with `mock: true` |
+| Settle upstream | 90s | 503 with `mock: true` |
+| Upstream health check | 5s | Marks upstream unreachable |
+| Webhook delivery | 10s | 502 with `delivered: false` |
+
 ## Environment Variables
 
 | Variable | Default | Description |
@@ -93,10 +118,21 @@ t402:
 | `FACILITATOR_API_KEY` | — | API key for upstream facilitator (required for /verify, /settle) |
 | `RATE_LIMIT_PER_MINUTE` | `100` | Max requests per IP per minute |
 | `TRUST_CF_HEADER` | `false` | Use `CF-Connecting-IP` header for rate limiting (enable behind Cloudflare) |
+| `WEBHOOK_SECRET` | `sandbox-webhook-test-secret` | HMAC-SHA256 secret for webhook signature verification |
 
 ## Mock Fallback
 
 When the upstream facilitator is unreachable, the sandbox returns **503 error responses** with `"mock": true`. This makes it clear no on-chain verification or settlement occurred.
+
+## Troubleshooting
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| All responses have `mock: true` | Upstream facilitator unreachable | Check `GET /ready`; use magic addresses for mock testing |
+| 415 Unsupported Media Type | Missing Content-Type header | Add `-H "Content-Type: application/json"` to POST requests |
+| 429 Too Many Requests | Rate limit exceeded | Wait 60s, or increase `RATE_LIMIT_PER_MINUTE` locally |
+| 400 "unsupported network" | Using mainnet chain ID | Use testnet equivalent (see `suggestion` in error response) |
+| 400 "missing network" | `paymentRequirements.network` not set | Include a valid testnet CAIP-2 network string |
 
 ## Development
 

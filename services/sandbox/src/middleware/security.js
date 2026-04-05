@@ -11,6 +11,7 @@ export function securityHeaders(req, res, next) {
   res.set("X-Frame-Options", "DENY");
   res.set("Referrer-Policy", "strict-origin-when-cross-origin");
   res.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
-  res.set("Content-Security-Policy", "default-src 'none'");
+  res.set("Content-Security-Policy", "default-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'");
+  res.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
   next();
 }

@@ -10,6 +10,6 @@ USER node
 EXPOSE 3406
 
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 --start-period=5s \
-  CMD wget -q --spider http://127.0.0.1:3406/health || exit 1
+  CMD node -e "fetch('http://127.0.0.1:3406/health').then(r=>{if(!r.ok)throw r.status;process.exit(0)}).catch(()=>process.exit(1))"
 
 CMD ["node", "src/proxy.js"]

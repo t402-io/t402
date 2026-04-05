@@ -15,7 +15,7 @@ export function registerDeveloperRoutes(app) {
   // Playground page
   app.get("/playground", (_req, res) => {
     incrementRequests();
-    res.set("Content-Security-Policy", "default-src 'self'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'");
+    res.set("Content-Security-Policy", "default-src 'self'; style-src 'unsafe-inline'; script-src 'unsafe-inline' https://static.cloudflareinsights.com; connect-src 'self' https://static.cloudflareinsights.com; img-src 'self' data:; base-uri 'self'; frame-ancestors 'none'; form-action 'self'");
     res.type("html").send(playgroundHtml);
   });
 
