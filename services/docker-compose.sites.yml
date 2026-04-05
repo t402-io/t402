@@ -55,7 +55,9 @@ services:
       - FACILITATOR_API_KEY=${FACILITATOR_API_KEY:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       - PIMLICO_API_KEY=${PIMLICO_API_KEY:-}
-      - BRIDGE_WALLET_PRIVATE_KEY=${BRIDGE_WALLET_PRIVATE_KEY:-}
+      - BRIDGE_WALLET_PRIVATE_KEY_FILE=/run/secrets/bridge_wallet_key
+    secrets:
+      - bridge_wallet_key
     ports:
       - "127.0.0.1:3012:3000"
     restart: unless-stopped
@@ -71,3 +73,7 @@ services:
       options:
         max-size: "5m"
         max-file: "3"
+
+secrets:
+  bridge_wallet_key:
+    environment: BRIDGE_WALLET_PRIVATE_KEY

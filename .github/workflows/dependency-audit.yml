@@ -1,0 +1,96 @@
+name: Dependency Security Audit
+
+on:
+  schedule:
+    - cron: "0 8 * * 1" # Every Monday at 08:00 UTC
+  pull_request:
+    paths:
+      - "**/package.json"
+      - "**/package-lock.json"
+      - "**/pnpm-lock.yaml"
+      - "**/go.sum"
+      - "**/requirements*.txt"
+      - "**/pyproject.toml"
+      - "**/pom.xml"
+  workflow_dispatch:
+
+jobs:
+  typescript:
+    name: TypeScript (npm audit)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sdks/typescript
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm audit --audit-level=high
+        continue-on-error: true
+
+  go:
+    name: Go (govulncheck)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sdks/go
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+      - run: go install golang.org/x/vuln/cmd/govulncheck@latest
+      - run: govulncheck ./...
+        continue-on-error: true
+
+  python:
+    name: Python (pip-audit)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sdks/python/t402
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pip-audit
+      - run: pip-audit -r requirements.txt || pip-audit
+        continue-on-error: true
+
+  java:
+    name: Java (OWASP dependency-check)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sdks/java
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - run: mvn org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=7 || true
+
+  services:
+    name: Services (npm audit)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [bazaar, status, explorer, agent-dashboard, sandbox]
+    defaults:
+      run:
+        working-directory: services/${{ matrix.service }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+      - run: npm ci
+      - run: npm audit --audit-level=high
+        continue-on-error: true

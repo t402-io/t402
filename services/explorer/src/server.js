@@ -204,6 +204,12 @@ app.get("/api/v1/tokens", async (_req, res) => {
 });
 
 app.get("/api/v1/export", async (req, res) => {
+  // Require admin API key for bulk export
+  const apiKey = req.headers["x-api-key"] || req.query.apiKey;
+  if (!apiKey || apiKey !== process.env.EXPLORER_ADMIN_KEY) {
+    return res.status(401).json({ error: "Authentication required for export" });
+  }
+
   const { format, network, token } = req.query;
   if (format !== "csv") {
     return res.status(400).json({ error: "Unsupported format. Use ?format=csv" });

@@ -1,15 +1,26 @@
 #!/bin/bash
 # T402 New Services — Deployment Script
 #
-# Run on production server (220.134.32.65):
-#   ssh doge@220.134.32.65
+# Prerequisites:
+#   Set DEPLOY_HOST and CF_TUNNEL_ID in .env or environment
+#
+# Run on production server:
 #   cd /home/doge/github/t402/services
 #   bash deploy-new-services.sh
 #
 # Or from local machine:
-#   ssh doge@220.134.32.65 'cd /home/doge/github/t402/services && bash deploy-new-services.sh'
+#   ssh $DEPLOY_HOST 'cd /home/doge/github/t402/services && bash deploy-new-services.sh'
 
 set -euo pipefail
+
+# Load from .env if present
+if [ -f .env ]; then
+  # shellcheck disable=SC1091
+  source .env
+fi
+
+DEPLOY_HOST="${DEPLOY_HOST:?Set DEPLOY_HOST in .env or environment}"
+CF_TUNNEL_ID="${CF_TUNNEL_ID:?Set CF_TUNNEL_ID in .env or environment}"
 
 echo "🚀 T402 New Services Deployment"
 echo "================================"
@@ -67,10 +78,10 @@ echo ""
 
 echo "🌐 Step 6: Cloudflare DNS (one-time)"
 echo "   Create CNAME records in Cloudflare Dashboard:"
-echo "   bazaar.t402.io   → d4000e5f-9db4-430f-961b-6fa2d7fb9aac.cfargotunnel.com"
-echo "   status.t402.io   → d4000e5f-9db4-430f-961b-6fa2d7fb9aac.cfargotunnel.com"
-echo "   explorer.t402.io → d4000e5f-9db4-430f-961b-6fa2d7fb9aac.cfargotunnel.com"
-echo "   agents.t402.io   → d4000e5f-9db4-430f-961b-6fa2d7fb9aac.cfargotunnel.com"
-echo "   sandbox.t402.io  → d4000e5f-9db4-430f-961b-6fa2d7fb9aac.cfargotunnel.com"
+echo "   bazaar.t402.io   → ${CF_TUNNEL_ID}.cfargotunnel.com"
+echo "   status.t402.io   → ${CF_TUNNEL_ID}.cfargotunnel.com"
+echo "   explorer.t402.io → ${CF_TUNNEL_ID}.cfargotunnel.com"
+echo "   agents.t402.io   → ${CF_TUNNEL_ID}.cfargotunnel.com"
+echo "   sandbox.t402.io  → ${CF_TUNNEL_ID}.cfargotunnel.com"
 echo ""
 echo "✅ Deployment complete!"

@@ -1,12 +1,12 @@
 # Cloudflare Tunnel Configuration — New Services
 #
 # Add these entries to your existing ~/.cloudflared/config.yml
-# on the production server (220.134.32.65)
+# on the production server.
 #
 # After adding, restart cloudflared:
 #   sudo systemctl restart cloudflared
 #
-# Existing tunnel ID: d4000e5f-9db4-430f-961b-6fa2d7fb9aac
+# Tunnel ID: Set CF_TUNNEL_ID in .env (do NOT hardcode here)
 
 # --- ADD THESE TO YOUR EXISTING ingress SECTION ---
 

@@ -38,7 +38,8 @@ try {
       verification TEXT,
       discovery TEXT,
       registered_at TEXT NOT NULL,
-      updated_at TEXT NOT NULL
+      updated_at TEXT NOT NULL,
+      api_key_hash TEXT
     );
 
     CREATE INDEX IF NOT EXISTS idx_services_category ON services(category);
@@ -57,8 +58,8 @@ let stmts;
 if (!useMemory) {
   stmts = {
     insert: db.prepare(`
-      INSERT INTO services (id, url, name, description, category, price_amount, price_token, price_network, methods, tags, owner, verified, verification, discovery, registered_at, updated_at)
-      VALUES (@id, @url, @name, @description, @category, @price_amount, @price_token, @price_network, @methods, @tags, @owner, @verified, @verification, @discovery, @registered_at, @updated_at)
+      INSERT INTO services (id, url, name, description, category, price_amount, price_token, price_network, methods, tags, owner, verified, verification, discovery, registered_at, updated_at, api_key_hash)
+      VALUES (@id, @url, @name, @description, @category, @price_amount, @price_token, @price_network, @methods, @tags, @owner, @verified, @verification, @discovery, @registered_at, @updated_at, @api_key_hash)
     `),
     getById: db.prepare("SELECT * FROM services WHERE id = ?"),
     getByUrl: db.prepare("SELECT * FROM services WHERE url = ?"),

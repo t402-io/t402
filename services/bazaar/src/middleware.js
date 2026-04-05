@@ -167,7 +167,47 @@ export function requireAuth(req, res, next) {
   if (!key || key.length !== ADMIN_API_KEY.length || !crypto.timingSafeEqual(Buffer.from(key), Buffer.from(ADMIN_API_KEY))) {
     return res.status(401).json({ error: "Unauthorized — provide X-API-Key header" });
   }
+  req.isAdmin = true;
   next();
+}
+
+/**
+ * Hash an API key for storage (SHA-256).
+ */
+export function hashApiKey(key) {
+  return crypto.createHash("sha256").update(key).digest("hex");
+}
+
+/**
+ * Require service-level auth: admin key OR the service's own API key.
+ * Must be used AFTER the route handler loads the service (req.params.id).
+ * Attach the store's getById to req via dependency injection.
+ */
+export function requireServiceAuth(getById) {
+  return (req, res, next) => {
+    const key = req.headers["x-api-key"] || req.headers["authorization"]?.replace("Bearer ", "");
+    if (!key) {
+      return res.status(401).json({ error: "Unauthorized — provide X-API-Key header" });
+    }
+
+    // Admin key always works
+    if (ADMIN_API_KEY && key.length === ADMIN_API_KEY.length &&
+        crypto.timingSafeEqual(Buffer.from(key), Buffer.from(ADMIN_API_KEY))) {
+      req.isAdmin = true;
+      return next();
+    }
+
+    // Check per-service key
+    const service = getById(req.params.id);
+    if (!service) {
+      return res.status(404).json({ error: "Service not found" });
+    }
+    if (service.api_key_hash && service.api_key_hash === hashApiKey(key)) {
+      return next();
+    }
+
+    return res.status(403).json({ error: "Forbidden — you do not own this service" });
+  };
 }
 
 // ── Input validation ──────────────────────────────────────────────────

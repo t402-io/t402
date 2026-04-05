@@ -4,32 +4,32 @@
 
 | Service | URL | Platform | Port |
 |---------|-----|----------|------|
-| Main Site | https://t402.io | Docker (220.134.32.65) | 3010 |
-| Docs | https://docs.t402.io | Docker (220.134.32.65) | 3011 |
-| Demo | https://demo.t402.io | Docker (220.134.32.65) | 3012 |
-| Facilitator | https://facilitator.t402.io | Docker (220.134.32.65) | 8080 |
-| Grafana | https://grafana-facilitator.t402.io | Docker (220.134.32.65) | 3000 |
-| Scan2Pay API | https://scan2pay-api.t402.io | Docker (220.134.32.65) | 8081 |
-| Scan2Pay Frontend | https://scan2pay.t402.io | Docker (220.134.32.65) | 3001 |
-| Bazaar | https://bazaar.t402.io | Docker (220.134.32.65) | 3402 |
-| Status | https://status.t402.io | Docker (220.134.32.65) | 3403 |
-| Explorer | https://explorer.t402.io | Docker (220.134.32.65) | 3404 |
-| Agent Dashboard | https://agents.t402.io | Docker (220.134.32.65) | 3405 |
-| Sandbox | https://sandbox.t402.io | Docker (220.134.32.65) | 3406 |
+| Main Site | https://t402.io | Docker ($DEPLOY_HOST) | 3010 |
+| Docs | https://docs.t402.io | Docker ($DEPLOY_HOST) | 3011 |
+| Demo | https://demo.t402.io | Docker ($DEPLOY_HOST) | 3012 |
+| Facilitator | https://facilitator.t402.io | Docker ($DEPLOY_HOST) | 8080 |
+| Grafana | https://grafana-facilitator.t402.io | Docker ($DEPLOY_HOST) | 3000 |
+| Scan2Pay API | https://scan2pay-api.t402.io | Docker ($DEPLOY_HOST) | 8081 |
+| Scan2Pay Frontend | https://scan2pay.t402.io | Docker ($DEPLOY_HOST) | 3001 |
+| Bazaar | https://bazaar.t402.io | Docker ($DEPLOY_HOST) | 3402 |
+| Status | https://status.t402.io | Docker ($DEPLOY_HOST) | 3403 |
+| Explorer | https://explorer.t402.io | Docker ($DEPLOY_HOST) | 3404 |
+| Agent Dashboard | https://agents.t402.io | Docker ($DEPLOY_HOST) | 3405 |
+| Sandbox | https://sandbox.t402.io | Docker ($DEPLOY_HOST) | 3406 |
 
 ## Prerequisites
 
-- SSH access: `ssh doge@220.134.32.65`
+- SSH access: `ssh doge@$DEPLOY_HOST`
 - Docker + Docker Compose on production server
 - GitHub Actions secrets configured: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY`
-- Cloudflare Tunnel running on prod (`d4000e5f-9db4-430f-961b-6fa2d7fb9aac`)
+- Cloudflare Tunnel running on prod (`$CF_TUNNEL_ID`)
 
 ## Static Sites
 
 All three run as Docker containers via Cloudflare Tunnel (migrated from Vercel/Cloudflare Pages on 2026-03-20).
 
 ```bash
-ssh doge@220.134.32.65
+ssh doge@$DEPLOY_HOST
 cd /home/doge/github/t402-main/services
 docker compose -f docker-compose.sites.yml build site docs demo
 docker compose -f docker-compose.sites.yml up -d
@@ -64,7 +64,7 @@ docker compose -f docker-compose.sites.yml up -d
 - **Build + Deploy**: `docker compose -f docker-compose.sites.yml build demo && docker compose -f docker-compose.sites.yml up -d demo`
 - **Health check**: `curl -s localhost:3012`
 
-## Docker Services (Production Server: 220.134.32.65)
+## Docker Services (Production Server: $DEPLOY_HOST)
 
 ### Facilitator
 
@@ -73,7 +73,7 @@ docker compose -f docker-compose.sites.yml up -d
 - **Build**: CI builds `ghcr.io/t402-io/facilitator:latest` on push to main
 - **Deploy**:
   ```bash
-  ssh doge@220.134.32.65
+  ssh doge@$DEPLOY_HOST
   cd /home/doge/github/t402/services/facilitator/facilitator
   docker compose -f docker-compose.prod.yaml pull facilitator
   docker compose -f docker-compose.prod.yaml up -d
@@ -109,7 +109,7 @@ Grafana runs as part of the Facilitator compose stack (not separately).
 - **Location (repo)**: `services/scan2pay/` (submodule, for reference only)
 - **Build + Deploy**:
   ```bash
-  ssh doge@220.134.32.65
+  ssh doge@$DEPLOY_HOST
   cd /home/doge/github/scan2pay-t402/scan2pay-java
   git pull origin main
   docker compose build api frontend
@@ -133,7 +133,7 @@ Grafana runs as part of the Facilitator compose stack (not separately).
 - **Location (repo)**: `services/` (bazaar, status, explorer, agent-dashboard, sandbox directories)
 - **Build + Deploy**:
   ```bash
-  ssh doge@220.134.32.65
+  ssh doge@$DEPLOY_HOST
   cd /home/doge/github/t402-main/services
   git pull origin main
   docker compose -f docker-compose.new-services.yml build --parallel
@@ -197,7 +197,7 @@ Grafana runs as part of the Facilitator compose stack (not separately).
 
 ### Cloudflare Tunnel
 
-Tunnel ID: `d4000e5f-9db4-430f-961b-6fa2d7fb9aac`
+Tunnel ID: `$CF_TUNNEL_ID`
 Config: `~/.cloudflared/config.yml` on prod server
 
 **Routing table:**
@@ -258,7 +258,7 @@ The Scan2Pay frontend must be built with `NEXT_PUBLIC_API_DIRECT_URL=https://sca
 Grafana mounts dashboards from `../../scan2pay/scan2pay-java/monitoring/grafana/dashboards` relative to the facilitator compose dir. Ensure the scan2pay repo is checked out at the expected path on the prod server.
 
 **Cloudflare Tunnel not routing:**
-Check `~/.cloudflared/config.yml` has the hostname entry, then `sudo systemctl restart cloudflared`. Verify DNS CNAME points to `d4000e5f-9db4-430f-961b-6fa2d7fb9aac.cfargotunnel.com`.
+Check `~/.cloudflared/config.yml` has the hostname entry, then `sudo systemctl restart cloudflared`. Verify DNS CNAME points to `$CF_TUNNEL_ID.cfargotunnel.com`.
 
 **Container logs:**
 ```bash

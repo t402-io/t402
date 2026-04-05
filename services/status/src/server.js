@@ -21,7 +21,7 @@
 
 import express from "express";
 import compression from "compression";
-import { timingSafeEqual } from "node:crypto";
+import { timingSafeEqual, randomBytes } from "node:crypto";
 import { SERVICES, SERVICE_MAP, CHECK_INTERVAL, RATE_LIMIT, loadServices } from "./config.js";
 import { init, recordCheck, getUptime, getDailyUptime, getIncidents, getIncidentsByService, getRecentChecks, getPercentiles, addManualIncident, updateIncident, isInitialCheckComplete, markInitialCheckComplete, flush } from "./history.js";
 import { checkAll } from "./checker.js";
@@ -46,7 +46,10 @@ app.use((_req, res, next) => {
   res.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
   res.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   res.set("X-Permitted-Cross-Domain-Policies", "none");
-  res.set("Content-Security-Policy", "default-src 'none'; script-src 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; form-action 'self'; frame-ancestors 'none'; base-uri 'none'");
+  // Generate per-request nonce for CSP
+  const nonce = randomBytes(16).toString("base64");
+  res.locals.cspNonce = nonce;
+  res.set("Content-Security-Policy", `default-src 'none'; script-src 'nonce-${nonce}' https://static.cloudflareinsights.com; style-src 'nonce-${nonce}'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; form-action 'self'; frame-ancestors 'none'; base-uri 'none'`);
   next();
 });
 
@@ -507,7 +510,7 @@ app.get("/", (_req, res) => {
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='${encodeURIComponent(overallColor)}'/></svg>">
 <link rel="alternate" type="application/rss+xml" title="T402 Status Incidents" href="/rss">
 <noscript><meta http-equiv="refresh" content="60"></noscript>
-<style>${CSS}</style></head>
+<style nonce="${res.locals.cspNonce}">${CSS}</style></head>
 <body>
   <h1 id="overall" style="color:${overallColor}">${overall}</h1>
   <p style="color:#9ca3af;font-size:.9rem" id="last-checked">Last checked: <span class="rt" data-t="${new Date().toISOString()}">${new Date().toISOString()}</span></p>
@@ -532,7 +535,7 @@ app.get("/", (_req, res) => {
       <a href="/badge">Badge</a> ·
       Powered by <a href="https://t402.io">T402</a></p>
   </div>
-  <script>
+  <script nonce="${res.locals.cspNonce}">
     ${CLIENT_JS}
     (function(){
       updateTimes();
@@ -680,7 +683,7 @@ app.get("/service/:id", (req, res) => {
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%2350AF95'/></svg>">
 <noscript><meta http-equiv="refresh" content="60"></noscript>
-<style>${CSS}</style></head>
+<style nonce="${res.locals.cspNonce}">${CSS}</style></head>
 <body>
   <div class="svc-nav"><a href="/">&larr; All services</a></div>
   <h1><span class="status-dot" role="img" aria-label="${escapeXml(current?.status || "unknown")}">${dot}</span>${escapeXml(service.name)}</h1>
@@ -698,7 +701,7 @@ app.get("/service/:id", (req, res) => {
   <div class="uptime-legend"><span class="l-ok">Operational</span><span class="l-deg">Degraded</span><span class="l-down">Down</span><span class="l-na">No data</span></div>
   <h2>Incidents</h2>
   ${incidentHtml}
-  <script>
+  <script nonce="${res.locals.cspNonce}">
     ${CLIENT_JS}
     updateTimes();
     document.querySelectorAll('.uptime-bar').forEach(initBarTips);

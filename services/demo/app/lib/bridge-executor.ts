@@ -4,10 +4,12 @@
  * Uses a self-contained CHAIN_REGISTRY (22 chains) and calls OFT contracts
  * directly via viem — no dependency on SDK address constants.
  *
- * Requires BRIDGE_WALLET_PRIVATE_KEY env var (uses Facilitator wallet).
+ * Reads private key from Docker secret file (BRIDGE_WALLET_PRIVATE_KEY_FILE)
+ * or env var (BRIDGE_WALLET_PRIVATE_KEY) as fallback.
  * Falls back to null (caller uses simulation) if not configured.
  */
 
+import { readFileSync } from "node:fs";
 import {
   createWalletClient,
   createPublicClient,
@@ -139,6 +141,21 @@ const ERC20_ABI = [
     type: "function",
   },
 ] as const;
+
+// ---------------------------------------------------------------------------
+// Private key loader — prefers Docker secret file, falls back to env var
+// ---------------------------------------------------------------------------
+function loadPrivateKey(): string | undefined {
+  const keyFile = process.env.BRIDGE_WALLET_PRIVATE_KEY_FILE;
+  if (keyFile) {
+    try {
+      return readFileSync(keyFile, "utf8").trim();
+    } catch {
+      // file not found — fall through to env var
+    }
+  }
+  return process.env.BRIDGE_WALLET_PRIVATE_KEY;
+}
 
 // ---------------------------------------------------------------------------
 // CHAIN_REGISTRY — single source of truth for all 22 USDT0 chains
@@ -548,7 +565,7 @@ export async function quoteBridge(params: {
 }): Promise<BridgeQuoteResult | null> {
   if (params.amount <= BigInt(0)) return null;
 
-  const rawKey = process.env.BRIDGE_WALLET_PRIVATE_KEY;
+  const rawKey = loadPrivateKey();
   if (!rawKey) {
     console.log("[bridge-quote] BRIDGE_WALLET_PRIVATE_KEY not configured");
     return null;
@@ -659,7 +676,7 @@ export async function executeBridge(params: {
   amount: bigint;
   recipient: string;
 }): Promise<BridgeExecutionResult | null> {
-  const rawKey = process.env.BRIDGE_WALLET_PRIVATE_KEY;
+  const rawKey = loadPrivateKey();
   if (!rawKey) {
     console.log("[bridge] BRIDGE_WALLET_PRIVATE_KEY not configured, using simulation");
     return null;

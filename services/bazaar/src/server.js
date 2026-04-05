@@ -26,6 +26,8 @@ import compression from "compression";
 import {
   rateLimit,
   requireAuth,
+  requireServiceAuth,
+  hashApiKey,
   validateServiceInput,
   sanitizeString,
   verifyServiceUrl,
@@ -239,6 +241,10 @@ app.post("/api/v1/services", requireAuth, (req, res) => {
     updatedAt: now,
   };
 
+  // Store hash of the caller's API key for per-service auth on future updates/deletes
+  const callerKey = req.headers["x-api-key"] || req.headers["authorization"]?.replace("Bearer ", "");
+  service.apiKeyHash = callerKey ? hashApiKey(callerKey) : null;
+
   store.set(id, service);
   recordRegistration(false, false);
   logger.info("service registered", { id, url, name: service.name });
@@ -260,7 +266,7 @@ app.post("/api/v1/services", requireAuth, (req, res) => {
 });
 
 // ── Update service ────────────────────────────────────────────────────
-app.put("/api/v1/services/:id", requireAuth, (req, res) => {
+app.put("/api/v1/services/:id", requireServiceAuth((id) => store.get(id)), (req, res) => {
   const service = store.get(req.params.id);
   if (!service) {
     return res.status(404).json({ error: "Service not found" });
@@ -336,7 +342,7 @@ app.put("/api/v1/services/:id", requireAuth, (req, res) => {
 });
 
 // ── Delete service ────────────────────────────────────────────────────
-app.delete("/api/v1/services/:id", requireAuth, (req, res) => {
+app.delete("/api/v1/services/:id", requireServiceAuth((id) => store.get(id)), (req, res) => {
   const service = store.get(req.params.id);
   if (!service) {
     return res.status(404).json({ error: "Service not found" });
