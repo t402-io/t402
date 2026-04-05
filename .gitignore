@@ -128,3 +128,7 @@ services/docs/pages/sdks/typescript/wdk-bridge.mdx
 services/docs/pages/sdks/typescript/wdk-gasless.mdx
 services/docs/pages/sdks/typescript/wdk-multisig.mdx
 .gstack/
+
+# Architecture documents (generated/exported)
+*.pdf
+scan2pay-architecture.md
