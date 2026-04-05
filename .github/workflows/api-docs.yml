@@ -54,11 +54,13 @@ jobs:
 
       - name: Install docs dependencies
         working-directory: services/docs
-        run: npm install
+        run: pnpm install --frozen-lockfile
 
       - name: Build documentation site
         working-directory: services/docs
-        run: npm run build
+        run: pnpm run build
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
 
       - name: Deploy to Cloudflare Pages
         if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'

@@ -35,7 +35,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build (with TypeDoc API docs)
-        run: npm run build:full
+        run: pnpm run build:full
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
