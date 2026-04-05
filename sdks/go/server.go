@@ -325,6 +325,32 @@ func (s *t402ResourceServer) VerifyPayment(ctx context.Context, payload types.Pa
 		return nil, NewVerifyError("failed_to_marshal_requirements", "", Network(requirements.Network), err)
 	}
 
+	// Validate extensions append-only compliance: payload.extensions must include
+	// at least the extensions from requirements.Extra["extensions"] if present.
+	// Per spec section 5.1.2: client may append but cannot delete/overwrite.
+	if requirements.Extra != nil {
+		if reqExtensions, ok := requirements.Extra["extensions"].(map[string]interface{}); ok && len(reqExtensions) > 0 {
+			payExtensions := payload.Extensions
+			if payExtensions == nil {
+				return nil, NewVerifyError("extensions_missing", "", Network(requirements.Network),
+					fmt.Errorf("payload missing required extensions"))
+			}
+			for key, reqVal := range reqExtensions {
+				payVal, exists := payExtensions[key]
+				if !exists {
+					return nil, NewVerifyError("extension_removed", "", Network(requirements.Network),
+						fmt.Errorf("required extension %q was removed by client", key))
+				}
+				reqJSON, _ := json.Marshal(reqVal)
+				payJSON, _ := json.Marshal(payVal)
+				if string(reqJSON) != string(payJSON) {
+					return nil, NewVerifyError("extension_modified", "", Network(requirements.Network),
+						fmt.Errorf("required extension %q was modified by client", key))
+				}
+			}
+		}
+	}
+
 	// Execute beforeVerify hooks
 	hookCtx := VerifyContext{
 		Ctx:               ctx,

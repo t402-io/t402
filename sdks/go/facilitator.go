@@ -2,10 +2,12 @@ package t402
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"sync"
 
+	"github.com/t402-io/t402/sdks/go/policy"
 	"github.com/t402-io/t402/sdks/go/types"
 )
 
@@ -43,6 +45,70 @@ func Newt402Facilitator() *t402Facilitator {
 		schemes:    []*schemeData{},
 		extensions: []string{},
 	}
+}
+
+// WithSettlementPolicy attaches a policy engine to the facilitator that enforces
+// settlement amount caps, rate limits, and allowlists. The policy is evaluated
+// as a BeforeSettle hook — settlements that violate the policy are rejected
+// before any on-chain transaction is submitted.
+//
+// Example:
+//
+//	facilitator.WithSettlementPolicy(&policy.PaymentPolicy{
+//	    MaxAmountPerPayment: "10000000",   // 10 USDT max per tx
+//	    MaxAmountPerDay:     "100000000",  // 100 USDT max per day
+//	    MaxPaymentsPerHour:  60,
+//	})
+func (f *t402Facilitator) WithSettlementPolicy(p *policy.PaymentPolicy) *t402Facilitator {
+	engine := policy.NewEngine(p)
+
+	f.OnBeforeSettle(func(ctx FacilitatorSettleContext) (*FacilitatorBeforeHookResult, error) {
+		// Extract amount, scheme, network, asset, payTo from requirements
+		var scheme, network, asset, amount, payTo string
+
+		// Try V2 first
+		var req types.PaymentRequirements
+		if err := json.Unmarshal(ctx.RequirementsBytes, &req); err == nil && req.Scheme != "" {
+			scheme = req.Scheme
+			network = req.Network
+			asset = req.Asset
+			amount = req.Amount
+			payTo = req.PayTo
+		} else {
+			// Try V1
+			var reqV1 types.PaymentRequirementsV1
+			if err := json.Unmarshal(ctx.RequirementsBytes, &reqV1); err == nil {
+				scheme = reqV1.Scheme
+				network = reqV1.Network
+				asset = reqV1.Asset
+				amount = reqV1.MaxAmountRequired
+				payTo = reqV1.PayTo
+			}
+		}
+
+		decision := engine.Evaluate(scheme, network, asset, amount, payTo)
+		if !decision.Allowed {
+			return &FacilitatorBeforeHookResult{
+				Abort:  true,
+				Reason: fmt.Sprintf("settlement_policy_violation: %s", decision.Reason),
+			}, nil
+		}
+
+		return nil, nil
+	})
+
+	f.OnAfterSettle(func(ctx FacilitatorSettleResultContext) error {
+		if ctx.Result != nil && ctx.Result.Success {
+			// Extract amount from requirements for tracking
+			var req types.PaymentRequirements
+			if err := json.Unmarshal(ctx.RequirementsBytes, &req); err == nil && req.Amount != "" {
+				engine.RecordPayment(req.Amount)
+			}
+		}
+		return nil
+	})
+
+	return f
 }
 
 // RegisterV1 registers a V1 facilitator mechanism for multiple networks (legacy)

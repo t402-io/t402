@@ -34,10 +34,17 @@ export class ExactTronScheme implements SchemeNetworkFacilitator {
   readonly caipFamily = 'tron:*'
   private readonly signer: FacilitatorTronSigner
   private readonly config: ExactTronSchemeConfig
+  /** Set of payload hashes already processed — replay protection */
+  private processedTxs = new Set<string>()
 
   constructor(signer: FacilitatorTronSigner, config?: ExactTronSchemeConfig) {
     this.signer = signer
     this.config = config ?? {}
+  }
+
+  /** Compute a deterministic key for replay detection */
+  private payloadHash(signedTx: string, from: string, to: string, amount: string): string {
+    return `${signedTx}:${from}:${to}:${amount}`
   }
 
   /**
@@ -97,6 +104,21 @@ export class ExactTronScheme implements SchemeNetworkFacilitator {
     }
 
     const authorization = tronPayload.authorization
+
+    // Step 1b: Replay protection
+    const ph = this.payloadHash(
+      tronPayload.signedTransaction,
+      authorization.from,
+      authorization.to,
+      authorization.amount,
+    )
+    if (this.processedTxs.has(ph)) {
+      return {
+        isValid: false,
+        invalidReason: 'replay_detected',
+        payer: authorization.from,
+      }
+    }
 
     // Step 2: Validate scheme
     if (payload.accepted.scheme !== SCHEME_EXACT || requirements.scheme !== SCHEME_EXACT) {
@@ -284,6 +306,15 @@ export class ExactTronScheme implements SchemeNetworkFacilitator {
         payer: tronPayload.authorization.from,
       }
     }
+
+    // Mark as processed for replay protection
+    const settleHash = this.payloadHash(
+      tronPayload.signedTransaction,
+      tronPayload.authorization.from,
+      tronPayload.authorization.to,
+      tronPayload.authorization.amount,
+    )
+    this.processedTxs.add(settleHash)
 
     try {
       const network = normalizeNetwork(String(payload.accepted.network))

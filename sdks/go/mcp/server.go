@@ -35,8 +35,17 @@ func NewServerWithIO(config *ServerConfig, reader io.Reader, writer io.Writer) *
 	}
 }
 
+// Cleanup clears sensitive data from memory.
+// Should be called on server shutdown.
+func (s *Server) Cleanup() {
+	if s.config != nil {
+		s.config.PrivateKey = ""
+	}
+}
+
 // Run starts the MCP server and processes requests until EOF.
 func (s *Server) Run(ctx context.Context) error {
+	defer s.Cleanup()
 	// Log startup to stderr (not stdout, which is for MCP protocol)
 	fmt.Fprintln(os.Stderr, "T402 MCP Server starting...")
 	fmt.Fprintf(os.Stderr, "Demo mode: %v\n", s.config.DemoMode)

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 
@@ -130,6 +131,26 @@ func (f *ExactEvmScheme) Verify(
 
 	if authValue.Cmp(requiredValue) < 0 {
 		return nil, t402.NewVerifyError("insufficient_amount", evmPayload.Authorization.From, network, nil)
+	}
+
+	// Check time window: validAfter <= now <= validBefore
+	now := time.Now().Unix()
+	validAfter, ok := new(big.Int).SetString(evmPayload.Authorization.ValidAfter, 10)
+	if !ok {
+		return nil, t402.NewVerifyError("invalid_valid_after", evmPayload.Authorization.From, network,
+			fmt.Errorf("invalid validAfter: %q", evmPayload.Authorization.ValidAfter))
+	}
+	validBefore, ok := new(big.Int).SetString(evmPayload.Authorization.ValidBefore, 10)
+	if !ok {
+		return nil, t402.NewVerifyError("invalid_valid_before", evmPayload.Authorization.From, network,
+			fmt.Errorf("invalid validBefore: %q", evmPayload.Authorization.ValidBefore))
+	}
+	if validAfter.Int64() > now {
+		return nil, t402.NewVerifyError("authorization_not_yet_valid", evmPayload.Authorization.From, network, nil)
+	}
+	// 6 second buffer for block time
+	if validBefore.Int64() < now+6 {
+		return nil, t402.NewVerifyError("authorization_expired", evmPayload.Authorization.From, network, nil)
 	}
 
 	// Check if nonce has been used

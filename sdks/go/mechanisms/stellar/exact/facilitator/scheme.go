@@ -2,9 +2,12 @@ package facilitator
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"strconv"
+	"sync"
 
 	t402 "github.com/t402-io/t402/sdks/go"
 	"github.com/t402-io/t402/sdks/go/mechanisms/stellar"
@@ -14,13 +17,29 @@ import (
 // ExactStellarScheme implements the SchemeNetworkFacilitator interface for Stellar exact payments (V2)
 type ExactStellarScheme struct {
 	signer stellar.FacilitatorStellarSigner
+
+	// processedMu guards processedTxs for concurrent access
+	processedMu sync.Mutex
+	// processedTxs tracks hashes of already-processed payment payloads for replay protection
+	processedTxs map[string]struct{}
 }
 
 // NewExactStellarScheme creates a new ExactStellarScheme
 func NewExactStellarScheme(signer stellar.FacilitatorStellarSigner) *ExactStellarScheme {
 	return &ExactStellarScheme{
-		signer: signer,
+		signer:       signer,
+		processedTxs: make(map[string]struct{}),
 	}
+}
+
+// payloadHash returns a deterministic hash of the payment payload for replay detection
+func payloadHash(signedXDR, from, to, amount string) string {
+	h := sha256.New()
+	h.Write([]byte(signedXDR))
+	h.Write([]byte(from))
+	h.Write([]byte(to))
+	h.Write([]byte(amount))
+	return hex.EncodeToString(h.Sum(nil))
 }
 
 // Scheme returns the scheme identifier
@@ -97,6 +116,19 @@ func (f *ExactStellarScheme) Verify(
 
 	authorization := stellarPayload.Authorization
 	payer := authorization.From
+
+	// Step 3b: Replay protection — check if this exact payload was already processed
+	ph := payloadHash(stellarPayload.SignedXDR, authorization.From, authorization.To, authorization.Amount)
+	f.processedMu.Lock()
+	if _, seen := f.processedTxs[ph]; seen {
+		f.processedMu.Unlock()
+		return &t402.VerifyResponse{
+			IsValid:       false,
+			InvalidReason: "replay_detected",
+			Payer:         payer,
+		}, nil
+	}
+	f.processedMu.Unlock()
 
 	// Step 4: Validate XDR format
 	if err := stellar.ValidateXDR(stellarPayload.SignedXDR); err != nil {
@@ -264,6 +296,12 @@ func (f *ExactStellarScheme) Settle(
 	if err != nil {
 		return nil, t402.NewSettleError("invalid_payload", verifyResp.Payer, network, "", err)
 	}
+
+	// Mark payload as processed for replay protection
+	settleHash := payloadHash(stellarPayload.SignedXDR, stellarPayload.Authorization.From, stellarPayload.Authorization.To, stellarPayload.Authorization.Amount)
+	f.processedMu.Lock()
+	f.processedTxs[settleHash] = struct{}{}
+	f.processedMu.Unlock()
 
 	// Submit the signed transaction to network
 	txHash, err := f.signer.SubmitTransaction(ctx, stellarPayload.SignedXDR, string(network))

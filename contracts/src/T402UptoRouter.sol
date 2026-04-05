@@ -124,6 +124,10 @@ contract T402UptoRouter is IT402UptoRouter {
         IERC20Permit(token).permit(from, address(this), maxAmount, deadline, v, r, s);
 
         // Transfer only the settled amount (which may be less than maxAmount)
+        // Note: After transferFrom, the Router retains (maxAmount - settleAmount) allowance.
+        // This is safe because: (1) the Router is non-upgradeable with no admin functions,
+        // (2) only authorized facilitators can call executeUptoTransfer, and
+        // (3) the payer can revoke the allowance at any time via approve(router, 0).
         bool success = IERC20Permit(token).transferFrom(from, to, settleAmount);
         if (!success) {
             revert TransferFailed();

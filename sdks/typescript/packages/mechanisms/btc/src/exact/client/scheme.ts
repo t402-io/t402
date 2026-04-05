@@ -90,22 +90,15 @@ export class ExactBtcScheme implements SchemeNetworkClient {
    * @returns Base64-encoded unsigned PSBT
    */
   private buildUnsignedPsbt(requirements: PaymentRequirements): string {
-    // Encode payment details as a JSON payload in the PSBT
-    // The signer is responsible for building the full PSBT
-    // with proper UTXO selection and fee estimation
+    // Encode payment instructions for signer to build a proper BIP-174 PSBT.
+    // The signer is responsible for UTXO selection, fee estimation, and
+    // constructing the final PSBT with bitcoinjs-lib or equivalent.
     const psbtData = {
-      outputs: [
-        {
-          address: requirements.payTo,
-          value: requirements.amount,
-        },
-      ],
+      outputs: [{ address: requirements.payTo, value: requirements.amount }],
       network: requirements.network,
       fromAddress: this.signer.getAddress(),
       fromPubKey: this.signer.getPublicKey(),
     }
-
-    // Encode as base64 for transport
     return Buffer.from(JSON.stringify(psbtData)).toString('base64')
   }
 }

@@ -2,9 +2,12 @@ package facilitator
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"strconv"
+	"sync"
 	"time"
 
 	t402 "github.com/t402-io/t402/sdks/go"
@@ -16,6 +19,11 @@ import (
 type ExactTronScheme struct {
 	signer tron.FacilitatorTronSigner
 	config *ExactTronSchemeConfig
+
+	// processedMu guards processedTxs for concurrent access
+	processedMu sync.Mutex
+	// processedTxs tracks hashes of already-processed payment payloads for replay protection
+	processedTxs map[string]struct{}
 }
 
 // ExactTronSchemeConfig contains configuration for the facilitator scheme
@@ -31,9 +39,20 @@ func NewExactTronScheme(signer tron.FacilitatorTronSigner, config ...*ExactTronS
 		cfg = config[0]
 	}
 	return &ExactTronScheme{
-		signer: signer,
-		config: cfg,
+		signer:       signer,
+		config:       cfg,
+		processedTxs: make(map[string]struct{}),
 	}
+}
+
+// tronPayloadHash returns a deterministic hash for replay detection
+func tronPayloadHash(signedTx, from, to, amount string) string {
+	h := sha256.New()
+	h.Write([]byte(signedTx))
+	h.Write([]byte(from))
+	h.Write([]byte(to))
+	h.Write([]byte(amount))
+	return hex.EncodeToString(h.Sum(nil))
 }
 
 // Scheme returns the scheme identifier
@@ -117,6 +136,19 @@ func (f *ExactTronScheme) Verify(
 
 	authorization := tronPayload.Authorization
 	payer := authorization.From
+
+	// Step 3b: Replay protection
+	ph := tronPayloadHash(tronPayload.SignedTransaction, authorization.From, authorization.To, authorization.Amount)
+	f.processedMu.Lock()
+	if _, seen := f.processedTxs[ph]; seen {
+		f.processedMu.Unlock()
+		return &t402.VerifyResponse{
+			IsValid:       false,
+			InvalidReason: "replay_detected",
+			Payer:         payer,
+		}, nil
+	}
+	f.processedMu.Unlock()
 
 	// Step 4: Validate addresses
 	if !tron.ValidateTronAddress(authorization.From) {
@@ -296,6 +328,12 @@ func (f *ExactTronScheme) Settle(
 	if err != nil {
 		return nil, t402.NewSettleError("invalid_payload", verifyResp.Payer, network, "", err)
 	}
+
+	// Mark as processed for replay protection
+	settlePh := tronPayloadHash(tronPayload.SignedTransaction, tronPayload.Authorization.From, tronPayload.Authorization.To, tronPayload.Authorization.Amount)
+	f.processedMu.Lock()
+	f.processedTxs[settlePh] = struct{}{}
+	f.processedMu.Unlock()
 
 	// Broadcast the transaction
 	txId, err := f.signer.BroadcastTransaction(ctx, tronPayload.SignedTransaction, string(network))

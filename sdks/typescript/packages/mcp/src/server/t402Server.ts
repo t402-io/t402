@@ -156,6 +156,20 @@ export class T402McpServer {
     }
   }
 
+  /**
+   * Clear sensitive data from memory.
+   * Should be called on server shutdown to minimize key exposure window.
+   */
+  cleanup(): void {
+    if (this.config.privateKey) {
+      this.config.privateKey = ''
+    }
+    if (this.config.seedPhrase) {
+      this.config.seedPhrase = ''
+    }
+    this.wdk = null
+  }
+
   /** TON MCP bridge configuration */
   private tonBridgeConfig: TonMcpBridgeConfig | null = null
 
@@ -811,6 +825,12 @@ export class T402McpServer {
   async run(): Promise<void> {
     // Initialize WDK if seed phrase is configured
     await this.initWdk()
+
+    // Register cleanup on process exit to clear sensitive data from memory
+    const onExit = () => this.cleanup()
+    process.on('exit', onExit)
+    process.on('SIGINT', () => { onExit(); process.exit(0) })
+    process.on('SIGTERM', () => { onExit(); process.exit(0) })
 
     const transport = new StdioServerTransport()
     await this.server.connect(transport)

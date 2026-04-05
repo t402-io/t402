@@ -1,3 +1,4 @@
+import { randomBytes, createCipheriv, createDecipheriv, scryptSync } from "node:crypto";
 import chalk from "chalk";
 import ora, { type Ora } from "ora";
 import type { BalanceResult, NetworkInfo, PaymentResult } from "../types.js";
@@ -153,35 +154,43 @@ export function isValidSeedPhrase(phrase: string): boolean {
 }
 
 /**
- * Simple XOR encryption for seed storage
- * Note: This is basic obfuscation, not secure encryption.
- * For production, use proper encryption with a password.
+ * Derive a 256-bit key from the passphrase using scrypt.
  */
-export function encryptSeed(seed: string, key: string): string {
-  const seedBytes = Buffer.from(seed, "utf8");
-  const keyBytes = Buffer.from(key, "utf8");
-  const encrypted = Buffer.alloc(seedBytes.length);
-
-  for (let i = 0; i < seedBytes.length; i++) {
-    encrypted[i] = seedBytes[i] ^ keyBytes[i % keyBytes.length];
-  }
-
-  return encrypted.toString("base64");
+function deriveKey(passphrase: string, salt: Buffer): Buffer {
+  return scryptSync(passphrase, salt, 32) as Buffer;
 }
 
 /**
- * Decrypt seed phrase
+ * Encrypt seed phrase using AES-256-GCM.
+ * Output format: base64(salt[16] + iv[12] + authTag[16] + ciphertext)
+ */
+export function encryptSeed(seed: string, key: string): string {
+  const salt = randomBytes(16);
+  const iv = randomBytes(12);
+  const derivedKey = deriveKey(key, salt);
+
+  const cipher = createCipheriv("aes-256-gcm", derivedKey, iv);
+  const encrypted = Buffer.concat([cipher.update(seed, "utf8"), cipher.final()]);
+  const authTag = cipher.getAuthTag();
+
+  return Buffer.concat([salt, iv, authTag, encrypted]).toString("base64");
+}
+
+/**
+ * Decrypt seed phrase encrypted with AES-256-GCM.
  */
 export function decryptSeed(encrypted: string, key: string): string {
-  const encryptedBytes = Buffer.from(encrypted, "base64");
-  const keyBytes = Buffer.from(key, "utf8");
-  const decrypted = Buffer.alloc(encryptedBytes.length);
+  const data = Buffer.from(encrypted, "base64");
+  const salt = data.subarray(0, 16);
+  const iv = data.subarray(16, 28);
+  const authTag = data.subarray(28, 44);
+  const ciphertext = data.subarray(44);
 
-  for (let i = 0; i < encryptedBytes.length; i++) {
-    decrypted[i] = encryptedBytes[i] ^ keyBytes[i % keyBytes.length];
-  }
+  const derivedKey = deriveKey(key, salt);
 
-  return decrypted.toString("utf8");
+  const decipher = createDecipheriv("aes-256-gcm", derivedKey, iv);
+  decipher.setAuthTag(authTag);
+  return decipher.update(ciphertext) + decipher.final("utf8");
 }
 
 /**

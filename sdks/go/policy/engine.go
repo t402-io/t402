@@ -14,6 +14,7 @@ type Engine struct {
 	policy   *PaymentPolicy
 	stats    SessionStats
 	payments []paymentRecord
+	store    Store // optional persistent store
 }
 
 type paymentRecord struct {
@@ -31,6 +32,14 @@ func NewEngine(policy *PaymentPolicy) *Engine {
 			StartTime:       time.Now(),
 		},
 	}
+}
+
+// NewEngineWithStore creates a policy engine backed by a persistent store.
+// Counters and spending totals survive process restarts.
+func NewEngineWithStore(policy *PaymentPolicy, store Store) *Engine {
+	e := NewEngine(policy)
+	e.store = store
+	return e
 }
 
 // Evaluate checks whether a payment is permitted by the policy.
@@ -163,6 +172,13 @@ func (e *Engine) RecordPayment(amount string) {
 	e.payments = append(e.payments, paymentRecord{amount: amt, time: now})
 
 	e.pruneHourlyPayments()
+
+	// Persist to store if available
+	if e.store != nil {
+		_ = e.store.AddSpending("daily", amt, 24*time.Hour)
+		_ = e.store.AddSpending("session", amt, 0) // 0 = no expiry
+		_, _ = e.store.IncrementCounter("hourly_count", time.Hour)
+	}
 }
 
 // Reset clears all session statistics.

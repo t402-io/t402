@@ -143,10 +143,12 @@ type PaymentRequirementsSelector func(requirements []PaymentRequirementsView) Pa
 // Works with unified view interface
 type PaymentPolicy func(requirements []PaymentRequirementsView) []PaymentRequirementsView
 
-// DefaultPaymentSelector chooses the first available payment option
+// DefaultPaymentSelector chooses the first available payment option.
+// Returns a zero-value view if requirements is empty (callers should
+// validate the slice length before calling).
 func DefaultPaymentSelector(requirements []PaymentRequirementsView) PaymentRequirementsView {
 	if len(requirements) == 0 {
-		panic("no payment requirements available")
+		return &types.PaymentRequirements{}
 	}
 	return requirements[0]
 }

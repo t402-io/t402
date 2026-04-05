@@ -49,6 +49,20 @@ type SessionStats struct {
 	StartTime        time.Time
 }
 
+// Store is an optional interface for persistent policy state.
+// Implementations can back this with Redis, SQLite, etc.
+// When provided to NewEngineWithStore, the engine persists counters
+// and spending totals across restarts.
+type Store interface {
+	// IncrementCounter atomically increments a counter key with the given TTL window.
+	// Returns the new count.
+	IncrementCounter(key string, window time.Duration) (int64, error)
+	// GetSpending returns the cumulative spending for the given key and period.
+	GetSpending(key string, period time.Duration) (*big.Int, error)
+	// AddSpending adds the given amount to the spending counter for the key and period.
+	AddSpending(key string, amount *big.Int, period time.Duration) error
+}
+
 // Decision is the result of a policy evaluation.
 type Decision struct {
 	Allowed bool

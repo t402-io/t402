@@ -60,11 +60,16 @@ func VerifyEOASignature(
 		return false, ErrSignatureMalleability
 	}
 
-	// Adjust v value for recovery
+	// Validate and adjust v value for recovery
 	// Ethereum uses v = 27 or 28, but crypto.SigToPub expects v = 0 or 1
 	v := sig[64]
-	if v >= 27 {
+	switch v {
+	case 0, 1:
+		// already in recovery format
+	case 27, 28:
 		sig[64] = v - 27
+	default:
+		return false, errors.New("invalid signature v value: must be 0, 1, 27, or 28")
 	}
 
 	// Recover the public key from the signature

@@ -143,6 +143,28 @@ func TestVerifyEOASignature_VValueAdjustment(t *testing.T) {
 	})
 }
 
+// TestVerifyEOASignature_InvalidVValue tests that invalid v values are rejected
+func TestVerifyEOASignature_InvalidVValue(t *testing.T) {
+	privateKey, _ := crypto.GenerateKey()
+	address := crypto.PubkeyToAddress(privateKey.PublicKey)
+	testHash := crypto.Keccak256([]byte("v-value test"))
+
+	sig, _ := crypto.Sign(testHash, privateKey)
+
+	for _, invalidV := range []byte{2, 26, 29, 100, 255} {
+		t.Run("rejects v="+string(rune('0'+invalidV)), func(t *testing.T) {
+			badSig := make([]byte, 65)
+			copy(badSig, sig)
+			badSig[64] = invalidV
+
+			_, err := VerifyEOASignature(testHash, badSig, address)
+			if err == nil {
+				t.Errorf("VerifyEOASignature() should reject v=%d", invalidV)
+			}
+		})
+	}
+}
+
 // TestVerifyEOASignature_Malleability tests that high-s signatures are rejected
 func TestVerifyEOASignature_Malleability(t *testing.T) {
 	privateKey, _ := crypto.GenerateKey()

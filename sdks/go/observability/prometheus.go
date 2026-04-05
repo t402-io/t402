@@ -36,7 +36,7 @@ func ToPrometheusMetrics(m PaymentMetrics) string {
 	// Per-network counts
 	if len(m.CountByNetwork) > 0 {
 		writeHelp(&b, "t402_payments_by_network", "Payment count by network")
-		writeType(&b, "t402_payments_by_network", "gauge")
+		writeType(&b, "t402_payments_by_network", "counter")
 		for _, network := range sortedKeys(m.CountByNetwork) {
 			fmt.Fprintf(&b, "t402_payments_by_network{network=%q} %d\n", network, m.CountByNetwork[network])
 		}
@@ -45,7 +45,7 @@ func ToPrometheusMetrics(m PaymentMetrics) string {
 	// Per-network amounts
 	if len(m.AmountByNetwork) > 0 {
 		writeHelp(&b, "t402_amount_by_network", "Total payment amount by network (smallest unit)")
-		writeType(&b, "t402_amount_by_network", "gauge")
+		writeType(&b, "t402_amount_by_network", "counter")
 		for _, network := range sortedBigIntKeys(m.AmountByNetwork) {
 			fmt.Fprintf(&b, "t402_amount_by_network{network=%q} %s\n", network, m.AmountByNetwork[network].String())
 		}

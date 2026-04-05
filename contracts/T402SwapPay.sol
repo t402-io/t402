@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
 /**
  * @title T402SwapPay
  * @notice Atomic swap-and-pay: payer sends any token, merchant receives stablecoins.
@@ -13,13 +17,6 @@ pragma solidity ^0.8.20;
  * 4. Contract transfers outputToken to merchant (payTo)
  * 5. Refunds any excess input tokens to payer
  */
-
-interface IERC20 {
-    function transferFrom(address from, address to, uint256 amount) external returns (bool);
-    function transfer(address to, uint256 amount) external returns (bool);
-    function approve(address spender, uint256 amount) external returns (bool);
-    function balanceOf(address account) external view returns (uint256);
-}
 
 interface ISwapRouter {
     struct ExactOutputSingleParams {
@@ -38,8 +35,15 @@ interface ISwapRouter {
         returns (uint256 amountIn);
 }
 
-contract T402SwapPay {
+contract T402SwapPay is ReentrancyGuard {
+    using SafeERC20 for IERC20;
+
     ISwapRouter public immutable swapRouter;
+    address public immutable facilitator;
+
+    error UnauthorizedCaller();
+    error InvalidAddress();
+    error InvalidAmount();
 
     event SwapAndPay(
         address indexed payer,
@@ -51,8 +55,16 @@ contract T402SwapPay {
         uint24 poolFee
     );
 
-    constructor(address _swapRouter) {
+    modifier onlyFacilitator() {
+        if (msg.sender != facilitator) revert UnauthorizedCaller();
+        _;
+    }
+
+    constructor(address _swapRouter, address _facilitator) {
+        if (_swapRouter == address(0)) revert InvalidAddress();
+        if (_facilitator == address(0)) revert InvalidAddress();
         swapRouter = ISwapRouter(_swapRouter);
+        facilitator = _facilitator;
     }
 
     /**
@@ -73,12 +85,15 @@ contract T402SwapPay {
         uint256 outputAmount,
         uint256 maxInputAmount,
         uint24 poolFee
-    ) external returns (uint256 amountIn) {
+    ) external onlyFacilitator nonReentrant returns (uint256 amountIn) {
+        if (payer == address(0) || payTo == address(0)) revert InvalidAddress();
+        if (outputAmount == 0 || maxInputAmount == 0) revert InvalidAmount();
+
         // Pull input tokens from payer
-        IERC20(inputToken).transferFrom(payer, address(this), maxInputAmount);
+        IERC20(inputToken).safeTransferFrom(payer, address(this), maxInputAmount);
 
         // Approve router to spend input tokens
-        IERC20(inputToken).approve(address(swapRouter), maxInputAmount);
+        IERC20(inputToken).forceApprove(address(swapRouter), maxInputAmount);
 
         // Swap exact output: get exactly outputAmount of outputToken
         amountIn = swapRouter.exactOutputSingle(
@@ -93,10 +108,13 @@ contract T402SwapPay {
             })
         );
 
+        // Reset approval to 0 after swap
+        IERC20(inputToken).forceApprove(address(swapRouter), 0);
+
         // Refund excess input tokens to payer
         uint256 remaining = IERC20(inputToken).balanceOf(address(this));
         if (remaining > 0) {
-            IERC20(inputToken).transfer(payer, remaining);
+            IERC20(inputToken).safeTransfer(payer, remaining);
         }
 
         emit SwapAndPay(payer, payTo, inputToken, outputToken, amountIn, outputAmount, poolFee);

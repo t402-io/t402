@@ -5,6 +5,15 @@ import { registerWalletCommands } from "./wallet.js";
 // Mock state
 let mockHasSeed = false;
 let mockEncryptedSeed: string | undefined;
+let mockReadlineAnswer = "";
+
+// Mock node:readline for interactive import
+vi.mock("node:readline", () => ({
+  createInterface: vi.fn(() => ({
+    question: (_prompt: string, cb: (answer: string) => void) => cb(mockReadlineAnswer),
+    close: vi.fn(),
+  })),
+}));
 
 // Mock config module
 vi.mock("../config/index.js", () => ({
@@ -125,15 +134,15 @@ describe("Wallet Commands", () => {
       const walletCmd = program.commands.find((cmd) => cmd.name() === "wallet");
       const importCmd = walletCmd?.commands.find((cmd) => cmd.name() === "import");
       expect(importCmd).toBeDefined();
-      expect(importCmd?.description()).toBe("Import an existing wallet from a seed phrase");
+      expect(importCmd?.description()).toBe("Import an existing wallet from a seed phrase (interactive prompt)");
     });
 
     it("imports a valid 12-word seed phrase", async () => {
       const { printSuccess } = await import("../utils/index.js");
       const { storeSeed } = await import("../config/index.js");
-      const seedPhrase = "word1 word2 word3 word4 word5 word6 word7 word8 word9 word10 word11 word12";
+      mockReadlineAnswer = "word1 word2 word3 word4 word5 word6 word7 word8 word9 word10 word11 word12";
 
-      await program.parseAsync(["node", "test", "wallet", "import", seedPhrase]);
+      await program.parseAsync(["node", "test", "wallet", "import"]);
 
       expect(storeSeed).toHaveBeenCalled();
       expect(printSuccess).toHaveBeenCalledWith("Wallet imported successfully");
@@ -141,8 +150,9 @@ describe("Wallet Commands", () => {
 
     it("rejects invalid seed phrase", async () => {
       const { printError } = await import("../utils/index.js");
+      mockReadlineAnswer = "too few words";
 
-      await program.parseAsync(["node", "test", "wallet", "import", "too few words"]);
+      await program.parseAsync(["node", "test", "wallet", "import"]);
 
       expect(printError).toHaveBeenCalledWith("Invalid seed phrase. Must be 12 or 24 words.");
     });
@@ -151,13 +161,7 @@ describe("Wallet Commands", () => {
       mockHasSeed = true;
       const { printWarning } = await import("../utils/index.js");
 
-      await program.parseAsync([
-        "node",
-        "test",
-        "wallet",
-        "import",
-        "word1 word2 word3 word4 word5 word6 word7 word8 word9 word10 word11 word12",
-      ]);
+      await program.parseAsync(["node", "test", "wallet", "import"]);
 
       expect(printWarning).toHaveBeenCalledWith(
         "A wallet is already configured. Use 'wallet clear' first to remove it.",

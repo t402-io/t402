@@ -84,21 +84,38 @@ export async function executeAutoPay(
   const { T402Protocol } = await import('@t402/wdk-protocol')
   const protocol = await T402Protocol.create(wdk, { chains })
 
-  const { response, receipt } = await protocol.fetch(input.url)
-
-  // Check max amount
-  if (receipt && input.maxAmount) {
-    const paidAmount = parseFloat(receipt.amount) / 1e6 // Assume 6 decimals
+  // Pre-flight: check payment requirements before executing payment
+  if (input.maxAmount) {
     const maxAmount = parseFloat(input.maxAmount)
-    if (paidAmount > maxAmount) {
-      return {
-        success: false,
-        statusCode: 402,
-        body: '',
-        error: `Payment amount (${paidAmount}) exceeds max allowed (${maxAmount})`,
+    const preflightResponse = await fetch(input.url)
+    if (preflightResponse.status === 402) {
+      const requirementsHeader = preflightResponse.headers.get('x-payment') ||
+        preflightResponse.headers.get('x-payment-requirements')
+      if (requirementsHeader) {
+        try {
+          const requirements = JSON.parse(requirementsHeader)
+          const reqArray = Array.isArray(requirements) ? requirements : [requirements]
+          for (const req of reqArray) {
+            if (req.amount) {
+              const reqAmount = parseFloat(req.amount) / 1e6 // Assume 6 decimals
+              if (reqAmount > maxAmount) {
+                return {
+                  success: false,
+                  statusCode: 402,
+                  body: '',
+                  error: `Required payment amount (${reqAmount}) exceeds max allowed (${maxAmount})`,
+                }
+              }
+            }
+          }
+        } catch {
+          // If we can't parse requirements, continue with payment
+        }
       }
     }
   }
+
+  const { response, receipt } = await protocol.fetch(input.url)
 
   // Read response body
   const contentType = response.headers.get('content-type') ?? undefined

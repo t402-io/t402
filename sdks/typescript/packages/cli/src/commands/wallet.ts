@@ -21,8 +21,13 @@ import {
   getNetworkName,
 } from "../utils/index.js";
 
-// Machine ID for basic encryption key
-const MACHINE_KEY = `t402-cli-${process.env.USER || "default"}`;
+import { hostname } from "node:os";
+import { createHash } from "node:crypto";
+
+// Derive a machine-bound key from multiple environment signals
+const MACHINE_KEY = createHash("sha256")
+  .update(`t402-cli:${process.env.USER || "default"}:${hostname()}:${process.env.HOME || ""}`)
+  .digest("hex");
 
 /**
  * Register wallet-related commands
@@ -72,15 +77,23 @@ export function registerWalletCommands(program: Command): void {
   // wallet import
   wallet
     .command("import")
-    .description("Import an existing wallet from a seed phrase")
-    .argument("<seed-phrase>", "12 or 24 word seed phrase (in quotes)")
-    .action(async (seedPhrase: string) => {
+    .description("Import an existing wallet from a seed phrase (interactive prompt)")
+    .action(async () => {
       if (hasSeedConfigured()) {
         printWarning("A wallet is already configured. Use 'wallet clear' first to remove it.");
         return;
       }
 
-      const phrase = seedPhrase.trim();
+      // Read seed phrase interactively from stdin to avoid shell history exposure
+      const readline = await import("node:readline");
+      const rl = readline.createInterface({ input: process.stdin, output: process.stderr });
+      const phrase = await new Promise<string>((resolve) => {
+        rl.question("Enter seed phrase (12 or 24 words): ", (answer) => {
+          rl.close();
+          resolve(answer.trim());
+        });
+      });
+
       if (!isValidSeedPhrase(phrase)) {
         printError("Invalid seed phrase. Must be 12 or 24 words.");
         return;

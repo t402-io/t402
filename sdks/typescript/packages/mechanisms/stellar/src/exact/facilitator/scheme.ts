@@ -35,12 +35,20 @@ export class ExactStellarScheme implements SchemeNetworkFacilitator {
   readonly scheme = SCHEME_EXACT
   readonly caipFamily = 'stellar:*'
   private config: ExactStellarSchemeConfig
+  /** Set of payload hashes already processed — replay protection */
+  private processedTxs = new Set<string>()
 
   constructor(
     private readonly signer: FacilitatorStellarSigner,
     config: ExactStellarSchemeConfig = {},
   ) {
     this.config = config
+  }
+
+  /** Compute a deterministic hash for replay detection */
+  private payloadHash(xdr: string, from: string, to: string, amount: string): string {
+    // Simple deterministic key — crypto.subtle not needed for uniqueness
+    return `${xdr}:${from}:${to}:${amount}`
   }
 
   /**
@@ -106,6 +114,21 @@ export class ExactStellarScheme implements SchemeNetworkFacilitator {
     }
 
     const authorization = stellarPayload.authorization
+
+    // Step 0: Replay protection
+    const ph = this.payloadHash(
+      stellarPayload.signedTransactionXdr,
+      authorization.from,
+      authorization.to,
+      authorization.amount,
+    )
+    if (this.processedTxs.has(ph)) {
+      return {
+        isValid: false,
+        invalidReason: 'replay_detected',
+        payer: authorization.from,
+      }
+    }
 
     // Step 1: Verify scheme matches
     if (payload.accepted.scheme !== SCHEME_EXACT || requirements.scheme !== SCHEME_EXACT) {
@@ -269,6 +292,15 @@ export class ExactStellarScheme implements SchemeNetworkFacilitator {
         payer: stellarPayload.authorization.from,
       }
     }
+
+    // Mark as processed for replay protection
+    const settleHash = this.payloadHash(
+      stellarPayload.signedTransactionXdr,
+      stellarPayload.authorization.from,
+      stellarPayload.authorization.to,
+      stellarPayload.authorization.amount,
+    )
+    this.processedTxs.add(settleHash)
 
     try {
       // Submit the signed transaction

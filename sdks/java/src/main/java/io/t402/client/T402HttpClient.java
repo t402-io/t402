@@ -28,19 +28,35 @@ import java.util.UUID;
 public class T402HttpClient {
 
     private final HttpClient http = HttpClient.newHttpClient();
-    private final int    t402Version = 1;
-    private final String scheme      = "exact";
-    private final String network     = "base-sepolia";
+    private final int    t402Version;
+    private final String scheme;
+    private final String network;
 
     private final CryptoSigner signer;
 
     /**
-     * Creates a new T402 HTTP client with the specified crypto signer.
+     * Creates a new T402 HTTP client with the specified crypto signer
+     * using default settings (V2, exact scheme, eip155:8453).
      *
      * @param signer the crypto signer for signing payment headers
      */
     public T402HttpClient(CryptoSigner signer) {
+        this(signer, 2, "exact", "eip155:8453");
+    }
+
+    /**
+     * Creates a new T402 HTTP client with configurable protocol parameters.
+     *
+     * @param signer      the crypto signer for signing payment headers
+     * @param t402Version protocol version (1 or 2)
+     * @param scheme      payment scheme (e.g., "exact", "upto")
+     * @param network     CAIP-2 network ID (e.g., "eip155:8453", "eip155:42161")
+     */
+    public T402HttpClient(CryptoSigner signer, int t402Version, String scheme, String network) {
         this.signer = signer;
+        this.t402Version = t402Version;
+        this.scheme = scheme;
+        this.network = network;
     }
 
     /**
