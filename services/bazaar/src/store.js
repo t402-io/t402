@@ -146,6 +146,7 @@ function serviceToRow(svc) {
     discovery: svc.discovery ? JSON.stringify(svc.discovery) : null,
     registered_at: svc.registeredAt,
     updated_at: svc.updatedAt,
+    api_key_hash: svc.apiKeyHash || null,
     // MCP marketplace fields
     service_type: svc.serviceType || "rest",
     mcp_tools: JSON.stringify(svc.mcpTools || []),
