@@ -378,14 +378,15 @@ const mcpSeeds = [
 let nextId = 1;
 
 export function seedStore() {
-  // Only seed if store is empty
-  if (store.size() > 0) {
+  const now = new Date().toISOString();
+  // Always seed MCP tools if none exist yet
+  const hasMcp = store.getAll().some((s) => s.serviceType === "mcp");
+  const allSeeds = store.size() === 0 ? [...seeds, ...mcpSeeds] : hasMcp ? [] : mcpSeeds;
+  if (allSeeds.length === 0) {
     logger.info("store already seeded", { services: store.size() });
     return;
   }
-
-  const now = new Date().toISOString();
-  for (const seed of [...seeds, ...mcpSeeds]) {
+  for (const seed of allSeeds) {
     const id = `svc-${String(nextId++).padStart(3, "0")}`;
     store.set(id, {
       id,
