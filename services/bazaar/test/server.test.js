@@ -70,11 +70,11 @@ describe("Search", () => {
     assert.ok(data.services.every((s) => s.category === "ai"));
   });
 
-  it("network filter (eip155:42161 = 2)", async () => {
+  it("network filter (eip155:42161 = 3)", async () => {
     const res = await fetch(`${BASE}/api/v1/search?network=eip155:42161`);
     assert.strictEqual(res.status, 200);
     const data = await res.json();
-    assert.strictEqual(data.total, 2, `Expected 2 services on eip155:42161, got ${data.total}`);
+    assert.strictEqual(data.total, 3, `Expected 3 services on eip155:42161, got ${data.total}`);
     assert.ok(data.services.every((s) => s.price.network === "eip155:42161"));
   });
 
