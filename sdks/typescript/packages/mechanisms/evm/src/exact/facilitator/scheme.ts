@@ -202,6 +202,25 @@ export class ExactEvmScheme implements SchemeNetworkFacilitator {
       }
     }
 
+    // Check if nonce has already been used on-chain (EIP-3009 authorizationState)
+    try {
+      const nonceUsed = await this.signer.readContract({
+        address: getAddress(requirements.asset),
+        abi: [{ type: "function", name: "authorizationState", inputs: [{ type: "address" }, { type: "bytes32" }], outputs: [{ type: "bool" }], stateMutability: "view" }],
+        functionName: "authorizationState",
+        args: [getAddress(exactEvmPayload.authorization.from), exactEvmPayload.authorization.nonce as `0x${string}`],
+      });
+      if (nonceUsed) {
+        return {
+          isValid: false,
+          invalidReason: "nonce_already_used",
+          payer: exactEvmPayload.authorization.from,
+        };
+      }
+    } catch {
+      // authorizationState may not exist on all tokens — continue with verification
+    }
+
     // Verify payment recipient matches
     if (getAddress(exactEvmPayload.authorization.to) !== getAddress(requirements.payTo)) {
       return {

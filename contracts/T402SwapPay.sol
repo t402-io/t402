@@ -84,7 +84,8 @@ contract T402SwapPay is ReentrancyGuard {
         address outputToken,
         uint256 outputAmount,
         uint256 maxInputAmount,
-        uint24 poolFee
+        uint24 poolFee,
+        uint160 sqrtPriceLimitX96
     ) external onlyFacilitator nonReentrant returns (uint256 amountIn) {
         if (payer == address(0) || payTo == address(0)) revert InvalidAddress();
         if (outputAmount == 0 || maxInputAmount == 0) revert InvalidAmount();
@@ -96,6 +97,8 @@ contract T402SwapPay is ReentrancyGuard {
         IERC20(inputToken).forceApprove(address(swapRouter), maxInputAmount);
 
         // Swap exact output: get exactly outputAmount of outputToken
+        // sqrtPriceLimitX96 provides MEV/sandwich protection — caller should
+        // compute from a TWAP oracle or off-chain price feed
         amountIn = swapRouter.exactOutputSingle(
             ISwapRouter.ExactOutputSingleParams({
                 tokenIn: inputToken,
@@ -104,7 +107,7 @@ contract T402SwapPay is ReentrancyGuard {
                 recipient: payTo, // Send directly to merchant
                 amountOut: outputAmount,
                 amountInMaximum: maxInputAmount,
-                sqrtPriceLimitX96: 0
+                sqrtPriceLimitX96: sqrtPriceLimitX96
             })
         );
 
@@ -118,5 +121,10 @@ contract T402SwapPay is ReentrancyGuard {
         }
 
         emit SwapAndPay(payer, payTo, inputToken, outputToken, amountIn, outputAmount, poolFee);
+    }
+
+    /// @notice Reject any ETH sent directly to the contract
+    receive() external payable {
+        revert("ETH not accepted");
     }
 }

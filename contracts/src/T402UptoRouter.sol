@@ -3,12 +3,13 @@ pragma solidity ^0.8.24;
 
 import { IT402UptoRouter } from "./interfaces/IT402UptoRouter.sol";
 import { IERC20Permit } from "./interfaces/IERC20Permit.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /// @title T402UptoRouter
 /// @notice Router contract for T402 Up-To scheme payments
 /// @dev Enables usage-based billing by combining EIP-2612 permit with flexible settlement amounts
 /// @custom:security-contact security@t402.io
-contract T402UptoRouter is IT402UptoRouter {
+contract T402UptoRouter is IT402UptoRouter, ReentrancyGuard {
     /*//////////////////////////////////////////////////////////////
                                  ERRORS
     //////////////////////////////////////////////////////////////*/
@@ -104,7 +105,7 @@ contract T402UptoRouter is IT402UptoRouter {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external onlyFacilitator {
+    ) external onlyFacilitator nonReentrant {
         // Validate inputs
         if (token == address(0) || from == address(0) || to == address(0)) {
             revert ZeroAddress();
@@ -202,5 +203,10 @@ contract T402UptoRouter is IT402UptoRouter {
     /// @return The domain separator
     function getDomainSeparator(address token) external view returns (bytes32) {
         return IERC20Permit(token).DOMAIN_SEPARATOR();
+    }
+
+    /// @notice Reject any ETH sent directly to the contract
+    receive() external payable {
+        revert("ETH not accepted");
     }
 }

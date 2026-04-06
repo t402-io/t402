@@ -717,12 +717,11 @@ export class t402ResourceServer {
           deepEqual(paymentRequirements, paymentPayload.accepted),
         );
       case 1:
-        // For v1, match by scheme and network
-        return availableRequirements.find(
-          req =>
-            req.scheme === paymentPayload.accepted.scheme &&
-            req.network === paymentPayload.accepted.network,
-        );
+        // V1 is deprecated — reject by default to prevent downgrade attacks.
+        // V1 matching only checks scheme+network (not amount/asset/payTo),
+        // which allows an attacker to bypass strict requirement matching.
+        console.warn("V1 payment rejected: protocol downgrade not allowed. Use V2.");
+        return undefined;
       default:
         throw new Error(
           `Unsupported t402 version: ${(paymentPayload as PaymentPayload).t402Version}`,
@@ -763,6 +762,37 @@ export class t402ResourceServer {
           extensions,
         ),
       };
+    }
+
+    // Cross-resource replay protection: if the payload includes a resource binding,
+    // validate it matches the resource being accessed.
+    if (paymentPayload.resource?.url && resourceInfo.url) {
+      const payloadUrl = new URL(paymentPayload.resource.url).pathname;
+      const requestUrl = new URL(resourceInfo.url, "http://localhost").pathname;
+      if (payloadUrl !== requestUrl) {
+        return {
+          success: false,
+          error: `resource_mismatch: payment bound to ${payloadUrl} but used on ${requestUrl}`,
+        };
+      }
+    }
+
+    // Extensions append-only validation: payload extensions must include
+    // all required extensions without removal or modification
+    if (extensions && Object.keys(extensions).length > 0) {
+      const payExtensions = paymentPayload.extensions;
+      if (!payExtensions) {
+        return { success: false, error: "extensions_missing: payload missing required extensions" };
+      }
+      for (const [key, reqVal] of Object.entries(extensions)) {
+        const payVal = payExtensions[key];
+        if (payVal === undefined) {
+          return { success: false, error: `extension_removed: required extension '${key}' was removed` };
+        }
+        if (JSON.stringify(reqVal) !== JSON.stringify(payVal)) {
+          return { success: false, error: `extension_modified: required extension '${key}' was modified` };
+        }
+      }
     }
 
     // Find matching requirements

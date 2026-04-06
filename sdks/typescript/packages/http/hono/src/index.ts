@@ -150,23 +150,11 @@ export function paymentMiddleware(
         }
 
       case "payment-verified":
-        // Payment is valid, need to wrap response for settlement
+        // Payment is valid — settle BEFORE executing handler to prevent
+        // side effects from leaking on settlement failure.
         const { paymentPayload, paymentRequirements } = result;
 
-        // Proceed to the next middleware or route handler
-        await next();
-
-        // Get the current response
-        let res = c.res;
-
-        // If the response from the protected route is >= 400, do not settle payment
-        if (res.status >= 400) {
-          return;
-        }
-
-        // Clear the response so we can modify headers
-        c.res = undefined;
-
+        // Settle payment first
         try {
           const settleResult = await httpServer.processSettlement(
             paymentPayload,
@@ -174,24 +162,28 @@ export function paymentMiddleware(
           );
 
           if (!settleResult.success) {
-            // Settlement failed - do not return the protected resource
-            res = c.json(
+            return c.json(
               {
                 error: "Settlement failed",
                 details: settleResult.errorReason,
               },
               402,
             );
-          } else {
-            // Settlement succeeded - add headers to response
-            Object.entries(settleResult.headers).forEach(([key, value]) => {
-              res.headers.set(key, value);
-            });
           }
+
+          // Settlement succeeded — now execute handler
+          await next();
+
+          // Add settlement headers to response
+          let res = c.res;
+          c.res = undefined;
+          Object.entries(settleResult.headers).forEach(([key, value]) => {
+            res.headers.set(key, value);
+          });
+          c.res = res;
         } catch (error) {
           console.error(error);
-          // If settlement fails, return an error response
-          res = c.json(
+          return c.json(
             {
               error: "Settlement failed",
               details: error instanceof Error ? error.message : "Unknown error",
@@ -199,9 +191,6 @@ export function paymentMiddleware(
             402,
           );
         }
-
-        // Restore the response (potentially modified with settlement headers)
-        c.res = res;
         return;
     }
   };

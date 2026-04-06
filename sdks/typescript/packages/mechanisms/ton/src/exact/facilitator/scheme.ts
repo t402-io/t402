@@ -201,8 +201,11 @@ export class ExactTonScheme implements SchemeNetworkFacilitator {
         }
       }
     } catch (error) {
-      // If we can't check balance, log warning but continue
-      console.warn('Could not verify Jetton balance:', error)
+      return {
+        isValid: false,
+        invalidReason: 'balance_check_failed',
+        payer: authorization.from,
+      }
     }
 
     // Step 7: Verify amount is sufficient
@@ -250,7 +253,11 @@ export class ExactTonScheme implements SchemeNetworkFacilitator {
         }
       }
     } catch (error) {
-      console.warn('Could not verify seqno:', error)
+      return {
+        isValid: false,
+        invalidReason: 'seqno_check_failed',
+        payer: authorization.from,
+      }
     }
 
     // Step 11: Verify wallet is deployed
@@ -264,7 +271,11 @@ export class ExactTonScheme implements SchemeNetworkFacilitator {
         }
       }
     } catch (error) {
-      console.warn('Could not verify wallet deployment:', error)
+      return {
+        isValid: false,
+        invalidReason: 'wallet_deployment_check_failed',
+        payer: authorization.from,
+      }
     }
 
     return {

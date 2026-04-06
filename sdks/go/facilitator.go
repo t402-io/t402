@@ -289,7 +289,7 @@ func (f *t402Facilitator) Verify(ctx context.Context, payloadBytes []byte, requi
 		// Execute afterVerify hooks
 		resultCtx := FacilitatorVerifyResultContext{FacilitatorVerifyContext: hookCtx, Result: verifyResult}
 		for _, hook := range f.afterVerifyHooks {
-			_ = hook(resultCtx) // Log errors but don't fail
+			_ = hook(resultCtx) // After-hooks are observational — errors intentionally ignored
 		}
 
 		return verifyResult, nil
@@ -343,7 +343,7 @@ func (f *t402Facilitator) Verify(ctx context.Context, payloadBytes []byte, requi
 		// Execute afterVerify hooks
 		resultCtx := FacilitatorVerifyResultContext{FacilitatorVerifyContext: hookCtx, Result: verifyResult}
 		for _, hook := range f.afterVerifyHooks {
-			_ = hook(resultCtx) // Log errors but don't fail
+			_ = hook(resultCtx) // After-hooks are observational — errors intentionally ignored
 		}
 
 		return verifyResult, nil
@@ -416,7 +416,7 @@ func (f *t402Facilitator) Settle(ctx context.Context, payloadBytes []byte, requi
 		// Execute afterSettle hooks
 		resultCtx := FacilitatorSettleResultContext{FacilitatorSettleContext: hookCtx, Result: settleResult}
 		for _, hook := range f.afterSettleHooks {
-			_ = hook(resultCtx) // Log errors but don't fail
+			_ = hook(resultCtx) // After-hooks are observational — errors intentionally ignored
 		}
 
 		return settleResult, nil
@@ -470,7 +470,7 @@ func (f *t402Facilitator) Settle(ctx context.Context, payloadBytes []byte, requi
 		// Execute afterSettle hooks
 		resultCtx := FacilitatorSettleResultContext{FacilitatorSettleContext: hookCtx, Result: settleResult}
 		for _, hook := range f.afterSettleHooks {
-			_ = hook(resultCtx) // Log errors but don't fail
+			_ = hook(resultCtx) // After-hooks are observational — errors intentionally ignored
 		}
 
 		return settleResult, nil

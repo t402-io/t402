@@ -399,7 +399,7 @@ func (s *t402ResourceServer) VerifyPayment(ctx context.Context, payload types.Pa
 	// Execute afterVerify hooks
 	resultCtx := VerifyResultContext{VerifyContext: hookCtx, Result: verifyResult}
 	for _, hook := range s.afterVerifyHooks {
-		_ = hook(resultCtx) // Log errors but don't fail
+		_ = hook(resultCtx) // After-hooks are observational — errors intentionally ignored
 	}
 
 	return verifyResult, nil
@@ -466,7 +466,7 @@ func (s *t402ResourceServer) SettlePayment(ctx context.Context, payload types.Pa
 	// Execute afterSettle hooks
 	resultCtx := SettleResultContext{SettleContext: hookCtx, Result: settleResult}
 	for _, hook := range s.afterSettleHooks {
-		_ = hook(resultCtx) // Log errors but don't fail
+		_ = hook(resultCtx) // After-hooks are observational — errors intentionally ignored
 	}
 
 	return settleResult, nil

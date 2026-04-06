@@ -189,7 +189,11 @@ export class ExactStellarScheme implements SchemeNetworkFacilitator {
         }
       }
     } catch (error) {
-      console.warn('Could not verify ledger expiry:', error)
+      return {
+        isValid: false,
+        invalidReason: 'ledger_expiry_check_failed',
+        payer: authorization.from,
+      }
     }
 
     // Step 5: Verify token balance
@@ -207,7 +211,11 @@ export class ExactStellarScheme implements SchemeNetworkFacilitator {
         }
       }
     } catch (error) {
-      console.warn('Could not verify token balance:', error)
+      return {
+        isValid: false,
+        invalidReason: 'balance_check_failed',
+        payer: authorization.from,
+      }
     }
 
     // Step 6: Verify amount is sufficient
@@ -248,7 +256,11 @@ export class ExactStellarScheme implements SchemeNetworkFacilitator {
         }
       }
     } catch (error) {
-      console.warn('Could not verify account existence:', error)
+      return {
+        isValid: false,
+        invalidReason: 'account_existence_check_failed',
+        payer: authorization.from,
+      }
     }
 
     return {

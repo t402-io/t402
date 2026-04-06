@@ -219,6 +219,7 @@ func toViews[T PaymentRequirementsView](reqs []T) []PaymentRequirementsView {
 }
 
 // fromView converts a view interface back to concrete type
-func fromView[T PaymentRequirementsView](view PaymentRequirementsView) T {
-	return view.(T)
+func fromView[T PaymentRequirementsView](view PaymentRequirementsView) (T, bool) {
+	result, ok := view.(T)
+	return result, ok
 }

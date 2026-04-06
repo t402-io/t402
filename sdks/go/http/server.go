@@ -375,6 +375,19 @@ func (s *t402HTTPResourceServer) ProcessHTTPRequest(ctx context.Context, reqCtx 
 		}
 	}
 
+	// Cross-resource replay protection: if payload includes resource binding, validate it
+	if typedPayload.Resource != nil && typedPayload.Resource.URL != "" && resourceInfo != nil && resourceInfo.URL != "" {
+		if typedPayload.Resource.URL != resourceInfo.URL {
+			return HTTPProcessResult{
+				Type: ResultPaymentError,
+				Response: s.createHTTPResponseV2(
+					s.CreatePaymentRequiredResponse(requirements, resourceInfo, "resource_mismatch: payment bound to different resource", extensions),
+					false, paywallConfig, "", nil,
+				),
+			}
+		}
+	}
+
 	// Find matching requirements (type-safe)
 	matchingReqs := s.FindMatchingRequirements(requirements, *typedPayload)
 	if matchingReqs == nil {

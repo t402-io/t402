@@ -176,4 +176,9 @@ abstract contract T402BasePermit2Proxy is ReentrancyGuard {
             emit EIP2612PermitFailed(token, owner, reason);
         }
     }
+
+    /// @notice Reject any ETH sent directly to the contract
+    receive() external payable {
+        revert("ETH not accepted");
+    }
 }

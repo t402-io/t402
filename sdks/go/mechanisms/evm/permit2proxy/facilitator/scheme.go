@@ -137,6 +137,12 @@ func (f *Permit2ProxyEvmScheme) Verify(
 ) (*t402.VerifyResponse, error) {
 	network := t402.Network(requirements.Network)
 
+	// Guard: reject if proxy contracts are not deployed
+	if !permit2proxy.IsProxyDeployed() {
+		return nil, t402.NewVerifyError("permit2proxy_not_deployed", "", network,
+			fmt.Errorf("Permit2Proxy contracts are not deployed — update ExactProxyAddress/UptoProxyAddress"))
+	}
+
 	// Validate scheme
 	if payload.Accepted.Scheme != permit2proxy.SchemePermit2Proxy {
 		return nil, t402.NewVerifyError("invalid_scheme", "", network, nil)

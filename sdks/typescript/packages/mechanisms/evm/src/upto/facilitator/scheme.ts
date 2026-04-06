@@ -192,6 +192,44 @@ export class UptoEvmFacilitatorScheme implements SchemeNetworkFacilitator {
       };
     }
 
+    // Verify on-chain permit nonce matches payload nonce
+    try {
+      const onChainNonce = await this.signer.readContract({
+        address: getAddress(requirements.asset),
+        abi: [{ type: "function", name: "nonces", inputs: [{ type: "address" }], outputs: [{ type: "uint256" }], stateMutability: "view" }],
+        functionName: "nonces",
+        args: [getAddress(uptoPayload.authorization.owner)],
+      }) as bigint;
+      if (onChainNonce !== BigInt(uptoPayload.authorization.nonce)) {
+        return {
+          isValid: false,
+          invalidReason: "invalid_nonce: on-chain nonce does not match payload",
+          payer: uptoPayload.authorization.owner,
+        };
+      }
+    } catch {
+      // nonces() may not exist on all tokens — continue
+    }
+
+    // Verify payer has sufficient balance
+    try {
+      const balance = await this.signer.readContract({
+        address: getAddress(requirements.asset),
+        abi: [{ type: "function", name: "balanceOf", inputs: [{ type: "address" }], outputs: [{ type: "uint256" }], stateMutability: "view" }],
+        functionName: "balanceOf",
+        args: [getAddress(uptoPayload.authorization.owner)],
+      }) as bigint;
+      if (balance < BigInt(maxAmount)) {
+        return {
+          isValid: false,
+          invalidReason: "insufficient_balance",
+          payer: uptoPayload.authorization.owner,
+        };
+      }
+    } catch {
+      // balanceOf may fail — continue with verification
+    }
+
     // Build typed data for signature verification
     const chainId = parseInt(requirements.network.split(":")[1]);
     const permitTypedData = {

@@ -310,6 +310,12 @@ func (f *ExactEvmScheme) Settle(
 		s := signatureBytes[32:64]
 		v := signatureBytes[64]
 
+		// Defense-in-depth: validate v before on-chain submission
+		if v != 0 && v != 1 && v != 27 && v != 28 {
+			return nil, t402.NewSettleError("invalid_signature_v_value", verifyResp.Payer, network, "",
+				fmt.Errorf("v=%d, expected 0, 1, 27, or 28", v))
+		}
+
 		txHash, err = f.signer.WriteContract(
 			ctx,
 			assetInfo.Address,

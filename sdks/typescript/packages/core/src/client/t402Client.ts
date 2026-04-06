@@ -261,7 +261,7 @@ export class t402Client {
       const partialPayload = await schemeNetworkClient.createPaymentPayload(paymentRequired.t402Version, requirements);
 
       let paymentPayload: PaymentPayload;
-      if (partialPayload.t402Version == 1) {
+      if (partialPayload.t402Version === 1) {
         paymentPayload = partialPayload as PaymentPayload;
       } else {
         paymentPayload = {

@@ -16,6 +16,9 @@ import type { ExactTronPayload } from '../../types.js'
 import { SCHEME_EXACT, MIN_VALIDITY_BUFFER } from '../../constants.js'
 import { normalizeNetwork, validateTronAddress, addressesEqual } from '../../utils.js'
 
+/** Base58Check format for TRON addresses */
+const TRON_ADDRESS_REGEX = /^T[1-9A-HJ-NP-Za-km-z]{33}$/
+
 /**
  * Configuration for ExactTronScheme (facilitator)
  */
@@ -150,7 +153,30 @@ export class ExactTronScheme implements SchemeNetworkFacilitator {
       }
     }
 
-    // Step 4: Validate addresses
+    // Step 4a: Quick address format validation (regex)
+    if (!TRON_ADDRESS_REGEX.test(authorization.from)) {
+      return {
+        isValid: false,
+        invalidReason: 'invalid_sender_address_format',
+        payer: authorization.from,
+      }
+    }
+    if (!TRON_ADDRESS_REGEX.test(authorization.to)) {
+      return {
+        isValid: false,
+        invalidReason: 'invalid_recipient_address_format',
+        payer: authorization.from,
+      }
+    }
+    if (!TRON_ADDRESS_REGEX.test(authorization.contractAddress)) {
+      return {
+        isValid: false,
+        invalidReason: 'invalid_contract_address_format',
+        payer: authorization.from,
+      }
+    }
+
+    // Step 4b: Full address validation
     if (!validateTronAddress(authorization.from)) {
       return {
         isValid: false,
@@ -221,7 +247,11 @@ export class ExactTronScheme implements SchemeNetworkFacilitator {
         }
       }
     } catch (error) {
-      console.warn('Could not verify balance:', error)
+      return {
+        isValid: false,
+        invalidReason: 'balance_check_failed',
+        payer: authorization.from,
+      }
     }
 
     // Step 8: Verify amount sufficiency
@@ -262,7 +292,11 @@ export class ExactTronScheme implements SchemeNetworkFacilitator {
         }
       }
     } catch (error) {
-      console.warn('Could not verify account activation:', error)
+      return {
+        isValid: false,
+        invalidReason: 'account_activation_check_failed',
+        payer: authorization.from,
+      }
     }
 
     // All checks passed

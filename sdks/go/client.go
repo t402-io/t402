@@ -157,7 +157,14 @@ func (c *t402Client) SelectPaymentRequirementsV1(requirements []types.PaymentReq
 
 	// Select final and convert back
 	selected := c.requirementsSelector(filtered)
-	return fromView[types.PaymentRequirementsV1](selected), nil
+	result, ok := fromView[types.PaymentRequirementsV1](selected)
+	if !ok {
+		return types.PaymentRequirementsV1{}, &PaymentError{
+			Code:    ErrCodeUnsupportedScheme,
+			Message: "selector returned wrong payment requirements type (expected V1)",
+		}
+	}
+	return result, nil
 }
 
 // SelectPaymentRequirements selects a payment requirement (V2, default)
@@ -201,7 +208,14 @@ func (c *t402Client) SelectPaymentRequirements(requirements []types.PaymentRequi
 
 	// Select final and convert back
 	selected := c.requirementsSelector(filtered)
-	return fromView[types.PaymentRequirements](selected), nil
+	result, ok := fromView[types.PaymentRequirements](selected)
+	if !ok {
+		return types.PaymentRequirements{}, &PaymentError{
+			Code:    ErrCodeUnsupportedScheme,
+			Message: "selector returned wrong payment requirements type (expected V2)",
+		}
+	}
+	return result, nil
 }
 
 // CreatePaymentPayloadV1 creates a V1 payment payload
