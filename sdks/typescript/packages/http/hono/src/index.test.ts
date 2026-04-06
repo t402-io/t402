@@ -301,7 +301,9 @@ describe("paymentMiddleware", () => {
     expect(responseHeaders.get("PAYMENT-RESPONSE")).toBe("settled");
   });
 
-  it("skips settlement when handler returns >= 400", async () => {
+  it("settles before handler — handler errors do not prevent settlement", async () => {
+    // With settle-before-handler flow, settlement happens BEFORE next().
+    // If handler returns >= 400, settlement has already succeeded.
     setupMockHttpServer(
       {
         type: "payment-verified",
@@ -326,8 +328,9 @@ describe("paymentMiddleware", () => {
 
     await middleware(context, next);
 
+    // Settlement happens before handler in the new secure flow
+    expect(mockProcessSettlement).toHaveBeenCalled();
     expect(next).toHaveBeenCalled();
-    expect(mockProcessSettlement).not.toHaveBeenCalled();
   });
 
   it("returns 402 when settlement throws error", async () => {

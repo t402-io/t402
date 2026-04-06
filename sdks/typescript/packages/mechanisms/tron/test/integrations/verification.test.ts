@@ -324,7 +324,7 @@ describe('TRON Verification Edge Cases', () => {
       const result = await facilitator.verify(payload, requirements)
 
       expect(result.isValid).toBe(false)
-      expect(result.invalidReason).toBe('invalid_sender_address')
+      expect(result.invalidReason).toBe('invalid_sender_address_format')
     })
 
     it('should reject invalid recipient address', async () => {
@@ -341,7 +341,7 @@ describe('TRON Verification Edge Cases', () => {
       const result = await facilitator.verify(payload, requirements)
 
       expect(result.isValid).toBe(false)
-      expect(result.invalidReason).toBe('invalid_recipient_address')
+      expect(result.invalidReason).toBe('invalid_recipient_address_format')
     })
 
     it('should reject invalid contract address', async () => {
@@ -358,7 +358,7 @@ describe('TRON Verification Edge Cases', () => {
       const result = await facilitator.verify(payload, requirements)
 
       expect(result.isValid).toBe(false)
-      expect(result.invalidReason).toBe('invalid_contract_address')
+      expect(result.invalidReason).toBe('invalid_contract_address_format')
     })
   })
 
@@ -472,7 +472,7 @@ describe('TRON Verification Edge Cases', () => {
       expect(result.invalidReason).toBe('insufficient_balance')
     })
 
-    it('should continue if balance check fails', async () => {
+    it('should reject if balance check fails', async () => {
       const mockSigner = createMockSigner(VALID_FACILITATOR)
       ;(mockSigner.getBalance as ReturnType<typeof vi.fn>).mockRejectedValue(
         new Error('Network error'),
@@ -482,9 +482,10 @@ describe('TRON Verification Edge Cases', () => {
       const requirements = createMockRequirements()
       const payload = createMockPayload()
 
-      // Should continue to next checks even if balance check fails
+      // Balance check failures now reject instead of warning
       const result = await facilitator.verify(payload, requirements)
-      expect(result.isValid).toBe(true) // Other checks pass
+      expect(result.isValid).toBe(false)
+      expect(result.invalidReason).toBe('balance_check_failed')
     })
   })
 
@@ -628,7 +629,7 @@ describe('TRON Verification Edge Cases', () => {
       expect(result.invalidReason).toBe('account_not_activated')
     })
 
-    it('should continue if activation check fails', async () => {
+    it('should reject if activation check fails', async () => {
       const mockSigner = createMockSigner(VALID_FACILITATOR)
       ;(mockSigner.isActivated as ReturnType<typeof vi.fn>).mockRejectedValue(
         new Error('Network error'),
@@ -638,9 +639,10 @@ describe('TRON Verification Edge Cases', () => {
       const requirements = createMockRequirements()
       const payload = createMockPayload()
 
-      // Should pass even if activation check fails
+      // Activation check failures now reject instead of warning
       const result = await facilitator.verify(payload, requirements)
-      expect(result.isValid).toBe(true)
+      expect(result.isValid).toBe(false)
+      expect(result.invalidReason).toBe('account_activation_check_failed')
     })
   })
 
