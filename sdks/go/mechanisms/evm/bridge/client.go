@@ -53,8 +53,15 @@ func (b *Usdt0Bridge) Quote(ctx context.Context, params *BridgeQuoteParams) (*Br
 		return nil, fmt.Errorf("failed to parse fee: %w", err)
 	}
 
+	// Apply facilitator margin to bridge fee
+	margin := new(big.Int).Mul(fee.NativeFee, big.NewInt(int64(FacilitatorBridgeMargin*10000)))
+	margin.Div(margin, big.NewInt(10000))
+	adjustedFee := new(big.Int).Add(fee.NativeFee, margin)
+
 	return &BridgeQuote{
-		NativeFee:          fee.NativeFee,
+		NativeFee:          adjustedFee,
+		BaseFee:            fee.NativeFee,
+		FacilitatorMargin:  margin,
 		AmountToSend:       params.Amount,
 		MinAmountToReceive: sendParam.MinAmountLD,
 		EstimatedTime:      EstimatedBridgeTime,

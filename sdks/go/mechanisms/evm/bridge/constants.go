@@ -13,6 +13,10 @@ const (
 	// DefaultSlippage is the default slippage tolerance (0.5%).
 	DefaultSlippage = 0.5
 
+	// FacilitatorBridgeMargin is the percentage margin added to bridge fees (0.5%).
+	// This covers gas costs and generates revenue for the facilitator.
+	FacilitatorBridgeMargin = 0.005
+
 	// EstimatedBridgeTime is the estimated bridge completion time in seconds (~5 minutes).
 	EstimatedBridgeTime = 300
 

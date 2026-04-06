@@ -20,8 +20,12 @@ type BridgeQuoteParams struct {
 
 // BridgeQuote contains the quote result for a bridge transaction.
 type BridgeQuote struct {
-	// NativeFee is the native token fee required (in wei).
+	// NativeFee is the total fee including facilitator margin (in wei).
 	NativeFee *big.Int
+	// BaseFee is the raw bridge protocol fee without margin (in wei).
+	BaseFee *big.Int
+	// FacilitatorMargin is the facilitator's revenue portion (in wei).
+	FacilitatorMargin *big.Int
 	// AmountToSend is the amount that will be sent.
 	AmountToSend *big.Int
 	// MinAmountToReceive is the minimum amount to receive (after fees/slippage).

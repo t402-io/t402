@@ -577,9 +577,12 @@ func (s *t402HTTPResourceServer) createHTTPResponseV2(paymentRequired types.Paym
 
 // createSettlementHeaders creates settlement response headers
 func (s *t402HTTPResourceServer) createSettlementHeaders(response *t402.SettleResponse) map[string]string {
-	return map[string]string{
+	headers := map[string]string{
 		"PAYMENT-RESPONSE": encodePaymentResponseHeader(*response),
 	}
+	// Fee transparency: include facilitator fee percentage in response
+	headers["X-T402-Fee-Percentage"] = "0.1"
+	return headers
 }
 
 // generatePaywallHTMLV2 generates HTML paywall for V2 PaymentRequired

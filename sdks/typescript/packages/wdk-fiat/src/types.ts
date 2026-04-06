@@ -41,6 +41,8 @@ export interface FiatConfig {
   protocol: string;
   apiKey: string;
   environment?: "sandbox" | "production";
+  /** Referral/affiliate code for revenue sharing with the fiat provider */
+  referralCode?: string;
 }
 
 /**

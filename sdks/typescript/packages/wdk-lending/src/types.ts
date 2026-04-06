@@ -59,6 +59,8 @@ export interface LendingConfig {
   rpcUrl: string;
   /** Protocol-specific configuration */
   protocolConfig?: Record<string, unknown>;
+  /** Referral code for protocol revenue sharing (e.g., Aave referral program) */
+  referralCode?: number;
 }
 
 /**
