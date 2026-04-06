@@ -47,12 +47,22 @@ try {
     CREATE INDEX IF NOT EXISTS idx_services_network ON services(price_network);
   `);
 
-  // Migration: add api_key_hash column if missing (existing DBs)
-  try {
-    db.exec(`ALTER TABLE services ADD COLUMN api_key_hash TEXT`);
-  } catch {
-    // Column already exists — ignore
+  // Migrations: add columns for existing DBs
+  const migrations = [
+    "ALTER TABLE services ADD COLUMN api_key_hash TEXT",
+    "ALTER TABLE services ADD COLUMN service_type TEXT DEFAULT 'rest'",
+    "ALTER TABLE services ADD COLUMN mcp_tools TEXT DEFAULT '[]'",
+    "ALTER TABLE services ADD COLUMN commission_rate REAL DEFAULT 0.15",
+    "ALTER TABLE services ADD COLUMN total_calls INTEGER DEFAULT 0",
+    "ALTER TABLE services ADD COLUMN total_revenue TEXT DEFAULT '0'",
+    "ALTER TABLE services ADD COLUMN vendor_email TEXT DEFAULT ''",
+    "ALTER TABLE services ADD COLUMN documentation_url TEXT DEFAULT ''",
+  ];
+  for (const migration of migrations) {
+    try { db.exec(migration); } catch { /* column exists */ }
   }
+
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_services_type ON services(service_type)`);
 
   logger.info("database initialized", { path: DB_PATH, engine: "sqlite" });
 } catch (e) {
@@ -65,8 +75,8 @@ let stmts;
 if (!useMemory) {
   stmts = {
     insert: db.prepare(`
-      INSERT INTO services (id, url, name, description, category, price_amount, price_token, price_network, methods, tags, owner, verified, verification, discovery, registered_at, updated_at, api_key_hash)
-      VALUES (@id, @url, @name, @description, @category, @price_amount, @price_token, @price_network, @methods, @tags, @owner, @verified, @verification, @discovery, @registered_at, @updated_at, @api_key_hash)
+      INSERT INTO services (id, url, name, description, category, price_amount, price_token, price_network, methods, tags, owner, verified, verification, discovery, registered_at, updated_at, api_key_hash, service_type, mcp_tools, commission_rate, vendor_email, documentation_url)
+      VALUES (@id, @url, @name, @description, @category, @price_amount, @price_token, @price_network, @methods, @tags, @owner, @verified, @verification, @discovery, @registered_at, @updated_at, @api_key_hash, @service_type, @mcp_tools, @commission_rate, @vendor_email, @documentation_url)
     `),
     getById: db.prepare("SELECT * FROM services WHERE id = ?"),
     getByUrl: db.prepare("SELECT * FROM services WHERE url = ?"),
@@ -107,6 +117,14 @@ function rowToService(row) {
     discovery: row.discovery ? JSON.parse(row.discovery) : undefined,
     registeredAt: row.registered_at,
     updatedAt: row.updated_at,
+    // MCP marketplace fields
+    serviceType: row.service_type || "rest",
+    mcpTools: row.mcp_tools ? JSON.parse(row.mcp_tools) : [],
+    commissionRate: row.commission_rate ?? 0.15,
+    totalCalls: row.total_calls || 0,
+    totalRevenue: row.total_revenue || "0",
+    vendorEmail: row.vendor_email || "",
+    documentationUrl: row.documentation_url || "",
   };
 }
 
@@ -128,6 +146,12 @@ function serviceToRow(svc) {
     discovery: svc.discovery ? JSON.stringify(svc.discovery) : null,
     registered_at: svc.registeredAt,
     updated_at: svc.updatedAt,
+    // MCP marketplace fields
+    service_type: svc.serviceType || "rest",
+    mcp_tools: JSON.stringify(svc.mcpTools || []),
+    commission_rate: svc.commissionRate ?? 0.15,
+    vendor_email: svc.vendorEmail || "",
+    documentation_url: svc.documentationUrl || "",
   };
 }
 
@@ -293,6 +317,64 @@ const seeds = [
   },
 ];
 
+const mcpSeeds = [
+  {
+    url: "https://mcp.weather402.com",
+    name: "Weather MCP Server",
+    description: "MCP tools for weather data: forecast, historical, alerts",
+    category: "data",
+    price: { amount: "1000", token: "USDC", network: "eip155:8453" },
+    methods: ["POST"],
+    tags: ["mcp", "weather", "forecast"],
+    owner: "0x209693Bc6afc0C5328bA36FaF03C514EF312287C",
+    serviceType: "mcp",
+    mcpTools: [
+      { name: "get_forecast", description: "Get weather forecast for a location", inputSchema: { type: "object", properties: { lat: { type: "number" }, lon: { type: "number" }, days: { type: "integer", default: 7 } }, required: ["lat", "lon"] } },
+      { name: "get_alerts", description: "Get active weather alerts for a region", inputSchema: { type: "object", properties: { region: { type: "string" } }, required: ["region"] } },
+    ],
+    commissionRate: 0.15,
+    vendorEmail: "weather@example.com",
+    documentationUrl: "https://docs.weather402.com",
+  },
+  {
+    url: "https://mcp.code402.com",
+    name: "Code Analysis MCP Server",
+    description: "MCP tools for code review, security scanning, and refactoring suggestions",
+    category: "developer-tools",
+    price: { amount: "5000", token: "USDC", network: "eip155:8453" },
+    methods: ["POST"],
+    tags: ["mcp", "code-review", "security", "developer"],
+    owner: "0xfedcfedcfedcfedcfedcfedcfedcfedcfedcfedc",
+    serviceType: "mcp",
+    mcpTools: [
+      { name: "review_code", description: "AI-powered code review with suggestions", inputSchema: { type: "object", properties: { code: { type: "string" }, language: { type: "string" } }, required: ["code"] } },
+      { name: "scan_security", description: "Scan code for security vulnerabilities", inputSchema: { type: "object", properties: { code: { type: "string" }, severity: { type: "string", enum: ["low", "medium", "high", "critical"] } }, required: ["code"] } },
+      { name: "suggest_refactor", description: "Get refactoring suggestions", inputSchema: { type: "object", properties: { code: { type: "string" }, goal: { type: "string" } }, required: ["code"] } },
+    ],
+    commissionRate: 0.15,
+    vendorEmail: "code@example.com",
+    documentationUrl: "https://docs.code402.com",
+  },
+  {
+    url: "https://mcp.data402.com",
+    name: "Blockchain Data MCP Server",
+    description: "MCP tools for on-chain analytics, wallet profiling, and token data",
+    category: "data",
+    price: { amount: "10000", token: "USDT0", network: "eip155:42161" },
+    methods: ["POST"],
+    tags: ["mcp", "blockchain", "analytics", "wallet"],
+    owner: "0xaaaa1111bbbb2222cccc3333dddd4444eeee5555",
+    serviceType: "mcp",
+    mcpTools: [
+      { name: "get_wallet_profile", description: "Get comprehensive wallet profile and history", inputSchema: { type: "object", properties: { address: { type: "string" }, chain: { type: "string" } }, required: ["address"] } },
+      { name: "get_token_price", description: "Get token price and market data", inputSchema: { type: "object", properties: { token: { type: "string" }, currency: { type: "string", default: "USD" } }, required: ["token"] } },
+    ],
+    commissionRate: 0.15,
+    vendorEmail: "data@example.com",
+    documentationUrl: "https://docs.data402.com",
+  },
+];
+
 let nextId = 1;
 
 export function seedStore() {
@@ -303,10 +385,15 @@ export function seedStore() {
   }
 
   const now = new Date().toISOString();
-  for (const seed of seeds) {
+  for (const seed of [...seeds, ...mcpSeeds]) {
     const id = `svc-${String(nextId++).padStart(3, "0")}`;
     store.set(id, {
       id,
+      serviceType: seed.serviceType || "rest",
+      mcpTools: seed.mcpTools || [],
+      commissionRate: seed.commissionRate ?? 0.15,
+      vendorEmail: seed.vendorEmail || "",
+      documentationUrl: seed.documentationUrl || "",
       ...seed,
       verified: true,
       registeredAt: now,

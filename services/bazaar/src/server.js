@@ -379,6 +379,116 @@ app.get("/api/v1/featured", (req, res) => {
   sendWithEtag(req, res, { services: featured, count: featured.length }, "public, max-age=300");
 });
 
+// ── MCP Marketplace ──────────────────────────────────────────────────
+
+// List all MCP tools across all services
+app.get("/api/v1/mcp/tools", (req, res) => {
+  const mcpServices = store.getAll().filter((s) => s.serviceType === "mcp");
+  const tools = [];
+  for (const svc of mcpServices) {
+    for (const tool of svc.mcpTools || []) {
+      tools.push({
+        ...tool,
+        serviceId: svc.id,
+        serviceName: svc.name,
+        serviceUrl: svc.url,
+        price: svc.price,
+        verified: svc.verified,
+        commissionRate: svc.commissionRate,
+      });
+    }
+  }
+  const { q, category } = req.query;
+  let filtered = tools;
+  if (q) {
+    const query = q.toLowerCase();
+    filtered = filtered.filter(
+      (t) => t.name.toLowerCase().includes(query) || t.description.toLowerCase().includes(query),
+    );
+  }
+  if (category) {
+    const mcpInCategory = store.getAll().filter((s) => s.serviceType === "mcp" && s.category === category);
+    const ids = new Set(mcpInCategory.map((s) => s.id));
+    filtered = filtered.filter((t) => ids.has(t.serviceId));
+  }
+  sendWithEtag(req, res, { tools: filtered, count: filtered.length }, "public, max-age=60");
+});
+
+// Get specific tool schema
+app.get("/api/v1/mcp/tools/:toolName/schema", (req, res) => {
+  const { toolName } = req.params;
+  const mcpServices = store.getAll().filter((s) => s.serviceType === "mcp");
+  for (const svc of mcpServices) {
+    const tool = (svc.mcpTools || []).find((t) => t.name === toolName);
+    if (tool) {
+      return res.json({
+        tool: tool.name,
+        description: tool.description,
+        inputSchema: tool.inputSchema,
+        serviceId: svc.id,
+        serviceName: svc.name,
+        serviceUrl: svc.url,
+        price: svc.price,
+      });
+    }
+  }
+  res.status(404).json({ error: `Tool '${toolName}' not found` });
+});
+
+// MCP marketplace stats
+app.get("/api/v1/mcp/stats", (req, res) => {
+  const mcpServices = store.getAll().filter((s) => s.serviceType === "mcp");
+  let totalTools = 0;
+  let totalCalls = 0;
+  const categories = {};
+  for (const svc of mcpServices) {
+    totalTools += (svc.mcpTools || []).length;
+    totalCalls += svc.totalCalls || 0;
+    categories[svc.category] = (categories[svc.category] || 0) + 1;
+  }
+  sendWithEtag(req, res, {
+    services: mcpServices.length,
+    tools: totalTools,
+    totalCalls,
+    categories,
+    commissionRate: 0.15,
+  }, "public, max-age=60");
+});
+
+// Record a tool call (for commission tracking)
+app.post("/api/v1/mcp/call", requireAuth, (req, res) => {
+  const { serviceId, toolName, amount } = req.body;
+  if (!serviceId || !toolName) {
+    return res.status(400).json({ error: "serviceId and toolName required" });
+  }
+  const service = store.get(serviceId);
+  if (!service || service.serviceType !== "mcp") {
+    return res.status(404).json({ error: "MCP service not found" });
+  }
+  const tool = (service.mcpTools || []).find((t) => t.name === toolName);
+  if (!tool) {
+    return res.status(404).json({ error: `Tool '${toolName}' not found in service` });
+  }
+
+  // Update call count and revenue
+  service.totalCalls = (service.totalCalls || 0) + 1;
+  const callAmount = parseInt(amount || service.price.amount || "0");
+  const commission = Math.floor(callAmount * (service.commissionRate || 0.15));
+  const currentRevenue = BigInt(service.totalRevenue || "0");
+  service.totalRevenue = (currentRevenue + BigInt(callAmount - commission)).toString();
+  service.updatedAt = new Date().toISOString();
+  store.set(serviceId, service);
+
+  res.json({
+    success: true,
+    tool: toolName,
+    amount: callAmount,
+    commission,
+    vendorReceives: callAmount - commission,
+    totalCalls: service.totalCalls,
+  });
+});
+
 // ── Categories ────────────────────────────────────────────────────────
 app.get("/api/v1/categories", (req, res) => {
   const categories = {};
