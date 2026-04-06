@@ -226,6 +226,8 @@ app.post("/api/v1/services", requireAuth, (req, res) => {
 
   const id = getNextId();
   const now = new Date().toISOString();
+  const { serviceType, mcpTools, commissionRate, vendorEmail, documentationUrl } = req.body;
+
   const service = {
     id,
     url,
@@ -239,6 +241,14 @@ app.post("/api/v1/services", requireAuth, (req, res) => {
     verified: false,
     registeredAt: now,
     updatedAt: now,
+    // MCP marketplace fields
+    serviceType: serviceType === "mcp" ? "mcp" : "rest",
+    mcpTools: Array.isArray(mcpTools) ? mcpTools : [],
+    commissionRate: typeof commissionRate === "number" ? commissionRate : 0.15,
+    totalCalls: 0,
+    totalRevenue: "0",
+    vendorEmail: sanitizeString(vendorEmail || ""),
+    documentationUrl: sanitizeString(documentationUrl || ""),
   };
 
   // Store hash of the caller's API key for per-service auth on future updates/deletes
