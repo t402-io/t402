@@ -802,7 +802,7 @@ describe("t402ResourceServer", () => {
       expect(result).toEqual(req1);
     });
 
-    it("should match v1 requirements by scheme and network", () => {
+    it("should reject v1 payments to prevent downgrade attacks", () => {
       const server = new t402ResourceServer();
 
       const req1 = buildPaymentRequirements({
@@ -816,13 +816,14 @@ describe("t402ResourceServer", () => {
         accepted: buildPaymentRequirements({
           scheme: "exact",
           network: "eip155:8453" as Network,
-          amount: "9999999", // Different amount - should still match for v1
+          amount: "9999999",
         }),
       });
 
       const result = server.findMatchingRequirements([req1], payload);
 
-      expect(result).toEqual(req1);
+      // V1 payments are rejected by default to prevent protocol downgrade
+      expect(result).toBeUndefined();
     });
 
     it("should return undefined if no match found", () => {
