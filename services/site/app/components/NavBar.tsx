@@ -83,6 +83,7 @@ const navLinks = [
   { href: "/features", label: "Features" },
   { href: "/transports", label: "Transports" },
   { href: "/ecosystem", label: "Ecosystem" },
+  { href: "/pricing", label: "Pricing" },
   { href: "/use-cases", label: "Use Cases" },
   { href: "/compare", label: "Why T402" },
   { href: "/playground", label: "Playground" },
