@@ -85,7 +85,9 @@ if (!useMemory) {
       UPDATE services SET url=@url, name=@name, description=@description, category=@category,
         price_amount=@price_amount, price_token=@price_token, price_network=@price_network,
         methods=@methods, tags=@tags, owner=@owner, verified=@verified, verification=@verification,
-        discovery=@discovery, updated_at=@updated_at
+        discovery=@discovery, updated_at=@updated_at,
+        service_type=@service_type, mcp_tools=@mcp_tools, commission_rate=@commission_rate,
+        vendor_email=@vendor_email, documentation_url=@documentation_url
       WHERE id=@id
     `),
     delete: db.prepare("DELETE FROM services WHERE id = ?"),
