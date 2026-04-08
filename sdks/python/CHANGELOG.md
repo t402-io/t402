@@ -4,6 +4,20 @@ All notable changes to the T402 Python SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [1.13.1] - 2026-04-08
+
+### Fixed
+- **HTTP clients use V2 headers** — `requests.py` and `httpx.py` now send `PAYMENT-SIGNATURE` (V2) instead of `X-Payment` (V1), consistent with TS/Go/Java SDKs
+
+## [1.13.0] - 2026-03-24
+
+### Added
+- **Spark mechanism** (`t402.schemes.spark`) — Lightning-compatible spark payments
+- **A2A protocol** — Account-to-account transfer support
+- **Bridge support** — Cross-chain USDT bridge via LayerZero
+- **Multisig/Safe integration** — Safe transaction building and signature collection
+- **WDK enhancements** — Bridge, gasless, hardware wallet support
+
 ## [1.12.1] - 2026-02-23
 
 ### Added
