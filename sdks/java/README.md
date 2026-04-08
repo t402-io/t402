@@ -14,13 +14,13 @@ Java implementation of the [t402 Payment Protocol](https://t402.io).
 <dependency>
     <groupId>io.t402</groupId>
     <artifactId>t402</artifactId>
-    <version>1.13.0</version>
+    <version>1.13.1</version>
 </dependency>
 ```
 
 **Gradle:**
 ```groovy
-implementation 'io.t402:t402:1.13.0'
+implementation 'io.t402:t402:1.13.1'
 ```
 
 ## Features

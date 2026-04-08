@@ -4,6 +4,26 @@ All notable changes to the T402 Java SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [1.13.1] - 2026-04-08
+
+### Added
+- **Test coverage** — HttpConstantsTest, PaymentRequirementsTest, EvmConstantsTest, TonConstantsTest, TronConstantsTest, SvmConstantsTest (+26 new tests)
+- **README version update** — Maven/Gradle examples updated to 1.13.0
+
+### Changed
+- **CI** — `mvn test` → `mvn verify` to enable JaCoCo coverage check goal
+
+## [1.13.0] - 2026-03-24
+
+### Added
+- **Spark mechanism** (`io.t402.schemes.spark`) — Lightning-compatible spark payments
+- **A2A protocol** — Account-to-account transfer support
+- **Bridge support** — Cross-chain USDT bridge via LayerZero
+- **Multisig/Safe integration** — Safe transaction building and signature collection
+- **WDK enhancements** — Bridge, gasless, hardware wallet support
+- **Observability** — PaymentEvent, PaymentTracer, PrometheusExporter
+- **Policy engine** — PaymentPolicy, PolicyEngine, PolicyRules
+
 ## [1.12.1] - 2026-02-23
 
 ### Added
