@@ -90,7 +90,7 @@ class TestHttpxPaymentFlowV1:
         }
         retry_response = Response(200)
         retry_response.headers = {
-            "X-Payment-Response": base64.b64encode(
+            "PAYMENT-RESPONSE": base64.b64encode(
                 json.dumps(payment_result).encode()
             ).decode()
         }
@@ -112,7 +112,7 @@ class TestHttpxPaymentFlowV1:
         assert result.status_code == 200
         assert mock_client.send.called
         retry_req = mock_client.send.call_args[0][0]
-        assert retry_req.headers["X-Payment"] == mock_header
+        assert retry_req.headers["PAYMENT-SIGNATURE"] == mock_header
 
     async def test_non_402_passes_through(self, account):
         """Test that non-402 responses pass through unchanged."""

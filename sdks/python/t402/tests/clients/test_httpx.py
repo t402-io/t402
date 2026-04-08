@@ -97,7 +97,7 @@ async def test_on_response_payment_flow(hooks, payment_requirements):
     }
     retry_response = Response(200)
     retry_response.headers = {
-        "X-Payment-Response": base64.b64encode(
+        "PAYMENT-RESPONSE": base64.b64encode(
             json.dumps(payment_result).encode()
         ).decode()
     }
@@ -123,10 +123,10 @@ async def test_on_response_payment_flow(hooks, payment_requirements):
         # Verify the retry request was made
         assert mock_client.send.called
         retry_request = mock_client.send.call_args[0][0]
-        assert retry_request.headers["X-Payment"] == mock_header
+        assert retry_request.headers["PAYMENT-SIGNATURE"] == mock_header
         assert (
             retry_request.headers["Access-Control-Expose-Headers"]
-            == "X-Payment-Response"
+            == "PAYMENT-RESPONSE"
         )
 
         # Verify the mocked methods were called with correct arguments

@@ -84,7 +84,7 @@ class TestRequestsPaymentFlow:
         retry_response = Response()
         retry_response.status_code = 200
         retry_response.headers = {
-            "X-Payment-Response": base64.b64encode(
+            "PAYMENT-RESPONSE": base64.b64encode(
                 json.dumps(payment_result).encode()
             ).decode()
         }
@@ -113,7 +113,7 @@ class TestRequestsPaymentFlow:
             response = adapter.send(request)
 
         assert response.status_code == 200
-        assert "X-Payment-Response" in response.headers
+        assert "PAYMENT-RESPONSE" in response.headers
         adapter.client.select_payment_requirements.assert_called_once()
         adapter.client.create_payment_header.assert_called_once()
 

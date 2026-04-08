@@ -8,6 +8,7 @@ from t402.clients.base import (
     PaymentError,
     PaymentSelectorCallable,
 )
+from t402.encoding import HEADER_PAYMENT_SIGNATURE, HEADER_PAYMENT_RESPONSE
 from t402.types import t402PaymentRequiredResponse
 import copy
 
@@ -65,8 +66,8 @@ class t402HTTPAdapter(HTTPAdapter):
 
             # Mark as retry and add payment header
             self._is_retry = True
-            request.headers["X-Payment"] = payment_header
-            request.headers["Access-Control-Expose-Headers"] = "X-Payment-Response"
+            request.headers[HEADER_PAYMENT_SIGNATURE] = payment_header
+            request.headers["Access-Control-Expose-Headers"] = HEADER_PAYMENT_RESPONSE
 
             retry_response = super().send(request, **kwargs)
 

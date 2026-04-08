@@ -7,6 +7,7 @@ from t402.clients.base import (
     PaymentError,
     PaymentSelectorCallable,
 )
+from t402.encoding import HEADER_PAYMENT_SIGNATURE, HEADER_PAYMENT_RESPONSE
 from t402.types import t402PaymentRequiredResponse
 
 
@@ -57,8 +58,8 @@ class HttpxHooks:
             self._is_retry = True
             request = response.request
 
-            request.headers["X-Payment"] = payment_header
-            request.headers["Access-Control-Expose-Headers"] = "X-Payment-Response"
+            request.headers[HEADER_PAYMENT_SIGNATURE] = payment_header
+            request.headers["Access-Control-Expose-Headers"] = HEADER_PAYMENT_RESPONSE
 
             # Retry the request
             async with AsyncClient() as client:

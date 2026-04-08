@@ -154,7 +154,7 @@ def test_adapter_payment_flow(adapter, payment_requirements):
     retry_response = Response()
     retry_response.status_code = 200
     retry_response.headers = {
-        "X-Payment-Response": base64.b64encode(
+        "PAYMENT-RESPONSE": base64.b64encode(
             json.dumps(payment_result).encode()
         ).decode()
     }
@@ -185,7 +185,7 @@ def test_adapter_payment_flow(adapter, payment_requirements):
 
         # Verify the result
         assert response.status_code == 200
-        assert "X-Payment-Response" in response.headers
+        assert "PAYMENT-RESPONSE" in response.headers
 
         # Verify the mocked methods were called with correct arguments
         adapter.client.select_payment_requirements.assert_called_once_with(
@@ -195,14 +195,14 @@ def test_adapter_payment_flow(adapter, payment_requirements):
             payment_requirements, 1
         )
 
-        # Verify the retry request was made with correct headers
+        # Verify the retry request was made with V2 headers
         assert mock_send.call_count == 2
         retry_call = mock_send.call_args_list[1]
         retry_request = retry_call[0][0]
-        assert retry_request.headers["X-Payment"] == mock_header
+        assert retry_request.headers["PAYMENT-SIGNATURE"] == mock_header
         assert (
             retry_request.headers["Access-Control-Expose-Headers"]
-            == "X-Payment-Response"
+            == "PAYMENT-RESPONSE"
         )
 
 
