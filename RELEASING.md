@@ -195,8 +195,8 @@ Use workflow dispatch for testing:
 2. Commit changes
 3. Create and push a tag with `java/` prefix:
    ```bash
-   git tag java/v1.10.0
-   git push origin java/v1.10.0
+   git tag java/v1.13.0
+   git push origin java/v1.13.0
    ```
 4. GitHub Actions will:
    - Run tests
@@ -209,13 +209,13 @@ Use workflow dispatch for testing:
 Java packages are published to Maven Central:
 - Group ID: `io.t402`
 - Artifact ID: `t402`
-- Current version: `1.10.0`
+- Current version: `1.13.0`
 
 ```xml
 <dependency>
     <groupId>io.t402</groupId>
     <artifactId>t402</artifactId>
-    <version>1.10.0</version>
+    <version>1.13.0</version>
 </dependency>
 ```
 
