@@ -130,7 +130,7 @@ jobs:
           cache: "maven"
 
       - name: Run tests with coverage
-        run: mvn test jacoco:report -B
+        run: mvn verify -B
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v6

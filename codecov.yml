@@ -37,6 +37,10 @@ flags:
     paths:
       - python/
     carryforward: true
+  java:
+    paths:
+      - java/
+    carryforward: true
 
 ignore:
   - "**/test/**"

@@ -94,3 +94,22 @@ jobs:
       - run: npm ci
       - run: npm audit --audit-level=high
         continue-on-error: true
+
+  summary:
+    name: Audit Summary
+    needs: [typescript, go, python, java, services]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check results
+        run: |
+          echo "## Dependency Audit Results" >> $GITHUB_STEP_SUMMARY
+          echo "| SDK | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| TypeScript | ${{ needs.typescript.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Go | ${{ needs.go.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Python | ${{ needs.python.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Java | ${{ needs.java.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Services | ${{ needs.services.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo ""
+          echo "Note: continue-on-error is set. Check individual jobs for vulnerability details."
