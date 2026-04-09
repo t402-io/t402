@@ -188,8 +188,8 @@ resp, err := c.Get("https://api.example.com/api/premium")
   </Tabs.Tab>
   <Tabs.Tab>
 ```java
-import io.t402.sdk.evm.EvmSigner;
-import io.t402.sdk.http.T402HttpClient;
+import io.t402.crypto.EvmSigner;
+import io.t402.client.T402HttpClient;
 
 EvmSigner signer = EvmSigner.fromPrivateKey("0x...", 8453, "https://mainnet.base.org");
 T402HttpClient client = new T402HttpClient(signer);
@@ -241,7 +241,7 @@ Includes all 13 mechanisms, HTTP middleware (net/http, Gin, Echo, Chi), and MCP 
 <dependency>
     <groupId>io.t402</groupId>
     <artifactId>t402</artifactId>
-    <version>1.12.1</version>
+    <version>1.13.1</version>
 </dependency>
 ```
 
