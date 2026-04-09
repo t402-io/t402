@@ -16,7 +16,22 @@ T402 follows [Semantic Versioning](https://semver.org/):
   <Tabs.Tab>
 ## TypeScript SDK
 
-### v2.8.x (Current)
+### v2.9.x (Current)
+
+**v2.9.0** - April 2026
+- T402PaymentError — Structured error class with cause, phase, and retryable fields
+- WDK Test Harness — Mock factories for unit testing
+- Multi-Chain Address Validation — EVM, TON, TRON, Solana, Bitcoin, Cosmos
+- Solana Versioned Transactions — Priority fees and Token-2022
+- TRON Energy Estimation — Dynamic fee limits
+- TON Jetton Transfer Verification — Enhanced verification
+- Multi-Provider RPC Failover — Health checks across providers
+- Payment Idempotency Manager — Payment deduplication
+- Webhook Manager — HMAC-SHA256 signed webhook delivery
+- Encrypted Backup/Recovery — Encrypted seed phrase backup
+- Compliance Manager — Provider pattern for compliance checks
+
+### v2.8.x
 
 **v2.8.0** - March 2026
 - New `@t402/stellar` package — Stellar blockchain support with Soroban SEP-41 USDC transfers
@@ -236,7 +251,15 @@ T402 follows [Semantic Versioning](https://semver.org/):
 <Tabs.Tab>
 ## Python SDK
 
-### v1.12.x (Current)
+### v1.13.x (Current)
+
+**v1.13.1** - April 2026
+- HTTP clients upgraded from V1 `X-Payment` to V2 `PAYMENT-SIGNATURE` header (cross-SDK consistency fix)
+
+**v1.13.0** - March 2026
+- Spark mechanism, A2A protocol, Bridge support, Multisig/Safe integration, WDK enhancements
+
+### v1.12.x
 
 **v1.12.1** - March 2026
 - Stellar mechanism support
@@ -302,7 +325,17 @@ T402 follows [Semantic Versioning](https://semver.org/):
 <Tabs.Tab>
 ## Java SDK
 
-### v1.12.x (Current)
+### v1.13.x (Current)
+
+**v1.13.1** - April 2026
+- +26 new tests (HttpConstants, PaymentRequirements, EVM/TON/TRON/SVM constants)
+- CI: JaCoCo coverage check enabled, Codecov Java flag added
+
+**v1.13.0** - March 2026
+- Spark mechanism, A2A protocol, Bridge support, Multisig/Safe integration
+- Observability (PaymentEvent, PaymentTracer, PrometheusExporter), Policy engine
+
+### v1.12.x
 
 **v1.12.1** - March 2026
 - Stellar mechanism support
