@@ -17,7 +17,22 @@ The [Sandbox](https://sandbox.t402.io) supports 7 testnets with [magic test addr
 
 ## Authentication
 
-The public facilitator does not require authentication for basic usage. For rate limit increases or enterprise features, contact the T402 team.
+The production facilitator requires an API key for `/verify` and `/settle` endpoints. Get a free key at [facilitator.t402.io/register](https://facilitator.t402.io/register).
+
+**Pass the key via header:**
+
+```
+Authorization: Bearer t402_sk_...
+```
+
+Or via `X-API-Key` header. Free tier includes 1,000 transactions/month at 0% fee.
+
+| Tier | Quota | RPM | Fee |
+|------|-------|-----|-----|
+| Free | 1,000 tx/month | 10 | 0% |
+| Builder | 100K tx/month | 100 | 0.1% |
+| Scale | 1M tx/month | 1,000 | 0.08% |
+| Enterprise | Unlimited | 10,000 | Custom |
 
 ## Endpoints
 
@@ -284,6 +299,241 @@ Execute on-chain settlement for a verified payment.
 
 ---
 
+### GET /info
+
+Returns API version, feature flags, and all available endpoints.
+
+**Response**: JSON with `name`, `version`, `description`, `endpoints[]`, `features{}`.
+
+---
+
+### GET /tiers
+
+List all available pricing tiers and their configurations.
+
+**Response**
+
+```json
+{
+  "tiers": {
+    "free": { "name": "Free", "monthlyQuota": 1000, "rpmLimit": 10, "feeRate": 0, "priceCents": 0 },
+    "builder": { "name": "Builder", "monthlyQuota": 100000, "rpmLimit": 100, "feeRate": 0.001, "priceCents": 0 },
+    "scale": { "name": "Scale", "monthlyQuota": 1000000, "rpmLimit": 1000, "feeRate": 0.0008, "priceCents": 9900 },
+    "enterprise": { "name": "Enterprise", "monthlyQuota": -1, "rpmLimit": 10000, "feeRate": 0.0005, "priceCents": 0 }
+  }
+}
+```
+
+---
+
+## Registration & Key Management
+
+### POST /register
+
+Create a new API key. Idempotent per email + project name.
+
+**Request Body**
+
+```json
+{ "email": "you@company.com", "projectName": "My App" }
+```
+
+**Response** (201 Created)
+
+```json
+{
+  "apiKey": "t402_sk_...",
+  "projectName": "My App",
+  "quota": { "limit": 1000, "period": "monthly", "used": 0, "tier": "free", "feeRate": 0, "resetsAt": "2026-05-01T00:00:00Z" },
+  "isNew": true
+}
+```
+
+Rate limited: 5 registrations per IP per hour.
+
+---
+
+### POST /lookup
+
+Recover an existing API key by email. Rate limited separately from registration.
+
+**Request Body**
+
+```json
+{ "email": "you@company.com" }
+```
+
+---
+
+## Dashboard API
+
+All dashboard endpoints require `Authorization: Bearer t402_sk_...` header.
+
+### GET /dashboard/info
+
+Get key info, tier, quota, and settings. **Does not increment quota.**
+
+**Response**
+
+```json
+{
+  "tier": "free",
+  "config": { "name": "Free", "monthlyQuota": 1000, "rpmLimit": 10, "feeRate": 0 },
+  "quota": { "limit": 1000, "used": 42, "tier": "free", "feeRate": 0, "resetsAt": "2026-05-01T00:00:00Z" },
+  "email": "you@company.com",
+  "project": "My App",
+  "status": "active",
+  "createdAt": "2026-04-07T06:28:26Z",
+  "webhookUrl": "",
+  "allowedIPs": null,
+  "allowedRef": null
+}
+```
+
+---
+
+### GET /dashboard/keys
+
+List all API keys for the authenticated user's email.
+
+**Response**
+
+```json
+{
+  "keys": [
+    { "apiKey": "t402_sk_...", "project": "My App", "tier": "free", "status": "active", "createdAt": "...", "current": true }
+  ],
+  "email": "you@company.com"
+}
+```
+
+---
+
+### GET /dashboard/usage
+
+Daily usage data for the last 7 days (for charts).
+
+**Response**
+
+```json
+{
+  "days": 7,
+  "usage": [
+    { "date": "2026-04-01", "count": 0 },
+    { "date": "2026-04-02", "count": 15 }
+  ]
+}
+```
+
+---
+
+### POST /dashboard/rotate
+
+Regenerate API key. The old key is **immediately invalidated**. All settings (webhook, restrictions, tier) are preserved.
+
+**Response**
+
+```json
+{ "apiKey": "t402_sk_NEW...", "project": "My App", "message": "Key rotated successfully. Old key is now invalid." }
+```
+
+---
+
+### POST /dashboard/webhook
+
+Set a webhook URL for settlement notifications. Must use HTTPS. Send empty string to clear.
+
+**Request Body**
+
+```json
+{ "webhookUrl": "https://your-server.com/t402-webhook" }
+```
+
+---
+
+### POST /dashboard/webhook/test
+
+Send a test payload to the configured webhook URL.
+
+**Response**
+
+```json
+{ "success": true, "statusCode": 200, "message": "Webhook responded with 200 OK" }
+```
+
+---
+
+### POST /dashboard/restrictions
+
+Set IP and referrer domain restrictions. Empty arrays allow all.
+
+**Request Body**
+
+```json
+{ "allowedIPs": ["203.0.113.1"], "allowedRef": ["myapp.com"] }
+```
+
+---
+
+## Credit Scoring API
+
+### GET /v1/credit/score?wallet=0x...
+
+Get credit score (0-1000) for a wallet based on payment history.
+
+**Response**
+
+```json
+{
+  "wallet": "0x...",
+  "score": 750,
+  "breakdown": { "volumeScore": 200, "frequencyScore": 180, "reliabilityScore": 250, "ageScore": 120 },
+  "stats": { "paymentCount": 150, "successRate": 0.98, "totalVolume": "5000000000", "accountAgeDays": 90 }
+}
+```
+
+---
+
+### POST /v1/credit/refresh
+
+Force a fresh score computation. Accepts query param `?wallet=0x...` or JSON body `{"wallet":"0x..."}`.
+
+---
+
+### GET /v1/credit/top?limit=20
+
+Leaderboard of top wallets by credit score.
+
+---
+
+## Stats API
+
+### GET /stats/keys
+
+Public count of registered API keys.
+
+```json
+{ "totalKeys": 27 }
+```
+
+### GET /stats/requests
+
+Aggregate request statistics (requires database).
+
+```json
+{ "totalRequests": 235000, "successfulRequests": 234300, "failedRequests": 700, "avgDurationMs": 5.1 }
+```
+
+### GET /stats/settlements
+
+Settlement status counts.
+
+```json
+{ "confirmed": 0, "failed": 32, "pending": 0 }
+```
+
+---
+
 ## Error Responses
 
 All endpoints return structured error responses:
@@ -312,19 +562,27 @@ All endpoints return structured error responses:
 
 ## Rate Limiting
 
-The public facilitator implements rate limiting:
+**Global limit**: 1,000 requests/minute per IP (anonymous) or per API key (authenticated).
 
-| Tier | Requests/Minute | Description |
-|------|-----------------|-------------|
-| Default | 60 | Standard public access |
-| Authenticated | 1000 | With API key |
+**Endpoint-specific limits:**
 
-Rate limit headers are included in responses:
+| Endpoint | Limit | Reason |
+|----------|-------|--------|
+| `POST /settle` | 100/min | On-chain transactions |
+| `POST /register` | 30/min | Registration (also 5/hour per IP) |
+| `POST /lookup` | 30/min | Key recovery (also 5/hour per IP) |
+| `POST /dashboard/rotate` | 5/min | Key rotation (destructive) |
+| `POST /dashboard/webhook/test` | 5/min | Webhook test |
+| `GET /dashboard/info` | 120/min | Dashboard reads |
+| `POST /v1/intent/execute` | 100/min | Intent execution |
+
+**Response headers** (on authenticated requests):
 
 ```
-X-RateLimit-Limit: 60
-X-RateLimit-Remaining: 45
-X-RateLimit-Reset: 1706745660
+X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 978
+X-RateLimit-Reset: 1712592000
+X-RateLimit-Tier: free
 ```
 
 ---
