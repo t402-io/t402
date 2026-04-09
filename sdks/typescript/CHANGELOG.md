@@ -4,6 +4,8 @@ All notable changes to the T402 TypeScript SDK will be documented in this file.
 
 ## [Unreleased]
 
+## [2.9.0] - 2026-04-09
+
 ### Added
 - **T402PaymentError** - Structured error class with cause, phase, and retryable fields in `@t402/core`
 - **WDK Test Harness** - Mock factories at `@t402/wdk/testing` for unit testing

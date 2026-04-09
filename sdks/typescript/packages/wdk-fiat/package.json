@@ -1,6 +1,6 @@
 {
   "name": "@t402/wdk-fiat",
-  "version": "2.8.0",
+  "version": "2.8.1",
   "description": "Fiat on/off-ramp protocol abstractions for t402 (MoonPay, Transak)",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",

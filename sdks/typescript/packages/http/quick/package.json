@@ -1,6 +1,6 @@
 {
   "name": "@t402/quick",
-  "version": "2.8.0",
+  "version": "2.8.1",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/index.d.ts",
@@ -46,9 +46,15 @@
     "hono": "^4.12.10"
   },
   "peerDependenciesMeta": {
-    "express": { "optional": true },
-    "fastify": { "optional": true },
-    "hono": { "optional": true }
+    "express": {
+      "optional": true
+    },
+    "fastify": {
+      "optional": true
+    },
+    "hono": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
