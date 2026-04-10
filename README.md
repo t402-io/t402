@@ -9,6 +9,8 @@
 
 t402 is an open standard for internet native payments. It aims to support all networks (both crypto & fiat) and forms of value (stablecoins, tokens, fiat).
 
+**Compatible with [Tether WDK](https://wdk.tether.io)** — bring your own wallet, or use Tether WDK as the underlying wallet layer. t402 provides the payment protocol; WDK provides the wallet.
+
 ```typescript
 app.use(
   paymentMiddleware(
@@ -297,8 +299,8 @@ Legend: ✅ Complete | ❌ Not Available
 The t402 ecosystem is growing! Check out our [ecosystem page](https://t402.io/ecosystem) to see projects building with t402.
 
 - **Whitepaper:** [T402 Protocol Whitepaper](https://t402.io/t402-whitepaper.pdf) (PDF)
-- **Roadmap:** [ROADMAP.md](https://github.com/t402-io/t402/blob/main/ROADMAP.md)
 - **Documentation:** [docs.t402.io](https://docs.t402.io)
+- **Changelog:** [CHANGELOG.md](./CHANGELOG.md)
 
 ## Terms
 

@@ -2,6 +2,7 @@
   "name": "create-t402-agent",
   "version": "2.8.0",
   "description": "Scaffold an AI agent with t402 payment capabilities",
+  "license": "Apache-2.0",
   "bin": { "create-t402-agent": "./src/cli.js" },
   "type": "module",
   "files": ["src"],

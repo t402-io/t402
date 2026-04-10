@@ -2,8 +2,11 @@
 Thanks for contributing to t402!
 Please fill out the information below to help reviewers understand your changes.
 
-Note: We require commit signing.
-See here for instructions: https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification
+Requirements:
+1. Commits must be GPG-signed (cryptographic author verification)
+2. Commits must have DCO sign-off (Developer Certificate of Origin)
+
+See CONTRIBUTING.md Section 6 for setup instructions.
 -->
 
 ## Description
@@ -27,7 +30,9 @@ For Go: Run `go test ./...` from the `/go` directory
 
 - [ ] I have formatted and linted my code
 - [ ] All new and existing tests pass
-- [ ] My commits are signed (required for merge) -- you may need to rebase if you initially pushed unsigned commits
+- [ ] My commits are GPG-signed (required for merge)
+- [ ] My commits have DCO sign-off (`Signed-off-by:` trailer via `git commit -s`) — by signing off I certify the [Developer Certificate of Origin](https://developercertificate.org/)
+- [ ] I confirm this contribution is licensed under Apache 2.0 (the project license)
 
 <!--
 For TypeScript: Run `pnpm format && pnpm lint` from `/typescript` and/or `/examples/typescript`

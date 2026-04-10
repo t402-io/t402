@@ -297,10 +297,27 @@ cd sdks/python/t402 && uv run pytest
 
 ### 6. Commit
 
-All commits must be [signed](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits):
+All commits must be **both GPG-signed and DCO sign-off**:
 
+**GPG signing** (cryptographic author verification):
 ```bash
 git config --global commit.gpgsign true
+```
+See [GitHub's guide](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits).
+
+**DCO sign-off** (Developer Certificate of Origin — legal statement that you have the right to submit):
+```bash
+git config --global format.signoff true    # automatic on every commit
+# or manually per commit:
+git commit -s -m "feat(evm): add zkSync Era"
+```
+
+DCO sign-off adds a `Signed-off-by: Your Name <email@example.com>` trailer to each commit message. By adding this line you certify the statement at [developercertificate.org](https://developercertificate.org/): that you have the right to submit the contribution under the project's Apache 2.0 license.
+
+**Combined** (recommended, set once):
+```bash
+git config --global commit.gpgsign true
+git config --global format.signoff true
 ```
 
 Use conventional commit messages:

@@ -7,6 +7,68 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **WDK Alignment work** (2026-04-10) — Phase 0 cleanup for t402 × Tether WDK ecosystem partnership positioning
+- README: "Compatible with Tether WDK" statement
+- `llms.txt` / `llms-full.txt`: refreshed to reflect 13 chain families, 47 TS packages, current SDK versions, WDK compatibility
+- CONTRIBUTING.md: added DCO sign-off requirement alongside GPG signing
+- PR template: added DCO checkboxes and Apache 2.0 license confirmation
+- License metadata added to 8 previously missing `package.json` files (all Apache-2.0)
+
+### Changed
+- `archive/plans/` removed (14 superseded Q1 2026 planning docs)
+- Root architecture PDFs moved to `archive/` with date-stamped names
+- `ROADMAP.md` merged into `DEVELOPMENT_PLAN_2026.md` (single source of truth)
+
+## [2.9.0] - 2026-04-09
+
+### Added
+- **MCP Tool Marketplace** (Bazaar Phase 5) — new marketplace for discovering and registering t402-enabled MCP tools, includes service registration, seed data, UPDATE support for MCP fields
+- **Monetization infrastructure** — facilitator fee tracking, bridge margin support, referral code system
+- **Pricing page** on t402.io site with tier comparison
+- **Ecosystem partner directory** on site
+- **Content paywall demo** — real AI-generated articles with web search, Haiku model for speed
+- **Bridge demo on user wallet** — no server funds needed, exactly matches USDT0 OFT deployments (22 chains)
+- Java SDK: util and model test coverage
+- Go SDK stub documentation for experimental mechanisms
+
+### Changed
+- **Python SDK**: HTTP clients upgraded from V1 to V2 payment headers
+- Go toolchain upgraded to 1.26 in all workflows (CI, codeql, release)
+- docs workflows migrated from npm to pnpm
+- Sandbox improvements (v1.3.0): metrics, upstream handling, security, test coverage
+
+### Fixed
+- **Security hardening**: 48 security audit findings resolved across all SDKs
+- **Security**: `upto` EVM scheme `verify()` now enforces `spender == routerAddress`
+- **Security**: 19 issues resolved in comprehensive services audit — auth, secrets, CSP, CI
+- Bazaar: API key hash default handling, MCP tools seeding for existing databases, ALTER TABLE migration for `api_key_hash`
+- Demo: plain text parsing for paywall, bridge explorer label in Demo mode, USDT0 OFT deployment exact-match
+- V1 matching test reflects downgrade prevention
+
+## [2.8.0] - 2026-03-16
+
+### Added
+- **Stellar mechanism** (`@t402/stellar`) — Soroban USDC payment support, added to npm release workflow
+- **Spark mechanism** (`@t402/spark`) — Bitcoin L2 payment support across all 4 SDKs (TS, Go, Python, Java)
+- **Intella fiat integration** in Scan2Pay (OLPay provider, polling scheduler, E2E flow)
+- **Spring Boot 4.0.3** compatibility for Java SDK (Jackson 3 migration)
+- Facilitator improvements: multi-key support, API playground, tier CTAs, key rotation UX
+
+### Changed
+- Java SDK version bumped to 1.12.1 (Spring Boot 4 compatible)
+- Python SDK version bumped to 1.12.1
+- Go SDK version bumped to 1.13.0
+- Many scan2pay submodule updates (admin UI, merchant management, Spring Boot 4 page serialization, batch operations, i18n)
+- Facilitator v1.14.x — v1.16.0 UI/UX refactor (register/dashboard pages, security, 24 new tests)
+- Gas price buffer handling and EIP-55 checksums in mechanisms
+- USAT support + receipt timeout fix in facilitator
+
+### Fixed
+- TRON payment flow corrections
+- Fiat payment integration bugs (callback handling, timezone, sanitization)
+- Dead USDT0 contract references removed
+
 ## [2.7.1] - 2026-02-23
 
 ### Added

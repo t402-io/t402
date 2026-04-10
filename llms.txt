@@ -1,49 +1,79 @@
 # T402 Protocol
 
-> Open-source HTTP-native payment protocol for USDT/USDT0 stablecoins.
+> Open-source HTTP-native payment protocol for USDT/USDT0 and other stablecoins. Compatible with Tether WDK.
 
 ## Overview
 
 T402 is a payment protocol that uses HTTP 402 status codes. Flow: client requests resource -> server responds 402 + PaymentRequirements -> client signs off-chain -> resubmits with signed PAYMENT-SIGNATURE header -> server verifies via facilitator and serves resource.
 
-Architecture: Transport (HTTP, MCP, A2A) x Scheme (exact, upto) x Network (EVM, Solana, TON, TRON, etc.)
+Architecture: Transport (HTTP, MCP, A2A) x Scheme (exact, upto, exact-direct) x Network (13 chain families)
+
+**Compatible with [Tether WDK](https://wdk.tether.io)** — bring your own wallet, or use Tether WDK as the underlying wallet layer. t402 provides the payment protocol; WDK provides the wallet.
 
 ## Scheme Types
 
-- exact: Fixed-amount transfers (EIP-3009 on EVM, SPL on Solana, TRC20 on TRON, Jettons on TON)
+- exact: Fixed-amount transfers (EIP-3009 on EVM, SPL on Solana, TRC20 on TRON, Jettons on TON, FA2 on Tezos, SIP-010 on Stacks)
 - upto: Up-to-amount authorization (EIP-2612 on EVM) [draft]
-- exact-direct: On-chain transfer proof (NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos)
+- exact-direct: On-chain transfer proof (NEAR, Aptos, Polkadot, Cosmos, BTC, Stellar, Spark)
 
 ## Supported Networks (CAIP-2)
 
-- EVM: eip155:1 (Ethereum), eip155:8453 (Base), eip155:42161 (Arbitrum), eip155:10 (Optimism), eip155:137 (Polygon), eip155:43114 (Avalanche), eip155:57073 (Ink), eip155:80094 (Berachain), eip155:130 (Unichain)
-- Solana: solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp (mainnet), solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1 (devnet)
-- TON: ton:mainnet, ton:testnet
-- TRON: tron:mainnet, tron:shasta
-- Others: near:mainnet, aptos:mainnet, cosmos:cosmoshub-4, stacks:mainnet, polkadot:91b171bb158e2d3848fa23a9f1c25182, tezos:NetXdQprcVkpaWU
+- **EVM** (19 networks): eip155:1 (Ethereum), eip155:8453 (Base), eip155:42161 (Arbitrum), eip155:10 (Optimism), eip155:137 (Polygon), eip155:43114 (Avalanche), eip155:56 (BSC), eip155:57073 (Ink), eip155:80094 (Berachain), eip155:130 (Unichain), + testnets
+- **Solana**: solana:mainnet, solana:devnet
+- **TON**: ton:mainnet, ton:testnet
+- **TRON**: tron:mainnet, tron:shasta, tron:nile
+- **NEAR**: near:mainnet
+- **Aptos**: aptos:mainnet
+- **Tezos**: tezos:NetXdQprcVkpaWU (mainnet)
+- **Polkadot**: polkadot:91b171bb158e2d3848fa23a9f1c25182
+- **Stacks**: stacks:mainnet
+- **Cosmos**: cosmos:cosmoshub-4 (Noble USDT)
+- **Bitcoin**: bip122:000000000019d6689c085ae165831e93 (mainnet, PSBT + Lightning BOLT11), bip122:000000000933ea01ad0ee984209779ba (testnet)
+- **Stellar**: stellar:pubnet (mainnet, Soroban USDC), stellar:testnet
+- **Spark**: spark:mainnet (Bitcoin L2), spark:testnet
 
-## SDKs
+Total: **13 chain families**, 50+ networks on the t402 facilitator.
 
-- TypeScript (v2.5.0): @t402/core, @t402/evm, @t402/svm, @t402/ton, @t402/tron, @t402/near, @t402/aptos, @t402/tezos, @t402/polkadot, @t402/stacks, @t402/cosmos + HTTP frameworks (@t402/express, @t402/hono, @t402/fastify, @t402/next) + AI (@t402/mcp)
-- Go (v1.9.0): github.com/t402-io/t402/sdks/go
-- Python (v1.10.1): t402 on PyPI
-- Java (v1.10.0): io.t402:t402-sdk on Maven Central
+## SDKs (all current versions)
+
+- **TypeScript** (v2.9.0): 47 packages. Core: `@t402/core`, `@t402/extensions`. Mechanisms (13): `@t402/evm`, `@t402/evm-core`, `@t402/svm`, `@t402/ton`, `@t402/tron`, `@t402/near`, `@t402/aptos`, `@t402/tezos`, `@t402/polkadot`, `@t402/stacks`, `@t402/cosmos`, `@t402/btc`, `@t402/stellar`, `@t402/spark`. HTTP: `@t402/express`, `@t402/hono`, `@t402/fastify`, `@t402/next`, `@t402/axios`, `@t402/fetch`, `@t402/quick`, `@t402/facilitator-embedded`. UI: `@t402/paywall`, `@t402/react`, `@t402/vue`, `@t402/react-native`. WDK (Tether WDK compatibility layer): `@t402/wdk`, `@t402/wdk-bridge`, `@t402/wdk-gasless`, `@t402/wdk-multisig`, `@t402/wdk-defi`, `@t402/wdk-protocol`, `@t402/wdk-ton`, `@t402/wdk-ton-gasless`, `@t402/wdk-tron-gasfree`, `@t402/wdk-lending`, `@t402/wdk-fiat`, `@t402/wdk-swap-jupiter`, `@t402/wdk-facilitator`. Agent: `@t402/mcp`, `@t402/a2a`, `@t402/erc8004`. Observability/policy: `@t402/observability`, `@t402/policy`.
+- **Go** (v1.13.1): `github.com/t402-io/t402/sdks/go` — all 13 mechanisms, MCP server
+- **Python** (v1.13.1): `t402` on PyPI — all 13 mechanisms, MCP server
+- **Java** (v1.13.1): `io.t402:t402-sdk` on Maven Central (Spring Boot 4 compatible) — all 13 mechanisms, MCP server
 
 ## Transport Types
 
-- HTTP: 402 status code with PAYMENT-SIGNATURE / PAYMENT-REQUIRED / PAYMENT-RESPONSE headers
-- MCP: Model Context Protocol for AI agents (11 tools)
-- A2A: Agent-to-Agent protocol
+- **HTTP**: 402 status code with PAYMENT-SIGNATURE / PAYMENT-REQUIRED / PAYMENT-RESPONSE headers
+- **MCP**: Model Context Protocol for AI agents (34 tools in TS, 22 in Java, 6 in Go/Py). Supports Claude, Claude Code, Codex, Gemini.
+- **A2A**: Agent-to-Agent protocol via `@t402/a2a`
+
+## AI Agent Features
+
+- **ERC-8004** Trustless Agents: identity + reputation via `@t402/erc8004`
+- **MCP server** with payment tools (autoPay, wdkTransfer, verifySignature, etc.)
+- **A2A transport** for agent-to-agent payment flows
+- Claude Code / Codex / Gemini compatible via `@t402/payments-mcp`
+
+## Facilitators
+
+- Hosted: https://facilitator.t402.io — 50+ networks, 11 signer families
+- Self-host: deploy your own facilitator (Docker compose available)
 
 ## Key Types
 
 - PaymentRequirements: { scheme, network, asset, amount, payTo, maxTimeoutSeconds, extra }
 - PaymentPayload: { t402Version, payload, accepted, resource, extensions }
 - PaymentRequired (402 response): { t402Version, resource, accepts[], extensions }
+- ResourceInfo (v2): CAIP-2 + extensions
 
 ## Links
 
 - [Specification](https://github.com/t402-io/t402/blob/main/specs/t402-specification-v2.md)
 - [Documentation](https://docs.t402.io)
 - [Website](https://t402.io)
+- [Demo](https://demo.t402.io)
+- [Sandbox](https://sandbox.t402.io)
+- [Explorer](https://explorer.t402.io)
+- [Bazaar](https://bazaar.t402.io) — ecosystem marketplace
+- [Tether WDK](https://wdk.tether.io) — compatible wallet layer
 - [Full LLM context](https://t402.io/llms-full.txt)

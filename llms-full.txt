@@ -1,20 +1,22 @@
 # T402 Protocol
 
-> Open-source HTTP-native payment protocol for USDT/USDT0 stablecoins.
+> Open-source HTTP-native payment protocol for USDT/USDT0 and other stablecoins. Compatible with Tether WDK.
 
 ## Overview
 
 T402 is a payment protocol that uses HTTP 402 status codes. Flow: client requests resource -> server responds 402 + PaymentRequirements -> client signs off-chain -> resubmits with signed PAYMENT-SIGNATURE header -> server verifies via facilitator and serves resource.
 
-Architecture: Transport (HTTP, MCP, A2A) x Scheme (exact, upto) x Network (EVM, Solana, TON, TRON, etc.)
+Architecture: Transport (HTTP, MCP, A2A) x Scheme (exact, upto, exact-direct) x Network (13 chain families: EVM, Solana, TON, TRON, NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos, BTC, Stellar, Spark)
+
+**Compatible with [Tether WDK](https://wdk.tether.io)** — bring your own wallet, or use Tether WDK as the underlying wallet layer. t402 provides the payment protocol; WDK provides the wallet.
 
 Protocol version: 2 (current). Version 1 is legacy.
 
 ## Scheme Types
 
-- exact: Fixed-amount transfers (EIP-3009 on EVM, SPL on Solana, TRC20 on TRON, Jettons on TON)
+- exact: Fixed-amount transfers (EIP-3009 on EVM, SPL on Solana, TRC20 on TRON, Jettons on TON, FA2 on Tezos, SIP-010 on Stacks)
 - upto: Up-to-amount authorization (EIP-2612 on EVM) [draft]
-- exact-direct: On-chain transfer proof (NEAR, Aptos, Tezos, Polkadot, Stacks, Cosmos)
+- exact-direct: On-chain transfer proof (NEAR, Aptos, Polkadot, Cosmos, BTC, Stellar, Spark)
 
 ## Supported Networks (CAIP-2)
 
@@ -27,25 +29,35 @@ Protocol version: 2 (current). Version 1 is legacy.
 | Optimism | eip155:10 | 10 |
 | Polygon | eip155:137 | 137 |
 | Avalanche | eip155:43114 | 43114 |
+| BSC | eip155:56 | 56 |
 | Ink | eip155:57073 | 57073 |
 | Berachain | eip155:80094 | 80094 |
 | Unichain | eip155:130 | 130 |
 
+Plus testnets (Base Sepolia, Arbitrum Sepolia, Ethereum Sepolia, etc.). Total 19 EVM networks supported by facilitator.
+
 ### Non-EVM Networks
 | Name | CAIP-2 |
 |------|--------|
-| Solana (mainnet) | solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp |
-| Solana (devnet) | solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1 |
+| Solana (mainnet) | solana:mainnet |
+| Solana (devnet) | solana:devnet |
 | TON (mainnet) | ton:mainnet |
 | TON (testnet) | ton:testnet |
 | TRON (mainnet) | tron:mainnet |
 | TRON (shasta) | tron:shasta |
+| TRON (nile) | tron:nile |
 | NEAR | near:mainnet |
 | Aptos | aptos:mainnet |
-| Cosmos (Noble) | cosmos:cosmoshub-4 |
+| Cosmos (Noble USDT) | cosmos:cosmoshub-4 |
 | Stacks | stacks:mainnet |
 | Polkadot | polkadot:91b171bb158e2d3848fa23a9f1c25182 |
 | Tezos | tezos:NetXdQprcVkpaWU |
+| Bitcoin mainnet (PSBT + Lightning) | bip122:000000000019d6689c085ae165831e93 |
+| Bitcoin testnet | bip122:000000000933ea01ad0ee984209779ba |
+| Stellar mainnet (Soroban USDC) | stellar:pubnet |
+| Stellar testnet | stellar:testnet |
+| Spark mainnet (Bitcoin L2) | spark:mainnet |
+| Spark testnet | spark:testnet |
 
 ### Token Addresses (EVM)
 
@@ -68,16 +80,30 @@ Protocol version: 2 (current). Version 1 is legacy.
 
 ## SDKs
 
-- TypeScript (v2.5.0): @t402/core, @t402/evm, @t402/svm, @t402/ton, @t402/tron, @t402/near, @t402/aptos, @t402/tezos, @t402/polkadot, @t402/stacks, @t402/cosmos + HTTP frameworks (@t402/express, @t402/hono, @t402/fastify, @t402/next) + AI (@t402/mcp)
-- Go (v1.9.0): github.com/t402-io/t402/sdks/go
-- Python (v1.10.1): t402 on PyPI
-- Java (v1.10.0): io.t402:t402-sdk on Maven Central
+- **TypeScript** (v2.9.0): 47 packages total.
+  - Core: `@t402/core`, `@t402/extensions`, `@t402/policy`, `@t402/observability`
+  - Mechanisms (13): `@t402/evm`, `@t402/evm-core`, `@t402/svm`, `@t402/ton`, `@t402/tron`, `@t402/near`, `@t402/aptos`, `@t402/tezos`, `@t402/polkadot`, `@t402/stacks`, `@t402/cosmos`, `@t402/btc`, `@t402/stellar`, `@t402/spark`
+  - HTTP middleware: `@t402/express`, `@t402/hono`, `@t402/fastify`, `@t402/next`, `@t402/axios`, `@t402/fetch`, `@t402/quick`, `@t402/facilitator-embedded`
+  - UI: `@t402/paywall`, `@t402/react`, `@t402/vue`, `@t402/react-native`
+  - WDK compatibility: `@t402/wdk`, `@t402/wdk-bridge`, `@t402/wdk-gasless`, `@t402/wdk-multisig`, `@t402/wdk-defi`, `@t402/wdk-protocol`, `@t402/wdk-ton`, `@t402/wdk-ton-gasless`, `@t402/wdk-tron-gasfree`, `@t402/wdk-lending`, `@t402/wdk-fiat`, `@t402/wdk-swap-jupiter`, `@t402/wdk-facilitator`
+  - AI agent: `@t402/mcp` (34 tools), `@t402/a2a`, `@t402/erc8004`
+  - Tools: `@t402/cli`
+- **Go** (v1.13.1): `github.com/t402-io/t402/sdks/go` — all 13 mechanisms, MCP (6 tools)
+- **Python** (v1.13.1): `t402` on PyPI — all 13 mechanisms, MCP (6 tools)
+- **Java** (v1.13.1): `io.t402:t402-sdk` on Maven Central — all 13 mechanisms, MCP (22 tools), Spring Boot 4 compatible
 
 ## Transport Types
 
 - HTTP: 402 status code with PAYMENT-SIGNATURE / PAYMENT-REQUIRED / PAYMENT-RESPONSE headers
-- MCP: Model Context Protocol for AI agents (11 tools)
-- A2A: Agent-to-Agent protocol
+- MCP: Model Context Protocol for AI agents (TS 34 tools, Java 22, Go 6, Py 6). Compatible with Claude, Claude Code, Codex, Gemini.
+- A2A: Agent-to-Agent protocol via `@t402/a2a`
+
+## Agent Economy Features
+
+- **ERC-8004 Trustless Agents**: identity + reputation via `@t402/erc8004`
+- **MCP server**: 34 tools in TS including autoPay, wdkTransfer, verifySignature, bazaar lookup
+- **`@t402/payments-mcp`**: one-command install for Claude Code / Codex / Gemini
+- **A2A transport**: agent-to-agent payment flows
 
 ## PaymentRequired (402 Response)
 
