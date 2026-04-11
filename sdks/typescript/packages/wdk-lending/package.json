@@ -14,8 +14,8 @@
     "@t402/core": "workspace:*"
   },
   "peerDependencies": {
-    "@tetherto/wdk": ">=1.0.0-beta.6",
-    "@tetherto/wdk-protocol-lending-aave-evm": ">=1.0.0-beta.6"
+    "@tetherto/wdk": ">=1.0.0-beta.7",
+    "@tetherto/wdk-protocol-lending-aave-evm": ">=1.0.0-beta.3"
   },
   "peerDependenciesMeta": {
     "@tetherto/wdk": {
