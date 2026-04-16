@@ -1,11 +1,3 @@
-import { loadEnv } from 'vite'
-import { defineConfig } from 'vitest/config'
-import tsconfigPaths from 'vite-tsconfig-paths'
+import { createVitestConfig } from "../../../config/vitest.base";
 
-export default defineConfig(({ mode }) => ({
-  test: {
-    env: loadEnv(mode, process.cwd(), ''),
-    exclude: ['**/node_modules/**', '**/dist/**'],
-  },
-  plugins: [tsconfigPaths({ projects: ['.'] })],
-}))
+export default createVitestConfig();

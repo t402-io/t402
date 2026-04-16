@@ -1,2 +1,8 @@
-import { defineConfig } from "vitest/config";
-export default defineConfig({ test: { pool: "forks", include: ["test/**/*.test.ts"] } });
+import { createVitestConfig } from "../../../config/vitest.base";
+
+export default createVitestConfig({
+  noLoadEnv: true,
+  noTsconfigPaths: true,
+  pool: "forks",
+  include: ["test/**/*.test.ts"],
+});

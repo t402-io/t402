@@ -1,16 +1,13 @@
-import { defineConfig } from "vitest/config";
+import { createVitestConfig } from "../../../config/vitest.base";
 
-export default defineConfig({
-  test: {
-    globals: true,
-    environment: "node",
-    include: ["test/**/*.test.ts"],
-    exclude: ["test/integrations/**/*.test.ts"],
-    coverage: {
-      provider: "v8",
-      reporter: ["text", "json", "html"],
-      include: ["src/**/*.ts"],
-      exclude: ["src/**/*.d.ts"],
-    },
-  },
+export default createVitestConfig({
+  noLoadEnv: true,
+  noTsconfigPaths: true,
+  globals: true,
+  environment: "node",
+  include: ["test/**/*.test.ts"],
+  exclude: ["test/integrations/**/*.test.ts"],
+  coverage: true,
+  coverageInclude: ["src/**/*.ts"],
+  coverageExclude: ["src/**/*.d.ts"],
 });
