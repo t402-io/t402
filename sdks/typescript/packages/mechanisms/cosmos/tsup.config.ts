@@ -1,30 +1,10 @@
-import { defineConfig } from "tsup";
+import { createTsupConfig } from "../../../config/tsup.base";
 
-const baseConfig = {
+export default createTsupConfig({
   entry: {
     index: "src/index.ts",
     "exact-direct/client/index": "src/exact-direct/client/index.ts",
     "exact-direct/server/index": "src/exact-direct/server/index.ts",
     "exact-direct/facilitator/index": "src/exact-direct/facilitator/index.ts",
   },
-  dts: {
-    resolve: true,
-  },
-  sourcemap: true,
-  target: "es2020",
-};
-
-export default defineConfig([
-  {
-    ...baseConfig,
-    format: "esm",
-    outDir: "dist/esm",
-    clean: true,
-  },
-  {
-    ...baseConfig,
-    format: "cjs",
-    outDir: "dist/cjs",
-    clean: false,
-  },
-]);
+});

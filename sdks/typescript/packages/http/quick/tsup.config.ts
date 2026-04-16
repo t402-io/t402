@@ -1,30 +1,11 @@
-import { defineConfig } from "tsup";
+import { createTsupConfig } from "../../../config/tsup.base";
 
-const baseConfig = {
+export default createTsupConfig({
   entry: {
     index: "src/index.ts",
     express: "src/express.ts",
     fastify: "src/fastify.ts",
     hono: "src/hono.ts",
   },
-  dts: {
-    resolve: true,
-  },
-  sourcemap: true,
-  target: "node16" as const,
-};
-
-export default defineConfig([
-  {
-    ...baseConfig,
-    format: "esm",
-    outDir: "dist/esm",
-    clean: true,
-  },
-  {
-    ...baseConfig,
-    format: "cjs",
-    outDir: "dist/cjs",
-    clean: false,
-  },
-]);
+  target: "node16",
+});

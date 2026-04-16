@@ -1,6 +1,6 @@
-import { defineConfig } from "tsup";
+import { createTsupConfig } from "../../config/tsup.base";
 
-const baseConfig = {
+export default createTsupConfig({
   entry: {
     index: "src/index.ts",
     "client/index": "src/client/index.ts",
@@ -11,24 +11,4 @@ const baseConfig = {
     "types/v1/index": "src/types/v1/index.ts",
     "utils/index": "src/utils/index.ts",
   },
-  dts: {
-    resolve: true,
-  },
-  sourcemap: true,
-  target: "es2020",
-};
-
-export default defineConfig([
-  {
-    ...baseConfig,
-    format: "esm",
-    outDir: "dist/esm",
-    clean: true,
-  },
-  {
-    ...baseConfig,
-    format: "cjs",
-    outDir: "dist/cjs",
-    clean: false,
-  },
-]);
+});

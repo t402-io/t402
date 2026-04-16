@@ -1,12 +1,8 @@
-import { defineConfig } from "vitest/config";
-import tsconfigPaths from "vite-tsconfig-paths";
+import { createVitestConfig } from "../../../config/vitest.base";
 
-export default defineConfig({
-  plugins: [tsconfigPaths({ projects: ["."] })],
-  test: {
-    globals: true,
-    environment: "node",
-    include: ["src/**/*.test.ts"],
-    exclude: ["**/node_modules/**", "**/dist/**"],
-  },
+export default createVitestConfig({
+  noLoadEnv: true,
+  globals: true,
+  environment: "node",
+  include: ["src/**/*.test.ts"],
 });
