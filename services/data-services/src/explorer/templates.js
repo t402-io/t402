@@ -1,4 +1,18 @@
-import { escapeHtml, formatAmount, formatNumber, formatAddress, formatHash, formatTime, getNetworkName, getExplorerUrl, getAddressUrl } from "./utils.js";
+/**
+ * Explorer HTML templates — pure rendering functions.
+ */
+
+import {
+  escapeHtml,
+  formatAmount,
+  formatNumber,
+  formatAddress,
+  formatHash,
+  formatTime,
+  getNetworkName,
+  getExplorerUrl,
+  getAddressUrl,
+} from "../utils.js";
 
 function themeToggleScript() {
   return `<script src="/static/theme.js"></script>`;
@@ -106,7 +120,7 @@ function renderRow(tx) {
     <td class="amount">$${escapeHtml(amount)}</td>
     <td><a href="/address/${escapeHtml(encodeURIComponent(tx.from))}"><code>${escapeHtml(formatAddress(tx.from))}</code></a></td>
     <td>${tx.to && tx.to.toLowerCase() === FACILITATOR_ADDRESS.toLowerCase() ? toCell : `<a href="/address/${escapeHtml(encodeURIComponent(tx.to))}">${toCell}</a>`}</td>
-    <td class="purpose">${tx.description ? `<span class="badge badge-purpose" title="${escapeHtml(tx.source || '')}">${escapeHtml(tx.description)}</span>` : '<span class="muted">—</span>'}</td>
+    <td class="purpose">${tx.description ? `<span class="badge badge-purpose" title="${escapeHtml(tx.source || '')}">${escapeHtml(tx.description)}</span>` : '<span class="muted">\u2014</span>'}</td>
     <td><span class="badge ${schemeClass}" title="${escapeHtml(schemeTitle)}">${escapeHtml(tx.scheme)}</span></td>
     <td class="time" title="${escapeHtml(tx.settledAt)}">${escapeHtml(formatTime(tx.settledAt))}</td>
   </tr>`;
@@ -180,7 +194,7 @@ ${themeToggleScript()}
     </table>
   </div>
   <footer>
-    <a href="/">Back to Explorer</a> ·
+    <a href="/">Back to Explorer</a> \u00b7
     Powered by <a href="https://t402.io">T402</a>
   </footer>
   <script src="/static/app.js"></script>
@@ -243,7 +257,7 @@ ${themeToggleScript()}
     </table>
   </div>
   <footer>
-    <a href="/api/v1/export?format=csv&network=${escapeHtml(encodeURIComponent(networkId))}">Export CSV</a> ·
+    <a href="/api/v1/export?format=csv&network=${escapeHtml(encodeURIComponent(networkId))}">Export CSV</a> \u00b7
     Powered by <a href="https://t402.io">T402</a>
   </footer>
   <script src="/static/app.js"></script>
@@ -304,7 +318,7 @@ ${themeToggleScript()}
     </table>
   </div>
   <footer>
-    <a href="/api/v1/export?format=csv&token=${escapeHtml(encodeURIComponent(tokenSymbol))}">Export CSV</a> ·
+    <a href="/api/v1/export?format=csv&token=${escapeHtml(encodeURIComponent(tokenSymbol))}">Export CSV</a> \u00b7
     Powered by <a href="https://t402.io">T402</a>
   </footer>
   <script src="/static/app.js"></script>

@@ -7,8 +7,10 @@ const ADMIN_KEY = process.env.BAZAAR_ADMIN_KEY || "test-key";
 
 if (!BASE) {
   if (!process.env.BAZAAR_ADMIN_KEY) process.env.BAZAAR_ADMIN_KEY = "test-key";
+  if (!process.env.EXPLORER_MODE) process.env.EXPLORER_MODE = "seed";
   before(async () => {
-    const app = (await import("../src/server.js")).default;
+    const { default: app, start } = await import("../src/server.js");
+    await start({ listen: false });
     server = app.listen(0);
     await new Promise((resolve) => server.on("listening", resolve));
     BASE = `http://localhost:${server.address().port}`;
@@ -18,14 +20,15 @@ if (!BASE) {
 
 // ── Health / Ready / Metrics ──────────────────────────────────────────
 
-describe("Health / Ready / Metrics", () => {
-  it("GET /health returns ok", async () => {
+describe("Bazaar — Health / Ready / Metrics", () => {
+  it("GET /health returns ok with bazaar info", async () => {
     const res = await fetch(`${BASE}/health`);
     assert.strictEqual(res.status, 200);
     const data = await res.json();
     assert.strictEqual(data.status, "ok");
-    assert.strictEqual(data.service, "t402-bazaar");
-    assert.ok(data.services >= 8, `Expected >= 8 services, got ${data.services}`);
+    assert.strictEqual(data.service, "data-services");
+    assert.ok(data.bazaar, "bazaar object should exist");
+    assert.ok(data.bazaar.services >= 8, `Expected >= 8 services, got ${data.bazaar.services}`);
   });
 
   it("GET /ready returns ready", async () => {
@@ -35,7 +38,7 @@ describe("Health / Ready / Metrics", () => {
     assert.strictEqual(data.status, "ready");
   });
 
-  it("GET /metrics returns request metrics", async () => {
+  it("GET /metrics returns request metrics with store info", async () => {
     const res = await fetch(`${BASE}/metrics`);
     assert.strictEqual(res.status, 200);
     const data = await res.json();
@@ -50,9 +53,9 @@ describe("Health / Ready / Metrics", () => {
 
 // ── Search ────────────────────────────────────────────────────────────
 
-describe("Search", () => {
+describe("Bazaar — Search", () => {
   it("basic search q=weather", async () => {
-    const res = await fetch(`${BASE}/api/v1/search?q=weather`);
+    const res = await fetch(`${BASE}/api/v1/bazaar-search?q=weather`);
     assert.strictEqual(res.status, 200);
     const data = await res.json();
     assert.ok(data.services.length > 0, "Should find weather services");
@@ -63,7 +66,7 @@ describe("Search", () => {
   });
 
   it("category filter (ai = 3 services)", async () => {
-    const res = await fetch(`${BASE}/api/v1/search?category=ai`);
+    const res = await fetch(`${BASE}/api/v1/bazaar-search?category=ai`);
     assert.strictEqual(res.status, 200);
     const data = await res.json();
     assert.strictEqual(data.total, 3, `Expected 3 AI services, got ${data.total}`);
@@ -71,7 +74,7 @@ describe("Search", () => {
   });
 
   it("network filter (eip155:42161 = 3)", async () => {
-    const res = await fetch(`${BASE}/api/v1/search?network=eip155:42161`);
+    const res = await fetch(`${BASE}/api/v1/bazaar-search?network=eip155:42161`);
     assert.strictEqual(res.status, 200);
     const data = await res.json();
     assert.strictEqual(data.total, 3, `Expected 3 services on eip155:42161, got ${data.total}`);
@@ -79,16 +82,15 @@ describe("Search", () => {
   });
 
   it("maxPrice filter (0.005)", async () => {
-    const res = await fetch(`${BASE}/api/v1/search?maxPrice=0.005`);
+    const res = await fetch(`${BASE}/api/v1/bazaar-search?maxPrice=0.005`);
     assert.strictEqual(res.status, 200);
     const data = await res.json();
     assert.ok(data.services.length > 0, "Should find services under 0.005");
-    // 0.005 * 1e6 = 5000
     assert.ok(data.services.every((s) => parseInt(s.price.amount) <= 5000));
   });
 
   it("limit cap (999999 clamped to max 100)", async () => {
-    const res = await fetch(`${BASE}/api/v1/search?limit=999999`);
+    const res = await fetch(`${BASE}/api/v1/bazaar-search?limit=999999`);
     assert.strictEqual(res.status, 200);
     const data = await res.json();
     assert.ok(
@@ -98,7 +100,7 @@ describe("Search", () => {
   });
 
   it("pagination (limit=2&offset=2)", async () => {
-    const res = await fetch(`${BASE}/api/v1/search?limit=2&offset=2`);
+    const res = await fetch(`${BASE}/api/v1/bazaar-search?limit=2&offset=2`);
     assert.strictEqual(res.status, 200);
     const data = await res.json();
     assert.strictEqual(data.count, 2, "Should return 2 services");
@@ -108,13 +110,11 @@ describe("Search", () => {
   });
 
   it("sorted (verified first)", async () => {
-    const res = await fetch(`${BASE}/api/v1/search`);
+    const res = await fetch(`${BASE}/api/v1/bazaar-search`);
     assert.strictEqual(res.status, 200);
     const data = await res.json();
-    // Find the first unverified service index
     const firstUnverifiedIdx = data.services.findIndex((s) => !s.verified);
     if (firstUnverifiedIdx > -1) {
-      // All services after this point should also be unverified
       const afterUnverified = data.services.slice(firstUnverifiedIdx);
       assert.ok(
         afterUnverified.every((s) => !s.verified),
@@ -124,14 +124,14 @@ describe("Search", () => {
   });
 
   it("empty query returns all (total >= 8)", async () => {
-    const res = await fetch(`${BASE}/api/v1/search`);
+    const res = await fetch(`${BASE}/api/v1/bazaar-search`);
     assert.strictEqual(res.status, 200);
     const data = await res.json();
     assert.ok(data.total >= 8, `Expected >= 8 services, got ${data.total}`);
   });
 
   it("no match returns empty", async () => {
-    const res = await fetch(`${BASE}/api/v1/search?q=xyznonexistent9999`);
+    const res = await fetch(`${BASE}/api/v1/bazaar-search?q=xyznonexistent9999`);
     assert.strictEqual(res.status, 200);
     const data = await res.json();
     assert.strictEqual(data.services.length, 0, "Should return no services for nonexistent query");
@@ -139,21 +139,21 @@ describe("Search", () => {
   });
 
   it("multi-word query matches (weather+forecast)", async () => {
-    const res = await fetch(`${BASE}/api/v1/search?q=weather+forecast`);
+    const res = await fetch(`${BASE}/api/v1/bazaar-search?q=weather+forecast`);
     assert.strictEqual(res.status, 200);
     const data = await res.json();
     assert.ok(data.services.length > 0, "weather+forecast should match");
   });
 
   it("multi-word query fails when one term missing (weather+zzzznonexistent)", async () => {
-    const res = await fetch(`${BASE}/api/v1/search?q=weather+zzzznonexistent`);
+    const res = await fetch(`${BASE}/api/v1/bazaar-search?q=weather+zzzznonexistent`);
     assert.strictEqual(res.status, 200);
     const data = await res.json();
     assert.strictEqual(data.services.length, 0, "weather+zzzznonexistent should not match");
   });
 
   it("token filter (USDT0)", async () => {
-    const res = await fetch(`${BASE}/api/v1/search?token=USDT0`);
+    const res = await fetch(`${BASE}/api/v1/bazaar-search?token=USDT0`);
     assert.strictEqual(res.status, 200);
     const data = await res.json();
     assert.ok(data.services.length > 0, "Should find USDT0 services");
@@ -161,7 +161,7 @@ describe("Search", () => {
   });
 
   it("tags filter (llm,inference)", async () => {
-    const res = await fetch(`${BASE}/api/v1/search?tags=llm,inference`);
+    const res = await fetch(`${BASE}/api/v1/bazaar-search?tags=llm,inference`);
     assert.strictEqual(res.status, 200);
     const data = await res.json();
     assert.ok(data.services.length > 0, "Should find services with llm or inference tags");
@@ -174,7 +174,7 @@ describe("Search", () => {
   });
 
   it("verified filter (verified=true)", async () => {
-    const res = await fetch(`${BASE}/api/v1/search?verified=true`);
+    const res = await fetch(`${BASE}/api/v1/bazaar-search?verified=true`);
     assert.strictEqual(res.status, 200);
     const data = await res.json();
     assert.ok(data.services.length > 0, "Should find verified services");
@@ -184,7 +184,7 @@ describe("Search", () => {
 
 // ── CRUD ──────────────────────────────────────────────────────────────
 
-describe("CRUD", () => {
+describe("Bazaar — CRUD", () => {
   it("GET service by ID (svc-001, check updatedAt)", async () => {
     const res = await fetch(`${BASE}/api/v1/services/svc-001`);
     assert.strictEqual(res.status, 200);
@@ -267,9 +267,7 @@ describe("CRUD", () => {
         "Content-Type": "application/json",
         "X-API-Key": ADMIN_KEY,
       },
-      body: JSON.stringify({
-        // Missing url, name, price
-      }),
+      body: JSON.stringify({}),
     });
     assert.strictEqual(res.status, 400);
     const data = await res.json();
@@ -299,7 +297,6 @@ describe("CRUD", () => {
 
   it("POST rejects duplicate URL with 409", async () => {
     if (!ADMIN_KEY) return;
-    // Use the URL of an existing seed service
     const res = await fetch(`${BASE}/api/v1/services`, {
       method: "POST",
       headers: {
@@ -369,7 +366,6 @@ describe("CRUD", () => {
     const putData = await putRes.json();
     assert.strictEqual(putData.name, updatedName);
 
-    // Verify persistence with GET
     const getRes = await fetch(`${BASE}/api/v1/services/svc-001`);
     assert.strictEqual(getRes.status, 200);
     const getData = await getRes.json();
@@ -402,7 +398,7 @@ describe("CRUD", () => {
 
 // ── Tags ──────────────────────────────────────────────────────────────
 
-describe("Tags", () => {
+describe("Bazaar — Tags", () => {
   it("GET /api/v1/tags returns tag counts (llm >= 1, weather >= 1)", async () => {
     const res = await fetch(`${BASE}/api/v1/tags`);
     assert.strictEqual(res.status, 200);
@@ -426,7 +422,7 @@ describe("Tags", () => {
 
 // ── Discovery ─────────────────────────────────────────────────────────
 
-describe("Discovery", () => {
+describe("Bazaar — Discovery", () => {
   it("GET /api/v1/featured (verified, max 5)", async () => {
     const res = await fetch(`${BASE}/api/v1/featured`);
     assert.strictEqual(res.status, 200);
@@ -448,8 +444,8 @@ describe("Discovery", () => {
     assert.ok(data.categories["data"] > 0, "Should have data category");
   });
 
-  it("GET /api/v1/stats (totalServices >= 8, verified >= 8, networks, tokens)", async () => {
-    const res = await fetch(`${BASE}/api/v1/stats`);
+  it("GET /api/v1/bazaar-stats (totalServices >= 8, verified >= 8, networks, tokens)", async () => {
+    const res = await fetch(`${BASE}/api/v1/bazaar-stats`);
     assert.strictEqual(res.status, 200);
     const data = await res.json();
     assert.ok(data.totalServices >= 8, `Expected >= 8 totalServices, got ${data.totalServices}`);
@@ -463,7 +459,7 @@ describe("Discovery", () => {
 
 // ── Security ──────────────────────────────────────────────────────────
 
-describe("Security", () => {
+describe("Bazaar — Security", () => {
   it("security headers present (nosniff, DENY, strict-origin-when-cross-origin)", async () => {
     const res = await fetch(`${BASE}/health`);
     assert.strictEqual(
@@ -484,7 +480,7 @@ describe("Security", () => {
   });
 
   it("CORS header (*)", async () => {
-    const res = await fetch(`${BASE}/api/v1/search`);
+    const res = await fetch(`${BASE}/api/v1/bazaar-search`);
     assert.strictEqual(
       res.headers.get("access-control-allow-origin"),
       "*",

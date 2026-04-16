@@ -8,17 +8,26 @@ name: t402-services
 # - Port 3402-3406 available
 
 services:
-  bazaar:
-    build: ./bazaar
-    container_name: t402-bazaar
+  data-services:
+    build: ./data-services
+    container_name: t402-data-services
     ports:
       - "3402:3402"
     environment:
       - PORT=3402
+      - DB_PATH=/data/data-services.db
       - RATE_LIMIT_PER_MINUTE=60
       - BAZAAR_ADMIN_KEY=${BAZAAR_ADMIN_KEY:-}
+      - EXPLORER_ADMIN_KEY=${EXPLORER_ADMIN_KEY:-}
+      - FACILITATOR_URL=${FACILITATOR_URL:-http://facilitator:8080}
+      - FACILITATOR_API_KEY=${FACILITATOR_API_KEY:-}
+      - EXPLORER_MODE=${EXPLORER_MODE:-auto}
+      - SYNC_INTERVAL_MS=${SYNC_INTERVAL_MS:-10000}
+    networks:
+      - default
+      - facilitator_ext
     volumes:
-      - bazaar-data:/app/data
+      - data-services-data:/data
     restart: unless-stopped
     read_only: true
     tmpfs:
@@ -33,7 +42,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 128M
+          memory: 256M
         reservations:
           memory: 64M
     healthcheck:
@@ -78,44 +87,6 @@ services:
         max-file: "3"
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://localhost:3403/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-
-  explorer:
-    build: ./explorer
-    container_name: t402-explorer
-    ports:
-      - "3404:3404"
-    environment:
-      - PORT=3404
-      - FACILITATOR_URL=${FACILITATOR_URL:-http://facilitator:8080}
-      - FACILITATOR_API_KEY=${FACILITATOR_API_KEY:-}
-      - EXPLORER_MODE=${EXPLORER_MODE:-auto}
-      - SQLITE_PATH=/data/explorer.db
-      - SYNC_INTERVAL_MS=${SYNC_INTERVAL_MS:-10000}
-    networks:
-      - default
-      - facilitator_ext
-    volumes:
-      - explorer-data:/data
-    restart: unless-stopped
-    read_only: true
-    security_opt:
-      - no-new-privileges:true
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-        reservations:
-          memory: 64M
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3404/health"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -196,9 +167,8 @@ services:
       retries: 3
 
 volumes:
-  bazaar-data:
+  data-services-data:
   status-data:
-  explorer-data:
 
 networks:
   scan2pay:

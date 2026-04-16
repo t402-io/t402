@@ -1,0 +1,24 @@
+{
+  "name": "@t402/data-services",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "EXPLORER_MODE=seed BAZAAR_ADMIN_KEY=dev-key node --watch src/server.js",
+    "start": "node src/server.js",
+    "test": "EXPLORER_MODE=seed node --test --test-force-exit test/*.test.js",
+    "test:bazaar": "EXPLORER_MODE=seed node --test --test-force-exit test/bazaar.test.js",
+    "test:explorer": "EXPLORER_MODE=seed node --test --test-force-exit test/explorer.test.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.8.0",
+    "compression": "^1.8.1",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "vitest": "^3.1.1"
+  }
+}
