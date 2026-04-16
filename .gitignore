@@ -128,6 +128,11 @@ services/docs/pages/sdks/typescript/wdk-gasless.mdx
 services/docs/pages/sdks/typescript/wdk-multisig.mdx
 .gstack/
 
+# Auto-generated inline paywall templates (regenerate via: pnpm --filter @t402/paywall build:paywall)
+sdks/python/t402/src/t402/*_paywall_template_inline.py
+sdks/go/http/*_paywall_template_inline.go
+sdks/typescript/packages/http/paywall/src/*/gen/template-inline.ts
+
 # Architecture documents (generated/exported)
 *.pdf
 scan2pay-architecture.md
