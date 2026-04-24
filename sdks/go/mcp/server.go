@@ -170,6 +170,12 @@ func (s *Server) handleCallTool(ctx context.Context, params json.RawMessage) *To
 		return s.handleGetBridgeFee(ctx, callParams.Arguments)
 	case "t402/bridge":
 		return s.handleBridge(ctx, callParams.Arguments)
+	case "t402/getTokenPrice":
+		return s.handleGetTokenPrice(ctx, callParams.Arguments)
+	case "t402/getGasPrice":
+		return s.handleGetGasPrice(ctx, callParams.Arguments)
+	case "t402/signMessage":
+		return s.handleSignMessage(ctx, callParams.Arguments)
 	default:
 		return &ToolResult{
 			Content: []ContentBlock{{Type: "text", Text: fmt.Sprintf("Unknown tool: %s", callParams.Name)}},
@@ -349,6 +355,53 @@ func GetToolDefinitions() []Tool {
 					},
 				},
 				Required: []string{"fromChain", "toChain", "amount", "recipient"},
+			},
+		},
+		{
+			Name:        "t402/getTokenPrice",
+			Description: "Get current token prices in a target currency via CoinGecko (e.g., ETH, USDC in USD)",
+			InputSchema: InputSchema{
+				Type: "object",
+				Properties: map[string]Property{
+					"tokens": {
+						Type:        "array",
+						Description: "Token symbols to price (e.g., [\"ETH\", \"USDC\"])",
+					},
+					"currency": {
+						Type:        "string",
+						Description: "Target currency (default: 'usd')",
+					},
+				},
+				Required: []string{"tokens"},
+			},
+		},
+		{
+			Name:        "t402/getGasPrice",
+			Description: "Get the current suggested gas price for a network (wei and gwei)",
+			InputSchema: InputSchema{
+				Type: "object",
+				Properties: map[string]Property{
+					"network": {
+						Type:        "string",
+						Description: "Network to query",
+						Enum:        networks,
+					},
+				},
+				Required: []string{"network"},
+			},
+		},
+		{
+			Name:        "t402/signMessage",
+			Description: "Sign a message using the configured private key (EIP-191 personal_sign)",
+			InputSchema: InputSchema{
+				Type: "object",
+				Properties: map[string]Property{
+					"message": {
+						Type:        "string",
+						Description: "Plain-text message to sign",
+					},
+				},
+				Required: []string{"message"},
 			},
 		},
 	}

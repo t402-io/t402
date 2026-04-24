@@ -153,15 +153,20 @@ class TestToolDefinitions:
     def test_get_tool_definitions(self):
         """Test get_tool_definitions returns all tools."""
         tools = get_tool_definitions()
-        assert len(tools) == 6
+        assert len(tools) == 9
 
         tool_names = {t.name for t in tools}
+        # Original 6 tools (pre-Phase C).
         assert "t402/getBalance" in tool_names
         assert "t402/getAllBalances" in tool_names
         assert "t402/pay" in tool_names
         assert "t402/payGasless" in tool_names
         assert "t402/getBridgeFee" in tool_names
         assert "t402/bridge" in tool_names
+        # Phase C cross-SDK parity additions (2026-04-24).
+        assert "t402/getTokenPrice" in tool_names
+        assert "t402/getGasPrice" in tool_names
+        assert "t402/signMessage" in tool_names
 
     def test_tool_schemas(self):
         """Test tool schemas are valid."""
@@ -247,7 +252,7 @@ class TestT402McpServer:
         response = json.loads(stdout.read())
 
         assert response["jsonrpc"] == "2.0"
-        assert len(response["result"]["tools"]) == 6
+        assert len(response["result"]["tools"]) == 9
 
     @pytest.mark.asyncio
     async def test_call_tool_get_balance(self):

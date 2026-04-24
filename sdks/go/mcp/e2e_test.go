@@ -120,7 +120,7 @@ func TestE2E_ServerListTools(t *testing.T) {
 
 	tools, ok := result["tools"].([]any)
 	require.True(t, ok)
-	assert.Len(t, tools, 6)
+	assert.Len(t, tools, 9)
 
 	// Verify all expected tools are listed
 	toolNames := make(map[string]bool)
@@ -133,12 +133,17 @@ func TestE2E_ServerListTools(t *testing.T) {
 	}
 
 	expectedTools := []string{
+		// Original 6 (pre-Phase C)
 		"t402/getBalance",
 		"t402/getAllBalances",
 		"t402/pay",
 		"t402/payGasless",
 		"t402/getBridgeFee",
 		"t402/bridge",
+		// Phase C parity additions (2026-04-24)
+		"t402/getTokenPrice",
+		"t402/getGasPrice",
+		"t402/signMessage",
 	}
 	for _, expected := range expectedTools {
 		assert.True(t, toolNames[expected], "Missing tool: %s", expected)

@@ -185,19 +185,24 @@ func TestAllNetworks(t *testing.T) {
 
 func TestGetToolDefinitions(t *testing.T) {
 	tools := GetToolDefinitions()
-	assert.Len(t, tools, 6)
+	assert.Len(t, tools, 9)
 
 	toolNames := make(map[string]bool)
 	for _, tool := range tools {
 		toolNames[tool.Name] = true
 	}
 
+	// Original 6 tools (pre-Phase C).
 	assert.True(t, toolNames["t402/getBalance"])
 	assert.True(t, toolNames["t402/getAllBalances"])
 	assert.True(t, toolNames["t402/pay"])
 	assert.True(t, toolNames["t402/payGasless"])
 	assert.True(t, toolNames["t402/getBridgeFee"])
 	assert.True(t, toolNames["t402/bridge"])
+	// Phase C cross-SDK parity additions (2026-04-24).
+	assert.True(t, toolNames["t402/getTokenPrice"])
+	assert.True(t, toolNames["t402/getGasPrice"])
+	assert.True(t, toolNames["t402/signMessage"])
 }
 
 func TestToolDefinitionSchemas(t *testing.T) {
@@ -284,7 +289,7 @@ func TestServerListTools(t *testing.T) {
 
 	tools, ok := result["tools"].([]any)
 	require.True(t, ok)
-	assert.Len(t, tools, 6)
+	assert.Len(t, tools, 9)
 }
 
 func TestServerCallToolGetBalance(t *testing.T) {

@@ -206,3 +206,34 @@ type BridgeResult struct {
 	EstimatedTime int    `json:"estimatedTime"`
 	DemoMode      bool   `json:"demoMode,omitempty"`
 }
+
+// ===== Phase C cross-SDK parity additions (2026-04-24) =====
+
+// GetTokenPriceInput is the input for t402/getTokenPrice.
+type GetTokenPriceInput struct {
+	Tokens   []string `json:"tokens"`
+	Currency string   `json:"currency,omitempty"`
+}
+
+// TokenPriceResult represents the result of a getTokenPrice call.
+type TokenPriceResult struct {
+	Prices   map[string]float64 `json:"prices"`
+	Currency string             `json:"currency"`
+}
+
+// GetGasPriceInput is the input for t402/getGasPrice.
+type GetGasPriceInput struct {
+	Network SupportedNetwork `json:"network"`
+}
+
+// SignMessageInput is the input for t402/signMessage.
+type SignMessageInput struct {
+	Message string `json:"message"`
+}
+
+// SignMessageResult represents the result of a signMessage call.
+type SignMessageResult struct {
+	Address   string `json:"address"`
+	Message   string `json:"message"`
+	Signature string `json:"signature"`
+}

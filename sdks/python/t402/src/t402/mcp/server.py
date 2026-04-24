@@ -25,6 +25,7 @@ from .constants import (
     is_valid_network,
     parse_token_amount,
 )
+from .price_service import get_token_prices, get_token_prices_demo
 from .tools import get_tool_definitions
 from .types import (
     BalanceInfo,
@@ -196,6 +197,12 @@ class T402McpServer:
             result = await self._handle_get_bridge_fee(arguments)
         elif tool_name == "t402/bridge":
             result = await self._handle_bridge(arguments)
+        elif tool_name == "t402/getTokenPrice":
+            result = await self._handle_get_token_price(arguments)
+        elif tool_name == "t402/getGasPrice":
+            result = await self._handle_get_gas_price(arguments)
+        elif tool_name == "t402/signMessage":
+            result = self._handle_sign_message(arguments)
         else:
             result = self._error_result(f"Unknown tool: {tool_name}")
 
@@ -764,6 +771,116 @@ class T402McpServer:
         except Exception as e:
             return self._error_result(str(e))
 
+    # ------------------------------------------------------------------
+    # Phase C cross-SDK parity additions (2026-04-24)
+    # ------------------------------------------------------------------
+
+    async def _handle_get_token_price(self, args: dict[str, Any]) -> ToolResult:
+        """Handle t402/getTokenPrice.
+
+        Fetches live prices from CoinGecko (with a 5-minute in-memory
+        cache) or returns a fixed demo table when demo_mode is set. The
+        markdown output is sorted alphabetically so the same inputs
+        produce the same output regardless of request order.
+        """
+        try:
+            tokens = args.get("tokens", [])
+            if not tokens or not isinstance(tokens, list):
+                return self._error_result("tokens must not be empty")
+            currency = (args.get("currency") or "usd").strip() or "usd"
+
+            if self.config.demo_mode:
+                prices = get_token_prices_demo(tokens)
+            else:
+                prices = await asyncio.get_event_loop().run_in_executor(
+                    None, get_token_prices, tokens, currency
+                )
+
+            currency_upper = currency.upper()
+            lines = ["## Token Prices", ""]
+            for token in sorted(prices):
+                price = prices[token]
+                if price > 0:
+                    lines.append(f"- **{token}:** {_format_price(price)} {currency_upper}")
+                else:
+                    lines.append(f"- **{token}:** Price unavailable")
+            return self._text_result("\n".join(lines))
+        except Exception as e:
+            return self._error_result(f"Failed to fetch prices: {e}")
+
+    async def _handle_get_gas_price(self, args: dict[str, Any]) -> ToolResult:
+        """Handle t402/getGasPrice.
+
+        Returns the network's current suggested gas price in both gwei and
+        raw wei. Demo mode returns a plausible fixed value so callers can
+        exercise the flow without an RPC.
+        """
+        try:
+            network = args.get("network", "")
+            if not is_valid_network(network):
+                return self._error_result(f"Invalid network: {network}")
+
+            if self.config.demo_mode:
+                return self._text_result(
+                    self._format_gas_price(network, 25_000_000_000, demo=True)
+                )
+
+            w3 = self._get_web3(network)
+            gas_price = await run_sync_in_executor(lambda: w3.eth.gas_price)
+            return self._text_result(self._format_gas_price(network, int(gas_price)))
+        except Exception as e:
+            return self._error_result(str(e))
+
+    def _handle_sign_message(self, args: dict[str, Any]) -> ToolResult:
+        """Handle t402/signMessage.
+
+        Signs a plain-text message with the configured private key using
+        EIP-191 personal_sign semantics. Returns the recovered address
+        (derived from the key) together with the signature.
+        """
+        try:
+            message = args.get("message", "")
+            if not message:
+                return self._error_result("message must not be empty")
+            if not self.config.private_key:
+                return self._error_result(
+                    "Private key not configured. Set T402_PRIVATE_KEY to sign messages."
+                )
+
+            from eth_account import Account
+            from eth_account.messages import encode_defunct
+
+            account = Account.from_key(self.config.private_key)
+            signable = encode_defunct(text=message)
+            signed = account.sign_message(signable)
+            signature = signed.signature.hex()
+            if not signature.startswith("0x"):
+                signature = "0x" + signature
+
+            lines = [
+                "## Signed Message",
+                "",
+                f"- **Address:** {account.address}",
+                f"- **Message:** {message}",
+                f"- **Signature:** {signature}",
+            ]
+            return self._text_result("\n".join(lines))
+        except Exception as e:
+            return self._error_result(str(e))
+
+    def _format_gas_price(self, network: str, gas_price_wei: int, demo: bool = False) -> str:
+        """Format gas price output as markdown."""
+        gwei = gas_price_wei / 1e9
+        lines = [
+            f"## Gas Price on {network}",
+            "",
+            f"- **Gas Price:** {gwei:.3f} gwei",
+            f"- **Raw (wei):** {gas_price_wei}",
+        ]
+        if demo:
+            lines.append("- **Mode:** demo (no RPC call)")
+        return "\n".join(lines)
+
     # Result helpers
 
     def _text_result(self, text: str) -> ToolResult:
@@ -913,6 +1030,18 @@ class T402McpServer:
             data["result"] = response.result
 
         return json.dumps(data)
+
+
+def _format_price(price: float) -> str:
+    """Format a float with up to 6 significant decimals, trimming trailing zeros.
+
+    Keeps token-price output readable across tiny (BTC in BTC) and large
+    (ETH in USD) values without locking into a fixed decimal count.
+    """
+    s = f"{price:.6f}"
+    if "." in s:
+        s = s.rstrip("0").rstrip(".")
+    return s or "0"
 
 
 def load_config_from_env() -> ServerConfig:

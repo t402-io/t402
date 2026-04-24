@@ -166,4 +166,54 @@ def get_tool_definitions() -> list[Tool]:
                 required=["fromChain", "toChain", "amount", "recipient"],
             ),
         ),
+        # ------------------------------------------------------------------
+        # Phase C cross-SDK parity additions (2026-04-24)
+        # ------------------------------------------------------------------
+        Tool(
+            name="t402/getTokenPrice",
+            description="Get current token prices in a target currency via CoinGecko (e.g., ETH, USDC in USD)",
+            inputSchema=InputSchema(
+                type="object",
+                properties={
+                    "tokens": Property(
+                        type="array",
+                        description="Token symbols to price (e.g., [\"ETH\", \"USDC\"])",
+                    ),
+                    "currency": Property(
+                        type="string",
+                        description="Target currency (default: 'usd')",
+                    ),
+                },
+                required=["tokens"],
+            ),
+        ),
+        Tool(
+            name="t402/getGasPrice",
+            description="Get the current suggested gas price for a network (wei and gwei)",
+            inputSchema=InputSchema(
+                type="object",
+                properties={
+                    "network": Property(
+                        type="string",
+                        description="Network to query",
+                        enum=networks,
+                    ),
+                },
+                required=["network"],
+            ),
+        ),
+        Tool(
+            name="t402/signMessage",
+            description="Sign a message using the configured private key (EIP-191 personal_sign)",
+            inputSchema=InputSchema(
+                type="object",
+                properties={
+                    "message": Property(
+                        type="string",
+                        description="Plain-text message to sign",
+                    ),
+                },
+                required=["message"],
+            ),
+        ),
     ]
