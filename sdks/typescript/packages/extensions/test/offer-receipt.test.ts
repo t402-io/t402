@@ -180,9 +180,22 @@ describe("verifyOffer", () => {
     expect(result.valid).toBe(false);
   });
 
-  it("should return invalid for JWS format (not yet implemented)", async () => {
+  it("should throw a clear error when JWS offer is verified without resolveJWSKey", async () => {
     const offer = { format: "jws" as const, signature: "eyJ..." };
-    const result = await verifyOffer(mockVerifier, offer);
+    await expect(verifyOffer(mockVerifier, offer)).rejects.toThrow(
+      /resolveJWSKey was not provided/,
+    );
+  });
+
+  it("should delegate JWS offer verification to the resolver-driven path", async () => {
+    const offer = { format: "jws" as const, signature: "invalid.jws.string" };
+    // Resolver supplies a dummy key; verifyJWSSignature will fail to parse
+    // the malformed input and return { valid: false }, which verifyOffer
+    // surfaces as { valid: false } (NOT a thrown error).
+    const resolver = async () => new Uint8Array(32);
+    const result = await verifyOffer(mockVerifier, offer, {
+      resolveJWSKey: resolver,
+    });
     expect(result.valid).toBe(false);
   });
 });

@@ -735,12 +735,34 @@ async function verifySmartWalletSignature(
 /**
  * Verifies a signature using EIP-6492 (universal signature verification).
  *
- * This supports both deployed and undeployed smart wallets.
+ * Supports both deployed and counterfactual (not-yet-deployed) smart
+ * wallets. For counterfactual signatures (signature ends with the 6492
+ * magic suffix), the wallet's factory deployment data is embedded in
+ * the signature itself and must be executed before `isValidSignature`
+ * can be called. Two resolution paths:
+ *
+ *   1. If `provider` is a viem `PublicClient` (duck-typed by the presence
+ *      of a `verifyMessage` method), delegate to its native 6492 support
+ *      — viem uses the ERC-6492 "Universal Signature Validator" deployless
+ *      `eth_call` pattern so the wallet doesn't actually need to be
+ *      deployed to be verified.
+ *
+ *   2. Otherwise, throw with a clear message instructing the caller to
+ *      supply a viem `PublicClient`. A raw EIP-1193 provider is not
+ *      enough: deployless verification requires invoking the universal
+ *      validator bytecode, which we don't bundle (to avoid shipping a
+ *      couple of kilobytes of contract code and keep the optional viem
+ *      peer dependency the single source of truth for this logic).
+ *
+ * Deployed (non-6492) signatures fall through to standard EIP-1271
+ * verification via `eth_call isValidSignature`, which works on any
+ * EIP-1193 provider.
  *
  * @param walletAddress - Wallet address (may be counterfactual)
  * @param messageHash - Hash of the message that was signed
  * @param signature - The signature (may include deployment data)
- * @param provider - Ethereum provider
+ * @param provider - Ethereum provider — viem `PublicClient` for 6492,
+ *                   any EIP-1193 provider for plain 1271
  * @returns True if signature is valid
  */
 export async function verifyEIP6492Signature(
@@ -754,15 +776,62 @@ export async function verifyEIP6492Signature(
   const sigHex = signature.startsWith("0x") ? signature.slice(2) : signature;
 
   if (sigHex.endsWith(EIP6492_SUFFIX)) {
-    // This is an EIP-6492 signature with deployment data
-    // For full implementation, we would need to:
-    // 1. Deploy the wallet contract to a local fork
-    // 2. Then call isValidSignature
-    // This requires more complex provider interaction
-    console.warn("EIP-6492 deployment signatures not yet fully implemented");
-    return false;
+    // Counterfactual (undeployed) wallet signature. Delegate to viem's
+    // native 6492 verifier if the provider exposes verifyMessage/verifyHash.
+    const viemClient = provider as {
+      verifyMessage?: (args: {
+        address: `0x${string}`;
+        message: string;
+        signature: `0x${string}`;
+      }) => Promise<boolean>;
+      verifyHash?: (args: {
+        address: `0x${string}`;
+        hash: `0x${string}`;
+        signature: `0x${string}`;
+      }) => Promise<boolean>;
+    };
+
+    const normalizedHash = (messageHash.startsWith("0x")
+      ? messageHash
+      : "0x" + messageHash) as `0x${string}`;
+    const normalizedSig = (signature.startsWith("0x")
+      ? signature
+      : "0x" + signature) as `0x${string}`;
+    const normalizedAddress = walletAddress as `0x${string}`;
+
+    if (typeof viemClient.verifyHash === "function") {
+      try {
+        return await viemClient.verifyHash({
+          address: normalizedAddress,
+          hash: normalizedHash,
+          signature: normalizedSig,
+        });
+      } catch {
+        return false;
+      }
+    }
+
+    if (typeof viemClient.verifyMessage === "function") {
+      // `verifyMessage` takes a plaintext message, not a pre-hashed one.
+      // Callers using 6492 should prefer passing a viem PublicClient that
+      // has `verifyHash` available; otherwise fall through to the hard error.
+      throw new Error(
+        "verifyEIP6492Signature: provider has verifyMessage but not verifyHash. " +
+          "Pass a viem PublicClient (which exposes verifyHash) to verify " +
+          "ERC-6492 counterfactual signatures from a pre-hashed message.",
+      );
+    }
+
+    throw new Error(
+      "verifyEIP6492Signature: ERC-6492 counterfactual wallet signatures require " +
+        "a viem PublicClient (createPublicClient({ chain, transport: http() })) " +
+        "as the provider. A raw EIP-1193 provider is not sufficient because " +
+        "deployless verification needs the Universal Signature Validator " +
+        "bytecode shipped by viem.",
+    );
   }
 
-  // Fall back to standard EIP-1271 verification
+  // Deployed wallet — fall back to standard EIP-1271 verification, which
+  // works on any EIP-1193 provider.
   return verifySmartWalletSignature(walletAddress, messageHash, signature, provider);
 }

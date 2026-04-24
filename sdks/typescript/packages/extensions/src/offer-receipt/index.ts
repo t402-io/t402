@@ -36,6 +36,16 @@ export {
   matchOfferToRequirements,
   isOfferExpired,
 } from "./signing";
+export type { VerifyOfferReceiptOptions } from "./signing";
+
+// JWS verification
+export { verifyJWSSignature } from "./jws";
+export type {
+  JWSAlgorithm,
+  JWSProtectedHeader,
+  JWSVerifyResult,
+  JWSKeyResolver,
+} from "./jws";
 
 // Server extension
 export {
