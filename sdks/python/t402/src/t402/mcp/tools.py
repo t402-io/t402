@@ -216,4 +216,143 @@ def get_tool_definitions() -> list[Tool]:
                 required=["message"],
             ),
         ),
+        # ------------------------------------------------------------------
+        # Phase C Batch 2 — WDK tools (2026-04-24). Three are fully
+        # implemented; the swap trio is a honest stub (see server.py).
+        # ------------------------------------------------------------------
+        Tool(
+            name="t402/wdk/getWallet",
+            description="Get wallet info (EVM address and configured chains) for the current WDK identity",
+            inputSchema=InputSchema(
+                type="object",
+                properties={},
+                required=[],
+            ),
+        ),
+        Tool(
+            name="t402/wdk/getBalances",
+            description="Get multi-chain balances (USDT0, USDC, native) for the WDK wallet, with totals",
+            inputSchema=InputSchema(
+                type="object",
+                properties={
+                    "chains": Property(
+                        type="array",
+                        description="Optional list of chains to check. If empty, checks all configured chains.",
+                    ),
+                },
+                required=[],
+            ),
+        ),
+        Tool(
+            name="t402/wdk/transfer",
+            description=(
+                "Send tokens via the WDK wallet. Requires `confirmed: true` to "
+                "execute; otherwise returns a preview."
+            ),
+            inputSchema=InputSchema(
+                type="object",
+                properties={
+                    "to": Property(
+                        type="string",
+                        description="Recipient address",
+                        pattern="^0x[a-fA-F0-9]{40}$",
+                    ),
+                    "amount": Property(
+                        type="string",
+                        description="Amount to send (e.g., '10.5')",
+                        pattern=r"^\d+(\.\d+)?$",
+                    ),
+                    "token": Property(
+                        type="string",
+                        description="Token to transfer",
+                        enum=["USDC", "USDT", "USDT0"],
+                    ),
+                    "chain": Property(
+                        type="string",
+                        description="Chain to execute transfer on",
+                        enum=networks,
+                    ),
+                    "confirmed": Property(
+                        type="boolean",
+                        description="Set to true to execute; otherwise a preview is returned.",
+                    ),
+                },
+                required=["to", "amount", "token", "chain"],
+            ),
+        ),
+        Tool(
+            name="t402/wdk/swap",
+            description=(
+                "[Python SDK: not implemented — returns an error directing callers "
+                "to the TS SDK] Swap tokens via WDK."
+            ),
+            inputSchema=InputSchema(
+                type="object",
+                properties={
+                    "fromToken": Property(type="string", description="Token to swap from"),
+                    "toToken": Property(type="string", description="Token to swap to"),
+                    "amount": Property(
+                        type="string",
+                        description="Amount to swap",
+                        pattern=r"^\d+(\.\d+)?$",
+                    ),
+                    "chain": Property(
+                        type="string",
+                        description="Chain to execute swap on",
+                        enum=networks,
+                    ),
+                    "confirmed": Property(
+                        type="boolean",
+                        description="Set to true to execute; otherwise a preview is returned.",
+                    ),
+                },
+                required=["fromToken", "toToken", "amount", "chain"],
+            ),
+        ),
+        Tool(
+            name="t402/wdk/quoteSwap",
+            description=(
+                "[Python SDK: not implemented — returns an error directing callers "
+                "to the TS SDK] Get a swap quote with a stored quoteId."
+            ),
+            inputSchema=InputSchema(
+                type="object",
+                properties={
+                    "fromToken": Property(type="string", description="Token to swap from"),
+                    "toToken": Property(type="string", description="Token to swap to"),
+                    "amount": Property(
+                        type="string",
+                        description="Amount to swap",
+                        pattern=r"^\d+(\.\d+)?$",
+                    ),
+                    "chain": Property(
+                        type="string",
+                        description="Chain to execute swap on",
+                        enum=networks,
+                    ),
+                },
+                required=["fromToken", "toToken", "amount", "chain"],
+            ),
+        ),
+        Tool(
+            name="t402/wdk/executeSwap",
+            description=(
+                "[Python SDK: not implemented — returns an error directing callers "
+                "to the TS SDK] Execute a swap from a stored quoteId."
+            ),
+            inputSchema=InputSchema(
+                type="object",
+                properties={
+                    "quoteId": Property(
+                        type="string",
+                        description="Quote ID from wdk/quoteSwap",
+                    ),
+                    "confirmed": Property(
+                        type="boolean",
+                        description="Set to true to execute",
+                    ),
+                },
+                required=["quoteId"],
+            ),
+        ),
     ]

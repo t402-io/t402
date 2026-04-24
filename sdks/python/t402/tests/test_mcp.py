@@ -153,7 +153,7 @@ class TestToolDefinitions:
     def test_get_tool_definitions(self):
         """Test get_tool_definitions returns all tools."""
         tools = get_tool_definitions()
-        assert len(tools) == 9
+        assert len(tools) == 15
 
         tool_names = {t.name for t in tools}
         # Original 6 tools (pre-Phase C).
@@ -163,21 +163,35 @@ class TestToolDefinitions:
         assert "t402/payGasless" in tool_names
         assert "t402/getBridgeFee" in tool_names
         assert "t402/bridge" in tool_names
-        # Phase C cross-SDK parity additions (2026-04-24).
+        # Phase C Batch 1 (2026-04-24).
         assert "t402/getTokenPrice" in tool_names
         assert "t402/getGasPrice" in tool_names
         assert "t402/signMessage" in tool_names
+        # Phase C Batch 2 — WDK tools (2026-04-24).
+        assert "t402/wdk/getWallet" in tool_names
+        assert "t402/wdk/getBalances" in tool_names
+        assert "t402/wdk/transfer" in tool_names
+        assert "t402/wdk/swap" in tool_names
+        assert "t402/wdk/quoteSwap" in tool_names
+        assert "t402/wdk/executeSwap" in tool_names
 
     def test_tool_schemas(self):
         """Test tool schemas are valid."""
         tools = get_tool_definitions()
 
+        # Tools that legitimately accept an empty object.
+        tools_with_no_required = {
+            "t402/wdk/getWallet",
+            "t402/wdk/getBalances",
+        }
+
         for tool in tools:
             assert tool.name
             assert tool.description
             assert tool.inputSchema.type == "object"
-            assert tool.inputSchema.properties
-            assert tool.inputSchema.required
+            if tool.name not in tools_with_no_required:
+                assert tool.inputSchema.properties
+                assert tool.inputSchema.required
 
             # All required fields should be in properties
             for req in tool.inputSchema.required:
@@ -252,7 +266,7 @@ class TestT402McpServer:
         response = json.loads(stdout.read())
 
         assert response["jsonrpc"] == "2.0"
-        assert len(response["result"]["tools"]) == 9
+        assert len(response["result"]["tools"]) == 15
 
     @pytest.mark.asyncio
     async def test_call_tool_get_balance(self):

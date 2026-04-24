@@ -203,6 +203,14 @@ class T402McpServer:
             result = await self._handle_get_gas_price(arguments)
         elif tool_name == "t402/signMessage":
             result = self._handle_sign_message(arguments)
+        elif tool_name == "t402/wdk/getWallet":
+            result = self._handle_wdk_get_wallet(arguments)
+        elif tool_name == "t402/wdk/getBalances":
+            result = await self._handle_wdk_get_balances(arguments)
+        elif tool_name == "t402/wdk/transfer":
+            result = await self._handle_wdk_transfer(arguments)
+        elif tool_name in ("t402/wdk/swap", "t402/wdk/quoteSwap", "t402/wdk/executeSwap"):
+            result = self._handle_wdk_swap_stub()
         else:
             result = self._error_result(f"Unknown tool: {tool_name}")
 
@@ -880,6 +888,206 @@ class T402McpServer:
         if demo:
             lines.append("- **Mode:** demo (no RPC call)")
         return "\n".join(lines)
+
+    # ------------------------------------------------------------------
+    # Phase C Batch 2 — WDK tool handlers (2026-04-24)
+    # ------------------------------------------------------------------
+
+    def _handle_wdk_get_wallet(self, _args: dict[str, Any]) -> ToolResult:
+        """Handle t402/wdk/getWallet.
+
+        Derives the EVM address from the configured private key (or
+        reports a zero address in demo mode) and lists the chains the
+        server is configured for.
+        """
+        try:
+            chains = list(ALL_NETWORKS)
+            demo_mode = self.config.demo_mode or not self.config.private_key
+
+            if demo_mode:
+                address = "0x0000000000000000000000000000000000000000"
+            else:
+                from eth_account import Account
+
+                address = Account.from_key(self.config.private_key).address
+
+            lines = [
+                "## Wallet",
+                "",
+                f"- **EVM Address:** {address}",
+                f"- **Chains:** {', '.join(chains)}",
+            ]
+            if demo_mode:
+                lines.append("- **Mode:** demo (no private key configured)")
+            return self._text_result("\n".join(lines))
+        except Exception as e:
+            return self._error_result(str(e))
+
+    async def _handle_wdk_get_balances(self, args: dict[str, Any]) -> ToolResult:
+        """Handle t402/wdk/getBalances.
+
+        Returns a simplified per-chain view (usdt0, usdc, native) plus
+        USDT0/USDC totals across all queried chains. Matches the TS
+        wdk/getBalances schema for cross-SDK consistency.
+        """
+        try:
+            chains_input = args.get("chains") or []
+            if not isinstance(chains_input, list):
+                return self._error_result("chains must be a list of strings")
+            chains = chains_input or list(ALL_NETWORKS)
+
+            # Validate chain names up-front so an obvious typo fails loud
+            # rather than silently producing empty entries.
+            for chain in chains:
+                if not is_valid_network(chain):
+                    return self._error_result(f"Invalid network: {chain}")
+
+            demo_mode = self.config.demo_mode or not self.config.private_key
+            address = (
+                "0x0000000000000000000000000000000000000000"
+                if demo_mode
+                else __import__("eth_account").Account.from_key(
+                    self.config.private_key
+                ).address
+            )
+
+            entries: list[dict[str, str]] = []
+            total_usdt0 = 0
+            total_usdc = 0
+
+            for chain in chains:
+                if demo_mode:
+                    entries.append(
+                        {"chain": chain, "usdt0": "0", "usdc": "0", "native": "0"}
+                    )
+                    continue
+
+                try:
+                    w3 = self._get_web3(chain)
+                    native_raw = await run_sync_in_executor(
+                        get_native_balance, w3, address
+                    )
+                    usdt0_raw = 0
+                    usdc_raw = 0
+
+                    usdt0_addr = get_token_address(chain, "USDT0")
+                    if usdt0_addr:
+                        try:
+                            usdt0_raw = await run_sync_in_executor(
+                                get_erc20_balance, w3, usdt0_addr, address
+                            )
+                        except Exception:
+                            pass
+                    usdc_addr = get_token_address(chain, "USDC")
+                    if usdc_addr:
+                        try:
+                            usdc_raw = await run_sync_in_executor(
+                                get_erc20_balance, w3, usdc_addr, address
+                            )
+                        except Exception:
+                            pass
+
+                    entries.append(
+                        {
+                            "chain": chain,
+                            "usdt0": format_token_amount(usdt0_raw, TOKEN_DECIMALS),
+                            "usdc": format_token_amount(usdc_raw, TOKEN_DECIMALS),
+                            "native": format_token_amount(native_raw, NATIVE_DECIMALS),
+                        }
+                    )
+                    total_usdt0 += int(usdt0_raw)
+                    total_usdc += int(usdc_raw)
+                except Exception as e:
+                    entries.append(
+                        {
+                            "chain": chain,
+                            "usdt0": "0",
+                            "usdc": "0",
+                            "native": "0",
+                            "error": str(e),
+                        }
+                    )
+
+            lines = ["## WDK Balances", ""]
+            for entry in entries:
+                lines.append(f"### {entry['chain']}")
+                lines.append(f"- USDT0: {entry['usdt0']}")
+                lines.append(f"- USDC: {entry['usdc']}")
+                lines.append(f"- Native: {entry['native']}")
+                if "error" in entry:
+                    lines.append(f"- Error: {entry['error']}")
+                lines.append("")
+
+            lines.append("## Totals")
+            lines.append("")
+            lines.append(f"- **USDT0:** {format_token_amount(total_usdt0, TOKEN_DECIMALS)}")
+            lines.append(f"- **USDC:** {format_token_amount(total_usdc, TOKEN_DECIMALS)}")
+            if demo_mode:
+                lines.append("")
+                lines.append("_Demo mode — balances are zero._")
+            return self._text_result("\n".join(lines))
+        except Exception as e:
+            return self._error_result(str(e))
+
+    async def _handle_wdk_transfer(self, args: dict[str, Any]) -> ToolResult:
+        """Handle t402/wdk/transfer.
+
+        Confirmation-gated: unconfirmed requests return a preview; a
+        confirmed request delegates to the core `_handle_pay` handler
+        (wdk/transfer maps `chain` to pay's `network`).
+        """
+        try:
+            to = args.get("to", "")
+            amount = args.get("amount", "")
+            token = args.get("token", "")
+            chain = args.get("chain", "")
+            confirmed = bool(args.get("confirmed", False))
+
+            if not is_valid_network(chain):
+                return self._error_result(f"Invalid chain: {chain}")
+
+            if not confirmed:
+                lines = [
+                    "## Transfer Preview (NOT executed)",
+                    "",
+                    f"- **Amount:** {amount} {token}",
+                    f"- **To:** {to}",
+                    f"- **Chain:** {chain}",
+                    "",
+                    "Set `confirmed: true` to execute.",
+                ]
+                return self._text_result("\n".join(lines))
+
+            # Delegate to pay handler. Repackage `chain` → `network`; other
+            # fields are structurally identical.
+            pay_args = {
+                "to": to,
+                "amount": amount,
+                "token": token,
+                "network": chain,
+            }
+            return await self._handle_pay(pay_args)
+        except Exception as e:
+            return self._error_result(str(e))
+
+    def _handle_wdk_swap_stub(self) -> ToolResult:
+        """Shared handler for t402/wdk/swap, quoteSwap, executeSwap.
+
+        The Python SDK has no equivalent to @tetherto/wdk and does not
+        bundle a DEX aggregator client; the tool schemas exist for
+        cross-SDK parity at the discovery level but the handlers return
+        an error pointing callers to the TypeScript SDK. See
+        memory/phase-c-d-decisions-2026-04-24.md for context.
+        """
+        return self._error_result(
+            "swap is not supported in the Python SDK. "
+            "Use the TypeScript SDK (@t402/mcp) for swap workflows — "
+            "it integrates with Tether WDK via wdk-swap-jupiter (SVM) "
+            "and @tetherto/wdk-protocol-swap-velora-evm (EVM). "
+            "The wdk/swap, wdk/quoteSwap, and wdk/executeSwap schemas "
+            "are exposed here for cross-SDK parity at the tool-discovery "
+            "level only."
+        )
 
     # Result helpers
 

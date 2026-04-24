@@ -176,6 +176,18 @@ func (s *Server) handleCallTool(ctx context.Context, params json.RawMessage) *To
 		return s.handleGetGasPrice(ctx, callParams.Arguments)
 	case "t402/signMessage":
 		return s.handleSignMessage(ctx, callParams.Arguments)
+	case "t402/wdk/getWallet":
+		return s.handleWdkGetWallet(ctx, callParams.Arguments)
+	case "t402/wdk/getBalances":
+		return s.handleWdkGetBalances(ctx, callParams.Arguments)
+	case "t402/wdk/transfer":
+		return s.handleWdkTransfer(ctx, callParams.Arguments)
+	case "t402/wdk/swap":
+		return s.handleWdkSwap(ctx, callParams.Arguments)
+	case "t402/wdk/quoteSwap":
+		return s.handleWdkQuoteSwap(ctx, callParams.Arguments)
+	case "t402/wdk/executeSwap":
+		return s.handleWdkExecuteSwap(ctx, callParams.Arguments)
 	default:
 		return &ToolResult{
 			Content: []ContentBlock{{Type: "text", Text: fmt.Sprintf("Unknown tool: %s", callParams.Name)}},
@@ -402,6 +414,112 @@ func GetToolDefinitions() []Tool {
 					},
 				},
 				Required: []string{"message"},
+			},
+		},
+		// ------------------------------------------------------------------
+		// Phase C Batch 2: WDK tools (2026-04-24)
+		//
+		// Three are fully implemented (getWallet, getBalances, transfer).
+		// The swap trio is schema-only for cross-SDK parity; Go has no
+		// @tetherto/wdk counterpart, and the handlers return a clear
+		// error directing callers to the TypeScript SDK.
+		// ------------------------------------------------------------------
+		{
+			Name:        "t402/wdk/getWallet",
+			Description: "Get wallet info (EVM address and configured chains) for the current WDK identity",
+			InputSchema: InputSchema{
+				Type:       "object",
+				Properties: map[string]Property{},
+				Required:   []string{},
+			},
+		},
+		{
+			Name:        "t402/wdk/getBalances",
+			Description: "Get multi-chain balances (USDT0, USDC, native) for the WDK wallet, with totals",
+			InputSchema: InputSchema{
+				Type: "object",
+				Properties: map[string]Property{
+					"chains": {
+						Type:        "array",
+						Description: "Optional list of chains to check. If empty, checks all configured chains.",
+					},
+				},
+				Required: []string{},
+			},
+		},
+		{
+			Name:        "t402/wdk/transfer",
+			Description: "Send tokens via the WDK wallet. Requires `confirmed: true` to execute; otherwise returns a preview.",
+			InputSchema: InputSchema{
+				Type: "object",
+				Properties: map[string]Property{
+					"to": {
+						Type:        "string",
+						Description: "Recipient address",
+						Pattern:     "^0x[a-fA-F0-9]{40}$",
+					},
+					"amount": {
+						Type:        "string",
+						Description: "Amount to send (e.g., '10.5')",
+						Pattern:     `^\d+(\.\d+)?$`,
+					},
+					"token": {
+						Type:        "string",
+						Description: "Token to transfer",
+						Enum:        []string{"USDC", "USDT", "USDT0"},
+					},
+					"chain": {
+						Type:        "string",
+						Description: "Chain to execute transfer on",
+						Enum:        networks,
+					},
+					"confirmed": {
+						Type:        "boolean",
+						Description: "Set to true to execute; otherwise a preview is returned.",
+					},
+				},
+				Required: []string{"to", "amount", "token", "chain"},
+			},
+		},
+		{
+			Name:        "t402/wdk/swap",
+			Description: "[Go SDK: not implemented — returns an error directing callers to the TS SDK] Swap tokens via WDK.",
+			InputSchema: InputSchema{
+				Type: "object",
+				Properties: map[string]Property{
+					"fromToken": {Type: "string", Description: "Token to swap from"},
+					"toToken":   {Type: "string", Description: "Token to swap to"},
+					"amount":    {Type: "string", Description: "Amount to swap", Pattern: `^\d+(\.\d+)?$`},
+					"chain":     {Type: "string", Description: "Chain to execute swap on", Enum: networks},
+					"confirmed": {Type: "boolean", Description: "Set to true to execute; otherwise a preview is returned."},
+				},
+				Required: []string{"fromToken", "toToken", "amount", "chain"},
+			},
+		},
+		{
+			Name:        "t402/wdk/quoteSwap",
+			Description: "[Go SDK: not implemented — returns an error directing callers to the TS SDK] Get a swap quote with a stored quoteId.",
+			InputSchema: InputSchema{
+				Type: "object",
+				Properties: map[string]Property{
+					"fromToken": {Type: "string", Description: "Token to swap from"},
+					"toToken":   {Type: "string", Description: "Token to swap to"},
+					"amount":    {Type: "string", Description: "Amount to swap", Pattern: `^\d+(\.\d+)?$`},
+					"chain":     {Type: "string", Description: "Chain to execute swap on", Enum: networks},
+				},
+				Required: []string{"fromToken", "toToken", "amount", "chain"},
+			},
+		},
+		{
+			Name:        "t402/wdk/executeSwap",
+			Description: "[Go SDK: not implemented — returns an error directing callers to the TS SDK] Execute a swap from a stored quoteId.",
+			InputSchema: InputSchema{
+				Type: "object",
+				Properties: map[string]Property{
+					"quoteId":   {Type: "string", Description: "Quote ID from wdk/quoteSwap"},
+					"confirmed": {Type: "boolean", Description: "Set to true to execute"},
+				},
+				Required: []string{"quoteId"},
 			},
 		},
 	}

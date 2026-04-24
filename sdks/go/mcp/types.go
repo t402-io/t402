@@ -237,3 +237,60 @@ type SignMessageResult struct {
 	Message   string `json:"message"`
 	Signature string `json:"signature"`
 }
+
+// ===== Phase C Batch 2 — WDK tool types (2026-04-24) =====
+
+// WdkGetBalancesInput is the input for t402/wdk/getBalances.
+type WdkGetBalancesInput struct {
+	// Chains optionally restricts the query to a subset of chains.
+	// When empty all configured chains are queried.
+	Chains []string `json:"chains,omitempty"`
+}
+
+// WdkChainBalance is a per-chain balance entry in WdkGetBalancesResult.
+type WdkChainBalance struct {
+	Chain  string `json:"chain"`
+	USDT0  string `json:"usdt0"`
+	USDC   string `json:"usdc"`
+	Native string `json:"native"`
+	Error  string `json:"error,omitempty"`
+}
+
+// WdkGetBalancesResult aggregates per-chain balances and USDT0/USDC totals.
+type WdkGetBalancesResult struct {
+	Chains     []WdkChainBalance `json:"chains"`
+	TotalUsdt0 string            `json:"totalUsdt0"`
+	TotalUsdc  string            `json:"totalUsdc"`
+}
+
+// WdkTransferInput is the input for t402/wdk/transfer.
+type WdkTransferInput struct {
+	To        string `json:"to"`
+	Amount    string `json:"amount"`
+	Token     string `json:"token"`
+	Chain     string `json:"chain"`
+	Confirmed bool   `json:"confirmed,omitempty"`
+}
+
+// WdkWalletInfo is the result of t402/wdk/getWallet.
+type WdkWalletInfo struct {
+	EvmAddress string   `json:"evmAddress"`
+	Chains     []string `json:"chains"`
+}
+
+// WdkSwapInput captures the shared fields of the swap/quoteSwap schemas.
+// Kept for schema completeness even though all three swap handlers are
+// honest stubs in the Go SDK — see wdk_tools.go for rationale.
+type WdkSwapInput struct {
+	FromToken string `json:"fromToken"`
+	ToToken   string `json:"toToken"`
+	Amount    string `json:"amount"`
+	Chain     string `json:"chain"`
+	Confirmed bool   `json:"confirmed,omitempty"`
+}
+
+// WdkExecuteSwapInput is the input for t402/wdk/executeSwap.
+type WdkExecuteSwapInput struct {
+	QuoteID   string `json:"quoteId"`
+	Confirmed bool   `json:"confirmed,omitempty"`
+}

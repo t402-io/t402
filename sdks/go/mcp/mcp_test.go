@@ -185,7 +185,7 @@ func TestAllNetworks(t *testing.T) {
 
 func TestGetToolDefinitions(t *testing.T) {
 	tools := GetToolDefinitions()
-	assert.Len(t, tools, 9)
+	assert.Len(t, tools, 15)
 
 	toolNames := make(map[string]bool)
 	for _, tool := range tools {
@@ -199,21 +199,37 @@ func TestGetToolDefinitions(t *testing.T) {
 	assert.True(t, toolNames["t402/payGasless"])
 	assert.True(t, toolNames["t402/getBridgeFee"])
 	assert.True(t, toolNames["t402/bridge"])
-	// Phase C cross-SDK parity additions (2026-04-24).
+	// Phase C Batch 1 (2026-04-24).
 	assert.True(t, toolNames["t402/getTokenPrice"])
 	assert.True(t, toolNames["t402/getGasPrice"])
 	assert.True(t, toolNames["t402/signMessage"])
+	// Phase C Batch 2 — WDK tools (2026-04-24).
+	assert.True(t, toolNames["t402/wdk/getWallet"])
+	assert.True(t, toolNames["t402/wdk/getBalances"])
+	assert.True(t, toolNames["t402/wdk/transfer"])
+	assert.True(t, toolNames["t402/wdk/swap"])
+	assert.True(t, toolNames["t402/wdk/quoteSwap"])
+	assert.True(t, toolNames["t402/wdk/executeSwap"])
 }
 
 func TestToolDefinitionSchemas(t *testing.T) {
 	tools := GetToolDefinitions()
 
+	// Tools that legitimately have no required input — the schema is
+	// still valid, it just accepts an empty object.
+	toolsWithNoRequired := map[string]bool{
+		"t402/wdk/getWallet":   true,
+		"t402/wdk/getBalances": true,
+	}
+
 	for _, tool := range tools {
 		t.Run(tool.Name, func(t *testing.T) {
 			assert.NotEmpty(t, tool.Description)
 			assert.Equal(t, "object", tool.InputSchema.Type)
-			assert.NotEmpty(t, tool.InputSchema.Properties)
-			assert.NotEmpty(t, tool.InputSchema.Required)
+			if !toolsWithNoRequired[tool.Name] {
+				assert.NotEmpty(t, tool.InputSchema.Properties)
+				assert.NotEmpty(t, tool.InputSchema.Required)
+			}
 
 			// Verify all required fields exist in properties
 			for _, req := range tool.InputSchema.Required {
@@ -289,7 +305,7 @@ func TestServerListTools(t *testing.T) {
 
 	tools, ok := result["tools"].([]any)
 	require.True(t, ok)
-	assert.Len(t, tools, 9)
+	assert.Len(t, tools, 15)
 }
 
 func TestServerCallToolGetBalance(t *testing.T) {
