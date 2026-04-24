@@ -27,16 +27,9 @@ The t402 standard separates three key concepts:
 | [MCP](./transports-v2/mcp.md) | Model Context Protocol for AI agents |
 | [A2A](./transports-v2/a2a.md) | Agent-to-Agent protocol |
 
-### v1 Transports (Deprecated)
+### v1 Transports (Removed)
 
-> **Note**: v1 transports are deprecated. Please use v2 transports for new implementations.
-> See [Migration Guide](https://docs.t402.io/advanced/migration-v1-to-v2) for upgrading.
-
-| Transport | Description |
-|-----------|-------------|
-| [HTTP](./transports-v1/http.md) | Original HTTP transport (deprecated) |
-| [MCP](./transports-v1/mcp.md) | Original MCP transport (deprecated) |
-| [A2A](./transports-v1/a2a.md) | Original A2A transport (deprecated) |
+> v1 transport specifications have been removed. See [Migration Guide](https://docs.t402.io/advanced/migration-v1-to-v2) for upgrading legacy v1 clients to v2.
 
 ## Payment Schemes
 
