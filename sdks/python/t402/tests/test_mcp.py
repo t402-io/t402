@@ -153,7 +153,7 @@ class TestToolDefinitions:
     def test_get_tool_definitions(self):
         """Test get_tool_definitions returns all tools."""
         tools = get_tool_definitions()
-        assert len(tools) == 15
+        assert len(tools) == 21
 
         tool_names = {t.name for t in tools}
         # Original 6 tools (pre-Phase C).
@@ -174,6 +174,13 @@ class TestToolDefinitions:
         assert "t402/wdk/swap" in tool_names
         assert "t402/wdk/quoteSwap" in tool_names
         assert "t402/wdk/executeSwap" in tool_names
+        # Phase C Batch 3 (2026-04-24).
+        assert "t402/verifySignature" in tool_names
+        assert "t402/estimatePaymentFee" in tool_names
+        assert "t402/compareNetworkFees" in tool_names
+        assert "t402/getHistoricalPrice" in tool_names
+        assert "t402/quoteBridge" in tool_names
+        assert "t402/executeBridgeFromQuote" in tool_names
 
     def test_tool_schemas(self):
         """Test tool schemas are valid."""
@@ -266,7 +273,7 @@ class TestT402McpServer:
         response = json.loads(stdout.read())
 
         assert response["jsonrpc"] == "2.0"
-        assert len(response["result"]["tools"]) == 15
+        assert len(response["result"]["tools"]) == 21
 
     @pytest.mark.asyncio
     async def test_call_tool_get_balance(self):

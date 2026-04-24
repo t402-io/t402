@@ -185,7 +185,7 @@ func TestAllNetworks(t *testing.T) {
 
 func TestGetToolDefinitions(t *testing.T) {
 	tools := GetToolDefinitions()
-	assert.Len(t, tools, 15)
+	assert.Len(t, tools, 21)
 
 	toolNames := make(map[string]bool)
 	for _, tool := range tools {
@@ -210,6 +210,13 @@ func TestGetToolDefinitions(t *testing.T) {
 	assert.True(t, toolNames["t402/wdk/swap"])
 	assert.True(t, toolNames["t402/wdk/quoteSwap"])
 	assert.True(t, toolNames["t402/wdk/executeSwap"])
+	// Phase C Batch 3 (2026-04-24).
+	assert.True(t, toolNames["t402/verifySignature"])
+	assert.True(t, toolNames["t402/estimatePaymentFee"])
+	assert.True(t, toolNames["t402/compareNetworkFees"])
+	assert.True(t, toolNames["t402/getHistoricalPrice"])
+	assert.True(t, toolNames["t402/quoteBridge"])
+	assert.True(t, toolNames["t402/executeBridgeFromQuote"])
 }
 
 func TestToolDefinitionSchemas(t *testing.T) {
@@ -305,7 +312,7 @@ func TestServerListTools(t *testing.T) {
 
 	tools, ok := result["tools"].([]any)
 	require.True(t, ok)
-	assert.Len(t, tools, 15)
+	assert.Len(t, tools, 21)
 }
 
 func TestServerCallToolGetBalance(t *testing.T) {

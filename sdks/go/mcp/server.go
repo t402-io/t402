@@ -188,6 +188,18 @@ func (s *Server) handleCallTool(ctx context.Context, params json.RawMessage) *To
 		return s.handleWdkQuoteSwap(ctx, callParams.Arguments)
 	case "t402/wdk/executeSwap":
 		return s.handleWdkExecuteSwap(ctx, callParams.Arguments)
+	case "t402/verifySignature":
+		return s.handleVerifySignature(ctx, callParams.Arguments)
+	case "t402/estimatePaymentFee":
+		return s.handleEstimatePaymentFee(ctx, callParams.Arguments)
+	case "t402/compareNetworkFees":
+		return s.handleCompareNetworkFees(ctx, callParams.Arguments)
+	case "t402/getHistoricalPrice":
+		return s.handleGetHistoricalPrice(ctx, callParams.Arguments)
+	case "t402/quoteBridge":
+		return s.handleQuoteBridge(ctx, callParams.Arguments)
+	case "t402/executeBridgeFromQuote":
+		return s.handleExecuteBridgeFromQuote(ctx, callParams.Arguments)
 	default:
 		return &ToolResult{
 			Content: []ContentBlock{{Type: "text", Text: fmt.Sprintf("Unknown tool: %s", callParams.Name)}},
@@ -517,6 +529,87 @@ func GetToolDefinitions() []Tool {
 				Type: "object",
 				Properties: map[string]Property{
 					"quoteId":   {Type: "string", Description: "Quote ID from wdk/quoteSwap"},
+					"confirmed": {Type: "boolean", Description: "Set to true to execute"},
+				},
+				Required: []string{"quoteId"},
+			},
+		},
+		// ------------------------------------------------------------------
+		// Phase C Batch 3 tools (2026-04-24)
+		// ------------------------------------------------------------------
+		{
+			Name:        "t402/verifySignature",
+			Description: "Verify an EIP-191 signed message against an expected signer address",
+			InputSchema: InputSchema{
+				Type: "object",
+				Properties: map[string]Property{
+					"chain":     {Type: "string", Description: "Blockchain network context", Enum: networks},
+					"message":   {Type: "string", Description: "The original message that was signed"},
+					"signature": {Type: "string", Description: "The signature to verify (hex string)", Pattern: "^0x[a-fA-F0-9]+$"},
+					"address":   {Type: "string", Description: "The expected signer address", Pattern: "^0x[a-fA-F0-9]{40}$"},
+				},
+				Required: []string{"chain", "message", "signature", "address"},
+			},
+		},
+		{
+			Name:        "t402/estimatePaymentFee",
+			Description: "Estimate gas and USD cost for an ERC-20 payment on a specific network",
+			InputSchema: InputSchema{
+				Type: "object",
+				Properties: map[string]Property{
+					"network": {Type: "string", Description: "Network to estimate on", Enum: networks},
+					"amount":  {Type: "string", Description: "Payment amount", Pattern: `^\d+(\.\d+)?$`},
+					"token":   {Type: "string", Description: "Token to use", Enum: []string{"USDC", "USDT", "USDT0"}},
+				},
+				Required: []string{"network", "amount", "token"},
+			},
+		},
+		{
+			Name:        "t402/compareNetworkFees",
+			Description: "Compare payment fees across multiple networks for a given amount and token",
+			InputSchema: InputSchema{
+				Type: "object",
+				Properties: map[string]Property{
+					"amount":   {Type: "string", Description: "Payment amount", Pattern: `^\d+(\.\d+)?$`},
+					"token":    {Type: "string", Description: "Token to use", Enum: []string{"USDC", "USDT", "USDT0"}},
+					"networks": {Type: "array", Description: "Networks to compare. If empty, compares all supported networks."},
+				},
+				Required: []string{"amount", "token"},
+			},
+		},
+		{
+			Name:        "t402/getHistoricalPrice",
+			Description: "Get historical price data (1-365 days) for a token via CoinGecko",
+			InputSchema: InputSchema{
+				Type: "object",
+				Properties: map[string]Property{
+					"token": {Type: "string", Description: "Token symbol (e.g., 'ETH', 'USDC')"},
+					"days":  {Type: "integer", Description: "Number of days (default: 7, max: 365)"},
+				},
+				Required: []string{"token"},
+			},
+		},
+		{
+			Name:        "t402/quoteBridge",
+			Description: "Get a USDT0 bridge quote and receive a quoteId usable with executeBridgeFromQuote",
+			InputSchema: InputSchema{
+				Type: "object",
+				Properties: map[string]Property{
+					"fromChain": {Type: "string", Description: "Source chain", Enum: bridgeableChains},
+					"toChain":   {Type: "string", Description: "Destination chain", Enum: bridgeableChains},
+					"amount":    {Type: "string", Description: "Amount to bridge", Pattern: `^\d+(\.\d+)?$`},
+					"recipient": {Type: "string", Description: "Recipient address on destination chain", Pattern: "^0x[a-fA-F0-9]{40}$"},
+				},
+				Required: []string{"fromChain", "toChain", "amount", "recipient"},
+			},
+		},
+		{
+			Name:        "t402/executeBridgeFromQuote",
+			Description: "Execute a USDT0 bridge from a stored quoteId (requires confirmed: true)",
+			InputSchema: InputSchema{
+				Type: "object",
+				Properties: map[string]Property{
+					"quoteId":   {Type: "string", Description: "Quote ID from t402/quoteBridge"},
 					"confirmed": {Type: "boolean", Description: "Set to true to execute"},
 				},
 				Required: []string{"quoteId"},

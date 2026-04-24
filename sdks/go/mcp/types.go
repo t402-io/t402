@@ -294,3 +294,59 @@ type WdkExecuteSwapInput struct {
 	QuoteID   string `json:"quoteId"`
 	Confirmed bool   `json:"confirmed,omitempty"`
 }
+
+// ===== Phase C Batch 3 tool types (2026-04-24) =====
+
+// VerifySignatureInput is the input for t402/verifySignature.
+type VerifySignatureInput struct {
+	Chain     string `json:"chain"`
+	Message   string `json:"message"`
+	Signature string `json:"signature"`
+	Address   string `json:"address"`
+}
+
+// VerifySignatureResult is the output of t402/verifySignature.
+type VerifySignatureResult struct {
+	Valid   bool   `json:"valid"`
+	Address string `json:"address"`
+	Message string `json:"message"`
+	Network string `json:"network"`
+	Error   string `json:"error,omitempty"`
+}
+
+// EstimatePaymentFeeInput is the input for t402/estimatePaymentFee.
+type EstimatePaymentFeeInput struct {
+	Network string `json:"network"`
+	Amount  string `json:"amount"`
+	Token   string `json:"token"`
+}
+
+// PaymentFeeEstimate is the output of t402/estimatePaymentFee and the
+// per-network entry in CompareNetworkFees output.
+type PaymentFeeEstimate struct {
+	Network      string `json:"network"`
+	GasLimit     string `json:"gasLimit"`
+	GasPriceGwei string `json:"gasPriceGwei"`
+	NativeCost   string `json:"nativeCost"`
+	NativeSymbol string `json:"nativeSymbol"`
+	USDCost      string `json:"usdCost"`
+}
+
+// CompareNetworkFeesInput is the input for t402/compareNetworkFees.
+type CompareNetworkFeesInput struct {
+	Amount   string   `json:"amount"`
+	Token    string   `json:"token"`
+	Networks []string `json:"networks,omitempty"`
+}
+
+// GetHistoricalPriceInput is the input for t402/getHistoricalPrice.
+type GetHistoricalPriceInput struct {
+	Token string `json:"token"`
+	Days  int    `json:"days,omitempty"`
+}
+
+// ExecuteBridgeFromQuoteInput is the input for t402/executeBridgeFromQuote.
+type ExecuteBridgeFromQuoteInput struct {
+	QuoteID   string `json:"quoteId"`
+	Confirmed bool   `json:"confirmed,omitempty"`
+}

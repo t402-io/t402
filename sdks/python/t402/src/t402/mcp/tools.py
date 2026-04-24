@@ -355,4 +355,151 @@ def get_tool_definitions() -> list[Tool]:
                 required=["quoteId"],
             ),
         ),
+        # ------------------------------------------------------------------
+        # Phase C Batch 3 — high-utility tools (2026-04-24)
+        # ------------------------------------------------------------------
+        Tool(
+            name="t402/verifySignature",
+            description="Verify an EIP-191 signed message against an expected signer address",
+            inputSchema=InputSchema(
+                type="object",
+                properties={
+                    "chain": Property(
+                        type="string",
+                        description="Blockchain network context",
+                        enum=networks,
+                    ),
+                    "message": Property(
+                        type="string",
+                        description="The original message that was signed",
+                    ),
+                    "signature": Property(
+                        type="string",
+                        description="The signature to verify (hex string)",
+                        pattern="^0x[a-fA-F0-9]+$",
+                    ),
+                    "address": Property(
+                        type="string",
+                        description="The expected signer address",
+                        pattern="^0x[a-fA-F0-9]{40}$",
+                    ),
+                },
+                required=["chain", "message", "signature", "address"],
+            ),
+        ),
+        Tool(
+            name="t402/estimatePaymentFee",
+            description="Estimate gas and USD cost for an ERC-20 payment on a specific network",
+            inputSchema=InputSchema(
+                type="object",
+                properties={
+                    "network": Property(
+                        type="string",
+                        description="Network to estimate on",
+                        enum=networks,
+                    ),
+                    "amount": Property(
+                        type="string",
+                        description="Payment amount",
+                        pattern=r"^\d+(\.\d+)?$",
+                    ),
+                    "token": Property(
+                        type="string",
+                        description="Token to use",
+                        enum=["USDC", "USDT", "USDT0"],
+                    ),
+                },
+                required=["network", "amount", "token"],
+            ),
+        ),
+        Tool(
+            name="t402/compareNetworkFees",
+            description="Compare payment fees across multiple networks for a given amount and token",
+            inputSchema=InputSchema(
+                type="object",
+                properties={
+                    "amount": Property(
+                        type="string",
+                        description="Payment amount",
+                        pattern=r"^\d+(\.\d+)?$",
+                    ),
+                    "token": Property(
+                        type="string",
+                        description="Token to use",
+                        enum=["USDC", "USDT", "USDT0"],
+                    ),
+                    "networks": Property(
+                        type="array",
+                        description="Networks to compare. If empty, compares all supported networks.",
+                    ),
+                },
+                required=["amount", "token"],
+            ),
+        ),
+        Tool(
+            name="t402/getHistoricalPrice",
+            description="Get historical price data (1-365 days) for a token via CoinGecko",
+            inputSchema=InputSchema(
+                type="object",
+                properties={
+                    "token": Property(
+                        type="string",
+                        description="Token symbol (e.g., 'ETH', 'USDC')",
+                    ),
+                    "days": Property(
+                        type="integer",
+                        description="Number of days (default: 7, max: 365)",
+                    ),
+                },
+                required=["token"],
+            ),
+        ),
+        Tool(
+            name="t402/quoteBridge",
+            description="Get a USDT0 bridge quote and receive a quoteId usable with executeBridgeFromQuote",
+            inputSchema=InputSchema(
+                type="object",
+                properties={
+                    "fromChain": Property(
+                        type="string",
+                        description="Source chain",
+                        enum=bridgeable_chains,
+                    ),
+                    "toChain": Property(
+                        type="string",
+                        description="Destination chain",
+                        enum=bridgeable_chains,
+                    ),
+                    "amount": Property(
+                        type="string",
+                        description="Amount to bridge",
+                        pattern=r"^\d+(\.\d+)?$",
+                    ),
+                    "recipient": Property(
+                        type="string",
+                        description="Recipient address on destination chain",
+                        pattern="^0x[a-fA-F0-9]{40}$",
+                    ),
+                },
+                required=["fromChain", "toChain", "amount", "recipient"],
+            ),
+        ),
+        Tool(
+            name="t402/executeBridgeFromQuote",
+            description="Execute a USDT0 bridge from a stored quoteId (requires confirmed: true)",
+            inputSchema=InputSchema(
+                type="object",
+                properties={
+                    "quoteId": Property(
+                        type="string",
+                        description="Quote ID from t402/quoteBridge",
+                    ),
+                    "confirmed": Property(
+                        type="boolean",
+                        description="Set to true to execute",
+                    ),
+                },
+                required=["quoteId"],
+            ),
+        ),
     ]

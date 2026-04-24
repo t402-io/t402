@@ -4,6 +4,7 @@ import asyncio
 import json
 import os
 import sys
+import time
 from dataclasses import asdict
 from typing import Any, Optional, TextIO
 
@@ -26,6 +27,7 @@ from .constants import (
     parse_token_amount,
 )
 from .price_service import get_token_prices, get_token_prices_demo
+from .quote_store import clear_quote_store, create_quote, delete_quote, get_quote
 from .tools import get_tool_definitions
 from .types import (
     BalanceInfo,
@@ -211,6 +213,18 @@ class T402McpServer:
             result = await self._handle_wdk_transfer(arguments)
         elif tool_name in ("t402/wdk/swap", "t402/wdk/quoteSwap", "t402/wdk/executeSwap"):
             result = self._handle_wdk_swap_stub()
+        elif tool_name == "t402/verifySignature":
+            result = self._handle_verify_signature(arguments)
+        elif tool_name == "t402/estimatePaymentFee":
+            result = await self._handle_estimate_payment_fee(arguments)
+        elif tool_name == "t402/compareNetworkFees":
+            result = await self._handle_compare_network_fees(arguments)
+        elif tool_name == "t402/getHistoricalPrice":
+            result = await self._handle_get_historical_price(arguments)
+        elif tool_name == "t402/quoteBridge":
+            result = await self._handle_quote_bridge(arguments)
+        elif tool_name == "t402/executeBridgeFromQuote":
+            result = await self._handle_execute_bridge_from_quote(arguments)
         else:
             result = self._error_result(f"Unknown tool: {tool_name}")
 
@@ -1088,6 +1102,432 @@ class T402McpServer:
             "are exposed here for cross-SDK parity at the tool-discovery "
             "level only."
         )
+
+    # ------------------------------------------------------------------
+    # Phase C Batch 3 — six high-utility tools (2026-04-24)
+    # ------------------------------------------------------------------
+
+    def _handle_verify_signature(self, args: dict[str, Any]) -> ToolResult:
+        """Handle t402/verifySignature — EIP-191 verify via eth_account."""
+        try:
+            chain = args.get("chain", "")
+            message = args.get("message", "")
+            signature = args.get("signature", "")
+            address = args.get("address", "")
+
+            if not message:
+                return self._error_result("message must not be empty")
+            if not is_valid_network(chain):
+                return self._error_result(f"Invalid chain: {chain}")
+            if not address.startswith("0x") or len(address) != 42:
+                return self._error_result(
+                    "address must be a 0x-prefixed 20-byte hex address"
+                )
+
+            recovered: Optional[str] = None
+            error: Optional[str] = None
+            valid = False
+            try:
+                from eth_account import Account
+                from eth_account.messages import encode_defunct
+
+                encoded = encode_defunct(text=message)
+                recovered = Account.recover_message(encoded, signature=signature)
+                valid = recovered.lower() == address.lower()
+            except Exception as e:
+                error = str(e)
+
+            lines = [
+                "## Signature Verification",
+                "",
+                f"- **Valid:** {str(valid).lower()}",
+                f"- **Expected Address:** {address}",
+                f"- **Network:** {chain}",
+                f"- **Message:** {message}",
+            ]
+            if recovered and not valid:
+                lines.append(f"- **Recovered Address:** {recovered}")
+            if error:
+                lines.append(f"- **Error:** {error}")
+            return self._text_result("\n".join(lines))
+        except Exception as e:
+            return self._error_result(str(e))
+
+    async def _handle_estimate_payment_fee(self, args: dict[str, Any]) -> ToolResult:
+        """Handle t402/estimatePaymentFee. See `_estimate_payment_fee`."""
+        try:
+            network = args.get("network", "")
+            amount = args.get("amount", "")
+            token = args.get("token", "")
+
+            if not is_valid_network(network):
+                return self._error_result(f"Invalid network: {network}")
+
+            estimate = await self._estimate_payment_fee(network, amount, token)
+            return self._text_result(self._format_payment_fee(estimate))
+        except Exception as e:
+            return self._error_result(str(e))
+
+    async def _estimate_payment_fee(
+        self, network: str, amount: str, token: str
+    ) -> dict[str, str]:
+        """Compute a payment fee estimate for a single network.
+
+        Demo mode uses a canned table so the call works offline; live
+        mode estimates gas via web3, fetches the current gas price, and
+        converts the native cost to USD via CoinGecko when possible.
+        """
+        native_symbol = NATIVE_SYMBOLS.get(network, "ETH")
+        demo_mode = self.config.demo_mode
+
+        if demo_mode:
+            return self._demo_payment_fee(network, native_symbol)
+
+        token_addr = get_token_address(network, token)
+        if not token_addr:
+            raise ValueError(f"token {token} not supported on {network}")
+
+        w3 = self._get_web3(network)
+        from web3 import Web3
+
+        transfer_selector = Web3.keccak(text="transfer(address,uint256)")[:4]
+        dummy_to = "0x000000000000000000000000000000000000dEaD"
+        raw_amount = parse_token_amount(amount, TOKEN_DECIMALS)
+        call_data = (
+            transfer_selector
+            + bytes.fromhex(dummy_to[2:]).rjust(32, b"\x00")
+            + raw_amount.to_bytes(32, "big")
+        )
+        try:
+            gas_limit = await run_sync_in_executor(
+                lambda: w3.eth.estimate_gas({"to": token_addr, "data": call_data})
+            )
+        except Exception:
+            gas_limit = 65_000
+
+        gas_price = await run_sync_in_executor(lambda: w3.eth.gas_price)
+        native_cost_wei = gas_limit * gas_price
+
+        usd_cost = "unknown"
+        try:
+            prices = await run_sync_in_executor(
+                get_token_prices, [native_symbol], "usd"
+            )
+            native_price = prices.get(native_symbol.upper(), 0.0)
+            if native_price > 0:
+                native_cost_eth = native_cost_wei / 1e18
+                usd_cost = f"${native_cost_eth * native_price:.4f}"
+        except Exception:
+            pass
+
+        return {
+            "network": network,
+            "gasLimit": str(gas_limit),
+            "gasPriceGwei": f"{gas_price / 1e9:.3f}",
+            "nativeCost": f"{native_cost_wei / 1e18:.9f}",
+            "nativeSymbol": native_symbol,
+            "usdCost": usd_cost,
+        }
+
+    def _demo_payment_fee(self, network: str, native_symbol: str) -> dict[str, str]:
+        """Canned payment-fee estimate mirroring the TS demo table."""
+        table = {
+            "ethereum": (65_000, 25_000_000_000, 3250.42),
+            "base": (65_000, 50_000_000, 3250.42),
+            "arbitrum": (65_000, 100_000_000, 3250.42),
+            "optimism": (65_000, 50_000_000, 3250.42),
+            "polygon": (65_000, 30_000_000_000, 0.58),
+            "avalanche": (65_000, 25_000_000_000, 24.15),
+            "ink": (65_000, 50_000_000, 3250.42),
+            "berachain": (65_000, 1_000_000_000, 3.82),
+            "unichain": (65_000, 50_000_000, 3250.42),
+        }
+        gas_limit, gas_price, native_price = table.get(network, table["ethereum"])
+        native_cost_wei = gas_limit * gas_price
+        native_cost_eth = native_cost_wei / 1e18
+        return {
+            "network": network,
+            "gasLimit": str(gas_limit),
+            "gasPriceGwei": f"{gas_price / 1e9:.3f}",
+            "nativeCost": f"{native_cost_eth:.9f}",
+            "nativeSymbol": native_symbol,
+            "usdCost": f"${native_cost_eth * native_price:.4f}",
+        }
+
+    def _format_payment_fee(self, e: dict[str, str]) -> str:
+        return "\n".join(
+            [
+                f"## Payment Fee Estimate ({e['network']})",
+                "",
+                f"- **Gas Limit:** {e['gasLimit']}",
+                f"- **Gas Price:** {e['gasPriceGwei']} gwei",
+                f"- **Native Cost:** {e['nativeCost']} {e['nativeSymbol']}",
+                f"- **USD Cost:** {e['usdCost']}",
+            ]
+        )
+
+    async def _handle_compare_network_fees(self, args: dict[str, Any]) -> ToolResult:
+        """Handle t402/compareNetworkFees — aggregates estimatePaymentFee."""
+        try:
+            amount = args.get("amount", "")
+            token = args.get("token", "")
+            networks = args.get("networks") or list(ALL_NETWORKS)
+
+            for network in networks:
+                if not is_valid_network(network):
+                    return self._error_result(f"Invalid network: {network}")
+
+            estimates: list[dict[str, str]] = []
+            for network in networks:
+                try:
+                    estimates.append(
+                        await self._estimate_payment_fee(network, amount, token)
+                    )
+                except Exception:
+                    # Skip networks that don't support this token.
+                    continue
+
+            # Sort by USD cost ascending; unparseable entries sink.
+            def _usd(e: dict[str, str]) -> float:
+                s = e.get("usdCost", "").lstrip("$")
+                try:
+                    return float(s)
+                except ValueError:
+                    return float("inf")
+
+            estimates.sort(key=_usd)
+
+            lines = [
+                f"## Network Fee Comparison for {amount} {token}",
+                "",
+            ]
+            for e in estimates:
+                lines.extend(
+                    [
+                        f"### {e['network']}",
+                        f"- USD Cost: {e['usdCost']}",
+                        f"- Native: {e['nativeCost']} {e['nativeSymbol']}",
+                        f"- Gas Limit × Price: {e['gasLimit']} × {e['gasPriceGwei']} gwei",
+                        "",
+                    ]
+                )
+            if not estimates:
+                lines.append("_No supported networks returned a successful estimate._")
+            return self._text_result("\n".join(lines))
+        except Exception as e:
+            return self._error_result(str(e))
+
+    async def _handle_get_historical_price(self, args: dict[str, Any]) -> ToolResult:
+        """Handle t402/getHistoricalPrice — CoinGecko historical chart."""
+        try:
+            token = args.get("token", "")
+            days = args.get("days") or 7
+
+            if not token:
+                return self._error_result("token must not be empty")
+            if not isinstance(days, int) or days < 1 or days > 365:
+                return self._error_result("days must be an integer between 1 and 365")
+
+            if self.config.demo_mode:
+                return self._text_result(self._demo_historical_price(token, days))
+
+            from .price_service import TOKEN_TO_COINGECKO_ID
+
+            coin_id = TOKEN_TO_COINGECKO_ID.get(token.upper(), token.lower())
+            url = (
+                f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart"
+                f"?vs_currency=usd&days={days}"
+            )
+
+            from urllib.request import Request, urlopen
+            import json as _json
+
+            req = Request(url, headers={"User-Agent": "t402-mcp/1.0"})
+
+            def _fetch() -> list[list[float]]:
+                with urlopen(req, timeout=10) as resp:
+                    if resp.status != 200:
+                        raise RuntimeError(f"CoinGecko API error: {resp.status}")
+                    data = _json.loads(resp.read().decode("utf-8"))
+                    return data.get("prices", [])
+
+            series: list[list[float]] = await run_sync_in_executor(_fetch)
+            if not series:
+                return self._error_result("CoinGecko returned no price data")
+
+            return self._text_result(
+                self._format_historical_price(token, coin_id, days, series)
+            )
+        except Exception as e:
+            return self._error_result(str(e))
+
+    def _format_historical_price(
+        self,
+        token: str,
+        coin_id: str,
+        days: int,
+        series: list[list[float]],
+    ) -> str:
+        from datetime import datetime, timezone
+
+        lines = [
+            f"## Historical Price — {token.upper()} ({days} days)",
+            "",
+            f"- **CoinGecko ID:** {coin_id}",
+            f"- **Data Points:** {len(series)}",
+            "",
+        ]
+        start = series[0][1]
+        end = series[-1][1]
+        absolute = end - start
+        percent = (absolute / start * 100) if start else 0.0
+        lines.extend(
+            [
+                "**Price Change Over Period:**",
+                f"- Start: ${start:.4f}",
+                f"- End:   ${end:.4f}",
+                f"- Change: ${absolute:.4f} ({percent:.2f}%)",
+                "",
+                "**Sample Points:**",
+            ]
+        )
+        step = max(1, len(series) // 10)
+        for i in range(0, len(series), step):
+            ts = int(series[i][0]) // 1000
+            date = datetime.fromtimestamp(ts, tz=timezone.utc).strftime(
+                "%Y-%m-%d %H:%M"
+            )
+            lines.append(f"- {date}: ${series[i][1]:.4f}")
+        return "\n".join(lines)
+
+    def _demo_historical_price(self, token: str, days: int) -> str:
+        from datetime import datetime, timezone
+
+        now = int(time.time())
+        points = [
+            (now - days * 86400, 3000.0),
+            (now - days * 64800, 3100.0),
+            (now - days * 43200, 3200.0),
+            (now, 3250.0),
+        ]
+        lines = [
+            f"## Historical Price — {token.upper()} ({days} days) [demo]",
+            "",
+            "- **Demo mode** — synthetic data, CoinGecko was not contacted.",
+            "",
+            "**Price Change Over Period:** $250.00 (+8.33%)",
+            "",
+            "**Sample Points:**",
+        ]
+        for ts, price in points:
+            date = datetime.fromtimestamp(ts, tz=timezone.utc).strftime(
+                "%Y-%m-%d %H:%M"
+            )
+            lines.append(f"- {date}: ${price:.4f}")
+        return "\n".join(lines)
+
+    async def _handle_quote_bridge(self, args: dict[str, Any]) -> ToolResult:
+        """Handle t402/quoteBridge — wraps getBridgeFee with a stored quoteId."""
+        try:
+            from_chain = args.get("fromChain", "")
+            to_chain = args.get("toChain", "")
+            amount = args.get("amount", "")
+            recipient = args.get("recipient", "")
+
+            # Build the fee quote using the existing getBridgeFee handler.
+            fee_result = await self._handle_get_bridge_fee(args)
+            if fee_result.isError:
+                return fee_result
+
+            quote_id = create_quote(
+                "bridge",
+                {
+                    "fromChain": from_chain,
+                    "toChain": to_chain,
+                    "amount": amount,
+                    "recipient": recipient,
+                },
+            )
+
+            from datetime import datetime, timedelta, timezone
+
+            expires_at = (
+                datetime.now(timezone.utc) + timedelta(minutes=5)
+            ).isoformat()
+
+            lines = [
+                "## Bridge Quote",
+                "",
+                f"- **Quote ID:** `{quote_id}`",
+                f"- **From:** {from_chain}",
+                f"- **To:** {to_chain}",
+                f"- **Amount:** {amount} USDT0",
+                f"- **Recipient:** {recipient}",
+                f"- **Expires At:** {expires_at}",
+                "",
+                "Fee detail:",
+                fee_result.content[0].text,
+                "",
+                "Submit `quoteId` to `t402/executeBridgeFromQuote` with `confirmed: true` to execute.",
+            ]
+            return self._text_result("\n".join(lines))
+        except Exception as e:
+            return self._error_result(str(e))
+
+    async def _handle_execute_bridge_from_quote(
+        self, args: dict[str, Any]
+    ) -> ToolResult:
+        """Handle t402/executeBridgeFromQuote."""
+        try:
+            quote_id = args.get("quoteId", "")
+            confirmed = bool(args.get("confirmed", False))
+
+            if not quote_id:
+                return self._error_result("quoteId must not be empty")
+
+            quote = get_quote(quote_id)
+            if quote is None:
+                return self._error_result(
+                    "Quote not found or expired. Please request a new quote."
+                )
+            if quote.type != "bridge":
+                return self._error_result(
+                    "Invalid quote type. Expected a bridge quote."
+                )
+
+            data = quote.data
+            from_chain = data.get("fromChain", "")
+            to_chain = data.get("toChain", "")
+            amount = data.get("amount", "")
+            recipient = data.get("recipient", "")
+
+            if not confirmed:
+                lines = [
+                    "## Bridge Preview (NOT executed)",
+                    "",
+                    f"- **Quote ID:** `{quote_id}`",
+                    f"- **Amount:** {amount} USDT0",
+                    f"- **From:** {from_chain}",
+                    f"- **To:** {to_chain}",
+                    f"- **Recipient:** {recipient}",
+                    "",
+                    "Set `confirmed: true` to execute.",
+                ]
+                return self._text_result("\n".join(lines))
+
+            # Delegate to bridge handler, then consume the quote on success.
+            bridge_args = {
+                "fromChain": from_chain,
+                "toChain": to_chain,
+                "amount": amount,
+                "recipient": recipient,
+            }
+            result = await self._handle_bridge(bridge_args)
+            if not result.isError:
+                delete_quote(quote_id)
+            return result
+        except Exception as e:
+            return self._error_result(str(e))
 
     # Result helpers
 
