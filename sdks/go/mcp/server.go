@@ -200,6 +200,20 @@ func (s *Server) handleCallTool(ctx context.Context, params json.RawMessage) *To
 		return s.handleQuoteBridge(ctx, callParams.Arguments)
 	case "t402/executeBridgeFromQuote":
 		return s.handleExecuteBridgeFromQuote(ctx, callParams.Arguments)
+	case "t402/searchBazaar":
+		return s.handleSearchBazaar(ctx, callParams.Arguments)
+	case "t402/payForService":
+		return s.handlePayForService(ctx, callParams.Arguments)
+	case "t402/autoPay":
+		return s.handleAutoPay(ctx, callParams.Arguments)
+	case "t402/erc8004/resolveAgent":
+		return s.handleErc8004ResolveAgent(ctx, callParams.Arguments)
+	case "t402/erc8004/verifyWallet":
+		return s.handleErc8004VerifyWallet(ctx, callParams.Arguments)
+	case "t402/erc8004/checkReputation":
+		return s.handleErc8004CheckReputation(ctx, callParams.Arguments)
+	case "t402/getTransferHistory":
+		return s.handleGetTransferHistory(ctx, callParams.Arguments)
 	default:
 		return &ToolResult{
 			Content: []ContentBlock{{Type: "text", Text: fmt.Sprintf("Unknown tool: %s", callParams.Name)}},
@@ -613,6 +627,107 @@ func GetToolDefinitions() []Tool {
 					"confirmed": {Type: "boolean", Description: "Set to true to execute"},
 				},
 				Required: []string{"quoteId"},
+			},
+		},
+		// ------------------------------------------------------------------
+		// Phase C Batch 4 tools (2026-04-25)
+		// ------------------------------------------------------------------
+		{
+			Name:        "t402/searchBazaar",
+			Description: "Discover t402-protected services from the Bazaar marketplace",
+			InputSchema: InputSchema{
+				Type: "object",
+				Properties: map[string]Property{
+					"query":    {Type: "string", Description: "Search query (e.g. 'weather API')"},
+					"category": {Type: "string", Description: "Filter by category"},
+					"maxPrice": {Type: "string", Description: "Maximum price in USD"},
+					"network":  {Type: "string", Description: "Filter by CAIP-2 network"},
+					"token":    {Type: "string", Description: "Filter by token symbol"},
+					"tags":     {Type: "string", Description: "Comma-separated tags"},
+				},
+				Required: []string{"query"},
+			},
+		},
+		{
+			Name:        "t402/payForService",
+			Description: "[Go SDK: not implemented — use TS SDK] Pay for a t402-protected service end-to-end",
+			InputSchema: InputSchema{
+				Type: "object",
+				Properties: map[string]Property{
+					"url":       {Type: "string", Description: "URL of the t402-protected service"},
+					"method":    {Type: "string", Description: "HTTP method (default: GET)"},
+					"body":      {Type: "string", Description: "Request body for POST/PUT"},
+					"maxAmount": {Type: "string", Description: "Max USD amount willing to pay"},
+					"confirmed": {Type: "boolean", Description: "Confirm and execute payment"},
+				},
+				Required: []string{"url"},
+			},
+		},
+		{
+			Name:        "t402/autoPay",
+			Description: "[Go SDK: not implemented — use TS SDK] Smart payment orchestrator: fetch URL, detect 402, sign payment, retry",
+			InputSchema: InputSchema{
+				Type: "object",
+				Properties: map[string]Property{
+					"url":            {Type: "string", Description: "URL to fetch (may return 402)"},
+					"maxAmount":      {Type: "string", Description: "Maximum amount willing to pay", Pattern: `^\d+(\.\d+)?$`},
+					"preferredChain": {Type: "string", Description: "Preferred chain for payment"},
+					"confirmed":      {Type: "boolean", Description: "Set to true to execute"},
+				},
+				Required: []string{"url"},
+			},
+		},
+		{
+			Name:        "t402/erc8004/resolveAgent",
+			Description: "[Go SDK: not implemented — use TS SDK] Resolve an ERC-8004 agent's on-chain identity",
+			InputSchema: InputSchema{
+				Type: "object",
+				Properties: map[string]Property{
+					"agentId":       {Type: "integer", Description: "Agent NFT token ID"},
+					"agentRegistry": {Type: "string", Description: "Agent registry CAIP-2 ID (e.g. eip155:8453:0x...)", Pattern: `^eip155:\d+:0x[a-fA-F0-9]+$`},
+				},
+				Required: []string{"agentId", "agentRegistry"},
+			},
+		},
+		{
+			Name:        "t402/erc8004/verifyWallet",
+			Description: "[Go SDK: not implemented — use TS SDK] Verify a payTo address matches an ERC-8004 agent's wallet",
+			InputSchema: InputSchema{
+				Type: "object",
+				Properties: map[string]Property{
+					"agentId":       {Type: "integer", Description: "Agent NFT token ID"},
+					"agentRegistry": {Type: "string", Description: "Agent registry CAIP-2 ID", Pattern: `^eip155:\d+:0x[a-fA-F0-9]+$`},
+					"walletAddress": {Type: "string", Description: "Wallet to verify", Pattern: "^0x[a-fA-F0-9]{40}$"},
+				},
+				Required: []string{"agentId", "agentRegistry", "walletAddress"},
+			},
+		},
+		{
+			Name:        "t402/erc8004/checkReputation",
+			Description: "[Go SDK: not implemented — use TS SDK] Query an ERC-8004 agent's reputation score",
+			InputSchema: InputSchema{
+				Type: "object",
+				Properties: map[string]Property{
+					"agentId":            {Type: "integer", Description: "Agent NFT token ID"},
+					"agentRegistry":      {Type: "string", Description: "Agent registry CAIP-2 ID", Pattern: `^eip155:\d+:0x[a-fA-F0-9]+$`},
+					"reputationRegistry": {Type: "string", Description: "Reputation Registry contract address", Pattern: "^0x[a-fA-F0-9]{40}$"},
+					"trustedReviewers":   {Type: "array", Description: "Addresses whose feedback is trusted"},
+				},
+				Required: []string{"agentId", "agentRegistry", "reputationRegistry", "trustedReviewers"},
+			},
+		},
+		{
+			Name:        "t402/getTransferHistory",
+			Description: "Query recent ERC-20 stablecoin Transfer events for an address (last 10,000 blocks)",
+			InputSchema: InputSchema{
+				Type: "object",
+				Properties: map[string]Property{
+					"network": {Type: "string", Description: "Network to query", Enum: networks},
+					"address": {Type: "string", Description: "Wallet address", Pattern: "^0x[a-fA-F0-9]{40}$"},
+					"token":   {Type: "string", Description: "Filter by token (USDC, USDT, USDT0)", Enum: []string{"USDC", "USDT", "USDT0"}},
+					"limit":   {Type: "integer", Description: "Max results (default 10, max 100)"},
+				},
+				Required: []string{"network", "address"},
 			},
 		},
 	}

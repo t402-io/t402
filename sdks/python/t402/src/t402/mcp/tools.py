@@ -502,4 +502,152 @@ def get_tool_definitions() -> list[Tool]:
                 required=["quoteId"],
             ),
         ),
+        # ------------------------------------------------------------------
+        # Phase C Batch 4 (2026-04-25)
+        # ------------------------------------------------------------------
+        Tool(
+            name="t402/searchBazaar",
+            description="Discover t402-protected services from the Bazaar marketplace",
+            inputSchema=InputSchema(
+                type="object",
+                properties={
+                    "query": Property(type="string", description="Search query (e.g. 'weather API')"),
+                    "category": Property(type="string", description="Filter by category"),
+                    "maxPrice": Property(type="string", description="Maximum price in USD"),
+                    "network": Property(type="string", description="Filter by CAIP-2 network"),
+                    "token": Property(type="string", description="Filter by token symbol"),
+                    "tags": Property(type="string", description="Comma-separated tags"),
+                },
+                required=["query"],
+            ),
+        ),
+        Tool(
+            name="t402/payForService",
+            description="[Python SDK: not implemented — use TS SDK] Pay for a t402-protected service end-to-end",
+            inputSchema=InputSchema(
+                type="object",
+                properties={
+                    "url": Property(type="string", description="URL of the t402-protected service"),
+                    "method": Property(type="string", description="HTTP method (default: GET)"),
+                    "body": Property(type="string", description="Request body for POST/PUT"),
+                    "maxAmount": Property(type="string", description="Max USD amount willing to pay"),
+                    "confirmed": Property(type="boolean", description="Confirm and execute payment"),
+                },
+                required=["url"],
+            ),
+        ),
+        Tool(
+            name="t402/autoPay",
+            description="[Python SDK: not implemented — use TS SDK] Smart payment orchestrator: fetch URL, detect 402, sign payment, retry",
+            inputSchema=InputSchema(
+                type="object",
+                properties={
+                    "url": Property(type="string", description="URL to fetch (may return 402)"),
+                    "maxAmount": Property(
+                        type="string",
+                        description="Maximum amount willing to pay",
+                        pattern=r"^\d+(\.\d+)?$",
+                    ),
+                    "preferredChain": Property(type="string", description="Preferred chain for payment"),
+                    "confirmed": Property(type="boolean", description="Set to true to execute"),
+                },
+                required=["url"],
+            ),
+        ),
+        Tool(
+            name="t402/erc8004/resolveAgent",
+            description="[Python SDK: not implemented — use TS SDK] Resolve an ERC-8004 agent's on-chain identity",
+            inputSchema=InputSchema(
+                type="object",
+                properties={
+                    "agentId": Property(type="integer", description="Agent NFT token ID"),
+                    "agentRegistry": Property(
+                        type="string",
+                        description="Agent registry CAIP-2 ID (e.g. eip155:8453:0x...)",
+                        pattern=r"^eip155:\d+:0x[a-fA-F0-9]+$",
+                    ),
+                },
+                required=["agentId", "agentRegistry"],
+            ),
+        ),
+        Tool(
+            name="t402/erc8004/verifyWallet",
+            description="[Python SDK: not implemented — use TS SDK] Verify a payTo address matches an ERC-8004 agent's wallet",
+            inputSchema=InputSchema(
+                type="object",
+                properties={
+                    "agentId": Property(type="integer", description="Agent NFT token ID"),
+                    "agentRegistry": Property(
+                        type="string",
+                        description="Agent registry CAIP-2 ID",
+                        pattern=r"^eip155:\d+:0x[a-fA-F0-9]+$",
+                    ),
+                    "walletAddress": Property(
+                        type="string",
+                        description="Wallet to verify",
+                        pattern="^0x[a-fA-F0-9]{40}$",
+                    ),
+                },
+                required=["agentId", "agentRegistry", "walletAddress"],
+            ),
+        ),
+        Tool(
+            name="t402/erc8004/checkReputation",
+            description="[Python SDK: not implemented — use TS SDK] Query an ERC-8004 agent's reputation score",
+            inputSchema=InputSchema(
+                type="object",
+                properties={
+                    "agentId": Property(type="integer", description="Agent NFT token ID"),
+                    "agentRegistry": Property(
+                        type="string",
+                        description="Agent registry CAIP-2 ID",
+                        pattern=r"^eip155:\d+:0x[a-fA-F0-9]+$",
+                    ),
+                    "reputationRegistry": Property(
+                        type="string",
+                        description="Reputation Registry contract address",
+                        pattern="^0x[a-fA-F0-9]{40}$",
+                    ),
+                    "trustedReviewers": Property(
+                        type="array",
+                        description="Addresses whose feedback is trusted",
+                    ),
+                },
+                required=[
+                    "agentId",
+                    "agentRegistry",
+                    "reputationRegistry",
+                    "trustedReviewers",
+                ],
+            ),
+        ),
+        Tool(
+            name="t402/getTransferHistory",
+            description="Query recent ERC-20 stablecoin Transfer events for an address (last 10,000 blocks)",
+            inputSchema=InputSchema(
+                type="object",
+                properties={
+                    "network": Property(
+                        type="string",
+                        description="Network to query",
+                        enum=networks,
+                    ),
+                    "address": Property(
+                        type="string",
+                        description="Wallet address",
+                        pattern="^0x[a-fA-F0-9]{40}$",
+                    ),
+                    "token": Property(
+                        type="string",
+                        description="Filter by token (USDC, USDT, USDT0)",
+                        enum=["USDC", "USDT", "USDT0"],
+                    ),
+                    "limit": Property(
+                        type="integer",
+                        description="Max results (default 10, max 100)",
+                    ),
+                },
+                required=["network", "address"],
+            ),
+        ),
     ]

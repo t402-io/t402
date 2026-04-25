@@ -350,3 +350,42 @@ type ExecuteBridgeFromQuoteInput struct {
 	QuoteID   string `json:"quoteId"`
 	Confirmed bool   `json:"confirmed,omitempty"`
 }
+
+// ===== Phase C Batch 4 tool types (2026-04-25) =====
+
+// SearchBazaarInput is the input for t402/searchBazaar.
+type SearchBazaarInput struct {
+	Query    string `json:"query"`
+	Category string `json:"category,omitempty"`
+	MaxPrice string `json:"maxPrice,omitempty"`
+	Network  string `json:"network,omitempty"`
+	Token    string `json:"token,omitempty"`
+	Tags     string `json:"tags,omitempty"`
+}
+
+// BazaarPrice is a single price entry in BazaarService.Price.
+type BazaarPrice struct {
+	Amount  string `json:"amount"`
+	Token   string `json:"token"`
+	Network string `json:"network"`
+}
+
+// BazaarService is one entry in t402/searchBazaar results.
+type BazaarService struct {
+	URL         string      `json:"url"`
+	Name        string      `json:"name"`
+	Description string      `json:"description"`
+	Category    string      `json:"category"`
+	Price       BazaarPrice `json:"price"`
+	Methods     []string    `json:"methods"`
+	Tags        []string    `json:"tags,omitempty"`
+	Verified    *bool       `json:"verified,omitempty"`
+}
+
+// GetTransferHistoryInput is the input for t402/getTransferHistory.
+type GetTransferHistoryInput struct {
+	Network string `json:"network"`
+	Address string `json:"address"`
+	Token   string `json:"token,omitempty"`
+	Limit   int    `json:"limit,omitempty"`
+}

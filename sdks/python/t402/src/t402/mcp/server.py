@@ -225,6 +225,18 @@ class T402McpServer:
             result = await self._handle_quote_bridge(arguments)
         elif tool_name == "t402/executeBridgeFromQuote":
             result = await self._handle_execute_bridge_from_quote(arguments)
+        elif tool_name == "t402/searchBazaar":
+            result = await self._handle_search_bazaar(arguments)
+        elif tool_name in (
+            "t402/payForService",
+            "t402/autoPay",
+            "t402/erc8004/resolveAgent",
+            "t402/erc8004/verifyWallet",
+            "t402/erc8004/checkReputation",
+        ):
+            result = self._handle_batch4_stub(tool_name)
+        elif tool_name == "t402/getTransferHistory":
+            result = await self._handle_get_transfer_history(arguments)
         else:
             result = self._error_result(f"Unknown tool: {tool_name}")
 
@@ -1528,6 +1540,307 @@ class T402McpServer:
             return result
         except Exception as e:
             return self._error_result(str(e))
+
+    # ------------------------------------------------------------------
+    # Phase C Batch 4 — bazaar discovery, transfer history, stubs (2026-04-25)
+    # ------------------------------------------------------------------
+
+    async def _handle_search_bazaar(self, args: dict[str, Any]) -> ToolResult:
+        """Handle t402/searchBazaar.
+
+        Calls bazaar.t402.io when reachable, falls back to a small
+        curated demo set when offline. Schema and demo data mirror
+        the TS implementation.
+        """
+        try:
+            query = args.get("query", "")
+            if not query:
+                return self._error_result("query must not be empty")
+
+            params: dict[str, str] = {"q": query}
+            for key in ("category", "maxPrice", "network", "token", "tags"):
+                value = args.get(key)
+                if value:
+                    params[key] = str(value)
+
+            services = await self._fetch_bazaar_services(params)
+            if services is None:
+                services = self._bazaar_demo_results(query)
+            if not services:
+                return self._text_result("No services found.")
+
+            lines = ["## Bazaar Results", ""]
+            for svc in services:
+                price = svc.get("price", {}) or {}
+                amount = price.get("amount", "")
+                try:
+                    amount = f"{int(amount) / 1e6:.4f}"
+                except (TypeError, ValueError):
+                    pass
+                lines.append(
+                    f"• **{svc.get('name', '?')}** — {svc.get('description', '')}"
+                )
+                lines.append(f"  URL: {svc.get('url', '')}")
+                lines.append(
+                    f"  Price: {amount} {price.get('token', '?')} on {price.get('network', '?')}"
+                )
+                tags = svc.get("tags") or []
+                if tags:
+                    lines.append(f"  Tags: {', '.join(tags)}")
+                lines.append("")
+            return self._text_result("\n".join(lines))
+        except Exception as e:
+            return self._error_result(str(e))
+
+    async def _fetch_bazaar_services(
+        self, params: dict[str, str]
+    ) -> Optional[list[dict[str, Any]]]:
+        """Try the live bazaar API; return None on any failure so the
+        caller falls back to demo results without a separate error path.
+        """
+        try:
+            from urllib.parse import urlencode
+            from urllib.request import Request, urlopen
+            import json as _json
+
+            url = f"https://bazaar.t402.io/api/v1/search?{urlencode(params)}"
+            req = Request(url, headers={"User-Agent": "t402-mcp/1.0"})
+
+            def _fetch() -> Optional[list[dict[str, Any]]]:
+                with urlopen(req, timeout=10) as resp:
+                    if resp.status != 200:
+                        return None
+                    payload = _json.loads(resp.read().decode("utf-8"))
+                    return payload.get("services", [])
+
+            return await run_sync_in_executor(_fetch)
+        except Exception:
+            return None
+
+    def _bazaar_demo_results(self, query: str) -> list[dict[str, Any]]:
+        """Mirrors the TS demo fallback set."""
+        q = query.lower()
+        catalogue = [
+            {
+                "url": "https://api.weather402.com/forecast",
+                "name": "Weather Forecast API",
+                "description": "Global weather data with hourly resolution, 7-day forecast",
+                "category": "data",
+                "price": {"amount": "1000", "token": "USDC", "network": "eip155:8453"},
+                "methods": ["GET"],
+            },
+            {
+                "url": "https://api.llm402.com/v1/chat/completions",
+                "name": "LLM Inference API",
+                "description": "Pay-per-request access to GPT-4, Claude, and open models",
+                "category": "ai",
+                "price": {"amount": "5000", "token": "USDC", "network": "eip155:8453"},
+                "methods": ["POST"],
+            },
+            {
+                "url": "https://api.market402.com/report",
+                "name": "DeFi Market Intelligence",
+                "description": "Weekly DeFi market analysis with trading signals and risk metrics",
+                "category": "reports",
+                "price": {"amount": "50000", "token": "USDT0", "network": "eip155:42161"},
+                "methods": ["GET"],
+            },
+            {
+                "url": "https://api.image402.com/generate",
+                "name": "Image Generation API",
+                "description": "High-res image generation via Stable Diffusion XL and Flux",
+                "category": "ai",
+                "price": {"amount": "2000", "token": "USDC", "network": "eip155:8453"},
+                "methods": ["POST"],
+            },
+            {
+                "url": "https://api.compute402.com/gpu/run",
+                "name": "GPU Compute Service",
+                "description": "On-demand GPU compute for ML inference (A100, H100)",
+                "category": "compute",
+                "price": {"amount": "100000", "token": "USDT0", "network": "eip155:42161"},
+                "methods": ["POST"],
+            },
+        ]
+        return [
+            s
+            for s in catalogue
+            if q in s["name"].lower()
+            or q in s["description"].lower()
+            or q in s["category"].lower()
+        ]
+
+    def _handle_batch4_stub(self, tool_name: str) -> ToolResult:
+        """Single error-stub handler shared by payForService, autoPay,
+        and the three erc8004 tools. Each tool needs ABI bindings or a
+        WDK-style orchestration layer that the Python SDK does not
+        bundle yet — schemas exist for cross-SDK discovery parity but
+        the handlers point callers at the TypeScript SDK.
+        """
+        if tool_name in ("t402/payForService", "t402/autoPay"):
+            msg = (
+                f"{tool_name.split('/')[1]} is not implemented in the Python SDK. "
+                "These tools perform a multi-step orchestration "
+                "(fetch → 402 detect → balance check → sign → retry) "
+                "that depends on a WDK-style wallet abstraction. "
+                "Use the TypeScript SDK (@t402/mcp) for now; the schema "
+                "is exposed here for cross-SDK discovery parity only."
+            )
+        else:
+            msg = (
+                "ERC-8004 agent identity tools are not implemented in the "
+                "Python SDK. resolveAgent / verifyWallet / checkReputation "
+                "all require ERC-8004 contract ABI bindings that the "
+                "Python SDK does not ship yet. Use the TypeScript SDK "
+                "(@t402/mcp) for ERC-8004 flows. Schemas are exposed here "
+                "for cross-SDK discovery parity."
+            )
+        return self._error_result(msg)
+
+    async def _handle_get_transfer_history(
+        self, args: dict[str, Any]
+    ) -> ToolResult:
+        """Handle t402/getTransferHistory.
+
+        Queries the last 10,000 blocks for ERC-20 stablecoin Transfer
+        events involving `address` (as sender or receiver), merges
+        results across the configured stablecoins (or the requested
+        single token), sorts newest-first, and trims to `limit`. Demo
+        mode returns a placeholder note.
+        """
+        try:
+            network = args.get("network", "")
+            address = args.get("address", "")
+            token = args.get("token", "") or ""
+            limit = args.get("limit") or 10
+            if not isinstance(limit, int) or limit <= 0:
+                limit = 10
+            if limit > 100:
+                limit = 100
+
+            if not is_valid_network(network):
+                return self._error_result(f"Invalid network: {network}")
+            if not address:
+                return self._error_result("address must not be empty")
+
+            if self.config.demo_mode:
+                lines = [
+                    f"## Transfer History — {address} on {network} [demo]",
+                    "",
+                    "_Demo mode — no RPC was queried._",
+                    "",
+                    f"Would have returned up to {limit} most recent ERC-20 transfers in the last 10,000 blocks.",
+                ]
+                return self._text_result("\n".join(lines))
+
+            from web3 import Web3
+
+            w3 = self._get_web3(network)
+            latest = await run_sync_in_executor(lambda: w3.eth.block_number)
+            from_block = max(0, latest - 10_000)
+
+            tokens = [token] if token else ["USDC", "USDT", "USDT0"]
+            transfer_topic = Web3.keccak(
+                text="Transfer(address,address,uint256)"
+            ).hex()
+            address_topic = "0x" + address[2:].rjust(64, "0").lower()
+
+            records: list[dict[str, Any]] = []
+            for tok in tokens:
+                token_addr = get_token_address(network, tok)
+                if not token_addr:
+                    continue
+
+                for position in (1, 2):  # 1 = from, 2 = to
+                    topics: list[Any] = [transfer_topic, None, None]
+                    topics[position] = address_topic
+                    filter_params = {
+                        "fromBlock": from_block,
+                        "toBlock": latest,
+                        "address": token_addr,
+                        "topics": topics,
+                    }
+                    try:
+                        logs = await run_sync_in_executor(
+                            lambda fp=filter_params: w3.eth.get_logs(fp)
+                        )
+                    except Exception:
+                        continue
+                    for lg in logs:
+                        records.append(self._transfer_record(lg, tok, network))
+
+            records.sort(
+                key=lambda r: (r["blockNumber"], r["logIndex"]),
+                reverse=True,
+            )
+            records = records[:limit]
+
+            if not records:
+                return self._text_result(
+                    f"## Transfer History\n\nNo transfers found for {address} "
+                    f"on {network} in the last 10,000 blocks."
+                )
+
+            lines = [
+                f"## Transfer History — {address} on {network}",
+                "",
+                f"Showing {len(records)} most recent transfers (latest 10,000 blocks):",
+                "",
+            ]
+            for r in records:
+                amount = r["amount"] / 1e6
+                if r["from"].lower() == address.lower():
+                    direction = "↗"
+                    other = r["to"]
+                elif r["to"].lower() == address.lower():
+                    direction = "↘"
+                    other = r["from"]
+                else:
+                    direction = "→"
+                    other = r["to"]
+                lines.append(
+                    f"- {direction} {amount:.4f} {r['token']} {other}  "
+                    f"(block {r['blockNumber']}, tx `{r['txHash']}`)"
+                )
+            return self._text_result("\n".join(lines))
+        except Exception as e:
+            return self._error_result(str(e))
+
+    @staticmethod
+    def _transfer_record(
+        log: dict[str, Any], token: str, network: str
+    ) -> dict[str, Any]:
+        """Decode a Transfer event log into a flat record."""
+        topics = log.get("topics", [])
+        # web3.py returns topics as HexBytes; normalize to lowercase strings.
+        topics = [t.hex() if hasattr(t, "hex") else str(t) for t in topics]
+        from_addr = "0x" + topics[1][-40:].lower()
+        to_addr = "0x" + topics[2][-40:].lower()
+
+        data = log.get("data", "0x")
+        if hasattr(data, "hex"):
+            data_hex = data.hex()
+        else:
+            data_hex = str(data)
+        data_hex = data_hex[2:] if data_hex.startswith("0x") else data_hex
+        amount = int(data_hex, 16) if data_hex else 0
+
+        tx_hash = log.get("transactionHash")
+        if hasattr(tx_hash, "hex"):
+            tx_hash = tx_hash.hex()
+        if isinstance(tx_hash, str) and not tx_hash.startswith("0x"):
+            tx_hash = "0x" + tx_hash
+
+        return {
+            "token": token,
+            "network": network,
+            "from": from_addr,
+            "to": to_addr,
+            "amount": amount,
+            "blockNumber": log.get("blockNumber", 0),
+            "logIndex": log.get("logIndex", 0),
+            "txHash": tx_hash or "",
+        }
 
     # Result helpers
 

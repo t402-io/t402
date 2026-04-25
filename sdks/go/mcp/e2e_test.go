@@ -120,7 +120,7 @@ func TestE2E_ServerListTools(t *testing.T) {
 
 	tools, ok := result["tools"].([]any)
 	require.True(t, ok)
-	assert.Len(t, tools, 21)
+	assert.Len(t, tools, 28)
 
 	// Verify all expected tools are listed
 	toolNames := make(map[string]bool)
@@ -134,30 +134,20 @@ func TestE2E_ServerListTools(t *testing.T) {
 
 	expectedTools := []string{
 		// Original 6 (pre-Phase C)
-		"t402/getBalance",
-		"t402/getAllBalances",
-		"t402/pay",
-		"t402/payGasless",
-		"t402/getBridgeFee",
-		"t402/bridge",
+		"t402/getBalance", "t402/getAllBalances", "t402/pay",
+		"t402/payGasless", "t402/getBridgeFee", "t402/bridge",
 		// Phase C Batch 1 (2026-04-24)
-		"t402/getTokenPrice",
-		"t402/getGasPrice",
-		"t402/signMessage",
+		"t402/getTokenPrice", "t402/getGasPrice", "t402/signMessage",
 		// Phase C Batch 2 — WDK tools (2026-04-24)
-		"t402/wdk/getWallet",
-		"t402/wdk/getBalances",
-		"t402/wdk/transfer",
-		"t402/wdk/swap",
-		"t402/wdk/quoteSwap",
-		"t402/wdk/executeSwap",
+		"t402/wdk/getWallet", "t402/wdk/getBalances", "t402/wdk/transfer",
+		"t402/wdk/swap", "t402/wdk/quoteSwap", "t402/wdk/executeSwap",
 		// Phase C Batch 3 (2026-04-24)
-		"t402/verifySignature",
-		"t402/estimatePaymentFee",
-		"t402/compareNetworkFees",
-		"t402/getHistoricalPrice",
-		"t402/quoteBridge",
-		"t402/executeBridgeFromQuote",
+		"t402/verifySignature", "t402/estimatePaymentFee", "t402/compareNetworkFees",
+		"t402/getHistoricalPrice", "t402/quoteBridge", "t402/executeBridgeFromQuote",
+		// Phase C Batch 4 (2026-04-25)
+		"t402/searchBazaar", "t402/payForService", "t402/autoPay",
+		"t402/erc8004/resolveAgent", "t402/erc8004/verifyWallet", "t402/erc8004/checkReputation",
+		"t402/getTransferHistory",
 	}
 	for _, expected := range expectedTools {
 		assert.True(t, toolNames[expected], "Missing tool: %s", expected)
