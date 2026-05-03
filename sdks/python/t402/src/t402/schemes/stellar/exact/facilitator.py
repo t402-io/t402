@@ -12,7 +12,6 @@ The facilitator:
 
 from __future__ import annotations
 
-import time
 import logging
 from typing import Any, Dict, List, Optional, Protocol, Union, runtime_checkable
 
@@ -27,8 +26,6 @@ from t402.stellar import (
     SCHEME_EXACT,
     MIN_VALIDITY_BUFFER,
     LEDGER_TIME_SECONDS,
-    TransactionStatus,
-    validate_stellar_address,
     addresses_equal,
     is_valid_network,
     get_network_config,

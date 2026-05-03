@@ -6,7 +6,7 @@ Supports EIP-712 signing format.
 """
 
 import time
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Protocol
 
 

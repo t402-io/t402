@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import time
 from threading import Lock
-from typing import Optional
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 import json

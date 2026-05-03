@@ -8,11 +8,9 @@ using Soroban smart contract token transfers (SEP-41).
 from __future__ import annotations
 
 import re
-import time
-import base64
 import math
 from enum import Enum
-from typing import Any, Dict, Optional, List
+from typing import Dict, Optional
 from typing_extensions import TypedDict
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator

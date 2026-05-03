@@ -27,8 +27,8 @@ Example:
 
 import time
 import threading
-from dataclasses import dataclass, field
-from typing import Any, Callable, List, Optional
+from dataclasses import dataclass
+from typing import Callable, List, Optional
 
 
 @dataclass

@@ -26,7 +26,11 @@ from typing import (
     Awaitable,
     Protocol,
     runtime_checkable,
+    TYPE_CHECKING,
 )
+
+if TYPE_CHECKING:
+    from t402.settlement_cache import SettlementCache
 from typing_extensions import TypedDict
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator

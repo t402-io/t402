@@ -16,14 +16,13 @@ from __future__ import annotations
 import hashlib
 import logging
 import threading
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Union
 
 from t402.types import (
     PaymentRequirementsV2,
     PaymentPayloadV2,
     VerifyResponse,
     SettleResponse,
-    Network,
 )
 from t402.schemes.spark.types import (
     SCHEME_EXACT,
@@ -197,8 +196,6 @@ class SparkFacilitatorScheme:
         Returns:
             VerifyResponse indicating validity.
         """
-        network = requirements.get("network", "")
-
         if not payload.transfer_id:
             return VerifyResponse(
                 is_valid=False,

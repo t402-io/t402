@@ -7,8 +7,7 @@ for Stellar network using Soroban token transfers (SEP-41).
 from __future__ import annotations
 
 import math
-import time
-from typing import Any, Callable, Dict, Optional, Protocol, Union, Awaitable
+from typing import Any, Dict, Protocol, Union
 
 from t402.types import (
     PaymentRequirementsV2,
