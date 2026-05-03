@@ -8,11 +8,21 @@ import (
 	"github.com/gagliardetto/solana-go/programs/system"
 )
 
-// Test private key (deterministic for testing)
-// This is a valid test key for Solana
-const testPrivateKeyBase58 = "4Z7cXSyeFR8wNGMVXUE1TwtKn5D5Vu7FzEv69dokLv7KrQk7h2enu1bSz1tLTjKLuqBm1cUYXL9j3xTmD8wWEqmr"
+// generateTestPrivateKey produces a fresh valid Solana keypair for tests.
+// Using a hardcoded base58 key is brittle: solana-go ≥1.19 strictly verifies
+// the seed/public-key relationship, so a key valid under one version may be
+// rejected under another.
+func generateTestPrivateKey(t *testing.T) string {
+	t.Helper()
+	priv, err := solana.NewRandomPrivateKey()
+	if err != nil {
+		t.Fatalf("NewRandomPrivateKey() failed: %v", err)
+	}
+	return priv.String()
+}
 
 func TestNewClientSignerFromPrivateKey(t *testing.T) {
+	testPrivateKeyBase58 := generateTestPrivateKey(t)
 	tests := []struct {
 		name    string
 		key     string
@@ -61,7 +71,7 @@ func TestNewClientSignerFromPrivateKey(t *testing.T) {
 }
 
 func TestClientSigner_Address(t *testing.T) {
-	signer, err := NewClientSignerFromPrivateKey(testPrivateKeyBase58)
+	signer, err := NewClientSignerFromPrivateKey(generateTestPrivateKey(t))
 	if err != nil {
 		t.Fatalf("NewClientSignerFromPrivateKey() failed: %v", err)
 	}
@@ -80,7 +90,7 @@ func TestClientSigner_Address(t *testing.T) {
 }
 
 func TestClientSigner_SignTransaction(t *testing.T) {
-	signer, err := NewClientSignerFromPrivateKey(testPrivateKeyBase58)
+	signer, err := NewClientSignerFromPrivateKey(generateTestPrivateKey(t))
 	if err != nil {
 		t.Fatalf("NewClientSignerFromPrivateKey() failed: %v", err)
 	}
@@ -131,7 +141,7 @@ func TestClientSigner_SignTransaction(t *testing.T) {
 }
 
 func TestClientSigner_SignTransaction_SignatureArray(t *testing.T) {
-	signer, err := NewClientSignerFromPrivateKey(testPrivateKeyBase58)
+	signer, err := NewClientSignerFromPrivateKey(generateTestPrivateKey(t))
 	if err != nil {
 		t.Fatalf("NewClientSignerFromPrivateKey() failed: %v", err)
 	}
