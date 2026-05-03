@@ -246,7 +246,7 @@ export class ExactTronScheme implements SchemeNetworkFacilitator {
           payer: authorization.from,
         }
       }
-    } catch (error) {
+    } catch (_error) {
       return {
         isValid: false,
         invalidReason: 'balance_check_failed',
@@ -291,7 +291,7 @@ export class ExactTronScheme implements SchemeNetworkFacilitator {
           payer: authorization.from,
         }
       }
-    } catch (error) {
+    } catch (_error) {
       return {
         isValid: false,
         invalidReason: 'account_activation_check_failed',

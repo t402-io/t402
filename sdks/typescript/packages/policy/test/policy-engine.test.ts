@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 
 import { PaymentPolicyEngine } from "../src/engine";
 import { withPolicy, PolicyViolationError } from "../src/middleware";
-import type { PaymentPolicy, PolicyDecision } from "../src/types";
+import type { PaymentPolicy } from "../src/types";
 
 const BASE_REQ = {
   scheme: "exact",
@@ -630,7 +630,7 @@ describe("withPolicy middleware", () => {
     extra: {},
   };
 
-  function mockClient(accepted = MOCK_REQ) {
+  function mockClient(_accepted = MOCK_REQ) {
     return {
       handlePaymentRequired: async (accepts: typeof MOCK_REQ[]) => ({
         accepted: accepts[0],
