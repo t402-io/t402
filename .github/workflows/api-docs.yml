@@ -71,7 +71,7 @@ jobs:
           command: pages deploy services/docs/out --project-name=t402-docs
 
       - name: Deploy Preview
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
