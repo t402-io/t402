@@ -46,7 +46,21 @@
     "ora": "^9.3.0",
     "viem": "^2.47.10"
   },
+  "peerDependencies": {
+    "@t402/wdk": "workspace:*",
+    "@t402/wdk-gasless": "workspace:*"
+  },
+  "peerDependenciesMeta": {
+    "@t402/wdk": {
+      "optional": true
+    },
+    "@t402/wdk-gasless": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "@t402/wdk": "workspace:*",
+    "@t402/wdk-gasless": "workspace:*",
     "@types/node": "^25.5.2",
     "glob": "^13.0.6",
     "tsup": "^8.5.1",
