@@ -200,7 +200,7 @@ export class ExactTonScheme implements SchemeNetworkFacilitator {
           payer: authorization.from,
         }
       }
-    } catch (error) {
+    } catch (_error) {
       return {
         isValid: false,
         invalidReason: 'balance_check_failed',
@@ -252,7 +252,7 @@ export class ExactTonScheme implements SchemeNetworkFacilitator {
           payer: authorization.from,
         }
       }
-    } catch (error) {
+    } catch (_error) {
       return {
         isValid: false,
         invalidReason: 'seqno_check_failed',
@@ -270,7 +270,7 @@ export class ExactTonScheme implements SchemeNetworkFacilitator {
           payer: authorization.from,
         }
       }
-    } catch (error) {
+    } catch (_error) {
       return {
         isValid: false,
         invalidReason: 'wallet_deployment_check_failed',
@@ -375,8 +375,8 @@ export class ExactTonScheme implements SchemeNetworkFacilitator {
         network: payload.accepted.network,
         payer: tonPayload.authorization.from,
       }
-    } catch (error) {
-      console.error('Failed to settle TON transaction:', error)
+    } catch (_error) {
+      console.error('Failed to settle TON transaction:', _error)
       return {
         success: false,
         errorReason: 'transaction_failed',

@@ -92,12 +92,19 @@ export function decodeTransactionFromPayload(svmPayload: ExactSvmPayloadV1): Tra
  * @returns The token payer address as a base58 string
  */
 export function getTokenPayerFromTransaction(transaction: Transaction): string {
-  const compiled = getCompiledTransactionMessageDecoder().decode(
-    transaction.messageBytes,
-  );
+  const compiled = getCompiledTransactionMessageDecoder().decode(transaction.messageBytes);
   // All current Solana transactions use legacy or v0 format, both of which have instructions
-  const staticAccounts = "staticAccounts" in compiled ? (compiled.staticAccounts as readonly { toString(): string }[]) : [];
-  const instructions = "instructions" in compiled ? (compiled.instructions as readonly { programAddressIndex: number; accountIndices?: number[] }[]) : [];
+  const staticAccounts =
+    "staticAccounts" in compiled
+      ? (compiled.staticAccounts as readonly { toString(): string }[])
+      : [];
+  const instructions =
+    "instructions" in compiled
+      ? (compiled.instructions as readonly {
+          programAddressIndex: number;
+          accountIndices?: number[];
+        }[])
+      : [];
 
   for (const ix of instructions) {
     const programIndex = ix.programAddressIndex;

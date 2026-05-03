@@ -42,7 +42,8 @@ export interface ERC7710Signer {
 }
 
 // ERC-7579 single call mode (all zeros)
-const SINGLE_CALL_MODE = "0x0000000000000000000000000000000000000000000000000000000000000000" as Hex;
+const SINGLE_CALL_MODE =
+  "0x0000000000000000000000000000000000000000000000000000000000000000" as Hex;
 
 // redeemDelegations ABI
 const redeemDelegationsAbi = [
@@ -87,17 +88,29 @@ export function encodeERC7579Execution(
   return `0x${target}${value}${transferCallData}` as Hex;
 }
 
+/**
+ *
+ */
 export class ERC7710FacilitatorScheme {
   private signer: ERC7710Signer;
 
+  /**
+   * Construct a facilitator scheme that delegates signing to the supplied ERC-7710 signer.
+   */
   constructor(signer: ERC7710Signer) {
     this.signer = signer;
   }
 
+  /**
+   * The scheme identifier in the t402 wire format.
+   */
   get scheme(): string {
     return "exact";
   }
 
+  /**
+   * CAIP-2 family the scheme handles — all EVM networks under eip155.
+   */
   get caipFamily(): string {
     return "eip155:*";
   }
@@ -111,7 +124,11 @@ export class ERC7710FacilitatorScheme {
   ): Promise<VerifyResponse> {
     const erc7710Payload = payload.payload as unknown as ExactERC7710Payload;
 
-    if (!erc7710Payload.delegationManager || !erc7710Payload.permissionContext || !erc7710Payload.delegator) {
+    if (
+      !erc7710Payload.delegationManager ||
+      !erc7710Payload.permissionContext ||
+      !erc7710Payload.delegator
+    ) {
       return { isValid: false };
     }
 
@@ -126,11 +143,7 @@ export class ERC7710FacilitatorScheme {
         erc7710Payload.delegationManager,
         redeemDelegationsAbi,
         "redeemDelegations",
-        [
-          [erc7710Payload.permissionContext],
-          [SINGLE_CALL_MODE],
-          [executionCallData],
-        ],
+        [[erc7710Payload.permissionContext], [SINGLE_CALL_MODE], [executionCallData]],
       );
 
       return { isValid: true, payer: erc7710Payload.delegator };
@@ -166,11 +179,7 @@ export class ERC7710FacilitatorScheme {
       erc7710Payload.delegationManager,
       redeemDelegationsAbi,
       "redeemDelegations",
-      [
-        [erc7710Payload.permissionContext],
-        [SINGLE_CALL_MODE],
-        [executionCallData],
-      ],
+      [[erc7710Payload.permissionContext], [SINGLE_CALL_MODE], [executionCallData]],
     );
 
     const receipt = await this.signer.waitForTransaction(txHash);

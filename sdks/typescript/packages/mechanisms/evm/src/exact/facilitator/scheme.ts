@@ -206,9 +206,20 @@ export class ExactEvmScheme implements SchemeNetworkFacilitator {
     try {
       const nonceUsed = await this.signer.readContract({
         address: getAddress(requirements.asset),
-        abi: [{ type: "function", name: "authorizationState", inputs: [{ type: "address" }, { type: "bytes32" }], outputs: [{ type: "bool" }], stateMutability: "view" }],
+        abi: [
+          {
+            type: "function",
+            name: "authorizationState",
+            inputs: [{ type: "address" }, { type: "bytes32" }],
+            outputs: [{ type: "bool" }],
+            stateMutability: "view",
+          },
+        ],
         functionName: "authorizationState",
-        args: [getAddress(exactEvmPayload.authorization.from), exactEvmPayload.authorization.nonce as `0x${string}`],
+        args: [
+          getAddress(exactEvmPayload.authorization.from),
+          exactEvmPayload.authorization.nonce as `0x${string}`,
+        ],
       });
       if (nonceUsed) {
         return {

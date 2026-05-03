@@ -188,7 +188,7 @@ export class ExactStellarScheme implements SchemeNetworkFacilitator {
           payer: authorization.from,
         }
       }
-    } catch (error) {
+    } catch (_error) {
       return {
         isValid: false,
         invalidReason: 'ledger_expiry_check_failed',
@@ -210,7 +210,7 @@ export class ExactStellarScheme implements SchemeNetworkFacilitator {
           payer: authorization.from,
         }
       }
-    } catch (error) {
+    } catch (_error) {
       return {
         isValid: false,
         invalidReason: 'balance_check_failed',
@@ -255,7 +255,7 @@ export class ExactStellarScheme implements SchemeNetworkFacilitator {
           payer: authorization.from,
         }
       }
-    } catch (error) {
+    } catch (_error) {
       return {
         isValid: false,
         invalidReason: 'account_existence_check_failed',
@@ -339,8 +339,8 @@ export class ExactStellarScheme implements SchemeNetworkFacilitator {
         network: payload.accepted.network,
         payer: stellarPayload.authorization.from,
       }
-    } catch (error) {
-      console.error('Failed to settle Stellar transaction:', error)
+    } catch (_error) {
+      console.error('Failed to settle Stellar transaction:', _error)
       return {
         success: false,
         errorReason: 'transaction_failed',

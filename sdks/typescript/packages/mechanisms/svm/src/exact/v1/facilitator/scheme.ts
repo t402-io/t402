@@ -12,10 +12,7 @@ import {
   parseTransferCheckedInstruction as parseTransferCheckedInstruction2022,
   TOKEN_2022_PROGRAM_ADDRESS,
 } from "@solana-program/token-2022";
-import {
-  getCompiledTransactionMessageDecoder,
-  type Address,
-} from "@solana/kit";
+import { getCompiledTransactionMessageDecoder, type Address } from "@solana/kit";
 import type {
   PaymentPayload,
   PaymentRequirements,
@@ -154,13 +151,17 @@ export class ExactSvmSchemeV1 implements SchemeNetworkFacilitator {
       };
     }
 
-    const compiled = getCompiledTransactionMessageDecoder().decode(
-      transaction.messageBytes,
-    );
+    const compiled = getCompiledTransactionMessageDecoder().decode(transaction.messageBytes);
 
     // All current Solana transactions use legacy or v0 format with instructions/staticAccounts
-    const staticAccounts = ("staticAccounts" in compiled ? compiled.staticAccounts : []) as Address[];
-    const compiledInstructions = ("instructions" in compiled ? compiled.instructions : []) as { programAddressIndex: number; accountIndices?: number[]; data?: Uint8Array }[];
+    const staticAccounts = (
+      "staticAccounts" in compiled ? compiled.staticAccounts : []
+    ) as Address[];
+    const compiledInstructions = ("instructions" in compiled ? compiled.instructions : []) as {
+      programAddressIndex: number;
+      accountIndices?: number[];
+      data?: Uint8Array;
+    }[];
 
     // Map compiled instructions to decompiled format with resolved addresses
     const instructions = compiledInstructions.map(ix => ({

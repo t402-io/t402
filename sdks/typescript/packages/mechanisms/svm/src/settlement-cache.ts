@@ -17,15 +17,27 @@ interface CacheEntry {
 
 const DEFAULT_TTL = 60_000;
 
+/**
+ *
+ */
 export class SettlementCache {
   private entries = new Map<string, CacheEntry>();
   private ttl: number;
 
+  /**
+   * Create a new settlement cache. TTL falls back to DEFAULT_TTL when unset.
+   *
+   * @param options
+   */
   constructor(options?: SettlementCacheOptions) {
     this.ttl = options?.ttl ?? DEFAULT_TTL;
   }
 
-  /** Compute a cache key from transaction bytes. */
+  /**
+   * Compute a cache key from transaction bytes.
+   *
+   * @param txBytes
+   */
   static transactionKey(txBytes: Uint8Array | string): string {
     const data = typeof txBytes === "string" ? Buffer.from(txBytes, "base64") : txBytes;
     return createHash("sha256").update(data).digest("hex");
@@ -34,6 +46,8 @@ export class SettlementCache {
   /**
    * Check if a transaction is already being settled.
    * Returns true if duplicate, false if new (and records it).
+   *
+   * @param key
    */
   isDuplicate(key: string): boolean {
     this.pruneExpired();
@@ -46,7 +60,11 @@ export class SettlementCache {
     return false;
   }
 
-  /** Remove a key from the cache (called after settlement completes). */
+  /**
+   * Remove a key from the cache (called after settlement completes).
+   *
+   * @param key
+   */
   remove(key: string): void {
     this.entries.delete(key);
   }
@@ -56,6 +74,9 @@ export class SettlementCache {
     return this.entries.size;
   }
 
+  /**
+   * Drop entries past their TTL.
+   */
   private pruneExpired(): void {
     const now = Date.now();
     for (const [key, entry] of this.entries) {

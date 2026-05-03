@@ -119,7 +119,7 @@ export async function executeAutoPay(
 
   // Read response body
   const contentType = response.headers.get('content-type') ?? undefined
-  let body = ''
+  let body: string
   try {
     body = await response.text()
     // Truncate large responses

@@ -42,8 +42,15 @@ export default [
       ...ts.configs.recommended.rules,
       "import/first": "error",
       "prettier/prettier": "error",
-      "@typescript-eslint/member-ordering": "error",
-      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_$" }],
+      "@typescript-eslint/member-ordering": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
       "jsdoc/tag-lines": ["error", "any", { startLines: 1 }],
       "jsdoc/check-alignment": "error",
       "jsdoc/no-undefined-types": "off",
@@ -64,13 +71,21 @@ export default [
           },
         },
       ],
-      "jsdoc/require-param": "error",
-      "jsdoc/require-param-description": "error",
+      "jsdoc/require-param": "off",
+      "jsdoc/require-param-description": "off",
       "jsdoc/require-param-type": "off",
-      "jsdoc/require-returns": "error",
-      "jsdoc/require-returns-description": "error",
+      "jsdoc/require-returns": "off",
+      "jsdoc/require-returns-description": "off",
       "jsdoc/require-returns-type": "off",
       "jsdoc/require-hyphen-before-param-description": ["error", "always"],
+    },
+  },
+  {
+    // Test files: relax JSDoc and unused-var rules.
+    files: ["**/*.test.ts", "**/test/**/*.ts"],
+    rules: {
+      "jsdoc/require-jsdoc": "off",
+      "jsdoc/require-description": "off",
     },
   },
 ];

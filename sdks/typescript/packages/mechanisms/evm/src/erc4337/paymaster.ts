@@ -88,8 +88,8 @@ export class PaymasterClient {
    * @returns Gas estimates including paymaster verification and postOp gas
    */
   async estimatePaymasterGas(
-    _userOp: Partial<UserOperation>, // eslint-disable-line @typescript-eslint/no-unused-vars
-    _chainId: number, // eslint-disable-line @typescript-eslint/no-unused-vars
+    _userOp: Partial<UserOperation>,
+    _chainId: number,
   ): Promise<GasEstimate> {
     // For most paymasters, use default gas limits
     // This can be overridden by calling the paymaster service

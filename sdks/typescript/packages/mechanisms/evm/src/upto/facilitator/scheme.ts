@@ -194,12 +194,20 @@ export class UptoEvmFacilitatorScheme implements SchemeNetworkFacilitator {
 
     // Verify on-chain permit nonce matches payload nonce
     try {
-      const onChainNonce = await this.signer.readContract({
+      const onChainNonce = (await this.signer.readContract({
         address: getAddress(requirements.asset),
-        abi: [{ type: "function", name: "nonces", inputs: [{ type: "address" }], outputs: [{ type: "uint256" }], stateMutability: "view" }],
+        abi: [
+          {
+            type: "function",
+            name: "nonces",
+            inputs: [{ type: "address" }],
+            outputs: [{ type: "uint256" }],
+            stateMutability: "view",
+          },
+        ],
         functionName: "nonces",
         args: [getAddress(uptoPayload.authorization.owner)],
-      }) as bigint;
+      })) as bigint;
       if (onChainNonce !== BigInt(uptoPayload.authorization.nonce)) {
         return {
           isValid: false,
@@ -213,12 +221,20 @@ export class UptoEvmFacilitatorScheme implements SchemeNetworkFacilitator {
 
     // Verify payer has sufficient balance
     try {
-      const balance = await this.signer.readContract({
+      const balance = (await this.signer.readContract({
         address: getAddress(requirements.asset),
-        abi: [{ type: "function", name: "balanceOf", inputs: [{ type: "address" }], outputs: [{ type: "uint256" }], stateMutability: "view" }],
+        abi: [
+          {
+            type: "function",
+            name: "balanceOf",
+            inputs: [{ type: "address" }],
+            outputs: [{ type: "uint256" }],
+            stateMutability: "view",
+          },
+        ],
         functionName: "balanceOf",
         args: [getAddress(uptoPayload.authorization.owner)],
-      }) as bigint;
+      })) as bigint;
       if (balance < BigInt(maxAmount)) {
         return {
           isValid: false,

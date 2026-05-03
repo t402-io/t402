@@ -9,11 +9,7 @@
  * direct wallet interactions, or pre-configured session keys.
  */
 
-import type {
-  PaymentPayload,
-  PaymentRequirements,
-  SchemeNetworkClient,
-} from "@t402/core/types";
+import type { PaymentPayload, PaymentRequirements, SchemeNetworkClient } from "@t402/core/types";
 import type { ExactERC7710Payload } from "@t402/evm-core";
 
 /**
@@ -46,6 +42,9 @@ export class ERC7710ClientScheme implements SchemeNetworkClient {
   readonly scheme = "exact";
   private readonly config: ERC7710ClientConfig;
 
+  /**
+   * Construct an ERC-7710 client scheme. Validates required config fields up front.
+   */
   constructor(config: ERC7710ClientConfig) {
     if (!config.delegationManager) throw new Error("delegationManager is required");
     if (!config.permissionContext) throw new Error("permissionContext is required");
