@@ -77,7 +77,7 @@ jobs:
           echo "Released Go module version: $VERSION"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           name: "Go SDK ${{ steps.version.outputs.version }}"
           body: |
