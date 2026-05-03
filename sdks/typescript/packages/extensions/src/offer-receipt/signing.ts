@@ -38,6 +38,10 @@ export interface VerifyOfferReceiptOptions {
 
 /**
  * Create a signed offer from payment requirements.
+ *
+ * @param signer
+ * @param payload
+ * @param acceptIndex
  */
 export async function createSignedOffer(
   signer: EIP712OfferReceiptSigner,
@@ -55,6 +59,9 @@ export async function createSignedOffer(
 
 /**
  * Create a signed receipt after successful payment.
+ *
+ * @param signer
+ * @param payload
  */
 export async function createSignedReceipt(
   signer: EIP712OfferReceiptSigner,
@@ -76,6 +83,10 @@ export async function createSignedReceipt(
  * Returns `{ valid: true, signer, payload }` on success, or `{ valid: false }`
  * on any failure. The `signer` field carries the recovered EVM address for
  * EIP-712 inputs and the JWS header's `kid` (when present) for JWS inputs.
+ *
+ * @param verifier
+ * @param offer
+ * @param options
  */
 export async function verifyOffer(
   verifier: EIP712OfferReceiptVerifier,
@@ -101,10 +112,7 @@ export async function verifyOffer(
   }
 
   try {
-    const signerAddress = await verifier.recoverOfferSigner(
-      offer.payload,
-      offer.signature,
-    );
+    const signerAddress = await verifier.recoverOfferSigner(offer.payload, offer.signature);
     return {
       valid: true,
       signer: signerAddress,
@@ -118,6 +126,10 @@ export async function verifyOffer(
 /**
  * Verify a signed receipt. Dispatches to EIP-712 recovery or JWS verification
  * based on `receipt.format`. Same options semantics as `verifyOffer`.
+ *
+ * @param verifier
+ * @param receipt
+ * @param options
  */
 export async function verifyReceipt(
   verifier: EIP712OfferReceiptVerifier,
@@ -143,10 +155,7 @@ export async function verifyReceipt(
   }
 
   try {
-    const signerAddress = await verifier.recoverReceiptSigner(
-      receipt.payload,
-      receipt.signature,
-    );
+    const signerAddress = await verifier.recoverReceiptSigner(receipt.payload, receipt.signature);
     return {
       valid: true,
       signer: signerAddress,
@@ -159,6 +168,14 @@ export async function verifyReceipt(
 
 /**
  * Match an offer to payment requirements by comparing key fields.
+ *
+ * @param offer
+ * @param requirements
+ * @param requirements.scheme
+ * @param requirements.network
+ * @param requirements.asset
+ * @param requirements.payTo
+ * @param requirements.amount
  */
 export function matchOfferToRequirements(
   offer: SignedOffer,
@@ -184,6 +201,9 @@ export function matchOfferToRequirements(
 
 /**
  * Check if an offer has expired.
+ *
+ * @param offer
+ * @param nowSeconds
  */
 export function isOfferExpired(offer: SignedOffer, nowSeconds?: number): boolean {
   const payload = offer.format === "eip712" ? offer.payload : null;

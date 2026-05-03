@@ -18,30 +18,26 @@ import { OFFER_RECEIPT_KEY } from "./server";
 
 /**
  * Extract offers from a 402 response's extensions.
+ *
+ * @param extensions
  */
-export function extractOffers(
-  extensions?: Record<string, unknown>,
-): SignedOffer[] {
+export function extractOffers(extensions?: Record<string, unknown>): SignedOffer[] {
   if (!extensions) return [];
 
-  const ext = extensions[OFFER_RECEIPT_KEY] as
-    | { info?: { offers?: SignedOffer[] } }
-    | undefined;
+  const ext = extensions[OFFER_RECEIPT_KEY] as { info?: { offers?: SignedOffer[] } } | undefined;
 
   return ext?.info?.offers ?? [];
 }
 
 /**
  * Extract a receipt from a success response's extensions.
+ *
+ * @param extensions
  */
-export function extractReceipt(
-  extensions?: Record<string, unknown>,
-): SignedReceipt | null {
+export function extractReceipt(extensions?: Record<string, unknown>): SignedReceipt | null {
   if (!extensions) return null;
 
-  const ext = extensions[OFFER_RECEIPT_KEY] as
-    | { info?: { receipt?: SignedReceipt } }
-    | undefined;
+  const ext = extensions[OFFER_RECEIPT_KEY] as { info?: { receipt?: SignedReceipt } } | undefined;
 
   return ext?.info?.receipt ?? null;
 }
@@ -50,6 +46,18 @@ export function extractReceipt(
  * Find and verify the offer that matches specific payment requirements.
  *
  * Returns the verified offer if found and valid, null otherwise.
+ *
+ * @param verifier
+ * @param offers
+ * @param requirements
+ * @param requirements.scheme
+ * @param requirements.network
+ * @param requirements.asset
+ * @param requirements.payTo
+ * @param requirements.amount
+ * @param options
+ * @param options.expectedSigner
+ * @param options.nowSeconds
  */
 export async function findAndVerifyOffer(
   verifier: EIP712OfferReceiptVerifier,
@@ -105,6 +113,11 @@ export async function findAndVerifyOffer(
  * Verify a receipt from a success response.
  *
  * Returns the verified receipt data if valid, null otherwise.
+ *
+ * @param verifier
+ * @param extensions
+ * @param options
+ * @param options.expectedSigner
  */
 export async function verifyReceiptFromResponse(
   verifier: EIP712OfferReceiptVerifier,

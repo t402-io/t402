@@ -791,12 +791,12 @@ export async function verifyEIP6492Signature(
       }) => Promise<boolean>;
     };
 
-    const normalizedHash = (messageHash.startsWith("0x")
-      ? messageHash
-      : "0x" + messageHash) as `0x${string}`;
-    const normalizedSig = (signature.startsWith("0x")
-      ? signature
-      : "0x" + signature) as `0x${string}`;
+    const normalizedHash = (
+      messageHash.startsWith("0x") ? messageHash : "0x" + messageHash
+    ) as `0x${string}`;
+    const normalizedSig = (
+      signature.startsWith("0x") ? signature : "0x" + signature
+    ) as `0x${string}`;
     const normalizedAddress = walletAddress as `0x${string}`;
 
     if (typeof viemClient.verifyHash === "function") {

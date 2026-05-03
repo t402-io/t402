@@ -22,9 +22,7 @@ function base64urlEncode(bytes: Uint8Array): string {
   let binary = "";
   for (const b of bytes) binary += String.fromCharCode(b);
   const base64 =
-    typeof btoa === "function"
-      ? btoa(binary)
-      : Buffer.from(binary, "binary").toString("base64");
+    typeof btoa === "function" ? btoa(binary) : Buffer.from(binary, "binary").toString("base64");
   return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 

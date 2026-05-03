@@ -37,6 +37,9 @@ export interface OfferReceiptServerConfig {
  *
  * Called by the server when generating a 402 response.
  * Each accepted payment method gets a corresponding signed offer.
+ *
+ * @param config
+ * @param accepts
  */
 export async function createOffersFromRequirements(
   config: OfferReceiptServerConfig,
@@ -49,9 +52,7 @@ export async function createOffersFromRequirements(
   }>,
 ): Promise<SignedOffer[]> {
   const now = Math.floor(Date.now() / 1000);
-  const validUntil = config.offerValiditySeconds
-    ? now + config.offerValiditySeconds
-    : 0;
+  const validUntil = config.offerValiditySeconds ? now + config.offerValiditySeconds : 0;
 
   const offers: SignedOffer[] = [];
 
@@ -79,6 +80,12 @@ export async function createOffersFromRequirements(
  * Create a signed receipt after successful payment.
  *
  * Called by the server after verifying and settling a payment.
+ *
+ * @param config
+ * @param params
+ * @param params.network
+ * @param params.payer
+ * @param params.transaction
  */
 export async function createReceiptForPayment(
   config: OfferReceiptServerConfig,
@@ -113,6 +120,8 @@ export async function createReceiptForPayment(
  *
  * server.registerExtension(extension);
  * ```
+ *
+ * @param _config
  */
 export function offerReceiptServerExtension(
   _config: OfferReceiptServerConfig,
@@ -120,7 +129,7 @@ export function offerReceiptServerExtension(
   return {
     key: OFFER_RECEIPT_KEY,
 
-    enrichDeclaration: (declaration) => {
+    enrichDeclaration: declaration => {
       // The offers will be populated async by the server when it generates
       // the 402 response via createOffersFromRequirements(). This extension
       // just declares the key so the framework knows to include it.

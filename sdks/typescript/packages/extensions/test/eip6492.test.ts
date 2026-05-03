@@ -14,12 +14,10 @@
 import { describe, it, expect, vi } from "vitest";
 import { verifyEIP6492Signature } from "../src/sign-in-with-x";
 
-const EIP6492_SUFFIX =
-  "6492649264926492649264926492649264926492649264926492649264926492";
+const EIP6492_SUFFIX = "6492649264926492649264926492649264926492649264926492649264926492";
 
 const SAMPLE_ADDRESS = "0x1234567890abcdef1234567890abcdef12345678";
-const SAMPLE_HASH =
-  "0xabcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789";
+const SAMPLE_HASH = "0xabcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789";
 
 function make6492Signature(): string {
   // 65-byte EOA signature + EIP-6492 magic suffix
@@ -71,12 +69,7 @@ describe("verifyEIP6492Signature — counterfactual (6492 suffix)", () => {
     };
 
     await expect(
-      verifyEIP6492Signature(
-        SAMPLE_ADDRESS,
-        SAMPLE_HASH,
-        make6492Signature(),
-        provider,
-      ),
+      verifyEIP6492Signature(SAMPLE_ADDRESS, SAMPLE_HASH, make6492Signature(), provider),
     ).rejects.toThrow(/verifyMessage but not verifyHash/);
   });
 
@@ -86,12 +79,7 @@ describe("verifyEIP6492Signature — counterfactual (6492 suffix)", () => {
     };
 
     await expect(
-      verifyEIP6492Signature(
-        SAMPLE_ADDRESS,
-        SAMPLE_HASH,
-        make6492Signature(),
-        provider,
-      ),
+      verifyEIP6492Signature(SAMPLE_ADDRESS, SAMPLE_HASH, make6492Signature(), provider),
     ).rejects.toThrow(/require a viem PublicClient/);
   });
 });
@@ -101,9 +89,7 @@ describe("verifyEIP6492Signature — plain 1271 fallback", () => {
     // Standard 1271 magic value response
     const request = vi
       .fn()
-      .mockResolvedValue(
-        "0x1626ba7e00000000000000000000000000000000000000000000000000000000",
-      );
+      .mockResolvedValue("0x1626ba7e00000000000000000000000000000000000000000000000000000000");
     const provider = { request };
 
     const result = await verifyEIP6492Signature(
@@ -125,9 +111,7 @@ describe("verifyEIP6492Signature — plain 1271 fallback", () => {
   it("returns false when eth_call response does not match the 1271 magic value", async () => {
     const request = vi
       .fn()
-      .mockResolvedValue(
-        "0xffffffff00000000000000000000000000000000000000000000000000000000",
-      );
+      .mockResolvedValue("0xffffffff00000000000000000000000000000000000000000000000000000000");
     const provider = { request };
 
     const result = await verifyEIP6492Signature(

@@ -40,8 +40,12 @@ const mockVerifier: EIP712OfferReceiptVerifier = {
 };
 
 const failingVerifier: EIP712OfferReceiptVerifier = {
-  recoverOfferSigner: async () => { throw new Error("invalid signature"); },
-  recoverReceiptSigner: async () => { throw new Error("invalid signature"); },
+  recoverOfferSigner: async () => {
+    throw new Error("invalid signature");
+  },
+  recoverReceiptSigner: async () => {
+    throw new Error("invalid signature");
+  },
 };
 
 const sampleOffer: OfferPayload = {
@@ -77,17 +81,28 @@ describe("EIP-712 Constants", () => {
   });
 
   it("should have correct offer type fields", () => {
-    const fieldNames = OFFER_TYPES.Offer.map((f) => f.name);
+    const fieldNames = OFFER_TYPES.Offer.map(f => f.name);
     expect(fieldNames).toEqual([
-      "version", "resourceUrl", "scheme", "network",
-      "asset", "payTo", "amount", "validUntil",
+      "version",
+      "resourceUrl",
+      "scheme",
+      "network",
+      "asset",
+      "payTo",
+      "amount",
+      "validUntil",
     ]);
   });
 
   it("should have correct receipt type fields", () => {
-    const fieldNames = RECEIPT_TYPES.Receipt.map((f) => f.name);
+    const fieldNames = RECEIPT_TYPES.Receipt.map(f => f.name);
     expect(fieldNames).toEqual([
-      "version", "network", "resourceUrl", "payer", "issuedAt", "transaction",
+      "version",
+      "network",
+      "resourceUrl",
+      "payer",
+      "issuedAt",
+      "transaction",
     ]);
   });
 

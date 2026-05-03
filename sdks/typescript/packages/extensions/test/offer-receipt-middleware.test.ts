@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 
 import {
   createOffersFromRequirements,
@@ -29,8 +29,12 @@ const mockVerifier: EIP712OfferReceiptVerifier = {
 };
 
 const failingVerifier: EIP712OfferReceiptVerifier = {
-  recoverOfferSigner: async () => { throw new Error("bad sig"); },
-  recoverReceiptSigner: async () => { throw new Error("bad sig"); },
+  recoverOfferSigner: async () => {
+    throw new Error("bad sig");
+  },
+  recoverReceiptSigner: async () => {
+    throw new Error("bad sig");
+  },
 };
 
 const accepts = [
@@ -123,9 +127,7 @@ describe("Client: extractOffers", () => {
     const extensions = {
       [OFFER_RECEIPT_KEY]: {
         info: {
-          offers: [
-            { format: "eip712", payload: {}, signature: "0x" },
-          ],
+          offers: [{ format: "eip712", payload: {}, signature: "0x" }],
         },
       },
     };
@@ -178,32 +180,38 @@ describe("Client: findAndVerifyOffer", () => {
   };
 
   it("should find and verify a matching offer", async () => {
-    const result = await findAndVerifyOffer(
-      mockVerifier,
-      [sampleOffer],
-      { scheme: "exact", network: "eip155:8453", asset: "0xUSDC", payTo: "0xserver1234", amount: "10000" },
-    );
+    const result = await findAndVerifyOffer(mockVerifier, [sampleOffer], {
+      scheme: "exact",
+      network: "eip155:8453",
+      asset: "0xUSDC",
+      payTo: "0xserver1234",
+      amount: "10000",
+    });
 
     expect(result).not.toBeNull();
     expect(result!.signer).toBe("0xserver1234");
   });
 
   it("should return null when no matching offer", async () => {
-    const result = await findAndVerifyOffer(
-      mockVerifier,
-      [sampleOffer],
-      { scheme: "exact", network: "eip155:1", asset: "0xUSDC", payTo: "0xserver1234", amount: "10000" },
-    );
+    const result = await findAndVerifyOffer(mockVerifier, [sampleOffer], {
+      scheme: "exact",
+      network: "eip155:1",
+      asset: "0xUSDC",
+      payTo: "0xserver1234",
+      amount: "10000",
+    });
 
     expect(result).toBeNull();
   });
 
   it("should return null when signature verification fails", async () => {
-    const result = await findAndVerifyOffer(
-      failingVerifier,
-      [sampleOffer],
-      { scheme: "exact", network: "eip155:8453", asset: "0xUSDC", payTo: "0xserver1234", amount: "10000" },
-    );
+    const result = await findAndVerifyOffer(failingVerifier, [sampleOffer], {
+      scheme: "exact",
+      network: "eip155:8453",
+      asset: "0xUSDC",
+      payTo: "0xserver1234",
+      amount: "10000",
+    });
 
     expect(result).toBeNull();
   });
@@ -212,7 +220,13 @@ describe("Client: findAndVerifyOffer", () => {
     const result = await findAndVerifyOffer(
       mockVerifier,
       [sampleOffer],
-      { scheme: "exact", network: "eip155:8453", asset: "0xUSDC", payTo: "0xserver1234", amount: "10000" },
+      {
+        scheme: "exact",
+        network: "eip155:8453",
+        asset: "0xUSDC",
+        payTo: "0xserver1234",
+        amount: "10000",
+      },
       { expectedSigner: "0xdifferent" },
     );
 
@@ -228,7 +242,13 @@ describe("Client: findAndVerifyOffer", () => {
     const result = await findAndVerifyOffer(
       mockVerifier,
       [expiredOffer],
-      { scheme: "exact", network: "eip155:8453", asset: "0xUSDC", payTo: "0xserver1234", amount: "10000" },
+      {
+        scheme: "exact",
+        network: "eip155:8453",
+        asset: "0xUSDC",
+        payTo: "0xserver1234",
+        amount: "10000",
+      },
       { nowSeconds: 2000 },
     );
 

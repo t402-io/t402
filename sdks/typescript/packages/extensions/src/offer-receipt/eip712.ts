@@ -54,6 +54,16 @@ export const RECEIPT_PRIMARY_TYPE = "Receipt" as const;
 /**
  * Normalize an OfferPayload for EIP-712 signing.
  * Optional fields use 0 or "" when absent.
+ *
+ * @param payload
+ * @param payload.version
+ * @param payload.resourceUrl
+ * @param payload.scheme
+ * @param payload.network
+ * @param payload.asset
+ * @param payload.payTo
+ * @param payload.amount
+ * @param payload.validUntil
  */
 export function normalizeOfferForSigning(payload: {
   version: number;
@@ -80,6 +90,14 @@ export function normalizeOfferForSigning(payload: {
 /**
  * Normalize a ReceiptPayload for EIP-712 signing.
  * Optional fields use "" when absent.
+ *
+ * @param payload
+ * @param payload.version
+ * @param payload.network
+ * @param payload.resourceUrl
+ * @param payload.payer
+ * @param payload.issuedAt
+ * @param payload.transaction
  */
 export function normalizeReceiptForSigning(payload: {
   version: number;
