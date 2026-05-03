@@ -53,22 +53,25 @@ class TestMcpServerLifecycle:
         assert "tools" in response["result"]["capabilities"]
 
     async def test_list_tools(self, demo_config):
-        """Test tools/list returns all 6 tools."""
+        """Test tools/list returns the full registered tool set including core 6."""
         response = await send_request(
             demo_config,
             {"jsonrpc": "2.0", "id": 2, "method": "tools/list"},
         )
         assert "result" in response
         tools = response["result"]["tools"]
-        assert len(tools) == 6
+        assert len(tools) >= 6
 
         tool_names = {t["name"] for t in tools}
-        assert "t402/getBalance" in tool_names
-        assert "t402/getAllBalances" in tool_names
-        assert "t402/pay" in tool_names
-        assert "t402/payGasless" in tool_names
-        assert "t402/getBridgeFee" in tool_names
-        assert "t402/bridge" in tool_names
+        core_tools = {
+            "t402/getBalance",
+            "t402/getAllBalances",
+            "t402/pay",
+            "t402/payGasless",
+            "t402/getBridgeFee",
+            "t402/bridge",
+        }
+        assert core_tools.issubset(tool_names)
 
     async def test_notifications_initialized(self, demo_config):
         """Test notifications/initialized returns empty result."""
@@ -426,13 +429,11 @@ class TestMcpToolCallsE2E:
 class TestMcpToolDefinitionsE2E:
     """E2E tests for tool definition completeness."""
 
-    def test_all_6_tools_defined(self):
-        """Test all 6 base tools are defined."""
+    def test_core_tools_defined(self):
+        """Test the 6 core tools are present in the registered set."""
         tools = get_tool_definitions()
-        assert len(tools) == 6
-
         names = {t.name for t in tools}
-        assert names == {
+        core = {
             "t402/getBalance",
             "t402/getAllBalances",
             "t402/pay",
@@ -440,18 +441,19 @@ class TestMcpToolDefinitionsE2E:
             "t402/getBridgeFee",
             "t402/bridge",
         }
+        assert core.issubset(names)
 
     def test_all_tools_have_valid_schemas(self):
-        """Test all tools have valid input schemas."""
+        """Test all tools have valid input schemas. Some tools (e.g. wdk/getWallet)
+        legitimately take no parameters, so properties/required may be empty/None."""
         for tool in get_tool_definitions():
             assert tool.name
             assert tool.description
             assert tool.inputSchema.type == "object"
-            assert tool.inputSchema.properties
-            assert tool.inputSchema.required
 
-            for req in tool.inputSchema.required:
-                assert req in tool.inputSchema.properties
+            if tool.inputSchema.required:
+                for req in tool.inputSchema.required:
+                    assert req in (tool.inputSchema.properties or {})
 
     def test_9_supported_networks(self):
         """Test all 9 networks are supported."""
