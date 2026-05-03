@@ -32,7 +32,7 @@ jobs:
         run: cp whitepaper/main.pdf services/site/public/t402-whitepaper.pdf
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v5
+        uses: pnpm/action-setup@v6
 
       - uses: actions/setup-node@v6
         with:
