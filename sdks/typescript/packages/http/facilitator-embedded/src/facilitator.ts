@@ -3,8 +3,8 @@ import type {
   SettleResponse,
   PaymentPayload,
   PaymentRequirements,
-} from "@t402/core/types";
-import type { EmbeddedFacilitatorConfig, SchemeHandler } from "./types";
+} from '@t402/core/types'
+import type { EmbeddedFacilitatorConfig, SchemeHandler } from './types'
 
 /**
  * Embedded facilitator that runs in-process alongside a resource server,
@@ -14,8 +14,8 @@ import type { EmbeddedFacilitatorConfig, SchemeHandler } from "./types";
  * based on the scheme and network in payment requirements.
  */
 export class EmbeddedFacilitator {
-  private readonly schemes: Map<string, SchemeHandler>;
-  private readonly apiKey: string | undefined;
+  private readonly schemes: Map<string, SchemeHandler>
+  private readonly apiKey: string | undefined
 
   /**
    * Create a new EmbeddedFacilitator.
@@ -23,8 +23,8 @@ export class EmbeddedFacilitator {
    * @param config - Configuration including scheme handlers and optional API key
    */
   constructor(config: EmbeddedFacilitatorConfig) {
-    this.schemes = new Map(config.schemes);
-    this.apiKey = config.apiKey;
+    this.schemes = new Map(config.schemes)
+    this.apiKey = config.apiKey
   }
 
   /**
@@ -35,15 +35,18 @@ export class EmbeddedFacilitator {
    * @param requirements - The payment requirements to verify against
    * @returns Promise resolving to the verification response
    */
-  async verify(payload: PaymentPayload, requirements: PaymentRequirements): Promise<VerifyResponse> {
-    const handler = this.findHandler(requirements.scheme, requirements.network);
+  async verify(
+    payload: PaymentPayload,
+    requirements: PaymentRequirements,
+  ): Promise<VerifyResponse> {
+    const handler = this.findHandler(requirements.scheme, requirements.network)
     if (!handler) {
       return {
         isValid: false,
         invalidReason: `No handler registered for scheme "${requirements.scheme}" on network "${requirements.network}"`,
-      };
+      }
     }
-    return handler.verify(payload, requirements);
+    return handler.verify(payload, requirements)
   }
 
   /**
@@ -54,17 +57,20 @@ export class EmbeddedFacilitator {
    * @param requirements - The payment requirements for settlement
    * @returns Promise resolving to the settlement response
    */
-  async settle(payload: PaymentPayload, requirements: PaymentRequirements): Promise<SettleResponse> {
-    const handler = this.findHandler(requirements.scheme, requirements.network);
+  async settle(
+    payload: PaymentPayload,
+    requirements: PaymentRequirements,
+  ): Promise<SettleResponse> {
+    const handler = this.findHandler(requirements.scheme, requirements.network)
     if (!handler) {
       return {
         success: false,
         errorReason: `No handler registered for scheme "${requirements.scheme}" on network "${requirements.network}"`,
-        transaction: "",
+        transaction: '',
         network: requirements.network,
-      };
+      }
     }
-    return handler.settle(payload, requirements);
+    return handler.settle(payload, requirements)
   }
 
   /**
@@ -75,7 +81,7 @@ export class EmbeddedFacilitator {
   supported(): { kinds: string[] } {
     return {
       kinds: Array.from(this.schemes.keys()),
-    };
+    }
   }
 
   /**
@@ -86,7 +92,7 @@ export class EmbeddedFacilitator {
    * @param handler - The scheme handler to register
    */
   register(pattern: string, handler: SchemeHandler): void {
-    this.schemes.set(pattern, handler);
+    this.schemes.set(pattern, handler)
   }
 
   /**
@@ -96,7 +102,7 @@ export class EmbeddedFacilitator {
    * @returns True if a handler was removed, false if none was found
    */
   unregister(pattern: string): boolean {
-    return this.schemes.delete(pattern);
+    return this.schemes.delete(pattern)
   }
 
   /**
@@ -107,8 +113,8 @@ export class EmbeddedFacilitator {
    * @returns True if the key is valid or no key is required
    */
   validateApiKey(key: string | undefined): boolean {
-    if (!this.apiKey) return true;
-    return key === this.apiKey;
+    if (!this.apiKey) return true
+    return key === this.apiKey
   }
 
   /**
@@ -121,16 +127,16 @@ export class EmbeddedFacilitator {
    */
   private findHandler(scheme: string, network: string): SchemeHandler | undefined {
     // Exact match: "scheme:network"
-    const exactKey = `${scheme}:${network}`;
-    const exact = this.schemes.get(exactKey);
-    if (exact) return exact;
+    const exactKey = `${scheme}:${network}`
+    const exact = this.schemes.get(exactKey)
+    if (exact) return exact
 
     // Wildcard match: "scheme:family:*"
-    const family = network.split(":")[0];
-    const wildcardKey = `${scheme}:${family}:*`;
-    const wildcard = this.schemes.get(wildcardKey);
-    if (wildcard) return wildcard;
+    const family = network.split(':')[0]
+    const wildcardKey = `${scheme}:${family}:*`
+    const wildcard = this.schemes.get(wildcardKey)
+    if (wildcard) return wildcard
 
-    return undefined;
+    return undefined
   }
 }

@@ -3,7 +3,7 @@ import type {
   PaymentLifecycleEventUnion,
   PaymentLifecycleListener,
   PaymentLifecycleEmitterInterface,
-} from "./types";
+} from './types'
 
 /**
  * Emitter for payment lifecycle events.
@@ -13,10 +13,21 @@ import type {
  * settling, settled, and failed.
  */
 export class PaymentLifecycleEmitter implements PaymentLifecycleEmitterInterface {
-  private listeners: Map<PaymentLifecycleEventType, Set<PaymentLifecycleListener>> = new Map();
-  private allListeners: Set<PaymentLifecycleListener> = new Set();
-  private history: PaymentLifecycleEventUnion[] = [];
-  private readonly maxHistorySize: number;
+  /**
+   * Format a lifecycle event as an SSE-compatible string.
+   * Suitable for streaming to clients via Server-Sent Events.
+   *
+   * @param event - The lifecycle event to format
+   * @returns SSE-formatted string with event type and JSON data
+   */
+  static formatSSE(event: PaymentLifecycleEventUnion): string {
+    return `event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`
+  }
+
+  private listeners: Map<PaymentLifecycleEventType, Set<PaymentLifecycleListener>> = new Map()
+  private allListeners: Set<PaymentLifecycleListener> = new Set()
+  private history: PaymentLifecycleEventUnion[] = []
+  private readonly maxHistorySize: number
 
   /**
    * Create a new PaymentLifecycleEmitter.
@@ -24,7 +35,7 @@ export class PaymentLifecycleEmitter implements PaymentLifecycleEmitterInterface
    * @param maxHistorySize - Maximum number of events to retain in history (default: 100)
    */
   constructor(maxHistorySize: number = 100) {
-    this.maxHistorySize = maxHistorySize;
+    this.maxHistorySize = maxHistorySize
   }
 
   /**
@@ -36,17 +47,17 @@ export class PaymentLifecycleEmitter implements PaymentLifecycleEmitterInterface
    */
   emit(event: PaymentLifecycleEventUnion): void {
     // Add to history
-    this.history.push(event);
+    this.history.push(event)
     if (this.history.length > this.maxHistorySize) {
-      this.history.shift();
+      this.history.shift()
     }
 
     // Dispatch to type-specific listeners
-    const typeListeners = this.listeners.get(event.type);
+    const typeListeners = this.listeners.get(event.type)
     if (typeListeners) {
       for (const listener of typeListeners) {
         try {
-          listener(event);
+          listener(event)
         } catch {
           // Swallow listener errors to prevent cascading failures
         }
@@ -56,7 +67,7 @@ export class PaymentLifecycleEmitter implements PaymentLifecycleEmitterInterface
     // Dispatch to catch-all listeners
     for (const listener of this.allListeners) {
       try {
-        listener(event);
+        listener(event)
       } catch {
         // Swallow listener errors to prevent cascading failures
       }
@@ -71,9 +82,9 @@ export class PaymentLifecycleEmitter implements PaymentLifecycleEmitterInterface
    */
   on(type: PaymentLifecycleEventType, listener: PaymentLifecycleListener): void {
     if (!this.listeners.has(type)) {
-      this.listeners.set(type, new Set());
+      this.listeners.set(type, new Set())
     }
-    this.listeners.get(type)!.add(listener);
+    this.listeners.get(type)!.add(listener)
   }
 
   /**
@@ -82,7 +93,7 @@ export class PaymentLifecycleEmitter implements PaymentLifecycleEmitterInterface
    * @param listener - The callback function invoked for every event
    */
   onAll(listener: PaymentLifecycleListener): void {
-    this.allListeners.add(listener);
+    this.allListeners.add(listener)
   }
 
   /**
@@ -92,11 +103,11 @@ export class PaymentLifecycleEmitter implements PaymentLifecycleEmitterInterface
    * @param listener - The listener function to remove
    */
   off(type: PaymentLifecycleEventType, listener: PaymentLifecycleListener): void {
-    const typeListeners = this.listeners.get(type);
+    const typeListeners = this.listeners.get(type)
     if (typeListeners) {
-      typeListeners.delete(listener);
+      typeListeners.delete(listener)
       if (typeListeners.size === 0) {
-        this.listeners.delete(type);
+        this.listeners.delete(type)
       }
     }
   }
@@ -107,7 +118,7 @@ export class PaymentLifecycleEmitter implements PaymentLifecycleEmitterInterface
    * @param listener - The listener function to remove
    */
   offAll(listener: PaymentLifecycleListener): void {
-    this.allListeners.delete(listener);
+    this.allListeners.delete(listener)
   }
 
   /**
@@ -116,14 +127,14 @@ export class PaymentLifecycleEmitter implements PaymentLifecycleEmitterInterface
    * @returns A copy of the event history array
    */
   getHistory(): PaymentLifecycleEventUnion[] {
-    return [...this.history];
+    return [...this.history]
   }
 
   /**
    * Clear all event history.
    */
   clearHistory(): void {
-    this.history = [];
+    this.history = []
   }
 
   /**
@@ -134,28 +145,17 @@ export class PaymentLifecycleEmitter implements PaymentLifecycleEmitterInterface
    */
   listenerCount(type?: PaymentLifecycleEventType): number {
     if (type) {
-      return (this.listeners.get(type)?.size ?? 0) + this.allListeners.size;
+      return (this.listeners.get(type)?.size ?? 0) + this.allListeners.size
     }
-    return this.allListeners.size;
+    return this.allListeners.size
   }
 
   /**
    * Remove all listeners and clear history.
    */
   removeAllListeners(): void {
-    this.listeners.clear();
-    this.allListeners.clear();
-    this.history = [];
-  }
-
-  /**
-   * Format a lifecycle event as an SSE-compatible string.
-   * Suitable for streaming to clients via Server-Sent Events.
-   *
-   * @param event - The lifecycle event to format
-   * @returns SSE-formatted string with event type and JSON data
-   */
-  static formatSSE(event: PaymentLifecycleEventUnion): string {
-    return `event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`;
+    this.listeners.clear()
+    this.allListeners.clear()
+    this.history = []
   }
 }

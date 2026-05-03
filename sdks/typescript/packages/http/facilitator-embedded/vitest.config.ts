@@ -1,3 +1,3 @@
-import { createVitestConfig } from "../../../config/vitest.base";
+import { createVitestConfig } from '../../../config/vitest.base'
 
-export default createVitestConfig();
+export default createVitestConfig()

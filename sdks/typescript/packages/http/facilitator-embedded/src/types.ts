@@ -1,4 +1,9 @@
-import type { VerifyResponse, SettleResponse, PaymentPayload, PaymentRequirements } from "@t402/core/types";
+import type {
+  VerifyResponse,
+  SettleResponse,
+  PaymentPayload,
+  PaymentRequirements,
+} from '@t402/core/types'
 
 /**
  * Handler for a specific payment scheme, responsible for verifying and settling payments.
@@ -11,7 +16,7 @@ export interface SchemeHandler {
    * @param requirements - The payment requirements to verify against
    * @returns Promise resolving to the verification response
    */
-  verify(payload: PaymentPayload, requirements: PaymentRequirements): Promise<VerifyResponse>;
+  verify(payload: PaymentPayload, requirements: PaymentRequirements): Promise<VerifyResponse>
 
   /**
    * Settle a payment based on payload and requirements.
@@ -20,7 +25,7 @@ export interface SchemeHandler {
    * @param requirements - The payment requirements for settlement
    * @returns Promise resolving to the settlement response
    */
-  settle(payload: PaymentPayload, requirements: PaymentRequirements): Promise<SettleResponse>;
+  settle(payload: PaymentPayload, requirements: PaymentRequirements): Promise<SettleResponse>
 }
 
 /**
@@ -33,24 +38,24 @@ export interface EmbeddedFacilitatorConfig {
    * - Exact: "exact:eip155:8453" (scheme:network)
    * - Wildcard: "exact:eip155:*" (scheme:family:*)
    */
-  schemes: Map<string, SchemeHandler>;
+  schemes: Map<string, SchemeHandler>
 
   /**
    * Optional API key for authentication when exposing /verify /settle externally.
    */
-  apiKey?: string;
+  apiKey?: string
 }
 
 /**
  * Payment lifecycle event types emitted during payment processing.
  */
 export type PaymentLifecycleEventType =
-  | "payment.received"
-  | "payment.verifying"
-  | "payment.verified"
-  | "payment.settling"
-  | "payment.settled"
-  | "payment.failed";
+  | 'payment.received'
+  | 'payment.verifying'
+  | 'payment.verified'
+  | 'payment.settling'
+  | 'payment.settled'
+  | 'payment.failed'
 
 /**
  * Base interface for all payment lifecycle events.
@@ -59,22 +64,22 @@ export interface PaymentLifecycleEvent {
   /**
    * The type of lifecycle event.
    */
-  type: PaymentLifecycleEventType;
+  type: PaymentLifecycleEventType
 
   /**
    * ISO 8601 timestamp when the event occurred.
    */
-  timestamp: string;
+  timestamp: string
 
   /**
    * The payment payload associated with this event.
    */
-  payload: PaymentPayload;
+  payload: PaymentPayload
 
   /**
    * The payment requirements associated with this event.
    */
-  requirements: PaymentRequirements;
+  requirements: PaymentRequirements
 }
 
 /**
@@ -84,7 +89,7 @@ export interface PaymentReceivedEvent extends PaymentLifecycleEvent {
   /**
    * Event type discriminator.
    */
-  type: "payment.received";
+  type: 'payment.received'
 }
 
 /**
@@ -94,7 +99,7 @@ export interface PaymentVerifyingEvent extends PaymentLifecycleEvent {
   /**
    * Event type discriminator.
    */
-  type: "payment.verifying";
+  type: 'payment.verifying'
 }
 
 /**
@@ -104,12 +109,12 @@ export interface PaymentVerifiedEvent extends PaymentLifecycleEvent {
   /**
    * Event type discriminator.
    */
-  type: "payment.verified";
+  type: 'payment.verified'
 
   /**
    * The verification result.
    */
-  result: VerifyResponse;
+  result: VerifyResponse
 }
 
 /**
@@ -119,7 +124,7 @@ export interface PaymentSettlingEvent extends PaymentLifecycleEvent {
   /**
    * Event type discriminator.
    */
-  type: "payment.settling";
+  type: 'payment.settling'
 }
 
 /**
@@ -129,12 +134,12 @@ export interface PaymentSettledEvent extends PaymentLifecycleEvent {
   /**
    * Event type discriminator.
    */
-  type: "payment.settled";
+  type: 'payment.settled'
 
   /**
    * The settlement result.
    */
-  result: SettleResponse;
+  result: SettleResponse
 }
 
 /**
@@ -144,17 +149,17 @@ export interface PaymentFailedEvent extends PaymentLifecycleEvent {
   /**
    * Event type discriminator.
    */
-  type: "payment.failed";
+  type: 'payment.failed'
 
   /**
    * The error that caused the failure.
    */
-  error: string;
+  error: string
 
   /**
    * The phase during which the failure occurred.
    */
-  phase: "verification" | "settlement";
+  phase: 'verification' | 'settlement'
 }
 
 /**
@@ -166,12 +171,12 @@ export type PaymentLifecycleEventUnion =
   | PaymentVerifiedEvent
   | PaymentSettlingEvent
   | PaymentSettledEvent
-  | PaymentFailedEvent;
+  | PaymentFailedEvent
 
 /**
  * Listener function for payment lifecycle events.
  */
-export type PaymentLifecycleListener = (event: PaymentLifecycleEventUnion) => void;
+export type PaymentLifecycleListener = (event: PaymentLifecycleEventUnion) => void
 
 /**
  * Options for the embedded payment middleware.
@@ -181,23 +186,23 @@ export interface EmbeddedMiddlewareOptions {
    * Function to extract payment payload from the request.
    * Receives the request object and returns the parsed payment payload, or null if no payment is present.
    */
-  extractPayload: (req: GenericRequest) => PaymentPayload | null;
+  extractPayload: (req: GenericRequest) => PaymentPayload | null
 
   /**
    * Function to determine the payment requirements for a request.
    * Returns null if the route does not require payment.
    */
-  getRequirements: (req: GenericRequest) => PaymentRequirements | null;
+  getRequirements: (req: GenericRequest) => PaymentRequirements | null
 
   /**
    * Optional lifecycle emitter for observing payment events.
    */
-  lifecycle?: PaymentLifecycleEmitterInterface;
+  lifecycle?: PaymentLifecycleEmitterInterface
 
   /**
    * Whether to settle payments automatically after verification (default: true).
    */
-  autoSettle?: boolean;
+  autoSettle?: boolean
 }
 
 /**
@@ -207,12 +212,17 @@ export interface GenericRequest {
   /**
    * The request path.
    */
-  path: string;
+  path: string
 
   /**
    * The HTTP method.
    */
-  method: string;
+  method: string
+
+  /**
+   * The parsed request body, if available.
+   */
+  body?: unknown
 
   /**
    * Function to retrieve a header value by name.
@@ -220,12 +230,7 @@ export interface GenericRequest {
    * @param name - The header name
    * @returns The header value or undefined
    */
-  header(name: string): string | undefined;
-
-  /**
-   * The parsed request body, if available.
-   */
-  body?: unknown;
+  header(name: string): string | undefined
 }
 
 /**
@@ -238,7 +243,7 @@ export interface GenericResponse {
    * @param code - The status code
    * @returns The response object for chaining
    */
-  status(code: number): GenericResponse;
+  status(code: number): GenericResponse
 
   /**
    * Send a JSON response body.
@@ -246,7 +251,7 @@ export interface GenericResponse {
    * @param body - The JSON body to send
    * @returns The response object for chaining
    */
-  json(body: unknown): GenericResponse;
+  json(body: unknown): GenericResponse
 
   /**
    * Set a response header.
@@ -255,13 +260,13 @@ export interface GenericResponse {
    * @param value - The header value
    * @returns The response object for chaining
    */
-  setHeader(name: string, value: string): GenericResponse;
+  setHeader(name: string, value: string): GenericResponse
 }
 
 /**
  * Next function to pass control to the next middleware.
  */
-export type NextFunction = () => void;
+export type NextFunction = () => void
 
 /**
  * Interface for the PaymentLifecycleEmitter to allow dependency injection.
@@ -272,7 +277,7 @@ export interface PaymentLifecycleEmitterInterface {
    *
    * @param event - The lifecycle event to emit
    */
-  emit(event: PaymentLifecycleEventUnion): void;
+  emit(event: PaymentLifecycleEventUnion): void
 
   /**
    * Register a listener for a specific event type.
@@ -280,7 +285,7 @@ export interface PaymentLifecycleEmitterInterface {
    * @param type - The event type to listen for
    * @param listener - The listener function
    */
-  on(type: PaymentLifecycleEventType, listener: PaymentLifecycleListener): void;
+  on(type: PaymentLifecycleEventType, listener: PaymentLifecycleListener): void
 
   /**
    * Remove a listener for a specific event type.
@@ -288,5 +293,5 @@ export interface PaymentLifecycleEmitterInterface {
    * @param type - The event type
    * @param listener - The listener function to remove
    */
-  off(type: PaymentLifecycleEventType, listener: PaymentLifecycleListener): void;
+  off(type: PaymentLifecycleEventType, listener: PaymentLifecycleListener): void
 }

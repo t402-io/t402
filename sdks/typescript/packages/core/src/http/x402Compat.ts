@@ -27,6 +27,9 @@ import type { PaymentRequired, PaymentPayload } from "../types/payments";
 
 /**
  * Detect whether a decoded payload uses x402 format (has x402Version field).
+ *
+ * @param payload - Decoded payload object to inspect.
+ * @returns True iff the payload has `x402Version` and not `t402Version`.
  */
 export function isX402Format(payload: Record<string, unknown>): boolean {
   return "x402Version" in payload && !("t402Version" in payload);
@@ -34,6 +37,9 @@ export function isX402Format(payload: Record<string, unknown>): boolean {
 
 /**
  * Detect whether a decoded payload uses T402 format (has t402Version field).
+ *
+ * @param payload - Decoded payload object to inspect.
+ * @returns True iff the payload has `t402Version` and not `x402Version`.
  */
 export function isT402Format(payload: Record<string, unknown>): boolean {
   return "t402Version" in payload && !("x402Version" in payload);
@@ -41,6 +47,9 @@ export function isT402Format(payload: Record<string, unknown>): boolean {
 
 /**
  * Detect whether a decoded payload has either version field.
+ *
+ * @param payload - Decoded payload object to inspect.
+ * @returns True if the payload has either `t402Version` or `x402Version`.
  */
 export function hasVersionField(payload: Record<string, unknown>): boolean {
   return "t402Version" in payload || "x402Version" in payload;
@@ -52,6 +61,9 @@ export function hasVersionField(payload: Record<string, unknown>): boolean {
  *
  * If the payload is already in T402 format, returns it unchanged.
  * If the payload has no version field, returns it unchanged.
+ *
+ * @param payload - Payload that may be in x402 format.
+ * @returns Payload normalized to T402 format (or the original if no conversion needed).
  */
 export function x402ToT402<T extends Record<string, unknown>>(payload: T): T {
   if (!isX402Format(payload)) return payload;
@@ -66,6 +78,9 @@ export function x402ToT402<T extends Record<string, unknown>>(payload: T): T {
  *
  * If the payload is already in x402 format, returns it unchanged.
  * If the payload has no version field, returns it unchanged.
+ *
+ * @param payload - Payload that may be in T402 format.
+ * @returns Payload normalized to x402 format (or the original if no conversion needed).
  */
 export function t402ToX402<T extends Record<string, unknown>>(payload: T): T {
   if (!isT402Format(payload)) return payload;
@@ -80,6 +95,9 @@ export function t402ToX402<T extends Record<string, unknown>>(payload: T): T {
  *
  * Use this at the HTTP boundary when decoding incoming headers —
  * it handles both formats transparently.
+ *
+ * @param payload - Payload in either T402 or x402 format.
+ * @returns Payload normalized to T402 format.
  */
 export function normalizeToT402<T extends Record<string, unknown>>(payload: T): T {
   return x402ToT402(payload);
@@ -87,6 +105,9 @@ export function normalizeToT402<T extends Record<string, unknown>>(payload: T): 
 
 /**
  * Normalize a PaymentPayload from any format to T402 format.
+ *
+ * @param payload - Decoded payment payload object.
+ * @returns The payload typed as `PaymentPayload` in T402 format.
  */
 export function normalizePaymentPayload(payload: Record<string, unknown>): PaymentPayload {
   return normalizeToT402(payload) as unknown as PaymentPayload;
@@ -94,6 +115,9 @@ export function normalizePaymentPayload(payload: Record<string, unknown>): Payme
 
 /**
  * Normalize a PaymentRequired from any format to T402 format.
+ *
+ * @param payload - Decoded payment requirements object.
+ * @returns The payload typed as `PaymentRequired` in T402 format.
  */
 export function normalizePaymentRequired(payload: Record<string, unknown>): PaymentRequired {
   return normalizeToT402(payload) as unknown as PaymentRequired;

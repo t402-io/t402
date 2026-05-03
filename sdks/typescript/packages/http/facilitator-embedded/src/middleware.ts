@@ -1,12 +1,12 @@
-import type { PaymentPayload, PaymentRequirements } from "@t402/core/types";
-import type { EmbeddedFacilitator } from "./facilitator";
+import type { PaymentPayload, PaymentRequirements } from '@t402/core/types'
+import type { EmbeddedFacilitator } from './facilitator'
 import type {
   EmbeddedMiddlewareOptions,
   GenericRequest,
   GenericResponse,
   NextFunction,
   PaymentLifecycleEmitterInterface,
-} from "./types";
+} from './types'
 
 /**
  * Emit a lifecycle event if a lifecycle emitter is configured.
@@ -24,14 +24,14 @@ function emitEvent(
   requirements: PaymentRequirements,
   extra?: Record<string, unknown>,
 ): void {
-  if (!lifecycle) return;
+  if (!lifecycle) return
   lifecycle.emit({
-    type: type as "payment.received",
+    type: type as 'payment.received',
     timestamp: new Date().toISOString(),
     payload,
     requirements,
     ...extra,
-  });
+  })
 }
 
 /**
@@ -49,81 +49,81 @@ export function createEmbeddedPaymentMiddleware(
   facilitator: EmbeddedFacilitator,
   options: EmbeddedMiddlewareOptions,
 ): (req: GenericRequest, res: GenericResponse, next: NextFunction) => Promise<void> {
-  const { extractPayload, getRequirements, lifecycle, autoSettle = true } = options;
+  const { extractPayload, getRequirements, lifecycle, autoSettle = true } = options
 
   return async (req: GenericRequest, res: GenericResponse, next: NextFunction): Promise<void> => {
     // Check if this route requires payment
-    const requirements = getRequirements(req);
+    const requirements = getRequirements(req)
     if (!requirements) {
-      next();
-      return;
+      next()
+      return
     }
 
     // Extract payment payload from request
-    const payload = extractPayload(req);
+    const payload = extractPayload(req)
     if (!payload) {
       res.status(402).json({
-        error: "Payment required",
+        error: 'Payment required',
         accepts: [requirements],
-      });
-      return;
+      })
+      return
     }
 
     // Emit received event
-    emitEvent(lifecycle, "payment.received", payload, requirements);
+    emitEvent(lifecycle, 'payment.received', payload, requirements)
 
     // Verify payment
-    emitEvent(lifecycle, "payment.verifying", payload, requirements);
+    emitEvent(lifecycle, 'payment.verifying', payload, requirements)
 
-    const verifyResult = await facilitator.verify(payload, requirements);
+    const verifyResult = await facilitator.verify(payload, requirements)
 
     if (!verifyResult.isValid) {
-      emitEvent(lifecycle, "payment.failed", payload, requirements, {
-        error: verifyResult.invalidReason || "Verification failed",
-        phase: "verification",
-      });
+      emitEvent(lifecycle, 'payment.failed', payload, requirements, {
+        error: verifyResult.invalidReason || 'Verification failed',
+        phase: 'verification',
+      })
       res.status(402).json({
-        error: "Payment verification failed",
+        error: 'Payment verification failed',
         reason: verifyResult.invalidReason,
-      });
-      return;
+      })
+      return
     }
 
-    emitEvent(lifecycle, "payment.verified", payload, requirements, {
+    emitEvent(lifecycle, 'payment.verified', payload, requirements, {
       result: verifyResult,
-    });
+    })
 
     // Settle payment if autoSettle is enabled
     if (autoSettle) {
-      emitEvent(lifecycle, "payment.settling", payload, requirements);
+      emitEvent(lifecycle, 'payment.settling', payload, requirements)
 
-      const settleResult = await facilitator.settle(payload, requirements);
+      const settleResult = await facilitator.settle(payload, requirements)
 
       if (!settleResult.success) {
-        emitEvent(lifecycle, "payment.failed", payload, requirements, {
-          error: settleResult.errorReason || "Settlement failed",
-          phase: "settlement",
-        });
+        emitEvent(lifecycle, 'payment.failed', payload, requirements, {
+          error: settleResult.errorReason || 'Settlement failed',
+          phase: 'settlement',
+        })
         res.status(402).json({
-          error: "Payment settlement failed",
+          error: 'Payment settlement failed',
           reason: settleResult.errorReason,
-        });
-        return;
+        })
+        return
       }
 
-      emitEvent(lifecycle, "payment.settled", payload, requirements, {
+      emitEvent(lifecycle, 'payment.settled', payload, requirements, {
         result: settleResult,
-      });
+      })
 
       // Add settlement headers to the response
-      res.setHeader("X-Payment-Transaction", settleResult.transaction);
-      res.setHeader("X-Payment-Network", settleResult.network);
+      res.setHeader('X-Payment-Transaction', settleResult.transaction)
+      res.setHeader('X-Payment-Network', settleResult.network)
       if (settleResult.payer) {
-        res.setHeader("X-Payment-Payer", settleResult.payer);
+        res.setHeader('X-Payment-Payer', settleResult.payer)
       }
     }
 
     // Payment processed successfully, proceed to next handler
-    next();
-  };
+    next()
+  }
 }

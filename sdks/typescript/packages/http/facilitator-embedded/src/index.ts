@@ -1,6 +1,6 @@
-export { EmbeddedFacilitator } from "./facilitator";
-export { PaymentLifecycleEmitter } from "./lifecycle";
-export { createEmbeddedPaymentMiddleware } from "./middleware";
+export { EmbeddedFacilitator } from './facilitator'
+export { PaymentLifecycleEmitter } from './lifecycle'
+export { createEmbeddedPaymentMiddleware } from './middleware'
 
 export type {
   SchemeHandler,
@@ -20,4 +20,4 @@ export type {
   GenericRequest,
   GenericResponse,
   NextFunction,
-} from "./types";
+} from './types'

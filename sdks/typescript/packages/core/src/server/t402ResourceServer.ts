@@ -787,10 +787,16 @@ export class t402ResourceServer {
       for (const [key, reqVal] of Object.entries(extensions)) {
         const payVal = payExtensions[key];
         if (payVal === undefined) {
-          return { success: false, error: `extension_removed: required extension '${key}' was removed` };
+          return {
+            success: false,
+            error: `extension_removed: required extension '${key}' was removed`,
+          };
         }
         if (JSON.stringify(reqVal) !== JSON.stringify(payVal)) {
-          return { success: false, error: `extension_modified: required extension '${key}' was modified` };
+          return {
+            success: false,
+            error: `extension_modified: required extension '${key}' was modified`,
+          };
         }
       }
     }

@@ -1,6 +1,6 @@
-import { createTsupConfig } from "../../../config/tsup.base";
+import { createTsupConfig } from '../../../config/tsup.base'
 
 export default createTsupConfig({
-  entry: { index: "src/index.ts" },
-  target: "node16",
-});
+  entry: { index: 'src/index.ts' },
+  target: 'node16',
+})

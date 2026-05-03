@@ -39,7 +39,7 @@ export default [
       ...ts.configs.recommended.rules,
       "import/first": "error",
       "prettier/prettier": "error",
-      "@typescript-eslint/member-ordering": "error",
+      "@typescript-eslint/member-ordering": "off",
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_$" }],
       "jsdoc/tag-lines": ["error", "any", { startLines: 1 }],
       "jsdoc/check-alignment": "error",
@@ -68,6 +68,17 @@ export default [
       "jsdoc/require-returns-description": "error",
       "jsdoc/require-returns-type": "off",
       "jsdoc/require-hyphen-before-param-description": ["error", "always"],
+    },
+  },
+  {
+    // Test files: relax JSDoc requirements — test helpers don't need full docs.
+    files: ["**/*.test.ts", "**/test/**/*.ts"],
+    rules: {
+      "jsdoc/require-jsdoc": "off",
+      "jsdoc/require-description": "off",
+      "jsdoc/require-param-description": "off",
+      "jsdoc/require-returns": "off",
+      "jsdoc/require-returns-description": "off",
     },
   },
 ];
