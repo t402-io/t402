@@ -117,8 +117,7 @@ contract T402Permit2ProxyHandler is Test {
             to: recipient, facilitator: facilitator, validAfter: block.timestamp
         });
 
-        bytes memory sig =
-            _signPermitWitnessTransfer(payerKey, permit, address(uptoProxy), witness);
+        bytes memory sig = _signPermitWitnessTransfer(payerKey, permit, address(uptoProxy), witness);
 
         vm.prank(facilitator);
         uptoProxy.settle(permit, settleAmount, payer, witness, sig);
@@ -260,16 +259,8 @@ contract T402Permit2ProxyInvariantTest is StdInvariant, Test {
 
     /// @notice Proxy contracts must never hold any tokens
     function invariant_proxiesNeverHoldTokens() public view {
-        assertEq(
-            token.balanceOf(address(exactProxy)),
-            0,
-            "exact proxy must never hold tokens"
-        );
-        assertEq(
-            token.balanceOf(address(uptoProxy)),
-            0,
-            "upto proxy must never hold tokens"
-        );
+        assertEq(token.balanceOf(address(exactProxy)), 0, "exact proxy must never hold tokens");
+        assertEq(token.balanceOf(address(uptoProxy)), 0, "upto proxy must never hold tokens");
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -278,11 +269,7 @@ contract T402Permit2ProxyInvariantTest is StdInvariant, Test {
 
     /// @notice Total supply must remain constant (no tokens created or destroyed)
     function invariant_totalSupplyConserved() public view {
-        assertEq(
-            token.totalSupply(),
-            INITIAL_PAYER_BALANCE,
-            "total supply must not change"
-        );
+        assertEq(token.totalSupply(), INITIAL_PAYER_BALANCE, "total supply must not change");
     }
 
     /// @notice Funds deducted from payer must equal funds received by recipient
@@ -320,8 +307,7 @@ contract T402Permit2ProxyInvariantTest is StdInvariant, Test {
     /// @notice Payer balance must always be non-negative (handled by Solidity, but explicit)
     function invariant_payerBalanceNonNegative() public view {
         assertTrue(
-            token.balanceOf(payer) <= INITIAL_PAYER_BALANCE,
-            "payer balance must not exceed initial"
+            token.balanceOf(payer) <= INITIAL_PAYER_BALANCE, "payer balance must not exceed initial"
         );
     }
 

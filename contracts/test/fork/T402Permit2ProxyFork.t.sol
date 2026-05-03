@@ -57,8 +57,9 @@ contract T402Permit2ProxyForkTest is Test {
 
         // Payer approves Permit2 to spend USDC
         vm.prank(payer);
-        (bool ok,) =
-            USDC.call(abi.encodeWithSignature("approve(address,uint256)", PERMIT2, type(uint256).max));
+        (bool ok,) = USDC.call(
+            abi.encodeWithSignature("approve(address,uint256)", PERMIT2, type(uint256).max)
+        );
         require(ok, "approve failed");
     }
 
@@ -180,8 +181,7 @@ contract T402Permit2ProxyForkTest is Test {
             to: recipient, facilitator: facilitator, validAfter: block.timestamp
         });
 
-        bytes memory sig =
-            _signPermitWitnessTransfer(payerKey, permit, address(uptoProxy), witness);
+        bytes memory sig = _signPermitWitnessTransfer(payerKey, permit, address(uptoProxy), witness);
 
         uint256 payerBefore = IERC20Permit(USDC).balanceOf(payer);
 
@@ -204,8 +204,7 @@ contract T402Permit2ProxyForkTest is Test {
             to: recipient, facilitator: facilitator, validAfter: block.timestamp
         });
 
-        bytes memory sig =
-            _signPermitWitnessTransfer(payerKey, permit, address(uptoProxy), witness);
+        bytes memory sig = _signPermitWitnessTransfer(payerKey, permit, address(uptoProxy), witness);
 
         vm.prank(facilitator);
         uptoProxy.settle(permit, AMOUNT, payer, witness, sig);
@@ -224,8 +223,7 @@ contract T402Permit2ProxyForkTest is Test {
             to: recipient, facilitator: facilitator, validAfter: block.timestamp
         });
 
-        bytes memory sig =
-            _signPermitWitnessTransfer(payerKey, permit, address(uptoProxy), witness);
+        bytes memory sig = _signPermitWitnessTransfer(payerKey, permit, address(uptoProxy), witness);
 
         vm.prank(facilitator);
         vm.expectRevert(T402UptoPermit2Proxy.AmountExceedsPermitted.selector);

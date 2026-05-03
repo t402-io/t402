@@ -36,9 +36,13 @@ jobs:
         run: forge build
 
       - name: Run tests
+        env:
+          BASE_RPC_URL: https://mainnet.base.org
         run: forge test -vvv
 
       - name: Run tests with gas report
+        env:
+          BASE_RPC_URL: https://mainnet.base.org
         run: forge test --gas-report
 
   # Solidity Linting
