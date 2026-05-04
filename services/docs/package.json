@@ -25,7 +25,7 @@
     "autoprefixer": "^10.5.0",
     "pagefind": "^1.5.2",
     "postcss": "^8.5.13",
-    "tailwindcss": "^3.4.0",
+    "tailwindcss": "^4.2.4",
     "typescript": "^5.5.0"
   }
 }
