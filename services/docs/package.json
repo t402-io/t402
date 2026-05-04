@@ -26,6 +26,6 @@
     "pagefind": "^1.5.2",
     "postcss": "^8.5.13",
     "tailwindcss": "^3.4.0",
-    "typescript": "^5.5.0"
+    "typescript": "^6.0.3"
   }
 }
