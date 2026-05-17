@@ -33,13 +33,13 @@ export interface Partner {
 export const partners: Partner[] = [
   // Infrastructure
   {
-    id: "tether",
-    name: "Tether / USDT0",
+    id: "usdt0",
+    name: "USDT0",
     category: "infrastructure",
     description:
-      "USDT0 cross-chain stablecoin — default payment asset for t402 across 22+ chains via LayerZero OFT.",
+      "USDT0 cross-chain stablecoin (LayerZero OFT) — supported as a payment asset across 22+ chains. Not an official partnership; t402 supports the public USDT0 contracts.",
     url: "https://usdt0.to",
-    integration: "Default asset on all EVM mechanisms",
+    integration: "Supported asset on EVM mechanisms (nominative use)",
     badge: "live",
   },
   {
@@ -455,10 +455,10 @@ export const packages: EcosystemPackage[] = [
     name: "@t402/wdk",
     category: "wallet",
     description:
-      "Tether Wallet Development Kit integration for unified wallet management across chains.",
+      "Wallet abstraction layer for unified self-custodial account management across chains.",
     language: "typescript",
     npmPackage: "@t402/wdk",
-    features: ["Multi-chain wallets", "Tether WDK", "Unified API"],
+    features: ["Multi-chain wallets", "Self-custodial", "Unified API"],
   },
   {
     id: "wdk-gasless",
@@ -498,10 +498,10 @@ export const packages: EcosystemPackage[] = [
     name: "@t402/wdk-protocol",
     category: "wallet",
     description:
-      "T402 payment protocol integration for Tether WDK wallet applications.",
+      "T402 payment protocol bindings for WDK-compatible wallet applications.",
     language: "typescript",
     npmPackage: "@t402/wdk-protocol",
-    features: ["WDK integration", "Payment protocol", "Auto-signing"],
+    features: ["WDK bindings", "Payment protocol", "Auto-signing"],
     badge: "new",
   },
   {
@@ -531,7 +531,7 @@ export const packages: EcosystemPackage[] = [
     name: "@t402/wdk-ton-gasless",
     category: "wallet",
     description:
-      "Gasless USDT0 payments on TON blockchain with Tether WDK integration.",
+      "Gasless USDT0 payments on TON blockchain via WDK wallet abstraction.",
     language: "typescript",
     npmPackage: "@t402/wdk-ton-gasless",
     features: ["TON gasless", "USDT0", "WDK"],
@@ -542,7 +542,7 @@ export const packages: EcosystemPackage[] = [
     name: "@t402/wdk-tron-gasfree",
     category: "wallet",
     description:
-      "Gas-free USDT payments on TRON blockchain with Tether WDK integration.",
+      "Gas-free USDT payments on TRON blockchain via WDK wallet abstraction.",
     language: "typescript",
     npmPackage: "@t402/wdk-tron-gasfree",
     features: ["TRON gas-free", "USDT", "WDK"],

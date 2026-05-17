@@ -368,7 +368,7 @@ export const typescriptPackages: Package[] = [
   {
     name: "@t402/wdk",
     npmPackage: "@t402/wdk",
-    description: "Tether Wallet Development Kit integration",
+    description: "Wallet abstraction layer for unified self-custodial accounts",
     features: ["Multi-chain wallets", "Balance aggregation", "Seed phrase support", "T402 signers"],
   },
   {
@@ -393,7 +393,7 @@ export const typescriptPackages: Package[] = [
   {
     name: "@t402/wdk-protocol",
     npmPackage: "@t402/wdk-protocol",
-    description: "T402 payment protocol for Tether WDK wallet apps",
+    description: "T402 payment protocol bindings for WDK-compatible wallet apps",
     features: ["WDK integration", "Payment protocol", "Wallet apps", "Auto-signing"],
     badge: "new",
   },
@@ -414,14 +414,14 @@ export const typescriptPackages: Package[] = [
   {
     name: "@t402/wdk-ton-gasless",
     npmPackage: "@t402/wdk-ton-gasless",
-    description: "Gasless USDT0 payments on TON with Tether WDK",
+    description: "Gasless USDT0 payments on TON via WDK abstraction",
     features: ["TON gasless", "USDT0 payments", "WDK integration", "No gas needed"],
     badge: "new",
   },
   {
     name: "@t402/wdk-tron-gasfree",
     npmPackage: "@t402/wdk-tron-gasfree",
-    description: "Gas-free USDT payments on TRON with Tether WDK",
+    description: "Gas-free USDT payments on TRON via WDK abstraction",
     features: ["TRON gas-free", "USDT payments", "WDK integration", "No energy needed"],
     badge: "new",
   },

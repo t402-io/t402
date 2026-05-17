@@ -27,7 +27,7 @@ const categories: { id: Category; label: string }[] = [
 const articles: Article[] = [
   {
     slug: "t402-launch",
-    title: "Introducing T402: The Official Payment Protocol for USDT",
+    title: "Introducing T402: An Open HTTP Payment Protocol for Stablecoins",
     description:
       "T402 brings HTTP-native stablecoin payments to the internet. Zero fees, instant settlement, and support for 47 networks across EVM, Solana, TON, TRON, NEAR, Aptos, and more.",
     date: "Jan 15, 2026",

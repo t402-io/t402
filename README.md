@@ -7,9 +7,9 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Whitepaper](https://img.shields.io/badge/whitepaper-PDF-orange.svg)](https://t402.io/t402-whitepaper.pdf)
 
-t402 is an open standard for internet native payments. It aims to support all networks (both crypto & fiat) and forms of value (stablecoins, tokens, fiat).
+t402 is an open standard for internet-native payments. It aims to support all networks (both crypto & fiat) and forms of value (stablecoins, tokens, fiat).
 
-**Compatible with [Tether WDK](https://wdk.tether.io)** — bring your own wallet, or use Tether WDK as the underlying wallet layer. t402 provides the payment protocol; WDK provides the wallet.
+**Bring your own wallet.** t402 ships its own structurally-typed wallet abstraction (`@t402/wdk*`) and works with any wallet that conforms to a small interface. It can interoperate with [Tether's open-source Wallet Development Kit](https://wdk.tether.io) (Apache 2.0) at the user's option, but t402 has no formal affiliation with Tether Operations Limited (see Trademark Notice below).
 
 ```typescript
 app.use(
@@ -58,7 +58,7 @@ HTTP Integrations:
 @t402/vue               Vue composables and components
 
 WDK (Wallet Development Kit):
-@t402/wdk               Tether WDK integration
+@t402/wdk               Wallet abstraction layer (interoperable with Tether's open-source WDK)
 @t402/wdk-gasless       ERC-4337 gasless payments
 @t402/wdk-bridge        LayerZero cross-chain bridging
 @t402/wdk-multisig      Safe multi-sig support
@@ -558,3 +558,21 @@ See [SECURITY.md](SECURITY.md) for security policy and vulnerability reporting.
 ## License
 
 Apache 2.0 - See [LICENSE](LICENSE) for details.
+
+## Trademark Notice
+
+T402 is an independent open-source project. It is not affiliated with,
+endorsed by, sponsored by, or in any way officially connected with
+Tether Operations Limited, Tether Holdings, or any of their affiliates.
+
+"Tether", "USDT", "USDT0", "USDC", and other token names and trademarks
+referenced in this repository are the property of their respective
+owners. They are used here nominatively to describe token
+interoperability and chain support, and not to imply any partnership or
+endorsement. Compatibility with Tether's open-source Wallet Development
+Kit (Apache 2.0) is at the user's option and does not represent a
+formal partnership.
+
+If you are a rights holder and believe any reference here is
+inappropriate, please open an issue or email the maintainers and we
+will respond promptly.

@@ -1,11 +1,11 @@
 import { ImageResponse } from "next/og";
 
 export const dynamic = "force-static";
-export const alt = "Introducing T402: The Official Payment Protocol for USDT";
+export const alt = "Introducing T402: An Open HTTP Payment Protocol for Stablecoins";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const title = "Introducing T402: The Official Payment Protocol for USDT";
+const title = "Introducing T402: An Open HTTP Payment Protocol for Stablecoins";
 const category = "Announcement";
 const color = "#50AF95";
 const slug = "t402-launch";

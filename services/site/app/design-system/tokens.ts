@@ -2,7 +2,7 @@
  * T402 Design System Tokens
  *
  * A comprehensive design token system for the t402.io website.
- * Uses Tether-inspired green as the primary brand color.
+ * Uses a high-contrast green palette evoking trust, growth, and financial UI conventions.
  * Supports both dark and light section variants for a premium corporate aesthetic.
  */
 
@@ -41,9 +41,9 @@ export const colors = {
     onLightTertiary: '#718096',
   },
 
-  // Brand colors - Tether inspired
+  // Brand colors - stablecoin-financial green palette
   brand: {
-    primary: '#50AF95',      // Primary brand - Tether green
+    primary: '#50AF95',      // Primary brand
     secondary: '#26A17B',    // Secondary brand - darker green
     accent: '#1BA27A',       // Accent - hover/active states
     muted: 'rgba(80, 175, 149, 0.1)', // Muted brand for backgrounds

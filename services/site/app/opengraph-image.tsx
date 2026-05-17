@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const dynamic = "force-static";
-export const alt = "T402 - The Official Payment Protocol for USDT";
+export const alt = "T402 - Open-source HTTP Payment Protocol for Stablecoins";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -107,7 +107,7 @@ export default async function Image() {
               letterSpacing: "-0.02em",
             }}
           >
-            The Official Payment Protocol
+            Open HTTP Payment Protocol
           </h1>
 
           {/* Subtitle */}
@@ -121,7 +121,7 @@ export default async function Image() {
               letterSpacing: "-0.02em",
             }}
           >
-            for USDT
+            for Stablecoins
           </p>
 
           {/* Description */}

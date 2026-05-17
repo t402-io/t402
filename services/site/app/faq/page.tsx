@@ -6,11 +6,11 @@ import { FAQClient } from "./FAQClient";
 export const metadata: Metadata = {
   title: "FAQ - T402",
   description:
-    "Frequently asked questions about T402, the HTTP-native payment protocol for USDT stablecoins across 47 networks.",
+    "Frequently asked questions about T402, the open-source HTTP-native payment protocol for stablecoins across 47 networks.",
   openGraph: {
     title: "FAQ - T402",
     description:
-      "Frequently asked questions about T402, the HTTP-native payment protocol for USDT stablecoins.",
+      "Frequently asked questions about T402, the open-source HTTP-native payment protocol for stablecoins.",
     url: "/faq",
   },
 };

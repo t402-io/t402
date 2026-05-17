@@ -7,7 +7,7 @@ export const metadata = {
   description:
     "Discover why T402 is the leading HTTP-native stablecoin payment protocol. 47 networks, 4 SDKs, 18 HTTP framework integrations, AI agent support, and more.",
   openGraph: {
-    title: "Why T402 - The Payment Protocol for USDT",
+    title: "Why T402 - The Open HTTP Payment Protocol for Stablecoins",
     description:
       "47 networks, 4 SDKs, zero fees, instant settlement. See why T402 is the best way to accept stablecoin payments.",
   },

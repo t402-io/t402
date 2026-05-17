@@ -384,7 +384,7 @@ export default function CompareClient() {
               Why T402
             </span>
             <h1 className="mt-4 text-4xl font-bold tracking-tight md:text-5xl" style={{ color: "#FAFAFA" }}>
-              The Payment Protocol for USDT
+              The HTTP Payment Protocol for Stablecoins
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg" style={{ color: "#A1A1AA" }}>
               HTTP-native stablecoin payments with zero fees, instant settlement,

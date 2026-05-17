@@ -35,9 +35,9 @@ export function Hero() {
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="text-5xl font-bold tracking-tight text-white md:text-7xl lg:text-8xl"
         >
-          The Payment Protocol
+          The HTTP Payment Protocol
           <br />
-          <span className="text-gradient">for USDT</span>
+          <span className="text-gradient">for Stablecoins</span>
         </motion.h1>
 
         {/* Subtitle */}

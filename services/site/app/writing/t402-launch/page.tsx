@@ -3,7 +3,7 @@ import Link from "next/link";
 import { NavBar } from "../../components/NavBar";
 import { Footer } from "../../components/Footer";
 
-const pageTitle = "Introducing T402: The Official Payment Protocol for USDT";
+const pageTitle = "Introducing T402: An Open HTTP Payment Protocol for Stablecoins";
 const pageDescription =
   "T402 brings HTTP-native stablecoin payments to the internet. Zero fees, instant settlement, and support for 47 networks across 13 families.";
 
@@ -102,7 +102,7 @@ export default function T402LaunchPage() {
                 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-tight mb-6"
                 style={{ color: "#FAFAFA" }}
               >
-                Introducing T402: The Official Payment Protocol for USDT
+                Introducing T402: An Open HTTP Payment Protocol for Stablecoins
               </h1>
               <div className="flex items-center gap-4 text-sm" style={{ color: "#A1A1AA" }}>
                 <span>January 15, 2026</span>
@@ -149,7 +149,7 @@ export default function T402LaunchPage() {
               <section className="space-y-4">
                 <h2 className="text-2xl font-semibold mt-4" style={{ color: "#1A1A2E" }}>What is T402?</h2>
                 <p className="text-base" style={{ color: "#4A5568" }}>
-                  T402 is the official payment protocol for USDT stablecoins. It leverages the long-dormant HTTP 402 &quot;Payment Required&quot; status code to enable native web payments without intermediaries.
+                  T402 is an open-source HTTP-native payment protocol for stablecoins. It leverages the long-dormant HTTP 402 &quot;Payment Required&quot; status code to enable native web payments without intermediaries. Pay with USDT, USDC, or other supported stablecoins.
                 </p>
                 <p className="text-base" style={{ color: "#4A5568" }}>
                   When a client requests a paid resource, the server responds with a 402 status code and payment requirements. The client signs a transaction, includes it in the request headers, and the server verifies payment before delivering the resource. Simple, secure, and instant.

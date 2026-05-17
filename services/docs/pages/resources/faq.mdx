@@ -12,7 +12,7 @@ T402 is an open standard for HTTP-native stablecoin payments. It enables any HTT
 
 ##### Why the name "T402"?
 
-The name combines "T" (for Tether/USDT) with "402" (the HTTP status code for "Payment Required"). The HTTP 402 status code was reserved for future use in digital payment systems - T402 fulfills that vision.
+The name combines "T" (for token) with "402" (the HTTP status code for "Payment Required"). The HTTP 402 status code was reserved for future use in digital payment systems - T402 fulfills that vision for stablecoin-denominated payments.
 
 ##### What stablecoins are supported?
 
@@ -596,7 +596,7 @@ SDK component that generates payment requirements and processes payment headers.
 Wallet interface for signing messages and transactions. Can be browser extension, hardware wallet, or programmatic key.
 
 ##### WDK (Wallet Development Kit)
-Tether's SDK for wallet integration, used by T402 for advanced features.
+A wallet abstraction layer for multi-chain account management. T402 provides its own `@t402/wdk*` packages (structurally typed). Tether also publishes an open-source WDK under Apache 2.0 that conforms to the same interface shape — interoperability is at the user's option.
 
 ### HTTP Terms
 

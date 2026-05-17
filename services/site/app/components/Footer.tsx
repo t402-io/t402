@@ -126,8 +126,9 @@ export function Footer() {
                 className="mt-4 max-w-xs text-sm leading-relaxed"
                 style={{ color: "#71717A" }}
               >
-                The Official Payment Protocol for USDT. HTTP-native stablecoin
-                payments across multiple blockchains.
+                Open-source HTTP-native payment protocol for stablecoins.
+                Pay with USDT, USDC, and other ERC-20 / TRC-20 / TON tokens
+                across multiple blockchains.
               </p>
             </div>
 
@@ -139,6 +140,24 @@ export function Footer() {
               <FooterColumn title="Chains" links={footerLinks.chains} />
             </div>
           </div>
+        </div>
+
+        {/* Trademark disclaimer */}
+        <div
+          className="py-5 text-xs leading-relaxed"
+          style={{
+            color: "#52525B",
+            borderTop: "1px solid rgba(255, 255, 255, 0.06)",
+          }}
+        >
+          T402 is an independent open-source project. It is not affiliated
+          with, endorsed by, sponsored by, or in any way officially
+          connected with Tether Operations Limited, Tether Holdings, or
+          any of their affiliates. &ldquo;Tether&rdquo;, &ldquo;USDT&rdquo;,
+          &ldquo;USDT0&rdquo;, &ldquo;USDC&rdquo;, and other token names
+          and logos referenced on this site are trademarks of their
+          respective owners and are used here nominatively to describe
+          token interoperability only.
         </div>
 
         {/* Bottom bar */}

@@ -34,7 +34,7 @@ const faqs: FAQItem[] = [
     id: "why-402",
     question: "Why is it called T402?",
     answer:
-      "The name comes from HTTP status code 402 'Payment Required', which was reserved in the HTTP/1.1 specification for future use with digital payments. T402 finally implements this vision, using the 402 response to signal payment requirements and the 'T' represents Tether (USDT), the primary stablecoin supported.",
+      "The name comes from HTTP status code 402 'Payment Required', which was reserved in the HTTP/1.1 specification for future use with digital payments. T402 implements this vision, using the 402 response to signal payment requirements. The 'T' stands for token, since the protocol is designed for stablecoin-denominated payments.",
     category: "general",
   },
   {

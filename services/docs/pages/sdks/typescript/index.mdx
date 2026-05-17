@@ -38,11 +38,11 @@ import { Cards, FileTree, Callout } from 'nextra/components'
   **Bundle Size Optimization**: Use `@t402/evm-core` instead of `@t402/evm` if you only need types and don't require viem. This significantly reduces bundle size for type-only consumers.
 </Callout>
 
-## WDK Integration (Tether Wallet Development Kit)
+## WDK Integration (Tether's open-source WDK (Apache 2.0))
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| `@t402/wdk` | 2.9.0 | Tether WDK integration for EVM, TON, Solana, TRON |
+| `@t402/wdk` | 2.9.0 | the WDK integration for EVM, TON, Solana, TRON |
 | `@t402/wdk-protocol` | 2.9.0 | T402 payment protocol for WDK wallet apps |
 | `@t402/wdk-gasless` | 2.9.0 | Gasless payments via ERC-4337 account abstraction |
 | `@t402/wdk-bridge` | 2.9.0 | Cross-chain bridging via LayerZero OFT |
@@ -163,7 +163,7 @@ pnpm add @t402/core @t402/evm @t402/svm @t402/ton @t402/tron @t402/near @t402/ap
     │
     ├── @t402/stacks        Stacks mechanism (SIP-010)
     │
-    └── @t402/wdk           Tether WDK integration (EVM, TON, Solana, TRON)
+    └── @t402/wdk           the WDK integration (EVM, TON, Solana, TRON)
         │
         ├── @t402/wdk-protocol  T402 payment protocol for WDK apps
         │

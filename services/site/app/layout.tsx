@@ -16,9 +16,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "T402 - The Official Payment Protocol for USDT",
+  title: "T402 - Open-source HTTP Payment Protocol for Stablecoins",
   description:
-    "T402 is the official payment protocol for USDT. HTTP-native stablecoin payments across 47 networks including EVM, Solana, TON, TRON, NEAR, Aptos, and more. Zero fees. Instant settlement. Built for AI agents.",
+    "T402 is an open-source HTTP-native payment protocol for stablecoins. Pay with USDT, USDC, and other ERC-20 / TRC-20 / TON tokens across 47 networks (EVM, Solana, TON, TRON, NEAR, Aptos, and more). Low fees. Fast settlement. Built for AI agents.",
   keywords: [
     "USDT",
     "USDT0",
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: "T402 - The Official Payment Protocol for USDT",
+    title: "T402 - Open-source HTTP Payment Protocol for Stablecoins",
     description:
       "HTTP-native stablecoin payments across 47 networks. Zero fees. Instant settlement. Built for AI agents.",
     type: "website",
@@ -56,13 +56,13 @@ export const metadata: Metadata = {
         url: "/t402-logo.png",
         width: 512,
         height: 512,
-        alt: "T402 - The Official Payment Protocol for USDT",
+        alt: "T402 - Open-source HTTP Payment Protocol for Stablecoins",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "T402 - The Official Payment Protocol for USDT",
+    title: "T402 - Open-source HTTP Payment Protocol for Stablecoins",
     description:
       "HTTP-native stablecoin payments across 47 networks. Zero fees. Instant settlement. Built for AI agents.",
     images: ["/t402-logo.png"],
@@ -96,7 +96,7 @@ const jsonLd = {
       "@id": "https://t402.io/#website",
       url: "https://t402.io",
       name: "T402",
-      description: "The Official Payment Protocol for USDT",
+      description: "Open-source HTTP Payment Protocol for Stablecoins",
       publisher: {
         "@id": "https://t402.io/#organization",
       },

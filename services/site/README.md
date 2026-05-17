@@ -1,6 +1,6 @@
 # T402 Site
 
-Marketing website for T402 - The Official Payment Protocol for USDT.
+Marketing website for T402 - Open-source HTTP Payment Protocol for Stablecoins.
 
 **Live site:** https://t402.io
 
