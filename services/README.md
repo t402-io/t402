@@ -11,8 +11,6 @@ This directory contains web services for the t402 ecosystem.
 | `scan2pay/` | Merchant payment gateway (Java + Next.js) | 8081/3001 | ✅ Production |
 | `bazaar/` | Service marketplace for AI agents | 3402 | 🆕 New |
 | `status/` | Public health monitoring + status page | 3403 | 🆕 New |
-| `explorer/` | Payment transaction explorer | 3404 | 🆕 New |
-| `agent-dashboard/` | AI agent payment monitoring UI | 3405 | 🆕 New |
 | `sandbox/` | Public testnet facilitator for developers | 8080 | 🆕 New |
 
 The `facilitator` and `scan2pay` services are private submodules.
@@ -30,7 +28,5 @@ Internet
         ├── scan2pay-api.t402.io → scan2pay/api/:8081
         ├── bazaar.t402.io → bazaar/:3402
         ├── status.t402.io → status/:3403
-        ├── explorer.t402.io → explorer/:3404
-        ├── agents.t402.io → agent-dashboard/:3405
         └── sandbox.t402.io → sandbox/:8080
 ```

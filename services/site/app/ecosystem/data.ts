@@ -136,16 +136,6 @@ export const partners: Partner[] = [
     badge: "live",
   },
   {
-    id: "explorer",
-    name: "T402 Explorer",
-    category: "services",
-    description:
-      "On-chain payment transaction browser for t402 settlements across all networks.",
-    url: "https://explorer.t402.io",
-    integration: "Native t402 service",
-    badge: "live",
-  },
-  {
     id: "sandbox",
     name: "T402 Sandbox",
     category: "services",

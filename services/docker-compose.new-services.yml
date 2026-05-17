@@ -82,84 +82,6 @@ services:
       timeout: 5s
       retries: 3
 
-  explorer:
-    build: ./explorer
-    container_name: t402-explorer
-    ports:
-      - "3404:3404"
-    environment:
-      - PORT=3404
-      - FACILITATOR_URL=${FACILITATOR_URL:-http://facilitator:8080}
-      - FACILITATOR_API_KEY=${FACILITATOR_API_KEY:-}
-      - EXPLORER_MODE=${EXPLORER_MODE:-auto}
-      - SQLITE_PATH=/data/explorer.db
-      - SYNC_INTERVAL_MS=${SYNC_INTERVAL_MS:-10000}
-    networks:
-      - default
-      - facilitator_ext
-    volumes:
-      - explorer-data:/data
-    restart: unless-stopped
-    read_only: true
-    security_opt:
-      - no-new-privileges:true
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-        reservations:
-          memory: 64M
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3404/health"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-
-  agent-dashboard:
-    build: ./agent-dashboard
-    container_name: t402-agent-dashboard
-    ports:
-      - "3405:3405"
-    environment:
-      - PORT=3405
-      - DATABASE_URL=${AGENT_DASHBOARD_DATABASE_URL:-}
-      - DASHBOARD_API_KEY=${AGENT_DASHBOARD_API_KEY:-}
-      - ALLOWED_ORIGINS=${AGENT_DASHBOARD_ALLOWED_ORIGINS:-}
-      - RATE_LIMIT_PER_MINUTE=${AGENT_DASHBOARD_RATE_LIMIT:-100}
-      - BUDGET_MAX_PER_PAYMENT=${BUDGET_MAX_PER_PAYMENT:-1000000}
-      - BUDGET_MAX_PER_SESSION=${BUDGET_MAX_PER_SESSION:-10000000}
-      - BUDGET_MAX_PER_DAY=${BUDGET_MAX_PER_DAY:-50000000}
-    networks:
-      - default
-      - facilitator
-    restart: unless-stopped
-    read_only: true
-    tmpfs:
-      - /tmp
-    security_opt:
-      - no-new-privileges:true
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-        reservations:
-          memory: 64M
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3405/health"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-
   sandbox:
     build: ./sandbox
     container_name: t402-sandbox
@@ -198,7 +120,6 @@ services:
 volumes:
   bazaar-data:
   status-data:
-  explorer-data:
 
 networks:
   scan2pay:

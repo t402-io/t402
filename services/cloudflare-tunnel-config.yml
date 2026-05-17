@@ -18,14 +18,6 @@
   - hostname: status.t402.io
     service: http://localhost:3403
 
-  # T402 Explorer — Payment Transaction Browser
-  - hostname: explorer.t402.io
-    service: http://localhost:3404
-
-  # T402 Agent Dashboard — AI Agent Monitoring
-  - hostname: agents.t402.io
-    service: http://localhost:3405
-
   # T402 Sandbox — Testnet Facilitator
   - hostname: sandbox.t402.io
     service: http://localhost:3406
