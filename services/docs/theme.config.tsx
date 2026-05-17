@@ -216,7 +216,7 @@ const config: DocsThemeConfig = {
           fontSize: '0.8125rem',
           opacity: 0.5,
         }}>
-          &copy; {new Date().getFullYear()} T402 &middot; The Official Payment Protocol for USDT
+          &copy; {new Date().getFullYear()} T402 &middot; Open-source HTTP Payment Protocol for Stablecoins
         </span>
       </div>
     )
@@ -226,9 +226,9 @@ const config: DocsThemeConfig = {
   head: (
     <>
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <meta name="description" content="T402 - The Official Payment Protocol for USDT" />
+      <meta name="description" content="T402 - Open-source HTTP Payment Protocol for Stablecoins" />
       <meta property="og:title" content="T402 Documentation" />
-      <meta property="og:description" content="HTTP-native stablecoin payments for USDT and USDT0" />
+      <meta property="og:description" content="Open-source HTTP-native stablecoin payments. Supports USDT, USDC, USDT0 and other tokens across 47 networks." />
       <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
       <link rel="icon" type="image/x-icon" href="/favicon.ico" />
       <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
