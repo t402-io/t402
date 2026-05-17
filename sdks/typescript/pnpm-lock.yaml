@@ -1915,7 +1915,7 @@ importers:
         specifier: workspace:*
         version: link:../mechanisms/evm
       '@tetherto/wdk':
-        specifier: '>=1.0.0-beta.6 <2.0.0'
+        specifier: '>=1.0.0-beta.7 <2.0.0'
         version: 1.0.0-beta.9(bare-tcp@2.2.12(bare-abort-controller@1.1.1)(bare-buffer@3.6.0))
       '@tetherto/wdk-pricing-bitfinex-http':
         specifier: '>=1.0.0-beta.0'
@@ -2161,41 +2161,6 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@emnapi/core@1.9.2)(@emnapi/runtime@1.8.1)(@types/debug@4.1.13)(@types/node@25.5.2)(esbuild@0.27.7)(happy-dom@20.8.9(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@29.0.1(@noble/hashes@2.2.0))(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.3)
 
-  packages/wdk-facilitator:
-    dependencies:
-      '@t402/core':
-        specifier: workspace:*
-        version: link:../core
-      '@t402/evm-core':
-        specifier: workspace:*
-        version: link:../mechanisms/evm-core
-    devDependencies:
-      tsup:
-        specifier: ^8.0.0
-        version: 8.5.1(postcss@8.5.8)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
-      typescript:
-        specifier: ^5.9.0
-        version: 5.9.3
-      vitest:
-        specifier: ^3.2.0
-        version: 3.2.4(@emnapi/core@1.9.2)(@emnapi/runtime@1.8.1)(@types/debug@4.1.13)(@types/node@25.5.2)(esbuild@0.27.7)(happy-dom@20.8.9(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@29.0.1(@noble/hashes@2.2.0))(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.3)
-
-  packages/wdk-fiat:
-    dependencies:
-      '@t402/core':
-        specifier: workspace:*
-        version: link:../core
-    devDependencies:
-      tsup:
-        specifier: ^8.0.0
-        version: 8.5.1(postcss@8.5.8)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
-      typescript:
-        specifier: ^5.9.0
-        version: 5.9.3
-      vitest:
-        specifier: ^3.2.0
-        version: 3.2.4(@emnapi/core@1.9.2)(@emnapi/runtime@1.8.1)(@types/debug@4.1.13)(@types/node@25.5.2)(esbuild@0.27.7)(happy-dom@20.8.9(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@29.0.1(@noble/hashes@2.2.0))(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.3)
-
   packages/wdk-gasless:
     dependencies:
       '@t402/core':
@@ -2208,13 +2173,13 @@ importers:
         specifier: workspace:*
         version: link:../wdk
       '@tetherto/wdk':
-        specifier: '>=1.0.0-beta.6'
+        specifier: '>=1.0.0-beta.7'
         version: 1.0.0-beta.9(bare-tcp@2.2.12(bare-abort-controller@1.1.1)(bare-buffer@3.6.0))
       '@tetherto/wdk-wallet-evm':
-        specifier: '>=1.0.0-beta.6'
+        specifier: '>=1.0.0-beta.5'
         version: 1.0.0-beta.12(bare-abort-controller@1.1.1)(bare-buffer@3.6.0)(bare-tcp@2.2.12(bare-abort-controller@1.1.1)(bare-buffer@3.6.0))(bufferutil@4.0.9)(sodium-javascript@0.8.0)(utf-8-validate@5.0.10)
       '@tetherto/wdk-wallet-evm-erc-4337':
-        specifier: '>=1.0.0-beta.6'
+        specifier: '>=1.0.0-beta.5'
         version: 1.0.0-beta.6(bare-abort-controller@1.1.1)(bare-buffer@3.6.0)(bare-tcp@2.2.12(bare-abort-controller@1.1.1)(bare-buffer@3.6.0))(bufferutil@4.0.9)(sodium-javascript@0.8.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
       viem:
         specifier: 2.47.6
@@ -2269,28 +2234,6 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@emnapi/core@1.9.2)(@emnapi/runtime@1.8.1)(@types/debug@4.1.13)(@types/node@25.5.2)(esbuild@0.27.7)(happy-dom@20.8.9(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@29.0.1(@noble/hashes@2.2.0))(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.3)
 
-  packages/wdk-lending:
-    dependencies:
-      '@t402/core':
-        specifier: workspace:*
-        version: link:../core
-      '@tetherto/wdk':
-        specifier: '>=1.0.0-beta.7'
-        version: 1.0.0-beta.9(bare-tcp@2.2.12(bare-abort-controller@1.1.1)(bare-buffer@3.6.0))
-      '@tetherto/wdk-protocol-lending-aave-evm':
-        specifier: '>=1.0.0-beta.3'
-        version: 1.0.0-beta.4(bare-abort-controller@1.1.1)(bare-buffer@3.6.0)(bare-tcp@2.2.12(bare-abort-controller@1.1.1)(bare-buffer@3.6.0))(bufferutil@4.0.9)(sodium-javascript@0.8.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.47.6(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))(zod@4.3.6)
-    devDependencies:
-      tsup:
-        specifier: ^8.0.0
-        version: 8.5.1(postcss@8.5.8)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
-      typescript:
-        specifier: ^5.9.0
-        version: 5.9.3
-      vitest:
-        specifier: ^3.2.0
-        version: 3.2.4(@emnapi/core@1.9.2)(@emnapi/runtime@1.8.1)(@types/debug@4.1.13)(@types/node@25.5.2)(esbuild@0.27.7)(happy-dom@20.8.9(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@29.0.1(@noble/hashes@2.2.0))(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.3)
-
   packages/wdk-multisig:
     dependencies:
       '@t402/core':
@@ -2306,13 +2249,13 @@ importers:
         specifier: workspace:*
         version: link:../wdk-gasless
       '@tetherto/wdk':
-        specifier: '>=1.0.0-beta.6'
+        specifier: '>=1.0.0-beta.7'
         version: 1.0.0-beta.9(bare-tcp@2.2.12(bare-abort-controller@1.1.1)(bare-buffer@3.6.0))
       '@tetherto/wdk-safe-protocol-kit':
         specifier: '>=6.0.0'
         version: 6.1.3(bufferutil@4.0.9)(ethers@6.16.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
       '@tetherto/wdk-wallet-evm':
-        specifier: '>=1.0.0-beta.6'
+        specifier: '>=1.0.0-beta.5'
         version: 1.0.0-beta.12(bare-abort-controller@1.1.1)(bare-buffer@3.6.0)(bare-tcp@2.2.12(bare-abort-controller@1.1.1)(bare-buffer@3.6.0))(bufferutil@4.0.9)(sodium-javascript@0.8.0)(utf-8-validate@5.0.10)
       viem:
         specifier: 2.47.6
@@ -2382,7 +2325,7 @@ importers:
         specifier: workspace:*
         version: link:../wdk
       '@tetherto/wdk':
-        specifier: '>=1.0.0-beta.6'
+        specifier: '>=1.0.0-beta.7'
         version: 1.0.0-beta.9(bare-tcp@2.2.12(bare-abort-controller@1.1.1)(bare-buffer@3.6.0))
       viem:
         specifier: 2.47.6
@@ -2405,25 +2348,6 @@ importers:
         version: 6.1.1(typescript@5.9.3)(vite@8.0.3(@emnapi/core@1.9.2)(@emnapi/runtime@1.8.1)(@types/node@25.5.2)(esbuild@0.27.7)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.3))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@emnapi/core@1.9.2)(@emnapi/runtime@1.8.1)(@types/debug@4.1.13)(@types/node@25.5.2)(esbuild@0.27.7)(happy-dom@20.8.9(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@29.0.1(@noble/hashes@2.2.0))(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.3)
-
-  packages/wdk-swap-jupiter:
-    dependencies:
-      '@t402/core':
-        specifier: workspace:*
-        version: link:../core
-    devDependencies:
-      '@types/node':
-        specifier: ^25.5.2
-        version: 25.5.2
-      tsup:
-        specifier: ^8.0.0
-        version: 8.5.1(postcss@8.5.8)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
-      typescript:
-        specifier: ^5.9.0
-        version: 5.9.3
-      vitest:
-        specifier: ^3.2.0
         version: 3.2.4(@emnapi/core@1.9.2)(@emnapi/runtime@1.8.1)(@types/debug@4.1.13)(@types/node@25.5.2)(esbuild@0.27.7)(happy-dom@20.8.9(bufferutil@4.0.9)(utf-8-validate@5.0.10))(jsdom@29.0.1(@noble/hashes@2.2.0))(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/wdk-ton:
@@ -16455,29 +16379,6 @@ snapshots:
       '@tetherto/wdk-wallet': 1.0.0-beta.7(bare-tcp@2.2.12(bare-abort-controller@1.1.1)(bare-buffer@3.6.0))
       '@tetherto/wdk-wallet-evm': 1.0.0-beta.8(bare-abort-controller@1.1.1)(bare-buffer@3.6.0)(bare-events@2.8.2(bare-abort-controller@1.1.1))(bare-tcp@2.2.12(bare-abort-controller@1.1.1)(bare-buffer@3.6.0))(bare-url@2.4.2)(bufferutil@4.0.9)(sodium-javascript@0.8.0)(utf-8-validate@5.0.10)
       '@tetherto/wdk-wallet-evm-erc-4337': 1.0.0-beta.5(bare-abort-controller@1.1.1)(bare-buffer@3.6.0)(bare-events@2.8.2(bare-abort-controller@1.1.1))(bare-tcp@2.2.12(bare-abort-controller@1.1.1)(bare-buffer@3.6.0))(bare-url@2.4.2)(bufferutil@4.0.9)(sodium-javascript@0.8.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
-      bare-node-runtime: 1.3.1(bare-tcp@2.2.12(bare-abort-controller@1.1.1)(bare-buffer@3.6.0))
-      ethers: 6.14.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-    transitivePeerDependencies:
-      - bare-abort-controller
-      - bare-buffer
-      - bare-events
-      - bare-tcp
-      - bare-url
-      - bufferutil
-      - debug
-      - react-native-b4a
-      - sodium-javascript
-      - typescript
-      - utf-8-validate
-      - viem
-      - zod
-
-  '@tetherto/wdk-protocol-lending-aave-evm@1.0.0-beta.4(bare-abort-controller@1.1.1)(bare-buffer@3.6.0)(bare-tcp@2.2.12(bare-abort-controller@1.1.1)(bare-buffer@3.6.0))(bufferutil@4.0.9)(sodium-javascript@0.8.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.47.6(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))(zod@4.3.6)':
-    dependencies:
-      '@bgd-labs/aave-address-book': 4.33.0(viem@2.47.6(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))
-      '@tetherto/wdk-wallet': 1.0.0-beta.7(bare-tcp@2.2.12(bare-abort-controller@1.1.1)(bare-buffer@3.6.0))
-      '@tetherto/wdk-wallet-evm': 1.0.0-beta.8(bare-abort-controller@1.1.1)(bare-buffer@3.6.0)(bare-tcp@2.2.12(bare-abort-controller@1.1.1)(bare-buffer@3.6.0))(bufferutil@4.0.9)(sodium-javascript@0.8.0)(utf-8-validate@5.0.10)
-      '@tetherto/wdk-wallet-evm-erc-4337': 1.0.0-beta.5(bare-abort-controller@1.1.1)(bare-buffer@3.6.0)(bare-tcp@2.2.12(bare-abort-controller@1.1.1)(bare-buffer@3.6.0))(bufferutil@4.0.9)(sodium-javascript@0.8.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
       bare-node-runtime: 1.3.1(bare-tcp@2.2.12(bare-abort-controller@1.1.1)(bare-buffer@3.6.0))
       ethers: 6.14.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
