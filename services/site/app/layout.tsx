@@ -161,6 +161,29 @@ gtag('config', 'G-7FRFFD0PH0');`}
           Skip to main content
         </a>
         <main id="main-content">{children}</main>
+        {/* SSR-rendered trademark disclaimer — visible in raw HTML for crawlers
+            and screen readers without relying on client hydration. */}
+        <aside
+          aria-label="Trademark notice"
+          style={{
+            background: "#0A0A0B",
+            color: "#52525B",
+            fontSize: "11px",
+            lineHeight: 1.5,
+            padding: "12px 24px",
+            textAlign: "center",
+            borderTop: "1px solid rgba(255,255,255,0.04)",
+          }}
+        >
+          T402 is an independent open-source project. Not affiliated with,
+          endorsed by, sponsored by, or in any way officially connected with
+          Tether Operations Limited, Tether Holdings, or any of their
+          affiliates. &ldquo;Tether&rdquo;, &ldquo;USDT&rdquo;,
+          &ldquo;USDT0&rdquo;, &ldquo;USDC&rdquo;, and other token names and
+          logos referenced on this site are trademarks of their respective
+          owners and are used nominatively to describe token interoperability
+          only.
+        </aside>
       </body>
     </html>
   );

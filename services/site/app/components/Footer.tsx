@@ -142,25 +142,9 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Trademark disclaimer */}
-        <div
-          className="py-5 text-xs leading-relaxed"
-          style={{
-            color: "#52525B",
-            borderTop: "1px solid rgba(255, 255, 255, 0.06)",
-          }}
-        >
-          T402 is an independent open-source project. It is not affiliated
-          with, endorsed by, sponsored by, or in any way officially
-          connected with Tether Operations Limited, Tether Holdings, or
-          any of their affiliates. &ldquo;Tether&rdquo;, &ldquo;USDT&rdquo;,
-          &ldquo;USDT0&rdquo;, &ldquo;USDC&rdquo;, and other token names
-          and logos referenced on this site are trademarks of their
-          respective owners and are used here nominatively to describe
-          token interoperability only.
-        </div>
-
         {/* Bottom bar */}
+        {/* Trademark disclaimer moved to layout.tsx as a SSR aside —
+            see services/site/app/layout.tsx for the source-of-truth text. */}
         <div
           className="flex flex-col items-center justify-between gap-6 py-6 sm:flex-row"
           style={{ borderTop: "1px solid rgba(255, 255, 255, 0.06)" }}
