@@ -137,23 +137,15 @@ jobs:
       fail-fast: false
       # Parallel — no inter-package dep at publish step (each is a self-contained tarball)
       matrix:
-        include:
-          - name: wdk-protocol
-            tarball_glob: "t402-wdk-protocol-*.tgz"
-          - name: wdk-ton
-            tarball_glob: "t402-wdk-ton-*.tgz"
-          - name: wdk-gasless
-            tarball_glob: "t402-wdk-gasless-*.tgz"
-          - name: wdk-bridge
-            tarball_glob: "t402-wdk-bridge-*.tgz"
-          - name: wdk-multisig
-            tarball_glob: "t402-wdk-multisig-*.tgz"
-          - name: wdk-ton-gasless
-            tarball_glob: "t402-wdk-ton-gasless-*.tgz"
-          - name: wdk-tron-gasfree
-            tarball_glob: "t402-wdk-tron-gasfree-*.tgz"
-          - name: wdk
-            tarball_glob: "t402-wdk-*.tgz"
+        name:
+          - wdk-protocol
+          - wdk-ton
+          - wdk-gasless
+          - wdk-bridge
+          - wdk-multisig
+          - wdk-ton-gasless
+          - wdk-tron-gasfree
+          - wdk
     steps:
       - name: Gate — should this package publish?
         id: gate
@@ -184,11 +176,12 @@ jobs:
         if: steps.gate.outputs.publish == 'true'
         id: pkg
         run: |
-          # wdk's glob `t402-wdk-*.tgz` would also match siblings; resolve uniquely.
-          if [[ "${{ matrix.name }}" == "wdk" ]]; then
-            TARBALL=$(ls /tmp/wdk-tarballs/t402-wdk-[0-9]*.tgz)
-          else
-            TARBALL=$(ls /tmp/wdk-tarballs/${{ matrix.tarball_glob }})
+          # The `[0-9]` anchor forces the version-number segment to follow the
+          # package name, so sibling-named tarballs (e.g. wdk-ton vs
+          # wdk-ton-gasless, or wdk vs wdk-bridge) do not get matched together.
+          TARBALL=$(ls /tmp/wdk-tarballs/t402-${{ matrix.name }}-[0-9]*.tgz)
+          if [[ $(echo "$TARBALL" | wc -l) -ne 1 ]]; then
+            echo "ERROR: glob matched multiple files:"; echo "$TARBALL"; exit 1
           fi
           echo "tarball=$TARBALL" >> $GITHUB_OUTPUT
           echo "Resolved: $TARBALL"
