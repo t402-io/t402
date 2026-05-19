@@ -10,10 +10,6 @@
 
 # --- ADD THESE TO YOUR EXISTING ingress SECTION ---
 
-  # T402 Bazaar — Service Marketplace
-  - hostname: bazaar.t402.io
-    service: http://localhost:3402
-
   # T402 Status — Public Health Monitoring
   - hostname: status.t402.io
     service: http://localhost:3403

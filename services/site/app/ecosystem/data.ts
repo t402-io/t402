@@ -126,16 +126,6 @@ export const partners: Partner[] = [
   },
   // Services
   {
-    id: "bazaar",
-    name: "T402 Bazaar",
-    category: "services",
-    description:
-      "Service marketplace for AI agents to discover and register t402-protected APIs.",
-    url: "https://bazaar.t402.io",
-    integration: "Native t402 service",
-    badge: "live",
-  },
-  {
     id: "sandbox",
     name: "T402 Sandbox",
     category: "services",

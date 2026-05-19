@@ -484,7 +484,7 @@ class PaywallConfig(TypedDict, total=False):
 
     app_name: str
     app_logo: str
-    delivery_mode: str  # "cdn" (default) or "inline"
+    delivery_mode: str  # "cdn" (only mode shipped; "inline" removed v3.0, kept for API compat)
 
 
 class DiscoveredResource(BaseModel):

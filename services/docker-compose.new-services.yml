@@ -8,40 +8,6 @@ name: t402-services
 # - Port 3402-3406 available
 
 services:
-  bazaar:
-    build: ./bazaar
-    container_name: t402-bazaar
-    ports:
-      - "3402:3402"
-    environment:
-      - PORT=3402
-      - RATE_LIMIT_PER_MINUTE=60
-      - BAZAAR_ADMIN_KEY=${BAZAAR_ADMIN_KEY:-}
-    volumes:
-      - bazaar-data:/app/data
-    restart: unless-stopped
-    read_only: true
-    tmpfs:
-      - /tmp
-    security_opt:
-      - no-new-privileges:true
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-        reservations:
-          memory: 64M
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3402/health"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-
   status:
     build: ./status
     container_name: t402-status
@@ -118,7 +84,6 @@ services:
       retries: 3
 
 volumes:
-  bazaar-data:
   status-data:
 
 networks:

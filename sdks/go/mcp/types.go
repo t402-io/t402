@@ -278,23 +278,6 @@ type WdkWalletInfo struct {
 	Chains     []string `json:"chains"`
 }
 
-// WdkSwapInput captures the shared fields of the swap/quoteSwap schemas.
-// Kept for schema completeness even though all three swap handlers are
-// honest stubs in the Go SDK — see wdk_tools.go for rationale.
-type WdkSwapInput struct {
-	FromToken string `json:"fromToken"`
-	ToToken   string `json:"toToken"`
-	Amount    string `json:"amount"`
-	Chain     string `json:"chain"`
-	Confirmed bool   `json:"confirmed,omitempty"`
-}
-
-// WdkExecuteSwapInput is the input for t402/wdk/executeSwap.
-type WdkExecuteSwapInput struct {
-	QuoteID   string `json:"quoteId"`
-	Confirmed bool   `json:"confirmed,omitempty"`
-}
-
 // ===== Phase C Batch 3 tool types (2026-04-24) =====
 
 // VerifySignatureInput is the input for t402/verifySignature.

@@ -3,7 +3,6 @@ package mcp
 import (
 	"context"
 	"encoding/json"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -28,12 +27,6 @@ func callWdkTool(t *testing.T, s *Server, name string, args any) *ToolResult {
 		return s.handleWdkGetBalances(ctx, raw)
 	case "t402/wdk/transfer":
 		return s.handleWdkTransfer(ctx, raw)
-	case "t402/wdk/swap":
-		return s.handleWdkSwap(ctx, raw)
-	case "t402/wdk/quoteSwap":
-		return s.handleWdkQuoteSwap(ctx, raw)
-	case "t402/wdk/executeSwap":
-		return s.handleWdkExecuteSwap(ctx, raw)
 	default:
 		t.Fatalf("unknown tool: %s", name)
 		return nil
@@ -165,27 +158,3 @@ func TestWdkTransfer_InvalidChain(t *testing.T) {
 	assert.Contains(t, result.Content[0].Text, "Invalid chain")
 }
 
-// ---------------------------------------------------------------------------
-// Honest stubs: swap / quoteSwap / executeSwap
-// ---------------------------------------------------------------------------
-
-func TestWdkSwap_HonestStub(t *testing.T) {
-	server := NewServer(&ServerConfig{DemoMode: true})
-
-	for _, tool := range []string{
-		"t402/wdk/swap",
-		"t402/wdk/quoteSwap",
-		"t402/wdk/executeSwap",
-	} {
-		t.Run(tool, func(t *testing.T) {
-			result := callWdkTool(t, server, tool, map[string]any{})
-			assert.True(t, result.IsError, "%s should return an error stub", tool)
-			assert.True(t,
-				strings.Contains(result.Content[0].Text, "not supported") ||
-					strings.Contains(result.Content[0].Text, "TS SDK"),
-				"stub error should mention TS SDK fallback: got %s",
-				result.Content[0].Text,
-			)
-		})
-	}
-}

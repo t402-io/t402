@@ -5,17 +5,11 @@ on:
     branches:
       - main
     paths:
-      - "services/bazaar/**"
       - "services/status/**"
-      - "services/explorer/**"
-      - "services/agent-dashboard/**"
       - "services/sandbox/**"
   pull_request:
     paths:
-      - "services/bazaar/**"
       - "services/status/**"
-      - "services/explorer/**"
-      - "services/agent-dashboard/**"
       - "services/sandbox/**"
   workflow_dispatch:
 
@@ -25,10 +19,7 @@ jobs:
     strategy:
       matrix:
         service:
-          - bazaar
           - status
-          - explorer
-          - agent-dashboard
           - sandbox
     name: test-${{ matrix.service }}
     defaults:
@@ -53,34 +44,23 @@ jobs:
         if: matrix.service != 'status'
         run: npm start &
         env:
-          BAZAAR_ADMIN_KEY: test-ci-key
-          EXPLORER_MODE: seed
           RATE_LIMIT_PER_MINUTE: "1000"
 
       - name: Wait for server
         if: matrix.service != 'status'
         run: |
-          PORT=${{ matrix.service == 'bazaar' && '3402' || matrix.service == 'explorer' && '3404' || matrix.service == 'agent-dashboard' && '3405' || '3406' }}
+          PORT=3406
           for i in $(seq 1 15); do
             curl -sf http://localhost:${PORT}/health && break
             sleep 1
           done
-          # Explorer needs extra time for seed data insertion
-          if [ "${{ matrix.service }}" = "explorer" ]; then
-            for i in $(seq 1 10); do
-              COUNT=$(curl -sf http://localhost:${PORT}/api/v1/transactions?limit=1 | node -e "process.stdin.on('data',d=>{try{console.log(JSON.parse(d).total||0)}catch{console.log(0)}})" 2>/dev/null)
-              [ "$COUNT" -gt 0 ] 2>/dev/null && break
-              sleep 1
-            done
-          fi
 
       - name: Run tests
         run: npm test
         timeout-minutes: 5
         env:
-          BAZAAR_ADMIN_KEY: test-ci-key
           RATE_LIMIT_PER_MINUTE: "1000"
-          BASE_URL: http://localhost:${{ matrix.service == 'bazaar' && '3402' || matrix.service == 'status' && '3403' || matrix.service == 'explorer' && '3404' || matrix.service == 'agent-dashboard' && '3405' || '3406' }}
+          BASE_URL: http://localhost:${{ matrix.service == 'status' && '3403' || '3406' }}
 
   detect-changes:
     needs: test
@@ -96,12 +76,12 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             # Deploy all services on manual trigger
-            echo "services=bazaar status explorer agent-dashboard sandbox" >> "$GITHUB_OUTPUT"
+            echo "services=status sandbox" >> "$GITHUB_OUTPUT"
           else
             BASE="${{ github.event.before }}"
             HEAD="${{ github.sha }}"
             CHANGED=""
-            for svc in bazaar status explorer agent-dashboard sandbox; do
+            for svc in status sandbox; do
               if git diff --name-only "$BASE" "$HEAD" | grep -q "^services/${svc}/"; then
                 CHANGED="${CHANGED:+$CHANGED }${svc}"
               fi

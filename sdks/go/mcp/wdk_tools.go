@@ -244,33 +244,3 @@ func (s *Server) handleWdkTransfer(ctx context.Context, args json.RawMessage) *T
 	return s.handlePay(ctx, raw)
 }
 
-// ---------------------------------------------------------------------------
-// t402/wdk/swap, t402/wdk/quoteSwap, t402/wdk/executeSwap — honest stubs
-// ---------------------------------------------------------------------------
-
-const swapNotSupportedMsg = `swap is not supported in the Go SDK.
-
-The Go SDK has no equivalent to @tetherto/wdk and does not bundle a
-multi-chain DEX aggregator. For swap workflows, use the TypeScript SDK
-(@t402/mcp) which integrates with Tether WDK via wdk-swap-jupiter (SVM)
-and @tetherto/wdk-protocol-swap-velora-evm (EVM).
-
-The wdk/swap, wdk/quoteSwap, and wdk/executeSwap tool schemas are
-exposed in the Go MCP server for cross-SDK parity at the tool-discovery
-level, but the handlers return this error until a native swap adapter
-is added.`
-
-// handleWdkSwap handles the t402/wdk/swap tool — schema-only stub.
-func (s *Server) handleWdkSwap(_ context.Context, _ json.RawMessage) *ToolResult {
-	return errorResult(swapNotSupportedMsg)
-}
-
-// handleWdkQuoteSwap handles the t402/wdk/quoteSwap tool — schema-only stub.
-func (s *Server) handleWdkQuoteSwap(_ context.Context, _ json.RawMessage) *ToolResult {
-	return errorResult(swapNotSupportedMsg)
-}
-
-// handleWdkExecuteSwap handles the t402/wdk/executeSwap tool — schema-only stub.
-func (s *Server) handleWdkExecuteSwap(_ context.Context, _ json.RawMessage) *ToolResult {
-	return errorResult(swapNotSupportedMsg)
-}

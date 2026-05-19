@@ -9,7 +9,6 @@ This directory contains web services for the t402 ecosystem.
 | `demo/` | Interactive demo, 9 scenarios ([demo.t402.io](https://demo.t402.io)) | 3012 | ✅ Production (Docker + Cloudflare Tunnel) |
 | `facilitator/` | Payment verification + settlement (Go) | 8080 | ✅ Production |
 | `scan2pay/` | Merchant payment gateway (Java + Next.js) | 8081/3001 | ✅ Production |
-| `bazaar/` | Service marketplace for AI agents | 3402 | 🆕 New |
 | `status/` | Public health monitoring + status page | 3403 | 🆕 New |
 | `sandbox/` | Public testnet facilitator for developers | 8080 | 🆕 New |
 
@@ -26,7 +25,6 @@ Internet
         ├── facilitator.t402.io → facilitator/:8080
         ├── scan2pay.t402.io → scan2pay/service/:3001
         ├── scan2pay-api.t402.io → scan2pay/api/:8081
-        ├── bazaar.t402.io → bazaar/:3402
         ├── status.t402.io → status/:3403
         └── sandbox.t402.io → sandbox/:8080
 ```

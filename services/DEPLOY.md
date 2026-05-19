@@ -11,7 +11,6 @@
 | Grafana | https://grafana-facilitator.t402.io | Docker ($DEPLOY_HOST) | 3000 |
 | Scan2Pay API | https://scan2pay-api.t402.io | Docker ($DEPLOY_HOST) | 8081 |
 | Scan2Pay Frontend | https://scan2pay.t402.io | Docker ($DEPLOY_HOST) | 3001 |
-| Bazaar | https://bazaar.t402.io | Docker ($DEPLOY_HOST) | 3402 |
 | Status | https://status.t402.io | Docker ($DEPLOY_HOST) | 3403 |
 | Sandbox | https://sandbox.t402.io | Docker ($DEPLOY_HOST) | 3406 |
 
@@ -125,10 +124,10 @@ Grafana runs as part of the Facilitator compose stack (not separately).
   - Frontend needs `NEXT_PUBLIC_API_DIRECT_URL=https://scan2pay-api.t402.io` as a build arg — without it, Ethereum settlements (>30s) time out through the Next.js proxy
   - Stack includes: api, frontend, postgres, redis, backup, postgres-exporter, redis-exporter (7 containers)
 
-### New Services (Bazaar, Status, Sandbox)
+### New Services (Status, Sandbox)
 
 - **Location (prod)**: `/home/doge/github/t402-main/services/`
-- **Location (repo)**: `services/` (bazaar, status, sandbox directories)
+- **Location (repo)**: `services/` (status, sandbox directories)
 - **Build + Deploy**:
   ```bash
   ssh doge@$DEPLOY_HOST
@@ -143,14 +142,13 @@ Grafana runs as part of the Facilitator compose stack (not separately).
   ```
 - **Health checks**:
   ```bash
-  curl -s localhost:3402/health   # bazaar
   curl -s localhost:3403/health   # status
   curl -s localhost:3406/health   # sandbox
   ```
-- **Env vars**: `BAZAAR_ADMIN_KEY`, `WEBHOOK_URLS`, `DATABASE_URL`
+- **Env vars**: `WEBHOOK_URLS`, `DATABASE_URL`
 - **Gotchas**:
   - Sandbox connects to the facilitator via `https://facilitator.t402.io` (set in docker-compose)
-  - Bazaar and Status use named volumes (`bazaar-data`, `status-data`) for persistence
+  - Status uses named volume (`status-data`) for persistence
 
 ### Sandbox (sandbox.t402.io)
 
@@ -207,7 +205,6 @@ Config: `~/.cloudflared/config.yml` on prod server
 | `grafana-facilitator.t402.io` | `localhost:3000` |
 | `scan2pay.t402.io` | `localhost:3001` |
 | `scan2pay-api.t402.io` | `localhost:8081` |
-| `bazaar.t402.io` | `localhost:3402` |
 | `status.t402.io` | `localhost:3403` |
 | `sandbox.t402.io` | `localhost:3406` |
 
