@@ -1,0 +1,207 @@
+name: NPM Release (WDK)
+
+# Publishes the @t402/wdk* package family from the private premium submodule
+# via npm Trusted Publishing (OIDC). No NPM_TOKEN required at the publish step.
+#
+# Prerequisites (one-time setup):
+# 1. Secret SUBMODULE_PAT must exist (used to clone private premium submodule).
+# 2. Each of the 8 wdk* packages must have its npm Trusted Publisher configured:
+#    https://www.npmjs.com/package/@t402/<name>/access -> Trusted Publishers
+#    Repository owner: t402-io
+#    Repository name:  t402
+#    Workflow filename: npm_release_wdk.yml
+#    Environment name: (leave blank, or set "npm-publish" if env is added below)
+#
+# Trigger:
+#   - Push tag wdk/v* (e.g. wdk/v2.9.0)
+#   - Manual workflow_dispatch with optional package selection + dry_run
+
+on:
+  push:
+    tags:
+      - "wdk/v*"
+  workflow_dispatch:
+    inputs:
+      package:
+        description: "Package to publish"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - wdk
+          - wdk-protocol
+          - wdk-gasless
+          - wdk-bridge
+          - wdk-multisig
+          - wdk-ton
+          - wdk-ton-gasless
+          - wdk-tron-gasfree
+      dry_run:
+        description: "Dry run (no actual publish)"
+        required: false
+        default: false
+        type: boolean
+      skip_tests:
+        description: "Skip tests"
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  test:
+    if: ${{ github.event.inputs.skip_tests != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          token: ${{ secrets.SUBMODULE_PAT }}
+
+      - name: Sync premium -> mirror (wdk* packages)
+        run: |
+          for pkg in wdk wdk-gasless wdk-bridge wdk-multisig wdk-protocol wdk-ton wdk-ton-gasless wdk-tron-gasfree; do
+            rsync -a \
+              --exclude='node_modules' \
+              --exclude='dist' \
+              --exclude='.turbo' \
+              "premium/packages/$pkg/" "sdks/typescript/packages/$pkg/"
+          done
+          echo "Mirror sync complete."
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: ./sdks/typescript
+
+      - name: Install dependencies
+        working-directory: ./sdks/typescript
+        run: pnpm install
+
+      - name: Build wdk* packages
+        working-directory: ./sdks/typescript
+        run: |
+          pnpm -r \
+            --filter "@t402/wdk" \
+            --filter "@t402/wdk-gasless" \
+            --filter "@t402/wdk-bridge" \
+            --filter "@t402/wdk-multisig" \
+            --filter "@t402/wdk-protocol" \
+            --filter "@t402/wdk-ton" \
+            --filter "@t402/wdk-ton-gasless" \
+            --filter "@t402/wdk-tron-gasfree" \
+            build
+
+      - name: Test wdk* packages
+        working-directory: ./sdks/typescript
+        run: |
+          pnpm -r \
+            --filter "@t402/wdk" \
+            --filter "@t402/wdk-gasless" \
+            --filter "@t402/wdk-bridge" \
+            --filter "@t402/wdk-multisig" \
+            --filter "@t402/wdk-protocol" \
+            --filter "@t402/wdk-ton" \
+            --filter "@t402/wdk-ton-gasless" \
+            --filter "@t402/wdk-tron-gasfree" \
+            test
+
+  publish:
+    needs: test
+    if: ${{ always() && (needs.test.result == 'success' || needs.test.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    strategy:
+      fail-fast: false
+      # Dependency-aware order so that re-publishes of dependent packages
+      # always see the newer versions of their dependencies in the registry
+      # by the time they run.
+      max-parallel: 1
+      matrix:
+        include:
+          - name: wdk-protocol
+            path: packages/wdk-protocol
+          - name: wdk-ton
+            path: packages/wdk-ton
+          - name: wdk-gasless
+            path: packages/wdk-gasless
+          - name: wdk-bridge
+            path: packages/wdk-bridge
+          - name: wdk-multisig
+            path: packages/wdk-multisig
+          - name: wdk-ton-gasless
+            path: packages/wdk-ton-gasless
+          - name: wdk-tron-gasfree
+            path: packages/wdk-tron-gasfree
+          - name: wdk
+            path: packages/wdk
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          token: ${{ secrets.SUBMODULE_PAT }}
+
+      - name: Sync premium -> mirror (this package)
+        run: |
+          rsync -a \
+            --exclude='node_modules' \
+            --exclude='dist' \
+            --exclude='.turbo' \
+            "premium/${{ matrix.path }}/" "sdks/typescript/${{ matrix.path }}/"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: ./sdks/typescript
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        working-directory: ./sdks/typescript
+        run: pnpm install
+
+      - name: Build this package
+        working-directory: ./sdks/typescript
+        run: pnpm --filter "@t402/${{ matrix.name }}" build
+
+      - name: Should publish?
+        id: gate
+        run: |
+          if [[ "${{ github.event.inputs.package }}" == "all" ]] \
+             || [[ "${{ github.event.inputs.package }}" == "${{ matrix.name }}" ]] \
+             || [[ "${{ github.event_name }}" == "push" ]]; then
+            echo "publish=true" >> $GITHUB_OUTPUT
+          else
+            echo "publish=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Publish @t402/${{ matrix.name }}
+        if: steps.gate.outputs.publish == 'true'
+        working-directory: ./sdks/typescript/${{ matrix.path }}
+        run: |
+          if [[ "${{ github.event.inputs.dry_run }}" == "true" ]]; then
+            echo "DRY RUN: @t402/${{ matrix.name }}"
+            npm publish --access public --provenance --dry-run
+          else
+            npm publish --access public --provenance
+          fi
+
+      - name: Publish summary
+        if: steps.gate.outputs.publish == 'true'
+        run: |
+          VERSION=$(node -p "require('./sdks/typescript/${{ matrix.path }}/package.json').version")
+          {
+            echo "### Published @t402/${{ matrix.name }}@${VERSION}"
+            echo "- Provenance: enabled (OIDC)"
+            echo "- NPM: https://www.npmjs.com/package/@t402/${{ matrix.name }}"
+          } >> $GITHUB_STEP_SUMMARY
