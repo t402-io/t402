@@ -1,20 +1,32 @@
 name: NPM Release (WDK)
 
 # Publishes the @t402/wdk* package family from the private premium submodule
-# via npm Trusted Publishing (OIDC). No NPM_TOKEN required at the publish step.
+# via npm Trusted Publishing (OIDC). No NPM_TOKEN needed.
 #
-# Prerequisites (one-time setup):
-# 1. Secret SUBMODULE_PAT must exist (used to clone private premium submodule).
-# 2. Each of the 8 wdk* packages must have its npm Trusted Publisher configured:
-#    https://www.npmjs.com/package/@t402/<name>/access -> Trusted Publishers
-#    Repository owner: t402-io
-#    Repository name:  t402
-#    Workflow filename: npm_release_wdk.yml
-#    Environment name: (leave blank, or set "npm-publish" if env is added below)
+# Architecture:
+#   build-and-pack job (single)
+#     - checkout w/ submodules (private premium via SUBMODULE_PAT)
+#     - rsync all 8 wdk* from premium -> sdks/typescript/packages/wdk*/
+#     - pnpm install + pnpm -r build (whole workspace, topological)
+#     - pnpm -r --filter wdk* test
+#     - npm pack each wdk* -> upload-artifact
+#
+#   publish jobs (matrix of 8, parallel)
+#     - download-artifact (just the .tgz)
+#     - npm publish ./<tarball>.tgz --provenance --access public  [OIDC]
+#     - Gated by input.package selector
+#
+# Prerequisites (one-time):
+# - Secret SUBMODULE_PAT (private premium submodule access)
+# - Each wdk* package has its npm Trusted Publisher configured:
+#     Repository owner: t402-io
+#     Repository name:  t402
+#     Workflow filename: npm_release_wdk.yml
+#     Environment name: (blank)
 #
 # Trigger:
-#   - Push tag wdk/v* (e.g. wdk/v2.9.0)
-#   - Manual workflow_dispatch with optional package selection + dry_run
+# - Push tag wdk/v* (e.g. wdk/v2.10.0)
+# - Manual workflow_dispatch with package + dry_run
 
 on:
   push:
@@ -49,8 +61,7 @@ on:
         type: boolean
 
 jobs:
-  test:
-    if: ${{ github.event.inputs.skip_tests != 'true' }}
+  build-and-pack:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -58,7 +69,7 @@ jobs:
           submodules: recursive
           token: ${{ secrets.SUBMODULE_PAT }}
 
-      - name: Sync premium -> mirror (wdk* packages)
+      - name: Sync premium -> mirror (all 8 wdk* packages)
         run: |
           for pkg in wdk wdk-gasless wdk-bridge wdk-multisig wdk-protocol wdk-ton wdk-ton-gasless wdk-tron-gasfree; do
             rsync -a \
@@ -67,7 +78,6 @@ jobs:
               --exclude='.turbo' \
               "premium/packages/$pkg/" "sdks/typescript/packages/$pkg/"
           done
-          echo "Mirror sync complete."
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -82,14 +92,12 @@ jobs:
         working-directory: ./sdks/typescript
         run: pnpm install
 
-      - name: Build all workspace packages
-        # wdk* depends on @t402/core, @t402/evm (workspace:*) — those need
-        # dist/ to exist before TypeScript can resolve types. Build the whole
-        # workspace; pnpm orders by topological dep graph automatically.
+      - name: Build all workspace packages (topological)
         working-directory: ./sdks/typescript
         run: pnpm -r build
 
       - name: Test wdk* packages
+        if: ${{ github.event.inputs.skip_tests != 'true' }}
         working-directory: ./sdks/typescript
         run: |
           pnpm -r \
@@ -103,97 +111,90 @@ jobs:
             --filter "@t402/wdk-tron-gasfree" \
             test
 
+      - name: Pack each wdk* into .tgz
+        working-directory: ./sdks/typescript
+        run: |
+          mkdir -p /tmp/wdk-tarballs
+          for pkg in wdk wdk-gasless wdk-bridge wdk-multisig wdk-protocol wdk-ton wdk-ton-gasless wdk-tron-gasfree; do
+            (cd packages/$pkg && npm pack --pack-destination /tmp/wdk-tarballs)
+          done
+          ls -la /tmp/wdk-tarballs
+
+      - name: Upload tarballs
+        uses: actions/upload-artifact@v4
+        with:
+          name: wdk-tarballs
+          path: /tmp/wdk-tarballs/*.tgz
+          retention-days: 1
+
   publish:
-    needs: test
-    if: ${{ always() && (needs.test.result == 'success' || needs.test.result == 'skipped') }}
+    needs: build-and-pack
     runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
     strategy:
       fail-fast: false
-      # Dependency-aware order so that re-publishes of dependent packages
-      # always see the newer versions of their dependencies in the registry
-      # by the time they run.
-      max-parallel: 1
+      # Parallel — no inter-package dep at publish step (each is a self-contained tarball)
       matrix:
         include:
           - name: wdk-protocol
-            path: packages/wdk-protocol
+            tarball_glob: "t402-wdk-protocol-*.tgz"
           - name: wdk-ton
-            path: packages/wdk-ton
+            tarball_glob: "t402-wdk-ton-*.tgz"
           - name: wdk-gasless
-            path: packages/wdk-gasless
+            tarball_glob: "t402-wdk-gasless-*.tgz"
           - name: wdk-bridge
-            path: packages/wdk-bridge
+            tarball_glob: "t402-wdk-bridge-*.tgz"
           - name: wdk-multisig
-            path: packages/wdk-multisig
+            tarball_glob: "t402-wdk-multisig-*.tgz"
           - name: wdk-ton-gasless
-            path: packages/wdk-ton-gasless
+            tarball_glob: "t402-wdk-ton-gasless-*.tgz"
           - name: wdk-tron-gasfree
-            path: packages/wdk-tron-gasfree
+            tarball_glob: "t402-wdk-tron-gasfree-*.tgz"
           - name: wdk
-            path: packages/wdk
-
+            tarball_glob: "t402-wdk-*.tgz"
+    # Skip entire job if this package not selected
+    if: |
+      github.event.inputs.package == 'all'
+        || github.event.inputs.package == matrix.name
+        || github.event_name == 'push'
     steps:
-      - uses: actions/checkout@v6
-        with:
-          submodules: recursive
-          token: ${{ secrets.SUBMODULE_PAT }}
-
-      - name: Sync premium -> mirror (this package)
-        run: |
-          rsync -a \
-            --exclude='node_modules' \
-            --exclude='dist' \
-            --exclude='.turbo' \
-            "premium/${{ matrix.path }}/" "sdks/typescript/${{ matrix.path }}/"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v6
-
       - uses: actions/setup-node@v6
         with:
           node-version: "20"
-          cache: "pnpm"
-          cache-dependency-path: ./sdks/typescript
           registry-url: "https://registry.npmjs.org"
 
-      - name: Install dependencies
-        working-directory: ./sdks/typescript
-        run: pnpm install
+      - name: Download tarballs
+        uses: actions/download-artifact@v4
+        with:
+          name: wdk-tarballs
+          path: /tmp/wdk-tarballs
 
-      - name: Build dependency chain + this package
-        # Same reasoning as test job: wdk* depends on core/evm via workspace:*
-        working-directory: ./sdks/typescript
-        run: pnpm -r build
-
-      - name: Should publish?
-        id: gate
+      - name: Identify tarball
+        id: pkg
         run: |
-          if [[ "${{ github.event.inputs.package }}" == "all" ]] \
-             || [[ "${{ github.event.inputs.package }}" == "${{ matrix.name }}" ]] \
-             || [[ "${{ github.event_name }}" == "push" ]]; then
-            echo "publish=true" >> $GITHUB_OUTPUT
+          # wdk's glob `t402-wdk-*.tgz` would also match siblings; resolve uniquely.
+          if [[ "${{ matrix.name }}" == "wdk" ]]; then
+            TARBALL=$(ls /tmp/wdk-tarballs/t402-wdk-[0-9]*.tgz)
           else
-            echo "publish=false" >> $GITHUB_OUTPUT
+            TARBALL=$(ls /tmp/wdk-tarballs/${{ matrix.tarball_glob }})
           fi
+          echo "tarball=$TARBALL" >> $GITHUB_OUTPUT
+          echo "Resolved: $TARBALL"
 
       - name: Publish @t402/${{ matrix.name }}
-        if: steps.gate.outputs.publish == 'true'
-        working-directory: ./sdks/typescript/${{ matrix.path }}
         run: |
           if [[ "${{ github.event.inputs.dry_run }}" == "true" ]]; then
             echo "DRY RUN: @t402/${{ matrix.name }}"
-            npm publish --access public --provenance --dry-run
+            npm publish "${{ steps.pkg.outputs.tarball }}" --access public --provenance --dry-run
           else
-            npm publish --access public --provenance
+            npm publish "${{ steps.pkg.outputs.tarball }}" --access public --provenance
           fi
 
-      - name: Publish summary
-        if: steps.gate.outputs.publish == 'true'
+      - name: Summary
         run: |
-          VERSION=$(node -p "require('./sdks/typescript/${{ matrix.path }}/package.json').version")
+          VERSION=$(echo "${{ steps.pkg.outputs.tarball }}" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+[A-Za-z0-9.-]*' | head -1)
           {
             echo "### Published @t402/${{ matrix.name }}@${VERSION}"
             echo "- Provenance: enabled (OIDC)"
