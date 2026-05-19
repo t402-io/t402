@@ -154,24 +154,34 @@ jobs:
             tarball_glob: "t402-wdk-tron-gasfree-*.tgz"
           - name: wdk
             tarball_glob: "t402-wdk-*.tgz"
-    # Skip entire job if this package not selected
-    if: |
-      github.event.inputs.package == 'all'
-        || github.event.inputs.package == matrix.name
-        || github.event_name == 'push'
     steps:
+      - name: Gate — should this package publish?
+        id: gate
+        run: |
+          if [[ "${{ github.event.inputs.package }}" == "all" ]] \
+             || [[ "${{ github.event.inputs.package }}" == "${{ matrix.name }}" ]] \
+             || [[ "${{ github.event_name }}" == "push" ]]; then
+            echo "publish=true" >> $GITHUB_OUTPUT
+          else
+            echo "publish=false" >> $GITHUB_OUTPUT
+            echo "Skipping @t402/${{ matrix.name }} (input.package=${{ github.event.inputs.package }})"
+          fi
+
       - uses: actions/setup-node@v6
+        if: steps.gate.outputs.publish == 'true'
         with:
           node-version: "20"
           registry-url: "https://registry.npmjs.org"
 
       - name: Download tarballs
+        if: steps.gate.outputs.publish == 'true'
         uses: actions/download-artifact@v4
         with:
           name: wdk-tarballs
           path: /tmp/wdk-tarballs
 
       - name: Identify tarball
+        if: steps.gate.outputs.publish == 'true'
         id: pkg
         run: |
           # wdk's glob `t402-wdk-*.tgz` would also match siblings; resolve uniquely.
@@ -184,6 +194,7 @@ jobs:
           echo "Resolved: $TARBALL"
 
       - name: Publish @t402/${{ matrix.name }}
+        if: steps.gate.outputs.publish == 'true'
         run: |
           if [[ "${{ github.event.inputs.dry_run }}" == "true" ]]; then
             echo "DRY RUN: @t402/${{ matrix.name }}"
@@ -193,6 +204,7 @@ jobs:
           fi
 
       - name: Summary
+        if: steps.gate.outputs.publish == 'true'
         run: |
           VERSION=$(echo "${{ steps.pkg.outputs.tarball }}" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+[A-Za-z0-9.-]*' | head -1)
           {
