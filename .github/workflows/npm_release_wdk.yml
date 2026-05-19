@@ -82,19 +82,12 @@ jobs:
         working-directory: ./sdks/typescript
         run: pnpm install
 
-      - name: Build wdk* packages
+      - name: Build all workspace packages
+        # wdk* depends on @t402/core, @t402/evm (workspace:*) — those need
+        # dist/ to exist before TypeScript can resolve types. Build the whole
+        # workspace; pnpm orders by topological dep graph automatically.
         working-directory: ./sdks/typescript
-        run: |
-          pnpm -r \
-            --filter "@t402/wdk" \
-            --filter "@t402/wdk-gasless" \
-            --filter "@t402/wdk-bridge" \
-            --filter "@t402/wdk-multisig" \
-            --filter "@t402/wdk-protocol" \
-            --filter "@t402/wdk-ton" \
-            --filter "@t402/wdk-ton-gasless" \
-            --filter "@t402/wdk-tron-gasfree" \
-            build
+        run: pnpm -r build
 
       - name: Test wdk* packages
         working-directory: ./sdks/typescript
@@ -170,9 +163,10 @@ jobs:
         working-directory: ./sdks/typescript
         run: pnpm install
 
-      - name: Build this package
+      - name: Build dependency chain + this package
+        # Same reasoning as test job: wdk* depends on core/evm via workspace:*
         working-directory: ./sdks/typescript
-        run: pnpm --filter "@t402/${{ matrix.name }}" build
+        run: pnpm -r build
 
       - name: Should publish?
         id: gate
