@@ -132,5 +132,8 @@ services/docs/pages/sdks/typescript/wdk-multisig.mdx
 *.pdf
 scan2pay-architecture.md
 
+# t402 Pay — closed-source SaaS (lives in private repo t402-io/t402pay, will become submodule)
+services/t402pay/
+
 # Security reports (private — do not commit)
 security/reports/
