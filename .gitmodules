@@ -12,4 +12,4 @@
 	url = https://github.com/t402-io/scan2pay-t402.git
 [submodule "services/t402pay"]
 	path = services/t402pay
-	url = git@github.com:t402-io/t402pay.git
+	url = https://github.com/t402-io/t402pay.git
