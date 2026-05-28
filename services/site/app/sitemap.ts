@@ -5,14 +5,6 @@ export const dynamic = "force-static";
 
 const baseUrl = "https://t402.io";
 
-// All feature pages
-const featurePages = [
-  "gasless",
-  "bridge",
-  "multisig",
-  "mcp",
-];
-
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
 
@@ -88,13 +80,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  // Feature sub-pages
-  const featureSubPages: MetadataRoute.Sitemap = featurePages.map((slug) => ({
-    url: `${baseUrl}/features/${slug}`,
-    lastModified: now,
-    changeFrequency: "monthly" as const,
-    priority: 0.6,
-  }));
-
-  return [...staticPages, ...chainPages, ...featureSubPages];
+  return [...staticPages, ...chainPages];
 }

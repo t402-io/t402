@@ -49,15 +49,6 @@ function MultisigIcon({ className = "", style }: IconProps) {
   );
 }
 
-function ArrowRightIcon({ className = "", style }: IconProps) {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style} aria-hidden="true">
-      <path d="M5 12h14" />
-      <path d="m12 5 7 7-7 7" />
-    </svg>
-  );
-}
-
 function ExternalLinkIcon({ className = "" }: { className?: string }) {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
@@ -86,7 +77,9 @@ function FeatureCard({ feature, index }: { feature: Feature; index: number }) {
       transition={{ duration: 0.5, delay: index * 0.1 }}
     >
       <Link
-        href={`/features/${feature.slug}`}
+        href={feature.docsUrl}
+        target="_blank"
+        rel="noopener noreferrer"
         className="card-elevated group relative flex h-full flex-col overflow-hidden p-8"
       >
         {/* Color accent line */}
@@ -104,33 +97,7 @@ function FeatureCard({ feature, index }: { feature: Feature; index: number }) {
         </div>
 
         {/* Content */}
-        <div className="mb-2 flex flex-wrap items-center gap-2">
-          <h3 className="text-xl font-semibold" style={{ color: "#1A1A2E" }}>{feature.name}</h3>
-          {feature.badge && (
-            <span
-              className="rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider"
-              style={{
-                background: feature.badge === "beta"
-                  ? "rgba(245, 158, 11, 0.1)"
-                  : feature.badge === "coming-soon"
-                    ? "rgba(168, 85, 247, 0.1)"
-                    : "rgba(16, 185, 129, 0.1)",
-                color: feature.badge === "beta"
-                  ? "#F59E0B"
-                  : feature.badge === "coming-soon"
-                    ? "#A855F7"
-                    : "#10B981",
-                border: `1px solid ${feature.badge === "beta"
-                  ? "rgba(245, 158, 11, 0.2)"
-                  : feature.badge === "coming-soon"
-                    ? "rgba(168, 85, 247, 0.2)"
-                    : "rgba(16, 185, 129, 0.2)"}`,
-              }}
-            >
-              {feature.badge}
-            </span>
-          )}
-        </div>
+        <h3 className="mb-2 text-xl font-semibold" style={{ color: "#1A1A2E" }}>{feature.name}</h3>
         <p className="mb-4 text-sm font-medium" style={{ color: feature.color }}>
           {feature.tagline}
         </p>
@@ -138,39 +105,10 @@ function FeatureCard({ feature, index }: { feature: Feature; index: number }) {
           {feature.description}
         </p>
 
-        {/* Supported chains */}
-        <div className="mb-6">
-          <p className="mb-2 text-xs font-medium uppercase tracking-wider" style={{ color: "#718096" }}>
-            Supported Chains
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            {feature.supportedChains.slice(0, 4).map((chain) => (
-              <span
-                key={chain}
-                className="rounded-md px-2 py-1 text-xs"
-                style={{ background: "#F7FAF9", color: "#718096" }}
-              >
-                {chain}
-              </span>
-            ))}
-            {feature.supportedChains.length > 4 && (
-              <span
-                className="rounded-md px-2 py-1 text-xs"
-                style={{ background: "#F7FAF9", color: "#718096" }}
-              >
-                +{feature.supportedChains.length - 4}
-              </span>
-            )}
-          </div>
-        </div>
-
         {/* CTA */}
         <div className="flex items-center gap-2 text-sm font-medium">
-          <span style={{ color: feature.color }}>Learn more</span>
-          <ArrowRightIcon
-            className="transition-transform group-hover:translate-x-1"
-            style={{ color: feature.color }}
-          />
+          <span style={{ color: feature.color }}>Read docs</span>
+          <ExternalLinkIcon className="opacity-50" />
         </div>
       </Link>
     </motion.div>
