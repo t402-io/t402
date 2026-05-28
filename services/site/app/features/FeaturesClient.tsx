@@ -68,88 +68,11 @@ function ExternalLinkIcon({ className = "" }: { className?: string }) {
   );
 }
 
-function PolicyIcon({ className = "", style }: IconProps) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style} aria-hidden="true">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
-      <path d="m9 12 2 2 4-4" />
-    </svg>
-  );
-}
-
-function A2AIcon({ className = "", style }: IconProps) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style} aria-hidden="true">
-      <circle cx="7" cy="12" r="3" />
-      <circle cx="17" cy="12" r="3" />
-      <path d="M10 12h4" />
-      <path d="m14 10 2 2-2 2" />
-    </svg>
-  );
-}
-
-function StreamingIcon({ className = "", style }: IconProps) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style} aria-hidden="true">
-      <path d="M2 12h4" />
-      <path d="M8 12h4" />
-      <path d="M14 12h4" />
-      <path d="M20 12h2" />
-      <path d="m6 8 2 4-2 4" />
-      <path d="m12 8 2 4-2 4" />
-      <path d="m18 8 2 4-2 4" />
-    </svg>
-  );
-}
-
-function ZKIcon({ className = "", style }: IconProps) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style} aria-hidden="true">
-      <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20" />
-      <path d="M12 6v6l4 2" />
-      <path d="M8 14l4-4" />
-    </svg>
-  );
-}
-
-function RouterIcon({ className = "", style }: IconProps) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style} aria-hidden="true">
-      <path d="M12 2v4" />
-      <path d="M12 18v4" />
-      <path d="m4.93 4.93 2.83 2.83" />
-      <path d="m16.24 16.24 2.83 2.83" />
-      <path d="M2 12h4" />
-      <path d="M18 12h4" />
-      <circle cx="12" cy="12" r="4" />
-    </svg>
-  );
-}
-
-function IntentIcon({ className = "", style }: IconProps) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style} aria-hidden="true">
-      <path d="M4 4h16v16H4z" />
-      <path d="M9 9h6v6H9z" />
-      <path d="M4 12h5" />
-      <path d="M15 12h5" />
-      <path d="M12 4v5" />
-      <path d="M12 15v5" />
-    </svg>
-  );
-}
-
 const iconMap: Record<string, React.FC<IconProps>> = {
   gasless: GaslessIcon,
   bridge: BridgeIcon,
   mcp: MCPIcon,
   multisig: MultisigIcon,
-  policy: PolicyIcon,
-  a2a: A2AIcon,
-  streaming: StreamingIcon,
-  zk: ZKIcon,
-  router: RouterIcon,
-  intent: IntentIcon,
 };
 
 function FeatureCard({ feature, index }: { feature: Feature; index: number }) {
