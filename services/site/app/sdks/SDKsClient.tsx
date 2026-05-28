@@ -2,13 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { motion } from "motion/react";
 import { sdks, type SDK } from "./data";
 
 function TypeScriptIcon({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 32 32" className={className} aria-hidden="true">
-      <rect width="32" height="32" rx="4" fill="#3178C6" />
+      <rect width="32" height="32" rx="0" fill="#3178C6" />
       <path
         d="M22.47 24.47v-2.55a2.13 2.13 0 0 0 1.06 1.86 4.22 4.22 0 0 0 2.22.55 4.88 4.88 0 0 0 1.1-.11 2.7 2.7 0 0 0 .86-.36 1.87 1.87 0 0 0 .56-.59 1.57 1.57 0 0 0 .2-.81 1.45 1.45 0 0 0-.24-.84 2.19 2.19 0 0 0-.65-.6 5.47 5.47 0 0 0-.95-.46c-.36-.14-.74-.28-1.14-.43a9.79 9.79 0 0 1-1.35-.59 4.54 4.54 0 0 1-1.08-.77 3.22 3.22 0 0 1-.71-1 3.43 3.43 0 0 1-.26-1.38 3.38 3.38 0 0 1 .38-1.66 3.31 3.31 0 0 1 1-1.17 4.47 4.47 0 0 1 1.49-.69 6.71 6.71 0 0 1 1.8-.23 7.56 7.56 0 0 1 1.71.17 4.35 4.35 0 0 1 1.27.48v2.42a2.77 2.77 0 0 0-.49-.38 3.57 3.57 0 0 0-.61-.29 4 4 0 0 0-.69-.19 3.91 3.91 0 0 0-.72-.07 3.13 3.13 0 0 0-.94.13 2.21 2.21 0 0 0-.71.35 1.62 1.62 0 0 0-.45.53 1.39 1.39 0 0 0-.16.66 1.26 1.26 0 0 0 .19.7 1.83 1.83 0 0 0 .54.52 4.94 4.94 0 0 0 .84.43l1.11.42a12.06 12.06 0 0 1 1.4.61 4.84 4.84 0 0 1 1.12.78 3.29 3.29 0 0 1 .75 1 3.24 3.24 0 0 1 .27 1.38 3.64 3.64 0 0 1-.4 1.76 3.39 3.39 0 0 1-1.08 1.19 4.79 4.79 0 0 1-1.57.68 8 8 0 0 1-1.87.21 7.25 7.25 0 0 1-2-.27 4.72 4.72 0 0 1-1.5-.71zM6 15.13h3.37v9.58h2.63v-9.58h3.37v-2.21H6z"
         fill="#fff"
@@ -103,19 +102,19 @@ function CopyIcon({ className = "" }: { className?: string }) {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
       aria-hidden="true"
     >
-      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+      <rect x="9" y="9" width="13" height="13" rx="0" ry="0" />
       <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
     </svg>
   );
 }
 
-function CheckIcon({ className = "", style }: { className?: string; style?: React.CSSProperties }) {
+function CheckIcon() {
   return (
     <svg
       width="16"
@@ -123,43 +122,12 @@ function CheckIcon({ className = "", style }: { className?: string; style?: Reac
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={className}
-      style={style}
       aria-hidden="true"
     >
       <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-}
-
-function ExternalLinkIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
-      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-      <polyline points="15 3 21 3 21 9" />
-      <line x1="10" y1="14" x2="21" y2="3" />
-    </svg>
-  );
-}
-
-function GitHubIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
-      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
     </svg>
   );
 }
@@ -176,142 +144,129 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors"
-      style={{ background: "rgba(255,255,255,0.06)", color: "#A1A1AA" }}
+      className="flex h-8 w-8 shrink-0 items-center justify-center transition-colors hover:text-[var(--color-brand)]"
+      style={{ color: "var(--color-foreground-tertiary)" }}
       aria-label={copied ? "Copied" : "Copy install command"}
     >
-      {copied ? <CheckIcon style={{ color: "#50AF95" }} /> : <CopyIcon />}
+      {copied ? <CheckIcon /> : <CopyIcon />}
     </button>
   );
 }
 
-function SDKCard({ sdk, index }: { sdk: SDK; index: number }) {
+function SDKEntry({ sdk, index }: { sdk: SDK; index: number }) {
   const Icon = iconMap[sdk.icon];
+  const num = String(index + 1).padStart(2, "0");
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.08 }}
-      className="rounded-2xl p-6 sm:p-8"
-      style={{ background: "#111113", border: "1px solid rgba(255,255,255,0.08)" }}
-    >
-      <div className="mb-4 flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          {Icon && <Icon className="h-10 w-10 shrink-0" />}
-          <div>
-            <h3 className="text-lg font-semibold" style={{ color: "#FAFAFA" }}>
-              {sdk.name}
-            </h3>
-            <p className="text-sm" style={{ color: "#71717A" }}>
-              {sdk.language}
-            </p>
-          </div>
+    <div className="grid grid-cols-12 gap-6 py-10 md:py-14">
+      {/* Number column */}
+      <div className="col-span-12 md:col-span-1">
+        <span className="editorial-mark text-base md:text-lg">{num}</span>
+      </div>
+
+      {/* Icon + name + meta */}
+      <div className="col-span-12 md:col-span-3">
+        <div className="mb-3 flex items-center gap-3">
+          {Icon && <Icon className="h-8 w-8" />}
+          <h3 className="font-serif text-2xl text-[var(--color-foreground)]">
+            {sdk.name}
+          </h3>
         </div>
-        <span
-          className="shrink-0 rounded-full px-2.5 py-1 text-xs font-medium"
-          style={{ background: "rgba(255,255,255,0.06)", color: "#A1A1AA" }}
-        >
-          v{sdk.version}
-        </span>
+        <p className="eyebrow">
+          {sdk.language} · v{sdk.version}
+        </p>
       </div>
 
-      <p className="mb-6 text-sm leading-relaxed" style={{ color: "#A1A1AA" }}>
-        {sdk.description}
-      </p>
+      {/* Description + install + links */}
+      <div className="col-span-12 md:col-span-8">
+        <p className="mb-6 text-base leading-[1.65] text-[var(--color-foreground-secondary)]">
+          {sdk.description}
+        </p>
 
-      <div
-        className="mb-6 flex items-center gap-2 rounded-xl p-3"
-        style={{ background: "#0A0A0B", border: "1px solid rgba(255,255,255,0.06)" }}
-      >
-        <span style={{ color: "#50AF95" }}>$</span>
-        <code className="flex-1 overflow-x-auto whitespace-nowrap text-sm" style={{ color: "#FAFAFA" }}>
-          {sdk.installCommand}
-        </code>
-        <CopyButton text={sdk.installCommand} />
-      </div>
+        <div
+          className="mb-6 flex items-center gap-3 border border-[var(--color-foreground)] px-4 py-3"
+          style={{ background: "var(--color-background-secondary)" }}
+        >
+          <span className="font-serif italic text-[var(--color-brand)]">$</span>
+          <code
+            className="flex-1 overflow-x-auto whitespace-nowrap font-mono text-sm"
+            style={{ color: "var(--color-foreground)" }}
+          >
+            {sdk.installCommand}
+          </code>
+          <CopyButton text={sdk.installCommand} />
+        </div>
 
-      <div className="flex flex-wrap gap-3">
-        <Link
-          href={sdk.docsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all hover:opacity-90"
-          style={{ background: "#50AF95", color: "#0A0A0B" }}
-        >
-          Docs
-          <ExternalLinkIcon />
-        </Link>
-        <Link
-          href={sdk.githubUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all"
-          style={{ border: "1px solid rgba(255,255,255,0.16)", color: "#FAFAFA" }}
-        >
-          <GitHubIcon className="h-4 w-4" />
-          GitHub
-        </Link>
+        <div className="flex flex-wrap gap-6">
+          <Link
+            href={sdk.docsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-serif text-base italic text-[var(--color-foreground)] underline decoration-[var(--color-brand)] decoration-2 underline-offset-[6px] transition-colors hover:text-[var(--color-brand)]"
+          >
+            Documentation →
+          </Link>
+          <Link
+            href={sdk.githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-serif text-base italic text-[var(--color-foreground-secondary)] transition-colors hover:text-[var(--color-foreground)]"
+          >
+            Source →
+          </Link>
+        </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
 export default function SDKsClient() {
   return (
-    <>
-      {/* Hero */}
-      <section className="section-dark py-24 md:py-32">
-        <div className="mx-auto max-w-7xl px-6 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#50AF95" }}>
-              SDKs
-            </span>
-            <h1 className="mt-4 text-4xl font-bold tracking-tight md:text-5xl" style={{ color: "#FAFAFA" }}>
-              Build with T402
-            </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg" style={{ color: "#A1A1AA" }}>
-              Official SDKs for TypeScript, Python, Go, and Java. Pick a language, copy the
-              install command, and follow the docs.
-            </p>
-          </motion.div>
+    <section className="section-light pt-32 pb-24 md:pt-44 md:pb-32">
+      <div className="mx-auto max-w-editorial px-6">
+        {/* Page mark */}
+        <div className="mb-10 flex items-baseline justify-between">
+          <span className="editorial-mark text-base md:text-lg">N° 402.SDK</span>
+          <span className="eyebrow">Build with T402</span>
         </div>
-      </section>
 
-      {/* SDK grid */}
-      <section className="section-dark pb-24 md:pb-32">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="grid gap-6 sm:grid-cols-2">
-            {sdks.map((sdk, index) => (
-              <SDKCard key={sdk.id} sdk={sdk} index={index} />
-            ))}
-          </div>
+        <hr className="rule" />
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="mt-16 text-center"
-          >
-            <Link
-              href="https://docs.t402.io/getting-started/quickstart"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl px-8 py-4 text-base font-semibold transition-all hover:shadow-glow"
-              style={{ background: "#50AF95", color: "#0A0A0B" }}
-            >
-              Read the Quickstart
-              <ExternalLinkIcon />
-            </Link>
-          </motion.div>
+        {/* Page heading */}
+        <h1 className="mt-12 mb-10 font-serif text-[2.5rem] leading-[1.05] text-[var(--color-foreground)] md:text-[4rem]">
+          Official SDKs.
+          <br />
+          Four languages.
+        </h1>
+
+        <p className="mb-6 max-w-2xl text-base leading-[1.65] text-[var(--color-foreground-secondary)] md:text-lg">
+          Production-ready reference implementations for the protocol. Pick
+          a language, copy the install command, and follow the documentation.
+        </p>
+
+        <hr className="rule mt-12" />
+
+        {/* SDK entries */}
+        <div className="divide-y divide-[var(--color-rule-soft)]">
+          {sdks.map((sdk, i) => (
+            <SDKEntry key={sdk.id} sdk={sdk} index={i} />
+          ))}
         </div>
-      </section>
-    </>
+
+        <hr className="rule" />
+
+        {/* Final note */}
+        <div className="mt-16 text-center">
+          <Link
+            href="https://docs.t402.io/getting-started/quickstart"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-serif text-lg italic text-[var(--color-foreground)] underline decoration-[var(--color-brand)] decoration-2 underline-offset-[6px] transition-colors hover:text-[var(--color-brand)]"
+          >
+            Read the quickstart guide →
+          </Link>
+        </div>
+      </div>
+    </section>
   );
 }
