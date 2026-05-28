@@ -515,7 +515,4 @@ export const supportedChains = [
   { name: "Bitcoin", id: "bitcoin", color: "#F7931A" },
   { name: "Lightning", id: "lightning", color: "#FFC107" },
   { name: "Spark", id: "spark", color: "#FF6B35" },
-  { name: "Sui", id: "sui", color: "#4DA2FF" },
-  { name: "Hedera", id: "hedera", color: "#222222" },
-  { name: "Algorand", id: "algorand", color: "#000000" },
 ];
