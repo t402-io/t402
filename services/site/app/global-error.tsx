@@ -17,10 +17,9 @@ export default function GlobalError({
     <html lang="en">
       <body
         style={{
-          backgroundColor: "#0A0A0B",
-          color: "#FAFAFA",
-          fontFamily:
-            '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          backgroundColor: "#FAFAF7",
+          color: "#0F0F0F",
+          fontFamily: "Georgia, serif",
           margin: 0,
         }}
       >
@@ -33,65 +32,80 @@ export default function GlobalError({
             padding: "24px",
           }}
         >
-          <div
-            style={{
-              maxWidth: "448px",
-              width: "100%",
-              textAlign: "center",
-            }}
-          >
-            <div style={{ marginBottom: "40px" }}>
+          <div style={{ maxWidth: "640px", width: "100%" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "baseline",
+                color: "#5A5750",
+                fontSize: "16px",
+                marginBottom: "24px",
+              }}
+            >
+              <span style={{ fontStyle: "italic", color: "#50AF95" }}>N° 500</span>
               <span
                 style={{
-                  fontSize: "96px",
-                  fontWeight: 700,
-                  color: "rgba(239,68,68,0.2)",
+                  fontFamily:
+                    "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.18em",
+                  fontSize: "12px",
+                  fontWeight: 500,
                 }}
               >
-                500
+                Critical Errata
               </span>
-              <h1
-                style={{
-                  fontSize: "24px",
-                  fontWeight: 700,
-                  marginTop: "16px",
-                  color: "#FAFAFA",
-                }}
-              >
-                Critical Error
-              </h1>
-              <p
-                style={{
-                  color: "#A1A1AA",
-                  marginTop: "12px",
-                  fontSize: "16px",
-                  lineHeight: 1.6,
-                }}
-              >
-                The application encountered a critical error.
-              </p>
             </div>
+
+            <div style={{ borderTop: "1px solid #0F0F0F" }} />
+
+            <h1
+              style={{
+                fontSize: "48px",
+                fontWeight: 500,
+                marginTop: "40px",
+                marginBottom: "32px",
+                color: "#0F0F0F",
+                lineHeight: 1.1,
+                letterSpacing: "-0.015em",
+              }}
+            >
+              Critical error.
+            </h1>
+
+            <div style={{ borderTop: "1px solid #0F0F0F" }} />
+
+            <p
+              style={{
+                color: "#5A5750",
+                marginTop: "32px",
+                fontSize: "17px",
+                lineHeight: 1.65,
+              }}
+            >
+              The application encountered a critical error.
+            </p>
+
             <button
               onClick={reset}
               style={{
-                backgroundColor: "#50AF95",
-                color: "#0A0A0B",
-                padding: "12px 24px",
-                borderRadius: "12px",
+                marginTop: "40px",
+                background: "transparent",
+                color: "#0F0F0F",
                 border: "none",
-                fontWeight: 600,
-                fontSize: "14px",
+                fontSize: "18px",
+                fontStyle: "italic",
+                fontFamily: "Georgia, serif",
                 cursor: "pointer",
-                transition: "background-color 300ms",
+                textDecoration: "underline",
+                textDecorationColor: "#50AF95",
+                textDecorationThickness: "2px",
+                textUnderlineOffset: "6px",
+                padding: 0,
               }}
-              onMouseOver={(e) =>
-                (e.currentTarget.style.backgroundColor = "#26A17B")
-              }
-              onMouseOut={(e) =>
-                (e.currentTarget.style.backgroundColor = "#50AF95")
-              }
             >
-              Reload Page
+              Reload page →
             </button>
           </div>
         </div>

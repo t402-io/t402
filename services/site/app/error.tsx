@@ -15,36 +15,49 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-[#0A0A0B] text-white flex items-center justify-center p-6">
-      <div className="max-w-md w-full text-center">
-        <div className="mb-10">
-          <span className="text-8xl font-bold text-[#EF4444]/20">500</span>
-          <h1 className="text-2xl font-bold mt-4 text-white">
-            Something went wrong
-          </h1>
-          <p className="text-[#A1A1AA] mt-3 text-base">
-            An unexpected error occurred. This has been logged for investigation.
-          </p>
+    <div
+      className="flex min-h-screen items-center justify-center p-6"
+      style={{ background: "var(--color-background)", color: "var(--color-foreground)" }}
+    >
+      <div className="mx-auto max-w-editorial w-full">
+        <div className="mb-10 flex items-baseline justify-between text-[var(--color-foreground-secondary)]">
+          <span className="editorial-mark text-base md:text-lg">N° 500</span>
+          <span className="eyebrow">Errata</span>
         </div>
 
+        <hr className="rule" />
+
+        <h1 className="mt-12 mb-8 font-serif text-4xl leading-[1.1] text-[var(--color-foreground)] md:text-5xl">
+          Something went wrong.
+        </h1>
+
+        <hr className="rule" />
+
+        <p className="mt-10 max-w-xl text-base leading-[1.65] text-[var(--color-foreground-secondary)] md:text-lg">
+          An unexpected error occurred. This has been logged for investigation.
+        </p>
+
         {error.digest && (
-          <div className="rounded-xl border border-[#27272A] bg-[#111113] p-4 mb-8 text-left font-mono text-sm text-[#71717A]">
+          <p
+            className="mt-6 font-mono text-sm text-[var(--color-foreground-tertiary)]"
+            style={{ borderLeft: "2px solid var(--color-rule-soft)", paddingLeft: "1rem" }}
+          >
             Digest: {error.digest}
-          </div>
+          </p>
         )}
 
-        <div className="flex gap-3 justify-center">
+        <div className="mt-10 flex flex-col items-start gap-6 md:flex-row md:items-baseline md:gap-10">
           <button
             onClick={reset}
-            className="inline-flex items-center rounded-xl bg-[#50AF95] px-6 py-3 text-sm font-semibold text-[#0A0A0B] transition-colors hover:bg-[#26A17B] cursor-pointer"
+            className="cursor-pointer font-serif text-lg italic text-[var(--color-foreground)] underline decoration-[var(--color-brand)] decoration-2 underline-offset-[6px] transition-colors hover:text-[var(--color-brand)]"
           >
-            Try again
+            Try again →
           </button>
           <Link
             href="/"
-            className="inline-flex items-center rounded-xl border border-[#27272A] bg-[#111113] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#18181B]"
+            className="font-serif text-lg italic text-[var(--color-foreground-secondary)] transition-colors hover:text-[var(--color-foreground)]"
           >
-            Go home
+            Return home →
           </Link>
         </div>
       </div>

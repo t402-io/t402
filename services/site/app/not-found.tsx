@@ -4,34 +4,43 @@ import { Footer } from "./components/Footer";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-[#0A0A0B] text-white flex flex-col">
+    <div
+      className="flex min-h-screen flex-col"
+      style={{ background: "var(--color-background)", color: "var(--color-foreground)" }}
+    >
       <NavBar />
 
-      <main className="flex-1 flex items-center justify-center p-6">
-        <div className="max-w-md w-full text-center">
-          <div className="mb-10">
-            <span className="text-9xl font-bold text-gradient-brand">404</span>
-            <h1 className="text-2xl font-bold mt-6 text-white">
-              Page not found
-            </h1>
-            <p className="text-[#A1A1AA] mt-3 text-base">
-              This resource doesn&apos;t exist — but if it did, you could pay
-              for it.
-            </p>
+      <main className="flex flex-1 items-center justify-center px-6 py-24">
+        <div className="mx-auto max-w-editorial w-full">
+          <div className="mb-10 flex items-baseline justify-between text-[var(--color-foreground-secondary)]">
+            <span className="editorial-mark text-base md:text-lg">N° 404</span>
+            <span className="eyebrow">Page not found</span>
           </div>
 
-          <div className="flex gap-3 justify-center">
+          <hr className="rule" />
+
+          <h1 className="mt-12 mb-8 font-serif text-[3rem] leading-[1.05] text-[var(--color-foreground)] md:text-[5rem]">
+            Page not found.
+          </h1>
+
+          <hr className="rule" />
+
+          <p className="mt-10 max-w-xl text-base leading-[1.65] text-[var(--color-foreground-secondary)] md:text-lg">
+            This resource doesn&apos;t exist — but if it did, you could pay for it.
+          </p>
+
+          <div className="mt-12 flex flex-col items-start gap-6 md:flex-row md:items-baseline md:gap-10">
             <Link
               href="/"
-              className="inline-flex items-center rounded-xl bg-[#50AF95] px-6 py-3 text-sm font-semibold text-[#0A0A0B] transition-colors hover:bg-[#26A17B]"
+              className="font-serif text-lg italic text-[var(--color-foreground)] underline decoration-[var(--color-brand)] decoration-2 underline-offset-[6px] transition-colors hover:text-[var(--color-brand)]"
             >
-              Go home
+              Return home →
             </Link>
             <Link
-              href="/chains"
-              className="inline-flex items-center rounded-xl border border-[#27272A] bg-[#111113] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#18181B]"
+              href="/sdks"
+              className="font-serif text-lg italic text-[var(--color-foreground-secondary)] transition-colors hover:text-[var(--color-foreground)]"
             >
-              Explore Chains
+              View SDKs →
             </Link>
           </div>
         </div>
